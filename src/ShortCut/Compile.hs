@@ -260,7 +260,7 @@ bblast genes genomes out = do
   need [genes, genomes]
   -- TODO fix bblast so order doesn't matter here
   -- TODO take a verbosity flag and pass the value on to bblast
-  cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "blastp" "-t" bbtmp
+  cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
 cFilterGenes :: Typed [Gene] -> Rules FilePath
