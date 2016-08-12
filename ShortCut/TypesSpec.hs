@@ -1,5 +1,7 @@
 module ShortCut.TypesSpec where
 
+-- TODO test the show/pretty instances?
+
 import ShortCut.Types
 import Test.Hspec
 import Control.Monad.Trans (liftIO)
