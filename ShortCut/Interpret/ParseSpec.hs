@@ -14,18 +14,14 @@ module ShortCut.Interpret.ParseSpec where
 
 -- TODO: email test function to jakewheatmail@gmail.com?
 
-import ShortCut.Types
-import ShortCut.Interpret.Parse
-
+import Data.Either (isRight)
 import Data.Scientific
+import ShortCut.Interpret.Parse
+import ShortCut.Types
+import ShortCut.TypesSpec (loadExamples, readASTs)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
-
-import Data.Either      (isRight)
-import Data.List        (isSuffixOf)
-import System.Directory (getDirectoryContents)
-import System.FilePath  (combine)
 
 --------------------
 -- variable names --
@@ -332,16 +328,10 @@ test p ((a,b):xs) = case regularParse p a of
     then test p xs
     else Left (a, show r)
 
--- TODO move to TypesSpec.hs
-loadExampleScripts :: IO [(String, ParsedScript)]
-loadExampleScripts = do
-  let exDir = "examples"
-  paths <- getDirectoryContents exDir
-  let rawPaths = map (combine exDir) $ filter (isSuffixOf ".cut") paths
-      astPaths = map (combine exDir) $ filter (isSuffixOf ".ast") paths
-  raws <- mapM readFile rawPaths
-  asts <- mapM readFile astPaths
-  return $ zip raws $ map read asts
+pExCuts :: IO (Either ShortCutError [ParsedScript])
+pExCuts = do
+  cuts <- loadExamples ".cut"
+  return $ mapM (regularParse pScript) cuts
 
 takeVarName :: String -> VarName
 takeVarName = VarName . takeWhile (flip elem $ vNonFirstChars)
@@ -396,9 +386,10 @@ spec = do
     describe "pScript" $ do
       it "parses the concatenated example statements to the correct AST" $
         test pScript exScripts `shouldBe` Right ()
-      examples <- runIO loadExampleScripts
-      it "parses the example scripts to their correct ASTs" $
-        test pScript examples `shouldBe` Right ()
+      it "parses the example scripts to their correct ASTs" $ do
+        parsed  <- pExCuts
+        written <- readASTs
+        parsed `shouldBe` (Right written)
 
     describe "pVarEq" $ do
       prop "parses the first half of a statement, up through '='" $

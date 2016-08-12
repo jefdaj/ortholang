@@ -10,8 +10,9 @@
 
 import Test.Hspec
 
+import qualified ShortCut.TypesSpec               as T
 import qualified ShortCut.Interpret.ParseSpec     as P
-import qualified ShortCut.Interpret.TypeCheckSpec as T
+import qualified ShortCut.Interpret.TypeCheckSpec as C
 import qualified ShortCut.ReplSpec                as R
 
 main :: IO ()
@@ -19,6 +20,7 @@ main = hspec spec
 
 spec :: Spec
 spec = do
+  describe "ShortCut.TypesSpec" T.spec
   describe "ShortCut.Parse"     P.spec
-  describe "ShortCut.TypeCheck" T.spec
+  describe "ShortCut.TypeCheck" C.spec
   describe "ShortCut.Repl"      R.spec
