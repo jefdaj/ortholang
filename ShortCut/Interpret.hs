@@ -24,7 +24,6 @@ import Data.List.Utils            (delFromAL)
 import Development.Shake
 import ShortCut.Interpret.Compile
 import ShortCut.Interpret.Parse
-import ShortCut.Interpret.TypeCheck
 import ShortCut.Monads
 import ShortCut.Types
 
