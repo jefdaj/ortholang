@@ -7,21 +7,22 @@ module ShortCut.ReplSpec where
 -- TODO write separate tests for each of those!
 
 import Test.Hspec
-import Test.Hspec.QuickCheck
+-- import Test.Hspec.QuickCheck
 
 main :: IO ()
 main = hspec spec
 
 spec :: Spec
 spec = do
+  return ()
 
-  describe "loads files, same as the "
-  describe "cmdLoad"
-  describe "cmdSave" -- TODO rename to write?
-  describe "cmdDrop"
-  describe "cmdShow"
-  describe "cmdType"
-  describe ""
+  -- describe "loads files, same as the "
+  -- describe "cmdLoad"
+  -- describe "cmdSave" -- TODO rename to write?
+  -- describe "cmdDrop"
+  -- describe "cmdShow"
+  -- describe "cmdType"
+  -- describe ""
   -- TODO assign
   -- TODO print
 
