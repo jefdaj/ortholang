@@ -18,6 +18,7 @@
 -- TODO pass tmpDir as a config option somehow, and verbosity
 
 -- TODO just insert IO debugging messages in the actions, duh!
+-- TODO bring namedTmp back from Types.hs? It's not a type!
 
 module ShortCut.Interpret.Compile where
 
@@ -39,8 +40,8 @@ import System.FilePath            (makeRelative)
 -- name tmpfiles --
 -------------------
 
-tmpDir :: FilePath
-tmpDir = "_shortcut"
+-- tmpDir :: FilePath
+-- tmpDir = "_shortcut"
 
 cacheDir :: FilePath
 cacheDir = tmpDir </> "cache"
@@ -55,14 +56,6 @@ digest :: (Show a) => a -> String
 digest val = take 10 $ show (hash asBytes :: Digest MD5)
   where
     asBytes = (pack . show) val
-
--- TODO flip arguments for consistency with everything else
--- There's a kludge here for the special case of "result", which is like the
--- "main" function of a ShortCut script, and always goes to <tmpdir>/result.
-namedTmp :: Returns a -> TypedVar -> FilePath
-namedTmp rtn (TypedVar var) = tmpDir </> var <.> ext'
-  where
-    ext' = if var == "result" then "" else ext rtn
 
 hashedTmp :: Returns a -> Typed a -> [FilePath] -> FilePath
 hashedTmp retn expr paths = exprDir </> uniq <.> ext retn

@@ -8,8 +8,8 @@
 
 module ShortCut.Repl where
 
+import ShortCut.Types
 import ShortCut.Interpret
-import ShortCut.Monads
 
 import Control.Monad.IO.Class         (liftIO)
 import Data.Char                      (isSpace)

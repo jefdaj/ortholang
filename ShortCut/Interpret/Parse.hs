@@ -14,7 +14,6 @@
 module ShortCut.Interpret.Parse where
 
 import ShortCut.Types
-import ShortCut.Monads
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, foldM)
