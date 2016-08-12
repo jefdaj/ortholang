@@ -27,6 +27,8 @@ executable shortcut
                      enclosed-exceptions
 
 -- TODO why doesn't `cabal test` run the tests? fix that
+-- TODO try to make it do this by default:
+-- cabal test --show-details=streaming --test-options="--color --qc-max-success=999
 test-suite shortcut-test
   ghc-options:       -Wall
   type:              exitcode-stdio-1.0

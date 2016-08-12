@@ -22,10 +22,10 @@ import Data.Either                (isRight)
 import Data.List.Utils            (delFromAL)
 
 import Development.Shake
-import ShortCut.Compile
+import ShortCut.Interpret.Compile
+import ShortCut.Interpret.Parse
+import ShortCut.Interpret.TypeCheck
 import ShortCut.Monads
-import ShortCut.Parse
-import ShortCut.TypeCheck
 import ShortCut.Types
 
 isAssignment :: String -> Bool

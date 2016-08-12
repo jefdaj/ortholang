@@ -1,4 +1,4 @@
-module ShortCut.TypeCheckSpec where
+module ShortCut.Interpret.TypeCheckSpec where
 
 import Test.Hspec
 import Test.Hspec.QuickCheck

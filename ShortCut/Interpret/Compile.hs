@@ -19,7 +19,7 @@
 
 -- TODO just insert IO debugging messages in the actions, duh!
 
-module ShortCut.Compile where
+module ShortCut.Interpret.Compile where
 
 import Development.Shake
 import ShortCut.Types

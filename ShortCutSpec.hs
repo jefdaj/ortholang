@@ -10,9 +10,9 @@
 
 import Test.Hspec
 
-import qualified ShortCut.ParseSpec     as P
-import qualified ShortCut.TypeCheckSpec as T
-import qualified ShortCut.ReplSpec      as R
+import qualified ShortCut.Interpret.ParseSpec     as P
+import qualified ShortCut.Interpret.TypeCheckSpec as T
+import qualified ShortCut.ReplSpec                as R
 
 main :: IO ()
 main = hspec spec

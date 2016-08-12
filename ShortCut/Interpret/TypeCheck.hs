@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 
-module ShortCut.TypeCheck where
+module ShortCut.Interpret.TypeCheck where
 
 import ShortCut.Types
 import ShortCut.Monads

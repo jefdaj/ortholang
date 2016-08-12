@@ -7,7 +7,7 @@
 -- TODO: fix bug where a non-function with args parses to varname with args dropped
 --       (example: 'this = load_that cool')
 
-module ShortCut.Parse where
+module ShortCut.Interpret.Parse where
 
 import ShortCut.Types
 
