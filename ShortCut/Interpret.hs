@@ -12,7 +12,8 @@ module ShortCut.Interpret
   , iAssign
   , iExpr
   , iFile -- TODO have the CLI call this
-  , eExpr
+  , eval
+  , cScript
   , isAssignment
   )
   where
@@ -69,6 +70,7 @@ myShake = shake myOpts . alternatives
 
 -- run the result of any of the c* functions, and print it
 -- (only cScript is actually useful outside testing though)
+-- TODO should this be part of `interpret`?
 eval :: Rules FilePath -> IO ()
 eval = ignoreErrors . eval'
   where
@@ -81,18 +83,3 @@ eval = ignoreErrors . eval'
         -- TODO show the var rather than the actual file contents
         str <- readFile' path
         putQuiet $ "\n" ++ str
-
--- runs an expression and names it "result"
--- TODO how to handle if the var isn't in the script??
--- TODO hook the logs + configs together?
--- TODO only evaluate up to the point where the expression they want, or all?
--- TODO show the return type too (make a show instance for TypedExpr?)
-eExpr :: String -> ReplM ()
-eExpr line = do
-  scr <- getScript
-  case iExpr scr line of
-    Left  err -> message $ show err
-    Right expr -> do
-      let res  = TypedVar "result"
-          scr' = delFromAL scr res ++ [(res,expr)]
-      liftIO $ eval $ cScript res scr'

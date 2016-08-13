@@ -9,21 +9,16 @@ import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJ      ((<+>), vcat, text, sep, empty)
 import Text.PrettyPrint.HughesPJClass (Pretty, pPrint)
 
-import Control.Exception          (throwIO, catch, )
 import Control.Monad.Except       (throwError, MonadError, ExceptT, runExceptT)
-import Control.Monad.IO.Class     (MonadIO, liftIO)
-import Control.Monad.Identity     (Identity, mzero)
+import Control.Monad.IO.Class     (MonadIO)
+import Control.Monad.Identity     (Identity)
 import Control.Monad.RWS.Lazy     (RWST, runRWS, runRWST, get, put, ask)
 import Control.Monad.Reader       (MonadReader)
 import Control.Monad.State        (MonadState)
 import Control.Monad.Trans        (MonadTrans, lift)
-import Control.Monad.Trans.Maybe  (MaybeT(..), runMaybeT)
 import Control.Monad.Writer       (MonadWriter)
 import Data.List                  (isInfixOf)
 import Data.List.Utils            (delFromAL)
-import System.Console.Haskeline   (InputT, runInputT, defaultSettings, getInputLine)
-import System.Directory           (removeFile)
-import System.IO.Error            (isDoesNotExistError)
 import Development.Shake.FilePath ((<.>), (</>))
 
 --------------------
@@ -255,8 +250,10 @@ type CheckLog    = [String]
 type CheckState  = TypedScript
 
 newtype CheckT m a = CheckT
-  { unCheckT :: ExceptT ShortCutError (RWST CheckConfig CheckLog CheckState m) a
-  }
+  { unCheckT :: ExceptT
+                  ShortCutError
+                  (RWST CheckConfig CheckLog CheckState m)
+                  a }
   deriving
     ( Functor
     , Applicative
@@ -315,54 +312,3 @@ runCheckM = runRWS . runExceptT . unCheckT
 runCheckT :: CheckT m a -> CheckConfig -> CheckState
           -> m (Either ShortCutError a, CheckState, CheckLog)
 runCheckT = runRWST . runExceptT . unCheckT
-
-----------------
--- Repl monad --
-----------------
-
-newtype ReplM a = ReplM { unReplM :: MaybeT (CheckT (InputT IO)) a }
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadIO
-    , MonadReader CheckConfig
-    , MonadWriter CheckLog
-    , MonadState  CheckState
-    , MonadError  ShortCutError
-    )
-
-removeIfExists :: FilePath -> IO ()
-removeIfExists fileName = removeFile fileName `catch` handleExists
-  where handleExists e
-          | isDoesNotExistError e = return ()
-          | otherwise = throwIO e
-
--- TODO how can I prevent duplicating this code?
--- warning: be careful when trying; last time I ended up with a bug that caused
---          infinite loops because they called themselves
--- TODO try without the class at all because it's just not worth it right now!
--- TODO or, try putting maybet inside checkt so you don't have to lift it
--- TODO or, try making use of lift from CheckT's MonadTrans instance
--- TODO or, try using liftMaybe again
--- TODO could using both mtl and transformers be an issue?
-instance MonadCheck ReplM where
-  askConfig = ask
-  getScript = get
-  putScript = put
-  putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
-  getExpr v = getScript >>= \s -> return $ lookup v s
-  throw     = throwError
-
-runReplM :: ReplM a -> CheckConfig -> CheckState
-         -> IO (Either ShortCutError (Maybe a), CheckState, CheckLog)
-runReplM r c s = runInputT defaultSettings $ runCheckT (runMaybeT $ unReplM r) c s
-
-prompt :: String -> ReplM (Maybe String)
-prompt = ReplM . lift . lift . getInputLine
-
-message :: String -> ReplM ()
-message str = liftIO $ putStrLn str
-
-quit :: ReplM a
-quit = ReplM mzero

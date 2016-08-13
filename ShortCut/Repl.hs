@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 -- Based on:
 -- http://dev.stephendiehl.com/hask/ (the Haskeline section)
 -- https://github.com/goldfirere/glambda
@@ -11,14 +13,78 @@ module ShortCut.Repl where
 import ShortCut.Types
 import ShortCut.Interpret
 
+import Control.Exception              (throwIO, catch, )
+import Control.Monad.Except           (throwError, MonadError, ExceptT
+                                      ,runExceptT)
+import Control.Monad.IO.Class         (MonadIO, liftIO)
 import Control.Monad.IO.Class         (liftIO)
+import Control.Monad.Identity         (Identity, mzero)
+import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST, get, put, ask)
+import Control.Monad.Reader           (MonadReader)
+import Control.Monad.State            (MonadState)
+import Control.Monad.Trans            (MonadTrans, lift)
+import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
+import Control.Monad.Writer           (MonadWriter)
 import Data.Char                      (isSpace)
-import Data.List                      (dropWhileEnd)
-import Data.List                      (isPrefixOf)
+import Data.List                      (dropWhileEnd, isPrefixOf)
 import Data.List.Utils                (delFromAL)
 import Data.Maybe                     (fromJust)
+import Prelude                 hiding (print)
 import System.Command                 (runCommand, waitForProcess)
+import System.Console.Haskeline       (InputT, runInputT, defaultSettings
+                                      ,getInputLine)
+import System.Directory               (removeFile)
+import System.IO.Error                (isDoesNotExistError)
 import Text.PrettyPrint.HughesPJClass (prettyShow)
+
+----------------
+-- Repl monad --
+----------------
+
+newtype ReplM a = ReplM { unReplM :: MaybeT (CheckT (InputT IO)) a }
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadIO
+    , MonadReader CheckConfig
+    , MonadWriter CheckLog
+    , MonadState  CheckState
+    , MonadError  ShortCutError
+    )
+
+-- TODO should this go in Interpret.hs? Types.hs?
+removeIfExists :: FilePath -> IO ()
+removeIfExists fileName = removeFile fileName `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwIO e
+
+-- TODO how can I prevent duplicating this code?
+-- warning: be careful when trying; last time I ended up with a bug that caused
+--          infinite loops because they called themselves
+-- TODO try without the class at all because it's just not worth it right now!
+-- TODO or, try putting maybet inside checkt so you don't have to lift it
+-- TODO or, try making use of lift from CheckT's MonadTrans instance
+-- TODO or, try using liftMaybe again
+-- TODO could using both mtl and transformers be an issue?
+instance MonadCheck ReplM where
+  askConfig = ask
+  getScript = get
+  putScript = put
+  putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
+  getExpr v = getScript >>= \s -> return $ lookup v s
+  throw     = throwError
+
+runReplM :: ReplM a -> CheckConfig -> CheckState
+         -> IO (Either ShortCutError (Maybe a), CheckState, CheckLog)
+runReplM r c s = runInputT defaultSettings $ runCheckT (runMaybeT $ unReplM r) c s
+
+prompt :: String -> ReplM (Maybe String)
+prompt = ReplM . lift . lift . getInputLine
+
+print :: String -> ReplM ()
+print str = liftIO $ putStrLn str
 
 ---------------
 -- utilities --
@@ -60,12 +126,23 @@ loop = do
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
     "" -> return ()
     (':':cmd) -> runCmd cmd
-    line -> if isAssignment line then do
-              scr <- getScript
-              case iAssign scr line of
-                Left  e -> message $ show e
-                Right a -> putAssign a
-            else eExpr line
+    line -> do
+      scr <- getScript
+      if isAssignment line
+        then do
+          case iAssign scr line of
+            Left  e -> print $ show e
+            Right a -> putAssign a
+        else do
+          -- TODO how to handle if the var isn't in the script??
+          -- TODO hook the logs + configs together?
+          -- TODO only evaluate up to the point where the expression they want?
+          case iExpr scr line of
+            Left  err -> throw err
+            Right expr -> do
+              let res  = TypedVar "result"
+                  scr' = delFromAL scr res ++ [(res,expr)]
+              liftIO $ eval $ cScript res scr'
   loop
 
 --------------------------
@@ -75,8 +152,8 @@ loop = do
 runCmd :: String -> ReplM ()
 runCmd line = case matches of
   [(_, fn)] -> fn $ stripWhiteSpace args
-  []        -> message $ "unknown command: "   ++ cmd
-  _         -> message $ "ambiguous command: " ++ cmd
+  []        -> print $ "unknown command: "   ++ cmd
+  _         -> print $ "ambiguous command: " ++ cmd
   where
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) cmds
@@ -98,7 +175,7 @@ cmds =
 ---------------------------
 
 cmdHelp :: String -> ReplM ()
-cmdHelp _ = message
+cmdHelp _ = print
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
   \There are also some extra commands:\n\n\
   \:help  to print this help text\n\
@@ -115,7 +192,7 @@ cmdLoad :: String -> ReplM ()
 cmdLoad path = do
   ec <- liftIO $ iFile path 
   case ec of
-    Left e  -> message $ show e
+    Left e  -> print $ show e
     Right c -> putScript c
 
 -- TODO this needs to read a second arg for the var to be main?
@@ -131,13 +208,13 @@ cmdDrop [] = putScript []
 cmdDrop var = do
   expr <- getExpr (TypedVar var)
   case expr of
-    Nothing -> message $ "VarName '" ++ var ++ "' not found"
+    Nothing -> print $ "VarName '" ++ var ++ "' not found"
     Just _  -> getScript >>= \s -> putScript $ delFromAL s (TypedVar var)
 
 cmdType :: String -> ReplM ()
 cmdType s = do
   script <- getScript
-  message $ case iExpr script s of
+  print $ case iExpr script s of
     Right expr -> prettyShow expr
     Left  err  -> show err
 
@@ -145,12 +222,12 @@ cmdShow :: String -> ReplM ()
 cmdShow [] = getScript >>= liftIO . mapM_ (putStrLn . prettyShow)
 cmdShow var = do
   expr <- getExpr (TypedVar var)
-  message $ case expr of
+  print $ case expr of
     Nothing -> "VarName '" ++ var ++ "' not found"
     Just e  -> prettyShow e
 
 cmdQuit :: String -> ReplM ()
-cmdQuit _ = quit
+cmdQuit _ = ReplM mzero
 
 cmdBang :: String -> ReplM ()
 cmdBang cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
