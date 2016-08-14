@@ -7,7 +7,7 @@
 module ShortCut.Interpret
   ( Typed(..)
   , TypedVar(..)
-  , ShortCutError(..)
+  , CutError(..)
   , TypedExpr(..)
   , iAssign
   , iExpr
@@ -30,26 +30,26 @@ import ShortCut.Types
 isAssignment :: String -> Bool
 isAssignment line = isRight $ regularParse pVarEq line
 
-interpret :: Parser t -> (t -> CheckM b)
-          -> TypedScript -> String -> Either ShortCutError b
+interpret :: Parser t -> (t -> CutM b)
+          -> TypedScript -> String -> Either CutError b
 interpret parser checker script str = do
   parsed <- parseWithEof parser str
-  let (checked, _, _) = runCheckM (checker parsed) [] script
+  let (checked, _, _) = runCutM (checker parsed) [] script
   checked
 
-iExpr :: TypedScript -> String -> Either ShortCutError TypedExpr
+iExpr :: TypedScript -> String -> Either CutError TypedExpr
 iExpr = interpret pExpr tExpr
 
-iAssign :: TypedScript -> String -> Either ShortCutError TypedAssign
+iAssign :: TypedScript -> String -> Either CutError TypedAssign
 iAssign = interpret pAssign tAssign
 
 -- TODO remove? nah, will be used for overall CLI parsing a file
-iScript :: TypedScript -> String -> Either ShortCutError TypedScript
+iScript :: TypedScript -> String -> Either CutError TypedScript
 iScript = interpret pScript tScript
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
-iFile :: FilePath -> IO (Either ShortCutError TypedScript)
+iFile :: FilePath -> IO (Either CutError TypedScript)
 iFile path = readFile path >>= (\s -> return $ iScript [] s)
 
 -- TODO use hashes + dates to decide which files to regenerate?

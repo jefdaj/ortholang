@@ -1,35 +1,32 @@
-{-# LANGUAGE GADTs, StandaloneDeriving, FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module ShortCut.Types where
 
-import Data.List                      (intersperse)
+import Control.Monad.Except           (throwError, MonadError, ExceptT, runExceptT)
+import Control.Monad.IO.Class         (MonadIO)
+import Control.Monad.Identity         (Identity)
+import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST, get, put, ask)
+import Control.Monad.Reader           (MonadReader)
+import Control.Monad.State            (MonadState)
+import Control.Monad.Trans            (MonadTrans, lift)
+import Control.Monad.Writer           (MonadWriter)
+import Data.List                      (intersperse, isInfixOf)
+import Data.List.Utils                (delFromAL)
 import Data.Scientific                (Scientific)
+import Development.Shake.FilePath     ((<.>), (</>))
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJ      ((<+>), vcat, text, sep, empty)
 import Text.PrettyPrint.HughesPJClass (Pretty, pPrint)
-
-import Control.Monad.Except       (throwError, MonadError, ExceptT, runExceptT)
-import Control.Monad.IO.Class     (MonadIO)
-import Control.Monad.Identity     (Identity)
-import Control.Monad.RWS.Lazy     (RWST, runRWS, runRWST, get, put, ask)
-import Control.Monad.Reader       (MonadReader)
-import Control.Monad.State        (MonadState)
-import Control.Monad.Trans        (MonadTrans, lift)
-import Control.Monad.Writer       (MonadWriter)
-import Data.List                  (isInfixOf)
-import Data.List.Utils            (delFromAL)
-import Development.Shake.FilePath ((<.>), (</>))
 
 --------------------
 -- error messages --
 --------------------
 
--- TODO generalize ShortCutError to CutError and include parse stuff?
--- TODO replace pattern matching failures with guards that describe the types
---      ("load_genes called with the wrong number of aruguments: ..." etc)
-
-data ShortCutError
+data CutError
   = InvalidSyntax  ParseError
   | NoSuchFunction String
   | NoSuchVariable String
@@ -37,7 +34,7 @@ data ShortCutError
   | WrongArgNumber String Int Int
   deriving Eq
 
-instance Show ShortCutError where
+instance Show CutError where
   show (InvalidSyntax  err)  = "Invalid syntax for ShortCut code " ++ show err
   show (NoSuchFunction name) = "No such function: " ++ name
   show (NoSuchVariable name) = "No such variable: " ++ name
@@ -238,50 +235,47 @@ namedTmp rtn (TypedVar var) = tmpDir </> var <.> ext'
 tmpDir :: FilePath
 tmpDir = "_shortcut"
 
------------------
--- check monad --
------------------
+--------------------
+-- main Cut monad --
+--------------------
 
 -- TODO look into the RWS-specific stuff in Control.Monad.Trans.Except:
 --      (Monoid w, MonadError e m) => MonadError e (RWST r w s m) etc.
 
-type CheckConfig = [(String, String)]
-type CheckLog    = [String]
-type CheckState  = TypedScript
+type CutConfig = [(String, String)]
+type CutLog    = [String]
+type CutState  = TypedScript
 
-newtype CheckT m a = CheckT
-  { unCheckT :: ExceptT
-                  ShortCutError
-                  (RWST CheckConfig CheckLog CheckState m)
-                  a }
+newtype CutT m a = CutT
+  { unCutT :: ExceptT CutError (RWST CutConfig CutLog CutState m) a
+  }
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadIO
-    , MonadError  ShortCutError
-    , MonadReader CheckConfig
-    , MonadWriter CheckLog
-    , MonadState  CheckState
+    , MonadError  CutError
+    , MonadReader CutConfig
+    , MonadWriter CutLog
+    , MonadState  CutState
     )
 
-type CheckM a = CheckT Identity a
+type CutM a = CutT Identity a
 
-class (MonadReader CheckConfig m, MonadState CheckState m
-      ,MonadError ShortCutError m) => MonadCheck m where
-  askConfig :: m CheckConfig
-  getScript :: m CheckState
-  putScript :: CheckState -> m ()
+class ( MonadReader CutConfig m
+      , MonadState  CutState  m
+      , MonadError  CutError  m ) => MonadCut m where
+  askConfig :: m CutConfig
+  getScript :: m CutState
+  putScript :: CutState -> m ()
   getExpr   :: TypedVar -> m (Maybe TypedExpr)
   putAssign :: TypedAssign -> m ()
-  throw     :: ShortCutError -> m a
+  throw     :: CutError -> m a
 
--- TODO is this instance right? if not, that could be causing my issues!
---      looks like it has the right signature though, and two lifts makes sense
-instance MonadTrans CheckT where
-  lift = CheckT . lift . lift
+instance MonadTrans CutT where
+  lift = CutT . lift . lift
 
-instance (Monad m) => MonadCheck (CheckT m) where
+instance (Monad m) => MonadCut (CutT m) where
   askConfig = ask
   getScript = get
   putScript = put
@@ -295,7 +289,7 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 -- the Bool specifies whether to continue if the variable exists already
 -- note that it will always continue if only the *file* exists,
 -- because that might just be left over from an earlier program run
-putAssign' :: MonadCheck m => Bool -> TypedAssign -> m FilePath
+putAssign' :: MonadCut m => Bool -> TypedAssign -> m FilePath
 putAssign' force (v@(TypedVar var), e@(TypedExpr r _)) = do
   s <- getScript
   let path = namedTmp r v
@@ -305,10 +299,10 @@ putAssign' force (v@(TypedVar var), e@(TypedExpr r _)) = do
       putScript $ delFromAL s v ++ [(v,e)]
       return path
 
-runCheckM :: CheckM a -> CheckConfig -> CheckState
-          -> (Either ShortCutError a, CheckState, CheckLog)
-runCheckM = runRWS . runExceptT . unCheckT
+runCutM :: CutM a -> CutConfig -> CutState
+        -> (Either CutError a, CutState, CutLog)
+runCutM = runRWS . runExceptT . unCutT
 
-runCheckT :: CheckT m a -> CheckConfig -> CheckState
-          -> m (Either ShortCutError a, CheckState, CheckLog)
-runCheckT = runRWST . runExceptT . unCheckT
+runCutT :: CutT m a -> CutConfig -> CutState
+        -> m (Either CutError a, CutState, CutLog)
+runCutT = runRWST . runExceptT . unCutT

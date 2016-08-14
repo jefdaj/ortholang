@@ -328,7 +328,7 @@ test p ((a,b):xs) = case regularParse p a of
     then test p xs
     else Left (a, show r)
 
-pExCuts :: IO (Either ShortCutError [ParsedScript])
+pExCuts :: IO (Either CutError [ParsedScript])
 pExCuts = do
   cuts <- loadExamples ".cut"
   return $ mapM (regularParse pScript) cuts

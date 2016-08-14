@@ -41,16 +41,22 @@ import Text.PrettyPrint.HughesPJClass (prettyShow)
 -- Repl monad --
 ----------------
 
-newtype ReplM a = ReplM { unReplM :: MaybeT (CheckT (InputT IO)) a }
+{- Normally I put all the types in Types.hs, but this seems so repl-specific
+ - that I moved it here for modularity.
+ -}
+
+newtype ReplM a = ReplM
+  { unReplM :: MaybeT (CutT (InputT IO)) a
+  }
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadIO
-    , MonadReader CheckConfig
-    , MonadWriter CheckLog
-    , MonadState  CheckState
-    , MonadError  ShortCutError
+    , MonadReader CutConfig
+    , MonadWriter CutLog
+    , MonadState  CutState
+    , MonadError  CutError
     )
 
 -- TODO should this go in Interpret.hs? Types.hs?
@@ -65,10 +71,10 @@ removeIfExists fileName = removeFile fileName `catch` handleExists
 --          infinite loops because they called themselves
 -- TODO try without the class at all because it's just not worth it right now!
 -- TODO or, try putting maybet inside checkt so you don't have to lift it
--- TODO or, try making use of lift from CheckT's MonadTrans instance
+-- TODO or, try making use of lift from CutT's MonadTrans instance
 -- TODO or, try using liftMaybe again
 -- TODO could using both mtl and transformers be an issue?
-instance MonadCheck ReplM where
+instance MonadCut ReplM where
   askConfig = ask
   getScript = get
   putScript = put
@@ -76,9 +82,9 @@ instance MonadCheck ReplM where
   getExpr v = getScript >>= \s -> return $ lookup v s
   throw     = throwError
 
-runReplM :: ReplM a -> CheckConfig -> CheckState
-         -> IO (Either ShortCutError (Maybe a), CheckState, CheckLog)
-runReplM r c s = runInputT defaultSettings $ runCheckT (runMaybeT $ unReplM r) c s
+runReplM :: ReplM a -> CutConfig -> CutState
+         -> IO (Either CutError (Maybe a), CutState, CutLog)
+runReplM r c s = runInputT defaultSettings $ runCutT (runMaybeT $ unReplM r) c s
 
 prompt :: String -> ReplM (Maybe String)
 prompt = ReplM . lift . lift . getInputLine

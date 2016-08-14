@@ -13,21 +13,20 @@
 
 module ShortCut.Interpret.Parse where
 
-import ShortCut.Types
-
-import Control.Applicative    ((<|>), many)
-import Control.Monad          (void, foldM)
-import Control.Monad.Identity (Identity)
-import Data.Char              (isPrint)
-import Text.Parsec            (parse, try)
-import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
-                              ,newline, string, oneOf)
-import Text.Parsec.Combinator (optional, many1, manyTill, eof
-                              ,lookAhead, between, choice, anyToken)
-import Text.Parsec.Expr       (buildExpressionParser, Assoc(..)
-                              ,Operator(..))
-import Text.Parsec.Prim       (Parsec)
+import Control.Applicative            ((<|>), many)
+import Control.Monad                  (void, foldM)
+import Control.Monad.Identity         (Identity)
+import Data.Char                      (isPrint)
 import Data.Scientific                (Scientific)
+import ShortCut.Types
+import Text.Parsec                    (parse, try)
+import Text.Parsec.Char               (char, digit ,letter, spaces, anyChar
+                                      ,newline, string, oneOf)
+import Text.Parsec.Combinator         (optional, many1, manyTill, eof
+                                      ,lookAhead, between, choice, anyToken)
+import Text.Parsec.Expr               (buildExpressionParser, Assoc(..)
+                                      ,Operator(..))
+import Text.Parsec.Prim               (Parsec)
 import Text.PrettyPrint.HughesPJClass (prettyShow)
 
 ------------------------------------------
@@ -40,23 +39,23 @@ import Text.PrettyPrint.HughesPJClass (prettyShow)
 type Parser  = Parsec String ()
 type OpTable = [[Operator String () Identity ParsedExpr]]
 
-parseWithError :: Parser a -> String -> Either ShortCutError a
+parseWithError :: Parser a -> String -> Either CutError a
 parseWithError psr str = case parse psr "" str of
   Left  err -> Left $ InvalidSyntax err
   Right res -> Right res
 
-regularParse :: Parser a -> String -> Either ShortCutError a
+regularParse :: Parser a -> String -> Either CutError a
 regularParse p = parseWithError p
 
-parseWithEof :: Parser a -> String -> Either ShortCutError a
+parseWithEof :: Parser a -> String -> Either CutError a
 parseWithEof p = parseWithError (p <* eof)
 
-parseWithLeftOver :: Parser a -> String -> Either ShortCutError (a,String)
+parseWithLeftOver :: Parser a -> String -> Either CutError (a,String)
 parseWithLeftOver p = parseWithError ((,) <$> p <*> leftOver)
   where
     leftOver = manyTill anyToken eof
 
-parseWithWSEof :: Parser a -> String -> Either ShortCutError a
+parseWithWSEof :: Parser a -> String -> Either CutError a
 parseWithWSEof p = parseWithEof (whiteSpace *> p)
   where
     whiteSpace = void $ many $ oneOf " \n\t"
@@ -239,45 +238,45 @@ pScript = optional spaces *> many pComment *> many (pAssign <* many pComment)
 -- main check functions --
 --------------------------
 
-tExpr :: ParsedExpr -> CheckM TypedExpr
+tExpr :: ParsedExpr -> CutM TypedExpr
 tExpr (Fil s)       = tFil s
 tExpr (Num n)       = tNum n
 tExpr (Ref v)       = tRef v
 tExpr (Cmd s es)    = tCmd s es
 tExpr (Bop c e1 e2) = tBop c (e1,e2)
 
-tAssign :: ParsedAssign -> CheckM TypedAssign
+tAssign :: ParsedAssign -> CutM TypedAssign
 tAssign ((VarName var), expr) = do
   cexpr <- tExpr expr
   return (TypedVar var, cexpr) -- TODO is the var always going to be OK?
 
 -- I'm not sure what this is supposed to mean design-wise,
 -- but it has the type required by foldM for use in tScript
-foldAssign :: TypedScript -> ParsedAssign -> CheckM TypedScript
+foldAssign :: TypedScript -> ParsedAssign -> CutM TypedScript
 foldAssign script assign = do
-  let (cassign, _, _) = runCheckM (tAssign assign) [] script
+  let (cassign, _, _) = runCutM (tAssign assign) [] script
   case cassign of
     Left err -> throw err
     Right c  -> return $ script ++ [c]
 
-tScript :: ParsedScript -> CheckM TypedScript
+tScript :: ParsedScript -> CutM TypedScript
 tScript = foldM foldAssign []
 
 -----------------
 -- basic types --
 -----------------
 
-tFil :: String -> CheckM TypedExpr
+tFil :: String -> CutM TypedExpr
 tFil s = return $ TypedExpr RFile $ File s
 
-tNum :: Scientific -> CheckM TypedExpr
+tNum :: Scientific -> CutM TypedExpr
 tNum n = return $ TypedExpr RNumber $ Number n
 
 ----------------------
 -- binary operators --
 ----------------------
 
-tBop :: Char -> (ParsedExpr, ParsedExpr) -> CheckM TypedExpr
+tBop :: Char -> (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tBop c (e1,e2) = case c of
   '+' -> tPlus  (e1,e2)
   '-' -> tDash  (e1,e2)
@@ -286,7 +285,7 @@ tBop c (e1,e2) = case c of
   '&' -> tAmp   (e1,e2)
   _   -> throw $ NoSuchFunction [c]
 
-tPlus :: (ParsedExpr, ParsedExpr) -> CheckM TypedExpr
+tPlus :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tPlus (e1, e2) = do
   TypedExpr r1 c1 <- tExpr e1
   TypedExpr r2 c2 <- tExpr e2
@@ -297,7 +296,7 @@ tPlus (e1, e2) = do
     _ -> throw $ WrongArgTypes "+" ["set", "same type of set"]
           [prettyShow r1, prettyShow r2]
 
-tDash :: (ParsedExpr, ParsedExpr) -> CheckM TypedExpr
+tDash :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tDash (e1,e2) = do
   TypedExpr r1 c1 <- tExpr e1
   TypedExpr r2 c2 <- tExpr e2
@@ -308,7 +307,7 @@ tDash (e1,e2) = do
     _ -> throw $ WrongArgTypes "-" ["set", "same type of set"]
           [prettyShow r1, prettyShow r2]
 
-tAmp :: (ParsedExpr, ParsedExpr) -> CheckM TypedExpr
+tAmp :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tAmp (e1,e2) = do
   TypedExpr r1 c1 <- tExpr e1
   TypedExpr r2 c2 <- tExpr e2
@@ -318,7 +317,7 @@ tAmp (e1,e2) = do
     _ -> throw $ WrongArgTypes "*" ["set", "same type of set"]
           [prettyShow r1, prettyShow r2]
 
-tStar :: (ParsedExpr, ParsedExpr) -> CheckM TypedExpr
+tStar :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tStar (e1,e2) = do
   TypedExpr r1 c1 <- tExpr e1
   TypedExpr r2 c2 <- tExpr e2
@@ -327,7 +326,7 @@ tStar (e1,e2) = do
     _ -> throw $ WrongArgTypes "*" ["number", "number"]
           [prettyShow r1, prettyShow r2]
 
-tSlash :: (ParsedExpr, ParsedExpr) -> CheckM TypedExpr
+tSlash :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tSlash (e1,e2) = do
   TypedExpr r1 c1 <- tExpr e1
   TypedExpr r2 c2 <- tExpr e2
@@ -341,20 +340,20 @@ tSlash (e1,e2) = do
 ----------
 
 tMathOp :: ((Typed Scientific, Typed Scientific) -> Typed Scientific)
-        ->  (Typed Scientific, Typed Scientific) -> CheckM TypedExpr
+        ->  (Typed Scientific, Typed Scientific) -> CutM TypedExpr
 tMathOp fn (c1,c2) = return $ TypedExpr RNumber $ fn (c1,c2)
 
-tAdd :: (Typed Scientific, Typed Scientific) -> CheckM TypedExpr
+tAdd :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
 tAdd = tMathOp Add
 
-tSubtract :: (Typed Scientific, Typed Scientific) -> CheckM TypedExpr
+tSubtract :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
 tSubtract = tMathOp Subtract
 
-tMultiply :: (Typed Scientific, Typed Scientific) -> CheckM TypedExpr
+tMultiply :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
 tMultiply = tMathOp Multiply
 
 -- TODO what about division by zero??
-tDivide :: (Typed Scientific, Typed Scientific) -> CheckM TypedExpr
+tDivide :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
 tDivide = tMathOp Divide
 
 ----------
@@ -362,23 +361,23 @@ tDivide = tMathOp Divide
 ----------
 
 tSetOp :: ((Typed [a], Typed [a]) -> Typed [a])
-       -> Returns [a] -> (Typed [a], Typed [a]) -> CheckM TypedExpr
+       -> Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
 tSetOp fn r (c1,c2) = return $ TypedExpr r $ fn (c1,c2)
 
-tUnion :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CheckM TypedExpr
+tUnion :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
 tUnion = tSetOp Union
 
-tIntersect :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CheckM TypedExpr
+tIntersect :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
 tIntersect = tSetOp Intersect
 
-tDifference :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CheckM TypedExpr
+tDifference :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
 tDifference = tSetOp Difference
 
 --------------
 -- commands --
 --------------
 
-tCmd :: String -> [ParsedExpr] -> CheckM TypedExpr
+tCmd :: String -> [ParsedExpr] -> CutM TypedExpr
 tCmd s es = case s of
   "load_aa_seqs"      -> tLoadFAA       es
   "load_na_seqs"      -> tLoadFNA       es
@@ -390,7 +389,7 @@ tCmd s es = case s of
   _ -> throw $ NoSuchFunction s
 
 -- tLoadFile :: (FilePath -> Typed a) -> Returns a
-          -- -> [ParsedExpr] -> CheckM TypedExpr
+          -- -> [ParsedExpr] -> CutM TypedExpr
 -- tLoadFile fn r [e] = do
 --   TypedExpr s c <- tExpr e
 --   case s of
@@ -399,7 +398,7 @@ tCmd s es = case s of
 -- tLoadFile _ _ _ = throw "type error!"
 
 -- TODO why the weird type error when combining these into tLoadFile?
-tLoadFAA :: [ParsedExpr] -> CheckM TypedExpr
+tLoadFAA :: [ParsedExpr] -> CutM TypedExpr
 tLoadFAA [e] = do
   TypedExpr s c <- tExpr e
   case s of
@@ -408,7 +407,7 @@ tLoadFAA [e] = do
 tLoadFAA es = throw $ WrongArgNumber "load_aa_seqs" 1 (length es)
 
 -- TODO why the weird type error when combining these into tLoadFile?
-tLoadFNA :: [ParsedExpr] -> CheckM TypedExpr
+tLoadFNA :: [ParsedExpr] -> CutM TypedExpr
 tLoadFNA [e] = do
   TypedExpr s c <- tExpr e
   case s of
@@ -417,7 +416,7 @@ tLoadFNA [e] = do
 tLoadFNA es = throw $ WrongArgNumber "load_na_seqs" 1 (length es)
 
 -- TODO why the weird type error when combining these into tLoadFile?
-tLoadGenomes :: [ParsedExpr] -> CheckM TypedExpr
+tLoadGenomes :: [ParsedExpr] -> CutM TypedExpr
 tLoadGenomes [e] = do
   TypedExpr s c <- tExpr e
   case s of
@@ -426,7 +425,7 @@ tLoadGenomes [e] = do
 tLoadGenomes es = throw $ WrongArgNumber "load_genomes" 1 (length es)
 
 -- TODO why the weird type error when combining these into tLoadFile?
-tLoadGenes :: [ParsedExpr] -> CheckM TypedExpr
+tLoadGenes :: [ParsedExpr] -> CutM TypedExpr
 tLoadGenes [e] = do
   TypedExpr s c <- tExpr e
   case s of
@@ -434,7 +433,7 @@ tLoadGenes [e] = do
     w -> throw $ WrongArgTypes "load_genes" ["string"] [prettyShow w]
 tLoadGenes es = throw $ WrongArgNumber "load_genes" 1 (length es)
 
-tFilterGenomes :: [ParsedExpr] -> CheckM TypedExpr
+tFilterGenomes :: [ParsedExpr] -> CutM TypedExpr
 tFilterGenomes [genomes, genes, cutoff] = do
   TypedExpr r1 c1 <- tExpr genomes
   TypedExpr r2 c2 <- tExpr genes
@@ -448,7 +447,7 @@ tFilterGenomes [genomes, genes, cutoff] = do
       ["<can't show yet>"]
 tFilterGenomes es = throw $ WrongArgNumber "filter_genomes" 1 (length es)
 
-tFilterGenes :: [ParsedExpr] -> CheckM TypedExpr
+tFilterGenes :: [ParsedExpr] -> CutM TypedExpr
 tFilterGenes [genes, genomes, cutoff] = do
   TypedExpr r1 c1 <- tExpr genes
   TypedExpr r2 c2 <- tExpr genomes
@@ -462,7 +461,7 @@ tFilterGenes [genes, genomes, cutoff] = do
       [prettyShow r1, prettyShow r2, prettyShow r3]
 tFilterGenes es = throw $ WrongArgNumber "filter_genes" 1 (length es)
 
-tWorstBest :: [ParsedExpr] -> CheckM TypedExpr
+tWorstBest :: [ParsedExpr] -> CutM TypedExpr
 tWorstBest [genes, genomes] = do
   TypedExpr r1 c1 <- tExpr genes
   TypedExpr r2 c2 <- tExpr genomes
@@ -478,7 +477,7 @@ tWorstBest es = throw $ WrongArgNumber "worst_best_evalue" 1 (length es)
 -- refs --
 ----------
 
-tRef :: VarName -> CheckM TypedExpr
+tRef :: VarName -> CutM TypedExpr
 tRef (VarName v) = do
   script <- getScript
   case lookup (TypedVar v) script of
