@@ -25,9 +25,9 @@ import Text.PrettyPrint.HughesPJClass (prettyShow)
 import Control.Monad.Except           (throwError)
 import Control.Monad.RWS.Lazy         (get)
 
-------------------------------------------
--- aliases + helpers to simplify parsec --
-------------------------------------------
+--------------------------------
+-- helpers to simplify parsec --
+--------------------------------
 
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
@@ -46,20 +46,21 @@ regularParse p = parseWithError p
 parseWithEof :: Parser a -> String -> Either CutError a
 parseWithEof p = parseWithError (p <* eof)
 
+parseAndShow :: (Show a) => Parser a -> String -> String
+parseAndShow p s = case regularParse p s of
+  Left err -> show err
+  Right s2 -> show s2
+
 parseWithLeftOver :: Parser a -> String -> Either CutError (a,String)
 parseWithLeftOver p = parseWithError ((,) <$> p <*> leftOver)
   where
     leftOver = manyTill anyToken eof
 
-parseWithWSEof :: Parser a -> String -> Either CutError a
-parseWithWSEof p = parseWithEof (whiteSpace *> p)
-  where
-    whiteSpace = void $ many $ oneOf " \n\t"
-
-parseAndShow :: (Show a) => Parser a -> String -> String
-parseAndShow p s = case regularParse p s of
-  Left err -> show err
-  Right s2 -> show s2
+-- this works fine, but isn't used so far:
+-- parseWithWSEof :: Parser a -> String -> Either CutError a
+-- parseWithWSEof p = parseWithEof (whiteSpace *> p)
+--   where
+--     whiteSpace = void $ many $ oneOf " \n\t"
 
 -- There's a convention in parsers that each one should consume whitespace
 -- after itself (handled by this function), and you only skip leading
