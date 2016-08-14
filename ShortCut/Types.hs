@@ -6,16 +6,15 @@
 
 module ShortCut.Types where
 
-import Control.Monad.Except           (throwError, MonadError, ExceptT, runExceptT)
+import Control.Monad.Except           (MonadError, ExceptT, runExceptT)
 import Control.Monad.IO.Class         (MonadIO)
 import Control.Monad.Identity         (Identity)
-import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST, get, put, ask)
+import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST)
 import Control.Monad.Reader           (MonadReader)
 import Control.Monad.State            (MonadState)
 import Control.Monad.Trans            (MonadTrans, lift)
 import Control.Monad.Writer           (MonadWriter)
-import Data.List                      (intersperse, isInfixOf)
-import Data.List.Utils                (delFromAL)
+import Data.List                      (intersperse)
 import Data.Scientific                (Scientific)
 import Development.Shake.FilePath     ((<.>), (</>))
 import Text.Parsec                    (ParseError)
@@ -239,12 +238,11 @@ tmpDir = "_shortcut"
 -- main Cut monad --
 --------------------
 
--- TODO look into the RWS-specific stuff in Control.Monad.Trans.Except:
---      (Monoid w, MonadError e m) => MonadError e (RWST r w s m) etc.
-
 type CutConfig = [(String, String)]
 type CutLog    = [String]
 type CutState  = TypedScript
+
+type CutM a = CutT Identity a
 
 newtype CutT m a = CutT
   { unCutT :: ExceptT CutError (RWST CutConfig CutLog CutState m) a
@@ -260,44 +258,8 @@ newtype CutT m a = CutT
     , MonadState  CutState
     )
 
-type CutM a = CutT Identity a
-
-class ( MonadReader CutConfig m
-      , MonadState  CutState  m
-      , MonadError  CutError  m ) => MonadCut m where
-  askConfig :: m CutConfig
-  getScript :: m CutState
-  putScript :: CutState -> m ()
-  getExpr   :: TypedVar -> m (Maybe TypedExpr)
-  putAssign :: TypedAssign -> m ()
-  throw     :: CutError -> m a
-
 instance MonadTrans CutT where
   lift = CutT . lift . lift
-
-instance (Monad m) => MonadCut (CutT m) where
-  askConfig = ask
-  getScript = get
-  putScript = put
-  getExpr v = getScript >>= \s -> return $ lookup v s
-  putAssign a = putAssign' False a >> return ()
-  throw     = throwError
-
-containsKey :: (Eq a) => [(a,b)] -> a -> Bool
-containsKey lst key = isInfixOf [key] $ map fst lst
-
--- the Bool specifies whether to continue if the variable exists already
--- note that it will always continue if only the *file* exists,
--- because that might just be left over from an earlier program run
-putAssign' :: MonadCut m => Bool -> TypedAssign -> m FilePath
-putAssign' force (v@(TypedVar var), e@(TypedExpr r _)) = do
-  s <- getScript
-  let path = namedTmp r v
-  if s `containsKey` v && not force
-    then error $ "Variable '" ++ var ++ "' used twice"
-    else do
-      putScript $ delFromAL s v ++ [(v,e)]
-      return path
 
 runCutM :: CutM a -> CutConfig -> CutState
         -> (Either CutError a, CutState, CutLog)

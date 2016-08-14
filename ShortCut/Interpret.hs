@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 {- ShortCut code is interpreted in three phases: parse, check, and eval. But
  - client code shouldn't need to care about that, so this module wraps them in
  - a simplified interface. It just holds whatever [i]nterpret functions the
@@ -15,17 +17,24 @@ module ShortCut.Interpret
   , eval
   , cScript
   , isAssignment
+  , putAssign
   )
   where
-
-import Control.Exception.Enclosed (catchAny)
-import Data.Either                (isRight)
-import Data.List.Utils            (delFromAL)
 
 import Development.Shake
 import ShortCut.Interpret.Compile
 import ShortCut.Interpret.Parse
 import ShortCut.Types
+import Control.Exception          (throwIO, catch, )
+import Control.Exception.Enclosed (catchAny)
+import Control.Monad.IO.Class     (MonadIO)
+import Control.Monad.RWS.Lazy     (get, put)
+import Control.Monad.State        (MonadState)
+import Data.Either                (isRight)
+import Data.List                  (isInfixOf)
+import Data.List.Utils            (delFromAL)
+import System.Directory           (removeFile)
+import System.IO.Error            (isDoesNotExistError)
 
 isAssignment :: String -> Bool
 isAssignment line = isRight $ regularParse pVarEq line
@@ -83,3 +92,33 @@ eval = ignoreErrors . eval'
         -- TODO show the var rather than the actual file contents
         str <- readFile' path
         putQuiet $ "\n" ++ str
+
+-- TODO is this ever used?
+-- putAssign' a = putAssign False a >> return ()
+
+containsKey :: (Eq a) => [(a,b)] -> a -> Bool
+containsKey lst key = isInfixOf [key] $ map fst lst
+
+-- the Bool specifies whether to continue if the variable exists already
+-- note that it will always continue if only the *file* exists,
+-- because that might just be left over from an earlier program run
+putAssign' :: MonadState CutState m => Bool -> TypedAssign -> m FilePath
+putAssign' force (v@(TypedVar var), e@(TypedExpr r _)) = do
+  s <- get
+  let path = namedTmp r v
+  if s `containsKey` v && not force
+    then error $ "Variable '" ++ var ++ "' used twice"
+    else do
+      put $ delFromAL s v ++ [(v,e)]
+      return path
+
+-- TODO remove? refactor?
+putAssign :: (MonadIO m, MonadState CutState m) =>  TypedAssign -> m ()
+putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
+
+-- TODO should this go in Interpret.hs? Types.hs?
+removeIfExists :: FilePath -> IO ()
+removeIfExists fileName = removeFile fileName `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwIO e

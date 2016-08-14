@@ -12,13 +12,11 @@ module ShortCut.Repl where
 
 import ShortCut.Types
 import ShortCut.Interpret
-
-import Control.Exception              (throwIO, catch, )
 import Control.Monad.Except           (throwError, MonadError, ExceptT
                                       ,runExceptT)
 import Control.Monad.IO.Class         (MonadIO, liftIO)
 import Control.Monad.IO.Class         (liftIO)
-import Control.Monad.Identity         (Identity, mzero)
+import Control.Monad.Identity         (mzero)
 import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST, get, put, ask)
 import Control.Monad.Reader           (MonadReader)
 import Control.Monad.State            (MonadState)
@@ -33,8 +31,6 @@ import Prelude                 hiding (print)
 import System.Command                 (runCommand, waitForProcess)
 import System.Console.Haskeline       (InputT, runInputT, defaultSettings
                                       ,getInputLine)
-import System.Directory               (removeFile)
-import System.IO.Error                (isDoesNotExistError)
 import Text.PrettyPrint.HughesPJClass (prettyShow)
 
 ----------------
@@ -58,29 +54,6 @@ newtype ReplM a = ReplM
     , MonadState  CutState
     , MonadError  CutError
     )
-
--- TODO should this go in Interpret.hs? Types.hs?
-removeIfExists :: FilePath -> IO ()
-removeIfExists fileName = removeFile fileName `catch` handleExists
-  where handleExists e
-          | isDoesNotExistError e = return ()
-          | otherwise = throwIO e
-
--- TODO how can I prevent duplicating this code?
--- warning: be careful when trying; last time I ended up with a bug that caused
---          infinite loops because they called themselves
--- TODO try without the class at all because it's just not worth it right now!
--- TODO or, try putting maybet inside checkt so you don't have to lift it
--- TODO or, try making use of lift from CutT's MonadTrans instance
--- TODO or, try using liftMaybe again
--- TODO could using both mtl and transformers be an issue?
-instance MonadCut ReplM where
-  askConfig = ask
-  getScript = get
-  putScript = put
-  putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
-  getExpr v = getScript >>= \s -> return $ lookup v s
-  throw     = throwError
 
 runReplM :: ReplM a -> CutConfig -> CutState
          -> IO (Either CutError (Maybe a), CutState, CutLog)
@@ -133,7 +106,7 @@ loop = do
     "" -> return ()
     (':':cmd) -> runCmd cmd
     line -> do
-      scr <- getScript
+      scr <- get
       if isAssignment line
         then do
           case iAssign scr line of
@@ -144,7 +117,7 @@ loop = do
           -- TODO hook the logs + configs together?
           -- TODO only evaluate up to the point where the expression they want?
           case iExpr scr line of
-            Left  err -> throw err
+            Left  err -> throwError err
             Right expr -> do
               let res  = TypedVar "result"
                   scr' = delFromAL scr res ++ [(res,expr)]
@@ -194,41 +167,42 @@ cmdHelp _ = print
   \:!     to run the rest of the line as a shell command"
 
 -- TODO this is totally duplicating code from putAssign; factor out
+-- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> ReplM ()
 cmdLoad path = do
   ec <- liftIO $ iFile path 
   case ec of
     Left e  -> print $ show e
-    Right c -> putScript c
+    Right c -> put c
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
 -- TODO replace showHack with something nicer
 cmdSave :: String -> ReplM ()
-cmdSave path = getScript >>= \s -> liftIO $ writeFile path $ showHack s
+cmdSave path = get >>= \s -> liftIO $ writeFile path $ showHack s
   where
     showHack = unlines . map show
 
 cmdDrop :: String -> ReplM ()
-cmdDrop [] = putScript []
+cmdDrop [] = put []
 cmdDrop var = do
-  expr <- getExpr (TypedVar var)
-  case expr of
+  s <- get
+  case lookup (TypedVar var) s of
     Nothing -> print $ "VarName '" ++ var ++ "' not found"
-    Just _  -> getScript >>= \s -> putScript $ delFromAL s (TypedVar var)
+    Just _  -> get >>= \s -> put $ delFromAL s (TypedVar var)
 
 cmdType :: String -> ReplM ()
 cmdType s = do
-  script <- getScript
+  script <- get
   print $ case iExpr script s of
     Right expr -> prettyShow expr
     Left  err  -> show err
 
 cmdShow :: String -> ReplM ()
-cmdShow [] = getScript >>= liftIO . mapM_ (putStrLn . prettyShow)
+cmdShow [] = get >>= liftIO . mapM_ (putStrLn . prettyShow)
 cmdShow var = do
-  expr <- getExpr (TypedVar var)
-  print $ case expr of
+  s <- get
+  print $ case lookup (TypedVar var) s of
     Nothing -> "VarName '" ++ var ++ "' not found"
     Just e  -> prettyShow e
 
