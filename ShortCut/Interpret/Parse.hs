@@ -190,7 +190,7 @@ pTerm :: Parser ParsedExpr
 pTerm = pParens <|> pCmd <|> try pNum <|> pFil <|> pRef
 
 operatorChars :: [Char]
-operatorChars = "+-*/&"
+operatorChars = "+-*/&|~"
 
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here as
@@ -276,7 +276,9 @@ tNum n = return $ TypedExpr RNumber $ Number n
 tBop :: Char -> (ParsedExpr, ParsedExpr) -> CutM TypedExpr
 tBop c (e1,e2) = case c of
   '+' -> tPlus  (e1,e2)
+  '|' -> tUni   (e1,e2)
   '-' -> tDash  (e1,e2)
+  '~' -> tDiff  (e1,e2)
   '*' -> tStar  (e1,e2)
   '/' -> tSlash (e1,e2)
   '&' -> tAmp   (e1,e2)
@@ -288,9 +290,17 @@ tPlus (e1, e2) = do
   TypedExpr r2 c2 <- tExpr e2
   case (r1, r2) of
     (RNumber , RNumber ) -> tAdd      (c1,c2)
+    _ -> throwError $ WrongArgTypes "+" ["set", "same type of set"]
+          [prettyShow r1, prettyShow r2]
+
+tUni :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
+tUni (e1, e2) = do
+  TypedExpr r1 c1 <- tExpr e1
+  TypedExpr r2 c2 <- tExpr e2
+  case (r1, r2) of
     (RGenes  , RGenes  ) -> tUnion r1 (c1,c2)
     (RGenomes, RGenomes) -> tUnion r1 (c1,c2)
-    _ -> throwError $ WrongArgTypes "+" ["set", "same type of set"]
+    _ -> throwError $ WrongArgTypes "|" ["set", "same type of set"]
           [prettyShow r1, prettyShow r2]
 
 tDash :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
@@ -302,6 +312,16 @@ tDash (e1,e2) = do
     (RGenes  , RGenes  ) -> tDifference r1 (c1,c2)
     (RGenomes, RGenomes) -> tDifference r1 (c1,c2)
     _ -> throwError $ WrongArgTypes "-" ["set", "same type of set"]
+          [prettyShow r1, prettyShow r2]
+
+tDiff :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
+tDiff (e1,e2) = do
+  TypedExpr r1 c1 <- tExpr e1
+  TypedExpr r2 c2 <- tExpr e2
+  case (r1, r2) of
+    (RGenes  , RGenes  ) -> tDifference r1 (c1,c2)
+    (RGenomes, RGenomes) -> tDifference r1 (c1,c2)
+    _ -> throwError $ WrongArgTypes "~" ["set", "same type of set"]
           [prettyShow r1, prettyShow r2]
 
 tAmp :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
