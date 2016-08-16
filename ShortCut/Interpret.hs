@@ -69,10 +69,10 @@ myShake = shake myOpts . alternatives
     myOpts = shakeOptions
       { shakeFiles     = "_shortcut"
       , shakeReport    = ["_shortcut/report.html"]
-      , shakeVerbosity = Loud -- TODO configure with a command line flag?
+      , shakeVerbosity = Quiet -- TODO configure with a command line flag?
       , shakeThreads   = 0    -- set to number of processors
+      , shakeCommandOptions = [EchoStdout True]
       -- , shakeChange = ChangeModtimeAndDigest
-      -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeProgress = progressSimple
       -- , shakeLineBuffering = False
       }
@@ -92,9 +92,6 @@ eval = ignoreErrors . eval'
         -- TODO show the var rather than the actual file contents
         str <- readFile' path
         putQuiet $ "\n" ++ str
-
--- TODO is this ever used?
--- putAssign' a = putAssign False a >> return ()
 
 containsKey :: (Eq a) => [(a,b)] -> a -> Bool
 containsKey lst key = isInfixOf [key] $ map fst lst

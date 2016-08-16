@@ -8,6 +8,8 @@
 -- TODO incorporate golden testing (it seems simple enough)
 -- https://hackage.haskell.org/package/test-framework-golden-1.1.3.3
 
+-- TODO test for freeze when running the actual binary on a minimal script
+
 import Test.Hspec
 
 import qualified ShortCut.TypesSpec           as T

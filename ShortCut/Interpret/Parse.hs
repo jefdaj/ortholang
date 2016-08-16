@@ -405,16 +405,6 @@ tCmd s es = case s of
   "worst_best_evalue" -> tWorstBest     es
   _ -> throwError $ NoSuchFunction s
 
--- tLoadFile :: (FilePath -> Typed a) -> Returns a
-          -- -> [ParsedExpr] -> CutM TypedExpr
--- tLoadFile fn r [e] = do
---   TypedExpr s c <- tExpr e
---   case s of
---     RFile -> return $ TypedExpr r $ fn c
---     _ -> throwError "type error!"
--- tLoadFile _ _ _ = throwError "type error!"
-
--- TODO why the weird type error when combining these into tLoadFile?
 tLoadFAA :: [ParsedExpr] -> CutM TypedExpr
 tLoadFAA [e] = do
   TypedExpr s c <- tExpr e
@@ -423,7 +413,6 @@ tLoadFAA [e] = do
     w -> throwError $ WrongArgTypes "load_aa_seqs" [prettyShow RFile] [prettyShow w]
 tLoadFAA es = throwError $ WrongArgNumber "load_aa_seqs" 1 (length es)
 
--- TODO why the weird type error when combining these into tLoadFile?
 tLoadFNA :: [ParsedExpr] -> CutM TypedExpr
 tLoadFNA [e] = do
   TypedExpr s c <- tExpr e
@@ -432,7 +421,6 @@ tLoadFNA [e] = do
     w -> throwError $ WrongArgTypes "load_na_seqs" [prettyShow RFile] [prettyShow w]
 tLoadFNA es = throwError $ WrongArgNumber "load_na_seqs" 1 (length es)
 
--- TODO why the weird type error when combining these into tLoadFile?
 tLoadGenomes :: [ParsedExpr] -> CutM TypedExpr
 tLoadGenomes [e] = do
   TypedExpr s c <- tExpr e
@@ -441,7 +429,6 @@ tLoadGenomes [e] = do
     w -> throwError $ WrongArgTypes "load_genomes" ["string"] [prettyShow w]
 tLoadGenomes es = throwError $ WrongArgNumber "load_genomes" 1 (length es)
 
--- TODO why the weird type error when combining these into tLoadFile?
 tLoadGenes :: [ParsedExpr] -> CutM TypedExpr
 tLoadGenes [e] = do
   TypedExpr s c <- tExpr e
