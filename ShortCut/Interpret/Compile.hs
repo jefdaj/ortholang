@@ -24,6 +24,7 @@ module ShortCut.Interpret.Compile where
 
 import Development.Shake
 import ShortCut.Types
+import ShortCut.Interpret.Parse (uExpr)
 
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
@@ -68,29 +69,33 @@ hashedTmp' extn expr paths = exprDir </> uniq <.> extn
   where
     uniq = digest $ unlines $ (show expr):paths
 
+hashedTmp2 :: String -> ParsedExpr -> [FilePath] -> FilePath
+hashedTmp2 extn expr paths = exprDir </> uniq <.> extn
+  where
+    uniq = digest $ unlines $ (show expr):paths
+
 ---------------------
 -- dispatch on AST --
 ---------------------
 
 cExpr :: TypedExpr -> Rules FilePath
-cExpr (TypedExpr _ e@(Reference   _ _)) = cRef e
-cExpr (TypedExpr r e@(File          _)) = cLit r e
-cExpr (TypedExpr r e@(Number        _)) = cLit r e
-cExpr (TypedExpr r e@(LoadFNA       _)) = cLoad r e
-cExpr (TypedExpr r e@(LoadFAA       _)) = cLoad r e
-cExpr (TypedExpr r e@(LoadGenes     _)) = cLoadGenes r e
-cExpr (TypedExpr r e@(LoadGenomes   _)) = cLoad r e
-cExpr (TypedExpr r e@(Add           _)) = cMath (+) "add"      r e
-cExpr (TypedExpr r e@(Subtract      _)) = cMath (-) "subtract" r e
-cExpr (TypedExpr r e@(Multiply      _)) = cMath (*) "multiply" r e
-cExpr (TypedExpr r e@(Divide        _)) = cMath (/) "divide"   r e
-cExpr (TypedExpr r e@(Union         _)) = cSet union        "union"      r e
-cExpr (TypedExpr r e@(Difference    _)) = cSet difference   "difference" r e
-cExpr (TypedExpr r e@(Intersect     _)) = cSet intersection "intersect"  r e
-cExpr (TypedExpr _ e@(FilterGenes   _)) = cFilterGenes   e
-cExpr (TypedExpr _ e@(FilterGenomes _)) = cFilterGenomes e
-cExpr (TypedExpr _ e@(WorstBest     _)) = cWorstBest     e
--- cExpr (TypedExpr r e@(Complement      _ _)) = cSet ??? r e -- TODO remove?
+cExpr e@(TypedExpr r (Reference _ _)) = cRef2 (ext r) (uExpr e)
+cExpr e@(TypedExpr r (File        _)) = cLit2 (ext r) (uExpr e)
+cExpr e@(TypedExpr r (Number      _)) = cLit2 (ext r) (uExpr e)
+cExpr e@(TypedExpr r (LoadFNA     _)) = cLoad2 (ext r) (uExpr e)
+cExpr e@(TypedExpr r (LoadFAA     _)) = cLoad2 (ext r) (uExpr e)
+cExpr e@(TypedExpr r (LoadGenomes _)) = cLoad2 (ext r) (uExpr e)
+cExpr e@(TypedExpr r (LoadGenes   _)) = cLoadGenes2 (ext r) (uExpr e)
+cExpr e@(TypedExpr _ (Add      ts)) = cMath2 (+) "add"      (uExpr e) ts
+cExpr e@(TypedExpr _ (Subtract ts)) = cMath2 (-) "subtract" (uExpr e) ts
+cExpr e@(TypedExpr _ (Multiply ts)) = cMath2 (*) "multiply" (uExpr e) ts
+cExpr e@(TypedExpr _ (Divide   ts)) = cMath2 (/) "divide"   (uExpr e) ts
+cExpr e@(TypedExpr r (Union      ts)) = cSet2 union        "union"      (uExpr e) r ts
+cExpr e@(TypedExpr r (Difference ts)) = cSet2 difference   "difference" (uExpr e) r ts
+cExpr e@(TypedExpr r (Intersect  ts)) = cSet2 intersection "intersect"  (uExpr e) r ts
+cExpr e@(TypedExpr _ t@(FilterGenes   _)) = cFilterGenes2   (uExpr e) t
+cExpr e@(TypedExpr _ t@(FilterGenomes _)) = cFilterGenomes2 (uExpr e) t
+cExpr e@(TypedExpr _ t@(WorstBest     _)) = cWorstBest2     (uExpr e) t
 
 -- same as above, but works on the unwrapped return type + expression
 cExpr' :: Returns a -> Typed a -> Rules FilePath
@@ -113,18 +118,17 @@ cScript v as = do
 ----------------------
 
 -- write a literal value from ShortCut source code to file
-cLit :: Returns a -> Typed a -> Rules FilePath
-cLit rtn expr = do
-  let path = hashedTmp rtn expr []
+cLit2 :: String -> ParsedExpr -> Rules FilePath
+cLit2 extn expr = do
+  let path = hashedTmp2 extn expr []
   path %> \out -> do
     putQuiet $ unwords ["write", out]
     writeFileChanged out $ paths expr ++ "\n"
   return path
   where
-    paths :: Typed a -> String
-    paths (File   s) = s
-    paths (Number n) = show n
-    paths _ = error "oh no, programmer error in cLit!"
+    paths :: ParsedExpr -> String
+    paths (Fil s) = s
+    paths (Num n) = show n
 
 ----------------------------------------
 -- compile everything symlink-related --
@@ -132,43 +136,38 @@ cLit rtn expr = do
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: Typed a -> Rules FilePath
-cRef (Reference rtn var) = return $ namedTmp rtn $ TypedVar var
-cRef _ = error "oh no, programmer error in cRef!"
+cRef2 :: String -> ParsedExpr -> Rules FilePath
+cRef2 ext (Ref (VarName var)) = return $ namedTmp2 ext var
 
 -- creates a symlink from expression file to input file
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
-cLoad :: Returns a -> Typed a -> Rules FilePath
-cLoad retn path = do
-  path' <- paths path
-  let link = hashedTmp retn path []
+cLoad2 :: String -> ParsedExpr -> Rules FilePath
+cLoad2 extn expr = do
+  path <- paths expr
+  let link = hashedTmp2 extn expr []
   link %> \out -> do
-    str    <- fmap strip $ readFile' path'
+    str    <- fmap strip $ readFile' path
     path'' <- liftIO $ canonicalizePath str
     putQuiet $ unwords ["link", str, out]
     quietly $ cmd "ln -fs" [path'', out]
   return link
   where
-    paths :: Typed a -> Rules FilePath
-    paths (LoadFNA     s) = cExpr' RFile s
-    paths (LoadFAA     s) = cExpr' RFile s
-    paths (LoadGenomes s) = cExpr' RFile s
-    paths _ = error "oh no, programmer error in cLoad!"
+    paths :: ParsedExpr -> Rules FilePath
+    paths (Cmd _ [Fil s]) = cExpr' RFile $ File s
 
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
-cLoadGenes :: Returns [Gene] -> Typed [Gene] -> Rules FilePath
-cLoadGenes retn e@(LoadGenes s) = do
-  path <- cExpr' RFile s
+cLoadGenes2 :: String -> ParsedExpr -> Rules FilePath
+cLoadGenes2 extn expr@(Cmd _ [Fil s]) = do
+  path <- cExpr' RFile $ File s
   let fstmp = cacheDir </> "loadgenes" -- not actually used
-      genes = hashedTmp retn e []
+      genes = hashedTmp2 extn expr []
   genes %> \out -> do
     need [path]
     path' <- readFile' path
     cmd "extract-seq-ids.py" fstmp out path'
   return genes
-cLoadGenes _ _ = error "oh no, programmer error in cLoadGenes!"
 
 -- Creates a symlink from varname to expression file.
 cVar :: TypedVar -> Returns a -> FilePath -> Rules FilePath
@@ -187,11 +186,10 @@ cVar var rtn dest = do
 ------------------------------
 
 -- apply a math operation to two numbers
-cMath :: (Scientific -> Scientific -> Scientific) -> String
-      -> Returns Scientific -> Typed Scientific
-      -> Rules FilePath
-cMath fn fnName _ expr = do
-  (p1, p2, p3) <- paths RNumber expr
+cMath2 :: (Scientific -> Scientific -> Scientific) -> String
+      -> ParsedExpr -> (Typed Scientific, Typed Scientific) -> Rules FilePath
+cMath2 fn fnName expr ts = do
+  (p1, p2, p3) <- paths expr
   p3 %> \out -> do
     num1 <- fmap strip $ readFile' p1
     num2 <- fmap strip $ readFile' p2
@@ -200,19 +198,16 @@ cMath fn fnName _ expr = do
     writeFileChanged out $ show num3 ++ "\n"
   return p3
   where
-    paths :: Returns a -> Typed a -> Rules (FilePath, FilePath, FilePath)
-    paths r e@(Add      (n1,n2)) = cBop r e (n1,n2)
-    paths r e@(Subtract (n1,n2)) = cBop r e (n1,n2)
-    paths r e@(Multiply (n1,n2)) = cBop r e (n1,n2)
-    paths r e@(Divide   (n1,n2)) = cBop r e (n1,n2)
-    paths _ _ = error "oh no, programmer error in cMath!"
+    paths :: ParsedExpr -> Rules (FilePath, FilePath, FilePath)
+    paths (Cmd _ [n1, n2]) = cBop2 expr (n1, n2) RNumber ts
 
 -- apply a set operation to two sets (implemented as lists so far)
-cSet :: (Set String -> Set String -> Set String) -> String
-     -> Returns [a] -> Typed [a]
+cSet2 :: (Set String -> Set String -> Set String) -> String
+     -> ParsedExpr
+     -> Returns [a] -> (Typed [a], Typed [a]) -- TODO remove
      -> Rules FilePath
-cSet fn fnName rtn expr = do
-  (p1, p2, p3) <- paths rtn expr
+cSet2 fn fnName pexpr retn texpr = do
+  (p1, p2, p3) <- paths pexpr retn texpr
   p3 %> \out -> do
     lines1 <- readFileLines p1
     lines2 <- readFileLines p2
@@ -221,20 +216,19 @@ cSet fn fnName rtn expr = do
     writeFileLines out $ toList lines3
   return p3
   where
-    paths :: Returns [a] -> Typed [a] -> Rules (FilePath, FilePath, FilePath)
-    paths r e@(Union      (s1,s2)) = cBop r e (s1,s2)
-    paths r e@(Difference (s1,s2)) = cBop r e (s1,s2)
-    paths r e@(Intersect  (s1,s2)) = cBop r e (s1,s2)
-    paths _ _ = error "oh no, programmer error in cSet!"
+    paths :: ParsedExpr -> Returns [a] -> (Typed [a], Typed [a])
+          -> Rules (FilePath, FilePath, FilePath)
+    paths (Bop _ s1 s2) r ts = cBop2 pexpr (s1, s2) r ts
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
-cBop :: Returns a -> Typed a -> (Typed a, Typed a)
-     -> Rules (FilePath, FilePath, FilePath)
-cBop r e (s1,s2) = do
-  p1 <- cExpr' r s1
-  p2 <- cExpr' r s2
-  return (p1, p2, hashedTmp r e [p1, p2])
+cBop2 :: ParsedExpr -> (ParsedExpr, ParsedExpr)
+      -> Returns a -> (Typed a, Typed a) -- TODO remove
+      -> Rules (FilePath, FilePath, FilePath)
+cBop2 expr (n1, n2) r (t1, t2) = do
+  p1 <- cExpr' r t1
+  p2 <- cExpr' r t2
+  return (p1, p2, hashedTmp2 (ext r) expr [p1, p2])
 
 ---------------------
 -- compile scripts --
@@ -256,13 +250,13 @@ bblast genes genomes out = do
   cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
-cFilterGenes :: Typed [Gene] -> Rules FilePath
-cFilterGenes e@(FilterGenes (gens,goms,sci)) = do
+cFilterGenes2 :: ParsedExpr -> Typed [Gene] -> Rules FilePath
+cFilterGenes2 pexpr e@(FilterGenes (gens,goms,sci)) = do
   genes   <- cExpr' RGenes   gens
   genomes <- cExpr' RGenomes goms
   evalue  <- cExpr' RNumber  sci
-  let hits   = hashedTmp' "csv" e [genes, genomes]
-      faa    = hashedTmp' "faa" e [genes, "extractseqs"]
+  let hits   = hashedTmp2 "csv" pexpr [genes, genomes]
+      faa    = hashedTmp2 "faa" pexpr [genes, "extractseqs"]
       genes' = hashedTmp RGenes e [hits, evalue]
       fgtmp  = cacheDir </> "fgtmp" -- TODO remove? not actually used
   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
@@ -272,16 +266,15 @@ cFilterGenes e@(FilterGenes (gens,goms,sci)) = do
     need [genomes, hits, evalue]
     cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
   return genes'
-cFilterGenes _ = error "oh no, programmer error in cFilterGenes!"
 
 -- TODO factor out bblast!
-cFilterGenomes :: Typed [Genome] -> Rules FilePath
-cFilterGenomes e@(FilterGenomes (goms,gens,sci)) = do
+cFilterGenomes2 :: ParsedExpr -> Typed [Genome] -> Rules FilePath
+cFilterGenomes2 pexpr e@(FilterGenomes (goms,gens,sci)) = do
   genomes <- cExpr' RGenomes goms
   genes   <- cExpr' RGenes   gens
   evalue  <- cExpr' RNumber  sci
-  let hits     = hashedTmp' "csv" e [genomes, genes]
-      faa      = hashedTmp' "faa" e [genes, "extractseqs"]
+  let hits     = hashedTmp2 "csv" pexpr [genomes, genes]
+      faa      = hashedTmp2 "faa" pexpr [genes, "extractseqs"]
       genomes' = hashedTmp RGenomes e [hits, evalue]
       fgtmp = cacheDir </> "fgtmp" -- TODO remove? not actually used
   faa  %> extractSeqs genes
@@ -290,14 +283,13 @@ cFilterGenomes e@(FilterGenomes (goms,gens,sci)) = do
     need [genes, hits, evalue]
     cmd "filter_genomes.R" [fgtmp, out, genes, hits, evalue]
   return genomes'
-cFilterGenomes _ = error "oh no, programmer error in cFilterGenomes!"
 
-cWorstBest :: Typed Scientific -> Rules FilePath
-cWorstBest e@(WorstBest (gens,goms)) = do
+cWorstBest2 :: ParsedExpr -> Typed Scientific -> Rules FilePath
+cWorstBest2 pexpr e@(WorstBest (gens,goms)) = do
   genes   <- cExpr' RGenes   gens
   genomes <- cExpr' RGenomes goms
-  let faa    = hashedTmp' "faa"  e [genes, "extractseqs"]
-      hits   = hashedTmp' "csv"  e [genomes, genes]
+  let faa    = hashedTmp2 "faa"  pexpr [genes, "extractseqs"]
+      hits   = hashedTmp2 "csv"  pexpr [genomes, genes]
       evalue = hashedTmp RNumber e [genes, genomes]
       wbtmp  = cacheDir </> "wbtmp" -- TODO remove? not actually used
   faa  %> extractSeqs genes
@@ -306,4 +298,3 @@ cWorstBest e@(WorstBest (gens,goms)) = do
     need [hits, genes]
     cmd "worst_best_evalue.R" [wbtmp, out, hits, genes]
   return evalue
-cWorstBest _ = error "oh no, programmer error in cWorstBest!"

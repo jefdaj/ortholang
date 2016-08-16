@@ -229,6 +229,12 @@ namedTmp rtn (TypedVar var) = tmpDir </> var <.> ext'
   where
     ext' = if var == "result" then "" else ext rtn
 
+-- TODO remove the other one and rename this to namedTmp after removing GADTs
+namedTmp2 :: String -> String -> FilePath
+namedTmp2 e var = tmpDir </> var <.> e'
+  where
+    e' = if var == "result" then "" else e
+
 -- TODO deduplicate with the one in Compile.hs
 --      (actually, load from config)
 tmpDir :: FilePath
