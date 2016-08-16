@@ -500,3 +500,35 @@ tRef (VarName v) = do
   case lookup (TypedVar v) script of
     Just (TypedExpr r _) -> return $ TypedExpr r $ Reference r v
     Nothing -> throwError $ NoSuchVariable v
+
+---------------------------------------------------
+-- "un-checkers" to convert typed back to parsed --
+---------------------------------------------------
+
+-- This is a temporary function to "undo" the GADT-based typechecking.
+-- Hopefully it'll let me remove GADts without breaking anything in the process.
+
+uExpr :: TypedExpr -> ParsedExpr
+uExpr (TypedExpr _ (Reference _ s)) = Ref $ VarName s
+uExpr (TypedExpr _ (File        s)) = Fil s
+uExpr (TypedExpr _ (Number      n)) = Num n
+uExpr (TypedExpr _ (LoadFNA     f)) = Cmd "load_fasta_na" [(uExpr $ TypedExpr RFile f)]
+uExpr (TypedExpr _ (LoadFAA     f)) = Cmd "load_fasta_aa" [(uExpr $ TypedExpr RFile f)]
+uExpr (TypedExpr _ (LoadGenes   f)) = Cmd "load_genes"    [(uExpr $ TypedExpr RFile f)] -- or is this a string?
+uExpr (TypedExpr _ (LoadGenomes f)) = Cmd "load_genomes"  [(uExpr $ TypedExpr RFile f)] -- or is this a string?
+uExpr (TypedExpr r (Add      (n1, n2))) = Bop '+' (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Subtract (n1, n2))) = Bop '-' (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Multiply (n1, n2))) = Bop '*' (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Divide   (n1, n2))) = Bop '/' (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Union      (s1, s2))) = Bop '|' (uExpr $ TypedExpr r s1) (uExpr $ TypedExpr r s2)
+uExpr (TypedExpr r (Difference (s1, s2))) = Bop '~' (uExpr $ TypedExpr r s1) (uExpr $ TypedExpr r s2)
+uExpr (TypedExpr r (Intersect  (s1, s2))) = Bop '&' (uExpr $ TypedExpr r s1) (uExpr $ TypedExpr r s2)
+uExpr (TypedExpr _ (FilterGenes   (a1, a2, a3))) = Cmd "filter_genes"   [(uExpr $ TypedExpr RGenes   a1), (uExpr $ TypedExpr RGenomes a2), (uExpr $ TypedExpr RNumber a3)]
+uExpr (TypedExpr _ (FilterGenomes (a1, a2, a3))) = Cmd "filter_genomes" [(uExpr $ TypedExpr RGenomes a1), (uExpr $ TypedExpr RGenes   a2), (uExpr $ TypedExpr RNumber a3)]
+uExpr (TypedExpr _ (WorstBest     (a1, a2))) = Cmd "worst_best_evalue" [(uExpr $ TypedExpr RGenes   a1), (uExpr $ TypedExpr RGenomes a2)]
+
+uAssign :: TypedAssign -> ParsedAssign
+uAssign (TypedVar v, e) = (VarName v, uExpr e)
+
+uScript :: TypedScript -> ParsedScript
+uScript = map uAssign

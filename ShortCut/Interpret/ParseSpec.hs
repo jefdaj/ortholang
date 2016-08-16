@@ -260,8 +260,8 @@ exTerms = exCmds ++
 -- TODO: add more types
 exExprs :: [(String, ParsedExpr)]
 exExprs = exTerms ++
-  [ ("(ingoodcyanos + inknowngenomes) - inucyna",
-      Bop '-' (Bop '+' (Ref (VarName "ingoodcyanos"))
+  [ ("(ingoodcyanos | inknowngenomes) ~ inucyna",
+      Bop '~' (Bop '|' (Ref (VarName "ingoodcyanos"))
                        (Ref (VarName "inknowngenomes")))
               (Ref (VarName "inucyna")))
   ]
