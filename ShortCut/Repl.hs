@@ -8,6 +8,8 @@
 --      hey! just store a list of vars referenced as you go too. much easier!
 --      will still have to do that recursively.. don't try until after lab meeting
 
+-- TODO you should be able to write comments in the REPL
+
 module ShortCut.Repl where
 
 import ShortCut.Types
@@ -63,7 +65,7 @@ prompt :: String -> ReplM (Maybe String)
 prompt = ReplM . lift . lift . getInputLine
 
 print :: String -> ReplM ()
-print str = liftIO $ putStr str
+print str = liftIO $ putStrLn str
 
 ---------------
 -- utilities --

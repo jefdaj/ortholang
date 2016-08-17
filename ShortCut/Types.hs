@@ -16,7 +16,7 @@ import Data.Scientific                (Scientific())
 import Development.Shake.FilePath     ((<.>), (</>))
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJ      ((<+>), vcat, text, sep, empty)
-import Text.PrettyPrint.HughesPJClass (Pretty, pPrint)
+import Text.PrettyPrint.HughesPJClass
 
 --------------------
 -- error messages --
@@ -110,18 +110,27 @@ instance Pretty Ext where
 
 instance {-# OVERLAPPING #-} Pretty TypedAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
+  -- this adds type info, but makes the pretty-print not valid source code
+  -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ getExt e))
 
 instance Pretty TypedScript where
   pPrint [] = empty
-  pPrint as = vcat $ map pPrint as
+  pPrint as = fsep $ map pPrint as
 
+-- the TBop one is pretty messy, but nicely lines everything up :D
 instance Pretty TypedExpr where
   pPrint (TNum n)         = text $ show n
   pPrint (TSet _ _)       = undefined -- TODO figure this out!
   pPrint (TStr s)         = text $ show s
   pPrint (TRef _ v)       = pPrint v
-  pPrint (TCmd _ s es)    = text s <+> sep (map pPrint es)
-  pPrint (TBop _ c e1 e2) = pPrint e1 <+> text c <+> pPrint e2
+  pPrint (TCmd _ s es)    = text s <+> sep (map pPrint es) -- TODO long vs wrap?
+  pPrint (TBop _ c e1 e2) = let use fn = fn (pPrint e1)
+                                            (nest (-2) $ text c <+> pPrint e2)
+                                long = use (<+>)
+                                wrap = use ($+$)
+                            in if (length $ render $ long) > 80
+                                then wrap
+                                else long
 
 ---------------
 -- Cut monad --
