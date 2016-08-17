@@ -62,7 +62,7 @@ data ParsedExpr
 newtype VarName = VarName String deriving (Eq, Show, Read)
 
 type ParsedVar    = VarName
-type ParsedAssign = (ParsedVar, ParsedExpr)
+type ParsedAssign = (ParsedVar, ParsedExpr) -- TODO could add type tags here
 type ParsedScript = [ParsedAssign]
 
 -- TODO add tests for round-tripping everything based on these
@@ -83,6 +83,45 @@ instance {-# OVERLAPPING #-} Pretty ParsedAssign where
 instance Pretty ParsedScript where
   pPrint [] = empty
   pPrint as = vcat $ map pPrint as
+
+----------------------------------
+-- new non-GADT typed AST types --
+----------------------------------
+
+-- TODO unify these with the above Parsed ones
+-- TODO rethink paths and literals:
+--        literals are strings or numbers
+--        no need to represent paths separately at all?
+--        no need for an extension tag in either
+
+-- Filename extension, which in ShortCut is equivalent to variable type
+-- TODO can this be done better with phantom types?
+data Ext = SetOf Ext | Ext String
+  deriving (Eq, Show, Read)
+
+data TypedExpr2
+  = Str2 String
+  | Num2 Scientific
+  | Ref2 Ext ParsedVar
+  | Set2 Ext [TypedExpr2]
+  | Bop2 Ext String  TypedExpr2 TypedExpr2
+  | Cmd2 Ext String [TypedExpr2]
+  deriving (Eq, Show, Read)
+
+type TypedAssign2 = (ParsedVar, TypedExpr2)
+type TypedScript2 = [TypedAssign2]
+
+getExt :: TypedExpr2 -> Ext
+getExt (Str2   _    ) = Ext "str"
+getExt (Num2   _    ) = Ext "num"
+getExt (Ref2 e _    ) = e
+getExt (Cmd2 e _ _  ) = e
+getExt (Bop2 e _ _ _) = e
+getExt (Set2 e _    ) = e
+
+-- TODO remove
+ext2 :: Returns a -> Ext
+ext2 = Ext . ext
 
 -----------------------
 -- Typed AST Types --
@@ -188,7 +227,7 @@ instance Pretty (Returns a) where
 -- TODO use .txt for all the lists? or .list?
 ext :: Returns a -> String
 ext RNumber  = "num"
-ext RFile    = "txt"
+ext RFile    = "path"
 ext RFastaNA = "fna"
 ext RFastaAA = "faa"
 ext RGene    = "gene"
@@ -224,16 +263,11 @@ instance {-# OVERLAPPING #-} Pretty TypedAssign where
 -- TODO flip arguments for consistency with everything else
 -- There's a kludge here for the special case of "result", which is like the
 -- "main" function of a ShortCut script, and always goes to <tmpdir>/result.
-namedTmp :: Returns a -> TypedVar -> FilePath
-namedTmp rtn (TypedVar var) = tmpDir </> var <.> ext'
+namedTmp :: ParsedVar -> TypedExpr2 -> FilePath
+namedTmp (VarName var) expr = tmpDir </> base
   where
-    ext' = if var == "result" then "" else ext rtn
-
--- TODO remove the other one and rename this to namedTmp after removing GADTs
-namedTmp2 :: String -> String -> FilePath
-namedTmp2 e var = tmpDir </> var <.> e'
-  where
-    e' = if var == "result" then "" else e
+    base  = if var == "result" then var else var <.> e
+    Ext e = getExt expr
 
 -- TODO deduplicate with the one in Compile.hs
 --      (actually, load from config)

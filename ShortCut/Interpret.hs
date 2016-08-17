@@ -102,7 +102,7 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 putAssign' :: MonadState CutState m => Bool -> TypedAssign -> m FilePath
 putAssign' force (v@(TypedVar var), e@(TypedExpr r _)) = do
   s <- get
-  let path = namedTmp r v
+  let path = namedTmp (VarName var) (uExpr e)
   if s `containsKey` v && not force
     then error $ "Variable '" ++ var ++ "' used twice"
     else do

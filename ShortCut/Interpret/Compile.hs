@@ -1,3 +1,5 @@
+{-# LANGUAGE GADTs #-}
+
 -- Once text has been parsed into an abstract syntax tree (Parse.hs), and that
 -- tree has been checked for errors (Check.hs), this module "compiles" it by
 -- translating it into a set of Shake build rules. To actually run the rules,
@@ -22,7 +24,6 @@ module ShortCut.Interpret.Compile where
 
 import Development.Shake
 import ShortCut.Types
-import ShortCut.Interpret.Parse (uExpr, uAssign, uScript)
 
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
@@ -56,44 +57,55 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
   where
     asBytes = (pack . show) val
 
-hashedTmp :: String -> ParsedExpr -> [FilePath] -> FilePath
-hashedTmp extn expr paths = exprDir </> uniq <.> extn
+-- TODO extn can be found inside expr now; remove it
+hashedTmp :: TypedExpr2 -> [FilePath] -> FilePath
+hashedTmp expr paths = exprDir </> uniq <.> e
+  where
+    Ext e = getExt expr
+    uniq = digest $ unlines $ (show expr):paths
+
+-- overrides the expression's "natural" extension
+-- TODO figure out how to remove!
+hashedTmp' :: Ext -> TypedExpr2 -> [FilePath] -> FilePath
+hashedTmp' (Ext e) expr paths = exprDir </> uniq <.> e
   where
     uniq = digest $ unlines $ (show expr):paths
+hashedTmp' _ _ _ = error "bad arguments to hashedTmp'"
 
 ---------------------
 -- dispatch on AST --
 ---------------------
 
-cExpr :: ParsedExpr -> Rules FilePath
-cExpr e@(Ref _) = cRef e
-cExpr e@(Fil _) = cLit "txt" e
-cExpr e@(Num _) = cLit "num" e
-cExpr e@(Bop '+' _ _) = cMath (+) "add"      e
-cExpr e@(Bop '-' _ _) = cMath (-) "subtract" e
-cExpr e@(Bop '*' _ _) = cMath (*) "multiply" e
-cExpr e@(Bop '/' _ _) = cMath (/) "divide"   e
-cExpr e@(Bop '|' _ _) = cSet union        "union"      e
-cExpr e@(Bop '~' _ _) = cSet difference   "difference" e
-cExpr e@(Bop '&' _ _) = cSet intersection "intersect"  e
-cExpr e@(Cmd "load_fasta_na" _) = cLoad      "fna"     e
-cExpr e@(Cmd "load_fasta_aa" _) = cLoad      "faa"     e
-cExpr e@(Cmd "load_genes"    _) = cLoadGenes "genes"   e
-cExpr e@(Cmd "load_genomes"  _) = cLoad      "genomes" e
-cExpr e@(Cmd "filter_genes"      _) = cFilterGenes   e
-cExpr e@(Cmd "filter_genomes"    _) = cFilterGenomes e
-cExpr e@(Cmd "worst_best_evalue" _) = cWorstBest     e
+cExpr :: TypedExpr2 -> Rules FilePath
+cExpr e@(Str2 _) = cLit e
+cExpr e@(Num2 _) = cLit e
+cExpr e@(Ref2 _ _) = cRef e
+cExpr e@(Bop2 _ "+" _ _) = cMath (+) "add"      e
+cExpr e@(Bop2 _ "-" _ _) = cMath (-) "subtract" e
+cExpr e@(Bop2 _ "*" _ _) = cMath (*) "multiply" e
+cExpr e@(Bop2 _ "/" _ _) = cMath (/) "divide"   e
+cExpr e@(Bop2 _ "|" _ _) = cSet union        "union"      e
+cExpr e@(Bop2 _ "~" _ _) = cSet difference   "difference" e
+cExpr e@(Bop2 _ "&" _ _) = cSet intersection "intersect"  e
+cExpr e@(Cmd2 _ "load_fasta_na" _) = cLoad      e
+cExpr e@(Cmd2 _ "load_fasta_aa" _) = cLoad      e
+cExpr e@(Cmd2 _ "load_genes"    _) = cLoadGenes e
+cExpr e@(Cmd2 _ "load_genomes"  _) = cLoad      e
+cExpr e@(Cmd2 _ "filter_genes"      _) = cFilterGenes   e
+cExpr e@(Cmd2 _ "filter_genomes"    _) = cFilterGenomes e
+cExpr e@(Cmd2 _ "worst_best_evalue" _) = cWorstBest     e
+cExpr _ = error "bad argument to cExpr"
 
-cAssign :: ParsedAssign -> Rules (ParsedVar, FilePath)
-cAssign (v@(VarName var), expr) = do
+cAssign :: TypedAssign2 -> Rules (ParsedVar, FilePath)
+cAssign (var, expr) = do
   -- liftIO $ putStrLn "entering cExpr"
   path  <- cExpr expr
   -- liftIO $ putStrLn "got past cExpr!"
-  path' <- cVar var path
-  return (v, path')
+  path' <- cVar var expr path
+  return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
-cScript' :: ParsedVar -> ParsedScript -> Rules FilePath
+cScript' :: ParsedVar -> TypedScript2 -> Rules FilePath
 cScript' v as = do
   -- liftIO $ putStrLn "entering cScript"
   rpaths <- mapM cAssign as
@@ -108,18 +120,19 @@ cScript (TypedVar v) s = cScript' (VarName v) (uScript s)
 ----------------------
 
 -- write a literal value from ShortCut source code to file
-cLit :: String -> ParsedExpr -> Rules FilePath
-cLit extn expr = do
+cLit :: TypedExpr2 -> Rules FilePath
+cLit expr = do
   -- liftIO $ putStrLn "entering cLit"
-  let path = hashedTmp extn expr []
+  let path = hashedTmp expr []
   path %> \out -> do
     putQuiet $ unwords ["write", out]
     writeFileChanged out $ paths expr ++ "\n"
   return path
   where
-    paths :: ParsedExpr -> String
-    paths (Fil s) = s
-    paths (Num n) = show n
+    paths :: TypedExpr2 -> String
+    paths (Str2 s) = s
+    paths (Num2 n) = show n
+    paths _ = error "bad argument to paths"
 
 ----------------------------------------
 -- compile everything symlink-related --
@@ -127,45 +140,50 @@ cLit extn expr = do
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: ParsedExpr -> Rules FilePath
-cRef (Ref (VarName var)) = do
+cRef :: TypedExpr2 -> Rules FilePath
+cRef expr@(Ref2 _ var) = do
   -- liftIO $ putStrLn "entering cRef"
-  return $ namedTmp2 "ref" var
+  return $ namedTmp var expr
+cRef _ = error "bad argument to cRef"
 
 -- creates a symlink from expression file to input file
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
-cLoad :: String -> ParsedExpr -> Rules FilePath
-cLoad extn e@(Cmd _ [f]) = do
+cLoad :: TypedExpr2 -> Rules FilePath
+cLoad e@(Cmd2 _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
   path <- cExpr f
-  let link = hashedTmp extn e [path]
+  let link = hashedTmp e [path]
   link %> \out -> do
     str    <- fmap strip $ readFile' path
     path'' <- liftIO $ canonicalizePath str
     putQuiet $ unwords ["link", str, out]
     quietly $ cmd "ln -fs" [path'', out]
   return link
+cLoad _ = error "bad argument to cLoad"
 
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
-cLoadGenes :: String -> ParsedExpr -> Rules FilePath
-cLoadGenes extn expr@(Cmd _ [f]) = do
+cLoadGenes :: TypedExpr2 -> Rules FilePath
+cLoadGenes expr@(Cmd2 _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
   path <- cExpr f
   let fstmp = cacheDir </> "loadgenes" -- not actually used
-      genes = hashedTmp extn expr []
+      genes = hashedTmp expr []
   genes %> \out -> do
     need [path]
     path' <- readFile' path
     cmd "extract-seq-ids.py" fstmp out path'
   return genes
+cLoadGenes _ = error "bad argument to cLoadGenes"
 
 -- Creates a symlink from varname to expression file.
-cVar :: String -> FilePath -> Rules FilePath
-cVar var dest = do
+-- TODO how should this handle file extensions? just not have them?
+-- TODO or pick up the extension of the destination?
+cVar :: ParsedVar -> TypedExpr2 -> FilePath -> Rules FilePath
+cVar var expr dest = do
   -- liftIO $ putStrLn "entering cVar"
-  let link  = namedTmp2 "var" var -- wonder if the freeze bug occurs here?
+  let link  = namedTmp var expr
       dest' = makeRelative tmpDir dest
   link %> \out -> do
     alwaysRerun
@@ -180,10 +198,10 @@ cVar var dest = do
 
 -- apply a math operation to two numbers
 cMath :: (Scientific -> Scientific -> Scientific) -> String
-      -> ParsedExpr -> Rules FilePath
-cMath fn fnName e@(Bop _ n1 n2) = do
+      -> TypedExpr2 -> Rules FilePath
+cMath fn fnName e@(Bop2 extn _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
-  (p1, p2, p3) <- cBop "num" e (n1, n2)
+  (p1, p2, p3) <- cBop extn e (n1, n2)
   p3 %> \out -> do
     num1 <- fmap strip $ readFile' p1
     num2 <- fmap strip $ readFile' p2
@@ -191,13 +209,14 @@ cMath fn fnName e@(Bop _ n1 n2) = do
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
     writeFileChanged out $ show num3 ++ "\n"
   return p3
+cMath _ _ _ = error "bad argument to cMath"
 
 -- apply a set operation to two sets (implemented as lists so far)
 cSet :: (Set String -> Set String -> Set String) -> String
-     -> ParsedExpr -> Rules FilePath
-cSet fn fnName e@(Bop _ s1 s2) = do
+     -> TypedExpr2 -> Rules FilePath
+cSet fn fnName e@(Bop2 extn _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSet"
-  (p1, p2, p3) <- cBop "set" e (s1, s2)
+  (p1, p2, p3) <- cBop extn e (s1, s2)
   p3 %> \out -> do
     lines1 <- readFileLines p1
     lines2 <- readFileLines p2
@@ -205,16 +224,17 @@ cSet fn fnName e@(Bop _ s1 s2) = do
     let lines3 = fn (fromList lines1) (fromList lines2)
     writeFileLines out $ toList lines3
   return p3
+cSet _ _ _ = error "bad argument to cSet"
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
-cBop :: String -> ParsedExpr -> (ParsedExpr, ParsedExpr)
+cBop :: Ext -> TypedExpr2 -> (TypedExpr2, TypedExpr2)
       -> Rules (FilePath, FilePath, FilePath)
 cBop extn expr (n1, n2) = do
   -- liftIO $ putStrLn "entering cBop"
   p1 <- cExpr n1
   p2 <- cExpr n2
-  return (p1, p2, hashedTmp extn expr [p1, p2])
+  return (p1, p2, hashedTmp' extn expr [p1, p2])
 
 ---------------------
 -- compile scripts --
@@ -238,15 +258,15 @@ bblast genes genomes out = do
   cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
-cFilterGenes :: ParsedExpr -> Rules FilePath
-cFilterGenes e@(Cmd _ [gens, goms, sci]) = do
+cFilterGenes :: TypedExpr2 -> Rules FilePath
+cFilterGenes e@(Cmd2 _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
   genes   <- cExpr gens
   genomes <- cExpr goms
   evalue  <- cExpr sci
-  let hits   = hashedTmp "csv" e [genes, genomes]
-      faa    = hashedTmp "faa" e [genes, "extractseqs"]
-      genes' = hashedTmp (ext RGenes) e [hits, evalue]
+  let hits   = hashedTmp' (Ext "csv") e [genes, genomes]
+      faa    = hashedTmp' (Ext "faa") e [genes, "extractseqs"]
+      genes' = hashedTmp e [hits, evalue]
       fgtmp  = cacheDir </> "fgtmp" -- TODO remove? not actually used
   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
   faa  %> extractSeqs genes
@@ -255,17 +275,18 @@ cFilterGenes e@(Cmd _ [gens, goms, sci]) = do
     need [genomes, hits, evalue]
     cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
   return genes'
+cFilterGenes _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
-cFilterGenomes :: ParsedExpr -> Rules FilePath
-cFilterGenomes e@(Cmd _ [goms, gens, sci]) = do
+cFilterGenomes :: TypedExpr2 -> Rules FilePath
+cFilterGenomes e@(Cmd2 _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
   genomes <- cExpr goms
   genes   <- cExpr gens
   evalue  <- cExpr sci
-  let hits     = hashedTmp "csv" e [genomes, genes]
-      faa      = hashedTmp "faa" e [genes, "extractseqs"]
-      genomes' = hashedTmp (ext RGenomes) e [hits, evalue]
+  let hits     = hashedTmp' (Ext "csv") e [genomes, genes]
+      faa      = hashedTmp' (Ext "faa") e [genes, "extractseqs"]
+      genomes' = hashedTmp e [hits, evalue]
       fgtmp = cacheDir </> "fgtmp" -- TODO remove? not actually used
   faa  %> extractSeqs genes
   hits %> bblast faa genomes
@@ -273,15 +294,16 @@ cFilterGenomes e@(Cmd _ [goms, gens, sci]) = do
     need [genes, hits, evalue]
     cmd "filter_genomes.R" [fgtmp, out, genes, hits, evalue]
   return genomes'
+cFilterGenomes _ = error "bad argument to cFilterGenomes"
 
-cWorstBest :: ParsedExpr -> Rules FilePath
-cWorstBest e@(Cmd _ [gens, goms]) = do
+cWorstBest :: TypedExpr2 -> Rules FilePath
+cWorstBest e@(Cmd2 _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
   genes   <- cExpr gens
   genomes <- cExpr goms
-  let faa    = hashedTmp "faa"  e [genes, "extractseqs"]
-      hits   = hashedTmp "csv"  e [genomes, genes]
-      evalue = hashedTmp (ext RNumber) e [genes, genomes]
+  let faa    = hashedTmp' (Ext "faa")  e [genes, "extractseqs"]
+      hits   = hashedTmp' (Ext "csv")  e [genomes, genes]
+      evalue = hashedTmp e [genes, genomes]
       wbtmp  = cacheDir </> "wbtmp" -- TODO remove? not actually used
   faa  %> extractSeqs genes
   hits %> bblast faa genomes
@@ -289,3 +311,44 @@ cWorstBest e@(Cmd _ [gens, goms]) = do
     need [hits, genes]
     cmd "worst_best_evalue.R" [wbtmp, out, hits, genes]
   return evalue
+cWorstBest _ = error "bad argument to cWorstBest"
+
+---------------------------------------------------
+-- "un-checkers" to convert typed back to parsed --
+---------------------------------------------------
+
+-- This is a temporary function to "undo" the GADT-based typechecking.
+-- Hopefully it'll let me remove GADts without breaking anything in the process.
+
+uExpr :: TypedExpr -> TypedExpr2
+uExpr (TypedExpr r (Reference _ s)) = Ref2 (ext2 r) (VarName s)
+uExpr (TypedExpr _ (File        s)) = Str2 s
+uExpr (TypedExpr _ (Number      n)) = Num2 n
+uExpr (TypedExpr r (LoadFNA     f)) = Cmd2 (ext2 r) "load_fasta_na" [(uExpr $ TypedExpr RFile f)]
+uExpr (TypedExpr r (LoadFAA     f)) = Cmd2 (ext2 r) "load_fasta_aa" [(uExpr $ TypedExpr RFile f)]
+uExpr (TypedExpr r (LoadGenes   f)) = Cmd2 (ext2 r) "load_genes"    [(uExpr $ TypedExpr RFile f)] -- or is this a string?
+uExpr (TypedExpr r (LoadGenomes f)) = Cmd2 (ext2 r) "load_genomes"  [(uExpr $ TypedExpr RFile f)] -- or is this a string?
+uExpr (TypedExpr r (Add      (n1, n2))) = Bop2 (ext2 r) "+" (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Subtract (n1, n2))) = Bop2 (ext2 r) "-" (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Multiply (n1, n2))) = Bop2 (ext2 r) "*" (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Divide   (n1, n2))) = Bop2 (ext2 r) "/" (uExpr $ TypedExpr r n1) (uExpr $ TypedExpr r n2)
+uExpr (TypedExpr r (Union      (s1, s2))) = Bop2 (ext2 r) "|" (uExpr $ TypedExpr r s1) (uExpr $ TypedExpr r s2)
+uExpr (TypedExpr r (Difference (s1, s2))) = Bop2 (ext2 r) "~" (uExpr $ TypedExpr r s1) (uExpr $ TypedExpr r s2)
+uExpr (TypedExpr r (Intersect  (s1, s2))) = Bop2 (ext2 r) "&" (uExpr $ TypedExpr r s1) (uExpr $ TypedExpr r s2)
+uExpr (TypedExpr r (FilterGenes   (a1, a2, a3)))
+  = Cmd2 (ext2 r) "filter_genes"   [(uExpr $ TypedExpr RGenes   a1),
+                                    (uExpr $ TypedExpr RGenomes a2),
+                                     (uExpr $ TypedExpr RNumber a3)]
+uExpr (TypedExpr r (FilterGenomes (a1, a2, a3)))
+  = Cmd2 (ext2 r) "filter_genomes" [(uExpr $ TypedExpr RGenomes a1),
+                                    (uExpr $ TypedExpr RGenes   a2),
+                                    (uExpr $ TypedExpr RNumber  a3)]
+uExpr (TypedExpr r (WorstBest     (a1, a2)))
+  = Cmd2 (ext2 r) "worst_best_evalue" [(uExpr $ TypedExpr RGenes   a1),
+                                       (uExpr $ TypedExpr RGenomes a2)]
+
+uAssign :: TypedAssign -> TypedAssign2
+uAssign (TypedVar v, e) = (VarName v, uExpr e)
+
+uScript :: TypedScript -> TypedScript2
+uScript = map uAssign
