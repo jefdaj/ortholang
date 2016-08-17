@@ -14,6 +14,7 @@ module ShortCut.Repl where
 
 import ShortCut.Types
 import ShortCut.Interpret
+import ShortCut.Utils                 (absolutize)
 import Control.Monad.Except           (throwError, MonadError, ExceptT
                                       ,runExceptT)
 import Control.Monad.IO.Class         (MonadIO, liftIO)
@@ -143,7 +144,7 @@ cmds :: [(String, String -> ReplM ())]
 cmds =
   [ ("help" , cmdHelp)
   , ("load" , cmdLoad)
-  , ("write", cmdSave) -- TODO rename to write to avoid conflict with show
+  , ("write", cmdSave)
   , ("drop" , cmdDrop)
   , ("type" , cmdType)
   , ("show" , cmdShow)
@@ -181,9 +182,11 @@ cmdLoad path = do
 --      or just tell people to define main themselves?
 -- TODO replace showHack with something nicer
 cmdSave :: String -> ReplM ()
-cmdSave path = get >>= \s -> liftIO $ writeFile path $ showHack s
+cmdSave path = do
+  path' <- liftIO $ absolutize path
+  get >>= \s -> liftIO $ writeFile path' $ showHack s
   where
-    showHack = unlines . map show
+    showHack = unlines . map prettyShow
 
 cmdDrop :: String -> ReplM ()
 cmdDrop [] = put []
