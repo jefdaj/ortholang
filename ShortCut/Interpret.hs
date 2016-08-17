@@ -7,9 +7,7 @@
  -}
 
 module ShortCut.Interpret
-  ( Typed(..)
-  , TypedVar(..)
-  , CutError(..)
+  ( CutError(..)
   , TypedExpr(..)
   , iAssign
   , iExpr
@@ -68,10 +66,10 @@ myShake = shake myOpts . alternatives
   where
     myOpts = shakeOptions
       { shakeFiles     = "_shortcut"
-      , shakeReport    = ["_shortcut/report.html"]
       , shakeVerbosity = Quiet -- TODO configure with a command line flag?
       , shakeThreads   = 0    -- set to number of processors
-      , shakeCommandOptions = [EchoStdout True]
+      -- , shakeCommandOptions = [EchoStdout True]
+      -- , shakeReport    = ["_shortcut/report.html"]
       -- , shakeChange = ChangeModtimeAndDigest
       -- , shakeProgress = progressSimple
       -- , shakeLineBuffering = False
@@ -91,7 +89,8 @@ eval = ignoreErrors . eval'
         alwaysRerun
         -- TODO show the var rather than the actual file contents
         str <- readFile' path
-        putQuiet $ "\n" ++ str
+        -- putQuiet $ "\n" ++ str
+        liftIO $ putStr str
 
 containsKey :: (Eq a) => [(a,b)] -> a -> Bool
 containsKey lst key = isInfixOf [key] $ map fst lst
@@ -100,13 +99,13 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 -- note that it will always continue if only the *file* exists,
 -- because that might just be left over from an earlier program run
 putAssign' :: MonadState CutState m => Bool -> TypedAssign -> m FilePath
-putAssign' force (v@(TypedVar var), e@(TypedExpr r _)) = do
+putAssign' force (v@(VarName var), expr) = do
   s <- get
-  let path = namedTmp (VarName var) (uExpr e)
+  let path = namedTmp v expr
   if s `containsKey` v && not force
     then error $ "Variable '" ++ var ++ "' used twice"
     else do
-      put $ delFromAL s v ++ [(v,e)]
+      put $ delFromAL s v ++ [(v,expr)]
       return path
 
 -- TODO remove? refactor?

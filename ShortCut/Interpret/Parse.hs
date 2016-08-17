@@ -1,5 +1,3 @@
-{-# LANGUAGE GADTs #-}
-
 -- TODO: stop accidentally interpreting args in the wrong order as one big variable
 -- TODO: start adding nice error messages to each parser
 -- TODO: fix bug where a non-function with args parses to varname with args dropped
@@ -7,23 +5,20 @@
 
 module ShortCut.Interpret.Parse where
 
-import Control.Applicative            ((<|>), many)
-import Control.Monad                  (void, foldM)
-import Control.Monad.Identity         (Identity)
-import Data.Char                      (isPrint)
-import Data.Scientific                (Scientific)
+import Control.Applicative    ((<|>), many)
+import Control.Monad          (void, foldM)
+import Control.Monad.Identity (Identity)
+import Data.Char              (isPrint)
 import ShortCut.Types
-import Text.Parsec                    (parse, try)
-import Text.Parsec.Char               (char, digit ,letter, spaces, anyChar
-                                      ,newline, string, oneOf)
-import Text.Parsec.Combinator         (optional, many1, manyTill, eof
-                                      ,lookAhead, between, choice, anyToken)
-import Text.Parsec.Expr               (buildExpressionParser, Assoc(..)
-                                      ,Operator(..))
-import Text.Parsec.Prim               (Parsec)
-import Text.PrettyPrint.HughesPJClass (prettyShow)
-import Control.Monad.Except           (throwError)
-import Control.Monad.RWS.Lazy         (get)
+import Text.Parsec            (parse, try)
+import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
+                              ,newline, string, oneOf)
+import Text.Parsec.Combinator (optional, many1, manyTill, eof
+                              ,lookAhead, between, choice, anyToken)
+import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
+import Text.Parsec.Prim       (Parsec)
+import Control.Monad.Except   (throwError)
+import Control.Monad.RWS.Lazy (get)
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -227,25 +222,21 @@ pComment = lexeme $ void $ char '#' >> restOfLine
 pScript :: Parser ParsedScript
 pScript = optional spaces *> many pComment *> many (pAssign <* many pComment)
 
-------------------------------------------------
--- everything below this is from TypeCheck.hs --
-------------------------------------------------
-
---------------------------
--- main check functions --
---------------------------
+-----------------------------------------
+-- typechecking (not nearly done yet!) --
+-----------------------------------------
 
 tExpr :: ParsedExpr -> CutM TypedExpr
-tExpr (Fil s)       = tFil s
-tExpr (Num n)       = tNum n
-tExpr (Ref v)       = tRef v
-tExpr (Cmd s es)    = tCmd s es
-tExpr (Bop c e1 e2) = tBop c (e1,e2)
+tExpr   (Fil s)     = return $ TStr s
+tExpr   (Num n)     = return $ TNum n
+tExpr r@(Ref _)     = tRef r
+tExpr c@(Cmd _ _  ) = tCmd c
+tExpr b@(Bop _ _ _) = tBop b
 
 tAssign :: ParsedAssign -> CutM TypedAssign
-tAssign ((VarName var), expr) = do
+tAssign (var, expr) = do
   cexpr <- tExpr expr
-  return (TypedVar var, cexpr) -- TODO is the var always going to be OK?
+  return (var, cexpr) -- TODO is the var always going to be OK?
 
 -- I'm not sure what this is supposed to mean design-wise,
 -- but it has the type required by foldM for use in tScript
@@ -259,231 +250,38 @@ foldAssign script assign = do
 tScript :: ParsedScript -> CutM TypedScript
 tScript = foldM foldAssign []
 
------------------
--- basic types --
------------------
+tBop :: ParsedExpr -> CutM TypedExpr
+tBop (Bop o a1 a2) = do
+  a1' <- tExpr a1
+  a2' <- tExpr a2
+  -- TODO assert o `elem` "+-*/&|~"
+  -- TODO assert (getExt a1 == getExt a2)
+  -- TODO if o `elem` "+-*/" assert (getExt a1) == "num"
+  -- TODO if o `elem` "&|~"  assert (getExt a1) == "set of something"
+  return (TBop (getExt a1') [o] a1' a2')
+tBop x = error $ "bad argument to tBop: '" ++ show x ++ "'"
 
-tFil :: String -> CutM TypedExpr
-tFil s = return $ TypedExpr RFile $ File s
+tCmd :: ParsedExpr -> CutM TypedExpr
+tCmd (Cmd c as) = do
+  -- TODO check return types
+  as' <- mapM tExpr as
+  return $ TCmd (Ext rtype) c as'
+  where
+    (rtype, _) = case c of
+      "load_aa_seqs"      -> ("faa"    ,["str"])
+      "load_na_seqs"      -> ("fna"    ,["str"])
+      "load_genes"        -> ("genes"  ,["str"])
+      "load_genomes"      -> ("genomes",["str"])
+      "filter_genomes"    -> ("genomes",["genomes", "genes"  , "num"])
+      "filter_genes"      -> ("genes"  ,["genes"  , "genomes", "num"])
+      "worst_best_evalue" -> ("num"    ,["genes"  , "genomes"])
+      x -> error $ "bad argument to tCmd: '" ++ show x ++ "'"
+tCmd x = error $ "bad argument to tCmd: '" ++ show x ++ "'"
 
-tNum :: Scientific -> CutM TypedExpr
-tNum n = return $ TypedExpr RNumber $ Number n
-
-----------------------
--- binary operators --
-----------------------
-
-tBop :: Char -> (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tBop c (e1,e2) = case c of
-  '+' -> tPlus  (e1,e2)
-  '|' -> tUni   (e1,e2)
-  '-' -> tDash  (e1,e2)
-  '~' -> tDiff  (e1,e2)
-  '*' -> tStar  (e1,e2)
-  '/' -> tSlash (e1,e2)
-  '&' -> tAmp   (e1,e2)
-  _   -> throwError $ NoSuchFunction [c]
-
-tPlus :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tPlus (e1, e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RNumber , RNumber ) -> tAdd      (c1,c2)
-    _ -> throwError $ WrongArgTypes "+" ["set", "same type of set"]
-          [prettyShow r1, prettyShow r2]
-
-tUni :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tUni (e1, e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RGenes  , RGenes  ) -> tUnion r1 (c1,c2)
-    (RGenomes, RGenomes) -> tUnion r1 (c1,c2)
-    _ -> throwError $ WrongArgTypes "|" ["set", "same type of set"]
-          [prettyShow r1, prettyShow r2]
-
-tDash :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tDash (e1,e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RNumber , RNumber ) -> tSubtract      (c1,c2)
-    (RGenes  , RGenes  ) -> tDifference r1 (c1,c2)
-    (RGenomes, RGenomes) -> tDifference r1 (c1,c2)
-    _ -> throwError $ WrongArgTypes "-" ["set", "same type of set"]
-          [prettyShow r1, prettyShow r2]
-
-tDiff :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tDiff (e1,e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RGenes  , RGenes  ) -> tDifference r1 (c1,c2)
-    (RGenomes, RGenomes) -> tDifference r1 (c1,c2)
-    _ -> throwError $ WrongArgTypes "~" ["set", "same type of set"]
-          [prettyShow r1, prettyShow r2]
-
-tAmp :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tAmp (e1,e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RGenes  , RGenes  ) -> tIntersect r1 (c1,c2)
-    (RGenomes, RGenomes) -> tIntersect r1 (c1,c2)
-    _ -> throwError $ WrongArgTypes "*" ["set", "same type of set"]
-          [prettyShow r1, prettyShow r2]
-
-tStar :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tStar (e1,e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RNumber, RNumber) -> tMultiply (c1,c2)
-    _ -> throwError $ WrongArgTypes "*" ["number", "number"]
-          [prettyShow r1, prettyShow r2]
-
-tSlash :: (ParsedExpr, ParsedExpr) -> CutM TypedExpr
-tSlash (e1,e2) = do
-  TypedExpr r1 c1 <- tExpr e1
-  TypedExpr r2 c2 <- tExpr e2
-  case (r1, r2) of
-    (RNumber, RNumber) -> tDivide (c1,c2)
-    _ -> throwError $ WrongArgTypes "/" ["number", "number"]
-          [prettyShow r1, prettyShow r2]
-
-----------
--- math --
-----------
-
-tMathOp :: ((Typed Scientific, Typed Scientific) -> Typed Scientific)
-        ->  (Typed Scientific, Typed Scientific) -> CutM TypedExpr
-tMathOp fn (c1,c2) = return $ TypedExpr RNumber $ fn (c1,c2)
-
-tAdd :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
-tAdd = tMathOp Add
-
-tSubtract :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
-tSubtract = tMathOp Subtract
-
-tMultiply :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
-tMultiply = tMathOp Multiply
-
--- TODO what about division by zero??
-tDivide :: (Typed Scientific, Typed Scientific) -> CutM TypedExpr
-tDivide = tMathOp Divide
-
-----------
--- sets --
-----------
-
-tSetOp :: ((Typed [a], Typed [a]) -> Typed [a])
-       -> Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
-tSetOp fn r (c1,c2) = return $ TypedExpr r $ fn (c1,c2)
-
-tUnion :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
-tUnion = tSetOp Union
-
-tIntersect :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
-tIntersect = tSetOp Intersect
-
-tDifference :: Ord a => Returns [a] -> (Typed [a], Typed [a]) -> CutM TypedExpr
-tDifference = tSetOp Difference
-
---------------
--- commands --
---------------
-
-tCmd :: String -> [ParsedExpr] -> CutM TypedExpr
-tCmd s es = case s of
-  "load_aa_seqs"      -> tLoadFAA       es
-  "load_na_seqs"      -> tLoadFNA       es
-  "load_genes"        -> tLoadGenes     es
-  "load_genomes"      -> tLoadGenomes   es
-  "filter_genomes"    -> tFilterGenomes es
-  "filter_genes"      -> tFilterGenes   es
-  "worst_best_evalue" -> tWorstBest     es
-  _ -> throwError $ NoSuchFunction s
-
-tLoadFAA :: [ParsedExpr] -> CutM TypedExpr
-tLoadFAA [e] = do
-  TypedExpr s c <- tExpr e
-  case s of
-    RFile -> return $ TypedExpr RFastaAA $ LoadFAA c
-    w -> throwError $ WrongArgTypes "load_aa_seqs" [prettyShow RFile] [prettyShow w]
-tLoadFAA es = throwError $ WrongArgNumber "load_aa_seqs" 1 (length es)
-
-tLoadFNA :: [ParsedExpr] -> CutM TypedExpr
-tLoadFNA [e] = do
-  TypedExpr s c <- tExpr e
-  case s of
-    RFile -> return $ TypedExpr RFastaNA $ LoadFNA c
-    w -> throwError $ WrongArgTypes "load_na_seqs" [prettyShow RFile] [prettyShow w]
-tLoadFNA es = throwError $ WrongArgNumber "load_na_seqs" 1 (length es)
-
-tLoadGenomes :: [ParsedExpr] -> CutM TypedExpr
-tLoadGenomes [e] = do
-  TypedExpr s c <- tExpr e
-  case s of
-    RFile -> return $ TypedExpr RGenomes $ LoadGenomes c
-    w -> throwError $ WrongArgTypes "load_genomes" ["string"] [prettyShow w]
-tLoadGenomes es = throwError $ WrongArgNumber "load_genomes" 1 (length es)
-
-tLoadGenes :: [ParsedExpr] -> CutM TypedExpr
-tLoadGenes [e] = do
-  TypedExpr s c <- tExpr e
-  case s of
-    RFile -> return $ TypedExpr RGenes $ LoadGenes c
-    w -> throwError $ WrongArgTypes "load_genes" ["string"] [prettyShow w]
-tLoadGenes es = throwError $ WrongArgNumber "load_genes" 1 (length es)
-
-tFilterGenomes :: [ParsedExpr] -> CutM TypedExpr
-tFilterGenomes [genomes, genes, cutoff] = do
-  TypedExpr r1 c1 <- tExpr genomes
-  TypedExpr r2 c2 <- tExpr genes
-  TypedExpr r3 c3 <- tExpr cutoff
-  case (r1, r2, r3) of
-    (RGenomes, RGenes, RNumber) ->
-      return $ TypedExpr RGenomes $ FilterGenomes (c1,c2,c3)
-    _ -> throwError $ WrongArgTypes
-      "filter_genomes"
-      [prettyShow RGenomes, prettyShow RGenes, prettyShow RNumber]
-      ["<can't show yet>"]
-tFilterGenomes es = throwError $ WrongArgNumber "filter_genomes" 1 (length es)
-
-tFilterGenes :: [ParsedExpr] -> CutM TypedExpr
-tFilterGenes [genes, genomes, cutoff] = do
-  TypedExpr r1 c1 <- tExpr genes
-  TypedExpr r2 c2 <- tExpr genomes
-  TypedExpr r3 c3 <- tExpr cutoff
-  case (r1, r2, r3) of
-    (RGenes, RGenomes, RNumber) ->
-      return $ TypedExpr RGenes $ FilterGenes (c1,c2,c3)
-    _ -> throwError $ WrongArgTypes
-      "filter_genes"
-      [prettyShow RGenes, prettyShow RGenomes, prettyShow RNumber]
-      [prettyShow r1, prettyShow r2, prettyShow r3]
-tFilterGenes es = throwError $ WrongArgNumber "filter_genes" 1 (length es)
-
-tWorstBest :: [ParsedExpr] -> CutM TypedExpr
-tWorstBest [genes, genomes] = do
-  TypedExpr r1 c1 <- tExpr genes
-  TypedExpr r2 c2 <- tExpr genomes
-  case (r1, r2) of
-    (RGenes, RGenomes) -> return $ TypedExpr RNumber $ WorstBest (c1,c2)
-    _ -> throwError $ WrongArgTypes
-      "tWorstBest"
-      [prettyShow RGenes, prettyShow RGenomes]
-      [prettyShow r1, prettyShow r2]
-tWorstBest es = throwError $ WrongArgNumber "worst_best_evalue" 1 (length es)
-
-----------
--- refs --
-----------
-
-tRef :: VarName -> CutM TypedExpr
-tRef (VarName v) = do
-  script <- get
-  case lookup (TypedVar v) script of
-    Just (TypedExpr r _) -> return $ TypedExpr r $ Reference r v
-    Nothing -> throwError $ NoSuchVariable v
+tRef :: ParsedExpr -> CutM TypedExpr
+tRef (Ref v@(VarName var)) = do
+  s <- get
+  case lookup v s of
+    Nothing -> throwError $ NoSuchVariable var
+    Just e -> return $ TRef (getExt e) v
+tRef x = error $ "bad argument to tRef: '" ++ show x ++ "'"

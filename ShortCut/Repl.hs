@@ -63,7 +63,7 @@ prompt :: String -> ReplM (Maybe String)
 prompt = ReplM . lift . lift . getInputLine
 
 print :: String -> ReplM ()
-print str = liftIO $ putStrLn str
+print str = liftIO $ putStr str
 
 ---------------
 -- utilities --
@@ -119,7 +119,7 @@ loop = do
           case iExpr scr line of
             Left  err -> throwError err
             Right expr -> do
-              let res  = TypedVar "result"
+              let res  = VarName "result"
                   scr' = delFromAL scr res ++ [(res,expr)]
               liftIO $ eval $ cScript res scr'
   loop
@@ -187,22 +187,22 @@ cmdDrop :: String -> ReplM ()
 cmdDrop [] = put []
 cmdDrop var = do
   s <- get
-  case lookup (TypedVar var) s of
+  case lookup (VarName var) s of
     Nothing -> print $ "VarName '" ++ var ++ "' not found"
-    Just _  -> get >>= \s -> put $ delFromAL s (TypedVar var)
+    Just _  -> get >>= \s -> put $ delFromAL s (VarName var)
 
 cmdType :: String -> ReplM ()
 cmdType s = do
   script <- get
   print $ case iExpr script s of
-    Right expr -> prettyShow expr
+    Right expr -> prettyShow $ getExt expr
     Left  err  -> show err
 
 cmdShow :: String -> ReplM ()
 cmdShow [] = get >>= liftIO . mapM_ (putStrLn . prettyShow)
 cmdShow var = do
   s <- get
-  print $ case lookup (TypedVar var) s of
+  print $ case lookup (VarName var) s of
     Nothing -> "VarName '" ++ var ++ "' not found"
     Just e  -> prettyShow e
 
