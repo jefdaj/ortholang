@@ -1,3 +1,5 @@
+module ShortCutSpec where
+
 {- Runs all the Hspec tests.
  - You can also run the nested Spec.hs files independently like:
  - `runhaskell ShortCut/ParseSpec.hs`
@@ -16,9 +18,6 @@ import qualified ShortCut.TypesSpec           as T
 import qualified ShortCut.Interpret.ParseSpec as P
 import qualified ShortCut.ReplSpec            as R
 import qualified ShortCut.InterpretSpec       as I
-
-main :: IO ()
-main = hspec spec
 
 spec :: Spec
 spec = do

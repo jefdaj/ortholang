@@ -1,7 +1,7 @@
 { mkDerivation, base, bytestring, Command, containers, cryptohash
-, directory, enclosed-exceptions, filepath, haskeline, hspec
-, MissingH, mtl, parsec, pretty, QuickCheck, scientific, shake
-, stdenv, transformers
+, directory, docopt, enclosed-exceptions, filepath, haskeline
+, hspec, MissingH, mtl, parsec, pretty, QuickCheck, scientific
+, shake, stdenv, transformers
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -10,7 +10,7 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    base bytestring Command containers cryptohash directory
+    base bytestring Command containers cryptohash directory docopt
     enclosed-exceptions filepath haskeline MissingH mtl parsec pretty
     scientific shake transformers
   ];
