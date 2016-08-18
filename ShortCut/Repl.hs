@@ -79,8 +79,8 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 -- main interface --
 --------------------
 
-repl :: IO ()
-repl = welcome >> runReplM loop [] [] >> goodbye
+repl :: CutConfig -> IO ()
+repl cfg = welcome >> runReplM loop cfg [] >> goodbye
 
 welcome :: IO ()
 welcome = putStrLn
@@ -110,16 +110,17 @@ loop = do
     (':':cmd) -> runCmd cmd
     line -> do
       scr <- get
+      cfg <- ask
       if isAssignment line
         then do
-          case iAssign scr line of
+          case iAssign cfg scr line of
             Left  e -> print $ show e
             Right a -> putAssign a
         else do
           -- TODO how to handle if the var isn't in the script??
           -- TODO hook the logs + configs together?
           -- TODO only evaluate up to the point where the expression they want?
-          case iExpr scr line of
+          case iExpr cfg scr line of
             Left  err -> throwError err
             Right expr -> do
               let res  = VarName "result"
@@ -173,7 +174,8 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> ReplM ()
 cmdLoad path = do
-  ec <- liftIO $ iFile path 
+  cfg <- ask
+  ec <- liftIO $ iFile cfg path 
   case ec of
     Left e  -> print $ show e
     Right c -> put c
@@ -199,7 +201,8 @@ cmdDrop var = do
 cmdType :: String -> ReplM ()
 cmdType s = do
   script <- get
-  print $ case iExpr script s of
+  cfg <- ask
+  print $ case iExpr cfg script s of
     Right expr -> prettyShow $ getExt expr
     Left  err  -> show err
 

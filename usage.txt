@@ -5,14 +5,16 @@ Usage:
   shortcut [options]
 
 Options:
-  -i, --interactive           Start the interpreter, and load SCRIPT if any.
-                              This is the default if no arguments are given.
-  -s SCRIPT, --script SCRIPT  ShortCut script to run, or load in the REPL
-  -w WDIR, --workdir WDIR     Working directory and start point for
-                              relative paths in the script [default: .]
-  -c CDIR, --cachedir CDIR    Where to cache results, including many
-                              intermediate files [default: _shortcut]
-  -h, --help                  Print this help text and exit
-      --version               Print version number and exit
-  -v, --verbose               Print debugging messages to stderr
-  -t, --test                  Run self-tests before doing anything else
+  --help           Print this help text and exit.
+  --version        Print version number and exit.
+  --verbose        Print debugging messages to stderr.
+  --test           Run self-tests before doing anything else.
+  --interactive    Start the interpreter, and load SCRIPT if any. This is the
+                   default if no arguments are given.
+  --script SCRIPT  ShortCut script to run, or load with -i
+  --tmpdir TDIR    Where to cache results, including many intermediate files.
+                   [default: ~/.shortcut]
+  --config CONFIG  Load any/all these options from a config file.
+                   [default: ~/.shortcut/config]
+  --workdir WDIR   Working directory and start point for relative paths.
+                   [default: .]

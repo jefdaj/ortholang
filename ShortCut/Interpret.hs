@@ -33,31 +33,32 @@ import Data.List                  (isInfixOf)
 import Data.List.Utils            (delFromAL)
 import System.Directory           (removeFile)
 import System.IO.Error            (isDoesNotExistError)
+import Control.Monad.Reader       (ask)
 
 isAssignment :: String -> Bool
 isAssignment line = isRight $ regularParse pVarEq line
 
-interpret :: Parser t -> (t -> CutM b)
+interpret :: Parser t -> (t -> CutM b) -> CutConfig
           -> TypedScript -> String -> Either CutError b
-interpret parser checker script str = do
+interpret parser checker cfg script str = do
   parsed <- parseWithEof parser str
-  let (checked, _, _) = runCutM (checker parsed) [] script
+  let (checked, _, _) = runCutM (checker parsed) cfg script
   checked
 
-iExpr :: TypedScript -> String -> Either CutError TypedExpr
+iExpr :: CutConfig -> TypedScript -> String -> Either CutError TypedExpr
 iExpr = interpret pExpr tExpr
 
-iAssign :: TypedScript -> String -> Either CutError TypedAssign
+iAssign :: CutConfig -> TypedScript -> String -> Either CutError TypedAssign
 iAssign = interpret pAssign tAssign
 
 -- TODO remove? nah, will be used for overall CLI parsing a file
-iScript :: TypedScript -> String -> Either CutError TypedScript
+iScript :: CutConfig -> TypedScript -> String -> Either CutError TypedScript
 iScript = interpret pScript tScript
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
-iFile :: FilePath -> IO (Either CutError TypedScript)
-iFile path = readFile path >>= (\s -> return $ iScript [] s)
+iFile :: CutConfig -> FilePath -> IO (Either CutError TypedScript)
+iFile cfg path = readFile path >>= (\s -> return $ iScript cfg [] s)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error

@@ -40,6 +40,8 @@ import System.FilePath            (makeRelative)
 -- name tmpfiles --
 -------------------
 
+-- TODO move all this stuff to utils or a new config module or something...
+
 -- TODO deduplicate with the one in Compile.hs
 --      (actually, load from config)
 tmpDir :: FilePath
@@ -211,7 +213,7 @@ cVar var expr dest = do
 -- apply a math operation to two numbers
 cMath :: (Scientific -> Scientific -> Scientific) -> String
       -> TypedExpr -> Rules FilePath
-cMath fn fnName e@(TBop extn _ n1 n2) = do
+cMath fn _ e@(TBop extn _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
   (p1, p2, p3) <- cBop extn e (n1, n2)
   p3 %> \out -> do
@@ -226,7 +228,7 @@ cMath _ _ _ = error "bad argument to cMath"
 -- apply a set operation to two sets (implemented as lists so far)
 cSet :: (Set String -> Set String -> Set String) -> String
      -> TypedExpr -> Rules FilePath
-cSet fn fnName e@(TBop extn _ s1 s2) = do
+cSet fn _ e@(TBop extn _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSet"
   (p1, p2, p3) <- cBop extn e (s1, s2)
   p3 %> \out -> do

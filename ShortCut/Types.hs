@@ -3,6 +3,8 @@
 
 module ShortCut.Types where
 
+import Text.PrettyPrint.HughesPJClass
+
 import Control.Monad.Except           (MonadError, ExceptT, runExceptT)
 import Control.Monad.IO.Class         (MonadIO)
 import Control.Monad.Identity         (Identity)
@@ -13,10 +15,7 @@ import Control.Monad.Trans            (MonadTrans, lift)
 import Control.Monad.Writer           (MonadWriter)
 import Data.List                      (intersperse)
 import Data.Scientific                (Scientific())
-import Development.Shake.FilePath     ((<.>), (</>))
 import Text.Parsec                    (ParseError)
-import Text.PrettyPrint.HughesPJ      ((<+>), vcat, text, sep, empty)
-import Text.PrettyPrint.HughesPJClass
 
 --------------------
 -- error messages --
@@ -132,11 +131,22 @@ instance Pretty TypedExpr where
                                 then wrap
                                 else long
 
+------------
+-- config --
+------------
+
+-- type CutConfig = [(String, String)]
+data CutConfig = CutConfig
+  { cfgScript  :: Maybe String
+  , cfgWorkDir :: Maybe String
+  , cfgTmpDir  :: Maybe String
+  , cfgVerbose :: Maybe String
+  }
+
 ---------------
 -- Cut monad --
 ---------------
 
-type CutConfig = [(String, String)]
 type CutLog    = [String]
 type CutState  = TypedScript
 

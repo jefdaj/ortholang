@@ -1,58 +1,62 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 module Main where
 
-import System.Console.Docopt.NoTH
+import ShortCut.Types
+import ShortCut.Repl           (repl)
+import Prelude          hiding (lookup)
+import Control.Monad           (when)
+import Data.Configurator       (load, lookup)
+import Data.Configurator.Types (Config, Worth(..))
+import Data.Maybe              (fromJust)
+import ShortCutSpec            (spec)
+import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
+                                getArg, isPresent, longOption, parseArgsOrExit)
+import System.Environment      (getArgs)
+import System.Exit             (exitSuccess)
+import Test.Hspec              (hspec)
+import Data.Text (pack)
 
-import Control.Monad      (when)
-import Data.Map           (toList)
-import ShortCut.Repl      (repl)
-import ShortCutSpec       (spec)
-import System.Environment (getArgs)
-import System.Exit        (exitSuccess)
-import Test.Hspec         (hspec)
+loadField :: Arguments -> Config -> String -> IO (Maybe String)
+loadField args cfg key
+  | isPresent args (longOption key) = return $ getArg args $ longOption key
+  | otherwise = lookup cfg $ pack key
 
-gotLong :: Arguments -> String -> Bool
-gotLong args arg = isPresent args $ longOption arg
+loadConfig :: Arguments -> IO CutConfig
+loadConfig args = do
+  let path = fromJust $ getArg args $ longOption "config"
+  cfg <- load [Optional path]
+  csc <- loadField args cfg "script"
+  cwd <- loadField args cfg "workdir"
+  ctd <- loadField args cfg "tmpdir"
+  cvb <- loadField args cfg "verbose"
+  return CutConfig
+    { cfgScript  = csc
+    , cfgWorkDir = cwd
+    , cfgTmpDir  = ctd
+    , cfgVerbose = cvb
+    }
 
-gotEither :: Arguments -> Char -> String -> Bool
-gotEither args short long
-  = isPresent args (shortOption short)
- || gotLong args long 
+runScript :: CutConfig -> IO ()
+runScript _ = undefined -- TODO write this
+-- TODO codify/explain the "result" file a little more
 
--- TODO if given a file, run iFile + eval on it
--- TODO if no commands given, enter the REPL
+usage :: Docopt
+usage = [docoptFile|usage.txt|]
 
-printVersion :: IO ()
-printVersion = putStrLn "ShortCut 0.7 \"De Pijp\""
-
-printUsage :: Docopt -> IO ()
-printUsage = putStrLn . usage
-
-runTests :: IO ()
-runTests = hspec spec
+hasArg :: Arguments -> String -> Bool
+hasArg as a = isPresent as $ longOption a
 
 main:: IO ()
 main = do
-  -- TODO would the quasiquoted version be easier to deploy?
-  help <- parseUsageOrExit =<< readFile "usage.txt"
-  args <- parseArgsOrExit help =<< getArgs
-  let gotL = gotLong   args
-      gotE = gotEither args
-
-  -- TODO parse SCRIPT, WDIR, CDIR, verbosity into a config
-
-  when (gotE 'h' "help"       ) (printUsage help >> exitSuccess)
-  when (gotL     "version"    ) (printVersion    >> exitSuccess)
-  when (gotE 't' "test"       ) runTests
-  when (gotE 'i' "interactive") repl
-
-  -- TODO remove once CLI works
-  putStrLn $ "parsed these arguments:"
-  mapM_ (putStrLn . ("  " ++) .show) $ toList args
-  putStrLn ""
-
-
-  -- when (args `isPresent` (shortOption 't')) $ hspec spec
-  -- TODO how to get docopt to abort with help on --help?
-  -- ifArg args "h" $ putStrLn $ usage help
-  -- when (args `isPresent` (command "test")) $ hspec spec
-  -- when (args `isPresent` (command "i"   )) $ repl
+  args <- parseArgsOrExit usage =<< getArgs
+  when (hasArg args "help")
+    (exitWithUsage usage)
+  when (hasArg args "version")
+    (putStrLn "ShortCut 0.7 \"De Pijp\"" >> exitSuccess) -- TODO move to text?
+  when (hasArg args "test")
+    (hspec spec)
+  cfg <- loadConfig args
+  if (hasArg args "script" && (not $ hasArg args "interactive"))
+    then (runScript cfg)
+    else (repl cfg)

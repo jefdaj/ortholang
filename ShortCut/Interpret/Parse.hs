@@ -5,11 +5,12 @@
 
 module ShortCut.Interpret.Parse where
 
+import ShortCut.Types
+
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, foldM)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
-import ShortCut.Types
 import Text.Parsec            (parse, try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
                               ,newline, string, oneOf)
@@ -19,6 +20,7 @@ import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 import Text.Parsec.Prim       (Parsec)
 import Control.Monad.Except   (throwError)
 import Control.Monad.RWS.Lazy (get)
+import Control.Monad.Reader   (ask)
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -242,7 +244,8 @@ tAssign (var, expr) = do
 -- but it has the type required by foldM for use in tScript
 foldAssign :: TypedScript -> ParsedAssign -> CutM TypedScript
 foldAssign script assign = do
-  let (cassign, _, _) = runCutM (tAssign assign) [] script
+  cfg <- ask
+  let (cassign, _, _) = runCutM (tAssign assign) cfg script -- TODO pass it the cfg
   case cassign of
     Left err -> throwError err
     Right c  -> return $ script ++ [c]
