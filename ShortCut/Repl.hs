@@ -64,7 +64,7 @@ prompt :: String -> ReplM (Maybe String)
 prompt = ReplM . lift . lift . getInputLine
 
 print :: String -> ReplM ()
-print str = liftIO $ putStrLn str
+print str' = liftIO $ putStrLn str'
 
 ---------------
 -- utilities --
@@ -204,7 +204,7 @@ cmdType s = do
   script <- get
   cfg <- ask
   print $ case iExpr cfg script s of
-    Right expr -> typeDesc expr
+    Right expr -> prettyShow $ typeOf expr
     Left  err  -> show err
 
 cmdShow :: String -> ReplM ()

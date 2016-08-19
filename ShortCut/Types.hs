@@ -2,10 +2,12 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module ShortCut.Types
-  ( CutError(..), VarName(..), Ext(..), typeExt, typeDesc
+  ( CutError(..), VarName(..), CutType(..), typeOf
   , ParsedExpr(..), ParsedVar, ParsedAssign, ParsedScript
   , TypedExpr(..), TypedAssign, TypedScript
   , CutConfig(..), CutState, CutLog, CutM, CutT(..), runCutM, runCutT
+  -- shortcut types (haskell values)
+  , str, num, faa, fna, gen, gom, csv
   )
   where
 
@@ -80,40 +82,51 @@ type ParsedScript = [ParsedAssign]
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
-data Ext = SetOf Ext | Ext String
-  deriving (Eq, Show, Read)
+-- data Ext = SetOf Ext | Ext String
+  -- deriving (Eq, Show, Read)
 
 data TypedExpr
   = TStr String
   | TNum Scientific
-  | TRef Ext ParsedVar
-  | TSet Ext [TypedExpr]
-  | TBop Ext String  TypedExpr TypedExpr
-  | TCmd Ext String [TypedExpr]
+  | TRef CutType ParsedVar
+  | TSet CutType [TypedExpr]
+  | TBop CutType String  TypedExpr TypedExpr
+  | TCmd CutType String [TypedExpr]
   deriving (Eq, Show, Read)
 
 type TypedAssign = (ParsedVar, TypedExpr)
 type TypedScript = [TypedAssign]
 
--- TODO fix these up with a more principled record + Pretty instance
+data CutType
+  = CutType String String
+  | SetOf CutType
+  deriving (Eq, Show, Read)
 
-typeExt :: TypedExpr -> Ext
-typeExt (TStr   _    ) = Ext "str"
-typeExt (TNum   _    ) = Ext "num"
-typeExt (TRef e _    ) = e
-typeExt (TCmd e _ _  ) = e
-typeExt (TBop e _ _ _) = e
-typeExt (TSet e _    ) = e
+instance Pretty CutType where
+  pPrint (CutType ext desc) = text ext <+> parens (text desc)
+  pPrint (SetOf t) = text "set of" <+> pPrint t
 
-typeDesc :: TypedExpr -> String
-typeDesc e = case typeExt e of
-  Ext "str"     -> "str (string)"
-  Ext "num"     -> "num (number in scientific notation)"
-  Ext "faa"     -> "faa (fasta amino acid)"
-  Ext "fna"     -> "fna (fasta nucleic acid)"
-  Ext "genes"   -> "genes (set of gene)"
-  Ext "genomes" -> "genomes (set of genome)"
-  _             -> "unknown"
+typeOf :: TypedExpr -> CutType
+typeOf (TStr _) = str
+typeOf (TNum _) = num
+typeOf (TRef t _) = t
+typeOf (TSet t _) = SetOf t
+typeOf (TBop t _ _ _) = t
+typeOf (TCmd t _ _) = t
+
+str, num, faa, fna, gen, gom, csv :: CutType
+str = CutType "str"    "string"
+num = CutType "num"    "number in scientific notation"
+
+-- TODO separate faa, fna and remove gen, gom
+faa = CutType "faa"    "fasta amino acid"
+fna = CutType "fna"    "fasta nucleic acid"
+gen = CutType "gene"   "gene" -- TODO deprecate
+gom = CutType "genome" "genome" -- TODO deprecate
+csv = CutType "csv"    "spreadsheet"
+
+-- coreTypes :: [CutType]
+-- coreTypes = [str, num, faa, fna, gen, gom, csv]
 
 ---------------------
 -- pretty printers --
@@ -125,9 +138,9 @@ instance Pretty VarName where
   pPrint (VarName s) = text s
 
 -- TODO add descriptions here? if so, need to separate actual extension code
-instance Pretty Ext where
-  pPrint (SetOf e) = pPrint e <> text "s"
-  pPrint (Ext   e) = text e
+-- instance Pretty Ext where
+--   pPrint (SetOf e) = pPrint e <> text "s"
+--   pPrint (Ext   e) = text e
 
 instance {-# OVERLAPPING #-} Pretty TypedAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e

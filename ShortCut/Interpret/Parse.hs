@@ -33,7 +33,7 @@ type Parser  = Parsec String ()
 type OpTable = [[Operator String () Identity ParsedExpr]]
 
 parseWithError :: Parser a -> String -> Either CutError a
-parseWithError psr str = case parse psr "" str of
+parseWithError psr str' = case parse psr "" str' of
   Left  err -> Left $ InvalidSyntax err
   Right res -> Right res
 
@@ -169,9 +169,9 @@ fnNames =
 
 -- TODO: put this in terms of "keyword" or something?
 pName :: Parser String
-pName = choice $ map (try . str) fnNames
+pName = choice $ map (try . str') fnNames
   where
-    str s = string s <* (void spaces1 <|> eof)
+    str' s = string s <* (void spaces1 <|> eof)
 
 pCmd :: Parser ParsedExpr
 pCmd = Cmd <$> pName <*> manyTill pTerm pEnd
@@ -258,26 +258,26 @@ tBop (Bop o a1 a2) = do
   a1' <- tExpr a1
   a2' <- tExpr a2
   -- TODO assert o `elem` "+-*/&|~"
-  -- TODO assert (typeExt a1 == typeExt a2)
-  -- TODO if o `elem` "+-*/" assert (typeExt a1) == "num"
-  -- TODO if o `elem` "&|~"  assert (typeExt a1) == "set of something"
-  return (TBop (typeExt a1') [o] a1' a2')
+  -- TODO assert (tExt a1 == tExt a2)
+  -- TODO if o `elem` "+-*/" assert (tExt a1) == "num"
+  -- TODO if o `elem` "&|~"  assert (tExt a1) == "set of something"
+  return (TBop (typeOf a1') [o] a1' a2')
 tBop x = error $ "bad argument to tBop: '" ++ show x ++ "'"
 
 tCmd :: ParsedExpr -> CutM TypedExpr
 tCmd (Cmd c as) = do
   -- TODO check return types
   as' <- mapM tExpr as
-  return $ TCmd (Ext rtype) c as'
+  return $ TCmd rtype c as'
   where
     (rtype, _) = case c of
-      "load_aa_seqs"      -> ("faa"    ,["str"])
-      "load_na_seqs"      -> ("fna"    ,["str"])
-      "load_genes"        -> ("genes"  ,["str"])
-      "load_genomes"      -> ("genomes",["str"])
-      "filter_genomes"    -> ("genomes",["genomes", "genes"  , "num"])
-      "filter_genes"      -> ("genes"  ,["genes"  , "genomes", "num"])
-      "worst_best_evalue" -> ("num"    ,["genes"  , "genomes"])
+      "load_aa_seqs"      -> (faa, ["str"])
+      "load_na_seqs"      -> (fna, ["str"])
+      "load_genes"        -> (gen, ["str"])
+      "load_genomes"      -> (gom, ["str"])
+      "filter_genomes"    -> (gom, ["genomes", "genes"  , "num"])
+      "filter_genes"      -> (gen, ["genes"  , "genomes", "num"])
+      "worst_best_evalue" -> (num, ["genes"  , "genomes"])
       x -> error $ "bad argument to tCmd: '" ++ show x ++ "'"
 tCmd x = error $ "bad argument to tCmd: '" ++ show x ++ "'"
 
@@ -286,5 +286,5 @@ tRef (Ref v@(VarName var)) = do
   s <- get
   case lookup v s of
     Nothing -> throwError $ NoSuchVariable var
-    Just e -> return $ TRef (typeExt e) v
+    Just e -> return $ TRef (typeOf e) v
 tRef x = error $ "bad argument to tRef: '" ++ show x ++ "'"

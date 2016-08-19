@@ -337,8 +337,8 @@ takeVarName :: String -> VarName
 takeVarName = VarName . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: Parser a -> String -> Expectation
-parsedItAll p str = (`shouldReturn` True) $
-  case parseWithLeftOver p str of
+parsedItAll p str' = (`shouldReturn` True) $
+  case parseWithLeftOver p str' of
      Right (_, "") -> return True
      _ -> return False
 

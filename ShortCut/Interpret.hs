@@ -40,8 +40,8 @@ isAssignment line = isRight $ regularParse pVarEq line
 
 interpret :: Parser t -> (t -> CutM b) -> CutConfig
           -> TypedScript -> String -> Either CutError b
-interpret parser checker cfg script str = do
-  parsed <- parseWithEof parser str
+interpret parser checker cfg script str' = do
+  parsed <- parseWithEof parser str'
   let (checked, _, _) = runCutM (checker parsed) cfg script
   checked
 
@@ -89,9 +89,9 @@ eval = ignoreErrors . eval'
       "eval" ~> do
         alwaysRerun
         -- TODO show the var rather than the actual file contents
-        str <- readFile' path
+        str' <- readFile' path
         -- putQuiet $ "\n" ++ str
-        liftIO $ putStr str
+        liftIO $ putStr str'
 
 containsKey :: (Eq a) => [(a,b)] -> a -> Bool
 containsKey lst key = isInfixOf [key] $ map fst lst

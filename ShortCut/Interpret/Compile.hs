@@ -69,19 +69,19 @@ namedTmp :: ParsedVar -> TypedExpr -> FilePath
 namedTmp (VarName var) expr = tmpDir </> base
   where
     base  = if var == "result" then var else var <.> e
-    Ext e = typeExt expr
+    (CutType e _) = typeOf expr
 
 -- TODO extn can be found inside expr now; remove it
 hashedTmp :: TypedExpr -> [FilePath] -> FilePath
 hashedTmp expr paths = exprDir </> uniq <.> e
   where
-    Ext e = typeExt expr
+    (CutType e _) = typeOf expr
     uniq = digest $ unlines $ (show expr):paths
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
-hashedTmp' :: Ext -> TypedExpr -> [FilePath] -> FilePath
-hashedTmp' (Ext e) expr paths = exprDir </> uniq <.> e
+hashedTmp' :: CutType -> TypedExpr -> [FilePath] -> FilePath
+hashedTmp' (CutType extn _) expr paths = exprDir </> uniq <.> extn
   where
     uniq = digest $ unlines $ (show expr):paths
 hashedTmp' _ _ _ = error "bad arguments to hashedTmp'"
@@ -169,9 +169,9 @@ cLoad e@(TCmd _ _ [f]) = do
   path <- cExpr f
   let link = hashedTmp e [path]
   link %> \out -> do
-    str    <- fmap strip $ readFile' path
-    path'' <- liftIO $ canonicalizePath str
-    -- putQuiet $ unwords ["link", str, out]
+    str'   <- fmap strip $ readFile' path
+    path'' <- liftIO $ canonicalizePath str'
+    -- putQuiet $ unwords ["link", str', out]
     quietly $ cmd "ln -fs" [path'', out]
   return link
 cLoad _ = error "bad argument to cLoad"
@@ -242,13 +242,13 @@ cSet _ _ _ = error "bad argument to cSet"
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
-cBop :: Ext -> TypedExpr -> (TypedExpr, TypedExpr)
+cBop :: CutType -> TypedExpr -> (TypedExpr, TypedExpr)
       -> Rules (FilePath, FilePath, FilePath)
-cBop extn expr (n1, n2) = do
+cBop t expr (n1, n2) = do
   -- liftIO $ putStrLn "entering cBop"
   p1 <- cExpr n1
   p2 <- cExpr n2
-  return (p1, p2, hashedTmp' extn expr [p1, p2])
+  return (p1, p2, hashedTmp' t expr [p1, p2])
 
 ---------------------
 -- compile scripts --
@@ -278,13 +278,13 @@ cFilterGenes e@(TCmd _ _ [gens, goms, sci]) = do
   genes   <- cExpr gens
   genomes <- cExpr goms
   evalue  <- cExpr sci
-  let hits   = hashedTmp' (Ext "csv") e [genes, genomes]
-      faa    = hashedTmp' (Ext "faa") e [genes, "extractseqs"]
+  let hits   = hashedTmp' csv e [genes, genomes]
+      faa'   = hashedTmp' faa e [genes, "extractseqs"]
       genes' = hashedTmp e [hits, evalue]
       fgtmp  = cacheDir </> "fgtmp" -- TODO remove? not actually used
   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
-  faa  %> extractSeqs genes
-  hits %> bblast faa genomes
+  faa' %> extractSeqs genes
+  hits %> bblast faa' genomes
   genes' %> \out -> do
     need [genomes, hits, evalue]
     quietly $ cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
@@ -298,12 +298,12 @@ cFilterGenomes e@(TCmd _ _ [goms, gens, sci]) = do
   genomes <- cExpr goms
   genes   <- cExpr gens
   evalue  <- cExpr sci
-  let faa      = hashedTmp' (Ext "faa") e [genes, "extractseqs"]
-      hits     = hashedTmp' (Ext "csv") e [genomes, genes]
+  let faa'     = hashedTmp' faa e [genes, "extractseqs"]
+      hits     = hashedTmp' csv e [genomes, genes]
       genomes' = hashedTmp e [hits, evalue]
       fgtmp = cacheDir </> "fgtmp" -- TODO remove? not actually used
-  faa  %> extractSeqs genes
-  hits %> bblast faa genomes
+  faa' %> extractSeqs genes
+  hits %> bblast faa' genomes
   genomes' %> \out -> do
     need [genes, hits, evalue]
     quietly $ cmd "filter_genomes.R" [fgtmp, out, genes, hits, evalue]
@@ -315,12 +315,12 @@ cWorstBest e@(TCmd _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
   genes   <- cExpr gens
   genomes <- cExpr goms
-  let faa    = hashedTmp' (Ext "faa")  e [genes, "extractseqs"]
-      hits   = hashedTmp' (Ext "csv")  e [genomes, genes]
+  let faa'   = hashedTmp' faa e [genes, "extractseqs"]
+      hits   = hashedTmp' csv e [genomes, genes]
       evalue = hashedTmp e [genes, genomes]
       wbtmp  = cacheDir </> "wbtmp" -- TODO remove? not actually used
-  faa  %> extractSeqs genes
-  hits %> bblast faa genomes
+  faa' %> extractSeqs genes
+  hits %> bblast faa' genomes
   evalue %> \out -> do
     need [hits, genes]
     quietly $ cmd "worst_best_evalue.R" [wbtmp, out, hits, genes]
