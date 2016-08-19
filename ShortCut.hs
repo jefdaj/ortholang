@@ -8,7 +8,7 @@ import Prelude          hiding (lookup)
 import Control.Monad           (when)
 import Data.Configurator       (load, lookup)
 import Data.Configurator.Types (Config, Worth(..))
-import Data.Maybe              (fromJust)
+import Data.Maybe              (fromJust, fromMaybe)
 import ShortCutSpec            (spec)
 import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
@@ -25,6 +25,7 @@ loadField args cfg key
 loadConfig :: Arguments -> IO CutConfig
 loadConfig args = do
   let path = fromJust $ getArg args $ longOption "config"
+  putStrLn $ show args
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   cwd <- loadField args cfg "workdir"
@@ -32,9 +33,9 @@ loadConfig args = do
   cvb <- loadField args cfg "verbose"
   return CutConfig
     { cfgScript  = csc
-    , cfgWorkDir = cwd
-    , cfgTmpDir  = ctd
-    , cfgVerbose = cvb
+    , cfgWorkDir = fromJust cwd
+    , cfgTmpDir  = fromJust ctd
+    , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
     }
 
 runScript :: CutConfig -> IO ()

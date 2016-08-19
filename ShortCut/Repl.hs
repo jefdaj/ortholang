@@ -27,11 +27,12 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.Char                      (isSpace)
 import Data.List                      (dropWhileEnd, isPrefixOf)
 import Data.List.Utils                (delFromAL)
-import Data.Maybe                     (fromJust)
+import Data.Maybe                     (fromJust, fromMaybe)
 import Prelude                 hiding (print)
 import System.Command                 (runCommand, waitForProcess)
 import System.Console.Haskeline       (InputT, runInputT, defaultSettings
                                       ,getInputLine)
+-- import Control.Monad (when)
 import Text.PrettyPrint.HughesPJClass (prettyShow)
 -- import Control.Monad (when)
 
@@ -227,11 +228,37 @@ cmdSet = undefined
   -- TODO script sets the default for cmdSave?
   -- TODO don't bother with script yet; start with the obvious ones
 
+-- TODO if no args, dump whole config by pretty-printing
+-- TODO wow much staircase get rid of it
 cmdConfig :: String -> ReplM ()
 cmdConfig s = do
+  cfg <- getConfig
   let ws = words s
-  case length ws of
-    0 -> print "no variable" >> return ()
-    1 -> undefined -- TODO write after making the config mutable
-    _ -> print "too many variables" >> return ()
-  return ()
+  if (length ws == 0)
+    then (print (prettyShow cfg) >> return ()) -- TODO Pretty instance
+    else if (length ws  > 2)
+      then (print "too many variables" >> return ())
+      -- TODO separate into get/set cases:
+      else if (length ws == 1)
+        then (cmdConfigShow (head ws))
+        else (cmdConfigSet  (head ws) (last ws))
+
+cmdConfigShow :: String -> ReplM ()
+cmdConfigShow key = getConfig >>= \cfg -> print $ fn cfg
+  where
+    fn = case key of
+          "script"  -> (\c -> fromMaybe "none" $ cfgScript c)
+          "verbose" -> (\c -> show $ cfgVerbose c)
+          "workdir" -> cfgWorkDir
+          "tmpdir"  -> cfgTmpDir
+          _ -> \_ -> "no such config entry"
+
+cmdConfigSet :: String -> String -> ReplM ()
+cmdConfigSet key val = do
+  cfg <- getConfig
+  case key of
+    "script"  -> putConfig $ cfg { cfgScript  = Just val }
+    "verbose" -> putConfig $ cfg { cfgVerbose = read val }
+    "workdir" -> putConfig $ cfg { cfgWorkDir = val }
+    "tmpdir"  -> putConfig $ cfg { cfgTmpDir  = val }
+    _ -> throwError $ NoSuchVariable key

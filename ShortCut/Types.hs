@@ -177,10 +177,19 @@ pNested e = pPrint e
 -- TODO make these into FilePaths and an Int/Bool
 data CutConfig = CutConfig
   { cfgScript  :: Maybe String
-  , cfgWorkDir :: Maybe String
-  , cfgTmpDir  :: Maybe String
-  , cfgVerbose :: Maybe String
+  , cfgWorkDir :: String
+  , cfgTmpDir  :: String
+  , cfgVerbose :: Bool
   }
+  deriving (Eq, Show, Read)
+
+instance Pretty CutConfig where
+  pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
+    [ ("script" , show . cfgScript )
+    , ("workdir", show . cfgWorkDir)
+    , ("tmpdir" , show . cfgTmpDir )
+    , ("verbose", show . cfgVerbose)
+    ]
 
 ---------------
 -- Cut monad --
