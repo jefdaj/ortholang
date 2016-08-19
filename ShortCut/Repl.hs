@@ -204,7 +204,7 @@ cmdType s = do
   script <- get
   cfg <- ask
   print $ case iExpr cfg script s of
-    Right expr -> prettyShow $ getExt expr
+    Right expr -> typeDesc expr
     Left  err  -> show err
 
 cmdShow :: String -> ReplM ()

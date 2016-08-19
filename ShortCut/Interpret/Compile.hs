@@ -69,13 +69,13 @@ namedTmp :: ParsedVar -> TypedExpr -> FilePath
 namedTmp (VarName var) expr = tmpDir </> base
   where
     base  = if var == "result" then var else var <.> e
-    Ext e = getExt expr
+    Ext e = typeExt expr
 
 -- TODO extn can be found inside expr now; remove it
 hashedTmp :: TypedExpr -> [FilePath] -> FilePath
 hashedTmp expr paths = exprDir </> uniq <.> e
   where
-    Ext e = getExt expr
+    Ext e = typeExt expr
     uniq = digest $ unlines $ (show expr):paths
 
 -- overrides the expression's "natural" extension

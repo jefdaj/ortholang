@@ -2,7 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module ShortCut.Types
-  ( CutError(..), VarName(..), Ext(..), getExt
+  ( CutError(..), VarName(..), Ext(..), typeExt, typeDesc
   , ParsedExpr(..), ParsedVar, ParsedAssign, ParsedScript
   , TypedExpr(..), TypedAssign, TypedScript
   , CutConfig(..), CutState, CutLog, CutM, CutT(..), runCutM, runCutT
@@ -95,14 +95,25 @@ data TypedExpr
 type TypedAssign = (ParsedVar, TypedExpr)
 type TypedScript = [TypedAssign]
 
--- TODO matching function to get the type description
-getExt :: TypedExpr -> Ext
-getExt (TStr   _    ) = Ext "str"
-getExt (TNum   _    ) = Ext "num"
-getExt (TRef e _    ) = e
-getExt (TCmd e _ _  ) = e
-getExt (TBop e _ _ _) = e
-getExt (TSet e _    ) = e
+-- TODO fix these up with a more principled record + Pretty instance
+
+typeExt :: TypedExpr -> Ext
+typeExt (TStr   _    ) = Ext "str"
+typeExt (TNum   _    ) = Ext "num"
+typeExt (TRef e _    ) = e
+typeExt (TCmd e _ _  ) = e
+typeExt (TBop e _ _ _) = e
+typeExt (TSet e _    ) = e
+
+typeDesc :: TypedExpr -> String
+typeDesc e = case typeExt e of
+  Ext "str"     -> "str (string)"
+  Ext "num"     -> "num (number in scientific notation)"
+  Ext "faa"     -> "faa (fasta amino acid)"
+  Ext "fna"     -> "fna (fasta nucleic acid)"
+  Ext "genes"   -> "genes (set of gene)"
+  Ext "genomes" -> "genomes (set of genome)"
+  _             -> "unknown"
 
 ---------------------
 -- pretty printers --
@@ -121,7 +132,7 @@ instance Pretty Ext where
 instance {-# OVERLAPPING #-} Pretty TypedAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
   -- this adds type info, but makes the pretty-print not valid source code
-  -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ getExt e))
+  -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
 instance Pretty TypedScript where
   pPrint [] = empty

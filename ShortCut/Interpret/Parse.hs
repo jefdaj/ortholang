@@ -258,10 +258,10 @@ tBop (Bop o a1 a2) = do
   a1' <- tExpr a1
   a2' <- tExpr a2
   -- TODO assert o `elem` "+-*/&|~"
-  -- TODO assert (getExt a1 == getExt a2)
-  -- TODO if o `elem` "+-*/" assert (getExt a1) == "num"
-  -- TODO if o `elem` "&|~"  assert (getExt a1) == "set of something"
-  return (TBop (getExt a1') [o] a1' a2')
+  -- TODO assert (typeExt a1 == typeExt a2)
+  -- TODO if o `elem` "+-*/" assert (typeExt a1) == "num"
+  -- TODO if o `elem` "&|~"  assert (typeExt a1) == "set of something"
+  return (TBop (typeExt a1') [o] a1' a2')
 tBop x = error $ "bad argument to tBop: '" ++ show x ++ "'"
 
 tCmd :: ParsedExpr -> CutM TypedExpr
@@ -286,5 +286,5 @@ tRef (Ref v@(VarName var)) = do
   s <- get
   case lookup v s of
     Nothing -> throwError $ NoSuchVariable var
-    Just e -> return $ TRef (getExt e) v
+    Just e -> return $ TRef (typeExt e) v
 tRef x = error $ "bad argument to tRef: '" ++ show x ++ "'"
