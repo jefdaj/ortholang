@@ -15,15 +15,13 @@ module ShortCut.Repl where
 import ShortCut.Types
 import ShortCut.Interpret
 import ShortCut.Utils                 (absolutize)
-import Control.Monad.Except           (throwError, MonadError, ExceptT
-                                      ,runExceptT)
+import Control.Monad.Except           (throwError, MonadError)
 import Control.Monad.IO.Class         (MonadIO, liftIO)
-import Control.Monad.IO.Class         (liftIO)
 import Control.Monad.Identity         (mzero)
-import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST, get, put, ask)
+import Control.Monad.RWS.Lazy         (get, put, ask)
 import Control.Monad.Reader           (MonadReader)
 import Control.Monad.State            (MonadState)
-import Control.Monad.Trans            (MonadTrans, lift)
+import Control.Monad.Trans            (lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Control.Monad.Writer           (MonadWriter)
 import Data.Char                      (isSpace)
@@ -149,6 +147,7 @@ cmds =
   , ("drop" , cmdDrop)
   , ("type" , cmdType)
   , ("show" , cmdShow)
+  , ("set"  , cmdSet)
   , ("quit" , cmdQuit)
   , ("!"    , cmdBang)
   ]
@@ -177,7 +176,7 @@ cmdLoad path = do
   cfg <- ask
   ec <- liftIO $ iFile cfg path 
   case ec of
-    Left e  -> print $ show e
+    Left  e -> print $ show e
     Right c -> put c
 
 -- TODO this needs to read a second arg for the var to be main?
@@ -193,11 +192,13 @@ cmdSave path = do
 cmdDrop :: String -> ReplM ()
 cmdDrop [] = put []
 cmdDrop var = do
-  s <- get
-  case lookup (VarName var) s of
+  script <- get
+  case lookup (VarName var) script of
     Nothing -> print $ "VarName '" ++ var ++ "' not found"
-    Just _  -> get >>= \s -> put $ delFromAL s (VarName var)
+    Just _  -> put $ delFromAL script (VarName var)
 
+-- TODO show the type description here too once that's ready
+--      (add to the pretty instance?)
 cmdType :: String -> ReplM ()
 cmdType s = do
   script <- get
@@ -219,3 +220,10 @@ cmdQuit _ = ReplM mzero
 
 cmdBang :: String -> ReplM ()
 cmdBang cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
+
+cmdSet :: String -> ReplM ()
+cmdSet = undefined
+  -- TODO split string into first word and the rest
+  -- TODO case statement for first word: verbose, workdir, tmpdir, script?
+  -- TODO script sets the default for cmdSave?
+  -- TODO don't bother with script yet; start with the obvious ones

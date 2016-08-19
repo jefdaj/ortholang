@@ -33,7 +33,7 @@ import Data.List                  (isInfixOf)
 import Data.List.Utils            (delFromAL)
 import System.Directory           (removeFile)
 import System.IO.Error            (isDoesNotExistError)
-import Control.Monad.Reader       (ask)
+-- import Control.Monad.Reader       (ask)
 
 isAssignment :: String -> Bool
 isAssignment line = isRight $ regularParse pVarEq line

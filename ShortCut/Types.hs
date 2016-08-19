@@ -89,6 +89,7 @@ data TypedExpr
 type TypedAssign = (ParsedVar, TypedExpr)
 type TypedScript = [TypedAssign]
 
+-- TODO matching function to get the type description
 getExt :: TypedExpr -> Ext
 getExt (TStr   _    ) = Ext "str"
 getExt (TNum   _    ) = Ext "num"
@@ -101,11 +102,15 @@ getExt (TSet e _    ) = e
 -- pretty printers --
 ---------------------
 
+-- TODO should these go in their own file, or would that cause orphan instances?
+
 instance Pretty VarName where
   pPrint (VarName s) = text s
 
+-- TODO add descriptions here? if so, need to separate actual extension code
 instance Pretty Ext where
-  pPrint (Ext e) = text e
+  pPrint (SetOf e) = pPrint e <> text "s"
+  pPrint (Ext   e) = text e
 
 instance {-# OVERLAPPING #-} Pretty TypedAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
@@ -116,20 +121,26 @@ instance Pretty TypedScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
--- the TBop one is pretty messy, but nicely lines everything up :D
+-- the TBop one is messy, but it does print pretty :D
+-- TODO put parens around nested function calls:
 instance Pretty TypedExpr where
   pPrint (TNum n)         = text $ show n
   pPrint (TSet _ _)       = undefined -- TODO figure this out!
   pPrint (TStr s)         = text $ show s
   pPrint (TRef _ v)       = pPrint v
   pPrint (TCmd _ s es)    = text s <+> sep (map pPrint es) -- TODO long vs wrap?
-  pPrint (TBop _ c e1 e2) = let use fn = fn (pPrint e1)
-                                            (nest (-2) $ text c <+> pPrint e2)
-                                long = use (<+>)
-                                wrap = use ($+$)
-                            in if (length $ render $ long) > 80
-                                then wrap
-                                else long
+  pPrint (TBop _ c e1 e2) =
+    let use fn = fn (pPrint e1)
+                    (nest (-2) $ text c <+> pPrint e2)
+        long = use (<+>)
+        wrap = use ($+$)
+    in if (length $ render $ long) > 80
+        then wrap
+        else long
+
+-- this is a hack to add parens around nested function calls
+-- pNested (TCmd _ s es) = text s 
+-- pNested x = pPrint x
 
 ------------
 -- config --
