@@ -27,19 +27,19 @@ import Test.QuickCheck
 -- variable names --
 --------------------
 
-exVarNames :: [(String, ParsedVar)]
-exVarNames =
-  [ ("plastidcut"    , VarName "plastidcut")
-  , ("knowngenes"    , VarName "knowngenes")
-  , ("knowngenomes"  , VarName "knowngenomes")
-  , ("ucyna"         , VarName "ucyna")
-  , ("othercyanos"   , VarName "othercyanos")
-  , ("goodcyanos"    , VarName "goodcyanos")
-  , ("ingoodcyanos"  , VarName "ingoodcyanos")
-  , ("inknowngenomes", VarName "inknowngenomes")
-  , ("inucyna"       , VarName "inucyna")
-  , ("mycutoff"      , VarName "mycutoff")
-  , ("psIIcut"       , VarName "psIIcut")
+exCutVars :: [(String, CutVar)]
+exCutVars =
+  [ ("plastidcut"    , CutVar "plastidcut")
+  , ("knowngenes"    , CutVar "knowngenes")
+  , ("knowngenomes"  , CutVar "knowngenomes")
+  , ("ucyna"         , CutVar "ucyna")
+  , ("othercyanos"   , CutVar "othercyanos")
+  , ("goodcyanos"    , CutVar "goodcyanos")
+  , ("ingoodcyanos"  , CutVar "ingoodcyanos")
+  , ("inknowngenomes", CutVar "inknowngenomes")
+  , ("inucyna"       , CutVar "inucyna")
+  , ("mycutoff"      , CutVar "mycutoff")
+  , ("psIIcut"       , CutVar "psIIcut")
   ]
 
 vFirstChars :: [Char]
@@ -48,16 +48,16 @@ vFirstChars = '_':['a'..'z']
 vNonFirstChars :: [Char]
 vNonFirstChars = vFirstChars ++ ['0'..'9']
 
-gVarName :: Gen String
-gVarName = (:) <$> first <*> listOf rest
+gCutVar :: Gen String
+gCutVar = (:) <$> first <*> listOf rest
   where
     first = elements vFirstChars
     rest  = elements vNonFirstChars
 
-newtype ExVarName = ExVarName VarName deriving (Eq, Show)
+newtype ExCutVar = ExCutVar CutVar deriving (Eq, Show)
 
-instance Arbitrary ExVarName where
-  arbitrary = (ExVarName . VarName) <$> gVarName
+instance Arbitrary ExCutVar where
+  arbitrary = (ExCutVar . CutVar) <$> gCutVar
 
 ----------------
 -- references --
@@ -66,7 +66,7 @@ instance Arbitrary ExVarName where
 newtype ExRef = ExRef String deriving (Eq, Show)
 
 instance Arbitrary ExRef where
-  arbitrary = ExRef <$> gVarName
+  arbitrary = ExRef <$> gCutVar
 
 ----------------
 -- whitespace --
@@ -98,7 +98,7 @@ instance Arbitrary ExSymbol where
 -----------------
 
 gAssign :: Gen String
-gAssign = (++ " =") <$> gVarName
+gAssign = (++ " =") <$> gCutVar
 
 newtype ExAssign = ExAssign String deriving (Eq, Show)
 
@@ -190,8 +190,8 @@ exCmds =
       Cmd "load_genomes" [Fil "known-good-genomes.txt"]),
 
     ("filter_genomes knowngenes othercyanos 20",
-      Cmd "filter_genomes" [Ref (VarName "knowngenes"),
-                            Ref (VarName "othercyanos"),
+      Cmd "filter_genomes" [Ref (CutVar "knowngenes"),
+                            Ref (CutVar "othercyanos"),
                             Num 20])
   ]
 
@@ -238,7 +238,7 @@ instance Arbitrary ExBop where
 -- TODO: will need to add sized in order to prevent infinite recursion on fn
 -- TODO: are plain quoted strings allowed, or do they need to be fn args?
 gTerm :: Gen String
-gTerm = oneof [gNum, gQuoted, gVarName]
+gTerm = oneof [gNum, gQuoted, gCutVar]
 
 gExpr :: Gen String
 gExpr = oneof [gBop, gTerm, gCmd]
@@ -254,16 +254,16 @@ instance Arbitrary ExExpr where
 
 exTerms :: [(String, ParsedExpr)]
 exTerms = exCmds ++
-  [ ("psIIcut", Ref (VarName "psIIcut"))
+  [ ("psIIcut", Ref (CutVar "psIIcut"))
   ]
 
 -- TODO: add more types
 exExprs :: [(String, ParsedExpr)]
 exExprs = exTerms ++
   [ ("(ingoodcyanos | inknowngenomes) ~ inucyna",
-      Bop '~' (Bop '|' (Ref (VarName "ingoodcyanos"))
-                       (Ref (VarName "inknowngenomes")))
-              (Ref (VarName "inucyna")))
+      Bop '~' (Bop '|' (Ref (CutVar "ingoodcyanos"))
+                       (Ref (CutVar "inknowngenomes")))
+              (Ref (CutVar "inucyna")))
   ]
 
 -- expression examples with parens added;
@@ -280,11 +280,11 @@ parensExamples = map (\(a,b) -> ("(" ++ a ++ ")",b)) exExprs
 exStatements :: [(String, ParsedAssign)]
 exStatements = zip statements parsedBoth
   where
-    vars        = map fst exVarNames
+    vars        = map fst exCutVars
     addEq a b   = a ++ " = " ++ b
     statements  = zipWith addEq vars (map fst exExprs)
     parsedExprs = map snd exExprs
-    parsedBoth  = zip (map VarName vars) parsedExprs
+    parsedBoth  = zip (map CutVar vars) parsedExprs
 
 gStatement :: Gen String
 gStatement = undefined
@@ -333,8 +333,8 @@ pExCuts = do
   cuts <- loadExamples ".cut"
   return $ mapM (regularParse pScript) cuts
 
-takeVarName :: String -> VarName
-takeVarName = VarName . takeWhile (flip elem $ vNonFirstChars)
+takeCutVar :: String -> CutVar
+takeCutVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: Parser a -> String -> Expectation
 parsedItAll p str' = (`shouldReturn` True) $
@@ -354,14 +354,14 @@ spec = do
 
   describe "[p]arses Strings to ParsedExprs" $ do
 
-    describe "pVarName" $ do
+    describe "pCutVar" $ do
       it "parses some valid variable names" $
-        test pVarName exVarNames `shouldBe` Right ()
+        test pCutVar exCutVars `shouldBe` Right ()
       prop "parses any valid variable name" $
-        \(ExVarName v@(VarName s)) -> parseWithLeftOver pVarName s == Right (v, "")
+        \(ExCutVar v@(CutVar s)) -> parseWithLeftOver pCutVar s == Right (v, "")
       prop "consumes trailing whitespace" $
-        \(ExVarName v@(VarName s)) (ExSpace w) ->
-          parseWithLeftOver pVarName (s ++ w) == Right (v, "")
+        \(ExCutVar v@(CutVar s)) (ExSpace w) ->
+          parseWithLeftOver pCutVar (s ++ w) == Right (v, "")
 
     -- TODO: check that it fails with other trailing chars
     describe "pSym" $ do
@@ -394,10 +394,10 @@ spec = do
     describe "pVarEq" $ do
       prop "parses the first half of a statement, up through '='" $
         \(ExAssign a) ->
-          parseWithLeftOver pVarEq a == Right (takeVarName a, "")
+          parseWithLeftOver pVarEq a == Right (takeCutVar a, "")
       prop "consumes trailing whitespace" $
         \(ExAssign a) (ExSpace w) ->
-          parseWithLeftOver pVarEq (a ++ w) == Right (takeVarName a, "")
+          parseWithLeftOver pVarEq (a ++ w) == Right (takeCutVar a, "")
 
     describe "pQuoted" $ do
       prop "parses quoted strings, preserving internal whitespace" $
@@ -410,7 +410,7 @@ spec = do
       prop "skips comments" $
         \(ExComment c) -> parseWithLeftOver pComment c == Right ((), "")
       prop "stops at the first iden char on a new line" $
-        \(ExComment c) (ExVarName (VarName s)) ->
+        \(ExComment c) (ExCutVar (CutVar s)) ->
           parseWithLeftOver pComment (c ++ "\n" ++ s) == Right ((), s)
 
     describe "pNum" $ do

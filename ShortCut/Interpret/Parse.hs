@@ -81,16 +81,16 @@ pSym c = void $ lexeme $ char c
 -- identifiers --
 -----------------
 
-pVarName :: Parser VarName
-pVarName = lexeme (iden <$> first <*> many rest)
+pCutVar :: Parser CutVar
+pCutVar = lexeme (iden <$> first <*> many rest)
   where
-    iden c cs = VarName (c:cs)
+    iden c cs = CutVar (c:cs)
     first = letter <|> char '_'
     rest  = digit  <|> first
 
 -- TODO: should this include the Var itself?
 pRef :: Parser ParsedExpr
-pRef = Ref <$> pVarName
+pRef = Ref <$> pCutVar
 
 -------------
 -- numbers --
@@ -135,8 +135,8 @@ pFil = Fil <$> pQuoted
 -- (assignment) statements --
 -----------------------------
 
-pVarEq :: Parser ParsedVar
-pVarEq = pVarName <* (pSym '=')
+pVarEq :: Parser CutVar
+pVarEq = pCutVar <* (pSym '=')
 
 pAssign :: Parser ParsedAssign
 pAssign = lexeme ((,) <$> pVarEq <*> pExpr <* optional newline)
@@ -228,14 +228,14 @@ pScript = optional spaces *> many pComment *> many (pAssign <* many pComment)
 -- typechecking (not nearly done yet!) --
 -----------------------------------------
 
-tExpr :: ParsedExpr -> CutM TypedExpr
+tExpr :: ParsedExpr -> CutM CutExpr
 tExpr   (Fil s)     = return $ TStr s
 tExpr   (Num n)     = return $ TNum n
 tExpr r@(Ref _)     = tRef r
 tExpr c@(Cmd _ _  ) = tCmd c
 tExpr b@(Bop _ _ _) = tBop b
 
-tAssign :: ParsedAssign -> CutM TypedAssign
+tAssign :: ParsedAssign -> CutM CutAssign
 tAssign (var, expr) = do
   cexpr <- tExpr expr
   return (var, cexpr) -- TODO is the var always going to be OK?
@@ -253,7 +253,7 @@ foldAssign script assign = do
 tScript :: ParsedScript -> CutM CutScript
 tScript = foldM foldAssign []
 
-tBop :: ParsedExpr -> CutM TypedExpr
+tBop :: ParsedExpr -> CutM CutExpr
 tBop (Bop o a1 a2) = do
   a1' <- tExpr a1
   a2' <- tExpr a2
@@ -264,7 +264,7 @@ tBop (Bop o a1 a2) = do
   return (TBop (typeOf a1') [o] a1' a2')
 tBop x = error $ "bad argument to tBop: '" ++ show x ++ "'"
 
-tCmd :: ParsedExpr -> CutM TypedExpr
+tCmd :: ParsedExpr -> CutM CutExpr
 tCmd (Cmd c as) = do
   -- TODO check return types
   as' <- mapM tExpr as
@@ -281,8 +281,8 @@ tCmd (Cmd c as) = do
       x -> error $ "bad argument to tCmd: '" ++ show x ++ "'"
 tCmd x = error $ "bad argument to tCmd: '" ++ show x ++ "'"
 
-tRef :: ParsedExpr -> CutM TypedExpr
-tRef (Ref v@(VarName var)) = do
+tRef :: ParsedExpr -> CutM CutExpr
+tRef (Ref v@(CutVar var)) = do
   (s, _) <- get
   case lookup v s of
     Nothing -> throwError $ NoSuchVariable var

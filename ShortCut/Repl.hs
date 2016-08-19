@@ -121,7 +121,7 @@ loop = do
           case iExpr cfg scr line of
             Left  err -> throwError err
             Right expr -> do
-              let res  = VarName "result"
+              let res  = CutVar "result"
                   scr' = delFromAL scr res ++ [(res,expr)]
               liftIO $ eval $ cScript res scr'
   loop
@@ -194,9 +194,9 @@ cmdDrop :: String -> ReplM ()
 cmdDrop [] = get >>= \(_, cfg) -> put ([], cfg)
 cmdDrop var = do
   (script, cfg) <- get
-  case lookup (VarName var) script of
-    Nothing -> print $ "VarName '" ++ var ++ "' not found"
-    Just _  -> put (delFromAL script (VarName var), cfg)
+  case lookup (CutVar var) script of
+    Nothing -> print $ "CutVar '" ++ var ++ "' not found"
+    Just _  -> put (delFromAL script (CutVar var), cfg)
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
@@ -211,8 +211,8 @@ cmdShow :: String -> ReplM ()
 cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . prettyShow) $ s
 cmdShow var = do
   (s, _) <- get
-  print $ case lookup (VarName var) s of
-    Nothing -> "VarName '" ++ var ++ "' not found"
+  print $ case lookup (CutVar var) s of
+    Nothing -> "CutVar '" ++ var ++ "' not found"
     Just e  -> prettyShow e
 
 cmdQuit :: String -> ReplM ()

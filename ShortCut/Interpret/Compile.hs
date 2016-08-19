@@ -65,14 +65,14 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
 -- TODO flip arguments for consistency with everything else
 -- There's a kludge here for the special case of "result", which is like the
 -- "main" function of a ShortCut script, and always goes to <tmpdir>/result.
-namedTmp :: ParsedVar -> TypedExpr -> FilePath
-namedTmp (VarName var) expr = tmpDir </> base
+namedTmp :: CutVar -> CutExpr -> FilePath
+namedTmp (CutVar var) expr = tmpDir </> base
   where
     base  = if var == "result" then var else var <.> e
     (CutType e _) = typeOf expr
 
 -- TODO extn can be found inside expr now; remove it
-hashedTmp :: TypedExpr -> [FilePath] -> FilePath
+hashedTmp :: CutExpr -> [FilePath] -> FilePath
 hashedTmp expr paths = exprDir </> uniq <.> e
   where
     (CutType e _) = typeOf expr
@@ -80,7 +80,7 @@ hashedTmp expr paths = exprDir </> uniq <.> e
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
-hashedTmp' :: CutType -> TypedExpr -> [FilePath] -> FilePath
+hashedTmp' :: CutType -> CutExpr -> [FilePath] -> FilePath
 hashedTmp' (CutType extn _) expr paths = exprDir </> uniq <.> extn
   where
     uniq = digest $ unlines $ (show expr):paths
@@ -90,7 +90,7 @@ hashedTmp' _ _ _ = error "bad arguments to hashedTmp'"
 -- dispatch on AST --
 ---------------------
 
-cExpr :: TypedExpr -> Rules FilePath
+cExpr :: CutExpr -> Rules FilePath
 cExpr e@(TStr _) = cLit e
 cExpr e@(TNum _) = cLit e
 cExpr e@(TRef _ _) = cRef e
@@ -110,7 +110,7 @@ cExpr e@(TCmd _ "filter_genomes"    _) = cFilterGenomes e
 cExpr e@(TCmd _ "worst_best_evalue" _) = cWorstBest     e
 cExpr _ = error "bad argument to cExpr"
 
-cAssign :: TypedAssign -> Rules (ParsedVar, FilePath)
+cAssign :: CutAssign -> Rules (CutVar, FilePath)
 cAssign (var, expr) = do
   -- liftIO $ putStrLn "entering cExpr"
   path  <- cExpr expr
@@ -119,22 +119,22 @@ cAssign (var, expr) = do
   return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
-cScript' :: ParsedVar -> CutScript -> Rules FilePath
+cScript' :: CutVar -> CutScript -> Rules FilePath
 cScript' v as = do
   -- liftIO $ putStrLn "entering cScript"
   rpaths <- mapM cAssign as
   return $ fromJust $ lookup v rpaths
 
 -- pretends to the rest of ShortCut that cScript' still works with GADTs
-cScript :: ParsedVar -> CutScript -> Rules FilePath
-cScript (VarName v) s = cScript' (VarName v) s
+cScript :: CutVar -> CutScript -> Rules FilePath
+cScript (CutVar v) s = cScript' (CutVar v) s
 
 ----------------------
 -- compile literals --
 ----------------------
 
 -- write a literal value from ShortCut source code to file
-cLit :: TypedExpr -> Rules FilePath
+cLit :: CutExpr -> Rules FilePath
 cLit expr = do
   -- liftIO $ putStrLn "entering cLit"
   let path = hashedTmp expr []
@@ -143,7 +143,7 @@ cLit expr = do
     writeFileChanged out $ paths expr ++ "\n"
   return path
   where
-    paths :: TypedExpr -> String
+    paths :: CutExpr -> String
     paths (TStr s) = s
     paths (TNum n) = show n
     paths _ = error "bad argument to paths"
@@ -154,7 +154,7 @@ cLit expr = do
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: TypedExpr -> Rules FilePath
+cRef :: CutExpr -> Rules FilePath
 cRef expr@(TRef _ var) = do
   -- liftIO $ putStrLn "entering cRef"
   return $ namedTmp var expr
@@ -163,7 +163,7 @@ cRef _ = error "bad argument to cRef"
 -- creates a symlink from expression file to input file
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
-cLoad :: TypedExpr -> Rules FilePath
+cLoad :: CutExpr -> Rules FilePath
 cLoad e@(TCmd _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
   path <- cExpr f
@@ -178,7 +178,7 @@ cLoad _ = error "bad argument to cLoad"
 
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
-cLoadGenes :: TypedExpr -> Rules FilePath
+cLoadGenes :: CutExpr -> Rules FilePath
 cLoadGenes expr@(TCmd _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
   path <- cExpr f
@@ -194,7 +194,7 @@ cLoadGenes _ = error "bad argument to cLoadGenes"
 -- Creates a symlink from varname to expression file.
 -- TODO how should this handle file extensions? just not have them?
 -- TODO or pick up the extension of the destination?
-cVar :: ParsedVar -> TypedExpr -> FilePath -> Rules FilePath
+cVar :: CutVar -> CutExpr -> FilePath -> Rules FilePath
 cVar var expr dest = do
   -- liftIO $ putStrLn "entering cVar"
   let link  = namedTmp var expr
@@ -212,7 +212,7 @@ cVar var expr dest = do
 
 -- apply a math operation to two numbers
 cMath :: (Scientific -> Scientific -> Scientific) -> String
-      -> TypedExpr -> Rules FilePath
+      -> CutExpr -> Rules FilePath
 cMath fn _ e@(TBop extn _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
   (p1, p2, p3) <- cBop extn e (n1, n2)
@@ -227,7 +227,7 @@ cMath _ _ _ = error "bad argument to cMath"
 
 -- apply a set operation to two sets (implemented as lists so far)
 cSet :: (Set String -> Set String -> Set String) -> String
-     -> TypedExpr -> Rules FilePath
+     -> CutExpr -> Rules FilePath
 cSet fn _ e@(TBop extn _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSet"
   (p1, p2, p3) <- cBop extn e (s1, s2)
@@ -242,7 +242,7 @@ cSet _ _ _ = error "bad argument to cSet"
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
-cBop :: CutType -> TypedExpr -> (TypedExpr, TypedExpr)
+cBop :: CutType -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (FilePath, FilePath, FilePath)
 cBop t expr (n1, n2) = do
   -- liftIO $ putStrLn "entering cBop"
@@ -272,7 +272,7 @@ bblast genes genomes out = do
   quietly $ cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
-cFilterGenes :: TypedExpr -> Rules FilePath
+cFilterGenes :: CutExpr -> Rules FilePath
 cFilterGenes e@(TCmd _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
   genes   <- cExpr gens
@@ -292,7 +292,7 @@ cFilterGenes e@(TCmd _ _ [gens, goms, sci]) = do
 cFilterGenes _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
-cFilterGenomes :: TypedExpr -> Rules FilePath
+cFilterGenomes :: CutExpr -> Rules FilePath
 cFilterGenomes e@(TCmd _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
   genomes <- cExpr goms
@@ -310,7 +310,7 @@ cFilterGenomes e@(TCmd _ _ [goms, gens, sci]) = do
   return genomes'
 cFilterGenomes _ = error "bad argument to cFilterGenomes"
 
-cWorstBest :: TypedExpr -> Rules FilePath
+cWorstBest :: CutExpr -> Rules FilePath
 cWorstBest e@(TCmd _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
   genes   <- cExpr gens

@@ -8,7 +8,7 @@
 
 module ShortCut.Interpret
   ( CutError(..)
-  , TypedExpr(..)
+  , CutExpr(..)
   , iAssign
   , iExpr
   , iFile -- TODO have the CLI call this
@@ -43,10 +43,10 @@ interpret parser checker cfg script str' = do
   let (checked, _) = runCutM (checker parsed) (script, cfg)
   checked
 
-iExpr :: CutConfig -> CutScript -> String -> Either CutError TypedExpr
+iExpr :: CutConfig -> CutScript -> String -> Either CutError CutExpr
 iExpr = interpret pExpr tExpr
 
-iAssign :: CutConfig -> CutScript -> String -> Either CutError TypedAssign
+iAssign :: CutConfig -> CutScript -> String -> Either CutError CutAssign
 iAssign = interpret pAssign tAssign
 
 -- TODO remove? nah, will be used for overall CLI parsing a file
@@ -97,8 +97,8 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 -- the Bool specifies whether to continue if the variable exists already
 -- note that it will always continue if only the *file* exists,
 -- because that might just be left over from an earlier program run
-putAssign' :: MonadState CutState m => Bool -> TypedAssign -> m FilePath
-putAssign' force (v@(VarName var), expr) = do
+putAssign' :: MonadState CutState m => Bool -> CutAssign -> m FilePath
+putAssign' force (v@(CutVar var), expr) = do
   scr <- getScript
   let path = namedTmp v expr
   if scr `containsKey` v && not force
@@ -108,7 +108,7 @@ putAssign' force (v@(VarName var), expr) = do
       return path
 
 -- TODO remove? refactor?
-putAssign :: (MonadIO m, MonadState CutState m) => TypedAssign -> m ()
+putAssign :: (MonadIO m, MonadState CutState m) => CutAssign -> m ()
 putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
 
 -- TODO should this go in Interpret.hs? Types.hs?

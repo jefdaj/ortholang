@@ -3,9 +3,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module ShortCut.Types
-  ( CutError(..), VarName(..), CutType(..), typeOf
-  , ParsedExpr(..), ParsedVar, ParsedAssign, ParsedScript
-  , TypedExpr(..), TypedAssign, CutScript
+  ( CutError(..), CutType(..), typeOf
+  , CutVar, CutExpr(..), CutAssign, CutScript
   , CutConfig(..), CutState, CutM, CutT(..), runCutM, runCutT
   , getScript, getConfig, putScript, putConfig
   -- shortcut types (haskell values)
@@ -55,19 +54,16 @@ instance Show CutError where
 -- initial AST types --
 -----------------------
 
-data ParsedExpr
-  = Bop Char ParsedExpr ParsedExpr
-  | Cmd String [ParsedExpr]
-  | Num Scientific
-  | Ref ParsedVar
-  | Fil String
-  deriving (Eq, Show, Read)
-
-newtype VarName = VarName String deriving (Eq, Show, Read)
-
-type ParsedVar    = VarName
-type ParsedAssign = (ParsedVar, ParsedExpr)
-type ParsedScript = [ParsedAssign]
+-- data ParsedExpr
+--   = Bop Char ParsedExpr ParsedExpr
+--   | Cmd String [ParsedExpr]
+--   | Num Scientific
+--   | Ref CutVar
+--   | Fil String
+--   deriving (Eq, Show, Read)
+-- 
+-- type ParsedAssign = (CutVar, ParsedExpr)
+-- type ParsedScript = [ParsedAssign]
 
 ---------------------
 -- typed AST types --
@@ -84,17 +80,19 @@ type ParsedScript = [ParsedAssign]
 -- data Ext = SetOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
-data TypedExpr
+newtype CutVar = CutVar String deriving (Eq, Show, Read)
+
+data CutExpr
   = TStr String
   | TNum Scientific
-  | TRef CutType ParsedVar
-  | TSet CutType [TypedExpr]
-  | TBop CutType String  TypedExpr TypedExpr
-  | TCmd CutType String [TypedExpr]
+  | TRef CutType CutVar
+  | TSet CutType [CutExpr]
+  | TBop CutType String  CutExpr CutExpr
+  | TCmd CutType String [CutExpr]
   deriving (Eq, Show, Read)
 
-type TypedAssign = (ParsedVar, TypedExpr)
-type CutScript = [TypedAssign]
+type CutAssign = (CutVar, CutExpr)
+type CutScript = [CutAssign]
 
 data CutType
   = CutType String String
@@ -105,7 +103,7 @@ instance Pretty CutType where
   pPrint (CutType ext desc) = text ext <+> parens (text desc)
   pPrint (SetOf t) = text "set of" <+> pPrint t
 
-typeOf :: TypedExpr -> CutType
+typeOf :: CutExpr -> CutType
 typeOf (TStr _) = str
 typeOf (TNum _) = num
 typeOf (TRef t _) = t
@@ -133,15 +131,15 @@ csv = CutType "csv"    "spreadsheet"
 
 -- I would put these in a separate Pretty.hs, but that causes orphan instances
 
-instance Pretty VarName where
-  pPrint (VarName s) = text s
+instance Pretty CutVar where
+  pPrint (CutVar s) = text s
 
 -- TODO add descriptions here? if so, need to separate actual extension code
 -- instance Pretty Ext where
 --   pPrint (SetOf e) = pPrint e <> text "s"
 --   pPrint (Ext   e) = text e
 
-instance {-# OVERLAPPING #-} Pretty TypedAssign where
+instance {-# OVERLAPPING #-} Pretty CutAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
@@ -150,7 +148,7 @@ instance Pretty CutScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
-instance Pretty TypedExpr where
+instance Pretty CutExpr where
   pPrint (TNum n)         = text $ show n
   pPrint (TSet _ _)       = undefined -- TODO figure this out!
   pPrint (TStr s)         = text $ show s
@@ -164,7 +162,7 @@ instance Pretty TypedExpr where
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
-pNested :: TypedExpr -> Doc
+pNested :: CutExpr -> Doc
 pNested e@(TCmd _ _ _  ) = parens $ pPrint e
 pNested e@(TBop _ _ _ _) = parens $ pPrint e
 pNested e = pPrint e
