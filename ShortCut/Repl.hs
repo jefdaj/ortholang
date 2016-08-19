@@ -18,12 +18,12 @@ import ShortCut.Utils                 (absolutize)
 import Control.Monad.Except           (throwError, MonadError)
 import Control.Monad.IO.Class         (MonadIO, liftIO)
 import Control.Monad.Identity         (mzero)
-import Control.Monad.RWS.Lazy         (get, put, ask)
-import Control.Monad.Reader           (MonadReader)
-import Control.Monad.State            (MonadState)
+-- import Control.Monad.RWS.Lazy         (get, put, ask)
+-- import Control.Monad.Reader           (MonadReader)
+import Control.Monad.State            (MonadState, get, put)
 import Control.Monad.Trans            (lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
-import Control.Monad.Writer           (MonadWriter)
+-- import Control.Monad.Writer           (MonadWriter)
 import Data.Char                      (isSpace)
 import Data.List                      (dropWhileEnd, isPrefixOf)
 import Data.List.Utils                (delFromAL)
@@ -33,6 +33,7 @@ import System.Command                 (runCommand, waitForProcess)
 import System.Console.Haskeline       (InputT, runInputT, defaultSettings
                                       ,getInputLine)
 import Text.PrettyPrint.HughesPJClass (prettyShow)
+-- import Control.Monad (when)
 
 ----------------
 -- Repl monad --
@@ -50,15 +51,14 @@ newtype ReplM a = ReplM
     , Applicative
     , Monad
     , MonadIO
-    , MonadReader CutConfig
-    , MonadWriter CutLog
+    -- , MonadReader CutConfig
+    -- , MonadWriter CutLog
     , MonadState  CutState
     , MonadError  CutError
     )
 
-runReplM :: ReplM a -> CutConfig -> CutState
-         -> IO (Either CutError (Maybe a), CutState, CutLog)
-runReplM r c s = runInputT defaultSettings $ runCutT (runMaybeT $ unReplM r) c s
+runReplM :: ReplM a -> CutState -> IO (Either CutError (Maybe a), CutState)
+runReplM r s = runInputT defaultSettings $ runCutT (runMaybeT $ unReplM r) s
 
 prompt :: String -> ReplM (Maybe String)
 prompt = ReplM . lift . lift . getInputLine
@@ -78,7 +78,7 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 --------------------
 
 repl :: CutConfig -> IO ()
-repl cfg = welcome >> runReplM loop cfg [] >> goodbye
+repl cfg = welcome >> runReplM loop ([], cfg) >> goodbye
 
 welcome :: IO ()
 welcome = putStrLn
@@ -107,8 +107,7 @@ loop = do
     "" -> return ()
     (':':cmd) -> runCmd cmd
     line -> do
-      scr <- get
-      cfg <- ask
+      (scr, cfg) <- get
       if isAssignment line
         then do
           case iAssign cfg scr line of
@@ -150,6 +149,7 @@ cmds =
   , ("set"  , cmdSet)
   , ("quit" , cmdQuit)
   , ("!"    , cmdBang)
+  , ("config", cmdConfig)
   ]
 
 ---------------------------
@@ -173,11 +173,11 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> ReplM ()
 cmdLoad path = do
-  cfg <- ask
-  ec <- liftIO $ iFile cfg path 
-  case ec of
+  (_, cfg) <- get
+  new <- liftIO $ iFile cfg path 
+  case new of
     Left  e -> print $ show e
-    Right c -> put c
+    Right n -> put (n, cfg)
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
@@ -185,32 +185,31 @@ cmdLoad path = do
 cmdSave :: String -> ReplM ()
 cmdSave path = do
   path' <- liftIO $ absolutize path
-  get >>= \s -> liftIO $ writeFile path' $ showHack s
+  get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
   where
     showHack = unlines . map prettyShow
 
 cmdDrop :: String -> ReplM ()
-cmdDrop [] = put []
+cmdDrop [] = get >>= \(_, cfg) -> put ([], cfg)
 cmdDrop var = do
-  script <- get
+  (script, cfg) <- get
   case lookup (VarName var) script of
     Nothing -> print $ "VarName '" ++ var ++ "' not found"
-    Just _  -> put $ delFromAL script (VarName var)
+    Just _  -> put (delFromAL script (VarName var), cfg)
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
 cmdType :: String -> ReplM ()
 cmdType s = do
-  script <- get
-  cfg <- ask
+  (script, cfg) <- get
   print $ case iExpr cfg script s of
     Right expr -> prettyShow $ typeOf expr
     Left  err  -> show err
 
 cmdShow :: String -> ReplM ()
-cmdShow [] = get >>= liftIO . mapM_ (putStrLn . prettyShow)
+cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . prettyShow) $ s
 cmdShow var = do
-  s <- get
+  (s, _) <- get
   print $ case lookup (VarName var) s of
     Nothing -> "VarName '" ++ var ++ "' not found"
     Just e  -> prettyShow e
@@ -227,3 +226,12 @@ cmdSet = undefined
   -- TODO case statement for first word: verbose, workdir, tmpdir, script?
   -- TODO script sets the default for cmdSave?
   -- TODO don't bother with script yet; start with the obvious ones
+
+cmdConfig :: String -> ReplM ()
+cmdConfig s = do
+  let ws = words s
+  case length ws of
+    0 -> print "no variable" >> return ()
+    1 -> undefined -- TODO write after making the config mutable
+    _ -> print "too many variables" >> return ()
+  return ()

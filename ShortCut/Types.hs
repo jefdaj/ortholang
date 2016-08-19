@@ -1,11 +1,13 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module ShortCut.Types
   ( CutError(..), VarName(..), CutType(..), typeOf
   , ParsedExpr(..), ParsedVar, ParsedAssign, ParsedScript
-  , TypedExpr(..), TypedAssign, TypedScript
-  , CutConfig(..), CutState, CutLog, CutM, CutT(..), runCutM, runCutT
+  , TypedExpr(..), TypedAssign, CutScript
+  , CutConfig(..), CutState, CutM, CutT(..), runCutM, runCutT
+  , getScript, getConfig, putScript, putConfig
   -- shortcut types (haskell values)
   , str, num, faa, fna, gen, gom, csv
   )
@@ -16,11 +18,8 @@ import Text.PrettyPrint.HughesPJClass
 import Control.Monad.Except   (MonadError, ExceptT, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Identity (Identity)
-import Control.Monad.RWS.Lazy (RWST, runRWS, runRWST)
-import Control.Monad.Reader   (MonadReader)
-import Control.Monad.State    (MonadState)
+import Control.Monad.State    (MonadState, StateT, runState, runStateT, get, put)
 import Control.Monad.Trans    (MonadTrans, lift)
-import Control.Monad.Writer   (MonadWriter)
 import Data.List              (intersperse)
 import Data.Scientific        (Scientific())
 import Text.Parsec            (ParseError)
@@ -95,7 +94,7 @@ data TypedExpr
   deriving (Eq, Show, Read)
 
 type TypedAssign = (ParsedVar, TypedExpr)
-type TypedScript = [TypedAssign]
+type CutScript = [TypedAssign]
 
 data CutType
   = CutType String String
@@ -147,7 +146,7 @@ instance {-# OVERLAPPING #-} Pretty TypedAssign where
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
-instance Pretty TypedScript where
+instance Pretty CutScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
@@ -174,8 +173,8 @@ pNested e = pPrint e
 -- config --
 ------------
 
--- type CutConfig = [(String, String)]
 -- TODO always load defaults for WorkDir, TmpDir, Verbose
+-- TODO make these into FilePaths and an Int/Bool
 data CutConfig = CutConfig
   { cfgScript  :: Maybe String
   , cfgWorkDir :: Maybe String
@@ -187,32 +186,37 @@ data CutConfig = CutConfig
 -- Cut monad --
 ---------------
 
-type CutLog    = [String]
-type CutState  = TypedScript
+type CutState = (CutScript, CutConfig)
+
+getScript :: MonadState CutState m => m CutScript
+getScript = fmap fst get
+
+getConfig :: MonadState CutState m => m CutConfig
+getConfig = fmap snd get
+
+putScript :: MonadState CutState m => CutScript -> m ()
+putScript scr = get >>= \(_, c) -> put (scr, c)
+
+putConfig :: MonadState CutState m => CutConfig -> m ()
+putConfig cfg = get >>= \(s, _) -> put (s, cfg)
 
 type CutM a = CutT Identity a
 
-newtype CutT m a = CutT
-  { unCutT :: ExceptT CutError (RWST CutConfig CutLog CutState m) a
-  }
+newtype CutT m a = CutT { unCutT :: ExceptT CutError (StateT CutState m) a }
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadIO
-    , MonadError  CutError
-    , MonadReader CutConfig
-    , MonadWriter CutLog
-    , MonadState  CutState
+    , MonadState CutState
+    , MonadError CutError
     )
 
 instance MonadTrans CutT where
   lift = CutT . lift . lift
 
-runCutM :: CutM a -> CutConfig -> CutState
-        -> (Either CutError a, CutState, CutLog)
-runCutM = runRWS . runExceptT . unCutT
+runCutM :: CutM a -> CutState -> (Either CutError a, CutState)
+runCutM = runState . runExceptT . unCutT
 
-runCutT :: CutT m a -> CutConfig -> CutState
-        -> m (Either CutError a, CutState, CutLog)
-runCutT = runRWST . runExceptT . unCutT
+runCutT :: CutT m a -> CutState -> m (Either CutError a, CutState)
+runCutT = runStateT . runExceptT . unCutT

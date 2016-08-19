@@ -512,6 +512,6 @@ spec = do
       prop "fails on random invalid ParsedExprs" pending
 
     describe "cScript" $ do
-      it "reconstructs the example TypedScripts" pending
-      prop "concstructs TypedScripts from random valid ParsedScripts" pending
+      it "reconstructs the example CutScripts" pending
+      prop "concstructs CutScripts from random valid ParsedScripts" pending
       prop "fails on random invalid ParsedScripts" pending

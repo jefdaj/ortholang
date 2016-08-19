@@ -20,7 +20,7 @@ import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 import Text.Parsec.Prim       (Parsec)
 import Control.Monad.Except   (throwError)
 import Control.Monad.RWS.Lazy (get)
-import Control.Monad.Reader   (ask)
+-- import Control.Monad.Reader   (ask)
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -242,15 +242,15 @@ tAssign (var, expr) = do
 
 -- I'm not sure what this is supposed to mean design-wise,
 -- but it has the type required by foldM for use in tScript
-foldAssign :: TypedScript -> ParsedAssign -> CutM TypedScript
+foldAssign :: CutScript -> ParsedAssign -> CutM CutScript
 foldAssign script assign = do
-  cfg <- ask
-  let (cassign, _, _) = runCutM (tAssign assign) cfg script -- TODO pass it the cfg
-  case cassign of
+  (_, cfg) <- get
+  let (res, _) = runCutM (tAssign assign) (script, cfg) -- TODO pass it the cfg
+  case res of
     Left err -> throwError err
     Right c  -> return $ script ++ [c]
 
-tScript :: ParsedScript -> CutM TypedScript
+tScript :: ParsedScript -> CutM CutScript
 tScript = foldM foldAssign []
 
 tBop :: ParsedExpr -> CutM TypedExpr
@@ -283,7 +283,7 @@ tCmd x = error $ "bad argument to tCmd: '" ++ show x ++ "'"
 
 tRef :: ParsedExpr -> CutM TypedExpr
 tRef (Ref v@(VarName var)) = do
-  s <- get
+  (s, _) <- get
   case lookup v s of
     Nothing -> throwError $ NoSuchVariable var
     Just e -> return $ TRef (typeOf e) v

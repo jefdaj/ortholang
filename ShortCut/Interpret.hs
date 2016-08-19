@@ -26,38 +26,36 @@ import ShortCut.Types
 import Control.Exception          (throwIO, catch, )
 import Control.Exception.Enclosed (catchAny)
 import Control.Monad.IO.Class     (MonadIO)
-import Control.Monad.RWS.Lazy     (get, put)
 import Control.Monad.State        (MonadState)
 import Data.Either                (isRight)
 import Data.List                  (isInfixOf)
 import Data.List.Utils            (delFromAL)
 import System.Directory           (removeFile)
 import System.IO.Error            (isDoesNotExistError)
--- import Control.Monad.Reader       (ask)
 
 isAssignment :: String -> Bool
 isAssignment line = isRight $ regularParse pVarEq line
 
 interpret :: Parser t -> (t -> CutM b) -> CutConfig
-          -> TypedScript -> String -> Either CutError b
+          -> CutScript -> String -> Either CutError b
 interpret parser checker cfg script str' = do
   parsed <- parseWithEof parser str'
-  let (checked, _, _) = runCutM (checker parsed) cfg script
+  let (checked, _) = runCutM (checker parsed) (script, cfg)
   checked
 
-iExpr :: CutConfig -> TypedScript -> String -> Either CutError TypedExpr
+iExpr :: CutConfig -> CutScript -> String -> Either CutError TypedExpr
 iExpr = interpret pExpr tExpr
 
-iAssign :: CutConfig -> TypedScript -> String -> Either CutError TypedAssign
+iAssign :: CutConfig -> CutScript -> String -> Either CutError TypedAssign
 iAssign = interpret pAssign tAssign
 
 -- TODO remove? nah, will be used for overall CLI parsing a file
-iScript :: CutConfig -> TypedScript -> String -> Either CutError TypedScript
+iScript :: CutConfig -> CutScript -> String -> Either CutError CutScript
 iScript = interpret pScript tScript
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
-iFile :: CutConfig -> FilePath -> IO (Either CutError TypedScript)
+iFile :: CutConfig -> FilePath -> IO (Either CutError CutScript)
 iFile cfg path = readFile path >>= (\s -> return $ iScript cfg [] s)
 
 -- TODO use hashes + dates to decide which files to regenerate?
@@ -101,16 +99,16 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 -- because that might just be left over from an earlier program run
 putAssign' :: MonadState CutState m => Bool -> TypedAssign -> m FilePath
 putAssign' force (v@(VarName var), expr) = do
-  s <- get
+  scr <- getScript
   let path = namedTmp v expr
-  if s `containsKey` v && not force
+  if scr `containsKey` v && not force
     then error $ "Variable '" ++ var ++ "' used twice"
     else do
-      put $ delFromAL s v ++ [(v,expr)]
+      putScript $ delFromAL scr v ++ [(v,expr)]
       return path
 
 -- TODO remove? refactor?
-putAssign :: (MonadIO m, MonadState CutState m) =>  TypedAssign -> m ()
+putAssign :: (MonadIO m, MonadState CutState m) => TypedAssign -> m ()
 putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
 
 -- TODO should this go in Interpret.hs? Types.hs?

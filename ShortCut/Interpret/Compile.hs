@@ -119,14 +119,14 @@ cAssign (var, expr) = do
   return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
-cScript' :: ParsedVar -> TypedScript -> Rules FilePath
+cScript' :: ParsedVar -> CutScript -> Rules FilePath
 cScript' v as = do
   -- liftIO $ putStrLn "entering cScript"
   rpaths <- mapM cAssign as
   return $ fromJust $ lookup v rpaths
 
 -- pretends to the rest of ShortCut that cScript' still works with GADTs
-cScript :: ParsedVar -> TypedScript -> Rules FilePath
+cScript :: ParsedVar -> CutScript -> Rules FilePath
 cScript (VarName v) s = cScript' (VarName v) s
 
 ----------------------
