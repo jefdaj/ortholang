@@ -1,21 +1,27 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module ShortCut.Types where
+module ShortCut.Types
+  ( CutError(..), VarName(..), Ext(..), getExt
+  , ParsedExpr(..), ParsedVar, ParsedAssign, ParsedScript
+  , TypedExpr(..), TypedAssign, TypedScript
+  , CutConfig(..), CutState, CutLog, CutM, CutT(..), runCutM, runCutT
+  )
+  where
 
 import Text.PrettyPrint.HughesPJClass
 
-import Control.Monad.Except           (MonadError, ExceptT, runExceptT)
-import Control.Monad.IO.Class         (MonadIO)
-import Control.Monad.Identity         (Identity)
-import Control.Monad.RWS.Lazy         (RWST, runRWS, runRWST)
-import Control.Monad.Reader           (MonadReader)
-import Control.Monad.State            (MonadState)
-import Control.Monad.Trans            (MonadTrans, lift)
-import Control.Monad.Writer           (MonadWriter)
-import Data.List                      (intersperse)
-import Data.Scientific                (Scientific())
-import Text.Parsec                    (ParseError)
+import Control.Monad.Except   (MonadError, ExceptT, runExceptT)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Identity (Identity)
+import Control.Monad.RWS.Lazy (RWST, runRWS, runRWST)
+import Control.Monad.Reader   (MonadReader)
+import Control.Monad.State    (MonadState)
+import Control.Monad.Trans    (MonadTrans, lift)
+import Control.Monad.Writer   (MonadWriter)
+import Data.List              (intersperse)
+import Data.Scientific        (Scientific())
+import Text.Parsec            (ParseError)
 
 --------------------
 -- error messages --
@@ -102,7 +108,7 @@ getExt (TSet e _    ) = e
 -- pretty printers --
 ---------------------
 
--- TODO should these go in their own file, or would that cause orphan instances?
+-- I would put these in a separate Pretty.hs, but that causes orphan instances
 
 instance Pretty VarName where
   pPrint (VarName s) = text s
@@ -121,32 +127,31 @@ instance Pretty TypedScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
--- the TBop one is messy, but it does print pretty :D
--- TODO put parens around nested function calls:
 instance Pretty TypedExpr where
   pPrint (TNum n)         = text $ show n
   pPrint (TSet _ _)       = undefined -- TODO figure this out!
   pPrint (TStr s)         = text $ show s
   pPrint (TRef _ v)       = pPrint v
-  pPrint (TCmd _ s es)    = text s <+> sep (map pPrint es) -- TODO long vs wrap?
-  pPrint (TBop _ c e1 e2) =
-    let use fn = fn (pPrint e1)
-                    (nest (-2) $ text c <+> pPrint e2)
-        long = use (<+>)
-        wrap = use ($+$)
-    in if (length $ render $ long) > 80
-        then wrap
-        else long
+  pPrint (TCmd _ s es)    = text s <+> sep (map pNested es)
+  pPrint (TBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
+    where
+      bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
+      one = bopWith (<+>)
+      two = bopWith ($+$)
 
--- this is a hack to add parens around nested function calls
--- pNested (TCmd _ s es) = text s 
--- pNested x = pPrint x
+-- this adds parens around nested function calls
+-- without it things can get really messy!
+pNested :: TypedExpr -> Doc
+pNested e@(TCmd _ _ _  ) = parens $ pPrint e
+pNested e@(TBop _ _ _ _) = parens $ pPrint e
+pNested e = pPrint e
 
 ------------
 -- config --
 ------------
 
 -- type CutConfig = [(String, String)]
+-- TODO always load defaults for WorkDir, TmpDir, Verbose
 data CutConfig = CutConfig
   { cfgScript  :: Maybe String
   , cfgWorkDir :: Maybe String
