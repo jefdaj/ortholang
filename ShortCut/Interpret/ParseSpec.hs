@@ -337,8 +337,8 @@ takeVarName :: String -> VarName
 takeVarName = VarName . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: Parser a -> String -> Expectation
-parsedItAll p str = (`shouldReturn` True) $
-  case parseWithLeftOver p str of
+parsedItAll p str' = (`shouldReturn` True) $
+  case parseWithLeftOver p str' of
      Right (_, "") -> return True
      _ -> return False
 
@@ -512,6 +512,6 @@ spec = do
       prop "fails on random invalid ParsedExprs" pending
 
     describe "cScript" $ do
-      it "reconstructs the example TypedScripts" pending
-      prop "concstructs TypedScripts from random valid ParsedScripts" pending
+      it "reconstructs the example CutScripts" pending
+      prop "concstructs CutScripts from random valid ParsedScripts" pending
       prop "fails on random invalid ParsedScripts" pending

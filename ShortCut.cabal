@@ -1,6 +1,6 @@
 name:                ShortCut
 version:             0.7.0.0
-synopsis:            A language for short (and easy!) phylogenomic cuts
+synopsis:            A scripting language that makes short work of phylogenomic cuts
 author:              Jeffrey David Johnson
 maintainer:          jefdaj@berkeley.edu
 build-type:          Simple
@@ -8,9 +8,12 @@ cabal-version:       >=1.10
 
 executable shortcut
   main-is:           ShortCut.hs
+  ghc-options:       -Wall
   default-language:  Haskell2010
   build-depends:     base,
+                     configurator,
                      directory,
+                     docopt,
                      filepath,
                      haskeline,
                      parsec,
@@ -24,33 +27,11 @@ executable shortcut
                      shake,
                      cryptohash,
                      bytestring,
-                     enclosed-exceptions
+                     enclosed-exceptions,
+                     QuickCheck,
+                     hspec,
+                     text
 
--- TODO why doesn't `cabal test` run the tests? fix that
+-- TODO get `cabal test` to build the actual binary and run its tests?
 -- TODO try to make it do this by default:
 -- cabal test --show-details=streaming --test-options="--color --qc-max-success=999
-test-suite shortcut-test
-  ghc-options:       -Wall
-  type:              exitcode-stdio-1.0
-  hs-source-dirs:    .
-  main-is:           ShortCutSpec.hs
-  default-language:  Haskell2010
-  -- extensions:        GeneralizedNewtypeDeriving
-  build-depends:     base,
-                     QuickCheck,
-                     directory,
-                     filepath,
-                     haskeline,
-                     hspec,
-                     parsec,
-                     scientific,
-                     transformers,
-                     mtl,
-                     Command,
-                     MissingH,
-                     pretty,
-                     containers,
-                     shake,
-                     cryptohash,
-                     bytestring,
-                     enclosed-exceptions

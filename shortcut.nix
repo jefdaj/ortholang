@@ -1,7 +1,7 @@
-{ mkDerivation, base, bytestring, Command, containers, cryptohash
-, directory, enclosed-exceptions, filepath, haskeline, hspec
-, MissingH, mtl, parsec, pretty, QuickCheck, scientific, shake
-, stdenv, transformers
+{ mkDerivation, base, bytestring, Command, configurator, containers
+, cryptohash, directory, docopt, enclosed-exceptions, filepath
+, haskeline, hspec, MissingH, mtl, parsec, pretty, QuickCheck
+, scientific, shake, stdenv, text, transformers
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -10,15 +10,11 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    base bytestring Command containers cryptohash directory
-    enclosed-exceptions filepath haskeline MissingH mtl parsec pretty
-    scientific shake transformers
+    base bytestring Command configurator containers cryptohash
+    directory docopt enclosed-exceptions filepath haskeline hspec
+    MissingH mtl parsec pretty QuickCheck scientific shake text
+    transformers
   ];
-  testHaskellDepends = [
-    base bytestring Command containers cryptohash directory
-    enclosed-exceptions filepath haskeline hspec MissingH mtl parsec
-    pretty QuickCheck scientific shake transformers
-  ];
-  description = "A language for making short work of phylogenomic cuts";
+  description = "A scripting language that makes short work of phylogenomic cuts";
   license = stdenv.lib.licenses.unfree;
 }

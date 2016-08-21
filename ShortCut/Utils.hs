@@ -6,6 +6,8 @@ import System.Directory (getHomeDirectory)
 import Data.Maybe (fromJust)
 import Data.List (isPrefixOf)
 
+-- kind of silly that haskell doesn't have this built in, but whatever
+-- https://www.schoolofhaskell.com/user/dshevchenko/cookbook/transform-relative-path-to-an-absolute-path
 absolutize :: String -> IO String
 absolutize aPath 
     | "~" `isPrefixOf` aPath = do

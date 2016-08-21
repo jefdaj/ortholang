@@ -5,11 +5,12 @@
 
 module ShortCut.Interpret.Parse where
 
+import ShortCut.Types
+
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, foldM)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
-import ShortCut.Types
 import Text.Parsec            (parse, try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
                               ,newline, string, oneOf)
@@ -19,6 +20,7 @@ import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 import Text.Parsec.Prim       (Parsec)
 import Control.Monad.Except   (throwError)
 import Control.Monad.RWS.Lazy (get)
+-- import Control.Monad.Reader   (ask)
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -31,7 +33,7 @@ type Parser  = Parsec String ()
 type OpTable = [[Operator String () Identity ParsedExpr]]
 
 parseWithError :: Parser a -> String -> Either CutError a
-parseWithError psr str = case parse psr "" str of
+parseWithError psr str' = case parse psr "" str' of
   Left  err -> Left $ InvalidSyntax err
   Right res -> Right res
 
@@ -167,9 +169,9 @@ fnNames =
 
 -- TODO: put this in terms of "keyword" or something?
 pName :: Parser String
-pName = choice $ map (try . str) fnNames
+pName = choice $ map (try . str') fnNames
   where
-    str s = string s <* (void spaces1 <|> eof)
+    str' s = string s <* (void spaces1 <|> eof)
 
 pCmd :: Parser ParsedExpr
 pCmd = Cmd <$> pName <*> manyTill pTerm pEnd
@@ -240,14 +242,15 @@ tAssign (var, expr) = do
 
 -- I'm not sure what this is supposed to mean design-wise,
 -- but it has the type required by foldM for use in tScript
-foldAssign :: TypedScript -> ParsedAssign -> CutM TypedScript
+foldAssign :: CutScript -> ParsedAssign -> CutM CutScript
 foldAssign script assign = do
-  let (cassign, _, _) = runCutM (tAssign assign) [] script
-  case cassign of
+  (_, cfg) <- get
+  let (res, _) = runCutM (tAssign assign) (script, cfg) -- TODO pass it the cfg
+  case res of
     Left err -> throwError err
     Right c  -> return $ script ++ [c]
 
-tScript :: ParsedScript -> CutM TypedScript
+tScript :: ParsedScript -> CutM CutScript
 tScript = foldM foldAssign []
 
 tBop :: ParsedExpr -> CutM TypedExpr
@@ -255,33 +258,33 @@ tBop (Bop o a1 a2) = do
   a1' <- tExpr a1
   a2' <- tExpr a2
   -- TODO assert o `elem` "+-*/&|~"
-  -- TODO assert (getExt a1 == getExt a2)
-  -- TODO if o `elem` "+-*/" assert (getExt a1) == "num"
-  -- TODO if o `elem` "&|~"  assert (getExt a1) == "set of something"
-  return (TBop (getExt a1') [o] a1' a2')
+  -- TODO assert (tExt a1 == tExt a2)
+  -- TODO if o `elem` "+-*/" assert (tExt a1) == "num"
+  -- TODO if o `elem` "&|~"  assert (tExt a1) == "set of something"
+  return (TBop (typeOf a1') [o] a1' a2')
 tBop x = error $ "bad argument to tBop: '" ++ show x ++ "'"
 
 tCmd :: ParsedExpr -> CutM TypedExpr
 tCmd (Cmd c as) = do
   -- TODO check return types
   as' <- mapM tExpr as
-  return $ TCmd (Ext rtype) c as'
+  return $ TCmd rtype c as'
   where
     (rtype, _) = case c of
-      "load_aa_seqs"      -> ("faa"    ,["str"])
-      "load_na_seqs"      -> ("fna"    ,["str"])
-      "load_genes"        -> ("genes"  ,["str"])
-      "load_genomes"      -> ("genomes",["str"])
-      "filter_genomes"    -> ("genomes",["genomes", "genes"  , "num"])
-      "filter_genes"      -> ("genes"  ,["genes"  , "genomes", "num"])
-      "worst_best_evalue" -> ("num"    ,["genes"  , "genomes"])
+      "load_aa_seqs"      -> (faa, ["str"])
+      "load_na_seqs"      -> (fna, ["str"])
+      "load_genes"        -> (gen, ["str"])
+      "load_genomes"      -> (gom, ["str"])
+      "filter_genomes"    -> (gom, ["genomes", "genes"  , "num"])
+      "filter_genes"      -> (gen, ["genes"  , "genomes", "num"])
+      "worst_best_evalue" -> (num, ["genes"  , "genomes"])
       x -> error $ "bad argument to tCmd: '" ++ show x ++ "'"
 tCmd x = error $ "bad argument to tCmd: '" ++ show x ++ "'"
 
 tRef :: ParsedExpr -> CutM TypedExpr
 tRef (Ref v@(VarName var)) = do
-  s <- get
+  (s, _) <- get
   case lookup v s of
     Nothing -> throwError $ NoSuchVariable var
-    Just e -> return $ TRef (getExt e) v
+    Just e -> return $ TRef (typeOf e) v
 tRef x = error $ "bad argument to tRef: '" ++ show x ++ "'"
