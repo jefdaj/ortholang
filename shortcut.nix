@@ -16,5 +16,5 @@ mkDerivation {
     transformers
   ];
   description = "A scripting language that makes short work of phylogenomic cuts";
-  license = stdenv.lib.licenses.unfree;
+  license = stdenv.lib.licenses.gpl3;
 }
