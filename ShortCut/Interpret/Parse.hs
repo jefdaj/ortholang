@@ -22,18 +22,14 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
-import Text.Parsec            (try, ParseError)
+import Text.Parsec            (try, ParseError, getState)
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
                               ,newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
                               ,lookAhead, between, choice, anyToken)
 -- import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 import Text.Parsec.Expr       (buildExpressionParser, Operator(..))
--- import Text.Parsec.Prim       (Parsec)
--- import Control.Monad.Except   (throwError)
--- import Control.Monad.RWS.Lazy (get)
 -- import Data.Scientific (Scientific)
--- import Control.Monad.Reader   (ask)
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -42,33 +38,33 @@ import Text.Parsec.Expr       (buildExpressionParser, Operator(..))
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
--- parseWithError :: Parser a -> CutState -> String -> Either ParseError a
--- parseWithError parser state str' = case runParser parser state str' of
+-- parseWithError :: ParseM a -> CutState -> String -> Either ParseError a
+-- parseWithError parser state str' = case runParseM parser state str' of
 --   -- Left  err -> Left $ InvalidSyntax err
 --   Left  err -> fail $ "invalid syntax: " ++ show err
 --   Right res -> Right res
 
--- parseWithError = runParser
+-- parseWithError = runParseM
 
 -- TODO remove? is it exactly parseWithError?
--- regularParse :: Parser a -> CutState -> String -> Either CutError a
+-- regularParse :: ParseM a -> CutState -> String -> Either CutError a
 -- regularParse p s = parseWithError p s
 
-parseWithEof :: Parser a -> CutState -> String -> Either ParseError a
-parseWithEof p s = runParser (p <* eof) s
+parseWithEof :: ParseM a -> CutState -> String -> Either ParseError a
+parseWithEof p s = runParseM (p <* eof) s
 
-parseAndShow :: (Show a) => Parser a -> CutState -> String -> String
-parseAndShow p s str' = case runParser p s str' of
+parseAndShow :: (Show a) => ParseM a -> CutState -> String -> String
+parseAndShow p s str' = case runParseM p s str' of
   Left err -> show err
   Right s2 -> show s2
 
-parseWithLeftOver :: Parser a -> CutState -> String -> Either ParseError (a,String)
-parseWithLeftOver p s = runParser ((,) <$> p <*> leftOver) s
+parseWithLeftOver :: ParseM a -> CutState -> String -> Either ParseError (a,String)
+parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof
 
 -- this works fine, but isn't used so far:
--- parseWithWSEof :: Parser a -> String -> Either CutError a
+-- parseWithWSEof :: ParseM a -> String -> Either CutError a
 -- parseWithWSEof p = parseWithEof (whiteSpace *> p)
 --   where
 --     whiteSpace = void $ many $ oneOf " \n\t"
@@ -77,7 +73,7 @@ parseWithLeftOver p s = runParser ((,) <$> p <*> leftOver) s
 -- after itself (handled by this function), and you only skip leading
 -- whitespace at the top level. That way all the whitespace gets skipped
 -- exactly once.
-lexeme :: Parser a -> Parser a
+lexeme :: ParseM a -> ParseM a
 lexeme p = p <* spaces
 
 whitespaceChars :: [Char]
@@ -85,17 +81,17 @@ whitespaceChars = " \t\n"
 
 -- this is like spaces, except it requires at least one
 -- TODO can this be replaced with something from Text.Parsec.Token?
-spaces1 :: Parser ()
+spaces1 :: ParseM ()
 spaces1 = void $ many1 $ oneOf whitespaceChars
 
-pSym :: Char -> Parser ()
+pSym :: Char -> ParseM ()
 pSym c = void $ lexeme $ char c
 
 -----------------
 -- identifiers --
 -----------------
 
-pVar :: Parser CutVar
+pVar :: ParseM CutVar
 pVar = lexeme (iden <$> first <*> many rest)
   where
     iden c cs = CutVar (c:cs)
@@ -104,18 +100,19 @@ pVar = lexeme (iden <$> first <*> many rest)
 
 -- TODO should this include the Var itself?
 -- TODO how to look up the variable? guess this requires the monad?
-pRef :: Parser CutExpr
+pRef :: ParseM CutExpr
 -- pRef = CutRef <$> pVar
 pRef = do
   v@(CutVar var) <- pVar
-  scr <- getScript
+  -- scr <- getScript
+  (scr, _) <- getState
   case lookup v scr of 
     -- TODO replace CutError with regular Parsec errors? Needed for anything else?
     -- Nothing -> throwError $ NoSuchVariable var
     Nothing -> fail $ "no such variable '" ++ var ++ "'"
     Just e -> return $ CutRef (typeOf e) v
 
--- tRef :: CutExpr -> Parser CutExpr
+-- tRef :: CutExpr -> ParseM CutExpr
 -- tRef (Ref v@(CutVar var)) = do
 --   (s, _) <- get
 --   case lookup v s of
@@ -128,7 +125,7 @@ pRef = do
 -------------
 
 -- TODO allow negative numbers? (would currently conflict with minus op)
-pNum :: Parser CutExpr
+pNum :: ParseM CutExpr
 pNum = do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   n  <- digit
@@ -154,24 +151,24 @@ literalChars = filter valid $ map toEnum [0..127]
 -- because that would consume spaces inside the string literal.
 -- see stackoverflow.com/questions/24106314
 -- TODO can the between part be replaced with something from Text.Parsec.Token?
-pQuoted :: Parser String
+pQuoted :: ParseM String
 pQuoted = lexeme $ between (char '"') (char '"') $ many (lit <|> esc)
   where
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
 -- this is just any literal that doens't parse as a number with pNum
-pStr :: Parser CutExpr
+pStr :: ParseM CutExpr
 pStr = CutLit str <$> pQuoted
 
 ----------------
 -- statements --
 ----------------
 
-pVarEq :: Parser CutVar
+pVarEq :: ParseM CutVar
 pVarEq = pVar <* (pSym '=')
 
-pAssign :: Parser CutAssign
+pAssign :: ParseM CutAssign
 pAssign = lexeme ((,) <$> pVarEq <*> pExpr <* optional newline)
 
 -- tAssign :: CutAssign -> CutM CutAssign
@@ -186,7 +183,7 @@ pAssign = lexeme ((,) <$> pVarEq <*> pExpr <* optional newline)
 -- This is a kludge to make my "interesting" preference for spaces as function
 -- application work right. It's used to test whether we've reached the end of a
 -- list of arguments for the function currently being parsed.
-pEnd :: Parser ()
+pEnd :: ParseM ()
 pEnd = lookAhead $ void $ choice
   [ eof, pComment, pSym ')'
   , void $ try $ choice $ map pSym operatorChars
@@ -206,12 +203,12 @@ fnNames =
   ]
 
 -- TODO put this in terms of "keyword" or something?
-pName :: Parser String
+pName :: ParseM String
 pName = choice $ map (try . str') fnNames
   where
     str' s = string s <* (void spaces1 <|> eof)
 
--- pFun :: Parser CutExpr
+-- pFun :: ParseM CutExpr
 -- pFun = Fun <$> pName <*> manyTill pTerm pEnd
 
 -- tFun :: CutExpr -> CutM CutExpr
@@ -231,7 +228,7 @@ pName = choice $ map (try . str') fnNames
 --       x -> error $ "bad argument to tFun: '" ++ show x ++ "'"
 -- tFun x = error $ "bad argument to tFun: '" ++ show x ++ "'"
 
-pFun :: Parser CutExpr
+pFun :: ParseM CutExpr
 pFun = do
   name <- pName
   args <- manyTill pTerm pEnd
@@ -250,16 +247,16 @@ pFun = do
 -- expressions --
 -----------------
 
-pParens :: Parser CutExpr
+pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr
 
-pTerm :: Parser CutExpr
+pTerm :: ParseM CutExpr
 pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef
 
 operatorChars :: [Char]
 operatorChars = "+-*/&|~"
 
--- TODO update for new Parser type
+-- TODO update for new ParseM type
 -- type OpTable = [[Operator String () Identity CutExpr]]
 type OpTable = [[Operator String CutState Identity CutExpr]]
 
@@ -291,7 +288,7 @@ operatorTable = -- [map binary operatorChars]
 -- to do without it. Also it seems like it will get more useful if I want to
 -- add non-assignment statements like assertions. See:
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
-pExpr :: Parser CutExpr
+pExpr :: ParseM CutExpr
 pExpr = buildExpressionParser operatorTable pTerm
 
 --------------
@@ -299,7 +296,7 @@ pExpr = buildExpressionParser operatorTable pTerm
 --------------
 
 -- Tricky bit: # should NOT be a lexeme
-pComment :: Parser ()
+pComment :: ParseM ()
 pComment = lexeme $ void $ char '#' >> restOfLine
   where
     restOfLine = manyTill anyChar (void newline <|> eof)
@@ -308,5 +305,5 @@ pComment = lexeme $ void $ char '#' >> restOfLine
 -- scripts --
 -------------
 
-pScript :: Parser CutScript
+pScript :: ParseM CutScript
 pScript = optional spaces *> many pComment *> many (pAssign <* many pComment)

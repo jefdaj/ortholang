@@ -62,13 +62,10 @@ loop = do
     (':':cmd) -> runCmd cmd
     line -> do
       s@(scr, cfg) <- get
-      -- scr <- getScript
-      -- cfg <- getConfig
       if isAssignment s line
         then do
           case iAssign s line of
             Left  e -> print $ show e
-            -- Right a -> putAssign a TODO re-implement once working!
             Right a@(v, _) -> do
               let scr' = delFromAL scr v
               put (scr' ++ [a], cfg)
@@ -77,7 +74,6 @@ loop = do
           -- TODO hook the logs + configs together?
           -- TODO only evaluate up to the point where the expression they want?
           case iExpr s line of
-            -- Left  err -> throwError err
             Left  err  -> fail $ "oh no! " ++ show err
             Right expr -> do
               let res  = CutVar "result"
@@ -134,7 +130,6 @@ cmdHelp _ = print
 cmdLoad :: String -> Repl ()
 cmdLoad path = do
   (_, cfg) <- get
-  -- cfg <- getConfig
   new <- liftIO $ iFile ([], cfg) path 
   case new of
     Left  e -> print $ show e
@@ -146,21 +141,17 @@ cmdLoad path = do
 cmdSave :: String -> Repl ()
 cmdSave path = do
   path' <- liftIO $ absolutize path
-  -- getScript >>= \s -> liftIO $ writeFile path' $ show s
   get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
   where
     showHack = unlines . map prettyShow
 
 cmdDrop :: String -> Repl ()
--- cmdDrop [] = putScript []
 cmdDrop [] = get >>= \s -> put ([], snd s)
 cmdDrop var = do
   (scr, cfg) <- get
-  -- scr <- getScript
   let v = CutVar var
   case lookup v scr of
     Nothing -> print $ "Var '" ++ var ++ "' not found"
-    -- Just _  -> putScript $ delFromAL scr v
     Just _  -> put (delFromAL scr v, cfg)
 
 -- TODO show the type description here too once that's ready
@@ -168,23 +159,16 @@ cmdDrop var = do
 cmdType :: String -> Repl ()
 cmdType s = do
   (scr, cfg) <- get
-  -- scr <- getScript
-  -- cfg <- getConfig
   print $ case iExpr (scr, cfg) s of
-    -- Right expr -> prettyShow $ typeOf expr
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 
 cmdShow :: String -> Repl ()
--- cmdShow [] = getScript >>= \s -> liftIO $ mapM_ (putStrLn . prettyShow) s
--- cmdShow [] = getScript >>= \s -> liftIO $ mapM_ (putStrLn . show) s
 cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . show) s
 cmdShow var = do
-  -- scr <- getScript
   (scr, _) <- get
   print $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
-    -- Just e  -> prettyShow e
     Just e  -> show e
 
 cmdQuit :: String -> Repl ()
@@ -193,22 +177,20 @@ cmdQuit _ = mzero
 cmdBang :: String -> Repl ()
 cmdBang cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
 
+-- TODO split string into first word and the rest
+-- TODO case statement for first word: verbose, workdir, tmpdir, script?
+-- TODO script sets the default for cmdSave?
+-- TODO don't bother with script yet; start with the obvious ones
 cmdSet :: String -> Repl ()
 cmdSet = undefined
-  -- TODO split string into first word and the rest
-  -- TODO case statement for first word: verbose, workdir, tmpdir, script?
-  -- TODO script sets the default for cmdSave?
-  -- TODO don't bother with script yet; start with the obvious ones
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
 cmdConfig :: String -> Repl ()
 cmdConfig s = do
-  -- cfg <- getConfig
   (_, cfg) <- get
   let ws = words s
   if (length ws == 0)
-    -- then (print (prettyShow cfg) >> return ()) -- TODO Pretty instance
     then (print (show cfg) >> return ()) -- TODO Pretty instance
     else if (length ws  > 2)
       then (print "too many variables" >> return ())
@@ -229,12 +211,10 @@ cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
 
 cmdConfigSet :: String -> String -> Repl ()
 cmdConfigSet key val = do
-  -- cfg <- getConfig
   (scr, cfg) <- get
   case key of
     "script"  -> put (scr, cfg { cfgScript  = Just val })
     "verbose" -> put (scr, cfg { cfgVerbose = read val })
     "workdir" -> put (scr, cfg { cfgWorkDir = val })
     "tmpdir"  -> put (scr, cfg { cfgTmpDir  = val })
-    -- _ -> throwError $ NoSuchVariable key
     _ -> fail $ "no such variable '" ++ key ++ "'"

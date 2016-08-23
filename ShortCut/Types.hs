@@ -1,12 +1,9 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module ShortCut.Types
   ( CutType(..), typeOf
   , CutVar(..), CutExpr(..), CutAssign, CutScript
-  , CutConfig(..), CutState, Parser, ParserT, runParser, runParserT
-  , getScript, getConfig, putScript, putConfig
+  , CutConfig(..), CutState, ParseM, runParseM
   , str, num, faa, fna, gen, gom, csv
   , prettyShow
   , Repl, runRepl, prompt, print
@@ -17,65 +14,13 @@ import Prelude hiding (print)
 import qualified Text.Parsec as P
 import Text.PrettyPrint.HughesPJClass
 
-import Control.Monad.Identity (Identity)
-import Data.Scientific        (Scientific())
-import Text.Parsec            (ParseError)
-import Control.Monad.State.Lazy    -- (MonadState, StateT, runState, get, put)
-import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
-import System.Console.Haskeline (InputT, getInputLine, runInputT, defaultSettings,
-                                 outputStrLn)
-
---------------------
--- error messages --
---------------------
-
--- TODO remove and use Parsec's error messages instead?
--- data CutError
---   = InvalidSyntax  ParseError
---   | NoSuchFunction String
---   | NoSuchVariable String
---   | WrongArgTypes  String [String] [String]
---   | WrongArgNumber String Int Int
---   deriving Eq
--- 
--- instance Show CutError where
---   show (InvalidSyntax  err)  = "Invalid syntax for ShortCut code " ++ show err
---   show (NoSuchFunction name) = "No such function: " ++ name
---   show (NoSuchVariable name) = "No such variable: " ++ name
---   show (WrongArgNumber name n1 n2) = unlines
---     [ "Wrong number of arguments for " ++ name ++ ": "
---     , "need " ++ show n1 ++ " but got " ++ show n2 ++ "."
---     ]
---   show (WrongArgTypes name es as) = unlines
---     [ "Wrong argument types for the function '" ++ name ++ "'."
---     , "  Need: " ++ (concat $ intersperse ", " es)
---     , "  Got:  " ++ (concat $ intersperse ", " as)
---     ]
-
------------------------
--- initial AST types --
------------------------
-
--- data ParsedExpr
---   = Bop Char ParsedExpr ParsedExpr
---   | Cmd String [ParsedExpr]
---   | Num Scientific
---   | Ref Var
---   | Fil String
---   deriving (Eq, Show, Read)
--- 
--- type ParsedAssign = (Var, ParsedExpr)
--- type ParsedScript = [ParsedAssign]
-
----------------------
--- typed AST types --
----------------------
-
--- TODO unify these with the above Parsed ones
--- TODO rethink paths and literals:
---        literals are strings or numbers
---        no need to represent paths separately at all?
---        no need for an extension tag in either
+-- import Control.Monad.Identity    (Identity)
+import Data.Scientific           (Scientific())
+import Text.Parsec               (ParseError)
+import Control.Monad.State.Lazy  (StateT, execStateT, lift)
+import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
+import System.Console.Haskeline  (InputT, getInputLine, runInputT,
+                                  defaultSettings, outputStrLn)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -191,31 +136,11 @@ instance Pretty CutConfig where
 -- Parse monad --
 -----------------
 
--- TODO any need for ParserT now, if not in the Repl?
+type CutState = (CutScript, CutConfig)
+type ParseM a = P.Parsec String CutState a
 
-type CutState  = (CutScript, CutConfig)
-type ParserT m = P.ParsecT String CutState m
-type Parser    = ParserT Identity
-
-runParser :: Parser a -> CutState -> String -> Either ParseError a
-runParser p s = P.runParser p s "somefile"
-
-runParserT :: Monad m => ParserT m a -> CutState -> String -> m (Either ParseError a)
-runParserT psr st = P.runParserT psr st "somefile"
-
-getScript :: Monad m => ParserT m CutScript
-getScript = fmap fst P.getState
-
-getConfig :: Monad m => ParserT m CutConfig
-getConfig = fmap snd P.getState
-
-putScript :: Monad m => CutScript -> ParserT m ()
-putScript scr = P.getState >>= \(_, c) -> P.putState (scr, c)
-
-putConfig :: Monad m => CutConfig -> ParserT m ()
-putConfig cfg = P.getState >>= \(s, _) -> P.putState (s, cfg)
-
--- TODO modState, modConfig (maybe instead of the put ones?)
+runParseM :: ParseM a -> CutState -> String -> Either ParseError a
+runParseM p s = P.runParser p s "somefile"
 
 ----------------
 -- Repl monad --
