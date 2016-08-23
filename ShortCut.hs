@@ -17,6 +17,8 @@ import System.Exit             (exitSuccess)
 import Test.Hspec              (hspec)
 import Data.Text (pack)
 
+-- TODO separate Config.hs, but only if it can actually be separated
+
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key

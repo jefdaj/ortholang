@@ -31,7 +31,7 @@ import Text.Parsec.Combinator (optional, many1, manyTill, eof
 import Text.Parsec.Expr       (buildExpressionParser, Operator(..))
 -- import Text.Parsec.Prim       (Parsec)
 -- import Control.Monad.Except   (throwError)
-import Control.Monad.RWS.Lazy (get)
+-- import Control.Monad.RWS.Lazy (get)
 -- import Data.Scientific (Scientific)
 -- import Control.Monad.Reader   (ask)
 
@@ -310,29 +310,3 @@ pComment = lexeme $ void $ char '#' >> restOfLine
 
 pScript :: Parser CutScript
 pScript = optional spaces *> many pComment *> many (pAssign <* many pComment)
-
------------------------------------------
--- typechecking (not nearly done yet!) --
------------------------------------------
-
--- tExpr :: CutExpr -> CutM CutExpr
--- tExpr   (Fil s)     = return $ TStr s
--- tExpr   (Num n)     = return $ CutNum n
--- tExpr r@(Ref _)     = tRef r
--- tExpr c@(Fun _ _  ) = tFun c
--- tExpr b@(Bop _ _ _) = tBop b
--- TODO set!
-
--- I'm not sure what this is supposed to mean design-wise,
--- but it has the type required by foldM for use in tScript
--- foldAssign :: CutScript -> CutAssign -> Parser CutScript
--- foldAssign script assign = do
---   cfg <- getConfig
---   -- let (res, _) = runParser (tAssign assign) (script, cfg)
---   let res = runParser (tAssign assign) (script, cfg)
---   case res of
---     Left err -> throwError err
---     Right c  -> return $ script ++ [c]
--- 
--- tScript :: CutScript -> Parser CutScript
--- tScript = foldM foldAssign []

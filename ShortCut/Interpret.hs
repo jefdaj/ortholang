@@ -26,8 +26,9 @@ import ShortCut.Interpret.Parse
 import ShortCut.Types
 import Control.Exception          (throwIO, catch, )
 import Control.Exception.Enclosed (catchAny)
--- import Control.Monad.IO.Class     (MonadIO)
+import Control.Monad.IO.Class     (MonadIO)
 -- import Control.Monad.State        (MonadState)
+-- import Control.Monad.State        (get, put)
 import Data.Either                (isRight)
 import Data.List                  (isInfixOf)
 import Data.List.Utils            (delFromAL)
@@ -91,17 +92,22 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 -- note that it will always continue if only the *file* exists,
 -- because that might just be left over from an earlier program run
 -- putAssign' :: MonadState CutState m => Bool -> CutAssign -> m FilePath
+putAssign' :: Monad m => Bool -> CutAssign -> ParserT m FilePath
 putAssign' force (v@(CutVar var), expr) = do
   scr <- getScript
+  -- (scr, cfg) <- get
   let path = namedTmp v expr
   if scr `containsKey` v && not force
     then error $ "Variable '" ++ var ++ "' used twice"
     else do
       putScript $ delFromAL scr v ++ [(v,expr)]
+      -- put (delFromAL scr v ++ [(v,expr)], cfg)
       return path
 
 -- TODO remove? refactor?
+-- TODO is there a way to mark the file outdated without deleting it? hashes?
 -- putAssign :: (MonadIO m, MonadState CutState m) => CutAssign -> m ()
+putAssign :: MonadIO m => CutAssign -> ParserT m ()
 putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
 
 -- TODO should this go in Interpret.hs? Types.hs?

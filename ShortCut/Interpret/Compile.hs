@@ -53,7 +53,7 @@ cacheDir = tmpDir </> "cache"
 exprDir :: FilePath
 exprDir = cacheDir </> "shortcut"
 
--- Note that MD5 is no longer considered secure!
+-- Note that MD5 is no longer considered secure
 -- But for our purposes (checking for updated files) it doesn't matter.
 -- See https://en.wikipedia.org/wiki/MD5
 digest :: (Show a) => a -> String
@@ -61,7 +61,6 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
   where
     asBytes = (pack . show) val
 
--- TODO move back to Compile.hs or somewhere else? It's not a type!
 -- TODO flip arguments for consistency with everything else
 -- There's a kludge here for the special case of "result", which is like the
 -- "main" function of a ShortCut script, and always goes to <tmpdir>/result.

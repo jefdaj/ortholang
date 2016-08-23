@@ -9,6 +9,7 @@ module ShortCut.Types
   , getScript, getConfig, putScript, putConfig
   , str, num, faa, fna, gen, gom, csv
   , prettyShow
+  , Repl, prompt, print, runRepl
   -- , Repl(..), runRepl, -- prompt, print
   )
   where
@@ -20,6 +21,9 @@ import Text.PrettyPrint.HughesPJClass
 import Control.Monad.Identity (Identity)
 import Data.Scientific        (Scientific())
 import Text.Parsec            (ParseError)
+import System.Console.Haskeline (InputT, getInputLine, runInputT, defaultSettings,
+                                 outputStrLn)
+import Control.Monad.Trans            (lift)
 
 --------------------
 -- error messages --
@@ -80,9 +84,7 @@ import Text.Parsec            (ParseError)
 
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
  
--- TODO convert all the current Bop, Cmd, Num etc mentions
--- TODO then rename these without the Ts up front
-
+-- TODO only keep the extensions themselves here, not the whole CutType?
 data CutExpr
   = CutLit CutType String
   | CutRef CutType CutVar
@@ -110,19 +112,15 @@ typeOf (CutBop t _ _ _) = t
 typeOf (CutFun t _ _  ) = t
 typeOf (CutSet t _    ) = SetOf t
 
+-- TODO move to modules as soon as parsing works again
 str, num, faa, fna, gen, gom, csv :: CutType
 str = CutType "str"    "string"
 num = CutType "num"    "number in scientific notation"
-
--- TODO separate faa, fna and remove gen, gom
 faa = CutType "faa"    "fasta amino acid"
 fna = CutType "fna"    "fasta nucleic acid"
 gen = CutType "gene"   "gene" -- TODO deprecate
 gom = CutType "genome" "genome" -- TODO deprecate
 csv = CutType "csv"    "spreadsheet"
-
--- coreTypes :: [CutType]
--- coreTypes = [str, num, faa, fna, gen, gom, csv]
 
 ---------------------
 -- pretty printers --
@@ -198,21 +196,36 @@ type ParserT m = P.ParsecT String CutState m
 type Parser    = ParserT Identity
 
 runParser :: Parser a -> CutState -> String -> Either ParseError a
-runParser parser state string = P.runParser parser state "somefile" string
+runParser p s = P.runParser p s "somefile"
 
 runParserT :: Monad m => ParserT m a -> CutState -> String -> m (Either ParseError a)
-runParserT parser state string = P.runParserT parser state "somefile" string
+runParserT psr st = P.runParserT psr st "somefile"
 
-getScript :: Monad m => P.ParsecT s CutState m CutScript
+getScript :: Monad m => ParserT m CutScript
 getScript = fmap fst P.getState
 
-getConfig :: Monad m => P.ParsecT s CutState m CutConfig
+getConfig :: Monad m => ParserT m CutConfig
 getConfig = fmap snd P.getState
 
--- putScript :: MonadState CutState m => CutScript -> m ()
+putScript :: Monad m => CutScript -> ParserT m ()
 putScript scr = P.getState >>= \(_, c) -> P.putState (scr, c)
 
--- putConfig :: MonadState CutState m => CutConfig -> m ()
+putConfig :: Monad m => CutConfig -> ParserT m ()
 putConfig cfg = P.getState >>= \(s, _) -> P.putState (s, cfg)
 
 -- TODO modState, modConfig (maybe instead of the put ones?)
+
+----------------
+-- Repl monad --
+----------------
+
+-- type Repl a = ParserT (InputT IO) a
+type Repl a = P.ParsecT String CutState (InputT IO) a
+
+runRepl = undefined
+
+prompt :: String -> Repl (Maybe String)
+prompt = lift . getInputLine
+
+print :: String -> Repl ()
+print = lift . outputStrLn

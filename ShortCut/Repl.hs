@@ -1,3 +1,4 @@
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 -- Based on:
@@ -22,7 +23,6 @@ import Control.Monad.IO.Class         (liftIO)
 import Control.Monad.Identity         (mzero)
 -- import Control.Monad.RWS.Lazy         (get, put, ask)
 -- import Control.Monad.Reader           (MonadReader)
--- import Control.Monad.State            (MonadState, get, put)
 -- import Control.Monad.Writer           (MonadWriter)
 import Data.Char                      (isSpace)
 import Data.List                      (dropWhileEnd, isPrefixOf)
@@ -37,12 +37,12 @@ import System.Command                 (runCommand, waitForProcess)
 -- import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 -- import Control.Monad.Trans            (lift)
 -- import System.Console.Haskeline       (InputT, runInputT, defaultSettings
-import System.Console.Haskeline       (InputT, getInputLine)
+-- import System.Console.Haskeline (getInputLine)
 -- import Control.Monad.Except   (MonadError, ExceptT, runExceptT)
 -- import Control.Monad.IO.Class (MonadIO)
--- import Control.Monad.State    (MonadState, get, put)
+-- import Control.Monad.State.Lazy    (MonadState, StateT, get, put)
 -- import Control.Monad.Trans    (MonadTrans, lift)
-import Control.Monad.Trans    (lift)
+-- import Control.Monad.Trans    (lift)
 -- import Data.List              (intersperse)
 
 ----------------
@@ -69,7 +69,23 @@ import Control.Monad.Trans    (lift)
 -- newtype Repl a = Repl { unRepl :: ParserT (MaybeT (InputT IO)) a } 
 -- newtype Repl a = Repl { unRepl :: ParserT (InputT IO) a } 
 
-type Repl a = ParserT (InputT IO) a
+-- runParserT :: Monad m => ParserT m a -> CutState -> String -> m (Either ParseError a)
+
+-- TODO ok, it does need a StateT to pass the CutState along right?
+-- type Repl a = ParserT (InputT IO) a
+-- type Repl a = StateT CutState (InputT IO) a
+-- type Repl a = InputT (ParserT IO) a
+-- type Repl a = ParserT (InputT IO) a
+-- newtype Repl a = Repl { unRepl :: ParserT (InputT IO) a }
+--   deriving
+--     ( Functor
+--     , Applicative
+--     , Monad
+--     , MonadIO
+--     -- , MonadState CutState
+--     )
+
+-- TODO or, Repl a = InputT (StateT CutState IO a)?
 
 -- type Repl a = MaybeT (ParserT (InputT IO)) a
 
@@ -94,13 +110,12 @@ type Repl a = ParserT (InputT IO) a
 -- runRepl repl cfg = runParserT pAssign ([], cfg)
                      -- (runMaybeT (runInputT defaultSettings) repl)
 
-runRepl = undefined
+-- runRepl :: Repl a -> CutState -> IO (Either ParseError a)
+-- runRepl r s = runInputT 
+-- runRepl r s = runParserT pAssign s $ runInputT defaultSettings r
 
-prompt :: String -> Repl (Maybe String)
-prompt = lift . getInputLine
-
-print :: String -> Repl ()
-print = liftIO . putStrLn
+-- runRepl :: (InputT IO a) -> CutState -> IO a
+-- runRepl = undefined
 
 ---------------
 -- utilities --
@@ -143,8 +158,9 @@ loop = do
     "" -> return ()
     (':':cmd) -> runCmd cmd
     line -> do
-      cfg <- getConfig
+      -- s@(scr, _) <- get
       scr <- getScript
+      cfg <- getConfig
       if isAssignment (scr, cfg) line
         then do
           case iAssign (scr, cfg) line of
