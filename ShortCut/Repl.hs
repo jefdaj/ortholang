@@ -1,4 +1,3 @@
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 -- Based on:
@@ -14,115 +13,19 @@
 
 module ShortCut.Repl where
 
--- import Text.Parsec (ParseError) -- TODO re-export from Types.hs
 import ShortCut.Types
 import ShortCut.Interpret
-import ShortCut.Utils                 (absolutize)
--- import Control.Monad.Except           (throwError, MonadError)
-import Control.Monad.IO.Class         (liftIO)
-import Control.Monad.Identity         (mzero)
--- import Control.Monad.RWS.Lazy         (get, put, ask)
--- import Control.Monad.Reader           (MonadReader)
--- import Control.Monad.Writer           (MonadWriter)
-import Data.Char                      (isSpace)
-import Data.List                      (dropWhileEnd, isPrefixOf)
-import Data.List.Utils                (delFromAL)
-import Data.Maybe                     (fromJust, fromMaybe)
-import Prelude                 hiding (print)
-import System.Command                 (runCommand, waitForProcess)
--- import Control.Monad (when)
--- import Text.PrettyPrint.HughesPJClass (prettyShow)
--- import Control.Monad (when)
--- import Control.Monad.IO.Class         (MonadIO, liftIO)
--- import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
--- import Control.Monad.Trans            (lift)
--- import System.Console.Haskeline       (InputT, runInputT, defaultSettings
--- import System.Console.Haskeline (getInputLine)
--- import Control.Monad.Except   (MonadError, ExceptT, runExceptT)
--- import Control.Monad.IO.Class (MonadIO)
--- import Control.Monad.State.Lazy    (MonadState, StateT, get, put)
--- import Control.Monad.Trans    (MonadTrans, lift)
--- import Control.Monad.Trans    (lift)
--- import Data.List              (intersperse)
 
-----------------
--- Repl monad --
-----------------
-
--- newtype Repl a = Repl { unRepl :: MaybeT (ParserT (InputT IO)) a }
---   deriving
---     ( Functor
---     , Applicative
---     , Monad
---     , MonadIO
---     -- , MonadState CutState
---     -- , MonadError ParseError
---     )
-
--- first we get input from the user -----------------
---                                                  |
--- if they quit, it's all for Nothing -------       |
---                                          |       |
--- otherwise, parse it --------------       |       |
---                                  |       |       |
---                                  v       v       v
--- newtype Repl a = Repl { unRepl :: ParserT (MaybeT (InputT IO)) a } 
--- newtype Repl a = Repl { unRepl :: ParserT (InputT IO) a } 
-
--- runParserT :: Monad m => ParserT m a -> CutState -> String -> m (Either ParseError a)
-
--- TODO ok, it does need a StateT to pass the CutState along right?
--- type Repl a = ParserT (InputT IO) a
--- type Repl a = StateT CutState (InputT IO) a
--- type Repl a = InputT (ParserT IO) a
--- type Repl a = ParserT (InputT IO) a
--- newtype Repl a = Repl { unRepl :: ParserT (InputT IO) a }
---   deriving
---     ( Functor
---     , Applicative
---     , Monad
---     , MonadIO
---     -- , MonadState CutState
---     )
-
--- TODO or, Repl a = InputT (StateT CutState IO a)?
-
--- type Repl a = MaybeT (ParserT (InputT IO)) a
-
--- TODO can you remove the MaybeT altogether by quitting immediately on ":quit"?
---      would get rid of the nice prefix ability they have now :(
-
--- steps to evaluating Repl a:
--- check if Nothing or Just (the rest)
--- if just, need to runParser with user input
--- then get back Either ParseError or an a
-
--- InputT brings lines of input from the user,
--- and MaybeT handles the Nothing resulting from quitting the Repl
--- type Repl a = MaybeT (ParserT (InputT IO)) a
-
--- runRepl :: Repl a -> CutState -> IO (Either CutError (Maybe a), CutState)
--- runRepl :: Repl a -> CutConfig -> IO (Either ParseError (Maybe a))
--- runRepl r c = runInputT defaultSettings $ runParserT ([], c) (runMaybeT $ unRepl r) c ()
--- runRepl r s = runInputT defaultSettings $ runParserT pAssign (runMaybeT r) s
--- runRepl r s = runParserT (runMaybeT $ unRepl r) s $ runInputT defaultSettings
--- runRepl = undefined -- TODO write this!
--- runRepl repl cfg = runParserT pAssign ([], cfg)
-                     -- (runMaybeT (runInputT defaultSettings) repl)
-
--- runRepl :: Repl a -> CutState -> IO (Either ParseError a)
--- runRepl r s = runInputT 
--- runRepl r s = runParserT pAssign s $ runInputT defaultSettings r
-
--- runRepl :: (InputT IO a) -> CutState -> IO a
--- runRepl = undefined
-
----------------
--- utilities --
----------------
-
-stripWhiteSpace :: String -> String
-stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
+import Control.Monad.IO.Class   (liftIO)
+import Control.Monad.Identity   (mzero)
+import Control.Monad.State.Lazy (get, put)
+import Data.Char                (isSpace)
+import Data.List                (isPrefixOf)
+import Data.List.Utils          (delFromAL)
+import Data.Maybe               (fromJust, fromMaybe)
+import Prelude           hiding (print)
+import ShortCut.Utils           (absolutize, stripWhiteSpace)
+import System.Command           (runCommand, waitForProcess)
 
 --------------------
 -- main interface --
@@ -158,19 +61,22 @@ loop = do
     "" -> return ()
     (':':cmd) -> runCmd cmd
     line -> do
-      -- s@(scr, _) <- get
-      scr <- getScript
-      cfg <- getConfig
-      if isAssignment (scr, cfg) line
+      s@(scr, cfg) <- get
+      -- scr <- getScript
+      -- cfg <- getConfig
+      if isAssignment s line
         then do
-          case iAssign (scr, cfg) line of
+          case iAssign s line of
             Left  e -> print $ show e
-            Right a -> putAssign a
+            -- Right a -> putAssign a TODO re-implement once working!
+            Right a@(v, _) -> do
+              let scr' = delFromAL scr v
+              put (scr' ++ [a], cfg)
         else do
           -- TODO how to handle if the var isn't in the script??
           -- TODO hook the logs + configs together?
           -- TODO only evaluate up to the point where the expression they want?
-          case iExpr (scr, cfg) line of
+          case iExpr s line of
             -- Left  err -> throwError err
             Left  err  -> fail $ "oh no! " ++ show err
             Right expr -> do
@@ -227,12 +133,12 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> Repl ()
 cmdLoad path = do
-  -- (_, cfg) <- get
-  cfg <- getConfig
+  (_, cfg) <- get
+  -- cfg <- getConfig
   new <- liftIO $ iFile ([], cfg) path 
   case new of
     Left  e -> print $ show e
-    Right n -> putScript n
+    Right n -> put (n, cfg)
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
@@ -240,28 +146,30 @@ cmdLoad path = do
 cmdSave :: String -> Repl ()
 cmdSave path = do
   path' <- liftIO $ absolutize path
-  -- get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
-  getScript >>= \s -> liftIO $ writeFile path' $ show s
-  -- where
-    -- showHack = unlines . map prettyShow
+  -- getScript >>= \s -> liftIO $ writeFile path' $ show s
+  get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
+  where
+    showHack = unlines . map prettyShow
 
 cmdDrop :: String -> Repl ()
-cmdDrop [] = putScript []
+-- cmdDrop [] = putScript []
+cmdDrop [] = get >>= \s -> put ([], snd s)
 cmdDrop var = do
-  -- (script, cfg) <- get
-  scr <- getScript
+  (scr, cfg) <- get
+  -- scr <- getScript
   let v = CutVar var
   case lookup v scr of
     Nothing -> print $ "Var '" ++ var ++ "' not found"
-    Just _  -> putScript $ delFromAL scr v
+    -- Just _  -> putScript $ delFromAL scr v
+    Just _  -> put (delFromAL scr v, cfg)
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
 cmdType :: String -> Repl ()
 cmdType s = do
-  -- (script, cfg) <- get
-  scr <- getScript
-  cfg <- getConfig
+  (scr, cfg) <- get
+  -- scr <- getScript
+  -- cfg <- getConfig
   print $ case iExpr (scr, cfg) s of
     -- Right expr -> prettyShow $ typeOf expr
     Right expr -> show $ typeOf expr
@@ -269,9 +177,11 @@ cmdType s = do
 
 cmdShow :: String -> Repl ()
 -- cmdShow [] = getScript >>= \s -> liftIO $ mapM_ (putStrLn . prettyShow) s
-cmdShow [] = getScript >>= \s -> liftIO $ mapM_ (putStrLn . show) s
+-- cmdShow [] = getScript >>= \s -> liftIO $ mapM_ (putStrLn . show) s
+cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . show) s
 cmdShow var = do
-  scr <- getScript
+  -- scr <- getScript
+  (scr, _) <- get
   print $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     -- Just e  -> prettyShow e
@@ -294,7 +204,8 @@ cmdSet = undefined
 -- TODO wow much staircase get rid of it
 cmdConfig :: String -> Repl ()
 cmdConfig s = do
-  cfg <- getConfig
+  -- cfg <- getConfig
+  (_, cfg) <- get
   let ws = words s
   if (length ws == 0)
     -- then (print (prettyShow cfg) >> return ()) -- TODO Pretty instance
@@ -307,7 +218,7 @@ cmdConfig s = do
         else (cmdConfigSet  (head ws) (last ws))
 
 cmdConfigShow :: String -> Repl ()
-cmdConfigShow key = getConfig >>= \cfg -> print $ fn cfg
+cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
   where
     fn = case key of
           "script"  -> (\c -> fromMaybe "none" $ cfgScript c)
@@ -318,11 +229,12 @@ cmdConfigShow key = getConfig >>= \cfg -> print $ fn cfg
 
 cmdConfigSet :: String -> String -> Repl ()
 cmdConfigSet key val = do
-  cfg <- getConfig
+  -- cfg <- getConfig
+  (scr, cfg) <- get
   case key of
-    "script"  -> putConfig $ cfg { cfgScript  = Just val }
-    "verbose" -> putConfig $ cfg { cfgVerbose = read val }
-    "workdir" -> putConfig $ cfg { cfgWorkDir = val }
-    "tmpdir"  -> putConfig $ cfg { cfgTmpDir  = val }
+    "script"  -> put (scr, cfg { cfgScript  = Just val })
+    "verbose" -> put (scr, cfg { cfgVerbose = read val })
+    "workdir" -> put (scr, cfg { cfgWorkDir = val })
+    "tmpdir"  -> put (scr, cfg { cfgTmpDir  = val })
     -- _ -> throwError $ NoSuchVariable key
     _ -> fail $ "no such variable '" ++ key ++ "'"

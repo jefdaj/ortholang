@@ -5,6 +5,11 @@ import System.FilePath (addTrailingPathSeparator, normalise)
 import System.Directory (getHomeDirectory)
 import Data.Maybe (fromJust)
 import Data.List (isPrefixOf)
+import Data.Char                (isSpace)
+import Data.List                (dropWhileEnd)
+
+stripWhiteSpace :: String -> String
+stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- kind of silly that haskell doesn't have this built in, but whatever
 -- https://www.schoolofhaskell.com/user/dshevchenko/cookbook/transform-relative-path-to-an-absolute-path

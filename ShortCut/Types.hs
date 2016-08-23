@@ -9,8 +9,7 @@ module ShortCut.Types
   , getScript, getConfig, putScript, putConfig
   , str, num, faa, fna, gen, gom, csv
   , prettyShow
-  , Repl, prompt, print, runRepl
-  -- , Repl(..), runRepl, -- prompt, print
+  , Repl, runRepl, prompt, print
   )
   where
 
@@ -21,9 +20,10 @@ import Text.PrettyPrint.HughesPJClass
 import Control.Monad.Identity (Identity)
 import Data.Scientific        (Scientific())
 import Text.Parsec            (ParseError)
+import Control.Monad.State.Lazy    -- (MonadState, StateT, runState, get, put)
+import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import System.Console.Haskeline (InputT, getInputLine, runInputT, defaultSettings,
                                  outputStrLn)
-import Control.Monad.Trans            (lift)
 
 --------------------
 -- error messages --
@@ -187,9 +187,11 @@ instance Pretty CutConfig where
     , ("verbose", show . cfgVerbose)
     ]
 
----------------
--- Cut monad --
----------------
+-----------------
+-- Parse monad --
+-----------------
+
+-- TODO any need for ParserT now, if not in the Repl?
 
 type CutState  = (CutScript, CutConfig)
 type ParserT m = P.ParsecT String CutState m
@@ -219,13 +221,13 @@ putConfig cfg = P.getState >>= \(s, _) -> P.putState (s, cfg)
 -- Repl monad --
 ----------------
 
--- type Repl a = ParserT (InputT IO) a
-type Repl a = P.ParsecT String CutState (InputT IO) a
+type Repl a = StateT CutState (MaybeT (InputT IO)) a
 
-runRepl = undefined
+runRepl :: Repl a -> CutState -> IO (Maybe CutState)
+runRepl r s = runInputT defaultSettings $ runMaybeT $ execStateT r s
 
 prompt :: String -> Repl (Maybe String)
-prompt = lift . getInputLine
+prompt = lift . lift . getInputLine
 
 print :: String -> Repl ()
-print = lift . outputStrLn
+print = lift . lift . outputStrLn
