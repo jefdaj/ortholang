@@ -7,8 +7,7 @@
  -}
 
 module ShortCut.Interpret
-  ( CutError(..)
-  , CutExpr(..)
+  ( CutExpr(..)
   , iAssign
   , iExpr
   , iFile -- TODO have the CLI call this
@@ -16,47 +15,41 @@ module ShortCut.Interpret
   , cScript
   , isAssignment
   , putAssign
+  , pAssign
   )
   where
 
+import Text.Parsec (ParseError)
 import Development.Shake
 import ShortCut.Interpret.Compile
 import ShortCut.Interpret.Parse
 import ShortCut.Types
 import Control.Exception          (throwIO, catch, )
 import Control.Exception.Enclosed (catchAny)
-import Control.Monad.IO.Class     (MonadIO)
-import Control.Monad.State        (MonadState)
+-- import Control.Monad.IO.Class     (MonadIO)
+-- import Control.Monad.State        (MonadState)
 import Data.Either                (isRight)
 import Data.List                  (isInfixOf)
 import Data.List.Utils            (delFromAL)
 import System.Directory           (removeFile)
 import System.IO.Error            (isDoesNotExistError)
 
-isAssignment :: String -> Bool
-isAssignment line = isRight $ regularParse pVarEq line
+isAssignment :: CutState -> String -> Bool
+isAssignment state line = isRight $ runParser pVarEq state line
 
-interpret :: Parser t -> (t -> CutM b) -> CutConfig
-          -> CutScript -> String -> Either CutError b
-interpret parser checker cfg script str' = do
-  parsed <- parseWithEof parser str'
-  let (checked, _) = runCutM (checker parsed) (script, cfg)
-  checked
+iExpr :: CutState -> String -> Either ParseError CutExpr
+iExpr = runParser pExpr
 
-iExpr :: CutConfig -> CutScript -> String -> Either CutError CutExpr
-iExpr = interpret pExpr tExpr
+iAssign :: CutState -> String -> Either ParseError CutAssign
+iAssign = runParser pAssign
 
-iAssign :: CutConfig -> CutScript -> String -> Either CutError CutAssign
-iAssign = interpret pAssign tAssign
-
--- TODO remove? nah, will be used for overall CLI parsing a file
-iScript :: CutConfig -> CutScript -> String -> Either CutError CutScript
-iScript = interpret pScript tScript
+iScript :: CutState -> String -> Either ParseError CutScript
+iScript = runParser pScript
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
-iFile :: CutConfig -> FilePath -> IO (Either CutError CutScript)
-iFile cfg path = readFile path >>= (\s -> return $ iScript cfg [] s)
+iFile :: CutState -> FilePath -> IO (Either ParseError CutScript)
+iFile state path = readFile path >>= (\s -> return $ iScript state s)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -97,7 +90,7 @@ containsKey lst key = isInfixOf [key] $ map fst lst
 -- the Bool specifies whether to continue if the variable exists already
 -- note that it will always continue if only the *file* exists,
 -- because that might just be left over from an earlier program run
-putAssign' :: MonadState CutState m => Bool -> CutAssign -> m FilePath
+-- putAssign' :: MonadState CutState m => Bool -> CutAssign -> m FilePath
 putAssign' force (v@(CutVar var), expr) = do
   scr <- getScript
   let path = namedTmp v expr
@@ -108,7 +101,7 @@ putAssign' force (v@(CutVar var), expr) = do
       return path
 
 -- TODO remove? refactor?
-putAssign :: (MonadIO m, MonadState CutState m) => CutAssign -> m ()
+-- putAssign :: (MonadIO m, MonadState CutState m) => CutAssign -> m ()
 putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
 
 -- TODO should this go in Interpret.hs? Types.hs?

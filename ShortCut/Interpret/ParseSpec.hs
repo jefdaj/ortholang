@@ -12,7 +12,7 @@
 
 module ShortCut.Interpret.ParseSpec where
 
--- TODO: email test function to jakewheatmail@gmail.com?
+-- TODO email test function to jakewheatmail@gmail.com?
 
 import Data.Either (isRight)
 import Data.Scientific
@@ -27,8 +27,8 @@ import Test.QuickCheck
 -- variable names --
 --------------------
 
-exCutVars :: [(String, CutVar)]
-exCutVars =
+exVars :: [(String, CutVar)]
+exVars =
   [ ("plastidcut"    , CutVar "plastidcut")
   , ("knowngenes"    , CutVar "knowngenes")
   , ("knowngenomes"  , CutVar "knowngenomes")
@@ -48,16 +48,16 @@ vFirstChars = '_':['a'..'z']
 vNonFirstChars :: [Char]
 vNonFirstChars = vFirstChars ++ ['0'..'9']
 
-gCutVar :: Gen String
-gCutVar = (:) <$> first <*> listOf rest
+gVar :: Gen String
+gVar = (:) <$> first <*> listOf rest
   where
     first = elements vFirstChars
     rest  = elements vNonFirstChars
 
-newtype ExCutVar = ExCutVar CutVar deriving (Eq, Show)
+newtype ExVar = ExVar CutVar deriving (Eq, Show)
 
-instance Arbitrary ExCutVar where
-  arbitrary = (ExCutVar . CutVar) <$> gCutVar
+instance Arbitrary ExVar where
+  arbitrary = (ExVar . CutVar) <$> gVar
 
 ----------------
 -- references --
@@ -66,7 +66,7 @@ instance Arbitrary ExCutVar where
 newtype ExRef = ExRef String deriving (Eq, Show)
 
 instance Arbitrary ExRef where
-  arbitrary = ExRef <$> gCutVar
+  arbitrary = ExRef <$> gVar
 
 ----------------
 -- whitespace --
@@ -98,7 +98,7 @@ instance Arbitrary ExSymbol where
 -----------------
 
 gAssign :: Gen String
-gAssign = (++ " =") <$> gCutVar
+gAssign = (++ " =") <$> gVar
 
 newtype ExAssign = ExAssign String deriving (Eq, Show)
 
@@ -109,7 +109,7 @@ instance Arbitrary ExAssign where
 -- quoted string literals --
 ----------------------------
 
--- TODO: why both Fil and Quoted?
+-- TODO why both Fil and Quoted?
 
 gEscaped :: Gen String
 gEscaped = (\c -> '\\':[c]) <$> elements escapeChars
@@ -119,7 +119,7 @@ gLiteral = (\c -> [c]) <$> elements literalChars
 
 -- the repeat 15 thing is just to make sure there are more literal chars
 -- than escaped ones, because otherwise the strings are very hard to read
--- TODO: should just "" be allowed here?
+-- TODO should just "" be allowed here?
 gQuoted :: Gen String
 gQuoted = do
   ss <- (listOf . oneof) $ gEscaped:(take 15 $ repeat gLiteral)
@@ -168,7 +168,7 @@ exNums =
 gSci :: Gen Scientific
 gSci = scientific <$> arbitrary <*> arbitrary
 
--- TODO: negative numbers too?
+-- TODO negative numbers too?
 gNum :: Gen String
 gNum = (show . abs) <$> gSci
 
@@ -184,15 +184,15 @@ instance Arbitrary ExNum where
 exCmds :: [(String, ParsedExpr)]
 exCmds =
   [ ("load_aa_seqs \"tair-plastidcut2.faa\"",
-      Cmd "load_aa_seqs" [Fil "tair-plastidcut2.faa"]),
+      CutFun "gens" "load_aa_seqs" [CutLit "str" "tair-plastidcut2.faa"]),
 
     ("load_genomes \"known-good-genomes.txt\"",
-      Cmd "load_genomes" [Fil "known-good-genomes.txt"]),
+      CutFun "goms" "load_genomes" [CutLit "str" "known-good-genomes.txt"]),
 
     ("filter_genomes knowngenes othercyanos 20",
-      Cmd "filter_genomes" [Ref (CutVar "knowngenes"),
-                            Ref (CutVar "othercyanos"),
-                            Num 20])
+      CutFun "goms" "filter_genomes" [CutRef "gens" "knowngenes",
+                                      CutRef "goms" "othercyanos",
+                                      CutLit "num" 20])
   ]
 
 gCmdName :: Gen String
@@ -215,10 +215,11 @@ instance Arbitrary ExCmd where
 -- binary operators --
 ----------------------
 
--- TODO: should messy whitespace be added here, or somewhere else?
+-- TODO should messy whitespace be added here, or somewhere else?
+-- TODO add another one of these for the set operators
 gBop :: Gen String
 gBop = do
-  op <- elements ["+", "-", "*"]
+  op <- elements ["+", "-", "*", "/"]
   s1 <- gExpr
   s2 <- gExpr
   return $ concat $ zipWith (++) [s1,op,s2] (repeat " ")
@@ -232,13 +233,13 @@ instance Arbitrary ExBop where
 -- expressions --
 -----------------
 
--- TODO: finish these! there are lots of issues so far...
+-- TODO finish these! there are lots of issues so far...
 
--- TODO: add parens, fn
--- TODO: will need to add sized in order to prevent infinite recursion on fn
--- TODO: are plain quoted strings allowed, or do they need to be fn args?
+-- TODO add parens, fn
+-- TODO will need to add sized in order to prevent infinite recursion on fn
+-- TODO are plain quoted strings allowed, or do they need to be fn args?
 gTerm :: Gen String
-gTerm = oneof [gNum, gQuoted, gCutVar]
+gTerm = oneof [gNum, gQuoted, gVar]
 
 gExpr :: Gen String
 gExpr = oneof [gBop, gTerm, gCmd]
@@ -252,18 +253,19 @@ instance Arbitrary ExTerm where
 instance Arbitrary ExExpr where
   arbitrary = ExExpr <$> gExpr
 
+-- TODO this shouldn't work without variables to look up now, right?
 exTerms :: [(String, ParsedExpr)]
 exTerms = exCmds ++
-  [ ("psIIcut", Ref (CutVar "psIIcut"))
+  [ ("psIIcut", Ref (Var "psIIcut"))
   ]
 
--- TODO: add more types
+-- TODO add more types
 exExprs :: [(String, ParsedExpr)]
 exExprs = exTerms ++
   [ ("(ingoodcyanos | inknowngenomes) ~ inucyna",
-      Bop '~' (Bop '|' (Ref (CutVar "ingoodcyanos"))
-                       (Ref (CutVar "inknowngenomes")))
-              (Ref (CutVar "inucyna")))
+      Bop '~' (Bop '|' (Ref (Var "ingoodcyanos"))
+                       (Ref (Var "inknowngenomes")))
+              (Ref (Var "inucyna")))
   ]
 
 -- expression examples with parens added;
@@ -280,11 +282,11 @@ parensExamples = map (\(a,b) -> ("(" ++ a ++ ")",b)) exExprs
 exStatements :: [(String, ParsedAssign)]
 exStatements = zip statements parsedBoth
   where
-    vars        = map fst exCutVars
+    vars        = map fst exVars
     addEq a b   = a ++ " = " ++ b
     statements  = zipWith addEq vars (map fst exExprs)
     parsedExprs = map snd exExprs
-    parsedBoth  = zip (map CutVar vars) parsedExprs
+    parsedBoth  = zip (map Var vars) parsedExprs
 
 gStatement :: Gen String
 gStatement = undefined
@@ -333,8 +335,8 @@ pExCuts = do
   cuts <- loadExamples ".cut"
   return $ mapM (regularParse pScript) cuts
 
-takeCutVar :: String -> CutVar
-takeCutVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
+takeVar :: String -> Var
+takeVar = Var . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: Parser a -> String -> Expectation
 parsedItAll p str' = (`shouldReturn` True) $
@@ -354,16 +356,16 @@ spec = do
 
   describe "[p]arses Strings to ParsedExprs" $ do
 
-    describe "pCutVar" $ do
+    describe "pVar" $ do
       it "parses some valid variable names" $
-        test pCutVar exCutVars `shouldBe` Right ()
+        test pVar exVars `shouldBe` Right ()
       prop "parses any valid variable name" $
-        \(ExCutVar v@(CutVar s)) -> parseWithLeftOver pCutVar s == Right (v, "")
+        \(ExVar v@(Var s)) -> parseWithLeftOver pVar s == Right (v, "")
       prop "consumes trailing whitespace" $
-        \(ExCutVar v@(CutVar s)) (ExSpace w) ->
-          parseWithLeftOver pCutVar (s ++ w) == Right (v, "")
+        \(ExVar v@(Var s)) (ExSpace w) ->
+          parseWithLeftOver pVar (s ++ w) == Right (v, "")
 
-    -- TODO: check that it fails with other trailing chars
+    -- TODO check that it fails with other trailing chars
     describe "pSym" $ do
       prop "parses any valid symbol (reserved char)" $
         \(ExSymbol c) -> parseWithLeftOver (pSym c) [c] == Right ((), "")
@@ -371,8 +373,8 @@ spec = do
         \(ExSymbol c) (ExSpace w) ->
           parseWithLeftOver (pSym c) (c:w) == Right ((), "")
 
-    -- TODO: make sure the - op never catches "-" inside scientific notation
-    -- TODO: make sure the - op never catches "-" inside quoted strings
+    -- TODO make sure the - op never catches "-" inside scientific notation
+    -- TODO make sure the - op never catches "-" inside quoted strings
     describe "pExpr" $ do
       it "parses some valid expressions to their correct ASTs" $
         test pExpr exExprs `shouldBe` Right ()
@@ -394,10 +396,10 @@ spec = do
     describe "pVarEq" $ do
       prop "parses the first half of a statement, up through '='" $
         \(ExAssign a) ->
-          parseWithLeftOver pVarEq a == Right (takeCutVar a, "")
+          parseWithLeftOver pVarEq a == Right (takeVar a, "")
       prop "consumes trailing whitespace" $
         \(ExAssign a) (ExSpace w) ->
-          parseWithLeftOver pVarEq (a ++ w) == Right (takeCutVar a, "")
+          parseWithLeftOver pVarEq (a ++ w) == Right (takeVar a, "")
 
     describe "pQuoted" $ do
       prop "parses quoted strings, preserving internal whitespace" $
@@ -410,7 +412,7 @@ spec = do
       prop "skips comments" $
         \(ExComment c) -> parseWithLeftOver pComment c == Right ((), "")
       prop "stops at the first iden char on a new line" $
-        \(ExComment c) (ExCutVar (CutVar s)) ->
+        \(ExComment c) (ExVar (Var s)) ->
           parseWithLeftOver pComment (c ++ "\n" ++ s) == Right ((), s)
 
     describe "pNum" $ do
@@ -450,7 +452,7 @@ spec = do
   -- everything below is from TypeCheckSpec.hs --
   -----------------------------------------------
 
-  -- TODO: rename these to be more coherent
+  -- TODO rename these to be more coherent
   describe "finds the [t]ypes of expressions" $ do
 
     describe "tExpr" $ do
@@ -459,18 +461,18 @@ spec = do
 
   describe "find type [s]ignatures of commands" $ do
 
-    -- TODO: rename to tArgs
+    -- TODO rename to tArgs
     describe "sCmd" $ do
       it "finds the correct type signature for each command" pending
 
-    -- TODO: rename... to what?
+    -- TODO rename... to what?
     describe "sCmds" $ do
       it "finds correct type signatures for example commands" pending
       prop "finds correct type signatures for generated commands" pending
 
   describe "asserts that types [m]atch" $ do
 
-    -- TODO: rename to mBop
+    -- TODO rename to mBop
     describe "mExprs" $ do
       it "tests whether two expressions have matching types" pending
       prop "is always true when passed the same one twice" pending
@@ -493,7 +495,7 @@ spec = do
       prop "fails if given a non-Ref" pending
       prop "fails when no vars are defined" pending
 
-    -- TODO: rename this or cBop so it's obvious that creates CheckedCmds too?
+    -- TODO rename this or cBop so it's obvious that creates CheckedCmds too?
     describe "cCmd" $ do
       it "reconstructs the example CheckedCmds" pending
       prop "constructs CheckedCmds from random valid Cmds" pending

@@ -16,7 +16,7 @@ loadExamples suffix = do
   let paths' = map (combine exDir) $ filter (isSuffixOf suffix) paths
   mapM readFile paths'
 
-readASTs :: IO [ParsedScript]
+readASTs :: IO [CutScript]
 readASTs = do
   asts <- loadExamples ".ast"
   return $ map read asts

@@ -91,23 +91,22 @@ hashedTmp' _ _ _ = error "bad arguments to hashedTmp'"
 ---------------------
 
 cExpr :: CutExpr -> Rules FilePath
-cExpr e@(TStr _) = cLit e
-cExpr e@(TNum _) = cLit e
-cExpr e@(TRef _ _) = cRef e
-cExpr e@(TBop _ "+" _ _) = cMath (+) "add"      e
-cExpr e@(TBop _ "-" _ _) = cMath (-) "subtract" e
-cExpr e@(TBop _ "*" _ _) = cMath (*) "multiply" e
-cExpr e@(TBop _ "/" _ _) = cMath (/) "divide"   e
-cExpr e@(TBop _ "|" _ _) = cSet union        "union"      e
-cExpr e@(TBop _ "~" _ _) = cSet difference   "difference" e
-cExpr e@(TBop _ "&" _ _) = cSet intersection "intersect"  e
-cExpr e@(TCmd _ "load_fasta_na" _) = cLoad      e
-cExpr e@(TCmd _ "load_fasta_aa" _) = cLoad      e
-cExpr e@(TCmd _ "load_genes"    _) = cLoadGenes e
-cExpr e@(TCmd _ "load_genomes"  _) = cLoad      e
-cExpr e@(TCmd _ "filter_genes"      _) = cFilterGenes   e
-cExpr e@(TCmd _ "filter_genomes"    _) = cFilterGenomes e
-cExpr e@(TCmd _ "worst_best_evalue" _) = cWorstBest     e
+cExpr e@(CutLit _ _) = cLit e
+cExpr e@(CutRef _ _) = cRef e
+cExpr e@(CutBop _ "+" _ _) = cMath (+) "add"      e
+cExpr e@(CutBop _ "-" _ _) = cMath (-) "subtract" e
+cExpr e@(CutBop _ "*" _ _) = cMath (*) "multiply" e
+cExpr e@(CutBop _ "/" _ _) = cMath (/) "divide"   e
+cExpr e@(CutBop _ "|" _ _) = cSet union        "union"      e
+cExpr e@(CutBop _ "~" _ _) = cSet difference   "difference" e
+cExpr e@(CutBop _ "&" _ _) = cSet intersection "intersect"  e
+cExpr e@(CutFun _ "load_fasta_na" _) = cLoad      e
+cExpr e@(CutFun _ "load_fasta_aa" _) = cLoad      e
+cExpr e@(CutFun _ "load_genes"    _) = cLoadGenes e
+cExpr e@(CutFun _ "load_genomes"  _) = cLoad      e
+cExpr e@(CutFun _ "filter_genes"      _) = cFilterGenes   e
+cExpr e@(CutFun _ "filter_genomes"    _) = cFilterGenomes e
+cExpr e@(CutFun _ "worst_best_evalue" _) = cWorstBest     e
 cExpr _ = error "bad argument to cExpr"
 
 cAssign :: CutAssign -> Rules (CutVar, FilePath)
@@ -144,8 +143,7 @@ cLit expr = do
   return path
   where
     paths :: CutExpr -> String
-    paths (TStr s) = s
-    paths (TNum n) = show n
+    paths (CutLit _ s) = s
     paths _ = error "bad argument to paths"
 
 ----------------------------------------
@@ -155,7 +153,7 @@ cLit expr = do
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 cRef :: CutExpr -> Rules FilePath
-cRef expr@(TRef _ var) = do
+cRef expr@(CutRef _ var) = do
   -- liftIO $ putStrLn "entering cRef"
   return $ namedTmp var expr
 cRef _ = error "bad argument to cRef"
@@ -164,7 +162,7 @@ cRef _ = error "bad argument to cRef"
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
 cLoad :: CutExpr -> Rules FilePath
-cLoad e@(TCmd _ _ [f]) = do
+cLoad e@(CutFun _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
   path <- cExpr f
   let link = hashedTmp e [path]
@@ -179,7 +177,7 @@ cLoad _ = error "bad argument to cLoad"
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
 cLoadGenes :: CutExpr -> Rules FilePath
-cLoadGenes expr@(TCmd _ _ [f]) = do
+cLoadGenes expr@(CutFun _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
   path <- cExpr f
   let fstmp = cacheDir </> "loadgenes" -- not actually used
@@ -213,7 +211,7 @@ cVar var expr dest = do
 -- apply a math operation to two numbers
 cMath :: (Scientific -> Scientific -> Scientific) -> String
       -> CutExpr -> Rules FilePath
-cMath fn _ e@(TBop extn _ n1 n2) = do
+cMath fn _ e@(CutBop extn _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
   (p1, p2, p3) <- cBop extn e (n1, n2)
   p3 %> \out -> do
@@ -228,7 +226,7 @@ cMath _ _ _ = error "bad argument to cMath"
 -- apply a set operation to two sets (implemented as lists so far)
 cSet :: (Set String -> Set String -> Set String) -> String
      -> CutExpr -> Rules FilePath
-cSet fn _ e@(TBop extn _ s1 s2) = do
+cSet fn _ e@(CutBop extn _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSet"
   (p1, p2, p3) <- cBop extn e (s1, s2)
   p3 %> \out -> do
@@ -273,7 +271,7 @@ bblast genes genomes out = do
 
 -- TODO factor out bblast!
 cFilterGenes :: CutExpr -> Rules FilePath
-cFilterGenes e@(TCmd _ _ [gens, goms, sci]) = do
+cFilterGenes e@(CutFun _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
   genes   <- cExpr gens
   genomes <- cExpr goms
@@ -293,7 +291,7 @@ cFilterGenes _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
 cFilterGenomes :: CutExpr -> Rules FilePath
-cFilterGenomes e@(TCmd _ _ [goms, gens, sci]) = do
+cFilterGenomes e@(CutFun _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
   genomes <- cExpr goms
   genes   <- cExpr gens
@@ -311,7 +309,7 @@ cFilterGenomes e@(TCmd _ _ [goms, gens, sci]) = do
 cFilterGenomes _ = error "bad argument to cFilterGenomes"
 
 cWorstBest :: CutExpr -> Rules FilePath
-cWorstBest e@(TCmd _ _ [gens, goms]) = do
+cWorstBest e@(CutFun _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
   genes   <- cExpr gens
   genomes <- cExpr goms

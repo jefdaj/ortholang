@@ -3,23 +3,21 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module ShortCut.Types
-  ( CutError(..), CutType(..), typeOf
-  , CutVar, CutExpr(..), CutAssign, CutScript
-  , CutConfig(..), CutState, CutM, CutT(..), runCutM, runCutT
+  ( CutType(..), typeOf
+  , CutVar(..), CutExpr(..), CutAssign, CutScript
+  , CutConfig(..), CutState, Parser, ParserT, runParser, runParserT
   , getScript, getConfig, putScript, putConfig
-  -- shortcut types (haskell values)
   , str, num, faa, fna, gen, gom, csv
+  , prettyShow
+  -- , Repl(..), runRepl, -- prompt, print
   )
   where
 
+import Prelude hiding (print)
+import qualified Text.Parsec as P
 import Text.PrettyPrint.HughesPJClass
 
-import Control.Monad.Except   (MonadError, ExceptT, runExceptT)
-import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Identity (Identity)
-import Control.Monad.State    (MonadState, StateT, runState, runStateT, get, put)
-import Control.Monad.Trans    (MonadTrans, lift)
-import Data.List              (intersperse)
 import Data.Scientific        (Scientific())
 import Text.Parsec            (ParseError)
 
@@ -28,27 +26,27 @@ import Text.Parsec            (ParseError)
 --------------------
 
 -- TODO remove and use Parsec's error messages instead?
-data CutError
-  = InvalidSyntax  ParseError
-  | NoSuchFunction String
-  | NoSuchVariable String
-  | WrongArgTypes  String [String] [String]
-  | WrongArgNumber String Int Int
-  deriving Eq
-
-instance Show CutError where
-  show (InvalidSyntax  err)  = "Invalid syntax for ShortCut code " ++ show err
-  show (NoSuchFunction name) = "No such function: " ++ name
-  show (NoSuchVariable name) = "No such variable: " ++ name
-  show (WrongArgNumber name n1 n2) = unlines
-    [ "Wrong number of arguments for " ++ name ++ ": "
-    , "need " ++ show n1 ++ " but got " ++ show n2 ++ "."
-    ]
-  show (WrongArgTypes name es as) = unlines
-    [ "Wrong argument types for the function '" ++ name ++ "'."
-    , "  Need: " ++ (concat $ intersperse ", " es)
-    , "  Got:  " ++ (concat $ intersperse ", " as)
-    ]
+-- data CutError
+--   = InvalidSyntax  ParseError
+--   | NoSuchFunction String
+--   | NoSuchVariable String
+--   | WrongArgTypes  String [String] [String]
+--   | WrongArgNumber String Int Int
+--   deriving Eq
+-- 
+-- instance Show CutError where
+--   show (InvalidSyntax  err)  = "Invalid syntax for ShortCut code " ++ show err
+--   show (NoSuchFunction name) = "No such function: " ++ name
+--   show (NoSuchVariable name) = "No such variable: " ++ name
+--   show (WrongArgNumber name n1 n2) = unlines
+--     [ "Wrong number of arguments for " ++ name ++ ": "
+--     , "need " ++ show n1 ++ " but got " ++ show n2 ++ "."
+--     ]
+--   show (WrongArgTypes name es as) = unlines
+--     [ "Wrong argument types for the function '" ++ name ++ "'."
+--     , "  Need: " ++ (concat $ intersperse ", " es)
+--     , "  Got:  " ++ (concat $ intersperse ", " as)
+--     ]
 
 -----------------------
 -- initial AST types --
@@ -58,11 +56,11 @@ instance Show CutError where
 --   = Bop Char ParsedExpr ParsedExpr
 --   | Cmd String [ParsedExpr]
 --   | Num Scientific
---   | Ref CutVar
+--   | Ref Var
 --   | Fil String
 --   deriving (Eq, Show, Read)
 -- 
--- type ParsedAssign = (CutVar, ParsedExpr)
+-- type ParsedAssign = (Var, ParsedExpr)
 -- type ParsedScript = [ParsedAssign]
 
 ---------------------
@@ -81,14 +79,16 @@ instance Show CutError where
   -- deriving (Eq, Show, Read)
 
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
+ 
+-- TODO convert all the current Bop, Cmd, Num etc mentions
+-- TODO then rename these without the Ts up front
 
 data CutExpr
-  = TStr String
-  | TNum Scientific
-  | TRef CutType CutVar
-  | TSet CutType [CutExpr]
-  | TBop CutType String  CutExpr CutExpr
-  | TCmd CutType String [CutExpr]
+  = CutLit CutType String
+  | CutRef CutType CutVar
+  | CutBop CutType String  CutExpr CutExpr
+  | CutFun CutType String [CutExpr]
+  | CutSet CutType [CutExpr]
   deriving (Eq, Show, Read)
 
 type CutAssign = (CutVar, CutExpr)
@@ -101,15 +101,14 @@ data CutType
 
 instance Pretty CutType where
   pPrint (CutType ext desc) = text ext <+> parens (text desc)
-  pPrint (SetOf t) = text "set of" <+> pPrint t
+  pPrint (SetOf t) = text "set of" <+> pPrint t <> text "s"
 
 typeOf :: CutExpr -> CutType
-typeOf (TStr _) = str
-typeOf (TNum _) = num
-typeOf (TRef t _) = t
-typeOf (TSet t _) = SetOf t
-typeOf (TBop t _ _ _) = t
-typeOf (TCmd t _ _) = t
+typeOf (CutLit t _    ) = t
+typeOf (CutRef t _    ) = t
+typeOf (CutBop t _ _ _) = t
+typeOf (CutFun t _ _  ) = t
+typeOf (CutSet t _    ) = SetOf t
 
 str, num, faa, fna, gen, gom, csv :: CutType
 str = CutType "str"    "string"
@@ -149,12 +148,13 @@ instance Pretty CutScript where
   pPrint as = fsep $ map pPrint as
 
 instance Pretty CutExpr where
-  pPrint (TNum n)         = text $ show n
-  pPrint (TSet _ _)       = undefined -- TODO figure this out!
-  pPrint (TStr s)         = text $ show s
-  pPrint (TRef _ v)       = pPrint v
-  pPrint (TCmd _ s es)    = text s <+> sep (map pNested es)
-  pPrint (TBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
+  pPrint e@(CutLit _ s)
+    | typeOf e == num = text $ show $ (read s :: Scientific)
+    | otherwise       = text $ show s
+  pPrint (CutRef _ v)       = pPrint v
+  pPrint (CutFun _ s es)    = text s <+> sep (map pNested es)
+  pPrint (CutSet _ _)       = undefined -- TODO figure this out!
+  pPrint (CutBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
       one = bopWith (<+>)
@@ -163,8 +163,8 @@ instance Pretty CutExpr where
 -- this adds parens around nested function calls
 -- without it things can get really messy!
 pNested :: CutExpr -> Doc
-pNested e@(TCmd _ _ _  ) = parens $ pPrint e
-pNested e@(TBop _ _ _ _) = parens $ pPrint e
+pNested e@(CutFun _ _ _  ) = parens $ pPrint e
+pNested e@(CutBop _ _ _ _) = parens $ pPrint e
 pNested e = pPrint e
 
 ------------
@@ -193,37 +193,26 @@ instance Pretty CutConfig where
 -- Cut monad --
 ---------------
 
-type CutState = (CutScript, CutConfig)
+type CutState  = (CutScript, CutConfig)
+type ParserT m = P.ParsecT String CutState m
+type Parser    = ParserT Identity
 
-getScript :: MonadState CutState m => m CutScript
-getScript = fmap fst get
+runParser :: Parser a -> CutState -> String -> Either ParseError a
+runParser parser state string = P.runParser parser state "somefile" string
 
-getConfig :: MonadState CutState m => m CutConfig
-getConfig = fmap snd get
+runParserT :: Monad m => ParserT m a -> CutState -> String -> m (Either ParseError a)
+runParserT parser state string = P.runParserT parser state "somefile" string
 
-putScript :: MonadState CutState m => CutScript -> m ()
-putScript scr = get >>= \(_, c) -> put (scr, c)
+getScript :: Monad m => P.ParsecT s CutState m CutScript
+getScript = fmap fst P.getState
 
-putConfig :: MonadState CutState m => CutConfig -> m ()
-putConfig cfg = get >>= \(s, _) -> put (s, cfg)
+getConfig :: Monad m => P.ParsecT s CutState m CutConfig
+getConfig = fmap snd P.getState
 
-type CutM a = CutT Identity a
+-- putScript :: MonadState CutState m => CutScript -> m ()
+putScript scr = P.getState >>= \(_, c) -> P.putState (scr, c)
 
-newtype CutT m a = CutT { unCutT :: ExceptT CutError (StateT CutState m) a }
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadIO
-    , MonadState CutState
-    , MonadError CutError
-    )
+-- putConfig :: MonadState CutState m => CutConfig -> m ()
+putConfig cfg = P.getState >>= \(s, _) -> P.putState (s, cfg)
 
-instance MonadTrans CutT where
-  lift = CutT . lift . lift
-
-runCutM :: CutM a -> CutState -> (Either CutError a, CutState)
-runCutM = runState . runExceptT . unCutT
-
-runCutT :: CutT m a -> CutState -> m (Either CutError a, CutState)
-runCutT = runStateT . runExceptT . unCutT
+-- TODO modState, modConfig (maybe instead of the put ones?)

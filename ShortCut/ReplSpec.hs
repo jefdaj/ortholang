@@ -26,7 +26,7 @@ spec = do
   -- TODO assign
   -- TODO print
 
-  -- TODO: remove everything below this
+  -- TODO remove everything below this
 --   describe "finds the [t]ypes of expressions" $ do
 -- 
 --     describe "tExpr" $ do
@@ -35,18 +35,18 @@ spec = do
 -- 
 --   describe "find type [s]ignatures of commands" $ do
 -- 
---     -- TODO: rename to tArgs
+--     -- TODO rename to tArgs
 --     describe "sCmd" $ do
 --       it "finds the correct type signature for each command" pending
 -- 
---     -- TODO: rename... to what?
+--     -- TODO rename... to what?
 --     describe "sCmds" $ do
 --       it "finds correct type signatures for example commands" pending
 --       prop "finds correct type signatures for generated commands" pending
 -- 
 --   describe "asserts that types [m]atch" $ do
 -- 
---     -- TODO: rename to mBop
+--     -- TODO rename to mBop
 --     describe "mExprs" $ do
 --       it "tests whether two expressions have matching types" pending
 --       prop "is always true when passed the same one twice" pending
@@ -69,7 +69,7 @@ spec = do
 --       prop "fails if given a non-Ref" pending
 --       prop "fails when no vars are defined" pending
 -- 
---     -- TODO: rename this or cBop so it's obvious that creates CheckedCmds too?
+--     -- TODO rename this or cBop so it's obvious that creates CheckedCmds too?
 --     describe "cCmd" $ do
 --       it "reconstructs the example CheckedCmds" pending
 --       prop "constructs CheckedCmds from random valid Cmds" pending
