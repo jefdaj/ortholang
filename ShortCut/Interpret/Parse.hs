@@ -27,8 +27,7 @@ import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
                               ,newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
                               ,lookAhead, between, choice, anyToken)
--- import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
-import Text.Parsec.Expr       (buildExpressionParser, Operator(..))
+import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 -- import Data.Scientific (Scientific)
 
 --------------------------------
@@ -256,33 +255,6 @@ pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef
 operatorChars :: [Char]
 operatorChars = "+-*/&|~"
 
--- TODO update for new ParseM type
--- type OpTable = [[Operator String () Identity CutExpr]]
-type OpTable = [[Operator String CutState Identity CutExpr]]
-
--- for now, I think all binary operators at the same precedence should work.
--- but it gets more complicated I'll write out an actual table here as
--- expected, with a prefix function too etc. see the jake wheat tutorial
-operatorTable :: OpTable
-operatorTable = -- [map binary operatorChars]
-  -- where
-    -- TODO probably put the tBop parsers here?
-    -- binary c = Infix (CutBop c <$ pSym c) AssocLeft
-  [
-  ]
-
--- TODO parse directly to this.... uses operator table?
--- tBop :: CutExpr -> CutM CutExpr
--- tBop (Bop o a1 a2) = do
---   a1' <- tExpr a1
---   a2' <- tExpr a2
---   -- TODO assert o `elem` "+-*/&|~"
---   -- TODO assert (tExt a1 == tExt a2)
---   -- TODO if o `elem` "+-*/" assert (tExt a1) == "num"
---   -- TODO if o `elem` "&|~"  assert (tExt a1) == "set of something"
---   return (Bop (typeOf a1') [o] a1' a2')
--- tBop x = error $ "bad argument to tBop: '" ++ show x ++ "'"
-
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
 -- to do without it. Also it seems like it will get more useful if I want to
@@ -290,6 +262,22 @@ operatorTable = -- [map binary operatorChars]
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM CutExpr
 pExpr = buildExpressionParser operatorTable pTerm
+
+-- TODO move to Types.hs?
+type OpTable = [[Operator String CutState Identity CutExpr]]
+
+-- for now, I think all binary operators at the same precedence should work.
+-- but it gets more complicated I'll write out an actual table here as
+-- expected, with a prefix function too etc. see the jake wheat tutorial
+operatorTable :: OpTable
+operatorTable = [map binary operatorChars]
+  where
+    binary c = Infix (pSym c *> pBop c) AssocLeft
+
+-- this is weird, but has the type needed to go in an OpTable...
+-- err, i guess it makes sense because the terms have to be parsed separately
+pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
+pBop o = return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2
 
 --------------
 -- comments --
