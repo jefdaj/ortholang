@@ -1,34 +1,21 @@
+module ShortCut.Interpret.Parse where
+
 -- TODO stop accidentally interpreting args in the wrong order as one big variable
--- TODO start adding nice error messages to each parser
 -- TODO fix bug where a non-function with args parses to varname with args dropped
 --       (example: 'this = load_that cool')
-
--- TODO maybe instead of making it all one step, the simple thing is to 
---      have a second step for just *tagging* everything with the right
---      extensions? and since there's only one constructor for lit now,
---      the tags can just be added around the expressions themselves
-
--- TODO and if we're going this direction, is there any need for a Ref
---      to have a Var inside it rather than just a string? Maybe it makes sense
-
--- TODO add more useful error messages with <?>
-
-module ShortCut.Interpret.Parse where
 
 import ShortCut.Types
 
 import Control.Applicative    ((<|>), many)
--- import Control.Monad          (void, foldM, fail)
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
-import Text.Parsec            (try, ParseError, getState)
-import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar
-                              ,newline, string, oneOf)
+import Text.Parsec            (try, ParseError, getState, putState, (<?>))
+import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
+                               newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
                               ,lookAhead, between, choice, anyToken)
 import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
--- import Data.Scientific (Scientific)
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -36,18 +23,6 @@ import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
-
--- parseWithError :: ParseM a -> CutState -> String -> Either ParseError a
--- parseWithError parser state str' = case runParseM parser state str' of
---   -- Left  err -> Left $ InvalidSyntax err
---   Left  err -> fail $ "invalid syntax: " ++ show err
---   Right res -> Right res
-
--- parseWithError = runParseM
-
--- TODO remove? is it exactly parseWithError?
--- regularParse :: ParseM a -> CutState -> String -> Either CutError a
--- regularParse p s = parseWithError p s
 
 parseWithEof :: ParseM a -> CutState -> String -> Either ParseError a
 parseWithEof p s = runParseM (p <* eof) s
@@ -62,78 +37,66 @@ parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof
 
--- this works fine, but isn't used so far:
--- parseWithWSEof :: ParseM a -> String -> Either CutError a
--- parseWithWSEof p = parseWithEof (whiteSpace *> p)
---   where
---     whiteSpace = void $ many $ oneOf " \n\t"
-
 -- There's a convention in parsers that each one should consume whitespace
 -- after itself (handled by this function), and you only skip leading
 -- whitespace at the top level. That way all the whitespace gets skipped
--- exactly once.
+-- exactly once. (I guess it would work the other way around too)
 lexeme :: ParseM a -> ParseM a
 lexeme p = p <* spaces
 
-whitespaceChars :: [Char]
-whitespaceChars = " \t\n"
+spaceChars :: [Char]
+spaceChars = " \t\n"
 
 -- this is like spaces, except it requires at least one
 -- TODO can this be replaced with something from Text.Parsec.Token?
 spaces1 :: ParseM ()
-spaces1 = void $ many1 $ oneOf whitespaceChars
+spaces1 = void $ many1 $ oneOf spaceChars
 
 pSym :: Char -> ParseM ()
 pSym c = void $ lexeme $ char c
+
+--------------
+-- comments --
+--------------
+
+-- Tricky bit: # should NOT be a lexeme
+pComment :: ParseM ()
+pComment = (lexeme $ void $ char '#' >> restOfLine) <?> "comment"
+  where
+    restOfLine = manyTill anyChar (void newline <|> eof)
 
 -----------------
 -- identifiers --
 -----------------
 
 pVar :: ParseM CutVar
-pVar = lexeme (iden <$> first <*> many rest)
+pVar = lexeme (iden <$> first <*> many rest) <?> "variable"
   where
     iden c cs = CutVar (c:cs)
+    -- TODO allow variable names that start with numbers too?
     first = letter <|> char '_'
     rest  = digit  <|> first
 
--- TODO should this include the Var itself?
--- TODO how to look up the variable? guess this requires the monad?
+-- A reference is just a variable name, but that variable has to be in the script.
+-- TODO why does it fail after this, but only sometimes??
 pRef :: ParseM CutExpr
--- pRef = CutRef <$> pVar
 pRef = do
   v@(CutVar var) <- pVar
-  -- scr <- getScript
   (scr, _) <- getState
   case lookup v scr of 
-    -- TODO replace CutError with regular Parsec errors? Needed for anything else?
-    -- Nothing -> throwError $ NoSuchVariable var
-    Nothing -> fail $ "no such variable '" ++ var ++ "'"
+    Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" ++ show scr
     Just e -> return $ CutRef (typeOf e) v
 
--- tRef :: CutExpr -> ParseM CutExpr
--- tRef (Ref v@(CutVar var)) = do
---   (s, _) <- get
---   case lookup v s of
---     Nothing -> throwError $ NoSuchVariable var
---     Just e -> return $ CutRef (typeOf e) v
--- tRef x = error $ "bad argument to tRef: '" ++ show x ++ "'"
+--------------
+-- literals --
+--------------
 
--------------
--- numbers --
--------------
-
--- TODO allow negative numbers? (would currently conflict with minus op)
 pNum :: ParseM CutExpr
 pNum = do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   n  <- digit
   ns <- lexeme $ many (digit <|> oneOf ".e-")
   return $ CutLit num (n:ns)
-
----------------------
--- string literals --
----------------------
 
 -- list of chars which can be escaped in ShortCut
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -151,29 +114,33 @@ literalChars = filter valid $ map toEnum [0..127]
 -- see stackoverflow.com/questions/24106314
 -- TODO can the between part be replaced with something from Text.Parsec.Token?
 pQuoted :: ParseM String
-pQuoted = lexeme $ between (char '"') (char '"') $ many (lit <|> esc)
+pQuoted = (lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quoted"
   where
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
--- this is just any literal that doens't parse as a number with pNum
 pStr :: ParseM CutExpr
-pStr = CutLit str <$> pQuoted
+pStr = CutLit str <$> pQuoted <?> "string"
 
-----------------
--- statements --
-----------------
+---------------
+-- operators --
+---------------
 
-pVarEq :: ParseM CutVar
-pVarEq = pVar <* (pSym '=')
+operatorChars :: [Char]
+operatorChars = "+-*/&|~"
 
-pAssign :: ParseM CutAssign
-pAssign = lexeme ((,) <$> pVarEq <*> pExpr <* optional newline)
+-- for now, I think all binary operators at the same precedence should work.
+-- but it gets more complicated I'll write out an actual table here with a
+-- prefix function too etc. see the jake wheat tutorial
+operatorTable :: [[Operator String CutState Identity CutExpr]]
+operatorTable = [map binary operatorChars]
+  where
+    binary c = Infix (pBop c) AssocLeft
 
--- tAssign :: CutAssign -> CutM CutAssign
--- tAssign (var, expr) = do
---   cexpr <- tExpr expr
---   return (var, cexpr) -- TODO is the var always going to be OK?
+-- Tricky bit: needs to take two already-parsed expressions
+-- TODO verify they have the correct types
+pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
+pBop o = pSym o *> (return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2)
 
 ---------------
 -- functions --
@@ -190,42 +157,20 @@ pEnd = lookAhead $ void $ choice
   ]
 
 -- TODO load names from modules, of course
-fnNames :: [String]
-fnNames =
-  [ "load_aa_seqs"
-  , "load_na_seqs"
-  , "load_genes"
-  , "load_genomes"
-  , "filter_genomes"
-  , "filter_genes"
-  , "worst_best_evalue"
-  ]
-
 -- TODO put this in terms of "keyword" or something?
 pName :: ParseM String
-pName = choice $ map (try . str') fnNames
+pName = (choice $ map (try . str') names) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
-
--- pFun :: ParseM CutExpr
--- pFun = Fun <$> pName <*> manyTill pTerm pEnd
-
--- tFun :: CutExpr -> CutM CutExpr
--- tFun (Fun c as) = do
---   -- TODO check return types
---   as' <- mapM tExpr as
---   return $ CutFun rtype c as'
---   where
---     (rtype, _) = case c of
---       "load_aa_seqs"      -> (faa, ["str"])
---       "load_na_seqs"      -> (fna, ["str"])
---       "load_genes"        -> (gen, ["str"])
---       "load_genomes"      -> (gom, ["str"])
---       "filter_genomes"    -> (gom, ["genomes", "genes"  , "num"])
---       "filter_genes"      -> (gen, ["genes"  , "genomes", "num"])
---       "worst_best_evalue" -> (num, ["genes"  , "genomes"])
---       x -> error $ "bad argument to tFun: '" ++ show x ++ "'"
--- tFun x = error $ "bad argument to tFun: '" ++ show x ++ "'"
+    names =
+      [ "load_aa_seqs"
+      , "load_na_seqs"
+      , "load_genes"
+      , "load_genomes"
+      , "filter_genomes"
+      , "filter_genes"
+      , "worst_best_evalue"
+      ]
 
 pFun :: ParseM CutExpr
 pFun = do
@@ -247,13 +192,10 @@ pFun = do
 -----------------
 
 pParens :: ParseM CutExpr
-pParens = between (pSym '(') (pSym ')') pExpr
+pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
 pTerm :: ParseM CutExpr
-pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef
-
-operatorChars :: [Char]
-operatorChars = "+-*/&|~"
+pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
@@ -261,37 +203,35 @@ operatorChars = "+-*/&|~"
 -- add non-assignment statements like assertions. See:
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM CutExpr
-pExpr = buildExpressionParser operatorTable pTerm
+pExpr = buildExpressionParser operatorTable pTerm <?> "expression"
 
--- TODO move to Types.hs?
-type OpTable = [[Operator String CutState Identity CutExpr]]
+----------------
+-- statements --
+----------------
 
--- for now, I think all binary operators at the same precedence should work.
--- but it gets more complicated I'll write out an actual table here as
--- expected, with a prefix function too etc. see the jake wheat tutorial
-operatorTable :: OpTable
-operatorTable = [map binary operatorChars]
-  where
-    binary c = Infix (pSym c *> pBop c) AssocLeft
+pVarEq :: ParseM CutVar
+pVarEq = pVar <* (pSym '=') <?> "vareq"
 
--- this is weird, but has the type needed to go in an OpTable...
--- err, i guess it makes sense because the terms have to be parsed separately
-pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
-pBop o = return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2
-
---------------
--- comments --
---------------
-
--- Tricky bit: # should NOT be a lexeme
-pComment :: ParseM ()
-pComment = lexeme $ void $ char '#' >> restOfLine
-  where
-    restOfLine = manyTill anyChar (void newline <|> eof)
+-- TODO message in case it doesn't parse?
+pAssign :: ParseM CutAssign
+pAssign = do
+  (scr, cfg) <- getState
+  optional newline
+  v <- pVarEq
+  e <- lexeme pExpr
+  putState (scr ++ [(v,e)], cfg)
+  return (v,e)
 
 -------------
 -- scripts --
 -------------
 
+-- TODO message in case it doesn't parse?
 pScript :: ParseM CutScript
-pScript = optional spaces *> many pComment *> many (pAssign <* many pComment)
+pScript = do
+  (_, cfg) <- getState
+  optional spaces
+  void $ many pComment
+  scr <- many (pAssign <* many pComment)
+  putState (scr, cfg)
+  return scr

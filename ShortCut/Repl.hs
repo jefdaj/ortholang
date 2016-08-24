@@ -10,6 +10,7 @@
 
 -- TODO you should be able to write comments in the REPL
 -- TODO why doesn't prettyShow work anymore? what changed??
+-- TODO should be able to :reload the current script, if any
 
 module ShortCut.Repl where
 
