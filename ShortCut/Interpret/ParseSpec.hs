@@ -1,3 +1,22 @@
+module ShortCut.Interpret.ParseSpec where
+
+-- TODO comment out old tests
+-- TODO update pSym tests
+-- TODO update pQuoted tests
+-- TODO update pComment tests
+-- TODO update pVar tests
+-- TODO update pLit tests
+-- TODO update pExpr tests
+-- TODO update pVarEq tests
+-- TODO update pTerm tests
+-- TODO update pFun tests
+-- TODO update pParens tests
+-- TODO update pRef tests
+-- TODO update pAssign tests
+-- TODO update pScript tests
+-- TODO add pretty-printing round trips to everything
+-- TODO move some of the test utilties here to Utils.hs?
+
 -- The generators can also be tested manually in ghci like so:
 -- > generate gQuoted
 -- "\"\\^bx\\ng_!vd\""
@@ -9,8 +28,6 @@
 -- handwritten [ex]amples (strings and their correct parses)
 -- [Ex]ample QuickCheck types made with string [g]enerators
 -- [v]alid and i[n]valid chars (not done yet)
-
-module ShortCut.Interpret.ParseSpec where
 
 -- TODO email test function to jakewheatmail@gmail.com?
 
@@ -37,7 +54,7 @@ exVars =
   , ("goodcyanos"    , CutVar "goodcyanos")
   , ("ingoodcyanos"  , CutVar "ingoodcyanos")
   , ("inknowngenomes", CutVar "inknowngenomes")
-  , ("inucyna"       , CutVar "inucyna")
+  
   , ("mycutoff"      , CutVar "mycutoff")
   , ("psIIcut"       , CutVar "psIIcut")
   ]
@@ -348,8 +365,8 @@ parsedItAll p str' = (`shouldReturn` True) $
 -- main --
 ----------
 
-main :: IO ()
-main = hspec spec
+-- main :: IO ()
+-- main = hspec spec
 
 spec :: Spec
 spec = do
