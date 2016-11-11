@@ -232,4 +232,13 @@ names. There are lots of other unnamed temporary files too, for example there's
 
 ### Examples
 
+### Developing Shortcut
+
+You can `nix-build` the main package or any of the top-level subdirectories. I
+find that to be annoyingly slow for Haskell packages though, because it
+recompiles them from scratch each time. So I normally keep `stack test
+--file-watch` open in one terminal to do incremental builds + tests, and `stack
+ghci` in another for playing around with the types. Running `nix-shell`, then
+`cabal repl` would work for that too.
+
 ### Reference

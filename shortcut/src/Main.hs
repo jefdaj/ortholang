@@ -1,7 +1,7 @@
 module Main where
 
 import ShortCut.Repl (repl)
-import ShortCut.Interpret -- TODO if given a file, run iFile + eval on it
+-- import ShortCut.Interpret -- TODO if given a file, run iFile + eval on it
 
 main:: IO ()
 main = repl

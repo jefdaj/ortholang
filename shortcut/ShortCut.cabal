@@ -10,11 +10,12 @@ library
   ghc-options:       -Wall
   hs-source-dirs:    src
   exposed-modules:   ShortCut.Interpret,
-                     ShortCut.TypeCheck,
-                     ShortCut.Parse,
-                     ShortCut.Types,
+                     ShortCut.Compile,
                      ShortCut.Monads,
-                     ShortCut.Compile
+                     ShortCut.Parse,
+                     ShortCut.Repl,
+                     ShortCut.TypeCheck,
+                     ShortCut.Types
   default-language:  Haskell2010
   build-depends:     base,
                      directory,
@@ -35,6 +36,13 @@ library
 
 executable shortcut
   main-is:           Main.hs
+  other-modules:     ShortCut.Compile,
+                     ShortCut.Interpret,
+                     ShortCut.Monads,
+                     ShortCut.Parse,
+                     ShortCut.Repl,
+                     ShortCut.TypeCheck,
+                     ShortCut.Types
   hs-source-dirs:    src, src/ShortCut
   default-language:  Haskell2010
   build-depends:     base,

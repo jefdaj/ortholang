@@ -8,5 +8,4 @@ for arg in $@; do
   keywords="$keywords -m $arg"
 done
 
-cabal test --show-details=streaming \
-  --test-options="--color --qc-max-success=999 $keywords"
+stack test --file-watch --test-arguments="--qc-max-success=999 $keywords"
