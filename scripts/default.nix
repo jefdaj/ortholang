@@ -1,13 +1,10 @@
 # TODO pass proper arguments
+# TODO shells for working on individual scripts (split by language?)
 
-with import <mypkgs>;
+with import ../nixpkgs;
 
 let
-  # TODO replace with lots of smaller scripts
-  # TODO this isn't a dependency of the scripts, but shortcut itself right now!
-  # bblast = import ./bblast;
-
-  myR = pkgs.rWrapper.override {
+  myRWrapper = pkgs.rWrapper.override {
     packages = with pkgs.rPackages; [
       dplyr
     ];
@@ -15,14 +12,13 @@ let
 
 in stdenv.mkDerivation {
   name = "shortcut-scripts";
+  # TODO version?
   src = ./.;
   buildInputs = [
-    myR
-    # bblast
-    pythonPackages.biopython
     makeWrapper
+    pythonPackages.biopython
+    myRWrapper
   ];
-  # inherit bblast;
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
     source ${stdenv}/setup
@@ -36,11 +32,11 @@ in stdenv.mkDerivation {
     for script in $out/bin/*; do
       wrapProgram $script \
         --prefix PYTHONPATH : $(toPythonPath ${pythonPackages.biopython}) \
-        --prefix PATH : "${myR}/bin"
+        --prefix PATH : "${myRWrapper}/bin"
     done
   '';
 
   shellHook = ''
-    export PATH=${myR}/bin:${pythonPackages.ipython}/bin:\$PATH
+    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:\$PATH
   '';
 }

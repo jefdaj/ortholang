@@ -1,9 +1,6 @@
-with import <mypkgs>;
-let bblast =
+{ pythonPackages, ncbi-blast, parallel }:
 
-{ pythonPackages }:
-
-buildPythonPackage {
+pythonPackages.buildPythonPackage {
   name = "bblast-0.1";
   namePrefix = "";
   src = ./.;
@@ -16,5 +13,3 @@ buildPythonPackage {
   doCheck = false;
   dontStrip = true;
 }
-
-; in myCall bblast
