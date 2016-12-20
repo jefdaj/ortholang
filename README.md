@@ -12,10 +12,9 @@ to eliminate a few of the pain points I've run into while doing them manually:
 
 Beyond those specific improvements, the goal is to create a pleasant
 environment that removes as much of the "busywork" as possible so you can focus
-on biology instead.
-
-<!-- TODO add stuff about reproducibility -->
-<!-- TODO add a section about code design -->
+on biology instead. Biology is notoriously difficult to automate, of course, so
+I opted for a language rather than a one-off website or CLI tool with the hope
+that the extra flexibility can overcome some initial setup + learning cost.
 
 ## Install
 
@@ -29,8 +28,9 @@ code, or `cd scripts && nix-shell` to work on one of the scripts called by it.
 
 ShortCut is very easy to learn compared to "real" programming languages like
 Python or R, but it also executes code in a unique way that may take some
-getting used to. So read through this short tutorial, try it out, and email me
-if/when you find things that don't make sense or could be clearer!
+getting used to. So read through this short tutorial, try it out, and contact
+me if/when you find things that don't make sense or could be clearer. Emails,
+github issues, and pull requests welcome!
 
 ### Interpreter
 
@@ -54,16 +54,16 @@ factors:
 ~~~
 shortcut >> :load cuts/psII.cut 
 shortcut >> :show
-plastidcut = load_genes "genes/tair-plastidcut2.faa" -> genes
-knowngenes = load_genes "genes/tair-known-ps2genes.faa" -> genes
-knowngenomes = load_genomes "lists/shi-falkowski-cyanos.txt" -> genomes
-cutoff = worst_best_evalue knowngenes knowngenomes -> number
-ucyna = load_genomes "lists/ucyna-genomes.txt" -> genomes
-othercyanos = load_genomes "lists/ncbi-cyanos.txt" + load_genomes "lists/img-cyanos.txt" - ucyna -> genomes
-goodcyanos = filter_genomes othercyanos knowngenes 1.0e-15 -> genomes
-ingoodcyanos = filter_genes plastidcut goodcyanos 1.0e-12 -> genes
-inucyna = filter_genes plastidcut ucyna 0.1 -> genes
-psIIcut = ingoodcyanos - inucyna -> genes
+plastidcut = load_genes "genes/tair-plastidcut2.faa"
+knowngenes = load_genes "genes/tair-known-ps2genes.faa"
+knowngenomes = load_genomes "lists/shi-falkowski-cyanos.txt"
+cutoff = worst_best_evalue knowngenes knowngenomes
+ucyna = load_genomes "lists/ucyna-genomes.txt"
+othercyanos = load_genomes "lists/ncbi-cyanos.txt" + load_genomes "lists/img-cyanos.txt" - ucyna
+goodcyanos = filter_genomes othercyanos knowngenes 1.0e-15
+ingoodcyanos = filter_genes plastidcut goodcyanos 1.0e-12
+inucyna = filter_genes plastidcut ucyna 0.1
+psIIcut = ingoodcyanos - inucyna
 ~~~
 
 By the end of the tutorial you should understand everything going on in it, and
@@ -126,13 +126,11 @@ shortcut >>
 
 Unlike in some languages, there’s only one type of number. It’s called
 “number”. You can write integers, decimals, or scientific notation. The
-only gotcha is that math doesn’t follow normal order of operations—instead,
-everything is just left to right. For example, `3 + 1 / 2` is `2`, not
-`3.5`. PEMDAS could be added fairly easily, but I haven’t done so it
-because the `+` and `-` functions are also used with sets, and I think it
-would be confusing if they switched behavior depending on the type you call
-them with. More on that later. Most phylogenomic cuts won’t involve long
-equations, and if you do need one you can use parentheses.
+only gotcha is that math doesn’t follow normal order of
+operations—instead, everything is just left to right. For example, `3
++ 1 / 2` is `2`, not `3.5`. PEMDAS could be added fairly easily if anyone
+cares. Most phylogenomic cuts won’t involve long equations, and if you do
+need one you can use parentheses.
 
 ### Lazy evaluation
 
@@ -148,20 +146,19 @@ guess `2.0`. But actually:
 
 ~~~
 shortcut >> :show var1
-1.0 + 1.0 -> number
+1.0 + 1.0
 ~~~
 
 This is where ShortCut starts to get a little weird. It has “lazy” evaluation,
 which means nothing is computed until you ask to see the result.  When we
 created `var1` it just said “OK, now var1 is defined”. Now you’ve asked “How is
-var1 defined?”, and it says “var1 is the result of 1 + 1, which will be
-a number”.
+var1 defined?”, and it says “var1 is the result of 1 + 1”.
 
-Silly, right? It makes more sense when you consider expensive computations.
-If `var1` were a huge table of 10,000,000 BLAST results, you might want to
-finish setting up the rest of the script, then go home and let it run
-everything at once overnight. But since we know `1+1` is easy, we’ll go
-ahead and tell it “Yes, I really do want to know what the number is”.
+Silly, right? It makes more sense when you consider expensive computations. If
+`var1` were a table of 10,000,000 BLAST results, you might want to finish
+setting up the rest of the script, then go home and let it run everything at
+once overnight. But since we know `1+1` is easy, we’ll go ahead and tell it
+“Yes, I really do want to know what the number is”.
 
 ~~~
 shortcut >> var1
@@ -176,8 +173,7 @@ will also do steps that don’t depend on each other in parallel.
 
 If you’ve ever written a makefile, assigning the variable is similar to writing
 a rule that will generate the `var1` file, and asking for the answer is like
-running `make var1`. As you’ll see in a few minutes, this is very close to how
-ShortCut works internally.
+running `make var1`. In fact, this is very close to how it works internally.
 
 ### Types
 
@@ -228,11 +224,16 @@ a fourth. Everything gets a temporary file! By default, they go in the
 `_shortcut` folder. When we asked ShortCut to calculate `var1` above, it
 created a text file `_shortcut/var1.num` with "2.0" in it. This function call
 will create `_shortcut/ingoodcyanos.genes`, which will contain a list of gene
-names. There are lots of other unnamed temporary files too, for example there's 
+names. There are lots of other unnamed temporary files too. They go in
+`_shortcut/cache` to minimize clutter.
 
 ### Examples
 
 ### Developing Shortcut
+
+The interpreter is a Haskell package, and it calls scripts written in various
+languages---Python, R, and Bash so far. I use the [Nix](https://nixos.org/nix)
+package manager to make sure everything builds reproducibly.
 
 You can `nix-build` the main package or any of the top-level subdirectories. I
 find that to be annoyingly slow for Haskell packages though, because it
@@ -240,5 +241,9 @@ recompiles them from scratch each time. So I normally keep `stack test
 --file-watch` open in one terminal to do incremental builds + tests, and `stack
 ghci` in another for playing around with the types. Running `nix-shell`, then
 `cabal repl` would work for that too.
+
+You have to write a little Haskell to extend ShortCut with new
+scripts/functions, but not much! I include well-commented examples, and it
+should be safe to muddle through editing them, then check that it compiles.
 
 ### Reference

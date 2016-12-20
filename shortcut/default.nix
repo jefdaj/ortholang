@@ -25,5 +25,5 @@ mkDerivation {
     pretty QuickCheck scientific shake transformers
   ];
   description = "First draft of a ShortCut parser";
-  license = stdenv.lib.licenses.unfree;
+  license = stdenv.lib.licenses.gpl3;
 }
