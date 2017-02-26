@@ -1,4 +1,4 @@
-with import <mypkgs>;
+with import <nixpkgs> {};
 
 # TODO scripts-shell for working on individual scripts (split by language?)
 # TODO auto-run tests if possible (in nix? cabal?)

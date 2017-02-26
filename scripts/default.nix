@@ -1,6 +1,6 @@
 # TODO pass proper arguments
 
-with import <mypkgs>;
+with import <nixpkgs> {};
 
 let
   # TODO replace with lots of smaller scripts

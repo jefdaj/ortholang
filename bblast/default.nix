@@ -1,4 +1,5 @@
-with import <mypkgs>;
+with import <nixpkgs> {};
+with pythonPackages;
 let bblast =
 
 { pythonPackages }:
@@ -7,7 +8,7 @@ buildPythonPackage {
   name = "bblast-0.1";
   namePrefix = "";
   src = ./.;
-  propagatedBuildInputs = with pythonPackages; [
+  propagatedBuildInputs = [
     ncbi-blast
     docopt
     parallel
@@ -17,4 +18,4 @@ buildPythonPackage {
   dontStrip = true;
 }
 
-; in myCall bblast
+; in callPackage bblast {}
