@@ -71,7 +71,7 @@ instance Pretty ParsedExpr where
 instance {-# OVERLAPPING #-} Pretty ParsedAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
 
-instance Pretty ParsedScript where
+instance {-# OVERLAPPING #-} Pretty ParsedScript where
   pPrint [] = empty
   pPrint as = vcat $ map pPrint as
 
