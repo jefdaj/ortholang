@@ -1,5 +1,5 @@
 # TODO can the resolver be kept in sync with nix?
-resolver: ghc-8.0.1
+resolver: lts-8.3
 packages:
 - '.'
 extra-deps: []

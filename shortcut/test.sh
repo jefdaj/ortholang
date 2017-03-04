@@ -9,4 +9,7 @@ for arg in $@; do
 done
 
 # TODO before committing, do with --qc-max-success=999 ?
-stack test --file-watch --test-arguments="$keywords"
+TMPDIR=$(pwd)/../.tmp stack test \
+  --test-arguments="$keywords" \
+  --allow-different-user \
+  --file-watch
