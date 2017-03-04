@@ -86,7 +86,7 @@ instance {-# OVERLAPPING #-} Pretty CutAssign where
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
-instance Pretty CutScript where
+instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
