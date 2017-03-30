@@ -128,11 +128,11 @@ Unlike in some languages, there’s only one type of number. It’s called
 “number”. You can write integers, decimals, or scientific notation. The
 only gotcha is that math doesn’t follow normal order of operations—instead,
 everything is just left to right. For example, `3 + 1 / 2` is `2`, not
-`3.5`. PEMDAS could be added fairly easily, but I haven’t done so it
-because the `+` and `-` functions are also used with sets, and I think it
-would be confusing if they switched behavior depending on the type you call
-them with. More on that later. Most phylogenomic cuts won’t involve long
-equations, and if you do need one you can use parentheses.
+`3.5`. PEMDAS could be added fairly easily, but I haven’t done it because the
+`+` and `-` functions are also used with sets, and I think it would be
+confusing if they switched behavior depending on the type you call them with.
+More on that later. Most phylogenomic cuts won’t involve long equations, and if
+you do need one you can use parentheses.
 
 ### Lazy evaluation
 
@@ -151,13 +151,12 @@ shortcut >> :show var1
 1.0 + 1.0 -> number
 ~~~
 
-This is where ShortCut starts to get a little weird. It has “lazy” evaluation,
-which means nothing is computed until you ask to see the result.  When we
-created `var1` it just said “OK, now var1 is defined”. Now you’ve asked “How is
-var1 defined?”, and it says “var1 is the result of 1 + 1, which will be
-a number”.
+ShortCut has “lazy” evaluation, which means nothing is computed until you ask
+to see the result.  When we created `var1` it just said “OK, now var1 is
+defined”. Now you’ve asked “How is var1 defined?”, and it says “var1 is the
+result of 1 + 1, which will be a number”.
 
-Silly, right? It makes more sense when you consider expensive computations.
+This makes more sense when you consider expensive computations.
 If `var1` were a huge table of 10,000,000 BLAST results, you might want to
 finish setting up the rest of the script, then go home and let it run
 everything at once overnight. But since we know `1+1` is easy, we’ll go
