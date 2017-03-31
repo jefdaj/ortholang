@@ -45,7 +45,7 @@ runScript _ = undefined -- TODO write this
 -- TODO codify/explain the "result" file a little more
 
 usage :: Docopt
-usage = [docoptFile|src/usage.txt|]
+usage = [docoptFile|usage.txt|]
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a

@@ -13,3 +13,6 @@ spec = do
   -- describe "ShortCut.Parse"     P.spec
   describe "ShortCut.Repl"      R.spec
   describe "ShortCut.Interpret" I.spec
+
+main :: IO ()
+main = hspec spec
