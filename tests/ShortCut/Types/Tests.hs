@@ -1,4 +1,4 @@
-module ShortCut.TypesSpec where
+module ShortCut.Types.Tests where
 
 -- TODO test the show/pretty instances?
 

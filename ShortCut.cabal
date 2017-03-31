@@ -6,14 +6,12 @@ maintainer:          jefdaj@berkeley.edu
 build-type:          Simple
 cabal-version:       >=1.10
 
-executable shortcut
-  main-is:           ShortCut.hs
+library
   ghc-options:       -Wall
+  hs-source-dirs:    src
   default-language:  Haskell2010
   build-depends:     base,
-                     configurator,
                      directory,
-                     docopt,
                      filepath,
                      haskeline,
                      parsec,
@@ -27,11 +25,72 @@ executable shortcut
                      shake,
                      cryptohash,
                      bytestring,
-                     enclosed-exceptions,
-                     QuickCheck,
-                     hspec,
-                     text
+                     enclosed-exceptions
 
--- TODO get `cabal test` to build the actual binary and run its tests?
--- TODO try to make it do this by default:
--- cabal test --show-details=streaming --test-options="--color --qc-max-success=999
+executable shortcut
+  main-is:           ShortCut.hs
+  hs-source-dirs:    src, tests
+  default-language:  Haskell2010
+  other-modules:     ShortCut.Interpret,
+                     ShortCut.Interpret.Compile,
+                     ShortCut.Interpret.Parse,
+                     ShortCut.Interpret.Tests,
+                     ShortCut.Repl,
+                     ShortCut.Repl.Tests,
+                     ShortCut.Tests,
+                     ShortCut.Types,
+                     ShortCut.Types.Tests,
+                     ShortCut.Utils
+  build-depends:     base,
+                     Command,
+                     MissingH,
+                     QuickCheck,
+                     bytestring,
+                     configurator,
+                     containers,
+                     cryptohash,
+                     directory,
+                     docopt,
+                     enclosed-exceptions,
+                     filepath,
+                     haskeline,
+                     hspec,
+                     mtl,
+                     parsec,
+                     pretty,
+                     scientific,
+                     shake,
+                     text,
+                     transformers
+
+test-suite shortcut-tests
+  ghc-options:        -Wall
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     src, tests
+  main-is:            ShortCutTests.hs
+  default-language:   Haskell2010
+  default-extensions: GeneralizedNewtypeDeriving
+  other-modules:      ShortCut.Tests,
+                      ShortCut.Interpret.Tests,
+                      ShortCut.Repl.Tests,
+                      ShortCut.Types,
+                      ShortCut.Types.Tests
+  build-depends:      base,
+                      QuickCheck,
+                      directory,
+                      filepath,
+                      haskeline,
+                      hspec,
+                      parsec,
+                      scientific,
+                      transformers,
+                      mtl,
+                      Command,
+                      MissingH,
+                      pretty,
+                      containers,
+                      shake,
+                      cryptohash,
+                      bytestring,
+                      enclosed-exceptions,
+                      text

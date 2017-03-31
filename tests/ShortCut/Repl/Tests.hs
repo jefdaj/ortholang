@@ -1,4 +1,4 @@
-module ShortCut.ReplSpec where
+module ShortCut.Repl.Tests where
 
 -- This module tests only the REPL, not:
 --   the interpreter functions called

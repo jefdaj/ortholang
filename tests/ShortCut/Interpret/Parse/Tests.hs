@@ -1,4 +1,4 @@
-module ShortCut.Interpret.ParseSpec where
+module ShortCut.Interpret.Parse.Tests where
 
 -- TODO comment out old tests
 -- TODO update pSym tests
@@ -35,7 +35,7 @@ import Data.Either (isRight)
 import Data.Scientific
 import ShortCut.Interpret.Parse
 import ShortCut.Types
-import ShortCut.TypesSpec (loadExamples, readASTs)
+import ShortCut.Types.Tests (loadExamples, readASTs)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
@@ -466,7 +466,7 @@ spec = do
           regularParse pExpr e
 
   -----------------------------------------------
-  -- everything below is from TypeCheckSpec.hs --
+  -- everything below is from TypeCheck.Tests.hs --
   -----------------------------------------------
 
   -- TODO rename these to be more coherent
