@@ -15,19 +15,7 @@ import System.Environment      (getArgs)
 import System.Exit             (exitSuccess)
 import Data.Text (pack)
 import Test.Hspec
-
--- TODO rename these like ShortCut.Test.Module?
-import qualified ShortCut.TypesSpec           as T
--- import qualified ShortCut.Interpret.ParseSpec as P TODO update these!
-import qualified ShortCut.ReplSpec            as R
-import qualified ShortCut.InterpretSpec       as I
-
-spec :: Spec
-spec = do
-  describe "ShortCut.TypesSpec" T.spec
-  -- describe "ShortCut.Parse"     P.spec
-  describe "ShortCut.Repl"      R.spec
-  describe "ShortCut.Interpret" I.spec
+import ShortCut.Tests (spec)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 
@@ -57,7 +45,7 @@ runScript _ = undefined -- TODO write this
 -- TODO codify/explain the "result" file a little more
 
 usage :: Docopt
-usage = [docoptFile|usage.txt|]
+usage = [docoptFile|src/usage.txt|]
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
@@ -70,8 +58,7 @@ main = do
   when (hasArg args "version")
     (putStrLn "ShortCut 0.7 \"De Pijp\"" >> exitSuccess) -- TODO move to text?
   when (hasArg args "test")
-    ((putStrLn "found --test") >>
-    (hspec spec))
+    ((putStrLn "found --test") >> (hspec spec)) -- TODO don't print about it
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then (runScript cfg)

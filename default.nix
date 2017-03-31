@@ -14,8 +14,8 @@
 with import ./nixpkgs;
 
 let
-  shortcut = haskellPackages.callPackage ./shortcut.nix {};
   scripts  = import ./scripts;
+  shortcut = haskellPackages.callPackage ./shortcut.nix {};
 
 in stdenv.mkDerivation {
 

@@ -1,9 +1,9 @@
-module ShortCutSpec where
+module Main where
 
 {- Runs all the Hspec tests.
  - You can also run the nested Spec.hs files independently like:
- - `runhaskell ShortCut/ParseSpec.hs`
- - `ghc --make ShortCut/ParseSpec.hs -o parse-spec && ./parse-spec`.
+ - `runhaskell ShortCut/Parse/Tests.hs`
+ - `ghc --make ShortCut/Parse/Tests.hs -o parse-spec && ./parse-spec`.
  - See: https://github.com/hspec/hspec-example
  -}
 
@@ -13,8 +13,7 @@ module ShortCutSpec where
 -- TODO test for freeze when running the actual binary on a minimal script
 
 import Test.Hspec
+import ShortCut.Tests (spec)
 
-import qualified ShortCut.TypesSpec           as T
--- import qualified ShortCut.Interpret.ParseSpec as P TODO update these!
-import qualified ShortCut.ReplSpec            as R
-import qualified ShortCut.InterpretSpec       as I
+main :: IO ()
+main = hspec spec

@@ -1,10 +1,12 @@
-module ShortCut.InterpretSpec where
+module ShortCut.Interpret.Tests where
 
+import Test.Hspec
+
+-- TODO import qualified ShortCut.Interpret.Parse.Tests as P
 -- import ShortCut.Interpret.Compile
 -- import ShortCut.Interpret.Parse
 -- import ShortCut.Interpret.ParseSpec
 -- import ShortCut.Types
-import Test.Hspec
 
 spec :: Spec
 spec = do
