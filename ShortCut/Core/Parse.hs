@@ -1,10 +1,10 @@
-module ShortCut.Interpret.Parse where
+module ShortCut.Core.Parse where
 
 -- TODO stop accidentally interpreting args in the wrong order as one big variable
 -- TODO fix bug where a non-function with args parses to varname with args dropped
 --       (example: 'this = load_that cool')
 
-import ShortCut.Types
+import ShortCut.Core.Types
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void)

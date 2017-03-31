@@ -12,10 +12,10 @@
 -- TODO why doesn't prettyShow work anymore? what changed??
 -- TODO should be able to :reload the current script, if any
 
-module ShortCut.Repl where
+module ShortCut.Core.Repl where
 
-import ShortCut.Types
-import ShortCut.Interpret
+import ShortCut.Core.Types
+import ShortCut.Core.Interpret
 
 import Control.Monad.IO.Class   (liftIO)
 import Control.Monad.Identity   (mzero)
@@ -25,7 +25,7 @@ import Data.List                (isPrefixOf)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (fromJust, fromMaybe)
 import Prelude           hiding (print)
-import ShortCut.Utils           (absolutize, stripWhiteSpace)
+import ShortCut.Core.Util            (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
 
 --------------------

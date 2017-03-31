@@ -29,16 +29,19 @@ library
 executable shortcut
   main-is:           ShortCut.hs
   default-language:  Haskell2010
-  other-modules:     ShortCut.Interpret,
-                     ShortCut.Interpret.Compile,
-                     ShortCut.Interpret.Parse,
-                     ShortCut.Interpret.Tests,
-                     ShortCut.Repl,
-                     ShortCut.Repl.Tests,
-                     ShortCut.Tests,
-                     ShortCut.Types,
-                     ShortCut.Types.Tests,
-                     ShortCut.Utils
+  other-modules:     ShortCut.Core,
+                     ShortCut.Core.Compile,
+                     ShortCut.Core.Interpret,
+                     ShortCut.Core.Interpret.Tests,
+                     ShortCut.Core.Parse,
+                     ShortCut.Core.Parse.Tests,
+                     ShortCut.Core.Repl,
+                     ShortCut.Core.Repl.Tests,
+                     ShortCut.Core.Tests,
+                     ShortCut.Core.Types,
+                     ShortCut.Core.Types.Tests,
+                     ShortCut.Core.Util,
+                     ShortCut.Tests
   build-depends:     base,
                      Command,
                      MissingH,
@@ -68,10 +71,13 @@ test-suite shortcut-tests
   default-language:   Haskell2010
   default-extensions: GeneralizedNewtypeDeriving
   other-modules:      ShortCut.Tests,
-                      ShortCut.Interpret.Tests,
-                      ShortCut.Repl.Tests,
-                      ShortCut.Types,
-                      ShortCut.Types.Tests
+                      ShortCut.Core.Tests,
+                      ShortCut.Core.Compile.Tests,
+                      ShortCut.Core.Interpret.Tests,
+                      ShortCut.Core.Parse.Tests,
+                      ShortCut.Core.Repl.Tests,
+                      ShortCut.Core.Types,
+                      ShortCut.Core.Types.Tests
   build-depends:      base,
                       QuickCheck,
                       directory,

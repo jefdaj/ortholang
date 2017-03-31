@@ -2,8 +2,6 @@
 
 module Main where
 
-import ShortCut.Types
-import ShortCut.Repl           (repl)
 import Prelude          hiding (lookup)
 import Control.Monad           (when)
 import Data.Configurator       (load, lookup)
@@ -13,9 +11,9 @@ import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
 import System.Environment      (getArgs)
 import System.Exit             (exitSuccess)
-import Data.Text (pack)
+import Data.Text               (pack)
+import ShortCut.Core           (repl, spec, CutConfig(..))
 import Test.Hspec
-import ShortCut.Tests (spec)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 

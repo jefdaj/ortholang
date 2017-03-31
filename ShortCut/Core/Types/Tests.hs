@@ -1,8 +1,8 @@
-module ShortCut.Types.Tests where
+module ShortCut.Core.Types.Tests where
 
 -- TODO test the show/pretty instances?
 
-import ShortCut.Types
+import ShortCut.Core.Types
 import Test.Hspec
 import Control.Monad.Trans (liftIO)
 import Data.List        (isSuffixOf)

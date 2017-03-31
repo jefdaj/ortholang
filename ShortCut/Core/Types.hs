@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module ShortCut.Types
+module ShortCut.Core.Types
   ( CutType(..), typeOf
   , CutVar(..), CutExpr(..), CutAssign, CutScript
   , CutConfig(..), CutState, ParseM, runParseM

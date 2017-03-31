@@ -1,4 +1,4 @@
-module ShortCut.Interpret.Parse.Tests where
+module ShortCut.Core.Interpret.Parse.Tests where
 
 -- TODO comment out old tests
 -- TODO update pSym tests
@@ -33,9 +33,9 @@ module ShortCut.Interpret.Parse.Tests where
 
 import Data.Either (isRight)
 import Data.Scientific
-import ShortCut.Interpret.Parse
-import ShortCut.Types
-import ShortCut.Types.Tests (loadExamples, readASTs)
+import ShortCut.Core.Interpret.Parse
+import ShortCut.Core.Types
+import ShortCut.Core.Types.Tests (loadExamples, readASTs)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck

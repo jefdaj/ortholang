@@ -1,4 +1,4 @@
-module ShortCut.Utils where
+module ShortCut.Core.Util where
 
 import System.Path.NameManip (guess_dotdot, absolute_path)
 import System.FilePath (addTrailingPathSeparator, normalise)

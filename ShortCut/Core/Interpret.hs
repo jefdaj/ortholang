@@ -6,7 +6,7 @@
  - Repl and Main modules use for now rather than any comprehensive API.
  -}
 
-module ShortCut.Interpret
+module ShortCut.Core.Interpret
   ( CutExpr(..)
   , iAssign
   , iExpr
@@ -21,9 +21,9 @@ module ShortCut.Interpret
 
 import Text.Parsec (ParseError)
 import Development.Shake
-import ShortCut.Interpret.Compile
-import ShortCut.Interpret.Parse
-import ShortCut.Types
+import ShortCut.Core.Compile
+import ShortCut.Core.Parse
+import ShortCut.Core.Types
 -- import Control.Exception          (throwIO, catch, )
 import Control.Exception.Enclosed (catchAny)
 -- import Control.Monad.IO.Class     (MonadIO)

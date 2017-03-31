@@ -20,10 +20,10 @@
 
 -- TODO why doesn't turning down the verbosity actually work?
 
-module ShortCut.Interpret.Compile where
+module ShortCut.Core.Compile where
 
 import Development.Shake
-import ShortCut.Types
+import ShortCut.Core.Types
 
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
