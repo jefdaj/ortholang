@@ -9,7 +9,7 @@ import Data.Configurator.Types (Config, Worth(..))
 import Data.Maybe              (fromJust, fromMaybe)
 import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
-import System.Environment      (getArgs)
+import System.Environment      (getArgs, withArgs)
 import System.Exit             (exitSuccess)
 import Data.Text               (pack)
 import ShortCut.Core           (repl, spec, CutConfig(..))
@@ -56,7 +56,8 @@ main = do
   when (hasArg args "version")
     (putStrLn "ShortCut 0.7 \"De Pijp\"" >> exitSuccess) -- TODO move to text?
   when (hasArg args "test")
-    ((putStrLn "found --test") >> (hspec spec)) -- TODO don't print about it
+		-- TODO allow passing args to hspec here if not too hard
+    (withArgs [] $ hspec spec >> exitSuccess)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then (runScript cfg)

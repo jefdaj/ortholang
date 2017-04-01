@@ -1,14 +1,14 @@
 A scripting language that makes short work of phylogenomic cuts.
 
 Usage:
-  shortcut --help | --version
+  shortcut --help | --version | --test
   shortcut [options]
 
 Options:
   --help           Print this help text and exit.
   --version        Print version number and exit.
   --verbose        Print debugging messages to stderr? [default: no]
-  --test           Run self-tests before doing anything else.
+  --test           Run self-tests and exit.
   --interactive    Start the interpreter, and load SCRIPT if any. This is the
                    default if no arguments are given.
   --script SCRIPT  ShortCut script to run, or load with -i
