@@ -35,22 +35,22 @@ import Data.Either                (isRight)
 -- import System.Directory           (removeFile)
 -- import System.IO.Error            (isDoesNotExistError)
 
-isAssignment :: CutState -> String -> Bool
-isAssignment state line = isRight $ runParseM pVarEq state line
+isAssignment :: CutScript -> String -> Bool
+isAssignment script line = isRight $ runParseM pVarEq script line
 
-iExpr :: CutState -> String -> Either ParseError CutExpr
+iExpr :: CutScript -> String -> Either ParseError CutExpr
 iExpr = runParseM pExpr
 
-iAssign :: CutState -> String -> Either ParseError CutAssign
+iAssign :: CutScript -> String -> Either ParseError CutAssign
 iAssign = runParseM pAssign
 
-iScript :: CutState -> String -> Either ParseError CutScript
+iScript :: CutScript -> String -> Either ParseError CutScript
 iScript = runParseM pScript
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
-iFile :: CutState -> FilePath -> IO (Either ParseError CutScript)
-iFile state path = readFile path >>= (\s -> return $ iScript state s)
+iFile :: CutScript -> FilePath -> IO (Either ParseError CutScript)
+iFile script path = readFile path >>= (\s -> return $ iScript script s)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error

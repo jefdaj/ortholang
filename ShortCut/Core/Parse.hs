@@ -24,15 +24,15 @@ import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
-parseWithEof :: ParseM a -> CutState -> String -> Either ParseError a
+parseWithEof :: ParseM a -> CutScript -> String -> Either ParseError a
 parseWithEof p s = runParseM (p <* eof) s
 
-parseAndShow :: (Show a) => ParseM a -> CutState -> String -> String
+parseAndShow :: (Show a) => ParseM a -> CutScript -> String -> String
 parseAndShow p s str' = case runParseM p s str' of
   Left err -> show err
   Right s2 -> show s2
 
-parseWithLeftOver :: ParseM a -> CutState -> String -> Either ParseError (a,String)
+parseWithLeftOver :: ParseM a -> CutScript -> String -> Either ParseError (a,String)
 parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof
@@ -82,7 +82,7 @@ pVar = lexeme (iden <$> first <*> many rest) <?> "variable"
 pRef :: ParseM CutExpr
 pRef = do
   v@(CutVar var) <- pVar
-  (scr, _) <- getState
+  scr <- getState
   case lookup v scr of 
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" ++ show scr
     Just e -> return $ CutRef (typeOf e) v
@@ -132,7 +132,7 @@ operatorChars = "+-*/&|~"
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
-operatorTable :: [[Operator String CutState Identity CutExpr]]
+operatorTable :: [[Operator String CutScript Identity CutExpr]]
 operatorTable = [map binary operatorChars]
   where
     binary c = Infix (pBop c) AssocLeft
@@ -159,18 +159,20 @@ pEnd = lookAhead $ void $ choice
 -- TODO load names from modules, of course
 -- TODO put this in terms of "keyword" or something?
 pName :: ParseM String
-pName = (choice $ map (try . str') names) <?> "fn name"
+pName = (choice $ map (try . str') fnNames) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
-    names =
-      [ "load_aa_seqs"
-      , "load_na_seqs"
-      , "load_genes"
-      , "load_genomes"
-      , "filter_genomes"
-      , "filter_genes"
-      , "worst_best_evalue"
-      ]
+
+fnNames :: [String]
+fnNames =
+  [ "load_aa_seqs"
+  , "load_na_seqs"
+  , "load_genes"
+  , "load_genomes"
+  , "filter_genomes"
+  , "filter_genes"
+  , "worst_best_evalue"
+  ]
 
 pFun :: ParseM CutExpr
 pFun = do
@@ -215,11 +217,11 @@ pVarEq = pVar <* (pSym '=') <?> "vareq"
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
 pAssign = do
-  (scr, cfg) <- getState
+  scr <- getState
   optional newline
   v <- pVarEq
   e <- lexeme pExpr
-  putState (scr ++ [(v,e)], cfg)
+  putState $ scr ++ [(v,e)]
   return (v,e)
 
 -------------
@@ -227,11 +229,11 @@ pAssign = do
 -------------
 
 -- TODO message in case it doesn't parse?
+-- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
 pScript = do
-  (_, cfg) <- getState
   optional spaces
   void $ many pComment
   scr <- many (pAssign <* many pComment)
-  putState (scr, cfg)
+  putState scr
   return scr

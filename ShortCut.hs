@@ -41,6 +41,7 @@ loadConfig args = do
     , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
     }
 
+
 runScript :: CutConfig -> IO ()
 runScript _ = undefined -- TODO write this
 -- TODO codify/explain the "result" file a little more

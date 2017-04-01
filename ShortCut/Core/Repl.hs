@@ -62,10 +62,10 @@ loop = do
     "" -> return ()
     (':':cmd) -> runCmd cmd
     line -> do
-      s@(scr, cfg) <- get
-      if isAssignment s line
+      (scr, cfg) <- get
+      if isAssignment scr line
         then do
-          case iAssign s line of
+          case iAssign scr line of
             Left  e -> print $ show e
             Right a@(v, _) -> do
               let scr' = delFromAL scr v
@@ -74,7 +74,7 @@ loop = do
           -- TODO how to handle if the var isn't in the script??
           -- TODO hook the logs + configs together?
           -- TODO only evaluate up to the point where the expression they want?
-          case iExpr s line of
+          case iExpr scr line of
             Left  err  -> fail $ "oh no! " ++ show err
             Right expr -> do
               let res  = CutVar "result"
@@ -130,11 +130,10 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> Repl ()
 cmdLoad path = do
-  (_, cfg) <- get
-  new <- liftIO $ iFile ([], cfg) path 
+  new <- liftIO $ iFile [] path 
   case new of
     Left  e -> print $ show e
-    Right n -> put (n, cfg)
+    Right s -> get >>= \(_, c) -> put (s, c)
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
@@ -159,8 +158,8 @@ cmdDrop var = do
 --      (add to the pretty instance?)
 cmdType :: String -> Repl ()
 cmdType s = do
-  (scr, cfg) <- get
-  print $ case iExpr (scr, cfg) s of
+  (scr, _) <- get
+  print $ case iExpr scr s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 

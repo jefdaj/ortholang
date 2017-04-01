@@ -1,7 +1,7 @@
 module ShortCut.Core
   ( repl
   , spec
-	, CutConfig(..)
+  , CutConfig(..)
   )
   where
 
