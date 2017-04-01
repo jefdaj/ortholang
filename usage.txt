@@ -11,10 +11,10 @@ Options:
   --test           Run self-tests and exit.
   --interactive    Start the interpreter, and load SCRIPT if any. This is the
                    default if no arguments are given.
-  --script SCRIPT  ShortCut script to run, or load with -i
+  --script SCRIPT  ShortCut script to run, or load with --interactive
   --tmpdir TDIR    Where to cache results, including many intermediate files.
                    [default: ~/.shortcut]
-  --config CONFIG  Load any/all these options from a config file.
+  --config CONFIG  Load any/all of these options from a config file.
                    [default: ~/.shortcut/config]
   --workdir WDIR   Working directory and start point for relative paths.
                    [default: .]

@@ -7,6 +7,8 @@ module Main where
  - See: https://github.com/hspec/hspec-example
  -}
 
+-- TODO remove this once testing is well-integrated in the main binary
+
 -- TODO incorporate golden testing (it seems simple enough)
 -- https://hackage.haskell.org/package/test-framework-golden-1.1.3.3
 
