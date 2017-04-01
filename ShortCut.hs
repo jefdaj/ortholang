@@ -2,18 +2,21 @@
 
 module Main where
 
-import Prelude          hiding (lookup)
 import Control.Monad           (when)
 import Data.Configurator       (load, lookup)
 import Data.Configurator.Types (Config, Worth(..))
 import Data.Maybe              (fromJust, fromMaybe)
+import Data.Text               (pack)
+import Data.Version            (showVersion)
+import Paths_ShortCut          (version)
+import Prelude          hiding (lookup)
+import ShortCut.Core           (repl, CutConfig(..))
+import ShortCut.Tests          (spec)
 import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
 import System.Environment      (getArgs, withArgs)
 import System.Exit             (exitSuccess)
-import Data.Text               (pack)
-import ShortCut.Core           (repl, spec, CutConfig(..))
-import Test.Hspec
+import Test.Hspec              (hspec)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 
@@ -54,9 +57,9 @@ main = do
   when (hasArg args "help")
     (exitWithUsage usage)
   when (hasArg args "version")
-    (putStrLn "ShortCut 0.7 \"De Pijp\"" >> exitSuccess) -- TODO move to text?
+    (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
-		-- TODO allow passing args to hspec here if not too hard
+    -- TODO allow passing args to hspec here if not too hard
     (withArgs [] $ hspec spec >> exitSuccess)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
