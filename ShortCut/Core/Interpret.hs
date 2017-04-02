@@ -3,7 +3,7 @@
 {- ShortCut code is interpreted in three phases: parse, check, and eval. But
  - client code shouldn't need to care about that, so this module wraps them in
  - a simplified interface. It just holds whatever [i]nterpret functions the
- - Repl and Main modules use for now rather than any comprehensive API.
+ - Repl and ShortCut modules use for now rather than any comprehensive API.
  -}
 
 module ShortCut.Core.Interpret
@@ -16,6 +16,7 @@ module ShortCut.Core.Interpret
   , isAssignment
   -- , putAssign
   , pAssign
+  , eFile
   )
   where
 
@@ -44,13 +45,14 @@ iExpr = runParseM pExpr
 iAssign :: CutScript -> String -> Either ParseError CutAssign
 iAssign = runParseM pAssign
 
-iScript :: CutScript -> String -> Either ParseError CutScript
-iScript = runParseM pScript
+iScript :: String -> Either ParseError CutScript
+iScript = runParseM pScript []
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
-iFile :: CutScript -> FilePath -> IO (Either ParseError CutScript)
-iFile script path = readFile path >>= (\s -> return $ iScript script s)
+-- TODO should we really care what the current script is when loading a new one?
+iFile :: FilePath -> IO (Either ParseError CutScript)
+iFile path = readFile path >>= (\s -> return $ iScript s)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -85,6 +87,13 @@ eval = ignoreErrors . eval'
         str' <- readFile' path
         -- putQuiet $ "\n" ++ str
         liftIO $ putStr str'
+
+eFile :: FilePath -> IO ()
+eFile path = do
+  f <- iFile path
+  case f of
+    Left  e -> fail $ "oh no! " ++ show e
+    Right s -> eval $ cScript (CutVar "result") s
 
 -- TODO: rewrite this section, keeping IO out of ParseM
 

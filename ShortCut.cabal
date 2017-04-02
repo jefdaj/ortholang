@@ -30,6 +30,7 @@ executable shortcut
                     ShortCut.Core.Tests,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
+                    ShortCut.Core.Util.Tests,
                     ShortCut.Tests
   build-depends:    base,
                     Command,
@@ -52,4 +53,5 @@ executable shortcut
                     text,
                     transformers,
                     tasty,
-                    tasty-quickcheck
+                    tasty-quickcheck,
+                    tasty-golden

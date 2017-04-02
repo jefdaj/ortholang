@@ -10,7 +10,7 @@ import Data.Text               (pack)
 import Data.Version            (showVersion)
 import Paths_ShortCut          (version)
 import Prelude          hiding (lookup)
-import ShortCut.Core           (repl, CutConfig(..))
+import ShortCut.Core           (repl, CutConfig(..), eFile)
 import ShortCut.Tests          (tests)
 import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
@@ -42,10 +42,6 @@ loadConfig args = do
     }
 
 
-runScript :: CutConfig -> IO ()
-runScript _ = undefined -- TODO write this
--- TODO codify/explain the "result" file a little more
-
 usage :: Docopt
 usage = [docoptFile|usage.txt|]
 
@@ -64,5 +60,5 @@ main = do
     (withArgs [] $ defaultMain tests)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then (runScript cfg)
+    then (eFile $ fromJust $ cfgScript cfg) -- TODO better idiom here
     else (repl cfg)
