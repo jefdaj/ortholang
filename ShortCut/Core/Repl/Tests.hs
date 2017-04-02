@@ -6,15 +6,13 @@ module ShortCut.Core.Repl.Tests where
 --   the monad functions called
 -- TODO write separate tests for each of those!
 
-import Test.Hspec
--- import Test.Hspec.QuickCheck
+import Test.Tasty (TestTree, testGroup)
 
-main :: IO ()
-main = hspec spec
+tests :: TestTree
+tests = testGroup "Repl" []
 
-spec :: Spec
-spec = do
-  return ()
+-- spec :: Spec
+-- spec = do
 
   -- describe "loads files, same as the "
   -- describe "cmdLoad"
