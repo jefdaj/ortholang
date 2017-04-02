@@ -7,6 +7,10 @@ module ShortCut.Core.Parse.Tests where
 --      * generate number and string statements
 --      * generate references to those
 --      * generate function calls with those
+--      some ideas for alternative/easier formulation:
+--      * given a valid script, a reference to any var is valid
+--      * given a valid script, fn calls made from refs are valid
+--        (unless they create cycles? see what happens!)
 
 -- The generators can also be tested manually in ghci like so:
 -- > generate gQuoted

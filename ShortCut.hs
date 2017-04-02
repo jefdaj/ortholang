@@ -16,7 +16,8 @@ import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
 import System.Environment      (getArgs, withArgs)
 import System.Exit             (exitSuccess)
-import Test.Hspec              (hspec)
+import Test.Tasty              (defaultMain)
+import Test.Tasty.Hspec        (testSpec)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 
@@ -61,7 +62,7 @@ main = do
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
     -- TODO allow passing args to hspec here if not too hard
-    (withArgs [] $ hspec spec >> exitSuccess)
+    (withArgs [] $ testSpec "old Hspec tests" spec >>= defaultMain)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then (runScript cfg)
