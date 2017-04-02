@@ -1,11 +1,10 @@
 module ShortCut.Tests where
 
-import Test.Hspec
+import Test.Tasty
 import qualified ShortCut.Core.Tests as C
 
-spec :: Spec
-spec = do
-  describe "ShortCut.Core" C.spec
+tests :: TestTree
+tests = testGroup "ShortCut" [C.tests]
 
 main :: IO ()
-main = hspec spec
+main = defaultMain tests

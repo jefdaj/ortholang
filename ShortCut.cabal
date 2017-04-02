@@ -44,7 +44,6 @@ executable shortcut
                     enclosed-exceptions,
                     filepath,
                     haskeline,
-                    hspec,
                     mtl,
                     parsec,
                     pretty,
@@ -53,4 +52,4 @@ executable shortcut
                     text,
                     transformers,
                     tasty,
-                    tasty-hspec
+                    tasty-quickcheck

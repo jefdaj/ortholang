@@ -26,14 +26,14 @@ module ShortCut.Core.Parse.Tests where
 
 -- TODO email test function to jakewheatmail@gmail.com?
 
-import Data.Either (isRight)
+import Data.Either           (isRight)
 import Data.Scientific
 import ShortCut.Core.Parse
 import ShortCut.Core.Types
-import Test.Hspec
-import Test.Hspec.QuickCheck
 import Test.QuickCheck
-import Text.Parsec (ParseError)
+import Test.Tasty            (TestTree, testGroup)
+import Test.Tasty.QuickCheck (testProperty)
+import Text.Parsec           (ParseError)
 
 -------------------------
 -- Arbitrary instances --
@@ -339,74 +339,70 @@ regularParse p = parseWithEof p []
 takeVar :: String -> CutVar
 takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> String -> Expectation
-parsedItAll p str' = (`shouldReturn` True) $
-  case parseWithLeftOver p [] str' of
-     Right (_, "") -> return True
-     _ -> return False
+parsedItAll :: ParseM a -> String -> Bool
+parsedItAll p str' = case parseWithLeftOver p [] str' of
+  Right (_, "") -> True
+  _ -> False
 
 ----------
 -- main --
 ----------
 
-main :: IO ()
-main = hspec spec
+tests :: TestTree
+tests = testGroup "Parse" [wsProps, acProps]
 
-spec :: Spec
-spec = do
+wsProps :: TestTree
+wsProps = testGroup "consumes whitespace properly"
+  [ testProperty "after variables" $
+    \(ExVar v@(CutVar s)) (ExSpace w) ->
+      parseWithLeftOver pVar [] (s ++ w) == Right (v, "")
+  , testProperty "after symbols" $
+    \(ExSymbol c) (ExSpace w) ->
+      parseWithLeftOver (pSym c) [] (c:w) == Right ((), "")
+  , testProperty "after equals signs in assignment statements" $
+    \(ExAssign a) (ExSpace w) ->
+      parseWithLeftOver pVarEq [] (a ++ w) == Right (takeVar a, "")
+  , testProperty "after quoted strings" $
+    \(ExQuoted q) (ExSpace w) ->
+      parseWithLeftOver pQuoted [] (q ++ w) == Right (read q, "")
+  , testProperty "after numbers" $
+    \(ExNum n) (ExSpace w) -> parsedItAll pNum (n ++ w)
+  , testProperty "before the first identifier on a new line" $
+    \(ExComment c) (ExVar (CutVar s)) ->
+      parseWithLeftOver pComment [] (c ++ "\n" ++ s) == Right ((), s)
+  ]
 
-  describe "[p]arses Strings to CutExprs" $ do
+acProps :: TestTree
+acProps = testGroup "parses arbitrary cut code"
+  [ testProperty "variable names" $
+      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar [] s == Right (v, "")
+  , testProperty "symbols (reserved characters)" $
+      \(ExSymbol c) -> parseWithLeftOver (pSym c) [] [c] == Right ((), "")
+  , testProperty "variables with equal signs after" $
+      \(ExAssign a) ->
+        parseWithLeftOver pVarEq [] a == Right (takeVar a, "")
+  , testProperty "quoted strings" $
+      \(ExQuoted q) -> regularParse pQuoted q == Right (read q)
+  , testProperty "comments" $
+      \(ExComment c) -> parseWithLeftOver pComment [] c == Right ((), "")
+  , testProperty "positive numbers" $
+      \(ExNum n) -> isRight $ regularParse pNum n
+  ]
 
-    describe "pVar" $ do
+-- spec :: Spec
+-- spec = do
+
+  -- describe "[p]arses Strings to CutExprs" $ do
+
+    -- describe "pVar" $ do
       -- TODO put back as a golden test
       -- it "parses some valid variable names" $
       --   test pVar exVars `shouldBe` Right ()
-      prop "parses any valid variable name" $
-        \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar [] s == Right (v, "")
-      prop "consumes trailing whitespace" $
-        \(ExVar v@(CutVar s)) (ExSpace w) ->
-          parseWithLeftOver pVar [] (s ++ w) == Right (v, "")
 
-    -- TODO check that it fails with other trailing chars
-    describe "pSym" $ do
-      prop "parses any valid symbol (reserved char)" $
-        \(ExSymbol c) -> parseWithLeftOver (pSym c) [] [c] == Right ((), "")
-      prop "consumes trailing whitespace" $
-        \(ExSymbol c) (ExSpace w) ->
-          parseWithLeftOver (pSym c) [] (c:w) == Right ((), "")
-
-    describe "pVarEq" $ do
-      prop "parses the first half of a statement, up through '='" $
-        \(ExAssign a) ->
-          parseWithLeftOver pVarEq [] a == Right (takeVar a, "")
-      prop "consumes trailing whitespace" $
-        \(ExAssign a) (ExSpace w) ->
-          parseWithLeftOver pVarEq [] (a ++ w) == Right (takeVar a, "")
-
-    describe "pQuoted" $ do
-      prop "parses quoted strings, preserving internal whitespace" $
-        \(ExQuoted q) -> regularParse pQuoted q == Right (read q)
-      prop "consumes trailing whitespace" $
-        \(ExQuoted q) (ExSpace w) ->
-          parseWithLeftOver pQuoted [] (q ++ w) == Right (read q, "")
-
-    describe "pComment" $ do
-      prop "skips comments" $
-        \(ExComment c) -> parseWithLeftOver pComment [] c == Right ((), "")
-      prop "stops at the first iden char on a new line" $
-        \(ExComment c) (ExVar (CutVar s)) ->
-          parseWithLeftOver pComment [] (c ++ "\n" ++ s) == Right ((), s)
-
-    describe "pNum" $ do
+    -- describe "pNum" $ do
       -- TODO put back as a golden test
       -- it "parses some example numbers correctly" $
       --   test pNum exNums == Right ()
-      prop "parses random positive numbers (results not checked)" $
-        \(ExNum n) -> isRight $ regularParse pNum n
-      prop "consumes trailing whitespace" $
-        \(ExNum n) (ExSpace w) -> parsedItAll pNum (n ++ w)
-      it "parses negative numbers" $
-        pendingWith "how to tell apart from the - op?"
 
     -- TODO make sure the - op never catches "-" inside scientific notation
     -- TODO make sure the - op never catches "-" inside quoted strings

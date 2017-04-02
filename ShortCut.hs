@@ -11,13 +11,12 @@ import Data.Version            (showVersion)
 import Paths_ShortCut          (version)
 import Prelude          hiding (lookup)
 import ShortCut.Core           (repl, CutConfig(..))
-import ShortCut.Tests          (spec)
+import ShortCut.Tests          (tests)
 import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
 import System.Environment      (getArgs, withArgs)
 import System.Exit             (exitSuccess)
 import Test.Tasty              (defaultMain)
-import Test.Tasty.Hspec        (testSpec)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 
@@ -61,8 +60,8 @@ main = do
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
-    -- TODO allow passing args to hspec here if not too hard
-    (withArgs [] $ testSpec "old Hspec tests" spec >>= defaultMain)
+    -- TODO allow passing args to tasty here if not too hard
+    (withArgs [] $ defaultMain tests)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then (runScript cfg)
