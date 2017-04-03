@@ -12,7 +12,8 @@ data-files:         examples/PSII.cut,
                     scripts/extract-seqs-by-id.py,
                     scripts/filter_genes.R,
                     scripts/filter_genomes.R,
-                    scripts/worst_best_evalue.R
+                    scripts/worst_best_evalue.R,
+                    usage.txt
 
 executable shortcut
   main-is:          ShortCut.hs
@@ -30,6 +31,7 @@ executable shortcut
                     ShortCut.Core.Tests,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
+                    ShortCut.Core.Util.Tests,
                     ShortCut.Tests
   build-depends:    base,
                     Command,

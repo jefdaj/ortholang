@@ -8,12 +8,14 @@ import Data.Configurator.Types (Config, Worth(..))
 import Data.Maybe              (fromJust, fromMaybe)
 import Data.Text               (pack)
 import Data.Version            (showVersion)
-import Paths_ShortCut          (version)
+import Paths_ShortCut          (version, getDataFileName)
 import Prelude          hiding (lookup)
 import ShortCut.Core           (repl, CutConfig(..))
+import ShortCut.Core.Util (expandTildes)
 import ShortCut.Tests          (tests)
-import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
+import System.Console.Docopt   (Docopt, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
+import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment      (getArgs, withArgs)
 import System.Exit             (exitSuccess)
 import Test.Tasty              (defaultMain)
@@ -46,14 +48,18 @@ runScript :: CutConfig -> IO ()
 runScript _ = undefined -- TODO write this
 -- TODO codify/explain the "result" file a little more
 
-usage :: Docopt
-usage = [docoptFile|usage.txt|]
+getUsage :: IO Docopt
+getUsage = do
+  path <- getDataFileName "usage.txt"
+  txt  <- expandTildes =<< readFile path
+  parseUsageOrExit txt
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
 
 main:: IO ()
 main = do
+  usage <- getUsage
   args <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
     (exitWithUsage usage)

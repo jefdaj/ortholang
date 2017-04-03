@@ -7,6 +7,7 @@ import Data.Maybe (fromJust)
 import Data.List (isPrefixOf)
 import Data.Char                (isSpace)
 import Data.List                (dropWhileEnd)
+import Data.List.Utils (replace)
 
 stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
@@ -22,3 +23,8 @@ absolutize aPath
     | otherwise = do
         pathMaybeWithDots <- absolute_path aPath
         return $ fromJust $ guess_dotdot pathMaybeWithDots
+
+expandTildes :: String -> IO String
+expandTildes s = do
+  home <- getHomeDirectory
+  return $ replace "~" home s
