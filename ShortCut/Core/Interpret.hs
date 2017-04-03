@@ -6,6 +6,8 @@
  - Repl and ShortCut modules use for now rather than any comprehensive API.
  -}
 
+-- TODO should there be an iLine function that tries both expr and assign?
+
 module ShortCut.Core.Interpret
   ( CutExpr(..)
   , iAssign
@@ -35,6 +37,7 @@ import Data.Either                (isRight)
 -- import Data.List.Utils            (delFromAL)
 -- import System.Directory           (removeFile)
 -- import System.IO.Error            (isDoesNotExistError)
+import Data.Maybe (fromJust)
 
 isAssignment :: CutScript -> String -> Bool
 isAssignment script line = isRight $ runParseM pVarEq script line
@@ -56,12 +59,12 @@ iFile path = readFile path >>= (\s -> return $ iScript s)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
-myShake :: Rules () -> IO ()
-myShake = shake myOpts . alternatives
+myShake :: CutConfig -> Rules () -> IO ()
+myShake cfg = shake myOpts . alternatives
   where
     myOpts = shakeOptions
-      { shakeFiles     = "_shortcut"
-      , shakeVerbosity = Quiet -- TODO configure with a command line flag?
+      { shakeFiles     = cfgTmpDir cfg
+      , shakeVerbosity = Quiet -- TODO get from cfg
       , shakeThreads   = 0    -- set to number of processors
       -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeReport    = ["_shortcut/report.html"]
@@ -74,11 +77,11 @@ myShake = shake myOpts . alternatives
 -- (only cScript is actually useful outside testing though)
 -- TODO should this be part of `interpret`?
 -- TODO rename `runRules` or `runShake`?
-eval :: Rules FilePath -> IO ()
-eval = ignoreErrors . eval'
+eval :: CutConfig -> Rules FilePath -> IO ()
+eval cfg = ignoreErrors . eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
-    eval' rpath = myShake $ do
+    eval' rpath = myShake cfg $ do
       path <- rpath
       want ["eval"]
       "eval" ~> do
@@ -88,12 +91,14 @@ eval = ignoreErrors . eval'
         -- putQuiet $ "\n" ++ str
         liftIO $ putStr str'
 
-eFile :: FilePath -> IO ()
-eFile path = do
-  f <- iFile path
+-- TODO take at least a tmpdir?
+eFile :: CutConfig -> IO ()
+eFile cfg = do
+  f <- iFile $ fromJust $ cfgScript cfg -- TODO something safer!
   case f of
     Left  e -> fail $ "oh no! " ++ show e
-    Right s -> eval $ cScript (CutVar "result") s
+    -- TODO is the Nothing coming from cScript? maybe no "result" CutVar?
+    Right s -> eval cfg $ cScript cfg (CutVar "result") s
 
 -- TODO: rewrite this section, keeping IO out of ParseM
 

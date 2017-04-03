@@ -79,7 +79,7 @@ loop = do
             Right expr -> do
               let res  = CutVar "result"
                   scr' = delFromAL scr res ++ [(res,expr)]
-              liftIO $ eval $ cScript res scr'
+              liftIO $ eval cfg $ cScript cfg res scr'
   loop
 
 --------------------------
@@ -205,7 +205,6 @@ cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
     fn = case key of
           "script"  -> (\c -> fromMaybe "none" $ cfgScript c)
           "verbose" -> (\c -> show $ cfgVerbose c)
-          "workdir" -> cfgWorkDir
           "tmpdir"  -> cfgTmpDir
           _ -> \_ -> "no such config entry"
 
@@ -215,6 +214,5 @@ cmdConfigSet key val = do
   case key of
     "script"  -> put (scr, cfg { cfgScript  = Just val })
     "verbose" -> put (scr, cfg { cfgVerbose = read val })
-    "workdir" -> put (scr, cfg { cfgWorkDir = val })
     "tmpdir"  -> put (scr, cfg { cfgTmpDir  = val })
     _ -> fail $ "no such variable '" ++ key ++ "'"

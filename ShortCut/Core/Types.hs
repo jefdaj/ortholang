@@ -117,9 +117,8 @@ pNested e = pPrint e
 -- TODO always load defaults for WorkDir, TmpDir, Verbose
 -- TODO make these into FilePaths and an Int/Bool
 data CutConfig = CutConfig
-  { cfgScript  :: Maybe String
-  , cfgWorkDir :: String
-  , cfgTmpDir  :: String
+  { cfgScript  :: Maybe FilePath
+  , cfgTmpDir  :: FilePath
   , cfgVerbose :: Bool
   }
   deriving (Eq, Show, Read)
@@ -127,7 +126,6 @@ data CutConfig = CutConfig
 instance Pretty CutConfig where
   pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
     [ ("script" , show . cfgScript )
-    , ("workdir", show . cfgWorkDir)
     , ("tmpdir" , show . cfgTmpDir )
     , ("verbose", show . cfgVerbose)
     ]

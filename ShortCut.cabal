@@ -12,7 +12,11 @@ data-files:         examples/PSII.cut,
                     scripts/extract-seqs-by-id.py,
                     scripts/filter_genes.R,
                     scripts/filter_genomes.R,
-                    scripts/worst_best_evalue.R
+                    scripts/worst_best_evalue.R,
+                    ShortCut/Core/Repl/tests/test01.cut,
+                    ShortCut/Core/Repl/tests/test01.golden,
+                    ShortCut/Core/Repl/tests/test02.cut,
+                    ShortCut/Core/Repl/tests/test02.golden
 
 executable shortcut
   main-is:          ShortCut.hs
@@ -54,4 +58,6 @@ executable shortcut
                     transformers,
                     tasty,
                     tasty-quickcheck,
-                    tasty-golden
+                    tasty-golden,
+                    Glob,
+                    temporary

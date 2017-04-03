@@ -11,12 +11,13 @@ import Data.Version            (showVersion)
 import Paths_ShortCut          (version)
 import Prelude          hiding (lookup)
 import ShortCut.Core           (repl, CutConfig(..), eFile)
-import ShortCut.Tests          (tests)
+import ShortCut.Tests          (mkTests)
 import System.Console.Docopt   (Docopt, docoptFile, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
 import System.Environment      (getArgs, withArgs)
 import System.Exit             (exitSuccess)
 import Test.Tasty              (defaultMain)
+import System.IO.Temp          (withSystemTempDirectory)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 
@@ -31,22 +32,35 @@ loadConfig args = do
   putStrLn $ show args
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
-  cwd <- loadField args cfg "workdir"
-  ctd <- loadField args cfg "tmpdir"
+  ctd <- loadField args cfg "tmpdir" -- TODO default to _shortcut?
   cvb <- loadField args cfg "verbose"
   return CutConfig
     { cfgScript  = csc
-    , cfgWorkDir = fromJust cwd
     , cfgTmpDir  = fromJust ctd
     , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
     }
 
-
+-- TODO put usage.txt in package and go with NoTH version?
 usage :: Docopt
 usage = [docoptFile|usage.txt|]
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
+
+-- TODO move to Tests.hs?
+mkTestConfig :: FilePath -> CutConfig
+mkTestConfig dir = CutConfig
+  { cfgScript  = Nothing
+  , cfgTmpDir  = dir
+  , cfgVerbose = True
+  }
+
+-- TODO move to Tests.hs?
+-- TODO allow passing args to tasty here if not too hard
+runTests :: IO ()
+runTests = withArgs [] $ withSystemTempDirectory "shortcut" $ \d -> do
+  tests <- mkTests $ mkTestConfig d
+  defaultMain tests
 
 main:: IO ()
 main = do
@@ -56,9 +70,8 @@ main = do
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
-    -- TODO allow passing args to tasty here if not too hard
-    (withArgs [] $ defaultMain tests)
+    (runTests >> exitSuccess)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then (eFile $ fromJust $ cfgScript cfg) -- TODO better idiom here
-    else (repl cfg)
+    then eFile cfg
+    else repl  cfg

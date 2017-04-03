@@ -1,5 +1,7 @@
 module ShortCut.Core.Repl.Tests where
 
+-- TODO these are actually the interpreter/file tests, aren't they?
+
 -- This module tests only the REPL, not:
 --   the interpreter functions called
 --   the scripts called
@@ -7,85 +9,36 @@ module ShortCut.Core.Repl.Tests where
 -- TODO write separate tests for each of those!
 
 import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.Golden (goldenVsFile, findByExtension)
+import System.FilePath.Posix (replaceExtension, takeBaseName, (</>))
+import Paths_ShortCut (getDataFileName)
+import ShortCut.Core.Interpret (eFile)
+import ShortCut.Core.Types (CutConfig(..))
+import ShortCut.Core.Util (mkTestGroup)
 
-tests :: TestTree
-tests = testGroup "Repl" []
+mkTests :: CutConfig -> IO TestTree
+mkTests cfg = mkTestGroup cfg "Repl" [goldenScripts]
 
--- spec :: Spec
--- spec = do
+testDir :: IO FilePath
+testDir = getDataFileName "ShortCut/Core/Repl/tests"
 
-  -- describe "loads files, same as the "
-  -- describe "cmdLoad"
-  -- describe "cmdSave" -- TODO rename to write?
-  -- describe "cmdDrop"
-  -- describe "cmdShow"
-  -- describe "cmdType"
-  -- describe ""
-  -- TODO assign
-  -- TODO print
+-- TODO need to evaluate the script in a tmpdir, and pass tmpdir/result
+--      to goldenVsFile
+-- TODO might as well name the test by the basename? if it needs a name
+-- TODO use System.FilePath.Posix for manipulations
+-- TODO i guess now is the time to make Compile use cfgTmpDir from CutConfig?
+goldenScript :: CutConfig -> FilePath -> FilePath -> TestTree
+goldenScript cfg cut gld = goldenVsFile name gld res' $ eFile cfg'
+  where
+    name = takeBaseName cut
+    cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
+    res  = (cfgTmpDir cfg' </> "result")
+		res' = trace ("expect result in " ++ show res) res
 
-  -- TODO remove everything below this
---   describe "finds the [t]ypes of expressions" $ do
--- 
---     describe "tExpr" $ do
---       it "gets correct types of example ParsedExprs" pending
---       prop "gets correct types of generated ParsedExprs" pending
--- 
---   describe "find type [s]ignatures of commands" $ do
--- 
---     -- TODO rename to tArgs
---     describe "sCmd" $ do
---       it "finds the correct type signature for each command" pending
--- 
---     -- TODO rename... to what?
---     describe "sCmds" $ do
---       it "finds correct type signatures for example commands" pending
---       prop "finds correct type signatures for generated commands" pending
--- 
---   describe "asserts that types [m]atch" $ do
--- 
---     -- TODO rename to mBop
---     describe "mExprs" $ do
---       it "tests whether two expressions have matching types" pending
---       prop "is always true when passed the same one twice" pending
--- 
---     describe "mArgs" $ do
---       it "tests whether a list of args has the correct types" pending
---       prop "aborts if the lists are different lengths" pending
---       prop "suceeds with empty lists" pending
--- 
---   describe "[c]hecks ParsedExprs and builds CheckedExprs" $ do
--- 
---     describe "cLit" $ do
---       it "reconstructs the example CheckedLits" pending
---       prop "constructs LitNumbers from random Nums" pending
---       prop "constructs LitFiles from random Strs" pending
--- 
---     describe "cRef" $ do
---       it "reconstructs the example CheckedRefs" pending
---       prop "constructs CheckedRsfs from valid generated Refs" pending
---       prop "fails if given a non-Ref" pending
---       prop "fails when no vars are defined" pending
--- 
---     -- TODO rename this or cBop so it's obvious that creates CheckedCmds too?
---     describe "cCmd" $ do
---       it "reconstructs the example CheckedCmds" pending
---       prop "constructs CheckedCmds from random valid Cmds" pending
---       prop "fails if given a non-Cmd" pending
---       prop "fails on invalid generated Cmds" pending
--- 
---     describe "cBop" $ do
---       it "reconstructs the example Bop CheckedCmds" pending
---       prop "constructs CheckedCmds from random valid Bops" pending
---       prop "fails if given a non-Bop" pending
---       prop "fails on invalid generated Bops" pending
--- 
---     describe "cExpr" $ do
---       it "reconstructs the example CheckedExprs" pending
---       prop "constructs CheckedExprs from random valid ParsedExprs" pending
---       prop "fails on random invalid ParsedExprs" pending
--- 
---     describe "cScript" $ do
---       it "reconstructs the example CutScripts" pending
---       prop "concstructs CutScripts from random valid ParsedScripts" pending
---       prop "fails on random invalid ParsedScripts" pending
+goldenScripts :: CutConfig -> IO TestTree
+goldenScripts cfg = do
+  tDir <- testDir
+  cuts <- findByExtension [".cut"] tDir
+  let gFiles = map (\s -> replaceExtension s "golden") cuts
+      gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)
+  return $ testGroup "Golden scripts" gTests

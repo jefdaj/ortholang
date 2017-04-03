@@ -36,6 +36,9 @@ import Development.Shake.FilePath ((<.>), (</>))
 import System.Directory           (canonicalizePath)
 import System.FilePath            (makeRelative)
 
+-- TODO remove before release!
+import Debug.Trace
+
 -------------------
 -- name tmpfiles --
 -------------------
@@ -44,14 +47,15 @@ import System.FilePath            (makeRelative)
 
 -- TODO deduplicate with the one in Compile.hs
 --      (actually, load from config)
-tmpDir :: FilePath
-tmpDir = "_shortcut"
+-- tmpDir :: CutConfig -> FilePath
+-- tmpDir cfg = cfgTmpDir cfg
 
-cacheDir :: FilePath
-cacheDir = tmpDir </> "cache"
+cacheDir :: CutConfig -> FilePath
+cacheDir cfg = cfgTmpDir cfg </> "cache"
 
-exprDir :: FilePath
-exprDir = cacheDir </> "shortcut"
+-- TODO what was this even for? remove it?
+exprDir :: CutConfig -> FilePath
+exprDir cfg = cacheDir cfg </> "shortcut"
 
 -- Note that MD5 is no longer considered secure
 -- But for our purposes (checking for updated files) it doesn't matter.
@@ -64,78 +68,84 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
 -- TODO flip arguments for consistency with everything else
 -- There's a kludge here for the special case of "result", which is like the
 -- "main" function of a ShortCut script, and always goes to <tmpdir>/result.
-namedTmp :: CutVar -> CutExpr -> FilePath
-namedTmp (CutVar var) expr = tmpDir </> base
+namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
+namedTmp cfg (CutVar var) expr = cfgTmpDir cfg </> base
   where
-    base  = if var == "result" then var else var <.> e
-    (CutType e _) = typeOf expr
+    base  = if var == "result" then var else var <.> ext
+    (CutType ext _) = typeOf expr
 
 -- TODO extn can be found inside expr now; remove it
-hashedTmp :: CutExpr -> [FilePath] -> FilePath
-hashedTmp expr paths = exprDir </> uniq <.> e
+hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
+hashedTmp cfg expr paths = exprDir cfg </> uniq <.> e
   where
     (CutType e _) = typeOf expr
     uniq = digest $ unlines $ (show expr):paths
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
-hashedTmp' :: CutType -> CutExpr -> [FilePath] -> FilePath
-hashedTmp' (CutType extn _) expr paths = exprDir </> uniq <.> extn
+hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
+hashedTmp' cfg (CutType extn _) expr paths = exprDir cfg </> uniq <.> extn
   where
     uniq = digest $ unlines $ (show expr):paths
-hashedTmp' _ _ _ = error "bad arguments to hashedTmp'"
+hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 
 ---------------------
 -- dispatch on AST --
 ---------------------
 
-cExpr :: CutExpr -> Rules FilePath
-cExpr e@(CutLit _ _) = cLit e
-cExpr e@(CutRef _ _) = cRef e
-cExpr e@(CutBop _ "+" _ _) = cMath (+) "add"      e
-cExpr e@(CutBop _ "-" _ _) = cMath (-) "subtract" e
-cExpr e@(CutBop _ "*" _ _) = cMath (*) "multiply" e
-cExpr e@(CutBop _ "/" _ _) = cMath (/) "divide"   e
-cExpr e@(CutBop _ "|" _ _) = cSet union        "union"      e
-cExpr e@(CutBop _ "~" _ _) = cSet difference   "difference" e
-cExpr e@(CutBop _ "&" _ _) = cSet intersection "intersect"  e
-cExpr e@(CutFun _ "load_fasta_na" _) = cLoad      e
-cExpr e@(CutFun _ "load_fasta_aa" _) = cLoad      e
-cExpr e@(CutFun _ "load_genes"    _) = cLoadGenes e
-cExpr e@(CutFun _ "load_genomes"  _) = cLoad      e
-cExpr e@(CutFun _ "filter_genes"      _) = cFilterGenes   e
-cExpr e@(CutFun _ "filter_genomes"    _) = cFilterGenomes e
-cExpr e@(CutFun _ "worst_best_evalue" _) = cWorstBest     e
-cExpr _ = error "bad argument to cExpr"
+cExpr :: CutConfig -> CutExpr -> Rules FilePath
+cExpr c e@(CutLit _ _) = cLit c e
+cExpr c e@(CutRef _ _) = cRef c e
+cExpr c e@(CutBop _ "+" _ _) = cMath c (+) "add"      e
+cExpr c e@(CutBop _ "-" _ _) = cMath c (-) "subtract" e
+cExpr c e@(CutBop _ "*" _ _) = cMath c (*) "multiply" e
+cExpr c e@(CutBop _ "/" _ _) = cMath c (/) "divide"   e
+cExpr c e@(CutBop _ "|" _ _) = cSet c union        "union"      e
+cExpr c e@(CutBop _ "~" _ _) = cSet c difference   "difference" e
+cExpr c e@(CutBop _ "&" _ _) = cSet c intersection "intersect"  e
+cExpr c e@(CutFun _ "load_fasta_na" _) = cLoad      c e
+cExpr c e@(CutFun _ "load_fasta_aa" _) = cLoad      c e
+cExpr c e@(CutFun _ "load_genes"    _) = cLoadGenes c e
+cExpr c e@(CutFun _ "load_genomes"  _) = cLoad      c e
+cExpr c e@(CutFun _ "filter_genes"      _) = cFilterGenes   c e
+cExpr c e@(CutFun _ "filter_genomes"    _) = cFilterGenomes c e
+cExpr c e@(CutFun _ "worst_best_evalue" _) = cWorstBest     c e
+cExpr _ _ = error "bad argument to cExpr"
 
-cAssign :: CutAssign -> Rules (CutVar, FilePath)
-cAssign (var, expr) = do
+cAssign :: CutConfig -> CutAssign -> Rules (CutVar, FilePath)
+cAssign cfg (var, expr) = do
   -- liftIO $ putStrLn "entering cExpr"
-  path  <- cExpr expr
+  path  <- cExpr cfg expr
   -- liftIO $ putStrLn "got past cExpr!"
-  path' <- cVar var expr path
+  path' <- cVar cfg var expr path
   return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
-cScript' :: CutVar -> CutScript -> Rules FilePath
-cScript' v as = do
+-- cScript :: CutConfig -> CutScript -> Rules FilePath
+-- cScript cfg as = mapM_ (cAssign cfg) as >> return (cfgTmpDir cfg </> "result")
+
+cScript :: CutConfig -> CutVar -> CutScript -> Rules FilePath
+cScript cfg v as = do
   -- liftIO $ putStrLn "entering cScript"
-  rpaths <- mapM cAssign as
-  return $ fromJust $ lookup v rpaths
+  rpaths <- mapM (cAssign cfg) as
+  return $ fromJust $ lookup v rpaths -- TODO does result appear here?
 
 -- pretends to the rest of ShortCut that cScript' still works with GADTs
-cScript :: CutVar -> CutScript -> Rules FilePath
-cScript (CutVar v) s = cScript' (CutVar v) s
+-- cScript :: CutConfig -> CutVar -> CutScript -> Rules FilePath
+-- cScript cfg (CutVar v) s = cScript' cfg (CutVar v) s
+-- TODO ready to remove cScript' now?
+-- cScript :: CutConfig -> CutScript -> Rules FilePath
+-- cScript cfg s = cScript' cfg s
 
 ----------------------
 -- compile literals --
 ----------------------
 
 -- write a literal value from ShortCut source code to file
-cLit :: CutExpr -> Rules FilePath
-cLit expr = do
+cLit :: CutConfig -> CutExpr -> Rules FilePath
+cLit cfg expr = do
   -- liftIO $ putStrLn "entering cLit"
-  let path = hashedTmp expr []
+  let path = hashedTmp cfg expr []
   path %> \out -> do
     -- putQuiet $ unwords ["write", out]
     writeFileChanged out $ paths expr ++ "\n"
@@ -151,56 +161,56 @@ cLit expr = do
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: CutExpr -> Rules FilePath
-cRef expr@(CutRef _ var) = do
+cRef :: CutConfig -> CutExpr -> Rules FilePath
+cRef cfg expr@(CutRef _ var) = do
   -- liftIO $ putStrLn "entering cRef"
-  return $ namedTmp var expr
-cRef _ = error "bad argument to cRef"
+  return $ namedTmp cfg var expr
+cRef _ _ = error "bad argument to cRef"
 
 -- creates a symlink from expression file to input file
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
-cLoad :: CutExpr -> Rules FilePath
-cLoad e@(CutFun _ _ [f]) = do
+cLoad :: CutConfig -> CutExpr -> Rules FilePath
+cLoad cfg e@(CutFun _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
-  path <- cExpr f
-  let link = hashedTmp e [path]
+  path <- cExpr cfg f
+  let link = hashedTmp cfg e [path]
   link %> \out -> do
     str'   <- fmap strip $ readFile' path
     path'' <- liftIO $ canonicalizePath str'
     -- putQuiet $ unwords ["link", str', out]
     quietly $ cmd "ln -fs" [path'', out]
   return link
-cLoad _ = error "bad argument to cLoad"
+cLoad _ _ = error "bad argument to cLoad"
 
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
-cLoadGenes :: CutExpr -> Rules FilePath
-cLoadGenes expr@(CutFun _ _ [f]) = do
+cLoadGenes :: CutConfig -> CutExpr -> Rules FilePath
+cLoadGenes cfg expr@(CutFun _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
-  path <- cExpr f
-  let fstmp = cacheDir </> "loadgenes" -- not actually used
-      genes = hashedTmp expr []
+  path <- cExpr cfg f
+  let fstmp = cacheDir cfg </> "loadgenes" -- not actually used
+      genes = hashedTmp cfg expr []
   genes %> \out -> do
     need [path]
     path' <- readFile' path
     quietly $ cmd "extract-seq-ids.py" fstmp out path'
   return genes
-cLoadGenes _ = error "bad argument to cLoadGenes"
+cLoadGenes _ _ = error "bad argument to cLoadGenes"
 
 -- Creates a symlink from varname to expression file.
 -- TODO how should this handle file extensions? just not have them?
 -- TODO or pick up the extension of the destination?
-cVar :: CutVar -> CutExpr -> FilePath -> Rules FilePath
-cVar var expr dest = do
+cVar :: CutConfig -> CutVar -> CutExpr -> FilePath -> Rules FilePath
+cVar cfg var expr dest = do
   -- liftIO $ putStrLn "entering cVar"
-  let link  = namedTmp var expr
-      dest' = makeRelative tmpDir dest
+  let link  = namedTmp cfg var expr
+      dest' = makeRelative (cfgTmpDir cfg) dest
   link %> \out -> do
     alwaysRerun
     need [dest]
-    -- putQuiet $ unwords ["link", tmpDir </> dest', out]
-    quietly $ cmd "ln -fs" [dest', out]
+    -- putQuiet $ unwords ["link", (cfgTmpDir cfg) </> dest', out]
+    quietly $ trace ("linking " ++ show dest ++ " -> " ++ show out) $ cmd "ln -fs" [dest', out]
   return link
 
 ------------------------------
@@ -208,11 +218,11 @@ cVar var expr dest = do
 ------------------------------
 
 -- apply a math operation to two numbers
-cMath :: (Scientific -> Scientific -> Scientific) -> String
+cMath :: CutConfig -> (Scientific -> Scientific -> Scientific) -> String
       -> CutExpr -> Rules FilePath
-cMath fn _ e@(CutBop extn _ n1 n2) = do
+cMath cfg fn _ e@(CutBop extn _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
-  (p1, p2, p3) <- cBop extn e (n1, n2)
+  (p1, p2, p3) <- cBop cfg extn e (n1, n2)
   p3 %> \out -> do
     num1 <- fmap strip $ readFile' p1
     num2 <- fmap strip $ readFile' p2
@@ -220,14 +230,14 @@ cMath fn _ e@(CutBop extn _ n1 n2) = do
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
     writeFileChanged out $ show num3 ++ "\n"
   return p3
-cMath _ _ _ = error "bad argument to cMath"
+cMath _ _ _ _ = error "bad argument to cMath"
 
 -- apply a set operation to two sets (implemented as lists so far)
-cSet :: (Set String -> Set String -> Set String) -> String
+cSet :: CutConfig -> (Set String -> Set String -> Set String) -> String
      -> CutExpr -> Rules FilePath
-cSet fn _ e@(CutBop extn _ s1 s2) = do
+cSet cfg fn _ e@(CutBop extn _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSet"
-  (p1, p2, p3) <- cBop extn e (s1, s2)
+  (p1, p2, p3) <- cBop cfg extn e (s1, s2)
   p3 %> \out -> do
     lines1 <- readFileLines p1
     lines2 <- readFileLines p2
@@ -235,91 +245,91 @@ cSet fn _ e@(CutBop extn _ s1 s2) = do
     let lines3 = fn (fromList lines1) (fromList lines2)
     writeFileLines out $ toList lines3
   return p3
-cSet _ _ _ = error "bad argument to cSet"
+cSet _ _ _ _ = error "bad argument to cSet"
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
-cBop :: CutType -> CutExpr -> (CutExpr, CutExpr)
+cBop :: CutConfig -> CutType -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (FilePath, FilePath, FilePath)
-cBop t expr (n1, n2) = do
+cBop cfg t expr (n1, n2) = do
   -- liftIO $ putStrLn "entering cBop"
-  p1 <- cExpr n1
-  p2 <- cExpr n2
-  return (p1, p2, hashedTmp' t expr [p1, p2])
+  p1 <- cExpr cfg n1
+  p2 <- cExpr cfg n2
+  return (p1, p2, hashedTmp' cfg t expr [p1, p2])
 
 ---------------------
 -- compile scripts --
 ---------------------
 
 -- TODO does this need to distinguish FNA from FAA?
-extractSeqs :: CmdResult b => FilePath -> FilePath -> Action b
-extractSeqs genes out = do
+extractSeqs :: CmdResult b => CutConfig -> FilePath -> FilePath -> Action b
+extractSeqs cfg genes out = do
   -- liftIO $ putStrLn "entering extractseqs"
-  let estmp = cacheDir </> "extractseqs"
+  let estmp = cacheDir cfg </> "extractseqs"
   need [genes]
   quietly $ cmd "extract-seqs-by-id.py" estmp out genes
 
-bblast :: CmdResult b => FilePath -> FilePath -> FilePath -> Action b
-bblast genes genomes out = do
+bblast :: CmdResult b => CutConfig -> FilePath -> FilePath -> FilePath -> Action b
+bblast cfg genes genomes out = do
   -- liftIO $ putStrLn "entering bblast"
-  let bbtmp = cacheDir </> "bblast"
+  let bbtmp = cacheDir cfg </> "bblast"
   need [genes, genomes]
   -- TODO fix bblast so order doesn't matter here
   -- TODO take a verbosity flag and pass the value on to bblast
   quietly $ cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
-cFilterGenes :: CutExpr -> Rules FilePath
-cFilterGenes e@(CutFun _ _ [gens, goms, sci]) = do
+cFilterGenes :: CutConfig -> CutExpr -> Rules FilePath
+cFilterGenes cfg e@(CutFun _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
-  genes   <- cExpr gens
-  genomes <- cExpr goms
-  evalue  <- cExpr sci
-  let hits   = hashedTmp' csv e [genes, genomes]
-      faa'   = hashedTmp' faa e [genes, "extractseqs"]
-      genes' = hashedTmp e [hits, evalue]
-      fgtmp  = cacheDir </> "fgtmp" -- TODO remove? not actually used
+  genes   <- cExpr cfg gens
+  genomes <- cExpr cfg goms
+  evalue  <- cExpr cfg sci
+  let hits   = hashedTmp' cfg csv e [genes, genomes]
+      faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
+      genes' = hashedTmp  cfg e [hits, evalue]
+      fgtmp  = cacheDir cfg </> "fgtmp" -- TODO remove? not actually used
   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
-  faa' %> extractSeqs genes
-  hits %> bblast faa' genomes
+  faa' %> extractSeqs cfg genes
+  hits %> bblast cfg faa' genomes
   genes' %> \out -> do
     need [genomes, hits, evalue]
     quietly $ cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
   return genes'
-cFilterGenes _ = error "bad argument to cFilterGenes"
+cFilterGenes _ _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
-cFilterGenomes :: CutExpr -> Rules FilePath
-cFilterGenomes e@(CutFun _ _ [goms, gens, sci]) = do
+cFilterGenomes :: CutConfig -> CutExpr -> Rules FilePath
+cFilterGenomes cfg e@(CutFun _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
-  genomes <- cExpr goms
-  genes   <- cExpr gens
-  evalue  <- cExpr sci
-  let faa'     = hashedTmp' faa e [genes, "extractseqs"]
-      hits     = hashedTmp' csv e [genomes, genes]
-      genomes' = hashedTmp e [hits, evalue]
-      fgtmp = cacheDir </> "fgtmp" -- TODO remove? not actually used
-  faa' %> extractSeqs genes
-  hits %> bblast faa' genomes
+  genomes <- cExpr cfg goms
+  genes   <- cExpr cfg gens
+  evalue  <- cExpr cfg sci
+  let faa'     = hashedTmp' cfg faa e [genes, "extractseqs"]
+      hits     = hashedTmp' cfg csv e [genomes, genes]
+      genomes' = hashedTmp  cfg e [hits, evalue]
+      fgtmp = cacheDir cfg </> "fgtmp" -- TODO remove? not actually used
+  faa' %> extractSeqs cfg genes
+  hits %> bblast cfg faa' genomes
   genomes' %> \out -> do
     need [genes, hits, evalue]
     quietly $ cmd "filter_genomes.R" [fgtmp, out, genes, hits, evalue]
   return genomes'
-cFilterGenomes _ = error "bad argument to cFilterGenomes"
+cFilterGenomes _ _ = error "bad argument to cFilterGenomes"
 
-cWorstBest :: CutExpr -> Rules FilePath
-cWorstBest e@(CutFun _ _ [gens, goms]) = do
+cWorstBest :: CutConfig -> CutExpr -> Rules FilePath
+cWorstBest cfg e@(CutFun _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
-  genes   <- cExpr gens
-  genomes <- cExpr goms
-  let faa'   = hashedTmp' faa e [genes, "extractseqs"]
-      hits   = hashedTmp' csv e [genomes, genes]
-      evalue = hashedTmp e [genes, genomes]
-      wbtmp  = cacheDir </> "wbtmp" -- TODO remove? not actually used
-  faa' %> extractSeqs genes
-  hits %> bblast faa' genomes
+  genes   <- cExpr cfg gens
+  genomes <- cExpr cfg goms
+  let faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
+      hits   = hashedTmp' cfg csv e [genomes, genes]
+      evalue = hashedTmp  cfg e [genes, genomes]
+      wbtmp  = cacheDir cfg </> "wbtmp" -- TODO remove? not actually used
+  faa' %> extractSeqs cfg genes
+  hits %> bblast cfg faa' genomes
   evalue %> \out -> do
     need [hits, genes]
     quietly $ cmd "worst_best_evalue.R" [wbtmp, out, hits, genes]
   return evalue
-cWorstBest _ = error "bad argument to cWorstBest"
+cWorstBest _ _ = error "bad argument to cWorstBest"
