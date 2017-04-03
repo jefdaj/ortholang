@@ -6,17 +6,18 @@ maintainer:         jefdaj@berkeley.edu
 build-type:         Simple
 cabal-version:      >=1.10
 extra-source-files: README.md
-data-files:         examples/PSII.cut,
+data-files:         ShortCut/Core/Repl/tests/test01.cut,
+                    ShortCut/Core/Repl/tests/test01.golden,
+                    ShortCut/Core/Repl/tests/test02.cut,
+                    ShortCut/Core/Repl/tests/test02.golden,
                     examples/PSII.ast,
+                    examples/PSII.cut,
                     scripts/extract-seq-ids.py,
                     scripts/extract-seqs-by-id.py,
                     scripts/filter_genes.R,
                     scripts/filter_genomes.R,
                     scripts/worst_best_evalue.R,
-                    ShortCut/Core/Repl/tests/test01.cut,
-                    ShortCut/Core/Repl/tests/test01.golden,
-                    ShortCut/Core/Repl/tests/test02.cut,
-                    ShortCut/Core/Repl/tests/test02.golden
+                    usage.txt
 
 executable shortcut
   main-is:          ShortCut.hs
@@ -36,10 +37,11 @@ executable shortcut
                     ShortCut.Core.Util,
                     ShortCut.Core.Util.Tests,
                     ShortCut.Tests
-  build-depends:    base,
-                    Command,
+  build-depends:    Command,
+                    Glob,
                     MissingH,
                     QuickCheck,
+                    base,
                     bytestring,
                     configurator,
                     containers,
@@ -54,10 +56,9 @@ executable shortcut
                     pretty,
                     scientific,
                     shake,
-                    text,
-                    transformers,
                     tasty,
-                    tasty-quickcheck,
                     tasty-golden,
-                    Glob,
-                    temporary
+                    tasty-quickcheck,
+                    temporary,
+                    text,
+                    transformers

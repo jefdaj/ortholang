@@ -91,7 +91,6 @@ eval cfg = ignoreErrors . eval'
         -- putQuiet $ "\n" ++ str
         liftIO $ putStr str'
 
--- TODO take at least a tmpdir?
 eFile :: CutConfig -> IO ()
 eFile cfg = do
   f <- iFile $ fromJust $ cfgScript cfg -- TODO something safer!

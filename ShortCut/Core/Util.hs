@@ -1,16 +1,17 @@
 module ShortCut.Core.Util where
 
--- TODO move out of Core? It's kind of unrelated
+-- TODO move out of Core? Depends what you want core to mean
 
+import Data.Char             (isSpace)
+import Data.List             (dropWhileEnd)
+import Data.List             (isPrefixOf)
+import Data.List.Utils       (replace)
+import Data.Maybe            (fromJust)
+import ShortCut.Core.Types   (CutConfig)
+import System.Directory      (getHomeDirectory)
+import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
-import System.FilePath (addTrailingPathSeparator, normalise)
-import System.Directory (getHomeDirectory)
-import Data.Maybe (fromJust)
-import Data.List (isPrefixOf)
-import Data.Char                (isSpace)
-import Data.List                (dropWhileEnd)
-import ShortCut.Core.Types (CutConfig)
-import Test.Tasty (testGroup, TestTree)
+import Test.Tasty            (testGroup, TestTree)
 
 stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
@@ -26,6 +27,11 @@ absolutize aPath
     | otherwise = do
         pathMaybeWithDots <- absolute_path aPath
         return $ fromJust $ guess_dotdot pathMaybeWithDots
+
+expandTildes :: String -> IO String
+expandTildes s = do
+  home <- getHomeDirectory
+  return $ replace "~" home s
 
 mkTestGroup :: CutConfig -> String -> [CutConfig -> IO TestTree] -> IO TestTree
 mkTestGroup cfg name trees = do

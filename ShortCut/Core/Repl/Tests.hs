@@ -15,6 +15,7 @@ import Paths_ShortCut (getDataFileName)
 import ShortCut.Core.Interpret (eFile)
 import ShortCut.Core.Types (CutConfig(..))
 import ShortCut.Core.Util (mkTestGroup)
+import Debug.Trace -- TODO remove before releasing!
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = mkTestGroup cfg "Repl" [goldenScripts]
@@ -33,7 +34,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res' $ eFile cfg'
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     res  = (cfgTmpDir cfg' </> "result")
-		res' = trace ("expect result in " ++ show res) res
+    res' = trace ("expect result in " ++ show res) res
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
