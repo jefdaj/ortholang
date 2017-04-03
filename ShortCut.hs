@@ -10,8 +10,8 @@ import Data.Text               (pack)
 import Data.Version            (showVersion)
 import Paths_ShortCut          (version, getDataFileName)
 import Prelude          hiding (lookup)
-import ShortCut.Core           (repl, CutConfig(..))
 import ShortCut.Core.Util (expandTildes)
+import ShortCut.Core           (repl, CutConfig(..), eFile)
 import ShortCut.Tests          (tests)
 import System.Console.Docopt   (Docopt, Arguments, exitWithUsage,
                                 getArg, isPresent, longOption, parseArgsOrExit)
@@ -43,7 +43,6 @@ loadConfig args = do
     , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
     }
 
-
 runScript :: CutConfig -> IO ()
 runScript _ = undefined -- TODO write this
 -- TODO codify/explain the "result" file a little more
@@ -70,5 +69,5 @@ main = do
     (withArgs [] $ defaultMain tests)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then (runScript cfg)
+    then (eFile $ fromJust $ cfgScript cfg) -- TODO better idiom here
     else (repl cfg)

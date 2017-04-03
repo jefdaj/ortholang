@@ -130,7 +130,7 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> Repl ()
 cmdLoad path = do
-  new <- liftIO $ iFile [] path 
+  new <- liftIO $ iFile path
   case new of
     Left  e -> print $ show e
     Right s -> get >>= \(_, c) -> put (s, c)

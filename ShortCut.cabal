@@ -54,4 +54,5 @@ executable shortcut
                     text,
                     transformers,
                     tasty,
-                    tasty-quickcheck
+                    tasty-quickcheck,
+                    tasty-golden
