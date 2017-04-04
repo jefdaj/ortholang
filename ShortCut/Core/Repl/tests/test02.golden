@@ -1,4 +1,6 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
-shortcut >> :quit
+shortcut >> 1 + 1
+2.0
+shortcut >> :q
 Bye for now!

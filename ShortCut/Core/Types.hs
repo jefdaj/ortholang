@@ -6,7 +6,7 @@ module ShortCut.Core.Types
   , CutConfig(..), CutState, ParseM, runParseM
   , str, num, faa, fna, gen, gom, csv
   , prettyShow
-  , Repl, runRepl, prompt, print
+  , Repl, runRepl, prompt, print, mockPrompt
   )
   where
 
@@ -17,7 +17,7 @@ import Text.PrettyPrint.HughesPJClass
 -- import Control.Monad.Identity    (Identity)
 import Data.Scientific           (Scientific())
 import Text.Parsec               (ParseError)
-import Control.Monad.State.Lazy  (StateT, execStateT, lift)
+import Control.Monad.State.Lazy  (StateT, execStateT, lift, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
 import System.Console.Haskeline  (InputT, getInputLine, runInputT,
                                   defaultSettings, outputStrLn)
@@ -153,5 +153,16 @@ runRepl r s = runInputT defaultSettings $ runMaybeT $ execStateT r s
 prompt :: String -> Repl (Maybe String)
 prompt = lift . lift . getInputLine
 
+-- partialPrompt = return
+
 print :: String -> Repl ()
 print = lift . lift . outputStrLn
+
+-- This is for golden testing of REPL sessions. It should take first a string
+-- with the stdin text to inject, then a prompt like the regular prompt
+-- function (although it will only be called with "shortcut >> " like the
+-- other, so hardcode that in both?)
+mockPrompt :: String -> String -> Repl (Maybe String)
+mockPrompt stdinStr promptStr = do
+	liftIO $ putStr promptStr
+	return $ return stdinStr

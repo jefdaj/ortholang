@@ -27,6 +27,7 @@ import Data.Maybe               (fromJust, fromMaybe)
 import Prelude           hiding (print)
 import ShortCut.Core.Util            (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
+import System.IO.Silently (capture_)
 import Debug.Trace
 
 --------------------
@@ -34,8 +35,18 @@ import Debug.Trace
 --------------------
 
 -- TODO load script from cfg if one was given on the command line
+-- TODO shit! need to feed the mock stdin line by line?
 repl :: CutConfig -> IO ()
-repl cfg = welcome >> runRepl loop ([], cfg) >> goodbye
+repl = repl' prompt
+-- repl = repl' $ mockPrompt "1 + 1\n"
+
+-- For golden testing the repl. Takes stdin as a string and returns stdout.
+mockRepl :: String -> CutConfig -> IO String
+mockRepl stdin cfg = capture_ $ repl' (mockPrompt stdin) cfg
+
+-- Like repl, but allows overriding the prompt function for golden testing.
+repl' :: (String -> Repl (Maybe String)) -> CutConfig -> IO ()
+repl' promptFn cfg = welcome >> runRepl (loop' promptFn) ([], cfg) >> goodbye
 
 welcome :: IO ()
 welcome = putStrLn
@@ -58,8 +69,13 @@ goodbye = putStrLn "Bye for now!"
 -- TODO improve error messages by only parsing up until the varname asked for!
 -- TODO should the new statement go where the old one was, or at the end??
 loop :: Repl ()
-loop = do
-  mline <- prompt "shortcut >> "
+loop = loop' prompt
+
+-- Like loop, but allows overriding the prompt function for golden testing.
+-- (No need to override print because stdout can be captured directly)
+loop' :: (String -> Repl (Maybe String)) -> Repl ()
+loop' promptFn = do
+  mline <- promptFn "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
     ""        -> return ()
     (':':cmd) -> runCmd cmd
@@ -68,7 +84,7 @@ loop = do
       case iStatement scr line of
         Left e -> print $ show e
         Right r@(v, _) -> put (delFromAL scr v ++ [traceShow r r], cfg) -- v is always "result"
-  loop
+  loop' promptFn
 
 -- eLine :: String -> Repl ()
 -- eLine line = do
