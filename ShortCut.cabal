@@ -55,6 +55,7 @@ executable shortcut
                     mtl,
                     parsec,
                     pretty,
+                    regex-compat,
                     silently,
                     scientific,
                     shake,
