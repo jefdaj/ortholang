@@ -31,7 +31,7 @@ loadField args cfg key
 loadConfig :: Arguments -> IO CutConfig
 loadConfig args = do
   let path = fromJust $ getArg args $ longOption "config"
-  putStrLn $ show args
+  -- putStrLn $ show args
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   ctd <- loadField args cfg "tmpdir" -- TODO default to _shortcut?

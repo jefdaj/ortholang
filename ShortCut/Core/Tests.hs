@@ -11,7 +11,7 @@ import qualified ShortCut.Core.Repl.Tests      as R
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = mkTestGroup cfg "Core"
-  [	I.mkTests
+  [  I.mkTests
   , P.mkTests
   , R.mkTests
   ]
