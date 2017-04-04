@@ -7,15 +7,19 @@
  -}
 
 -- TODO should there be an iLine function that tries both expr and assign?
+-- TODO create Eval.hs again and move [e]val functions there? might be clearer
+--      but then again interpret and eval are kind of the same thing here right?
+--      it's either interpret or compile + eval
 
 module ShortCut.Core.Interpret
   ( CutExpr(..)
-  , iAssign
+  , iStatement
   , iExpr
+  -- , iLine
   , iFile -- TODO have the CLI call this
   , eval
   , cScript
-  , isAssignment
+  -- , isAssignment
   -- , putAssign
   , pAssign
   , eFile
@@ -38,15 +42,25 @@ import Data.Either                (isRight)
 -- import System.Directory           (removeFile)
 -- import System.IO.Error            (isDoesNotExistError)
 import Data.Maybe (fromJust)
+-- import Debug.Trace
 
-isAssignment :: CutScript -> String -> Bool
-isAssignment script line = isRight $ runParseM pVarEq script line
+-- isAssignment :: CutScript -> String -> Bool
+-- isAssignment script line = isRight $ runParseM pVarEq script line
 
+-- TODO make this return the "result" assignment directly?
 iExpr :: CutScript -> String -> Either ParseError CutExpr
 iExpr = runParseM pExpr
 
-iAssign :: CutScript -> String -> Either ParseError CutAssign
-iAssign = runParseM pAssign
+iStatement :: CutScript -> String -> Either ParseError CutAssign
+iStatement = runParseM pAssign
+
+-- Even if the line is a one-off expression, it gets assigned to "result"
+-- iLine :: CutScript -> String -> Either ParseError CutAssign
+-- iLine scr line = if isAssignment scr line
+--   then case iExpr scr line of
+--     Left  err  -> Left err
+--     Right expr -> Right (CutVar "result", expr)
+--   else iStatement scr line
 
 iScript :: String -> Either ParseError CutScript
 iScript = runParseM pScript []
@@ -56,6 +70,15 @@ iScript = runParseM pScript []
 -- TODO should we really care what the current script is when loading a new one?
 iFile :: FilePath -> IO (Either ParseError CutScript)
 iFile path = readFile path >>= (\s -> return $ iScript s)
+-- iFile path = readFile path >>= return . iScript
+
+-- TODO this should be called iFile right, and the other one goes away?
+eFile :: CutConfig -> IO ()
+eFile cfg = do
+  f <- iFile $ fromJust $ cfgScript cfg -- TODO something safer!
+  case f of
+    Left  e -> fail $ "oh no! " ++ show e
+    Right s -> eval cfg $ cScript cfg s
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -79,6 +102,7 @@ myShake cfg = shake myOpts . alternatives
 -- TODO rename `runRules` or `runShake`?
 eval :: CutConfig -> Rules FilePath -> IO ()
 eval cfg = ignoreErrors . eval'
+-- eval cfg = eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
@@ -90,14 +114,6 @@ eval cfg = ignoreErrors . eval'
         str' <- readFile' path
         -- putQuiet $ "\n" ++ str
         liftIO $ putStr str'
-
-eFile :: CutConfig -> IO ()
-eFile cfg = do
-  f <- iFile $ fromJust $ cfgScript cfg -- TODO something safer!
-  case f of
-    Left  e -> fail $ "oh no! " ++ show e
-    -- TODO is the Nothing coming from cScript? maybe no "result" CutVar?
-    Right s -> eval cfg $ cScript cfg (CutVar "result") s
 
 -- TODO: rewrite this section, keeping IO out of ParseM
 

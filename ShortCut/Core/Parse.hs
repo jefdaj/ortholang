@@ -224,6 +224,17 @@ pAssign = do
   putState $ scr ++ [(v,e)]
   return (v,e)
 
+-- Handles the special case of a naked top-level expression, which is treated
+-- as being assigned to "result". This parses the same in a script or the repl,
+-- but doing it more than once in a script will cause an error later.
+-- TODO prevent assignments that include the variable being assigned to
+--      (later when working on statement issues)
+pResult :: ParseM CutAssign
+pResult = pExpr >>= \e -> return (CutVar "result", e)
+
+pStatement :: ParseM CutAssign
+pStatement = pAssign <|> pResult
+
 -------------
 -- scripts --
 -------------
@@ -234,6 +245,6 @@ pScript :: ParseM CutScript
 pScript = do
   optional spaces
   void $ many pComment
-  scr <- many (pAssign <* many pComment)
+  scr <- many (pStatement <* many pComment)
   putState scr
   return scr

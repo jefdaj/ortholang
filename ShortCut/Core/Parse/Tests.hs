@@ -348,8 +348,8 @@ parsedItAll p str' = case parseWithLeftOver p [] str' of
 -- main --
 ----------
 
-tests :: TestTree
-tests = testGroup "Parse" [wsProps, acProps]
+mkTests :: CutConfig -> IO TestTree
+mkTests _ = return $ testGroup "Parse" [wsProps, acProps]
 
 wsProps :: TestTree
 wsProps = testGroup "consumes whitespace properly"

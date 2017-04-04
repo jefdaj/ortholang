@@ -37,7 +37,7 @@ import System.Directory           (canonicalizePath)
 import System.FilePath            (makeRelative)
 
 -- TODO remove before release!
-import Debug.Trace
+-- import Debug.Trace
 
 -------------------
 -- name tmpfiles --
@@ -121,21 +121,11 @@ cAssign cfg (var, expr) = do
   return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
--- cScript :: CutConfig -> CutScript -> Rules FilePath
--- cScript cfg as = mapM_ (cAssign cfg) as >> return (cfgTmpDir cfg </> "result")
-
-cScript :: CutConfig -> CutVar -> CutScript -> Rules FilePath
-cScript cfg v as = do
+cScript :: CutConfig -> CutScript -> Rules FilePath
+cScript cfg as = do
   -- liftIO $ putStrLn "entering cScript"
   rpaths <- mapM (cAssign cfg) as
-  return $ fromJust $ lookup v rpaths -- TODO does result appear here?
-
--- pretends to the rest of ShortCut that cScript' still works with GADTs
--- cScript :: CutConfig -> CutVar -> CutScript -> Rules FilePath
--- cScript cfg (CutVar v) s = cScript' cfg (CutVar v) s
--- TODO ready to remove cScript' now?
--- cScript :: CutConfig -> CutScript -> Rules FilePath
--- cScript cfg s = cScript' cfg s
+  return $ fromJust $ lookup (CutVar "result") rpaths
 
 ----------------------
 -- compile literals --
@@ -210,7 +200,7 @@ cVar cfg var expr dest = do
     alwaysRerun
     need [dest]
     -- putQuiet $ unwords ["link", (cfgTmpDir cfg) </> dest', out]
-    quietly $ trace ("linking " ++ show dest ++ " -> " ++ show out) $ cmd "ln -fs" [dest', out]
+    quietly $ cmd "ln -fs" [dest', out]
   return link
 
 ------------------------------

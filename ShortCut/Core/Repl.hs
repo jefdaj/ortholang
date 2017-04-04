@@ -27,11 +27,13 @@ import Data.Maybe               (fromJust, fromMaybe)
 import Prelude           hiding (print)
 import ShortCut.Core.Util            (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
+import Debug.Trace
 
 --------------------
 -- main interface --
 --------------------
 
+-- TODO load script from cfg if one was given on the command line
 repl :: CutConfig -> IO ()
 repl cfg = welcome >> runRepl loop ([], cfg) >> goodbye
 
@@ -59,28 +61,43 @@ loop :: Repl ()
 loop = do
   mline <- prompt "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
-    "" -> return ()
+    ""        -> return ()
     (':':cmd) -> runCmd cmd
-    line -> do
+    line      -> do
       (scr, cfg) <- get
-      if isAssignment scr line
-        then do
-          case iAssign scr line of
-            Left  e -> print $ show e
-            Right a@(v, _) -> do
-              let scr' = delFromAL scr v
-              put (scr' ++ [a], cfg)
-        else do
-          -- TODO how to handle if the var isn't in the script??
-          -- TODO hook the logs + configs together?
-          -- TODO only evaluate up to the point where the expression they want?
-          case iExpr scr line of
-            Left  err  -> fail $ "oh no! " ++ show err
-            Right expr -> do
-              let res  = CutVar "result"
-                  scr' = delFromAL scr res ++ [(res,expr)]
-              liftIO $ eval cfg $ cScript cfg res scr'
+      case iStatement scr line of
+        Left e -> print $ show e
+        Right r@(v, _) -> put (delFromAL scr v ++ [traceShow r r], cfg) -- v is always "result"
   loop
+
+-- eLine :: String -> Repl ()
+-- eLine line = do
+--   (scr, cfg) <- get
+--   if isAssignment scr line
+--     then do
+--       case iStatement scr line of
+--         Left  e -> print $ show e
+--         Right a@(v, _) -> do
+--           let scr' = delFromAL scr v
+--           put (scr' ++ [a], cfg) -- TODO put back in place rather than at end?
+--     else do
+--       -- TODO how to handle if the var isn't in the script??
+--       -- TODO hook the logs + configs together?
+--       -- TODO only evaluate up to the point where the expression they want?
+--       case iExpr scr line of
+--         Left  err  -> fail $ "oh no! " ++ show err
+--         Right expr -> do
+--           let res  = CutVar "result"
+--               scr' = delFromAL scr res ++ [(res,expr)]
+--           liftIO $ eval cfg $ cScript cfg scr'
+
+-- This almost works, but not quite. isAssignment broken?
+-- eLine2 :: String -> Repl ()
+-- eLine2 line = do
+--   (scr, cfg) <- get
+--   case iStatement scr line of
+--     Left e -> print $ show e
+--     Right r@(v, _) -> put (delFromAL scr v ++ [r], cfg) -- v is always "result"
 
 --------------------------
 -- dispatch to commands --
