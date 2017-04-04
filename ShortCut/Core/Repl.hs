@@ -35,18 +35,17 @@ import Debug.Trace
 --------------------
 
 -- TODO load script from cfg if one was given on the command line
--- TODO shit! need to feed the mock stdin line by line?
 repl :: CutConfig -> IO ()
-repl = repl' prompt
--- repl = repl' $ mockPrompt "1 + 1\n"
+repl = repl' $ repeat prompt
+-- repl = mockRepl [":q"] >> return . return ()
 
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
-mockRepl :: String -> CutConfig -> IO String
-mockRepl stdin cfg = capture_ $ repl' (mockPrompt stdin) cfg
+mockRepl :: [String] -> CutConfig -> IO String
+mockRepl stdin cfg = capture_ $ repl' (map mockPrompt stdin) cfg
 
 -- Like repl, but allows overriding the prompt function for golden testing.
-repl' :: (String -> Repl (Maybe String)) -> CutConfig -> IO ()
-repl' promptFn cfg = welcome >> runRepl (loop' promptFn) ([], cfg) >> goodbye
+repl' :: [(String -> Repl (Maybe String))] -> CutConfig -> IO ()
+repl' promptFns cfg = welcome >> runRepl (loop promptFns) ([], cfg) >> goodbye
 
 welcome :: IO ()
 welcome = putStrLn
@@ -68,13 +67,13 @@ goodbye = putStrLn "Bye for now!"
 --      in practice once the kinks are worked out?
 -- TODO improve error messages by only parsing up until the varname asked for!
 -- TODO should the new statement go where the old one was, or at the end??
-loop :: Repl ()
-loop = loop' prompt
-
--- Like loop, but allows overriding the prompt function for golden testing.
--- (No need to override print because stdout can be captured directly)
-loop' :: (String -> Repl (Maybe String)) -> Repl ()
-loop' promptFn = do
+--
+-- The weird list of prompt functions allows mocking stdin for golded testing.
+-- (No need to mock print because stdout can be captured directly)
+--
+-- TODO loop' [] = error?
+loop :: [(String -> Repl (Maybe String))] -> Repl ()
+loop (promptFn:promptFns) = do
   mline <- promptFn "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
     ""        -> return ()
@@ -84,7 +83,7 @@ loop' promptFn = do
       case iStatement scr line of
         Left e -> print $ show e
         Right r@(v, _) -> put (delFromAL scr v ++ [traceShow r r], cfg) -- v is always "result"
-  loop' promptFn
+  loop promptFns
 
 -- eLine :: String -> Repl ()
 -- eLine line = do
