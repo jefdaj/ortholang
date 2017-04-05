@@ -6,7 +6,7 @@ module ShortCut.Core.Types
   , CutConfig(..), CutState, ParseM, runParseM
   , str, num, faa, fna, gen, gom, csv
   , prettyShow
-  , Repl, runRepl, prompt, print, mockPrompt
+  , Repl, runRepl, prompt, print
   )
   where
 
@@ -157,12 +157,3 @@ prompt = lift . lift . getInputLine
 
 print :: String -> Repl ()
 print = lift . lift . outputStrLn
-
--- This is for golden testing of REPL sessions. It should take first a string
--- with the stdin text to inject, then a prompt like the regular prompt
--- function (although it will only be called with "shortcut >> " like the
--- other, so hardcode that in both?)
-mockPrompt :: String -> String -> Repl (Maybe String)
-mockPrompt stdinStr promptStr = do
-	liftIO $ putStr promptStr
-	return $ return stdinStr

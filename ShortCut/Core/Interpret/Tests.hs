@@ -9,6 +9,8 @@ import System.IO.Silently      (silence)
 import Test.Tasty              (TestTree, testGroup)
 import Test.Tasty.Golden       (goldenVsFile, findByExtension)
 
+-- import Debug.Trace
+
 -- import Debug.Trace -- TODO remove before releasing!
 -- import Test.Tasty.Golden
 -- import System.FilePath.Glob (globDir1)
@@ -19,9 +21,6 @@ import Test.Tasty.Golden       (goldenVsFile, findByExtension)
 -- import ShortCut.Core.Interpret.Parse
 -- import ShortCut.Core.Interpret.ParseSpec
 -- import ShortCut.Core.Types
-
-testDir :: IO FilePath
-testDir = getDataFileName "ShortCut/Core/Interpret/tests"
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts]
@@ -41,8 +40,8 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
-  tDir <- testDir
-  cuts <- findByExtension [".cut"] tDir
-  let gFiles = map (\s -> replaceExtension s "golden") cuts
+  tDir <- getDataFileName "ShortCut/Core/Interpret/tests"
+  gFiles <- findByExtension [".golden"] tDir
+  let cuts   = map (\s -> replaceExtension s "cut") gFiles
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)
-  return $ testGroup "interprets test scripts" gTests
+  return $ testGroup "interpret test scripts" gTests

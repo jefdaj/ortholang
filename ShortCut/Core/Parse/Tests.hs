@@ -352,7 +352,7 @@ mkTests :: CutConfig -> IO TestTree
 mkTests _ = return $ testGroup "Parse" [wsProps, acProps]
 
 wsProps :: TestTree
-wsProps = testGroup "consumes whitespace properly"
+wsProps = testGroup "consume arbitrary whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar s)) (ExSpace w) ->
       parseWithLeftOver pVar [] (s ++ w) == Right (v, "")
@@ -373,7 +373,7 @@ wsProps = testGroup "consumes whitespace properly"
   ]
 
 acProps :: TestTree
-acProps = testGroup "parses arbitrary cut code"
+acProps = testGroup "parse arbitrary cut code"
   [ testProperty "variable names" $
       \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar [] s == Right (v, "")
   , testProperty "symbols (reserved characters)" $

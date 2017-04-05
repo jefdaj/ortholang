@@ -37,13 +37,10 @@ import Debug.Trace
 -- TODO load script from cfg if one was given on the command line
 repl :: CutConfig -> IO ()
 repl = repl' $ repeat prompt
--- repl = mockRepl [":q"] >> return . return ()
-
--- For golden testing the repl. Takes stdin as a string and returns stdout.
-mockRepl :: [String] -> CutConfig -> IO String
-mockRepl stdin cfg = capture_ $ repl' (map mockPrompt stdin) cfg
+-- repl = mockRepl ["1 + 1", ":q"]
 
 -- Like repl, but allows overriding the prompt function for golden testing.
+-- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 repl' :: [(String -> Repl (Maybe String))] -> CutConfig -> IO ()
 repl' promptFns cfg = welcome >> runRepl (loop promptFns) ([], cfg) >> goodbye
 
@@ -73,6 +70,7 @@ goodbye = putStrLn "Bye for now!"
 --
 -- TODO loop' [] = error?
 loop :: [(String -> Repl (Maybe String))] -> Repl ()
+loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do
   mline <- promptFn "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
