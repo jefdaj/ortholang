@@ -1,4 +1,4 @@
-module ShortCut.Core.Repl.Tests where
+module ShortCut.Test.Repl where
 
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
@@ -55,7 +55,7 @@ goldenRepl cfg path = do
 
 goldenRepls :: CutConfig -> IO TestTree
 goldenRepls cfg = do
-  tDir  <- getDataFileName "ShortCut/Core/Repl/tests"
+  tDir  <- getDataFileName "ShortCut/Test/sessions"
   golds <- findByExtension [".golden"] tDir
   let tests = mapM (goldenRepl cfg) golds
       group = testGroup "reproduce test sessions"

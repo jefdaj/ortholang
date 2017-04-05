@@ -1,4 +1,4 @@
-module ShortCut.Core.Parse.Tests where
+module ShortCut.Test.Parse where
 
 -- TODO add pretty-printing round trips to everything
 -- TODO move some of the test utilties here to Utils.hs?
@@ -352,7 +352,7 @@ mkTests :: CutConfig -> IO TestTree
 mkTests _ = return $ testGroup "Parse" [wsProps, acProps]
 
 wsProps :: TestTree
-wsProps = testGroup "consume arbitrary whitespace"
+wsProps = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar s)) (ExSpace w) ->
       parseWithLeftOver pVar [] (s ++ w) == Right (v, "")
@@ -373,7 +373,7 @@ wsProps = testGroup "consume arbitrary whitespace"
   ]
 
 acProps :: TestTree
-acProps = testGroup "parse arbitrary cut code"
+acProps = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
       \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar [] s == Right (v, "")
   , testProperty "symbols (reserved characters)" $

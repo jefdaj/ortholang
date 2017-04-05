@@ -1,4 +1,4 @@
-module ShortCut.Core.Interpret.Tests where
+module ShortCut.Test.Interpret where
 
 import Paths_ShortCut          (getDataFileName)
 import ShortCut.Core.Interpret (eFile)
@@ -40,7 +40,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
-  tDir <- getDataFileName "ShortCut/Core/Interpret/tests"
+  tDir <- getDataFileName "ShortCut/Test/scripts"
   gFiles <- findByExtension [".golden"] tDir
   let cuts   = map (\s -> replaceExtension s "cut") gFiles
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)

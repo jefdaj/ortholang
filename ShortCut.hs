@@ -12,7 +12,7 @@ import Paths_ShortCut             (version, getDataFileName)
 import Prelude             hiding (lookup)
 import ShortCut.Core              (repl, CutConfig(..), eFile)
 import ShortCut.Core.Util         (expandTildes)
-import ShortCut.Tests             (mkTests)
+import ShortCut.Test              (mkTests)
 import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
                                    getArg, isPresent, longOption, parseArgsOrExit)
 import System.Console.Docopt.NoTH (parseUsageOrExit)

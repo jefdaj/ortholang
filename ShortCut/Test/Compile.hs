@@ -1,4 +1,4 @@
-module ShortCut.Core.Compile.Tests where
+module ShortCut.Test.Compile where
 
 -- TODO is the compile module going away?
 
