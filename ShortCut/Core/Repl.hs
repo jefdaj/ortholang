@@ -17,6 +17,7 @@ module ShortCut.Core.Repl where
 import ShortCut.Core.Types
 import ShortCut.Core.Interpret
 
+import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO)
 import Control.Monad.Identity   (mzero)
 import Control.Monad.State.Lazy (get, put)
@@ -53,6 +54,7 @@ goodbye :: IO ()
 goodbye = putStrLn "Bye for now!"
 
 -- There are four types of input we might get, in the order checked for:
+-- TODO update this to reflect 3/4 merged
 --   1. a blank line, in which case we just loop again
 --   2. a REPL command, which starts with `:`
 --   3. an assignment statement (even an invalid one)
@@ -62,13 +64,15 @@ goodbye = putStrLn "Bye for now!"
 -- TODO if you type an existing variable name, should it evaluate the script
 --      *only up to the point of that variable*? or will that not be needed
 --      in practice once the kinks are worked out?
+--
 -- TODO improve error messages by only parsing up until the varname asked for!
 -- TODO should the new statement go where the old one was, or at the end??
 --
 -- The weird list of prompt functions allows mocking stdin for golded testing.
 -- (No need to mock print because stdout can be captured directly)
 --
--- TODO loop' [] = error?
+-- TODO replace list of prompts with pipe-style read/write from here?
+--      http://stackoverflow.com/a/14027387
 loop :: [(String -> Repl (Maybe String))] -> Repl ()
 loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do
@@ -80,37 +84,14 @@ loop (promptFn:promptFns) = do
       (scr, cfg) <- get
       case iStatement scr line of
         Left e -> print $ show e
-        Right r@(v, _) -> put (delFromAL scr v ++ [traceShow r r], cfg) -- v is always "result"
+        Right r@(v, e) -> do
+          let scr' = delFromAL scr v ++ [r]
+          put (scr', cfg) -- v is always "result"
+          -- even though result gets added to the script either way,
+          -- still have to check whether to print it
+          when (isExpr scr line)
+            (liftIO $ eval cfg $ cScript cfg scr')
   loop promptFns
-
--- eLine :: String -> Repl ()
--- eLine line = do
---   (scr, cfg) <- get
---   if isAssignment scr line
---     then do
---       case iStatement scr line of
---         Left  e -> print $ show e
---         Right a@(v, _) -> do
---           let scr' = delFromAL scr v
---           put (scr' ++ [a], cfg) -- TODO put back in place rather than at end?
---     else do
---       -- TODO how to handle if the var isn't in the script??
---       -- TODO hook the logs + configs together?
---       -- TODO only evaluate up to the point where the expression they want?
---       case iExpr scr line of
---         Left  err  -> fail $ "oh no! " ++ show err
---         Right expr -> do
---           let res  = CutVar "result"
---               scr' = delFromAL scr res ++ [(res,expr)]
---           liftIO $ eval cfg $ cScript cfg scr'
-
--- This almost works, but not quite. isAssignment broken?
--- eLine2 :: String -> Repl ()
--- eLine2 line = do
---   (scr, cfg) <- get
---   case iStatement scr line of
---     Left e -> print $ show e
---     Right r@(v, _) -> put (delFromAL scr v ++ [r], cfg) -- v is always "result"
 
 --------------------------
 -- dispatch to commands --

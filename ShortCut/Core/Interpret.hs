@@ -15,12 +15,10 @@ module ShortCut.Core.Interpret
   ( CutExpr(..)
   , iStatement
   , iExpr
-  -- , iLine
   , iFile -- TODO have the CLI call this
   , eval
   , cScript
-  -- , isAssignment
-  -- , putAssign
+  , isExpr
   , pAssign
   , eFile
   )
@@ -44,15 +42,15 @@ import Data.Either                (isRight)
 import Data.Maybe (fromJust)
 -- import Debug.Trace
 
--- isAssignment :: CutScript -> String -> Bool
--- isAssignment script line = isRight $ runParseM pVarEq script line
+isExpr :: CutScript -> String -> Bool
+isExpr script line = isRight $ runParseM pExpr script line
 
 -- TODO make this return the "result" assignment directly?
 iExpr :: CutScript -> String -> Either ParseError CutExpr
 iExpr = runParseM pExpr
 
 iStatement :: CutScript -> String -> Either ParseError CutAssign
-iStatement = runParseM pAssign
+iStatement = runParseM pStatement
 
 -- Even if the line is a one-off expression, it gets assigned to "result"
 -- iLine :: CutScript -> String -> Either ParseError CutAssign
@@ -102,7 +100,6 @@ myShake cfg = shake myOpts . alternatives
 -- TODO rename `runRules` or `runShake`?
 eval :: CutConfig -> Rules FilePath -> IO ()
 eval cfg = ignoreErrors . eval'
--- eval cfg = eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
@@ -115,34 +112,7 @@ eval cfg = ignoreErrors . eval'
         -- putQuiet $ "\n" ++ str
         liftIO $ putStr str'
 
--- TODO: rewrite this section, keeping IO out of ParseM
-
--- containsKey :: (Eq a) => [(a,b)] -> a -> Bool
--- containsKey lst key = isInfixOf [key] $ map fst lst
--- 
--- the Bool specifies whether to continue if the variable exists already
--- note that it will always continue if only the *file* exists,
--- because that might just be left over from an earlier program run
--- putAssign' :: MonadState CutState m => Bool -> CutAssign -> m FilePath
--- putAssign' :: Bool -> CutAssign -> ParseM FilePath
--- putAssign' force (v@(CutVar var), expr) = do
---   scr <- getScript
---   -- (scr, cfg) <- get
---   let path = namedTmp v expr
---   if scr `containsKey` v && not force
---     then error $ "Variable '" ++ var ++ "' used twice"
---     else do
---       putScript $ delFromAL scr v ++ [(v,expr)]
---       -- put (delFromAL scr v ++ [(v,expr)], cfg)
---       return path
--- 
--- -- TODO remove? refactor?
--- -- TODO is there a way to mark the file outdated without deleting it? hashes?
--- -- putAssign :: (MonadIO m, MonadState CutState m) => CutAssign -> m ()
--- putAssign :: CutAssign -> ParseM ()
--- putAssign a = putAssign' True a >>= \f -> liftIO $ removeIfExists f
--- 
--- -- TODO should this go in Interpret.hs? Types.hs?
+-- TODO should this go in Interpret.hs? Types.hs?
 -- removeIfExists :: FilePath -> IO ()
 -- removeIfExists fileName = removeFile fileName `catch` handleExists
 --   where handleExists e

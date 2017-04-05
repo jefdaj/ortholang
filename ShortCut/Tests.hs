@@ -1,5 +1,8 @@
 module ShortCut.Tests where
 
+-- TODO reorganize so all tests go here, and make a Docs module too
+--      ShortCut.Test.Repl, ShortCut.Test.Parse, etc
+
 import Test.Tasty (TestTree)
 import qualified ShortCut.Core.Tests as C
 import ShortCut.Core.Types (CutConfig)

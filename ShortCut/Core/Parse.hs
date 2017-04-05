@@ -233,7 +233,7 @@ pResult :: ParseM CutAssign
 pResult = pExpr >>= \e -> return (CutVar "result", e)
 
 pStatement :: ParseM CutAssign
-pStatement = pAssign <|> pResult
+pStatement = try pAssign <|> pResult
 
 -------------
 -- scripts --
