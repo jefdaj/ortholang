@@ -20,7 +20,10 @@
 
 -- TODO why doesn't turning down the verbosity actually work?
 
-module ShortCut.Core.Compile where
+module ShortCut.Core.Compile
+  ( compileScript
+  )
+  where
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -121,9 +124,9 @@ cAssign cfg (var, expr) = do
   return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
-cScript :: CutConfig -> CutScript -> Rules FilePath
-cScript cfg as = do
-  -- liftIO $ putStrLn "entering cScript"
+compileScript :: CutConfig -> CutScript -> Rules FilePath
+compileScript cfg as = do
+  -- liftIO $ putStrLn "entering compileScript"
   rpaths <- mapM (cAssign cfg) as
   return $ fromJust $ lookup (CutVar "result") rpaths
 

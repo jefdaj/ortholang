@@ -3,7 +3,7 @@ module ShortCut.Test.Repl where
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Paths_ShortCut             (getDataFileName)
-import ShortCut.Core.Repl         (repl)
+import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Types        (CutConfig, ReplM)
 import ShortCut.Core.Util         (mkTestGroup)
 import System.FilePath.Posix      (takeBaseName)
@@ -43,7 +43,7 @@ mockPrompt stdinStr promptStr = do
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
 mockRepl :: [String] -> CutConfig -> IO String
-mockRepl stdin cfg = capture_ $ repl (map mockPrompt stdin) cfg
+mockRepl stdin cfg = capture_ $ mkRepl (map mockPrompt stdin) cfg
 
 goldenRepl :: CutConfig -> FilePath -> IO TestTree
 goldenRepl cfg path = do

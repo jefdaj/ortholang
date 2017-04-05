@@ -1,7 +1,5 @@
 module ShortCut.Core.Util where
 
--- TODO move out of Core? Depends what you want core to mean
-
 import Data.Char             (isSpace)
 import Data.List             (dropWhileEnd)
 import Data.List             (isPrefixOf)

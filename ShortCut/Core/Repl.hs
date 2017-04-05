@@ -12,10 +12,11 @@
 -- TODO why doesn't prettyShow work anymore? what changed??
 -- TODO should be able to :reload the current script, if any
 
-module ShortCut.Core.Repl where
-
-import ShortCut.Core.Types
-import ShortCut.Core.Interpret
+module ShortCut.Core.Repl
+  ( mkRepl
+  , runRepl
+  )
+  where
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO)
@@ -25,11 +26,15 @@ import Data.Char                (isSpace)
 import Data.List                (isPrefixOf)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (fromJust, fromMaybe)
-import Prelude           hiding (print)
-import ShortCut.Core.Util            (absolutize, stripWhiteSpace)
-import System.Command           (runCommand, waitForProcess)
-import System.IO.Silently (capture_)
 import Debug.Trace
+import Prelude           hiding (print)
+import ShortCut.Core.Compile    (compileScript)
+import ShortCut.Core.Eval       (evalScript)
+import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
+import ShortCut.Core.Types
+import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
+import System.Command           (runCommand, waitForProcess)
+import System.IO.Silently       (capture_)
 
 --------------------
 -- main interface --
@@ -37,13 +42,13 @@ import Debug.Trace
 
 -- TODO load script from cfg if one was given on the command line
 runRepl :: CutConfig -> IO ()
-runRepl = repl $ repeat prompt
+runRepl = mkRepl $ repeat prompt
 -- repl = mockRepl ["1 + 1", ":q"]
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
-repl :: [(String -> ReplM (Maybe String))] -> CutConfig -> IO ()
-repl promptFns cfg = welcome >> runReplM (loop promptFns) ([], cfg) >> goodbye
+mkRepl :: [(String -> ReplM (Maybe String))] -> CutConfig -> IO ()
+mkRepl promptFns cfg = welcome >> runReplM (loop promptFns) ([], cfg) >> goodbye
 
 welcome :: IO ()
 welcome = putStrLn
@@ -82,15 +87,15 @@ loop (promptFn:promptFns) = do
     (':':cmd) -> runCmd cmd
     line      -> do
       (scr, cfg) <- get
-      case iStatement scr line of
+      case parseStatement scr line of
         Left e -> print $ show e
         Right r@(v, e) -> do
           let scr' = delFromAL scr v ++ [r]
           put (scr', cfg) -- v is always "result"
           -- even though result gets added to the script either way,
           -- still have to check whether to print it
-          when (isExpr scr line)
-            (liftIO $ eval cfg $ cScript cfg scr')
+          -- TODO should be able to factor this out and put in Eval.hs
+          when (isExpr scr line) (liftIO $ evalScript cfg scr')
   loop promptFns
 
 --------------------------
@@ -141,7 +146,7 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> ReplM ()
 cmdLoad path = do
-  new <- liftIO $ iFile path
+  new <- liftIO $ parseFile path
   case new of
     Left  e -> print $ show e
     Right s -> get >>= \(_, c) -> put (s, c)
@@ -170,7 +175,7 @@ cmdDrop var = do
 cmdType :: String -> ReplM ()
 cmdType s = do
   (scr, _) <- get
-  print $ case iExpr scr s of
+  print $ case parseExpr scr s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 

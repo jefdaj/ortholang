@@ -1,4 +1,26 @@
-module ShortCut.Core.Parse where
+module ShortCut.Core.Parse
+  -- parsec stuff
+  ( ParseError
+  , parseWithEof
+  , parseWithLeftOver
+  -- functions used elsewhere in core
+  , isExpr
+  , parseExpr
+  , parseStatement
+  , parseFile
+  -- functiosn only used for testing
+  , escapeChars
+  , fnNames -- TODO load these from modules
+  , literalChars
+  , pComment
+  , pNum
+  , pQuoted
+  , pSym
+  , pVar
+  , pVarEq
+  , spaceChars
+  )
+  where
 
 -- TODO stop accidentally interpreting args in the wrong order as one big variable
 -- TODO fix bug where a non-function with args parses to varname with args dropped
@@ -10,12 +32,36 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
+import Data.Either            (isRight)
 import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
                                newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
                               ,lookAhead, between, choice, anyToken)
 import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
+
+--------------------------
+-- functions for export --
+--------------------------
+
+isExpr :: CutScript -> String -> Bool
+isExpr script line = isRight $ runParseM pExpr script line
+
+-- TODO make this return the "result" assignment directly?
+parseExpr :: CutScript -> String -> Either ParseError CutExpr
+parseExpr = runParseM pExpr
+
+parseStatement :: CutScript -> String -> Either ParseError CutAssign
+parseStatement = runParseM pStatement
+
+parseString :: String -> Either ParseError CutScript
+parseString = runParseM pScript []
+
+-- TODO could generalize to other parsers/checkers like above for testing
+-- TODO is it OK that all the others take an initial script but not this?
+-- TODO should we really care what the current script is when loading a new one?
+parseFile :: FilePath -> IO (Either ParseError CutScript)
+parseFile path = readFile path >>= return . parseString
 
 --------------------------------
 -- helpers to simplify parsec --

@@ -1,12 +1,26 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module ShortCut.Core.Types
-  ( CutType(..), typeOf
-  , CutVar(..), CutExpr(..), CutAssign, CutScript
-  , CutConfig(..), CutState, ParseM, runParseM
-  , str, num, faa, fna, gen, gom, csv
+  -- data structures
+  ( CutAssign
+  , CutExpr(..)
+  , CutConfig(..)
+  , CutType(..)
+  , CutVar(..)
+  , CutScript
+  , CutState
+  -- parse monad
+  , ParseM
+  , runParseM
+  -- repl monad
+  , print
+  , prompt
+  , runReplM
+  , ReplM
+  -- misc
   , prettyShow
-  , ReplM, runReplM, prompt, print
+  , str, num, faa, fna, gen, gom, csv -- TODO load these from modules
+  , typeOf
   )
   where
 

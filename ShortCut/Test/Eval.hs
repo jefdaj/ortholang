@@ -1,7 +1,7 @@
-module ShortCut.Test.Interpret where
+module ShortCut.Test.Eval where
 
 import Paths_ShortCut          (getDataFileName)
-import ShortCut.Core.Script    (runScript)
+import ShortCut.Core.Eval      (evalFile)
 import ShortCut.Core.Types     (CutConfig(..))
 import ShortCut.Core.Util      (mkTestGroup)
 import System.FilePath.Posix   (replaceExtension, takeBaseName, (</>))
@@ -36,7 +36,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     res  = (cfgTmpDir cfg' </> "result")
-    act  = silence $ runScript cfg'
+    act  = silence $ evalFile cfg'
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do

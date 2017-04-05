@@ -10,7 +10,7 @@ import Data.Text                  (pack)
 import Data.Version               (showVersion)
 import Paths_ShortCut             (version, getDataFileName)
 import Prelude             hiding (lookup)
-import ShortCut.Core              (runRepl, CutConfig(..), runScript)
+import ShortCut.Core              (runRepl, CutConfig(..), evalFile)
 import ShortCut.Core.Util         (expandTildes)
 import ShortCut.Test              (runTests)
 import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
@@ -32,7 +32,7 @@ loadConfig args = do
   -- putStrLn $ show args
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
-  ctd <- loadField args cfg "tmpdir" -- TODO default to _shortcut?
+  ctd <- loadField args cfg "tmpdir"
   cvb <- loadField args cfg "verbose"
   return CutConfig
     { cfgScript  = csc
@@ -62,5 +62,5 @@ main = do
     (withArgs [] $ runTests >> exitSuccess)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then runScript cfg
-    else runRepl   cfg
+    then evalFile cfg
+    else runRepl cfg
