@@ -1,10 +1,12 @@
 module ShortCut.Core
-  ( repl
-  , eFile
+  ( runRepl
+  , runScript
   , CutConfig(..)
   )
   where
 
-import ShortCut.Core.Interpret
-import ShortCut.Core.Repl
-import ShortCut.Core.Types
+-- TODO add stuff for config file in core if possible
+
+import ShortCut.Core.Repl   (runRepl)
+import ShortCut.Core.Script (runScript)
+import ShortCut.Core.Types  (CutConfig(..))

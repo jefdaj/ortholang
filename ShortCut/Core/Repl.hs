@@ -36,14 +36,14 @@ import Debug.Trace
 --------------------
 
 -- TODO load script from cfg if one was given on the command line
-repl :: CutConfig -> IO ()
-repl = repl' $ repeat prompt
+runRepl :: CutConfig -> IO ()
+runRepl = repl $ repeat prompt
 -- repl = mockRepl ["1 + 1", ":q"]
 
--- Like repl, but allows overriding the prompt function for golden testing.
+-- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
-repl' :: [(String -> Repl (Maybe String))] -> CutConfig -> IO ()
-repl' promptFns cfg = welcome >> runRepl (loop promptFns) ([], cfg) >> goodbye
+repl :: [(String -> ReplM (Maybe String))] -> CutConfig -> IO ()
+repl promptFns cfg = welcome >> runReplM (loop promptFns) ([], cfg) >> goodbye
 
 welcome :: IO ()
 welcome = putStrLn
@@ -73,7 +73,7 @@ goodbye = putStrLn "Bye for now!"
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
-loop :: [(String -> Repl (Maybe String))] -> Repl ()
+loop :: [(String -> ReplM (Maybe String))] -> ReplM ()
 loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do
   mline <- promptFn "shortcut >> "
@@ -97,7 +97,7 @@ loop (promptFn:promptFns) = do
 -- dispatch to commands --
 --------------------------
 
-runCmd :: String -> Repl ()
+runCmd :: String -> ReplM ()
 runCmd line = case matches of
   [(_, fn)] -> fn $ stripWhiteSpace args
   []        -> print $ "unknown command: "   ++ cmd
@@ -106,7 +106,7 @@ runCmd line = case matches of
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) cmds
 
-cmds :: [(String, String -> Repl ())]
+cmds :: [(String, String -> ReplM ())]
 cmds =
   [ ("help" , cmdHelp)
   , ("load" , cmdLoad)
@@ -124,7 +124,7 @@ cmds =
 -- run specific commands --
 ---------------------------
 
-cmdHelp :: String -> Repl ()
+cmdHelp :: String -> ReplM ()
 cmdHelp _ = print
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
   \There are also some extra commands:\n\n\
@@ -139,7 +139,7 @@ cmdHelp _ = print
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
-cmdLoad :: String -> Repl ()
+cmdLoad :: String -> ReplM ()
 cmdLoad path = do
   new <- liftIO $ iFile path
   case new of
@@ -149,14 +149,14 @@ cmdLoad path = do
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
 -- TODO replace showHack with something nicer
-cmdSave :: String -> Repl ()
+cmdSave :: String -> ReplM ()
 cmdSave path = do
   path' <- liftIO $ absolutize path
   get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
   where
     showHack = unlines . map prettyShow
 
-cmdDrop :: String -> Repl ()
+cmdDrop :: String -> ReplM ()
 cmdDrop [] = get >>= \s -> put ([], snd s)
 cmdDrop var = do
   (scr, cfg) <- get
@@ -167,14 +167,14 @@ cmdDrop var = do
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
-cmdType :: String -> Repl ()
+cmdType :: String -> ReplM ()
 cmdType s = do
   (scr, _) <- get
   print $ case iExpr scr s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 
-cmdShow :: String -> Repl ()
+cmdShow :: String -> ReplM ()
 cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . show) s
 cmdShow var = do
   (scr, _) <- get
@@ -182,22 +182,22 @@ cmdShow var = do
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> show e
 
-cmdQuit :: String -> Repl ()
+cmdQuit :: String -> ReplM ()
 cmdQuit _ = mzero
 
-cmdBang :: String -> Repl ()
+cmdBang :: String -> ReplM ()
 cmdBang cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
 
 -- TODO split string into first word and the rest
 -- TODO case statement for first word: verbose, workdir, tmpdir, script?
 -- TODO script sets the default for cmdSave?
 -- TODO don't bother with script yet; start with the obvious ones
-cmdSet :: String -> Repl ()
+cmdSet :: String -> ReplM ()
 cmdSet = undefined
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
-cmdConfig :: String -> Repl ()
+cmdConfig :: String -> ReplM ()
 cmdConfig s = do
   (_, cfg) <- get
   let ws = words s
@@ -210,7 +210,7 @@ cmdConfig s = do
         then (cmdConfigShow (head ws))
         else (cmdConfigSet  (head ws) (last ws))
 
-cmdConfigShow :: String -> Repl ()
+cmdConfigShow :: String -> ReplM ()
 cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
   where
     fn = case key of
@@ -219,7 +219,7 @@ cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
           "tmpdir"  -> cfgTmpDir
           _ -> \_ -> "no such config entry"
 
-cmdConfigSet :: String -> String -> Repl ()
+cmdConfigSet :: String -> String -> ReplM ()
 cmdConfigSet key val = do
   (scr, cfg) <- get
   case key of

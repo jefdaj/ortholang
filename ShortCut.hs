@@ -10,16 +10,14 @@ import Data.Text                  (pack)
 import Data.Version               (showVersion)
 import Paths_ShortCut             (version, getDataFileName)
 import Prelude             hiding (lookup)
-import ShortCut.Core              (repl, CutConfig(..), eFile)
+import ShortCut.Core              (runRepl, CutConfig(..), runScript)
 import ShortCut.Core.Util         (expandTildes)
-import ShortCut.Test              (mkTests)
+import ShortCut.Test              (runTests)
 import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
                                    getArg, isPresent, longOption, parseArgsOrExit)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
-import System.IO.Temp             (withSystemTempDirectory)
-import Test.Tasty                 (defaultMain)
 
 -- TODO separate Config.hs, but only if it can actually be separated
 
@@ -42,10 +40,6 @@ loadConfig args = do
     , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
     }
 
-runScript :: CutConfig -> IO ()
-runScript _ = undefined -- TODO write this
--- TODO codify/explain the "result" file a little more
-
 getUsage :: IO Docopt
 getUsage = do
   path <- getDataFileName "usage.txt"
@@ -54,21 +48,6 @@ getUsage = do
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
-
--- TODO move to Tests.hs?
-mkTestConfig :: FilePath -> CutConfig
-mkTestConfig dir = CutConfig
-  { cfgScript  = Nothing
-  , cfgTmpDir  = dir
-  , cfgVerbose = True
-  }
-
--- TODO move to Tests.hs?
--- TODO allow passing args to tasty here if not too hard
-runTests :: IO ()
-runTests = withArgs [] $ withSystemTempDirectory "shortcut" $ \d -> do
-  tests <- mkTests $ mkTestConfig d
-  defaultMain tests
 
 main:: IO ()
 main = do
@@ -79,8 +58,9 @@ main = do
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
-    (runTests >> exitSuccess)
+    -- TODO allow passing args to tasty here if not too hard
+    (withArgs [] $ runTests >> exitSuccess)
   cfg <- loadConfig args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then eFile cfg
-    else repl  cfg
+    then runScript cfg
+    else runRepl   cfg

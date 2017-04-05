@@ -3,8 +3,8 @@ module ShortCut.Test.Repl where
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Paths_ShortCut             (getDataFileName)
-import ShortCut.Core.Repl         (repl')
-import ShortCut.Core.Types        (CutConfig, Repl)
+import ShortCut.Core.Repl         (repl)
+import ShortCut.Core.Types        (CutConfig, ReplM)
 import ShortCut.Core.Util         (mkTestGroup)
 import System.FilePath.Posix      (takeBaseName)
 import System.IO.Silently         (capture_)
@@ -35,7 +35,7 @@ extractStdin txt = tail $ map fst split
 -- For golden testing of REPL sessions. It takes a string with a line of text
 -- to inject, then a prompt string like the regular prompt fn. Only injects one
 -- line; map it over a list to simulate more.
-mockPrompt :: String -> String -> Repl (Maybe String)
+mockPrompt :: String -> String -> ReplM (Maybe String)
 mockPrompt stdinStr promptStr = do
   liftIO $ putStrLn $ promptStr ++ stdinStr
   return $ return stdinStr
@@ -43,7 +43,7 @@ mockPrompt stdinStr promptStr = do
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
 mockRepl :: [String] -> CutConfig -> IO String
-mockRepl stdin cfg = capture_ $ repl' (map mockPrompt stdin) cfg
+mockRepl stdin cfg = capture_ $ repl (map mockPrompt stdin) cfg
 
 goldenRepl :: CutConfig -> FilePath -> IO TestTree
 goldenRepl cfg path = do

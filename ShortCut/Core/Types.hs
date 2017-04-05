@@ -6,7 +6,7 @@ module ShortCut.Core.Types
   , CutConfig(..), CutState, ParseM, runParseM
   , str, num, faa, fna, gen, gom, csv
   , prettyShow
-  , Repl, runRepl, prompt, print
+  , ReplM, runReplM, prompt, print
   )
   where
 
@@ -145,15 +145,13 @@ runParseM p s = P.runParser p s "somefile"
 -- Repl monad --
 ----------------
 
-type Repl a = StateT CutState (MaybeT (InputT IO)) a
+type ReplM a = StateT CutState (MaybeT (InputT IO)) a
 
-runRepl :: Repl a -> CutState -> IO (Maybe CutState)
-runRepl r s = runInputT defaultSettings $ runMaybeT $ execStateT r s
+runReplM :: ReplM a -> CutState -> IO (Maybe CutState)
+runReplM r s = runInputT defaultSettings $ runMaybeT $ execStateT r s
 
-prompt :: String -> Repl (Maybe String)
+prompt :: String -> ReplM (Maybe String)
 prompt = lift . lift . getInputLine
 
--- partialPrompt = return
-
-print :: String -> Repl ()
+print :: String -> ReplM ()
 print = lift . lift . outputStrLn

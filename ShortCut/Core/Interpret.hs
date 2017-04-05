@@ -6,6 +6,8 @@
  - Repl and ShortCut modules use for now rather than any comprehensive API.
  -}
 
+-- TODO rename this to Eval.hs? or rename eval to something else?
+
 -- TODO should there be an iLine function that tries both expr and assign?
 -- TODO create Eval.hs again and move [e]val functions there? might be clearer
 --      but then again interpret and eval are kind of the same thing here right?
@@ -20,7 +22,6 @@ module ShortCut.Core.Interpret
   , cScript
   , isExpr
   , pAssign
-  , eFile
   )
   where
 
@@ -39,7 +40,6 @@ import Data.Either                (isRight)
 -- import Data.List.Utils            (delFromAL)
 -- import System.Directory           (removeFile)
 -- import System.IO.Error            (isDoesNotExistError)
-import Data.Maybe (fromJust)
 -- import Debug.Trace
 
 isExpr :: CutScript -> String -> Bool
@@ -69,14 +69,6 @@ iScript = runParseM pScript []
 iFile :: FilePath -> IO (Either ParseError CutScript)
 iFile path = readFile path >>= (\s -> return $ iScript s)
 -- iFile path = readFile path >>= return . iScript
-
--- TODO this should be called iFile right, and the other one goes away?
-eFile :: CutConfig -> IO ()
-eFile cfg = do
-  f <- iFile $ fromJust $ cfgScript cfg -- TODO something safer!
-  case f of
-    Left  e -> fail $ "oh no! " ++ show e
-    Right s -> eval cfg $ cScript cfg s
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
