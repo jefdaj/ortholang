@@ -180,12 +180,12 @@ cmdType s = do
     Left  err  -> show err
 
 cmdShow :: String -> ReplM ()
-cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . show) s
+cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . prettyShow) s
 cmdShow var = do
   (scr, _) <- get
   print $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
-    Just e  -> show e
+    Just e  -> prettyShow e
 
 cmdQuit :: String -> ReplM ()
 cmdQuit _ = mzero
