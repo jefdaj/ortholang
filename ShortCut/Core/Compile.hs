@@ -68,9 +68,9 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
   where
     asBytes = (pack . show) val
 
--- TODO flip arguments for consistency with everything else
--- There's a kludge here for the special case of "result", which is like the
--- "main" function of a ShortCut script, and always goes to <tmpdir>/result.
+-- TODO flip arguments for consistency with everything else There's a special
+-- case for "result", which is like the "main" function of a ShortCut script,
+-- and always goes to <tmpdir>/result.
 namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
 namedTmp cfg (CutVar var) expr = cfgTmpDir cfg </> base
   where
@@ -82,14 +82,16 @@ hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
 hashedTmp cfg expr paths = exprDir cfg </> uniq <.> e
   where
     (CutType e _) = typeOf expr
-    uniq = digest $ unlines $ (show expr):paths
+    paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    uniq = digest $ unlines $ (show expr):paths'
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
 hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
 hashedTmp' cfg (CutType extn _) expr paths = exprDir cfg </> uniq <.> extn
   where
-    uniq = digest $ unlines $ (show expr):paths
+    paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    uniq = digest $ unlines $ (show expr):paths'
 hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 
 ---------------------
