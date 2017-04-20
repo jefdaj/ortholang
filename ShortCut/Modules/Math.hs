@@ -1,11 +1,38 @@
 module ShortCut.Modules.Math where
 
--- TODO move add here
--- TODO move subtract here
--- TODO move multiply here
--- TODO move divide here
-
-import ShortCut.Core.Types (CutModule)
+import Prelude      hiding (div)
+import ShortCut.Core.Types (CutModule(..), CutFunction(..))
 
 cutModule :: CutModule
-cutModule = undefined
+cutModule = CutModule
+  { mName = "math"
+  , mFunctions = [add, sub, mul, div]
+  }
+
+add :: CutFunction
+add = CutFunction
+  { fName = "add"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }
+
+sub :: CutFunction
+sub = CutFunction
+  { fName = "subtract"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }
+
+mul :: CutFunction
+mul = CutFunction
+  { fName = "multiply"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }
+
+div :: CutFunction
+div = CutFunction
+  { fName = "divide"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }

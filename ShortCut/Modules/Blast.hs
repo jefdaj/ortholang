@@ -1,10 +1,30 @@
 module ShortCut.Modules.Blast where
 
--- TODO move filter_genes here
--- TODO move filter_genomes here
--- TODO move worst_best_evalue here?
-
-import ShortCut.Core.Types (CutModule)
+import ShortCut.Core.Types (CutModule(..), CutFunction(..))
 
 cutModule :: CutModule
-cutModule = undefined
+cutModule = CutModule
+  { mName = "blast"
+  , mFunctions = [filterGenes, filterGenomes, worstBestEvalue]
+  }
+
+filterGenes :: CutFunction
+filterGenes = CutFunction
+  { fName = "filter_genes"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }
+
+filterGenomes :: CutFunction
+filterGenomes = CutFunction
+  { fName = "filter_genomes"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }
+
+worstBestEvalue :: CutFunction
+worstBestEvalue = CutFunction
+  { fName = "worst_best_evalue"
+  , fAccepts = undefined
+  , fReturns = undefined
+  }

@@ -189,6 +189,7 @@ print = lift . lift . outputStrLn
 --   deriving (Eq, Show, Read)
 
 -- TODO does eq make sense here?
+-- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
   { fName    :: String
   , fAccepts :: [CutType]
@@ -196,10 +197,25 @@ data CutFunction = CutFunction
   -- , fParser   :: ???
   -- , fCompiler :: ???
   }
-  deriving (Eq, Show, Read)
+  deriving (Eq, Read)
+
+-- TODO change this to something useful
+instance Pretty CutFunction where
+  pPrint fn = text $ "CutFunction '" ++ fName fn ++ "'"
+
+instance Show CutFunction where
+  show = prettyShow
 
 -- TODO does eq make sense here?
 data CutModule = CutModule
-  { mFunctions :: [CutFunction]
+  { mName :: String
+  , mFunctions :: [CutFunction]
   }
-  deriving (Eq, Show, Read)
+  deriving (Eq, Read)
+
+-- TODO change this to something useful
+instance Pretty CutModule where
+  pPrint fn = text $ "CutModule '" ++ mName fn ++ "'"
+
+instance Show CutModule where
+  show = prettyShow
