@@ -41,7 +41,6 @@ executable shortcut
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
                     ShortCut.Test,
-                    ShortCut.Test.Compile,
                     ShortCut.Test.Eval,
                     ShortCut.Test.Parse,
                     ShortCut.Test.Repl

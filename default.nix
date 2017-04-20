@@ -6,7 +6,8 @@
 #
 # Then there are a bunch of misc build instructions at the top level.  To
 # update Haskell dependencies, change the cabal file and run
-# `cabal2nix shortcut > shortcut.nix`.
+# `cabal2nix . > shortcut.nix`.
+# TODO add cabal2nix to global nix pkgs
 
 # TODO auto-run tests if possible (in nix? cabal?)
 # TODO use stack and/or make some kind of cabal shell to speed compilation

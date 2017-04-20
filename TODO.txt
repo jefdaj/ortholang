@@ -1,0 +1,76 @@
+BEFORE WORKING ANY MORE ON THIS, CHECK THAT IT'S PROBABLY PUBLISHABLE!!
+	google for mentions of phylogenomic cuts
+	read papers and sketch out how they seemed to do it in each case
+	plan how you could adapt shortcut to do the same, or improve on it
+	and make a list of examples/things to try and see if they work
+	which journals would it maybe fit in?
+	if any jump out, what are their publication standards like?
+
+bugs to fix LATER WHEN THAT'S DONE:
+	division hangs indefinitely on non-obvious fractions like 2/7, but not 2/4 or 2/8
+		scientific must be spending time calculating them exactly or something?
+
+documentation:
+	remember you don't need it until the project gets past being you alone!
+	for now, just explain as much as clarifies it for yourself
+	need to explain installation
+		don't worry about this part yet!
+		probably just recommend nix, but also distribute a script that should work on Debian
+		if time, make a web server. but only once the paper's written!! don't bother yet
+	need a tutorial about the basics
+		ideally short, but have to cover the common issues
+			iterate on it with other people once the first draft is done
+		cover the basics quickly: CLI, types, "make-style" evaluation
+	then switch to explaining the PSIIcut as an example:
+		basic idea of cuts/subtractive analysis
+		blast 7942 against 3 model species and ucyna, then subtract
+		adding other cyanos
+		methods for telling which genes are good
+		methods for telling which genomes are good
+		fanciness/actually useful techniques:
+			tree stuff
+			universal bootstrapping if you ever get it working
+				split known genes in half and rediscover
+			multigeneblast
+			... etc
+		this way the tutorial can dovetail with my actual study/paper
+	then do a few other example cuts
+		ideally people will want to do their projects!
+		but bootstrap by reproducing other papers first
+	end with a reference
+		all the available functions from each module
+		couple examples of the use of each module
+
+changes to make to core:
+	whatever's needed to make the PSIIcut example work again!!
+		that's most important because your project depends on having a real example
+		want to get it working before messing with internals in case that breaks something
+	docs module? not yet! consider it when you get to an unmanagable number of examples
+	modules for the win!
+		rearrange script data structure until it can be extended easily
+		start with records for cut types, functions, and modules
+			just do it the obvious way; no fancy type magic! import them all in Modules.hs
+		you know enough to make it work now for sure! just go to it
+	should be able to write result in the repl and have it handled like !! in a shell
+		would allow assigning result to things after seeing their output
+		should still be an error in saved scripts to prevent cycles
+	rewrite everything in terms of actual files and operations so they compose better
+		genes and genomes -> fasta/genbank files
+
+modules to write:
+	download sequences from ncbi
+		https://ncbiinsights.ncbi.nlm.nih.gov/2013/02/19/how-to-download-bacterial-genomes-using-the-entrez-api/
+		see if that's still current, then rewrite in biopython (or something else better!)
+		use rsync for the actual transfers?
+		expose intermediate functions that list the records that will be downloaded
+		do i want genbank or refseq?
+	set permutations and summaries, bootstrapping
+		have to think about this some more!
+	treecl
+		try using it for the PSIIcut first, then package as a module if it's helpful
+	multigeneblast
+		very nice for finding gene islands
+		does it fit with the current paradigm of genes and genomes? no, but if put in terms of fasta and blast it works
+	something for phylogenetic trees
+		both raxml and fasttree?
+		how can i simplify the huge number of options here? need something robust with few choices
