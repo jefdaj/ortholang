@@ -6,7 +6,7 @@ module ShortCut.Test
   where
 
 import Control.Monad       (sequence)
-import ShortCut.Core.Types (CutConfig(..))
+import ShortCut.Core.Types (CutConfig(..), CutModule)
 import ShortCut.Core.Util  (mkTestGroup)
 import System.IO.Temp      (withSystemTempDirectory)
 import Test.Tasty          (TestTree)
@@ -23,14 +23,15 @@ mkTests cfg = mkTestGroup cfg "Core"
   , R.mkTests
   ]
 
-mkTestConfig :: FilePath -> CutConfig
-mkTestConfig dir = CutConfig
+mkTestConfig :: [CutModule] -> FilePath -> CutConfig
+mkTestConfig mods dir = CutConfig
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
   , cfgVerbose = True
+  , cfgModules = mods
   }
 
-runTests :: IO ()
-runTests = withSystemTempDirectory "shortcut" $ \d -> do
-  tests <- mkTests $ mkTestConfig d
+runTests :: [CutModule] -> IO ()
+runTests mods = withSystemTempDirectory "shortcut" $ \d -> do
+  tests <- mkTests $ mkTestConfig mods d
   defaultMain tests

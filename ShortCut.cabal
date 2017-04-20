@@ -40,6 +40,7 @@ executable shortcut
                     ShortCut.Core.Repl,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
+                    ShortCut.Modules,
                     ShortCut.Test,
                     ShortCut.Test.Eval,
                     ShortCut.Test.Parse,

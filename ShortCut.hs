@@ -10,8 +10,9 @@ import Data.Text                  (pack)
 import Data.Version               (showVersion)
 import Paths_ShortCut             (version, getDataFileName)
 import Prelude             hiding (lookup)
-import ShortCut.Core              (runRepl, CutConfig(..), evalFile)
+import ShortCut.Core              (runRepl, CutConfig(..), CutModule, evalFile)
 import ShortCut.Core.Util         (expandTildes)
+import ShortCut.Modules           (modules)
 import ShortCut.Test              (runTests)
 import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
                                    getArg, isPresent, longOption, parseArgsOrExit)
@@ -26,8 +27,8 @@ loadField args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
   | otherwise = lookup cfg $ pack key
 
-loadConfig :: Arguments -> IO CutConfig
-loadConfig args = do
+loadConfig :: [CutModule] -> Arguments -> IO CutConfig
+loadConfig mods args = do
   let path = fromJust $ getArg args $ longOption "config"
   -- putStrLn $ show args
   cfg <- load [Optional path]
@@ -38,6 +39,7 @@ loadConfig args = do
     { cfgScript  = csc
     , cfgTmpDir  = fromJust ctd
     , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
+    , cfgModules = mods
     }
 
 getUsage :: IO Docopt
@@ -59,8 +61,8 @@ main = do
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
     -- TODO allow passing args to tasty here if not too hard
-    (withArgs [] $ runTests >> exitSuccess)
-  cfg <- loadConfig args
+    (withArgs [] $ runTests modules >> exitSuccess)
+  cfg <- loadConfig modules args
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then evalFile cfg
     else runRepl cfg

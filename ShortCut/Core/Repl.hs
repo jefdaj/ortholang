@@ -47,6 +47,7 @@ runRepl = mkRepl $ repeat prompt
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
+-- TODO pass modules list on here
 mkRepl :: [(String -> ReplM (Maybe String))] -> CutConfig -> IO ()
 mkRepl promptFns cfg = welcome >> runReplM (loop promptFns) ([], cfg) >> goodbye
 

@@ -21,6 +21,9 @@ module ShortCut.Core.Types
   , prettyShow
   , str, num, faa, fna, gen, gom, csv -- TODO load these from modules
   , typeOf
+  -- module stuff (in flux)
+  , CutFunction(..)
+  , CutModule(..)
   )
   where
 
@@ -130,10 +133,12 @@ pNested e = pPrint e
 
 -- TODO always load defaults for WorkDir, TmpDir, Verbose
 -- TODO make these into FilePaths and an Int/Bool
+-- TODO rename cfg prefix to just c?
 data CutConfig = CutConfig
   { cfgScript  :: Maybe FilePath
   , cfgTmpDir  :: FilePath
   , cfgVerbose :: Bool
+  , cfgModules :: [CutModule]
   }
   deriving (Eq, Show, Read)
 
@@ -169,3 +174,32 @@ prompt = lift . lift . getInputLine
 
 print :: String -> ReplM ()
 print = lift . lift . outputStrLn
+
+--------------------------------
+-- Module stuff (all in flux) --
+--------------------------------
+
+-- TODO replace current CutType with something like this:
+-- TODO does eq make sense here?
+-- data CutType = CutType
+--   { tName :: String
+--   , tExt  :: String
+--   , tDesc :: String
+--   }
+--   deriving (Eq, Show, Read)
+
+-- TODO does eq make sense here?
+data CutFunction = CutFunction
+  { fName    :: String
+  , fAccepts :: [CutType]
+  , fReturns :: CutType
+  -- , fParser   :: ???
+  -- , fCompiler :: ???
+  }
+  deriving (Eq, Show, Read)
+
+-- TODO does eq make sense here?
+data CutModule = CutModule
+  { mFunctions :: [CutFunction]
+  }
+  deriving (Eq, Show, Read)
