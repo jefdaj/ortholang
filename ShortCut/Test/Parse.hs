@@ -333,14 +333,14 @@ instance Arbitrary ExScript where
 -- utility functions --
 -----------------------
 
-regularParse :: ParseM a -> String -> Either ParseError a
-regularParse p = parseWithEof p []
+regularParse :: ParseM a -> CutConfig -> String -> Either ParseError a
+regularParse p cfg = parseWithEof p ([], cfg)
 
 takeVar :: String -> CutVar
 takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> String -> Bool
-parsedItAll p str' = case parseWithLeftOver p [] str' of
+parsedItAll :: ParseM a -> CutConfig -> String -> Bool
+parsedItAll p cfg str' = case parseWithLeftOver p ([], cfg) str' of
   Right (_, "") -> True
   _ -> False
 
@@ -349,44 +349,44 @@ parsedItAll p str' = case parseWithLeftOver p [] str' of
 ----------
 
 mkTests :: CutConfig -> IO TestTree
-mkTests _ = return $ testGroup "Parse" [wsProps, acProps]
+mkTests cfg = return $ testGroup "Parse" [wsProps cfg, acProps cfg]
 
-wsProps :: TestTree
-wsProps = testGroup "consume randomly generated whitespace"
+wsProps :: CutConfig -> TestTree
+wsProps cfg = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar s)) (ExSpace w) ->
-      parseWithLeftOver pVar [] (s ++ w) == Right (v, "")
+      parseWithLeftOver pVar ([], cfg) (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
-      parseWithLeftOver (pSym c) [] (c:w) == Right ((), "")
+      parseWithLeftOver (pSym c) ([], cfg) (c:w) == Right ((), "")
   , testProperty "after equals signs in assignment statements" $
     \(ExAssign a) (ExSpace w) ->
-      parseWithLeftOver pVarEq [] (a ++ w) == Right (takeVar a, "")
+      parseWithLeftOver pVarEq ([], cfg) (a ++ w) == Right (takeVar a, "")
   , testProperty "after quoted strings" $
     \(ExQuoted q) (ExSpace w) ->
-      parseWithLeftOver pQuoted [] (q ++ w) == Right (read q, "")
+      parseWithLeftOver pQuoted ([], cfg) (q ++ w) == Right (read q, "")
   , testProperty "after numbers" $
-    \(ExNum n) (ExSpace w) -> parsedItAll pNum (n ++ w)
+    \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg (n ++ w)
   , testProperty "before the first identifier on a new line" $
     \(ExComment c) (ExVar (CutVar s)) ->
-      parseWithLeftOver pComment [] (c ++ "\n" ++ s) == Right ((), s)
+      parseWithLeftOver pComment ([], cfg) (c ++ "\n" ++ s) == Right ((), s)
   ]
 
-acProps :: TestTree
-acProps = testGroup "parse randomly generated cut code"
+acProps :: CutConfig -> TestTree
+acProps cfg = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
-      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar [] s == Right (v, "")
+      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg) s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
-      \(ExSymbol c) -> parseWithLeftOver (pSym c) [] [c] == Right ((), "")
+      \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg) [c] == Right ((), "")
   , testProperty "variables with equal signs after" $
       \(ExAssign a) ->
-        parseWithLeftOver pVarEq [] a == Right (takeVar a, "")
+        parseWithLeftOver pVarEq ([], cfg) a == Right (takeVar a, "")
   , testProperty "quoted strings" $
-      \(ExQuoted q) -> regularParse pQuoted q == Right (read q)
+      \(ExQuoted q) -> regularParse pQuoted cfg q == Right (read q)
   , testProperty "comments" $
-      \(ExComment c) -> parseWithLeftOver pComment [] c == Right ((), "")
+      \(ExComment c) -> parseWithLeftOver pComment ([], cfg) c == Right ((), "")
   , testProperty "positive numbers" $
-      \(ExNum n) -> isRight $ regularParse pNum n
+      \(ExNum n) -> isRight $ regularParse pNum cfg n
   ]
 
 -- spec :: Spec

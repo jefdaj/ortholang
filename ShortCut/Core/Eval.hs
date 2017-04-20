@@ -64,7 +64,7 @@ evalScript c s = eval c $ compileScript c s
 
 evalFile :: CutConfig -> IO ()
 evalFile cfg = do
-  f <- parseFile $ fromJust $ cfgScript cfg -- TODO something safer!
+  f <- parseFile cfg $ fromJust $ cfgScript cfg -- TODO something safer!
   case f of
     Left  e -> fail $ "oh no! " ++ show e -- TODO better errors
     Right s -> evalScript cfg s

@@ -153,11 +153,10 @@ instance Pretty CutConfig where
 -- Parse monad --
 -----------------
 
--- TODO is CutState used anywhere yet, or just CutScript?
 type CutState = (CutScript, CutConfig)
-type ParseM a = P.Parsec String CutScript a
+type ParseM a = P.Parsec String CutState a
 
-runParseM :: ParseM a -> CutScript -> String -> Either ParseError a
+runParseM :: ParseM a -> CutState -> String -> Either ParseError a
 runParseM p s = P.runParser p s "somefile"
 
 ----------------

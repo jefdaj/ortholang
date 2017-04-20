@@ -44,24 +44,31 @@ import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
 -- functions for export --
 --------------------------
 
-isExpr :: CutScript -> String -> Bool
-isExpr script line = isRight $ runParseM pExpr script line
+-- TODO all these top-level functions need to take a CutState?
+--      (anything that runs runParseM does I guess)
+
+isExpr :: CutState -> String -> Bool
+isExpr state line = isRight $ runParseM pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: CutScript -> String -> Either ParseError CutExpr
+parseExpr :: CutState -> String -> Either ParseError CutExpr
 parseExpr = runParseM pExpr
 
-parseStatement :: CutScript -> String -> Either ParseError CutAssign
+-- TODO need CutState here? or just CutConfig?
+parseStatement :: CutState -> String -> Either ParseError CutAssign
 parseStatement = runParseM pStatement
 
-parseString :: String -> Either ParseError CutScript
-parseString = runParseM pScript []
+-- The name doesn't do a good job of explaining this, but it's expected to be
+-- parsing an entire script from a string (no previous state).
+-- TODO clarify that
+parseString :: CutConfig -> String -> Either ParseError CutScript
+parseString c = runParseM pScript ([], c)
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: FilePath -> IO (Either ParseError CutScript)
-parseFile path = readFile path >>= return . parseString
+parseFile :: CutConfig -> FilePath -> IO (Either ParseError CutScript)
+parseFile cfg path = readFile path >>= return . parseString cfg
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -70,15 +77,15 @@ parseFile path = readFile path >>= return . parseString
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
-parseWithEof :: ParseM a -> CutScript -> String -> Either ParseError a
+parseWithEof :: ParseM a -> CutState -> String -> Either ParseError a
 parseWithEof p s = runParseM (p <* eof) s
 
-parseAndShow :: (Show a) => ParseM a -> CutScript -> String -> String
+parseAndShow :: (Show a) => ParseM a -> CutState -> String -> String
 parseAndShow p s str' = case runParseM p s str' of
   Left err -> show err
   Right s2 -> show s2
 
-parseWithLeftOver :: ParseM a -> CutScript -> String -> Either ParseError (a,String)
+parseWithLeftOver :: ParseM a -> CutState -> String -> Either ParseError (a,String)
 parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof
@@ -128,7 +135,7 @@ pVar = lexeme (iden <$> first <*> many rest) <?> "variable"
 pRef :: ParseM CutExpr
 pRef = do
   v@(CutVar var) <- pVar
-  scr <- getState
+  (scr, _) <- getState
   case lookup v scr of 
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" ++ show scr
     Just e -> return $ CutRef (typeOf e) v
@@ -178,7 +185,7 @@ operatorChars = "+-*/&|~"
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
-operatorTable :: [[Operator String CutScript Identity CutExpr]]
+operatorTable :: [[Operator String CutState Identity CutExpr]]
 operatorTable = [map binary operatorChars]
   where
     binary c = Infix (pBop c) AssocLeft
@@ -204,6 +211,7 @@ pEnd = lookAhead $ void $ choice
 
 -- TODO load names from modules, of course
 -- TODO put this in terms of "keyword" or something?
+-- TODO get function names from modules
 pName :: ParseM String
 pName = (choice $ map (try . str') fnNames) <?> "fn name"
   where
@@ -263,11 +271,11 @@ pVarEq = pVar <* (pSym '=') <?> "vareq"
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
 pAssign = do
-  scr <- getState
+  (scr, cfg) <- getState
   optional newline
   v <- pVarEq
   e <- lexeme pExpr
-  putState $ scr ++ [(v,e)]
+  putState (scr ++ [(v,e)], cfg)
   return (v,e)
 
 -- Handles the special case of a naked top-level expression, which is treated
@@ -289,8 +297,9 @@ pStatement = try pAssign <|> pResult
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
 pScript = do
+  (_, cfg) <- getState
   optional spaces
   void $ many pComment
   scr <- many (pStatement <* many pComment)
-  putState scr
+  putState (scr, cfg)
   return scr

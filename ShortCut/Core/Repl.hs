@@ -87,8 +87,8 @@ loop (promptFn:promptFns) = do
     ""        -> return ()
     (':':cmd) -> runCmd cmd
     line      -> do
-      (scr, cfg) <- get
-      case parseStatement scr line of
+      st@(scr, cfg) <- get
+      case parseStatement st line of
         Left e -> print $ show e
         Right r@(v, e) -> do
           let scr' = delFromAL scr v ++ [r]
@@ -96,7 +96,7 @@ loop (promptFn:promptFns) = do
           -- even though result gets added to the script either way,
           -- still have to check whether to print it
           -- TODO should be able to factor this out and put in Eval.hs
-          when (isExpr scr line) (liftIO $ evalScript cfg scr')
+          when (isExpr st line) (liftIO $ evalScript cfg scr')
   loop promptFns
 
 --------------------------
@@ -147,10 +147,11 @@ cmdHelp _ = print
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: String -> ReplM ()
 cmdLoad path = do
-  new <- liftIO $ parseFile path
+  (_, cfg)  <- get
+  new <- liftIO $ parseFile cfg path
   case new of
     Left  e -> print $ show e
-    Right s -> get >>= \(_, c) -> put (s, c)
+    Right s -> put (s, cfg)
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
@@ -163,7 +164,7 @@ cmdSave path = do
     showHack = unlines . map prettyShow
 
 cmdDrop :: String -> ReplM ()
-cmdDrop [] = get >>= \s -> put ([], snd s)
+cmdDrop [] = get >>= \(_, cfg) -> put ([], cfg)
 cmdDrop var = do
   (scr, cfg) <- get
   let v = CutVar var
@@ -175,8 +176,8 @@ cmdDrop var = do
 --      (add to the pretty instance?)
 cmdType :: String -> ReplM ()
 cmdType s = do
-  (scr, _) <- get
-  print $ case parseExpr scr s of
+  state <- get
+  print $ case parseExpr state s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 
