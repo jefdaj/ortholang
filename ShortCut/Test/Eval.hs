@@ -1,13 +1,16 @@
 module ShortCut.Test.Eval where
 
-import Paths_ShortCut          (getDataFileName)
-import ShortCut.Core.Eval      (evalFile)
-import ShortCut.Core.Types     (CutConfig(..))
-import ShortCut.Core.Util      (mkTestGroup)
-import System.FilePath.Posix   (replaceExtension, takeBaseName, (</>))
-import System.IO.Silently      (silence)
-import Test.Tasty              (TestTree, testGroup)
-import Test.Tasty.Golden       (goldenVsFile, findByExtension)
+import Data.ByteString.Lazy.Char8 (pack, writeFile)
+import Paths_ShortCut             (getDataFileName)
+import ShortCut.Core.Eval         (evalFile)
+import ShortCut.Core.Types        (CutConfig(..))
+import ShortCut.Core.Util         (mkTestGroup)
+import System.FilePath.Posix      (replaceExtension, takeBaseName, (</>))
+import System.IO.Silently         (silence)
+import Test.Tasty                 (TestTree, testGroup)
+import Test.Tasty.Golden          (goldenVsFile, goldenVsString, findByExtension)
+import System.Process             (cwd, readCreateProcess, shell)
+import Prelude             hiding (writeFile)
 
 -- import Debug.Trace
 
@@ -23,13 +26,14 @@ import Test.Tasty.Golden       (goldenVsFile, findByExtension)
 -- import ShortCut.Core.Types
 
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts]
+mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts, goldenTrees]
 
 -- TODO need to evaluate the script in a tmpdir, and pass tmpdir/result
 --      to goldenVsFile
 -- TODO might as well name the test by the basename? if it needs a name
 -- TODO use System.FilePath.Posix for manipulations
 -- TODO i guess now is the time to make Compile use cfgTmpDir from CutConfig?
+-- TODO include goldenTree here too (should pass both at once)
 goldenScript :: CutConfig -> FilePath -> FilePath -> TestTree
 goldenScript cfg cut gld = goldenVsFile name gld res act
   where
@@ -41,7 +45,34 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
   tDir <- getDataFileName "ShortCut/Test/scripts"
-  gFiles <- findByExtension [".golden"] tDir
+  gFiles <- findByExtension [".result"] tDir
   let cuts   = map (\s -> replaceExtension s "cut") gFiles
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)
-  return $ testGroup "interpret test scripts" gTests
+  return $ testGroup "produce expected results" gTests
+
+-- Line goldenScript, except it tests that the proper tree of tmpfiles was
+-- created instead of the proper result.  Note that the tree file is unrelated
+-- to the TestTree.
+-- TODO ensure that tree is installed, or use a more basic command!
+goldenTree :: CutConfig -> FilePath -> FilePath -> TestTree
+goldenTree cfg cut tre = goldenVsString name tre act
+  where
+    name = takeBaseName cut
+    cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
+    cmd  = (shell "tree") { cwd = Just $ cfgTmpDir cfg' }
+    act  = do
+             silence $ evalFile cfg'
+             out <- readCreateProcess cmd ""
+             -- txt <- readFile tre
+             -- putStrLn txt
+             return $ pack out
+
+-- TODO shit, something about the result numbers is nondeterministic; need to fix to pass these!
+--      probably because it needs to not rely on the path *to* the shortcut dir, only inside it
+goldenTrees :: CutConfig -> IO TestTree
+goldenTrees cfg = do
+  tDir <- getDataFileName "ShortCut/Test/scripts"
+  gFiles <- findByExtension [".tree"] tDir
+  let cuts   = map (\s -> replaceExtension s "cut") gFiles
+      gTests = map (\(s,g) -> goldenTree cfg s g) (zip cuts gFiles)
+  return $ testGroup "produce expected tmpfiles" gTests

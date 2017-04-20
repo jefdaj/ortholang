@@ -45,6 +45,7 @@ mockPrompt stdinStr promptStr = do
 mockRepl :: [String] -> CutConfig -> IO String
 mockRepl stdin cfg = capture_ $ mkRepl (map mockPrompt stdin) cfg
 
+-- TODO include goldenTree here too (should pass both at once)
 goldenRepl :: CutConfig -> FilePath -> IO TestTree
 goldenRepl cfg path = do
   txt <- readFile path
@@ -56,7 +57,7 @@ goldenRepl cfg path = do
 goldenRepls :: CutConfig -> IO TestTree
 goldenRepls cfg = do
   tDir  <- getDataFileName "ShortCut/Test/sessions"
-  golds <- findByExtension [".golden"] tDir
+  golds <- findByExtension [".txt"] tDir
   let tests = mapM (goldenRepl cfg) golds
       group = testGroup "reproduce test sessions"
   fmap group tests

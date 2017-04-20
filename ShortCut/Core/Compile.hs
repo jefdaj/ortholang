@@ -82,14 +82,16 @@ hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
 hashedTmp cfg expr paths = exprDir cfg </> uniq <.> e
   where
     (CutType e _) = typeOf expr
-    uniq = digest $ unlines $ (show expr):paths
+    paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    uniq = digest $ unlines $ (show expr):paths'
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
 hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
 hashedTmp' cfg (CutType extn _) expr paths = exprDir cfg </> uniq <.> extn
   where
-    uniq = digest $ unlines $ (show expr):paths
+    paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    uniq = digest $ unlines $ (show expr):paths'
 hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 
 ---------------------
