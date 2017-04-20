@@ -6,9 +6,10 @@ import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Types        (CutConfig(..), ReplM)
 import ShortCut.Core.Util         (mkTestGroup)
-import System.FilePath.Posix      (takeBaseName, replaceExtension)
-import System.IO.Silently         (capture_)
-import System.IO.Silently         (silence)
+import System.Directory           (createDirectoryIfMissing)
+import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>))
+import System.IO                  (stdout, stderr)
+import System.IO.Silently         (hCapture_)
 import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, findByExtension)
@@ -44,15 +45,16 @@ mockPrompt stdinStr promptStr = do
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
 mockRepl :: [String] -> CutConfig -> IO String
-mockRepl stdin cfg = capture_ $ mkRepl (map mockPrompt stdin) cfg
+mockRepl stdin cfg = hCapture_ [stdout, stderr] $ mkRepl (map mockPrompt stdin) cfg
 
 -- TODO include goldenTree here too (should pass both at once)
 goldenRepl :: CutConfig -> FilePath -> IO TestTree
 goldenRepl cfg path = do
   txt <- readFile path
   let name   = takeBaseName path
+      cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       stdin  = extractStdin txt
-      action = fmap pack $ mockRepl stdin cfg
+      action = fmap pack $ mockRepl stdin cfg'
   return $ goldenVsString name path action
 
 goldenRepls :: CutConfig -> IO TestTree
@@ -64,18 +66,19 @@ goldenRepls cfg = do
   fmap group tests
 
 goldenReplTree :: CutConfig -> FilePath -> IO TestTree
-goldenReplTree cfg txt = do
-  txt <- readFile txt
-  let name   = takeBaseName txt
-      tree   = replaceExtension txt "tree"
+goldenReplTree cfg ses = do
+  txt <- readFile ses
+  let name   = takeBaseName ses
+      cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
+      tree   = replaceExtension ses "tree"
       stdin  = extractStdin txt
-      cmd    = (shell "tree") { cwd = Just $ cfgTmpDir cfg }
+      tmpDir = cfgTmpDir cfg'
+      cmd    = (shell "tree") { cwd = Just $ tmpDir }
       action = do
-                 silence $ mockRepl stdin cfg
+                 mockRepl stdin cfg'
+                 createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  return $ pack out
-  putStrLn $ "on txt " ++ txt
-  putStrLn $ "looking for " ++ tree
   return $ goldenVsString name tree action
 
 goldenReplTrees :: CutConfig -> IO TestTree
@@ -85,31 +88,3 @@ goldenReplTrees cfg = do
   let tests = mapM (goldenReplTree cfg) txts
       group = testGroup "create expected tmpfiles"
   fmap group tests
-
-
--- -- Line goldenScript, except it tests that the proper tree of tmpfiles was
--- -- created instead of the proper result.  Note that the tree file is unrelated
--- -- to the TestTree.
--- -- TODO ensure that tree is installed, or use a more basic command!
--- goldenTree :: CutConfig -> FilePath -> FilePath -> TestTree
--- goldenTree cfg cut tre = goldenVsString name tre act
---   where
---     name = takeBaseName cut
---     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
---     cmd  = (shell "tree") { cwd = Just $ cfgTmpDir cfg' }
---     act  = do
---              silence $ evalFile cfg'
---              out <- readCreateProcess cmd ""
---              -- txt <- readFile tre
---              -- putStrLn txt
---              return $ pack out
--- 
--- -- TODO shit, something about the result numbers is nondeterministic; need to fix to pass these!
--- --      probably because it needs to not rely on the path *to* the shortcut dir, only inside it
--- goldenTrees :: CutConfig -> IO TestTree
--- goldenTrees cfg = do
---   tDir <- getDataFileName "ShortCut/Test/sessions"
---   gFiles <- findByExtension [".tree"] tDir
---   let cuts   = map (\s -> replaceExtension s "txt") gFiles
---       gTests = map (\(s,g) -> goldenTree cfg s g) (zip cuts gFiles)
---   return $ testGroup "produce expected tmpfiles" gTests
