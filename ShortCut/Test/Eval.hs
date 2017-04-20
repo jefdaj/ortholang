@@ -26,7 +26,7 @@ import Prelude             hiding (writeFile)
 -- import ShortCut.Core.Types
 
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts, goldenTrees]
+mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts, goldenScriptTrees]
 
 -- TODO need to evaluate the script in a tmpdir, and pass tmpdir/result
 --      to goldenVsFile
@@ -54,8 +54,8 @@ goldenScripts cfg = do
 -- created instead of the proper result.  Note that the tree file is unrelated
 -- to the TestTree.
 -- TODO ensure that tree is installed, or use a more basic command!
-goldenTree :: CutConfig -> FilePath -> FilePath -> TestTree
-goldenTree cfg cut tre = goldenVsString name tre act
+goldenScriptTree :: CutConfig -> FilePath -> FilePath -> TestTree
+goldenScriptTree cfg cut tre = goldenVsString name tre act
   where
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
@@ -69,10 +69,10 @@ goldenTree cfg cut tre = goldenVsString name tre act
 
 -- TODO shit, something about the result numbers is nondeterministic; need to fix to pass these!
 --      probably because it needs to not rely on the path *to* the shortcut dir, only inside it
-goldenTrees :: CutConfig -> IO TestTree
-goldenTrees cfg = do
+goldenScriptTrees :: CutConfig -> IO TestTree
+goldenScriptTrees cfg = do
   tDir <- getDataFileName "ShortCut/Test/scripts"
   gFiles <- findByExtension [".tree"] tDir
   let cuts   = map (\s -> replaceExtension s "cut") gFiles
-      gTests = map (\(s,g) -> goldenTree cfg s g) (zip cuts gFiles)
+      gTests = map (\(s,g) -> goldenScriptTree cfg s g) (zip cuts gFiles)
   return $ testGroup "produce expected tmpfiles" gTests

@@ -4,16 +4,18 @@ import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
-import ShortCut.Core.Types        (CutConfig, ReplM)
+import ShortCut.Core.Types        (CutConfig(..), ReplM)
 import ShortCut.Core.Util         (mkTestGroup)
-import System.FilePath.Posix      (takeBaseName)
+import System.FilePath.Posix      (takeBaseName, replaceExtension)
 import System.IO.Silently         (capture_)
+import System.IO.Silently         (silence)
+import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, findByExtension)
 import Text.Regex                 (mkRegex, splitRegex)
 
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "Repl" [goldenRepls]
+mkTests cfg = mkTestGroup cfg "Repl" [goldenRepls, goldenReplTrees]
 
 -- TODO have to fix eLine before getting anything out of the repl at all!
 --      but can work on splitting the repl files first
@@ -23,8 +25,7 @@ mkTests cfg = mkTestGroup cfg "Repl" [goldenRepls]
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
--- Parse a pasted REPL session (golden string) into initial prompt, text the
--- user typed, and text printed back by shortcut.
+-- Extract text the user typed from a pasted REPL session (golden string)
 -- TODO use a function like lineStartsWith and take the prompt as an argument?
 extractStdin :: String -> [String]
 extractStdin txt = tail $ map fst split
@@ -59,5 +60,56 @@ goldenRepls cfg = do
   tDir  <- getDataFileName "ShortCut/Test/sessions"
   golds <- findByExtension [".txt"] tDir
   let tests = mapM (goldenRepl cfg) golds
-      group = testGroup "reproduce test sessions"
+      group = testGroup "print expected responses"
   fmap group tests
+
+goldenReplTree :: CutConfig -> FilePath -> IO TestTree
+goldenReplTree cfg txt = do
+  txt <- readFile txt
+  let name   = takeBaseName txt
+      tree   = replaceExtension txt "tree"
+      stdin  = extractStdin txt
+      cmd    = (shell "tree") { cwd = Just $ cfgTmpDir cfg }
+      action = do
+                 silence $ mockRepl stdin cfg
+                 out <- readCreateProcess cmd ""
+                 return $ pack out
+  putStrLn $ "on txt " ++ txt
+  putStrLn $ "looking for " ++ tree
+  return $ goldenVsString name tree action
+
+goldenReplTrees :: CutConfig -> IO TestTree
+goldenReplTrees cfg = do
+  tDir  <- getDataFileName "ShortCut/Test/sessions"
+  txts  <- findByExtension [".txt"] tDir
+  let tests = mapM (goldenReplTree cfg) txts
+      group = testGroup "create expected tmpfiles"
+  fmap group tests
+
+
+-- -- Line goldenScript, except it tests that the proper tree of tmpfiles was
+-- -- created instead of the proper result.  Note that the tree file is unrelated
+-- -- to the TestTree.
+-- -- TODO ensure that tree is installed, or use a more basic command!
+-- goldenTree :: CutConfig -> FilePath -> FilePath -> TestTree
+-- goldenTree cfg cut tre = goldenVsString name tre act
+--   where
+--     name = takeBaseName cut
+--     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
+--     cmd  = (shell "tree") { cwd = Just $ cfgTmpDir cfg' }
+--     act  = do
+--              silence $ evalFile cfg'
+--              out <- readCreateProcess cmd ""
+--              -- txt <- readFile tre
+--              -- putStrLn txt
+--              return $ pack out
+-- 
+-- -- TODO shit, something about the result numbers is nondeterministic; need to fix to pass these!
+-- --      probably because it needs to not rely on the path *to* the shortcut dir, only inside it
+-- goldenTrees :: CutConfig -> IO TestTree
+-- goldenTrees cfg = do
+--   tDir <- getDataFileName "ShortCut/Test/sessions"
+--   gFiles <- findByExtension [".tree"] tDir
+--   let cuts   = map (\s -> replaceExtension s "txt") gFiles
+--       gTests = map (\(s,g) -> goldenTree cfg s g) (zip cuts gFiles)
+--   return $ testGroup "produce expected tmpfiles" gTests
