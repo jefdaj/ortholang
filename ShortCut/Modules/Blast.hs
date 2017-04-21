@@ -109,8 +109,8 @@ worstBestEvalue = CutFunction
 -- TODO rewrite this with mkLoader from Compile
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
-cLoadGenes :: CutConfig -> CutExpr -> CutType -> Rules FilePath
-cLoadGenes cfg expr@(CutFun _ _ [f]) _ = do
+cLoadGenes :: CutConfig -> CutExpr -> Rules FilePath
+cLoadGenes cfg expr@(CutFun _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
   -- TODO this shouldn't be needed because this fn will be starting from a gom,
   --      not a str; mkLoader or cLoad or whatever handles str -> gom
@@ -122,7 +122,7 @@ cLoadGenes cfg expr@(CutFun _ _ [f]) _ = do
     path' <- readFile' path
     quietly $ cmd "extract-seq-ids.py" fstmp out path'
   return genes
-cLoadGenes _ _ _ = error "bad argument to cLoadGenes"
+cLoadGenes _ _ = error "bad argument to cLoadGenes"
 
 -- TODO does this need to distinguish FNA from FAA?
 extractSeqs :: CmdResult b => CutConfig -> FilePath -> FilePath -> Action b
@@ -142,8 +142,8 @@ bblast cfg genes genomes out = do
   quietly $ cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
-cFilterGenes :: CutConfig -> CutExpr -> CutType -> Rules FilePath
-cFilterGenes cfg e@(CutFun _ _ [gens, goms, sci]) _ = do
+cFilterGenes :: CutConfig -> CutExpr -> Rules FilePath
+cFilterGenes cfg e@(CutFun _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
   genes   <- cExpr cfg gens
   genomes <- cExpr cfg goms
@@ -159,11 +159,11 @@ cFilterGenes cfg e@(CutFun _ _ [gens, goms, sci]) _ = do
     need [genomes, hits, evalue]
     quietly $ cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
   return genes'
-cFilterGenes _ _ _ = error "bad argument to cFilterGenes"
+cFilterGenes _ _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
-cFilterGenomes :: CutConfig -> CutExpr -> CutType -> Rules FilePath
-cFilterGenomes cfg e@(CutFun _ _ [goms, gens, sci]) _ = do
+cFilterGenomes :: CutConfig -> CutExpr -> Rules FilePath
+cFilterGenomes cfg e@(CutFun _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
   genomes <- cExpr cfg goms
   genes   <- cExpr cfg gens
@@ -178,10 +178,10 @@ cFilterGenomes cfg e@(CutFun _ _ [goms, gens, sci]) _ = do
     need [genes, hits, evalue]
     quietly $ cmd "filter_genomes.R" [fgtmp, out, genes, hits, evalue]
   return genomes'
-cFilterGenomes _ _ _ = error "bad argument to cFilterGenomes"
+cFilterGenomes _ _ = error "bad argument to cFilterGenomes"
 
-cWorstBest :: CutConfig -> CutExpr -> CutType -> Rules FilePath
-cWorstBest cfg e@(CutFun _ _ [gens, goms]) _ = do
+cWorstBest :: CutConfig -> CutExpr -> Rules FilePath
+cWorstBest cfg e@(CutFun _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
   genes   <- cExpr cfg gens
   genomes <- cExpr cfg goms
@@ -195,4 +195,4 @@ cWorstBest cfg e@(CutFun _ _ [gens, goms]) _ = do
     need [hits, genes]
     quietly $ cmd "worst_best_evalue.R" [wbtmp, out, hits, genes]
   return evalue
-cWorstBest _ _ _ = error "bad argument to cWorstBest"
+cWorstBest _ _ = error "bad argument to cWorstBest"

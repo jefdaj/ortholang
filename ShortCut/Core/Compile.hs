@@ -185,8 +185,8 @@ cRef _ _ = error "bad argument to cRef"
 -- creates a symlink from expression file to input file
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
-cLoad :: CutConfig -> CutExpr -> CutType -> Rules FilePath
-cLoad cfg e@(CutFun _ _ [f]) _ = do
+cLoad :: CutConfig -> CutExpr -> Rules FilePath
+cLoad cfg e@(CutFun _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
   path <- cExpr cfg f
   let link = hashedTmp cfg e [path]
@@ -196,7 +196,7 @@ cLoad cfg e@(CutFun _ _ [f]) _ = do
     -- putQuiet $ unwords ["link", str', out]
     quietly $ cmd "ln -fs" [path'', out]
   return link
-cLoad _ _ _ = error "bad argument to cLoad"
+cLoad _ _ = error "bad argument to cLoad"
 
 -- TODO this should probably be exported for use in modules?
 -- TODO typecheck here? expr has to be of type str (rtn type set by caller)

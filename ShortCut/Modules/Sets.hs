@@ -21,12 +21,11 @@ cutModule = CutModule
 --      what if I give *everything* an argument like this?
 --      for the polymorphic fns it determines the return type,
 --      and the rest require successful pattern matching?
-mkSetBop :: String -> (Set String -> Set String -> Set String)
-        -> CutType -> CutFunction
-mkSetBop name fn rtn = CutFunction
+mkSetBop :: String -> (Set String -> Set String -> Set String) -> CutFunction
+mkSetBop name fn = CutFunction
   { fName = name
-  , fAccepts = [SetOf rtn, SetOf rtn]
-  , fReturns = SetOf rtn
+  , fAccepts = [SetOf str, SetOf str] -- TODO not str, placeholder!
+  , fReturns = SetOf str              -- TODO not str, placeholder!
   , fFixity  = Infix
   , fCompiler = cSet fn
   }

@@ -19,8 +19,8 @@ cutModule = CutModule
   }
 
 mkMathFn :: String -> (Scientific -> Scientific -> Scientific)
-         -> CutType -> CutFunction
-mkMathFn name fn rtn = CutFunction
+         -> CutFunction
+mkMathFn name fn = CutFunction
   { fName = name
   , fAccepts = [num, num]
   , fReturns = num

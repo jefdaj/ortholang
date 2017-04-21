@@ -215,7 +215,7 @@ data CutFunction = CutFunction
   , fAccepts :: [CutType]
   , fReturns :: CutType
   , fFixity  :: CutFixity
-  , fCompiler :: CutConfig -> CutExpr -> CutType -> Rules FilePath
+  , fCompiler :: CutConfig -> CutExpr -> Rules FilePath
   }
   -- deriving (Eq, Read)
 
@@ -229,7 +229,7 @@ instance Show CutFunction where
 -- TODO does eq make sense here?
 data CutModule = CutModule
   { mName :: String
-  , mFunctions :: [CutType -> CutFunction]
+  , mFunctions :: [CutFunction]
   }
   -- deriving (Eq, Read)
 
