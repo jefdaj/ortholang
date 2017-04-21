@@ -1,6 +1,13 @@
 module ShortCut.Modules.Files where
 
-import ShortCut.Core.Types (CutModule(..), CutFunction(..))
+import ShortCut.Core.Types
+
+-- TODO break this into core (set loading) + fns in each other module?
+
+gen = CutType "gene"   "gene"   -- TODO deprecate
+gom = CutType "genome" "genome" -- TODO deprecate
+faa = CutType "faa"    "fasta amino acid"
+fna = CutType "fna"    "fasta nucleic acid"
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -11,27 +18,27 @@ cutModule = CutModule
 loadFastaAA :: CutFunction
 loadFastaAA = CutFunction
   { fName = "load_fasta_aa"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [str]
+  , fReturns = faa
   }
 
 loadFastaNA :: CutFunction
 loadFastaNA = CutFunction
   { fName = "load_fasta_na"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [str]
+  , fReturns = fna
   }
 
 loadGenes :: CutFunction
 loadGenes = CutFunction
   { fName = "load_genes"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [str]
+  , fReturns = gen
   }
 
 loadGenomes :: CutFunction
 loadGenomes = CutFunction
   { fName = "load_genomes"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [str]
+  , fReturns = gom
   }

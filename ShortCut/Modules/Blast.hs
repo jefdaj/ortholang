@@ -1,6 +1,9 @@
 module ShortCut.Modules.Blast where
 
-import ShortCut.Core.Types (CutModule(..), CutFunction(..))
+import ShortCut.Core.Types
+import ShortCut.Modules.Files (faa, fna, gen, gom)
+
+csv = CutType "csv" "spreadsheet"
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -11,20 +14,20 @@ cutModule = CutModule
 filterGenes :: CutFunction
 filterGenes = CutFunction
   { fName = "filter_genes"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [SetOf gen, SetOf gom, num]
+  , fReturns = SetOf gen
   }
 
 filterGenomes :: CutFunction
 filterGenomes = CutFunction
   { fName = "filter_genomes"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [SetOf gom, SetOf gen, num]
+  , fReturns = SetOf gom
   }
 
 worstBestEvalue :: CutFunction
 worstBestEvalue = CutFunction
   { fName = "worst_best_evalue"
-  , fAccepts = undefined
-  , fReturns = undefined
+  , fAccepts = [SetOf gen, SetOf gom]
+  , fReturns = num
   }

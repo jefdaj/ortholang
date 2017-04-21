@@ -29,9 +29,10 @@ module ShortCut.Core.Parse
 import ShortCut.Core.Types
 
 import Control.Applicative    ((<|>), many)
-import Control.Monad          (void)
+import Control.Monad          (void, fail)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
+import Data.List              (find)
 import Data.Either            (isRight)
 import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
@@ -226,18 +227,14 @@ fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 -- TODO load these from modules too, somehow
 pFun :: ParseM CutExpr
 pFun = do
+  (_, cfg) <- getState
   name <- pName
   args <- manyTill pTerm pEnd
-  let (rtype, _) = case name of
-                    "load_aa_seqs"      -> (faa, [str])
-                    "load_na_seqs"      -> (fna, [str])
-                    "load_genes"        -> (gen, [str])
-                    "load_genomes"      -> (gom, [str])
-                    "filter_genomes"    -> (gom, [SetOf gom, SetOf gen, num])
-                    "filter_genes"      -> (gen, [SetOf gen, SetOf gom, num])
-                    "worst_best_evalue" -> (num, [SetOf gen, SetOf gom]) 
-                    x -> error $ "bad argument to pFun: '" ++ show x ++ "'"
-  return $ CutFun rtype name args
+  let fns = concat $ map mFunctions $ cfgModules cfg
+      fn  = find (\f -> fName f == name) fns
+  case fn of
+    Nothing -> fail $ "no such function: '" ++ name ++ "'"
+    Just f  -> return $ CutFun (fReturns f) (fName f) args
 
 -----------------
 -- expressions --

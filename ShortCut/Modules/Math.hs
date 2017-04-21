@@ -1,7 +1,7 @@
 module ShortCut.Modules.Math where
 
-import Prelude      hiding (div)
-import ShortCut.Core.Types (CutModule(..), CutFunction(..))
+import Prelude hiding (div)
+import ShortCut.Core.Types
 
 cutModule :: CutModule
 cutModule = CutModule

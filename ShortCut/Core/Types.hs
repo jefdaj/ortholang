@@ -19,7 +19,7 @@ module ShortCut.Core.Types
   , ReplM
   -- misc
   , prettyShow
-  , str, num, faa, fna, gen, gom, csv -- TODO load these from modules
+  , str, num -- TODO load these from modules
   , typeOf
   -- module stuff (in flux)
   , CutFunction(..)
@@ -75,14 +75,11 @@ typeOf (CutFun t _ _  ) = t
 typeOf (CutSet t _    ) = SetOf t
 
 -- TODO move to modules as soon as parsing works again
-str, num, faa, fna, gen, gom, csv :: CutType
+-- TODO keep literals in the core along with refs and stuff? seems reasonable
+-- TODO how about lists/sets, are those core too?
+str, num :: CutType
 str = CutType "str"    "string"
 num = CutType "num"    "number in scientific notation"
-faa = CutType "faa"    "fasta amino acid"
-fna = CutType "fna"    "fasta nucleic acid"
-gen = CutType "gene"   "gene" -- TODO deprecate
-gom = CutType "genome" "genome" -- TODO deprecate
-csv = CutType "csv"    "spreadsheet"
 
 ---------------------
 -- pretty printers --
