@@ -209,7 +209,7 @@ cmdConfig s = do
   (_, cfg) <- get
   let ws = words s
   if (length ws == 0)
-    then (print (show cfg) >> return ()) -- TODO Pretty instance
+    then (print (prettyShow cfg) >> return ()) -- TODO Pretty instance
     else if (length ws  > 2)
       then (print "too many variables" >> return ())
       -- TODO separate into get/set cases:

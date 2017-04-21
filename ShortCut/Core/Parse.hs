@@ -39,14 +39,12 @@ import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
                                newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
                               ,lookAhead, between, choice, anyToken)
-import Text.Parsec.Expr       (buildExpressionParser, Assoc(..), Operator(..))
+-- import Text.Parsec.Expr       (buildExpressionParser)
+import qualified Text.Parsec.Expr as E
 
 --------------------------
 -- functions for export --
 --------------------------
-
--- TODO all these top-level functions need to take a CutState?
---      (anything that runs runParseM does I guess)
 
 isExpr :: CutState -> String -> Bool
 isExpr state line = isRight $ runParseM pExpr state line
@@ -180,21 +178,39 @@ pStr = CutLit str <$> pQuoted <?> "string"
 -- operators --
 ---------------
 
+-- TODO load from modules somehow... or do individual fn parsers make it obsolete?
 operatorChars :: [Char]
 operatorChars = "+-*/&|~"
 
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
-operatorTable :: [[Operator String CutState Identity CutExpr]]
+-- TODO remove this once sure the version 2 below works
+operatorTable :: [[E.Operator String CutState Identity CutExpr]]
 operatorTable = [map binary operatorChars]
   where
-    binary c = Infix (pBop c) AssocLeft
+    binary c = E.Infix (pBop c) E.AssocLeft
+
+-- TODO once sure this works, remove the one above
+operatorTable2 :: CutConfig -> [[E.Operator String CutState Identity CutExpr]]
+operatorTable2 cfg = [map binary bops]
+  where
+    -- TODO extract these to utility functions in Types or somewhere?
+    binary f = E.Infix (pBop2 $ fName f) E.AssocLeft
+    -- TODO shit, seems the extra type arg might have been a bad idea
+    --      could put (f undefined) here, but that smells bad!
+    bops = filter (\f -> fFixity f == Infix) (concat $ map mFunctions mods)
+    mods = cfgModules cfg
 
 -- Tricky bit: needs to take two already-parsed expressions
 -- TODO verify they have the correct types
 pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop o = pSym o *> (return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2)
+
+-- TODO is there a better way than only taking one-char strings?
+pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
+pBop2 [o] = pSym o *> (return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2)
+pBop2  s  = error $ "invalid binary op name '" ++ s ++ "'"
 
 ---------------
 -- functions --
@@ -252,7 +268,10 @@ pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 -- add non-assignment statements like assertions. See:
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM CutExpr
-pExpr = buildExpressionParser operatorTable pTerm <?> "expression"
+-- pExpr = E.buildExpressionParser operatorTable pTerm <?> "expression"
+pExpr = do
+  (_, cfg) <- getState
+  E.buildExpressionParser (operatorTable2 cfg) pTerm <?> "expression"
 
 ----------------
 -- statements --

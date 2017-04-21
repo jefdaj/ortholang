@@ -9,6 +9,8 @@ module ShortCut.Core.Types
   , CutVar(..)
   , CutScript
   , CutState
+  -- , Assoc(..) -- we reuse this from Parsec
+  , CutFixity(..)
   -- parse monad
   , ParseM
   , runParseM
@@ -34,10 +36,12 @@ import Text.PrettyPrint.HughesPJClass
 -- import Control.Monad.Identity    (Identity)
 import Data.Scientific           (Scientific())
 import Text.Parsec               (ParseError)
+-- import Text.Parsec.Expr          (Assoc(..))
 import Control.Monad.State.Lazy  (StateT, execStateT, lift, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
 import System.Console.Haskeline  (InputT, getInputLine, runInputT,
                                   defaultSettings, outputStrLn)
+import Development.Shake (Rules)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -137,7 +141,7 @@ data CutConfig = CutConfig
   , cfgVerbose :: Bool
   , cfgModules :: [CutModule]
   }
-  deriving (Eq, Show, Read)
+  -- deriving (Eq, Show, Read)
 
 instance Pretty CutConfig where
   pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
@@ -184,16 +188,36 @@ print = lift . lift . outputStrLn
 --   }
 --   deriving (Eq, Show, Read)
 
--- TODO does eq make sense here?
+-- TODO should there be any more fundamental difference between fns and bops?
+data CutFixity = Prefix | Infix
+  deriving (Eq, Show, Read)
+
+-- TODO GET RID OF THAT EXTRA RETURN TYPE ARG YOU JUST ADDED EVERYWHERE
+-- TODO START MAKING GIT BRANCHES FOR EACH LITTLE IDEA TO KEEP SANE
+-- TODO THEN TRY MIMICKING HASKELL'S "SET A" NOTATION: "SETOF A"
+--      YOUR TYPECHECKER CAN JUST HAVE A SPECIAL CASE FOR THOSE!
+--      CHECK THAT ALL THE "A"S AND "SETOF A"S MATCH,
+--      THEN CHECK THE REST NORMALLY
+--      DON'T GO OVERBOARD FOR NOW; JUST AN "A" TYPE IS ENOUGH TO TRY IT
+--      CAN ALSO MAKE A SPECIAL CASE WHEN PRINTING THE TYPE SIGNATURES + ERRORS
+--      but how to avoid putting those placeholder "a"s in at runtime?
+-- TODO another idea, which could go in a branch:
+--      have the args list take an argument, and also contain the return type
+--      (not just a list, but whatever you get it)
+--      that way you can adjust based on the first arg
+--      but would that make handling sets hard as opposed to regular types?
+--      would it mean having pattern matches that can fail?
+
+-- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
   { fName    :: String
   , fAccepts :: [CutType]
   , fReturns :: CutType
-  -- , fParser   :: ???
-  -- , fCompiler :: ???
+  , fFixity  :: CutFixity
+  , fCompiler :: CutConfig -> CutExpr -> CutType -> Rules FilePath
   }
-  deriving (Eq, Read)
+  -- deriving (Eq, Read)
 
 -- TODO change this to something useful
 instance Pretty CutFunction where
@@ -205,9 +229,9 @@ instance Show CutFunction where
 -- TODO does eq make sense here?
 data CutModule = CutModule
   { mName :: String
-  , mFunctions :: [CutFunction]
+  , mFunctions :: [CutType -> CutFunction]
   }
-  deriving (Eq, Read)
+  -- deriving (Eq, Read)
 
 -- TODO change this to something useful
 instance Pretty CutModule where
