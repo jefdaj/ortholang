@@ -149,8 +149,22 @@ instance Arbitrary ExNum where
 
 -- commands --
 
+-- TODO need to use forAll with another function with CutConfig arg rather than
+-- an Arbitrary instance here? for now, just faking it...
 gFunName :: Gen String
 gFunName = elements fnNames
+
+-- TODO remove once gFunName takes a CutConfig
+fnNames :: [String]
+fnNames =
+  [ "load_aa_seqs"
+  , "load_na_seqs"
+  , "load_genes"
+  , "load_genomes"
+  , "filter_genomes"
+  , "filter_genes"
+  , "worst_best_evalue"
+  ]
 
 gFun :: Gen String
 gFun = do

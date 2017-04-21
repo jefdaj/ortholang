@@ -10,7 +10,7 @@ module ShortCut.Core.Parse
   , parseFile
   -- functiosn only used for testing
   , escapeChars
-  , fnNames -- TODO load these from modules
+  -- , fnNames -- TODO load these from modules
   , literalChars
   , pComment
   , pNum
@@ -213,21 +213,17 @@ pEnd = lookAhead $ void $ choice
 -- TODO put this in terms of "keyword" or something?
 -- TODO get function names from modules
 pName :: ParseM String
-pName = (choice $ map (try . str') fnNames) <?> "fn name"
+pName = do
+  (_, cfg) <- getState
+  (choice $ map (try . str') $ fnNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
 
-fnNames :: [String]
-fnNames =
-  [ "load_aa_seqs"
-  , "load_na_seqs"
-  , "load_genes"
-  , "load_genomes"
-  , "filter_genomes"
-  , "filter_genes"
-  , "worst_best_evalue"
-  ]
+-- TODO move to types? utils?
+fnNames :: CutConfig -> [String]
+fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
+-- TODO load these from modules too, somehow
 pFun :: ParseM CutExpr
 pFun = do
   name <- pName
