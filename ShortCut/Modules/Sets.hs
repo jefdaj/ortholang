@@ -19,13 +19,15 @@ cutModule = CutModule
 
 -- TODO how do I say "set of whatever" here? Maybe need rtn argument?
 --      what if I give *everything* an argument like this?
---      for the polymorphic fns it determines the return type,
---      and the rest require successful pattern matching?
+--      no no no, just the functions that actually need it!
+--      return type should be known once arguments are parsed,
+--      and then you can call this function with it!
 mkSetBop :: String -> (Set String -> Set String -> Set String) -> CutFunction
 mkSetBop name fn = CutFunction
   { fName = name
-  , fAccepts = [SetOf str, SetOf str] -- TODO not str, placeholder!
-  , fReturns = SetOf str              -- TODO not str, placeholder!
+  -- , fAccepts = [SetOf rtn, SetOf rtn]
+  -- , fReturns = SetOf rtn
+  , fSignature = \(SetOf a) -> (SetOf a, [SetOf a, SetOf a])
   , fFixity  = Infix
   , fCompiler = cSet fn
   }

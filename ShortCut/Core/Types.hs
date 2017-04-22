@@ -208,12 +208,15 @@ data CutFixity = Prefix | Infix
 --      but would that make handling sets hard as opposed to regular types?
 --      would it mean having pattern matches that can fail?
 
+type CutSignature = CutType -> (CutType, [CutType])
+
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
   { fName    :: String
-  , fAccepts :: [CutType]
-  , fReturns :: CutType
+  -- , fAccepts :: [CutType]
+  -- , fReturns :: CutType
+  , fSignature :: CutSignature
   , fFixity  :: CutFixity
   , fCompiler :: CutConfig -> CutExpr -> Rules FilePath
   }

@@ -34,8 +34,9 @@ cutModule = CutModule
 loadFastaAA :: CutFunction
 loadFastaAA = CutFunction
   { fName = "load_fasta_aa"
-  , fAccepts = [str]
-  , fReturns = faa
+  -- , fAccepts = [str]
+  -- , fReturns = faa
+  , fSignature = \_ -> (faa, [str])
   , fFixity  = Prefix
   , fCompiler = cLoad
   }
@@ -43,8 +44,9 @@ loadFastaAA = CutFunction
 loadFastaNA :: CutFunction
 loadFastaNA = CutFunction
   { fName = "load_fasta_na"
-  , fAccepts = [str]
-  , fReturns = fna
+  -- , fAccepts = [str]
+  -- , fReturns = fna
+  , fSignature = \_ -> (fna, [str])
   , fFixity  = Prefix
   , fCompiler = cLoad
   }
@@ -52,8 +54,9 @@ loadFastaNA = CutFunction
 loadGenes :: CutFunction
 loadGenes = CutFunction
   { fName = "load_genes"
-  , fAccepts = [str]
-  , fReturns = gen
+  -- , fAccepts = [str]
+  -- , fReturns = gen
+  , fSignature = \_ -> (gen, [str])
   , fFixity  = Prefix
   , fCompiler = cLoad
   }
@@ -61,8 +64,9 @@ loadGenes = CutFunction
 loadGenomes :: CutFunction
 loadGenomes = CutFunction
   { fName = "load_genomes"
-  , fAccepts = [str]
-  , fReturns = gom
+  -- , fAccepts = [str]
+  -- , fReturns = gom
+  , fSignature = \_ -> (gom, [str])
   , fFixity  = Prefix
   , fCompiler = cLoad
   }
@@ -70,8 +74,9 @@ loadGenomes = CutFunction
 filterGenes :: CutFunction
 filterGenes = CutFunction
   { fName = "filter_genes"
-  , fAccepts = [SetOf gen, SetOf gom, num]
-  , fReturns = SetOf gen
+  -- , fAccepts = [SetOf gen, SetOf gom, num]
+  -- , fReturns = SetOf gen
+  , fSignature = \_ -> (SetOf gen, [SetOf gen, SetOf gom, num])
   , fFixity  = Prefix
   , fCompiler = cFilterGenes
   }
@@ -79,8 +84,9 @@ filterGenes = CutFunction
 filterGenomes :: CutFunction
 filterGenomes = CutFunction
   { fName = "filter_genomes"
-  , fAccepts = [SetOf gom, SetOf gen, num]
-  , fReturns = SetOf gom
+  -- , fAccepts = [SetOf gom, SetOf gen, num]
+  -- , fReturns = SetOf gom
+  , fSignature = \_ -> (SetOf gom, [SetOf gom, SetOf gen, num])
   , fFixity  = Prefix
   , fCompiler = cFilterGenomes
   }
@@ -88,8 +94,9 @@ filterGenomes = CutFunction
 worstBestEvalue :: CutFunction
 worstBestEvalue = CutFunction
   { fName = "worst_best_evalue"
-  , fAccepts = [SetOf gen, SetOf gom]
-  , fReturns = num
+  -- , fAccepts = [SetOf gen, SetOf gom]
+  -- , fReturns = num
+  , fSignature = \_ -> (num, [SetOf gen, SetOf gom])
   , fFixity  = Prefix
   , fCompiler = cWorstBest
   }

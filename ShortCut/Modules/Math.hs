@@ -22,8 +22,9 @@ mkMathFn :: String -> (Scientific -> Scientific -> Scientific)
          -> CutFunction
 mkMathFn name fn = CutFunction
   { fName = name
-  , fAccepts = [num, num]
-  , fReturns = num
+  -- , fAccepts = [num, num]
+  -- , fReturns = num
+  , fSignature = \_ -> (num, [num, num])
   , fFixity  = Infix
   , fCompiler = cMath fn
   }

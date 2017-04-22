@@ -250,7 +250,7 @@ pFun = do
       fn  = find (\f -> fName f == name) fns
   case fn of
     Nothing -> fail $ "no such function: '" ++ name ++ "'"
-    Just f  -> return $ CutFun (fReturns f) (fName f) args
+    Just f  -> return $ CutFun (typeOf $ head args) (fName f) args
 
 -----------------
 -- expressions --
