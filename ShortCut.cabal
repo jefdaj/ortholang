@@ -44,7 +44,7 @@ executable shortcut
                     ShortCut.Modules,
                     ShortCut.Modules.Blast,
                     ShortCut.Modules.Math,
-                    ShortCut.Modules.Sets,
+                    ShortCut.Modules.SetOps,
                     ShortCut.Test,
                     ShortCut.Test.Eval,
                     ShortCut.Test.Parse,
