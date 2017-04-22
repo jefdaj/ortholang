@@ -44,7 +44,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
-  tDir <- getDataFileName "ShortCut/Test/scripts"
+  tDir <- getDataFileName "ShortCut/Test/math"
   gFiles <- findByExtension [".result"] tDir
   let cuts   = map (\s -> replaceExtension s "cut") gFiles
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)
@@ -71,7 +71,7 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
 --      probably because it needs to not rely on the path *to* the shortcut dir, only inside it
 goldenScriptTrees :: CutConfig -> IO TestTree
 goldenScriptTrees cfg = do
-  tDir <- getDataFileName "ShortCut/Test/scripts"
+  tDir <- getDataFileName "ShortCut/Test/math"
   gFiles <- findByExtension [".tree"] tDir
   let cuts   = map (\s -> replaceExtension s "cut") gFiles
       gTests = map (\(s,g) -> goldenScriptTree cfg s g) (zip cuts gFiles)
