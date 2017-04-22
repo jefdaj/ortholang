@@ -8,7 +8,7 @@ import ShortCut.Core.Types
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "sets"
+  { mName = "setops"
   , mFunctions =
     [ mkSetBop "|" union
     , mkSetBop "~" difference

@@ -59,7 +59,8 @@ type CutScript = [CutAssign]
 
 data CutType
   = CutType String String
-  | SetOf CutType -- TODO rename to ListOf?
+  | SetOf CutType -- TODO rename to ListOf
+  | EmptySet
   deriving (Eq, Show, Read)
 
 typeOf :: CutExpr -> CutType
@@ -67,6 +68,7 @@ typeOf (CutLit t _    ) = t
 typeOf (CutRef t _    ) = t
 typeOf (CutBop t _ _ _) = t
 typeOf (CutFun t _ _  ) = t
+typeOf (CutSet EmptySet _) = EmptySet
 typeOf (CutSet t _    ) = SetOf t
 
 -- TODO move to modules as soon as parsing works again

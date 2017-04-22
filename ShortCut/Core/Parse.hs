@@ -16,6 +16,7 @@ module ShortCut.Core.Parse
   , pNum
   , pQuoted
   , pSym
+  , pSet
   , pVar
   , pVarEq
   , spaceChars
@@ -177,6 +178,18 @@ pQuoted = (lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quo
 pStr :: ParseM CutExpr
 pStr = CutLit str <$> pQuoted <?> "string"
 
+-- TODO write this next
+-- TODO what should be the type of an empty set?
+pSet :: ParseM CutExpr
+pSet = do
+  terms <- between (pSym '{') (pSym '}')
+    (optional spaces *> many (optional spaces *> pTerm) <* optional spaces)
+  let rtn = if null terms
+              then EmptySet
+              else typeOf $ head terms
+  -- TODO assert that the rest of the terms match the first one here!
+  return $ CutSet rtn terms
+
 ---------------
 -- operators --
 ---------------
@@ -266,7 +279,7 @@ pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
 pTerm :: ParseM CutExpr
-pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
+pTerm = pSet <|> pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how

@@ -1,6 +1,6 @@
 module ShortCut.Modules where
 
-import ShortCut.Core.Types (CutModule)
+import ShortCut.Core.Types (CutModule(..))
 
 import qualified ShortCut.Modules.Math   as M
 import qualified ShortCut.Modules.SetOps as S
