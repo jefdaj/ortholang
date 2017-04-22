@@ -1,11 +1,10 @@
 module ShortCut.Modules.Math where
 
 import Development.Shake
-import Data.Scientific            (Scientific)
-import Prelude hiding (div)
 import ShortCut.Core.Types
+import Data.Scientific       (Scientific)
+import Data.String.Utils     (strip)
 import ShortCut.Core.Compile (cBop)
-import Data.String.Utils          (strip)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -22,8 +21,6 @@ mkMathFn :: String -> (Scientific -> Scientific -> Scientific)
          -> CutFunction
 mkMathFn name fn = CutFunction
   { fName = name
-  -- , fAccepts = [num, num]
-  -- , fReturns = num
   , fSignature = \_ -> (num, [num, num])
   , fFixity  = Infix
   , fCompiler = cMath fn

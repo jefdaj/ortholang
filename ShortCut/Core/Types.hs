@@ -33,10 +33,8 @@ import Prelude hiding (print)
 import qualified Text.Parsec as P
 import Text.PrettyPrint.HughesPJClass
 
--- import Control.Monad.Identity    (Identity)
 import Data.Scientific           (Scientific())
 import Text.Parsec               (ParseError)
--- import Text.Parsec.Expr          (Assoc(..))
 import Control.Monad.State.Lazy  (StateT, execStateT, lift, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
 import System.Console.Haskeline  (InputT, getInputLine, runInputT,
@@ -192,30 +190,12 @@ print = lift . lift . outputStrLn
 data CutFixity = Prefix | Infix
   deriving (Eq, Show, Read)
 
--- TODO GET RID OF THAT EXTRA RETURN TYPE ARG YOU JUST ADDED EVERYWHERE
--- TODO START MAKING GIT BRANCHES FOR EACH LITTLE IDEA TO KEEP SANE
--- TODO THEN TRY MIMICKING HASKELL'S "SET A" NOTATION: "SETOF A"
---      YOUR TYPECHECKER CAN JUST HAVE A SPECIAL CASE FOR THOSE!
---      CHECK THAT ALL THE "A"S AND "SETOF A"S MATCH,
---      THEN CHECK THE REST NORMALLY
---      DON'T GO OVERBOARD FOR NOW; JUST AN "A" TYPE IS ENOUGH TO TRY IT
---      CAN ALSO MAKE A SPECIAL CASE WHEN PRINTING THE TYPE SIGNATURES + ERRORS
---      but how to avoid putting those placeholder "a"s in at runtime?
--- TODO another idea, which could go in a branch:
---      have the args list take an argument, and also contain the return type
---      (not just a list, but whatever you get it)
---      that way you can adjust based on the first arg
---      but would that make handling sets hard as opposed to regular types?
---      would it mean having pattern matches that can fail?
-
 type CutSignature = CutType -> (CutType, [CutType])
 
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
   { fName    :: String
-  -- , fAccepts :: [CutType]
-  -- , fReturns :: CutType
   , fSignature :: CutSignature
   , fFixity  :: CutFixity
   , fCompiler :: CutConfig -> CutExpr -> Rules FilePath

@@ -1,32 +1,23 @@
 module ShortCut.Modules.Sets where
 
-import Data.Set                   (Set, union, difference, intersection
-                                  ,fromList, toList)
 import Development.Shake
-import Prelude hiding (div)
 import ShortCut.Core.Types
+import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import ShortCut.Core.Compile (cBop)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "sets"
   , mFunctions =
-    [ mkSetBop "|" union        -- TODO pass the return type to it
-    , mkSetBop "~" difference   -- TODO pass the return type to it
-    , mkSetBop "&" intersection -- TODO pass the return type to it
+    [ mkSetBop "|" union
+    , mkSetBop "~" difference
+    , mkSetBop "&" intersection
     ]
   }
 
--- TODO how do I say "set of whatever" here? Maybe need rtn argument?
---      what if I give *everything* an argument like this?
---      no no no, just the functions that actually need it!
---      return type should be known once arguments are parsed,
---      and then you can call this function with it!
 mkSetBop :: String -> (Set String -> Set String -> Set String) -> CutFunction
 mkSetBop name fn = CutFunction
   { fName = name
-  -- , fAccepts = [SetOf rtn, SetOf rtn]
-  -- , fReturns = SetOf rtn
   , fSignature = \(SetOf a) -> (SetOf a, [SetOf a, SetOf a])
   , fFixity  = Infix
   , fCompiler = cSet fn
