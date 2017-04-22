@@ -17,10 +17,10 @@ cutModule = CutModule
 
 mkSetBop :: String -> (Set String -> Set String -> Set String) -> CutFunction
 mkSetBop name fn = CutFunction
-  { fName = name
+  { fName      = name
   , fSignature = \(SetOf a) -> (SetOf a, [SetOf a, SetOf a])
-  , fFixity  = Infix
-  , fCompiler = cSet fn
+  , fFixity    = Infix
+  , fCompiler  = cSet fn
   }
 
 -- apply a set operation to two sets (implemented as lists so far)

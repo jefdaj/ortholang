@@ -37,6 +37,7 @@ executable shortcut
                     ShortCut.Core.Compile,
                     ShortCut.Core.Eval,
                     ShortCut.Core.Parse,
+                    ShortCut.Core.Pretty,
                     ShortCut.Core.Repl,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,

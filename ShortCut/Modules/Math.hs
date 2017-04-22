@@ -17,13 +17,12 @@ cutModule = CutModule
     ]
   }
 
-mkMathFn :: String -> (Scientific -> Scientific -> Scientific)
-         -> CutFunction
+mkMathFn :: String -> (Scientific -> Scientific -> Scientific) -> CutFunction
 mkMathFn name fn = CutFunction
-  { fName = name
+  { fName      = name
   , fSignature = \_ -> (num, [num, num])
-  , fFixity  = Infix
-  , fCompiler = cMath fn
+  , fFixity    = Infix
+  , fCompiler  = cMath fn
   }
 
 -- apply a math operation to two numbers
