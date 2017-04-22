@@ -75,4 +75,4 @@ goldenScriptTrees cfg = do
   gFiles <- findByExtension [".tree"] tDir
   let cuts   = map (\s -> replaceExtension s "cut") gFiles
       gTests = map (\(s,g) -> goldenScriptTree cfg s g) (zip cuts gFiles)
-  return $ testGroup "produce expected tmpfiles" gTests
+  return $ testGroup "create expected tmpfiles" gTests
