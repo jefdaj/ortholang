@@ -15,46 +15,22 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ loadFastaAA
-    , loadFastaNA
-    , loadGenes
-    , loadGenomes
+    [ mkLoadFn "load_fasta_aa" faa
+    , mkLoadFn "load_fasta_na" fna
+    , mkLoadFn "load_genes"    gen -- TODO replace with cLoadGenes?
+    , mkLoadFn "load_genomes"  gom
     , filterGenes
     , filterGenomes
     , worstBestEvalue
     ]
   }
 
-loadFastaAA :: CutFunction
-loadFastaAA = CutFunction
-  { fName = "load_fasta_aa"
-  , fSignature = \_ -> (faa, [str])
-  , fFixity  = Prefix
-  , fCompiler = cLoad
-  }
-
-loadFastaNA :: CutFunction
-loadFastaNA = CutFunction
-  { fName = "load_fasta_na"
-  , fSignature = \_ -> (fna, [str])
-  , fFixity  = Prefix
-  , fCompiler = cLoad
-  }
-
-loadGenes :: CutFunction
-loadGenes = CutFunction
-  { fName = "load_genes"
-  , fSignature = \_ -> (gen, [str])
-  , fFixity  = Prefix
-  , fCompiler = cLoad
-  }
-
-loadGenomes :: CutFunction
-loadGenomes = CutFunction
-  { fName = "load_genomes"
-  , fSignature = \_ -> (gom, [str])
-  , fFixity  = Prefix
-  , fCompiler = cLoad
+mkLoadFn :: String -> CutType -> CutFunction
+mkLoadFn name rtn = CutFunction
+  { fName      = name
+  , fSignature = \_ -> (rtn, [str])
+  , fFixity    = Prefix
+  , fCompiler  = cLoad
   }
 
 filterGenes :: CutFunction

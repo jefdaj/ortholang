@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module ShortCut.Core.Types
   -- data structures
   ( CutAssign
@@ -20,7 +18,7 @@ module ShortCut.Core.Types
   , runReplM
   , ReplM
   -- misc
-  , prettyShow
+  -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
   -- module stuff (in flux)
@@ -31,7 +29,6 @@ module ShortCut.Core.Types
 
 import Prelude hiding (print)
 import qualified Text.Parsec as P
-import Text.PrettyPrint.HughesPJClass
 
 import Data.Scientific           (Scientific())
 import Text.Parsec               (ParseError)
@@ -65,10 +62,6 @@ data CutType
   | SetOf CutType
   deriving (Eq, Show, Read)
 
-instance Pretty CutType where
-  pPrint (CutType ext desc) = text ext <+> parens (text desc)
-  pPrint (SetOf t) = text "set of" <+> pPrint t <> text "s"
-
 typeOf :: CutExpr -> CutType
 typeOf (CutLit t _    ) = t
 typeOf (CutRef t _    ) = t
@@ -82,49 +75,6 @@ typeOf (CutSet t _    ) = SetOf t
 str, num :: CutType
 str = CutType "str"    "string"
 num = CutType "num"    "number in scientific notation"
-
----------------------
--- pretty printers --
----------------------
-
--- I would put these in a separate Pretty.hs, but that causes orphan instances
-
-instance Pretty CutVar where
-  pPrint (CutVar s) = text s
-
--- TODO add descriptions here? if so, need to separate actual extension code
--- instance Pretty Ext where
---   pPrint (SetOf e) = pPrint e <> text "s"
---   pPrint (Ext   e) = text e
-
-instance {-# OVERLAPPING #-} Pretty CutAssign where
-  pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
-  -- this adds type info, but makes the pretty-print not valid source code
-  -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
-
-instance {-# OVERLAPPING #-} Pretty CutScript where
-  pPrint [] = empty
-  pPrint as = fsep $ map pPrint as
-
-instance Pretty CutExpr where
-  pPrint e@(CutLit _ s)
-    | typeOf e == num = text $ show $ (read s :: Scientific)
-    | otherwise       = text $ show s
-  pPrint (CutRef _ v)       = pPrint v
-  pPrint (CutFun _ s es)    = text s <+> sep (map pNested es)
-  pPrint (CutSet _ _)       = undefined -- TODO figure this out!
-  pPrint (CutBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
-    where
-      bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
-      one = bopWith (<+>)
-      two = bopWith ($+$)
-
--- this adds parens around nested function calls
--- without it things can get really messy!
-pNested :: CutExpr -> Doc
-pNested e@(CutFun _ _ _  ) = parens $ pPrint e
-pNested e@(CutBop _ _ _ _) = parens $ pPrint e
-pNested e = pPrint e
 
 ------------
 -- config --
@@ -140,13 +90,6 @@ data CutConfig = CutConfig
   , cfgModules :: [CutModule]
   }
   -- deriving (Eq, Show, Read)
-
-instance Pretty CutConfig where
-  pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
-    [ ("script" , show . cfgScript )
-    , ("tmpdir" , show . cfgTmpDir )
-    , ("verbose", show . cfgVerbose)
-    ]
 
 -----------------
 -- Parse monad --
@@ -202,23 +145,9 @@ data CutFunction = CutFunction
   }
   -- deriving (Eq, Read)
 
--- TODO change this to something useful
-instance Pretty CutFunction where
-  pPrint fn = text $ "CutFunction '" ++ fName fn ++ "'"
-
-instance Show CutFunction where
-  show = prettyShow
-
 -- TODO does eq make sense here?
 data CutModule = CutModule
   { mName :: String
   , mFunctions :: [CutFunction]
   }
   -- deriving (Eq, Read)
-
--- TODO change this to something useful
-instance Pretty CutModule where
-  pPrint fn = text $ "CutModule '" ++ mName fn ++ "'"
-
-instance Show CutModule where
-  show = prettyShow
