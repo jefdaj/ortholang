@@ -37,6 +37,7 @@ module ShortCut.Core.Compile
 import Development.Shake
 import ShortCut.Core.Types
 
+import Data.List              (find)
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
 import Data.Maybe                 (fromJust)
@@ -114,9 +115,9 @@ hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 --
 -- Nah, just invert it: each function has one of these as the fCompiler,
 -- then cExpr2 just calls those. Oh man, just need one case for CutFun, CutBop?
-cExpr :: CutConfig -> CutExpr -> Rules FilePath
-cExpr c e@(CutLit _ _) = cLit c e
-cExpr c e@(CutRef _ _) = cRef c e
+-- cExpr :: CutConfig -> CutExpr -> Rules FilePath
+-- cExpr c e@(CutLit _ _) = cLit c e
+-- cExpr c e@(CutRef _ _) = cRef c e
 -- TODO these go in math
 -- cExpr c e@(CutBop _ "+" _ _) = cMath c (+) "add"      e
 -- cExpr c e@(CutBop _ "-" _ _) = cMath c (-) "subtract" e
@@ -135,7 +136,27 @@ cExpr c e@(CutRef _ _) = cRef c e
 -- cExpr c e@(CutFun _ "filter_genomes"    _) = cFilterGenomes c e
 -- cExpr c e@(CutFun _ "worst_best_evalue" _) = cWorstBest     c e
 -- TODO this goes away because invalid fns don't parse in the first place
+-- cExpr _ _ = error "bad argument to cExpr"
+
+-- TODO what happens to plain sets?
+cExpr :: CutConfig -> CutExpr -> Rules FilePath
+cExpr c e@(CutLit _ _    ) = cLit c e
+cExpr c e@(CutRef _ _    ) = cRef c e
+cExpr c e@(CutBop _ n _ _) = compileByName c e n
+cExpr c e@(CutFun _ n _  ) = compileByName c e n
 cExpr _ _ = error "bad argument to cExpr"
+
+-- TODO remove once no longer needed
+compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
+compileByName cfg expr name = case findFnByName cfg name of
+  Nothing -> error $ "no such function '" ++ name ++ "'"
+  Just f  -> (fCompiler f) cfg expr
+
+findFnByName :: CutConfig -> String -> Maybe CutFunction
+findFnByName cfg name = find (\f -> fName f == name) fs
+  where
+    ms = cfgModules cfg
+    fs = concat $ map mFunctions ms
 
 cAssign :: CutConfig -> CutAssign -> Rules (CutVar, FilePath)
 cAssign cfg (var, expr) = do
