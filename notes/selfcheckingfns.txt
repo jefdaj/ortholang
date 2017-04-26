@@ -1,0 +1,12 @@
+this seems like the way to go after all, at least for now!
+PROBABLY DON'T FINISH IMPLEMENTING IT UNTIL AFTER YOUR COMMITTEE MEETING PITCH THO
+anyway, you can make the check fn be `typecheck :: [CutType] -> Bool`. super simple!
+can pattern match to implement polymorphic functions if that seems helpful later
+	wait, would good error messages require knowing the specialized types here?
+	like "expected [str,num] but got [str,str]"
+  in that case something more like `accepts :: [CutType] -> [CutType]`
+		if identical checking passes
+		if different, can print both expected and actual in the error message
+    cool, that works
+  errors still might not work well on polymorphic functions
+		but cross that bridge when you get to it!
