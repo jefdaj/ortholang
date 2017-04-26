@@ -27,9 +27,9 @@ mkSetBop name fn = CutFunction
 -- if the user gives two sets but of different types, complain that they must
 -- be the same. if there aren't two sets at all, complain about that first
 bopTypeCheck :: [CutType] -> Either String CutType
-bopTypeCheck actual@[SetOf a, SetOf b]
-  | a == b    = Right $ SetOf a
-  | otherwise = Left $ typeError [SetOf a, SetOf a] actual
+bopTypeCheck actual@[ListOf a, ListOf b]
+  | a == b    = Right $ ListOf a
+  | otherwise = Left $ typeError [ListOf a, ListOf a] actual
 bopTypeCheck actual = Left "Type error: expected two sets of the same type"
 
 -- apply a set operation to two sets (implemented as lists so far)

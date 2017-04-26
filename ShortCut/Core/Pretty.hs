@@ -8,14 +8,14 @@ import Text.PrettyPrint.HughesPJClass
 
 instance Pretty CutType where
   pPrint (CutType ext desc) = text ext <+> parens (text desc)
-  pPrint (SetOf t) = text "set of" <+> pPrint t <> text "s"
+  pPrint (ListOf t) = text "list of" <+> pPrint t <> text "s"
 
 instance Pretty CutVar where
   pPrint (CutVar s) = text s
 
 -- TODO add descriptions here? if so, need to separate actual extension code
 -- instance Pretty Ext where
---   pPrint (SetOf e) = pPrint e <> text "s"
+--   pPrint (ListOf e) = pPrint e <> text "s"
 --   pPrint (Ext   e) = text e
 
 instance {-# OVERLAPPING #-} Pretty CutAssign where

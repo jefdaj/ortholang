@@ -40,7 +40,7 @@ import Development.Shake (Rules)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
--- data Ext = SetOf Ext | Ext String
+-- data Ext = ListOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
@@ -59,8 +59,8 @@ type CutScript = [CutAssign]
 
 data CutType
   = CutType String String
-  | SetOf CutType -- TODO rename to ListOf
-  | EmptySet
+  | ListOf CutType
+  | EmptyList -- TODO remove this? should never be a need to define an empty list
   deriving (Eq, Show, Read)
 
 typeOf :: CutExpr -> CutType
@@ -68,8 +68,8 @@ typeOf (CutLit t _    ) = t
 typeOf (CutRef t _    ) = t
 typeOf (CutBop t _ _ _) = t
 typeOf (CutFun t _ _  ) = t
-typeOf (CutSet EmptySet _) = EmptySet
-typeOf (CutSet t _    ) = SetOf t
+typeOf (CutSet EmptyList _) = EmptyList
+typeOf (CutSet t _    ) = ListOf t
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
@@ -140,11 +140,10 @@ type CutSignature = CutType -> (CutType, [CutType])
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
-  { fName    :: String
-  -- , fSignature :: CutSignature
+  { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
-  , fFixity  :: CutFixity
-  , fCompiler :: CutConfig -> CutExpr -> Rules FilePath
+  , fFixity    :: CutFixity
+  , fCompiler  :: CutConfig -> CutExpr -> Rules FilePath
   }
   -- deriving (Eq, Read)
 

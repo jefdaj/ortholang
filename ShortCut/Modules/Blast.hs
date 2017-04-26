@@ -37,7 +37,7 @@ mkLoadFn name rtn = CutFunction
 filterGenes :: CutFunction
 filterGenes = CutFunction
   { fName = "filter_genes"
-  , fTypeCheck = defaultTypeCheck [SetOf gen, SetOf gom, num] (SetOf gen)
+  , fTypeCheck = defaultTypeCheck [ListOf gen, ListOf gom, num] (ListOf gen)
   , fFixity  = Prefix
   , fCompiler = cFilterGenes
   }
@@ -45,7 +45,7 @@ filterGenes = CutFunction
 filterGenomes :: CutFunction
 filterGenomes = CutFunction
   { fName = "filter_genomes"
-  , fTypeCheck = defaultTypeCheck [SetOf gom, SetOf gen, num] (SetOf gom)
+  , fTypeCheck = defaultTypeCheck [ListOf gom, ListOf gen, num] (ListOf gom)
   , fFixity  = Prefix
   , fCompiler = cFilterGenomes
   }
@@ -53,7 +53,7 @@ filterGenomes = CutFunction
 worstBestEvalue :: CutFunction
 worstBestEvalue = CutFunction
   { fName = "worst_best_evalue"
-  , fTypeCheck = defaultTypeCheck [SetOf gen, SetOf gom] num
+  , fTypeCheck = defaultTypeCheck [ListOf gen, ListOf gom] num
   , fFixity  = Prefix
   , fCompiler = cWorstBest
   }

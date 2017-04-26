@@ -185,7 +185,7 @@ pSet = do
   terms <- between (pSym '{') (pSym '}')
     (optional spaces *> many (optional spaces *> pTerm) <* optional spaces)
   let rtn = if null terms
-              then EmptySet
+              then EmptyList
               else typeOf $ head terms
   -- TODO assert that the rest of the terms match the first one here!
   return $ CutSet rtn terms
