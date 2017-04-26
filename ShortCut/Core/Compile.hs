@@ -69,7 +69,7 @@ namedTmp cfg (CutVar var) expr = cfgTmpDir cfg </> base
 hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
 hashedTmp cfg expr paths = exprDir cfg </> uniq <.> e
   where
-    (CutType e _) = typeOf expr
+    (CutType e _) = typeOf expr -- TODO how to handle empty set here? still ext?
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
 
@@ -83,12 +83,12 @@ hashedTmp' cfg (CutType extn _) expr paths = exprDir cfg </> uniq <.> extn
 hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 
 -- TODO what happens to plain sets?
+-- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
 cExpr :: CutConfig -> CutExpr -> Rules FilePath
 cExpr c e@(CutLit _ _    ) = cLit c e
 cExpr c e@(CutRef _ _    ) = cRef c e
 cExpr c e@(CutBop _ n _ _) = compileByName c e n
 cExpr c e@(CutFun _ n _  ) = compileByName c e n
-cExpr _ _ = error "bad argument to cExpr"
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
@@ -130,6 +130,19 @@ cLit cfg expr = do
     paths :: CutExpr -> String
     paths (CutLit _ s) = s
     paths _ = error "bad argument to paths"
+
+-- TODO how should this work?
+--      if it's a set of literals, can just write them all here
+--      otherwise, make each line the text of a symlink?
+--      do we need to do anything special for other types like fasta?
+--      empty set is easy: corresponds to an empty file
+cSet :: CutConfig -> CutExpr -> Rules FilePath
+cSet cfg e@(CutSet EmptySet []) = do
+  let link = hashedTmp cfg e []
+  link %> \out -> quietly $ cmd "touch" [out]
+  return link
+cSet cfg e@(CutSet rtn exprs) = undefined -- TODO figure this out
+cSet _ _ = error "bad argument to cSet"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)

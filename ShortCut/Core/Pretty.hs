@@ -33,7 +33,7 @@ instance Pretty CutExpr where
     | otherwise       = text $ show s
   pPrint (CutRef _ v)       = pPrint v
   pPrint (CutFun _ s es)    = text s <+> sep (map pNested es)
-  pPrint (CutSet _ _)       = undefined -- TODO figure this out!
+  pPrint (CutSet _ es)      = text "{" <+> sep (map pPrint es) <+> text "}"
   pPrint (CutBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
