@@ -59,7 +59,7 @@ type CutScript = [CutAssign]
 
 data CutType
   = CutType String String
-  | SetOf CutType
+  | SetOf CutType -- TODO rename to ListOf?
   deriving (Eq, Show, Read)
 
 typeOf :: CutExpr -> CutType
@@ -139,7 +139,8 @@ type CutSignature = CutType -> (CutType, [CutType])
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
   { fName    :: String
-  , fSignature :: CutSignature
+  -- , fSignature :: CutSignature
+  , fTypeCheck :: [CutType] -> Either String CutType
   , fFixity  :: CutFixity
   , fCompiler :: CutConfig -> CutExpr -> Rules FilePath
   }

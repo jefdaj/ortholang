@@ -19,6 +19,9 @@ module ShortCut.Core.Parse
   , pVar
   , pVarEq
   , spaceChars
+  -- typecheckers
+  , defaultTypeCheck
+  , typeError
   )
   where
 
@@ -240,17 +243,20 @@ pName = do
 fnNames :: CutConfig -> [String]
 fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
--- TODO load these from modules too, somehow
 pFun :: ParseM CutExpr
 pFun = do
   (_, cfg) <- getState
+  -- find the function by name
   name <- pName
   args <- manyTill pTerm pEnd
   let fns = concat $ map mFunctions $ cfgModules cfg
       fn  = find (\f -> fName f == name) fns
   case fn of
     Nothing -> fail $ "no such function: '" ++ name ++ "'"
-    Just f  -> return $ CutFun (typeOf $ head args) (fName f) args
+    -- once found, have the function typecheck its own arguments
+    Just f  -> case (fTypeCheck f) (map typeOf args) of
+      Left  err -> fail err
+      Right rtn -> return $ CutFun rtn (fName f) args
 
 -----------------
 -- expressions --
@@ -315,3 +321,19 @@ pScript = do
   scr <- many (pStatement <* many pComment)
   putState (scr, cfg)
   return scr
+
+-------------------------------------------------
+-- typechecking (is this the proper location?) --
+-------------------------------------------------
+
+typeError :: [CutType] -> [CutType] -> String
+typeError expected actual =
+  "Type error:\nexpected " ++ show expected
+           ++ "\nbut got " ++ show actual
+
+defaultTypeCheck :: [CutType] -> CutType
+                 -> [CutType] -> Either String CutType
+defaultTypeCheck expected returned actual =
+  if actual == expected
+    then Right returned
+    else Left $ typeError expected actual

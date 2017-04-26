@@ -3,6 +3,7 @@ module ShortCut.Modules.Blast where
 import Development.Shake
 import Development.Shake.FilePath ((<.>), (</>))
 import ShortCut.Core.Compile
+import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Types
 
 gen = CutType "gene"   "gene"   -- TODO deprecate
@@ -28,7 +29,7 @@ cutModule = CutModule
 mkLoadFn :: String -> CutType -> CutFunction
 mkLoadFn name rtn = CutFunction
   { fName      = name
-  , fSignature = \_ -> (rtn, [str])
+  , fTypeCheck = defaultTypeCheck [str] rtn
   , fFixity    = Prefix
   , fCompiler  = cLoad
   }
@@ -36,7 +37,7 @@ mkLoadFn name rtn = CutFunction
 filterGenes :: CutFunction
 filterGenes = CutFunction
   { fName = "filter_genes"
-  , fSignature = \_ -> (SetOf gen, [SetOf gen, SetOf gom, num])
+  , fTypeCheck = defaultTypeCheck [SetOf gen, SetOf gom, num] (SetOf gen)
   , fFixity  = Prefix
   , fCompiler = cFilterGenes
   }
@@ -44,7 +45,7 @@ filterGenes = CutFunction
 filterGenomes :: CutFunction
 filterGenomes = CutFunction
   { fName = "filter_genomes"
-  , fSignature = \_ -> (SetOf gom, [SetOf gom, SetOf gen, num])
+  , fTypeCheck = defaultTypeCheck [SetOf gom, SetOf gen, num] (SetOf gom)
   , fFixity  = Prefix
   , fCompiler = cFilterGenomes
   }
@@ -52,7 +53,7 @@ filterGenomes = CutFunction
 worstBestEvalue :: CutFunction
 worstBestEvalue = CutFunction
   { fName = "worst_best_evalue"
-  , fSignature = \_ -> (num, [SetOf gen, SetOf gom])
+  , fTypeCheck = defaultTypeCheck [SetOf gen, SetOf gom] num
   , fFixity  = Prefix
   , fCompiler = cWorstBest
   }
