@@ -1,0 +1,9 @@
+not sure if it's really fake but whatever
+you could have a shortcut type be a simple list of haskell values
+but there should be one for "set of whatever", where you write the whatever
+that way you can say [SetOf (Some "thing"), SetOf num, (Some "thing")]
+the "thing" wouldn't mean anything except it could be used in error messages
+the typechecker would just require each "a" to match the same type in the fn call
+
+oooh, but this might get complicated if they also return the (Some "thing")!
+maybe don't go down that road. simpler to have each record (function) check itself?

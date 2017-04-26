@@ -1,0 +1,20 @@
+ok, upon thinking about it some more the self-compiling functions sound like the best idea so far
+really it makes sense: parsing, printing, repl etc. can be done generically but compiling is very individual to modules
+	is typechecking too? at least for now because you don't know what you want the final version to be!
+sure they require a little haskell---not a big deal until anyone uses it anyway!
+they have two advantages:
+	let you keep everything at the value level in Haskell
+		will definitely work
+		won't waste time or sound stupid
+		you can make it more advanced if/when the need is obvious for maps or whatever
+	allow you lots of freedom in developing individual modules
+		customized error messages for common mistakes, or a simple default one
+		hack or bypass the typechecker as needed to do the sampling stuff
+make the type something like typecheck :: [CutType] -> Either String [CutType]
+
+ok, so write this down more clearly and then resolve the general messy state of the repo
+don't get far down the track of actually coding it yet after that because TNSEQ IS A HIGHER PRIORITY!!
+just be happy that when you do come back to it (after lab meet? committee meet? at least talking to kris!) you'll be able to move on
+
+do think a lot about how you'll do it and what should be done andhow to publish though!
+just no more coding until the pitch is put together
