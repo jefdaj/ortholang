@@ -85,7 +85,7 @@ loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do
   mline <- promptFn "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
-    ""        -> return ()
+    ""        -> return () -- TODO also handle comments this way (for examples mostly)
     (':':cmd) -> runCmd cmd
     line      -> do
       st@(scr, cfg) <- get
