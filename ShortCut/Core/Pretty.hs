@@ -85,4 +85,4 @@ instance Show CutModule where
 prettyCat :: CutType -> FilePath -> IO ()
 prettyCat EmptyList  _ = putStrLn "[]"
 prettyCat (ListOf _) f = undefined
-prettyCat t          f = readFile f >>= (putStrLn . (tCat t))
+prettyCat t          f = readFile f >>= (putStr . (tCat t))
