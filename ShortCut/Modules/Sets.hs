@@ -24,15 +24,15 @@ mkSetBop name fn = CutFunction
   , fCompiler  = cSet fn
   }
 
--- if the user gives two sets but of different types, complain that they must
--- be the same. if there aren't two sets at all, complain about that first
+-- if the user gives two lists but of different types, complain that they must
+-- be the same. if there aren't two lists at all, complain about that first
 bopTypeCheck :: [CutType] -> Either String CutType
 bopTypeCheck actual@[ListOf a, ListOf b]
   | a == b    = Right $ ListOf a
   | otherwise = Left $ typeError [ListOf a, ListOf a] actual
-bopTypeCheck actual = Left "Type error: expected two sets of the same type"
+bopTypeCheck actual = Left "Type error: expected two lists of the same type"
 
--- apply a set operation to two sets (implemented as lists so far)
+-- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
 cSet :: (Set String -> Set String -> Set String)
      -> CutConfig -> CutExpr -> Rules FilePath

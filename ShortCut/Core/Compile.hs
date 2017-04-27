@@ -62,14 +62,12 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
 namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
 namedTmp cfg (CutVar var) expr = cfgTmpDir cfg </> base
   where
-    base  = if var == "result" then var else var <.> ext
-    (CutType ext _) = typeOf expr
+    base  = if var == "result" then var else var <.> extOf (typeOf expr)
 
 -- TODO extn can be found inside expr now; remove it
 hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
-hashedTmp cfg expr paths = exprDir cfg </> uniq <.> e
+hashedTmp cfg expr paths = exprDir cfg </> uniq <.> extOf (typeOf expr)
   where
-    (CutType e _) = typeOf expr -- TODO how to handle empty set here? still ext?
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
 
@@ -85,10 +83,11 @@ hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
 cExpr :: CutConfig -> CutExpr -> Rules FilePath
-cExpr c e@(CutLit _ _    ) = cLit c e
-cExpr c e@(CutRef _ _    ) = cRef c e
-cExpr c e@(CutBop _ n _ _) = compileByName c e n
-cExpr c e@(CutFun _ n _  ) = compileByName c e n
+cExpr c e@(CutLit  _ _    ) = cLit c e
+cExpr c e@(CutRef  _ _    ) = cRef c e
+cExpr c e@(CutList _ _    ) = cList c e
+cExpr c e@(CutBop  _ n _ _) = compileByName c e n -- TODO turn into Fun?
+cExpr c e@(CutFun  _ n _  ) = compileByName c e n
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
@@ -131,15 +130,17 @@ cLit cfg expr = do
     paths (CutLit _ s) = s
     paths _ = error "bad argument to paths"
 
--- TODO lists should always be lists *of paths*;
--- if it's a single file it's a single shortcut data type for now
+-- TODO how to show the list once it's created? not just as a list of paths!
 cList :: CutConfig -> CutExpr -> Rules FilePath
 cList cfg e@(CutList EmptyList []) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cList cfg e@(CutList rtn exprs) = undefined -- TODO figure this out
-cList _ _ = error "bad argument to cList"
+cList cfg e@(CutList rtn exprs) = do
+  paths <- mapM (cExpr cfg) exprs
+  let path = hashedTmp cfg e paths
+  path %> \out -> need paths >> writeFileLines out paths
+  return path
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)

@@ -21,6 +21,7 @@ module ShortCut.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
+  , extOf
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
@@ -70,6 +71,11 @@ typeOf (CutBop t _ _ _) = t
 typeOf (CutFun t _ _  ) = t
 typeOf (CutList EmptyList _) = EmptyList
 typeOf (CutList t _    ) = ListOf t
+
+extOf :: CutType -> String
+extOf (CutType t _) = t
+extOf (ListOf t   ) = extOf t ++ ".list"
+extOf EmptyList     = "list"
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
