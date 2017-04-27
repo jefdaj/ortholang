@@ -74,7 +74,7 @@ hashedTmp cfg expr paths = exprDir cfg </> uniq <.> extOf (typeOf expr)
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
 hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
-hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> tExt rtn
+hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
   where
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'

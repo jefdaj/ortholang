@@ -72,10 +72,12 @@ data CutType
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq CutType where
-  t1 == t2 = tExt t1 == tExt t2
+  EmptyList  == EmptyList  = True
+  (ListOf a) == (ListOf b) = a == b
+  t1         == t2         = tExt t1 == tExt t2
 
 instance Show CutType where
-  show = tExt
+  show = extOf
 
 typeOf :: CutExpr -> CutType
 typeOf (CutLit t _    ) = t

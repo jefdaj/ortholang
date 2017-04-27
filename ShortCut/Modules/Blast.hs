@@ -46,8 +46,8 @@ cutModule = CutModule
   , mFunctions =
     [ mkLoadFn "load_fasta_aa" faa
     , mkLoadFn "load_fasta_na" fna
-    , mkLoadFn "load_genes"    gen -- TODO replace with cLoadGenes?
-    , mkLoadFn "load_genomes"  gom
+    , mkLoadFn "load_genes"    (ListOf gen) -- TODO replace with cLoadGenes?
+    , mkLoadFn "load_genomes"  (ListOf gom)
     , filterGenes
     , filterGenomes
     , worstBestEvalue

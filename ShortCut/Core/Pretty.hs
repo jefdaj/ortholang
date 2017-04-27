@@ -81,8 +81,10 @@ instance Show CutModule where
 -- This seems to be separately required to show the final result of eval
 -- TODO is there a way to get rid of it?
 -- TODO rename prettyContents? prettyResult?
--- TODO should this actually open external programs?
+-- TODO should this actually open external programs
+-- TODO idea for lists: if any element contains "\n", just add blank lines between them
+-- TODO for str and num lists, showing should be like prettyShowing right?
 prettyCat :: CutType -> FilePath -> IO ()
-prettyCat EmptyList  _ = putStrLn "[]"
-prettyCat (ListOf _) f = undefined
+prettyCat EmptyList  _ = putStrLn "[]" -- TODO remove?
+prettyCat (ListOf _) f = readFile f >>= putStrLn -- TODO figure out how to handle these better
 prettyCat t          f = readFile f >>= (putStr . (tCat t))
