@@ -137,11 +137,11 @@ cLit cfg expr = do
 --      do we need to do anything special for other types like fasta?
 --      empty set is easy: corresponds to an empty file
 cSet :: CutConfig -> CutExpr -> Rules FilePath
-cSet cfg e@(CutSet EmptyList []) = do
+cSet cfg e@(CutList EmptyList []) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cSet cfg e@(CutSet rtn exprs) = undefined -- TODO figure this out
+cSet cfg e@(CutList rtn exprs) = undefined -- TODO figure this out
 cSet _ _ = error "bad argument to cSet"
 
 -- return a link to an existing named variable

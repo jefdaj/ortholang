@@ -1,3 +1,5 @@
+-- TODO why export all these?
+
 module ShortCut.Core.Parse
   -- parsec stuff
   ( ParseError
@@ -16,7 +18,7 @@ module ShortCut.Core.Parse
   , pNum
   , pQuoted
   , pSym
-  , pSet
+  , pList
   , pVar
   , pVarEq
   , spaceChars
@@ -42,7 +44,7 @@ import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
                                newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
-                              ,lookAhead, between, choice, anyToken)
+                              ,lookAhead, between, choice, anyToken, sepBy)
 -- import Text.Parsec.Expr       (buildExpressionParser)
 import qualified Text.Parsec.Expr as E
 
@@ -76,6 +78,8 @@ parseFile cfg path = readFile path >>= return . parseString cfg
 --------------------------------
 -- helpers to simplify parsec --
 --------------------------------
+
+-- TODO make an empty CutState so you can run these in ghci again
 
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
@@ -178,17 +182,16 @@ pQuoted = (lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quo
 pStr :: ParseM CutExpr
 pStr = CutLit str <$> pQuoted <?> "string"
 
--- TODO write this next
--- TODO what should be the type of an empty set?
-pSet :: ParseM CutExpr
-pSet = do
-  terms <- between (pSym '{') (pSym '}')
-    (optional spaces *> many (optional spaces *> pTerm) <* optional spaces)
+-- TODO remove the empty list case? can't imagine when it would be used
+-- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
+pList :: ParseM CutExpr
+pList = do
+  terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
   let rtn = if null terms
               then EmptyList
               else typeOf $ head terms
   -- TODO assert that the rest of the terms match the first one here!
-  return $ CutSet rtn terms
+  return $ CutList rtn terms
 
 ---------------
 -- operators --
@@ -279,7 +282,7 @@ pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
 pTerm :: ParseM CutExpr
-pTerm = pSet <|> pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
+pTerm = pList <|> pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how

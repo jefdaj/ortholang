@@ -80,6 +80,8 @@ goodbye = putStrLn "Bye for now!"
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
+--
+-- TODO if you type result, that shouldn't update result to point to itself!
 loop :: [(String -> ReplM (Maybe String))] -> ReplM ()
 loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do

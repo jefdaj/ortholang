@@ -51,7 +51,7 @@ data CutExpr
   | CutRef CutType CutVar
   | CutBop CutType String  CutExpr CutExpr
   | CutFun CutType String [CutExpr]
-  | CutSet CutType [CutExpr]
+  | CutList CutType [CutExpr]
   deriving (Eq, Show, Read)
 
 type CutAssign = (CutVar, CutExpr)
@@ -68,8 +68,8 @@ typeOf (CutLit t _    ) = t
 typeOf (CutRef t _    ) = t
 typeOf (CutBop t _ _ _) = t
 typeOf (CutFun t _ _  ) = t
-typeOf (CutSet EmptyList _) = EmptyList
-typeOf (CutSet t _    ) = ListOf t
+typeOf (CutList EmptyList _) = EmptyList
+typeOf (CutList t _    ) = ListOf t
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
