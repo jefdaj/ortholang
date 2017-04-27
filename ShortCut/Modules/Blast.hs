@@ -6,11 +6,39 @@ import ShortCut.Core.Compile
 import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Types
 
-gen = CutType "gene"   "gene"   -- TODO deprecate
-gom = CutType "genome" "genome" -- TODO deprecate
-faa = CutType "faa"    "fasta amino acid"
-fna = CutType "fna"    "fasta nucleic acid"
-csv = CutType "csv" "spreadsheet"
+-- TODO deprecate
+gen = CutType
+  { tExt  = "gene"
+  , tDesc = "gene"
+  , tCat  = id
+  }
+
+-- TODO deprecate
+gom = CutType
+  { tExt  = "genome"
+  , tDesc = "genome"
+  , tCat  = id
+  }
+
+faa = CutType
+  { tExt  = "faa"
+  , tDesc = "fasta amino acid"
+  , tCat  = id
+  }
+
+fna = CutType
+  { tExt  = "fna"
+  , tDesc = "fasta nucleic acid"
+  , tCat  = id
+  }
+
+-- TODO use tsv instead
+-- TODO obviously, better printing that says # rows and stuff
+csv = CutType
+  { tExt  = "csv"
+  , tDesc = "spreadsheet"
+  , tCat  = unlines . (++ ["..."]) . take 5 . lines
+  }
 
 cutModule :: CutModule
 cutModule = CutModule

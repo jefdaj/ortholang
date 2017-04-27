@@ -1,14 +1,19 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module ShortCut.Core.Pretty (prettyShow) where
+module ShortCut.Core.Pretty
+  ( prettyShow
+  , prettyCat
+  )
+  where
 
 import Data.Scientific (Scientific())
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
 
 instance Pretty CutType where
-  pPrint (CutType ext desc) = text ext <+> parens (text desc)
+  pPrint EmptyList  = text "empty list" -- TODO remove
   pPrint (ListOf t) = text "list of" <+> pPrint t <> text "s"
+  pPrint t          = text (tExt t) <+> parens (text $ tDesc t)
 
 instance Pretty CutVar where
   pPrint (CutVar s) = text s
@@ -27,9 +32,11 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
+-- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where
-  pPrint e@(CutLit _ s)
+  pPrint e@(CutLit t s)
     | typeOf e == num       = text $ show $ (read s :: Scientific)
+    -- | tExt t == tExt num    = text $ show (read s :: Scientific)
     | otherwise             = text $ show s
   pPrint (CutRef _ v)       = pPrint v
   pPrint (CutFun _ s es)    = text s <+> fsep (map pNested es)
@@ -70,3 +77,12 @@ instance Pretty CutModule where
 
 instance Show CutModule where
   show = prettyShow
+
+-- This seems to be separately required to show the final result of eval
+-- TODO is there a way to get rid of it?
+-- TODO rename prettyContents? prettyResult?
+-- TODO should this actually open external programs?
+prettyCat :: CutType -> FilePath -> IO ()
+prettyCat EmptyList  _ = putStrLn "[]"
+prettyCat (ListOf _) f = undefined
+prettyCat t          f = readFile f >>= (putStrLn . (tCat t))

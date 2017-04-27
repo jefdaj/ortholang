@@ -74,11 +74,10 @@ hashedTmp cfg expr paths = exprDir cfg </> uniq <.> extOf (typeOf expr)
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
 hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
-hashedTmp' cfg (CutType extn _) expr paths = exprDir cfg </> uniq <.> extn
+hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> tExt rtn
   where
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
-hashedTmp' _ _ _ _ = error "bad arguments to hashedTmp'"
 
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?

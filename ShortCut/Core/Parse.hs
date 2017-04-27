@@ -1,4 +1,6 @@
 -- TODO why export all these?
+-- TODO make sure expressions consume the whole string
+--      for example right now "\"this\" 2" parses as a str
 
 module ShortCut.Core.Parse
   -- parsec stuff
@@ -317,6 +319,8 @@ pAssign = do
 -- but doing it more than once in a script will cause an error later.
 -- TODO prevent assignments that include the variable being assigned to
 --      (later when working on statement issues)
+-- TODO if the statement is literally `result`, what do we do?
+--      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM CutAssign
 pResult = pExpr >>= \e -> return (CutVar "result", e)
 
