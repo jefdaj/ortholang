@@ -106,9 +106,9 @@ loop (promptFn:promptFns) = do
 --      (later, with the "which variables does this depend on" function)
 updateScript :: CutScript -> CutAssign -> CutScript
 updateScript scr asn@(var, expr) =
-	case expr of
-		(CutRef _ var) -> scr
-		_ -> delFromAL scr var ++ [asn]
+  case expr of
+    (CutRef _ var) -> scr
+    _ -> delFromAL scr var ++ [asn]
 
 --------------------------
 -- dispatch to commands --

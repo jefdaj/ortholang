@@ -24,9 +24,9 @@ mkTests cfg = mkTestGroup cfg "Repl" [goldenRepls, goldenReplTrees]
 -- returns just the parts of a pasted REPL session that represent user input
 extractPrompted :: String -> String -> [String]
 extractPrompted prompt session = inputs
-	where
-		plines = filter (isPrefixOf prompt) (lines session)
-		inputs = map (drop $ length prompt) plines
+  where
+    plines = filter (isPrefixOf prompt) (lines session)
+    inputs = map (drop $ length prompt) plines
 
 -- For golden testing of REPL sessions. It takes a string with a line of text
 -- to inject, then a prompt string like the regular prompt fn. Only injects one
