@@ -80,8 +80,6 @@ goodbye = putStrLn "Bye for now!"
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
---
--- TODO if you type result, that shouldn't update result to point to itself!
 loop :: [(String -> ReplM (Maybe String))] -> ReplM ()
 loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do
@@ -92,15 +90,25 @@ loop (promptFn:promptFns) = do
     line      -> do
       st@(scr, cfg) <- get
       case parseStatement st line of
-        Left e -> print $ show e
-        Right r@(v, e) -> do
-          let scr' = delFromAL scr v ++ [r]
-          put (scr', cfg) -- v is always "result"
+        Left  e -> print $ show e
+        Right r -> do
+          let scr' = updateScript scr r
+          put (scr', cfg)
           -- even though result gets added to the script either way,
           -- still have to check whether to print it
           -- TODO should be able to factor this out and put in Eval.hs
           when (isExpr st line) (liftIO $ evalScript cfg scr')
   loop promptFns
+
+-- this is needed to avoid assigning a variable to itself,
+-- which is especially a problem when auto-assigning "result"
+-- TODO also catch variables assigned to things depending on themselves
+--      (later, with the "which variables does this depend on" function)
+updateScript :: CutScript -> CutAssign -> CutScript
+updateScript scr asn@(var, expr) =
+	case expr of
+		(CutRef _ var) -> scr
+		_ -> delFromAL scr var ++ [asn]
 
 --------------------------
 -- dispatch to commands --
