@@ -138,8 +138,9 @@ cList cfg e@(CutList EmptyList []) = do
   return link
 cList cfg e@(CutList rtn exprs) = do
   paths <- mapM (cExpr cfg) exprs
-  let path = hashedTmp cfg e paths
-  path %> \out -> need paths >> writeFileLines out paths
+  let path   = hashedTmp cfg e paths
+      paths' = map (makeRelative $ cfgTmpDir cfg) paths
+  path %> \out -> need paths >> writeFileLines out paths'
   return path
 
 -- return a link to an existing named variable
