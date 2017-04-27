@@ -57,7 +57,7 @@ goldenRepl cfg path = do
 
 goldenRepls :: CutConfig -> IO TestTree
 goldenRepls cfg = do
-  tDir  <- getDataFileName "ShortCut/Test/repl"
+  tDir  <- getDataFileName "tests/repl"
   golds <- findByExtension [".txt"] tDir
   let tests = mapM (goldenRepl cfg) golds
       group = testGroup "print expected responses"
@@ -81,7 +81,7 @@ goldenReplTree cfg ses = do
 
 goldenReplTrees :: CutConfig -> IO TestTree
 goldenReplTrees cfg = do
-  tDir  <- getDataFileName "ShortCut/Test/repl"
+  tDir  <- getDataFileName "tests/repl"
   txts  <- findByExtension [".txt"] tDir
   let tests = mapM (goldenReplTree cfg) txts
       group = testGroup "create expected tmpfiles"
