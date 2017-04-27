@@ -114,16 +114,6 @@ changes to make to core:
 		that's most important because your project depends on having a real example
 		want to get it working before messing with internals in case that breaks something
 	docs module? not yet! consider it when you get to an unmanagable number of examples
-	modules for the win!
-		rearrange script data structure until it can be extended easily
-		start with records for cut types, functions, and modules
-			just do it the obvious way; no fancy type magic! import them all in Modules.hs
-		you know enough to make it work now for sure! just go to it
-	should be able to write result in the repl and have it handled like !! in a shell
-		would allow assigning result to things after seeing their output
-		should still be an error in saved scripts to prevent cycles
-	rewrite everything in terms of actual files and operations so they compose better
-		genes and genomes -> fasta/genbank files
 
 modules to write:
 	download sequences from ncbi
