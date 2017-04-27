@@ -131,18 +131,15 @@ cLit cfg expr = do
     paths (CutLit _ s) = s
     paths _ = error "bad argument to paths"
 
--- TODO how should this work?
---      if it's a set of literals, can just write them all here
---      otherwise, make each line the text of a symlink?
---      do we need to do anything special for other types like fasta?
---      empty set is easy: corresponds to an empty file
-cSet :: CutConfig -> CutExpr -> Rules FilePath
-cSet cfg e@(CutList EmptyList []) = do
+-- TODO lists should always be lists *of paths*;
+-- if it's a single file it's a single shortcut data type for now
+cList :: CutConfig -> CutExpr -> Rules FilePath
+cList cfg e@(CutList EmptyList []) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cSet cfg e@(CutList rtn exprs) = undefined -- TODO figure this out
-cSet _ _ = error "bad argument to cSet"
+cList cfg e@(CutList rtn exprs) = undefined -- TODO figure this out
+cList _ _ = error "bad argument to cList"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
