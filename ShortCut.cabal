@@ -38,6 +38,7 @@ executable shortcut
                     ShortCut.Core.Util,
                     ShortCut.Modules,
                     ShortCut.Modules.Blast,
+                    ShortCut.Modules.BioMartR,
                     ShortCut.Modules.Math,
                     ShortCut.Modules.Sets,
                     ShortCut.Test,

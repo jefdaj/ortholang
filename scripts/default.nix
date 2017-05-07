@@ -1,5 +1,6 @@
 # TODO pass proper arguments
 # TODO shells for working on individual scripts (split by language?)
+# TODO other random unix dependencies: uname
 
 with import ../nixpkgs;
 
@@ -7,6 +8,7 @@ let
   myRWrapper = pkgs.rWrapper.override {
     packages = with pkgs.rPackages; [
       dplyr
+      biomartr # TODO is version 0.50 any better for now?
     ];
   };
 
