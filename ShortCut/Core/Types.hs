@@ -31,7 +31,7 @@ module ShortCut.Core.Types
 import Prelude hiding (print)
 import qualified Text.Parsec as P
 
-import Data.Scientific           (Scientific())
+-- import Data.Scientific           (Scientific())
 import Text.Parsec               (ParseError)
 import Control.Monad.State.Lazy  (StateT, execStateT, lift, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)

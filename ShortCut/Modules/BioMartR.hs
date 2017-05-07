@@ -6,12 +6,13 @@ module ShortCut.Modules.BioMartR where
 -- TODO "show" the results using that convenient .txt file biomartr saves
 -- TODO combine databases if none is specified
 -- TODO once this works, document it in a notebook entry!
+-- TODO known bug: hashes are getting mixed up in cParseSearches
 
 import ShortCut.Core.Types
 import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import Development.Shake
 import ShortCut.Core.Parse (defaultTypeCheck)
-import ShortCut.Core.Compile (cExpr, hashedTmp)
+import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
 import Control.Monad (void, when)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -21,6 +22,7 @@ import Data.Maybe (fromMaybe)
 import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
+import Development.Shake.FilePath ((</>))
 
 ------------------------
 -- module description --
@@ -31,8 +33,8 @@ cutModule = CutModule
   { mName = "biomartr"
   , mFunctions =
     [ parseSearch -- TODO hide from end users?
+    , getGenomes
     -- , getGenome
-    -- , getGenomes
     ]
   }
 
@@ -51,13 +53,13 @@ parseSearch = CutFunction
   , fCompiler  = cParseSearches
   }
 
-getGenome :: CutFunction
-getGenome = CutFunction
-  { fName      = "get_genome"
-  , fTypeCheck = defaultTypeCheck [str] gom
-  , fFixity    = Prefix
-  , fCompiler  = cGetGenome
-  }
+-- getGenome :: CutFunction
+-- getGenome = CutFunction
+--   { fName      = "get_genome"
+--   , fTypeCheck = defaultTypeCheck [str] gom
+--   , fFixity    = Prefix
+--   , fCompiler  = cGetGenome
+--   }
 
 getGenomes :: CutFunction
 getGenomes = CutFunction
@@ -133,6 +135,8 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     header             = ["species", "db", "id"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
+-- TODO accept only the search strings themselves here, not the fn
+-- TODO make sure the hashes are unique! they're overlapping now :(
 cParseSearches :: CutConfig -> CutExpr -> Rules FilePath
 cParseSearches cfg expr@(CutFun _ _ ss) = do
   sFiles <- mapM (cExpr cfg) ss
@@ -153,11 +157,22 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 -----------------
 
 -- TODO this is where to parse the searches?
-cGetGenome :: CutConfig -> CutExpr -> Rules FilePath
-cGetGenome cfg expr@(CutFun _ _ [s]) = undefined
-cGetGenome _ _ = error "bad cGetGenome call"
+-- cGetGenome :: CutConfig -> CutExpr -> Rules FilePath
+-- cGetGenome cfg expr@(CutFun _ _ [s]) = undefined
+-- cGetGenome _ _ = error "bad cGetGenome call"
 
--- TODO this is where to parse the searches?
+-- TODO bugfix: why is the species name "cache"??
+-- TODO factor out a "trivial string file" function?
 cGetGenomes :: CutConfig -> CutExpr -> Rules FilePath
-cGetGenomes cfg expr@(CutFun _ _ ss) = undefined
+cGetGenomes cfg expr@(CutFun _ _ ss) = do
+  sTable <- cParseSearches cfg expr
+  bmFn   <- cExpr cfg (CutLit str "getGenomes")
+  let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
+      -- bmFn  = hashedTmp cfg (CutLit str "getGenomes") [] -- TODO ok?
+      goms  = hashedTmp cfg expr [sTable]
+  -- bmFn %> \out -> writeFile' out "getGenome"
+  goms %> \out -> do
+    need [sTable, bmFn]
+    quietly $ cmd "biomartr.R" [bmTmp, out, bmFn, goms]
+  return goms
 cGetGenomes _ _ = error "bad cGetGenomes call"
