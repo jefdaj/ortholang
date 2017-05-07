@@ -12,8 +12,8 @@ import ShortCut.Core.Types
 import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import Development.Shake
 import ShortCut.Core.Parse (defaultTypeCheck)
-import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
-import Control.Monad (void, when)
+import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp', cList)
+import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
 import Text.Parsec.Char (char, string, alphaNum, oneOf)
@@ -23,6 +23,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
+import Debug.Trace
 
 ------------------------
 -- module description --
@@ -40,7 +41,7 @@ cutModule = CutModule
 
 search :: CutType
 search = CutType
-  { tExt  = "tsv" -- TODO should these be unique?
+  { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
   , tCat  = id
   }
@@ -116,7 +117,7 @@ pSearch = do
   filters <- optionMaybe $ inParens pFilters
   case filters of
     Nothing    -> return $ Search species Nothing Nothing
-    Just (n,i) -> return $ Search species n i
+    Just (n,i) -> return $ Search (traceShow species species) n i
   where
     inParens = between (pSym '(') (pSym ')')
     pSym     = void . char 
@@ -124,7 +125,7 @@ pSearch = do
 readSearch :: FilePath -> IO (Either String Search)
 readSearch p = do
   txt <- readFile p
-  return $ case runParser pSearch () "search string" txt of
+  return $ case runParser pSearch () "search string" (traceShow txt txt) of
     Left  e -> Left  $ show e
     Right s -> Right $ s
 
@@ -133,28 +134,39 @@ toTsv :: [Search] -> String
 toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
   where
     header             = ["species", "db", "id"]
-    row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
+    row (Search s d i) = [traceShow s s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 -- TODO accept only the search strings themselves here, not the fn
 -- TODO make sure the hashes are unique! they're overlapping now :(
 cParseSearches :: CutConfig -> CutExpr -> Rules FilePath
-cParseSearches cfg expr@(CutFun _ _ ss) = do
-  sFiles <- mapM (cExpr cfg) ss
-  let sTable = hashedTmp cfg expr sFiles
-  sTable %> \out -> do
-    need sFiles
-    parses <- liftIO $ mapM readSearch sFiles
-    let (errors, searches) = partitionEithers parses
-        tsv = toTsv searches
+-- cParseSearches cfg expr@(CutFun _ _ ss) = do
+-- cParseSearches cfg expr@(CutList _ [ss]) = do
+cParseSearches cfg e@(CutList _ es) = do
+  -- searches <- cExpr cfg e
+  searches <- mapM (cExpr cfg) es -- TODO use cList?
+  let searchTable = hashedTmp' cfg search e searches
+  searchTable %> \out -> do
+    -- need [searches]
+    need searches
+    -- parses <- liftIO $ readFile searches >>= mapM readSearch . lines
+    -- parses <- liftIO $ mapM (readFile' >>= readSearch) searches
+    -- parses <- liftIO $ mapM readSearch searches
+    parses <- do
+      -- TODO searches is a ListOf (ListOf str) when it should be ListOf str?
+      -- searches' <- readFile' searches
+      -- liftIO $ mapM readSearch $ lines (traceShow searches searches)
+      liftIO $ mapM readSearch $ traceShow searches searches
+    let (errors, searches') = partitionEithers parses
     -- TODO better error here
-    when (not $ null errors) (error "invalid search!")
-    liftIO $ writeFile out tsv
-  return sTable
+    if (not . null) errors
+      then error "invalid search!"
+      else liftIO $ writeFile out $ toTsv searches'
+  return searchTable
 cParseSearches _ _ = error "bad arguments to cParseSearches"
 
------------------
--- get genomes --
------------------
+------------------
+-- run biomartr --
+------------------
 
 -- TODO this is where to parse the searches?
 -- cGetGenome :: CutConfig -> CutExpr -> Rules FilePath
@@ -165,14 +177,15 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 -- TODO factor out a "trivial string file" function?
 cGetGenomes :: CutConfig -> CutExpr -> Rules FilePath
 cGetGenomes cfg expr@(CutFun _ _ ss) = do
-  sTable <- cParseSearches cfg expr
   bmFn   <- cExpr cfg (CutLit str "getGenomes")
-  let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      -- bmFn  = hashedTmp cfg (CutLit str "getGenomes") [] -- TODO ok?
-      goms  = hashedTmp cfg expr [sTable]
-  -- bmFn %> \out -> writeFile' out "getGenome"
+  -- sTable <- cParseSearches cfg ss
+  sTable <- cParseSearches cfg $ CutList str ss
+  let bmTmp = cfgTmpDir cfg </> "cacheHere" </> "biomartr"
+      -- TODO stop this from getting the search table written to it!
+      goms  = hashedTmp cfg expr [bmFn, sTable] -- TODO is this wrong?
   goms %> \out -> do
-    need [sTable, bmFn]
-    quietly $ cmd "biomartr.R" [bmTmp, out, bmFn, goms]
+    need [bmFn, sTable]
+    -- TODO should biomartr get multiple output paths?
+    quietly $ cmd "biomartr.R" [bmTmp, out, bmFn, sTable]
   return goms
 cGetGenomes _ _ = error "bad cGetGenomes call"

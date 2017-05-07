@@ -19,6 +19,7 @@ module ShortCut.Core.Compile
   , hashedTmp
   , hashedTmp'
   , cExpr
+  , cList
   , cacheDir
   )
   where
@@ -130,7 +131,6 @@ cLit cfg expr = do
     paths _ = error "bad argument to paths"
 
 -- TODO how to show the list once it's created? not just as a list of paths!
--- TODO make paths relative to tmpDir so they're readable + portable
 cList :: CutConfig -> CutExpr -> Rules FilePath
 cList cfg e@(CutList EmptyList []) = do
   let link = hashedTmp cfg e []
