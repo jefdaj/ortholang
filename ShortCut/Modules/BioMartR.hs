@@ -23,7 +23,6 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
-import Debug.Trace
 
 ------------------------
 -- module description --
@@ -117,7 +116,7 @@ pSearch = do
   filters <- optionMaybe $ inParens pFilters
   case filters of
     Nothing    -> return $ Search species Nothing Nothing
-    Just (n,i) -> return $ Search (traceShow species species) n i
+    Just (n,i) -> return $ Search species n i
   where
     inParens = between (pSym '(') (pSym ')')
     pSym     = void . char 
@@ -127,28 +126,27 @@ pSearch = do
 --           then when it reads the list it gets more filenames. doh!
 readSearch :: FilePath -> IO (Either String Search)
 readSearch p = do
-  txt <- readFile (trace ("p: " ++ p) p)
-  return $ case runParser pSearch () "search string" (trace ("txt: " ++ txt) txt) of
+  txt <- readFile p
+  return $ case runParser pSearch () "search string" txt of
     Left  e -> Left  $ show e
-    Right s@(Search sp d i) -> Right $ trace ("species: " ++ sp) s
+    Right s@(Search sp d i) -> Right s
 
 -- TODO use cassava?
 toTsv :: [Search] -> String
 toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
   where
-    header             = ["species", "db", "id"]
-    row (Search s d i) = [traceShow s s, fromMaybe "NA" d, fromMaybe "NA" i]
+    header             = ["organism", "database", "identifier"]
+    row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
--- TODO accept only the search strings themselves here, not the fn
--- TODO make sure the hashes are unique! they're overlapping now :(
 cParseSearches :: CutConfig -> CutExpr -> Rules FilePath
 cParseSearches cfg expr@(CutList _ _) = do
   sList <- cExpr cfg expr
   let searchTable = hashedTmp' cfg search expr [sList]
   searchTable %> \out -> do
-    sLines <- fmap lines $ fmap (cfgTmpDir cfg </>) $ readFile' sList
-    need (trace ("sLines: " ++ show sLines) sLines) -- TODO what?
-    parses <- liftIO $ mapM readSearch (trace ("sLines: " ++ show sLines) sLines)
+    tmp <- readFile' sList
+    let sLines = map (cfgTmpDir cfg </>) (lines tmp)
+    need sLines
+    parses <- liftIO $ mapM readSearch sLines
     let (errors, searches') = partitionEithers parses
     -- TODO better error here
     if (not . null) errors
@@ -166,16 +164,13 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 -- cGetGenome cfg expr@(CutFun _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
--- TODO bugfix: why is the species name "cache"??
 -- TODO factor out a "trivial string file" function?
 cGetGenomes :: CutConfig -> CutExpr -> Rules FilePath
-cGetGenomes cfg expr@(CutFun _ _ ss) = do
+cGetGenomes cfg expr@(CutFun _ _ [ss]) = do
   bmFn   <- cExpr cfg (CutLit str "getGenomes")
-  -- sTable <- cParseSearches cfg ss
-  sTable <- cParseSearches cfg $ CutList str ss
-  let bmTmp = cfgTmpDir cfg </> "cacheHere" </> "biomartr"
-      -- TODO stop this from getting the search table written to it!
-      goms  = hashedTmp cfg expr [bmFn, sTable] -- TODO is this wrong?
+  sTable <- cParseSearches cfg ss
+  let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
+      goms  = hashedTmp cfg expr [bmFn, sTable]
   goms %> \out -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?
