@@ -122,12 +122,15 @@ pSearch = do
     inParens = between (pSym '(') (pSym ')')
     pSym     = void . char 
 
+-- TODO bug: this is getting passed a filepath and is partially parsing it
+--           it expects a single filepath but gets a list of them
+--           then when it reads the list it gets more filenames. doh!
 readSearch :: FilePath -> IO (Either String Search)
 readSearch p = do
-  txt <- readFile p
-  return $ case runParser pSearch () "search string" (traceShow txt txt) of
+  txt <- readFile (trace ("p: " ++ p) p)
+  return $ case runParser pSearch () "search string" (trace ("txt: " ++ txt) txt) of
     Left  e -> Left  $ show e
-    Right s -> Right $ s
+    Right s@(Search sp d i) -> Right $ trace ("species: " ++ sp) s
 
 -- TODO use cassava?
 toTsv :: [Search] -> String
@@ -139,23 +142,13 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
 -- TODO accept only the search strings themselves here, not the fn
 -- TODO make sure the hashes are unique! they're overlapping now :(
 cParseSearches :: CutConfig -> CutExpr -> Rules FilePath
--- cParseSearches cfg expr@(CutFun _ _ ss) = do
--- cParseSearches cfg expr@(CutList _ [ss]) = do
-cParseSearches cfg e@(CutList _ es) = do
-  -- searches <- cExpr cfg e
-  searches <- mapM (cExpr cfg) es -- TODO use cList?
-  let searchTable = hashedTmp' cfg search e searches
+cParseSearches cfg expr@(CutList _ _) = do
+  sList <- cExpr cfg expr
+  let searchTable = hashedTmp' cfg search expr [sList]
   searchTable %> \out -> do
-    -- need [searches]
-    need searches
-    -- parses <- liftIO $ readFile searches >>= mapM readSearch . lines
-    -- parses <- liftIO $ mapM (readFile' >>= readSearch) searches
-    -- parses <- liftIO $ mapM readSearch searches
-    parses <- do
-      -- TODO searches is a ListOf (ListOf str) when it should be ListOf str?
-      -- searches' <- readFile' searches
-      -- liftIO $ mapM readSearch $ lines (traceShow searches searches)
-      liftIO $ mapM readSearch $ traceShow searches searches
+    sLines <- fmap lines $ fmap (cfgTmpDir cfg </>) $ readFile' sList
+    need (trace ("sLines: " ++ show sLines) sLines) -- TODO what?
+    parses <- liftIO $ mapM readSearch (trace ("sLines: " ++ show sLines) sLines)
     let (errors, searches') = partitionEithers parses
     -- TODO better error here
     if (not . null) errors
