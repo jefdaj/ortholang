@@ -167,8 +167,9 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 -- TODO factor out a "trivial string file" function?
 cGetGenomes :: CutConfig -> CutExpr -> Rules FilePath
 cGetGenomes cfg expr@(CutFun _ _ [ss]) = do
-  bmFn   <- cExpr cfg (CutLit str "getGenomes")
+  bmFn   <- cExpr cfg (CutLit str "getGenome")
   sTable <- cParseSearches cfg ss
+  -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
       goms  = hashedTmp cfg expr [bmFn, sTable]
   goms %> \out -> do
