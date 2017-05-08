@@ -97,6 +97,7 @@ loop (promptFn:promptFns) = do
           -- even though result gets added to the script either way,
           -- still have to check whether to print it
           -- TODO should be able to factor this out and put in Eval.hs
+          -- TODO nothing should be run when manually assigning result!
           when (isExpr st line) (liftIO $ evalScript cfg scr')
   loop promptFns
 
@@ -107,8 +108,11 @@ loop (promptFn:promptFns) = do
 updateScript :: CutScript -> CutAssign -> CutScript
 updateScript scr asn@(var, expr) =
   case expr of
-    (CutRef _ var) -> scr
-    _ -> delFromAL scr var ++ [asn]
+    (CutRef _ var') -> if var' == var then scr else scr'
+    _ -> scr'
+    where
+      scr' = delFromAL scr var ++ [asn]
+
 
 --------------------------
 -- dispatch to commands --
