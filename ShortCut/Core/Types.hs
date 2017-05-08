@@ -21,6 +21,7 @@ module ShortCut.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
+  , extOf
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
@@ -40,7 +41,7 @@ import Development.Shake (Rules)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
--- data Ext = SetOf Ext | Ext String
+-- data Ext = ListOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
@@ -51,30 +52,63 @@ data CutExpr
   | CutRef CutType CutVar
   | CutBop CutType String  CutExpr CutExpr
   | CutFun CutType String [CutExpr]
-  | CutSet CutType [CutExpr]
-  deriving (Eq, Show, Read)
+  | CutList CutType [CutExpr]
+  deriving (Eq, Show)
 
+-- TODO have a separate CutAssign for "result"?
 type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
 data CutType
-  = CutType String String
-  | SetOf CutType -- TODO rename to ListOf?
-  deriving (Eq, Show, Read)
+  = EmptyList -- TODO remove this? should never be a need to define an empty list
+  | ListOf CutType
+  | CutType
+    { tExt  :: String
+    , tDesc :: String -- TODO include a longer help text too
+    , tCat  :: String -> String
+    }
+  -- deriving (Eq, Show, Read)
+
+-- TODO is it dangerous to just assume they're the same by extension?
+--      maybe we need to assert no duplicates while loading modules?
+instance Eq CutType where
+  EmptyList  == EmptyList  = True
+  (ListOf a) == (ListOf b) = a == b
+  t1         == t2         = tExt t1 == tExt t2
+
+instance Show CutType where
+  show = extOf
 
 typeOf :: CutExpr -> CutType
 typeOf (CutLit t _    ) = t
 typeOf (CutRef t _    ) = t
 typeOf (CutBop t _ _ _) = t
 typeOf (CutFun t _ _  ) = t
-typeOf (CutSet t _    ) = SetOf t
+typeOf (CutList EmptyList _) = EmptyList
+typeOf (CutList t _    ) = ListOf t
+
+extOf :: CutType -> String
+extOf (ListOf t   ) = extOf t ++ ".list"
+extOf EmptyList     = "list"
+extOf t = tExt t
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
 -- TODO how about lists/sets, are those core too?
-str, num :: CutType
-str = CutType "str"    "string"
-num = CutType "num"    "number in scientific notation"
+
+str :: CutType
+str = CutType
+  { tExt  = "str"
+  , tDesc = "string"
+  , tCat  = read
+  }
+
+num :: CutType
+num = CutType
+  { tExt  = "num"
+  , tDesc = "number in scientific notation"
+  , tCat  = id
+  }
 
 ------------
 -- config --
@@ -138,11 +172,10 @@ type CutSignature = CutType -> (CutType, [CutType])
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
-  { fName    :: String
-  -- , fSignature :: CutSignature
+  { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
-  , fFixity  :: CutFixity
-  , fCompiler :: CutConfig -> CutExpr -> Rules FilePath
+  , fFixity    :: CutFixity
+  , fCompiler  :: CutConfig -> CutExpr -> Rules FilePath
   }
   -- deriving (Eq, Read)
 

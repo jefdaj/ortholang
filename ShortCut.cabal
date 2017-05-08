@@ -6,19 +6,7 @@ maintainer:         jefdaj@berkeley.edu
 build-type:         Simple
 cabal-version:      >=1.10
 extra-source-files: README.md
-data-files:         ShortCut/Test/math/math01.cut,
-                    ShortCut/Test/math/math01.result,
-                    ShortCut/Test/math/math01.tree,
-                    ShortCut/Test/math/math02.cut,
-                    ShortCut/Test/math/math02.result,
-                    ShortCut/Test/math/math02.tree,
-                    ShortCut/Test/math/math03.cut,
-                    ShortCut/Test/math/math03.result,
-                    ShortCut/Test/math/math03.tree,
-                    ShortCut/Test/repl/repl01.txt,
-                    ShortCut/Test/repl/repl01.tree,
-                    ShortCut/Test/repl/repl02.txt,
-                    ShortCut/Test/repl/repl02.tree,
+data-files:         usage.txt,
                     examples/PSII.ast,
                     examples/PSII.cut,
                     scripts/extract-seq-ids.py,
@@ -26,7 +14,14 @@ data-files:         ShortCut/Test/math/math01.cut,
                     scripts/filter_genes.R,
                     scripts/filter_genomes.R,
                     scripts/worst_best_evalue.R,
-                    usage.txt
+                    tests/lists/*.cut,
+                    tests/lists/*.result,
+                    -- tests/lists/*.tree,
+                    tests/math/*.cut,
+                    tests/math/*.result,
+                    tests/math/*.tree,
+                    tests/repl/*.tree,
+                    tests/repl/*.txt
 
 executable shortcut
   main-is:          ShortCut.hs

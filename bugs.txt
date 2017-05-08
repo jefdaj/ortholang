@@ -1,0 +1,20 @@
+tests/list01
+	doesn't create the output file
+	not sure if this is an actual problem
+	next steps:
+		remove explicit empty list case altogether
+		put in a sensible error instead
+
+tests/repl03
+	that one line keeps printing to actual stdout instead of being captured
+	some kind of interaction between tasty and silently?
+	next steps:
+		try reproducing it without tasty (separate main file)
+		email/file github issue with author
+		ask on stackoverflow
+
+division
+	division by certain numbers hangs for a long time (forever?)
+	seems to only happen with non-powers-of-two?
+	next steps:
+		try manually `read`ing + doing the math in ghci

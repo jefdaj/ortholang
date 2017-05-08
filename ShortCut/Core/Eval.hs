@@ -24,7 +24,8 @@ import Control.Exception.Enclosed (catchAny)
 import Data.Maybe                 (fromJust)
 import ShortCut.Core.Compile      (compileScript)
 import ShortCut.Core.Parse        (ParseError, parseFile)
-import ShortCut.Core.Types        (CutConfig(..), CutScript)
+import ShortCut.Core.Types
+import ShortCut.Core.Pretty       (prettyCat)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -45,8 +46,10 @@ myShake cfg = shake myOpts . alternatives
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
 -- TODO rename `runRules` or `runShake`?
-eval :: CutConfig -> Rules FilePath -> IO ()
-eval cfg = ignoreErrors . eval'
+-- TODO require a return type just for showing the result?
+-- TODO take a variable instead?
+eval :: CutConfig -> CutType -> Rules FilePath -> IO ()
+eval cfg rtype = ignoreErrors . eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
@@ -54,13 +57,18 @@ eval cfg = ignoreErrors . eval'
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        -- TODO show the var rather than the actual file contents
-        str' <- readFile' path
+        need [path] -- TODO is this done automatically in the case of result?
+        liftIO $ prettyCat rtype path
+        -- txt <- liftIO $ readFile path -- TODO don't read the whole file here!
         -- putQuiet $ "\n" ++ str
-        liftIO $ putStr str'
+        -- liftIO $ putStrLn $ prettyCat rtype txt
 
+-- TODO get the type of result and pass to eval
 evalScript :: CutConfig -> CutScript -> IO ()
-evalScript c s = eval c $ compileScript c s
+evalScript c s = eval c rtn $ compileScript c s
+  where
+    res = fromJust $ lookup (CutVar "result") s
+    rtn = typeOf res
 
 evalFile :: CutConfig -> IO ()
 evalFile cfg = do

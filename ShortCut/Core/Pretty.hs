@@ -1,21 +1,26 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module ShortCut.Core.Pretty (prettyShow) where
+module ShortCut.Core.Pretty
+  ( prettyShow
+  , prettyCat
+  )
+  where
 
 import Data.Scientific (Scientific())
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
 
 instance Pretty CutType where
-  pPrint (CutType ext desc) = text ext <+> parens (text desc)
-  pPrint (SetOf t) = text "set of" <+> pPrint t <> text "s"
+  pPrint EmptyList  = text "empty list" -- TODO remove
+  pPrint (ListOf t) = text "list of" <+> pPrint t <> text "s"
+  pPrint t          = text (tExt t) <+> parens (text $ tDesc t)
 
 instance Pretty CutVar where
   pPrint (CutVar s) = text s
 
 -- TODO add descriptions here? if so, need to separate actual extension code
 -- instance Pretty Ext where
---   pPrint (SetOf e) = pPrint e <> text "s"
+--   pPrint (ListOf e) = pPrint e <> text "s"
 --   pPrint (Ext   e) = text e
 
 instance {-# OVERLAPPING #-} Pretty CutAssign where
@@ -27,18 +32,23 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
 
+-- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where
-  pPrint e@(CutLit _ s)
-    | typeOf e == num = text $ show $ (read s :: Scientific)
-    | otherwise       = text $ show s
+  pPrint e@(CutLit t s)
+    | typeOf e == num       = text $ show $ (read s :: Scientific)
+    -- | tExt t == tExt num    = text $ show (read s :: Scientific)
+    | otherwise             = text $ show s
   pPrint (CutRef _ v)       = pPrint v
-  pPrint (CutFun _ s es)    = text s <+> sep (map pNested es)
-  pPrint (CutSet _ _)       = undefined -- TODO figure this out!
+  pPrint (CutFun _ s es)    = text s <+> fsep (map pNested es)
+  pPrint (CutList _ es)     = pList es
   pPrint (CutBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
       one = bopWith (<+>)
       two = bopWith ($+$)
+
+pList :: (Pretty a) => [a] -> Doc
+pList es = text "[" <> fsep (punctuate (text ",") (map pPrint es)) <> text "]"
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
@@ -67,3 +77,14 @@ instance Pretty CutModule where
 
 instance Show CutModule where
   show = prettyShow
+
+-- This seems to be separately required to show the final result of eval
+-- TODO is there a way to get rid of it?
+-- TODO rename prettyContents? prettyResult?
+-- TODO should this actually open external programs
+-- TODO idea for lists: if any element contains "\n", just add blank lines between them
+-- TODO for str and num lists, showing should be like prettyShowing right?
+prettyCat :: CutType -> FilePath -> IO ()
+prettyCat EmptyList  _ = putStrLn "[]" -- TODO remove?
+prettyCat (ListOf _) f = readFile f >>= putStrLn -- TODO figure out how to handle these better
+prettyCat t          f = readFile f >>= (putStr . (tCat t))

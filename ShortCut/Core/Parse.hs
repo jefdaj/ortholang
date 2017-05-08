@@ -1,3 +1,7 @@
+-- TODO why export all these?
+-- TODO make sure expressions consume the whole string
+--      for example right now "\"this\" 2" parses as a str
+
 module ShortCut.Core.Parse
   -- parsec stuff
   ( ParseError
@@ -16,6 +20,7 @@ module ShortCut.Core.Parse
   , pNum
   , pQuoted
   , pSym
+  , pList
   , pVar
   , pVarEq
   , spaceChars
@@ -41,7 +46,7 @@ import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
                                newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
-                              ,lookAhead, between, choice, anyToken)
+                              ,lookAhead, between, choice, anyToken, sepBy)
 -- import Text.Parsec.Expr       (buildExpressionParser)
 import qualified Text.Parsec.Expr as E
 
@@ -75,6 +80,8 @@ parseFile cfg path = readFile path >>= return . parseString cfg
 --------------------------------
 -- helpers to simplify parsec --
 --------------------------------
+
+-- TODO make an empty CutState so you can run these in ghci again
 
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
@@ -177,6 +184,17 @@ pQuoted = (lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quo
 pStr :: ParseM CutExpr
 pStr = CutLit str <$> pQuoted <?> "string"
 
+-- TODO remove the empty list case? can't imagine when it would be used
+-- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
+pList :: ParseM CutExpr
+pList = do
+  terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
+  let rtn = if null terms
+              then EmptyList
+              else typeOf $ head terms
+  -- TODO assert that the rest of the terms match the first one here!
+  return $ CutList rtn terms
+
 ---------------
 -- operators --
 ---------------
@@ -266,7 +284,7 @@ pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
 pTerm :: ParseM CutExpr
-pTerm = pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
+pTerm = pList <|> pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
@@ -301,6 +319,8 @@ pAssign = do
 -- but doing it more than once in a script will cause an error later.
 -- TODO prevent assignments that include the variable being assigned to
 --      (later when working on statement issues)
+-- TODO if the statement is literally `result`, what do we do?
+--      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM CutAssign
 pResult = pExpr >>= \e -> return (CutVar "result", e)
 

@@ -6,11 +6,39 @@ import ShortCut.Core.Compile
 import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Types
 
-gen = CutType "gene"   "gene"   -- TODO deprecate
-gom = CutType "genome" "genome" -- TODO deprecate
-faa = CutType "faa"    "fasta amino acid"
-fna = CutType "fna"    "fasta nucleic acid"
-csv = CutType "csv" "spreadsheet"
+-- TODO deprecate
+gen = CutType
+  { tExt  = "gene"
+  , tDesc = "gene"
+  , tCat  = id
+  }
+
+-- TODO deprecate
+gom = CutType
+  { tExt  = "genome"
+  , tDesc = "genome"
+  , tCat  = id
+  }
+
+faa = CutType
+  { tExt  = "faa"
+  , tDesc = "fasta amino acid"
+  , tCat  = id
+  }
+
+fna = CutType
+  { tExt  = "fna"
+  , tDesc = "fasta nucleic acid"
+  , tCat  = id
+  }
+
+-- TODO use tsv instead
+-- TODO obviously, better printing that says # rows and stuff
+csv = CutType
+  { tExt  = "csv"
+  , tDesc = "spreadsheet"
+  , tCat  = unlines . (++ ["..."]) . take 5 . lines
+  }
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -18,8 +46,8 @@ cutModule = CutModule
   , mFunctions =
     [ mkLoadFn "load_fasta_aa" faa
     , mkLoadFn "load_fasta_na" fna
-    , mkLoadFn "load_genes"    gen -- TODO replace with cLoadGenes?
-    , mkLoadFn "load_genomes"  gom
+    , mkLoadFn "load_genes"    (ListOf gen) -- TODO replace with cLoadGenes?
+    , mkLoadFn "load_genomes"  (ListOf gom)
     , filterGenes
     , filterGenomes
     , worstBestEvalue
@@ -37,7 +65,7 @@ mkLoadFn name rtn = CutFunction
 filterGenes :: CutFunction
 filterGenes = CutFunction
   { fName = "filter_genes"
-  , fTypeCheck = defaultTypeCheck [SetOf gen, SetOf gom, num] (SetOf gen)
+  , fTypeCheck = defaultTypeCheck [ListOf gen, ListOf gom, num] (ListOf gen)
   , fFixity  = Prefix
   , fCompiler = cFilterGenes
   }
@@ -45,7 +73,7 @@ filterGenes = CutFunction
 filterGenomes :: CutFunction
 filterGenomes = CutFunction
   { fName = "filter_genomes"
-  , fTypeCheck = defaultTypeCheck [SetOf gom, SetOf gen, num] (SetOf gom)
+  , fTypeCheck = defaultTypeCheck [ListOf gom, ListOf gen, num] (ListOf gom)
   , fFixity  = Prefix
   , fCompiler = cFilterGenomes
   }
@@ -53,7 +81,7 @@ filterGenomes = CutFunction
 worstBestEvalue :: CutFunction
 worstBestEvalue = CutFunction
   { fName = "worst_best_evalue"
-  , fTypeCheck = defaultTypeCheck [SetOf gen, SetOf gom] num
+  , fTypeCheck = defaultTypeCheck [ListOf gen, ListOf gom] num
   , fFixity  = Prefix
   , fCompiler = cWorstBest
   }

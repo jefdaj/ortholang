@@ -1,5 +1,7 @@
 module ShortCut.Modules.Math where
 
+-- TODO is math ever actually needed in a cut script?
+
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
 import Development.Shake
