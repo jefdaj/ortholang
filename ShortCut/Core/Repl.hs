@@ -85,20 +85,34 @@ loop [] = runCmd "quit"
 loop (promptFn:promptFns) = do
   mline <- promptFn "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
-    ""        -> return ()
+    ""        -> return () -- TODO also handle comments this way (for examples mostly)
     (':':cmd) -> runCmd cmd
     line      -> do
       st@(scr, cfg) <- get
       case parseStatement st line of
-        Left e -> print $ show e
-        Right r@(v, e) -> do
-          let scr' = delFromAL scr v ++ [r]
-          put (scr', cfg) -- v is always "result"
+        Left  e -> print $ show e
+        Right r -> do
+          let scr' = updateScript scr r
+          put (scr', cfg)
           -- even though result gets added to the script either way,
           -- still have to check whether to print it
           -- TODO should be able to factor this out and put in Eval.hs
+          -- TODO nothing should be run when manually assigning result!
           when (isExpr st line) (liftIO $ evalScript cfg scr')
   loop promptFns
+
+-- this is needed to avoid assigning a variable to itself,
+-- which is especially a problem when auto-assigning "result"
+-- TODO also catch variables assigned to things depending on themselves
+--      (later, with the "which variables does this depend on" function)
+updateScript :: CutScript -> CutAssign -> CutScript
+updateScript scr asn@(var, expr) =
+  case expr of
+    (CutRef _ var') -> if var' == var then scr else scr'
+    _ -> scr'
+    where
+      scr' = delFromAL scr var ++ [asn]
+
 
 --------------------------
 -- dispatch to commands --
