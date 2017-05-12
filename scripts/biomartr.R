@@ -2,11 +2,22 @@
 
 # TODO: cache results in shortcut to prevent wasting time on FTP stuff
 # TODO: hardcode args for development
-# TODO: put downloads in tmpDir (will be created by Shake?)
+
+# TODO: put downloads in tmpDirs specific to the functions (genome, proteome, ...)
+
 # TODO: search specific databases and filter by identifier
 #       (build up args as list, then use do.call?)
-# TODO: nice messages when more than one genome/whatever found
-# TODO: will this work with things other than genomes??
+
+# TODO: convert "more than one genome" warning to an error like this:
+# http://stackoverflow.com/questions/8217901/breaking-loop-when-warnings-appear-in-r
+
+# TODO: handle getProteome, getCDS, getGFF in addition to getGenome
+# TODO: figure out why curl/whatever is spamming terminal and cut it off
+#       (might be better done in haskell)
+
+# TODO: haskell function to show the doc_ files when you print a variable,
+#       and one to shorten it to one line for lists
+#       ... in fact, you want general "show" and "show one line" functions
 
 suppressPackageStartupMessages(require(biomartr))
 suppressPackageStartupMessages(require(dplyr))
