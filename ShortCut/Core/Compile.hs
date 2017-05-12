@@ -19,6 +19,7 @@ module ShortCut.Core.Compile
   , hashedTmp
   , hashedTmp'
   , cExpr
+  , cList
   , cacheDir
   )
   where
@@ -122,7 +123,7 @@ cLit cfg expr = do
   let path = hashedTmp cfg expr []
   path %> \out -> do
     -- putQuiet $ unwords ["write", out]
-    writeFileChanged out $ paths expr ++ "\n"
+    writeFileChanged out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
   return path
   where
     paths :: CutExpr -> String
@@ -130,17 +131,18 @@ cLit cfg expr = do
     paths _ = error "bad argument to paths"
 
 -- TODO how to show the list once it's created? not just as a list of paths!
--- TODO make paths relative to tmpDir so they're readable + portable
+-- TODO why are lists of lists not given .list.list ext? hides a more serious bug?
+--      or possibly the bug is that we're making accidental lists of lists?
 cList :: CutConfig -> CutExpr -> Rules FilePath
-cList cfg e@(CutList EmptyList []) = do
+cList cfg e@(CutList EmptyList _) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cList cfg e@(CutList rtn exprs) = do
+cList cfg e@(CutList _ exprs) = do
   paths <- mapM (cExpr cfg) exprs
   let path   = hashedTmp cfg e paths
       paths' = map (makeRelative $ cfgTmpDir cfg) paths
-  path %> \out -> need paths >> writeFileLines out paths'
+  path %> \out -> need paths >> writeFileChanged out (unlines paths')
   return path
 
 -- return a link to an existing named variable

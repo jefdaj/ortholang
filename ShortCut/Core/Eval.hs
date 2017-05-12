@@ -34,7 +34,7 @@ myShake cfg = shake myOpts . alternatives
   where
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg
-      , shakeVerbosity = Quiet -- TODO get from cfg
+      , shakeVerbosity = Chatty -- TODO get from cfg
       , shakeThreads   = 0    -- set to number of processors
       -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeReport    = ["_shortcut/report.html"]
