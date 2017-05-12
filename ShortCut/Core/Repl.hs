@@ -152,7 +152,7 @@ cmdHelp _ = print
   \:help  to print this help text\n\
   \:load  to load a script (same as typing the file contents)\n\
   \:write to write the current script to a file\n\
-  \:drop  to discard the current script and start fresh\n\
+  \:drop  to discard the current script (or a specific variable)\n\
   \:quit  to discard the current script and exit the interpreter\n\
   \:type  to print the type of an expression\n\
   \:show  to print an expression along with its type\n\
