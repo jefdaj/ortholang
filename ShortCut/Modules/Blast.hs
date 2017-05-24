@@ -5,31 +5,32 @@ import Development.Shake.FilePath ((<.>), (</>))
 import ShortCut.Core.Compile
 import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Types
+import Text.PrettyPrint.HughesPJClass (text)
 
 -- TODO deprecate
 gen = CutType
   { tExt  = "gene"
   , tDesc = "gene"
-  , tCat  = id
+  , tCat  = undefined
   }
 
 -- TODO deprecate
 gom = CutType
   { tExt  = "genome"
   , tDesc = "genome"
-  , tCat  = id
+  , tCat  = undefined
   }
 
 faa = CutType
   { tExt  = "faa"
   , tDesc = "fasta amino acid"
-  , tCat  = id
+  , tCat  = undefined
   }
 
 fna = CutType
   { tExt  = "fna"
   , tDesc = "fasta nucleic acid"
-  , tCat  = id
+  , tCat  = undefined
   }
 
 -- TODO use tsv instead
@@ -37,7 +38,7 @@ fna = CutType
 csv = CutType
   { tExt  = "csv"
   , tDesc = "spreadsheet"
-  , tCat  = unlines . (++ ["..."]) . take 5 . lines
+  , tCat  = return . text . unlines . (++ ["..."]) . take 5 . lines
   }
 
 cutModule :: CutModule

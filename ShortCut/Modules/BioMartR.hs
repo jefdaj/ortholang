@@ -42,7 +42,7 @@ search :: CutType
 search = CutType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
-  , tCat  = id
+  , tCat  = undefined
   }
 
 parseSearch :: CutFunction

@@ -32,12 +32,13 @@ import Prelude hiding (print)
 import qualified Text.Parsec as P
 
 -- import Data.Scientific           (Scientific())
-import Text.Parsec               (ParseError)
-import Control.Monad.State.Lazy  (StateT, execStateT, lift, liftIO)
-import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
-import System.Console.Haskeline  (InputT, getInputLine, runInputT,
-                                  defaultSettings, outputStrLn)
-import Development.Shake (Rules)
+import Text.Parsec                    (ParseError)
+import Control.Monad.State.Lazy       (StateT, execStateT, lift, liftIO)
+import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
+import System.Console.Haskeline       (InputT, getInputLine, runInputT,
+                                       defaultSettings, outputStrLn)
+import Development.Shake              (Rules)
+import Text.PrettyPrint.HughesPJClass (Doc, pPrint, text, doubleQuotes)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -65,7 +66,7 @@ data CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tCat  :: String -> String
+    , tCat  :: String -> IO Doc
     }
   -- deriving (Eq, Show, Read)
 
@@ -100,14 +101,14 @@ str :: CutType
 str = CutType
   { tExt  = "str"
   , tDesc = "string"
-  , tCat  = read
+  , tCat  = return . doubleQuotes . text . init
   }
 
 num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tCat  = id
+  , tCat  = return . text . init
   }
 
 ------------

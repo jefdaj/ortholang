@@ -2,11 +2,12 @@
 
 module ShortCut.Core.Pretty
   ( prettyShow
-  , prettyCat
+  , prettyResult
   )
   where
 
-import Data.Scientific (Scientific())
+import Data.Scientific            (Scientific())
+import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
 
@@ -84,7 +85,12 @@ instance Show CutModule where
 -- TODO should this actually open external programs
 -- TODO idea for lists: if any element contains "\n", just add blank lines between them
 -- TODO for str and num lists, showing should be like prettyShowing right?
-prettyCat :: CutType -> FilePath -> IO ()
-prettyCat EmptyList  _ = putStrLn "[]" -- TODO remove?
-prettyCat (ListOf _) f = readFile f >>= putStrLn -- TODO figure out how to handle these better
-prettyCat t          f = readFile f >>= (putStr . (tCat t))
+prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
+prettyResult _ EmptyList  _ = return $ text "[]"
+prettyResult cfg (ListOf t) f = do
+  paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+  pretties <- mapM (prettyResult cfg t) paths
+  return $ text "[" <> fsep ((punctuate (text ",") pretties)) <> text "]"
+prettyResult cfg t f = do
+  txt <- readFile $ cfgTmpDir cfg </> f
+  tCat t $ txt

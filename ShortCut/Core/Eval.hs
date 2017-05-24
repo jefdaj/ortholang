@@ -25,7 +25,8 @@ import Data.Maybe                 (fromJust)
 import ShortCut.Core.Compile      (compileScript)
 import ShortCut.Core.Parse        (ParseError, parseFile)
 import ShortCut.Core.Types
-import ShortCut.Core.Pretty       (prettyCat)
+import ShortCut.Core.Pretty       (prettyResult)
+import Text.PrettyPrint.HughesPJClass (render)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -58,10 +59,9 @@ eval cfg rtype = ignoreErrors . eval'
       "eval" ~> do
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
-        liftIO $ prettyCat rtype path
-        -- txt <- liftIO $ readFile path -- TODO don't read the whole file here!
-        -- putQuiet $ "\n" ++ str
-        -- liftIO $ putStrLn $ prettyCat rtype txt
+        liftIO $ do
+          res <- prettyResult cfg rtype path
+          putStrLn $ render res
 
 -- TODO get the type of result and pass to eval
 evalScript :: CutConfig -> CutScript -> IO ()
