@@ -4,13 +4,21 @@ module ShortCut.Modules.Macros where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile (cExpr, hashedTmp')
+
+import Data.List                  (intersect)
+import ShortCut.Core.Compile      (cExpr, hashedTmp')
+import Development.Shake.FilePath ((</>))
+
+-----------------------
+-- module definition --
+-----------------------
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "macros"
   , mFunctions =
     [ leaveOneOut
+    , commonElements
     ]
   }
 
@@ -18,13 +26,25 @@ leaveOneOut :: CutFunction
 leaveOneOut = CutFunction
   { fName      = "leave_each_out"
   , fFixity    = Prefix
-  , fTypeCheck = macroTypeCheck
-  , fCompiler  = cSplit leaveEachOut
+  , fTypeCheck = combosTypeCheck
+  , fCompiler  = cCombos leaveEachOut
   }
 
-macroTypeCheck :: [CutType] -> Either String CutType
-macroTypeCheck [(ListOf t)] = Right $ ListOf $ ListOf t
-macroTypeCheck _ = Left "type error in leave_each_out!"
+commonElements :: CutFunction
+commonElements = CutFunction
+  { fName      = "common_elements"
+  , fFixity    = Prefix
+  , fTypeCheck = summaryTypeCheck
+  , fCompiler  = cSummary (foldr1 intersect)
+  }
+
+---------------------------------------------------------
+-- explode lists into lists of lists of their elements --
+---------------------------------------------------------
+
+combosTypeCheck :: [CutType] -> Either String CutType
+combosTypeCheck [(ListOf t)] = Right $ ListOf $ ListOf t
+combosTypeCheck _ = Left "type error in leave_each_out!"
 
 -- drops the element at index n from a list
 -- (for some reason this isn't a built-in function?)
@@ -44,14 +64,12 @@ leaveEachOut xs
   | otherwise = map (dropFromList xs) [1..length xs]
 
 -- splits a list into a list of lists using the provided function
--- TODO this should take a function call, and that's where you get the name!
 -- TODO produce each output list in a separate Shake monad section?
 -- TODO are paths hashes unique now??
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
-cSplit :: ([FilePath] -> [[FilePath]])
-       -> CutConfig -> CutExpr -> Rules FilePath
-cSplit comboFn cfg expr@(CutFun _ fnName [iList]) = do
+cCombos :: ([FilePath] -> [[FilePath]]) -> CutConfig -> CutExpr -> Rules FilePath
+cCombos comboFn cfg expr@(CutFun _ fnName [iList]) = do
   iPath <- cExpr cfg iList
   let oType = ListOf $ typeOf iList
       oList = hashedTmp' cfg oType expr [iPath, fnName]
@@ -59,9 +77,39 @@ cSplit comboFn cfg expr@(CutFun _ fnName [iList]) = do
     need [iPath]
     elements <- fmap lines $ readFile' iPath
     let combos = comboFn elements
-        lType  = typeOf iList
+        lType  = typeOf iList -- TODO is this right?
         oPaths = map (\e -> hashedTmp' cfg lType iList [out, e]) elements
     mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
     writeFileChanged out $ unlines oPaths
   return oList
-cSplit _ _ _ = error "bad argument to cSplit"
+cCombos _ _ _ = error "bad argument to cCombos"
+
+----------------------------------------------
+-- summarize lists of lists back into lists --
+----------------------------------------------
+
+summaryTypeCheck :: [CutType] -> Either String CutType
+summaryTypeCheck [(ListOf (ListOf t))] = Right $ ListOf t
+summaryTypeCheck _ = Left "type error in summary!"
+
+commonToAll :: [[FilePath]] -> [FilePath]
+commonToAll = undefined
+
+-- takes a list of lists and summarizes (flattens?) it to a single list
+-- using the given summaryFn
+-- TODO are paths hashes unique now??
+-- TODO use writeFileChanged instead of writeFileLines?
+--      (if it turns out to be re-running stuff unneccesarily)
+cSummary :: ([[FilePath]] -> [FilePath]) -> CutConfig -> CutExpr -> Rules FilePath
+cSummary summaryFn cfg expr@(CutFun _ fnName [iList]) = do
+  iPath <- cExpr cfg iList
+  let (ListOf (ListOf eType)) = typeOf iList
+      oPath = hashedTmp' cfg (ListOf eType) expr [iPath, fnName]
+  oPath %> \out -> do
+    need [iPath]
+    iLists <- fmap lines $ readFile' iPath
+    iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
+    let oElems = summaryFn iElems
+    writeFileLines out oElems
+  return oPath
+cSummary _ _ _ = error "bad argument to cSummary"
