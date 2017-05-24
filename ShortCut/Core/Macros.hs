@@ -79,3 +79,26 @@ module ShortCut.Core.Macros () where
  - `priority` to make sure none of the rules overlap. That would be a horrible
  - hack though!
  -}
+
+{- What should the final ShortCut code look like? Can it be split up by
+ - combination functions and summary functions, or are the two linked too
+ - closely? This could be easily solved in Haskell style with higher-order
+ - functions, but hopefully I can avoid implementing + explaining that!
+ -
+ - I guess the simplest way would be do do most things in the "split" part, and
+ - then summarizing can be pretty simple. "split" could actually mean more like
+ - "repeat for all combinations" and would involve both the independent and
+ - dependent variables. Internally it could be broken down further than that,
+ - but I don't think there's any reason a user would want to split without
+ - repeating.... right?
+ -
+ - The module could be called "Every" or "Permutations"
+ -}
+
+{- The other thing to consider is the user's perspective: what will they expect
+ - or want? Would they find it simpler to stick with an "all possibilities at
+ - once" approach that doesn't consider state, or would they want to do quick
+ - single samples from a list? Maybe that's `samples` vs `sample`?
+ -
+ - many_lists = sample 3 [1,2,3,4,5]
+ -}
