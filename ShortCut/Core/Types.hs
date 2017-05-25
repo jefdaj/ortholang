@@ -22,6 +22,7 @@ module ShortCut.Core.Types
   , str, num -- TODO load these from modules
   , typeOf
   , extOf
+  , depsOf
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
@@ -49,11 +50,11 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
  
 -- TODO only keep the extensions themselves here, not the whole CutType?
 data CutExpr
-  = CutLit CutType String
-  | CutRef CutType CutVar
-  | CutBop CutType String  CutExpr CutExpr
-  | CutFun CutType String [CutExpr]
-  | CutList CutType [CutExpr]
+  = CutLit  CutType String
+  | CutRef  CutType CutVar
+  | CutBop  CutType [CutVar] String  CutExpr CutExpr
+  | CutFun  CutType [CutVar] String [CutExpr]
+  | CutList CutType [CutVar] [CutExpr]
   deriving (Eq, Show)
 
 -- TODO have a separate CutAssign for "result"?
@@ -83,15 +84,22 @@ instance Show CutType where
 typeOf :: CutExpr -> CutType
 typeOf (CutLit t _    ) = t
 typeOf (CutRef t _    ) = t
-typeOf (CutBop t _ _ _) = t
-typeOf (CutFun t _ _  ) = t
-typeOf (CutList EmptyList _) = EmptyList
-typeOf (CutList t _    ) = ListOf t
+typeOf (CutBop t _ _ _ _) = t
+typeOf (CutFun t _ _ _  ) = t
+typeOf (CutList EmptyList _ _) = EmptyList
+typeOf (CutList t _ _    ) = ListOf t
 
 extOf :: CutType -> String
 extOf (ListOf t   ) = extOf t ++ ".list"
 extOf EmptyList     = "list"
 extOf t = tExt t
+
+depsOf :: CutExpr -> [CutVar]
+depsOf (CutLit  _ _        ) = []
+depsOf (CutRef  _ d        ) = [d]
+depsOf (CutBop  _ ds _ _ _ ) = ds
+depsOf (CutFun  _ ds _ _   ) = ds
+depsOf (CutList _ ds _     ) = ds
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable

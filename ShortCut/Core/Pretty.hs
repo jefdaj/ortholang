@@ -40,9 +40,9 @@ instance Pretty CutExpr where
     -- | tExt t == tExt num    = text $ show (read s :: Scientific)
     | otherwise             = text $ show s
   pPrint (CutRef _ v)       = pPrint v
-  pPrint (CutFun _ s es)    = text s <+> fsep (map pNested es)
-  pPrint (CutList _ es)     = pList es
-  pPrint (CutBop _ c e1 e2) = if (length $ render $ one) > 80 then two else one
+  pPrint (CutFun _ _ s es)    = text s <+> fsep (map pNested es)
+  pPrint (CutList _ _ es)     = pList es
+  pPrint (CutBop _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
       one = bopWith (<+>)
@@ -54,8 +54,8 @@ pList es = text "[" <> fsep (punctuate (text ",") (map pPrint es)) <> text "]"
 -- this adds parens around nested function calls
 -- without it things can get really messy!
 pNested :: CutExpr -> Doc
-pNested e@(CutFun _ _ _  ) = parens $ pPrint e
-pNested e@(CutBop _ _ _ _) = parens $ pPrint e
+pNested e@(CutFun _ _ _ _  ) = parens $ pPrint e
+pNested e@(CutBop _ _ _ _ _) = parens $ pPrint e
 pNested e = pPrint e
 
 instance Pretty CutConfig where

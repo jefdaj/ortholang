@@ -40,7 +40,7 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
-import Data.List              (find)
+import Data.List              (find, union)
 import Data.Either            (isRight)
 import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
@@ -189,11 +189,12 @@ pStr = CutLit str <$> pQuoted <?> "string"
 pList :: ParseM CutExpr
 pList = do
   terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
-  let rtn = if null terms
-              then EmptyList
-              else typeOf $ head terms
+  let deps = foldr1 union $ map depsOf terms
+      rtn  = if null terms
+               then EmptyList
+               else typeOf $ head terms
   -- TODO assert that the rest of the terms match the first one here!
-  return $ CutList rtn terms
+  return $ CutList rtn deps terms
 
 ---------------
 -- operators --
@@ -225,12 +226,17 @@ operatorTable2 cfg = [map binary bops]
 
 -- Tricky bit: needs to take two already-parsed expressions
 -- TODO verify they have the correct types
+-- TODO is this obsolete now that there's pBop2?
 pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
-pBop o = pSym o *> (return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2)
+pBop o = pSym o *> (return $ \e1 e2 ->
+  let deps = union (depsOf e1) (depsOf e2)
+  in CutBop (typeOf e1) deps [o] e1 e2)
 
 -- TODO is there a better way than only taking one-char strings?
 pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
-pBop2 [o] = pSym o *> (return $ \e1 e2 -> CutBop (typeOf e1) [o] e1 e2)
+pBop2 [o] = pSym o *> (return $ \e1 e2 ->
+  let deps = union (depsOf e1) (depsOf e2)
+  in CutBop (typeOf e1) deps [o] e1 e2)
 pBop2  s  = error $ "invalid binary op name '" ++ s ++ "'"
 
 ---------------
@@ -267,14 +273,15 @@ pFun = do
   -- find the function by name
   name <- pName
   args <- manyTill pTerm pEnd
-  let fns = concat $ map mFunctions $ cfgModules cfg
-      fn  = find (\f -> fName f == name) fns
+  let fns  = concat $ map mFunctions $ cfgModules cfg
+      fn   = find (\f -> fName f == name) fns
+      deps = foldr1 union $ map depsOf args
   case fn of
     Nothing -> fail $ "no such function: '" ++ name ++ "'"
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
       Left  err -> fail err
-      Right rtn -> return $ CutFun rtn (fName f) args
+      Right rtn -> return $ CutFun rtn deps (fName f) args
 
 -----------------
 -- expressions --

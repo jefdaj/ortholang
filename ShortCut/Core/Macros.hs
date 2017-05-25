@@ -10,6 +10,9 @@
  - * "If I removed the known PSII assembly factors one at a time, which of them
  -    would be rediscovered in my results?"
  -
+ - * "Does adding more genomes increase the number of known assembly factors
+ -    I rediscover, or is it just a waste of CPU cycles?"
+ -
  - These and other similar questions should be answerable using only a
  - moderately complicated algorithm:
  -
@@ -37,19 +40,7 @@
 
 -- TODO most of this goes in a module right? only put macro handling itself here
 
-module ShortCut.Core.Macros () where
-
--- TODO sample :: num -> [whatever] -> [[whatever]]
---      (if n > 1 it takes that many items, and if < 1 it takes that fraction.
---       negative numbers remove that many items)
-
--- TODO actually sample should be a more basic function that does the same thing
---      as its R counterpart. make the one above a different name and it uses this
---      one (always? sometimes?)
-
--- TODO shared :: num -> [[whatever]] -> [whatever]
---      kind of the opposite of sample; reports the elements shared by at least
---      n permutations or that fraction. what do negatives mean... error?
+module ShortCut.Core.Macros where
 
 {- How should macros be processed overall? I guess they could be another type
  - of CutFunction. But when they're being parsed they'll need to be given a
@@ -80,25 +71,14 @@ module ShortCut.Core.Macros () where
  - hack though!
  -}
 
-{- What should the final ShortCut code look like? Can it be split up by
- - combination functions and summary functions, or are the two linked too
- - closely? This could be easily solved in Haskell style with higher-order
- - functions, but hopefully I can avoid implementing + explaining that!
- -
- - I guess the simplest way would be do do most things in the "split" part, and
- - then summarizing can be pretty simple. "split" could actually mean more like
- - "repeat for all combinations" and would involve both the independent and
- - dependent variables. Internally it could be broken down further than that,
- - but I don't think there's any reason a user would want to split without
- - repeating.... right?
- -
- - The module could be called "Every" or "Permutations"
- -}
+import ShortCut.Core.Types
 
-{- The other thing to consider is the user's perspective: what will they expect
- - or want? Would they find it simpler to stick with an "all possibilities at
- - once" approach that doesn't consider state, or would they want to do quick
- - single samples from a list? Maybe that's `samples` vs `sample`?
- -
- - many_lists = sample 3 [1,2,3,4,5]
- -}
+expandMacro
+  :: CutConfig -- context to operate in
+  -> CutScript -- initial script before expansion
+  -> CutExpr   -- independent/input list to expand into a list of lists
+  -> CutExpr   -- dependent/output variable to recalculate multiple times
+               -- (doesn't necessarily have to be a list?)
+  -> CutScript -- final script with the macro expanded
+expandMacro config script inlist outlist = undefined
+-- expandMacro _ _ _ _ = error "bad arguments to expandMacro"
