@@ -75,6 +75,70 @@ import ShortCut.Core.Types
 import Data.List (intersect)
 import Data.Maybe (fromJust)
 
+
+--------------------------------------------------------
+-- prefix variable names so duplicates don't conflict --
+--------------------------------------------------------
+
+-- TODO only mangle the specific vars we want changed!
+
+mangleVar :: (String -> String) -> CutVar -> CutVar
+mangleVar fn (CutVar v) = CutVar (fn v)
+
+mangleExpr :: (String -> String) -> CutExpr -> CutExpr
+mangleExpr fn e@(CutLit  _ _) = e
+mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map (mangleVar fn) vs)   (mangleVar fn v)
+mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map (mangleVar fn) vs) n (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map (mangleVar fn) vs) n (map (mangleExpr fn) es)
+mangleExpr fn (CutList t vs   es   ) = CutList t (map (mangleVar fn) vs)   (map (mangleExpr fn) es)
+
+mangleAssign :: (String -> String) -> CutAssign -> CutAssign
+mangleAssign fn (CutVar var, expr) = (CutVar $ fn var, mangleExpr fn expr)
+
+mangleScript :: (String -> String) -> CutScript -> CutScript
+mangleScript fn = map (mangleAssign fn)
+
+-- TODO pad with zeros?
+-- Add a "dupN." prefix to each variable name in the path from independent
+-- -> dependent variable, using a list of those varnames
+addDupPrefix :: Int -> [String] -> String -> String
+addDupPrefix n ss s =
+  if elem s ss
+    then "dup" ++ show n ++ "_" ++ s
+    else s
+
+-- TODO should be able to just apply this to a duplicate script section right?
+addDupPrefixes :: Int -> [String] -> CutScript -> CutScript
+addDupPrefixes n ss = mangleScript (addDupPrefix n ss)
+
+
+------------------------------------------------------------
+-- duplicate steps between independent and dependent vars --
+------------------------------------------------------------
+
+splitIndVar :: CutVar -> CutScript -> CutScript
+splitIndVar var script = undefined
+
+-- TODO will this need to run inside the Action monad?
+addDups = undefined
+
+
+--------------------------
+-- main macro expansion --
+--------------------------
+
+-- TODO make sure the variables duplicated include the independent + dependent ones themselves
+-- TODO draw this stuff on the windows?
+-- TODO rename Macro -> Expand, and put the Summary stuff in a different module
+--      then you can also have a Core.Expand module and call it from Modules.Expand
+-- TODO = script ++ [splitInd, repeatDep]
+
+-- TODO simpler way of thinking through the algorithm, shake-style:
+-- 1. need the final list of result permutations
+-- 2. to make a result permutation:
+--    a. make a copy of the relevant region of the script
+--    b. substitute one of the input permutations for the original input
+
 expandMacro
   :: CutConfig -- context to operate in
   -> CutScript -- initial script before expansion
