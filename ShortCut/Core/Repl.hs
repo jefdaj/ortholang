@@ -194,10 +194,12 @@ cmdDeps var = do
     Nothing -> print $ "Var '" ++ var ++ "' not found"
     Just v  -> liftIO $ putStrLn $ prettyDeps $ depsOf v
 
+-- TODO move to Pretty.hs
+prettyDeps :: [CutVar] -> String
 prettyDeps ds = render
   $ fsep
-	$ punctuate (text ",")
-	$ map (\(CutVar s) -> text s) ds
+  $ punctuate (text ",")
+  $ map (\(CutVar s) -> text s) ds
 
 cmdRDeps :: String -> ReplM ()
 cmdRDeps var = do
