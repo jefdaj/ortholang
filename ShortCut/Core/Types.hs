@@ -40,6 +40,8 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT,
                                        defaultSettings, outputStrLn)
 import Development.Shake              (Rules)
 import Text.PrettyPrint.HughesPJClass (Doc, pPrint, text, doubleQuotes)
+import Data.Maybe (catMaybes)
+import Data.List  (nub)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -51,7 +53,7 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
 -- TODO only keep the extensions themselves here, not the whole CutType?
 data CutExpr
   = CutLit  CutType String
-  | CutRef  CutType CutVar
+  | CutRef  CutType [CutVar] CutVar
   | CutBop  CutType [CutVar] String  CutExpr CutExpr
   | CutFun  CutType [CutVar] String [CutExpr]
   | CutList CutType [CutVar] [CutExpr]
@@ -83,7 +85,7 @@ instance Show CutType where
 
 typeOf :: CutExpr -> CutType
 typeOf (CutLit t _    ) = t
-typeOf (CutRef t _    ) = t
+typeOf (CutRef t _ _  ) = t
 typeOf (CutBop t _ _ _ _) = t
 typeOf (CutFun t _ _ _  ) = t
 typeOf (CutList EmptyList _ _) = EmptyList
@@ -94,12 +96,16 @@ extOf (ListOf t   ) = extOf t ++ ".list"
 extOf EmptyList     = "list"
 extOf t = tExt t
 
+varOf :: CutExpr -> [CutVar]
+varOf (CutRef _ vs _) = vs
+varOf _               = []
+
 depsOf :: CutExpr -> [CutVar]
-depsOf (CutLit  _ _        ) = []
-depsOf (CutRef  _ d        ) = [d]
-depsOf (CutBop  _ ds _ _ _ ) = ds
-depsOf (CutFun  _ ds _ _   ) = ds
-depsOf (CutList _ ds _     ) = ds
+depsOf (CutLit  _ _         ) = []
+depsOf (CutRef  _ vs v      ) = v:vs
+depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
+depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
+depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable

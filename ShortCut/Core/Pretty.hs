@@ -39,7 +39,7 @@ instance Pretty CutExpr where
     | typeOf e == num       = text $ show (read s :: Scientific)
     -- | tExt t == tExt num    = text $ show (read s :: Scientific)
     | otherwise             = text $ show s
-  pPrint (CutRef _ v)       = pPrint v
+  pPrint (CutRef _ _ v)       = pPrint v
   pPrint (CutFun _ _ s es)    = text s <+> fsep (map pNested es)
   pPrint (CutList _ _ es)     = pList es
   pPrint (CutBop _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one

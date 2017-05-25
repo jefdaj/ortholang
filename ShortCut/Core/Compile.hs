@@ -84,7 +84,7 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
 cExpr :: CutConfig -> CutExpr -> Rules FilePath
 cExpr c e@(CutLit  _ _      ) = cLit c e
-cExpr c e@(CutRef  _ _      ) = cRef c e
+cExpr c e@(CutRef  _ _ _    ) = cRef c e
 cExpr c e@(CutList _ _ _    ) = cList c e
 cExpr c e@(CutBop  _ _ n _ _) = compileByName c e n -- TODO turn into Fun?
 cExpr c e@(CutFun  _ _ n _  ) = compileByName c e n
@@ -148,7 +148,7 @@ cList cfg e@(CutList _ _ exprs) = do
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 cRef :: CutConfig -> CutExpr -> Rules FilePath
-cRef cfg expr@(CutRef _ var) = do
+cRef cfg expr@(CutRef _ _ var) = do
   -- liftIO $ putStrLn "entering cRef"
   return $ namedTmp cfg var expr
 cRef _ _ = error "bad argument to cRef"

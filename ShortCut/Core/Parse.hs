@@ -147,7 +147,7 @@ pRef = do
   (scr, _) <- getState
   case lookup v scr of 
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" ++ show scr
-    Just e -> return $ CutRef (typeOf e) v
+    Just e -> return $ CutRef (typeOf e) (depsOf e) v
 
 --------------
 -- literals --
@@ -189,7 +189,7 @@ pStr = CutLit str <$> pQuoted <?> "string"
 pList :: ParseM CutExpr
 pList = do
   terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
-  let deps = foldr1 union $ map depsOf terms
+  let deps = foldr1 union $ map depsOf terms -- TODO what happens if []?
       rtn  = if null terms
                then EmptyList
                else typeOf $ head terms

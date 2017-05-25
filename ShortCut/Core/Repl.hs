@@ -37,6 +37,9 @@ import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
 import System.IO.Silently       (capture_)
 
+-- TODO factor these out into Pretty.hs
+import Text.PrettyPrint.HughesPJClass (punctuate, text, render, fsep)
+
 --------------------
 -- main interface --
 --------------------
@@ -108,7 +111,7 @@ loop (promptFn:promptFns) = do
 updateScript :: CutScript -> CutAssign -> CutScript
 updateScript scr asn@(var, expr) =
   case expr of
-    (CutRef _ var') -> if var' == var then scr else scr'
+    (CutRef _ _ var') -> if var' == var then scr else scr'
     _ -> scr'
     where
       scr' = delFromAL scr var ++ [asn]
@@ -129,16 +132,17 @@ runCmd line = case matches of
 
 cmds :: [(String, String -> ReplM ())]
 cmds =
-  [ ("help" , cmdHelp)
-  , ("load" , cmdLoad)
-  , ("write", cmdSave)
-  , ("drop" , cmdDrop)
-  , ("type" , cmdType)
-  , ("show" , cmdShow)
-  , ("set"  , cmdSet)
-  , ("quit" , cmdQuit)
-  , ("!"    , cmdBang)
-  , ("config", cmdConfig)
+  [ ("help"   , cmdHelp  )
+  , ("load"   , cmdLoad  )
+  , ("write"  , cmdSave  )
+  , ("depends", cmdDeps  )
+  , ("drop"   , cmdDrop  )
+  , ("type"   , cmdType  )
+  , ("show"   , cmdShow  )
+  , ("set"    , cmdSet   )
+  , ("quit"   , cmdQuit  )
+  , ("!"      , cmdBang  )
+  , ("config" , cmdConfig)
   ]
 
 ---------------------------
@@ -149,14 +153,15 @@ cmdHelp :: String -> ReplM ()
 cmdHelp _ = print
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
   \There are also some extra commands:\n\n\
-  \:help  to print this help text\n\
-  \:load  to load a script (same as typing the file contents)\n\
-  \:write to write the current script to a file\n\
-  \:drop  to discard the current script (or a specific variable)\n\
-  \:quit  to discard the current script and exit the interpreter\n\
-  \:type  to print the type of an expression\n\
-  \:show  to print an expression along with its type\n\
-  \:!     to run the rest of the line as a shell command"
+  \:help    to print this help text\n\
+  \:load    to load a script (same as typing the file contents)\n\
+  \:write   to write the current script to a file\n\
+  \:depends to show which variables an expression depends on\n\
+  \:drop    to discard the current script (or a specific variable)\n\
+  \:quit    to discard the current script and exit the interpreter\n\
+  \:type    to print the type of an expression\n\
+  \:show    to print an expression along with its type\n\
+  \:!       to run the rest of the line as a shell command"
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
@@ -178,6 +183,22 @@ cmdSave path = do
   where
     showHack = unlines . map prettyShow
 
+-- TODO factor out the variable lookup stuff
+-- TODO except, this should work with expressions too!
+cmdDeps :: String -> ReplM ()
+cmdDeps var = do
+  (scr, cfg) <- get
+  case lookup (CutVar var) scr of
+    Nothing -> print $ "Var '" ++ var ++ "' not found"
+    -- Just v  -> liftIO $ putStrLn $ pPrintList $ map (\(CutVar s) -> s) (depsOf v)
+    Just v  -> liftIO $ putStrLn $ prettyDeps $ depsOf v
+  where
+    prettyDeps ds = render
+                  $ fsep
+                  $ punctuate (text ",")
+                  $ map (\(CutVar s) -> text s) ds
+
+-- TODO factor out the variable lookup stuff
 cmdDrop :: String -> ReplM ()
 cmdDrop [] = get >>= \(_, cfg) -> put ([], cfg)
 cmdDrop var = do
@@ -196,6 +217,7 @@ cmdType s = do
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 
+-- TODO factor out the variable lookup stuff
 cmdShow :: String -> ReplM ()
 cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . prettyShow) s
 cmdShow var = do
