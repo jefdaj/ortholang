@@ -72,13 +72,23 @@ module ShortCut.Core.Macros where
  -}
 
 import ShortCut.Core.Types
+import Data.List (intersect)
+import Data.Maybe (fromJust)
 
 expandMacro
   :: CutConfig -- context to operate in
   -> CutScript -- initial script before expansion
-  -> CutExpr   -- independent/input list to expand into a list of lists
-  -> CutExpr   -- dependent/output variable to recalculate multiple times
-               -- (doesn't necessarily have to be a list?)
+  -> CutVar    -- independent/input list to expand into a list of lists
+               -- (must be a var because the output expression must depend on it)
+               -- (and the var must point to a list)
+  -> CutExpr   -- dependent/output expression to recalculate multiple times
+               -- (doesn't necessarily have to be a list)
+               -- (does need to depend on the input var)
   -> CutScript -- final script with the macro expanded
-expandMacro config script inlist outlist = undefined
--- expandMacro _ _ _ _ = error "bad arguments to expandMacro"
+expandMacro cfg script indVar depExpr = undefined
+  where
+    assumeVar v = fromJust $ lookup v script -- TODO something safer
+    varsToCopy = intersect (rDepsOf script $ assumeVar v) (map assumeVar $ depsOf depExpr)
+    splitFn    = undefined
+    repeatFn   = undefined
+    joinFn     = undefined

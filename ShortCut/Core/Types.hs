@@ -41,7 +41,6 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT,
                                        defaultSettings, outputStrLn)
 import Development.Shake              (Rules)
 import Text.PrettyPrint.HughesPJClass (Doc, pPrint, text, doubleQuotes)
-import Data.Maybe (catMaybes)
 import Data.List  (nub)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
