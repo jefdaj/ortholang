@@ -103,7 +103,7 @@ worstBestEvalue = CutFunction
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
 cLoadGenes :: CutConfig -> CutExpr -> Rules FilePath
-cLoadGenes cfg expr@(CutFun _ _ [f]) = do
+cLoadGenes cfg expr@(CutFun _ _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
   -- TODO this shouldn't be needed because this fn will be starting from a gom,
   --      not a str; mkLoader or cLoad or whatever handles str -> gom
@@ -136,7 +136,7 @@ bblast cfg genes genomes out = do
 
 -- TODO factor out bblast!
 cFilterGenes :: CutConfig -> CutExpr -> Rules FilePath
-cFilterGenes cfg e@(CutFun _ _ [gens, goms, sci]) = do
+cFilterGenes cfg e@(CutFun _ _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
   genes   <- cExpr cfg gens
   genomes <- cExpr cfg goms
@@ -156,7 +156,7 @@ cFilterGenes _ _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
 cFilterGenomes :: CutConfig -> CutExpr -> Rules FilePath
-cFilterGenomes cfg e@(CutFun _ _ [goms, gens, sci]) = do
+cFilterGenomes cfg e@(CutFun _ _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
   genomes <- cExpr cfg goms
   genes   <- cExpr cfg gens
@@ -174,7 +174,7 @@ cFilterGenomes cfg e@(CutFun _ _ [goms, gens, sci]) = do
 cFilterGenomes _ _ = error "bad argument to cFilterGenomes"
 
 cWorstBest :: CutConfig -> CutExpr -> Rules FilePath
-cWorstBest cfg e@(CutFun _ _ [gens, goms]) = do
+cWorstBest cfg e@(CutFun _ _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
   genes   <- cExpr cfg gens
   genomes <- cExpr cfg goms

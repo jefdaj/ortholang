@@ -139,7 +139,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 cParseSearches :: CutConfig -> CutExpr -> Rules FilePath
-cParseSearches cfg expr@(CutList _ _) = do
+cParseSearches cfg expr@(CutList _ _ _) = do
   sList <- cExpr cfg expr
   let searchTable = hashedTmp' cfg search expr [sList]
   searchTable %> \out -> do
@@ -161,12 +161,12 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 
 -- TODO this is where to parse the searches?
 -- cGetGenome :: CutConfig -> CutExpr -> Rules FilePath
--- cGetGenome cfg expr@(CutFun _ _ [s]) = undefined
+-- cGetGenome cfg expr@(CutFun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO factor out a "trivial string file" function?
 cGetGenomes :: CutConfig -> CutExpr -> Rules FilePath
-cGetGenomes cfg expr@(CutFun _ _ [ss]) = do
+cGetGenomes cfg expr@(CutFun _ _ _ [ss]) = do
   bmFn   <- cExpr cfg (CutLit str "getGenome")
   sTable <- cParseSearches cfg ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?

@@ -83,11 +83,11 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
 cExpr :: CutConfig -> CutExpr -> Rules FilePath
-cExpr c e@(CutLit  _ _    ) = cLit c e
-cExpr c e@(CutRef  _ _    ) = cRef c e
-cExpr c e@(CutList _ _    ) = cList c e
-cExpr c e@(CutBop  _ n _ _) = compileByName c e n -- TODO turn into Fun?
-cExpr c e@(CutFun  _ n _  ) = compileByName c e n
+cExpr c e@(CutLit  _ _      ) = cLit c e
+cExpr c e@(CutRef  _ _      ) = cRef c e
+cExpr c e@(CutList _ _ _    ) = cList c e
+cExpr c e@(CutBop  _ _ n _ _) = compileByName c e n -- TODO turn into Fun?
+cExpr c e@(CutFun  _ _ n _  ) = compileByName c e n
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
@@ -134,11 +134,11 @@ cLit cfg expr = do
 -- TODO why are lists of lists not given .list.list ext? hides a more serious bug?
 --      or possibly the bug is that we're making accidental lists of lists?
 cList :: CutConfig -> CutExpr -> Rules FilePath
-cList cfg e@(CutList EmptyList _) = do
+cList cfg e@(CutList EmptyList _ _) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cList cfg e@(CutList _ exprs) = do
+cList cfg e@(CutList _ _ exprs) = do
   paths <- mapM (cExpr cfg) exprs
   let path   = hashedTmp cfg e paths
       paths' = map (makeRelative $ cfgTmpDir cfg) paths
@@ -157,7 +157,7 @@ cRef _ _ = error "bad argument to cRef"
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
 cLoad :: CutConfig -> CutExpr -> Rules FilePath
-cLoad cfg e@(CutFun _ _ [f]) = do
+cLoad cfg e@(CutFun _ _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
   path <- cExpr cfg f
   let link = hashedTmp cfg e [path]

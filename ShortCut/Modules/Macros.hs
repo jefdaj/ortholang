@@ -69,7 +69,7 @@ leaveEachOut xs
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 cCombos :: ([FilePath] -> [[FilePath]]) -> CutConfig -> CutExpr -> Rules FilePath
-cCombos comboFn cfg expr@(CutFun _ fnName [iList]) = do
+cCombos comboFn cfg expr@(CutFun _ _ fnName [iList]) = do
   iPath <- cExpr cfg iList
   let oType = ListOf $ typeOf iList
       oList = hashedTmp' cfg oType expr [iPath, fnName]
@@ -101,7 +101,7 @@ commonToAll = undefined
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 cSummary :: ([[FilePath]] -> [FilePath]) -> CutConfig -> CutExpr -> Rules FilePath
-cSummary summaryFn cfg expr@(CutFun _ fnName [iList]) = do
+cSummary summaryFn cfg expr@(CutFun _ _ fnName [iList]) = do
   iPath <- cExpr cfg iList
   let (ListOf (ListOf eType)) = typeOf iList
       oPath = hashedTmp' cfg (ListOf eType) expr [iPath, fnName]
