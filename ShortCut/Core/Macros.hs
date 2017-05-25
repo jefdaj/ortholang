@@ -73,6 +73,47 @@ module ShortCut.Core.Macros where
 
 import ShortCut.Core.Types
 
+
+--------------------------------------------------------
+-- prefix variable names so duplicates don't conflict --
+--------------------------------------------------------
+
+mangleVar :: (String -> String) -> CutVar -> CutVar
+mangleVar fn (CutVar v) = CutVar (fn v)
+
+mangleExpr :: (String -> String) -> CutExpr -> CutExpr
+mangleExpr fn e@(CutLit  _ _) = e
+mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map (mangleVar fn) vs)   (mangleVar fn v)
+mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map (mangleVar fn) vs) n (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map (mangleVar fn) vs) n (map (mangleExpr fn) es)
+mangleExpr fn (CutList t vs   es   ) = CutList t (map (mangleVar fn) vs)   (map (mangleExpr fn) es)
+
+mangleAssign :: (String -> String) -> CutAssign -> CutAssign
+mangleAssign fn (CutVar var, expr) = (CutVar $ fn var, mangleExpr fn expr)
+
+mangleScript :: (String -> String) -> CutScript -> CutScript
+mangleScript fn = map (mangleAssign fn)
+
+-- TODO pad with zeros?
+addDupPrefix :: Int -> CutScript -> CutScript
+addDupPrefix n = mangleScript $ \s -> "dup" ++ show n ++ "_" ++ s
+
+
+------------------------------------------------------------
+-- duplicate steps between independent and dependent vars --
+------------------------------------------------------------
+
+splitIndVar :: CutVar -> CutScript -> CutScript
+splitIndVar var script = undefined
+
+-- TODO will this need to run inside the Action monad?
+addDups = undefined
+
+
+--------------------------
+-- main macro expansion --
+--------------------------
+
 expandMacro
   :: CutConfig -- context to operate in
   -> CutScript -- initial script before expansion
