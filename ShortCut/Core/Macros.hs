@@ -78,6 +78,8 @@ import ShortCut.Core.Types
 -- prefix variable names so duplicates don't conflict --
 --------------------------------------------------------
 
+-- TODO only mangle the specific vars we want changed!
+
 mangleVar :: (String -> String) -> CutVar -> CutVar
 mangleVar fn (CutVar v) = CutVar (fn v)
 
@@ -95,8 +97,17 @@ mangleScript :: (String -> String) -> CutScript -> CutScript
 mangleScript fn = map (mangleAssign fn)
 
 -- TODO pad with zeros?
-addDupPrefix :: Int -> CutScript -> CutScript
-addDupPrefix n = mangleScript $ \s -> "dup" ++ show n ++ "_" ++ s
+-- Add a "dupN." prefix to each variable name in the path from independent
+-- -> dependent variable, using a list of those varnames
+addDupPrefix :: Int -> [String] -> String -> String
+addDupPrefix n ss s =
+  if elem s ss
+    then "dup" ++ show n ++ "_" ++ s
+    else s
+
+-- TODO should be able to just apply this to a duplicate script section right?
+addDupPrefixes :: Int -> [String] -> CutScript -> CutScript
+addDupPrefixes n ss = mangleScript (addDupPrefix n ss)
 
 
 ------------------------------------------------------------
@@ -114,6 +125,18 @@ addDups = undefined
 -- main macro expansion --
 --------------------------
 
+-- TODO make sure the variables duplicated include the independent + dependent ones themselves
+-- TODO draw this stuff on the windows?
+-- TODO rename Macro -> Expand, and put the Summary stuff in a different module
+--      then you can also have a Core.Expand module and call it from Modules.Expand
+-- TODO = script ++ [splitInd, repeatDep]
+
+-- TODO simpler way of thinking through the algorithm, shake-style:
+-- 1. need the final list of result permutations
+-- 2. to make a result permutation:
+--    a. make a copy of the relevant region of the script
+--    b. substitute one of the input permutations for the original input
+
 expandMacro
   :: CutConfig -- context to operate in
   -> CutScript -- initial script before expansion
@@ -122,4 +145,3 @@ expandMacro
                -- (doesn't necessarily have to be a list?)
   -> CutScript -- final script with the macro expanded
 expandMacro config script inlist outlist = undefined
--- expandMacro _ _ _ _ = error "bad arguments to expandMacro"
