@@ -132,17 +132,18 @@ runCmd line = case matches of
 
 cmds :: [(String, String -> ReplM ())]
 cmds =
-  [ ("help"   , cmdHelp  )
-  , ("load"   , cmdLoad  )
-  , ("write"  , cmdSave  )
-  , ("depends", cmdDeps  )
-  , ("drop"   , cmdDrop  )
-  , ("type"   , cmdType  )
-  , ("show"   , cmdShow  )
-  , ("set"    , cmdSet   )
-  , ("quit"   , cmdQuit  )
-  , ("!"      , cmdBang  )
-  , ("config" , cmdConfig)
+  [ ("help"    , cmdHelp  )
+  , ("load"    , cmdLoad  )
+  , ("write"   , cmdSave  )
+  , ("depends" , cmdDeps  )
+  , ("rdepends", cmdRDeps )
+  , ("drop"    , cmdDrop  )
+  , ("type"    , cmdType  )
+  , ("show"    , cmdShow  )
+  , ("set"     , cmdSet   )
+  , ("quit"    , cmdQuit  )
+  , ("!"       , cmdBang  )
+  , ("config"  , cmdConfig)
   ]
 
 ---------------------------
@@ -153,15 +154,16 @@ cmdHelp :: String -> ReplM ()
 cmdHelp _ = print
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
   \There are also some extra commands:\n\n\
-  \:help    to print this help text\n\
-  \:load    to load a script (same as typing the file contents)\n\
-  \:write   to write the current script to a file\n\
-  \:depends to show which variables an expression depends on\n\
-  \:drop    to discard the current script (or a specific variable)\n\
-  \:quit    to discard the current script and exit the interpreter\n\
-  \:type    to print the type of an expression\n\
-  \:show    to print an expression along with its type\n\
-  \:!       to run the rest of the line as a shell command"
+  \:help     to print this help text\n\
+  \:load     to load a script (same as typing the file contents)\n\
+  \:write    to write the current script to a file\n\
+  \:depends  to show which variables a given variable depends on\n\
+  \:rdepends to show which variables depend on the given variable\n\
+  \:drop     to discard the current script (or a specific variable)\n\
+  \:quit     to discard the current script and exit the interpreter\n\
+  \:type     to print the type of an expression\n\
+  \:show     to print an expression along with its type\n\
+  \:!        to run the rest of the line as a shell command"
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
@@ -190,13 +192,20 @@ cmdDeps var = do
   (scr, cfg) <- get
   case lookup (CutVar var) scr of
     Nothing -> print $ "Var '" ++ var ++ "' not found"
-    -- Just v  -> liftIO $ putStrLn $ pPrintList $ map (\(CutVar s) -> s) (depsOf v)
     Just v  -> liftIO $ putStrLn $ prettyDeps $ depsOf v
-  where
-    prettyDeps ds = render
-                  $ fsep
-                  $ punctuate (text ",")
-                  $ map (\(CutVar s) -> text s) ds
+
+prettyDeps ds = render
+  $ fsep
+	$ punctuate (text ",")
+	$ map (\(CutVar s) -> text s) ds
+
+cmdRDeps :: String -> ReplM ()
+cmdRDeps var = do
+  (scr, cfg) <- get
+  let var' = CutVar var
+  case lookup var' scr of
+    Nothing -> print $ "Var '" ++ var ++ "' not found"
+    Just v  -> liftIO $ putStrLn $ prettyDeps $ rDepsOf scr var'
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: String -> ReplM ()

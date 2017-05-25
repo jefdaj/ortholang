@@ -23,6 +23,7 @@ module ShortCut.Core.Types
   , typeOf
   , extOf
   , depsOf
+  , rDepsOf
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
@@ -106,6 +107,12 @@ depsOf (CutRef  _ vs v      ) = v:vs
 depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
 depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
 depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
+
+rDepsOf :: CutScript -> CutVar -> [CutVar]
+rDepsOf scr var = map fst rDeps
+  where
+    rDeps = filter (\(_,e) -> isRDep e) scr
+    isRDep expr = elem var $ depsOf expr
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
