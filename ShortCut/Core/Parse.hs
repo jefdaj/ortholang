@@ -7,6 +7,7 @@ module ShortCut.Core.Parse
   ( ParseError
   , parseWithEof
   , parseWithLeftOver
+  , parseAndShow
   -- functions used elsewhere in core
   , isExpr
   , parseExpr
@@ -208,10 +209,10 @@ operatorChars = "+-*/&|~"
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
 -- TODO remove this once sure the version 2 below works
-operatorTable :: [[E.Operator String CutState Identity CutExpr]]
-operatorTable = [map binary operatorChars]
-  where
-    binary c = E.Infix (pBop c) E.AssocLeft
+-- operatorTable :: [[E.Operator String CutState Identity CutExpr]]
+-- operatorTable = [map binary operatorChars]
+--   where
+--     binary c = E.Infix (pBop c) E.AssocLeft
 
 -- TODO once sure this works, remove the one above
 operatorTable2 :: CutConfig -> [[E.Operator String CutState Identity CutExpr]]
@@ -227,10 +228,10 @@ operatorTable2 cfg = [map binary bops]
 -- Tricky bit: needs to take two already-parsed expressions
 -- TODO verify they have the correct types
 -- TODO is this obsolete now that there's pBop2?
-pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
-pBop o = pSym o *> (return $ \e1 e2 ->
-  let deps = union (depsOf e1) (depsOf e2)
-  in CutBop (typeOf e1) deps [o] e1 e2)
+-- pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
+-- pBop o = pSym o *> (return $ \e1 e2 ->
+--   let deps = union (depsOf e1) (depsOf e2)
+--   in CutBop (typeOf e1) deps [o] e1 e2)
 
 -- TODO is there a better way than only taking one-char strings?
 pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)

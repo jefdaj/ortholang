@@ -12,7 +12,7 @@ import ShortCut.Core.Types
 import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import Development.Shake
 import ShortCut.Core.Parse (defaultTypeCheck)
-import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp', cList)
+import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -129,7 +129,7 @@ readSearch p = do
   txt <- readFile p
   return $ case runParser pSearch () "search string" txt of
     Left  e -> Left  $ show e
-    Right s@(Search sp d i) -> Right s
+    Right s@(Search _ _ _) -> Right s
 
 -- TODO use cassava?
 toTsv :: [Search] -> String

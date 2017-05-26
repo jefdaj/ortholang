@@ -30,7 +30,7 @@ bopTypeCheck :: [CutType] -> Either String CutType
 bopTypeCheck actual@[ListOf a, ListOf b]
   | a == b    = Right $ ListOf a
   | otherwise = Left $ typeError [ListOf a, ListOf a] actual
-bopTypeCheck actual = Left "Type error: expected two lists of the same type"
+bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists

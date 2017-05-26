@@ -31,9 +31,9 @@ import Data.List              (find)
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
 import Data.Maybe                 (fromJust)
-import Data.Scientific            (Scientific)
-import Data.Set                   (Set, union, difference, intersection
-                                  ,fromList, toList)
+-- import Data.Scientific            (Scientific)
+-- import Data.Set                   (Set, union, difference, intersection
+                                  -- ,fromList, toList)
 import Development.Shake.FilePath ((<.>), (</>))
 import System.Directory           (canonicalizePath)
 import System.FilePath            (makeRelative)
@@ -88,6 +88,7 @@ cExpr c e@(CutRef  _ _ _    ) = cRef c e
 cExpr c e@(CutList _ _ _    ) = cList c e
 cExpr c e@(CutBop  _ _ n _ _) = compileByName c e n -- TODO turn into Fun?
 cExpr c e@(CutFun  _ _ n _  ) = compileByName c e n
+cExpr _   (CutRep  _ _ _ _  ) = undefined
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
@@ -144,6 +145,7 @@ cList cfg e@(CutList _ _ exprs) = do
       paths' = map (makeRelative $ cfgTmpDir cfg) paths
   path %> \out -> need paths >> writeFileChanged out (unlines paths')
   return path
+cList _ _ = error "bad arguemnts to cList"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)

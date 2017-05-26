@@ -35,13 +35,14 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where
-  pPrint e@(CutLit t s)
+  pPrint e@(CutLit _ s)
     | typeOf e == num       = text $ show (read s :: Scientific)
     -- | tExt t == tExt num    = text $ show (read s :: Scientific)
     | otherwise             = text $ show s
   pPrint (CutRef _ _ v)       = pPrint v
   pPrint (CutFun _ _ s es)    = text s <+> fsep (map pNested es)
   pPrint (CutList _ _ es)     = pList es
+  pPrint (CutRep _ _ _ _ )    = undefined
   pPrint (CutBop _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)

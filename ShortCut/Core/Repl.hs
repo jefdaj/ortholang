@@ -26,16 +26,16 @@ import Data.Char                (isSpace)
 import Data.List                (isPrefixOf)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (fromJust, fromMaybe)
-import Debug.Trace
+-- import Debug.Trace
 import Prelude           hiding (print)
-import ShortCut.Core.Compile    (compileScript)
+-- import ShortCut.Core.Compile    (compileScript)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty     (prettyShow)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
-import System.IO.Silently       (capture_)
+-- import System.IO.Silently       (capture_)
 
 -- TODO factor these out into Pretty.hs
 import Text.PrettyPrint.HughesPJClass (punctuate, text, render, fsep)
@@ -189,7 +189,7 @@ cmdSave path = do
 -- TODO except, this should work with expressions too!
 cmdDeps :: String -> ReplM ()
 cmdDeps var = do
-  (scr, cfg) <- get
+  (scr, _) <- get
   case lookup (CutVar var) scr of
     Nothing -> print $ "Var '" ++ var ++ "' not found"
     Just v  -> liftIO $ putStrLn $ prettyDeps $ depsOf v
@@ -203,11 +203,11 @@ prettyDeps ds = render
 
 cmdRDeps :: String -> ReplM ()
 cmdRDeps var = do
-  (scr, cfg) <- get
+  (scr, _) <- get
   let var' = CutVar var
   case lookup var' scr of
     Nothing -> print $ "Var '" ++ var ++ "' not found"
-    Just v  -> liftIO $ putStrLn $ prettyDeps $ rDepsOf scr var'
+    Just _  -> liftIO $ putStrLn $ prettyDeps $ rDepsOf scr var'
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: String -> ReplM ()

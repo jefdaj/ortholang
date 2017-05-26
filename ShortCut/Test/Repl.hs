@@ -73,7 +73,7 @@ goldenReplTree cfg ses = do
       tmpDir = cfgTmpDir cfg'
       cmd    = (shell "tree") { cwd = Just $ tmpDir }
       action = do
-                 mockRepl stdin cfg'
+                 _ <- mockRepl stdin cfg'
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  return $ pack out

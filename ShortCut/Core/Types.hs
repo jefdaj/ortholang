@@ -33,15 +33,14 @@ module ShortCut.Core.Types
 import Prelude hiding (print)
 import qualified Text.Parsec as P
 
--- import Data.Scientific           (Scientific())
-import Text.Parsec                    (ParseError)
-import Control.Monad.State.Lazy       (StateT, execStateT, lift, liftIO)
+import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
+import Data.List                      (nub)
+import Development.Shake              (Rules)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT,
                                        defaultSettings, outputStrLn)
-import Development.Shake              (Rules)
-import Text.PrettyPrint.HughesPJClass (Doc, pPrint, text, doubleQuotes)
-import Data.List  (nub)
+import Text.Parsec                    (ParseError)
+import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -57,6 +56,7 @@ data CutExpr
   | CutBop  CutType [CutVar] String  CutExpr CutExpr
   | CutFun  CutType [CutVar] String [CutExpr]
   | CutList CutType [CutVar] [CutExpr]
+  | CutRep  CutExpr CutVar CutExpr [CutAssign] -- dep, ind, ind', cxt
   deriving (Eq, Show)
 
 -- TODO have a separate CutAssign for "result"?
@@ -84,12 +84,13 @@ instance Show CutType where
   show = extOf
 
 typeOf :: CutExpr -> CutType
-typeOf (CutLit t _    ) = t
-typeOf (CutRef t _ _  ) = t
-typeOf (CutBop t _ _ _ _) = t
-typeOf (CutFun t _ _ _  ) = t
+typeOf (CutLit  t _          ) = t
+typeOf (CutRef  t _ _        ) = t
+typeOf (CutBop  t _ _ _ _    ) = t
+typeOf (CutFun  t _ _ _      ) = t
 typeOf (CutList EmptyList _ _) = EmptyList
-typeOf (CutList t _ _    ) = ListOf t
+typeOf (CutList t  _ _       ) = ListOf t
+typeOf (CutRep  e _ _ _      ) = ListOf $ typeOf e
 
 extOf :: CutType -> String
 extOf (ListOf t   ) = extOf t ++ ".list"
@@ -106,6 +107,7 @@ depsOf (CutRef  _ vs v      ) = v:vs
 depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
 depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
 depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
+depsOf (CutRep  d _ i _     ) = nub $ depsOf d ++ depsOf i
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
@@ -188,7 +190,7 @@ print = lift . lift . outputStrLn
 data CutFixity = Prefix | Infix
   deriving (Eq, Show, Read)
 
-type CutSignature = CutType -> (CutType, [CutType])
+-- type CutSignature = CutType -> (CutType, [CutType])
 
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now

@@ -1,13 +1,14 @@
 module ShortCut.Modules.Blast where
 
 import Development.Shake
-import Development.Shake.FilePath ((<.>), (</>))
+import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Compile
 import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass (text)
 
 -- TODO deprecate
+gen :: CutType
 gen = CutType
   { tExt  = "gene"
   , tDesc = "gene"
@@ -15,18 +16,21 @@ gen = CutType
   }
 
 -- TODO deprecate
+gom :: CutType
 gom = CutType
   { tExt  = "genome"
   , tDesc = "genome"
   , tCat  = undefined
   }
 
+faa :: CutType
 faa = CutType
   { tExt  = "faa"
   , tDesc = "fasta amino acid"
   , tCat  = undefined
   }
 
+fna :: CutType
 fna = CutType
   { tExt  = "fna"
   , tDesc = "fasta nucleic acid"
@@ -35,6 +39,7 @@ fna = CutType
 
 -- TODO use tsv instead
 -- TODO obviously, better printing that says # rows and stuff
+csv :: CutType
 csv = CutType
   { tExt  = "csv"
   , tDesc = "spreadsheet"

@@ -35,7 +35,7 @@
 module ShortCut.Modules.Cheat where
 
 import Development.Shake
-import ShortCut.Core.Parse (typeError)
+-- import ShortCut.Core.Parse (typeError)
 import ShortCut.Core.Types
 
 cutModule :: CutModule
@@ -57,7 +57,7 @@ cheatTypeCheck :: [CutType] -> Either String CutType
 cheatTypeCheck (script : rtype : _)
   | script == str && rtype == str = findOrMake $ tExt rtype
   where
-    findOrMake rtype = undefined
+    findOrMake _ = undefined
 cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
                           \be strings specifying the script path and return type"
 

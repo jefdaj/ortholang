@@ -1,6 +1,6 @@
 module ShortCut.Test.Eval where
 
-import Data.ByteString.Lazy.Char8 (pack, writeFile)
+import Data.ByteString.Lazy.Char8 (pack)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Types        (CutConfig(..))

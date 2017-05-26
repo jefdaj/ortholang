@@ -5,7 +5,7 @@ module ShortCut.Test
   )
   where
 
-import Control.Monad       (sequence)
+-- import Control.Monad       (sequence)
 import ShortCut.Core.Types (CutConfig(..), CutModule)
 import ShortCut.Core.Util  (mkTestGroup)
 import System.IO.Temp      (withSystemTempDirectory)
