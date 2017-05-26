@@ -290,7 +290,7 @@ pFun = do
 -----------------------------------
 
 sTypeCheck :: [CutType] -> Either String CutType
-sTypeCheck ((ListOf dep):(ListOf ind):ind':[]) | ind == ind' = Right dep
+sTypeCheck (res:(ListOf sub'):sub:[]) | sub' == sub = Right $ ListOf res
 sTypeCheck _ = Left "invalid args to substitute_each" -- TODO better errors here
 
 -- TODO if there end up being more macros, factor them out like pFun above
@@ -302,10 +302,10 @@ pSubs = do
     Left err -> fail err
     Right rtn -> do
       (scr, _) <- getState
-      let (depList:indList:(CutRef _ _ indVar):[]) = args
-          deps = nub $ depsOf indList ++ depsOf depList
+      let (depExpr:indList:(CutRef _ _ indVar):[]) = args
+          deps = nub $ depsOf indList ++ depsOf depExpr
           scr' = filter (\(v,_) -> elem v deps) scr
-      return $ CutSubs depList indList indVar scr'
+      return $ CutSubs depExpr indList indVar scr'
 
 -----------------
 -- expressions --

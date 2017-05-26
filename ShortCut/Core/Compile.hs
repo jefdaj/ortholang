@@ -28,6 +28,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.List              (find)
+import Data.List.Utils          (delFromAL)
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
 import Data.Maybe                 (fromJust)
@@ -86,9 +87,9 @@ cExpr :: CutConfig -> CutExpr -> Rules FilePath
 cExpr c e@(CutLit  _ _      ) = cLit c e
 cExpr c e@(CutRef  _ _ _    ) = cRef c e
 cExpr c e@(CutList _ _ _    ) = cList c e
+cExpr c e@(CutSubs _ _ _ _  ) = cSubs c e
 cExpr c e@(CutBop  _ _ n _ _) = compileByName c e n -- TODO turn into Fun?
 cExpr c e@(CutFun  _ _ n _  ) = compileByName c e n
-cExpr _   (CutSubs _ _ _ _  ) = undefined
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
@@ -102,6 +103,26 @@ findByName cfg name = find (\f -> fName f == name) fs
   where
     ms = cfgModules cfg
     fs = concat $ map mFunctions ms
+
+-- TODO is the result thing going to mess everything up?
+cSub :: CutConfig -> CutExpr -> CutVar -> CutScript
+     -> CutExpr -> Rules FilePath
+cSub cfg resExpr subVar script subExpr = do
+  let res   = (CutVar "result", resExpr)
+      sub   = (subVar, subExpr)
+      scr'  = delFromAL script subVar -- TODO need to remove result too?
+      scr'' = res:sub:scr'
+  resPath <- compileScript cfg scr''
+  return resPath
+
+cSubs :: CutConfig -> CutExpr -> Rules FilePath
+cSubs cfg (CutSubs resExpr (CutList _ _ subList) subVar scr) = do
+  -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
+  resPaths <- mapM (cSub cfg resExpr subVar scr) subList
+  let outPath = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths
+  outPath %> \out -> need resPaths >> writeFileLines out resPaths
+  return outPath
+cSubs _ _ = error "bad arguments to cSubs"
 
 cAssign :: CutConfig -> CutAssign -> Rules (CutVar, FilePath)
 cAssign cfg (var, expr) = do
