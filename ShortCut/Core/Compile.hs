@@ -88,7 +88,7 @@ cExpr c e@(CutRef  _ _ _    ) = cRef c e
 cExpr c e@(CutList _ _ _    ) = cList c e
 cExpr c e@(CutBop  _ _ n _ _) = compileByName c e n -- TODO turn into Fun?
 cExpr c e@(CutFun  _ _ n _  ) = compileByName c e n
-cExpr _   (CutRep  _ _ _ _  ) = undefined
+cExpr _   (CutSubs _ _ _ _  ) = undefined
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath

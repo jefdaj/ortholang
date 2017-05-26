@@ -27,6 +27,7 @@ module ShortCut.Core.Parse
   , spaceChars
   -- typecheckers
   , defaultTypeCheck
+  , sTypeCheck
   , typeError
   )
   where
@@ -41,7 +42,7 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
-import Data.List              (find, union)
+import Data.List              (find, union, nub)
 import Data.Either            (isRight)
 import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
@@ -284,6 +285,28 @@ pFun = do
       Left  err -> fail err
       Right rtn -> return $ CutFun rtn deps (fName f) args
 
+-----------------------------------
+-- "substitute and repeat" macro --
+-----------------------------------
+
+sTypeCheck :: [CutType] -> Either String CutType
+sTypeCheck ((ListOf dep):(ListOf ind):ind':[]) | ind == ind' = Right dep
+sTypeCheck _ = Left "invalid args to substitute_each" -- TODO better errors here
+
+-- TODO if there end up being more macros, factor them out like pFun above
+pSubs :: ParseM CutExpr
+pSubs = do
+  void $ string "substitute_each" <* (void spaces1 <|> eof)
+  args <- manyTill pTerm pEnd
+  case sTypeCheck (map typeOf args) of
+    Left err -> fail err
+    Right rtn -> do
+      (scr, _) <- getState
+      let (depList:indList:(CutRef _ _ indVar):[]) = args
+          deps = nub $ depsOf indList ++ depsOf depList
+          scr' = filter (\(v,_) -> elem v deps) scr
+      return $ CutSubs depList indList indVar scr'
+
 -----------------
 -- expressions --
 -----------------
@@ -292,7 +315,7 @@ pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
 pTerm :: ParseM CutExpr
-pTerm = pList <|> pParens <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
+pTerm = pList <|> pParens <|> pSubs <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
