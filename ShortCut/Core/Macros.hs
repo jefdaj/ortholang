@@ -40,8 +40,6 @@
 
 -- TODO most of this goes in a module right? only put macro handling itself here
 
-module ShortCut.Core.Macros where
-
 {- How should macros be processed overall? I guess they could be another type
  - of CutFunction. But when they're being parsed they'll need to be given a
  - chance to transform the whole script up to where they were called. This
@@ -71,6 +69,8 @@ module ShortCut.Core.Macros where
  - hack though!
  -}
 
+module ShortCut.Core.Macros where
+
 import ShortCut.Core.Types
 import Data.List (intersect)
 import Data.Maybe (fromJust)
@@ -82,45 +82,50 @@ import Data.Maybe (fromJust)
 
 -- TODO only mangle the specific vars we want changed!
 
-mangleVar :: (String -> String) -> CutVar -> CutVar
-mangleVar fn (CutVar v) = CutVar (fn v)
-
-mangleExpr :: (String -> String) -> CutExpr -> CutExpr
+mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
 mangleExpr fn e@(CutLit  _ _) = e
-mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map (mangleVar fn) vs)   (mangleVar fn v)
-mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map (mangleVar fn) vs) n (mangleExpr fn e1) (mangleExpr fn e2)
-mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map (mangleVar fn) vs) n (map (mangleExpr fn) es)
-mangleExpr fn (CutList t vs   es   ) = CutList t (map (mangleVar fn) vs)   (map (mangleExpr fn) es)
+mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map fn vs)   (fn v)
+mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map fn vs) n (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map fn vs) n (map (mangleExpr fn) es)
+mangleExpr fn (CutList t vs   es   ) = CutList t (map fn vs)   (map (mangleExpr fn) es)
 
-mangleAssign :: (String -> String) -> CutAssign -> CutAssign
-mangleAssign fn (CutVar var, expr) = (CutVar $ fn var, mangleExpr fn expr)
+mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
+mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
 
-mangleScript :: (String -> String) -> CutScript -> CutScript
+mangleScript :: (CutVar -> CutVar) -> CutScript -> CutScript
 mangleScript fn = map (mangleAssign fn)
 
 -- TODO pad with zeros?
 -- Add a "dupN." prefix to each variable name in the path from independent
 -- -> dependent variable, using a list of those varnames
-addDupPrefix :: Int -> [String] -> String -> String
-addDupPrefix n ss s =
-  if elem s ss
-    then "dup" ++ show n ++ "_" ++ s
-    else s
+addPrefix :: Int -> [CutVar] -> (CutVar -> CutVar)
+addPrefix n vs v@(CutVar s) =
+  if elem v vs
+    then CutVar $ "p" ++ show n ++ "_" ++ s
+    else v
 
 -- TODO should be able to just apply this to a duplicate script section right?
-addDupPrefixes :: Int -> [String] -> CutScript -> CutScript
-addDupPrefixes n ss = mangleScript (addDupPrefix n ss)
+addPrefixes :: Int -> [CutVar] -> CutScript -> CutScript
+addPrefixes n vs = mangleScript (addPrefix n vs)
 
 
-------------------------------------------------------------
--- duplicate steps between independent and dependent vars --
-------------------------------------------------------------
+-------------------------------------------------------
+-- duplicate path from independent -> dependent vars --
+-------------------------------------------------------
 
-splitIndVar :: CutVar -> CutScript -> CutScript
-splitIndVar var script = undefined
+varsToPermute :: CutScript -> CutVar -> CutExpr -> [CutVar]
+varsToPermute scr ind dep = intersect (rDepsOf scr ind) (depsOf dep)
 
--- TODO will this need to run inside the Action monad?
-addDups = undefined
+-- Note that this is NOT a working script on its own,
+-- just a list of assignment statements to add to a larger script
+permuteAssigns :: CutScript -> CutVar -> CutExpr -> Int -> [CutAssign]
+permuteAssigns scr ind dep n = addPrefixes n vars $ filter keep scr
+  where
+    vars = varsToPermute scr ind dep
+    keep asn = elem (fst asn) vars
+
+-- permuteIndList :: [CutVar] -> [CutExpr] -> [CutExpr]
+-- permuteIndList vars exprs = map (\(n,e) -> addPrefix n vars e) (zip [1..] exprs)
 
 
 --------------------------
@@ -151,8 +156,6 @@ expandMacro
   -> CutScript -- final script with the macro expanded
 expandMacro cfg script indVar depExpr = undefined
   where
-    assumeVar v = fromJust $ lookup v script -- TODO something safer
-    varsToCopy = intersect (rDepsOf script $ assumeVar v) (map assumeVar $ depsOf depExpr)
     splitFn    = undefined
     repeatFn   = undefined
     joinFn     = undefined

@@ -23,7 +23,7 @@ import Development.Shake
 import Control.Exception.Enclosed (catchAny)
 import Data.Maybe                 (fromJust)
 import ShortCut.Core.Compile      (compileScript)
-import ShortCut.Core.Parse        (ParseError, parseFile)
+import ShortCut.Core.Parse        (parseFile)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty       (prettyResult)
 import Text.PrettyPrint.HughesPJClass (render)
