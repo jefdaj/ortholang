@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-{- ShortCut code is interpreted in three phases: parse, check, and eval. But
- - client code shouldn't need to care about that, so this module wraps them in
- - a simplified interface. It just holds whatever [i]nterpret functions the
- - Repl and ShortCut modules use for now rather than any comprehensive API.
+{- ShortCut code is interpreted in phases, but client code shouldn't need to
+ - care about that, so this module wraps them in a simplified interface. It
+ - just holds whatever [i]nterpret functions the Repl and ShortCut modules use
+ - for now rather than any comprehensive API.
  -}
 
 -- TODO should there be an iLine function that tries both expr and assign?
