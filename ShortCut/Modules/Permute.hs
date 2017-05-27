@@ -1,24 +1,14 @@
--- TODO rename to something that makes sense
-
-module ShortCut.Modules.Macros where
+module ShortCut.Modules.Permute where
 
 import Development.Shake
 import ShortCut.Core.Types
-
-import Data.List                  (intersect)
-import ShortCut.Core.Compile      (cExpr, hashedTmp')
-import Development.Shake.FilePath ((</>))
-
------------------------
--- module definition --
------------------------
+import ShortCut.Core.Compile (cExpr, hashedTmp')
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "macros"
+  { mName = "permute"
   , mFunctions =
     [ leaveOneOut
-    , commonElements
     ]
   }
 
@@ -29,18 +19,6 @@ leaveOneOut = CutFunction
   , fTypeCheck = combosTypeCheck
   , fCompiler  = cCombos leaveEachOut
   }
-
-commonElements :: CutFunction
-commonElements = CutFunction
-  { fName      = "common_elements"
-  , fFixity    = Prefix
-  , fTypeCheck = summaryTypeCheck
-  , fCompiler  = cSummary (foldr1 intersect)
-  }
-
----------------------------------------------------------
--- explode lists into lists of lists of their elements --
----------------------------------------------------------
 
 combosTypeCheck :: [CutType] -> Either String CutType
 combosTypeCheck [(ListOf t)] = Right $ ListOf $ ListOf t
@@ -83,33 +61,3 @@ cCombos comboFn cfg expr@(CutFun _ _ fnName [iList]) = do
     writeFileChanged out $ unlines oPaths
   return oList
 cCombos _ _ _ = error "bad argument to cCombos"
-
-----------------------------------------------
--- summarize lists of lists back into lists --
-----------------------------------------------
-
-summaryTypeCheck :: [CutType] -> Either String CutType
-summaryTypeCheck [(ListOf (ListOf t))] = Right $ ListOf t
-summaryTypeCheck _ = Left "type error in summary!"
-
-commonToAll :: [[FilePath]] -> [FilePath]
-commonToAll = undefined
-
--- takes a list of lists and summarizes (flattens?) it to a single list
--- using the given summaryFn
--- TODO are paths hashes unique now??
--- TODO use writeFileChanged instead of writeFileLines?
---      (if it turns out to be re-running stuff unneccesarily)
-cSummary :: ([[FilePath]] -> [FilePath]) -> CutConfig -> CutExpr -> Rules FilePath
-cSummary summaryFn cfg expr@(CutFun _ _ fnName [iList]) = do
-  iPath <- cExpr cfg iList
-  let (ListOf (ListOf eType)) = typeOf iList
-      oPath = hashedTmp' cfg (ListOf eType) expr [iPath, fnName]
-  oPath %> \out -> do
-    need [iPath]
-    iLists <- fmap lines $ readFile' iPath
-    iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
-    let oElems = summaryFn iElems
-    writeFileLines out oElems
-  return oPath
-cSummary _ _ _ = error "bad argument to cSummary"

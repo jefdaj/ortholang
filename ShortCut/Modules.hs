@@ -2,19 +2,21 @@ module ShortCut.Modules where
 
 import ShortCut.Core.Types (CutModule(..))
 
-import qualified ShortCut.Modules.Cheat    as C
-import qualified ShortCut.Modules.Math     as M
-import qualified ShortCut.Modules.Macros   as Mc
-import qualified ShortCut.Modules.Sets     as S
-import qualified ShortCut.Modules.Blast    as B
-import qualified ShortCut.Modules.BioMartR as BM
+import qualified ShortCut.Modules.BioMartR  as BioMartR
+import qualified ShortCut.Modules.Blast     as Blast -- TODO replace with shmlast
+import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
+import qualified ShortCut.Modules.Math      as Math
+import qualified ShortCut.Modules.Permute   as Permute
+import qualified ShortCut.Modules.Sets      as Sets
+import qualified ShortCut.Modules.Summarize as Summarize
 
 modules :: [CutModule]
 modules =
-  [ C.cutModule
-  , M.cutModule
-  , S.cutModule
-  , B.cutModule
-  , BM.cutModule
-  , Mc.cutModule
+  [ BioMartR.cutModule
+  , Blast.cutModule
+  , Cheat.cutModule
+  , Math.cutModule
+  , Permute.cutModule
+  , Sets.cutModule
+  , Summarize.cutModule
   ]
