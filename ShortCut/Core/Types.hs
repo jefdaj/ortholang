@@ -107,7 +107,7 @@ depsOf (CutRef  _ vs v      ) = v:vs
 depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
 depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
 depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
-depsOf (CutSubs d i _ _     ) = nub $ depsOf d ++ depsOf i
+depsOf (CutSubs d i v _     ) = nub $ depsOf d ++ depsOf i ++ [v] ++ concat (map varOf [d,i])
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps

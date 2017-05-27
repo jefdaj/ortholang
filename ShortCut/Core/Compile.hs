@@ -24,6 +24,8 @@ module ShortCut.Core.Compile
   )
   where
 
+import Debug.Trace
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -115,6 +117,7 @@ cSub cfg resExpr subVar script subExpr = do
   resPath <- compileScript cfg scr''
   return resPath
 
+-- TODO this has to work with *Refs* to the things too! (no assuming CutList)
 cSubs :: CutConfig -> CutExpr -> Rules FilePath
 cSubs cfg (CutSubs resExpr (CutList _ _ subList) subVar scr) = do
   -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
@@ -122,7 +125,7 @@ cSubs cfg (CutSubs resExpr (CutList _ _ subList) subVar scr) = do
   let outPath = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths
   outPath %> \out -> need resPaths >> writeFileLines out resPaths
   return outPath
-cSubs _ _ = error "bad arguments to cSubs"
+cSubs _ expr = error $ "bad argument to cSubs: " ++ show expr
 
 cAssign :: CutConfig -> CutAssign -> Rules (CutVar, FilePath)
 cAssign cfg (var, expr) = do
@@ -136,7 +139,7 @@ compileScript :: CutConfig -> CutScript -> Rules FilePath
 compileScript cfg as = do
   -- liftIO $ putStrLn "entering compileScript"
   rpaths <- mapM (cAssign cfg) as
-  return $ fromJust $ lookup (CutVar "result") rpaths
+  return $ trace ("rpaths: " ++ show rpaths) (fromJust $ lookup (CutVar "result") rpaths)
 
 -- write a literal value from ShortCut source code to file
 cLit :: CutConfig -> CutExpr -> Rules FilePath

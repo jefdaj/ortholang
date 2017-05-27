@@ -42,7 +42,9 @@ instance Pretty CutExpr where
   pPrint (CutRef _ _ v)       = pPrint v
   pPrint (CutFun _ _ s es)    = text s <+> fsep (map pNested es)
   pPrint (CutList _ _ es)     = pList es
-  pPrint (CutSubs _ _ _ _ )    = undefined
+  pPrint (CutSubs r ss (CutVar s) _ ) = text "substitute_each"
+                                    <+> fsep (map pNested [r, ss])
+                                    <+> text s
   pPrint (CutBop _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
@@ -55,8 +57,9 @@ pList es = text "[" <> fsep (punctuate (text ",") (map pPrint es)) <> text "]"
 -- this adds parens around nested function calls
 -- without it things can get really messy!
 pNested :: CutExpr -> Doc
-pNested e@(CutFun _ _ _ _  ) = parens $ pPrint e
-pNested e@(CutBop _ _ _ _ _) = parens $ pPrint e
+pNested e@(CutFun  _ _ _ _  ) = parens $ pPrint e
+pNested e@(CutBop  _ _ _ _ _) = parens $ pPrint e
+pNested e@(CutSubs _ _ _ _  ) = parens $ pPrint e
 pNested e = pPrint e
 
 instance Pretty CutConfig where

@@ -300,12 +300,12 @@ pSubs = do
   args <- manyTill pTerm pEnd
   case sTypeCheck (map typeOf args) of
     Left err -> fail err
-    Right rtn -> do
+    Right _  -> do
       (scr, _) <- getState
-      let (depExpr:indList:(CutRef _ _ indVar):[]) = args
-          deps = nub $ depsOf indList ++ depsOf depExpr
+      let (resExpr:subList:(CutRef _ _ subVar):[]) = args
+          deps = nub $ depsOf subList ++ depsOf resExpr
           scr' = filter (\(v,_) -> elem v deps) scr
-      return $ CutSubs depExpr indList indVar scr'
+      return $ CutSubs resExpr subList subVar scr' -- TODO leave var wrapped in its ref?
 
 -----------------
 -- expressions --
