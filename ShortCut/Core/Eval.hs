@@ -67,7 +67,7 @@ eval cfg rtype = ignoreErrors . eval'
 
 -- TODO get the type of result and pass to eval
 evalScript :: CutConfig -> CutScript -> IO ()
-evalScript c s = eval c rtn $ compileScript c s
+evalScript c s = eval c rtn $ compileScript c s Nothing
   where
     res = trace ("s: " ++ show s) (fromJust $ lookup (CutVar "result") s)
     rtn = typeOf res

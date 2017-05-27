@@ -72,8 +72,8 @@
 module ShortCut.Core.Macros where
 
 import ShortCut.Core.Types
-import Data.List (intersect)
-import Data.Maybe (fromJust)
+-- import Data.List (intersect)
+-- import Data.Maybe (fromJust)
 
 
 --------------------------------------------------------
@@ -83,11 +83,13 @@ import Data.Maybe (fromJust)
 -- TODO only mangle the specific vars we want changed!
 
 mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
-mangleExpr fn e@(CutLit  _ _) = e
+mangleExpr _ e@(CutLit  _ _) = e
 mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map fn vs)   (fn v)
 mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map fn vs) n (mangleExpr fn e1) (mangleExpr fn e2)
 mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map fn vs) n (map (mangleExpr fn) es)
 mangleExpr fn (CutList t vs   es   ) = CutList t (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr fn (CutSubs r ss v as) = CutSubs (mangleExpr fn r) (mangleExpr fn ss) (fn v) (mangleScript fn as)
+-- CutSubs CutExpr CutExpr CutVar [CutAssign] -- dep, ind, ind', cxt
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
@@ -98,31 +100,28 @@ mangleScript fn = map (mangleAssign fn)
 -- TODO pad with zeros?
 -- Add a "dupN." prefix to each variable name in the path from independent
 -- -> dependent variable, using a list of those varnames
-addPrefix :: Int -> [CutVar] -> (CutVar -> CutVar)
-addPrefix n vs v@(CutVar s) =
-  if elem v vs
-    then CutVar $ "p" ++ show n ++ "_" ++ s
-    else v
+addPrefix :: Int -> (CutVar -> CutVar)
+addPrefix n (CutVar s) = CutVar $ s ++ "." ++ show n
 
 -- TODO should be able to just apply this to a duplicate script section right?
-addPrefixes :: Int -> [CutVar] -> CutScript -> CutScript
-addPrefixes n vs = mangleScript (addPrefix n vs)
+addPrefixes :: Int -> CutScript -> CutScript
+addPrefixes n = mangleScript (addPrefix n)
 
 
 -------------------------------------------------------
 -- duplicate path from independent -> dependent vars --
 -------------------------------------------------------
 
-varsToPermute :: CutScript -> CutVar -> CutExpr -> [CutVar]
-varsToPermute scr ind dep = intersect (rDepsOf scr ind) (depsOf dep)
-
--- Note that this is NOT a working script on its own,
--- just a list of assignment statements to add to a larger script
-permuteAssigns :: CutScript -> CutVar -> CutExpr -> Int -> [CutAssign]
-permuteAssigns scr ind dep n = addPrefixes n vars $ filter keep scr
-  where
-    vars = varsToPermute scr ind dep
-    keep asn = elem (fst asn) vars
+-- varsToPermute :: CutScript -> CutVar -> CutExpr -> [CutVar]
+-- varsToPermute scr ind dep = intersect (rDepsOf scr ind) (depsOf dep)
+-- 
+-- -- Note that this is NOT a working script on its own,
+-- -- just a list of assignment statements to add to a larger script
+-- permuteAssigns :: CutScript -> CutVar -> CutExpr -> Int -> [CutAssign]
+-- permuteAssigns scr ind dep n = addPrefixes n vars $ filter keep scr
+--   where
+--     vars = varsToPermute scr ind dep
+--     keep asn = elem (fst asn) vars
 
 -- permuteIndList :: [CutVar] -> [CutExpr] -> [CutExpr]
 -- permuteIndList vars exprs = map (\(n,e) -> addPrefix n vars e) (zip [1..] exprs)
@@ -144,18 +143,18 @@ permuteAssigns scr ind dep n = addPrefixes n vars $ filter keep scr
 --    a. make a copy of the relevant region of the script
 --    b. substitute one of the input permutations for the original input
 
-expandMacro
-  :: CutConfig -- context to operate in
-  -> CutScript -- initial script before expansion
-  -> CutVar    -- independent/input list to expand into a list of lists
-               -- (must be a var because the output expression must depend on it)
-               -- (and the var must point to a list)
-  -> CutExpr   -- dependent/output expression to recalculate multiple times
-               -- (doesn't necessarily have to be a list)
-               -- (does need to depend on the input var)
-  -> CutScript -- final script with the macro expanded
-expandMacro cfg script indVar depExpr = undefined
-  where
-    splitFn    = undefined
-    repeatFn   = undefined
-    joinFn     = undefined
+-- expandMacro
+--   :: CutConfig -- context to operate in
+--   -> CutScript -- initial script before expansion
+--   -> CutVar    -- independent/input list to expand into a list of lists
+--                -- (must be a var because the output expression must depend on it)
+--                -- (and the var must point to a list)
+--   -> CutExpr   -- dependent/output expression to recalculate multiple times
+--                -- (doesn't necessarily have to be a list)
+--                -- (does need to depend on the input var)
+--   -> CutScript -- final script with the macro expanded
+-- expandMacro cfg script indVar depExpr = undefined
+--   where
+--     splitFn    = undefined
+--     repeatFn   = undefined
+--     joinFn     = undefined

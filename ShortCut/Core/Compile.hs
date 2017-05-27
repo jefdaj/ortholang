@@ -28,6 +28,7 @@ import Debug.Trace
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Macros (addPrefixes)
 
 import Data.List              (find)
 import Data.List.Utils          (delFromAL)
@@ -107,21 +108,22 @@ findByName cfg name = find (\f -> fName f == name) fs
     fs = concat $ map mFunctions ms
 
 -- TODO is the result thing going to mess everything up?
-cSub :: CutConfig -> CutExpr -> CutVar -> CutScript
+cSub :: CutConfig -> CutExpr -> CutVar -> CutScript -> Int
      -> CutExpr -> Rules FilePath
-cSub cfg resExpr subVar script subExpr = do
-  let res   = (CutVar "result", resExpr)
-      sub   = (subVar, subExpr)
-      scr'  = delFromAL script subVar -- TODO need to remove result too?
-      scr'' = res:sub:scr'
-  resPath <- compileScript cfg scr''
+cSub cfg resExpr subVar script n subExpr = do
+  let res    = (CutVar "result", resExpr)
+      sub    = (subVar, subExpr)
+      scr'   = delFromAL script subVar -- TODO need to remove result too?
+      scr''  = res:sub:scr'
+      scr''' = addPrefixes n scr''
+  resPath <- compileScript cfg scr''' (Just n)
   return resPath
 
 -- TODO this has to work with *Refs* to the things too! (no assuming CutList)
 cSubs :: CutConfig -> CutExpr -> Rules FilePath
 cSubs cfg (CutSubs resExpr (CutList _ _ subList) subVar scr) = do
   -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
-  resPaths <- mapM (cSub cfg resExpr subVar scr) subList
+  resPaths <- mapM (\(n,e) -> cSub cfg resExpr subVar scr n e) (zip [1..] subList)
   let outPath = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths
   outPath %> \out -> need resPaths >> writeFileLines out resPaths
   return outPath
@@ -135,11 +137,15 @@ cAssign cfg (var, expr) = do
 
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
-compileScript :: CutConfig -> CutScript -> Rules FilePath
-compileScript cfg as = do
+compileScript :: CutConfig -> CutScript -> Maybe Int -> Rules FilePath
+compileScript cfg as n = do
   -- liftIO $ putStrLn "entering compileScript"
   rpaths <- mapM (cAssign cfg) as
-  return $ trace ("rpaths: " ++ show rpaths) (fromJust $ lookup (CutVar "result") rpaths)
+  return $ trace ("rpaths: " ++ show rpaths) (fromJust $ lookup (CutVar res) rpaths)
+  where
+    res = case n of
+      Nothing -> "result"
+      Just n' -> "result." ++ show n'
 
 -- write a literal value from ShortCut source code to file
 cLit :: CutConfig -> CutExpr -> Rules FilePath
