@@ -24,24 +24,19 @@ module ShortCut.Core.Compile
   )
   where
 
-import Debug.Trace
-
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Macros (addPrefixes)
 
-import Data.List              (find)
-import Data.List.Utils          (delFromAL)
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
+import Data.List                  (find)
+import Data.List.Utils            (delFromAL)
 import Data.Maybe                 (fromJust)
--- import Data.Scientific            (Scientific)
--- import Data.Set                   (Set, union, difference, intersection
-                                  -- ,fromList, toList)
+import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((<.>), (</>))
+import ShortCut.Core.Macros       (addPrefixes)
 import System.Directory           (canonicalizePath)
 import System.FilePath            (makeRelative)
-import Data.String.Utils          (strip)
 
 -- TODO move all this stuff to utils or a new config module or something...
 
@@ -141,7 +136,7 @@ compileScript :: CutConfig -> CutScript -> Maybe Int -> Rules FilePath
 compileScript cfg as n = do
   -- liftIO $ putStrLn "entering compileScript"
   rpaths <- mapM (cAssign cfg) as
-  return $ trace ("rpaths: " ++ show rpaths) (fromJust $ lookup (CutVar res) rpaths)
+  return $ fromJust $ lookup (CutVar res) rpaths
   where
     res = case n of
       Nothing -> "result"
