@@ -1,0 +1,9 @@
+.
+|-- cache
+|   `-- shortcut
+|       |-- 01f80f40b8.str.list.list
+|       |-- 8ccede23ed.str
+|       `-- ed4e72e3ce.str.list
+`-- result -> cache/shortcut/01f80f40b8.str.list.list
+
+2 directories, 4 files

@@ -1,0 +1,9 @@
+.
+|-- cache
+|   `-- shortcut
+|       |-- 34f58e92d3.num
+|       |-- 3efb908042.num
+|       `-- a0ab2f0d54.num
+`-- result -> cache/shortcut/a0ab2f0d54.num
+
+2 directories, 4 files

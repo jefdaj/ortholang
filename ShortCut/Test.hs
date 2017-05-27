@@ -11,7 +11,7 @@ import ShortCut.Core.Util  (mkTestGroup)
 import System.IO.Temp      (withSystemTempDirectory)
 import Test.Tasty          (TestTree)
 import Test.Tasty          (defaultMain)
-import System.Environment  (setEnv)
+-- import System.Environment  (setEnv)
 
 import qualified ShortCut.Test.Parse as P
 import qualified ShortCut.Test.Eval  as E
@@ -35,5 +35,5 @@ mkTestConfig mods dir = CutConfig
 runTests :: [CutModule] -> IO ()
 runTests mods = withSystemTempDirectory "shortcut" $ \d -> do
   tests <- mkTests $ mkTestConfig mods d
-  setEnv "TASTY_HIDE_SUCCESSES" "True" -- TODO shortcut flag for this?
+  -- setEnv "TASTY_HIDE_SUCCESSES" "True" -- TODO shortcut flag for this?
   defaultMain tests
