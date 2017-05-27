@@ -28,7 +28,6 @@ executable shortcut
                     ShortCut.Core,
                     ShortCut.Core.Compile,
                     ShortCut.Core.Eval,
-                    ShortCut.Core.Macros,
                     ShortCut.Core.Parse,
                     ShortCut.Core.Pretty,
                     ShortCut.Core.Repl,

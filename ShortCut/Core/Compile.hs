@@ -34,9 +34,45 @@ import Data.List.Utils            (delFromAL)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((<.>), (</>))
-import ShortCut.Core.Macros       (addPrefixes)
 import System.Directory           (canonicalizePath)
 import System.FilePath            (makeRelative)
+
+
+--------------------------------------------------------
+-- prefix variable names so duplicates don't conflict --
+--------------------------------------------------------
+
+-- TODO only mangle the specific vars we want changed!
+
+mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
+mangleExpr _ e@(CutLit  _ _) = e
+mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map fn vs)   (fn v)
+mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map fn vs) n (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map fn vs) n (map (mangleExpr fn) es)
+mangleExpr fn (CutList t vs   es   ) = CutList t (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr fn (CutSubs r ss v as) = CutSubs (mangleExpr fn r) (mangleExpr fn ss) (fn v) (mangleScript fn as)
+-- CutSubs CutExpr CutExpr CutVar [CutAssign] -- dep, ind, ind', cxt
+
+mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
+mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
+
+mangleScript :: (CutVar -> CutVar) -> CutScript -> CutScript
+mangleScript fn = map (mangleAssign fn)
+
+-- TODO pad with zeros?
+-- Add a "dupN." prefix to each variable name in the path from independent
+-- -> dependent variable, using a list of those varnames
+addPrefix :: Int -> (CutVar -> CutVar)
+addPrefix n (CutVar s) = CutVar $ s ++ "." ++ show n
+
+-- TODO should be able to just apply this to a duplicate script section right?
+addPrefixes :: Int -> CutScript -> CutScript
+addPrefixes n = mangleScript (addPrefix n)
+
+
+---------------------
+-- determine paths --
+---------------------
 
 -- TODO move all this stuff to utils or a new config module or something...
 
@@ -78,6 +114,11 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
   where
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
+
+
+------------------------------
+-- compile the ShortCut AST --
+------------------------------
 
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
