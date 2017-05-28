@@ -3,7 +3,7 @@ Type :help for a list of the available commands.
 shortcut >> v1 = "one"
 shortcut >> v2 = "two"
 shortcut >> v3 = [v1, v2]
-shortcut >> :show
+shortcut >> :show 
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
@@ -12,6 +12,12 @@ shortcut >> :depends v1
 shortcut >> :depends v2
 
 shortcut >> :depends v3
-v1, v2
-shortcut >> :quit
+v1 = "one"
+v2 = "two"
+shortcut >> v4 = v3
+shortcut >> :depends v4
+v1 = "one"
+v2 = "two"
+v3 = [v1, v2]
+shortcut >> :q
 Bye for now!

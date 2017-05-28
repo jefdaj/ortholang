@@ -37,9 +37,6 @@ import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
 
--- TODO factor these out into Pretty.hs
-import Text.PrettyPrint.HughesPJClass (punctuate, text, render, fsep)
-
 --------------------
 -- main interface --
 --------------------
@@ -190,24 +187,21 @@ cmdSave path = do
 cmdDeps :: String -> ReplM ()
 cmdDeps var = do
   (scr, _) <- get
-  case lookup (CutVar var) scr of
-    Nothing -> print $ "Var '" ++ var ++ "' not found"
-    Just v  -> liftIO $ putStrLn $ prettyDeps $ depsOf v
+  print $ case lookup (CutVar var) scr of
+    Nothing -> "Var '" ++ var ++ "' not found"
+    Just e  -> prettyAssigns (\(v,_) -> elem v $ depsOf e) scr
 
 -- TODO move to Pretty.hs
-prettyDeps :: [CutVar] -> String
-prettyDeps ds = render
-  $ fsep
-  $ punctuate (text ",")
-  $ map (\(CutVar s) -> text s) ds
+prettyAssigns :: (CutAssign -> Bool) -> CutScript -> String
+prettyAssigns fn scr = stripWhiteSpace $ unlines $ map prettyShow $ filter fn scr
 
 cmdRDeps :: String -> ReplM ()
 cmdRDeps var = do
   (scr, _) <- get
   let var' = CutVar var
-  case lookup var' scr of
-    Nothing -> print $ "Var '" ++ var ++ "' not found"
-    Just _  -> liftIO $ putStrLn $ prettyDeps $ rDepsOf scr var'
+  print $ case lookup var' scr of
+    Nothing -> "Var '" ++ var ++ "' not found"
+    Just _  -> prettyAssigns (\(v,_) -> elem v $ rDepsOf scr var') scr
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: String -> ReplM ()

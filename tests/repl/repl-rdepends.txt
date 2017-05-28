@@ -8,16 +8,17 @@ v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 shortcut >> :rdepends v1
-v3
-shortcut >> :rdepends v2
-v3
-shortcut >> :rdepends v3
+v3 = [v1, v2]
+shortcut >> :rdep v2
+v3 = [v1, v2]
+shortcut >> :rdep v3
 
 shortcut >> v4 = v3
-shortcut >> :rdepends v3
-v4
+shortcut >> :rdep v3
+v4 = v3
 shortcut >> v5 = v4
-shortcut >> :rdepends v3
-v4, v5
-shortcut >> :q
+shortcut >> :rdep v3
+v4 = v3
+v5 = v4
+shortcut >> :quit
 Bye for now!
