@@ -57,7 +57,7 @@ data CutExpr
   | CutBop  CutType [CutVar] String  CutExpr CutExpr
   | CutFun  CutType [CutVar] String [CutExpr]
   | CutList CutType [CutVar] [CutExpr]
-  | CutSubs CutExpr CutExpr CutVar [CutAssign] -- dep, ind, ind', cxt
+  | CutSubs CutExpr CutVar CutExpr [CutAssign] -- dep, ind, ind', cxt
   deriving (Eq, Show)
 
 -- TODO have a separate CutAssign for "result"?
@@ -108,7 +108,7 @@ depsOf (CutRef  _ vs v      ) = v:vs
 depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
 depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
 depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
-depsOf (CutSubs d i v _     ) = nub $ depsOf d ++ depsOf i ++ [v] ++ concat (map varOf [d,i])
+depsOf (CutSubs d v i _     ) = nub $ depsOf d ++ [v] ++ depsOf i ++ concat (map varOf [d,i])
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
