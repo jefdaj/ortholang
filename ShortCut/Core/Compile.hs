@@ -156,6 +156,11 @@ cSub cfg resExpr subVar script n subExpr = do
   return resPath
 
 -- TODO this has to work with *Refs* to the things too! (no assuming CutList)
+--      does that mean it has to be written to a file?
+--      ... not possible :( requires the recursive script it holds too
+--      maybe it's time to give up and pass the whole state?
+--      then this could be a regular function in a Substitute module
+--      yeah, better go with that for now!
 cSubs :: CutConfig -> CutExpr -> Rules FilePath
 cSubs cfg (CutSubs resExpr subVar (CutList _ _ subList) scr) = do
   -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D

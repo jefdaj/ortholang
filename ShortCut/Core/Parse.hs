@@ -282,6 +282,7 @@ pFun = do
   case fn of
     -- TODO does this happen, or does it just move on to variables?
     --      it should commit to being a fn as soon as there are args!
+    -- TODO use an error call here to definitively fail until you figure out Parsec
     Nothing -> fail $ "no such function: '" ++ name ++ "'"
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
@@ -296,7 +297,7 @@ sTypeCheck :: [CutType] -> Either String CutType
 sTypeCheck (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 sTypeCheck _ = Left "invalid args to substitute_each" -- TODO better errors here
 
--- TODO how to make this fail definitively rather than trying other parsers?
+-- TODO use an error call here to definitively fail until you figure out Parsec
 sDepCheck :: CutExpr -> CutVar -> ParseM ()
 sDepCheck resExpr subVar = if elem subVar $ depsOf resExpr
   then return ()

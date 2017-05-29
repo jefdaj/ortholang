@@ -57,6 +57,7 @@ data CutExpr
   | CutBop  CutType [CutVar] String  CutExpr CutExpr
   | CutFun  CutType [CutVar] String [CutExpr]
   | CutList CutType [CutVar] [CutExpr]
+  -- TODO remove this and replace by passing Scripts to compiler functions
   | CutSubs CutExpr CutVar CutExpr [CutAssign] -- dep, ind, ind', cxt
   deriving (Eq, Show)
 
