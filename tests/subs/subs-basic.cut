@@ -1,0 +1,4 @@
+ind = 1
+dep = 1.2e3 * ind
+subs = substitute_each dep [1,2,3,4,5] ind
+result = subs

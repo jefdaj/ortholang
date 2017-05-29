@@ -160,8 +160,9 @@ cSubs :: CutConfig -> CutExpr -> Rules FilePath
 cSubs cfg (CutSubs resExpr (CutList _ _ subList) subVar scr) = do
   -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
   resPaths <- mapM (\(n,e) -> cSub cfg resExpr subVar scr n e) (zip [1..] subList)
-  let outPath = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths
-  outPath %> \out -> need resPaths >> writeFileLines out resPaths
+  let resPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
+      outPath   = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths'
+  outPath %> \out -> need resPaths >> writeFileLines out resPaths'
   return outPath
 cSubs _ expr = error $ "bad argument to cSubs: " ++ show expr
 
