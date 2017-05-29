@@ -240,7 +240,7 @@ pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop2 [o] = pSym o *> (return $ \e1 e2 ->
   let deps = union (depsOf e1) (depsOf e2)
   in CutBop (typeOf e1) deps [o] e1 e2)
-pBop2  s  = error $ "invalid binary op name '" ++ s ++ "'"
+pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 
 ---------------
 -- functions --
