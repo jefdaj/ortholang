@@ -315,7 +315,7 @@ pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
 pTerm :: ParseM CutExpr
-pTerm = pList <|> pParens <|> pSubs <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
+pTerm = pList <|> pParens <|> try pSubs <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
