@@ -38,9 +38,10 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub)
 import Development.Shake              (Rules)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT,
-                                       defaultSettings, outputStrLn)
+                                       defaultSettings)
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+import Control.Monad.IO.Class   (liftIO)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -171,7 +172,7 @@ prompt :: String -> ReplM (Maybe String)
 prompt = lift . lift . getInputLine
 
 print :: String -> ReplM ()
-print = lift . lift . outputStrLn
+print = liftIO . putStrLn
 
 --------------------------------
 -- Module stuff (all in flux) --
