@@ -35,10 +35,10 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
 cSet :: (Set String -> Set String -> Set String)
-     -> CutConfig -> CutExpr -> Rules FilePath
-cSet fn cfg e@(CutBop extn _ _ s1 s2) = do
+     -> CutState -> CutExpr -> Rules FilePath
+cSet fn s e@(CutBop extn _ _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSet"
-  (p1, p2, p3) <- cBop cfg extn e (s1, s2)
+  (p1, p2, p3) <- cBop s extn e (s1, s2)
   p3 %> \out -> do
     lines1 <- readFileLines p1
     lines2 <- readFileLines p2

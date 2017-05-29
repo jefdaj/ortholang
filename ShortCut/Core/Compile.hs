@@ -122,19 +122,19 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
 
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
-cExpr :: CutConfig -> CutExpr -> Rules FilePath
-cExpr c e@(CutLit  _ _      ) = cLit c e
-cExpr c e@(CutRef  _ _ _    ) = cRef c e
-cExpr c e@(CutList _ _ _    ) = cList c e
-cExpr c e@(CutSubs _ _ _ _  ) = cSubs c e
-cExpr c e@(CutBop  _ _ n _ _) = compileByName c e n -- TODO turn into Fun?
-cExpr c e@(CutFun  _ _ n _  ) = compileByName c e n
+cExpr :: CutState -> CutExpr -> Rules FilePath
+cExpr s e@(CutLit  _ _      ) = cLit s e
+cExpr s e@(CutRef  _ _ _    ) = cRef s e
+cExpr s e@(CutList _ _ _    ) = cList s e
+cExpr s e@(CutSubs _ _ _ _  ) = cSubs s e
+cExpr s e@(CutBop  _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
+cExpr s e@(CutFun  _ _ n _  ) = compileByName s e n
 
 -- TODO remove once no longer needed (parser should find fns)
-compileByName :: CutConfig -> CutExpr -> String -> Rules FilePath
-compileByName cfg expr name = case findByName cfg name of
+compileByName :: CutState -> CutExpr -> String -> Rules FilePath
+compileByName s@(_,cfg) expr name = case findByName cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
-  Just f  -> (fCompiler f) cfg expr
+  Just f  -> (fCompiler f) s expr
 
 -- TODO remove once no longer needed (parser should find fns)
 findByName :: CutConfig -> String -> Maybe CutFunction
@@ -144,15 +144,15 @@ findByName cfg name = find (\f -> fName f == name) fs
     fs = concat $ map mFunctions ms
 
 -- TODO is the result thing going to mess everything up?
-cSub :: CutConfig -> CutExpr -> CutVar -> CutScript -> Int
+cSub :: CutState -> CutExpr -> CutVar -> CutScript -> Int
      -> CutExpr -> Rules FilePath
-cSub cfg resExpr subVar script n subExpr = do
+cSub (_,cfg) resExpr subVar script n subExpr = do
   let res    = (CutVar "result", resExpr)
       sub    = (subVar, subExpr)
       scr'   = delFromAL script subVar -- TODO need to remove result too?
       scr''  = res:sub:scr'
       scr''' = addPrefixes n scr''
-  resPath <- compileScript cfg scr''' (Just n)
+  resPath <- compileScript (scr''',cfg) (Just n)
   return resPath
 
 -- TODO this has to work with *Refs* to the things too! (no assuming CutList)
@@ -161,28 +161,28 @@ cSub cfg resExpr subVar script n subExpr = do
 --      maybe it's time to give up and pass the whole state?
 --      then this could be a regular function in a Substitute module
 --      yeah, better go with that for now!
-cSubs :: CutConfig -> CutExpr -> Rules FilePath
-cSubs cfg (CutSubs resExpr subVar (CutList _ _ subList) scr) = do
+cSubs :: CutState -> CutExpr -> Rules FilePath
+cSubs s@(_,cfg) (CutSubs resExpr subVar (CutList _ _ subList) scr) = do
   -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
-  resPaths <- mapM (\(n,e) -> cSub cfg resExpr subVar scr n e) (zip [1..] subList)
+  resPaths <- mapM (\(n,e) -> cSub s resExpr subVar scr n e) (zip [1..] subList)
   let resPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
       outPath   = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths'
   outPath %> \out -> need resPaths >> writeFileLines out resPaths'
   return outPath
 cSubs _ expr = error $ "bad argument to cSubs: " ++ show expr
 
-cAssign :: CutConfig -> CutAssign -> Rules (CutVar, FilePath)
-cAssign cfg (var, expr) = do
-  path  <- cExpr cfg expr
-  path' <- cVar cfg var expr path
+cAssign :: CutState -> CutAssign -> Rules (CutVar, FilePath)
+cAssign s (var, expr) = do
+  path  <- cExpr s expr
+  path' <- cVar s var expr path
   return (var, path')
 
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
-compileScript :: CutConfig -> CutScript -> Maybe Int -> Rules FilePath
-compileScript cfg as n = do
+compileScript :: CutState -> Maybe Int -> Rules FilePath
+compileScript s@(as,_) n = do
   -- liftIO $ putStrLn "entering compileScript"
-  rpaths <- mapM (cAssign cfg) as
+  rpaths <- mapM (cAssign s) as
   return $ fromJust $ lookup (CutVar res) rpaths
   where
     res = case n of
@@ -190,8 +190,8 @@ compileScript cfg as n = do
       Just n' -> "result." ++ show n'
 
 -- write a literal value from ShortCut source code to file
-cLit :: CutConfig -> CutExpr -> Rules FilePath
-cLit cfg expr = do
+cLit :: CutState -> CutExpr -> Rules FilePath
+cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
   let path = hashedTmp cfg expr []
   path %> \out -> do
@@ -206,13 +206,13 @@ cLit cfg expr = do
 -- TODO how to show the list once it's created? not just as a list of paths!
 -- TODO why are lists of lists not given .list.list ext? hides a more serious bug?
 --      or possibly the bug is that we're making accidental lists of lists?
-cList :: CutConfig -> CutExpr -> Rules FilePath
-cList cfg e@(CutList EmptyList _ _) = do
+cList :: CutState -> CutExpr -> Rules FilePath
+cList (_,cfg) e@(CutList EmptyList _ _) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cList cfg e@(CutList _ _ exprs) = do
-  paths <- mapM (cExpr cfg) exprs
+cList s@(_,cfg) e@(CutList _ _ exprs) = do
+  paths <- mapM (cExpr s) exprs
   let path   = hashedTmp cfg e paths
       paths' = map (makeRelative $ cfgTmpDir cfg) paths
   path %> \out -> need paths >> writeFileChanged out (unlines paths')
@@ -221,8 +221,8 @@ cList _ _ = error "bad arguemnts to cList"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: CutConfig -> CutExpr -> Rules FilePath
-cRef cfg expr@(CutRef _ _ var) = do
+cRef :: CutState -> CutExpr -> Rules FilePath
+cRef (_,cfg) expr@(CutRef _ _ var) = do
   -- liftIO $ putStrLn "entering cRef"
   return $ namedTmp cfg var expr
 cRef _ _ = error "bad argument to cRef"
@@ -230,10 +230,10 @@ cRef _ _ = error "bad argument to cRef"
 -- creates a symlink from expression file to input file
 -- these should be the only absolute ones,
 -- and the only ones that point outside the temp dir
-cLoad :: CutConfig -> CutExpr -> Rules FilePath
-cLoad cfg e@(CutFun _ _ _ [f]) = do
+cLoad :: CutState -> CutExpr -> Rules FilePath
+cLoad s@(_,cfg) e@(CutFun _ _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoad"
-  path <- cExpr cfg f
+  path <- cExpr s f
   let link = hashedTmp cfg e [path]
   link %> \out -> do
     str'   <- fmap strip $ readFile' path
@@ -246,8 +246,8 @@ cLoad _ _ = error "bad argument to cLoad"
 -- Creates a symlink from varname to expression file.
 -- TODO how should this handle file extensions? just not have them?
 -- TODO or pick up the extension of the destination?
-cVar :: CutConfig -> CutVar -> CutExpr -> FilePath -> Rules FilePath
-cVar cfg var expr dest = do
+cVar :: CutState -> CutVar -> CutExpr -> FilePath -> Rules FilePath
+cVar (_,cfg) var expr dest = do
   -- liftIO $ putStrLn "entering cVar"
   let link  = namedTmp cfg var expr
       dest' = makeRelative (cfgTmpDir cfg) dest
@@ -260,10 +260,10 @@ cVar cfg var expr dest = do
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
-cBop :: CutConfig -> CutType -> CutExpr -> (CutExpr, CutExpr)
+cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (FilePath, FilePath, FilePath)
-cBop cfg t expr (n1, n2) = do
+cBop s@(_,cfg) t expr (n1, n2) = do
   -- liftIO $ putStrLn "entering cBop"
-  p1 <- cExpr cfg n1
-  p2 <- cExpr cfg n2
+  p1 <- cExpr s n1
+  p2 <- cExpr s n2
   return (p1, p2, hashedTmp' cfg t expr [p1, p2])

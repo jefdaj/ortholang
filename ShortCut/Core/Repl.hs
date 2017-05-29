@@ -98,7 +98,7 @@ loop (promptFn:promptFns) = do
           -- still have to check whether to print it
           -- TODO should be able to factor this out and put in Eval.hs
           -- TODO nothing should be run when manually assigning result!
-          when (isExpr st line) (liftIO $ evalScript cfg scr')
+          when (isExpr st line) (liftIO $ evalScript (scr',cfg))
   loop promptFns
 
 -- this is needed to avoid assigning a variable to itself,

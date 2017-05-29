@@ -107,12 +107,12 @@ worstBestEvalue = CutFunction
 -- TODO rewrite this with mkLoader from Compile
 -- TODO should what you've been calling load_genes actually be load_fna/faa?
 -- TODO adapt to work with multiple files?
-cLoadGenes :: CutConfig -> CutExpr -> Rules FilePath
-cLoadGenes cfg expr@(CutFun _ _ _ [f]) = do
+cLoadGenes :: CutState -> CutExpr -> Rules FilePath
+cLoadGenes s@(_,cfg) expr@(CutFun _ _ _ [f]) = do
   -- liftIO $ putStrLn "entering cLoadGenes"
   -- TODO this shouldn't be needed because this fn will be starting from a gom,
   --      not a str; mkLoader or cLoad or whatever handles str -> gom
-  path <- cExpr cfg f
+  path <- cExpr s f
   let fstmp = cacheDir cfg </> "loadgenes" -- not actually used
       genes = hashedTmp cfg expr []
   genes %> \out -> do
@@ -140,12 +140,12 @@ bblast cfg genes genomes out = do
   quietly $ cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
 
 -- TODO factor out bblast!
-cFilterGenes :: CutConfig -> CutExpr -> Rules FilePath
-cFilterGenes cfg e@(CutFun _ _ _ [gens, goms, sci]) = do
+cFilterGenes :: CutState -> CutExpr -> Rules FilePath
+cFilterGenes s@(_,cfg) e@(CutFun _ _ _ [gens, goms, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenes"
-  genes   <- cExpr cfg gens
-  genomes <- cExpr cfg goms
-  evalue  <- cExpr cfg sci
+  genes   <- cExpr s gens
+  genomes <- cExpr s goms
+  evalue  <- cExpr s sci
   let hits   = hashedTmp' cfg csv e [genes, genomes]
       faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
       genes' = hashedTmp  cfg e [hits, evalue]
@@ -160,12 +160,12 @@ cFilterGenes cfg e@(CutFun _ _ _ [gens, goms, sci]) = do
 cFilterGenes _ _ = error "bad argument to cFilterGenes"
 
 -- TODO factor out bblast!
-cFilterGenomes :: CutConfig -> CutExpr -> Rules FilePath
-cFilterGenomes cfg e@(CutFun _ _ _ [goms, gens, sci]) = do
+cFilterGenomes :: CutState -> CutExpr -> Rules FilePath
+cFilterGenomes s@(_,cfg) e@(CutFun _ _ _ [goms, gens, sci]) = do
   -- liftIO $ putStrLn "entering cFilterGenomes"
-  genomes <- cExpr cfg goms
-  genes   <- cExpr cfg gens
-  evalue  <- cExpr cfg sci
+  genomes <- cExpr s goms
+  genes   <- cExpr s gens
+  evalue  <- cExpr s sci
   let faa'     = hashedTmp' cfg faa e [genes, "extractseqs"]
       hits     = hashedTmp' cfg csv e [genomes, genes]
       genomes' = hashedTmp  cfg e [hits, evalue]
@@ -178,11 +178,11 @@ cFilterGenomes cfg e@(CutFun _ _ _ [goms, gens, sci]) = do
   return genomes'
 cFilterGenomes _ _ = error "bad argument to cFilterGenomes"
 
-cWorstBest :: CutConfig -> CutExpr -> Rules FilePath
-cWorstBest cfg e@(CutFun _ _ _ [gens, goms]) = do
+cWorstBest :: CutState -> CutExpr -> Rules FilePath
+cWorstBest s@(_,cfg) e@(CutFun _ _ _ [gens, goms]) = do
   -- liftIO $ putStrLn "entering cWorstBest"
-  genes   <- cExpr cfg gens
-  genomes <- cExpr cfg goms
+  genes   <- cExpr s gens
+  genomes <- cExpr s goms
   let faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
       hits   = hashedTmp' cfg csv e [genomes, genes]
       evalue = hashedTmp  cfg e [genes, genomes]

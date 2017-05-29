@@ -64,10 +64,10 @@ eval cfg rtype = ignoreErrors . eval'
           putStrLn $ render res
 
 -- TODO get the type of result and pass to eval
-evalScript :: CutConfig -> CutScript -> IO ()
-evalScript c s = eval c rtn $ compileScript c s Nothing
+evalScript :: CutState -> IO ()
+evalScript s@(as,c) = eval c rtn $ compileScript s Nothing
   where
-    res = fromJust $ lookup (CutVar "result") s
+    res = fromJust $ lookup (CutVar "result") as
     rtn = typeOf res
 
 evalFile :: CutConfig -> IO ()
@@ -75,4 +75,4 @@ evalFile cfg = do
   f <- parseFile cfg $ fromJust $ cfgScript cfg -- TODO something safer!
   case f of
     Left  e -> fail $ "oh no! " ++ show e -- TODO better errors
-    Right s -> evalScript cfg s
+    Right s -> evalScript (s,cfg)

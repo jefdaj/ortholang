@@ -200,7 +200,7 @@ data CutFunction = CutFunction
   { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
   , fFixity    :: CutFixity
-  , fCompiler  :: CutConfig -> CutExpr -> Rules FilePath
+  , fCompiler  :: CutState -> CutExpr -> Rules FilePath
   }
   -- deriving (Eq, Read)
 

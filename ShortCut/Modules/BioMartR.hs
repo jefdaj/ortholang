@@ -138,9 +138,9 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
-cParseSearches :: CutConfig -> CutExpr -> Rules FilePath
-cParseSearches cfg expr@(CutList _ _ _) = do
-  sList <- cExpr cfg expr
+cParseSearches :: CutState -> CutExpr -> Rules FilePath
+cParseSearches s@(_,cfg) expr@(CutList _ _ _) = do
+  sList <- cExpr s expr
   let searchTable = hashedTmp' cfg search expr [sList]
   searchTable %> \out -> do
     tmp <- readFile' sList
@@ -161,14 +161,14 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 
 -- TODO this is where to parse the searches?
 -- cGetGenome :: CutConfig -> CutExpr -> Rules FilePath
--- cGetGenome cfg expr@(CutFun _ _ _ [s]) = undefined
+-- cGetGenome (_,cfg) expr@(CutFun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO factor out a "trivial string file" function?
-cGetGenomes :: CutConfig -> CutExpr -> Rules FilePath
-cGetGenomes cfg expr@(CutFun _ _ _ [ss]) = do
-  bmFn   <- cExpr cfg (CutLit str "getGenome")
-  sTable <- cParseSearches cfg ss
+cGetGenomes :: CutState -> CutExpr -> Rules FilePath
+cGetGenomes s@(_,cfg) expr@(CutFun _ _ _ [ss]) = do
+  bmFn   <- cExpr s (CutLit str "getGenome")
+  sTable <- cParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
       goms  = hashedTmp cfg expr [bmFn, sTable]
