@@ -14,14 +14,17 @@ data-files:         usage.txt,
                     tests/lists/*.cut,
                     tests/lists/*.result,
                     tests/lists/*.tree,
-                    tests/vars/*.cut,
-                    tests/vars/*.result,
-                    tests/vars/*.tree,
                     tests/math/*.cut,
                     tests/math/*.result,
                     tests/math/*.tree,
                     tests/repl/*.tree,
-                    tests/repl/*.txt
+                    tests/repl/*.txt,
+                    tests/subs/*.cut,
+                    tests/subs/*.result,
+                    tests/subs/*.tree,
+                    tests/vars/*.cut,
+                    tests/vars/*.result,
+                    tests/vars/*.tree
 
 executable shortcut
   main-is:          ShortCut.hs

@@ -148,7 +148,7 @@ pRef = do
   v@(CutVar var) <- pVar
   (scr, _) <- getState
   case lookup v scr of 
-    Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" ++ show scr
+    Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
     Just e -> return $ CutRef (typeOf e) (depsOf e) v
 
 --------------
@@ -158,6 +158,7 @@ pRef = do
 pNum :: ParseM CutExpr
 pNum = do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
+  -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
   n  <- digit
   ns <- lexeme $ many (digit <|> oneOf ".e-")
   return $ CutLit num (n:ns)
@@ -279,6 +280,9 @@ pFun = do
       fn   = find (\f -> fName f == name) fns
       deps = foldr1 union $ map depsOf args
   case fn of
+    -- TODO does this happen, or does it just move on to variables?
+    --      it should commit to being a fn as soon as there are args!
+    -- TODO use an error call here to definitively fail until you figure out Parsec
     Nothing -> fail $ "no such function: '" ++ name ++ "'"
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
@@ -290,22 +294,30 @@ pFun = do
 -----------------------------------
 
 sTypeCheck :: [CutType] -> Either String CutType
-sTypeCheck (res:(ListOf sub'):sub:[]) | sub' == sub = Right $ ListOf res
+sTypeCheck (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 sTypeCheck _ = Left "invalid args to substitute_each" -- TODO better errors here
+
+-- TODO use an error call here to definitively fail until you figure out Parsec
+sDepCheck :: CutExpr -> CutVar -> ParseM ()
+sDepCheck resExpr subVar = if elem subVar $ depsOf resExpr
+  then return ()
+  else fail "error: the second variable must depend on the first"
 
 -- TODO if there end up being more macros, factor them out like pFun above
 pSubs :: ParseM CutExpr
 pSubs = do
-  void $ string "substitute_each" <* (void spaces1 <|> eof)
+  -- TODO there seems to be a `reserved` parser... do you want that here?
+  void $ try $ string "substitute_each" <* (void spaces1 <|> eof)
   args <- manyTill pTerm pEnd
   case sTypeCheck (map typeOf args) of
     Left err -> fail err
     Right _  -> do
       (scr, _) <- getState
-      let (resExpr:subList:(CutRef _ _ subVar):[]) = args
-          deps = nub $ depsOf subList ++ depsOf resExpr
+      let (resExpr:(CutRef _ _ subVar):subList:[]) = args
+          deps = nub $ depsOf resExpr ++ depsOf subList
           scr' = filter (\(v,_) -> elem v deps) scr
-      return $ CutSubs resExpr subList subVar scr' -- TODO leave var wrapped in its ref?
+      sDepCheck resExpr subVar
+      return $ CutSubs resExpr subVar subList scr' -- TODO leave var wrapped in its ref?
 
 -----------------
 -- expressions --
@@ -314,8 +326,13 @@ pSubs = do
 pParens :: ParseM CutExpr
 pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 
+-- TODO need to commit to separate branches so Parsec doesn't try to parse
+--      other stuff after substitute_each fails. the rule should be:
+--      once a fn/macro name is parsed it commits to that branch
+--      if none of them work it moves on to others
+--      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
-pTerm = pList <|> pParens <|> try pSubs <|> pFun <|> try pNum <|> pStr <|> pRef <?> "term"
+pTerm = pList <|> pParens <|> pSubs <|> pFun <|> pNum <|> pStr <|> pRef <?> "term"
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how

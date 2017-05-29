@@ -50,7 +50,7 @@ mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map fn vs)   (fn v)
 mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map fn vs) n (mangleExpr fn e1) (mangleExpr fn e2)
 mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map fn vs) n (map (mangleExpr fn) es)
 mangleExpr fn (CutList t vs   es   ) = CutList t (map fn vs)   (map (mangleExpr fn) es)
-mangleExpr fn (CutSubs r ss v as) = CutSubs (mangleExpr fn r) (mangleExpr fn ss) (fn v) (mangleScript fn as)
+mangleExpr fn (CutSubs r v ss as) = CutSubs (mangleExpr fn r) (fn v) (mangleExpr fn ss) (mangleScript fn as)
 -- CutSubs CutExpr CutExpr CutVar [CutAssign] -- dep, ind, ind', cxt
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
@@ -156,12 +156,18 @@ cSub cfg resExpr subVar script n subExpr = do
   return resPath
 
 -- TODO this has to work with *Refs* to the things too! (no assuming CutList)
+--      does that mean it has to be written to a file?
+--      ... not possible :( requires the recursive script it holds too
+--      maybe it's time to give up and pass the whole state?
+--      then this could be a regular function in a Substitute module
+--      yeah, better go with that for now!
 cSubs :: CutConfig -> CutExpr -> Rules FilePath
-cSubs cfg (CutSubs resExpr (CutList _ _ subList) subVar scr) = do
+cSubs cfg (CutSubs resExpr subVar (CutList _ _ subList) scr) = do
   -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
   resPaths <- mapM (\(n,e) -> cSub cfg resExpr subVar scr n e) (zip [1..] subList)
-  let outPath = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths
-  outPath %> \out -> need resPaths >> writeFileLines out resPaths
+  let resPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
+      outPath   = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths'
+  outPath %> \out -> need resPaths >> writeFileLines out resPaths'
   return outPath
 cSubs _ expr = error $ "bad argument to cSubs: " ++ show expr
 

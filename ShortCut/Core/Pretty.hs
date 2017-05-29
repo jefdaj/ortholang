@@ -42,9 +42,9 @@ instance Pretty CutExpr where
   pPrint (CutRef _ _ v)       = pPrint v
   pPrint (CutFun _ _ s es)    = text s <+> fsep (map pNested es)
   pPrint (CutList _ _ es)     = pList es
-  pPrint (CutSubs r ss (CutVar s) _ ) = text "substitute_each"
-                                    <+> fsep (map pNested [r, ss])
+  pPrint (CutSubs r (CutVar s) ss _ ) = text "substitute_each"
                                     <+> text s
+                                    <+> fsep (map pNested [r, ss])
   pPrint (CutBop _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
