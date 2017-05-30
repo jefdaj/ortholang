@@ -44,6 +44,7 @@ executable shortcut
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.BioMartR,
                     ShortCut.Modules.Permute,
+                    ShortCut.Modules.Substitute,
                     ShortCut.Modules.Summarize,
                     ShortCut.Modules.Math,
                     ShortCut.Modules.Sets,

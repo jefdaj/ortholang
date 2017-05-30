@@ -21,6 +21,7 @@ module ShortCut.Core.Compile
   , cExpr
   , cList
   , cacheDir
+  , addPrefixes
   )
   where
 
