@@ -22,6 +22,7 @@ module ShortCut.Core.Compile
   , cList
   , cacheDir
   , addPrefixes
+  , digest
   )
   where
 
@@ -62,12 +63,12 @@ mangleScript fn = map (mangleAssign fn)
 -- TODO pad with zeros?
 -- Add a "dupN." prefix to each variable name in the path from independent
 -- -> dependent variable, using a list of those varnames
-addPrefix :: Int -> (CutVar -> CutVar)
-addPrefix n (CutVar s) = CutVar $ s ++ "." ++ show n
+addPrefix :: String -> (CutVar -> CutVar)
+addPrefix p (CutVar s) = CutVar $ s ++ "." ++ p
 
 -- TODO should be able to just apply this to a duplicate script section right?
-addPrefixes :: Int -> CutScript -> CutScript
-addPrefixes n = mangleScript (addPrefix n)
+addPrefixes :: String -> CutScript -> CutScript
+addPrefixes p = mangleScript (addPrefix p)
 
 
 ---------------------
@@ -150,15 +151,15 @@ cAssign s (var, expr) = do
 
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
-compileScript :: CutState -> Maybe Int -> Rules FilePath
-compileScript s@(as,_) n = do
+compileScript :: CutState -> Maybe String -> Rules FilePath
+compileScript s@(as,_) p = do
   -- liftIO $ putStrLn "entering compileScript"
   rpaths <- mapM (cAssign s) as
   return $ fromJust $ lookup (CutVar res) rpaths
   where
-    res = case n of
+    res = case p of
       Nothing -> "result"
-      Just n' -> "result." ++ show n'
+      Just p' -> "result." ++ p'
 
 -- write a literal value from ShortCut source code to file
 cLit :: CutState -> CutExpr -> Rules FilePath

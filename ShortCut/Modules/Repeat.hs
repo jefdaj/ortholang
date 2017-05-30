@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 import Data.List             (nub)
 import Data.List.Utils       (delFromAL)
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Compile (cExpr, hashedTmp, addPrefixes, compileScript)
+import ShortCut.Core.Compile (cExpr, hashedTmp, addPrefixes, compileScript, digest)
 import System.FilePath       (makeRelative)
 
 cutModule :: CutModule
@@ -34,21 +34,21 @@ extractExprs  _  (CutList _ _ es) = es
 extractExprs scr (CutRef  _ _ v ) = extractExprs scr $ fromJust $ lookup v scr
 extractExprs  _   e               = error $ "bad arg to extractExpr: " ++ show e
 
-cRepeat :: CutState -> CutExpr -> CutVar -> Int -> CutExpr -> Rules FilePath
-cRepeat (script,cfg) resExpr subVar n subExpr = do
+cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules FilePath
+cRepeat (script,cfg) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)
       sub  = (subVar, subExpr)
-      deps = filter (\(v,_) -> (elem v $ depsOf resExpr)
-                             && elem v (rDepsOf script subVar)) script
-      scr' = addPrefixes n ([sub] ++ deps ++ [res])
-  resPath <- compileScript (scr',cfg) (Just n)
+      deps = filter (\(v,_) -> (elem v $ depsOf resExpr)) script
+      pre  = digest $ map show $ res:sub:deps
+      scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
+  resPath <- compileScript (scr',cfg) (Just pre)
   return resPath
 
 cRepeatEach :: CutState -> CutExpr -> Rules FilePath
 cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ (resExpr:(CutRef _ _ subVar):subList:[])) = do
   subPaths <- cExpr s subList
   let subExprs = extractExprs scr subList
-  resPaths <- mapM (\(n,e) -> cRepeat s resExpr subVar n e) (zip [1..] subExprs)
+  resPaths <- mapM (cRepeat s resExpr subVar) subExprs
   let outPath = hashedTmp cfg expr resPaths
   outPath %> \out -> do
     need (subPaths:resPaths)
