@@ -3,8 +3,6 @@ module ShortCut.Modules.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.List             (nub)
-import Data.List.Utils       (delFromAL)
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Compile (cExpr, hashedTmp, addPrefixes, compileScript, digest)
 import System.FilePath       (makeRelative)
