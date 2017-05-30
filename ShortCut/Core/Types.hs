@@ -57,8 +57,6 @@ data CutExpr
   | CutBop  CutType [CutVar] String  CutExpr CutExpr
   | CutFun  CutType [CutVar] String [CutExpr]
   | CutList CutType [CutVar] [CutExpr]
-  -- TODO remove this and replace by passing Scripts to compiler functions
-  | CutSubs CutExpr CutVar CutExpr [CutAssign] -- dep, ind, ind', cxt
   deriving (Eq, Show)
 
 -- TODO have a separate CutAssign for "result"?
@@ -92,7 +90,6 @@ typeOf (CutBop  t _ _ _ _    ) = t
 typeOf (CutFun  t _ _ _      ) = t
 typeOf (CutList EmptyList _ _) = EmptyList
 typeOf (CutList t  _ _       ) = ListOf t
-typeOf (CutSubs e _ _ _      ) = ListOf $ typeOf e
 
 extOf :: CutType -> String
 extOf (ListOf t   ) = extOf t ++ ".list"
@@ -109,7 +106,6 @@ depsOf (CutRef  _ vs v      ) = v:vs
 depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
 depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
 depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
-depsOf (CutSubs d v i _     ) = nub $ depsOf d ++ [v] ++ depsOf i ++ concat (map varOf [d,i])
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps

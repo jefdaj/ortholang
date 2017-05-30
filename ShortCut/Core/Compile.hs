@@ -31,7 +31,6 @@ import ShortCut.Core.Types
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
 import Data.List                  (find)
-import Data.List.Utils            (delFromAL)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((<.>), (</>))
@@ -51,7 +50,7 @@ mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map fn vs)   (fn v)
 mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map fn vs) n (mangleExpr fn e1) (mangleExpr fn e2)
 mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map fn vs) n (map (mangleExpr fn) es)
 mangleExpr fn (CutList t vs   es   ) = CutList t (map fn vs)   (map (mangleExpr fn) es)
-mangleExpr fn (CutSubs r v ss as) = CutSubs (mangleExpr fn r) (fn v) (mangleExpr fn ss) (mangleScript fn as)
+-- mangleExpr fn (CutSubs r v ss as) = CutSubs (mangleExpr fn r) (fn v) (mangleExpr fn ss) (mangleScript fn as)
 -- CutSubs CutExpr CutExpr CutVar [CutAssign] -- dep, ind, ind', cxt
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
@@ -127,7 +126,6 @@ cExpr :: CutState -> CutExpr -> Rules FilePath
 cExpr s e@(CutLit  _ _      ) = cLit s e
 cExpr s e@(CutRef  _ _ _    ) = cRef s e
 cExpr s e@(CutList _ _ _    ) = cList s e
-cExpr s e@(CutSubs _ _ _ _  ) = cSubs s e
 cExpr s e@(CutBop  _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
 cExpr s e@(CutFun  _ _ n _  ) = compileByName s e n
 
@@ -143,34 +141,6 @@ findByName cfg name = find (\f -> fName f == name) fs
   where
     ms = cfgModules cfg
     fs = concat $ map mFunctions ms
-
--- TODO is the result thing going to mess everything up?
-cSub :: CutState -> CutExpr -> CutVar -> CutScript -> Int
-     -> CutExpr -> Rules FilePath
-cSub (_,cfg) resExpr subVar script n subExpr = do
-  let res    = (CutVar "result", resExpr)
-      sub    = (subVar, subExpr)
-      scr'   = delFromAL script subVar -- TODO need to remove result too?
-      scr''  = res:sub:scr'
-      scr''' = addPrefixes n scr''
-  resPath <- compileScript (scr''',cfg) (Just n)
-  return resPath
-
--- TODO this has to work with *Refs* to the things too! (no assuming CutList)
---      does that mean it has to be written to a file?
---      ... not possible :( requires the recursive script it holds too
---      maybe it's time to give up and pass the whole state?
---      then this could be a regular function in a Substitute module
---      yeah, better go with that for now!
-cSubs :: CutState -> CutExpr -> Rules FilePath
-cSubs s@(_,cfg) (CutSubs resExpr subVar (CutList _ _ subList) scr) = do
-  -- subPaths <- cExpr cfg subList TODO is this not even needed? WIN :D
-  resPaths <- mapM (\(n,e) -> cSub s resExpr subVar scr n e) (zip [1..] subList)
-  let resPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
-      outPath   = hashedTmp' cfg (ListOf $ typeOf resExpr) resExpr resPaths'
-  outPath %> \out -> need resPaths >> writeFileLines out resPaths'
-  return outPath
-cSubs _ expr = error $ "bad argument to cSubs: " ++ show expr
 
 cAssign :: CutState -> CutAssign -> Rules (CutVar, FilePath)
 cAssign s (var, expr) = do
