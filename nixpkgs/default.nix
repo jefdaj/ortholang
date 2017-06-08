@@ -8,6 +8,7 @@ let
   ncbi-blast = pkgs.callPackage ./ncbi-blast {};
   last-align = pkgs.callPackage ./last-align {};
   shmlast    = pkgs.callPackage ./shmlast    { inherit last-align; };
+  crb-blast  = pkgs.callPackage ./crb-blast {};
 
   # TODO remove this, as it's probably not useful to anyone
   bblast = pkgs.callPackage ./bblast {
@@ -23,6 +24,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast bblast last-align shmlast;
+  inherit ncbi-blast bblast last-align shmlast crb-blast;
   pythonPackages = myPython;
 }
