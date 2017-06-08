@@ -20,6 +20,8 @@ in stdenv.mkDerivation {
     makeWrapper
     pythonPackages.biopython
     myRWrapper
+    crb-blast
+    ncbi-blast
   ];
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
@@ -34,11 +36,12 @@ in stdenv.mkDerivation {
     for script in $out/bin/*; do
       wrapProgram $script \
         --prefix PYTHONPATH : $(toPythonPath ${pythonPackages.biopython}) \
-        --prefix PATH : "${myRWrapper}/bin"
+        --prefix PATH : "${myRWrapper}/bin" : "${crb-blast}/bin"
     done
   '';
 
+  # TODO can you use makeWrapper here?
   shellHook = ''
-    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:\$PATH
+    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:${crb-blast}/bin:${ncbi-blast}/bin:\$PATH
   '';
 }

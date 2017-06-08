@@ -6,6 +6,7 @@ let
   inherit (nixpkgs) pkgs;
 
   ncbi-blast = pkgs.callPackage ./ncbi-blast {};
+  crb-blast  = pkgs.callPackage ./crb-blast {};
 
   # TODO remove this, as it's probably not useful to anyone
   bblast = pkgs.callPackage ./bblast {
@@ -21,6 +22,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast bblast;
+  inherit ncbi-blast crb-blast bblast;
   pythonPackages = myPython;
 }
