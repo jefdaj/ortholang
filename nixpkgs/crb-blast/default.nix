@@ -2,7 +2,12 @@
 #   http://nixos.org/nixpkgs/manual/#sec-language-ruby
 #   http://blog.arkency.com/2016/04/packaging-ruby-programs-in-nixos
 
-{ stdenv, lib, bundlerEnv, ruby, makeWrapper, ncbi-blast }:
+# TODO get it to recognize and not attempt re-downloading blast+,
+#      which is probably caused by this 32bit-related error:
+# blastx: error while loading shared libraries: libidn.so.11: cannot open shared object file: No such file or directory
+
+# { stdenv, lib, bundlerEnv, ruby, makeWrapper, ncbi-blast }:
+with import <nixpkgs> {};
 
 let
   version = (import ./gemset.nix).crb-blast.version;
@@ -25,10 +30,9 @@ in stdenv.mkDerivation {
   name         = "crb-blast-${version}";
   buildInputs  = [ makeWrapper ncbi-blast ];
   phases       = [ "installPhase" ];
-  # TODO prefix path instead of setting the whole thing?
   installPhase = ''
     mkdir -p $out/bin
     makeWrapper ${env}/bin/crb-blast $out/bin/crb-blast \
-      --set PATH "${ncbi-blast}/bin:$PATH"
+      --prefix PATH "${ncbi-blast}/bin"
   '';
 }
