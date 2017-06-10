@@ -7,8 +7,7 @@ build-type:         Simple
 cabal-version:      >=1.10
 extra-source-files: README.md
 data-files:         usage.txt,
-                    examples/PSII.ast,
-                    examples/PSII.cut,
+                    examples/*.cut,
                     scripts/*.R,
                     scripts/*.py,
                     tests/lists/*.cut,
