@@ -1,0 +1,46 @@
+diff -ur a/requirements.txt b/requirements.txt
+--- a/requirements.txt	2017-01-18 12:32:52.000000000 -0800
++++ b/requirements.txt	2017-06-14 23:45:53.406691858 -0700
+@@ -1,10 +1,10 @@
+ doit>=0.29.0
+ ficus>=0.3.2
+-matplotlib==1.5.1
++matplotlib
+ numpy>=1.9.0
+ pandas>=0.17.0
+ scipy>=0.16.0
+ screed>=0.9
+ seaborn>=0.6.0
+-pytest>=2.5
++pytest
+ filelock>=2.0.6
+diff -ur a/setup.py b/setup.py
+--- a/setup.py	2017-01-18 12:32:52.000000000 -0800
++++ b/setup.py	2017-06-14 23:56:25.970691858 -0700
+@@ -25,7 +25,9 @@
+             version = __version__,
+             description = 'An improved implementation of Conditional Reciprocal'\
+                           ' Best Hits with LAST and Python.',
+-            long_description = open("README.rst").read(),
++            # got a unicode decode error reading README.rst here:
++            long_description = 'An improved implementation of Conditional Reciprocal'\
++                          ' Best Hits with LAST and Python.',
+             url = 'https://github.com/camillescott/shmlast',
+             author = 'Camille Scott',
+             author_email = 'camille.scott.w@gmail.com',
+@@ -37,13 +39,13 @@
+                              'codecov'],
+             install_requires = ['doit>=0.29.0',
+                                 'ficus>=0.3.2',
+-                                'matplotlib==1.5.1',
++                                'matplotlib',
+                                 'numpy>=1.9.0',
+                                 'pandas>=0.17.0',
+                                 'scipy>=0.16.0',
+                                 'screed>=0.9',
+                                 'seaborn>=0.6.0',
+-                                'pytest>=2.5',
++                                'pytest',
+                                 'filelock>=2.0.6'],
+             zip_safe = False,
+             include_package_data = True )

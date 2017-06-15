@@ -1,7 +1,8 @@
 # TODO: finish this if shmlast works well
 
-# {fetchurl, fetchgit, python3Packages, parallel, last-align}:
-with import <nixpkgs> {};
+# {fetchurl, python3Packages, parallel, last-align}:
+# with import <nixpkgs> {};
+with import ../.;
 with python3Packages;
 
 let
@@ -32,12 +33,14 @@ let
   };
   ficus = buildPythonPackage {
     name = "ficus-0.3";
-    # TODO seems to work as long as you remove the nosetest requirement?
-    # src = fetchurl {
-    #   url = "https://pypi.python.org/packages/1a/ec/b92090badf7093ab2a329f2be6e7ded0803f7dfe0b8196bc3881a53b19b2/ficus-0.3.tar.gz";
-    #   sha256 = "0q1mpzr5iwys7y754lnzfp812jhl3qa19lp79fb2f0ji3ny1ckh0";
-    # };
-    src = ./ficus;
+    # TODO patch/make your own without nosetest requirement; then it works!
+    src = fetchurl {
+      url = "https://pypi.python.org/packages/1a/ec/b92090badf7093ab2a329f2be6e7ded0803f7dfe0b8196bc3881a53b19b2/ficus-0.3.tar.gz";
+      sha256 = "0q1mpzr5iwys7y754lnzfp812jhl3qa19lp79fb2f0ji3ny1ckh0";
+    };
+    # src = ./ficus;
+    # TODO patch not actually needed??
+    patches = [ ./ficus.patch ];
     buildInputs = [matplotlib];
     doCheck = false;
     # propagatedBuildInputs = [bz2file];
@@ -56,12 +59,12 @@ let
 in buildPythonPackage rec {
   name = "shmlast-${version}";
   version = "1.1";
-  # src = fetchgit {
-  #   url = "https://github.com/camillescott/shmlast";
-  #   rev = "1819885e67f37875450c87556b694b54803e4538";
-  #   sha256 = "11kmddbkdki87296gil63zd6rd7nms9nxlvwvc4wmls18254bifb";
-  # };
-  src = ./shmlast;
+  src = fetchurl {
+    url = "https://github.com/camillescott/shmlast/archive/v1.1.tar.gz";
+    sha256 = "0654b2fdark0x1vagkqmydg5193vgnsjby95hnvl3a5m2a3zz2qd";
+  };
+  patches = [ ./shmlast.patch ]; # TODO why isn't this applied?
+  doCheck = false;
   buildInputs = [
     matplotlib
     parallel
@@ -70,10 +73,9 @@ in buildPythonPackage rec {
     filelock
     scipy
     seaborn
-    screed
     ficus
+    pytest
   ];
-  doCheck = false;
   propagatedBuildInputs = [
     pandas
     matplotlib
@@ -83,6 +85,7 @@ in buildPythonPackage rec {
     ficus
     seaborn
     numpy
-  ]; # TODO remove?
-  # patchPhase = "sed -i 's/long-description/\#long-description/g' $src/setup.py";
+    filelock
+    screed
+  ];
 }
