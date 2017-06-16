@@ -20,6 +20,7 @@ in stdenv.mkDerivation {
     makeWrapper
     pythonPackages.biopython
     myRWrapper
+    shmlast
   ];
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
@@ -34,11 +35,11 @@ in stdenv.mkDerivation {
     for script in $out/bin/*; do
       wrapProgram $script \
         --prefix PYTHONPATH : $(toPythonPath ${pythonPackages.biopython}) \
-        --prefix PATH : "${myRWrapper}/bin"
+        --prefix PATH : "${myRWrapper}/bin" "${shmlast}/bin"
     done
   '';
 
   shellHook = ''
-    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:\$PATH
+    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:${shmlast}/bin:\$PATH
   '';
 }

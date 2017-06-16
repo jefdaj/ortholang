@@ -1,12 +1,7 @@
-# TODO: finish this if shmlast works well
-
-# {fetchurl, python3Packages, parallel, last-align}:
-# with import <nixpkgs> {};
-with import ../.;
+{fetchurl, python3Packages, parallel, last-align, coreutils}:
 with python3Packages;
 
 let
-  last-align = callPackage ../last-align {}; # TODO remove when calling as a fn
   doit = buildPythonPackage {
     name = "doit-0.30.3";
     src = fetchurl {
@@ -32,15 +27,15 @@ let
     doCheck = false;
   };
   ficus = buildPythonPackage {
-    name = "ficus-0.3";
-    # TODO patch/make your own without nosetest requirement; then it works!
+    name = "ficus-0.3.2";
     src = fetchurl {
-      url = "https://pypi.python.org/packages/1a/ec/b92090badf7093ab2a329f2be6e7ded0803f7dfe0b8196bc3881a53b19b2/ficus-0.3.tar.gz";
-      sha256 = "0q1mpzr5iwys7y754lnzfp812jhl3qa19lp79fb2f0ji3ny1ckh0";
+      url = "https://github.com/camillescott/ficus/archive/v0.3.2.tar.gz";
+      sha256 = "14yllgdssqdkjby0923yv8p3mdjv9639d6q2zfdk1c9yjq3i6lsk";
     };
-    # src = ./ficus;
-    # TODO patch not actually needed??
-    patches = [ ./ficus.patch ];
+    patchPhase = ''
+      sed -i  '/nose-capturestderr.*/d'  requirements.txt
+      sed -i "s/'nose-capturestderr'//g" setup.py
+    '';
     buildInputs = [matplotlib];
     doCheck = false;
     # propagatedBuildInputs = [bz2file];
@@ -63,18 +58,23 @@ in buildPythonPackage rec {
     url = "https://github.com/camillescott/shmlast/archive/v1.1.tar.gz";
     sha256 = "0654b2fdark0x1vagkqmydg5193vgnsjby95hnvl3a5m2a3zz2qd";
   };
-  patches = [ ./shmlast.patch ]; # TODO why isn't this applied?
+  patchPhase = ''
+    sed -i 's/matplotlib==.*/matplotlib/g' requirements.txt
+    sed -i "s/'matplotlib.=.*'/'matplotlib'/g" setup.py
+    sed -i "s/'pytest.=.*'/'pytest'/g"         setup.py
+    sed -i 's/long_description.*/long_description = "unicode error reading README.rst",/g' setup.py
+  '';
   doCheck = false;
   buildInputs = [
-    matplotlib
-    parallel
-    last-align
-    doit
-    filelock
-    scipy
-    seaborn
-    ficus
+    # doit
+    # ficus
+    # filelock
+    # last-align
+    # matplotlib
+    # parallel
+    # seaborn
     pytest
+    scipy
   ];
   propagatedBuildInputs = [
     pandas
@@ -87,5 +87,6 @@ in buildPythonPackage rec {
     numpy
     filelock
     screed
+    coreutils # for uname
   ];
 }
