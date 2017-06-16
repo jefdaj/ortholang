@@ -46,6 +46,7 @@ executable shortcut
                     ShortCut.Modules.Permute,
                     ShortCut.Modules.Repeat,
                     ShortCut.Modules.Sets,
+                    ShortCut.Modules.Shmlast,
                     ShortCut.Modules.Summarize,
                     ShortCut.Test,
                     ShortCut.Test.Eval,
