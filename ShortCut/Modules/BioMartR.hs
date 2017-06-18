@@ -8,8 +8,12 @@ module ShortCut.Modules.BioMartR where
 -- TODO once this works, document it in a notebook entry!
 -- TODO known bug: hashes are getting mixed up in cParseSearches
 
+-- TODO what's the overall plan?
+--      1. parse searches regardless of function being used
+--      2. feed search table to biomartr script along with fn name
+
+-- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
-import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import Development.Shake
 import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
@@ -23,6 +27,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
+import Text.PrettyPrint.HughesPJ (text)
 
 ------------------------
 -- module description --
@@ -34,6 +39,7 @@ cutModule = CutModule
   , mFunctions =
     [ parseSearch -- TODO hide from end users?
     , getGenomes
+    , getProteomes
     -- , getGenome
     ]
   }
@@ -45,6 +51,22 @@ search = CutType
   , tCat  = undefined
   }
 
+-- TODO unify with fna? or replace it?
+fnagz :: CutType
+fnagz = CutType
+  { tExt  = "fna.gz"
+  , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
+  , tCat  = \_ -> return $ text "tCat not implemented yet for fnagz"
+  }
+
+-- TODO unify with faa? or replace it?
+faagz :: CutType
+faagz = CutType
+  { tExt  = "faa.gz"
+  , tDesc = "gzipped fasta amino acid (proteome)"
+  , tCat  = \_ -> return $ text "tCat not implemented yet for faagz"
+  }
+
 parseSearch :: CutFunction
 parseSearch = CutFunction
   { fName      = "parse_search"
@@ -53,20 +75,20 @@ parseSearch = CutFunction
   , fCompiler  = cParseSearches
   }
 
--- getGenome :: CutFunction
--- getGenome = CutFunction
---   { fName      = "get_genome"
---   , fTypeCheck = defaultTypeCheck [str] gom
---   , fFixity    = Prefix
---   , fCompiler  = cGetGenome
---   }
-
 getGenomes :: CutFunction
 getGenomes = CutFunction
   { fName      = "get_genomes"
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf gom)
+  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fFixity    = Prefix
-  , fCompiler  = cGetGenomes
+  , fCompiler  = cBioMartR "getGenome"
+  }
+
+getProteomes :: CutFunction
+getProteomes = CutFunction
+  { fName      = "get_proteomes"
+  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
+  , fFixity    = Prefix
+  , fCompiler  = cBioMartR "getProteome"
   }
 
 --------------------------
@@ -165,16 +187,16 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO factor out a "trivial string file" function?
-cGetGenomes :: CutState -> CutExpr -> Rules FilePath
-cGetGenomes s@(_,cfg) expr@(CutFun _ _ _ [ss]) = do
-  bmFn   <- cExpr s (CutLit str "getGenome")
+cBioMartR :: String -> CutState -> CutExpr -> Rules FilePath
+cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ [ss]) = do
+  bmFn   <- cExpr s (CutLit str fn)
   sTable <- cParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      goms  = hashedTmp cfg expr [bmFn, sTable]
-  goms %> \out -> do
+      outs  = hashedTmp cfg expr [bmFn, sTable]
+  outs %> \out -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?
     quietly $ cmd "biomartr.R" [bmTmp, out, bmFn, sTable]
-  return goms
-cGetGenomes _ _ = error "bad cGetGenomes call"
+  return outs
+cBioMartR _ _ _ = error "bad cBioMartR call"

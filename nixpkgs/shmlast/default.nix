@@ -1,4 +1,5 @@
 {fetchurl, python3Packages, parallel, last-align, coreutils}:
+# with import ../.;
 with python3Packages;
 
 let
@@ -51,6 +52,8 @@ let
     propagatedBuildInputs = [bz2file];
   };
 
+# TODO need lastdb, lastal at runtime
+
 in buildPythonPackage rec {
   name = "shmlast-${version}";
   version = "1.1";
@@ -80,7 +83,7 @@ in buildPythonPackage rec {
     pandas
     matplotlib
     doit
-    last-align
+    last-align # TODO add to scripts dependencies too?
     parallel
     ficus
     seaborn
@@ -88,5 +91,7 @@ in buildPythonPackage rec {
     filelock
     screed
     coreutils # for uname
+    # TODO only for shell:
+    # which
   ];
 }

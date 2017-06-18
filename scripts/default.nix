@@ -21,6 +21,7 @@ in stdenv.mkDerivation {
     pythonPackages.biopython
     myRWrapper
     shmlast
+    last-align
   ];
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash

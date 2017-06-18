@@ -1,10 +1,12 @@
 -- TODO go for simple: take and return faa only at first
+-- TODO before working on this, get it to work on its own!
 
 module ShortCut.Modules.Shmlast where
 
+import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Parse    (defaultTypeCheck)
-import ShortCut.Modules.Blast (faa, gom)
+import ShortCut.Modules.Blast (faa)
 
 ---------------
 -- interface --
@@ -25,23 +27,26 @@ bbh = CutType
 
 rbh :: CutFunction
 rbh = CutFunction
-  { fName = "blast_rbh"
-  , fTypeCheck = defaultTypeCheck [faa, ListOf gom, num] faa
-  , fFixity  = Prefix
-  , fCompiler = cRbh
+  { fName      = "blast_rbh"
+  , fTypeCheck = defaultTypeCheck [faa, ListOf faa, num] faa
+  , fFixity    = Prefix
+  , fCompiler  = cRbh
   }
 
 crbh :: CutFunction
 crbh = CutFunction
-  { fName = "blast_crbh"
-  , fTypeCheck = defaultTypeCheck [faa, ListOf gom] faa
-  , fFixity  = Prefix
-  , fCompiler = cCrbh
+  { fName      = "blast_crbh"
+  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] faa
+  , fFixity    = Prefix
+  , fCompiler  = cCrbh
   }
 
 --------------------
 -- implementation --
 --------------------
 
+cRbh :: CutState -> CutExpr -> Rules FilePath
 cRbh = undefined
+
+cCrbh :: CutState -> CutExpr -> Rules FilePath
 cCrbh = undefined

@@ -46,7 +46,8 @@ download_matches <- function(tmpDir, fnName, schTable)
 	  # sink()
 		# cat(paste0(c("Got '", g, "'\n")))
 		# return(g)
-		getGenome(row["organism"], db=row["database"], path=tmpDir)
+		# getGenome(row["organism"], db=row["database"], path=tmpDir)
+		do.call(fnName, list(row["organism"], db=row["database"], path=tmpDir))
   })
 
 save_list <- function(files, outPath) {
