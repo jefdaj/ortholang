@@ -6,8 +6,8 @@
 #      which is probably caused by this 32bit-related error:
 # blastx: error while loading shared libraries: libidn.so.11: cannot open shared object file: No such file or directory
 
-# { stdenv, lib, bundlerEnv, ruby, makeWrapper, ncbi-blast }:
-with import <nixpkgs> {};
+{ stdenv, lib, bundlerEnv, ruby, makeWrapper, ncbi-blast }:
+# with import <nixpkgs> {};
 
 let
   version = (import ./gemset.nix).crb-blast.version;
