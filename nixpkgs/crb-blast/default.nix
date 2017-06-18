@@ -6,11 +6,19 @@
 #      which is probably caused by this 32bit-related error:
 # blastx: error while loading shared libraries: libidn.so.11: cannot open shared object file: No such file or directory
 
-{ stdenv, lib, bundlerEnv, ruby, makeWrapper, ncbi-blast }:
+{ stdenv, fetchurl, lib, bundlerEnv, ruby, makeWrapper, ncbi-blast }:
 # with import <nixpkgs> {};
 
 let
   version = (import ./gemset.nix).crb-blast.version;
+#   blast2229 = ncbi-blast.overrideDerivation (old: rec {
+#     name="ncbi-blast-${version}";
+#     version="2.2.29";
+#     src = fetchurl {
+#       url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-x64-linux.tar.gz";
+#       sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
+#     };
+#   });
   env = bundlerEnv {
     inherit ruby version;
     name = "crb-blast-${version}-env";
@@ -28,7 +36,7 @@ let
 in stdenv.mkDerivation {
   inherit env version;
   name         = "crb-blast-${version}";
-  buildInputs  = [ makeWrapper ncbi-blast ];
+  buildInputs  = [ coreutils makeWrapper ncbi-blast ];
   phases       = [ "installPhase" ];
   installPhase = ''
     mkdir -p $out/bin

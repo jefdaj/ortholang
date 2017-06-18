@@ -5,7 +5,16 @@ let
   nixpkgs = import <nixpkgs> {};
   inherit (nixpkgs) pkgs;
 
-  ncbi-blast = pkgs.callPackage ./ncbi-blast {};
+  # crb-blast only supports this version, and there are reports of a bug in newer ones (still? not sure)
+  ncbi-blast = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
+    version="2.2.29";
+    name="ncbi-blast-${version}";
+    src = pkgs.fetchurl {
+      url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-x64-linux.tar.gz";
+      sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
+    };
+  });
+
   last-align = pkgs.callPackage ./last-align {};
   shmlast    = pkgs.callPackage ./shmlast    { inherit last-align; };
   crb-blast  = pkgs.callPackage ./crb-blast {};
