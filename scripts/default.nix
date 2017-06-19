@@ -24,6 +24,7 @@ in stdenv.mkDerivation {
     last-align
     crb-blast
     ncbi-blast
+    coreutils # for cat TODO why doesn't this work?
   ];
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
@@ -38,12 +39,12 @@ in stdenv.mkDerivation {
     for script in $out/bin/*; do
       wrapProgram $script \
         --prefix PYTHONPATH : $(toPythonPath ${pythonPackages.biopython}) \
-        --prefix PATH : "${myRWrapper}/bin" : "${shmlast}/bin" : "${crb-blast}/bin"
+        --prefix PATH : "${myRWrapper}/bin" : "${shmlast}/bin" : "${crb-blast}/bin" : "${coreutils}/bin"
     done
   '';
 
   # TODO can you use makeWrapper here?
   shellHook = ''
-    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:${shmlast}/bin:${crb-blast}/bin:${ncbi-blast}/bin:\$PATH
+    export PATH=${myRWrapper}/bin:${pythonPackages.ipython}/bin:${shmlast}/bin:${crb-blast}/bin:${ncbi-blast}/bin:${coreutils}/bin:\$PATH
   '';
 }
