@@ -6,6 +6,10 @@
  - for now rather than any comprehensive API.
  -}
 
+-- TODO ghc --make MyBuildSystem -rtsopts -with-rtsopts=-I0
+-- TODO -j (is that done already?)
+-- TODO --flush=N
+
 -- TODO should there be an iLine function that tries both expr and assign?
 -- TODO create Eval.hs again and move [e]val functions there? might be clearer
 --      but then again interpret and eval are kind of the same thing here right?
