@@ -18,25 +18,18 @@ let
   scripts  = import ./scripts;
   shortcut = haskellPackages.callPackage ./shortcut.nix {};
 
-in stdenv.mkDerivation {
+  # from https://github.com/jml/nix-haskell-example
+  # TODO make this cleaner, or maybe remove
+  addRuntimeDependencies = drv: xs: haskell.lib.overrideCabal drv (drv: {
+    buildDepends = (drv.buildDepends or []) ++ [ pkgs.makeWrapper ];
+    postInstall = ''
+      ${drv.postInstall or ""}
+      for exe in "$out/bin/"* ; do
+        wrapProgram "$exe" --prefix PATH ":" ${pkgs.lib.makeBinPath xs}
+      done
+    '';
+  });
 
-  name = "shortcut";
-  # TODO version?
-  buildInputs = [ bblast scripts shortcut ];
-
-  builder = writeScript "builder.sh" ''
-    #!/usr/bin/env bash
-    source ${stdenv}/setup
-    mkdir -p $out/bin
-
-    cat << EOF > $out/bin/shortcut
-    #!/usr/bin/env bash
-    export PATH=${bblast}/bin:\$PATH
-    export PATH=${scripts}/bin:\$PATH
-    export PATH=${shortcut}/bin:\$PATH
-    shortcut \$@
-    EOF
-
-    chmod +x $out/bin/shortcut
-  '';
-}
+in addRuntimeDependencies
+     shortcut
+     [bblast scripts]
