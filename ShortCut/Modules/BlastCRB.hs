@@ -4,7 +4,7 @@ import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Parse    (defaultTypeCheck)
 import ShortCut.Core.Compile  (cExpr)
-import ShortCut.Modules.Blast (faa, fna)
+import ShortCut.Modules.Fasta (faa, fna)
 
 ---------------
 -- interface --
@@ -47,7 +47,7 @@ blastCRB = CutFunction
 --       genes' = hashedTmp  cfg e [hits, evalue]
 --       fgtmp  = cacheDir cfg </> "fgtmp" -- TODO remove? not actually used
 --   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
---   faa' %> extractSeqs cfg genes
+--   faa' %> extractFastaSeqs cfg genes
 --   hits %> bblast cfg faa' genomes
 --   genes' %> \out -> do
 --     need [genomes, hits, evalue]

@@ -6,7 +6,7 @@ module ShortCut.Modules.Shmlast where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Parse    (defaultTypeCheck)
-import ShortCut.Modules.Blast (faa)
+import ShortCut.Modules.Fasta (faa)
 
 ---------------
 -- interface --

@@ -4,6 +4,8 @@ module ShortCut.Modules.Load
   -- )
   where
 
+-- TODO load string lists, which are needed for almost anything else!
+
 import Development.Shake
 import ShortCut.Core.Types
 import Data.String.Utils     (strip)
