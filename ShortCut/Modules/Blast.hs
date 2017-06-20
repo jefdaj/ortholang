@@ -6,6 +6,7 @@ import ShortCut.Core.Compile
 import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass (text)
+import ShortCut.Modules.Load (mkLoad, mkLoadList)
 
 -- TODO deprecate
 gen :: CutType
@@ -50,22 +51,15 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ mkLoadFn "load_fasta_aa" faa
-    , mkLoadFn "load_fasta_na" fna
-    , mkLoadFn "load_genes"    (ListOf gen) -- TODO replace with cLoadGenes?
-    , mkLoadFn "load_genomes"  (ListOf gom)
+    [ mkLoad "load_fasta_aa" faa
+    , mkLoad "load_fasta_na" fna
+    , mkLoad "load_genes"    (ListOf gen) -- TODO replace with cLoadGenes?
+    , mkLoad "load_genomes"  (ListOf gom)
+    , mkLoadList "load_csvs" csv -- TODO remove once list loading works
     , filterGenes
     , filterGenomes
     , worstBestEvalue
     ]
-  }
-
-mkLoadFn :: String -> CutType -> CutFunction
-mkLoadFn name rtn = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [str] rtn
-  , fFixity    = Prefix
-  , fCompiler  = cLoad
   }
 
 filterGenes :: CutFunction

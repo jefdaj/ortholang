@@ -15,7 +15,6 @@
 module ShortCut.Core.Compile
   ( compileScript
   , cBop
-  , cLoad
   , hashedTmp
   , hashedTmp'
   , cExpr
@@ -33,9 +32,7 @@ import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
 import Data.List                  (find)
 import Data.Maybe                 (fromJust)
-import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((<.>), (</>))
-import System.Directory           (canonicalizePath)
 import System.FilePath            (makeRelative)
 
 
@@ -198,22 +195,6 @@ cRef (_,cfg) expr@(CutRef _ _ var) = do
   -- liftIO $ putStrLn "entering cRef"
   return $ namedTmp cfg var expr
 cRef _ _ = error "bad argument to cRef"
-
--- creates a symlink from expression file to input file
--- these should be the only absolute ones,
--- and the only ones that point outside the temp dir
-cLoad :: CutState -> CutExpr -> Rules FilePath
-cLoad s@(_,cfg) e@(CutFun _ _ _ [f]) = do
-  -- liftIO $ putStrLn "entering cLoad"
-  path <- cExpr s f
-  let link = hashedTmp cfg e [path]
-  link %> \out -> do
-    str'   <- fmap strip $ readFile' path
-    path'' <- liftIO $ canonicalizePath str'
-    -- putQuiet $ unwords ["link", str', out]
-    quietly $ cmd "ln -fs" [path'', out]
-  return link
-cLoad _ _ = error "bad argument to cLoad"
 
 -- Creates a symlink from varname to expression file.
 -- TODO how should this handle file extensions? just not have them?
