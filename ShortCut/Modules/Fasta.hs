@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import Data.String.Utils              (strip)
 import Development.Shake.FilePath     ((</>))
-import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, cProperList)
+import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, cPathList, cLitList)
 import ShortCut.Core.Parse            (typeError)
 import ShortCut.Modules.Load          (mkLoad, mkLoadList)
 import Text.PrettyPrint.HughesPJClass (text)
@@ -59,16 +59,21 @@ extractSeqs = CutFunction
 tExtractSeqs [x, ListOf str] | elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
--- Usage: extract-seqs-by-id <tmpdir> <outfasta> <infasta> <idlist>
+-- TODO this function is presumably fine, but load_faa seems to be loading the
+-- literal text of its filename instead of linking to that file
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
+  liftIO . putStrLn $ "extracting sequences from " ++ faPath
   idsPath <- cExpr s ids
   let estmp   = cacheDir cfg </> "fasta" -- TODO is this needed?
       outPath = hashedTmp cfg e []
+      tmpList = hashedTmp cfg e ["tmpList"]
+  liftIO . putStrLn $ "tmplist: " ++ tmpList
+  tmpList %> \out -> cLitList cfg idsPath out -- TODO this needs to announce that it makes the lit files?
   outPath %> \out -> do
-    need [faPath, idsPath]
-    cmd "extract-seqs-by-id.py" estmp out faPath idsPath
+    need [faPath, tmpList]
+    quietly $ cmd "extract-seqs-by-id.py" estmp out faPath tmpList
   return outPath
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
 
@@ -99,6 +104,6 @@ cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [f]) = do
   tmpIDs %> \out -> do
     path' <- fmap strip $ readFile' path
     cmd "extract-seq-ids.py" fstmp out path'
-  outIDs %> \out -> cProperList cfg str tmpIDs out
+  outIDs %> \out -> cPathList cfg str tmpIDs out
   return outIDs
 cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"

@@ -22,9 +22,12 @@ module ShortCut.Core.Compile
   , cacheDir
   , addPrefixes
   , digest
-  , cProperList
+  , cPathList
+  , cLitList
   )
   where
+
+import Debug.Trace
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -220,13 +223,30 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 
 -- this is needed when calling a script that writes a list of literals,
 -- because shortcut expects a list of hashed filenames *pointing* to literals
-cProperList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
-cProperList cfg litType inPath outPath = do
-  lits <- fmap lines $ readFile' inPath
-  let litExprs  = map (\l -> CutLit litType l) lits
-      litPaths  = map (\e -> hashedTmp cfg e []) litExprs
-      litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
-  liftIO $ mapM_ (\(l, p) -> writeFile' (cfgTmpDir cfg </> p) l) (zip lits litPaths')
+-- TODO this needs to announce that it makes those literal files, doesn't it?
+cPathList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
+cPathList cfg litType inPath outPath = do
+  lits <- fmap lines $ readFile' (traceShow inPath inPath)
+  let litExprs  = map (\l -> CutLit litType l)       (traceShow lits lits)
+      litPaths  = map (\e -> hashedTmp cfg e [])     (traceShow litExprs litExprs)
+      litPaths' = map (makeRelative $ cfgTmpDir cfg) (traceShow litPaths litPaths)
+
+  -- TODO actually writing the files doesn't seem to be enough for shake;
+  -- have to also announce that they were written somehow:
+  liftIO $ mapM_ (\(l, p) -> writeFile (cfgTmpDir cfg </> p) (l ++ "\n")) (zip lits litPaths')
+  trackWrite litPaths
+
   need [inPath]
   writeFileLines outPath litPaths'
   return ()
+
+-- reverse of cPathList
+-- for passing a shortcut list in a format scripts will understand
+cLitList :: CutConfig -> FilePath -> FilePath -> Action ()
+cLitList cfg inPath outPath = do
+  litPaths <- fmap lines $ readFile' inPath
+
+  -- TODO are there extra newlines here? TODO readFile'?
+  litLines <- mapM (liftIO . readFile . (cfgTmpDir cfg </>)) litPaths
+
+  writeFileLines outPath litLines
