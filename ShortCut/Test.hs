@@ -36,5 +36,5 @@ runTests :: [CutModule] -> IO ()
 runTests mods = withSystemTempDirectory "shortcut" $ \d -> do
   tests <- mkTests $ mkTestConfig mods d
   setEnv "LANG" "C"
-  -- setEnv "TASTY_HIDE_SUCCESSES" "True" -- TODO shortcut flag for this?
+  setEnv "TASTY_HIDE_SUCCESSES" "True" -- TODO shortcut flag for this?
   defaultMain tests

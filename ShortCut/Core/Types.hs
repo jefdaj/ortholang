@@ -125,16 +125,15 @@ str :: CutType
 str = CutType
   { tExt  = "str"
   , tDesc = "string"
-  -- TODO wtf was the init for?
-  -- , tCat  = return . doubleQuotes . text . init
-  , tCat  = return . doubleQuotes . text
+  -- the init is for removing newlines
+  , tCat  = return . doubleQuotes . text . init
   }
 
 num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tCat  = return . text
+  , tCat  = return . text . init
   }
 
 ------------
