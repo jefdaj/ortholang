@@ -26,7 +26,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
-  tDirs  <- mapM getDataFileName ["tests/math", "tests/lists", "tests/vars", "tests/repeat"]
+  tDirs  <- mapM getDataFileName ["tests/math", "tests/lists", "tests/vars", "tests/repeat", "tests/fasta"]
   cuts   <- fmap concat $ mapM (findByExtension [".cut"]) tDirs
   let gFiles = map (\s -> replaceExtension s "result") cuts
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)

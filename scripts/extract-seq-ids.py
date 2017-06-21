@@ -5,6 +5,8 @@
 # (tmpdir is passed as by ShortCut convention, but not used)
 
 # TODO get this working with symlinks so it doesn't randomly fail on the wiki
+# TODO print ids and let the haskell code make them into a shortcut list
+#      (write a convenience function to ease the pain of that)
 
 from Bio import SeqIO
 from sys import argv

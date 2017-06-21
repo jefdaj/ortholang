@@ -69,7 +69,7 @@ goldenReplTree cfg ses = do
   let name   = takeBaseName ses
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tree   = replaceExtension ses "tree"
-      stdin  = extractPrompted "shortcut >> " txt -- TODO pass prompt here
+      stdin  = extractPrompted "shortcut >> " txt
       tmpDir = cfgTmpDir cfg'
       cmd    = (shell "tree") { cwd = Just $ tmpDir }
       action = do

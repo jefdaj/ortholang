@@ -79,6 +79,12 @@ instance Pretty CutModule where
 instance Show CutModule where
   show = prettyShow
 
+-- TODO oh i finally get it!
+--      nothing's wrong here. extract_seqs should be adding a layer of
+--      indirection that it isn't adding: lists are lists of paths to literals,
+--      not lists of literals themselves! (this is fairly annoying for writing
+--      scripts though)
+
 -- This seems to be separately required to show the final result of eval
 -- TODO is there a way to get rid of it?
 -- TODO rename prettyContents? prettyResult?
@@ -91,8 +97,6 @@ prettyResult cfg (ListOf t) f = do
   paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
   pretties <- mapM (prettyResult cfg t) paths
   return $ text "[" <> fsep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg t f
-  | elem t [str, num] = (tCat t) f -- TODO any other literals?
-  | otherwise = do
-    txt <- readFile $ cfgTmpDir cfg </> f
-    tCat t $ txt
+prettyResult cfg t f = do
+  txt <- readFile $ cfgTmpDir cfg </> f
+  tCat t $ txt

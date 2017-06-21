@@ -8,9 +8,11 @@ from sys import argv
 
 def read_ids(filename):
     with open(filename, 'r') as f:
-        return f.readlines()
+        return [l.strip() for l in f.readlines()]
 
 def filter_seqs(fasta, ids):
+    # print ids
+    # print fasta
     return list(s for s in SeqIO.parse(fasta, 'fasta') if s.id in ids)
 
 def write_seqs(seqs, filename):
@@ -23,5 +25,5 @@ def main():
     seqs  = filter_seqs(fasta, ids)
     write_seqs(seqs, argv[2])
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()

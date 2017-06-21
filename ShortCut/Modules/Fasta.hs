@@ -55,9 +55,10 @@ extractSeqs = CutFunction
   }
 
 -- TODO does ListOf str match on the value or just the constructor?
-tExtractSeqs [ListOf str, x] | elem x [faa, fna] = Right x
+tExtractSeqs [x, ListOf str] | elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
+-- Usage: extract-seqs-by-id <tmpdir> <outfasta> <infasta> <idlist>
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
@@ -66,7 +67,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
       outPath = hashedTmp cfg e []
   outPath %> \out -> do
     need [faPath, idsPath]
-    cmd "extract-seqs-by-id.py" estmp faPath idsPath
+    cmd "extract-seqs-by-id.py" estmp out faPath idsPath
   return outPath
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
 

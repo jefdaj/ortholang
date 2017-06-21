@@ -8,11 +8,13 @@ cabal-version:      >=1.10
 extra-source-files: README.md
 data-files:         usage.txt,
                     examples/*.cut,
+                    data/*.faa,
                     scripts/*.R,
                     scripts/*.py,
                     tests/lists/*.cut,
                     tests/lists/*.result,
                     tests/lists/*.tree,
+                    tests/fasta/*.cut,
                     tests/math/*.cut,
                     tests/math/*.result,
                     tests/math/*.tree,
