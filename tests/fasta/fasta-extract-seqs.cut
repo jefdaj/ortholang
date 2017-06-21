@@ -1,0 +1,7 @@
+faa10  = load_faa "data/6803genes10.faa"
+ids10  = extract_seq_ids faa10
+result = ids10
+# seqs10 = extract_seqs    faa10 ids10
+# idsall = extract_seq_ids seqs10
+# diff   = idsall ~ ids10
+# result = diff

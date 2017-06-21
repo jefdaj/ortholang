@@ -7,10 +7,11 @@ import ShortCut.Core.Types
 
 import Data.String.Utils              (strip)
 import Development.Shake.FilePath     ((</>))
-import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp)
+import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, cProperList)
 import ShortCut.Core.Parse            (typeError)
 import ShortCut.Modules.Load          (mkLoad, mkLoadList)
 import Text.PrettyPrint.HughesPJClass (text)
+import System.FilePath            (makeRelative)
 
 -----------------------
 -- module definition --
@@ -91,17 +92,13 @@ tExtractSeqIDs _ = Left "expected a fasta file"
 -- TODO rewrite this with mkLoader from Compile
 cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [f]) = do
-  -- liftIO $ putStrLn "entering cExtractSeqIDs"
-  -- TODO this shouldn't be needed because this fn will be starting from a gom,
-  --      not a str; mkLoader or cLoad or whatever handles str -> gom
   path <- cExpr s f
-  let fstmp = cacheDir cfg </> "fasta" -- not actually used
-      genes = hashedTmp cfg expr []
-  genes %> \out -> do
-    need [path]
+  let fstmp  = cacheDir cfg </> "fasta" -- not actually used
+      tmpIDs = hashedTmp cfg expr ["tmpids"]
+      outIDs = hashedTmp cfg expr []
+  tmpIDs %> \out -> do
     path' <- fmap strip $ readFile' path
-    liftIO $ putStrLn $ "path': " ++ show path'
-    liftIO $ putStrLn $ "genes: " ++ show genes
     cmd "extract-seq-ids.py" fstmp out path'
-  return genes
+  outIDs %> \out -> cProperList cfg str tmpIDs out
+  return outIDs
 cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"

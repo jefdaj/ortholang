@@ -22,6 +22,7 @@ module ShortCut.Core.Compile
   , cacheDir
   , addPrefixes
   , digest
+  , cProperList
   )
   where
 
@@ -138,7 +139,7 @@ findByName :: CutConfig -> String -> Maybe CutFunction
 findByName cfg name = find (\f -> fName f == name) fs
   where
     ms = cfgModules cfg
-    fs = concat $ map mFunctions ms
+    fs = concatMap mFunctions ms
 
 cAssign :: CutState -> CutAssign -> Rules (CutVar, FilePath)
 cAssign s (var, expr) = do
@@ -163,9 +164,7 @@ cLit :: CutState -> CutExpr -> Rules FilePath
 cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
   let path = hashedTmp cfg expr []
-  path %> \out -> do
-    -- putQuiet $ unwords ["write", out]
-    writeFileChanged out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
+  path %> \out -> writeFileChanged out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
   return path
   where
     paths :: CutExpr -> String
@@ -191,9 +190,7 @@ cList _ _ = error "bad arguemnts to cList"
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 cRef :: CutState -> CutExpr -> Rules FilePath
-cRef (_,cfg) expr@(CutRef _ _ var) = do
-  -- liftIO $ putStrLn "entering cRef"
-  return $ namedTmp cfg var expr
+cRef (_,cfg) expr@(CutRef _ _ var) = return $ namedTmp cfg var expr
 cRef _ _ = error "bad argument to cRef"
 
 -- Creates a symlink from varname to expression file.
@@ -220,3 +217,16 @@ cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
   return (p1, p2, hashedTmp' cfg t expr [p1, p2])
+
+-- this is needed when calling a script that writes a list of literals,
+-- because shortcut expects a list of hashed filenames *pointing* to literals
+cProperList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
+cProperList cfg litType inPath outPath = do
+  lits <- fmap lines $ readFile' inPath
+  let litExprs  = map (\l -> CutLit litType l) lits
+      litPaths  = map (\e -> hashedTmp cfg e []) litExprs
+      litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
+  liftIO $ mapM_ (\(l, p) -> writeFile' (cfgTmpDir cfg </> p) l) (zip lits litPaths')
+  need [inPath]
+  writeFileLines outPath litPaths'
+  return ()
