@@ -117,6 +117,8 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
 
+scriptTmp :: Show a => FilePath -> String -> a -> FilePath
+scriptTmp tmpDir ext uniq = tmpDir </> digest uniq <.> ext
 
 ------------------------------
 -- compile the ShortCut AST --
@@ -224,29 +226,43 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 -- this is needed when calling a script that writes a list of literals,
 -- because shortcut expects a list of hashed filenames *pointing* to literals
 -- TODO this needs to announce that it makes those literal files, doesn't it?
-cPathList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
-cPathList cfg litType inPath outPath = do
-  lits <- fmap lines $ readFile' (traceShow inPath inPath)
-  let litExprs  = map (\l -> CutLit litType l)       (traceShow lits lits)
-      litPaths  = map (\e -> hashedTmp cfg e [])     (traceShow litExprs litExprs)
-      litPaths' = map (makeRelative $ cfgTmpDir cfg) (traceShow litPaths litPaths)
+-- cPathList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
+-- cPathList cfg litType inPath outPath = do
+--   lits <- fmap lines $ readFile' (traceShow inPath inPath)
+--   let litExprs  = map (\l -> CutLit litType l)       (traceShow lits lits)
+--       litPaths  = map (\e -> hashedTmp cfg e [])     (traceShow litExprs litExprs)
+--       litPaths' = map (makeRelative $ cfgTmpDir cfg) (traceShow litPaths litPaths)
+--   -- TODO actually writing the files doesn't seem to be enough for shake;
+--   -- have to also announce that they were written somehow:
+--   liftIO $ mapM_ (\(l, p) -> writeFile (cfgTmpDir cfg </> p) (l ++ "\n")) (zip lits litPaths')
+--   trackWrite litPaths
+--   need [inPath]
+--   writeFileLines outPath litPaths'
+--   return ()
 
-  -- TODO actually writing the files doesn't seem to be enough for shake;
-  -- have to also announce that they were written somehow:
-  liftIO $ mapM_ (\(l, p) -> writeFile (cfgTmpDir cfg </> p) (l ++ "\n")) (zip lits litPaths')
-  trackWrite litPaths
-
-  need [inPath]
-  writeFileLines outPath litPaths'
-  return ()
+-- TODO fix "XXX.str.list: openFile: does not exist" (need it first, making this Rules?)
+cPathList :: CutState -> CutType -> FilePath -> Rules FilePath
+cPathList state litType listPath = do
+  litPaths <- fmap lines $ liftIO $ readFile listPath -- TODO should this be in an action?
+  let litExprs = map (CutLit litType) litPaths
+      listExpr = CutList (ListOf litType) [] litExprs
+  cExpr state listExpr
 
 -- reverse of cPathList
 -- for passing a shortcut list in a format scripts will understand
-cLitList :: CutConfig -> FilePath -> FilePath -> Action ()
-cLitList cfg inPath outPath = do
-  litPaths <- fmap lines $ readFile' inPath
+-- cLitList :: CutConfig -> FilePath -> FilePath -> Action ()
+-- cLitList cfg inPath outPath = do
+--   litPaths <- fmap lines $ readFile' inPath
+--   -- TODO are there extra newlines here? TODO readFile'?
+--   litLines <- mapM (liftIO . readFile . (cfgTmpDir cfg </>)) litPaths
+--   writeFileLines outPath litLines
 
-  -- TODO are there extra newlines here? TODO readFile'?
-  litLines <- mapM (liftIO . readFile . (cfgTmpDir cfg </>)) litPaths
-
-  writeFileLines outPath litLines
+cLitList :: FilePath -> FilePath -> Rules FilePath
+cLitList tmpDir inPath = do
+  let outPath = scriptTmp tmpDir "txt" inPath
+  outPath %> \out -> do
+    litPaths <- readFileLines inPath
+    need litPaths
+    lits <- mapM readFile' litPaths
+    writeFileLines out lits
+  return outPath

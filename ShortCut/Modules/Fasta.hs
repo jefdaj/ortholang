@@ -70,7 +70,8 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
       outPath = hashedTmp cfg e []
       tmpList = hashedTmp cfg e ["tmpList"]
   liftIO . putStrLn $ "tmplist: " ++ tmpList
-  tmpList %> \out -> cLitList cfg idsPath out -- TODO this needs to announce that it makes the lit files?
+  -- tmpList %> \out -> cLitList estmp idsPath out -- TODO this needs to announce that it makes the lit files?
+  tmpList <- cLitList estmp idsPath
   outPath %> \out -> do
     need [faPath, tmpList]
     quietly $ cmd "extract-seqs-by-id.py" estmp out faPath tmpList
@@ -104,6 +105,7 @@ cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [f]) = do
   tmpIDs %> \out -> do
     path' <- fmap strip $ readFile' path
     cmd "extract-seq-ids.py" fstmp out path'
-  outIDs %> \out -> cPathList cfg str tmpIDs out
-  return outIDs
+  -- outIDs %> \out -> cPathList cfg str tmpIDs out
+  -- return outIDs
+  cPathList s str tmpIDs
 cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"
