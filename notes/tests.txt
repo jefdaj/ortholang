@@ -1,0 +1,7 @@
+print pretty results of each type in repl
+
+extract ids from fasta file
+  will require adding them to the tests, but that's good long-term
+
+extract seqs matching ids from fasta file
+  can extract ids from that; should match original ids

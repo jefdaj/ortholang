@@ -24,6 +24,7 @@ module ShortCut.Core.Types
   , extOf
   , depsOf
   , rDepsOf
+  , defaultCat
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
@@ -73,6 +74,9 @@ data CutType
     }
   -- deriving (Eq, Show, Read)
 
+defaultCat :: String -> IO Doc
+defaultCat = return . text . unlines . (++ ["..."]) . take 5 . lines
+
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq CutType where
@@ -103,9 +107,9 @@ varOf _               = []
 depsOf :: CutExpr -> [CutVar]
 depsOf (CutLit  _ _         ) = []
 depsOf (CutRef  _ vs v      ) = v:vs
-depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concat (map varOf [e1, e2])
-depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concat (map varOf es      )
-depsOf (CutList _ vs   es   ) = nub $ vs ++ concat (map varOf es      )
+depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
+depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concatMap varOf es
+depsOf (CutList _ vs   es   ) = nub $ vs ++ concatMap varOf es
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
@@ -121,14 +125,16 @@ str :: CutType
 str = CutType
   { tExt  = "str"
   , tDesc = "string"
-  , tCat  = return . doubleQuotes . text . init
+  -- TODO wtf was the init for?
+  -- , tCat  = return . doubleQuotes . text . init
+  , tCat  = return . doubleQuotes . text
   }
 
 num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tCat  = return . text . init
+  , tCat  = return . text
   }
 
 ------------

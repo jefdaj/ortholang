@@ -67,6 +67,7 @@ cLink2 s@(_,cfg) expr strs = do
   link %> \out -> do
     str <- fmap strip $ readFile' path
     src <- liftIO $ canonicalizePath str
+    putQuiet $ unwords ["ln -fs", src, out]
     quietly $ cmd "ln -fs" [src, out]
   return link
 

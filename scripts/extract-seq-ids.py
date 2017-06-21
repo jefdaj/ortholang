@@ -14,5 +14,6 @@ infasta  = argv[3]
 
 with open(outgenes, 'wb') as out:
     for seq in SeqIO.parse(infasta, 'fasta'):
-        line = '%s:%s\n' % (infasta, seq.id)
+        # line = '%s:%s\n' % (infasta, seq.id)
+        line = '%s\n' % seq.id
         out.write(line)
