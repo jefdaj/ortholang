@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import Data.String.Utils              (strip)
 import Development.Shake.FilePath     ((</>))
-import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, cPathList, cLitList)
+import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmp)
 import ShortCut.Core.Parse            (typeError)
 import ShortCut.Modules.Load          (mkLoad, mkLoadList)
 import Text.PrettyPrint.HughesPJClass (text)
@@ -43,6 +43,37 @@ fna = CutType
   , tCat  = defaultCat
   }
 
+-------------------------------------------
+-- extract sequence IDs from FASTA files --
+-------------------------------------------
+
+extractSeqIDs :: CutFunction
+extractSeqIDs = CutFunction
+  { fName      = "extract_seq_ids"
+  , fFixity    = Prefix
+  , fTypeCheck = tExtractSeqIDs
+  , fCompiler  = cExtractSeqIDs
+  }
+
+tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
+tExtractSeqIDs _ = Left "expected a fasta file"
+
+cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
+cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
+  faPath <- cExpr s fa
+  let faTmp  = cacheDir cfg </> "fasta"
+      tmpOut = scriptTmp faTmp faPath "txt"
+      actOut = hashedTmp cfg expr []
+  tmpOut %> \out -> do
+    -- faPath' <- fmap strip $ readFile' faPath
+    -- faPath' <- readFile' faPath
+    need [faPath]
+    cmd "extract-seq-ids.py" faTmp out faPath
+    -- trackWrite [out]
+  actOut %> \out -> toShortCutList s str tmpOut out
+  return actOut
+cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"
+
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
 ----------------------------------------------
@@ -66,46 +97,14 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
   liftIO . putStrLn $ "extracting sequences from " ++ faPath
   idsPath <- cExpr s ids
-  let estmp   = cacheDir cfg </> "fasta" -- TODO is this needed?
+  let faTmp   = cacheDir cfg </> "fasta" -- TODO is this needed?
       outPath = hashedTmp cfg e []
       tmpList = hashedTmp cfg e ["tmpList"]
   liftIO . putStrLn $ "tmplist: " ++ tmpList
-  -- tmpList %> \out -> cLitList estmp idsPath out -- TODO this needs to announce that it makes the lit files?
-  tmpList <- cLitList estmp idsPath
+  -- tmpList %> \out -> fromShortCutList faTmp idsPath out -- TODO this needs to announce that it makes the lit files?
+  tmpList <- fromShortCutList faTmp idsPath
   outPath %> \out -> do
     need [faPath, tmpList]
-    quietly $ cmd "extract-seqs-by-id.py" estmp out faPath tmpList
+    quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList
   return outPath
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
-
--------------------------------------------
--- extract sequence IDs from FASTA files --
--------------------------------------------
-
-extractSeqIDs :: CutFunction
-extractSeqIDs = CutFunction
-  { fName      = "extract_seq_ids"
-  , fFixity    = Prefix
-  , fTypeCheck = tExtractSeqIDs
-  , fCompiler  = cExtractSeqIDs
-  }
-
-tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
-tExtractSeqIDs _ = Left "expected a fasta file"
-
--- TODO is there a reason for duplicating cLoad, or was I just being lazy?
---      even if there was it could be refactored in terms of mkLoader right?
--- TODO rewrite this with mkLoader from Compile
-cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
-cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [f]) = do
-  path <- cExpr s f
-  let fstmp  = cacheDir cfg </> "fasta" -- not actually used
-      tmpIDs = hashedTmp cfg expr ["tmpids"]
-      outIDs = hashedTmp cfg expr []
-  tmpIDs %> \out -> do
-    path' <- fmap strip $ readFile' path
-    cmd "extract-seq-ids.py" fstmp out path'
-  -- outIDs %> \out -> cPathList cfg str tmpIDs out
-  -- return outIDs
-  cPathList s str tmpIDs
-cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"

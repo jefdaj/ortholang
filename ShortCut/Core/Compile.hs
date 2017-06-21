@@ -17,13 +17,14 @@ module ShortCut.Core.Compile
   , cBop
   , hashedTmp
   , hashedTmp'
+  , scriptTmp
   , cExpr
   , cList
   , cacheDir
   , addPrefixes
   , digest
-  , cPathList
-  , cLitList
+  , toShortCutList
+  , fromShortCutList
   )
   where
 
@@ -117,8 +118,8 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
 
-scriptTmp :: Show a => FilePath -> String -> a -> FilePath
-scriptTmp tmpDir ext uniq = tmpDir </> digest uniq <.> ext
+scriptTmp :: Show a => FilePath -> a -> String -> FilePath
+scriptTmp tmpDir uniq ext = tmpDir </> digest uniq <.> ext
 
 ------------------------------
 -- compile the ShortCut AST --
@@ -223,11 +224,9 @@ cBop s@(_,cfg) t expr (n1, n2) = do
   p2 <- cExpr s n2
   return (p1, p2, hashedTmp' cfg t expr [p1, p2])
 
--- this is needed when calling a script that writes a list of literals,
--- because shortcut expects a list of hashed filenames *pointing* to literals
 -- TODO this needs to announce that it makes those literal files, doesn't it?
--- cPathList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
--- cPathList cfg litType inPath outPath = do
+-- toShortCutList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
+-- toShortCutList cfg litType inPath outPath = do
 --   lits <- fmap lines $ readFile' (traceShow inPath inPath)
 --   let litExprs  = map (\l -> CutLit litType l)       (traceShow lits lits)
 --       litPaths  = map (\e -> hashedTmp cfg e [])     (traceShow litExprs litExprs)
@@ -240,29 +239,40 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 --   writeFileLines outPath litPaths'
 --   return ()
 
--- TODO fix "XXX.str.list: openFile: does not exist" (need it first, making this Rules?)
-cPathList :: CutState -> CutType -> FilePath -> Rules FilePath
-cPathList state litType listPath = do
-  litPaths <- fmap lines $ liftIO $ readFile listPath -- TODO should this be in an action?
-  let litExprs = map (CutLit litType) litPaths
-      listExpr = CutList (ListOf litType) [] litExprs
-  cExpr state listExpr
+----------------------------------------------
+-- adapters for scripts to read/write lists --
+----------------------------------------------
 
--- reverse of cPathList
--- for passing a shortcut list in a format scripts will understand
--- cLitList :: CutConfig -> FilePath -> FilePath -> Action ()
--- cLitList cfg inPath outPath = do
---   litPaths <- fmap lines $ readFile' inPath
---   -- TODO are there extra newlines here? TODO readFile'?
---   litLines <- mapM (liftIO . readFile . (cfgTmpDir cfg </>)) litPaths
---   writeFileLines outPath litLines
-
-cLitList :: FilePath -> FilePath -> Rules FilePath
-cLitList tmpDir inPath = do
-  let outPath = scriptTmp tmpDir "txt" inPath
+-- gathers a list into one file so scripts don't have to worry about the
+-- details of ShortCut's caching habits. note that that file might still be a
+-- list of paths, if the original was a list of lists
+-- TODO is there any good way to handle that?
+fromShortCutList :: FilePath -> FilePath -> Rules FilePath
+fromShortCutList tmpDir inPath = do
+  let outPath = scriptTmp tmpDir inPath "txt"
   outPath %> \out -> do
     litPaths <- readFileLines inPath
     need litPaths
     lits <- mapM readFile' litPaths
     writeFileLines out lits
   return outPath
+
+-- OK, so you have to decide the expression path of the final output file
+-- beforehand right? maybe better make it the hashedTmp of the whole fn call?
+
+-- reverse of fromShortCutList. this is needed after calling a script that
+-- writes a list of literals, because shortcut expects a list of hashed
+-- filenames *pointing* to literals
+toShortCutList :: CutState -> CutType -> FilePath -> FilePath -> Action ()
+toShortCutList s@(_,cfg) litType inPath outPath = do
+  -- TODO need to need inPath here i think
+  need [inPath]
+  lits <- readFileLines inPath
+  -- need litPaths TODO nope, can't know those beforehand?
+  let litExprs = map (CutLit litType) lits
+      litPaths = map (\e -> hashedTmp cfg e []) litExprs
+      litPairs = zip lits litPaths
+      -- listExpr = CutList (ListOf litType) [] litExprs
+  -- TODO how to actually write to those files?
+  liftIO $ mapM (\(l,p) -> writeFile' p $ l ++ "\n") litPairs -- TODO newlines right?
+  liftIO $ writeFileLines outPath litPaths

@@ -12,6 +12,15 @@ import Test.Tasty.Golden          (goldenVsFile, goldenVsString, findByExtension
 import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
 
+testDirs :: [String]
+testDirs = 
+  [ "tests/fasta"
+  , "tests/repeat"
+  , "tests/lists"
+  , "tests/vars"
+  , "tests/math"
+  ]
+
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts, goldenScriptTrees]
 
@@ -26,7 +35,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
-  tDirs  <- mapM getDataFileName ["tests/math", "tests/lists", "tests/vars", "tests/repeat", "tests/fasta"]
+  tDirs  <- mapM getDataFileName testDirs
   cuts   <- fmap concat $ mapM (findByExtension [".cut"]) tDirs
   let gFiles = map (\s -> replaceExtension s "result") cuts
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)
@@ -51,7 +60,7 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
 
 goldenScriptTrees :: CutConfig -> IO TestTree
 goldenScriptTrees cfg = do
-  tDirs  <- mapM getDataFileName ["tests/math", "tests/lists", "tests/vars", "tests/repeat"]
+  tDirs  <- mapM getDataFileName testDirs
   cuts   <- fmap concat $ mapM (findByExtension [".cut"]) tDirs
   let gFiles = map (\s -> replaceExtension s "tree") cuts
       gTests = map (\(s,g) -> goldenScriptTree cfg s g) (zip cuts gFiles)
