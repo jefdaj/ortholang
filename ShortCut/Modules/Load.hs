@@ -6,10 +6,12 @@ module ShortCut.Modules.Load
 
 -- TODO load string lists, which are needed for almost anything else!
 
+import Debug.Trace
+
 import Development.Shake
 import ShortCut.Core.Types
 import Data.String.Utils     (strip)
-import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
+import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp', toShortCutList)
 import ShortCut.Core.Parse   (defaultTypeCheck)
 import System.Directory      (canonicalizePath)
 import System.FilePath            (makeRelative)
@@ -81,3 +83,31 @@ cLoadList rtype s@(_,cfg) e@(CutFun (ListOf t) _ _ [CutList _ _ ps]) = do
   links %> \out -> need paths >> writeFileLines out paths
   return links
 cLoadList _ _ _ = error "bad arguments to cLoadList"
+
+-------------------------------------------
+-- load a list of strings as one big one --
+-------------------------------------------
+
+-- TODO finish writing this
+
+-- loadLines :: CutFunction
+-- loadLines = CutFunction
+--   { fName      = "list_lines"
+--   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+--   , fFixity    = Prefix
+--   , fCompiler  = cListLines
+--   }
+
+-- toShortCutList :: CutState -> CutType -> FilePath -> FilePath -> Action ()
+-- TODO requires multiline strings? should be pretty easy, just """
+-- cListLines :: CutState -> CutExpr -> Rules FilePath
+-- cListLines s@(_,cfg) e@(CutFun _ _ _ [lines]) = do
+--   strPath <- cExpr s (traceShow ("expr: " ++ show lines) lines)
+--   let outPath = hashedTmp cfg e []
+--   -- outPath %> \out -> do
+--     -- strs <- fmap (map strip . lines . strip) (readFile' strPath)
+--     -- undefined
+--   -- return outPath
+--   (traceShow ("outPath: " ++ outPath) outPath) %> toShortCutList s str strPath -- TODO this doesn't work :(
+--   return outPath
+-- cListLines _ _ = error "bad argument to cListLines"
