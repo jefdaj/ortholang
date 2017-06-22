@@ -11,6 +11,8 @@ import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsFile, goldenVsString, findByExtension)
 import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
+import Data.String.Utils          (replace)
+import System.Directory           (getCurrentDirectory)
 
 testDirs :: [String]
 testDirs = 
@@ -44,7 +46,7 @@ goldenScripts cfg = do
 -- Line goldenScript, except it tests that the proper tree of tmpfiles was
 -- created instead of the proper result.  Note that the tree file is unrelated
 -- to the TestTree.
--- TODO ensure that tree is installed, or use a more basic command!
+-- TODO ensure that tree is installed with coreutils
 goldenScriptTree :: CutConfig -> FilePath -> FilePath -> TestTree
 goldenScriptTree cfg cut tre = goldenVsString name tre act
   where
@@ -54,9 +56,15 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
     act  = do
              silence $ evalFile cfg'
              out <- readCreateProcess cmd ""
-             -- txt <- readFile tre
-             -- putStrLn txt
-             return $ pack out
+             wd  <- getCurrentDirectory
+             return $ pack $ fixWorkingDir wd out
+
+-- symlinks from the cache -> elsewhere only work when absolute,
+-- but that makes them nondeterministic when tests are run from random tmpdirs.
+-- this fixes it by editing test output to include a generic $PWD
+-- TODO does this misleadinly imply shell interpolation in tree files?
+fixWorkingDir :: String -> String -> String
+fixWorkingDir wd = replace wd "$PWD"
 
 goldenScriptTrees :: CutConfig -> IO TestTree
 goldenScriptTrees cfg = do

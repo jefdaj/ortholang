@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- fasta
-|   |   `-- 6bc1cd6d7e.txt
+|   |   `-- c7dbb4eb7f.txt
 |   `-- shortcut
 |       |-- 092b067d8c.str
 |       |-- 108ad7a653.str
 |       |-- 11d487fa74.str
 |       |-- 136eb32a09.str.list
 |       |-- 3c962de529.str
-|       |-- 3dd244caec.faa -> /home/user/shortcut/data/6803genes10.faa
+|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
 |       |-- 6270ccb3fa.str
 |       |-- 779cde49fa.str
 |       |-- 77bd2233aa.str

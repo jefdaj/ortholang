@@ -1,8 +1,8 @@
 .
 |-- cache
 |   |-- fasta
-|   |   |-- 19bed49e53.txt
-|   |   `-- adfc702b8d.txt
+|   |   |-- 46103098eb.txt
+|   |   `-- 9644fc7bc5.txt
 |   `-- shortcut
 |       |-- 092b067d8c.str
 |       |-- 108ad7a653.str
@@ -10,7 +10,7 @@
 |       |-- 136eb32a09.str.list
 |       |-- 37f87ca791.faa
 |       |-- 3c962de529.str
-|       |-- 3dd244caec.faa -> /home/user/shortcut/data/6803genes10.faa
+|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
 |       |-- 6270ccb3fa.str
 |       |-- 779cde49fa.str
 |       |-- 77bd2233aa.str
