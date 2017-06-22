@@ -1,10 +1,13 @@
 .
 |-- cache
 |   |-- fasta
-|   |   |-- 46103098eb.txt
-|   |   `-- 9644fc7bc5.txt
+|   |   |-- 30566e4ffb.txt
+|   |   |-- b0f6f7a279.txt
+|   |   `-- cbac60421d.txt
 |   `-- shortcut
+|       |-- 03f7132a8c.str.list
 |       |-- 092b067d8c.str
+|       |-- 0a3237f802.str.list
 |       |-- 108ad7a653.str
 |       |-- 11d487fa74.str
 |       |-- 136eb32a09.str.list
@@ -18,9 +21,11 @@
 |       |-- e07b1246dc.str
 |       |-- e6655c8a09.str
 |       `-- ed1ab7717e.str
+|-- diff.str.list -> cache/shortcut/0a3237f802.str.list
 |-- faa10.faa -> cache/shortcut/3dd244caec.faa
 |-- ids10.str.list -> cache/shortcut/136eb32a09.str.list
-|-- result -> seqs10.faa
+|-- idsall.str.list -> cache/shortcut/03f7132a8c.str.list
+|-- result -> diff.str.list
 `-- seqs10.faa -> cache/shortcut/37f87ca791.faa
 
-3 directories, 20 files
+3 directories, 25 files
