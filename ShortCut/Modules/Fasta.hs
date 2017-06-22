@@ -64,11 +64,9 @@ cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
   faPath <- cExpr s fa
   let faTmp  = cacheDir cfg </> "fasta"
-      tmpOut = scriptTmp faTmp faPath "txt"
+      tmpOut = scriptTmp faTmp expr "txt"
       actOut = hashedTmp cfg expr []
   tmpOut %> \out -> do
-    -- faPath' <- fmap strip $ readFile' faPath
-    -- faPath' <- readFile' faPath
     need [faPath]
     quietly $ cmd "extract-seq-ids.py" faTmp out faPath
     -- trackWrite [out]
@@ -92,19 +90,15 @@ extractSeqs = CutFunction
 tExtractSeqs [x, ListOf str] | elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
--- TODO this function is presumably fine, but load_faa seems to be loading the
--- literal text of its filename instead of linking to that file
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
   liftIO . putStrLn $ "extracting sequences from " ++ faPath
   idsPath <- cExpr s ids
-  let faTmp   = cacheDir cfg </> "fasta" -- TODO is this needed?
+  let faTmp   = cacheDir cfg </> "fasta"
       outPath = hashedTmp cfg e []
-      tmpList = hashedTmp cfg e ["tmpList"]
-  liftIO . putStrLn $ "tmplist: " ++ tmpList
-  -- tmpList %> \out -> fromShortCutList faTmp idsPath out -- TODO this needs to announce that it makes the lit files?
-  tmpList <- fromShortCutList cfg faTmp idsPath
+      tmpList = scriptTmp faTmp e "txt"
+  tmpList %> \out -> fromShortCutList cfg faTmp idsPath out
   outPath %> \out -> do
     need [faPath, tmpList]
     quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList

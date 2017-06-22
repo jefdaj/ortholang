@@ -201,7 +201,6 @@ cRef _ _ = error "bad argument to cRef"
 -- TODO unify with cLink2, cLoadOne etc?
 cVar :: CutState -> CutVar -> CutExpr -> FilePath -> Rules FilePath
 cVar (_,cfg) var expr dest = do
-  -- liftIO $ putStrLn "entering cVar"
   let link  = namedTmp cfg var expr
       dest' = makeRelative (cfgTmpDir cfg) dest
   link %> \out -> do
@@ -215,25 +214,9 @@ cVar (_,cfg) var expr dest = do
 cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (FilePath, FilePath, FilePath)
 cBop s@(_,cfg) t expr (n1, n2) = do
-  -- liftIO $ putStrLn "entering cBop"
   p1 <- cExpr s n1
   p2 <- cExpr s n2
   return (p1, p2, hashedTmp' cfg t expr [p1, p2])
-
--- TODO this needs to announce that it makes those literal files, doesn't it?
--- toShortCutList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
--- toShortCutList cfg litType inPath outPath = do
---   lits <- fmap lines $ readFile' (traceShow inPath inPath)
---   let litExprs  = map (\l -> CutLit litType l)       (traceShow lits lits)
---       litPaths  = map (\e -> hashedTmp cfg e [])     (traceShow litExprs litExprs)
---       litPaths' = map (makeRelative $ cfgTmpDir cfg) (traceShow litPaths litPaths)
---   -- TODO actually writing the files doesn't seem to be enough for shake;
---   -- have to also announce that they were written somehow:
---   liftIO $ mapM_ (\(l, p) -> writeFile (cfgTmpDir cfg </> p) (l ++ "\n")) (zip lits litPaths')
---   trackWrite litPaths
---   need [inPath]
---   writeFileLines outPath litPaths'
---   return ()
 
 ----------------------------------------------
 -- adapters for scripts to read/write lists --
@@ -243,33 +226,23 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 -- details of ShortCut's caching habits. note that that file might still be a
 -- list of paths, if the original was a list of lists
 -- TODO is there any good way to handle that?
-fromShortCutList :: CutConfig -> FilePath -> FilePath -> Rules FilePath
-fromShortCutList cfg tmpDir inPath = do
-  let outPath = scriptTmp tmpDir inPath "txt"
-  outPath %> \out -> do
-    litPaths <- readFileLines inPath
-    let litPaths' = map (cfgTmpDir cfg </>) litPaths
-    need litPaths'
-    lits <- mapM readFile' litPaths'
-    writeFileLines out lits
-  return outPath
-
--- TODO this needs to make the paths it writes relative
+fromShortCutList :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
+fromShortCutList cfg tmpDir inPath outPath = do
+  litPaths <- readFileLines inPath
+  let litPaths' = map (cfgTmpDir cfg </>) litPaths
+  need litPaths'
+  lits <- mapM readFile' litPaths'
+  writeFileLines outPath lits
 
 -- reverse of fromShortCutList. this is needed after calling a script that
 -- writes a list of literals, because shortcut expects a list of hashed
 -- filenames *pointing* to literals
 toShortCutList :: CutState -> CutType -> FilePath -> FilePath -> Action ()
 toShortCutList s@(_,cfg) litType inPath outPath = do
-  -- TODO need to need inPath here i think
-  need [inPath] -- TODO remove
   lits <- readFileLines inPath
-  -- need litPaths TODO nope, can't know those beforehand?
   let litExprs  = map (CutLit litType) lits
       litPaths  = map (\e -> hashedTmp cfg e []) litExprs
       litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
       litPairs  = zip lits litPaths
-      -- listExpr = CutList (ListOf litType) [] litExprs
-  -- TODO how to actually write to those files?
-  liftIO $ mapM (\(l,p) -> writeFile' p $ l ++ "\n") litPairs -- TODO newlines right?
+  liftIO $ mapM (\(l,p) -> writeFile' p $ l ++ "\n") litPairs
   liftIO $ writeFileLines outPath litPaths'
