@@ -32,4 +32,4 @@ let
 
 in addRuntimeDependencies
      shortcut
-     [bblast scripts]
+     [bblast scripts crb-blast]

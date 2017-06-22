@@ -1,0 +1,3 @@
+mini6803 = load_faa "data/6803genes10.faa"
+full7942 = load_faa "data/7942genes.faa" # TODO make smaller
+result   = crb_blast mini6803 full7942

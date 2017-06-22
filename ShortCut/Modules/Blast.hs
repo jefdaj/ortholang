@@ -1,5 +1,17 @@
 module ShortCut.Modules.Blast where
 
+-- TODO write some of these functions:
+-- blastn
+-- blastp
+-- blastx
+-- dbiblast
+-- deltablast
+-- psiblast
+-- rpsblast
+-- rpsblastn
+-- tblastn
+-- tblastx
+
 -- import Development.Shake
 -- import Development.Shake.FilePath ((</>))
 -- import ShortCut.Core.Compile

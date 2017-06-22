@@ -3,8 +3,9 @@ module ShortCut.Modules.BlastCRB where
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Parse    (defaultTypeCheck)
-import ShortCut.Core.Compile  (cExpr)
+import ShortCut.Core.Compile  (cExpr, hashedTmp')
 import ShortCut.Modules.Fasta (faa, fna)
+import System.Directory       (createDirectoryIfMissing)
 
 ---------------
 -- interface --
@@ -20,13 +21,15 @@ crb :: CutType
 crb = CutType
   { tExt  = "crb"
   , tDesc = "tab-separated table of conditional reciprocal blast best hits"
-  , tCat  = undefined
+  , tCat  = defaultCat
   }
+
+-- TODO what to do about the e-value cutoff?
 
 blastCRB :: CutFunction
 blastCRB = CutFunction
-  { fName      = "blast_crb"
-  , fTypeCheck = defaultTypeCheck [faa, ListOf fna] crb
+  { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
+  , fTypeCheck = defaultTypeCheck [faa, faa] crb
   , fFixity    = Prefix
   , fCompiler  = cBlastCRB
   }
@@ -67,16 +70,21 @@ blastCRB = CutFunction
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
--- TODO finish this
+-- an example command is:
+-- crb-blast --query assembly.fa --target reference_proteins.fa --threads 8 --output annotation.tsv
+
 cBlastCRB :: CutState -> CutExpr -> Rules FilePath
-cBlastCRB s@(script,config) e@(CutFun _ _ _ [query, targets]) = do
-  qPath  <- cExpr s query
-  tPaths <- cExpr s targets
-  let res = undefined
-  res %> \out -> do
-    need [qPath, tPaths]
-    quietly $ cmd "crb-blast" ["-q", qPath, "-t", "-o"]
-  return undefined
+cBlastCRB s@(scr,cfg) e@(CutFun _ _ _ [query, target]) = do
+  qPath <- cExpr s query
+  tPath <- cExpr s target
+  let outPath = hashedTmp' cfg crb e []
+  outPath %> \out -> do
+    need [qPath, tPath]
+    -- createDirectoryIfMissing True 
+    -- tPath' <- readFile' tPath
+    -- qPath' <- readFile' qPath
+    quietly $ cmd "crb-blast" ["--query", qPath, "--target", tPath, "--output", out]
+  return outPath
 
 -- TODO version with e-value cutoff?
 -- TODO versions with other query and target types (or should the one function be variable?)
