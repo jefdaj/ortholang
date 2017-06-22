@@ -3,9 +3,10 @@ module ShortCut.Modules.BlastCRB where
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Parse    (defaultTypeCheck)
-import ShortCut.Core.Compile  (cExpr, hashedTmp')
+import ShortCut.Core.Compile  (cExpr, hashedTmp', toShortCutList)
 import ShortCut.Modules.Fasta (faa, fna)
 import System.Directory       (createDirectoryIfMissing)
+import Development.Shake.FilePath ((</>))
 
 ---------------
 -- interface --
@@ -14,7 +15,11 @@ import System.Directory       (createDirectoryIfMissing)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blastcrb"
-  , mFunctions = [blastCRB]
+  , mFunctions =
+    [ blastCRB
+    , extractCrbQueries
+    , extractCrbTargets
+    ]
   }
 
 crb :: CutType
@@ -26,6 +31,10 @@ crb = CutType
 
 -- TODO what to do about the e-value cutoff?
 
+----------------------
+-- basic crb search --
+----------------------
+
 blastCRB :: CutFunction
 blastCRB = CutFunction
   { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
@@ -33,30 +42,6 @@ blastCRB = CutFunction
   , fFixity    = Prefix
   , fCompiler  = cBlastCRB
   }
-
---------------------
--- implementation --
---------------------
-
--- an old blast function for reference:
--- cFilterGenes :: CutState -> CutExpr -> Rules FilePath
--- cFilterGenes s@(_,cfg) e@(CutFun _ _ _ [gens, goms, sci]) = do
---   -- liftIO $ putStrLn "entering cFilterGenes"
---   genes   <- cExpr s gens
---   genomes <- cExpr s goms
---   evalue  <- cExpr s sci
---   let hits   = hashedTmp' cfg csv e [genes, genomes]
---       faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
---       genes' = hashedTmp  cfg e [hits, evalue]
---       fgtmp  = cacheDir cfg </> "fgtmp" -- TODO remove? not actually used
---   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
---   faa' %> extractFastaSeqs cfg genes
---   hits %> bblast cfg faa' genomes
---   genes' %> \out -> do
---     need [genomes, hits, evalue]
---     quietly $ cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
---   return genes'
--- cFilterGenes _ _ = error "bad argument to cFilterGenes"
 
 -- output columns:
 -- query - the name of the transcript from the 'query' fasta file
@@ -70,21 +55,56 @@ blastCRB = CutFunction
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
--- an example command is:
--- crb-blast --query assembly.fa --target reference_proteins.fa --threads 8 --output annotation.tsv
-
 cBlastCRB :: CutState -> CutExpr -> Rules FilePath
 cBlastCRB s@(scr,cfg) e@(CutFun _ _ _ [query, target]) = do
   qPath <- cExpr s query
   tPath <- cExpr s target
-  let outPath = hashedTmp' cfg crb e []
+  let crbTmp  = cfgTmpDir cfg </> "cache" </> "crbblast"
+      outPath = hashedTmp' cfg crb e []
   outPath %> \out -> do
     need [qPath, tPath]
-    -- createDirectoryIfMissing True 
-    -- tPath' <- readFile' tPath
-    -- qPath' <- readFile' qPath
-    quietly $ cmd "crb-blast" ["--query", qPath, "--target", tPath, "--output", out]
+    liftIO $ createDirectoryIfMissing True crbTmp
+    quietly $ cmd (Cwd crbTmp) "crb-blast"
+      [ "--query"  , qPath
+      , "--target" , tPath
+      , "--output" , out
+      , "--threads", "8" -- TODO how to pick this?
+      , "--split"
+      ]
   return outPath
 
 -- TODO version with e-value cutoff?
--- TODO versions with other query and target types (or should the one function be variable?)
+
+-------------------------------
+-- list query or target hits --
+-------------------------------
+
+extractCrbQueries :: CutFunction
+extractCrbQueries = CutFunction
+  { fName      = "extract_crb_queries"
+  , fTypeCheck = defaultTypeCheck [crb] (ListOf str)
+  , fFixity    = Prefix
+  , fCompiler  = cExtractCrbColumn 1
+  }
+
+extractCrbTargets :: CutFunction
+extractCrbTargets = CutFunction
+  { fName      = "extract_crb_targets"
+  , fTypeCheck = defaultTypeCheck [crb] (ListOf str)
+  , fFixity    = Prefix
+  , fCompiler  = cExtractCrbColumn 2
+  }
+
+cExtractCrbColumn :: Int -> CutState -> CutExpr -> Rules FilePath
+cExtractCrbColumn n s@(_,cfg) e@(CutFun _ _ _ [hits]) = do
+  hitsPath <- cExpr s hits
+  let tmpPath = hashedTmp' cfg str e []
+      outPath = hashedTmp' cfg (ListOf str) e []
+  tmpPath %> \out -> do
+    need [hitsPath]
+    let awkCmd = "awk '{print $" ++ show n ++ "}'"
+    Stdout strs <- quietly $ cmd Shell awkCmd hitsPath
+    writeFile' out strs
+  outPath %> \out -> toShortCutList s (ListOf str) tmpPath out
+  return outPath
+extractCrbColumn _ _ _ = error "bad argument to extractCrbColumn"
