@@ -12,6 +12,7 @@ import Data.String.Utils     (strip)
 import ShortCut.Core.Compile (cExpr, hashedTmp)
 import ShortCut.Core.Parse   (defaultTypeCheck)
 import System.Directory      (canonicalizePath)
+import System.FilePath            (makeRelative)
 
 ---------------
 -- interface --
@@ -53,14 +54,13 @@ mkLoadList name rtn = CutFunction
 --------------------
 
 -- TODO replace with cLink2
-cLink :: CutConfig -> FilePath -> FilePath -> Action ()
-cLink cfg strPath dstPath = do
-  str <- fmap strip $ readFile' strPath
-  src <- liftIO $ canonicalizePath str
-  -- putQuiet $ unwords ["link", str', out]
-  quietly $ cmd "ln -fs" [src, dstPath]
+-- cLink :: CutConfig -> FilePath -> FilePath -> Action ()
+-- cLink cfg strPath dstPath = do
+--   str <- fmap strip $ readFile' strPath
+--   src <- liftIO $ canonicalizePath str
+--   -- putQuiet $ unwords ["link", str', out]
+--   quietly $ cmd "ln -fs" [src, dstPath]
 
--- TODO that's odd: this isn't being run at all?
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
@@ -73,34 +73,33 @@ cLink2 s@(_,cfg) expr  = do
     -- alwaysRerun
     liftIO $ putStrLn "running cLink2"
     str <- fmap strip $ readFile' strPath
-    src <- liftIO $ canonicalizePath str
+    src <- liftIO $ canonicalizePath str -- TODO need relative symlink to pass tests
+    -- let src = makeRelative (cfgTmpDir cfg) str
     liftIO . putStrLn $ unwords ["ln -fs", src, out]
     cmd "ln -fs" [src, out]
   return outPath
 
 -- TODO this is linking to the path as a string rather than its actual path!
--- TODO need to include e in the list of paths given to cLinks2?
+-- TODO need to include e in the list of paths given to cLink2?
 cLoadOne :: CutState -> CutExpr -> Rules FilePath
 cLoadOne s (CutFun _ _ _ [p]) = cLink2 s p
 cLoadOne _ _ = error "bad argument to cLoadOne"
 
--- TODO still need to call cLoadOne in here somehow... or part of it anyway
--- TODO replace with cLoadList2
-cLoadList :: CutState -> CutExpr -> Rules FilePath
-cLoadList s@(_,cfg) e@(CutFun _ _ _ [CutList (ListOf t) ds ps]) = do
-  liftIO $ putStrLn "entering cLoadList"
-  strPaths <- mapM (cExpr s) ps
-  let loaded = hashedTmp cfg e strPaths
-      -- links  = map () ps
-  loaded %> \out -> do
-    -- pathsToStrs <- readFileLines strs
-    -- need pathsToStrs
-    userStrs <- liftIO $ mapM (\p -> fmap strip $ readFile p) strPaths
-    extPaths <- liftIO $ mapM canonicalizePath userStrs
-    need extPaths
-    writeFileLines out extPaths
-  return loaded
-cLoadList _ _ = error "bad argument to cLoadList"
+-- cLoadList :: CutState -> CutExpr -> Rules FilePath
+-- cLoadList s@(_,cfg) e@(CutFun _ _ _ [CutList (ListOf t) ds ps]) = do
+--   liftIO $ putStrLn "entering cLoadList"
+--   strPaths <- mapM (cExpr s) ps
+--   let loaded = hashedTmp cfg e strPaths
+--       -- links  = map () ps
+--   loaded %> \out -> do
+--     -- pathsToStrs <- readFileLines strs
+--     -- need pathsToStrs
+--     userStrs <- liftIO $ mapM (\p -> fmap strip $ readFile p) strPaths
+--     extPaths <- liftIO $ mapM canonicalizePath userStrs
+--     need extPaths
+--     writeFileLines out extPaths
+--   return loaded
+-- cLoadList _ _ = error "bad argument to cLoadList"
 
 cLoadList2 :: CutState -> CutExpr -> Rules FilePath
 cLoadList2 s@(_,cfg) e@(CutFun (ListOf t) _ _ [CutList _ _ ps]) = do
