@@ -15,21 +15,54 @@
 with import ./nixpkgs;
 
 let
-  scripts  = import ./scripts;
+  myR = pkgs.rWrapper.override {
+    packages = with pkgs.rPackages; [
+      dplyr
+      biomartr # TODO is version 0.50 any better for now?
+    ];
+  };
+  myPython = pkgs.pythonPackages.python.withPackages (ps: with ps; [
+    biopython
+  ]);
   shortcut = haskellPackages.callPackage ./shortcut.nix {};
 
-  # from https://github.com/jml/nix-haskell-example
-  # TODO make this cleaner, or maybe remove
-  addRuntimeDependencies = drv: xs: haskell.lib.overrideCabal drv (drv: {
-    buildDepends = (drv.buildDepends or []) ++ [ pkgs.makeWrapper ];
-    postInstall = ''
-      ${drv.postInstall or ""}
-      for exe in "$out/bin/"* ; do
-        wrapProgram "$exe" --prefix PATH ":" ${pkgs.lib.makeBinPath xs}
-      done
-    '';
-  });
+in stdenv.mkDerivation rec {
+  # TODO version?
+  name = "shortcut";
+  src = ./.;
+  buildInputs = [ makeWrapper ];
+  runDepends = [
+    shmlast
+    ncbi-blast
+    crb-blast
+    coreutils
+    last-align
+    myR
+    myPython
+  ];
+  shellDepends = [
+    which
+    stack # TODO stack in nix-shell, or stack with nix-managed dependenencies?
+  ];
 
-in addRuntimeDependencies
-     shortcut
-     [bblast scripts crb-blast]
+  # TODO why does this work when the haskell overrideDerivation style doesn't?
+  #      (see https://github.com/jml/nix-haskell-example)
+  builder = writeScript "builder.sh" ''
+    #!/usr/bin/env bash
+    source ${stdenv}/setup
+    mkdir -p $out/bin
+    wrapperScript=$out/bin/shortcut
+    cat << EOF > $wrapperScript
+    #!/usr/bin/env bash
+    ${shortcut}/bin/shortcut \$@
+    EOF
+    chmod +x $wrapperScript
+    wrapProgram $wrapperScript --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+  '';
+
+  # TODO how to avoid building shortcut for this?
+  shellHook = ''
+    export PATH="${pkgs.lib.makeBinPath   runDepends}:\$PATH"
+    export PATH="${pkgs.lib.makeBinPath shellDepends}:\$PATH"
+  '';
+}

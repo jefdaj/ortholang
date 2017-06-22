@@ -1,7 +1,7 @@
 # see http://nixos.org/patchelf.html
 # and firefox-bin (suggested on mailing list)
 
-{stdenv, fetchurl, zlib, bzip2}:
+{stdenv, fetchurl, zlib, bzip2, libidn2}:
 
 let
   ftpSite = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+";
@@ -25,10 +25,12 @@ in stdenv.mkDerivation rec {
       stdenv.cc.cc
       zlib
       bzip2
+      libidn2
     ] + ":" + stdenv.lib.makeSearchPath "lib64" [
       stdenv.cc.cc
       zlib
       bzip2
+      libidn2
     ];
   phases = "unpackPhase installPhase";
   unpackPhase = ''

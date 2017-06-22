@@ -6,5 +6,5 @@ let
 
 # TODO unify with addRuntimeDependencies?
 in stdenv.lib.overrideDerivation shortcut (attrs: {
-  buildInputs = attrs.buildInputs ++ [ bblast scripts crb-blast ];
+  buildInputs = attrs.buildInputs ++ [ scripts crb-blast ];
 })
