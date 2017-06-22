@@ -1,0 +1,37 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   |-- evalues_data
+|   |   |-- fitting_data
+|   |   |-- full7942.phr
+|   |   |-- full7942.pin
+|   |   |-- full7942.psq
+|   |   |-- full7942_into_mini6803.2.blast
+|   |   |-- mini6803.phr
+|   |   |-- mini6803.pin
+|   |   |-- mini6803.psq
+|   |   `-- mini6803_into_full7942.1.blast
+|   `-- shortcut
+|       |-- 178d3cf920.str
+|       |-- 1b69e079d0.str
+|       |-- 2c319deb39.str
+|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
+|       |-- 3f9689e6e6.str
+|       |-- 58b609ed45.str
+|       |-- 779cde49fa.str
+|       |-- 8d5f64d533.str
+|       |-- 96a0330ea7.str
+|       |-- a1b5083334.str
+|       |-- b9920733a6.crb
+|       |-- c0363ff289.str
+|       |-- ccbbb8d620.str
+|       |-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
+|       |-- daabc91684.str
+|       |-- eb85a49f5b.str
+|       `-- eb85a49f5b.str.list
+|-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
+|-- hits.crb -> cache/shortcut/b9920733a6.crb
+|-- mini6803.faa -> cache/shortcut/3dd244caec.faa
+`-- result -> cache/shortcut/eb85a49f5b.str.list
+
+3 directories, 31 files

@@ -16,7 +16,8 @@ import System.Directory           (getCurrentDirectory)
 
 testDirs :: [String]
 testDirs = 
-  [ "tests/fasta"
+  [ "tests/crb"
+  , "tests/fasta"
   , "tests/repeat"
   , "tests/lists"
   , "tests/vars"

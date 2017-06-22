@@ -105,6 +105,6 @@ cExtractCrbColumn n s@(_,cfg) e@(CutFun _ _ _ [hits]) = do
     let awkCmd = "awk '{print $" ++ show n ++ "}'"
     Stdout strs <- quietly $ cmd Shell awkCmd hitsPath
     writeFile' out strs
-  outPath %> \out -> toShortCutList s (ListOf str) tmpPath out
+  outPath %> \out -> toShortCutList s str tmpPath out
   return outPath
 extractCrbColumn _ _ _ = error "bad argument to extractCrbColumn"
