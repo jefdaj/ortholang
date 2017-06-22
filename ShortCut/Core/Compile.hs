@@ -33,7 +33,7 @@ import ShortCut.Core.Types
 
 import Crypto.Hash                (hash, Digest, MD5)
 import Data.ByteString.Char8      (pack)
-import Data.List                  (find)
+import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((<.>), (</>))
 import System.FilePath            (makeRelative)
@@ -239,7 +239,7 @@ fromShortCutList cfg tmpDir inPath outPath = do
 -- filenames *pointing* to literals
 toShortCutList :: CutState -> CutType -> FilePath -> FilePath -> Action ()
 toShortCutList s@(_,cfg) litType inPath outPath = do
-  lits <- readFileLines inPath
+  lits <- fmap sort $ readFileLines inPath
   let litExprs  = map (CutLit litType) lits
       litPaths  = map (\e -> hashedTmp cfg e []) litExprs
       litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
