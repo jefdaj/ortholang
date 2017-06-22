@@ -9,6 +9,7 @@
 from Bio import SeqIO
 from sys import argv
 
+print "argv:", argv
 outgenes = argv[2]
 infasta  = argv[3]
 

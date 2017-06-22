@@ -28,8 +28,6 @@ module ShortCut.Core.Compile
   )
   where
 
-import Debug.Trace
-
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -266,7 +264,7 @@ fromShortCutList tmpDir inPath = do
 toShortCutList :: CutState -> CutType -> FilePath -> FilePath -> Action ()
 toShortCutList s@(_,cfg) litType inPath outPath = do
   -- TODO need to need inPath here i think
-  need [inPath]
+  need [inPath] -- TODO remove
   lits <- readFileLines inPath
   -- need litPaths TODO nope, can't know those beforehand?
   let litExprs = map (CutLit litType) lits

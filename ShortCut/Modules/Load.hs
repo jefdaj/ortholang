@@ -60,25 +60,28 @@ cLink cfg strPath dstPath = do
   -- putQuiet $ unwords ["link", str', out]
   quietly $ cmd "ln -fs" [src, dstPath]
 
-cLink2 :: CutState -> CutExpr -> [FilePath] -> Rules FilePath
-cLink2 s@(_,cfg) expr strs = do
-  path <- cExpr s expr
-  let link = hashedTmp cfg expr strs
-  link %> \out -> do
-    str <- fmap strip $ readFile' path
+-- TODO that's odd: this isn't being run at all?
+-- The paths here are a little confusing: expr is a str of the path we want to
+-- link to. So after compiling it we get a path to *that str*, and have to read
+-- the file to access it. Then we want to `ln` to the file it points to.
+cLink2 :: CutState -> CutExpr -> Rules FilePath
+cLink2 s@(_,cfg) expr  = do
+  strPath <- cExpr s expr
+  -- TODO damn, need to be more systematic about these unique paths!
+  let outPath = hashedTmp cfg expr ["outPath"] -- a symlink to the path in the strPath
+  outPath %> \out -> do
+    -- alwaysRerun
+    liftIO $ putStrLn "running cLink2"
+    str <- fmap strip $ readFile' strPath
     src <- liftIO $ canonicalizePath str
-    putQuiet $ unwords ["ln -fs", src, out]
-    quietly $ cmd "ln -fs" [src, out]
-  return link
+    liftIO . putStrLn $ unwords ["ln -fs", src, out]
+    cmd "ln -fs" [src, out]
+  return outPath
 
+-- TODO this is linking to the path as a string rather than its actual path!
 -- TODO need to include e in the list of paths given to cLinks2?
 cLoadOne :: CutState -> CutExpr -> Rules FilePath
-cLoadOne s (CutFun _ _ _ [p]) = cLink2 s p []
---cLoadOne s@(_,cfg) e@(CutFun _ _ _ [p]) = do
---  path <- cExpr s e
---  let link = hashedTmp cfg e [path]
---  link %> \out -> cLink cfg path link
---  return link
+cLoadOne s (CutFun _ _ _ [p]) = cLink2 s p
 cLoadOne _ _ = error "bad argument to cLoadOne"
 
 -- TODO still need to call cLoadOne in here somehow... or part of it anyway
@@ -106,7 +109,7 @@ cLoadList2 s@(_,cfg) e@(CutFun (ListOf t) _ _ [CutList _ _ ps]) = do
   -- let fnCalls = map (\p -> CutFun t ds n [p]) ps
       -- e' = CutList (ListOf t) ds fnCalls
   -- lst <- cExpr s e'
-  paths <- mapM (\p -> cLink2 s p []) ps -- TODO is cLink2 OK with no paths?
+  paths <- mapM (cLink2 s) ps -- TODO is cLink2 OK with no paths?
   let links = hashedTmp cfg e paths
   links %> \out -> need paths >> writeFileLines out paths
   return links

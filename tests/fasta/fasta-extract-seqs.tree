@@ -1,0 +1,26 @@
+.
+|-- cache
+|   |-- fasta
+|   |   |-- 28e65e44f0.txt
+|   |   `-- dcfa8d5593.txt
+|   `-- shortcut
+|       |-- 092b067d8c.str
+|       |-- 108ad7a653.str
+|       |-- 11d487fa74.str
+|       |-- 136eb32a09.str.list
+|       |-- 37f87ca791.faa
+|       |-- 3c962de529.str
+|       |-- 3dd244caec.str -> /home/user/shortcut/data/6803genes10.faa
+|       |-- 6270ccb3fa.str
+|       |-- 779cde49fa.str
+|       |-- 77bd2233aa.str
+|       |-- 7c5ea62914.str
+|       |-- e07b1246dc.str
+|       |-- e6655c8a09.str
+|       `-- ed1ab7717e.str
+|-- faa10.faa -> cache/shortcut/3dd244caec.str
+|-- ids10.str.list -> cache/shortcut/136eb32a09.str.list
+|-- result -> seqs10.faa
+`-- seqs10.faa -> cache/shortcut/37f87ca791.faa
+
+3 directories, 20 files

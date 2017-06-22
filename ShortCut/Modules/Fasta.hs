@@ -47,6 +47,8 @@ fna = CutType
 -- extract sequence IDs from FASTA files --
 -------------------------------------------
 
+-- TODO this needs to do relative paths again, not absolute!
+
 extractSeqIDs :: CutFunction
 extractSeqIDs = CutFunction
   { fName      = "extract_seq_ids"
@@ -68,6 +70,8 @@ cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
     -- faPath' <- fmap strip $ readFile' faPath
     -- faPath' <- readFile' faPath
     need [faPath]
+    unit $ cmd "pwd"
+    unit $ cmd "ls"
     cmd "extract-seq-ids.py" faTmp out faPath
     -- trackWrite [out]
   actOut %> \out -> toShortCutList s str tmpOut out
@@ -107,4 +111,4 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
     need [faPath, tmpList]
     quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList
   return outPath
-cExtractSeqs _ _ = error "bad argument to extractSeqs"
+mExtractSeqs _ _ = error "bad argument to extractSeqs"
