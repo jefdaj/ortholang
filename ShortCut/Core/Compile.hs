@@ -198,8 +198,7 @@ cRef (_,cfg) expr@(CutRef _ _ var) = return $ namedTmp cfg var expr
 cRef _ _ = error "bad argument to cRef"
 
 -- Creates a symlink from varname to expression file.
--- TODO how should this handle file extensions? just not have them?
--- TODO or pick up the extension of the destination?
+-- TODO unify with cLink2, cLoadOne etc?
 cVar :: CutState -> CutVar -> CutExpr -> FilePath -> Rules FilePath
 cVar (_,cfg) var expr dest = do
   -- liftIO $ putStrLn "entering cVar"
@@ -208,7 +207,6 @@ cVar (_,cfg) var expr dest = do
   link %> \out -> do
     alwaysRerun
     need [dest]
-    -- putQuiet $ unwords ["link", (cfgTmpDir cfg) </> dest', out]
     quietly $ cmd "ln -fs" [dest', out]
   return link
 
@@ -245,18 +243,18 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 -- details of ShortCut's caching habits. note that that file might still be a
 -- list of paths, if the original was a list of lists
 -- TODO is there any good way to handle that?
-fromShortCutList :: FilePath -> FilePath -> Rules FilePath
-fromShortCutList tmpDir inPath = do
+fromShortCutList :: CutConfig -> FilePath -> FilePath -> Rules FilePath
+fromShortCutList cfg tmpDir inPath = do
   let outPath = scriptTmp tmpDir inPath "txt"
   outPath %> \out -> do
     litPaths <- readFileLines inPath
-    need litPaths
-    lits <- mapM readFile' litPaths
+    let litPaths' = map (cfgTmpDir cfg </>) litPaths
+    need litPaths'
+    lits <- mapM readFile' litPaths'
     writeFileLines out lits
   return outPath
 
--- OK, so you have to decide the expression path of the final output file
--- beforehand right? maybe better make it the hashedTmp of the whole fn call?
+-- TODO this needs to make the paths it writes relative
 
 -- reverse of fromShortCutList. this is needed after calling a script that
 -- writes a list of literals, because shortcut expects a list of hashed
@@ -267,10 +265,11 @@ toShortCutList s@(_,cfg) litType inPath outPath = do
   need [inPath] -- TODO remove
   lits <- readFileLines inPath
   -- need litPaths TODO nope, can't know those beforehand?
-  let litExprs = map (CutLit litType) lits
-      litPaths = map (\e -> hashedTmp cfg e []) litExprs
-      litPairs = zip lits litPaths
+  let litExprs  = map (CutLit litType) lits
+      litPaths  = map (\e -> hashedTmp cfg e []) litExprs
+      litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
+      litPairs  = zip lits litPaths
       -- listExpr = CutList (ListOf litType) [] litExprs
   -- TODO how to actually write to those files?
   liftIO $ mapM (\(l,p) -> writeFile' p $ l ++ "\n") litPairs -- TODO newlines right?
-  liftIO $ writeFileLines outPath litPaths
+  liftIO $ writeFileLines outPath litPaths'

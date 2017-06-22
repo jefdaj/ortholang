@@ -70,9 +70,7 @@ cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
     -- faPath' <- fmap strip $ readFile' faPath
     -- faPath' <- readFile' faPath
     need [faPath]
-    unit $ cmd "pwd"
-    unit $ cmd "ls"
-    cmd "extract-seq-ids.py" faTmp out faPath
+    quietly $ cmd "extract-seq-ids.py" faTmp out faPath
     -- trackWrite [out]
   actOut %> \out -> toShortCutList s str tmpOut out
   return actOut
@@ -106,7 +104,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
       tmpList = hashedTmp cfg e ["tmpList"]
   liftIO . putStrLn $ "tmplist: " ++ tmpList
   -- tmpList %> \out -> fromShortCutList faTmp idsPath out -- TODO this needs to announce that it makes the lit files?
-  tmpList <- fromShortCutList faTmp idsPath
+  tmpList <- fromShortCutList cfg faTmp idsPath
   outPath %> \out -> do
     need [faPath, tmpList]
     quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList
