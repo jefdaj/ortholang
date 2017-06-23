@@ -28,12 +28,12 @@ in stdenv.mkDerivation rec {
     source ${stdenv}/setup
     mkdir -p $out/bin
     for script in $src/*.{py,R}; do
-      install -m755 $script $out/bin
-      base="$(basename "$script")"
-      wrapProgram $out/bin/$base \
-        --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+      dest="$out/bin/$(basename "$script")"
+      install -m755 $script $dest
+      wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
     done
   '';
+  # TODO remove? buildInputs seems more effective
   shellHook = ''
     export PATH="${pkgs.lib.makeBinPath runDepends}:\$PATH"
   '';

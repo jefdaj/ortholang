@@ -251,4 +251,7 @@ To build and test everything:
 
 nix-build && ./result/bin/shortcut --test
 
+Looks like stack build + test works, but you have to do it from inside
+nix-shell to get non-haskell depndencies like crb-blast.
+
 ### Reference

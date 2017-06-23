@@ -6,13 +6,10 @@ let
 
 # see https://github.com/jml/nix-haskell-example
 in haskell.lib.overrideCabal interpreter (drv: {
-  buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ];
+  buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
   postInstall = ''
     ${drv.postInstall or ""}
     wrapProgram "$out/bin/shortcut" \
       --prefix PATH ":" "${pkgs.lib.makeBinPath runDepends}"
-  '';
-  shellHook = ''
-    export PATH="${pkgs.lib.makeBinPath runDepends}:\$PATH"
   '';
 })
