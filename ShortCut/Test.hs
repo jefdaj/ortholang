@@ -38,7 +38,6 @@ mkTestConfig mods dir = CutConfig
 runTests :: [CutModule] -> IO ()
 runTests mods = withSystemTempDirectory "shortcut" $ \d -> do
   dataDir <- getDataFileName "data"
-  putStrLn $ "symlinking " ++ (d </> "data") ++ " -> " ++ dataDir
   -- TODO check exit code?
   (_,_,_) <- readCreateProcessWithExitCode (shell $ unwords ["ln -s", dataDir, (d </> "data")]) ""
   tests <- mkTests $ mkTestConfig mods d
