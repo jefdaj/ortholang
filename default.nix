@@ -1,50 +1,53 @@
-# The source code is split up into 3 major parts:
-#
-# 1. shortcut, which contains the haskell binary of the same name
-# 2. scripts, which contains scripts called by the shortcut binary
-# 3. nixpkgs, which contains misc dependencies I had to package
-#
-# Then there are a bunch of misc build instructions at the top level.  To
-# update Haskell dependencies, change the cabal file and run
-# `cabal2nix . > shortcut.nix`.
-# TODO add cabal2nix to global nix pkgs
-
-# TODO auto-run tests if possible (in nix? cabal?)
-# TODO use stack and/or make some kind of cabal shell to speed compilation
-
+# This imports a bunch of random stuff that I ended up having to package,
+# which will hopefully be merged into upstream nixpkgs before publication.
 with import ./nixpkgs;
-
 let
-  myR = pkgs.rWrapper.override {
-    packages = with pkgs.rPackages; [
-      dplyr
-      biomartr # TODO is version 0.50 any better for now?
-    ];
-  };
+
+  # This imports the Haskell build info, which is in a separate file so it can
+  # be auto-updated. To do that, run `cabal2nix ./. > shortcut.nix`
+  shortcut = haskellPackages.callPackage ./shortcut.nix {};
+
+  # List R packages here
+  myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
+    dplyr
+    biomartr # TODO is version 0.50 any better for now?
+  ];};
+
+  # List Python packages here
   myPython = pkgs.pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
-  shortcut = haskellPackages.callPackage ./shortcut.nix {};
 
-in stdenv.mkDerivation rec {
-  # TODO version?
-  name = "shortcut";
-  src = ./.;
-  buildInputs = [ makeWrapper ];
+  # List packages needed at runtime here
   runDepends = [
     shmlast
-    ncbi-blast
-    crb-blast
+    ncbi-blast # TODO try the newest version
+    crb-blast  # TODO try with the newest ncbi-blast
     coreutils
     last-align
     myR
     myPython
   ];
-  shellDepends = [
-    which
+
+  # List packages you use during development here
+  # (It's also be fine to remove what you don't want, for example vim)
+  shellDepends = runDepends ++ [
+    stdenv # bunch of standard unix programs
     stack # TODO stack in nix-shell, or stack with nix-managed dependenencies?
+    which
+    xz
+    gnumake
+    gnutar
   ];
 
+in stdenv.mkDerivation {
+  # TODO decide on a version scheme
+  name = "shortcut";
+  src = ./.;
+  buildInputs = [ makeWrapper ];
+
+  # This generates an overall wrapper script called `shortcut` which has all
+  # required dependencies on its PATH.
   # TODO why does this work when the haskell overrideDerivation style doesn't?
   #      (see https://github.com/jml/nix-haskell-example)
   builder = writeScript "builder.sh" ''
@@ -60,9 +63,8 @@ in stdenv.mkDerivation rec {
     wrapProgram $wrapperScript --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 
-  # TODO how to avoid building shortcut for this?
+  # Commands here are run on entering the development shell
   shellHook = ''
-    export PATH="${pkgs.lib.makeBinPath   runDepends}:\$PATH"
     export PATH="${pkgs.lib.makeBinPath shellDepends}:\$PATH"
   '';
 }

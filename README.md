@@ -234,15 +234,14 @@ names. There are lots of other unnamed temporary files too. They go in
 ### Developing Shortcut
 
 The interpreter is a Haskell package, and it calls scripts written in various
-languages---Python, R, and Bash so far. I use the [Nix](https://nixos.org/nix)
+languages---Python, R, Bash, Ruby... I use the [Nix](https://nixos.org/nix)
 package manager to make sure everything builds reproducibly.
 
-You can `nix-build` the main package or any of the top-level subdirectories. I
-find that to be annoyingly slow for Haskell packages though, because it
-recompiles them from scratch each time. So I normally keep `stack test
---file-watch` open in one terminal to do incremental builds + tests, and `stack
-ghci` in another for playing around with the types. Running `nix-shell`, then
-`cabal repl` would work for that too.
+You can `nix-build` the main package. I find that to be annoyingly slow for
+Haskell though, because it recompiles them from scratch each time. So I
+normally enter `nix-shell default.nix`, then keep `stack test --file-watch`
+open in one terminal to do incremental builds + tests, and `stack repl` in
+another for playing around with the types.
 
 You have to write a little Haskell to extend ShortCut with new
 scripts/functions, but not much! I include well-commented examples, and it
