@@ -1,5 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
-
 module Main where
 
 import Control.Monad              (when)
@@ -20,8 +18,6 @@ import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
 
--- TODO separate Config.hs, but only if it can actually be separated
-
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
@@ -30,7 +26,6 @@ loadField args cfg key
 loadConfig :: [CutModule] -> Arguments -> IO CutConfig
 loadConfig mods args = do
   let path = fromJust $ getArg args $ longOption "config"
-  -- putStrLn $ show args
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   ctd <- loadField args cfg "tmpdir"

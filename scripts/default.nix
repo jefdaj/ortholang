@@ -12,9 +12,6 @@ let
     biopython
   ]);
   runDepends = [
-    # shmlast # TODO remove along with the haskell module
-    # last-align # TODO remove here and add to crb-blast
-    # coreutils # TODO remove?
     myR
     myPython
   ];
