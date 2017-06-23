@@ -4,41 +4,34 @@
 with import ../nixpkgs;
 
 let
-  myR = pkgs.rWrapper.override {
-    packages = with pkgs.rPackages; [
-      dplyr
-      biomartr # TODO is version 0.50 any better for now?
-    ];
-  };
+  myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
+    dplyr
+    biomartr # TODO is version 0.50 any better for now?
+  ];};
   myPython = pkgs.pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
-
-in stdenv.mkDerivation rec {
-  # TODO version?
-  name = "shortcut-scripts";
-  src = ./.;
-  buildInputs = [ makeWrapper ];
   runDepends = [
-    shmlast
-    ncbi-blast
-    crb-blast
-    coreutils
-    last-align
+    # shmlast # TODO remove along with the haskell module
+    # last-align # TODO remove here and add to crb-blast
+    # coreutils # TODO remove?
     myR
     myPython
   ];
+
+in stdenv.mkDerivation rec {
+  name = "shortcut-scripts"; # TODO version?
+  src = ./.;
+  buildInputs = [ makeWrapper ];
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
     source ${stdenv}/setup
     mkdir -p $out/bin
     for script in $src/*.{py,R}; do
-      echo "$script"
-      base="$(basename "$script")"
       install -m755 $script $out/bin
-    done
-    for script in $out/bin/*; do
-      wrapProgram $script --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+      base="$(basename "$script")"
+      wrapProgram $out/bin/$base \
+        --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
     done
   '';
   shellHook = ''

@@ -247,4 +247,8 @@ You have to write a little Haskell to extend ShortCut with new
 scripts/functions, but not much! I include well-commented examples, and it
 should be safe to muddle through editing them, then check that it compiles.
 
+To build and test everything:
+
+nix-build && ./result/bin/shortcut --test
+
 ### Reference
