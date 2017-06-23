@@ -33,11 +33,19 @@ let
   # (It's also be fine to remove what you don't want, for example vim)
   shellDepends = runDepends ++ [
     stdenv # bunch of standard unix programs
-    stack # TODO stack in nix-shell, or stack with nix-managed dependenencies?
     which
+
+    # stack deps:
+    # TODO does source ${stdenv}/setup fix a lot of these?
     xz
     gnumake
+    gnugrep
     gnutar
+    gnused
+    perl
+    gcc
+    # libarchive
+    stack # TODO stack in nix-shell, or stack with nix-managed dependenencies?
   ];
 
 in stdenv.mkDerivation {
@@ -64,7 +72,10 @@ in stdenv.mkDerivation {
   '';
 
   # Commands here are run on entering the development shell
+  # TODO why does nix build shortcut when entering nix-shell?
+  #      (maybe because it's used in the script above? try removing that)
   shellHook = ''
+    source ${stdenv}/setup
     export PATH="${pkgs.lib.makeBinPath shellDepends}:\$PATH"
   '';
 }

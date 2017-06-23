@@ -1,6 +1,7 @@
 # see http://nixos.org/patchelf.html
 # and firefox-bin (suggested on mailing list)
 
+# TODO is libidn actually required or helping?
 {stdenv, fetchurl, zlib, bzip2, libidn2}:
 
 let
