@@ -1,33 +1,3 @@
-assigning something shouldn't also run it
-	seems that assigning anything causes result to be re-evaluated?
-  except assigning result itself, ironically
-	if result is :dropped, then you get fromJust: Nothing when assigning to anything
-		also happens when running script with no result var
-	only happens when assigning to result in repl
-	but when assigning *anything* to result, it evals result
-	but when assigning at all in a script
-	wait, is this just compiling and not running, as it's supposed to?
-
-stdout capture issue with Tasty/Silently
-  try to make a reproducable example for SO
-  consider switching to Writer monad
-  consider redirecting directly to a file
-
-tests/list01
-	doesn't create the output file
-	not sure if this is an actual problem
-	next steps:
-		remove explicit empty list case altogether
-		put in a sensible error instead
-
-tests/repl03
-	that one line keeps printing to actual stdout instead of being captured
-	some kind of interaction between tasty and silently?
-	next steps:
-		try reproducing it without tasty (separate main file)
-		email/file github issue with author
-		ask on stackoverflow
-
 division
 	division by certain numbers hangs for a long time (forever?)
 	seems to only happen with non-powers-of-two?
