@@ -1,5 +1,0 @@
-division
-	division by certain numbers hangs for a long time (forever?)
-	seems to only happen with non-powers-of-two?
-	next steps:
-		try manually `read`ing + doing the math in ghci
