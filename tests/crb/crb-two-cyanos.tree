@@ -1,16 +1,17 @@
 .
 |-- cache
 |   |-- crbblast
-|   |   |-- evalues_data
-|   |   |-- fitting_data
-|   |   |-- full7942.phr
-|   |   |-- full7942.pin
-|   |   |-- full7942.psq
-|   |   |-- full7942_into_mini6803.2.blast
-|   |   |-- mini6803.phr
-|   |   |-- mini6803.pin
-|   |   |-- mini6803.psq
-|   |   `-- mini6803_into_full7942.1.blast
+|   |   `-- 80af883df5
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       |-- full7942.phr
+|   |       |-- full7942.pin
+|   |       |-- full7942.psq
+|   |       |-- full7942_into_mini6803.2.blast
+|   |       |-- mini6803.phr
+|   |       |-- mini6803.pin
+|   |       |-- mini6803.psq
+|   |       `-- mini6803_into_full7942.1.blast
 |   `-- shortcut
 |       |-- 178d3cf920.str
 |       |-- 1b69e079d0.str
@@ -34,4 +35,4 @@
 |-- mini6803.faa -> cache/shortcut/3dd244caec.faa
 `-- result -> cache/shortcut/eb85a49f5b.str.list
 
-3 directories, 31 files
+4 directories, 31 files

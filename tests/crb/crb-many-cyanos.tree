@@ -1,0 +1,57 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   |-- 873c28887d
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   |-- full7942.phr
+|   |   |   |-- full7942.pin
+|   |   |   |-- full7942.psq
+|   |   |   |-- full7942_into_mini6803.2.blast
+|   |   |   |-- mini6803.phr
+|   |   |   |-- mini6803.pin
+|   |   |   |-- mini6803.psq
+|   |   |   `-- mini6803_into_full7942.1.blast
+|   |   |-- d3870b5634
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   |-- full7002.phr
+|   |   |   |-- full7002.pin
+|   |   |   |-- full7002.psq
+|   |   |   |-- full7002_into_mini6803.2.blast
+|   |   |   |-- mini6803.phr
+|   |   |   |-- mini6803.pin
+|   |   |   |-- mini6803.psq
+|   |   |   `-- mini6803_into_full7002.1.blast
+|   |   `-- e8163a81fa
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       |-- full7122.phr
+|   |       |-- full7122.pin
+|   |       |-- full7122.psq
+|   |       |-- full7122_into_mini6803.2.blast
+|   |       |-- mini6803.phr
+|   |       |-- mini6803.pin
+|   |       |-- mini6803.psq
+|   |       `-- mini6803_into_full7122.1.blast
+|   `-- shortcut
+|       |-- 068b6e0914.crb.list
+|       |-- 1b69e079d0.str
+|       |-- 26112c170d.faa -> $PWD/data/7002genes.faa
+|       |-- 3a42fda007.crb
+|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
+|       |-- 3df7ea9a18.crb
+|       |-- 407c2e523b.str
+|       |-- 65f7f4555e.crb
+|       |-- 779cde49fa.str
+|       |-- 7df7dbc0ff.str
+|       |-- 814c26a3a0.faa -> $PWD/data/7122genes.faa
+|       `-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
+|-- full7002.faa -> cache/shortcut/26112c170d.faa
+|-- full7122.faa -> cache/shortcut/814c26a3a0.faa
+|-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
+|-- hitlists.crb.list -> cache/shortcut/068b6e0914.crb.list
+|-- mini6803.faa -> cache/shortcut/3dd244caec.faa
+`-- result -> hitlists.crb.list
+
+6 directories, 48 files

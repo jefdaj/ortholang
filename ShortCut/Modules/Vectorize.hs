@@ -10,11 +10,12 @@
 
 module ShortCut.Modules.Vectorize where
 
-import Debug.Trace
+-- import Debug.Trace
 
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Compile (hashedTmp)
+import System.FilePath       (makeRelative)
 
 -- TODO is there any point to empty ones? maybe just import from other files...
 --      could have a separate set of API/dev modules or something
@@ -38,7 +39,7 @@ tVectorize :: ([CutType] -> Either String CutType) ->  [CutType]
 tVectorize _ [] = Left "bad args to tVectorize"
 tVectorize tFn argTypes = case tFn argTypes' of
   Left err -> Left err
-  Right r  -> let res = (Right $ ListOf r) in traceShow (ListOf r) res
+  Right r  -> let res = (Right $ ListOf r) in res
   where
     (ListOf t) = last argTypes
     argTypes'  = init argTypes ++ [t]
@@ -50,7 +51,8 @@ cVectorize cFn s@(_,cfg) e@(CutFun t ds n args) = do
       argLists = map (\a -> CutFun t ds n $ init args ++ [a]) lasts
   resPaths <- mapM (cFn s) argLists
   let outPath = hashedTmp cfg e []
-  traceShow outPath outPath %> \out -> do
+  outPath %> \out -> do
     need resPaths
-    writeFileLines out resPaths
+    let resPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
+    writeFileLines out resPaths'
   return outPath
