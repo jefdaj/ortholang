@@ -1,2 +1,0 @@
-is this what you've been looking for to write the docs?
-github.com/ChrisPenner/tempered
