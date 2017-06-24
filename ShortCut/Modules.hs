@@ -13,6 +13,7 @@ import qualified ShortCut.Modules.Permute   as Permute
 import qualified ShortCut.Modules.Repeat    as Repeat
 import qualified ShortCut.Modules.Sets      as Sets
 import qualified ShortCut.Modules.Summarize as Summarize
+import qualified ShortCut.Modules.Vectorize as Vectorize
 
 modules :: [CutModule]
 modules =
@@ -27,4 +28,5 @@ modules =
   , Repeat.cutModule
   , Sets.cutModule
   , Summarize.cutModule
+  , Vectorize.cutModule
   ]

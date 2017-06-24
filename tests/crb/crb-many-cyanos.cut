@@ -1,0 +1,10 @@
+# this is mainly a test of the vectorize function
+mini6803 = load_faa "data/6803genes10.faa"
+full7942 = load_faa "data/7942genes.faa"
+full7002 = load_faa "data/7002genes.faa"
+full7122 = load_faa "data/7122genes.faa"
+hitlists = crb_blast_all mini6803 [full7942, full7002, full7122]
+result = hitlists
+# result = common_elements hitlists # TODO rename "all"
+# TODO extract_crb_targets_all?
+# result = extract_crb_targets hits

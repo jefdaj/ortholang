@@ -1,12 +1,19 @@
 module ShortCut.Modules.BlastCRB where
 
+-- TODO any way to prevent it having to remake the mini6803 or whatever
+--      query database each time? seems kind of inefficient! but can't put
+--      everything in the same folder or it trips over itself in parallel
+
+-- TODO what to do about the e-value cutoff?
+
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Parse    (defaultTypeCheck)
-import ShortCut.Core.Compile  (cExpr, hashedTmp', toShortCutList)
+import ShortCut.Core.Compile  (cExpr, scriptTmp, hashedTmp', toShortCutList)
 import ShortCut.Modules.Fasta (faa, fna)
 import System.Directory       (createDirectoryIfMissing)
 import Development.Shake.FilePath ((</>))
+import ShortCut.Modules.Vectorize (vectorize)
 
 ---------------
 -- interface --
@@ -17,6 +24,7 @@ cutModule = CutModule
   { mName = "blastcrb"
   , mFunctions =
     [ blastCRB
+    , blastCRBAll
     , extractCrbQueries
     , extractCrbTargets
     ]
@@ -29,8 +37,6 @@ crb = CutType
   , tCat  = defaultCat
   }
 
--- TODO what to do about the e-value cutoff?
-
 ----------------------
 -- basic crb search --
 ----------------------
@@ -42,6 +48,9 @@ blastCRB = CutFunction
   , fFixity    = Prefix
   , fCompiler  = cBlastCRB
   }
+
+blastCRBAll :: CutFunction
+blastCRBAll = vectorize blastCRB "crb_blast_all"
 
 -- output columns:
 -- query - the name of the transcript from the 'query' fasta file
@@ -59,7 +68,7 @@ cBlastCRB :: CutState -> CutExpr -> Rules FilePath
 cBlastCRB s@(scr,cfg) e@(CutFun _ _ _ [query, target]) = do
   qPath <- cExpr s query
   tPath <- cExpr s target
-  let crbTmp  = cfgTmpDir cfg </> "cache" </> "crbblast"
+  let crbTmp  = scriptTmp (cfgTmpDir cfg </> "cache" </> "crbblast") e []
       outPath = hashedTmp' cfg crb e []
   outPath %> \out -> do
     need [qPath, tPath]

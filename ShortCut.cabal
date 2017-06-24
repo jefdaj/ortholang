@@ -61,6 +61,7 @@ executable shortcut
                     ShortCut.Modules.Repeat,
                     ShortCut.Modules.Sets,
                     ShortCut.Modules.Summarize,
+                    ShortCut.Modules.Vectorize,
                     ShortCut.Test,
                     ShortCut.Test.Deps
                     ShortCut.Test.Eval,
