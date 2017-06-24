@@ -1,4 +1,5 @@
--- Simple Golden tests to confirm dependencies are found.
+-- Simple Golden tests to confirm depCmds are found.
+-- TODO should it be more flexible about the exact versions?
 
 module ShortCut.Test.Deps where
 
@@ -10,21 +11,22 @@ import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
 
-deps :: [(String, String)]
-deps =
+depCmds :: [(String, String)]
+depCmds =
   [ ("ncbi-blast", "blastx -version")
   , ("crb-blast" , "crb-blast --version")
   , ("python"    , "python --version")
-  , ("R"         , "R --version")
-  -- , ("biopython" , "python -c \"import Bio\"") -- TODO needed at top level?
-  -- TODO test each script
+  , ("r"         , "R --version")
+  , ("biopython" , "python -c \"import Bio; print Bio.__version__\"")
+  , ("biomartr"  , "Rscript -e \"require(biomartr); packageVersion('biomartr')\"")
+  , ("dplyr"     , "Rscript -e \"require(dplyr); packageVersion('dplyr')\"")
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: CutConfig -> IO TestTree
 mkTests _ = do
   testDir <- getDataFileName $ "tests" </> "deps"
-  return $ testGroup "Dependencies" $ map (mkTestDep testDir) deps
+  return $ testGroup "Deps" $ map (mkTestDep testDir) depCmds
 
 mkTestDep :: FilePath -> (TestName, String) -> TestTree
 mkTestDep dir (name, cmd) = goldenVsString name gld act
@@ -32,4 +34,4 @@ mkTestDep dir (name, cmd) = goldenVsString name gld act
     gld = dir </> name <.> "txt"
     act = do
       (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""
-      return $ pack (out ++ err)
+      return $ pack $ err ++ out

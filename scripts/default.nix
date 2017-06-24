@@ -16,10 +16,11 @@ let
     myPython
   ];
 
-in stdenv.mkDerivation rec {
-  name = "shortcut-scripts"; # TODO version?
+in stdenv.mkDerivation {
+  name = "shortcut-scripts";
   src = ./.;
-  buildInputs = [ makeWrapper ];
+  buildInputs = [ makeWrapper ] ++ runDepends;
+  inherit runDepends;
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
     source ${stdenv}/setup
@@ -29,9 +30,5 @@ in stdenv.mkDerivation rec {
       install -m755 $script $dest
       wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
     done
-  '';
-  # TODO remove? buildInputs seems more effective
-  shellHook = ''
-    export PATH="${pkgs.lib.makeBinPath runDepends}:\$PATH"
   '';
 }

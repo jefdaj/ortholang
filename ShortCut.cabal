@@ -9,8 +9,11 @@ extra-source-files: README.md
 data-files:         usage.txt,
                     examples/*.cut,
                     data/*.faa,
-                    scripts/*.R,
-                    scripts/*.py,
+
+                    -- TODO do these go here or in a separate nix package?
+                    -- scripts/*.R,
+                    -- scripts/*.py,
+
                     tests/deps/*.txt,
                     tests/crb/*.cut,
                     tests/crb/*.tree,
