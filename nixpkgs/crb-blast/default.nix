@@ -25,7 +25,7 @@ let
     };
   };
 
-# TODO why doesn't cat get in the runtime path?
+# TODO why doesn't cat get in the runtime path? and proper ncbi-blast?
 in stdenv.mkDerivation {
   inherit env version;
   name         = "crb-blast-${version}";

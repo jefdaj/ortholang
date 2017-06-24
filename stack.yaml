@@ -10,4 +10,4 @@ extra-package-dbs: []
 nix:
   enable: true
   pure: false
-  shell-file: shell.nix
+  shell-file: default.nix
