@@ -13,9 +13,11 @@ module ShortCut.Modules.Vectorize where
 -- import Debug.Trace
 
 import ShortCut.Core.Types
+
 import Development.Shake
-import ShortCut.Core.Compile (hashedTmp)
+import ShortCut.Core.Compile (cExpr, hashedTmp)
 import System.FilePath       (makeRelative)
+import ShortCut.Modules.Repeat (extractExprs)
 
 -- TODO is there any point to empty ones? maybe just import from other files...
 --      could have a separate set of API/dev modules or something
@@ -44,15 +46,17 @@ tVectorize tFn argTypes = case tFn argTypes' of
     (ListOf t) = last argTypes
     argTypes'  = init argTypes ++ [t]
 
-cVectorize :: (CutState -> CutExpr -> Rules FilePath) -> CutState -> CutExpr
-           -> Rules FilePath
-cVectorize cFn s@(_,cfg) e@(CutFun t ds n args) = do
-  let (CutList _ _ lasts) = last args -- TODO can the pattern match fail?
-      argLists = map (\a -> CutFun t ds n $ init args ++ [a]) lasts
-  resPaths <- mapM (cFn s) argLists
-  let outPath = hashedTmp cfg e []
+-- TODO factor out common code between this and cRepeatEach
+cVectorize :: (CutState -> CutExpr -> Rules FilePath)
+           -> (CutState -> CutExpr -> Rules FilePath)
+cVectorize cFn s@(scr,cfg) e@(CutFun t ds n args) = do
+  let inits = init args
+      lasts = extractExprs scr $ last args -- TODO what happens if this is a fn call?
+  resPaths <- mapM (\l -> cFn s $ CutFun t ds n $ inits ++ [l]) lasts
+  let outPath = hashedTmp cfg e resPaths
   outPath %> \out -> do
-    need resPaths
-    let resPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
-    writeFileLines out resPaths'
+    need resPaths -- TODO if there's an error, try adding inits + lasts here too
+    let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
+    writeFileLines out outPaths'
   return outPath
+cVectorize _ _ _ = error "bad argument to cVectorize"
