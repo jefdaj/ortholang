@@ -35,12 +35,12 @@
 |   |       |-- mini6803.psq
 |   |       `-- mini6803_into_full7122.1.blast
 |   `-- shortcut
-|       |-- 068b6e0914.crb.list
 |       |-- 1b69e079d0.str
 |       |-- 26112c170d.faa -> $PWD/data/7002genes.faa
 |       |-- 3a42fda007.crb
 |       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
 |       |-- 3df7ea9a18.crb
+|       |-- 3ee4ca4057.crb.list
 |       |-- 407c2e523b.str
 |       |-- 65f7f4555e.crb
 |       |-- 779cde49fa.str
@@ -50,7 +50,7 @@
 |-- full7002.faa -> cache/shortcut/26112c170d.faa
 |-- full7122.faa -> cache/shortcut/814c26a3a0.faa
 |-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
-|-- hitlists.crb.list -> cache/shortcut/068b6e0914.crb.list
+|-- hitlists.crb.list -> cache/shortcut/3ee4ca4057.crb.list
 |-- mini6803.faa -> cache/shortcut/3dd244caec.faa
 `-- result -> hitlists.crb.list
 
