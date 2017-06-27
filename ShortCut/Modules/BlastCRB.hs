@@ -46,7 +46,7 @@ blastCRB = CutFunction
   { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
   , fTypeCheck = defaultTypeCheck [faa, faa] crb
   , fFixity    = Prefix
-  , fCompiler  = cBlastCRB
+  , fCompiler  = rTwoArgScript "crbblast"
   }
 
 blastCRBAll :: CutFunction
@@ -64,23 +64,28 @@ blastCRBAll = vectorize blastCRB "crb_blast_all"
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
-cBlastCRB :: CutState -> CutExpr -> Rules FilePath
-cBlastCRB s@(scr,cfg) e@(CutFun _ _ _ [query, target]) = do
+rTwoArgScript :: FilePath -> (CutState -> CutExpr -> Rules FilePath)
+rTwoArgScript tmpName s@(scr,cfg) e@(CutFun _ _ _ [query, target]) = do
   qPath <- cExpr s query
   tPath <- cExpr s target
-  let crbTmp  = scriptTmp (cfgTmpDir cfg </> "cache" </> "crbblast") e []
+  -- TODO more tmp dirs here? or rename something more appropriate
+  let crbTmp  = scriptTmp (cfgTmpDir cfg </> "cache" </> tmpName) e []
       outPath = hashedTmp' cfg crb e []
   outPath %> \out -> do
     need [qPath, tPath]
     liftIO $ createDirectoryIfMissing True crbTmp
-    quietly $ cmd (Cwd crbTmp) "crb-blast"
-      [ "--query"  , qPath
-      , "--target" , tPath
-      , "--output" , out
-      , "--threads", "8" -- TODO how to pick this?
-      , "--split"
-      ]
+    aBlastCRB crbTmp qPath tPath out
   return outPath
+
+aBlastCRB :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aBlastCRB crbTmp qPath tPath outPath = do
+  quietly $ cmd (Cwd crbTmp) "crb-blast"
+    [ "--query"  , qPath
+    , "--target" , tPath
+    , "--output" , outPath
+    , "--threads", "8" -- TODO how to pick this?
+    , "--split"
+    ]
 
 -- TODO version with e-value cutoff?
 
@@ -93,7 +98,7 @@ extractCrbQueries = CutFunction
   { fName      = "extract_crb_queries"
   , fTypeCheck = defaultTypeCheck [crb] (ListOf str)
   , fFixity    = Prefix
-  , fCompiler  = cExtractCrbColumn 1
+  , fCompiler  = rTsvColumn 1
   }
 
 extractCrbTargets :: CutFunction
@@ -101,11 +106,14 @@ extractCrbTargets = CutFunction
   { fName      = "extract_crb_targets"
   , fTypeCheck = defaultTypeCheck [crb] (ListOf str)
   , fFixity    = Prefix
-  , fCompiler  = cExtractCrbColumn 2
+  , fCompiler  = rTsvColumn 2
   }
 
-cExtractCrbColumn :: Int -> CutState -> CutExpr -> Rules FilePath
-cExtractCrbColumn n s@(_,cfg) e@(CutFun _ _ _ [hits]) = do
+-- TODO can this be used generically on any tsv?
+--      assuming so, rename variables here to be generic
+-- extracts a column from a tsv file by index
+rTsvColumn :: Int -> (CutState -> CutExpr -> Rules FilePath)
+rTsvColumn n s@(_,cfg) e@(CutFun _ _ _ [hits]) = do
   hitsPath <- cExpr s hits
   let tmpPath = hashedTmp' cfg str e []
       outPath = hashedTmp' cfg (ListOf str) e []
