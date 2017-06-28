@@ -1,18 +1,19 @@
 .
 |-- cache
 |   |-- crbblast
-|   |   |-- 873c28887d
+|   |   |-- 0107109533
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
-|   |   |   |-- full7942.phr
-|   |   |   |-- full7942.pin
-|   |   |   |-- full7942.psq
-|   |   |   |-- full7942_into_mini6803.2.blast
+|   |   |   |-- full7122.phr
+|   |   |   |-- full7122.pin
+|   |   |   |-- full7122.psq
+|   |   |   |-- full7122_into_mini6803.2.blast
 |   |   |   |-- mini6803.phr
 |   |   |   |-- mini6803.pin
 |   |   |   |-- mini6803.psq
-|   |   |   `-- mini6803_into_full7942.1.blast
-|   |   |-- d3870b5634
+|   |   |   |-- mini6803_into_full7122.1.blast
+|   |   |   `-- out.crb
+|   |   |-- 6e721fb403
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
 |   |   |   |-- full7002.phr
@@ -22,27 +23,27 @@
 |   |   |   |-- mini6803.phr
 |   |   |   |-- mini6803.pin
 |   |   |   |-- mini6803.psq
-|   |   |   `-- mini6803_into_full7002.1.blast
-|   |   `-- e8163a81fa
+|   |   |   |-- mini6803_into_full7002.1.blast
+|   |   |   `-- out.crb
+|   |   `-- b61c4a34f4
 |   |       |-- evalues_data
 |   |       |-- fitting_data
-|   |       |-- full7122.phr
-|   |       |-- full7122.pin
-|   |       |-- full7122.psq
-|   |       |-- full7122_into_mini6803.2.blast
+|   |       |-- full7942.phr
+|   |       |-- full7942.pin
+|   |       |-- full7942.psq
+|   |       |-- full7942_into_mini6803.2.blast
 |   |       |-- mini6803.phr
 |   |       |-- mini6803.pin
 |   |       |-- mini6803.psq
-|   |       `-- mini6803_into_full7122.1.blast
+|   |       |-- mini6803_into_full7942.1.blast
+|   |       `-- out.crb
 |   `-- shortcut
 |       |-- 1b69e079d0.str
 |       |-- 26112c170d.faa -> $PWD/data/7002genes.faa
-|       |-- 3a42fda007.crb
+|       |-- 370915cff8.crb
 |       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
-|       |-- 3df7ea9a18.crb
-|       |-- 3ee4ca4057.crb.list
 |       |-- 407c2e523b.str
-|       |-- 65f7f4555e.crb
+|       |-- 620b13968a.faa.list
 |       |-- 779cde49fa.str
 |       |-- 7df7dbc0ff.str
 |       |-- 814c26a3a0.faa -> $PWD/data/7122genes.faa
@@ -50,8 +51,8 @@
 |-- full7002.faa -> cache/shortcut/26112c170d.faa
 |-- full7122.faa -> cache/shortcut/814c26a3a0.faa
 |-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
-|-- hitlists.crb.list -> cache/shortcut/3ee4ca4057.crb.list
+|-- hitlists.crb -> cache/shortcut/370915cff8.crb
 |-- mini6803.faa -> cache/shortcut/3dd244caec.faa
-`-- result -> hitlists.crb.list
+`-- result -> hitlists.crb
 
-6 directories, 48 files
+6 directories, 49 files

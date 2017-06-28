@@ -49,11 +49,17 @@ blastCRB = CutFunction
   { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
   , fTypeCheck = defaultTypeCheck [faa, faa] crb
   , fFixity    = Prefix
-  , fCompiler  = rSimple aBlastCRB "crbblast" crb
+  , fCompiler  = rSimpleTmp aBlastCRB "crbblast" crb
   }
 
 blastCRBAll :: CutFunction
-blastCRBAll = vectorize blastCRB "crb_blast_all"
+-- blastCRBAll = vectorize blastCRB "crb_blast_all"
+blastCRBAll = CutFunction
+  { fName      = "crb_blast_all"
+  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] crb
+  , fFixity    = Prefix
+  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" crb
+  }
 
 -- output columns:
 -- query - the name of the transcript from the 'query' fasta file
@@ -67,9 +73,11 @@ blastCRBAll = vectorize blastCRB "crb_blast_all"
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
-rSimple :: ([FilePath] -> Action ()) -> String -> CutType
-        -> (CutState -> CutExpr -> Rules FilePath)
-rSimple actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
+-- TODO move to another module
+-- takes an action fn with any number of args and calls it with a tmpdir.
+rSimpleTmp :: ([FilePath] -> Action ()) -> String -> CutType
+           -> (CutState -> CutExpr -> Rules FilePath)
+rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let outPath = hashedTmp' cfg rtnType e []
       tmpDir  = scriptTmpDir (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
@@ -79,27 +87,29 @@ rSimple actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
     actFn $ [tmpDir, outPath] ++ argPaths
     trackWrite [outPath]
   return outPath
-rSimple _ _ _ _ _ = error "bad argument to cSimple"
+rSimpleTmp _ _ _ _ _ = error "bad argument to cSimple"
 
 -- TODO move to another module
+-- TODO should this put the intermediate out files in the expressions cache dir?
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmpEach :: ([FilePath] -> Action ()) -> String -> CutType
-                -> (CutState -> CutExpr -> Rules FilePath)
-rMapLastTmpEach actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
+rMapLastTmps :: ([FilePath] -> Action ()) -> String -> CutType
+             -> (CutState -> CutExpr -> Rules FilePath)
+rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   lastsPath <- cExpr s (last exprs)
   let outPath    = hashedTmp' cfg rtnType e []
       tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
-    let dirs = map (\p -> scriptTmpDir tmpPrefix' [show e, show p]) lastPaths
-        outs = map (\d -> d </> "out" <.> tExt rtnType) dirs
-        rels = map (makeRelative $ cfgTmpDir cfg) outs
+    let lasts = map (cfgTmpDir cfg </>) lastPaths
+        dirs  = map (\p -> scriptTmpDir tmpPrefix' [show e, show p]) lasts
+        outs  = map (\d -> d </> "out" <.> tExt rtnType) dirs
+        rels  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
-      (zip3 lastPaths dirs outs)
+      (zip3 lasts dirs outs)
       (\(last, dir, out) -> do
-        need (initPaths ++ [last])
+        need $ initPaths ++ [last]
         liftIO $ createDirectoryIfMissing True dir
         actFn $ [dir, out] ++ initPaths ++ [last]
         trackWrite [out]
@@ -107,7 +117,7 @@ rMapLastTmpEach actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
     need outs
     writeFileLines outPath rels
   return outPath
-rMapLastTmpEach _ _ _ _ _ = error "bad argument to rMapLastTmpEach"
+rMapLastTmps _ _ _ _ _ = error "bad argument to rMapLastTmps"
 
 aBlastCRB :: [FilePath] -> Action ()
 aBlastCRB [tmpDir, oPath, qPath, tPath] =

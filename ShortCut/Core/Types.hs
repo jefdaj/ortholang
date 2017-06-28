@@ -75,7 +75,12 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultCat :: String -> IO Doc
-defaultCat = return . text . unlines . (++ ["..."]) . take 5 . lines
+defaultCat s = (return . text . unlines) toShow
+  where
+    nLines = 5
+    toShow = if length (lines s) > nLines
+               then (take nLines $ lines s) ++ ["..."]
+               else lines s
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
