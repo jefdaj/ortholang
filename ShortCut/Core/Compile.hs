@@ -29,8 +29,6 @@ module ShortCut.Core.Compile
   )
   where
 
-import Debug.Trace
-
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -102,7 +100,7 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
 namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
 namedTmp cfg (CutVar var) expr = cfgTmpDir cfg </> base
   where
-    base  = if var == "result" then var else var <.> extOf (typeOf $ traceShow expr expr)
+    base  = if var == "result" then var else var <.> extOf (typeOf expr)
 
 -- TODO extn can be found inside expr now; remove it
 hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
@@ -244,8 +242,8 @@ fromShortCutList cfg tmpDir inPath outPath = do
 -- writes a list of literals, because shortcut expects a list of hashed
 -- filenames *pointing* to literals
 -- TODO any reason to pass the full state instead of just config?
-toShortCutList :: CutState -> CutType -> FilePath -> FilePath -> Action ()
-toShortCutList s@(_,cfg) litType inPath outPath = do
+toShortCutList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
+toShortCutList cfg litType inPath outPath = do
   lits <- fmap sort $ readFileLines inPath
   let litExprs  = map (CutLit litType) lits
       litPaths  = map (\e -> hashedTmp cfg e []) litExprs

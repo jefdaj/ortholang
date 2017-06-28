@@ -70,7 +70,7 @@ cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
     need [faPath]
     quietly $ cmd "extract-seq-ids.py" faTmp out faPath
     -- trackWrite [out]
-  actOut %> \out -> toShortCutList s str tmpOut out
+  actOut %> \_ -> toShortCutList cfg str tmpOut actOut
   return actOut
 cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"
 

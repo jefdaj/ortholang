@@ -6,13 +6,12 @@ module ShortCut.Modules.BlastCRB where
 
 -- TODO what to do about the e-value cutoff?
 
-import Debug.Trace
-
 import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Compile      (cExpr, scriptTmpDir, hashedTmp', toShortCutList)
+import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile,
+                                   hashedTmp', toShortCutList)
 import ShortCut.Core.Parse        (defaultTypeCheck)
 import ShortCut.Modules.Fasta     (faa, fna)
 import ShortCut.Modules.Vectorize (rMapSimple)
@@ -32,7 +31,7 @@ cutModule = CutModule
     , blastCRBAll
     , extractCrbQueries
     , extractAllCrbQueries
-    , extractCrbTargets -- TODO fix pattern match bug in here!
+    , extractCrbTargets
     , extractAllCrbTargets
     ]
   }
@@ -79,7 +78,7 @@ blastCRBAll = CutFunction
 
 -- TODO move to another module
 -- takes an action fn with any number of args and calls it with a tmpdir.
-rSimpleTmp :: ([FilePath] -> Action ()) -> String -> CutType
+rSimpleTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
            -> (CutState -> CutExpr -> Rules FilePath)
 rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
@@ -88,18 +87,16 @@ rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   outPath %> \_ -> do
     need argPaths
     liftIO $ createDirectoryIfMissing True tmpDir
-    let bug = [tmpDir, outPath] ++ argPaths
-    actFn $ (traceShow bug bug)
+    actFn cfg $ [tmpDir, outPath] ++ argPaths
     trackWrite [outPath]
   return outPath
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
 -- TODO move to another module
 -- TODO should this put the intermediate out files in the expressions cache dir?
--- TODO make a version with no tmpDirs and use it for extractCol stuff
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmps :: ([FilePath] -> Action ()) -> String -> CutType
+rMapLastTmps :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
              -> (CutState -> CutExpr -> Rules FilePath)
 rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
@@ -110,14 +107,14 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
     lastPaths <- readFileLines lastsPath
     let lasts = map (cfgTmpDir cfg </>) lastPaths
         dirs  = map (\p -> scriptTmpDir tmpPrefix' [show e, show p]) lasts
-        outs  = map (\d -> d </> "out" <.> (extOf rtnType)) dirs
+        outs  = map (\d -> d </> "out" <.> extOf rtnType) dirs
         rels  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip3 lasts dirs outs)
       (\(last, dir, out) -> do
         need $ initPaths ++ [last]
         liftIO $ createDirectoryIfMissing True dir
-        actFn $ [dir, out] ++ initPaths ++ [last]
+        actFn cfg $ [dir, out] ++ initPaths ++ [last]
         trackWrite [out]
       )
     need outs
@@ -125,9 +122,9 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
   return outPath
 rMapLastTmps _ _ _ _ _ = error "bad argument to rMapLastTmps"
 
-aBlastCRB :: [FilePath] -> Action ()
-aBlastCRB [tmpDir, oPath, qPath, tPath] =
-  quietly $ cmd (Cwd (traceShow tmpDir tmpDir)) "crb-blast"
+aBlastCRB :: CutConfig -> [FilePath] -> Action ()
+aBlastCRB _ [tmpDir, oPath, qPath, tPath] =
+  quietly $ cmd (Cwd tmpDir) "crb-blast"
     [ "--query"  , qPath
     , "--target" , tPath
     , "--output" , oPath
@@ -171,30 +168,11 @@ extractAllCrbTargets = CutFunction
   , fCompiler  = rMapSimple $ aTsvColumn 2
   }
 
--- TODO AHA! MIGHT HAVE FOUND THE BUG: NEED TOSHORTCUTLIST IN HERE?
---      TO FIX THAT, NEED TO PASS CONFIG TO IT
---      AND TO DO THAT, NEED TO ADJUST A FEW TYPES
---      PLUS, NEED TO ADD A TMPFILE (MAYBE IN THE TMPDIR? OR NOT)
--- first arg is the tmpdir, which isn't needed here
--- TODO make a version that doesn't include one for simplicity
 aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
-aTsvColumn n cfg [_, outPath, tsvPath] = do
+aTsvColumn n cfg as@[tmpDir, outPath, tsvPath] = do
   -- need [tsvPath]
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-  Stdout strs <- quietly $ cmd Shell awkCmd $ traceShow tsvPath tsvPath
-  writeFile' outPath strs
-
--- TODO move to another module
--- rTsvColumn :: Int -> (CutState -> CutExpr -> Rules FilePath)
--- rTsvColumn n s@(_,cfg) e@(CutFun _ _ _ [tsvExpr]) = do
---   tsvPath <- cExpr s tsvExpr
---   let tmpPath = hashedTmp' cfg str e []
---       outPath = hashedTmp' cfg (ListOf str) e []
---   tmpPath %> \out -> do
---     need [tsvPath]
---     let awkCmd = "awk '{print $" ++ show n ++ "}'"
---     Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
---     writeFile' out strs
---   outPath %> \out -> toShortCutList s str tmpPath out
---   return outPath
--- extractCrbColumn _ _ _ = error "bad argument to extractCrbColumn"
+      tmpOut = scriptTmpFile tmpDir as (extOf str)
+  Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
+  writeFile' tmpOut strs
+  toShortCutList cfg str tmpOut outPath

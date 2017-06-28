@@ -31,8 +31,6 @@ module ShortCut.Core.Types
   )
   where
 
-import Debug.Trace
-
 import Prelude hiding (print)
 import qualified Text.Parsec as P
 
@@ -77,13 +75,12 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultCat :: String -> IO Doc
-defaultCat = return . text . unlines . (++ ["..."]) . take 5 . lines
--- defaultCat s = (return . text . unlines) toShow
-  -- where
-    -- nLines = trace "defaultCat" 5
-    -- toShow = if length (lines s) > nLines
-               -- then (take nLines $ lines s) ++ ["..."]
-               -- else lines s
+defaultCat s = (return . text . unlines) toShow
+  where
+    nLines = 5
+    toShow = if length (lines s) > nLines
+               then (take nLines $ lines s) ++ ["..."]
+               else lines s
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?

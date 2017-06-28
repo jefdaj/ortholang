@@ -6,8 +6,6 @@ module ShortCut.Modules.Load
 
 -- TODO load string lists, which are needed for almost anything else!
 
-import Debug.Trace
-
 import Development.Shake
 import ShortCut.Core.Types
 import Data.String.Utils     (strip)
@@ -43,7 +41,7 @@ mkLoad name rtn = CutFunction
 -- the file to access it. Then we want to `ln` to the file it points to.
 cLink :: CutState -> CutExpr -> CutType -> Rules FilePath
 cLink s@(_,cfg) expr rtype = do
-  strPath <- cExpr s (traceShow expr expr)
+  strPath <- cExpr s expr
   -- TODO damn, need to be more systematic about these unique paths!
   let outPath = hashedTmp' cfg rtype expr ["outPath"] -- TODo remove outPath part?
   outPath %> \out -> do
@@ -55,7 +53,7 @@ cLink s@(_,cfg) expr rtype = do
   return outPath
 
 cLoadOne :: CutType -> CutState -> CutExpr -> Rules FilePath
-cLoadOne t s (CutFun _ _ _ [p]) = cLink (trace "cLoadOne" s) p t
+cLoadOne t s (CutFun _ _ _ [p]) = cLink s p t
 cLoadOne _ _ _ = error "bad argument to cLoadOne"
 
 --------------------------

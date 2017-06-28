@@ -5,20 +5,17 @@
 -- crb_blast_all compares a query to a list of targets. No summary is performed
 -- on the rsults; you just get back a list of the regular return type.
 
--- TODO awesome, it almost works! just need unique tmpdir per blast because of
---      silly naming issues?
+-- TODO remove this module and put what's left in Core somewhere
 
 module ShortCut.Modules.Vectorize where
 
-import Debug.Trace
-
+import Development.Shake
 import ShortCut.Core.Types
 
-import Development.Shake
-import ShortCut.Core.Compile (cExpr, hashedTmp, scriptTmpFile)
-import System.FilePath       (makeRelative)
-import ShortCut.Modules.Repeat (extractExprs)
 import Development.Shake.FilePath ((</>))
+import ShortCut.Core.Compile      (cExpr, hashedTmp, scriptTmpFile)
+import ShortCut.Modules.Repeat    (extractExprs)
+import System.FilePath            (makeRelative)
 
 -- TODO is there any point to empty ones? maybe just import from other files...
 --      could have a separate set of API/dev modules or something
@@ -47,38 +44,13 @@ tVectorize tFn argTypes = case tFn argTypes' of
     (ListOf t) = last argTypes
     argTypes'  = init argTypes ++ [t]
 
--- rMapLastTmps :: ([FilePath] -> Action ()) -> String -> CutType
---              -> (CutState -> CutExpr -> Rules FilePath)
--- rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
---   initPaths <- mapM (cExpr s) (init exprs)
---   lastsPath <- cExpr s (last exprs)
---   let outPath    = hashedTmp' cfg rtnType e []
---       tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
---   outPath %> \_ -> do
---     lastPaths <- readFileLines lastsPath
---     let lasts = map (cfgTmpDir cfg </>) lastPaths
---         dirs  = map (\p -> scriptTmpDir tmpPrefix' [show e, show p]) lasts
---         outs  = map (\d -> d </> "out" <.> tExt rtnType) dirs
---         rels  = map (makeRelative $ cfgTmpDir cfg) outs
---     (flip mapM)
---       (zip3 lasts dirs outs)
---       (\(last, dir, out) -> do
---         need $ initPaths ++ [last]
---         liftIO $ createDirectoryIfMissing True dir
---         actFn $ [dir, out] ++ initPaths ++ [last]
---         trackWrite [out]
---       )
---     need outs
---     writeFileLines outPath rels
---   return outPath
--- rMapLastTmps _ _ _ _ _ = error "bad argument to rMapLastTmps"
-
-rMapSimple :: ([FilePath] -> Action ()) -> (CutState -> CutExpr -> Rules FilePath)
+rMapSimple :: (CutConfig -> [FilePath] -> Action ())
+           -> (CutState -> CutExpr -> Rules FilePath)
 rMapSimple actFn s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   lastsPath <- cExpr s (last exprs)
   let outPath    = hashedTmp cfg e []
-      (ListOf t) = typeOf $ (traceShow (last exprs) last exprs)
+      (ListOf t) = typeOf $ last exprs
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
     let lasts = map (cfgTmpDir cfg </>) lastPaths
@@ -89,7 +61,7 @@ rMapSimple actFn s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
       (\(out, last) -> do
         need (last:initPaths)
         let tmp = (out:last:initPaths)
-        actFn (traceShow tmp tmp)
+        actFn cfg tmp
         trackWrite [out]
       )
     need outs

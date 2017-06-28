@@ -22,8 +22,6 @@ module ShortCut.Core.Eval
   )
   where
 
-import Debug.Trace
-
 import Development.Shake
 import ShortCut.Core.Types
 
