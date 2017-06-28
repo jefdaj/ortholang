@@ -31,6 +31,8 @@ module ShortCut.Core.Types
   )
   where
 
+import Debug.Trace
+
 import Prelude hiding (print)
 import qualified Text.Parsec as P
 
@@ -75,19 +77,20 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultCat :: String -> IO Doc
-defaultCat s = (return . text . unlines) toShow
-  where
-    nLines = 5
-    toShow = if length (lines s) > nLines
-               then (take nLines $ lines s) ++ ["..."]
-               else lines s
+defaultCat = return . text . unlines . (++ ["..."]) . take 5 . lines
+-- defaultCat s = (return . text . unlines) toShow
+  -- where
+    -- nLines = trace "defaultCat" 5
+    -- toShow = if length (lines s) > nLines
+               -- then (take nLines $ lines s) ++ ["..."]
+               -- else lines s
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq CutType where
   EmptyList  == EmptyList  = True
   (ListOf a) == (ListOf b) = a == b
-  t1         == t2         = tExt t1 == tExt t2
+  t1         == t2         = extOf t1 == extOf t2
 
 instance Show CutType where
   show = extOf
@@ -100,6 +103,7 @@ typeOf (CutFun  t _ _ _      ) = t
 typeOf (CutList EmptyList _ _) = EmptyList
 typeOf (CutList t  _ _       ) = ListOf t
 
+-- note that traceShow in here can cause an infinite loop
 extOf :: CutType -> String
 extOf (ListOf t   ) = extOf t ++ ".list"
 extOf EmptyList     = "list"

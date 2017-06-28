@@ -1,19 +1,7 @@
 .
 |-- cache
 |   |-- crbblast
-|   |   |-- 0107109533
-|   |   |   |-- evalues_data
-|   |   |   |-- fitting_data
-|   |   |   |-- full7122.phr
-|   |   |   |-- full7122.pin
-|   |   |   |-- full7122.psq
-|   |   |   |-- full7122_into_mini6803.2.blast
-|   |   |   |-- mini6803.phr
-|   |   |   |-- mini6803.pin
-|   |   |   |-- mini6803.psq
-|   |   |   |-- mini6803_into_full7122.1.blast
-|   |   |   `-- out.crb
-|   |   |-- 6e721fb403
+|   |   |-- 8abba28f0d
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
 |   |   |   |-- full7002.phr
@@ -25,7 +13,19 @@
 |   |   |   |-- mini6803.psq
 |   |   |   |-- mini6803_into_full7002.1.blast
 |   |   |   `-- out.crb
-|   |   `-- b61c4a34f4
+|   |   |-- 8ee217c961
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   |-- full7122.phr
+|   |   |   |-- full7122.pin
+|   |   |   |-- full7122.psq
+|   |   |   |-- full7122_into_mini6803.2.blast
+|   |   |   |-- mini6803.phr
+|   |   |   |-- mini6803.pin
+|   |   |   |-- mini6803.psq
+|   |   |   |-- mini6803_into_full7122.1.blast
+|   |   |   `-- out.crb
+|   |   `-- f8f8901e01
 |   |       |-- evalues_data
 |   |       |-- fitting_data
 |   |       |-- full7942.phr
