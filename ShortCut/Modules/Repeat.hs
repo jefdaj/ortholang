@@ -29,7 +29,7 @@ tRepeatEach _ = Left "invalid args to repeat_each" -- TODO better errors here
 
 -- TODO will this get printed, or will there just be a parse error?
 explainFnBug :: String
-explainFnBug = "Error: You've stumbled on an outstanding bug. Sorry about that! \
+explainFnBug = "You've stumbled on an outstanding bug. Sorry about that! \
                \The problem is that when doing transformations involving lists \
                \like repeat or map, ShortCut can't \"see\" through future function calls; \
                \it can only manipulate lists whose elements are known *before* running the \

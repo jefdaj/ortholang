@@ -17,7 +17,8 @@ module ShortCut.Core.Compile
   , cBop
   , hashedTmp
   , hashedTmp'
-  , scriptTmp
+  , scriptTmpFile
+  , scriptTmpDir
   , cExpr
   , cList
   , cacheDir
@@ -116,8 +117,11 @@ hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq = digest $ unlines $ (show expr):paths'
 
-scriptTmp :: Show a => FilePath -> a -> String -> FilePath
-scriptTmp tmpDir uniq ext = tmpDir </> digest uniq <.> ext
+scriptTmpDir :: Show a => FilePath -> a -> FilePath
+scriptTmpDir tmpDir uniq = tmpDir </> digest uniq
+
+scriptTmpFile :: Show a => FilePath -> a -> String -> FilePath
+scriptTmpFile tmpDir uniq ext = scriptTmpDir tmpDir uniq <.> ext
 
 ------------------------------
 -- compile the ShortCut AST --

@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import Data.String.Utils              (strip)
 import Development.Shake.FilePath     ((</>))
-import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmp)
+import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmpFile)
 import ShortCut.Core.Parse            (typeError)
 import ShortCut.Modules.Load          (mkLoad, mkLoadList)
 import Text.PrettyPrint.HughesPJClass (text)
@@ -64,7 +64,7 @@ cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
   faPath <- cExpr s fa
   let faTmp  = cacheDir cfg </> "fasta"
-      tmpOut = scriptTmp faTmp expr "txt"
+      tmpOut = scriptTmpFile faTmp expr "txt"
       actOut = hashedTmp cfg expr []
   tmpOut %> \out -> do
     need [faPath]
@@ -97,7 +97,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   idsPath <- cExpr s ids
   let faTmp   = cacheDir cfg </> "fasta"
       outPath = hashedTmp cfg e []
-      tmpList = scriptTmp faTmp e "txt"
+      tmpList = scriptTmpFile faTmp e "txt"
   tmpList %> \out -> fromShortCutList cfg faTmp idsPath out
   outPath %> \out -> do
     need [faPath, tmpList]
