@@ -6,6 +6,8 @@ module ShortCut.Modules.BlastCRB where
 
 -- TODO what to do about the e-value cutoff?
 
+import Debug.Trace
+
 import ShortCut.Core.Types
 import Development.Shake
 
@@ -14,7 +16,7 @@ import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile,
                                    hashedTmp', toShortCutList)
 import ShortCut.Core.Parse        (defaultTypeCheck)
 import ShortCut.Modules.Fasta     (faa, fna)
-import ShortCut.Modules.Vectorize (rMapSimple)
+import ShortCut.Modules.Vectorize (rMapLastTmp)
 import ShortCut.Modules.Repeat    (extractExprs)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath            (makeRelative)
@@ -59,7 +61,7 @@ blastCRBAll :: CutFunction
 -- blastCRBAll = vectorize blastCRB "crb_blast_all"
 blastCRBAll = CutFunction
   { fName      = "crb_blast_all"
-  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] crb
+  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf crb)
   , fFixity    = Prefix
   , fCompiler  = rMapLastTmps aBlastCRB "crbblast" crb
   }
@@ -113,8 +115,8 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
       (zip3 lasts dirs outs)
       (\(last, dir, out) -> do
         need $ initPaths ++ [last]
-        liftIO $ createDirectoryIfMissing True dir
-        actFn cfg $ [dir, out] ++ initPaths ++ [last]
+        liftIO $ createDirectoryIfMissing True (traceShow dir dir)
+        actFn cfg $ [dir, (traceShow out out)] ++ initPaths ++ [last]
         trackWrite [out]
       )
     need outs
@@ -149,7 +151,7 @@ extractAllCrbQueries = CutFunction
   { fName      = "extract_all_crb_queries"
   , fTypeCheck = defaultTypeCheck [(ListOf crb)] (ListOf $ ListOf str)
   , fFixity    = Prefix
-  , fCompiler  = rMapSimple $ aTsvColumn 1
+  , fCompiler  = rMapLastTmp (aTsvColumn 1) "crbblast"
   }
 
 extractCrbTargets :: CutFunction
@@ -165,9 +167,15 @@ extractAllCrbTargets = CutFunction
   { fName      = "extract_all_crb_targets"
   , fTypeCheck = defaultTypeCheck [(ListOf crb)] (ListOf $ ListOf str)
   , fFixity    = Prefix
-  , fCompiler  = rMapSimple $ aTsvColumn 2
+  , fCompiler  = rMapLastTmp (aTsvColumn 2) "crbblast"
   }
 
+-- TODO is it not getting to here? stuck in an r* fn somewhere?
+--      because there aren't any .str.list paths being printed...
+--
+-- HUH MIGHTA FOUND THE BUG: THE OUTPATH IS NAMED LIKE:
+-- /root/.shortcut/cache/b388c53d6c.cache/crbblast/7c52c1f9ea/out.crb
+-- (should be more like /root/.shortcut/cache/crbblast/b388c53d6c/out.str.list)
 aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
 aTsvColumn n cfg as@[tmpDir, outPath, tsvPath] = do
   -- need [tsvPath]
@@ -175,4 +183,5 @@ aTsvColumn n cfg as@[tmpDir, outPath, tsvPath] = do
       tmpOut = scriptTmpFile tmpDir as (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut strs
-  toShortCutList cfg str tmpOut outPath
+  toShortCutList cfg str tmpOut (traceShow as outPath)
+aTsvColumn _ _ as = traceShow as (error "bad arguments to aTsvColumn")

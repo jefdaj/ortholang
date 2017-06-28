@@ -284,10 +284,10 @@ pFun = do
     -- TODO does this happen, or does it just move on to variables?
     --      it should commit to being a fn as soon as there are args!
     -- TODO use an error call here to definitively fail until you figure out Parsec
-    Nothing -> fail $ "no such function: '" ++ name ++ "'"
+    Nothing -> (trace (name ++ " " ++ show args) (fail name))
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
-      Left  err -> fail err
+      Left  err -> fail (trace (name ++ " " ++ show args) err)
       Right rtn -> return $ CutFun rtn deps (fName f) (trace (name ++ " " ++ show args) args)
 
 -----------------

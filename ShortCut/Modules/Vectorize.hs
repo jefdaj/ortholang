@@ -15,9 +15,10 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Compile      (cExpr, hashedTmp, scriptTmpFile)
+import ShortCut.Core.Compile      (cExpr, hashedTmp, scriptTmpFile, scriptTmpDir)
 import ShortCut.Modules.Repeat    (extractExprs)
 import System.FilePath            (makeRelative)
+import System.Directory           (createDirectoryIfMissing)
 
 -- TODO is there any point to empty ones? maybe just import from other files...
 --      could have a separate set of API/dev modules or something
@@ -46,32 +47,41 @@ tVectorize tFn argTypes = case tFn argTypes' of
     (ListOf t) = last argTypes
     argTypes'  = init argTypes ++ [t]
 
--- TODO fix bug: argument could be a ref to a fn rather than the fn itself
---      (or a ref to a ref to a fn...)
--- TODO this is probably a general problem with any fn that takes a list of args!
-rMapSimple :: (CutConfig -> [FilePath] -> Action ())
+-- TODO does this need a tmpDir?
+-- TODO bug? argument could be a ref to a fn rather than the fn itself
+--      (or a ref to a ref to a fn...) (am I thinking about this right?)
+--      if so, probably a general problem with any fn that takes a list of args!
+rMapLastTmp :: (CutConfig -> [FilePath] -> Action ()) -> String
            -> (CutState -> CutExpr -> Rules FilePath)
-rMapSimple actFn s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
+rMapLastTmp actFn tmpPrefix s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   -- initPaths <- mapM (cExpr s) (traceShow exprs $ init exprs)
   -- lastsPath <- cExpr s (last exprs)
-  exprPaths <- mapM (cExpr s) (traceShow exprs exprs)
+  exprPaths <- mapM (cExpr s) (trace "rMapLastTmp" exprs)
   let outPath    = hashedTmp cfg e []
       (ListOf t) = typeOf $ last exprs -- TODO fails on a ref? not sure
   outPath %> \_ -> do
     lastPaths <- readFileLines $ last exprPaths
-    let inits = init exprPaths
-        lasts = map (cfgTmpDir cfg </>) lastPaths
-        outs  = map (scriptTmpFile (cfgTmpDir cfg </> "cache") (extOf t)) lastPaths
+    let inits  = init exprPaths
+        lasts  = map (cfgTmpDir cfg </>) lastPaths
+
+        -- TODO this might work for the current one but not in general right?
+        tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
+
+        outs   = map (scriptTmpFile (cfgTmpDir cfg </> "cache") (extOf t)) (traceShow lastPaths lastPaths)
         outs' = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
       (\(out, last) -> do
         need (last:inits)
-        let tmp = (out:last:inits)
-        actFn cfg tmp
+        liftIO $ createDirectoryIfMissing True tmpDir
+
+        -- TODO soooo close now! is tmpDir just a little messed up?
+        --      actually it looks pretty ok. maybe an earlier one is wrong?
+        actFn cfg $ (traceShow tmpDir tmpDir):out:last:inits
+
         trackWrite [out]
       )
     need outs
     writeFileLines outPath outs'
   return outPath
-rMapSimple _ _ _ = error "bad argument to cMapSimple"
+rMapLastTmp _ _ _ _ = error "bad argument to cMapLastTmp"
