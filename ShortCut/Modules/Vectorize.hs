@@ -9,6 +9,8 @@
 
 module ShortCut.Modules.Vectorize where
 
+import Debug.Trace
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -44,23 +46,28 @@ tVectorize tFn argTypes = case tFn argTypes' of
     (ListOf t) = last argTypes
     argTypes'  = init argTypes ++ [t]
 
+-- TODO fix bug: argument could be a ref to a fn rather than the fn itself
+--      (or a ref to a ref to a fn...)
+-- TODO this is probably a general problem with any fn that takes a list of args!
 rMapSimple :: (CutConfig -> [FilePath] -> Action ())
            -> (CutState -> CutExpr -> Rules FilePath)
 rMapSimple actFn s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
-  initPaths <- mapM (cExpr s) (init exprs)
-  lastsPath <- cExpr s (last exprs)
+  -- initPaths <- mapM (cExpr s) (traceShow exprs $ init exprs)
+  -- lastsPath <- cExpr s (last exprs)
+  exprPaths <- mapM (cExpr s) (traceShow exprs exprs)
   let outPath    = hashedTmp cfg e []
-      (ListOf t) = typeOf $ last exprs
+      (ListOf t) = typeOf $ last exprs -- TODO fails on a ref? not sure
   outPath %> \_ -> do
-    lastPaths <- readFileLines lastsPath
-    let lasts = map (cfgTmpDir cfg </>) lastPaths
+    lastPaths <- readFileLines $ last exprPaths
+    let inits = init exprPaths
+        lasts = map (cfgTmpDir cfg </>) lastPaths
         outs  = map (scriptTmpFile (cfgTmpDir cfg </> "cache") (extOf t)) lastPaths
         outs' = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
       (\(out, last) -> do
-        need (last:initPaths)
-        let tmp = (out:last:initPaths)
+        need (last:inits)
+        let tmp = (out:last:inits)
         actFn cfg tmp
         trackWrite [out]
       )

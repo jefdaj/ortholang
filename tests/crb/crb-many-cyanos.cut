@@ -3,4 +3,9 @@ full7942 = load_faa "data/7942genes.faa"
 full7002 = load_faa "data/7002genes.faa"
 full7122 = load_faa "data/7122genes.faa"
 hitlists = crb_blast_all mini6803 [full7942, full7002, full7122]
+
+# TODO this should result in a link hitlists.crb.list -> something right?
+#      and that something should be the list of paths, not a link to that list
+
+# TODO get lab stuff + emails done Wednesday, then look at this in the evening only!
 result   = extract_all_crb_targets hitlists

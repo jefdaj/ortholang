@@ -35,6 +35,8 @@ module ShortCut.Core.Parse
 -- TODO fix bug where a non-function with args parses to varname with args dropped
 --       (example: 'this = load_that cool')
 
+import Debug.Trace
+
 import ShortCut.Core.Types
 
 import Control.Applicative    ((<|>), many)
@@ -286,7 +288,7 @@ pFun = do
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
       Left  err -> fail err
-      Right rtn -> return $ CutFun rtn deps (fName f) args
+      Right rtn -> return $ CutFun rtn deps (fName f) (trace (name ++ " " ++ show args) args)
 
 -----------------
 -- expressions --
