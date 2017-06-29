@@ -264,7 +264,7 @@ cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
   where
     fn = case key of
           "script"  -> (\c -> fromMaybe "none" $ cfgScript c)
-          "verbose" -> (\c -> show $ cfgVerbose c)
+          "verbose" -> (\c -> show $ cfgDebug c)
           "tmpdir"  -> cfgTmpDir
           _ -> \_ -> "no such config entry"
 
@@ -273,6 +273,6 @@ cmdConfigSet key val = do
   (scr, cfg) <- get
   case key of
     "script"  -> put (scr, cfg { cfgScript  = Just val })
-    "verbose" -> put (scr, cfg { cfgVerbose = read val })
+    "verbose" -> put (scr, cfg { cfgDebug = read val })
     "tmpdir"  -> put (scr, cfg { cfgTmpDir  = val })
     _ -> fail $ "no such variable '" ++ key ++ "'"

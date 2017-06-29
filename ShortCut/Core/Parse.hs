@@ -37,6 +37,7 @@ module ShortCut.Core.Parse
 
 import ShortCut.Core.Types
 
+import ShortCut.Core.Debug    (debug)
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Control.Monad.Identity (Identity)
@@ -76,7 +77,9 @@ parseString c = runParseM pScript ([], c)
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: CutConfig -> FilePath -> IO (Either ParseError CutScript)
-parseFile cfg path = readFile path >>= return . parseString cfg
+parseFile cfg path = readFile path' >>= return . parseString cfg
+  where
+    path' = debug cfg ("parse: '" ++ path ++ "'") path
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -286,7 +289,8 @@ pFun = do
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
       Left  err -> fail err
-      Right rtn -> return $ CutFun rtn deps (fName f) args
+      Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
+                   in return $ CutFun rtn' deps (fName f) args
 
 -----------------
 -- expressions --

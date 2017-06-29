@@ -68,7 +68,7 @@ cBlastCRB :: CutState -> CutExpr -> Rules FilePath
 cBlastCRB s@(scr,cfg) e@(CutFun _ _ _ [query, target]) = do
   qPath <- cExpr s query
   tPath <- cExpr s target
-  let crbTmp  = scriptTmp (cfgTmpDir cfg </> "cache" </> "crbblast") e []
+  let crbTmp  = scriptTmp cfg (cfgTmpDir cfg </> "cache" </> "crbblast") e []
       outPath = hashedTmp' cfg crb e []
   outPath %> \out -> do
     need [qPath, tPath]

@@ -1,9 +1,10 @@
 module Main where
 
+import ShortCut.Core.Debug        (debug)
 import Control.Monad              (when)
 import Data.Configurator          (load, lookup)
 import Data.Configurator.Types    (Config, Worth(..))
-import Data.Maybe                 (fromJust, fromMaybe)
+import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
 import Data.Version               (showVersion)
 import Paths_ShortCut             (version, getDataFileName)
@@ -29,11 +30,10 @@ loadConfig mods args = do
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   ctd <- loadField args cfg "tmpdir"
-  cvb <- loadField args cfg "verbose"
   return CutConfig
     { cfgScript  = csc
     , cfgTmpDir  = fromJust ctd
-    , cfgVerbose = read $ fromMaybe "False" cvb -- TODO why is this needed?
+    , cfgDebug   = isPresent args $ longOption "debug"
     , cfgModules = mods
     }
 
@@ -58,6 +58,7 @@ main = do
     -- TODO allow passing args to tasty here if not too hard
     (withArgs [] $ runTests modules >> exitSuccess)
   cfg <- loadConfig modules args
+  let cfg' = debug cfg ("config: " ++ show cfg) cfg
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile cfg
-    else runRepl cfg
+    then evalFile cfg'
+    else runRepl  cfg'

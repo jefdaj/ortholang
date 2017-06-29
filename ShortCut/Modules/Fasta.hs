@@ -64,7 +64,7 @@ cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
   faPath <- cExpr s fa
   let faTmp  = cacheDir cfg </> "fasta"
-      tmpOut = scriptTmp faTmp expr "txt"
+      tmpOut = scriptTmp cfg faTmp expr "txt"
       actOut = hashedTmp cfg expr []
   tmpOut %> \out -> do
     need [faPath]
@@ -97,7 +97,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   idsPath <- cExpr s ids
   let faTmp   = cacheDir cfg </> "fasta"
       outPath = hashedTmp cfg e []
-      tmpList = scriptTmp faTmp e "txt"
+      tmpList = scriptTmp cfg faTmp e "txt"
   tmpList %> \out -> fromShortCutList cfg faTmp idsPath out
   outPath %> \out -> do
     need [faPath, tmpList]

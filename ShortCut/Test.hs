@@ -32,7 +32,7 @@ mkTestConfig :: [CutModule] -> FilePath -> CutConfig
 mkTestConfig mods dir = CutConfig
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
-  , cfgVerbose = True
+  , cfgDebug = True
   , cfgModules = mods
   }
 
