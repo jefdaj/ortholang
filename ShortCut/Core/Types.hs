@@ -152,10 +152,10 @@ num = CutType
 data CutConfig = CutConfig
   { cfgScript  :: Maybe FilePath
   , cfgTmpDir  :: FilePath
-  , cfgVerbose :: Bool
+  , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
   }
-  -- deriving (Eq, Show, Read)
+  deriving (Show)
 
 -----------------
 -- Parse monad --
@@ -217,3 +217,7 @@ data CutModule = CutModule
   , mFunctions :: [CutFunction]
   }
   -- deriving (Eq, Read)
+
+-- TODO what about prettyShow in Pretty.hs?
+instance Show CutModule where
+  show = mName

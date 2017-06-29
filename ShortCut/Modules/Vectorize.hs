@@ -9,11 +9,10 @@
 
 module ShortCut.Modules.Vectorize where
 
-import Debug.Trace
-
 import Development.Shake
 import ShortCut.Core.Types
 
+import ShortCut.Core.Debug        (debugReadLines)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Compile      (cExpr, hashedTmp, scriptTmpFile, scriptTmpDir)
 import ShortCut.Modules.Repeat    (extractExprs)
@@ -56,18 +55,18 @@ rMapLastTmp :: (CutConfig -> [FilePath] -> Action ()) -> String
 rMapLastTmp actFn tmpPrefix s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   -- initPaths <- mapM (cExpr s) (traceShow exprs $ init exprs)
   -- lastsPath <- cExpr s (last exprs)
-  exprPaths <- mapM (cExpr s) (trace "rMapLastTmp" exprs)
+  exprPaths <- mapM (cExpr s) exprs
   let outPath    = hashedTmp cfg e []
       (ListOf t) = typeOf $ last exprs -- TODO fails on a ref? not sure
   outPath %> \_ -> do
-    lastPaths <- readFileLines $ last exprPaths
+    lastPaths <- debugReadLines cfg $ last exprPaths
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
 
         -- TODO this might work for the current one but not in general right?
         tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
 
-        outs   = map (scriptTmpFile (cfgTmpDir cfg </> "cache") (extOf t)) (traceShow lastPaths lastPaths)
+        outs   = map (scriptTmpFile cfg (cfgTmpDir cfg </> "cache") (extOf t)) lastPaths
         outs' = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
@@ -77,7 +76,7 @@ rMapLastTmp actFn tmpPrefix s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
 
         -- TODO soooo close now! is tmpDir just a little messed up?
         --      actually it looks pretty ok. maybe an earlier one is wrong?
-        actFn cfg $ (traceShow tmpDir tmpDir):out:last:inits
+        actFn cfg (tmpDir:out:last:inits)
 
         trackWrite [out]
       )

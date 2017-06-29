@@ -6,8 +6,6 @@ module ShortCut.Modules.BlastCRB where
 
 -- TODO what to do about the e-value cutoff?
 
-import Debug.Trace
-
 import ShortCut.Core.Types
 import Development.Shake
 
@@ -85,7 +83,7 @@ rSimpleTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
 rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let outPath = hashedTmp' cfg rtnType e []
-      tmpDir  = scriptTmpDir (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
+      tmpDir  = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
   outPath %> \_ -> do
     need argPaths
     liftIO $ createDirectoryIfMissing True tmpDir
@@ -108,15 +106,15 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
     let lasts = map (cfgTmpDir cfg </>) lastPaths
-        dirs  = map (\p -> scriptTmpDir tmpPrefix' [show e, show p]) lasts
+        dirs  = map (\p -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
         outs  = map (\d -> d </> "out" <.> extOf rtnType) dirs
         rels  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip3 lasts dirs outs)
       (\(last, dir, out) -> do
         need $ initPaths ++ [last]
-        liftIO $ createDirectoryIfMissing True (traceShow dir dir)
-        actFn cfg $ [dir, (traceShow out out)] ++ initPaths ++ [last]
+        liftIO $ createDirectoryIfMissing True dir
+        actFn cfg $ [dir, out] ++ initPaths ++ [last]
         trackWrite [out]
       )
     need outs
@@ -180,8 +178,8 @@ aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
 aTsvColumn n cfg as@[tmpDir, outPath, tsvPath] = do
   -- need [tsvPath]
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-      tmpOut = scriptTmpFile tmpDir as (extOf str)
+      tmpOut = scriptTmpFile cfg tmpDir as (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut strs
-  toShortCutList cfg str tmpOut (traceShow as outPath)
-aTsvColumn _ _ as = traceShow as (error "bad arguments to aTsvColumn")
+  toShortCutList cfg str tmpOut outPath
+aTsvColumn _ _ as = error "bad arguments to aTsvColumn"

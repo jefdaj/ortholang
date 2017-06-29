@@ -43,6 +43,7 @@ executable shortcut
   other-modules:    Paths_ShortCut,
                     ShortCut.Core,
                     ShortCut.Core.Compile,
+                    ShortCut.Core.Debug,
                     ShortCut.Core.Eval,
                     ShortCut.Core.Parse,
                     ShortCut.Core.Pretty,

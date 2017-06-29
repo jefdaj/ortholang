@@ -7,7 +7,7 @@ Usage:
 Options:
   --help           Print this help text and exit.
   --version        Print version number and exit.
-  --verbose        Print debugging messages to stderr? [default: no]
+  --debug          Print debugging messages to stderr
   --test           Run self-tests and exit.
   --interactive    Start the interpreter, and load SCRIPT if any. This is the
                    default if no arguments are given.

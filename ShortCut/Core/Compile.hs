@@ -30,6 +30,7 @@ module ShortCut.Core.Compile
   where
 
 import Development.Shake
+import ShortCut.Core.Debug
 import ShortCut.Core.Types
 
 import Crypto.Hash                (hash, Digest, MD5)
@@ -98,30 +99,37 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
 -- case for "result", which is like the "main" function of a ShortCut script,
 -- and always goes to <tmpdir>/result.
 namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
-namedTmp cfg (CutVar var) expr = cfgTmpDir cfg </> base
+namedTmp cfg (CutVar var) expr = debug cfg ("tmpfile:" ++ rtn) rtn
   where
-    base  = if var == "result" then var else var <.> extOf (typeOf expr)
+    base = if var == "result" then var else var <.> extOf (typeOf expr)
+    rtn  = cfgTmpDir cfg </> base
 
 -- TODO extn can be found inside expr now; remove it
 hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
-hashedTmp cfg expr paths = exprDir cfg </> uniq <.> extOf (typeOf expr)
+hashedTmp cfg expr paths = debug cfg ("tmpfile: " ++ rtn) rtn
   where
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
-    uniq = digest $ unlines $ (show expr):paths'
+    uniq   = digest $ unlines $ (show expr):paths'
+    rtn    = exprDir cfg </> uniq <.> extOf (typeOf expr)
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
 hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
-hashedTmp' cfg rtn expr paths = exprDir cfg </> uniq <.> extOf rtn
+hashedTmp' cfg rtn expr paths = debug cfg ("tmpfile: " ++ rtn') rtn'
   where
     paths' = map (makeRelative $ cfgTmpDir cfg) paths
-    uniq = digest $ unlines $ (show expr):paths'
+    uniq   = digest $ unlines $ (show expr):paths'
+    rtn'   = exprDir cfg </> uniq <.> extOf rtn
 
-scriptTmpDir :: Show a => FilePath -> a -> FilePath
-scriptTmpDir tmpDir uniq = tmpDir </> digest uniq
+scriptTmpDir :: Show a => CutConfig -> FilePath -> a -> FilePath
+scriptTmpDir cfg tmpDir uniq = debug cfg ("tmpdir: " ++ rtn) rtn
+  where
+    rtn = tmpDir </> digest uniq
 
-scriptTmpFile :: Show a => FilePath -> a -> String -> FilePath
-scriptTmpFile tmpDir uniq ext = scriptTmpDir tmpDir uniq <.> ext
+scriptTmpFile :: Show a => CutConfig -> FilePath -> a -> String -> FilePath
+scriptTmpFile cfg tmpDir uniq ext = debug cfg ("tmpfile: " ++ rtn) rtn
+  where
+    rtn = scriptTmpDir cfg tmpDir uniq <.> ext
 
 ------------------------------
 -- compile the ShortCut AST --
@@ -172,7 +180,7 @@ cLit :: CutState -> CutExpr -> Rules FilePath
 cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
   let path = hashedTmp cfg expr []
-  path %> \out -> writeFileChanged out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
+  path %> \out -> debugWriteChanged cfg out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
   return path
   where
     paths :: CutExpr -> String
@@ -232,10 +240,10 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 -- TODO is there any good way to handle that?
 fromShortCutList :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
 fromShortCutList cfg tmpDir inPath outPath = do
-  litPaths <- readFileLines inPath
+  litPaths <- debugReadLines cfg inPath
   let litPaths' = map (cfgTmpDir cfg </>) litPaths
   need litPaths'
-  lits <- mapM readFile' litPaths'
+  lits <- mapM (debugReadFile cfg) litPaths'
   writeFileLines outPath lits
 
 -- reverse of fromShortCutList. this is needed after calling a script that
@@ -244,10 +252,10 @@ fromShortCutList cfg tmpDir inPath outPath = do
 -- TODO any reason to pass the full state instead of just config?
 toShortCutList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
 toShortCutList cfg litType inPath outPath = do
-  lits <- fmap sort $ readFileLines inPath
+  lits <- fmap sort $ debugReadLines cfg inPath
   let litExprs  = map (CutLit litType) lits
       litPaths  = map (\e -> hashedTmp cfg e []) litExprs
       litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
       litPairs  = zip lits litPaths
-  liftIO $ mapM (\(l,p) -> writeFile' p $ l ++ "\n") litPairs
+  liftIO $ mapM (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
   liftIO $ writeFileLines outPath litPaths'

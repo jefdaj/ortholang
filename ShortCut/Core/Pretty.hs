@@ -62,7 +62,7 @@ instance Pretty CutConfig where
   pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
     [ ("script" , show . cfgScript )
     , ("tmpdir" , show . cfgTmpDir )
-    , ("verbose", show . cfgVerbose)
+    , ("verbose", show . cfgDebug)
     ]
 
 -- TODO change this to something useful
@@ -76,8 +76,8 @@ instance Show CutFunction where
 instance Pretty CutModule where
   pPrint fn = text $ "CutModule '" ++ mName fn ++ "'"
 
-instance Show CutModule where
-  show = prettyShow
+-- instance Show CutModule where
+  -- show = prettyShow
 
 -- TODO oh i finally get it!
 --      nothing's wrong here. extract_seqs should be adding a layer of
