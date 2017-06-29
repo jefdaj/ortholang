@@ -1,6 +1,8 @@
 .
 |-- cache
 |   |-- crbblast
+|   |   |-- 49b11882f1
+|   |   |   `-- 2bc128a8a4.str
 |   |   `-- 80af883df5
 |   |       |-- evalues_data
 |   |       |-- fitting_data
@@ -28,11 +30,10 @@
 |       |-- ccbbb8d620.str
 |       |-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
 |       |-- daabc91684.str
-|       |-- eb85a49f5b.str
 |       `-- eb85a49f5b.str.list
 |-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
 |-- hits.crb -> cache/shortcut/b9920733a6.crb
 |-- mini6803.faa -> cache/shortcut/3dd244caec.faa
 `-- result -> cache/shortcut/eb85a49f5b.str.list
 
-4 directories, 31 files
+5 directories, 31 files

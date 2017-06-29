@@ -1,7 +1,9 @@
 .
 |-- cache
+|   |-- bc6b012bce.crb
+|   |-- be07839ef4.crb
 |   |-- crbblast
-|   |   |-- 8abba28f0d
+|   |   |-- 0cabba3080
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
 |   |   |   |-- full7002.phr
@@ -13,7 +15,10 @@
 |   |   |   |-- mini6803.psq
 |   |   |   |-- mini6803_into_full7002.1.blast
 |   |   |   `-- out.crb
-|   |   |-- 8ee217c961
+|   |   |-- 5ae0828591.str
+|   |   |-- 668c5ed690.str
+|   |   |-- 9700b14fbc.str
+|   |   |-- 9f6ab72cf8
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
 |   |   |   |-- full7122.phr
@@ -25,7 +30,7 @@
 |   |   |   |-- mini6803.psq
 |   |   |   |-- mini6803_into_full7122.1.blast
 |   |   |   `-- out.crb
-|   |   `-- f8f8901e01
+|   |   `-- a58f541876
 |   |       |-- evalues_data
 |   |       |-- fitting_data
 |   |       |-- full7942.phr
@@ -37,22 +42,35 @@
 |   |       |-- mini6803.psq
 |   |       |-- mini6803_into_full7942.1.blast
 |   |       `-- out.crb
+|   |-- eab6c5da50.crb
 |   `-- shortcut
+|       |-- 068b6e0914.crb.list
+|       |-- 092b067d8c.str
+|       |-- 108ad7a653.str
+|       |-- 11d487fa74.str
+|       |-- 1ad0599ebf.str.list
 |       |-- 1b69e079d0.str
 |       |-- 26112c170d.faa -> $PWD/data/7002genes.faa
-|       |-- 370915cff8.crb
+|       |-- 3c962de529.str
 |       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
 |       |-- 407c2e523b.str
 |       |-- 620b13968a.faa.list
+|       |-- 6270ccb3fa.str
 |       |-- 779cde49fa.str
+|       |-- 77bd2233aa.str
+|       |-- 7c5ea62914.str
 |       |-- 7df7dbc0ff.str
 |       |-- 814c26a3a0.faa -> $PWD/data/7122genes.faa
-|       `-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
+|       |-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
+|       |-- e07b1246dc.str
+|       |-- e6655c8a09.str
+|       |-- ecdd827c4d.str.list.list
+|       `-- ed1ab7717e.str
 |-- full7002.faa -> cache/shortcut/26112c170d.faa
 |-- full7122.faa -> cache/shortcut/814c26a3a0.faa
 |-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
-|-- hitlists.crb -> cache/shortcut/370915cff8.crb
+|-- hitlists.crb.list -> cache/shortcut/068b6e0914.crb.list
 |-- mini6803.faa -> cache/shortcut/3dd244caec.faa
-`-- result -> hitlists.crb
+`-- result -> cache/shortcut/1ad0599ebf.str.list
 
-6 directories, 49 files
+6 directories, 67 files
