@@ -1,14 +1,17 @@
 module ShortCut.Modules.Blast where
 
--- import Development.Shake
--- import Development.Shake.FilePath ((</>))
--- import ShortCut.Core.Compile
--- import ShortCut.Core.Parse (defaultTypeCheck)
-
+import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.ModuleAPI (defaultTypeCheck)
+import ShortCut.Core.Debug (debugReadFile)
+import ShortCut.Core.Parse (defaultTypeCheck)
 import ShortCut.Modules.Fasta  (faa, fna)
+-- import Development.Shake.FilePath ((</>))
+import ShortCut.Core.Compile (cExpr, hashedTmp')
+-- import ShortCut.Core.Parse (defaultTypeCheck)
+
+-- TODO write this in Debug
+debugTrackWrite = undefined
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -32,40 +35,36 @@ bht = CutType
   , tCat  = defaultCat
   }
 
--- TODO mkBlast function that deduplicates these
-
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn name qType tType = CutFunction
-  { fName      = name
+mkBlastFn cmd qType tType = CutFunction
+  { fName      = cmd
   , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = undefined
+  , fCompiler  = mkBlastRules cmd
   }
 
--- filterGenes :: CutFunction
--- filterGenes = CutFunction
---   { fName = "filter_genes"
---   , fTypeCheck = defaultTypeCheck [ListOf gen, ListOf gom, num] (ListOf gen)
---   , fFixity  = Prefix
---   , fCompiler = cFilterGenes
---   }
--- 
--- filterGenomes :: CutFunction
--- filterGenomes = CutFunction
---   { fName = "filter_genomes"
---   , fTypeCheck = defaultTypeCheck [ListOf gom, ListOf gen, num] (ListOf gom)
---   , fFixity  = Prefix
---   , fCompiler = cFilterGenomes
---   }
--- 
--- worstBestEvalue :: CutFunction
--- worstBestEvalue = CutFunction
---   { fName = "worst_best_evalue"
---   , fTypeCheck = defaultTypeCheck [ListOf gen, ListOf gom] num
---   , fFixity  = Prefix
---   , fCompiler = cWorstBest
---   }
--- 
+mkBlastRules :: String -> (CutState -> CutExpr -> Rules FilePath)
+mkBlastRules bCmd s@(_,cfg) e@(CutFun _ _ _ [query, target, evalue]) = do
+  qPath <- cExpr s query
+  tPath <- cExpr s target
+  ePath <- cExpr s evalue
+  let oPath = hashedTmp' cfg bht e []
+      dPath = undefined -- TODO make database(s)!
+  oPath %> \_ -> do
+    -- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
+    need [dPath, qPath, tPath, ePath]
+    eVal <- debugReadFile cfg ePath
+    unit $ quietly $ cmd bCmd -- TODO (Cwd tmpDir) here?
+      [ "-db"     , dPath
+      , "-query"  , qPath
+      , "-subject", tPath
+      , "-out"    , oPath
+      , "-evalue" , eVal
+      ]
+    debugTrackWrite [oPath]
+  return oPath
+mkBlastRules _ _ _ = error "bad argument to mkBlastRules"
+
 -- bblast :: CmdResult b => CutConfig -> FilePath -> FilePath -> FilePath -> Action b
 -- bblast cfg genes genomes out = do
 --   -- liftIO $ putStrLn "entering bblast"
