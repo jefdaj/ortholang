@@ -53,7 +53,7 @@ executable shortcut
                     ShortCut.Modules,
                     ShortCut.Modules.Load,
                     ShortCut.Modules.BioMartR,
-                    -- ShortCut.Modules.Blast,
+                    ShortCut.Modules.Blast,
                     ShortCut.Modules.BlastCRB,
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.Fasta,
