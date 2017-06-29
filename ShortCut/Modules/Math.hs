@@ -6,7 +6,7 @@ import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
 import Development.Shake
 import ShortCut.Core.Compile (cBop)
-import ShortCut.Core.Parse (defaultTypeCheck)
+import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Types
 
 cutModule :: CutModule

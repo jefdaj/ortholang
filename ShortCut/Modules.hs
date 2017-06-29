@@ -2,7 +2,6 @@ module ShortCut.Modules where
 
 import ShortCut.Core.Types (CutModule(..))
 
-import qualified ShortCut.Modules.Load      as Load
 import qualified ShortCut.Modules.BioMartR  as BioMartR
 -- import qualified ShortCut.Modules.Blast     as Blast -- TODO replace with shmlast
 import qualified ShortCut.Modules.BlastCRB  as BlastCRB
@@ -13,12 +12,10 @@ import qualified ShortCut.Modules.Permute   as Permute
 import qualified ShortCut.Modules.Repeat    as Repeat
 import qualified ShortCut.Modules.Sets      as Sets
 import qualified ShortCut.Modules.Summarize as Summarize
-import qualified ShortCut.Modules.Vectorize as Vectorize
 
 modules :: [CutModule]
 modules =
-  [ Load.cutModule
-  , BioMartR.cutModule
+  [ BioMartR.cutModule
   -- , Blast.cutModule
   , BlastCRB.cutModule
   , Cheat.cutModule
@@ -28,5 +25,4 @@ modules =
   , Repeat.cutModule
   , Sets.cutModule
   , Summarize.cutModule
-  , Vectorize.cutModule
   ]

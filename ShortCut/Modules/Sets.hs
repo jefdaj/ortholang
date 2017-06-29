@@ -3,7 +3,7 @@ module ShortCut.Modules.Sets where
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
 import ShortCut.Core.Compile (cBop)
-import ShortCut.Core.Parse (typeError)
+import ShortCut.Core.ModuleAPI (typeError)
 import ShortCut.Core.Types
 
 cutModule :: CutModule

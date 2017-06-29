@@ -15,7 +15,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Parse (defaultTypeCheck)
+import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)

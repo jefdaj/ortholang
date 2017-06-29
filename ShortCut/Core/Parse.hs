@@ -25,9 +25,6 @@ module ShortCut.Core.Parse
   , pVar
   , pVarEq
   , spaceChars
-  -- typecheckers
-  , defaultTypeCheck
-  , typeError
   )
   where
 
@@ -364,19 +361,3 @@ pScript = do
   scr <- many (pStatement <* many pComment)
   putState (scr, cfg)
   return scr
-
--------------------------------------------------
--- typechecking (is this the proper location?) --
--------------------------------------------------
-
-typeError :: [CutType] -> [CutType] -> String
-typeError expected actual =
-  "Type error:\nexpected " ++ show expected
-           ++ "\nbut got " ++ show actual
-
-defaultTypeCheck :: [CutType] -> CutType
-                 -> [CutType] -> Either String CutType
-defaultTypeCheck expected returned actual =
-  if actual == expected
-    then Right returned
-    else Left $ typeError expected actual

@@ -5,13 +5,10 @@ module ShortCut.Modules.Fasta where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.String.Utils              (strip)
 import Development.Shake.FilePath     ((</>))
 import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmpFile)
-import ShortCut.Core.Parse            (typeError)
-import ShortCut.Modules.Load          (mkLoad, mkLoadList)
+import ShortCut.Core.ModuleAPI        (mkLoad, mkLoadList, typeError)
 import Text.PrettyPrint.HughesPJClass (text)
-import System.FilePath            (makeRelative)
 
 -----------------------
 -- module definition --
