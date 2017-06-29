@@ -53,7 +53,9 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
   where
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    cmd  = (shell "tree") { cwd = Just $ cfgTmpDir cfg' }
+    -- crbblast folder is excluded because blast isn't deterministic
+    -- TODO list of plugin folders to exlude, or certain filetypes in them only
+    cmd  = (shell $ "tree -I 'crbblast'") { cwd = Just $ cfgTmpDir cfg' }
     act  = do
              silence $ evalFile cfg'
              out <- readCreateProcess cmd ""

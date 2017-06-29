@@ -9,10 +9,9 @@ module ShortCut.Modules.BlastCRB where
 import ShortCut.Core.Types
 import Development.Shake
 
-import ShortCut.Core.Debug (debug)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile,
-                                   hashedTmp', toShortCutList)
+                                   hashedTmp', toShortCutList, exprDir)
 import ShortCut.Core.Parse        (defaultTypeCheck)
 import ShortCut.Modules.Fasta     (faa, fna)
 import ShortCut.Modules.Vectorize (rMapLastTmp)
@@ -57,7 +56,6 @@ blastCRB = CutFunction
   }
 
 blastCRBAll :: CutFunction
--- blastCRBAll = vectorize blastCRB "crb_blast_all"
 blastCRBAll = CutFunction
   { fName      = "crb_blast_all"
   , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf crb)
@@ -85,16 +83,15 @@ rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let outPath = hashedTmp' cfg rtnType e []
       tmpDir  = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
-  (debug cfg ("outPath: " ++ outPath) outPath) %> \_ -> do
-    need $ debug cfg ("argPaths: " ++ show argPaths) argPaths
-    liftIO $ createDirectoryIfMissing True $ debug cfg ("tmpDir: " ++ tmpDir) tmpDir
-    actFn cfg $ [tmpDir, (debug cfg ("outPath for aTsvColumn: " ++ outPath) outPath)] ++ argPaths
+  outPath %> \_ -> do
+    need argPaths
+    liftIO $ createDirectoryIfMissing True tmpDir
+    actFn cfg $ [tmpDir, outPath] ++ argPaths
     trackWrite [outPath]
-  return $ debug cfg ("rSimpleTmp outPath: " ++ outPath) outPath
+  return outPath
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
 -- TODO move to another module
--- TODO should this put the intermediate out files in the expressions cache dir?
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
@@ -105,16 +102,16 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
   let outPath    = hashedTmp' cfg (ListOf rtnType) e []
       tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
   outPath %> \_ -> do
-    lastPaths <- readFileLines (debug cfg ("lastsPath: " ++ lastsPath) lastsPath)
+    lastPaths <- readFileLines lastsPath
     let lasts = map (cfgTmpDir cfg </>) lastPaths
-        dirs  = map (\p -> scriptTmpDir cfg (debug cfg ("tmpPrefix': " ++ tmpPrefix') tmpPrefix') [show e, show p]) lasts
+        dirs  = map (\p -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
         outs  = map (\d -> d </> "out" <.> extOf rtnType) dirs
         rels  = map (makeRelative $ cfgTmpDir cfg) outs -- TODO standardize this stuff
     (flip mapM)
       (zip3 lasts dirs outs)
       (\(last, dir, out) -> do
         need $ initPaths ++ [last]
-        liftIO $ createDirectoryIfMissing True $ debug cfg ("dir: " ++ dir) dir
+        liftIO $ createDirectoryIfMissing True dir
         actFn cfg $ [dir, out] ++ initPaths ++ [last]
         trackWrite [out]
       )
@@ -124,7 +121,7 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
 rMapLastTmps _ _ _ _ _ = error "bad argument to rMapLastTmps"
 
 aBlastCRB :: CutConfig -> [FilePath] -> Action ()
-aBlastCRB _ [tmpDir, oPath, qPath, tPath] =
+aBlastCRB cfg args@[tmpDir, oPath, qPath, tPath] =
   quietly $ cmd (Cwd tmpDir) "crb-blast"
     [ "--query"  , qPath
     , "--target" , tPath
@@ -150,7 +147,7 @@ extractAllCrbQueries = CutFunction
   { fName      = "extract_all_crb_queries"
   , fTypeCheck = defaultTypeCheck [(ListOf crb)] (ListOf $ ListOf str)
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 1) "crbblast"
+  , fCompiler  = rMapLastTmp (aTsvColumn 1) "crbblast" (ListOf str)
   }
 
 extractCrbTargets :: CutFunction
@@ -166,21 +163,15 @@ extractAllCrbTargets = CutFunction
   { fName      = "extract_all_crb_targets"
   , fTypeCheck = defaultTypeCheck [(ListOf crb)] (ListOf $ ListOf str)
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 2) "crbblast"
+  , fCompiler  = rMapLastTmp (aTsvColumn 2) "crbblast" (ListOf str)
   }
 
--- TODO is it not getting to here? stuck in an r* fn somewhere?
---      because there aren't any .str.list paths being printed...
---
--- HUH MIGHTA FOUND THE BUG: THE OUTPATH IS NAMED LIKE:
--- /root/.shortcut/cache/b388c53d6c.cache/crbblast/7c52c1f9ea/out.crb
--- (should be more like /root/.shortcut/cache/crbblast/b388c53d6c/out.str.list)
+-- TODO move to another module
 aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
-aTsvColumn n cfg as@[tmpDir, outPath, tsvPath] = do -- TODO aha! outPath is the fucked up one
-  -- need [tsvPath]
+aTsvColumn n cfg as@[_, outPath, tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-      tmpOut = scriptTmpFile cfg tmpDir as (extOf str)
+      tmpOut = scriptTmpFile cfg (exprDir cfg) ["aTsvColumn", show n, tsvPath] (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut strs
-  toShortCutList cfg str (debug cfg ("tmpOut: " ++ tmpOut) tmpOut) (debug cfg ("outPath: " ++ outPath) outPath)
+  toShortCutList cfg str tmpOut outPath
 aTsvColumn _ _ as = error "bad arguments to aTsvColumn"

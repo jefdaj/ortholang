@@ -12,9 +12,9 @@ module ShortCut.Modules.Vectorize where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug        (debug, debugReadLines)
+import ShortCut.Core.Debug        (debugReadLines)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Compile      (cExpr, hashedTmp, scriptTmpFile, scriptTmpDir)
+import ShortCut.Core.Compile      (cExpr, hashedTmp, hashedTmp', scriptTmpFile, scriptTmpDir, exprDir)
 import ShortCut.Modules.Repeat    (extractExprs)
 import System.FilePath            (makeRelative)
 import System.Directory           (createDirectoryIfMissing)
@@ -27,14 +27,6 @@ cutModule = CutModule
   , mFunctions = []
   }
 
--- vectorize :: CutFunction -> String -> CutFunction
--- vectorize fn name = CutFunction
---   { fName      = name
---   , fFixity    = Prefix
---   , fTypeCheck = tVectorize $ fTypeCheck fn
---   , fCompiler  = cMapSimple $ fCompiler fn
---   }
-
 -- TODO enforce that lists are actually all the same type (in parser)!
 tVectorize :: ([CutType] -> Either String CutType) ->  [CutType]
            -> Either String CutType
@@ -46,42 +38,27 @@ tVectorize tFn argTypes = case tFn argTypes' of
     (ListOf t) = last argTypes
     argTypes'  = init argTypes ++ [t]
 
--- TODO does this need a tmpDir?
--- TODO bug? argument could be a ref to a fn rather than the fn itself
---      (or a ref to a ref to a fn...) (am I thinking about this right?)
---      if so, probably a general problem with any fn that takes a list of args!
-rMapLastTmp :: (CutConfig -> [FilePath] -> Action ()) -> String
-           -> (CutState -> CutExpr -> Rules FilePath)
-rMapLastTmp actFn tmpPrefix s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
-  -- initPaths <- mapM (cExpr s) (traceShow exprs $ init exprs)
-  -- lastsPath <- cExpr s (last exprs)
+rMapLastTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
+            -> (CutState -> CutExpr -> Rules FilePath)
+rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
   exprPaths <- mapM (cExpr s) exprs
-  let outPath    = hashedTmp cfg e []
-      (ListOf t) = typeOf $ last exprs -- TODO fails on a ref? not sure
+  let outPath    = hashedTmp' cfg t e []
   outPath %> \_ -> do
     lastPaths <- debugReadLines cfg $ last exprPaths
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
-
-        -- TODO this might work for the current one but not in general right?
-        tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
-
-        outs   = map (\p -> scriptTmpFile cfg (cfgTmpDir cfg </> "cache") p (extOf t)) lastPaths
+        tmpDir = exprDir cfg </> tmpPrefix
+        outs   = map (\p -> scriptTmpFile cfg (exprDir cfg) p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
       (\(out, last) -> do
         need (last:inits)
         liftIO $ createDirectoryIfMissing True tmpDir
-
-        -- TODO soooo close now! is tmpDir just a little messed up?
-        --      actually it looks pretty ok. maybe an earlier one is wrong?
-        -- TODO bug in out here!
-        actFn cfg (tmpDir:(debug cfg ("out for aTsvColumn: " ++ out) out):last:inits)
-
+        actFn cfg (tmpDir:out:last:inits)
         trackWrite [out]
       )
     need outs
     writeFileLines outPath outs'
   return outPath
-rMapLastTmp _ _ _ _ = error "bad argument to cMapLastTmp"
+rMapLastTmp _ _ _ _ _ = error "bad argument to cMapLastTmp"

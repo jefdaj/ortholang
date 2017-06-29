@@ -22,6 +22,7 @@ module ShortCut.Core.Compile
   , cExpr
   , cList
   , cacheDir
+  , exprDir
   , addPrefixes
   , digest
   , toShortCutList
