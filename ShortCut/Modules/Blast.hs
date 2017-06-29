@@ -1,34 +1,47 @@
 module ShortCut.Modules.Blast where
 
--- TODO write some of these functions:
--- blastn
--- blastp
--- blastx
--- dbiblast
--- deltablast
--- psiblast
--- rpsblast
--- rpsblastn
--- tblastn
--- tblastx
-
 -- import Development.Shake
 -- import Development.Shake.FilePath ((</>))
 -- import ShortCut.Core.Compile
 -- import ShortCut.Core.Parse (defaultTypeCheck)
--- import ShortCut.Core.Types
--- import ShortCut.Modules.Fasta (gen, gom, faa, fna, csv)
--- 
--- cutModule :: CutModule
--- cutModule = CutModule
---   { mName = "blast"
---   , mFunctions =
---     [ filterGenes
---     , filterGenomes
---     , worstBestEvalue
---     ]
---   }
--- 
+
+import ShortCut.Core.Types
+
+import ShortCut.Core.ModuleAPI (defaultTypeCheck)
+import ShortCut.Modules.Fasta  (faa, fna)
+
+cutModule :: CutModule
+cutModule = CutModule
+  { mName = "blast"
+  , mFunctions =
+    [ mkBlastFn  "blastn" fna fna
+    , mkBlastFn  "blastp" faa faa
+    , mkBlastFn  "blastx" fna faa
+    , mkBlastFn "tblastn" faa fna
+    , mkBlastFn "tblastx" fna fna
+    -- TODO vectorized versions
+    -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
+    -- TODO extract_queries, extract_targets
+    ]
+  }
+
+bht :: CutType
+bht = CutType
+  { tExt  = "bht"
+  , tDesc = "tab-separated table of reciprocal blast hits"
+  , tCat  = defaultCat
+  }
+
+-- TODO mkBlast function that deduplicates these
+
+mkBlastFn :: String -> CutType -> CutType -> CutFunction
+mkBlastFn name qType tType = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
+  , fFixity    = Prefix
+  , fCompiler  = undefined
+  }
+
 -- filterGenes :: CutFunction
 -- filterGenes = CutFunction
 --   { fName = "filter_genes"
