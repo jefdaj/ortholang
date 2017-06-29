@@ -12,7 +12,7 @@ module ShortCut.Modules.Vectorize where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug        (debugReadLines)
+import ShortCut.Core.Debug        (debug, debugReadLines)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Compile      (cExpr, hashedTmp, scriptTmpFile, scriptTmpDir)
 import ShortCut.Modules.Repeat    (extractExprs)
@@ -66,8 +66,8 @@ rMapLastTmp actFn tmpPrefix s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
         -- TODO this might work for the current one but not in general right?
         tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
 
-        outs   = map (scriptTmpFile cfg (cfgTmpDir cfg </> "cache") (extOf t)) lastPaths
-        outs' = map (makeRelative $ cfgTmpDir cfg) outs
+        outs   = map (\p -> scriptTmpFile cfg (cfgTmpDir cfg </> "cache") p (extOf t)) lastPaths
+        outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
       (\(out, last) -> do
@@ -76,7 +76,8 @@ rMapLastTmp actFn tmpPrefix s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
 
         -- TODO soooo close now! is tmpDir just a little messed up?
         --      actually it looks pretty ok. maybe an earlier one is wrong?
-        actFn cfg (tmpDir:out:last:inits)
+        -- TODO bug in out here!
+        actFn cfg (tmpDir:(debug cfg ("out for aTsvColumn: " ++ out) out):last:inits)
 
         trackWrite [out]
       )

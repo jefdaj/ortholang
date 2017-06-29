@@ -129,7 +129,7 @@ scriptTmpDir cfg tmpDir uniq = debug cfg ("tmpdir: " ++ rtn) rtn
 scriptTmpFile :: Show a => CutConfig -> FilePath -> a -> String -> FilePath
 scriptTmpFile cfg tmpDir uniq ext = debug cfg ("tmpfile: " ++ rtn) rtn
   where
-    rtn = scriptTmpDir cfg tmpDir uniq <.> ext
+    rtn = tmpDir </> digest uniq <.> ext
 
 ------------------------------
 -- compile the ShortCut AST --
