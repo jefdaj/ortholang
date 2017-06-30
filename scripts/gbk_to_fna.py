@@ -19,10 +19,11 @@ with open(outfaa, 'w') as out:
   for seq_record in SeqIO.parse(ingbk, 'genbank'):
     for seq_feature in seq_record.features:
       if seq_feature.type == 'CDS':
-        assert len(seq_feature.qualifiers['locus_tag']) == 1
-        assert len(seq_feature.qualifiers['product']) == 1
         assert len(seq_feature.qualifiers['translation']) == 1
+        assert len(seq_feature.qualifiers['gene']) == 1
+        assert len(seq_feature.qualifiers['product']) == 1
         sid   = seq_feature.qualifiers['locus_tag'][0]
+        # sgene = seq_feature.qualifiers['gene'][0]
         sprod = seq_feature.qualifiers['product'][0]
-        seq   = seq_feature.qualifiers['translation'][0]
+        seq   = seq_feature.extract(seq_record.seq)
         out.write(">%s %s\n%s\n" % (sid, sprod, seq))

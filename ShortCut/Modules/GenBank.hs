@@ -1,18 +1,16 @@
 module ShortCut.Modules.GenBank where
 
-import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Compile (cExpr, hashedTmp)
-import ShortCut.Modules.Fasta (faa, fna)
+import ShortCut.Core.Types
+
+import ShortCut.Core.Compile   (cExpr, hashedTmp)
 import ShortCut.Core.ModuleAPI (defaultTypeCheck, cOneArgScript, mkLoad)
+import ShortCut.Modules.Fasta  (faa, fna)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "genbank"
-  , mFunctions = 
-    [ mkLoad "load_gbk" gbk
-    , gbkToFaa
-    ]
+  , mFunctions = [loadGbk, gbkToFaa, gbkToFna]
   }
 
 gbk :: CutType
@@ -22,7 +20,9 @@ gbk = CutType
   , tCat  = defaultCat
   }
 
--- TODO fna version, which is what i really wanted...
+loadGbk :: CutFunction
+loadGbk = mkLoad "load_gbk" gbk
+
 gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
   { fName      = "gbk_to_faa"
@@ -31,10 +31,10 @@ gbkToFaa = CutFunction
   , fCompiler  = cOneArgScript "genbank" "gbk_to_faa.py"
   }
 
--- cGenbankToFaa :: CutState -> CutExpr -> Rules FilePath
--- cGenbankToFaa s@(_,cfg) e@(CutFun _ _ _ [gbk]) = do
---   gbkPath <- cExpr s gbk
---   let oPath = hashedTmp cfg e []
---   oPath %> \_ -> undefined
---   return oPath
--- cGenbankToFaa _ _ = error "bad argument to cGenbankToFaa"
+gbkToFna :: CutFunction
+gbkToFna = CutFunction
+  { fName      = "gbk_to_fna"
+  , fTypeCheck = defaultTypeCheck [gbk] fna
+  , fFixity    = Prefix
+  , fCompiler  = cOneArgScript "genbank" "gbk_to_fna.py"
+  }

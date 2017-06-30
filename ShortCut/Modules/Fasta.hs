@@ -23,7 +23,7 @@ cutModule = CutModule
     , mkLoad "load_fna" fna
     , extractSeqs
     , extractSeqIDs
-    , translate
+    , translate -- TODO make a "convert" module
     -- , back_transcribe
     -- , mkLoadList "load_csvs" csv -- TODO remove once list loading works
     ]
