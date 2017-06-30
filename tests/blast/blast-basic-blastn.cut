@@ -1,3 +1,5 @@
-genes6803  = load_fna "data/6803genes10.fna"
+seqids6803 = extract_seq_ids (load_faa "data/6803genes10.faa")
+genome6803 = load_fna "data/6803genome.fna"
+genes6803  = extract_seqs genome6803 seqids6803
 genome7942 = load_fna "data/7942genome.fna"
 result = blastn genes6803 genome7942 1e-5

@@ -4,10 +4,11 @@ module ShortCut.Modules.Fasta where
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Debug (debugTrackWrite)
 
 import Development.Shake.FilePath     ((</>))
 import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmpFile)
-import ShortCut.Core.ModuleAPI        (mkLoad, mkLoadList, typeError)
+import ShortCut.Core.ModuleAPI        (mkLoad, mkLoadList, defaultTypeCheck, typeError)
 import Text.PrettyPrint.HughesPJClass (text)
 
 -----------------------
@@ -22,6 +23,8 @@ cutModule = CutModule
     , mkLoad "load_fna" fna
     , extractSeqs
     , extractSeqIDs
+    , translate
+    -- , back_transcribe
     -- , mkLoadList "load_csvs" csv -- TODO remove once list loading works
     ]
   }
@@ -101,3 +104,33 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
     quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList
   return outPath
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
+
+-------------------------------------
+-- convert between DNA and protein --
+-------------------------------------
+
+translate :: CutFunction
+translate = CutFunction
+  { fName      = "translate"
+  , fFixity    = Prefix
+  , fTypeCheck = defaultTypeCheck [fna] faa
+  , fCompiler  = cConvert "translate.py"
+  }
+
+-- TODO remove as biologically invalid?
+-- back_transcribe :: CutFunction
+-- back_transcribe = CutFunction
+--   { fName      = "back_transcribe"
+--   , fFixity    = Prefix
+--   , fTypeCheck = defaultTypeCheck [faa] fna
+--   , fCompiler  = cConvert "back_transcribe.py"
+--   }
+
+cConvert :: FilePath -> CutState -> CutExpr -> Rules FilePath
+cConvert script s@(_,cfg) e@(CutFun _ _ _ [fa]) = do
+  faPath <- cExpr s fa
+  let oPath = hashedTmp cfg e []
+  oPath %> \_ -> need [faPath] >> unit (cmd script oPath faPath)
+    -- debugTrackWrite cfg [oPath] TODO is this implied?
+  return oPath
+cConvert _ _ _ = error "bad argument to cConvert"

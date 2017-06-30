@@ -2,6 +2,7 @@
 
 # Convert a list of genes back to FASTA.
 # Usage: extract-seqs-by-id <tmpdir> <outfasta> <infasta> <idlist>
+# TODO why does this create an empty fasta file??
 
 from Bio import SeqIO
 from sys import argv
@@ -11,8 +12,6 @@ def read_ids(filename):
         return [l.strip() for l in f.readlines()]
 
 def filter_seqs(fasta, ids):
-    print ids
-    print fasta
     return list(s for s in SeqIO.parse(fasta, 'fasta') if s.id in ids)
 
 def write_seqs(seqs, filename):

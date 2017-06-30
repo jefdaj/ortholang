@@ -234,7 +234,7 @@ fromShortCutList cfg tmpDir inPath outPath = do
   litPaths <- debugReadLines cfg inPath
   let litPaths' = map (cfgTmpDir cfg </>) litPaths
   need litPaths'
-  lits <- mapM (debugReadFile cfg) litPaths'
+  lits <- mapM (\p -> fmap init $ debugReadFile cfg p) litPaths'
   writeFileLines outPath lits
 
 -- reverse of fromShortCutList. this is needed after calling a script that
