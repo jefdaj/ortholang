@@ -58,6 +58,7 @@ executable shortcut
                     ShortCut.Modules.BlastCRB,
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.Fasta,
+                    ShortCut.Modules.GenBank,
                     ShortCut.Modules.Math,
                     ShortCut.Modules.Permute,
                     ShortCut.Modules.Repeat,
