@@ -3,6 +3,7 @@ module ShortCut.Core.ModuleAPI
   , defaultTypeCheck
   , mkLoad
   , mkLoadList
+  , cOneArgScript
   , aTsvColumn
   , rSimpleTmp
   , rMapLastTmp
@@ -15,7 +16,7 @@ import ShortCut.Core.Types
 
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile,
+import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile, cacheDir,
                                    hashedTmp, hashedTmp', exprDir, toShortCutList)
 import ShortCut.Core.Debug        (debugReadLines)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
@@ -40,6 +41,18 @@ defaultTypeCheck expected returned actual =
 ------------------------------------------
 -- functions to make whole CutFunctions --
 ------------------------------------------
+
+cOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
+cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [arg]) = do
+  argPath <- cExpr s arg
+  let tmpDir = cacheDir cfg </> tmpName
+      oPath  = hashedTmp cfg expr []
+  oPath %> \_ -> do
+    need [argPath]
+    quietly $ unit $ cmd script tmpDir oPath argPath
+    trackWrite [oPath]
+  return oPath
+cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 
 -- load a single file --
 

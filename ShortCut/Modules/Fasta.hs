@@ -4,10 +4,11 @@ module ShortCut.Modules.Fasta where
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Debug (debugTrackWrite)
 
 import Development.Shake.FilePath     ((</>))
 import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmpFile)
-import ShortCut.Core.ModuleAPI        (mkLoad, mkLoadList, typeError)
+import ShortCut.Core.ModuleAPI        (mkLoad, mkLoadList, defaultTypeCheck, typeError)
 import Text.PrettyPrint.HughesPJClass (text)
 
 -----------------------
@@ -22,6 +23,8 @@ cutModule = CutModule
     , mkLoad "load_fna" fna
     , extractSeqs
     , extractSeqIDs
+    , translate -- TODO make a "convert" module
+    -- , back_transcribe
     -- , mkLoadList "load_csvs" csv -- TODO remove once list loading works
     ]
   }
@@ -57,19 +60,22 @@ extractSeqIDs = CutFunction
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
-cExtractSeqIDs :: CutState -> CutExpr -> Rules FilePath
-cExtractSeqIDs s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
+cExtractSeqIDs = cOneArgListScript "fasta" "extract-seq-ids.py"
+
+-- TODO move to API
+cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
+cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
   faPath <- cExpr s fa
-  let faTmp  = cacheDir cfg </> "fasta"
-      tmpOut = scriptTmpFile cfg faTmp expr "txt"
+  let tmpDir = cacheDir cfg </> tmpName
+      tmpOut = scriptTmpFile cfg tmpDir expr "txt"
       actOut = hashedTmp cfg expr []
   tmpOut %> \out -> do
     need [faPath]
-    quietly $ cmd "extract-seq-ids.py" faTmp out faPath
+    quietly $ cmd script tmpDir out faPath
     -- trackWrite [out]
   actOut %> \_ -> toShortCutList cfg str tmpOut actOut
   return actOut
-cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"
+cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
 
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
@@ -77,7 +83,7 @@ cExtractSeqIDs _ _ = error "bad argument to cExtractSeqIDs"
 
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
-  { fName      = "extract_seqs"
+  { fName      = "extract_seqs_by_id"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
   , fCompiler  = cExtractSeqs
@@ -90,14 +96,44 @@ tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
-  liftIO . putStrLn $ "extracting sequences from " ++ faPath
   idsPath <- cExpr s ids
+  -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let faTmp   = cacheDir cfg </> "fasta"
       outPath = hashedTmp cfg e []
       tmpList = scriptTmpFile cfg faTmp e "txt"
-  tmpList %> \out -> fromShortCutList cfg faTmp idsPath out
-  outPath %> \out -> do
+  tmpList %> \_ -> fromShortCutList cfg faTmp idsPath tmpList
+  outPath %> \_ -> do
     need [faPath, tmpList]
-    quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList
+    quietly $ cmd "extract-seqs-by-id.py" faTmp outPath faPath tmpList
   return outPath
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
+
+-------------------------------------
+-- convert between DNA and protein --
+-------------------------------------
+
+translate :: CutFunction
+translate = CutFunction
+  { fName      = "translate"
+  , fFixity    = Prefix
+  , fTypeCheck = defaultTypeCheck [fna] faa
+  , fCompiler  = cConvert "translate.py"
+  }
+
+-- TODO remove as biologically invalid?
+-- back_transcribe :: CutFunction
+-- back_transcribe = CutFunction
+--   { fName      = "back_transcribe"
+--   , fFixity    = Prefix
+--   , fTypeCheck = defaultTypeCheck [faa] fna
+--   , fCompiler  = cConvert "back_transcribe.py"
+--   }
+
+cConvert :: FilePath -> CutState -> CutExpr -> Rules FilePath
+cConvert script s@(_,cfg) e@(CutFun _ _ _ [fa]) = do
+  faPath <- cExpr s fa
+  let oPath = hashedTmp cfg e []
+  oPath %> \_ -> need [faPath] >> unit (cmd script oPath faPath)
+    -- debugTrackWrite cfg [oPath] TODO is this implied?
+  return oPath
+cConvert _ _ _ = error "bad argument to cConvert"

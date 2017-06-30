@@ -1,0 +1,3 @@
+genes6803  = load_faa "data/6803genes10.fna"
+genome7942 = load_fna "data/7942genome.fna"
+result = tblastx genes6803 genome7942 1e-5

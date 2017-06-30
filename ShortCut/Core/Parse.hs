@@ -271,6 +271,7 @@ pName = do
 fnNames :: CutConfig -> [String]
 fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
+-- TODO any way to do this last so "function not found" error comes through??
 pFun :: ParseM CutExpr
 pFun = do
   (_, cfg) <- getState

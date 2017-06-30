@@ -1,5 +1,3 @@
--- TODO once the modules are done, will this mostly be gone?
---      all except the basic refs, symlinks, etc. i guess
 
 -- Once text has been parsed into an abstract syntax tree (Parse.hs), this
 -- module "compiles" it by translating it into a set of Shake build rules. To
@@ -34,8 +32,7 @@ import Development.Shake
 import ShortCut.Core.Debug
 import ShortCut.Core.Types
 
-import Crypto.Hash                (hash, Digest, MD5)
-import Data.ByteString.Char8      (pack)
+import ShortCut.Core.Util         (digest)
 import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((<.>), (</>))
@@ -88,14 +85,6 @@ cacheDir cfg = cfgTmpDir cfg </> "cache"
 exprDir :: CutConfig -> FilePath
 exprDir cfg = cacheDir cfg </> "shortcut"
 
--- Note that MD5 is no longer considered secure
--- But for our purposes (checking for updated files) it doesn't matter.
--- See https://en.wikipedia.org/wiki/MD5
-digest :: (Show a) => a -> String
-digest val = take 10 $ show (hash asBytes :: Digest MD5)
-  where
-    asBytes = (pack . show) val
-
 -- TODO flip arguments for consistency with everything else There's a special
 -- case for "result", which is like the "main" function of a ShortCut script,
 -- and always goes to <tmpdir>/result.
@@ -122,6 +111,7 @@ hashedTmp' cfg rtn expr paths = debug cfg ("tmpfile: " ++ rtn') rtn'
     uniq   = digest $ unlines $ (show expr):paths'
     rtn'   = exprDir cfg </> uniq <.> extOf rtn
 
+-- TODO should this handle calling cfgTmpDir too?
 scriptTmpDir :: Show a => CutConfig -> FilePath -> a -> FilePath
 scriptTmpDir cfg tmpDir uniq = debug cfg ("tmpdir: " ++ rtn) rtn
   where
@@ -244,7 +234,7 @@ fromShortCutList cfg tmpDir inPath outPath = do
   litPaths <- debugReadLines cfg inPath
   let litPaths' = map (cfgTmpDir cfg </>) litPaths
   need litPaths'
-  lits <- mapM (debugReadFile cfg) litPaths'
+  lits <- mapM (\p -> fmap init $ debugReadFile cfg p) litPaths'
   writeFileLines outPath lits
 
 -- reverse of fromShortCutList. this is needed after calling a script that

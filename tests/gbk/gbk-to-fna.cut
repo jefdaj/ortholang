@@ -1,0 +1,3 @@
+gbk6803 = load_gbk "data/Synechocystis-PCC-6803-uid159873.gbk"
+fna6803 = gbk_to_fna gbk6803
+result  = fna6803

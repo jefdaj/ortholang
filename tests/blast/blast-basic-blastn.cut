@@ -1,0 +1,14 @@
+# this is a roundabout way to get the sequences,
+# but works around cyanobase being down and tests other functions for free
+# TODO should be able to extract sequence from gbk directly
+
+pcc6803full  = gbk_to_fna (load_gbk "data/Synechocystis-PCC-6803-uid159873.gbk")
+pcc6803small = extract_seqs_by_id pcc6803full
+                 ["SYNGTS_0001", "SYNGTS_0002", "SYNGTS_0003",
+                  "SYNGTS_0004", "SYNGTS_0005", "SYNGTS_0006",
+                  "SYNGTS_0007", "SYNGTS_0008", "SYNGTS_0009",
+                  "SYNGTS_0010"]
+
+pcc7942genome = load_fna "data/7942genome.fna"
+result = blastn pcc6803small pcc7942genome 1e-5
+# result = pcc6803small
