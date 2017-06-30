@@ -1,0 +1,3 @@
+genes6803    = load_fna "data/6803genes10.fna"
+genes7942all = load_faa "data/7942genes.faa"
+result = blastx genes6803 genes7942all 1e-5

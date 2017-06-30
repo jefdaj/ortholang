@@ -3,7 +3,7 @@ module ShortCut.Modules.Blast where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.Scientific            (formatScientific)
+import Data.Scientific            (formatScientific, FPFormat(..))
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Compile      (cExpr, hashedTmp', cacheDir, scriptTmpDir)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
@@ -94,14 +94,14 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ [query, subject, evalue]) = do
     -- dbDir   <- rBlastDB cfg (typeOf target) sPath
     -- dbFiles <- listFiles dbDir
     need $ [qPath, sPath, ePath] -- ++ dbFiles
-    -- TODO need to read this as scientific, then conver to a Real?
-    e <- fmap init $ debugReadFile cfg ePath
+    eStr <- fmap init $ debugReadFile cfg ePath
+    let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
     unit $ quietly $ cmd bCmd -- (AddEnv "BLASTDB" dbDir) -- TODO Cwd?
       -- [ "-db"     , "db" -- TODO anything useful needed here?
       [ "-query"  , qPath
       , "-subject", sPath -- TODO is this different from target?
       , "-out"    , oPath
-      , "-evalue" , e
+      , "-evalue" , eDec
       , "-outfmt" , "6"
       -- , "-num_threads", "4" -- TODO how to pick this? should I even use it?
       -- TODO support -remote?
