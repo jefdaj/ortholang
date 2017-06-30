@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Debug (debugReadFile)
-import ShortCut.Core.Parse (defaultTypeCheck)
+import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Modules.Fasta  (faa, fna)
 -- import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Compile (cExpr, hashedTmp')
