@@ -14,6 +14,7 @@ data-files:         usage.txt,
                     -- scripts/*.R,
                     -- scripts/*.py,
 
+                    tests/blast/*.cut,
                     tests/deps/*.txt,
                     tests/crb/*.cut,
                     tests/crb/*.tree,

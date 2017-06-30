@@ -6,6 +6,7 @@ module ShortCut.Core.Debug
   , debugWriteFile
   , debugWriteLines
   , debugWriteChanged
+  , debugTrackWrite
   )
   where
 
@@ -47,3 +48,6 @@ debugWriteLines cfg f ss = debug cfg ("write: " ++ f) (writeFileLines f ss)
 
 debugWriteChanged :: MonadIO m => CutConfig -> FilePath -> String -> m ()
 debugWriteChanged cfg f s = debug cfg ("write: " ++ f) (writeFileChanged f s)
+
+debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
+debugTrackWrite cfg fs = debug cfg ("write: " ++ show fs) (trackWrite fs)

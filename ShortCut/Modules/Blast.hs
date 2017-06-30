@@ -3,15 +3,14 @@ module ShortCut.Modules.Blast where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug (debugReadFile)
-import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Modules.Fasta  (faa, fna)
--- import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Compile (cExpr, hashedTmp')
--- import ShortCut.Core.Parse (defaultTypeCheck)
-
--- TODO write this in Debug
-debugTrackWrite = undefined
+import Data.Scientific            (formatScientific)
+import Development.Shake.FilePath ((</>))
+import ShortCut.Core.Compile      (cExpr, hashedTmp', cacheDir, scriptTmpDir)
+import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
+import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
+import ShortCut.Core.Util         (digest)
+import ShortCut.Modules.Fasta     (faa, fna)
+import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -29,49 +28,17 @@ cutModule = CutModule
     ]
   }
 
---------------------
--- make databases --
---------------------
-
--- TODO have this be a separate script called from the main blast fn
---      that way you can handle hashing, multiple files, etc. in one tmpdir
-
--- bdb :: CutType
--- bdb = CutType
---   { tExt  = "bdb"
---   , tDesc = "blast database" -- TODO is this going to be a folder? list of files?
---   , tCat  = defaultCat -- TODO list files?
---   }
-
--- makeblastdb :: CutType -> CutFunction
--- makeblastdb faType = CutFunction
---   { fName      = "makeblastdb"
---   , fTypeCheck = defaultTypeCheck [faType] bdb
---   , fFixity    = Prefix
---   , fCompiler  = rMakeBlastDB (if faType == faa then "prot" else "nucl")
---   }
-
--- TODO how should you handle needing multiple files here??
--- TODO use hashed name rather than varname for better caching
--- rMakeBlastDB :: String -> (CutState -> CutExpr -> Rules FilePath)
--- rMakeBlastDB dbType s@(_,cfg) e@(CutFun _ _ _ [fa]) = do
---   faPath <- cExpr s fa
---   let oPath = hashedTmp' cfg bdb e []
---   oPath %> \_ -> do
---     need [faPath]
---     unit $ quietly $ cmd "makeblastdb" -- TODO (Cwd tmpDir) here?
---       [ "-in"    , faPath
---       , "-out"   , oPath
---       , "-title" , undefined -- TODO what's this again?
---       , "-dbtype", dbType
---       ]
---     debugTrackWrite [oPath]
---   return oPath
--- rMakeBlastDB _ _ _ = error "bad argument to rMakeBlastDB"
-
-------------------
--- run searches --
-------------------
+{- The most straightforward way I can now think to do this is having a
+ - top-level db dir cache/blastdb, and in there is a folder for each database.
+ - The folder can be named by the hash of the fasta file it's made from, and
+ - inside are whatever files blast wants to make.
+ -
+ - I don't think this needs to be exposed to ShortCut users as an actual
+ - CutType yet, but that could happen at some point. Maybe it will seem more
+ - like the thing to do once I get folder-based types figured out in a standard
+ - way? (They'll probably come up elsewhere, like with tree-making programs) It
+ - also might be needed to use the NCBI nr database; not sure yet.
+ -}
 
 -- tsv with these columns:
 -- qseqid sseqid pident length mismatch gapopen
@@ -91,102 +58,54 @@ mkBlastFn cmd qType tType = CutFunction
   , fCompiler  = rBlast cmd
   }
 
+-- TODO move to Util?
+listFiles :: FilePath -> Action [FilePath]
+listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
+
+-- The extra hash command is needed to determine oDir
+-- TODO silence stdout
+-- rBlastDB :: CutConfig -> CutType -> FilePath -> Action FilePath
+-- rBlastDB cfg faType faPath = do
+--   need [faPath]
+--   hash <- fmap digest $ liftIO $ readFile faPath
+--   let dbDir = cacheDir cfg </> "blastdb" </> hash -- TODO need faType too?
+--   liftIO $ createDirectoryIfMissing True dbDir
+--   unit $ quietly $ cmd "makeblastdb" (Cwd dbDir)
+--     [ "-in"    , faPath
+--     , "-out"   , "db" -- TODO is this right?
+--     , "-title" , hash
+--     , "-dbtype", if faType == faa then "prot" else "nucl"
+--     ]
+--   files <- listFiles dbDir
+--   debugTrackWrite cfg files
+--   -- TODO need to communicate that files were written in dbDir?
+--   return dbDir
+
 -- TODO use hashed name rather than varname for better caching
+-- TODO are databases unneeded, or just automatically made in the working directory?
+-- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
 rBlast :: String -> (CutState -> CutExpr -> Rules FilePath)
-rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ [query, target, evalue]) = do
+rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ [query, subject, evalue]) = do
   qPath <- cExpr s query
-  tPath <- cExpr s target
+  sPath <- cExpr s subject
   ePath <- cExpr s evalue
   let oPath = hashedTmp' cfg bht e []
-      dPath = undefined -- TODO make database(s)!
   oPath %> \_ -> do
-    -- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
-    need [dPath, qPath, tPath, ePath]
-    e <- debugReadFile cfg ePath
-    -- TODO make tmpdir if needed
-    unit $ quietly $ cmd bCmd -- TODO (Cwd tmpDir) here?
-      -- TODO BLASTDB environment var like in bblast?
-      [ "-db"     , dPath
-      , "-query"  , qPath
-      , "-subject", tPath -- TODO is this different from target?
+    -- dbDir   <- rBlastDB cfg (typeOf target) sPath
+    -- dbFiles <- listFiles dbDir
+    need $ [qPath, sPath, ePath] -- ++ dbFiles
+    -- TODO need to read this as scientific, then conver to a Real?
+    e <- fmap init $ debugReadFile cfg ePath
+    unit $ quietly $ cmd bCmd -- (AddEnv "BLASTDB" dbDir) -- TODO Cwd?
+      -- [ "-db"     , "db" -- TODO anything useful needed here?
+      [ "-query"  , qPath
+      , "-subject", sPath -- TODO is this different from target?
       , "-out"    , oPath
       , "-evalue" , e
       , "-outfmt" , "6"
       -- , "-num_threads", "4" -- TODO how to pick this? should I even use it?
       -- TODO support -remote?
       ]
-    debugTrackWrite [oPath]
+    debugTrackWrite cfg [oPath]
   return oPath
 rBlast _ _ _ = error "bad argument to rBlast"
-
------------------------------
--- old stuff (TODO remove) --
------------------------------
-
--- bblast :: CmdResult b => CutConfig -> FilePath -> FilePath -> FilePath -> Action b
--- bblast cfg genes genomes out = do
---   -- liftIO $ putStrLn "entering bblast"
---   let bbtmp = cacheDir cfg </> "bblast"
---   need [genes, genomes]
---   -- TODO fix bblast so order doesn't matter here
---   -- TODO take a verbosity flag and pass the value on to bblast
---   quietly $ cmd "bblast" "-o" out "-d" genomes "-f" genes "-c" "tblastn" "-t" bbtmp
--- 
--- -- TODO factor out bblast!
--- cFilterGenes :: CutState -> CutExpr -> Rules FilePath
--- cFilterGenes s@(_,cfg) e@(CutFun _ _ _ [gens, goms, sci]) = do
---   -- liftIO $ putStrLn "entering cFilterGenes"
---   genes   <- cExpr s gens
---   genomes <- cExpr s goms
---   evalue  <- cExpr s sci
---   let hits   = hashedTmp' cfg csv e [genes, genomes]
---       faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
---       genes' = hashedTmp  cfg e [hits, evalue]
---       fgtmp  = cacheDir cfg </> "fgtmp" -- TODO remove? not actually used
---   -- TODO extract-seqs-by-id first, and pass that to filter_genes.R
---   -- faa' %> extractFastaSeqs cfg genes
---   faa' %> undefined -- so I can change extractFastaSeqs
---   hits %> bblast cfg faa' genomes
---   genes' %> \out -> do
---     need [genomes, hits, evalue]
---     quietly $ cmd "filter_genes.R" [fgtmp, out, genomes, hits, evalue]
---   return genes'
--- cFilterGenes _ _ = error "bad argument to cFilterGenes"
--- 
--- -- TODO factor out bblast!
--- cFilterGenomes :: CutState -> CutExpr -> Rules FilePath
--- cFilterGenomes s@(_,cfg) e@(CutFun _ _ _ [goms, gens, sci]) = do
---   -- liftIO $ putStrLn "entering cFilterGenomes"
---   genomes <- cExpr s goms
---   genes   <- cExpr s gens
---   evalue  <- cExpr s sci
---   let faa'     = hashedTmp' cfg faa e [genes, "extractseqs"]
---       hits     = hashedTmp' cfg csv e [genomes, genes]
---       genomes' = hashedTmp  cfg e [hits, evalue]
---       fgtmp = cacheDir cfg </> "fgtmp" -- TODO remove? not actually used
---   -- faa' %> extractFastaSeqs cfg genes
---   faa' %> undefined -- so I can change extractFastaSeqs
---   hits %> bblast cfg faa' genomes
---   genomes' %> \out -> do
---     need [genes, hits, evalue]
---     quietly $ cmd "filter_genomes.R" [fgtmp, out, genes, hits, evalue]
---   return genomes'
--- cFilterGenomes _ _ = error "bad argument to cFilterGenomes"
--- 
--- cWorstBest :: CutState -> CutExpr -> Rules FilePath
--- cWorstBest s@(_,cfg) e@(CutFun _ _ _ [gens, goms]) = do
---   -- liftIO $ putStrLn "entering cWorstBest"
---   genes   <- cExpr s gens
---   genomes <- cExpr s goms
---   let faa'   = hashedTmp' cfg faa e [genes, "extractseqs"]
---       hits   = hashedTmp' cfg csv e [genomes, genes]
---       evalue = hashedTmp  cfg e [genes, genomes]
---       wbtmp  = cacheDir cfg </> "wbtmp" -- TODO remove? not actually used
---   -- faa' %> extractFastaSeqs cfg genes
---   faa' %> undefined -- so I can change extractFastaSeqs
---   hits %> bblast cfg faa' genomes
---   evalue %> \out -> do
---     need [hits, genes]
---     quietly $ cmd "worst_best_evalue.R" [wbtmp, out, hits, genes]
---   return evalue
--- cWorstBest _ _ = error "bad argument to cWorstBest"

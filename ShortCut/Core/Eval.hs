@@ -40,10 +40,10 @@ myShake cfg = shake myOpts . alternatives
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg
       , shakeVerbosity = if cfgDebug cfg then Chatty else Quiet
-      , shakeThreads   = 0    -- set to number of processors
+      , shakeThreads   = 0    -- sets it to number of processors
+      , shakeChange    = ChangeModtimeAndDigest -- TODO test this
       -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeReport    = ["_shortcut/report.html"]
-      -- , shakeChange = ChangeModtimeAndDigest
       -- , shakeProgress = progressSimple
       -- , shakeLineBuffering = False
       }
