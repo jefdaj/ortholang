@@ -22,12 +22,60 @@ cutModule = CutModule
     , mkBlastFn  "blastx" fna faa
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
+    -- TODO expose makeblastdb?
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     -- TODO extract_queries, extract_targets
     ]
   }
 
+--------------------
+-- make databases --
+--------------------
+
+-- TODO have this be a separate script called from the main blast fn
+--      that way you can handle hashing, multiple files, etc. in one tmpdir
+
+-- bdb :: CutType
+-- bdb = CutType
+--   { tExt  = "bdb"
+--   , tDesc = "blast database" -- TODO is this going to be a folder? list of files?
+--   , tCat  = defaultCat -- TODO list files?
+--   }
+
+-- makeblastdb :: CutType -> CutFunction
+-- makeblastdb faType = CutFunction
+--   { fName      = "makeblastdb"
+--   , fTypeCheck = defaultTypeCheck [faType] bdb
+--   , fFixity    = Prefix
+--   , fCompiler  = rMakeBlastDB (if faType == faa then "prot" else "nucl")
+--   }
+
+-- TODO how should you handle needing multiple files here??
+-- TODO use hashed name rather than varname for better caching
+-- rMakeBlastDB :: String -> (CutState -> CutExpr -> Rules FilePath)
+-- rMakeBlastDB dbType s@(_,cfg) e@(CutFun _ _ _ [fa]) = do
+--   faPath <- cExpr s fa
+--   let oPath = hashedTmp' cfg bdb e []
+--   oPath %> \_ -> do
+--     need [faPath]
+--     unit $ quietly $ cmd "makeblastdb" -- TODO (Cwd tmpDir) here?
+--       [ "-in"    , faPath
+--       , "-out"   , oPath
+--       , "-title" , undefined -- TODO what's this again?
+--       , "-dbtype", dbType
+--       ]
+--     debugTrackWrite [oPath]
+--   return oPath
+-- rMakeBlastDB _ _ _ = error "bad argument to rMakeBlastDB"
+
+------------------
+-- run searches --
+------------------
+
+-- tsv with these columns:
+-- qseqid sseqid pident length mismatch gapopen
+-- qstart qend sstart send evalue bitscore
 bht :: CutType
 bht = CutType
   { tExt  = "bht"
@@ -40,11 +88,12 @@ mkBlastFn cmd qType tType = CutFunction
   { fName      = cmd
   , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = mkBlastRules cmd
+  , fCompiler  = rBlast cmd
   }
 
-mkBlastRules :: String -> (CutState -> CutExpr -> Rules FilePath)
-mkBlastRules bCmd s@(_,cfg) e@(CutFun _ _ _ [query, target, evalue]) = do
+-- TODO use hashed name rather than varname for better caching
+rBlast :: String -> (CutState -> CutExpr -> Rules FilePath)
+rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ [query, target, evalue]) = do
   qPath <- cExpr s query
   tPath <- cExpr s target
   ePath <- cExpr s evalue
@@ -53,17 +102,26 @@ mkBlastRules bCmd s@(_,cfg) e@(CutFun _ _ _ [query, target, evalue]) = do
   oPath %> \_ -> do
     -- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
     need [dPath, qPath, tPath, ePath]
-    eVal <- debugReadFile cfg ePath
+    e <- debugReadFile cfg ePath
+    -- TODO make tmpdir if needed
     unit $ quietly $ cmd bCmd -- TODO (Cwd tmpDir) here?
+      -- TODO BLASTDB environment var like in bblast?
       [ "-db"     , dPath
       , "-query"  , qPath
-      , "-subject", tPath
+      , "-subject", tPath -- TODO is this different from target?
       , "-out"    , oPath
-      , "-evalue" , eVal
+      , "-evalue" , e
+      , "-outfmt" , "6"
+      -- , "-num_threads", "4" -- TODO how to pick this? should I even use it?
+      -- TODO support -remote?
       ]
     debugTrackWrite [oPath]
   return oPath
-mkBlastRules _ _ _ = error "bad argument to mkBlastRules"
+rBlast _ _ _ = error "bad argument to rBlast"
+
+-----------------------------
+-- old stuff (TODO remove) --
+-----------------------------
 
 -- bblast :: CmdResult b => CutConfig -> FilePath -> FilePath -> FilePath -> Action b
 -- bblast cfg genes genomes out = do
