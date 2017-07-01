@@ -5,4 +5,4 @@ full7122 = load_faa "data/7122genes.faa"
 
 # TODO make one function that does this?
 hitlists = crb_blast_all mini6803 [full7942, full7002, full7122]
-result = common_elements (extract_all_crb_queries hitlists)
+result = common_elements (extract_all_queries hitlists)

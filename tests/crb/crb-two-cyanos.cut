@@ -1,4 +1,4 @@
 mini6803 = load_faa "data/6803genes10.faa"
 full7942 = load_faa "data/7942genes.faa"
 hits = crb_blast mini6803 full7942
-result = extract_crb_targets hits
+result = extract_targets hits

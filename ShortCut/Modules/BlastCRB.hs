@@ -24,10 +24,6 @@ cutModule = CutModule
   , mFunctions =
     [ blastCRB
     , blastCRBAll
-    , extractCrbQueries
-    , extractAllCrbQueries
-    , extractCrbTargets
-    , extractAllCrbTargets
     ]
   }
 
@@ -79,39 +75,3 @@ aBlastCRB cfg args@[tmpDir, oPath, qPath, tPath] =
     , "--threads", "8" -- TODO how to pick this?
     , "--split"
     ]
-
--------------------------------
--- list query or target hits --
--------------------------------
-
-extractCrbQueries :: CutFunction
-extractCrbQueries = CutFunction
-  { fName      = "extract_crb_queries"
-  , fTypeCheck = defaultTypeCheck [crb] (ListOf str)
-  , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aTsvColumn 1) "crbblast" (ListOf str)
-  }
-
-extractAllCrbQueries :: CutFunction
-extractAllCrbQueries = CutFunction
-  { fName      = "extract_all_crb_queries"
-  , fTypeCheck = defaultTypeCheck [(ListOf crb)] (ListOf $ ListOf str)
-  , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 1) "crbblast" (ListOf str)
-  }
-
-extractCrbTargets :: CutFunction
-extractCrbTargets = CutFunction
-  { fName      = "extract_crb_targets"
-  , fTypeCheck = defaultTypeCheck [crb] (ListOf str)
-  , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aTsvColumn 2) "crbblast" (ListOf str)
-  }
-
-extractAllCrbTargets :: CutFunction
-extractAllCrbTargets = CutFunction
-  { fName      = "extract_all_crb_targets"
-  , fTypeCheck = defaultTypeCheck [(ListOf crb)] (ListOf $ ListOf str)
-  , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 2) "crbblast" (ListOf str)
-  }

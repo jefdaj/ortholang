@@ -59,8 +59,8 @@ mkBlastFn cmd qType tType = CutFunction
   }
 
 -- TODO move to Util?
-listFiles :: FilePath -> Action [FilePath]
-listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
+-- listFiles :: FilePath -> Action [FilePath]
+-- listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
 
 -- The extra hash command is needed to determine oDir
 -- TODO silence stdout

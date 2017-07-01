@@ -9,6 +9,8 @@ extra-source-files: README.md
 data-files:         usage.txt,
                     examples/*.cut,
                     data/*.faa,
+                    data/*.fna,
+                    data/*.gbk,
                     tests/blast/*.cut,
                     tests/blast/*.tree,
                     tests/blast/*.result,

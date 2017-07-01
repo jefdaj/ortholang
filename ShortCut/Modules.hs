@@ -10,6 +10,7 @@ import qualified ShortCut.Modules.Math      as Math
 import qualified ShortCut.Modules.PRS       as PRS
 import qualified ShortCut.Modules.Sets      as Sets
 import qualified ShortCut.Modules.SeqIO     as SeqIO
+import qualified ShortCut.Modules.Tables    as Tables
 
 modules :: [CutModule]
 modules =
@@ -21,4 +22,5 @@ modules =
   , PRS.cutModule
   , Sets.cutModule
   , SeqIO.cutModule
+  , Tables.cutModule
   ]
