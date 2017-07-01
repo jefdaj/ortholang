@@ -16,15 +16,7 @@ let
     };
   });
 
-  last-align = pkgs.callPackage ./last-align {};
-  shmlast    = pkgs.callPackage ./shmlast    { inherit last-align; };
   crb-blast  = pkgs.callPackage ./crb-blast  { inherit ncbi-blast; };
-
-  # TODO remove this, as it's probably not useful to anyone
-  # bblast = pkgs.callPackage ./bblast {
-  #   inherit ncbi-blast;
-  # inherit (pkgs) parallel pythonPackages;
-  # };
 
   myPython = pkgs.pythonPackages // {
     biopython =  pkgs.callPackage ./biopython {
@@ -34,6 +26,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast last-align shmlast crb-blast;
+  inherit ncbi-blast crb-blast;
   pythonPackages = myPython;
 }
