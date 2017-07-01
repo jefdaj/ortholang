@@ -14,7 +14,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-		[ mkLoad "load_gbk" gbk
+    [ mkLoad "load_gbk" gbk
     , mkLoad "load_faa" faa
     , mkLoad "load_fna" fna
     , gbkToFaa

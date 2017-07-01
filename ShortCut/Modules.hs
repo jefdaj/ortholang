@@ -7,10 +7,8 @@ import qualified ShortCut.Modules.Blast     as Blast
 import qualified ShortCut.Modules.BlastCRB  as BlastCRB
 import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
 import qualified ShortCut.Modules.Math      as Math
-import qualified ShortCut.Modules.Permute   as Permute
-import qualified ShortCut.Modules.Repeat    as Repeat
+import qualified ShortCut.Modules.PRS       as PRS
 import qualified ShortCut.Modules.Sets      as Sets
-import qualified ShortCut.Modules.Summarize as Summarize
 import qualified ShortCut.Modules.SeqIO     as SeqIO
 
 modules :: [CutModule]
@@ -20,9 +18,7 @@ modules =
   , BlastCRB.cutModule
   , Cheat.cutModule
   , Math.cutModule
-  , Permute.cutModule
-  , Repeat.cutModule
+  , PRS.cutModule
   , Sets.cutModule
-  , Summarize.cutModule
   , SeqIO.cutModule
   ]

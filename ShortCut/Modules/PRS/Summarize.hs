@@ -1,4 +1,4 @@
-module ShortCut.Modules.Summarize where
+module ShortCut.Modules.PRS.Summarize where
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -7,17 +7,11 @@ import Data.List                  (intersect)
 import ShortCut.Core.Compile      (cExpr, hashedTmp')
 import Development.Shake.FilePath ((</>))
 
-cutModule :: CutModule
-cutModule = CutModule
-  { mName = "summarize"
-  , mFunctions =
-    [ commonElements
-    ]
-  }
+-- TODO write `any`
 
 commonElements :: CutFunction
 commonElements = CutFunction
-  { fName      = "common_elements"
+  { fName      = "common_elements" -- TODO rename to `all`?
   , fFixity    = Prefix
   , fTypeCheck = summaryTypeCheck
   , fCompiler  = cSummary (foldr1 intersect)

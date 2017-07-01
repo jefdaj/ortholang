@@ -1,0 +1,9 @@
+.
+`-- cache
+    `-- shortcut
+        |-- 1b69e079d0.str
+        |-- 3f1e68b765.str
+        |-- a54ef94577.num
+        `-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
+
+2 directories, 4 files

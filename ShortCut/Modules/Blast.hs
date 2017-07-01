@@ -9,7 +9,7 @@ import ShortCut.Core.Compile      (cExpr, hashedTmp', cacheDir, scriptTmpDir)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
 import ShortCut.Core.Util         (digest)
-import ShortCut.Modules.Fasta     (faa, fna)
+import ShortCut.Modules.SeqIO     (faa, fna)
 import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule

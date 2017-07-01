@@ -1,16 +1,8 @@
-module ShortCut.Modules.Permute where
+module ShortCut.Modules.PRS.Permute where
 
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile (cExpr, hashedTmp')
-
-cutModule :: CutModule
-cutModule = CutModule
-  { mName = "permute"
-  , mFunctions =
-    [ leaveOneOut
-    ]
-  }
 
 leaveOneOut :: CutFunction
 leaveOneOut = CutFunction

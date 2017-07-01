@@ -4,6 +4,7 @@ module ShortCut.Core.ModuleAPI
   , mkLoad
   , mkLoadList
   , cOneArgScript
+  , cOneArgListScript
   , aTsvColumn
   , rSimpleTmp
   , rMapLastTmp

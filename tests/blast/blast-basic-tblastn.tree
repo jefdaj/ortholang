@@ -1,0 +1,14 @@
+.
+|-- cache
+|   `-- shortcut
+|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
+|       |-- 5a7744855d.str
+|       |-- 779cde49fa.str
+|       |-- a325500a11.bht
+|       |-- a54ef94577.num
+|       `-- eb7af0efb4.fna -> $PWD/data/7942genome.fna
+|-- genes6803.faa -> cache/shortcut/3dd244caec.faa
+|-- genome7942.fna -> cache/shortcut/eb7af0efb4.fna
+`-- result -> cache/shortcut/a325500a11.bht
+
+2 directories, 9 files

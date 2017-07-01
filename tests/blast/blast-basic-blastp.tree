@@ -1,0 +1,14 @@
+.
+|-- cache
+|   `-- shortcut
+|       |-- 1b69e079d0.str
+|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
+|       |-- 779cde49fa.str
+|       |-- a54ef94577.num
+|       |-- ac3c38e452.bht
+|       `-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
+|-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
+|-- mini6803.faa -> cache/shortcut/3dd244caec.faa
+`-- result -> cache/shortcut/ac3c38e452.bht
+
+2 directories, 9 files
