@@ -1,4 +1,4 @@
-module ShortCut.Modules.PRS.Repeat where
+module ShortCut.Modules.Repeat where
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -6,6 +6,14 @@ import ShortCut.Core.Types
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Compile (cExpr, hashedTmp, addPrefixes, compileScript, digest)
 import System.FilePath       (makeRelative)
+
+cutModule :: CutModule
+cutModule = CutModule
+  { mName = "repeat"
+  , mFunctions =
+    [ repeatEach
+    ]
+  }
 
 repeatEach :: CutFunction
 repeatEach = CutFunction

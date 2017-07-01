@@ -1,4 +1,4 @@
-module ShortCut.Modules.PRS.Summarize where
+module ShortCut.Modules.Summarize where
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -6,6 +6,14 @@ import ShortCut.Core.Types
 import Data.List                  (intersect)
 import ShortCut.Core.Compile      (cExpr, hashedTmp')
 import Development.Shake.FilePath ((</>))
+
+cutModule :: CutModule
+cutModule = CutModule
+  { mName = "summarize"
+  , mFunctions =
+    [ commonElements
+    ]
+  }
 
 -- TODO write `any`
 
