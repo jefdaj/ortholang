@@ -54,6 +54,20 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [arg]) = do
   return oPath
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 
+cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
+cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
+  faPath <- cExpr s fa
+  let tmpDir = cacheDir cfg </> tmpName
+      tmpOut = scriptTmpFile cfg tmpDir expr "txt"
+      actOut = hashedTmp cfg expr []
+  tmpOut %> \out -> do
+    need [faPath]
+    quietly $ cmd script tmpDir out faPath
+    -- trackWrite [out]
+  actOut %> \_ -> toShortCutList cfg str tmpOut actOut
+  return actOut
+cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
+
 -- load a single file --
 
 {- Takes a string with the filepath to load. Creates a trivial expression file

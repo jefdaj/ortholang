@@ -9,11 +9,6 @@ extra-source-files: README.md
 data-files:         usage.txt,
                     examples/*.cut,
                     data/*.faa,
-
-                    -- TODO do these go here or in a separate nix package?
-                    -- scripts/*.R,
-                    -- scripts/*.py,
-
                     tests/blast/*.cut,
                     tests/deps/*.txt,
                     tests/crb/*.cut,
@@ -57,12 +52,11 @@ executable shortcut
                     ShortCut.Modules.Blast,
                     ShortCut.Modules.BlastCRB,
                     ShortCut.Modules.Cheat,
-                    ShortCut.Modules.Fasta,
-                    ShortCut.Modules.GenBank,
                     ShortCut.Modules.Math,
                     ShortCut.Modules.Permute,
                     ShortCut.Modules.Repeat,
                     ShortCut.Modules.Sets,
+                    ShortCut.Modules.SeqIO,
                     ShortCut.Modules.Summarize,
                     ShortCut.Test,
                     ShortCut.Test.Deps

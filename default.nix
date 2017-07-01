@@ -1,8 +1,9 @@
 with import ./nixpkgs;
 let
-  scripts    = import ./scripts;
+  biomartr   = import ./ShortCut/Modules/BioMartR;
+  seqio      = import ./ShortCut/Modules/SeqIO;
   cabalPkg   = haskellPackages.callPackage ./shortcut.nix {};
-  runDepends = scripts.runDepends ++ [ scripts ncbi-blast crb-blast ];
+  runDepends = biomartr.runDepends ++ seqio.runDepends ++ [ ncbi-blast crb-blast ];
 
 # see https://github.com/jml/nix-haskell-example
 in haskell.lib.overrideCabal cabalPkg (drv: {

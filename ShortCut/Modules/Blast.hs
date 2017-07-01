@@ -16,7 +16,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ mkBlastFn  "blastn" fna fna
+    [ mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastFn  "blastp" faa faa
     , mkBlastFn  "blastx" fna faa
     , mkBlastFn "tblastn" faa fna

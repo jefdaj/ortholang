@@ -1,32 +1,35 @@
-module ShortCut.Modules.Fasta where
-
--- TODO convert genbank to fasta in this module?
+module ShortCut.Modules.SeqIO where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Debug (debugTrackWrite)
 
-import Development.Shake.FilePath     ((</>))
-import ShortCut.Core.Compile          (cacheDir, cExpr, hashedTmp, toShortCutList, fromShortCutList, scriptTmpFile)
-import ShortCut.Core.ModuleAPI        (mkLoad, mkLoadList, defaultTypeCheck, typeError)
-import Text.PrettyPrint.HughesPJClass (text)
-
------------------------
--- module definition --
------------------------
+import Development.Shake.FilePath ((</>))
+import ShortCut.Core.Compile      (cacheDir, cExpr, hashedTmp, toShortCutList,
+                                   fromShortCutList, scriptTmpFile)
+import ShortCut.Core.Debug        (debugTrackWrite)
+import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
+                                   typeError, cOneArgScript, cOneArgListScript)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "fasta"
+  { mName = "seqio"
   , mFunctions =
-    [ mkLoad "load_faa" faa
+		[ mkLoad "load_gbk" gbk
+    , mkLoad "load_faa" faa
     , mkLoad "load_fna" fna
+    , gbkToFaa
+    , gbkToFna
     , extractSeqs
     , extractSeqIDs
-    , translate -- TODO make a "convert" module
-    -- , back_transcribe
-    -- , mkLoadList "load_csvs" csv -- TODO remove once list loading works
+    , translate
     ]
+  }
+
+gbk :: CutType
+gbk = CutType
+  { tExt  = "gbk"
+  , tDesc = "genbank file"
+  , tCat  = defaultCat
   }
 
 faa :: CutType
@@ -43,11 +46,28 @@ fna = CutType
   , tCat  = defaultCat
   }
 
+gbkToFaa :: CutFunction
+gbkToFaa = CutFunction
+  { fName      = "gbk_to_faa"
+  , fTypeCheck = defaultTypeCheck [gbk] faa
+  , fFixity    = Prefix
+  , fCompiler  = cOneArgScript "seqio" "gbk_to_faa.py"
+  }
+
+gbkToFna :: CutFunction
+gbkToFna = CutFunction
+  { fName      = "gbk_to_fna"
+  , fTypeCheck = defaultTypeCheck [gbk] fna
+  , fFixity    = Prefix
+  , fCompiler  = cOneArgScript "seqio" "gbk_to_fna.py"
+  }
+
 -------------------------------------------
 -- extract sequence IDs from FASTA files --
 -------------------------------------------
 
 -- TODO this needs to do relative paths again, not absolute!
+-- TODO also extract them from genbank files
 
 extractSeqIDs :: CutFunction
 extractSeqIDs = CutFunction
@@ -62,24 +82,11 @@ tExtractSeqIDs _ = Left "expected a fasta file"
 
 cExtractSeqIDs = cOneArgListScript "fasta" "extact-seq-ids.py"
 
--- TODO move to API
-cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
-cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
-  faPath <- cExpr s fa
-  let tmpDir = cacheDir cfg </> tmpName
-      tmpOut = scriptTmpFile cfg tmpDir expr "txt"
-      actOut = hashedTmp cfg expr []
-  tmpOut %> \out -> do
-    need [faPath]
-    quietly $ cmd script tmpDir out faPath
-    -- trackWrite [out]
-  actOut %> \_ -> toShortCutList cfg str tmpOut actOut
-  return actOut
-cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
-
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
 ----------------------------------------------
+
+-- TODO also extract them from genbank files
 
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
@@ -93,6 +100,7 @@ extractSeqs = CutFunction
 tExtractSeqs [x, ListOf str] | elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
+-- TODO can this be replaced with cOneArgListScript?
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
@@ -112,6 +120,7 @@ mExtractSeqs _ _ = error "bad argument to extractSeqs"
 -- convert between DNA and protein --
 -------------------------------------
 
+-- TODO name something else like fna_to_faa?
 translate :: CutFunction
 translate = CutFunction
   { fName      = "translate"
@@ -129,6 +138,7 @@ translate = CutFunction
 --   , fCompiler  = cConvert "back_transcribe.py"
 --   }
 
+-- TODO can this use cOneArgScript?
 cConvert :: FilePath -> CutState -> CutExpr -> Rules FilePath
 cConvert script s@(_,cfg) e@(CutFun _ _ _ [fa]) = do
   faPath <- cExpr s fa
