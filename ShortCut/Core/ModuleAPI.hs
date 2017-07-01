@@ -168,7 +168,7 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ expr
     lastPaths <- debugReadLines cfg $ last exprPaths
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
-        tmpDir = exprDir cfg </> tmpPrefix
+        tmpDir = exprDir cfg </> tmpPrefix -- TODO probably don't need the prefix anymore
         outs   = map (\p -> scriptTmpFile cfg (exprDir cfg) p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)

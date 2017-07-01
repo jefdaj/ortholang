@@ -80,7 +80,7 @@ extractSeqIDs = CutFunction
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
-cExtractSeqIDs = cOneArgListScript "fasta" "extact-seq-ids.py"
+cExtractSeqIDs = cOneArgListScript "fasta" "extract-seq-ids.py"
 
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
@@ -90,7 +90,7 @@ cExtractSeqIDs = cOneArgListScript "fasta" "extact-seq-ids.py"
 
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
-  { fName      = "extract_seqs"
+  { fName      = "extract_seqs_by_id"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
   , fCompiler  = cExtractSeqs
@@ -104,15 +104,15 @@ tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
-  liftIO . putStrLn $ "extracting sequences from " ++ faPath
   idsPath <- cExpr s ids
+  -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let faTmp   = cacheDir cfg </> "fasta"
       outPath = hashedTmp cfg e []
       tmpList = scriptTmpFile cfg faTmp e "txt"
-  tmpList %> \out -> fromShortCutList cfg faTmp idsPath out
-  outPath %> \out -> do
+  tmpList %> \_ -> fromShortCutList cfg faTmp idsPath tmpList
+  outPath %> \_ -> do
     need [faPath, tmpList]
-    quietly $ cmd "extract-seqs-by-id.py" faTmp out faPath tmpList
+    quietly $ cmd "extract-seqs-by-id.py" faTmp outPath faPath tmpList
   return outPath
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
 
