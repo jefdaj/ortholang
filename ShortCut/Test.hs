@@ -13,7 +13,7 @@ import Test.Tasty          (TestTree, defaultMain)
 import System.Environment  (setEnv)
 import Paths_ShortCut      (getDataFileName)
 import System.FilePath.Posix ((</>))
-import System.Process        (cwd, readCreateProcessWithExitCode, shell)
+import System.Process        (readCreateProcessWithExitCode, shell)
 
 import qualified ShortCut.Test.Parse as P
 import qualified ShortCut.Test.Eval  as E

@@ -7,8 +7,9 @@ module ShortCut.Core
   )
   where
 
-import ShortCut.Core.Pretty
-import ShortCut.Core.Debug (debug, debugShow)
-import ShortCut.Core.Eval  (evalFile)
-import ShortCut.Core.Repl  (runRepl)
-import ShortCut.Core.Types (CutConfig(..), CutModule(..))
+-- TODO be systematic about what's exported here
+
+import ShortCut.Core.Pretty (prettyShow)
+import ShortCut.Core.Eval   (evalFile)
+import ShortCut.Core.Repl   (runRepl)
+import ShortCut.Core.Types  (CutConfig(..), CutModule(..))
