@@ -57,7 +57,9 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
 -- * return type
 -- * salt, which can be changed to force re-evaluation of an expr + all depends
 --   (it should start at 0 and be incremented, though that doesn't really matter)
--- TODO test that it works correctly!
+-- TODO start from 1 instead of 0?
+-- TODO test that it works correctly! in particular, it should go thru refs!
+--      (do we need to add salts of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
 data CutExpr
   = CutLit  CutType Int String
@@ -76,11 +78,11 @@ data CutExpr
 -- getSalt (CutList _ n _ _)     = n
 
 setSalt :: Int -> CutExpr -> CutExpr
-setSalt n' (CutLit  t n s)          = CutLit  t n' s
-setSalt n' (CutRef  t n ds v)       = CutRef  t n' ds v
-setSalt n' (CutBop  t n ds s e1 e2) = CutBop  t n' ds s e1 e2
-setSalt n' (CutFun  t n ds s es)    = CutFun  t n' ds s es
-setSalt n' (CutList t n ds es)      = CutList t n' ds es
+setSalt n (CutLit  t _ s)          = CutLit  t n s
+setSalt n (CutRef  t _ ds v)       = CutRef  t n ds v
+setSalt n (CutBop  t _ ds s e1 e2) = CutBop  t n ds s e1 e2
+setSalt n (CutFun  t _ ds s es)    = CutFun  t n ds s es
+setSalt n (CutList t _ ds es)      = CutList t n ds es
 
 -- TODO have a separate CutAssign for "result"?
 type CutAssign = (CutVar, CutExpr)
