@@ -39,9 +39,9 @@ explainFnBug = "You've stumbled on an outstanding bug. Sorry about that! \
 -- TODO what if it's a function call? do we have to make a rule that you can't use those?
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: CutScript -> CutExpr -> [CutExpr]
-extractExprs  _  (CutList _ _ es) = es
-extractExprs scr (CutRef  _ _ v ) = extractExprs scr $ fromJust $ lookup v scr
-extractExprs _   (CutFun _ _ _ _) = error explainFnBug
+extractExprs  _  (CutList _ _ _ es) = es
+extractExprs scr (CutRef  _ _ _ v ) = extractExprs scr $ fromJust $ lookup v scr
+extractExprs _   (CutFun _ _ _ _ _) = error explainFnBug
 extractExprs  _   e               = error $ "bad arg to extractExpr: " ++ show e
 
 cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules FilePath
@@ -55,7 +55,7 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
   return resPath
 
 cRepeatEach :: CutState -> CutExpr -> Rules FilePath
-cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ (resExpr:(CutRef _ _ subVar):subList:[])) = do
+cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- cExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs

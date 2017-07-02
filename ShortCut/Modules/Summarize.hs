@@ -35,7 +35,7 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 cSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules FilePath
-cSummary summaryFn s@(_,cfg) expr@(CutFun _ _ fnName [iList]) = do
+cSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   iPath <- cExpr s iList
   let (ListOf (ListOf eType)) = typeOf iList
       oPath = hashedTmp' cfg (ListOf eType) expr [iPath, fnName]

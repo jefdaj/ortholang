@@ -44,7 +44,7 @@ defaultTypeCheck expected returned actual =
 ------------------------------------------
 
 cOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
-cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [arg]) = do
+cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   argPath <- cExpr s arg
   let tmpDir = cacheDir cfg </> tmpName
       oPath  = hashedTmp cfg expr []
@@ -56,7 +56,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [arg]) = do
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 
 cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
-cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ [fa]) = do
+cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   faPath <- cExpr s fa
   let tmpDir = cacheDir cfg </> tmpName
       tmpOut = scriptTmpFile cfg tmpDir expr "txt"
@@ -100,7 +100,7 @@ cLink s@(_,cfg) expr rtype = do
   return outPath
 
 cLoadOne :: CutType -> CutState -> CutExpr -> Rules FilePath
-cLoadOne t s (CutFun _ _ _ [p]) = cLink s p t
+cLoadOne t s (CutFun _ _ _ _ [p]) = cLink s p t
 cLoadOne _ _ _ = error "bad argument to cLoadOne"
 
 -- load a list of files --
@@ -119,7 +119,7 @@ mkLoadList name rtn = CutFunction
   }
 
 cLoadList :: CutType -> CutState -> CutExpr -> Rules FilePath
-cLoadList rtype s@(_,cfg) e@(CutFun (ListOf t) _ _ [CutList _ _ ps]) = do
+cLoadList rtype s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
   liftIO $ putStrLn "entering cLoadList"
   paths <- mapM (\p -> cLink s p rtype) ps -- TODO is cLink OK with no paths?
   let links = hashedTmp cfg e paths
@@ -147,7 +147,7 @@ aTsvColumn _ _ as = error "bad arguments to aTsvColumn"
 -- takes an action fn with any number of args and calls it with a tmpdir.
 rSimpleTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
            -> (CutState -> CutExpr -> Rules FilePath)
-rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
+rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let outPath = hashedTmp' cfg rtnType e []
       tmpDir  = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
@@ -161,7 +161,7 @@ rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
 rMapLastTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
             -> (CutState -> CutExpr -> Rules FilePath)
-rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ exprs) = do
+rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   exprPaths <- mapM (cExpr s) exprs
   let outPath    = hashedTmp' cfg t e []
   outPath %> \_ -> do
@@ -188,7 +188,7 @@ rMapLastTmp _ _ _ _ _ = error "bad argument to cMapLastTmp"
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
              -> (CutState -> CutExpr -> Rules FilePath)
-rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ exprs) = do
+rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   lastsPath <- cExpr s (last exprs)
   let outPath    = hashedTmp' cfg (ListOf rtnType) e []

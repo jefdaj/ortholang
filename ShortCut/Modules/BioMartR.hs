@@ -161,7 +161,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 cParseSearches :: CutState -> CutExpr -> Rules FilePath
-cParseSearches s@(_,cfg) expr@(CutList _ _ _) = do
+cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
   sList <- cExpr s expr
   let searchTable = hashedTmp' cfg search expr [sList]
   searchTable %> \out -> do
@@ -188,8 +188,8 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 
 -- TODO factor out a "trivial string file" function?
 cBioMartR :: String -> CutState -> CutExpr -> Rules FilePath
-cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ [ss]) = do
-  bmFn   <- cExpr s (CutLit str fn)
+cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
+  bmFn   <- cExpr s (CutLit str 0 fn)
   sTable <- cParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"

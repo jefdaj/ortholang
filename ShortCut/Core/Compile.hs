@@ -46,13 +46,11 @@ import System.FilePath            (makeRelative)
 -- TODO only mangle the specific vars we want changed!
 
 mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
-mangleExpr _ e@(CutLit  _ _) = e
-mangleExpr fn (CutRef  t vs v      ) = CutRef  t (map fn vs)   (fn v)
-mangleExpr fn (CutBop  t vs n e1 e2) = CutBop  t (map fn vs) n (mangleExpr fn e1) (mangleExpr fn e2)
-mangleExpr fn (CutFun  t vs n es   ) = CutFun  t (map fn vs) n (map (mangleExpr fn) es)
-mangleExpr fn (CutList t vs   es   ) = CutList t (map fn vs)   (map (mangleExpr fn) es)
--- mangleExpr fn (CutSubs r v ss as) = CutSubs (mangleExpr fn r) (fn v) (mangleExpr fn ss) (mangleScript fn as)
--- CutSubs CutExpr CutExpr CutVar [CutAssign] -- dep, ind, ind', cxt
+mangleExpr _ e@(CutLit  _ _ _) = e
+mangleExpr fn (CutRef  t n vs v      ) = CutRef  t n (map fn vs)   (fn v)
+mangleExpr fn (CutBop  t n vs s e1 e2) = CutBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (CutFun  t n vs s es   ) = CutFun  t n (map fn vs) s (map (mangleExpr fn) es)
+mangleExpr fn (CutList t n vs   es   ) = CutList t n (map fn vs)   (map (mangleExpr fn) es)
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
@@ -129,11 +127,11 @@ scriptTmpFile cfg tmpDir uniq ext = debug cfg ("tmpfile: " ++ rtn) rtn
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
 cExpr :: CutState -> CutExpr -> Rules FilePath
-cExpr s e@(CutLit  _ _      ) = cLit s e
-cExpr s e@(CutRef  _ _ _    ) = cRef s e
-cExpr s e@(CutList _ _ _    ) = cList s e
-cExpr s e@(CutBop  _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
-cExpr s e@(CutFun  _ _ n _  ) = compileByName s e n
+cExpr s e@(CutLit  _ _ _      ) = cLit s e
+cExpr s e@(CutRef  _ _ _ _    ) = cRef s e
+cExpr s e@(CutList _ _ _ _    ) = cList s e
+cExpr s e@(CutBop  _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
+cExpr s e@(CutFun  _ _ _ n _  ) = compileByName s e n
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutState -> CutExpr -> String -> Rules FilePath
@@ -175,18 +173,18 @@ cLit (_,cfg) expr = do
   return path
   where
     paths :: CutExpr -> String
-    paths (CutLit _ s) = s
+    paths (CutLit _ _ s) = s
     paths _ = error "bad argument to paths"
 
 -- TODO how to show the list once it's created? not just as a list of paths!
 -- TODO why are lists of lists not given .list.list ext? hides a more serious bug?
 --      or possibly the bug is that we're making accidental lists of lists?
 cList :: CutState -> CutExpr -> Rules FilePath
-cList (_,cfg) e@(CutList EmptyList _ _) = do
+cList (_,cfg) e@(CutList EmptyList _ _ _) = do
   let link = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return link
-cList s@(_,cfg) e@(CutList _ _ exprs) = do
+cList s@(_,cfg) e@(CutList _ _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
   let path   = hashedTmp cfg e paths
       paths' = map (makeRelative $ cfgTmpDir cfg) paths
@@ -197,7 +195,7 @@ cList _ _ = error "bad arguemnts to cList"
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 cRef :: CutState -> CutExpr -> Rules FilePath
-cRef (_,cfg) expr@(CutRef _ _ var) = return $ namedTmp cfg var expr
+cRef (_,cfg) expr@(CutRef _ _ _ var) = return $ namedTmp cfg var expr
 cRef _ _ = error "bad argument to cRef"
 
 -- Creates a symlink from varname to expression file.
@@ -244,7 +242,7 @@ fromShortCutList cfg tmpDir inPath outPath = do
 toShortCutList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
 toShortCutList cfg litType inPath outPath = do
   lits <- fmap sort $ debugReadLines cfg inPath
-  let litExprs  = map (CutLit litType) lits
+  let litExprs  = map (CutLit litType 0) lits
       litPaths  = map (\e -> hashedTmp cfg e []) litExprs
       litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
       litPairs  = zip lits litPaths

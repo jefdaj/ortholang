@@ -150,7 +150,7 @@ pRef = do
   (scr, _) <- getState
   case lookup v scr of 
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
-    Just e -> return $ CutRef (typeOf e) (depsOf e) v
+    Just e -> return $ CutRef (typeOf e) 0 (depsOf e) v
 
 --------------
 -- literals --
@@ -162,7 +162,7 @@ pNum = do
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
   n  <- digit
   ns <- lexeme $ many (digit <|> oneOf ".e-")
-  return $ CutLit num (n:ns)
+  return $ CutLit num 0 (n:ns)
 
 -- list of chars which can be escaped in ShortCut
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -186,7 +186,7 @@ pQuoted = (lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quo
     esc = char '\\' *> oneOf escapeChars
 
 pStr :: ParseM CutExpr
-pStr = CutLit str <$> pQuoted <?> "string"
+pStr = CutLit str 0 <$> pQuoted <?> "string"
 
 -- TODO remove the empty list case? can't imagine when it would be used
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
@@ -198,7 +198,7 @@ pList = do
                then EmptyList
                else typeOf $ head terms
   -- TODO assert that the rest of the terms match the first one here!
-  return $ CutList rtn deps terms
+  return $ CutList rtn 0 deps terms
 
 ---------------
 -- operators --
@@ -240,7 +240,7 @@ operatorTable2 cfg = [map binary bops]
 pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop2 [o] = pSym o *> (return $ \e1 e2 ->
   let deps = union (depsOf e1) (depsOf e2)
-  in CutBop (typeOf e1) deps [o] e1 e2)
+  in CutBop (typeOf e1) 0 deps [o] e1 e2)
 pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 
 ---------------
@@ -290,7 +290,7 @@ pFun = do
     Just f  -> case (fTypeCheck f) (map typeOf args) of
       Left  err -> fail err
       Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
-                   in return $ CutFun rtn' deps (fName f) args
+                   in return $ CutFun rtn' 0 deps (fName f) args
 
 -----------------
 -- expressions --

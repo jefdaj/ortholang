@@ -51,13 +51,17 @@ import Control.Monad.IO.Class   (liftIO)
 
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
  
--- TODO only keep the extensions themselves here, not the whole CutType?
+-- the common fields are:
+-- * return type
+-- * nonce, which can be incremented to change the hash and force re-evaluation
+--   (it should always start set to 0, although that doesn't really matter)
+-- * list of dependencies (except lits don't have any)
 data CutExpr
-  = CutLit  CutType String
-  | CutRef  CutType [CutVar] CutVar
-  | CutBop  CutType [CutVar] String  CutExpr CutExpr
-  | CutFun  CutType [CutVar] String [CutExpr]
-  | CutList CutType [CutVar] [CutExpr]
+  = CutLit  CutType Int String
+  | CutRef  CutType Int [CutVar] CutVar -- TODO do refs need a nonce?
+  | CutBop  CutType Int [CutVar] String  CutExpr CutExpr
+  | CutFun  CutType Int [CutVar] String [CutExpr]
+  | CutList CutType Int [CutVar] [CutExpr]
   deriving (Eq, Show)
 
 -- TODO have a separate CutAssign for "result"?
@@ -93,12 +97,12 @@ instance Show CutType where
   show = extOf
 
 typeOf :: CutExpr -> CutType
-typeOf (CutLit  t _          ) = t
-typeOf (CutRef  t _ _        ) = t
-typeOf (CutBop  t _ _ _ _    ) = t
-typeOf (CutFun  t _ _ _      ) = t
-typeOf (CutList EmptyList _ _) = EmptyList
-typeOf (CutList t  _ _       ) = ListOf t
+typeOf (CutLit  t _ _          ) = t
+typeOf (CutRef  t _ _ _        ) = t
+typeOf (CutBop  t _ _ _ _ _    ) = t
+typeOf (CutFun  t _ _ _ _      ) = t
+typeOf (CutList EmptyList _ _ _) = EmptyList
+typeOf (CutList t  _ _ _       ) = ListOf t
 
 -- note that traceShow in here can cause an infinite loop
 extOf :: CutType -> String
@@ -107,15 +111,15 @@ extOf EmptyList     = "list"
 extOf t = tExt t
 
 varOf :: CutExpr -> [CutVar]
-varOf (CutRef _ vs _) = vs
-varOf _               = []
+varOf (CutRef _ _ vs _) = vs
+varOf _                 = []
 
 depsOf :: CutExpr -> [CutVar]
-depsOf (CutLit  _ _         ) = []
-depsOf (CutRef  _ vs v      ) = v:vs
-depsOf (CutBop  _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
-depsOf (CutFun  _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (CutList _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (CutLit  _ _ _         ) = []
+depsOf (CutRef  _ _ vs v      ) = v:vs
+depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
+depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
+depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps

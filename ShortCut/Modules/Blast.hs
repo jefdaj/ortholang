@@ -85,7 +85,7 @@ mkBlastFn cmd qType tType = CutFunction
 -- TODO are databases unneeded, or just automatically made in the working directory?
 -- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
 rBlast :: String -> (CutState -> CutExpr -> Rules FilePath)
-rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ [query, subject, evalue]) = do
+rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
   qPath <- cExpr s query
   sPath <- cExpr s subject
   ePath <- cExpr s evalue

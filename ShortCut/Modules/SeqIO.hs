@@ -102,7 +102,7 @@ tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
 -- TODO can this be replaced with cOneArgListScript?
 cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
-cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ [fa, ids]) = do
+cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
@@ -140,7 +140,7 @@ translate = CutFunction
 
 -- TODO can this use cOneArgScript?
 cConvert :: FilePath -> CutState -> CutExpr -> Rules FilePath
-cConvert script s@(_,cfg) e@(CutFun _ _ _ [fa]) = do
+cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   faPath <- cExpr s fa
   let oPath = hashedTmp cfg e []
   oPath %> \_ -> need [faPath] >> unit (cmd script oPath faPath)

@@ -108,7 +108,7 @@ loop (promptFn:promptFns) = do
 updateScript :: CutScript -> CutAssign -> CutScript
 updateScript scr asn@(var, expr) =
   case expr of
-    (CutRef _ _ var') -> if var' == var then scr else scr'
+    (CutRef _ _ _ var') -> if var' == var then scr else scr'
     _ -> scr'
     where
       scr' = delFromAL scr var ++ [asn]
