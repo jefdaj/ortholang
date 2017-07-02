@@ -1,41 +1,43 @@
 .
 |-- cache
 |   |-- shortcut
-|   |   |-- 08b0df2aae.str
 |   |   |-- 144e3e36b6.str
-|   |   |-- 18aa67ad1c.str
+|   |   |-- 14c5be78ba.str
 |   |   |-- 223937da4f.str.list
 |   |   |-- 280524ae4e.str.list
 |   |   |-- 28f59ed6ab.str
+|   |   |-- 29bd237dd1.str
 |   |   |-- 2be2a6b558.str.list
+|   |   |-- 2c53132f3d.str
 |   |   |-- 3590aa6c60.fna -> $PWD/data/6803genes10.fna
 |   |   |-- 365ae4b20d.str.list.list
 |   |   |-- 3a2956d747.str
+|   |   |-- 3f5e2f49b1.str
+|   |   |-- 3fdb20ed4a.str
 |   |   |-- 498379e4ed.str.list
 |   |   |-- 4bb6bfde4f.str
 |   |   |-- 4cf05999e8.str
 |   |   |-- 52140ab5bb.bht
-|   |   |-- 5ad0f7f2d4.str
+|   |   |-- 549386d682.str
+|   |   |-- 5ebe4cfe01.str
 |   |   |-- 67e3f027d6.str
 |   |   |-- 7104beee58.str.list
-|   |   |-- 7a70343aa8.str
 |   |   |-- 7a99fd8132.str.list
 |   |   |-- 7ec0e9a495.str.list
+|   |   |-- 89fa630575.str
 |   |   |-- 8cf7094fb4.str
 |   |   |-- 90af94a996.str.list
-|   |   |-- 90affa3154.str
 |   |   |-- 91455ec004.str.list
 |   |   |-- 95f8d2c3f8.bht
-|   |   |-- a9970d9923.str
 |   |   |-- ac3821415b.bht
+|   |   |-- acbbcb9908.str
 |   |   |-- b06c3e986c.str
 |   |   |-- b3bdc806b2.str.list
-|   |   |-- b876924ea1.str
 |   |   |-- ba089080ec.bht
 |   |   |-- c1f42e7c21.bht
 |   |   |-- c4acfb68b4.num
+|   |   |-- ca9ea2f64a.str
 |   |   |-- cc27b8c254.fna.list
-|   |   |-- cf00da2f08.str
 |   |   |-- d1dcda57ce.fna -> $PWD/data/7942genome.fna
 |   |   |-- d445abaa8e.bht
 |   |   |-- d903401940.str.list
@@ -44,10 +46,8 @@
 |   |   |-- de2c2b2dc0.bht
 |   |   |-- df96ea8843.bht
 |   |   |-- eae4bd9abd.str
-|   |   |-- f701b25951.str
 |   |   |-- f882880663.bht
 |   |   |-- fb1b47f4db.str
-|   |   |-- fc2a5bd6ec.str
 |   |   `-- fede174161.str
 |   `-- tables
 |       |-- 2b778ade13
