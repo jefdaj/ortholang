@@ -15,6 +15,7 @@ module ShortCut.Core.ModuleAPI
 import Development.Shake
 import ShortCut.Core.Types
 
+import Data.Set                   (fromList, toList)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile, cacheDir,
@@ -32,6 +33,7 @@ typeError expected actual =
   "Type error:\nexpected " ++ show expected
            ++ "\nbut got " ++ show actual
 
+-- TODO this should fail for type errors like multiplying a list by a num!
 defaultTypeCheck :: [CutType] -> CutType
                  -> [CutType] -> Either String CutType
 defaultTypeCheck expected returned actual =
@@ -131,12 +133,16 @@ cLoadList _ _ _ = error "bad arguments to cLoadList"
 -- [a]ction functions (just describe how to build files) --
 -----------------------------------------------------------
 
+-- based on https://stackoverflow.com/a/18627837
+-- uniqLines :: Ord a => [a] -> [a]
+uniqLines = unlines . toList . fromList . lines
+
 aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
 aTsvColumn n cfg as@[_, outPath, tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
       tmpOut = scriptTmpFile cfg (exprDir cfg) ["aTsvColumn", show n, tsvPath] (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
-  writeFile' tmpOut strs
+  writeFile' tmpOut $ uniqLines strs
   toShortCutList cfg str tmpOut outPath
 aTsvColumn _ _ as = error "bad arguments to aTsvColumn"
 

@@ -38,7 +38,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Debug    (debug)
 import Control.Applicative    ((<|>), many)
-import Control.Monad          (void, fail)
+import Control.Monad          (void, fail, when)
 import Control.Monad.Identity (Identity)
 import Data.Char              (isPrint)
 import Data.List              (find, union)
@@ -190,6 +190,7 @@ pStr = CutLit str 0 <$> pQuoted <?> "string"
 
 -- TODO remove the empty list case? can't imagine when it would be used
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
+-- TODO actually check that elements are the same type
 pList :: ParseM CutExpr
 pList = do
   terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
@@ -198,6 +199,9 @@ pList = do
                then EmptyList
                else typeOf $ head terms
   -- TODO assert that the rest of the terms match the first one here!
+  when
+    (not $ all (== rtn) (map typeOf terms))
+    (error "all elements of a list must have the same type")
   return $ CutList rtn 0 deps terms
 
 ---------------
