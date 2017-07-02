@@ -1,23 +1,9 @@
 .
 |-- cache
-|   |-- fasta
-|   |   `-- e039dd1cd8.txt
+|   |-- seqio
 |   `-- shortcut
-|       |-- 092b067d8c.str
-|       |-- 108ad7a653.str
-|       |-- 11d487fa74.str
-|       |-- 136eb32a09.str.list
-|       |-- 3c962de529.str
-|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
-|       |-- 6270ccb3fa.str
-|       |-- 779cde49fa.str
-|       |-- 77bd2233aa.str
-|       |-- 7c5ea62914.str
-|       |-- e07b1246dc.str
-|       |-- e6655c8a09.str
-|       `-- ed1ab7717e.str
-|-- faa10.faa -> cache/shortcut/3dd244caec.faa
-|-- ids10.str.list -> cache/shortcut/136eb32a09.str.list
-`-- result -> ids10.str.list
+|       |-- 139e073c49.str
+|       `-- 392fa3759b.faa -> $PWD/data/6803genes10.faa
+`-- faa10.faa -> cache/shortcut/392fa3759b.faa
 
-3 directories, 17 files
+3 directories, 3 files

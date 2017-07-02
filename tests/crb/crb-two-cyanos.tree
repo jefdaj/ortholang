@@ -1,26 +1,28 @@
 .
 |-- cache
-|   `-- shortcut
-|       |-- 178d3cf920.str
-|       |-- 1b69e079d0.str
-|       |-- 2a93593dc6.str
-|       |-- 2c319deb39.str
-|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
-|       |-- 3f9689e6e6.str
-|       |-- 58b609ed45.str
-|       |-- 779cde49fa.str
-|       |-- 8d5f64d533.str
-|       |-- 96a0330ea7.str
-|       |-- a1b5083334.str
-|       |-- b9920733a6.crb
-|       |-- c0363ff289.str
-|       |-- ccbbb8d620.str
-|       |-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
-|       |-- daabc91684.str
-|       `-- eb85a49f5b.str.list
-|-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
-|-- hits.crb -> cache/shortcut/b9920733a6.crb
-|-- mini6803.faa -> cache/shortcut/3dd244caec.faa
-`-- result -> cache/shortcut/eb85a49f5b.str.list
+|   |-- shortcut
+|   |   |-- 0226b907dd.faa -> $PWD/data/7942genes.faa
+|   |   |-- 089b659f4c.str
+|   |   |-- 139e073c49.str
+|   |   |-- 1423f28f8a.str
+|   |   |-- 253c5e795e.crb
+|   |   |-- 2684b5e703.str
+|   |   |-- 2e2272aa5b.str
+|   |   |-- 392fa3759b.faa -> $PWD/data/6803genes10.faa
+|   |   |-- 39cacf76b7.str
+|   |   |-- 51af1955b0.str.list
+|   |   |-- 775d9ceec2.str
+|   |   |-- 7e75d857db.str
+|   |   |-- 8168a260d6.str
+|   |   |-- 8b9ad78431.str
+|   |   |-- a152b19041.str
+|   |   |-- d5bd22f990.str
+|   |   `-- e160f24d3c.str
+|   `-- tables
+|       `-- 9b5b1be6fb
+|-- full7942.faa -> cache/shortcut/0226b907dd.faa
+|-- hits.crb -> cache/shortcut/253c5e795e.crb
+|-- mini6803.faa -> cache/shortcut/392fa3759b.faa
+`-- result -> cache/shortcut/51af1955b0.str.list
 
-2 directories, 21 files
+4 directories, 21 files

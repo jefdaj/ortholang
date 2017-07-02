@@ -9,6 +9,7 @@ import ShortCut.Core.Compile      (cacheDir, cExpr, hashedTmp, toShortCutList,
 import ShortCut.Core.Debug        (debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    typeError, cOneArgScript, cOneArgListScript)
+import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -80,7 +81,7 @@ extractSeqIDs = CutFunction
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
-cExtractSeqIDs = cOneArgListScript "fasta" "extract-seq-ids.py"
+cExtractSeqIDs = cOneArgListScript "seqio" "extract-seq-ids.py"
 
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
@@ -106,13 +107,16 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let faTmp   = cacheDir cfg </> "fasta"
+  let tmpDir  = cacheDir cfg </> "seqio"
       outPath = hashedTmp cfg e []
-      tmpList = scriptTmpFile cfg faTmp e "txt"
-  tmpList %> \_ -> fromShortCutList cfg faTmp idsPath tmpList
+      tmpList = scriptTmpFile cfg tmpDir e "txt"
+  tmpList %> \_ -> do
+    liftIO $ createDirectoryIfMissing True tmpDir
+    fromShortCutList cfg idsPath tmpList
   outPath %> \_ -> do
     need [faPath, tmpList]
-    quietly $ cmd "extract-seqs-by-id.py" faTmp outPath faPath tmpList
+    liftIO $ createDirectoryIfMissing True tmpDir
+    quietly $ cmd "extract-seqs-by-id.py" tmpDir outPath faPath tmpList
   return outPath
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
 

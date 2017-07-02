@@ -1,14 +1,105 @@
 .
 |-- cache
-|   `-- shortcut
-|       |-- 1b69e079d0.str
-|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
-|       |-- 779cde49fa.str
-|       |-- a54ef94577.num
-|       |-- ac3c38e452.bht
-|       `-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
-|-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
-|-- mini6803.faa -> cache/shortcut/3dd244caec.faa
-`-- result -> cache/shortcut/ac3c38e452.bht
+|   |-- shortcut
+|   |   |-- 0226b907dd.faa -> $PWD/data/7942genes.faa
+|   |   |-- 07dab4c745.str
+|   |   |-- 125fab61aa.bht
+|   |   |-- 139e073c49.str
+|   |   |-- 1423f28f8a.str
+|   |   |-- 1ce4ed6c9c.bht
+|   |   |-- 20375936bf.bht
+|   |   |-- 21599cd0ca.str.list
+|   |   |-- 21f78eac3a.str
+|   |   |-- 236eccc8af.str
+|   |   |-- 2794c08fb6.str.list
+|   |   |-- 2b03b78ad3.str.list.list
+|   |   |-- 36710da6f8.str
+|   |   |-- 392fa3759b.faa -> $PWD/data/6803genes10.faa
+|   |   |-- 45db678a47.str.list
+|   |   |-- 538e7fe6ea.str
+|   |   |-- 56a597f18f.str.list
+|   |   |-- 57754e17a6.bht
+|   |   |-- 57d2f20787.str
+|   |   |-- 5c8a1af3fb.str.list
+|   |   |-- 5fb3a0e73b.str
+|   |   |-- 65ee3078f8.str
+|   |   |-- 7416440eff.str
+|   |   |-- 758b447ef2.str
+|   |   |-- 7ed264bc41.str
+|   |   |-- 81305f7541.bht
+|   |   |-- 8c44de147a.bht
+|   |   |-- 8d8fc03992.str
+|   |   |-- 8eec2dd318.faa.list
+|   |   |-- 9305652215.bht
+|   |   |-- 95e123a81b.str
+|   |   |-- a1b01323d6.str
+|   |   |-- b44350f7b6.bht
+|   |   |-- b9bfc4e150.str
+|   |   |-- bae38290b7.str.list
+|   |   |-- c4acfb68b4.num
+|   |   |-- c63ecf5afa.str.list
+|   |   |-- d2786a2b11.str.list
+|   |   |-- d42b2a25f4.str
+|   |   |-- d6b3f36247.bht
+|   |   |-- dae2a968c1.str.list
+|   |   |-- df33e69a51.str
+|   |   |-- eb8ce152f8.str
+|   |   |-- f190421777.str
+|   |   |-- f9278aa806.str.list
+|   |   |-- fc3aced87e.bht
+|   |   |-- fdb3e61078.str
+|   |   `-- ffb43dc1ab.str.list
+|   `-- tables
+|       |-- 014e7a56d9
+|       |-- 0f9b828f54
+|       |-- 2ac4c6466b
+|       |-- 2ef02c14e3
+|       |-- 57a28c538e
+|       |-- 5e43d3740d
+|       |-- ab864c0a49
+|       |-- c42285f3b8
+|       |-- d3a72a7699
+|       `-- e88badb90a
+|-- full7942.48068971a8.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.76333c7b85.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.816a16ac2b.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.821f228192.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.a3d2e7fcd9.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.b67774824c.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.bc75636c42.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.c3694114de.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.dc4dab2df4.faa -> cache/shortcut/0226b907dd.faa
+|-- full7942.f7aac0f6e9.faa -> cache/shortcut/0226b907dd.faa
+|-- hits6803.48068971a8.str.list -> cache/shortcut/c63ecf5afa.str.list
+|-- hits6803.76333c7b85.str.list -> cache/shortcut/2794c08fb6.str.list
+|-- hits6803.816a16ac2b.str.list -> cache/shortcut/21599cd0ca.str.list
+|-- hits6803.821f228192.str.list -> cache/shortcut/d2786a2b11.str.list
+|-- hits6803.a3d2e7fcd9.str.list -> cache/shortcut/45db678a47.str.list
+|-- hits6803.b67774824c.str.list -> cache/shortcut/5c8a1af3fb.str.list
+|-- hits6803.bc75636c42.str.list -> cache/shortcut/f9278aa806.str.list
+|-- hits6803.c3694114de.str.list -> cache/shortcut/56a597f18f.str.list
+|-- hits6803.dc4dab2df4.str.list -> cache/shortcut/ffb43dc1ab.str.list
+|-- hits6803.f7aac0f6e9.str.list -> cache/shortcut/bae38290b7.str.list
+|-- mini6803.48068971a8.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.76333c7b85.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.816a16ac2b.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.821f228192.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.a3d2e7fcd9.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.b67774824c.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.bc75636c42.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.c3694114de.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.dc4dab2df4.faa -> cache/shortcut/392fa3759b.faa
+|-- mini6803.f7aac0f6e9.faa -> cache/shortcut/392fa3759b.faa
+|-- result -> cache/shortcut/dae2a968c1.str.list
+|-- result.48068971a8.str.list -> hits6803.48068971a8.str.list
+|-- result.76333c7b85.str.list -> hits6803.76333c7b85.str.list
+|-- result.816a16ac2b.str.list -> hits6803.816a16ac2b.str.list
+|-- result.821f228192.str.list -> hits6803.821f228192.str.list
+|-- result.a3d2e7fcd9.str.list -> hits6803.a3d2e7fcd9.str.list
+|-- result.b67774824c.str.list -> hits6803.b67774824c.str.list
+|-- result.bc75636c42.str.list -> hits6803.bc75636c42.str.list
+|-- result.c3694114de.str.list -> hits6803.c3694114de.str.list
+|-- result.dc4dab2df4.str.list -> hits6803.dc4dab2df4.str.list
+`-- result.f7aac0f6e9.str.list -> hits6803.f7aac0f6e9.str.list
 
-2 directories, 9 files
+13 directories, 89 files

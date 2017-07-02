@@ -86,6 +86,7 @@ exprDir cfg = cacheDir cfg </> "shortcut"
 -- TODO flip arguments for consistency with everything else There's a special
 -- case for "result", which is like the "main" function of a ShortCut script,
 -- and always goes to <tmpdir>/result.
+-- TODO auto-apply fromShortCutList to result?
 namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
 namedTmp cfg (CutVar var) expr = debug cfg ("tmpfile:" ++ rtn) rtn
   where
@@ -227,8 +228,9 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 -- details of ShortCut's caching habits. note that that file might still be a
 -- list of paths, if the original was a list of lists
 -- TODO is there any good way to handle that?
-fromShortCutList :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
-fromShortCutList cfg tmpDir inPath outPath = do
+-- TODO remove tmpDir
+fromShortCutList :: CutConfig -> FilePath -> FilePath -> Action ()
+fromShortCutList cfg inPath outPath = do
   litPaths <- debugReadLines cfg inPath
   let litPaths' = map (cfgTmpDir cfg </>) litPaths
   need litPaths'

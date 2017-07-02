@@ -1,9 +1,14 @@
 .
-`-- cache
-    `-- shortcut
-        |-- 3f1e68b765.str
-        |-- 5a7744855d.str
-        |-- a54ef94577.num
-        `-- eb7af0efb4.fna -> $PWD/data/7942genome.fna
+|-- cache
+|   `-- shortcut
+|       |-- 144e3e36b6.str
+|       |-- 3590aa6c60.fna -> $PWD/data/6803genes10.fna
+|       |-- 8cf7094fb4.str
+|       |-- c4acfb68b4.num
+|       |-- cd887d84e1.bht
+|       `-- d1dcda57ce.fna -> $PWD/data/7942genome.fna
+|-- genes6803.fna -> cache/shortcut/3590aa6c60.fna
+|-- genome7942.fna -> cache/shortcut/d1dcda57ce.fna
+`-- result -> cache/shortcut/cd887d84e1.bht
 
-2 directories, 4 files
+2 directories, 9 files

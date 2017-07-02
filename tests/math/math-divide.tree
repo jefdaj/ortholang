@@ -1,9 +1,9 @@
 .
 |-- cache
 |   `-- shortcut
-|       |-- 34f58e92d3.num
-|       |-- 3efb908042.num
-|       `-- a0ab2f0d54.num
-`-- result -> cache/shortcut/a0ab2f0d54.num
+|       |-- 2dbd0025fd.num
+|       |-- 907d84fa63.num
+|       `-- dc18fc2507.num
+`-- result -> cache/shortcut/2dbd0025fd.num
 
 2 directories, 4 files

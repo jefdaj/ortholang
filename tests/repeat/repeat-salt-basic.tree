@@ -1,0 +1,29 @@
+.
+|-- cache
+|   `-- shortcut
+|       |-- 0473288d10.num
+|       |-- 11c5b01a8b.num
+|       |-- 2837def133.num
+|       |-- 5267b1bc9e.num
+|       |-- 5bf5b9dc45.num.list
+|       |-- 6664311459.num
+|       |-- 6a239df178.num.list
+|       |-- 75fd5000cb.num
+|       |-- 907d84fa63.num
+|       |-- a0947cf083.num
+|       |-- ea8a5b1bc0.num
+|       |-- ee3c65d80a.num
+|       `-- f65d8c97c0.num
+|-- result -> cache/shortcut/6a239df178.num.list
+|-- result.79cdbba5be.num -> cache/shortcut/a0947cf083.num
+|-- result.9d61c3445a.num -> cache/shortcut/ee3c65d80a.num
+|-- result.cdd58a2a5d.num -> cache/shortcut/f65d8c97c0.num
+|-- result.d989550f3e.num -> cache/shortcut/2837def133.num
+|-- result.ec6cb0deae.num -> cache/shortcut/5267b1bc9e.num
+|-- var1.79cdbba5be.num -> cache/shortcut/75fd5000cb.num
+|-- var1.9d61c3445a.num -> cache/shortcut/0473288d10.num
+|-- var1.cdd58a2a5d.num -> cache/shortcut/6664311459.num
+|-- var1.d989550f3e.num -> cache/shortcut/ea8a5b1bc0.num
+`-- var1.ec6cb0deae.num -> cache/shortcut/11c5b01a8b.num
+
+2 directories, 24 files

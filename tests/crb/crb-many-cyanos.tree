@@ -1,39 +1,40 @@
 .
 |-- cache
 |   `-- shortcut
-|       |-- 068b6e0914.crb.list
-|       |-- 092b067d8c.str
-|       |-- 108ad7a653.str
-|       |-- 11d487fa74.str
-|       |-- 1b69e079d0.str
-|       |-- 26112c170d.faa -> $PWD/data/7002genes.faa
-|       |-- 3862468ff5.str
-|       |-- 3c962de529.str
-|       |-- 3dd244caec.faa -> $PWD/data/6803genes10.faa
-|       |-- 407c2e523b.str
-|       |-- 41394219cc.str
-|       |-- 5d949a0667.str
-|       |-- 620b13968a.faa.list
-|       |-- 6270ccb3fa.str
-|       |-- 779cde49fa.str
-|       |-- 77bd2233aa.str
-|       |-- 7994f70116.str
-|       |-- 7c5ea62914.str
-|       |-- 7df7dbc0ff.str
-|       |-- 814c26a3a0.faa -> $PWD/data/7122genes.faa
-|       |-- bdc3c493ef.str
-|       |-- c3d5aec159.str
-|       |-- cddca6ee8e.faa -> $PWD/data/7942genes.faa
-|       |-- e07b1246dc.str
-|       |-- e6655c8a09.str
-|       |-- ecdd827c4d.str.list
-|       |-- ed1ab7717e.str
-|       `-- f18e73c477.str.list
-|-- full7002.faa -> cache/shortcut/26112c170d.faa
-|-- full7122.faa -> cache/shortcut/814c26a3a0.faa
-|-- full7942.faa -> cache/shortcut/cddca6ee8e.faa
-|-- hitlists.crb.list -> cache/shortcut/068b6e0914.crb.list
-|-- mini6803.faa -> cache/shortcut/3dd244caec.faa
-`-- result -> cache/shortcut/f18e73c477.str.list
+|       |-- 0226b907dd.faa -> $PWD/data/7942genes.faa
+|       |-- 07dab4c745.str
+|       |-- 08e1414fc0.faa -> $PWD/data/7002genes.faa
+|       |-- 0fbf7f52af.faa -> $PWD/data/7122genes.faa
+|       |-- 139e073c49.str
+|       |-- 1423f28f8a.str
+|       |-- 1529922e70.str.list
+|       |-- 2c0216d977.str
+|       |-- 2e024aefd9.str.list
+|       |-- 32522aa0b1.str
+|       |-- 3893fa9fdf.str
+|       |-- 392fa3759b.faa -> $PWD/data/6803genes10.faa
+|       |-- 421b057a32.crb.list
+|       |-- 538e7fe6ea.str
+|       |-- 5f1dbb4334.str
+|       |-- 5fb3a0e73b.str
+|       |-- 7416440eff.str
+|       |-- 8d8fc03992.str
+|       |-- 95e123a81b.str
+|       |-- a1b01b73f7.str
+|       |-- b5c9532f8d.str
+|       |-- b9bfc4e150.str
+|       |-- c716b47755.str
+|       |-- ca1c2b130e.faa.list
+|       |-- d42b2a25f4.str
+|       |-- eb8ce152f8.str
+|       |-- f190421777.str
+|       |-- fedd6ffaa8.str
+|       `-- tables
+|-- full7002.faa -> cache/shortcut/08e1414fc0.faa
+|-- full7122.faa -> cache/shortcut/0fbf7f52af.faa
+|-- full7942.faa -> cache/shortcut/0226b907dd.faa
+|-- hitlists.crb.list -> cache/shortcut/421b057a32.crb.list
+|-- mini6803.faa -> cache/shortcut/392fa3759b.faa
+`-- result -> cache/shortcut/2e024aefd9.str.list
 
-2 directories, 34 files
+3 directories, 34 files
