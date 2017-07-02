@@ -101,6 +101,7 @@ extractNum _ _ = error "bad argument to extractNum"
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
+-- TODO error if subVar not in (depsOf resExpr)
 cRepeatN :: CutState -> CutExpr -> Rules FilePath
 cRepeatN s@(scr,cfg) e@(CutFun t salt deps name
                                [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
