@@ -1,9 +1,31 @@
 .
 |-- cache
 |   |-- seqio
+|   |   |-- 03a02c573d.txt
+|   |   |-- 33c9049461.txt
+|   |   `-- bfca568efe.txt
 |   `-- shortcut
+|       |-- 07dab4c745.str
+|       |-- 0d80804331.str.list
 |       |-- 139e073c49.str
-|       `-- 392fa3759b.faa -> $PWD/data/6803genes10.faa
-`-- faa10.faa -> cache/shortcut/392fa3759b.faa
+|       |-- 392fa3759b.faa -> $PWD/data/6803genes10.faa
+|       |-- 538e7fe6ea.str
+|       |-- 5fb3a0e73b.str
+|       |-- 6c33c594bc.faa
+|       |-- 7416440eff.str
+|       |-- 8d8fc03992.str
+|       |-- 95e123a81b.str
+|       |-- b9bfc4e150.str
+|       |-- d42b2a25f4.str
+|       |-- e69bc83a1d.str.list
+|       |-- eb8ce152f8.str
+|       |-- f044eeff14.str.list
+|       `-- f190421777.str
+|-- diff.str.list -> cache/shortcut/f044eeff14.str.list
+|-- faa10.faa -> cache/shortcut/392fa3759b.faa
+|-- ids10.str.list -> cache/shortcut/0d80804331.str.list
+|-- idsall.str.list -> cache/shortcut/e69bc83a1d.str.list
+|-- result -> diff.str.list
+`-- seqs10.faa -> cache/shortcut/6c33c594bc.faa
 
-3 directories, 3 files
+3 directories, 25 files

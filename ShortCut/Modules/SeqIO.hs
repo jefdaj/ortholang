@@ -72,7 +72,7 @@ gbkToFna = CutFunction
 
 extractSeqIDs :: CutFunction
 extractSeqIDs = CutFunction
-  { fName      = "extract_seq_ids"
+  { fName      = "extract_ids"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqIDs
   , fCompiler  = cExtractSeqIDs
@@ -81,7 +81,7 @@ extractSeqIDs = CutFunction
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
-cExtractSeqIDs = cOneArgListScript "seqio" "extract-seq-ids.py"
+cExtractSeqIDs = cOneArgListScript "seqio" "extract_ids.py"
 
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
@@ -91,7 +91,7 @@ cExtractSeqIDs = cOneArgListScript "seqio" "extract-seq-ids.py"
 
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
-  { fName      = "extract_seqs_by_id"
+  { fName      = "extract_seqs"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
   , fCompiler  = cExtractSeqs
@@ -116,7 +116,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   outPath %> \_ -> do
     need [faPath, tmpList]
     liftIO $ createDirectoryIfMissing True tmpDir
-    quietly $ cmd "extract-seqs-by-id.py" tmpDir outPath faPath tmpList
+    quietly $ cmd "extract_seqs.py" tmpDir outPath faPath tmpList
   return outPath
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
 

@@ -292,7 +292,7 @@ pFun = do
     Nothing -> (trace (name ++ " " ++ show args) (fail name))
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
-      Left  err -> fail err
+      Left  err -> error err
       Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
                    in return $ CutFun rtn' 0 deps (fName f) args
 
