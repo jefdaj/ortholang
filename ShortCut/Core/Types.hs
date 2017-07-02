@@ -28,6 +28,8 @@ module ShortCut.Core.Types
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
+  -- , getNonce
+  , setNonce
   )
   where
 
@@ -53,16 +55,32 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
  
 -- the common fields are:
 -- * return type
--- * nonce, which can be incremented to change the hash and force re-evaluation
---   (it should always start set to 0, although that doesn't really matter)
+-- * nonce, which can be changed to force re-evaluation of an expr + all depends
+--   (it should start at 0 and be incremented, though that doesn't really matter)
+-- TODO test that it works correctly!
 -- * list of dependencies (except lits don't have any)
 data CutExpr
   = CutLit  CutType Int String
-  | CutRef  CutType Int [CutVar] CutVar -- TODO do refs need a nonce?
+  | CutRef  CutType Int [CutVar] CutVar -- do refs need a nonce? yes! (i think?)
   | CutBop  CutType Int [CutVar] String  CutExpr CutExpr
   | CutFun  CutType Int [CutVar] String [CutExpr]
   | CutList CutType Int [CutVar] [CutExpr]
   deriving (Eq, Show)
+
+-- TODO is this not actually needed? seems "show expr" handles it?
+-- getNonce :: CutExpr -> Int
+-- getNonce (CutLit  _ n _)       = n
+-- getNonce (CutRef  _ n _ _)     = n
+-- getNonce (CutBop  _ n _ _ _ _) = n
+-- getNonce (CutFun  _ n _ _ _)   = n
+-- getNonce (CutList _ n _ _)     = n
+
+setNonce :: Int -> CutExpr -> CutExpr
+setNonce n' (CutLit  t n s)          = CutLit  t n' s
+setNonce n' (CutRef  t n ds v)       = CutRef  t n' ds v
+setNonce n' (CutBop  t n ds s e1 e2) = CutBop  t n' ds s e1 e2
+setNonce n' (CutFun  t n ds s es)    = CutFun  t n' ds s es
+setNonce n' (CutList t n ds es)      = CutList t n' ds es
 
 -- TODO have a separate CutAssign for "result"?
 type CutAssign = (CutVar, CutExpr)
