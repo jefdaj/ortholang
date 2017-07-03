@@ -14,11 +14,26 @@ import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
 import System.Directory           (getCurrentDirectory)
 
-testDirs :: [String]
-testDirs = 
+resultDirs :: [String]
+resultDirs = 
   [ "tests/blast"
   , "tests/crb"
   , "tests/fasta"
+  , "tests/repeat"
+  , "tests/lists"
+  , "tests/vars"
+  , "tests/math"
+  ]
+
+-- These are mostly the same, except missing the modules I haven't managed
+-- to get to run deterministically. I still test their results of course;
+-- just not the tmpfiles they create.
+-- TODO everything should be deterministic! or at least the whole shortcut dir
+treeDirs :: [String]
+treeDirs = 
+  -- [ "tests/blast"
+  -- , "tests/crb"
+  [ "tests/fasta"
   , "tests/repeat"
   , "tests/lists"
   , "tests/vars"
@@ -39,7 +54,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
-  tDirs  <- mapM getDataFileName testDirs
+  tDirs  <- mapM getDataFileName resultDirs
   cuts   <- fmap concat $ mapM (findByExtension [".cut"]) tDirs
   let gFiles = map (\s -> replaceExtension s "result") cuts
       gTests = map (\(s,g) -> goldenScript cfg s g) (zip cuts gFiles)
@@ -54,9 +69,7 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
   where
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    -- crbblast folder is excluded because blast isn't deterministic
-    -- TODO list of plugin folders to exlude, or certain filetypes in them only
-    cmd  = (shell $ "tree -I 'crbblast'") { cwd = Just $ cfgTmpDir cfg' }
+    cmd  = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
     act  = do
              silence $ evalFile cfg'
              out <- readCreateProcess cmd ""
@@ -72,7 +85,7 @@ fixWorkingDir wd = replace wd "$PWD"
 
 goldenScriptTrees :: CutConfig -> IO TestTree
 goldenScriptTrees cfg = do
-  tDirs  <- mapM getDataFileName testDirs
+  tDirs  <- mapM getDataFileName treeDirs
   cuts   <- fmap concat $ mapM (findByExtension [".cut"]) tDirs
   let gFiles = map (\s -> replaceExtension s "tree") cuts
       gTests = map (\(s,g) -> goldenScriptTree cfg s g) (zip cuts gFiles)
