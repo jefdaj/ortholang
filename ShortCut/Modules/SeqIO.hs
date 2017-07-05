@@ -15,9 +15,12 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-    [ mkLoad "load_gbk" gbk
-    , mkLoad "load_faa" faa
-    , mkLoad "load_fna" fna
+    [ loadGbk
+    , loadGbkAll
+    , loadFaa
+    , loadFaaAll
+    , loadFna
+    , loadFaaAll
     , gbkToFaa
     , gbkToFna
     , extractSeqs
@@ -62,6 +65,28 @@ gbkToFna = CutFunction
   , fFixity    = Prefix
   , fCompiler  = cOneArgScript "seqio" "gbk_to_fna.py"
   }
+
+--------------------
+-- load sequences --
+--------------------
+
+loadFaa :: CutFunction
+loadFaa = mkLoad "load_faa" faa
+
+loadFaaAll :: CutFunction
+loadFaaAll = mkLoadList "load_faa_all" faa
+
+loadFna :: CutFunction
+loadFna = mkLoad "load_fna" fna
+
+loadFnaAll :: CutFunction
+loadFnaAll = mkLoadList "load_fna_all" fna
+
+loadGbk :: CutFunction
+loadGbk = mkLoad "load_gbk" gbk
+
+loadGbkAll :: CutFunction
+loadGbkAll = mkLoadList "load_gbk_all" gbk
 
 -------------------------------------------
 -- extract sequence IDs from FASTA files --
