@@ -122,7 +122,8 @@ mkLoadList name rtn = CutFunction
 
 cLoadList :: CutType -> CutState -> CutExpr -> Rules FilePath
 cLoadList rtype s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
-  liftIO $ putStrLn "entering cLoadList"
+  -- liftIO $ putStrLn "entering cLoadList"
+  -- liftIO $ putStrLn $ "e: " ++ show e
   paths <- mapM (\p -> cLink s p rtype) ps -- TODO is cLink OK with no paths?
   let links = hashedTmp cfg e paths
   links %> \out -> need paths >> writeFileLines out paths

@@ -5,10 +5,12 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
+import Data.List                  (intercalate)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Compile      (cacheDir, cExpr, hashedTmp, toShortCutList,
                                    fromShortCutList, scriptTmpFile)
-import ShortCut.Core.Debug        (debugTrackWrite)
+import ShortCut.Core.Debug        (debug, debugTrackWrite, debugReadLines,
+                                   debugReadFile, debugWriteFile)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    typeError, cOneArgScript, cOneArgListScript)
 import System.Directory           (createDirectoryIfMissing)
@@ -189,20 +191,26 @@ concatFastas = CutFunction
   { fName      = "concat_fastas"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
-  , fCompiler  = cConcatFastas
+  , fCompiler  = cConcat
   }
-
 
 tConcatFastas :: [CutType] -> Either String CutType
 tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
-cConcatFastas :: CutState -> CutExpr -> Rules FilePath
-cConcatFastas s@(_,cfg) e@(CutFun _ _ _ _ fas) = do
-  faPaths <- mapM (cExpr s) fas
+-- TODO why is this writing the file paths instead of their contents?
+cConcat :: CutState -> CutExpr -> Rules FilePath
+cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
+  fsPath <- cExpr s fs
   let oPath = hashedTmp cfg e []
   oPath %> \_ -> do
-    need faPaths
-    undefined
+    -- need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
+    -- let catCmd = intercalate " " $ ["cat"] ++ faPaths ++ [">", oPath]
+    -- unit $ quietly $ cmd Shell (debug cfg ("catCmd: " ++ catCmd) catCmd)
+    -- debugTrackWrite cfg [oPath]
+    fPaths <- debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath) fsPath)
+    need fPaths -- TODO shouldn't the next line handle this?
+    txt <- fmap concat $ mapM (debugReadFile cfg) (debug cfg ("fPaths: " ++ show fPaths) fPaths)
+    debugWriteFile cfg oPath txt
   return oPath
-cConcatFastas _ _ = error "bad argument to cConcatFastas"
+cConcat _ _ = error "bad argument to cConcat"
