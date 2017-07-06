@@ -206,6 +206,7 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
         dirs  = map (\p -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
         outs  = map (\d -> d </> "out" <.> extOf rtnType) dirs
         rels  = map (makeRelative $ cfgTmpDir cfg) outs -- TODO standardize this stuff
+    -- TODO oh shit, does this only work sequentially? parallelize!
     (flip mapM)
       (zip3 lasts dirs outs)
       (\(last, dir, out) -> do
