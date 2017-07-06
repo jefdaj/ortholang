@@ -1,3 +1,5 @@
+-- TODO rename something more general like SeqUtils
+
 module ShortCut.Modules.SeqIO where
 
 import Development.Shake
@@ -26,6 +28,7 @@ cutModule = CutModule
     , extractSeqs
     , extractSeqIDs
     , translate
+    , concatFastas
     ]
   }
 
@@ -176,3 +179,30 @@ cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
     -- debugTrackWrite cfg [oPath] TODO is this implied?
   return oPath
 cConvert _ _ _ = error "bad argument to cConvert"
+
+------------------------
+-- concat fasta files --
+------------------------
+
+concatFastas :: CutFunction
+concatFastas = CutFunction
+  { fName      = "concat_fastas"
+  , fFixity    = Prefix
+  , fTypeCheck = tConcatFastas
+  , fCompiler  = cConcatFastas
+  }
+
+
+tConcatFastas :: [CutType] -> Either String CutType
+tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
+tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
+
+cConcatFastas :: CutState -> CutExpr -> Rules FilePath
+cConcatFastas s@(_,cfg) e@(CutFun _ _ _ _ fas) = do
+  faPaths <- mapM (cExpr s) fas
+  let oPath = hashedTmp cfg e []
+  oPath %> \_ -> do
+    need faPaths
+    undefined
+  return oPath
+cConcatFastas _ _ = error "bad argument to cConcatFastas"
