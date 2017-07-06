@@ -2,26 +2,33 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Compile (cBop)
+import ShortCut.Core.Compile (cBop, cExpr, hashedTmp)
 import ShortCut.Core.ModuleAPI (typeError)
 import ShortCut.Core.Types
+import ShortCut.Core.Debug (debugReadLines, debugWriteLines)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "setops"
   , mFunctions =
-    [ mkSetBop "|" union
-    , mkSetBop "~" difference
-    , mkSetBop "&" intersection
+    [ unionBop
+    , unionFold
+    , intersectionBop
+    , intersectionFold
+    , differenceBop
     ]
   }
+
+----------------------
+-- binary operators --
+----------------------
 
 mkSetBop :: String -> (Set String -> Set String -> Set String) -> CutFunction
 mkSetBop name fn = CutFunction
   { fName      = name
   , fTypeCheck = bopTypeCheck
   , fFixity    = Infix
-  , fCompiler  = cSet fn
+  , fCompiler  = cSetBop fn
   }
 
 -- if the user gives two lists but of different types, complain that they must
@@ -34,10 +41,10 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
-cSet :: (Set String -> Set String -> Set String)
+cSetBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules FilePath
-cSet fn s e@(CutBop extn _ _ _ s1 s2) = do
-  -- liftIO $ putStrLn "entering cSet"
+cSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
+  -- liftIO $ putStrLn "entering cSetBop"
   (p1, p2, p3) <- cBop s extn e (s1, s2)
   p3 %> \out -> do
     lines1 <- readFileLines p1
@@ -46,4 +53,48 @@ cSet fn s e@(CutBop extn _ _ _ s1 s2) = do
     let lines3 = fn (fromList lines1) (fromList lines2)
     writeFileLines out $ toList lines3
   return p3
-cSet _ _ _ = error "bad argument to cSet"
+cSetBop _ _ _ = error "bad argument to cSetBop"
+
+unionBop :: CutFunction
+unionBop = mkSetBop "|" union
+
+differenceBop :: CutFunction
+differenceBop = mkSetBop "~" difference
+
+intersectionBop :: CutFunction
+intersectionBop = mkSetBop "&" intersection
+
+---------------------------------------------
+-- functions that summarize lists of lists --
+---------------------------------------------
+
+mkSetFold :: String -> ([Set String] -> Set String) -> CutFunction
+mkSetFold name fn = CutFunction
+  { fName      = name
+  , fTypeCheck = tSetFold
+  , fFixity    = Infix
+  , fCompiler  = cSetSummary fn
+  }
+
+tSetFold :: [CutType] -> Either String CutType
+tSetFold [ListOf (ListOf x)] = Right $ ListOf x
+tSetFold _ = Left "expecting a list of lists"
+
+cSetSummary fn s@(_,cfg) e@(CutFun _ _ _ _ sets) = do
+  setPaths <- mapM (cExpr s) sets
+  let oPath = hashedTmp cfg e []
+  oPath %> \_ -> do
+    lists <- mapM (debugReadLines cfg) setPaths
+    let sets = map fromList lists
+        oLst = toList $ fn sets
+    debugWriteLines cfg oPath oLst
+  return oPath
+cSetSummary _ _ _ = error "bad argument to cSetSummary"
+
+-- avoided calling it `all` because that's a Prelude function
+intersectionFold :: CutFunction
+intersectionFold = mkSetFold "all" $ foldr1 intersection
+
+-- avoided calling it `any` because that's a Prelude function
+unionFold :: CutFunction
+unionFold = mkSetFold "any" $ foldr1 union
