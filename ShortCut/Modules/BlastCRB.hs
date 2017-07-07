@@ -72,6 +72,7 @@ aBlastCRB cfg args@[tmpDir, oPath, qPath, tPath] =
     [ "--query"  , qPath
     , "--target" , tPath
     , "--output" , oPath
-    , "--threads", "10" -- TODO how to pick this?
-    , "--split"
+    -- TODO put these back once sure the rest works concurrently
+    -- , "--threads", "10" -- TODO how to pick this?
+    -- , "--split"
     ]
