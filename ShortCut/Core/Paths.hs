@@ -56,7 +56,7 @@ module ShortCut.Core.Paths
   , hashedTmp'    -- TODO rename exprPath', or remove if possible
   , scriptTmpFile -- TODO replace with updated cacheDir
   , scriptTmpDir  -- TODO replace with updated cacheDir
-  , namedTmp      -- TODO rename varPath
+  , varPath
   )
   where
 
@@ -66,54 +66,48 @@ import ShortCut.Core.Util         (digest)
 import Development.Shake.FilePath ((<.>), (</>))
 import System.FilePath            (makeRelative)
 
--- TODO move these to Types
-newtype CacheDir = CacheDir FilePath -- ~/.shortcut/cache/<modname>
-newtype ExprPath = ExprPath FilePath -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
-newtype VarPath  = VarPath  FilePath -- ~/.shortcut/vars/<varname>.<type>
-newtype ResPath  = ResPath  FilePath -- ~/.shortcut/vars/result (what about nesting?)
-
 -- TODO remove to stop the temptation to use it
-cacheDir :: CutConfig -> FilePath
-cacheDir cfg = cfgTmpDir cfg </> "cache"
+cacheDir :: CutConfig -> CacheDir
+cacheDir cfg = CacheDir $ cfgTmpDir cfg </> "cache"
 
 -- TODO what was this even for? remove it? yeah to stop the temptation :D
-exprDir :: CutConfig -> FilePath
-exprDir cfg = cacheDir cfg </> "shortcut"
+-- exprDir :: CutConfig -> FilePath
+-- exprDir cfg = cfgTmpDir cfg </> "exprs"
 
 -- TODO flip arguments for consistency with everything else There's a special
 -- case for "result", which is like the "main" function of a ShortCut script,
 -- and always goes to <tmpdir>/result.
 -- TODO auto-apply fromShortCutList to result?
 -- TODO rename varPath
-namedTmp :: CutConfig -> CutVar -> CutExpr -> FilePath
-namedTmp cfg (CutVar var) expr = debug cfg ("tmpfile:" ++ rtn) rtn
+varPath :: CutConfig -> CutVar -> CutExpr -> VarPath
+varPath cfg (CutVar var) expr = VarPath (debug cfg ("tmpfile:" ++ rtn) rtn)
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
     rtn  = cfgTmpDir cfg </> base
 
 -- TODO extn can be found inside expr now; remove it
 -- TODO rename exprPath?
-hashedTmp :: CutConfig -> CutExpr -> [FilePath] -> FilePath
-hashedTmp cfg expr paths = debug cfg ("tmpfile: " ++ rtn) rtn
+hashedTmp :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
+hashedTmp cfg expr paths = ExprPath (debug cfg ("tmpfile: " ++ rtn) rtn)
   where
-    paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
     uniq   = digest $ unlines $ (show expr):paths'
-    rtn    = exprDir cfg </> uniq <.> extOf (typeOf expr)
+    rtn    = cfgTmpDir cfg </> "exprs" </> uniq <.> extOf (typeOf expr)
 
 -- overrides the expression's "natural" extension
 -- TODO figure out how to remove!
 -- TODO rename exprPath'? or remove?
-hashedTmp' :: CutConfig -> CutType -> CutExpr -> [FilePath] -> FilePath
-hashedTmp' cfg rtn expr paths = debug cfg ("tmpfile: " ++ rtn') rtn'
+hashedTmp' :: CutConfig -> CutType -> CutExpr -> [ExprPath] -> ExprPath
+hashedTmp' cfg rtn expr paths = ExprPath (debug cfg ("tmpfile: " ++ rtn') rtn')
   where
-    paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
     uniq   = digest $ unlines $ (show expr):paths'
-    rtn'   = exprDir cfg </> uniq <.> extOf rtn
+    rtn'   = cfgTmpDir cfg </> "exprs" </> uniq <.> extOf rtn
 
 -- TODO should this handle calling cfgTmpDir too?
 -- TODO rename cacheDir or something
-scriptTmpDir :: Show a => CutConfig -> FilePath -> a -> FilePath
-scriptTmpDir cfg tmpDir uniq = debug cfg ("tmpdir: " ++ rtn) rtn
+scriptTmpDir :: Show a => CutConfig -> FilePath -> a -> CacheDir
+scriptTmpDir cfg tmpDir uniq = CacheDir (debug cfg ("tmpdir: " ++ rtn) rtn)
   where
     rtn = tmpDir </> digest uniq
 

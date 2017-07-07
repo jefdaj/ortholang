@@ -53,12 +53,12 @@ myShake cfg = shake myOpts . alternatives
 -- TODO rename `runRules` or `runShake`?
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
-eval :: CutConfig -> CutType -> Rules FilePath -> IO ()
+eval :: CutConfig -> CutType -> Rules ResPath -> IO ()
 eval cfg rtype = ignoreErrors . eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
-      path <- rpath
+      (ResPath path) <- rpath
       want ["eval"]
       "eval" ~> do
         alwaysRerun

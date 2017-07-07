@@ -132,22 +132,22 @@ tExtractSeqs [x, ListOf str] | elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
 -- TODO can this be replaced with cOneArgListScript?
-cExtractSeqs :: CutState -> CutExpr -> Rules FilePath
+cExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
-  faPath  <- cExpr s fa
+  (ExprPath faPath)  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let tmpDir  = cfgTmpDir cfg </> "cache" </> "seqio"
-      outPath = hashedTmp cfg e []
+      (ExprPath outPath) = hashedTmp cfg e []
       tmpList = scriptTmpFile cfg tmpDir e "txt"
   tmpList %> \_ -> do
     liftIO $ createDirectoryIfMissing True tmpDir
-    fromShortCutList cfg idsPath tmpList
+    fromShortCutList cfg idsPath (ExprPath tmpList)
   outPath %> \_ -> do
     need [faPath, tmpList]
     liftIO $ createDirectoryIfMissing True tmpDir
     quietly $ cmd "extract_seqs.py" tmpDir outPath faPath tmpList
-  return outPath
+  return (ExprPath outPath)
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
 
 -------------------------------------
@@ -173,13 +173,13 @@ translate = CutFunction
 --   }
 
 -- TODO can this use cOneArgScript?
-cConvert :: FilePath -> CutState -> CutExpr -> Rules FilePath
+cConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
-  faPath <- cExpr s fa
-  let oPath = hashedTmp cfg e []
+  (ExprPath faPath) <- cExpr s fa
+  let (ExprPath oPath) = hashedTmp cfg e []
   oPath %> \_ -> need [faPath] >> unit (cmd script oPath faPath)
     -- debugTrackWrite cfg [oPath] TODO is this implied?
-  return oPath
+  return (ExprPath oPath)
 cConvert _ _ _ = error "bad argument to cConvert"
 
 ------------------------
@@ -199,10 +199,10 @@ tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
 -- TODO why is this writing the file paths instead of their contents?
-cConcat :: CutState -> CutExpr -> Rules FilePath
+cConcat :: CutState -> CutExpr -> Rules ExprPath
 cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
-  fsPath <- cExpr s fs
-  let oPath = hashedTmp cfg e []
+  (ExprPath fsPath) <- cExpr s fs
+  let (ExprPath oPath) = hashedTmp cfg e []
   oPath %> \_ -> do
     -- need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
     -- let catCmd = intercalate " " $ ["cat"] ++ faPaths ++ [">", oPath]
@@ -212,5 +212,5 @@ cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
     need fPaths -- TODO shouldn't the next line handle this?
     txt <- fmap concat $ mapM (debugReadFile cfg) (debug cfg ("fPaths: " ++ show fPaths) fPaths)
     debugWriteFile cfg oPath txt
-  return oPath
+  return (ExprPath oPath)
 cConcat _ _ = error "bad argument to cConcat"

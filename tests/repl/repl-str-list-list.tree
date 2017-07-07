@@ -1,9 +1,8 @@
 .
-|-- cache
-|   `-- shortcut
-|       |-- 0ea18e5ea0.str.list.list
-|       |-- a830208172.str
-|       `-- a92012f1b2.str.list
-`-- result -> cache/shortcut/0ea18e5ea0.str.list.list
+|-- exprs
+|   |-- 0787bb369d.str.list
+|   |-- a830208172.str
+|   `-- b338d1127a.str.list.list
+`-- result -> exprs/b338d1127a.str.list.list
 
-2 directories, 4 files
+1 directory, 4 files

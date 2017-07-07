@@ -43,17 +43,17 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
 cSetBop :: (Set String -> Set String -> Set String)
-     -> CutState -> CutExpr -> Rules FilePath
+     -> CutState -> CutExpr -> Rules ExprPath
 cSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSetBop"
-  (p1, p2, p3) <- cBop s extn e (s1, s2)
+  (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (s1, s2)
   p3 %> \out -> do
     lines1 <- readFileLines p1
     lines2 <- readFileLines p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let lines3 = fn (fromList lines1) (fromList lines2)
     writeFileLines out $ toList lines3
-  return p3
+  return (ExprPath p3)
 cSetBop _ _ _ = error "bad argument to cSetBop"
 
 unionBop :: CutFunction
@@ -83,13 +83,13 @@ tSetFold _ = Left "expecting a list of lists"
 
 cSetSummary fn s@(_,cfg) e@(CutFun _ _ _ _ sets) = do
   setPaths <- mapM (cExpr s) sets
-  let oPath = hashedTmp cfg e []
+  let (ExprPath oPath) = hashedTmp cfg e []
   oPath %> \_ -> do
-    lists <- mapM (debugReadLines cfg) setPaths
+    lists <- mapM (debugReadLines cfg) (map (\(ExprPath p) -> p) setPaths)
     let sets = map fromList lists
         oLst = toList $ fn sets
     debugWriteLines cfg oPath oLst
-  return oPath
+  return (ExprPath oPath)
 cSetSummary _ _ _ = error "bad argument to cSetSummary"
 
 -- avoided calling it `all` because that's a Prelude function

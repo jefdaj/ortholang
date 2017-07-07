@@ -66,13 +66,9 @@ blastCRBAll = CutFunction
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
-aBlastCRB :: CutConfig -> [FilePath] -> Action ()
-aBlastCRB cfg args@[tmpDir, oPath, qPath, tPath] =
-  quietly $ cmd (Cwd tmpDir) "crb-blast"
-    [ "--query"  , qPath
-    , "--target" , tPath
-    , "--output" , oPath
-    -- TODO put these back once sure the rest works concurrently
-    -- , "--threads", "10" -- TODO how to pick this?
-    -- , "--split"
-    ]
+aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aBlastCRB cfg (CacheDir tmpDir) args@[(ExprPath o), (ExprPath q), (ExprPath t)] =
+  quietly $ cmd (Cwd tmpDir) "crb-blast" ["--query", q, "--target", t, "--output", o]
+  -- TODO put these back once sure the rest works concurrently
+  -- , "--threads", "10" -- TODO how to pick this?
+  -- , "--split"

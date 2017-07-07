@@ -55,27 +55,29 @@ extractExprs  _   e               = error $ "bad arg to extractExpr: " ++ show e
 
 -- TODO ideally, this shouldn't need any custom digesting? but whatever no
 --      messing with it for now
-cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules FilePath
+cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules ExprPath
 cRepeat (script,cfg) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)
       sub  = (subVar, subExpr)
       deps = filter (\(v,_) -> (elem v $ depsOf resExpr)) script
       pre  = digest $ map show $ res:sub:deps
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
-  resPath <- compileScript (scr',cfg) (Just pre)
-  return resPath
+  (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
+  return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
-cRepeatEach :: CutState -> CutExpr -> Rules FilePath
+cRepeatEach :: CutState -> CutExpr -> Rules ExprPath
 cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- cExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
-  let outPath = hashedTmp cfg expr resPaths
+  let (ExprPath outPath) = hashedTmp cfg expr resPaths
+      (ExprPath subPaths') = subPaths
+      resPaths' = map (\(ExprPath p) -> p) resPaths
   outPath %> \out -> do
-    need (subPaths:resPaths) -- TODO is needing subPaths required?
-    let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths
+    need (subPaths':resPaths') -- TODO is needing subPaths required?
+    let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
     writeFileLines out outPaths'
-  return outPath
+  return (ExprPath outPath)
 cRepeatEach _ expr = error $ "bad argument to cRepeatEach: " ++ show expr
 
 -----------------------------------------------------
@@ -106,7 +108,7 @@ extractNum _ _ = error "bad argument to extractNum"
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
-cRepeatN :: CutState -> CutExpr -> Rules FilePath
+cRepeatN :: CutState -> CutExpr -> Rules ExprPath
 cRepeatN s@(scr,cfg) e@(CutFun t salt deps name
                                [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
   cRepeatEach s (CutFun t salt deps name [resExpr, subVar, subList])

@@ -47,18 +47,18 @@ leaveEachOut xs
 -- TODO are paths hashes unique now??
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
-cCombos :: ([FilePath] -> [[FilePath]]) -> CutState -> CutExpr -> Rules FilePath
+cCombos :: ([FilePath] -> [[FilePath]]) -> CutState -> CutExpr -> Rules ExprPath
 cCombos comboFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
-  iPath <- cExpr s iList
+  (ExprPath iPath) <- cExpr s iList
   let oType = ListOf $ typeOf iList
-      oList = hashedTmp' cfg oType expr [iPath, fnName]
+      (ExprPath oList) = hashedTmp' cfg oType expr [ExprPath iPath] -- TODO need fnName too like before?
   oList %> \out -> do
     need [iPath]
     elements <- fmap lines $ readFile' iPath
     let combos = comboFn elements
         lType  = typeOf iList -- TODO is this right?
-        oPaths = map (\e -> hashedTmp' cfg lType iList [out, e]) elements
+        oPaths = map (\(ExprPath p) -> p) $ map (\e -> hashedTmp' cfg lType iList [ExprPath out, ExprPath e]) elements
     mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
     writeFileChanged out $ unlines oPaths
-  return oList
+  return (ExprPath oList)
 cCombos _ _ _ = error "bad argument to cCombos"

@@ -30,6 +30,11 @@ module ShortCut.Core.Types
   , CutModule(..)
   -- , getSalt
   , setSalt
+  -- wrappers to prevent confusing the various paths
+  , CacheDir(..)
+  , ExprPath(..)
+  , VarPath(..)
+  , ResPath(..)
   )
   where
 
@@ -45,6 +50,11 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT,
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 import Control.Monad.IO.Class   (liftIO)
+
+newtype CacheDir = CacheDir FilePath -- ~/.shortcut/cache/<modname>
+newtype ExprPath = ExprPath FilePath -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
+newtype VarPath  = VarPath  FilePath -- ~/.shortcut/vars/<varname>.<type>
+newtype ResPath  = ResPath  FilePath -- ~/.shortcut/vars/result (what about nesting?)
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -231,7 +241,7 @@ data CutFunction = CutFunction
   { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
   , fFixity    :: CutFixity
-  , fCompiler  :: CutState -> CutExpr -> Rules FilePath
+  , fCompiler  :: CutState -> CutExpr -> Rules ExprPath
   }
   -- deriving (Eq, Read)
 

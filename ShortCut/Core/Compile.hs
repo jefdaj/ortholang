@@ -68,7 +68,7 @@ addPrefixes p = mangleScript (addPrefix p)
 
 -- TODO what happens to plain sets?
 -- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
-cExpr :: CutState -> CutExpr -> Rules FilePath
+cExpr :: CutState -> CutExpr -> Rules ExprPath
 cExpr s e@(CutLit  _ _ _      ) = cLit s e
 cExpr s e@(CutRef  _ _ _ _    ) = cRef s e
 cExpr s e@(CutList _ _ _ _    ) = cList s e
@@ -76,7 +76,7 @@ cExpr s e@(CutBop  _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
 cExpr s e@(CutFun  _ _ _ n _  ) = compileByName s e n
 
 -- TODO remove once no longer needed (parser should find fns)
-compileByName :: CutState -> CutExpr -> String -> Rules FilePath
+compileByName :: CutState -> CutExpr -> String -> Rules ExprPath
 compileByName s@(_,cfg) expr name = case findByName cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> (fCompiler f) s expr
@@ -88,7 +88,7 @@ findByName cfg name = find (\f -> fName f == name) fs
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
 
-cAssign :: CutState -> CutAssign -> Rules (CutVar, FilePath)
+cAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
 cAssign s (var, expr) = do
   path  <- cExpr s expr
   path' <- cVar s var expr path
@@ -96,66 +96,70 @@ cAssign s (var, expr) = do
 
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
-compileScript :: CutState -> Maybe String -> Rules FilePath
-compileScript s@(as,_) p = do
+compileScript :: CutState -> Maybe String -> Rules ResPath
+compileScript s@(as,_) permHash = do
   -- liftIO $ putStrLn "entering compileScript"
   rpaths <- mapM (cAssign s) as
-  return $ fromJust $ lookup (CutVar res) rpaths
+  return $ (\(VarPath r) -> ResPath r) $ fromJust $ lookup (CutVar res) rpaths
   where
-    res = case p of
+    -- p here is "result" + the permutation name/hash if there is one right?
+    res = case permHash of
       Nothing -> "result"
-      Just p' -> "result." ++ p'
+      Just h  -> "result." ++ h
 
 -- write a literal value from ShortCut source code to file
-cLit :: CutState -> CutExpr -> Rules FilePath
+cLit :: CutState -> CutExpr -> Rules ExprPath
 cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
-  let path = hashedTmp cfg expr []
+  let (ExprPath path) = hashedTmp cfg expr []
   path %> \out -> debugWriteChanged cfg out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
-  return path
+  return (ExprPath path)
   where
-    paths :: CutExpr -> String
-    paths (CutLit _ _ s) = s
+    paths :: CutExpr -> FilePath
+    paths (CutLit _ _ p) = p
     paths _ = error "bad argument to paths"
 
 -- TODO how to show the list once it's created? not just as a list of paths!
 -- TODO why are lists of lists not given .list.list ext? hides a more serious bug?
 --      or possibly the bug is that we're making accidental lists of lists?
-cList :: CutState -> CutExpr -> Rules FilePath
+cList :: CutState -> CutExpr -> Rules ExprPath
 cList (_,cfg) e@(CutList EmptyList _ _ _) = do
-  let link = hashedTmp cfg e []
+  let (ExprPath link) = hashedTmp cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
-  return link
+  return (ExprPath link)
 cList s@(_,cfg) e@(CutList _ _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
-  let path   = hashedTmp cfg e paths
-      paths' = map (makeRelative $ cfgTmpDir cfg) paths
-  path %> \out -> need paths >> writeFileChanged out (unlines paths')
-  return path
+  let (ExprPath path) = hashedTmp cfg e paths
+      paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
+  path %> \out -> need (map (\(ExprPath p) -> p) paths) >> writeFileChanged out (unlines paths')
+  return (ExprPath path)
 cList _ _ = error "bad arguemnts to cList"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: CutState -> CutExpr -> Rules FilePath
-cRef (_,cfg) expr@(CutRef _ _ _ var) = return $ namedTmp cfg var expr
+cRef :: CutState -> CutExpr -> Rules ExprPath
+cRef (_,cfg) expr@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var expr
+  where
+    ePath (VarPath p) = ExprPath p
 cRef _ _ = error "bad argument to cRef"
 
 -- Creates a symlink from varname to expression file.
 -- TODO unify with cLink2, cLoadOne etc?
-cVar :: CutState -> CutVar -> CutExpr -> FilePath -> Rules FilePath
-cVar (_,cfg) var expr dest = do
-  let link  = namedTmp cfg var expr
+-- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
+cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
+cVar (_,cfg) var expr (ExprPath dest) = do
+  let (VarPath link) = varPath cfg var expr
       dest' = makeRelative (cfgTmpDir cfg) dest
   link %> \out -> do
     alwaysRerun
     need [dest]
     quietly $ cmd "ln -fs" [dest', out]
-  return link
+  return (VarPath link)
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
 cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
-      -> Rules (FilePath, FilePath, FilePath)
+      -> Rules (ExprPath, ExprPath, ExprPath)
 cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
@@ -170,8 +174,8 @@ cBop s@(_,cfg) t expr (n1, n2) = do
 -- list of paths, if the original was a list of lists
 -- TODO is there any good way to handle that?
 -- TODO remove tmpDir
-fromShortCutList :: CutConfig -> FilePath -> FilePath -> Action ()
-fromShortCutList cfg inPath outPath = do
+fromShortCutList :: CutConfig -> ExprPath -> ExprPath -> Action ()
+fromShortCutList cfg (ExprPath inPath) (ExprPath outPath) = do
   litPaths <- debugReadLines cfg inPath
   let litPaths' = map (cfgTmpDir cfg </>) litPaths
   need litPaths'
@@ -182,12 +186,13 @@ fromShortCutList cfg inPath outPath = do
 -- writes a list of literals, because shortcut expects a list of hashed
 -- filenames *pointing* to literals
 -- TODO any reason to pass the full state instead of just config?
-toShortCutList :: CutConfig -> CutType -> FilePath -> FilePath -> Action ()
-toShortCutList cfg litType inPath outPath = do
+toShortCutList :: CutConfig -> CutType -> ExprPath -> ExprPath -> Action ()
+toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
+  -- TODO function for readnig paths as exprpaths
   lits <- fmap sort $ debugReadLines cfg inPath
   let litExprs  = map (CutLit litType 0) lits
       litPaths  = map (\e -> hashedTmp cfg e []) litExprs
-      litPaths' = map (makeRelative $ cfgTmpDir cfg) litPaths
-      litPairs  = zip lits litPaths
+      litPaths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
+      litPairs  = zip lits $ map (\(ExprPath p) -> p) litPaths
   liftIO $ mapM (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
   liftIO $ writeFileLines outPath litPaths'

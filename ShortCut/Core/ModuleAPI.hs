@@ -45,32 +45,32 @@ defaultTypeCheck expected returned actual =
 -- functions to make whole CutFunctions --
 ------------------------------------------
 
-cOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
+cOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
 cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
-  argPath <- cExpr s arg
+  (ExprPath argPath) <- cExpr s arg
   -- let tmpDir = cacheDir cfg </> tmpName
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      oPath  = hashedTmp cfg expr []
+      (ExprPath oPath) = hashedTmp cfg expr []
   oPath %> \_ -> do
     need [argPath]
     quietly $ unit $ cmd script tmpDir oPath argPath
     trackWrite [oPath]
-  return oPath
+  return (ExprPath oPath)
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 
-cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
+cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
 cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
-  faPath <- cExpr s fa
+  (ExprPath faPath) <- cExpr s fa
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
       tmpOut = scriptTmpFile cfg tmpDir expr "txt"
-      actOut = hashedTmp cfg expr []
+      (ExprPath actOut) = hashedTmp cfg expr []
   tmpOut %> \out -> do
     need [faPath]
     quietly $ cmd script tmpDir out faPath
     -- trackWrite [out]
-  actOut %> \_ -> toShortCutList cfg str tmpOut actOut
-  return actOut
+  actOut %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath actOut)
+  return (ExprPath actOut)
 cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
 
 -- load a single file --
@@ -90,20 +90,20 @@ mkLoad name rtn = CutFunction
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
-cLink :: CutState -> CutExpr -> CutType -> Rules FilePath
+cLink :: CutState -> CutExpr -> CutType -> Rules ExprPath
 cLink s@(_,cfg) expr rtype = do
-  strPath <- cExpr s expr
+  (ExprPath strPath) <- cExpr s expr
   -- TODO damn, need to be more systematic about these unique paths!
-  let outPath = hashedTmp' cfg rtype expr ["outPath"] -- TODo remove outPath part?
+  let (ExprPath outPath) = hashedTmp' cfg rtype expr [] -- TODO ok without ["outPath"]?
   outPath %> \out -> do
     str <- fmap strip $ readFile' strPath
     src <- liftIO $ canonicalizePath str
     need [src]
     -- TODO these have to be absolute, so golden tests need to adjust them:
     quietly $ cmd "ln -fs" [src, out]
-  return outPath
+  return (ExprPath outPath)
 
-cLoadOne :: CutType -> CutState -> CutExpr -> Rules FilePath
+cLoadOne :: CutType -> CutState -> CutExpr -> Rules ExprPath
 cLoadOne t s (CutFun _ _ _ _ [p]) = cLink s p t
 cLoadOne _ _ _ = error "bad argument to cLoadOne"
 
@@ -122,14 +122,15 @@ mkLoadList name rtn = CutFunction
   , fCompiler  = cLoadList rtn
   }
 
-cLoadList :: CutType -> CutState -> CutExpr -> Rules FilePath
+cLoadList :: CutType -> CutState -> CutExpr -> Rules ExprPath
 cLoadList rtype s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
   -- liftIO $ putStrLn "entering cLoadList"
   -- liftIO $ putStrLn $ "e: " ++ show e
   paths <- mapM (\p -> cLink s p rtype) ps -- TODO is cLink OK with no paths?
-  let links = hashedTmp cfg e paths
-  links %> \out -> need paths >> writeFileLines out paths
-  return links
+  let paths' = map (\(ExprPath p) -> p) paths
+      (ExprPath links) = hashedTmp cfg e paths
+  links %> \out -> need paths' >> writeFileLines out paths'
+  return (ExprPath links)
 cLoadList _ _ _ = error "bad arguments to cLoadList"
 
 -----------------------------------------------------------
@@ -140,41 +141,41 @@ cLoadList _ _ _ = error "bad arguments to cLoadList"
 -- uniqLines :: Ord a => [a] -> [a]
 uniqLines = unlines . toList . fromList . lines
 
-aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
-aTsvColumn n cfg as@[_, outPath, tsvPath] = do
+aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aTsvColumn n cfg _ as@[(ExprPath outPath), (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
       tmpOut = scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") ["aTsvColumn", show n, tsvPath] (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut $ uniqLines strs
-  toShortCutList cfg str tmpOut outPath
-aTsvColumn _ _ as = error "bad arguments to aTsvColumn"
+  toShortCutList cfg str (ExprPath tmpOut) (ExprPath outPath)
+aTsvColumn _ _ _ as = error "bad arguments to aTsvColumn"
 
 -------------------------------------------------------------------------------
 -- [r]ules functions (just describe which files to build with which actions) --
 -------------------------------------------------------------------------------
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
-rSimpleTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
-           -> (CutState -> CutExpr -> Rules FilePath)
+rSimpleTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
+           -> (CutState -> CutExpr -> Rules ExprPath)
 rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
-  let outPath = hashedTmp' cfg rtnType e []
-      tmpDir  = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
+  let (ExprPath outPath) = hashedTmp' cfg rtnType e []
+      (CacheDir tmpDir ) = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
   outPath %> \_ -> do
-    need argPaths
+    need $ map (\(ExprPath p) -> p) argPaths
     liftIO $ createDirectoryIfMissing True tmpDir
-    actFn cfg $ [tmpDir, outPath] ++ argPaths
+    actFn cfg (CacheDir tmpDir) ([ExprPath outPath] ++ argPaths)
     trackWrite [outPath]
-  return outPath
+  return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
-rMapLastTmp :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
-            -> (CutState -> CutExpr -> Rules FilePath)
+rMapLastTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
+            -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   exprPaths <- mapM (cExpr s) exprs
-  let outPath    = hashedTmp' cfg t e []
+  let (ExprPath outPath) = hashedTmp' cfg t e []
   outPath %> \_ -> do
-    lastPaths <- debugReadLines cfg $ last exprPaths
+    lastPaths <- debugReadLines cfg $ (\(ExprPath p) -> p) $ last exprPaths
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
         -- TODO replace with a Paths function
@@ -185,41 +186,42 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ ex
     (flip mapM)
       (zip outs lasts)
       (\(out, last) -> do
-        need (last:inits)
+        need (last:map (\(ExprPath p) -> p) inits)
         liftIO $ createDirectoryIfMissing True tmpDir
-        actFn cfg (tmpDir:out:last:inits)
+        actFn cfg (CacheDir tmpDir) (ExprPath out:ExprPath last:inits)
         trackWrite [out]
       )
     need outs
     writeFileLines outPath outs'
-  return outPath
+  return (ExprPath outPath)
 rMapLastTmp _ _ _ _ _ = error "bad argument to cMapLastTmp"
 
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmps :: (CutConfig -> [FilePath] -> Action ()) -> String -> CutType
-             -> (CutState -> CutExpr -> Rules FilePath)
+rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
+             -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
-  lastsPath <- cExpr s (last exprs)
-  let outPath    = hashedTmp' cfg (ListOf rtnType) e []
+  (ExprPath lastsPath) <- cExpr s (last exprs)
+  let (ExprPath outPath) = hashedTmp' cfg (ListOf rtnType) e []
       tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
-    let lasts = map (cfgTmpDir cfg </>) lastPaths
-        dirs  = map (\p -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
-        outs  = map (\d -> d </> "out" <.> extOf rtnType) dirs
-        rels  = map (makeRelative $ cfgTmpDir cfg) outs -- TODO standardize this stuff
+    let inits = map (\(ExprPath p) -> p) initPaths
+        lasts = map (\p -> ExprPath $ cfgTmpDir cfg </> p) lastPaths
+        dirs  = map (\(ExprPath p) -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
+        outs  = map (\(CacheDir d) -> ExprPath (d </> "out" <.> extOf rtnType)) dirs
+        rels  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) outs -- TODO standardize this stuff
     -- TODO oh shit, does this only work sequentially? parallelize!
     (flip mapM)
       (zip3 lasts dirs outs)
-      (\(last, dir, out) -> do
-        need $ initPaths ++ [last]
+      (\(l@(ExprPath last), (CacheDir dir), o@(ExprPath out)) -> do
+        need $ inits ++ [last]
         liftIO $ createDirectoryIfMissing True dir
-        actFn cfg $ [dir, out] ++ initPaths ++ [last]
+        actFn cfg (CacheDir dir) ([o] ++ initPaths ++ [l])
         trackWrite [out]
       )
-    need outs
+    need $ map (\(ExprPath p) -> p) outs
     writeFileLines outPath rels
-  return outPath
+  return (ExprPath outPath)
 rMapLastTmps _ _ _ _ _ = error "bad argument to rMapLastTmps"

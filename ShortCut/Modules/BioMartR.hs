@@ -161,10 +161,10 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
-cParseSearches :: CutState -> CutExpr -> Rules FilePath
+cParseSearches :: CutState -> CutExpr -> Rules ExprPath
 cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
-  sList <- cExpr s expr
-  let searchTable = hashedTmp' cfg search expr [sList]
+  (ExprPath sList) <- cExpr s expr
+  let (ExprPath searchTable) = hashedTmp' cfg search expr [ExprPath sList]
   searchTable %> \out -> do
     tmp <- readFile' sList
     let sLines = map (cfgTmpDir cfg </>) (lines tmp)
@@ -175,7 +175,7 @@ cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
     if (not . null) errors
       then error "invalid search!"
       else liftIO $ writeFile out $ toTsv searches'
-  return searchTable
+  return (ExprPath searchTable)
 cParseSearches _ _ = error "bad arguments to cParseSearches"
 
 ------------------
@@ -183,21 +183,21 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 ------------------
 
 -- TODO this is where to parse the searches?
--- cGetGenome :: CutConfig -> CutExpr -> Rules FilePath
+-- cGetGenome :: CutConfig -> CutExpr -> Rules ExprPath
 -- cGetGenome (_,cfg) expr@(CutFun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO factor out a "trivial string file" function?
-cBioMartR :: String -> CutState -> CutExpr -> Rules FilePath
+cBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
 cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
-  bmFn   <- cExpr s (CutLit str 0 fn)
-  sTable <- cParseSearches s ss
+  (ExprPath bmFn  ) <- cExpr s (CutLit str 0 fn)
+  (ExprPath sTable) <- cParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      outs  = hashedTmp cfg expr [bmFn, sTable]
+      (ExprPath outs) = hashedTmp cfg expr [ExprPath bmFn, ExprPath sTable]
   outs %> \out -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?
-    quietly $ cmd "biomartr.R" [bmTmp, out, bmFn, sTable]
-  return outs
+    quietly $ cmd "biomartr.R" bmTmp [out, bmFn, sTable]
+  return (ExprPath outs)
 cBioMartR _ _ _ = error "bad cBioMartR call"

@@ -1,8 +1,7 @@
 .
-|-- cache
-|   `-- shortcut
-|       |-- 09260f1de8.num
-|       `-- eedacbffbb.num.list
-`-- result -> cache/shortcut/eedacbffbb.num.list
+|-- exprs
+|   |-- 09260f1de8.num
+|   `-- f14072eefd.num.list
+`-- result -> exprs/f14072eefd.num.list
 
-2 directories, 3 files
+1 directory, 3 files

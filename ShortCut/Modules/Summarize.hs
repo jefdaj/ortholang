@@ -35,16 +35,16 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- TODO are paths hashes unique now??
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
-cSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules FilePath
+cSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPath
 cSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
-  iPath <- cExpr s iList
+  (ExprPath iPath) <- cExpr s iList
   let (ListOf (ListOf eType)) = typeOf iList
-      oPath = hashedTmp' cfg (ListOf eType) expr [iPath, fnName]
+      (ExprPath oPath) = hashedTmp' cfg (ListOf eType) expr [ExprPath iPath] -- TODO need fnName too??
   oPath %> \out -> do
     need [iPath]
     iLists <- fmap lines $ readFile' iPath
     iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
     let oElems = summaryFn iElems
     writeFileLines out oElems
-  return oPath
+  return (ExprPath oPath)
 cSummary _ _ _ = error "bad argument to cSummary"

@@ -85,12 +85,12 @@ mkBlastFn cmd qType tType = CutFunction
 -- TODO use hashed name rather than varname for better caching
 -- TODO are databases unneeded, or just automatically made in the working directory?
 -- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
-rBlast :: String -> (CutState -> CutExpr -> Rules FilePath)
+rBlast :: String -> (CutState -> CutExpr -> Rules ExprPath)
 rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
-  qPath <- cExpr s query
-  sPath <- cExpr s subject
-  ePath <- cExpr s evalue
-  let oPath = hashedTmp' cfg bht e []
+  (ExprPath qPath) <- cExpr s query
+  (ExprPath sPath) <- cExpr s subject
+  (ExprPath ePath) <- cExpr s evalue
+  let (ExprPath oPath) = hashedTmp' cfg bht e []
   oPath %> \_ -> do
     -- dbDir   <- rBlastDB cfg (typeOf target) sPath
     -- dbFiles <- listFiles dbDir
@@ -108,5 +108,5 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
       -- TODO support -remote?
       ]
     debugTrackWrite cfg [oPath]
-  return oPath
+  return (ExprPath oPath)
 rBlast _ _ _ = error "bad argument to rBlast"

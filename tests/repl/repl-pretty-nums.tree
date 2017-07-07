@@ -1,21 +1,20 @@
 .
-|-- cache
-|   `-- shortcut
-|       |-- 09260f1de8.num
-|       |-- 0b2320ed7c.num
-|       |-- 6ddf61ba14.num
-|       |-- 8131cb661d.num
-|       |-- 8c8b66ceef.num
-|       |-- 907d84fa63.num
-|       |-- a8c9170e41.num.list
-|       |-- b15bdb8411.num
-|       |-- c218cf62bb.num.list
-|       |-- d251c18467.num
-|       |-- d35e3fd31c.num
-|       |-- dc18fc2507.num
-|       |-- eedacbffbb.num.list
-|       |-- f400e5135d.num
-|       `-- fbd697bb89.num
-`-- result -> cache/shortcut/c218cf62bb.num.list
+|-- exprs
+|   |-- 09260f1de8.num
+|   |-- 0b2320ed7c.num
+|   |-- 41339ddb02.num.list
+|   |-- 6ddf61ba14.num
+|   |-- 8131cb661d.num
+|   |-- 8c8b66ceef.num
+|   |-- 907d84fa63.num
+|   |-- 9a244cbafd.num.list
+|   |-- b15bdb8411.num
+|   |-- d16ec6b7a6.num
+|   |-- d251c18467.num
+|   |-- dc18fc2507.num
+|   |-- f14072eefd.num.list
+|   |-- f400e5135d.num
+|   `-- fbd697bb89.num
+`-- result -> exprs/9a244cbafd.num.list
 
-2 directories, 16 files
+1 directory, 16 files
