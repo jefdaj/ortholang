@@ -18,8 +18,9 @@ import ShortCut.Core.Types
 import Data.Set                   (fromList, toList)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Compile      (cExpr, scriptTmpDir, scriptTmpFile, cacheDir,
-                                   hashedTmp, hashedTmp', exprDir, toShortCutList)
+import ShortCut.Core.Paths        (scriptTmpDir, scriptTmpFile, cacheDir,
+                                   hashedTmp, hashedTmp', exprDir)
+import ShortCut.Core.Compile      (cExpr, toShortCutList)
 import ShortCut.Core.Debug        (debugReadLines)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath            (makeRelative)

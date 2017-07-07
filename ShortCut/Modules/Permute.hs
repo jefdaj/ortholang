@@ -2,7 +2,8 @@ module ShortCut.Modules.Permute where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile (cExpr, hashedTmp')
+import ShortCut.Core.Paths   (hashedTmp')
+import ShortCut.Core.Compile (cExpr)
 
 cutModule :: CutModule
 cutModule = CutModule

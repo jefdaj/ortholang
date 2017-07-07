@@ -16,7 +16,8 @@ module ShortCut.Modules.BioMartR where
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Compile (cExpr, hashedTmp, hashedTmp')
+import ShortCut.Core.Paths   (hashedTmp, hashedTmp')
+import ShortCut.Core.Compile (cExpr)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)

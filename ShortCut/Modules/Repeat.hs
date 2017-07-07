@@ -4,8 +4,10 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Compile (cExpr, hashedTmp, addPrefixes, compileScript, digest)
+import ShortCut.Core.Paths   (hashedTmp)
+import ShortCut.Core.Compile (cExpr, addPrefixes, compileScript)
 import System.FilePath       (makeRelative)
+import ShortCut.Core.Util         (digest)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -51,6 +53,8 @@ extractExprs scr (CutRef  _ _ _ v ) = extractExprs scr $ fromJust $ lookup v scr
 extractExprs _   (CutFun _ _ _ _ _) = error explainFnBug
 extractExprs  _   e               = error $ "bad arg to extractExpr: " ++ show e
 
+-- TODO ideally, this shouldn't need any custom digesting? but whatever no
+--      messing with it for now
 cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules FilePath
 cRepeat (script,cfg) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)

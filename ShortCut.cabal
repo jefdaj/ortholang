@@ -37,6 +37,7 @@ data-files:         usage.txt,
 executable shortcut
   main-is:          ShortCut.hs
   -- TODO adjust -N to the actual number of cores!
+  -- TODO get the tests to work with this! (make them single-threaded?)
   ghc-options: 
         -threaded
         -rtsopts
@@ -49,6 +50,7 @@ executable shortcut
                     ShortCut.Core.Eval,
                     ShortCut.Core.ModuleAPI,
                     ShortCut.Core.Parse,
+                    ShortCut.Core.Paths,
                     ShortCut.Core.Pretty,
                     ShortCut.Core.Repl,
                     ShortCut.Core.Types,

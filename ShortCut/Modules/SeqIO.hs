@@ -7,8 +7,8 @@ import ShortCut.Core.Types
 
 import Data.List                  (intercalate)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Compile      (cacheDir, cExpr, hashedTmp, toShortCutList,
-                                   fromShortCutList, scriptTmpFile)
+import ShortCut.Core.Paths        (cacheDir, hashedTmp, scriptTmpFile)
+import ShortCut.Core.Compile      (cExpr, toShortCutList, fromShortCutList)
 import ShortCut.Core.Debug        (debug, debugTrackWrite, debugReadLines,
                                    debugReadFile, debugWriteFile)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,

@@ -5,7 +5,8 @@ import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Compile      (cExpr, hashedTmp', cacheDir, scriptTmpDir)
+import ShortCut.Core.Paths        (hashedTmp', cacheDir, scriptTmpDir)
+import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
 import ShortCut.Core.Util         (digest)

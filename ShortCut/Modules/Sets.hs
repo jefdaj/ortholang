@@ -2,7 +2,8 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Compile (cBop, cExpr, hashedTmp)
+import ShortCut.Core.Paths   (hashedTmp)
+import ShortCut.Core.Compile (cBop, cExpr)
 import ShortCut.Core.ModuleAPI (typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines)

@@ -4,7 +4,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.List                  (intersect)
-import ShortCut.Core.Compile      (cExpr, hashedTmp')
+import ShortCut.Core.Paths        (hashedTmp')
+import ShortCut.Core.Compile      (cExpr)
 import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule
