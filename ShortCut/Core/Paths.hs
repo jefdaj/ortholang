@@ -1,11 +1,62 @@
+{- ShortCut makes heavy use of tmpfiles, and this module controls where they go
+ - inside the main tmpdir. After a rewrite, the overall layout should be:
+ -
+ - TMPDIR
+ - |-- cache: a tmpdir per module for index files or whatever
+ - |   |-- biomartr
+ - |   |-- blast
+ - |   |-- crb-blast
+ - |   |-- seqio
+ - |   `-- ...
+ - |-- exprs: the hashed result of every expression, organized by fn
+ - |   |-- all
+ - |   |-- any
+ - |   |-- concat_fastas
+ - |   |-- crb_blast
+ - |   |-- crb_blast_all
+ - |   |-- extract_ids
+ - |   |-- extract_seqs
+ - |   |-- gbk_to_faa
+ - |   |-- gbk_to_fna
+ - |   |-- leave_each_out
+ - |   |-- repeat
+ - |   |-- repeat_each
+ - |   |-- translate
+ - |   `-- ...
+ - `-- vars: symlinks from user variable names to hashed expressions
+ -    |-- green_hits.str.list
+ -    |-- greens.faa.list
+ -    |-- plantcut.str.list
+ -    |-- result
+ -    `-- ...
+ -
+ - Files in the cache will be organized however seems best on a per-module
+ - basis.
+ -
+ - Expression paths are determined by the exprPath function. It gets the base
+ - name by `show`ing the expression and `digest`ing the resulting `String`, the
+ - extension based on type, and the folder based on constructor + function name
+ - if a function. Some made up examples:
+ -
+ -   ~/.shortcut/exprs/cut_list/f987e9b98a.str.list
+ -   ~/.shortcut/exprs/cut_lit/a09f8e8b9c.str
+ -   ~/.shortcut/exprs/crb_blast/38978s9a79.crb
+ -   ~/.shortcut/exprs/gbk_to_fna/289379af7a.fna
+ -
+ - Var links are the user-given name plus type extension.
+ -
+ - Rough list of changes that need to be made to get there:
+ -   DONE stop exporting cacheDir and exprDir directly
+ -   DONE add newtype wrappers for different types of paths
+ -   TODO refactor functions, adding newtypes everywhere as you go
+ -}
+
 module ShortCut.Core.Paths
-  ( hashedTmp
-  , hashedTmp'
-  , scriptTmpFile
-  , scriptTmpDir
-  -- , cacheDir
-  -- , exprDir
-  , namedTmp
+  ( hashedTmp     -- TODO rename exprPath
+  , hashedTmp'    -- TODO rename exprPath', or remove if possible
+  , scriptTmpFile -- TODO replace with updated cacheDir
+  , scriptTmpDir  -- TODO replace with updated cacheDir
+  , namedTmp      -- TODO rename varPath
   )
   where
 
@@ -14,6 +65,12 @@ import ShortCut.Core.Debug (debug)
 import ShortCut.Core.Util         (digest)
 import Development.Shake.FilePath ((<.>), (</>))
 import System.FilePath            (makeRelative)
+
+-- TODO move these to Types
+newtype CacheDir = CacheDir FilePath -- ~/.shortcut/cache/<modname>
+newtype ExprPath = ExprPath FilePath -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
+newtype VarPath  = VarPath  FilePath -- ~/.shortcut/vars/<varname>.<type>
+newtype ResPath  = ResPath  FilePath -- ~/.shortcut/vars/result (what about nesting?)
 
 -- TODO remove to stop the temptation to use it
 cacheDir :: CutConfig -> FilePath
