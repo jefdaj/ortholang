@@ -112,7 +112,7 @@ compileScript s@(as,_) permHash = do
 cLit :: CutState -> CutExpr -> Rules ExprPath
 cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
-  let (ExprPath path) = hashedTmp cfg expr []
+  let (ExprPath path) = exprPath cfg expr []
   path %> \out -> debugWriteChanged cfg out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
   return (ExprPath path)
   where
@@ -125,12 +125,12 @@ cLit (_,cfg) expr = do
 --      or possibly the bug is that we're making accidental lists of lists?
 cList :: CutState -> CutExpr -> Rules ExprPath
 cList (_,cfg) e@(CutList EmptyList _ _ _) = do
-  let (ExprPath link) = hashedTmp cfg e []
+  let (ExprPath link) = exprPath cfg e []
   link %> \out -> quietly $ cmd "touch" [out]
   return (ExprPath link)
 cList s@(_,cfg) e@(CutList _ _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
-  let (ExprPath path) = hashedTmp cfg e paths
+  let (ExprPath path) = exprPath cfg e paths
       paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
   path %> \out -> need (map (\(ExprPath p) -> p) paths) >> writeFileChanged out (unlines paths')
   return (ExprPath path)
@@ -165,7 +165,7 @@ cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
 cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
-  return (p1, p2, hashedTmp' cfg t expr [p1, p2])
+  return (p1, p2, exprPath' cfg t expr [p1, p2])
 
 ----------------------------------------------
 -- adapters for scripts to read/write lists --
@@ -193,7 +193,7 @@ toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
   -- TODO function for readnig paths as exprpaths
   lits <- fmap sort $ debugReadLines cfg inPath
   let litExprs  = map (CutLit litType 0) lits
-      litPaths  = map (\e -> hashedTmp cfg e []) litExprs
+      litPaths  = map (\e -> exprPath cfg e []) litExprs
       litPaths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
       litPairs  = zip lits $ map (\(ExprPath p) -> p) litPaths
   liftIO $ mapM (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs

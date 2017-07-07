@@ -53,8 +53,8 @@
  -}
 
 module ShortCut.Core.Paths
-  ( hashedTmp     -- TODO rename exprPath
-  , hashedTmp'    -- TODO rename exprPath', or remove if possible
+  ( exprPath     -- TODO rename exprPath
+  , exprPath'    -- TODO rename exprPath', or remove if possible
   , scriptTmpFile -- TODO replace with updated cacheDir
   , scriptTmpDir  -- TODO replace with updated cacheDir
   , varPath
@@ -86,20 +86,14 @@ varPath cfg (CutVar var) expr = VarPath (debug cfg ("varPah:" ++ rtn) rtn)
     base = if var == "result" then var else var <.> extOf (typeOf expr)
     rtn  = cfgTmpDir cfg </> "vars" </> base
 
--- TODO extn can be found inside expr now; remove it
--- TODO rename exprPath?
-hashedTmp :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
-hashedTmp cfg expr paths = ExprPath (debug cfg ("hashedTmp: " ++ rtn) rtn)
-  where
-    paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
-    uniq   = digest $ unlines $ (show expr):paths'
-    rtn    = cfgTmpDir cfg </> "exprs" </> uniq <.> extOf (typeOf expr)
+exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
+exprPath cfg expr paths = exprPath' cfg (typeOf expr) expr paths
 
--- overrides the expression's "natural" extension
--- TODO figure out how to remove!
--- TODO rename exprPath'? or remove?
-hashedTmp' :: CutConfig -> CutType -> CutExpr -> [ExprPath] -> ExprPath
-hashedTmp' cfg rtn expr paths = ExprPath (debug cfg ("hashedTmp': " ++ rtn') rtn')
+-- Same as exprPath, except you also set the type. This is needed when writing
+-- Haskell functions that modify ShortCut functions, such as the r* ones in
+-- ModuleAPI.hs
+exprPath' :: CutConfig -> CutType -> CutExpr -> [ExprPath] -> ExprPath
+exprPath' cfg rtn expr paths = ExprPath (debug cfg ("exprPath': " ++ rtn') rtn')
   where
     paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
     uniq   = digest $ unlines $ (show expr):paths'

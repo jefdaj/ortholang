@@ -2,7 +2,7 @@ module ShortCut.Modules.Permute where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Paths   (hashedTmp')
+import ShortCut.Core.Paths   (exprPath')
 import ShortCut.Core.Compile (cExpr)
 
 cutModule :: CutModule
@@ -51,13 +51,13 @@ cCombos :: ([FilePath] -> [[FilePath]]) -> CutState -> CutExpr -> Rules ExprPath
 cCombos comboFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- cExpr s iList
   let oType = ListOf $ typeOf iList
-      (ExprPath oList) = hashedTmp' cfg oType expr [ExprPath iPath] -- TODO need fnName too like before?
+      (ExprPath oList) = exprPath' cfg oType expr [ExprPath iPath] -- TODO need fnName too like before?
   oList %> \out -> do
     need [iPath]
     elements <- fmap lines $ readFile' iPath
     let combos = comboFn elements
         lType  = typeOf iList -- TODO is this right?
-        oPaths = map (\(ExprPath p) -> p) $ map (\e -> hashedTmp' cfg lType iList [ExprPath out, ExprPath e]) elements
+        oPaths = map (\(ExprPath p) -> p) $ map (\e -> exprPath' cfg lType iList [ExprPath out, ExprPath e]) elements
     mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
     writeFileChanged out $ unlines oPaths
   return (ExprPath oList)

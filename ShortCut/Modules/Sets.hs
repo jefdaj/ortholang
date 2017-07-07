@@ -2,7 +2,7 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Paths   (hashedTmp)
+import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile (cBop, cExpr)
 import ShortCut.Core.ModuleAPI (typeError)
 import ShortCut.Core.Types
@@ -83,7 +83,7 @@ tSetFold _ = Left "expecting a list of lists"
 
 cSetSummary fn s@(_,cfg) e@(CutFun _ _ _ _ sets) = do
   setPaths <- mapM (cExpr s) sets
-  let (ExprPath oPath) = hashedTmp cfg e []
+  let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
     lists <- mapM (debugReadLines cfg) (map (\(ExprPath p) -> p) setPaths)
     let sets = map fromList lists

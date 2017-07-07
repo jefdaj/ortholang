@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Paths        (hashedTmp')
+import ShortCut.Core.Paths        (exprPath)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
@@ -90,7 +90,7 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
   (ExprPath qPath) <- cExpr s query
   (ExprPath sPath) <- cExpr s subject
   (ExprPath ePath) <- cExpr s evalue
-  let (ExprPath oPath) = hashedTmp' cfg bht e []
+  let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
     -- dbDir   <- rBlastDB cfg (typeOf target) sPath
     -- dbFiles <- listFiles dbDir

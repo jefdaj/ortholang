@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Paths   (hashedTmp)
+import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile (cExpr, addPrefixes, compileScript)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util         (digest)
@@ -70,7 +70,7 @@ cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
   subPaths <- cExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
-  let (ExprPath outPath) = hashedTmp cfg expr resPaths
+  let (ExprPath outPath) = exprPath cfg expr resPaths
       (ExprPath subPaths') = subPaths
       resPaths' = map (\(ExprPath p) -> p) resPaths
   outPath %> \out -> do

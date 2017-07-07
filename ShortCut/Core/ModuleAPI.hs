@@ -18,7 +18,7 @@ import ShortCut.Core.Types
 import Data.Set                   (fromList, toList)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Paths        (scriptTmpDir, scriptTmpFile, hashedTmp, hashedTmp')
+import ShortCut.Core.Paths        (scriptTmpDir, scriptTmpFile, exprPath, exprPath')
 import ShortCut.Core.Compile      (cExpr, toShortCutList)
 import ShortCut.Core.Debug        (debugReadLines)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
@@ -51,7 +51,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   -- let tmpDir = cacheDir cfg </> tmpName
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      (ExprPath oPath) = hashedTmp cfg expr []
+      (ExprPath oPath) = exprPath cfg expr []
   oPath %> \_ -> do
     need [argPath]
     quietly $ unit $ cmd script tmpDir oPath argPath
@@ -64,7 +64,7 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
       tmpOut = scriptTmpFile cfg tmpDir expr "txt"
-      (ExprPath actOut) = hashedTmp cfg expr []
+      (ExprPath actOut) = exprPath cfg expr []
   tmpOut %> \out -> do
     need [faPath]
     quietly $ cmd script tmpDir out faPath
@@ -94,7 +94,7 @@ cLink :: CutState -> CutExpr -> CutType -> Rules ExprPath
 cLink s@(_,cfg) expr rtype = do
   (ExprPath strPath) <- cExpr s expr
   -- TODO damn, need to be more systematic about these unique paths!
-  let (ExprPath outPath) = hashedTmp' cfg rtype expr [] -- TODO ok without ["outPath"]?
+  let (ExprPath outPath) = exprPath' cfg rtype expr [] -- ok without ["outPath"]?
   outPath %> \out -> do
     str <- fmap strip $ readFile' strPath
     src <- liftIO $ canonicalizePath str
@@ -119,19 +119,17 @@ mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = cLoadList rtn
+  , fCompiler  = cLoadList
   }
 
-cLoadList :: CutType -> CutState -> CutExpr -> Rules ExprPath
-cLoadList rtype s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
-  -- liftIO $ putStrLn "entering cLoadList"
-  -- liftIO $ putStrLn $ "e: " ++ show e
-  paths <- mapM (\p -> cLink s p rtype) ps -- TODO is cLink OK with no paths?
+cLoadList :: CutState -> CutExpr -> Rules ExprPath
+cLoadList s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
+  paths <- mapM (\p -> cLink s p t) ps -- is cLink OK with no paths?
   let paths' = map (\(ExprPath p) -> p) paths
-      (ExprPath links) = hashedTmp cfg e paths
+      (ExprPath links) = exprPath' cfg t e []
   links %> \out -> need paths' >> writeFileLines out paths'
   return (ExprPath links)
-cLoadList _ _ _ = error "bad arguments to cLoadList"
+cLoadList _ _ = error "bad arguments to cLoadList"
 
 -----------------------------------------------------------
 -- [a]ction functions (just describe how to build files) --
@@ -159,7 +157,7 @@ rSimpleTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> Cu
            -> (CutState -> CutExpr -> Rules ExprPath)
 rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
-  let (ExprPath outPath) = hashedTmp' cfg rtnType e []
+  let (ExprPath outPath) = exprPath cfg e []
       (CacheDir tmpDir ) = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
   outPath %> \_ -> do
     need $ map (\(ExprPath p) -> p) argPaths
@@ -173,13 +171,12 @@ rMapLastTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> C
             -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   exprPaths <- mapM (cExpr s) exprs
-  let (ExprPath outPath) = hashedTmp' cfg t e []
+  let (ExprPath outPath) = exprPath cfg e []
   outPath %> \_ -> do
     lastPaths <- debugReadLines cfg $ (\(ExprPath p) -> p) $ last exprPaths
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
         -- TODO replace with a Paths function
-        -- TODO and probably don't need the prefix anymore
         tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
         outs   = map (\p -> scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
@@ -203,7 +200,7 @@ rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> 
 rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
-  let (ExprPath outPath) = hashedTmp' cfg (ListOf rtnType) e []
+  let (ExprPath outPath) = exprPath' cfg (ListOf rtnType) e []
       tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
@@ -211,7 +208,7 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
         lasts = map (\p -> ExprPath $ cfgTmpDir cfg </> p) lastPaths
         dirs  = map (\(ExprPath p) -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
         outs  = map (\(CacheDir d) -> ExprPath (d </> "out" <.> extOf rtnType)) dirs
-        rels  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) outs -- TODO standardize this stuff
+        rels  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) outs
     -- TODO oh shit, does this only work sequentially? parallelize!
     (flip mapM)
       (zip3 lasts dirs outs)

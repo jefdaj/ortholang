@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.List                  (intersect)
-import ShortCut.Core.Paths        (hashedTmp')
+import ShortCut.Core.Paths        (exprPath')
 import ShortCut.Core.Compile      (cExpr)
 import Development.Shake.FilePath ((</>))
 
@@ -39,7 +39,7 @@ cSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPat
 cSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- cExpr s iList
   let (ListOf (ListOf eType)) = typeOf iList
-      (ExprPath oPath) = hashedTmp' cfg (ListOf eType) expr [ExprPath iPath] -- TODO need fnName too??
+      (ExprPath oPath) = exprPath' cfg (ListOf eType) expr [ExprPath iPath] -- TODO need fnName too??
   oPath %> \out -> do
     need [iPath]
     iLists <- fmap lines $ readFile' iPath

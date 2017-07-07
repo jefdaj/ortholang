@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import Data.List                  (intercalate)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Paths        (hashedTmp, scriptTmpFile)
+import ShortCut.Core.Paths        (exprPath, scriptTmpFile)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, fromShortCutList)
 import ShortCut.Core.Debug        (debug, debugTrackWrite, debugReadLines,
                                    debugReadFile, debugWriteFile)
@@ -138,7 +138,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let tmpDir  = cfgTmpDir cfg </> "cache" </> "seqio"
-      (ExprPath outPath) = hashedTmp cfg e []
+      (ExprPath outPath) = exprPath cfg e []
       tmpList = scriptTmpFile cfg tmpDir e "txt"
   tmpList %> \_ -> do
     liftIO $ createDirectoryIfMissing True tmpDir
@@ -176,7 +176,7 @@ translate = CutFunction
 cConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath oPath) = hashedTmp cfg e []
+  let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> need [faPath] >> unit (cmd script oPath faPath)
     -- debugTrackWrite cfg [oPath] TODO is this implied?
   return (ExprPath oPath)
@@ -202,7 +202,7 @@ tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 cConcat :: CutState -> CutExpr -> Rules ExprPath
 cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- cExpr s fs
-  let (ExprPath oPath) = hashedTmp cfg e []
+  let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
     -- need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
     -- let catCmd = intercalate " " $ ["cat"] ++ faPaths ++ [">", oPath]

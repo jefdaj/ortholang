@@ -16,7 +16,7 @@ module ShortCut.Modules.BioMartR where
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Paths   (hashedTmp, hashedTmp')
+import ShortCut.Core.Paths   (exprPath, exprPath')
 import ShortCut.Core.Compile (cExpr)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
@@ -164,7 +164,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
 cParseSearches :: CutState -> CutExpr -> Rules ExprPath
 cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
   (ExprPath sList) <- cExpr s expr
-  let (ExprPath searchTable) = hashedTmp' cfg search expr [ExprPath sList]
+  let (ExprPath searchTable) = exprPath' cfg search expr [ExprPath sList]
   searchTable %> \out -> do
     tmp <- readFile' sList
     let sLines = map (cfgTmpDir cfg </>) (lines tmp)
@@ -194,7 +194,7 @@ cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   (ExprPath sTable) <- cParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      (ExprPath outs) = hashedTmp cfg expr [ExprPath bmFn, ExprPath sTable]
+      (ExprPath outs) = exprPath cfg expr [ExprPath bmFn, ExprPath sTable]
   outs %> \out -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?
