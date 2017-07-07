@@ -29,7 +29,8 @@ import ShortCut.Core.Paths
 import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
-import System.FilePath            (makeRelative)
+import System.FilePath            (makeRelative, takeDirectory)
+import System.Directory           (createDirectoryIfMissing)
 
 
 --------------------------------------------------------
@@ -149,10 +150,11 @@ cRef _ _ = error "bad argument to cRef"
 cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 cVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
-      dest' = makeRelative (cfgTmpDir cfg) dest
+      dest' = ".." </> (makeRelative (cfgTmpDir cfg) dest)
   link %> \out -> do
     alwaysRerun
     need [dest]
+    liftIO $ createDirectoryIfMissing True $ takeDirectory out
     quietly $ cmd "ln -fs" [dest', out]
   return (VarPath link)
 

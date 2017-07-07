@@ -49,6 +49,7 @@
  -   DONE stop exporting cacheDir and exprDir directly
  -   DONE add newtype wrappers for different types of paths
  -   TODO refactor functions, adding newtypes everywhere as you go
+ -   TODO introduce smart constructors (or only use cExpr) to prevent mistakes
  -}
 
 module ShortCut.Core.Paths
@@ -83,7 +84,7 @@ varPath :: CutConfig -> CutVar -> CutExpr -> VarPath
 varPath cfg (CutVar var) expr = VarPath (debug cfg ("tmpfile:" ++ rtn) rtn)
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
-    rtn  = cfgTmpDir cfg </> base
+    rtn  = cfgTmpDir cfg </> "vars" </> base
 
 -- TODO extn can be found inside expr now; remove it
 -- TODO rename exprPath?

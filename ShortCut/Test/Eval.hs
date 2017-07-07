@@ -49,7 +49,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
   where
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    res  = (cfgTmpDir cfg' </> "result")
+    res  = (cfgTmpDir cfg' </> "vars" </> "result")
     act  = silence $ evalFile cfg'
 
 goldenScripts :: CutConfig -> IO TestTree
