@@ -2,6 +2,7 @@
 |-- exprs
 |   |-- 0787bb369d.str.list
 |   `-- a830208172.str
-`-- result -> exprs/0787bb369d.str.list
+`-- vars
+    `-- result -> ../exprs/0787bb369d.str.list
 
-1 directory, 3 files
+2 directories, 3 files

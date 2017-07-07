@@ -68,8 +68,8 @@ import Development.Shake.FilePath ((<.>), (</>))
 import System.FilePath            (makeRelative)
 
 -- TODO remove to stop the temptation to use it
-cacheDir :: CutConfig -> CacheDir
-cacheDir cfg = CacheDir $ cfgTmpDir cfg </> "cache"
+-- cacheDir :: CutConfig -> CacheDir
+-- cacheDir cfg = CacheDir $ cfgTmpDir cfg </> "cache"
 
 -- TODO what was this even for? remove it? yeah to stop the temptation :D
 -- exprDir :: CutConfig -> FilePath
@@ -81,7 +81,7 @@ cacheDir cfg = CacheDir $ cfgTmpDir cfg </> "cache"
 -- TODO auto-apply fromShortCutList to result?
 -- TODO rename varPath
 varPath :: CutConfig -> CutVar -> CutExpr -> VarPath
-varPath cfg (CutVar var) expr = VarPath (debug cfg ("tmpfile:" ++ rtn) rtn)
+varPath cfg (CutVar var) expr = VarPath (debug cfg ("varPah:" ++ rtn) rtn)
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
     rtn  = cfgTmpDir cfg </> "vars" </> base
@@ -89,7 +89,7 @@ varPath cfg (CutVar var) expr = VarPath (debug cfg ("tmpfile:" ++ rtn) rtn)
 -- TODO extn can be found inside expr now; remove it
 -- TODO rename exprPath?
 hashedTmp :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
-hashedTmp cfg expr paths = ExprPath (debug cfg ("tmpfile: " ++ rtn) rtn)
+hashedTmp cfg expr paths = ExprPath (debug cfg ("hashedTmp: " ++ rtn) rtn)
   where
     paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
     uniq   = digest $ unlines $ (show expr):paths'
@@ -99,7 +99,7 @@ hashedTmp cfg expr paths = ExprPath (debug cfg ("tmpfile: " ++ rtn) rtn)
 -- TODO figure out how to remove!
 -- TODO rename exprPath'? or remove?
 hashedTmp' :: CutConfig -> CutType -> CutExpr -> [ExprPath] -> ExprPath
-hashedTmp' cfg rtn expr paths = ExprPath (debug cfg ("tmpfile: " ++ rtn') rtn')
+hashedTmp' cfg rtn expr paths = ExprPath (debug cfg ("hashedTmp': " ++ rtn') rtn')
   where
     paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
     uniq   = digest $ unlines $ (show expr):paths'
@@ -108,12 +108,12 @@ hashedTmp' cfg rtn expr paths = ExprPath (debug cfg ("tmpfile: " ++ rtn') rtn')
 -- TODO should this handle calling cfgTmpDir too?
 -- TODO rename cacheDir or something
 scriptTmpDir :: Show a => CutConfig -> FilePath -> a -> CacheDir
-scriptTmpDir cfg tmpDir uniq = CacheDir (debug cfg ("tmpdir: " ++ rtn) rtn)
+scriptTmpDir cfg tmpDir uniq = CacheDir (debug cfg ("scriptTmpDir: " ++ rtn) rtn)
   where
     rtn = tmpDir </> digest uniq
 
 -- TODO is this needed at all?
 scriptTmpFile :: Show a => CutConfig -> FilePath -> a -> String -> FilePath
-scriptTmpFile cfg tmpDir uniq ext = debug cfg ("tmpfile: " ++ rtn) rtn
+scriptTmpFile cfg tmpDir uniq ext = debug cfg ("scriptTmpFile: " ++ rtn) rtn
   where
     rtn = tmpDir </> digest uniq <.> ext

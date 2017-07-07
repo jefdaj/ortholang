@@ -25,6 +25,7 @@
 |   |-- c9dc80b9fd.str
 |   |-- e4b46dbe52.str
 |   `-- e9d480f57b.str
-`-- result -> exprs/86baaec237.str.list
+`-- vars
+    `-- result -> ../exprs/86baaec237.str.list
 
-1 directory, 26 files
+2 directories, 26 files

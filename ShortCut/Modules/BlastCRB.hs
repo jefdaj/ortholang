@@ -11,7 +11,6 @@ import Development.Shake
 
 import ShortCut.Core.ModuleAPI (aTsvColumn, rSimpleTmp, rMapLastTmp,
                                 rMapLastTmps, defaultTypeCheck)
-import ShortCut.Core.Paths     (scriptTmpFile)
 import ShortCut.Modules.SeqIO  (faa, fna)
 
 ---------------

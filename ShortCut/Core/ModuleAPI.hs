@@ -144,7 +144,7 @@ uniqLines = unlines . toList . fromList . lines
 aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aTsvColumn n cfg _ as@[(ExprPath outPath), (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-      tmpOut = scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") ["aTsvColumn", show n, tsvPath] (extOf str)
+      tmpOut = scriptTmpFile cfg (cfgTmpDir cfg </> "exprs") ["aTsvColumn", show n, tsvPath] (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut $ uniqLines strs
   toShortCutList cfg str (ExprPath tmpOut) (ExprPath outPath)
@@ -180,7 +180,7 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ ex
         lasts  = map (cfgTmpDir cfg </>) lastPaths
         -- TODO replace with a Paths function
         -- TODO and probably don't need the prefix anymore
-        tmpDir = cfgTmpDir cfg </> "cache" </> "shortcut" </> tmpPrefix
+        tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
         outs   = map (\p -> scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)

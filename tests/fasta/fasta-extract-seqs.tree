@@ -4,12 +4,12 @@
 |       |-- 03a02c573d.txt
 |       |-- 33c9049461.txt
 |       `-- bfca568efe.txt
-|-- diff.str.list -> exprs/f044eeff14.str.list
 |-- exprs
 |   |-- 07dab4c745.str
 |   |-- 0d80804331.str.list
 |   |-- 139e073c49.faa -> $PWD/data/6803genes10.faa
 |   |-- 139e073c49.str
+|   |-- 275afecf6b.str.list
 |   |-- 538e7fe6ea.str
 |   |-- 5fb3a0e73b.str
 |   |-- 6c33c594bc.faa
@@ -20,12 +20,13 @@
 |   |-- d42b2a25f4.str
 |   |-- e69bc83a1d.str.list
 |   |-- eb8ce152f8.str
-|   |-- f044eeff14.str.list
 |   `-- f190421777.str
-|-- faa10.faa -> exprs/139e073c49.faa
-|-- ids10.str.list -> exprs/0d80804331.str.list
-|-- idsall.str.list -> exprs/e69bc83a1d.str.list
-|-- result -> diff.str.list
-`-- seqs10.faa -> exprs/6c33c594bc.faa
+`-- vars
+    |-- diff.str.list -> ../exprs/275afecf6b.str.list
+    |-- faa10.faa -> ../exprs/139e073c49.faa
+    |-- ids10.str.list -> ../exprs/0d80804331.str.list
+    |-- idsall.str.list -> ../exprs/e69bc83a1d.str.list
+    |-- result -> ../vars/diff.str.list
+    `-- seqs10.faa -> ../exprs/6c33c594bc.faa
 
-3 directories, 25 files
+4 directories, 25 files

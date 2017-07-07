@@ -16,8 +16,9 @@
 |   |-- d42b2a25f4.str
 |   |-- eb8ce152f8.str
 |   `-- f190421777.str
-|-- faa10.faa -> exprs/139e073c49.faa
-|-- ids10.str.list -> exprs/0d80804331.str.list
-`-- result -> ids10.str.list
+`-- vars
+    |-- faa10.faa -> ../exprs/139e073c49.faa
+    |-- ids10.str.list -> ../exprs/0d80804331.str.list
+    `-- result -> ../vars/ids10.str.list
 
-3 directories, 17 files
+4 directories, 17 files

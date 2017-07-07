@@ -2,6 +2,7 @@
 |-- exprs
 |   |-- 09260f1de8.num
 |   `-- 5d794c3179.num
-`-- result -> exprs/5d794c3179.num
+`-- vars
+    `-- result -> ../exprs/5d794c3179.num
 
-1 directory, 3 files
+2 directories, 3 files

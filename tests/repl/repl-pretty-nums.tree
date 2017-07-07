@@ -15,6 +15,7 @@
 |   |-- f14072eefd.num.list
 |   |-- f400e5135d.num
 |   `-- fbd697bb89.num
-`-- result -> exprs/9a244cbafd.num.list
+`-- vars
+    `-- result -> ../exprs/9a244cbafd.num.list
 
-1 directory, 16 files
+2 directories, 16 files

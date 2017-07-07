@@ -3,6 +3,7 @@
 |   |-- 09260f1de8.num
 |   |-- 0b2320ed7c.num
 |   `-- 163076abe4.num
-`-- result -> exprs/163076abe4.num
+`-- vars
+    `-- result -> ../exprs/163076abe4.num
 
-1 directory, 4 files
+2 directories, 4 files

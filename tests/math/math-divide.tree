@@ -3,6 +3,7 @@
 |   |-- 8f74cd1339.num
 |   |-- 907d84fa63.num
 |   `-- dc18fc2507.num
-`-- result -> exprs/8f74cd1339.num
+`-- vars
+    `-- result -> ../exprs/8f74cd1339.num
 
-1 directory, 4 files
+2 directories, 4 files
