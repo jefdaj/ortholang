@@ -18,8 +18,7 @@ import ShortCut.Core.Types
 import Data.Set                   (fromList, toList)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Paths        (scriptTmpDir, scriptTmpFile, cacheDir,
-                                   hashedTmp, hashedTmp', exprDir)
+import ShortCut.Core.Paths        (scriptTmpDir, scriptTmpFile, hashedTmp, hashedTmp')
 import ShortCut.Core.Compile      (cExpr, toShortCutList)
 import ShortCut.Core.Debug        (debugReadLines)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
@@ -49,7 +48,9 @@ defaultTypeCheck expected returned actual =
 cOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
 cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   argPath <- cExpr s arg
-  let tmpDir = cacheDir cfg </> tmpName
+  -- let tmpDir = cacheDir cfg </> tmpName
+  -- TODO get tmpDir from a Paths funcion
+  let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
       oPath  = hashedTmp cfg expr []
   oPath %> \_ -> do
     need [argPath]
@@ -61,7 +62,7 @@ cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules FilePath
 cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   faPath <- cExpr s fa
-  let tmpDir = cacheDir cfg </> tmpName
+  let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
       tmpOut = scriptTmpFile cfg tmpDir expr "txt"
       actOut = hashedTmp cfg expr []
   tmpOut %> \out -> do
@@ -142,7 +143,7 @@ uniqLines = unlines . toList . fromList . lines
 aTsvColumn :: Int -> CutConfig -> [FilePath] -> Action ()
 aTsvColumn n cfg as@[_, outPath, tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-      tmpOut = scriptTmpFile cfg (exprDir cfg) ["aTsvColumn", show n, tsvPath] (extOf str)
+      tmpOut = scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") ["aTsvColumn", show n, tsvPath] (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut $ uniqLines strs
   toShortCutList cfg str tmpOut outPath
@@ -176,8 +177,10 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ ex
     lastPaths <- debugReadLines cfg $ last exprPaths
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
-        tmpDir = exprDir cfg </> tmpPrefix -- TODO probably don't need the prefix anymore
-        outs   = map (\p -> scriptTmpFile cfg (exprDir cfg) p (extOf elemType)) lastPaths
+        -- TODO replace with a Paths function
+        -- TODO and probably don't need the prefix anymore
+        tmpDir = cfgTmpDir cfg </> "cache" </> "shortcut" </> tmpPrefix
+        outs   = map (\p -> scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)

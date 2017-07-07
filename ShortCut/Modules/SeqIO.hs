@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import Data.List                  (intercalate)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Paths        (cacheDir, hashedTmp, scriptTmpFile)
+import ShortCut.Core.Paths        (hashedTmp, scriptTmpFile)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, fromShortCutList)
 import ShortCut.Core.Debug        (debug, debugTrackWrite, debugReadLines,
                                    debugReadFile, debugWriteFile)
@@ -137,7 +137,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   faPath  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let tmpDir  = cacheDir cfg </> "seqio"
+  let tmpDir  = cfgTmpDir cfg </> "cache" </> "seqio"
       outPath = hashedTmp cfg e []
       tmpList = scriptTmpFile cfg tmpDir e "txt"
   tmpList %> \_ -> do
