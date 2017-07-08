@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import Data.List                  (intercalate)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Paths        (exprPath, cacheFile)
+import ShortCut.Core.Paths        (exprPath, cacheDir, cacheFile)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, fromShortCutList)
 import ShortCut.Core.Debug        (debug, debugTrackWrite, debugReadLines,
                                    debugReadFile, debugWriteFile)
@@ -138,9 +138,9 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ name [fa, ids]) = do
   (ExprPath faPath)  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let tmpDir  = cfgTmpDir cfg </> "cache" </> "seqio"
+  let (CacheDir tmpDir ) = cacheDir cfg "seqio"
       (ExprPath outPath) = exprPath cfg e []
-      tmpList = cacheFile cfg name idsPath "txt"
+      tmpList = cacheFile cfg "seqio" idsPath "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   tmpList %> \_ -> do
     liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
@@ -148,7 +148,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ name [fa, ids]) = do
   outPath %> \_ -> do
     need [faPath, tmpList]
     liftIO $ createDirectoryIfMissing True tmpDir
-    quietly $ cmd "extract_seqs.py" tmpDir outPath faPath tmpList
+    quietly $ cmd "extract_seqs.py" (Cwd tmpDir) outPath faPath tmpList
   return (ExprPath outPath)
 mExtractSeqs _ _ = error "bad argument to extractSeqs"
 

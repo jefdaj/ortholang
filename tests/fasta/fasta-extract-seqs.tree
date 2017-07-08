@@ -1,10 +1,9 @@
 .
 |-- cache
-|   |-- extract_seqs
-|   |   `-- 18dc604acb.txt
 |   `-- seqio
 |       |-- 2542681ad0.txt
-|       `-- 3278bd2ac0.txt
+|       |-- 3278bd2ac0.txt
+|       `-- 7a4190916c.txt
 |-- exprs
 |   |-- cut_bop
 |   |   `-- 275afecf6b.str.list
@@ -35,4 +34,4 @@
     |-- result -> ../vars/diff.str.list
     `-- seqs10.faa -> ../exprs/extract_seqs/6c33c594bc.faa
 
-10 directories, 25 files
+9 directories, 25 files

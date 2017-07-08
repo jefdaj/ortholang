@@ -12,19 +12,18 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "summarize"
   , mFunctions =
-    [ commonElements
+    [
     ]
   }
 
--- TODO write `any`
-
-commonElements :: CutFunction
-commonElements = CutFunction
-  { fName      = "common_elements" -- TODO rename to `all`?
-  , fFixity    = Prefix
-  , fTypeCheck = summaryTypeCheck
-  , fCompiler  = cSummary (foldr1 intersect)
-  }
+-- TODO remove once a couple others are finished
+-- commonElements :: CutFunction
+-- commonElements = CutFunction
+--   { fName      = "common_elements" -- TODO rename to `all`?
+--   , fFixity    = Prefix
+--   , fTypeCheck = summaryTypeCheck
+--   , fCompiler  = cSummary (foldr1 intersect)
+--   }
 
 summaryTypeCheck :: [CutType] -> Either String CutType
 summaryTypeCheck [(ListOf (ListOf t))] = Right $ ListOf t

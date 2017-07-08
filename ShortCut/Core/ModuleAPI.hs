@@ -71,7 +71,7 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
       (ExprPath actOut) = exprPath cfg expr []
   tmpOut %> \out -> do
     need [faPath]
-    quietly $ cmd script tmpDir (debug cfg ("cOneArgList out: " ++ out) out) faPath
+    quietly $ cmd script (Cwd tmpDir) (debug cfg ("cOneArgList out: " ++ out) out) faPath
     -- trackWrite [out]
   actOut %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath actOut)
   return (ExprPath actOut)

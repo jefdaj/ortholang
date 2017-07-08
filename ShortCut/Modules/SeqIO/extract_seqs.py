@@ -7,10 +7,10 @@
 from Bio import SeqIO
 from sys import argv
 
-tmpdir = argv[1] # passed by convention, but not used here TODO remove?
-outfa  = argv[2]
-infa   = argv[3]
-inids  = argv[4]
+# tmpdir = argv[1] # passed by convention, but not used here TODO remove?
+outfa  = argv[1]
+infa   = argv[2]
+inids  = argv[3]
 
 with open(inids, 'r') as iis:
     ids = set(i.strip() for i in iis.readlines())

@@ -10,8 +10,8 @@ from Bio import SeqIO
 from sys import argv
 
 # print "argv:", argv
-outgenes = argv[2]
-infasta  = argv[3]
+outgenes = argv[1]
+infasta  = argv[2]
 
 uniq = set()
 

@@ -1,4 +1,4 @@
 mini6803 = load_fna "data/6803genes10.fna"
 full7942 = load_faa "data/7942genes.faa"
 hits6803 = extract_queries (blastx mini6803 full7942 1e-5)
-result = common_elements (repeat hits6803 mini6803 10)
+result = all (repeat hits6803 mini6803 10)

@@ -6,7 +6,8 @@ import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile (cBop, cExpr)
 import ShortCut.Core.ModuleAPI (typeError)
 import ShortCut.Core.Types
-import ShortCut.Core.Debug (debugReadLines, debugWriteLines)
+import ShortCut.Core.Debug (debugReadLines, debugWriteLines, debug)
+import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -74,23 +75,25 @@ mkSetFold name fn = CutFunction
   { fName      = name
   , fTypeCheck = tSetFold
   , fFixity    = Infix
-  , fCompiler  = cSetSummary fn
+  , fCompiler  = cSetFold fn
   }
 
 tSetFold :: [CutType] -> Either String CutType
 tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
 
-cSetSummary fn s@(_,cfg) e@(CutFun _ _ _ _ sets) = do
-  setPaths <- mapM (cExpr s) sets
+cSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
+cSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
+  (ExprPath setsPath) <- cExpr s lol
   let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
-    lists <- mapM (debugReadLines cfg) (map (\(ExprPath p) -> p) setPaths)
-    let sets = map fromList lists
-        oLst = toList $ fn sets
-    debugWriteLines cfg oPath oLst
+    lists <- debugReadLines cfg (debug cfg ("setsPath: " ++ setsPath) setsPath)
+    listContents <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
+    let sets = map fromList listContents
+        oLst = toList $ fn (debug cfg ("sets: " ++ show sets) sets)
+    debugWriteLines cfg oPath (debug cfg ("oLst: " ++ show oLst) oLst)
   return (ExprPath oPath)
-cSetSummary _ _ _ = error "bad argument to cSetSummary"
+cSetFold _ _ _ = error "bad argument to cSetFold"
 
 -- avoided calling it `all` because that's a Prelude function
 intersectionFold :: CutFunction
