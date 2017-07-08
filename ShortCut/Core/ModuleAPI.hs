@@ -119,22 +119,26 @@ cLoadOne _ _ _ = error "bad argument to cLoadOne"
  - write the list in a file, whereas this can handle literal lists in the
  - source code.
  -}
+-- TODO fix it putting both the initial files and lists of them in the same dir!
+--      (.faa and .faa.list are together in exprs/load_faa_all,
+--       when the former should be in exprs/load_faa)
 mkLoadList :: String -> CutType -> CutFunction
 mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = cLoadList
+  , fCompiler  = cLoadList rtn
   }
 
-cLoadList :: CutState -> CutExpr -> Rules ExprPath
-cLoadList s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
+cLoadList :: CutType -> CutState -> CutExpr -> Rules ExprPath
+cLoadList elemRtnType s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
+  -- TODO is t here always str?
   paths <- mapM (\p -> cLink s p t name) ps -- is cLink OK with no paths?
   let paths' = map (\(ExprPath p) -> p) paths
-      (ExprPath links) = exprPathExplicit cfg t e name []
+      (ExprPath links) = exprPathExplicit cfg (ListOf elemRtnType) e name []
   links %> \out -> need paths' >> writeFileLines out paths'
   return (ExprPath links)
-cLoadList _ _ = error "bad arguments to cLoadList"
+cLoadList _ _ _ = error "bad arguments to cLoadList"
 
 -----------------------------------------------------------
 -- [a]ction functions (just describe how to build files) --
