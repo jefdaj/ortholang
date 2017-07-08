@@ -71,3 +71,4 @@ aBlastCRB cfg (CacheDir tmpDir) args@[(ExprPath o), (ExprPath q), (ExprPath t)] 
   -- TODO put these back once sure the rest works concurrently
   -- , "--threads", "10" -- TODO how to pick this?
   -- , "--split"
+aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

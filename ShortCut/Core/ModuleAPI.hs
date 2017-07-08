@@ -18,12 +18,13 @@ import ShortCut.Core.Types
 import Data.Set                   (fromList, toList)
 import Data.List                  (nub, sort)
 import Data.String.Utils          (strip)
-import Development.Shake.FilePath ((</>), (<.>))
+import Development.Shake.FilePath ((</>), (<.>), (-<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
-import ShortCut.Core.Debug        (debugReadLines, debug)
+import ShortCut.Core.Debug        (debugReadLines, debugWriteLines, debugTrackWrite, debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
-import System.FilePath            (makeRelative)
+import System.FilePath            (makeRelative, takeFileName, takeBaseName)
+import ShortCut.Core.Util         (digest)
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -118,22 +119,26 @@ cLoadOne _ _ _ = error "bad argument to cLoadOne"
  - write the list in a file, whereas this can handle literal lists in the
  - source code.
  -}
+-- TODO fix it putting both the initial files and lists of them in the same dir!
+--      (.faa and .faa.list are together in exprs/load_faa_all,
+--       when the former should be in exprs/load_faa)
 mkLoadList :: String -> CutType -> CutFunction
 mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = cLoadList
+  , fCompiler  = cLoadList rtn
   }
 
-cLoadList :: CutState -> CutExpr -> Rules ExprPath
-cLoadList s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
+cLoadList :: CutType -> CutState -> CutExpr -> Rules ExprPath
+cLoadList elemRtnType s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
+  -- TODO is t here always str?
   paths <- mapM (\p -> cLink s p t name) ps -- is cLink OK with no paths?
   let paths' = map (\(ExprPath p) -> p) paths
-      (ExprPath links) = exprPathExplicit cfg t e name []
+      (ExprPath links) = exprPathExplicit cfg (ListOf elemRtnType) e name []
   links %> \out -> need paths' >> writeFileLines out paths'
   return (ExprPath links)
-cLoadList _ _ = error "bad arguments to cLoadList"
+cLoadList _ _ _ = error "bad arguments to cLoadList"
 
 -----------------------------------------------------------
 -- [a]ction functions (just describe how to build files) --
@@ -185,30 +190,44 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
     tmpFn (ExprPath p) = cacheDirUniq cfg tmpPrefix [show e, show p]
 
 -- common code factored out from the two functions above
+-- TODO now that the new Shake strategy works, clean it up!
 rMapLast :: (ExprPath -> CacheDir) -- this will be called to get each tmpDir
          -> (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
          -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLast tmpFn actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) e name []
+  let inits = map (\(ExprPath p) -> p) initPaths
+      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) e name []
+      (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
+
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
-    let inits = map (\(ExprPath p) -> p) initPaths
-        lasts = map (\p -> ExprPath $ cfgTmpDir cfg </> p) lastPaths
-        dirs  = map tmpFn lasts
-        outs  = map (\(CacheDir d) -> ExprPath (d </> "out" <.> extOf rtnType)) dirs
-        rels  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) outs
-    -- TODO oh shit, does this only work sequentially? parallelize!
-    (flip mapM)
-      (zip3 lasts dirs outs)
-      (\(l@(ExprPath last), (CacheDir dir), o@(ExprPath out)) -> do
-        need $ inits ++ [last]
-        liftIO $ createDirectoryIfMissing True dir
-        actFn cfg (CacheDir dir) ([o] ++ initPaths ++ [l])
-        trackWrite [out]
-      )
-    need $ map (\(ExprPath p) -> p) outs
-    writeFileLines outPath rels
+    -- this writes the .args files for use in the rule above
+    (flip mapM) lastPaths $ \p -> do
+      -- TODO write the out path here too so all the args are together?
+      let argsPath = mapTmp </> takeBaseName p <.> "args"
+          argPaths = inits ++ [cfgTmpDir cfg </> p]
+      liftIO $ createDirectoryIfMissing True $ mapTmp
+      debugWriteLines cfg argsPath argPaths
+    -- then we just trigger them and write to the overall outPath
+    let outPaths = map (\p -> mapTmp </> takeBaseName p) lastPaths
+    need outPaths
+    debugWriteLines cfg outPath outPaths
+
+  -- This builds one of the list of out paths based on a .args file
+  -- (made in the action above). It's a pretty roundabout way to do it!
+  -- TODO ask ndmitchell if there's something much more elegant I'm missing
+  (mapTmp </> "*") %> \out -> do
+    let argsPath = out -<.> ".args" -- TODO clean up
+    -- args <- debugReadLines cfg argsPath
+    args <- fmap lines $ liftIO $ readFile argsPath
+    let args' = map (cfgTmpDir cfg </>) args
+    need args'
+    let (CacheDir dir) = tmpFn (ExprPath $ last args)
+    liftIO $ createDirectoryIfMissing True dir
+    actFn cfg (CacheDir dir) (map ExprPath (out:args'))
+    trackWrite [out]
+
   return (ExprPath outPath)
 rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"
