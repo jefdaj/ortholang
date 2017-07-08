@@ -111,6 +111,7 @@ extractSeqIDs = CutFunction
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
+-- TODO these should put their tmpfiles in cache/extract_ids!
 cExtractSeqIDs = cOneArgListScript "seqio" "extract_ids.py"
 
 ----------------------------------------------
@@ -133,15 +134,16 @@ tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
 -- TODO can this be replaced with cOneArgListScript?
 cExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
-cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
+cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ name [fa, ids]) = do
   (ExprPath faPath)  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let tmpDir  = cfgTmpDir cfg </> "cache" </> "seqio"
       (ExprPath outPath) = exprPath cfg e []
-      tmpList = cacheFile cfg tmpDir e "txt"
+      tmpList = cacheFile cfg name idsPath "txt"
+  -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   tmpList %> \_ -> do
-    liftIO $ createDirectoryIfMissing True tmpDir
+    liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
     fromShortCutList cfg idsPath (ExprPath tmpList)
   outPath %> \_ -> do
     need [faPath, tmpList]

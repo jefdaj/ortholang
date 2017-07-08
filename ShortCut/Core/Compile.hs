@@ -17,6 +17,7 @@ module ShortCut.Core.Compile
   , cList
   , addPrefixes
   , toShortCutList
+  , toShortCutListStr
   , fromShortCutList
   )
   where
@@ -165,7 +166,7 @@ cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
 cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
-  return (p1, p2, exprPathTyped cfg t expr [p1, p2])
+  return (p1, p2, exprPathExplicit cfg t expr "cut_bop" [p1, p2]) -- TODO name each one?
 
 ----------------------------------------------
 -- adapters for scripts to read/write lists --
@@ -190,8 +191,12 @@ fromShortCutList cfg (ExprPath inPath) (ExprPath outPath) = do
 -- TODO any reason to pass the full state instead of just config?
 toShortCutList :: CutConfig -> CutType -> ExprPath -> ExprPath -> Action ()
 toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
-  -- TODO function for readnig paths as exprpaths
   lits <- fmap sort $ debugReadLines cfg inPath
+  toShortCutListStr cfg litType (ExprPath outPath) lits
+
+-- Like toShortCutList, but takes strings instead of a tmpfile containing strings.
+toShortCutListStr :: CutConfig -> CutType -> ExprPath -> [String] -> Action ()
+toShortCutListStr cfg litType (ExprPath outPath) lits = do
   let litExprs  = map (CutLit litType 0) lits
       litPaths  = map (\e -> exprPath cfg e []) litExprs
       litPaths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths

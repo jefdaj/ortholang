@@ -33,8 +33,8 @@
  - Files in the cache are organized however seems best on a per-module basis
  - with help from `cacheDir`, `cacheDirUniq`, and `cacheFile`.
  -
- - Expression paths are determined by `exprPath` or `exprPathTyped`. They get
- - the base name by `show`ing the expression and `digest`ing the resulting
+ - Expression paths are determined by `exprPath` or `exprPathExplicit`. They
+ - get the base name by `show`ing the expression and `digest`ing the resulting
  - `String`, the extension based on the `CutType`, and the folder based on
  - constructor + function name if a function. Some made up examples:
  -
@@ -57,7 +57,7 @@ module ShortCut.Core.Paths
   , cacheDirUniq
   , cacheFile
   , exprPath
-  , exprPathTyped
+  , exprPathExplicit
   , varPath
   -- TODO resPath?
   )
@@ -75,7 +75,7 @@ import System.FilePath            (makeRelative)
 cacheDir :: CutConfig -> String -> CacheDir
 cacheDir cfg modName = CacheDir (debug cfg ("cacheDir: " ++ rtn) rtn)
   where
-    rtn = cfgTmpDir cfg </> modName
+    rtn = cfgTmpDir cfg </> "cache" </> modName
 
 -- Creates a unique hashed directory inside the main module cache dir.
 -- Needed for scripts that name their tmpfiles the same each time they're run
@@ -87,23 +87,36 @@ cacheDirUniq cfg modName showable = CacheDir (debug cfg ("cacheDirUniq: " ++ rtn
     rtn = d </> digest showable
 
 -- TODO is this needed at all?
-cacheFile :: Show a => CutConfig -> FilePath -> a -> String -> FilePath
-cacheFile cfg tmpDir uniq ext = debug cfg ("cacheFile: " ++ rtn) rtn
+cacheFile :: Show a => CutConfig -> String -> a -> String -> FilePath
+cacheFile cfg modName uniq ext = debug cfg ("cacheFile: " ++ rtn ++ " (modName: " ++ modName ++ ")") rtn
   where
-    rtn = tmpDir </> digest uniq <.> ext
+    (CacheDir d) = cacheDir cfg modName
+    rtn = d </> digest uniq <.> ext
+
+-- helper fr exprPath* that finds the right subdirectory
+-- CutLit  CutType Int String
+-- CutRef  CutType Int [CutVar] CutVar -- do refs need a salt? yes! (i think?)
+-- CutBop  CutType Int [CutVar] String  CutExpr CutExpr
+-- CutFun  CutType Int [CutVar] String [CutExpr]
+-- CutList CutType Int [CutVar] [CutExpr]
+exprPrefix e@(CutLit _ _ _       ) = "cut_lit"
+exprPrefix e@(CutRef _ _ _ _     ) = "cut_ref"
+exprPrefix e@(CutBop _ _ _ _ _ _ ) = "cut_bop" -- TODO should these have individual names?
+exprPrefix e@(CutList _ _ _ _    ) = "cut_list"
+exprPrefix e@(CutFun _ _ _ name _) = name
 
 exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
-exprPath cfg expr paths = exprPathTyped cfg (typeOf expr) expr paths
+exprPath cfg expr paths = exprPathExplicit cfg (typeOf expr) expr (exprPrefix expr) paths
 
 -- Same as exprPath, except you also set the type. This is needed when writing
 -- Haskell functions that modify ShortCut functions, such as the r* ones in
 -- ModuleAPI.hs
-exprPathTyped :: CutConfig -> CutType -> CutExpr -> [ExprPath] -> ExprPath
-exprPathTyped cfg rtn expr paths = ExprPath (debug cfg ("exprPathTyped: " ++ rtn') rtn')
+exprPathExplicit :: CutConfig -> CutType -> CutExpr -> String -> [ExprPath] -> ExprPath
+exprPathExplicit cfg rtn expr prefix paths = ExprPath (debug cfg ("exprPathExplicit: " ++ rtn') rtn')
   where
     paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
     uniq   = digest $ unlines $ (show expr):paths'
-    rtn'   = cfgTmpDir cfg </> "exprs" </> uniq <.> extOf rtn
+    rtn'   = cfgTmpDir cfg </> "exprs" </> prefix </> uniq <.> extOf rtn
 
 -- TODO flip arguments for consistency with everything else There's a special
 -- case for "result", which is like the "main" function of a ShortCut script,

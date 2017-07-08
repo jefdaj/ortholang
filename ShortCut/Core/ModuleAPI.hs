@@ -18,9 +18,9 @@ import ShortCut.Core.Types
 import Data.Set                   (fromList, toList)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathTyped)
-import ShortCut.Core.Compile      (cExpr, toShortCutList)
-import ShortCut.Core.Debug        (debugReadLines)
+import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
+import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
+import ShortCut.Core.Debug        (debugReadLines, debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath            (makeRelative)
 
@@ -59,15 +59,18 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   return (ExprPath oPath)
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 
+-- for scripts that take one arg and return a list of lits,
+-- which then needs converting to ShortCut format
+-- TODO this should put tmpfiles in cache/<script name>!
 cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
 cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      tmpOut = cacheFile cfg tmpDir expr "txt"
+  let (CacheDir tmpDir) = cacheDir cfg tmpName
+      tmpOut            = cacheFile cfg tmpName fa "txt"
       (ExprPath actOut) = exprPath cfg expr []
   tmpOut %> \out -> do
     need [faPath]
-    quietly $ cmd script tmpDir out faPath
+    quietly $ cmd script tmpDir (debug cfg ("cOneArgList out: " ++ out) out) faPath
     -- trackWrite [out]
   actOut %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath actOut)
   return (ExprPath actOut)
@@ -90,11 +93,11 @@ mkLoad name rtn = CutFunction
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
-cLink :: CutState -> CutExpr -> CutType -> Rules ExprPath
-cLink s@(_,cfg) expr rtype = do
+cLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
+cLink s@(_,cfg) expr rtype prefix = do
   (ExprPath strPath) <- cExpr s expr
-  -- TODO damn, need to be more systematic about these unique paths!
-  let (ExprPath outPath) = exprPathTyped cfg rtype expr [] -- ok without ["outPath"]?
+  -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
+  let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
   outPath %> \out -> do
     str <- fmap strip $ readFile' strPath
     src <- liftIO $ canonicalizePath str
@@ -104,7 +107,7 @@ cLink s@(_,cfg) expr rtype = do
   return (ExprPath outPath)
 
 cLoadOne :: CutType -> CutState -> CutExpr -> Rules ExprPath
-cLoadOne t s (CutFun _ _ _ _ [p]) = cLink s p t
+cLoadOne t s (CutFun _ _ _ n [p]) = cLink s p t n
 cLoadOne _ _ _ = error "bad argument to cLoadOne"
 
 -- load a list of files --
@@ -123,10 +126,10 @@ mkLoadList name rtn = CutFunction
   }
 
 cLoadList :: CutState -> CutExpr -> Rules ExprPath
-cLoadList s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
-  paths <- mapM (\p -> cLink s p t) ps -- is cLink OK with no paths?
+cLoadList s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
+  paths <- mapM (\p -> cLink s p t name) ps -- is cLink OK with no paths?
   let paths' = map (\(ExprPath p) -> p) paths
-      (ExprPath links) = exprPathTyped cfg t e []
+      (ExprPath links) = exprPathExplicit cfg t e name []
   links %> \out -> need paths' >> writeFileLines out paths'
   return (ExprPath links)
 cLoadList _ _ = error "bad arguments to cLoadList"
@@ -140,13 +143,10 @@ cLoadList _ _ = error "bad arguments to cLoadList"
 uniqLines = unlines . toList . fromList . lines
 
 aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aTsvColumn n cfg _ as@[(ExprPath outPath), (ExprPath tsvPath)] = do
+aTsvColumn n cfg _ as@[outPath, (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-      -- TODO write toShortCutList' that takes strings
-      tmpOut = cacheFile cfg (cfgTmpDir cfg </> "exprs") ["aTsvColumn", show n, tsvPath] (extOf str)
-  Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
-  writeFile' tmpOut $ uniqLines strs
-  toShortCutList cfg str (ExprPath tmpOut) (ExprPath outPath)
+  Stdout out <- quietly $ cmd Shell awkCmd tsvPath
+  toShortCutListStr cfg str outPath $ lines out
 aTsvColumn _ _ _ as = error "bad arguments to aTsvColumn"
 
 -------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ rSimpleTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> Cu
 rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let (ExprPath outPath) = exprPath cfg e []
-      (CacheDir tmpDir ) = cacheDir cfg tmpPrefix
+      (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
   outPath %> \_ -> do
     need $ map (\(ExprPath p) -> p) argPaths
     liftIO $ createDirectoryIfMissing True tmpDir
@@ -178,6 +178,7 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ ex
     let inits  = init exprPaths
         lasts  = map (cfgTmpDir cfg </>) lastPaths
         -- TODO replace with a Paths function
+        -- TODO tables bug not in here, but it sure is messy!
         tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
         outs   = map (\p -> cacheFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
@@ -198,10 +199,10 @@ rMapLastTmp _ _ _ _ _ = error "bad argument to cMapLastTmp"
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
              -> (CutState -> CutExpr -> Rules ExprPath)
-rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
+rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
-  let (ExprPath outPath) = exprPathTyped cfg (ListOf rtnType) e []
+  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) e name []
       -- tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
       tmpDir = cacheDir cfg tmpPrefix
   outPath %> \_ -> do

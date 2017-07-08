@@ -51,10 +51,10 @@ import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 import Control.Monad.IO.Class   (liftIO)
 
-newtype CacheDir = CacheDir FilePath -- ~/.shortcut/cache/<modname>
-newtype ExprPath = ExprPath FilePath -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
-newtype VarPath  = VarPath  FilePath -- ~/.shortcut/vars/<varname>.<type>
-newtype ResPath  = ResPath  FilePath -- ~/.shortcut/vars/result (what about nesting?)
+newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
+newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
+newtype VarPath  = VarPath  FilePath deriving Show -- ~/.shortcut/vars/<varname>.<type>
+newtype ResPath  = ResPath  FilePath deriving Show -- ~/.shortcut/vars/result[.<hash>.<type>]
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
