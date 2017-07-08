@@ -67,7 +67,7 @@ blastCRBAll = CutFunction
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBlastCRB cfg (CacheDir tmpDir) args@[(ExprPath o), (ExprPath q), (ExprPath t)] =
-  quietly $ cmd (Cwd tmpDir) "crb-blast" ["--query", q, "--target", t, "--output", o]
+  quietly $ cmd (Cwd tmpDir) "crb-blast" ["--query", q, "--target", t, "--output", o, "--threads", "8", "--split"]
   -- TODO put these back once sure the rest works concurrently
   -- , "--threads", "10" -- TODO how to pick this?
   -- , "--split"
