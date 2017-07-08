@@ -170,6 +170,7 @@ rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
+-- TODO unify with rMapLastTmps!
 rMapLastTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
             -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
@@ -181,8 +182,8 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ ex
         lasts  = map (cfgTmpDir cfg </>) lastPaths
         -- TODO replace with a Paths function
         -- TODO tables bug not in here, but it sure is messy!
-        tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
-        outs   = map (\p -> cacheFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
+        (CacheDir tmpDir) = cacheDir cfg tmpPrefix
+        outs   = map (\p -> cacheFile cfg tmpPrefix p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
@@ -206,7 +207,7 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) e name []
       -- tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
-      tmpDir = cacheDir cfg tmpPrefix
+      -- tmpDir = cacheDir cfg tmpPrefix
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
     let inits = map (\(ExprPath p) -> p) initPaths

@@ -1,8 +1,10 @@
 .
 |-- exprs
-|   |-- 09260f1de8.num
-|   `-- 5d794c3179.num
+|   |-- cut_bop
+|   |   `-- aca120d99d.num
+|   `-- cut_lit
+|       `-- 09260f1de8.num
 `-- vars
-    `-- result -> ../exprs/5d794c3179.num
+    `-- result -> ../exprs/cut_bop/aca120d99d.num
 
-2 directories, 3 files
+4 directories, 3 files

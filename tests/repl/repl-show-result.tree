@@ -1,9 +1,11 @@
 .
 |-- exprs
-|   |-- 09260f1de8.num
-|   |-- 6ab49f2121.num
-|   `-- 907d84fa63.num
+|   |-- cut_bop
+|   |   `-- 3ad66d9073.num
+|   `-- cut_lit
+|       |-- 09260f1de8.num
+|       `-- 907d84fa63.num
 `-- vars
-    `-- result -> ../exprs/6ab49f2121.num
+    `-- result -> ../exprs/cut_bop/3ad66d9073.num
 
-2 directories, 4 files
+4 directories, 4 files

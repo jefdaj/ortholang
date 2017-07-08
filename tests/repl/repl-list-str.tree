@@ -1,8 +1,10 @@
 .
 |-- exprs
-|   |-- 0787bb369d.str.list
-|   `-- a830208172.str
+|   |-- cut_list
+|   |   `-- bbb893b46e.str.list
+|   `-- cut_lit
+|       `-- a830208172.str
 `-- vars
-    `-- result -> ../exprs/0787bb369d.str.list
+    `-- result -> ../exprs/cut_list/bbb893b46e.str.list
 
-2 directories, 3 files
+4 directories, 3 files

@@ -1,30 +1,34 @@
 .
 |-- exprs
-|   |-- 09260f1de8.num
-|   |-- 0b2320ed7c.num
-|   |-- 766a7f5b6d.num
-|   |-- 797a46dcd1.num
-|   |-- 907d84fa63.num
-|   |-- 946d99a213.num
-|   |-- 9556a13dac.num
-|   |-- b6629ae183.num.list
-|   |-- c866614a6d.num
-|   |-- d251c18467.num
-|   |-- dc18fc2507.num
-|   |-- ecd953d4f3.num.list
-|   `-- ed3833df5e.num
+|   |-- cut_bop
+|   |   |-- 04cd8e6802.num
+|   |   |-- 510351fac9.num
+|   |   |-- 9953c0dfed.num
+|   |   |-- b22af1a5d1.num
+|   |   `-- c8a8326a6d.num
+|   |-- cut_list
+|   |   `-- cf896f365a.num.list
+|   |-- cut_lit
+|   |   |-- 09260f1de8.num
+|   |   |-- 0b2320ed7c.num
+|   |   |-- 766a7f5b6d.num
+|   |   |-- 907d84fa63.num
+|   |   |-- d251c18467.num
+|   |   `-- dc18fc2507.num
+|   `-- repeat_each
+|       `-- ecd953d4f3.num.list
 `-- vars
-    |-- dep.4fd7942476.num -> ../exprs/797a46dcd1.num
-    |-- dep.85da98dc9a.num -> ../exprs/c866614a6d.num
-    |-- dep.ae859b6609.num -> ../exprs/9556a13dac.num
-    |-- dep.cb5a23ec25.num -> ../exprs/ed3833df5e.num
-    |-- dep.f993e5e00b.num -> ../exprs/946d99a213.num
-    |-- ind.4fd7942476.num -> ../exprs/dc18fc2507.num
-    |-- ind.85da98dc9a.num -> ../exprs/d251c18467.num
-    |-- ind.ae859b6609.num -> ../exprs/0b2320ed7c.num
-    |-- ind.cb5a23ec25.num -> ../exprs/09260f1de8.num
-    |-- ind.f993e5e00b.num -> ../exprs/907d84fa63.num
-    |-- rep.num.list -> ../exprs/ecd953d4f3.num.list
+    |-- dep.4fd7942476.num -> ../exprs/cut_bop/510351fac9.num
+    |-- dep.85da98dc9a.num -> ../exprs/cut_bop/b22af1a5d1.num
+    |-- dep.ae859b6609.num -> ../exprs/cut_bop/04cd8e6802.num
+    |-- dep.cb5a23ec25.num -> ../exprs/cut_bop/9953c0dfed.num
+    |-- dep.f993e5e00b.num -> ../exprs/cut_bop/c8a8326a6d.num
+    |-- ind.4fd7942476.num -> ../exprs/cut_lit/dc18fc2507.num
+    |-- ind.85da98dc9a.num -> ../exprs/cut_lit/d251c18467.num
+    |-- ind.ae859b6609.num -> ../exprs/cut_lit/0b2320ed7c.num
+    |-- ind.cb5a23ec25.num -> ../exprs/cut_lit/09260f1de8.num
+    |-- ind.f993e5e00b.num -> ../exprs/cut_lit/907d84fa63.num
+    |-- rep.num.list -> ../exprs/repeat_each/ecd953d4f3.num.list
     |-- result -> ../vars/rep.num.list
     |-- result.4fd7942476.num -> ../vars/dep.4fd7942476.num
     |-- result.85da98dc9a.num -> ../vars/dep.85da98dc9a.num
@@ -32,4 +36,4 @@
     |-- result.cb5a23ec25.num -> ../vars/dep.cb5a23ec25.num
     `-- result.f993e5e00b.num -> ../vars/dep.f993e5e00b.num
 
-2 directories, 30 files
+6 directories, 30 files

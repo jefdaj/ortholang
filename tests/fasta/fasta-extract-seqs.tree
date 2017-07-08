@@ -1,32 +1,38 @@
 .
 |-- cache
+|   |-- extract_seqs
+|   |   `-- 18dc604acb.txt
 |   `-- seqio
-|       |-- 03a02c573d.txt
-|       |-- 33c9049461.txt
-|       `-- bfca568efe.txt
+|       |-- 2542681ad0.txt
+|       `-- 3278bd2ac0.txt
 |-- exprs
-|   |-- 07dab4c745.str
-|   |-- 0d80804331.str.list
-|   |-- 139e073c49.faa -> $PWD/data/6803genes10.faa
-|   |-- 139e073c49.str
-|   |-- 275afecf6b.str.list
-|   |-- 538e7fe6ea.str
-|   |-- 5fb3a0e73b.str
-|   |-- 6c33c594bc.faa
-|   |-- 7416440eff.str
-|   |-- 8d8fc03992.str
-|   |-- 95e123a81b.str
-|   |-- b9bfc4e150.str
-|   |-- d42b2a25f4.str
-|   |-- e69bc83a1d.str.list
-|   |-- eb8ce152f8.str
-|   `-- f190421777.str
+|   |-- cut_bop
+|   |   `-- 275afecf6b.str.list
+|   |-- cut_lit
+|   |   |-- 07dab4c745.str
+|   |   |-- 139e073c49.str
+|   |   |-- 538e7fe6ea.str
+|   |   |-- 5fb3a0e73b.str
+|   |   |-- 7416440eff.str
+|   |   |-- 8d8fc03992.str
+|   |   |-- 95e123a81b.str
+|   |   |-- b9bfc4e150.str
+|   |   |-- d42b2a25f4.str
+|   |   |-- eb8ce152f8.str
+|   |   `-- f190421777.str
+|   |-- extract_ids
+|   |   |-- 0d80804331.str.list
+|   |   `-- e69bc83a1d.str.list
+|   |-- extract_seqs
+|   |   `-- 6c33c594bc.faa
+|   `-- load_faa
+|       `-- 139e073c49.faa -> $PWD/data/6803genes10.faa
 `-- vars
-    |-- diff.str.list -> ../exprs/275afecf6b.str.list
-    |-- faa10.faa -> ../exprs/139e073c49.faa
-    |-- ids10.str.list -> ../exprs/0d80804331.str.list
-    |-- idsall.str.list -> ../exprs/e69bc83a1d.str.list
+    |-- diff.str.list -> ../exprs/cut_bop/275afecf6b.str.list
+    |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
+    |-- ids10.str.list -> ../exprs/extract_ids/0d80804331.str.list
+    |-- idsall.str.list -> ../exprs/extract_ids/e69bc83a1d.str.list
     |-- result -> ../vars/diff.str.list
-    `-- seqs10.faa -> ../exprs/6c33c594bc.faa
+    `-- seqs10.faa -> ../exprs/extract_seqs/6c33c594bc.faa
 
-4 directories, 25 files
+10 directories, 25 files

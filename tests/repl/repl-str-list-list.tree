@@ -1,9 +1,11 @@
 .
 |-- exprs
-|   |-- 0787bb369d.str.list
-|   |-- a830208172.str
-|   `-- b338d1127a.str.list.list
+|   |-- cut_list
+|   |   |-- 21e473712a.str.list.list
+|   |   `-- bbb893b46e.str.list
+|   `-- cut_lit
+|       `-- a830208172.str
 `-- vars
-    `-- result -> ../exprs/b338d1127a.str.list.list
+    `-- result -> ../exprs/cut_list/21e473712a.str.list.list
 
-2 directories, 4 files
+4 directories, 4 files

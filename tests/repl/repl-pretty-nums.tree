@@ -1,21 +1,24 @@
 .
 |-- exprs
-|   |-- 09260f1de8.num
-|   |-- 0b2320ed7c.num
-|   |-- 41339ddb02.num.list
-|   |-- 6ddf61ba14.num
-|   |-- 8131cb661d.num
-|   |-- 8c8b66ceef.num
-|   |-- 907d84fa63.num
-|   |-- 9a244cbafd.num.list
-|   |-- b15bdb8411.num
-|   |-- d16ec6b7a6.num
-|   |-- d251c18467.num
-|   |-- dc18fc2507.num
-|   |-- f14072eefd.num.list
-|   |-- f400e5135d.num
-|   `-- fbd697bb89.num
+|   |-- cut_bop
+|   |   `-- fd548fbd12.num
+|   |-- cut_list
+|   |   |-- 506230c38a.num.list
+|   |   |-- aa87ea2e73.num.list
+|   |   `-- e271b68cf7.num.list
+|   `-- cut_lit
+|       |-- 09260f1de8.num
+|       |-- 0b2320ed7c.num
+|       |-- 6ddf61ba14.num
+|       |-- 8131cb661d.num
+|       |-- 8c8b66ceef.num
+|       |-- 907d84fa63.num
+|       |-- b15bdb8411.num
+|       |-- d251c18467.num
+|       |-- dc18fc2507.num
+|       |-- f400e5135d.num
+|       `-- fbd697bb89.num
 `-- vars
-    `-- result -> ../exprs/9a244cbafd.num.list
+    `-- result -> ../exprs/cut_list/e271b68cf7.num.list
 
-2 directories, 16 files
+5 directories, 16 files
