@@ -170,49 +170,33 @@ rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
--- TODO unify with rMapLastTmps!
 rMapLastTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
             -> (CutState -> CutExpr -> Rules ExprPath)
-rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
-  exprPaths <- mapM (cExpr s) exprs
-  let (ExprPath outPath) = exprPath cfg e []
-  outPath %> \_ -> do
-    lastPaths <- debugReadLines cfg $ (\(ExprPath p) -> p) $ last exprPaths
-    let inits  = init exprPaths
-        lasts  = map (cfgTmpDir cfg </>) lastPaths
-        -- TODO replace with a Paths function
-        -- TODO tables bug not in here, but it sure is messy!
-        (CacheDir tmpDir) = cacheDir cfg tmpPrefix
-        outs   = map (\p -> cacheFile cfg tmpPrefix p (extOf elemType)) lastPaths
-        outs'  = map (makeRelative $ cfgTmpDir cfg) outs
-    (flip mapM)
-      (zip outs lasts)
-      (\(out, last) -> do
-        need (last:map (\(ExprPath p) -> p) inits)
-        liftIO $ createDirectoryIfMissing True tmpDir
-        actFn cfg (CacheDir tmpDir) (ExprPath out:ExprPath last:inits)
-        trackWrite [out]
-      )
-    need outs
-    writeFileLines outPath outs'
-  return (ExprPath outPath)
-rMapLastTmp _ _ _ _ _ = error "bad argument to cMapLastTmp"
+rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefix t s
+  where
+    tmpDir = cacheDir cfg tmpPrefix
 
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
              -> (CutState -> CutExpr -> Rules ExprPath)
-rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
+  where
+    tmpFn (ExprPath p) = cacheDirUniq cfg tmpPrefix [show e, show p]
+
+-- common code factored out from the two functions above
+rMapLast :: (ExprPath -> CacheDir) -- this will be called to get each tmpDir
+         -> (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
+         -> (CutState -> CutExpr -> Rules ExprPath)
+rMapLast tmpFn actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) e name []
-      -- tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
-      -- tmpDir = cacheDir cfg tmpPrefix
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
     let inits = map (\(ExprPath p) -> p) initPaths
         lasts = map (\p -> ExprPath $ cfgTmpDir cfg </> p) lastPaths
-        dirs  = map (\(ExprPath p) -> cacheDirUniq cfg tmpPrefix [show e, show p]) lasts
+        dirs  = map tmpFn lasts
         outs  = map (\(CacheDir d) -> ExprPath (d </> "out" <.> extOf rtnType)) dirs
         rels  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) outs
     -- TODO oh shit, does this only work sequentially? parallelize!
@@ -227,4 +211,4 @@ rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
     need $ map (\(ExprPath p) -> p) outs
     writeFileLines outPath rels
   return (ExprPath outPath)
-rMapLastTmps _ _ _ _ _ = error "bad argument to rMapLastTmps"
+rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"
