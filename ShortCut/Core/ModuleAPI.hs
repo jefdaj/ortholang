@@ -18,7 +18,7 @@ import ShortCut.Core.Types
 import Data.Set                   (fromList, toList)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Paths        (scriptTmpDir, scriptTmpFile, exprPath, exprPath')
+import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathTyped)
 import ShortCut.Core.Compile      (cExpr, toShortCutList)
 import ShortCut.Core.Debug        (debugReadLines)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
@@ -63,7 +63,7 @@ cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPa
 cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      tmpOut = scriptTmpFile cfg tmpDir expr "txt"
+      tmpOut = cacheFile cfg tmpDir expr "txt"
       (ExprPath actOut) = exprPath cfg expr []
   tmpOut %> \out -> do
     need [faPath]
@@ -94,7 +94,7 @@ cLink :: CutState -> CutExpr -> CutType -> Rules ExprPath
 cLink s@(_,cfg) expr rtype = do
   (ExprPath strPath) <- cExpr s expr
   -- TODO damn, need to be more systematic about these unique paths!
-  let (ExprPath outPath) = exprPath' cfg rtype expr [] -- ok without ["outPath"]?
+  let (ExprPath outPath) = exprPathTyped cfg rtype expr [] -- ok without ["outPath"]?
   outPath %> \out -> do
     str <- fmap strip $ readFile' strPath
     src <- liftIO $ canonicalizePath str
@@ -126,7 +126,7 @@ cLoadList :: CutState -> CutExpr -> Rules ExprPath
 cLoadList s@(_,cfg) e@(CutFun (ListOf t) _ _ _ [CutList _ _ _ ps]) = do
   paths <- mapM (\p -> cLink s p t) ps -- is cLink OK with no paths?
   let paths' = map (\(ExprPath p) -> p) paths
-      (ExprPath links) = exprPath' cfg t e []
+      (ExprPath links) = exprPathTyped cfg t e []
   links %> \out -> need paths' >> writeFileLines out paths'
   return (ExprPath links)
 cLoadList _ _ = error "bad arguments to cLoadList"
@@ -142,7 +142,8 @@ uniqLines = unlines . toList . fromList . lines
 aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aTsvColumn n cfg _ as@[(ExprPath outPath), (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-      tmpOut = scriptTmpFile cfg (cfgTmpDir cfg </> "exprs") ["aTsvColumn", show n, tsvPath] (extOf str)
+      -- TODO write toShortCutList' that takes strings
+      tmpOut = cacheFile cfg (cfgTmpDir cfg </> "exprs") ["aTsvColumn", show n, tsvPath] (extOf str)
   Stdout strs <- quietly $ cmd Shell awkCmd tsvPath
   writeFile' tmpOut $ uniqLines strs
   toShortCutList cfg str (ExprPath tmpOut) (ExprPath outPath)
@@ -158,7 +159,7 @@ rSimpleTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> Cu
 rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let (ExprPath outPath) = exprPath cfg e []
-      (CacheDir tmpDir ) = scriptTmpDir cfg (cfgTmpDir cfg </> "cache" </> tmpPrefix) e
+      (CacheDir tmpDir ) = cacheDir cfg tmpPrefix
   outPath %> \_ -> do
     need $ map (\(ExprPath p) -> p) argPaths
     liftIO $ createDirectoryIfMissing True tmpDir
@@ -178,7 +179,7 @@ rMapLastTmp actFn tmpPrefix t@(ListOf elemType) s@(scr,cfg) e@(CutFun _ _ _ _ ex
         lasts  = map (cfgTmpDir cfg </>) lastPaths
         -- TODO replace with a Paths function
         tmpDir = cfgTmpDir cfg </> "cache" </> tmpPrefix
-        outs   = map (\p -> scriptTmpFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
+        outs   = map (\p -> cacheFile cfg (cfgTmpDir cfg </> "cache" </> "shortcut") p (extOf elemType)) lastPaths
         outs'  = map (makeRelative $ cfgTmpDir cfg) outs
     (flip mapM)
       (zip outs lasts)
@@ -200,13 +201,14 @@ rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> 
 rMapLastTmps actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
-  let (ExprPath outPath) = exprPath' cfg (ListOf rtnType) e []
-      tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
+  let (ExprPath outPath) = exprPathTyped cfg (ListOf rtnType) e []
+      -- tmpPrefix' = cfgTmpDir cfg </> "cache" </> tmpPrefix
+      tmpDir = cacheDir cfg tmpPrefix
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
     let inits = map (\(ExprPath p) -> p) initPaths
         lasts = map (\p -> ExprPath $ cfgTmpDir cfg </> p) lastPaths
-        dirs  = map (\(ExprPath p) -> scriptTmpDir cfg tmpPrefix' [show e, show p]) lasts
+        dirs  = map (\(ExprPath p) -> cacheDirUniq cfg tmpPrefix [show e, show p]) lasts
         outs  = map (\(CacheDir d) -> ExprPath (d </> "out" <.> extOf rtnType)) dirs
         rels  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) outs
     -- TODO oh shit, does this only work sequentially? parallelize!

@@ -16,7 +16,7 @@ module ShortCut.Modules.BioMartR where
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Paths   (exprPath, exprPath')
+import ShortCut.Core.Paths   (exprPath, exprPathTyped)
 import ShortCut.Core.Compile (cExpr)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
@@ -164,7 +164,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
 cParseSearches :: CutState -> CutExpr -> Rules ExprPath
 cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
   (ExprPath sList) <- cExpr s expr
-  let (ExprPath searchTable) = exprPath' cfg search expr [ExprPath sList]
+  let (ExprPath searchTable) = exprPathTyped cfg search expr [ExprPath sList]
   searchTable %> \out -> do
     tmp <- readFile' sList
     let sLines = map (cfgTmpDir cfg </>) (lines tmp)

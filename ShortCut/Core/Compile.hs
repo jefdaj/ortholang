@@ -165,7 +165,7 @@ cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
 cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
-  return (p1, p2, exprPath' cfg t expr [p1, p2])
+  return (p1, p2, exprPathTyped cfg t expr [p1, p2])
 
 ----------------------------------------------
 -- adapters for scripts to read/write lists --
