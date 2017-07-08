@@ -16,6 +16,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Set                   (fromList, toList)
+import Data.List                  (nub, sort)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
@@ -146,7 +147,8 @@ aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aTsvColumn n cfg _ as@[outPath, (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
-  toShortCutListStr cfg str outPath $ lines out
+  let out' = sort $ nub $ lines out
+  toShortCutListStr cfg str outPath out'
 aTsvColumn _ _ _ as = error "bad arguments to aTsvColumn"
 
 -------------------------------------------------------------------------------

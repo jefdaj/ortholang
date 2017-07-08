@@ -9,12 +9,20 @@
 from Bio import SeqIO
 from sys import argv
 
-print "argv:", argv
+# print "argv:", argv
 outgenes = argv[2]
 infasta  = argv[3]
 
+uniq = set()
+
+for seq in SeqIO.parse(infasta, 'fasta'):
+    # line = '%s:%s\n' % (infasta, seq.id)
+    line = '%s\n' % seq.id
+    uniq.add(line)
+
+uniq = list(uniq)
+uniq.sort()
+
 with open(outgenes, 'wb') as out:
-    for seq in SeqIO.parse(infasta, 'fasta'):
-        # line = '%s:%s\n' % (infasta, seq.id)
-        line = '%s\n' % seq.id
+    for line in uniq:
         out.write(line)
