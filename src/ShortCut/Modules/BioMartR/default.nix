@@ -1,7 +1,7 @@
 # TODO pass proper arguments
 # TODO shells for working on individual scripts (split by language?)
 
-with import ../../../nixpkgs;
+with import ../../../../nixpkgs;
 
 let
   myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [

@@ -7,7 +7,6 @@ build-type:         Simple
 cabal-version:      >=1.10
 extra-source-files: README.md
 data-files:         usage.txt,
-                    examples/*.cut,
                     data/*.faa,
                     data/*.fna,
                     data/*.gbk,
@@ -95,6 +94,7 @@ executable shortcut
                     silently,
                     scientific,
                     shake,
+                    sleep,
                     tasty,
                     tasty-golden,
                     tasty-quickcheck,

@@ -1,8 +1,8 @@
 with import ./nixpkgs;
 let
-  biomartr   = import ./ShortCut/Modules/BioMartR;
-  seqio      = import ./ShortCut/Modules/SeqIO;
-  cabalPkg   = haskellPackages.callPackage ./shortcut.nix {};
+  biomartr   = import ./src/ShortCut/Modules/BioMartR;
+  seqio      = import ./src/ShortCut/Modules/SeqIO;
+  cabalPkg   = haskellPackages.callPackage ./src/shortcut.nix {};
   runDepends = [ biomartr seqio ncbi-blast crb-blast ncurses ] # TODO ncurses?
                ++ biomartr.runDepends
                ++ seqio.runDepends;
