@@ -5,7 +5,6 @@ author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
 build-type:         Simple
 cabal-version:      >=1.10
-extra-source-files: README.md
 data-files:         usage.txt,
                     data/*.faa,
                     data/*.fna,
@@ -94,7 +93,6 @@ executable shortcut
                     silently,
                     scientific,
                     shake,
-                    sleep,
                     tasty,
                     tasty-golden,
                     tasty-quickcheck,
