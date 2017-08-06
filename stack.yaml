@@ -1,6 +1,6 @@
 # TODO load all the nix dependencies in here, including the scripts?
 
-resolver: lts-9.0
+resolver: lts-8.6
 packages:
 - '.'
 extra-deps:

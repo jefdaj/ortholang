@@ -6,5 +6,5 @@
 # TODO set PATH for stack
 
 # stack build --pedantic --ghc-options="-Wno-orphans" --allow-different-user # \
-stack build --ghc-options="-Wno-orphans" --allow-different-user \
+stack build --pedantic --ghc-options="-Wno-orphans" \
   && ./.stack-work/install/*/*/*/bin/shortcut --test
