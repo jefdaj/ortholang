@@ -44,6 +44,4 @@ runTests mods = withSystemTempDirectory "shortcut" $ \d -> do
   (_,_,_) <- readCreateProcessWithExitCode (shell $ unwords ["ln -s", dataDir, (d </> "data")]) ""
   tests <- mkTests $ mkTestConfig mods d
   setEnv "LANG" "C"
-  setEnv "TASTY_HIDE_SUCCESSES" "True" -- TODO flag for this?
-  setEnv "TASTY_NUM_THREADS" "1" -- mock repl can't handle multiple stdin/stdout
   defaultMain tests

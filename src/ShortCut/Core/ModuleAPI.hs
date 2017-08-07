@@ -15,16 +15,16 @@ module ShortCut.Core.ModuleAPI
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.Set                   (fromList, toList)
+-- import Data.Set                   (fromList, toList)
 import Data.List                  (nub, sort)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>), (-<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
-import ShortCut.Core.Debug        (debugReadLines, debugWriteLines, debugTrackWrite, debug)
+import ShortCut.Core.Debug        (debugWriteLines, debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
-import System.FilePath            (makeRelative, takeFileName, takeBaseName)
-import ShortCut.Core.Util         (digest)
+import System.FilePath            (takeBaseName)
+-- import ShortCut.Core.Util         (digest)
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -101,8 +101,8 @@ cLink s@(_,cfg) expr rtype prefix = do
   -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
   let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
   outPath %> \out -> do
-    str <- fmap strip $ readFile' strPath
-    src <- liftIO $ canonicalizePath str
+    pth <- fmap strip $ readFile' strPath
+    src <- liftIO $ canonicalizePath pth
     need [src]
     -- TODO these have to be absolute, so golden tests need to adjust them:
     quietly $ cmd "ln -fs" [src, out]
@@ -146,15 +146,15 @@ cLoadList _ _ _ = error "bad arguments to cLoadList"
 
 -- based on https://stackoverflow.com/a/18627837
 -- uniqLines :: Ord a => [a] -> [a]
-uniqLines = unlines . toList . fromList . lines
+-- uniqLines = unlines . toList . fromList . lines
 
 aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aTsvColumn n cfg _ as@[outPath, (ExprPath tsvPath)] = do
+aTsvColumn n cfg _ [outPath, (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
   let out' = sort $ nub $ lines out
   toShortCutListStr cfg str outPath out'
-aTsvColumn _ _ _ as = error "bad arguments to aTsvColumn"
+aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 
 -------------------------------------------------------------------------------
 -- [r]ules functions (just describe which files to build with which actions) --
@@ -163,7 +163,7 @@ aTsvColumn _ _ _ as = error "bad arguments to aTsvColumn"
 -- takes an action fn with any number of args and calls it with a tmpdir.
 rSimpleTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
            -> (CutState -> CutExpr -> Rules ExprPath)
-rSimpleTmp actFn tmpPrefix rtnType s@(scr,cfg) e@(CutFun _ _ _ _ exprs) = do
+rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let (ExprPath outPath) = exprPath cfg e []
       (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
@@ -194,7 +194,7 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
 rMapLast :: (ExprPath -> CacheDir) -- this will be called to get each tmpDir
          -> (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
          -> (CutState -> CutExpr -> Rules ExprPath)
-rMapLast tmpFn actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
@@ -204,7 +204,7 @@ rMapLast tmpFn actFn tmpPrefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = d
   outPath %> \_ -> do
     lastPaths <- readFileLines lastsPath
     -- this writes the .args files for use in the rule above
-    (flip mapM) lastPaths $ \p -> do
+    (flip mapM_) lastPaths $ \p -> do
       -- TODO write the out path here too so all the args are together?
       let argsPath = mapTmp </> takeBaseName p <.> "args"
           argPaths = inits ++ [cfgTmpDir cfg </> p]

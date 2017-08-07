@@ -3,8 +3,7 @@ module ShortCut.Modules.Tables where
 import ShortCut.Core.Types
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
-import ShortCut.Core.ModuleAPI   (aTsvColumn, rSimpleTmp, rMapLastTmp,
-                                  defaultTypeCheck)
+import ShortCut.Core.ModuleAPI   (aTsvColumn, rSimpleTmp, rMapLastTmp)
 
 cutModule :: CutModule
 cutModule = CutModule

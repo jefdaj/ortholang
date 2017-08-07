@@ -49,7 +49,6 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT,
                                        defaultSettings)
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
-import Control.Monad.IO.Class   (liftIO)
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>

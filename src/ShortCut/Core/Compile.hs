@@ -201,5 +201,5 @@ toShortCutListStr cfg litType (ExprPath outPath) lits = do
       litPaths  = map (\e -> exprPath cfg e []) litExprs
       litPaths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
       litPairs  = zip lits $ map (\(ExprPath p) -> p) litPaths
-  liftIO $ mapM (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
+  liftIO $ mapM_ (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
   liftIO $ writeFileLines outPath litPaths'

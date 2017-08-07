@@ -99,11 +99,12 @@ cacheFile cfg modName uniq ext = debug cfg ("cacheFile: " ++ rtn ++ " (modName: 
 -- CutBop  CutType Int [CutVar] String  CutExpr CutExpr
 -- CutFun  CutType Int [CutVar] String [CutExpr]
 -- CutList CutType Int [CutVar] [CutExpr]
-exprPrefix e@(CutLit _ _ _       ) = "cut_lit"
-exprPrefix e@(CutRef _ _ _ _     ) = "cut_ref"
-exprPrefix e@(CutBop _ _ _ _ _ _ ) = "cut_bop" -- TODO should these have individual names?
-exprPrefix e@(CutList _ _ _ _    ) = "cut_list"
-exprPrefix e@(CutFun _ _ _ name _) = name
+exprPrefix :: CutExpr -> String
+exprPrefix (CutLit _ _ _       ) = "cut_lit"
+exprPrefix (CutRef _ _ _ _     ) = "cut_ref"
+exprPrefix (CutBop _ _ _ _ _ _ ) = "cut_bop" -- TODO individual names?
+exprPrefix (CutList _ _ _ _    ) = "cut_list"
+exprPrefix (CutFun _ _ _ name _) = name
 
 exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
 exprPath cfg expr paths = exprPathExplicit cfg (typeOf expr) expr (exprPrefix expr) paths
