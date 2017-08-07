@@ -18,6 +18,8 @@ import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
+import Control.Monad.IO.Class   (liftIO)
+import System.IO
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -48,6 +50,8 @@ hasArg as a = isPresent as $ longOption a
 
 main:: IO ()
 main = do
+  hSetBuffering stdin  LineBuffering
+  hSetBuffering stdout LineBuffering
   usage <- getUsage
   args <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
@@ -60,5 +64,5 @@ main = do
   cfg <- loadConfig modules args
   let cfg' = debug cfg ("config: " ++ show cfg) cfg
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile cfg'
+    then evalFile (liftIO . putStrLn) cfg'
     else runRepl  cfg'
