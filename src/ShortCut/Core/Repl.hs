@@ -21,7 +21,7 @@ module ShortCut.Core.Repl
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO)
 import Control.Monad.Identity   (mzero)
-import Control.Monad.State.Lazy (get, put)
+import Control.Monad.State.Lazy (get, put, lift)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf)
 import Data.List.Utils          (delFromAL)
@@ -36,6 +36,7 @@ import ShortCut.Core.Pretty     (prettyShow)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
+import System.Console.Haskeline       (getExternalPrint)
 
 --------------------
 -- main interface --
@@ -49,8 +50,15 @@ runRepl = mkRepl $ repeat prompt
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 -- TODO pass modules list on here
+-- TODO try passing my own print function here that sends to a file instead
 mkRepl :: [(String -> ReplM (Maybe String))] -> CutConfig -> IO ()
-mkRepl promptFns cfg = welcome >> runReplM (loop promptFns) ([], cfg) >> goodbye
+-- mkRepl promptFns cfg = welcome >> runReplM ((lift $ lift $ getExternalPrint) >>= loop promptFns) ([], cfg) >> goodbye
+mkRepl promptFns cfg = welcome >> runReplM (myPrint >>= loop promptFns) ([], cfg) >> goodbye
+  where
+    myPrint = lift $ lift $ getExternalPrint -- TODO write this (separately for repl and tests)
+
+-- TODO need myFilePrint :: String -> IO (), which will carry around an open file handle to write, and need to close it after the repl finishes
+-- TODO need myTermPrint :: String -> IO (), which will actually print to the terminal (same as print does now)
 
 welcome :: IO ()
 welcome = putStrLn
@@ -80,17 +88,19 @@ goodbye = putStrLn "Bye for now!"
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
-loop :: [(String -> ReplM (Maybe String))] -> ReplM ()
-loop [] = runCmd "quit"
-loop (promptFn:promptFns) = do
+loop :: [(String -> ReplM (Maybe String))] -> (String -> IO ()) -> ReplM ()
+loop [] printFn = runCmd printFn "quit"
+loop (promptFn:promptFns) printFn = do
+  -- printFn <- lift $ lift $ getExternalPrint
   mline <- promptFn "shortcut >> "
   case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
     ""        -> return () -- TODO also handle comments this way (for examples mostly)
-    (':':cmd) -> runCmd cmd
+    (':':cmd) -> runCmd printFn cmd
     line      -> do
       st@(scr, cfg) <- get
       case parseStatement st line of
-        Left  e -> print $ show e
+        -- Left  e -> (liftIO . printFn) $ show e
+        Left  e -> print printFn $ show e
         Right r -> do
           let scr' = updateScript scr r
           put (scr', cfg)
@@ -99,7 +109,7 @@ loop (promptFn:promptFns) = do
           -- TODO should be able to factor this out and put in Eval.hs
           -- TODO nothing should be run when manually assigning result!
           when (isExpr st line) (liftIO $ evalScript (scr',cfg))
-  loop promptFns
+  loop promptFns printFn
 
 -- this is needed to avoid assigning a variable to itself,
 -- which is especially a problem when auto-assigning "result"
@@ -118,16 +128,16 @@ updateScript scr asn@(var, expr) =
 -- dispatch to commands --
 --------------------------
 
-runCmd :: String -> ReplM ()
-runCmd line = case matches of
-  [(_, fn)] -> fn $ stripWhiteSpace args
-  []        -> print $ "unknown command: "   ++ cmd
-  _         -> print $ "ambiguous command: " ++ cmd
+runCmd :: (String -> IO ()) -> String -> ReplM ()
+runCmd pFn line = case matches of
+  [(_, fn)] -> fn pFn $ stripWhiteSpace args
+  []        -> print pFn $ "unknown command: "   ++ cmd
+  _         -> print pFn $ "ambiguous command: " ++ cmd
   where
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) cmds
 
-cmds :: [(String, String -> ReplM ())]
+cmds :: [(String, (String -> IO ()) -> String -> ReplM ())]
 cmds =
   [ ("help"    , cmdHelp  )
   , ("load"    , cmdLoad  )
@@ -147,8 +157,8 @@ cmds =
 -- run specific commands --
 ---------------------------
 
-cmdHelp :: String -> ReplM ()
-cmdHelp _ = print
+cmdHelp :: (String -> IO ()) -> String -> ReplM ()
+cmdHelp pFn _ = print pFn
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
   \There are also some extra commands:\n\n\
   \:help     to print this help text\n\
@@ -164,19 +174,19 @@ cmdHelp _ = print
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO this shouldn't crash if a file referenced from the script doesn't exist!
-cmdLoad :: String -> ReplM ()
-cmdLoad path = do
+cmdLoad :: (String -> IO ()) -> String -> ReplM ()
+cmdLoad pFn path = do
   (_, cfg)  <- get
   new <- liftIO $ parseFile cfg path
   case new of
-    Left  e -> print $ show e
+    Left  e -> print pFn $ show e
     Right s -> put (s, cfg)
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
 -- TODO replace showHack with something nicer
-cmdSave :: String -> ReplM ()
-cmdSave path = do
+cmdSave :: (String -> IO ()) -> String -> ReplM ()
+cmdSave _ path = do
   path' <- liftIO $ absolutize path
   get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
   where
@@ -184,10 +194,10 @@ cmdSave path = do
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdDeps :: String -> ReplM ()
-cmdDeps var = do
+cmdDeps :: (String -> IO ()) -> String -> ReplM ()
+cmdDeps pFn var = do
   (scr, _) <- get
-  print $ case lookup (CutVar var) scr of
+  print pFn $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyAssigns (\(v,_) -> elem v $ depsOf e) scr
 
@@ -195,72 +205,72 @@ cmdDeps var = do
 prettyAssigns :: (CutAssign -> Bool) -> CutScript -> String
 prettyAssigns fn scr = stripWhiteSpace $ unlines $ map prettyShow $ filter fn scr
 
-cmdRDeps :: String -> ReplM ()
-cmdRDeps var = do
+cmdRDeps :: (String -> IO ()) -> String -> ReplM ()
+cmdRDeps pFn var = do
   (scr, _) <- get
   let var' = CutVar var
-  print $ case lookup var' scr of
+  print pFn $ case lookup var' scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just _  -> prettyAssigns (\(v,_) -> elem v $ rDepsOf scr var') scr
 
 -- TODO factor out the variable lookup stuff
-cmdDrop :: String -> ReplM ()
-cmdDrop [] = get >>= \(_, cfg) -> put ([], cfg)
-cmdDrop var = do
+cmdDrop :: (String -> IO ()) -> String -> ReplM ()
+cmdDrop _ [] = get >>= \(_, cfg) -> put ([], cfg)
+cmdDrop pFn var = do
   (scr, cfg) <- get
   let v = CutVar var
   case lookup v scr of
-    Nothing -> print $ "Var '" ++ var ++ "' not found"
+    Nothing -> print pFn $ "Var '" ++ var ++ "' not found"
     Just _  -> put (delFromAL scr v, cfg)
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
-cmdType :: String -> ReplM ()
-cmdType s = do
+cmdType :: (String -> IO ()) -> String -> ReplM ()
+cmdType pFn s = do
   state <- get
-  print $ case parseExpr state s of
+  print pFn $ case parseExpr state s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 
 -- TODO factor out the variable lookup stuff
-cmdShow :: String -> ReplM ()
-cmdShow [] = get >>= \(s, _) -> liftIO $ mapM_ (putStrLn . prettyShow) s
-cmdShow var = do
+cmdShow :: (String -> IO ()) -> String -> ReplM ()
+cmdShow pFn [] = get >>= \(s, _) -> liftIO $ mapM_ (pFn . prettyShow) s
+cmdShow pFn var = do
   (scr, _) <- get
-  print $ case lookup (CutVar var) scr of
+  print pFn $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyShow e
 
-cmdQuit :: String -> ReplM ()
-cmdQuit _ = mzero
+cmdQuit :: (String -> IO ()) -> String -> ReplM ()
+cmdQuit _ _ = mzero
 
-cmdBang :: String -> ReplM ()
-cmdBang cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
+cmdBang :: (String -> IO ()) -> String -> ReplM ()
+cmdBang _ cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
 
 -- TODO split string into first word and the rest
 -- TODO case statement for first word: verbose, workdir, tmpdir, script?
 -- TODO script sets the default for cmdSave?
 -- TODO don't bother with script yet; start with the obvious ones
-cmdSet :: String -> ReplM ()
-cmdSet = undefined
+cmdSet :: (String -> IO ()) -> String -> ReplM ()
+cmdSet _ = undefined
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
-cmdConfig :: String -> ReplM ()
-cmdConfig s = do
+cmdConfig :: (String -> IO ()) -> String -> ReplM ()
+cmdConfig pFn s = do
   (_, cfg) <- get
   let ws = words s
   if (length ws == 0)
-    then (print (prettyShow cfg) >> return ()) -- TODO Pretty instance
+    then (print pFn (prettyShow cfg) >> return ()) -- TODO Pretty instance
     else if (length ws  > 2)
-      then (print "too many variables" >> return ())
+      then (print pFn "too many variables" >> return ())
       -- TODO separate into get/set cases:
       else if (length ws == 1)
-        then (cmdConfigShow (head ws))
-        else (cmdConfigSet  (head ws) (last ws))
+        then (cmdConfigShow pFn (head ws))
+        else (cmdConfigSet pFn (head ws) (last ws))
 
-cmdConfigShow :: String -> ReplM ()
-cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
+cmdConfigShow :: (String -> IO ()) -> String -> ReplM ()
+cmdConfigShow pFn key = get >>= \(_, cfg) -> print pFn $ fn cfg
   where
     fn = case key of
           "script"  -> (\c -> fromMaybe "none" $ cfgScript c)
@@ -268,8 +278,8 @@ cmdConfigShow key = get >>= \(_, cfg) -> print $ fn cfg
           "tmpdir"  -> cfgTmpDir
           _ -> \_ -> "no such config entry"
 
-cmdConfigSet :: String -> String -> ReplM ()
-cmdConfigSet key val = do
+cmdConfigSet :: (String -> IO ()) -> String -> String -> ReplM ()
+cmdConfigSet _ key val = do
   (scr, cfg) <- get
   case key of
     "script"  -> put (scr, cfg { cfgScript  = Just val })

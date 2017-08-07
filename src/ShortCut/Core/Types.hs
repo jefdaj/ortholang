@@ -207,14 +207,18 @@ runParseM p s = P.runParser p s "somefile"
 
 type ReplM a = StateT CutState (MaybeT (InputT IO)) a
 
+-- TODO use useFile(Handle) for stdin?
+-- TODO use getExternalPrint to safely print during Tasty tests!
 runReplM :: ReplM a -> CutState -> IO (Maybe CutState)
 runReplM r s = runInputT defaultSettings $ runMaybeT $ execStateT r s
 
 prompt :: String -> ReplM (Maybe String)
 prompt = lift . lift . getInputLine
 
-print :: String -> ReplM ()
-print = liftIO . putStrLn
+-- TODO does this need rewriting for externalPrint?
+print :: (String -> IO ()) -> String -> ReplM ()
+print pFn = liftIO . pFn
+-- print pFn = lift . lift . pFn
 
 --------------------------------
 -- Module stuff (all in flux) --

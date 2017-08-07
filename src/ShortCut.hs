@@ -18,6 +18,7 @@ import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
+import System.IO
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -48,6 +49,8 @@ hasArg as a = isPresent as $ longOption a
 
 main:: IO ()
 main = do
+  hSetBuffering stdin  LineBuffering
+  hSetBuffering stdout LineBuffering
   usage <- getUsage
   args <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
