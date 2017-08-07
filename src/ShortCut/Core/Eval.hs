@@ -53,8 +53,8 @@ myShake cfg = shake myOpts . alternatives
 -- TODO rename `runRules` or `runShake`?
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
-eval :: CutConfig -> CutType -> Rules ResPath -> IO ()
-eval cfg rtype = ignoreErrors . eval'
+eval :: (String -> IO ()) -> CutConfig -> CutType -> Rules ResPath -> IO ()
+eval printFn cfg rtype = ignoreErrors . eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
@@ -65,18 +65,18 @@ eval cfg rtype = ignoreErrors . eval'
         need [path] -- TODO is this done automatically in the case of result?
         liftIO $ do
           res <- prettyResult cfg rtype path
-          putStrLn $ render res
+          printFn $ render res
 
 -- TODO get the type of result and pass to eval
-evalScript :: CutState -> IO ()
-evalScript s@(as,c) = eval c rtn $ compileScript s Nothing
+evalScript :: (String -> IO ()) -> CutState -> IO ()
+evalScript printFn s@(as,c) = eval printFn c rtn $ compileScript s Nothing
   where
     res = fromJust $ lookup (CutVar "result") as
     rtn = typeOf res
 
-evalFile :: CutConfig -> IO ()
-evalFile cfg = do
+evalFile :: (String -> IO ()) -> CutConfig -> IO ()
+evalFile printFn cfg = do
   f <- parseFile cfg $ fromJust $ cfgScript cfg -- TODO something safer!
   case f of
     Left  e -> fail $ "oh no! " ++ show e -- TODO better errors
-    Right s -> evalScript (s,cfg)
+    Right s -> evalScript printFn (s,cfg)

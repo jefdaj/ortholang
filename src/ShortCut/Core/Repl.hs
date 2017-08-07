@@ -1,5 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+-- TODO could simplify to the same code everywhere except you pass the handle (file vs stdout)?
+
 -- Based on:
 -- http://dev.stephendiehl.com/hask/ (the Haskeline section)
 -- https://github.com/goldfirere/glambda
@@ -44,29 +46,29 @@ import System.Console.Haskeline       (getExternalPrint)
 
 -- TODO load script from cfg if one was given on the command line
 runRepl :: CutConfig -> IO ()
-runRepl = mkRepl $ repeat prompt
+runRepl = mkRepl (repeat prompt) (liftIO . putStrLn)
 -- repl = mockRepl ["1 + 1", ":q"]
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 -- TODO pass modules list on here
 -- TODO try passing my own print function here that sends to a file instead
-mkRepl :: [(String -> ReplM (Maybe String))] -> CutConfig -> IO ()
+mkRepl :: [(String -> ReplM (Maybe String))] -> (String -> IO ()) -> CutConfig -> IO ()
 -- mkRepl promptFns cfg = welcome >> runReplM ((lift $ lift $ getExternalPrint) >>= loop promptFns) ([], cfg) >> goodbye
-mkRepl promptFns cfg = welcome >> runReplM (myPrint >>= loop promptFns) ([], cfg) >> goodbye
-  where
-    myPrint = lift $ lift $ getExternalPrint -- TODO write this (separately for repl and tests)
+mkRepl promptFns printFn cfg = welcome printFn >> runReplM (loop promptFns printFn) ([], cfg) >> goodbye printFn
+  -- where
+    -- myPrint = lift $ lift $ getExternalPrint -- TODO write this (separately for repl and tests)
 
 -- TODO need myFilePrint :: String -> IO (), which will carry around an open file handle to write, and need to close it after the repl finishes
 -- TODO need myTermPrint :: String -> IO (), which will actually print to the terminal (same as print does now)
 
-welcome :: IO ()
-welcome = putStrLn
+welcome :: (String -> IO ()) -> IO ()
+welcome pFn = pFn
   "Welcome to the ShortCut interpreter!\n\
   \Type :help for a list of the available commands."
 
-goodbye :: IO ()
-goodbye = putStrLn "Bye for now!"
+goodbye :: (String -> IO ()) -> IO ()
+goodbye pFn = pFn "Bye for now!"
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -100,7 +102,7 @@ loop (promptFn:promptFns) printFn = do
       st@(scr, cfg) <- get
       case parseStatement st line of
         -- Left  e -> (liftIO . printFn) $ show e
-        Left  e -> print printFn $ show e
+        Left  e -> liftIO $ printFn $ show e
         Right r -> do
           let scr' = updateScript scr r
           put (scr', cfg)
@@ -108,7 +110,7 @@ loop (promptFn:promptFns) printFn = do
           -- still have to check whether to print it
           -- TODO should be able to factor this out and put in Eval.hs
           -- TODO nothing should be run when manually assigning result!
-          when (isExpr st line) (liftIO $ evalScript (scr',cfg))
+          when (isExpr st line) (liftIO $ evalScript printFn (scr',cfg)) -- TODO return only a string and print it here?
   loop promptFns printFn
 
 -- this is needed to avoid assigning a variable to itself,
@@ -131,8 +133,8 @@ updateScript scr asn@(var, expr) =
 runCmd :: (String -> IO ()) -> String -> ReplM ()
 runCmd pFn line = case matches of
   [(_, fn)] -> fn pFn $ stripWhiteSpace args
-  []        -> print pFn $ "unknown command: "   ++ cmd
-  _         -> print pFn $ "ambiguous command: " ++ cmd
+  []        -> liftIO $ pFn $ "unknown command: "   ++ cmd
+  _         -> liftIO $ pFn $ "ambiguous command: " ++ cmd
   where
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) cmds
@@ -158,7 +160,7 @@ cmds =
 ---------------------------
 
 cmdHelp :: (String -> IO ()) -> String -> ReplM ()
-cmdHelp pFn _ = print pFn
+cmdHelp pFn _ = liftIO $ pFn
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
   \There are also some extra commands:\n\n\
   \:help     to print this help text\n\
@@ -179,7 +181,7 @@ cmdLoad pFn path = do
   (_, cfg)  <- get
   new <- liftIO $ parseFile cfg path
   case new of
-    Left  e -> print pFn $ show e
+    Left  e -> liftIO $ pFn $ show e
     Right s -> put (s, cfg)
 
 -- TODO this needs to read a second arg for the var to be main?
@@ -197,7 +199,7 @@ cmdSave _ path = do
 cmdDeps :: (String -> IO ()) -> String -> ReplM ()
 cmdDeps pFn var = do
   (scr, _) <- get
-  print pFn $ case lookup (CutVar var) scr of
+  liftIO $ pFn $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyAssigns (\(v,_) -> elem v $ depsOf e) scr
 
@@ -209,7 +211,7 @@ cmdRDeps :: (String -> IO ()) -> String -> ReplM ()
 cmdRDeps pFn var = do
   (scr, _) <- get
   let var' = CutVar var
-  print pFn $ case lookup var' scr of
+  liftIO $ pFn $ case lookup var' scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just _  -> prettyAssigns (\(v,_) -> elem v $ rDepsOf scr var') scr
 
@@ -220,7 +222,7 @@ cmdDrop pFn var = do
   (scr, cfg) <- get
   let v = CutVar var
   case lookup v scr of
-    Nothing -> print pFn $ "Var '" ++ var ++ "' not found"
+    Nothing -> liftIO $ pFn $ "Var '" ++ var ++ "' not found"
     Just _  -> put (delFromAL scr v, cfg)
 
 -- TODO show the type description here too once that's ready
@@ -228,7 +230,7 @@ cmdDrop pFn var = do
 cmdType :: (String -> IO ()) -> String -> ReplM ()
 cmdType pFn s = do
   state <- get
-  print pFn $ case parseExpr state s of
+  liftIO $ pFn $ case parseExpr state s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
 
@@ -237,7 +239,7 @@ cmdShow :: (String -> IO ()) -> String -> ReplM ()
 cmdShow pFn [] = get >>= \(s, _) -> liftIO $ mapM_ (pFn . prettyShow) s
 cmdShow pFn var = do
   (scr, _) <- get
-  print pFn $ case lookup (CutVar var) scr of
+  liftIO $ pFn $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyShow e
 
@@ -261,16 +263,16 @@ cmdConfig pFn s = do
   (_, cfg) <- get
   let ws = words s
   if (length ws == 0)
-    then (print pFn (prettyShow cfg) >> return ()) -- TODO Pretty instance
+    then (liftIO $ pFn (prettyShow cfg) >> return ()) -- TODO Pretty instance
     else if (length ws  > 2)
-      then (print pFn "too many variables" >> return ())
+      then (liftIO $ pFn "too many variables" >> return ())
       -- TODO separate into get/set cases:
       else if (length ws == 1)
         then (cmdConfigShow pFn (head ws))
         else (cmdConfigSet pFn (head ws) (last ws))
 
 cmdConfigShow :: (String -> IO ()) -> String -> ReplM ()
-cmdConfigShow pFn key = get >>= \(_, cfg) -> print pFn $ fn cfg
+cmdConfigShow pFn key = get >>= \(_, cfg) -> liftIO $ pFn $ fn cfg
   where
     fn = case key of
           "script"  -> (\c -> fromMaybe "none" $ cfgScript c)

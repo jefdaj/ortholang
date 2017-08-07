@@ -13,6 +13,7 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
 import System.Directory           (getCurrentDirectory)
+import Control.Monad.Trans        (liftIO)
 
 resultDirs :: [String]
 resultDirs = 
@@ -50,7 +51,7 @@ goldenScript cfg cut gld = goldenVsFile name gld res act
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     res  = (cfgTmpDir cfg' </> "vars" </> "result")
-    act  = silence $ evalFile cfg'
+    act  = silence $ evalFile (liftIO . putStrLn) cfg'
 
 goldenScripts :: CutConfig -> IO TestTree
 goldenScripts cfg = do
@@ -71,7 +72,7 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     cmd  = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
     act  = do
-             silence $ evalFile cfg'
+             silence $ evalFile (liftIO . putStrLn) cfg'
              out <- readCreateProcess cmd ""
              wd  <- getCurrentDirectory
              return $ pack $ fixWorkingDir wd out
