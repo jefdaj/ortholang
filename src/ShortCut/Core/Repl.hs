@@ -23,7 +23,7 @@ module ShortCut.Core.Repl
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO)
 import Control.Monad.Identity   (mzero)
-import Control.Monad.State.Lazy (get, put, lift)
+import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf)
 import Data.List.Utils          (delFromAL)
@@ -38,7 +38,6 @@ import ShortCut.Core.Pretty     (prettyShow)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
-import System.Console.Haskeline       (getExternalPrint)
 
 --------------------
 -- main interface --

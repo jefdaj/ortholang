@@ -9,9 +9,8 @@ module ShortCut.Modules.BlastCRB where
 import ShortCut.Core.Types
 import Development.Shake
 
-import ShortCut.Core.ModuleAPI (aTsvColumn, rSimpleTmp, rMapLastTmp,
-                                rMapLastTmps, defaultTypeCheck)
-import ShortCut.Modules.SeqIO  (faa, fna)
+import ShortCut.Core.ModuleAPI (rSimpleTmp, rMapLastTmps, defaultTypeCheck)
+import ShortCut.Modules.SeqIO  (faa)
 
 ---------------
 -- interface --
@@ -66,7 +65,7 @@ blastCRBAll = CutFunction
 -- tlen - the length of the target transcript
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aBlastCRB cfg (CacheDir tmpDir) args@[(ExprPath o), (ExprPath q), (ExprPath t)] =
+aBlastCRB _ (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
   quietly $ cmd (Cwd tmpDir) "crb-blast" ["--query", q, "--target", t, "--output", o, "--threads", "8", "--split"]
   -- TODO put these back once sure the rest works concurrently
   -- , "--threads", "10" -- TODO how to pick this?

@@ -5,14 +5,12 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.List                  (intercalate)
-import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Paths        (exprPath, cacheDir, cacheFile)
-import ShortCut.Core.Compile      (cExpr, toShortCutList, fromShortCutList)
-import ShortCut.Core.Debug        (debug, debugTrackWrite, debugReadLines,
+import ShortCut.Core.Compile      (cExpr, fromShortCutList)
+import ShortCut.Core.Debug        (debug, debugReadLines,
                                    debugReadFile, debugWriteFile)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
-                                   typeError, cOneArgScript, cOneArgListScript)
+                                   cOneArgScript, cOneArgListScript)
 import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
@@ -108,10 +106,12 @@ extractSeqIDs = CutFunction
   , fCompiler  = cExtractSeqIDs
   }
 
+tExtractSeqIDs :: [CutType] -> Either String CutType
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
 -- TODO these should put their tmpfiles in cache/extract_ids!
+cExtractSeqIDs :: CutState -> CutExpr -> Rules ExprPath
 cExtractSeqIDs = cOneArgListScript "seqio" "extract_ids.py"
 
 ----------------------------------------------
@@ -129,12 +129,13 @@ extractSeqs = CutFunction
   }
 
 -- TODO does ListOf str match on the value or just the constructor?
-tExtractSeqs [x, ListOf str] | elem x [faa, fna] = Right x
+tExtractSeqs  :: [CutType] -> Either String CutType
+tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
 -- TODO can this be replaced with cOneArgListScript?
 cExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
-cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ name [fa, ids]) = do
+cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   (ExprPath faPath)  <- cExpr s fa
   idsPath <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
@@ -150,7 +151,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ name [fa, ids]) = do
     liftIO $ createDirectoryIfMissing True tmpDir
     quietly $ cmd "extract_seqs.py" (Cwd tmpDir) outPath faPath tmpList
   return (ExprPath outPath)
-mExtractSeqs _ _ = error "bad argument to extractSeqs"
+cExtractSeqs _ _ = error "bad argument to extractSeqs"
 
 -------------------------------------
 -- convert between DNA and protein --

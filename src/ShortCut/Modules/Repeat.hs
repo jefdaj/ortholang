@@ -96,11 +96,11 @@ repeatN = CutFunction
 -- and returns a list of the result var type. start type can be whatever
 -- TODO does num here refer to actual num, or is it shadowing it?
 tRepeatN :: [CutType] -> Either String CutType 
-tRepeatN [rType, _, num] = Right $ ListOf rType
+tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
 tRepeatN _ = Left "invalid args to repeatN"
 
 extractNum :: CutScript -> CutExpr -> Int
-extractNum _   (CutLit num _ n) = read n
+extractNum _   (CutLit x _ n) | x == num = read n
 extractNum scr (CutRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
 
@@ -109,8 +109,7 @@ extractNum _ _ = error "bad argument to extractNum"
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
 cRepeatN :: CutState -> CutExpr -> Rules ExprPath
-cRepeatN s@(scr,cfg) e@(CutFun t salt deps name
-                               [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
+cRepeatN s@(scr,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
   cRepeatEach s (CutFun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = fromJust $ lookup v scr

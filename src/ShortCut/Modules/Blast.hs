@@ -4,14 +4,11 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
-import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Paths        (exprPath)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
-import ShortCut.Core.Util         (digest)
 import ShortCut.Modules.SeqIO     (faa, fna)
-import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -52,11 +49,11 @@ bht = CutType
   }
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn cmd qType tType = CutFunction
-  { fName      = cmd
+mkBlastFn cmdFn qType tType = CutFunction
+  { fName      = cmdFn
   , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rBlast cmd
+  , fCompiler  = rBlast cmdFn
   }
 
 -- TODO move to Util?
