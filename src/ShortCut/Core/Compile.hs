@@ -33,7 +33,6 @@ import Development.Shake.FilePath ((</>))
 import System.FilePath            (makeRelative, takeDirectory)
 import System.Directory           (createDirectoryIfMissing)
 
-
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
 --------------------------------------------------------
@@ -114,7 +113,7 @@ cLit :: CutState -> CutExpr -> Rules ExprPath
 cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
   let (ExprPath path) = exprPath cfg expr []
-  path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
+  path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n"
   return (ExprPath path)
   where
     paths :: CutExpr -> FilePath
