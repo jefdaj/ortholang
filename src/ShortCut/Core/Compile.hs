@@ -22,7 +22,7 @@ module ShortCut.Core.Compile
   )
   where
 
-import Development.Shake hiding (doesFileExist)
+import Development.Shake
 import ShortCut.Core.Debug
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
@@ -31,8 +31,7 @@ import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
 import System.FilePath            (makeRelative, takeDirectory)
-import System.Directory           (createDirectoryIfMissing, doesFileExist)
-import Control.Monad              (unless)
+import System.Directory           (createDirectoryIfMissing)
 
 
 --------------------------------------------------------
@@ -115,7 +114,7 @@ cLit :: CutState -> CutExpr -> Rules ExprPath
 cLit (_,cfg) expr = do
   -- liftIO $ putStrLn "entering cLit"
   let (ExprPath path) = exprPath cfg expr []
-  path %> \out -> debugWriteChanged cfg out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
+  path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n" -- TODO is writeFileChanged right?
   return (ExprPath path)
   where
     paths :: CutExpr -> FilePath
@@ -195,13 +194,6 @@ toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
   lits <- fmap sort $ debugReadLines cfg inPath
   toShortCutListStr cfg litType (ExprPath outPath) lits
 
--- TODO this seems to fix it in this case, but reveals others!
---      guess maybe shake can't handle multiple threads as well as I assumed?
---      it seems to duplicate writes for lits :(
---      maybe override all the write* functions to check first?
---      or maybe it's only the cut_lits that have this problem?
---      nah, might as well fix everything for sure
-
 -- Like toShortCutList, but takes strings instead of a tmpfile containing strings.
 toShortCutListStr :: CutConfig -> CutType -> ExprPath -> [String] -> Action ()
 toShortCutListStr cfg litType (ExprPath outPath) lits = do
@@ -209,12 +201,5 @@ toShortCutListStr cfg litType (ExprPath outPath) lits = do
       litPaths  = map (\e -> exprPath cfg e []) litExprs
       litPaths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
       litPairs  = zip lits $ map (\(ExprPath p) -> p) litPaths
-  -- TODO simple doesFileExist (non-shake version) good enough here? or need the individual lits too?
-  liftIO $ mapM_ writeLitUnlessExists litPairs
-  liftIO $ writeListUnlessExists outPath litPaths'
-  where
-    writeLitUnlessExists (l, p) = unlessExists p (debugWriteFile cfg p $ l ++ "\n")
-    writeListUnlessExists o ps  = unlessExists o (writeFileLines o ps)
-    unlessExists path act = do
-      e <- doesFileExist path
-      unless e act
+  mapM_ (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
+  debugWriteLines cfg outPath litPaths'
