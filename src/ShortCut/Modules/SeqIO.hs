@@ -141,7 +141,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let (CacheDir tmpDir ) = cacheDir cfg "seqio"
       (ExprPath outPath) = exprPath cfg e []
-      tmpList = cacheFile cfg "seqio" idsPath "txt"
+      tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   tmpList %> \_ -> do
     liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?

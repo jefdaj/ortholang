@@ -1,9 +1,9 @@
 .
 |-- cache
 |   `-- seqio
+|       |-- 07160e24e2.txt
 |       |-- 2542681ad0.txt
-|       |-- 3278bd2ac0.txt
-|       `-- d9ed5548d1.txt
+|       `-- 3278bd2ac0.txt
 |-- exprs
 |   |-- cut_bop
 |   |   `-- 275afecf6b.str.list
