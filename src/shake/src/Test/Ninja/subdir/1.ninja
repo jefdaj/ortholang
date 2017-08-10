@@ -1,2 +1,0 @@
-# weirdly, Ninja includes are not relative to who includes them
-include subdir/2.ninja

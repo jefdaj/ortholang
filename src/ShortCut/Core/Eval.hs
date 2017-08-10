@@ -35,7 +35,7 @@ import Text.PrettyPrint.HughesPJClass (render)
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
 myShake :: CutConfig -> Rules () -> IO ()
-myShake cfg = shake myOpts
+myShake cfg = shake myOpts . alternatives
   where
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg
