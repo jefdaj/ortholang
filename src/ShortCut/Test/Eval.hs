@@ -42,7 +42,8 @@ treeDirs =
   ]
 
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "Interpret" [goldenScripts, goldenScriptTrees]
+mkTests cfg = mkTestGroup cfg "interpret script files"
+                [goldenScripts, goldenScriptTrees]
 
 -- TODO i guess now is the time to make Compile use cfgTmpDir from CutConfig?
 goldenScript :: CutConfig -> FilePath -> FilePath -> TestTree

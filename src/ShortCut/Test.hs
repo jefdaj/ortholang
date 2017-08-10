@@ -14,6 +14,7 @@ import System.Environment  (setEnv)
 import Paths_ShortCut      (getDataFileName)
 import System.FilePath.Posix ((</>))
 import System.Process        (readCreateProcessWithExitCode, shell)
+import System.Directory      (setCurrentDirectory)
 
 import qualified ShortCut.Test.Parse as P
 import qualified ShortCut.Test.Eval  as E
@@ -21,7 +22,7 @@ import qualified ShortCut.Test.Repl  as R
 import qualified ShortCut.Test.Deps  as D
 
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "Test"
+mkTests cfg = mkTestGroup cfg "all tests"
   [ D.mkTests
   , P.mkTests
   , E.mkTests
@@ -36,12 +37,13 @@ mkTestConfig mods dir = CutConfig
   , cfgModules = mods
   }
 
--- TODO is d also the script's cwd where data files should go?
 runTests :: [CutModule] -> IO ()
-runTests mods = withSystemTempDirectory "shortcut" $ \d -> do
-  dataDir <- getDataFileName "data"
+runTests mods = withSystemTempDirectory "shortcut" $ \td -> do
+  wd <- getDataFileName ""
+  setCurrentDirectory wd
   -- TODO check exit code?
-  (_,_,_) <- readCreateProcessWithExitCode (shell $ unwords ["ln -s", dataDir, (d </> "data")]) ""
-  tests <- mkTests $ mkTestConfig mods d
+  (_,_,_) <- readCreateProcessWithExitCode
+               (shell $ unwords ["ln -s", wd </> "data", (td </> "data")]) ""
+  tests <- mkTests $ mkTestConfig mods td
   setEnv "LANG" "C"
   defaultMain tests

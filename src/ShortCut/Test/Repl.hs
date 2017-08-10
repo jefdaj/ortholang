@@ -16,7 +16,8 @@ import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "Repl" [goldenRepls, goldenReplTrees]
+mkTests cfg = mkTestGroup cfg "mock REPL interaction"
+                [goldenRepls, goldenReplTrees]
 
 -- TODO have to fix eLine before getting anything out of the repl at all!
 --      but can work on splitting the repl files first
@@ -54,11 +55,11 @@ goldenRepl :: CutConfig -> FilePath -> IO TestTree
 goldenRepl cfg goldenFile = do
   txt <- readFile goldenFile
   let name   = takeBaseName goldenFile
-      outFile = "/global/home/users/jefdaj/shortcut/src/" ++ name ++ ".out"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
+      tstOut = cfgTmpDir cfg' ++ name ++ ".out"
       stdin  = extractPrompted "shortcut >> " txt -- TODO pass the prompt here
-      action = mockRepl stdin outFile cfg'
-  return $ goldenVsFile name goldenFile outFile action
+      action = mockRepl stdin tstOut cfg'
+  return $ goldenVsFile name goldenFile tstOut action
 
 goldenRepls :: CutConfig -> IO TestTree
 goldenRepls cfg = do
@@ -76,10 +77,10 @@ goldenReplTree cfg ses = do
       tree   = replaceExtension ses "tree"
       stdin  = extractPrompted "shortcut >> " txt
       tmpDir = cfgTmpDir cfg'
+      tmpOut = cfgTmpDir cfg </> name ++ ".out"
       cmd    = (shell "tree") { cwd = Just $ tmpDir }
       action = do
-                 -- TODO any reason this doesn't use the file directly? fix it...
-                 _ <- mockRepl stdin ("/global/home/users/jefdaj/shortcut/src/" ++ name ++ ".out") cfg'
+                 _ <- mockRepl stdin tmpOut cfg'
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  return $ pack out
