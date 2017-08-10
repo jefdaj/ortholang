@@ -31,6 +31,7 @@ import ShortCut.Core.Compile          (compileScript)
 import ShortCut.Core.Parse            (parseFile)
 import ShortCut.Core.Pretty           (prettyResult)
 import Text.PrettyPrint.HughesPJClass (render)
+import System.IO                (Handle, hPutStrLn)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -53,8 +54,8 @@ myShake cfg = shake myOpts . alternatives
 -- TODO rename `runRules` or `runShake`?
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
-eval :: (String -> IO ()) -> CutConfig -> CutType -> Rules ResPath -> IO ()
-eval printFn cfg rtype = ignoreErrors . eval'
+eval :: Handle -> CutConfig -> CutType -> Rules ResPath -> IO ()
+eval hdl cfg rtype = ignoreErrors . eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
@@ -65,18 +66,18 @@ eval printFn cfg rtype = ignoreErrors . eval'
         need [path] -- TODO is this done automatically in the case of result?
         liftIO $ do
           res <- prettyResult cfg rtype path
-          printFn $ render res
+          hPutStrLn hdl $ render res
 
 -- TODO get the type of result and pass to eval
-evalScript :: (String -> IO ()) -> CutState -> IO ()
-evalScript printFn s@(as,c) = eval printFn c rtn $ compileScript s Nothing
+evalScript :: Handle -> CutState -> IO ()
+evalScript hdl s@(as,c) = eval hdl c rtn $ compileScript s Nothing
   where
     res = fromJust $ lookup (CutVar "result") as
     rtn = typeOf res
 
-evalFile :: (String -> IO ()) -> CutConfig -> IO ()
-evalFile printFn cfg = do
+evalFile :: Handle -> CutConfig -> IO ()
+evalFile hdl cfg = do
   f <- parseFile cfg $ fromJust $ cfgScript cfg -- TODO something safer!
   case f of
     Left  e -> fail $ "oh no! " ++ show e -- TODO better errors
-    Right s -> evalScript printFn (s,cfg)
+    Right s -> evalScript hdl (s,cfg)

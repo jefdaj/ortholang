@@ -18,8 +18,7 @@ import System.Console.Docopt      (Docopt, Arguments, exitWithUsage,
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
-import Control.Monad.IO.Class   (liftIO)
-import System.IO
+import System.IO                  (stdin, stdout, hSetBuffering, BufferMode(..))
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -64,5 +63,5 @@ main = do
   cfg <- loadConfig modules args
   let cfg' = debug cfg ("config: " ++ show cfg) cfg
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile (liftIO . putStrLn) cfg'
+    then evalFile stdout cfg'
     else runRepl  cfg'

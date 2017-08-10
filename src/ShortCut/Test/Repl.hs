@@ -42,7 +42,7 @@ mockPrompt handle stdinStr promptStr = do
 mockRepl :: [String] -> FilePath -> CutConfig -> IO ()
 mockRepl stdinLines path cfg = withFile path WriteMode $ \handle -> do
   -- putStrLn ("stdin: '" ++ unlines stdin ++ "'")
-  _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) (\s -> liftIO $ hPutStrLn handle s) cfg -- TODO write the print-to-file fn
+  _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg
   -- putStrLn $ "stdout: '" ++ out ++ "'"
   return ()
 
