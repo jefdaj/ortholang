@@ -35,6 +35,7 @@ mkTestConfig mods dir = CutConfig
   , cfgTmpDir  = dir
   , cfgDebug   = False
   , cfgModules = mods
+  , cfgNodes   = Nothing -- TODO test them?
   }
 
 runTests :: [CutModule] -> IO ()

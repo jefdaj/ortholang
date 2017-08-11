@@ -1,6 +1,6 @@
 module Main where
 
-import ShortCut.Core.Debug        (debug)
+-- import ShortCut.Core.Debug        (debug)
 import Control.Monad              (when)
 import Data.Configurator          (load, lookup)
 import Data.Configurator.Types    (Config, Worth(..))
@@ -19,6 +19,7 @@ import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
 import System.IO                  (stdin, stdout, hSetBuffering, BufferMode(..))
+import ShortCut.Core.Slurm        (slurmNodesResource)
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -31,11 +32,13 @@ loadConfig mods args = do
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   ctd <- loadField args cfg "tmpdir"
+  snr <- slurmNodesResource
   return CutConfig
     { cfgScript  = csc
     , cfgTmpDir  = fromJust ctd
     , cfgDebug   = isPresent args $ longOption "debug"
     , cfgModules = mods
+    , cfgNodes   = snr
     }
 
 getUsage :: IO Docopt
@@ -59,9 +62,10 @@ main = do
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   when (hasArg args "test")
     -- TODO allow passing args to tasty here if not too hard
+    -- TODO still run other stuff after tests?
     (withArgs [] $ runTests modules >> exitSuccess)
   cfg <- loadConfig modules args
-  let cfg' = debug cfg ("config: " ++ show cfg) cfg
+  -- let cfg' = debug cfg ("config: " ++ show cfg) cfg
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile stdout cfg'
-    else runRepl  cfg'
+    then evalFile stdout cfg
+    else runRepl  cfg

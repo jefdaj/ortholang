@@ -49,6 +49,7 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT,
                                        defaultSettings)
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+import Development.Shake              (Resource)
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
@@ -187,8 +188,9 @@ data CutConfig = CutConfig
   , cfgTmpDir  :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
+  , cfgNodes   :: Maybe Resource -- available SLURM nodes, if any
   }
-  deriving (Show)
+  -- deriving (Show)
 
 -----------------
 -- Parse monad --

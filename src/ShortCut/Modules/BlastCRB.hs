@@ -66,6 +66,7 @@ blastCRBAll = CutFunction
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBlastCRB _ (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
+  -- TODO just set --threads to the number available on the node with $nproc or similar
   quietly $ cmd (Cwd tmpDir) "crb-blast" ["--query", q, "--target", t, "--output", o, "--threads", "8", "--split"]
   -- TODO put these back once sure the rest works concurrently
   -- , "--threads", "10" -- TODO how to pick this?
