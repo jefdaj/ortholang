@@ -328,7 +328,7 @@ pExpr = do
 ----------------
 
 pVarEq :: ParseM CutVar
-pVarEq = pVar <* (pSym '=') <?> "vareq"
+pVarEq = pVar <* (optional pComment) <* (pSym '=') <* (optional pComment) <?> "vareq"
 
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
