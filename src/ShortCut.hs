@@ -19,7 +19,7 @@ import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Environment         (getArgs, withArgs)
 import System.Exit                (exitSuccess)
 import System.IO                  (stdin, stdout, hSetBuffering, BufferMode(..))
-import ShortCut.Core.Slurm        (slurmNodesResource)
+import Development.Shake          (newResourceIO)
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -32,13 +32,20 @@ loadConfig mods args = do
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   ctd <- loadField args cfg "tmpdir"
-  snr <- slurmNodesResource
+  cns <- loadField args cfg "cluster-nodes"
+  cls <- loadField args cfg "cluster-script"
+  cns' <- case cns of
+    Nothing -> return Nothing
+    Just ns -> do
+      r <- newResourceIO "cluster-nodes" $ read ns
+      return $ Just r
   return CutConfig
-    { cfgScript  = csc
-    , cfgTmpDir  = fromJust ctd
-    , cfgDebug   = isPresent args $ longOption "debug"
-    , cfgModules = mods
-    , cfgNodes   = snr
+    { cfgScript        = csc -- cut script, not cluster script
+    , cfgTmpDir        = fromJust ctd
+    , cfgDebug         = isPresent args $ longOption "debug"
+    , cfgModules       = mods
+    , cfgClusterNodes  = cns'
+    , cfgClusterScript = cls
     }
 
 getUsage :: IO Docopt

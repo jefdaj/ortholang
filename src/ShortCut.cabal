@@ -54,7 +54,6 @@ executable shortcut
                     ShortCut.Core.Paths,
                     ShortCut.Core.Pretty,
                     ShortCut.Core.Repl,
-                    ShortCut.Core.Slurm,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
                     ShortCut.Modules,

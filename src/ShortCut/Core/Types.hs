@@ -188,7 +188,8 @@ data CutConfig = CutConfig
   , cfgTmpDir  :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
-  , cfgNodes   :: Maybe Resource -- available SLURM nodes, if any
+  , cfgClusterNodes   :: Maybe Resource
+  , cfgClusterScript  :: Maybe FilePath
   }
   -- deriving (Show)
 
