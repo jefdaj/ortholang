@@ -3,6 +3,7 @@ module ShortCut.Core.Types
   ( CutAssign
   , CutExpr(..)
   , CutConfig(..)
+  , ClusterConfig(..)
   , CutType(..)
   , CutVar(..)
   , CutScript
@@ -188,10 +189,15 @@ data CutConfig = CutConfig
   , cfgTmpDir  :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
-  , cfgClusterNodes   :: Maybe Resource
-  , cfgClusterScript  :: Maybe FilePath
+  , cfgCluster :: Maybe ClusterConfig
   }
-  -- deriving (Show)
+  deriving Show
+
+data ClusterConfig = ClusterConfig
+  { clusterScript :: FilePath
+  , clusterLimit  :: Maybe Resource
+  }
+  deriving Show
 
 -----------------
 -- Parse monad --

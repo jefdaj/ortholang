@@ -2,6 +2,7 @@ module ShortCut.Core
   ( runRepl
   , evalFile
   , CutConfig(..)
+  , ClusterConfig(..)
   , CutModule(..)
   , prettyShow
   )
@@ -13,4 +14,4 @@ module ShortCut.Core
 import ShortCut.Core.Pretty (prettyShow)
 import ShortCut.Core.Eval   (evalFile)
 import ShortCut.Core.Repl   (runRepl)
-import ShortCut.Core.Types  (CutConfig(..), CutModule(..))
+import ShortCut.Core.Types  (CutConfig(..), CutModule(..), ClusterConfig(..))
