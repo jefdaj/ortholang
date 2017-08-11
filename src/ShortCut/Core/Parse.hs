@@ -281,7 +281,8 @@ pFun = do
   (_, cfg) <- getState
   -- find the function by name
   name <- pName
-  args <- manyTill pTerm pEnd
+  void $ optional pComment
+  args <- manyTill (pTerm <* optional pComment) pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fn   = find (\f -> fName f == name) fns
       deps = foldr1 union $ map depsOf args
