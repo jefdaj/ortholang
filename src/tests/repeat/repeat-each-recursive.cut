@@ -1,6 +1,6 @@
-ind = 1  # TODO make this a prime number
-ind2 = 4 # TODO make this a prime number
-ind3 = 2 # TODO make this a prime number
+ind = 1
+ind2 = 4
+ind3 = 2
 dep = 1.2e3 * ind * ind2 * ind3
 rep1 = repeat_each dep  ind  [1,2]
 rep2 = repeat_each rep1 ind2 [15,17,2,3,4,5]

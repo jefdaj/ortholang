@@ -281,8 +281,7 @@ pFun = do
   (_, cfg) <- getState
   -- find the function by name
   name <- pName
-  void $ optional pComment
-  args <- manyTill (pTerm <* optional pComment) pEnd
+  args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fn   = find (\f -> fName f == name) fns
       deps = foldr1 union $ map depsOf args
@@ -328,7 +327,7 @@ pExpr = do
 ----------------
 
 pVarEq :: ParseM CutVar
-pVarEq = pVar <* (optional pComment) <* (pSym '=') <* (optional pComment) <?> "vareq"
+pVarEq = pVar <* (pSym '=') <?> "vareq"
 
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
