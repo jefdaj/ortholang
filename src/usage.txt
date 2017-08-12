@@ -19,9 +19,9 @@ Options:
                             [default: ~/.shortcut/config]
   --workdir WDIR            Working directory and start point for relative paths.
                             [default: .]
-  --cluster-script CSCRIPT  Script to run arbitrary commands on the cluster.
+  --clusterscript CSCRIPT   Script to run arbitrary commands on the cluster.
                             ShortCut makes sure only LIMIT instances are
                             running at the same time, but otherwise assumes
                             this script will handle concurrency.
-  --cluster-limit  LIMIT    Max number of CSCRIPTs to run at once.
+  --clusterlimit LIMIT      Max number of CSCRIPTs to run at once.
                             If zero, no limit is set. [default: 0]

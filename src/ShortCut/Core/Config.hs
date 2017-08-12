@@ -5,7 +5,7 @@ import Data.Configurator          (load, lookup)
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
-import Development.Shake          (newResourceIO, command_, withResource, Action, CmdOption)
+import Development.Shake          (newResourceIO, command_, withResource, Action, CmdOption(..))
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core              (CutConfig(..), CutModule(..), ClusterConfig(..))
 import ShortCut.Core.Util         (expandTildes)
@@ -22,15 +22,15 @@ loadField args cfg key
 -- gets passed around everywhere else in ShortCut.
 loadClusterConfig :: Arguments -> Config -> IO (Maybe ClusterConfig)
 loadClusterConfig args cfg = do
-  cscr <- loadField args cfg "cluster-script"
+  cscr <- loadField args cfg "clusterscript"
   case cscr of
     Nothing -> return Nothing
     Just cscr' -> do
-      clim <- loadField args cfg "cluster-limit"
+      clim <- loadField args cfg "clusterlimit"
       clim' <- case clim of
         Nothing -> return Nothing
         Just n  -> do
-          r <- newResourceIO "cluster-limit" $ read n
+          r <- newResourceIO "clusterlimit" $ read n
           return $ Just r
       return $ Just ClusterConfig
         { clusterScript = cscr'
@@ -65,11 +65,11 @@ hasArg as a = isPresent as $ longOption a
 
 -- TODO gather shake stuff into a Shake.hs module? could have config, debug, cmd, eval...
 -- Shake's command_ adapted to work with clusterScript and clusterLimit if used
-clusterCmd :: Maybe ClusterConfig -> CmdOption -> String -> [String] -> Action ()
+clusterCmd :: Maybe ClusterConfig -> String -> String -> [String] -> Action ()
 clusterCmd mcfg tdir bin args = case mcfg of
-  Nothing  -> command_ [tdir] bin args
+  Nothing  -> command_ [Cwd tdir] bin args
   Just cfg -> case clusterLimit cfg of
     Nothing  -> cCmd
     Just lim -> withResource lim 1 cCmd
     where
-      cCmd = command_ [tdir] (clusterScript cfg) (bin:args)
+      cCmd = command_ [Cwd tdir] (clusterScript cfg) (tdir:bin:args)
