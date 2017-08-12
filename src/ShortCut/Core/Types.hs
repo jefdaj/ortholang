@@ -3,7 +3,7 @@ module ShortCut.Core.Types
   ( CutAssign
   , CutExpr(..)
   , CutConfig(..)
-  , ClusterConfig(..)
+  , WrapperConfig(..)
   , CutType(..)
   , CutVar(..)
   , CutScript
@@ -189,13 +189,13 @@ data CutConfig = CutConfig
   , cfgTmpDir  :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
-  , cfgCluster :: Maybe ClusterConfig
+  , cfgWrapper :: Maybe WrapperConfig
   }
   deriving Show
 
-data ClusterConfig = ClusterConfig
-  { clusterScript :: FilePath
-  , clusterLimit  :: Maybe Resource
+data WrapperConfig = WrapperConfig
+  { wrapperScript :: FilePath
+  , wrapperLimit  :: Maybe Resource
   }
   deriving Show
 

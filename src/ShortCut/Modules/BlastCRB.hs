@@ -7,8 +7,8 @@ module ShortCut.Modules.BlastCRB where
 -- TODO what to do about the e-value cutoff?
 
 import ShortCut.Core.Types
-import Development.Shake       (quietly, CmdOption(..), Action)
-import ShortCut.Core.Config    (clusterCmd)
+import Development.Shake       (quietly, Action)
+import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.ModuleAPI (rSimpleTmp, rMapLastTmps, defaultTypeCheck)
 import ShortCut.Modules.SeqIO  (faa)
 
@@ -67,7 +67,7 @@ blastCRBAll = CutFunction
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
   -- TODO just set --threads to the number available on the node with $nproc or similar
-  quietly $ clusterCmd (cfgCluster cfg) tmpDir "crb-blast" ["--query", q, "--target", t, "--output", o]
+  quietly $ wrappedCmd (cfgWrapper cfg) tmpDir "crb-blast" ["--query", q, "--target", t, "--output", o]
   -- TODO put these back once sure the rest works concurrently
   -- , "--threads", "10" -- TODO how to pick this?
   -- , "--split"
