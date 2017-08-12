@@ -5,7 +5,7 @@ import Data.Configurator          (load, lookup)
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
-import Development.Shake          (newResourceIO)
+import Development.Shake          (newResourceIO, command_, withResource, Action, CmdOption)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core              (CutConfig(..), CutModule(..), ClusterConfig(..))
 import ShortCut.Core.Util         (expandTildes)
@@ -62,3 +62,14 @@ getUsage = do
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
+
+-- TODO gather shake stuff into a Shake.hs module? could have config, debug, cmd, eval...
+-- Shake's command_ adapted to work with clusterScript and clusterLimit if used
+clusterCmd :: Maybe ClusterConfig -> CmdOption -> String -> [String] -> Action ()
+clusterCmd mcfg tdir bin args = case mcfg of
+  Nothing  -> command_ [tdir] bin args
+  Just cfg -> case clusterLimit cfg of
+    Nothing  -> cCmd
+    Just lim -> withResource lim 1 cCmd
+    where
+      cCmd = command_ [tdir] (clusterScript cfg) (bin:args)
