@@ -9,6 +9,7 @@
 # ../shortcut-slurm.sh 6 12 12:00:00 --script $HOME/shortcut/cuts/green.cut --debug
 
 # TODO would it be more efficient to ask for each srun allocation outside salloc as we go?
+# TODO try an interactive job next!
 
 USAGE="usage: shortcut-slurm.sh <nodes> <cpus> <hh:mm:ss> [shortcut args]"
 [[ $# -ge 4 ]] || (echo "$USAGE" && exit 1)
