@@ -6,6 +6,7 @@ import ShortCut.Core.Types
 import Data.Scientific            (formatScientific, FPFormat(..))
 import ShortCut.Core.Paths        (exprPath)
 import ShortCut.Core.Compile      (cExpr)
+import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
@@ -49,11 +50,11 @@ bht = CutType
   }
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn cmdFn qType tType = CutFunction
-  { fName      = cmdFn
+mkBlastFn wrappedCmdFn qType tType = CutFunction
+  { fName      = wrappedCmdFn
   , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rBlast cmdFn
+  , fCompiler  = rBlast wrappedCmdFn
   }
 
 -- TODO move to Util?
@@ -68,7 +69,7 @@ mkBlastFn cmdFn qType tType = CutFunction
 --   hash <- fmap digest $ liftIO $ readFile faPath
 --   let dbDir = cacheDir cfg </> "blastdb" </> hash -- TODO need faType too?
 --   liftIO $ createDirectoryIfMissing True dbDir
---   unit $ quietly $ cmd "makeblastdb" (Cwd dbDir)
+--   unit $ quietly $ wrappedCmd "makeblastdb" (Cwd dbDir)
 --     [ "-in"    , faPath
 --     , "-out"   , "db" -- TODO is this right?
 --     , "-title" , hash
@@ -94,7 +95,7 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
     need $ [qPath, sPath, ePath] -- ++ dbFiles
     eStr <- fmap init $ debugReadFile cfg ePath
     let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-    unit $ quietly $ cmd bCmd -- (AddEnv "BLASTDB" dbDir) -- TODO Cwd?
+    unit $ quietly $ wrappedCmd cfg [] bCmd -- (AddEnv "BLASTDB" dbDir) -- TODO Cwd?
       -- [ "-db"     , "db" -- TODO anything useful needed here?
       [ "-query"  , qPath
       , "-subject", sPath -- TODO is this different from target?

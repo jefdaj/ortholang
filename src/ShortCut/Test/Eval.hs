@@ -71,10 +71,10 @@ goldenScriptTree cfg cut tre = goldenVsString name tre act
   where
     name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    cmd  = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
+    wrappedCmd  = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
     act  = do
              silence $ evalFile stdout cfg'
-             out <- readCreateProcess cmd ""
+             out <- readCreateProcess wrappedCmd ""
              wd  <- getCurrentDirectory
              return $ pack $ fixWorkingDir wd out
 

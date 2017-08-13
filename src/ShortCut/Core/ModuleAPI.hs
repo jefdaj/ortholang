@@ -24,6 +24,7 @@ import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
 import ShortCut.Core.Debug        (debugWriteLines, debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath            (takeBaseName)
+import ShortCut.Core.Config       (wrappedCmd)
 -- import ShortCut.Core.Util         (digest)
 
 ------------------------------
@@ -56,7 +57,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
       (ExprPath oPath) = exprPath cfg expr []
   oPath %> \_ -> do
     need [argPath]
-    quietly $ unit $ cmd script tmpDir oPath argPath
+    quietly $ unit $ wrappedCmd cfg [] script [tmpDir, oPath, argPath]
     trackWrite [oPath]
   return (ExprPath oPath)
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
@@ -72,7 +73,7 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
       (ExprPath actOut) = exprPath cfg expr []
   tmpOut %> \out -> do
     need [faPath]
-    quietly $ cmd script (Cwd tmpDir) (debug cfg ("cOneArgList out: " ++ out) out) faPath
+    quietly $ wrappedCmd cfg [Cwd tmpDir] script [(debug cfg ("cOneArgList out: " ++ out) out), faPath]
     -- trackWrite [out]
   actOut %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath actOut)
   return (ExprPath actOut)
@@ -105,7 +106,7 @@ cLink s@(_,cfg) expr rtype prefix = do
     src <- liftIO $ canonicalizePath pth
     need [src]
     -- TODO these have to be absolute, so golden tests need to adjust them:
-    quietly $ cmd "ln -fs" [src, out]
+    quietly $ wrappedCmd cfg [] "ln" ["-fs", src, out]
   return (ExprPath outPath)
 
 cLoadOne :: CutType -> CutState -> CutExpr -> Rules ExprPath
@@ -148,6 +149,7 @@ cLoadList _ _ _ = error "bad arguments to cLoadList"
 -- uniqLines :: Ord a => [a] -> [a]
 -- uniqLines = unlines . toList . fromList . lines
 
+-- TODO rewrite this awk -> haskell, and using wrappedCmd
 aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aTsvColumn n cfg _ [outPath, (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"

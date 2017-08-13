@@ -7,7 +7,7 @@ import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
 import Development.Shake          (newResourceIO, command_, withResource, Action, CmdOption(..))
 import Paths_ShortCut             (getDataFileName)
-import ShortCut.Core              (CutConfig(..), CutModule(..), WrapperConfig(..))
+import ShortCut.Core.Types        (CutConfig(..), CutModule(..), WrapperConfig(..))
 import ShortCut.Core.Util         (expandTildes)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
@@ -65,13 +65,14 @@ getUsage = do
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
 
--- TODO gather shake stuff into a Shake.hs module? could have config, debug, cmd, eval...
 -- Shake's command_ adapted to work with wrapperScript and wrapperLimit if used
-wrappedCmd :: Maybe WrapperConfig -> String -> String -> [String] -> Action ()
-wrappedCmd mcfg tdir bin args = case mcfg of
-  Nothing  -> command_ [Cwd tdir] bin args
-  Just cfg -> case wrapperLimit cfg of
-    Nothing  -> wCmd
-    Just lim -> withResource lim 1 wCmd
+-- TODO gather shake stuff into a Shake.hs module?
+--      could have config, debug, wrappedCmd, eval...
+wrappedCmd :: CutConfig -> [CmdOption] -> FilePath -> [String] -> Action ()
+wrappedCmd cfg opts bin args = case cfgWrapper cfg of
+  Nothing -> command_ opts bin args
+  Just wc -> case wrapperLimit wc of
+    Nothing -> wCmd
+    Just l  -> withResource l 1 wCmd
     where
-      wCmd = command_ [Cwd tdir] (wrapperScript cfg) (bin:args)
+      wCmd = command_ opts (wrapperScript wc) (bin:args)

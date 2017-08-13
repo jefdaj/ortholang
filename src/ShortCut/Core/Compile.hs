@@ -32,6 +32,7 @@ import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
 import System.FilePath            (makeRelative, takeDirectory)
 import System.Directory           (createDirectoryIfMissing)
+import ShortCut.Core.Config       (wrappedCmd)
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
@@ -126,7 +127,7 @@ cLit (_,cfg) expr = do
 cList :: CutState -> CutExpr -> Rules ExprPath
 cList (_,cfg) e@(CutList EmptyList _ _ _) = do
   let (ExprPath link) = exprPath cfg e []
-  link %> \out -> quietly $ cmd "touch" [out]
+  link %> \out -> quietly $ wrappedCmd cfg [] "touch" [out]
   return (ExprPath link)
 cList s@(_,cfg) e@(CutList _ _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
@@ -155,7 +156,7 @@ cVar (_,cfg) var expr (ExprPath dest) = do
     alwaysRerun
     need [dest]
     liftIO $ createDirectoryIfMissing True $ takeDirectory out
-    quietly $ cmd "ln -fs" [dest', out]
+    quietly $ wrappedCmd cfg [] "ln" ["-fs", dest', out]
   return (VarPath link)
 
 -- handles the actual rule generation for all binary operators

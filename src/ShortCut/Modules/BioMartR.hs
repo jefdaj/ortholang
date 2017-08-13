@@ -18,6 +18,7 @@ import Development.Shake
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Paths   (exprPath, exprPathExplicit)
 import ShortCut.Core.Compile (cExpr)
+import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -199,6 +200,6 @@ cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   outs %> \out -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?
-    quietly $ cmd "biomartr.R" bmTmp [out, bmFn, sTable]
+    quietly $ wrappedCmd cfg [Cwd bmTmp] "biomartr.R" [out, bmFn, sTable]
   return (ExprPath outs)
 cBioMartR _ _ _ = error "bad cBioMartR call"

@@ -12,6 +12,7 @@ import ShortCut.Core.Debug        (debug, debugReadLines,
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
 import System.Directory           (createDirectoryIfMissing)
+import ShortCut.Core.Config       (wrappedCmd)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -149,7 +150,8 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   outPath %> \_ -> do
     need [faPath, tmpList]
     liftIO $ createDirectoryIfMissing True tmpDir
-    quietly $ cmd "extract_seqs.py" (Cwd tmpDir) outPath faPath tmpList
+    quietly $ wrappedCmd cfg [Cwd tmpDir]
+                         "extract_seqs.py" [outPath, faPath, tmpList]
   return (ExprPath outPath)
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
 
@@ -180,7 +182,9 @@ cConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> need [faPath] >> unit (cmd script oPath faPath)
+  oPath %> \_ -> do
+    need [faPath]
+    unit $ wrappedCmd cfg [] script [oPath, faPath]
     -- debugTrackWrite cfg [oPath] TODO is this implied?
   return (ExprPath oPath)
 cConvert _ _ _ = error "bad argument to cConvert"
@@ -209,7 +213,7 @@ cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   oPath %> \_ -> do
     -- need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
     -- let catCmd = intercalate " " $ ["cat"] ++ faPaths ++ [">", oPath]
-    -- unit $ quietly $ cmd Shell (debug cfg ("catCmd: " ++ catCmd) catCmd)
+    -- unit $ quietly $ wrappedCmd Shell (debug cfg ("catCmd: " ++ catCmd) catCmd)
     -- debugTrackWrite cfg [oPath]
     fPaths <- debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath) fsPath)
     need fPaths -- TODO shouldn't the next line handle this?
