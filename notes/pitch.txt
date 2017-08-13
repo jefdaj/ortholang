@@ -1,0 +1,9 @@
+ShortCut code aims to be:
+
+* shorter than an english description of the same algorithm
+* reproducable on different computers at different times
+* trivially updated when new genomes or annotations come out
+* robust to changes in the search parameters (if done properly)
+* explored interactively or run as a script, depending on expected runtime
+* automatically parallelized to any number of cores
+* valid when saved at any point in a live interpreter session
