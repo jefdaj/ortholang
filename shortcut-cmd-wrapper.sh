@@ -16,4 +16,5 @@ case "$(basename "$1")" in
 	*) CMD="$@" ;; # run the command as-is in this shell
 esac
 
+# TODO set an environment variable (SOMETHING_DEBUG) that controls whether to echo the cmd
 echo "$CMD" && eval "$CMD"
