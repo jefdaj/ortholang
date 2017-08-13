@@ -3,6 +3,7 @@ module ShortCut.Core.Types
   ( CutAssign
   , CutExpr(..)
   , CutConfig(..)
+  , WrapperConfig(..)
   , CutType(..)
   , CutVar(..)
   , CutScript
@@ -49,6 +50,7 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT,
                                        defaultSettings)
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+import Development.Shake              (Resource)
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
@@ -187,8 +189,15 @@ data CutConfig = CutConfig
   , cfgTmpDir  :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
+  , cfgWrapper :: Maybe WrapperConfig
   }
-  deriving (Show)
+  deriving Show
+
+data WrapperConfig = WrapperConfig
+  { wrapperScript :: FilePath
+  , wrapperLimit  :: Maybe Resource
+  }
+  deriving Show
 
 -----------------
 -- Parse monad --
