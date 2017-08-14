@@ -26,7 +26,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Exception.Enclosed     (catchAny)
-import Data.Maybe                     (fromJust)
+import Data.Maybe                     (fromJust, maybeToList)
 import ShortCut.Core.Compile          (compileScript)
 import ShortCut.Core.Parse            (parseFile)
 import ShortCut.Core.Pretty           (prettyResult)
@@ -43,8 +43,8 @@ myShake cfg = shake myOpts . alternatives
       , shakeVerbosity = if cfgDebug cfg then Chatty else Quiet
       , shakeThreads   = 0
       , shakeChange    = ChangeModtimeAndDigest -- TODO test this
+      , shakeReport    = maybeToList $ cfgReport cfg
       -- , shakeCommandOptions = [EchoStdout True]
-      -- , shakeReport    = ["_shortcut/report.html"]
       -- , shakeProgress = progressSimple
       -- , shakeLineBuffering = False
       }

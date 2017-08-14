@@ -193,6 +193,7 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
 
 -- common code factored out from the two functions above
 -- TODO now that the new Shake strategy works, clean it up!
+-- TODO sprinkle some need in here?
 rMapLast :: (ExprPath -> CacheDir) -- this will be called to get each tmpDir
          -> (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
          -> (CutState -> CutExpr -> Rules ExprPath)

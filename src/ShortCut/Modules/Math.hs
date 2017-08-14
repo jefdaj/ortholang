@@ -36,6 +36,7 @@ cMath fn s e@(CutBop extn _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (n1, n2)
   p3 %> \out -> do
+    need [p1, p2]
     num1 <- fmap strip $ readFile' p1
     num2 <- fmap strip $ readFile' p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]

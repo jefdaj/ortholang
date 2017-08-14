@@ -45,6 +45,7 @@ loadConfig mods args = do
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
   ctd <- loadField args cfg "tmpdir"
+  rep <- loadField args cfg "report"
   -- TODO if cluster-scripts given, activate wrappedCmd calls
   -- TODO if cluster-limit given, define wrappedCmd to use a resource
   cls <- loadWrapperConfig args cfg
@@ -54,6 +55,7 @@ loadConfig mods args = do
     , cfgDebug   = isPresent args $ longOption "debug"
     , cfgModules = mods
     , cfgWrapper = cls
+    , cfgReport  = rep
     }
 
 getUsage :: IO Docopt

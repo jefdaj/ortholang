@@ -190,6 +190,7 @@ data CutConfig = CutConfig
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
   , cfgWrapper :: Maybe WrapperConfig
+  , cfgReport :: Maybe String
   }
   deriving Show
 

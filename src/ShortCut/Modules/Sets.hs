@@ -49,6 +49,7 @@ cSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
   -- liftIO $ putStrLn "entering cSetBop"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (s1, s2)
   p3 %> \out -> do
+    need [p1, p2] -- this is required for parallel evaluation!
     lines1 <- readFileLines p1
     lines2 <- readFileLines p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]

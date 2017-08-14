@@ -55,6 +55,7 @@ extractExprs  _   e               = error $ "bad arg to extractExpr: " ++ show e
 
 -- TODO ideally, this shouldn't need any custom digesting? but whatever no
 --      messing with it for now
+-- TODO can this be parallelized better?
 cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules ExprPath
 cRepeat (script,cfg) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)

@@ -25,3 +25,6 @@ Options:
                             this script will handle concurrency.
   --wrapperlimit LIMIT      Max number of WSCRIPTs to run at once.
                             If zero, no limit is set. [default: 0]
+  --report HTML             Write an interactive HTML report that helps
+                            optimize performance. Not sure whether this works
+                            well with SLURM or not yet.

@@ -101,6 +101,9 @@ cAssign s (var, expr) = do
 compileScript :: CutState -> Maybe String -> Rules ResPath
 compileScript s@(as,_) permHash = do
   -- liftIO $ putStrLn "entering compileScript"
+  -- TODO this can't be done all in parallel because they depend on each other,
+  --      but can parts of it be parallelized? or maybe it doesn't matter because
+  --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (cAssign s) as
   return $ (\(VarPath r) -> ResPath r) $ fromJust $ lookup (CutVar res) rpaths
   where
@@ -197,9 +200,13 @@ toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
 -- Like toShortCutList, but takes strings instead of a tmpfile containing strings.
 toShortCutListStr :: CutConfig -> CutType -> ExprPath -> [String] -> Action ()
 toShortCutListStr cfg litType (ExprPath outPath) lits = do
-  let litExprs  = map (CutLit litType 0) lits
-      litPaths  = map (\e -> exprPath cfg e []) litExprs
-      litPaths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
-      litPairs  = zip lits $ map (\(ExprPath p) -> p) litPaths
+  let litExprs   = map (CutLit litType 0) lits
+      litPaths   = map (\e -> exprPath cfg e []) litExprs
+      litPaths'  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
+      litPaths'' = map (\(ExprPath p) -> p) litPaths
+      litPairs   = zip lits litPaths''
+  -- TODO nope have to separately use an action for each write if you want parallel
+  --      (but would that even help much?)
+  -- need litPaths''
   mapM_ (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
   debugWriteLines cfg outPath litPaths'

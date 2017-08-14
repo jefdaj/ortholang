@@ -13,6 +13,8 @@ import System.Environment    (getArgs, withArgs)
 import System.Exit           (exitSuccess)
 import System.IO             (stdin, stdout, hSetBuffering, BufferMode(..))
 
+-- TODO --interactive and --script should work at the same time
+
 main:: IO ()
 main = do
   hSetBuffering stdin  LineBuffering
