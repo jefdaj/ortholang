@@ -39,6 +39,7 @@ import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
 import System.IO                (Handle, hPutStrLn, stdout)
+import System.Directory         (doesFileExist)
 
 --------------------
 -- main interface --
@@ -165,14 +166,17 @@ cmdHelp hdl _ = liftIO $ hPutStrLn hdl
   \:!        to run the rest of the line as a shell command"
 
 -- TODO this is totally duplicating code from putAssign; factor out
--- TODO this shouldn't crash if a file referenced from the script doesn't exist!
 cmdLoad :: Handle -> String -> ReplM ()
 cmdLoad hdl path = do
   (_, cfg)  <- get
-  new <- liftIO $ parseFile cfg path
-  case new of
-    Left  e -> liftIO $ hPutStrLn hdl $ show e
-    Right s -> put (s, cfg)
+  dfe <- liftIO $ doesFileExist path
+  if not dfe
+    then liftIO $ hPutStrLn hdl $ "no such file: " ++ path
+    else do
+      new <- liftIO $ parseFile cfg path
+      case new of
+        Left  e -> liftIO $ hPutStrLn hdl $ show e
+        Right s -> put (s, cfg)
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?

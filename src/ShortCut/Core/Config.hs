@@ -11,6 +11,7 @@ import ShortCut.Core.Types        (CutConfig(..), CutModule(..), WrapperConfig(.
 import ShortCut.Core.Util         (expandTildes)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
+import System.Directory           (makeAbsolute)
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -26,8 +27,9 @@ loadWrapperConfig args cfg = do
   case wscr of
     Nothing -> return Nothing
     Just wscr' -> do
-      wlim <- loadField args cfg "wrapperlimit"
-      wlim' <- case wlim of
+      wscr'' <- makeAbsolute wscr'
+      wlim   <- loadField args cfg "wrapperlimit"
+      wlim'  <- case wlim of
         Nothing -> return Nothing
         Just n  -> case read n of
           0  -> return Nothing
@@ -35,7 +37,7 @@ loadWrapperConfig args cfg = do
             r <- newResourceIO "wrapperlimit" n'
             return $ Just r
       return $ Just WrapperConfig
-        { wrapperScript = wscr'
+        { wrapperScript = wscr''
         , wrapperLimit  = wlim'
         }
 
