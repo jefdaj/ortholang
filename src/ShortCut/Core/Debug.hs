@@ -7,6 +7,8 @@ module ShortCut.Core.Debug
   , debugWriteLines
   , debugWriteChanged
   , debugTrackWrite
+  , readFileStrict
+  , readLinesStrict
   )
   where
 
@@ -15,8 +17,11 @@ import Debug.Trace            (trace, traceShow)
 import ShortCut.Core.Types    (CutConfig(..))
 import Control.Monad              (unless)
 import System.IO.Error (isAlreadyInUseError, ioError, catchIOError)
+import System.IO              (IOMode(..), withFile)
+import System.IO.Strict       (hGetContents)
 
 -- TODO add tags/description for filtering the output? (plus docopt to read them)
+-- TODO rename to Shake.hs or something if it gathers more than debugging? combine with Eval.hs?
 
 ---------------------------------
 -- basic wrappers around trace --
@@ -57,14 +62,31 @@ writeFileSafe name x = liftIO $ catchIOError (writeFile name x) handler
 writeLinesSafe :: FilePath -> [String] -> Action ()
 writeLinesSafe name = writeFileSafe name . unlines
 
+-----------------------------------
+-- handle large numbers of reads --
+-----------------------------------
+
+{- Lazy IO turns out not to work well for printing large lists of literals
+ - (couple hundred thousand at once). The solution is just to use strict IO.
+ - See: https://github.com/ndmitchell/shake/issues/37
+ -}
+
+-- TODO don't use this since you should be needing whole groups of files?
+readFileStrict :: FilePath -> Action String
+readFileStrict path = need [path] >> liftIO (withFile path ReadMode hGetContents)
+{-# INLINE readFileStrict #-}
+
+readLinesStrict :: FilePath -> Action [String]
+readLinesStrict = fmap lines . readFileStrict
+
 -------------------------------------------------------
 -- re-export Shake functions with new stuff attached --
 -------------------------------------------------------
 
--- TODO is there a more elegant way?
+-- TODO rename like myReadFile, myReadLines?
 
 debugReadFile :: CutConfig -> FilePath -> Action String
-debugReadFile cfg f = debug cfg ("read: " ++ f) (readFile' f)
+debugReadFile cfg f = debug cfg ("read: " ++ f) (readFileStrict f)
 
 debugWriteFile :: CutConfig -> FilePath -> String -> Action ()
 debugWriteFile cfg f s = unlessExists f
@@ -72,7 +94,7 @@ debugWriteFile cfg f s = unlessExists f
                        $ writeFileSafe f s
 
 debugReadLines :: CutConfig -> FilePath -> Action [String]
-debugReadLines cfg f = debug cfg ("read: " ++ f) (readFileLines f)
+debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 
 debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
 debugWriteLines cfg f ss = unlessExists f

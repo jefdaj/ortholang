@@ -96,6 +96,7 @@ executable shortcut
                     silently,
                     scientific,
                     shake,
+                    strict,
                     tasty,
                     tasty-golden,
                     tasty-quickcheck,
