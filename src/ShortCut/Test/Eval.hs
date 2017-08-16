@@ -39,6 +39,7 @@ treeDirs =
   , "tests/lists"
   , "tests/vars"
   , "tests/math"
+  , "tests/bugfix"
   ]
 
 mkTests :: CutConfig -> IO TestTree

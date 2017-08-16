@@ -183,18 +183,21 @@ rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefi
   where
     tmpDir = cacheDir cfg tmpPrefix
 
+-- TODO does this have a problem with repeated evaluation of shared list elements?
+
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
              -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
   where
-    tmpFn (ExprPath p) = cacheDirUniq cfg tmpPrefix [show e, show p]
+    -- TODO what if the same last arg is used in different mapping fns? will it be unique?
+    tmpFn args = cacheDirUniq cfg tmpPrefix args
 
 -- common code factored out from the two functions above
 -- TODO now that the new Shake strategy works, clean it up!
 -- TODO sprinkle some need in here?
-rMapLast :: (ExprPath -> CacheDir) -- this will be called to get each tmpDir
+rMapLast :: ([FilePath] -> CacheDir) -- this will be called to get each tmpDir
          -> (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
          -> (CutState -> CutExpr -> Rules ExprPath)
 rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
@@ -227,7 +230,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
     args <- fmap lines $ liftIO $ readFile argsPath
     let args' = map (cfgTmpDir cfg </>) args
     need args'
-    let (CacheDir dir) = tmpFn (ExprPath $ last args)
+    let (CacheDir dir) = tmpFn args
     liftIO $ createDirectoryIfMissing True dir
     actFn cfg (CacheDir dir) (map ExprPath (out:args'))
     trackWrite [out]
