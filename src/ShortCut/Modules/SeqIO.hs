@@ -8,7 +8,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Paths        (exprPath, cacheDir, cacheFile)
 import ShortCut.Core.Compile      (cExpr, fromShortCutList)
 import ShortCut.Core.Debug        (debug, debugReadLines,
-                                   debugReadFile, debugWriteFile)
+                                   debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
 import System.Directory           (createDirectoryIfMissing)
@@ -205,19 +205,19 @@ tConcatFastas :: [CutType] -> Either String CutType
 tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
--- TODO why is this writing the file paths instead of their contents?
 cConcat :: CutState -> CutExpr -> Rules ExprPath
 cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- cExpr s fs
   let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
-    -- need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
-    -- let catCmd = intercalate " " $ ["cat"] ++ faPaths ++ [">", oPath]
-    -- unit $ quietly $ wrappedCmd Shell (debug cfg ("catCmd: " ++ catCmd) catCmd)
-    -- debugTrackWrite cfg [oPath]
-    fPaths <- debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath) fsPath)
-    need fPaths -- TODO shouldn't the next line handle this?
-    txt <- fmap concat $ mapM (debugReadFile cfg) (debug cfg ("fPaths: " ++ show fPaths) fPaths)
-    debugWriteFile cfg oPath txt
+    faPaths <- debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath) fsPath)
+    need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
+    let catArgs = faPaths ++ [">", oPath]
+    unit $ quietly $ wrappedCmd cfg [Shell] "cat" (debug cfg ("catArgs: " ++ show catArgs) catArgs)
+    debugTrackWrite cfg [oPath]
+     -- TODO shouldn't have to read the files into memory!
+    -- need fPaths
+    -- txt <- fmap concat $ mapM (debugReadFile cfg) (debug cfg ("fPaths: " ++ show fPaths) fPaths)
+    -- debugWriteFile cfg oPath txt
   return (ExprPath oPath)
 cConcat _ _ = error "bad argument to cConcat"
