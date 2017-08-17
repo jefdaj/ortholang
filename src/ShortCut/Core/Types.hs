@@ -187,6 +187,7 @@ num = CutType
 data CutConfig = CutConfig
   { cfgScript  :: Maybe FilePath
   , cfgTmpDir  :: FilePath
+  , cfgWorkDir :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
   , cfgWrapper :: Maybe WrapperConfig

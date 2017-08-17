@@ -46,14 +46,19 @@ loadConfig mods args = do
   let path = fromJust $ getArg args $ longOption "config"
   cfg <- load [Optional path]
   csc <- loadField args cfg "script"
+  csc' <- case csc of
+            Nothing -> return Nothing
+            Just s  -> makeAbsolute s >>= return . Just
   ctd <- loadField args cfg "tmpdir"
+  cwd <- loadField args cfg "workdir"
   rep <- loadField args cfg "report"
   -- TODO if cluster-scripts given, activate wrappedCmd calls
   -- TODO if cluster-limit given, define wrappedCmd to use a resource
   cls <- loadWrapperConfig args cfg
   return CutConfig
-    { cfgScript  = csc -- cut script, not cluster script
+    { cfgScript  = csc'
     , cfgTmpDir  = fromJust ctd
+    , cfgWorkDir = fromJust cwd
     , cfgDebug   = isPresent args $ longOption "debug"
     , cfgModules = mods
     , cfgWrapper = cls

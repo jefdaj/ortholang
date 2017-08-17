@@ -33,6 +33,7 @@ mkTestConfig :: [CutModule] -> FilePath -> CutConfig
 mkTestConfig mods dir = CutConfig
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
+  , cfgWorkDir = dir
   , cfgDebug   = False
   , cfgModules = mods
   , cfgWrapper = Nothing -- TODO test this?
