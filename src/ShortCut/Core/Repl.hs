@@ -286,25 +286,22 @@ cmdConfig hdl s = do
 -- tab completion --
 --------------------
 
-searchState :: CutState -> String -> [Completion]
-searchState (scr,cfg) txt = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
+listCompletions :: MonadIO m => CutState -> String -> m [Completion]
+listCompletions (scr,cfg) txt = do
+  files <- listFiles txt
+  let misc = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
+  return (files ++ misc)
   where
+    wordList = fnNames ++ varNames ++ cmdNames
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
     varNames = map ((\(CutVar v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) cmds
-    wordList = fnNames ++ varNames ++ cmdNames
 
-searchCompletions :: MonadIO m => CutState -> String -> m [Completion]
-searchCompletions st txt = do
-  files <- listFiles txt
-  let misc = searchState st txt
-  return (files ++ misc)
-
--- this is mostly lifted from the Haskeline source
+-- this is mostly lifted from Haskeline's completeFile
 myComplete :: MonadIO m => CutState -> CompletionFunc m
-myComplete s = completeQuotedWord (Just '\\') "\"'" (searchCompletions s)
+myComplete s = completeQuotedWord (Just '\\') "\"'" (listCompletions s)
              $ completeWord (Just '\\') ("\"\'" ++ filenameWordBreakChars)
-                            (searchCompletions s)
+                            (listCompletions s)
 
 -- This is separate from the CutConfig because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
