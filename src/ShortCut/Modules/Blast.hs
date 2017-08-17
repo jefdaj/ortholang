@@ -46,7 +46,7 @@ bht :: CutType
 bht = CutType
   { tExt  = "bht"
   , tDesc = "tab-separated table of reciprocal blast hits"
-  , tCat  = defaultCat
+  , tShow  = defaultShow
   }
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction

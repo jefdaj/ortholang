@@ -98,6 +98,4 @@ prettyResult cfg (ListOf t) f = do
   paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
   pretties <- mapM (prettyResult cfg t) paths
   return $ text "[" <> fsep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg t f = do
-  txt <- readFile $ cfgTmpDir cfg </> f
-  tCat t $ txt
+prettyResult cfg t f = fmap text $ (tShow t) (cfgTmpDir cfg </> f)

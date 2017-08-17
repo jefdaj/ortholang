@@ -29,7 +29,7 @@ crb :: CutType
 crb = CutType
   { tExt  = "crb"
   , tDesc = "tab-separated table of conditional reciprocal blast best hits"
-  , tCat  = defaultCat
+  , tShow  = defaultShow
   }
 
 ----------------------

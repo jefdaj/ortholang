@@ -29,7 +29,6 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
-import Text.PrettyPrint.HughesPJ (text)
 
 ------------------------
 -- module description --
@@ -50,7 +49,7 @@ search :: CutType
 search = CutType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
-  , tCat  = undefined
+  , tShow  = undefined
   }
 
 -- TODO unify with fna? or replace it?
@@ -58,7 +57,7 @@ fnagz :: CutType
 fnagz = CutType
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tCat  = \_ -> return $ text "tCat not implemented yet for fnagz"
+  , tShow  = \_ -> return "tShow not implemented yet for fnagz"
   }
 
 -- TODO unify with faa? or replace it?
@@ -66,7 +65,7 @@ faagz :: CutType
 faagz = CutType
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
-  , tCat  = \_ -> return $ text "tCat not implemented yet for faagz"
+  , tShow  = \_ -> return "tShow not implemented yet for faagz"
   }
 
 parseSearch :: CutFunction

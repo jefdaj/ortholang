@@ -37,21 +37,21 @@ gbk :: CutType
 gbk = CutType
   { tExt  = "gbk"
   , tDesc = "genbank file"
-  , tCat  = defaultCat
+  , tShow  = defaultShow
   }
 
 faa :: CutType
 faa = CutType
   { tExt  = "faa"
   , tDesc = "FASTA (amino acid)"
-  , tCat  = defaultCat
+  , tShow  = defaultShow
   }
 
 fna :: CutType
 fna = CutType
   { tExt  = "fna"
   , tDesc = "FASTA (nucleic acid)"
-  , tCat  = defaultCat
+  , tShow  = defaultShow
   }
 
 gbkToFaa :: CutFunction

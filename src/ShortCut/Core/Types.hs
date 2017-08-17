@@ -25,7 +25,7 @@ module ShortCut.Core.Types
   , extOf
   , depsOf
   , rDepsOf
-  , defaultCat
+  , defaultShow
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
@@ -48,7 +48,7 @@ import Data.List                      (nub)
 import Development.Shake              (Rules)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
-import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+-- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 import Development.Shake              (Resource)
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
@@ -104,17 +104,20 @@ data CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tCat  :: String -> IO Doc
+    , tShow :: FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
 
-defaultCat :: String -> IO Doc
-defaultCat s = (return . text . unlines) toShow
-  where
-    nLines = 5
-    toShow = if length (lines s) > nLines
-               then (take nLines $ lines s) ++ ["..."]
-               else lines s
+-- TODO ah I get it: I'm still passing the full text as the filename!
+defaultShow :: FilePath -> IO String
+defaultShow = fmap (unlines . take 5 . lines) . readFile
+  -- I gave up on the ellipses for now because they required counting lines,
+  -- which required reading the whole file. Is there a better way?
+  -- where
+    -- nLines = 5
+    -- fmtLines s = if length (lines s) > nLines
+    --                then unlines $ (take nLines $ lines s) ++ ["..."]
+    --                else s
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
@@ -166,14 +169,14 @@ str = CutType
   { tExt  = "str"
   , tDesc = "string"
   -- the init is for removing newlines
-  , tCat  = return . doubleQuotes . text . init
+  , tShow = \f -> readFile f >>= (return . (\x -> "\"" ++ x ++ "\"") . init)
   }
 
 num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tCat  = return . text . init
+  , tShow = \f -> readFile f >>= return . init
   }
 
 ------------
