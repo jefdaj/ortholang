@@ -23,7 +23,7 @@ import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, 
 import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
 import ShortCut.Core.Debug        (debugWriteLines, debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
-import System.FilePath            (takeBaseName)
+import System.FilePath            (takeBaseName, makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
 -- import ShortCut.Core.Util         (digest)
 
@@ -183,8 +183,6 @@ rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefi
   where
     tmpDir = cacheDir cfg tmpPrefix
 
--- TODO does this have a problem with repeated evaluation of shared list elements?
-
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
@@ -229,8 +227,9 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
     -- args <- debugReadLines cfg argsPath
     args <- fmap lines $ liftIO $ readFile argsPath
     let args' = map (cfgTmpDir cfg </>) args
+        rels  = map (makeRelative $ cfgTmpDir cfg) args
     need args'
-    let (CacheDir dir) = tmpFn args
+    let (CacheDir dir) = tmpFn rels -- relative paths for determinism!
     liftIO $ createDirectoryIfMissing True dir
     actFn cfg (CacheDir dir) (map ExprPath (out:args'))
     trackWrite [out]
