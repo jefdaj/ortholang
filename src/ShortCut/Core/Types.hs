@@ -108,16 +108,14 @@ data CutType
     }
   -- deriving (Eq, Show, Read)
 
--- TODO ah I get it: I'm still passing the full text as the filename!
 defaultShow :: FilePath -> IO String
-defaultShow = fmap (unlines . take 5 . lines) . readFile
-  -- I gave up on the ellipses for now because they required counting lines,
-  -- which required reading the whole file. Is there a better way?
-  -- where
-    -- nLines = 5
-    -- fmtLines s = if length (lines s) > nLines
-    --                then unlines $ (take nLines $ lines s) ++ ["..."]
-    --                else s
+defaultShow = fmap (unlines . fmtLines . lines) . readFile
+  where
+    nLines      = 5
+    fmtLines ls = let nPlusOne = take (nLines + 1) ls
+                  in if length nPlusOne > nLines
+                    then init nPlusOne ++ ["..."]
+                    else nPlusOne
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
