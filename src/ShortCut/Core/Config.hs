@@ -1,5 +1,10 @@
 module ShortCut.Core.Config where
 
+-- TODO move Pretty instance here? or import implementation from here?
+-- TODO use setters to do the initial parsing too
+-- TODO remove --limit for now, since it's only needed for salloc scripts?
+-- TODO get modules too
+
 import qualified Data.Configurator as C
 
 import Data.Configurator.Types    (Config, Worth(..))
