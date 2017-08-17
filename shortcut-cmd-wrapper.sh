@@ -11,10 +11,11 @@ SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_norm
 SRUN="$SRUN --chdir $(pwd) --nodes=1-1 --ntasks=1"
 
 # put any changes needed to optimize specific commands here
+# TODO set an environment variable (SOMETHING_DEBUG) that controls whether to echo the cmd
 case "$(basename "$1")" in
-	crb-blast) CMD="$SRUN --cpus-per-task=12 --time=99:00:00 $@ --split --threads=12" ;;
-	*) CMD="$@" ;; # run the command as-is in this shell
+	crb-blast) CMD="$SRUN --cpus-per-task=12 --time=99:00:00 $@ --split --threads=12"; echo "$CMD";;
+	ln) CMD="$@";;
+	*) CMD="$@"; echo "$cmd";; # run the command as-is in this shell
 esac
 
-# TODO set an environment variable (SOMETHING_DEBUG) that controls whether to echo the cmd
-echo "$CMD" && eval "$CMD"
+eval "$CMD"
