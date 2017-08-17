@@ -104,4 +104,5 @@ executable shortcut
                     tasty-quickcheck,
                     temporary,
                     text,
-                    transformers
+                    transformers,
+                    utility-ht

@@ -5,26 +5,25 @@ Usage:
   shortcut [options]
 
 Options:
-  --help                    Print this help text and exit.
-  --version                 Print version number and exit.
-  --debug                   Print debugging messages to stderr
-  --test                    Run self-tests and exit.
-  --interactive             Start the interpreter, and load SCRIPT if any.
-                            This is the default if no arguments are given.
-  --script SCRIPT           ShortCut script to run, or load with --interactive
-  --tmpdir TDIR             Where to cache results, including many large
-                            intermediate files.
-                            [default: ~/.shortcut]
-  --config CONFIG           Load any/all of these options from a config file.
-                            [default: ~/.shortcut/config]
-  --workdir WDIR            Working directory and start point for relative paths.
-                            [default: .]
-  --wrapperscript WSCRIPT   Script to wrap arbitrary system commands.
-                            ShortCut makes sure only LIMIT instances are
-                            running at the same time, but otherwise assumes
-                            this script will handle concurrency.
-  --wrapperlimit LIMIT      Max number of WSCRIPTs to run at once.
-                            If zero, no limit is set. [default: 0]
-  --report HTML             Write an interactive HTML report that helps
-                            optimize performance. Not sure whether this works
-                            well with SLURM or not yet.
+  --help             Print this help text and exit.
+  --version          Print version number and exit.
+  --debug            Print debugging messages to stderr
+  --test             Run self-tests and exit.
+	--interactive      Start the interpreter, and load SCRIPT if any. This is
+                     the default if no arguments are given.
+  --script SCRIPT    ShortCut script to run, or load with --interactive
+  --tmpdir TDIR      Where to cache results, including many large
+                     intermediate files.
+                     [default: ~/.shortcut]
+  --config CONFIG    Load any/all of these options from a config file.
+                     [default: ~/.shortcut/config]
+  --workdir WDIR     Working directory and start point for relative paths.
+                     [default: .]
+	--wrapper WRAPPER  Script to wrap arbitrary system commands.  ShortCut makes
+										 sure only LIMIT instances are running at the same time,
+                     but otherwise assumes this script will handle concurrency.
+	--limit LIMIT      Max number of WRAPPERs to run at once. If zero, no limit
+                     is set. [default: 0]
+	--report HTML      Write an interactive HTML report that helps optimize
+										 performance. Not sure whether this works well with SLURM
+                     or not yet.

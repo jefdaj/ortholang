@@ -36,6 +36,7 @@ import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty     (prettyShow)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
+import ShortCut.Core.Config     (showConfigField, setConfigField)
 import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
 import System.IO                (Handle, hPutStrLn, stdout)
@@ -157,6 +158,8 @@ cmds =
 -- run specific commands --
 ---------------------------
 
+-- TODO load this from a file?
+-- TODO update to include :config getting + setting
 cmdHelp :: Handle -> String -> ReplM ()
 cmdHelp hdl _ = liftIO $ hPutStrLn hdl
   "You can type or paste ShortCut code here to run it, same as in a script.\n\
@@ -261,31 +264,14 @@ cmdSet _ = undefined
 -- TODO wow much staircase get rid of it
 cmdConfig :: Handle -> String -> ReplM ()
 cmdConfig hdl s = do
-  (_, cfg) <- get
+  (scr, cfg) <- get
   let ws = words s
   if (length ws == 0)
     then (liftIO $ hPutStrLn hdl (prettyShow cfg) >> return ()) -- TODO Pretty instance
     else if (length ws  > 2)
       then (liftIO $ hPutStrLn hdl "too many variables" >> return ())
-      -- TODO separate into get/set cases:
       else if (length ws == 1)
-        then (cmdConfigShow hdl (head ws))
-        else (cmdConfigSet hdl (head ws) (last ws))
-
-cmdConfigShow :: Handle -> String -> ReplM ()
-cmdConfigShow hdl key = get >>= \(_, cfg) -> liftIO $ hPutStrLn hdl $ fn cfg
-  where
-    fn = case key of
-          "script"  -> (\c -> fromMaybe "none" $ cfgScript c)
-          "verbose" -> (\c -> show $ cfgDebug c)
-          "tmpdir"  -> cfgTmpDir
-          _ -> \_ -> "no such config entry"
-
-cmdConfigSet :: Handle -> String -> String -> ReplM ()
-cmdConfigSet _ key val = do
-  (scr, cfg) <- get
-  case key of
-    "script"  -> put (scr, cfg { cfgScript  = Just val })
-    "verbose" -> put (scr, cfg { cfgDebug = read val })
-    "tmpdir"  -> put (scr, cfg { cfgTmpDir  = val })
-    _ -> fail $ "no such variable '" ++ key ++ "'"
+        then liftIO $ hPutStrLn hdl $ showConfigField cfg $ head ws
+        else case setConfigField cfg (head ws) (last ws) of
+               Left err -> liftIO $ hPutStrLn hdl err
+               Right cfg' -> put (scr, cfg')

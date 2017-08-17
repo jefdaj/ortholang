@@ -58,6 +58,7 @@ pNested e@(CutFun  _ _ _ _ _  ) = parens $ pPrint e
 pNested e@(CutBop  _ _ _ _ _ _) = parens $ pPrint e
 pNested e = pPrint e
 
+-- TODO update this by mapping over the fields
 instance Pretty CutConfig where
   pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
     [ ("script" , show . cfgScript )
