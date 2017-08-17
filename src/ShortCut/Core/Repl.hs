@@ -286,6 +286,11 @@ cmdConfig hdl s = do
 -- tab completion --
 --------------------
 
+-- TODO decide when to complete files vs variables and stuff:
+--      files only if inside quotation marks?
+--      or if started with one of the file-related commands (:!, :write, etc.)
+--      otherwise shortcut entities only?
+
 listCompletions :: MonadIO m => CutState -> String -> m [Completion]
 listCompletions (scr,cfg) txt = do
   files <- listFiles txt
