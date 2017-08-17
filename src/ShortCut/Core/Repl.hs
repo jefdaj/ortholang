@@ -15,13 +15,13 @@
 -- TODO should be able to :reload the current script, if any
 
 module ShortCut.Core.Repl
-  ( mkRepl
-  , runRepl
-  )
+  -- ( mkRepl
+  -- , runRepl
+  -- )
   where
 
 import Control.Monad            (when)
-import Control.Monad.IO.Class   (liftIO)
+import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.Identity   (mzero)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
@@ -41,7 +41,8 @@ import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
 import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
-import System.Console.Haskeline (Settings(..), Completion, simpleCompletion, completeWord)
+import System.Console.Haskeline (Settings(..), Completion, simpleCompletion, completeWord,
+                                 CompletionFunc, listFiles, completeQuotedWord, filenameWordBreakChars)
 import System.FilePath.Posix    ((</>))
 
 --------------------
@@ -52,6 +53,8 @@ import System.FilePath.Posix    ((</>))
 runRepl :: CutConfig -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 -- repl = mockRepl ["1 + 1", ":q"]
+
+-- TODO now, just need to update the repl settings at each iteration! so needs to be in loop?
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
@@ -65,12 +68,13 @@ mkRepl promptFns hdl cfg = do
       start = case cfgScript cfg of
                 Nothing   -> return () 
                 Just path -> cmdLoad hdl path
-  state <- runReplM (mkReplSettings cfg) start blank
+  state <- runReplM (replSettings blank) start blank
+  let state' = (fromMaybe blank state)
   -- run main repl with initial state
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
-  _ <- runReplM (mkReplSettings cfg) (loop promptFns hdl) (fromMaybe blank state)
+  _ <- runReplM (replSettings state') (loop promptFns hdl) state'
   hPutStrLn hdl "Bye for now!"
 
 -- There are four types of input we might get, in the order checked for:
@@ -150,7 +154,7 @@ cmds =
   , ("drop"    , cmdDrop  )
   , ("type"    , cmdType  )
   , ("show"    , cmdShow  )
-  , ("set"     , cmdSet   )
+  -- , ("set"     , cmdSet   ) -- TODO is this obsolete?
   , ("quit"    , cmdQuit  )
   , ("!"       , cmdBang  )
   , ("config"  , cmdConfig)
@@ -259,8 +263,8 @@ cmdBang _ cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
 -- TODO case statement for first word: verbose, workdir, tmpdir, script?
 -- TODO script sets the default for cmdSave?
 -- TODO don't bother with script yet; start with the obvious ones
-cmdSet :: Handle -> String -> ReplM ()
-cmdSet _ = undefined
+-- cmdSet :: Handle -> String -> ReplM ()
+-- cmdSet _ = undefined
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
@@ -282,25 +286,31 @@ cmdConfig hdl s = do
 -- tab completion --
 --------------------
 
--- wordList = [ "Apple", "Pear", "Peach", "Grape", "Grapefruit", "Slime Mold"]
-
-searchFunc :: CutConfig -> String -> [Completion]
-searchFunc cfg s = map simpleCompletion $ filter (s `isPrefixOf`) wordList
+searchState :: CutState -> String -> [Completion]
+searchState (scr,cfg) txt = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
   where
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
-    wordList = fnNames
+    varNames = map ((\(CutVar v) -> v) . fst) scr
+    cmdNames = map ((':':) . fst) cmds
+    wordList = fnNames ++ varNames ++ cmdNames
 
--- mySettings :: CutConfig -> Settings IO
--- mySettings cfg = Settings { historyFile = Just "myhist"
---                           , complete = completeWord Nothing " \t" $ return . (searchFunc cfg)
---                           , autoAddHistory = True
---                           }
+searchCompletions :: MonadIO m => CutState -> String -> m [Completion]
+searchCompletions st txt = do
+  files <- listFiles txt
+  let misc = searchState st txt
+  return (files ++ misc)
+
+-- this is mostly lifted from the Haskeline source
+myComplete :: MonadIO m => CutState -> CompletionFunc m
+myComplete s = completeQuotedWord (Just '\\') "\"'" (searchCompletions s)
+             $ completeWord (Just '\\') ("\"\'" ++ filenameWordBreakChars)
+                            (searchCompletions s)
 
 -- This is separate from the CutConfig because it shouldn't need changing.
--- TODO is the monad IO, ReplM, or something inbetween?
-mkReplSettings :: CutConfig -> Settings IO
-mkReplSettings cfg = Settings
-  { complete       = completeWord Nothing " \t" $ return . (searchFunc cfg)
+-- TODO do we actually need the script here? only if we're recreating it every loop i guess
+replSettings :: CutState -> Settings IO
+replSettings s@(_,cfg) = Settings
+  { complete       = myComplete s
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
   , autoAddHistory = True
   }
