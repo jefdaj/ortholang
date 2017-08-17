@@ -25,7 +25,7 @@ import Control.Monad.IO.Class   (liftIO)
 import Control.Monad.Identity   (mzero)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
-import Data.List                (isPrefixOf)
+import Data.List                (isPrefixOf, filter)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (fromJust, fromMaybe)
 -- import Debug.Trace
@@ -41,6 +41,8 @@ import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
 import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
+import System.Console.Haskeline (Settings(..), Completion, simpleCompletion, completeWord)
+import System.FilePath.Posix    ((</>))
 
 --------------------
 -- main interface --
@@ -63,12 +65,12 @@ mkRepl promptFns hdl cfg = do
       start = case cfgScript cfg of
                 Nothing   -> return () 
                 Just path -> cmdLoad hdl path
-  state <- runReplM start blank
+  state <- runReplM (mkReplSettings cfg) start blank
   -- run main repl with initial state
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
-  _ <- runReplM (loop promptFns hdl) (fromMaybe blank state)
+  _ <- runReplM (mkReplSettings cfg) (loop promptFns hdl) (fromMaybe blank state)
   hPutStrLn hdl "Bye for now!"
 
 -- There are four types of input we might get, in the order checked for:
@@ -186,7 +188,7 @@ cmdLoad hdl path = do
       new <- liftIO $ parseFile cfg path
       case new of
         Left  e -> liftIO $ hPutStrLn hdl $ show e
-        Right s -> put (s, cfg)
+        Right s -> put (s, cfg { cfgScript = Just path }) -- TODO makeAbsolute?
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
@@ -275,3 +277,30 @@ cmdConfig hdl s = do
         else case setConfigField cfg (head ws) (last ws) of
                Left err -> liftIO $ hPutStrLn hdl err
                Right cfg' -> put (scr, cfg')
+
+--------------------
+-- tab completion --
+--------------------
+
+-- wordList = [ "Apple", "Pear", "Peach", "Grape", "Grapefruit", "Slime Mold"]
+
+searchFunc :: CutConfig -> String -> [Completion]
+searchFunc cfg s = map simpleCompletion $ filter (s `isPrefixOf`) wordList
+  where
+    fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
+    wordList = fnNames
+
+-- mySettings :: CutConfig -> Settings IO
+-- mySettings cfg = Settings { historyFile = Just "myhist"
+--                           , complete = completeWord Nothing " \t" $ return . (searchFunc cfg)
+--                           , autoAddHistory = True
+--                           }
+
+-- This is separate from the CutConfig because it shouldn't need changing.
+-- TODO is the monad IO, ReplM, or something inbetween?
+mkReplSettings :: CutConfig -> Settings IO
+mkReplSettings cfg = Settings
+  { complete       = completeWord Nothing " \t" $ return . (searchFunc cfg)
+  , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
+  , autoAddHistory = True
+  }

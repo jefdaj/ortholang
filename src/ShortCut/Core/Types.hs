@@ -46,8 +46,7 @@ import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub)
 import Development.Shake              (Rules)
-import System.Console.Haskeline       (InputT, getInputLine, runInputT,
-                                       defaultSettings)
+import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
 import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 import Development.Shake              (Resource)
@@ -219,8 +218,9 @@ type ReplM a = StateT CutState (MaybeT (InputT IO)) a
 
 -- TODO use useFile(Handle) for stdin?
 -- TODO use getExternalPrint to safely print during Tasty tests!
-runReplM :: ReplM a -> CutState -> IO (Maybe CutState)
-runReplM r s = runInputT defaultSettings $ runMaybeT $ execStateT r s
+runReplM :: Settings IO -> ReplM a -> CutState -> IO (Maybe CutState)
+runReplM settings replm state =
+  runInputT settings $ runMaybeT $ execStateT replm state
 
 prompt :: String -> ReplM (Maybe String)
 prompt = lift . lift . getInputLine

@@ -1,5 +1,7 @@
 module ShortCut.Test.Repl where
 
+-- TODO could the mock repl be implemented more cleanly with Haskeline's Behaviors?
+
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.List                  (isPrefixOf)
