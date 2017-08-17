@@ -57,10 +57,17 @@ runRepl = mkRepl (repeat prompt) stdout
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> CutConfig -> IO ()
 -- mkRepl promptFns cfg = welcome >> runReplM ((lift $ lift $ getExternalPrint) >>= loop promptFns) ([], cfg) >> goodbye
 mkRepl promptFns hdl cfg = do
+  -- load initial state, if any
+  let blank = ([], cfg)
+      start = case cfgScript cfg of
+                Nothing   -> return () 
+                Just path -> cmdLoad hdl path
+  state <- runReplM start blank
+  -- run main repl with initial state
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
-  _ <- runReplM (loop promptFns hdl) ([], cfg)
+  _ <- runReplM (loop promptFns hdl) (fromMaybe blank state)
   hPutStrLn hdl "Bye for now!"
 
 -- There are four types of input we might get, in the order checked for:

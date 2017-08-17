@@ -31,6 +31,7 @@ main = do
     (withArgs [] $ runTests modules >> exitSuccess)
   cfg <- loadConfig modules args
   let cfg' = debug cfg ("config: " ++ show cfg) cfg
+
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then evalFile stdout cfg'
     else runRepl  cfg'
