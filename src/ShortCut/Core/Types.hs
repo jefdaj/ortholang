@@ -3,7 +3,7 @@ module ShortCut.Core.Types
   ( CutAssign
   , CutExpr(..)
   , CutConfig(..)
-  , WrapperConfig(..)
+  -- , WrapperConfig(..)
   , CutType(..)
   , CutVar(..)
   , CutScript
@@ -190,16 +190,16 @@ data CutConfig = CutConfig
   , cfgWorkDir :: FilePath
   , cfgDebug   :: Bool
   , cfgModules :: [CutModule]
-  , cfgWrapper :: Maybe WrapperConfig
-  , cfgReport :: Maybe String
+  , cfgWrapper :: Maybe FilePath
+  , cfgReport  :: Maybe String
   }
   deriving Show
 
-data WrapperConfig = WrapperConfig
-  { wrapperScript :: FilePath
-  , wrapperLimit  :: Maybe Resource
-  }
-  deriving Show
+-- data WrapperConfig = WrapperConfig
+--   { wrapperScript :: FilePath
+--   , wrapperLimit  :: Maybe Resource
+--   }
+--   deriving Show
 
 -----------------
 -- Parse monad --

@@ -9,6 +9,7 @@ module ShortCut.Core.Pretty
 import Data.Scientific            (Scientific())
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Types
+import ShortCut.Core.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
 
 instance Pretty CutType where
@@ -60,11 +61,7 @@ pNested e = pPrint e
 
 -- TODO update this by mapping over the fields
 instance Pretty CutConfig where
-  pPrint cfg = vcat $ map (\(k,fn) -> text k <+> text "=" <+> text (fn cfg))
-    [ ("script" , show . cfgScript )
-    , ("tmpdir" , show . cfgTmpDir )
-    , ("verbose", show . cfgDebug)
-    ]
+  pPrint = text . showConfig
 
 -- TODO change this to something useful
 instance Pretty CutFunction where
