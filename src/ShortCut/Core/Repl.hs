@@ -185,14 +185,15 @@ cmdHelp hdl _ = liftIO $ hPutStrLn hdl
 cmdLoad :: Handle -> String -> ReplM ()
 cmdLoad hdl path = do
   (_, cfg)  <- get
-  dfe <- liftIO $ doesFileExist path
+  path' <- liftIO $ absolutize path
+  dfe   <- liftIO $ doesFileExist path'
   if not dfe
-    then liftIO $ hPutStrLn hdl $ "no such file: " ++ path
+    then liftIO $ hPutStrLn hdl $ "no such file: " ++ path'
     else do
-      new <- liftIO $ parseFile cfg path
+      new <- liftIO $ parseFile cfg path'
       case new of
         Left  e -> liftIO $ hPutStrLn hdl $ show e
-        Right s -> put (s, cfg { cfgScript = Just path }) -- TODO makeAbsolute?
+        Right s -> put (s, cfg { cfgScript = Just path' })
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?

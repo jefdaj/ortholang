@@ -15,10 +15,9 @@ import Data.Text                  (pack)
 import Development.Shake          (newResourceIO, command_, withResource, Action, CmdOption(..))
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..), WrapperConfig(..))
-import ShortCut.Core.Util         (expandTildes)
+import ShortCut.Core.Util         (expandTildes, absolutize)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
-import System.Directory           (makeAbsolute)
 import Development.Shake          (Resource)
 import Text.Read.HT               (maybeRead)
 
@@ -36,7 +35,7 @@ loadWrapperConfig args cfg = do
   case wscr of
     Nothing -> return Nothing
     Just wscr' -> do
-      wscr'' <- makeAbsolute wscr'
+      wscr'' <- absolutize wscr'
       wlim   <- loadField args cfg "limit"
       wlim'  <- case wlim of
         Nothing -> return Nothing
@@ -57,7 +56,7 @@ loadConfig mods args = do
   csc <- loadField args cfg "script"
   csc' <- case csc of
             Nothing -> return Nothing
-            Just s  -> makeAbsolute s >>= return . Just
+            Just s  -> absolutize s >>= return . Just
   ctd <- loadField args cfg "tmpdir"
   cwd <- loadField args cfg "workdir"
   rep <- loadField args cfg "report"
@@ -77,7 +76,7 @@ loadConfig mods args = do
 getUsage :: IO Docopt
 getUsage = do
   path <- getDataFileName "usage.txt"
-  txt  <- expandTildes =<< readFile path
+  txt  <- absolutize =<< readFile path
   parseUsageOrExit txt
 
 hasArg :: Arguments -> String -> Bool

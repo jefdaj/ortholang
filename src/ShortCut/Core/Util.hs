@@ -6,7 +6,7 @@ import Data.List             (isPrefixOf)
 import Data.List.Utils       (replace)
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Types   (CutConfig)
-import System.Directory      (getHomeDirectory)
+import System.Directory      (getHomeDirectory, makeAbsolute)
 import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
 import Test.Tasty            (testGroup, TestTree)
@@ -27,14 +27,17 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 -- kind of silly that haskell doesn't have this built in, but whatever
 -- https://www.schoolofhaskell.com/user/dshevchenko/cookbook/transform-relative-path-to-an-absolute-path
 absolutize :: String -> IO String
-absolutize aPath 
-    | "~" `isPrefixOf` aPath = do
-        homePath <- getHomeDirectory
-        return $ normalise $ addTrailingPathSeparator homePath 
-                             ++ tail aPath
-    | otherwise = do
-        pathMaybeWithDots <- absolute_path aPath
-        return $ fromJust $ guess_dotdot pathMaybeWithDots
+absolutize aPath = do
+  aPath' <- if "~" `isPrefixOf` aPath
+    then do
+      homePath <- getHomeDirectory
+      return $ normalise $ addTrailingPathSeparator homePath
+                        ++ tail aPath
+    else do
+      pathMaybeWithDots <- absolute_path aPath
+      return $ fromJust $ guess_dotdot pathMaybeWithDots
+  aPath'' <- makeAbsolute aPath'
+  return aPath''
 
 expandTildes :: String -> IO String
 expandTildes s = do
