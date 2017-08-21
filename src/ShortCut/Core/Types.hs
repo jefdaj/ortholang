@@ -49,7 +49,6 @@ import Development.Shake              (Rules)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
-import Development.Shake              (Resource)
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
@@ -194,12 +193,6 @@ data CutConfig = CutConfig
   , cfgReport  :: Maybe String
   }
   deriving Show
-
--- data WrapperConfig = WrapperConfig
---   { wrapperScript :: FilePath
---   , wrapperLimit  :: Maybe Resource
---   }
---   deriving Show
 
 -----------------
 -- Parse monad --

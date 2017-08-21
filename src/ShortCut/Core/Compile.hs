@@ -192,6 +192,7 @@ fromShortCutList cfg (ExprPath inPath) (ExprPath outPath) = do
 -- writes a list of literals, because shortcut expects a list of hashed
 -- filenames *pointing* to literals
 -- TODO any reason to pass the full state instead of just config?
+-- TODO do they not need to be lits?
 toShortCutList :: CutConfig -> CutType -> ExprPath -> ExprPath -> Action ()
 toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
   lits <- fmap sort $ debugReadLines cfg inPath

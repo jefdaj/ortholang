@@ -25,7 +25,6 @@ import ShortCut.Core.Debug        (debugWriteLines, debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath            (takeBaseName, makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
--- import ShortCut.Core.Util         (digest)
 
 ------------------------------
 -- [t]ypechecking functions --

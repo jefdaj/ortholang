@@ -7,8 +7,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths        (exprPath, cacheDir, cacheFile)
 import ShortCut.Core.Compile      (cExpr, fromShortCutList)
-import ShortCut.Core.Debug        (debug, debugReadLines,
-                                   debugReadFile, debugTrackWrite)
+import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
 import System.Directory           (createDirectoryIfMissing)
