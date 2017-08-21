@@ -104,27 +104,27 @@ setDebug cfg val = case maybeRead val of
 
 setScript :: CutConfig -> String -> Either String CutConfig
 setScript cfg "Nothing" = Right $ cfg { cfgScript = Nothing }
-setScript cfg val = case maybeRead val of
+setScript cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgScript = Just v }
 
 setTmpdir :: CutConfig -> String -> Either String CutConfig
-setTmpdir cfg val = case maybeRead val of
+setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgTmpDir = v }
 
 setWorkdir :: CutConfig -> String -> Either String CutConfig
-setWorkdir cfg val = case maybeRead val of
+setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgWorkDir = v }
 
 setWrapper :: CutConfig -> String -> Either String CutConfig
 setWrapper cfg "Nothing" = Right $ cfg { cfgWrapper = Nothing }
-setWrapper cfg val = case maybeRead val of
+setWrapper cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgWrapper = Just v }
 
 setReport :: CutConfig -> String -> Either String CutConfig
-setReport cfg val = case maybeRead val of
+setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   v       -> Right $ cfg { cfgReport = v }
