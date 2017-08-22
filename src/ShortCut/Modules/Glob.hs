@@ -40,7 +40,7 @@ cGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
   let (ExprPath outPath) = exprPath cfg e []
   outPath %> \_ -> do
     ptn   <- fmap strip $ debugReadFile cfg path
-    liftIO $ putStrLn $ "ptn: " ++ show ptn
+    -- liftIO $ putStrLn $ "ptn: " ++ show ptn
     paths <- liftIO $ mapM absolutize =<< glob ptn
     toShortCutListStr cfg str (ExprPath outPath) paths
   return (ExprPath outPath)

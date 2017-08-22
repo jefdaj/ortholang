@@ -188,19 +188,17 @@ pQuoted = (lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quo
 pStr :: ParseM CutExpr
 pStr = CutLit str 0 <$> pQuoted <?> "string"
 
--- TODO remove the empty list case? can't imagine when it would be used
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
--- TODO actually check that elements are the same type
 pList :: ParseM CutExpr
 pList = do
   terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
-  let deps = foldr1 union $ map depsOf terms -- TODO what happens if []?
-      rtn  = if null terms
+  let deps = if null terms
+               then []
+               else foldr1 union $ map depsOf terms
+      rtn = if null terms
                then EmptyList
                else typeOf $ head terms
-  -- TODO assert that the rest of the terms match the first one here!
-  when
-    (not $ all (== rtn) (map typeOf terms))
+  when (not $ all (== rtn) (map typeOf terms))
     (error "all elements of a list must have the same type")
   return $ CutList rtn 0 deps terms
 
