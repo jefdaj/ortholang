@@ -1,17 +1,13 @@
 module ShortCut.Modules.Length where
 
-import ShortCut.Core.Types
 import Development.Shake
+import ShortCut.Core.Types
 import ShortCut.Core.Compile (cExpr)
-import ShortCut.Core.Paths (exprPath)
--- import ShortCut.Core.Config (wrappedCmd)
-import ShortCut.Core.Debug (debugReadLines, debugWriteFile)
+import ShortCut.Core.Debug   (debugReadLines, debugWriteFile)
+import ShortCut.Core.Paths   (exprPath)
 
 cutModule :: CutModule
-cutModule = CutModule
-  { mName = "length"
-  , mFunctions = [len]
-  }
+cutModule = CutModule {mName = "length", mFunctions = [len]}
 
 -- can't name it length because that's a standard Haskell function
 len :: CutFunction
@@ -29,8 +25,8 @@ tLen _ = Left $ "length requires a list"
 
 cLen :: CutState -> CutExpr -> Rules ExprPath
 cLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
-  (ExprPath lPath) <- cExpr s l
-  let (ExprPath outPath) = exprPath cfg e []
+  lp@(ExprPath lPath) <- cExpr s l
+  let (ExprPath outPath) = exprPath cfg e [lp]
   outPath %> \_ -> do
     n <- fmap length $ debugReadLines cfg lPath
     debugWriteFile cfg outPath (show n ++ "\n") -- TODO auto-add the \n?
