@@ -7,7 +7,7 @@ import qualified Data.Configurator as C
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
-import Development.Shake          (command_, Action, CmdOption(..))
+import Development.Shake          (command, Action, CmdOption(..), CmdResult)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
 import ShortCut.Core.Util         (absolutize)
@@ -55,10 +55,10 @@ hasArg as a = isPresent as $ longOption a
 -- Shake's command_ adapted to work with wrapperScript and wrapperLimit if used
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
-wrappedCmd :: CutConfig -> [CmdOption] -> FilePath -> [String] -> Action ()
+wrappedCmd :: CmdResult r => CutConfig -> [CmdOption] -> FilePath -> [String] -> Action r
 wrappedCmd cfg opts bin args = case cfgWrapper cfg of
-  Nothing -> command_ opts bin args
-  Just w  -> command_ opts w (bin:args)
+  Nothing -> command opts bin args
+  Just w  -> command opts w (bin:args)
 
 -------------------------
 -- getters and setters --
