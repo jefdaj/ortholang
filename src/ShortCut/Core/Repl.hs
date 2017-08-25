@@ -29,7 +29,7 @@ import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf, filter)
 import Data.List.Utils          (delFromAL)
-import Data.Maybe               (fromJust, fromMaybe)
+import Data.Maybe               (fromJust)
 -- import Debug.Trace
 import Prelude           hiding (print)
 -- import ShortCut.Core.Compile    (compileScript)
@@ -65,16 +65,16 @@ mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> CutConfig -> IO ()
 mkRepl promptFns hdl cfg = do
   -- load initial state, if any
   let blank = ([], cfg)
-      start = case cfgScript cfg of
-                Nothing   -> return () 
-                Just path -> cmdLoad hdl path
-  state <- runReplM (replSettings blank) start blank
-  let state' = (fromMaybe blank state)
+  state <- case cfgScript cfg of
+             Nothing   -> return blank
+             Just path -> cmdLoad blank hdl path
+  -- state <- runReplM (replSettings blank') blank'
+  -- let state' = fromMaybe loaded state
   -- run main repl with initial state
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
-  _ <- runReplM (replSettings state') (loop promptFns hdl) state'
+  _ <- runReplM (replSettings state) (loop promptFns hdl) state
   hPutStrLn hdl "Bye for now!"
 
 -- There are four types of input we might get, in the order checked for:
@@ -98,10 +98,15 @@ mkRepl promptFns hdl cfg = do
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
 loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
-loop [] hdl = runCmd hdl "quit" -- only happens when mock repl input runs out
+loop [] hdl = do -- only happens when mock repl input runs out
+  st <- get
+  _  <- liftIO $ runCmd st hdl "quit"
+  return ()
 loop (promptFn:promptFns) hdl = do
   mline <- promptFn "shortcut >> "
-  step hdl mline
+  st  <- get
+  st' <- liftIO $ step st hdl $ fromJust mline -- can this ever be Nothing??
+  put st'
   loop promptFns hdl
 
 -- TODO try to lift this into ReplM and wrap the entire `step` in it!
@@ -119,28 +124,21 @@ printErrors hdl = handle handler
 -- Attempts to process a line of input, but prints an error and falls back to
 -- the current state if anything goes wrong. This should eventually be the only
 -- place exceptions are caught.
-step :: Handle -> Maybe String -> ReplM ()
-step hdl mline = case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
-  ""        -> return ()
-  ('#':_  ) -> return ()
-  (':':cmd) -> runCmd hdl cmd
-  line      -> runStatement hdl line
+step :: CutState -> Handle -> String -> IO CutState
+step st hdl line = case stripWhiteSpace line of
+  ""        -> return st
+  ('#':_  ) -> return st
+  (':':cmd) -> runCmd st hdl cmd
+  statement -> runStatement st hdl statement
 
-runStatement :: Handle -> String -> ReplM ()
-runStatement hdl line = do
-  st@(scr, cfg) <- get
+runStatement :: CutState -> Handle -> String -> IO CutState
+runStatement st@(scr,cfg) hdl line = do
   case parseStatement st line of
-    Left  e -> liftIO $ hPutStrLn hdl $ show e
+    Left  e -> hPutStrLn hdl (show e) >> return st
     Right r -> do
-      let scr' = updateScript scr r
-      put (scr', cfg)
-      -- even though result gets added to the script either way,
-      -- still have to check whether to print it
-      -- TODO should be able to factor this out and put in Eval.hs
-      -- TODO nothing should be run when manually assigning result!
-      when (isExpr st line)
-        -- TODO return only a string and print it here?
-        (liftIO $ printErrors hdl $ evalScript hdl (scr',cfg))
+      let st' = (updateScript scr r, cfg)
+      when (isExpr st line) (evalScript hdl st')
+      return st'
 
 -- this is needed to avoid assigning a variable to itself,
 -- which is especially a problem when auto-assigning "result"
@@ -159,16 +157,16 @@ updateScript scr asn@(var, expr) =
 -- dispatch to commands --
 --------------------------
 
-runCmd :: Handle -> String -> ReplM ()
-runCmd hdl line = case matches of
-  [(_, fn)] -> fn hdl $ stripWhiteSpace args
-  []        -> liftIO $ hPutStrLn hdl $ "unknown command: "   ++ cmd
-  _         -> liftIO $ hPutStrLn hdl $ "ambiguous command: " ++ cmd
+runCmd :: CutState -> Handle -> String -> IO CutState
+runCmd st hdl line = case matches of
+  [(_, fn)] -> fn st hdl $ stripWhiteSpace args
+  []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
+  _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
   where
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) cmds
 
-cmds :: [(String, Handle -> String -> ReplM ())]
+cmds :: [(String, CutState -> Handle -> String -> IO CutState)]
 cmds =
   [ ("help"    , cmdHelp  )
   , ("load"    , cmdLoad  )
@@ -190,122 +188,124 @@ cmds =
 
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
-cmdHelp :: Handle -> String -> ReplM ()
-cmdHelp hdl _ = liftIO $ hPutStrLn hdl
-  "You can type or paste ShortCut code here to run it, same as in a script.\n\
-  \There are also some extra commands:\n\n\
-  \:help     to print this help text\n\
-  \:load     to load a script (same as typing the file contents)\n\
-  \:write    to write the current script to a file\n\
-  \:depends  to show which variables a given variable depends on\n\
-  \:rdepends to show which variables depend on the given variable\n\
-  \:drop     to discard the current script (or a specific variable)\n\
-  \:quit     to discard the current script and exit the interpreter\n\
-  \:type     to print the type of an expression\n\
-  \:show     to print an expression along with its type\n\
-  \:!        to run the rest of the line as a shell command"
+cmdHelp :: CutState -> Handle -> String -> IO CutState
+cmdHelp st hdl _ = hPutStrLn hdl msg >> return st
+  where
+    -- TODO extract this to a file alonside usage.txt
+    msg = "You can type or paste ShortCut code here to run it,\
+          \same as in a script.\n\
+          \There are also some extra commands:\n\n\
+          \:help     to print this help text\n\
+          \:load     to load a script (same as typing the file contents)\n\
+          \:write    to write the current script to a file\n\
+          \:depends  to show which variables a given variable depends on\n\
+          \:rdepends to show which variables depend on the given variable\n\
+          \:drop     to discard the current script (or a specific variable)\n\
+          \:quit     to discard the current script and exit the interpreter\n\
+          \:type     to print the type of an expression\n\
+          \:show     to print an expression along with its type\n\
+          \:!        to run the rest of the line as a shell command"
 
 -- TODO this is totally duplicating code from putAssign; factor out
-cmdLoad :: Handle -> String -> ReplM ()
-cmdLoad hdl path = do
-  (_, cfg)  <- get
-  path' <- liftIO $ absolutize path
-  dfe   <- liftIO $ doesFileExist path'
+cmdLoad :: CutState -> Handle -> String -> IO CutState
+cmdLoad st@(_,cfg) hdl path = do
+  path' <- absolutize path
+  dfe   <- doesFileExist path'
   if not dfe
-    then liftIO $ hPutStrLn hdl $ "no such file: " ++ path'
+    then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
-      new <- liftIO $ parseFile cfg path'
+      new <- parseFile cfg path'
       case new of
-        Left  e -> liftIO $ hPutStrLn hdl $ show e
-        Right s -> put (s, cfg { cfgScript = Just path' })
+        Left  e -> hPutStrLn hdl (show e) >> return st
+        Right s -> return (s, cfg { cfgScript = Just path' })
 
 -- TODO this needs to read a second arg for the var to be main?
 --      or just tell people to define main themselves?
 -- TODO replace showHack with something nicer
-cmdSave :: Handle -> String -> ReplM ()
-cmdSave _ path = do
-  path' <- liftIO $ absolutize path
-  get >>= \s -> liftIO $ writeFile path' $ showHack $ fst s
+cmdSave :: CutState -> Handle -> String -> IO CutState
+cmdSave st _ path = do
+  path' <- absolutize path
+  writeFile path' $ showHack $ fst st
+  return st
   where
     showHack = unlines . map prettyShow
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdDeps :: Handle -> String -> ReplM ()
-cmdDeps hdl var = do
-  (scr, _) <- get
-  liftIO $ hPutStrLn hdl $ case lookup (CutVar var) scr of
+cmdDeps :: CutState -> Handle -> String -> IO CutState
+cmdDeps st@(scr,_) hdl var = do
+  hPutStrLn hdl $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyAssigns (\(v,_) -> elem v $ depsOf e) scr
+  return st
 
 -- TODO move to Pretty.hs
 prettyAssigns :: (CutAssign -> Bool) -> CutScript -> String
 prettyAssigns fn scr = stripWhiteSpace $ unlines $ map prettyShow $ filter fn scr
 
-cmdRDeps :: Handle -> String -> ReplM ()
-cmdRDeps hdl var = do
-  (scr, _) <- get
+cmdRDeps :: CutState -> Handle -> String -> IO CutState
+cmdRDeps st@(scr,_) hdl var = do
   let var' = CutVar var
-  liftIO $ hPutStrLn hdl $ case lookup var' scr of
+  hPutStrLn hdl $ case lookup var' scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just _  -> prettyAssigns (\(v,_) -> elem v $ rDepsOf scr var') scr
+  return st
 
 -- TODO factor out the variable lookup stuff
-cmdDrop :: Handle -> String -> ReplM ()
-cmdDrop _ [] = get >>= \(_, cfg) -> put ([], cfg)
-cmdDrop hdl var = do
-  (scr, cfg) <- get
+cmdDrop :: CutState -> Handle -> String -> IO CutState
+cmdDrop (_,cfg) _ [] = return ([], cfg)
+cmdDrop st@(scr,cfg) hdl var = do
   let v = CutVar var
   case lookup v scr of
-    Nothing -> liftIO $ hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    Just _  -> put (delFromAL scr v, cfg)
+    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Just _  -> return (delFromAL scr v, cfg)
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
-cmdType :: Handle -> String -> ReplM ()
-cmdType hdl s = do
-  state <- get
-  liftIO $ hPutStrLn hdl $ case parseExpr state s of
+cmdType :: CutState -> Handle -> String -> IO CutState
+cmdType state hdl s = do
+  hPutStrLn hdl $ case parseExpr state s of
     Right expr -> show $ typeOf expr
     Left  err  -> show err
+  return state
 
 -- TODO factor out the variable lookup stuff
-cmdShow :: Handle -> String -> ReplM ()
-cmdShow hdl [] = get >>= \(s, _) -> liftIO $ mapM_ (hPutStrLn hdl . prettyShow) s
-cmdShow hdl var = do
-  (scr, _) <- get
-  liftIO $ hPutStrLn hdl $ case lookup (CutVar var) scr of
+cmdShow :: CutState -> Handle -> String -> IO CutState
+cmdShow st@(s,_) hdl [] = mapM_ (hPutStrLn hdl . prettyShow) s >> return st
+cmdShow st@(scr,_) hdl var = do
+  hPutStrLn hdl $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyShow e
+  return st
 
-cmdQuit :: Handle -> String -> ReplM ()
-cmdQuit _ _ = mzero
+-- TODO does this one need to be a special case now?
+cmdQuit :: CutState -> Handle -> String -> IO CutState
+cmdQuit _ _ _ = mzero
 
-cmdBang :: Handle -> String -> ReplM ()
-cmdBang _ cmd = liftIO (runCommand cmd >>= waitForProcess) >> return ()
+cmdBang :: CutState -> Handle -> String -> IO CutState
+cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 
 -- TODO split string into first word and the rest
 -- TODO case statement for first word: verbose, workdir, tmpdir, script?
 -- TODO script sets the default for cmdSave?
 -- TODO don't bother with script yet; start with the obvious ones
--- cmdSet :: Handle -> String -> ReplM ()
+-- cmdSet :: CutState -> Handle -> String -> IO CutState
 -- cmdSet _ = undefined
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
-cmdConfig :: Handle -> String -> ReplM ()
-cmdConfig hdl s = do
-  (scr, cfg) <- get
+cmdConfig :: CutState -> Handle -> String -> IO CutState
+cmdConfig st@(scr,cfg) hdl s = do
   let ws = words s
   if (length ws == 0)
-    then (liftIO $ hPutStrLn hdl (prettyShow cfg) >> return ()) -- TODO Pretty instance
+    then hPutStrLn hdl (prettyShow cfg) >> return st -- TODO Pretty instance
     else if (length ws  > 2)
-      then (liftIO $ hPutStrLn hdl "too many variables" >> return ())
+      then hPutStrLn hdl "too many variables" >> return st
       else if (length ws == 1)
-        then liftIO $ hPutStrLn hdl $ showConfigField cfg $ head ws
+        then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st
         else case setConfigField cfg (head ws) (last ws) of
-               Left err -> liftIO $ hPutStrLn hdl err
-               Right cfg' -> put (scr, cfg')
+               Left err -> hPutStrLn hdl err >> return st
+               Right cfg' -> return (scr, cfg')
 
 --------------------
 -- tab completion --
