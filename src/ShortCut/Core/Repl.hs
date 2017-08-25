@@ -98,25 +98,34 @@ mkRepl promptFns hdl cfg = do
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
 loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
-loop [] hdl = runCmd hdl "quit"
+loop [] hdl = runCmd hdl "quit" -- only happens when mock repl input runs out
 loop (promptFn:promptFns) hdl = do
   mline <- promptFn "shortcut >> "
-  case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
-    ""        -> return () -- TODO also handle comments this way (for examples mostly)
-    (':':cmd) -> runCmd hdl cmd
-    line      -> do
-      st@(scr, cfg) <- get
-      case parseStatement st line of
-        Left  e -> liftIO $ hPutStrLn hdl $ show e
-        Right r -> do
-          let scr' = updateScript scr r
-          put (scr', cfg)
-          -- even though result gets added to the script either way,
-          -- still have to check whether to print it
-          -- TODO should be able to factor this out and put in Eval.hs
-          -- TODO nothing should be run when manually assigning result!
-          when (isExpr st line) (liftIO $ evalScript hdl (scr',cfg)) -- TODO return only a string and print it here?
+  runStep hdl mline
   loop promptFns hdl
+
+-- TODO print + ignore all errors in here!
+runStep :: Handle -> Maybe String -> ReplM ()
+runStep hdl mline = case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
+  ""        -> return ()
+  ('#':_  ) -> return ()
+  (':':cmd) -> runCmd  hdl cmd
+  line      -> runStatement hdl line
+
+runStatement :: Handle -> String -> ReplM ()
+runStatement hdl line = do
+  st@(scr, cfg) <- get
+  case parseStatement st line of
+    Left  e -> liftIO $ hPutStrLn hdl $ show e
+    Right r -> do
+      let scr' = updateScript scr r
+      put (scr', cfg)
+      -- even though result gets added to the script either way,
+      -- still have to check whether to print it
+      -- TODO should be able to factor this out and put in Eval.hs
+      -- TODO nothing should be run when manually assigning result!
+      when (isExpr st line)
+        (liftIO $ evalScript hdl (scr',cfg)) -- TODO return only a string and print it here?
 
 -- this is needed to avoid assigning a variable to itself,
 -- which is especially a problem when auto-assigning "result"
