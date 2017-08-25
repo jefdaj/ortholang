@@ -20,6 +20,8 @@ module ShortCut.Core.Repl
   -- )
   where
 
+import System.Console.Haskeline
+
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.Identity   (mzero)
@@ -41,8 +43,6 @@ import System.Command           (runCommand, waitForProcess)
 -- import System.IO.Silently       (capture_)
 import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
-import System.Console.Haskeline (Settings(..), Completion, simpleCompletion, completeWord,
-                                 CompletionFunc, listFiles, completeQuotedWord, filenameWordBreakChars)
 import System.FilePath.Posix    ((</>))
 
 --------------------
@@ -101,15 +101,29 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 loop [] hdl = runCmd hdl "quit" -- only happens when mock repl input runs out
 loop (promptFn:promptFns) hdl = do
   mline <- promptFn "shortcut >> "
-  runStep hdl mline
+  step hdl mline
   loop promptFns hdl
 
--- TODO print + ignore all errors in here!
-runStep :: Handle -> Maybe String -> ReplM ()
-runStep hdl mline = case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
+-- TODO try to lift this into ReplM and wrap the entire `step` in it!
+--      turns out you have to do that to catch the parse errors!
+--      Would making ReplM a newtype with some derivations help?
+-- TODO once that works, should it move to Types.hs by ReplM?
+printErrors :: Handle -> IO () -> IO ()
+printErrors hdl = handle handler
+  where
+    handler :: SomeException -> IO ()
+    handler e = do
+      liftIO $ hPutStrLn hdl $ "error! " ++ show e
+      return ()
+
+-- Attempts to process a line of input, but prints an error and falls back to
+-- the current state if anything goes wrong. This should eventually be the only
+-- place exceptions are caught.
+step :: Handle -> Maybe String -> ReplM ()
+step hdl mline = case stripWhiteSpace (fromJust mline) of -- can this ever be Nothing??
   ""        -> return ()
   ('#':_  ) -> return ()
-  (':':cmd) -> runCmd  hdl cmd
+  (':':cmd) -> runCmd hdl cmd
   line      -> runStatement hdl line
 
 runStatement :: Handle -> String -> ReplM ()
@@ -125,7 +139,8 @@ runStatement hdl line = do
       -- TODO should be able to factor this out and put in Eval.hs
       -- TODO nothing should be run when manually assigning result!
       when (isExpr st line)
-        (liftIO $ evalScript hdl (scr',cfg)) -- TODO return only a string and print it here?
+        -- TODO return only a string and print it here?
+        (liftIO $ printErrors hdl $ evalScript hdl (scr',cfg))
 
 -- this is needed to avoid assigning a variable to itself,
 -- which is especially a problem when auto-assigning "result"
