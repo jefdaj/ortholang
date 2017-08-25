@@ -4,7 +4,8 @@
 |   |   `-- 506230c38a.num.list
 |   `-- cut_lit
 |       `-- 09260f1de8.num
+|-- history.txt
 `-- vars
     `-- result -> ../exprs/cut_list/506230c38a.num.list
 
-4 directories, 3 files
+4 directories, 4 files

@@ -4,7 +4,8 @@
 |   |   `-- bbb893b46e.str.list
 |   `-- cut_lit
 |       `-- a830208172.str
+|-- history.txt
 `-- vars
     `-- result -> ../exprs/cut_list/bbb893b46e.str.list
 
-4 directories, 3 files
+4 directories, 4 files
