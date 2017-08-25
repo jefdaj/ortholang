@@ -24,7 +24,7 @@ import System.Console.Haskeline
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
-import Control.Monad.Identity   (mzero)
+-- import Control.Monad.Identity   (mzero)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf, filter)
@@ -44,38 +44,30 @@ import System.Command           (runCommand, waitForProcess)
 import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
+import Data.Typeable            (Typeable)
+import Control.Exception.Safe   (throwM)
 
 --------------------
 -- main interface --
 --------------------
 
--- TODO load script from cfg if one was given on the command line
 runRepl :: CutConfig -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
--- repl = mockRepl ["1 + 1", ":q"]
-
--- TODO now, just need to update the repl settings at each iteration! so needs to be in loop?
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
--- TODO pass modules list on here
--- TODO try passing my own print function here that sends to a file instead
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> CutConfig -> IO ()
--- mkRepl promptFns cfg = welcome >> runReplM ((lift $ lift $ getExternalPrint) >>= loop promptFns) ([], cfg) >> goodbye
 mkRepl promptFns hdl cfg = do
   -- load initial state, if any
-  let blank = ([], cfg)
-  state <- case cfgScript cfg of
-             Nothing   -> return blank
-             Just path -> cmdLoad blank hdl path
-  -- state <- runReplM (replSettings blank') blank'
-  -- let state' = fromMaybe loaded state
+  st <- case cfgScript cfg of
+          Nothing   -> return  ([],cfg)
+          Just path -> cmdLoad ([],cfg) hdl path
   -- run main repl with initial state
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
-  _ <- runReplM (replSettings state) (loop promptFns hdl) state
-  hPutStrLn hdl "Bye for now!"
+  _ <- runReplM (replSettings st) (loop promptFns hdl) st
+  return ()
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -120,6 +112,18 @@ printErrors hdl = handle handler
     handler e = do
       liftIO $ hPutStrLn hdl $ "error! " ++ show e
       return ()
+
+
+-- TODO move to Types.hs
+-- TODO use this pattern for other errors if successful?
+
+data QuitRepl = QuitRepl
+  deriving Typeable
+
+instance Exception QuitRepl
+
+instance Show QuitRepl where
+  show QuitRepl = "Bye for now!"
 
 -- Attempts to process a line of input, but prints an error and falls back to
 -- the current state if anything goes wrong. This should eventually be the only
@@ -280,7 +284,7 @@ cmdShow st@(scr,_) hdl var = do
 
 -- TODO does this one need to be a special case now?
 cmdQuit :: CutState -> Handle -> String -> IO CutState
-cmdQuit _ _ _ = mzero
+cmdQuit _ _ _ = throwM QuitRepl
 
 cmdBang :: CutState -> Handle -> String -> IO CutState
 cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
