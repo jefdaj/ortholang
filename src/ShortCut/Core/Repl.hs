@@ -21,7 +21,6 @@ module ShortCut.Core.Repl
   where
 
 import System.Console.Haskeline hiding (catch)
-import System.IO.Error (isUserError)
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
@@ -131,12 +130,11 @@ runStatement st@(scr,cfg) hdl line = case parseStatement st line of
 
 -- this is needed to avoid assigning a variable to itself,
 -- which is especially a problem when auto-assigning "result"
--- TODO also catch variables assigned to things depending on themselves
---      (later, with the "which variables does this depend on" function)
+-- TODO you should actually be able to do that, but it should replace
+--      the `result` var with its current expression first
 updateScript :: CutScript -> CutAssign -> CutScript
-updateScript scr asn@(var, expr) = case expr of
-  (CutRef _ _ _ var') -> if var' == var then scr else scr'
-  _ -> scr'
+updateScript scr asn@(var, expr) =
+  if var `elem` depsOf expr then scr else scr'
   where
     scr' = delFromAL scr var ++ [asn]
 
