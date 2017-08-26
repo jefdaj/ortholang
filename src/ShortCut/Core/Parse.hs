@@ -47,7 +47,8 @@ import Text.Parsec            (try, ParseError, getState, putState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
                                newline, string, oneOf)
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
-                              ,lookAhead, between, choice, anyToken, sepBy)
+                              ,lookAhead, between, choice, anyToken, sepBy
+                              ,notFollowedBy)
 -- import Text.Parsec.Expr       (buildExpressionParser)
 import qualified Text.Parsec.Expr as E
 
@@ -142,11 +143,14 @@ pVar = lexeme (iden <$> first <*> many rest) <?> "variable"
     first = letter <|> char '_'
     rest  = digit  <|> first
 
+pEq :: ParseM ()
+pEq = void $ spaces <* pSym '='
+
 -- A reference is just a variable name, but that variable has to be in the script.
 -- TODO why does it fail after this, but only sometimes??
 pRef :: ParseM CutExpr
 pRef = do
-  v@(CutVar var) <- pVar
+  v@(CutVar var) <- pVar <* notFollowedBy pEq
   (scr, _) <- getState
   case lookup v scr of 
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
@@ -189,9 +193,11 @@ pStr :: ParseM CutExpr
 pStr = CutLit str 0 <$> pQuoted <?> "string"
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
+-- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
 pList :: ParseM CutExpr
 pList = do
-  terms <- between (pSym '[') (pSym ']') (sepBy pTerm $ pSym ',')
+  lookAhead $ try $ pSym '['
+  terms <- between (pSym '[') (pSym ']') (sepBy pExpr $ pSym ',')
   let deps = if null terms
                then []
                else foldr1 union $ map depsOf terms
@@ -254,7 +260,7 @@ pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 -- list of arguments for the function currently being parsed.
 pEnd :: ParseM ()
 pEnd = lookAhead $ void $ choice
-  [ eof, pComment, pSym ')'
+  [ eof, pComment, try $ pSym ')', try $ pSym ',', try $ pSym ']'
   , void $ try $ choice $ map pSym operatorChars
   , void $ try pVarEq
   ]
@@ -274,13 +280,14 @@ fnNames :: CutConfig -> [String]
 fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
 -- TODO any way to do this last so "function not found" error comes through??
+-- TODO should be able to commit after parsing the fn name, which would allow real failure
 pFun :: ParseM CutExpr
 pFun = do
   (_, cfg) <- getState
   -- find the function by name
   name <- pName
   void $ optional pComment
-  args <- manyTill (pTerm <* optional pComment) pEnd
+  args <- manyTill (pExpr <* optional pComment) pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fn   = find (\f -> fName f == name) fns
       deps = foldr1 union $ map depsOf args
@@ -309,6 +316,14 @@ pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 --      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
 pTerm = (pList <|> pParens <|> pFun <|> pNum <|> pStr <|> pRef <?> "term") <* optional pComment
+-- pTerm = choice
+--   [ pList
+--   , pParens
+--   , pFun
+--   , pNum
+--   , pStr
+--   , pRef
+--   ] <* optional pComment
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
@@ -325,15 +340,18 @@ pExpr = do
 -- statements --
 ----------------
 
+-- TODO combine pVar and pVarEq somehow to reduce try issues?
+
 pVarEq :: ParseM CutVar
-pVarEq = pVar <* (optional pComment) <* (pSym '=') <* (optional pComment) <?> "vareq"
+pVarEq = pVar <* (optional pComment) <* pEq <* (optional pComment) <?> "vareq"
 
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
 pAssign = do
   (scr, cfg) <- getState
   optional newline
-  v <- pVarEq
+  void $ lookAhead $ try pVarEq
+  v <- pVarEq -- TODO use lookAhead here to decide whether to commit to it
   e <- lexeme pExpr
   putState (scr ++ [(v,e)], cfg)
   return (v,e)
@@ -349,7 +367,7 @@ pResult :: ParseM CutAssign
 pResult = pExpr >>= \e -> return (CutVar "result", e)
 
 pStatement :: ParseM CutAssign
-pStatement = try pAssign <|> pResult
+pStatement = pAssign <|> pResult
 
 -------------
 -- scripts --

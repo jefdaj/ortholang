@@ -90,6 +90,7 @@ executable shortcut
                     directory,
                     docopt,
                     enclosed-exceptions,
+                    safe-exceptions,
                     filepath,
                     haskeline,
                     mtl,

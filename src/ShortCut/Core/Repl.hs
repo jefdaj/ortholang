@@ -20,19 +20,15 @@ module ShortCut.Core.Repl
   -- )
   where
 
-import System.Console.Haskeline
+import System.Console.Haskeline hiding (catch)
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
--- import Control.Monad.Identity   (mzero)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf, filter)
 import Data.List.Utils          (delFromAL)
-import Data.Maybe               (fromJust)
--- import Debug.Trace
 import Prelude           hiding (print)
--- import ShortCut.Core.Compile    (compileScript)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
@@ -40,12 +36,10 @@ import ShortCut.Core.Pretty     (prettyShow)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import ShortCut.Core.Config     (showConfigField, setConfigField)
 import System.Command           (runCommand, waitForProcess)
--- import System.IO.Silently       (capture_)
 import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
-import Data.Typeable            (Typeable)
-import Control.Exception.Safe   (throwM)
+import Control.Exception.Safe   -- (throwM)
 
 --------------------
 -- main interface --
@@ -58,14 +52,14 @@ runRepl = mkRepl (repeat prompt) stdout
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> CutConfig -> IO ()
 mkRepl promptFns hdl cfg = do
-  -- load initial state, if any
-  st <- case cfgScript cfg of
-          Nothing   -> return  ([],cfg)
-          Just path -> cmdLoad ([],cfg) hdl path
-  -- run main repl with initial state
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
+  -- load initial script if any
+  st <- case cfgScript cfg of
+          Nothing   -> return  ([],cfg)
+          Just path -> cmdLoad ([],cfg) hdl path
+  -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
 
@@ -90,29 +84,27 @@ mkRepl promptFns hdl cfg = do
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
 loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
-loop [] hdl = do -- only happens when mock repl input runs out
-  st <- get
-  _  <- liftIO $ runCmd st hdl "quit"
-  return ()
+-- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
+loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
-  mline <- promptFn "shortcut >> "
+  Just line <- promptFn "shortcut >> " -- TODO can this fail?
   st  <- get
-  st' <- liftIO $ step st hdl $ fromJust mline -- can this ever be Nothing??
-  put st'
+  st' <- liftIO $ try $ step st hdl line
+  case st' of
+    Left (SomeException e) -> liftIO $ hPutStrLn hdl $ show e
+    Right s  -> put s
   loop promptFns hdl
 
 -- TODO try to lift this into ReplM and wrap the entire `step` in it!
 --      turns out you have to do that to catch the parse errors!
 --      Would making ReplM a newtype with some derivations help?
 -- TODO once that works, should it move to Types.hs by ReplM?
-printErrors :: Handle -> IO () -> IO ()
-printErrors hdl = handle handler
-  where
-    handler :: SomeException -> IO ()
-    handler e = do
-      liftIO $ hPutStrLn hdl $ "error! " ++ show e
-      return ()
+-- printErrors :: Handle -> IO a -> IO (Maybe a)
+-- printErrrs = try
+-- printErrors hdl io = catch (io >>= return) (handler hdl)
 
+-- handler :: Handle -> SomeException -> IO (Maybe a)
+-- handler hdl e = hPutStrLn hdl ("error! " ++ show e) >> return Nothing
 
 -- TODO move to Types.hs
 -- TODO use this pattern for other errors if successful?
@@ -136,26 +128,23 @@ step st hdl line = case stripWhiteSpace line of
   statement -> runStatement st hdl statement
 
 runStatement :: CutState -> Handle -> String -> IO CutState
-runStatement st@(scr,cfg) hdl line = do
-  case parseStatement st line of
-    Left  e -> hPutStrLn hdl (show e) >> return st
-    Right r -> do
-      let st' = (updateScript scr r, cfg)
-      when (isExpr st line) (evalScript hdl st')
-      return st'
+runStatement st@(scr,cfg) hdl line = case parseStatement st line of
+  Left  e -> hPutStrLn hdl (show e) >> return st
+  Right r -> do
+    let st' = (updateScript scr r, cfg)
+    when (isExpr st line) (evalScript hdl st')
+    return st'
 
 -- this is needed to avoid assigning a variable to itself,
 -- which is especially a problem when auto-assigning "result"
 -- TODO also catch variables assigned to things depending on themselves
 --      (later, with the "which variables does this depend on" function)
 updateScript :: CutScript -> CutAssign -> CutScript
-updateScript scr asn@(var, expr) =
-  case expr of
-    (CutRef _ _ _ var') -> if var' == var then scr else scr'
-    _ -> scr'
-    where
-      scr' = delFromAL scr var ++ [asn]
-
+updateScript scr asn@(var, expr) = case expr of
+  (CutRef _ _ _ var') -> if var' == var then scr else scr'
+  _ -> scr'
+  where
+    scr' = delFromAL scr var ++ [asn]
 
 --------------------------
 -- dispatch to commands --
@@ -180,7 +169,6 @@ cmds =
   , ("drop"    , cmdDrop  )
   , ("type"    , cmdType  )
   , ("show"    , cmdShow  )
-  -- , ("set"     , cmdSet   ) -- TODO is this obsolete?
   , ("quit"    , cmdQuit  )
   , ("!"       , cmdBang  )
   , ("config"  , cmdConfig)
@@ -284,17 +272,10 @@ cmdShow st@(scr,_) hdl var = do
 
 -- TODO does this one need to be a special case now?
 cmdQuit :: CutState -> Handle -> String -> IO CutState
-cmdQuit _ _ _ = throwM QuitRepl
+cmdQuit _ _ _ = throw QuitRepl
 
 cmdBang :: CutState -> Handle -> String -> IO CutState
 cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
-
--- TODO split string into first word and the rest
--- TODO case statement for first word: verbose, workdir, tmpdir, script?
--- TODO script sets the default for cmdSave?
--- TODO don't bother with script yet; start with the obvious ones
--- cmdSet :: CutState -> Handle -> String -> IO CutState
--- cmdSet _ = undefined
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
