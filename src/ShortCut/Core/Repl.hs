@@ -21,6 +21,7 @@ module ShortCut.Core.Repl
   where
 
 import System.Console.Haskeline hiding (catch)
+import System.IO.Error (isUserError)
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
@@ -91,23 +92,16 @@ loop (promptFn:promptFns) hdl = do
   st  <- get
   st' <- liftIO $ try $ step st hdl line
   case st' of
-    Left (SomeException e) -> liftIO $ hPutStrLn hdl $ show e
-    Right s  -> put s
-  loop promptFns hdl
-
--- TODO try to lift this into ReplM and wrap the entire `step` in it!
---      turns out you have to do that to catch the parse errors!
---      Would making ReplM a newtype with some derivations help?
--- TODO once that works, should it move to Types.hs by ReplM?
--- printErrors :: Handle -> IO a -> IO (Maybe a)
--- printErrrs = try
--- printErrors hdl io = catch (io >>= return) (handler hdl)
+    Right s -> put s >> loop promptFns hdl
+    Left (SomeException e) -> do
+      liftIO $ hPutStrLn hdl $ show e
+      return () -- TODO *only* return if it's QuitRepl; ignore otherwise
 
 -- handler :: Handle -> SomeException -> IO (Maybe a)
 -- handler hdl e = hPutStrLn hdl ("error! " ++ show e) >> return Nothing
 
 -- TODO move to Types.hs
--- TODO use this pattern for other errors if successful?
+-- TODO use this pattern for other errors? or remove?
 
 data QuitRepl = QuitRepl
   deriving Typeable
@@ -273,6 +267,7 @@ cmdShow st@(scr,_) hdl var = do
 -- TODO does this one need to be a special case now?
 cmdQuit :: CutState -> Handle -> String -> IO CutState
 cmdQuit _ _ _ = throw QuitRepl
+-- cmdQuit _ _ _ = ioError $ userError "Bye for now!"
 
 cmdBang :: CutState -> Handle -> String -> IO CutState
 cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
