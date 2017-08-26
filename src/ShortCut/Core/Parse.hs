@@ -196,7 +196,7 @@ pStr = CutLit str 0 <$> pQuoted <?> "string"
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
 pList :: ParseM CutExpr
 pList = do
-  lookAhead $ try $ pSym '['
+  lookAhead $ try $ pSym '[' -- TODO remove?
   terms <- between (pSym '[') (pSym ']') (sepBy pExpr $ pSym ',')
   let deps = if null terms
                then []
@@ -205,7 +205,7 @@ pList = do
                then EmptyList
                else typeOf $ head terms
   when (not $ all (== rtn) (map typeOf terms))
-    (error "all elements of a list must have the same type")
+    (fail "all elements of a list must have the same type")
   return $ CutList rtn 0 deps terms
 
 ---------------
@@ -298,7 +298,7 @@ pFun = do
     Nothing -> (trace (name ++ " " ++ show args) (fail name))
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
-      Left  err -> error err
+      Left  err -> fail err
       Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
                    in return $ CutFun rtn' 0 deps (fName f) args
 
@@ -315,7 +315,7 @@ pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 --      if none of them work it moves on to others
 --      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
-pTerm = (pList <|> pParens <|> pFun <|> pNum <|> pStr <|> pRef <?> "term") <* optional pComment
+pTerm = (pList <|> pParens <|> pNum <|> pStr <|> pFun <|> pRef <?> "term") <* optional pComment
 -- pTerm = choice
 --   [ pList
 --   , pParens
