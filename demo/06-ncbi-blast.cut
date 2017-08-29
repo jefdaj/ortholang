@@ -1,0 +1,7 @@
+# Demo of the NCBI BLAST functions.
+# type system keeps you from messing up arguments
+# can BLAST things live
+# creates blast hit table, which you can extract query or subject sequences from
+# there are _each/_all versions of each function for one vs many comparisons
+# can get the length of a list, which helps for quick comparisons
+# store cutoff as a variable, change it, and re-run

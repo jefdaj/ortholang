@@ -1,0 +1,6 @@
+# Demo of tmpfiles + links.
+# Things to cover:
+# everything gets a tmpfile, even if you type it live
+# variables are links to expression files
+# latest thing is always linked from "result"
+# can open them separately

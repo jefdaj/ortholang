@@ -1,0 +1,7 @@
+# Demo of set operations.
+# Things to cover:
+# union, intersection, difference
+# can chain them together
+# all and any for lists of lists
+# show greecut venn diagram again with code?
+# can express anything you could draw as a venn diagram

@@ -1,0 +1,15 @@
+# Demo of working with FASTA files.
+# Things to cover:
+# explain that "load" means link + track changes
+# concat_fastas for fragmented genomes
+# several types of genomes: fna, faa, gbk
+# convert genbank -> faa
+# extract IDs from a faa
+# load IDs from a list as str, then extract those sequences from faa
+
+pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid158059_NC_017052.faa"
+
+pcc7942 = concat_fastas [ load_faa "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
+                          load_faa "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa" ]
+
+pcc7120 = gbk_to_fna (...)

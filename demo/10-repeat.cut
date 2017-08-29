@@ -1,0 +1,5 @@
+# Demo of the replace function.
+# Things to cover:
+# why it's needed (work around caching)
+# using length to summarize results
+# using set subtractions to find stable and unstable results (write fns for this?)
