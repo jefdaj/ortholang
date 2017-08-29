@@ -1,0 +1,8 @@
+# Demo of running an existing cut vs loading it in the interpreter.
+# Things to cover:
+# source code (this file) and comments
+# running it on the command line (explain my extra tmpdir thing)
+# :help
+# :load
+# :show
+# evaluate something + print it

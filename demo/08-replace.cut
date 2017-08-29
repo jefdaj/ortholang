@@ -1,0 +1,6 @@
+# Demo of PRS replace function.
+# Things to cover:
+# redo the differece cutoff thing but assign to a new var with replace this time
+# do the same thing with a genome
+# use replace_each with a range of e-values
+# same thing but take length of each for easier comparison

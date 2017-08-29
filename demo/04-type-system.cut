@@ -1,0 +1,8 @@
+# Demo of the type system.
+# Things to cover:
+# each expression has a type that decides which functions it can go in
+# compare that to python again (adding a num and str)
+# helps ensure that your long-running code won't error out partway through
+# types are used for file extensions
+# :type of a few things
+# append .list for list of whatever
