@@ -1,5 +1,8 @@
 module ShortCut.Modules.Blast where
 
+-- TODO remove the rest of the evalue machinery from rBlast once filter_evalue works!
+-- TODO write/find filter_evalue.R
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -20,6 +23,7 @@ cutModule = CutModule
     , mkBlastFn  "blastx" fna faa
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
+    , filterEvalue
     -- TODO expose makeblastdb?
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
@@ -48,6 +52,10 @@ bht = CutType
   , tDesc = "tab-separated table of blast hits (outfmt 6)"
   , tShow  = defaultShow
   }
+
+---------------------------
+-- basic blast+ commands --
+---------------------------
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
 mkBlastFn wrappedCmdFn qType tType = CutFunction
@@ -100,7 +108,7 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
       [ "-query"  , qPath
       , "-subject", sPath -- TODO is this different from target?
       , "-out"    , oPath
-      -- , "-evalue" , eDec
+      , "-evalue" , eDec
       , "-outfmt" , "6"
       -- , "-num_threads", "4" -- TODO how to pick this? should I even use it?
       -- TODO support -remote?
@@ -108,3 +116,27 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 rBlast _ _ _ = error "bad argument to rBlast"
+
+---------------------------
+-- filter hits by evalue --
+---------------------------
+
+filterEvalue :: CutFunction
+filterEvalue = CutFunction
+  { fName      = "filter_evalue"
+  , fTypeCheck = defaultTypeCheck [num, bht] bht
+  , fFixity    = Prefix
+  , fCompiler  = cFilterEvalue
+  }
+
+cFilterEvalue :: CutState -> CutExpr -> Rules ExprPath
+cFilterEvalue s@(_,cfg) e@(CutFun _ _ _ _ [evalue, hits]) = do
+  (ExprPath ePath) <- cExpr s evalue
+  (ExprPath hPath) <- cExpr s hits
+  let (ExprPath oPath) = exprPath cfg e []
+  oPath %> \_ -> do
+    need [ePath, hPath]
+    unit$ quietly $ wrappedCmd cfg [] "filter_evalue.R" [oPath, ePath, hPath]
+    debugTrackWrite cfg [oPath]
+  return (ExprPath oPath)
+cFilterEvalue _ _ = error "bad argument to cFilterEvalue"
