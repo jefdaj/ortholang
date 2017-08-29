@@ -45,7 +45,7 @@ cutModule = CutModule
 bht :: CutType
 bht = CutType
   { tExt  = "bht"
-  , tDesc = "tab-separated table of reciprocal blast hits"
+  , tDesc = "tab-separated table of blast hits (outfmt 6)"
   , tShow  = defaultShow
   }
 
@@ -100,7 +100,7 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
       [ "-query"  , qPath
       , "-subject", sPath -- TODO is this different from target?
       , "-out"    , oPath
-      , "-evalue" , eDec
+      -- , "-evalue" , eDec
       , "-outfmt" , "6"
       -- , "-num_threads", "4" -- TODO how to pick this? should I even use it?
       -- TODO support -remote?
