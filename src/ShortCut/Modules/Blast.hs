@@ -28,6 +28,7 @@ cutModule = CutModule
     , mkBlastEachFn  "blastx" fna faa
     , mkBlastEachFn "tblastn" faa fna
     , mkBlastEachFn "tblastx" fna fna
+    , reciprocal
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -112,7 +113,26 @@ bestHits = CutFunction
 aBestHits :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
   unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
-aBestHits _ _ args = error $ "bad argument to cBestHits: " ++ show args
+aBestHits _ _ args = error $ "bad argument to aBestHits: " ++ show args
+
+--------------------------
+-- reciprocal best hits --
+--------------------------
+
+-- TODO once this works, what should the actual fn people call look like?
+
+reciprocal :: CutFunction
+reciprocal = CutFunction
+  { fName      = "reciprocal"
+  , fTypeCheck = defaultTypeCheck [bht, bht] bht
+  , fFixity    = Prefix
+  , fCompiler  = rSimpleTmp aRecip "blast" bht
+  }
+
+aRecip :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
+  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "reciprocal.R" [out, left, right]
+aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
 
 -----------------------------------
 -- mapped versions of everything --
