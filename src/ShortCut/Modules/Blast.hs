@@ -7,7 +7,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
-import ShortCut.Core.Paths        (exprPath)
+import ShortCut.Core.Paths        (exprPath, cacheDir)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
@@ -62,7 +62,7 @@ mkBlastFn wrappedCmdFn qType tType = CutFunction
   { fName      = wrappedCmdFn
   , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rBlast wrappedCmdFn
+  , fCompiler  = rParallelBlast wrappedCmdFn
   }
 
 -- TODO move to Util?
@@ -116,6 +116,30 @@ rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 rBlast _ _ _ = error "bad argument to rBlast"
+
+rParallelBlast :: String -> (CutState -> CutExpr -> Rules ExprPath)
+rParallelBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
+  (ExprPath qPath) <- cExpr s query
+  (ExprPath sPath) <- cExpr s subject
+  (ExprPath ePath) <- cExpr s evalue
+  let (CacheDir cDir ) = cacheDir cfg "blast"
+      (ExprPath oPath) = exprPath cfg e []
+  oPath %> \_ -> do
+    need [qPath, sPath, ePath]
+    eStr <- fmap init $ debugReadFile cfg ePath
+    let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
+    unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
+      [ "-c", bCmd
+      , "-t", cDir
+      , "-q", qPath
+      , "-s", sPath
+      , "-o", oPath
+      , "-e", eDec
+      , "-p"
+      ]
+    debugTrackWrite cfg [oPath]
+  return (ExprPath oPath)
+rParallelBlast _ _ _ = error "bad argument to rParallelBlast"
 
 ---------------------------
 -- filter hits by evalue --

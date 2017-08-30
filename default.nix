@@ -4,7 +4,7 @@ let
   blast      = import ./src/ShortCut/Modules/Blast;
   seqio      = import ./src/ShortCut/Modules/SeqIO;
   cabalPkg   = haskellPackages.callPackage ./src/shortcut.nix {};
-  runDepends = [ biomartr seqio ncbi-blast crb-blast ncurses ] # TODO ncurses?
+  runDepends = [ biomartr blast seqio ncbi-blast crb-blast ncurses ] # TODO ncurses?
                ++ biomartr.runDepends
                ++ blast.runDepends
                ++ seqio.runDepends;

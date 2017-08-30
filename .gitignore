@@ -4,3 +4,4 @@ result
 tmp
 *.log
 .nfs*
+*.egg-info
