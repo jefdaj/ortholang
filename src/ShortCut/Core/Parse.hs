@@ -258,6 +258,7 @@ pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 -- This is a kludge to make my "interesting" preference for spaces as function
 -- application work right. It's used to test whether we've reached the end of a
 -- list of arguments for the function currently being parsed.
+-- TODO can factor the try out to be by void right?
 pEnd :: ParseM ()
 pEnd = lookAhead $ void $ choice
   [ eof, pComment, try $ pSym ')', try $ pSym ',', try $ pSym ']'

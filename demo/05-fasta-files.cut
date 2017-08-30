@@ -11,5 +11,5 @@ pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid158059_NC_017052.
 
 pcc7942 = concat_fastas [ load_faa "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
                           load_faa "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa" ]
-
+ 
 pcc7120 = gbk_to_fna (...)

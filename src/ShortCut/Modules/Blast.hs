@@ -24,10 +24,8 @@ cutModule = CutModule
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
     , filterEvalue
-    -- TODO expose makeblastdb?
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
-    -- TODO extract_queries, extract_targets
     ]
   }
 
@@ -68,54 +66,6 @@ mkBlastFn wrappedCmdFn qType tType = CutFunction
 -- TODO move to Util?
 -- listFiles :: FilePath -> Action [FilePath]
 -- listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
-
--- The extra hash command is needed to determine oDir
--- TODO silence stdout
--- rBlastDB :: CutConfig -> CutType -> FilePath -> Action FilePath
--- rBlastDB cfg faType faPath = do
---   need [faPath]
---   hash <- fmap digest $ liftIO $ readFile faPath
---   let dbDir = cacheDir cfg </> "blastdb" </> hash -- TODO need faType too?
---   liftIO $ createDirectoryIfMissing True dbDir
---   unit $ quietly $ wrappedCmd "makeblastdb" (Cwd dbDir)
---     [ "-in"    , faPath
---     , "-out"   , "db" -- TODO is this right?
---     , "-title" , hash
---     , "-dbtype", if faType == faa then "prot" else "nucl"
---     ]
---   files <- listFiles dbDir
---   debugTrackWrite cfg files
---   -- TODO need to communicate that files were written in dbDir?
---   return dbDir
-
--- TODO use hashed name rather than varname for better caching
--- TODO are databases unneeded, or just automatically made in the working directory?
--- see https://www.ncbi.nlm.nih.gov/books/NBK279675/
-rBlast :: String -> (CutState -> CutExpr -> Rules ExprPath)
-rBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
-  (ExprPath qPath) <- cExpr s query
-  (ExprPath sPath) <- cExpr s subject
-  (ExprPath ePath) <- cExpr s evalue
-  let (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> do
-    -- dbDir   <- rBlastDB cfg (typeOf target) sPath
-    -- dbFiles <- listFiles dbDir
-    need $ [qPath, sPath, ePath] -- ++ dbFiles
-    eStr <- fmap init $ debugReadFile cfg ePath
-    let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-    unit $ quietly $ wrappedCmd cfg [] bCmd -- (AddEnv "BLASTDB" dbDir) -- TODO Cwd?
-      -- [ "-db"     , "db" -- TODO anything useful needed here?
-      [ "-query"  , qPath
-      , "-subject", sPath -- TODO is this different from target?
-      , "-out"    , oPath
-      , "-evalue" , eDec
-      , "-outfmt" , "6"
-      -- , "-num_threads", "4" -- TODO how to pick this? should I even use it?
-      -- TODO support -remote?
-      ]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-rBlast _ _ _ = error "bad argument to rBlast"
 
 rParallelBlast :: String -> (CutState -> CutExpr -> Rules ExprPath)
 rParallelBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
