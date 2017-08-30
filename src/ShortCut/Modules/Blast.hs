@@ -7,8 +7,10 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
+import ShortCut.Core.Paths        (exprPath)
+import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
-import ShortCut.Core.Debug        (debugReadFile)
+import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 
@@ -29,6 +31,7 @@ cutModule = CutModule
     , mkBlastEachFn "tblastn" faa fna
     , mkBlastEachFn "tblastx" fna fna
     , reciprocal
+    , blastpRBH
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -133,6 +136,32 @@ aRecip :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
   unit $ quietly $ wrappedCmd cfg [Cwd tmp] "reciprocal.R" [out, left, right]
 aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
+
+-- TODO make the rest of them... but not until after lab meeting?
+blastpRBH :: CutFunction
+blastpRBH = CutFunction
+  { fName = "blastp_rbh"
+  , fTypeCheck = defaultTypeCheck [faa, faa, num] bht
+  , fFixity = Prefix
+  , fCompiler = cBlastpRBH
+  }
+
+-- it this works I'll be modeling new versions of the map ones after it
+cBlastpRBH :: CutState -> CutExpr -> Rules ExprPath
+cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [lfaa, rfaa, evalue]) = do
+  let lhits = CutFun bht salt deps "blastp"     [lfaa , rfaa , evalue]
+      rhits = CutFun bht salt deps "blastp"     [rfaa , lfaa , evalue]
+      lbest = CutFun bht salt deps "best_hits"  [lhits]
+      rbest = CutFun bht salt deps "best_hits"  [rhits]
+      rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
+      (ExprPath out) = exprPath cfg e []
+  (ExprPath rbhPath) <- cExpr s rbh
+  out %> \_ -> do
+    need [rbhPath]
+    unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
+    debugTrackWrite cfg [out]
+  return (ExprPath out)
+cBlastpRBH _ _ = error "bad argument to cBlastRBH"
 
 -----------------------------------
 -- mapped versions of everything --
