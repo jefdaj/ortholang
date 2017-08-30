@@ -11,7 +11,7 @@ import ShortCut.Core.Paths        (exprPath, cacheDir)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
-import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
+import ShortCut.Core.ModuleAPI    (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 
 cutModule :: CutModule
@@ -57,45 +57,31 @@ bht = CutType
 ---------------------------
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn wrappedCmdFn qType tType = CutFunction
+mkBlastFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn
-  , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
+  , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rParallelBlast wrappedCmdFn
+  , fCompiler  = rSimpleTmp (aParBlast wrappedCmdFn) "blast" bht
   }
 
 -- TODO move to Util?
 -- listFiles :: FilePath -> Action [FilePath]
 -- listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
 
-rParallelBlast :: String -> (CutState -> CutExpr -> Rules ExprPath)
-rParallelBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
-  (ExprPath qPath) <- cExpr s query
-  (ExprPath sPath) <- cExpr s subject
-  (ExprPath ePath) <- cExpr s evalue
-  let (CacheDir cDir ) = cacheDir cfg "blast"
-      (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> do
-    need [qPath, sPath, ePath]
-    eStr <- fmap init $ debugReadFile cfg ePath
-    let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-    unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
-      [ "-c", bCmd
-      , "-t", cDir
-      , "-q", qPath
-      , "-s", sPath
-      , "-o", oPath
-      , "-e", eDec
-      , "-p"
-      ]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-rParallelBlast _ _ _ = error "bad argument to rParallelBlast"
+aParBlast :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subject, ExprPath evalue] = do
+  -- TODO is this automatic? need [query, subject, ePath]
+  eStr <- fmap init $ debugReadFile cfg evalue
+  let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
+  unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
+    [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
+aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 ---------------------------
 -- filter hits by evalue --
 ---------------------------
 
+-- TODO rewrite with rSimpleTmp if possible!
 filterEvalue :: CutFunction
 filterEvalue = CutFunction
   { fName      = "filter_evalue"
@@ -120,6 +106,7 @@ cFilterEvalue _ _ = error "bad argument to cFilterEvalue"
 -- get the best hit per gene --
 -------------------------------
 
+-- TODO rewrite with rSimpleTmp if possible!
 bestHits :: CutFunction
 bestHits = CutFunction
   { fName      = "best_hits"
@@ -138,3 +125,21 @@ cBestHits s@(_,cfg) e@(CutFun _ _ _ _ [hits]) = do
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 cBestHits _ _ = error "bad argument to cBestHits"
+
+-----------------------------------
+-- mapped versions of everything --
+-----------------------------------
+
+-- blastpEach :: CutFunction
+-- blastpEach = CutFunction
+--   { fName      = "blastp_each"
+--   , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf bht)
+--   , fFixity    = Prefix
+--   , fCompiler  = rMapLast aBlastCRB crb
+--   }
+
+-- aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+-- aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
+--   quietly $ wrappedCmd cfg [Cwd tmpDir]
+--                        "crb-blast" ["--query", q, "--target", t, "--output", o]
+-- aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
