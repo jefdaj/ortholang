@@ -7,10 +7,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
-import ShortCut.Core.Paths        (exprPath)
-import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
-import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
+import ShortCut.Core.Debug        (debugReadFile)
 import ShortCut.Core.ModuleAPI    (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 
@@ -91,8 +89,8 @@ filterEvalue = CutFunction
   }
 
 aFilterEvalue :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aFilterEvalue cfg (CacheDir cDir) [ExprPath out, ExprPath evalue, ExprPath hits] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd cDir] "filter_evalue.R" [out, evalue, hits]
+aFilterEvalue cfg (CacheDir tmp) [ExprPath out, ExprPath evalue, ExprPath hits] = do
+  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "filter_evalue.R" [out, evalue, hits]
 aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 
 -------------------------------
@@ -105,19 +103,13 @@ bestHits = CutFunction
   { fName      = "best_hits"
   , fTypeCheck = defaultTypeCheck [bht] bht
   , fFixity    = Prefix
-  , fCompiler  = cBestHits
+  , fCompiler  = rSimpleTmp aBestHits "blast" bht
   }
 
-cBestHits :: CutState -> CutExpr -> Rules ExprPath
-cBestHits s@(_,cfg) e@(CutFun _ _ _ _ [hits]) = do
-  (ExprPath hPath) <- cExpr s hits
-  let (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> do
-    need [hPath]
-    unit $ quietly $ wrappedCmd cfg [] "best_hits.R" [oPath, hPath]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-cBestHits _ _ = error "bad argument to cBestHits"
+aBestHits :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
+  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
+aBestHits _ _ args = error $ "bad argument to cBestHits: " ++ show args
 
 -----------------------------------
 -- mapped versions of everything --
