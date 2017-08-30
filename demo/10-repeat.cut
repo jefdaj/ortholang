@@ -1,5 +1,15 @@
-# Demo of the replace function.
+# Demo of the repeat function.
 # Things to cover:
 # why it's needed (work around caching)
 # using length to summarize results
 # using set subtractions to find stable and unstable results (write fns for this?)
+# example of blast vs blast + filter
+
+# TODO is this just an artifact of "<="? nope!
+pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-PCC-N-uid159835_NC_017039.faa"
+pcc7942 = concat_fastas (load_faa_all ["ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
+                                       "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"])
+blastonly = blastp pcc7942 pcc6803 1e-9
+blastfilter = filter_evalue 1e-9 (blastp pcc7942 pcc6803 1e-5)
+diff = (extract_queries blastfilter) ~ (extract_queries blastonly)
+result = length diff # should be 3?

@@ -10,10 +10,15 @@
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --nodes=1-1 --ntasks=1"
 
+# unset LIBRARY_PATH
+# unset LD_LIBRARY_PATH
+
 # put any changes needed to optimize specific commands here
 # TODO set an environment variable (SOMETHING_DEBUG) that controls whether to echo the cmd
 case "$(basename "$1")" in
 	crb-blast) CMD="$SRUN --cpus-per-task=12 --time=99:00:00 $@ --verbose --split --threads=12"; echo "$CMD";;
+	parallelblast|parallelblast.py) CMD="$SRUN --cpus-per-task=12 --time=99:00:00 $@"; echo "$CMD";;
+	blastn|blastp|blastx|tblastn|tblastx) CMD="$SRUN --cpus-per-task=1 --time=99:00:00 $@"; echo "$CMD";;
 	cat|ln) CMD="$@";; # TODO does anything echoed here get sent to the output file??
 	*) CMD="$@"; echo "$CMD";; # run the command as-is in this shell
 esac

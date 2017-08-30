@@ -1,0 +1,12 @@
+all were probably started around 12:15 - 12:30?
+finishing times and line counts:
+	12:36 21389
+	12:58 707151
+	12:58 80339
+	12:59 1471487
+	13:02 3313459
+	13:05 1067964
+	13:46 134885709
+so it definitely makes a difference!
+
+what about the results themselves? filtered to the strictest evalue are they the same?
