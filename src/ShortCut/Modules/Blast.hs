@@ -24,6 +24,7 @@ cutModule = CutModule
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
     , filterEvalue
+    , bestHits
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -110,7 +111,30 @@ cFilterEvalue s@(_,cfg) e@(CutFun _ _ _ _ [evalue, hits]) = do
   let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
     need [ePath, hPath]
-    unit$ quietly $ wrappedCmd cfg [] "filter_evalue.R" [oPath, ePath, hPath]
+    unit $ quietly $ wrappedCmd cfg [] "filter_evalue.R" [oPath, ePath, hPath]
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 cFilterEvalue _ _ = error "bad argument to cFilterEvalue"
+
+-------------------------------
+-- get the best hit per gene --
+-------------------------------
+
+bestHits :: CutFunction
+bestHits = CutFunction
+  { fName      = "best_hits"
+  , fTypeCheck = defaultTypeCheck [bht] bht
+  , fFixity    = Prefix
+  , fCompiler  = cBestHits
+  }
+
+cBestHits :: CutState -> CutExpr -> Rules ExprPath
+cBestHits s@(_,cfg) e@(CutFun _ _ _ _ [hits]) = do
+  (ExprPath hPath) <- cExpr s hits
+  let (ExprPath oPath) = exprPath cfg e []
+  oPath %> \_ -> do
+    need [hPath]
+    unit $ quietly $ wrappedCmd cfg [] "best_hits.R" [oPath, hPath]
+    debugTrackWrite cfg [oPath]
+  return (ExprPath oPath)
+cBestHits _ _ = error "bad argument to cBestHits"
