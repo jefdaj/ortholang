@@ -10,7 +10,7 @@ import Data.Scientific            (formatScientific, FPFormat(..))
 import ShortCut.Core.Paths        (exprPath)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
-import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
+import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite, debugWriteLines)
 import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 
@@ -32,6 +32,7 @@ cutModule = CutModule
     , mkBlastEachFn "tblastx" fna fna
     , reciprocal
     , blastpRBH
+    , blastpRBHEach
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -141,14 +142,14 @@ aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
 blastpRBH :: CutFunction
 blastpRBH = CutFunction
   { fName = "blastp_rbh"
-  , fTypeCheck = defaultTypeCheck [faa, faa, num] bht
+  , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fFixity = Prefix
   , fCompiler = cBlastpRBH
   }
 
 -- it this works I'll be modeling new versions of the map ones after it
 cBlastpRBH :: CutState -> CutExpr -> Rules ExprPath
-cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [lfaa, rfaa, evalue]) = do
+cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
   let lhits = CutFun bht salt deps "blastp"     [lfaa , rfaa , evalue]
       rhits = CutFun bht salt deps "blastp"     [rfaa , lfaa , evalue]
       lbest = CutFun bht salt deps "best_hits"  [lhits]
@@ -178,14 +179,28 @@ mkBlastEachFn wrappedCmdFn qType sType = CutFunction
 
 -- kludge to allow easy mapping over the subject rather than evalue
 aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlast' bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath evalue, ExprPath query, ExprPath subject] =
- aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subject, ExprPath evalue]
+aParBlast' bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
+ aParBlast bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
 aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
--- blastCRBAll :: CutFunction
--- blastCRBAll = CutFunction
---   { fName      = "crb_blast_all"
---   , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf crb)
---   , fFixity    = Prefix
---   , fCompiler  = rMapLastTmps aBlastCRB "crbblast" crb
---   }
+blastpRBHEach :: CutFunction
+blastpRBHEach = CutFunction
+  { fName      = "blastp_rbh_each"
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
+  , fFixity    = Prefix
+  , fCompiler  = cBlastpRBHEach
+  }
+
+-- TODO oh right, that might not be directly a list!
+--      can this be done a cleaner way??
+cBlastpRBHEach :: CutState -> CutExpr -> Rules ExprPath
+cBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutList _ _ _ ss]) = do
+-- cBlastpRBHEach st@(scr,cfg) expr@(CutFun _ salt _ _ [e, q, ss]) = do
+  -- let subjects = extractExprs scr ss
+  let exprs = map (\s -> CutFun bht salt (concatMap depsOf [e, q, s]) "blastp_rbh" [e, q, s]) ss
+  paths <- mapM (cExpr st) exprs
+  let (ExprPath out) = exprPath cfg expr []
+      paths' = map (\(ExprPath p) -> p) paths
+  out %> \_ -> need paths' >> debugWriteLines cfg out paths' >> debugTrackWrite cfg [out]
+  return (ExprPath out)
+cBlastpRBHEach _ _ = error "bad argument to cBlastpRBHEach"
