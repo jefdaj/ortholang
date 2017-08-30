@@ -9,7 +9,7 @@ import ShortCut.Core.Types
 import Data.Scientific            (formatScientific, FPFormat(..))
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile)
-import ShortCut.Core.ModuleAPI    (rSimpleTmp, defaultTypeCheck)
+import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 
 cutModule :: CutModule
@@ -23,6 +23,11 @@ cutModule = CutModule
     , mkBlastFn "tblastx" fna fna
     , filterEvalue
     , bestHits
+    , mkBlastEachFn  "blastn" fna fna -- TODO why doesn't this one work??
+    , mkBlastEachFn  "blastp" faa faa
+    , mkBlastEachFn  "blastx" fna faa
+    , mkBlastEachFn "tblastn" faa fna
+    , mkBlastEachFn "tblastx" fna fna
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -79,7 +84,6 @@ aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 -- filter hits by evalue --
 ---------------------------
 
--- TODO rewrite with rSimpleTmp if possible!
 filterEvalue :: CutFunction
 filterEvalue = CutFunction
   { fName      = "filter_evalue"
@@ -97,7 +101,6 @@ aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 -- get the best hit per gene --
 -------------------------------
 
--- TODO rewrite with rSimpleTmp if possible!
 bestHits :: CutFunction
 bestHits = CutFunction
   { fName      = "best_hits"
@@ -115,16 +118,25 @@ aBestHits _ _ args = error $ "bad argument to cBestHits: " ++ show args
 -- mapped versions of everything --
 -----------------------------------
 
--- blastpEach :: CutFunction
--- blastpEach = CutFunction
---   { fName      = "blastp_each"
---   , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf bht)
---   , fFixity    = Prefix
---   , fCompiler  = rMapLast aBlastCRB crb
---   }
+-- TODO gotta have a variation for "not the last arg"
+mkBlastEachFn :: String -> CutType -> CutType -> CutFunction
+mkBlastEachFn wrappedCmdFn qType sType = CutFunction
+  { fName      = wrappedCmdFn ++ "_each"
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
+  , fFixity    = Prefix
+  , fCompiler  = rMapLastTmp (aParBlast' wrappedCmdFn) "blast" bht
+  }
 
--- aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
--- aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
---   quietly $ wrappedCmd cfg [Cwd tmpDir]
---                        "crb-blast" ["--query", q, "--target", t, "--output", o]
--- aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
+-- kludge to allow easy mapping over the subject rather than evalue
+aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast' bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath evalue, ExprPath query, ExprPath subject] =
+ aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subject, ExprPath evalue]
+aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+
+-- blastCRBAll :: CutFunction
+-- blastCRBAll = CutFunction
+--   { fName      = "crb_blast_all"
+--   , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf crb)
+--   , fFixity    = Prefix
+--   , fCompiler  = rMapLastTmps aBlastCRB "crbblast" crb
+--   }
