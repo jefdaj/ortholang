@@ -7,11 +7,9 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
-import ShortCut.Core.Paths        (exprPath, cacheDir)
-import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
-import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
-import ShortCut.Core.ModuleAPI    (defaultTypeCheck)
+import ShortCut.Core.Debug        (debugReadFile)
+import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 
 cutModule :: CutModule
@@ -24,6 +22,12 @@ cutModule = CutModule
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
     , filterEvalue
+    , bestHits
+    , mkBlastEachFn  "blastn" fna fna -- TODO why doesn't this one work??
+    , mkBlastEachFn  "blastp" faa faa
+    , mkBlastEachFn  "blastx" fna faa
+    , mkBlastEachFn "tblastn" faa fna
+    , mkBlastEachFn "tblastx" fna fna
     -- TODO vectorized versions
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -56,40 +60,25 @@ bht = CutType
 ---------------------------
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn wrappedCmdFn qType tType = CutFunction
+mkBlastFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn
-  , fTypeCheck = defaultTypeCheck [qType, tType, num] bht
+  , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rParallelBlast wrappedCmdFn
+  , fCompiler  = rSimpleTmp (aParBlast wrappedCmdFn) "blast" bht
   }
 
 -- TODO move to Util?
 -- listFiles :: FilePath -> Action [FilePath]
 -- listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
 
-rParallelBlast :: String -> (CutState -> CutExpr -> Rules ExprPath)
-rParallelBlast bCmd s@(_,cfg) e@(CutFun _ _ _ _ [query, subject, evalue]) = do
-  (ExprPath qPath) <- cExpr s query
-  (ExprPath sPath) <- cExpr s subject
-  (ExprPath ePath) <- cExpr s evalue
-  let (CacheDir cDir ) = cacheDir cfg "blast"
-      (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> do
-    need [qPath, sPath, ePath]
-    eStr <- fmap init $ debugReadFile cfg ePath
-    let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-    unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
-      [ "-c", bCmd
-      , "-t", cDir
-      , "-q", qPath
-      , "-s", sPath
-      , "-o", oPath
-      , "-e", eDec
-      , "-p"
-      ]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-rParallelBlast _ _ _ = error "bad argument to rParallelBlast"
+aParBlast :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subject, ExprPath evalue] = do
+  -- TODO is this automatic? need [query, subject, ePath]
+  eStr <- fmap init $ debugReadFile cfg evalue
+  let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
+  unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
+    [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
+aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 ---------------------------
 -- filter hits by evalue --
@@ -100,17 +89,54 @@ filterEvalue = CutFunction
   { fName      = "filter_evalue"
   , fTypeCheck = defaultTypeCheck [num, bht] bht
   , fFixity    = Prefix
-  , fCompiler  = cFilterEvalue
+  , fCompiler  = rSimpleTmp aFilterEvalue "blast" bht
   }
 
-cFilterEvalue :: CutState -> CutExpr -> Rules ExprPath
-cFilterEvalue s@(_,cfg) e@(CutFun _ _ _ _ [evalue, hits]) = do
-  (ExprPath ePath) <- cExpr s evalue
-  (ExprPath hPath) <- cExpr s hits
-  let (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> do
-    need [ePath, hPath]
-    unit$ quietly $ wrappedCmd cfg [] "filter_evalue.R" [oPath, ePath, hPath]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-cFilterEvalue _ _ = error "bad argument to cFilterEvalue"
+aFilterEvalue :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aFilterEvalue cfg (CacheDir tmp) [ExprPath out, ExprPath evalue, ExprPath hits] = do
+  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "filter_evalue.R" [out, evalue, hits]
+aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
+
+-------------------------------
+-- get the best hit per gene --
+-------------------------------
+
+bestHits :: CutFunction
+bestHits = CutFunction
+  { fName      = "best_hits"
+  , fTypeCheck = defaultTypeCheck [bht] bht
+  , fFixity    = Prefix
+  , fCompiler  = rSimpleTmp aBestHits "blast" bht
+  }
+
+aBestHits :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
+  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
+aBestHits _ _ args = error $ "bad argument to cBestHits: " ++ show args
+
+-----------------------------------
+-- mapped versions of everything --
+-----------------------------------
+
+-- TODO gotta have a variation for "not the last arg"
+mkBlastEachFn :: String -> CutType -> CutType -> CutFunction
+mkBlastEachFn wrappedCmdFn qType sType = CutFunction
+  { fName      = wrappedCmdFn ++ "_each"
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
+  , fFixity    = Prefix
+  , fCompiler  = rMapLastTmp (aParBlast' wrappedCmdFn) "blast" bht
+  }
+
+-- kludge to allow easy mapping over the subject rather than evalue
+aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast' bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath evalue, ExprPath query, ExprPath subject] =
+ aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subject, ExprPath evalue]
+aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+
+-- blastCRBAll :: CutFunction
+-- blastCRBAll = CutFunction
+--   { fName      = "crb_blast_all"
+--   , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf crb)
+--   , fFixity    = Prefix
+--   , fCompiler  = rMapLastTmps aBlastCRB "crbblast" crb
+--   }

@@ -182,6 +182,8 @@ rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefi
   where
     tmpDir = cacheDir cfg tmpPrefix
 
+-- TODO use a hash for the cached path rather than the name, which changes!
+
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
 rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType

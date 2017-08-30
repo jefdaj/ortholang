@@ -4,20 +4,26 @@ suppressPackageStartupMessages(require(dplyr))
 
 read_hits <- function(filename)
   # read a table of BLAST hits from a file
-  # should be a CSV formatted with the BLAST+ "-outfmt 10" option,
-  # prepended with an extra column for dbname
+  # should be a CSV formatted with the BLAST+ "-outfmt 6" option,
   # TODO move to a separate utilities file?
-  # TODO only read the columns we use?
-	# TODO is there really still a dbname?
-  tbl_df(read.csv(filename, col.names=c(
+  # TODO leave out the colnames since we only use evalue?
+  tbl_df(read.table(filename, sep="\t", col.names=c(
     'queryid', 'subjectid', 'percentidentity', 'alignmentlength',
     'mismatches', 'gapopens', 'qstart', 'qend', 'sstart', 'send', 'evalue',
     'bitscore')))
 
+write_hits <- function(hits, filename)
+  # TODO move to a separate utilities file?
+  write.table(hits, filename, sep="\t",
+              quote=FALSE, row.names=FALSE, col.names=FALSE)
+
 best_hits <- function(out, bht) {
-	# TODO is there still a dbname col?
-	# TODO arrange does ascending by default right?
-  read_hits(bht) %>% arrange(evalue) %>%distinct(queryid) %>% write(out)
+  read_hits(bht) %>%
+    arrange(evalue) %>%
+    group_by(queryid) %>%
+    filter(n() == 1) %>%
+    ungroup() %>%
+    write_hits(out)
 }
 
 main <- function() {
