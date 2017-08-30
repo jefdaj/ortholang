@@ -7,7 +7,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
-import ShortCut.Core.Paths        (exprPath)
+import ShortCut.Core.Paths        (exprPath, cacheDir)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite, debugWriteLines)
@@ -156,13 +156,19 @@ cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
       rbest = CutFun bht salt deps "best_hits"  [rhits]
       rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
       (ExprPath out) = exprPath cfg e []
-  (ExprPath rbhPath) <- cExpr s rbh
+  (ExprPath rbhPath) <- cExpr s rbh -- TODO this is the sticking point right?
   out %> \_ -> do
     need [rbhPath]
-    unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
+    aBlastpRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
     debugTrackWrite cfg [out]
   return (ExprPath out)
 cBlastpRBH _ _ = error "bad argument to cBlastRBH"
+
+-- this is an attempt to convert cBlastpRBH into a form usable with rMapLastTmp
+aBlastpRBH :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
+  unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
+aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 
 -----------------------------------
 -- mapped versions of everything --
