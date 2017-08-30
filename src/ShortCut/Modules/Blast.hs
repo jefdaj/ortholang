@@ -7,7 +7,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
-import ShortCut.Core.Paths        (exprPath, cacheDir)
+import ShortCut.Core.Paths        (exprPath)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
@@ -87,20 +87,13 @@ filterEvalue = CutFunction
   { fName      = "filter_evalue"
   , fTypeCheck = defaultTypeCheck [num, bht] bht
   , fFixity    = Prefix
-  , fCompiler  = cFilterEvalue
+  , fCompiler  = rSimpleTmp aFilterEvalue "blast" bht
   }
 
-cFilterEvalue :: CutState -> CutExpr -> Rules ExprPath
-cFilterEvalue s@(_,cfg) e@(CutFun _ _ _ _ [evalue, hits]) = do
-  (ExprPath ePath) <- cExpr s evalue
-  (ExprPath hPath) <- cExpr s hits
-  let (ExprPath oPath) = exprPath cfg e []
-  oPath %> \_ -> do
-    need [ePath, hPath]
-    unit $ quietly $ wrappedCmd cfg [] "filter_evalue.R" [oPath, ePath, hPath]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-cFilterEvalue _ _ = error "bad argument to cFilterEvalue"
+aFilterEvalue :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aFilterEvalue cfg (CacheDir cDir) [ExprPath out, ExprPath evalue, ExprPath hits] = do
+  unit $ quietly $ wrappedCmd cfg [Cwd cDir] "filter_evalue.R" [out, evalue, hits]
+aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 
 -------------------------------
 -- get the best hit per gene --
