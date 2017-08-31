@@ -1,8 +1,13 @@
-# Demo of the type system.
-# Things to cover:
-# each expression has a type that decides which functions it can go in
-# compare that to python again (adding a num and str)
-# helps ensure that your long-running code won't error out partway through
-# types are used for file extensions
-# :type of a few things
-# append .list for list of whatever
+# Demo of the type system:
+#   expressions have types that decide which functions they can go in
+#   compare that to adding a num and str in python
+#   :type of vars, num, num.list etc
+#   helps ensure that your long-running code won't error out partway through
+#   types are used for file extensions
+#   append .list for list of whatever
+
+string1 = "good morning!"
+number1 = 4
+number2 = 4e-34
+listofnumbers = [number1, number2, 23]
+result = listofnumbers

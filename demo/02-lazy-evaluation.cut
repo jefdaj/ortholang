@@ -1,4 +1,8 @@
-# Demo of lazy evaluation
-# Things to cover:
-# difference between assigning something and running it (show same code in python!)
-# can change something and save another valid script
+# Demo of lazy evaluation:
+#   difference between assigning something and running it (show same code in python)
+#   :depends, :rdepends
+#   can change something and save as a script
+
+string1 = "good morning!"
+string2 = "some long-running code that won't be evaluated yet"
+result = string1
