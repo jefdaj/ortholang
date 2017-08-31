@@ -18,6 +18,7 @@ write_hits <- function(hits, filename)
               quote=FALSE, row.names=FALSE, col.names=FALSE)
 
 best_hits <- function(out, bht) {
+	print(head(bht))
   read_hits(bht) %>%
     arrange(evalue) %>%
     group_by(queryid) %>%

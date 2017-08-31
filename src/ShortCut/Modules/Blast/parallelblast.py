@@ -69,7 +69,7 @@ def make_db(args, tmpdir, fasta, dbtype):
         , '-out', db
         , '-title', basename(db)
         , '-dbtype', dbtype
-        , '-parse_seqids' # TODO sanitize those
+        # , '-parse_seqids' # TODO sanitize those
         ]
     try:
         log(args, ' '.join(cmd))
@@ -107,6 +107,7 @@ def make_hits(args, db):
     cmd = ' '.join(cmd)
     if args['--parallel']:
         # TODO use a smaller block size? probably!
+        # TODO try 10K
         p = "parallel --no-notice --block 100k --recstart '>' --pipe"
         cmd = "cat '%s' | %s '%s' > '%s'" % (query, p, cmd, hits)
     try:
