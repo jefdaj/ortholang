@@ -13,6 +13,8 @@ import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
+import System.Directory           (createDirectoryIfMissing)
+import Control.Monad.Trans        (liftIO)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -34,6 +36,7 @@ cutModule = CutModule
     , mkBlastEachRevFn "blastp" faa faa -- TODO don't expose to users?
     , reciprocal
     , blastpRBH
+    , blastpRBHEach
     -- , blastpRBHEach -- TODO broken :(
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -195,6 +198,7 @@ aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 -- kludge for mapping reciprocal best hits --
 ---------------------------------------------
 
+-- TODO remove?
 reciprocalEach :: CutFunction
 reciprocalEach = CutFunction
   { fName      = "reciprocal_each"
@@ -213,7 +217,7 @@ cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   oPath %> \_ -> do
     need [lsPath, rsPath]
     unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py"
-      [oPath, lsPath, rsPath]
+      [cDir, oPath, lsPath, rsPath]
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 cRecipEach _ _ = error "bad argument to cRecipEach"
@@ -288,21 +292,24 @@ aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 blastpRBHEach :: CutFunction
 blastpRBHEach = CutFunction
   { fName      = "blastp_rbh_each"
-  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
   , fCompiler  = cBlastpRBHEach
   }
 
 cBlastpRBHEach :: CutState -> CutExpr -> Rules ExprPath
 cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
-  let mkExpr           = CutFun rtn salt deps 
-      (ExprPath oPath) = exprPath cfg e []
-      (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
-  (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"     [evalue, query, subjects]
-  (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev" [evalue, query, subjects]
+  -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
+  -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]
+  let mkExpr name = CutFun rtn salt deps name [evalue, query, subjects]
+      (ExprPath oPath)  = exprPath cfg e []
+      (CacheDir cDir )  = cacheDir cfg "reciprocal_each"
+  (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"
+  (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev"
   oPath %> \_ -> do
     need [fwdsPath, revsPath]
-    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py" [oPath, fwdsPath, revsPath]
+    liftIO $ createDirectoryIfMissing True cDir
+    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath] -- TODO how is it failing? seems fine
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 cBlastpRBHEach _ _ = error "bad argument to cRecipEach"
