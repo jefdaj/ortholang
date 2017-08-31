@@ -30,6 +30,8 @@ cutModule = CutModule
     , mkBlastEachFn  "blastx" fna faa
     , mkBlastEachFn "tblastn" faa fna
     , mkBlastEachFn "tblastx" fna fna
+    , mkBlastEachRevFn "blastn" fna fna -- TODO don't expose to users?
+    , mkBlastEachRevFn "blastp" faa faa -- TODO don't expose to users?
     , reciprocal
     , blastpRBH
     -- , blastpRBHEach -- TODO broken :(
@@ -234,6 +236,24 @@ aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aParBlast' bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
  aParBlast bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
 aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+
+---------------------------------------------------------------------
+-- reverse mapped versions (needed for mapped reciprocal versions) --
+---------------------------------------------------------------------
+
+-- TODO gotta have a variation for "not the last arg"
+mkBlastEachRevFn :: String -> CutType -> CutType -> CutFunction
+mkBlastEachRevFn wrappedCmdFn qType sType = CutFunction
+  { fName      = wrappedCmdFn ++ "_each_rev"
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
+  , fFixity    = Prefix
+  , fCompiler  = rMapLastTmp (aParBlastRev' wrappedCmdFn) "blast" bht
+  }
+
+-- kludge to allow easy mapping over the subject rather than evalue
+aParBlastRev' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd cfg cDir [o,e,s,q]
+aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 
 -- TODO find a way to fix this or replace it...
