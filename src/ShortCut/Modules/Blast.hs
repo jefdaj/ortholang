@@ -84,6 +84,26 @@ aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subje
     [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
 aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
+-----------------------------------------------------------
+-- "reverse" versions to help write reciprocal best hits --
+-----------------------------------------------------------
+
+-- TODO remove these if you don't end up using them
+
+-- note: only works on symmetric blast fns (take two of the same type)
+mkBlastRevFn :: String -> CutType -> CutType -> CutFunction
+mkBlastRevFn wrappedCmdFn qType sType = CutFunction
+  { fName      = wrappedCmdFn ++ "_rev"
+  , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
+  , fFixity    = Prefix
+  , fCompiler  = rSimpleTmp (aParBlastRev wrappedCmdFn) "blast" bht
+  }
+
+-- just switches the query and subject, which won't work for asymmetric blast fns!
+aParBlastRev :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlastRev bCmd cfg cDir [o, q, s, e] = aParBlast bCmd cfg cDir [o, s, q, e]
+aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+
 ---------------------------
 -- filter hits by evalue --
 ---------------------------
