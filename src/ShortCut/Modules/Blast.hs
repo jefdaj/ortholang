@@ -32,8 +32,7 @@ cutModule = CutModule
     , mkBlastEachFn "tblastx" fna fna
     , reciprocal
     , blastpRBH
-    , blastpRBHEach
-    -- TODO vectorized versions
+    , blastpRBHEach -- TODO broken :(
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
   }
@@ -182,16 +181,17 @@ reciprocalEach = CutFunction
   , fCompiler  = cRecipEach
   }
 
+-- TODO how to hook this up to blastp_each?
 cRecipEach :: CutState -> CutExpr -> Rules ExprPath
-cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbht, rbhts]) = do
-  (ExprPath  lPath) <- cExpr s lbht
+cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
+  (ExprPath lsPath) <- cExpr s lbhts
   (ExprPath rsPath) <- cExpr s rbhts
   let (ExprPath oPath) = exprPath cfg e []
       (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
   oPath %> \_ -> do
-    need [lPath, rsPath]
-    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.sh"
-      [oPath, lPath, rsPath]
+    need [lsPath, rsPath]
+    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py"
+      [oPath, lsPath, rsPath]
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 cRecipEach _ _ = error "bad argument to cRecipEach"

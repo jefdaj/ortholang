@@ -20,25 +20,41 @@
 # TODO once it works, parallelize? should be doable but maybe not needed?
 # TODO need to add md5sum to nix?
 
-OUTBHTLIST="$1"
-LHITSBHT="$2"
-RHITSBHTLIST="$3"
+# TODO rewrite to take into account that we need to "zip" two lists of tables
 
-echo "reciprocal_each.sh cwd: $(pwd)"
-echo "reciprocal_each.sh args: $@"
-echo "OUTBHTLIST  : $OUTBHTLIST"
-echo "LHITSBHT    : $LHITSBHT"
-echo "RHITSBHTLIST: $RHITSBHTLIST"
+# OUTBHTLIST="$1"
+# LHITSBHTLIST="$2"
+# RHITSBHTLIST="$3"
+# 
+# echo "reciprocal_each.sh cwd: $(pwd)"
+# echo "reciprocal_each.sh args: $@"
+# echo "OUTBHTLIST  : $OUTBHTLIST"
+# echo "LHITSBHTLIST: $LHITSBHTLIST"
+# echo "RHITSBHTLIST: $RHITSBHTLIST"
+# 
+# CACHEDIR="$(md5sum "$LHITSBHT" | awk '{print $1}')"
+# mkdir -p "$CACHEDIR"
+# echo "CACHEDIR: $CACHEDIR"
+# 
+# cat "$RHITSBHTLIST" | while read rhitsbht; do
+# 	recipbht="$CACHEDIR/$(md5sum "$LHITSBHT" | awk '{print $1}')".bht
+# 	echo "rhitsbht: $rhitsbht"
+# 	echo "recipbht: $recipbht"
+# 	cmd="reciprocal.R $recipbht $LHITSBHT $rhitsbht"
+# 	echo "$cmd" && $cmd && echo "$recipbht" >> "$OUTBHTLIST"
+# 	# each R script invocation needs: out, lhits, rhits
+# done
 
-CACHEDIR="$(md5sum "$LHITSBHT" | awk '{print $1}')"
-mkdir -p "$CACHEDIR"
-echo "CACHEDIR: $CACHEDIR"
+# out, left, and right hit table lists
+OBHTS="$1"; LBHTS="$2"; RBHTS="$3"
 
-cat "$RHITSBHTLIST" | while read rhitsbht; do
-	recipbht="$CACHEDIR/$(md5sum "$LHITSBHT" | awk '{print $1}')".bht
-	echo "rhitsbht: $rhitsbht"
-	echo "recipbht: $recipbht"
-	cmd="reciprocal.R $recipbht $LHITSBHT $rhitsbht"
-	echo "$cmd" && $cmd && echo "$recipbht" >> "$OUTBHTLIST"
-	# each R script invocation needs: out, lhits, rhits
+# sanity check: lists should be the same length
+NLBHTs=$(wc -l $LBHTS | awk '{print $1}')
+NRBHTS=$(wc -l $LBHTS | awk '{print $1}')
+[[ $NLBHTS == $NRBHTS ]] || (echo "uh oh! lists are different lengths!"; exit 1)
+
+# if empty lists, just touch output
+[[ $NBHTS == 0 ]] && touch $OBHTS && exit 0
+
+for n in {1..$NBHTS}; do
 done
