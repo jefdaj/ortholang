@@ -18,7 +18,7 @@ import ShortCut.Core.Types
 -- import Data.Set                   (fromList, toList)
 import Data.List                  (nub, sort)
 import Data.String.Utils          (strip)
-import Development.Shake.FilePath ((</>), (<.>), (-<.>))
+import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
 import ShortCut.Core.Debug        (debugWriteLines, debug)
@@ -211,7 +211,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
     -- this writes the .args files for use in the rule above
     (flip mapM_) lastPaths $ \p -> do
       -- TODO write the out path here too so all the args are together?
-      let argsPath = mapTmp </> takeBaseName p <.> "args"
+      let argsPath = mapTmp </> takeBaseName p <.> "args" -- TODO use a hash here?
           argPaths = inits ++ [cfgTmpDir cfg </> p]
       liftIO $ createDirectoryIfMissing True $ mapTmp
       debugWriteLines cfg argsPath argPaths
@@ -224,7 +224,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   -- (made in the action above). It's a pretty roundabout way to do it!
   -- TODO ask ndmitchell if there's something much more elegant I'm missing
   (mapTmp </> "*") %> \out -> do
-    let argsPath = out -<.> ".args" -- TODO clean up
+    let argsPath = out <.> ".args" -- TODO clean up
     -- args <- debugReadLines cfg argsPath
     args <- fmap lines $ liftIO $ readFile argsPath
     let args' = map (cfgTmpDir cfg </>) args
