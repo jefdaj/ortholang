@@ -2,15 +2,17 @@
 
 suppressPackageStartupMessages(require(dplyr))
 
-read_hits <- function(filename)
+read_hits <- function(filename) {
   # read a table of BLAST hits from a file
   # should be a CSV formatted with the BLAST+ "-outfmt 6" option,
   # TODO move to a separate utilities file?
   # TODO leave out the colnames since we only use evalue?
-  tbl_df(read.table(filename, as.is=TRUE, sep="\t", col.names=c(
+  # cat(paste0('reading ', filename, '\n'))
+  read.csv(filename, colClasses="character", sep="", quote="\n", col.names=c(
     'queryid', 'subjectid', 'percentidentity', 'alignmentlength',
     'mismatches', 'gapopens', 'qstart', 'qend', 'sstart', 'send', 'evalue',
-    'bitscore')))
+    'bitscore')) %>% tbl_df
+}
 
 write_hits <- function(hits, filename)
   # TODO move to a separate utilities file?
