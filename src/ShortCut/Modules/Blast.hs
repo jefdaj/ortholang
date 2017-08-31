@@ -170,6 +170,32 @@ aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
   unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
 aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 
+---------------------------------------------
+-- kludge for mapping reciprocal best hits --
+---------------------------------------------
+
+reciprocalEach :: CutFunction
+reciprocalEach = CutFunction
+  { fName      = "reciprocal_each"
+  , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
+  , fFixity    = Prefix
+  , fCompiler  = cRecipEach
+  }
+
+cRecipEach :: CutState -> CutExpr -> Rules ExprPath
+cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbht, rbhts]) = do
+  (ExprPath  lPath) <- cExpr s lbht
+  (ExprPath rsPath) <- cExpr s rbhts
+  let (ExprPath oPath) = exprPath cfg e []
+      (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
+  oPath %> \_ -> do
+    need [lPath, rsPath]
+    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.sh"
+      [oPath, lPath, rsPath]
+    debugTrackWrite cfg [oPath]
+  return (ExprPath oPath)
+cRecipEach _ _ = error "bad argument to cRecipEach"
+
 -----------------------------------
 -- mapped versions of everything --
 -----------------------------------
