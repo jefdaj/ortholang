@@ -255,6 +255,10 @@ aParBlastRev' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd cfg cDir [o,e,s,q]
 aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
+-----------------------------------------------
+-- the hard part: mapped reciprocal versions --
+-----------------------------------------------
+
 
 -- TODO find a way to fix this or replace it...
 
@@ -279,3 +283,26 @@ aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 --   out %> \_ -> need paths' >> debugWriteLines cfg out paths' >> debugTrackWrite cfg [out]
 --   return (ExprPath out)
 -- cBlastpRBHEach _ _ = error "bad argument to cBlastpRBHEach"
+
+
+blastpRBHEach :: CutFunction
+blastpRBHEach = CutFunction
+  { fName      = "blastp_rbh_each"
+  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf bht)
+  , fFixity    = Prefix
+  , fCompiler  = cBlastpRBHEach
+  }
+
+cBlastpRBHEach :: CutState -> CutExpr -> Rules ExprPath
+cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
+  let mkExpr           = CutFun rtn salt deps 
+      (ExprPath oPath) = exprPath cfg e []
+      (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
+  (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"     [evalue, query, subjects]
+  (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev" [evalue, query, subjects]
+  oPath %> \_ -> do
+    need [fwdsPath, revsPath]
+    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py" [oPath, fwdsPath, revsPath]
+    debugTrackWrite cfg [oPath]
+  return (ExprPath oPath)
+cBlastpRBHEach _ _ = error "bad argument to cRecipEach"
