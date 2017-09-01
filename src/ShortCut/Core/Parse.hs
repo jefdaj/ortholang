@@ -165,7 +165,8 @@ pNum = do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
   n  <- digit
-  ns <- lexeme $ many (digit <|> oneOf ".e-")
+  ns <- many (digit <|> oneOf ".e-")
+  spaces
   return $ CutLit num 0 (n:ns)
 
 -- list of chars which can be escaped in ShortCut
@@ -196,7 +197,7 @@ pStr = CutLit str 0 <$> pQuoted <?> "string"
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
 pList :: ParseM CutExpr
 pList = do
-  lookAhead $ try $ pSym '[' -- TODO remove?
+  -- lookAhead $ try $ pSym '[' -- TODO remove?
   terms <- between (pSym '[') (pSym ']') (sepBy pExpr $ pSym ',')
   let deps = if null terms
                then []

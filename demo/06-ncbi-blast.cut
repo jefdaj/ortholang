@@ -18,3 +18,12 @@ genes7942 = extract_targets hits1
 # note: don't run hits2 because the dna isn't broken into genes!
 hits2 = extract_queries (blastx  pcc7942dna pcc6803 1e-7)
 hits3 = extract_queries (tblastn pcc6803 pcc7942dna 1e-7)
+
+# blast against a list of genomes
+# TODO fix inconstent argument order
+chlamy = load_faa "Creinhardtii_281_v5.5.protein.fa"
+hits4 = blastp_each 1e-10 pcc6803 [pcc7942prot, chlamy]
+ids4 = extract_all_queries hits4
+
+# reciprocal best hits
+hits5 = blastp_rbh 1e-10 pcc6803 pcc7942prot

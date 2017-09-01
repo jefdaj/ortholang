@@ -1,7 +1,19 @@
-# Demo of set operations.
-# Things to cover:
-# union, intersection, difference
-# can chain them together
-# all and any for lists of lists
-# show greecut venn diagram again with code?
-# can express anything you could draw as a venn diagram
+# Demo of set operations:
+#   union, intersection, difference
+#   can chain them together
+#   all and any for lists of lists
+#   can express anything you could draw as a venn diagram
+
+# old stuff:
+pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid158059_NC_017052.faa"
+pcc7942dna = load_fna "ncbi_Synechococcus-elongatus-PCC-7942-uid58045.fna"
+pcc7942prot = concat_fastas (load_faa_all ["ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
+                                           "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"])
+hits1 = blastp pcc6803 pcc7942prot 1e-10
+genes6803 = extract_queries hits1
+genes7942 = extract_targets hits1
+hits3 = extract_queries (tblastn pcc6803 pcc7942dna 1e-7)
+chlamy = load_faa "Creinhardtii_281_v5.5.protein.fa"
+hits4 = blastp_each 1e-10 pcc6803 [pcc7942prot, chlamy]
+ids4 = extract_all_queries hits4
+hits5 = blastp_rbh 1e-10 pcc6803 pcc7942prot

@@ -50,7 +50,7 @@ instance Pretty CutExpr where
       two = bopWith ($+$)
 
 pList :: (Pretty a) => [a] -> Doc
-pList es = text "[" <> fsep (punctuate (text ",") (map pPrint es)) <> text "]"
+pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
@@ -94,5 +94,5 @@ prettyResult _ EmptyList  _ = return $ text "[]"
 prettyResult cfg (ListOf t) f = do
   paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
   pretties <- mapM (prettyResult cfg t) paths
-  return $ text "[" <> fsep ((punctuate (text ",") pretties)) <> text "]"
+  return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg t f = fmap text $ (tShow t) (cfgTmpDir cfg </> f)

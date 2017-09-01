@@ -3,7 +3,7 @@
 #   command line arguments
 #   running it on the command line
 #   print something in the interpreter
-#   :help, :load, :show, :!, tab completion
+#   :help, :load, :drop, :show, :!, tab completion
 
 string1 = "good morning!"
 result = string1

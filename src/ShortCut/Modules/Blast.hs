@@ -230,7 +230,7 @@ cRecipEach _ _ = error "bad argument to cRecipEach"
 mkBlastEachFn :: String -> CutType -> CutType -> CutFunction
 mkBlastEachFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn ++ "_each"
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
   , fCompiler  = rMapLastTmp (aParBlast' wrappedCmdFn) "blast" bht
   }

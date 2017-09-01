@@ -176,7 +176,7 @@ cmdHelp :: CutState -> Handle -> String -> IO CutState
 cmdHelp st hdl _ = hPutStrLn hdl msg >> return st
   where
     -- TODO extract this to a file alonside usage.txt
-    msg = "You can type or paste ShortCut code here to run it,\
+    msg = "You can type or paste ShortCut code here to run it, \
           \same as in a script.\n\
           \There are also some extra commands:\n\n\
           \:help     to print this help text\n\
