@@ -75,7 +75,7 @@ executable shortcut
                     ShortCut.Modules.Tables,
                     ShortCut.Test,
                     ShortCut.Test.Deps
-                    ShortCut.Test.Eval,
+                    ShortCut.Test.Scripts,
                     ShortCut.Test.Parse,
                     ShortCut.Test.Repl
   build-depends:    Command,

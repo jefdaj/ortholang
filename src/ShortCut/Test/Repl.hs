@@ -80,11 +80,11 @@ goldenReplTree cfg ses = do
       stdin  = extractPrompted "shortcut >> " txt
       tmpDir = cfgTmpDir cfg'
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
-      wrappedCmd    = (shell "tree") { cwd = Just $ tmpDir }
+      cmd    = (shell "tree") { cwd = Just $ tmpDir }
       action = do
                  _ <- mockRepl stdin tmpOut cfg'
                  createDirectoryIfMissing True tmpDir
-                 out <- readCreateProcess wrappedCmd ""
+                 out <- readCreateProcess cmd ""
                  return $ pack out
   return $ goldenVsString name tree action
 
