@@ -2,12 +2,25 @@ with import ./nixpkgs;
 let
   biomartr   = import ./src/ShortCut/Modules/BioMartR;
   blast      = import ./src/ShortCut/Modules/Blast;
+  blastrbh   = import ./src/ShortCut/Modules/BlastRBH;
   seqio      = import ./src/ShortCut/Modules/SeqIO;
+  tables     = import ./src/ShortCut/Modules/Tables;
   cabalPkg   = haskellPackages.callPackage ./src/shortcut.nix {};
-  runDepends = [ biomartr blast seqio ncbi-blast crb-blast ncurses ] # TODO ncurses?
-               ++ biomartr.runDepends
-               ++ blast.runDepends
-               ++ seqio.runDepends;
+  runDepends = [
+    biomartr
+    blast
+    blastrbh
+    seqio
+    tables
+    ncbi-blast
+    crb-blast
+    ncurses # TODO is this needed?
+  ]
+    ++ biomartr.runDepends
+    ++ blast.runDepends
+    ++ blastrbh.runDepends
+    ++ tables.runDepends
+    ++ seqio.runDepends;
 
 # see https://github.com/jml/nix-haskell-example
 in haskell.lib.overrideCabal cabalPkg (drv: {

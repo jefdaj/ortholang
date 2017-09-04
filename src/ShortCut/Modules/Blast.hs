@@ -18,18 +18,16 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
-    , mkBlastFn  "blastp" faa faa
-    , mkBlastFn  "blastx" fna faa
-    , mkBlastFn "tblastn" faa fna
-    , mkBlastFn "tblastx" fna fna
-    , filterEvalue
-    , bestHits
-    , mkBlastEachFn  "blastn" fna fna -- TODO why doesn't this one work??
-    , mkBlastEachFn  "blastp" faa faa
-    , mkBlastEachFn  "blastx" fna faa
-    , mkBlastEachFn "tblastn" faa fna
-    , mkBlastEachFn "tblastx" fna fna
+    [ mkBlastFn        "blastn" fna fna -- TODO why doesn't this one work??
+    , mkBlastFn        "blastp" faa faa
+    , mkBlastFn        "blastx" fna faa
+    , mkBlastFn       "tblastn" faa fna
+    , mkBlastFn       "tblastx" fna fna
+    , mkBlastEachFn    "blastn" fna fna -- TODO why doesn't this one work??
+    , mkBlastEachFn    "blastp" faa faa
+    , mkBlastEachFn    "blastx" fna faa
+    , mkBlastEachFn   "tblastn" faa fna
+    , mkBlastEachFn   "tblastx" fna fna
     , mkBlastEachRevFn "blastn" fna fna -- TODO don't expose to users?
     , mkBlastEachRevFn "blastp" faa faa -- TODO don't expose to users?
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
@@ -152,39 +150,6 @@ aParBlastRev :: String -> ActionFn
 aParBlastRev b c d [o, q, s, e] = aParBlast b c d [o, s, q, e]
 aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
----------------------------
--- filter hits by evalue --
----------------------------
-
-filterEvalue :: CutFunction
-filterEvalue = CutFunction
-  { fName      = "filter_evalue"
-  , fTypeCheck = defaultTypeCheck [num, bht] bht
-  , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aFilterEvalue "blast" bht
-  }
-
-aFilterEvalue :: ActionFn
-aFilterEvalue cfg (CacheDir tmp) [ExprPath out, ExprPath evalue, ExprPath hits] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "filter_evalue.R" [out, evalue, hits]
-aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
-
--------------------------------
--- get the best hit per gene --
--------------------------------
-
-bestHits :: CutFunction
-bestHits = CutFunction
-  { fName      = "best_hits"
-  , fTypeCheck = defaultTypeCheck [bht] bht
-  , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aBestHits "blast" bht
-  }
-
-aBestHits :: ActionFn
-aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
-aBestHits _ _ args = error $ "bad argument to aBestHits: " ++ show args
 
 ----------------------------------
 -- mapped versions of blast fns --

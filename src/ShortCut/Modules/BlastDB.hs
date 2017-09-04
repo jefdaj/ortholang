@@ -26,6 +26,9 @@ bdb = CutType
   , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
   }
 
+-- TODO silence output?
+-- TODO does this have an error where db path depends on the outer expression
+--      in addition to actual inputs?
 mkBlastDB :: CutFunction
 mkBlastDB = CutFunction
   { fName      = "makeblastdb"
@@ -54,9 +57,9 @@ tMkBlastDB _ = error "makeblastdb requires a fasta file"
  -      needs to be rebuilt?
  -}
 cMkBlastDB :: RulesFn
-cMkBlastDB s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
+cMkBlastDB s@(_,cfg) (CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath dbPrefix) = exprPath cfg e []
+  let (ExprPath dbPrefix) = exprPath cfg fa []
       dbType = if      typeOf fa == fna then "nucl"
                else if typeOf fa == faa then "prot"
                else    error $ "invalid FASTA type: " ++ show (typeOf fa)
