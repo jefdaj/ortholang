@@ -1,23 +1,4 @@
-#!/usr/bin/env python
-
-'''
-Parallel BLAST uses GNU Parallel to speed up BLAST+, as suggested here:
-https://www.biostars.org/p/63816/
-
-It was adapted from an earlier "blast batch" script; I plan to remove most of
-the custom options here and just take regular BLAST commands eventually. Note
-that the query sequence gets split into 100K sections, so nothing much changes
-if it has fewer lines than that.
-
-Usage:
-    parallelblast --help
-    parallelblast -t <tmpdir> -o <outcsv> -c <cmd> -q <query> -s <subject> [-e <evalue>] [-pv]
-
-Options:
-  -h --help               Show this help text
-  -c --cmd <cmd>          BLAST comand to run (blastn, tblastn, ...)
-  -q --query <query>      FASTA query sequences (must match the command!)
-  -s --subject <subject>  FASTA subject/target sequences (must match the command!) 
+  -d --dbpath <dbpath>    FASTA database prefix (must match the command!)
   -o --outcsv <outcsv>    Where to write the final hit table (CSV spreadsheet)
   -t --tmpdir <tmpdir>    Where to put databases and hit tables [default: bbtmp]
   -e --evalue <evalue>    E-value cutoff [default: 1e-5]
@@ -31,14 +12,17 @@ from glob               import glob
 from os                 import remove, devnull
 from os.path            import exists, join, basename, dirname, splitext
 from subprocess         import check_call
+from hashlib            import md5
 
 def log(args, message):
     if args['--verbose']:
         print message
 
 def hash_file(filename):
+    # this matches the digest fn in ShortCut.Core.Util
+    # TODO check that they really match!
     with open(filename, 'r') as f:
-        return str(abs(hash(f.read())))
+        return md5(f.read()).hexdigest()[:10]
 
 def db_type(cmd):
     dbt = 'nucl'
@@ -69,7 +53,7 @@ def make_db(args, tmpdir, fasta, dbtype):
         , '-out', db
         , '-title', basename(db)
         , '-dbtype', dbtype
-        # , '-parse_seqids' # TODO sanitize those
+        # , '-parse_seqids' # TODO are these helpful? need to sanitize if so
         ]
     try:
         log(args, ' '.join(cmd))
@@ -97,7 +81,7 @@ def make_hits(args, db):
     else:
         q = query
     cmd = \
-        [ 'BLASTDB=%s' % dirname(db)
+        [ 'BLASTDB=%s' % dirname(db) # TODO error here with path separator?
         , args['--cmd']
         , '-db', basename(db)
         , '-query', q
@@ -128,7 +112,10 @@ def main():
     if not exists(tmp):
         mkpath(tmp)
     dbt = db_type(args['--cmd'])
-    db  = make_db(args, tmp, args['--subject'], dbt)
+    try:
+        db = args['--dbpath']
+    except:
+        db  = make_db(args, tmp, args['--subject'], dbt)
     out = make_hits(args, db)
     return out
 

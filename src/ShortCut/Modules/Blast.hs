@@ -8,6 +8,7 @@ import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
 import ShortCut.Core.Paths        (exprPath, cacheDir)
+import ShortCut.Core.Util         (digest)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
@@ -15,6 +16,7 @@ import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 import System.Directory           (createDirectoryIfMissing)
 import Control.Monad.Trans        (liftIO)
+import System.FilePath            (takeBaseName, (</>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -73,21 +75,42 @@ mkBlastFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aParBlast wrappedCmdFn) "blast" bht
+  , fCompiler  = rSimpleTmp (aParBlast wrappedCmdFn sType) "blast" bht
   }
 
--- TODO move to Util?
--- listFiles :: FilePath -> Action [FilePath]
--- listFiles dir = fmap (map (dir </>)) (getDirectoryFiles dir ["*"])
+-- parallelblast.py also has a function for this, but after I wrote that I
+-- discovered the race condition where more than one instance of it tries to
+-- create the db at once. Creating it first with Shake first prevents it.
+aBlastDB :: CutConfig -> CutType -> ExprPath -> Action ExprPath
+aBlastDB cfg sType (ExprPath sPath) = do
+  need [sPath]
+  sDigest <- fmap digest $ debugReadFile cfg sPath
+  -- this should match find_db in parallelblast.py:
+  let dbPath = cDir </> (sDigest ++ "_" ++ dbType)
+  unit $ quietly $ wrappedCmd cfg [Cwd cDir] "makeblastdb"
+    [ "-in"    , sPath
+    , "-out"   , dbPath
+    , "-title" , takeBaseName dbPath
+    , "-dbtype", dbType
+    ]
+  return (ExprPath dbPath)
+  where
+    (CacheDir cDir) = cacheDir cfg "blast"
+    dbType = if      sType == fna then "nucl"
+             else if sType == faa then "prot"
+             else    error $ "invalid FASTA type for aBlastDB: " ++ show sType
 
-aParBlast :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlast bCmd cfg (CacheDir cDir) [ExprPath out, ExprPath query, ExprPath subject, ExprPath evalue] = do
+aParBlast :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast bCmd sType cfg (CacheDir cDir)
+          [ExprPath out, ExprPath query, subject, ExprPath evalue] = do
   -- TODO is this automatic? need [query, subject, ePath]
   eStr <- fmap init $ debugReadFile cfg evalue
+  (ExprPath dbPath) <- aBlastDB cfg sType subject -- TODO have to make this a pattern!
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
   unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
-    [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
-aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+    -- [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
+    [ "-c", bCmd, "-t", cDir, "-q", query, "-d", dbPath, "-o", out, "-e", eDec, "-p"]
+aParBlast _ _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 -----------------------------------------------------------
 -- "reverse" versions to help write reciprocal best hits --
@@ -101,13 +124,13 @@ mkBlastRevFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn ++ "_rev"
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aParBlastRev wrappedCmdFn) "blast" bht
+  , fCompiler  = rSimpleTmp (aParBlastRev wrappedCmdFn sType) "blast" bht
   }
 
 -- just switches the query and subject, which won't work for asymmetric blast fns!
-aParBlastRev :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlastRev bCmd cfg cDir [o, q, s, e] = aParBlast bCmd cfg cDir [o, s, q, e]
-aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+aParBlastRev :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlastRev bCmd sType cfg cDir [o, q, s, e] = aParBlast bCmd sType cfg cDir [o, s, q, e]
+aParBlastRev _ _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 ---------------------------
 -- filter hits by evalue --
@@ -232,14 +255,14 @@ mkBlastEachFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn ++ "_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aParBlast' wrappedCmdFn) "blast" bht
+  , fCompiler  = rMapLastTmp (aParBlast' wrappedCmdFn sType) "blast" bht
   }
 
 -- kludge to allow easy mapping over the subject rather than evalue
-aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlast' bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
- aParBlast bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
-aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+aParBlast' :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast' bCmd sType cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
+ aParBlast bCmd sType cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
+aParBlast' _ _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 ---------------------------------------------------------------------
 -- reverse mapped versions (needed for mapped reciprocal versions) --
@@ -251,13 +274,13 @@ mkBlastEachRevFn wrappedCmdFn qType sType = CutFunction
   { fName      = wrappedCmdFn ++ "_each_rev"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aParBlastRev' wrappedCmdFn) "blast" bht
+  , fCompiler  = rMapLastTmp (aParBlastRev' wrappedCmdFn sType) "blast" bht
   }
 
 -- kludge to allow easy mapping over the subject rather than evalue
-aParBlastRev' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd cfg cDir [o,e,s,q]
-aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+aParBlastRev' :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlastRev' bCmd sType cfg cDir [o,e,q,s] = aParBlast' bCmd sType cfg cDir [o,e,s,q]
+aParBlastRev' _ _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 -----------------------------------------------
 -- the hard part: mapped reciprocal versions --

@@ -21,7 +21,6 @@ nonDeterministicCut path = (takeDirectory . takeDirectory) path `elem` dirs
   where
     dirs = map ("tests" </>) ["blast", "crb"]
 
--- TODO oh dammit, use findByExtension
 getTestCuts :: IO [FilePath]
 getTestCuts = do
   testDir  <- getDataFileName "tests"
@@ -34,6 +33,8 @@ getTestCuts = do
 -- TODO does this misleadinly imply shell interpolation in tree files?
 fixWorkingDir :: String -> String -> String
 fixWorkingDir wd = replace wd "$PWD"
+
+-- TODO add an assertion that none of the tmpfiles include the tmpdir path?
 
 goldenScriptAndTree :: (FilePath, FilePath, (Maybe FilePath))
                     -> CutConfig -> IO TestTree
