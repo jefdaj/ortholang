@@ -18,7 +18,7 @@ write_hits <- function(hits, filename)
               quote=FALSE, row.names=FALSE, col.names=FALSE)
 
 filter_evalue <- function(out, num, bht) {
-  cutoff <- as.numeric(read.table(num))
+  cutoff <- as.numeric(read.table(num)) # TODO fail if this doesn't parse!
   read_hits(bht) %>% filter(evalue <= cutoff) %>% write_hits(out)
 }
 

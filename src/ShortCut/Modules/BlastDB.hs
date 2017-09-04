@@ -19,10 +19,17 @@ cutModule = CutModule
     ]
   }
 
-bdb :: CutType
-bdb = CutType
-  { tExt  = "bdb"
-  , tDesc = "blast database"
+bnd :: CutType
+bnd = CutType
+  { tExt  = "bnd"
+  , tDesc = "blast nucleic acid database"
+  , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
+  }
+
+bpd :: CutType
+bpd = CutType
+  { tExt  = "bpd"
+  , tDesc = "blast protein database"
   , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
   }
 
@@ -38,7 +45,9 @@ mkBlastDB = CutFunction
   }
 
 tMkBlastDB :: TypeChecker
-tMkBlastDB [x] | x `elem` [faa, fna] = Right bdb
+tMkBlastDB [x]
+  | x == fna = Right bnd
+  | x == faa = Right bpd
 tMkBlastDB _ = error "makeblastdb requires a fasta file"
 
 {- There are a few types of BLAST database files. For nucleic acids:
@@ -57,12 +66,10 @@ tMkBlastDB _ = error "makeblastdb requires a fasta file"
  -      needs to be rebuilt?
  -}
 cMkBlastDB :: RulesFn
-cMkBlastDB s@(_,cfg) (CutFun _ _ _ _ [fa]) = do
+cMkBlastDB s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let (ExprPath dbPrefix) = exprPath cfg fa []
-      dbType = if      typeOf fa == fna then "nucl"
-               else if typeOf fa == faa then "prot"
-               else    error $ "invalid FASTA type: " ++ show (typeOf fa)
+      dbType = if rtn == bnd then "nucl" else "prot"
   dbPrefix %> \_ -> do
     need [faPath]
     unit $ quietly $ wrappedCmd cfg [] "makeblastdb"
