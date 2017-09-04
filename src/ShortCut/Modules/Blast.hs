@@ -9,15 +9,15 @@ import ShortCut.Core.Types
 
 import Data.Scientific            (formatScientific, FPFormat(..))
 import ShortCut.Core.Paths        (exprPath, cacheDir)
-import ShortCut.Core.Util         (digest)
+-- import ShortCut.Core.Util         (digest)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
-import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLast, defaultTypeCheck)
+import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 import System.Directory           (createDirectoryIfMissing)
 import Control.Monad.Trans        (liftIO)
-import System.FilePath            (takeBaseName, (</>))
+import System.FilePath            (takeBaseName)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -96,28 +96,43 @@ mkBlastDB = CutFunction
   , fCompiler  = cMkBlastDB
   }
 
-tMkBlastDB :: [CutType] -> Either String CutType
+tMkBlastDB :: TypeChecker
 tMkBlastDB [x] | x `elem` [faa, fna] = Right bdb
 tMkBlastDB _ = error "makeblastdb requires a fasta file"
 
-cMkBlastDB :: CutState -> CutExpr -> Rules ExprPath
+{- There are a few types of BLAST database files. For nucleic acids:
+ - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
+ -
+ - And for proteins:
+ - <prefix>.phr, <prefix>.pin, <prefix>.pog, ...
+ -
+ - The BLAST programs just expect to be passed the prefix, which is fine for
+ - most purposes but difficult in Shake; since it's not actually a file Shake
+ - will complain that the Action failed to generate it. My hacky solution for
+ - now is just to `touch` the prefix itself. BLAST doesn't seem to mind one
+ - extra file, and Shake doesn't mind several.
+ -
+ - TODO does it work properly when the input fasta file changes and the database
+ -      needs to be rebuilt?
+ -}
+cMkBlastDB :: RulesFn
 cMkBlastDB s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (CacheDir tmpDir) = cacheDir cfg "makeblastdb"
-      (ExprPath dbPath) = exprPath cfg e []
+  let (ExprPath dbPrefix) = exprPath cfg e []
       dbType = if      typeOf fa == fna then "nucl"
                else if typeOf fa == faa then "prot"
-               else    error $ "invalid FASTA type for aBlastDB: " ++ show (typeOf fa)
-  dbPath %> \_ -> do
+               else    error $ "invalid FASTA type: " ++ show (typeOf fa)
+  dbPrefix %> \_ -> do
     need [faPath]
-    unit $ quietly $ wrappedCmd cfg [Cwd tmpDir] "makeblastdb"
+    unit $ quietly $ wrappedCmd cfg [] "makeblastdb"
       [ "-in"    , faPath
-      , "-out"   , dbPath
-      , "-title" , takeBaseName dbPath -- TODO does this make sense?
+      , "-out"   , dbPrefix
+      , "-title" , takeBaseName dbPrefix -- TODO does this make sense?
       , "-dbtype", dbType
       ]
-    debugTrackWrite cfg [faPath]
-  return (ExprPath dbPath)
+    unit $ quietly $ wrappedCmd cfg [] "touch" [dbPrefix]
+    debugTrackWrite cfg [dbPrefix]
+  return (ExprPath dbPrefix)
 cMkBlastDB _ _ = error "bad argument to mkBlastDB"
 
 ---------------------------
@@ -130,62 +145,76 @@ mkBlastFn bCmd qType sType = CutFunction
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
   -- , fCompiler  = rSimpleTmp (aParBlast bCmd sType) "blast" bht
-  , fCompiler  = cMkBlast bCmd aParBlast
+  , fCompiler  = cMkBlast2 bCmd aParBlast
   }
 
 -- TODO wait, can this be done as just a transformation of the AST + an action fn?
 --      (that is, no Rules monad needed?)
 --      if so, can also write the _each version the same way!!
-cMkBlast :: String
-         -> (String -> CutConfig -> CacheDir -> [ExprPath] -> Action ())
-         -> (CutState -> CutExpr -> Rules ExprPath)
-cMkBlast bCmd bActFn st@(_,cfg) e@(CutFun _ _ _ _ [q, s, n]) = do
-  qPath  <- cExpr st q
-  dbPath <- cExpr st $ CutFun bdb (saltOf s) (depsOf s) "makeblastdb" [s]
-  nPath  <- cExpr st n
-  let (ExprPath htPath) = exprPath cfg e []
-      tmpDir = cacheDir cfg "blast"
-  htPath %> \_ -> bActFn bCmd cfg tmpDir [ExprPath htPath, qPath, dbPath, nPath]
-  return (ExprPath htPath)
-cMkBlast _ _ _ _ = error "bad argument to cMkBlast"
+-- cMkBlast :: String
+--          -> (String -> ActionFn)
+--          -> RulesFn
+-- cMkBlast bCmd bActFn st@(_,cfg) e@(CutFun _ _ _ _ [q, s, n]) = do
+--   qPath  <- cExpr st q
+--   dbPath <- cExpr st $ CutFun bdb (saltOf s) (depsOf s) "makeblastdb" [s]
+--   nPath  <- cExpr st n
+--   let (ExprPath htPath) = exprPath cfg e []
+--       tmpDir = cacheDir cfg "blast"
+--   htPath %> \_ -> bActFn bCmd cfg tmpDir [ExprPath htPath, qPath, dbPath, nPath]
+--   return (ExprPath htPath)
+-- cMkBlast _ _ _ _ = error "bad argument to cMkBlast"
+
+cMkBlast2 :: String -> (String -> ActionFn) -> RulesFn
+cMkBlast2 bCmd bActFn st (CutFun rtn salt deps name [q, s, n]) = -- TODO is arg order right?
+  rSimpleTmp (bActFn bCmd) "blast" bht st e'
+  where
+    db = CutFun bdb salt (depsOf s) "makeblastdb" [s]
+    e' = CutFun rtn salt deps name [q, db, n] -- TODO is it confusing to keep the same name?
+cMkBlast2 _ _ _ _ = error "bad argument to cMkBlast2"
 
 -- TODO this typechecks but WILL NOT WORK! need to make the blast db first
 -- rMapLast takes an action function, which needs to be vectorized on its last argument
 -- so we have the prime versions of each blast action function to work around that
 -- TODO map functions that do that automatically
-cMkBlastEach :: String
-             -> (String -> CutConfig -> CacheDir -> [ExprPath] -> Action ())
-             -> (CutState -> CutExpr -> Rules ExprPath)
-cMkBlastEach bCmd bActFn s@(_,cfg) = rMapLast tmpFn (bActFn bCmd) "blast" bht s
-  where
-    tmpFn = const $ cacheDir cfg "blast"
+cMkBlastEach :: String -> (String -> ActionFn) -> RulesFn
+cMkBlastEach bCmd bActFn = -- s@(_,cfg) = -- TODO transform: (CutFun rtn salt deps name [q, ss, n])
+  rMapLastTmp (bActFn bCmd) "blast" (ListOf bht)
+  -- TODO could do both the prime functions here by reversing last two args right?
+
+  -- TODO MAYBE WHAT'S NEEDED IS A DIFFERENT ACTION FUNCTION THAT DOES THE AST TRANSFORMATION?
+  --      AHHH IT'S JUST A COMBINATION OF THE PRIME ONES YOU DID ALREADY,
+  --      AND THE MAKEBLASTDB TRANSFORMATION YOU DID ABOVE... RIGHT?
+  -- = rMapLast tmpFn (bActFn bCmd) "blast" bht s
+  -- for ref: rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefix t s
+  --where
+    --tmpFn = const $ cacheDir cfg "blast"
 
 -- parallelblast.py also has a function for this, but after I wrote that I
 -- discovered the race condition where more than one instance of it tries to
 -- create the db at once. Creating it first with Shake first prevents it.
 -- aBlastDB sType cfg [ExprPath dbPath, ExprPath sPath] = do
 -- aBlastDB _ _ _ = error "bad argument to aBlastDB"
-aBlastDB :: CutType -> CutConfig -> ExprPath -> Action ExprPath
-aBlastDB sType cfg (ExprPath sPath) = do
-  need [sPath]
-  sDigest <- fmap digest $ debugReadFile cfg sPath
-  -- this should match find_db in parallelblast.py:
-  let dbPath = cDir </> (sDigest ++ "_" ++ dbType)
-  unit $ quietly $ wrappedCmd cfg [Cwd cDir] "makeblastdb"
-    [ "-in"    , sPath
-    , "-out"   , dbPath
-    , "-title" , takeBaseName dbPath
-    , "-dbtype", dbType
-    ]
-  debugTrackWrite cfg [dbPath]
-  return (ExprPath dbPath)
-  where
-    (CacheDir cDir) = cacheDir cfg "blast"
-    dbType = if      sType == fna then "nucl"
-             else if sType == faa then "prot"
-             else    error $ "invalid FASTA type for aBlastDB: " ++ show sType
+-- aBlastDB :: CutType -> CutConfig -> ExprPath -> Action ExprPath
+-- aBlastDB sType cfg (ExprPath sPath) = do
+--   need [sPath]
+--   sDigest <- fmap digest $ debugReadFile cfg sPath
+--   -- this should match find_db in parallelblast.py:
+--   let dbPath = cDir </> (sDigest ++ "_" ++ dbType)
+--   unit $ quietly $ wrappedCmd cfg [Cwd cDir] "makeblastdb"
+--     [ "-in"    , sPath
+--     , "-out"   , dbPath
+--     , "-title" , takeBaseName dbPath
+--     , "-dbtype", dbType
+--     ]
+--   debugTrackWrite cfg [dbPath]
+--   return (ExprPath dbPath)
+--   where
+--     (CacheDir cDir) = cacheDir cfg "blast"
+--     dbType = if      sType == fna then "nucl"
+--              else if sType == faa then "prot"
+--              else    error $ "invalid FASTA type for aBlastDB: " ++ show sType
 
-aParBlast :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast :: String -> ActionFn
 aParBlast bCmd cfg (CacheDir cDir)
           [ExprPath out, ExprPath query, ExprPath db, ExprPath evalue] = do
   -- TODO is this automatic? need [query, subject, ePath]
@@ -211,12 +240,12 @@ mkBlastRevFn bCmd qType sType = CutFunction
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
   -- , fCompiler  = rSimpleTmp (aParBlastRev bCmd sType) "blast" bht
-  , fCompiler  = cMkBlast bCmd aParBlastRev
+  , fCompiler  = cMkBlast2 bCmd aParBlastRev
   }
 
 -- just switches the query and subject, which won't work for asymmetric blast fns!
 -- TODO write specific ones for that, or a fn + mapping
-aParBlastRev :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlastRev :: String -> ActionFn
 aParBlastRev b c d [o, q, s, e] = aParBlast b c d [o, s, q, e]
 aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
@@ -232,7 +261,7 @@ filterEvalue = CutFunction
   , fCompiler  = rSimpleTmp aFilterEvalue "blast" bht
   }
 
-aFilterEvalue :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aFilterEvalue :: ActionFn
 aFilterEvalue cfg (CacheDir tmp) [ExprPath out, ExprPath evalue, ExprPath hits] = do
   unit $ quietly $ wrappedCmd cfg [Cwd tmp] "filter_evalue.R" [out, evalue, hits]
 aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
@@ -249,7 +278,7 @@ bestHits = CutFunction
   , fCompiler  = rSimpleTmp aBestHits "blast" bht
   }
 
-aBestHits :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aBestHits :: ActionFn
 aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
   unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
 aBestHits _ _ args = error $ "bad argument to aBestHits: " ++ show args
@@ -268,7 +297,7 @@ reciprocal = CutFunction
   , fCompiler  = rSimpleTmp aRecip "blast" bht
   }
 
-aRecip :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aRecip :: ActionFn
 aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
   unit $ quietly $ wrappedCmd cfg [Cwd tmp] "reciprocal.R" [out, left, right]
 aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
@@ -283,7 +312,7 @@ blastpRBH = CutFunction
   }
 
 -- it this works I'll be modeling new versions of the map ones after it
-cBlastpRBH :: CutState -> CutExpr -> Rules ExprPath
+cBlastpRBH :: RulesFn
 cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
   let lhits = CutFun bht salt deps "blastp"     [lfaa , rfaa , evalue]
       rhits = CutFun bht salt deps "blastp"     [rfaa , lfaa , evalue]
@@ -300,7 +329,7 @@ cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
 cBlastpRBH _ _ = error "bad argument to cBlastRBH"
 
 -- this is an attempt to convert cBlastpRBH into a form usable with rMapLastTmp
-aBlastpRBH :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aBlastpRBH :: ActionFn
 aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
   unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
 aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
@@ -319,7 +348,7 @@ reciprocalEach = CutFunction
   }
 
 -- TODO how to hook this up to blastp_each?
-cRecipEach :: CutState -> CutExpr -> Rules ExprPath
+cRecipEach :: RulesFn
 cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   (ExprPath lsPath) <- cExpr s lbhts
   (ExprPath rsPath) <- cExpr s rbhts
@@ -344,11 +373,12 @@ mkBlastEachFn bCmd qType sType = CutFunction
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
   -- , fCompiler  = rMapLastTmp (aParBlast' bCmd sType) "blast" bht
-  , fCompiler  = cMkBlastEach bCmd aParBlast
+  , fCompiler  = cMkBlastEach bCmd aParBlast'
   }
 
 -- kludge to allow easy mapping over the subject rather than evalue
-aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+-- TODO have a version of the map functions that does this on its own
+aParBlast' :: String -> ActionFn
 aParBlast' bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
  aParBlast bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
 aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
@@ -364,13 +394,13 @@ mkBlastEachRevFn bCmd qType sType = CutFunction
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
   , fFixity    = Prefix
   -- , fCompiler  = rMapLastTmp (aParBlastRev' bCmd sType) "blast" bht
-  , fCompiler  = cMkBlastEach bCmd aParBlastRev
+  , fCompiler  = cMkBlastEach bCmd aParBlastRev'
   }
 
 -- kludge to allow easy mapping over the subject rather than evalue
--- aParBlastRev' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
--- aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd sType cfg cDir [o,e,s,q]
--- aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+aParBlastRev' :: String -> ActionFn
+aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd cfg cDir [o,e,s,q]
+aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 -----------------------------------------------
 -- the hard part: mapped reciprocal versions --
@@ -389,7 +419,7 @@ mkBlastEachRevFn bCmd qType sType = CutFunction
 -- 
 -- -- TODO oh right, that might not be directly a list!
 -- --      can this be done a cleaner way??
--- cBlastpRBHEach :: CutState -> CutExpr -> Rules ExprPath
+-- cBlastpRBHEach :: RulesFn
 -- cBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutList _ _ _ ss]) = do
 -- -- cBlastpRBHEach st@(scr,cfg) expr@(CutFun _ salt _ _ [e, q, ss]) = do
 --   -- let subjects = extractExprs scr ss
@@ -410,7 +440,8 @@ blastpRBHEach = CutFunction
   , fCompiler  = cBlastpRBHEach
   }
 
-cBlastpRBHEach :: CutState -> CutExpr -> Rules ExprPath
+
+cBlastpRBHEach :: RulesFn
 cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
   -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
   -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]

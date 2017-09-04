@@ -109,7 +109,7 @@ cLink s@(_,cfg) expr rtype prefix = do
     quietly $ wrappedCmd cfg [] "ln" ["-fs", src, out]
   return (ExprPath outPath)
 
-cLoadOne :: CutType -> CutState -> CutExpr -> Rules ExprPath
+cLoadOne :: CutType -> RulesFn
 cLoadOne t s (CutFun _ _ _ n [p]) = cLink s p t n
 cLoadOne _ _ _ = error "bad argument to cLoadOne"
 
@@ -131,7 +131,7 @@ mkLoadList name rtn = CutFunction
   , fCompiler  = cLoadList rtn
   }
 
-cLoadList :: CutType -> CutState -> CutExpr -> Rules ExprPath
+cLoadList :: CutType -> RulesFn
 cLoadList elemRtnType s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
   -- TODO is t here always str?
   paths <- mapM (\p -> cLink s p t name) ps -- is cLink OK with no paths?
@@ -150,7 +150,7 @@ cLoadList _ _ _ = error "bad arguments to cLoadList"
 -- uniqLines = unlines . toList . fromList . lines
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd
-aTsvColumn :: Int -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aTsvColumn :: Int -> ActionFn
 aTsvColumn n cfg _ [outPath, (ExprPath tsvPath)] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
@@ -163,8 +163,7 @@ aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 -------------------------------------------------------------------------------
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
-rSimpleTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
-           -> (CutState -> CutExpr -> Rules ExprPath)
+rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
 rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let (ExprPath outPath) = exprPath cfg e []
@@ -177,8 +176,7 @@ rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
-rMapLastTmp :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
-            -> (CutState -> CutExpr -> Rules ExprPath)
+rMapLastTmp :: ActionFn -> String -> CutType -> RulesFn
 rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefix t s
   where
     tmpDir = cacheDir cfg tmpPrefix
@@ -187,8 +185,7 @@ rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefi
 
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmps :: (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
-             -> (CutState -> CutExpr -> Rules ExprPath)
+rMapLastTmps :: ActionFn -> String -> CutType -> RulesFn
 rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
   where
     -- TODO what if the same last arg is used in different mapping fns? will it be unique?
@@ -198,10 +195,9 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
 -- TODO put the .args and final functions in the cachedir of the regular fn?
 -- TODO now that the new Shake strategy works, clean it up!
 -- TODO sprinkle some need in here?
-rMapLast :: ([FilePath] -> CacheDir) -- this will be called to get each tmpDir
-         -> (CutConfig -> CacheDir -> [ExprPath] -> Action ()) -> String -> CutType
-         -> (CutState -> CutExpr -> Rules ExprPath)
+rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
 rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths

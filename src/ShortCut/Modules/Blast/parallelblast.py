@@ -1,3 +1,23 @@
+#!/usr/bin/env python
+
+'''
+Parallel BLAST uses GNU Parallel to speed up BLAST+, as suggested here:
+https://www.biostars.org/p/63816/
+
+It was adapted from an earlier "blast batch" script; I plan to remove most of
+the custom options here and just take regular BLAST commands eventually. Note
+that the query sequence gets split into 100K sections, so nothing much changes
+if it has fewer lines than that.
+
+Usage:
+  parallelblast --help
+  parallelblast -t <tmpdir> -o <outcsv> -c <cmd> -q <query> (-s <subject> | -d <dbpath>) [-e <evalue>] [-pv]
+
+Options:
+  -h --help               Show this help text
+  -c --cmd <cmd>          BLAST comand to run (blastn, tblastn, ...)
+  -q --query <query>      FASTA query sequences (must match the command!)
+  -s --subject <subject>  FASTA subject/target sequences (must match the command!) 
   -d --dbpath <dbpath>    FASTA database prefix (must match the command!)
   -o --outcsv <outcsv>    Where to write the final hit table (CSV spreadsheet)
   -t --tmpdir <tmpdir>    Where to put databases and hit tables [default: bbtmp]

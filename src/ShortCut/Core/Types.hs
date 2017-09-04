@@ -36,22 +36,30 @@ module ShortCut.Core.Types
   , ExprPath(..)
   , VarPath(..)
   , ResPath(..)
-  -- misc
+  -- misc experimental stuff
   , extractExprs
+  , ActionFn
+  , RulesFn
+  , TypeChecker
   )
   where
 
 -- import Prelude hiding (print)
 import qualified Text.Parsec as P
 
+import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub)
-import Development.Shake              (Rules)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
 import Data.Maybe            (fromJust)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+
+-- TODO where should these go?
+type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
+type RulesFn     = CutState -> CutExpr -> Rules ExprPath
+type TypeChecker = [CutType] -> Either String CutType
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
