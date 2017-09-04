@@ -64,6 +64,7 @@ executable shortcut
                     ShortCut.Modules.Blast,
                     ShortCut.Modules.BlastDB,
                     ShortCut.Modules.BlastCRB,
+                    ShortCut.Modules.BlastRBH,
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.Glob,
                     ShortCut.Modules.Length,

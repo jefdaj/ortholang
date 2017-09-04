@@ -7,64 +7,34 @@ module ShortCut.Modules.Blast where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.Scientific            (formatScientific, FPFormat(..))
-import ShortCut.Core.Paths        (exprPath, cacheDir)
--- import ShortCut.Core.Util         (digest)
-import ShortCut.Core.Compile      (cExpr)
-import ShortCut.Core.Config       (wrappedCmd)
-import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
-import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
-import ShortCut.Modules.SeqIO     (faa, fna)
-import ShortCut.Modules.BlastDB   (bdb)
-import System.Directory           (createDirectoryIfMissing)
-import Control.Monad.Trans        (liftIO)
-import System.FilePath            (takeBaseName)
+import Data.Scientific          (formatScientific, FPFormat(..))
+import ShortCut.Core.Config     (wrappedCmd)
+import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite)
+import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
+import ShortCut.Modules.BlastDB (bdb)
+import ShortCut.Modules.SeqIO   (faa, fna)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    -- [ mkBlastDB
-
     [ mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastFn  "blastp" faa faa
     , mkBlastFn  "blastx" fna faa
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
-
     , filterEvalue
     , bestHits
-
     , mkBlastEachFn  "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastEachFn  "blastp" faa faa
     , mkBlastEachFn  "blastx" fna faa
     , mkBlastEachFn "tblastn" faa fna
     , mkBlastEachFn "tblastx" fna fna
-
     , mkBlastEachRevFn "blastn" fna fna -- TODO don't expose to users?
     , mkBlastEachRevFn "blastp" faa faa -- TODO don't expose to users?
-
-    -- TODO move to a new module:
-    , reciprocal
-    , blastpRBH
-    , blastpRBHEach
-    -- , blastpRBHEach -- TODO broken :(
-
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
   }
-
-{- The most straightforward way I can now think to do this is having a
- - top-level db dir cache/blastdb, and in there is a folder for each database.
- - The folder can be named by the hash of the fasta file it's made from, and
- - inside are whatever files blast wants to make.
- -
- - I don't think this needs to be exposed to ShortCut users as an actual
- - CutType yet, but that could happen at some point. Maybe it will seem more
- - like the thing to do once I get folder-based types figured out in a standard
- - way? (They'll probably come up elsewhere, like with tree-making programs) It
- - also might be needed to use the NCBI nr database; not sure yet.
- -}
 
 -- tsv with these columns:
 -- qseqid sseqid pident length mismatch gapopen
@@ -107,16 +77,16 @@ mkBlastFn bCmd qType sType = CutFunction
 
 cMkBlast2 :: String -> (String -> ActionFn) -> RulesFn
 cMkBlast2 bCmd bActFn st expr = -- (CutFun rtn salt deps name [q, s, n]) = -- TODO is arg order right?
-  rSimpleTmp (bActFn bCmd) "blast" bht st (addMakeDBCall expr)
+  rSimpleTmp (bActFn bCmd) "blast" bht st $ addMakeDBCall expr
   -- where
     -- db = CutFun bdb salt (depsOf s) "makeblastdb" [s]
     -- e' = CutFun rtn salt deps name [q, db, n] -- TODO is it confusing to keep the same name?
 -- cMkBlast2 _ _ _ _ = error "bad argument to cMkBlast2"
 
 addMakeDBCall :: CutExpr -> CutExpr
-addMakeDBCall (CutFun rtn salt deps name [q, s, n]) = CutFun rtn salt deps name [q, db, n]
+addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
   where
-    db = CutFun bdb salt (depsOf s) "makeblastdb" [s]
+    db = CutFun bdb i (depsOf s) "makeblastdb" [s]
 addMakeDBCall _ = error "bad argument to addMakeDBCall"
 
 cMkBlastEach :: String -> (String -> ActionFn) -> RulesFn
@@ -154,10 +124,8 @@ aParBlast bCmd cfg (CacheDir cDir)
           [ExprPath out, ExprPath query, ExprPath db, ExprPath evalue] = do
   -- TODO is this automatic? need [query, subject, ePath]
   eStr <- fmap init $ debugReadFile cfg evalue
-  -- (ExprPath dbPath) <- aBlastDB cfg sType subject -- TODO have to make this a pattern!
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
   unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
-    -- [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
     [ "-c", bCmd, "-t", cDir, "-q", query, "-d", db, "-o", out, "-e", eDec, "-p"]
   debugTrackWrite cfg [out]
 aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
@@ -218,85 +186,6 @@ aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
   unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
 aBestHits _ _ args = error $ "bad argument to aBestHits: " ++ show args
 
---------------------------
--- reciprocal best hits --
---------------------------
-
--- TODO once this works, what should the actual fn people call look like?
-
-reciprocal :: CutFunction
-reciprocal = CutFunction
-  { fName      = "reciprocal"
-  , fTypeCheck = defaultTypeCheck [bht, bht] bht
-  , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aRecip "blast" bht
-  }
-
-aRecip :: ActionFn
-aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "reciprocal.R" [out, left, right]
-aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
-
--- TODO make the rest of them... but not until after lab meeting?
-blastpRBH :: CutFunction
-blastpRBH = CutFunction
-  { fName = "blastp_rbh"
-  , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
-  , fFixity = Prefix
-  , fCompiler = cBlastpRBH
-  }
-
--- it this works I'll be modeling new versions of the map ones after it
-cBlastpRBH :: RulesFn
-cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
-  let lhits = CutFun bht salt deps "blastp"     [lfaa , rfaa , evalue]
-      rhits = CutFun bht salt deps "blastp"     [rfaa , lfaa , evalue]
-      lbest = CutFun bht salt deps "best_hits"  [lhits]
-      rbest = CutFun bht salt deps "best_hits"  [rhits]
-      rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
-      (ExprPath out) = exprPath cfg e []
-  (ExprPath rbhPath) <- cExpr s rbh -- TODO this is the sticking point right?
-  out %> \_ -> do
-    need [rbhPath]
-    aBlastpRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
-    debugTrackWrite cfg [out]
-  return (ExprPath out)
-cBlastpRBH _ _ = error "bad argument to cBlastRBH"
-
--- this is an attempt to convert cBlastpRBH into a form usable with rMapLastTmp
-aBlastpRBH :: ActionFn
-aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
-  unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
-aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
-
----------------------------------------------
--- kludge for mapping reciprocal best hits --
----------------------------------------------
-
--- TODO remove?
-reciprocalEach :: CutFunction
-reciprocalEach = CutFunction
-  { fName      = "reciprocal_each"
-  , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
-  , fFixity    = Prefix
-  , fCompiler  = cRecipEach
-  }
-
--- TODO how to hook this up to blastp_each?
-cRecipEach :: RulesFn
-cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
-  (ExprPath lsPath) <- cExpr s lbhts
-  (ExprPath rsPath) <- cExpr s rbhts
-  let (ExprPath oPath) = exprPath cfg e []
-      (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
-  oPath %> \_ -> do
-    need [lsPath, rsPath]
-    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py"
-      [cDir, oPath, lsPath, rsPath]
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-cRecipEach _ _ = error "bad argument to cRecipEach"
-
 ----------------------------------
 -- mapped versions of blast fns --
 ----------------------------------
@@ -322,6 +211,8 @@ aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 -- reverse mapped versions (needed for mapped reciprocal versions) --
 ---------------------------------------------------------------------
 
+-- TODO move to BlastRBH module?
+
 -- TODO gotta have a variation for "not the last arg"
 mkBlastEachRevFn :: String -> CutType -> CutType -> CutFunction
 mkBlastEachRevFn bCmd qType sType = CutFunction
@@ -336,59 +227,3 @@ mkBlastEachRevFn bCmd qType sType = CutFunction
 aParBlastRev' :: String -> ActionFn
 aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd cfg cDir [o,e,s,q]
 aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
-
------------------------------------------------
--- the hard part: mapped reciprocal versions --
------------------------------------------------
-
-
--- TODO find a way to fix this or replace it...
-
--- blastpRBHEach :: CutFunction
--- blastpRBHEach = CutFunction
---   { fName      = "blastp_rbh_each"
---   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
---   , fFixity    = Prefix
---   , fCompiler  = cBlastpRBHEach
---   }
--- 
--- -- TODO oh right, that might not be directly a list!
--- --      can this be done a cleaner way??
--- cBlastpRBHEach :: RulesFn
--- cBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutList _ _ _ ss]) = do
--- -- cBlastpRBHEach st@(scr,cfg) expr@(CutFun _ salt _ _ [e, q, ss]) = do
---   -- let subjects = extractExprs scr ss
---   let exprs = map (\s -> CutFun bht salt (concatMap depsOf [e, q, s]) "blastp_rbh" [e, q, s]) ss
---   paths <- mapM (cExpr st) exprs
---   let (ExprPath out) = exprPath cfg expr []
---       paths' = map (\(ExprPath p) -> p) paths
---   out %> \_ -> need paths' >> debugWriteLines cfg out paths' >> debugTrackWrite cfg [out]
---   return (ExprPath out)
--- cBlastpRBHEach _ _ = error "bad argument to cBlastpRBHEach"
-
-
-blastpRBHEach :: CutFunction
-blastpRBHEach = CutFunction
-  { fName      = "blastp_rbh_each"
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
-  , fFixity    = Prefix
-  , fCompiler  = cBlastpRBHEach
-  }
-
-
-cBlastpRBHEach :: RulesFn
-cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
-  -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
-  -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]
-  let mkExpr name = CutFun rtn salt deps name [evalue, query, subjects]
-      (ExprPath oPath)  = exprPath cfg e []
-      (CacheDir cDir )  = cacheDir cfg "reciprocal_each"
-  (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"
-  (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev"
-  oPath %> \_ -> do
-    need [fwdsPath, revsPath]
-    liftIO $ createDirectoryIfMissing True cDir
-    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath] -- TODO how is it failing? seems fine
-    debugTrackWrite cfg [oPath]
-  return (ExprPath oPath)
-cBlastpRBHEach _ _ = error "bad argument to cRecipEach"

@@ -6,6 +6,7 @@ import qualified ShortCut.Modules.BioMartR  as BioMartR
 import qualified ShortCut.Modules.Blast     as Blast
 import qualified ShortCut.Modules.BlastDB   as BlastDB
 import qualified ShortCut.Modules.BlastCRB  as BlastCRB
+import qualified ShortCut.Modules.BlastRBH  as BlastRBH
 import qualified ShortCut.Modules.Glob      as Glob
 import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
 import qualified ShortCut.Modules.Length    as Length
@@ -23,6 +24,7 @@ modules =
   , Blast.cutModule
   , BlastDB.cutModule
   , BlastCRB.cutModule
+  , BlastRBH.cutModule
   , Glob.cutModule
   , Cheat.cutModule
   , Length.cutModule
