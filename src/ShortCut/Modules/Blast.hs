@@ -1,5 +1,6 @@
 module ShortCut.Modules.Blast where
 
+-- TODO make a separate module for the reciprocal stuff?
 -- TODO remove the rest of the evalue machinery from rBlast once filter_evalue works!
 -- TODO write/find filter_evalue.R
 
@@ -12,7 +13,7 @@ import ShortCut.Core.Util         (digest)
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
-import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
+import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLast, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
 import System.Directory           (createDirectoryIfMissing)
 import Control.Monad.Trans        (liftIO)
@@ -22,26 +23,43 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
+    [ mkBlastDB
+
+    , mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastFn  "blastp" faa faa
     , mkBlastFn  "blastx" fna faa
     , mkBlastFn "tblastn" faa fna
     , mkBlastFn "tblastx" fna fna
+
     , filterEvalue
     , bestHits
+
     , mkBlastEachFn  "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastEachFn  "blastp" faa faa
     , mkBlastEachFn  "blastx" fna faa
     , mkBlastEachFn "tblastn" faa fna
     , mkBlastEachFn "tblastx" fna fna
+
     , mkBlastEachRevFn "blastn" fna fna -- TODO don't expose to users?
     , mkBlastEachRevFn "blastp" faa faa -- TODO don't expose to users?
+
+    -- TODO move to a new module:
     , reciprocal
     , blastpRBH
     , blastpRBHEach
     -- , blastpRBHEach -- TODO broken :(
+
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
+  }
+
+-- Users shouldn't need to work with these directly, but I discovered it's
+-- muuuch easier to write the BLAST function if I include it here.
+bdb :: CutType
+bdb = CutType
+  { tExt  = "bdb"
+  , tDesc = "blast database"
+  , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
   }
 
 {- The most straightforward way I can now think to do this is having a
@@ -66,23 +84,89 @@ bht = CutType
   , tShow  = defaultShow
   }
 
+-------------------
+-- make blast db --
+-------------------
+
+mkBlastDB :: CutFunction
+mkBlastDB = CutFunction
+  { fName      = "makeblastdb"
+  , fTypeCheck = tMkBlastDB
+  , fFixity    = Prefix
+  , fCompiler  = cMkBlastDB
+  }
+
+tMkBlastDB :: [CutType] -> Either String CutType
+tMkBlastDB [x] | x `elem` [faa, fna] = Right bdb
+tMkBlastDB _ = error "makeblastdb requires a fasta file"
+
+cMkBlastDB :: CutState -> CutExpr -> Rules ExprPath
+cMkBlastDB s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
+  (ExprPath faPath) <- cExpr s fa
+  let (CacheDir tmpDir) = cacheDir cfg "makeblastdb"
+      (ExprPath dbPath) = exprPath cfg e []
+      dbType = if      typeOf fa == fna then "nucl"
+               else if typeOf fa == faa then "prot"
+               else    error $ "invalid FASTA type for aBlastDB: " ++ show (typeOf fa)
+  dbPath %> \_ -> do
+    need [faPath]
+    unit $ quietly $ wrappedCmd cfg [Cwd tmpDir] "makeblastdb"
+      [ "-in"    , faPath
+      , "-out"   , dbPath
+      , "-title" , takeBaseName dbPath -- TODO does this make sense?
+      , "-dbtype", dbType
+      ]
+    debugTrackWrite cfg [faPath]
+  return (ExprPath dbPath)
+cMkBlastDB _ _ = error "bad argument to mkBlastDB"
+
 ---------------------------
 -- basic blast+ commands --
 ---------------------------
 
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn wrappedCmdFn qType sType = CutFunction
-  { fName      = wrappedCmdFn
+mkBlastFn bCmd qType sType = CutFunction
+  { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aParBlast wrappedCmdFn sType) "blast" bht
+  -- , fCompiler  = rSimpleTmp (aParBlast bCmd sType) "blast" bht
+  , fCompiler  = cMkBlast bCmd aParBlast
   }
+
+-- TODO wait, can this be done as just a transformation of the AST + an action fn?
+--      (that is, no Rules monad needed?)
+--      if so, can also write the _each version the same way!!
+cMkBlast :: String
+         -> (String -> CutConfig -> CacheDir -> [ExprPath] -> Action ())
+         -> (CutState -> CutExpr -> Rules ExprPath)
+cMkBlast bCmd bActFn st@(_,cfg) e@(CutFun _ _ _ _ [q, s, n]) = do
+  qPath  <- cExpr st q
+  dbPath <- cExpr st $ CutFun bdb (saltOf s) (depsOf s) "makeblastdb" [s]
+  nPath  <- cExpr st n
+  let (ExprPath htPath) = exprPath cfg e []
+      tmpDir = cacheDir cfg "blast"
+  htPath %> \_ -> bActFn bCmd cfg tmpDir [ExprPath htPath, qPath, dbPath, nPath]
+  return (ExprPath htPath)
+cMkBlast _ _ _ _ = error "bad argument to cMkBlast"
+
+-- TODO this typechecks but WILL NOT WORK! need to make the blast db first
+-- rMapLast takes an action function, which needs to be vectorized on its last argument
+-- so we have the prime versions of each blast action function to work around that
+-- TODO map functions that do that automatically
+cMkBlastEach :: String
+             -> (String -> CutConfig -> CacheDir -> [ExprPath] -> Action ())
+             -> (CutState -> CutExpr -> Rules ExprPath)
+cMkBlastEach bCmd bActFn s@(_,cfg) = rMapLast tmpFn (bActFn bCmd) "blast" bht s
+  where
+    tmpFn = const $ cacheDir cfg "blast"
 
 -- parallelblast.py also has a function for this, but after I wrote that I
 -- discovered the race condition where more than one instance of it tries to
 -- create the db at once. Creating it first with Shake first prevents it.
-aBlastDB :: CutConfig -> CutType -> ExprPath -> Action ExprPath
-aBlastDB cfg sType (ExprPath sPath) = do
+-- aBlastDB sType cfg [ExprPath dbPath, ExprPath sPath] = do
+-- aBlastDB _ _ _ = error "bad argument to aBlastDB"
+aBlastDB :: CutType -> CutConfig -> ExprPath -> Action ExprPath
+aBlastDB sType cfg (ExprPath sPath) = do
   need [sPath]
   sDigest <- fmap digest $ debugReadFile cfg sPath
   -- this should match find_db in parallelblast.py:
@@ -93,6 +177,7 @@ aBlastDB cfg sType (ExprPath sPath) = do
     , "-title" , takeBaseName dbPath
     , "-dbtype", dbType
     ]
+  debugTrackWrite cfg [dbPath]
   return (ExprPath dbPath)
   where
     (CacheDir cDir) = cacheDir cfg "blast"
@@ -100,17 +185,18 @@ aBlastDB cfg sType (ExprPath sPath) = do
              else if sType == faa then "prot"
              else    error $ "invalid FASTA type for aBlastDB: " ++ show sType
 
-aParBlast :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlast bCmd sType cfg (CacheDir cDir)
-          [ExprPath out, ExprPath query, subject, ExprPath evalue] = do
+aParBlast :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast bCmd cfg (CacheDir cDir)
+          [ExprPath out, ExprPath query, ExprPath db, ExprPath evalue] = do
   -- TODO is this automatic? need [query, subject, ePath]
   eStr <- fmap init $ debugReadFile cfg evalue
-  (ExprPath dbPath) <- aBlastDB cfg sType subject -- TODO have to make this a pattern!
+  -- (ExprPath dbPath) <- aBlastDB cfg sType subject -- TODO have to make this a pattern!
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
   unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
     -- [ "-c", bCmd, "-t", cDir, "-q", query, "-s", subject, "-o", out, "-e", eDec, "-p"]
-    [ "-c", bCmd, "-t", cDir, "-q", query, "-d", dbPath, "-o", out, "-e", eDec, "-p"]
-aParBlast _ _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+    [ "-c", bCmd, "-t", cDir, "-q", query, "-d", db, "-o", out, "-e", eDec, "-p"]
+  debugTrackWrite cfg [out]
+aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 -----------------------------------------------------------
 -- "reverse" versions to help write reciprocal best hits --
@@ -120,17 +206,19 @@ aParBlast _ _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 -- note: only works on symmetric blast fns (take two of the same type)
 mkBlastRevFn :: String -> CutType -> CutType -> CutFunction
-mkBlastRevFn wrappedCmdFn qType sType = CutFunction
-  { fName      = wrappedCmdFn ++ "_rev"
+mkBlastRevFn bCmd qType sType = CutFunction
+  { fName      = bCmd ++ "_rev"
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aParBlastRev wrappedCmdFn sType) "blast" bht
+  -- , fCompiler  = rSimpleTmp (aParBlastRev bCmd sType) "blast" bht
+  , fCompiler  = cMkBlast bCmd aParBlastRev
   }
 
 -- just switches the query and subject, which won't work for asymmetric blast fns!
-aParBlastRev :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlastRev bCmd sType cfg cDir [o, q, s, e] = aParBlast bCmd sType cfg cDir [o, s, q, e]
-aParBlastRev _ _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+-- TODO write specific ones for that, or a fn + mapping
+aParBlastRev :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlastRev b c d [o, q, s, e] = aParBlast b c d [o, s, q, e]
+aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 ---------------------------
 -- filter hits by evalue --
@@ -251,18 +339,19 @@ cRecipEach _ _ = error "bad argument to cRecipEach"
 
 -- TODO gotta have a variation for "not the last arg"
 mkBlastEachFn :: String -> CutType -> CutType -> CutFunction
-mkBlastEachFn wrappedCmdFn qType sType = CutFunction
-  { fName      = wrappedCmdFn ++ "_each"
+mkBlastEachFn bCmd qType sType = CutFunction
+  { fName      = bCmd ++ "_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aParBlast' wrappedCmdFn sType) "blast" bht
+  -- , fCompiler  = rMapLastTmp (aParBlast' bCmd sType) "blast" bht
+  , fCompiler  = cMkBlastEach bCmd aParBlast
   }
 
 -- kludge to allow easy mapping over the subject rather than evalue
-aParBlast' :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlast' bCmd sType cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
- aParBlast bCmd sType cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
-aParBlast' _ _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+aParBlast' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+aParBlast' bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath e, ExprPath q, ExprPath s] =
+ aParBlast bCmd cfg (CacheDir cDir) [ExprPath o, ExprPath q, ExprPath s, ExprPath e]
+aParBlast' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 ---------------------------------------------------------------------
 -- reverse mapped versions (needed for mapped reciprocal versions) --
@@ -270,17 +359,18 @@ aParBlast' _ _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 -- TODO gotta have a variation for "not the last arg"
 mkBlastEachRevFn :: String -> CutType -> CutType -> CutFunction
-mkBlastEachRevFn wrappedCmdFn qType sType = CutFunction
-  { fName      = wrappedCmdFn ++ "_each_rev"
+mkBlastEachRevFn bCmd qType sType = CutFunction
+  { fName      = bCmd ++ "_each_rev"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aParBlastRev' wrappedCmdFn sType) "blast" bht
+  -- , fCompiler  = rMapLastTmp (aParBlastRev' bCmd sType) "blast" bht
+  , fCompiler  = cMkBlastEach bCmd aParBlastRev
   }
 
 -- kludge to allow easy mapping over the subject rather than evalue
-aParBlastRev' :: String -> CutType -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aParBlastRev' bCmd sType cfg cDir [o,e,q,s] = aParBlast' bCmd sType cfg cDir [o,e,s,q]
-aParBlastRev' _ _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
+-- aParBlastRev' :: String -> CutConfig -> CacheDir -> [ExprPath] -> Action ()
+-- aParBlastRev' bCmd cfg cDir [o,e,q,s] = aParBlast' bCmd sType cfg cDir [o,e,s,q]
+-- aParBlastRev' _ _ _ args = error $ "bad argument to aParBlast': " ++ show args
 
 -----------------------------------------------
 -- the hard part: mapped reciprocal versions --

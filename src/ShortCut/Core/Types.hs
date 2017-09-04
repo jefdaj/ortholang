@@ -29,7 +29,7 @@ module ShortCut.Core.Types
   -- module stuff (in flux)
   , CutFunction(..)
   , CutModule(..)
-  -- , getSalt
+  , saltOf
   , setSalt
   -- wrappers to prevent confusing the various paths
   , CacheDir(..)
@@ -82,12 +82,12 @@ data CutExpr
   deriving (Eq, Show)
 
 -- TODO is this not actually needed? seems "show expr" handles it?
--- getSalt :: CutExpr -> Int
--- getSalt (CutLit  _ n _)       = n
--- getSalt (CutRef  _ n _ _)     = n
--- getSalt (CutBop  _ n _ _ _ _) = n
--- getSalt (CutFun  _ n _ _ _)   = n
--- getSalt (CutList _ n _ _)     = n
+saltOf :: CutExpr -> Int
+saltOf (CutLit  _ n _)       = n
+saltOf (CutRef  _ n _ _)     = n
+saltOf (CutBop  _ n _ _ _ _) = n
+saltOf (CutFun  _ n _ _ _)   = n
+saltOf (CutList _ n _ _)     = n
 
 setSalt :: Int -> CutExpr -> CutExpr
 setSalt n (CutLit  t _ s)          = CutLit  t n s

@@ -7,6 +7,7 @@ module ShortCut.Core.ModuleAPI
   , cOneArgListScript
   , aTsvColumn
   , rSimpleTmp
+  , rMapLast
   , rMapLastTmp
   , rMapLastTmps
   )
@@ -194,6 +195,7 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
     tmpFn args = cacheDirUniq cfg tmpPrefix args
 
 -- common code factored out from the two functions above
+-- TODO put the .args and final functions in the cachedir of the regular fn?
 -- TODO now that the new Shake strategy works, clean it up!
 -- TODO sprinkle some need in here?
 rMapLast :: ([FilePath] -> CacheDir) -- this will be called to get each tmpDir
