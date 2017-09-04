@@ -7,7 +7,7 @@ import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
 import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
-import ShortCut.Modules.BlastDB (bnd, bpd)
+import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
 
 cutModule :: CutModule
@@ -61,7 +61,7 @@ cMkBlastFn bCmd bActFn st expr = mapFn st $ addMakeDBCall expr
 addMakeDBCall :: CutExpr -> CutExpr
 addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
   where
-    dbType = if typeOf s == fna then bnd else bpd
+    dbType = if typeOf s == fna then ndb else pdb
     db = CutFun dbType i (depsOf s) "makeblastdb" [s]
 addMakeDBCall _ = error "bad argument to addMakeDBCall"
 

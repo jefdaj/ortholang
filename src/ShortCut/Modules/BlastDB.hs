@@ -3,35 +3,70 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile  (cExpr)
-import ShortCut.Core.Config   (wrappedCmd)
-import ShortCut.Core.Debug    (debugTrackWrite)
-import ShortCut.Core.Paths    (exprPath)
-import ShortCut.Modules.SeqIO (faa, fna)
-import System.FilePath        (takeBaseName)
+import ShortCut.Core.Compile   (cExpr)
+import ShortCut.Core.Config    (wrappedCmd)
+import ShortCut.Core.Debug     (debugTrackWrite)
+import ShortCut.Core.ModuleAPI (mkLoad, mkLoadList)
+import ShortCut.Core.Paths     (exprPath)
+import ShortCut.Modules.SeqIO  (faa, fna)
+import System.FilePath         (takeBaseName)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blastdb"
   , mFunctions =
-    [ mkBlastDB
+    [ loadNuclDB
+    , loadProtDB
+    , loadNuclDBEach
+    , loadProtDBEach
+    , mkBlastDB
     -- , TODO write loadBlastDB
     ]
   }
 
-bnd :: CutType
-bnd = CutType
-  { tExt  = "bnd"
+ndb :: CutType
+ndb = CutType
+  { tExt  = "ndb"
   , tDesc = "blast nucleic acid database"
   , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
   }
 
-bpd :: CutType
-bpd = CutType
-  { tExt  = "bpd"
+-- TODO will people confuse this with PDB files for viewing molecules?
+pdb :: CutType
+pdb = CutType
+  { tExt  = "pdb"
   , tDesc = "blast protein database"
   , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
   }
+
+---------------------
+-- load from files --
+---------------------
+
+-- TODO how to handle the prefix issue? guess we have to check + touch here?
+--      or should i expect one compressed file instead?
+
+loadNuclDB :: CutFunction
+loadNuclDB = mkLoad "load_nucl_db" ndb
+
+loadProtDB :: CutFunction
+loadProtDB = mkLoad "load_prot_db" pdb
+
+loadNuclDBEach :: CutFunction
+loadNuclDBEach = mkLoadList "load_nucl_db_each" ndb
+
+loadProtDBEach :: CutFunction
+loadProtDBEach = mkLoadList "load_prot_db_each" pdb
+
+------------------------
+-- download from NCBI --
+------------------------
+
+-- TODO write this!
+
+--------------------------
+-- make from FASTA file --
+--------------------------
 
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
@@ -46,8 +81,8 @@ mkBlastDB = CutFunction
 
 tMkBlastDB :: TypeChecker
 tMkBlastDB [x]
-  | x == fna = Right bnd
-  | x == faa = Right bpd
+  | x == fna = Right ndb
+  | x == faa = Right pdb
 tMkBlastDB _ = error "makeblastdb requires a fasta file"
 
 {- There are a few types of BLAST database files. For nucleic acids:
@@ -69,7 +104,7 @@ cMkBlastDB :: RulesFn
 cMkBlastDB s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let (ExprPath dbPrefix) = exprPath cfg fa []
-      dbType = if rtn == bnd then "nucl" else "prot"
+      dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do
     need [faPath]
     unit $ quietly $ wrappedCmd cfg [] "makeblastdb"
