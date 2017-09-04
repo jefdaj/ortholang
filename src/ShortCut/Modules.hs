@@ -4,6 +4,7 @@ import ShortCut.Core.Types (CutModule(..))
 
 import qualified ShortCut.Modules.BioMartR  as BioMartR
 import qualified ShortCut.Modules.Blast     as Blast
+import qualified ShortCut.Modules.BlastDB   as BlastDB
 import qualified ShortCut.Modules.BlastCRB  as BlastCRB
 import qualified ShortCut.Modules.Glob      as Glob
 import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
@@ -20,6 +21,7 @@ modules :: [CutModule]
 modules =
   [ BioMartR.cutModule
   , Blast.cutModule
+  , BlastDB.cutModule
   , BlastCRB.cutModule
   , Glob.cutModule
   , Cheat.cutModule

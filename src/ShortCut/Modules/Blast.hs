@@ -15,6 +15,7 @@ import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO     (faa, fna)
+import ShortCut.Modules.BlastDB   (bdb)
 import System.Directory           (createDirectoryIfMissing)
 import Control.Monad.Trans        (liftIO)
 import System.FilePath            (takeBaseName)
@@ -23,9 +24,9 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ mkBlastDB
+    -- [ mkBlastDB
 
-    , mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
+    [ mkBlastFn  "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastFn  "blastp" faa faa
     , mkBlastFn  "blastx" fna faa
     , mkBlastFn "tblastn" faa fna
@@ -53,15 +54,6 @@ cutModule = CutModule
     ]
   }
 
--- Users shouldn't need to work with these directly, but I discovered it's
--- muuuch easier to write the BLAST function if I include it here.
-bdb :: CutType
-bdb = CutType
-  { tExt  = "bdb"
-  , tDesc = "blast database"
-  , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
-  }
-
 {- The most straightforward way I can now think to do this is having a
  - top-level db dir cache/blastdb, and in there is a folder for each database.
  - The folder can be named by the hash of the fasta file it's made from, and
@@ -83,57 +75,6 @@ bht = CutType
   , tDesc = "tab-separated table of blast hits (outfmt 6)"
   , tShow  = defaultShow
   }
-
--------------------
--- make blast db --
--------------------
-
-mkBlastDB :: CutFunction
-mkBlastDB = CutFunction
-  { fName      = "makeblastdb"
-  , fTypeCheck = tMkBlastDB
-  , fFixity    = Prefix
-  , fCompiler  = cMkBlastDB
-  }
-
-tMkBlastDB :: TypeChecker
-tMkBlastDB [x] | x `elem` [faa, fna] = Right bdb
-tMkBlastDB _ = error "makeblastdb requires a fasta file"
-
-{- There are a few types of BLAST database files. For nucleic acids:
- - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
- -
- - And for proteins:
- - <prefix>.phr, <prefix>.pin, <prefix>.pog, ...
- -
- - The BLAST programs just expect to be passed the prefix, which is fine for
- - most purposes but difficult in Shake; since it's not actually a file Shake
- - will complain that the Action failed to generate it. My hacky solution for
- - now is just to `touch` the prefix itself. BLAST doesn't seem to mind one
- - extra file, and Shake doesn't mind several.
- -
- - TODO does it work properly when the input fasta file changes and the database
- -      needs to be rebuilt?
- -}
-cMkBlastDB :: RulesFn
-cMkBlastDB s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
-  (ExprPath faPath) <- cExpr s fa
-  let (ExprPath dbPrefix) = exprPath cfg e []
-      dbType = if      typeOf fa == fna then "nucl"
-               else if typeOf fa == faa then "prot"
-               else    error $ "invalid FASTA type: " ++ show (typeOf fa)
-  dbPrefix %> \_ -> do
-    need [faPath]
-    unit $ quietly $ wrappedCmd cfg [] "makeblastdb"
-      [ "-in"    , faPath
-      , "-out"   , dbPrefix
-      , "-title" , takeBaseName dbPrefix -- TODO does this make sense?
-      , "-dbtype", dbType
-      ]
-    unit $ quietly $ wrappedCmd cfg [] "touch" [dbPrefix]
-    debugTrackWrite cfg [dbPrefix]
-  return (ExprPath dbPrefix)
-cMkBlastDB _ _ = error "bad argument to mkBlastDB"
 
 ---------------------------
 -- basic blast+ commands --
@@ -165,29 +106,23 @@ mkBlastFn bCmd qType sType = CutFunction
 -- cMkBlast _ _ _ _ = error "bad argument to cMkBlast"
 
 cMkBlast2 :: String -> (String -> ActionFn) -> RulesFn
-cMkBlast2 bCmd bActFn st (CutFun rtn salt deps name [q, s, n]) = -- TODO is arg order right?
-  rSimpleTmp (bActFn bCmd) "blast" bht st e'
+cMkBlast2 bCmd bActFn st expr = -- (CutFun rtn salt deps name [q, s, n]) = -- TODO is arg order right?
+  rSimpleTmp (bActFn bCmd) "blast" bht st (addMakeDBCall expr)
+  -- where
+    -- db = CutFun bdb salt (depsOf s) "makeblastdb" [s]
+    -- e' = CutFun rtn salt deps name [q, db, n] -- TODO is it confusing to keep the same name?
+-- cMkBlast2 _ _ _ _ = error "bad argument to cMkBlast2"
+
+addMakeDBCall :: CutExpr -> CutExpr
+addMakeDBCall (CutFun rtn salt deps name [q, s, n]) = CutFun rtn salt deps name [q, db, n]
   where
     db = CutFun bdb salt (depsOf s) "makeblastdb" [s]
-    e' = CutFun rtn salt deps name [q, db, n] -- TODO is it confusing to keep the same name?
-cMkBlast2 _ _ _ _ = error "bad argument to cMkBlast2"
+addMakeDBCall _ = error "bad argument to addMakeDBCall"
 
--- TODO this typechecks but WILL NOT WORK! need to make the blast db first
--- rMapLast takes an action function, which needs to be vectorized on its last argument
--- so we have the prime versions of each blast action function to work around that
--- TODO map functions that do that automatically
 cMkBlastEach :: String -> (String -> ActionFn) -> RulesFn
-cMkBlastEach bCmd bActFn = -- s@(_,cfg) = -- TODO transform: (CutFun rtn salt deps name [q, ss, n])
-  rMapLastTmp (bActFn bCmd) "blast" (ListOf bht)
-  -- TODO could do both the prime functions here by reversing last two args right?
-
-  -- TODO MAYBE WHAT'S NEEDED IS A DIFFERENT ACTION FUNCTION THAT DOES THE AST TRANSFORMATION?
-  --      AHHH IT'S JUST A COMBINATION OF THE PRIME ONES YOU DID ALREADY,
-  --      AND THE MAKEBLASTDB TRANSFORMATION YOU DID ABOVE... RIGHT?
-  -- = rMapLast tmpFn (bActFn bCmd) "blast" bht s
-  -- for ref: rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefix t s
-  --where
-    --tmpFn = const $ cacheDir cfg "blast"
+cMkBlastEach bCmd bActFn st expr = mapFn st $ addMakeDBCall expr
+  where
+    mapFn = rMapLastTmp (bActFn bCmd) "blast" bht
 
 -- parallelblast.py also has a function for this, but after I wrote that I
 -- discovered the race condition where more than one instance of it tries to

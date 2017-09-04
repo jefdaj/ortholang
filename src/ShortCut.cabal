@@ -62,6 +62,7 @@ executable shortcut
                     ShortCut.Modules,
                     ShortCut.Modules.BioMartR,
                     ShortCut.Modules.Blast,
+                    ShortCut.Modules.BlastDB,
                     ShortCut.Modules.BlastCRB,
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.Glob,
