@@ -18,11 +18,11 @@ cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
     [ loadGbk
-    , loadGbkAll
+    , loadGbkEach
     , loadFaa
-    , loadFaaAll
+    , loadFaaEach
     , loadFna
-    , loadFaaAll
+    , loadFaaEach
     , gbkToFaa
     , gbkToFna
     , extractSeqs
@@ -76,20 +76,20 @@ gbkToFna = CutFunction
 loadFaa :: CutFunction
 loadFaa = mkLoad "load_faa" faa
 
-loadFaaAll :: CutFunction
-loadFaaAll = mkLoadList "load_faa_all" faa
+loadFaaEach :: CutFunction
+loadFaaEach = mkLoadList "load_faa_each" faa
 
 loadFna :: CutFunction
 loadFna = mkLoad "load_fna" fna
 
-loadFnaAll :: CutFunction
-loadFnaAll = mkLoadList "load_fna_all" fna
+loadFnaEach :: CutFunction
+loadFnaEach = mkLoadList "load_fna_each" fna
 
 loadGbk :: CutFunction
 loadGbk = mkLoad "load_gbk" gbk
 
-loadGbkAll :: CutFunction
-loadGbkAll = mkLoadList "load_gbk_all" gbk
+loadGbkEach :: CutFunction
+loadGbkEach = mkLoadList "load_gbk_each" gbk
 
 -------------------------------------------
 -- extract sequence IDs from FASTA files --
