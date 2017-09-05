@@ -9,7 +9,8 @@ import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
-import System.FilePath          (makeRelative, takeDirectory, (</>))
+import System.FilePath          (takeDirectory, takeFileName, (</>))
+import ShortCut.Core.Util      (stripWhiteSpace)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -85,23 +86,19 @@ addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
 addMakeDBCall _ = error "bad argument to addMakeDBCall"
 
 aParBlast :: String -> ActionFn
-aParBlast bCmd cfg _ [ExprPath o, ExprPath q, ExprPath d, ExprPath e] = do
+aParBlast bCmd cfg _ [ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
   eStr   <- fmap init $ debugReadFile cfg e
-  prefix <- fmap (cfgTmpDir cfg </>) $ debugReadFile cfg d
-  let eDec = formatScientific Fixed Nothing (read eStr)
+  prefix <- fmap (cfgTmpDir cfg </>)
+          $ fmap stripWhiteSpace
+          $ debugReadFile cfg p
+  let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
       cDir = cfgTmpDir cfg </> takeDirectory prefix
-  unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
-    [ "-c", bCmd
-    , "-t", cDir
-    , "-q", q
-    , "-d", prefix
-    , "-o", o
-    , "-e", eDec -- evalue formatted as decimal
-    , "-p"
-    -- , "-v" turns on debugging info
-    ]
+      dbg  = if cfgDebug cfg then ["-v"] else []
+      args = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix
+             , "-o", o   , "-e", eDec, "-p"] ++ dbg
+  unit $ quietly $ wrappedCmd cfg [Cwd $ takeDirectory prefix] "parallelblast.py" args -- TODO Cwd?
   debugTrackWrite cfg [o]
-aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 
 ---------------------
 -- mapped versions --

@@ -5,13 +5,14 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile   (cExpr, toShortCutListStr)
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugTrackWrite)
+import ShortCut.Core.Debug     (debugReadFile, debugWriteFile)
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Paths     (exprPath, cacheDir)
+import ShortCut.Core.Paths     (exprPath, exprPathExplicit, cacheDir)
+import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
-import System.FilePath         (takeBaseName, takeExtension, (<.>), makeRelative)
+import System.FilePath         (takeFileName, takeExtension, (</>), (<.>), makeRelative)
 import System.Directory        (createDirectoryIfMissing)
-import System.FilePath.Glob    (compile, globDir1)
+-- import System.FilePath.Glob    (compile, globDir1)
 import Data.List               (isInfixOf)
 import Data.Char               (toLower)
 -- import System.Exit             (ExitCode(..))
@@ -84,7 +85,7 @@ mkLoadDBEach name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = undefined -- TODO write this
+  , fCompiler  = undefined -- TODO write this!
   }
 
 cLoadDB :: RulesFn
@@ -97,22 +98,6 @@ cLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
     debugWriteFile cfg oPath pattern'
   return (ExprPath oPath)
 cLoadDB _ _ = error "bad argument to cLoadDB"
-
--- The paths here are a little confusing: expr is a str of the path we want to
--- link to. So after compiling it we get a path to *that str*, and have to read
--- the file to access it. Then we want to `ln` to the file it points to.
--- cLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
--- cLink s@(_,cfg) expr rtype prefix = do
---   (ExprPath strPath) <- cExpr s expr
---   -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
---   let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
---   outPath %> \out -> do
---     pth <- fmap strip $ readFile' strPath
---     src <- liftIO $ canonicalizePath pth
---     need [src]
---     -- TODO these have to be absolute, so golden tests need to adjust them:
---     quietly $ wrappedCmd cfg [] "ln" ["-fs", src, out]
---   return (ExprPath outPath)
 
 loadNuclDB :: CutFunction
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -168,8 +153,6 @@ blastdbget = CutFunction
   , fCompiler  = cBlastdbget
   }
 
--- TODO abort on nonzero exit code, which seems to happen a lot!
---      wait, is the check just broken? maybe remove it
 cBlastdbget :: RulesFn
 cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- cExpr st name
@@ -177,25 +160,15 @@ cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
       (ExprPath dbPrefix) = exprPath cfg e [] -- final prefix
   dbPrefix %> \_ -> do
     need [nPath]
-    dbName <- debugReadFile cfg nPath -- TODO need to strip?
+    dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
     liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
     -- Exit code <- quietly $ wrappedCmd cfg [Cwd tmpDir]
     unit $ quietly $ wrappedCmd cfg [Cwd tmpDir]
-      "blastdbget" ["-d", "taxdb", "-d", dbName, tmpDir]
-
+      "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
     -- case code of
       -- ExitFailure n -> error $ "blastdbget reported error code " ++ show n
       -- ExitSuccess -> do
-
-    -- Final dbPrefix has to be independent of the name because we don't
-    -- know the name during compilation. So I guess the thing to do is link
-    -- all the db files next to their final location and touch the prefix
-    -- itself.
-    dbFiles <- liftIO $ globDir1 (compile $ dbName ++ ".*") tmpDir
-    mapM_ (\f -> linkDBFile cfg f dbPrefix) dbFiles
-    unit $ quietly $ wrappedCmd cfg [] "touch" [dbPrefix]
-    debugTrackWrite cfg [dbPrefix]
-
+    debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
   return (ExprPath dbPrefix)
 cBlastdbget _ _ = error "bad argument to cBlastdbget"
 
@@ -226,10 +199,11 @@ tMakeblastdb [x]
   | x == faa = Right pdb
 tMakeblastdb _ = error "makeblastdb requires a fasta file"
 
+-- TODO why does this get rebuilt one extra time, but *only* one?
 cMakeblastdb :: RulesFn
-cMakeblastdb s@(_,cfg) e@(CutFun rtn _ _ _ [fa]) = do
+cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath dbPrefix) = exprPath cfg e []
+  let (ExprPath dbPrefix) = exprPathExplicit cfg rtn fa "makeblastdb" []
       dbPrefixRel = makeRelative (cfgTmpDir cfg) dbPrefix
       dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do
@@ -237,7 +211,7 @@ cMakeblastdb s@(_,cfg) e@(CutFun rtn _ _ _ [fa]) = do
     unit $ quietly $ wrappedCmd cfg [] "makeblastdb"
       [ "-in"    , faPath
       , "-out"   , dbPrefix
-      , "-title" , takeBaseName dbPrefix -- TODO does this make sense?
+      , "-title" , takeFileName dbPrefix -- TODO does this make sense?
       , "-dbtype", dbType
       ]
     debugWriteFile cfg dbPrefix dbPrefixRel

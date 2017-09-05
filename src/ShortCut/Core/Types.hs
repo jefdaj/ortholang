@@ -261,6 +261,7 @@ data CutFunction = CutFunction
   , fTypeCheck :: [CutType] -> Either String CutType
   , fFixity    :: CutFixity
   , fCompiler  :: CutState -> CutExpr -> Rules ExprPath
+  -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)
 

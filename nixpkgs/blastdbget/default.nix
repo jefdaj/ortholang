@@ -3,7 +3,7 @@ with pythonPackages;
 
 buildPythonPackage {
   name = "blastdbget";
-  version = "2015-07"; # TODO is that right?
+  # version = "98ba28";
   prefix = "";
   src = fetchgit {
     url = "https://github.com/brwnj/blastdbget";
@@ -11,4 +11,5 @@ buildPythonPackage {
     sha256 = "0kfhqf03b52v5bbyi8rjx4lp1ncgvmy5fbzdbvgjnf7jzbpgzvvb";
   };
   propagatedBuildInputs = [ sh ];
+  patches = ./blastdbget-no-validate-dbs.patch;
 }

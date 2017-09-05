@@ -1,0 +1,24 @@
+--- brwnj-blastdbget-98ba287/blastdbget.py	2017-09-05 09:53:52.770944000 -0700
++++ blastdbget-no-validate-dbs/blastdbget.py	2017-09-05 09:54:10.689944000 -0700
+@@ -325,13 +325,14 @@
+     q.join()
+ 
+     # validate the database
+-    status = validate_dbs(output, database)
+-    for db, success in status.iteritems():
+-        if success:
+-            log.info("%s created successfully" % db)
+-            # maybe delete the tgz and md5 files
+-        else:
+-            log.warn("%s failed validation" % db)
++    # (removed because blastdbcheck seems to be broken)
++    # status = validate_dbs(output, database)
++    # for db, success in status.iteritems():
++    #     if success:
++    #         log.info("%s created successfully" % db)
++    #         # maybe delete the tgz and md5 files
++    #     else:
++    #         log.warn("%s failed validation" % db)
+     log.info("Process complete.")
+ 
+ 
