@@ -16,9 +16,9 @@ cutModule = CutModule
   { mName = "tables"
   , mFunctions =
     [ extractQueries
-    , extractAllQueries
+    , extractQueriesEach
     , extractTargets
-    , extractAllTargets
+    , extractTargetsEach
     , filterEvalue
     , bestHits
     ]
@@ -44,9 +44,9 @@ extractQueries = CutFunction
   , fCompiler  = rSimpleTmp (aTsvColumn 1) "tables" (ListOf str)
   }
 
-extractAllQueries :: CutFunction
-extractAllQueries = CutFunction
-  { fName      = "extract_all_queries"
+extractQueriesEach :: CutFunction
+extractQueriesEach = CutFunction
+  { fName      = "extract_queries_each"
   , fTypeCheck = tExtractAll
   , fFixity    = Prefix
   , fCompiler  = rMapLastTmp (aTsvColumn 1) "tables" (ListOf str)
@@ -60,9 +60,9 @@ extractTargets = CutFunction
   , fCompiler  = rSimpleTmp (aTsvColumn 2) "tables" (ListOf str)
   }
 
-extractAllTargets :: CutFunction
-extractAllTargets = CutFunction
-  { fName      = "extract_all_targets"
+extractTargetsEach :: CutFunction
+extractTargetsEach = CutFunction
+  { fName      = "extract_targets_each"
   , fTypeCheck = tExtractAll
   , fFixity    = Prefix
   , fCompiler  = rMapLastTmp (aTsvColumn 2) "tables" (ListOf str)
