@@ -14,6 +14,7 @@ import System.Directory        (createDirectoryIfMissing)
 import System.FilePath.Glob    (compile, globDir1)
 import Data.List               (isInfixOf)
 import Data.Char               (toLower)
+-- import System.Exit             (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -24,7 +25,7 @@ cutModule = CutModule
     , loadNuclDBEach
     , loadProtDBEach
     , makeblastdb
-    , blastdbget
+    , blastdbget -- TODO mapped version so you can list -> git at once?
     , blastdblist
     -- , TODO write loadBlastDB
     ]
@@ -106,6 +107,8 @@ blastdbget = CutFunction
   , fCompiler  = cBlastdbget
   }
 
+-- TODO abort on nonzero exit code, which seems to happen a lot!
+--      wait, is the check just broken? maybe remove it
 cBlastdbget :: RulesFn
 cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- cExpr st name
@@ -115,12 +118,18 @@ cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
     need [nPath]
     dbName <- debugReadFile cfg nPath -- TODO need to strip?
     liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
-    unit $ quietly $ wrappedCmd cfg [Cwd tmpDir] "blastdbget" -- TODO no Cwd?
-      ["-d", "taxdb", "-d", dbName, tmpDir]
+    -- Exit code <- quietly $ wrappedCmd cfg [Cwd tmpDir]
+    unit $ quietly $ wrappedCmd cfg [Cwd tmpDir]
+      "blastdbget" ["-d", "taxdb", "-d", dbName, tmpDir]
 
-    -- Final dbPrefix has to be independent of the name because we don't know
-    -- the name during compilation. So I guess the thing to do is link all the
-    -- db files next to their final location and touch the prefix itself.
+    -- case code of
+      -- ExitFailure n -> error $ "blastdbget reported error code " ++ show n
+      -- ExitSuccess -> do
+
+    -- Final dbPrefix has to be independent of the name because we don't
+    -- know the name during compilation. So I guess the thing to do is link
+    -- all the db files next to their final location and touch the prefix
+    -- itself.
     dbFiles <- liftIO $ globDir1 (compile $ dbName ++ ".*") tmpDir
     mapM_ (\f -> linkDBFile cfg f dbPrefix) dbFiles
     unit $ quietly $ wrappedCmd cfg [] "touch" [dbPrefix]
