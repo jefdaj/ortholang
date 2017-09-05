@@ -13,6 +13,8 @@ import Test.Tasty            (testGroup, TestTree)
 import Crypto.Hash           (hash, Digest, MD5)
 import Data.ByteString.Char8 (pack)
 
+-- TODO fn to makeRelative to config dir
+
 -- Note that MD5 is no longer considered secure
 -- But for our purposes (checking for updated files) it doesn't matter.
 -- See https://en.wikipedia.org/wiki/MD5

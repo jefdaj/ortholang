@@ -5,16 +5,32 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile   (cExpr, toShortCutListStr)
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Debug     (debugReadFile, debugTrackWrite)
-import ShortCut.Core.ModuleAPI (mkLoad, mkLoadList, defaultTypeCheck)
+import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugTrackWrite)
+import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Paths     (exprPath, cacheDir)
 import ShortCut.Modules.SeqIO  (faa, fna)
-import System.FilePath         (takeBaseName, takeExtension, (<.>))
+import System.FilePath         (takeBaseName, takeExtension, (<.>), makeRelative)
 import System.Directory        (createDirectoryIfMissing)
 import System.FilePath.Glob    (compile, globDir1)
 import Data.List               (isInfixOf)
 import Data.Char               (toLower)
 -- import System.Exit             (ExitCode(..))
+
+{- There are a few types of BLAST database files. For nucleic acids:
+ - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
+ -
+ - And for proteins:
+ - <prefix>.phr, <prefix>.pin, <prefix>.pog, ...
+ -
+ - The BLAST programs just expect to be passed the prefix, which is fine for
+ - most purposes but difficult in Shake; since it's not actually a file Shake
+ - will complain that the Action failed to generate it. My solution for
+ - now is to make a text file with the prefix pattern in it. The contents are
+ - passed to BLAST functions.
+ -
+ - TODO does it work properly when the input fasta file changes and the database
+ -      needs to be rebuilt?
+ -}
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -50,20 +66,65 @@ pdb = CutType
 -- load from files --
 ---------------------
 
--- TODO how to handle the prefix issue? guess we have to check + touch here?
---      or should i expect one compressed file instead?
+{- These are a little different from normal, because rather than linking
+ - directly to a database file (there isn't one!), they create separate text
+ - files that you can read to get the proper prefix pattern.
+ -}
+
+mkLoadDB :: String -> CutType -> CutFunction
+mkLoadDB name rtn = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str] rtn
+  , fFixity    = Prefix
+  , fCompiler  = cLoadDB
+  }
+
+mkLoadDBEach :: String -> CutType -> CutFunction
+mkLoadDBEach name rtn = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
+  , fFixity    = Prefix
+  , fCompiler  = undefined -- TODO write this
+  }
+
+cLoadDB :: RulesFn
+cLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
+  (ExprPath sPath) <- cExpr st s
+  let (ExprPath oPath) = exprPath cfg e []
+  oPath %> \_ -> do
+    pattern <- debugReadFile cfg sPath
+    let pattern' = makeRelative (cfgTmpDir cfg) pattern
+    debugWriteFile cfg oPath pattern'
+  return (ExprPath oPath)
+cLoadDB _ _ = error "bad argument to cLoadDB"
+
+-- The paths here are a little confusing: expr is a str of the path we want to
+-- link to. So after compiling it we get a path to *that str*, and have to read
+-- the file to access it. Then we want to `ln` to the file it points to.
+-- cLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
+-- cLink s@(_,cfg) expr rtype prefix = do
+--   (ExprPath strPath) <- cExpr s expr
+--   -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
+--   let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
+--   outPath %> \out -> do
+--     pth <- fmap strip $ readFile' strPath
+--     src <- liftIO $ canonicalizePath pth
+--     need [src]
+--     -- TODO these have to be absolute, so golden tests need to adjust them:
+--     quietly $ wrappedCmd cfg [] "ln" ["-fs", src, out]
+--   return (ExprPath outPath)
 
 loadNuclDB :: CutFunction
-loadNuclDB = mkLoad "load_nucl_db" ndb
+loadNuclDB = mkLoadDB "load_nucl_db" ndb
 
 loadProtDB :: CutFunction
-loadProtDB = mkLoad "load_prot_db" pdb
+loadProtDB = mkLoadDB "load_prot_db" pdb
 
 loadNuclDBEach :: CutFunction
-loadNuclDBEach = mkLoadList "load_nucl_db_each" ndb
+loadNuclDBEach = mkLoadDBEach "load_nucl_db_each" ndb
 
 loadProtDBEach :: CutFunction
-loadProtDBEach = mkLoadList "load_prot_db_each" pdb
+loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 
 ------------------------
 -- download from NCBI --
@@ -165,25 +226,11 @@ tMakeblastdb [x]
   | x == faa = Right pdb
 tMakeblastdb _ = error "makeblastdb requires a fasta file"
 
-{- There are a few types of BLAST database files. For nucleic acids:
- - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
- -
- - And for proteins:
- - <prefix>.phr, <prefix>.pin, <prefix>.pog, ...
- -
- - The BLAST programs just expect to be passed the prefix, which is fine for
- - most purposes but difficult in Shake; since it's not actually a file Shake
- - will complain that the Action failed to generate it. My hacky solution for
- - now is just to `touch` the prefix itself. BLAST doesn't seem to mind one
- - extra file, and Shake doesn't mind several.
- -
- - TODO does it work properly when the input fasta file changes and the database
- -      needs to be rebuilt?
- -}
 cMakeblastdb :: RulesFn
-cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
+cMakeblastdb s@(_,cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath dbPrefix) = exprPath cfg fa []
+  let (ExprPath dbPrefix) = exprPath cfg e []
+      dbPrefixRel = makeRelative (cfgTmpDir cfg) dbPrefix
       dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do
     need [faPath]
@@ -193,7 +240,6 @@ cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
       , "-title" , takeBaseName dbPrefix -- TODO does this make sense?
       , "-dbtype", dbType
       ]
-    unit $ quietly $ wrappedCmd cfg [] "touch" [dbPrefix]
-    debugTrackWrite cfg [dbPrefix]
+    debugWriteFile cfg dbPrefix dbPrefixRel
   return (ExprPath dbPrefix)
 cMakeblastdb _ _ = error "bad argument to makeblastdb"

@@ -140,7 +140,8 @@ def main():
         mkpath(tmp)
     dbt = db_type(args['--cmd'])
     try:
-        db = resolve_link(args['--dbpath'])
+        # db = resolve_link(args['--dbpath'])
+        db = args['--dbpath']
     except:
         db  = make_db(args, tmp, args['--subject'], dbt)
     out = make_hits(args, db)

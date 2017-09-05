@@ -9,7 +9,7 @@ import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
--- import System.FilePath          (takeDirectory, (</>))
+import System.FilePath          (makeRelative, takeDirectory, (</>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -84,33 +84,24 @@ addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
     db = CutFun dbType i (depsOf s) "makeblastdb" [s]
 addMakeDBCall _ = error "bad argument to addMakeDBCall"
 
--- TODO need to follow the db link until it's not a link, then use that?
--- TODO wait, why are the blast databases being made inside cut_ref?
---      that can't be right!
 aParBlast :: String -> ActionFn
-aParBlast bCmd cfg (CacheDir cDir)
-          [ExprPath out, ExprPath query, ExprPath db, ExprPath evalue] = do
-  -- TODO is this automatic? need [query, subject, ePath]
-  eStr <- fmap init $ debugReadFile cfg evalue
-  -- db'  <- resolveLink cfg db
-  let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
+aParBlast bCmd cfg _ [ExprPath o, ExprPath q, ExprPath d, ExprPath e] = do
+  eStr   <- fmap init $ debugReadFile cfg e
+  prefix <- fmap (cfgTmpDir cfg </>) $ debugReadFile cfg d
+  let eDec = formatScientific Fixed Nothing (read eStr)
+      cDir = cfgTmpDir cfg </> takeDirectory prefix
   unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
-    [ "-c", bCmd, "-t", cDir, "-q", query, "-d", db, "-o", out, "-e", eDec, "-p"]
-  debugTrackWrite cfg [out]
+    [ "-c", bCmd
+    , "-t", cDir
+    , "-q", q
+    , "-d", prefix
+    , "-o", o
+    , "-e", eDec -- evalue formatted as decimal
+    , "-p"
+    -- , "-v" turns on debugging info
+    ]
+  debugTrackWrite cfg [o]
 aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
-
--- TODO remove? trying to put it in the python code for now
--- follow one or more symbolic links to the original file
--- TODO switch to using the directory package once 1.3.1.1 works with nix/stack?
--- resolveLink :: CutConfig -> FilePath -> Action FilePath
--- resolveLink cfg path = do
---   let path' = takeDirectory path </> path
---   -- Stdout out <- wrappedCmd cfg [Cwd $ takeDirectory path] "readlink" [path]
---   Stdout out <- wrappedCmd cfg [] "readlink" [path']
---   let path'' = init out
---   if null path''
---     then return path -- no symlinks here
---     else resolveLink cfg path'' -- recurse
 
 ---------------------
 -- mapped versions --
