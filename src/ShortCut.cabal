@@ -110,4 +110,5 @@ executable shortcut
                     temporary,
                     text,
                     transformers,
+                    unix,
                     utility-ht

@@ -29,7 +29,7 @@ Options:
 from distutils.dir_util import mkpath
 from docopt             import docopt
 from glob               import glob
-from os                 import remove, devnull
+from os                 import remove, devnull, readlink
 from os.path            import exists, join, basename, dirname, splitext
 from subprocess         import check_call
 from hashlib            import md5
@@ -125,6 +125,13 @@ def make_hits(args, db):
             remove(hits)
         raise
 
+def resolve_link(path):
+    while True:
+        try:
+            path = readlink(path)
+        except: # no longer a link
+            return path
+
 def main():
     args = docopt(__doc__, version='parallelblast 0.1')
     log(args, args)
@@ -133,7 +140,7 @@ def main():
         mkpath(tmp)
     dbt = db_type(args['--cmd'])
     try:
-        db = args['--dbpath']
+        db = resolve_link(args['--dbpath'])
     except:
         db  = make_db(args, tmp, args['--subject'], dbt)
     out = make_hits(args, db)

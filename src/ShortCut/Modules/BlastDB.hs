@@ -34,16 +34,16 @@ cutModule = CutModule
 ndb :: CutType
 ndb = CutType
   { tExt  = "ndb"
-  , tDesc = "blast nucleic acid database"
-  , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
+  , tDesc = "BLAST nucleotide database"
+  , tShow  = \f -> return $ "BLAST nucleotide database " ++ f
   }
 
 -- TODO will people confuse this with PDB files for viewing molecules?
 pdb :: CutType
 pdb = CutType
   { tExt  = "pdb"
-  , tDesc = "blast protein database"
-  , tShow  = defaultShow -- TODO will this work? maybe use a dummy one
+  , tDesc = "BLAST protein database"
+  , tShow  = \f -> return $ "BLAST protein database " ++ f
   }
 
 ---------------------

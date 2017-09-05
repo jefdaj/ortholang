@@ -3,7 +3,7 @@
 , Glob, haskeline, MissingH, mtl, parsec, pretty, process
 , QuickCheck, regex-compat, scientific, shake, silently, stdenv
 , tasty, tasty-golden, tasty-quickcheck, temporary, text
-, transformers, strict, utility-ht, safe-exceptions
+, transformers, strict, utility-ht, safe-exceptions, unix
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -17,6 +17,7 @@ mkDerivation {
     MissingH mtl parsec pretty process QuickCheck regex-compat
     scientific shake silently tasty tasty-golden tasty-quickcheck
     temporary text transformers strict utility-ht safe-exceptions
+    unix
   ];
   description = "A scripting language that makes short work of phylogenomic cuts";
   license = stdenv.lib.licenses.gpl3;

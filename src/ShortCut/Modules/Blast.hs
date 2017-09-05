@@ -9,6 +9,7 @@ import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite)
 import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
+-- import System.FilePath          (takeDirectory, (</>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -19,6 +20,11 @@ cutModule = CutModule
     , mkBlastFn        "blastx" fna faa
     , mkBlastFn       "tblastn" faa fna
     , mkBlastFn       "tblastx" fna fna
+    , mkBlastDbFn      "blastn" fna ndb -- TODO why doesn't this one work??
+    , mkBlastDbFn      "blastp" faa pdb
+    , mkBlastDbFn      "blastx" fna pdb
+    , mkBlastDbFn     "tblastn" faa ndb
+    , mkBlastDbFn     "tblastx" fna ndb
     , mkBlastEachFn    "blastn" fna fna -- TODO why doesn't this one work??
     , mkBlastEachFn    "blastp" faa faa
     , mkBlastEachFn    "blastx" fna faa
@@ -45,6 +51,17 @@ bht = CutType
 -- basic blast+ commands --
 ---------------------------
 
+-- the "regular" function that requires an existing blast db
+mkBlastDbFn :: String -> CutType -> CutType -> CutFunction
+mkBlastDbFn bCmd qType dbType = CutFunction
+  { fName      = bCmd ++ "_db"
+  , fTypeCheck = defaultTypeCheck [qType, dbType, num] bht
+  , fFixity    = Prefix
+  , fCompiler  = cMkBlastDbFn bCmd aParBlast
+  }
+
+-- the "fancy" one that makes the db from a fasta file
+-- (this is what i imagine users will usually want)
 mkBlastFn :: String -> CutType -> CutType -> CutFunction
 mkBlastFn bCmd qType sType = CutFunction
   { fName      = bCmd
@@ -53,10 +70,12 @@ mkBlastFn bCmd qType sType = CutFunction
   , fCompiler  = cMkBlastFn bCmd aParBlast
   }
 
+cMkBlastDbFn :: String -> (String -> ActionFn) -> RulesFn
+cMkBlastDbFn bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
+
+-- convert the fasta file to a db and pass to the db version (above)
 cMkBlastFn :: String -> (String -> ActionFn) -> RulesFn
-cMkBlastFn bCmd bActFn st expr = mapFn st $ addMakeDBCall expr
-  where
-    mapFn = rSimpleTmp (bActFn bCmd) "blast" bht
+cMkBlastFn c a s e = cMkBlastDbFn c a s $ addMakeDBCall e
 
 addMakeDBCall :: CutExpr -> CutExpr
 addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
@@ -65,16 +84,33 @@ addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
     db = CutFun dbType i (depsOf s) "makeblastdb" [s]
 addMakeDBCall _ = error "bad argument to addMakeDBCall"
 
+-- TODO need to follow the db link until it's not a link, then use that?
+-- TODO wait, why are the blast databases being made inside cut_ref?
+--      that can't be right!
 aParBlast :: String -> ActionFn
 aParBlast bCmd cfg (CacheDir cDir)
           [ExprPath out, ExprPath query, ExprPath db, ExprPath evalue] = do
   -- TODO is this automatic? need [query, subject, ePath]
   eStr <- fmap init $ debugReadFile cfg evalue
+  -- db'  <- resolveLink cfg db
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
   unit $ quietly $ wrappedCmd cfg [] "parallelblast.py" -- TODO Cwd cDir?
     [ "-c", bCmd, "-t", cDir, "-q", query, "-d", db, "-o", out, "-e", eDec, "-p"]
   debugTrackWrite cfg [out]
 aParBlast _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
+
+-- TODO remove? trying to put it in the python code for now
+-- follow one or more symbolic links to the original file
+-- TODO switch to using the directory package once 1.3.1.1 works with nix/stack?
+-- resolveLink :: CutConfig -> FilePath -> Action FilePath
+-- resolveLink cfg path = do
+--   let path' = takeDirectory path </> path
+--   -- Stdout out <- wrappedCmd cfg [Cwd $ takeDirectory path] "readlink" [path]
+--   Stdout out <- wrappedCmd cfg [] "readlink" [path']
+--   let path'' = init out
+--   if null path''
+--     then return path -- no symlinks here
+--     else resolveLink cfg path'' -- recurse
 
 ---------------------
 -- mapped versions --
