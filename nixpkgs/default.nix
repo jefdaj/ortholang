@@ -19,7 +19,8 @@ let
   crb-blast  = pkgs.callPackage ./crb-blast  { inherit ncbi-blast; };
 
   myPython = pkgs.pythonPackages // {
-    biopython =  pkgs.callPackage ./biopython {
+    blastdbget = pkgs.callPackage ./blastdbget {};
+    biopython  = pkgs.callPackage ./biopython {
       inherit pkgs;
       inherit (pkgs) pythonPackages;
     };
