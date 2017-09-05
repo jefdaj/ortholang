@@ -2,6 +2,7 @@ with import ./nixpkgs;
 let
   biomartr   = import ./src/ShortCut/Modules/BioMartR;
   blast      = import ./src/ShortCut/Modules/Blast;
+  blastdb    = import ./src/ShortCut/Modules/BlastDB;
   blastrbh   = import ./src/ShortCut/Modules/BlastRBH;
   seqio      = import ./src/ShortCut/Modules/SeqIO;
   tables     = import ./src/ShortCut/Modules/Tables;
@@ -9,6 +10,7 @@ let
   runDepends = [
     biomartr
     blast
+    blastdb
     blastrbh
     seqio
     tables
@@ -18,6 +20,7 @@ let
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
+    ++ blastdb.runDepends
     ++ blastrbh.runDepends
     ++ tables.runDepends
     ++ seqio.runDepends;
