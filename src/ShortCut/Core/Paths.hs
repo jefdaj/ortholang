@@ -13,7 +13,7 @@
  - |   |-- any
  - |   |-- concat_fastas
  - |   |-- crb_blast
- - |   |-- crb_blast_all
+ - |   |-- crb_blast_each
  - |   |-- extract_ids
  - |   |-- extract_seqs
  - |   |-- gbk_to_faa

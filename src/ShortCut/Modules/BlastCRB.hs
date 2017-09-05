@@ -1,58 +1,24 @@
 module ShortCut.Modules.BlastCRB where
 
--- TODO any way to prevent it having to remake the mini6803 or whatever
---      query database each time? seems kind of inefficient! but can't put
---      everything in the same folder or it trips over itself in parallel
-
--- TODO what to do about the e-value cutoff?
+-- TODO expose the e-value cutoff, since it is an option? does it make a difference?
 
 import ShortCut.Core.Types
 import Development.Shake       (quietly, Action, CmdOption(..))
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.ModuleAPI (rSimpleTmp, rMapLastTmps, defaultTypeCheck)
-import ShortCut.Modules.SeqIO  (faa)
-
----------------
--- interface --
----------------
+import ShortCut.Core.ModuleAPI (rSimpleTmp, rMapLastTmps)
+import ShortCut.Modules.SeqIO  (faa, fna)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "crb-blast"
   , mFunctions =
     [ blastCRB
-    , blastCRBAll
+    , blastCRBEach
     ]
   }
 
-crb :: CutType
-crb = CutType
-  { tExt  = "crb"
-  , tDesc = "tab-separated table of conditional reciprocal blast best hits"
-  , tShow  = defaultShow
-  }
-
-----------------------
--- basic crb search --
-----------------------
-
-blastCRB :: CutFunction
-blastCRB = CutFunction
-  { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
-  , fTypeCheck = defaultTypeCheck [faa, faa] crb
-  , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aBlastCRB "crbblast" crb
-  }
-
-blastCRBAll :: CutFunction
-blastCRBAll = CutFunction
-  { fName      = "crb_blast_all"
-  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] (ListOf crb)
-  , fFixity    = Prefix
-  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" crb
-  }
-
--- output columns:
+-- crb columns:
+--
 -- query - the name of the transcript from the 'query' fasta file
 -- target - the name of the transcript from the 'target' fasta file
 -- id - the percent sequence identity
@@ -64,8 +30,39 @@ blastCRBAll = CutFunction
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
+crb :: CutType
+crb = CutType
+  { tExt  = "crb"
+  , tDesc = "tab-separated table of conditional reciprocal blast best hits"
+  , tShow  = defaultShow
+  }
+
+blastCRB :: CutFunction
+blastCRB = CutFunction
+  { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
+  , fTypeCheck = tCrbBlast
+  , fFixity    = Prefix
+  , fCompiler  = rSimpleTmp aBlastCRB "crbblast" crb
+  }
+
+blastCRBEach :: CutFunction
+blastCRBEach = CutFunction
+  { fName      = "crb_blast_each"
+  , fTypeCheck = tCrbBlastEach
+  , fFixity    = Prefix
+  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" (ListOf crb)
+  }
+
+tCrbBlast :: [CutType] -> Either String CutType
+tCrbBlast [x, y] | x == fna && y `elem` [fna, faa] = Right crb
+tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
+
+tCrbBlastEach :: [CutType] -> Either String CutType
+tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
+tCrbBlastEach _ = Left "crb_blast requires a fna query and list of fna or faa targets"
+
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
   quietly $ wrappedCmd cfg [Cwd tmpDir]
-                       "crb-blast" ["--query", q, "--target", t, "--output", o]
+    "crb-blast" ["--query", q, "--target", t, "--output", o]
 aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

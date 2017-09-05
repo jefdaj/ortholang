@@ -20,7 +20,7 @@ log() { [[ -z $SHORTCUT_LOGLEVEL ]] || echo "[$(date '+%Y-%m-%d %H:%M:%S')] $@";
 
 # put any changes needed to optimize specific commands here
 case "$(basename "$1")" in
-	crb-blast) CMD="$SRUN --cpus-per-task=12 --time=99:00:00 $@ --verbose --split --threads=12"; log "$CMD";;
+	crb-blast) CMD="$SRUN --cpus-per-task=6 --time=99:00:00 $@ --verbose --split --threads=6"; log "$CMD";;
 	parallelblast.py) CMD="$SRUN --cpus-per-task=12 --time=16:00:00 $@"; log "$CMD";;
 	blastn|blastp|blastx|tblastn|tblastx) CMD="$SRUN --cpus-per-task=1 --time=99:00:00 $@"; log "$CMD";;
 	cat|ln) CMD="$@";; # TODO does anything echoed here get sent to the output file??
