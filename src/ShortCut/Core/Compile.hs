@@ -26,7 +26,7 @@ import Development.Shake
 import ShortCut.Core.Debug
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
-import ShortCut.Core.Util (absolutize, resolveSymlinks, stripWhiteSpace)
+import ShortCut.Core.Util (resolveSymlinks, stripWhiteSpace)
 
 import Data.List                  (find, sort)
 -- import Data.String.Utils          (strip) -- TODO stripWhiteSpace?
@@ -70,8 +70,6 @@ addPrefixes p = mangleScript (addPrefix p)
 -- compile the ShortCut AST --
 ------------------------------
 
--- TODO what happens to plain sets?
--- TODO WAIT ARE SETS REALLY NEEDED? OR CAN WE JUST REFER TO FILETYPES?
 cExpr :: CutState -> CutExpr -> Rules ExprPath
 cExpr s e@(CutLit  _ _ _      ) = cLit s e
 cExpr s e@(CutRef  _ _ _ _    ) = cRef s e
@@ -102,7 +100,6 @@ cAssign s (var, expr) = do
 --      (or, is that not possible for a typechecked AST?)
 compileScript :: CutState -> Maybe String -> Rules ResPath
 compileScript s@(as,_) permHash = do
-  -- liftIO $ putStrLn "entering compileScript"
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
@@ -126,56 +123,51 @@ cLit (_,cfg) expr = do
     paths (CutLit _ _ p) = p
     paths _ = error "bad argument to paths"
 
--- TODO how to show the list once it's created? not just as a list of paths!
--- TODO why are lists of lists not given .list.list ext? hides a more serious bug?
---      or possibly the bug is that we're making accidental lists of lists?
--- TODO special single-file cases for str.list and num.list!
 cList :: CutState -> CutExpr -> Rules ExprPath
-cList (_,cfg) e@(CutList EmptyList _ _ _) = do
+cList s e@(CutList EmptyList _ _ _) = cListEmpty s e
+cList s e@(CutList rtn _ _ _)
+  | rtn `elem` [str, num] = cListLits s e
+  | otherwise = cListPaths s e
+cList _ _ = error "bad arguemnt to cList"
+
+-- special case for empty lists
+-- TODO is a special type for this really needed?
+cListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+cListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
   let (ExprPath link) = exprPath cfg e []
   link %> \out -> quietly $ wrappedCmd cfg [] "touch" [out]
   return (ExprPath link)
-cList s e@(CutList rtn _ _ exprs) -- TODO should pass whole list here?
-  | rtn `elem` [str, num] = cListOne s e
-  | otherwise = cListMany s e
-cList _ _ = error "bad arguemnt to cList"
+cListEmpty _ e = error $ "bad arguemnt to cListEmpty: " ++ show e
 
 -- special case for writing lists of strings or numbers as a single file
-cListOne :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListOne s@(_,cfg) e@(CutList rtn _ _ exprs) = do
+cListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+cListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   litPaths <- mapM (cExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
-  -- TODO you can fix this but have to remove the main expression from Explicit first
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" litPaths' -- TODO only depend on `rtn` + `paths`?
-  liftIO $ putStrLn $ "cListOne: " ++ show e ++ " -> " ++ outPath
+  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" litPaths'
+  liftIO $ putStrLn $ "cListLits: " ++ show e ++ " -> " ++ outPath
   outPath %> \_ -> do
-    lits  <- fmap (map stripWhiteSpace) $ mapM (debugReadFile cfg) litPaths'
-    liftIO $ putStrLn $ "cListOne lits: " ++ show lits -- TODO line split issue here?
-    debugWriteLines cfg outPath lits
+    lits  <- mapM (debugReadFile cfg) litPaths'
+    let lits' = sort $ map stripWhiteSpace lits
+    liftIO $ putStrLn $ "cListLits lits': " ++ show lits'
+    debugWriteLines cfg outPath lits'
   return (ExprPath outPath)
-cListOne _ e = error $ "bad arguemnt to cListOne: " ++ show e
+cListLits _ e = error $ "bad arguemnt to cListLits: " ++ show e
 
 -- regular case for writing a list of links to some other file type
-cListMany :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListMany s@(_,cfg) e@(CutList rtn _ _ exprs) = do
+cListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+cListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
-
-  -- TODO only depend on final exprs
-  -- let (ExprPath outPath) = exprPath cfg e [] -- TODO only depend on `rtn` + `paths`?
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" (map show paths) -- TODO only depend on `rtn` + `paths`?
-      -- paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
-  liftIO $ putStrLn $ "cListMany: " ++ show e ++ " -> " ++ outPath
+  let paths' = map (\(ExprPath p) -> p) paths
+  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" paths'
+  liftIO $ putStrLn $ "cListPaths: " ++ show e ++ " -> " ++ outPath
   outPath %> \_ -> do
-    -- need (map (\(ExprPath p) -> p) paths)
-    let paths' = map (\(ExprPath p) -> p) paths
     need paths'
     paths'' <- liftIO $ mapM resolveSymlinks paths'
     liftIO $ putStrLn $ "paths'': " ++ show paths''
-    -- writeFileChanged out (unlines paths') -- TODO debug?
     debugWriteLines cfg outPath paths''
   return (ExprPath outPath)
-cListMany _ _ = error "bad arguemnts to cListMany"
-
+cListPaths _ _ = error "bad arguemnts to cListPaths"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
@@ -206,45 +198,5 @@ cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
 cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
-  return (p1, p2, exprPathExplicit cfg t "cut_bop" [show expr, show p1, show p2]) -- TODO name each one?
-
-----------------------------------------------
--- adapters for scripts to read/write lists --
-----------------------------------------------
-
--- gathers a list into one file so scripts don't have to worry about the
--- details of ShortCut's caching habits. note that that file might still be a
--- list of paths, if the original was a list of lists
--- TODO is there any good way to handle that?
--- TODO remove tmpDir
--- fromShortCutList :: CutConfig -> ExprPath -> ExprPath -> Action ()
--- fromShortCutList cfg (ExprPath inPath) (ExprPath outPath) = do
---   litPaths <- debugReadLines cfg inPath
---   let litPaths' = map (cfgTmpDir cfg </>) litPaths
---   need litPaths'
---   lits <- mapM (\p -> fmap init $ debugReadFile cfg p) litPaths'
---   writeFileLines outPath lits
-
--- reverse of fromShortCutList. this is needed after calling a script that
--- writes a list of literals, because shortcut expects a list of hashed
--- filenames *pointing* to literals
--- TODO any reason to pass the full state instead of just config?
--- TODO do they not need to be lits?
--- toShortCutList :: CutConfig -> CutType -> ExprPath -> ExprPath -> Action ()
--- toShortCutList cfg litType (ExprPath inPath) (ExprPath outPath) = do
---   lits <- fmap sort $ debugReadLines cfg inPath
---   toShortCutListStr cfg litType (ExprPath outPath) lits
-
--- Like toShortCutList, but takes strings instead of a tmpfile containing strings.
--- toShortCutListStr :: CutConfig -> CutType -> ExprPath -> [String] -> Action ()
--- toShortCutListStr cfg litType (ExprPath outPath) lits = do
---   let litExprs   = map (CutLit litType 0) lits
---       litPaths   = map (\e -> exprPath cfg e []) litExprs
---       litPaths'  = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) litPaths
---       litPaths'' = map (\(ExprPath p) -> p) litPaths
---       litPairs   = zip lits litPaths''
---   -- TODO nope have to separately use an action for each write if you want parallel
---   --      (but would that even help much?)
---   -- need litPaths''
---   mapM_ (\(l,p) -> debugWriteFile cfg p $ l ++ "\n") litPairs
---   debugWriteLines cfg outPath litPaths'
+  -- TODO name each one?
+  return (p1, p2, exprPathExplicit cfg t "cut_bop" [show expr, show p1, show p2])

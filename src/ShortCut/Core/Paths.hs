@@ -68,7 +68,6 @@ import ShortCut.Core.Types
 import Development.Shake.FilePath ((<.>), (</>))
 import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Util         (digest)
-import System.FilePath            (makeRelative)
 
 -- TODO should this handle calling cfgTmpDir too?
 -- TODO decide tmpDir from the config

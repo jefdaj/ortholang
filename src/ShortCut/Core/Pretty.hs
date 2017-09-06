@@ -37,28 +37,19 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where
   pPrint e@(CutLit _ _ s)
-    | typeOf e == num       = text $ show (read s :: Scientific)
-    -- | tExt t == tExt num    = text $ show (read s :: Scientific)
-    | otherwise             = text $ show s
-  pPrint (CutRef _ _ _ v)       = pPrint v
-  pPrint (CutFun _ _ _ s es)    = text s <+> fsep (map pNested es)
-  pPrint (CutList t _ _ es) = pListMany es
-    -- | t `elem` [str, num] = pListOne es
-    -- | otherwise           = pListMany es
+    | typeOf e == num = text $ show (read s :: Scientific)
+    | otherwise       = text $ "\"" ++ show s ++ "\""
+  pPrint (CutRef _ _ _ v)    = pPrint v
+  pPrint (CutFun _ _ _ s es) = text s <+> fsep (map pNested es)
+  pPrint (CutList _ _ _ es)  = pList es
   pPrint (CutBop _ _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
       one = bopWith (<+>)
       two = bopWith ($+$)
 
-pListOne :: [CutExpr] -> Doc
-pListOne es = text "[" <> sep (punctuate (text ",") (map extractLit es)) <> text "]"
-  where
-    extractLit (CutLit _ _ s) = text s
-    extractLit _ = error "bad argument to extractLit"
-
-pListMany :: (Pretty a) => [a] -> Doc
-pListMany es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
+pList :: (Pretty a) => [a] -> Doc
+pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
@@ -85,25 +76,22 @@ instance Pretty CutModule where
 -- instance Show CutModule where
   -- show = prettyShow
 
--- TODO oh i finally get it!
---      nothing's wrong here. extract_seqs should be adding a layer of
---      indirection that it isn't adding: lists are lists of paths to literals,
---      not lists of literals themselves! (this is fairly annoying for writing
---      scripts though)
-
 -- This seems to be separately required to show the final result of eval
 -- TODO is there a way to get rid of it?
 -- TODO rename prettyContents? prettyResult?
 -- TODO should this actually open external programs
 -- TODO idea for lists: if any element contains "\n", just add blank lines between them
--- TODO for str and num lists, showing should be like prettyShowing right?
+-- TODO clean this up!
 prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
 prettyResult _ EmptyList  _ = return $ text "[]"
 prettyResult cfg (ListOf t) f 
   | t `elem` [str, num] = do
     putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
     lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
-    return $ text "[" <> sep ((punctuate (text ",") (map text lits))) <> text "]"
+    let lits' = if t == str
+                  then map (\s -> text $ "\"" ++ s ++ "\"") lits
+                  else map text lits
+    return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
     putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
     paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
