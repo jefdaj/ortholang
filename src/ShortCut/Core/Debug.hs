@@ -1,6 +1,8 @@
 module ShortCut.Core.Debug
   ( debug
   , debugShow
+  , debugParser
+  , debugCompiler
   , debugReadFile
   , debugReadLines
   , debugWriteFile
@@ -33,6 +35,16 @@ debug cfg str rtn = if cfgDebug cfg then trace str rtn else rtn
 debugShow :: Show a => CutConfig -> a -> b -> b
 debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
 
+
+debugParser :: Show a => CutConfig -> String -> a -> a
+debugParser cfg name res = debug cfg msg res
+  where
+    msg = name ++ " parsed " ++ show res
+
+debugCompiler :: (Show a, Show b) => CutConfig -> String -> a -> b -> b
+debugCompiler cfg name input output = debug cfg msg output
+  where
+    msg = name ++ " compiled " ++ show input ++ " to " ++ show output
 
 -----------------------------
 -- handle duplicate writes --
@@ -86,11 +98,11 @@ readLinesStrict = fmap lines . readFileStrict
 -- TODO rename like myReadFile, myReadLines?
 
 debugReadFile :: CutConfig -> FilePath -> Action String
-debugReadFile cfg f = debug cfg ("read: " ++ f) (readFileStrict f)
+debugReadFile cfg f = debug cfg ("read '" ++ f ++ "'") (readFileStrict f)
 
 debugWriteFile :: CutConfig -> FilePath -> String -> Action ()
 debugWriteFile cfg f s = unlessExists f
-                       $ debug cfg ("write: " ++ f)
+                       $ debug cfg ("write '" ++ f ++ "'")
                        $ writeFileSafe f s
 
 debugReadLines :: CutConfig -> FilePath -> Action [String]
@@ -98,13 +110,13 @@ debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 
 debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
 debugWriteLines cfg f ss = unlessExists f
-                         $ debug cfg ("write: " ++ f)
+                         $ debug cfg ("write '" ++ f ++ "'")
                          $ writeLinesSafe f ss
 
 debugWriteChanged :: CutConfig -> FilePath -> String -> Action ()
 debugWriteChanged cfg f s = unlessExists f
-                          $ debug cfg ("write: " ++ f)
+                          $ debug cfg ("write '" ++ f ++ "'")
                           $ writeFileChanged f s
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
-debugTrackWrite cfg fs = debug cfg ("write: " ++ show fs) (trackWrite fs)
+debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)

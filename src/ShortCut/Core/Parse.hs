@@ -36,7 +36,7 @@ import Debug.Trace
 
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug    (debug)
+import ShortCut.Core.Debug    (debug, debugParser)
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail, when)
 import Control.Monad.Identity (Identity)
@@ -79,7 +79,7 @@ parseString c = runParseM pScript ([], c)
 parseFile :: CutConfig -> FilePath -> IO (Either ParseError CutScript)
 parseFile cfg path = readFile path' >>= return . parseString cfg
   where
-    path' = debug cfg ("parse: '" ++ path ++ "'") path
+    path' = debug cfg ("parseFile '" ++ path ++ "'") path
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -301,8 +301,10 @@ pFun = do
     -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
       Left  err -> fail err
-      Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
-                   in return $ CutFun rtn' 0 deps (fName f) args
+      -- Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
+      Right rtn -> let res  = CutFun rtn 0 deps (fName f) args
+                       res' = debugParser cfg "pFun" res
+                   in return res'
 
 -----------------
 -- expressions --
@@ -356,7 +358,9 @@ pAssign = do
   v <- pVarEq -- TODO use lookAhead here to decide whether to commit to it
   e <- lexeme pExpr
   putState (scr ++ [(v,e)], cfg)
-  return (v,e)
+  let res  = (v,e)
+      res' = debugParser cfg "pAssign" res
+  return res'
 
 -- Handles the special case of a naked top-level expression, which is treated
 -- as being assigned to "result". This parses the same in a script or the repl,
@@ -369,7 +373,11 @@ pResult :: ParseM CutAssign
 pResult = pExpr >>= \e -> return (CutVar "result", e)
 
 pStatement :: ParseM CutAssign
-pStatement = pAssign <|> pResult
+pStatement = do
+  (_, cfg) <- getState
+  res <- pAssign <|> pResult
+  let res' = debugParser cfg "pStatement" res
+  return res'
 
 -------------
 -- scripts --
@@ -384,4 +392,5 @@ pScript = do
   void $ many pComment
   scr <- many (pStatement <* many pComment)
   putState (scr, cfg)
-  return scr
+  let scr' = debugParser cfg "pScript" scr
+  return scr'

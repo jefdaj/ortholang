@@ -16,20 +16,17 @@ module ShortCut.Core.Compile
   , cExpr
   , cList
   , addPrefixes
-  -- , toShortCutList
-  -- , toShortCutListStr
-  -- , fromShortCutList
   )
   where
 
 import Development.Shake
-import ShortCut.Core.Debug
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
-import ShortCut.Core.Util (resolveSymlinks, stripWhiteSpace)
 
+import ShortCut.Core.Debug        (debugCompiler, debugReadFile,
+                                   debugWriteFile, debugWriteLines)
+import ShortCut.Core.Util         (resolveSymlinks, stripWhiteSpace)
 import Data.List                  (find, sort)
--- import Data.String.Utils          (strip) -- TODO stripWhiteSpace?
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
 import System.FilePath            (makeRelative, takeDirectory)
@@ -91,10 +88,12 @@ findByName cfg name = find (\f -> fName f == name) fs
     fs = concatMap mFunctions ms
 
 cAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
-cAssign s (var, expr) = do
+cAssign s@(_,cfg) (var, expr) = do
   path  <- cExpr s expr
   path' <- cVar s var expr path
-  return (var, path')
+  let res  = (var, path')
+      res' = debugCompiler cfg "cAssign" (var, expr) res
+  return res'
 
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
@@ -114,10 +113,10 @@ compileScript s@(as,_) permHash = do
 -- write a literal value from ShortCut source code to file
 cLit :: CutState -> CutExpr -> Rules ExprPath
 cLit (_,cfg) expr = do
-  -- liftIO $ putStrLn "entering cLit"
   let (ExprPath path) = exprPath cfg expr []
+      path' = debugCompiler cfg "cLit" expr path
   path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n"
-  return (ExprPath path)
+  return (ExprPath path')
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
@@ -135,8 +134,9 @@ cList _ _ = error "bad arguemnt to cList"
 cListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
   let (ExprPath link) = exprPath cfg e []
+      link' = debugCompiler cfg "cListEmpty" e link
   link %> \out -> quietly $ wrappedCmd cfg [] "touch" [out]
-  return (ExprPath link)
+  return (ExprPath link')
 cListEmpty _ e = error $ "bad arguemnt to cListEmpty: " ++ show e
 
 -- special case for writing lists of strings or numbers as a single file
@@ -144,15 +144,14 @@ cListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   litPaths <- mapM (cExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" litPaths'
-  liftIO $ putStrLn $ "cListLits: " ++ show e ++ " -> " ++ outPath
+      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" litPaths'
+      outPath' = debugCompiler cfg "cListLits" e outPath
   outPath %> \_ -> do
     lits  <- mapM (debugReadFile cfg) litPaths'
     let lits' = sort $ map stripWhiteSpace lits
-    liftIO $ putStrLn $ "cListLits lits': " ++ show lits'
     debugWriteLines cfg outPath lits'
-  return (ExprPath outPath)
-cListLits _ e = error $ "bad arguemnt to cListLits: " ++ show e
+  return (ExprPath outPath')
+cListLits _ e = error $ "bad argument to cListLits: " ++ show e
 
 -- regular case for writing a list of links to some other file type
 cListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
@@ -160,21 +159,20 @@ cListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
   let paths' = map (\(ExprPath p) -> p) paths
   let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" paths'
-  liftIO $ putStrLn $ "cListPaths: " ++ show e ++ " -> " ++ outPath
+      outPath' = debugCompiler cfg "cListPaths" e outPath
   outPath %> \_ -> do
     need paths'
     paths'' <- liftIO $ mapM resolveSymlinks paths'
-    liftIO $ putStrLn $ "paths'': " ++ show paths''
     debugWriteLines cfg outPath paths''
-  return (ExprPath outPath)
+  return (ExprPath outPath')
 cListPaths _ _ = error "bad arguemnts to cListPaths"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 cRef :: CutState -> CutExpr -> Rules ExprPath
-cRef (_,cfg) expr@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var expr
+cRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
-    ePath (VarPath p) = ExprPath p
+    ePath (VarPath p) = ExprPath $ debugCompiler cfg "cRef" e p
 cRef _ _ = error "bad argument to cRef"
 
 -- Creates a symlink from varname to expression file.
@@ -184,12 +182,13 @@ cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 cVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
       dest' = ".." </> (makeRelative (cfgTmpDir cfg) dest)
+      link' = debugCompiler cfg "cVar" var dest'
   link %> \out -> do
     alwaysRerun
     need [dest]
     liftIO $ createDirectoryIfMissing True $ takeDirectory out
     quietly $ wrappedCmd cfg [] "ln" ["-fs", dest', out]
-  return (VarPath link)
+  return (VarPath link')
 
 -- handles the actual rule generation for all binary operators
 -- basically the `paths` functions with pattern matching factored out
@@ -199,4 +198,6 @@ cBop s@(_,cfg) t expr (n1, n2) = do
   p1 <- cExpr s n1
   p2 <- cExpr s n2
   -- TODO name each one?
-  return (p1, p2, exprPathExplicit cfg t "cut_bop" [show expr, show p1, show p2])
+  let path  = exprPathExplicit cfg t "cut_bop" [show expr, show p1, show p2]
+      path' = debugCompiler cfg "cBop" expr path
+  return (p1, p2, path')

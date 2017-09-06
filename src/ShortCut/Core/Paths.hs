@@ -66,31 +66,26 @@ module ShortCut.Core.Paths
 import ShortCut.Core.Types
 
 import Development.Shake.FilePath ((<.>), (</>))
-import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Util         (digest)
 
 -- TODO should this handle calling cfgTmpDir too?
 -- TODO decide tmpDir from the config
 cacheDir :: CutConfig -> String -> CacheDir
-cacheDir cfg modName = CacheDir (debug cfg ("cacheDir: " ++ rtn) rtn)
-  where
-    rtn = cfgTmpDir cfg </> "cache" </> modName
+cacheDir cfg modName = CacheDir $ cfgTmpDir cfg </> "cache" </> modName
 
 -- Creates a unique hashed directory inside the main module cache dir.
 -- Needed for scripts that name their tmpfiles the same each time they're run
 -- (I'm looking at you, crb-blast...)
 cacheDirUniq :: Show a => CutConfig -> String -> a -> CacheDir
-cacheDirUniq cfg modName showable = CacheDir (debug cfg ("cacheDirUniq: " ++ rtn) rtn)
+cacheDirUniq cfg modName showable = CacheDir $ d </> digest showable
   where
     (CacheDir d) = cacheDir cfg modName
-    rtn = d </> digest showable
 
 -- TODO is this needed at all?
 cacheFile :: Show a => CutConfig -> String -> a -> String -> FilePath
-cacheFile cfg modName uniq ext = debug cfg ("cacheFile: " ++ rtn ++ " (modName: " ++ modName ++ ")") rtn
+cacheFile cfg modName uniq ext = d </> digest uniq <.> ext
   where
     (CacheDir d) = cacheDir cfg modName
-    rtn = d </> digest uniq <.> ext
 
 -- helper fr exprPath* that finds the right subdirectory
 -- CutLit  CutType Int String
@@ -113,7 +108,7 @@ exprPath cfg expr paths = exprPathExplicit cfg (typeOf expr) (exprPrefix expr)
 -- Haskell functions that modify ShortCut functions, such as the r* ones in
 -- ModuleAPI.hs
 exprPathExplicit :: CutConfig -> CutType -> String -> [String] -> ExprPath
-exprPathExplicit cfg rtn prefix strings = ExprPath (debug cfg ("exprPathExplicit: " ++ rtn') rtn')
+exprPathExplicit cfg rtn prefix strings = ExprPath rtn'
   where
     -- paths' = map (makeRelative $ cfgTmpDir cfg) paths
     uniq   = digest $ unlines strings
@@ -125,7 +120,6 @@ exprPathExplicit cfg rtn prefix strings = ExprPath (debug cfg ("exprPathExplicit
 -- TODO auto-apply fromShortCutList to result?
 -- TODO rename varPath
 varPath :: CutConfig -> CutVar -> CutExpr -> VarPath
-varPath cfg (CutVar var) expr = VarPath (debug cfg ("varPath:" ++ rtn) rtn)
+varPath cfg (CutVar var) expr = VarPath $ cfgTmpDir cfg </> "vars" </> base
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
-    rtn  = cfgTmpDir cfg </> "vars" </> base
