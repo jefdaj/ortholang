@@ -24,7 +24,7 @@ import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExp
 import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines
                                    , debug, debugWriteFile, debugReadLines)
-import System.Directory           (canonicalizePath, createDirectoryIfMissing)
+import System.Directory           (createDirectoryIfMissing)
 import System.FilePath            (takeBaseName, makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks)
@@ -64,8 +64,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   return (ExprPath oPath)
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 
--- for scripts that take one arg and return a list of lits,
--- which then needs converting to ShortCut format
+-- for scripts that take one arg and return a list of lits
 -- TODO this should put tmpfiles in cache/<script name>!
 -- TODO name something more explicitly about fasta files?
 cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
@@ -73,16 +72,11 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let (CacheDir tmpDir ) = cacheDir cfg tmpName
       (ExprPath outPath) = exprPath cfg expr []
-      -- tmpOut            = cacheFile cfg tmpName fa "txt"
-  -- tmpOut %> \out -> do
   outPath %> \_ -> do
     need [faPath]
     Stdout out <- wrappedCmd cfg [Cwd tmpDir] script
                     [(debug cfg ("cOneArgList outPath: " ++ outPath) outPath), faPath]
     debugWriteFile cfg outPath out
-    -- trackWrite [out]
-  -- outPath %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath outPath)
-  -- outPath %> \_ -> debugWriteLines cfg tmpOut (ExprPath outPath)
   return (ExprPath outPath)
 cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
 
@@ -91,6 +85,7 @@ cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
 {- Takes a string with the filepath to load. Creates a trivial expression file
  - that's just a symlink to the given path. These should be the only absolute
  - links, and the only ones that point outside the temp dir.
+ - TODO still true?
  -}
 mkLoad :: String -> CutType -> CutFunction
 mkLoad name rtn = CutFunction
@@ -103,25 +98,20 @@ mkLoad name rtn = CutFunction
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
--- TODO absolutize these to match the new list stuff
---      oh heeeey, don't have to follow them! just don't make at all lol
+-- TODO should this go in Compile.hs?
 cLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
 cLink s@(_,cfg) expr rtype prefix = do
   (ExprPath strPath) <- cExpr s expr -- TODO is this the issue?
-  -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
-
   -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg rtype prefix [show expr] -- ok without ["outPath"]?
-
+  -- ok without ["outPath"]?
+  let (ExprPath outPath) = exprPathExplicit cfg rtype prefix [show expr]
   outPath %> \_ -> do
     pth <- fmap strip $ readFile' strPath
-    -- src <- liftIO $ canonicalizePath pth
-    src <- liftIO $ absolutize pth
+    src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
     liftIO $ putStrLn $ "pth: " ++ pth
     liftIO $ putStrLn $ "src: " ++ src
     liftIO $ putStrLn $ "outPath: " ++ outPath
     need [src]
-    -- TODO these have to be absolute, so golden tests need to adjust them:
     unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", src, outPath]
     debugTrackWrite cfg [outPath]
   return (ExprPath outPath)
@@ -148,26 +138,20 @@ mkLoadList name rtn = CutFunction
   , fCompiler  = cLoadList
   }
 
--- TODO why is a list of lists like [[1,2,5], [1,2,3]] going to cLoadOne? fix!
 cLoadList :: RulesFn
 cLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
   | typeOf es `elem` [ListOf str, ListOf num] = cLoadListOne rtn s es
-  -- | typeOf es `elem` [ListOf str, ListOf num] = cListOne s e -- infinite loop :(
   | otherwise = cLoadListMany s e
 cLoadList _ _ = error "bad arguments to cLoadList"
 
 -- special case for lists of str and num
--- TODO is this different from cListOne, except in its return type? unify!
+-- TODO is this different from cListOne, except in its return type?
 cLoadListOne :: CutType -> RulesFn
 cLoadListOne rtn (_,cfg) e@(CutList _ _ _ es) = do
   liftIO $ putStrLn "cLoadListOne"
-  -- (ExprPath esPath) <- cExpr s es
-
   -- TODO only depend on final expressions
   let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" [show e]
-
   outPath %> \_ -> do
-    -- es <- debugReadLines cfg esPath
     let lits = map extractLit es
     lits' <- liftIO $ mapM absolutize lits
     liftIO $ putStrLn $ "lits: " ++ show lits
@@ -185,19 +169,11 @@ cLoadListMany :: RulesFn
 cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   liftIO $ putStrLn "cLoadListMany"
   (ExprPath pathsPath) <- cExpr s es
-  -- let (ExprPath outPath) = exprPath cfg e []
-
   -- TODO only depend on final expressions
   let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_list" [show e]
-
   outPath %> \_ -> do
-  -- let (ExprPath outPath) = exprPathExplicit cfg (ListOf elemRtnType) e name []
-    -- paths <- fmap (map (cfgWorkDir cfg </>)) (debugReadLines cfg pathsPath)
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     paths' <- liftIO $ mapM resolveSymlinks paths
-    -- paths <- debugReadLines cfg pathsPath
-    -- let paths' = map (cfgWorkDir cfg </>) paths
-    -- liftIO $ putStrLn $ "es: " ++ show expr
     liftIO $ putStrLn $ "paths: " ++ show paths
     liftIO $ putStrLn $ "paths': " ++ show paths'
     need paths'
@@ -242,9 +218,10 @@ rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
 rMapLastTmp :: ActionFn -> String -> CutType -> RulesFn
-rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefix t s
+rMapLastTmp actFn tmpPrefix t s@(_,cfg) = mapFn t s
   where
     tmpDir = cacheDir cfg tmpPrefix
+    mapFn  = rMapLast (const tmpDir) actFn tmpPrefix
 
 -- TODO use a hash for the cached path rather than the name, which changes!
 
@@ -253,7 +230,8 @@ rMapLastTmp actFn tmpPrefix t s@(_,cfg) = rMapLast (const tmpDir) actFn tmpPrefi
 rMapLastTmps :: ActionFn -> String -> CutType -> RulesFn
 rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
   where
-    -- TODO what if the same last arg is used in different mapping fns? will it be unique?
+    -- TODO what if the same last arg is used in different mapping fns?
+    --      will it be unique?
     tmpFn args = cacheDirUniq cfg tmpPrefix args
 
 -- common code factored out from the two functions above
