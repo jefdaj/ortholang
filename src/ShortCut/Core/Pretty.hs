@@ -86,14 +86,12 @@ prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
 prettyResult _ EmptyList  _ = return $ text "[]"
 prettyResult cfg (ListOf t) f 
   | t `elem` [str, num] = do
-    putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
     lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map text lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
     paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
     pretties <- mapM (prettyResult cfg t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"

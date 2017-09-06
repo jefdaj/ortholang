@@ -108,9 +108,6 @@ cLink s@(_,cfg) expr rtype prefix = do
   outPath %> \_ -> do
     pth <- fmap strip $ readFile' strPath
     src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
-    liftIO $ putStrLn $ "pth: " ++ pth
-    liftIO $ putStrLn $ "src: " ++ src
-    liftIO $ putStrLn $ "outPath: " ++ outPath
     need [src]
     unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", src, outPath]
     debugTrackWrite cfg [outPath]

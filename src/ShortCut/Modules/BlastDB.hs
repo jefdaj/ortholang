@@ -3,6 +3,7 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
+import Control.Monad           (when)
 import ShortCut.Core.Compile   (cExpr)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugWriteLines)
@@ -209,12 +210,13 @@ cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
       dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do
     need [faPath]
-    unit $ quietly $ wrappedCmd cfg [] "makeblastdb"
+    Stdout out <- wrappedCmd cfg [] "makeblastdb"
       [ "-in"    , faPath
       , "-out"   , dbPrefix
       , "-title" , takeFileName dbPrefix -- TODO does this make sense?
       , "-dbtype", dbType
       ]
+    when (cfgDebug cfg) (liftIO $ putStrLn $ out)
     debugWriteFile cfg dbPrefix dbPrefixRel
   return (ExprPath dbPrefix)
 cMakeblastdb _ _ = error "bad argument to makeblastdb"
