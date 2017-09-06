@@ -6,7 +6,8 @@ import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile (cBop, cExpr)
 import ShortCut.Core.ModuleAPI (typeError)
 import ShortCut.Core.Types
-import ShortCut.Core.Debug (debugReadLines, debugWriteLines, debug)
+import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
+                            debugCompiler)
 import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule
@@ -87,13 +88,17 @@ cSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPat
 cSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- cExpr s lol
   let (ExprPath oPath) = exprPath cfg e []
+      oPath' = debugCompiler cfg "cSetFold" e oPath
   oPath %> \_ -> do
-    lists <- debugReadLines cfg (debug cfg ("setsPath: " ++ setsPath) setsPath)
+    -- lists <- debugReadLines cfg (debug cfg ("setsPath: " ++ setsPath) setsPath)
+    lists <- debugReadLines cfg setsPath
     listContents <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
     let sets = map fromList listContents
-        oLst = toList $ fn (debug cfg ("sets: " ++ show sets) sets)
-    debugWriteLines cfg oPath (debug cfg ("oLst: " ++ show oLst) oLst)
-  return (ExprPath oPath)
+        -- oLst = toList $ fn (debug cfg ("sets: " ++ show sets) sets)
+        oLst = toList $ fn sets
+    -- debugWriteLines cfg oPath (debug cfg ("oLst: " ++ show oLst) oLst)
+    debugWriteLines cfg oPath oLst
+  return (ExprPath oPath')
 cSetFold _ _ _ = error "bad argument to cSetFold"
 
 -- avoided calling it `all` because that's a Prelude function

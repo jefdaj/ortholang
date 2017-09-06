@@ -181,8 +181,9 @@ cRef _ _ = error "bad argument to cRef"
 cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 cVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
+      -- TODO is this needed? maybe just have links be absolute?
       dest' = ".." </> (makeRelative (cfgTmpDir cfg) dest)
-      link' = debugCompiler cfg "cVar" var dest'
+      link' = debugCompiler cfg "cVar" var link
   link %> \out -> do
     alwaysRerun
     need [dest]

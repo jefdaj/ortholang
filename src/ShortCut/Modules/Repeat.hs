@@ -6,6 +6,7 @@ import ShortCut.Core.Types
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile (cExpr, addPrefixes, compileScript)
+import ShortCut.Core.Debug   (debugCompiler)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util         (digest)
 
@@ -46,7 +47,9 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
       pre  = digest $ map show $ res:sub:deps
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
-  return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
+  -- let res  = (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
+  let resPath' = debugCompiler cfg "cRepeat" (resExpr, subVar, subExpr) resPath
+  return (ExprPath resPath') -- TODO this is supposed to convert result -> expr right?
 
 cRepeatEach :: CutState -> CutExpr -> Rules ExprPath
 cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
@@ -56,11 +59,12 @@ cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
   let (ExprPath outPath) = exprPath cfg expr resPaths
       (ExprPath subPaths') = subPaths
       resPaths' = map (\(ExprPath p) -> p) resPaths
+      outPath' = debugCompiler cfg "cRepeatEach" expr outPath
   outPath %> \out -> do
     need (subPaths':resPaths') -- TODO is needing subPaths required?
     let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
     writeFileLines out outPaths'
-  return (ExprPath outPath)
+  return (ExprPath outPath')
 cRepeatEach _ expr = error $ "bad argument to cRepeatEach: " ++ show expr
 
 -----------------------------------------------------
