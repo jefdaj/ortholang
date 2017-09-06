@@ -100,10 +100,10 @@ instance Pretty CutModule where
 prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
 prettyResult _ EmptyList  _ = return $ text "[]"
 prettyResult cfg (ListOf t) f 
-  -- | t `elem` [str, num] = do
-    -- putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
-    -- lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
-    -- return $ text "[" <> sep ((punctuate (text ",") (map text lits))) <> text "]"
+  | t `elem` [str, num] = do
+    putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
+    lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+    return $ text "[" <> sep ((punctuate (text ",") (map text lits))) <> text "]"
   | otherwise = do
     putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
     paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f

@@ -107,16 +107,17 @@ exprPrefix (CutList _ _ _ _    ) = "cut_list"
 exprPrefix (CutFun _ _ _ name _) = name
 
 exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
-exprPath cfg expr paths = exprPathExplicit cfg (typeOf expr) expr (exprPrefix expr) paths
+exprPath cfg expr paths = exprPathExplicit cfg (typeOf expr) (exprPrefix expr)
+  (show expr:map show paths)
 
 -- Same as exprPath, except you also set the type. This is needed when writing
 -- Haskell functions that modify ShortCut functions, such as the r* ones in
 -- ModuleAPI.hs
-exprPathExplicit :: CutConfig -> CutType -> CutExpr -> String -> [ExprPath] -> ExprPath
-exprPathExplicit cfg rtn expr prefix paths = ExprPath (debug cfg ("exprPathExplicit: " ++ rtn') rtn')
+exprPathExplicit :: CutConfig -> CutType -> String -> [String] -> ExprPath
+exprPathExplicit cfg rtn prefix strings = ExprPath (debug cfg ("exprPathExplicit: " ++ rtn') rtn')
   where
-    paths' = map (\(ExprPath p) -> makeRelative (cfgTmpDir cfg) p) paths
-    uniq   = digest $ unlines $ (show expr):paths'
+    -- paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    uniq   = digest $ unlines strings
     rtn'   = cfgTmpDir cfg </> "exprs" </> prefix </> uniq <.> extOf rtn
 
 -- TODO flip arguments for consistency with everything else There's a special

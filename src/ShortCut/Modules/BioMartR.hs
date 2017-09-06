@@ -165,7 +165,7 @@ cParseSearches :: CutState -> CutExpr -> Rules ExprPath
 cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
   (ExprPath sList) <- cExpr s expr
   -- TODO should this be a cacheFile instead?
-  let (ExprPath searchTable) = exprPathExplicit cfg search expr "parse_searches" [ExprPath sList]
+  let (ExprPath searchTable) = exprPathExplicit cfg search "parse_searches" [show expr, sList]
   searchTable %> \out -> do
     tmp <- readFile' sList
     let sLines = map (cfgTmpDir cfg </>) (lines tmp)

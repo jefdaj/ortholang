@@ -204,7 +204,7 @@ tMakeblastdb _ = error "makeblastdb requires a fasta file"
 cMakeblastdb :: RulesFn
 cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath dbPrefix) = exprPathExplicit cfg rtn fa "makeblastdb" []
+  let (ExprPath dbPrefix) = exprPathExplicit cfg rtn "makeblastdb" [faPath]
       dbPrefixRel = makeRelative (cfgTmpDir cfg) dbPrefix
       dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do

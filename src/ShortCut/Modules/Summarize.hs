@@ -37,7 +37,7 @@ cSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPat
 cSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- cExpr s iList
   let (ListOf (ListOf eType)) = typeOf iList
-      (ExprPath oPath) = exprPathExplicit cfg (ListOf eType) expr fnName [ExprPath iPath]
+      (ExprPath oPath) = exprPathExplicit cfg (ListOf eType) fnName [show expr, iPath]
   oPath %> \out -> do
     need [iPath]
     iLists <- fmap lines $ readFile' iPath

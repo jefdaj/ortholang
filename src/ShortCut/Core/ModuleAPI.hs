@@ -111,7 +111,7 @@ cLink s@(_,cfg) expr rtype prefix = do
   -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
 
   -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
+  let (ExprPath outPath) = exprPathExplicit cfg rtype prefix [show expr] -- ok without ["outPath"]?
 
   outPath %> \_ -> do
     pth <- fmap strip $ readFile' strPath
@@ -164,7 +164,7 @@ cLoadListOne rtn (_,cfg) e@(CutList _ _ _ es) = do
   -- (ExprPath esPath) <- cExpr s es
 
   -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) e "cut_list" []
+  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" [show e]
 
   outPath %> \_ -> do
     -- es <- debugReadLines cfg esPath
@@ -188,7 +188,7 @@ cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   -- let (ExprPath outPath) = exprPath cfg e []
 
   -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) e "cut_list" []
+  let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_list" [show e]
 
   outPath %> \_ -> do
   -- let (ExprPath outPath) = exprPathExplicit cfg (ListOf elemRtnType) e name []
@@ -266,7 +266,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
-      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) e name []
+      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
 
   outPath %> \_ -> do
