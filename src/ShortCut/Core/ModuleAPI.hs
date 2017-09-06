@@ -22,7 +22,8 @@ import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
 import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
-import ShortCut.Core.Debug        (debugWriteLines, debug)
+import ShortCut.Core.Debug        (debugTrackWrite, debugReadLines, debugWriteLines
+                                   , debug)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath            (takeBaseName, makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
@@ -101,12 +102,13 @@ cLink s@(_,cfg) expr rtype prefix = do
   (ExprPath strPath) <- cExpr s expr
   -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
   let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
-  outPath %> \out -> do
+  outPath %> \_ -> do
     pth <- fmap strip $ readFile' strPath
     src <- liftIO $ canonicalizePath pth
     need [src]
     -- TODO these have to be absolute, so golden tests need to adjust them:
-    quietly $ wrappedCmd cfg [] "ln" ["-fs", src, out]
+    unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", src, outPath]
+    debugTrackWrite cfg [outPath]
   return (ExprPath outPath)
 
 cLoadOne :: CutType -> RulesFn
@@ -131,15 +133,20 @@ mkLoadList name rtn = CutFunction
   , fCompiler  = cLoadList rtn
   }
 
+-- oh no, infinite loop!
 cLoadList :: CutType -> RulesFn
-cLoadList elemRtnType s@(_,cfg) e@(CutFun (ListOf t) _ _ name [CutList _ _ _ ps]) = do
-  -- TODO is t here always str?
-  paths <- mapM (\p -> cLink s p t name) ps -- is cLink OK with no paths?
-  let paths' = map (\(ExprPath p) -> p) paths
-      (ExprPath links) = exprPathExplicit cfg (ListOf elemRtnType) e name []
-  links %> \out -> need paths' >> writeFileLines out paths'
+cLoadList elemRtnType s@(_,cfg) e@(CutFun _ _ _ name [es]) = do
+  (ExprPath pathsPath) <- cExpr s es -- infinite loop :(
+  let (ExprPath links) = exprPathExplicit cfg (ListOf elemRtnType) e name []
+  links %> \_ -> do
+    -- paths <- fmap (map (cfgWorkDir cfg </>)) (debugReadLines cfg pathsPath)
+    paths <- debugReadLines cfg pathsPath
+    let paths' = map (cfgWorkDir cfg </>) paths
+    -- liftIO $ putStrLn $ "es: " ++ show expr
+    need paths'
+    writeFileLines links paths
   return (ExprPath links)
-cLoadList _ _ _ = error "bad arguments to cLoadList"
+cLoadList _ _ e = error $ "bad arguments to cLoadList. e: " ++ show e
 
 -----------------------------------------------------------
 -- [a]ction functions (just describe how to build files) --
