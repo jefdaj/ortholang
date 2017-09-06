@@ -42,15 +42,23 @@ instance Pretty CutExpr where
     | otherwise             = text $ show s
   pPrint (CutRef _ _ _ v)       = pPrint v
   pPrint (CutFun _ _ _ s es)    = text s <+> fsep (map pNested es)
-  pPrint (CutList _ _ _ es)     = pList es
+  pPrint (CutList t _ _ es) = pListMany es
+    -- | t `elem` [str, num] = pListOne es
+    -- | otherwise           = pListMany es
   pPrint (CutBop _ _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
       bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
       one = bopWith (<+>)
       two = bopWith ($+$)
 
-pList :: (Pretty a) => [a] -> Doc
-pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
+pListOne :: [CutExpr] -> Doc
+pListOne es = text "[" <> sep (punctuate (text ",") (map extractLit es)) <> text "]"
+  where
+    extractLit (CutLit _ _ s) = text s
+    extractLit _ = error "bad argument to extractLit"
+
+pListMany :: (Pretty a) => [a] -> Doc
+pListMany es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
@@ -91,8 +99,14 @@ instance Pretty CutModule where
 -- TODO for str and num lists, showing should be like prettyShowing right?
 prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
 prettyResult _ EmptyList  _ = return $ text "[]"
-prettyResult cfg (ListOf t) f = do
-  paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
-  pretties <- mapM (prettyResult cfg t) paths
-  return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
+prettyResult cfg (ListOf t) f 
+  -- | t `elem` [str, num] = do
+    -- putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
+    -- lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+    -- return $ text "[" <> sep ((punctuate (text ",") (map text lits))) <> text "]"
+  | otherwise = do
+    putStrLn $ "prettyResult of type " ++ show t ++ ": " ++ f
+    paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+    pretties <- mapM (prettyResult cfg t) paths
+    return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg t f = fmap text $ (tShow t) (cfgTmpDir cfg </> f)

@@ -6,12 +6,14 @@ import Data.List             (isPrefixOf)
 import Data.List.Utils       (replace)
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Types   (CutConfig)
-import System.Directory      (getHomeDirectory, makeAbsolute)
+import System.Directory      (getHomeDirectory, makeAbsolute,
+                              pathIsSymbolicLink)
 import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
 import Test.Tasty            (testGroup, TestTree)
 import Crypto.Hash           (hash, Digest, MD5)
 import Data.ByteString.Char8 (pack)
+import System.Posix.Files    (readSymbolicLink)
 
 -- TODO fn to makeRelative to config dir
 
@@ -26,7 +28,16 @@ digest val = take 10 $ show (hash asBytes :: Digest MD5)
 stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
+-- follows zero or more symlinks until it finds the original file
+resolveSymlinks :: FilePath -> IO FilePath
+resolveSymlinks path = do
+  isLink <- pathIsSymbolicLink path
+  if isLink
+    then readSymbolicLink path >>= resolveSymlinks
+    else return path
+
 -- kind of silly that haskell doesn't have this built in, but whatever
+-- TODO also follow symlinks? is there a time that would be bad?
 -- https://www.schoolofhaskell.com/user/dshevchenko/cookbook/transform-relative-path-to-an-absolute-path
 absolutize :: String -> IO String
 absolutize aPath = do
@@ -40,6 +51,7 @@ absolutize aPath = do
       return $ fromJust $ guess_dotdot pathMaybeWithDots
   aPath'' <- makeAbsolute aPath'
   return aPath''
+  -- resolveSymlink aPath''
 
 expandTildes :: String -> IO String
 expandTildes s = do

@@ -20,13 +20,14 @@ import ShortCut.Core.Types
 import Data.List                  (nub, sort)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, cacheFile, exprPath, exprPathExplicit)
-import ShortCut.Core.Compile      (cExpr, toShortCutList, toShortCutListStr)
-import ShortCut.Core.Debug        (debugTrackWrite, debugReadLines, debugWriteLines
-                                   , debug)
+import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
+import ShortCut.Core.Compile      (cExpr)
+import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines
+                                   , debug, debugWriteFile, debugReadLines)
 import System.Directory           (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath            (takeBaseName, makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
+import ShortCut.Core.Util         (absolutize, resolveSymlinks)
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -66,18 +67,23 @@ cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
 -- for scripts that take one arg and return a list of lits,
 -- which then needs converting to ShortCut format
 -- TODO this should put tmpfiles in cache/<script name>!
+-- TODO name something more explicitly about fasta files?
 cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
 cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (CacheDir tmpDir) = cacheDir cfg tmpName
-      tmpOut            = cacheFile cfg tmpName fa "txt"
-      (ExprPath actOut) = exprPath cfg expr []
-  tmpOut %> \out -> do
+  let (CacheDir tmpDir ) = cacheDir cfg tmpName
+      (ExprPath outPath) = exprPath cfg expr []
+      -- tmpOut            = cacheFile cfg tmpName fa "txt"
+  -- tmpOut %> \out -> do
+  outPath %> \_ -> do
     need [faPath]
-    quietly $ wrappedCmd cfg [Cwd tmpDir] script [(debug cfg ("cOneArgList out: " ++ out) out), faPath]
+    Stdout out <- wrappedCmd cfg [Cwd tmpDir] script
+                    [(debug cfg ("cOneArgList outPath: " ++ outPath) outPath), faPath]
+    debugWriteFile cfg outPath out
     -- trackWrite [out]
-  actOut %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath actOut)
-  return (ExprPath actOut)
+  -- outPath %> \_ -> toShortCutList cfg str (ExprPath tmpOut) (ExprPath outPath)
+  -- outPath %> \_ -> debugWriteLines cfg tmpOut (ExprPath outPath)
+  return (ExprPath outPath)
 cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
 
 -- load a single file --
@@ -97,14 +103,23 @@ mkLoad name rtn = CutFunction
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
+-- TODO absolutize these to match the new list stuff
+--      oh heeeey, don't have to follow them! just don't make at all lol
 cLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
 cLink s@(_,cfg) expr rtype prefix = do
-  (ExprPath strPath) <- cExpr s expr
+  (ExprPath strPath) <- cExpr s expr -- TODO is this the issue?
   -- TODO fix this putting file symlinks in cut_lit dir. they should go in their own
+
+  -- TODO only depend on final expressions
   let (ExprPath outPath) = exprPathExplicit cfg rtype expr prefix [] -- ok without ["outPath"]?
+
   outPath %> \_ -> do
     pth <- fmap strip $ readFile' strPath
-    src <- liftIO $ canonicalizePath pth
+    -- src <- liftIO $ canonicalizePath pth
+    src <- liftIO $ absolutize pth
+    liftIO $ putStrLn $ "pth: " ++ pth
+    liftIO $ putStrLn $ "src: " ++ src
+    liftIO $ putStrLn $ "outPath: " ++ outPath
     need [src]
     -- TODO these have to be absolute, so golden tests need to adjust them:
     unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", src, outPath]
@@ -130,23 +145,65 @@ mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = cLoadList rtn
+  , fCompiler  = cLoadList
   }
 
--- oh no, infinite loop!
-cLoadList :: CutType -> RulesFn
-cLoadList elemRtnType s@(_,cfg) e@(CutFun _ _ _ name [es]) = do
-  (ExprPath pathsPath) <- cExpr s es -- infinite loop :(
-  let (ExprPath links) = exprPathExplicit cfg (ListOf elemRtnType) e name []
-  links %> \_ -> do
+-- TODO why is a list of lists like [[1,2,5], [1,2,3]] going to cLoadOne? fix!
+cLoadList :: RulesFn
+cLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
+  | typeOf es `elem` [ListOf str, ListOf num] = cLoadListOne rtn s es
+  -- | typeOf es `elem` [ListOf str, ListOf num] = cListOne s e -- infinite loop :(
+  | otherwise = cLoadListMany s e
+cLoadList _ _ = error "bad arguments to cLoadList"
+
+-- special case for lists of str and num
+-- TODO is this different from cListOne, except in its return type? unify!
+cLoadListOne :: CutType -> RulesFn
+cLoadListOne rtn (_,cfg) e@(CutList _ _ _ es) = do
+  liftIO $ putStrLn "cLoadListOne"
+  -- (ExprPath esPath) <- cExpr s es
+
+  -- TODO only depend on final expressions
+  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) e "cut_list" []
+
+  outPath %> \_ -> do
+    -- es <- debugReadLines cfg esPath
+    let lits = map extractLit es
+    lits' <- liftIO $ mapM absolutize lits
+    liftIO $ putStrLn $ "lits: " ++ show lits
+    liftIO $ putStrLn $ "lits': " ++ show lits'
+    liftIO $ putStrLn $ "outPath: " ++ outPath
+    debugWriteLines cfg outPath lits'
+  return (ExprPath outPath)
+  where
+    extractLit (CutLit _ _ s) = s
+    extractLit _ = error "bad argument to extractLit"
+cLoadListOne _ _ e = error $ "bad arguments to cLoadListOne: " ++ show e
+
+-- regular case for lists of any other file type
+cLoadListMany :: RulesFn
+cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
+  liftIO $ putStrLn "cLoadListMany"
+  (ExprPath pathsPath) <- cExpr s es
+  -- let (ExprPath outPath) = exprPath cfg e []
+
+  -- TODO only depend on final expressions
+  let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) e "cut_list" []
+
+  outPath %> \_ -> do
+  -- let (ExprPath outPath) = exprPathExplicit cfg (ListOf elemRtnType) e name []
     -- paths <- fmap (map (cfgWorkDir cfg </>)) (debugReadLines cfg pathsPath)
-    paths <- debugReadLines cfg pathsPath
-    let paths' = map (cfgWorkDir cfg </>) paths
+    paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
+    paths' <- liftIO $ mapM resolveSymlinks paths
+    -- paths <- debugReadLines cfg pathsPath
+    -- let paths' = map (cfgWorkDir cfg </>) paths
     -- liftIO $ putStrLn $ "es: " ++ show expr
+    liftIO $ putStrLn $ "paths: " ++ show paths
+    liftIO $ putStrLn $ "paths': " ++ show paths'
     need paths'
-    writeFileLines links paths
-  return (ExprPath links)
-cLoadList _ _ e = error $ "bad arguments to cLoadList. e: " ++ show e
+    debugWriteLines cfg outPath paths'
+  return (ExprPath outPath)
+cLoadListMany _ _ = error "bad arguments to cLoadListMany"
 
 -----------------------------------------------------------
 -- [a]ction functions (just describe how to build files) --
@@ -158,11 +215,12 @@ cLoadList _ _ e = error $ "bad arguments to cLoadList. e: " ++ show e
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd
 aTsvColumn :: Int -> ActionFn
-aTsvColumn n cfg _ [outPath, (ExprPath tsvPath)] = do
+aTsvColumn n cfg _ [ExprPath outPath, ExprPath tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
   let out' = sort $ nub $ lines out
-  toShortCutListStr cfg str outPath out'
+  -- toShortCutListStr cfg str outPath out'
+  debugWriteLines cfg outPath out'
 aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 
 -------------------------------------------------------------------------------

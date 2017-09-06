@@ -3,12 +3,12 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Compile      (cExpr, toShortCutListStr)
+import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Paths        (exprPath)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
-import ShortCut.Core.Debug        (debugReadFile)
+import ShortCut.Core.Debug        (debugReadFile, debugWriteLines)
 import ShortCut.Core.Util         (absolutize)
 
 cutModule :: CutModule
@@ -42,6 +42,7 @@ cGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
     ptn   <- fmap strip $ debugReadFile cfg path
     -- liftIO $ putStrLn $ "ptn: " ++ show ptn
     paths <- liftIO $ mapM absolutize =<< glob ptn
-    toShortCutListStr cfg str (ExprPath outPath) paths
+    -- toShortCutListStr cfg str (ExprPath outPath) paths
+    debugWriteLines cfg outPath paths
   return (ExprPath outPath)
 cGlobFiles _ _ = error "bad arguments to cGlobFiles"

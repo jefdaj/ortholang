@@ -3,9 +3,9 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile   (cExpr, toShortCutListStr)
+import ShortCut.Core.Compile   (cExpr)
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Debug     (debugReadFile, debugWriteFile)
+import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugWriteLines)
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Util      (stripWhiteSpace)
@@ -140,7 +140,8 @@ cBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
     filterStr <- debugReadFile cfg fPath
     let names = if null filterStr || null out then []
                 else filterNames (init filterStr) (tail $ lines out)
-    toShortCutListStr cfg str (ExprPath oPath) names
+    -- toShortCutListStr cfg str (ExprPath oPath) names
+    debugWriteLines cfg oPath names
   return (ExprPath oPath)
 cBlastdblist _ _ = error "bad argument to cBlastdblist"
 

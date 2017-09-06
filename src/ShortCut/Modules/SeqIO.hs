@@ -5,13 +5,13 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths        (exprPath, cacheDir, cacheFile)
-import ShortCut.Core.Compile      (cExpr, fromShortCutList)
+import ShortCut.Core.Paths        (exprPath, cacheDir)
+import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
 import System.FilePath            ((</>))
-import System.Directory           (createDirectoryIfMissing)
+-- import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
 
 cutModule :: CutModule
@@ -139,21 +139,23 @@ tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 -- TODO can this be replaced with cOneArgListScript?
 cExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
 cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
-  (ExprPath faPath)  <- cExpr s fa
-  idsPath <- cExpr s ids
+  (ExprPath faPath ) <- cExpr s fa
+  (ExprPath idsPath) <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let (CacheDir tmpDir ) = cacheDir cfg "seqio"
       (ExprPath outPath) = exprPath cfg e []
-      tmpList = cacheFile cfg "seqio" ids "txt"
+      -- tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
-  tmpList %> \_ -> do
-    liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
-    fromShortCutList cfg idsPath (ExprPath tmpList)
+  -- tmpList %> \_ -> do
   outPath %> \_ -> do
-    need [faPath, tmpList]
-    liftIO $ createDirectoryIfMissing True tmpDir
+    -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
+    -- fromShortCutList cfg idsPath (ExprPath tmpList)
+  -- outPath %> \_ -> do
+    -- need [faPath, tmpList]
+    -- liftIO $ createDirectoryIfMissing True tmpDir
+    need [faPath, idsPath]
     quietly $ wrappedCmd cfg [Cwd tmpDir]
-                         "extract_seqs.py" [outPath, faPath, tmpList]
+                         "extract_seqs.py" [outPath, faPath, idsPath]
   return (ExprPath outPath)
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
 
