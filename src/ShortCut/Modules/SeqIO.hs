@@ -10,6 +10,7 @@ import ShortCut.Core.Compile      (cExpr, fromShortCutList)
 import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
+import System.FilePath            ((</>))
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
 
@@ -23,12 +24,14 @@ cutModule = CutModule
     , loadFaaEach
     , loadFna
     , loadFaaEach
-    , gbkToFaa
-    , gbkToFna
+    , gbkToFaa -- TODO each?
+    , gbkToFna -- TODO each?
     , extractSeqs
     , extractSeqIDs
     , translate
     , concatFastas
+    -- TODO combo that loads multiple fnas or faas and concats them?
+    -- TODO combo that loads multiple gbks -> fna or faa?
     ]
   }
 
@@ -209,7 +212,9 @@ cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- cExpr s fs
   let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
-    faPaths <- debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath) fsPath)
+    faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
+               (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)
+                                    fsPath))
     need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
     let catArgs = faPaths ++ [">", oPath]
     unit $ quietly $ wrappedCmd cfg [Shell] "cat" (debug cfg ("catArgs: " ++ show catArgs) catArgs)
