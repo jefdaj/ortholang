@@ -122,7 +122,8 @@ defaultShow :: FilePath -> IO String
 defaultShow = fmap (unlines . fmtLines . lines) . readFile
   where
     nLines      = 5
-    fmtLines ls = let nPlusOne = take (nLines + 1) ls
+    fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
+    fmtLines ls = let nPlusOne = map fmtLine $ take (nLines + 1) ls
                   in if length nPlusOne > nLines
                     then init nPlusOne ++ ["..."]
                     else nPlusOne

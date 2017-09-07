@@ -144,37 +144,29 @@ cLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
 cLoadList _ _ = error "bad arguments to cLoadList"
 
 -- special case for lists of str and num
+-- TODO remove rtn and use (typeOf expr)?
 -- TODO is this different from cListOne, except in its return type?
+-- TODO is it different from cLink? seems like it's just a copy/link operation...
 cLoadListOne :: CutType -> RulesFn
-cLoadListOne rtn (_,cfg) e@(CutList _ _ _ es) = do
-  -- liftIO $ putStrLn "cLoadListOne"
-  -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" [show e]
+cLoadListOne rtn s@(_,cfg) expr = do
+  (ExprPath litsPath) <- cExpr s expr
+  let relPath = makeRelative (cfgTmpDir cfg) litsPath
+      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" [relPath]
   outPath %> \_ -> do
-    let lits = map extractLit es
-    lits' <- liftIO $ mapM absolutize lits
-    -- liftIO $ putStrLn $ "lits: " ++ show lits
-    -- liftIO $ putStrLn $ "lits': " ++ show lits'
-    -- liftIO $ putStrLn $ "outPath: " ++ outPath
+    lits  <- debugReadLines cfg litsPath -- TODO strip?
+    lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
     debugWriteLines cfg outPath lits'
   return (ExprPath outPath)
-  where
-    extractLit (CutLit _ _ s) = s
-    extractLit _ = error "bad argument to extractLit"
-cLoadListOne _ _ e = error $ "bad arguments to cLoadListOne: " ++ show e
 
 -- regular case for lists of any other file type
 cLoadListMany :: RulesFn
 cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
-  -- liftIO $ putStrLn "cLoadListMany"
   (ExprPath pathsPath) <- cExpr s es
   -- TODO only depend on final expressions
   let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_list" [show e]
   outPath %> \_ -> do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     paths' <- liftIO $ mapM resolveSymlinks paths
-    -- liftIO $ putStrLn $ "paths: " ++ show paths
-    -- liftIO $ putStrLn $ "paths': " ++ show paths'
     need paths'
     debugWriteLines cfg outPath paths'
   return (ExprPath outPath)
