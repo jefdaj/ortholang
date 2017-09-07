@@ -31,8 +31,8 @@ data-files:         usage.txt,
                     -- tests/repl/*.tree,
                     tests/repl/*.txt,
                     tests/vars/*.cut,
-                    tests/vars/*.result
-                    -- tests/vars/*.tree
+                    tests/vars/*.result,
+                    tests/vars/*.tree
 
 executable shortcut
   main-is:          ShortCut.hs
