@@ -145,15 +145,15 @@ cLoadList _ _ = error "bad arguments to cLoadList"
 -- TODO is this different from cListOne, except in its return type?
 cLoadListOne :: CutType -> RulesFn
 cLoadListOne rtn (_,cfg) e@(CutList _ _ _ es) = do
-  liftIO $ putStrLn "cLoadListOne"
+  -- liftIO $ putStrLn "cLoadListOne"
   -- TODO only depend on final expressions
   let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" [show e]
   outPath %> \_ -> do
     let lits = map extractLit es
     lits' <- liftIO $ mapM absolutize lits
-    liftIO $ putStrLn $ "lits: " ++ show lits
-    liftIO $ putStrLn $ "lits': " ++ show lits'
-    liftIO $ putStrLn $ "outPath: " ++ outPath
+    -- liftIO $ putStrLn $ "lits: " ++ show lits
+    -- liftIO $ putStrLn $ "lits': " ++ show lits'
+    -- liftIO $ putStrLn $ "outPath: " ++ outPath
     debugWriteLines cfg outPath lits'
   return (ExprPath outPath)
   where
@@ -164,15 +164,15 @@ cLoadListOne _ _ e = error $ "bad arguments to cLoadListOne: " ++ show e
 -- regular case for lists of any other file type
 cLoadListMany :: RulesFn
 cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
-  liftIO $ putStrLn "cLoadListMany"
+  -- liftIO $ putStrLn "cLoadListMany"
   (ExprPath pathsPath) <- cExpr s es
   -- TODO only depend on final expressions
   let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_list" [show e]
   outPath %> \_ -> do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     paths' <- liftIO $ mapM resolveSymlinks paths
-    liftIO $ putStrLn $ "paths: " ++ show paths
-    liftIO $ putStrLn $ "paths': " ++ show paths'
+    -- liftIO $ putStrLn $ "paths: " ++ show paths
+    -- liftIO $ putStrLn $ "paths': " ++ show paths'
     need paths'
     debugWriteLines cfg outPath paths'
   return (ExprPath outPath)

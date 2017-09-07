@@ -144,7 +144,8 @@ cListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   litPaths <- mapM (cExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
-      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" litPaths'
+      relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
+      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" relPaths
       outPath' = debugCompiler cfg "cListLits" e outPath
   outPath %> \_ -> do
     lits  <- mapM (debugReadFile cfg) litPaths'
@@ -157,8 +158,9 @@ cListLits _ e = error $ "bad argument to cListLits: " ++ show e
 cListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
-  let paths' = map (\(ExprPath p) -> p) paths
-  let (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" paths'
+  let paths'   = map (\(ExprPath p) -> p) paths
+      relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
+      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" relPaths
       outPath' = debugCompiler cfg "cListPaths" e outPath
   outPath %> \_ -> do
     need paths'

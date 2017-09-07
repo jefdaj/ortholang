@@ -9,12 +9,12 @@ import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory
                                    (</>), (<.>))
 import System.IO.Silently         (silence)
 import Test.Tasty                 (TestTree, testGroup)
-import Test.Tasty.Golden          (goldenVsFile, goldenVsString, findByExtension)
+import Test.Tasty.Golden          (goldenVsString, findByExtension)
 import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
-import System.Directory           (getCurrentDirectory, doesFileExist)
-import System.IO                  (stdout, writeFile)
+import System.Directory           (getCurrentDirectory)
+import System.IO                  (stdout)
 import Data.Default.Class         (Default(def))
 import qualified Control.Monad.TaggedException as Exception (handle)
 import System.IO.LockFile -- TODO only some of it
@@ -31,28 +31,11 @@ getTestCuts = do
   testCuts <- findByExtension [".cut"] testDir
   return testCuts
 
--- symlinks from the cache -> elsewhere only work when absolute,
--- but that makes them nondeterministic when tests are run from random tmpdirs.
--- this fixes it by editing test output to include a generic $PWD
--- TODO does this misleadinly imply shell interpolation in tree files?
-fixWorkingDir :: String -> String -> String
-fixWorkingDir wd = replace wd "$PWD"
-
--- TODO add an assertion that none of the tmpfiles include the tmpdir path?
-
--- Do an IO action, unless it's been started already by another thread;
--- if it has, wait for that one to finish instead.
 -- TODO any particular corner cases to be aware of? (what if inturrupted?)
-doOrWait :: CutConfig -> IO () -> IO ()
-doOrWait cfg act = handleException $ withLockFile def started doIfNeeded
+withLock :: CutConfig -> IO () -> IO ()
+withLock cfg act = handleException $ withLockFile def started act
   where
-    started  = cfgTmpDir cfg <.> "started"
-    finished = cfgTmpDir cfg <.> "finished"
-    doIfNeeded = do
-      notNeeded <- doesFileExist finished
-      if notNeeded
-        then return ()
-        else act >> writeFile finished ""
+    started  = cfgTmpDir cfg <.> "lock"
     handleException = Exception.handle
         $ putStrLn . ("Locking failed with: " ++) . show
 
@@ -65,13 +48,17 @@ goldenScriptAndTree (cut, gld, mtre) cfg = return $ testGroup name bothTests
     cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     runCut     = silence $ evalFile stdout cfg'
     scriptRes  = (cfgTmpDir cfg' </> "vars" </> "result")
-    scriptTest = goldenVsFile "result" gld scriptRes (doOrWait cfg' runCut)
+    scriptAct  = do
+                   withLock cfg' runCut
+                   res <- readFile scriptRes
+                   return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
     treeCmd    = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
     treeAct    = do
-                   doOrWait cfg' runCut
+                   withLock cfg' runCut
                    out <- readCreateProcess treeCmd ""
-                   wd  <- getCurrentDirectory
-                   return $ pack $ fixWorkingDir wd out
+                   dir <- getCurrentDirectory
+                   return $ pack $ replace dir "$TESTDIR" out
+    scriptTest = goldenVsString "result" gld scriptAct
     treeTest t = goldenVsString "tmpfiles" t treeAct
     bothTests  = case mtre of
                    Nothing -> [scriptTest]
