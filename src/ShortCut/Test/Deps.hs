@@ -26,7 +26,8 @@ depCmds =
 mkTests :: CutConfig -> IO TestTree
 mkTests _ = do
   testDir <- getDataFileName $ "tests" </> "deps"
-  return $ testGroup "Deps" $ map (mkTestDep testDir) depCmds
+  return $ testGroup "check dependency versions"
+         $ map (mkTestDep testDir) depCmds
 
 mkTestDep :: FilePath -> (TestName, String) -> TestTree
 mkTestDep dir (name, wrappedCmd) = goldenVsString name gld act

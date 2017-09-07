@@ -5,16 +5,15 @@ module ShortCut.Test
   )
   where
 
--- import Control.Monad       (sequence)
-import ShortCut.Core.Types (CutConfig(..), CutModule)
-import ShortCut.Core.Util  (mkTestGroup)
-import System.IO.Temp      (withSystemTempDirectory)
-import Test.Tasty          (TestTree, defaultMain)
-import System.Environment  (setEnv)
-import Paths_ShortCut      (getDataFileName)
-import System.FilePath.Posix ((</>))
-import System.Process        (readCreateProcessWithExitCode, shell)
+import Paths_ShortCut        (getDataFileName)
+import ShortCut.Core.Types   (CutConfig(..))
+import ShortCut.Core.Util    (mkTestGroup)
 import System.Directory      (setCurrentDirectory)
+import System.Environment    (setEnv)
+import System.FilePath.Posix ((</>))
+import System.IO.Temp        (withSystemTempDirectory)
+import System.Process        (readCreateProcessWithExitCode, shell)
+import Test.Tasty            (TestTree, defaultMain)
 
 import qualified ShortCut.Test.Deps    as D
 import qualified ShortCut.Test.Parse   as P
@@ -30,24 +29,24 @@ mkTests cfg = mkTestGroup cfg "all tests"
   , S.mkTests
   ]
 
-mkTestConfig :: [CutModule] -> FilePath -> CutConfig
-mkTestConfig mods dir = CutConfig
+mkTestConfig :: CutConfig -> FilePath -> CutConfig
+mkTestConfig cfg dir = cfg
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
   , cfgWorkDir = dir
   , cfgDebug   = False
-  , cfgModules = mods
-  , cfgWrapper = Nothing -- TODO test this?
-  , cfgReport  = Nothing
+  -- , cfgModules = mods
+  -- , cfgWrapper = Nothing -- TODO test this?
+  -- , cfgReport  = Nothing
   }
 
-runTests :: [CutModule] -> IO ()
-runTests mods = withSystemTempDirectory "shortcut" $ \td -> do
+runTests :: CutConfig -> IO ()
+runTests cfg = withSystemTempDirectory "shortcut" $ \td -> do
   wd <- getDataFileName ""
-  setCurrentDirectory wd
+  setCurrentDirectory wd -- TODO issue with this in the stack tests?
   -- TODO check exit code?
   (_,_,_) <- readCreateProcessWithExitCode
                (shell $ unwords ["ln -s", wd </> "data", (td </> "data")]) ""
-  tests <- mkTests $ mkTestConfig mods td
+  tests <- mkTests $ mkTestConfig cfg td
   setEnv "LANG" "C"
   defaultMain tests

@@ -25,11 +25,11 @@ main = do
     (exitWithUsage usage)
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
-  when (hasArg args "test")
-    (withArgs [] $ runTests modules >> exitSuccess)
   cfg <- loadConfig modules args
   let cfg' = debug cfg ("config: " ++ show cfg) cfg
   setCurrentDirectory $ cfgWorkDir cfg'
+  when (hasArg args "test")
+    (withArgs [] $ runTests cfg') -- >> exitSuccess)
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then evalFile stdout cfg'
     else runRepl  cfg'

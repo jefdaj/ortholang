@@ -13,7 +13,6 @@ import Test.Tasty.Golden          (goldenVsString, findByExtension)
 import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
-import System.Directory           (getCurrentDirectory)
 import System.IO                  (stdout)
 import Data.Default.Class         (Default(def))
 import qualified Control.Monad.TaggedException as Exception (handle)
@@ -57,7 +56,7 @@ goldenScriptAndTree (cut, gld, mtre) cfg = return $ testGroup name bothTests
     treeAct    = do
                    withLock cfg' runCut
                    out <- readCreateProcess treeCmd ""
-                   dir <- getCurrentDirectory
+                   dir <- getDataFileName ""
                    return $ pack $ replace dir "$TESTDIR" out
     scriptTest = goldenVsString "result" gld scriptAct
     treeTest t = goldenVsString "tmpfiles" t treeAct
