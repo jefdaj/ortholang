@@ -38,7 +38,7 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
 instance Pretty CutExpr where
   pPrint e@(CutLit _ _ s)
     | typeOf e == num = text $ show (read s :: Scientific)
-    | otherwise       = text $ "\"" ++ show s ++ "\""
+    | otherwise       = text $ show s
   pPrint (CutRef _ _ _ v)    = pPrint v
   pPrint (CutFun _ _ _ s es) = text s <+> fsep (map pNested es)
   pPrint (CutList _ _ _ es)  = pList es
@@ -49,7 +49,7 @@ instance Pretty CutExpr where
       two = bopWith ($+$)
 
 pList :: (Pretty a) => [a] -> Doc
-pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
+pList es = text "[" <> fsep (punctuate (text ",") (map pPrint es)) <> text "]"
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!

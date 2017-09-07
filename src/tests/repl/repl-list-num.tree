@@ -1,0 +1,11 @@
+.
+|-- exprs
+|   |-- cut_list
+|   |   `-- 78ff197358.num.list
+|   `-- cut_lit
+|       `-- 09260f1de8.num
+|-- history.txt
+`-- vars
+    `-- result -> ../exprs/cut_list/78ff197358.num.list
+
+4 directories, 4 files

@@ -1,0 +1,11 @@
+.
+|-- exprs
+|   |-- cut_list
+|   |   `-- 3038138756.str.list
+|   `-- cut_lit
+|       `-- a830208172.str
+|-- history.txt
+`-- vars
+    `-- result -> ../exprs/cut_list/3038138756.str.list
+
+4 directories, 4 files
