@@ -1,0 +1,11 @@
+.
+|-- exprs
+|   |-- cut_bop
+|   |   `-- 2dab30e789.num
+|   `-- cut_lit
+|       |-- 0b2320ed7c.num
+|       `-- 0b9710c7d0.num
+`-- vars
+    `-- result -> ../exprs/cut_bop/2dab30e789.num
+
+4 directories, 4 files
