@@ -1,4 +1,3 @@
-
 -- Once text has been parsed into an abstract syntax tree (Parse.hs), this
 -- module "compiles" it by translating it into a set of Shake build rules. To
 -- actually run the rules, use `eval` in the Interpret module.
@@ -29,7 +28,7 @@ import ShortCut.Core.Util         (resolveSymlinks, stripWhiteSpace)
 import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
-import System.FilePath            (makeRelative, takeDirectory)
+import System.FilePath            (makeRelative, takeDirectory, takeFileName)
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
 
@@ -135,7 +134,7 @@ cListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
   let (ExprPath link) = exprPath cfg e []
       link' = debugCompiler cfg "cListEmpty" e link
-  link %> \out -> quietly $ wrappedCmd cfg [] "touch" [out]
+  link %> \_ -> wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
   return (ExprPath link')
 cListEmpty _ e = error $ "bad arguemnt to cListEmpty: " ++ show e
 
@@ -186,11 +185,11 @@ cVar (_,cfg) var expr (ExprPath dest) = do
       -- TODO is this needed? maybe just have links be absolute?
       dest' = ".." </> (makeRelative (cfgTmpDir cfg) dest)
       link' = debugCompiler cfg "cVar" var link
-  link %> \out -> do
+  link %> \_ -> do
     alwaysRerun
     need [dest]
-    liftIO $ createDirectoryIfMissing True $ takeDirectory out
-    quietly $ wrappedCmd cfg [] "ln" ["-fs", dest', out]
+    liftIO $ createDirectoryIfMissing True $ takeDirectory link
+    wrappedCmd cfg [link] [] "ln" ["-fs", dest', link] -- TODO quietly?
   return (VarPath link')
 
 -- Handles the actual rule generation for all binary operators;

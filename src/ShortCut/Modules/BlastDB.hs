@@ -3,15 +3,17 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Control.Monad           (when)
+-- import Control.Monad           (when)
 import ShortCut.Core.Compile   (cExpr)
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugWriteLines)
+import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
+                                debugWriteLines)
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
-import System.FilePath         (takeFileName, takeExtension, (</>), (<.>), makeRelative)
+import System.FilePath         (takeFileName, takeExtension, (</>), (<.>),
+                                makeRelative)
 import System.Directory        (createDirectoryIfMissing)
 -- import System.FilePath.Glob    (compile, globDir1)
 import Data.List               (isInfixOf)
@@ -135,12 +137,14 @@ cBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- cExpr s f
   let (CacheDir tmpDir) = cacheDir cfg "blastdbget"
       (ExprPath oPath ) = exprPath cfg e []
+      stdoutTmp = tmpDir </> "stdout" <.> "txt"
   oPath %> \_ -> do
-    (Exit _, Stdout out) <- wrappedCmd cfg [] "blastdbget" [tmpDir]
+    wrappedCmd cfg [oPath] [Shell] "blastdbget" [tmpDir, ">", fPath]
     -- TODO should this strip newlines on its own? seems important
-    filterStr <- debugReadFile cfg fPath
+    filterStr <- debugReadFile  cfg fPath
+    out       <- debugReadLines cfg stdoutTmp
     let names = if null filterStr || null out then []
-                else filterNames (init filterStr) (tail $ lines out)
+                else filterNames (init filterStr) (tail out)
     -- toShortCutListStr cfg str (ExprPath oPath) names
     debugWriteLines cfg oPath names
   return (ExprPath oPath)
@@ -164,21 +168,18 @@ cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
     need [nPath]
     dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
     liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
-    -- Exit code <- quietly $ wrappedCmd cfg [Cwd tmpDir]
-    unit $ quietly $ wrappedCmd cfg [Cwd tmpDir]
+    unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
       "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
-    -- case code of
-      -- ExitFailure n -> error $ "blastdbget reported error code " ++ show n
-      -- ExitSuccess -> do
     debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
   return (ExprPath dbPrefix)
 cBlastdbget _ _ = error "bad argument to cBlastdbget"
 
+-- TODO is this actually used anywhere?
 linkDBFile :: CutConfig -> FilePath -> FilePath -> Action ()
 linkDBFile cfg dbf prefix =
-  unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", dbf, dst]
+  unit $ quietly $ wrappedCmd cfg [dst, dst ++ ".*"] [] "ln" ["-fs", dbf, dst]
   where
-    dst = prefix <.> takeExtension dbf
+    dst  = prefix <.> takeExtension dbf
 
 --------------------------
 -- make from FASTA file --
@@ -210,13 +211,14 @@ cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
       dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do
     need [faPath]
-    Stdout out <- wrappedCmd cfg [] "makeblastdb"
+    quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [] "makeblastdb"
       [ "-in"    , faPath
       , "-out"   , dbPrefix
       , "-title" , takeFileName dbPrefix -- TODO does this make sense?
       , "-dbtype", dbType
       ]
-    when (cfgDebug cfg) (liftIO $ putStrLn $ out)
+    -- TODO put back if you can figure out how with the new wrappedCmd
+    -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
     debugWriteFile cfg dbPrefix dbPrefixRel
   return (ExprPath dbPrefix)
 cMakeblastdb _ _ = error "bad argument to makeblastdb"

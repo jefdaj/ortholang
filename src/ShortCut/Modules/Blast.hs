@@ -85,6 +85,7 @@ addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
     db = CutFun dbType i (depsOf s) "makeblastdb" [s]
 addMakeDBCall _ = error "bad argument to addMakeDBCall"
 
+-- TODO remove the old bbtmp default tmpDir
 aParBlast :: String -> ActionFn
 aParBlast bCmd cfg _ [ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
   eStr   <- fmap init $ debugReadFile cfg e
@@ -92,11 +93,12 @@ aParBlast bCmd cfg _ [ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
           $ fmap stripWhiteSpace
           $ debugReadFile cfg p
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-      cDir = cfgTmpDir cfg </> takeDirectory prefix
+      cDir = cfgTmpDir cfg </> takeDirectory prefix -- not actually used as of now
       dbg  = if cfgDebug cfg then ["-v"] else []
       args = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix
              , "-o", o   , "-e", eDec, "-p"] ++ dbg
-  unit $ quietly $ wrappedCmd cfg [Cwd $ takeDirectory prefix] "parallelblast.py" args -- TODO Cwd?
+  unit $ quietly $ wrappedCmd cfg [o] [Cwd $ takeDirectory prefix]
+                     "parallelblast.py" args
   debugTrackWrite cfg [o]
 aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 
@@ -113,6 +115,7 @@ mkBlastEachFn bCmd qType sType = CutFunction
   , fCompiler  = cMkBlastEach bCmd aParBlast
   }
 
+-- TODO more specific tmpDir?
 cMkBlastEach :: String -> (String -> ActionFn) -> RulesFn
 cMkBlastEach bCmd bActFn st expr = mapFn st $ addMakeDBCall expr
   where

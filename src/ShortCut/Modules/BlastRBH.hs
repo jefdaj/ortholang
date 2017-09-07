@@ -39,7 +39,7 @@ reciprocal = CutFunction
 
 aRecip :: ActionFn
 aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "reciprocal.R" [out, left, right]
+  unit $ quietly $ wrappedCmd cfg [out] [Cwd tmp] "reciprocal.R" [out, left, right]
 aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
 
 -- TODO make the rest of them... but not until after lab meeting?
@@ -71,7 +71,7 @@ cBlastpRBH _ _ = error "bad argument to cBlastRBH"
 -- this is an attempt to convert cBlastpRBH into a form usable with rMapLastTmp
 aBlastpRBH :: ActionFn
 aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
-  unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", rbhPath, out]
+  unit $ quietly $ wrappedCmd cfg [out] [] "ln" ["-fs", rbhPath, out]
 aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 
 ---------------------------------------------
@@ -96,7 +96,7 @@ cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
       (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
   oPath %> \_ -> do
     need [lsPath, rsPath]
-    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py"
+    unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
       [cDir, oPath, lsPath, rsPath]
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
@@ -141,6 +141,7 @@ blastpRBHEach = CutFunction
   }
 
 
+-- TODO how to remove all these files? will their mkBlast... take care of it?
 cBlastpRBHEach :: RulesFn
 cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
   -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
@@ -153,7 +154,8 @@ cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = 
   oPath %> \_ -> do
     need [fwdsPath, revsPath]
     liftIO $ createDirectoryIfMissing True cDir
-    unit $ quietly $ wrappedCmd cfg [Cwd cDir] "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath] -- TODO how is it failing? seems fine
+    unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
+                       "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
     debugTrackWrite cfg [oPath]
   return (ExprPath oPath)
 cBlastpRBHEach _ _ = error "bad argument to cRecipEach"

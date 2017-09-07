@@ -29,6 +29,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
+import System.FilePath (takeDirectory, takeFileName)
 
 ------------------------
 -- module description --
@@ -196,9 +197,9 @@ cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
       (ExprPath outs) = exprPath cfg expr [ExprPath bmFn, ExprPath sTable]
-  outs %> \out -> do
+  outs %> \_ -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?
-    quietly $ wrappedCmd cfg [Cwd bmTmp] "biomartr.R" [out, bmFn, sTable]
+    quietly $ wrappedCmd cfg [outs] [Cwd bmTmp] "biomartr.R" [outs, bmFn, sTable]
   return (ExprPath outs)
 cBioMartR _ _ _ = error "bad cBioMartR call"

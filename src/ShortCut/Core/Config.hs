@@ -7,7 +7,8 @@ import qualified Data.Configurator as C
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
-import Development.Shake          (command, Action, CmdOption(..), CmdResult)
+import Development.Shake          (command, Action, CmdOption(..), CmdResult, Exit(..),
+                                   removeFiles, liftIO)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
 import ShortCut.Core.Util         (absolutize)
@@ -15,6 +16,8 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
+import System.Exit                (ExitCode(..))
+import System.FilePath            ((</>), takeDirectory, takeFileName)
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key
@@ -52,13 +55,42 @@ getUsage = do
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a
 
+----------------------
+-- wrapped commands --
+----------------------
+
+-- TODO separate module for this?
+
+failGracefully :: String -> Int -> [String] -> Action ()
+failGracefully bin n ptns = do
+  -- toDel <- globs dir ptns -- TODO any better dir? absolute?
+  -- liftIO $ removeFiles dir ptns
+  liftIO $ mapM_ (\p -> removeFiles (takeDirectory p) [takeFileName p]) ptns
+  error $ unlines $
+    [ "Oh no! " ++ bin ++ " failed with error code " ++ show n ++ "."
+    , "The files it was working on have been deleted:"
+    ] ++ ptns
+
+-- TODO call this when exiting nonzero and/or exception thrown
+-- TODO take a list of globs and resolve them to files
+-- TODO delete the files, telling shake if possible
+-- TODO print a message for the user
+-- TODO raise/re-raise an exception
+
 -- Shake's command_ adapted to work with wrapperScript and wrapperLimit if used
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
-wrappedCmd :: CmdResult r => CutConfig -> [CmdOption] -> FilePath -> [String] -> Action r
-wrappedCmd cfg opts bin args = case cfgWrapper cfg of
-  Nothing -> command opts bin args
-  Just w  -> command opts w (bin:args)
+-- ptns is a list of patterns for files to delete in case the cmd fails
+wrappedCmd :: CutConfig -> [String]
+           -> [CmdOption] -> FilePath -> [String] -> Action ()
+wrappedCmd cfg ptns opts bin args = do
+  let cmd = case cfgWrapper cfg of
+              Nothing -> command opts bin args
+              Just w  -> command opts w (bin:args)
+  Exit code <- cmd
+  case code of
+    ExitFailure n -> failGracefully bin n ptns
+    ExitSuccess   -> return ()
 
 -------------------------
 -- getters and setters --

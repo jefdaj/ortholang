@@ -63,6 +63,6 @@ tCrbBlastEach _ = Left "crb_blast requires a fna query and list of fna or faa ta
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
-  quietly $ wrappedCmd cfg [Cwd tmpDir]
+  quietly $ wrappedCmd cfg [o] [Cwd tmpDir]
     "crb-blast" ["--query", q, "--target", t, "--output", o]
 aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

@@ -10,7 +10,7 @@ import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
-import System.FilePath            ((</>))
+import System.FilePath            ((</>), takeDirectory, takeFileName)
 -- import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
 
@@ -154,7 +154,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
     -- need [faPath, tmpList]
     -- liftIO $ createDirectoryIfMissing True tmpDir
     need [faPath, idsPath]
-    quietly $ wrappedCmd cfg [Cwd tmpDir]
+    quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
                          "extract_seqs.py" [outPath, faPath, idsPath]
   return (ExprPath outPath)
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
@@ -188,7 +188,7 @@ cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   let (ExprPath oPath) = exprPath cfg e []
   oPath %> \_ -> do
     need [faPath]
-    unit $ wrappedCmd cfg [] script [oPath, faPath]
+    unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
     -- debugTrackWrite cfg [oPath] TODO is this implied?
   return (ExprPath oPath)
 cConvert _ _ _ = error "bad argument to cConvert"
@@ -219,7 +219,8 @@ cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
                                     fsPath))
     need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
     let catArgs = faPaths ++ [">", oPath]
-    unit $ quietly $ wrappedCmd cfg [Shell] "cat" (debug cfg ("catArgs: " ++ show catArgs) catArgs)
+    unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
+                       (debug cfg ("catArgs: " ++ show catArgs) catArgs)
     debugTrackWrite cfg [oPath]
      -- TODO shouldn't have to read the files into memory!
     -- need fPaths

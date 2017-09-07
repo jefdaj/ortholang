@@ -64,6 +64,8 @@ def make_db(args, tmpdir, fasta, dbtype):
     makes the corresponding blast db if needed
     returns the path to the db
     '''
+    if not exists(tmpdir):
+        mkpath(tmpdir)
     db = find_db(tmpdir, fasta, dbtype)
     if glob(db + '*'):
         return db
@@ -135,14 +137,12 @@ def resolve_link(path):
 def main():
     args = docopt(__doc__, version='parallelblast 0.1')
     log(args, args)
-    tmp = args['--tmpdir']
-    if not exists(tmp):
-        mkpath(tmp)
     dbt = db_type(args['--cmd'])
     try:
         # db = resolve_link(args['--dbpath'])
         db = args['--dbpath']
     except:
+        tmp = args['--tmpdir']
         db  = make_db(args, tmp, args['--subject'], dbt)
     out = make_hits(args, db)
     return out

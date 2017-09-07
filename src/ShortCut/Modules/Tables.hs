@@ -82,7 +82,8 @@ filterEvalue = CutFunction
 
 aFilterEvalue :: ActionFn
 aFilterEvalue cfg (CacheDir tmp) [ExprPath out, ExprPath evalue, ExprPath hits] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "filter_evalue.R" [out, evalue, hits]
+  unit $ quietly $ wrappedCmd cfg [out] [Cwd tmp]
+                     "filter_evalue.R" [out, evalue, hits]
 aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 
 -------------------------------
@@ -99,5 +100,5 @@ bestHits = CutFunction
 
 aBestHits :: ActionFn
 aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
-  unit $ quietly $ wrappedCmd cfg [Cwd tmp] "best_hits.R" [out, hits]
+  unit $ quietly $ wrappedCmd cfg [out] [Cwd tmp] "best_hits.R" [out, hits]
 aBestHits _ _ args = error $ "bad argument to aBestHits: " ++ show args

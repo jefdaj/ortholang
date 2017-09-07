@@ -25,7 +25,8 @@ import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines
                                    , debug, debugWriteFile, debugReadLines)
 import System.Directory           (createDirectoryIfMissing)
-import System.FilePath            (takeBaseName, makeRelative)
+import System.FilePath            (takeDirectory, takeFileName, takeBaseName,
+                                   makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks)
 
@@ -60,7 +61,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   oPath %> \_ -> do
     need [argPath]
     liftIO $ createDirectoryIfMissing True tmpDir
-    quietly $ unit $ wrappedCmd cfg [] script [tmpDir, oPath, argPath]
+    quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
     trackWrite [oPath]
   return (ExprPath oPath)
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
@@ -76,9 +77,9 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   outPath %> \_ -> do
     need [faPath]
     liftIO $ createDirectoryIfMissing True tmpDir
-    Stdout out <- wrappedCmd cfg [Cwd tmpDir] script
-                    [(debug cfg ("cOneArgList outPath: " ++ outPath) outPath), faPath]
-    debugWriteFile cfg outPath out
+    wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
+    -- debugWriteFile cfg outPath out
+    debugTrackWrite cfg [outPath]
   return (ExprPath outPath)
 cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
 
@@ -111,7 +112,7 @@ cLink s@(_,cfg) expr rtype prefix = do
     pth <- fmap strip $ readFile' strPath
     src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
     need [src]
-    unit $ quietly $ wrappedCmd cfg [] "ln" ["-fs", src, outPath]
+    unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
     debugTrackWrite cfg [outPath]
   return (ExprPath outPath)
 
