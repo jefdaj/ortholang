@@ -1,0 +1,21 @@
+.
+|-- cache
+|   `-- seqio
+|-- exprs
+|   |-- concat_fastas
+|   |   `-- 387d296c5a.fna
+|   |-- cut_list
+|   |   `-- 6cfcb30456.fna.list
+|   |-- cut_lit
+|   |   |-- a7d15af7fe.str
+|   |   `-- bfa8ff7859.str
+|   |-- gbk_to_fna
+|   |   |-- 2c0bf5f44b.fna
+|   |   `-- a19553bc95.fna
+|   `-- load_gbk
+|       |-- a7d15af7fe.gbk -> $TESTDIR/data/SynPCC7942_chr.gbk
+|       `-- bfa8ff7859.gbk -> $TESTDIR/data/SynPCC7942_pANL.gbk
+`-- vars
+    `-- result -> ../exprs/concat_fastas/387d296c5a.fna
+
+9 directories, 9 files
