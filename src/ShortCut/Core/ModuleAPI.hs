@@ -59,6 +59,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
       (ExprPath oPath) = exprPath cfg expr []
   oPath %> \_ -> do
     need [argPath]
+    liftIO $ createDirectoryIfMissing True tmpDir
     quietly $ unit $ wrappedCmd cfg [] script [tmpDir, oPath, argPath]
     trackWrite [oPath]
   return (ExprPath oPath)
@@ -74,6 +75,7 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
       (ExprPath outPath) = exprPath cfg expr []
   outPath %> \_ -> do
     need [faPath]
+    liftIO $ createDirectoryIfMissing True tmpDir
     Stdout out <- wrappedCmd cfg [Cwd tmpDir] script
                     [(debug cfg ("cOneArgList outPath: " ++ outPath) outPath), faPath]
     debugWriteFile cfg outPath out
