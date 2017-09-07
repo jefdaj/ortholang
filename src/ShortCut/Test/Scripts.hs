@@ -6,7 +6,7 @@ import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Types        (CutConfig(..))
 import ShortCut.Core.Util         (mkTestGroup)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
-                                   (</>), (<.>))
+                                   takeFileName, (</>), (<.>))
 import System.IO.Silently         (silence)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, findByExtension)
@@ -21,9 +21,10 @@ import System.IO.LockFile -- TODO only some of it
 
 -- TODO get rid of as many of these as possible
 nonDeterministicCut :: FilePath -> Bool
-nonDeterministicCut path = (takeDirectory . takeDirectory) path `elem` dirs
+nonDeterministicCut path = testDir `elem` badDirs
   where
-    dirs = map ("tests" </>) ["blast", "crb"]
+    testDir = (takeFileName . takeDirectory) path
+    badDirs = ["blast", "crb"]
 
 getTestCuts :: IO [FilePath]
 getTestCuts = do
@@ -69,7 +70,8 @@ mkTests cfg = do
   cuts <- getTestCuts
   let results = map findResFile  cuts
       mtrees  = map findTreeFile cuts
-      groups  = map goldenScriptAndTree (zip3 cuts results mtrees)
+      triples = zip3 cuts results mtrees
+      groups  = map goldenScriptAndTree triples
   mkTestGroup cfg "interpret test scripts" groups
   where
     findResFile  c = replaceExtension c "result"
