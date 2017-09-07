@@ -32,9 +32,9 @@ tExtract :: TypeChecker
 tExtract [x] | elem x [crb, bht] = Right $ ListOf str
 tExtract  _ = Left "expected a blast hits table"
 
-tExtractAll :: TypeChecker
-tExtractAll [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
-tExtractAll  _ = Left "expected a list of blast hits tables"
+tExtractEach :: [CutType] -> Either String CutType
+tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
+tExtractEach  _ = Left "expected a list of blast hits tables"
 
 extractQueries :: CutFunction
 extractQueries = CutFunction
@@ -47,7 +47,7 @@ extractQueries = CutFunction
 extractQueriesEach :: CutFunction
 extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
-  , fTypeCheck = tExtractAll
+  , fTypeCheck = tExtractEach
   , fFixity    = Prefix
   , fCompiler  = rMapLastTmp (aTsvColumn 1) "tables" (ListOf str)
   }
@@ -63,7 +63,7 @@ extractTargets = CutFunction
 extractTargetsEach :: CutFunction
 extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
-  , fTypeCheck = tExtractAll
+  , fTypeCheck = tExtractEach
   , fFixity    = Prefix
   , fCompiler  = rMapLastTmp (aTsvColumn 2) "tables" (ListOf str)
   }

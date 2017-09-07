@@ -128,7 +128,7 @@ cLoadOne _ _ _ = error "bad argument to cLoadOne"
  - source code.
  -}
 -- TODO fix it putting both the initial files and lists of them in the same dir!
---      (.faa and .faa.list are together in exprs/load_faa_all,
+--      (.faa and .faa.list are together in exprs/load_faa_each,
 --       when the former should be in exprs/load_faa)
 mkLoadList :: String -> CutType -> CutFunction
 mkLoadList name rtn = CutFunction
