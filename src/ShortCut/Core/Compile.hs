@@ -191,14 +191,19 @@ cVar (_,cfg) var expr (ExprPath dest) = do
     quietly $ wrappedCmd cfg [] "ln" ["-fs", dest', out]
   return (VarPath link')
 
--- handles the actual rule generation for all binary operators
--- basically the `paths` functions with pattern matching factored out
+-- Handles the actual rule generation for all binary operators;
+-- basically the `paths` functions with pattern matching factored out.
+-- Some of the complication is just making sure paths don't depend on tmpdir,
+-- and some is that I wrote this near the beginning, when I didn't have
+-- many of the patterns worked out yet. Feel free to update...
 cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (ExprPath, ExprPath, ExprPath)
-cBop s@(_,cfg) t expr (n1, n2) = do
-  p1 <- cExpr s n1
-  p2 <- cExpr s n2
-  -- TODO name each one?
-  let path  = exprPathExplicit cfg t "cut_bop" [show expr, show p1, show p2]
-      path' = debugCompiler cfg "cBop" expr path
-  return (p1, p2, path')
+cBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
+  (ExprPath p1) <- cExpr s n1
+  (ExprPath p2) <- cExpr s n2
+  let rel1  = makeRelative (cfgTmpDir cfg) p1
+      rel2  = makeRelative (cfgTmpDir cfg) p2
+      path  = exprPathExplicit cfg t "cut_bop" [show salt, name, rel1, rel2]
+      path' = debugCompiler cfg "cBop" e path
+  return (ExprPath p1, ExprPath p2, path')
+cBop _ _ _ _ = error "bad argument to cBop"

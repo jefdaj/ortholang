@@ -1,10 +1,10 @@
 .
 |-- exprs
 |   |-- cut_bop
-|   |   `-- c02c2c82de.num
+|   |   `-- f9d134767f.num
 |   `-- cut_lit
 |       `-- 09260f1de8.num
 `-- vars
-    `-- result -> ../exprs/cut_bop/c02c2c82de.num
+    `-- result -> ../exprs/cut_bop/f9d134767f.num
 
 4 directories, 3 files

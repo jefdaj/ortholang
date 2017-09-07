@@ -6,7 +6,7 @@
 |   |-- all
 |   |   `-- 23cc660a2a.str.list
 |   |-- cut_list
-|   |   `-- f1fb19cccf.fna.list
+|   |   `-- 1066f777e7.fna.list
 |   |-- cut_lit
 |   |   |-- 144e3e36b6.str
 |   |   |-- 8cf7094fb4.str
@@ -26,48 +26,48 @@
 |   |   |-- 144e3e36b6.fna -> $PWD/data/6803genes10.fna
 |   |   `-- 8cf7094fb4.fna -> $PWD/data/7942genome.fna
 |   |-- makeblastdb
-|   |   |-- 420aece2b3.ndb
-|   |   |-- 420aece2b3.ndb.nhr
-|   |   |-- 420aece2b3.ndb.nin
-|   |   |-- 420aece2b3.ndb.nsq
-|   |   |-- 4548e9c71c.ndb
-|   |   |-- 4548e9c71c.ndb.nhr
-|   |   |-- 4548e9c71c.ndb.nin
-|   |   |-- 4548e9c71c.ndb.nsq
-|   |   |-- 5f44eb50ab.ndb
-|   |   |-- 5f44eb50ab.ndb.nhr
-|   |   |-- 5f44eb50ab.ndb.nin
-|   |   |-- 5f44eb50ab.ndb.nsq
-|   |   |-- 660b31db4a.ndb
-|   |   |-- 660b31db4a.ndb.nhr
-|   |   |-- 660b31db4a.ndb.nin
-|   |   |-- 660b31db4a.ndb.nsq
-|   |   |-- 7364a9dca0.ndb
-|   |   |-- 7364a9dca0.ndb.nhr
-|   |   |-- 7364a9dca0.ndb.nin
-|   |   |-- 7364a9dca0.ndb.nsq
-|   |   |-- 9df6f021e2.ndb
-|   |   |-- 9df6f021e2.ndb.nhr
-|   |   |-- 9df6f021e2.ndb.nin
-|   |   |-- 9df6f021e2.ndb.nsq
-|   |   |-- b1e1f5e023.ndb
-|   |   |-- b1e1f5e023.ndb.nhr
-|   |   |-- b1e1f5e023.ndb.nin
-|   |   |-- b1e1f5e023.ndb.nsq
-|   |   |-- b27eef2bd1.ndb
-|   |   |-- b27eef2bd1.ndb.nhr
-|   |   |-- b27eef2bd1.ndb.nin
-|   |   |-- b27eef2bd1.ndb.nsq
-|   |   |-- bfe49c337e.ndb
-|   |   |-- bfe49c337e.ndb.nhr
-|   |   |-- bfe49c337e.ndb.nin
-|   |   |-- bfe49c337e.ndb.nsq
-|   |   |-- f2e10fc416.ndb
-|   |   |-- f2e10fc416.ndb.nhr
-|   |   |-- f2e10fc416.ndb.nin
-|   |   `-- f2e10fc416.ndb.nsq
+|   |   |-- 085bf7745f.ndb
+|   |   |-- 085bf7745f.ndb.nhr
+|   |   |-- 085bf7745f.ndb.nin
+|   |   |-- 085bf7745f.ndb.nsq
+|   |   |-- 154880f4c1.ndb
+|   |   |-- 154880f4c1.ndb.nhr
+|   |   |-- 154880f4c1.ndb.nin
+|   |   |-- 154880f4c1.ndb.nsq
+|   |   |-- 2d3a5afbde.ndb
+|   |   |-- 2d3a5afbde.ndb.nhr
+|   |   |-- 2d3a5afbde.ndb.nin
+|   |   |-- 2d3a5afbde.ndb.nsq
+|   |   |-- 5eef5dbd18.ndb
+|   |   |-- 5eef5dbd18.ndb.nhr
+|   |   |-- 5eef5dbd18.ndb.nin
+|   |   |-- 5eef5dbd18.ndb.nsq
+|   |   |-- 73b06c11aa.ndb
+|   |   |-- 73b06c11aa.ndb.nhr
+|   |   |-- 73b06c11aa.ndb.nin
+|   |   |-- 73b06c11aa.ndb.nsq
+|   |   |-- 7b260955a5.ndb
+|   |   |-- 7b260955a5.ndb.nhr
+|   |   |-- 7b260955a5.ndb.nin
+|   |   |-- 7b260955a5.ndb.nsq
+|   |   |-- 99fc023a7c.ndb
+|   |   |-- 99fc023a7c.ndb.nhr
+|   |   |-- 99fc023a7c.ndb.nin
+|   |   |-- 99fc023a7c.ndb.nsq
+|   |   |-- abb1e607b9.ndb
+|   |   |-- abb1e607b9.ndb.nhr
+|   |   |-- abb1e607b9.ndb.nin
+|   |   |-- abb1e607b9.ndb.nsq
+|   |   |-- bb38aab9a4.ndb
+|   |   |-- bb38aab9a4.ndb.nhr
+|   |   |-- bb38aab9a4.ndb.nin
+|   |   |-- bb38aab9a4.ndb.nsq
+|   |   |-- e335e647a2.ndb
+|   |   |-- e335e647a2.ndb.nhr
+|   |   |-- e335e647a2.ndb.nin
+|   |   `-- e335e647a2.ndb.nsq
 |   |-- repeat
-|   |   `-- 7d7fc2abdb.str.list.list
+|   |   `-- c1b95ca671.str.list.list
 |   `-- tblastx
 |       |-- 1446841993.bht
 |       |-- 4ff3883850.bht
