@@ -1,11 +1,11 @@
 .
 |-- exprs
 |   |-- cut_bop
-|   |   `-- fd548fbd12.num
+|   |   `-- af9f526ebe.num
 |   |-- cut_list
-|   |   |-- 506230c38a.num.list
-|   |   |-- aa87ea2e73.num.list
-|   |   `-- e271b68cf7.num.list
+|   |   |-- bbf00f9196.num.list
+|   |   |-- c7689e1993.num.list
+|   |   `-- ce1453ad3d.num.list
 |   `-- cut_lit
 |       |-- 09260f1de8.num
 |       |-- 0b2320ed7c.num
@@ -20,6 +20,6 @@
 |       `-- fbd697bb89.num
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_list/e271b68cf7.num.list
+    `-- result -> ../exprs/cut_list/bbf00f9196.num.list
 
 5 directories, 17 files

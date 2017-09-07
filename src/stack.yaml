@@ -5,6 +5,8 @@ packages:
 - '.'
 extra-deps:
 - Command-0.0.7
+- lock-file-0.5.0.2
+- tagged-exception-core-2.2.0.0
 flags: {}
 extra-package-dbs: []
 nix:

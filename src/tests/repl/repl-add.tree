@@ -1,11 +1,11 @@
 .
 |-- exprs
 |   |-- cut_bop
-|   |   `-- aca120d99d.num
+|   |   `-- 92e0860eca.num
 |   `-- cut_lit
 |       `-- 09260f1de8.num
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_bop/aca120d99d.num
+    `-- result -> ../exprs/cut_bop/92e0860eca.num
 
 4 directories, 4 files

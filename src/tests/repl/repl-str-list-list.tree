@@ -1,12 +1,12 @@
 .
 |-- exprs
 |   |-- cut_list
-|   |   |-- 21e473712a.str.list.list
-|   |   `-- bbb893b46e.str.list
+|   |   |-- 9b25f1ff47.str.list
+|   |   `-- e936821c24.str.list.list
 |   `-- cut_lit
 |       `-- a830208172.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_list/21e473712a.str.list.list
+    `-- result -> ../exprs/cut_list/e936821c24.str.list.list
 
 4 directories, 5 files
