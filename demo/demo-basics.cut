@@ -1,0 +1,18 @@
+# Demo script to go with the "basics" section of Jeff's retreat poster
+
+pcc6803 = load_fna "Synechocystis_PCC_6803.fna"
+
+pcc7942 = concat_fastas [gbk_to_fna (load_gbk "SynPCC7942_chr.gbk"),
+                         gbk_to_fna (load_gbk "SynPCC7942_pANL.gbk")]
+
+A = [1,2,3]
+B = [2,4,6]
+C = [3,2,1e23,3e-9]
+
+set1 = all [A,B,C]
+set2 = all [A,B,C]
+set3 = A | B | C
+set4 = B ~ (A & C)
+set5 = B ~  A & C
+
+result = A
