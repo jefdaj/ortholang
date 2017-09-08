@@ -1,0 +1,4 @@
+this shouldn't work:
+    `ptr | tps`
+    but instead of failing immediately it prints some nonsense
+    :type shows faa

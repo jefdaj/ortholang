@@ -163,8 +163,9 @@ cListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
       outPath' = debugCompiler cfg "cListPaths" e outPath
   outPath %> \_ -> do
     need paths'
-    paths'' <- liftIO $ mapM resolveSymlinks paths'
-    debugWriteLines cfg outPath paths''
+    -- TODO yup bug was here! any reason to keep it?
+    -- paths'' <- liftIO $ mapM resolveSymlinks paths'
+    debugWriteLines cfg outPath paths'
   return (ExprPath outPath')
 cListPaths _ _ = error "bad arguemnts to cListPaths"
 
