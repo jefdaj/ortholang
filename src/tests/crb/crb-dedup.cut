@@ -1,6 +1,8 @@
 # This tests that BLAST on two lists only does one search per duplicate
 # element. It mainly guards against bugs in naming the hashed tmpfiles.
 
+# TODO need to actually test the tmpfiles then!
+
 # TODO Is it having the same issue the overall cut is having? Maybe crb-blast
 #      fails partway through and returns [] instead of actually failing!
 
@@ -28,4 +30,4 @@ large_hits = extract_queries_each (crb_blast_each reference large)
 # result = (any large_hits) ~ (any small_hits)
 # result = ["data/6803genes10.faa"]
 # result = small
-result = (any large_hits) ~ (any small_hits)
+result = any large_hits ~ any small_hits
