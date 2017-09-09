@@ -12,7 +12,7 @@
 |   |-- extract_seqs
 |   |   `-- 6c33c594bc.faa
 |   `-- load_faa
-|       `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|       `-- 139e073c49.faa -> /clusterfs/rosalind/users/jefdaj/shortcut/shortcut-stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/share/x86_64-linux-ghc-8.0.2/ShortCut-0.7.0.0/data/6803genes10.faa
 `-- vars
     |-- diff.str.list -> ../exprs/cut_bop/04286bcd60.str.list
     |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
