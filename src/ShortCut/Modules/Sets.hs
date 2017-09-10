@@ -87,7 +87,7 @@ tSetFold _ = Left "expecting a list of lists"
 cSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
 cSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- cExpr s lol
-  let (ExprPath oPath) = exprPath cfg e []
+  let (ExprPath oPath) = exprPath cfg True e []
       oPath' = debugCompiler cfg "cSetFold" e oPath
   oPath %> \_ -> do
     -- lists <- debugReadLines cfg (debug cfg ("setsPath: " ++ setsPath) setsPath)

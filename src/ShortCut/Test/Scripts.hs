@@ -52,9 +52,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
 -- TODO use Diff versions!
 -- TODO split off the 3 tests into their own fns
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath)) -> CutConfig -> IO TestTree
-mkScriptTests (cut, gld, mtre) cfg = do
-  tripSetup
-  return $ testGroup name allTests
+mkScriptTests (cut, gld, mtre) cfg = return $ testGroup name allTests
   where
     name       = takeBaseName cut
     cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
@@ -89,9 +87,13 @@ mkScriptTests (cut, gld, mtre) cfg = do
     tripSetup  = do
                    scr1 <- parseFileIO cfg' $ fromJust $ cfgScript cfg'
                    writeScript tripCut scr1
+                   -- writeFile "/tmp/diff1.txt" $ show scr1
                    writeFile tripShow $ show scr1
+                   -- writeScript "/tmp/show.txt" scr1
     tripAct    = do
+                   withLock cfg' tripSetup
                    scr2 <- parseFileIO cfg' tripCut
+                   -- writeFile "/tmp/diff2.txt" $ show scr2
                    return $ pack $ show scr2
 
 mkTests :: CutConfig -> IO TestTree

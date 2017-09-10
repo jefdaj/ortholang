@@ -166,7 +166,8 @@ cParseSearches :: CutState -> CutExpr -> Rules ExprPath
 cParseSearches s@(_,cfg) expr@(CutSet _ _ _ _) = do
   (ExprPath sList) <- cExpr s expr
   -- TODO should this be a cacheFile instead?
-  let (ExprPath searchTable) = exprPathExplicit cfg search "parse_searches" [show expr, sList]
+  let (ExprPath searchTable) = exprPathExplicit cfg True search "parse_searches"
+                                                [show expr, sList]
   searchTable %> \out -> do
     tmp <- readFile' sList
     let sLines = map (cfgTmpDir cfg </>) (lines tmp)
@@ -196,7 +197,7 @@ cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   (ExprPath sTable) <- cParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      (ExprPath outs) = exprPath cfg expr [ExprPath bmFn, ExprPath sTable]
+      (ExprPath outs) = exprPath cfg True expr [ExprPath bmFn, ExprPath sTable]
   outs %> \_ -> do
     need [bmFn, sTable]
     -- TODO should biomartr get multiple output paths?

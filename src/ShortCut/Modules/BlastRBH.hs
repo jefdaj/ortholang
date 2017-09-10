@@ -59,7 +59,7 @@ cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
       lbest = CutFun bht salt deps "best_hits"  [lhits]
       rbest = CutFun bht salt deps "best_hits"  [rhits]
       rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
-      (ExprPath out) = exprPath cfg e []
+      (ExprPath out) = exprPath cfg True e []
   (ExprPath rbhPath) <- cExpr s rbh -- TODO this is the sticking point right?
   out %> \_ -> do
     need [rbhPath]
@@ -92,7 +92,7 @@ cRecipEach :: RulesFn
 cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   (ExprPath lsPath) <- cExpr s lbhts
   (ExprPath rsPath) <- cExpr s rbhts
-  let (ExprPath oPath) = exprPath cfg e []
+  let (ExprPath oPath) = exprPath cfg True e []
       (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
   oPath %> \_ -> do
     need [lsPath, rsPath]
@@ -125,7 +125,7 @@ cRecipEach _ _ = error "bad argument to cRecipEach"
 --   -- let subjects = extractExprs scr ss
 --   let exprs = map (\s -> CutFun bht salt (concatMap depsOf [e, q, s]) "blastp_rbh" [e, q, s]) ss
 --   paths <- mapM (cExpr st) exprs
---   let (ExprPath out) = exprPath cfg expr []
+--   let (ExprPath out) = exprPath cfg True expr []
 --       paths' = map (\(ExprPath p) -> p) paths
 --   out %> \_ -> need paths' >> debugWriteLines cfg out paths' >> debugTrackWrite cfg [out]
 --   return (ExprPath out)
@@ -147,7 +147,7 @@ cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = 
   -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
   -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]
   let mkExpr name = CutFun rtn salt deps name [evalue, query, subjects]
-      (ExprPath oPath)  = exprPath cfg e []
+      (ExprPath oPath)  = exprPath cfg True e []
       (CacheDir cDir )  = cacheDir cfg "reciprocal_each"
   (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"
   (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev"

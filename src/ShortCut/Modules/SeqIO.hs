@@ -143,7 +143,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   (ExprPath idsPath) <- cExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let (CacheDir tmpDir ) = cacheDir cfg "seqio"
-      (ExprPath outPath) = exprPath cfg e []
+      (ExprPath outPath) = exprPath cfg True e []
       -- tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   -- tmpList %> \_ -> do
@@ -185,7 +185,7 @@ translate = CutFunction
 cConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath oPath) = exprPath cfg e []
+  let (ExprPath oPath) = exprPath cfg True e []
   oPath %> \_ -> do
     need [faPath]
     unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
@@ -212,7 +212,7 @@ tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 cConcat :: CutState -> CutExpr -> Rules ExprPath
 cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- cExpr s fs
-  let (ExprPath oPath) = exprPath cfg e []
+  let (ExprPath oPath) = exprPath cfg True e []
   oPath %> \_ -> do
     faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
                (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)

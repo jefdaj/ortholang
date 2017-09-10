@@ -37,7 +37,7 @@ globFiles = CutFunction
 cGlobFiles :: CutState -> CutExpr -> Rules ExprPath
 cGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- cExpr s p
-  let (ExprPath outPath) = exprPath cfg e []
+  let (ExprPath outPath) = exprPath cfg True e []
   outPath %> \_ -> do
     ptn   <- fmap strip $ debugReadFile cfg path
     -- liftIO $ putStrLn $ "ptn: " ++ show ptn

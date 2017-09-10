@@ -35,11 +35,12 @@ instance {-# OVERLAPPING #-} Pretty CutAssign where
 
 instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint [] = empty
+  -- pPrint as = text $ unlines $ map prettyShow as
   pPrint as = fsep $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
 writeScript :: FilePath -> CutScript -> IO ()
-writeScript path scr = writeFile path $ render $ pPrint scr
+writeScript path scr = writeFile path $ unlines $ map prettyShow scr
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where

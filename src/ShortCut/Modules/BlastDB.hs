@@ -94,7 +94,7 @@ mkLoadDBEach name rtn = CutFunction
 cLoadDB :: RulesFn
 cLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- cExpr st s
-  let (ExprPath oPath) = exprPath cfg e []
+  let (ExprPath oPath) = exprPath cfg True e []
   oPath %> \_ -> do
     pattern <- debugReadFile cfg sPath
     let pattern' = makeRelative (cfgTmpDir cfg) pattern
@@ -136,7 +136,7 @@ cBlastdblist :: RulesFn
 cBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- cExpr s f
   let (CacheDir tmpDir) = cacheDir cfg "blastdbget"
-      (ExprPath oPath ) = exprPath cfg e []
+      (ExprPath oPath ) = exprPath cfg True e []
       stdoutTmp = tmpDir </> "stdout" <.> "txt"
   oPath %> \_ -> do
     wrappedCmd cfg [oPath] [Shell] "blastdbget" [tmpDir, ">", fPath]
@@ -163,7 +163,7 @@ cBlastdbget :: RulesFn
 cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- cExpr st name
   let (CacheDir tmpDir  ) = cacheDir cfg "blastdbget"
-      (ExprPath dbPrefix) = exprPath cfg e [] -- final prefix
+      (ExprPath dbPrefix) = exprPath cfg True e [] -- final prefix
   dbPrefix %> \_ -> do
     need [nPath]
     dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
@@ -206,8 +206,9 @@ tMakeblastdb _ = error "makeblastdb requires a fasta file"
 cMakeblastdb :: RulesFn
 cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
-  let (ExprPath dbPrefix) = exprPathExplicit cfg rtn "makeblastdb" [faPath]
-      dbPrefixRel = makeRelative (cfgTmpDir cfg) dbPrefix
+  let relFa = makeRelative (cfgTmpDir cfg) faPath
+      relDb = makeRelative (cfgTmpDir cfg) dbPrefix
+      (ExprPath dbPrefix) = exprPathExplicit cfg True rtn "makeblastdb" [relFa]
       dbType = if rtn == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> do
     need [faPath]
@@ -219,6 +220,6 @@ cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
       ]
     -- TODO put back if you can figure out how with the new wrappedCmd
     -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
-    debugWriteFile cfg dbPrefix dbPrefixRel
+    debugWriteFile cfg dbPrefix relDb
   return (ExprPath dbPrefix)
 cMakeblastdb _ _ = error "bad argument to makeblastdb"

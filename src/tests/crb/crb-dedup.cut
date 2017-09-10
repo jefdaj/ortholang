@@ -24,4 +24,4 @@ large_hits = extract_queries_each (crb_blast_each reference large)
 # result = (any large_hits) ~ (any small_hits)
 # result = {"data/6803genes10.faa"}
 # result = small
-result = (any large_hits) ~ (any small_hits)
+result = any large_hits ~ any small_hits

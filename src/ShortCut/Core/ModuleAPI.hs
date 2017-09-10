@@ -57,7 +57,7 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   -- let tmpDir = cacheDir cfg </> tmpName
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      (ExprPath oPath) = exprPath cfg expr []
+      (ExprPath oPath) = exprPath cfg True expr []
   oPath %> \_ -> do
     need [argPath]
     liftIO $ createDirectoryIfMissing True tmpDir
@@ -73,7 +73,7 @@ cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPa
 cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let (CacheDir tmpDir ) = cacheDir cfg tmpName
-      (ExprPath outPath) = exprPath cfg expr []
+      (ExprPath outPath) = exprPath cfg True expr []
   outPath %> \_ -> do
     need [faPath]
     liftIO $ createDirectoryIfMissing True tmpDir
@@ -107,7 +107,7 @@ cLink s@(_,cfg) expr rtype prefix = do
   (ExprPath strPath) <- cExpr s expr -- TODO is this the issue?
   -- TODO only depend on final expressions
   -- ok without ["outPath"]?
-  let (ExprPath outPath) = exprPathExplicit cfg rtype prefix [show expr]
+  let (ExprPath outPath) = exprPathExplicit cfg True rtype prefix [show expr]
   outPath %> \_ -> do
     pth <- fmap strip $ readFile' strPath
     src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
@@ -152,7 +152,7 @@ cLoadListOne :: CutType -> RulesFn
 cLoadListOne rtn s@(_,cfg) expr = do
   (ExprPath litsPath) <- cExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_set" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" [relPath]
   outPath %> \_ -> do
     lits  <- debugReadLines cfg litsPath -- TODO strip?
     lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
@@ -163,8 +163,9 @@ cLoadListOne rtn s@(_,cfg) expr = do
 cLoadListMany :: RulesFn
 cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- cExpr s es
-  -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_set" [show e]
+  -- TODO is relPath enough to make sure it's unique??
+  let relPath = makeRelative (cfgTmpDir cfg) pathsPath
+      (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_set" [relPath]
   outPath %> \_ -> do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     paths' <- liftIO $ mapM resolveSymlinks paths
@@ -199,7 +200,7 @@ aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
 rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
-  let (ExprPath outPath) = exprPath cfg e []
+  let (ExprPath outPath) = exprPath cfg True e []
       (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
   outPath %> \_ -> do
     need $ map (\(ExprPath p) -> p) argPaths
@@ -236,7 +237,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtnType) name [show e]
+      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
 
   outPath %> \_ -> do

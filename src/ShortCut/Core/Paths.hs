@@ -102,21 +102,25 @@ exprPrefix (CutBop _ _ _ _ _ _ ) = "cut_bop" -- TODO individual names?
 exprPrefix (CutSet _ _ _ _    ) = "cut_set"
 exprPrefix (CutFun _ _ _ name _) = name
 
-exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
-exprPath cfg expr paths = exprPathExplicit cfg (typeOf expr) (exprPrefix expr)
-  (show expr:map show paths)
+exprPath :: CutConfig -> Bool -> CutExpr -> [ExprPath] -> ExprPath
+exprPath cfg noFullPaths expr paths =
+  exprPathExplicit cfg noFullPaths (typeOf expr) (exprPrefix expr)
+                   (show expr:map show paths)
 
 -- Same as exprPath, except you also set the type. This is needed when writing
 -- Haskell functions that modify ShortCut functions, such as the r* ones in
 -- ModuleAPI.hs
-exprPathExplicit :: CutConfig -> CutType -> String -> [String] -> ExprPath
-exprPathExplicit cfg rtn prefix strings = ExprPath rtn'
+-- The noFullPaths thing helps with debugging, but could be removed later
+exprPathExplicit :: CutConfig -> Bool -> CutType -> String -> [String] -> ExprPath
+exprPathExplicit cfg noFullPaths rtn prefix strings = ExprPath rtn'
   where
-    -- paths' = map (makeRelative $ cfgTmpDir cfg) paths
+    msg p = "found absolute path '" ++ p
+              ++ "'.\nfull exprPathExplicit args:\n"
+              ++ unlines ([show rtn, prefix] ++ strings)
     strings' = map (\s -> if (cfgTmpDir cfg) `isInfixOf` s
-                            then error $ "absolute path found: " ++ s
+                            then error $ msg s
                             else debug cfg ("path ok: " ++ s) s) strings
-    uniq   = digest $ unlines strings'
+    uniq   = digest $ unlines $ if noFullPaths then strings' else strings
     rtn'   = cfgTmpDir cfg </> "exprs" </> prefix </> uniq <.> extOf rtn
 
 -- TODO flip arguments for consistency with everything else There's a special

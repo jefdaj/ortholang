@@ -64,7 +64,7 @@ cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
       resPaths'  = map (\(ExprPath p) -> p) resPaths
       resPaths'' = map (makeRelative $ cfgTmpDir cfg) resPaths'
       outPath'   = debugCompiler cfg "cRepeatEach" expr outPath
-      (ExprPath outPath) = exprPath cfg expr $ map ExprPath resPaths''
+      (ExprPath outPath) = exprPath cfg True expr $ map ExprPath resPaths''
   outPath %> \_ ->
     let actFn = if typeOf expr `elem` [SetOf str, SetOf num]
                   then aRepeatEachLits (typeOf expr)

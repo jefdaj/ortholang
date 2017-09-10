@@ -331,15 +331,14 @@ pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 --      if none of them work it moves on to others
 --      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
-pTerm = (pList <|> pParens <|> pNum <|> pStr <|> pFun <|> pRef <?> "term") <* optional pComment
--- pTerm = choice
---   [ pList
---   , pParens
---   , pFun
---   , pNum
---   , pStr
---   , pRef
---   ] <* optional pComment
+pTerm = choice
+  [ pList
+  , pFun
+  , pNum
+  , pStr
+  , pRef
+  , pParens -- apparently has to go at the end? or at least after pFun
+  ] <* optional pComment
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how

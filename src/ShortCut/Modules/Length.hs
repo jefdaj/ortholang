@@ -40,7 +40,7 @@ cLen :: CutState -> CutExpr -> Rules ExprPath
 cLen s@(_,cfg) (CutFun _ _ _ _ [l]) = do
   (ExprPath lPath) <- cExpr s l
   let relPath = makeRelative (cfgTmpDir cfg) lPath
-      (ExprPath outPath) = exprPathExplicit cfg (typeOf l) "length" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg True (typeOf l) "length" [relPath]
   outPath %> \_ -> do
     n <- fmap length $ debugReadLines cfg lPath
     debugWriteFile cfg outPath (show n ++ "\n") -- TODO auto-add the \n?

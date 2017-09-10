@@ -2,4 +2,5 @@ mini6803 = load_faa "data/6803genes10.faa"
 full7942 = load_fna "data/7942genome.fna"
 hits6803 = extract_queries (tblastn mini6803 # test comment between args
                                     full7942 1e-5)
-result = all (repeat hits6803 mini6803 10)
+# result = all (repeat hits6803 mini6803 10)
+result = hits6803

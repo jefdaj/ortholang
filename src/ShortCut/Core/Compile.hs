@@ -114,7 +114,7 @@ compileScript s@(as,cfg) permHash = do
 -- write a literal value from ShortCut source code to file
 cLit :: CutState -> CutExpr -> Rules ExprPath
 cLit (_,cfg) expr = do
-  let (ExprPath path) = exprPath cfg expr []
+  let (ExprPath path) = exprPath cfg False expr [] -- absolute paths allowed!
       path' = debugCompiler cfg "cLit" expr path
   path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n"
   return (ExprPath path')
@@ -134,7 +134,7 @@ cSet _ _ = error "bad arguemnt to cSet"
 -- TODO is a special type for this really needed?
 cSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
-  let (ExprPath link) = exprPath cfg e []
+  let (ExprPath link) = exprPath cfg True e []
       link' = debugCompiler cfg "cSetEmpty" e link
   link %> \_ -> wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
   return (ExprPath link')
@@ -146,7 +146,7 @@ cSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   litPaths <- mapM (cExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_set" relPaths
+      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
       outPath' = debugCompiler cfg "cSetLits" e outPath
   outPath %> \_ -> do
     lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
@@ -161,7 +161,7 @@ cSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_set" relPaths
+      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
       outPath' = debugCompiler cfg "cSetPaths" e outPath
   outPath %> \_ -> do
     need paths'
@@ -208,7 +208,7 @@ cBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
   (ExprPath p2) <- cExpr s n2
   let rel1  = makeRelative (cfgTmpDir cfg) p1
       rel2  = makeRelative (cfgTmpDir cfg) p2
-      path  = exprPathExplicit cfg t "cut_bop" [show salt, name, rel1, rel2]
+      path  = exprPathExplicit cfg True t "cut_bop" [show salt, name, rel1, rel2]
       path' = debugCompiler cfg "cBop" e path
   return (ExprPath p1, ExprPath p2, path')
 cBop _ _ _ _ = error "bad argument to cBop"
