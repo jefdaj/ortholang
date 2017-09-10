@@ -48,8 +48,8 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
   -- let res  = (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
-  let resPath' = debugCompiler cfg "cRepeat" (resExpr, subVar, subExpr) resPath
-  return (ExprPath resPath') -- TODO this is supposed to convert result -> expr right?
+  -- let resPath' = debugCompiler cfg "cRepeat" (resExpr, subVar, subExpr) resPath
+  return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
 cRepeatEach :: CutState -> CutExpr -> Rules ExprPath
 cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do

@@ -3,6 +3,7 @@
 module ShortCut.Core.Pretty
   ( prettyShow
   , prettyResult
+  , CutExpr(..)
   )
   where
 

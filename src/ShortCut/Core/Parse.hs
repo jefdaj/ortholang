@@ -370,14 +370,14 @@ pAssign = do
 -- TODO if the statement is literally `result`, what do we do?
 --      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM CutAssign
-pResult = pExpr >>= \e -> return (CutVar "result", e)
+pResult = do
+  (_, cfg) <- getState
+  e <- pExpr
+  let e' = debugParser cfg "pResult" e
+  return (CutVar "result", e')
 
 pStatement :: ParseM CutAssign
-pStatement = do
-  (_, cfg) <- getState
-  res <- pAssign <|> pResult
-  let res' = debugParser cfg "pStatement" res
-  return res'
+pStatement = pAssign <|> pResult
 
 -------------
 -- scripts --
@@ -392,5 +392,4 @@ pScript = do
   void $ many pComment
   scr <- many (pStatement <* many pComment)
   putState (scr, cfg)
-  let scr' = debugParser cfg "pScript" scr
-  return scr'
+  return scr

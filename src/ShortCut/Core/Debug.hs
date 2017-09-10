@@ -15,8 +15,11 @@ module ShortCut.Core.Debug
   where
 
 import Development.Shake
+import ShortCut.Core.Types
+import ShortCut.Core.Pretty ()
+import Text.PrettyPrint.HughesPJClass
+
 import Debug.Trace            (trace, traceShow)
-import ShortCut.Core.Types    (CutConfig(..))
 import Control.Monad              (unless)
 import System.IO.Error (isAlreadyInUseError, ioError, catchIOError)
 import System.IO              (IOMode(..), withFile)
@@ -30,21 +33,28 @@ import System.IO.Strict       (hGetContents)
 ---------------------------------
 
 debug :: CutConfig -> String -> a -> a
-debug cfg str rtn = if cfgDebug cfg then trace str rtn else rtn
+debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 
 debugShow :: Show a => CutConfig -> a -> b -> b
 debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
 
+--------------------------------
+-- debuggers for core modules --
+--------------------------------
 
-debugParser :: Show a => CutConfig -> String -> a -> a
+debugParser :: Pretty a => CutConfig -> String -> a -> a
 debugParser cfg name res = debug cfg msg res
   where
-    msg = name ++ " parsed " ++ show res
+    ren = render $ pPrint res
+    msg = name ++ " parsed '" ++ ren ++ "'"
 
-debugCompiler :: (Show a, Show b) => CutConfig -> String -> a -> b -> b
+-- TODO restrict to CutExpr?
+-- TODO put in cExpr to catch everything at once? but misses which fn was called
+debugCompiler :: (Pretty a, Show b) => CutConfig -> String -> a -> b -> b
 debugCompiler cfg name input output = debug cfg msg output
   where
-    msg = name ++ " compiled " ++ show input ++ " to " ++ show output
+    ren = render $ pPrint input
+    msg = name ++ " compiled '" ++ ren ++ "' to " ++ show output
 
 -----------------------------
 -- handle duplicate writes --
