@@ -1,0 +1,33 @@
+.
+|-- exprs
+|   |-- cut_bop
+|   |   |-- 07869653ec.num
+|   |   |-- 494f9f005a.num
+|   |   |-- 52de655097.num
+|   |   |-- 5f7521a5d9.num
+|   |   `-- 83e1f9fcee.num
+|   |-- cut_list
+|   |   `-- d9e2b0cb90.num.list
+|   |-- cut_lit
+|   |   |-- 0473288d10.num
+|   |   |-- 11c5b01a8b.num
+|   |   |-- 6664311459.num
+|   |   |-- 75fd5000cb.num
+|   |   |-- 907d84fa63.num
+|   |   `-- ea8a5b1bc0.num
+|   `-- repeat
+|       `-- 1f3d86379d.num.list
+`-- vars
+    |-- result -> ../exprs/repeat/1f3d86379d.num.list
+    |-- result.79cdbba5be.num -> ../exprs/cut_bop/83e1f9fcee.num
+    |-- result.9d61c3445a.num -> ../exprs/cut_bop/5f7521a5d9.num
+    |-- result.cdd58a2a5d.num -> ../exprs/cut_bop/52de655097.num
+    |-- result.d989550f3e.num -> ../exprs/cut_bop/494f9f005a.num
+    |-- result.ec6cb0deae.num -> ../exprs/cut_bop/07869653ec.num
+    |-- var1.79cdbba5be.num -> ../exprs/cut_lit/75fd5000cb.num
+    |-- var1.9d61c3445a.num -> ../exprs/cut_lit/0473288d10.num
+    |-- var1.cdd58a2a5d.num -> ../exprs/cut_lit/6664311459.num
+    |-- var1.d989550f3e.num -> ../exprs/cut_lit/ea8a5b1bc0.num
+    `-- var1.ec6cb0deae.num -> ../exprs/cut_lit/11c5b01a8b.num
+
+6 directories, 24 files
