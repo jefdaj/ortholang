@@ -13,7 +13,7 @@ module ShortCut.Core.Compile
   ( compileScript
   , cBop
   , cExpr
-  , cList
+  , cSet
   , addPrefixes
   )
   where
@@ -69,7 +69,7 @@ addPrefixes p = mangleScript (addPrefix p)
 cExpr :: CutState -> CutExpr -> Rules ExprPath
 cExpr s e@(CutLit  _ _ _      ) = cLit s e
 cExpr s e@(CutRef  _ _ _ _    ) = cRef s e
-cExpr s e@(CutSet _ _ _ _    ) = cList s e
+cExpr s e@(CutSet _ _ _ _    ) = cSet s e
 cExpr s e@(CutBop  _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
 cExpr s e@(CutFun  _ _ _ n _  ) = compileByName s e n
 
@@ -121,53 +121,53 @@ cLit (_,cfg) expr = do
     paths (CutLit _ _ p) = p
     paths _ = error "bad argument to paths"
 
-cList :: CutState -> CutExpr -> Rules ExprPath
-cList s e@(CutSet EmptySet _ _ _) = cListEmpty s e
-cList s e@(CutSet rtn _ _ _)
-  | rtn `elem` [str, num] = cListLits s e
-  | otherwise = cListPaths s e
-cList _ _ = error "bad arguemnt to cList"
+cSet :: CutState -> CutExpr -> Rules ExprPath
+cSet s e@(CutSet EmptySet _ _ _) = cSetEmpty s e
+cSet s e@(CutSet rtn _ _ _)
+  | rtn `elem` [str, num] = cSetLits s e
+  | otherwise = cSetPaths s e
+cSet _ _ = error "bad arguemnt to cSet"
 
 -- special case for empty lists
 -- TODO is a special type for this really needed?
-cListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
+cSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+cSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
   let (ExprPath link) = exprPath cfg e []
-      link' = debugCompiler cfg "cListEmpty" e link
+      link' = debugCompiler cfg "cSetEmpty" e link
   link %> \_ -> wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
   return (ExprPath link')
-cListEmpty _ e = error $ "bad arguemnt to cListEmpty: " ++ show e
+cSetEmpty _ e = error $ "bad arguemnt to cSetEmpty: " ++ show e
 
 -- special case for writing lists of strings or numbers as a single file
-cListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
+cSetLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+cSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   litPaths <- mapM (cExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_list" relPaths
-      outPath' = debugCompiler cfg "cListLits" e outPath
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_set" relPaths
+      outPath' = debugCompiler cfg "cSetLits" e outPath
   outPath %> \_ -> do
-    lits  <- mapM (debugReadFile cfg) litPaths'
+    lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
     let lits' = sort $ map stripWhiteSpace lits
     debugWriteLines cfg outPath lits'
   return (ExprPath outPath')
-cListLits _ e = error $ "bad argument to cListLits: " ++ show e
+cSetLits _ e = error $ "bad argument to cSetLits: " ++ show e
 
 -- regular case for writing a list of links to some other file type
-cListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
+cSetPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+cSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_list" relPaths
-      outPath' = debugCompiler cfg "cListPaths" e outPath
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_set" relPaths
+      outPath' = debugCompiler cfg "cSetPaths" e outPath
   outPath %> \_ -> do
     need paths'
     -- TODO yup bug was here! any reason to keep it?
     -- paths'' <- liftIO $ mapM resolveSymlinks paths'
     debugWriteLines cfg outPath paths'
   return (ExprPath outPath')
-cListPaths _ _ = error "bad arguemnts to cListPaths"
+cSetPaths _ _ = error "bad arguemnts to cSetPaths"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)

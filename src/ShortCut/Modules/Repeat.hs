@@ -52,6 +52,9 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
   -- let resPath' = debugCompiler cfg "cRepeat" (resExpr, subVar, subExpr) resPath
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
+-- sortNumLits :: [String] -> [String]
+-- sortNumLits = sort -- TODO finish!
+
 cRepeatEach :: CutState -> CutExpr -> Rules ExprPath
 cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- cExpr s subList
@@ -63,12 +66,16 @@ cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
       outPath' = debugCompiler cfg "cRepeatEach" expr outPath
   outPath %> \_ -> if typeOf expr `elem` [SetOf str, SetOf num]
                      then do
-                       -- TODO factor out, and maybe unify with cListLits
+                       -- TODO factor out, and maybe unify with cSetLits
                        lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
-                       let lits' = sort $ map stripWhiteSpace lits
+                       let sortFn = if typeOf expr == (SetOf num)
+                                      -- then sortNumLits
+                                      then sort
+                                      else sort
+                           lits' = sortFn $ map stripWhiteSpace lits
                        debugWriteLines cfg outPath lits'
                      else do
-                       -- TODO factor out, and maybe unify with cListLinks
+                       -- TODO factor out, and maybe unify with cSetLinks
                        need (subPaths':resPaths') -- TODO is needing subPaths required?
                        let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
                        debugWriteLines cfg outPath outPaths'

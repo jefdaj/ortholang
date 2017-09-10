@@ -38,7 +38,7 @@
  - `String`, the extension based on the `CutType`, and the folder based on
  - constructor + function name if a function. Some made up examples:
  -
- -   ~/.shortcut/exprs/cut_list/f987e9b98a.str.list
+ -   ~/.shortcut/exprs/cut_set/f987e9b98a.str.list
  -   ~/.shortcut/exprs/cut_lit/a09f8e8b9c.str
  -   ~/.shortcut/exprs/crb_blast/38978s9a79.crb
  -   ~/.shortcut/exprs/gbk_to_fna/289379af7a.fna
@@ -97,7 +97,7 @@ exprPrefix :: CutExpr -> String
 exprPrefix (CutLit _ _ _       ) = "cut_lit"
 exprPrefix (CutRef _ _ _ _     ) = "cut_ref"
 exprPrefix (CutBop _ _ _ _ _ _ ) = "cut_bop" -- TODO individual names?
-exprPrefix (CutSet _ _ _ _    ) = "cut_list"
+exprPrefix (CutSet _ _ _ _    ) = "cut_set"
 exprPrefix (CutFun _ _ _ name _) = name
 
 exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath

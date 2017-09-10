@@ -146,13 +146,13 @@ cLoadList _ _ = error "bad arguments to cLoadList"
 
 -- special case for lists of str and num
 -- TODO remove rtn and use (typeOf expr)?
--- TODO is this different from cListOne, except in its return type?
+-- TODO is this different from cSetOne, except in its return type?
 -- TODO is it different from cLink? seems like it's just a copy/link operation...
 cLoadListOne :: CutType -> RulesFn
 cLoadListOne rtn s@(_,cfg) expr = do
   (ExprPath litsPath) <- cExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_list" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_set" [relPath]
   outPath %> \_ -> do
     lits  <- debugReadLines cfg litsPath -- TODO strip?
     lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
@@ -164,7 +164,7 @@ cLoadListMany :: RulesFn
 cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- cExpr s es
   -- TODO only depend on final expressions
-  let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_list" [show e]
+  let (ExprPath outPath) = exprPathExplicit cfg (typeOf e) "cut_set" [show e]
   outPath %> \_ -> do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     paths' <- liftIO $ mapM resolveSymlinks paths

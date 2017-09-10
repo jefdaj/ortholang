@@ -3,22 +3,22 @@
 |   `-- seqio
 |-- exprs
 |   |-- cut_bop
-|   |   `-- 04286bcd60.str.list
+|   |   `-- 277b6ab232.str.set
 |   |-- cut_lit
 |   |   `-- 139e073c49.str
 |   |-- extract_ids
-|   |   |-- 0d80804331.str.list
-|   |   `-- e69bc83a1d.str.list
+|   |   |-- 968b265408.str.set
+|   |   `-- cb3366f574.str.set
 |   |-- extract_seqs
-|   |   `-- 6c33c594bc.faa
+|   |   `-- 0d0bc4ddb7.faa
 |   `-- load_faa
 |       `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
 `-- vars
-    |-- diff.str.list -> ../exprs/cut_bop/04286bcd60.str.list
+    |-- diff.str.set -> ../exprs/cut_bop/277b6ab232.str.set
     |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
-    |-- ids10.str.list -> ../exprs/extract_ids/0d80804331.str.list
-    |-- idsall.str.list -> ../exprs/extract_ids/e69bc83a1d.str.list
-    |-- result -> ../vars/diff.str.list
-    `-- seqs10.faa -> ../exprs/extract_seqs/6c33c594bc.faa
+    |-- ids10.str.set -> ../exprs/extract_ids/cb3366f574.str.set
+    |-- idsall.str.set -> ../exprs/extract_ids/968b265408.str.set
+    |-- result -> ../vars/diff.str.set
+    `-- seqs10.faa -> ../exprs/extract_seqs/0d0bc4ddb7.faa
 
 9 directories, 12 files

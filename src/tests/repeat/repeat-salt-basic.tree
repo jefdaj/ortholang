@@ -6,8 +6,6 @@
 |   |   |-- 52de655097.num
 |   |   |-- 5f7521a5d9.num
 |   |   `-- 83e1f9fcee.num
-|   |-- cut_list
-|   |   `-- d9e2b0cb90.num.list
 |   |-- cut_lit
 |   |   |-- 0473288d10.num
 |   |   |-- 11c5b01a8b.num
@@ -15,10 +13,12 @@
 |   |   |-- 75fd5000cb.num
 |   |   |-- 907d84fa63.num
 |   |   `-- ea8a5b1bc0.num
+|   |-- cut_set
+|   |   `-- d9e2b0cb90.num.set
 |   `-- repeat
-|       `-- 1f3d86379d.num.list
+|       `-- 7aa3dabee2.num.set
 `-- vars
-    |-- result -> ../exprs/repeat/1f3d86379d.num.list
+    |-- result -> ../exprs/repeat/7aa3dabee2.num.set
     |-- result.79cdbba5be.num -> ../exprs/cut_bop/83e1f9fcee.num
     |-- result.9d61c3445a.num -> ../exprs/cut_bop/5f7521a5d9.num
     |-- result.cdd58a2a5d.num -> ../exprs/cut_bop/52de655097.num

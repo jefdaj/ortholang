@@ -56,7 +56,9 @@ goldenScriptAndTree (cut, gld, mtre) cfg = return $ testGroup name bothTests
     treeAct    = do
                    withLock cfg' runCut
                    out <- readCreateProcess treeCmd ""
-                   dir <- getDataFileName ""
+                   dir <- fmap (reverse . dropWhile (== '/') . reverse)
+                        $ getDataFileName ""
+                   -- TODO shouldn't I never need this anyway?
                    return $ pack $ replace dir "$TESTDIR" out
     scriptTest = goldenVsString "result" gld scriptAct
     treeTest t = goldenVsString "tmpfiles" t treeAct

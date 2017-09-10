@@ -1,37 +1,26 @@
 .
 |-- exprs
 |   |-- cut_bop
-|   |   |-- 02d2cb6ca1.num
-|   |   |-- 03cec631b0.num
-|   |   |-- 11310d2adb.num
-|   |   |-- 57866ba619.num
-|   |   |-- 6407236105.num
-|   |   |-- 6657fba97f.num
-|   |   |-- 67c13d1ca7.num
-|   |   |-- 6c8a0de9c3.num
-|   |   |-- 8b04e95ea9.num
-|   |   |-- 98fd1afd97.num
-|   |   |-- 9b187fd367.num
-|   |   |-- ab570676c8.num
-|   |   |-- ca5c54432d.num
-|   |   |-- de3e212a41.num
-|   |   |-- e3869768df.num
-|   |   |-- e8a972bb84.num
-|   |   |-- f20f30c502.num
-|   |   |-- f3d9ace68e.num
-|   |   |-- f4a8dfe50f.num
-|   |   `-- faa6a7050f.num
-|   |-- cut_list
-|   |   |-- 3bd8cd9211.num.list
-|   |   |-- 665774c7af.num.list
-|   |   |-- 7804cb86e2.num.list
-|   |   |-- 8207d401a2.num.list.list
-|   |   |-- b3a2dcecf2.num.list.list
-|   |   |-- b4a3d53a15.num.list.list
-|   |   |-- ba7f4b72fa.num.list.list
-|   |   |-- d8c00063d0.num.list
-|   |   |-- d9e2b0cb90.num.list
-|   |   `-- f3bf0415ee.num.list
+|   |   |-- 0ea4374c1a.num
+|   |   |-- 4955cce63c.num
+|   |   |-- 4e0e2d2853.num
+|   |   |-- 4f5c4ba52c.num
+|   |   |-- 60661ae5fd.num
+|   |   |-- 606d7184f6.num
+|   |   |-- 64865999dc.num
+|   |   |-- 787e4afd80.num
+|   |   |-- 7ce087ff5f.num
+|   |   |-- 7fbd5664c4.num
+|   |   |-- 8585d5eb1e.num
+|   |   |-- 8c0cf72e05.num
+|   |   |-- 8e3ab582fa.num
+|   |   |-- 8f2e3ccf49.num
+|   |   |-- 91beaa4108.num
+|   |   |-- 98a1c1d780.num
+|   |   |-- 9b58b33804.num
+|   |   |-- cab9f3389b.num
+|   |   |-- d15a8ff950.num
+|   |   `-- eb5b44df23.num
 |   |-- cut_lit
 |   |   |-- 0473288d10.num
 |   |   |-- 11c5b01a8b.num
@@ -39,65 +28,76 @@
 |   |   |-- 75fd5000cb.num
 |   |   |-- 907d84fa63.num
 |   |   `-- ea8a5b1bc0.num
+|   |-- cut_set
+|   |   |-- 045e6b5fb5.num.set
+|   |   |-- 31afd1eb9f.num.set.set
+|   |   |-- 39fcf4880d.num.set.set
+|   |   |-- 3bd8cd9211.num.set
+|   |   |-- 53c60a15e7.num.set
+|   |   |-- 8846f8c6d2.num.set.set
+|   |   |-- 8df6a32039.num.set
+|   |   |-- b68960f154.num.set.set
+|   |   |-- d9e2b0cb90.num.set
+|   |   `-- ee210684d4.num.set
 |   `-- repeat
-|       |-- 0008d8560d.num.list.list.list
-|       |-- 401337939e.num.list
-|       |-- b12e238a00.num.list
-|       |-- b25afd04f6.num.list
-|       `-- b93da5afd3.num.list
+|       |-- 193f1b21bc.num.set.set.set
+|       |-- 7e8eecbbd1.num.set
+|       |-- ac95006cc9.num.set
+|       |-- ad7aede64d.num.set
+|       `-- c6fa50b29e.num.set
 `-- vars
-    |-- result -> ../exprs/repeat/0008d8560d.num.list.list.list
-    |-- result.0682bfbc24.num.list.list -> ../exprs/cut_list/8207d401a2.num.list.list
-    |-- result.09a5943d7e.num.list.list -> ../exprs/cut_list/b4a3d53a15.num.list.list
-    |-- result.1619eaa89d.num -> ../exprs/cut_bop/de3e212a41.num
-    |-- result.1a4341c922.num -> ../exprs/cut_bop/9b187fd367.num
-    |-- result.1c71def905.num -> ../exprs/cut_bop/6c8a0de9c3.num
-    |-- result.27f538843f.num -> ../exprs/cut_bop/6657fba97f.num
-    |-- result.3727f9aeb1.num -> ../exprs/cut_bop/ab570676c8.num
-    |-- result.565fea801b.num.list.list -> ../exprs/cut_list/b3a2dcecf2.num.list.list
-    |-- result.58ede6b83d.num -> ../exprs/cut_bop/e3869768df.num
-    |-- result.5d155e6d89.num -> ../exprs/cut_bop/8b04e95ea9.num
-    |-- result.65b7e7f34a.num -> ../exprs/cut_bop/f4a8dfe50f.num
-    |-- result.6f80fbc289.num -> ../exprs/cut_bop/faa6a7050f.num
-    |-- result.897ba54ecd.num -> ../exprs/cut_bop/11310d2adb.num
-    |-- result.8cd2205b57.num -> ../exprs/cut_bop/02d2cb6ca1.num
-    |-- result.8ea1d2cbbc.num -> ../exprs/cut_bop/6407236105.num
-    |-- result.9489bb51ac.num -> ../exprs/cut_bop/98fd1afd97.num
-    |-- result.98c456ab07.num.list.list -> ../exprs/cut_list/ba7f4b72fa.num.list.list
-    |-- result.a22f91d0c3.num -> ../exprs/cut_bop/e8a972bb84.num
-    |-- result.a3350b64ea.num -> ../exprs/cut_bop/57866ba619.num
-    |-- result.bf5b6a5478.num -> ../exprs/cut_bop/67c13d1ca7.num
-    |-- result.d1a34d74f9.num -> ../exprs/cut_bop/f20f30c502.num
-    |-- result.d4aca62b9d.num -> ../exprs/cut_bop/ca5c54432d.num
-    |-- result.ecdee4312d.num -> ../exprs/cut_bop/03cec631b0.num
-    |-- result.f7725ed322.num -> ../exprs/cut_bop/f3d9ace68e.num
-    |-- var1.0682bfbc24.58ede6b83d.num -> ../exprs/cut_lit/75fd5000cb.num
-    |-- var1.0682bfbc24.65b7e7f34a.num -> ../exprs/cut_lit/ea8a5b1bc0.num
-    |-- var1.0682bfbc24.6f80fbc289.num -> ../exprs/cut_lit/6664311459.num
-    |-- var1.0682bfbc24.d4aca62b9d.num -> ../exprs/cut_lit/11c5b01a8b.num
-    |-- var1.0682bfbc24.ecdee4312d.num -> ../exprs/cut_lit/0473288d10.num
-    |-- var1.0682bfbc24.num -> ../exprs/cut_lit/0473288d10.num
-    |-- var1.09a5943d7e.1a4341c922.num -> ../exprs/cut_lit/ea8a5b1bc0.num
-    |-- var1.09a5943d7e.1c71def905.num -> ../exprs/cut_lit/0473288d10.num
-    |-- var1.09a5943d7e.27f538843f.num -> ../exprs/cut_lit/75fd5000cb.num
-    |-- var1.09a5943d7e.a22f91d0c3.num -> ../exprs/cut_lit/11c5b01a8b.num
-    |-- var1.09a5943d7e.bf5b6a5478.num -> ../exprs/cut_lit/6664311459.num
-    |-- var1.09a5943d7e.num -> ../exprs/cut_lit/ea8a5b1bc0.num
-    |-- var1.565fea801b.3727f9aeb1.num -> ../exprs/cut_lit/0473288d10.num
-    |-- var1.565fea801b.5d155e6d89.num -> ../exprs/cut_lit/6664311459.num
-    |-- var1.565fea801b.8ea1d2cbbc.num -> ../exprs/cut_lit/75fd5000cb.num
-    |-- var1.565fea801b.a3350b64ea.num -> ../exprs/cut_lit/ea8a5b1bc0.num
-    |-- var1.565fea801b.d1a34d74f9.num -> ../exprs/cut_lit/11c5b01a8b.num
-    |-- var1.565fea801b.num -> ../exprs/cut_lit/75fd5000cb.num
-    |-- var1.98c456ab07.1619eaa89d.num -> ../exprs/cut_lit/75fd5000cb.num
-    |-- var1.98c456ab07.897ba54ecd.num -> ../exprs/cut_lit/0473288d10.num
-    |-- var1.98c456ab07.8cd2205b57.num -> ../exprs/cut_lit/ea8a5b1bc0.num
-    |-- var1.98c456ab07.9489bb51ac.num -> ../exprs/cut_lit/6664311459.num
-    |-- var1.98c456ab07.f7725ed322.num -> ../exprs/cut_lit/11c5b01a8b.num
-    |-- var1.98c456ab07.num -> ../exprs/cut_lit/11c5b01a8b.num
-    |-- var2.0682bfbc24.num.list -> ../exprs/repeat/401337939e.num.list
-    |-- var2.09a5943d7e.num.list -> ../exprs/repeat/b93da5afd3.num.list
-    |-- var2.565fea801b.num.list -> ../exprs/repeat/b25afd04f6.num.list
-    `-- var2.98c456ab07.num.list -> ../exprs/repeat/b12e238a00.num.list
+    |-- result -> ../exprs/repeat/193f1b21bc.num.set.set.set
+    |-- result.024a357571.num.set.set -> ../exprs/cut_set/8846f8c6d2.num.set.set
+    |-- result.044c33a77d.num -> ../exprs/cut_bop/4f5c4ba52c.num
+    |-- result.1262fa104b.num -> ../exprs/cut_bop/98a1c1d780.num
+    |-- result.264d6d4223.num -> ../exprs/cut_bop/787e4afd80.num
+    |-- result.2d8f0b6a52.num.set.set -> ../exprs/cut_set/b68960f154.num.set.set
+    |-- result.399828ae85.num -> ../exprs/cut_bop/64865999dc.num
+    |-- result.430a7ee285.num -> ../exprs/cut_bop/4e0e2d2853.num
+    |-- result.64a989e66e.num -> ../exprs/cut_bop/7ce087ff5f.num
+    |-- result.6ee2f0ea40.num -> ../exprs/cut_bop/60661ae5fd.num
+    |-- result.7350492f03.num.set.set -> ../exprs/cut_set/39fcf4880d.num.set.set
+    |-- result.77be318c8a.num -> ../exprs/cut_bop/7fbd5664c4.num
+    |-- result.96a499cc44.num -> ../exprs/cut_bop/91beaa4108.num
+    |-- result.987fadcc57.num.set.set -> ../exprs/cut_set/31afd1eb9f.num.set.set
+    |-- result.9b59c53b85.num -> ../exprs/cut_bop/eb5b44df23.num
+    |-- result.9d52a64935.num -> ../exprs/cut_bop/cab9f3389b.num
+    |-- result.ae4d45d17f.num -> ../exprs/cut_bop/0ea4374c1a.num
+    |-- result.b256cec6b9.num -> ../exprs/cut_bop/8585d5eb1e.num
+    |-- result.b2b5329b2b.num -> ../exprs/cut_bop/8c0cf72e05.num
+    |-- result.b999c45635.num -> ../exprs/cut_bop/d15a8ff950.num
+    |-- result.be85771b39.num -> ../exprs/cut_bop/606d7184f6.num
+    |-- result.e1d1f678c9.num -> ../exprs/cut_bop/8f2e3ccf49.num
+    |-- result.f6d57570d8.num -> ../exprs/cut_bop/4955cce63c.num
+    |-- result.f78ad42e14.num -> ../exprs/cut_bop/9b58b33804.num
+    |-- result.fdb67438e0.num -> ../exprs/cut_bop/8e3ab582fa.num
+    |-- var1.024a357571.96a499cc44.num -> ../exprs/cut_lit/75fd5000cb.num
+    |-- var1.024a357571.b2b5329b2b.num -> ../exprs/cut_lit/0473288d10.num
+    |-- var1.024a357571.b999c45635.num -> ../exprs/cut_lit/6664311459.num
+    |-- var1.024a357571.f78ad42e14.num -> ../exprs/cut_lit/11c5b01a8b.num
+    |-- var1.024a357571.fdb67438e0.num -> ../exprs/cut_lit/ea8a5b1bc0.num
+    |-- var1.024a357571.num -> ../exprs/cut_lit/ea8a5b1bc0.num
+    |-- var1.2d8f0b6a52.264d6d4223.num -> ../exprs/cut_lit/ea8a5b1bc0.num
+    |-- var1.2d8f0b6a52.9d52a64935.num -> ../exprs/cut_lit/0473288d10.num
+    |-- var1.2d8f0b6a52.ae4d45d17f.num -> ../exprs/cut_lit/6664311459.num
+    |-- var1.2d8f0b6a52.b256cec6b9.num -> ../exprs/cut_lit/11c5b01a8b.num
+    |-- var1.2d8f0b6a52.e1d1f678c9.num -> ../exprs/cut_lit/75fd5000cb.num
+    |-- var1.2d8f0b6a52.num -> ../exprs/cut_lit/0473288d10.num
+    |-- var1.7350492f03.044c33a77d.num -> ../exprs/cut_lit/75fd5000cb.num
+    |-- var1.7350492f03.430a7ee285.num -> ../exprs/cut_lit/0473288d10.num
+    |-- var1.7350492f03.64a989e66e.num -> ../exprs/cut_lit/ea8a5b1bc0.num
+    |-- var1.7350492f03.77be318c8a.num -> ../exprs/cut_lit/11c5b01a8b.num
+    |-- var1.7350492f03.f6d57570d8.num -> ../exprs/cut_lit/6664311459.num
+    |-- var1.7350492f03.num -> ../exprs/cut_lit/75fd5000cb.num
+    |-- var1.987fadcc57.1262fa104b.num -> ../exprs/cut_lit/75fd5000cb.num
+    |-- var1.987fadcc57.399828ae85.num -> ../exprs/cut_lit/0473288d10.num
+    |-- var1.987fadcc57.6ee2f0ea40.num -> ../exprs/cut_lit/6664311459.num
+    |-- var1.987fadcc57.9b59c53b85.num -> ../exprs/cut_lit/11c5b01a8b.num
+    |-- var1.987fadcc57.be85771b39.num -> ../exprs/cut_lit/ea8a5b1bc0.num
+    |-- var1.987fadcc57.num -> ../exprs/cut_lit/11c5b01a8b.num
+    |-- var2.024a357571.num.set -> ../exprs/repeat/7e8eecbbd1.num.set
+    |-- var2.2d8f0b6a52.num.set -> ../exprs/repeat/ac95006cc9.num.set
+    |-- var2.7350492f03.num.set -> ../exprs/repeat/c6fa50b29e.num.set
+    `-- var2.987fadcc57.num.set -> ../exprs/repeat/ad7aede64d.num.set
 
 6 directories, 94 files

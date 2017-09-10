@@ -194,11 +194,11 @@ pStr :: ParseM CutExpr
 pStr = CutLit str 0 <$> pQuoted <?> "string"
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
--- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
+-- TODO once there's [ we can commit to a set, right? should allow failing for real afterward
 pList :: ParseM CutExpr
 pList = do
   -- lookAhead $ try $ pSym '[' -- TODO remove?
-  terms <- between (pSym '[') (pSym ']') (sepBy pExpr $ pSym ',')
+  terms <- between (pSym '{') (pSym '}') (sepBy pExpr $ pSym ',')
   let deps = if null terms
                then []
                else foldr1 union $ map depsOf terms
@@ -206,7 +206,7 @@ pList = do
                then EmptySet
                else typeOf $ head terms
   when (not $ all (== rtn) (map typeOf terms))
-    (fail "all elements of a list must have the same type")
+    (fail "all elements of a set must have the same type")
   return $ CutSet rtn 0 deps terms
 
 ---------------
@@ -262,7 +262,7 @@ pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 -- TODO can factor the try out to be by void right?
 pEnd :: ParseM ()
 pEnd = lookAhead $ void $ choice
-  [ eof, pComment, try $ pSym ')', try $ pSym ',', try $ pSym ']'
+  [ eof, pComment, try $ pSym ')', try $ pSym ',', try $ pSym '}'
   , void $ try $ choice $ map pSym operatorChars
   , void $ try pVarEq
   ]

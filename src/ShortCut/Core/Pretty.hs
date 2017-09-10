@@ -15,8 +15,8 @@ import Text.PrettyPrint.HughesPJClass
 -- import Control.Monad.Trans (liftIO)
 
 instance Pretty CutType where
-  pPrint EmptySet  = text "empty list" -- TODO remove
-  pPrint (SetOf t) = text "list of" <+> pPrint t <> text "s"
+  pPrint EmptySet  = text "empty set" -- TODO remove
+  pPrint (SetOf t) = text "set of" <+> pPrint t <> text "s"
   pPrint t          = text (tExt t) <+> parens (text $ tDesc t)
 
 instance Pretty CutVar where
@@ -51,7 +51,7 @@ instance Pretty CutExpr where
       two = bopWith ($+$)
 
 pList :: (Pretty a) => [a] -> Doc
-pList es = text "[" <> fsep (punctuate (text ",") (map pPrint es)) <> text "]"
+pList es = text "{" <> fsep (punctuate (text ",") (map pPrint es)) <> text "}"
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
@@ -82,23 +82,23 @@ instance Pretty CutModule where
 -- TODO is there a way to get rid of it?
 -- TODO rename prettyContents? prettyResult?
 -- TODO should this actually open external programs
--- TODO idea for lists: if any element contains "\n", just add blank lines between them
+-- TODO idea for sets: if any element contains "\n", just add blank lines between them
 -- TODO clean this up!
 prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
-prettyResult _ EmptySet  _ = return $ text "[]"
+prettyResult _ EmptySet  _ = return $ text "{}"
 prettyResult cfg (SetOf t) f
   | t `elem` [str, num] = do
-    -- liftIO $ putStrLn $ "pretty list of " ++ show t
+    -- liftIO $ putStrLn $ "pretty set of " ++ show t
     -- liftIO $ putStrLn $ "from file " ++ f
     lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
     -- liftIO $ putStrLn $ "lits are: " ++ show lits
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map text lits
-    return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
+    return $ text "{" <> sep ((punctuate (text ",") lits')) <> text "}"
   | otherwise = do
-    -- liftIO $ putStrLn $ "pretty list of " ++ show t
+    -- liftIO $ putStrLn $ "pretty set of " ++ show t
     paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
     pretties <- mapM (prettyResult cfg t) paths
-    return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
+    return $ text "{" <> sep ((punctuate (text ",") pretties)) <> text "}"
 prettyResult cfg t f = fmap text $ (tShow t) (cfgTmpDir cfg </> f)
