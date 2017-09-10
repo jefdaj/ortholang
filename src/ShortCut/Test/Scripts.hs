@@ -48,53 +48,53 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     -- this is taken from the Tasty docs
     fn ref new = ["diff", "-u", ref, new]
 
+mkScriptTest :: CutConfig -> FilePath -> TestTree
+mkScriptTest cfg gld = goldenDiff "result" gld scriptAct
+  where
+    scriptRes = (cfgTmpDir cfg </> "vars" </> "result")
+    scriptAct = do
+      runCut cfg
+      res <- readFile scriptRes
+      return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
+
+mkTreeTest :: CutConfig -> FilePath -> TestTree
+mkTreeTest cfg t = goldenDiff "tmpfiles" t treeAct
+  where
+    treeCmd = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg }
+    treeAct = do
+      runCut cfg
+      out <- readCreateProcess treeCmd ""
+      dir <- fmap (reverse . dropWhile (== '/') . reverse) $ getDataFileName ""
+      -- TODO shouldn't I never need this anyway?
+      return $ pack $ replace dir "$TESTDIR" out
+
+mkTripTest :: CutConfig -> TestTree
+mkTripTest cfg = goldenDiff "round-trip" tripShow tripAct
+  where
+    tripCut   = cfgTmpDir cfg <.> "cut"
+    tripShow  = cfgTmpDir cfg <.> "show"
+    tripSetup = do
+      scr1 <- parseFileIO cfg $ fromJust $ cfgScript cfg
+      writeScript tripCut scr1
+      writeFile tripShow $ show scr1
+    tripAct = do
+      withLock cfg tripSetup
+      scr2 <- parseFileIO cfg tripCut
+      return $ pack $ show scr2
+
+runCut :: CutConfig -> IO ()
+runCut cfg = withLock cfg $ silence $ evalFile stdout cfg
+
 -- TODO is the IO return type needed?
--- TODO use Diff versions!
--- TODO split off the 3 tests into their own fns
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath)) -> CutConfig -> IO TestTree
 mkScriptTests (cut, gld, mtre) cfg = return $ testGroup name allTests
   where
-    name       = takeBaseName cut
-    cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    runCut     = silence $ evalFile stdout cfg'
-    allTests   = [tripTest, scriptTest] ++ (case mtre of
-                   Nothing -> []
-                   Just t  -> [treeTest t])
-    -- script test
-    scriptTest :: TestTree
-    scriptTest = goldenDiff "result" gld scriptAct
-    scriptRes  = (cfgTmpDir cfg' </> "vars" </> "result")
-    scriptAct  = do
-                   withLock cfg' runCut
-                   res <- readFile scriptRes
-                   return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
-    -- tree test
-    treeTest :: FilePath -> TestTree
-    treeTest t = goldenDiff "tmpfiles" t treeAct
-    treeCmd    = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
-    treeAct    = do
-                   withLock cfg' runCut
-                   out <- readCreateProcess treeCmd ""
-                   dir <- fmap (reverse . dropWhile (== '/') . reverse)
-                        $ getDataFileName ""
-                   -- TODO shouldn't I never need this anyway?
-                   return $ pack $ replace dir "$TESTDIR" out
-    -- trip test
-    tripTest :: TestTree
-    tripTest   = goldenDiff "round-trip" tripShow tripAct
-    tripCut    = cfgTmpDir cfg' <.> "cut"
-    tripShow   = cfgTmpDir cfg' <.> "show"
-    tripSetup  = do
-                   scr1 <- parseFileIO cfg' $ fromJust $ cfgScript cfg'
-                   writeScript tripCut scr1
-                   -- writeFile "/tmp/diff1.txt" $ show scr1
-                   writeFile tripShow $ show scr1
-                   -- writeScript "/tmp/show.txt" scr1
-    tripAct    = do
-                   withLock cfg' tripSetup
-                   scr2 <- parseFileIO cfg' tripCut
-                   -- writeFile "/tmp/diff2.txt" $ show scr2
-                   return $ pack $ show scr2
+    name     = takeBaseName cut
+    cfg'     = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
+    allTests = [mkTripTest cfg', mkScriptTest cfg' gld] ++ treeTest
+    treeTest = case mtre of
+                 Nothing -> []
+                 Just t  -> [mkTreeTest cfg' t]
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = do
@@ -107,5 +107,5 @@ mkTests cfg = do
   where
     findResFile  c = replaceExtension c "result"
     findTreeFile c = if nonDeterministicCut c
-                       then Nothing
-                       else Just $ replaceExtension c "tree"
+      then Nothing
+      else Just $ replaceExtension c "tree"
