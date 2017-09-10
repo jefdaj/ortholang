@@ -3,6 +3,7 @@
 module ShortCut.Core.Pretty
   ( prettyShow
   , prettyResult
+  , writeScript
   , CutExpr(..)
   )
   where
@@ -35,6 +36,10 @@ instance {-# OVERLAPPING #-} Pretty CutAssign where
 instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint [] = empty
   pPrint as = fsep $ map pPrint as
+
+-- TODO move to a "files/io" module along with debug fns?
+writeScript :: FilePath -> CutScript -> IO ()
+writeScript path scr = writeFile path $ render $ pPrint scr
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where

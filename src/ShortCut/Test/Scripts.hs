@@ -13,10 +13,13 @@ import Test.Tasty.Golden          (goldenVsString, findByExtension)
 import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
-import System.IO                  (stdout)
+import System.IO                  (stdout, writeFile)
 import Data.Default.Class         (Default(def))
 import qualified Control.Monad.TaggedException as Exception (handle)
 import System.IO.LockFile -- TODO only some of it
+import ShortCut.Core.Parse            (parseFileIO)
+import ShortCut.Core.Pretty       (writeScript)
+import Data.Maybe                     (fromJust)
 
 -- TODO get rid of as many of these as possible
 nonDeterministicCut :: FilePath -> Bool
@@ -40,18 +43,30 @@ withLock cfg act = handleException $ withLockFile def started act
         $ putStrLn . ("Locking failed with: " ++) . show
 
 -- TODO is the IO return type needed?
-goldenScriptAndTree :: (FilePath, FilePath, (Maybe FilePath))
-                    -> CutConfig -> IO TestTree
-goldenScriptAndTree (cut, gld, mtre) cfg = return $ testGroup name bothTests
+-- TODO use Diff versions!
+-- TODO split off the 3 tests into their own fns
+mkScriptTests :: (FilePath, FilePath, (Maybe FilePath)) -> CutConfig -> IO TestTree
+mkScriptTests (cut, gld, mtre) cfg = do
+  tripSetup
+  return $ testGroup name allTests
   where
     name       = takeBaseName cut
     cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     runCut     = silence $ evalFile stdout cfg'
+    allTests   = [tripTest, scriptTest] ++ (case mtre of
+                   Nothing -> []
+                   Just t  -> [treeTest t])
+    -- script test
+    scriptTest :: TestTree
+    scriptTest = goldenVsString "result" gld scriptAct
     scriptRes  = (cfgTmpDir cfg' </> "vars" </> "result")
     scriptAct  = do
                    withLock cfg' runCut
                    res <- readFile scriptRes
                    return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
+    -- tree test
+    treeTest :: FilePath -> TestTree
+    treeTest t = goldenVsString "tmpfiles" t treeAct
     treeCmd    = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
     treeAct    = do
                    withLock cfg' runCut
@@ -60,11 +75,18 @@ goldenScriptAndTree (cut, gld, mtre) cfg = return $ testGroup name bothTests
                         $ getDataFileName ""
                    -- TODO shouldn't I never need this anyway?
                    return $ pack $ replace dir "$TESTDIR" out
-    scriptTest = goldenVsString "result" gld scriptAct
-    treeTest t = goldenVsString "tmpfiles" t treeAct
-    bothTests  = case mtre of
-                   Nothing -> [scriptTest]
-                   Just t  -> [scriptTest, treeTest t]
+    -- trip test
+    tripTest :: TestTree
+    tripTest   = goldenVsString "round-trip" tripShow tripAct
+    tripCut    = cfgTmpDir cfg' <.> "cut"
+    tripShow   = cfgTmpDir cfg' <.> "show"
+    tripSetup  = do
+                   scr1 <- parseFileIO cfg' $ fromJust $ cfgScript cfg'
+                   writeScript tripCut scr1
+                   writeFile tripShow $ show scr1
+    tripAct    = do
+                   scr2 <- parseFileIO cfg' tripCut
+                   return $ pack $ show scr2
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = do
@@ -72,7 +94,7 @@ mkTests cfg = do
   let results = map findResFile  cuts
       mtrees  = map findTreeFile cuts
       triples = zip3 cuts results mtrees
-      groups  = map goldenScriptAndTree triples
+      groups  = map mkScriptTests triples
   mkTestGroup cfg "interpret test scripts" groups
   where
     findResFile  c = replaceExtension c "result"

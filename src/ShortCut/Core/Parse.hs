@@ -13,6 +13,7 @@ module ShortCut.Core.Parse
   , parseExpr
   , parseStatement
   , parseFile
+  , parseFileIO
   -- functiosn only used for testing
   , escapeChars
   -- , fnNames -- TODO load these from modules
@@ -49,6 +50,7 @@ import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar,
 import Text.Parsec.Combinator (optional, many1, manyTill, eof
                               ,lookAhead, between, choice, anyToken, sepBy
                               ,notFollowedBy)
+import Data.Scientific            (Scientific())
 -- import Text.Parsec.Expr       (buildExpressionParser)
 import qualified Text.Parsec.Expr as E
 
@@ -80,6 +82,14 @@ parseFile :: CutConfig -> FilePath -> IO (Either ParseError CutScript)
 parseFile cfg path = readFile path' >>= return . parseString cfg
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
+
+-- TODO move to a separate "files/io" module along with some debug fns?
+parseFileIO :: CutConfig -> FilePath -> IO CutScript
+parseFileIO cfg scr = do
+  mscr1 <- parseFile cfg scr
+  case mscr1 of
+    Left  e -> fail $ show e
+    Right s -> return s
 
 --------------------------------
 -- helpers to simplify parsec --
@@ -167,7 +177,9 @@ pNum = do
   n  <- digit
   ns <- many (digit <|> oneOf ".e-")
   spaces
-  return $ CutLit num 0 (n:ns)
+  -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
+  let lit = show (read (n:ns) :: Scientific)
+  return $ CutLit num 0 lit
 
 -- list of chars which can be escaped in ShortCut
 -- (they're also escaped in Haskell, so need extra backslashes here)

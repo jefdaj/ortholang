@@ -28,7 +28,7 @@ import ShortCut.Core.Types
 import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (fromJust, maybeToList)
 import ShortCut.Core.Compile          (compileScript)
-import ShortCut.Core.Parse            (parseFile)
+import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyResult)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                (Handle, hPutStrLn)
@@ -77,7 +77,5 @@ evalScript hdl s@(as,c) = eval hdl c rtn $ compileScript s Nothing
 
 evalFile :: Handle -> CutConfig -> IO ()
 evalFile hdl cfg = do
-  f <- parseFile cfg $ fromJust $ cfgScript cfg -- TODO something safer!
-  case f of
-    Left  e -> fail $ "oh no! " ++ show e -- TODO better errors
-    Right s -> evalScript hdl (s,cfg)
+  s <- parseFileIO cfg $ fromJust $ cfgScript cfg -- TODO something safer!
+  evalScript hdl (s,cfg)

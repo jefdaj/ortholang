@@ -32,7 +32,7 @@ import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
-import ShortCut.Core.Pretty     (prettyShow)
+import ShortCut.Core.Pretty     (prettyShow, writeScript)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import ShortCut.Core.Config     (showConfigField, setConfigField)
 import System.Command           (runCommand, waitForProcess)
@@ -209,10 +209,8 @@ cmdLoad st@(_,cfg) hdl path = do
 cmdSave :: CutState -> Handle -> String -> IO CutState
 cmdSave st _ path = do
   path' <- absolutize path
-  writeFile path' $ showHack $ fst st
+  writeScript path' $ fst st
   return st
-  where
-    showHack = unlines . map prettyShow
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
