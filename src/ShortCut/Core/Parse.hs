@@ -53,6 +53,7 @@ import Text.Parsec.Combinator (optional, many1, manyTill, eof
 import Data.Scientific            (Scientific())
 -- import Text.Parsec.Expr       (buildExpressionParser)
 import qualified Text.Parsec.Expr as E
+import Text.PrettyPrint.HughesPJClass (render, pPrint)
 
 --------------------------
 -- functions for export --
@@ -226,8 +227,11 @@ pList = do
 ---------------
 
 -- TODO load from modules somehow... or do individual fn parsers make it obsolete?
-operatorChars :: [Char]
-operatorChars = "+-*/&|~"
+-- operatorChars :: [Char]
+-- operatorChars = "+-*/&|~"
+operatorChars :: CutConfig -> [Char]
+operatorChars cfg = concat $ map fName $ filter (\f -> fFixity f == Infix)
+                  $ concat $ map mFunctions $ cfgModules cfg
 
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
@@ -258,10 +262,17 @@ operatorTable2 cfg = [map binary bops]
 --   in CutBop (typeOf e1) deps [o] e1 e2)
 
 -- TODO is there a better way than only taking one-char strings?
+-- TODO check that typeOf e1 == typeOf e2 (error or skip on failure?)
 pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop2 [o] = pSym o *> (return $ \e1 e2 ->
   let deps = union (depsOf e1) (depsOf e2)
-  in CutBop (typeOf e1) 0 deps [o] e1 e2)
+      t1   = typeOf e1
+      t2   = typeOf e2
+      rtn  = if t1 == t2 then t1 else error $
+               o:" requires two arguments of the same type, but got:\n"
+                ++ "\t'" ++ render (pPrint e1) ++ "' (" ++ show t1 ++ ")\n"
+                ++ "\t'" ++ render (pPrint e2) ++ "' (" ++ show t2 ++ ")"
+  in CutBop rtn 0 deps [o] e1 e2)
 pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 
 ---------------
@@ -273,11 +284,16 @@ pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 -- list of arguments for the function currently being parsed.
 -- TODO can factor the try out to be by void right?
 pEnd :: ParseM ()
-pEnd = lookAhead $ void $ choice
-  [ eof, pComment, try $ pSym ')', try $ pSym ',', try $ pSym '}'
-  , void $ try $ choice $ map pSym operatorChars
-  , void $ try pVarEq
-  ]
+pEnd = do
+  (_, cfg) <- getState
+  res <- lookAhead $ void $ choice
+    [ eof
+    , pComment -- TODO shouldn't this not end it?
+    , void $ try $ choice $ map pSym $ operatorChars cfg ++ ")},"
+    , void $ try pVarEq
+    ]
+  let res' = debugParser cfg "pEnd" res
+  return res'
 
 -- TODO load names from modules, of course
 -- TODO put this in terms of "keyword" or something?
@@ -301,6 +317,7 @@ pFun = do
   -- find the function by name
   name <- pName
   void $ optional pComment
+  -- TODO why isn't this stopping on the ~ in crb-dedup.cut?
   args <- manyTill (pExpr <* optional pComment) pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fn   = find (\f -> fName f == name) fns
@@ -331,14 +348,7 @@ pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 --      if none of them work it moves on to others
 --      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
-pTerm = choice
-  [ pList
-  , pFun
-  , pNum
-  , pStr
-  , pRef
-  , pParens -- apparently has to go at the end? or at least after pFun
-  ] <* optional pComment
+pTerm = choice [pList, pParens, pNum, pStr, pFun, pRef] <* optional pComment
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
@@ -388,7 +398,11 @@ pResult = do
   return (CutVar "result", e')
 
 pStatement :: ParseM CutAssign
-pStatement = pAssign <|> pResult
+pStatement = do
+  (_, cfg) <- getState
+  res <- pAssign <|> pResult
+  let res' = debugParser cfg "pStatement" res
+  return res'
 
 -------------
 -- scripts --

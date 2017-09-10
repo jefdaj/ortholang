@@ -76,7 +76,7 @@ mkSetFold :: String -> ([Set String] -> Set String) -> CutFunction
 mkSetFold name fn = CutFunction
   { fName      = name
   , fTypeCheck = tSetFold
-  , fFixity    = Infix
+  , fFixity    = Prefix
   , fCompiler  = cSetFold fn
   }
 

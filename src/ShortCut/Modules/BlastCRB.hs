@@ -59,7 +59,7 @@ tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
 
 tCrbBlastEach :: [CutType] -> Either String CutType
 tCrbBlastEach [x, SetOf y] | x == fna && y `elem` [fna, faa] = Right (SetOf crb)
-tCrbBlastEach _ = Left "crb_blast requires a fna query and list of fna or faa targets"
+tCrbBlastEach _ = Left "crb_blast requires a fna query and a set of fna or faa targets"
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
