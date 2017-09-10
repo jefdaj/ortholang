@@ -1,6 +1,6 @@
 module ShortCut.Test.Scripts where
 
-import Data.ByteString.Lazy.Char8 (pack)
+import Data.ByteString.Lazy.Char8 (pack, ByteString)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Types        (CutConfig(..))
@@ -9,7 +9,7 @@ import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory
                                    takeFileName, (</>), (<.>))
 import System.IO.Silently         (silence)
 import Test.Tasty                 (TestTree, testGroup)
-import Test.Tasty.Golden          (goldenVsString, findByExtension)
+import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import System.Process             (cwd, readCreateProcess, shell)
 import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
@@ -42,6 +42,12 @@ withLock cfg act = handleException $ withLockFile def started act
     handleException = Exception.handle
         $ putStrLn . ("Locking failed with: " ++) . show
 
+goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
+goldenDiff name file action = goldenVsStringDiff name fn file action
+  where
+    -- this is taken from the Tasty docs
+    fn ref new = ["diff", "-u", ref, new]
+
 -- TODO is the IO return type needed?
 -- TODO use Diff versions!
 -- TODO split off the 3 tests into their own fns
@@ -58,7 +64,7 @@ mkScriptTests (cut, gld, mtre) cfg = do
                    Just t  -> [treeTest t])
     -- script test
     scriptTest :: TestTree
-    scriptTest = goldenVsString "result" gld scriptAct
+    scriptTest = goldenDiff "result" gld scriptAct
     scriptRes  = (cfgTmpDir cfg' </> "vars" </> "result")
     scriptAct  = do
                    withLock cfg' runCut
@@ -66,7 +72,7 @@ mkScriptTests (cut, gld, mtre) cfg = do
                    return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
     -- tree test
     treeTest :: FilePath -> TestTree
-    treeTest t = goldenVsString "tmpfiles" t treeAct
+    treeTest t = goldenDiff "tmpfiles" t treeAct
     treeCmd    = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg' }
     treeAct    = do
                    withLock cfg' runCut
@@ -77,7 +83,7 @@ mkScriptTests (cut, gld, mtre) cfg = do
                    return $ pack $ replace dir "$TESTDIR" out
     -- trip test
     tripTest :: TestTree
-    tripTest   = goldenVsString "round-trip" tripShow tripAct
+    tripTest   = goldenDiff "round-trip" tripShow tripAct
     tripCut    = cfgTmpDir cfg' <.> "cut"
     tripShow   = cfgTmpDir cfg' <.> "show"
     tripSetup  = do
