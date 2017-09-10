@@ -53,34 +53,41 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
 -- sortNumLits :: [String] -> [String]
--- sortNumLits = sort -- TODO finish!
+-- sortNumLits = sort -- TODO write this
 
 cRepeatEach :: CutState -> CutExpr -> Rules ExprPath
 cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- cExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
-  let (ExprPath outPath) = exprPath cfg expr resPaths
-      (ExprPath subPaths') = subPaths
-      resPaths' = map (\(ExprPath p) -> p) resPaths
-      outPath' = debugCompiler cfg "cRepeatEach" expr outPath
-  outPath %> \_ -> if typeOf expr `elem` [SetOf str, SetOf num]
-                     then do
-                       -- TODO factor out, and maybe unify with cSetLits
-                       lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
-                       let sortFn = if typeOf expr == (SetOf num)
-                                      -- then sortNumLits
-                                      then sort
-                                      else sort
-                           lits' = sortFn $ map stripWhiteSpace lits
-                       debugWriteLines cfg outPath lits'
-                     else do
-                       -- TODO factor out, and maybe unify with cSetLinks
-                       need (subPaths':resPaths') -- TODO is needing subPaths required?
-                       let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
-                       debugWriteLines cfg outPath outPaths'
+  let (ExprPath subPaths') = subPaths
+      resPaths'  = map (\(ExprPath p) -> p) resPaths
+      resPaths'' = map (makeRelative $ cfgTmpDir cfg) resPaths'
+      outPath'   = debugCompiler cfg "cRepeatEach" expr outPath
+      (ExprPath outPath) = exprPath cfg expr $ map ExprPath resPaths''
+  outPath %> \_ ->
+    let actFn = if typeOf expr `elem` [SetOf str, SetOf num]
+                  then aRepeatEachLits (typeOf expr)
+                  else aRepeatEachLinks
+    in actFn cfg outPath subPaths' resPaths'
   return (ExprPath outPath')
 cRepeatEach _ expr = error $ "bad argument to cRepeatEach: " ++ show expr
+
+-- TODO factor out, and maybe unify with cSetLits
+aRepeatEachLits :: CutType
+                -> CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
+aRepeatEachLits rtn cfg outPath subPaths' resPaths' = do
+  lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
+  let sortFn = if rtn == (SetOf num) then sort else sort -- TODO write sortNumLits
+      lits'  = sortFn $ map stripWhiteSpace lits
+  debugWriteLines cfg outPath lits'
+
+-- TODO factor out, and maybe unify with cSetLinks
+aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
+aRepeatEachLinks cfg outPath subPaths' resPaths' = do
+  need (subPaths':resPaths') -- TODO is needing subPaths required?
+  let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
+  debugWriteLines cfg outPath outPaths'
 
 -----------------------------------------------------
 -- repeat without permutation (to test robustness) --

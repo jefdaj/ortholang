@@ -97,12 +97,14 @@ cAssign s@(_,cfg) (var, expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 compileScript :: CutState -> Maybe String -> Rules ResPath
-compileScript s@(as,_) permHash = do
+compileScript s@(as,cfg) permHash = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (cAssign s) as
-  return $ (\(VarPath r) -> ResPath r) $ fromJust $ lookup (CutVar res) rpaths
+  let (VarPath r) = fromJust $ lookup (CutVar res) rpaths
+  -- return $ ResPath $ makeRelative (cfgTmpDir cfg) r
+  return $ ResPath r
   where
     -- p here is "result" + the permutation name/hash if there is one right?
     res = case permHash of
@@ -184,14 +186,15 @@ cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 cVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
-      dest' = ".." </> (makeRelative (cfgTmpDir cfg) dest)
-      link' = debugCompiler cfg "cVar" var link
+      destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
+      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
+      linkd = debugCompiler cfg "cVar" var link
   link %> \_ -> do
     alwaysRerun
     need [dest]
     liftIO $ createDirectoryIfMissing True $ takeDirectory link
-    wrappedCmd cfg [link] [] "ln" ["-fs", dest', link] -- TODO quietly?
-  return (VarPath link')
+    wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
+  return (VarPath linkd)
 
 -- Handles the actual rule generation for all binary operators;
 -- basically the `paths` functions with pattern matching factored out.

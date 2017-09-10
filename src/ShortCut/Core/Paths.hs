@@ -67,6 +67,8 @@ import ShortCut.Core.Types
 
 import Development.Shake.FilePath ((<.>), (</>))
 import ShortCut.Core.Util         (digest)
+import ShortCut.Core.Debug (debug)
+import Data.List (isInfixOf)
 
 -- TODO should this handle calling cfgTmpDir too?
 -- TODO decide tmpDir from the config
@@ -111,7 +113,10 @@ exprPathExplicit :: CutConfig -> CutType -> String -> [String] -> ExprPath
 exprPathExplicit cfg rtn prefix strings = ExprPath rtn'
   where
     -- paths' = map (makeRelative $ cfgTmpDir cfg) paths
-    uniq   = digest $ unlines strings
+    strings' = map (\s -> if (cfgTmpDir cfg) `isInfixOf` s
+                            then error $ "absolute path found: " ++ s
+                            else debug cfg ("path ok: " ++ s) s) strings
+    uniq   = digest $ unlines strings'
     rtn'   = cfgTmpDir cfg </> "exprs" </> prefix </> uniq <.> extOf rtn
 
 -- TODO flip arguments for consistency with everything else There's a special
