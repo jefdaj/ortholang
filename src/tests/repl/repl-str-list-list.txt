@@ -3,6 +3,6 @@ Type :help for a list of the available commands.
 shortcut >> {{"one"}}
 {{"one"}}
 shortcut >> :t {{"one"}}
-str.list.list
+str.set.set
 shortcut >> :quit
 Bye for now!
