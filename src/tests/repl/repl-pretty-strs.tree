@@ -1,9 +1,34 @@
 .
 |-- exprs
-|   `-- cut_lit
-|       `-- b2f8e2eba4.str
+|   |-- cut_lit
+|   |   |-- 1f5863985a.str
+|   |   |-- 2341435a64.str
+|   |   |-- 2415e58040.str
+|   |   |-- 36ccfabdc8.str
+|   |   |-- 3f42f6275f.str
+|   |   |-- 57a370cbc3.str
+|   |   |-- 5ed6377abd.str
+|   |   |-- 5f7ff9d88c.str
+|   |   |-- 63a289130e.str
+|   |   |-- 818d1ca144.str
+|   |   |-- 8fe4c17df2.str
+|   |   |-- 9ed2400f03.str
+|   |   |-- 9efe120ed4.str
+|   |   |-- 9f57c0c34b.str
+|   |   |-- a830208172.str
+|   |   |-- ab142063e0.str
+|   |   |-- b2f8e2eba4.str
+|   |   |-- b77956b4c7.str
+|   |   |-- bb3cf91f27.str
+|   |   |-- c9dc80b9fd.str
+|   |   |-- e4b46dbe52.str
+|   |   `-- e9d480f57b.str
+|   `-- cut_set
+|       |-- d187b31804.str.set
+|       |-- ecfada8ba8.str.set
+|       `-- f80ce78cea.str.set
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_lit/b2f8e2eba4.str
+    `-- result -> ../exprs/cut_set/ecfada8ba8.str.set
 
-3 directories, 3 files
+4 directories, 27 files

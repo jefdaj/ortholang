@@ -1,3 +1,11 @@
 .
+|-- exprs
+|   |-- cut_lit
+|   |   `-- a830208172.str
+|   `-- cut_set
+|       `-- 3038138756.str.set
+|-- history.txt
+`-- vars
+    `-- result -> ../exprs/cut_set/3038138756.str.set
 
-0 directories, 0 files
+4 directories, 4 files

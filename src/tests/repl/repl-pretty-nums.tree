@@ -2,11 +2,24 @@
 |-- exprs
 |   |-- cut_bop
 |   |   `-- f6d416b38e.num
-|   `-- cut_lit
-|       |-- 09260f1de8.num
-|       `-- 0b2320ed7c.num
+|   |-- cut_lit
+|   |   |-- 09260f1de8.num
+|   |   |-- 0b2320ed7c.num
+|   |   |-- 6ddf61ba14.num
+|   |   |-- 8131cb661d.num
+|   |   |-- 8c8b66ceef.num
+|   |   |-- 907d84fa63.num
+|   |   |-- b15bdb8411.num
+|   |   |-- d251c18467.num
+|   |   |-- dc18fc2507.num
+|   |   |-- f400e5135d.num
+|   |   `-- fbd697bb89.num
+|   `-- cut_set
+|       |-- 78ff197358.num.set
+|       |-- d9af8168a9.num.set
+|       `-- f4b75b48b6.num.set
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_bop/f6d416b38e.num
+    `-- result -> ../exprs/cut_set/f4b75b48b6.num.set
 
-4 directories, 5 files
+5 directories, 17 files
