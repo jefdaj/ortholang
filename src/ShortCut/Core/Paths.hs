@@ -92,12 +92,12 @@ cacheFile cfg modName uniq ext = d </> digest uniq <.> ext
 -- CutRef  CutType Int [CutVar] CutVar -- do refs need a salt? yes! (i think?)
 -- CutBop  CutType Int [CutVar] String  CutExpr CutExpr
 -- CutFun  CutType Int [CutVar] String [CutExpr]
--- CutList CutType Int [CutVar] [CutExpr]
+-- CutSet CutType Int [CutVar] [CutExpr]
 exprPrefix :: CutExpr -> String
 exprPrefix (CutLit _ _ _       ) = "cut_lit"
 exprPrefix (CutRef _ _ _ _     ) = "cut_ref"
 exprPrefix (CutBop _ _ _ _ _ _ ) = "cut_bop" -- TODO individual names?
-exprPrefix (CutList _ _ _ _    ) = "cut_list"
+exprPrefix (CutSet _ _ _ _    ) = "cut_list"
 exprPrefix (CutFun _ _ _ name _) = name
 
 exprPath :: CutConfig -> CutExpr -> [ExprPath] -> ExprPath
@@ -117,7 +117,7 @@ exprPathExplicit cfg rtn prefix strings = ExprPath rtn'
 -- TODO flip arguments for consistency with everything else There's a special
 -- case for "result", which is like the "main" function of a ShortCut script,
 -- and always goes to <tmpdir>/result.
--- TODO auto-apply fromShortCutList to result?
+-- TODO auto-apply fromShortCutSet to result?
 -- TODO rename varPath
 varPath :: CutConfig -> CutVar -> CutExpr -> VarPath
 varPath cfg (CutVar var) expr = VarPath $ cfgTmpDir cfg </> "vars" </> base

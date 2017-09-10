@@ -86,7 +86,7 @@ mkLoadDB name rtn = CutFunction
 mkLoadDBEach :: String -> CutType -> CutFunction
 mkLoadDBEach name rtn = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
+  , fTypeCheck = defaultTypeCheck [SetOf str] (SetOf rtn)
   , fFixity    = Prefix
   , fCompiler  = undefined -- TODO write this!
   }
@@ -122,7 +122,7 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 blastdblist :: CutFunction
 blastdblist = CutFunction
   { fName      = "blastdblist"
-  , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck [str] (SetOf str)
   , fFixity    = Prefix
   , fCompiler  = cBlastdblist
   }
@@ -145,7 +145,7 @@ cBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
     out       <- debugReadLines cfg stdoutTmp
     let names = if null filterStr || null out then []
                 else filterNames (init filterStr) (tail out)
-    -- toShortCutListStr cfg str (ExprPath oPath) names
+    -- toShortCutSetStr cfg str (ExprPath oPath) names
     debugWriteLines cfg oPath names
   return (ExprPath oPath)
 cBlastdblist _ _ = error "bad argument to cBlastdblist"

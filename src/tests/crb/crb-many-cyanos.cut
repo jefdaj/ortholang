@@ -5,5 +5,5 @@ full7002 = load_faa "data/7002genes.faa"
 full7122 = load_faa "data/7122genes.faa"
 
 # TODO hmm probably-minor symlink error? FINISH AND GET ON TO THE POSTER!
-hitlists = crb_blast_each mini6803 [full7942, full7002, full7122]
+hitlists = crb_blast_each mini6803 {full7942, full7002, full7122}
 result = all (extract_queries_each hitlists)

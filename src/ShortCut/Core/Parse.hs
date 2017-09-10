@@ -203,11 +203,11 @@ pList = do
                then []
                else foldr1 union $ map depsOf terms
       rtn = if null terms
-               then EmptyList
+               then EmptySet
                else typeOf $ head terms
   when (not $ all (== rtn) (map typeOf terms))
     (fail "all elements of a list must have the same type")
-  return $ CutList rtn 0 deps terms
+  return $ CutSet rtn 0 deps terms
 
 ---------------
 -- operators --

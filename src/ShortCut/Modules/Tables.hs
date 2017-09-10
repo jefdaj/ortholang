@@ -29,11 +29,11 @@ cutModule = CutModule
 ---------------------------------
 
 tExtract :: TypeChecker
-tExtract [x] | elem x [crb, bht] = Right $ ListOf str
+tExtract [x] | elem x [crb, bht] = Right $ SetOf str
 tExtract  _ = Left "expected a blast hits table"
 
 tExtractEach :: [CutType] -> Either String CutType
-tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
+tExtractEach [SetOf x] | elem x [crb, bht] = Right $ SetOf $ SetOf str
 tExtractEach  _ = Left "expected a list of blast hits tables"
 
 extractQueries :: CutFunction
@@ -41,7 +41,7 @@ extractQueries = CutFunction
   { fName      = "extract_queries"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aTsvColumn 1) "tables" (ListOf str)
+  , fCompiler  = rSimpleTmp (aTsvColumn 1) "tables" (SetOf str)
   }
 
 extractQueriesEach :: CutFunction
@@ -49,7 +49,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 1) "tables" (ListOf str)
+  , fCompiler  = rMapLastTmp (aTsvColumn 1) "tables" (SetOf str)
   }
 
 extractTargets :: CutFunction
@@ -57,7 +57,7 @@ extractTargets = CutFunction
   { fName      = "extract_targets"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aTsvColumn 2) "tables" (ListOf str)
+  , fCompiler  = rSimpleTmp (aTsvColumn 2) "tables" (SetOf str)
   }
 
 extractTargetsEach :: CutFunction
@@ -65,7 +65,7 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 2) "tables" (ListOf str)
+  , fCompiler  = rMapLastTmp (aTsvColumn 2) "tables" (SetOf str)
   }
 
 ---------------------------

@@ -110,7 +110,7 @@ aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 mkBlastEachFn :: String -> CutType -> CutType -> CutFunction
 mkBlastEachFn bCmd qType sType = CutFunction
   { fName      = bCmd ++ "_each"
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] (SetOf bht)
   , fFixity    = Prefix
   , fCompiler  = cMkBlastEach bCmd aParBlast
   }
@@ -151,7 +151,7 @@ aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 mkBlastEachRevFn :: String -> CutType -> CutType -> CutFunction
 mkBlastEachRevFn bCmd qType sType = CutFunction
   { fName      = bCmd ++ "_each_rev"
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
+  , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] bht
   , fFixity    = Prefix
   , fCompiler  = cMkBlastEach bCmd aParBlastRev
   }

@@ -33,7 +33,7 @@ repeatEach = CutFunction
   }
 
 tRepeatEach :: [CutType] -> Either String CutType
-tRepeatEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
+tRepeatEach (res:sub:(SetOf sub'):[]) | sub == sub' = Right $ SetOf res
 tRepeatEach _ = Left "invalid args to repeat_each" -- TODO better errors here
 
 
@@ -61,7 +61,7 @@ cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
       (ExprPath subPaths') = subPaths
       resPaths' = map (\(ExprPath p) -> p) resPaths
       outPath' = debugCompiler cfg "cRepeatEach" expr outPath
-  outPath %> \_ -> if typeOf expr `elem` [ListOf str, ListOf num]
+  outPath %> \_ -> if typeOf expr `elem` [SetOf str, SetOf num]
                      then do
                        -- TODO factor out, and maybe unify with cListLits
                        lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
@@ -91,7 +91,7 @@ repeatN = CutFunction
 -- and returns a list of the result var type. start type can be whatever
 -- TODO does num here refer to actual num, or is it shadowing it?
 tRepeatN :: [CutType] -> Either String CutType 
-tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
+tRepeatN [rType, _, n] | n == num = Right $ SetOf rType
 tRepeatN _ = Left "invalid args to repeatN"
 
 extractNum :: CutScript -> CutExpr -> Int
@@ -110,5 +110,5 @@ cRepeatN s@(scr,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), r
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = zipWith setSalt [1..nReps] (repeat subExpr)
-    subList = CutList (typeOf subExpr) 0 (depsOf subExpr) subs
+    subList = CutSet (typeOf subExpr) 0 (depsOf subExpr) subs
 cRepeatN _ _ = error "bad argument to cRepeatN"

@@ -133,14 +133,14 @@ cLoadOne _ _ _ = error "bad argument to cLoadOne"
 mkLoadList :: String -> CutType -> CutFunction
 mkLoadList name rtn = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
+  , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf rtn)
   , fFixity    = Prefix
   , fCompiler  = cLoadList
   }
 
 cLoadList :: RulesFn
-cLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
-  | typeOf es `elem` [ListOf str, ListOf num] = cLoadListOne rtn s es
+cLoadList s e@(CutFun (SetOf rtn) _ _ _ [es])
+  | typeOf es `elem` [SetOf str, SetOf num] = cLoadListOne rtn s es
   | otherwise = cLoadListMany s e
 cLoadList _ _ = error "bad arguments to cLoadList"
 
@@ -152,7 +152,7 @@ cLoadListOne :: CutType -> RulesFn
 cLoadListOne rtn s@(_,cfg) expr = do
   (ExprPath litsPath) <- cExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_list" [relPath]
   outPath %> \_ -> do
     lits  <- debugReadLines cfg litsPath -- TODO strip?
     lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
@@ -187,7 +187,7 @@ aTsvColumn n cfg _ [ExprPath outPath, ExprPath tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
   let out' = sort $ nub $ lines out
-  -- toShortCutListStr cfg str outPath out'
+  -- toShortCutSetStr cfg str outPath out'
   debugWriteLines cfg outPath out'
 aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 
@@ -236,7 +236,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
-      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtnType) name [show e]
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
 
   outPath %> \_ -> do

@@ -80,7 +80,7 @@ parseSearch = CutFunction
 getGenomes :: CutFunction
 getGenomes = CutFunction
   { fName      = "get_genomes"
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
+  , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf fnagz)
   , fFixity    = Prefix
   , fCompiler  = cBioMartR "getGenome"
   }
@@ -88,7 +88,7 @@ getGenomes = CutFunction
 getProteomes :: CutFunction
 getProteomes = CutFunction
   { fName      = "get_proteomes"
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
+  , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf faagz)
   , fFixity    = Prefix
   , fCompiler  = cBioMartR "getProteome"
   }
@@ -163,7 +163,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 cParseSearches :: CutState -> CutExpr -> Rules ExprPath
-cParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
+cParseSearches s@(_,cfg) expr@(CutSet _ _ _ _) = do
   (ExprPath sList) <- cExpr s expr
   -- TODO should this be a cacheFile instead?
   let (ExprPath searchTable) = exprPathExplicit cfg search "parse_searches" [show expr, sList]

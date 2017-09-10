@@ -37,9 +37,9 @@ mkSetBop name fn = CutFunction
 -- if the user gives two lists but of different types, complain that they must
 -- be the same. if there aren't two lists at all, complain about that first
 bopTypeCheck :: [CutType] -> Either String CutType
-bopTypeCheck actual@[ListOf a, ListOf b]
-  | a == b    = Right $ ListOf a
-  | otherwise = Left $ typeError [ListOf a, ListOf a] actual
+bopTypeCheck actual@[SetOf a, SetOf b]
+  | a == b    = Right $ SetOf a
+  | otherwise = Left $ typeError [SetOf a, SetOf a] actual
 bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 
 -- apply a set operation to two lists (converted to sets first)
@@ -81,7 +81,7 @@ mkSetFold name fn = CutFunction
   }
 
 tSetFold :: [CutType] -> Either String CutType
-tSetFold [ListOf (ListOf x)] = Right $ ListOf x
+tSetFold [SetOf (SetOf x)] = Right $ SetOf x
 tSetFold _ = Left "expecting a list of lists"
 
 cSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath

@@ -110,7 +110,7 @@ extractSeqIDs = CutFunction
   }
 
 tExtractSeqIDs :: [CutType] -> Either String CutType
-tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
+tExtractSeqIDs [x] | elem x [faa, fna] = Right (SetOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
 -- TODO these should put their tmpfiles in cache/extract_ids!
@@ -131,9 +131,9 @@ extractSeqs = CutFunction
   , fCompiler  = cExtractSeqs
   }
 
--- TODO does ListOf str match on the value or just the constructor?
+-- TODO does SetOf str match on the value or just the constructor?
 tExtractSeqs  :: [CutType] -> Either String CutType
-tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
+tExtractSeqs [x, SetOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
 -- TODO can this be replaced with cOneArgListScript?
@@ -148,8 +148,8 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   -- tmpList %> \_ -> do
   outPath %> \_ -> do
-    -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
-    -- fromShortCutList cfg idsPath (ExprPath tmpList)
+    -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutSet?
+    -- fromShortCutSet cfg idsPath (ExprPath tmpList)
   -- outPath %> \_ -> do
     -- need [faPath, tmpList]
     -- liftIO $ createDirectoryIfMissing True tmpDir
@@ -206,7 +206,7 @@ concatFastas = CutFunction
   }
 
 tConcatFastas :: [CutType] -> Either String CutType
-tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
+tConcatFastas [SetOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
 cConcat :: CutState -> CutExpr -> Rules ExprPath

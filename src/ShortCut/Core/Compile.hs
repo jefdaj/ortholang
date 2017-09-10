@@ -43,7 +43,7 @@ mangleExpr _ e@(CutLit  _ _ _) = e
 mangleExpr fn (CutRef  t n vs v      ) = CutRef  t n (map fn vs)   (fn v)
 mangleExpr fn (CutBop  t n vs s e1 e2) = CutBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
 mangleExpr fn (CutFun  t n vs s es   ) = CutFun  t n (map fn vs) s (map (mangleExpr fn) es)
-mangleExpr fn (CutList t n vs   es   ) = CutList t n (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr fn (CutSet t n vs   es   ) = CutSet t n (map fn vs)   (map (mangleExpr fn) es)
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
@@ -69,7 +69,7 @@ addPrefixes p = mangleScript (addPrefix p)
 cExpr :: CutState -> CutExpr -> Rules ExprPath
 cExpr s e@(CutLit  _ _ _      ) = cLit s e
 cExpr s e@(CutRef  _ _ _ _    ) = cRef s e
-cExpr s e@(CutList _ _ _ _    ) = cList s e
+cExpr s e@(CutSet _ _ _ _    ) = cList s e
 cExpr s e@(CutBop  _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
 cExpr s e@(CutFun  _ _ _ n _  ) = compileByName s e n
 
@@ -122,8 +122,8 @@ cLit (_,cfg) expr = do
     paths _ = error "bad argument to paths"
 
 cList :: CutState -> CutExpr -> Rules ExprPath
-cList s e@(CutList EmptyList _ _ _) = cListEmpty s e
-cList s e@(CutList rtn _ _ _)
+cList s e@(CutSet EmptySet _ _ _) = cListEmpty s e
+cList s e@(CutSet rtn _ _ _)
   | rtn `elem` [str, num] = cListLits s e
   | otherwise = cListPaths s e
 cList _ _ = error "bad arguemnt to cList"
@@ -131,7 +131,7 @@ cList _ _ = error "bad arguemnt to cList"
 -- special case for empty lists
 -- TODO is a special type for this really needed?
 cListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
+cListEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
   let (ExprPath link) = exprPath cfg e []
       link' = debugCompiler cfg "cListEmpty" e link
   link %> \_ -> wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
@@ -140,11 +140,11 @@ cListEmpty _ e = error $ "bad arguemnt to cListEmpty: " ++ show e
 
 -- special case for writing lists of strings or numbers as a single file
 cListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
+cListLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   litPaths <- mapM (cExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" relPaths
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_list" relPaths
       outPath' = debugCompiler cfg "cListLits" e outPath
   outPath %> \_ -> do
     lits  <- mapM (debugReadFile cfg) litPaths'
@@ -155,11 +155,11 @@ cListLits _ e = error $ "bad argument to cListLits: " ++ show e
 
 -- regular case for writing a list of links to some other file type
 cListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
+cListPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   paths <- mapM (cExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
-      (ExprPath outPath) = exprPathExplicit cfg (ListOf rtn) "cut_list" relPaths
+      (ExprPath outPath) = exprPathExplicit cfg (SetOf rtn) "cut_list" relPaths
       outPath' = debugCompiler cfg "cListPaths" e outPath
   outPath %> \_ -> do
     need paths'

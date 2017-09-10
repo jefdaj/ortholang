@@ -50,7 +50,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" (ListOf crb)
+  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" (SetOf crb)
   }
 
 tCrbBlast :: [CutType] -> Either String CutType
@@ -58,7 +58,7 @@ tCrbBlast [x, y] | x == fna && y `elem` [fna, faa] = Right crb
 tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
 
 tCrbBlastEach :: [CutType] -> Either String CutType
-tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
+tCrbBlastEach [x, SetOf y] | x == fna && y `elem` [fna, faa] = Right (SetOf crb)
 tCrbBlastEach _ = Left "crb_blast requires a fna query and list of fna or faa targets"
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()

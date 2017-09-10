@@ -27,12 +27,12 @@ lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp aLen "length_each" (ListOf num)
+  , fCompiler  = rMapLastTmp aLen "length_each" (SetOf num)
   }
 
 tLen :: [CutType] -> Either String CutType
-tLen [EmptyList ] = Right num
-tLen [(ListOf _)] = Right num
+tLen [EmptySet ] = Right num
+tLen [(SetOf _)] = Right num
 tLen [x] | x == bht = Right num
 tLen _ = Left $ "length requires a list"
 
@@ -48,9 +48,9 @@ cLen s@(_,cfg) (CutFun _ _ _ _ [l]) = do
 cLen _ _ = error "bad arguments to cLen"
 
 tLenEach :: [CutType] -> Either String CutType
-tLenEach [EmptyList          ] = Right (ListOf num)
-tLenEach [(ListOf (ListOf _))] = Right (ListOf num)
-tLenEach [ListOf x] | x == bht = Right (ListOf num)
+tLenEach [EmptySet          ] = Right (SetOf num)
+tLenEach [(SetOf (SetOf _))] = Right (SetOf num)
+tLenEach [SetOf x] | x == bht = Right (SetOf num)
 tLenEach _ = Left $ "length_each requires a list of lists"
 
 aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
