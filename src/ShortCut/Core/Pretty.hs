@@ -12,6 +12,7 @@ import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Types
 import ShortCut.Core.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
+-- import Control.Monad.Trans (liftIO)
 
 instance Pretty CutType where
   pPrint EmptyList  = text "empty list" -- TODO remove
@@ -87,12 +88,16 @@ prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
 prettyResult _ EmptyList  _ = return $ text "[]"
 prettyResult cfg (ListOf t) f 
   | t `elem` [str, num] = do
+    -- liftIO $ putStrLn $ "pretty list of " ++ show t
+    -- liftIO $ putStrLn $ "from file " ++ f
     lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+    -- liftIO $ putStrLn $ "lits are: " ++ show lits
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map text lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
+    -- liftIO $ putStrLn $ "pretty list of " ++ show t
     paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
     pretties <- mapM (prettyResult cfg t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
