@@ -24,13 +24,20 @@ n1 = CutLit num 0 "1.0"
 n2 = CutLit num 0 "2.0"
 
 set0, set1, set2, set3 :: CutExpr
-set0 = CutSet EmptySet 0 [] []
-set1 = CutSet num 0 [] [n1]
-set2 = CutSet num 0 [] [n1, n2]
-set3 = CutSet (SetOf num) 0 [] [set1]
+set0  = CutSet EmptySet 0 [] []
+set1  = CutSet num 0 [] [n1]
+set2  = CutSet num 0 [] [n1, n2]
+set3  = CutSet (SetOf num) 0 [] [set1]
+
+s4, set4 :: CutExpr
+s4   = CutLit str 0 "four"
+set4 = CutSet str 0 [] [s4]
 
 len :: [CutExpr] -> CutExpr
 len es = CutFun num 0 [] "length" es
+
+addParens :: (String, a) -> (String, a)
+addParens (s, a) = ("(" ++ s ++ ")", a)
 
 --------------
 -- examples --
@@ -49,10 +56,17 @@ exFuns =
 -- exBops = undefined
 
 exTerms :: [(String, CutExpr)]
-exTerms = []
+exTerms = exFuns ++ map addParens exFuns ++
+  [ ("{1}"       , set1)
+  , ("{\"four\"}", set4)
+  ]
 
 exExprs :: [(String, CutExpr)]
-exExprs = []
+exExprs = exTerms ++ map addParens exTerms ++
+  [ ("{ } | {}", CutBop EmptySet    0 [] "|" set0 set0)
+  , ("{1} | {}", CutBop (SetOf num) 0 [] "|" set1 set0) -- only one {} is OK
+  , ("{\"four\"} | {}", CutBop (SetOf str) 0 [] "|" set4 set0) -- only one {} is OK
+  ]
 
 exStatements :: [(String, CutAssign)]
 exStatements = []

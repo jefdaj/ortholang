@@ -271,10 +271,12 @@ operatorTable2 cfg = [map binary bops]
 pBop :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop [o] = pSym o *> (return $ \e1 e2 ->
   let deps = union (depsOf e1) (depsOf e2)
-      t1   = typeOf e1
-      t2   = typeOf e2
+      (t1, t2) = case (typeOf e1, typeOf e2) of
+                   (EmptySet, b) -> (b, b)
+                   (a, EmptySet) -> (a, a)
+                   (a, b) -> (a, b)
       rtn  = if t1 == t2 then t1 else error $
-               o:" requires two arguments of the same type, but got:\n"
+               o:" operator requires two arguments of the same type, but got:\n"
                 ++ "\t'" ++ render (pPrint e1) ++ "' (" ++ show t1 ++ ")\n"
                 ++ "\t'" ++ render (pPrint e2) ++ "' (" ++ show t2 ++ ")"
   in CutBop rtn 0 deps [o] e1 e2)

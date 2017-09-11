@@ -80,7 +80,7 @@ mkTests cfg = return $ testGroup "test parser"
 mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> String -> ParseM a
        -> [(String, a)] -> TestTree
 mkCase cfg name parser examples = 
-  testCase name $ tripExamples cfg parser examples @=? Right ()
+  testCase name $ Right () @=? tripExamples cfg parser examples
 
 exTests :: CutConfig -> TestTree
 exTests cfg = testGroup "round-trip handwritten cut code"
@@ -112,6 +112,7 @@ wsProps cfg = testGroup "consume randomly generated whitespace"
       parseWithLeftOver pComment ([], cfg) (c ++ "\n" ++ s) == Right ((), s)
   ]
 
+-- TODO use round-trip here too
 acProps :: CutConfig -> TestTree
 acProps cfg = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
