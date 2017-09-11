@@ -4,7 +4,7 @@
 , QuickCheck, regex-compat, scientific, shake, silently, stdenv
 , tasty, tasty-golden, tasty-quickcheck, temporary, text
 , transformers, strict, utility-ht, safe-exceptions, unix, lock-file
-, data-default-class, tagged-exception-core
+, data-default-class, tagged-exception-core, tasty-hunit
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -18,7 +18,7 @@ mkDerivation {
     MissingH mtl parsec pretty process QuickCheck regex-compat
     scientific shake silently tasty tasty-golden tasty-quickcheck
     temporary text transformers strict utility-ht safe-exceptions
-    unix lock-file data-default-class tagged-exception-core
+    unix lock-file data-default-class tagged-exception-core tasty-hunit
   ];
   description = "A scripting language that makes short work of phylogenomic cuts";
   license = stdenv.lib.licenses.gpl3;

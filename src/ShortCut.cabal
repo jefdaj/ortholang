@@ -80,6 +80,8 @@ executable shortcut
                     ShortCut.Test.Deps
                     ShortCut.Test.Scripts,
                     ShortCut.Test.Parse,
+                    ShortCut.Test.Parse.Arbitrary,
+                    ShortCut.Test.Parse.Examples,
                     ShortCut.Test.Repl
   build-depends:    Command,
                     Glob,
@@ -109,6 +111,7 @@ executable shortcut
                     strict,
                     tagged-exception-core,
                     tasty,
+                    tasty-hunit,
                     tasty-golden,
                     tasty-quickcheck,
                     temporary,

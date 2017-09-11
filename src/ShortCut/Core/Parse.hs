@@ -20,6 +20,11 @@ module ShortCut.Core.Parse
   , literalChars
   , pComment
   , pNum
+  , pBop
+  , pTerm
+  , pExpr
+  , pStatement
+  , pFun
   , pQuoted
   , pSym
   , pList
@@ -247,7 +252,7 @@ operatorTable2 :: CutConfig -> [[E.Operator String CutState Identity CutExpr]]
 operatorTable2 cfg = [map binary bops]
   where
     -- TODO extract these to utility functions in Types or somewhere?
-    binary f = E.Infix (pBop2 $ fName f) E.AssocLeft
+    binary f = E.Infix (pBop $ fName f) E.AssocLeft
     -- TODO shit, seems the extra type arg might have been a bad idea
     --      could put (f undefined) here, but that smells bad!
     bops = filter (\f -> fFixity f == Infix) (concat $ map mFunctions mods)
@@ -255,7 +260,7 @@ operatorTable2 cfg = [map binary bops]
 
 -- Tricky bit: needs to take two already-parsed expressions
 -- TODO verify they have the correct types
--- TODO is this obsolete now that there's pBop2?
+-- TODO is this obsolete now that there's pBop?
 -- pBop :: Char -> ParseM (CutExpr -> CutExpr -> CutExpr)
 -- pBop o = pSym o *> (return $ \e1 e2 ->
 --   let deps = union (depsOf e1) (depsOf e2)
@@ -263,8 +268,8 @@ operatorTable2 cfg = [map binary bops]
 
 -- TODO is there a better way than only taking one-char strings?
 -- TODO check that typeOf e1 == typeOf e2 (error or skip on failure?)
-pBop2 :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
-pBop2 [o] = pSym o *> (return $ \e1 e2 ->
+pBop :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
+pBop [o] = pSym o *> (return $ \e1 e2 ->
   let deps = union (depsOf e1) (depsOf e2)
       t1   = typeOf e1
       t2   = typeOf e2
@@ -273,7 +278,7 @@ pBop2 [o] = pSym o *> (return $ \e1 e2 ->
                 ++ "\t'" ++ render (pPrint e1) ++ "' (" ++ show t1 ++ ")\n"
                 ++ "\t'" ++ render (pPrint e2) ++ "' (" ++ show t2 ++ ")"
   in CutBop rtn 0 deps [o] e1 e2)
-pBop2  s  = fail $ "invalid binary op name '" ++ s ++ "'"
+pBop  s  = fail $ "invalid binary op name '" ++ s ++ "'"
 
 ---------------
 -- functions --
