@@ -10,20 +10,23 @@ import ShortCut.Core.Types
 -- TODO test operator precedence
 
 exFuns :: [(String, CutExpr)]
-exFuns = undefined
+exFuns =
+  [ ("length {}", CutFun num 0 [] "length" [CutSet EmptySet 0 [] []])
+  -- , ()
+  ]
 
 -- TODO can this be done with the weird lambda thing? is it worth it?
 -- exBops :: [(String, CutExpr)]
 -- exBops = undefined
 
 exTerms :: [(String, CutExpr)]
-exTerms = undefined
+exTerms = []
 
 exExprs :: [(String, CutExpr)]
-exExprs = undefined
+exExprs = []
 
 exStatements :: [(String, CutAssign)]
-exStatements = undefined
+exStatements = []
 
 --------------------------
 -- old golden-ish tests --
