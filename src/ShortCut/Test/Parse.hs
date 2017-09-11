@@ -2,6 +2,7 @@ module ShortCut.Test.Parse where
 
 import ShortCut.Core.Types
 import ShortCut.Core.Parse
+import ShortCut.Core.Pretty -- (prettyShow)
 import ShortCut.Test.Parse.Arbitrary
 import ShortCut.Test.Parse.Examples
 import Test.Tasty.QuickCheck
@@ -10,6 +11,7 @@ import Test.Tasty            (TestTree, testGroup)
 import Test.Tasty.HUnit
 import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
+import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
 -- import Test.Tasty            (TestTree, testGroup)
 -- import Test.Tasty.QuickCheck (testProperty)
@@ -44,16 +46,27 @@ parsedItAll p cfg str' = case parseWithLeftOver p ([], cfg) str' of
   Right (_, "") -> True
   _ -> False
 
--- Test that a list of example strings parse to their corresponding ASTs,
--- or return the first error.
--- TODO and also check that you can round-trip it!
-parseExamples :: (Eq a, Show a) => CutConfig -> ParseM a -> [(String, a)]
-              -> Either (String, String) ()
-parseExamples _ _ [] = Right ()
-parseExamples cfg p ((a,b):xs) = case regularParse p cfg a of
+-- parse some cut code, pretty-print it, parse again,
+-- and check that the two parsed ASTs are equal
+roundTrip :: (Eq a, Show a, Pretty a) => CutConfig
+          -> ParseM a -> String -> Either (String, String) a
+roundTrip cfg psr code = case regularParse psr cfg code of
+  Left  l1 -> Left (code, show l1)
+  Right r1 -> case regularParse psr cfg $ prettyShow r1 of
+    Left  l2 -> Left (code, show l2)
+    Right r2 -> if r1 == r2
+                  then Right r2
+                  else Left (code, show r2)
+
+-- Test that a list of example strings can be parsed + printed + parsed,
+-- and both parses come out correctly, or return the first error.
+tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> ParseM a
+             -> [(String, a)] -> Either (String, String) ()
+tripExamples _ _ [] = Right ()
+tripExamples cfg p ((a,b):xs) = case roundTrip cfg p a of
   Left  l -> Left (a, show l)
   Right r -> if r == b
-    then parseExamples cfg p xs
+    then tripExamples cfg p xs
     else Left (a, show r)
 
 -----------
@@ -64,13 +77,13 @@ mkTests :: CutConfig -> IO TestTree
 mkTests cfg = return $ testGroup "test parser"
                          [exTests cfg, wsProps cfg, acProps cfg]
 
-mkCase :: (Show a, Eq a) => CutConfig -> String -> ParseM a
+mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> String -> ParseM a
        -> [(String, a)] -> TestTree
 mkCase cfg name parser examples = 
-  testCase name $ parseExamples cfg parser examples @=? Right ()
+  testCase name $ tripExamples cfg parser examples @=? Right ()
 
 exTests :: CutConfig -> TestTree
-exTests cfg = testGroup "parse handwritten cut code"
+exTests cfg = testGroup "round-trip handwritten cut code"
   [ mkCase cfg "function calls"   pFun       exFuns
   , mkCase cfg "terms"            pTerm      exTerms
   , mkCase cfg "expressions"      pExpr      exExprs
