@@ -7,6 +7,7 @@ module ShortCut.Test.Parse.Examples
   where
 
 import ShortCut.Core.Types
+import ShortCut.Modules.SeqIO (faa)
 -- import ShortCut.Core.Parse
 
 -- TODO example function calls
@@ -68,6 +69,10 @@ exTerms = exFuns ++ map addParens exFuns ++
   , ("{\"four\"}", set4)
   , ("length { }" , len [set0])
   , ("length {1}" , len [set1])
+
+  -- empty sets are cast to whatever set type is required
+  -- TODO check that this holds for all the custom typecheck fns
+  , ("load_faa_each {}", CutFun (SetOf faa) 0 [] "load_faa_each" [set0])
   ]
 
 exExprs :: [(String, CutExpr)]
@@ -85,16 +90,18 @@ exExprs = exTerms ++ map addParens exTerms ++
   , ("{1} | {} | {}", CutBop (SetOf num) 0 [] "|" bop10 set0)
   , ("{\"four\"} | {} | {}", CutBop (SetOf str) 0 [] "|" bop40 set0)
 
-  -- TODO should be able to put fn calls in sets, with or without separators
+  -- can put fn calls in sets, with or without separators
   , ("{ length {} }", CutSet num 0 [] [len [set0]])
   , ("{(length {})}", CutSet num 0 [] [len [set0]])
   , ("{length {},  length {}}", CutSet num 0 [] [len [set0], len [set0]])
   , ("{length {},\nlength {}}", CutSet num 0 [] [len [set0], len [set0]])
 
   -- TODO should be able to put fn calls in bops, with or without parens
+  -- , ("", )
 
-  -- TODO should be able to insert comments without changing anything
-  , ("{length {}, # comment\nlength {}}", CutSet num 0 [] [len [set0], len [set0]])
+  -- comments are allowed in sets
+  , ("{length {}, # comment\nlength {}}" , CutSet num 0 [] [len [set0], len [set0]])
+  , ("{length {} # comment\n, length {}}", CutSet num 0 [] [len [set0], len [set0]])
   ]
 
 exStatements :: [(String, CutAssign)]

@@ -10,6 +10,8 @@ module ShortCut.Core.ModuleAPI
   , rMapLast
   , rMapLastTmp
   , rMapLastTmps
+  , typeMatches
+  , typesMatch
   )
   where
 
@@ -39,11 +41,25 @@ typeError expected actual =
   "Type error:\nexpected " ++ show expected
            ++ "\nbut got " ++ show actual
 
+-- this mostly checks equality, but also has to deal with how an empty set can
+-- be any kind of set
+-- TODO is there any more elegant way? this seems error-prone...
+typeMatches :: CutType -> CutType -> Bool
+typeMatches EmptySet  (SetOf _) = True
+typeMatches (SetOf _) EmptySet  = True
+typeMatches a b = a == b
+
+typesMatch :: [CutType] -> [CutType] -> Bool
+typesMatch as bs = sameLength && allMatch
+  where
+    sameLength = length as == length bs
+    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
+
 -- TODO this should fail for type errors like multiplying a list by a num!
 defaultTypeCheck :: [CutType] -> CutType
                  -> [CutType] -> Either String CutType
 defaultTypeCheck expected returned actual =
-  if actual == expected
+  if actual `typesMatch` expected
     then Right returned
     else Left $ typeError expected actual
 
