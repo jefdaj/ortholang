@@ -33,6 +33,13 @@ s4, set4 :: CutExpr
 s4   = CutLit str 0 "four"
 set4 = CutSet str 0 [] [s4]
 
+bop00, bop10, bop01, bop40, bop04 :: CutExpr
+bop00 = CutBop EmptySet 0 [] "|" set0 set0
+bop10 = CutBop (SetOf num) 0 [] "|" set1 set0
+bop01 = CutBop (SetOf num) 0 [] "|" set0 set1
+bop40 = CutBop (SetOf str) 0 [] "|" set4 set0
+bop04 = CutBop (SetOf str) 0 [] "|" set0 set4
+
 len :: [CutExpr] -> CutExpr
 len es = CutFun num 0 [] "length" es
 
@@ -59,13 +66,35 @@ exTerms :: [(String, CutExpr)]
 exTerms = exFuns ++ map addParens exFuns ++
   [ ("{1}"       , set1)
   , ("{\"four\"}", set4)
+  , ("length { }" , len [set0])
+  , ("length {1}" , len [set1])
   ]
 
 exExprs :: [(String, CutExpr)]
 exExprs = exTerms ++ map addParens exTerms ++
-  [ ("{ } | {}", CutBop EmptySet    0 [] "|" set0 set0)
-  , ("{1} | {}", CutBop (SetOf num) 0 [] "|" set1 set0) -- only one {} is OK
-  , ("{\"four\"} | {}", CutBop (SetOf str) 0 [] "|" set4 set0) -- only one {} is OK
+  -- empty sets have a special type
+  [ ("{} | {}", bop00)
+
+  -- if only one is empty, the bop should pick up the other's type
+  , ("{1} | { }", bop10)
+  , ("{ } | {1}", bop01)
+  , ("{\"four\"} | {}", bop40)
+  , ("{} | {\"four\"}", bop04)
+
+  -- bops should be left-associative, and type-picking-up should still work
+  , ("{1} | {} | {}", CutBop (SetOf num) 0 [] "|" bop10 set0)
+  , ("{\"four\"} | {} | {}", CutBop (SetOf str) 0 [] "|" bop40 set0)
+
+  -- TODO should be able to put fn calls in sets, with or without separators
+  , ("{ length {} }", CutSet num 0 [] [len [set0]])
+  , ("{(length {})}", CutSet num 0 [] [len [set0]])
+  , ("{length {},  length {}}", CutSet num 0 [] [len [set0], len [set0]])
+  , ("{length {},\nlength {}}", CutSet num 0 [] [len [set0], len [set0]])
+
+  -- TODO should be able to put fn calls in bops, with or without parens
+
+  -- TODO should be able to insert comments without changing anything
+  , ("{length {}, # comment\nlength {}}", CutSet num 0 [] [len [set0], len [set0]])
   ]
 
 exStatements :: [(String, CutAssign)]

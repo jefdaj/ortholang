@@ -27,7 +27,7 @@ module ShortCut.Core.Parse
   , pFun
   , pQuoted
   , pSym
-  , pList
+  , pSet
   , pVar
   , pVarEq
   , spaceChars
@@ -213,10 +213,12 @@ pStr = CutLit str 0 <$> pQuoted <?> "string"
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a set, right? should allow failing for real afterward
-pList :: ParseM CutExpr
-pList = do
+pSet :: ParseM CutExpr
+pSet = do
   -- lookAhead $ try $ pSym '[' -- TODO remove?
-  terms <- between (pSym '{') (pSym '}') (sepBy pExpr $ pSym ',')
+  terms <- between (pSym '{') (pSym '}')
+                   (sepBy (pExpr    <* optional pComment)
+                          (pSym ',' <* optional pComment))
   let deps = if null terms
                then []
                else foldr1 union $ map depsOf terms
@@ -355,7 +357,7 @@ pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 --      if none of them work it moves on to others
 --      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
-pTerm = choice [pList, pParens, pNum, pStr, pFun, pRef] <* optional pComment
+pTerm = choice [pSet, pParens, pNum, pStr, pFun, pRef] <* optional pComment
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
