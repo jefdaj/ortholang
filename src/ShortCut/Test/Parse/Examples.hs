@@ -1,4 +1,10 @@
-module ShortCut.Test.Parse.Examples where
+module ShortCut.Test.Parse.Examples
+  ( exFuns
+  , exTerms
+  , exExprs
+  , exStatements
+  )
+  where
 
 import ShortCut.Core.Types
 -- import ShortCut.Core.Parse
@@ -9,10 +15,33 @@ import ShortCut.Core.Types
 -- TODO everything with comments and newlines inturrupting
 -- TODO test operator precedence
 
+---------------------------------
+-- ASTs to use in the examples --
+---------------------------------
+
+n1, n2 :: CutExpr
+n1 = CutLit num 0 "1.0"
+n2 = CutLit num 0 "2.0"
+
+set0, set1, set2, set3 :: CutExpr
+set0 = CutSet EmptySet 0 [] []
+set1 = CutSet num 0 [] [n1]
+set2 = CutSet num 0 [] [n1, n2]
+set3 = CutSet (SetOf num) 0 [] [set1]
+
+len :: [CutExpr] -> CutExpr
+len es = CutFun num 0 [] "length" es
+
+--------------
+-- examples --
+--------------
+
 exFuns :: [(String, CutExpr)]
 exFuns =
-  [ ("length {}", CutFun num 0 [] "length" [CutSet EmptySet 0 [] []])
-  -- , ()
+  [ ("length {   }", len [set0])
+  , ("length {1  }", len [set1])
+  , ("length {1,2}", len [set2])
+  , ("length {{1}}", len [set3])
   ]
 
 -- TODO can this be done with the weird lambda thing? is it worth it?
