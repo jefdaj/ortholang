@@ -10,6 +10,7 @@ import ShortCut.Core.Debug   (debugCompiler, debugReadFile, debugWriteLines)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
 import Data.List             (sort)
+import Data.Scientific            (Scientific(), toBoundedInteger)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -108,8 +109,14 @@ tRepeatN :: [CutType] -> Either String CutType
 tRepeatN [rType, _, n] | n == num = Right $ SetOf rType
 tRepeatN _ = Left "invalid args to repeatN"
 
+readSciInt :: String -> Int
+readSciInt s = case toBoundedInteger (read s :: Scientific) of
+  Nothing -> error $ "Not possible to repeat something " ++ s ++ " times."
+  Just n  -> n
+
+-- TODO is the bug here? might need to convert string -> sci -> int
 extractNum :: CutScript -> CutExpr -> Int
-extractNum _   (CutLit x _ n) | x == num = read n
+extractNum _   (CutLit x _ n) | x == num = readSciInt n
 extractNum scr (CutRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
 
