@@ -5,6 +5,9 @@ let
   blastrbh   = import ./src/ShortCut/Modules/BlastRBH;
   seqio      = import ./src/ShortCut/Modules/SeqIO;
   tables     = import ./src/ShortCut/Modules/Tables;
+  myPython = pythonPackages.python.withPackages (ps: with ps; [
+    biopython
+  ]);
   cabalPkg   = haskellPackages.callPackage ./src/shortcut.nix {};
   runDepends = [
     biomartr
@@ -15,7 +18,8 @@ let
     ncbi-blast
     crb-blast
     ncurses # TODO is this needed?
-    pythonPackages.blastdbget
+    # pythonPackages.blastdbget # TODO what was this for?
+    myPython
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
@@ -25,7 +29,7 @@ let
 
 # see https://github.com/jml/nix-haskell-example
 in haskell.lib.overrideCabal cabalPkg (drv: {
-  buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ncurses ] ++ runDepends;
+  buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
   postInstall = ''
     ${drv.postInstall or ""}
     wrapProgram "$out/bin/shortcut" \
