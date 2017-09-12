@@ -47,6 +47,15 @@ len es = CutFun num 0 [] "length" es
 addParens :: (String, a) -> (String, a)
 addParens (s, a) = ("(" ++ s ++ ")", a)
 
+faa0 :: CutExpr
+faa0  = CutFun (SetOf faa) 0 [] "load_faa_each" [set0]
+
+-- TODO fix pretty-printing to write (SetOf faa) instead of faa.set here
+somefaa, loadsome, loadbop1 :: CutExpr
+somefaa  = CutSet str 0 [] [CutLit str 0 "some.faa"]
+loadsome = (CutFun (SetOf faa) 0 [] "load_faa_each" [somefaa])
+loadbop1 = CutBop (SetOf faa) 0 [] "~" loadsome loadsome
+
 --------------
 -- examples --
 --------------
@@ -72,7 +81,7 @@ exTerms = exFuns ++ map addParens exFuns ++
 
   -- empty sets are cast to whatever set type is required
   -- TODO check that this holds for all the custom typecheck fns
-  , ("load_faa_each {}", CutFun (SetOf faa) 0 [] "load_faa_each" [set0])
+  , ("load_faa_each {}", faa0)
   ]
 
 exExprs :: [(String, CutExpr)]
@@ -96,13 +105,17 @@ exExprs = exTerms ++ map addParens exTerms ++
   , ("{length {},  length {}}", CutSet num 0 [] [len [set0], len [set0]])
   , ("{length {},\nlength {}}", CutSet num 0 [] [len [set0], len [set0]])
 
-  -- TODO should be able to put fn calls in bops, with or without parens
-  -- , ("", )
+  -- should be able to put fn calls in bops, with or without parens
+  , ("(load_faa_each {\"some.faa\"}) ~ (load_faa_each {\"some.faa\"})", loadbop1)
+  , ( "load_faa_each {\"some.faa\"}  ~  load_faa_each {\"some.faa\"} ", loadbop1)
 
   -- comments are allowed in sets
   , ("{length {}, # comment\nlength {}}" , CutSet num 0 [] [len [set0], len [set0]])
   , ("{length {} # comment\n, length {}}", CutSet num 0 [] [len [set0], len [set0]])
   ]
+
+-- TODO list of pairs of expressions that should parse the same;
+--      then you don't have to actually write out the AST
 
 exStatements :: [(String, CutAssign)]
 exStatements = []

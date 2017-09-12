@@ -215,10 +215,8 @@ pStr = CutLit str 0 <$> pQuoted <?> "string"
 -- TODO once there's [ we can commit to a set, right? should allow failing for real afterward
 pSet :: ParseM CutExpr
 pSet = do
-  -- lookAhead $ try $ pSym '[' -- TODO remove?
   terms <- between (pSym '{') (pSym '}')
-                   (sepBy (pExpr    <* optional pComment)
-                          (pSym ',' <* optional pComment))
+                   (sepBy pExpr (pSym ',' <* optional pComment))
   let deps = if null terms
                then []
                else foldr1 union $ map depsOf terms
@@ -243,20 +241,10 @@ operatorChars cfg = concat $ map fName $ filter (\f -> fFixity f == Infix)
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
--- TODO remove this once sure the version 2 below works
--- operatorTable :: [[E.Operator String CutState Identity CutExpr]]
--- operatorTable = [map binary operatorChars]
---   where
---     binary c = E.Infix (pBop c) E.AssocLeft
-
--- TODO once sure this works, remove the one above
-operatorTable2 :: CutConfig -> [[E.Operator String CutState Identity CutExpr]]
-operatorTable2 cfg = [map binary bops]
+operatorTable :: CutConfig -> [[E.Operator String CutState Identity CutExpr]]
+operatorTable cfg = [map binary bops]
   where
-    -- TODO extract these to utility functions in Types or somewhere?
     binary f = E.Infix (pBop $ fName f) E.AssocLeft
-    -- TODO shit, seems the extra type arg might have been a bad idea
-    --      could put (f undefined) here, but that smells bad!
     bops = filter (\f -> fFixity f == Infix) (concat $ map mFunctions mods)
     mods = cfgModules cfg
 
@@ -323,23 +311,16 @@ fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 pFun :: ParseM CutExpr
 pFun = do
   (_, cfg) <- getState
-  -- find the function by name
-  name <- pName
+  name <- try $ pName
   void $ optional pComment
-  -- TODO why isn't this stopping on the ~ in crb-dedup.cut?
-  args <- manyTill (pExpr <* optional pComment) pEnd
+  args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fn   = find (\f -> fName f == name) fns
       deps = foldr1 union $ map depsOf args
   case fn of
-    -- TODO does this happen, or does it just move on to variables?
-    --      it should commit to being a fn as soon as there are args!
-    -- TODO use an error call here to definitively fail until you figure out Parsec
     Nothing -> (trace (name ++ " " ++ show args) (fail name))
-    -- once found, have the function typecheck its own arguments
     Just f  -> case (fTypeCheck f) (map typeOf args) of
       Left  err -> fail err
-      -- Right rtn -> let rtn' = debug cfg ("parse: " ++ fName f ++ " " ++ show args) rtn
       Right rtn -> let res  = CutFun rtn 0 deps (fName f) args
                        res' = debugParser cfg "pFun" res
                    in return res'
@@ -365,10 +346,10 @@ pTerm = choice [pSet, pParens, pNum, pStr, pFun, pRef] <* optional pComment
 -- add non-assignment statements like assertions. See:
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM CutExpr
--- pExpr = E.buildExpressionParser operatorTable pTerm <?> "expression"
 pExpr = do
   (_, cfg) <- getState
-  E.buildExpressionParser (operatorTable2 cfg) pTerm <?> "expression"
+  optional pComment
+  E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
 
 ----------------
 -- statements --
