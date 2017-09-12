@@ -64,8 +64,9 @@ mkTreeTest cfg t = goldenDiff "tmpfiles" t treeAct
     treeAct = do
       runCut cfg
       out <- readCreateProcess treeCmd ""
+      dir <- fmap (reverse . dropWhile (== '/') . reverse) $ getDataFileName ""
       -- TODO any way to avoid this and use only relative paths?
-      return $ pack $ replace (cfgTmpDir cfg) "$TESTDIR" out
+      return $ pack $ replace dir "$TESTDIR" out
 
 mkTripTest :: CutConfig -> TestTree
 mkTripTest cfg = goldenDiff "round-trip" tripShow tripAct

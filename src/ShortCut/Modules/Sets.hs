@@ -1,5 +1,7 @@
 module ShortCut.Modules.Sets where
 
+-- TODO move this stuff to Core? (maybe split Compile into a couple modules?)
+
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
 import ShortCut.Core.Paths   (exprPath)
@@ -9,6 +11,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
                             debugCompiler)
 import Development.Shake.FilePath ((</>))
+import ShortCut.Core.Util (resolveSymlinks)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -21,6 +24,14 @@ cutModule = CutModule
     , differenceBop
     ]
   }
+
+-- a kludge to resolve the difference between load_* and load_*_each paths
+-- TODO is it deterministic?
+canonicalLinks :: CutType -> [FilePath] -> IO [FilePath]
+canonicalLinks rtn =
+  if rtn `elem` [SetOf str, SetOf num]
+    then return
+    else \ps -> mapM resolveSymlinks ps
 
 ----------------------
 -- binary operators --
@@ -47,12 +58,13 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 cSetBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
 cSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
-  -- liftIO $ putStrLn "entering cSetBop"
+  liftIO $ putStrLn "entering cSetBop"
+  let fixLinks = liftIO . canonicalLinks (typeOf e)
   (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (s1, s2)
   p3 %> \out -> do
     need [p1, p2] -- this is required for parallel evaluation!
-    lines1 <- readFileLines p1
-    lines2 <- readFileLines p2
+    lines1 <- fixLinks =<< readFileLines p1
+    lines2 <- fixLinks =<< readFileLines p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let lines3 = fn (fromList lines1) (fromList lines2)
     writeFileLines out $ toList lines3
@@ -89,14 +101,14 @@ cSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- cExpr s lol
   let (ExprPath oPath) = exprPath cfg True e []
       oPath' = debugCompiler cfg "cSetFold" e oPath
+      fixLinks = liftIO . canonicalLinks (typeOf e)
   oPath %> \_ -> do
-    -- lists <- debugReadLines cfg (debug cfg ("setsPath: " ++ setsPath) setsPath)
     lists <- debugReadLines cfg setsPath
-    listContents <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
-    let sets = map fromList listContents
-        -- oLst = toList $ fn (debug cfg ("sets: " ++ show sets) sets)
+    listContents  <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
+    listContents' <- liftIO $ mapM fixLinks listContents
+    liftIO $ putStrLn $ "listContents': " ++ show listContents'
+    let sets = map fromList listContents'
         oLst = toList $ fn sets
-    -- debugWriteLines cfg oPath (debug cfg ("oLst: " ++ show oLst) oLst)
     debugWriteLines cfg oPath oLst
   return (ExprPath oPath')
 cSetFold _ _ _ = error "bad argument to cSetFold"
