@@ -184,8 +184,9 @@ cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
       (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_set" [relPath]
   outPath %> \_ -> do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
+    need paths
     paths' <- liftIO $ mapM resolveSymlinks paths
-    need paths'
+    -- need paths'
     debugWriteLines cfg outPath paths'
   return (ExprPath outPath)
 cLoadListMany _ _ = error "bad arguments to cLoadListMany"

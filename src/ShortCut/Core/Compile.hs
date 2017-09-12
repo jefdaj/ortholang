@@ -24,7 +24,7 @@ import ShortCut.Core.Paths
 
 import ShortCut.Core.Debug        (debugCompiler, debugReadFile,
                                    debugWriteFile, debugWriteLines)
-import ShortCut.Core.Util         (resolveSymlinks, stripWhiteSpace)
+import ShortCut.Core.Util         (stripWhiteSpace)
 import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))

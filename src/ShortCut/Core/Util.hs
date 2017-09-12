@@ -14,6 +14,7 @@ import Test.Tasty            (testGroup, TestTree)
 import Crypto.Hash           (hash, Digest, MD5)
 import Data.ByteString.Char8 (pack)
 import System.Posix.Files    (readSymbolicLink)
+import System.FilePath            ((</>), takeDirectory)
 
 -- TODO fn to makeRelative to config dir
 
@@ -29,11 +30,13 @@ stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- follows zero or more symlinks until it finds the original file
+-- TODO actually just one now... which should always be enough right?
 resolveSymlinks :: FilePath -> IO FilePath
 resolveSymlinks path = do
   isLink <- pathIsSymbolicLink path
   if isLink
-    then readSymbolicLink path >>= resolveSymlinks
+    -- TODO is it OK/desirable to follow more than once?
+    then fmap (takeDirectory path </>) (readSymbolicLink path) -- >>= resolveSymlinks
     else return path
 
 -- kind of silly that haskell doesn't have this built in, but whatever
