@@ -6,10 +6,11 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Config      (wrappedCmd)
-import ShortCut.Core.ModuleAPI   (aTsvColumn)
-import ShortCut.Core.ModuleAPI   (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
+import ShortCut.Core.Rules       (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
+import Data.List                  (nub, sort)
+import ShortCut.Core.Debug        (debugWriteLines)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -67,6 +68,17 @@ extractTargetsEach = CutFunction
   , fFixity    = Prefix
   , fRules  = rMapLastTmp (aTsvColumn 2) "tables" (SetOf str)
   }
+
+-- TODO rewrite this awk -> haskell, and using wrappedCmd
+aTsvColumn :: Int -> ActionFn
+aTsvColumn n cfg _ [ExprPath outPath, ExprPath tsvPath] = do
+  let awkCmd = "awk '{print $" ++ show n ++ "}'"
+  Stdout out <- quietly $ cmd Shell awkCmd tsvPath
+  let out' = sort $ nub $ lines out
+  -- toShortCutSetStr cfg str outPath out'
+  debugWriteLines cfg outPath out'
+aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
+
 
 ---------------------------
 -- filter hits by evalue --

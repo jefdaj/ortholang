@@ -5,14 +5,12 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths        (exprPath, cacheDir)
-import ShortCut.Core.Rules      (rExpr)
-import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
-import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
-                                   rOneArgScript, rOneArgListScript)
-import System.FilePath            ((</>))
--- import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Config       (wrappedCmd)
+import ShortCut.Core.Config (wrappedCmd)
+import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite)
+import ShortCut.Core.Paths  (exprPath, cacheDir)
+import ShortCut.Core.Rules  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
+                             rOneArgScript, rOneArgListScript)
+import System.FilePath      ((</>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -33,6 +31,40 @@ cutModule = CutModule
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
+  }
+
+-- load a single file --
+
+{- Takes a string with the filepath to load. Creates a trivial expression file
+ - that's just a symlink to the given path. These should be the only absolute
+ - links, and the only ones that point outside the temp dir.
+ - TODO still true?
+ -}
+mkLoad :: String -> CutType -> CutFunction
+mkLoad name rtn = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str] rtn
+  , fFixity    = Prefix
+  , fRules  = rLoadOne rtn
+  }
+
+-- load a list of files --
+
+{- Like cLoad, except it operates on a list of strings. Note that you can also
+ - load lists using cLoad, but it's not recommended because then you have to
+ - write the list in a file, whereas this can handle literal lists in the
+ - source code.
+ -}
+
+-- TODO fix it putting both the initial files and lists of them in the same dir!
+--      (.faa and .faa.list are together in exprs/load_faa_each,
+--       when the former should be in exprs/load_faa)
+mkLoadList :: String -> CutType -> CutFunction
+mkLoadList name rtn = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf rtn)
+  , fFixity    = Prefix
+  , fRules  = rLoadList
   }
 
 gbk :: CutType
@@ -189,12 +221,15 @@ rConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
   let (ExprPath oPath) = exprPath cfg True e []
-  oPath %> \_ -> do
-    need [faPath]
-    unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
-    -- debugTrackWrite cfg [oPath] TODO is this implied?
+  oPath %> \_ -> aConvert cfg oPath script faPath
   return (ExprPath oPath)
 rConvert _ _ _ = error "bad argument to rConvert"
+
+aConvert :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
+aConvert cfg oPath script faPath = do
+  need [faPath]
+  unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
+  -- debugTrackWrite cfg [oPath] TODO is this implied?
 
 ------------------------
 -- concat fasta files --
@@ -216,18 +251,17 @@ rConcat :: CutState -> CutExpr -> Rules ExprPath
 rConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- rExpr s fs
   let (ExprPath oPath) = exprPath cfg True e []
-  oPath %> \_ -> do
-    faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
-               (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)
-                                    fsPath))
-    need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
-    let catArgs = faPaths ++ [">", oPath]
-    unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
-                       (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-    debugTrackWrite cfg [oPath]
-     -- TODO shouldn't have to read the files into memory!
-    -- need fPaths
-    -- txt <- fmap concat $ mapM (debugReadFile cfg) (debug cfg ("fPaths: " ++ show fPaths) fPaths)
-    -- debugWriteFile cfg oPath txt
+  oPath %> \_ -> aConcat cfg oPath fsPath
   return (ExprPath oPath)
 rConcat _ _ = error "bad argument to rConcat"
+
+aConcat :: CutConfig -> String -> [Char] -> Action ()
+aConcat cfg oPath fsPath = do
+  faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
+             (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)
+                                  fsPath))
+  need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
+  let catArgs = faPaths ++ [">", oPath]
+  unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
+                     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
+  debugTrackWrite cfg [oPath]

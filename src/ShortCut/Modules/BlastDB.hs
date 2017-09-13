@@ -4,11 +4,10 @@ import Development.Shake
 import ShortCut.Core.Types
 
 -- import Control.Monad           (when)
-import ShortCut.Core.Rules   (rExpr)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugWriteLines)
-import ShortCut.Core.ModuleAPI (defaultTypeCheck, rMapLastTmp)
+import ShortCut.Core.Rules     (rExpr, defaultTypeCheck, rMapLastTmp)
 import ShortCut.Core.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)

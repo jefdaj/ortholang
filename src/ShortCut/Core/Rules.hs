@@ -10,12 +10,12 @@
 -- TODO why doesn't turning down the verbosity actually work?
 
 module ShortCut.Core.Rules
-  ( compileScript
-  , rBop
-  , rExpr
-  , rSet
-  , addPrefixes
-  )
+--   ( compileScript
+--   , rBop
+--   , rExpr
+--   , rSet
+--   , addPrefixes
+--   )
   where
 
 import Development.Shake
@@ -28,6 +28,16 @@ import Data.List                  (find)
 import Data.Maybe                 (fromJust)
 import System.FilePath            (makeRelative)
 
+-- from ModuleAPI --
+-- import Data.Set                   (fromList, toList)
+import Development.Shake.FilePath ((</>), (<.>))
+import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
+-- import ShortCut.Core.Rules      (rExpr)
+import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines, debugReadLines)
+import System.Directory           (createDirectoryIfMissing)
+import ShortCut.Core.Config       (wrappedCmd)
+import ShortCut.Core.Util         (absolutize, resolveSymlinks)
+import Text.PrettyPrint.HughesPJClass
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
@@ -192,3 +202,165 @@ rBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
       path' = debugCompiler cfg "rBop" e path
   return (ExprPath p1, ExprPath p2, path')
 rBop _ _ _ _ = error "bad argument to rBop"
+
+-- from ModuleAPI --
+
+------------------------------
+-- [t]ypechecking functions --
+------------------------------
+
+typeError :: [CutType] -> [CutType] -> String
+typeError expected actual =
+  "Type error:\nexpected " ++ show expected
+           ++ "\nbut got " ++ show actual
+
+-- this mostly checks equality, but also has to deal with how an empty set can
+-- be any kind of set
+-- TODO is there any more elegant way? this seems error-prone...
+typeMatches :: CutType -> CutType -> Bool
+typeMatches EmptySet  (SetOf _) = True
+typeMatches (SetOf _) EmptySet  = True
+typeMatches a b = a == b
+
+typesMatch :: [CutType] -> [CutType] -> Bool
+typesMatch as bs = sameLength && allMatch
+  where
+    sameLength = length as == length bs
+    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
+
+-- TODO this should fail for type errors like multiplying a list by a num!
+defaultTypeCheck :: [CutType] -> CutType
+                 -> [CutType] -> Either String CutType
+defaultTypeCheck expected returned actual =
+  if actual `typesMatch` expected
+    then Right returned
+    else Left $ typeError expected actual
+
+------------------------------------------
+-- functions to make whole CutFunctions --
+------------------------------------------
+
+rOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
+  (ExprPath argPath) <- rExpr s arg
+  -- let tmpDir = cacheDir cfg </> tmpName
+  -- TODO get tmpDir from a Paths funcion
+  let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
+      (ExprPath oPath) = exprPath cfg True expr []
+  oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
+  return (ExprPath oPath)
+rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
+
+-- for scripts that take one arg and return a list of lits
+-- TODO this should put tmpfiles in cache/<script name>!
+-- TODO name something more explicitly about fasta files?
+rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
+  (ExprPath faPath) <- rExpr s fa
+  let (CacheDir tmpDir ) = cacheDir cfg tmpName
+      (ExprPath outPath) = exprPath cfg True expr []
+  outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
+  return (ExprPath outPath)
+rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
+
+-- The paths here are a little confusing: expr is a str of the path we want to
+-- link to. So after compiling it we get a path to *that str*, and have to read
+-- the file to access it. Then we want to `ln` to the file it points to.
+-- TODO should this go in Compile.hs?
+rLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
+rLink s@(_,cfg) expr rtype prefix = do
+  (ExprPath strPath) <- rExpr s expr -- TODO is this the issue?
+  -- TODO only depend on final expressions
+  -- ok without ["outPath"]?
+  let (ExprPath outPath) = exprPathExplicit cfg True rtype prefix [show expr]
+  outPath %> \_ -> aLink cfg outPath strPath
+  return (ExprPath outPath)
+
+-- TODO remove this?
+rLoadOne :: CutType -> RulesFn
+rLoadOne t s (CutFun _ _ _ n [p]) = rLink s p t n
+rLoadOne _ _ _ = error "bad argument to rLoadOne"
+
+rLoadList :: RulesFn
+rLoadList s e@(CutFun (SetOf rtn) _ _ _ [es])
+  | typeOf es `elem` [SetOf str, SetOf num] = rLoadListOne rtn s es
+  | otherwise = rLoadListMany s e
+rLoadList _ _ = error "bad arguments to rLoadList"
+
+-- special case for lists of str and num
+-- TODO remove rtn and use (typeOf expr)?
+-- TODO is this different from rSetOne, except in its return type?
+-- TODO is it different from rLink? seems like it's just a copy/link operation...
+rLoadListOne :: CutType -> RulesFn
+rLoadListOne rtn s@(_,cfg) expr = do
+  (ExprPath litsPath) <- rExpr s expr
+  let relPath = makeRelative (cfgTmpDir cfg) litsPath
+      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" [relPath]
+  outPath %> \_ -> aLoadListOne cfg outPath litsPath
+  return (ExprPath outPath)
+
+-- regular case for lists of any other file type
+rLoadListMany :: RulesFn
+rLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
+  (ExprPath pathsPath) <- rExpr s es
+  -- TODO is relPath enough to make sure it's unique??
+  let relPath = makeRelative (cfgTmpDir cfg) pathsPath
+      (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_set" [relPath]
+  outPath %> \_ -> aLoadListMany cfg outPath pathsPath
+  return (ExprPath outPath)
+rLoadListMany _ _ = error "bad arguments to rLoadListMany"
+
+-- based on https://stackoverflow.com/a/18627837
+-- uniqLines :: Ord a => [a] -> [a]
+-- uniqLines = unlines . toList . fromList . lines
+
+-- takes an action fn with any number of args and calls it with a tmpdir.
+rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
+rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
+  argPaths <- mapM (rExpr s) exprs
+  let (ExprPath outPath) = exprPath cfg True e []
+      (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
+  outPath %> \_ -> aSimpleTmp cfg outPath actFn tmpDir argPaths
+  return (ExprPath outPath)
+rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
+
+rMapLastTmp :: ActionFn -> String -> CutType -> RulesFn
+rMapLastTmp actFn tmpPrefix t s@(_,cfg) = mapFn t s
+  where
+    tmpDir = cacheDir cfg tmpPrefix
+    mapFn  = rMapLast (const tmpDir) actFn tmpPrefix
+
+-- TODO use a hash for the cached path rather than the name, which changes!
+
+-- takes an action fn and vectorizes the last arg (calls the fn with each of a
+-- list of last args). returns a list of results. uses a new tmpDir each call.
+rMapLastTmps :: ActionFn -> String -> CutType -> RulesFn
+rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
+  where
+    -- TODO what if the same last arg is used in different mapping fns?
+    --      will it be unique?
+    tmpFn args = cacheDirUniq cfg tmpPrefix args
+
+-- common code factored out from the two functions above
+-- TODO put the .args and final functions in the cachedir of the regular fn?
+-- TODO now that the new Shake strategy works, clean it up!
+-- TODO sprinkle some need in here?
+rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
+rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+  liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
+
+  initPaths <- mapM (rExpr s) (init exprs)
+  (ExprPath lastsPath) <- rExpr s (last exprs)
+  let inits = map (\(ExprPath p) -> p) initPaths
+      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
+      (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
+
+  outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
+
+  -- This builds one of the list of out paths based on a .args file
+  -- (made in the action above). It's a pretty roundabout way to do it!
+  -- TODO ask ndmitchell if there's something much more elegant I'm missing
+  (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
+
+  return (ExprPath outPath)
+rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"
