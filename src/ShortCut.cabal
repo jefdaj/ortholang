@@ -58,6 +58,7 @@ executable shortcut
                     ShortCut.Core.Paths2,
                     ShortCut.Core.Pretty,
                     ShortCut.Core.Repl,
+                    ShortCut.Core.Repeat,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
                     ShortCut.Modules,
