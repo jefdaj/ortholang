@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 -- import Control.Monad           (when)
-import ShortCut.Core.Compile   (rExpr)
+import ShortCut.Core.Rules   (rExpr)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugWriteLines)

@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Paths     (exprPath, cacheDir)
-import ShortCut.Core.Compile   (rExpr)
+import ShortCut.Core.Rules   (rExpr)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugTrackWrite)
 import ShortCut.Core.ModuleAPI (rSimpleTmp, defaultTypeCheck)

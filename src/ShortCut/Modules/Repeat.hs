@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Paths   (exprPath)
-import ShortCut.Core.Compile (rExpr, addPrefixes, compileScript)
+import ShortCut.Core.Rules (rExpr, addPrefixes, compileScript)
 import ShortCut.Core.Debug   (debugCompiler, debugReadFile, debugWriteLines)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)

@@ -5,7 +5,7 @@ module ShortCut.Modules.Math where
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
 import Development.Shake
-import ShortCut.Core.Compile (rBop)
+import ShortCut.Core.Rules (rBop)
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Types
 

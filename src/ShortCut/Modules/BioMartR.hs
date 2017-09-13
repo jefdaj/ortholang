@@ -17,7 +17,7 @@ import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Paths   (exprPath, exprPathExplicit)
-import ShortCut.Core.Compile (rExpr)
+import ShortCut.Core.Rules (rExpr)
 import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)

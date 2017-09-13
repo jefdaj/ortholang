@@ -9,7 +9,7 @@
 
 -- TODO why doesn't turning down the verbosity actually work?
 
-module ShortCut.Core.Compile
+module ShortCut.Core.Rules
   ( compileScript
   , rBop
   , rExpr
@@ -21,16 +21,13 @@ module ShortCut.Core.Compile
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
+import ShortCut.Core.Actions
 
-import ShortCut.Core.Debug        (debugCompiler, debugReadFile,
-                                   debugWriteFile, debugWriteLines)
-import ShortCut.Core.Util         (stripWhiteSpace)
-import Data.List                  (find, sort)
+import ShortCut.Core.Debug        (debugCompiler)
+import Data.List                  (find)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((</>))
-import System.FilePath            (makeRelative, takeDirectory)
-import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Config       (wrappedCmd)
+import System.FilePath            (makeRelative)
+
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
@@ -116,12 +113,8 @@ rLit :: CutState -> CutExpr -> Rules ExprPath
 rLit (_,cfg) expr = do
   let (ExprPath path) = exprPath cfg False expr [] -- absolute paths allowed!
       path' = debugCompiler cfg "rLit" expr path
-  path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n"
+  path %> aLit cfg expr
   return (ExprPath path')
-  where
-    paths :: CutExpr -> FilePath
-    paths (CutLit _ _ p) = p
-    paths _ = error "bad argument to paths"
 
 rSet :: CutState -> CutExpr -> Rules ExprPath
 rSet s e@(CutSet EmptySet _ _ _) = rSetEmpty s e
@@ -140,9 +133,6 @@ rSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
   return (ExprPath link')
 rSetEmpty _ e = error $ "bad arguemnt to rSetEmpty: " ++ show e
 
-aSetEmpty :: CutConfig -> FilePath -> Action ()
-aSetEmpty cfg link = wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
-
 -- special case for writing lists of strings or numbers as a single file
 rSetLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
@@ -155,12 +145,6 @@ rSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   return (ExprPath outPath')
 rSetLits _ e = error $ "bad argument to rSetLits: " ++ show e
 
-aSetLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aSetLits cfg outPath relPaths = do
-  lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
-  let lits' = sort $ map stripWhiteSpace lits
-  debugWriteLines cfg outPath lits'
-
 -- regular case for writing a list of links to some other file type
 rSetPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
@@ -172,13 +156,6 @@ rSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   outPath %> \_ -> aSetPaths cfg outPath paths'
   return (ExprPath outPath')
 rSetPaths _ _ = error "bad arguemnts to rSetPaths"
-
-aSetPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aSetPaths cfg outPath paths' = do
-  need paths'
-  -- TODO yup bug was here! any reason to keep it?
-  -- paths'' <- liftIO $ mapM resolveSymlinks paths'
-  debugWriteLines cfg outPath paths'
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
@@ -198,15 +175,6 @@ rVar (_,cfg) var expr (ExprPath dest) = do
       linkd = debugCompiler cfg "rVar" var link
   link %> \_ -> aVar cfg dest link
   return (VarPath linkd)
-
-aVar :: CutConfig -> FilePath -> FilePath -> Action ()
-aVar cfg dest link = do
-  let destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
-      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
-  alwaysRerun
-  need [dest]
-  liftIO $ createDirectoryIfMissing True $ takeDirectory link
-  wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
 
 -- Handles the actual rule generation for all binary operators;
 -- basically the `paths` functions with pattern matching factored out.

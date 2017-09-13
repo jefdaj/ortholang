@@ -3,7 +3,7 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile   (rExpr)
+import ShortCut.Core.Rules   (rExpr)
 import ShortCut.Core.Debug     (debugReadLines, debugWriteFile)
 import ShortCut.Core.Paths     (cacheDir, exprPathExplicit)
 import ShortCut.Core.ModuleAPI (rMapLastTmp)

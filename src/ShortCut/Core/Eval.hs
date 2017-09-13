@@ -27,7 +27,7 @@ import ShortCut.Core.Types
 
 import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (fromJust, maybeToList)
-import ShortCut.Core.Compile          (compileScript)
+import ShortCut.Core.Rules          (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyResult)
 import Text.PrettyPrint.HughesPJClass (render)

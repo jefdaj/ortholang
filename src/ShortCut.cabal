@@ -49,7 +49,7 @@ executable shortcut
   hs-source-dirs:   .
   other-modules:    Paths_ShortCut,
                     ShortCut.Core,
-                    ShortCut.Core.Compile,
+                    ShortCut.Core.Rules,
                     ShortCut.Core.Config,
                     ShortCut.Core.Debug,
                     ShortCut.Core.Eval,

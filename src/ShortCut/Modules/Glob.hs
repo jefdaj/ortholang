@@ -3,7 +3,7 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Compile      (rExpr)
+import ShortCut.Core.Rules      (rExpr)
 import ShortCut.Core.Paths        (exprPath)
 import Data.String.Utils          (strip)
 
