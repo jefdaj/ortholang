@@ -8,7 +8,7 @@ import ShortCut.Core.Compile   (cExpr)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugWriteLines)
-import ShortCut.Core.ModuleAPI (defaultTypeCheck)
+import ShortCut.Core.ModuleAPI (defaultTypeCheck, rMapLastTmp)
 import ShortCut.Core.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
@@ -44,7 +44,10 @@ cutModule = CutModule
     , loadProtDB
     , loadNuclDBEach
     , loadProtDBEach
-    , makeblastdb
+    , mkMakeblastdb ndb
+    , mkMakeblastdb pdb
+    , mkMakeblastdbEach ndb
+    , mkMakeblastdbEach pdb
     , blastdbget -- TODO mapped version so you can list -> git at once?
     , blastdblist
     -- , TODO write loadBlastDB
@@ -188,38 +191,65 @@ linkDBFile cfg dbf prefix =
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
 --      in addition to actual inputs?
-makeblastdb :: CutFunction
-makeblastdb = CutFunction
-  { fName      = "makeblastdb"
-  , fTypeCheck = tMakeblastdb
+mkMakeblastdb :: CutType -> CutFunction
+mkMakeblastdb dbType = CutFunction
+  { fName      = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+  , fTypeCheck = tMakeblastdb dbType
   , fFixity    = Prefix
-  , fCompiler  = cMakeblastdb
+  , fCompiler  = cMakeblastdb dbType
   }
 
-tMakeblastdb :: TypeChecker
-tMakeblastdb [x]
-  | x == fna = Right ndb
-  | x == faa = Right pdb
-tMakeblastdb _ = error "makeblastdb requires a fasta file"
+-- TODO no! depends on an arg
+tMakeblastdb :: CutType -> TypeChecker
+tMakeblastdb dbType [x] | x `elem` [fna, faa] = Right dbType
+tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
-cMakeblastdb :: RulesFn
-cMakeblastdb s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
+-- TODO is rtn always the same as dbType?
+cMakeblastdb :: CutType -> RulesFn
+cMakeblastdb dbType s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let relFa = makeRelative (cfgTmpDir cfg) faPath
-      relDb = makeRelative (cfgTmpDir cfg) dbPrefix
       (ExprPath dbPrefix) = exprPathExplicit cfg True rtn "makeblastdb" [relFa]
-      dbType = if rtn == ndb then "nucl" else "prot"
-  dbPrefix %> \_ -> do
-    need [faPath]
-    quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [] "makeblastdb"
-      [ "-in"    , faPath
-      , "-out"   , dbPrefix
-      , "-title" , takeFileName dbPrefix -- TODO does this make sense?
-      , "-dbtype", dbType
-      ]
-    -- TODO put back if you can figure out how with the new wrappedCmd
-    -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
-    debugWriteFile cfg dbPrefix relDb
+      -- dbType' = if dbType == ndb then "nucl" else "prot"
+  dbPrefix %> \_ -> aMakeblastdb dbType cfg undefined [ExprPath dbPrefix, ExprPath faPath]
   return (ExprPath dbPrefix)
-cMakeblastdb _ _ = error "bad argument to makeblastdb"
+cMakeblastdb _ _ _ = error "bad argument to makeblastdb"
+
+aMakeblastdb :: CutType -> ActionFn
+aMakeblastdb dbType cfg _ [ExprPath dbPrefix, ExprPath faPath] = do
+  let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
+      dbType' = if dbType == ndb then "nucl" else "prot"
+  liftIO $ putStrLn $ "dbPrefix: " ++ dbPrefix
+  liftIO $ putStrLn $ "dbType': " ++ dbType'
+  need [faPath]
+  quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [] "makeblastdb"
+    [ "-in"    , faPath
+    , "-out"   , dbPrefix
+    , "-title" , takeFileName dbPrefix -- TODO does this make sense?
+    , "-dbtype", dbType'
+    ]
+  -- TODO put back if you can figure out how with the new wrappedCmd
+  -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
+  debugWriteFile cfg dbPrefix relDb
+aMakeblastdb _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show paths
+
+--------------------------------
+-- make many from FASTA files --
+--------------------------------
+
+mkMakeblastdbEach :: CutType -> CutFunction
+mkMakeblastdbEach dbType = CutFunction
+  { fName      = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+  , fTypeCheck = tMakeblastdbEach dbType
+  , fFixity    = Prefix
+  , fCompiler  = cMakeblastdbEach dbType
+  }
+
+-- TODO no! depends on an arg
+tMakeblastdbEach :: CutType -> TypeChecker
+tMakeblastdbEach dbType [SetOf x] | x `elem` [fna, faa] = Right (SetOf dbType)
+tMakeblastdbEach _ _ = error "makeblastdb_each requires a set of fasta files" -- TODO typed error
+
+cMakeblastdbEach :: CutType -> RulesFn
+cMakeblastdbEach dbType = rMapLastTmp (aMakeblastdb dbType) "makeblastdb" dbType

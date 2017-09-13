@@ -31,6 +31,7 @@ import System.FilePath            (takeDirectory, takeFileName, takeBaseName,
                                    makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks)
+import Text.PrettyPrint.HughesPJClass
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -250,6 +251,7 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
 -- TODO sprinkle some need in here?
 rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
 rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+  liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
 
   initPaths <- mapM (cExpr s) (init exprs)
   (ExprPath lastsPath) <- cExpr s (last exprs)
@@ -282,8 +284,10 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
         rels  = map (makeRelative $ cfgTmpDir cfg) args
     need args'
     let (CacheDir dir) = tmpFn rels -- relative paths for determinism!
+        args'' = out:args'
     liftIO $ createDirectoryIfMissing True dir
-    actFn cfg (CacheDir dir) (map ExprPath (out:args'))
+    liftIO $ putStrLn $ "args passed to actFn: " ++ show args''
+    actFn cfg (CacheDir dir) (map ExprPath args'')
     trackWrite [out]
 
   return (ExprPath outPath)
