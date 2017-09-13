@@ -61,7 +61,6 @@ executable shortcut
                     ShortCut.Core.Parse.Expr,
                     ShortCut.Core.Parse.Script,
                     ShortCut.Core.Paths,
-                    ShortCut.Core.Paths2,
                     ShortCut.Core.Pretty,
                     ShortCut.Core.Repl,
                     ShortCut.Core.Types,
