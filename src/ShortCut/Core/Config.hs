@@ -7,7 +7,7 @@ import qualified Data.Configurator as C
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
-import Development.Shake          (command, Action, CmdOption(..), CmdResult, Exit(..),
+import Development.Shake          (command, Action, CmdOption(..), Exit(..),
                                    removeFiles, liftIO)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
@@ -17,7 +17,7 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
 import System.Exit                (ExitCode(..))
-import System.FilePath            ((</>), takeDirectory, takeFileName)
+import System.FilePath            (takeDirectory, takeFileName)
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key

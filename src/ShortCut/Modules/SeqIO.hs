@@ -6,10 +6,10 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Paths        (exprPath, cacheDir)
-import ShortCut.Core.Compile      (cExpr)
+import ShortCut.Core.Compile      (rExpr)
 import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
-                                   cOneArgScript, cOneArgListScript)
+                                   rOneArgScript, rOneArgListScript)
 import System.FilePath            ((</>))
 -- import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
@@ -61,7 +61,7 @@ gbkToFaa = CutFunction
   { fName      = "gbk_to_faa"
   , fTypeCheck = defaultTypeCheck [gbk] faa
   , fFixity    = Prefix
-  , fCompiler  = cOneArgScript "seqio" "gbk_to_faa.py"
+  , fRules  = rOneArgScript "seqio" "gbk_to_faa.py"
   }
 
 gbkToFna :: CutFunction
@@ -69,7 +69,7 @@ gbkToFna = CutFunction
   { fName      = "gbk_to_fna"
   , fTypeCheck = defaultTypeCheck [gbk] fna
   , fFixity    = Prefix
-  , fCompiler  = cOneArgScript "seqio" "gbk_to_fna.py"
+  , fRules  = rOneArgScript "seqio" "gbk_to_fna.py"
   }
 
 --------------------
@@ -106,7 +106,7 @@ extractSeqIDs = CutFunction
   { fName      = "extract_ids"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqIDs
-  , fCompiler  = cExtractSeqIDs
+  , fRules  = rExtractSeqIDs
   }
 
 tExtractSeqIDs :: [CutType] -> Either String CutType
@@ -114,8 +114,8 @@ tExtractSeqIDs [x] | elem x [faa, fna] = Right (SetOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
 -- TODO these should put their tmpfiles in cache/extract_ids!
-cExtractSeqIDs :: CutState -> CutExpr -> Rules ExprPath
-cExtractSeqIDs = cOneArgListScript "seqio" "extract_ids.py"
+rExtractSeqIDs :: CutState -> CutExpr -> Rules ExprPath
+rExtractSeqIDs = rOneArgListScript "seqio" "extract_ids.py"
 
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
@@ -128,7 +128,7 @@ extractSeqs = CutFunction
   { fName      = "extract_seqs"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
-  , fCompiler  = cExtractSeqs
+  , fRules  = rExtractSeqs
   }
 
 -- TODO does SetOf str match on the value or just the constructor?
@@ -136,11 +136,11 @@ tExtractSeqs  :: [CutType] -> Either String CutType
 tExtractSeqs [x, SetOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a list of strings and a fasta file"
 
--- TODO can this be replaced with cOneArgListScript?
-cExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
-cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
-  (ExprPath faPath ) <- cExpr s fa
-  (ExprPath idsPath) <- cExpr s ids
+-- TODO can this be replaced with rOneArgListScript?
+rExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
+rExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
+  (ExprPath faPath ) <- rExpr s fa
+  (ExprPath idsPath) <- rExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
   let (CacheDir tmpDir ) = cacheDir cfg "seqio"
       (ExprPath outPath) = exprPath cfg True e []
@@ -149,7 +149,7 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   -- tmpList %> \_ -> do
   outPath %> \_ -> aExtractSeqs cfg outPath tmpDir faPath idsPath 
   return (ExprPath outPath)
-cExtractSeqs _ _ = error "bad argument to extractSeqs"
+rExtractSeqs _ _ = error "bad argument to extractSeqs"
 
 aExtractSeqs :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
 aExtractSeqs cfg outPath tmpDir faPath idsPath = do
@@ -172,7 +172,7 @@ translate = CutFunction
   { fName      = "translate"
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
-  , fCompiler  = cConvert "translate.py"
+  , fRules  = rConvert "translate.py"
   }
 
 -- TODO remove as biologically invalid?
@@ -181,20 +181,20 @@ translate = CutFunction
 --   { fName      = "back_transcribe"
 --   , fFixity    = Prefix
 --   , fTypeCheck = defaultTypeCheck [faa] fna
---   , fCompiler  = cConvert "back_transcribe.py"
+--   , fRules  = rConvert "back_transcribe.py"
 --   }
 
--- TODO can this use cOneArgScript?
-cConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
-cConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
-  (ExprPath faPath) <- cExpr s fa
+-- TODO can this use rOneArgScript?
+rConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
+  (ExprPath faPath) <- rExpr s fa
   let (ExprPath oPath) = exprPath cfg True e []
   oPath %> \_ -> do
     need [faPath]
     unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
     -- debugTrackWrite cfg [oPath] TODO is this implied?
   return (ExprPath oPath)
-cConvert _ _ _ = error "bad argument to cConvert"
+rConvert _ _ _ = error "bad argument to rConvert"
 
 ------------------------
 -- concat fasta files --
@@ -205,16 +205,16 @@ concatFastas = CutFunction
   { fName      = "concat_fastas"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
-  , fCompiler  = cConcat
+  , fRules  = rConcat
   }
 
 tConcatFastas :: [CutType] -> Either String CutType
 tConcatFastas [SetOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
-cConcat :: CutState -> CutExpr -> Rules ExprPath
-cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
-  (ExprPath fsPath) <- cExpr s fs
+rConcat :: CutState -> CutExpr -> Rules ExprPath
+rConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
+  (ExprPath fsPath) <- rExpr s fs
   let (ExprPath oPath) = exprPath cfg True e []
   oPath %> \_ -> do
     faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
@@ -230,4 +230,4 @@ cConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
     -- txt <- fmap concat $ mapM (debugReadFile cfg) (debug cfg ("fPaths: " ++ show fPaths) fPaths)
     -- debugWriteFile cfg oPath txt
   return (ExprPath oPath)
-cConcat _ _ = error "bad argument to cConcat"
+rConcat _ _ = error "bad argument to rConcat"

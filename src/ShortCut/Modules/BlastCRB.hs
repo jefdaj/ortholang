@@ -42,7 +42,7 @@ blastCRB = CutFunction
   { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
   , fTypeCheck = tCrbBlast
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aBlastCRB "crbblast" crb
+  , fRules  = rSimpleTmp aBlastCRB "crbblast" crb
   }
 
 blastCRBEach :: CutFunction
@@ -50,7 +50,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" (SetOf crb)
+  , fRules  = rMapLastTmps aBlastCRB "crbblast" (SetOf crb)
   }
 
 tCrbBlast :: [CutType] -> Either String CutType

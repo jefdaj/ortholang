@@ -3,7 +3,7 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile   (cExpr)
+import ShortCut.Core.Compile   (rExpr)
 import ShortCut.Core.Debug     (debugReadLines, debugWriteFile)
 import ShortCut.Core.Paths     (cacheDir, exprPathExplicit)
 import ShortCut.Core.ModuleAPI (rMapLastTmp)
@@ -19,7 +19,7 @@ len = CutFunction
   { fName      = "length"
   , fTypeCheck = tLen
   , fFixity    = Prefix
-  , fCompiler  = cLen
+  , fRules  = rLen
   }
 
 lenEach :: CutFunction
@@ -27,7 +27,7 @@ lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp aLen "length_each" (SetOf num)
+  , fRules  = rMapLastTmp aLen "length_each" (SetOf num)
   }
 
 tLen :: [CutType] -> Either String CutType
@@ -36,15 +36,15 @@ tLen [(SetOf _)] = Right num
 tLen [x] | x == bht = Right num
 tLen _ = Left $ "length requires a list"
 
-cLen :: CutState -> CutExpr -> Rules ExprPath
-cLen s@(_,cfg) (CutFun _ _ _ _ [l]) = do
-  (ExprPath lPath) <- cExpr s l
+rLen :: CutState -> CutExpr -> Rules ExprPath
+rLen s@(_,cfg) (CutFun _ _ _ _ [l]) = do
+  (ExprPath lPath) <- rExpr s l
   let relPath = makeRelative (cfgTmpDir cfg) lPath
       cDir = cacheDir cfg "length"
       (ExprPath outPath) = exprPathExplicit cfg True (typeOf l) "length" [relPath]
   outPath %> \_ -> aLen cfg cDir [ExprPath outPath, ExprPath lPath]
   return (ExprPath outPath)
-cLen _ _ = error "bad arguments to cLen"
+rLen _ _ = error "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
 tLenEach [EmptySet          ] = Right (SetOf num)

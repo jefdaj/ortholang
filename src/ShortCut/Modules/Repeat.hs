@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Data.Maybe            (fromJust)
 import ShortCut.Core.Paths   (exprPath)
-import ShortCut.Core.Compile (cExpr, addPrefixes, compileScript)
+import ShortCut.Core.Compile (rExpr, addPrefixes, compileScript)
 import ShortCut.Core.Debug   (debugCompiler, debugReadFile, debugWriteLines)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
@@ -30,7 +30,7 @@ repeatEach = CutFunction
   { fName      = "repeat_each"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatEach
-  , fCompiler  = cRepeatEach
+  , fRules  = rRepeatEach
   }
 
 tRepeatEach :: [CutType] -> Either String CutType
@@ -56,15 +56,15 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
 -- sortNumLits :: [String] -> [String]
 -- sortNumLits = sort -- TODO write this
 
-cRepeatEach :: CutState -> CutExpr -> Rules ExprPath
-cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
-  subPaths <- cExpr s subList
+rRepeatEach :: CutState -> CutExpr -> Rules ExprPath
+rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
+  subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
   let (ExprPath subPaths') = subPaths
       resPaths'  = map (\(ExprPath p) -> p) resPaths
       resPaths'' = map (makeRelative $ cfgTmpDir cfg) resPaths'
-      outPath'   = debugCompiler cfg "cRepeatEach" expr outPath
+      outPath'   = debugCompiler cfg "rRepeatEach" expr outPath
       (ExprPath outPath) = exprPath cfg True expr $ map ExprPath resPaths''
   outPath %> \_ ->
     let actFn = if typeOf expr `elem` [SetOf str, SetOf num]
@@ -72,9 +72,9 @@ cRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
                   else aRepeatEachLinks
     in actFn cfg outPath subPaths' resPaths'
   return (ExprPath outPath')
-cRepeatEach _ expr = error $ "bad argument to cRepeatEach: " ++ show expr
+rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 
--- TODO factor out, and maybe unify with cSetLits
+-- TODO factor out, and maybe unify with rSetLits
 aRepeatEachLits :: CutType
                 -> CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLits rtn cfg outPath subPaths' resPaths' = do
@@ -83,7 +83,7 @@ aRepeatEachLits rtn cfg outPath subPaths' resPaths' = do
       lits'  = sortFn $ map stripWhiteSpace lits
   debugWriteLines cfg outPath lits'
 
--- TODO factor out, and maybe unify with cSetLinks
+-- TODO factor out, and maybe unify with rSetLinks
 aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLinks cfg outPath subPaths' resPaths' = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
@@ -99,7 +99,7 @@ repeatN = CutFunction
   { fName      = "repeat"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatN
-  , fCompiler  = cRepeatN
+  , fRules  = rRepeatN
   }
 
 -- takes a result type, a starting type, and an int,
@@ -124,12 +124,12 @@ extractNum _ _ = error "bad argument to extractNum"
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
-cRepeatN :: CutState -> CutExpr -> Rules ExprPath
-cRepeatN s@(scr,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
-  cRepeatEach s (CutFun t salt deps name [resExpr, subVar, subList])
+rRepeatN :: CutState -> CutExpr -> Rules ExprPath
+rRepeatN s@(scr,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
+  rRepeatEach s (CutFun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = zipWith setSalt [1..nReps] (repeat subExpr)
     subList = CutSet (typeOf subExpr) 0 (depsOf subExpr) subs
-cRepeatN _ _ = error "bad argument to cRepeatN"
+rRepeatN _ _ = error "bad argument to rRepeatN"

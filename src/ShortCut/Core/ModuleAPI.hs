@@ -3,8 +3,8 @@ module ShortCut.Core.ModuleAPI
   , defaultTypeCheck
   , mkLoad
   , mkLoadList
-  , cOneArgScript
-  , cOneArgListScript
+  , rOneArgScript
+  , rOneArgListScript
   , aTsvColumn
   , rSimpleTmp
   , rMapLast
@@ -23,7 +23,7 @@ import Data.List                  (nub, sort)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
-import ShortCut.Core.Compile      (cExpr)
+import ShortCut.Core.Compile      (rExpr)
 import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines, debugReadLines)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath            (takeBaseName, makeRelative)
@@ -66,16 +66,16 @@ defaultTypeCheck expected returned actual =
 -- functions to make whole CutFunctions --
 ------------------------------------------
 
-cOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
-cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
-  (ExprPath argPath) <- cExpr s arg
+rOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
+  (ExprPath argPath) <- rExpr s arg
   -- let tmpDir = cacheDir cfg </> tmpName
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
       (ExprPath oPath) = exprPath cfg True expr []
   oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
   return (ExprPath oPath)
-cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
+rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
 
 aOneArgScript :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
 aOneArgScript cfg oPath script tmpDir argPath = do
@@ -87,14 +87,14 @@ aOneArgScript cfg oPath script tmpDir argPath = do
 -- for scripts that take one arg and return a list of lits
 -- TODO this should put tmpfiles in cache/<script name>!
 -- TODO name something more explicitly about fasta files?
-cOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
-cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
-  (ExprPath faPath) <- cExpr s fa
+rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
+  (ExprPath faPath) <- rExpr s fa
   let (CacheDir tmpDir ) = cacheDir cfg tmpName
       (ExprPath outPath) = exprPath cfg True expr []
   outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
   return (ExprPath outPath)
-cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
+rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
 
 aOneArgListScript :: CutConfig -> FilePath -> String -> FilePath -> FilePath -> Action ()
 aOneArgListScript cfg outPath script tmpDir faPath = do
@@ -116,16 +116,16 @@ mkLoad name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fFixity    = Prefix
-  , fCompiler  = cLoadOne rtn
+  , fRules  = rLoadOne rtn
   }
 
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
 -- TODO should this go in Compile.hs?
-cLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
-cLink s@(_,cfg) expr rtype prefix = do
-  (ExprPath strPath) <- cExpr s expr -- TODO is this the issue?
+rLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
+rLink s@(_,cfg) expr rtype prefix = do
+  (ExprPath strPath) <- rExpr s expr -- TODO is this the issue?
   -- TODO only depend on final expressions
   -- ok without ["outPath"]?
   let (ExprPath outPath) = exprPathExplicit cfg True rtype prefix [show expr]
@@ -140,9 +140,9 @@ aLink cfg outPath strPath = do
   unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
   debugTrackWrite cfg [outPath]
 
-cLoadOne :: CutType -> RulesFn
-cLoadOne t s (CutFun _ _ _ n [p]) = cLink s p t n
-cLoadOne _ _ _ = error "bad argument to cLoadOne"
+rLoadOne :: CutType -> RulesFn
+rLoadOne t s (CutFun _ _ _ n [p]) = rLink s p t n
+rLoadOne _ _ _ = error "bad argument to rLoadOne"
 
 -- load a list of files --
 
@@ -159,22 +159,22 @@ mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = cLoadList
+  , fRules  = rLoadList
   }
 
-cLoadList :: RulesFn
-cLoadList s e@(CutFun (SetOf rtn) _ _ _ [es])
-  | typeOf es `elem` [SetOf str, SetOf num] = cLoadListOne rtn s es
-  | otherwise = cLoadListMany s e
-cLoadList _ _ = error "bad arguments to cLoadList"
+rLoadList :: RulesFn
+rLoadList s e@(CutFun (SetOf rtn) _ _ _ [es])
+  | typeOf es `elem` [SetOf str, SetOf num] = rLoadListOne rtn s es
+  | otherwise = rLoadListMany s e
+rLoadList _ _ = error "bad arguments to rLoadList"
 
 -- special case for lists of str and num
 -- TODO remove rtn and use (typeOf expr)?
--- TODO is this different from cSetOne, except in its return type?
--- TODO is it different from cLink? seems like it's just a copy/link operation...
-cLoadListOne :: CutType -> RulesFn
-cLoadListOne rtn s@(_,cfg) expr = do
-  (ExprPath litsPath) <- cExpr s expr
+-- TODO is this different from rSetOne, except in its return type?
+-- TODO is it different from rLink? seems like it's just a copy/link operation...
+rLoadListOne :: CutType -> RulesFn
+rLoadListOne rtn s@(_,cfg) expr = do
+  (ExprPath litsPath) <- rExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" [relPath]
   outPath %> \_ -> aLoadListOne cfg outPath litsPath
@@ -187,15 +187,15 @@ aLoadListOne cfg outPath litsPath = do
   debugWriteLines cfg outPath lits'
 
 -- regular case for lists of any other file type
-cLoadListMany :: RulesFn
-cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
-  (ExprPath pathsPath) <- cExpr s es
+rLoadListMany :: RulesFn
+rLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
+  (ExprPath pathsPath) <- rExpr s es
   -- TODO is relPath enough to make sure it's unique??
   let relPath = makeRelative (cfgTmpDir cfg) pathsPath
       (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_set" [relPath]
   outPath %> \_ -> aLoadListMany cfg outPath pathsPath
   return (ExprPath outPath)
-cLoadListMany _ _ = error "bad arguments to cLoadListMany"
+rLoadListMany _ _ = error "bad arguments to rLoadListMany"
 
 aLoadListMany :: CutConfig -> FilePath -> FilePath -> Action ()
 aLoadListMany cfg outPath pathsPath = do
@@ -230,7 +230,7 @@ aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 -- takes an action fn with any number of args and calls it with a tmpdir.
 rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
 rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
-  argPaths <- mapM (cExpr s) exprs
+  argPaths <- mapM (rExpr s) exprs
   let (ExprPath outPath) = exprPath cfg True e []
       (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
   outPath %> \_ -> aSimpleTmp cfg outPath actFn tmpDir argPaths
@@ -269,8 +269,8 @@ rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
 rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
 
-  initPaths <- mapM (cExpr s) (init exprs)
-  (ExprPath lastsPath) <- cExpr s (last exprs)
+  initPaths <- mapM (rExpr s) (init exprs)
+  (ExprPath lastsPath) <- rExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e

@@ -3,7 +3,7 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Compile      (cExpr)
+import ShortCut.Core.Compile      (rExpr)
 import ShortCut.Core.Paths        (exprPath)
 import Data.String.Utils          (strip)
 
@@ -22,7 +22,7 @@ globFiles = CutFunction
   { fName      = "glob_files"
   , fTypeCheck = defaultTypeCheck [str] (SetOf str)
   , fFixity    = Prefix
-  , fCompiler  = cGlobFiles
+  , fRules  = rGlobFiles
   }
 
 -- TODO ok first part looks good, but now need another step?
@@ -32,15 +32,15 @@ globFiles = CutFunction
 -- 4. this fn does the actual globbing, creating paths
 -- 5. toShortCutSetStr puts them in ShortCut literal format
 --    (should use str rather than elemRtnType tho)
--- ... looks like this is actually cGlobFiles!
+-- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
-cGlobFiles :: CutState -> CutExpr -> Rules ExprPath
-cGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
-  (ExprPath path) <- cExpr s p
+rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
+rGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
+  (ExprPath path) <- rExpr s p
   let (ExprPath outPath) = exprPath cfg True e []
   outPath %> \_ -> aGlobFiles cfg outPath path
   return (ExprPath outPath)
-cGlobFiles _ _ = error "bad arguments to cGlobFiles"
+rGlobFiles _ _ = error "bad arguments to rGlobFiles"
 
 aGlobFiles :: CutConfig -> FilePath -> FilePath -> Action ()
 aGlobFiles cfg outPath path = do

@@ -11,9 +11,9 @@
 
 module ShortCut.Core.Compile
   ( compileScript
-  , cBop
-  , cExpr
-  , cSet
+  , rBop
+  , rExpr
+  , rSet
   , addPrefixes
   )
   where
@@ -66,18 +66,18 @@ addPrefixes p = mangleScript (addPrefix p)
 -- compile the ShortCut AST --
 ------------------------------
 
-cExpr :: CutState -> CutExpr -> Rules ExprPath
-cExpr s e@(CutLit _ _ _      ) = cLit s e
-cExpr s e@(CutRef _ _ _ _    ) = cRef s e
-cExpr s e@(CutSet _ _ _ _    ) = cSet s e
-cExpr s e@(CutBop _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
-cExpr s e@(CutFun _ _ _ n _  ) = compileByName s e n
+rExpr :: CutState -> CutExpr -> Rules ExprPath
+rExpr s e@(CutLit _ _ _      ) = rLit s e
+rExpr s e@(CutRef _ _ _ _    ) = rRef s e
+rExpr s e@(CutSet _ _ _ _    ) = rSet s e
+rExpr s e@(CutBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
+rExpr s e@(CutFun _ _ _ n _  ) = rulesByName s e n
 
 -- TODO remove once no longer needed (parser should find fns)
-compileByName :: CutState -> CutExpr -> String -> Rules ExprPath
-compileByName s@(_,cfg) expr name = case findByName cfg name of
+rulesByName :: CutState -> CutExpr -> String -> Rules ExprPath
+rulesByName s@(_,cfg) expr name = case findByName cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
-  Just f  -> (fCompiler f) s expr
+  Just f  -> (fRules f) s expr
 
 -- TODO remove once no longer needed (parser should find fns)
 findByName :: CutConfig -> String -> Maybe CutFunction
@@ -86,12 +86,12 @@ findByName cfg name = find (\f -> fName f == name) fs
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
 
-cAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
-cAssign s@(_,cfg) (var, expr) = do
-  path  <- cExpr s expr
-  path' <- cVar s var expr path
+rAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
+rAssign s@(_,cfg) (var, expr) = do
+  path  <- rExpr s expr
+  path' <- rVar s var expr path
   let res  = (var, path')
-      res' = debugCompiler cfg "cAssign" (var, expr) res
+      res' = debugCompiler cfg "rAssign" (var, expr) res
   return res'
 
 -- TODO how to fail if the var doesn't exist??
@@ -101,7 +101,7 @@ compileScript s@(as,_) permHash = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
-  rpaths <- mapM (cAssign s) as
+  rpaths <- mapM (rAssign s) as
   let (VarPath r) = fromJust $ lookup (CutVar res) rpaths
   -- return $ ResPath $ makeRelative (cfgTmpDir cfg) r
   return $ ResPath r
@@ -112,10 +112,10 @@ compileScript s@(as,_) permHash = do
       Just h  -> "result." ++ h
 
 -- write a literal value from ShortCut source code to file
-cLit :: CutState -> CutExpr -> Rules ExprPath
-cLit (_,cfg) expr = do
+rLit :: CutState -> CutExpr -> Rules ExprPath
+rLit (_,cfg) expr = do
   let (ExprPath path) = exprPath cfg False expr [] -- absolute paths allowed!
-      path' = debugCompiler cfg "cLit" expr path
+      path' = debugCompiler cfg "rLit" expr path
   path %> \out -> debugWriteFile cfg out $ paths expr ++ "\n"
   return (ExprPath path')
   where
@@ -123,37 +123,37 @@ cLit (_,cfg) expr = do
     paths (CutLit _ _ p) = p
     paths _ = error "bad argument to paths"
 
-cSet :: CutState -> CutExpr -> Rules ExprPath
-cSet s e@(CutSet EmptySet _ _ _) = cSetEmpty s e
-cSet s e@(CutSet rtn _ _ _)
-  | rtn `elem` [str, num] = cSetLits s e
-  | otherwise = cSetPaths s e
-cSet _ _ = error "bad arguemnt to cSet"
+rSet :: CutState -> CutExpr -> Rules ExprPath
+rSet s e@(CutSet EmptySet _ _ _) = rSetEmpty s e
+rSet s e@(CutSet rtn _ _ _)
+  | rtn `elem` [str, num] = rSetLits s e
+  | otherwise = rSetPaths s e
+rSet _ _ = error "bad arguemnt to rSet"
 
 -- special case for empty lists
 -- TODO is a special type for this really needed?
-cSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
+rSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+rSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
   let (ExprPath link) = exprPath cfg True e []
-      link' = debugCompiler cfg "cSetEmpty" e link
+      link' = debugCompiler cfg "rSetEmpty" e link
   link %> \_ -> aSetEmpty cfg link
   return (ExprPath link')
-cSetEmpty _ e = error $ "bad arguemnt to cSetEmpty: " ++ show e
+rSetEmpty _ e = error $ "bad arguemnt to rSetEmpty: " ++ show e
 
 aSetEmpty :: CutConfig -> FilePath -> Action ()
 aSetEmpty cfg link = wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
 
 -- special case for writing lists of strings or numbers as a single file
-cSetLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
-  litPaths <- mapM (cExpr s) exprs
+rSetLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+rSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
+  litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
-      outPath' = debugCompiler cfg "cSetLits" e outPath
+      outPath' = debugCompiler cfg "rSetLits" e outPath
   outPath %> \_ -> aSetLits cfg outPath relPaths
   return (ExprPath outPath')
-cSetLits _ e = error $ "bad argument to cSetLits: " ++ show e
+rSetLits _ e = error $ "bad argument to rSetLits: " ++ show e
 
 aSetLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
 aSetLits cfg outPath relPaths = do
@@ -162,16 +162,16 @@ aSetLits cfg outPath relPaths = do
   debugWriteLines cfg outPath lits'
 
 -- regular case for writing a list of links to some other file type
-cSetPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-cSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
-  paths <- mapM (cExpr s) exprs
+rSetPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+rSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
+  paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
-      outPath' = debugCompiler cfg "cSetPaths" e outPath
+      outPath' = debugCompiler cfg "rSetPaths" e outPath
   outPath %> \_ -> aSetPaths cfg outPath paths'
   return (ExprPath outPath')
-cSetPaths _ _ = error "bad arguemnts to cSetPaths"
+rSetPaths _ _ = error "bad arguemnts to rSetPaths"
 
 aSetPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
 aSetPaths cfg outPath paths' = do
@@ -182,20 +182,20 @@ aSetPaths cfg outPath paths' = do
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-cRef :: CutState -> CutExpr -> Rules ExprPath
-cRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
+rRef :: CutState -> CutExpr -> Rules ExprPath
+rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
-    ePath (VarPath p) = ExprPath $ debugCompiler cfg "cRef" e p
-cRef _ _ = error "bad argument to cRef"
+    ePath (VarPath p) = ExprPath $ debugCompiler cfg "rRef" e p
+rRef _ _ = error "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.
--- TODO unify with cLink2, cLoadOne etc?
+-- TODO unify with rLink2, rLoadOne etc?
 -- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
-cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
-cVar (_,cfg) var expr (ExprPath dest) = do
+rVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
+rVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
-      linkd = debugCompiler cfg "cVar" var link
+      linkd = debugCompiler cfg "rVar" var link
   link %> \_ -> aVar cfg dest link
   return (VarPath linkd)
 
@@ -213,14 +213,14 @@ aVar cfg dest link = do
 -- Some of the complication is just making sure paths don't depend on tmpdir,
 -- and some is that I wrote this near the beginning, when I didn't have
 -- many of the patterns worked out yet. Feel free to update...
-cBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
+rBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (ExprPath, ExprPath, ExprPath)
-cBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
-  (ExprPath p1) <- cExpr s n1
-  (ExprPath p2) <- cExpr s n2
+rBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
+  (ExprPath p1) <- rExpr s n1
+  (ExprPath p2) <- rExpr s n2
   let rel1  = makeRelative (cfgTmpDir cfg) p1
       rel2  = makeRelative (cfgTmpDir cfg) p2
       path  = exprPathExplicit cfg True t "cut_bop" [show salt, name, rel1, rel2]
-      path' = debugCompiler cfg "cBop" e path
+      path' = debugCompiler cfg "rBop" e path
   return (ExprPath p1, ExprPath p2, path')
-cBop _ _ _ _ = error "bad argument to cBop"
+rBop _ _ _ _ = error "bad argument to rBop"

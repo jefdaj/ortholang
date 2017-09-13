@@ -41,7 +41,7 @@ extractQueries = CutFunction
   { fName      = "extract_queries"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aTsvColumn 1) "tables" (SetOf str)
+  , fRules  = rSimpleTmp (aTsvColumn 1) "tables" (SetOf str)
   }
 
 extractQueriesEach :: CutFunction
@@ -49,7 +49,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 1) "tables" (SetOf str)
+  , fRules  = rMapLastTmp (aTsvColumn 1) "tables" (SetOf str)
   }
 
 extractTargets :: CutFunction
@@ -57,7 +57,7 @@ extractTargets = CutFunction
   { fName      = "extract_targets"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp (aTsvColumn 2) "tables" (SetOf str)
+  , fRules  = rSimpleTmp (aTsvColumn 2) "tables" (SetOf str)
   }
 
 extractTargetsEach :: CutFunction
@@ -65,7 +65,7 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmp (aTsvColumn 2) "tables" (SetOf str)
+  , fRules  = rMapLastTmp (aTsvColumn 2) "tables" (SetOf str)
   }
 
 ---------------------------
@@ -77,7 +77,7 @@ filterEvalue = CutFunction
   { fName      = "filter_evalue"
   , fTypeCheck = defaultTypeCheck [num, bht] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aFilterEvalue "blast" bht
+  , fRules  = rSimpleTmp aFilterEvalue "blast" bht
   }
 
 aFilterEvalue :: ActionFn
@@ -95,7 +95,7 @@ bestHits = CutFunction
   { fName      = "best_hits"
   , fTypeCheck = defaultTypeCheck [bht] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aBestHits "blast" bht
+  , fRules  = rSimpleTmp aBestHits "blast" bht
   }
 
 aBestHits :: ActionFn

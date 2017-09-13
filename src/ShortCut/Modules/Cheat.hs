@@ -28,7 +28,7 @@
 
 -- TODO write examples
 -- TODO write cheatTypeCheck
--- TODO write cCheat
+-- TODO write rCheat
 -- TODO come up with more neutral word than cheat?
 -- TODO have a help menu that lists current types? not until after meeting!
 
@@ -46,7 +46,7 @@ cheat = CutFunction
   { fName      = "cheat"
   , fTypeCheck = cheatTypeCheck
   , fFixity    = Prefix
-  , fCompiler  = cCheat
+  , fRules  = rCheat
   }
 
 -- TODO detect return type based on string contents,
@@ -61,5 +61,5 @@ cheatTypeCheck (script : rtype : _)
 cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
                           \be strings specifying the script path and return type"
 
-cCheat :: CutState -> CutExpr -> Rules ExprPath
-cCheat = undefined
+rCheat :: CutState -> CutExpr -> Rules ExprPath
+rCheat = undefined

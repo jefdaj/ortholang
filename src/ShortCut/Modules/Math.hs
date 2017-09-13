@@ -5,7 +5,7 @@ module ShortCut.Modules.Math where
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
 import Development.Shake
-import ShortCut.Core.Compile (cBop)
+import ShortCut.Core.Compile (rBop)
 import ShortCut.Core.ModuleAPI (defaultTypeCheck)
 import ShortCut.Core.Types
 
@@ -25,19 +25,19 @@ mkMathFn name fn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, num] num
   , fFixity    = Infix
-  , fCompiler  = cMath fn
+  , fRules  = rMath fn
   }
 
 -- apply a math operation to two numbers
 -- TODO can a lot of this be moved back into compile while leaving something?
-cMath :: (Scientific -> Scientific -> Scientific) -- in this module
+rMath :: (Scientific -> Scientific -> Scientific) -- in this module
       -> CutState -> CutExpr -> Rules ExprPath    -- in Compile module
-cMath fn s e@(CutBop extn _ _ _ n1 n2) = do
-  -- liftIO $ putStrLn "entering cMath"
-  (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (n1, n2)
+rMath fn s e@(CutBop extn _ _ _ n1 n2) = do
+  -- liftIO $ putStrLn "entering rMath"
+  (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (n1, n2)
   p3 %> aMath fn p1 p2
   return (ExprPath p3)
-cMath _ _ _ = error "bad argument to cMath"
+rMath _ _ _ = error "bad argument to rMath"
 
 aMath :: (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()

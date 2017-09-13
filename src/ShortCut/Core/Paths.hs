@@ -49,7 +49,7 @@
  -   DONE stop exporting cacheDir and exprDir directly
  -   DONE add newtype wrappers for different types of paths
  -   DONE refactor functions, adding newtypes everywhere as you go
- -   TODO introduce smart constructors (or only use cExpr) to prevent mistakes
+ -   TODO introduce smart constructors (or only use rExpr) to prevent mistakes
  -}
 
 module ShortCut.Core.Paths
