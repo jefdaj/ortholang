@@ -28,7 +28,7 @@ import ShortCut.Core.Util         (stripWhiteSpace)
 import Data.List                  (find, sort)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
-import System.FilePath            (makeRelative, takeDirectory, takeFileName)
+import System.FilePath            (makeRelative, takeDirectory)
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
 
@@ -67,11 +67,11 @@ addPrefixes p = mangleScript (addPrefix p)
 ------------------------------
 
 cExpr :: CutState -> CutExpr -> Rules ExprPath
-cExpr s e@(CutLit  _ _ _      ) = cLit s e
-cExpr s e@(CutRef  _ _ _ _    ) = cRef s e
+cExpr s e@(CutLit _ _ _      ) = cLit s e
+cExpr s e@(CutRef _ _ _ _    ) = cRef s e
 cExpr s e@(CutSet _ _ _ _    ) = cSet s e
-cExpr s e@(CutBop  _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
-cExpr s e@(CutFun  _ _ _ n _  ) = compileByName s e n
+cExpr s e@(CutBop _ _ _ n _ _) = compileByName s e n -- TODO turn into Fun?
+cExpr s e@(CutFun _ _ _ n _  ) = compileByName s e n
 
 -- TODO remove once no longer needed (parser should find fns)
 compileByName :: CutState -> CutExpr -> String -> Rules ExprPath
@@ -97,7 +97,7 @@ cAssign s@(_,cfg) (var, expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 compileScript :: CutState -> Maybe String -> Rules ResPath
-compileScript s@(as,cfg) permHash = do
+compileScript s@(as,_) permHash = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
@@ -136,9 +136,12 @@ cSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 cSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
   let (ExprPath link) = exprPath cfg True e []
       link' = debugCompiler cfg "cSetEmpty" e link
-  link %> \_ -> wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
+  link %> \_ -> aSetEmpty cfg link
   return (ExprPath link')
 cSetEmpty _ e = error $ "bad arguemnt to cSetEmpty: " ++ show e
+
+aSetEmpty :: CutConfig -> FilePath -> Action ()
+aSetEmpty cfg link = wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
 
 -- special case for writing lists of strings or numbers as a single file
 cSetLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
@@ -148,12 +151,15 @@ cSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
       outPath' = debugCompiler cfg "cSetLits" e outPath
-  outPath %> \_ -> do
-    lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
-    let lits' = sort $ map stripWhiteSpace lits
-    debugWriteLines cfg outPath lits'
+  outPath %> \_ -> aSetLits cfg outPath relPaths
   return (ExprPath outPath')
 cSetLits _ e = error $ "bad argument to cSetLits: " ++ show e
+
+aSetLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aSetLits cfg outPath relPaths = do
+  lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
+  let lits' = sort $ map stripWhiteSpace lits
+  debugWriteLines cfg outPath lits'
 
 -- regular case for writing a list of links to some other file type
 cSetPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
@@ -163,13 +169,16 @@ cSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
       outPath' = debugCompiler cfg "cSetPaths" e outPath
-  outPath %> \_ -> do
-    need paths'
-    -- TODO yup bug was here! any reason to keep it?
-    -- paths'' <- liftIO $ mapM resolveSymlinks paths'
-    debugWriteLines cfg outPath paths'
+  outPath %> \_ -> aSetPaths cfg outPath paths'
   return (ExprPath outPath')
 cSetPaths _ _ = error "bad arguemnts to cSetPaths"
+
+aSetPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aSetPaths cfg outPath paths' = do
+  need paths'
+  -- TODO yup bug was here! any reason to keep it?
+  -- paths'' <- liftIO $ mapM resolveSymlinks paths'
+  debugWriteLines cfg outPath paths'
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
@@ -186,15 +195,18 @@ cVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 cVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
-      destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
-      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
       linkd = debugCompiler cfg "cVar" var link
-  link %> \_ -> do
-    alwaysRerun
-    need [dest]
-    liftIO $ createDirectoryIfMissing True $ takeDirectory link
-    wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
+  link %> \_ -> aVar cfg dest link
   return (VarPath linkd)
+
+aVar :: CutConfig -> FilePath -> FilePath -> Action ()
+aVar cfg dest link = do
+  let destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
+      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
+  alwaysRerun
+  need [dest]
+  liftIO $ createDirectoryIfMissing True $ takeDirectory link
+  wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
 
 -- Handles the actual rule generation for all binary operators;
 -- basically the `paths` functions with pattern matching factored out.

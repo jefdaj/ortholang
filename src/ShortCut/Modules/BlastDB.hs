@@ -98,12 +98,15 @@ cLoadDB :: RulesFn
 cLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- cExpr st s
   let (ExprPath oPath) = exprPath cfg True e []
-  oPath %> \_ -> do
-    pattern <- debugReadFile cfg sPath
-    let pattern' = makeRelative (cfgTmpDir cfg) pattern
-    debugWriteFile cfg oPath pattern'
+  oPath %> \_ -> aLoadDB cfg oPath sPath 
   return (ExprPath oPath)
 cLoadDB _ _ = error "bad argument to cLoadDB"
+
+aLoadDB :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadDB cfg oPath sPath = do
+  pattern <- debugReadFile cfg sPath
+  let pattern' = makeRelative (cfgTmpDir cfg) pattern
+  debugWriteFile cfg oPath pattern'
 
 loadNuclDB :: CutFunction
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -141,17 +144,20 @@ cBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   let (CacheDir tmpDir) = cacheDir cfg "blastdbget"
       (ExprPath oPath ) = exprPath cfg True e []
       stdoutTmp = tmpDir </> "stdout" <.> "txt"
-  oPath %> \_ -> do
-    wrappedCmd cfg [oPath] [Shell] "blastdbget" [tmpDir, ">", fPath]
-    -- TODO should this strip newlines on its own? seems important
-    filterStr <- debugReadFile  cfg fPath
-    out       <- debugReadLines cfg stdoutTmp
-    let names = if null filterStr || null out then []
-                else filterNames (init filterStr) (tail out)
-    -- toShortCutSetStr cfg str (ExprPath oPath) names
-    debugWriteLines cfg oPath names
+  oPath %> \_ -> aBlastdblist cfg oPath tmpDir stdoutTmp fPath
   return (ExprPath oPath)
 cBlastdblist _ _ = error "bad argument to cBlastdblist"
+
+aBlastdblist :: CutConfig -> String -> String -> FilePath -> String -> Action ()
+aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
+  wrappedCmd cfg [oPath] [Shell] "blastdbget" [tmpDir, ">", fPath]
+  -- TODO should this strip newlines on its own? seems important
+  filterStr <- debugReadFile  cfg fPath
+  out       <- debugReadLines cfg stdoutTmp
+  let names = if null filterStr || null out then []
+              else filterNames (init filterStr) (tail out)
+  -- toShortCutSetStr cfg str (ExprPath oPath) names
+  debugWriteLines cfg oPath names
 
 -- TODO do I need to adjust the timeout? try on the cluster first
 blastdbget :: CutFunction
@@ -167,15 +173,18 @@ cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- cExpr st name
   let (CacheDir tmpDir  ) = cacheDir cfg "blastdbget"
       (ExprPath dbPrefix) = exprPath cfg True e [] -- final prefix
-  dbPrefix %> \_ -> do
-    need [nPath]
-    dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
-    liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
-    unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
-      "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
-    debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
+  dbPrefix %> \_ -> aBlastdbget cfg dbPrefix tmpDir nPath
   return (ExprPath dbPrefix)
 cBlastdbget _ _ = error "bad argument to cBlastdbget"
+
+aBlastdbget :: CutConfig -> [Char] -> FilePath -> FilePath -> Action ()
+aBlastdbget cfg dbPrefix tmpDir nPath = do
+  need [nPath]
+  dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
+  liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
+  unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
+    "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
+  debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
 
 -- TODO is this actually used anywhere?
 linkDBFile :: CutConfig -> FilePath -> FilePath -> Action ()

@@ -29,7 +29,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
-import System.FilePath (takeDirectory, takeFileName)
+-- import System.FilePath (takeDirectory, takeFileName)
 
 ------------------------
 -- module description --
@@ -168,18 +168,21 @@ cParseSearches s@(_,cfg) expr@(CutSet _ _ _ _) = do
   -- TODO should this be a cacheFile instead?
   let (ExprPath searchTable) = exprPathExplicit cfg True search "parse_searches"
                                                 [show expr, sList]
-  searchTable %> \out -> do
-    tmp <- readFile' sList
-    let sLines = map (cfgTmpDir cfg </>) (lines tmp)
-    need sLines
-    parses <- liftIO $ mapM readSearch sLines
-    let (errors, searches') = partitionEithers parses
-    -- TODO better error here
-    if (not . null) errors
-      then error "invalid search!"
-      else liftIO $ writeFile out $ toTsv searches'
+  searchTable %> \out -> aParseSearches cfg sList out
   return (ExprPath searchTable)
 cParseSearches _ _ = error "bad arguments to cParseSearches"
+
+aParseSearches :: CutConfig -> FilePath -> FilePath -> Action ()
+aParseSearches cfg sList out = do
+  tmp <- readFile' sList
+  let sLines = map (cfgTmpDir cfg </>) (lines tmp)
+  need sLines
+  parses <- liftIO $ mapM readSearch sLines
+  let (errors, searches') = partitionEithers parses
+  -- TODO better error here
+  if (not . null) errors
+    then error "invalid search!"
+    else liftIO $ writeFile out $ toTsv searches'
 
 ------------------
 -- run biomartr --

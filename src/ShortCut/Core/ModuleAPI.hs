@@ -24,11 +24,9 @@ import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
 import ShortCut.Core.Compile      (cExpr)
-import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines
-                                   , debug, debugWriteFile, debugReadLines)
+import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines, debugReadLines)
 import System.Directory           (createDirectoryIfMissing)
-import System.FilePath            (takeDirectory, takeFileName, takeBaseName,
-                                   makeRelative)
+import System.FilePath            (takeBaseName, makeRelative)
 import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks)
 import Text.PrettyPrint.HughesPJClass
@@ -75,13 +73,16 @@ cOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
       (ExprPath oPath) = exprPath cfg True expr []
-  oPath %> \_ -> do
-    need [argPath]
-    liftIO $ createDirectoryIfMissing True tmpDir
-    quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
-    trackWrite [oPath]
+  oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
   return (ExprPath oPath)
 cOneArgScript _ _ _ _ = error "bad argument to cOneArgScript"
+
+aOneArgScript :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
+aOneArgScript cfg oPath script tmpDir argPath = do
+  need [argPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
+  quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
+  trackWrite [oPath]
 
 -- for scripts that take one arg and return a list of lits
 -- TODO this should put tmpfiles in cache/<script name>!
@@ -91,14 +92,17 @@ cOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- cExpr s fa
   let (CacheDir tmpDir ) = cacheDir cfg tmpName
       (ExprPath outPath) = exprPath cfg True expr []
-  outPath %> \_ -> do
-    need [faPath]
-    liftIO $ createDirectoryIfMissing True tmpDir
-    wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
-    -- debugWriteFile cfg outPath out
-    debugTrackWrite cfg [outPath]
+  outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
   return (ExprPath outPath)
 cOneArgListScript _ _ _ _ = error "bad argument to cOneArgListScript"
+
+aOneArgListScript :: CutConfig -> FilePath -> String -> FilePath -> FilePath -> Action ()
+aOneArgListScript cfg outPath script tmpDir faPath = do
+  need [faPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
+  wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
+  -- debugWriteFile cfg outPath out
+  debugTrackWrite cfg [outPath]
 
 -- load a single file --
 
@@ -125,13 +129,16 @@ cLink s@(_,cfg) expr rtype prefix = do
   -- TODO only depend on final expressions
   -- ok without ["outPath"]?
   let (ExprPath outPath) = exprPathExplicit cfg True rtype prefix [show expr]
-  outPath %> \_ -> do
-    pth <- fmap strip $ readFile' strPath
-    src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
-    need [src]
-    unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
-    debugTrackWrite cfg [outPath]
+  outPath %> \_ -> aLink cfg outPath strPath
   return (ExprPath outPath)
+
+aLink :: CutConfig -> FilePath -> FilePath -> Action ()
+aLink cfg outPath strPath = do
+  pth <- fmap strip $ readFile' strPath
+  src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
+  need [src]
+  unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
+  debugTrackWrite cfg [outPath]
 
 cLoadOne :: CutType -> RulesFn
 cLoadOne t s (CutFun _ _ _ n [p]) = cLink s p t n
@@ -170,11 +177,14 @@ cLoadListOne rtn s@(_,cfg) expr = do
   (ExprPath litsPath) <- cExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" [relPath]
-  outPath %> \_ -> do
-    lits  <- debugReadLines cfg litsPath -- TODO strip?
-    lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
-    debugWriteLines cfg outPath lits'
+  outPath %> \_ -> aLoadListOne cfg outPath litsPath
   return (ExprPath outPath)
+
+aLoadListOne :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListOne cfg outPath litsPath = do
+  lits  <- debugReadLines cfg litsPath -- TODO strip?
+  lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
+  debugWriteLines cfg outPath lits'
 
 -- regular case for lists of any other file type
 cLoadListMany :: RulesFn
@@ -183,14 +193,17 @@ cLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   -- TODO is relPath enough to make sure it's unique??
   let relPath = makeRelative (cfgTmpDir cfg) pathsPath
       (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_set" [relPath]
-  outPath %> \_ -> do
+  outPath %> \_ -> aLoadListMany cfg outPath pathsPath
+  return (ExprPath outPath)
+cLoadListMany _ _ = error "bad arguments to cLoadListMany"
+
+aLoadListMany :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListMany cfg outPath pathsPath = do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     need paths
     paths' <- liftIO $ mapM resolveSymlinks paths
     -- need paths'
     debugWriteLines cfg outPath paths'
-  return (ExprPath outPath)
-cLoadListMany _ _ = error "bad arguments to cLoadListMany"
 
 -----------------------------------------------------------
 -- [a]ction functions (just describe how to build files) --
@@ -220,13 +233,16 @@ rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (cExpr s) exprs
   let (ExprPath outPath) = exprPath cfg True e []
       (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
-  outPath %> \_ -> do
-    need $ map (\(ExprPath p) -> p) argPaths
-    liftIO $ createDirectoryIfMissing True tmpDir
-    actFn cfg (CacheDir tmpDir) ([ExprPath outPath] ++ argPaths)
-    trackWrite [outPath]
+  outPath %> \_ -> aSimpleTmp cfg outPath actFn tmpDir argPaths
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
+
+aSimpleTmp :: CutConfig -> FilePath -> ActionFn -> FilePath -> [ExprPath] -> Action ()
+aSimpleTmp cfg outPath actFn tmpDir argPaths = do
+  need $ map (\(ExprPath p) -> p) argPaths
+  liftIO $ createDirectoryIfMissing True tmpDir
+  actFn cfg (CacheDir tmpDir) ([ExprPath outPath] ++ argPaths)
+  trackWrite [outPath]
 
 rMapLastTmp :: ActionFn -> String -> CutType -> RulesFn
 rMapLastTmp actFn tmpPrefix t s@(_,cfg) = mapFn t s
@@ -259,36 +275,46 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
 
-  outPath %> \_ -> do
-    lastPaths <- readFileLines lastsPath
-    -- this writes the .args files for use in the rule above
-    (flip mapM_) lastPaths $ \p -> do
-      -- TODO write the out path here too so all the args are together?
-      let argsPath = mapTmp </> takeBaseName p <.> "args" -- TODO use a hash here?
-          argPaths = inits ++ [cfgTmpDir cfg </> p]
-      liftIO $ createDirectoryIfMissing True $ mapTmp
-      debugWriteLines cfg argsPath argPaths
-    -- then we just trigger them and write to the overall outPath
-    let outPaths = map (\p -> mapTmp </> takeBaseName p) lastPaths
-    need outPaths
-    debugWriteLines cfg outPath outPaths
+  outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
 
   -- This builds one of the list of out paths based on a .args file
   -- (made in the action above). It's a pretty roundabout way to do it!
   -- TODO ask ndmitchell if there's something much more elegant I'm missing
-  (mapTmp </> "*") %> \out -> do
-    let argsPath = out <.> ".args" -- TODO clean up
-    -- args <- debugReadLines cfg argsPath
-    args <- fmap lines $ liftIO $ readFile argsPath
-    let args' = map (cfgTmpDir cfg </>) args
-        rels  = map (makeRelative $ cfgTmpDir cfg) args
-    need args'
-    let (CacheDir dir) = tmpFn rels -- relative paths for determinism!
-        args'' = out:args'
-    liftIO $ createDirectoryIfMissing True dir
-    liftIO $ putStrLn $ "args passed to actFn: " ++ show args''
-    actFn cfg (CacheDir dir) (map ExprPath args'')
-    trackWrite [out]
+  (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
 
   return (ExprPath outPath)
 rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"
+
+aMapLastArgs :: CutConfig -> FilePath -> [FilePath] -> FilePath -> FilePath -> Action ()
+aMapLastArgs cfg outPath inits mapTmp lastsPath = do
+  lastPaths <- readFileLines lastsPath
+  -- this writes the .args files for use in the rule above
+  (flip mapM_) lastPaths $ \p -> do
+    -- TODO write the out path here too so all the args are together?
+    let argsPath = mapTmp </> takeBaseName p <.> "args" -- TODO use a hash here?
+        argPaths = inits ++ [cfgTmpDir cfg </> p]
+    liftIO $ createDirectoryIfMissing True $ mapTmp
+    debugWriteLines cfg argsPath argPaths
+  -- then we just trigger them and write to the overall outPath
+  let outPaths = map (\p -> mapTmp </> takeBaseName p) lastPaths
+  need outPaths
+  debugWriteLines cfg outPath outPaths
+
+-- TODO rename this something less confusing
+aMapLastMapTmp :: CutConfig
+               -> ([FilePath] -> CacheDir)
+               -> (CutConfig -> CacheDir -> [ExprPath] -> Action a)
+               -> FilePath -> Action ()
+aMapLastMapTmp cfg tmpFn actFn out = do
+  let argsPath = out <.> ".args" -- TODO clean up
+  -- args <- debugReadLines cfg argsPath
+  args <- fmap lines $ liftIO $ readFile argsPath
+  let args' = map (cfgTmpDir cfg </>) args
+      rels  = map (makeRelative $ cfgTmpDir cfg) args
+  need args'
+  let (CacheDir dir) = tmpFn rels -- relative paths for determinism!
+      args'' = out:args'
+  liftIO $ createDirectoryIfMissing True dir
+  liftIO $ putStrLn $ "args passed to actFn: " ++ show args''
+  _ <- actFn cfg (CacheDir dir) (map ExprPath args'')
+  trackWrite [out]

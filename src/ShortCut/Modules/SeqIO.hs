@@ -10,7 +10,7 @@ import ShortCut.Core.Compile      (cExpr)
 import ShortCut.Core.Debug        (debug, debugReadLines, debugTrackWrite)
 import ShortCut.Core.ModuleAPI    (mkLoad, mkLoadList, defaultTypeCheck,
                                    cOneArgScript, cOneArgListScript)
-import System.FilePath            ((</>), takeDirectory, takeFileName)
+import System.FilePath            ((</>))
 -- import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)
 
@@ -147,17 +147,20 @@ cExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
       -- tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   -- tmpList %> \_ -> do
-  outPath %> \_ -> do
-    -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutSet?
-    -- fromShortCutSet cfg idsPath (ExprPath tmpList)
-  -- outPath %> \_ -> do
-    -- need [faPath, tmpList]
-    -- liftIO $ createDirectoryIfMissing True tmpDir
-    need [faPath, idsPath]
-    quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
-                         "extract_seqs.py" [outPath, faPath, idsPath]
+  outPath %> \_ -> aExtractSeqs cfg outPath tmpDir faPath idsPath 
   return (ExprPath outPath)
 cExtractSeqs _ _ = error "bad argument to extractSeqs"
+
+aExtractSeqs :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
+aExtractSeqs cfg outPath tmpDir faPath idsPath = do
+  -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutSet?
+  -- fromShortCutSet cfg idsPath (ExprPath tmpList)
+-- outPath %> \_ -> do
+  -- need [faPath, tmpList]
+  -- liftIO $ createDirectoryIfMissing True tmpDir
+  need [faPath, idsPath]
+  quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
+                       "extract_seqs.py" [outPath, faPath, idsPath]
 
 -------------------------------------
 -- convert between DNA and protein --

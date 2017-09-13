@@ -35,12 +35,16 @@ cMath :: (Scientific -> Scientific -> Scientific) -- in this module
 cMath fn s e@(CutBop extn _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering cMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (n1, n2)
-  p3 %> \out -> do
+  p3 %> aMath fn p1 p2
+  return (ExprPath p3)
+cMath _ _ _ = error "bad argument to cMath"
+
+aMath :: (Scientific -> Scientific -> Scientific)
+      -> FilePath -> FilePath -> FilePath -> Action ()
+aMath fn p1 p2 out = do
     need [p1, p2]
     num1 <- fmap strip $ readFile' p1
     num2 <- fmap strip $ readFile' p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
     writeFileChanged out $ show num3 ++ "\n"
-  return (ExprPath p3)
-cMath _ _ _ = error "bad argument to cMath"

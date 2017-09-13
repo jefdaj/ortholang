@@ -61,17 +61,16 @@ cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
       rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
       (ExprPath out) = exprPath cfg True e []
   (ExprPath rbhPath) <- cExpr s rbh -- TODO this is the sticking point right?
-  out %> \_ -> do
-    need [rbhPath]
-    aBlastpRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
-    debugTrackWrite cfg [out]
+  out %> \_ -> aBlastpRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
   return (ExprPath out)
 cBlastpRBH _ _ = error "bad argument to cBlastRBH"
 
 -- this is an attempt to convert cBlastpRBH into a form usable with rMapLastTmp
 aBlastpRBH :: ActionFn
-aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
+aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] = do
+  need [rbhPath]
   unit $ quietly $ wrappedCmd cfg [out] [] "ln" ["-fs", rbhPath, out]
+  debugTrackWrite cfg [out]
 aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 
 ---------------------------------------------
@@ -94,13 +93,16 @@ cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   (ExprPath rsPath) <- cExpr s rbhts
   let (ExprPath oPath) = exprPath cfg True e []
       (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
-  oPath %> \_ -> do
-    need [lsPath, rsPath]
-    unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
-      [cDir, oPath, lsPath, rsPath]
-    debugTrackWrite cfg [oPath]
+  oPath %> \_ -> aRecipEach cfg oPath lsPath rsPath cDir
   return (ExprPath oPath)
 cRecipEach _ _ = error "bad argument to cRecipEach"
+
+aRecipEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aRecipEach cfg oPath lsPath rsPath cDir = do
+  need [lsPath, rsPath]
+  unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
+    [cDir, oPath, lsPath, rsPath]
+  debugTrackWrite cfg [oPath]
 
 -----------------------------------------------
 -- the hard part: mapped reciprocal versions --
@@ -151,11 +153,14 @@ cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = 
       (CacheDir cDir )  = cacheDir cfg "reciprocal_each"
   (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"
   (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev"
-  oPath %> \_ -> do
-    need [fwdsPath, revsPath]
-    liftIO $ createDirectoryIfMissing True cDir
-    unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
-                       "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
-    debugTrackWrite cfg [oPath]
+  oPath %> \_ -> aBlastpRBHEach cfg oPath cDir fwdsPath revsPath
   return (ExprPath oPath)
 cBlastpRBHEach _ _ = error "bad argument to cRecipEach"
+
+aBlastpRBHEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aBlastpRBHEach cfg oPath cDir fwdsPath revsPath = do
+  need [fwdsPath, revsPath]
+  liftIO $ createDirectoryIfMissing True cDir
+  unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
+                       "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
+  debugTrackWrite cfg [oPath]

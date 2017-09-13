@@ -39,11 +39,15 @@ cSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   let (SetOf (SetOf eType)) = typeOf iList
       (ExprPath oPath) = exprPathExplicit cfg True (SetOf eType) fnName 
                                           [show expr, iPath]
-  oPath %> \out -> do
-    need [iPath]
-    iLists <- fmap lines $ readFile' iPath
-    iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
-    let oElems = summaryFn iElems
-    writeFileLines out oElems
+  oPath %> aSummary cfg summaryFn iPath
   return (ExprPath oPath)
 cSummary _ _ _ = error "bad argument to cSummary"
+
+aSummary :: CutConfig -> ([[String]] -> [String])
+         -> FilePath -> FilePath -> Action ()
+aSummary cfg summaryFn iPath out = do
+  need [iPath]
+  iLists <- fmap lines $ readFile' iPath
+  iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
+  let oElems = summaryFn iElems
+  writeFileLines out oElems

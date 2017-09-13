@@ -38,11 +38,14 @@ cGlobFiles :: CutState -> CutExpr -> Rules ExprPath
 cGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- cExpr s p
   let (ExprPath outPath) = exprPath cfg True e []
-  outPath %> \_ -> do
-    ptn   <- fmap strip $ debugReadFile cfg path
-    -- liftIO $ putStrLn $ "ptn: " ++ show ptn
-    paths <- liftIO $ mapM absolutize =<< glob ptn
-    -- toShortCutSetStr cfg str (ExprPath outPath) paths
-    debugWriteLines cfg outPath paths
+  outPath %> \_ -> aGlobFiles cfg outPath path
   return (ExprPath outPath)
 cGlobFiles _ _ = error "bad arguments to cGlobFiles"
+
+aGlobFiles :: CutConfig -> FilePath -> FilePath -> Action ()
+aGlobFiles cfg outPath path = do
+  ptn   <- fmap strip $ debugReadFile cfg path
+  -- liftIO $ putStrLn $ "ptn: " ++ show ptn
+  paths <- liftIO $ mapM absolutize =<< glob ptn
+  -- toShortCutSetStr cfg str (ExprPath outPath) paths
+  debugWriteLines cfg outPath paths

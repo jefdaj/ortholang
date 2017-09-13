@@ -52,15 +52,19 @@ cCombos comboFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- cExpr s iList
   let oType = SetOf $ typeOf iList
       (ExprPath oList) = exprPathExplicit cfg True oType fnName [show expr, iPath] -- TODO need fnName too like before?
-  oList %> \out -> do
-    need [iPath]
-    elements <- fmap lines $ readFile' iPath
-    let combos = comboFn elements
-        lType  = typeOf iList -- TODO is this right?
-        oPaths = map (\(ExprPath p) -> p)
-               $ map (\e -> exprPathExplicit cfg True lType
-                                             fnName [iPath, out, e]) elements
-    mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
-    writeFileChanged out $ unlines oPaths
+      lType  = typeOf iList -- TODO is this right?
+  oList %> aCombos cfg comboFn iPath lType fnName
   return (ExprPath oList)
 cCombos _ _ _ = error "bad argument to cCombos"
+
+aCombos :: CutConfig -> ([String] -> [[String]])
+        -> FilePath -> CutType -> String -> FilePath -> Action ()
+aCombos cfg comboFn iPath lType fnName out = do
+  need [iPath]
+  elements <- fmap lines $ readFile' iPath
+  let combos = comboFn elements
+      oPaths = map (\(ExprPath p) -> p)
+             $ map (\e -> exprPathExplicit cfg True lType
+                                           fnName [iPath, out, e]) elements
+  mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
+  writeFileChanged out $ unlines oPaths
