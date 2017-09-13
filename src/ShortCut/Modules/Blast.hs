@@ -5,34 +5,35 @@ import ShortCut.Core.Types
 
 import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
-import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite)
+import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite, debug)
 import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
 import System.FilePath          (takeDirectory, takeFileName, (</>))
 import ShortCut.Core.Util      (stripWhiteSpace)
+import Text.PrettyPrint.HughesPJClass
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    [ mkBlastFn        "blastn" fna fna -- TODO why doesn't this one work??
-    , mkBlastFn        "blastp" faa faa
-    , mkBlastFn        "blastx" fna faa
-    , mkBlastFn       "tblastn" faa fna
-    , mkBlastFn       "tblastx" fna fna
+    [ mkBlastFn        "blastn" fna fna ndb -- TODO why doesn't this one work??
+    , mkBlastFn        "blastp" faa faa pdb
+    , mkBlastFn        "blastx" fna faa pdb
+    , mkBlastFn       "tblastn" faa fna ndb
+    , mkBlastFn       "tblastx" fna fna ndb
     , mkBlastDbFn      "blastn" fna ndb -- TODO why doesn't this one work??
     , mkBlastDbFn      "blastp" faa pdb
     , mkBlastDbFn      "blastx" fna pdb
     , mkBlastDbFn     "tblastn" faa ndb
     , mkBlastDbFn     "tblastx" fna ndb
-    , mkBlastEachFn    "blastn" fna fna -- TODO why doesn't this one work??
-    , mkBlastEachFn    "blastp" faa faa
-    , mkBlastEachFn    "blastx" fna faa
-    , mkBlastEachFn   "tblastn" faa fna
-    , mkBlastEachFn   "tblastx" fna fna
-    , mkBlastEachRevFn "blastn" fna fna -- TODO don't expose to users?
-    , mkBlastEachRevFn "blastp" faa faa -- TODO don't expose to users?
+    , mkBlastEachFn    "blastn" fna fna ndb -- TODO why doesn't this one work??
+    , mkBlastEachFn    "blastp" faa faa pdb
+    , mkBlastEachFn    "blastx" fna faa pdb
+    , mkBlastEachFn   "tblastn" faa fna ndb
+    , mkBlastEachFn   "tblastx" fna fna ndb
+    , mkBlastEachRevFn "blastn" fna fna ndb -- TODO don't expose to users?
+    , mkBlastEachRevFn "blastp" faa faa pdb -- TODO don't expose to users?
     -- TODO use the reverse each ones?
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     ]
@@ -63,35 +64,50 @@ mkBlastDbFn bCmd qType dbType = CutFunction
 
 -- the "fancy" one that makes the db from a fasta file
 -- (this is what i imagine users will usually want)
-mkBlastFn :: String -> CutType -> CutType -> CutFunction
-mkBlastFn bCmd qType sType = CutFunction
+mkBlastFn :: String -> CutType -> CutType -> CutType -> CutFunction
+mkBlastFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastFn bCmd aParBlast
+  , fCompiler  = cMkBlastFn bCmd dbType aParBlast
   }
 
 cMkBlastDbFn :: String -> (String -> ActionFn) -> RulesFn
 cMkBlastDbFn bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
 
 -- convert the fasta file to a db and pass to the db version (above)
-cMkBlastFn :: String -> (String -> ActionFn) -> RulesFn
-cMkBlastFn c a s e = cMkBlastDbFn c a s $ addMakeDBCall e
+cMkBlastFn :: String -> CutType -> (String -> ActionFn) -> RulesFn
+cMkBlastFn c dbType a s e = cMkBlastDbFn c a s $ addMakeDBCall1 e dbType
 
-addMakeDBCall :: CutExpr -> CutExpr
-addMakeDBCall (CutFun r i ds n [q, s, e]) = CutFun r i ds n [q, db, e]
+-- TODO aha! this needs to know what type of db to make separately from the
+--      subject's original type, for tblastn and similar
+addMakeDBCall1 :: CutExpr -> CutType -> CutExpr
+addMakeDBCall1 (CutFun r i ds n [q, s, e]) dbType = CutFun r i ds n [q, db, e]
   where
-    dbType = if typeOf s == fna then ndb else pdb
-    db = CutFun dbType i (depsOf s) "makeblastdb" [s]
-addMakeDBCall _ = error "bad argument to addMakeDBCall"
+    -- dbType = if typeOf s `elem` [fna, SetOf fna] then ndb else pdb -- TODO maybe it's (SetOf fna)?
+    db = CutFun dbType i (depsOf s) name [s]
+    name = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+addMakeDBCall1 _ _ = error "bad argument to addMakeDBCall1"
+
+-- as a quick klude, duplicated this and rearranged the args
+addMakeDBCall2 :: CutExpr -> CutType -> CutExpr
+addMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
+  where
+    -- dbType = if typeOf s `elem` [fna, SetOf fna] then ndb else pdb -- TODO maybe it's (SetOf fna)?
+    dbs = CutFun dbType i (depsOf ss) name [ss]
+    name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+addMakeDBCall2 _ _ = error "bad argument to addMakeDBCall2"
 
 -- TODO remove the old bbtmp default tmpDir
 aParBlast :: String -> ActionFn
-aParBlast bCmd cfg _ [ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
+aParBlast bCmd cfg _ paths@[ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
+  liftIO $ putStrLn $ "aParBlast args: " ++ show paths
   eStr   <- fmap init $ debugReadFile cfg e
+  -- TODO why does this have the complete dna sequence in it when using tblastn_each??
   prefix <- fmap (cfgTmpDir cfg </>)
           $ fmap stripWhiteSpace
           $ debugReadFile cfg p
+  liftIO $ putStrLn $ "prefix: " ++ prefix
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
       cDir = cfgTmpDir cfg </> takeDirectory prefix -- not actually used as of now
       dbg  = if cfgDebug cfg then ["-v"] else []
@@ -107,23 +123,26 @@ aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 ---------------------
 
 -- TODO gotta have a variation for "not the last arg"
-mkBlastEachFn :: String -> CutType -> CutType -> CutFunction
-mkBlastEachFn bCmd qType sType = CutFunction
+mkBlastEachFn :: String -> CutType -> CutType -> CutType -> CutFunction
+mkBlastEachFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_each"
   , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] (SetOf bht)
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastEach bCmd aParBlast
+  , fCompiler  = cMkBlastEach bCmd dbType aParBlast
   }
 
+-- TODO need to apply addMakeDBCall2 *after* mapping over the last arg
 -- TODO more specific tmpDir?
-cMkBlastEach :: String -> (String -> ActionFn) -> RulesFn
-cMkBlastEach bCmd bActFn st expr = mapFn st $ addMakeDBCall expr
+cMkBlastEach :: String -> CutType -> (String -> ActionFn) -> RulesFn
+cMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ addMakeDBCall2 expr' dbType
   where
     mapFn = rMapLastTmp (bActFn' bCmd) "blast" bht
+    expr' = debug cfg ("cMkBlastEach expr: '" ++ render (pPrint expr) ++ "'") expr
     -- kludge to allow easy mapping over the subject rather than evalue:
     -- TODO is this right?
     -- TODO can it be changed to keep the evalues at the end like expected?
-    bActFn' b c d [o, e, q, s] = bActFn b c d [o, q, s, e]
+    -- TODO are the e and q getting reversed? they look OK here
+    bActFn' b c d [o, e, q, s] = let args = [o, q, s, e]; args' = debug cfg ("bActFn args: " ++ show args) args in bActFn b c d args'
     bActFn' _ _ _ _ = error "bad argument to bActFn'"
 
 -----------------------------------------------------------
@@ -133,12 +152,12 @@ cMkBlastEach bCmd bActFn st expr = mapFn st $ addMakeDBCall expr
 -- TODO move to BlastRBH module?
 
 -- note: only works on symmetric blast fns (take two of the same type)
-mkBlastRevFn :: String -> CutType -> CutType -> CutFunction
-mkBlastRevFn bCmd qType sType = CutFunction
+mkBlastRevFn :: String -> CutType -> CutType -> CutType -> CutFunction
+mkBlastRevFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_rev"
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastFn bCmd aParBlastRev
+  , fCompiler  = cMkBlastFn bCmd dbType aParBlastRev
   }
 
 -- just switches the query and subject, which won't work for asymmetric blast fns!
@@ -148,10 +167,10 @@ aParBlastRev b c d [o, q, s, e] = aParBlast b c d [o, s, q, e]
 aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
 -- TODO gotta have a variation for "not the last arg"
-mkBlastEachRevFn :: String -> CutType -> CutType -> CutFunction
-mkBlastEachRevFn bCmd qType sType = CutFunction
+mkBlastEachRevFn :: String -> CutType -> CutType -> CutType -> CutFunction
+mkBlastEachRevFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_each_rev"
   , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastEach bCmd aParBlastRev
+  , fCompiler  = cMkBlastEach bCmd dbType aParBlastRev
   }

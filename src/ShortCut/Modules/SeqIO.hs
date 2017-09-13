@@ -23,7 +23,7 @@ cutModule = CutModule
     , loadFaa
     , loadFaaEach
     , loadFna
-    , loadFaaEach
+    , loadFnaEach
     , gbkToFaa -- TODO each?
     , gbkToFna -- TODO each?
     , extractSeqs

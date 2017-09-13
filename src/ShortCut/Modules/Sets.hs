@@ -58,7 +58,7 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 cSetBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
 cSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
-  liftIO $ putStrLn "entering cSetBop"
+  -- liftIO $ putStrLn "entering cSetBop"
   let fixLinks = liftIO . canonicalLinks (typeOf e)
   (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (s1, s2)
   p3 %> \out -> do
@@ -106,7 +106,7 @@ cSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
     lists <- debugReadLines cfg setsPath
     listContents  <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
     listContents' <- liftIO $ mapM fixLinks listContents
-    liftIO $ putStrLn $ "listContents': " ++ show listContents'
+    -- liftIO $ putStrLn $ "listContents': " ++ show listContents'
     let sets = map fromList listContents'
         oLst = toList $ fn sets
     debugWriteLines cfg oPath oLst
