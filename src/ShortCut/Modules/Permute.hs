@@ -3,7 +3,7 @@ module ShortCut.Modules.Permute where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths   (exprPathExplicit)
-import ShortCut.Core.Rules (rExpr)
+import ShortCut.Core.Compile.Rules (rExpr)
 
 cutModule :: CutModule
 cutModule = CutModule

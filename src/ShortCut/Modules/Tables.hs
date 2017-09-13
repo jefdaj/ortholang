@@ -6,7 +6,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Config      (wrappedCmd)
-import ShortCut.Core.Rules       (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
+import ShortCut.Core.Compile.Rules       (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.List                  (nub, sort)

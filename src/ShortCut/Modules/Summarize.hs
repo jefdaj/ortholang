@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Paths        (exprPathExplicit)
-import ShortCut.Core.Rules      (rExpr)
+import ShortCut.Core.Compile.Rules      (rExpr)
 import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule

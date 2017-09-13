@@ -9,7 +9,7 @@
 
 -- TODO why doesn't turning down the verbosity actually work?
 
-module ShortCut.Core.Rules
+module ShortCut.Core.Compile.Rules
 --   ( compileScript
 --   , rBop
 --   , rExpr
@@ -21,7 +21,7 @@ module ShortCut.Core.Rules
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
-import ShortCut.Core.Actions
+import ShortCut.Core.Compile.Actions
 
 import ShortCut.Core.Debug        (debugCompiler)
 import Data.List                  (find)
@@ -32,7 +32,7 @@ import System.FilePath            (makeRelative)
 -- import Data.Set                   (fromList, toList)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
--- import ShortCut.Core.Rules      (rExpr)
+-- import ShortCut.Core.Compile.Rules      (rExpr)
 import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines, debugReadLines)
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Config       (wrappedCmd)

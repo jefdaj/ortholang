@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
 import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite, debug)
-import ShortCut.Core.Rules      (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
+import ShortCut.Core.Compile.Rules      (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
 import System.FilePath          (takeDirectory, takeFileName, (</>))

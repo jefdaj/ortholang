@@ -4,7 +4,7 @@ module ShortCut.Modules.Repeat where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Repeat
+import ShortCut.Core.Compile.Repeat
 
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)

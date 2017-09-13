@@ -1,4 +1,4 @@
-module ShortCut.Core.Actions where
+module ShortCut.Core.Compile.Actions where
 
 import Development.Shake
 import ShortCut.Core.Types

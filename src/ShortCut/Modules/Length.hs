@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Debug     (debugReadLines, debugWriteFile)
 import ShortCut.Core.Paths     (cacheDir, exprPathExplicit)
-import ShortCut.Core.Rules     (rExpr, rMapLastTmp)
+import ShortCut.Core.Compile.Rules     (rExpr, rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
 import System.FilePath         (makeRelative)
 

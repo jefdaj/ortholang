@@ -2,11 +2,12 @@ module ShortCut.Modules.Math where
 
 -- TODO is math ever actually needed in a cut script?
 
+import ShortCut.Core.Types
+import Development.Shake
+
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
-import Development.Shake
-import ShortCut.Core.Rules (rBop, defaultTypeCheck)
-import ShortCut.Core.Types
+import ShortCut.Core.Compile.Rules (rBop, defaultTypeCheck)
 
 cutModule :: CutModule
 cutModule = CutModule
