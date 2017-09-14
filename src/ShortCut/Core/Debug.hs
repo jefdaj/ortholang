@@ -49,7 +49,7 @@ debugParser cfg name res = debug cfg msg res
     msg = name ++ " parsed '" ++ ren ++ "'"
 
 -- TODO restrict to CutExpr?
--- TODO put in cExpr to catch everything at once? but misses which fn was called
+-- TODO put in rExpr to catch everything at once? but misses which fn was called
 debugCompiler :: (Pretty a, Show b) => CutConfig -> String -> a -> b -> b
 debugCompiler cfg name input output = debug cfg msg output
   where

@@ -4,12 +4,11 @@ import Development.Shake
 import ShortCut.Core.Types
 
 -- import Control.Monad           (when)
-import ShortCut.Core.Compile   (cExpr)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugWriteLines)
-import ShortCut.Core.ModuleAPI (defaultTypeCheck, rMapLastTmp)
-import ShortCut.Core.Paths     (exprPath, exprPathExplicit, cacheDir)
+import ShortCut.Core.Compile.Rules     (rExpr, defaultTypeCheck, rMapLastTmp)
+import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import System.FilePath         (takeFileName, takeExtension, (</>), (<.>),
@@ -83,7 +82,7 @@ mkLoadDB name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fFixity    = Prefix
-  , fCompiler  = cLoadDB
+  , fRules  = rLoadDB
   }
 
 mkLoadDBEach :: String -> CutType -> CutFunction
@@ -91,19 +90,22 @@ mkLoadDBEach name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [SetOf str] (SetOf rtn)
   , fFixity    = Prefix
-  , fCompiler  = undefined -- TODO write this!
+  , fRules  = undefined -- TODO write this!
   }
 
-cLoadDB :: RulesFn
-cLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
-  (ExprPath sPath) <- cExpr st s
+rLoadDB :: RulesFn
+rLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
+  (ExprPath sPath) <- rExpr st s
   let (ExprPath oPath) = exprPath cfg True e []
-  oPath %> \_ -> do
-    pattern <- debugReadFile cfg sPath
-    let pattern' = makeRelative (cfgTmpDir cfg) pattern
-    debugWriteFile cfg oPath pattern'
+  oPath %> \_ -> aLoadDB cfg oPath sPath 
   return (ExprPath oPath)
-cLoadDB _ _ = error "bad argument to cLoadDB"
+rLoadDB _ _ = error "bad argument to rLoadDB"
+
+aLoadDB :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadDB cfg oPath sPath = do
+  pattern <- debugReadFile cfg sPath
+  let pattern' = makeRelative (cfgTmpDir cfg) pattern
+  debugWriteFile cfg oPath pattern'
 
 loadNuclDB :: CutFunction
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -127,7 +129,7 @@ blastdblist = CutFunction
   { fName      = "blastdblist"
   , fTypeCheck = defaultTypeCheck [str] (SetOf str)
   , fFixity    = Prefix
-  , fCompiler  = cBlastdblist
+  , fRules  = rBlastdblist
   }
 
 filterNames :: String -> [String] -> [String]
@@ -135,23 +137,26 @@ filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
-cBlastdblist :: RulesFn
-cBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
-  (ExprPath fPath) <- cExpr s f
+rBlastdblist :: RulesFn
+rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
+  (ExprPath fPath) <- rExpr s f
   let (CacheDir tmpDir) = cacheDir cfg "blastdbget"
       (ExprPath oPath ) = exprPath cfg True e []
       stdoutTmp = tmpDir </> "stdout" <.> "txt"
-  oPath %> \_ -> do
-    wrappedCmd cfg [oPath] [Shell] "blastdbget" [tmpDir, ">", fPath]
-    -- TODO should this strip newlines on its own? seems important
-    filterStr <- debugReadFile  cfg fPath
-    out       <- debugReadLines cfg stdoutTmp
-    let names = if null filterStr || null out then []
-                else filterNames (init filterStr) (tail out)
-    -- toShortCutSetStr cfg str (ExprPath oPath) names
-    debugWriteLines cfg oPath names
+  oPath %> \_ -> aBlastdblist cfg oPath tmpDir stdoutTmp fPath
   return (ExprPath oPath)
-cBlastdblist _ _ = error "bad argument to cBlastdblist"
+rBlastdblist _ _ = error "bad argument to rBlastdblist"
+
+aBlastdblist :: CutConfig -> String -> String -> FilePath -> String -> Action ()
+aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
+  wrappedCmd cfg [oPath] [Shell] "blastdbget" [tmpDir, ">", fPath]
+  -- TODO should this strip newlines on its own? seems important
+  filterStr <- debugReadFile  cfg fPath
+  out       <- debugReadLines cfg stdoutTmp
+  let names = if null filterStr || null out then []
+              else filterNames (init filterStr) (tail out)
+  -- toShortCutSetStr cfg str (ExprPath oPath) names
+  debugWriteLines cfg oPath names
 
 -- TODO do I need to adjust the timeout? try on the cluster first
 blastdbget :: CutFunction
@@ -159,23 +164,26 @@ blastdbget = CutFunction
   { fName      = "blastdbget"
   , fTypeCheck = defaultTypeCheck [str] ndb -- TODO are there protein ones too?
   , fFixity    = Prefix
-  , fCompiler  = cBlastdbget
+  , fRules  = rBlastdbget
   }
 
-cBlastdbget :: RulesFn
-cBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
-  (ExprPath nPath) <- cExpr st name
+rBlastdbget :: RulesFn
+rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
+  (ExprPath nPath) <- rExpr st name
   let (CacheDir tmpDir  ) = cacheDir cfg "blastdbget"
       (ExprPath dbPrefix) = exprPath cfg True e [] -- final prefix
-  dbPrefix %> \_ -> do
-    need [nPath]
-    dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
-    liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
-    unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
-      "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
-    debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
+  dbPrefix %> \_ -> aBlastdbget cfg dbPrefix tmpDir nPath
   return (ExprPath dbPrefix)
-cBlastdbget _ _ = error "bad argument to cBlastdbget"
+rBlastdbget _ _ = error "bad argument to rBlastdbget"
+
+aBlastdbget :: CutConfig -> [Char] -> FilePath -> FilePath -> Action ()
+aBlastdbget cfg dbPrefix tmpDir nPath = do
+  need [nPath]
+  dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
+  liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
+  unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
+    "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
+  debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
 
 -- TODO is this actually used anywhere?
 linkDBFile :: CutConfig -> FilePath -> FilePath -> Action ()
@@ -196,7 +204,7 @@ mkMakeblastdb dbType = CutFunction
   { fName      = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
   , fTypeCheck = tMakeblastdb dbType
   , fFixity    = Prefix
-  , fCompiler  = cMakeblastdb dbType
+  , fRules  = rMakeblastdb dbType
   }
 
 -- TODO no! depends on an arg
@@ -206,15 +214,15 @@ tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
 -- TODO is rtn always the same as dbType?
-cMakeblastdb :: CutType -> RulesFn
-cMakeblastdb dbType s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
-  (ExprPath faPath) <- cExpr s fa
+rMakeblastdb :: CutType -> RulesFn
+rMakeblastdb dbType s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
+  (ExprPath faPath) <- rExpr s fa
   let relFa = makeRelative (cfgTmpDir cfg) faPath
       (ExprPath dbPrefix) = exprPathExplicit cfg True rtn "makeblastdb" [relFa]
       -- dbType' = if dbType == ndb then "nucl" else "prot"
   dbPrefix %> \_ -> aMakeblastdb dbType cfg undefined [ExprPath dbPrefix, ExprPath faPath]
   return (ExprPath dbPrefix)
-cMakeblastdb _ _ _ = error "bad argument to makeblastdb"
+rMakeblastdb _ _ _ = error "bad argument to makeblastdb"
 
 aMakeblastdb :: CutType -> ActionFn
 aMakeblastdb dbType cfg _ [ExprPath dbPrefix, ExprPath faPath] = do
@@ -243,7 +251,7 @@ mkMakeblastdbEach dbType = CutFunction
   { fName      = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
   , fTypeCheck = tMakeblastdbEach dbType
   , fFixity    = Prefix
-  , fCompiler  = cMakeblastdbEach dbType
+  , fRules  = rMakeblastdbEach dbType
   }
 
 -- TODO no! depends on an arg
@@ -251,5 +259,5 @@ tMakeblastdbEach :: CutType -> TypeChecker
 tMakeblastdbEach dbType [SetOf x] | x `elem` [fna, faa] = Right (SetOf dbType)
 tMakeblastdbEach _ _ = error "makeblastdb_each requires a set of fasta files" -- TODO typed error
 
-cMakeblastdbEach :: CutType -> RulesFn
-cMakeblastdbEach dbType = rMapLastTmp (aMakeblastdb dbType) "makeblastdb" dbType
+rMakeblastdbEach :: CutType -> RulesFn
+rMakeblastdbEach dbType = rMapLastTmp (aMakeblastdb dbType) "makeblastdb" dbType

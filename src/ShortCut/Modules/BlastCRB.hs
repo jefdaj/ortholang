@@ -5,7 +5,7 @@ module ShortCut.Modules.BlastCRB where
 import ShortCut.Core.Types
 import Development.Shake       (quietly, Action, CmdOption(..))
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.ModuleAPI (rSimpleTmp, rMapLastTmps)
+import ShortCut.Core.Compile.Rules (rSimpleTmp, rMapLastTmps)
 import ShortCut.Modules.SeqIO  (faa, fna)
 
 cutModule :: CutModule
@@ -42,7 +42,7 @@ blastCRB = CutFunction
   { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
   , fTypeCheck = tCrbBlast
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aBlastCRB "crbblast" crb
+  , fRules  = rSimpleTmp aBlastCRB "crbblast" crb
   }
 
 blastCRBEach :: CutFunction
@@ -50,7 +50,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fCompiler  = rMapLastTmps aBlastCRB "crbblast" (SetOf crb)
+  , fRules  = rMapLastTmps aBlastCRB "crbblast" (SetOf crb)
   }
 
 tCrbBlast :: [CutType] -> Either String CutType

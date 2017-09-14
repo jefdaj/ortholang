@@ -3,11 +3,10 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths     (exprPath, cacheDir)
-import ShortCut.Core.Compile   (cExpr)
+import ShortCut.Core.Compile.Paths     (exprPath, cacheDir)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugTrackWrite)
-import ShortCut.Core.ModuleAPI (rSimpleTmp, defaultTypeCheck)
+import ShortCut.Core.Compile.Rules     (rExpr, rSimpleTmp, defaultTypeCheck)
 import ShortCut.Modules.SeqIO  (faa)
 import ShortCut.Modules.Blast  (bht)
 import System.Directory        (createDirectoryIfMissing)
@@ -34,7 +33,7 @@ reciprocal = CutFunction
   { fName      = "reciprocal"
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fFixity    = Prefix
-  , fCompiler  = rSimpleTmp aRecip "blast" bht
+  , fRules  = rSimpleTmp aRecip "blast" bht
   }
 
 aRecip :: ActionFn
@@ -48,30 +47,29 @@ blastpRBH = CutFunction
   { fName = "blastp_rbh"
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fFixity = Prefix
-  , fCompiler = cBlastpRBH
+  , fRules = rBlastpRBH
   }
 
 -- it this works I'll be modeling new versions of the map ones after it
-cBlastpRBH :: RulesFn
-cBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
+rBlastpRBH :: RulesFn
+rBlastpRBH s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfaa, rfaa]) = do
   let lhits = CutFun bht salt deps "blastp"     [lfaa , rfaa , evalue]
       rhits = CutFun bht salt deps "blastp"     [rfaa , lfaa , evalue]
       lbest = CutFun bht salt deps "best_hits"  [lhits]
       rbest = CutFun bht salt deps "best_hits"  [rhits]
       rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
       (ExprPath out) = exprPath cfg True e []
-  (ExprPath rbhPath) <- cExpr s rbh -- TODO this is the sticking point right?
-  out %> \_ -> do
-    need [rbhPath]
-    aBlastpRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
-    debugTrackWrite cfg [out]
+  (ExprPath rbhPath) <- rExpr s rbh -- TODO this is the sticking point right?
+  out %> \_ -> aBlastpRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
   return (ExprPath out)
-cBlastpRBH _ _ = error "bad argument to cBlastRBH"
+rBlastpRBH _ _ = error "bad argument to cBlastRBH"
 
--- this is an attempt to convert cBlastpRBH into a form usable with rMapLastTmp
+-- this is an attempt to convert rBlastpRBH into a form usable with rMapLastTmp
 aBlastpRBH :: ActionFn
-aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] =
+aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] = do
+  need [rbhPath]
   unit $ quietly $ wrappedCmd cfg [out] [] "ln" ["-fs", rbhPath, out]
+  debugTrackWrite cfg [out]
 aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 
 ---------------------------------------------
@@ -84,23 +82,26 @@ reciprocalEach = CutFunction
   { fName      = "reciprocal_each"
   , fTypeCheck = defaultTypeCheck [bht, SetOf bht] (SetOf bht)
   , fFixity    = Prefix
-  , fCompiler  = cRecipEach
+  , fRules  = rRecipEach
   }
 
 -- TODO how to hook this up to blastp_each?
-cRecipEach :: RulesFn
-cRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
-  (ExprPath lsPath) <- cExpr s lbhts
-  (ExprPath rsPath) <- cExpr s rbhts
+rRecipEach :: RulesFn
+rRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
+  (ExprPath lsPath) <- rExpr s lbhts
+  (ExprPath rsPath) <- rExpr s rbhts
   let (ExprPath oPath) = exprPath cfg True e []
       (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
-  oPath %> \_ -> do
-    need [lsPath, rsPath]
-    unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
-      [cDir, oPath, lsPath, rsPath]
-    debugTrackWrite cfg [oPath]
+  oPath %> \_ -> aRecipEach cfg oPath lsPath rsPath cDir
   return (ExprPath oPath)
-cRecipEach _ _ = error "bad argument to cRecipEach"
+rRecipEach _ _ = error "bad argument to rRecipEach"
+
+aRecipEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aRecipEach cfg oPath lsPath rsPath cDir = do
+  need [lsPath, rsPath]
+  unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
+    [cDir, oPath, lsPath, rsPath]
+  debugTrackWrite cfg [oPath]
 
 -----------------------------------------------
 -- the hard part: mapped reciprocal versions --
@@ -114,22 +115,22 @@ cRecipEach _ _ = error "bad argument to cRecipEach"
 --   { fName      = "blastp_rbh_each"
 --   , fTypeCheck = defaultTypeCheck [num, faa, SetOf faa] (SetOf bht)
 --   , fFixity    = Prefix
---   , fCompiler  = cBlastpRBHEach
+--   , fRules  = rBlastpRBHEach
 --   }
 -- 
 -- -- TODO oh right, that might not be directly a list!
 -- --      can this be done a cleaner way??
--- cBlastpRBHEach :: RulesFn
--- cBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutSet _ _ _ ss]) = do
--- -- cBlastpRBHEach st@(scr,cfg) expr@(CutFun _ salt _ _ [e, q, ss]) = do
+-- rBlastpRBHEach :: RulesFn
+-- rBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutSet _ _ _ ss]) = do
+-- -- rBlastpRBHEach st@(scr,cfg) expr@(CutFun _ salt _ _ [e, q, ss]) = do
 --   -- let subjects = extractExprs scr ss
 --   let exprs = map (\s -> CutFun bht salt (concatMap depsOf [e, q, s]) "blastp_rbh" [e, q, s]) ss
---   paths <- mapM (cExpr st) exprs
+--   paths <- mapM (rExpr st) exprs
 --   let (ExprPath out) = exprPath cfg True expr []
 --       paths' = map (\(ExprPath p) -> p) paths
 --   out %> \_ -> need paths' >> debugWriteLines cfg out paths' >> debugTrackWrite cfg [out]
 --   return (ExprPath out)
--- cBlastpRBHEach _ _ = error "bad argument to cBlastpRBHEach"
+-- rBlastpRBHEach _ _ = error "bad argument to rBlastpRBHEach"
 
 
 blastpRBHEach :: CutFunction
@@ -137,25 +138,28 @@ blastpRBHEach = CutFunction
   { fName      = "blastp_rbh_each"
   , fTypeCheck = defaultTypeCheck [num, faa, SetOf faa] (SetOf bht)
   , fFixity    = Prefix
-  , fCompiler  = cBlastpRBHEach
+  , fRules  = rBlastpRBHEach
   }
 
 
 -- TODO how to remove all these files? will their mkBlast... take care of it?
-cBlastpRBHEach :: RulesFn
-cBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
+rBlastpRBHEach :: RulesFn
+rBlastpRBHEach s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjects]) = do
   -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
   -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]
   let mkExpr name = CutFun rtn salt deps name [evalue, query, subjects]
       (ExprPath oPath)  = exprPath cfg True e []
       (CacheDir cDir )  = cacheDir cfg "reciprocal_each"
-  (ExprPath fwdsPath) <- cExpr s $ mkExpr "blastp_each"
-  (ExprPath revsPath) <- cExpr s $ mkExpr "blastp_each_rev"
-  oPath %> \_ -> do
-    need [fwdsPath, revsPath]
-    liftIO $ createDirectoryIfMissing True cDir
-    unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
-                       "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
-    debugTrackWrite cfg [oPath]
+  (ExprPath fwdsPath) <- rExpr s $ mkExpr "blastp_each"
+  (ExprPath revsPath) <- rExpr s $ mkExpr "blastp_each_rev"
+  oPath %> \_ -> aBlastpRBHEach cfg oPath cDir fwdsPath revsPath
   return (ExprPath oPath)
-cBlastpRBHEach _ _ = error "bad argument to cRecipEach"
+rBlastpRBHEach _ _ = error "bad argument to rRecipEach"
+
+aBlastpRBHEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aBlastpRBHEach cfg oPath cDir fwdsPath revsPath = do
+  need [fwdsPath, revsPath]
+  liftIO $ createDirectoryIfMissing True cDir
+  unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
+                       "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
+  debugTrackWrite cfg [oPath]

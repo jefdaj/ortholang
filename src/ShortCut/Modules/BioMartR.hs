@@ -6,7 +6,7 @@ module ShortCut.Modules.BioMartR where
 -- TODO "show" the results using that convenient .txt file biomartr saves
 -- TODO combine databases if none is specified
 -- TODO once this works, document it in a notebook entry!
--- TODO known bug: hashes are getting mixed up in cParseSearches
+-- TODO known bug: hashes are getting mixed up in rParseSearches
 
 -- TODO what's the overall plan?
 --      1. parse searches regardless of function being used
@@ -15,9 +15,8 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.ModuleAPI (defaultTypeCheck)
-import ShortCut.Core.Paths   (exprPath, exprPathExplicit)
-import ShortCut.Core.Compile (cExpr)
+import ShortCut.Core.Compile.Paths   (exprPath, exprPathExplicit)
+import ShortCut.Core.Compile.Rules (rExpr, defaultTypeCheck)
 import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
@@ -29,7 +28,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
-import System.FilePath (takeDirectory, takeFileName)
+-- import System.FilePath (takeDirectory, takeFileName)
 
 ------------------------
 -- module description --
@@ -74,7 +73,7 @@ parseSearch = CutFunction
   { fName      = "parse_search"
   , fTypeCheck = defaultTypeCheck [str] search
   , fFixity    = Prefix
-  , fCompiler  = cParseSearches
+  , fRules  = rParseSearches
   }
 
 getGenomes :: CutFunction
@@ -82,7 +81,7 @@ getGenomes = CutFunction
   { fName      = "get_genomes"
   , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf fnagz)
   , fFixity    = Prefix
-  , fCompiler  = cBioMartR "getGenome"
+  , fRules  = rBioMartR "getGenome"
   }
 
 getProteomes :: CutFunction
@@ -90,7 +89,7 @@ getProteomes = CutFunction
   { fName      = "get_proteomes"
   , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf faagz)
   , fFixity    = Prefix
-  , fCompiler  = cBioMartR "getProteome"
+  , fRules  = rBioMartR "getProteome"
   }
 
 --------------------------
@@ -162,24 +161,27 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
-cParseSearches :: CutState -> CutExpr -> Rules ExprPath
-cParseSearches s@(_,cfg) expr@(CutSet _ _ _ _) = do
-  (ExprPath sList) <- cExpr s expr
+rParseSearches :: CutState -> CutExpr -> Rules ExprPath
+rParseSearches s@(_,cfg) expr@(CutSet _ _ _ _) = do
+  (ExprPath sList) <- rExpr s expr
   -- TODO should this be a cacheFile instead?
   let (ExprPath searchTable) = exprPathExplicit cfg True search "parse_searches"
                                                 [show expr, sList]
-  searchTable %> \out -> do
-    tmp <- readFile' sList
-    let sLines = map (cfgTmpDir cfg </>) (lines tmp)
-    need sLines
-    parses <- liftIO $ mapM readSearch sLines
-    let (errors, searches') = partitionEithers parses
-    -- TODO better error here
-    if (not . null) errors
-      then error "invalid search!"
-      else liftIO $ writeFile out $ toTsv searches'
+  searchTable %> \out -> aParseSearches cfg sList out
   return (ExprPath searchTable)
-cParseSearches _ _ = error "bad arguments to cParseSearches"
+rParseSearches _ _ = error "bad arguments to rParseSearches"
+
+aParseSearches :: CutConfig -> FilePath -> FilePath -> Action ()
+aParseSearches cfg sList out = do
+  tmp <- readFile' sList
+  let sLines = map (cfgTmpDir cfg </>) (lines tmp)
+  need sLines
+  parses <- liftIO $ mapM readSearch sLines
+  let (errors, searches') = partitionEithers parses
+  -- TODO better error here
+  if (not . null) errors
+    then error "invalid search!"
+    else liftIO $ writeFile out $ toTsv searches'
 
 ------------------
 -- run biomartr --
@@ -191,10 +193,10 @@ cParseSearches _ _ = error "bad arguments to cParseSearches"
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO factor out a "trivial string file" function?
-cBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
-  (ExprPath bmFn  ) <- cExpr s (CutLit str 0 fn)
-  (ExprPath sTable) <- cParseSearches s ss
+rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
+rBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
+  (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
+  (ExprPath sTable) <- rParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
       (ExprPath outs) = exprPath cfg True expr [ExprPath bmFn, ExprPath sTable]
@@ -203,4 +205,4 @@ cBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
     -- TODO should biomartr get multiple output paths?
     quietly $ wrappedCmd cfg [outs] [Cwd bmTmp] "biomartr.R" [outs, bmFn, sTable]
   return (ExprPath outs)
-cBioMartR _ _ _ = error "bad cBioMartR call"
+rBioMartR _ _ _ = error "bad rBioMartR call"

@@ -4,9 +4,8 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Paths   (exprPath)
-import ShortCut.Core.Compile (cBop, cExpr)
-import ShortCut.Core.ModuleAPI (typeError)
+import ShortCut.Core.Compile.Paths   (exprPath)
+import ShortCut.Core.Compile.Rules (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
                             debugCompiler)
@@ -42,7 +41,7 @@ mkSetBop name fn = CutFunction
   { fName      = name
   , fTypeCheck = bopTypeCheck
   , fFixity    = Infix
-  , fCompiler  = cSetBop fn
+  , fRules  = rSetBop fn
   }
 
 -- if the user gives two lists but of different types, complain that they must
@@ -55,21 +54,27 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
-cSetBop :: (Set String -> Set String -> Set String)
+rSetBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
-cSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
-  -- liftIO $ putStrLn "entering cSetBop"
-  let fixLinks = liftIO . canonicalLinks (typeOf e)
-  (ExprPath p1, ExprPath p2, ExprPath p3) <- cBop s extn e (s1, s2)
-  p3 %> \out -> do
-    need [p1, p2] -- this is required for parallel evaluation!
-    lines1 <- fixLinks =<< readFileLines p1
-    lines2 <- fixLinks =<< readFileLines p2
-    -- putQuiet $ unwords [fnName, p1, p2, p3]
-    let lines3 = fn (fromList lines1) (fromList lines2)
-    writeFileLines out $ toList lines3
+rSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
+  -- liftIO $ putStrLn "entering rSetBop"
+  -- let fixLinks = liftIO . canonicalLinks (typeOf e)
+  let fixLinks = canonicalLinks (typeOf e)
+  (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (s1, s2)
+  p3 %> aSetBop fixLinks fn p1 p2
   return (ExprPath p3)
-cSetBop _ _ _ = error "bad argument to cSetBop"
+rSetBop _ _ _ = error "bad argument to rSetBop"
+
+aSetBop :: ([String] -> IO [String])
+        -> (Set String -> Set String -> Set String)
+        -> FilePath -> FilePath -> FilePath -> Action ()
+aSetBop fixLinks fn p1 p2 out = do
+  need [p1, p2] -- this is required for parallel evaluation!
+  lines1 <- liftIO . fixLinks =<< readFileLines p1
+  lines2 <- liftIO . fixLinks =<< readFileLines p2
+  -- putQuiet $ unwords [fnName, p1, p2, p3]
+  let lines3 = fn (fromList lines1) (fromList lines2)
+  writeFileLines out $ toList lines3
 
 unionBop :: CutFunction
 unionBop = mkSetBop "|" union
@@ -89,29 +94,35 @@ mkSetFold name fn = CutFunction
   { fName      = name
   , fTypeCheck = tSetFold
   , fFixity    = Prefix
-  , fCompiler  = cSetFold fn
+  , fRules  = rSetFold fn
   }
 
 tSetFold :: [CutType] -> Either String CutType
 tSetFold [SetOf (SetOf x)] = Right $ SetOf x
 tSetFold _ = Left "expecting a list of lists"
 
-cSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
-cSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
-  (ExprPath setsPath) <- cExpr s lol
+rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
+rSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
+  (ExprPath setsPath) <- rExpr s lol
   let (ExprPath oPath) = exprPath cfg True e []
-      oPath' = debugCompiler cfg "cSetFold" e oPath
-      fixLinks = liftIO . canonicalLinks (typeOf e)
-  oPath %> \_ -> do
-    lists <- debugReadLines cfg setsPath
-    listContents  <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
-    listContents' <- liftIO $ mapM fixLinks listContents
-    -- liftIO $ putStrLn $ "listContents': " ++ show listContents'
-    let sets = map fromList listContents'
-        oLst = toList $ fn sets
-    debugWriteLines cfg oPath oLst
+      oPath' = debugCompiler cfg "rSetFold" e oPath
+      fixLinks = canonicalLinks (typeOf e)
+  oPath %> \_ -> aSetFold cfg fixLinks fn oPath setsPath
   return (ExprPath oPath')
-cSetFold _ _ _ = error "bad argument to cSetFold"
+rSetFold _ _ _ = error "bad argument to rSetFold"
+
+aSetFold :: CutConfig
+         -> ([String] -> IO [String])
+         -> ([Set String] -> Set String)
+         -> FilePath -> FilePath -> Action ()
+aSetFold cfg fixLinks fn oPath setsPath = do
+  lists <- debugReadLines cfg setsPath
+  listContents  <- mapM (debugReadLines cfg) $ map (cfgTmpDir cfg </>) lists
+  listContents' <- liftIO $ mapM (liftIO . fixLinks) listContents
+  -- liftIO $ putStrLn $ "listContents': " ++ show listContents'
+  let sets = map fromList listContents'
+      oLst = toList $ fn sets
+  debugWriteLines cfg oPath oLst
 
 -- avoided calling it `all` because that's a Prelude function
 intersectionFold :: CutFunction

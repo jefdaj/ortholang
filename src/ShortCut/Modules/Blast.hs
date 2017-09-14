@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
 import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite, debug)
-import ShortCut.Core.ModuleAPI  (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
+import ShortCut.Core.Compile.Rules      (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
 import System.FilePath          (takeDirectory, takeFileName, (</>))
@@ -59,7 +59,7 @@ mkBlastDbFn bCmd qType dbType = CutFunction
   { fName      = bCmd ++ "_db"
   , fTypeCheck = defaultTypeCheck [qType, dbType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastDbFn bCmd aParBlast
+  , fRules  = rMkBlastDbFn bCmd aParBlast
   }
 
 -- the "fancy" one that makes the db from a fasta file
@@ -69,15 +69,15 @@ mkBlastFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastFn bCmd dbType aParBlast
+  , fRules  = rMkBlastFn bCmd dbType aParBlast
   }
 
-cMkBlastDbFn :: String -> (String -> ActionFn) -> RulesFn
-cMkBlastDbFn bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
+rMkBlastDbFn :: String -> (String -> ActionFn) -> RulesFn
+rMkBlastDbFn bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
 
 -- convert the fasta file to a db and pass to the db version (above)
-cMkBlastFn :: String -> CutType -> (String -> ActionFn) -> RulesFn
-cMkBlastFn c dbType a s e = cMkBlastDbFn c a s $ addMakeDBCall1 e dbType
+rMkBlastFn :: String -> CutType -> (String -> ActionFn) -> RulesFn
+rMkBlastFn c dbType a s e = rMkBlastDbFn c a s $ addMakeDBCall1 e dbType
 
 -- TODO aha! this needs to know what type of db to make separately from the
 --      subject's original type, for tblastn and similar
@@ -128,16 +128,16 @@ mkBlastEachFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_each"
   , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] (SetOf bht)
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastEach bCmd dbType aParBlast
+  , fRules  = rMkBlastEach bCmd dbType aParBlast
   }
 
 -- TODO need to apply addMakeDBCall2 *after* mapping over the last arg
 -- TODO more specific tmpDir?
-cMkBlastEach :: String -> CutType -> (String -> ActionFn) -> RulesFn
-cMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ addMakeDBCall2 expr' dbType
+rMkBlastEach :: String -> CutType -> (String -> ActionFn) -> RulesFn
+rMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ addMakeDBCall2 expr' dbType
   where
     mapFn = rMapLastTmp (bActFn' bCmd) "blast" bht
-    expr' = debug cfg ("cMkBlastEach expr: '" ++ render (pPrint expr) ++ "'") expr
+    expr' = debug cfg ("rMkBlastEach expr: '" ++ render (pPrint expr) ++ "'") expr
     -- kludge to allow easy mapping over the subject rather than evalue:
     -- TODO is this right?
     -- TODO can it be changed to keep the evalues at the end like expected?
@@ -157,7 +157,7 @@ mkBlastRevFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_rev"
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastFn bCmd dbType aParBlastRev
+  , fRules  = rMkBlastFn bCmd dbType aParBlastRev
   }
 
 -- just switches the query and subject, which won't work for asymmetric blast fns!
@@ -172,5 +172,5 @@ mkBlastEachRevFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_each_rev"
   , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] bht
   , fFixity    = Prefix
-  , fCompiler  = cMkBlastEach bCmd dbType aParBlastRev
+  , fRules  = rMkBlastEach bCmd dbType aParBlastRev
   }
