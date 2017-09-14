@@ -20,7 +20,7 @@ module ShortCut.Core.Compile.Rules
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Paths
+import ShortCut.Core.Compile.Paths
 import ShortCut.Core.Compile.Actions
 
 import ShortCut.Core.Debug        (debugCompiler)
@@ -31,7 +31,7 @@ import System.FilePath            (makeRelative)
 -- from ModuleAPI --
 -- import Data.Set                   (fromList, toList)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
+import ShortCut.Core.Compile.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
 -- import ShortCut.Core.Compile.Rules      (rExpr)
 import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines, debugReadLines)
 import System.Directory           (createDirectoryIfMissing)

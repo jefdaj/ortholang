@@ -52,7 +52,7 @@
  -   TODO introduce smart constructors (or only use rExpr) to prevent mistakes
  -}
 
-module ShortCut.Core.Paths
+module ShortCut.Core.Compile.Paths
   ( cacheDir
   , cacheDirUniq
   , cacheFile
