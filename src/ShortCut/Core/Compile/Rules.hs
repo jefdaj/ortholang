@@ -23,21 +23,13 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths
 import ShortCut.Core.Compile.Actions
 
-import ShortCut.Core.Debug        (debugCompiler)
-import Data.List                  (find)
-import Data.Maybe                 (fromJust)
-import System.FilePath            (makeRelative)
-
--- from ModuleAPI --
--- import Data.Set                   (fromList, toList)
-import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Compile.Paths        (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
--- import ShortCut.Core.Compile.Rules      (rExpr)
-import ShortCut.Core.Debug        (debugTrackWrite, debugWriteLines, debugReadLines)
-import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Config       (wrappedCmd)
-import ShortCut.Core.Util         (absolutize, resolveSymlinks)
-import Text.PrettyPrint.HughesPJClass
+import ShortCut.Core.Debug         (debugCompiler)
+import Data.List                   (find)
+import Data.Maybe                  (fromJust)
+import System.FilePath             (makeRelative)
+import Development.Shake.FilePath  ((</>))
+import ShortCut.Core.Compile.Paths (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
+import Text.PrettyPrint.HughesPJClass (render, pPrint) -- TODO add to Types?
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
