@@ -6,7 +6,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Config (wrappedCmd)
-import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite)
+import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
 import ShortCut.Core.Compile.Paths  (exprPath, cacheDir)
 import ShortCut.Core.Compile.Rules  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
@@ -193,6 +193,8 @@ aExtractSeqs cfg outPath tmpDir faPath idsPath = do
   need [faPath, idsPath]
   quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
                        "extract_seqs.py" [outPath, faPath, idsPath]
+  let out = debugAction cfg "aExtractSeqs" outPath [tmpDir, faPath, idsPath]
+  debugTrackWrite cfg [out]
 
 -------------------------------------
 -- convert between DNA and protein --
@@ -229,7 +231,8 @@ aConvert :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
 aConvert cfg oPath script faPath = do
   need [faPath]
   unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
-  -- debugTrackWrite cfg [oPath] TODO is this implied?
+  let oPath' = debugAction cfg "aConvert" oPath [script, faPath]
+  debugTrackWrite cfg [oPath'] -- TODO is this implied?
 
 ------------------------
 -- concat fasta files --
@@ -262,6 +265,7 @@ aConcat cfg oPath fsPath = do
                                   fsPath))
   need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
   let catArgs = faPaths ++ [">", oPath]
+      oPath'  = debugAction cfg "aConcat" oPath [fsPath]
   unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
                      (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-  debugTrackWrite cfg [oPath]
+  debugTrackWrite cfg [oPath']

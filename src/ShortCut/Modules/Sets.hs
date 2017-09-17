@@ -8,7 +8,7 @@ import ShortCut.Core.Compile.Paths   (exprPath)
 import ShortCut.Core.Compile.Rules (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
-                            debugRules)
+                            debugRules, debugAction)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Util (resolveSymlinks)
 
@@ -56,25 +56,26 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 -- TODO if order turns out to be important in cuts, call them lists
 rSetBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
-rSetBop fn s e@(CutBop extn _ _ _ s1 s2) = do
+rSetBop fn s@(_,cfg) e@(CutBop extn _ _ _ s1 s2) = do
   -- liftIO $ putStrLn "entering rSetBop"
   -- let fixLinks = liftIO . canonicalLinks (typeOf e)
   let fixLinks = canonicalLinks (typeOf e)
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (s1, s2)
-  p3 %> aSetBop fixLinks fn p1 p2
+  p3 %> aSetBop cfg fixLinks fn p1 p2
   return (ExprPath p3)
 rSetBop _ _ _ = error "bad argument to rSetBop"
 
-aSetBop :: ([String] -> IO [String])
+aSetBop :: CutConfig -> ([String] -> IO [String])
         -> (Set String -> Set String -> Set String)
         -> FilePath -> FilePath -> FilePath -> Action ()
-aSetBop fixLinks fn p1 p2 out = do
+aSetBop cfg fixLinks fn p1 p2 out = do
   need [p1, p2] -- this is required for parallel evaluation!
   lines1 <- liftIO . fixLinks =<< readFileLines p1
   lines2 <- liftIO . fixLinks =<< readFileLines p2
   -- putQuiet $ unwords [fnName, p1, p2, p3]
   let lines3 = fn (fromList lines1) (fromList lines2)
-  writeFileLines out $ toList lines3
+      out' = debugAction cfg "aSetBop" out [p1, p2]
+  debugWriteLines cfg out' $ toList lines3
 
 unionBop :: CutFunction
 unionBop = mkSetBop "|" union
@@ -122,7 +123,8 @@ aSetFold cfg fixLinks fn oPath setsPath = do
   -- liftIO $ putStrLn $ "listContents': " ++ show listContents'
   let sets = map fromList listContents'
       oLst = toList $ fn sets
-  debugWriteLines cfg oPath oLst
+      oPath' = debugAction cfg "aSetFold" oPath [setsPath]
+  debugWriteLines cfg oPath' oLst
 
 -- avoided calling it `all` because that's a Prelude function
 intersectionFold :: CutFunction

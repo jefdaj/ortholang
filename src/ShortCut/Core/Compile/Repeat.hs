@@ -5,7 +5,8 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Paths   (exprPath)
 import ShortCut.Core.Compile.Rules (rExpr, addPrefixes, compileScript)
-import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines)
+import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines,
+                              debugAction)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
 import Data.List             (sort)
@@ -63,17 +64,19 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
 rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 
 -- TODO factor out, and maybe unify with rSetLits
-aRepeatEachLits :: CutType
-                -> CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
+aRepeatEachLits :: CutType -> CutConfig
+                -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLits rtn cfg outPath subPaths' resPaths' = do
   lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
   let sortFn = if rtn == (SetOf num) then sort else sort -- TODO write sortNumLits
       lits'  = sortFn $ map stripWhiteSpace lits
-  debugWriteLines cfg outPath lits'
+      out = debugAction cfg "aRepeatEachLits" outPath (subPaths':resPaths')
+  debugWriteLines cfg out lits'
 
 -- TODO factor out, and maybe unify with rSetLinks
 aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLinks cfg outPath subPaths' resPaths' = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
   let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
-  debugWriteLines cfg outPath outPaths'
+  let out = debugAction cfg "aRepeatEachLinks" outPath (subPaths':resPaths')
+  debugWriteLines cfg out outPaths'

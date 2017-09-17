@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 -- import Control.Monad           (when)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
-                                debugWriteLines)
+                                debugWriteLines, debugAction, debugTrackWrite)
 import ShortCut.Core.Compile.Rules     (rExpr, defaultTypeCheck, rMapLastTmp)
 import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Util      (stripWhiteSpace)
@@ -105,7 +105,8 @@ aLoadDB :: CutConfig -> FilePath -> FilePath -> Action ()
 aLoadDB cfg oPath sPath = do
   pattern <- debugReadFile cfg sPath
   let pattern' = makeRelative (cfgTmpDir cfg) pattern
-  debugWriteFile cfg oPath pattern'
+      oPath' = debugAction cfg "aLoadDB" oPath [sPath]
+  debugWriteFile cfg oPath' pattern'
 
 loadNuclDB :: CutFunction
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -155,8 +156,9 @@ aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
   out       <- debugReadLines cfg stdoutTmp
   let names = if null filterStr || null out then []
               else filterNames (init filterStr) (tail out)
+      oPath' = debugAction cfg "aBlastdblist" oPath [tmpDir, stdoutTmp, fPath]
   -- toShortCutSetStr cfg str (ExprPath oPath) names
-  debugWriteLines cfg oPath names
+  debugWriteLines cfg oPath' names
 
 -- TODO do I need to adjust the timeout? try on the cluster first
 blastdbget :: CutFunction
@@ -183,14 +185,17 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
   unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
     "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
-  debugWriteFile cfg dbPrefix $ (tmpDir </> dbName) ++ "\n"
+  let dbPrefix' = debugAction cfg "aBlastdbget" dbPrefix [tmpDir, nPath]
+  debugWriteFile cfg dbPrefix' $ (tmpDir </> dbName) ++ "\n"
 
 -- TODO is this actually used anywhere?
 linkDBFile :: CutConfig -> FilePath -> FilePath -> Action ()
-linkDBFile cfg dbf prefix =
+linkDBFile cfg dbf prefix = do
   unit $ quietly $ wrappedCmd cfg [dst, dst ++ ".*"] [] "ln" ["-fs", dbf, dst]
+  debugTrackWrite cfg [dst']
   where
     dst  = prefix <.> takeExtension dbf
+    dst' = debugAction cfg "linkDBFile" dst [dbf, prefix]
 
 --------------------------
 -- make from FASTA file --
@@ -239,7 +244,9 @@ aMakeblastdb dbType cfg _ [ExprPath dbPrefix, ExprPath faPath] = do
     ]
   -- TODO put back if you can figure out how with the new wrappedCmd
   -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
-  debugWriteFile cfg dbPrefix relDb
+  let dbPrefix' = debugAction cfg "aMakeblastdb" dbPrefix
+                              [extOf dbType, dbPrefix, faPath]
+  debugWriteFile cfg dbPrefix' relDb
 aMakeblastdb _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show paths
 
 --------------------------------

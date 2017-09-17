@@ -8,6 +8,7 @@ import Development.Shake
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
 import ShortCut.Core.Compile.Rules (rBop, defaultTypeCheck)
+import ShortCut.Core.Debug   (debugAction, debugWriteFile)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -32,19 +33,20 @@ mkMathFn name fn = CutFunction
 -- TODO can a lot of this be moved back into compile while leaving something?
 rMath :: (Scientific -> Scientific -> Scientific) -- in this module
       -> CutState -> CutExpr -> Rules ExprPath    -- in Compile module
-rMath fn s e@(CutBop extn _ _ _ n1 n2) = do
+rMath fn s@(_,cfg) e@(CutBop extn _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering rMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (n1, n2)
-  p3 %> aMath fn p1 p2
+  p3 %> aMath cfg fn p1 p2
   return (ExprPath p3)
 rMath _ _ _ = error "bad argument to rMath"
 
-aMath :: (Scientific -> Scientific -> Scientific)
+aMath :: CutConfig -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()
-aMath fn p1 p2 out = do
+aMath cfg fn p1 p2 out = do
     need [p1, p2]
     num1 <- fmap strip $ readFile' p1
     num2 <- fmap strip $ readFile' p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
-    writeFileChanged out $ show num3 ++ "\n"
+    let out' = debugAction cfg "aMath" out [p1, p2]
+    debugWriteFile cfg out' $ show num3 ++ "\n"

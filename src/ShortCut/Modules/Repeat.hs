@@ -1,6 +1,7 @@
 module ShortCut.Modules.Repeat where
 
 -- TODO which parts of this should go in Core/Repeat.hs?
+-- TODO debug transformations too!
 
 import Development.Shake
 import ShortCut.Core.Types

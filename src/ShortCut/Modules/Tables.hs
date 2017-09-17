@@ -10,7 +10,7 @@ import ShortCut.Core.Compile.Rules       (rSimpleTmp, rMapLastTmp, defaultTypeCh
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.List                  (nub, sort)
-import ShortCut.Core.Debug        (debugWriteLines)
+import ShortCut.Core.Debug        (debugWriteLines, debugAction, debugTrackWrite)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -75,8 +75,8 @@ aTsvColumn n cfg _ [ExprPath outPath, ExprPath tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
   let out' = sort $ nub $ lines out
-  -- toShortCutSetStr cfg str outPath out'
-  debugWriteLines cfg outPath out'
+      outPath' = debugAction cfg "aTsvColumn" outPath [show n, outPath, tsvPath]
+  debugWriteLines cfg outPath' out'
 aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 
 
@@ -96,6 +96,8 @@ aFilterEvalue :: ActionFn
 aFilterEvalue cfg (CacheDir tmp) [ExprPath out, ExprPath evalue, ExprPath hits] = do
   unit $ quietly $ wrappedCmd cfg [out] [Cwd tmp]
                      "filter_evalue.R" [out, evalue, hits]
+  let out' = debugAction cfg "aFilterEvalue" out [tmp, out, evalue, hits]
+  debugTrackWrite cfg [out']
 aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 
 -------------------------------
@@ -113,4 +115,6 @@ bestHits = CutFunction
 aBestHits :: ActionFn
 aBestHits cfg (CacheDir tmp) [ExprPath out, ExprPath hits] = do
   unit $ quietly $ wrappedCmd cfg [out] [Cwd tmp] "best_hits.R" [out, hits]
+  let out' = debugAction cfg "aBestHits" out [tmp, out, hits]
+  debugTrackWrite cfg [out']
 aBestHits _ _ args = error $ "bad argument to aBestHits: " ++ show args

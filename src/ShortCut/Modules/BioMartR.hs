@@ -28,6 +28,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
+import ShortCut.Core.Debug (debugAction, debugTrackWrite)
 -- import System.FilePath (takeDirectory, takeFileName)
 
 ------------------------
@@ -181,7 +182,9 @@ aParseSearches cfg sList out = do
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    else liftIO $ writeFile out $ toTsv searches'
+    else liftIO $ writeFile out' $ toTsv searches'
+    where
+      out' = debugAction cfg "aParseSearches" out [sList]
 
 ------------------
 -- run biomartr --
@@ -200,9 +203,14 @@ rBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
       (ExprPath outs) = exprPath cfg True expr [ExprPath bmFn, ExprPath sTable]
-  outs %> \_ -> do
-    need [bmFn, sTable]
-    -- TODO should biomartr get multiple output paths?
-    quietly $ wrappedCmd cfg [outs] [Cwd bmTmp] "biomartr.R" [outs, bmFn, sTable]
+  outs %> \_ -> aBioMartR cfg outs bmFn bmTmp sTable
   return (ExprPath outs)
 rBioMartR _ _ _ = error "bad rBioMartR call"
+
+aBioMartR :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
+aBioMartR cfg outs bmFn bmTmp sTable = do
+  need [bmFn, sTable]
+  -- TODO should biomartr get multiple output paths?
+  quietly $ wrappedCmd cfg [outs] [Cwd bmTmp] "biomartr.R" [outs, bmFn, sTable]
+  let outs' = debugAction cfg "aBioMartR" outs [bmFn, bmTmp, sTable]
+  debugTrackWrite cfg [outs']
