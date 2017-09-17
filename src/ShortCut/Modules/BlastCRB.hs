@@ -7,6 +7,7 @@ import Development.Shake       (quietly, Action, CmdOption(..))
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Compile.Rules (rSimpleTmp, rMapLastTmps)
 import ShortCut.Modules.SeqIO  (faa, fna)
+import ShortCut.Core.Debug (debugAction, debugTrackWrite)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -62,7 +63,9 @@ tCrbBlastEach [x, SetOf y] | x == fna && y `elem` [fna, faa] = Right (SetOf crb)
 tCrbBlastEach _ = Left "crb_blast requires a fna query and a set of fna or faa targets"
 
 aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] =
+aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] = do
   quietly $ wrappedCmd cfg [o] [Cwd tmpDir]
     "crb-blast" ["--query", q, "--target", t, "--output", o]
+  let o' = debugAction cfg "aBlastCRB" o [tmpDir, o, q, t]
+  debugTrackWrite cfg [o']
 aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

@@ -4,6 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths   (exprPathExplicit)
 import ShortCut.Core.Compile.Rules (rExpr)
+import ShortCut.Core.Debug (debugAction, debugWriteLines)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -67,4 +68,5 @@ aCombos cfg comboFn iPath lType fnName out = do
              $ map (\e -> exprPathExplicit cfg True lType
                                            fnName [iPath, out, e]) elements
   mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
-  writeFileChanged out $ unlines oPaths
+  let out' = debugAction cfg "aCombos" out [iPath, extOf lType, fnName, out]
+  debugWriteLines cfg out' oPaths

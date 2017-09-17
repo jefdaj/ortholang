@@ -7,7 +7,7 @@ import ShortCut.Core.Compile.Paths        (exprPath)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
-import ShortCut.Core.Debug        (debugReadFile, debugWriteLines)
+import ShortCut.Core.Debug        (debugReadFile, debugWriteLines, debugAction)
 import ShortCut.Core.Util         (absolutize)
 
 cutModule :: CutModule
@@ -47,4 +47,5 @@ aGlobFiles cfg outPath path = do
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   paths <- liftIO $ mapM absolutize =<< glob ptn
   -- toShortCutSetStr cfg str (ExprPath outPath) paths
-  debugWriteLines cfg outPath paths
+  let out = debugAction cfg "aGlobFiles" outPath [outPath, path]
+  debugWriteLines cfg out paths

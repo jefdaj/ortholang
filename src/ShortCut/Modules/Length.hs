@@ -3,7 +3,7 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug     (debugReadLines, debugWriteFile)
+import ShortCut.Core.Debug     (debugReadLines, debugWriteFile, debugAction)
 import ShortCut.Core.Compile.Paths     (cacheDir, exprPathExplicit)
 import ShortCut.Core.Compile.Rules     (rExpr, rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
@@ -48,11 +48,12 @@ rLen _ _ = error "bad arguments to rLen"
 tLenEach :: [CutType] -> Either String CutType
 tLenEach [EmptySet          ] = Right (SetOf num)
 tLenEach [(SetOf (SetOf _))] = Right (SetOf num)
-tLenEach [SetOf x] | x == bht = Right (SetOf num)
+tLenEach [SetOf x] | x == bht = Right (SetOf num) -- TODO also crb?
 tLenEach _ = Left $ "length_each requires a list of lists"
 
 aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aLen cfg _ [ExprPath out, ExprPath lst] = do
   n <- fmap length $ debugReadLines cfg lst
-  debugWriteFile cfg out (show n ++ "\n") -- TODO auto-add the \n?
+  let out' = debugAction cfg "aLen" out [out, lst]
+  debugWriteFile cfg out' (show n ++ "\n") -- TODO auto-add the \n?
 aLen _ _ args = error $ "bad arguments to aLen: " ++ show args

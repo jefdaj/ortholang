@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
-import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite, debug)
+import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite, debug, debugAction)
 import ShortCut.Core.Compile.Rules      (rSimpleTmp, rMapLastTmp, defaultTypeCheck)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
@@ -113,9 +113,10 @@ aParBlast bCmd cfg _ paths@[ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
       dbg  = if cfgDebug cfg then ["-v"] else []
       args = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix
              , "-o", o   , "-e", eDec, "-p"] ++ dbg
+      o' = debugAction cfg "aParBlast" o [bCmd, o, q, p, e]
   unit $ quietly $ wrappedCmd cfg [o] [Cwd $ takeDirectory prefix]
                      "parallelblast.py" args
-  debugTrackWrite cfg [o]
+  debugTrackWrite cfg [o']
 aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 
 ---------------------
@@ -162,6 +163,7 @@ mkBlastRevFn bCmd qType sType dbType = CutFunction
 
 -- just switches the query and subject, which won't work for asymmetric blast fns!
 -- TODO write specific ones for that, or a fn + mapping
+-- TODO debug transformations too!
 aParBlastRev :: String -> ActionFn
 aParBlastRev b c d [o, q, s, e] = aParBlast b c d [o, s, q, e]
 aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args

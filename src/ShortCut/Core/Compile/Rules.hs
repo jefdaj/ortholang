@@ -23,13 +23,13 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths
 import ShortCut.Core.Compile.Actions
 
-import ShortCut.Core.Debug         (debugCompiler)
+import ShortCut.Core.Debug         (debugRules)
 import Data.List                   (find)
 import Data.Maybe                  (fromJust)
 import System.FilePath             (makeRelative)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Compile.Paths (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
-import Text.PrettyPrint.HughesPJClass (render, pPrint) -- TODO add to Types?
+-- import Text.PrettyPrint.HughesPJClass (render, pPrint) -- TODO add to Types?
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
@@ -90,7 +90,7 @@ rAssign s@(_,cfg) (var, expr) = do
   path  <- rExpr s expr
   path' <- rVar s var expr path
   let res  = (var, path')
-      res' = debugCompiler cfg "rAssign" (var, expr) res
+      res' = debugRules cfg "rAssign" (var, expr) res
   return res'
 
 -- TODO how to fail if the var doesn't exist??
@@ -114,7 +114,7 @@ compileScript s@(as,_) permHash = do
 rLit :: CutState -> CutExpr -> Rules ExprPath
 rLit (_,cfg) expr = do
   let (ExprPath path) = exprPath cfg False expr [] -- absolute paths allowed!
-      path' = debugCompiler cfg "rLit" expr path
+      path' = debugRules cfg "rLit" expr path
   path %> aLit cfg expr
   return (ExprPath path')
 
@@ -130,7 +130,7 @@ rSet _ _ = error "bad arguemnt to rSet"
 rSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
   let (ExprPath link) = exprPath cfg True e []
-      link' = debugCompiler cfg "rSetEmpty" e link
+      link' = debugRules cfg "rSetEmpty" e link
   link %> \_ -> aSetEmpty cfg link
   return (ExprPath link')
 rSetEmpty _ e = error $ "bad arguemnt to rSetEmpty: " ++ show e
@@ -142,7 +142,7 @@ rSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
-      outPath' = debugCompiler cfg "rSetLits" e outPath
+      outPath' = debugRules cfg "rSetLits" e outPath
   outPath %> \_ -> aSetLits cfg outPath relPaths
   return (ExprPath outPath')
 rSetLits _ e = error $ "bad argument to rSetLits: " ++ show e
@@ -154,7 +154,7 @@ rSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
       (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
-      outPath' = debugCompiler cfg "rSetPaths" e outPath
+      outPath' = debugRules cfg "rSetPaths" e outPath
   outPath %> \_ -> aSetPaths cfg outPath paths'
   return (ExprPath outPath')
 rSetPaths _ _ = error "bad arguemnts to rSetPaths"
@@ -164,7 +164,7 @@ rSetPaths _ _ = error "bad arguemnts to rSetPaths"
 rRef :: CutState -> CutExpr -> Rules ExprPath
 rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
-    ePath (VarPath p) = ExprPath $ debugCompiler cfg "rRef" e p
+    ePath (VarPath p) = ExprPath $ debugRules cfg "rRef" e p
 rRef _ _ = error "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.
@@ -174,7 +174,7 @@ rVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 rVar (_,cfg) var expr (ExprPath dest) = do
   let (VarPath link) = varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
-      linkd = debugCompiler cfg "rVar" var link
+      linkd = debugRules cfg "rVar" var link
   link %> \_ -> aVar cfg dest link
   return (VarPath linkd)
 
@@ -191,7 +191,7 @@ rBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
   let rel1  = makeRelative (cfgTmpDir cfg) p1
       rel2  = makeRelative (cfgTmpDir cfg) p2
       path  = exprPathExplicit cfg True t "cut_bop" [show salt, name, rel1, rel2]
-      path' = debugCompiler cfg "rBop" e path
+      path' = debugRules cfg "rBop" e path
   return (ExprPath p1, ExprPath p2, path')
 rBop _ _ _ _ = error "bad argument to rBop"
 
@@ -333,26 +333,20 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
     --      will it be unique?
     tmpFn args = cacheDirUniq cfg tmpPrefix args
 
--- common code factored out from the two functions above
 -- TODO put the .args and final functions in the cachedir of the regular fn?
--- TODO now that the new Shake strategy works, clean it up!
--- TODO sprinkle some need in here?
 rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
 rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
-  liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
-
+  -- TODO make this an actual debug call
+  -- liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
   initPaths <- mapM (rExpr s) (init exprs)
   (ExprPath lastsPath) <- rExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
-      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
+      o@(ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
-
   outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
-
   -- This builds one of the list of out paths based on a .args file
   -- (made in the action above). It's a pretty roundabout way to do it!
   -- TODO ask ndmitchell if there's something much more elegant I'm missing
   (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
-
-  return (ExprPath outPath)
+  return $ debugRules cfg "rMapLast" e o
 rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"

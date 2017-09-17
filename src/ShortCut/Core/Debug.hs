@@ -2,7 +2,8 @@ module ShortCut.Core.Debug
   ( debug
   , debugShow
   , debugParser
-  , debugCompiler
+  , debugRules
+  , debugAction
   , debugReadFile
   , debugReadLines
   , debugWriteFile
@@ -50,11 +51,17 @@ debugParser cfg name res = debug cfg msg res
 
 -- TODO restrict to CutExpr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
-debugCompiler :: (Pretty a, Show b) => CutConfig -> String -> a -> b -> b
-debugCompiler cfg name input output = debug cfg msg output
+debugRules :: (Pretty a, Show b) => CutConfig -> String -> a -> b -> b
+debugRules cfg name input output = debug cfg msg output
   where
     ren = render $ pPrint input
     msg = name ++ " compiled '" ++ ren ++ "' to " ++ show output
+
+-- TODO put outPath last, here and in actual action fns
+debugAction :: CutConfig -> String -> FilePath -> [String] -> FilePath
+debugAction cfg name outPath args = debug cfg msg outPath
+  where
+    msg = name ++ " created " ++ show outPath ++ " using " ++ show args
 
 -----------------------------
 -- handle duplicate writes --
