@@ -48,7 +48,7 @@ rLen _ _ = error "bad arguments to rLen"
 tLenEach :: [CutType] -> Either String CutType
 tLenEach [EmptySet          ] = Right (SetOf num)
 tLenEach [(SetOf (SetOf _))] = Right (SetOf num)
-tLenEach [SetOf x] | x == bht = Right (SetOf num)
+tLenEach [SetOf x] | x == bht = Right (SetOf num) -- TODO also crb?
 tLenEach _ = Left $ "length_each requires a list of lists"
 
 aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()

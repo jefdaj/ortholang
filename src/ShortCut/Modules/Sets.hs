@@ -8,7 +8,7 @@ import ShortCut.Core.Compile.Paths   (exprPath)
 import ShortCut.Core.Compile.Rules (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
-                            debugCompiler)
+                            debugRules)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Util (resolveSymlinks)
 
@@ -105,7 +105,7 @@ rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPat
 rSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
   let (ExprPath oPath) = exprPath cfg True e []
-      oPath' = debugCompiler cfg "rSetFold" e oPath
+      oPath' = debugRules cfg "rSetFold" e oPath
       fixLinks = canonicalLinks (typeOf e)
   oPath %> \_ -> aSetFold cfg fixLinks fn oPath setsPath
   return (ExprPath oPath')

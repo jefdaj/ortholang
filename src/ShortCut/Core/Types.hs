@@ -57,6 +57,7 @@ import Data.Maybe            (fromJust)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 -- TODO where should these go?
+-- TODO edit ActionFn?
 type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
 type RulesFn     = CutState -> CutExpr -> Rules ExprPath
 type TypeChecker = [CutType] -> Either String CutType

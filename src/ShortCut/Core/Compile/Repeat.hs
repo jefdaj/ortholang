@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Paths   (exprPath)
 import ShortCut.Core.Compile.Rules (rExpr, addPrefixes, compileScript)
-import ShortCut.Core.Debug   (debugCompiler, debugReadFile, debugWriteLines)
+import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
 import Data.List             (sort)
@@ -38,7 +38,7 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
   -- let res  = (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
-  -- let resPath' = debugCompiler cfg "cRepeat" (resExpr, subVar, subExpr) resPath
+  -- let resPath' = debugRules cfg "cRepeat" (resExpr, subVar, subExpr) resPath
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
 -- sortNumLits :: [String] -> [String]
@@ -52,7 +52,7 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
   let (ExprPath subPaths') = subPaths
       resPaths'  = map (\(ExprPath p) -> p) resPaths
       resPaths'' = map (makeRelative $ cfgTmpDir cfg) resPaths'
-      outPath'   = debugCompiler cfg "rRepeatEach" expr outPath
+      outPath'   = debugRules cfg "rRepeatEach" expr outPath
       (ExprPath outPath) = exprPath cfg True expr $ map ExprPath resPaths''
   outPath %> \_ ->
     let actFn = if typeOf expr `elem` [SetOf str, SetOf num]
