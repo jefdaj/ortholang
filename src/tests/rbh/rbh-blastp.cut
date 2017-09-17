@@ -1,0 +1,18 @@
+# TODO when reversing the order, shouldn't need to re-run blastp!
+#      (also, should get the same results right?)
+# TODO maybe now is the time to make the map fns put stuff in regular dirs?
+pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid157913_NC_017038.faa"
+pcc7942 = concat_fastas (load_faa_each
+    {"ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
+     "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"})
+ref6803 = blastp_rbh 1e-5 pcc6803 pcc7942
+ref7942 = blastp_rbh 1e-5 pcc7942 pcc6803 # TODO why is this re-running blastp?
+
+# TODO almost right, but:
+#      - if it's a set, why are there duplicates?
+#      - should i go back to lists since that's useful here?
+result = repeat (length ref7942) pcc6803 4
+
+# TODO define the difference between these:
+# result = extract_seqs pcc6803 (extract_queries ref7942 ~ extract_targets ref6803)
+# result = extract_queries ref6803 ~ extract_targets ref7942
