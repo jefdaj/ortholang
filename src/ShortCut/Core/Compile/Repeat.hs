@@ -70,7 +70,7 @@ aRepeatEachLits rtn cfg outPath subPaths' resPaths' = do
   lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
   let sortFn = if rtn == (SetOf num) then sort else sort -- TODO write sortNumLits
       lits'  = sortFn $ map stripWhiteSpace lits
-      out = debugAction cfg "aRepeatEachLits" outPath (subPaths':resPaths')
+      out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths':resPaths')
   debugWriteLines cfg out lits'
 
 -- TODO factor out, and maybe unify with rSetLinks
@@ -78,5 +78,5 @@ aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLinks cfg outPath subPaths' resPaths' = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
   let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
-  let out = debugAction cfg "aRepeatEachLinks" outPath (subPaths':resPaths')
+  let out = debugAction cfg "aRepeatEachLinks" outPath (outPath:subPaths':resPaths')
   debugWriteLines cfg out outPaths'

@@ -51,5 +51,5 @@ aSummary cfg summaryFn iPath out = do
   iLists <- fmap lines $ readFile' iPath
   iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
-      out' = debugAction cfg "aSummary" out [iPath]
+      out' = debugAction cfg "aSummary" out [out, iPath]
   debugWriteLines cfg out' oElems

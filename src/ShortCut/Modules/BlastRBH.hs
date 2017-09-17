@@ -104,7 +104,7 @@ aRecipEach cfg oPath lsPath rsPath cDir = do
   need [lsPath, rsPath]
   unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
     [cDir, oPath, lsPath, rsPath]
-  let oPath' = debugAction cfg "aRecipEach" oPath [lsPath, rsPath, cDir]
+  let oPath' = debugAction cfg "aRecipEach" oPath [oPath, lsPath, rsPath, cDir]
   debugTrackWrite cfg [oPath']
 
 -----------------------------------------------
@@ -166,5 +166,5 @@ aBlastpRBHEach cfg oPath cDir fwdsPath revsPath = do
   liftIO $ createDirectoryIfMissing True cDir
   unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
                        "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
-  let oPath' = debugAction cfg "aBlastpRBHEach" oPath [cDir, fwdsPath, revsPath]
+  let oPath' = debugAction cfg "aBlastpRBHEach" oPath [oPath, cDir, fwdsPath, revsPath]
   debugTrackWrite cfg [oPath']

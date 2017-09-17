@@ -193,7 +193,7 @@ aExtractSeqs cfg outPath tmpDir faPath idsPath = do
   need [faPath, idsPath]
   quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
                        "extract_seqs.py" [outPath, faPath, idsPath]
-  let out = debugAction cfg "aExtractSeqs" outPath [tmpDir, faPath, idsPath]
+  let out = debugAction cfg "aExtractSeqs" outPath [outPath, tmpDir, faPath, idsPath]
   debugTrackWrite cfg [out]
 
 -------------------------------------
@@ -231,7 +231,7 @@ aConvert :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
 aConvert cfg oPath script faPath = do
   need [faPath]
   unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
-  let oPath' = debugAction cfg "aConvert" oPath [script, faPath]
+  let oPath' = debugAction cfg "aConvert" oPath [oPath, script, faPath]
   debugTrackWrite cfg [oPath'] -- TODO is this implied?
 
 ------------------------
@@ -265,7 +265,7 @@ aConcat cfg oPath fsPath = do
                                   fsPath))
   need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
   let catArgs = faPaths ++ [">", oPath]
-      oPath'  = debugAction cfg "aConcat" oPath [fsPath]
+      oPath'  = debugAction cfg "aConcat" oPath [oPath, fsPath]
   unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
                      (debug cfg ("catArgs: " ++ show catArgs) catArgs)
   debugTrackWrite cfg [oPath']

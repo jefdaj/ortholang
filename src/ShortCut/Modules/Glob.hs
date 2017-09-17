@@ -47,5 +47,5 @@ aGlobFiles cfg outPath path = do
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   paths <- liftIO $ mapM absolutize =<< glob ptn
   -- toShortCutSetStr cfg str (ExprPath outPath) paths
-  let out = debugAction cfg "aGlobFiles" outPath [path]
+  let out = debugAction cfg "aGlobFiles" outPath [outPath, path]
   debugWriteLines cfg out paths

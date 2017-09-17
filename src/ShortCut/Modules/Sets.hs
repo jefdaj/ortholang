@@ -74,7 +74,7 @@ aSetBop cfg fixLinks fn p1 p2 out = do
   lines2 <- liftIO . fixLinks =<< readFileLines p2
   -- putQuiet $ unwords [fnName, p1, p2, p3]
   let lines3 = fn (fromList lines1) (fromList lines2)
-      out' = debugAction cfg "aSetBop" out [p1, p2]
+      out' = debugAction cfg "aSetBop" out [p1, p2, out]
   debugWriteLines cfg out' $ toList lines3
 
 unionBop :: CutFunction
@@ -123,7 +123,7 @@ aSetFold cfg fixLinks fn oPath setsPath = do
   -- liftIO $ putStrLn $ "listContents': " ++ show listContents'
   let sets = map fromList listContents'
       oLst = toList $ fn sets
-      oPath' = debugAction cfg "aSetFold" oPath [setsPath]
+      oPath' = debugAction cfg "aSetFold" oPath [oPath, setsPath]
   debugWriteLines cfg oPath' oLst
 
 -- avoided calling it `all` because that's a Prelude function

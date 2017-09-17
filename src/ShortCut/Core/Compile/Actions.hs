@@ -29,14 +29,14 @@ aSetLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
 aSetLits cfg outPath relPaths = do
   lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
   let lits' = sort $ map stripWhiteSpace lits
-      out'  = debugAction cfg "aSetLits" outPath relPaths
+      out'  = debugAction cfg "aSetLits" outPath (outPath:relPaths)
   debugWriteLines cfg out' lits'
 
 aVar :: CutConfig -> FilePath -> FilePath -> Action ()
 aVar cfg dest link = do
   let destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
       linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
-      link'  = debugAction cfg "aVar" link [dest]
+      link'  = debugAction cfg "aVar" link [link, dest]
   alwaysRerun
   need [dest]
   liftIO $ createDirectoryIfMissing True $ takeDirectory link
@@ -46,11 +46,12 @@ aVar cfg dest link = do
 aSetPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
 aSetPaths cfg outPath paths = do
   need paths
-  let out = debugAction cfg "aSetPaths" outPath paths
+  let out = debugAction cfg "aSetPaths" outPath (outPath:paths)
   -- TODO yup bug was here! any reason to keep it?
   -- paths' <- liftIO $ mapM resolveSymlinks paths
   debugWriteLines cfg out paths
 
+-- TODO take the path, not the expression?
 aLit :: CutConfig -> CutExpr -> FilePath -> Action ()
 aLit cfg expr out = debugWriteFile cfg out' $ ePath ++ "\n"
   where
@@ -58,7 +59,7 @@ aLit cfg expr out = debugWriteFile cfg out' $ ePath ++ "\n"
     paths (CutLit _ _ p) = p
     paths _ = error "bad argument to paths"
     ePath = paths expr
-    out' = debugAction cfg "aLit" out [ePath]
+    out' = debugAction cfg "aLit" out [ePath, out]
 
 -- from ModuleAPI --
 
@@ -68,7 +69,7 @@ aOneArgScript cfg oPath script tmpDir argPath = do
   need [argPath]
   liftIO $ createDirectoryIfMissing True tmpDir
   quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
-  let oPath' = debugAction cfg "aOneArgScript" oPath [script,tmpDir,argPath]
+  let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
   trackWrite [oPath']
 
 aOneArgListScript :: CutConfig -> FilePath
@@ -78,7 +79,7 @@ aOneArgListScript cfg outPath script tmpDir faPath = do
   liftIO $ createDirectoryIfMissing True tmpDir
   wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
   -- debugWriteFile cfg outPath out
-  let out = debugAction cfg "aOneArgListScript" outPath [script, tmpDir, faPath]
+  let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
   debugTrackWrite cfg [out]
 
 aLink :: CutConfig -> FilePath -> FilePath -> Action ()
@@ -87,14 +88,14 @@ aLink cfg outPath strPath = do
   src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
   need [src]
   unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
-  let out = debugAction cfg "aLink" outPath [strPath]
+  let out = debugAction cfg "aLink" outPath [outPath, strPath]
   debugTrackWrite cfg [out]
 
 aLoadListOne :: CutConfig -> FilePath -> FilePath -> Action ()
 aLoadListOne cfg outPath litsPath = do
   lits  <- debugReadLines cfg litsPath -- TODO strip?
   lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
-  let out = debugAction cfg "aLoadListOne" outPath [litsPath]
+  let out = debugAction cfg "aLoadListOne" outPath [outPath, litsPath]
   debugWriteLines cfg out lits'
 
 aLoadListMany :: CutConfig -> FilePath -> FilePath -> Action ()
@@ -103,7 +104,7 @@ aLoadListMany cfg outPath pathsPath = do
     need paths
     paths' <- liftIO $ mapM resolveSymlinks paths
     -- need paths'
-    let out = debugAction cfg "aLoadListMany" outPath [pathsPath]
+    let out = debugAction cfg "aLoadListMany" outPath [outPath, pathsPath]
     debugWriteLines cfg out paths'
 
 aSimpleTmp :: CutConfig -> FilePath -> ActionFn -> FilePath -> [ExprPath] -> Action ()
@@ -112,7 +113,7 @@ aSimpleTmp cfg outPath actFn tmpDir argPaths = do
   need argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir
   actFn cfg (CacheDir tmpDir) ([ExprPath outPath] ++ argPaths)
-  let out = debugAction cfg "aSimpleTmp" outPath (tmpDir:argPaths') -- TODO actFn?
+  let out = debugAction cfg "aSimpleTmp" outPath (outPath:tmpDir:argPaths') -- TODO actFn?
   trackWrite [out]
 
 aMapLastArgs :: CutConfig -> FilePath -> [FilePath]
@@ -129,7 +130,7 @@ aMapLastArgs cfg outPath inits mapTmp lastsPath = do
   -- then we just trigger them and write to the overall outPath
   let outPaths = map (\p -> mapTmp </> takeBaseName p) lastPaths
   need outPaths
-  let out = debugAction cfg "aMapLastArgs" outPath (inits ++ [mapTmp, lastsPath])
+  let out = debugAction cfg "aMapLastArgs" outPath (outPath:inits ++ [mapTmp, lastsPath])
   debugWriteLines cfg out outPaths
 
 -- TODO rename this something less confusing
@@ -146,7 +147,7 @@ aMapLastMapTmp cfg tmpFn actFn out = do
   need args'
   let (CacheDir dir) = tmpFn rels -- relative paths for determinism!
       args'' = out:args'
-      out'   = debugAction cfg "aMapLastMapTmp" out args'
+      out'   = debugAction cfg "aMapLastMapTmp" out args' -- TODO is this right?
   liftIO $ createDirectoryIfMissing True dir
   liftIO $ putStrLn $ "args passed to actFn: " ++ show args''
   _ <- actFn cfg (CacheDir dir) (map ExprPath args'')

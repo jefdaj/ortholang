@@ -105,7 +105,7 @@ aLoadDB :: CutConfig -> FilePath -> FilePath -> Action ()
 aLoadDB cfg oPath sPath = do
   pattern <- debugReadFile cfg sPath
   let pattern' = makeRelative (cfgTmpDir cfg) pattern
-      oPath' = debugAction cfg "aLoadDB" oPath [sPath]
+      oPath' = debugAction cfg "aLoadDB" oPath [oPath, sPath]
   debugWriteFile cfg oPath' pattern'
 
 loadNuclDB :: CutFunction
@@ -156,7 +156,7 @@ aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
   out       <- debugReadLines cfg stdoutTmp
   let names = if null filterStr || null out then []
               else filterNames (init filterStr) (tail out)
-      oPath' = debugAction cfg "aBlastdblist" oPath [tmpDir, stdoutTmp, fPath]
+      oPath' = debugAction cfg "aBlastdblist" oPath [oPath, tmpDir, stdoutTmp, fPath]
   -- toShortCutSetStr cfg str (ExprPath oPath) names
   debugWriteLines cfg oPath' names
 
@@ -185,7 +185,7 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
   unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
     "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
-  let dbPrefix' = debugAction cfg "aBlastdbget" dbPrefix [tmpDir, nPath]
+  let dbPrefix' = debugAction cfg "aBlastdbget" dbPrefix [dbPrefix, tmpDir, nPath]
   debugWriteFile cfg dbPrefix' $ (tmpDir </> dbName) ++ "\n"
 
 -- TODO is this actually used anywhere?

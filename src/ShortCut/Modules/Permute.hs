@@ -68,5 +68,5 @@ aCombos cfg comboFn iPath lType fnName out = do
              $ map (\e -> exprPathExplicit cfg True lType
                                            fnName [iPath, out, e]) elements
   mapM_ (\(c,p) -> liftIO $ writeFileLines p c) (zip combos oPaths)
-  let out' = debugAction cfg "aCombos" out [iPath, extOf lType, fnName]
+  let out' = debugAction cfg "aCombos" out [iPath, extOf lType, fnName, out]
   debugWriteLines cfg out' oPaths

@@ -48,5 +48,5 @@ aMath cfg fn p1 p2 out = do
     num2 <- fmap strip $ readFile' p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
-    let out' = debugAction cfg "aMath" out [p1, p2]
+    let out' = debugAction cfg "aMath" out [p1, p2, out]
     debugWriteFile cfg out' $ show num3 ++ "\n"

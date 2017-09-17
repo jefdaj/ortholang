@@ -184,7 +184,7 @@ aParseSearches cfg sList out = do
     then error "invalid search!"
     else liftIO $ writeFile out' $ toTsv searches'
     where
-      out' = debugAction cfg "aParseSearches" out [sList]
+      out' = debugAction cfg "aParseSearches" out [sList, out]
 
 ------------------
 -- run biomartr --
@@ -212,5 +212,5 @@ aBioMartR cfg outs bmFn bmTmp sTable = do
   need [bmFn, sTable]
   -- TODO should biomartr get multiple output paths?
   quietly $ wrappedCmd cfg [outs] [Cwd bmTmp] "biomartr.R" [outs, bmFn, sTable]
-  let outs' = debugAction cfg "aBioMartR" outs [bmFn, bmTmp, sTable]
+  let outs' = debugAction cfg "aBioMartR" outs [outs, bmFn, bmTmp, sTable]
   debugTrackWrite cfg [outs']
