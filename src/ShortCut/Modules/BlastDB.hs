@@ -183,15 +183,15 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   need [nPath]
   dbName <- fmap stripWhiteSpace $ debugReadFile cfg nPath -- TODO need to strip?
   liftIO $ createDirectoryIfMissing True tmpDir -- TODO remove?
-  unit $ quietly $ wrappedCmd cfg [dbPrefix ++ ".*"] [Cwd tmpDir]
-    "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
   let dbPrefix' = debugAction cfg "aBlastdbget" dbPrefix [dbPrefix, tmpDir, nPath]
+  unit $ quietly $ wrappedCmd cfg [dbPrefix' ++ ".*"] [Cwd tmpDir]
+    "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
   debugWriteFile cfg dbPrefix' $ (tmpDir </> dbName) ++ "\n"
 
 -- TODO is this actually used anywhere?
 linkDBFile :: CutConfig -> FilePath -> FilePath -> Action ()
 linkDBFile cfg dbf prefix = do
-  unit $ quietly $ wrappedCmd cfg [dst, dst ++ ".*"] [] "ln" ["-fs", dbf, dst]
+  unit $ quietly $ wrappedCmd cfg [dst', dst ++ ".*"] [] "ln" ["-fs", dbf, dst]
   debugTrackWrite cfg [dst']
   where
     dst  = prefix <.> takeExtension dbf
@@ -200,6 +200,8 @@ linkDBFile cfg dbf prefix = do
 --------------------------
 -- make from FASTA file --
 --------------------------
+
+-- TODO put the database files themselves in the cache dir and only prefix in exprs?
 
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
@@ -236,16 +238,16 @@ aMakeblastdb dbType cfg _ [ExprPath dbPrefix, ExprPath faPath] = do
   liftIO $ putStrLn $ "dbPrefix: " ++ dbPrefix
   liftIO $ putStrLn $ "dbType': " ++ dbType'
   need [faPath]
+  let dbPrefix' = debugAction cfg "aMakeblastdb" dbPrefix
+                              [extOf dbType, dbPrefix, faPath]
   quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [] "makeblastdb"
     [ "-in"    , faPath
-    , "-out"   , dbPrefix
+    , "-out"   , dbPrefix'
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
     , "-dbtype", dbType'
     ]
   -- TODO put back if you can figure out how with the new wrappedCmd
   -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
-  let dbPrefix' = debugAction cfg "aMakeblastdb" dbPrefix
-                              [extOf dbType, dbPrefix, faPath]
   debugWriteFile cfg dbPrefix' relDb
 aMakeblastdb _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show paths
 

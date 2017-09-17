@@ -61,7 +61,7 @@ debugRules cfg name input output = debug cfg msg output
 debugAction :: CutConfig -> String -> FilePath -> [String] -> FilePath
 debugAction cfg name outPath args = debug cfg msg outPath
   where
-    msg = name ++ " created " ++ show outPath ++ " using " ++ show args
+    msg = name ++ " creating " ++ show outPath ++ " from " ++ show args
 
 -----------------------------
 -- handle duplicate writes --
