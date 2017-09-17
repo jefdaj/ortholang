@@ -111,10 +111,10 @@ aParBlast bCmd cfg _ paths@[ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
   let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
       cDir = cfgTmpDir cfg </> takeDirectory prefix -- not actually used as of now
       dbg  = if cfgDebug cfg then ["-v"] else []
-      args = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix
-             , "-o", o   , "-e", eDec, "-p"] ++ dbg
       o' = debugAction cfg "aParBlast" o [bCmd, o, q, p, e]
-  unit $ quietly $ wrappedCmd cfg [o] [Cwd $ takeDirectory prefix]
+      args = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix
+             , "-o", o'  , "-e", eDec, "-p"] ++ dbg
+  unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix]
                      "parallelblast.py" args
   debugTrackWrite cfg [o']
 aParBlast _ _ _ _ = error $ "bad argument to aParBlast"

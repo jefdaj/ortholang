@@ -11,6 +11,7 @@ import ShortCut.Core.Compile.Paths  (exprPath, cacheDir)
 import ShortCut.Core.Compile.Rules  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.FilePath      ((</>))
+import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -166,7 +167,7 @@ extractSeqs = CutFunction
 -- TODO does SetOf str match on the value or just the constructor?
 tExtractSeqs  :: [CutType] -> Either String CutType
 tExtractSeqs [x, SetOf s] | s == str && elem x [faa, fna] = Right x
-tExtractSeqs _ = Left "expected a list of strings and a fasta file"
+tExtractSeqs _ = Left "expected a fasta file and a set of strings"
 
 -- TODO can this be replaced with rOneArgListScript?
 rExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
@@ -191,6 +192,7 @@ aExtractSeqs cfg outPath tmpDir faPath idsPath = do
   -- need [faPath, tmpList]
   -- liftIO $ createDirectoryIfMissing True tmpDir
   need [faPath, idsPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
   quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
                        "extract_seqs.py" [outPath, faPath, idsPath]
   let out = debugAction cfg "aExtractSeqs" outPath [outPath, tmpDir, faPath, idsPath]

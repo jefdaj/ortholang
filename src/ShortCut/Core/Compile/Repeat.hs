@@ -66,11 +66,13 @@ rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 -- TODO factor out, and maybe unify with rSetLits
 aRepeatEachLits :: CutType -> CutConfig
                 -> FilePath -> FilePath -> [FilePath] -> Action ()
-aRepeatEachLits rtn cfg outPath subPaths' resPaths' = do
-  lits  <- mapM (debugReadFile cfg) (subPaths':resPaths')
+aRepeatEachLits rtn cfg outPath subPaths resPaths = do
+  lits <- mapM (debugReadFile cfg) resPaths
+  -- TODO wait, don't sort these at all if going back to lists
   let sortFn = if rtn == (SetOf num) then sort else sort -- TODO write sortNumLits
       lits'  = sortFn $ map stripWhiteSpace lits
-      out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths':resPaths')
+      out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths:resPaths)
+  -- liftIO $ putStrLn $ "aRepeatEachLits lits': " ++ show lits'
   debugWriteLines cfg out lits'
 
 -- TODO factor out, and maybe unify with rSetLinks

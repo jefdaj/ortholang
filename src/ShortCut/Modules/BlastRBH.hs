@@ -38,8 +38,8 @@ reciprocal = CutFunction
 
 aRecip :: ActionFn
 aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
-  unit $ quietly $ wrappedCmd cfg [out] [Cwd tmp] "reciprocal.R" [out, left, right]
   let out' = debugAction cfg "aRecip" out [tmp, out, left, right]
+  unit $ quietly $ wrappedCmd cfg [out'] [Cwd tmp] "reciprocal.R" [out', left, right]
   debugTrackWrite cfg [out']
 aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
 
@@ -70,8 +70,8 @@ rBlastpRBH _ _ = error "bad argument to cBlastRBH"
 aBlastpRBH :: ActionFn
 aBlastpRBH cfg _ [ExprPath out, ExprPath rbhPath] = do
   need [rbhPath]
-  unit $ quietly $ wrappedCmd cfg [out] [] "ln" ["-fs", rbhPath, out]
   let out' = debugAction cfg "aBlastpRBH" out [out, rbhPath]
+  unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", rbhPath, out']
   debugTrackWrite cfg [out']
 aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 
@@ -102,9 +102,9 @@ rRecipEach _ _ = error "bad argument to rRecipEach"
 aRecipEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 aRecipEach cfg oPath lsPath rsPath cDir = do
   need [lsPath, rsPath]
-  unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir] "reciprocal_each.py"
-    [cDir, oPath, lsPath, rsPath]
   let oPath' = debugAction cfg "aRecipEach" oPath [oPath, lsPath, rsPath, cDir]
+  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir] "reciprocal_each.py"
+    [cDir, oPath', lsPath, rsPath]
   debugTrackWrite cfg [oPath']
 
 -----------------------------------------------
@@ -164,7 +164,7 @@ aBlastpRBHEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> A
 aBlastpRBHEach cfg oPath cDir fwdsPath revsPath = do
   need [fwdsPath, revsPath]
   liftIO $ createDirectoryIfMissing True cDir
-  unit $ quietly $ wrappedCmd cfg [oPath] [Cwd cDir]
-                       "reciprocal_each.py" [cDir, oPath, fwdsPath, revsPath]
   let oPath' = debugAction cfg "aBlastpRBHEach" oPath [oPath, cDir, fwdsPath, revsPath]
+  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir]
+                       "reciprocal_each.py" [cDir, oPath', fwdsPath, revsPath]
   debugTrackWrite cfg [oPath']

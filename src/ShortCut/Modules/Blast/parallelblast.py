@@ -103,7 +103,7 @@ def make_hits(args, db):
     else:
         q = query
     cmd = \
-        [ 'BLASTDB=%s' % dirname(db) # TODO error here with path separator?
+        [ 'BLASTDB=%s' % basename(db) # TODO error here with path separator?
         , args['--cmd']
         , '-db', basename(db)
         , '-query', q
