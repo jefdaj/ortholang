@@ -218,7 +218,7 @@ cmdDeps :: CutState -> Handle -> String -> IO CutState
 cmdDeps st@(scr,_) hdl var = do
   hPutStrLn hdl $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
-    Just e  -> prettyAssigns (\(v,_) -> elem v $ depsOf e) scr
+    Just e  -> prettyAssigns (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
   return st
 
 -- TODO move to Pretty.hs
@@ -230,7 +230,7 @@ cmdRDeps st@(scr,_) hdl var = do
   let var' = CutVar var
   hPutStrLn hdl $ case lookup var' scr of
     Nothing -> "Var '" ++ var ++ "' not found"
-    Just _  -> prettyAssigns (\(v,_) -> elem v $ rDepsOf scr var') scr
+    Just _  -> prettyAssigns (\(v,_) -> elem v $ (CutVar var):rDepsOf scr var') scr
   return st
 
 -- TODO factor out the variable lookup stuff
