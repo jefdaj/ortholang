@@ -333,16 +333,25 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
     --      will it be unique?
     tmpFn args = cacheDirUniq cfg tmpPrefix args
 
--- TODO put the .args and final functions in the cachedir of the regular fn?
+-- TODO rename to be clearly "each"-related and use .each for the map files
+--
+-- TODO put the .each in the cachedir of the regular fn
+-- TODO and the final outfile in the expr dir of the regular fn:
+--
+--      cache/<fnname>/<hash of non-mapped args>.each
+--                          |
+--                          V
+--      exprs/<fnname>/<hash of all args>.<ext>
+--
 rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
-rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+rMapLast tmpFn actFn prefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   -- TODO make this an actual debug call
   -- liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
   initPaths <- mapM (rExpr s) (init exprs)
   (ExprPath lastsPath) <- rExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
       o@(ExprPath outPath) = exprPathExplicit cfg True (ListOf rtnType) name [show e]
-      (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
+      (CacheDir mapTmp) = cacheDirUniq cfg prefix e
   outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
   -- This builds one of the list of out paths based on a .args file
   -- (made in the action above). It's a pretty roundabout way to do it!
