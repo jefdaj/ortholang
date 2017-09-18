@@ -5,13 +5,16 @@ pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid157913_NC_017038.
 pcc7942 = concat_fastas (load_faa_each
     ["ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
      "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"])
-ref6803 = blastp_rbh 1e-5 pcc6803 pcc7942
-ref7942 = blastp_rbh 1e-5 pcc7942 pcc6803 # TODO why is this re-running blastp?
 
-# TODO almost right, but:
-#      - if it's a set, why are there duplicates?
-#      - should i go back to lists since that's useful here?
-result = repeat (length ref7942) pcc6803 4
+n = 1e-5
+ref6803 = blastp_rbh n pcc6803 pcc7942
+ref7942 = blastp_rbh n pcc7942 pcc6803 # TODO why is this re-running blastp?
+
+# seems to be mostly 971 but occasionally 972
+# (WP_010871442.1 comes and goes, which is odd because it has evalue 0 on NCBI!)
+rep10 = extract_queries_each (repeat ref7942 n 10)
+variable = any rep10 ~ all rep10
+result = extract_seqs pcc7942 variable
 
 # TODO define the difference between these:
 # result = extract_seqs pcc6803 (extract_queries ref7942 ~ extract_targets ref6803)
