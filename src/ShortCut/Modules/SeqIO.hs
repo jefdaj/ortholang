@@ -63,7 +63,7 @@ mkLoad name rtn = CutFunction
 mkLoadList :: String -> CutType -> CutFunction
 mkLoadList name rtn = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [(SetOf str)] (SetOf rtn)
+  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
   , fRules  = rLoadList
   }
@@ -143,7 +143,7 @@ extractSeqIDs = CutFunction
   }
 
 tExtractSeqIDs :: [CutType] -> Either String CutType
-tExtractSeqIDs [x] | elem x [faa, fna] = Right (SetOf str)
+tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
 -- TODO these should put their tmpfiles in cache/extract_ids!
@@ -164,10 +164,10 @@ extractSeqs = CutFunction
   , fRules  = rExtractSeqs
   }
 
--- TODO does SetOf str match on the value or just the constructor?
+-- TODO does ListOf str match on the value or just the constructor?
 tExtractSeqs  :: [CutType] -> Either String CutType
-tExtractSeqs [x, SetOf s] | s == str && elem x [faa, fna] = Right x
-tExtractSeqs _ = Left "expected a fasta file and a set of strings"
+tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
+tExtractSeqs _ = Left "expected a fasta file and a list of strings"
 
 -- TODO can this be replaced with rOneArgListScript?
 rExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
@@ -186,8 +186,8 @@ rExtractSeqs _ _ = error "bad argument to extractSeqs"
 
 aExtractSeqs :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
 aExtractSeqs cfg outPath tmpDir faPath idsPath = do
-  -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutSet?
-  -- fromShortCutSet cfg idsPath (ExprPath tmpList)
+  -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
+  -- fromShortCutList cfg idsPath (ExprPath tmpList)
 -- outPath %> \_ -> do
   -- need [faPath, tmpList]
   -- liftIO $ createDirectoryIfMissing True tmpDir
@@ -249,7 +249,7 @@ concatFastas = CutFunction
   }
 
 tConcatFastas :: [CutType] -> Either String CutType
-tConcatFastas [SetOf x] | elem x [faa, fna] = Right x
+tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
 rConcat :: CutState -> CutExpr -> Rules ExprPath

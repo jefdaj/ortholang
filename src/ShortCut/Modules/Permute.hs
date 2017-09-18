@@ -23,7 +23,7 @@ leaveOneOut = CutFunction
   }
 
 combosTypeCheck :: [CutType] -> Either String CutType
-combosTypeCheck [(SetOf t)] = Right $ SetOf $ SetOf t
+combosTypeCheck [(ListOf t)] = Right $ ListOf $ ListOf t
 combosTypeCheck _ = Left "type error in leave_each_out!"
 
 -- drops the element at index n from a list
@@ -51,7 +51,7 @@ leaveEachOut xs
 rCombos :: ([FilePath] -> [[FilePath]]) -> CutState -> CutExpr -> Rules ExprPath
 rCombos comboFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- rExpr s iList
-  let oType = SetOf $ typeOf iList
+  let oType = ListOf $ typeOf iList
       (ExprPath oList) = exprPathExplicit cfg True oType fnName [show expr, iPath] -- TODO need fnName too like before?
       lType  = typeOf iList -- TODO is this right?
   oList %> aCombos cfg comboFn iPath lType fnName

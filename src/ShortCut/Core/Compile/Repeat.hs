@@ -9,7 +9,6 @@ import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines,
                               debugAction)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
-import Data.List             (sort)
 
 ----------------------------------
 -- main repeat function for PRS --
@@ -24,7 +23,7 @@ repeatEach = CutFunction
   }
 
 tRepeatEach :: [CutType] -> Either String CutType
-tRepeatEach (res:sub:(SetOf sub'):[]) | sub == sub' = Right $ SetOf res
+tRepeatEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 tRepeatEach _ = Left "invalid args to repeat_each" -- TODO better errors here
 
 -- TODO ideally, this shouldn't need any custom digesting? but whatever no
@@ -42,9 +41,6 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
   -- let resPath' = debugRules cfg "cRepeat" (resExpr, subVar, subExpr) resPath
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
--- sortNumLits :: [String] -> [String]
--- sortNumLits = sort -- TODO write this
-
 rRepeatEach :: CutState -> CutExpr -> Rules ExprPath
 rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr s subList
@@ -56,26 +52,24 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
       outPath'   = debugRules cfg "rRepeatEach" expr outPath
       (ExprPath outPath) = exprPath cfg True expr $ map ExprPath resPaths''
   outPath %> \_ ->
-    let actFn = if typeOf expr `elem` [SetOf str, SetOf num]
+    let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aRepeatEachLits (typeOf expr)
                   else aRepeatEachLinks
     in actFn cfg outPath subPaths' resPaths'
   return (ExprPath outPath')
 rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 
--- TODO factor out, and maybe unify with rSetLits
+-- TODO factor out, and maybe unify with rListLits
 aRepeatEachLits :: CutType -> CutConfig
                 -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLits rtn cfg outPath subPaths resPaths = do
   lits <- mapM (debugReadFile cfg) resPaths
-  -- TODO wait, don't sort these at all if going back to lists
-  let sortFn = if rtn == (SetOf num) then sort else sort -- TODO write sortNumLits
-      lits'  = sortFn $ map stripWhiteSpace lits
+  let lits' = map stripWhiteSpace lits
       out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths:resPaths)
   -- liftIO $ putStrLn $ "aRepeatEachLits lits': " ++ show lits'
   debugWriteLines cfg out lits'
 
--- TODO factor out, and maybe unify with rSetLinks
+-- TODO factor out, and maybe unify with rListLinks
 aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLinks cfg outPath subPaths' resPaths' = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?

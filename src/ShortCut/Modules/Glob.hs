@@ -19,7 +19,7 @@ cutModule = CutModule
 globFiles :: CutFunction
 globFiles = CutFunction
   { fName      = "glob_files"
-  , fTypeCheck = defaultTypeCheck [str] (SetOf str)
+  , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fFixity    = Prefix
   , fRules  = rGlobFiles
   }
@@ -29,7 +29,7 @@ globFiles = CutFunction
 -- 2. compiler saves that to (ExprPath path)
 -- 3. this fn needs path, then reads it to ptn
 -- 4. this fn does the actual globbing, creating paths
--- 5. toShortCutSetStr puts them in ShortCut literal format
+-- 5. toShortCutListStr puts them in ShortCut literal format
 --    (should use str rather than elemRtnType tho)
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
@@ -46,6 +46,6 @@ aGlobFiles cfg outPath path = do
   ptn   <- fmap strip $ debugReadFile cfg path
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   paths <- liftIO $ mapM absolutize =<< glob ptn
-  -- toShortCutSetStr cfg str (ExprPath outPath) paths
+  -- toShortCutListStr cfg str (ExprPath outPath) paths
   let out = debugAction cfg "aGlobFiles" outPath [outPath, path]
   debugWriteLines cfg out paths

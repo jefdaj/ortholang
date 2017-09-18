@@ -1,12 +1,12 @@
 .
 |-- exprs
-|   |-- cut_lit
-|   |   `-- a830208172.str
-|   `-- cut_set
-|       |-- 3038138756.str.set
-|       `-- 9688e66d3e.str.set.set
+|   |-- cut_list
+|   |   |-- 3038138756.str.list
+|   |   `-- 8b60e594d0.str.list.list
+|   `-- cut_lit
+|       `-- a830208172.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_set/9688e66d3e.str.set.set
+    `-- result -> ../exprs/cut_list/8b60e594d0.str.list.list
 
 4 directories, 5 files

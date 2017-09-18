@@ -2,10 +2,10 @@ Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 shortcut >> "stuff"
 "stuff"
-shortcut >> {"more", "stuff"}
-{"more", "stuff"}
-shortcut >> {"what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"}
-{"a",
+shortcut >> ["more", "stuff"]
+["more", "stuff"]
+shortcut >> ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
+["a",
  "about",
  "be",
  "distributed",
@@ -19,12 +19,12 @@ shortcut >> {"what", "about", "a", "large", "number", "of", "short", "strings?",
  "strings?",
  "they",
  "what",
- "will"}
-shortcut >> {"one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"}
-{"and now some longer ones",
+ "will"]
+shortcut >> ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
+["and now some longer ones",
  "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones",
  "one",
  "three",
- "two"}
+ "two"]
 shortcut >> :q
 Bye for now!

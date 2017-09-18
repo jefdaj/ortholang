@@ -13,12 +13,10 @@
 |   |   |-- b0be7d3f4b.num
 |   |   |-- b3b8a3d264.num
 |   |   `-- f6b4a5973c.num
-|   |-- cut_set
-|   |   `-- 2388bd32b5.num.set
 |   `-- repeat
-|       `-- a9ba74e614.num.set
+|       `-- ea93353b28.num.list
 `-- vars
-    |-- result -> ../exprs/repeat/a9ba74e614.num.set
+    |-- result -> ../exprs/repeat/ea93353b28.num.list
     |-- result.2027ab9dca.num -> ../exprs/cut_bop/9c2073159b.num
     |-- result.384f764fe4.num -> ../exprs/cut_bop/373128a52d.num
     |-- result.8b87961447.num -> ../exprs/cut_bop/71e8c9c708.num
@@ -30,4 +28,4 @@
     |-- var1.914bd2723f.num -> ../exprs/cut_lit/b0be7d3f4b.num
     `-- var1.a2a4cd42aa.num -> ../exprs/cut_lit/14dd1297ad.num
 
-6 directories, 24 files
+5 directories, 23 files

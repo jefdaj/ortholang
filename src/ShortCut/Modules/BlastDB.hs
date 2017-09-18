@@ -88,7 +88,7 @@ mkLoadDB name rtn = CutFunction
 mkLoadDBEach :: String -> CutType -> CutFunction
 mkLoadDBEach name rtn = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [SetOf str] (SetOf rtn)
+  , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fFixity    = Prefix
   , fRules  = undefined -- TODO write this!
   }
@@ -128,7 +128,7 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 blastdblist :: CutFunction
 blastdblist = CutFunction
   { fName      = "blastdblist"
-  , fTypeCheck = defaultTypeCheck [str] (SetOf str)
+  , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fFixity    = Prefix
   , fRules  = rBlastdblist
   }
@@ -157,7 +157,7 @@ aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
   let names = if null filterStr || null out then []
               else filterNames (init filterStr) (tail out)
       oPath' = debugAction cfg "aBlastdblist" oPath [oPath, tmpDir, stdoutTmp, fPath]
-  -- toShortCutSetStr cfg str (ExprPath oPath) names
+  -- toShortCutListStr cfg str (ExprPath oPath) names
   debugWriteLines cfg oPath' names
 
 -- TODO do I need to adjust the timeout? try on the cluster first
@@ -265,8 +265,8 @@ mkMakeblastdbEach dbType = CutFunction
 
 -- TODO no! depends on an arg
 tMakeblastdbEach :: CutType -> TypeChecker
-tMakeblastdbEach dbType [SetOf x] | x `elem` [fna, faa] = Right (SetOf dbType)
-tMakeblastdbEach _ _ = error "makeblastdb_each requires a set of fasta files" -- TODO typed error
+tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
+tMakeblastdbEach _ _ = error "makeblastdb_each requires a list of fasta files" -- TODO typed error
 
 rMakeblastdbEach :: CutType -> RulesFn
 rMakeblastdbEach dbType = rMapLastTmp (aMakeblastdb dbType) "makeblastdb" dbType

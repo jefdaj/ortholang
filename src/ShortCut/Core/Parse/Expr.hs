@@ -20,17 +20,17 @@ import Text.Parsec.Combinator (optional, manyTill, eof, lookAhead, between,
 -- TODO once there's [ we can commit to a set, right? should allow failing for real afterward
 pSet :: ParseM CutExpr
 pSet = do
-  terms <- between (pSym '{') (pSym '}')
+  terms <- between (pSym '[') (pSym ']')
                    (sepBy pExpr (pSym ',' <* optional pComment))
   let deps = if null terms
                then []
                else foldr1 union $ map depsOf terms
       rtn = if null terms
-               then EmptySet
+               then EmptyList
                else typeOf $ head terms
   when (not $ all (== rtn) (map typeOf terms))
     (fail "all elements of a set must have the same type")
-  return $ CutSet rtn 0 deps terms
+  return $ CutList rtn 0 deps terms
 
 ---------------
 -- operators --
@@ -67,8 +67,8 @@ pBop :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop [o] = pSym o *> (return $ \e1 e2 ->
   let deps = union (depsOf e1) (depsOf e2)
       (t1, t2) = case (typeOf e1, typeOf e2) of
-                   (EmptySet, b) -> (b, b)
-                   (a, EmptySet) -> (a, a)
+                   (EmptyList, b) -> (b, b)
+                   (a, EmptyList) -> (a, a)
                    (a, b) -> (a, b)
       rtn  = if t1 == t2 then t1 else error $
                o:" operator requires two arguments of the same type, but got:\n"
@@ -91,7 +91,7 @@ pEnd = do
   res <- lookAhead $ void $ choice
     [ eof
     , pComment -- TODO shouldn't this not end it?
-    , void $ try $ choice $ map pSym $ operatorChars cfg ++ ")},"
+    , void $ try $ choice $ map pSym $ operatorChars cfg ++ ")],"
     , void $ try pVarEq
     ]
   let res' = debugParser cfg "pEnd" res
