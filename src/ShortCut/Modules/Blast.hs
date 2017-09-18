@@ -84,7 +84,7 @@ rMkBlastFn c dbType a s e = rMkBlastDbFn c a s $ addMakeDBCall1 e dbType
 addMakeDBCall1 :: CutExpr -> CutType -> CutExpr
 addMakeDBCall1 (CutFun r i ds n [q, s, e]) dbType = CutFun r i ds n [q, db, e]
   where
-    -- dbType = if typeOf s `elem` [fna, SetOf fna] then ndb else pdb -- TODO maybe it's (SetOf fna)?
+    -- dbType = if typeOf s `elem` [fna, ListOf fna] then ndb else pdb -- TODO maybe it's (ListOf fna)?
     db = CutFun dbType i (depsOf s) name [s]
     name = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
 addMakeDBCall1 _ _ = error "bad argument to addMakeDBCall1"
@@ -93,7 +93,7 @@ addMakeDBCall1 _ _ = error "bad argument to addMakeDBCall1"
 addMakeDBCall2 :: CutExpr -> CutType -> CutExpr
 addMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
   where
-    -- dbType = if typeOf s `elem` [fna, SetOf fna] then ndb else pdb -- TODO maybe it's (SetOf fna)?
+    -- dbType = if typeOf s `elem` [fna, ListOf fna] then ndb else pdb -- TODO maybe it's (ListOf fna)?
     dbs = CutFun dbType i (depsOf ss) name [ss]
     name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
 addMakeDBCall2 _ _ = error "bad argument to addMakeDBCall2"
@@ -127,7 +127,7 @@ aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 mkBlastEachFn :: String -> CutType -> CutType -> CutType -> CutFunction
 mkBlastEachFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_each"
-  , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] (SetOf bht)
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
   , fRules  = rMkBlastEach bCmd dbType aParBlast
   }
@@ -172,7 +172,7 @@ aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 mkBlastEachRevFn :: String -> CutType -> CutType -> CutType -> CutFunction
 mkBlastEachRevFn bCmd qType sType dbType = CutFunction
   { fName      = bCmd ++ "_each_rev"
-  , fTypeCheck = defaultTypeCheck [num, qType, SetOf sType] bht
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
   , fFixity    = Prefix
   , fRules  = rMkBlastEach bCmd dbType aParBlastRev
   }

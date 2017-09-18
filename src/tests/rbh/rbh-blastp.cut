@@ -3,8 +3,8 @@
 # TODO maybe now is the time to make the map fns put stuff in regular dirs?
 pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid157913_NC_017038.faa"
 pcc7942 = concat_fastas (load_faa_each
-    {"ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
-     "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"})
+    ["ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
+     "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"])
 ref6803 = blastp_rbh 1e-5 pcc6803 pcc7942
 ref7942 = blastp_rbh 1e-5 pcc7942 pcc6803 # TODO why is this re-running blastp?
 

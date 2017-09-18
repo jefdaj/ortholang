@@ -1,11 +1,11 @@
 .
 |-- exprs
-|   |-- cut_lit
-|   |   `-- 0656c14724.num
-|   `-- cut_set
-|       `-- 59daeafaee.num.set
+|   |-- cut_list
+|   |   `-- 59daeafaee.num.list
+|   `-- cut_lit
+|       `-- 0656c14724.num
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_set/59daeafaee.num.set
+    `-- result -> ../exprs/cut_list/59daeafaee.num.list
 
 4 directories, 4 files

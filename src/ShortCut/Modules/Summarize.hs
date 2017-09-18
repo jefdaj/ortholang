@@ -26,7 +26,7 @@ cutModule = CutModule
 --   }
 
 summaryTypeCheck :: [CutType] -> Either String CutType
-summaryTypeCheck [(SetOf (SetOf t))] = Right $ SetOf t
+summaryTypeCheck [(ListOf (ListOf t))] = Right $ ListOf t
 summaryTypeCheck _ = Left "type error in summary!"
 
 -- takes a list of lists and summarizes (flattens?) it to a single list
@@ -37,8 +37,8 @@ summaryTypeCheck _ = Left "type error in summary!"
 rSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPath
 rSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- rExpr s iList
-  let (SetOf (SetOf eType)) = typeOf iList
-      (ExprPath oPath) = exprPathExplicit cfg True (SetOf eType) fnName 
+  let (ListOf (ListOf eType)) = typeOf iList
+      (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
                                           [show expr, iPath]
   oPath %> aSummary cfg summaryFn iPath
   return (ExprPath oPath)

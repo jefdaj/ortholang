@@ -83,7 +83,7 @@ aBlastpRBH _ _ args = error $ "bad arguments to aBlastpRBH: " ++ show args
 reciprocalEach :: CutFunction
 reciprocalEach = CutFunction
   { fName      = "reciprocal_each"
-  , fTypeCheck = defaultTypeCheck [bht, SetOf bht] (SetOf bht)
+  , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules  = rRecipEach
   }
@@ -117,7 +117,7 @@ aRecipEach cfg oPath lsPath rsPath cDir = do
 -- blastpRBHEach :: CutFunction
 -- blastpRBHEach = CutFunction
 --   { fName      = "blastp_rbh_each"
---   , fTypeCheck = defaultTypeCheck [num, faa, SetOf faa] (SetOf bht)
+--   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
 --   , fFixity    = Prefix
 --   , fRules  = rBlastpRBHEach
 --   }
@@ -125,7 +125,7 @@ aRecipEach cfg oPath lsPath rsPath cDir = do
 -- -- TODO oh right, that might not be directly a list!
 -- --      can this be done a cleaner way??
 -- rBlastpRBHEach :: RulesFn
--- rBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutSet _ _ _ ss]) = do
+-- rBlastpRBHEach st@(_,cfg) expr@(CutFun _ salt _ _ [e, q, CutList _ _ _ ss]) = do
 -- -- rBlastpRBHEach st@(scr,cfg) expr@(CutFun _ salt _ _ [e, q, ss]) = do
 --   -- let subjects = extractExprs scr ss
 --   let exprs = map (\s -> CutFun bht salt (concatMap depsOf [e, q, s]) "blastp_rbh" [e, q, s]) ss
@@ -140,7 +140,7 @@ aRecipEach cfg oPath lsPath rsPath cDir = do
 blastpRBHEach :: CutFunction
 blastpRBHEach = CutFunction
   { fName      = "blastp_rbh_each"
-  , fTypeCheck = defaultTypeCheck [num, faa, SetOf faa] (SetOf bht)
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
   , fRules  = rBlastpRBHEach
   }

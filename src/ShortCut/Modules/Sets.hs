@@ -28,7 +28,7 @@ cutModule = CutModule
 -- TODO is it deterministic?
 canonicalLinks :: CutType -> [FilePath] -> IO [FilePath]
 canonicalLinks rtn =
-  if rtn `elem` [SetOf str, SetOf num]
+  if rtn `elem` [ListOf str, ListOf num]
     then return
     else \ps -> mapM resolveSymlinks ps
 
@@ -41,29 +41,29 @@ mkSetBop name fn = CutFunction
   { fName      = name
   , fTypeCheck = bopTypeCheck
   , fFixity    = Infix
-  , fRules  = rSetBop fn
+  , fRules  = rListBop fn
   }
 
 -- if the user gives two lists but of different types, complain that they must
 -- be the same. if there aren't two lists at all, complain about that first
 bopTypeCheck :: [CutType] -> Either String CutType
-bopTypeCheck actual@[SetOf a, SetOf b]
-  | a == b    = Right $ SetOf a
-  | otherwise = Left $ typeError [SetOf a, SetOf a] actual
+bopTypeCheck actual@[ListOf a, ListOf b]
+  | a == b    = Right $ ListOf a
+  | otherwise = Left $ typeError [ListOf a, ListOf a] actual
 bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
-rSetBop :: (Set String -> Set String -> Set String)
+rListBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
-rSetBop fn s@(_,cfg) e@(CutBop extn _ _ _ s1 s2) = do
-  -- liftIO $ putStrLn "entering rSetBop"
+rListBop fn s@(_,cfg) e@(CutBop extn _ _ _ s1 s2) = do
+  -- liftIO $ putStrLn "entering rListBop"
   -- let fixLinks = liftIO . canonicalLinks (typeOf e)
   let fixLinks = canonicalLinks (typeOf e)
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (s1, s2)
   p3 %> aSetBop cfg fixLinks fn p1 p2
   return (ExprPath p3)
-rSetBop _ _ _ = error "bad argument to rSetBop"
+rListBop _ _ _ = error "bad argument to rListBop"
 
 aSetBop :: CutConfig -> ([String] -> IO [String])
         -> (Set String -> Set String -> Set String)
@@ -95,22 +95,22 @@ mkSetFold name fn = CutFunction
   { fName      = name
   , fTypeCheck = tSetFold
   , fFixity    = Prefix
-  , fRules  = rSetFold fn
+  , fRules  = rListFold fn
   }
 
 tSetFold :: [CutType] -> Either String CutType
-tSetFold [SetOf (SetOf x)] = Right $ SetOf x
+tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
 
-rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
-rSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
+rListFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
+rListFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
   let (ExprPath oPath) = exprPath cfg True e []
-      oPath' = debugRules cfg "rSetFold" e oPath
+      oPath' = debugRules cfg "rListFold" e oPath
       fixLinks = canonicalLinks (typeOf e)
   oPath %> \_ -> aSetFold cfg fixLinks fn oPath setsPath
   return (ExprPath oPath')
-rSetFold _ _ _ = error "bad argument to rSetFold"
+rListFold _ _ _ = error "bad argument to rListFold"
 
 aSetFold :: CutConfig
          -> ([String] -> IO [String])

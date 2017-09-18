@@ -2,7 +2,7 @@
 # element. It mainly guards against bugs in naming the hashed tmpfiles.
 
 # TODO Is it having the same issue the overall cut is having? Maybe crb-blast
-#      fails partway through and returns {} instead of actually failing!
+#      fails partway through and returns [] instead of actually failing!
 
 # TODO what's this almost-infinite loop it's getting into?? writes lits for days yo
 
@@ -10,9 +10,9 @@
 reference = gbk_to_fna (load_gbk "data/SynPCC7942_pANL.gbk")
 
 # TODO how does this have 12 hits? shouldn't it be up to 10?
-small = load_faa_each {"data/6803genes10.faa"}
+small = load_faa_each ["data/6803genes10.faa"]
 
-large = load_faa_each {"data/7002genes.faa"} | small
+large = load_faa_each ["data/7002genes.faa"] | small
 
 # Only one BLAST search should be done against each of the genomes
 # in "small" because the result should be reused in "large".
@@ -23,7 +23,7 @@ large_hits = extract_queries_each (crb_blast_each reference large)
 # Result isn't important; just need it to evaluate both lists.
 # The real test is that it produces the expected tmpfiles.
 # result = (any large_hits) ~ (any small_hits)
-# result = {"data/6803genes10.faa"}
+# result = ["data/6803genes10.faa"]
 # result = small
 
 result = any large_hits ~ any small_hits

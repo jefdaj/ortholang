@@ -30,11 +30,11 @@ cutModule = CutModule
 ---------------------------------
 
 tExtract :: TypeChecker
-tExtract [x] | elem x [crb, bht] = Right $ SetOf str
+tExtract [x] | elem x [crb, bht] = Right $ ListOf str
 tExtract  _ = Left "expected a blast hits table"
 
 tExtractEach :: [CutType] -> Either String CutType
-tExtractEach [SetOf x] | elem x [crb, bht] = Right $ SetOf $ SetOf str
+tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
 tExtractEach  _ = Left "expected a list of blast hits tables"
 
 extractQueries :: CutFunction
@@ -42,7 +42,7 @@ extractQueries = CutFunction
   { fName      = "extract_queries"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp (aTsvColumn 1) "tables" (SetOf str)
+  , fRules  = rSimpleTmp (aTsvColumn 1) "tables" (ListOf str)
   }
 
 extractQueriesEach :: CutFunction
@@ -50,7 +50,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp (aTsvColumn 1) "tables" (SetOf str)
+  , fRules  = rMapLastTmp (aTsvColumn 1) "tables" (ListOf str)
   }
 
 extractTargets :: CutFunction
@@ -58,7 +58,7 @@ extractTargets = CutFunction
   { fName      = "extract_targets"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp (aTsvColumn 2) "tables" (SetOf str)
+  , fRules  = rSimpleTmp (aTsvColumn 2) "tables" (ListOf str)
   }
 
 extractTargetsEach :: CutFunction
@@ -66,7 +66,7 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp (aTsvColumn 2) "tables" (SetOf str)
+  , fRules  = rMapLastTmp (aTsvColumn 2) "tables" (ListOf str)
   }
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd

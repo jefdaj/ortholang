@@ -69,7 +69,7 @@ newtype ResPath  = ResPath  FilePath deriving Show -- ~/.shortcut/vars/result[.<
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
--- data Ext = SetOf Ext | Ext String
+-- data Ext = ListOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
@@ -87,7 +87,7 @@ data CutExpr
   | CutRef CutType Int [CutVar] CutVar -- do refs need a salt? yes! (i think?)
   | CutBop CutType Int [CutVar] String  CutExpr CutExpr
   | CutFun CutType Int [CutVar] String [CutExpr]
-  | CutSet CutType Int [CutVar] [CutExpr]
+  | CutList CutType Int [CutVar] [CutExpr]
   deriving (Eq, Show)
 
 -- TODO is this not actually needed? seems "show expr" handles it?
@@ -96,22 +96,22 @@ saltOf (CutLit _ n _)       = n
 saltOf (CutRef _ n _ _)     = n
 saltOf (CutBop _ n _ _ _ _) = n
 saltOf (CutFun _ n _ _ _)   = n
-saltOf (CutSet _ n _ _)     = n
+saltOf (CutList _ n _ _)     = n
 
 setSalt :: Int -> CutExpr -> CutExpr
 setSalt n (CutLit t _ s)          = CutLit t n s
 setSalt n (CutRef t _ ds v)       = CutRef t n ds v
 setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
 setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
-setSalt n (CutSet t _ ds es)      = CutSet t n ds es
+setSalt n (CutList t _ ds es)      = CutList t n ds es
 
 -- TODO have a separate CutAssign for "result"?
 type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
 data CutType
-  = EmptySet -- TODO remove this? should never be a need to define an empty list
-  | SetOf CutType
+  = EmptyList -- TODO remove this? should never be a need to define an empty list
+  | ListOf CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -132,8 +132,8 @@ defaultShow = fmap (unlines . fmtLines . lines) . readFile
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq CutType where
-  EmptySet  == EmptySet  = True
-  (SetOf a) == (SetOf b) = a == b
+  EmptyList  == EmptyList  = True
+  (ListOf a) == (ListOf b) = a == b
   t1        == t2        = extOf t1 == extOf t2
 
 instance Show CutType where
@@ -144,13 +144,13 @@ typeOf (CutLit t _ _         ) = t
 typeOf (CutRef t _ _ _       ) = t
 typeOf (CutBop t _ _ _ _ _   ) = t
 typeOf (CutFun t _ _ _ _     ) = t
-typeOf (CutSet EmptySet _ _ _) = EmptySet
-typeOf (CutSet t  _ _ _      ) = SetOf t
+typeOf (CutList EmptyList _ _ _) = EmptyList
+typeOf (CutList t  _ _ _      ) = ListOf t
 
 -- note that traceShow in here can cause an infinite loop
 extOf :: CutType -> String
-extOf (SetOf t   ) = extOf t ++ ".set"
-extOf EmptySet     = "set"
+extOf (ListOf t   ) = extOf t ++ ".list"
+extOf EmptyList     = "list"
 extOf t = tExt t
 
 varOf :: CutExpr -> [CutVar]
@@ -162,7 +162,7 @@ depsOf (CutLit  _ _ _         ) = []
 depsOf (CutRef  _ _ vs v      ) = v:vs
 depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (CutSet _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
@@ -282,7 +282,7 @@ instance Show CutModule where
 -- do we have to make a rule that you can't use those?
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: CutScript -> CutExpr -> [CutExpr]
-extractExprs  _  (CutSet _ _ _ es) = es
+extractExprs  _  (CutList _ _ _ es) = es
 extractExprs scr (CutRef  _ _ _ v ) = extractExprs scr $ fromJust $ lookup v scr
 extractExprs _   (CutFun _ _ _ _ _) = error explainFnBug
 extractExprs scr (CutBop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r

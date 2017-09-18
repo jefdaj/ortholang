@@ -13,7 +13,7 @@ module ShortCut.Core.Compile.Rules
 --   ( compileScript
 --   , rBop
 --   , rExpr
---   , rSet
+--   , rList
 --   , addPrefixes
 --   )
   where
@@ -42,7 +42,7 @@ mangleExpr _ e@(CutLit  _ _ _) = e
 mangleExpr fn (CutRef  t n vs v      ) = CutRef  t n (map fn vs)   (fn v)
 mangleExpr fn (CutBop  t n vs s e1 e2) = CutBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
 mangleExpr fn (CutFun  t n vs s es   ) = CutFun  t n (map fn vs) s (map (mangleExpr fn) es)
-mangleExpr fn (CutSet t n vs   es   ) = CutSet t n (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr fn (CutList t n vs   es   ) = CutList t n (map fn vs)   (map (mangleExpr fn) es)
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
@@ -68,7 +68,7 @@ addPrefixes p = mangleScript (addPrefix p)
 rExpr :: CutState -> CutExpr -> Rules ExprPath
 rExpr s e@(CutLit _ _ _      ) = rLit s e
 rExpr s e@(CutRef _ _ _ _    ) = rRef s e
-rExpr s e@(CutSet _ _ _ _    ) = rSet s e
+rExpr s e@(CutList _ _ _ _    ) = rList s e
 rExpr s e@(CutBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(CutFun _ _ _ n _  ) = rulesByName s e n
 
@@ -118,46 +118,46 @@ rLit (_,cfg) expr = do
   path %> aLit cfg expr
   return (ExprPath path')
 
-rSet :: CutState -> CutExpr -> Rules ExprPath
-rSet s e@(CutSet EmptySet _ _ _) = rSetEmpty s e
-rSet s e@(CutSet rtn _ _ _)
-  | rtn `elem` [str, num] = rSetLits s e
-  | otherwise = rSetPaths s e
-rSet _ _ = error "bad arguemnt to rSet"
+rList :: CutState -> CutExpr -> Rules ExprPath
+rList s e@(CutList EmptyList _ _ _) = rListEmpty s e
+rList s e@(CutList rtn _ _ _)
+  | rtn `elem` [str, num] = rListLits s e
+  | otherwise = rListPaths s e
+rList _ _ = error "bad arguemnt to rList"
 
 -- special case for empty lists
 -- TODO is a special type for this really needed?
-rSetEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rSetEmpty (_,cfg) e@(CutSet EmptySet _ _ _) = do
+rListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+rListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
   let (ExprPath link) = exprPath cfg True e []
-      link' = debugRules cfg "rSetEmpty" e link
+      link' = debugRules cfg "rListEmpty" e link
   link %> \_ -> aSetEmpty cfg link
   return (ExprPath link')
-rSetEmpty _ e = error $ "bad arguemnt to rSetEmpty: " ++ show e
+rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 
 -- special case for writing lists of strings or numbers as a single file
-rSetLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rSetLits s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
+rListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+rListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
-      outPath' = debugRules cfg "rSetLits" e outPath
+      (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
+      outPath' = debugRules cfg "rListLits" e outPath
   outPath %> \_ -> aSetLits cfg outPath relPaths
   return (ExprPath outPath')
-rSetLits _ e = error $ "bad argument to rSetLits: " ++ show e
+rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
 -- regular case for writing a list of links to some other file type
-rSetPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rSetPaths s@(_,cfg) e@(CutSet rtn _ _ exprs) = do
+rListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
+rListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
-      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" relPaths
-      outPath' = debugRules cfg "rSetPaths" e outPath
+      (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
+      outPath' = debugRules cfg "rListPaths" e outPath
   outPath %> \_ -> aSetPaths cfg outPath paths'
   return (ExprPath outPath')
-rSetPaths _ _ = error "bad arguemnts to rSetPaths"
+rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
@@ -206,12 +206,12 @@ typeError expected actual =
   "Type error:\nexpected " ++ show expected
            ++ "\nbut got " ++ show actual
 
--- this mostly checks equality, but also has to deal with how an empty set can
--- be any kind of set
+-- this mostly checks equality, but also has to deal with how an empty list can
+-- be any kind of list
 -- TODO is there any more elegant way? this seems error-prone...
 typeMatches :: CutType -> CutType -> Bool
-typeMatches EmptySet  (SetOf _) = True
-typeMatches (SetOf _) EmptySet  = True
+typeMatches EmptyList  (ListOf _) = True
+typeMatches (ListOf _) EmptyList  = True
 typeMatches a b = a == b
 
 typesMatch :: [CutType] -> [CutType] -> Bool
@@ -274,20 +274,20 @@ rLoadOne t s (CutFun _ _ _ n [p]) = rLink s p t n
 rLoadOne _ _ _ = error "bad argument to rLoadOne"
 
 rLoadList :: RulesFn
-rLoadList s e@(CutFun (SetOf rtn) _ _ _ [es])
-  | typeOf es `elem` [SetOf str, SetOf num] = rLoadListOne rtn s es
+rLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
+  | typeOf es `elem` [ListOf str, ListOf num] = rLoadListOne rtn s es
   | otherwise = rLoadListMany s e
 rLoadList _ _ = error "bad arguments to rLoadList"
 
 -- special case for lists of str and num
 -- TODO remove rtn and use (typeOf expr)?
--- TODO is this different from rSetOne, except in its return type?
+-- TODO is this different from rListOne, except in its return type?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 rLoadListOne :: CutType -> RulesFn
 rLoadListOne rtn s@(_,cfg) expr = do
   (ExprPath litsPath) <- rExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      (ExprPath outPath) = exprPathExplicit cfg True (SetOf rtn) "cut_set" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
   outPath %> \_ -> aLoadListOne cfg outPath litsPath
   return (ExprPath outPath)
 
@@ -297,7 +297,7 @@ rLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   -- TODO is relPath enough to make sure it's unique??
   let relPath = makeRelative (cfgTmpDir cfg) pathsPath
-      (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_set" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_list" [relPath]
   outPath %> \_ -> aLoadListMany cfg outPath pathsPath
   return (ExprPath outPath)
 rLoadListMany _ _ = error "bad arguments to rLoadListMany"
@@ -341,7 +341,7 @@ rMapLast tmpFn actFn _ rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   initPaths <- mapM (rExpr s) (init exprs)
   (ExprPath lastsPath) <- rExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
-      o@(ExprPath outPath) = exprPathExplicit cfg True (SetOf rtnType) name [show e]
+      o@(ExprPath outPath) = exprPathExplicit cfg True (ListOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg "map_last" e
   outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
   -- This builds one of the list of out paths based on a .args file

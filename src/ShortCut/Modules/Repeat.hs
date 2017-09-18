@@ -35,7 +35,7 @@ repeatN = CutFunction
 -- and returns a list of the result var type. start type can be whatever
 -- TODO does num here refer to actual num, or is it shadowing it?
 tRepeatN :: [CutType] -> Either String CutType 
-tRepeatN [rType, _, n] | n == num = Right $ SetOf rType
+tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
 tRepeatN _ = Left "invalid args to repeatN"
 
 readSciInt :: String -> Int
@@ -60,5 +60,5 @@ rRepeatN s@(scr,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), r
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = zipWith setSalt [1..nReps] (repeat subExpr)
-    subList = CutSet (typeOf subExpr) 0 (depsOf subExpr) subs
+    subList = CutList (typeOf subExpr) 0 (depsOf subExpr) subs
 rRepeatN _ _ = error "bad argument to rRepeatN"

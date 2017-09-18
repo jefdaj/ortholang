@@ -26,12 +26,12 @@ lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp aLen "length_each" (SetOf num)
+  , fRules  = rMapLastTmp aLen "length_each" num
   }
 
 tLen :: [CutType] -> Either String CutType
-tLen [EmptySet ] = Right num
-tLen [(SetOf _)] = Right num
+tLen [EmptyList ] = Right num
+tLen [(ListOf _)] = Right num
 tLen [x] | x == bht = Right num
 tLen _ = Left $ "length requires a list"
 
@@ -40,15 +40,15 @@ rLen s@(_,cfg) (CutFun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr s l
   let relPath = makeRelative (cfgTmpDir cfg) lPath
       cDir = cacheDir cfg "length"
-      (ExprPath outPath) = exprPathExplicit cfg True (typeOf l) "length" [relPath]
+      (ExprPath outPath) = exprPathExplicit cfg True num "length" [relPath]
   outPath %> \_ -> aLen cfg cDir [ExprPath outPath, ExprPath lPath]
   return (ExprPath outPath)
 rLen _ _ = error "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
-tLenEach [EmptySet          ] = Right (SetOf num)
-tLenEach [(SetOf (SetOf _))] = Right (SetOf num)
-tLenEach [SetOf x] | x == bht = Right (SetOf num) -- TODO also crb?
+tLenEach [EmptyList          ] = Right (ListOf num)
+tLenEach [(ListOf (ListOf _))] = Right (ListOf num)
+tLenEach [ListOf x] | x == bht = Right (ListOf num) -- TODO also crb?
 tLenEach _ = Left $ "length_each requires a list of lists"
 
 aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()

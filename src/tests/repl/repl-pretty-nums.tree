@@ -2,24 +2,24 @@
 |-- exprs
 |   |-- cut_bop
 |   |   `-- de96e48881.num
-|   |-- cut_lit
-|   |   |-- 0656c14724.num
-|   |   |-- 16ae4d58a2.num
-|   |   |-- 1e605f8d62.num
-|   |   |-- 6ca8eb8ecb.num
-|   |   |-- 7b5408a0db.num
-|   |   |-- 812a6174a2.num
-|   |   |-- ac73236e53.num
-|   |   |-- db66b4d649.num
-|   |   |-- f271ff8aac.num
-|   |   |-- f6b4a5973c.num
-|   |   `-- fce0c4ff2d.num
-|   `-- cut_set
-|       |-- 59daeafaee.num.set
-|       |-- 5b285d432b.num.set
-|       `-- b839830714.num.set
+|   |-- cut_list
+|   |   |-- 59daeafaee.num.list
+|   |   |-- 5b285d432b.num.list
+|   |   `-- b839830714.num.list
+|   `-- cut_lit
+|       |-- 0656c14724.num
+|       |-- 16ae4d58a2.num
+|       |-- 1e605f8d62.num
+|       |-- 6ca8eb8ecb.num
+|       |-- 7b5408a0db.num
+|       |-- 812a6174a2.num
+|       |-- ac73236e53.num
+|       |-- db66b4d649.num
+|       |-- f271ff8aac.num
+|       |-- f6b4a5973c.num
+|       `-- fce0c4ff2d.num
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_set/b839830714.num.set
+    `-- result -> ../exprs/cut_list/b839830714.num.list
 
 5 directories, 17 files
