@@ -203,14 +203,26 @@ cmdLoad st@(_,cfg) hdl path = do
         Left  e -> hPutStrLn hdl (show e) >> return st
         Right s -> return (s, cfg { cfgScript = Just path' })
 
--- TODO this needs to read a second arg for the var to be main?
---      or just tell people to define main themselves?
--- TODO replace showHack with something nicer
 cmdSave :: CutState -> Handle -> String -> IO CutState
-cmdSave st _ path = do
-  path' <- absolutize path
-  writeScript path' $ fst st
+cmdSave st@(scr,_) hdl line = do
+  case words line of
+    [path] -> saveScript scr path
+    [var, path] -> case lookup (CutVar var) scr of
+      Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+      Just e  -> saveScript (depsOnly e scr) path
+    _ -> hPutStrLn hdl $ "invalid save command: '" ++ line ++ "'"
   return st
+
+-- TODO where should this go?
+depsOnly :: CutExpr -> CutScript -> CutScript
+depsOnly expr scr = deps ++ [res]
+  where
+    deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
+    res  = (CutVar "result", expr)
+
+-- TODO where should this go?
+saveScript :: CutScript -> FilePath -> IO ()
+saveScript scr path = absolutize path >>= \p -> writeScript p scr
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!

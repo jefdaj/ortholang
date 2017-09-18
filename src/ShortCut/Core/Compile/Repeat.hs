@@ -62,7 +62,7 @@ rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 -- TODO factor out, and maybe unify with rListLits
 aRepeatEachLits :: CutType -> CutConfig
                 -> FilePath -> FilePath -> [FilePath] -> Action ()
-aRepeatEachLits rtn cfg outPath subPaths resPaths = do
+aRepeatEachLits _ cfg outPath subPaths resPaths = do
   lits <- mapM (debugReadFile cfg) resPaths
   let lits' = map stripWhiteSpace lits
       out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths:resPaths)
