@@ -4,6 +4,8 @@ module ShortCut.Core.Debug
   , debugParser
   , debugRules
   , debugAction
+  , debugHash
+  , debugPath
   , debugReadFile
   , debugReadLines
   , debugWriteFile
@@ -36,6 +38,7 @@ import System.IO.Strict       (hGetContents)
 debug :: CutConfig -> String -> a -> a
 debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 
+-- TODO stop exporting this in favor of the ones below?
 debugShow :: Show a => CutConfig -> a -> b -> b
 debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
 
@@ -43,11 +46,25 @@ debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
 -- debuggers for core modules --
 --------------------------------
 
+-- TODO are these all kind of the same fn? "debugExpr" or something
+
 debugParser :: Pretty a => CutConfig -> String -> a -> a
 debugParser cfg name res = debug cfg msg res
   where
     ren = render $ pPrint res
     msg = name ++ " parsed '" ++ ren ++ "'"
+
+debugHash :: CutConfig -> String -> CutExpr -> String -> String
+debugHash cfg name expr hash = debug cfg msg hash
+  where
+    ren = render $ pPrint expr
+    msg = name ++ " hashed '" ++ ren ++ "' to " ++ hash
+
+debugPath :: CutConfig -> String -> CutExpr -> FilePath -> FilePath
+debugPath cfg name expr path = debug cfg msg path
+  where
+    ren = render $ pPrint expr
+    msg = name ++ " for '" ++ ren ++ "' is " ++ path -- TODO include types?
 
 -- TODO restrict to CutExpr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called

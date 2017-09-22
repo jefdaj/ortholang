@@ -23,13 +23,13 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths
 
 -- import Data.List                  (isInfixOf)
--- import ShortCut.Core.Debug        (debug)
+import ShortCut.Core.Debug        (debugPath, debugHash)
 import Data.Data                  (Data)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((<.>), (</>))
 import ShortCut.Core.Util         (digest)
 import System.FilePath (isPathSeparator, makeRelative)
-import ShortCut.Core.Debug (debug)
+-- import ShortCut.Core.Debug (debug)
 import Text.PrettyPrint.HughesPJClass
 
 -----------------------------
@@ -79,16 +79,12 @@ lookupVar var scr = fromJust $ lookup var scr
 -- TODO hash phantom type? so far we just ignore it. will determine ext anyway
 -- TODO debug fn specifically for this?
 exprHash :: CutState -> CutExpr -> String
-exprHash s@(_, cfg) e = debug cfg msg res
-  where
-    res = exprHash' s e
-    msg = "exprHash of '" ++ render (pPrint e) ++ "' is " ++ res
-
-exprHash' :: CutState -> CutExpr -> String
-exprHash' s@(scr,_) (CutRef _ _ _ v) -- important not to include varnames themselves
+exprHash s@(scr,_) (CutRef _ _ _ v) -- important not to include varnames themselves
   = exprHash s $ lookupVar v scr
-exprHash' s@(_, cfg) expr = digest $ [pref, salt] ++ name ++ subs' -- should include deps right?
+exprHash s@(_, cfg) expr = res'
   where
+    res  = digest $ [pref, salt] ++ name ++ subs -- should include deps right?
+    res' = debugHash cfg "exprHash" expr res
     pref = exprPrefix expr
     salt = show $ saltOf expr
     -- deps = map (\(Path p) -> p)
@@ -102,7 +98,6 @@ exprHash' s@(_, cfg) expr = digest $ [pref, salt] ++ name ++ subs' -- should inc
     -- TODO use the subs' *paths* rather than exprs (call tmpToExpr)
     --      (what about when it's a ref... look up like above first?)
     -- TODO and factor out into a fn that can be reused when mapping
-    subs' = debug cfg ("exprHash subs: " ++ show subs) subs
     subs = map (\(Path p) -> p)
          $ map (tmpToExpr s)
          $ case expr of
@@ -116,11 +111,13 @@ exprHash' s@(_, cfg) expr = digest $ [pref, salt] ++ name ++ subs' -- should inc
 ------------------------------------------
 
 tmpToExpr :: CutState -> CutExpr -> Path TmpDir Expr
-tmpToExpr s expr = Path $ "exprs" </> prefix </> hash <.> ext
+tmpToExpr s@(_, cfg) expr = Path res'
   where
     prefix = exprPrefix expr
     hash   = exprHash s expr
     ext    = extOf $ typeOf expr
+    res    = "exprs" </> prefix </> hash <.> ext
+    res'   = debugPath cfg "tmpToExpr" expr res
 
 -- TODO is this too complicated?
 exprToExpr :: CutState -> CutExpr -> CutExpr -> Path Expr Expr

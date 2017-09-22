@@ -7,7 +7,7 @@ import ShortCut.Core.Debug     (debugReadLines, debugWriteFile, debugAction)
 import ShortCut.Core.Compile.Paths2    -- (cacheDir2, exprPathExplicit)
 import ShortCut.Core.Compile.Rules     (rExpr, rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
-import System.FilePath         (makeRelative, takeDirectory, (</>))
+import System.FilePath         (takeDirectory, (</>))
 import System.Directory           (createDirectoryIfMissing)
 import Data.Scientific (Scientific())
 
