@@ -4,10 +4,12 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Debug     (debugReadLines, debugWriteFile, debugAction)
-import ShortCut.Core.Compile.Paths     (cacheDir, exprPathExplicit)
+import ShortCut.Core.Compile.Paths2    -- (cacheDir2, exprPathExplicit)
 import ShortCut.Core.Compile.Rules     (rExpr, rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
-import System.FilePath         (makeRelative)
+import System.FilePath         (makeRelative, takeDirectory, (</>))
+import System.Directory           (createDirectoryIfMissing)
+import Data.Scientific (Scientific())
 
 cutModule :: CutModule
 cutModule = CutModule {mName = "length", mFunctions = [len, lenEach]}
@@ -36,13 +38,16 @@ tLen [x] | x == bht = Right num
 tLen _ = Left $ "length requires a list"
 
 rLen :: CutState -> CutExpr -> Rules ExprPath
-rLen s@(_,cfg) (CutFun _ _ _ _ [l]) = do
+rLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr s l
-  let relPath = makeRelative (cfgTmpDir cfg) lPath
-      cDir = cacheDir cfg "length"
-      (ExprPath outPath) = exprPathExplicit cfg True num "length" [relPath]
-  outPath %> \_ -> aLen cfg cDir [ExprPath outPath, ExprPath lPath]
-  return (ExprPath outPath)
+  -- TODO once all modules are converted, add back phantom types!
+  -- let relPath = makeRelative (cfgTmpDir cfg) lPath
+  -- (ExprPath outPath) = exprPathExplicit cfg True num "length" [relPath]
+  let (Path cDir   ) = cacheDir2 cfg "length"
+      (Path outPath) = tmpToExpr s e
+      out = cfgTmpDir cfg </> outPath
+  out %> \_ -> aLen cfg (CacheDir cDir) [ExprPath out, ExprPath lPath]
+  return (ExprPath out)
 rLen _ _ = error "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
@@ -53,7 +58,10 @@ tLenEach _ = Left $ "length_each requires a list of lists"
 
 aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aLen cfg _ [ExprPath out, ExprPath lst] = do
-  n <- fmap length $ debugReadLines cfg lst
+  n <- fmap (\n -> read n :: Scientific)
+     $ fmap (show . length)
+     $ debugReadLines cfg lst
   let out' = debugAction cfg "aLen" out [out, lst]
+  liftIO $ createDirectoryIfMissing True $ takeDirectory out
   debugWriteFile cfg out' (show n ++ "\n") -- TODO auto-add the \n?
 aLen _ _ args = error $ "bad arguments to aLen: " ++ show args

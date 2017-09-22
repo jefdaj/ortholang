@@ -131,7 +131,7 @@ rListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
   let (ExprPath link) = exprPath cfg True e []
       link' = debugRules cfg "rListEmpty" e link
-  link %> \_ -> aSetEmpty cfg link
+  link %> \_ -> aListEmpty cfg link
   return (ExprPath link')
 rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 
@@ -143,7 +143,7 @@ rListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
       (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
       outPath' = debugRules cfg "rListLits" e outPath
-  outPath %> \_ -> aSetLits cfg outPath relPaths
+  outPath %> \_ -> aListLits cfg outPath relPaths
   return (ExprPath outPath')
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
@@ -155,7 +155,7 @@ rListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
       (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
       outPath' = debugRules cfg "rListPaths" e outPath
-  outPath %> \_ -> aSetPaths cfg outPath paths'
+  outPath %> \_ -> aListPaths cfg outPath paths'
   return (ExprPath outPath')
 rListPaths _ _ = error "bad arguemnts to rListPaths"
 
@@ -343,6 +343,14 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
 --                          V
 --      exprs/<fnname>/<hash of all args>.<ext>
 --
+--     That should be pretty doable as long as you change the outfile paths to
+--     use hashes of the individual args rather than the whole expression:
+--
+--     exprs/<fnname>/<arg1hash>_<arg2hash>_<arg3hash>.<ext>
+--
+--     Then in rMapLastArgs (rename it something better) you can calculate what
+--     the outpath will be and put the .args in its proper place, and in this
+--     main fn you can calculate it too to make the mapTmp pattern.
 rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
 rMapLast tmpFn actFn prefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   -- TODO make this an actual debug call
@@ -352,6 +360,8 @@ rMapLast tmpFn actFn prefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   let inits = map (\(ExprPath p) -> p) initPaths
       o@(ExprPath outPath) = exprPathExplicit cfg True (ListOf rtnType) name [show e]
       (CacheDir mapTmp) = cacheDirUniq cfg prefix e
+  -- This builds .args files then needs their actual non-.args outpaths, which
+  -- will be built by the action below
   outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
   -- This builds one of the list of out paths based on a .args file
   -- (made in the action above). It's a pretty roundabout way to do it!

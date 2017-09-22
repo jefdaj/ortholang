@@ -70,6 +70,7 @@ pRef = do
 -- literals --
 --------------
 
+-- TODO hey Scientific has its own parser, would it work to add?
 pNum :: ParseM CutExpr
 pNum = do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction

@@ -18,18 +18,18 @@ import System.FilePath            (takeDirectory)
 
 -- from Compile (now Rules) --
 
-aSetEmpty :: CutConfig -> FilePath -> Action ()
-aSetEmpty cfg link = do
+aListEmpty :: CutConfig -> FilePath -> Action ()
+aListEmpty cfg link = do
   wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
   debugTrackWrite cfg [link']
   where
-    link' = debugAction cfg "aSetEmpty" link [link]
+    link' = debugAction cfg "aListEmpty" link [link]
 
-aSetLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aSetLits cfg outPath relPaths = do
+aListLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aListLits cfg outPath relPaths = do
   lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
   let lits' = sort $ map stripWhiteSpace lits
-      out'  = debugAction cfg "aSetLits" outPath (outPath:relPaths)
+      out'  = debugAction cfg "aListLits" outPath (outPath:relPaths)
   debugWriteLines cfg out' lits'
 
 aVar :: CutConfig -> FilePath -> FilePath -> Action ()
@@ -43,10 +43,10 @@ aVar cfg dest link = do
   wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
   debugTrackWrite cfg [link']
 
-aSetPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aSetPaths cfg outPath paths = do
+aListPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aListPaths cfg outPath paths = do
   need paths
-  let out = debugAction cfg "aSetPaths" outPath (outPath:paths)
+  let out = debugAction cfg "aListPaths" outPath (outPath:paths)
   -- TODO yup bug was here! any reason to keep it?
   -- paths' <- liftIO $ mapM resolveSymlinks paths
   debugWriteLines cfg out paths

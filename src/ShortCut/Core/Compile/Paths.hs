@@ -57,6 +57,7 @@ module ShortCut.Core.Compile.Paths
   , cacheDirUniq
   , cacheFile
   , exprPath
+  , exprPrefix
   , exprPathExplicit
   , varPath
   -- TODO resPath?
