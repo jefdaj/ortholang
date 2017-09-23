@@ -7,6 +7,23 @@
 --    (these actually are mostly captured by the paths package?)
 --    (no need for your own types; just use smart constructors/editors)
 
+-- TODO there are only a couple cases:
+--
+-- link from somewhere in tmpdir to a file
+-- link from somewhere in the workdir (or absolute) to a file
+-- link from var to another var (same dir)
+--
+-- all destinations are in the tmpdir
+-- start with absolute expr paths (expr fn)
+-- make them relative when linking or writing to a file (helper fn)
+-- make them absolute again when reading (helper fn)
+-- do it the haskell way this time: start repetitive, test, then DRY out
+
+-- DO ONLY THIS FIRST IN ONE BIG PUSH (NO CHANGING PATHS/TESTS)
+-- THEN NEXT PUSH IS TO GET THE PATHS INTO A NICE FORMAT (INDIV HASHES)
+-- THEN MASSAGE RMAP* TO BE NICER (NO BREAKING IF POSSIBLE!)
+-- THEN REASSESS/DOCUMENT + DEBUG BLAST, AFTER A BREAK DAY
+
 {- This is a transitional module for the new phantom-typed paths;
  - once everything uses them I'll remove the other and rename this to Paths.
  -}
