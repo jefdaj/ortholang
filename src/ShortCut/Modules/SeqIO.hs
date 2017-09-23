@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
-import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, Path(..))
+import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, MyPath(..))
 import ShortCut.Core.Compile.Rules  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.FilePath      ((</>))
@@ -175,8 +175,8 @@ rExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   (ExprPath faPath ) <- rExpr s fa
   (ExprPath idsPath) <- rExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let (Path tmpDir ) = cacheDir2 cfg "seqio"
-      (Path outPath) = tmpToExpr s e
+  let (MyPath tmpDir ) = cacheDir2 cfg "seqio"
+      (MyPath outPath) = tmpToExpr s e
       -- tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   -- tmpList %> \_ -> do
@@ -224,7 +224,7 @@ translate = CutFunction
 rConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let (Path oPath) = tmpToExpr s e
+  let (MyPath oPath) = tmpToExpr s e
   oPath %> \_ -> aConvert cfg oPath script faPath
   return (ExprPath oPath)
 rConvert _ _ _ = error "bad argument to rConvert"
@@ -255,7 +255,7 @@ tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 rConcat :: CutState -> CutExpr -> Rules ExprPath
 rConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- rExpr s fs
-  let (Path oPath) = tmpToExpr s e
+  let (MyPath oPath) = tmpToExpr s e
   oPath %> \_ -> aConcat cfg oPath fsPath
   return (ExprPath oPath)
 rConcat _ _ = error "bad argument to rConcat"

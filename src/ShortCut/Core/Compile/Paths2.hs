@@ -29,36 +29,32 @@
  -}
 
 module ShortCut.Core.Compile.Paths2
-  ( tmpToExpr
-  , exprToExpr
-  , varToExpr
-  , varToVar
-  , resToVar
-  , exprToInput
+  -- currently used in the codebase and need updating:
+  ( MyPath(..) -- TODO don't export constructor for safety?
   , cacheDir2
-  , cacheDirUniq2
-  , Path(..) -- TODO don't export constructor for safety?
-  , TmpDir, Var, Res, Expr -- TODO Root?
-  -- TODO don't export:
-  -- , argHashes
   , exprHash
+  , tmpToExpr
   )
   where
 
-import ShortCut.Core.Types
 -- import ShortCut.Core.Types2
+import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths
 
 -- import Data.List                  (isInfixOf)
-import ShortCut.Core.Debug        (debugPath, debugHash)
+-- import ShortCut.Core.Debug (debug)
+-- import System.FilePath (isPathSeparator, makeRelative)
+-- import Text.PrettyPrint.HughesPJClass
 import Data.Data                  (Data)
 import Data.List                  (intersperse)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((<.>), (</>))
+import ShortCut.Core.Debug        (debugPath, debugHash)
 import ShortCut.Core.Util         (digest)
-import System.FilePath (isPathSeparator, makeRelative)
--- import ShortCut.Core.Debug (debug)
--- import Text.PrettyPrint.HughesPJClass
+
+-----------------------
+-- Paths-based paths --
+-----------------------
 
 -----------------------------
 -- new phantom-typed paths --
@@ -68,18 +64,18 @@ import System.FilePath (isPathSeparator, makeRelative)
 -- TODO hide it from being exported
 -- (rtn put off until I have some time to add it)
 -- newtype Path src dst rtn = Path FilePath deriving (Show, Data)
-newtype Path src dst = Path FilePath deriving (Show, Data)
+newtype MyPath src dst = MyPath FilePath deriving (Show, Data)
 
 -- Possible source types:
 -- TODO also hide from being exported, or no?
 -- TODO Root?
 data TmpDir   -- <tmpdir>
-data Res      -- <tmpdir>/vars/result (TODO: salt dirs)
-data Var      -- <tmpdir>/vars/<name>.<ext>
+-- data Res      -- <tmpdir>/vars/result (TODO: salt dirs)
+-- data Var      -- <tmpdir>/vars/<name>.<ext>
 data Expr     -- <tmpdir>/exprs/<prefix>/<hash>.<ext>
 
 -- Possible destination types are Res, Var, Expr, or:
-data Input     -- any/path/the/user/feels.like
+-- data Input     -- any/path/the/user/feels.like
 -- data CacheDir2 -- <tmpdir>/cache/<modulename>
 
 -- Then the return type is either a phantom CutType, or:
@@ -91,8 +87,8 @@ data Input     -- any/path/the/user/feels.like
  -     p = tmpToExpr [] e
  -
  - ... would create a "path from the tmpdir to an expression of type str":
- - p :: Path TmpDir Expr CutStr
- - p = Path "exprs/cut_lit/6f2d5f011a.str"
+ - p :: MyPath TmpDir Expr CutStr
+ - p = MyPath "exprs/cut_lit/6f2d5f011a.str"
  -}
 
 -----------------------------
@@ -117,7 +113,7 @@ exprHash (scr, cfg) expr = res'
     res' = debugHash cfg "exprHash" expr res
     pref = exprPrefix expr
     salt = show $ saltOf expr
-    -- deps = map (\(Path p) -> p)
+    -- deps = map (\(MyPath p) -> p)
          -- $ map (tmpToExpr s)
          -- $ map (\v -> lookupVar v s)
          -- $ depsOf expr
@@ -128,7 +124,7 @@ exprHash (scr, cfg) expr = res'
     -- TODO use the subs' *paths* rather than exprs (call tmpToExpr)
     --      (what about when it's a ref... look up like above first?)
     -- TODO and factor out into a fn that can be reused when mapping
---     subs = map (\(Path p) -> p)
+--     subs = map (\(MyPath p) -> p)
 --          $ map (tmpToExpr s)
 --          $ case expr of
 --              (CutBop _ _ _  _ e1 e2) -> [e1, e2]
@@ -146,8 +142,8 @@ argHashes _ _ = []
 -- smart constructors for the new paths --
 ------------------------------------------
 
-tmpToExpr :: CutState -> CutExpr -> Path TmpDir Expr
-tmpToExpr s@(_, cfg) expr = Path res'
+tmpToExpr :: CutState -> CutExpr -> MyPath TmpDir Expr
+tmpToExpr s@(_, cfg) expr = MyPath res'
   where
     prefix = exprPrefix expr
     hash   = exprHash s expr
@@ -158,40 +154,40 @@ tmpToExpr s@(_, cfg) expr = Path res'
 -- TODO is this too complicated?
 -- TODO rename: linkToExpr :: ... -> Action?
 -- TODO switch src and dst?
-exprToExpr :: CutState -> CutExpr -> CutExpr -> Path Expr Expr
-exprToExpr s src dst = Path $ backToTmp </> fromTmp
-  where
-    (Path fromTmp) = tmpToExpr s dst
-    (Path src')    = tmpToExpr s src
-    nDirsBack      = length $ filter isPathSeparator src'
-    backToTmp      = foldr1 (</>) (take nDirsBack $ repeat "..")
+-- exprToExpr :: CutState -> CutExpr -> CutExpr -> Path Expr Expr
+-- exprToExpr s src dst = Path $ backToTmp </> fromTmp
+--   where
+--     (Path fromTmp) = tmpToExpr s dst
+--     (Path src')    = tmpToExpr s src
+--     nDirsBack      = length $ filter isPathSeparator src'
+--     backToTmp      = foldr1 (</>) (take nDirsBack $ repeat "..")
 
-varToExpr :: CutState -> CutExpr -> Path Var Expr
-varToExpr s expr = Path $ ".." </> tmpPath
- where
-    (Path tmpPath) = tmpToExpr s expr
+-- varToExpr :: CutState -> CutExpr -> Path Var Expr
+-- varToExpr s expr = Path $ ".." </> tmpPath
+--  where
+--     (Path tmpPath) = tmpToExpr s expr
 
-varToVar :: CutExpr -> String -> Path Var Var
-varToVar expr name = Path $ name <.> extOf (typeOf expr)
+-- varToVar :: CutExpr -> String -> Path Var Var
+-- varToVar expr name = Path $ name <.> extOf (typeOf expr)
 
-resToVar :: CutExpr -> String -> Path Res Var
-resToVar expr name = Path v2v
-  where
-    (Path v2v) = varToVar expr name
+-- resToVar :: CutExpr -> String -> Path Res Var
+-- resToVar expr name = Path v2v
+--   where
+--     (Path v2v) = varToVar expr name
 
 -- Makes the path relative to working dir if possible, and absolute otherwise.
-exprToInput :: CutConfig -> CutExpr -> FilePath -> Path Expr Input
-exprToInput cfg _ input = Path $ makeRelative (cfgWorkDir cfg) input
+-- exprToInput :: CutConfig -> CutExpr -> FilePath -> Path Expr Input
+-- exprToInput cfg _ input = Path $ makeRelative (cfgWorkDir cfg) input
 
 -- TODO change to tmpToCache? rootToCache?
-cacheDir2 :: CutConfig -> String -> Path TmpDir CacheDir
-cacheDir2 cfg modName = Path $ cfgTmpDir cfg </> "cache" </> modName
+cacheDir2 :: CutConfig -> String -> MyPath TmpDir CacheDir
+cacheDir2 cfg modName = MyPath $ cfgTmpDir cfg </> "cache" </> modName
 
 -- Creates a unique hashed directory inside the main module cache dir.
 -- Needed when scripts name their tmpfiles the same each time they're run
 -- (I'm looking at you, crb-blast...)
-cacheDirUniq2 :: CutState -> String -> CutExpr -> Path TmpDir CacheDir
-cacheDirUniq2 s@(_, cfg) modName expr = Path $ mainCache </> hash
-  where
-    (Path mainCache) = cacheDir2 cfg modName
-    hash = exprHash s expr
+-- cacheDirUniq2 :: CutState -> String -> CutExpr -> MyPath TmpDir CacheDir
+-- cacheDirUniq2 s@(_, cfg) modName expr = MyPath $ mainCache </> hash
+--   where
+--     (MyPath mainCache) = cacheDir2 cfg modName
+--     hash = exprHash s expr

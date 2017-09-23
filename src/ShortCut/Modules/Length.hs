@@ -43,8 +43,8 @@ rLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath
   -- (ExprPath outPath) = exprPathExplicit cfg True num "length" [relPath]
-  let (Path cDir   ) = cacheDir2 cfg "length"
-      (Path outPath) = tmpToExpr s e
+  let (MyPath cDir   ) = cacheDir2 cfg "length"
+      (MyPath outPath) = tmpToExpr s e
       out = cfgTmpDir cfg </> outPath
   out %> \_ -> aLen cfg (CacheDir cDir) [ExprPath out, ExprPath lPath]
   return (ExprPath out)
