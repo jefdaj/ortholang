@@ -15,6 +15,8 @@ module ShortCut.Core.Compile.Paths2
   , cacheDirUniq2
   , Path(..) -- TODO don't export constructor for safety?
   , TmpDir, Var, Res, Expr -- TODO Root?
+  -- TODO don't export:
+  -- , argHashes
   )
   where
 
@@ -25,12 +27,13 @@ import ShortCut.Core.Compile.Paths
 -- import Data.List                  (isInfixOf)
 import ShortCut.Core.Debug        (debugPath, debugHash)
 import Data.Data                  (Data)
+import Data.List                  (intersperse)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((<.>), (</>))
 import ShortCut.Core.Util         (digest)
 import System.FilePath (isPathSeparator, makeRelative)
 -- import ShortCut.Core.Debug (debug)
-import Text.PrettyPrint.HughesPJClass
+-- import Text.PrettyPrint.HughesPJClass
 
 -----------------------------
 -- new phantom-typed paths --
@@ -81,9 +84,11 @@ lookupVar var scr = fromJust $ lookup var scr
 exprHash :: CutState -> CutExpr -> String
 exprHash s@(scr,_) (CutRef _ _ _ v) -- important not to include varnames themselves
   = exprHash s $ lookupVar v scr
-exprHash s@(_, cfg) expr = res'
+exprHash (scr, cfg) expr = res'
   where
-    res  = digest $ [pref, salt] ++ name ++ subs -- should include deps right?
+    main = digest $ [pref, salt] ++ name -- "main" hash
+    res  = concat $ intersperse "_" (main:subs)
+    subs = argHashes scr expr
     res' = debugHash cfg "exprHash" expr res
     pref = exprPrefix expr
     salt = show $ saltOf expr
@@ -98,13 +103,19 @@ exprHash s@(_, cfg) expr = res'
     -- TODO use the subs' *paths* rather than exprs (call tmpToExpr)
     --      (what about when it's a ref... look up like above first?)
     -- TODO and factor out into a fn that can be reused when mapping
-    subs = map (\(Path p) -> p)
-         $ map (tmpToExpr s)
-         $ case expr of
-             (CutBop _ _ _  _ e1 e2) -> [e1, e2]
-             (CutFun _ _ _ _  es   ) -> es
-             (CutList _ _ _   es   ) -> es
-             _ -> []
+--     subs = map (\(Path p) -> p)
+--          $ map (tmpToExpr s)
+--          $ case expr of
+--              (CutBop _ _ _  _ e1 e2) -> [e1, e2]
+--              (CutFun _ _ _ _  es   ) -> es
+--              (CutList _ _ _   es   ) -> es
+--              _ -> []
+
+-- TODO replace exprHash above with this
+argHashes :: CutScript -> CutExpr -> [String]
+argHashes s (CutRef  _ _ _   v ) = argHashes s $ lookupVar v s
+argHashes s (CutFun  _ _ _ _ es) = concat $ map (argHashes s) es
+argHashes _ _ = []
 
 ------------------------------------------
 -- smart constructors for the new paths --
