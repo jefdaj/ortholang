@@ -1,5 +1,7 @@
 module ShortCut.Test.Scripts where
 
+-- TODO if using paths to make paths, is anything not deterministic??
+
 import Data.ByteString.Lazy.Char8 (pack, ByteString)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)

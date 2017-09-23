@@ -1,5 +1,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
+-- TODO wait it's much simpler:
+-- 1. always deal in full paths when shake is involved
+-- 2. always write paths relative to tmpdir and workdir
+-- 3. convert back and forth with a couple functions
+--    (these actually are mostly captured by the paths package?)
+--    (no need for your own types; just use smart constructors/editors)
+
 {- This is a transitional module for the new phantom-typed paths;
  - once everything uses them I'll remove the other and rename this to Paths.
  -}
@@ -17,6 +24,7 @@ module ShortCut.Core.Compile.Paths2
   , TmpDir, Var, Res, Expr -- TODO Root?
   -- TODO don't export:
   -- , argHashes
+  , exprHash
   )
   where
 
@@ -131,6 +139,8 @@ tmpToExpr s@(_, cfg) expr = Path res'
     res'   = debugPath cfg "tmpToExpr" expr res
 
 -- TODO is this too complicated?
+-- TODO rename: linkToExpr :: ... -> Action?
+-- TODO switch src and dst?
 exprToExpr :: CutState -> CutExpr -> CutExpr -> Path Expr Expr
 exprToExpr s src dst = Path $ backToTmp </> fromTmp
   where
@@ -156,6 +166,7 @@ resToVar expr name = Path v2v
 exprToInput :: CutConfig -> CutExpr -> FilePath -> Path Expr Input
 exprToInput cfg _ input = Path $ makeRelative (cfgWorkDir cfg) input
 
+-- TODO change to tmpToCache? rootToCache?
 cacheDir2 :: CutConfig -> String -> Path TmpDir CacheDir
 cacheDir2 cfg modName = Path $ cfgTmpDir cfg </> "cache" </> modName
 

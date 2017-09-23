@@ -6,13 +6,15 @@ import ShortCut.Core.Types
 -- import Control.Monad           (when)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
-                                debugWriteLines, debugAction, debugTrackWrite)
+                                debugWriteLines, debugAction, debugTrackWrite,
+                                debugRules)
 import ShortCut.Core.Compile.Rules     (rExpr, defaultTypeCheck, rMapLastTmp)
-import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
+-- import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
+import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, Path(..), exprHash)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
-import System.FilePath         (takeFileName, takeExtension, (</>), (<.>),
-                                makeRelative)
+import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>),
+                                makeRelative, takeDirectory)
 import System.Directory        (createDirectoryIfMissing)
 -- import System.FilePath.Glob    (compile, globDir1)
 import Data.List               (isInfixOf)
@@ -43,8 +45,10 @@ cutModule = CutModule
     , loadProtDB
     , loadNuclDBEach
     , loadProtDBEach
-    , mkMakeblastdb ndb
-    , mkMakeblastdb pdb
+    -- , mkMakeblastdb ndb
+    -- , mkMakeblastdb pdb
+    , makeblastdbNucl
+    , makeblastdbProt
     , mkMakeblastdbEach ndb
     , mkMakeblastdbEach pdb
     , blastdbget -- TODO mapped version so you can list -> git at once?
@@ -96,7 +100,7 @@ mkLoadDBEach name rtn = CutFunction
 rLoadDB :: RulesFn
 rLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
-  let (ExprPath oPath) = exprPath cfg True e []
+  let (Path oPath) = tmpToExpr st e
   oPath %> \_ -> aLoadDB cfg oPath sPath 
   return (ExprPath oPath)
 rLoadDB _ _ = error "bad argument to rLoadDB"
@@ -141,8 +145,8 @@ filterNames s cs = filter matchFn cs
 rBlastdblist :: RulesFn
 rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
-  let (CacheDir tmpDir) = cacheDir cfg "blastdbget"
-      (ExprPath oPath ) = exprPath cfg True e []
+  let (Path tmpDir) = cacheDir2 cfg "blastdbget"
+      (Path oPath ) = tmpToExpr s e
       stdoutTmp = tmpDir </> "stdout" <.> "txt"
   oPath %> \_ -> aBlastdblist cfg oPath tmpDir stdoutTmp fPath
   return (ExprPath oPath)
@@ -157,7 +161,6 @@ aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
   let names = if null filterStr || null out then []
               else filterNames (init filterStr) (tail out)
       oPath' = debugAction cfg "aBlastdblist" oPath [oPath, tmpDir, stdoutTmp, fPath]
-  -- toShortCutListStr cfg str (ExprPath oPath) names
   debugWriteLines cfg oPath' names
 
 -- TODO do I need to adjust the timeout? try on the cluster first
@@ -172,8 +175,8 @@ blastdbget = CutFunction
 rBlastdbget :: RulesFn
 rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
-  let (CacheDir tmpDir  ) = cacheDir cfg "blastdbget"
-      (ExprPath dbPrefix) = exprPath cfg True e [] -- final prefix
+  let (Path tmpDir  ) = cacheDir2 cfg "blastdbget"
+      (Path dbPrefix) = tmpToExpr st e -- final prefix
   dbPrefix %> \_ -> aBlastdbget cfg dbPrefix tmpDir nPath
   return (ExprPath dbPrefix)
 rBlastdbget _ _ = error "bad argument to rBlastdbget"
@@ -188,15 +191,6 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
     "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
   debugWriteFile cfg dbPrefix' $ (tmpDir </> dbName) ++ "\n"
 
--- TODO is this actually used anywhere?
-linkDBFile :: CutConfig -> FilePath -> FilePath -> Action ()
-linkDBFile cfg dbf prefix = do
-  unit $ quietly $ wrappedCmd cfg [dst', dst ++ ".*"] [] "ln" ["-fs", dbf, dst]
-  debugTrackWrite cfg [dst']
-  where
-    dst  = prefix <.> takeExtension dbf
-    dst' = debugAction cfg "linkDBFile" dst [dbf, prefix]
-
 --------------------------
 -- make from FASTA file --
 --------------------------
@@ -206,12 +200,20 @@ linkDBFile cfg dbf prefix = do
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
 --      in addition to actual inputs?
-mkMakeblastdb :: CutType -> CutFunction
-mkMakeblastdb dbType = CutFunction
-  { fName      = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-  , fTypeCheck = tMakeblastdb dbType
+makeblastdbNucl :: CutFunction
+makeblastdbNucl = CutFunction
+  { fName      = "makeblastdb_nucl"
+  , fTypeCheck = tMakeblastdb ndb
   , fFixity    = Prefix
-  , fRules  = rMakeblastdb dbType
+  , fRules     = rMakeblastdb
+  }
+
+makeblastdbProt :: CutFunction
+makeblastdbProt = CutFunction
+  { fName      = "makeblastdb_prot"
+  , fTypeCheck = tMakeblastdb pdb
+  , fFixity    = Prefix
+  , fRules     = rMakeblastdb
   }
 
 -- TODO no! depends on an arg
@@ -221,34 +223,49 @@ tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
 -- TODO is rtn always the same as dbType?
-rMakeblastdb :: CutType -> RulesFn
-rMakeblastdb dbType s@(_,cfg) (CutFun rtn _ _ _ [fa]) = do
+-- TODO get the blast fn to need this!
+-- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
+rMakeblastdb :: RulesFn
+rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let relFa = makeRelative (cfgTmpDir cfg) faPath
-      (ExprPath dbPrefix) = exprPathExplicit cfg True rtn "makeblastdb" [relFa]
-      -- dbType' = if dbType == ndb then "nucl" else "prot"
-  dbPrefix %> \_ -> aMakeblastdb dbType cfg undefined [ExprPath dbPrefix, ExprPath faPath]
-  return (ExprPath dbPrefix)
-rMakeblastdb _ _ _ = error "bad argument to makeblastdb"
+  let (Path out ) = tmpToExpr s e
+      out'        = cfgTmpDir cfg </> out
+      out''       = debugRules cfg "rMakeblastdb" e out'
+      (Path cDir) = cacheDir2 cfg $ "makeblastdb" ++ dbType
+      dbType      = if rtn == ndb then "_nucl" else "_prot"
+      dbPrefix    = cDir </> exprHash s fa
+      -- cache       = ".." </> ".." </> out -- TODO sytematize this
+  out'' %> \_ -> aMakeblastdb rtn cfg (CacheDir cDir)
+                      [ExprPath out'', ExprPath dbPrefix, ExprPath faPath]
+  -- TODO what's up with the linking? just write the prefix to the outfile!
+  return (ExprPath out'')
+rMakeblastdb _ _ = error "bad argument to makeblastdb"
 
 aMakeblastdb :: CutType -> ActionFn
-aMakeblastdb dbType cfg _ [ExprPath dbPrefix, ExprPath faPath] = do
+aMakeblastdb dbType cfg (CacheDir cDir) [ExprPath out, ExprPath dbPrefix, ExprPath faPath] = do
+  -- TODO tmpToExpr handles this now?
   let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
       dbType' = if dbType == ndb then "nucl" else "prot"
   liftIO $ putStrLn $ "dbPrefix: " ++ dbPrefix
   liftIO $ putStrLn $ "dbType': " ++ dbType'
   need [faPath]
-  let dbPrefix' = debugAction cfg "aMakeblastdb" dbPrefix
-                              [extOf dbType, dbPrefix, faPath]
-  quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [] "makeblastdb"
+  let out' = debugAction cfg "aMakeblastdb" out
+                         [extOf dbType, out, dbPrefix, faPath]
+      dbDir = takeDirectory dbPrefix
+  liftIO $ createDirectoryIfMissing True cDir
+  quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd dbDir] "makeblastdb"
     [ "-in"    , faPath
-    , "-out"   , dbPrefix'
+    , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
     , "-dbtype", dbType'
     ]
   -- TODO put back if you can figure out how with the new wrappedCmd
   -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
-  debugWriteFile cfg dbPrefix' relDb
+  files <- fmap (map (cfgTmpDir cfg </>))
+         $ getDirectoryFiles cDir [takeBaseName dbPrefix ++ ".*"]
+  debugTrackWrite cfg files
+  -- liftIO $ putStrLn $ "files: " ++ show files
+  debugWriteLines cfg out [relDb]
 aMakeblastdb _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show paths
 
 --------------------------------

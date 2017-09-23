@@ -4,7 +4,7 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Compile.Paths   (exprPath)
+import ShortCut.Core.Compile.Paths2  (tmpToExpr, Path(..))
 import ShortCut.Core.Compile.Rules (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
@@ -105,11 +105,12 @@ tSetFold _ = Left "expecting a list of lists"
 rListFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
 rListFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
-  let (ExprPath oPath) = exprPath cfg True e []
-      oPath' = debugRules cfg "rListFold" e oPath
+  let (Path oPath) = tmpToExpr s e
+      oPath' = cfgTmpDir cfg </> oPath
+      oPath'' = debugRules cfg "rListFold" e oPath
       fixLinks = canonicalLinks (typeOf e)
-  oPath %> \_ -> aSetFold cfg fixLinks fn oPath setsPath
-  return (ExprPath oPath')
+  oPath %> \_ -> aSetFold cfg fixLinks fn oPath' setsPath
+  return (ExprPath oPath'')
 rListFold _ _ _ = error "bad argument to rListFold"
 
 aSetFold :: CutConfig

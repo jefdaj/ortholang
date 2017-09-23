@@ -79,8 +79,7 @@ rMkBlastDbFn bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
 rMkBlastFn :: String -> CutType -> (String -> ActionFn) -> RulesFn
 rMkBlastFn c dbType a s e = rMkBlastDbFn c a s $ addMakeDBCall1 e dbType
 
--- TODO aha! this needs to know what type of db to make separately from the
---      subject's original type, for tblastn and similar
+-- TODO why doesn't this `need` the db out path?
 addMakeDBCall1 :: CutExpr -> CutType -> CutExpr
 addMakeDBCall1 (CutFun r i ds n [q, s, e]) dbType = CutFun r i ds n [q, db, e]
   where
@@ -89,7 +88,7 @@ addMakeDBCall1 (CutFun r i ds n [q, s, e]) dbType = CutFun r i ds n [q, db, e]
     name = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
 addMakeDBCall1 _ _ = error "bad argument to addMakeDBCall1"
 
--- as a quick klude, duplicated this and rearranged the args
+-- as a quick kludge, duplicated this and rearranged the args
 addMakeDBCall2 :: CutExpr -> CutType -> CutExpr
 addMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
   where
