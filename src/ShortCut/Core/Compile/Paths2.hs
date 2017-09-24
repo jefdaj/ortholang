@@ -109,11 +109,11 @@ lookupVar var scr = fromJust $ lookup var scr
 exprHash :: CutState -> CutExpr -> String
 exprHash s@(scr,_) (CutRef _ _ _ v) -- important not to include varnames themselves
   = exprHash s $ lookupVar v scr
-exprHash (scr, cfg) expr = res'
+exprHash s@(_, cfg) expr = res'
   where
     main = digest $ [pref, salt] ++ name -- expr needs at least one "main" hash
     res  = concat $ intersperse "_" (main:subs)
-    subs = argHashes scr expr
+    subs = argHashes s expr
     res' = debugHash cfg "exprHash" expr res
     pref = exprPrefix expr
     salt = show $ saltOf expr
@@ -122,11 +122,11 @@ exprHash (scr, cfg) expr = res'
              (CutFun _ _ _ n _   ) -> [n]
              _ -> []
 
-argHashes :: CutScript -> CutExpr -> [String]
-argHashes _ (CutLit  _ _     v ) = [digest v]
-argHashes s (CutRef  _ _ _   v ) = argHashes s $ lookupVar v s
-argHashes s (CutFun  _ _ _ _ es) = concat $ map (argHashes s) es
-argHashes s (CutList _ _ _   es) = [digest $ concat $ map (argHashes s) es]
+argHashes :: CutState -> CutExpr -> [String]
+argHashes s@(as,_) (CutRef _ _ _ v) = argHashes s $ lookupVar v as
+argHashes _ (CutLit  r _     v ) = [digest $ v ++ show r]
+argHashes s (CutFun  _ _ _ _ es) = map (digest . exprHash s) es
+argHashes s (CutList _ _ _   es) = [digest $ concat $ map (exprHash s) es]
 argHashes _ _ = []
 
 ------------------------------------------
