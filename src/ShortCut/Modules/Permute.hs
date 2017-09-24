@@ -3,7 +3,7 @@ module ShortCut.Modules.Permute where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths   (exprPathExplicit)
-import ShortCut.Core.Compile.Rules (rExpr)
+import ShortCut.Core.Compile.Basic (rExpr)
 import ShortCut.Core.Debug (debugAction, debugWriteLines)
 
 cutModule :: CutModule
@@ -23,7 +23,7 @@ leaveOneOut = CutFunction
   }
 
 combosTypeCheck :: [CutType] -> Either String CutType
-combosTypeCheck [(ListOf t)] = Right $ ListOf $ ListOf t
+combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t
 combosTypeCheck _ = Left "type error in leave_each_out!"
 
 -- drops the element at index n from a list
@@ -48,7 +48,8 @@ leaveEachOut xs
 -- TODO are paths hashes unique now??
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
-rCombos :: ([FilePath] -> [[FilePath]]) -> CutState -> CutExpr -> Rules ExprPath
+rCombos :: ([FilePath] -> [[FilePath]])
+        -> CutState -> CutExpr -> Rules ExprPath
 rCombos comboFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oType = ListOf $ typeOf iList
@@ -58,6 +59,7 @@ rCombos comboFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
   return (ExprPath oList)
 rCombos _ _ _ = error "bad argument to rCombos"
 
+-- TODO once back-compilation or whatever works, also use it here? not necessary but maybe simpler
 aCombos :: CutConfig -> ([String] -> [[String]])
         -> FilePath -> CutType -> String -> FilePath -> Action ()
 aCombos cfg comboFn iPath lType fnName out = do

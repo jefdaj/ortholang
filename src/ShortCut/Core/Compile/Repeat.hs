@@ -4,11 +4,40 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Paths   (exprPath)
-import ShortCut.Core.Compile.Rules (rExpr, addPrefixes, compileScript)
+import ShortCut.Core.Compile.Basic (rExpr, compileScript)
 import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines,
                               debugAction)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
+
+--------------------------------------------------------
+-- prefix variable names so duplicates don't conflict --
+--------------------------------------------------------
+
+-- TODO only mangle the specific vars we want changed!
+
+mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
+mangleExpr _ e@(CutLit  _ _ _) = e
+mangleExpr fn (CutRef  t n vs v      ) = CutRef  t n (map fn vs)   (fn v)
+mangleExpr fn (CutBop  t n vs s e1 e2) = CutBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (CutFun  t n vs s es   ) = CutFun  t n (map fn vs) s (map (mangleExpr fn) es)
+mangleExpr fn (CutList t n vs   es   ) = CutList t n (map fn vs)   (map (mangleExpr fn) es)
+
+mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
+mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
+
+mangleScript :: (CutVar -> CutVar) -> CutScript -> CutScript
+mangleScript fn = map (mangleAssign fn)
+
+-- TODO pad with zeros?
+-- Add a "dupN." prefix to each variable name in the path from independent
+-- -> dependent variable, using a list of those varnames
+addPrefix :: String -> (CutVar -> CutVar)
+addPrefix p (CutVar s) = CutVar $ s ++ "." ++ p
+
+-- TODO should be able to just apply this to a duplicate script section right?
+addPrefixes :: String -> CutScript -> CutScript
+addPrefixes p = mangleScript (addPrefix p)
 
 ----------------------------------
 -- main repeat function for PRS --

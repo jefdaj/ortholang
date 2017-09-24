@@ -5,7 +5,7 @@ module ShortCut.Modules.Sets where
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
 import ShortCut.Core.Compile.Paths2  (tmpToExpr)
-import ShortCut.Core.Compile.Rules (rBop, rExpr, typeError)
+import ShortCut.Core.Compile.Basic (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
                             debugRules, debugAction)

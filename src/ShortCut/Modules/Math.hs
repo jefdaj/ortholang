@@ -7,7 +7,7 @@ import Development.Shake
 
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
-import ShortCut.Core.Compile.Rules (rBop, defaultTypeCheck)
+import ShortCut.Core.Compile.Basic (rBop, defaultTypeCheck)
 import ShortCut.Core.Debug   (debugAction, debugWriteFile)
 
 cutModule :: CutModule

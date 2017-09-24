@@ -16,7 +16,7 @@ module ShortCut.Modules.BioMartR where
 import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Compile.Paths   (exprPath, exprPathExplicit)
-import ShortCut.Core.Compile.Rules (rExpr, defaultTypeCheck)
+import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)

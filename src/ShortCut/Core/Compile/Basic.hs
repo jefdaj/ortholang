@@ -9,7 +9,7 @@
 
 -- TODO why doesn't turning down the verbosity actually work?
 
-module ShortCut.Core.Compile.Rules
+module ShortCut.Core.Compile.Basic
 --   ( compileScript
 --   , rBop
 --   , rExpr
@@ -21,44 +21,18 @@ module ShortCut.Core.Compile.Rules
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths
-import ShortCut.Core.Compile.Actions
 
-import ShortCut.Core.Debug         (debugRules)
-import Data.List                   (find)
+import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)
-import System.FilePath             (makeRelative)
 import Development.Shake.FilePath  ((</>))
-import ShortCut.Core.Compile.Paths (cacheDir, cacheDirUniq, exprPath, exprPathExplicit)
--- import Text.PrettyPrint.HughesPJClass (render, pPrint) -- TODO add to Types?
-
---------------------------------------------------------
--- prefix variable names so duplicates don't conflict --
---------------------------------------------------------
-
--- TODO only mangle the specific vars we want changed!
-
-mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
-mangleExpr _ e@(CutLit  _ _ _) = e
-mangleExpr fn (CutRef  t n vs v      ) = CutRef  t n (map fn vs)   (fn v)
-mangleExpr fn (CutBop  t n vs s e1 e2) = CutBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
-mangleExpr fn (CutFun  t n vs s es   ) = CutFun  t n (map fn vs) s (map (mangleExpr fn) es)
-mangleExpr fn (CutList t n vs   es   ) = CutList t n (map fn vs)   (map (mangleExpr fn) es)
-
-mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
-mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
-
-mangleScript :: (CutVar -> CutVar) -> CutScript -> CutScript
-mangleScript fn = map (mangleAssign fn)
-
--- TODO pad with zeros?
--- Add a "dupN." prefix to each variable name in the path from independent
--- -> dependent variable, using a list of those varnames
-addPrefix :: String -> (CutVar -> CutVar)
-addPrefix p (CutVar s) = CutVar $ s ++ "." ++ p
-
--- TODO should be able to just apply this to a duplicate script section right?
-addPrefixes :: String -> CutScript -> CutScript
-addPrefixes p = mangleScript (addPrefix p)
+import ShortCut.Core.Compile.Paths (cacheDir, exprPath, exprPathExplicit)
+import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Debug         (debugReadFile, debugWriteLines, debugWriteFile,
+                                    debugTrackWrite, debugReadLines, debugAction,
+                                    debugRules)
+import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace)
+import System.Directory            (createDirectoryIfMissing)
+import System.FilePath             (takeDirectory, makeRelative)
 
 
 ------------------------------
@@ -316,56 +290,104 @@ rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
-rMapLastTmp :: ActionFn -> String -> CutType -> RulesFn
-rMapLastTmp actFn tmpPrefix t s@(_,cfg) = mapFn t s
+-------------
+-- actions --
+-------------
+
+aListEmpty :: CutConfig -> FilePath -> Action ()
+aListEmpty cfg link = do
+  wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
+  debugTrackWrite cfg [link']
   where
-    tmpDir = cacheDir cfg tmpPrefix
-    mapFn  = rMapLast (const tmpDir) actFn tmpPrefix
+    link' = debugAction cfg "aListEmpty" link [link]
 
--- TODO use a hash for the cached path rather than the name, which changes!
+aListLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aListLits cfg outPath relPaths = do
+  lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
+  let lits' = sort $ map stripWhiteSpace lits
+      out'  = debugAction cfg "aListLits" outPath (outPath:relPaths)
+  debugWriteLines cfg out' lits'
 
--- takes an action fn and vectorizes the last arg (calls the fn with each of a
--- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmps :: ActionFn -> String -> CutType -> RulesFn
-rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
+aVar :: CutConfig -> FilePath -> FilePath -> Action ()
+aVar cfg dest link = do
+  let destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
+      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
+      link'  = debugAction cfg "aVar" link [link, dest]
+  alwaysRerun
+  need [dest]
+  liftIO $ createDirectoryIfMissing True $ takeDirectory link
+  wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
+  debugTrackWrite cfg [link']
+
+aListPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aListPaths cfg outPath paths = do
+  need paths
+  let out = debugAction cfg "aListPaths" outPath (outPath:paths)
+  -- TODO yup bug was here! any reason to keep it?
+  -- paths' <- liftIO $ mapM resolveSymlinks paths
+  debugWriteLines cfg out paths
+
+-- TODO take the path, not the expression?
+aLit :: CutConfig -> CutExpr -> FilePath -> Action ()
+aLit cfg expr out = debugWriteFile cfg out' $ ePath ++ "\n"
   where
-    -- TODO what if the same last arg is used in different mapping fns?
-    --      will it be unique?
-    tmpFn args = cacheDirUniq cfg tmpPrefix args
+    paths :: CutExpr -> FilePath
+    paths (CutLit _ _ p) = p
+    paths _ = error "bad argument to paths"
+    ePath = paths expr
+    out' = debugAction cfg "aLit" out [ePath, out]
 
--- TODO rename to be clearly "each"-related and use .each for the map files
---
--- TODO put the .each in the cachedir of the regular fn
--- TODO and the final outfile in the expr dir of the regular fn:
---
---      cache/<fnname>/<hash of non-mapped args>.each
---                          |
---                          V
---      exprs/<fnname>/<hash of all args>.<ext>
---
---     That should be pretty doable as long as you change the outfile paths to
---     use hashes of the individual args rather than the whole expression:
---
---     exprs/<fnname>/<arg1hash>_<arg2hash>_<arg3hash>.<ext>
---
---     Then in rMapLastArgs (rename it something better) you can calculate what
---     the outpath will be and put the .args in its proper place, and in this
---     main fn you can calculate it too to make the mapTmp pattern.
-rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
-rMapLast tmpFn actFn prefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
-  -- TODO make this an actual debug call
-  -- liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
-  initPaths <- mapM (rExpr s) (init exprs)
-  (ExprPath lastsPath) <- rExpr s (last exprs)
-  let inits = map (\(ExprPath p) -> p) initPaths
-      o@(ExprPath outPath) = exprPathExplicit cfg True (ListOf rtnType) name [show e]
-      (CacheDir mapTmp) = cacheDirUniq cfg prefix e
-  -- This builds .args files then needs their actual non-.args outpaths, which
-  -- will be built by the action below
-  outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
-  -- This builds one of the list of out paths based on a .args file
-  -- (made in the action above). It's a pretty roundabout way to do it!
-  -- TODO ask ndmitchell if there's something much more elegant I'm missing
-  (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
-  return $ debugRules cfg "rMapLast" e o
-rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"
+-- from ModuleAPI --
+
+aOneArgScript :: CutConfig -> String
+              -> FilePath -> FilePath -> FilePath -> Action ()
+aOneArgScript cfg oPath script tmpDir argPath = do
+  need [argPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
+  quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
+  let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
+  trackWrite [oPath']
+
+aOneArgListScript :: CutConfig -> FilePath
+                  -> String -> FilePath -> FilePath -> Action ()
+aOneArgListScript cfg outPath script tmpDir faPath = do
+  need [faPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
+  wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
+  -- debugWriteFile cfg outPath out
+  let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
+  debugTrackWrite cfg [out]
+
+aLink :: CutConfig -> FilePath -> FilePath -> Action ()
+aLink cfg outPath strPath = do
+  pth <- fmap stripWhiteSpace $ readFile' strPath
+  src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
+  need [src]
+  unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
+  let out = debugAction cfg "aLink" outPath [outPath, strPath]
+  debugTrackWrite cfg [out]
+
+aLoadListOne :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListOne cfg outPath litsPath = do
+  lits  <- debugReadLines cfg litsPath -- TODO strip?
+  lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
+  let out = debugAction cfg "aLoadListOne" outPath [outPath, litsPath]
+  debugWriteLines cfg out lits'
+
+aLoadListMany :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListMany cfg outPath pathsPath = do
+    paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
+    need paths
+    paths' <- liftIO $ mapM resolveSymlinks paths
+    -- need paths'
+    let out = debugAction cfg "aLoadListMany" outPath [outPath, pathsPath]
+    debugWriteLines cfg out paths'
+
+aSimpleTmp :: CutConfig -> FilePath -> ActionFn -> FilePath -> [ExprPath] -> Action ()
+aSimpleTmp cfg outPath actFn tmpDir argPaths = do
+  let argPaths' = map (\(ExprPath p) -> p) argPaths
+  need argPaths'
+  liftIO $ createDirectoryIfMissing True tmpDir
+  actFn cfg (CacheDir tmpDir) ([ExprPath outPath] ++ argPaths)
+  let out = debugAction cfg "aSimpleTmp" outPath (outPath:tmpDir:argPaths') -- TODO actFn?
+  trackWrite [out]

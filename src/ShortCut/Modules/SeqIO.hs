@@ -9,7 +9,7 @@ import Path (fromAbsFile, fromAbsDir) -- TODO remove and use Path everywhere
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
 import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2)
-import ShortCut.Core.Compile.Rules  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
+import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.FilePath      ((</>))
 import System.Directory           (createDirectoryIfMissing)

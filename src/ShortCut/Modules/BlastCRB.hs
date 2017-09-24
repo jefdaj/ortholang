@@ -5,7 +5,8 @@ module ShortCut.Modules.BlastCRB where
 import ShortCut.Core.Types
 import Development.Shake       (quietly, Action, CmdOption(..))
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Compile.Rules (rSimpleTmp, rMapLastTmps)
+import ShortCut.Core.Compile.Basic (rSimpleTmp)
+import ShortCut.Core.Compile.Map (rMapLastTmps)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import ShortCut.Core.Debug (debugAction, debugTrackWrite)
 

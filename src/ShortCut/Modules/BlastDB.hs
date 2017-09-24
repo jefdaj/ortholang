@@ -8,7 +8,8 @@ import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugWriteLines, debugAction, debugTrackWrite,
                                 debugRules)
-import ShortCut.Core.Compile.Rules     (rExpr, defaultTypeCheck, rMapLastTmp)
+import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
+import ShortCut.Core.Compile.Map     (rMapLastTmp)
 -- import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
 import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, exprHash)
 import ShortCut.Core.Util      (stripWhiteSpace)
