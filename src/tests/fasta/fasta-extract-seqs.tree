@@ -10,7 +10,7 @@
 |   |   |-- 0d80804331.str.list
 |   |   `-- e69bc83a1d.str.list
 |   |-- extract_seqs
-|   |   `-- 6b7a563bee_aac872acbe_5a7716b8f7.faa
+|   |   `-- 6b7a563bee_91e0712ef3_31268eb863.faa
 |   `-- load_faa
 |       `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
 `-- vars
@@ -19,6 +19,6 @@
     |-- ids10.str.list -> ../exprs/extract_ids/0d80804331.str.list
     |-- idsall.str.list -> ../exprs/extract_ids/e69bc83a1d.str.list
     |-- result -> ../vars/diff.str.list
-    `-- seqs10.faa -> ../exprs/extract_seqs/6b7a563bee_aac872acbe_5a7716b8f7.faa
+    `-- seqs10.faa -> ../exprs/extract_seqs/6b7a563bee_91e0712ef3_31268eb863.faa
 
 9 directories, 12 files

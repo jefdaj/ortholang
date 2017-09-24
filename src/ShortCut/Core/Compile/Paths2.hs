@@ -111,8 +111,10 @@ exprHash s@(scr,_) (CutRef _ _ _ v) -- important not to include varnames themsel
   = exprHash s $ lookupVar v scr
 exprHash s@(_, cfg) expr = res'
   where
-    main = digest $ [pref, salt] ++ name -- expr needs at least one "main" hash
-    res  = concat $ intersperse "_" (main:subs)
+    main = digest $ [pref, salt] ++ name -- most need one "main" hash
+    res  = case expr of
+             (CutLit _ _ _) -> concat subs -- single hash is enough
+             _ -> concat $ intersperse "_" (main:subs)
     subs = argHashes s expr
     res' = debugHash cfg "exprHash" expr res
     pref = exprPrefix expr
