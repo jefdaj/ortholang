@@ -60,11 +60,11 @@ debugHash cfg name expr hash = debug cfg msg hash
     ren = render $ pPrint expr
     msg = name ++ " hashed '" ++ ren ++ "' to " ++ hash
 
-debugPath :: CutConfig -> String -> CutExpr -> FilePath -> FilePath
+debugPath :: Show a => CutConfig -> String -> CutExpr -> a -> a
 debugPath cfg name expr path = debug cfg msg path
   where
     ren = render $ pPrint expr
-    msg = name ++ " for '" ++ ren ++ "' is " ++ path -- TODO include types?
+    msg = name ++ " for '" ++ ren ++ "' is " ++ show path -- TODO include types?
 
 -- TODO restrict to CutExpr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called

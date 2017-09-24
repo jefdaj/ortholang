@@ -50,8 +50,8 @@ pStatement :: ParseM CutAssign
 pStatement = do
   (_, cfg) <- getState
   res <- pAssign <|> pResult
-  let res' = debugParser cfg "pStatement" res
-  return res'
+  -- let res' = debugParser cfg "pStatement" res
+  return res
 
 -------------
 -- scripts --

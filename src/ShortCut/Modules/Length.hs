@@ -4,12 +4,13 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Debug     (debugReadLines, debugWriteFile, debugAction)
-import ShortCut.Core.Compile.Paths2    -- (cacheDir2, exprPathExplicit)
+import ShortCut.Core.Compile.Paths2    (cacheDir2, tmpToExpr)
 import ShortCut.Core.Compile.Rules     (rExpr, rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
 import System.FilePath         (takeDirectory, (</>))
 import System.Directory           (createDirectoryIfMissing)
 import Data.Scientific (Scientific())
+import Path (fromAbsFile, fromAbsDir)
 
 cutModule :: CutModule
 cutModule = CutModule {mName = "length", mFunctions = [len, lenEach]}
@@ -43,8 +44,8 @@ rLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath
   -- (ExprPath outPath) = exprPathExplicit cfg True num "length" [relPath]
-  let (MyPath cDir   ) = cacheDir2 cfg "length"
-      (MyPath outPath) = tmpToExpr s e
+  let cDir    = fromAbsDir  $ cacheDir2 cfg "length"
+      outPath = fromAbsFile $ tmpToExpr s e
       out = cfgTmpDir cfg </> outPath
   out %> \_ -> aLen cfg (CacheDir cDir) [ExprPath out, ExprPath lPath]
   return (ExprPath out)

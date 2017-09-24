@@ -10,7 +10,7 @@ import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugRules)
 import ShortCut.Core.Compile.Rules     (rExpr, defaultTypeCheck, rMapLastTmp)
 -- import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
-import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, MyPath(..), exprHash)
+import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, exprHash)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>),
@@ -19,6 +19,7 @@ import System.Directory        (createDirectoryIfMissing)
 -- import System.FilePath.Glob    (compile, globDir1)
 import Data.List               (isInfixOf)
 import Data.Char               (toLower)
+import Path (fromAbsFile, fromAbsDir)
 -- import System.Exit             (ExitCode(..))
 
 {- There are a few types of BLAST database files. For nucleic acids:
@@ -100,7 +101,7 @@ mkLoadDBEach name rtn = CutFunction
 rLoadDB :: RulesFn
 rLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
-  let (MyPath oPath) = tmpToExpr st e
+  let oPath = fromAbsFile $ tmpToExpr st e
   oPath %> \_ -> aLoadDB cfg oPath sPath 
   return (ExprPath oPath)
 rLoadDB _ _ = error "bad argument to rLoadDB"
@@ -145,8 +146,8 @@ filterNames s cs = filter matchFn cs
 rBlastdblist :: RulesFn
 rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
-  let (MyPath tmpDir) = cacheDir2 cfg "blastdbget"
-      (MyPath oPath ) = tmpToExpr s e
+  let tmpDir = fromAbsDir  $ cacheDir2 cfg "blastdbget"
+      oPath  = fromAbsFile $ tmpToExpr s e
       stdoutTmp = tmpDir </> "stdout" <.> "txt"
   oPath %> \_ -> aBlastdblist cfg oPath tmpDir stdoutTmp fPath
   return (ExprPath oPath)
@@ -175,8 +176,8 @@ blastdbget = CutFunction
 rBlastdbget :: RulesFn
 rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
-  let (MyPath tmpDir  ) = cacheDir2 cfg "blastdbget"
-      (MyPath dbPrefix) = tmpToExpr st e -- final prefix
+  let tmpDir   = fromAbsDir  $ cacheDir2 cfg "blastdbget"
+      dbPrefix = fromAbsFile $ tmpToExpr st e -- final prefix
   dbPrefix %> \_ -> aBlastdbget cfg dbPrefix tmpDir nPath
   return (ExprPath dbPrefix)
 rBlastdbget _ _ = error "bad argument to rBlastdbget"
@@ -228,13 +229,13 @@ tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 rMakeblastdb :: RulesFn
 rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let (MyPath out ) = tmpToExpr s e
-      out'        = cfgTmpDir cfg </> out
-      out''       = debugRules cfg "rMakeblastdb" e out'
-      (MyPath cDir) = cacheDir2 cfg $ "makeblastdb" ++ dbType
-      dbType      = if rtn == ndb then "_nucl" else "_prot"
-      dbPrefix    = cDir </> exprHash s fa
-      -- cache       = ".." </> ".." </> out -- TODO sytematize this
+  let out   = fromAbsFile $ tmpToExpr s e
+      out'  = cfgTmpDir cfg </> out
+      out'' = debugRules cfg "rMakeblastdb" e out'
+      cDir  = fromAbsDir $ cacheDir2 cfg $ "makeblastdb" ++ dbType
+      dbType   = if rtn == ndb then "_nucl" else "_prot"
+      dbPrefix = cDir </> exprHash s fa
+      -- cache = ".." </> ".." </> out -- TODO sytematize this
   out'' %> \_ -> aMakeblastdb rtn cfg (CacheDir cDir)
                       [ExprPath out'', ExprPath dbPrefix, ExprPath faPath]
   -- TODO what's up with the linking? just write the prefix to the outfile!
@@ -265,7 +266,7 @@ aMakeblastdb dbType cfg (CacheDir cDir) [ExprPath out, ExprPath dbPrefix, ExprPa
          $ getDirectoryFiles cDir [takeBaseName dbPrefix ++ ".*"]
   debugTrackWrite cfg files
   -- liftIO $ putStrLn $ "files: " ++ show files
-  debugWriteLines cfg out [relDb]
+  debugWriteLines cfg out' [relDb]
 aMakeblastdb _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show paths
 
 --------------------------------

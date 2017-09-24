@@ -22,7 +22,7 @@
 -- DO ONLY THIS FIRST IN ONE BIG PUSH (NO CHANGING PATHS/TESTS)
 -- THEN NEXT PUSH IS TO GET THE PATHS INTO A NICE FORMAT (INDIV HASHES)
 -- THEN MASSAGE RMAP* TO BE NICER (NO BREAKING IF POSSIBLE!)
--- THEN REASSESS/DOCUMENT + DEBUG BLAST, AFTER A BREAK DAY
+-- THEN REASSESS/DOCUMENT + DEBUG BLAST, AFTER A BREAK DAY (OR DO TYPED EXPRESSIONS IF FEEL LIKE)
 
 {- This is a transitional module for the new phantom-typed paths;
  - once everything uses them I'll remove the other and rename this to Paths.
@@ -31,6 +31,7 @@
 module ShortCut.Core.Compile.Paths2
   -- currently used in the codebase and need updating:
   ( MyPath(..) -- TODO don't export constructor for safety?
+  , Path, Abs, Rel, File, Dir
   , cacheDir2
   , exprHash
   , tmpToExpr
@@ -38,6 +39,7 @@ module ShortCut.Core.Compile.Paths2
   where
 
 -- import ShortCut.Core.Types2
+import Path hiding ((</>)) -- (Path(..), Abs, Rel, File, Dir, parseAbsFile, parseAbsDir)
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Paths
 
@@ -53,12 +55,14 @@ import ShortCut.Core.Debug        (debugPath, debugHash)
 import ShortCut.Core.Util         (digest)
 
 -----------------------
--- Paths-based paths --
+-- new Paths-based paths --
 -----------------------
 
------------------------------
--- new phantom-typed paths --
------------------------------
+---------------------------------
+-- aborted phantom-typed paths --
+---------------------------------
+
+-- TODO remove all this gunk and replace using Paths pkg
 
 -- This doesn't guarantee much of anything on its own; needs smart constructors!
 -- TODO hide it from being exported
@@ -69,10 +73,10 @@ newtype MyPath src dst = MyPath FilePath deriving (Show, Data)
 -- Possible source types:
 -- TODO also hide from being exported, or no?
 -- TODO Root?
-data TmpDir   -- <tmpdir>
+-- data TmpDir   -- <tmpdir>
 -- data Res      -- <tmpdir>/vars/result (TODO: salt dirs)
 -- data Var      -- <tmpdir>/vars/<name>.<ext>
-data Expr     -- <tmpdir>/exprs/<prefix>/<hash>.<ext>
+-- data Expr     -- <tmpdir>/exprs/<prefix>/<hash>.<ext>
 
 -- Possible destination types are Res, Var, Expr, or:
 -- data Input     -- any/path/the/user/feels.like
@@ -107,48 +111,36 @@ exprHash s@(scr,_) (CutRef _ _ _ v) -- important not to include varnames themsel
   = exprHash s $ lookupVar v scr
 exprHash (scr, cfg) expr = res'
   where
-    main = digest $ [pref, salt] ++ name -- "main" hash
+    main = digest $ [pref, salt] ++ name -- expr needs at least one "main" hash
     res  = concat $ intersperse "_" (main:subs)
     subs = argHashes scr expr
     res' = debugHash cfg "exprHash" expr res
     pref = exprPrefix expr
     salt = show $ saltOf expr
-    -- deps = map (\(MyPath p) -> p)
-         -- $ map (tmpToExpr s)
-         -- $ map (\v -> lookupVar v s)
-         -- $ depsOf expr
-    name = case expr of
+    name = case expr of -- TODO roll this into prefix?
              (CutBop _ _ _ n  _ _) -> [n]
              (CutFun _ _ _ n _   ) -> [n]
              _ -> []
-    -- TODO use the subs' *paths* rather than exprs (call tmpToExpr)
-    --      (what about when it's a ref... look up like above first?)
-    -- TODO and factor out into a fn that can be reused when mapping
---     subs = map (\(MyPath p) -> p)
---          $ map (tmpToExpr s)
---          $ case expr of
---              (CutBop _ _ _  _ e1 e2) -> [e1, e2]
---              (CutFun _ _ _ _  es   ) -> es
---              (CutList _ _ _   es   ) -> es
---              _ -> []
 
--- TODO replace exprHash above with this
 argHashes :: CutScript -> CutExpr -> [String]
+argHashes _ (CutLit  _ _     v ) = [digest v]
 argHashes s (CutRef  _ _ _   v ) = argHashes s $ lookupVar v s
 argHashes s (CutFun  _ _ _ _ es) = concat $ map (argHashes s) es
+argHashes s (CutList _ _ _   es) = [digest $ concat $ map (argHashes s) es]
 argHashes _ _ = []
 
 ------------------------------------------
 -- smart constructors for the new paths --
 ------------------------------------------
 
-tmpToExpr :: CutState -> CutExpr -> MyPath TmpDir Expr
-tmpToExpr s@(_, cfg) expr = MyPath res'
+-- TODO rename... back to exprPath for now? and rewrite exprPathExplicit to match?
+tmpToExpr :: CutState -> CutExpr -> Path Abs File
+tmpToExpr s@(_, cfg) expr = fromJust $ parseAbsFile res'
   where
     prefix = exprPrefix expr
     hash   = exprHash s expr
     ext    = extOf $ typeOf expr
-    res    = "exprs" </> prefix </> hash <.> ext
+    res    = cfgTmpDir cfg </> "exprs" </> prefix </> hash <.> ext
     res'   = debugPath cfg "tmpToExpr" expr res
 
 -- TODO is this too complicated?
@@ -180,8 +172,12 @@ tmpToExpr s@(_, cfg) expr = MyPath res'
 -- exprToInput cfg _ input = Path $ makeRelative (cfgWorkDir cfg) input
 
 -- TODO change to tmpToCache? rootToCache?
-cacheDir2 :: CutConfig -> String -> MyPath TmpDir CacheDir
-cacheDir2 cfg modName = MyPath $ cfgTmpDir cfg </> "cache" </> modName
+-- TODO any better idea than fromJust here?
+cacheDir2 :: CutConfig -> String -> Path Abs Dir
+cacheDir2 cfg modName = fromJust $ parseAbsDir res
+  where
+    res :: FilePath
+    res = cfgTmpDir cfg </> "cache" </> modName
 
 -- Creates a unique hashed directory inside the main module cache dir.
 -- Needed when scripts name their tmpfiles the same each time they're run

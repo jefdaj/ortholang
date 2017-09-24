@@ -4,13 +4,14 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Compile.Paths2  (tmpToExpr, MyPath(..))
+import ShortCut.Core.Compile.Paths2  (tmpToExpr)
 import ShortCut.Core.Compile.Rules (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
                             debugRules, debugAction)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Util (resolveSymlinks)
+import Path (fromAbsFile) -- TODO remove and use Path everywhere
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -105,9 +106,9 @@ tSetFold _ = Left "expecting a list of lists"
 rListFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
 rListFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
-  let (MyPath oPath) = tmpToExpr s e
-      oPath' = cfgTmpDir cfg </> oPath
-      oPath'' = debugRules cfg "rListFold" e oPath
+  let oPath    = fromAbsFile $ tmpToExpr s e
+      oPath'   = cfgTmpDir cfg </> oPath
+      oPath''  = debugRules cfg "rListFold" e oPath
       fixLinks = canonicalLinks (typeOf e)
   oPath %> \_ -> aSetFold cfg fixLinks fn oPath' setsPath
   return (ExprPath oPath'')
