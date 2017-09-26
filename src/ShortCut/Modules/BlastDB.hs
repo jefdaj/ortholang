@@ -11,7 +11,7 @@ import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
 import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Map     (rMapLastTmp)
 -- import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
-import ShortCut.Core.Compile.Paths2 (tmpToExpr, cacheDir2, exprHash)
+import ShortCut.Core.Compile.Paths2 (exprPath, cacheDir, exprHash)
 import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>),
@@ -102,7 +102,7 @@ mkLoadDBEach name rtn = CutFunction
 rLoadDB :: RulesFn
 rLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
-  let oPath = fromAbsFile $ tmpToExpr st e
+  let oPath = fromAbsFile $ exprPath st e
   oPath %> \_ -> aLoadDB cfg oPath sPath 
   return (ExprPath oPath)
 rLoadDB _ _ = error "bad argument to rLoadDB"
@@ -147,8 +147,8 @@ filterNames s cs = filter matchFn cs
 rBlastdblist :: RulesFn
 rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
-  let tmpDir = fromAbsDir  $ cacheDir2 cfg "blastdbget"
-      oPath  = fromAbsFile $ tmpToExpr s e
+  let tmpDir = fromAbsDir  $ cacheDir cfg "blastdbget"
+      oPath  = fromAbsFile $ exprPath s e
       stdoutTmp = tmpDir </> "stdout" <.> "txt"
   oPath %> \_ -> aBlastdblist cfg oPath tmpDir stdoutTmp fPath
   return (ExprPath oPath)
@@ -177,8 +177,8 @@ blastdbget = CutFunction
 rBlastdbget :: RulesFn
 rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
-  let tmpDir   = fromAbsDir  $ cacheDir2 cfg "blastdbget"
-      dbPrefix = fromAbsFile $ tmpToExpr st e -- final prefix
+  let tmpDir   = fromAbsDir  $ cacheDir cfg "blastdbget"
+      dbPrefix = fromAbsFile $ exprPath st e -- final prefix
   dbPrefix %> \_ -> aBlastdbget cfg dbPrefix tmpDir nPath
   return (ExprPath dbPrefix)
 rBlastdbget _ _ = error "bad argument to rBlastdbget"
@@ -230,10 +230,10 @@ tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 rMakeblastdb :: RulesFn
 rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let out   = fromAbsFile $ tmpToExpr s e
+  let out   = fromAbsFile $ exprPath s e
       out'  = cfgTmpDir cfg </> out
       out'' = debugRules cfg "rMakeblastdb" e out'
-      cDir  = fromAbsDir $ cacheDir2 cfg $ "makeblastdb" ++ dbType
+      cDir  = fromAbsDir $ cacheDir cfg $ "makeblastdb" ++ dbType
       dbType   = if rtn == ndb then "_nucl" else "_prot"
       dbPrefix = cDir </> exprHash s fa
       -- cache = ".." </> ".." </> out -- TODO sytematize this
@@ -245,7 +245,7 @@ rMakeblastdb _ _ = error "bad argument to makeblastdb"
 
 aMakeblastdb :: CutType -> ActionFn
 aMakeblastdb dbType cfg (CacheDir cDir) [ExprPath out, ExprPath dbPrefix, ExprPath faPath] = do
-  -- TODO tmpToExpr handles this now?
+  -- TODO exprPath handles this now?
   let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
       dbType' = if dbType == ndb then "nucl" else "prot"
   liftIO $ putStrLn $ "dbPrefix: " ++ dbPrefix

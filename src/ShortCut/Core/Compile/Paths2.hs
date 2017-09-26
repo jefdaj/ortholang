@@ -32,16 +32,16 @@ module ShortCut.Core.Compile.Paths2
   -- currently used in the codebase and need updating:
   ( MyPath(..) -- TODO don't export constructor for safety?
   , Path, Abs, Rel, File, Dir
-  , cacheDir2
+  , cacheDir
   , exprHash
-  , tmpToExpr
+  , exprPath
   )
   where
 
 -- import ShortCut.Core.Types2
 import Path hiding ((</>)) -- (Path(..), Abs, Rel, File, Dir, parseAbsFile, parseAbsDir)
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Paths
+import ShortCut.Core.Compile.Paths hiding (exprPrefix, exprPath, exprPathExplicit, cacheDir)
 
 -- import Data.List                  (isInfixOf)
 -- import ShortCut.Core.Debug (debug)
@@ -88,16 +88,12 @@ newtype MyPath src dst = MyPath FilePath deriving (Show, Data)
 
 {- This code:
  - let e = (CutExpr2 $ CutLit str 0 "stuff") :: CutExpr2 CutStr
- -     p = tmpToExpr [] e
+ -     p = exprPath [] e
  -
  - ... would create a "path from the tmpdir to an expression of type str":
  - p :: MyPath TmpDir Expr CutStr
  - p = MyPath "exprs/cut_lit/6f2d5f011a.str"
  -}
-
------------------------------
--- hashes for use in paths --
------------------------------
 
 -- TODO add phantom type to var + expr
 -- TODO version that doesn't assume it exists?
@@ -131,19 +127,43 @@ argHashes s (CutFun  _ _ _ _ es) = map (digest . exprHash s) es
 argHashes s (CutList _ _ _   es) = [digest $ concat $ map (exprHash s) es]
 argHashes _ _ = []
 
-------------------------------------------
--- smart constructors for the new paths --
-------------------------------------------
+-- TODO add names to the CutBops themselves... or associate with prefix versions?
+exprPrefix :: CutExpr -> String
+exprPrefix (CutLit rtn _ _     ) = extOf rtn
+exprPrefix (CutFun _ _ _ name _) = name
+exprPrefix (CutList _ _ _ _    ) = "list"
+exprPrefix (CutRef _ _ _ _     ) = error  "CutRefs don't need a prefix"
+exprPrefix (CutBop _ _ _ n _ _ ) = case n of
+                                     "+" -> "add"
+                                     "-" -> "subtract"
+                                     "*" -> "multiply"
+                                     "/" -> "divide"
+                                     "~" -> "difference"
+                                     "&" -> "intersection"
+                                     "|" -> "union"
+                                     _   -> error "unknown CutBop"
 
 -- TODO rename... back to exprPath for now? and rewrite exprPathExplicit to match?
-tmpToExpr :: CutState -> CutExpr -> Path Abs File
-tmpToExpr s@(_, cfg) expr = fromJust $ parseAbsFile res'
+exprPath :: CutState -> CutExpr -> Path Abs File
+exprPath s@(_, cfg) expr = exprPathExplicit s prefix rtype salt hashes
   where
     prefix = exprPrefix expr
-    hash   = exprHash s expr
-    ext    = extOf $ typeOf expr
-    res    = cfgTmpDir cfg </> "exprs" </> prefix </> hash <.> ext
-    res'   = debugPath cfg "tmpToExpr" expr res
+    rtype  = typeOf expr
+    salt   = saltOf expr
+    hashes = argHashes s expr
+
+-- TODO now we need the prefix to be unique, so "cut_bop" isn't good enough!
+--      cut_bop -> union, difference, etc.
+--      cut_lit should be OK, but maybe separate into num, str anyway?
+exprPathExplicit :: CutState
+                 -> String -> CutType -> Int -> [String]
+                 -> Path Abs File
+exprPathExplicit s@(_, cfg) prefix rtype salt hashes = fp
+  where
+    suf  = if salt == 0 then "" else "_" ++ show salt
+    base = (concat $ intersperse "_" hashes) ++ suf
+    path = cfgTmpDir cfg </> "exprs" </> prefix </> base <.> extOf rtype
+    fp   = fromJust $ parseAbsFile path -- TODO remove and use Path everywhere
 
 -- TODO is this too complicated?
 -- TODO rename: linkToExpr :: ... -> Action?
@@ -151,15 +171,15 @@ tmpToExpr s@(_, cfg) expr = fromJust $ parseAbsFile res'
 -- exprToExpr :: CutState -> CutExpr -> CutExpr -> Path Expr Expr
 -- exprToExpr s src dst = Path $ backToTmp </> fromTmp
 --   where
---     (Path fromTmp) = tmpToExpr s dst
---     (Path src')    = tmpToExpr s src
+--     (Path fromTmp) = exprPath s dst
+--     (Path src')    = exprPath s src
 --     nDirsBack      = length $ filter isPathSeparator src'
 --     backToTmp      = foldr1 (</>) (take nDirsBack $ repeat "..")
 
 -- varToExpr :: CutState -> CutExpr -> Path Var Expr
 -- varToExpr s expr = Path $ ".." </> tmpPath
 --  where
---     (Path tmpPath) = tmpToExpr s expr
+--     (Path tmpPath) = exprPath s expr
 
 -- varToVar :: CutExpr -> String -> Path Var Var
 -- varToVar expr name = Path $ name <.> extOf (typeOf expr)
@@ -175,8 +195,8 @@ tmpToExpr s@(_, cfg) expr = fromJust $ parseAbsFile res'
 
 -- TODO change to tmpToCache? rootToCache?
 -- TODO any better idea than fromJust here?
-cacheDir2 :: CutConfig -> String -> Path Abs Dir
-cacheDir2 cfg modName = fromJust $ parseAbsDir res
+cacheDir :: CutConfig -> String -> Path Abs Dir
+cacheDir cfg modName = fromJust $ parseAbsDir res
   where
     res :: FilePath
     res = cfgTmpDir cfg </> "cache" </> modName
@@ -187,5 +207,5 @@ cacheDir2 cfg modName = fromJust $ parseAbsDir res
 -- cacheDirUniq2 :: CutState -> String -> CutExpr -> MyPath TmpDir CacheDir
 -- cacheDirUniq2 s@(_, cfg) modName expr = MyPath $ mainCache </> hash
 --   where
---     (MyPath mainCache) = cacheDir2 cfg modName
+--     (MyPath mainCache) = cacheDir cfg modName
 --     hash = exprHash s expr

@@ -4,7 +4,7 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Compile.Paths2  (tmpToExpr)
+import ShortCut.Core.Compile.Paths2  (exprPath)
 import ShortCut.Core.Compile.Basic (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugReadLines, debugWriteLines,
@@ -106,7 +106,7 @@ tSetFold _ = Left "expecting a list of lists"
 rListFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
 rListFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
-  let oPath    = fromAbsFile $ tmpToExpr s e
+  let oPath    = fromAbsFile $ exprPath s e
       oPath'   = cfgTmpDir cfg </> oPath
       oPath''  = debugRules cfg "rListFold" e oPath
       fixLinks = canonicalLinks (typeOf e)
