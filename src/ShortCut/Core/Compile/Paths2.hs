@@ -35,13 +35,14 @@ module ShortCut.Core.Compile.Paths2
   , cacheDir
   , exprHash
   , exprPath
+  , toTmpPath
   )
   where
 
 -- import ShortCut.Core.Types2
 import Path hiding ((</>)) -- (Path(..), Abs, Rel, File, Dir, parseAbsFile, parseAbsDir)
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Paths hiding (exprPrefix, exprPath, exprPathExplicit, cacheDir)
+-- import ShortCut.Core.Compile.Paths hiding (exprPrefix, exprPath, exprPathExplicit, cacheDir)
 
 -- import Data.List                  (isInfixOf)
 -- import ShortCut.Core.Debug (debug)
@@ -50,8 +51,8 @@ import ShortCut.Core.Compile.Paths hiding (exprPrefix, exprPath, exprPathExplici
 import Data.Data                  (Data)
 import Data.List                  (intersperse)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((<.>), (</>))
-import ShortCut.Core.Debug        (debugPath, debugHash)
+import Development.Shake.FilePath ((<.>), (</>), makeRelative)
+import ShortCut.Core.Debug        (debugHash)
 import ShortCut.Core.Util         (digest)
 
 -----------------------
@@ -120,11 +121,13 @@ exprHash s@(_, cfg) expr = res'
              (CutFun _ _ _ n _   ) -> [n]
              _ -> []
 
+-- TODO use Paths here rather than hashes to make it map-compatible!
+-- TODO and make them relative to the tmpdir for determinism
 argHashes :: CutState -> CutExpr -> [String]
 argHashes s@(as,_) (CutRef _ _ _ v) = argHashes s $ lookupVar v as
 argHashes _ (CutLit  r _     v ) = [digest $ v ++ show r]
-argHashes s (CutFun  _ _ _ _ es) = map (digest . exprHash s) es
-argHashes s (CutList _ _ _   es) = [digest $ concat $ map (exprHash s) es]
+argHashes s@(_,cfg) (CutFun  _ _ _ _ es) = map (digest . fromRelFile . toTmpPath cfg . exprPath s) es
+argHashes s@(_,cfg) (CutList _ _ _   es) = [digest $ concat $ map (fromRelFile . toTmpPath cfg . exprPath s) es]
 argHashes _ _ = []
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
@@ -145,7 +148,8 @@ exprPrefix (CutBop _ _ _ n _ _ ) = case n of
 
 -- TODO rename... back to exprPath for now? and rewrite exprPathExplicit to match?
 exprPath :: CutState -> CutExpr -> Path Abs File
-exprPath s@(_, cfg) expr = exprPathExplicit s prefix rtype salt hashes
+exprPath s@(scr, _) (CutRef _ _ _ v) = exprPath s $ lookupVar v scr
+exprPath s expr = exprPathExplicit s prefix rtype salt hashes
   where
     prefix = exprPrefix expr
     rtype  = typeOf expr
@@ -158,12 +162,21 @@ exprPath s@(_, cfg) expr = exprPathExplicit s prefix rtype salt hashes
 exprPathExplicit :: CutState
                  -> String -> CutType -> Int -> [String]
                  -> Path Abs File
-exprPathExplicit s@(_, cfg) prefix rtype salt hashes = fp
+exprPathExplicit (_, cfg) prefix rtype salt hashes = fp
   where
     suf  = if salt == 0 then "" else "_" ++ show salt
     base = (concat $ intersperse "_" hashes) ++ suf
     path = cfgTmpDir cfg </> "exprs" </> prefix </> base <.> extOf rtype
     fp   = fromJust $ parseAbsFile path -- TODO remove and use Path everywhere
+
+-- make an absolute expression path relative to the tmpdir
+-- TODO can it work on the cache dir/files?
+toTmpPath :: CutConfig -> Path Abs File -> Path Rel File
+toTmpPath cfg path = fromJust $ parseRelFile relPath
+  where
+    relPath = makeRelative tmpDir absPath
+    tmpDir  = cfgTmpDir cfg
+    absPath = fromAbsFile path
 
 -- TODO is this too complicated?
 -- TODO rename: linkToExpr :: ... -> Action?

@@ -3,7 +3,7 @@
 |   `-- seqio
 |-- exprs
 |   |-- concat_fastas
-|   |   `-- ff335914cc.fna
+|   |   `-- 6f5bcc9318.fna
 |   |-- cut_list
 |   |   `-- 6cfcb30456.fna.list
 |   |-- cut_lit
@@ -16,6 +16,6 @@
 |       |-- a7d15af7fe.gbk -> $TESTDIR/data/SynPCC7942_chr.gbk
 |       `-- bfa8ff7859.gbk -> $TESTDIR/data/SynPCC7942_pANL.gbk
 `-- vars
-    `-- result -> ../exprs/concat_fastas/ff335914cc.fna
+    `-- result -> ../exprs/concat_fastas/6f5bcc9318.fna
 
 9 directories, 9 files
