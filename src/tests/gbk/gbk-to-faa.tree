@@ -2,14 +2,14 @@
 |-- cache
 |   `-- seqio
 |-- exprs
-|   |-- cut_lit
-|   |   `-- 5542f3f4cb.str
 |   |-- gbk_to_faa
-|   |   `-- 571b0e070a.faa
-|   `-- load_gbk
-|       `-- 5542f3f4cb.gbk -> $TESTDIR/data/Synechocystis-PCC-6803-uid159873.gbk
+|   |   `-- c6a1efd706.faa
+|   |-- load_gbk
+|   |   `-- 5542f3f4cb.gbk -> $TESTDIR/data/Synechocystis-PCC-6803-uid159873.gbk
+|   `-- str
+|       `-- 0507961f5b.str
 `-- vars
-    |-- faa6803.faa -> ../exprs/gbk_to_faa/571b0e070a.faa
+    |-- faa6803.faa -> ../exprs/gbk_to_faa/c6a1efd706.faa
     |-- gbk6803.gbk -> ../exprs/load_gbk/5542f3f4cb.gbk
     `-- result -> ../vars/faa6803.faa
 

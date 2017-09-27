@@ -57,24 +57,27 @@ leaveEachOut xs
 --      (if it turns out to be re-running stuff unneccesarily)
 rCombos :: ([FilePath] -> [[FilePath]])
         -> CutState -> CutExpr -> Rules ExprPath
-rCombos comboFn s expr@(CutFun (ListOf etype) salt _ fnName [iList]) = do
+rCombos comboFn s expr@(CutFun (ListOf etype) salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oList = fromAbsFile $ exprPath s expr
-  oList %> aCombos s comboFn iPath etype salt fnName
+  oList %> aCombos s comboFn iPath etype salt
   return (ExprPath oList)
 rCombos _ _ _ = error "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
+-- TODO do something more obvious than writing to the "list" prefix??
 aCombos :: CutState
         -> ([String] -> [[String]])
-        -> FilePath -> CutType -> Int -> String
+        -> FilePath -> CutType -> Int
         -> FilePath -> Action ()
-aCombos s@(_,cfg) comboFn iPath lType salt fnName out = do
+aCombos s@(_,cfg) comboFn iPath lType salt out = do
   need [iPath]
   elements <- fmap lines $ readFile' iPath
-  let mkOut p = exprPathExplicit s fnName lType salt [digest p]
+  -- TODO these aren't digesting properly! elements need to be compiled first?
+  --      (digesting the elements themselves rather than the path to them)
+  let mkOut p = exprPathExplicit s "list" lType salt [digest p]
       oPaths  = map (fromAbsFile . mkOut) elements
       combos  = comboFn elements
   mapM_ (\(p,c) -> liftIO $ writeFileLines p c) (zip oPaths combos)
-  let out' = debugAction cfg "aCombos" out [iPath, extOf lType, fnName, out]
+  let out' = debugAction cfg "aCombos" out [iPath, extOf lType, out]
   debugWriteLines cfg out' oPaths

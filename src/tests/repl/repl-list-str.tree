@@ -1,11 +1,11 @@
 .
 |-- exprs
-|   |-- cut_list
-|   |   `-- 3038138756.str.list
-|   `-- cut_lit
-|       `-- a830208172.str
+|   |-- list
+|   |   `-- 92e7efcfb8.str.list
+|   `-- str
+|       `-- a2a665650c.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_list/3038138756.str.list
+    `-- result -> ../exprs/list/92e7efcfb8.str.list
 
 4 directories, 4 files

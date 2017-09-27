@@ -2,15 +2,15 @@
 |-- cache
 |   `-- seqio
 |-- exprs
-|   |-- cut_lit
-|   |   `-- 139e073c49.str
 |   |-- extract_ids
-|   |   `-- 0d80804331.str.list
-|   `-- load_faa
-|       `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|   |   `-- aadfee455f.str.list
+|   |-- load_faa
+|   |   `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|   `-- str
+|       `-- 50dbefb6d6.str
 `-- vars
     |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
-    |-- ids10.str.list -> ../exprs/extract_ids/0d80804331.str.list
+    |-- ids10.str.list -> ../exprs/extract_ids/aadfee455f.str.list
     `-- result -> ../vars/ids10.str.list
 
 7 directories, 6 files

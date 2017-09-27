@@ -1,12 +1,13 @@
 .
 |-- exprs
 |   |-- cut_list
-|   |   |-- 3038138756.str.list
-|   |   `-- 8b60e594d0.str.list.list
-|   `-- cut_lit
-|       `-- a830208172.str
+|   |   `-- a2a2ad57ca.str.list.list
+|   |-- list
+|   |   `-- 92e7efcfb8.str.list
+|   `-- str
+|       `-- a2a665650c.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_list/8b60e594d0.str.list.list
+    `-- result -> ../exprs/cut_list/a2a2ad57ca.str.list.list
 
-4 directories, 5 files
+5 directories, 5 files

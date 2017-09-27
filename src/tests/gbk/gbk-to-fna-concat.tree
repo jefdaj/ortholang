@@ -5,16 +5,16 @@
 |   |-- concat_fastas
 |   |   `-- 7719d6add4.fna
 |   |-- cut_list
-|   |   `-- 6cfcb30456.fna.list
-|   |-- cut_lit
-|   |   |-- a7d15af7fe.str
-|   |   `-- bfa8ff7859.str
+|   |   `-- e2828abec6.fna.list
 |   |-- gbk_to_fna
-|   |   |-- 2c0bf5f44b.fna
-|   |   `-- a19553bc95.fna
-|   `-- load_gbk
-|       |-- a7d15af7fe.gbk -> $TESTDIR/data/SynPCC7942_chr.gbk
-|       `-- bfa8ff7859.gbk -> $TESTDIR/data/SynPCC7942_pANL.gbk
+|   |   |-- 2529a1a40d.fna
+|   |   `-- 45914c672d.fna
+|   |-- load_gbk
+|   |   |-- a7d15af7fe.gbk -> $TESTDIR/data/SynPCC7942_chr.gbk
+|   |   `-- bfa8ff7859.gbk -> $TESTDIR/data/SynPCC7942_pANL.gbk
+|   `-- str
+|       |-- 7ec89da918.str
+|       `-- a8d18fa355.str
 `-- vars
     `-- result -> ../exprs/concat_fastas/7719d6add4.fna
 

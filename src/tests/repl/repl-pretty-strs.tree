@@ -1,34 +1,34 @@
 .
 |-- exprs
-|   |-- cut_list
-|   |   |-- d187b31804.str.list
-|   |   |-- ecfada8ba8.str.list
-|   |   `-- f80ce78cea.str.list
-|   `-- cut_lit
-|       |-- 1f5863985a.str
-|       |-- 2341435a64.str
-|       |-- 2415e58040.str
-|       |-- 36ccfabdc8.str
-|       |-- 3f42f6275f.str
-|       |-- 57a370cbc3.str
-|       |-- 5ed6377abd.str
-|       |-- 5f7ff9d88c.str
-|       |-- 63a289130e.str
-|       |-- 818d1ca144.str
-|       |-- 8fe4c17df2.str
-|       |-- 9ed2400f03.str
-|       |-- 9efe120ed4.str
-|       |-- 9f57c0c34b.str
-|       |-- a830208172.str
-|       |-- ab142063e0.str
-|       |-- b2f8e2eba4.str
-|       |-- b77956b4c7.str
-|       |-- bb3cf91f27.str
-|       |-- c9dc80b9fd.str
-|       |-- e4b46dbe52.str
-|       `-- e9d480f57b.str
+|   |-- list
+|   |   |-- 3d2fa74d28.str.list
+|   |   |-- 3e34eccc1e.str.list
+|   |   `-- 7d31e63613.str.list
+|   `-- str
+|       |-- 0a47f01093.str
+|       |-- 0ec5091ee0.str
+|       |-- 1ab4aaf713.str
+|       |-- 22b39cba86.str
+|       |-- 246a9c311f.str
+|       |-- 43399f6592.str
+|       |-- 56bf6aaf70.str
+|       |-- 5bf90e2173.str
+|       |-- 6067924ae1.str
+|       |-- 6f237ec7b7.str
+|       |-- 7462be7136.str
+|       |-- 7dda6874ad.str
+|       |-- 8019eec515.str
+|       |-- 812e7a8e73.str
+|       |-- 898644242c.str
+|       |-- 8b03aa5ea5.str
+|       |-- 9a2f3d7bee.str
+|       |-- a149aed1ee.str
+|       |-- a2a665650c.str
+|       |-- a66770af3e.str
+|       |-- b4a2cfacde.str
+|       `-- f898d1fc03.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_list/ecfada8ba8.str.list
+    `-- result -> ../exprs/list/3e34eccc1e.str.list
 
 4 directories, 27 files

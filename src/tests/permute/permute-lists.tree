@@ -1,22 +1,23 @@
 .
 |-- exprs
 |   |-- cut_list
-|   |   |-- 2d38f71033.num.list
-|   |   |-- a9500caa6f.num.list.list
-|   |   |-- ac8c6cabb9.num.list
-|   |   `-- bfbd572874.num.list
-|   |-- cut_lit
-|   |   |-- 0656c14724.num
-|   |   |-- 1e605f8d62.num
-|   |   |-- 7b5408a0db.num
-|   |   |-- ac73236e53.num
-|   |   `-- f6b4a5973c.num
-|   `-- leave_each_out
-|       |-- 1a68e14ba1.num.list.list
-|       |-- 6630ecd733.num.list.list
-|       |-- 6750392f0d.num.list.list
-|       `-- aeca64583f.num.list.list.list
+|   |   `-- 9801c299cf.num.list.list
+|   |-- leave_each_out
+|   |   `-- aeca64583f.num.list.list.list
+|   |-- list
+|   |   |-- 0301baab54.num.list.list
+|   |   |-- 1dbdf782e4.num.list
+|   |   |-- 3cf6ddd9cc.num.list.list
+|   |   |-- 43ee6c5629.num.list
+|   |   |-- 79379a40b0.num.list.list
+|   |   `-- 8b00bbfe13.num.list
+|   `-- num
+|       |-- 89fb8b4aed.num
+|       |-- a629005e3c.num
+|       |-- ea11b49459.num
+|       |-- eaad7f2e40.num
+|       `-- ee383407c9.num
 `-- vars
     `-- result -> ../exprs/leave_each_out/aeca64583f.num.list.list.list
 
-5 directories, 14 files
+6 directories, 14 files

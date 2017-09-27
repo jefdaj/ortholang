@@ -4,20 +4,20 @@
 |-- exprs
 |   |-- cut_bop
 |   |   `-- 04286bcd60.str.list
-|   |-- cut_lit
-|   |   `-- 139e073c49.str
 |   |-- extract_ids
-|   |   |-- 0d80804331.str.list
-|   |   `-- e69bc83a1d.str.list
+|   |   |-- a4456b5ee7.str.list
+|   |   `-- aadfee455f.str.list
 |   |-- extract_seqs
 |   |   `-- aadfee455f_8c5f530dc8.faa
-|   `-- load_faa
-|       `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|   |-- load_faa
+|   |   `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|   `-- str
+|       `-- 50dbefb6d6.str
 `-- vars
     |-- diff.str.list -> ../exprs/cut_bop/04286bcd60.str.list
     |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
-    |-- ids10.str.list -> ../exprs/extract_ids/0d80804331.str.list
-    |-- idsall.str.list -> ../exprs/extract_ids/e69bc83a1d.str.list
+    |-- ids10.str.list -> ../exprs/extract_ids/aadfee455f.str.list
+    |-- idsall.str.list -> ../exprs/extract_ids/a4456b5ee7.str.list
     |-- result -> ../vars/diff.str.list
     `-- seqs10.faa -> ../exprs/extract_seqs/aadfee455f_8c5f530dc8.faa
 

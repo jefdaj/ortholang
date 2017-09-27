@@ -20,12 +20,15 @@ module ShortCut.Core.Compile.Basic
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Paths
+
+-- TODO remove Old path fns
+import qualified ShortCut.Core.Compile.Paths as Old
+import ShortCut.Core.Compile.Paths2 (cacheDir, exprPath, exprPathExplicit)
+import Path (fromAbsDir, fromAbsFile)
 
 import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)
 import Development.Shake.FilePath  ((</>))
-import ShortCut.Core.Compile.Paths (cacheDir, exprPath, exprPathExplicit)
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugReadFile, debugWriteLines, debugWriteFile,
                                     debugTrackWrite, debugReadLines, debugAction,
@@ -86,14 +89,14 @@ compileScript s@(as,_) permHash = do
 
 -- write a literal value from ShortCut source code to file
 rLit :: CutState -> CutExpr -> Rules ExprPath
-rLit (_,cfg) expr = do
-  let (ExprPath path) = exprPath cfg False expr [] -- absolute paths allowed!
+rLit s@(_,cfg) expr = do
+  let path  = fromAbsFile $ exprPath s expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr path
   path %> aLit cfg expr
   return (ExprPath path')
 
 rList :: CutState -> CutExpr -> Rules ExprPath
-rList s e@(CutList EmptyList _ _ _) = rListEmpty s e
+rList s e@(CutList EmptyList _ _ _) = rListEmpty s e -- TODO remove?
 rList s e@(CutList rtn _ _ _)
   | rtn `elem` [str, num] = rListLits s e
   | otherwise = rListPaths s e
@@ -102,24 +105,41 @@ rList _ _ = error "bad arguemnt to rList"
 -- special case for empty lists
 -- TODO is a special type for this really needed?
 rListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rListEmpty (_,cfg) e@(CutList EmptyList _ _ _) = do
-  let (ExprPath link) = exprPath cfg True e []
+rListEmpty s@(_,cfg) e@(CutList EmptyList _ _ _) = do
+  let link  = fromAbsFile $ exprPath s e
       link' = debugRules cfg "rListEmpty" e link
   link %> \_ -> aListEmpty cfg link
   return (ExprPath link')
 rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 
+-- TODO is this actually needed? seems the same as lits or paths really
+aListEmpty :: CutConfig -> FilePath -> Action ()
+aListEmpty cfg link = do
+  wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
+  debugTrackWrite cfg [link']
+  where
+    link' = debugAction cfg "aListEmpty" link [link]
+
 -- special case for writing lists of strings or numbers as a single file
 rListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rListLits s@(_,cfg) e@(CutList rtn _ _ exprs) = do
+rListLits s@(_,cfg) e@(CutList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
+      outPath  = fromAbsFile $ exprPath s e
       outPath' = debugRules cfg "rListLits" e outPath
   outPath %> \_ -> aListLits cfg outPath relPaths
   return (ExprPath outPath')
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
+
+aListLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aListLits cfg outPath relPaths = do
+  let paths = map (cfgTmpDir cfg </>) relPaths -- TODO utility fn for this
+  need paths
+  lits <- mapM (debugReadFile cfg) paths
+  let lits' = sort $ map stripWhiteSpace lits
+      out'  = debugAction cfg "aListLits" outPath (outPath:relPaths)
+  debugWriteLines cfg out' lits'
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
@@ -127,16 +147,23 @@ rListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
       relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
-      (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
+      (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
       outPath' = debugRules cfg "rListPaths" e outPath
   outPath %> \_ -> aListPaths cfg outPath paths'
   return (ExprPath outPath')
 rListPaths _ _ = error "bad arguemnts to rListPaths"
 
+-- works on everything but lits: paths or empty lists
+aListPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
+aListPaths cfg outPath paths = do
+  need paths
+  let out = debugAction cfg "aListPaths" outPath (outPath:paths)
+  debugWriteLines cfg out paths
+
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 rRef :: CutState -> CutExpr -> Rules ExprPath
-rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
+rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ Old.varPath cfg var e
   where
     ePath (VarPath p) = ExprPath $ debugRules cfg "rRef" e p
 rRef _ _ = error "bad argument to rRef"
@@ -146,7 +173,7 @@ rRef _ _ = error "bad argument to rRef"
 -- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
 rVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 rVar (_,cfg) var expr (ExprPath dest) = do
-  let (VarPath link) = varPath cfg var expr
+  let (VarPath link) = Old.varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
       linkd = debugRules cfg "rVar" var link
   link %> \_ -> aVar cfg dest link
@@ -164,7 +191,7 @@ rBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
   (ExprPath p2) <- rExpr s n2
   let rel1  = makeRelative (cfgTmpDir cfg) p1
       rel2  = makeRelative (cfgTmpDir cfg) p2
-      path  = exprPathExplicit cfg True t "cut_bop" [show salt, name, rel1, rel2]
+      path  = Old.exprPathExplicit cfg True t "cut_bop" [show salt, name, rel1, rel2]
       path' = debugRules cfg "rBop" e path
   return (ExprPath p1, ExprPath p2, path')
 rBop _ _ _ _ = error "bad argument to rBop"
@@ -212,7 +239,7 @@ rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   -- let tmpDir = cacheDir cfg </> tmpName
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      (ExprPath oPath) = exprPath cfg True expr []
+      oPath  = fromAbsFile $ exprPath s expr
   oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
   return (ExprPath oPath)
 rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
@@ -223,8 +250,8 @@ rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
 rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
 rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let (CacheDir tmpDir ) = cacheDir cfg tmpName
-      (ExprPath outPath) = exprPath cfg True expr []
+  let tmpDir  = fromAbsDir  $ cacheDir cfg tmpName
+      outPath = fromAbsFile $ exprPath s expr
   outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
   return (ExprPath outPath)
 rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
@@ -238,7 +265,7 @@ rLink s@(_,cfg) expr rtype prefix = do
   (ExprPath strPath) <- rExpr s expr -- TODO is this the issue?
   -- TODO only depend on final expressions
   -- ok without ["outPath"]?
-  let (ExprPath outPath) = exprPathExplicit cfg True rtype prefix [show expr]
+  let (ExprPath outPath) = Old.exprPathExplicit cfg True rtype prefix [show expr]
   outPath %> \_ -> aLink cfg outPath strPath
   return (ExprPath outPath)
 
@@ -249,32 +276,32 @@ rLoadOne _ _ _ = error "bad argument to rLoadOne"
 
 rLoadList :: RulesFn
 rLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
-  | typeOf es `elem` [ListOf str, ListOf num] = rLoadListOne rtn s es
-  | otherwise = rLoadListMany s e
+  | typeOf es `elem` [ListOf str, ListOf num] = rLoadListLits rtn s es
+  | otherwise = rLoadListLinks s e
 rLoadList _ _ = error "bad arguments to rLoadList"
 
 -- special case for lists of str and num
 -- TODO remove rtn and use (typeOf expr)?
 -- TODO is this different from rListOne, except in its return type?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
-rLoadListOne :: CutType -> RulesFn
-rLoadListOne rtn s@(_,cfg) expr = do
+rLoadListLits :: CutType -> RulesFn
+rLoadListLits rtn s@(_,cfg) expr = do
   (ExprPath litsPath) <- rExpr s expr
   let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      (ExprPath outPath) = exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
-  outPath %> \_ -> aLoadListOne cfg outPath litsPath
+      (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
+  outPath %> \_ -> aLoadListLits cfg outPath litsPath
   return (ExprPath outPath)
 
 -- regular case for lists of any other file type
-rLoadListMany :: RulesFn
-rLoadListMany s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
+rLoadListLinks :: RulesFn
+rLoadListLinks s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   -- TODO is relPath enough to make sure it's unique??
   let relPath = makeRelative (cfgTmpDir cfg) pathsPath
-      (ExprPath outPath) = exprPathExplicit cfg True (typeOf e) "cut_list" [relPath]
-  outPath %> \_ -> aLoadListMany cfg outPath pathsPath
+      (ExprPath outPath) = Old.exprPathExplicit cfg True (typeOf e) "cut_list" [relPath]
+  outPath %> \_ -> aLoadListLinks cfg outPath pathsPath
   return (ExprPath outPath)
-rLoadListMany _ _ = error "bad arguments to rLoadListMany"
+rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
 
 -- based on https://stackoverflow.com/a/18627837
 -- uniqLines :: Ord a => [a] -> [a]
@@ -284,8 +311,8 @@ rLoadListMany _ _ = error "bad arguments to rLoadListMany"
 rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
 rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
-  let (ExprPath outPath) = exprPath cfg True e []
-      (CacheDir tmpDir ) = cacheDir cfg tmpPrefix -- TODO tables bug here?
+  let tmpDir  = fromAbsDir  $ cacheDir cfg tmpPrefix -- TODO tables bug here?
+      outPath = fromAbsFile $ exprPath s e
   outPath %> \_ -> aSimpleTmp cfg outPath actFn tmpDir argPaths
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
@@ -293,20 +320,6 @@ rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 -------------
 -- actions --
 -------------
-
-aListEmpty :: CutConfig -> FilePath -> Action ()
-aListEmpty cfg link = do
-  wrappedCmd cfg [link] [] "touch" [link] -- TODO quietly?
-  debugTrackWrite cfg [link']
-  where
-    link' = debugAction cfg "aListEmpty" link [link]
-
-aListLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aListLits cfg outPath relPaths = do
-  lits  <- mapM (\p -> debugReadFile cfg $ cfgTmpDir cfg </> p) relPaths
-  let lits' = sort $ map stripWhiteSpace lits
-      out'  = debugAction cfg "aListLits" outPath (outPath:relPaths)
-  debugWriteLines cfg out' lits'
 
 aVar :: CutConfig -> FilePath -> FilePath -> Action ()
 aVar cfg dest link = do
@@ -318,14 +331,6 @@ aVar cfg dest link = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory link
   wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
   debugTrackWrite cfg [link']
-
-aListPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aListPaths cfg outPath paths = do
-  need paths
-  let out = debugAction cfg "aListPaths" outPath (outPath:paths)
-  -- TODO yup bug was here! any reason to keep it?
-  -- paths' <- liftIO $ mapM resolveSymlinks paths
-  debugWriteLines cfg out paths
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> CutExpr -> FilePath -> Action ()
@@ -367,20 +372,20 @@ aLink cfg outPath strPath = do
   let out = debugAction cfg "aLink" outPath [outPath, strPath]
   debugTrackWrite cfg [out]
 
-aLoadListOne :: CutConfig -> FilePath -> FilePath -> Action ()
-aLoadListOne cfg outPath litsPath = do
+aLoadListLits :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListLits cfg outPath litsPath = do
   lits  <- debugReadLines cfg litsPath -- TODO strip?
   lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
-  let out = debugAction cfg "aLoadListOne" outPath [outPath, litsPath]
+  let out = debugAction cfg "aLoadListLits" outPath [outPath, litsPath]
   debugWriteLines cfg out lits'
 
-aLoadListMany :: CutConfig -> FilePath -> FilePath -> Action ()
-aLoadListMany cfg outPath pathsPath = do
+aLoadListLinks :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListLinks cfg outPath pathsPath = do
     paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
     need paths
     paths' <- liftIO $ mapM resolveSymlinks paths
     -- need paths'
-    let out = debugAction cfg "aLoadListMany" outPath [outPath, pathsPath]
+    let out = debugAction cfg "aLoadListLinks" outPath [outPath, pathsPath]
     debugWriteLines cfg out paths'
 
 aSimpleTmp :: CutConfig -> FilePath -> ActionFn -> FilePath -> [ExprPath] -> Action ()
