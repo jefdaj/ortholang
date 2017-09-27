@@ -42,7 +42,7 @@ import System.FilePath             (takeDirectory, makeRelative)
 rExpr :: CutState -> CutExpr -> Rules ExprPath
 rExpr s e@(CutLit _ _ _      ) = rLit s e
 rExpr s e@(CutRef _ _ _ _    ) = rRef s e
-rExpr s e@(CutList _ _ _ _    ) = rList s e
+rExpr s e@(CutList _ _ _ _   ) = rList s e
 rExpr s e@(CutBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(CutFun _ _ _ n _  ) = rulesByName s e n
 

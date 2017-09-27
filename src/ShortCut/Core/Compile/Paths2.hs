@@ -35,6 +35,7 @@ module ShortCut.Core.Compile.Paths2
   , cacheDir
   , exprHash
   , exprPath
+  , exprPathExplicit
   , toTmpPath
   )
   where
@@ -52,7 +53,7 @@ import Data.Data                  (Data)
 import Data.List                  (intersperse)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((<.>), (</>), makeRelative)
-import ShortCut.Core.Debug        (debugHash)
+import ShortCut.Core.Debug        (debugHash, debug)
 import ShortCut.Core.Util         (digest)
 
 -----------------------
@@ -124,11 +125,16 @@ exprHash s@(_, cfg) expr = res'
 -- TODO use Paths here rather than hashes to make it map-compatible!
 -- TODO and make them relative to the tmpdir for determinism
 argHashes :: CutState -> CutExpr -> [String]
-argHashes s@(as,_) (CutRef _ _ _ v) = argHashes s $ lookupVar v as
-argHashes _ (CutLit  r _     v ) = [digest $ v ++ show r]
-argHashes s@(_,cfg) (CutFun  _ _ _ _ es) = map (digest . fromRelFile . toTmpPath cfg . exprPath s) es
-argHashes s@(_,cfg) (CutList _ _ _   es) = [digest $ concat $ map (fromRelFile . toTmpPath cfg . exprPath s) es]
-argHashes _ _ = []
+argHashes s@(_, cfg) expr = debug cfg ("argHashes for '" ++ show expr ++ "': " ++ show res) res
+  where
+    res = argHashes' s expr
+
+argHashes' :: CutState -> CutExpr -> [String]
+argHashes' s@(as,_) (CutRef _ _ _ v) = argHashes s $ lookupVar v as
+argHashes' _ (CutLit  _ _     v ) = [digest v]
+argHashes' s@(_,cfg) (CutFun  _ _ _ _ es) = map (digest . fromRelFile . toTmpPath cfg . exprPath s) es
+argHashes' s@(_,cfg) (CutList _ _ _   es) = [digest $ concat $ map (fromRelFile . toTmpPath cfg . exprPath s) es]
+argHashes' _ _ = []
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 exprPrefix :: CutExpr -> String
@@ -159,9 +165,7 @@ exprPath s expr = exprPathExplicit s prefix rtype salt hashes
 -- TODO now we need the prefix to be unique, so "cut_bop" isn't good enough!
 --      cut_bop -> union, difference, etc.
 --      cut_lit should be OK, but maybe separate into num, str anyway?
-exprPathExplicit :: CutState
-                 -> String -> CutType -> Int -> [String]
-                 -> Path Abs File
+exprPathExplicit :: CutState -> String -> CutType -> Int -> [String] -> Path Abs File
 exprPathExplicit (_, cfg) prefix rtype salt hashes = fp
   where
     suf  = if salt == 0 then "" else "_" ++ show salt
