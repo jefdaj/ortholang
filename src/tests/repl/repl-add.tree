@@ -1,11 +1,11 @@
 .
 |-- exprs
-|   |-- cut_bop
-|   |   `-- 40b64e8799.num
+|   |-- add
+|   |   `-- 1a6e797776_1a6e797776.num
 |   `-- num
 |       `-- ee383407c9.num
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_bop/40b64e8799.num
+    `-- result -> ../exprs/add/1a6e797776_1a6e797776.num
 
 4 directories, 4 files

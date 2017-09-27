@@ -57,11 +57,11 @@ bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 -- TODO if order turns out to be important in cuts, call them lists
 rListBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
-rListBop fn s@(_,cfg) e@(CutBop extn _ _ _ s1 s2) = do
+rListBop fn s@(_,cfg) e@(CutBop _ _ _ _ s1 s2) = do
   -- liftIO $ putStrLn "entering rListBop"
   -- let fixLinks = liftIO . canonicalLinks (typeOf e)
   let fixLinks = canonicalLinks (typeOf e)
-  (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (s1, s2)
+  (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (s1, s2)
   p3 %> aSetBop cfg fixLinks fn p1 p2
   return (ExprPath p3)
 rListBop _ _ _ = error "bad argument to rListBop"

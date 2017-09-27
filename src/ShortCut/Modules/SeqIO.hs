@@ -47,7 +47,7 @@ mkLoad name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fFixity    = Prefix
-  , fRules  = rLoadOne rtn
+  , fRules  = rLoadOne
   }
 
 -- load a list of files --

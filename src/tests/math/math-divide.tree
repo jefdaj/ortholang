@@ -1,11 +1,11 @@
 .
 |-- exprs
-|   |-- cut_bop
-|   |   `-- da687e31e1.num
+|   |-- divide
+|   |   `-- ecd9c2bea7_c4e508ce10.num
 |   `-- num
 |       |-- 89fb8b4aed.num
 |       `-- a629005e3c.num
 `-- vars
-    `-- result -> ../exprs/cut_bop/da687e31e1.num
+    `-- result -> ../exprs/divide/ecd9c2bea7_c4e508ce10.num
 
 4 directories, 4 files

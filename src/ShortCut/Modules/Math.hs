@@ -33,9 +33,9 @@ mkMathFn name fn = CutFunction
 -- TODO can a lot of this be moved back into compile while leaving something?
 rMath :: (Scientific -> Scientific -> Scientific) -- in this module
       -> CutState -> CutExpr -> Rules ExprPath    -- in Compile module
-rMath fn s@(_,cfg) e@(CutBop extn _ _ _ n1 n2) = do
+rMath fn s@(_,cfg) e@(CutBop _ _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering rMath"
-  (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s extn e (n1, n2)
+  (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (n1, n2)
   p3 %> aMath cfg fn p1 p2
   return (ExprPath p3)
 rMath _ _ _ = error "bad argument to rMath"

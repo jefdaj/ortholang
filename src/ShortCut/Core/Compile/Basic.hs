@@ -23,7 +23,8 @@ import ShortCut.Core.Types
 
 -- TODO remove Old path fns
 import qualified ShortCut.Core.Compile.Paths as Old
-import ShortCut.Core.Compile.Paths2 (cacheDir, exprPath, exprPathExplicit)
+import ShortCut.Core.Compile.Paths2 (cacheDir, exprPath, exprPathExplicit,
+                                     pathHash)
 import Path (fromAbsDir, fromAbsFile)
 
 import Data.List                   (find, sort)
@@ -33,7 +34,8 @@ import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugReadFile, debugWriteLines, debugWriteFile,
                                     debugTrackWrite, debugReadLines, debugAction,
                                     debugRules)
-import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace)
+import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
+                                    digest)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeDirectory, makeRelative)
 
@@ -143,11 +145,11 @@ aListLits cfg outPath relPaths = do
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rListPaths s@(_,cfg) e@(CutList rtn _ _ exprs) = do
+rListPaths s@(_,cfg) e@(CutList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
-      relPaths = map (makeRelative $ cfgTmpDir cfg) paths'
-      (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" relPaths
+      hash     = digest $ concat $ map (pathHash cfg) paths' -- TODO utility fn
+      outPath  = fromAbsFile $ exprPathExplicit s "list" (ListOf rtn) salt [hash]
       outPath' = debugRules cfg "rListPaths" e outPath
   outPath %> \_ -> aListPaths cfg outPath paths'
   return (ExprPath outPath')
@@ -179,24 +181,17 @@ rVar (_,cfg) var expr (ExprPath dest) = do
   link %> \_ -> aVar cfg dest link
   return (VarPath linkd)
 
--- Handles the actual rule generation for all binary operators;
--- basically the `paths` functions with pattern matching factored out.
--- Some of the complication is just making sure paths don't depend on tmpdir,
--- and some is that I wrote this near the beginning, when I didn't have
--- many of the patterns worked out yet. Feel free to update...
-rBop :: CutState -> CutType -> CutExpr -> (CutExpr, CutExpr)
+-- Handles the actual rule generation for all binary operators.
+-- TODO can it be factored out somehow? seems almost trivial now...
+rBop :: CutState -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (ExprPath, ExprPath, ExprPath)
-rBop s@(_,cfg) t e@(CutBop _ salt _ name _ _) (n1, n2) = do
+rBop s@(_,cfg) e@(CutBop _ _ _ _ _ _) (n1, n2) = do
   (ExprPath p1) <- rExpr s n1
   (ExprPath p2) <- rExpr s n2
-  let rel1  = makeRelative (cfgTmpDir cfg) p1
-      rel2  = makeRelative (cfgTmpDir cfg) p2
-      path  = Old.exprPathExplicit cfg True t "cut_bop" [show salt, name, rel1, rel2]
+  let path  = fromAbsFile $ exprPath s e
       path' = debugRules cfg "rBop" e path
-  return (ExprPath p1, ExprPath p2, path')
-rBop _ _ _ _ = error "bad argument to rBop"
-
--- from ModuleAPI --
+  return (ExprPath p1, ExprPath p2, ExprPath path')
+rBop _ _ _ = error "bad argument to rBop"
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -256,27 +251,37 @@ rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   return (ExprPath outPath)
 rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
 
+--------------------------
+-- links to input files --
+--------------------------
+
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
--- TODO should this go in Compile.hs?
-rLink :: CutState -> CutExpr -> CutType -> String -> Rules ExprPath
-rLink s@(_,cfg) expr rtype prefix = do
-  (ExprPath strPath) <- rExpr s expr -- TODO is this the issue?
-  -- TODO only depend on final expressions
-  -- ok without ["outPath"]?
-  let (ExprPath outPath) = Old.exprPathExplicit cfg True rtype prefix [show expr]
-  outPath %> \_ -> aLink cfg outPath strPath
+rLink :: CutState -> CutExpr -> CutExpr -> Rules ExprPath
+rLink s@(_,cfg) outExpr strExpr = do
+  (ExprPath strPath) <- rExpr s strExpr
+  let outPath = fromAbsFile $ exprPath s outExpr
+  outPath %> aLink cfg strPath
   return (ExprPath outPath)
 
+aLink :: CutConfig -> FilePath -> FilePath -> Action ()
+aLink cfg strPath outPath = do
+  pth <- fmap stripWhiteSpace $ readFile' strPath
+  src <- liftIO $ absolutize pth -- TODO make relative to workdir instead
+  need [src]
+  unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
+  let out = debugAction cfg "aLink" outPath [outPath, strPath]
+  debugTrackWrite cfg [out]
+
 -- TODO remove this?
-rLoadOne :: CutType -> RulesFn
-rLoadOne t s (CutFun _ _ _ n [p]) = rLink s p t n
-rLoadOne _ _ _ = error "bad argument to rLoadOne"
+rLoadOne :: RulesFn
+rLoadOne s e@(CutFun _ _ _ _ [p]) = rLink s e p
+rLoadOne _ _ = error "bad argument to rLoadOne"
 
 rLoadList :: RulesFn
-rLoadList s e@(CutFun (ListOf rtn) _ _ _ [es])
-  | typeOf es `elem` [ListOf str, ListOf num] = rLoadListLits rtn s es
+rLoadList s e@(CutFun _ _ _ _ [es])
+  | typeOf es `elem` [ListOf str, ListOf num] = rLoadListLits s es
   | otherwise = rLoadListLinks s e
 rLoadList _ _ = error "bad arguments to rLoadList"
 
@@ -284,11 +289,12 @@ rLoadList _ _ = error "bad arguments to rLoadList"
 -- TODO remove rtn and use (typeOf expr)?
 -- TODO is this different from rListOne, except in its return type?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
-rLoadListLits :: CutType -> RulesFn
-rLoadListLits rtn s@(_,cfg) expr = do
+rLoadListLits :: RulesFn
+rLoadListLits s@(_,cfg) expr = do
   (ExprPath litsPath) <- rExpr s expr
-  let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
+  -- let relPath = makeRelative (cfgTmpDir cfg) litsPath
+      -- (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
+  let outPath = fromAbsFile $ exprPath s expr
   outPath %> \_ -> aLoadListLits cfg outPath litsPath
   return (ExprPath outPath)
 
@@ -361,15 +367,6 @@ aOneArgListScript cfg outPath script tmpDir faPath = do
   wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
   -- debugWriteFile cfg outPath out
   let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
-  debugTrackWrite cfg [out]
-
-aLink :: CutConfig -> FilePath -> FilePath -> Action ()
-aLink cfg outPath strPath = do
-  pth <- fmap stripWhiteSpace $ readFile' strPath
-  src <- liftIO $ absolutize pth -- TODO also follow symlinks here?
-  need [src]
-  unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
-  let out = debugAction cfg "aLink" outPath [outPath, strPath]
   debugTrackWrite cfg [out]
 
 aLoadListLits :: CutConfig -> FilePath -> FilePath -> Action ()

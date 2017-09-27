@@ -1,12 +1,12 @@
 .
 |-- exprs
-|   |-- cut_bop
-|   |   `-- f6e4a6c4e0.num
+|   |-- add
+|   |   `-- 1a6e797776_ecd9c2bea7.num
 |   `-- num
 |       |-- a629005e3c.num
 |       `-- ee383407c9.num
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/cut_bop/f6e4a6c4e0.num
+    `-- result -> ../exprs/add/1a6e797776_ecd9c2bea7.num
 
 4 directories, 5 files

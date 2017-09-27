@@ -2,20 +2,20 @@
 |-- cache
 |   `-- seqio
 |-- exprs
-|   |-- cut_bop
-|   |   `-- 04286bcd60.str.list
+|   |-- difference
+|   |   `-- 140ee5203c_8c5f530dc8.str.list
 |   |-- extract_ids
 |   |   |-- a4456b5ee7.str.list
 |   |   `-- aadfee455f.str.list
 |   |-- extract_seqs
 |   |   `-- aadfee455f_8c5f530dc8.faa
 |   |-- load_faa
-|   |   `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|   |   `-- b1ce41fc73.faa -> $TESTDIR/data/6803genes10.faa
 |   `-- str
 |       `-- 50dbefb6d6.str
 `-- vars
-    |-- diff.str.list -> ../exprs/cut_bop/04286bcd60.str.list
-    |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
+    |-- diff.str.list -> ../exprs/difference/140ee5203c_8c5f530dc8.str.list
+    |-- faa10.faa -> ../exprs/load_faa/b1ce41fc73.faa
     |-- ids10.str.list -> ../exprs/extract_ids/aadfee455f.str.list
     |-- idsall.str.list -> ../exprs/extract_ids/a4456b5ee7.str.list
     |-- result -> ../vars/diff.str.list

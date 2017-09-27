@@ -34,6 +34,7 @@ module ShortCut.Core.Compile.Paths2
   , Path, Abs, Rel, File, Dir
   , cacheDir
   , exprHash
+  , pathHash
   , exprPath
   , exprPathExplicit
   , toTmpPath
@@ -129,12 +130,18 @@ argHashes s@(_, cfg) expr = debug cfg ("argHashes for '" ++ show expr ++ "': " +
   where
     res = argHashes' s expr
 
+-- TODO rename hPath?
+-- TODO act differently when given a lit path?
+pathHash :: CutConfig -> FilePath -> String
+pathHash cfg = digest . makeRelative (cfgTmpDir cfg)
+
+-- TODO rename hSomething?
 argHashes' :: CutState -> CutExpr -> [String]
 argHashes' s@(as,_) (CutRef _ _ _ v) = argHashes s $ lookupVar v as
 argHashes' _ (CutLit  _ _     v ) = [digest v]
-argHashes' s@(_,cfg) (CutFun  _ _ _ _ es) = map (digest . fromRelFile . toTmpPath cfg . exprPath s) es
-argHashes' s@(_,cfg) (CutList _ _ _   es) = [digest $ concat $ map (fromRelFile . toTmpPath cfg . exprPath s) es]
-argHashes' _ _ = []
+argHashes' s@(_,cfg) (CutFun  _ _ _ _ es) = map (pathHash cfg . fromAbsFile . exprPath s) es
+argHashes' s@(_,cfg) (CutBop  _ _ _ _ e1 e2) = map (pathHash cfg . fromAbsFile . exprPath s) [e1, e2]
+argHashes' s@(_,cfg) (CutList _ _ _   es) = [digest $ concat $ map (pathHash cfg . fromAbsFile . exprPath s) es]
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 exprPrefix :: CutExpr -> String

@@ -5,11 +5,11 @@
 |   |-- extract_ids
 |   |   `-- aadfee455f.str.list
 |   |-- load_faa
-|   |   `-- 139e073c49.faa -> $TESTDIR/data/6803genes10.faa
+|   |   `-- b1ce41fc73.faa -> $TESTDIR/data/6803genes10.faa
 |   `-- str
 |       `-- 50dbefb6d6.str
 `-- vars
-    |-- faa10.faa -> ../exprs/load_faa/139e073c49.faa
+    |-- faa10.faa -> ../exprs/load_faa/b1ce41fc73.faa
     |-- ids10.str.list -> ../exprs/extract_ids/aadfee455f.str.list
     `-- result -> ../vars/ids10.str.list
 
