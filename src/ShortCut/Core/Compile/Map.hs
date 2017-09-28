@@ -80,7 +80,7 @@ aMapLastArgs cfg outPath inits mapTmp lastsPath = do
   (flip mapM_) lastPaths $ \p -> do
     -- TODO write the out path here too so all the args are together?
     let argsPath = mapTmp </> takeBaseName p <.> "args" -- TODO use a hash here?
-        argPaths = inits ++ [cfgTmpDir cfg </> p]
+        argPaths = inits ++ [cfgTmpDir cfg </> p] -- TODO abs path bug here?
     liftIO $ createDirectoryIfMissing True $ mapTmp
     debugWriteLines cfg argsPath argPaths
   -- then we just trigger them and write to the overall outPath
