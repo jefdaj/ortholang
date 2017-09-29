@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Debug     (debugReadLines, debugWriteFile, debugAction)
-import ShortCut.Core.Paths3    (cacheDir, exprPath, fromCutPath)
+import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Map     (rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)

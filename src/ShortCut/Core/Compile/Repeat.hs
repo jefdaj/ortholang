@@ -3,7 +3,7 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths3  (exprPath, fromCutPath)
+import ShortCut.Core.Paths  (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript)
 import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines,
                               debugAction)

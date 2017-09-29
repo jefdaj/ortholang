@@ -3,7 +3,7 @@ module ShortCut.Modules.Summarize where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths3 (exprPath, fromCutPath)
+import ShortCut.Core.Paths (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic      (rExpr)
 import ShortCut.Core.Debug (debugWriteLines, debugAction)
 import Development.Shake.FilePath ((</>))

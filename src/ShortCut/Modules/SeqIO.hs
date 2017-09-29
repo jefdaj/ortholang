@@ -8,7 +8,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
-import ShortCut.Core.Paths3 (exprPath, cacheDir, fromCutPath)
+import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath)
 import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.FilePath      ((</>))

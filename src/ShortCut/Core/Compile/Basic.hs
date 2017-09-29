@@ -21,10 +21,7 @@ module ShortCut.Core.Compile.Basic
 import Development.Shake
 import ShortCut.Core.Types
 
--- TODO remove Old path fns
--- import qualified ShortCut.Core.Compile.Paths as Old
-import ShortCut.Core.Paths3 (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath, varPath)
--- import Path (fromCutPath cfg, fromCutPath cfg)
+import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath, varPath)
 
 import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)

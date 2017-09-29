@@ -3,7 +3,7 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths3 (exprPath, cacheDir, fromCutPath)
+import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugTrackWrite, debugAction)
 import ShortCut.Core.Compile.Basic     (rExpr, rSimpleTmp, defaultTypeCheck)

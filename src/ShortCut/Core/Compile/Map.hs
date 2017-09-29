@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
 import Development.Shake.FilePath  ((</>), (<.>))
-import ShortCut.Core.Paths3        (cacheDir, fromCutPath, exprPath)
+import ShortCut.Core.Paths        (cacheDir, fromCutPath, exprPath)
 import ShortCut.Core.Debug         (debugWriteLines, debugAction, debugRules)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeBaseName, makeRelative)

@@ -10,8 +10,7 @@ import ShortCut.Core.Debug     (debugReadFile, debugWriteFile, debugReadLines,
                                 debugRules)
 import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Map     (rMapLastTmp)
--- import ShortCut.Core.Compile.Paths     (exprPath, exprPathExplicit, cacheDir)
-import ShortCut.Core.Paths3 (exprPath, cacheDir, fromCutPath)
+import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath)
 import ShortCut.Core.Util      (stripWhiteSpace, digest)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>),
