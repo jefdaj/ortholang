@@ -14,7 +14,7 @@ module ShortCut.Core.Paths3
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
-import ShortCut.Core.Debug (debugPath)
+import ShortCut.Core.Debug (debug, debugPath)
 import Data.String.Utils          (replace)
 import Data.Maybe (fromJust)
 import Development.Shake.FilePath ((</>), (<.>))
@@ -43,9 +43,12 @@ fromGeneric cfg txt = replace "$TMPDIR"  (cfgTmpDir  cfg)
                     $ txt
 
 toCutPath :: CutConfig -> FilePath -> CutPath
-toCutPath cfg = CutPath . normalize . toGeneric cfg
+toCutPath cfg = CutPath . toGeneric cfg . normalize'
   where
     normalize = fromAbsFile . fromJust . parseAbsFile
+    normalize' p =
+      let res = normalize p
+      in debug cfg ("normalized " ++ p ++ " to " ++ show res) p
 
 fromCutPath :: CutConfig -> CutPath -> FilePath
 fromCutPath cfg (CutPath path) = fromGeneric cfg path

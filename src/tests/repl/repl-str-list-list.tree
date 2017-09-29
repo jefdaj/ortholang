@@ -1,12 +1,12 @@
 .
 |-- exprs
 |   |-- list
-|   |   |-- 27f44c64de.str.list
-|   |   `-- f478a15e7b.str.list.list
+|   |   |-- 5fcae3e0c7.str.list
+|   |   `-- ccb50bd17c.str.list.list
 |   `-- str
 |       `-- a2a665650c.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/list/f478a15e7b.str.list.list
+    `-- result -> ../exprs/list/ccb50bd17c.str.list.list
 
 4 directories, 5 files

@@ -3,19 +3,19 @@
 |   `-- seqio
 |-- exprs
 |   |-- concat_fastas
-|   |   `-- 926e85a0fe.fna
+|   |   `-- 6228d09020.fna
 |   |-- gbk_to_fna
-|   |   |-- 2529a1a40d.fna
-|   |   `-- 45914c672d.fna
+|   |   |-- 3df9750b08.fna
+|   |   `-- fa18fb8485.fna
 |   |-- list
-|   |   `-- 60889b4ee4.fna.list
+|   |   `-- 1246d586de.fna.list
 |   |-- load_gbk
-|   |   |-- 12f3f6bd7f.gbk -> $TESTDIR/data/SynPCC7942_chr.gbk
-|   |   `-- 532ca547f5.gbk -> $TESTDIR/data/SynPCC7942_pANL.gbk
+|   |   |-- 870b00dc51.gbk -> $TESTDIR/data/SynPCC7942_pANL.gbk
+|   |   `-- a3dcfb40ac.gbk -> $TESTDIR/data/SynPCC7942_chr.gbk
 |   `-- str
 |       |-- 7ec89da918.str
 |       `-- a8d18fa355.str
 `-- vars
-    `-- result -> ../exprs/concat_fastas/926e85a0fe.fna
+    `-- result -> ../exprs/concat_fastas/6228d09020.fna
 
 9 directories, 9 files

@@ -1,11 +1,11 @@
 .
 |-- exprs
 |   |-- list
-|   |   `-- 27f44c64de.str.list
+|   |   `-- c3cacb52f7.str.list
 |   `-- str
 |       `-- a2a665650c.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/list/27f44c64de.str.list
+    `-- result -> ../exprs/list/c3cacb52f7.str.list
 
 4 directories, 4 files

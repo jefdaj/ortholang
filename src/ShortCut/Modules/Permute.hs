@@ -3,10 +3,9 @@ module ShortCut.Modules.Permute where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Development.Shake.FilePath   (makeRelative)
-import Path                         (fromAbsFile)
+-- import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
-import ShortCut.Core.Compile.Paths2 (exprPath, exprPathExplicit)
+import ShortCut.Core.Paths3 (exprPath, exprPathExplicit, fromCutPath)
 import ShortCut.Core.Debug          (debugAction, debugWriteLines)
 import ShortCut.Core.Util           (digest)
 
@@ -57,9 +56,9 @@ leaveEachOut xs
 --      (if it turns out to be re-running stuff unneccesarily)
 rCombos :: ([FilePath] -> [[FilePath]])
         -> CutState -> CutExpr -> Rules ExprPath
-rCombos comboFn s expr@(CutFun (ListOf etype) salt _ _ [iList]) = do
+rCombos comboFn s@(_, cfg) expr@(CutFun (ListOf etype) salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
-  let oList = fromAbsFile $ exprPath s expr
+  let oList = fromCutPath cfg $ exprPath s expr
   oList %> aCombos s comboFn iPath etype salt
   return (ExprPath oList)
 rCombos _ _ _ = error "bad argument to rCombos"
@@ -76,7 +75,7 @@ aCombos s@(_,cfg) comboFn iPath lType salt out = do
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   let mkOut p = exprPathExplicit s "list" lType salt [digest p]
-      oPaths  = map (fromAbsFile . mkOut) elements
+      oPaths  = map (fromCutPath cfg . mkOut) elements
       combos  = comboFn elements
   mapM_ (\(p,c) -> liftIO $ writeFileLines p c) (zip oPaths combos)
   let out' = debugAction cfg "aCombos" out [iPath, extOf lType, out]

@@ -1,9 +1,9 @@
 .
 |-- exprs
 |   |-- list
-|   |   |-- 228fc745da.str.list
-|   |   |-- 9058487801.str.list
-|   |   `-- bc0e472553.str.list
+|   |   |-- 2031a164d4.str.list
+|   |   |-- 96f786b065.str.list
+|   |   `-- c27c3fa33c.str.list
 |   `-- str
 |       |-- 0a47f01093.str
 |       |-- 0ec5091ee0.str
@@ -29,6 +29,6 @@
 |       `-- f898d1fc03.str
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/list/9058487801.str.list
+    `-- result -> ../exprs/list/2031a164d4.str.list
 
 4 directories, 27 files

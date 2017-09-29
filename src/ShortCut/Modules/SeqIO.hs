@@ -4,11 +4,11 @@ module ShortCut.Modules.SeqIO where
 
 import Development.Shake
 import ShortCut.Core.Types
-import Path (fromAbsFile, fromAbsDir) -- TODO remove and use Path everywhere
+-- import Path (fromCutPath cfg, fromCutPath cfg) -- TODO remove and use Path everywhere
 
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
-import ShortCut.Core.Compile.Paths2 (exprPath, cacheDir)
+import ShortCut.Core.Paths3 (exprPath, cacheDir, fromCutPath)
 import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.FilePath      ((</>))
@@ -176,8 +176,8 @@ rExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   (ExprPath faPath ) <- rExpr s fa
   (ExprPath idsPath) <- rExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let tmpDir  = fromAbsDir  $ cacheDir cfg "seqio"
-      outPath = fromAbsFile $ exprPath s e
+  let tmpDir  = fromCutPath cfg $ cacheDir cfg "seqio"
+      outPath = fromCutPath cfg $ exprPath s e
       -- tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   -- tmpList %> \_ -> do
@@ -225,7 +225,7 @@ translate = CutFunction
 rConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let oPath = fromAbsFile $ exprPath s e
+  let oPath = fromCutPath cfg $ exprPath s e
   oPath %> \_ -> aConvert cfg oPath script faPath
   return (ExprPath oPath)
 rConvert _ _ _ = error "bad argument to rConvert"
@@ -256,7 +256,7 @@ tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 rConcat :: CutState -> CutExpr -> Rules ExprPath
 rConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- rExpr s fs
-  let oPath = fromAbsFile $ exprPath s e
+  let oPath = fromCutPath cfg $ exprPath s e
   oPath %> \_ -> aConcat cfg oPath fsPath
   return (ExprPath oPath)
 rConcat _ _ = error "bad argument to rConcat"

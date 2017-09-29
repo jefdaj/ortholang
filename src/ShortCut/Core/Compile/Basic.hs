@@ -23,9 +23,8 @@ import ShortCut.Core.Types
 
 -- TODO remove Old path fns
 import qualified ShortCut.Core.Compile.Paths as Old
-import ShortCut.Core.Compile.Paths2 (cacheDir, exprPath, exprPathExplicit,
-                                     pathHash)
-import Path (fromAbsDir, fromAbsFile)
+import ShortCut.Core.Paths3 (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath)
+-- import Path (fromCutPath cfg, fromCutPath cfg)
 
 import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)
@@ -92,7 +91,7 @@ compileScript s@(as,_) permHash = do
 -- write a literal value from ShortCut source code to file
 rLit :: CutState -> CutExpr -> Rules ExprPath
 rLit s@(_,cfg) expr = do
-  let path  = fromAbsFile $ exprPath s expr -- absolute paths allowed!
+  let path  = fromCutPath cfg $ exprPath s expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr path
   path %> aLit cfg expr
   return (ExprPath path')
@@ -108,7 +107,7 @@ rList _ _ = error "bad arguemnt to rList"
 -- TODO is a special type for this really needed?
 rListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rListEmpty s@(_,cfg) e@(CutList EmptyList _ _ _) = do
-  let link  = fromAbsFile $ exprPath s e
+  let link  = fromCutPath cfg $ exprPath s e
       link' = debugRules cfg "rListEmpty" e link
   link %> \_ -> aListEmpty cfg link
   return (ExprPath link')
@@ -128,7 +127,7 @@ rListLits s@(_,cfg) e@(CutList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
       relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      outPath  = fromAbsFile $ exprPath s e
+      outPath  = fromCutPath cfg $ exprPath s e
       outPath' = debugRules cfg "rListLits" e outPath
   outPath %> \_ -> aListLits cfg outPath relPaths
   return (ExprPath outPath')
@@ -148,8 +147,8 @@ rListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rListPaths s@(_,cfg) e@(CutList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> p) paths
-      hash     = digest $ concat $ map (pathHash cfg) paths' -- TODO utility fn
-      outPath  = fromAbsFile $ exprPathExplicit s "list" (ListOf rtn) salt [hash]
+      hash     = digest $ concat $ map (digest . toCutPath cfg) paths' -- TODO utility fn
+      outPath  = fromCutPath cfg $ exprPathExplicit s "list" (ListOf rtn) salt [hash]
       outPath' = debugRules cfg "rListPaths" e outPath
   outPath %> \_ -> aListPaths cfg outPath paths'
   return (ExprPath outPath')
@@ -188,7 +187,7 @@ rBop :: CutState -> CutExpr -> (CutExpr, CutExpr)
 rBop s@(_,cfg) e@(CutBop _ _ _ _ _ _) (n1, n2) = do
   (ExprPath p1) <- rExpr s n1
   (ExprPath p2) <- rExpr s n2
-  let path  = fromAbsFile $ exprPath s e
+  let path  = fromCutPath cfg $ exprPath s e
       path' = debugRules cfg "rBop" e path
   return (ExprPath p1, ExprPath p2, ExprPath path')
 rBop _ _ _ = error "bad argument to rBop"
@@ -234,7 +233,7 @@ rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   -- let tmpDir = cacheDir cfg </> tmpName
   -- TODO get tmpDir from a Paths funcion
   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      oPath  = fromAbsFile $ exprPath s expr
+      oPath  = fromCutPath cfg $ exprPath s expr
   oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
   return (ExprPath oPath)
 rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
@@ -245,8 +244,8 @@ rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
 rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
 rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let tmpDir  = fromAbsDir  $ cacheDir cfg tmpName
-      outPath = fromAbsFile $ exprPath s expr
+  let tmpDir  = fromCutPath cfg $ cacheDir cfg tmpName
+      outPath = fromCutPath cfg $ exprPath s expr
   outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
   return (ExprPath outPath)
 rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
@@ -261,7 +260,7 @@ rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
 rLink :: CutState -> CutExpr -> CutExpr -> Rules ExprPath
 rLink s@(_,cfg) outExpr strExpr = do
   (ExprPath strPath) <- rExpr s strExpr
-  let outPath = fromAbsFile $ exprPath s outExpr
+  let outPath = fromCutPath cfg $ exprPath s outExpr
   outPath %> aLink cfg strPath
   return (ExprPath outPath)
 
@@ -294,7 +293,7 @@ rLoadListLits s@(_,cfg) expr = do
   (ExprPath litsPath) <- rExpr s expr
   -- let relPath = makeRelative (cfgTmpDir cfg) litsPath
       -- (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
-  let outPath = fromAbsFile $ exprPath s expr
+  let outPath = fromCutPath cfg $ exprPath s expr
   outPath %> \_ -> aLoadListLits cfg outPath litsPath
   return (ExprPath outPath)
 
@@ -317,8 +316,8 @@ rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
 rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
 rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
-  let tmpDir  = fromAbsDir  $ cacheDir cfg tmpPrefix -- TODO tables bug here?
-      outPath = fromAbsFile $ exprPath s e
+  let tmpDir  = fromCutPath cfg $ cacheDir cfg tmpPrefix -- TODO tables bug here?
+      outPath = fromCutPath cfg $ exprPath s e
   outPath %> \_ -> aSimpleTmp cfg outPath actFn tmpDir argPaths
   return (ExprPath outPath)
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
