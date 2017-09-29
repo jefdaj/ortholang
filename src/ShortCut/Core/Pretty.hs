@@ -13,7 +13,8 @@ import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Types
 import ShortCut.Core.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
--- import Control.Monad.Trans (liftIO)
+import Control.Monad.Trans (liftIO)
+import Data.String.Utils          (replace)
 
 instance Pretty CutType where
   pPrint EmptyList  = text "empty list" -- TODO remove
@@ -84,6 +85,19 @@ instance Pretty CutModule where
 -- instance Show CutModule where
   -- show = prettyShow
 
+-- This is pasted from Paths.hs to avoid an import cycle.
+-- Seems OK since it's just temporary anyway right?
+fromGeneric :: CutConfig -> String -> String
+fromGeneric cfg txt = replace "$TMPDIR"  (cfgTmpDir  cfg)
+                    $ replace "$WORKDIR" (cfgWorkDir cfg)
+                    $ txt
+
+-- TODO remove the else part once CutPaths are established
+fixPath :: CutConfig -> FilePath -> FilePath
+fixPath cfg path = if head path == '$'
+                     then fromGeneric cfg path
+                     else cfgTmpDir cfg </> path
+
 -- This seems to be separately required to show the final result of eval
 -- TODO is there a way to get rid of it?
 -- TODO rename prettyContents? prettyResult?
@@ -96,15 +110,16 @@ prettyResult cfg (ListOf t) f
   | t `elem` [str, num] = do
     -- liftIO $ putStrLn $ "pretty list of " ++ show t
     -- liftIO $ putStrLn $ "from file " ++ f
-    lits     <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+    lits     <- fmap lines $ readFile $ fixPath cfg f
     -- liftIO $ putStrLn $ "lits are: " ++ show lits
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map text lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    -- liftIO $ putStrLn $ "pretty list of " ++ show t
-    paths    <- fmap lines $ readFile $ cfgTmpDir cfg </> f
+    liftIO $ putStrLn $ "pretty list of " ++ show t
+    paths    <- fmap lines $ readFile $ fixPath cfg f
+    liftIO $ putStrLn $ "paths: " ++ show paths
     pretties <- mapM (prettyResult cfg t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg t f = fmap text $ (tShow t) (cfgTmpDir cfg </> f)
+prettyResult cfg t f = fmap text $ (tShow t) (fixPath cfg f)

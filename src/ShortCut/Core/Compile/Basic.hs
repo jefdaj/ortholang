@@ -21,7 +21,7 @@ module ShortCut.Core.Compile.Basic
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath, varPath)
+import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath, varPath, writePaths, CutPath)
 
 import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)
@@ -123,40 +123,39 @@ rListLits :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rListLits s@(_,cfg) e@(CutList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> p) litPaths
-      relPaths  = map (makeRelative $ cfgTmpDir cfg) litPaths'
-      outPath  = fromCutPath cfg $ exprPath s e
-      outPath' = debugRules cfg "rListLits" e outPath
-  outPath %> \_ -> aListLits cfg outPath relPaths
+      outPath   = fromCutPath cfg $ exprPath s e
+      outPath'  = debugRules cfg "rListLits" e outPath
+  outPath %> aListLits cfg litPaths'
   return (ExprPath outPath')
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
-aListLits :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aListLits cfg outPath relPaths = do
-  let paths = map (cfgTmpDir cfg </>) relPaths -- TODO utility fn for this
+aListLits :: CutConfig -> [FilePath] -> FilePath -> Action ()
+aListLits cfg paths outPath = do
   need paths
   lits <- mapM (debugReadFile cfg) paths
   let lits' = sort $ map stripWhiteSpace lits
-      out'  = debugAction cfg "aListLits" outPath (outPath:relPaths)
+      out'  = debugAction cfg "aListLits" outPath (outPath:paths)
   debugWriteLines cfg out' lits'
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
 rListPaths s@(_,cfg) e@(CutList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
-  let paths'   = map (\(ExprPath p) -> p) paths
-      hash     = digest $ concat $ map (digest . toCutPath cfg) paths' -- TODO utility fn
+  let paths'   = map (\(ExprPath p) -> toCutPath cfg p) paths
+      hash     = digest $ concat $ map digest paths'
       outPath  = fromCutPath cfg $ exprPathExplicit s "list" (ListOf rtn) salt [hash]
       outPath' = debugRules cfg "rListPaths" e outPath
-  outPath %> \_ -> aListPaths cfg outPath paths'
+  outPath %> aListPaths cfg paths'
   return (ExprPath outPath')
 rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 -- works on everything but lits: paths or empty lists
-aListPaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
-aListPaths cfg outPath paths = do
-  need paths
-  let out = debugAction cfg "aListPaths" outPath (outPath:paths)
-  debugWriteLines cfg out paths
+aListPaths :: CutConfig -> [CutPath] -> FilePath -> Action ()
+aListPaths cfg paths outPath = do
+  let fpaths =  map (fromCutPath cfg) paths -- TODO remove this
+  need fpaths
+  let out = debugAction cfg "aListPaths" outPath (outPath:fpaths)
+  writePaths cfg out paths
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
@@ -174,8 +173,19 @@ rVar (_,cfg) var expr (ExprPath dest) = do
   let link = fromCutPath cfg $ varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
       linkd = debugRules cfg "rVar" var link
-  link %> \_ -> aVar cfg dest link
+  link %> aVar cfg dest
   return (VarPath linkd)
+
+aVar :: CutConfig -> FilePath -> FilePath -> Action ()
+aVar cfg dest link = do
+  let destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
+      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
+      link'  = debugAction cfg "aVar" link [link, dest]
+  alwaysRerun
+  need [dest]
+  liftIO $ createDirectoryIfMissing True $ takeDirectory link
+  wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
+  debugTrackWrite cfg [link']
 
 -- Handles the actual rule generation for all binary operators.
 -- TODO can it be factored out somehow? seems almost trivial now...
@@ -319,17 +329,6 @@ rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 -------------
 -- actions --
 -------------
-
-aVar :: CutConfig -> FilePath -> FilePath -> Action ()
-aVar cfg dest link = do
-  let destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest)
-      linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link)
-      link'  = debugAction cfg "aVar" link [link, dest]
-  alwaysRerun
-  need [dest]
-  liftIO $ createDirectoryIfMissing True $ takeDirectory link
-  wrappedCmd cfg [linkr] [] "ln" ["-fs", destr, link] -- TODO quietly?
-  debugTrackWrite cfg [link']
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> CutExpr -> FilePath -> Action ()

@@ -48,7 +48,9 @@
 
 module ShortCut.Core.Paths
   -- cutpaths
-  ( CutPath
+  ( toGeneric   -- TODO remove once CutPaths are established
+  , fromGeneric -- TODO remove once CutPaths are established
+  , CutPath
   , toCutPath
   , fromCutPath
   -- cache dirs
@@ -57,13 +59,17 @@ module ShortCut.Core.Paths
   , exprPath
   , exprPathExplicit
   , varPath
+  -- file io
+  , readPaths
+  , writePaths
   )
   where
 
+import Development.Shake (Action)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
-import ShortCut.Core.Debug (debugPath)
+import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines)
 import Data.String.Utils          (replace)
 import Data.Maybe (fromJust)
 import Development.Shake.FilePath ((</>), (<.>))
@@ -147,3 +153,20 @@ varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
 varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
+
+-------------
+-- file io --
+-------------
+
+-- TODO convert these to Path Abs File
+readPaths :: CutConfig -> FilePath -> Action [CutPath]
+readPaths cfg path = (fmap . map) (toCutPath cfg) (debugReadLines cfg path)
+
+-- TODO take Path Abs File and convert them... or Path Rel File?
+writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
+writePaths cfg out cpaths = debugWriteLines cfg out paths
+  where
+    paths = map (\(CutPath path) -> path) cpaths
+
+-- TODO debugReadLit(s)
+-- TODO debugWriteLit(s)

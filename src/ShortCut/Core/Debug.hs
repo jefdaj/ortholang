@@ -14,9 +14,6 @@ module ShortCut.Core.Debug
   , debugTrackWrite
   , readFileStrict
   , readLinesStrict
-  -- paths
-  , debugWritePaths
-  , debugReadPaths
   )
   where
 
@@ -159,22 +156,3 @@ debugWriteChanged cfg f s = unlessExists f
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
-
---------------------
--- path utilities --
---------------------
-
--- TODO remove the "debug" names and move to Paths2?
-
--- TODO take Path Abs File and convert them... or Path Rel File?
-debugWritePaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
-debugWritePaths cfg out paths = debugWriteLines cfg out relPaths
-  where
-    relPaths = map (makeRelative $ cfgTmpDir cfg) paths
-
--- TODO convert these to Path Abs File
-debugReadPaths :: CutConfig -> FilePath -> Action [FilePath]
-debugReadPaths cfg path = (fmap . map) (cfgTmpDir cfg </>) (debugReadLines cfg path)
-
--- TODO debugReadLit(s)
--- TODO debugWriteLit(s)
