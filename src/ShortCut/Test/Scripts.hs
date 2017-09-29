@@ -53,7 +53,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "-u", ref, new]
 
 mkScriptTest :: CutConfig -> FilePath -> TestTree
-mkScriptTest cfg gld = goldenDiff "result" gld scriptAct
+mkScriptTest cfg gld = goldenDiff "result is correct" gld scriptAct
   where
     scriptRes = (cfgTmpDir cfg </> "vars" </> "result")
     scriptAct = do
@@ -62,7 +62,7 @@ mkScriptTest cfg gld = goldenDiff "result" gld scriptAct
       return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
 
 mkTreeTest :: CutConfig -> FilePath -> TestTree
-mkTreeTest cfg t = goldenDiff "tmpfiles" t treeAct
+mkTreeTest cfg t = goldenDiff "creates expected tmpfiles" t treeAct
   where
     treeCmd = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
@@ -72,7 +72,7 @@ mkTreeTest cfg t = goldenDiff "tmpfiles" t treeAct
       return $ pack $ replace dir "$WORKDIR" out
 
 mkTripTest :: CutConfig -> TestTree
-mkTripTest cfg = goldenDiff "round-trip" tripShow tripAct
+mkTripTest cfg = goldenDiff "survives round-trip to file" tripShow tripAct
   where
     tripCut   = cfgTmpDir cfg <.> "cut"
     tripShow  = cfgTmpDir cfg <.> "show"
@@ -87,7 +87,8 @@ mkTripTest cfg = goldenDiff "round-trip" tripShow tripAct
 
 -- test that no absolute paths snuck into the tmpfiles
 mkAbsTest :: CutConfig -> IO [TestTree]
-mkAbsTest cfg = testSpecs $ it "no-absolute-paths" $ absGrep `shouldReturn` ""
+mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
+  absGrep `shouldReturn` ""
   where
     absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
     absGrep = do
