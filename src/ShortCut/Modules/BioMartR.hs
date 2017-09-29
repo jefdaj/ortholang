@@ -15,7 +15,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Compile.Paths   (exprPath, exprPathExplicit)
+import ShortCut.Core.Paths3  (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
@@ -69,6 +69,7 @@ faagz = CutType
   , tShow  = \_ -> return "tShow not implemented yet for faagz"
   }
 
+-- TODO does this work at all?
 parseSearch :: CutFunction
 parseSearch = CutFunction
   { fName      = "parse_search"
@@ -166,9 +167,10 @@ rParseSearches :: CutState -> CutExpr -> Rules ExprPath
 rParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
   (ExprPath sList) <- rExpr s expr
   -- TODO should this be a cacheFile instead?
-  let (ExprPath searchTable) = exprPathExplicit cfg True search "parse_searches"
-                                                [show expr, sList]
-  searchTable %> \out -> aParseSearches cfg sList out
+  -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path [show expr, sList]
+  -- let searchTable = fromCutPath cfg $ exprPathExplicit s "parse_searches" search salt []
+  let searchTable = fromCutPath cfg $ exprPath s expr
+  searchTable %> aParseSearches cfg sList
   return (ExprPath searchTable)
 rParseSearches _ _ = error "bad arguments to rParseSearches"
 
@@ -202,7 +204,7 @@ rBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   (ExprPath sTable) <- rParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      (ExprPath outs) = exprPath cfg True expr [ExprPath bmFn, ExprPath sTable]
+      outs  = fromCutPath cfg $ exprPath s expr
   outs %> \_ -> aBioMartR cfg outs bmFn bmTmp sTable
   return (ExprPath outs)
 rBioMartR _ _ _ = error "bad rBioMartR call"
