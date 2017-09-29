@@ -3,7 +3,7 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile.Paths     (exprPath, cacheDir)
+import ShortCut.Core.Paths3 (exprPath, cacheDir, fromCutPath)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugTrackWrite, debugAction)
 import ShortCut.Core.Compile.Basic     (rExpr, rSimpleTmp, defaultTypeCheck)
@@ -62,9 +62,9 @@ rBlastSymRBH bCmd s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfa, rfa]) = do
       lbest = CutFun bht salt deps "best_hits"  [lhits]
       rbest = CutFun bht salt deps "best_hits"  [rhits]
       rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
-      (ExprPath out) = exprPath cfg True e []
+      out   = fromCutPath cfg $ exprPath s e
   (ExprPath rbhPath) <- rExpr s rbh -- TODO this is the sticking point right?
-  out %> \_ -> aBlastSymRBH cfg (cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
+  out %> \_ -> aBlastSymRBH cfg (CacheDir $ fromCutPath cfg $ cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
   return (ExprPath out)
 rBlastSymRBH _ _ _ = error "bad argument to cBlastSymRBH"
 
@@ -96,8 +96,8 @@ rRecipEach :: RulesFn
 rRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   (ExprPath lsPath) <- rExpr s lbhts
   (ExprPath rsPath) <- rExpr s rbhts
-  let (ExprPath oPath) = exprPath cfg True e []
-      (CacheDir cDir ) = cacheDir cfg "reciprocal_each"
+  let oPath = fromCutPath cfg $ exprPath s e
+      cDir = fromCutPath cfg $ cacheDir cfg "reciprocal_each"
   oPath %> \_ -> aRecipEach cfg oPath lsPath rsPath cDir
   return (ExprPath oPath)
 rRecipEach _ _ = error "bad argument to rRecipEach"
@@ -155,8 +155,8 @@ rBlastSymRBHEach bCmd s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjec
   -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
   -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]
   let mkExpr name = CutFun rtn salt deps name [evalue, query, subjects]
-      (ExprPath oPath)  = exprPath cfg True e []
-      (CacheDir cDir )  = cacheDir cfg "reciprocal_each"
+      oPath = fromCutPath cfg $ exprPath s e
+      cDir = fromCutPath cfg $ cacheDir cfg "reciprocal_each"
   (ExprPath fwdsPath) <- rExpr s $ mkExpr $ bCmd ++ "_each"
   (ExprPath revsPath) <- rExpr s $ mkExpr $ bCmd ++ "_each_rev"
   oPath %> \_ -> aBlastSymRBHEach cfg oPath cDir fwdsPath revsPath
