@@ -12,7 +12,9 @@ import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory
 import System.IO.Silently         (silence)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
-import System.Process             (cwd, readCreateProcess, shell)
+import Test.Hspec                 (it)
+import Test.Tasty.Hspec           (testSpecs, shouldReturn)
+import System.Process             (cwd, readCreateProcess, readProcessWithExitCode, shell)
 import Prelude             hiding (writeFile)
 import Data.String.Utils          (replace)
 import System.IO                  (stdout, writeFile)
@@ -83,27 +85,39 @@ mkTripTest cfg = goldenDiff "round-trip" tripShow tripAct
       scr2 <- parseFileIO cfg tripCut
       return $ pack $ show scr2
 
+-- test that no absolute paths snuck into the tmpfiles
+mkAbsTest :: CutConfig -> IO [TestTree]
+mkAbsTest cfg = testSpecs $ it "no-absolute-paths" $ absGrep `shouldReturn` ""
+  where
+    absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
+    absGrep = do
+      runCut cfg
+      (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
+      return $ out ++ err
+
 runCut :: CutConfig -> IO ()
 runCut cfg = withLock cfg $ silence $ evalFile stdout cfg
 
 -- TODO is the IO return type needed?
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath)) -> CutConfig -> IO TestTree
-mkScriptTests (cut, gld, mtre) cfg = return $ testGroup name allTests
+mkScriptTests (cut, gld, mtre) cfg = do
+  absTests <- mkAbsTest cfg' -- just one, but comes as a list
+  return $ testGroup name $ otherTests ++ absTests
   where
-    name     = takeBaseName cut
-    cfg'     = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    allTests = [mkTripTest cfg', mkScriptTest cfg' gld] ++ treeTest
-    treeTest = case mtre of
-                 Nothing -> []
-                 Just t  -> [mkTreeTest cfg' t]
+    name       = takeBaseName cut
+    cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
+    otherTests = [mkTripTest cfg', mkScriptTest cfg' gld] ++ genTests
+    genTests   = case mtre of
+                   Just t  -> [mkTreeTest cfg' t]
+                   Nothing -> []
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = do
   cuts <- getTestCuts
-  let results = map findResFile  cuts
-      mtrees  = map findTreeFile cuts
-      triples = zip3 cuts results mtrees
-      groups  = map mkScriptTests triples
+  let results  = map findResFile  cuts
+      mtrees   = map findTreeFile cuts
+      triples  = zip3 cuts results mtrees
+      groups   = map mkScriptTests triples
   mkTestGroup cfg "interpret test scripts" groups
   where
     findResFile  c = replaceExtension c "result"

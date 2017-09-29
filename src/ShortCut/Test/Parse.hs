@@ -8,7 +8,10 @@ import ShortCut.Test.Parse.Examples
 import Test.Tasty.QuickCheck
 
 import Test.Tasty            (TestTree, testGroup)
-import Test.Tasty.HUnit
+
+-- TODO switch this to use HSpec?
+import Test.Tasty.HUnit      ((@=?), testCase)
+
 import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
