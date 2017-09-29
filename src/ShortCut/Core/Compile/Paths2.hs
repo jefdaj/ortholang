@@ -47,7 +47,7 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Compile.Paths hiding (exprPrefix, exprPath, exprPathExplicit, cacheDir)
 
 -- import Data.List                  (isInfixOf)
--- import ShortCut.Core.Debug (debug)
+import ShortCut.Core.Debug (debugPath)
 -- import System.FilePath (isPathSeparator, makeRelative)
 -- import Text.PrettyPrint.HughesPJClass
 import Data.Data                  (Data)
@@ -162,12 +162,13 @@ exprPrefix (CutBop _ _ _ n _ _ ) = case n of
 -- TODO rename... back to exprPath for now? and rewrite exprPathExplicit to match?
 exprPath :: CutState -> CutExpr -> Path Abs File
 exprPath s@(scr, _) (CutRef _ _ _ v) = exprPath s $ lookupVar v scr
-exprPath s expr = exprPathExplicit s prefix rtype salt hashes
+exprPath s@(_, cfg) expr = debugPath cfg "exprPath" expr res
   where
     prefix = exprPrefix expr
     rtype  = typeOf expr
     salt   = saltOf expr
     hashes = argHashes s expr
+    res    = exprPathExplicit s prefix rtype salt hashes
 
 -- TODO now we need the prefix to be unique, so "cut_bop" isn't good enough!
 --      cut_bop -> union, difference, etc.

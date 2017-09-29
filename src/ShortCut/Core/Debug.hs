@@ -14,6 +14,9 @@ module ShortCut.Core.Debug
   , debugTrackWrite
   , readFileStrict
   , readLinesStrict
+  -- paths
+  , debugWritePaths
+  , debugReadPaths
   )
   where
 
@@ -27,6 +30,7 @@ import Control.Monad              (unless)
 import System.IO.Error (isAlreadyInUseError, ioError, catchIOError)
 import System.IO              (IOMode(..), withFile)
 import System.IO.Strict       (hGetContents)
+import Development.Shake.FilePath (makeRelative, (</>))
 
 -- TODO add tags/description for filtering the output? (plus docopt to read them)
 -- TODO rename to Shake.hs or something if it gathers more than debugging? combine with Eval.hs?
@@ -142,6 +146,7 @@ debugWriteFile cfg f s = unlessExists f
 debugReadLines :: CutConfig -> FilePath -> Action [String]
 debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 
+-- TODO remote in favor of only the Paths version?
 debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
 debugWriteLines cfg f ss = unlessExists f
                          $ debug cfg ("write '" ++ f ++ "'")
@@ -154,3 +159,22 @@ debugWriteChanged cfg f s = unlessExists f
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
+
+--------------------
+-- path utilities --
+--------------------
+
+-- TODO remove the "debug" names and move to Paths2?
+
+-- TODO take Path Abs File and convert them... or Path Rel File?
+debugWritePaths :: CutConfig -> FilePath -> [FilePath] -> Action ()
+debugWritePaths cfg out paths = debugWriteLines cfg out relPaths
+  where
+    relPaths = map (makeRelative $ cfgTmpDir cfg) paths
+
+-- TODO convert these to Path Abs File
+debugReadPaths :: CutConfig -> FilePath -> Action [FilePath]
+debugReadPaths cfg path = (fmap . map) (cfgTmpDir cfg </>) (debugReadLines cfg path)
+
+-- TODO debugReadLit(s)
+-- TODO debugWriteLit(s)
