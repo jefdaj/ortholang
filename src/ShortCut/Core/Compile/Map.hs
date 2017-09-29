@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
 import Development.Shake.FilePath  ((</>), (<.>))
-import ShortCut.Core.Paths        (cacheDir, fromCutPath, exprPath)
+import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath, readPaths, writePaths)
 import ShortCut.Core.Debug         (debugWriteLines, debugAction, debugRules)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeBaseName, makeRelative)
@@ -78,19 +78,22 @@ rMapLast _ _ _ _ _ = error "bad argument to rMapLastTmps"
 aMapLastArgs :: CutConfig -> FilePath -> [FilePath]
              -> FilePath -> FilePath -> Action ()
 aMapLastArgs cfg outPath inits mapTmp lastsPath = do
-  lastPaths <- readFileLines lastsPath
+  lastPaths <- readPaths cfg lastsPath
   -- this writes the .args files for use in the rule above
   (flip mapM_) lastPaths $ \p -> do
     -- TODO write the out path here too so all the args are together?
-    let argsPath = mapTmp </> takeBaseName p <.> "args" -- TODO use a hash here?
-        argPaths = inits ++ [cfgTmpDir cfg </> p] -- TODO abs path bug here?
+    let p'       = fromCutPath cfg p
+        argsPath = mapTmp </> takeBaseName p' <.> "args" -- TODO use a hash here?
+        argPaths = inits ++ [p'] -- TODO abs path bug here?
+    -- liftIO $ putStrLn $ "p: " ++ show p'
     liftIO $ createDirectoryIfMissing True $ mapTmp
     debugWriteLines cfg argsPath argPaths
   -- then we just trigger them and write to the overall outPath
-  let outPaths = map (\p -> mapTmp </> takeBaseName p) lastPaths
+  let outPaths  = map (\x -> mapTmp </> takeBaseName x) (map (fromCutPath cfg) lastPaths)
+      outPaths' = map (toCutPath cfg) outPaths
   need outPaths
   let out = debugAction cfg "aMapLastArgs" outPath (outPath:inits ++ [mapTmp, lastsPath])
-  debugWriteLines cfg out outPaths
+  writePaths cfg out outPaths'
 
 -- TODO rename this something less confusing
 aMapLastMapTmp :: CutConfig
