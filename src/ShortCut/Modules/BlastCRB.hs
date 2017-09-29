@@ -52,7 +52,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmps aBlastCRB "crbblast" (ListOf crb)
+  , fRules  = rMapLastTmps aBlastCRB "crbblast"
   }
 
 tCrbBlast :: [CutType] -> Either String CutType

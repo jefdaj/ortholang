@@ -51,7 +51,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp (aTsvColumn 1) "tables" (ListOf str)
+  , fRules  = rMapLastTmp (aTsvColumn 1) "tables"
   }
 
 extractTargets :: CutFunction
@@ -67,7 +67,7 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp (aTsvColumn 2) "tables" (ListOf str)
+  , fRules  = rMapLastTmp (aTsvColumn 2) "tables"
   }
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd

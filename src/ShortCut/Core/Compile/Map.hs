@@ -5,31 +5,32 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
 import Development.Shake.FilePath  ((</>), (<.>))
-import ShortCut.Core.Compile.Paths (cacheDir, cacheDirUniq, exprPathExplicit)
+import ShortCut.Core.Paths3        (cacheDir, fromCutPath, exprPath)
 import ShortCut.Core.Debug         (debugWriteLines, debugAction, debugRules)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeBaseName, makeRelative)
+import ShortCut.Core.Util          (digest)
 
 -----------------------------------------------------
 -- simplified versions that take care of cache dir --
 -----------------------------------------------------
 
-rMapLastTmp :: ActionFn -> String -> CutType -> RulesFn
-rMapLastTmp actFn tmpPrefix t s@(_,cfg) = mapFn t s
+rMapLastTmp :: ActionFn -> String -> RulesFn
+rMapLastTmp actFn tmpPrefix s@(_,cfg) = mapFn s
   where
-    tmpDir = cacheDir cfg tmpPrefix
+    tmpDir = CacheDir $ fromCutPath cfg $ cacheDir cfg tmpPrefix
     mapFn  = rMapLast (const tmpDir) actFn tmpPrefix
 
 -- TODO use a hash for the cached path rather than the name, which changes!
 
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmps :: ActionFn -> String -> CutType -> RulesFn
-rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
+rMapLastTmps :: ActionFn -> String -> RulesFn
+rMapLastTmps fn tmpPrefix s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix s e
   where
     -- TODO what if the same last arg is used in different mapping fns?
     --      will it be unique?
-    tmpFn args = cacheDirUniq cfg tmpPrefix args
+    tmpFn args = CacheDir $ fromCutPath cfg (cacheDir cfg tmpPrefix) </> digest args
 
 --------------------
 -- main algorithm --
@@ -53,15 +54,17 @@ rMapLastTmps fn tmpPrefix t s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix t s e
 --     Then in rMapLastArgs (rename it something better) you can calculate what
 --     the outpath will be and put the .args in its proper place, and in this
 --     main fn you can calculate it too to make the mapTmp pattern.
-rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> CutType -> RulesFn
-rMapLast tmpFn actFn prefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
+
+-- TODO is the rtnType doing anything that you can't get from CutFun?
+rMapLast :: ([FilePath] -> CacheDir) -> ActionFn -> String -> RulesFn
+rMapLast tmpFn actFn prefix s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   -- TODO make this an actual debug call
   -- liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
   initPaths <- mapM (rExpr s) (init exprs)
   (ExprPath lastsPath) <- rExpr s (last exprs)
   let inits = map (\(ExprPath p) -> p) initPaths
-      o@(ExprPath outPath) = exprPathExplicit cfg True (ListOf rtnType) name [show e]
-      (CacheDir mapTmp) = cacheDirUniq cfg prefix e
+      outPath = fromCutPath cfg $ exprPath s e
+      mapTmp = (fromCutPath cfg $ cacheDir cfg prefix) </> digest e
   -- This builds .args files then needs their actual non-.args outpaths, which
   -- will be built by the action below
   outPath %> \_ -> aMapLastArgs cfg outPath inits mapTmp lastsPath
@@ -69,8 +72,8 @@ rMapLast tmpFn actFn prefix rtnType s@(_,cfg) e@(CutFun _ _ _ name exprs) = do
   -- (made in the action above). It's a pretty roundabout way to do it!
   -- TODO ask ndmitchell if there's something much more elegant I'm missing
   (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
-  return $ debugRules cfg "rMapLast" e o
-rMapLast _ _ _ _ _ _ = error "bad argument to rMapLastTmps"
+  return $ debugRules cfg "rMapLast" e $ ExprPath outPath
+rMapLast _ _ _ _ _ = error "bad argument to rMapLastTmps"
 
 aMapLastArgs :: CutConfig -> FilePath -> [FilePath]
              -> FilePath -> FilePath -> Action ()

@@ -30,7 +30,7 @@ lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp aLen "length_each" num
+  , fRules  = rMapLastTmp aLen "length_each"
   }
 
 tLen :: [CutType] -> Either String CutType
