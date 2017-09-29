@@ -10,7 +10,7 @@
 |   |-- extract_seqs
 |   |   `-- a83fc07360_7d5451313f.faa
 |   |-- load_faa
-|   |   `-- 41fb3930db.faa -> $TESTDIR/data/6803genes10.faa
+|   |   `-- 41fb3930db.faa -> $WORKDIR/data/6803genes10.faa
 |   `-- str
 |       `-- 50dbefb6d6.str
 `-- vars

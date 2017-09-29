@@ -5,7 +5,7 @@
 |   |-- gbk_to_fna
 |   |   `-- eb35c02b46.fna
 |   |-- load_gbk
-|   |   `-- c1a5b4c25e.gbk -> $TESTDIR/data/Synechocystis-PCC-6803-uid159873.gbk
+|   |   `-- c1a5b4c25e.gbk -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
 |   `-- str
 |       `-- 0507961f5b.str
 `-- vars

@@ -5,7 +5,7 @@
 |   |-- extract_ids
 |   |   `-- bcb7179eda.str.list
 |   |-- load_faa
-|   |   `-- e036f3feea.faa -> $TESTDIR/data/6803genes10.faa
+|   |   `-- e036f3feea.faa -> $WORKDIR/data/6803genes10.faa
 |   `-- str
 |       `-- 50dbefb6d6.str
 `-- vars
