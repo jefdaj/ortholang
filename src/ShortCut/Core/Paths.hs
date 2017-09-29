@@ -175,6 +175,7 @@ readLitPaths cfg path = do
                    then line
                    else cfgWorkDir cfg </> line
 
+-- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
 writePaths cfg out cpaths = debugWriteLines cfg out paths

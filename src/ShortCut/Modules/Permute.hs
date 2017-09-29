@@ -5,8 +5,8 @@ import ShortCut.Core.Types
 
 -- import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
-import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath)
-import ShortCut.Core.Debug          (debugAction, debugWriteLines, debug)
+import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath, readPaths, writePaths, CutPath)
+import ShortCut.Core.Debug          (debugAction, debug)
 import ShortCut.Core.Util           (digest)
 
 cutModule :: CutModule
@@ -54,7 +54,7 @@ leaveEachOut xs
 -- TODO are paths hashes unique now??
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
-rCombos :: ([FilePath] -> [[FilePath]])
+rCombos :: ([CutPath] -> [[CutPath]])
         -> CutState -> CutExpr -> Rules ExprPath
 rCombos comboFn s@(_, cfg) expr@(CutFun (ListOf etype) salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
@@ -66,20 +66,21 @@ rCombos _ _ _ = error "bad argument to rCombos"
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
 aCombos :: CutState
-        -> ([String] -> [[String]])
+        -> ([CutPath] -> [[CutPath]])
         -> FilePath -> CutType -> Int
         -> FilePath -> Action ()
 aCombos s@(_,cfg) comboFn iPath lType salt out = do
   need [iPath]
 
   -- TODO once finished putting in Paths, this should turn deterministic? (paths generic)
-  elements <- fmap lines $ readFile' iPath
+  -- elements <- fmap lines $ readFile' iPath
+  elements <- readPaths cfg iPath
 
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   let mkOut p = exprPathExplicit s "list" lType salt [digest p]
-      oPaths  = map (fromCutPath cfg . mkOut) elements
+      oPaths  = map mkOut elements
       combos  = comboFn elements
-  mapM_ (\(p,c) -> liftIO $ writeFileLines p $ debug cfg ("combo: " ++ show c) c) (zip oPaths combos)
+  mapM_ (\(p,ps) -> writePaths cfg (fromCutPath cfg p) $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths combos)
   let out' = debugAction cfg "aCombos" out [iPath, extOf lType, out]
-  debugWriteLines cfg out' oPaths
+  writePaths cfg out' oPaths
