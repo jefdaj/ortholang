@@ -3,7 +3,7 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile.Paths   (exprPath)
+import ShortCut.Core.Paths3  (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript)
 import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines,
                               debugAction)
@@ -77,9 +77,8 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
   let (ExprPath subPaths') = subPaths
       resPaths'  = map (\(ExprPath p) -> p) resPaths
-      resPaths'' = map (makeRelative $ cfgTmpDir cfg) resPaths'
+      outPath    = fromCutPath cfg $ exprPath s expr
       outPath'   = debugRules cfg "rRepeatEach" expr outPath
-      (ExprPath outPath) = exprPath cfg True expr $ map ExprPath resPaths''
   outPath %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aRepeatEachLits (typeOf expr)
