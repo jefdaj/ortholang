@@ -3,7 +3,7 @@ module ShortCut.Modules.Summarize where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile.Paths        (exprPathExplicit)
+import ShortCut.Core.Paths3 (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic      (rExpr)
 import ShortCut.Core.Debug (debugWriteLines, debugAction)
 import Development.Shake.FilePath ((</>))
@@ -35,11 +35,12 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 rSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPath
-rSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ fnName [iList]) = do
+rSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
-  let (ListOf (ListOf eType)) = typeOf iList
-      (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
-                                          [show expr, iPath]
+  -- let (ListOf (ListOf eType)) = typeOf iList
+      -- (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
+                                          -- [show expr, iPath]
+  let oPath = fromCutPath cfg $ exprPath s expr
   oPath %> aSummary cfg summaryFn iPath
   return (ExprPath oPath)
 rSummary _ _ _ = error "bad argument to rSummary"
