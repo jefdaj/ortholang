@@ -3,7 +3,7 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
-import ShortCut.Core.Compile.Paths        (exprPath)
+import ShortCut.Core.Paths3 (exprPath, fromCutPath)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
@@ -36,7 +36,7 @@ globFiles = CutFunction
 rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
 rGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
-  let (ExprPath outPath) = exprPath cfg True e []
+  let outPath = fromCutPath cfg $ exprPath s e
   outPath %> \_ -> aGlobFiles cfg outPath path
   return (ExprPath outPath)
 rGlobFiles _ _ = error "bad arguments to rGlobFiles"
