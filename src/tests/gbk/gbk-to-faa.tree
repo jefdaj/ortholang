@@ -3,14 +3,14 @@
 |   `-- seqio
 |-- exprs
 |   |-- gbk_to_faa
-|   |   `-- 95e5af2a6d.faa
+|   |   `-- 31df2be117.faa
 |   |-- load_gbk
-|   |   `-- 6f73344e4c.gbk -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
+|   |   `-- ddba013b80.gbk -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
 |   `-- str
 |       `-- 0507961f5b.str
 `-- vars
-    |-- faa6803.faa -> ../exprs/gbk_to_faa/95e5af2a6d.faa
-    |-- gbk6803.gbk -> ../exprs/load_gbk/6f73344e4c.gbk
+    |-- faa6803.faa -> ../exprs/gbk_to_faa/31df2be117.faa
+    |-- gbk6803.gbk -> ../exprs/load_gbk/ddba013b80.gbk
     `-- result -> ../vars/faa6803.faa
 
 7 directories, 6 files

@@ -61,6 +61,7 @@ module ShortCut.Core.Paths
   , varPath
   -- file io
   , readPaths
+  , readLitPaths
   , writePaths
   )
   where
@@ -71,8 +72,7 @@ import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
 import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines)
 import Data.String.Utils          (replace)
-import Data.Maybe (fromJust)
-import Development.Shake.FilePath ((</>), (<.>))
+import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse)
 
 --------------
@@ -80,27 +80,30 @@ import Data.List                  (intersperse)
 --------------
 
 -- TODO move to Types.hs once settled
-newtype CutPath = CutPath FilePath deriving (Eq, Show)
+newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
 
 -- Replace current absolute paths with generic placeholders that won't change
 -- when the tmpDir is moved later or whatever.
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
 toGeneric :: CutConfig -> String -> String
-toGeneric cfg txt = replace (cfgTmpDir  cfg) "$TMPDIR"
-                  $ replace (cfgWorkDir cfg) "$WORKDIR"
+toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
+                  $ replace (cfgTmpDir  cfg) "$TMPDIR"
                   $ txt
 
 -- Replace generic path placeholders with current paths
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
 fromGeneric :: CutConfig -> String -> String
-fromGeneric cfg txt = replace "$TMPDIR"  (cfgTmpDir  cfg)
-                    $ replace "$WORKDIR" (cfgWorkDir cfg)
+fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
+                    $ replace "$TMPDIR"  (cfgTmpDir  cfg)
                     $ txt
 
+-- TODO print warning on failure?
 toCutPath :: CutConfig -> FilePath -> CutPath
 toCutPath cfg = CutPath . toGeneric cfg . normalize
   where
-    normalize = fromAbsFile . fromJust . parseAbsFile
+    normalize p = case parseAbsFile p of
+      Nothing -> error $ "toCutPath can't parse: " ++ p
+      Just p' -> fromAbsFile p'
 
 fromCutPath :: CutConfig -> CutPath -> FilePath
 fromCutPath cfg (CutPath path) = fromGeneric cfg path
@@ -158,9 +161,19 @@ varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> bas
 -- file io --
 -------------
 
--- TODO convert these to Path Abs File
 readPaths :: CutConfig -> FilePath -> Action [CutPath]
-readPaths cfg path = (fmap . map) (toCutPath cfg) (debugReadLines cfg path)
+readPaths cfg path = (fmap . map) CutPath (debugReadLines cfg path)
+
+-- read a file as lines, convert to absolute paths, then parse those as cutpaths
+-- used by the load_* functions to convert user-friendly relative paths to absolute
+readLitPaths :: CutConfig -> FilePath -> Action [CutPath]
+readLitPaths cfg path = do
+  ls <- debugReadLines cfg path
+  return $ map (toCutPath cfg . toAbs) ls
+  where
+    toAbs line = if isAbsolute line
+                   then line
+                   else cfgWorkDir cfg </> line
 
 -- TODO take Path Abs File and convert them... or Path Rel File?
 writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()

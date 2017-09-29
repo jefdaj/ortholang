@@ -24,6 +24,7 @@ import System.IO.LockFile -- TODO only some of it
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty       (writeScript)
 import Data.Maybe                     (fromJust)
+-- import Control.Monad.Trans (liftIO)
 
 -- TODO get rid of as many of these as possible
 nonDeterministicCut :: FilePath -> Bool
@@ -53,7 +54,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "-u", ref, new]
 
 mkScriptTest :: CutConfig -> FilePath -> TestTree
-mkScriptTest cfg gld = goldenDiff "result is correct" gld scriptAct
+mkScriptTest cfg gld = goldenDiff "prints the correct result" gld scriptAct
   where
     scriptRes = (cfgTmpDir cfg </> "vars" </> "result")
     scriptAct = do
@@ -68,11 +69,12 @@ mkTreeTest cfg t = goldenDiff "creates expected tmpfiles" t treeAct
     treeAct = do
       runCut cfg
       out <- readCreateProcess treeCmd ""
-      dir <- fmap (reverse . dropWhile (== '/') . reverse) $ getDataFileName ""
+      let dir = cfgWorkDir cfg
+      -- liftIO $ putStrLn $ "replacing '" ++ dir ++ "' with $WORKDIR"
       return $ pack $ replace dir "$WORKDIR" out
 
 mkTripTest :: CutConfig -> TestTree
-mkTripTest cfg = goldenDiff "survives round-trip to file" tripShow tripAct
+mkTripTest cfg = goldenDiff "unchanged by round-trip to file" tripShow tripAct
   where
     tripCut   = cfgTmpDir cfg <.> "cut"
     tripShow  = cfgTmpDir cfg <.> "show"

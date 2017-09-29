@@ -8,7 +8,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
-import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath)
+import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath, readPaths)
 import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.FilePath      ((</>))
@@ -263,11 +263,13 @@ rConcat _ _ = error "bad argument to rConcat"
 
 aConcat :: CutConfig -> String -> [Char] -> Action ()
 aConcat cfg oPath fsPath = do
-  faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
-             (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)
-                                  fsPath))
-  need (debug cfg ("faPaths: " ++ show faPaths) faPaths)
-  let catArgs = faPaths ++ [">", oPath]
+  -- faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
+  --            (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)
+  --                                 fsPath))
+  faPaths <- readPaths cfg fsPath
+  let faPaths' = map (fromCutPath cfg) faPaths
+  need (debug cfg ("faPaths: " ++ show faPaths) faPaths')
+  let catArgs = faPaths' ++ [">", oPath]
       oPath'  = debugAction cfg "aConcat" oPath [oPath, fsPath]
   unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
                      (debug cfg ("catArgs: " ++ show catArgs) catArgs)

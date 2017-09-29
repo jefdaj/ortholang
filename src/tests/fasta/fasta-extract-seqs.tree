@@ -3,22 +3,22 @@
 |   `-- seqio
 |-- exprs
 |   |-- difference
-|   |   `-- 6931bd3f43_7d5451313f.str.list
+|   |   `-- a1c70b9c47_bdfc405260.str.list
 |   |-- extract_ids
-|   |   |-- 1266da7e54.str.list
-|   |   `-- a83fc07360.str.list
+|   |   |-- 15f4610644.str.list
+|   |   `-- 6e8bd8b7c6.str.list
 |   |-- extract_seqs
-|   |   `-- a83fc07360_7d5451313f.faa
+|   |   `-- 6e8bd8b7c6_bdfc405260.faa
 |   |-- load_faa
-|   |   `-- 41fb3930db.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
 |   `-- str
 |       `-- 50dbefb6d6.str
 `-- vars
-    |-- diff.str.list -> ../exprs/difference/6931bd3f43_7d5451313f.str.list
-    |-- faa10.faa -> ../exprs/load_faa/41fb3930db.faa
-    |-- ids10.str.list -> ../exprs/extract_ids/a83fc07360.str.list
-    |-- idsall.str.list -> ../exprs/extract_ids/1266da7e54.str.list
+    |-- diff.str.list -> ../exprs/difference/a1c70b9c47_bdfc405260.str.list
+    |-- faa10.faa -> ../exprs/load_faa/bb54df8bd7.faa
+    |-- ids10.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
+    |-- idsall.str.list -> ../exprs/extract_ids/15f4610644.str.list
     |-- result -> ../vars/diff.str.list
-    `-- seqs10.faa -> ../exprs/extract_seqs/a83fc07360_7d5451313f.faa
+    `-- seqs10.faa -> ../exprs/extract_seqs/6e8bd8b7c6_bdfc405260.faa
 
 9 directories, 12 files

@@ -3,14 +3,14 @@
 |   `-- seqio
 |-- exprs
 |   |-- extract_ids
-|   |   `-- bcb7179eda.str.list
+|   |   `-- 6e8bd8b7c6.str.list
 |   |-- load_faa
-|   |   `-- e036f3feea.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
 |   `-- str
 |       `-- 50dbefb6d6.str
 `-- vars
-    |-- faa10.faa -> ../exprs/load_faa/e036f3feea.faa
-    |-- ids10.str.list -> ../exprs/extract_ids/bcb7179eda.str.list
+    |-- faa10.faa -> ../exprs/load_faa/bb54df8bd7.faa
+    |-- ids10.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
     `-- result -> ../vars/ids10.str.list
 
 7 directories, 6 files

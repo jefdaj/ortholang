@@ -21,7 +21,9 @@ module ShortCut.Core.Compile.Basic
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath, varPath, writePaths, CutPath)
+import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
+                            fromCutPath, varPath, readPaths, writePaths, CutPath,
+                            readLitPaths)
 
 import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)
@@ -76,6 +78,7 @@ compileScript s@(as,_) permHash = do
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (rAssign s) as
+  -- liftIO $ putStrLn $ "trying to look up result"
   let (VarPath r) = fromJust $ lookup (CutVar res) rpaths
   -- return $ ResPath $ makeRelative (cfgTmpDir cfg) r
   return $ ResPath r
@@ -273,21 +276,26 @@ rLink s@(_,cfg) outExpr strExpr = do
 
 aLink :: CutConfig -> FilePath -> FilePath -> Action ()
 aLink cfg strPath outPath = do
-  pth <- fmap stripWhiteSpace $ readFile' strPath
-  src <- liftIO $ absolutize pth -- TODO make relative to workdir instead
+  -- pth <- fmap stripWhiteSpace $ readFile' strPath
+  pth <- readLitPaths cfg strPath
+  -- src <- liftIO $ absolutize pth -- TODO make relative to workdir instead
+  -- let src  = if isAbsolute pth then pth else cfgWorkDir cfg </> pth
+  src <- liftIO $ resolveSymlinks $ fromCutPath cfg $ head pth
+  -- let src = fromCutPath cfg $ head pth'
   need [src]
   unit $ quietly $ wrappedCmd cfg [outPath] [] "ln" ["-fs", src, outPath]
   let out = debugAction cfg "aLink" outPath [outPath, strPath]
   debugTrackWrite cfg [out]
 
 -- TODO remove this?
+-- TODO is this where to convert string -> generic workdir path?
 rLoadOne :: RulesFn
 rLoadOne s e@(CutFun _ _ _ _ [p]) = rLink s e p
 rLoadOne _ _ = error "bad argument to rLoadOne"
 
 rLoadList :: RulesFn
-rLoadList s e@(CutFun _ _ _ _ [es])
-  | typeOf es `elem` [ListOf str, ListOf num] = rLoadListLits s es
+rLoadList s e@(CutFun r _ _ _ [es])
+  | r `elem` [ListOf str, ListOf num] = rLoadListLits s es
   | otherwise = rLoadListLinks s e
 rLoadList _ _ = error "bad arguments to rLoadList"
 
@@ -302,15 +310,35 @@ rLoadListLits s@(_,cfg) expr = do
   outPath %> \_ -> aLoadListLits cfg outPath litsPath
   return (ExprPath outPath)
 
+aLoadListLits :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListLits cfg outPath litsPath = do
+  lits  <- debugReadLines cfg litsPath -- TODO strip?
+  lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
+  let out = debugAction cfg "aLoadListLits" outPath [outPath, litsPath]
+  debugWriteLines cfg out lits'
+
 -- regular case for lists of any other file type
 rLoadListLinks :: RulesFn
 rLoadListLinks s@(_,cfg) (CutFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   let hash    = digest $ toCutPath cfg pathsPath
       outPath = fromCutPath cfg $ exprPathExplicit s "list" rtn salt [hash]
-  outPath %> \_ -> aLoadListLinks cfg outPath pathsPath
+  outPath %> aLoadListLinks cfg pathsPath
   return (ExprPath outPath)
 rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
+
+aLoadListLinks :: CutConfig -> FilePath -> FilePath -> Action ()
+aLoadListLinks cfg pathsPath outPath = do
+  -- Careful! The user will write paths relative to workdir and those come
+  -- through as a (ListOf str) here; have to read as Strings and convert to
+  paths <- readLitPaths cfg pathsPath
+  let paths' = map (fromCutPath cfg) paths
+  paths'' <- liftIO $ mapM resolveSymlinks paths'
+  liftIO $ putStrLn $ "about to need: " ++ show paths''
+  need paths''
+  let paths''' = map (toCutPath cfg) paths''
+  let out = debugAction cfg "aLoadListLinks" outPath [outPath, pathsPath]
+  writePaths cfg out paths'''
 
 -- based on https://stackoverflow.com/a/18627837
 -- uniqLines :: Ord a => [a] -> [a]
@@ -360,22 +388,6 @@ aOneArgListScript cfg outPath script tmpDir faPath = do
   -- debugWriteFile cfg outPath out
   let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
   debugTrackWrite cfg [out]
-
-aLoadListLits :: CutConfig -> FilePath -> FilePath -> Action ()
-aLoadListLits cfg outPath litsPath = do
-  lits  <- debugReadLines cfg litsPath -- TODO strip?
-  lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
-  let out = debugAction cfg "aLoadListLits" outPath [outPath, litsPath]
-  debugWriteLines cfg out lits'
-
-aLoadListLinks :: CutConfig -> FilePath -> FilePath -> Action ()
-aLoadListLinks cfg outPath pathsPath = do
-    paths <- fmap (map (cfgTmpDir cfg </>)) (debugReadLines cfg pathsPath)
-    need paths
-    paths' <- liftIO $ mapM resolveSymlinks paths
-    -- need paths'
-    let out = debugAction cfg "aLoadListLinks" outPath [outPath, pathsPath]
-    debugWriteLines cfg out paths'
 
 aSimpleTmp :: CutConfig -> FilePath -> ActionFn -> FilePath -> [ExprPath] -> Action ()
 aSimpleTmp cfg outPath actFn tmpDir argPaths = do
