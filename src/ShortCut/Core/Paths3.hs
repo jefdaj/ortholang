@@ -43,12 +43,9 @@ fromGeneric cfg txt = replace "$TMPDIR"  (cfgTmpDir  cfg)
                     $ txt
 
 toCutPath :: CutConfig -> FilePath -> CutPath
-toCutPath cfg = CutPath . toGeneric cfg . normalize'
+toCutPath cfg = CutPath . toGeneric cfg . normalize
   where
     normalize = fromAbsFile . fromJust . parseAbsFile
-    normalize' p =
-      let res = normalize p
-      in debug cfg ("normalized " ++ p ++ " to " ++ show res) p
 
 fromCutPath :: CutConfig -> CutPath -> FilePath
 fromCutPath cfg (CutPath path) = fromGeneric cfg path

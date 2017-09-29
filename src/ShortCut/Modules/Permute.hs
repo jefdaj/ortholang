@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 -- import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
 import ShortCut.Core.Paths3 (exprPath, exprPathExplicit, fromCutPath)
-import ShortCut.Core.Debug          (debugAction, debugWriteLines)
+import ShortCut.Core.Debug          (debugAction, debugWriteLines, debug)
 import ShortCut.Core.Util           (digest)
 
 cutModule :: CutModule
@@ -71,12 +71,15 @@ aCombos :: CutState
         -> FilePath -> Action ()
 aCombos s@(_,cfg) comboFn iPath lType salt out = do
   need [iPath]
+
+  -- TODO once finished putting in Paths3, this should turn deterministic? (paths generic)
   elements <- fmap lines $ readFile' iPath
+
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   let mkOut p = exprPathExplicit s "list" lType salt [digest p]
       oPaths  = map (fromCutPath cfg . mkOut) elements
       combos  = comboFn elements
-  mapM_ (\(p,c) -> liftIO $ writeFileLines p c) (zip oPaths combos)
+  mapM_ (\(p,c) -> liftIO $ writeFileLines p $ debug cfg ("combo: " ++ show c) c) (zip oPaths combos)
   let out' = debugAction cfg "aCombos" out [iPath, extOf lType, out]
   debugWriteLines cfg out' oPaths
