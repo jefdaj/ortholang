@@ -31,6 +31,7 @@ module ShortCut.Core.Types
   , CutModule(..)
   , saltOf
   , setSalt
+  , prefixOf
   -- wrappers to prevent confusing the various paths
   , CacheDir(..)
   , ExprPath(..)
@@ -104,6 +105,23 @@ setSalt n (CutRef t _ ds v)       = CutRef t n ds v
 setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
 setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
 setSalt n (CutList t _ ds es)      = CutList t n ds es
+
+-- TODO add names to the CutBops themselves... or associate with prefix versions?
+prefixOf :: CutExpr -> String
+prefixOf (CutLit rtn _ _     ) = extOf rtn
+prefixOf (CutFun _ _ _ name _) = name
+prefixOf (CutList _ _ _ _    ) = "list"
+prefixOf (CutRef _ _ _ _     ) = error  "CutRefs don't need a prefix"
+prefixOf (CutBop _ _ _ n _ _ ) = case n of
+                                   "+" -> "add"
+                                   "-" -> "subtract"
+                                   "*" -> "multiply"
+                                   "/" -> "divide"
+                                   "~" -> "difference"
+                                   "&" -> "intersection"
+                                   "|" -> "union"
+                                   _   -> error "unknown CutBop"
+
 
 -- TODO have a separate CutAssign for "result"?
 type CutAssign = (CutVar, CutExpr)

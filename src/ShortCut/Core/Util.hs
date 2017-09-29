@@ -5,7 +5,7 @@ import Data.List             (dropWhileEnd)
 import Data.List             (isPrefixOf)
 import Data.List.Utils       (replace)
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Types   (CutConfig)
+import ShortCut.Core.Types   (CutConfig, CutExpr, CutVar, CutScript,)
 import System.Directory      (getHomeDirectory, makeAbsolute,
                               pathIsSymbolicLink)
 import System.FilePath       (addTrailingPathSeparator, normalise)
@@ -66,3 +66,6 @@ mkTestGroup cfg name trees = do
   let trees' = mapM (\t -> t cfg) trees
   trees'' <- trees'
   return $ testGroup name trees''
+
+lookupVar :: CutVar -> CutScript -> CutExpr
+lookupVar var scr = fromJust $ lookup var scr
