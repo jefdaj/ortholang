@@ -1,5 +1,5 @@
 module ShortCut.Core.Paths3
-  -- 
+  -- cutpaths
   ( CutPath
   , toCutPath
   , fromCutPath
@@ -8,13 +8,14 @@ module ShortCut.Core.Paths3
   -- tmpfiles
   , exprPath
   , exprPathExplicit
+  , varPath
   )
   where
 
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
-import ShortCut.Core.Debug (debug, debugPath)
+import ShortCut.Core.Debug (debugPath)
 import Data.String.Utils          (replace)
 import Data.Maybe (fromJust)
 import Development.Shake.FilePath ((</>), (<.>))
@@ -92,3 +93,9 @@ exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path
     base = (concat $ intersperse "_" hashes) ++ suf
     suf  = if salt == 0 then "" else "_" ++ show salt
     path = dir </> base <.> extOf rtype
+
+-- TODO remove VarPath, ExprPath types once CutPath works everywhere
+varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
+varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base
+  where
+    base = if var == "result" then var else var <.> extOf (typeOf expr)

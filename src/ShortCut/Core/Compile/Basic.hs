@@ -22,8 +22,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 -- TODO remove Old path fns
-import qualified ShortCut.Core.Compile.Paths as Old
-import ShortCut.Core.Paths3 (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath)
+-- import qualified ShortCut.Core.Compile.Paths as Old
+import ShortCut.Core.Paths3 (cacheDir, exprPath, exprPathExplicit, toCutPath, fromCutPath, varPath)
 -- import Path (fromCutPath cfg, fromCutPath cfg)
 
 import Data.List                   (find, sort)
@@ -164,9 +164,9 @@ aListPaths cfg outPath paths = do
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 rRef :: CutState -> CutExpr -> Rules ExprPath
-rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ Old.varPath cfg var e
+rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
-    ePath (VarPath p) = ExprPath $ debugRules cfg "rRef" e p
+    ePath p = ExprPath $ debugRules cfg "rRef" e $ fromCutPath cfg p
 rRef _ _ = error "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.
@@ -174,7 +174,7 @@ rRef _ _ = error "bad argument to rRef"
 -- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
 rVar :: CutState -> CutVar -> CutExpr -> ExprPath -> Rules VarPath
 rVar (_,cfg) var expr (ExprPath dest) = do
-  let (VarPath link) = Old.varPath cfg var expr
+  let link = fromCutPath cfg $ varPath cfg var expr
       -- TODO is this needed? maybe just have links be absolute?
       linkd = debugRules cfg "rVar" var link
   link %> \_ -> aVar cfg dest link
@@ -291,19 +291,16 @@ rLoadList _ _ = error "bad arguments to rLoadList"
 rLoadListLits :: RulesFn
 rLoadListLits s@(_,cfg) expr = do
   (ExprPath litsPath) <- rExpr s expr
-  -- let relPath = makeRelative (cfgTmpDir cfg) litsPath
-      -- (ExprPath outPath) = Old.exprPathExplicit cfg True (ListOf rtn) "cut_list" [relPath]
   let outPath = fromCutPath cfg $ exprPath s expr
   outPath %> \_ -> aLoadListLits cfg outPath litsPath
   return (ExprPath outPath)
 
 -- regular case for lists of any other file type
 rLoadListLinks :: RulesFn
-rLoadListLinks s@(_,cfg) e@(CutFun _ _ _ _ [es]) = do
+rLoadListLinks s@(_,cfg) (CutFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
-  -- TODO is relPath enough to make sure it's unique??
-  let relPath = makeRelative (cfgTmpDir cfg) pathsPath
-      (ExprPath outPath) = Old.exprPathExplicit cfg True (typeOf e) "cut_list" [relPath]
+  let hash    = digest $ toCutPath cfg pathsPath
+      outPath = fromCutPath cfg $ exprPathExplicit s "list" rtn salt [hash]
   outPath %> \_ -> aLoadListLinks cfg outPath pathsPath
   return (ExprPath outPath)
 rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
