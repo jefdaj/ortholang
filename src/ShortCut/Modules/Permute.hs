@@ -3,7 +3,7 @@ module ShortCut.Modules.Permute where
 import Development.Shake
 import ShortCut.Core.Types
 
--- import Development.Shake.FilePath   (makeRelative)
+import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
 import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath, readStrings, writeStrings)
 import ShortCut.Core.Debug          (debugAction, debug)
@@ -50,12 +50,14 @@ aPermute s@(_,cfg) comboFn iPath eType salt out = do
   elements <- readStrings eType cfg iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
-  let mkOut p = exprPathExplicit s "list" (ListOf eType) salt [digest p] -- TODO will this match other files?
-      oPaths  = map (fromCutPath cfg . mkOut) elements
+  -- TODO will this match other files?
+  let mkOut p = exprPathExplicit s "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
+      oPaths  = map mkOut elements
+      oPaths' = map (fromCutPath cfg) oPaths
       combos  = comboFn elements
-  mapM_ (\(p,ps) -> writeStrings eType cfg p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths combos)
+  mapM_ (\(p,ps) -> writeStrings eType cfg p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths' combos)
   let out' = debugAction cfg "aPermute" out [iPath, extOf eType, out]
-  writeStrings (ListOf eType) cfg out' oPaths
+  writeStrings (ListOf eType) cfg out' oPaths'
 
 --------------------
 -- leave_each_out --
