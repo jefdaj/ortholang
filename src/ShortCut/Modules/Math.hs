@@ -8,7 +8,8 @@ import Development.Shake
 import Data.Scientific       (Scientific)
 import Data.String.Utils     (strip)
 import ShortCut.Core.Compile.Basic (rBop, defaultTypeCheck)
-import ShortCut.Core.Debug   (debugAction, debugWriteFile)
+import ShortCut.Core.Paths   (writeLit)
+import ShortCut.Core.Debug   (debugAction)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -49,4 +50,4 @@ aMath cfg fn p1 p2 out = do
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
     let out' = debugAction cfg "aMath" out [p1, p2, out]
-    debugWriteFile cfg out' $ show num3 ++ "\n"
+    writeLit cfg out' $ show num3

@@ -7,11 +7,10 @@ import ShortCut.Core.Types
 -- import Path (fromCutPath cfg, fromCutPath cfg) -- TODO remove and use Path everywhere
 
 import ShortCut.Core.Config (wrappedCmd)
-import ShortCut.Core.Debug  (debug, debugReadLines, debugTrackWrite, debugAction)
+import ShortCut.Core.Debug  (debug, debugTrackWrite, debugAction)
 import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath, readPaths)
 import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
-import System.FilePath      ((</>))
 import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
@@ -263,9 +262,6 @@ rConcat _ _ = error "bad argument to rConcat"
 
 aConcat :: CutConfig -> String -> [Char] -> Action ()
 aConcat cfg oPath fsPath = do
-  -- faPaths <- fmap (map (cfgTmpDir cfg </>)) -- TODO utility fn for this!
-  --            (debugReadLines cfg (debug cfg ("fsPath: " ++ fsPath)
-  --                                 fsPath))
   faPaths <- readPaths cfg fsPath
   let faPaths' = map (fromCutPath cfg) faPaths
   need (debug cfg ("faPaths: " ++ show faPaths) faPaths')

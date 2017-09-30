@@ -3,11 +3,11 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
-import ShortCut.Core.Paths (exprPath, fromCutPath)
+import ShortCut.Core.Paths (exprPath, fromCutPath, readLit, writeLits)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
-import ShortCut.Core.Debug        (debugReadFile, debugWriteLines, debugAction)
+import ShortCut.Core.Debug        (debugAction)
 import ShortCut.Core.Util         (absolutize)
 
 cutModule :: CutModule
@@ -43,9 +43,9 @@ rGlobFiles _ _ = error "bad arguments to rGlobFiles"
 
 aGlobFiles :: CutConfig -> FilePath -> FilePath -> Action ()
 aGlobFiles cfg outPath path = do
-  ptn   <- fmap strip $ debugReadFile cfg path
+  ptn   <- fmap strip $ readLit cfg path
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   paths <- liftIO $ mapM absolutize =<< glob ptn
   -- toShortCutListStr cfg str (ExprPath outPath) paths
   let out = debugAction cfg "aGlobFiles" outPath [outPath, path]
-  debugWriteLines cfg out paths
+  writeLits cfg out paths

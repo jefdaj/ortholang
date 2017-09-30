@@ -22,16 +22,14 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
-                            fromCutPath, varPath, readPaths, writePaths, CutPath,
-                            readLitPaths)
+                            fromCutPath, varPath, writePaths, CutPath, readLitPaths,
+                            readLit, readLits, writeLits)
 
 import Data.List                   (find, sort)
 import Data.Maybe                  (fromJust)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Config        (wrappedCmd)
-import ShortCut.Core.Debug         (debugReadFile, debugWriteLines, debugWriteFile,
-                                    debugTrackWrite, debugReadLines, debugAction,
-                                    debugRules)
+import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules)
 import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
                                     digest)
 import System.Directory            (createDirectoryIfMissing)
@@ -135,10 +133,10 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 aListLits :: CutConfig -> [FilePath] -> FilePath -> Action ()
 aListLits cfg paths outPath = do
   need paths
-  lits <- mapM (debugReadFile cfg) paths
+  lits <- mapM (readLit cfg) paths
   let lits' = sort $ map stripWhiteSpace lits
       out'  = debugAction cfg "aListLits" outPath (outPath:paths)
-  debugWriteLines cfg out' lits'
+  writeLits cfg out' lits'
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
@@ -312,10 +310,10 @@ rLoadListLits s@(_,cfg) expr = do
 
 aLoadListLits :: CutConfig -> FilePath -> FilePath -> Action ()
 aLoadListLits cfg outPath litsPath = do
-  lits  <- debugReadLines cfg litsPath -- TODO strip?
+  lits  <- readLits cfg litsPath -- TODO strip?
   lits' <- liftIO $ mapM absolutize lits -- TODO does this mess up non-paths?
   let out = debugAction cfg "aLoadListLits" outPath [outPath, litsPath]
-  debugWriteLines cfg out lits'
+  writeLits cfg out lits'
 
 -- regular case for lists of any other file type
 rLoadListLinks :: RulesFn
@@ -360,7 +358,7 @@ rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> CutExpr -> FilePath -> Action ()
-aLit cfg expr out = debugWriteFile cfg out' $ ePath ++ "\n"
+aLit cfg expr out = writeLits cfg out' [ePath]
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
@@ -385,7 +383,6 @@ aOneArgListScript cfg outPath script tmpDir faPath = do
   need [faPath]
   liftIO $ createDirectoryIfMissing True tmpDir
   wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
-  -- debugWriteFile cfg outPath out
   let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
   debugTrackWrite cfg [out]
 

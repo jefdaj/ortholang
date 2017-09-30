@@ -11,7 +11,8 @@ import ShortCut.Core.Compile.Map       (rMapLastTmp)
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.List                  (nub, sort)
-import ShortCut.Core.Debug        (debugWriteLines, debugAction, debugTrackWrite)
+import ShortCut.Core.Paths (writeLits)
+import ShortCut.Core.Debug        (debugAction, debugTrackWrite)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -77,7 +78,7 @@ aTsvColumn n cfg _ [ExprPath outPath, ExprPath tsvPath] = do
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath
   let out' = sort $ nub $ lines out
       outPath' = debugAction cfg "aTsvColumn" outPath [show n, outPath, tsvPath]
-  debugWriteLines cfg outPath' out'
+  writeLits cfg outPath' out'
 aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
 
 

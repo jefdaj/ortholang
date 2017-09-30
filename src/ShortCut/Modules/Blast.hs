@@ -5,13 +5,13 @@ import ShortCut.Core.Types
 
 import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
-import ShortCut.Core.Debug      (debugReadFile, debugTrackWrite, debug, debugAction)
+import ShortCut.Core.Paths      (readLit, readPath, fromCutPath)
+import ShortCut.Core.Debug      (debugTrackWrite, debug, debugAction)
 import ShortCut.Core.Compile.Basic      (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Core.Compile.Map      (rMapLastTmp)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
 import System.FilePath          (takeDirectory, takeFileName, (</>))
-import ShortCut.Core.Util      (stripWhiteSpace)
 import Text.PrettyPrint.HughesPJClass
 
 cutModule :: CutModule
@@ -102,19 +102,19 @@ addMakeDBCall2 _ _ = error "bad argument to addMakeDBCall2"
 aParBlast :: String -> ActionFn
 aParBlast bCmd cfg _ paths@[ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
   liftIO $ putStrLn $ "aParBlast args: " ++ show paths
-  eStr   <- fmap init $ debugReadFile cfg e
+  eStr   <- readLit cfg e
   -- TODO why does this have the complete dna sequence in it when using tblastn_each??
-  prefix <- fmap (cfgTmpDir cfg </>)
-          $ fmap stripWhiteSpace
-          $ debugReadFile cfg p
-  liftIO $ putStrLn $ "prefix: " ++ prefix
-  let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-      cDir = cfgTmpDir cfg </> takeDirectory prefix -- not actually used as of now
-      dbg  = if cfgDebug cfg then ["-v"] else []
-      o' = debugAction cfg "aParBlast" o [bCmd, o, q, p, e]
-      args = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix
-             , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix]
+  prefix <- readPath cfg p
+  let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
+      prefix' = fromCutPath cfg prefix
+      cDir    = cfgTmpDir cfg </> takeDirectory prefix'
+      dbg     = if cfgDebug cfg then ["-v"] else []
+      o'      = debugAction cfg "aParBlast" o [bCmd, o, q, p, e]
+      args    = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix'
+                , "-o", o'  , "-e", eDec, "-p"] ++ dbg
+  liftIO $ putStrLn $ "prefix: " ++ show prefix
+  liftIO $ putStrLn $ "prefix': " ++ prefix'
+  unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
                      "parallelblast.py" args
   debugTrackWrite cfg [o']
 aParBlast _ _ _ _ = error $ "bad argument to aParBlast"

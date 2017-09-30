@@ -5,8 +5,9 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
 import Development.Shake.FilePath  ((</>), (<.>))
-import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath, readPaths, writePaths)
-import ShortCut.Core.Debug         (debugWriteLines, debugAction, debugRules)
+import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath,
+                                    readPaths, writePaths, writeLits)
+import ShortCut.Core.Debug         (debugAction, debugRules)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeBaseName, makeRelative)
 import ShortCut.Core.Util          (digest)
@@ -78,16 +79,17 @@ rMapLast _ _ _ _ _ = error "bad argument to rMapLastTmps"
 aMapLastArgs :: CutConfig -> FilePath -> [FilePath]
              -> FilePath -> FilePath -> Action ()
 aMapLastArgs cfg outPath inits mapTmp lastsPath = do
-  lastPaths <- readPaths cfg lastsPath
+  lastPaths <- readPaths cfg lastsPath -- TODO this needs a lit variant?
   -- this writes the .args files for use in the rule above
   (flip mapM_) lastPaths $ \p -> do
     -- TODO write the out path here too so all the args are together?
+    liftIO $ putStrLn $ "p: " ++ show p
     let p'       = fromCutPath cfg p
         argsPath = mapTmp </> takeBaseName p' <.> "args" -- TODO use a hash here?
         argPaths = inits ++ [p'] -- TODO abs path bug here?
     -- liftIO $ putStrLn $ "p: " ++ show p'
     liftIO $ createDirectoryIfMissing True $ mapTmp
-    debugWriteLines cfg argsPath argPaths
+    writeLits cfg argsPath argPaths
   -- then we just trigger them and write to the overall outPath
   let outPaths  = map (\x -> mapTmp </> takeBaseName x) (map (fromCutPath cfg) lastPaths)
       outPaths' = map (toCutPath cfg) outPaths
@@ -102,8 +104,7 @@ aMapLastMapTmp :: CutConfig
                -> FilePath -> Action ()
 aMapLastMapTmp cfg tmpFn actFn out = do
   let argsPath = out <.> ".args" -- TODO clean up
-  -- args <- debugReadLines cfg argsPath
-  args <- fmap lines $ liftIO $ readFile argsPath
+  args <- fmap lines $ liftIO $ readFile argsPath -- TODO switch to readPaths?
   let args' = map (cfgTmpDir cfg </>) args
       rels  = map (makeRelative $ cfgTmpDir cfg) args
   need args'
