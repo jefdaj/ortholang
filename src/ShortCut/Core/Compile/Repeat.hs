@@ -3,10 +3,9 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths  (exprPath, fromCutPath)
+import ShortCut.Core.Paths  (exprPath, fromCutPath, writeLits, readLit)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript)
-import ShortCut.Core.Debug   (debugRules, debugReadFile, debugWriteLines,
-                              debugAction)
+import ShortCut.Core.Debug   (debugRules, debugAction)
 import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
 
@@ -91,11 +90,11 @@ rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 aRepeatEachLits :: CutType -> CutConfig
                 -> FilePath -> FilePath -> [FilePath] -> Action ()
 aRepeatEachLits _ cfg outPath subPaths resPaths = do
-  lits <- mapM (debugReadFile cfg) resPaths
+  lits <- mapM (readLit cfg) resPaths
   let lits' = map stripWhiteSpace lits
       out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths:resPaths)
   -- liftIO $ putStrLn $ "aRepeatEachLits lits': " ++ show lits'
-  debugWriteLines cfg out lits'
+  writeLits cfg out lits'
 
 -- TODO factor out, and maybe unify with rListLinks
 aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
@@ -103,4 +102,4 @@ aRepeatEachLinks cfg outPath subPaths' resPaths' = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
   let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
   let out = debugAction cfg "aRepeatEachLinks" outPath (outPath:subPaths':resPaths')
-  debugWriteLines cfg out outPaths'
+  writeLits cfg out outPaths'

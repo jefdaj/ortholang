@@ -3,8 +3,8 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug     (debugReadLines, debugWriteFile, debugAction)
-import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath)
+import ShortCut.Core.Debug     (debugAction)
+import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath, readLits, writeLit)
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Map     (rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
@@ -62,8 +62,8 @@ aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
 aLen cfg _ [ExprPath out, ExprPath lst] = do
   n <- fmap (\n -> read n :: Scientific)
      $ fmap (show . length)
-     $ debugReadLines cfg lst
+     $ readLits cfg lst
   let out' = debugAction cfg "aLen" out [out, lst]
   liftIO $ createDirectoryIfMissing True $ takeDirectory out
-  debugWriteFile cfg out' (show n ++ "\n") -- TODO auto-add the \n?
+  writeLit cfg out' $ show n
 aLen _ _ args = error $ "bad arguments to aLen: " ++ show args

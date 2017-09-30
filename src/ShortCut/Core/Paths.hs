@@ -1,3 +1,5 @@
+-- TODO rename this module to TmpFiles?
+
 {- ShortCut makes heavy use of tmpfiles, and this module controls where they go
  - inside the main tmpdir. After a rewrite, the overall layout should be:
  -
@@ -48,9 +50,7 @@
 
 module ShortCut.Core.Paths
   -- cutpaths
-  ( toGeneric   -- TODO remove once CutPaths are established
-  , fromGeneric -- TODO remove once CutPaths are established
-  , CutPath
+  ( CutPath
   , toCutPath
   , fromCutPath
   -- cache dirs
@@ -60,9 +60,20 @@ module ShortCut.Core.Paths
   , exprPathExplicit
   , varPath
   -- file io
+  , readPath
   , readPaths
   , readLitPaths
+  , writePath
   , writePaths
+  , readLit
+  , readLits
+  , writeLit
+  , writeLits
+  -- read and write tmpfiles as strings
+  , readString
+  , readStrings
+  , writeString
+  , writeStrings
   )
   where
 
@@ -70,10 +81,10 @@ import Development.Shake (Action)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
-import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines)
+import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
-import Data.List                  (intersperse)
+import Data.List                  (intersperse, isPrefixOf)
 
 --------------
 -- cutpaths --
@@ -96,6 +107,9 @@ fromGeneric :: CutConfig -> String -> String
 fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
                     $ replace "$TMPDIR"  (cfgTmpDir  cfg)
                     $ txt
+
+isGeneric :: FilePath -> Bool
+isGeneric path = "$TMPDIR" `isPrefixOf` path || "$WORKDIR" `isPrefixOf` path
 
 -- TODO print warning on failure?
 toCutPath :: CutConfig -> FilePath -> CutPath
@@ -157,12 +171,37 @@ varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> bas
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
 
+---------------
+-- io checks --
+---------------
+
+-- These are just to alert me of programming mistakes,
+-- and can be removed once the rest of the IO stuff is solid.
+
+checkLits :: [String] -> [String] -- (or error, but let's ignore that)
+checkLits = map checkLit
+  where
+    checkLit lit = if isGeneric lit
+                     then error $ "placeholder in lit: '" ++ lit ++ "'"
+                     else lit
+
+checkPaths :: [FilePath] -> [FilePath]
+checkPaths = map checkPath
+  where
+    checkPath path = if isAbsolute path || isGeneric path
+                       then path
+                       else error $ "invalid path: '" ++ path ++ "'"
+
 -------------
 -- file io --
 -------------
 
 readPaths :: CutConfig -> FilePath -> Action [CutPath]
-readPaths cfg path = (fmap . map) CutPath (debugReadLines cfg path)
+readPaths cfg path = fmap (map CutPath . checkPaths) (debugReadLines cfg path)
+
+-- TODO something safer than head!
+readPath :: CutConfig -> FilePath -> Action CutPath
+readPath cfg path = readPaths cfg path >>= return . head
 
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
@@ -182,5 +221,49 @@ writePaths cfg out cpaths = debugWriteLines cfg out paths
   where
     paths = map (\(CutPath path) -> path) cpaths
 
--- TODO debugReadLit(s)
--- TODO debugWriteLit(s)
+writePath :: CutConfig -> FilePath -> CutPath -> Action ()
+writePath cfg out path = writePaths cfg out [path]
+
+readLits :: CutConfig -> FilePath -> Action [String]
+readLits cfg path = debugReadLines cfg path >>= return . checkLits
+
+-- TODO something safer than head!
+-- TODO error if they contain $TMPDIR or $WORKDIR?
+readLit :: CutConfig -> FilePath -> Action String
+readLit cfg path = readLits cfg path >>= return . head
+
+-- TODO error if they contain $TMPDIR or $WORKDIR?
+writeLits :: CutConfig -> FilePath -> [String] -> Action ()
+writeLits cfg path lits = debugWriteLines cfg path $ checkLits lits
+
+writeLit :: CutConfig -> FilePath -> String -> Action ()
+writeLit cfg path lit = writeLits cfg path [lit]
+
+----------------------------------------
+-- read and write tmpfiles as strings --
+----------------------------------------
+
+-- These are useful for generic functions like in Sets.hs which operate on
+-- "lists of whatever". You include the CutType (of each element, not the
+-- list!) so it knows how to convert to/from String, and then within the
+-- function you treat them as Strings.
+
+readStrings :: CutType -> CutConfig -> FilePath -> Action [String]
+readStrings etype cfg path = if etype' `elem` [str, num]
+  then readLits cfg path
+  else (fmap . map) (fromCutPath cfg) (readPaths cfg path)
+  where
+    etype' = debug cfg ("readStrings (each " ++ extOf etype ++ ") from " ++ path) etype
+
+readString :: CutType -> CutConfig -> FilePath -> Action String
+readString etype cfg path = readStrings etype cfg path >>= return . head
+
+writeStrings :: CutType -> CutConfig -> FilePath -> [String] -> Action ()
+writeStrings etype cfg out whatevers = if etype' `elem` [str, num]
+  then writeLits cfg out whatevers
+  else writePaths cfg out $ map (toCutPath cfg) whatevers
+  where
+    etype' = debug cfg ("writeStrings (each " ++ extOf etype ++ "): " ++ show (take 3 whatevers)) etype
+
+writeString :: CutType -> CutConfig -> FilePath -> String -> Action ()
+writeString etype cfg out whatever = writeStrings etype cfg out [whatever]

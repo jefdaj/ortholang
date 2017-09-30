@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 -- import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
-import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath, readPaths, writePaths, CutPath)
+import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath, readStrings, writeStrings)
 import ShortCut.Core.Debug          (debugAction, debug)
 import ShortCut.Core.Util           (digest)
 
@@ -13,19 +13,62 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "permute"
   , mFunctions =
-    [ leaveOneOut
+    [ leaveEachOut
     -- TODO sample n elements n times
     -- TODO partition into training + test data
     -- TODO partition into trainint + test data for cross-validation 
     ]
   }
 
-leaveOneOut :: CutFunction
-leaveOneOut = CutFunction
+--------------------------------------
+-- generic plumbing for permute fns --
+--------------------------------------
+
+-- splits a list into a list of lists using the provided function
+-- TODO produce each output list in a separate Shake monad section?
+-- TODO are paths hashes unique now??
+-- TODO use writeFileChanged instead of writeFileLines?
+--      (if it turns out to be re-running stuff unneccesarily)
+rPermute :: ([String] -> [[String]])
+         -> CutState -> CutExpr -> Rules ExprPath
+rPermute comboFn s@(_, cfg) expr@(CutFun _ salt _ _ [iList]) = do
+  (ExprPath iPath) <- rExpr s iList
+  let oList      = fromCutPath cfg $ exprPath s expr
+      (ListOf t) = typeOf iList
+  oList %> aPermute s comboFn iPath t salt
+  return (ExprPath oList)
+rPermute _ _ _ = error "bad argument to rCombos"
+
+-- TODO once back-compilation or whatever works, also use it here?
+-- TODO do something more obvious than writing to the "list" prefix??
+aPermute :: CutState
+         -> ([String] -> [[String]])
+         -> FilePath -> CutType -> Int
+         -> FilePath -> Action ()
+aPermute s@(_,cfg) comboFn iPath eType salt out = do
+  need [iPath]
+  elements <- readStrings eType cfg iPath
+  -- TODO these aren't digesting properly! elements need to be compiled first?
+  --      (digesting the elements themselves rather than the path to them)
+  let mkOut p = exprPathExplicit s "list" (ListOf eType) salt [digest p] -- TODO will this match other files?
+      oPaths  = map (fromCutPath cfg . mkOut) elements
+      combos  = comboFn elements
+  mapM_ (\(p,ps) -> writeStrings eType cfg p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths combos)
+  let out' = debugAction cfg "aPermute" out [iPath, extOf eType, out]
+  writeStrings (ListOf eType) cfg out' oPaths
+
+--------------------
+-- leave_each_out --
+--------------------
+
+-- TODO rename actual function to drop_each?
+
+leaveEachOut :: CutFunction
+leaveEachOut = CutFunction
   { fName      = "leave_each_out"
   , fFixity    = Prefix
   , fTypeCheck = combosTypeCheck
-  , fRules  = rCombos leaveEachOut
+  , fRules     = rPermute dropEach
   }
 
 combosTypeCheck :: [CutType] -> Either String CutType
@@ -44,43 +87,7 @@ dropFromList xs n
 
 -- returns a list of lists where each element is left out once
 -- TODO should it be an error to call this with only one element?
-leaveEachOut :: [a] -> [[a]]
-leaveEachOut xs
+dropEach :: [a] -> [[a]]
+dropEach xs
   | length xs < 2 = []
   | otherwise = map (dropFromList xs) [1..length xs]
-
--- splits a list into a list of lists using the provided function
--- TODO produce each output list in a separate Shake monad section?
--- TODO are paths hashes unique now??
--- TODO use writeFileChanged instead of writeFileLines?
---      (if it turns out to be re-running stuff unneccesarily)
-rCombos :: ([CutPath] -> [[CutPath]])
-        -> CutState -> CutExpr -> Rules ExprPath
-rCombos comboFn s@(_, cfg) expr@(CutFun (ListOf etype) salt _ _ [iList]) = do
-  (ExprPath iPath) <- rExpr s iList
-  let oList = fromCutPath cfg $ exprPath s expr
-  oList %> aCombos s comboFn iPath etype salt
-  return (ExprPath oList)
-rCombos _ _ _ = error "bad argument to rCombos"
-
--- TODO once back-compilation or whatever works, also use it here?
--- TODO do something more obvious than writing to the "list" prefix??
-aCombos :: CutState
-        -> ([CutPath] -> [[CutPath]])
-        -> FilePath -> CutType -> Int
-        -> FilePath -> Action ()
-aCombos s@(_,cfg) comboFn iPath lType salt out = do
-  need [iPath]
-
-  -- TODO once finished putting in Paths, this should turn deterministic? (paths generic)
-  -- elements <- fmap lines $ readFile' iPath
-  elements <- readPaths cfg iPath
-
-  -- TODO these aren't digesting properly! elements need to be compiled first?
-  --      (digesting the elements themselves rather than the path to them)
-  let mkOut p = exprPathExplicit s "list" lType salt [digest p]
-      oPaths  = map mkOut elements
-      combos  = comboFn elements
-  mapM_ (\(p,ps) -> writePaths cfg (fromCutPath cfg p) $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths combos)
-  let out' = debugAction cfg "aCombos" out [iPath, extOf lType, out]
-  writePaths cfg out' oPaths
