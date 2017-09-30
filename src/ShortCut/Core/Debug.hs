@@ -18,16 +18,17 @@ module ShortCut.Core.Debug
   where
 
 import Development.Shake
-import ShortCut.Core.Types
 import ShortCut.Core.Pretty ()
+import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
 
-import Debug.Trace            (trace, traceShow)
-import Control.Monad              (unless)
-import System.IO.Error (isAlreadyInUseError, ioError, catchIOError)
-import System.IO              (IOMode(..), withFile)
-import System.IO.Strict       (hGetContents)
-import Development.Shake.FilePath (makeRelative, (</>))
+import Control.Exception (catch, throwIO)
+import Control.Monad     (unless)
+import Debug.Trace       (trace, traceShow)
+import System.Directory  (removeFile)
+import System.IO         (IOMode(..), withFile)
+import System.IO.Error   (isAlreadyInUseError, isDoesNotExistError, ioError, catchIOError)
+import System.IO.Strict  (hGetContents)
 
 -- TODO add tags/description for filtering the output? (plus docopt to read them)
 -- TODO rename to Shake.hs or something if it gathers more than debugging? combine with Eval.hs?
@@ -94,17 +95,27 @@ debugAction cfg name outPath args = debug cfg msg outPath
 
 -- TODO call this module something besides Debug now that it also handles errors?
 
+removeIfExists :: FilePath -> IO ()
+removeIfExists fileName = removeFile fileName `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwIO e
+
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
   e <- doesFileExist path
   unless e act
 
+-- This is safe in two ways:
+-- 1. It skips writing if the file is already being written by another thread
+-- 2. If some other error occurs it deletes the file, which is important
+--    because it prevents it being interreted as an empty list later
 writeFileSafe :: FilePath -> String -> Action ()
 writeFileSafe name x = liftIO $ catchIOError (writeFile name x) handler
   where
     handler e = if isAlreadyInUseError e
                   then return ()
-                  else ioError e
+                  else removeIfExists name >> ioError e
 
 writeLinesSafe :: FilePath -> [String] -> Action ()
 writeLinesSafe name = writeFileSafe name . unlines
