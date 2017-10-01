@@ -376,7 +376,8 @@ aLoadListLinks cfg pathsPath outPath = do
 -- uniqLines = unlines . toList . fromList . lines
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
-rSimpleTmp :: ActionFn -> String -> CutType -> RulesFn
+rSimpleTmp :: (CutConfig -> CutPath -> [CutPath] -> Action ())
+           -> String -> CutType -> RulesFn
 rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
   let argPaths' = map (\(ExprPath p) -> toCutPath cfg p) argPaths
@@ -388,16 +389,17 @@ rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
     outPath' = fromCutPath cfg outPath
 rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
 
-aSimpleTmp :: CutConfig -> CutPath -> ActionFn -> CutPath -> [CutPath] -> Action ()
+aSimpleTmp :: CutConfig -> CutPath
+           -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+           -> CutPath -> [CutPath] -> Action ()
 aSimpleTmp cfg outPath actFn tmpDir argPaths = do
   need argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir'
-  actFn cfg (CacheDir tmpDir') ([ExprPath outPath'] ++ argPaths'')
+  actFn cfg tmpDir (outPath:argPaths)
   trackWrite [out]
   where
     tmpDir'    = fromCutPath cfg tmpDir
     argPaths'  = map (fromCutPath cfg) argPaths
-    argPaths'' = map ExprPath argPaths'
     outPath'   = fromCutPath cfg outPath
     out = debugAction cfg "aSimpleTmp" outPath' (outPath':tmpDir':argPaths') -- TODO actFn?
 

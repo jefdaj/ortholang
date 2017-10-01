@@ -4,7 +4,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Debug     (debugAction)
-import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath, readLits, writeLit)
+import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath,
+                               toCutPath, readLits, writeLit, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Map     (rMapLastTmp)
 import ShortCut.Modules.Blast  (bht)
@@ -45,11 +46,12 @@ rLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath
   -- (ExprPath outPath) = exprPathExplicit cfg True num "length" [relPath]
-  let cDir    = fromCutPath cfg $ cacheDir cfg "length"
-      outPath = fromCutPath cfg $ exprPath s e
-      out = cfgTmpDir cfg </> outPath
-  out %> \_ -> aLen cfg (CacheDir cDir) [ExprPath out, ExprPath lPath]
-  return (ExprPath out)
+  let cDir    = cacheDir cfg "length"
+      outPath = exprPath s e
+      out'    = fromCutPath cfg outPath
+      lPath'  = toCutPath   cfg lPath
+  out' %> \_ -> aLen cfg cDir [outPath, lPath']
+  return (ExprPath out')
 rLen _ _ = error "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
@@ -58,12 +60,15 @@ tLenEach [(ListOf (ListOf _))] = Right (ListOf num)
 tLenEach [ListOf x] | x == bht = Right (ListOf num) -- TODO also crb?
 tLenEach _ = Left $ "length_each requires a list of lists"
 
-aLen :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aLen cfg _ [ExprPath out, ExprPath lst] = do
+aLen :: CutConfig -> CutPath -> [CutPath] -> Action ()
+aLen cfg _ [out, lst] = do
   n <- fmap (\n -> read n :: Scientific)
      $ fmap (show . length)
-     $ readLits cfg lst
-  let out' = debugAction cfg "aLen" out [out, lst]
-  liftIO $ createDirectoryIfMissing True $ takeDirectory out
-  writeLit cfg out' $ show n
+     $ readLits cfg lst'
+  liftIO $ createDirectoryIfMissing True $ takeDirectory out'
+  writeLit cfg out'' $ show n
+  where
+    out'  = fromCutPath cfg out
+    lst'  = fromCutPath cfg lst
+    out'' = debugAction cfg "aLen" out' [out', lst']
 aLen _ _ args = error $ "bad arguments to aLen: " ++ show args

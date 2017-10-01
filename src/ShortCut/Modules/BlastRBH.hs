@@ -3,7 +3,7 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath)
+import ShortCut.Core.Paths (exprPath, cacheDir, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugTrackWrite, debugAction)
 import ShortCut.Core.Compile.Basic     (rExpr, rSimpleTmp, defaultTypeCheck)
@@ -35,14 +35,19 @@ reciprocal = CutFunction
   { fName      = "reciprocal"
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp aRecip "blast" bht
+  , fRules     = rSimpleTmp aRecip "blast" bht
   }
 
-aRecip :: ActionFn
-aRecip cfg (CacheDir tmp) [ExprPath out, ExprPath left, ExprPath right] = do
-  let out' = debugAction cfg "aRecip" out [tmp, out, left, right]
-  unit $ quietly $ wrappedCmd cfg [out'] [Cwd tmp] "reciprocal.R" [out', left, right]
-  debugTrackWrite cfg [out']
+aRecip :: CutConfig -> CutPath -> [CutPath] -> Action ()
+aRecip cfg tmp [out, left, right] = do
+  unit $ quietly $ wrappedCmd cfg [out'] [Cwd tmp'] "reciprocal.R" [out', left', right']
+  debugTrackWrite cfg [out'']
+  where
+    tmp'   = fromCutPath cfg tmp
+    out'   = fromCutPath cfg out
+    left'  = fromCutPath cfg left
+    right' = fromCutPath cfg right
+    out''  = debugAction cfg "aRecip" out' [tmp', out', left', right']
 aRecip _ _ args = error $ "bad argument to aRecip: " ++ show args
 
 -- TODO make the rest of them... but not until after lab meeting?
@@ -96,19 +101,28 @@ rRecipEach :: RulesFn
 rRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   (ExprPath lsPath) <- rExpr s lbhts
   (ExprPath rsPath) <- rExpr s rbhts
-  let oPath = fromCutPath cfg $ exprPath s e
-      cDir = fromCutPath cfg $ cacheDir cfg "reciprocal_each"
-  oPath %> \_ -> aRecipEach cfg oPath lsPath rsPath cDir
-  return (ExprPath oPath)
+  let lsPath' = toCutPath cfg lsPath
+      rsPath' = toCutPath cfg rsPath
+  oPath' %> \_ -> aRecipEach cfg oPath lsPath' rsPath' cDir
+  return (ExprPath oPath')
+  where
+    cDir   = cacheDir cfg "reciprocal_each"
+    oPath  = exprPath s e
+    oPath' = fromCutPath cfg oPath
 rRecipEach _ _ = error "bad argument to rRecipEach"
 
-aRecipEach :: CutConfig -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aRecipEach :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aRecipEach cfg oPath lsPath rsPath cDir = do
-  need [lsPath, rsPath]
-  let oPath' = debugAction cfg "aRecipEach" oPath [oPath, lsPath, rsPath, cDir]
-  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir] "reciprocal_each.py"
-    [cDir, oPath', lsPath, rsPath]
-  debugTrackWrite cfg [oPath']
+  need [lsPath', rsPath']
+  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir'] "reciprocal_each.py"
+    [cDir', oPath', lsPath', rsPath']
+  debugTrackWrite cfg [oPath'']
+  where
+    oPath'  = fromCutPath cfg oPath
+    lsPath' = fromCutPath cfg lsPath
+    rsPath' = fromCutPath cfg rsPath
+    cDir'   = fromCutPath cfg cDir
+    oPath'' = debugAction cfg "aRecipEach" oPath' [oPath', rsPath', rsPath', cDir']
 
 -----------------------------------------------
 -- the hard part: mapped reciprocal versions --
@@ -155,20 +169,28 @@ rBlastSymRBHEach bCmd s@(_,cfg) e@(CutFun rtn salt deps _ [evalue, query, subjec
   -- TODO need to get best_hits on each of the subjects before calling it, or duplicate the code inside?
   -- let mkExpr name = CutFun bht salt deps "best_hits" [CutFun bht salt deps name [evalue, query, subjects]]
   let mkExpr name = CutFun rtn salt deps name [evalue, query, subjects]
-      oPath = fromCutPath cfg $ exprPath s e
-      cDir = fromCutPath cfg $ cacheDir cfg "reciprocal_each"
+      oPath  = exprPath s e
+      oPath' = fromCutPath cfg oPath
+      cDir   = cacheDir cfg "reciprocal_each"
   (ExprPath fwdsPath) <- rExpr s $ mkExpr $ bCmd ++ "_each"
   (ExprPath revsPath) <- rExpr s $ mkExpr $ bCmd ++ "_each_rev"
-  oPath %> \_ -> aBlastSymRBHEach cfg oPath cDir fwdsPath revsPath
-  return (ExprPath oPath)
+  let fwdsPath' = toCutPath cfg fwdsPath
+      revsPath' = toCutPath cfg revsPath
+  oPath' %> \_ -> aBlastSymRBHEach cfg oPath cDir fwdsPath' revsPath'
+  return (ExprPath oPath')
 rBlastSymRBHEach _ _ _ = error "bad argument to rBlastSymRBHEach"
 
-aBlastSymRBHEach :: CutConfig -> FilePath -> FilePath
-                 -> FilePath -> FilePath -> Action ()
+aBlastSymRBHEach :: CutConfig -> CutPath -> CutPath
+                 -> CutPath -> CutPath -> Action ()
 aBlastSymRBHEach cfg oPath cDir fwdsPath revsPath = do
-  need [fwdsPath, revsPath]
-  liftIO $ createDirectoryIfMissing True cDir
-  let oPath' = debugAction cfg "aBlastSymRBHEach" oPath [oPath, cDir, fwdsPath, revsPath]
-  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir]
-                       "reciprocal_each.py" [cDir, oPath', fwdsPath, revsPath]
-  debugTrackWrite cfg [oPath']
+  need [fwdsPath', revsPath']
+  liftIO $ createDirectoryIfMissing True cDir'
+  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir']
+                       "reciprocal_each.py" [cDir', oPath', fwdsPath', revsPath']
+  debugTrackWrite cfg [oPath'']
+  where
+    oPath'    = fromCutPath cfg oPath
+    cDir'     = fromCutPath cfg cDir
+    fwdsPath' = fromCutPath cfg fwdsPath
+    revsPath' = fromCutPath cfg revsPath
+    oPath'' = debugAction cfg "aBlastSymRBHEach" oPath' [oPath', cDir', fwdsPath', revsPath']

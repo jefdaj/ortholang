@@ -4,6 +4,7 @@ module ShortCut.Modules.BlastCRB where
 
 import ShortCut.Core.Types
 import Development.Shake       (quietly, Action, CmdOption(..))
+import ShortCut.Core.Paths     (CutPath, fromCutPath)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Map (rMapLastTmps)
@@ -63,10 +64,16 @@ tCrbBlastEach :: [CutType] -> Either String CutType
 tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
 tCrbBlastEach _ = Left "crb_blast requires a fna query and a list of fna or faa targets"
 
-aBlastCRB :: CutConfig -> CacheDir -> [ExprPath] -> Action ()
-aBlastCRB cfg (CacheDir tmpDir) [(ExprPath o), (ExprPath q), (ExprPath t)] = do
-  quietly $ wrappedCmd cfg [o] [Cwd tmpDir]
-    "crb-blast" ["--query", q, "--target", t, "--output", o]
-  let o' = debugAction cfg "aBlastCRB" o [tmpDir, o, q, t]
-  debugTrackWrite cfg [o']
+-- TODO expand into 3 args
+aBlastCRB :: CutConfig -> CutPath -> [CutPath] -> Action ()
+aBlastCRB cfg tmpDir [o, q, t] = do
+  quietly $ wrappedCmd cfg [o'] [Cwd tmp']
+    "crb-blast" ["--query", q', "--target", t', "--output", o']
+  debugTrackWrite cfg [o'']
+  where
+    o'   = fromCutPath cfg o
+    o''  = debugAction cfg "aBlastCRB" o' [tmp', o', q', t']
+    q'   = fromCutPath cfg q
+    t'   = fromCutPath cfg t
+    tmp' = fromCutPath cfg tmpDir
 aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

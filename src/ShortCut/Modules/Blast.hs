@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Data.Scientific          (formatScientific, FPFormat(..))
 import ShortCut.Core.Config     (wrappedCmd)
-import ShortCut.Core.Paths      (readLit, readPath, fromCutPath)
+import ShortCut.Core.Paths      (readLit, readPath, fromCutPath, CutPath)
 import ShortCut.Core.Debug      (debugTrackWrite, debug, debugAction)
 import ShortCut.Core.Compile.Basic      (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Core.Compile.Map      (rMapLastTmp)
@@ -73,11 +73,11 @@ mkBlastFn bCmd qType sType dbType = CutFunction
   , fRules  = rMkBlastFn bCmd dbType aParBlast
   }
 
-rMkBlastDbFn :: String -> (String -> ActionFn) -> RulesFn
+rMkBlastDbFn :: String -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
 rMkBlastDbFn bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
 
 -- convert the fasta file to a db and pass to the db version (above)
-rMkBlastFn :: String -> CutType -> (String -> ActionFn) -> RulesFn
+rMkBlastFn :: String -> CutType -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
 rMkBlastFn c dbType a s e = rMkBlastDbFn c a s $ addMakeDBCall1 e dbType
 
 -- TODO why doesn't this `need` the db out path?
@@ -99,24 +99,29 @@ addMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
 addMakeDBCall2 _ _ = error "bad argument to addMakeDBCall2"
 
 -- TODO remove the old bbtmp default tmpDir
-aParBlast :: String -> ActionFn
-aParBlast bCmd cfg _ paths@[ExprPath o, ExprPath q, ExprPath p, ExprPath e] = do
+aParBlast :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+aParBlast bCmd cfg _ paths@[o, q, p, e] = do
   liftIO $ putStrLn $ "aParBlast args: " ++ show paths
-  eStr   <- readLit cfg e
+  eStr   <- readLit cfg e'
   -- TODO why does this have the complete dna sequence in it when using tblastn_each??
-  prefix <- readPath cfg p
+  prefix <- readPath cfg p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       cDir    = cfgTmpDir cfg </> takeDirectory prefix'
       dbg     = if cfgDebug cfg then ["-v"] else []
-      o'      = debugAction cfg "aParBlast" o [bCmd, o, q, p, e]
-      args    = [ "-c", bCmd, "-t", cDir, "-q", q, "-d", takeFileName prefix'
+      args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
   liftIO $ putStrLn $ "prefix: " ++ show prefix
   liftIO $ putStrLn $ "prefix': " ++ prefix'
   unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
                      "parallelblast.py" args
-  debugTrackWrite cfg [o']
+  debugTrackWrite cfg [o'']
+  where
+    o'  = fromCutPath cfg o
+    q'  = fromCutPath cfg q
+    p'  = fromCutPath cfg p
+    e'  = fromCutPath cfg e
+    o'' = debugAction cfg "aParBlast" o' [bCmd, o', q', p', e']
 aParBlast _ _ _ _ = error $ "bad argument to aParBlast"
 
 ---------------------
@@ -134,7 +139,7 @@ mkBlastEachFn bCmd qType sType dbType = CutFunction
 
 -- TODO need to apply addMakeDBCall2 *after* mapping over the last arg
 -- TODO more specific tmpDir?
-rMkBlastEach :: String -> CutType -> (String -> ActionFn) -> RulesFn
+rMkBlastEach :: String -> CutType -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
 rMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ addMakeDBCall2 expr' dbType
   where
     mapFn = rMapLastTmp (bActFn' bCmd) (bCmd ++ "_each")
@@ -164,7 +169,7 @@ mkBlastRevFn bCmd qType sType dbType = CutFunction
 -- just switches the query and subject, which won't work for asymmetric blast fns!
 -- TODO write specific ones for that, or a fn + mapping
 -- TODO debug transformations too!
-aParBlastRev :: String -> ActionFn
+aParBlastRev :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
 aParBlastRev b c d [o, q, s, e] = aParBlast b c d [o, s, q, e]
 aParBlastRev _ _ _ args = error $ "bad argument to aParBlast: " ++ show args
 
