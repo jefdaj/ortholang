@@ -3,10 +3,10 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths  (exprPath, fromCutPath, writeLits, readLit)
+import ShortCut.Core.Paths  (exprPath, fromCutPath, writeLits, writePaths,
+                             readLit, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript)
 import ShortCut.Core.Debug   (debugRules, debugAction)
-import System.FilePath       (makeRelative)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
 
 --------------------------------------------------------
@@ -65,8 +65,6 @@ cRepeat (script,cfg) resExpr subVar subExpr = do
       pre  = digest $ map show $ res:sub:deps
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
-  -- let res  = (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
-  -- let resPath' = debugRules cfg "cRepeat" (resExpr, subVar, subExpr) resPath
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
 rRepeatEach :: CutState -> CutExpr -> Rules ExprPath
@@ -74,11 +72,11 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
   subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
-  let (ExprPath subPaths') = subPaths
-      resPaths'  = map (\(ExprPath p) -> p) resPaths
-      outPath    = fromCutPath cfg $ exprPath s expr
-      outPath'   = debugRules cfg "rRepeatEach" expr outPath
-  outPath %> \_ ->
+  let subPaths' = (\(ExprPath p) -> toCutPath cfg p) subPaths
+      resPaths' = map (\(ExprPath p) -> toCutPath cfg p) resPaths
+      outPath   = exprPath s expr
+      outPath'  = debugRules cfg "rRepeatEach" expr $ fromCutPath cfg outPath
+  outPath' %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aRepeatEachLits (typeOf expr)
                   else aRepeatEachLinks
@@ -87,19 +85,26 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
 rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 
 -- TODO factor out, and maybe unify with rListLits
+-- TODO subPaths is only one path? if so, rename it
 aRepeatEachLits :: CutType -> CutConfig
-                -> FilePath -> FilePath -> [FilePath] -> Action ()
+                -> CutPath -> CutPath -> [CutPath] -> Action ()
 aRepeatEachLits _ cfg outPath subPaths resPaths = do
-  lits <- mapM (readLit cfg) resPaths
+  lits <- mapM (readLit cfg) resPaths'
   let lits' = map stripWhiteSpace lits
-      out = debugAction cfg "aRepeatEachLits" outPath (outPath:subPaths:resPaths)
-  -- liftIO $ putStrLn $ "aRepeatEachLits lits': " ++ show lits'
   writeLits cfg out lits'
+  where
+    outPath'  = fromCutPath cfg outPath
+    subPaths' = fromCutPath cfg subPaths
+    resPaths' = map (fromCutPath cfg) resPaths
+    out = debugAction cfg "aRepeatEachLits" outPath' (outPath':subPaths':resPaths')
 
 -- TODO factor out, and maybe unify with rListLinks
-aRepeatEachLinks :: CutConfig -> FilePath -> FilePath -> [FilePath] -> Action ()
-aRepeatEachLinks cfg outPath subPaths' resPaths' = do
+aRepeatEachLinks :: CutConfig -> CutPath -> CutPath -> [CutPath] -> Action ()
+aRepeatEachLinks cfg outPath subPaths resPaths = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
-  let outPaths' = map (makeRelative $ cfgTmpDir cfg) resPaths'
-  let out = debugAction cfg "aRepeatEachLinks" outPath (outPath:subPaths':resPaths')
-  writeLits cfg out outPaths'
+  writePaths cfg out resPaths
+  where
+    outPath'  = fromCutPath cfg outPath
+    subPaths' = fromCutPath cfg subPaths
+    resPaths' = map (fromCutPath cfg) resPaths
+    out = debugAction cfg "aRepeatEachLinks" outPath' (outPath':subPaths':resPaths')
