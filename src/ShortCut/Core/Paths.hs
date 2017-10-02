@@ -77,7 +77,7 @@ module ShortCut.Core.Paths
   )
   where
 
-import Development.Shake (Action)
+import Development.Shake (Action, trackWrite)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
@@ -217,7 +217,7 @@ readLitPaths cfg path = do
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
-writePaths cfg out cpaths = debugWriteLines cfg out paths
+writePaths cfg out cpaths = debugWriteLines cfg out paths >> trackWrite paths
   where
     paths = map (\(CutPath path) -> path) cpaths
 

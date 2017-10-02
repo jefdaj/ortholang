@@ -4,12 +4,12 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
-import Development.Shake.FilePath  ((</>), (<.>))
+import Development.Shake.FilePath  ((</>), (<.>), (-<.>))
 import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath,
                                     readPaths, writePaths, writeLits, CutPath)
 import ShortCut.Core.Debug         (debugAction, debugRules)
 import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             (takeBaseName)
+import System.FilePath             (takeBaseName, takeFileName)
 import ShortCut.Core.Util          (digest)
 
 -----------------------------------------------------
@@ -65,39 +65,52 @@ rMapLast tmpFn actFn prefix s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   -- TODO make this an actual debug call
   -- liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
   initPaths <- mapM (rExpr s) (init exprs)
-  (ExprPath lastsPath) <- rExpr s (last exprs)
+  (ExprPath lastsPath) <- rExpr s (last exprs) -- TODO aha! these have the wrong ext! (faa instead of crb)
   let inits    = map (\(ExprPath p) -> toCutPath cfg p) initPaths
       lasts'   = toCutPath cfg lastsPath
       outPath  = exprPath s e
       outPath' = fromCutPath cfg outPath
-      mapTmp   = (fromCutPath cfg $ cacheDir cfg prefix) </> digest e
+      (ListOf t) = typeOf e
+      mapTmp   = (fromCutPath cfg $ cacheDir cfg prefix) </> digest e -- <.> extOf t
       mapTmp'  = toCutPath cfg mapTmp
   -- This builds .args files then needs their actual non-.args outpaths, which
   -- will be built by the action below
-  outPath' %> \_ -> aMapLastArgs cfg outPath inits mapTmp' lasts'
+  outPath' %> \_ -> aMapLastArgs cfg outPath inits mapTmp' t lasts'
   -- This builds one of the list of out paths based on a .args file
   -- (made in the action above). It's a pretty roundabout way to do it!
   -- TODO ask ndmitchell if there's something much more elegant I'm missing
-  (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
+
+  -- TODO need to prevent this from matching .args files? maybe mapped outfiles just need an extension
+  -- TODO HMM THE EXTENSION IS GETTING ADDED TO THE MAPTMP ITSELF RATHER THAN THE FILES INSIDE IT
+  -- (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
+  (mapTmp </> "*" <.> extOf t) %> aMapLastMapTmp cfg tmpFn actFn t
+
   return $ debugRules cfg "rMapLast" e $ ExprPath outPath'
 rMapLast _ _ _ _ _ = error "bad argument to rMapLastTmps"
 
 aMapLastArgs :: CutConfig -> CutPath -> [CutPath]
-             -> CutPath -> CutPath -> Action ()
-aMapLastArgs cfg outPath inits mapTmp lastsPath = do
+             -> CutPath -> CutType -> CutPath -> Action ()
+aMapLastArgs cfg outPath inits mapTmp etype lastsPath = do
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
   -- this writes the .args files for use in the rule above
   (flip mapM_) lastPaths $ \p -> do
     -- TODO write the out path here too so all the args are together?
-    liftIO $ putStrLn $ "p: " ++ show p
+    -- let p'       = fromCutPath cfg p -<.> extOf etype
     let p'       = fromCutPath cfg p
-        argsPath = tmp' </> takeBaseName p' <.> "args" -- TODO use a hash here?
+
+        -- TODO ok for one thing the paths written here are absolute (treated as lits?)
+        argsPath = tmp' </> takeFileName p' -<.> extOf etype <.> "args" -- TODO use a hash here?
+
         argPaths = inits' ++ [p'] -- TODO abs path bug here?
+    liftIO $ putStrLn $ "aMapLastArgs p': " ++ show p' ++ " and argsPath: " ++ show argsPath
     -- liftIO $ putStrLn $ "p: " ++ show p'
     liftIO $ createDirectoryIfMissing True $ tmp'
+
+    -- TODO these aren't lits! are they strings then?
     writeLits cfg argsPath argPaths
+
   -- then we just trigger them and write to the overall outPath
-  let outPaths  = map (\x -> tmp' </> takeBaseName x) (map (fromCutPath cfg) lastPaths)
+  let outPaths  = map (\x -> tmp' </> takeBaseName x <.> extOf etype) (map (fromCutPath cfg) lastPaths)
       outPaths' = map (toCutPath cfg) outPaths
   need outPaths
   let out = debugAction cfg "aMapLastArgs" out' (out':inits' ++ [tmp', lasts'])
@@ -113,19 +126,40 @@ aMapLastArgs cfg outPath inits mapTmp lastsPath = do
 aMapLastMapTmp :: CutConfig
                -> ([CutPath] -> CutPath)
                -> (CutConfig -> CutPath -> [CutPath] -> Action a)
-               -> FilePath -> Action ()
-aMapLastMapTmp cfg tmpFn actFn out = do
-  let argsPath = out <.> ".args" -- TODO clean up
+               -> CutType -> FilePath -> Action ()
+aMapLastMapTmp cfg tmpFn actFn etype out = do
+
+  -- this prevents the infinite .args extensions, and now shake detects recursion: this calls itself
+  -- TODO WAIT THAT MEANS THE ARGS PATH IS INCORRECTLY BEING SENT HERE AS THE OUTPATH? THAT COULD BE IT!
+  let argsPath = out <.> "args" -- TODO clean up
+
   -- args <- fmap lines $ liftIO $ readFile argsPath -- TODO switch to readPaths?
+
   -- let args' = map (cfgTmpDir cfg </>) args
+
+  -- ah, is it looping here? does shake auto-need the same thing with .args added?
+  -- that would be fine, except somehow to do that it goes back to another file
+  liftIO $ putStrLn $ "about to read argsPath: " ++ argsPath
   args <- readPaths cfg argsPath
+  liftIO $ putStrLn $ "just read argsPath"
+
+  -- ok so this is being called in a loop, but why?
+  -- AHA IS THIS FN JUST BEING PASSED THE WRONG LAST PATH VIA ARGS? (FINAL OUT INSTEAD OF TMP)
+  -- OR MAYBE JUST OMITTING THE LAST ONE AND SCREWING UP THE EXTENSION OF THE ONE BEFORE?
+  liftIO $ putStrLn $ "aMapLastMapTmp out: " ++ out ++ " and argsPath: " ++ argsPath
+  liftIO $ putStrLn $ "aMapLastMapTmp args: " ++ show args
+
   let args' = map (fromCutPath cfg) args
       -- rels  = map (makeRelative $ cfgTmpDir cfg) args'
+  
+  -- it never gets here, implying the loop is somewhere above? ^
+  liftIO $ putStrLn $ "args': " ++ show args'
+
   need args'
   let dir = tmpFn args -- TODO fix actual tmpFns to use CutPaths (automatically deterministic!)
       dir' = fromCutPath cfg dir
       args'' = (toCutPath cfg out):args
-      out'   = debugAction cfg "aMapLastMapTmp" out args' -- TODO is this right?
+      out'  = debugAction cfg "aMapLastMapTmp" out args' -- TODO is this right?
   liftIO $ createDirectoryIfMissing True dir'
   liftIO $ putStrLn $ "args passed to actFn: " ++ show args''
   _ <- actFn cfg dir args''

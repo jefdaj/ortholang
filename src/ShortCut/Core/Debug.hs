@@ -154,6 +154,7 @@ debugWriteFile cfg f s = unlessExists f
 debugReadLines :: CutConfig -> FilePath -> Action [String]
 debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 
+-- TODO track written in these!
 -- TODO remote in favor of only the Paths version?
 debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
 debugWriteLines cfg f ss = unlessExists f

@@ -272,7 +272,9 @@ aMakeblastdb dbType cfg cDir [out, dbPrefix, faPath] = do
   liftIO $ putStrLn $ "dbPrefix': " ++ dbPrefix'
   liftIO $ putStrLn $ "dbType': " ++ dbType'
   need [faPath']
-  liftIO $ createDirectoryIfMissing True cDir'
+  -- TODO is cDir' actually used?
+  -- liftIO $ createDirectoryIfMissing True cDir'
+  liftIO $ createDirectoryIfMissing True dbDir
   quietly $ wrappedCmd cfg [dbPrefix', dbPrefix' ++ ".*"] [Cwd dbDir] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix'
