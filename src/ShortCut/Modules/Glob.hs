@@ -3,7 +3,8 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
-import ShortCut.Core.Paths (exprPath, fromCutPath, readLit, writeLits)
+import ShortCut.Core.Paths (exprPath, CutPath, toCutPath,
+                            fromCutPath, readLit, writeLits)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
@@ -36,16 +37,21 @@ globFiles = CutFunction
 rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
 rGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
-  let outPath = fromCutPath cfg $ exprPath s e
-  outPath %> \_ -> aGlobFiles cfg outPath path
-  return (ExprPath outPath)
+  let outPath = exprPath s e
+      out'    = fromCutPath cfg outPath
+      path'   = toCutPath cfg path
+  out' %> \_ -> aGlobFiles cfg outPath path'
+  return (ExprPath out')
 rGlobFiles _ _ = error "bad arguments to rGlobFiles"
 
-aGlobFiles :: CutConfig -> FilePath -> FilePath -> Action ()
+aGlobFiles :: CutConfig -> CutPath -> CutPath -> Action ()
 aGlobFiles cfg outPath path = do
-  ptn   <- fmap strip $ readLit cfg path
+  ptn   <- fmap strip $ readLit cfg path'
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   paths <- liftIO $ mapM absolutize =<< glob ptn
   -- toShortCutListStr cfg str (ExprPath outPath) paths
-  let out = debugAction cfg "aGlobFiles" outPath [outPath, path]
-  writeLits cfg out paths
+  writeLits cfg out'' paths
+  where
+    out'  = fromCutPath cfg outPath
+    path' = fromCutPath cfg path
+    out'' = debugAction cfg "aGlobFiles" out' [out', path']
