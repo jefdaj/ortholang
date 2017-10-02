@@ -15,7 +15,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Paths  (exprPath, fromCutPath)
+import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
@@ -169,14 +169,16 @@ rParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
   -- TODO should this be a cacheFile instead?
   -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path [show expr, sList]
   -- let searchTable = fromCutPath cfg $ exprPathExplicit s "parse_searches" search salt []
-  let searchTable = fromCutPath cfg $ exprPath s expr
-  searchTable %> aParseSearches cfg sList
-  return (ExprPath searchTable)
+  let searchTable  = exprPath s expr
+      searchTable' = fromCutPath cfg searchTable
+      sList' = toCutPath cfg sList
+  searchTable' %> \_ -> aParseSearches cfg sList' searchTable
+  return (ExprPath searchTable')
 rParseSearches _ _ = error "bad arguments to rParseSearches"
 
-aParseSearches :: CutConfig -> FilePath -> FilePath -> Action ()
+aParseSearches :: CutConfig -> CutPath -> CutPath -> Action ()
 aParseSearches cfg sList out = do
-  tmp <- readFile' sList
+  tmp <- readFile' sList'
   let sLines = map (cfgTmpDir cfg </>) (lines tmp)
   need sLines
   parses <- liftIO $ mapM readSearch sLines
@@ -184,9 +186,11 @@ aParseSearches cfg sList out = do
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    else liftIO $ writeFile out' $ toTsv searches'
-    where
-      out' = debugAction cfg "aParseSearches" out [sList, out]
+    else liftIO $ writeFile out'' $ toTsv searches'
+  where
+    sList' = fromCutPath cfg sList
+    out'   = fromCutPath cfg out
+    out''  = debugAction cfg "aParseSearches" out' [sList', out']
 
 ------------------
 -- run biomartr --
@@ -203,16 +207,25 @@ rBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
   (ExprPath sTable) <- rParseSearches s ss
   -- TODO separate tmpDirs for genomes, proteomes, etc?
-  let bmTmp = cfgTmpDir cfg </> "cache" </> "biomartr"
-      outs  = fromCutPath cfg $ exprPath s expr
-  outs %> \_ -> aBioMartR cfg outs bmFn bmTmp sTable
-  return (ExprPath outs)
+  let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
+      tmp'    = toCutPath cfg bmTmp
+      out     = exprPath s expr
+      out'    = fromCutPath cfg out
+      sTable' = toCutPath cfg sTable
+      bmFn'   = toCutPath cfg bmFn
+  out' %> \_ -> aBioMartR cfg out bmFn' tmp' sTable'
+  return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
-aBioMartR cfg outs bmFn bmTmp sTable = do
-  need [bmFn, sTable]
+aBioMartR :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
+aBioMartR cfg out bmFn bmTmp sTable = do
+  need [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
-  quietly $ wrappedCmd cfg [outs] [Cwd bmTmp] "biomartr.R" [outs, bmFn, sTable]
-  let outs' = debugAction cfg "aBioMartR" outs [outs, bmFn, bmTmp, sTable]
-  debugTrackWrite cfg [outs']
+  quietly $ wrappedCmd cfg [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
+  debugTrackWrite cfg [out'']
+  where
+    out'    = fromCutPath cfg out
+    bmFn'   = fromCutPath cfg bmFn
+    bmTmp'  = fromCutPath cfg bmTmp
+    sTable' = fromCutPath cfg sTable
+    out'' = debugAction cfg "aBioMartR" out' [out', bmFn', bmTmp', sTable']
