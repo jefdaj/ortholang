@@ -8,7 +8,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugTrackWrite, debugAction)
-import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath, readPaths)
+import ShortCut.Core.Paths (exprPath, cacheDir, toCutPath, fromCutPath, readPaths, CutPath)
 import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
                              rOneArgScript, rOneArgListScript)
 import System.Directory           (createDirectoryIfMissing)
@@ -175,28 +175,36 @@ rExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
   (ExprPath faPath ) <- rExpr s fa
   (ExprPath idsPath) <- rExpr s ids
   -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let tmpDir  = fromCutPath cfg $ cacheDir cfg "seqio"
-      outPath = fromCutPath cfg $ exprPath s e
+  let tmpDir   = cacheDir cfg "seqio"
+      outPath  = exprPath s e
+      out'     = fromCutPath cfg outPath
+      faPath'  = toCutPath cfg faPath
+      idsPath' = toCutPath cfg idsPath
       -- tmpList = cacheFile cfg "seqio" ids "txt"
   -- TODO remove extra tmpdir here if possible, and put file somewhere standard
   -- tmpList %> \_ -> do
-  outPath %> \_ -> aExtractSeqs cfg outPath tmpDir faPath idsPath 
-  return (ExprPath outPath)
+  out' %> \_ -> aExtractSeqs cfg outPath tmpDir faPath' idsPath'
+  return (ExprPath out')
 rExtractSeqs _ _ = error "bad argument to extractSeqs"
 
-aExtractSeqs :: CutConfig -> String -> FilePath -> FilePath -> FilePath -> Action ()
+aExtractSeqs :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aExtractSeqs cfg outPath tmpDir faPath idsPath = do
   -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
   -- fromShortCutList cfg idsPath (ExprPath tmpList)
 -- outPath %> \_ -> do
   -- need [faPath, tmpList]
   -- liftIO $ createDirectoryIfMissing True tmpDir
-  need [faPath, idsPath]
-  liftIO $ createDirectoryIfMissing True tmpDir
-  quietly $ wrappedCmd cfg [outPath] [Cwd tmpDir]
-                       "extract_seqs.py" [outPath, faPath, idsPath]
-  let out = debugAction cfg "aExtractSeqs" outPath [outPath, tmpDir, faPath, idsPath]
-  debugTrackWrite cfg [out]
+  need [faPath', idsPath']
+  liftIO $ createDirectoryIfMissing True tmp'
+  quietly $ wrappedCmd cfg [out'] [Cwd tmp']
+                       "extract_seqs.py" [out', faPath', idsPath']
+  debugTrackWrite cfg [out']
+  where
+    out      = fromCutPath cfg outPath
+    tmp'     = fromCutPath cfg tmpDir
+    faPath'  = fromCutPath cfg faPath
+    idsPath' = fromCutPath cfg idsPath
+    out' = debugAction cfg "aExtractSeqs" out [out, tmp', faPath', idsPath']
 
 -------------------------------------
 -- convert between DNA and protein --
@@ -221,20 +229,25 @@ translate = CutFunction
 --   }
 
 -- TODO can this use rOneArgScript?
-rConvert :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rConvert :: String -> CutState -> CutExpr -> Rules ExprPath
 rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
-  let oPath = fromCutPath cfg $ exprPath s e
-  oPath %> \_ -> aConvert cfg oPath script faPath
-  return (ExprPath oPath)
+  let oPath = exprPath s e
+      out'  = fromCutPath cfg oPath
+      fa'   = toCutPath cfg faPath
+  out' %> \_ -> aConvert cfg oPath script fa'
+  return (ExprPath out')
 rConvert _ _ _ = error "bad argument to rConvert"
 
-aConvert :: CutConfig -> FilePath -> FilePath -> FilePath -> Action ()
+aConvert :: CutConfig -> CutPath -> String -> CutPath -> Action ()
 aConvert cfg oPath script faPath = do
-  need [faPath]
-  unit $ wrappedCmd cfg [oPath] [] script [oPath, faPath]
-  let oPath' = debugAction cfg "aConvert" oPath [oPath, script, faPath]
-  debugTrackWrite cfg [oPath'] -- TODO is this implied?
+  need [faPath']
+  unit $ wrappedCmd cfg [out''] [] script [out'', faPath']
+  debugTrackWrite cfg [out''] -- TODO is this implied?
+  where
+    out'    = fromCutPath cfg oPath
+    faPath' = fromCutPath cfg faPath
+    out'' = debugAction cfg "aConvert" out' [out', script, faPath']
 
 ------------------------
 -- concat fasta files --
@@ -255,18 +268,23 @@ tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 rConcat :: CutState -> CutExpr -> Rules ExprPath
 rConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
   (ExprPath fsPath) <- rExpr s fs
-  let oPath = fromCutPath cfg $ exprPath s e
-  oPath %> \_ -> aConcat cfg oPath fsPath
-  return (ExprPath oPath)
+  let oPath = exprPath s e
+      out'  = fromCutPath cfg oPath
+      fs'   = toCutPath cfg fsPath
+  out' %> \_ -> aConcat cfg oPath fs'
+  return (ExprPath out')
 rConcat _ _ = error "bad argument to rConcat"
 
-aConcat :: CutConfig -> String -> [Char] -> Action ()
+aConcat :: CutConfig -> CutPath -> CutPath -> Action ()
 aConcat cfg oPath fsPath = do
-  faPaths <- readPaths cfg fsPath
+  faPaths <- readPaths cfg fs'
   let faPaths' = map (fromCutPath cfg) faPaths
   need (debug cfg ("faPaths: " ++ show faPaths) faPaths')
-  let catArgs = faPaths' ++ [">", oPath]
-      oPath'  = debugAction cfg "aConcat" oPath [oPath, fsPath]
-  unit $ quietly $ wrappedCmd cfg [oPath] [Shell] "cat"
+  let out'    = fromCutPath cfg oPath
+      out''   = debugAction cfg "aConcat" out' [out', fs']
+      catArgs = faPaths' ++ [">", out']
+  unit $ quietly $ wrappedCmd cfg [out''] [Shell] "cat"
                      (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-  debugTrackWrite cfg [oPath']
+  debugTrackWrite cfg [out'']
+  where
+    fs' = fromCutPath cfg fsPath
