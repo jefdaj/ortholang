@@ -34,10 +34,13 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 resolveSymlinks :: FilePath -> IO FilePath
 resolveSymlinks path = do
   isLink <- pathIsSymbolicLink path
-  if isLink
+  if not isLink
+    then return path
     -- TODO is it OK/desirable to follow more than once?
-    then fmap (takeDirectory path </>) (readSymbolicLink path) -- >>= resolveSymlinks
-    else return path
+    else do
+      relPath <- readSymbolicLink path
+      absPath <- absolutize $ takeDirectory path </> relPath
+      return absPath
 
 -- kind of silly that haskell doesn't have this built in, but whatever
 -- TODO also follow symlinks? is there a time that would be bad?

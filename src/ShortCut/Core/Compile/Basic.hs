@@ -169,7 +169,12 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 -- works on everything but lits: paths or empty lists
 aListPaths :: CutConfig -> [CutPath] -> CutPath -> Action ()
-aListPaths cfg paths outPath = need paths' >> writePaths cfg out'' paths
+aListPaths cfg paths outPath = do
+  need paths'
+  paths'' <- liftIO $ mapM resolveSymlinks paths'
+  need paths''
+  let paths''' = map (toCutPath cfg) paths''
+  writePaths cfg out'' paths'''
   where
     out'   = fromCutPath cfg outPath
     out''  = debugAction cfg "aListPaths" out' (out':paths')
