@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugAction, debugTrackWrite, debugRules)
 import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
-import ShortCut.Core.Compile.Map     (rMapLastTmp)
+import ShortCut.Core.Compile.Map     (rMapTmp)
 import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath, readLit, writeLit,
                             readLits, writePath, writeLits, toCutPath, CutPath)
 import ShortCut.Core.Util      (stripWhiteSpace, digest)
@@ -315,4 +315,4 @@ tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "makeblastdb_each requires a list of fasta files" -- TODO typed error
 
 rMakeblastdbEach :: CutType -> RulesFn
-rMakeblastdbEach dbType = rMapLastTmp (aMakeblastdb dbType) "makeblastdb"
+rMakeblastdbEach dbType = rMapTmp (aMakeblastdb dbType) "makeblastdb"

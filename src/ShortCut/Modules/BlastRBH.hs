@@ -73,7 +73,7 @@ rBlastSymRBH bCmd s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfa, rfa]) = do
   return (ExprPath out)
 rBlastSymRBH _ _ _ = error "bad argument to cBlastSymRBH"
 
--- this is an attempt to convert rBlastpRBH into a form usable with rMapLastTmp
+-- this is an attempt to convert rBlastpRBH into a form usable with rMapTmp
 -- TODO is it just cLink? seems pretty similar!
 aBlastSymRBH :: ActionFn
 aBlastSymRBH cfg _ [ExprPath out, ExprPath rbhPath] = do

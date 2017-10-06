@@ -7,7 +7,7 @@ import Development.Shake       (quietly, Action, CmdOption(..))
 import ShortCut.Core.Paths     (CutPath, fromCutPath)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
-import ShortCut.Core.Compile.Map (rMapLastTmps)
+import ShortCut.Core.Compile.Map (rMapTmps)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import ShortCut.Core.Debug (debugAction, debugTrackWrite)
 
@@ -53,7 +53,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmps aBlastCRB "crbblast"
+  , fRules  = rMapTmps aBlastCRB "crbblast"
   }
 
 tCrbBlast :: [CutType] -> Either String CutType

@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config      (wrappedCmd)
 import ShortCut.Core.Compile.Basic       (rSimpleTmp, defaultTypeCheck)
-import ShortCut.Core.Compile.Map       (rMapLastTmp)
+import ShortCut.Core.Compile.Map       (rMapTmp)
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.List                  (nub, sort)
@@ -52,7 +52,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp (aTsvColumn 1) "tables"
+  , fRules  = rMapTmp (aTsvColumn 1) "tables"
   }
 
 extractTargets :: CutFunction
@@ -68,7 +68,7 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapLastTmp (aTsvColumn 2) "tables"
+  , fRules  = rMapTmp (aTsvColumn 2) "tables"
   }
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd

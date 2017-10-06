@@ -16,19 +16,19 @@ import ShortCut.Core.Util          (digest)
 -- simplified versions that take care of cache dir --
 -----------------------------------------------------
 
-rMapLastTmp :: (CutConfig -> CutPath -> [CutPath] -> Action ())
+rMapTmp :: (CutConfig -> CutPath -> [CutPath] -> Action ())
             -> String -> RulesFn
-rMapLastTmp actFn tmpPrefix s@(_,cfg) = mapFn s
+rMapTmp actFn tmpPrefix s@(_,cfg) = mapFn s
   where
     tmpDir = cacheDir cfg tmpPrefix
-    mapFn  = rMapLast (const tmpDir) actFn tmpPrefix
+    mapFn  = rMap (const tmpDir) actFn tmpPrefix
 
 -- TODO use a hash for the cached path rather than the name, which changes!
 
 -- takes an action fn and vectorizes the last arg (calls the fn with each of a
 -- list of last args). returns a list of results. uses a new tmpDir each call.
-rMapLastTmps :: (CutConfig -> CutPath -> [CutPath] -> Action ()) -> String -> RulesFn
-rMapLastTmps fn tmpPrefix s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix s e
+rMapTmps :: (CutConfig -> CutPath -> [CutPath] -> Action ()) -> String -> RulesFn
+rMapTmps fn tmpPrefix s@(_,cfg) e = rMap tmpFn fn tmpPrefix s e
   where
     -- TODO what if the same last arg is used in different mapping fns?
     --      will it be unique?
@@ -53,17 +53,17 @@ rMapLastTmps fn tmpPrefix s@(_,cfg) e = rMapLast tmpFn fn tmpPrefix s e
 --
 --     exprs/<fnname>/<arg1hash>_<arg2hash>_<arg3hash>.<ext>
 --
---     Then in rMapLastArgs (rename it something better) you can calculate what
+--     Then in rMapArgs (rename it something better) you can calculate what
 --     the outpath will be and put the .args in its proper place, and in this
 --     main fn you can calculate it too to make the mapTmp pattern.
 
 -- TODO is the rtnType doing anything that you can't get from CutFun?
-rMapLast :: ([CutPath] -> CutPath)
+rMap :: ([CutPath] -> CutPath)
          -> (CutConfig -> CutPath -> [CutPath] -> Action ())
          -> String -> RulesFn
-rMapLast tmpFn actFn prefix s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
+rMap tmpFn actFn prefix s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   -- TODO make this an actual debug call
-  -- liftIO $ putStrLn $ "rMapLast expr: " ++ render (pPrint e)
+  -- liftIO $ putStrLn $ "rMap expr: " ++ render (pPrint e)
   initPaths <- mapM (rExpr s) (init exprs)
   (ExprPath lastsPath) <- rExpr s (last exprs) -- TODO aha! these have the wrong ext! (faa instead of crb)
   let inits    = map (\(ExprPath p) -> toCutPath cfg p) initPaths
@@ -75,22 +75,22 @@ rMapLast tmpFn actFn prefix s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
       mapTmp'  = toCutPath cfg mapTmp
   -- This builds .args files then needs their actual non-.args outpaths, which
   -- will be built by the action below
-  outPath' %> \_ -> aMapLastArgs cfg outPath inits mapTmp' t lasts'
+  outPath' %> \_ -> aMapArgs cfg outPath inits mapTmp' t lasts'
   -- This builds one of the list of out paths based on a .args file
   -- (made in the action above). It's a pretty roundabout way to do it!
   -- TODO ask ndmitchell if there's something much more elegant I'm missing
 
   -- TODO need to prevent this from matching .args files? maybe mapped outfiles just need an extension
   -- TODO HMM THE EXTENSION IS GETTING ADDED TO THE MAPTMP ITSELF RATHER THAN THE FILES INSIDE IT
-  -- (mapTmp </> "*") %> aMapLastMapTmp cfg tmpFn actFn
-  (mapTmp </> "*" <.> extOf t) %> aMapLastMapTmp cfg tmpFn actFn t
+  -- (mapTmp </> "*") %> aMapTmp cfg tmpFn actFn
+  (mapTmp </> "*" <.> extOf t) %> aMapTmp cfg tmpFn actFn t
 
-  return $ debugRules cfg "rMapLast" e $ ExprPath outPath'
-rMapLast _ _ _ _ _ = error "bad argument to rMapLastTmps"
+  return $ debugRules cfg "rMap" e $ ExprPath outPath'
+rMap _ _ _ _ _ = error "bad argument to rMapTmps"
 
-aMapLastArgs :: CutConfig -> CutPath -> [CutPath]
+aMapArgs :: CutConfig -> CutPath -> [CutPath]
              -> CutPath -> CutType -> CutPath -> Action ()
-aMapLastArgs cfg outPath inits mapTmp etype lastsPath = do
+aMapArgs cfg outPath inits mapTmp etype lastsPath = do
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
   -- this writes the .args files for use in the rule above
   (flip mapM_) lastPaths $ \p -> do
@@ -102,7 +102,7 @@ aMapLastArgs cfg outPath inits mapTmp etype lastsPath = do
         argsPath = tmp' </> takeFileName p' -<.> extOf etype <.> "args" -- TODO use a hash here?
 
         argPaths = inits' ++ [p'] -- TODO abs path bug here?
-    liftIO $ putStrLn $ "aMapLastArgs p': " ++ show p' ++ " and argsPath: " ++ show argsPath
+    liftIO $ putStrLn $ "aMapArgs p': " ++ show p' ++ " and argsPath: " ++ show argsPath
     -- liftIO $ putStrLn $ "p: " ++ show p'
     liftIO $ createDirectoryIfMissing True $ tmp'
 
@@ -113,7 +113,7 @@ aMapLastArgs cfg outPath inits mapTmp etype lastsPath = do
   let outPaths  = map (\x -> tmp' </> takeBaseName x <.> extOf etype) (map (fromCutPath cfg) lastPaths)
       outPaths' = map (toCutPath cfg) outPaths
   need outPaths
-  let out = debugAction cfg "aMapLastArgs" out' (out':inits' ++ [tmp', lasts'])
+  let out = debugAction cfg "aMapArgs" out' (out':inits' ++ [tmp', lasts'])
   writePaths cfg out outPaths'
   where
     out'   = fromCutPath cfg outPath
@@ -123,11 +123,11 @@ aMapLastArgs cfg outPath inits mapTmp etype lastsPath = do
 
 -- TODO rename this something less confusing
 -- TODO any way to make that last FilePath into a CutPath? does it even matter?
-aMapLastMapTmp :: CutConfig
+aMapTmp :: CutConfig
                -> ([CutPath] -> CutPath)
                -> (CutConfig -> CutPath -> [CutPath] -> Action a)
                -> CutType -> FilePath -> Action ()
-aMapLastMapTmp cfg tmpFn actFn etype out = do
+aMapTmp cfg tmpFn actFn etype out = do
 
   -- this prevents the infinite .args extensions, and now shake detects recursion: this calls itself
   -- TODO WAIT THAT MEANS THE ARGS PATH IS INCORRECTLY BEING SENT HERE AS THE OUTPATH? THAT COULD BE IT!
@@ -146,8 +146,8 @@ aMapLastMapTmp cfg tmpFn actFn etype out = do
   -- ok so this is being called in a loop, but why?
   -- AHA IS THIS FN JUST BEING PASSED THE WRONG LAST PATH VIA ARGS? (FINAL OUT INSTEAD OF TMP)
   -- OR MAYBE JUST OMITTING THE LAST ONE AND SCREWING UP THE EXTENSION OF THE ONE BEFORE?
-  liftIO $ putStrLn $ "aMapLastMapTmp out: " ++ out ++ " and argsPath: " ++ argsPath
-  liftIO $ putStrLn $ "aMapLastMapTmp args: " ++ show args
+  liftIO $ putStrLn $ "aMapTmp out: " ++ out ++ " and argsPath: " ++ argsPath
+  liftIO $ putStrLn $ "aMapTmp args: " ++ show args
 
   let args' = map (fromCutPath cfg) args
       -- rels  = map (makeRelative $ cfgTmpDir cfg) args'
@@ -159,7 +159,7 @@ aMapLastMapTmp cfg tmpFn actFn etype out = do
   let dir = tmpFn args -- TODO fix actual tmpFns to use CutPaths (automatically deterministic!)
       dir' = fromCutPath cfg dir
       args'' = (toCutPath cfg out):args
-      out'  = debugAction cfg "aMapLastMapTmp" out args' -- TODO is this right?
+      out'  = debugAction cfg "aMapTmp" out args' -- TODO is this right?
   liftIO $ createDirectoryIfMissing True dir'
   liftIO $ putStrLn $ "args passed to actFn: " ++ show args''
   _ <- actFn cfg dir args''

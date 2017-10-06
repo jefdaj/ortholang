@@ -8,7 +8,7 @@ import ShortCut.Core.Config     (wrappedCmd)
 import ShortCut.Core.Paths      (readLit, readPath, fromCutPath, CutPath)
 import ShortCut.Core.Debug      (debugTrackWrite, debug, debugAction)
 import ShortCut.Core.Compile.Basic      (rSimpleTmp, defaultTypeCheck)
-import ShortCut.Core.Compile.Map      (rMapLastTmp)
+import ShortCut.Core.Compile.Map      (rMapTmp)
 import ShortCut.Modules.BlastDB (ndb, pdb)
 import ShortCut.Modules.SeqIO   (faa, fna)
 import System.FilePath          (takeDirectory, takeFileName, (</>))
@@ -142,7 +142,7 @@ mkBlastEachFn bCmd qType sType dbType = CutFunction
 rMkBlastEach :: String -> CutType -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
 rMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ addMakeDBCall2 expr' dbType
   where
-    mapFn = rMapLastTmp (bActFn' bCmd) (bCmd ++ "_each")
+    mapFn = rMapTmp (bActFn' bCmd) (bCmd ++ "_each")
     expr' = debug cfg ("rMkBlastEach expr: '" ++ render (pPrint expr) ++ "'") expr
     -- kludge to allow easy mapping over the subject rather than evalue:
     -- TODO is this right?
