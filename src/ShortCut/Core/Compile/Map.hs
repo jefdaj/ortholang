@@ -142,10 +142,7 @@ aMap cfg inits mapTmp eType lastsPath outPath = do
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
   lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)
   mapM_ (aMapArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
-
-  -- TODO try to use nicer (more unique!) hashes here, but only if it works
-  let outPaths  = map (\x -> tmp' </> takeBaseName x <.> extOf eType) lastPaths'
-
+  let outPaths  = map (mapPath tmp' eType) lastPaths'
   need outPaths
   outPaths' <- (fmap . map) (toCutPath cfg) $ liftIO $ mapM (resolveSymlinks cfg) outPaths
   let out = debugAction cfg "aMap" outPath (outPath:inits' ++ [tmp', lasts'])
@@ -155,19 +152,20 @@ aMap cfg inits mapTmp eType lastsPath outPath = do
     lasts' = fromCutPath cfg lastsPath
     tmp'   = fromCutPath cfg mapTmp
 
+-- TODO take + return CutPaths?
+mapPath :: FilePath -> CutType -> FilePath -> FilePath
+mapPath tmpDir eType path = tmpDir </> digest path <.> extOf eType
+
 {- This leaves arguments in .args files for aMapElem to find.
  -
- - TODO It has some tricky filename business that still needs straightening out right?
  - TODO should it write "lits" when they're really more like heterogenous path lists?
  -}
 aMapArgs :: CutConfig
          -> CutType -> [FilePath] -> FilePath -> CutPath
          -> Action ()
 aMapArgs cfg eType inits' tmp' p = do
-  -- TODO write the out path here too so all the args are together?
   let p'       = fromCutPath cfg p
-      -- TODO use a hash here?
-      argsPath = tmp' </> takeFileName p' -<.> extOf eType <.> "args"
+      argsPath = mapPath tmp' eType p' <.> "args"
       argPaths = inits' ++ [p'] -- TODO abs path bug here?
   liftIO $ createDirectoryIfMissing True $ tmp'
   writeLits cfg argsPath argPaths
@@ -175,11 +173,12 @@ aMapArgs cfg eType inits' tmp' p = do
 {- This gathers together Rules-time and Action-time arguments and passes
  - everything to actFn. To save on duplicated computation it writes the same
  - outfile that would have come from the equivalent non-mapped (single)
- - function, then links to it from the real outPath. Shake will be suprised
- - because the single outPath wasn't declared in any Rule beforehand, but it
- - should be able to adjust and skip repeating it when the time comes.
+ - function if that doesn't exist yet, then links to it from the real outPath.
+ - Shake will be suprised because the single outPath wasn't declared in any
+ - Rule beforehand, but it should be able to adjust and skip repeating it when
+ - the time comes.
  -
- - TODO does it have a race condition for writing the single file??
+ - TODO does it have a race condition for writing the single file?
  - TODO ask ndmitchell if there's something much more elegant I'm missing
  - TODO any way to make that last FilePath into a CutPath? does it even matter?
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
@@ -200,8 +199,8 @@ aMapElem cfg eType tmpFn actFn singleName salt out = do
       out' = debugAction cfg "aMapElem" out args''
   liftIO $ createDirectoryIfMissing True dir'
   --  TODO in order to match exprPath should this NOT follow symlinks?
-  let hashes = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
-      single = exprPathExplicit cfg singleName eType salt hashes
+  let hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
+      single  = exprPathExplicit cfg singleName eType salt hashes
       single' = fromCutPath cfg single
       args''' = single:map (toCutPath cfg) args''
   liftIO $ createDirectoryIfMissing True $ takeDirectory single'
