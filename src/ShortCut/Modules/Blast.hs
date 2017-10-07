@@ -142,7 +142,7 @@ mkBlastEachFn bCmd qType sType dbType = CutFunction
 rMkBlastEach :: String -> CutType -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
 rMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ addMakeDBCall2 expr' dbType
   where
-    mapFn = rMapTmp (bActFn' bCmd) (bCmd ++ "_each")
+    mapFn = rMapTmp (bActFn' bCmd) (bCmd ++ "_each") bCmd
     expr' = debug cfg ("rMkBlastEach expr: '" ++ render (pPrint expr) ++ "'") expr
     -- kludge to allow easy mapping over the subject rather than evalue:
     -- TODO is this right?

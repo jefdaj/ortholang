@@ -5,7 +5,7 @@ import Data.List             (dropWhileEnd)
 import Data.List             (isPrefixOf)
 import Data.List.Utils       (replace)
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Types   (CutConfig, CutExpr, CutVar, CutScript,)
+import ShortCut.Core.Types   (CutConfig(..), CutExpr, CutVar, CutScript,)
 import System.Directory      (getHomeDirectory, makeAbsolute,
                               pathIsSymbolicLink)
 import System.FilePath       (addTrailingPathSeparator, normalise)
@@ -31,8 +31,8 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- follows zero or more symlinks until it finds the original file
 -- TODO actually just one now... which should always be enough right?
-resolveSymlinks :: FilePath -> IO FilePath
-resolveSymlinks path = do
+resolveSymlinks :: CutConfig -> FilePath -> IO FilePath
+resolveSymlinks cfg path = do
   isLink <- pathIsSymbolicLink path
   if not isLink
     then return path
@@ -40,7 +40,10 @@ resolveSymlinks path = do
     else do
       relPath <- readSymbolicLink path
       absPath <- absolutize $ takeDirectory path </> relPath
-      return absPath
+      -- don't follow outside the "known" dirs
+      if cfgTmpDir cfg `isPrefixOf` absPath || cfgWorkDir cfg `isPrefixOf` absPath
+        then resolveSymlinks cfg absPath
+        else return path
 
 -- kind of silly that haskell doesn't have this built in, but whatever
 -- TODO also follow symlinks? is there a time that would be bad?

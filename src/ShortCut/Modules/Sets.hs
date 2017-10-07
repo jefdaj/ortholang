@@ -26,11 +26,11 @@ cutModule = CutModule
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
-canonicalLinks :: CutType -> [FilePath] -> IO [FilePath]
-canonicalLinks rtn =
+canonicalLinks :: CutConfig -> CutType -> [FilePath] -> IO [FilePath]
+canonicalLinks cfg rtn =
   if rtn `elem` [ListOf str, ListOf num]
     then return
-    else \ps -> mapM resolveSymlinks ps
+    else \ps -> mapM (resolveSymlinks cfg) ps
 
 ----------------------
 -- binary operators --
@@ -58,9 +58,8 @@ rSetBop :: (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
 rSetBop fn s@(_,cfg) e@(CutBop _ _ _ _ s1 s2) = do
   -- liftIO $ putStrLn "entering rSetBop"
-  -- let fixLinks = liftIO . canonicalLinks (typeOf e)
-  -- let fixLinks = canonicalLinks (typeOf e)
-  let fixLinks = return
+  -- let fixLinks = liftIO . canonicalLinks cfg (typeOf e)
+  let fixLinks = canonicalLinks cfg (typeOf e)
       (ListOf t) = typeOf s1 -- element type for translating to/from string
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (s1, s2)
   p3 %> aSetBop cfg fixLinks t fn p1 p2
@@ -72,12 +71,12 @@ aSetBop :: CutConfig
         -> CutType
         -> (Set String -> Set String -> Set String)
         -> FilePath -> FilePath -> FilePath -> Action ()
-aSetBop cfg _ etype fn p1 p2 out = do
+aSetBop cfg fixLinks etype fn p1 p2 out = do
   need [p1, p2] -- this is required for parallel evaluation!
   -- lines1 <- liftIO . fixLinks =<< readFileLines p1
   -- lines2 <- liftIO . fixLinks =<< readFileLines p2
-  paths1 <- readStrings etype cfg p1
-  paths2 <- readStrings etype cfg p2
+  paths1 <- liftIO . fixLinks =<< readStrings etype cfg p1
+  paths2 <- liftIO . fixLinks =<< readStrings etype cfg p2
   -- putQuiet $ unwords [fnName, p1, p2, p3]
   let paths3 = fn (fromList paths1) (fromList paths2)
       out' = debugAction cfg "aSetBop" out [p1, p2, out]
@@ -116,7 +115,7 @@ rSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
       oPath'   = cfgTmpDir cfg </> oPath
       oPath''  = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
-      fixLinks = canonicalLinks (typeOf e)
+      fixLinks = canonicalLinks cfg (typeOf e) -- TODO move to aSetFold
   oPath %> \_ -> aSetFold cfg fixLinks fn t oPath' setsPath
   return (ExprPath oPath'')
 rSetFold _ _ _ = error "bad argument to rSetFold"
@@ -128,11 +127,14 @@ aSetFold :: CutConfig
          -> CutType
          -> FilePath -> FilePath
          -> Action ()
-aSetFold cfg _ fn (ListOf etype) oPath setsPath = do
+aSetFold cfg fixLinks fn (ListOf etype) oPath setsPath = do
   liftIO $ putStrLn $ "aSetFold collapsing lists from " ++ extOf (ListOf etype) ++ " -> " ++ extOf etype
-  setPaths <- readPaths cfg setsPath
-  setElems <- mapM (readStrings etype cfg) (map (fromCutPath cfg) setPaths)
-  let sets = map fromList setElems
+  setPaths  <- readPaths cfg setsPath
+  setElems  <- mapM (readStrings etype cfg) (map (fromCutPath cfg) setPaths)
+  setElems' <- liftIO $ mapM fixLinks setElems
+  liftIO $ putStrLn $ "setElems: " ++ show setElems
+  liftIO $ putStrLn $ "setElems': " ++ show setElems'
+  let sets = map fromList setElems'
       oLst = toList $ fn sets
       oPath' = debugAction cfg "aSetFold" oPath [oPath, setsPath]
   writeStrings etype cfg oPath' oLst

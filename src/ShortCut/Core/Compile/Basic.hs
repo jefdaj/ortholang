@@ -23,9 +23,9 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, writePaths, CutPath, readLitPaths,
-                            readLit, readLits, writeLits)
+                            readLit, readLits, writeLits, resolveVars)
 
-import Data.List                   (find, sort)
+import Data.List                   (find, sort, intersperse)
 import Data.Maybe                  (fromJust)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Config        (wrappedCmd)
@@ -161,7 +161,7 @@ rListPaths s@(_,cfg) e@(CutList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toCutPath cfg p) paths
       hash     = digest $ concat $ map digest paths'
-      outPath  = exprPathExplicit s "list" (ListOf rtn) salt [hash]
+      outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath' = debugRules cfg "rListPaths" e $ fromCutPath cfg outPath
   outPath' %> \_ -> aListPaths cfg paths' outPath
   return (ExprPath outPath')
@@ -171,7 +171,7 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 aListPaths :: CutConfig -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg paths outPath = do
   need paths'
-  paths'' <- liftIO $ mapM resolveSymlinks paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks cfg) paths'
   need paths''
   let paths''' = map (toCutPath cfg) paths''
   writePaths cfg out'' paths'''
@@ -303,7 +303,7 @@ rLink s@(_,cfg) outExpr strExpr = do
 aLink :: CutConfig -> CutPath -> CutPath -> Action ()
 aLink cfg strPath outPath = do
   pth <- readLitPaths cfg strPath'
-  src <- liftIO $ resolveSymlinks $ fromCutPath cfg $ head pth
+  src <- liftIO $ resolveSymlinks cfg $ fromCutPath cfg $ head pth
   need [src]
   unit $ quietly $ wrappedCmd cfg [outPath'] [] "ln" ["-fs", src, outPath']
   debugTrackWrite cfg [out]
@@ -353,7 +353,7 @@ rLoadListLinks :: RulesFn
 rLoadListLinks s@(_,cfg) (CutFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   let hash     = digest $ toCutPath cfg pathsPath
-      outPath  = exprPathExplicit s "list" rtn salt [hash]
+      outPath  = exprPathExplicit cfg "list" rtn salt [hash]
       outPath' = fromCutPath cfg outPath
   outPath' %> \_ -> aLoadListLinks cfg (toCutPath cfg pathsPath) outPath
   return (ExprPath outPath')
@@ -366,7 +366,7 @@ aLoadListLinks cfg pathsPath outPath = do
   -- CutPaths
   paths <- readLitPaths cfg pathsPath'
   let paths' = map (fromCutPath cfg) paths
-  paths'' <- liftIO $ mapM resolveSymlinks paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks cfg) paths'
   liftIO $ putStrLn $ "about to need: " ++ show paths''
   need paths''
   let paths''' = map (toCutPath cfg) paths''
@@ -381,32 +381,46 @@ aLoadListLinks cfg pathsPath outPath = do
 -- uniqLines = unlines . toList . fromList . lines
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
+-- TODO rename something that goes with the map fns?
+rSimple :: (CutConfig -> CutPath -> [CutPath] -> Action ())
+        -> String -> CutType -> RulesFn
+rSimple = rSimple' False
+
 rSimpleTmp :: (CutConfig -> CutPath -> [CutPath] -> Action ())
            -> String -> CutType -> RulesFn
-rSimpleTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
+rSimpleTmp = rSimple' True
+
+rSimple' :: Bool -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+           -> String -> CutType -> RulesFn
+rSimple' mkTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
   let argPaths' = map (\(ExprPath p) -> toCutPath cfg p) argPaths
-  outPath' %> \_ -> aSimpleTmp cfg outPath actFn tmpDir argPaths'
+  outPath' %> \_ -> aSimple' mkTmp cfg outPath actFn tmpDir argPaths'
   return (ExprPath outPath')
   where
     tmpDir   = cacheDir cfg tmpPrefix -- TODO tables bug here?
     outPath  = exprPath s e
     outPath' = fromCutPath cfg outPath
-rSimpleTmp _ _ _ _ _ = error "bad argument to rSimpleTmp"
+rSimple' _ _ _ _ _ _ = error "bad argument to rSimple'"
 
-aSimpleTmp :: CutConfig -> CutPath
-           -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-           -> CutPath -> [CutPath] -> Action ()
-aSimpleTmp cfg outPath actFn tmpDir argPaths = do
+aSimple' :: Bool -> CutConfig -> CutPath
+         -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+         -> CutPath -> [CutPath] -> Action ()
+aSimple' mkTmp cfg outPath actFn tmpDir argPaths = do
   need argPaths'
+  argPaths'' <- liftIO $ resolveVars cfg argPaths
   liftIO $ createDirectoryIfMissing True tmpDir'
-  actFn cfg tmpDir (outPath:argPaths)
+  actFn cfg tmpDir (outPath:argPaths'')
   trackWrite [out]
   where
-    tmpDir'    = fromCutPath cfg tmpDir
+    -- TODO probably not "simple tmp" anymore... remove? rename?
+    hashes     = concat $ intersperse "_" $ map digest argPaths'
     argPaths'  = map (fromCutPath cfg) argPaths
     outPath'   = fromCutPath cfg outPath
-    out = debugAction cfg "aSimpleTmp" outPath' (outPath':tmpDir':argPaths') -- TODO actFn?
+    out = debugAction cfg "aSimple'" outPath' (outPath':tmpDir':argPaths') -- TODO actFn?
+    tmpDir'    = if mkTmp
+                   then fromCutPath cfg tmpDir </> hashes
+                   else fromCutPath cfg tmpDir
 
 -------------
 -- actions --

@@ -1,0 +1,12 @@
+# This tests that the tmpfiles produced by a mapped function include the ones
+# from its single equivalent. And also that the mapped tmpfile paths don't
+# include varnames. (There's no good way to confirm that other than manual
+# inspection of the tree for now)
+
+# TODO aha! remove varnames and match up the tmpfiles
+
+mini6803 = load_fna "data/6803genes10.fna"
+full7942 = load_faa "data/7942genes.faa"
+single = crb_blast mini6803 full7942
+mapped = crb_blast_each mini6803 [full7942]
+result = length ([single] | mapped) # should be 1?

@@ -303,11 +303,13 @@ aMakeblastdb _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show path
 
 mkMakeblastdbEach :: CutType -> CutFunction
 mkMakeblastdbEach dbType = CutFunction
-  { fName      = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+  { fName      = singleName ++ "_each"
   , fTypeCheck = tMakeblastdbEach dbType
   , fFixity    = Prefix
   , fRules  = rMakeblastdbEach dbType
   }
+  where
+    singleName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
 
 -- TODO no! depends on an arg
 tMakeblastdbEach :: CutType -> TypeChecker
@@ -315,4 +317,6 @@ tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "makeblastdb_each requires a list of fasta files" -- TODO typed error
 
 rMakeblastdbEach :: CutType -> RulesFn
-rMakeblastdbEach dbType = rMapTmp (aMakeblastdb dbType) "makeblastdb"
+rMakeblastdbEach dbType = rMapTmp (aMakeblastdb dbType) "makeblastdb" singleName
+  where
+    singleName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
