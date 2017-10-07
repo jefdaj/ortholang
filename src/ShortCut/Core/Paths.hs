@@ -61,8 +61,8 @@ module ShortCut.Core.Paths
   , exprPath
   , exprPathExplicit
   , varPath
-  , resolveVar
-  , resolveVars
+  -- , resolveVar
+  -- , resolveVars
   -- file io
   , readPath
   , readPaths
@@ -84,7 +84,7 @@ module ShortCut.Core.Paths
 import Development.Shake (Action, trackWrite)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
-import ShortCut.Core.Util (lookupVar, digest, resolveSymlinks)
+import ShortCut.Core.Util (lookupVar, digest)
 import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
@@ -151,15 +151,15 @@ argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
 argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
-resolveVar :: CutConfig -> CutPath -> IO CutPath
-resolveVar cfg p@(CutPath path) =
-  -- TODO is just using CutPath directly here OK?
-  if "$TMPDIR/vars" `isPrefixOf` path
-    then resolveSymlinks cfg (fromCutPath cfg p) >>= resolveVar cfg . toCutPath cfg
-    else return p
+-- resolveVar :: CutConfig -> CutPath -> IO CutPath
+-- resolveVar cfg p@(CutPath path) =
+--   -- TODO is just using CutPath directly here OK?
+--   if "$TMPDIR/vars" `isPrefixOf` path
+--     then resolveSymlinks cfg (fromCutPath cfg p) >>= resolveVar cfg . toCutPath cfg
+--     else return p
 
-resolveVars :: CutConfig -> [CutPath] -> IO [CutPath]
-resolveVars cfg = mapM (resolveVar cfg)
+-- resolveVars :: CutConfig -> [CutPath] -> IO [CutPath]
+-- resolveVars cfg = mapM (resolveVar cfg)
 
 -- TODO rename to tmpPath?
 exprPath :: CutState -> CutExpr -> CutPath

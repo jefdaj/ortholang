@@ -23,7 +23,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, writePaths, CutPath, readLitPaths,
-                            readLit, readLits, writeLits, resolveVars)
+                            readLit, readLits, writeLits)
 
 import Data.List                   (find, sort, intersperse)
 import Data.Maybe                  (fromJust)
@@ -408,7 +408,7 @@ aSimple' :: Bool -> CutConfig -> CutPath
          -> CutPath -> [CutPath] -> Action ()
 aSimple' mkTmp cfg outPath actFn tmpDir argPaths = do
   need argPaths'
-  argPaths'' <- liftIO $ resolveVars cfg argPaths
+  argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks cfg) argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir'
   actFn cfg tmpDir (outPath:argPaths'')
   trackWrite [out]

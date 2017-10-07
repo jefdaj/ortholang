@@ -7,7 +7,7 @@ import ShortCut.Core.Compile.Basic
 import Development.Shake.FilePath  ((</>), (<.>), (-<.>))
 import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath,
                                     readPaths, writePaths, writeLits, CutPath,
-                                    exprPathExplicit, resolveVars)
+                                    exprPathExplicit)
 import ShortCut.Core.Debug         (debugAction, debugRules, debugTrackWrite)
 import ShortCut.Core.Config        (wrappedCmd)
 import System.Directory            (createDirectoryIfMissing)
@@ -38,7 +38,7 @@ rMapTmps actFn tmpPrefix singleName s@(_,cfg) e =
     tmpFn args = do
       args' <- liftIO $ mapM (resolveSymlinks cfg . fromCutPath cfg) args
       let base = concat $ intersperse "_" $ map digest args'
-      let dir = fromCutPath cfg $ cacheDir cfg tmpPrefix
+          dir  = fromCutPath cfg $ cacheDir cfg tmpPrefix
       return $ toCutPath cfg (dir </> base)
 
 --------------------
@@ -105,14 +105,17 @@ rMapTmps actFn tmpPrefix singleName s@(_,cfg) e =
 -- TODO have aMapElem make a cached outfile, but also link to it from the expr path
 --      that's inelegant but should solve the duplication right?
 
-rMap :: ([CutPath] -> IO CutPath) -> (CutConfig -> CutPath -> [CutPath] -> Action ()) -> String -> String -> RulesFn
+-- TODO remove prefix now that it's unused
+-- TODO and remove singleName too right?
+rMap :: ([CutPath] -> IO CutPath) -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+     -> String -> String -> RulesFn
 rMap tmpFn actFn prefix singleName s@(_,cfg) e@(CutFun _ salt _ _ exprs) = do
   argInitPaths <- mapM (rExpr s) (init exprs)
   (ExprPath argsLastsPath) <- rExpr s (last exprs)
   let mainOutPath    = fromCutPath cfg $ exprPath s e
       argInitPaths'  = map (\(ExprPath p) -> toCutPath cfg p) argInitPaths
       argLastsPath'  = toCutPath cfg argsLastsPath
-      elemCacheDir   = (fromCutPath cfg $ cacheDir cfg prefix) </> digest e
+      elemCacheDir   = (fromCutPath cfg $ cacheDir cfg "map") </> digest e
       elemCacheDir'  = toCutPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
       (ListOf eType) = typeOf e
@@ -183,7 +186,7 @@ aMapSurpriseElem cfg out argPaths eType singleName salt = do
   -- let single = (replace mapName singleName lastPath) -<.> extOf eType -- TODO fix using singleName!
   -- let single = cfgTmpDir cfg </> "exprs" </> singleName </> takeFileName lastPath -<.> extOf eType
 -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path
-  let hashes = map digest argPaths
+  let hashes = map (digest . toCutPath cfg) argPaths
       single = fromCutPath cfg $ exprPathExplicit cfg singleName eType salt hashes
   liftIO $ putStrLn $ "argPaths: " ++ show argPaths
   liftIO $ putStrLn $ "hashes: " ++ show hashes
