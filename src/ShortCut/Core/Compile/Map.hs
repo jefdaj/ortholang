@@ -4,16 +4,17 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
-import Development.Shake.FilePath  ((</>), (<.>), (-<.>))
+import Development.Shake.FilePath  ((</>), (<.>), (-<.>), takeDirectory)
 import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath,
                                     readPaths, writePaths, writeLits, CutPath,
                                     exprPathExplicit)
 import ShortCut.Core.Debug         (debugAction, debugRules, debugTrackWrite)
 import ShortCut.Core.Config        (wrappedCmd)
 import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             (takeBaseName, takeFileName, takeDirectory)
+import System.FilePath             (takeBaseName, takeFileName)
 import ShortCut.Core.Util          (digest, resolveSymlinks)
 import Data.List (intersperse)
+import Control.Monad (when)
 -- import Data.List.Utils (replace)
 
 -----------------------------------------------------
@@ -107,9 +108,14 @@ rMapTmps actFn tmpPrefix singleName s@(_,cfg) e =
 
 -- TODO remove prefix now that it's unused
 -- TODO and remove singleName too right?
+
+{- This separately hooks up aMapElem to operate on any .args files, and aMap to
+ - generate some .args files then gather them into the overall list. Those two
+ - then need to agree on tmpfiles, communicating only through the .args files.
+ -}
 rMap :: ([CutPath] -> IO CutPath) -> (CutConfig -> CutPath -> [CutPath] -> Action ())
      -> String -> String -> RulesFn
-rMap tmpFn actFn prefix singleName s@(_,cfg) e@(CutFun _ salt _ _ exprs) = do
+rMap tmpFn actFn _ singleName s@(_,cfg) e@(CutFun _ salt _ _ exprs) = do
   argInitPaths <- mapM (rExpr s) (init exprs)
   (ExprPath argsLastsPath) <- rExpr s (last exprs)
   let mainOutPath    = fromCutPath cfg $ exprPath s e
@@ -124,8 +130,9 @@ rMap tmpFn actFn prefix singleName s@(_,cfg) e@(CutFun _ salt _ _ exprs) = do
   return $ debugRules cfg "rMap" e $ ExprPath mainOutPath
 rMap _ _ _ _ _ _ = error "bad argument to rMapTmps"
 
--- This builds .args files then needs their actual non-.args outpaths, which
--- will be built by the action below
+{- This calls aMapArgs to leave a .args file for each set of args, then gathers
+ - up the corresponding outPaths and returns a list of them.
+ -}
 aMap :: CutConfig
      -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
      -> Action ()
@@ -134,8 +141,11 @@ aMap cfg inits mapTmp eType lastsPath outPath = do
   inits'' <- liftIO $ mapM (resolveSymlinks cfg) inits'
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
   lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)
-  mapM_ (aMapElemArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
+  mapM_ (aMapArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
+
+  -- TODO try to use nicer (more unique!) hashes here, but only if it works
   let outPaths  = map (\x -> tmp' </> takeBaseName x <.> extOf eType) lastPaths'
+
   need outPaths
   outPaths' <- (fmap . map) (toCutPath cfg) $ liftIO $ mapM (resolveSymlinks cfg) outPaths
   let out = debugAction cfg "aMap" outPath (outPath:inits' ++ [tmp', lasts'])
@@ -145,88 +155,58 @@ aMap cfg inits mapTmp eType lastsPath outPath = do
     lasts' = fromCutPath cfg lastsPath
     tmp'   = fromCutPath cfg mapTmp
 
--- TODO can we remove eType here?
-aMapElemArgs :: CutConfig
-             -> CutType -> [FilePath] -> FilePath -> CutPath
-             -> Action ()
-aMapElemArgs cfg eType inits' tmp' p = do
+{- This leaves arguments in .args files for aMapElem to find.
+ -
+ - TODO It has some tricky filename business that still needs straightening out right?
+ - TODO should it write "lits" when they're really more like heterogenous path lists?
+ -}
+aMapArgs :: CutConfig
+         -> CutType -> [FilePath] -> FilePath -> CutPath
+         -> Action ()
+aMapArgs cfg eType inits' tmp' p = do
   -- TODO write the out path here too so all the args are together?
   let p'       = fromCutPath cfg p
       -- TODO use a hash here?
-      -- ePath    = p' -<.> extOf eType
       argsPath = tmp' </> takeFileName p' -<.> extOf eType <.> "args"
       argPaths = inits' ++ [p'] -- TODO abs path bug here?
-  liftIO $ putStrLn $ "p': " ++ p'
-  liftIO $ putStrLn $ "tmp': " ++ tmp'
-  -- liftIO $ putStrLn $ "ePath: " ++ ePath
-  liftIO $ putStrLn $ "argsPath: " ++ argsPath
-  -- liftIO $ putStrLn $ "link " ++ argsPath ++ " -> " ++ ePath
   liftIO $ createDirectoryIfMissing True $ tmp'
-  -- These aren't really lits so much as a heterogenous list of path types, but
-  -- this function still works OK so I haven't changed it to be more explicit
-  -- yet. They do need the same checking I guess?
   writeLits cfg argsPath argPaths
 
--- Creates a symlink from what would be the expression path of the single fn to
--- the equivalent map tmpfile. It's a surprise in that Shake doesn't know it's
--- coming when calculating rule dependencies, but that should be OK because
--- it'll just adjust by skipping either this or the single rule, whichever
--- comes second.
--- aMapSurpriseElem :: CutConfig -> FilePath -> FilePath -> CutType -> String -> Action ()
--- aMapSurpriseElem cfg out' lastPath eType singleName = do
-aMapSurpriseElem :: CutConfig
-                 -> FilePath -> [FilePath] -> CutType -> String
-                 -> Int -> Action ()
-aMapSurpriseElem cfg out argPaths eType singleName salt = do
-  -- make an additional symlink from what would be the single fn outpath
-  -- (this is a hack to prevent duplicate work, but is also confusing!)
-  -- TODO only when it doesn't exist yet!
-  -- TODO pass singleName explicitly from the fn definitions
-  -- let singleName = replace "_each" "" name -- TODO use singleName here
-  -- let single = (replace mapName singleName lastPath) -<.> extOf eType -- TODO fix using singleName!
-  -- let single = cfgTmpDir cfg </> "exprs" </> singleName </> takeFileName lastPath -<.> extOf eType
--- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path
-  let hashes = map (digest . toCutPath cfg) argPaths
-      single = fromCutPath cfg $ exprPathExplicit cfg singleName eType salt hashes
-  liftIO $ putStrLn $ "argPaths: " ++ show argPaths
-  liftIO $ putStrLn $ "hashes: " ++ show hashes
-  liftIO $ putStrLn $ "single: " ++ single
-  -- TODO should link to for example exprs/crb_blast/<hash>.str.list
-  --      whereas now it's cache/tables or whatever
-  -- liftIO $ putStrLn $ "mapName: " ++ mapName
-  -- liftIO $ putStrLn $ "singleName: " ++ singleName
-  out' <- liftIO $ resolveSymlinks cfg out
-  liftIO $ putStrLn $ "link " ++ out' ++ " -> " ++ single
-  liftIO $ createDirectoryIfMissing True $ takeDirectory single
-  unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", out', single]
-  debugTrackWrite cfg [out']
-
--- This builds one of the list of out paths based on a .args file
--- (made in the action above). It's a pretty roundabout way to do it!
--- TODO ask ndmitchell if there's something much more elegant I'm missing
--- TODO any way to make that last FilePath into a CutPath? does it even matter?
--- TODO can actFn here be looked up from the individal fn itsef passed in the definition?
--- TODO after singleFn works, can we remove tmpFn? (ok if not)
+{- This gathers together Rules-time and Action-time arguments and passes
+ - everything to actFn. To save on duplicated computation it writes the same
+ - outfile that would have come from the equivalent non-mapped (single)
+ - function, then links to it from the real outPath. Shake will be suprised
+ - because the single outPath wasn't declared in any Rule beforehand, but it
+ - should be able to adjust and skip repeating it when the time comes.
+ -
+ - TODO does it have a race condition for writing the single file??
+ - TODO ask ndmitchell if there's something much more elegant I'm missing
+ - TODO any way to make that last FilePath into a CutPath? does it even matter?
+ - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
+ - TODO after singleFn works, can we remove tmpFn? (ok if not)
+ -}
 aMapElem :: CutConfig -> CutType
          -> ([CutPath] -> IO CutPath)
          -> (CutConfig -> CutPath -> [CutPath] -> Action ())
          -> String -> Int -> FilePath -> Action ()
 aMapElem cfg eType tmpFn actFn singleName salt out = do
-  let argsPath = out <.> "args" -- TODO clean up
-  -- liftIO $ putStrLn $ "argsPath (aMapElem): " ++ argsPath
+  let argsPath = out <.> "args"
   args <- readPaths cfg argsPath
   let args' = map (fromCutPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks cfg) args' -- TODO remove?
-  -- liftIO $ putStrLn $ "argPaths (aMapElem): " ++ show args''
   need args'
-  -- TODO fix actual tmpFns to use CutPaths (automatically deterministic!)
   dir <- liftIO $ tmpFn args
-  let dir'   = fromCutPath cfg dir
-      args''' = (toCutPath cfg out):args
-      out'   = debugAction cfg "aMapElem" out args'' -- TODO is this right?
-  -- args''' <- liftIO $ resolveVars cfg args'' -- TODO does this go in Basic.hs?
+  let dir' = fromCutPath cfg dir
+      out' = debugAction cfg "aMapElem" out args''
   liftIO $ createDirectoryIfMissing True dir'
-  -- liftIO $ putStrLn $ "args'': " ++ show args''
-  _ <- actFn cfg dir args'''
+  --  TODO in order to match exprPath should this NOT follow symlinks?
+  let hashes = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
+      single = exprPathExplicit cfg singleName eType salt hashes
+      single' = fromCutPath cfg single
+      args''' = single:map (toCutPath cfg) args''
+  liftIO $ createDirectoryIfMissing True $ takeDirectory single'
+  done <- doesFileExist single'
+  when (not done) (actFn cfg dir args''' >> trackWrite [single'])
+  -- TODO utility/paths fn "symlink" (unless that's aLink?)
+  unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", single', out']
   trackWrite [out']
-  aMapSurpriseElem cfg out' args'' eType singleName salt

@@ -17,7 +17,7 @@
 |   |       `-- results.crb
 |   `-- map
 |       `-- a41e9333df
-|           |-- 7942genes.crb -> $TMPDIR/cache/crbblast/6306b9726c_f1e136eaf6/results.crb
+|           |-- 7942genes.crb -> $TMPDIR/exprs/crb_blast/237bf736b9_3fae05ef93.crb
 |           `-- 7942genes.crb.args
 |-- exprs
 |   |-- crb_blast
