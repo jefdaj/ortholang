@@ -5,6 +5,7 @@ module ShortCut.Test.Scripts where
 import Data.ByteString.Lazy.Char8 (pack, ByteString)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
+import ShortCut.Core.Paths        (toGeneric)
 import ShortCut.Core.Types        (CutConfig(..))
 import ShortCut.Core.Util         (mkTestGroup)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
@@ -16,7 +17,6 @@ import Test.Hspec                 (it)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 import System.Process             (cwd, readCreateProcess, readProcessWithExitCode, shell)
 import Prelude             hiding (writeFile)
-import Data.String.Utils          (replace)
 import System.IO                  (stdout, writeFile)
 import Data.Default.Class         (Default(def))
 import qualified Control.Monad.TaggedException as Exception (handle)
@@ -60,7 +60,7 @@ mkScriptTest cfg gld = goldenDiff "prints the correct result" gld scriptAct
     scriptAct = do
       runCut cfg
       res <- readFile scriptRes
-      return $ pack $ replace (cfgTmpDir cfg) "$TMPDIR" res
+      return $ pack $ toGeneric cfg res
 
 mkTreeTest :: CutConfig -> FilePath -> TestTree
 mkTreeTest cfg t = goldenDiff "creates expected tmpfiles" t treeAct
@@ -69,9 +69,7 @@ mkTreeTest cfg t = goldenDiff "creates expected tmpfiles" t treeAct
     treeAct = do
       runCut cfg
       out <- readCreateProcess treeCmd ""
-      let dir = cfgWorkDir cfg
-      -- liftIO $ putStrLn $ "replacing '" ++ dir ++ "' with $WORKDIR"
-      return $ pack $ replace dir "$WORKDIR" out
+      return $ pack $ toGeneric cfg out
 
 mkTripTest :: CutConfig -> TestTree
 mkTripTest cfg = goldenDiff "unchanged by round-trip to file" tripShow tripAct

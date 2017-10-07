@@ -9,4 +9,4 @@ mini6803 = load_fna "data/6803genes10.fna"
 full7942 = load_faa "data/7942genes.faa"
 single = crb_blast mini6803 full7942
 mapped = crb_blast_each mini6803 [full7942]
-result = length ([single] | mapped) # should be 1?
+result = length ([single] | mapped) # should be 1

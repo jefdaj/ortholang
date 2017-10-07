@@ -35,10 +35,9 @@ rMapTmps :: (CutConfig -> CutPath -> [CutPath] -> Action ())
 rMapTmps actFn tmpPrefix singleName s@(_,cfg) e =
   rMap tmpFn actFn tmpPrefix singleName s e
   where
-    hashes args = fmap (concat . intersperse "_" . map digest)
-                       (resolveVars cfg args)
     tmpFn args = do
-      base <- hashes args
+      args' <- liftIO $ mapM (resolveSymlinks cfg . fromCutPath cfg) args
+      let base = concat $ intersperse "_" $ map digest args'
       let dir = fromCutPath cfg $ cacheDir cfg tmpPrefix
       return $ toCutPath cfg (dir </> base)
 
@@ -129,14 +128,13 @@ aMap :: CutConfig
      -> Action ()
 aMap cfg inits mapTmp eType lastsPath outPath = do
   need inits'
-  inits'' <- (fmap . map) (fromCutPath cfg) (liftIO $ resolveVars cfg inits)
+  inits'' <- liftIO $ mapM (resolveSymlinks cfg) inits'
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
-  lastPaths' <- liftIO $ resolveVars cfg lastPaths
-  mapM_ (aMapElemArgs cfg eType inits'' tmp') lastPaths'
-  let outPaths  = map (\x -> tmp' </> takeBaseName x <.> extOf eType)
-                      (map (fromCutPath cfg) lastPaths')
-      outPaths' = map (toCutPath cfg) outPaths
+  lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)
+  mapM_ (aMapElemArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
+  let outPaths  = map (\x -> tmp' </> takeBaseName x <.> extOf eType) lastPaths'
   need outPaths
+  outPaths' <- (fmap . map) (toCutPath cfg) $ liftIO $ mapM (resolveSymlinks cfg) outPaths
   let out = debugAction cfg "aMap" outPath (outPath:inits' ++ [tmp', lasts'])
   writePaths cfg out outPaths'
   where
@@ -194,9 +192,9 @@ aMapSurpriseElem cfg out argPaths eType singleName salt = do
   --      whereas now it's cache/tables or whatever
   -- liftIO $ putStrLn $ "mapName: " ++ mapName
   -- liftIO $ putStrLn $ "singleName: " ++ singleName
-  liftIO $ putStrLn $ "link " ++ out ++ " -> " ++ single
-  liftIO $ createDirectoryIfMissing True $ takeDirectory single
   out' <- liftIO $ resolveSymlinks cfg out
+  liftIO $ putStrLn $ "link " ++ out' ++ " -> " ++ single
+  liftIO $ createDirectoryIfMissing True $ takeDirectory single
   unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", out', single]
   debugTrackWrite cfg [out']
 
@@ -214,10 +212,10 @@ aMapElem cfg eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args" -- TODO clean up
   -- liftIO $ putStrLn $ "argsPath (aMapElem): " ++ argsPath
   args <- readPaths cfg argsPath
-  args' <- liftIO $ resolveVars cfg args -- TODO remove?
-  let args'' = map (fromCutPath cfg) args'
+  let args' = map (fromCutPath cfg) args
+  args'' <- liftIO $ mapM (resolveSymlinks cfg) args' -- TODO remove?
   -- liftIO $ putStrLn $ "argPaths (aMapElem): " ++ show args''
-  need args''
+  need args'
   -- TODO fix actual tmpFns to use CutPaths (automatically deterministic!)
   dir <- liftIO $ tmpFn args
   let dir'   = fromCutPath cfg dir

@@ -53,6 +53,8 @@ module ShortCut.Core.Paths
   ( CutPath
   , toCutPath
   , fromCutPath
+  , toGeneric
+  , fromGeneric
   -- cache dirs
   , cacheDir
   -- tmpfiles
