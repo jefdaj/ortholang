@@ -58,6 +58,7 @@ module ShortCut.Core.Paths
   -- cache dirs
   , cacheDir
   -- tmpfiles
+  , hashContent
   , exprPath
   , exprPathExplicit
   , varPath
@@ -85,7 +86,7 @@ import Development.Shake (Action, trackWrite)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
-import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
+import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug, debugReadFile)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
@@ -149,6 +150,11 @@ argHashes _ (CutLit  _ _     v    ) = [digest v]
 argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
 argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
 argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
+
+hashContent :: CutConfig -> CutPath -> Action String
+hashContent cfg path = do
+  txt <- debugReadFile cfg $ fromCutPath cfg path
+  return $ digest txt
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
 -- resolveVar :: CutConfig -> CutPath -> IO CutPath

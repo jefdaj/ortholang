@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 import Development.Shake       -- (quietly, Action, CmdOption(..), need, unit)
 import Development.Shake.FilePath ((</>), (<.>), takeExtension)
 import System.Directory (createDirectoryIfMissing)
-import ShortCut.Core.Paths     (CutPath, fromCutPath)
+import ShortCut.Core.Paths     (CutPath, fromCutPath, hashContent)
 import ShortCut.Core.Util      (digest)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimple)
@@ -68,12 +68,6 @@ tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
 tCrbBlastEach :: [CutType] -> Either String CutType
 tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
 tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or faa targets"
-
--- TODO put in Paths? Util?
-hashContent :: CutConfig -> CutPath -> Action String
-hashContent cfg path = do
-  txt <- debugReadFile cfg $ fromCutPath cfg path
-  return $ digest txt
 
 aBlastCRB :: CutConfig -> CutPath -> [CutPath] -> Action ()
 aBlastCRB cfg tmpDir [o, q, t] = do

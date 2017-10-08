@@ -4,17 +4,18 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic
 
-import Development.Shake.FilePath  ((</>), (<.>), (-<.>), takeDirectory)
+import Development.Shake.FilePath  ((</>), (<.>), takeDirectory)
 import ShortCut.Core.Paths         (cacheDir, toCutPath, fromCutPath, exprPath,
                                     readPaths, writePaths, writeLits, CutPath,
                                     exprPathExplicit)
-import ShortCut.Core.Debug         (debugAction, debugRules, debugTrackWrite)
+import ShortCut.Core.Debug         (debugAction, debugRules, debugTrackWrite, debug)
 import ShortCut.Core.Config        (wrappedCmd)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeBaseName, takeFileName)
 import ShortCut.Core.Util          (digest, resolveSymlinks)
 import Data.List (intersperse)
 import Control.Monad (when)
+import Text.PrettyPrint.HughesPJClass
 -- import Data.List.Utils (replace)
 
 -----------------------------------------------------
@@ -115,7 +116,7 @@ rMapTmps actFn tmpPrefix singleName s@(_,cfg) e =
  -}
 rMap :: ([CutPath] -> IO CutPath) -> (CutConfig -> CutPath -> [CutPath] -> Action ())
      -> String -> String -> RulesFn
-rMap tmpFn actFn _ singleName s@(_,cfg) e@(CutFun _ salt _ _ exprs) = do
+rMap tmpFn actFn _ singleName s@(_,cfg) e@(CutFun r salt _ _ exprs) = do
   argInitPaths <- mapM (rExpr s) (init exprs)
   (ExprPath argsLastsPath) <- rExpr s (last exprs)
   let mainOutPath    = fromCutPath cfg $ exprPath s e
@@ -123,12 +124,12 @@ rMap tmpFn actFn _ singleName s@(_,cfg) e@(CutFun _ salt _ _ exprs) = do
       argLastsPath'  = toCutPath cfg argsLastsPath
       elemCacheDir   = (fromCutPath cfg $ cacheDir cfg "map") </> digest e
       elemCacheDir'  = toCutPath cfg elemCacheDir -- TODO redundant?
+      (ListOf eType) = debug cfg ("type of '" ++ render (pPrint e) ++ "' (" ++ show e ++ ") is " ++ show r) r -- TODO shit, can be a ref? or something
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
-      (ListOf eType) = typeOf e
   elemCachePtn %> aMapElem cfg eType tmpFn actFn singleName salt
   mainOutPath  %> aMap cfg argInitPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rMap" e $ ExprPath mainOutPath
-rMap _ _ _ _ _ _ = error "bad argument to rMapTmps"
+rMap _ _ _ _ _ _ = error "bad argument to rMap"
 
 {- This calls aMapArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
@@ -138,6 +139,10 @@ aMap :: CutConfig
      -> Action ()
 aMap cfg inits mapTmp eType lastsPath outPath = do
   need inits'
+  liftIO $ putStrLn $ "tmp': " ++ show tmp'
+  liftIO $ putStrLn $ "inits': " ++ show inits'
+  liftIO $ putStrLn $ "lasts': " ++ show lasts'
+  liftIO $ putStrLn $ "eType: " ++ show eType
   inits'' <- liftIO $ mapM (resolveSymlinks cfg) inits'
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
   lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)

@@ -90,11 +90,12 @@ addMakeDBCall1 (CutFun r i ds n [q, s, e]) dbType = CutFun r i ds n [q, db, e]
 addMakeDBCall1 _ _ = error "bad argument to addMakeDBCall1"
 
 -- as a quick kludge, duplicated this and rearranged the args
+-- TODO validation function so I can't mess up constructing these by hand? aha! write strings + parse normally!
 addMakeDBCall2 :: CutExpr -> CutType -> CutExpr
 addMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
   where
     -- dbType = if typeOf s `elem` [fna, ListOf fna] then ndb else pdb -- TODO maybe it's (ListOf fna)?
-    dbs = CutFun dbType i (depsOf ss) name [ss]
+    dbs = CutFun (ListOf dbType) i (depsOf ss) name [ss]
     name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
 addMakeDBCall2 _ _ = error "bad argument to addMakeDBCall2"
 
