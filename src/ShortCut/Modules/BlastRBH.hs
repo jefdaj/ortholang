@@ -12,6 +12,12 @@ import ShortCut.Modules.Blast  (bht)
 import System.Directory        (createDirectoryIfMissing)
 import Control.Monad.Trans     (liftIO)
 
+-- TODO unit to describe is fwd blast + rev blast + reciprocal best 
+--      have some fairly advanced primitives from Blast.hs:
+--        mkBlastEachFn, mkBlastEachRevFn
+--        ... but do they help? could scrap and write separate stuff
+--        either way need to expose them + test better!
+
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blastrbh"
@@ -38,6 +44,7 @@ reciprocal = CutFunction
   , fRules     = rSimpleTmp aRecip "blast" bht
   }
 
+-- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 aRecip :: CutConfig -> CutPath -> [CutPath] -> Action ()
 aRecip cfg tmp [out, left, right] = do
   unit $ quietly $ wrappedCmd cfg [out'] [Cwd tmp'] "reciprocal.R" [out', left', right']
@@ -111,6 +118,13 @@ rRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
     oPath' = fromCutPath cfg oPath
 rRecipEach _ _ = error "bad argument to rRecipEach"
 
+-- TODO ARE THE CUTPATHS GETTING THROUGH HERE? YEAH SUBPROCESS.WHATEVER...
+-- NEED TO MAKE SOMETHING TO REPLACE ALL THROUGH BEFORE PASSING TO OUTSIDE
+-- CODE, KIND OF LIKE FROMSHORTCUTLIST BUT HOPEFULLY A LOT SIMPLER?
+--
+-- THAT'S TOTALLY DOABLE, BUT WOULD REWRITING THIS SCRIPT IN HASKELL BE
+-- EASIER? CERTAINLY SEEMS ARBITRARY TO HAVE JUST THIS ONE PART IN PYTHON.
+-- TRY REWRITING IT FIRST I GUESS IN THE MORNING
 aRecipEach :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aRecipEach cfg oPath lsPath rsPath cDir = do
   need [lsPath', rsPath']
