@@ -135,7 +135,7 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 -- download from NCBI --
 ------------------------
 
--- takes a filter string
+-- takes a filter string (leave empty for all results)
 blastdblist :: CutFunction
 blastdblist = CutFunction
   { fName      = "blastdblist"
@@ -167,7 +167,6 @@ rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
     lTmp'   = toCutPath   cfg listTmp
 rBlastdblist _ _ = error "bad argument to rBlastdblist"
 
--- TODO use a specific cache file instead of stdout so you can... cache it lol
 aBlastdblist :: CutConfig -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdblist cfg oPath listTmp fPath = do
   done <- doesFileExist listTmp'
@@ -249,9 +248,10 @@ makeblastdbProt = CutFunction
   , fRules     = rMakeblastdb
   }
 
--- TODO no! depends on an arg
 tMakeblastdb :: CutType -> TypeChecker
-tMakeblastdb dbType [x] | x `elem` [fna, faa] = Right dbType
+tMakeblastdb dbType [faType]
+  | dbType == pdb && faType   ==    faa       = Right pdb
+  | dbType == ndb && faType `elem` [faa, fna] = Right dbType
 tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 -- TODO why does this get rebuilt one extra time, but *only* one?

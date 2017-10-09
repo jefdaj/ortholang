@@ -1,0 +1,100 @@
+.
+|-- cache
+|   |-- blast
+|   |   |-- 61743b68d0_c839c55439_8b34ebaac9
+|   |   |-- 94af770a6e_88d9d88bbd_8b34ebaac9
+|   |   |-- bbe49aac74_4cf1d518b5_8b34ebaac9
+|   |   |-- bbe49aac74_88d9d88bbd_8b34ebaac9
+|   |   |-- e96cbda315_4cf1d518b5_8b34ebaac9
+|   |   `-- e96cbda315_c839c55439_8b34ebaac9
+|   |-- blastdb
+|   |   `-- blastdbget
+|   |       |-- 56a61c920c
+|   |       |   |-- 56a61c920c.pdb.phr
+|   |       |   |-- 56a61c920c.pdb.pin
+|   |       |   `-- 56a61c920c.pdb.psq
+|   |       |-- 9754c305d1
+|   |       |   |-- 9754c305d1.ndb.nhr
+|   |       |   |-- 9754c305d1.ndb.nin
+|   |       |   `-- 9754c305d1.ndb.nsq
+|   |       `-- f1e136eaf6
+|   |           |-- f1e136eaf6.pdb.phr
+|   |           |-- f1e136eaf6.pdb.pin
+|   |           `-- f1e136eaf6.pdb.psq
+|   |-- map
+|   |   `-- 7e7547db32
+|   |       |-- 0077cceec7.str.list -> $TMPDIR/exprs/extract_queries/250c25d7e3.str.list
+|   |       |-- 0077cceec7.str.list.args
+|   |       |-- 0f49f37222.str.list -> $TMPDIR/exprs/extract_queries/89b408c434.str.list
+|   |       |-- 0f49f37222.str.list.args
+|   |       |-- 4bdc4d8da6.str.list -> $TMPDIR/exprs/extract_queries/8e0c83102d.str.list
+|   |       |-- 4bdc4d8da6.str.list.args
+|   |       |-- 7b21685f1e.str.list -> $TMPDIR/exprs/extract_queries/f703d2ba0a.str.list
+|   |       |-- 7b21685f1e.str.list.args
+|   |       |-- 8be4fbcaf3.str.list -> $TMPDIR/exprs/extract_queries/6ca5d67d48.str.list
+|   |       |-- 8be4fbcaf3.str.list.args
+|   |       |-- b1dc0ba03e.str.list -> $TMPDIR/exprs/extract_queries/f316ebe17b.str.list
+|   |       `-- b1dc0ba03e.str.list.args
+|   `-- tables
+|-- exprs
+|   |-- blastn_db
+|   |   |-- 8df2fbb1a8_d326247d21_8158675169.bht
+|   |   `-- bc4ea1fc06_d326247d21_8158675169.bht
+|   |-- blastp_db
+|   |   |-- 1af4d085e7_67b1500345_8158675169.bht
+|   |   `-- 6e8bd8b7c6_46b5852d89_8158675169.bht
+|   |-- blastx_db
+|   |   |-- 8df2fbb1a8_46b5852d89_8158675169.bht
+|   |   `-- bc4ea1fc06_67b1500345_8158675169.bht
+|   |-- extract_queries
+|   |   |-- 250c25d7e3.str.list
+|   |   |-- 6ca5d67d48.str.list
+|   |   |-- 89b408c434.str.list
+|   |   |-- 8e0c83102d.str.list
+|   |   |-- f316ebe17b.str.list
+|   |   `-- f703d2ba0a.str.list
+|   |-- extract_queries_each
+|   |   `-- a1d3217f11.str.list.list
+|   |-- list
+|   |   `-- 6dc0612e56.bht.list
+|   |-- load_faa
+|   |   |-- 2d88028e40.faa -> $WORKDIR/data/7942genes10.faa
+|   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
+|   |-- load_fna
+|   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
+|   |   |-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
+|   |   `-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
+|   |-- makeblastdb_nucl
+|   |   `-- f5e661a4be.ndb
+|   |-- makeblastdb_prot
+|   |   |-- c08cc19988.pdb
+|   |   `-- c14344af19.pdb
+|   |-- num
+|   |   `-- a53b190835.num
+|   `-- str
+|       |-- 1d8a61c770.str
+|       |-- 4cdbcfa070.str
+|       |-- 50dbefb6d6.str
+|       |-- 7da80bde02.str
+|       |-- 8fa8ede325.str
+|       |-- db90f32127.str
+|       `-- ec3b181d8a.str
+`-- vars
+    |-- hits6803n.bht -> ../exprs/blastn_db/8df2fbb1a8_d326247d21_8158675169.bht
+    |-- hits6803p.bht -> ../exprs/blastp_db/6e8bd8b7c6_46b5852d89_8158675169.bht
+    |-- hits6803x.bht -> ../exprs/blastx_db/8df2fbb1a8_46b5852d89_8158675169.bht
+    |-- hits7942n.bht -> ../exprs/blastn_db/bc4ea1fc06_d326247d21_8158675169.bht
+    |-- hits7942p.bht -> ../exprs/blastp_db/1af4d085e7_67b1500345_8158675169.bht
+    |-- hits7942x.bht -> ../exprs/blastx_db/bc4ea1fc06_67b1500345_8158675169.bht
+    |-- large6803faa.faa -> ../exprs/load_faa/dee24d6c3c.faa
+    |-- large7942faa.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- large7942fna.fna -> ../exprs/load_fna/eb12539f1c.fna
+    |-- result -> ../exprs/extract_queries_each/a1d3217f11.str.list.list
+    |-- small6803faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
+    |-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
+    |-- small7942faa.faa -> ../exprs/load_faa/2d88028e40.faa
+    `-- small7942fna.fna -> ../exprs/load_fna/82b637da24.fna
+
+30 directories, 67 files
