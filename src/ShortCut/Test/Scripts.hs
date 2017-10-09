@@ -10,14 +10,14 @@ import ShortCut.Core.Types        (CutConfig(..))
 import ShortCut.Core.Util         (mkTestGroup)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
                                    takeFileName, (</>), (<.>))
-import System.IO.Silently         (silence)
+import System.IO.Silently         (hSilence)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Hspec                 (it)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 import System.Process             (cwd, readCreateProcess, readProcessWithExitCode, shell)
 import Prelude             hiding (writeFile)
-import System.IO                  (stdout, writeFile)
+import System.IO                  (stdout, stderr, writeFile)
 import Data.Default.Class         (Default(def))
 import qualified Control.Monad.TaggedException as Exception (handle)
 import System.IO.LockFile -- TODO only some of it
@@ -54,7 +54,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "-u", ref, new]
 
 mkScriptTest :: CutConfig -> FilePath -> TestTree
-mkScriptTest cfg gld = goldenDiff "prints the correct result" gld scriptAct
+mkScriptTest cfg gld = goldenDiff "result is correct" gld scriptAct
   where
     scriptRes = (cfgTmpDir cfg </> "vars" </> "result")
     scriptAct = do
@@ -97,7 +97,7 @@ mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
       return $ out ++ err
 
 runCut :: CutConfig -> IO ()
-runCut cfg = withLock cfg $ silence $ evalFile stdout cfg
+runCut cfg = withLock cfg $ hSilence [stdout, stderr] $ evalFile stdout cfg
 
 -- TODO is the IO return type needed?
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath)) -> CutConfig -> IO TestTree

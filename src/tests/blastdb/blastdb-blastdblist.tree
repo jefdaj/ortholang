@@ -1,0 +1,28 @@
+.
+|-- cache
+|   `-- blastdb
+|       `-- blastdbget
+|           `-- dblist.txt
+|-- exprs
+|   |-- blastdblist
+|   |   |-- 4c04f88f38.str.list
+|   |   |-- 93c452e38f.str.list
+|   |   |-- da67996088.str.list
+|   |   `-- fa437bd7a3.str.list
+|   |-- str
+|   |   |-- 072c64781f.str
+|   |   |-- 419a892f8b.str
+|   |   |-- 6634f1bc9a.str
+|   |   `-- 9d4568c009.str
+|   `-- union
+|       |-- 1d547713ed_7a898deeb0.str.list
+|       |-- 3d6d858002_1c725bb84e.str.list
+|       `-- 627a06b957_45f0826180.str.list
+`-- vars
+    |-- dbs.str.list -> ../exprs/blastdblist/4c04f88f38.str.list
+    |-- human.str.list -> ../exprs/blastdblist/da67996088.str.list
+    |-- nrs.str.list -> ../exprs/blastdblist/fa437bd7a3.str.list
+    |-- proks.str.list -> ../exprs/blastdblist/93c452e38f.str.list
+    `-- result -> ../exprs/union/627a06b957_45f0826180.str.list
+
+8 directories, 17 files

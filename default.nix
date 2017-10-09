@@ -18,7 +18,7 @@ let
     ncbi-blast
     crb-blast
     ncurses # TODO is this needed?
-    # pythonPackages.blastdbget # TODO what was this for?
+    pythonPackages.blastdbget
     myPython
   ]
     ++ biomartr.runDepends

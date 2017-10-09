@@ -3,7 +3,7 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
--- import Control.Monad           (when)
+import Control.Monad           (when)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Debug     (debugAction, debugTrackWrite, debugRules)
 import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
@@ -11,7 +11,7 @@ import ShortCut.Core.Compile.Map     (rMapTmp)
 import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath, readLit, writeLit,
                             readLits, writePath, writeLits, toCutPath, CutPath,
                             hashContent)
-import ShortCut.Core.Util      (stripWhiteSpace, digest)
+import ShortCut.Core.Util      (stripWhiteSpace)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>),
                                 makeRelative, takeDirectory)
@@ -149,37 +149,45 @@ filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
+blastDbCache :: CutConfig -> CutPath
+blastDbCache cfg = cacheDir cfg $ "blastdb" </> "blastdbget"
+
 rBlastdblist :: RulesFn
 rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
-  oPath' %> \_ -> aBlastdblist cfg oPath tmpDir sTmp' fPath'
+  let fPath' = toCutPath   cfg fPath
+  oPath' %> \_ -> aBlastdblist cfg oPath lTmp' fPath'
   return (ExprPath oPath')
   where
-    oPath     = exprPath s e
-    stdoutTmp = tmpDir' </> "stdout" <.> "txt"
-    tmpDir    = cacheDir cfg "blastdb"
-    tmpDir'   = fromCutPath cfg tmpDir
-    oPath'    = fromCutPath cfg oPath
-    sTmp'     = toCutPath   cfg stdoutTmp
-    fPath'    = toCutPath   cfg stdoutTmp
+    oPath   = exprPath s e
+    tmpDir  = blastDbCache cfg
+    tmpDir' = fromCutPath cfg tmpDir
+    listTmp = tmpDir' </> "dblist" <.> "txt"
+    oPath'  = fromCutPath cfg oPath
+    lTmp'   = toCutPath   cfg listTmp
 rBlastdblist _ _ = error "bad argument to rBlastdblist"
 
-aBlastdblist :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
-aBlastdblist cfg oPath tmpDir stdoutTmp fPath = do
-  wrappedCmd cfg [oPath'] [Shell] "blastdbget" [tmpDir', ">", fPath']
-  -- TODO should this strip newlines on its own? seems important
+-- TODO use a specific cache file instead of stdout so you can... cache it lol
+aBlastdblist :: CutConfig -> CutPath -> CutPath -> CutPath -> Action ()
+aBlastdblist cfg oPath listTmp fPath = do
+  done <- doesFileExist listTmp'
+  when (not done) $ do
+    liftIO $ createDirectoryIfMissing True tmpDir
+    -- This one is tricky because it exits 1 on success
+    -- (I guess listing the dbs is seen as a failure to download one?)
+    Exit _ <- cmd (Cwd tmpDir) Shell "blastdbget"  tmpDir ">" listTmp'
+    debugTrackWrite cfg [listTmp']
   filterStr <- readLit  cfg fPath'
-  out       <- readLits cfg stdoutTmp'
-  let names = if null filterStr || null out
-                then []
-                else filterNames (init filterStr) (tail out)
-  writeLits cfg oPath' names
+  out       <- readLits cfg listTmp'
+  let names  = if null out then [] else tail out
+      names' = if null filterStr then names else filterNames filterStr names
+  writeLits cfg oPath'' names'
   where
-    fPath'     = fromCutPath cfg fPath
-    oPath'     = fromCutPath cfg oPath
-    tmpDir'    = fromCutPath cfg tmpDir
-    stdoutTmp' = fromCutPath cfg stdoutTmp
-    oPath'' = debugAction cfg "aBlastdblist" oPath' [oPath', tmpDir', stdoutTmp', fPath']
+    fPath'   = fromCutPath cfg fPath
+    oPath'   = fromCutPath cfg oPath
+    listTmp' = fromCutPath cfg listTmp
+    tmpDir   = takeDirectory $ listTmp'
+    oPath''  = debugAction cfg "aBlastdblist" oPath' [oPath', tmpDir, listTmp', fPath']
 
 -- TODO do I need to adjust the timeout? try on the cluster first
 blastdbget :: CutFunction
@@ -193,7 +201,7 @@ blastdbget = CutFunction
 rBlastdbget :: RulesFn
 rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
-  let tmpDir    = cacheDir cfg "blastdb"
+  let tmpDir    = blastDbCache cfg
       dbPrefix  = exprPath st e -- final prefix
       dbPrefix' = fromCutPath cfg dbPrefix
       nPath'    = toCutPath cfg nPath
@@ -255,7 +263,7 @@ rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdb" e $ fromCutPath cfg out
-      cDir      = cacheDir cfg "blastdb" -- ++ dbType -- TODO blastdb?
+      cDir      = blastDbCache cfg
       -- dbType    = if rtn == ndb then "_nucl" else "_prot"
       -- dbPrefix  = (fromCutPath cfg cDir) </> digest (exprPath s fa)
       -- dbPrefix' = toCutPath cfg dbPrefix
