@@ -41,7 +41,7 @@ mkSetBop name fn = CutFunction
   { fName      = name
   , fTypeCheck = bopTypeCheck
   , fFixity    = Infix
-  , fRules  = rSetBop fn
+  , fRules     = rSetBop fn
   }
 
 -- if the user gives two lists but of different types, complain that they must

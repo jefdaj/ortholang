@@ -149,9 +149,6 @@ filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
-blastDbCache :: CutConfig -> CutPath
-blastDbCache cfg = cacheDir cfg $ "blastdb" </> "blastdbget"
-
 rBlastdblist :: RulesFn
 rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
@@ -160,7 +157,7 @@ rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   return (ExprPath oPath')
   where
     oPath   = exprPath s e
-    tmpDir  = blastDbCache cfg
+    tmpDir  = cacheDir cfg $ "blastdb" </> "blastdbget"
     tmpDir' = fromCutPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
     oPath'  = fromCutPath cfg oPath
@@ -200,7 +197,7 @@ blastdbget = CutFunction
 rBlastdbget :: RulesFn
 rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
-  let tmpDir    = blastDbCache cfg
+  let tmpDir    = cacheDir cfg $ "blastdb" </> "blastdbget"
       dbPrefix  = exprPath st e -- final prefix
       dbPrefix' = fromCutPath cfg dbPrefix
       nPath'    = toCutPath cfg nPath
@@ -263,7 +260,7 @@ rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdb" e $ fromCutPath cfg out
-      cDir      = blastDbCache cfg
+      cDir      = cacheDir cfg $ "blastdb"
       -- dbType    = if rtn == ndb then "_nucl" else "_prot"
       -- dbPrefix  = (fromCutPath cfg cDir) </> digest (exprPath s fa)
       -- dbPrefix' = toCutPath cfg dbPrefix

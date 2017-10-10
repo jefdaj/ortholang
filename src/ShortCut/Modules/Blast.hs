@@ -47,9 +47,10 @@ cutModule = CutModule
     ] ++
 
     -- new description-based functions:
+    -- TODO remove the ones that don't apply to each fn type!
     map mkBlastFromDb     blastDescs ++
     map mkBlastFromFa     blastDescs ++
-    map newMkBlastRev     blastDescs ++
+    map mkBlastRev  blastDescs ++
     map newMkBlastEach    blastDescs ++
     map newMkBlastRevEach blastDescs
   }
@@ -96,10 +97,9 @@ mkBlastFromDb (bCmd, qType, _, dbType) = CutFunction
   , fRules     = rSimpleTmp (aBlastFromDb bCmd) "blast" bht
   }
 
--- TODO mention db in fn name?
 aBlastFromDb :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
 aBlastFromDb bCmd cfg _ paths@[o, q, p, e] = do
-  liftIO $ putStrLn $ "aBlastFromDb args: " ++ show paths
+  -- liftIO $ putStrLn $ "aBlastFromDb args: " ++ show paths
   eStr   <- readLit cfg e'
   -- TODO why does this have the complete dna sequence in it when using tblastn_each??
   prefix <- readPath cfg p'
@@ -109,8 +109,8 @@ aBlastFromDb bCmd cfg _ paths@[o, q, p, e] = do
       dbg     = if cfgDebug cfg then ["-v"] else []
       args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  liftIO $ putStrLn $ "prefix: " ++ show prefix
-  liftIO $ putStrLn $ "prefix': " ++ prefix'
+  -- liftIO $ putStrLn $ "prefix: " ++ show prefix
+  -- liftIO $ putStrLn $ "prefix': " ++ prefix'
   unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
                      "parallelblast.py" args
   debugTrackWrite cfg [o'']
@@ -143,14 +143,25 @@ rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps name [q, s, e])
     dbExpr = CutFun dbType salt [] dbName [s] -- TODO deps OK?
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
--- *blast*_rev
-newMkBlastRev :: BlastDesc -> CutFunction
-newMkBlastRev (bCmd, qType, _, dbType) = CutFunction
-  { fName      = "new_" ++ bCmd ++ "_rev"
-  , fTypeCheck = defaultTypeCheck [qType, dbType, num] bht
+-----------------
+-- *blast*_rev --
+-----------------
+
+mkBlastRev :: BlastDesc -> CutFunction
+mkBlastRev d@(bCmd, qType, sType, _) = CutFunction
+  { fName      = bCmd ++ "_rev"
+  , fTypeCheck = defaultTypeCheck [sType, qType, num] bht
   , fFixity    = Prefix
-  , fRules     = undefined
+  , fRules     = rMkBlastRev d
   }
+
+-- flips the query and subject arguments and reuses the regular compiler above
+rMkBlastRev :: BlastDesc -> RulesFn
+rMkBlastRev d st (CutFun rtn salt deps name [q, s, e])
+  = rulesFn   st (CutFun rtn salt deps name [s, q, e])
+  where
+    rulesFn = fRules $ mkBlastFromFa d
+rMkBlastRev _ _ _ = error "bad argument to rMkBlastRev"
 
 -- TODO how to do rev_each? db_each? _db_rev_each/_rev_db_each?
 -- *blast*_each
