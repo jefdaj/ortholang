@@ -1,97 +1,97 @@
 .
 |-- cache
 |   |-- blast
-|   |   |-- 61743b68d0_c839c55439_8b34ebaac9
-|   |   |-- 94af770a6e_88d9d88bbd_8b34ebaac9
-|   |   |-- bbe49aac74_4cf1d518b5_8b34ebaac9
-|   |   |-- bbe49aac74_88d9d88bbd_8b34ebaac9
-|   |   |-- e96cbda315_4cf1d518b5_8b34ebaac9
-|   |   `-- e96cbda315_c839c55439_8b34ebaac9
+|   |   |-- 1a30e79096_6ede56e67b_7a62a07b60
+|   |   |-- 210074a765_6ede56e67b_7a62a07b60
+|   |   |-- 210074a765_87d7cf37c4_7a62a07b60
+|   |   |-- 8f224de255_3c74212246_7a62a07b60
+|   |   |-- 8f224de255_6ede56e67b_7a62a07b60
+|   |   `-- 9bc36aefad_6ede56e67b_7a62a07b60
 |   |-- blastdb
 |   |   `-- blastdbget
-|   |       |-- 56a61c920c
-|   |       |   |-- 56a61c920c.pdb.phr
-|   |       |   |-- 56a61c920c.pdb.pin
-|   |       |   `-- 56a61c920c.pdb.psq
+|   |       |-- 63b6fa9145
+|   |       |   |-- 63b6fa9145.pdb.phr
+|   |       |   |-- 63b6fa9145.pdb.pin
+|   |       |   `-- 63b6fa9145.pdb.psq
 |   |       |-- 9754c305d1
 |   |       |   |-- 9754c305d1.ndb.nhr
 |   |       |   |-- 9754c305d1.ndb.nin
 |   |       |   `-- 9754c305d1.ndb.nsq
-|   |       `-- f1e136eaf6
-|   |           |-- f1e136eaf6.pdb.phr
-|   |           |-- f1e136eaf6.pdb.pin
-|   |           `-- f1e136eaf6.pdb.psq
+|   |       `-- ce746b5c13
+|   |           |-- ce746b5c13.ndb.nhr
+|   |           |-- ce746b5c13.ndb.nin
+|   |           `-- ce746b5c13.ndb.nsq
 |   |-- map
-|   |   `-- 7e7547db32
-|   |       |-- 0077cceec7.str.list -> $TMPDIR/exprs/extract_queries/250c25d7e3.str.list
-|   |       |-- 0077cceec7.str.list.args
-|   |       |-- 0f49f37222.str.list -> $TMPDIR/exprs/extract_queries/89b408c434.str.list
-|   |       |-- 0f49f37222.str.list.args
-|   |       |-- 4bdc4d8da6.str.list -> $TMPDIR/exprs/extract_queries/8e0c83102d.str.list
-|   |       |-- 4bdc4d8da6.str.list.args
-|   |       |-- 7b21685f1e.str.list -> $TMPDIR/exprs/extract_queries/f703d2ba0a.str.list
-|   |       |-- 7b21685f1e.str.list.args
-|   |       |-- 8be4fbcaf3.str.list -> $TMPDIR/exprs/extract_queries/6ca5d67d48.str.list
-|   |       |-- 8be4fbcaf3.str.list.args
-|   |       |-- b1dc0ba03e.str.list -> $TMPDIR/exprs/extract_queries/f316ebe17b.str.list
-|   |       `-- b1dc0ba03e.str.list.args
+|   |   `-- f61bea6fe7
+|   |       |-- 2e37902111.str.list -> $TMPDIR/exprs/extract_queries/411b8b60bb.str.list
+|   |       |-- 2e37902111.str.list.args
+|   |       |-- 4ff432fbc4.str.list -> $TMPDIR/exprs/extract_queries/6ca5d67d48.str.list
+|   |       |-- 4ff432fbc4.str.list.args
+|   |       |-- 6eb5d384c6.str.list -> $TMPDIR/exprs/extract_queries/f316ebe17b.str.list
+|   |       |-- 6eb5d384c6.str.list.args
+|   |       |-- 7fd6bd15c3.str.list -> $TMPDIR/exprs/extract_queries/89b408c434.str.list
+|   |       |-- 7fd6bd15c3.str.list.args
+|   |       |-- b67acd6dc7.str.list -> $TMPDIR/exprs/extract_queries/c7ee068e0c.str.list
+|   |       |-- b67acd6dc7.str.list.args
+|   |       |-- ce2e621e3c.str.list -> $TMPDIR/exprs/extract_queries/c766fb7fdd.str.list
+|   |       `-- ce2e621e3c.str.list.args
 |   `-- tables
 |-- exprs
 |   |-- blastn_db
-|   |   |-- 8df2fbb1a8_d326247d21_8158675169.bht
+|   |   |-- 8df2fbb1a8_a78dfa6d35_8158675169.bht
 |   |   `-- bc4ea1fc06_d326247d21_8158675169.bht
 |   |-- blastp_db
 |   |   |-- 1af4d085e7_67b1500345_8158675169.bht
-|   |   `-- 6e8bd8b7c6_46b5852d89_8158675169.bht
+|   |   `-- 6e8bd8b7c6_67b1500345_8158675169.bht
 |   |-- blastx_db
-|   |   |-- 8df2fbb1a8_46b5852d89_8158675169.bht
+|   |   |-- 8df2fbb1a8_67b1500345_8158675169.bht
 |   |   `-- bc4ea1fc06_67b1500345_8158675169.bht
 |   |-- extract_queries
-|   |   |-- 250c25d7e3.str.list
+|   |   |-- 411b8b60bb.str.list
 |   |   |-- 6ca5d67d48.str.list
 |   |   |-- 89b408c434.str.list
-|   |   |-- 8e0c83102d.str.list
-|   |   |-- f316ebe17b.str.list
-|   |   `-- f703d2ba0a.str.list
+|   |   |-- c766fb7fdd.str.list
+|   |   |-- c7ee068e0c.str.list
+|   |   `-- f316ebe17b.str.list
 |   |-- extract_queries_each
-|   |   `-- a1d3217f11.str.list.list
+|   |   `-- 621981ce15.str.list.list
 |   |-- list
-|   |   `-- 6dc0612e56.bht.list
+|   |   `-- 06a6a4b75f.bht.list
 |   |-- load_faa
 |   |   |-- 2d88028e40.faa -> $WORKDIR/data/7942genes10.faa
-|   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
 |   |   |-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
 |   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
 |   |   |-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
-|   |   `-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
+|   |   |-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
+|   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
 |   |-- makeblastdb_nucl
-|   |   `-- f5e661a4be.ndb
+|   |   |-- f5e661a4be.ndb
+|   |   `-- fddf135b43.ndb
 |   |-- makeblastdb_prot
-|   |   |-- c08cc19988.pdb
 |   |   `-- c14344af19.pdb
 |   |-- num
 |   |   `-- a53b190835.num
 |   `-- str
-|       |-- 1d8a61c770.str
 |       |-- 4cdbcfa070.str
 |       |-- 50dbefb6d6.str
 |       |-- 7da80bde02.str
 |       |-- 8fa8ede325.str
+|       |-- a2fd369878.str
 |       |-- db90f32127.str
 |       `-- ec3b181d8a.str
 `-- vars
-    |-- hits6803n.bht -> ../exprs/blastn_db/8df2fbb1a8_d326247d21_8158675169.bht
-    |-- hits6803p.bht -> ../exprs/blastp_db/6e8bd8b7c6_46b5852d89_8158675169.bht
-    |-- hits6803x.bht -> ../exprs/blastx_db/8df2fbb1a8_46b5852d89_8158675169.bht
+    |-- hits6803n.bht -> ../exprs/blastn_db/8df2fbb1a8_a78dfa6d35_8158675169.bht
+    |-- hits6803p.bht -> ../exprs/blastp_db/6e8bd8b7c6_67b1500345_8158675169.bht
+    |-- hits6803x.bht -> ../exprs/blastx_db/8df2fbb1a8_67b1500345_8158675169.bht
     |-- hits7942n.bht -> ../exprs/blastn_db/bc4ea1fc06_d326247d21_8158675169.bht
     |-- hits7942p.bht -> ../exprs/blastp_db/1af4d085e7_67b1500345_8158675169.bht
     |-- hits7942x.bht -> ../exprs/blastx_db/bc4ea1fc06_67b1500345_8158675169.bht
     |-- large6803faa.faa -> ../exprs/load_faa/dee24d6c3c.faa
-    |-- large7942faa.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- large6803fna.fna -> ../exprs/load_fna/f110b4b1c9.fna
     |-- large7942fna.fna -> ../exprs/load_fna/eb12539f1c.fna
-    |-- result -> ../exprs/extract_queries_each/a1d3217f11.str.list.list
+    |-- result -> ../exprs/extract_queries_each/621981ce15.str.list.list
     |-- small6803faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
     |-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
     |-- small7942faa.faa -> ../exprs/load_faa/2d88028e40.faa

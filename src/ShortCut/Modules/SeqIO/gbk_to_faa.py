@@ -10,9 +10,38 @@
 from Bio import SeqIO
 from sys import argv
 
+# silence warnings
+import warnings
+from Bio import BiopythonParserWarning
+warnings.simplefilter('ignore', BiopythonParserWarning)
+
 tmpdir = argv[1] # passed by convention but not used (TODO: remove?)
 outfaa = argv[2]
 ingbk  = argv[3]
+
+def seqid(seq_feature):
+    seqid = []
+    # pick an id
+    for q in ['locus_tag', 'protein_id']:
+        if q in seq_feature.qualifiers:
+            seqid = seq_feature.qualifiers[q]
+            break
+    if not seqid:
+        raise Exception('no seqid found for feature: %s' % seq_feature)
+    # add other info as the description
+    desc = []
+    desckeys = ['gene', 'product', 'inference', 'note']
+    if 'locus_tag' in seq_feature.qualifiers:
+        desckeys = ['protein_id'] + desckeys
+    for q in desckeys:
+        try:
+            val = seq_feature.qualifiers[q][0]
+            if not 'ORF_ID' in val:
+                desc.append(val)
+        except:
+            pass
+    seqid = ' '.join(seqid + desc)
+    return seqid
 
 # adapted from:
 # http://www2.warwick.ac.uk/fac/sci/moac/people/students/peter_cock/python/genbank2fasta
@@ -24,7 +53,6 @@ with open(outfaa, 'w') as out:
       # assert len(seq_feature.qualifiers['locus_tag']) == 1
       # assert len(seq_feature.qualifiers['product']) == 1
       # assert len(seq_feature.qualifiers['translation']) == 1
-      sid   = seq_feature.qualifiers['locus_tag'][0]
-      sprod = seq_feature.qualifiers['product'][0]
+      sid = seqid(seq_feature)
       seq   = seq_feature.qualifiers['translation'][0]
-      out.write(">%s %s\n%s\n" % (sid, sprod, seq))
+      out.write(">%s\n%s\n" % (sid, seq))
