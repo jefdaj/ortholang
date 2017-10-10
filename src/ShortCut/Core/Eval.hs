@@ -29,9 +29,11 @@ import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (fromJust, maybeToList)
 import ShortCut.Core.Compile.Basic          (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
-import ShortCut.Core.Pretty           (prettyResult)
+import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath,
+                                       readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                (Handle, hPutStrLn)
+import Text.PrettyPrint.HughesPJClass
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -49,6 +51,30 @@ myShake cfg = shake myOpts . alternatives
       -- , shakeLineBuffering = False
       }
 
+{- This seems to be separately required to show the final result of eval.
+ - It can't be moved to Pretty.hs either because that causes an import cycle.
+ -
+ - TODO is there a way to get rid of it?
+ - TODO rename prettyContents? prettyResult?
+ - TODO should this actually open external programs
+ - TODO idea for sets: if any element contains "\n", just add blank lines between them
+ - TODO clean this up!
+ -}
+prettyResult :: CutConfig -> CutType -> CutPath -> Action Doc
+prettyResult _ EmptyList  _ = return $ text "[]"
+prettyResult cfg (ListOf t) f
+  | t `elem` [str, num] = do
+    lits <- readLits cfg $ fromCutPath cfg f
+    let lits' = if t == str
+                  then map (\s -> text $ "\"" ++ s ++ "\"") lits
+                  else map text lits
+    return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
+  | otherwise = do
+    paths <- readPaths cfg $ fromCutPath cfg f
+    pretties <- mapM (prettyResult cfg t) paths
+    return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
+prettyResult cfg t f = liftIO $ fmap text $ (tShow t) (fromCutPath cfg f)
+
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
 -- TODO rename `runRules` or `runShake`?
@@ -64,9 +90,8 @@ eval hdl cfg rtype = ignoreErrors . eval'
       "eval" ~> do
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
-        liftIO $ do
-          res <- prettyResult cfg rtype path
-          hPutStrLn hdl $ render res
+        res <- prettyResult cfg rtype $ toCutPath cfg path
+        liftIO $ hPutStrLn hdl $ render res
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()

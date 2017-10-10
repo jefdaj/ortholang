@@ -2,7 +2,7 @@
 
 module ShortCut.Core.Pretty
   ( prettyShow
-  , prettyResult
+  -- , prettyResult (moved to Eval)
   , writeScript
   , CutExpr(..)
   )
@@ -84,42 +84,3 @@ instance Pretty CutModule where
 
 -- instance Show CutModule where
   -- show = prettyShow
-
--- This is pasted from Paths.hs to avoid an import cycle.
--- Seems OK since it's just temporary anyway right?
-fromGeneric :: CutConfig -> String -> String
-fromGeneric cfg txt = replace "$TMPDIR"  (cfgTmpDir  cfg)
-                    $ replace "$WORKDIR" (cfgWorkDir cfg)
-                    $ txt
-
--- TODO remove the else part once CutPaths are established
-fixPath :: CutConfig -> FilePath -> FilePath
-fixPath cfg path = if head path == '$'
-                     then fromGeneric cfg path
-                     else cfgTmpDir cfg </> path
-
--- This seems to be separately required to show the final result of eval
--- TODO is there a way to get rid of it?
--- TODO rename prettyContents? prettyResult?
--- TODO should this actually open external programs
--- TODO idea for sets: if any element contains "\n", just add blank lines between them
--- TODO clean this up!
-prettyResult :: CutConfig -> CutType -> FilePath -> IO Doc
-prettyResult _ EmptyList  _ = return $ text "[]"
-prettyResult cfg (ListOf t) f
-  | t `elem` [str, num] = do
-    -- liftIO $ putStrLn $ "pretty list of " ++ show t
-    -- liftIO $ putStrLn $ "from file " ++ f
-    lits     <- fmap lines $ readFile $ fixPath cfg f
-    -- liftIO $ putStrLn $ "lits are: " ++ show lits
-    let lits' = if t == str
-                  then map (\s -> text $ "\"" ++ s ++ "\"") lits
-                  else map text lits
-    return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
-  | otherwise = do
-    liftIO $ putStrLn $ "pretty list of " ++ show t
-    paths    <- fmap lines $ readFile $ fixPath cfg f
-    liftIO $ putStrLn $ "paths: " ++ show paths
-    pretties <- mapM (prettyResult cfg t) paths
-    return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg t f = fmap text $ (tShow t) (fixPath cfg f)
