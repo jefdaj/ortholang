@@ -25,17 +25,17 @@ cutModule = CutModule
   { mName = "blast"
   , mFunctions =
     -- old functions to replace:
-    [ oldMkBlastFn        "blastn" fna fna ndb -- TODO why doesn't this one work??
-    , oldMkBlastFn        "blastp" faa faa pdb
-    , oldMkBlastFn        "blastx" fna faa pdb
-    , oldMkBlastFn       "tblastn" faa fna ndb
-    , oldMkBlastFn       "tblastx" fna fna ndb
+    -- [ oldMkBlastFn        "blastn" fna fna ndb -- TODO why doesn't this one work??
+    -- , oldMkBlastFn        "blastp" faa faa pdb
+    -- , oldMkBlastFn        "blastx" fna faa pdb
+    -- , oldMkBlastFn       "tblastn" faa fna ndb
+    -- , oldMkBlastFn       "tblastx" fna fna ndb
     -- , oldMkBlastDb      "blastn" fna ndb -- TODO why doesn't this one work??
     -- , oldMkBlastDb      "blastp" faa pdb
     -- , oldMkBlastDb      "blastx" fna pdb
     -- , oldMkBlastDb     "tblastn" faa ndb
     -- , oldMkBlastDb     "tblastx" fna ndb
-    , oldMkBlastEachFn    "blastn" fna fna ndb -- TODO why doesn't this one work??
+    [ oldMkBlastEachFn    "blastn" fna fna ndb -- TODO why doesn't this one work??
     , oldMkBlastEachFn    "blastp" faa faa pdb
     , oldMkBlastEachFn    "blastx" fna faa pdb
     , oldMkBlastEachFn   "tblastn" faa fna ndb
@@ -47,8 +47,8 @@ cutModule = CutModule
     ] ++
 
     -- new description-based functions:
-    map mkBlastFromDb      blastDescs ++
-    map newMkBlastFa      blastDescs ++
+    map mkBlastFromDb     blastDescs ++
+    map mkBlastFromFa     blastDescs ++
     map newMkBlastRev     blastDescs ++
     map newMkBlastEach    blastDescs ++
     map newMkBlastRevEach blastDescs
@@ -122,16 +122,26 @@ aBlastFromDb bCmd cfg _ paths@[o, q, p, e] = do
     o'' = debugAction cfg "aBlastFromDb" o' [bCmd, o', q', p', e']
 aBlastFromDb _ _ _ _ = error $ "bad argument to aBlastFromDb"
 
+-------------
+-- *blast* --
+-------------
 
-
--- *blast*
-newMkBlastFa :: BlastDesc -> CutFunction
-newMkBlastFa (bCmd, qType, sType, _) = CutFunction
-  { fName      = "new_" ++ bCmd
+mkBlastFromFa :: BlastDesc -> CutFunction
+mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
+  { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
   , fFixity    = Prefix
-  , fRules     = undefined
+  , fRules     = rMkBlastFromFa d
   }
+
+-- inserts a "makeblastdb" call and reuses the _db compiler from above
+rMkBlastFromFa :: BlastDesc -> RulesFn
+rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps name [q, s, e])
+  = fRules (mkBlastFromDb d) st (CutFun rtn salt deps name [q, dbExpr, e])
+  where
+    dbName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+    dbExpr = CutFun dbType salt [] dbName [s] -- TODO deps OK?
+rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
 -- *blast*_rev
 newMkBlastRev :: BlastDesc -> CutFunction
@@ -165,41 +175,6 @@ newMkBlastRevEach (bCmd, qType, _, dbType) = CutFunction
 ---------------------------------
 -- (old) basic blast+ commands --
 ---------------------------------
-
--- the "regular" function that requires an existing blast db
--- oldMkBlastDb :: String -> CutType -> CutType -> CutFunction
--- oldMkBlastDb bCmd qType dbType = CutFunction
---   { fName      = bCmd ++ "_db"
---   , fTypeCheck = defaultTypeCheck [qType, dbType, num] bht
---   , fFixity    = Prefix
---   , fRules  = rOldMkBlastDb bCmd aOldParBlast
---   }
-
--- the "fancy" one that makes the db from a fasta file
--- (this is what i imagine users will usually want)
-oldMkBlastFn :: String -> CutType -> CutType -> CutType -> CutFunction
-oldMkBlastFn bCmd qType sType dbType = CutFunction
-  { fName      = bCmd
-  , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
-  , fFixity    = Prefix
-  , fRules  = rOldMkBlastFn bCmd dbType aOldParBlast
-  }
-
-rOldMkBlastDb :: String -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
-rOldMkBlastDb bCmd bActFn = rSimpleTmp (bActFn bCmd) "blast" bht
-
--- convert the fasta file to a db and pass to the db version (above)
-rOldMkBlastFn :: String -> CutType -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
-rOldMkBlastFn c dbType a s e = rOldMkBlastDb c a s $ oldAddMakeDBCall1 e dbType
-
--- TODO why doesn't this `need` the db out path?
-oldAddMakeDBCall1 :: CutExpr -> CutType -> CutExpr
-oldAddMakeDBCall1 (CutFun r i ds n [q, s, e]) dbType = CutFun r i ds n [q, db, e]
-  where
-    -- dbType = if typeOf s `elem` [fna, ListOf fna] then ndb else pdb -- TODO maybe it's (ListOf fna)?
-    db = CutFun dbType i (depsOf s) name [s]
-    name = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-oldAddMakeDBCall1 _ _ = error "bad argument to oldAddMakeDBCall1"
 
 -- as a quick kludge, duplicated this and rearranged the args
 -- TODO validation function so I can't mess up constructing these by hand? aha! write strings + parse normally!
