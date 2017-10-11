@@ -1,12 +1,16 @@
 .
+|-- cache
+|   `-- list
+|       |-- ac2cb07d42.txt
+|       `-- d8166958d0.txt
 |-- exprs
 |   |-- list
-|   |   |-- 0bd7d20130.str.list
-|   |   `-- b07a253658.str.list.list
+|   |   |-- 0bd7d20130.str.list -> ../../cache/list/d8166958d0.txt
+|   |   `-- b07a253658.str.list.list -> ../../cache/list/ac2cb07d42.txt
 |   `-- str
 |       `-- a2a665650c.str
 |-- history.txt
 `-- vars
     `-- result -> ../exprs/list/b07a253658.str.list.list
 
-4 directories, 5 files
+6 directories, 7 files

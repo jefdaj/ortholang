@@ -1,8 +1,12 @@
 .
+|-- cache
+|   `-- list
+|       |-- c0001ec330.txt
+|       `-- e066bf52e0.txt
 |-- exprs
 |   |-- list
-|   |   |-- 24a2410ed3.num.list
-|   |   `-- c4c5930fb6.num.list
+|   |   |-- 24a2410ed3.num.list -> ../../cache/list/c0001ec330.txt
+|   |   `-- c4c5930fb6.num.list -> ../../cache/list/e066bf52e0.txt
 |   |-- multiply
 |   |   |-- 2ce3c868d8_1e176ee1c9.num
 |   |   |-- 2ce3c868d8_2d69b2ef58.num
@@ -258,4 +262,4 @@
     |-- result.f8fd52c533.num.list -> ../vars/rep1.be00588729.f8fd52c533.num.list
     `-- result.f9a4a0eabe.num -> ../vars/dep.be00588729.2e9961938c.f9a4a0eabe.num
 
-6 directories, 252 files
+8 directories, 254 files

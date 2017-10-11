@@ -1,4 +1,4 @@
-# This tests the *blast*_rev functions. They aren't very useful on their own,
+# This tests the *blast*_rev* functions. They aren't very useful on their own,
 # but make it easier to write reciprocal best hits because you can write the
 # reverse call by pasting the forward one and adding "_rev".
 
@@ -10,6 +10,7 @@ large = load_fna "data/7942genes.fna"
 # fwds = blastn     small large 1e-5
 # revs = blastn_rev large small 1e-5
 
-fwds = extract_queries (blastn     1e-5 small large)
-revs = extract_queries (blastn_rev 1e-5 large small)
-result = (fwds ~ revs) | (revs ~ fwds)
+fwds  = extract_queries      (blastn          1e-5 small  large )
+srevs = extract_queries      (blastn_rev      1e-5 large  small )
+# mrevs = extract_queries_each (blastn_rev_each 1e-5 large [small])
+result = (fwds ~ srevs) | (srevs ~ fwds) # | (mrevs ~ [srevs])

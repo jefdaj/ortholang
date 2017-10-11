@@ -1,15 +1,23 @@
 .
+|-- cache
+|   `-- list
+|       |-- 153180d7e5.txt
+|       |-- 2a13ac791a.txt
+|       |-- 308602d525.txt
+|       |-- 3bd20a193b.txt
+|       |-- b92299bb10.txt
+|       `-- f669890081.txt
 |-- exprs
 |   |-- list
-|   |   |-- 164fd44466.num.list.list
-|   |   |-- 594b2cc5a2.num.list.list
-|   |   |-- 68a3e42292.num.list.list
-|   |   |-- 7363b51fb9.num.list
-|   |   |-- 74e18bd7d8.num.list.list
-|   |   |-- 9093e4ae21.num.list
-|   |   |-- 9316de3883.num.list
-|   |   |-- c282daa44c.num.list
-|   |   `-- e8ec6307e5.num.list
+|   |   |-- 164fd44466.num.list.list -> ../../cache/list/3bd20a193b.txt
+|   |   |-- 594b2cc5a2.num.list.list -> ../../cache/list/153180d7e5.txt
+|   |   |-- 68a3e42292.num.list.list -> ../../cache/list/308602d525.txt
+|   |   |-- 7363b51fb9.num.list -> ../../cache/list/2a13ac791a.txt
+|   |   |-- 74e18bd7d8.num.list.list -> ../../cache/list/b92299bb10.txt
+|   |   |-- 9093e4ae21.num.list -> ../../cache/list/2a13ac791a.txt
+|   |   |-- 9316de3883.num.list -> ../../cache/list/2a13ac791a.txt
+|   |   |-- c282daa44c.num.list -> ../../cache/list/f669890081.txt
+|   |   `-- e8ec6307e5.num.list -> ../../cache/list/2a13ac791a.txt
 |   |-- multiply
 |   |   |-- 07f5f6f02b_6d57e8642a.num
 |   |   |-- 839f0ba255_6d57e8642a.num
@@ -69,4 +77,4 @@
     |-- var2.a910eea1e0.num.list -> ../exprs/repeat/fd7315e8d4_df9846a7f4_9cf109b089.num.list
     `-- var2.af72dc906e.num.list -> ../exprs/repeat/3fc10e4dd3_f8d5fefdd1_9cf109b089.num.list
 
-6 directories, 63 files
+8 directories, 69 files

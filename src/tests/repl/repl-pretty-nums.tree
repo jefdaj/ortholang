@@ -1,11 +1,16 @@
 .
+|-- cache
+|   `-- list
+|       |-- 1c441b2ccd.txt
+|       |-- 42fb7081a8.txt
+|       `-- 558d528228.txt
 |-- exprs
 |   |-- add
 |   |   `-- fba69f6eb2_4578706b58.num
 |   |-- list
-|   |   |-- 2b8dc08526.num.list
-|   |   |-- 6dd0733494.num.list
-|   |   `-- b80c72ef6d.num.list
+|   |   |-- 2b8dc08526.num.list -> ../../cache/list/42fb7081a8.txt
+|   |   |-- 6dd0733494.num.list -> ../../cache/list/1c441b2ccd.txt
+|   |   `-- b80c72ef6d.num.list -> ../../cache/list/558d528228.txt
 |   `-- num
 |       |-- 3b0978a4fa.num
 |       |-- 3bd2aa8a34.num
@@ -22,4 +27,4 @@
 `-- vars
     `-- result -> ../exprs/list/6dd0733494.num.list
 
-5 directories, 17 files
+7 directories, 20 files

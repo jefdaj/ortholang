@@ -1,15 +1,21 @@
 .
+|-- cache
+|   `-- list
+|       |-- 002ed9e614.txt
+|       |-- 4949eea072.txt
+|       |-- 57ead42262.txt
+|       `-- 9c39ed92e9.txt
 |-- exprs
 |   |-- leave_each_out
 |   |   `-- aa40b826ea.num.list.list.list
 |   |-- list
-|   |   |-- 22fea5b2ef.num.list.list
-|   |   |-- 46dcadb3b5.num.list.list
-|   |   |-- 539c779beb.num.list.list
-|   |   |-- 7472d1bd6c.num.list
-|   |   |-- d886da37f0.num.list.list
-|   |   |-- f11e0b1ea5.num.list
-|   |   `-- fe5a87b3e4.num.list
+|   |   |-- 46dcadb3b5.num.list.list -> ../../cache/list/9c39ed92e9.txt
+|   |   |-- 5e5965979a.num.list.list
+|   |   |-- 7472d1bd6c.num.list -> ../../cache/list/57ead42262.txt
+|   |   |-- af240b8c1b.num.list.list
+|   |   |-- ed965fe717.num.list.list
+|   |   |-- f11e0b1ea5.num.list -> ../../cache/list/4949eea072.txt
+|   |   `-- fe5a87b3e4.num.list -> ../../cache/list/002ed9e614.txt
 |   `-- num
 |       |-- 89fb8b4aed.num
 |       |-- a629005e3c.num
@@ -19,4 +25,4 @@
 `-- vars
     `-- result -> ../exprs/leave_each_out/aa40b826ea.num.list.list.list
 
-5 directories, 14 files
+7 directories, 18 files

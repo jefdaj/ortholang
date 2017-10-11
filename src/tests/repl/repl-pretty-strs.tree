@@ -1,9 +1,14 @@
 .
+|-- cache
+|   `-- list
+|       |-- 6b31695827.txt
+|       |-- 8de9a8687f.txt
+|       `-- 914fe5e0a7.txt
 |-- exprs
 |   |-- list
-|   |   |-- 0b85a1d6fa.str.list
-|   |   |-- 4c1f2f14a0.str.list
-|   |   `-- e98e8cf304.str.list
+|   |   |-- 0b85a1d6fa.str.list -> ../../cache/list/8de9a8687f.txt
+|   |   |-- 4c1f2f14a0.str.list -> ../../cache/list/914fe5e0a7.txt
+|   |   `-- e98e8cf304.str.list -> ../../cache/list/6b31695827.txt
 |   `-- str
 |       |-- 0a47f01093.str
 |       |-- 0ec5091ee0.str
@@ -31,4 +36,4 @@
 `-- vars
     `-- result -> ../exprs/list/0b85a1d6fa.str.list
 
-4 directories, 27 files
+6 directories, 30 files

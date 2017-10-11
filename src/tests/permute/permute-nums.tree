@@ -1,4 +1,7 @@
 .
+|-- cache
+|   `-- list
+|       `-- 4949eea072.txt
 |-- exprs
 |   |-- leave_each_out
 |   |   `-- 4c347546d4.num.list.list
@@ -6,7 +9,7 @@
 |   |   |-- a629005e3c.num.list
 |   |   |-- ea11b49459.num.list
 |   |   |-- ee383407c9.num.list
-|   |   `-- f11e0b1ea5.num.list
+|   |   `-- f11e0b1ea5.num.list -> ../../cache/list/4949eea072.txt
 |   `-- num
 |       |-- a629005e3c.num
 |       |-- ea11b49459.num
@@ -14,4 +17,4 @@
 `-- vars
     `-- result -> ../exprs/leave_each_out/4c347546d4.num.list.list
 
-5 directories, 9 files
+7 directories, 10 files
