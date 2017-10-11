@@ -35,12 +35,12 @@ cutModule = CutModule
     -- , oldMkBlastDb      "blastx" fna pdb
     -- , oldMkBlastDb     "tblastn" faa ndb
     -- , oldMkBlastDb     "tblastx" fna ndb
-    [ oldMkBlastEachFn    "blastn" fna fna ndb -- TODO why doesn't this one work??
-    , oldMkBlastEachFn    "blastp" faa faa pdb
-    , oldMkBlastEachFn    "blastx" fna faa pdb
-    , oldMkBlastEachFn   "tblastn" faa fna ndb
-    , oldMkBlastEachFn   "tblastx" fna fna ndb
-    , oldMkBlastEachRevFn "blastn" fna fna ndb -- TODO don't expose to users?
+    -- [ oldMkBlastEachFn    "blastn" fna fna ndb -- TODO why doesn't this one work??
+    -- , oldMkBlastEachFn    "blastp" faa faa pdb
+    -- , oldMkBlastEachFn    "blastx" fna faa pdb
+    -- , oldMkBlastEachFn   "tblastn" faa fna ndb
+    -- , oldMkBlastEachFn   "tblastx" fna fna ndb
+    [ oldMkBlastEachRevFn "blastn" fna fna ndb -- TODO don't expose to users?
     , oldMkBlastEachRevFn "blastp" faa faa pdb -- TODO don't expose to users?
     -- TODO use the reverse each ones?
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
@@ -140,10 +140,10 @@ rMkBlastFromFa :: BlastDesc -> RulesFn
 rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
   = rules st (CutFun rtn salt deps name1 [e, q, expr])
   where
-    rules  = fRules $ mkBlastFromDb d
-    name1  = fName  $ mkBlastFromDb d
-    name2  = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-    expr   = CutFun dbType salt [] name2 [s] -- TODO deps OK?
+    rules = fRules $ mkBlastFromDb d
+    name1 = fName  $ mkBlastFromDb d
+    name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+    expr  = CutFun dbType salt (depsOf s) name2 [s] -- TODO deps OK?
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
 -----------------
@@ -189,19 +189,26 @@ rMkBlastFromDbEach d@(bCmd, _, _, _) = rMapTmp actFn "blast" sName
 -- *blast*_each --
 ------------------
 
--- TODO how to do rev_each? db_each? _db_rev_each/_rev_db_each?
--- *blast*_each
 mkBlastFromFaEach :: BlastDesc -> CutFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
-  { fName      = "new_" ++ bCmd ++ "_each"
+  { fName      = bCmd ++ "_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaEach d
   }
 
--- TODO before attempting this, move all evalue args to the front
+-- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach = undefined
+rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, ss])
+  = rules st (CutFun rtn salt deps name1 [e, q, ss'])
+  where
+    rules = rMkBlastFromDbEach d
+    ss'   = CutFun (ListOf dbType) salt (depsOf ss) name2 [ss]
+    name1 = (fName $ mkBlastFromFa d) ++ "_each"
+    name2 = "makeblastdb"
+              ++ (if dbType == ndb then "_nucl" else "_prot")
+              ++ "_each"
+rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"
 
 ----------------------
 -- *blast*_rev_each --
@@ -258,15 +265,6 @@ aOldParBlast _ _ _ _ = error $ "bad argument to aOldParBlast"
 ---------------------------
 -- (old) mapped versions --
 ---------------------------
-
--- TODO gotta have a variation for "not the last arg"
-oldMkBlastEachFn :: String -> CutType -> CutType -> CutType -> CutFunction
-oldMkBlastEachFn bCmd qType sType dbType = CutFunction
-  { fName      = bCmd ++ "_each"
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
-  , fFixity    = Prefix
-  , fRules  = rOldMkBlastEach bCmd dbType aOldParBlast
-  }
 
 -- TODO need to apply oldAddMakeDBCall2 *after* mapping over the last arg
 -- TODO more specific tmpDir?
