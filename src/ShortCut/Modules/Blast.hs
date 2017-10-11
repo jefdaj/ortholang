@@ -9,45 +9,22 @@ module ShortCut.Modules.Blast
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.Scientific          (formatScientific, FPFormat(..))
-import ShortCut.Core.Config     (wrappedCmd)
-import ShortCut.Core.Paths      (readLit, readPath, fromCutPath, CutPath)
-import ShortCut.Core.Debug      (debugTrackWrite, debug, debugAction)
-import ShortCut.Core.Compile.Basic      (rSimpleTmp, defaultTypeCheck)
-import ShortCut.Core.Compile.Map      (rMapTmp)
-import ShortCut.Modules.BlastDB (ndb, pdb)
-import ShortCut.Modules.SeqIO   (faa, fna)
-import System.FilePath          (takeDirectory, takeFileName, (</>))
-import Text.PrettyPrint.HughesPJClass
+import Data.Scientific             (formatScientific, FPFormat(..))
+import ShortCut.Core.Compile.Basic (rSimpleTmp, defaultTypeCheck)
+import ShortCut.Core.Compile.Map   (rMapTmp)
+import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
+import ShortCut.Core.Paths         (readLit, readPath, fromCutPath, CutPath)
+import ShortCut.Modules.BlastDB    (ndb, pdb)
+import ShortCut.Modules.SeqIO      (faa, fna)
+import System.FilePath             (takeDirectory, takeFileName, (</>))
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blast"
   , mFunctions =
-    -- old functions to replace:
-    -- [ oldMkBlastFn        "blastn" fna fna ndb -- TODO why doesn't this one work??
-    -- , oldMkBlastFn        "blastp" faa faa pdb
-    -- , oldMkBlastFn        "blastx" fna faa pdb
-    -- , oldMkBlastFn       "tblastn" faa fna ndb
-    -- , oldMkBlastFn       "tblastx" fna fna ndb
-    -- , oldMkBlastDb      "blastn" fna ndb -- TODO why doesn't this one work??
-    -- , oldMkBlastDb      "blastp" faa pdb
-    -- , oldMkBlastDb      "blastx" fna pdb
-    -- , oldMkBlastDb     "tblastn" faa ndb
-    -- , oldMkBlastDb     "tblastx" fna ndb
-    -- [ oldMkBlastEachFn    "blastn" fna fna ndb -- TODO why doesn't this one work??
-    -- , oldMkBlastEachFn    "blastp" faa faa pdb
-    -- , oldMkBlastEachFn    "blastx" fna faa pdb
-    -- , oldMkBlastEachFn   "tblastn" faa fna ndb
-    -- , oldMkBlastEachFn   "tblastx" fna fna ndb
-    [ oldMkBlastEachRevFn "blastn" fna fna ndb -- TODO don't expose to users?
-    , oldMkBlastEachRevFn "blastp" faa faa pdb -- TODO don't expose to users?
-    -- TODO use the reverse each ones?
-    -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
-    ] ++
-
-    -- new description-based functions:
     -- TODO remove the ones that don't apply to each fn type!
+    -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
     map mkBlastFromDb        blastDescs ++
     map mkBlastFromDbEach    blastDescs ++
     map mkBlastFromFa        blastDescs ++
@@ -70,6 +47,7 @@ bht = CutType
 -- new description-based blast functions --
 -------------------------------------------
 
+-- TODO need a separate db type for reverse fns?
 type BlastDesc =
   ( String  -- name and also system command to call
   , CutType -- query fasta type
@@ -104,7 +82,6 @@ rMkBlastFromDb (bCmd, _, _, _) = rSimpleTmp (aMkBlastFromDb bCmd) "blast" bht
 aMkBlastFromDb :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
 aMkBlastFromDb bCmd cfg _ [o, e, q, p] = do
   eStr   <- readLit cfg e'
-  -- TODO why does this have the complete dna sequence in it when using tblastn_each??
   prefix <- readPath cfg p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
@@ -215,98 +192,33 @@ rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"
 ----------------------
 
 mkBlastFromFaRevEach :: BlastDesc -> CutFunction
-mkBlastFromFaRevEach d@(bCmd, qType, sType, _) = CutFunction
-  { fName      = "new_" ++ bCmd ++ "_rev_each"
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
+mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
+  { fName      = bCmd ++ "_rev_each"
+  , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRevEach d
   }
 
--- TODO before attempting this, move all evalue args to the front
+-- The most confusing one! Edits the expression to make the subject into a db,
+-- and the action fn to take the query and subject flipped, then maps the new
+-- expression over the new action fn.
+-- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach = undefined
-
-
----------------------------------
--- (old) basic blast+ commands --
----------------------------------
-
--- as a quick kludge, duplicated this and rearranged the args
--- TODO validation function so I can't mess up constructing these by hand? aha! write strings + parse normally!
-oldAddMakeDBCall2 :: CutExpr -> CutType -> CutExpr
-oldAddMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
+rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
+  = rMapTmp revDbAct "blast" revDbName st editedExpr
   where
-    dbs = CutFun (ListOf dbType) i (depsOf ss) name [ss]
-    name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
-oldAddMakeDBCall2 _ _ = error "bad argument to oldAddMakeDBCall2"
+    revDbAct   = aMkBlastFromDbRev bCmd
+    subjDbExpr = CutFun dbType salt (depsOf s) dbFnName [s]
+    editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
+    revDbName  = bCmd ++ "_db_rev"
+    editedName = bCmd ++ "_db_rev_each"
+    (dbFnName, dbType) = if qType == faa
+                           then ("makeblastdb_prot", pdb)
+                           else ("makeblastdb_nucl", ndb)
+rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
 
--- TODO remove the old bbtmp default tmpDir
-aOldParBlast :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aOldParBlast bCmd cfg _ [o, q, p, e] = do
-  eStr   <- readLit cfg e'
-  prefix <- readPath cfg p'
-  let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
-      prefix' = fromCutPath cfg prefix
-      cDir    = cfgTmpDir cfg </> takeDirectory prefix'
-      dbg     = if cfgDebug cfg then ["-v"] else []
-      args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
-                , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
-                     "parallelblast.py" args
-  debugTrackWrite cfg [o'']
-  where
-    o'  = fromCutPath cfg o
-    q'  = fromCutPath cfg q
-    p'  = fromCutPath cfg p
-    e'  = fromCutPath cfg e
-    o'' = debugAction cfg "aOldParBlast" o' [bCmd, o', q', p', e']
-aOldParBlast _ _ _ _ = error $ "bad argument to aOldParBlast"
-
----------------------------
--- (old) mapped versions --
----------------------------
-
--- TODO need to apply oldAddMakeDBCall2 *after* mapping over the last arg
--- TODO more specific tmpDir?
-rOldMkBlastEach :: String -> CutType -> (String -> (CutConfig -> CutPath -> [CutPath] -> Action ())) -> RulesFn
-rOldMkBlastEach bCmd dbType bActFn st@(_,cfg) expr = mapFn st $ oldAddMakeDBCall2 expr' dbType
-  where
-    mapFn = rMapTmp (bActFn' bCmd) (bCmd ++ "_each") bCmd
-    expr' = debug cfg ("rOldMkBlastEach expr: '" ++ render (pPrint expr) ++ "'") expr
-    -- kludge to allow easy mapping over the subject rather than evalue:
-    -- TODO is this right?
-    -- TODO can it be changed to keep the evalues at the end like expected?
-    -- TODO are the e and q getting reversed? they look OK here
-    bActFn' b c d [o, e, q, s] = let args = [o, q, s, e]; args' = debug cfg ("bActFn args: " ++ show args) args in bActFn b c d args'
-    bActFn' _ _ _ _ = error "bad argument to bActFn'"
-
------------------------------------------------------------------
--- (old) "reverse" versions to help write reciprocal best hits --
------------------------------------------------------------------
-
--- TODO move to BlastRBH module?
-
--- note: only works on symmetric blast fns (take two of the same type)
--- oldMkBlastRevFn :: String -> CutType -> CutType -> CutType -> CutFunction
--- oldMkBlastRevFn bCmd qType sType dbType = CutFunction
---   { fName      = bCmd ++ "_rev"
---   , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
---   , fFixity    = Prefix
---   , fRules  = rOldMkBlastFn bCmd dbType aOldParBlastRev
---   }
-
--- just switches the query and subject, which won't work for asymmetric blast fns!
--- TODO write specific ones for that, or a fn + mapping
--- TODO debug transformations too!
-aOldParBlastRev :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aOldParBlastRev b c d [o, q, s, e] = aOldParBlast b c d [o, s, q, e]
-aOldParBlastRev _ _ _ args = error $ "bad argument to aOldParBlast: " ++ show args
-
--- TODO gotta have a variation for "not the last arg"
-oldMkBlastEachRevFn :: String -> CutType -> CutType -> CutType -> CutFunction
-oldMkBlastEachRevFn bCmd qType sType dbType = CutFunction
-  { fName      = bCmd ++ "_each_rev"
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] bht
-  , fFixity    = Prefix
-  , fRules  = rOldMkBlastEach bCmd dbType aOldParBlastRev
-  }
+-- TODO which blast commands make sense with this?
+aMkBlastFromDbRev :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+aMkBlastFromDbRev bCmd cfg cDir [oPath, eValue, dbPrefix, queryFa] =
+  aMkBlastFromDb  bCmd cfg cDir [oPath, eValue, queryFa, dbPrefix]
+aMkBlastFromDbRev _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
