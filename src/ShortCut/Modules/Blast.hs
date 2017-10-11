@@ -93,14 +93,13 @@ blastDescs =
 mkBlastFromDb :: BlastDesc -> CutFunction
 mkBlastFromDb (bCmd, qType, _, dbType) = CutFunction
   { fName      = bCmd ++ "_db"
-  , fTypeCheck = defaultTypeCheck [qType, dbType, num] bht
+  , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fFixity    = Prefix
   , fRules     = rSimpleTmp (aBlastFromDb bCmd) "blast" bht
   }
 
 aBlastFromDb :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aBlastFromDb bCmd cfg _ [o, q, p, e] = do
-  -- liftIO $ putStrLn $ "aBlastFromDb args: " ++ show paths
+aBlastFromDb bCmd cfg _ [o, e, q, p] = do
   eStr   <- readLit cfg e'
   -- TODO why does this have the complete dna sequence in it when using tblastn_each??
   prefix <- readPath cfg p'
@@ -110,8 +109,6 @@ aBlastFromDb bCmd cfg _ [o, q, p, e] = do
       dbg     = if cfgDebug cfg then ["-v"] else []
       args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  -- liftIO $ putStrLn $ "prefix: " ++ show prefix
-  -- liftIO $ putStrLn $ "prefix': " ++ prefix'
   unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
                      "parallelblast.py" args
   debugTrackWrite cfg [o'']
@@ -120,7 +117,7 @@ aBlastFromDb bCmd cfg _ [o, q, p, e] = do
     q'  = fromCutPath cfg q
     p'  = fromCutPath cfg p
     e'  = fromCutPath cfg e
-    o'' = debugAction cfg "aBlastFromDb" o' [bCmd, o', q', p', e']
+    o'' = debugAction cfg "aBlastFromDb" o' [bCmd, e', o', q', p']
 aBlastFromDb _ _ _ _ = error $ "bad argument to aBlastFromDb"
 
 -------------
@@ -130,15 +127,15 @@ aBlastFromDb _ _ _ _ = error $ "bad argument to aBlastFromDb"
 mkBlastFromFa :: BlastDesc -> CutFunction
 mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd
-  , fTypeCheck = defaultTypeCheck [qType, sType, num] bht
+  , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFa d
   }
 
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
 rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [q, s, e])
-  = rules st (CutFun rtn salt deps name1 [q, expr , e])
+rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name1 [e, q, expr])
   where
     rules  = fRules $ mkBlastFromDb d
     name1  = fName  $ mkBlastFromDb d
@@ -153,15 +150,15 @@ rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 mkBlastFromFaRev :: BlastDesc -> CutFunction
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd ++ "_rev"
-  , fTypeCheck = defaultTypeCheck [sType, qType, num] bht
+  , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRev d
   }
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (CutFun rtn salt deps _ [q, s, e])
-  = rules st (CutFun rtn salt deps name [s, q, e])
+rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name [e, s, q])
   where
     rules = fRules $ mkBlastFromFa d
     name  = fName  $ mkBlastFromFa d
@@ -174,7 +171,7 @@ rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
 mkBlastFromDbEach :: BlastDesc -> CutFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
   { fName      = "new_" ++ bCmd ++ "_db_each"
-  , fTypeCheck = defaultTypeCheck [qType, ListOf dbType, num] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDbEach d
   }
@@ -192,7 +189,7 @@ rMkBlastFromDbEach = undefined
 mkBlastFromFaEach :: BlastDesc -> CutFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
   { fName      = "new_" ++ bCmd ++ "_each"
-  , fTypeCheck = defaultTypeCheck [qType, ListOf faType, num] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaEach d
   }
@@ -208,7 +205,7 @@ rMkBlastFromFaEach = undefined
 mkBlastFromFaRevEach :: BlastDesc -> CutFunction
 mkBlastFromFaRevEach d@(bCmd, qType, sType, _) = CutFunction
   { fName      = "new_" ++ bCmd ++ "_rev_each"
-  , fTypeCheck = defaultTypeCheck [qType, ListOf sType, num] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRevEach d
   }
@@ -227,17 +224,14 @@ rMkBlastFromFaRevEach = undefined
 oldAddMakeDBCall2 :: CutExpr -> CutType -> CutExpr
 oldAddMakeDBCall2 (CutFun r i ds n [e, q, ss]) dbType = CutFun r i ds n [e, q, dbs]
   where
-    -- dbType = if typeOf s `elem` [fna, ListOf fna] then ndb else pdb -- TODO maybe it's (ListOf fna)?
     dbs = CutFun (ListOf dbType) i (depsOf ss) name [ss]
     name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
 oldAddMakeDBCall2 _ _ = error "bad argument to oldAddMakeDBCall2"
 
 -- TODO remove the old bbtmp default tmpDir
 aOldParBlast :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aOldParBlast bCmd cfg _ paths@[o, q, p, e] = do
-  liftIO $ putStrLn $ "aOldParBlast args: " ++ show paths
+aOldParBlast bCmd cfg _ [o, q, p, e] = do
   eStr   <- readLit cfg e'
-  -- TODO why does this have the complete dna sequence in it when using tblastn_each??
   prefix <- readPath cfg p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
@@ -245,8 +239,6 @@ aOldParBlast bCmd cfg _ paths@[o, q, p, e] = do
       dbg     = if cfgDebug cfg then ["-v"] else []
       args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  liftIO $ putStrLn $ "prefix: " ++ show prefix
-  liftIO $ putStrLn $ "prefix': " ++ prefix'
   unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
                      "parallelblast.py" args
   debugTrackWrite cfg [o'']

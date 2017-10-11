@@ -10,6 +10,6 @@ large = load_fna "data/7942genes.fna"
 # fwds = blastn     small large 1e-5
 # revs = blastn_rev large small 1e-5
 
-fwds = extract_queries (blastn     small large 1e-5)
-revs = extract_queries (blastn_rev large small 1e-5)
+fwds = extract_queries (blastn     1e-5 small large)
+revs = extract_queries (blastn_rev 1e-5 large small)
 result = (fwds ~ revs) | (revs ~ fwds)
