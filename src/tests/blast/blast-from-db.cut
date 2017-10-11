@@ -28,8 +28,8 @@ hits7942p = blastp_db 1e-5 small7942faa (makeblastdb_prot large6803faa)
 hits6803x = blastx_db 1e-5 small6803fna (makeblastdb_prot large7942faa)
 hits7942x = blastx_db 1e-5 small7942fna (makeblastdb_prot large6803faa)
 
-result = extract_queries_each
+result = any (extract_queries_each
   [ hits6803n, hits7942n
   , hits6803p, hits7942p
   , hits6803x, hits7942x
-  ]
+  ])

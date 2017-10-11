@@ -25,6 +25,6 @@ hits7942x = blastx_db 1e-5 small7942fna (makeblastdb_prot large6803faa)
 # TODO add tblastn? (does that make sense?)
 # TODO add tblastx? (does that make sense?)
 
-result = extract_queries_each
+result = any (extract_queries_each
   [ hits6803n, hits6803p, hits6803x
-  , hits7942n, hits7942p, hits7942x ]
+  , hits7942n, hits7942p, hits7942x ])
