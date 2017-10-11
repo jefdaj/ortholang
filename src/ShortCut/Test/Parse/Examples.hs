@@ -6,6 +6,8 @@ module ShortCut.Test.Parse.Examples
   )
   where
 
+-- TODO test nested Bops! (A ~ B) | (B ~ A) for example
+
 import ShortCut.Core.Types
 import ShortCut.Modules.SeqIO (faa)
 -- import ShortCut.Core.Parse

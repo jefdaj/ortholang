@@ -1,5 +1,7 @@
 module ShortCut.Modules.BlastDB where
 
+-- TODO should makeblastdb be just one fn? no, make everything else stricter later!
+
 import Development.Shake
 import ShortCut.Core.Types
 

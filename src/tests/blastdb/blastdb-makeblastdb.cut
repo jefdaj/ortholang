@@ -3,8 +3,6 @@
 # need an explicit makeblastdb call to make the db first.
 
 # TODO test the results too, not just that it runs!
-# TODO why does hits6803n not have any results??
-# TODO download the 6803 genbank to get fna genes
 
 large6803faa = load_faa "data/6803genes.faa"
 large6803fna = load_fna "data/6803genes.fna"
@@ -28,10 +26,5 @@ hits7942x = blastx_db small7942fna (makeblastdb_prot large6803faa) 1e-5
 # TODO add tblastx? (does that make sense?)
 
 result = extract_queries_each
-  [ hits6803n # TODO why no results here??
-  , hits6803p
-  , hits6803x
-  , hits7942n
-  , hits7942p
-  , hits7942x
-  ]
+  [ hits6803n, hits6803p, hits6803x
+  , hits7942n, hits7942p, hits7942x ]

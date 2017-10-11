@@ -304,6 +304,8 @@ cmdConfig st@(scr,cfg) hdl s = do
 --      or if started with one of the file-related commands (:!, :write, etc.)
 --      otherwise shortcut entities only?
 
+-- TODO sort functions alphabetically
+
 listCompletions :: MonadIO m => CutState -> String -> m [Completion]
 listCompletions (scr,cfg) txt = do
   files <- listFiles txt
