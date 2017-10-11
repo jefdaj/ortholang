@@ -1,40 +1,39 @@
 .
 |-- cache
 |   |-- blast
-|   |   |-- 5022cfa0e5_36e9bc3d9e_c2d810d7d1
-|   |   |-- 8af71e39cd_36e9bc3d9e_c2d810d7d1
-|   |   |-- 9f928b8b68_36e9bc3d9e_c2d810d7d1
-|   |   |-- 9f928b8b68_fdaa53db2b_c2d810d7d1
-|   |   |-- a1e34ad490_36e9bc3d9e_c2d810d7d1
-|   |   `-- a1e34ad490_62c688dce0_c2d810d7d1
+|   |   |-- 54ad056e4a_36165ff2d6_4f1041d12a
+|   |   |-- 54ad056e4a_6cfb346399_4f1041d12a
+|   |   |-- c23089add9_36165ff2d6_4f1041d12a
+|   |   |-- f44b21f541_36165ff2d6_4f1041d12a
+|   |   |-- f44b21f541_8086212a75_4f1041d12a
+|   |   `-- f4eb929f89_36165ff2d6_4f1041d12a
 |   |-- blastdb
-|   |   `-- blastdbget
-|   |       |-- 63b6fa9145
-|   |       |   |-- 63b6fa9145.pdb.phr
-|   |       |   |-- 63b6fa9145.pdb.pin
-|   |       |   `-- 63b6fa9145.pdb.psq
-|   |       |-- 9754c305d1
-|   |       |   |-- 9754c305d1.ndb.nhr
-|   |       |   |-- 9754c305d1.ndb.nin
-|   |       |   `-- 9754c305d1.ndb.nsq
-|   |       `-- ce746b5c13
-|   |           |-- ce746b5c13.ndb.nhr
-|   |           |-- ce746b5c13.ndb.nin
-|   |           `-- ce746b5c13.ndb.nsq
+|   |   |-- 63b6fa9145
+|   |   |   |-- 63b6fa9145.pdb.phr
+|   |   |   |-- 63b6fa9145.pdb.pin
+|   |   |   `-- 63b6fa9145.pdb.psq
+|   |   |-- 9754c305d1
+|   |   |   |-- 9754c305d1.ndb.nhr
+|   |   |   |-- 9754c305d1.ndb.nin
+|   |   |   `-- 9754c305d1.ndb.nsq
+|   |   `-- ce746b5c13
+|   |       |-- ce746b5c13.ndb.nhr
+|   |       |-- ce746b5c13.ndb.nin
+|   |       `-- ce746b5c13.ndb.nsq
 |   |-- map
 |   |   `-- f61bea6fe7
-|   |       |-- 4b2e9fa225.str.list -> $TMPDIR/exprs/extract_queries/c766fb7fdd.str.list
-|   |       |-- 4b2e9fa225.str.list.args
-|   |       |-- 52ffbbbad1.str.list -> $TMPDIR/exprs/extract_queries/f316ebe17b.str.list
-|   |       |-- 52ffbbbad1.str.list.args
-|   |       |-- 5c535ecf71.str.list -> $TMPDIR/exprs/extract_queries/c7ee068e0c.str.list
-|   |       |-- 5c535ecf71.str.list.args
-|   |       |-- 7413fbbae5.str.list -> $TMPDIR/exprs/extract_queries/411b8b60bb.str.list
-|   |       |-- 7413fbbae5.str.list.args
-|   |       |-- 96f973caec.str.list -> $TMPDIR/exprs/extract_queries/89b408c434.str.list
-|   |       |-- 96f973caec.str.list.args
-|   |       |-- f018bce611.str.list -> $TMPDIR/exprs/extract_queries/6ca5d67d48.str.list
-|   |       `-- f018bce611.str.list.args
+|   |       |-- 1275163eb8.str.list -> $TMPDIR/exprs/extract_queries/c766fb7fdd.str.list
+|   |       |-- 1275163eb8.str.list.args
+|   |       |-- 1ed8ac4bc9.str.list -> $TMPDIR/exprs/extract_queries/6ca5d67d48.str.list
+|   |       |-- 1ed8ac4bc9.str.list.args
+|   |       |-- 704100c6bf.str.list -> $TMPDIR/exprs/extract_queries/89b408c434.str.list
+|   |       |-- 704100c6bf.str.list.args
+|   |       |-- a44c012ed4.str.list -> $TMPDIR/exprs/extract_queries/c7ee068e0c.str.list
+|   |       |-- a44c012ed4.str.list.args
+|   |       |-- a93f2965a0.str.list -> $TMPDIR/exprs/extract_queries/411b8b60bb.str.list
+|   |       |-- a93f2965a0.str.list.args
+|   |       |-- ac02b759b9.str.list -> $TMPDIR/exprs/extract_queries/f316ebe17b.str.list
+|   |       `-- ac02b759b9.str.list.args
 |   `-- tables
 |-- exprs
 |   |-- blastn_db
@@ -97,4 +96,4 @@
     |-- small7942faa.faa -> ../exprs/load_faa/2d88028e40.faa
     `-- small7942fna.fna -> ../exprs/load_fna/82b637da24.fna
 
-30 directories, 67 files
+29 directories, 67 files

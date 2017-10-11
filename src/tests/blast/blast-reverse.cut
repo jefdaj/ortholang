@@ -12,13 +12,4 @@ large = load_fna "data/7942genes.fna"
 
 fwds = extract_queries (blastn     small large 1e-5)
 revs = extract_queries (blastn_rev large small 1e-5)
-
-# this runs across a separate bug related to pretty-printing nested bops,
-# so for now it gets written as three lines below
-# result = (fwds ~ revs) | (revs ~ fwds)
-
-# shows difference between the sets; should be []
-# (real test is that only one set of blast tmpfiles was created)
-fnotr = fwds ~ revs
-rnotf = revs ~ fwds
-result = fnotr | rnotf
+result = (fwds ~ revs) | (revs ~ fwds)

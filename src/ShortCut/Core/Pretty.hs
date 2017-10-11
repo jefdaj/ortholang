@@ -9,12 +9,12 @@ module ShortCut.Core.Pretty
   where
 
 import Data.Scientific            (Scientific())
-import Development.Shake.FilePath ((</>))
+-- import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Types
 import ShortCut.Core.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
-import Control.Monad.Trans (liftIO)
-import Data.String.Utils          (replace)
+-- import Control.Monad.Trans (liftIO)
+-- import Data.String.Utils          (replace)
 
 instance Pretty CutType where
   pPrint EmptyList  = text "empty list" -- TODO remove
@@ -53,7 +53,7 @@ instance Pretty CutExpr where
   pPrint (CutList _ _ _ es)  = pList es
   pPrint (CutBop _ _ _ c e1 e2) = if (length $ render $ one) > 80 then two else one
     where
-      bopWith fn = fn (pPrint e1) (nest (-2) (text c) <+> pPrint e2)
+      bopWith fn = fn (pNested e1) (nest (-2) (text c) <+> pNested e2)
       one = bopWith (<+>)
       two = bopWith ($+$)
 
