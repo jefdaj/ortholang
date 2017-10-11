@@ -91,15 +91,18 @@ blastDescs =
 ----------------
 
 mkBlastFromDb :: BlastDesc -> CutFunction
-mkBlastFromDb (bCmd, qType, _, dbType) = CutFunction
+mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
   { fName      = bCmd ++ "_db"
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fFixity    = Prefix
-  , fRules     = rSimpleTmp (aBlastFromDb bCmd) "blast" bht
+  , fRules     = rMkBlastFromDb d
   }
 
-aBlastFromDb :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aBlastFromDb bCmd cfg _ [o, e, q, p] = do
+rMkBlastFromDb :: BlastDesc -> RulesFn
+rMkBlastFromDb (bCmd, _, _, _) = rSimpleTmp (aMkBlastFromDb bCmd) "blast" bht
+
+aMkBlastFromDb :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+aMkBlastFromDb bCmd cfg _ [o, e, q, p] = do
   eStr   <- readLit cfg e'
   -- TODO why does this have the complete dna sequence in it when using tblastn_each??
   prefix <- readPath cfg p'
@@ -117,8 +120,8 @@ aBlastFromDb bCmd cfg _ [o, e, q, p] = do
     q'  = fromCutPath cfg q
     p'  = fromCutPath cfg p
     e'  = fromCutPath cfg e
-    o'' = debugAction cfg "aBlastFromDb" o' [bCmd, e', o', q', p']
-aBlastFromDb _ _ _ _ = error $ "bad argument to aBlastFromDb"
+    o'' = debugAction cfg "aMkBlastFromDb" o' [bCmd, e', o', q', p']
+aMkBlastFromDb _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------
 -- *blast* --
@@ -170,15 +173,17 @@ rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
 
 mkBlastFromDbEach :: BlastDesc -> CutFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
-  { fName      = "new_" ++ bCmd ++ "_db_each"
+  { fName      = bCmd ++ "_db_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDbEach d
   }
 
--- TODO before attempting this, move all evalue args to the front
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach = undefined
+rMkBlastFromDbEach d@(bCmd, _, _, _) = rMapTmp actFn "blast" sName
+  where
+    sName = fName $ mkBlastFromDb d
+    actFn = aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --

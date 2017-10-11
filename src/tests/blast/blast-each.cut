@@ -1,0 +1,38 @@
+# This tests the mapped versions of all the blast functions (*blast*_each).
+
+# TODO mapped hashes still aren't matching non-mapped ones??
+
+qfna = load_fna "data/7942genes10.fna"
+qfaa = load_faa "data/7942genes10.faa"
+
+sfna1 = load_fna "data/7942genes.fna"
+sfaa1 = load_faa "data/7942genes.faa"
+
+sfna2 = load_fna "data/6803genes.fna"
+sfaa2 = load_faa "data/7942genes50.faa"
+
+# run each _db search individually
+sdbfna = [blastn_db 1e-5 qfna (makeblastdb_nucl sfna1), blastn_db 1e-5 qfna (makeblastdb_nucl sfna2)]
+sdbfaa = [blastp_db 1e-5 qfaa (makeblastdb_prot sfaa1), blastp_db 1e-5 qfaa (makeblastdb_prot sfaa2)]
+
+# run each fa search individually
+sfafna = [blastn 1e-5 qfna sfna1, blastn 1e-5 qfna sfna2]
+sfafaa = [blastp 1e-5 qfaa sfaa1, blastp 1e-5 qfaa sfaa2]
+
+# run _db searches in mapped form
+mdbfna = blastn_db_each 1e-5 qfna [makeblastdb_nucl sfna1, makeblastdb_nucl sfna2]
+mdbfaa = blastp_db_each 1e-5 qfaa [makeblastdb_prot sfaa1, makeblastdb_prot sfaa2]
+
+# run fa searches in mapped form
+mfafna = blastn_each 1e-5 qfna [sfna1, sfna2]
+mfafaa = blastp_each 1e-5 qfaa [sfaa1, sfaa2]
+
+# just need to evaluate them all; actual test is to inspect tmpfile tree
+result = any ( extract_queries_each sdbfna
+             | extract_queries_each sdbfaa
+             | extract_queries_each mdbfna
+             | extract_queries_each mdbfaa
+             | extract_queries_each sfafna
+             | extract_queries_each sfafaa
+             | extract_queries_each mfafna
+             | extract_queries_each mfafaa )
