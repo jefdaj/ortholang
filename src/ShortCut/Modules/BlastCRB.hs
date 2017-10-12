@@ -7,12 +7,12 @@ import Development.Shake       -- (quietly, Action, CmdOption(..), need, unit)
 import Development.Shake.FilePath ((</>), (<.>), takeExtension)
 import System.Directory (createDirectoryIfMissing)
 import ShortCut.Core.Paths     (CutPath, fromCutPath, hashContent)
-import ShortCut.Core.Util      (digest)
+-- import ShortCut.Core.Util      (digest)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Map (rMapTmp)
 import ShortCut.Modules.SeqIO  (faa, fna)
-import ShortCut.Core.Debug (debugAction, debugTrackWrite, debugReadFile)
+import ShortCut.Core.Debug (debugAction, debugTrackWrite)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -61,6 +61,7 @@ blastCRBEach = CutFunction
   , fRules     = rMapTmp aBlastCRB "crbblast"
   }
 
+-- TODO split into two functions with different type signatures?
 tCrbBlast :: [CutType] -> Either String CutType
 tCrbBlast [x, y] | x == fna && y `elem` [fna, faa] = Right crb
 tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"

@@ -4,6 +4,7 @@
 # inspection of the tree for now, because of the tmpfiles race condition)
 
 # TODO fix (minor) race condition between mapped and single tmpfile trees
+# TODO don't use crb-blast for this since it's still nondeterministic?
 
 mini6803 = load_fna "data/6803genes10.fna"
 full7942 = load_faa "data/7942genes.faa"

@@ -26,13 +26,13 @@ import ShortCut.Core.Pretty       (writeScript)
 import Data.Maybe                     (fromJust)
 -- import Control.Monad.Trans (liftIO)
 
--- TODO get rid of as many of these as possible
 nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
   where
     testDir = (takeFileName . takeDirectory) path
-    -- TODO are all tests fine with these in place?
-    badDirs = [] -- ["blast", "crb", "dedup"]
+    -- TODO remove crb from the dedup tests so they can be deterministic
+    -- TODO will regular blast be nondeterministic at large scales too?
+    badDirs = ["crb", "dedup"] -- ["blast", "crb", "dedup"]
 
 getTestCuts :: IO [FilePath]
 getTestCuts = do
