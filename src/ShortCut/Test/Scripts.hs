@@ -31,7 +31,7 @@ nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
   where
     testDir = (takeFileName . takeDirectory) path
-    badDirs = ["blast", "crb", "map"]
+    badDirs = ["blast", "crb", "dedup"]
 
 getTestCuts :: IO [FilePath]
 getTestCuts = do
