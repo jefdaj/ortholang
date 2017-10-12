@@ -3,26 +3,34 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths (exprPath, cacheDir, CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Debug     (debugTrackWrite, debugAction)
-import ShortCut.Core.Compile.Basic     (rExpr, rSimpleTmp, defaultTypeCheck)
-import ShortCut.Modules.SeqIO  (faa, fna)
-import ShortCut.Modules.Blast  (bht)
-import System.Directory        (createDirectoryIfMissing)
-import Control.Monad.Trans     (liftIO)
+import Control.Monad.Trans         (liftIO)
+import ShortCut.Core.Compile.Basic (rExpr, rSimpleTmp, defaultTypeCheck)
+import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
+import ShortCut.Core.Paths         (exprPath, cacheDir, CutPath, toCutPath,
+                                    fromCutPath)
+import ShortCut.Modules.Blast      (bht)
+import ShortCut.Modules.SeqIO      (faa, fna)
+import System.Directory            (createDirectoryIfMissing)
 
--- TODO unit to describe is fwd blast + rev blast + reciprocal best 
---      have some fairly advanced primitives from Blast.hs:
---        mkBlastEachFn, mkBlastEachRevFn
---        ... but do they help? could scrap and write separate stuff
---        either way need to expose them + test better!
+-- TODO this module should provide:
+--
+-- best            :: bht -> bht
+-- reciprocal_best :: bht -> bht -> bht
+-- *blast*_rbh     :: fa -> fa -> bht (for the ones that make sense)
+--
+-- best_each            :: [bht] -> bht
+-- reciprocal_best_each :: bht -> [bht] -> [bht]
+-- *blast*_rbh_each     :: fa -> [fa] -> [bht] (for the ones with an _rbh)
+--
+-- TODO should the _rev functions also be moved here?
+-- TODO ideally, remove a lot of this crap and the second python script
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "blastrbh"
   , mFunctions =
-    [ reciprocal
+    [ reciprocalBest
     , mkBlastSymRBH     "blastn" fna
     , mkBlastSymRBHEach "blastn" fna
     , mkBlastSymRBH     "blastp" faa
@@ -36,9 +44,9 @@ cutModule = CutModule
 
 -- TODO once this works, what should the actual fn people call look like?
 
-reciprocal :: CutFunction
-reciprocal = CutFunction
-  { fName      = "reciprocal"
+reciprocalBest :: CutFunction
+reciprocalBest = CutFunction
+  { fName      = "reciprocal_best"
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fFixity    = Prefix
   , fRules     = rSimpleTmp "blast" aRecip
@@ -47,7 +55,7 @@ reciprocal = CutFunction
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 aRecip :: CutConfig -> CutPath -> [CutPath] -> Action ()
 aRecip cfg tmp [out, left, right] = do
-  unit $ quietly $ wrappedCmd cfg [out'] [Cwd tmp'] "reciprocal.R" [out', left', right']
+  unit $ quietly $ wrappedCmd cfg [out'] [Cwd tmp'] "reciprocal_best.R" [out', left', right']
   debugTrackWrite cfg [out'']
   where
     tmp'   = fromCutPath cfg tmp
@@ -73,7 +81,7 @@ rBlastSymRBH bCmd s@(_,cfg) e@(CutFun _ salt deps _ [evalue, lfa, rfa]) = do
       rhits = CutFun bht salt deps bCmd [rfa , lfa , evalue]
       lbest = CutFun bht salt deps "best_hits"  [lhits]
       rbest = CutFun bht salt deps "best_hits"  [rhits]
-      rbh   = CutFun bht salt deps "reciprocal" [lbest, rbest]
+      rbh   = CutFun bht salt deps "reciprocal_best" [lbest, rbest]
       out   = fromCutPath cfg $ exprPath s e
   (ExprPath rbhPath) <- rExpr s rbh -- TODO this is the sticking point right?
   out %> \_ -> aBlastSymRBH cfg (CacheDir $ fromCutPath cfg $ cacheDir cfg "blast") [ExprPath out, ExprPath rbhPath]
@@ -95,9 +103,9 @@ aBlastSymRBH _ _ args = error $ "bad arguments to aBlastSymRBH: " ++ show args
 ---------------------------------------------
 
 -- TODO remove?
-reciprocalEach :: CutFunction
-reciprocalEach = CutFunction
-  { fName      = "reciprocal_each"
+reciprocalBestEach :: CutFunction
+reciprocalBestEach = CutFunction
+  { fName      = "reciprocal_best_each"
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules  = rRecipEach
@@ -113,7 +121,7 @@ rRecipEach s@(_,cfg) e@(CutFun _ _ _ _ [lbhts, rbhts]) = do
   oPath' %> \_ -> aRecipEach cfg oPath lsPath' rsPath' cDir
   return (ExprPath oPath')
   where
-    cDir   = cacheDir cfg "reciprocal_each"
+    cDir   = cacheDir cfg "reciprocal_best_each"
     oPath  = exprPath s e
     oPath' = fromCutPath cfg oPath
 rRecipEach _ _ = error "bad argument to rRecipEach"
@@ -128,7 +136,7 @@ rRecipEach _ _ = error "bad argument to rRecipEach"
 aRecipEach :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aRecipEach cfg oPath lsPath rsPath cDir = do
   need [lsPath', rsPath']
-  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir'] "reciprocal_each.py"
+  unit $ quietly $ wrappedCmd cfg [oPath'] [Cwd cDir'] "reciprocal_best_each.py"
     [cDir', oPath', lsPath', rsPath']
   debugTrackWrite cfg [oPath'']
   where
