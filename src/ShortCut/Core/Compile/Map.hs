@@ -107,7 +107,7 @@ aMapMain cfg inits mapTmp eType lastsPath outPath = do
   lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
   lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)
   mapM_ (aMapArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
-  let outPaths  = map (mapPath tmp' eType) lastPaths'
+  let outPaths  = map (mapPath cfg tmp' eType) lastPaths'
   need outPaths
   outPaths' <- (fmap . map) (toCutPath cfg) $ liftIO $ mapM (resolveSymlinks cfg) outPaths
   let out = debugAction cfg "aMapMain" outPath (outPath:inits' ++ [tmp', lasts'])
@@ -118,8 +118,13 @@ aMapMain cfg inits mapTmp eType lastsPath outPath = do
     tmp'   = fromCutPath cfg mapTmp
 
 -- TODO take + return CutPaths?
-mapPath :: FilePath -> CutType -> FilePath -> FilePath
-mapPath tmpDir eType path = tmpDir </> digest path <.> extOf eType
+-- TODO blast really might be nondeterministic here now that paths are hashed!
+mapPath :: CutConfig -> FilePath -> CutType -> FilePath -> FilePath
+mapPath cfg tmpDir eType path = tmpDir </> hash' <.> extOf eType
+  where
+    path' = toCutPath cfg path
+    hash  = digest path'
+    hash' = debug cfg ("hash of " ++ show path' ++ " is " ++ hash) hash
 
 -- This leaves arguments in .args files for aMapElem to find.
 aMapArgs :: CutConfig
@@ -127,7 +132,7 @@ aMapArgs :: CutConfig
          -> Action ()
 aMapArgs cfg eType inits' tmp' p = do
   let p'        = fromCutPath cfg p
-      argsPath  = mapPath tmp' eType p' <.> "args"
+      argsPath  = mapPath cfg tmp' eType p' <.> "args"
       argPaths  = inits' ++ [p'] -- TODO abs path bug here?
       argPaths' = map (toCutPath cfg) argPaths
   liftIO $ createDirectoryIfMissing True $ tmp'
@@ -157,7 +162,7 @@ aMapElem cfg eType tmpFn actFn singleName salt out = do
   args'' <- liftIO $ mapM (resolveSymlinks cfg) args' -- TODO remove?
   need args'
   dir <- liftIO $ case tmpFn of
-    Nothing -> return undefined -- TODO that can't be a good idea right?
+    Nothing -> return $ cacheDir cfg "map" -- TODO any better option than this or undefined?
     Just fn -> do
       d <- fn args
       let d' = fromCutPath cfg d
