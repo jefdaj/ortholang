@@ -31,6 +31,7 @@ nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
   where
     testDir = (takeFileName . takeDirectory) path
+    -- TODO are all tests fine with these in place?
     badDirs = [] -- ["blast", "crb", "dedup"]
 
 getTestCuts :: IO [FilePath]
