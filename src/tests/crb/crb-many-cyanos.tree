@@ -1,0 +1,99 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   |-- 6306b9726c_550b555e01
+|   |   |   |-- 550b555e01.faa -> $WORKDIR/data/7122genes.faa
+|   |   |   |-- 550b555e01.phr
+|   |   |   |-- 550b555e01.pin
+|   |   |   |-- 550b555e01.psq
+|   |   |   |-- 550b555e01_into_6306b9726c.2.blast
+|   |   |   |-- 6306b9726c.fna -> $WORKDIR/data/6803genes10.fna
+|   |   |   |-- 6306b9726c.nhr
+|   |   |   |-- 6306b9726c.nin
+|   |   |   |-- 6306b9726c.nsq
+|   |   |   |-- 6306b9726c_into_550b555e01.1.blast
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   `-- results.crb
+|   |   |-- 6306b9726c_c00b9c2a1e
+|   |   |   |-- 6306b9726c.fna -> $WORKDIR/data/6803genes10.fna
+|   |   |   |-- 6306b9726c.nhr
+|   |   |   |-- 6306b9726c.nin
+|   |   |   |-- 6306b9726c.nsq
+|   |   |   |-- 6306b9726c_into_c00b9c2a1e.1.blast
+|   |   |   |-- c00b9c2a1e.faa -> $WORKDIR/data/7002genes.faa
+|   |   |   |-- c00b9c2a1e.phr
+|   |   |   |-- c00b9c2a1e.pin
+|   |   |   |-- c00b9c2a1e.psq
+|   |   |   |-- c00b9c2a1e_into_6306b9726c.2.blast
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   `-- results.crb
+|   |   `-- 6306b9726c_f1e136eaf6
+|   |       |-- 6306b9726c.fna -> $WORKDIR/data/6803genes10.fna
+|   |       |-- 6306b9726c.nhr
+|   |       |-- 6306b9726c.nin
+|   |       |-- 6306b9726c.nsq
+|   |       |-- 6306b9726c_into_f1e136eaf6.1.blast
+|   |       |-- evalues_data
+|   |       |-- f1e136eaf6.faa -> $WORKDIR/data/7942genes.faa
+|   |       |-- f1e136eaf6.phr
+|   |       |-- f1e136eaf6.pin
+|   |       |-- f1e136eaf6.psq
+|   |       |-- f1e136eaf6_into_6306b9726c.2.blast
+|   |       |-- fitting_data
+|   |       `-- results.crb
+|   |-- list
+|   |   `-- 196ccd0abf.txt
+|   `-- map
+|       |-- 2c65992c04
+|       |   |-- 149d73b0f9.crb -> $TMPDIR/exprs/crb_blast/237bf736b9_ded02d3d80.crb
+|       |   |-- 149d73b0f9.crb.args
+|       |   |-- 9ef8adf4b7.crb -> $TMPDIR/exprs/crb_blast/237bf736b9_6adffe63c7.crb
+|       |   |-- 9ef8adf4b7.crb.args
+|       |   |-- a7ef3267ae.crb -> $TMPDIR/exprs/crb_blast/237bf736b9_3fae05ef93.crb
+|       |   `-- a7ef3267ae.crb.args
+|       `-- 62fbd3a7e3
+|           |-- 5f0ff4e1d9.str.list -> $TMPDIR/exprs/extract_queries/4790a5a890.str.list
+|           |-- 5f0ff4e1d9.str.list.args
+|           |-- 76923ff72b.str.list -> $TMPDIR/exprs/extract_queries/5b854c2f27.str.list
+|           |-- 76923ff72b.str.list.args
+|           |-- c7ff3e27b1.str.list -> $TMPDIR/exprs/extract_queries/e1b4875908.str.list
+|           `-- c7ff3e27b1.str.list.args
+|-- exprs
+|   |-- all
+|   |   `-- 3ea6c8c907.str.list
+|   |-- crb_blast
+|   |   |-- 237bf736b9_3fae05ef93.crb -> $TMPDIR/cache/crbblast/6306b9726c_f1e136eaf6/results.crb
+|   |   |-- 237bf736b9_6adffe63c7.crb -> $TMPDIR/cache/crbblast/6306b9726c_550b555e01/results.crb
+|   |   `-- 237bf736b9_ded02d3d80.crb -> $TMPDIR/cache/crbblast/6306b9726c_c00b9c2a1e/results.crb
+|   |-- crb_blast_each
+|   |   `-- 8df2fbb1a8_898ac634dd.crb.list
+|   |-- extract_queries
+|   |   |-- 4790a5a890.str.list
+|   |   |-- 5b854c2f27.str.list
+|   |   `-- e1b4875908.str.list
+|   |-- extract_queries_each
+|   |   `-- 8e27e4454b.str.list.list
+|   |-- list
+|   |   `-- 3998a2d53c.faa.list -> ../../cache/list/196ccd0abf.txt
+|   |-- load_faa
+|   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- 5432882ab6.faa -> $WORKDIR/data/7002genes.faa
+|   |   `-- d30db7020b.faa -> $WORKDIR/data/7122genes.faa
+|   |-- load_fna
+|   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
+|   `-- str
+|       |-- 0398321ac5.str
+|       |-- 1d8a61c770.str
+|       |-- 7da80bde02.str
+|       `-- d8926fd3ed.str
+`-- vars
+    |-- full7002.faa -> ../exprs/load_faa/5432882ab6.faa
+    |-- full7122.faa -> ../exprs/load_faa/d30db7020b.faa
+    |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- hitlists.crb.list -> ../exprs/crb_blast_each/8df2fbb1a8_898ac634dd.crb.list
+    |-- mini6803.fna -> ../exprs/load_fna/9b7934c579.fna
+    `-- result -> ../exprs/all/3ea6c8c907.str.list
+
+20 directories, 76 files

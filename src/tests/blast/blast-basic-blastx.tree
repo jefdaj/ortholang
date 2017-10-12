@@ -1,0 +1,30 @@
+.
+|-- cache
+|   `-- blastdb
+|       `-- f1e136eaf6
+|           |-- f1e136eaf6.pdb.phr
+|           |-- f1e136eaf6.pdb.pin
+|           `-- f1e136eaf6.pdb.psq
+|-- exprs
+|   |-- blastx_db
+|   |   `-- 8158675169_8df2fbb1a8_46b5852d89.bht
+|   |-- extract_queries
+|   |   `-- 3a747a6845.str.list
+|   |-- load_faa
+|   |   `-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |-- load_fna
+|   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
+|   |-- makeblastdb_prot
+|   |   `-- c08cc19988.pdb
+|   |-- num
+|   |   `-- a53b190835.num
+|   `-- str
+|       |-- 1d8a61c770.str
+|       `-- 7da80bde02.str
+`-- vars
+    |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- hits6803.str.list -> ../exprs/extract_queries/3a747a6845.str.list
+    |-- mini6803.fna -> ../exprs/load_fna/9b7934c579.fna
+    `-- result -> ../vars/hits6803.str.list
+
+12 directories, 15 files

@@ -1,20 +1,24 @@
 # TODO when reversing the order, shouldn't need to re-run blastp!
 #      (also, should get the same results right?)
 # TODO maybe now is the time to make the map fns put stuff in regular dirs?
-pcc6803 = load_faa "ncbi_Synechocystis-PCC-6803-substr-GT-I-uid157913_NC_017038.faa"
-pcc7942 = concat_fastas (load_faa_each
-    ["ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007595.faa",
-     "ncbi_Synechococcus-elongatus-PCC-7942-uid58045_NC_007604.faa"])
+# TODO n shouldn't be getting written 10 times right? maybe a minor point
+
+faa6803 = load_faa "data/6803genes.faa"
+faa7942 = load_faa "data/7942genes.faa"
+
+fna6803 = load_fna "data/6803genes.fna"
+fna7942 = load_fna "data/7942genes.fna"
 
 n = 1e-5
-ref6803 = blastp_rbh n pcc6803 pcc7942
-ref7942 = blastp_rbh n pcc7942 pcc6803 # TODO why is this re-running blastp?
+
+ref6803fna = blastn_rbh n fna6803 fna7942
+ref7942fna = blastn_rbh n fna7942 fna6803 # TODO why is this re-running blastp?
 
 # seems to be mostly 971 but occasionally 972
 # (WP_010871442.1 comes and goes, which is odd because it has evalue 0 on NCBI!)
-rep10 = extract_queries_each (repeat ref7942 n 10)
+rep10 = extract_queries_each (repeat ref7942fna n 10)
 variable = any rep10 ~ all rep10
-result = extract_seqs pcc7942 variable
+result = extract_seqs fna7942 variable
 
 # TODO define the difference between these:
 # result = extract_seqs pcc6803 (extract_queries ref7942 ~ extract_targets ref6803)

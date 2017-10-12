@@ -327,6 +327,4 @@ tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "makeblastdb_each requires a list of fasta files" -- TODO typed error
 
 rMakeblastdbEach :: CutType -> RulesFn
-rMakeblastdbEach dbType = rMapTmp (aMakeblastdb dbType) "makeblastdb" singleName
-  where
-    singleName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+rMakeblastdbEach dbType = rMapTmp (aMakeblastdb dbType) "makeblastdb"

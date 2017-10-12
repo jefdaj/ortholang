@@ -1,6 +1,21 @@
 .
 |-- cache
 |   |-- crbblast
+|   |   |-- 52216ea0b1_1ea2b693e3
+|   |   |   `-- 6306b9726c_f1e136eaf6
+|   |   |       |-- 6306b9726c.fna -> $WORKDIR/data/6803genes10.fna
+|   |   |       |-- 6306b9726c.nhr
+|   |   |       |-- 6306b9726c.nin
+|   |   |       |-- 6306b9726c.nsq
+|   |   |       |-- 6306b9726c_into_f1e136eaf6.1.blast
+|   |   |       |-- evalues_data
+|   |   |       |-- f1e136eaf6.faa -> $WORKDIR/data/7942genes.faa
+|   |   |       |-- f1e136eaf6.phr
+|   |   |       |-- f1e136eaf6.pin
+|   |   |       |-- f1e136eaf6.psq
+|   |   |       |-- f1e136eaf6_into_6306b9726c.2.blast
+|   |   |       |-- fitting_data
+|   |   |       `-- results.crb
 |   |   `-- 6306b9726c_f1e136eaf6
 |   |       |-- 6306b9726c.fna -> $WORKDIR/data/6803genes10.fna
 |   |       |-- 6306b9726c.nhr
@@ -15,21 +30,24 @@
 |   |       |-- f1e136eaf6_into_6306b9726c.2.blast
 |   |       |-- fitting_data
 |   |       `-- results.crb
+|   |-- list
+|   |   |-- 176aefc67f.txt
+|   |   `-- abb933ea1c.txt
 |   `-- map
-|       `-- a41e9333df
-|           |-- fe949e7338.crb -> $TMPDIR/exprs/crb_blast/237bf736b9_3fae05ef93.crb
-|           `-- fe949e7338.crb.args
+|       `-- 3eaee328fe
+|           |-- a7ef3267ae.crb -> $TMPDIR/exprs/crb_blast/237bf736b9_3fae05ef93.crb
+|           `-- a7ef3267ae.crb.args
 |-- exprs
 |   |-- crb_blast
 |   |   |-- 237bf736b9_3fae05ef93.crb -> $TMPDIR/cache/crbblast/6306b9726c_f1e136eaf6/results.crb
-|   |   `-- 8df2fbb1a8_c08cc19988.crb -> $TMPDIR/cache/crbblast/6306b9726c_f1e136eaf6/results.crb
+|   |   `-- 8df2fbb1a8_c08cc19988.crb -> $TMPDIR/cache/crbblast/52216ea0b1_1ea2b693e3/6306b9726c_f1e136eaf6/results.crb
 |   |-- crb_blast_each
 |   |   `-- 8df2fbb1a8_ced061f0b2.crb.list
 |   |-- length
 |   |   `-- bf3abdc222.num
 |   |-- list
-|   |   |-- 140fbe67f6.crb.list
-|   |   `-- cce65539fd.faa.list
+|   |   |-- 140fbe67f6.crb.list -> ../../cache/list/abb933ea1c.txt
+|   |   `-- cce65539fd.faa.list -> ../../cache/list/176aefc67f.txt
 |   |-- load_faa
 |   |   `-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
 |   |-- load_fna
@@ -46,4 +64,4 @@
     |-- result -> ../exprs/length/bf3abdc222.num
     `-- single.crb -> ../exprs/crb_blast/8df2fbb1a8_c08cc19988.crb
 
-15 directories, 31 files
+18 directories, 46 files

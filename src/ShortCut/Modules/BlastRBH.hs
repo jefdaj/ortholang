@@ -41,7 +41,7 @@ reciprocal = CutFunction
   { fName      = "reciprocal"
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fFixity    = Prefix
-  , fRules     = rSimpleTmp aRecip "blast" bht
+  , fRules     = rSimpleTmp "blast" aRecip
   }
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??

@@ -9,7 +9,7 @@ import System.Directory (createDirectoryIfMissing)
 import ShortCut.Core.Paths     (CutPath, fromCutPath, hashContent)
 import ShortCut.Core.Util      (digest)
 import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Compile.Basic (rSimple)
+import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Map (rMapTmp)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import ShortCut.Core.Debug (debugAction, debugTrackWrite, debugReadFile)
@@ -19,7 +19,7 @@ cutModule = CutModule
   { mName = "crb-blast"
   , mFunctions =
     [ blastCRB
-    , blastCRBEach "crb_blast" -- TODO someting nicer than this!
+    , blastCRBEach -- TODO someting nicer than this!
     ]
   }
 
@@ -48,17 +48,17 @@ blastCRB = CutFunction
   { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
   , fTypeCheck = tCrbBlast
   , fFixity    = Prefix
-  , fRules  = rSimple aBlastCRB "crbblast" crb
+  , fRules     = rSimpleTmp "crbblast" aBlastCRB
   }
 
 -- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
 -- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
-blastCRBEach :: String -> CutFunction
-blastCRBEach singleName = CutFunction
+blastCRBEach :: CutFunction
+blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fRules  = rMapTmp aBlastCRB "crbblast" singleName
+  , fRules     = rMapTmp aBlastCRB "crbblast"
   }
 
 tCrbBlast :: [CutType] -> Either String CutType

@@ -405,31 +405,34 @@ aLoadListLinks cfg pathsPath outPath = do
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
 -- TODO rename something that goes with the map fns?
-rSimple :: (CutConfig -> CutPath -> [CutPath] -> Action ())
-        -> String -> CutType -> RulesFn
-rSimple = rSimple' False
+rSimple :: (CutConfig -> [CutPath] -> Action ()) -> RulesFn
+rSimple actFn = rSimple' Nothing actFn'
+  where
+    actFn' cfg _ args = actFn cfg args -- drop unused tmpdir
 
-rSimpleTmp :: (CutConfig -> CutPath -> [CutPath] -> Action ())
-           -> String -> CutType -> RulesFn
-rSimpleTmp = rSimple' True
+rSimpleTmp :: String
+           -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+           -> RulesFn
+rSimpleTmp prefix = rSimple' (Just prefix)
 
-rSimple' :: Bool -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-           -> String -> CutType -> RulesFn
-rSimple' mkTmp actFn tmpPrefix _ s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
+rSimple' :: Maybe String
+         -> (CutConfig -> CutPath -> [CutPath] -> Action ())
+         -> RulesFn
+rSimple' mTmpPrefix actFn s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
   let argPaths' = map (\(ExprPath p) -> toCutPath cfg p) argPaths
-  outPath' %> \_ -> aSimple' mkTmp cfg outPath actFn tmpDir argPaths'
+  outPath' %> \_ -> aSimple' cfg outPath actFn mTmpDir argPaths'
   return (ExprPath outPath')
   where
-    tmpDir   = cacheDir cfg tmpPrefix -- TODO tables bug here?
+    mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
     outPath  = exprPath s e
     outPath' = fromCutPath cfg outPath
-rSimple' _ _ _ _ _ _ = error "bad argument to rSimple'"
+rSimple' _ _ _ _ = error "bad argument to rSimple'"
 
-aSimple' :: Bool -> CutConfig -> CutPath
+aSimple' :: CutConfig -> CutPath
          -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-         -> CutPath -> [CutPath] -> Action ()
-aSimple' mkTmp cfg outPath actFn tmpDir argPaths = do
+         -> Maybe CutPath -> [CutPath] -> Action ()
+aSimple' cfg outPath actFn mTmpDir argPaths = do
   need argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks cfg) argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir'
@@ -440,10 +443,12 @@ aSimple' mkTmp cfg outPath actFn tmpDir argPaths = do
     hashes     = concat $ intersperse "_" $ map digest argPaths'
     argPaths'  = map (fromCutPath cfg) argPaths
     outPath'   = fromCutPath cfg outPath
-    out = debugAction cfg "aSimple'" outPath' (outPath':tmpDir':argPaths') -- TODO actFn?
-    tmpDir'    = if mkTmp
-                   then fromCutPath cfg tmpDir </> hashes
-                   else fromCutPath cfg tmpDir
+    out = debugAction cfg "aSimple'" outPath' (outPath':tmpDir':argPaths')
+    (tmpDir, tmpDir') = case mTmpDir of
+                Nothing  -> (toCutPath cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
+                Just dir -> (toCutPath cfg d, d)
+                  where
+                    d = fromCutPath cfg dir </> hashes
 
 -------------
 -- actions --

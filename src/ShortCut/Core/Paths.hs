@@ -58,6 +58,7 @@ module ShortCut.Core.Paths
   -- cache dirs
   , cacheDir
   -- tmpfiles
+  , argHashes
   , hashContent
   , exprPath
   , exprPathExplicit

@@ -10,8 +10,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Scientific             (formatScientific, FPFormat(..))
-import ShortCut.Core.Compile.Basic (rSimpleTmp, defaultTypeCheck)
-import ShortCut.Core.Compile.Map   (rMapTmp)
+import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
+import ShortCut.Core.Compile.Map   (rMap)
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (readLit, readPath, fromCutPath, CutPath)
@@ -76,16 +76,17 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
   , fRules     = rMkBlastFromDb d
   }
 
-rMkBlastFromDb :: BlastDesc -> RulesFn
-rMkBlastFromDb (bCmd, _, _, _) = rSimpleTmp (aMkBlastFromDb bCmd) "blast" bht
+-- TODO remove tmp?
+-- rMkBlastFromDb :: BlastDesc -> RulesFn
+rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aMkBlastFromDb bCmd cfg _ [o, e, q, p] = do
+aMkBlastFromDb :: String -> (CutConfig -> [CutPath] -> Action ())
+aMkBlastFromDb bCmd cfg [o, e, q, p] = do
   eStr   <- readLit cfg e'
   prefix <- readPath cfg p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
-      cDir    = cfgTmpDir cfg </> takeDirectory prefix'
+      cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
       dbg     = if cfgDebug cfg then ["-v"] else []
       args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
@@ -98,7 +99,7 @@ aMkBlastFromDb bCmd cfg _ [o, e, q, p] = do
     p'  = fromCutPath cfg p
     e'  = fromCutPath cfg e
     o'' = debugAction cfg "aMkBlastFromDb" o' [bCmd, e', o', q', p']
-aMkBlastFromDb _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
+aMkBlastFromDb _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------
 -- *blast* --
@@ -157,10 +158,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
   }
 
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach d@(bCmd, _, _, _) = rMapTmp actFn "blast" sName
-  where
-    sName = fName $ mkBlastFromDb d
-    actFn = aMkBlastFromDb bCmd
+rMkBlastFromDbEach d@(bCmd, _, _, _) = rMap $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --
@@ -205,12 +203,11 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
 rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
-  = rMapTmp revDbAct "blast" revDbName st editedExpr
+  = rMap revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
     subjDbExpr = CutFun dbType salt (depsOf s) dbFnName [s]
     editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
-    revDbName  = bCmd ++ "_db_rev"
     editedName = bCmd ++ "_db_rev_each"
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot", pdb)
@@ -218,7 +215,7 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
 rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
-aMkBlastFromDbRev :: String -> (CutConfig -> CutPath -> [CutPath] -> Action ())
-aMkBlastFromDbRev bCmd cfg cDir [oPath, eValue, dbPrefix, queryFa] =
-  aMkBlastFromDb  bCmd cfg cDir [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
+aMkBlastFromDbRev :: String -> (CutConfig -> [CutPath] -> Action ())
+aMkBlastFromDbRev bCmd cfg [oPath, eValue, dbPrefix, queryFa] =
+  aMkBlastFromDb  bCmd cfg [oPath, eValue, queryFa, dbPrefix]
+aMkBlastFromDbRev _ _ _ = error "bad argument to aMkBlastFromDbRev"

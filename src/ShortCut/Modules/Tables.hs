@@ -6,8 +6,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Config      (wrappedCmd)
-import ShortCut.Core.Compile.Basic       (rSimpleTmp, defaultTypeCheck)
-import ShortCut.Core.Compile.Map       (rMapTmp)
+import ShortCut.Core.Compile.Basic       (rSimple, rSimpleTmp, defaultTypeCheck)
+import ShortCut.Core.Compile.Map       (rMap)
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.List                  (nub, sort)
@@ -44,7 +44,7 @@ extractQueries = CutFunction
   { fName      = "extract_queries"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp (aTsvColumn 1) "tables" (ListOf str)
+  , fRules  = rSimple $ aTsvColumn 1
   }
 
 extractQueriesEach :: CutFunction
@@ -52,7 +52,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapTmp (aTsvColumn 1) "tables" "extract_queries"
+  , fRules  = rMap $ aTsvColumn 1
   }
 
 extractTargets :: CutFunction
@@ -60,7 +60,7 @@ extractTargets = CutFunction
   { fName      = "extract_targets"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp (aTsvColumn 2) "tables" (ListOf str)
+  , fRules  = rSimple $ aTsvColumn 2
   }
 
 extractTargetsEach :: CutFunction
@@ -68,12 +68,12 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules  = rMapTmp (aTsvColumn 2) "tables" "extract_targets"
+  , fRules  = rMap $ aTsvColumn 2
   }
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd
-aTsvColumn :: Int -> CutConfig -> CutPath -> [CutPath] -> Action ()
-aTsvColumn n cfg _ [outPath, tsvPath] = do
+aTsvColumn :: Int -> CutConfig -> [CutPath] -> Action ()
+aTsvColumn n cfg [outPath, tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
   Stdout out <- quietly $ cmd Shell awkCmd tsvPath'
   let out' = sort $ nub $ lines out
@@ -82,7 +82,7 @@ aTsvColumn n cfg _ [outPath, tsvPath] = do
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugAction cfg "aTsvColumn" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aTsvColumn _ _ _ _ = error "bad arguments to aTsvColumn"
+aTsvColumn _ _ _ = error "bad arguments to aTsvColumn"
 
 ---------------------------
 -- filter hits by evalue --
@@ -93,7 +93,7 @@ filterEvalue = CutFunction
   { fName      = "filter_evalue"
   , fTypeCheck = defaultTypeCheck [num, bht] bht
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp aFilterEvalue "blast" bht
+  , fRules  = rSimpleTmp "blast" aFilterEvalue -- TODO remove tmpdir?
   }
 
 aFilterEvalue :: CutConfig -> CutPath -> [CutPath] -> Action ()
@@ -118,7 +118,7 @@ bestHits = CutFunction
   { fName      = "best_hits"
   , fTypeCheck = defaultTypeCheck [bht] bht
   , fFixity    = Prefix
-  , fRules  = rSimpleTmp aBestHits "blast" bht
+  , fRules  = rSimpleTmp "blast" aBestHits
   }
 
 aBestHits :: CutConfig -> CutPath -> [CutPath] -> Action ()
