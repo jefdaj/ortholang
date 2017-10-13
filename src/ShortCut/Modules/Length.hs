@@ -3,9 +3,9 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug     (debugAction)
+import ShortCut.Core.Debug     (debugAction, debugReadLines)
 import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath,
-                               toCutPath, readLits, writeLit, CutPath)
+                               toCutPath, writeLit, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Map     (rMap)
 import ShortCut.Modules.Blast  (bht)
@@ -63,7 +63,7 @@ aLen :: CutConfig -> [CutPath] -> Action ()
 aLen cfg [out, lst] = do
   n <- fmap (\n -> read n :: Scientific)
      $ fmap (show . length)
-     $ readLits cfg lst'
+     $ debugReadLines cfg lst'
   liftIO $ createDirectoryIfMissing True $ takeDirectory out'
   writeLit cfg out'' $ show n
   where
