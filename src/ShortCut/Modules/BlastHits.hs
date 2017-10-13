@@ -1,4 +1,4 @@
-module ShortCut.Modules.Tables where
+module ShortCut.Modules.BlastHits where
 
 -- TODO rename to BlastHits?
 

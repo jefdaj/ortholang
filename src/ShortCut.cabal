@@ -77,8 +77,9 @@ executable shortcut
                     ShortCut.Modules,
                     ShortCut.Modules.BioMartR,
                     ShortCut.Modules.Blast,
-                    ShortCut.Modules.BlastDB,
                     ShortCut.Modules.BlastCRB,
+                    ShortCut.Modules.BlastDB,
+                    ShortCut.Modules.BlastHits,
                     ShortCut.Modules.BlastRBH,
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.Glob,
@@ -89,7 +90,6 @@ executable shortcut
                     ShortCut.Modules.Summarize,
                     ShortCut.Modules.SeqIO,
                     ShortCut.Modules.Sets,
-                    ShortCut.Modules.Tables,
                     ShortCut.Test,
                     ShortCut.Test.Deps
                     ShortCut.Test.Scripts,

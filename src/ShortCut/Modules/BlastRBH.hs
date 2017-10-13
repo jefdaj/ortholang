@@ -5,6 +5,7 @@ import ShortCut.Core.Types
 
 import Control.Monad.Trans         (liftIO)
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
+import ShortCut.Core.Compile.Map   (rMap)
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (exprPath, cacheDir, CutPath, toCutPath,
@@ -74,14 +75,24 @@ aReciprocalBest _ args = error $ "bad argument to aReciprocalBest: " ++ show arg
 --------------------------
 
 reciprocalBestEach :: CutFunction
-reciprocalBestEach = undefined
+reciprocalBestEach = CutFunction
+  { fName      = "reciprocal_best_each"
+  , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = rMap aReciprocalBest
+  }
 
 -----------------
 -- *blast*_rbh --
 -----------------
 
 mkBlastRbh :: BlastDesc -> CutFunction
-mkBlastRbh = undefined
+mkBlastRbh (bCmd, qType, sType, _) = CutFunction
+  { fName      = bCmd ++ "_rbh"
+  , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  , fFixity    = Prefix
+  , fRules     = undefined
+  }
 
 -- TODO make the rest of them... but not until after lab meeting?
 -- mkBlastSymRBH :: String -> CutType -> CutFunction
@@ -121,7 +132,12 @@ mkBlastRbh = undefined
 ----------------------
 
 mkBlastRbhEach :: BlastDesc -> CutFunction
-mkBlastRbhEach = undefined
+mkBlastRbhEach (bCmd, qType, sType, _) = CutFunction
+  { fName      = bCmd ++ "_rbh_each"
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = undefined
+  }
 
 -- TODO remove?
 -- reciprocalBestEach :: CutFunction
