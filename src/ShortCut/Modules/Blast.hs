@@ -3,6 +3,7 @@ module ShortCut.Modules.Blast
   , bht
   , BlastDesc
   , blastDescs
+  , blastDescsRev
   )
   where
 
@@ -25,12 +26,12 @@ cutModule = CutModule
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
-    map mkBlastFromDb        blastDescs ++
-    map mkBlastFromDbEach    blastDescs ++
     map mkBlastFromFa        blastDescs ++
     map mkBlastFromFaEach    blastDescs ++
-    map mkBlastFromFaRev     blastDescs ++
-    map mkBlastFromFaRevEach blastDescs
+    map mkBlastFromDb        blastDescs ++
+    map mkBlastFromDbEach    blastDescs ++
+    map mkBlastFromFaRev     blastDescsRev ++
+    map mkBlastFromFaRevEach blastDescsRev
   }
 
 -- tsv with these columns:
@@ -64,6 +65,12 @@ blastDescs =
   , ("tblastx", fna, fna, ndb)
   ]
 
+-- note that this just filters. it doesn't "reverse" the descriptions
+blastDescsRev :: [BlastDesc]
+blastDescsRev = filter isReversible blastDescs
+  where
+    isReversible (_, qType, sType, _) = qType == sType
+
 ----------------
 -- *blast*_db --
 ----------------
@@ -77,7 +84,7 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
   }
 
 -- TODO remove tmp?
--- rMkBlastFromDb :: BlastDesc -> RulesFn
+rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
 aMkBlastFromDb :: String -> (CutConfig -> [CutPath] -> Action ())
@@ -158,7 +165,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
   }
 
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach d@(bCmd, _, _, _) = rMap $ aMkBlastFromDb bCmd
+rMkBlastFromDbEach (bCmd, _, _, _) = rMap $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --

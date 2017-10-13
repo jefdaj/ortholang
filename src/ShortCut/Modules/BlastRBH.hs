@@ -10,7 +10,7 @@ import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (exprPath, cacheDir, CutPath, toCutPath,
                                     fromCutPath)
-import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs)
+import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescsRev)
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.Directory            (createDirectoryIfMissing)
 
@@ -24,9 +24,9 @@ cutModule = CutModule
     [ reciprocalBest
     , reciprocalBestEach
     ]
-    -- TODO filter for the ones that make sense in _rbh form!
-    ++ map mkBlastRbh     blastDescs
-    ++ map mkBlastRbhEach blastDescs
+    -- TODO also work with the non-symmetric ones that have an obvious way to do it?
+    ++ map mkBlastRbh     blastDescsRev
+    ++ map mkBlastRbhEach blastDescsRev
   }
 
 ---------------------
