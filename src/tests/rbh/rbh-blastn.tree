@@ -1,0 +1,77 @@
+.
+|-- cache
+|   |-- blastdb
+|   |   |-- 9754c305d1
+|   |   |   |-- 9754c305d1.ndb.nhr
+|   |   |   |-- 9754c305d1.ndb.nin
+|   |   |   `-- 9754c305d1.ndb.nsq
+|   |   `-- ce746b5c13
+|   |       |-- ce746b5c13.ndb.nhr
+|   |       |-- ce746b5c13.ndb.nin
+|   |       `-- ce746b5c13.ndb.nsq
+|   |-- list
+|   |   |-- 83f49e90f1.txt
+|   |   `-- 9b83172c90.txt
+|   `-- map
+|       |-- 3eedbe7995
+|       |   |-- 073de6789b.str.list -> $TMPDIR/exprs/extract_targets/073de6789b.str.list
+|       |   `-- 073de6789b.str.list.args
+|       `-- d6c281ab63
+|           |-- b5df3df818.str.list -> $TMPDIR/exprs/extract_queries/b5df3df818.str.list
+|           |-- b5df3df818.str.list.args
+|           |-- d75fa690e4.str.list -> $TMPDIR/exprs/extract_queries/d75fa690e4.str.list
+|           `-- d75fa690e4.str.list.args
+|-- exprs
+|   |-- all
+|   |   `-- c9463cb1e8.str.list
+|   |-- any
+|   |   `-- c9463cb1e8.str.list
+|   |-- blastn_db
+|   |   |-- 8158675169_f5e661a4be_a78dfa6d35.bht
+|   |   `-- 8158675169_fddf135b43_d326247d21.bht
+|   |-- difference
+|   |   `-- 20037e9ec4_2edf40164a.str.list
+|   |-- extract_queries
+|   |   |-- b5df3df818.str.list
+|   |   `-- d75fa690e4.str.list
+|   |-- extract_queries_each
+|   |   `-- 69a74973e9.str.list.list
+|   |-- extract_targets
+|   |   `-- 073de6789b.str.list
+|   |-- extract_targets_each
+|   |   `-- a90b254b89.str.list.list
+|   |-- list
+|   |   |-- 13d70f4b06.bht.list -> ../../cache/list/83f49e90f1.txt
+|   |   `-- 1b9e06f27d.bht.list -> ../../cache/list/9b83172c90.txt
+|   |-- load_fna
+|   |   |-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
+|   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
+|   |-- makeblastdb_nucl
+|   |   |-- f5e661a4be.ndb
+|   |   `-- fddf135b43.ndb
+|   |-- num
+|   |   `-- a53b190835.num
+|   |-- reciprocal_best
+|   |   |-- 71ee8f0fa5_7a08a6dc45.bht
+|   |   |-- d1ef2ec04e_52e9c434c8.bht
+|   |   `-- d1ef2ec04e_71ee8f0fa5.bht
+|   |-- str
+|   |   |-- 4cdbcfa070.str
+|   |   `-- a2fd369878.str
+|   `-- union
+|       `-- 00be747cc4_d2aa534aa7.str.list.list
+`-- vars
+    |-- fwd.bht -> ../exprs/blastn_db/8158675169_fddf135b43_d326247d21.bht
+    |-- lists.str.list.list -> ../exprs/union/00be747cc4_d2aa534aa7.str.list.list
+    |-- n.num -> ../exprs/num/a53b190835.num
+    |-- pcc6803.fna -> ../exprs/load_fna/f110b4b1c9.fna
+    |-- pcc7942.fna -> ../exprs/load_fna/eb12539f1c.fna
+    |-- rbh1.bht -> ../exprs/reciprocal_best/d1ef2ec04e_71ee8f0fa5.bht
+    |-- rbh2.bht -> ../exprs/reciprocal_best/d1ef2ec04e_52e9c434c8.bht
+    |-- rbh3.bht -> ../exprs/reciprocal_best/d1ef2ec04e_52e9c434c8.bht
+    |-- rbh4.bht -> ../exprs/reciprocal_best/71ee8f0fa5_7a08a6dc45.bht
+    |-- result -> ../exprs/difference/20037e9ec4_2edf40164a.str.list
+    |-- rev1.bht -> ../exprs/blastn_db/8158675169_f5e661a4be_a78dfa6d35.bht
+    `-- rev2.bht -> ../exprs/blastn_db/8158675169_f5e661a4be_a78dfa6d35.bht
+
+25 directories, 49 files
