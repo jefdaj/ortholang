@@ -1,0 +1,14 @@
+# A list of empty lists should have a nonzero length. (This was surprisingly
+# tricky to get working because it conflicts with deduplicating lists by their
+# content)
+
+# TODO include a repl test for the types?
+
+# TODO maybe don't dedup lists themselves, just in set ops?
+# TODO there's also a potentially serious bug: type "[[], [1]]", get [[], []]
+
+zero = length_each []
+one  = length_each [[]]
+two  = length_each [[], []]
+
+result = zero | one | two # should be [0.0]

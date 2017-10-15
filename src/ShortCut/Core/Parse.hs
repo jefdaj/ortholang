@@ -27,7 +27,7 @@ module ShortCut.Core.Parse
   , pFun
   , pQuoted
   , pSym
-  , pSet
+  , pList
   , pVar
   , pVarEq
   , spaceChars

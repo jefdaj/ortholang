@@ -4,7 +4,7 @@ let
   blast      = import ./src/ShortCut/Modules/Blast;
   blastrbh   = import ./src/ShortCut/Modules/BlastRBH;
   seqio      = import ./src/ShortCut/Modules/SeqIO;
-  tables     = import ./src/ShortCut/Modules/Tables;
+  blasthits  = import ./src/ShortCut/Modules/BlastHits;
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
@@ -14,7 +14,7 @@ let
     blast
     blastrbh
     seqio
-    tables
+    blasthits
     ncbi-blast
     crb-blast
     ncurses # TODO is this needed?
@@ -24,7 +24,7 @@ let
     ++ biomartr.runDepends
     ++ blast.runDepends
     ++ blastrbh.runDepends
-    ++ tables.runDepends
+    ++ blasthits.runDepends
     ++ seqio.runDepends;
 
 # see https://github.com/jml/nix-haskell-example

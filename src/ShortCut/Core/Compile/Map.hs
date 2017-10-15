@@ -20,7 +20,8 @@ import ShortCut.Core.Config       (wrappedCmd)
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    readPaths, writePaths, CutPath,
-                                   exprPathExplicit, argHashes)
+                                   exprPathExplicit, argHashes,
+                                   readLit, writeLits)
 import ShortCut.Core.Util         (digest, resolveSymlinks)
 import System.Directory           (createDirectoryIfMissing)
 
@@ -99,19 +100,17 @@ aMapMain :: CutConfig
          -> Action ()
 aMapMain cfg inits mapTmp eType lastsPath outPath = do
   need inits'
-  -- liftIO $ putStrLn $ "tmp': " ++ show tmp'
-  -- liftIO $ putStrLn $ "inits': " ++ show inits'
-  -- liftIO $ putStrLn $ "lasts': " ++ show lasts'
-  -- liftIO $ putStrLn $ "eType: " ++ show eType
-  inits'' <- liftIO $ mapM (resolveSymlinks cfg) inits'
-  lastPaths <- readPaths cfg lasts' -- TODO this needs a lit variant?
+  inits''    <- liftIO $ mapM (resolveSymlinks cfg) inits'
+  lastPaths  <- readPaths cfg lasts' -- TODO this needs a lit variant?
   lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)
   mapM_ (aMapArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
-  let outPaths  = map (mapPath cfg tmp' eType) lastPaths'
+  let outPaths = map (mapPath cfg tmp' eType) lastPaths'
   need outPaths
-  outPaths' <- (fmap . map) (toCutPath cfg) $ liftIO $ mapM (resolveSymlinks cfg) outPaths
+  outPaths' <- liftIO $ mapM (resolveSymlinks cfg) outPaths
   let out = debugAction cfg "aMapMain" outPath (outPath:inits' ++ [tmp', lasts'])
-  writePaths cfg out outPaths'
+  if eType `elem` [str, num]
+    then mapM (readLit cfg) outPaths' >>= writeLits cfg out
+    else writePaths cfg out $ map (toCutPath cfg) outPaths'
   where
     inits' = map (fromCutPath cfg) inits
     lasts' = fromCutPath cfg lastsPath

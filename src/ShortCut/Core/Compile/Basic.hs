@@ -32,7 +32,7 @@ import Development.Shake.FilePath  ((</>), (<.>))
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules)
 import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
-                                    digest)
+                                    digest, typesMatch)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             (takeDirectory, makeRelative)
 
@@ -107,7 +107,8 @@ aLit cfg expr out = writeLits cfg out'' [ePath]
     out'' = debugAction cfg "aLit" out' [ePath, out']
 
 rList :: CutState -> CutExpr -> Rules ExprPath
-rList s e@(CutList EmptyList _ _ _) = rListEmpty s e -- TODO remove?
+-- TODO is this the bug? refers to a list of other empty lists, no?
+-- rList s e@(CutList Empty _ _ _) = rListEmpty s e -- TODO remove?
 rList s e@(CutList rtn _ _ _)
   | rtn `elem` [str, num] = rListLits s e
   | otherwise = rListPaths s e
@@ -116,7 +117,7 @@ rList _ _ = error "bad arguemnt to rList"
 -- special case for empty lists
 -- TODO is a special type for this really needed?
 rListEmpty :: (CutScript, CutConfig) -> CutExpr -> Rules ExprPath
-rListEmpty s@(_,cfg) e@(CutList EmptyList _ _ _) = do
+rListEmpty s@(_,cfg) e@(CutList Empty _ _ _) = do
   let link  = exprPath s e
       link' = debugRules cfg "rListEmpty" e $ fromCutPath cfg link
   link' %> \_ -> aListEmpty cfg link
@@ -257,20 +258,6 @@ typeError :: [CutType] -> [CutType] -> String
 typeError expected actual =
   "Type error:\nexpected " ++ show expected
            ++ "\nbut got " ++ show actual
-
--- this mostly checks equality, but also has to deal with how an empty list can
--- be any kind of list
--- TODO is there any more elegant way? this seems error-prone...
-typeMatches :: CutType -> CutType -> Bool
-typeMatches EmptyList  (ListOf _) = True
-typeMatches (ListOf _) EmptyList  = True
-typeMatches a b = a == b
-
-typesMatch :: [CutType] -> [CutType] -> Bool
-typesMatch as bs = sameLength && allMatch
-  where
-    sameLength = length as == length bs
-    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
 
 -- TODO this should fail for type errors like multiplying a list by a num!
 defaultTypeCheck :: [CutType] -> CutType
