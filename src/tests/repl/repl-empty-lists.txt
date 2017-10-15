@@ -9,14 +9,14 @@ empty.list.list
 shortcut >> [[]]
 [[]]
 shortcut >> [[1]]
-[[1.0]]
+[[1]]
 shortcut >> :t [[1], []]
 num.list.list
 shortcut >> [[1], []]
-[[1.0], []]
+[[1], []]
 shortcut >> :t [[], [1]]
 num.list.list
 shortcut >> [[], [1]]
-[[], [1.0]]
+[[], [1]]
 shortcut >> :quit
 Bye for now!

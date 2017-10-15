@@ -29,6 +29,7 @@ import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (fromJust, maybeToList)
 import ShortCut.Core.Compile.Basic          (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
+import ShortCut.Core.Pretty (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath,
                                        readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
@@ -67,13 +68,15 @@ prettyResult cfg (ListOf t) f
     lits <- readLits cfg $ fromCutPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
-                  else map text lits
+                  else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
     paths <- readPaths cfg $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg t f = liftIO $ fmap text $ (tShow t) (fromCutPath cfg f)
+prettyResult cfg t f = liftIO $ fmap showFn $ (tShow t) (fromCutPath cfg f)
+  where
+    showFn = if t == num then prettyNum else text
 
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
