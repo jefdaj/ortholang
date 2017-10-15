@@ -11,4 +11,4 @@ zero = length_each []
 one  = length_each [[]]
 two  = length_each [[], []]
 
-result = zero + one + two # should be 3
+result = zero | one | two # should be [0.0]

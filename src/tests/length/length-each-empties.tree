@@ -1,0 +1,34 @@
+.
+|-- cache
+|   |-- list
+|   |   |-- bc0b5731cb.txt
+|   |   |-- be7310e980.txt
+|   |   `-- d751713988.txt
+|   `-- map
+|       |-- 8a613b228e
+|       |   |-- d090b1fa2c.num -> $TMPDIR/exprs/length/d090b1fa2c.num
+|       |   `-- d090b1fa2c.num.args
+|       `-- d6f0125f22
+|           |-- d090b1fa2c.num -> $TMPDIR/exprs/length/d090b1fa2c.num
+|           `-- d090b1fa2c.num.args
+|-- exprs
+|   |-- length
+|   |   `-- d090b1fa2c.num
+|   |-- length_each
+|   |   |-- 761608b24a.num.list
+|   |   |-- 9678607df3.num.list
+|   |   `-- abf109354a.num.list
+|   |-- list
+|   |   |-- 5e1abb69af.empty.list.list -> ../../cache/list/be7310e980.txt
+|   |   |-- 9d4568c009.empty.list -> ../../cache/list/d751713988.txt
+|   |   `-- cd486695fb.empty.list.list -> ../../cache/list/bc0b5731cb.txt
+|   `-- union
+|       |-- 6f12394f8b_cfc208719b.num.list
+|       `-- bfaa14d1d5_d1c1908d90.num.list
+`-- vars
+    |-- one.num.list -> ../exprs/length_each/abf109354a.num.list
+    |-- result -> ../exprs/union/6f12394f8b_cfc208719b.num.list
+    |-- two.num.list -> ../exprs/length_each/9678607df3.num.list
+    `-- zero.num.list -> ../exprs/length_each/761608b24a.num.list
+
+11 directories, 20 files

@@ -280,6 +280,7 @@ readStrings etype cfg path = if etype' `elem` [str, num]
 readString :: CutType -> CutConfig -> FilePath -> Action String
 readString etype cfg path = readStrings etype cfg path >>= return . head
 
+-- TODO if given paths and writing lits, should this read them?
 writeStrings :: CutType -> CutConfig -> FilePath -> [String] -> Action ()
 writeStrings etype cfg out whatevers = if etype' `elem` [str, num]
   then writeLits cfg out whatevers

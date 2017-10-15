@@ -9,6 +9,7 @@ import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath,
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Map     (rMap)
 import ShortCut.Modules.Blast  (bht)
+import ShortCut.Modules.BlastCRB (crb)
 import System.FilePath         (takeDirectory, (</>))
 import System.Directory           (createDirectoryIfMissing)
 import Data.Scientific (Scientific())
@@ -54,17 +55,16 @@ rLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
 rLen _ _ = error "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
-tLenEach [ ListOf  Empty     ] = Right (ListOf num)
+tLenEach [ ListOf  Empty     ] = Right (ListOf num) -- specifically, []
 tLenEach [(ListOf (ListOf _))] = Right (ListOf num)
-tLenEach [ ListOf  x         ] | x == bht = Right (ListOf num) -- TODO also crb?
-tLenEach _ = Left $ "length_each requires a list of lists"
+tLenEach [ListOf  x] | x `elem` [bht, crb] = Right (ListOf num)
+tLenEach _ = Left $ "length_each requires a list of things with lengths"
 
 -- TODO if given a list with empty lists, should return zeros!
 aLen :: CutConfig -> [CutPath] -> Action ()
 aLen cfg [out, lst] = do
-  n <- fmap (\n -> read n :: Scientific)
-     $ fmap (show . length)
-     $ debugReadLines cfg lst'
+  let count ls = read (show $ length ls) :: Scientific
+  n <- fmap count $ debugReadLines cfg lst'
   liftIO $ createDirectoryIfMissing True $ takeDirectory out'
   liftIO $ putStrLn $ "length of " ++ lst' ++ " is " ++ show n
   writeLit cfg out'' $ show n
