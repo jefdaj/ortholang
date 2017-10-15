@@ -35,7 +35,7 @@ lenEach = CutFunction
   }
 
 tLen :: [CutType] -> Either String CutType
-tLen [EmptyList ] = Right num
+tLen [Empty ] = Right num
 tLen [(ListOf _)] = Right num
 tLen [x] | x == bht = Right num
 tLen _ = Left $ "length requires a list"
@@ -54,17 +54,19 @@ rLen s@(_,cfg) e@(CutFun _ _ _ _ [l]) = do
 rLen _ _ = error "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
-tLenEach [EmptyList          ] = Right (ListOf num)
+tLenEach [ ListOf  Empty     ] = Right (ListOf num)
 tLenEach [(ListOf (ListOf _))] = Right (ListOf num)
-tLenEach [ListOf x] | x == bht = Right (ListOf num) -- TODO also crb?
+tLenEach [ ListOf  x         ] | x == bht = Right (ListOf num) -- TODO also crb?
 tLenEach _ = Left $ "length_each requires a list of lists"
 
+-- TODO if given a list with empty lists, should return zeros!
 aLen :: CutConfig -> [CutPath] -> Action ()
 aLen cfg [out, lst] = do
   n <- fmap (\n -> read n :: Scientific)
      $ fmap (show . length)
      $ debugReadLines cfg lst'
   liftIO $ createDirectoryIfMissing True $ takeDirectory out'
+  liftIO $ putStrLn $ "length of " ++ lst' ++ " is " ++ show n
   writeLit cfg out'' $ show n
   where
     out'  = fromCutPath cfg out

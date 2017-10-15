@@ -5,7 +5,8 @@ import Data.List             (dropWhileEnd)
 import Data.List             (isPrefixOf)
 import Data.List.Utils       (replace)
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Types   (CutConfig(..), CutExpr, CutVar, CutScript,)
+import ShortCut.Core.Types   (CutConfig(..), CutExpr, CutVar, CutScript,
+                              CutType(..))
 import System.Directory      (getHomeDirectory, makeAbsolute,
                               pathIsSymbolicLink)
 import System.FilePath       (addTrailingPathSeparator, normalise)
@@ -75,3 +76,18 @@ mkTestGroup cfg name trees = do
 
 lookupVar :: CutVar -> CutScript -> CutExpr
 lookupVar var scr = fromJust $ lookup var scr
+
+-- this mostly checks equality, but also has to deal with how an empty list can
+-- be any kind of list
+-- TODO is there any more elegant way? this seems error-prone...
+typeMatches :: CutType -> CutType -> Bool
+typeMatches Empty _ = True
+typeMatches _ Empty = True
+typeMatches (ListOf a) (ListOf b) = typeMatches a b
+typeMatches a b = a == b
+
+typesMatch :: [CutType] -> [CutType] -> Bool
+typesMatch as bs = sameLength && allMatch
+  where
+    sameLength = length as == length bs
+    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)

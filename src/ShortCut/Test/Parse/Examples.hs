@@ -27,7 +27,7 @@ n1 = CutLit num 0 "1.0"
 n2 = CutLit num 0 "2.0"
 
 lst0, lst1, lst2, lst3 :: CutExpr
-lst0  = CutList EmptyList 0 [] []
+lst0  = CutList Empty 0 [] [] -- ah, this is getting empty.list instead of empty
 lst1  = CutList num 0 [] [n1]
 lst2  = CutList num 0 [] [n1, n2]
 lst3  = CutList (ListOf num) 0 [] [lst1]
@@ -36,12 +36,13 @@ s4, lst4 :: CutExpr
 s4   = CutLit str 0 "four"
 lst4 = CutList str 0 [] [s4]
 
+-- TODO why do bops use the list type while lists use the elem type?
 bop00, bop10, bop01, bop40, bop04 :: CutExpr
-bop00 = CutBop EmptyList 0 [] "|" lst0 lst0
-bop10 = CutBop (ListOf num) 0 [] "|" lst1 lst0
-bop01 = CutBop (ListOf num) 0 [] "|" lst0 lst1
-bop40 = CutBop (ListOf str) 0 [] "|" lst4 lst0
-bop04 = CutBop (ListOf str) 0 [] "|" lst0 lst4
+bop00 = CutBop (ListOf Empty) 0 [] "|" lst0 lst0
+bop10 = CutBop (ListOf num  ) 0 [] "|" lst1 lst0
+bop01 = CutBop (ListOf num  ) 0 [] "|" lst0 lst1
+bop40 = CutBop (ListOf str  ) 0 [] "|" lst4 lst0
+bop04 = CutBop (ListOf str  ) 0 [] "|" lst0 lst4
 
 len :: [CutExpr] -> CutExpr
 len es = CutFun num 0 [] "length" es

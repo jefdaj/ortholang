@@ -22,6 +22,7 @@ module ShortCut.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
+  , listElemType
   , extOf
   , depsOf
   , rDepsOf
@@ -128,7 +129,7 @@ type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
 data CutType
-  = EmptyList -- TODO remove this? should never be a need to define an empty list
+  = Empty -- TODO remove this? should never be a need to define an empty list
   | ListOf CutType
   | CutType
     { tExt  :: String
@@ -149,27 +150,39 @@ defaultShow = fmap (unlines . fmtLines . lines) . readFile
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
+-- TODO should this use typesMatch?
 instance Eq CutType where
-  EmptyList  == EmptyList  = True
+  Empty      == Empty      = True
   (ListOf a) == (ListOf b) = a == b
-  t1        == t2        = extOf t1 == extOf t2
+  t1         == t2         = extOf t1 == extOf t2
 
 instance Show CutType where
   show = extOf
 
 typeOf :: CutExpr -> CutType
-typeOf (CutLit t _ _         ) = t
-typeOf (CutRef t _ _ _       ) = t
-typeOf (CutBop t _ _ _ _ _   ) = t
-typeOf (CutFun t _ _ _ _     ) = t
-typeOf (CutList EmptyList _ _ _) = EmptyList
-typeOf (CutList t  _ _ _      ) = ListOf t
+typeOf (CutLit  t _ _      ) = t
+typeOf (CutRef  t _ _ _    ) = t
+typeOf (CutBop  t _ _ _ _ _) = t
+typeOf (CutFun  t _ _ _ _  ) = t
+typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
+-- typeOf (CutList _ _ _ ts     ) = ListOf $ listElemType $ map typeOf ts
+-- typeOf (CutList _ _ _ []     ) = Empty
+-- typeOf (CutList _ _ _ []     ) = ListOf Empty
+
+-- Works around a bug where if the first element is an empty list but others
+-- have elements, it would call the whole thing an "emptylist.list".
+-- Note no typechecking happens here; heterogenous lists won't be noticed.
+listElemType :: [CutExpr] -> CutType
+listElemType    []  = Empty
+listElemType (x:[]) = typeOf x -- catches (ListOf Empty)
+listElemType (_:xs) = listElemType xs
 
 -- note that traceShow in here can cause an infinite loop
+-- and that there will be an issue if it's called on Empty alone
 extOf :: CutType -> String
-extOf (ListOf t   ) = extOf t ++ ".list"
-extOf EmptyList     = "list"
-extOf t = tExt t
+extOf Empty      = "empty" -- for lists with nothing in them yet
+extOf (ListOf t) = extOf t ++ ".list"
+extOf t          = tExt t
 
 varOf :: CutExpr -> [CutVar]
 varOf (CutRef _ _ vs _) = vs

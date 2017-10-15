@@ -17,7 +17,7 @@ import Text.PrettyPrint.HughesPJClass
 -- import Data.String.Utils          (replace)
 
 instance Pretty CutType where
-  pPrint EmptyList  = text "empty list" -- TODO remove
+  pPrint Empty  = error "should never actually need to print the Empty type"
   pPrint (ListOf t) = text "list of" <+> pPrint t <> text "s"
   pPrint t          = text (tExt t) <+> parens (text $ tDesc t)
 

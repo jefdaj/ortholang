@@ -1,0 +1,6 @@
+# Set operations should remove duplicate lists, even with the weird [] stuff.
+
+two  = [[], []]
+both = length      two  # should be 2
+each = length_each two  # should be [0, 0]
+sets = length (any two) # should be 1

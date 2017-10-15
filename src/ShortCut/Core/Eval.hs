@@ -61,7 +61,7 @@ myShake cfg = shake myOpts . alternatives
  - TODO clean this up!
  -}
 prettyResult :: CutConfig -> CutType -> CutPath -> Action Doc
-prettyResult _ EmptyList  _ = return $ text "[]"
+prettyResult _ Empty  _ = return $ text "[]"
 prettyResult cfg (ListOf t) f
   | t `elem` [str, num] = do
     lits <- readLits cfg $ fromCutPath cfg f
