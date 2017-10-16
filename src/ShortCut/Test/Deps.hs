@@ -25,7 +25,7 @@ depCmds =
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: CutConfig -> IO TestTree
 mkTests _ = do
-  testDir <- getDataFileName $ "tests" </> "deps"
+  testDir <- getDataFileName $ "tests" </> "dependencies"
   return $ testGroup "check dependency versions"
          $ map (mkTestDep testDir) depCmds
 
