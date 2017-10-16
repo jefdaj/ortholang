@@ -64,7 +64,7 @@ executable shortcut
                     ShortCut.Core,
                     ShortCut.Core.Compile,
                     ShortCut.Core.Compile.Basic,
-                    ShortCut.Core.Compile.Map,
+                    ShortCut.Core.Compile.Each,
                     ShortCut.Core.Compile.Repeat,
                     ShortCut.Core.Paths,
                     ShortCut.Core.Config,

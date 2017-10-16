@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Control.Monad.Trans         (liftIO)
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Map   (rMap)
+import ShortCut.Core.Compile.Each   (rEach)
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (exprPath, cacheDir, CutPath, toCutPath,
@@ -64,7 +64,7 @@ reciprocalBestEach = CutFunction
   { fName      = "reciprocal_best_each"
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rMap aReciprocalBest
+  , fRules     = rEach aReciprocalBest
   }
 
 -----------------

@@ -12,7 +12,7 @@ import ShortCut.Core.Types
 
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Map   (rMap)
+import ShortCut.Core.Compile.Each   (rEach)
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (readLit, readPath, fromCutPath, CutPath)
@@ -165,7 +165,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
   }
 
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach (bCmd, _, _, _) = rMap $ aMkBlastFromDb bCmd
+rMkBlastFromDbEach (bCmd, _, _, _) = rEach $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --
@@ -210,7 +210,7 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
 rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
-  = rMap revDbAct st editedExpr
+  = rEach revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
     subjDbExpr = CutFun dbType salt (depsOf s) dbFnName [s]

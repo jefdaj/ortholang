@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config      (wrappedCmd)
 import ShortCut.Core.Compile.Basic       (rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Map       (rMap)
+import ShortCut.Core.Compile.Each       (rEach)
 import ShortCut.Modules.Blast    (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.List                  (nub, sort)
@@ -53,7 +53,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules     = rMap $ aTsvColumn 1
+  , fRules     = rEach $ aTsvColumn 1
   }
 
 extractTargets :: CutFunction
@@ -69,7 +69,7 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules     = rMap $ aTsvColumn 2
+  , fRules     = rEach $ aTsvColumn 2
   }
 
 -- TODO rewrite this awk -> haskell, and using wrappedCmd
@@ -129,7 +129,7 @@ bestHitsEach = CutFunction
   { fName      = "best_hits_each"
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rMap aBestHits
+  , fRules     = rEach aBestHits
   }
 
 aBestHits :: CutConfig -> [CutPath] -> Action ()

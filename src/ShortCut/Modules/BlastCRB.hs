@@ -10,7 +10,7 @@ import ShortCut.Core.Paths     (CutPath, fromCutPath, hashContent)
 -- import ShortCut.Core.Util      (digest)
 import ShortCut.Core.Config    (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
-import ShortCut.Core.Compile.Map (rMapTmp)
+import ShortCut.Core.Compile.Each (rEachTmp)
 import ShortCut.Modules.SeqIO  (faa, fna)
 import ShortCut.Core.Debug (debugAction, debugTrackWrite)
 
@@ -58,7 +58,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fRules     = rMapTmp aBlastCRB "crbblast"
+  , fRules     = rEachTmp aBlastCRB "crbblast"
   }
 
 -- TODO split into two functions with different type signatures?

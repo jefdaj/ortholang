@@ -7,7 +7,7 @@ import ShortCut.Core.Debug     (debugAction, debugReadLines)
 import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath,
                                toCutPath, writeLit, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
-import ShortCut.Core.Compile.Map     (rMap)
+import ShortCut.Core.Compile.Each     (rEach)
 import ShortCut.Modules.Blast  (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import System.FilePath         (takeDirectory, (</>))
@@ -32,7 +32,7 @@ lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
   , fFixity    = Prefix
-  , fRules  = rMap aLen
+  , fRules  = rEach aLen
   }
 
 tLen :: [CutType] -> Either String CutType
