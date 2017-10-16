@@ -3,16 +3,15 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Control.Monad.Trans         (liftIO)
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Each   (rEach)
+import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
-import ShortCut.Core.Paths         (exprPath, cacheDir, CutPath, toCutPath,
-                                    fromCutPath)
-import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescsRev)
-import ShortCut.Modules.SeqIO      (faa, fna)
-import System.Directory            (createDirectoryIfMissing)
+import ShortCut.Core.Paths         (CutPath, fromCutPath)
+import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
+                                    aMkBlastFromDb)
+import ShortCut.Modules.BlastDB    (ndb, pdb)
+import ShortCut.Modules.SeqIO      (faa)
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
@@ -21,13 +20,77 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "blastrbh"
   , mFunctions =
+    -- TODO also work with the non-symmetric ones that have an obvious way to do it?
+    map mkBlastFromFaRev     blastDescsRev ++
+    map mkBlastFromFaRevEach blastDescsRev ++
     [ reciprocalBest
     , reciprocalBestEach
-    ]
-    -- TODO also work with the non-symmetric ones that have an obvious way to do it?
-    ++ map mkBlastRbh     blastDescsRev
-    ++ map mkBlastRbhEach blastDescsRev
+    ] ++
+    map mkBlastRbh     blastDescsRev ++
+    map mkBlastRbhEach blastDescsRev
   }
+
+-- note that this just filters. it doesn't "reverse" the descriptions
+blastDescsRev :: [BlastDesc]
+blastDescsRev = filter isReversible blastDescs
+  where
+    isReversible (_, qType, sType, _) = qType == sType
+
+-----------------
+-- *blast*_rev --
+-----------------
+
+mkBlastFromFaRev :: BlastDesc -> CutFunction
+mkBlastFromFaRev d@(bCmd, qType, sType, _) = CutFunction
+  { fName      = bCmd ++ "_rev"
+  , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
+  , fFixity    = Prefix
+  , fRules     = rMkBlastFromFaRev d
+  }
+
+-- flips the query and subject arguments and reuses the regular compiler above
+rMkBlastFromFaRev :: BlastDesc -> RulesFn
+rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name [e, s, q])
+  where
+    rules = fRules $ mkBlastFromFa d
+    name  = fName  $ mkBlastFromFa d
+rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
+
+----------------------
+-- *blast*_rev_each --
+----------------------
+
+mkBlastFromFaRevEach :: BlastDesc -> CutFunction
+mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
+  { fName      = bCmd ++ "_rev_each"
+  , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = rMkBlastFromFaRevEach d
+  }
+
+-- The most confusing one! Edits the expression to make the subject into a db,
+-- and the action fn to take the query and subject flipped, then maps the new
+-- expression over the new action fn.
+-- TODO check if all this is right, since it's confusing!
+rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
+rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
+  = rEach revDbAct st editedExpr
+  where
+    revDbAct   = aMkBlastFromDbRev bCmd
+    subjDbExpr = CutFun dbType salt (depsOf s) dbFnName [s]
+    editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
+    editedName = bCmd ++ "_db_rev_each"
+    (dbFnName, dbType) = if qType == faa
+                           then ("makeblastdb_prot", pdb)
+                           else ("makeblastdb_nucl", ndb)
+rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
+
+-- TODO which blast commands make sense with this?
+aMkBlastFromDbRev :: String -> (CutConfig -> [CutPath] -> Action ())
+aMkBlastFromDbRev bCmd cfg [oPath, eValue, dbPrefix, queryFa] =
+  aMkBlastFromDb  bCmd cfg [oPath, eValue, queryFa, dbPrefix]
+aMkBlastFromDbRev _ _ _ = error "bad argument to aMkBlastFromDbRev"
 
 ---------------------
 -- reciprocal_best --

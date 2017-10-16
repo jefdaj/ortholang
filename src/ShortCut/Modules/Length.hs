@@ -4,13 +4,13 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Debug     (debugAction, debugReadLines)
-import ShortCut.Core.Paths    (cacheDir, exprPath, fromCutPath,
+import ShortCut.Core.Paths    (exprPath, fromCutPath,
                                toCutPath, writeLit, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Each     (rEach)
 import ShortCut.Modules.Blast  (bht)
 import ShortCut.Modules.BlastCRB (crb)
-import System.FilePath         (takeDirectory, (</>))
+import System.FilePath         (takeDirectory)
 import System.Directory           (createDirectoryIfMissing)
 import Data.Scientific (Scientific())
 -- import Path (fromAbsFile, fromAbsDir)

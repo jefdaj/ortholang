@@ -1,9 +1,11 @@
 module ShortCut.Modules.Blast
   ( cutModule
   , bht
+  -- the rest is for blastrbh, which is pretty intimately related:
   , BlastDesc
   , blastDescs
-  , blastDescsRev
+  , mkBlastFromFa
+  , aMkBlastFromDb
   )
   where
 
@@ -26,12 +28,10 @@ cutModule = CutModule
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
-    map mkBlastFromFa        blastDescs ++
-    map mkBlastFromFaEach    blastDescs ++
-    map mkBlastFromDb        blastDescs ++
-    map mkBlastFromDbEach    blastDescs ++
-    map mkBlastFromFaRev     blastDescsRev ++
-    map mkBlastFromFaRevEach blastDescsRev
+    map mkBlastFromFa     blastDescs ++
+    map mkBlastFromFaEach blastDescs ++
+    map mkBlastFromDb     blastDescs ++
+    map mkBlastFromDbEach blastDescs
   }
 
 -- tsv with these columns:
@@ -43,10 +43,6 @@ bht = CutType
   , tDesc = "tab-separated table of blast hits (outfmt 6)"
   , tShow  = defaultShow
   }
-
--------------------------------------------
--- new description-based blast functions --
--------------------------------------------
 
 -- TODO need a separate db type for reverse fns?
 type BlastDesc =
@@ -64,12 +60,6 @@ blastDescs =
   , ("tblastn", faa, fna, ndb)
   , ("tblastx", fna, fna, ndb)
   ]
-
--- note that this just filters. it doesn't "reverse" the descriptions
-blastDescsRev :: [BlastDesc]
-blastDescsRev = filter isReversible blastDescs
-  where
-    isReversible (_, qType, sType, _) = qType == sType
 
 ----------------
 -- *blast*_db --
@@ -131,27 +121,6 @@ rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
     expr  = CutFun dbType salt (depsOf s) name2 [s] -- TODO deps OK?
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
------------------
--- *blast*_rev --
------------------
-
-mkBlastFromFaRev :: BlastDesc -> CutFunction
-mkBlastFromFaRev d@(bCmd, qType, sType, _) = CutFunction
-  { fName      = bCmd ++ "_rev"
-  , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
-  , fFixity    = Prefix
-  , fRules     = rMkBlastFromFaRev d
-  }
-
--- flips the query and subject arguments and reuses the regular compiler above
-rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
-  = rules st (CutFun rtn salt deps name [e, s, q])
-  where
-    rules = fRules $ mkBlastFromFa d
-    name  = fName  $ mkBlastFromFa d
-rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
-
 ---------------------
 -- *blast*_db_each --
 ---------------------
@@ -191,38 +160,3 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, ss])
               ++ (if dbType == ndb then "_nucl" else "_prot")
               ++ "_each"
 rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"
-
-----------------------
--- *blast*_rev_each --
-----------------------
-
-mkBlastFromFaRevEach :: BlastDesc -> CutFunction
-mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
-  { fName      = bCmd ++ "_rev_each"
-  , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
-  , fFixity    = Prefix
-  , fRules     = rMkBlastFromFaRevEach d
-  }
-
--- The most confusing one! Edits the expression to make the subject into a db,
--- and the action fn to take the query and subject flipped, then maps the new
--- expression over the new action fn.
--- TODO check if all this is right, since it's confusing!
-rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
-  = rEach revDbAct st editedExpr
-  where
-    revDbAct   = aMkBlastFromDbRev bCmd
-    subjDbExpr = CutFun dbType salt (depsOf s) dbFnName [s]
-    editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
-    editedName = bCmd ++ "_db_rev_each"
-    (dbFnName, dbType) = if qType == faa
-                           then ("makeblastdb_prot", pdb)
-                           else ("makeblastdb_nucl", ndb)
-rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
-
--- TODO which blast commands make sense with this?
-aMkBlastFromDbRev :: String -> (CutConfig -> [CutPath] -> Action ())
-aMkBlastFromDbRev bCmd cfg [oPath, eValue, dbPrefix, queryFa] =
-  aMkBlastFromDb  bCmd cfg [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ _ = error "bad argument to aMkBlastFromDbRev"
