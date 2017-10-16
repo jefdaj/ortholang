@@ -9,18 +9,18 @@
 |   |       |-- f1e136eaf6.pdb.phr
 |   |       |-- f1e136eaf6.pdb.pin
 |   |       `-- f1e136eaf6.pdb.psq
-|   |-- list
-|   |   |-- 67045753f7.txt
-|   |   `-- a6ba15d651.txt
-|   `-- map
-|       |-- 373cb5605f
-|       |   |-- 394b76567b.str.list -> $TMPDIR/exprs/extract_queries/394b76567b.str.list
-|       |   |-- 394b76567b.str.list.args
-|       |   |-- ee6f0b2c4c.str.list -> $TMPDIR/exprs/extract_queries/ee6f0b2c4c.str.list
-|       |   `-- ee6f0b2c4c.str.list.args
-|       `-- a7030e5acc
-|           |-- 472c8a152d.str.list -> $TMPDIR/exprs/extract_targets/472c8a152d.str.list
-|           `-- 472c8a152d.str.list.args
+|   |-- each
+|   |   |-- 373cb5605f
+|   |   |   |-- 394b76567b.str.list -> $TMPDIR/exprs/extract_queries/394b76567b.str.list
+|   |   |   |-- 394b76567b.str.list.args
+|   |   |   |-- ee6f0b2c4c.str.list -> $TMPDIR/exprs/extract_queries/ee6f0b2c4c.str.list
+|   |   |   `-- ee6f0b2c4c.str.list.args
+|   |   `-- a7030e5acc
+|   |       |-- 472c8a152d.str.list -> $TMPDIR/exprs/extract_targets/472c8a152d.str.list
+|   |       `-- 472c8a152d.str.list.args
+|   `-- list
+|       |-- 67045753f7.txt
+|       `-- a6ba15d651.txt
 |-- exprs
 |   |-- all
 |   |   `-- 93c342188f.str.list

@@ -13,22 +13,22 @@
 |   |       |-- f1e136eaf6.pdb.phr
 |   |       |-- f1e136eaf6.pdb.pin
 |   |       `-- f1e136eaf6.pdb.psq
-|   |-- list
-|   |   `-- 6018b4aff5.txt
-|   `-- map
-|       `-- c56e6b4ee8
-|           |-- 124e9063de.str.list -> $TMPDIR/exprs/extract_queries/124e9063de.str.list
-|           |-- 124e9063de.str.list.args
-|           |-- 1c78118a6f.str.list -> $TMPDIR/exprs/extract_queries/1c78118a6f.str.list
-|           |-- 1c78118a6f.str.list.args
-|           |-- 217d76f66f.str.list -> $TMPDIR/exprs/extract_queries/217d76f66f.str.list
-|           |-- 217d76f66f.str.list.args
-|           |-- 4dcfad3c69.str.list -> $TMPDIR/exprs/extract_queries/4dcfad3c69.str.list
-|           |-- 4dcfad3c69.str.list.args
-|           |-- 934a55faaa.str.list -> $TMPDIR/exprs/extract_queries/934a55faaa.str.list
-|           |-- 934a55faaa.str.list.args
-|           |-- e9b730c3ee.str.list -> $TMPDIR/exprs/extract_queries/e9b730c3ee.str.list
-|           `-- e9b730c3ee.str.list.args
+|   |-- each
+|   |   `-- c56e6b4ee8
+|   |       |-- 124e9063de.str.list -> $TMPDIR/exprs/extract_queries/124e9063de.str.list
+|   |       |-- 124e9063de.str.list.args
+|   |       |-- 1c78118a6f.str.list -> $TMPDIR/exprs/extract_queries/1c78118a6f.str.list
+|   |       |-- 1c78118a6f.str.list.args
+|   |       |-- 217d76f66f.str.list -> $TMPDIR/exprs/extract_queries/217d76f66f.str.list
+|   |       |-- 217d76f66f.str.list.args
+|   |       |-- 4dcfad3c69.str.list -> $TMPDIR/exprs/extract_queries/4dcfad3c69.str.list
+|   |       |-- 4dcfad3c69.str.list.args
+|   |       |-- 934a55faaa.str.list -> $TMPDIR/exprs/extract_queries/934a55faaa.str.list
+|   |       |-- 934a55faaa.str.list.args
+|   |       |-- e9b730c3ee.str.list -> $TMPDIR/exprs/extract_queries/e9b730c3ee.str.list
+|   |       `-- e9b730c3ee.str.list.args
+|   `-- list
+|       `-- 6018b4aff5.txt
 |-- exprs
 |   |-- any
 |   |   `-- eb0be40455.str.list

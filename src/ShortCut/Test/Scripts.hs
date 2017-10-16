@@ -32,7 +32,7 @@ nonDeterministicCut path = testDir `elem` badDirs
     testDir = (takeFileName . takeDirectory) path
     -- TODO remove crb from the dedup tests so they can be deterministic
     -- TODO will regular blast be nondeterministic at large scales too?
-    badDirs = ["crb_blast", "each"] -- ["blast", "crb", "dedup"]
+    badDirs = ["blastcrb", "each"]
 
 getTestCuts :: IO [FilePath]
 getTestCuts = do

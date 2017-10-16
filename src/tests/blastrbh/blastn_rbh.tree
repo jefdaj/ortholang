@@ -9,18 +9,18 @@
 |   |       |-- ce746b5c13.ndb.nhr
 |   |       |-- ce746b5c13.ndb.nin
 |   |       `-- ce746b5c13.ndb.nsq
-|   |-- list
-|   |   |-- 83f49e90f1.txt
-|   |   `-- 9b83172c90.txt
-|   `-- map
-|       |-- 3eedbe7995
-|       |   |-- 073de6789b.str.list -> $TMPDIR/exprs/extract_targets/073de6789b.str.list
-|       |   `-- 073de6789b.str.list.args
-|       `-- d6c281ab63
-|           |-- b5df3df818.str.list -> $TMPDIR/exprs/extract_queries/b5df3df818.str.list
-|           |-- b5df3df818.str.list.args
-|           |-- d75fa690e4.str.list -> $TMPDIR/exprs/extract_queries/d75fa690e4.str.list
-|           `-- d75fa690e4.str.list.args
+|   |-- each
+|   |   |-- 3eedbe7995
+|   |   |   |-- 073de6789b.str.list -> $TMPDIR/exprs/extract_targets/073de6789b.str.list
+|   |   |   `-- 073de6789b.str.list.args
+|   |   `-- d6c281ab63
+|   |       |-- b5df3df818.str.list -> $TMPDIR/exprs/extract_queries/b5df3df818.str.list
+|   |       |-- b5df3df818.str.list.args
+|   |       |-- d75fa690e4.str.list -> $TMPDIR/exprs/extract_queries/d75fa690e4.str.list
+|   |       `-- d75fa690e4.str.list.args
+|   `-- list
+|       |-- 83f49e90f1.txt
+|       `-- 9b83172c90.txt
 |-- exprs
 |   |-- all
 |   |   `-- c9463cb1e8.str.list
