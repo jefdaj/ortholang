@@ -94,14 +94,14 @@ mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
       return $ out ++ err
 
--- Without the delays, Tasty messages sometimes get captured in the output
--- If it still happens, try TASTY_HIDE_SUCCESSES=True or TASTY_NUM_THREADS=1.
--- hFlush does not seem to help.
+-- Without the delays, Tasty messages sometimes get captured in the output. If
+-- it still happens try TASTY_HIDE_SUCCESSES=True, not TASTY_NUM_THREADS=1.
+-- hFlush also does not seem to help.
 runCut :: CutConfig -> IO String
 runCut cfg = withLock cfg $ do
-  delay 100
+  delay 10000 -- 1/10 of a second
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg
-  delay 100
+  delay 10000 -- 1/10 of a second
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail "script failed")
   return out

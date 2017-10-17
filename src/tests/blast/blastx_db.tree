@@ -1,8 +1,54 @@
 .
+|-- cache
+|   |-- blastdb
+|   |   `-- f1e136eaf6
+|   |       |-- f1e136eaf6.pdb.phr
+|   |       |-- f1e136eaf6.pdb.pin
+|   |       `-- f1e136eaf6.pdb.psq
+|   |-- each
+|   |   |-- 8641bd3b28
+|   |   |   |-- 7fd4089230.str.list -> $TMPDIR/exprs/extract_queries/7fd4089230.str.list
+|   |   |   `-- 7fd4089230.str.list.args
+|   |   `-- e1397ded9f
+|   |       |-- 46b5852d89.bht -> $TMPDIR/exprs/blastx_db/8158675169_b23045213e_46b5852d89.bht
+|   |       `-- 46b5852d89.bht.args
+|   `-- list
+|       |-- af5b1fa4b5.txt
+|       `-- daecab170a.txt
 |-- exprs
-|   `-- str
-|       `-- b0458da0ae.str
+|   |-- all
+|   |   `-- 782f523b0c.str.list
+|   |-- blastx_db
+|   |   |-- 8158675169_b23045213e_46b5852d89.bht
+|   |   `-- 8158675169_bc4ea1fc06_46b5852d89.bht
+|   |-- blastx_db_each
+|   |   `-- 8158675169_bc4ea1fc06_f2e2e6cab1.bht.list
+|   |-- extract_queries
+|   |   |-- 7fd4089230.str.list
+|   |   `-- ba961ef0a0.str.list
+|   |-- extract_queries_each
+|   |   `-- 3146559dc8.str.list.list
+|   |-- list
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/daecab170a.txt
+|   |   `-- e214a4da42.pdb.list -> ../../cache/list/af5b1fa4b5.txt
+|   |-- load_faa
+|   |   `-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |-- load_fna
+|   |   `-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
+|   |-- makeblastdb_prot
+|   |   `-- c08cc19988.pdb
+|   |-- num
+|   |   `-- a53b190835.num
+|   |-- str
+|   |   |-- 1d8a61c770.str
+|   |   `-- 8fa8ede325.str
+|   `-- union
+|       `-- cf82e8ab2f_ba0d672bb8.str.list.list
 `-- vars
-    `-- result -> ../exprs/str/b0458da0ae.str
+    |-- full7942.pdb -> ../exprs/makeblastdb_prot/c08cc19988.pdb
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/3146559dc8.str.list.list
+    |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
+    |-- result -> ../exprs/all/782f523b0c.str.list
+    `-- single.str.list -> ../exprs/extract_queries/ba961ef0a0.str.list
 
-3 directories, 2 files
+21 directories, 30 files

@@ -1,5 +1,5 @@
-mini6803 = load_fna "data/6803genes10.fna"
+mini7942 = load_fna "data/7942genes10.fna"
 full7942 = load_faa "data/7942genes.faa"
-hits6803 = extract_queries (blastx 1e-5 mini6803 full7942)
-# result = all (repeat hits6803 mini6803 10)
-result = hits6803
+single = extract_queries      (blastx      1e-5 mini7942  full7942 )
+mapped = extract_queries_each (blastx_each 1e-5 mini7942 [full7942])
+result = all ([single] | mapped)
