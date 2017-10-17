@@ -1,8 +1,15 @@
 .
+|-- cache
+|   `-- list
+|       `-- dd81c4f27d.txt
 |-- exprs
+|   |-- list
+|   |   `-- df2095ac89.str.list -> ../../cache/list/dd81c4f27d.txt
+|   |-- parse_searches
+|   |   `-- 42a03b76c5.search
 |   `-- str
-|       `-- b0458da0ae.str
+|       `-- 45914ff33c.str
 `-- vars
-    `-- result -> ../exprs/str/b0458da0ae.str
+    `-- result -> ../exprs/parse_searches/42a03b76c5.search
 
-3 directories, 2 files
+7 directories, 5 files

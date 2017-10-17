@@ -1,4 +1,5 @@
-mini6803 = load_faa "data/6803genes10.faa"
+mini7942 = load_faa "data/7942genes10.faa"
 full7942 = load_faa "data/7942genes.faa"
-hits6803 = extract_queries (blastp 1e-5 mini6803 full7942)
-result = hits6803
+single = extract_queries      (blastp      1e-5 mini7942  full7942 )
+mapped = extract_queries_each (blastp_each 1e-5 mini7942 [full7942])
+result = all ([single] | mapped)

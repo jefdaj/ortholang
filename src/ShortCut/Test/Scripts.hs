@@ -18,7 +18,7 @@ import ShortCut.Core.Util         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
                                    takeFileName, (</>), (<.>))
-import System.IO                  (stdout, stderr, writeFile)
+import System.IO                  (stdout, stderr, writeFile, hFlush)
 import System.IO.LockFile         (withLockFile)
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
@@ -55,7 +55,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "-u", ref, new]
 
 mkOutTest :: CutConfig -> FilePath -> TestTree
-mkOutTest cfg gld = goldenDiff "prints the right result" gld scriptAct
+mkOutTest cfg gld = goldenDiff "prints expected output" gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = runCut cfg >>= return . pack
@@ -94,11 +94,20 @@ mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
       return $ out ++ err
 
--- TODO use a regex to remove captured Tasty output? any better way?
+-- TODO set TASTY_NUM_THREADS=1 when creating golden files to fix it?
 runCut :: CutConfig -> IO String
 runCut cfg = withLock cfg $ do
-  delay 100 -- without this, Tasty messages sometimes get captured too
+
+  -- TODO these aren't ALL necessary along with single threading are they??
+  delay 1000 -- without this, Tasty messages sometimes get captured in the output
+  hFlush stdout
+  hFlush stderr
+  delay 1000
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg
+  delay 1000
+  hFlush stdout
+  hFlush stderr
+
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail "script failed")
   return out
