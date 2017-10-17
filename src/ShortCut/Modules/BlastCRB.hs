@@ -82,7 +82,7 @@ aBlastCRB cfg tmpDir [o, q, t] = do
       qLink = tDir </> qHash <.> takeExtension q'
       tLink = tDir </> tHash <.> takeExtension t'
       oPath = tDir </> "results.crb"
-  liftIO $ putStrLn $ "tDir: " ++ tDir
+  -- liftIO $ putStrLn $ "tDir: " ++ tDir
   liftIO $ createDirectoryIfMissing True tDir
   unit $ quietly $ wrappedCmd cfg [q'] [] "ln" ["-fs", q', qLink]
   unit $ quietly $ wrappedCmd cfg [t'] [] "ln" ["-fs", t', tLink]

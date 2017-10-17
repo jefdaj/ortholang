@@ -128,12 +128,12 @@ aSetFold :: CutConfig
          -> FilePath -> FilePath
          -> Action ()
 aSetFold cfg fixLinks fn (ListOf etype) oPath setsPath = do
-  liftIO $ putStrLn $ "aSetFold collapsing lists from " ++ extOf (ListOf etype) ++ " -> " ++ extOf etype
+  -- liftIO $ putStrLn $ "aSetFold collapsing lists from " ++ extOf (ListOf etype) ++ " -> " ++ extOf etype
   setPaths  <- readPaths cfg setsPath
   setElems  <- mapM (readStrings etype cfg) (map (fromCutPath cfg) setPaths)
   setElems' <- liftIO $ mapM fixLinks setElems
-  liftIO $ putStrLn $ "setElems: " ++ show setElems
-  liftIO $ putStrLn $ "setElems': " ++ show setElems'
+  -- liftIO $ putStrLn $ "setElems: " ++ show setElems
+  -- liftIO $ putStrLn $ "setElems': " ++ show setElems'
   let sets = map fromList setElems'
       oLst = toList $ fn sets
       oPath' = debugAction cfg "aSetFold" oPath [oPath, setsPath]

@@ -17,8 +17,8 @@ import System.Directory      (setCurrentDirectory)
 
 main:: IO ()
 main = do
-  hSetBuffering stdin  LineBuffering
-  hSetBuffering stdout LineBuffering
+  -- hSetBuffering stdin  LineBuffering -- TODO remove?
+  -- hSetBuffering stdout LineBuffering -- TODO remove?
   usage <- getUsage
   args  <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
@@ -29,7 +29,7 @@ main = do
   let cfg' = debug cfg ("config: " ++ show cfg) cfg
   setCurrentDirectory $ cfgWorkDir cfg'
   when (hasArg args "test")
-    (withArgs [] $ runTests cfg') -- >> exitSuccess)
+    (withArgs [] $ runTests cfg')
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then evalFile stdout cfg'
     else runRepl  cfg'

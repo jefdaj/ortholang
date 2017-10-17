@@ -50,7 +50,7 @@
 
 module ShortCut.Core.Paths
   -- cutpaths
-  ( CutPath
+  ( CutPath()
   , toCutPath
   , fromCutPath
   , toGeneric
@@ -112,7 +112,7 @@ toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
 fromGeneric :: CutConfig -> String -> String
 fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
                     $ replace "$TMPDIR"  (cfgTmpDir  cfg)
-                    $ txt
+                    $ checkPath txt
 
 isGeneric :: FilePath -> Bool
 isGeneric path = "$TMPDIR" `isPrefixOf` path || "$WORKDIR" `isPrefixOf` path
@@ -199,20 +199,23 @@ varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> bas
 
 -- These are just to alert me of programming mistakes,
 -- and can be removed once the rest of the IO stuff is solid.
+checkLit :: String -> String
+checkLit lit = if isGeneric lit
+                 then error $ "placeholder in lit: '" ++ lit ++ "'"
+                 else lit
 
 checkLits :: [String] -> [String] -- (or error, but let's ignore that)
 checkLits = map checkLit
-  where
-    checkLit lit = if isGeneric lit
-                     then error $ "placeholder in lit: '" ++ lit ++ "'"
-                     else lit
+
+
+checkPath :: FilePath -> FilePath
+checkPath path = if isAbsolute path || isGeneric path
+                   then path
+                   else error $ "invalid path: '" ++ path ++ "'"
 
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath
-  where
-    checkPath path = if isAbsolute path || isGeneric path
-                       then path
-                       else error $ "invalid path: '" ++ path ++ "'"
+
 
 -------------
 -- file io --

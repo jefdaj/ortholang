@@ -66,7 +66,7 @@ aLen cfg [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
   n <- fmap count $ debugReadLines cfg lst'
   liftIO $ createDirectoryIfMissing True $ takeDirectory out'
-  liftIO $ putStrLn $ "length of " ++ lst' ++ " is " ++ show n
+  -- liftIO $ putStrLn $ "length of " ++ lst' ++ " is " ++ show n
   writeLit cfg out'' $ show n
   where
     out'  = fromCutPath cfg out

@@ -377,7 +377,7 @@ aLoadListLinks cfg pathsPath outPath = do
   paths <- readLitPaths cfg pathsPath'
   let paths' = map (fromCutPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks cfg) paths'
-  liftIO $ putStrLn $ "about to need: " ++ show paths''
+  -- liftIO $ putStrLn $ "about to need: " ++ show paths''
   need paths''
   let paths''' = map (toCutPath cfg) paths''
   writePaths cfg out paths'''

@@ -81,6 +81,7 @@ failGracefully bin n ptns = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- ptns is a list of patterns for files to delete in case the cmd fails
+-- TODO any way to propogate Shake cmd's cool stdout, stderr, exit feature?
 wrappedCmd :: CutConfig -> [String]
            -> [CmdOption] -> FilePath -> [String] -> Action ()
 wrappedCmd cfg ptns opts bin args = do

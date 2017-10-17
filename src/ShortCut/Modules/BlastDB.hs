@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module ShortCut.Modules.BlastDB where
 
 -- TODO should makeblastdb be just one fn? no, make everything else stricter later!
@@ -5,24 +7,21 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Control.Monad           (when)
-import ShortCut.Core.Config    (wrappedCmd)
-import ShortCut.Core.Debug     (debugAction, debugTrackWrite, debugRules)
-import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
-import ShortCut.Core.Compile.Each     (rEachTmp)
-import ShortCut.Core.Paths (exprPath, cacheDir, fromCutPath, readLit, writeLit,
-                            readLits, writePath, writeLits, toCutPath, CutPath,
-                            hashContent)
-import ShortCut.Core.Util      (stripWhiteSpace)
-import ShortCut.Modules.SeqIO  (faa, fna)
-import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>),
-                                makeRelative, takeDirectory)
-import System.Directory        (createDirectoryIfMissing)
--- import System.FilePath.Glob    (compile, globDir1)
-import Data.List               (isInfixOf)
-import Data.Char               (toLower)
--- import Path (fromCutPath cfg, fromCutPath cfg)
--- import System.Exit             (ExitCode(..))
+import Control.Monad               (when)
+import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Debug         (debugAction, debugTrackWrite, debugRules)
+import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
+import ShortCut.Core.Compile.Each  (rEachTmp)
+import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath, readLit,
+                                    writeLit, readLits, writePath, writeLits,
+                                    toCutPath, CutPath, hashContent)
+import ShortCut.Core.Util          (stripWhiteSpace)
+import ShortCut.Modules.SeqIO      (faa, fna)
+import System.FilePath             (takeFileName, (</>), (<.>), makeRelative,
+                                    takeDirectory)
+import System.Directory            (createDirectoryIfMissing)
+import Data.List                   (isInfixOf)
+import Data.Char                   (toLower)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -273,33 +272,64 @@ rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   return (ExprPath out')
 rMakeblastdb _ _ = error "bad argument to makeblastdb"
 
+listPrefixFiles :: FilePattern -> Action [FilePath]
+listPrefixFiles prefix = do
+  let pDir  = takeDirectory prefix
+      pName = takeFileName  prefix
+  e1 <- doesDirectoryExist pDir
+  if e1
+    then getDirectoryFiles pDir [pName] >>= return . map (pDir </>)
+    else return []
+
 -- TODO why is cDir just the top-level cache without its last dir component?
 aMakeblastdb :: CutType -> CutConfig -> CutPath -> [CutPath] -> Action ()
 aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
   let dbType' = if dbType == ndb then "nucl" else "prot"
-  liftIO $ putStrLn $ "aMakeblastdb out': " ++ out'
-  -- liftIO $ putStrLn $ "aMakeblastdb dbPrefix': " ++ dbPrefix'
-  liftIO $ putStrLn $ "aMakeblastdb dbType': " ++ dbType'
   need [faPath']
   faHash <- hashContent cfg faPath
   let dbPrefix  = cDir' </> faHash </> faHash <.> extOf dbType
       dbPrefix' = toCutPath cfg dbPrefix
-      out'' = debugAction cfg "aMakeblastdb" out' [extOf dbType, out', dbPrefix, faPath']
+      out'' = debugAction cfg "aMakeblastdb" out'
+                [extOf dbType, out', dbPrefix, faPath']
   liftIO $ createDirectoryIfMissing True cDir'
-  quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd cDir'] "makeblastdb"
+
+  -- TODO somehow out' still has the TMPDIR prefix in it! wtf?
+  --      ah the cfgTmpDir itself is set to $TMPDIR! real wtf
+  -- liftIO $ putStrLn $ "aMakeblastdb out': "      ++ out'
+  -- liftIO $ putStrLn $ "aMakeblastdb cDir: "     ++ show cDir
+  -- liftIO $ putStrLn $ "aMakeblastdb cDir': "     ++ cDir'
+  -- liftIO $ putStrLn $ "aMakeblastdb dbPrefix': " ++ show dbPrefix'
+  -- liftIO $ putStrLn $ "aMakeblastdb dbPrefix: "  ++ dbPrefix
+  -- liftIO $ putStrLn $ "aMakeblastdb dbType': "   ++ dbType'
+  -- liftIO $ putStrLn $ "aMakeblastdb cfg: "   ++ show cfg
+
+  let ptn = dbPrefix ++ ".*" -- TODO is this failing because of the TMPDIR?
+  -- before <- getDirectoryFiles (takeDirectory ptn) [takeFileName ptn]
+  before <- listPrefixFiles ptn
+  -- liftIO $ putStrLn $ "before: " ++ show before
+
+  -- TODO why can't shake detect that they exist already? am I not using trackWrite?
+  when (not $ null before) (return ())
+
+  -- TODO is there a need for wrapping or cleanup on errors here?
+  -- TODO check files before too and skip if they exist? annoying but still...
+  -- quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd cDir']
+  (Stdout (_ :: String), Stderr (_ :: String)) <- quietly $ cmd [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
     , "-dbtype", dbType'
     ]
-  -- TODO put back if you can figure out how with the new wrappedCmd
+
+  -- TODO why does after never work? maybe the command hasn't finished when called?
   -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
-  files <- fmap (map (cfgTmpDir cfg </>))
-         $ getDirectoryFiles cDir' [takeBaseName dbPrefix ++ ".*"]
-  debugTrackWrite cfg files
-  -- liftIO $ putStrLn $ "files: " ++ show files
+  -- after <- getDirectoryFiles (takeDirectory ptn) [takeFileName ptn]
+  after <- listPrefixFiles ptn
+  debugTrackWrite cfg after
+  -- liftIO $ putStrLn $ "after: " ++ show after
+  -- when (null after) (fail $ "makeblastdb failed to create " ++ ptn)
   writePath cfg out'' dbPrefix'
   where
     out'    = fromCutPath cfg out
