@@ -12,7 +12,7 @@ import ShortCut.Test         (runTests)
 import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
 import System.Environment    (getArgs, withArgs)
 import System.Exit           (exitSuccess)
-import System.IO             (stdin, stdout, hSetBuffering, BufferMode(..))
+import System.IO             (stdout)
 import System.Directory      (setCurrentDirectory)
 
 main:: IO ()

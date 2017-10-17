@@ -5,16 +5,16 @@
 |   |       |-- 9754c305d1.ndb.nhr
 |   |       |-- 9754c305d1.ndb.nin
 |   |       `-- 9754c305d1.ndb.nsq
-|   |-- list
-|   |   |-- 17387fd93a.txt
-|   |   `-- 2a267084df.txt
-|   `-- map
-|       |-- 65be1ab9d7
-|       |   |-- 3288ba2dfd.str.list -> $TMPDIR/exprs/extract_queries/2731730014.str.list
-|       |   `-- 3288ba2dfd.str.list.args
-|       `-- ff83ea8a55
-|           |-- e3c3cd1ba8.bht -> $TMPDIR/exprs/blastn_db_rev/8158675169_d326247d21_b23045213e.bht
-|           `-- e3c3cd1ba8.bht.args
+|   |-- each
+|   |   |-- 65be1ab9d7
+|   |   |   |-- 2731730014.str.list -> $TMPDIR/exprs/extract_queries/2731730014.str.list
+|   |   |   `-- 2731730014.str.list.args
+|   |   `-- ff83ea8a55
+|   |       |-- b23045213e.bht -> $TMPDIR/exprs/blastn_db_rev/8158675169_d326247d21_b23045213e.bht
+|   |       `-- b23045213e.bht.args
+|   `-- list
+|       |-- 17387fd93a.txt
+|       `-- 2a267084df.txt
 |-- exprs
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht

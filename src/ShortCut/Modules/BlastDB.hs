@@ -8,7 +8,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (when)
-import ShortCut.Core.Config        (wrappedCmd)
+-- import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debugAction, debugTrackWrite, debugRules)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEachTmp)
@@ -172,7 +172,8 @@ aBlastdblist cfg oPath listTmp fPath = do
     liftIO $ createDirectoryIfMissing True tmpDir
     -- This one is tricky because it exits 1 on success
     -- (I guess listing the dbs is seen as a failure to download one?)
-    Exit _ <- cmd (Cwd tmpDir) Shell "blastdbget"  tmpDir ">" listTmp'
+    (Stderr (_ :: String), Exit _) <- cmd (Cwd tmpDir) Shell
+      "blastdbget"  tmpDir ">" listTmp'
     debugTrackWrite cfg [listTmp']
   filterStr <- readLit  cfg fPath'
   out       <- readLits cfg listTmp'
@@ -211,10 +212,13 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   need [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg nPath' -- TODO need to strip?
   liftIO $ createDirectoryIfMissing True tmp' -- TODO remove?
-  unit $ quietly $ wrappedCmd cfg [dbPrefix'' ++ ".*"] [Cwd tmp']
-    "blastdbget" ["-d", dbName, "."] -- TODO was taxdb needed for anything else?
+  -- TODO was taxdb needed for anything else?
+  -- TODO any way to get back the wrapping, since this takes a long time?
+  -- quietly $ wrappedCmd cfg [dbPrefix'' ++ ".*"] [Cwd tmp']
+  (Stdout (_ :: String), Stderr (_ :: String)) <- quietly $
+    cmd [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
-  writeLit cfg dbPrefix' $ tmp' </> dbName
+  writeLit cfg dbPrefix'' $ tmp' </> dbName
   where
     tmp'       = fromCutPath cfg tmpDir
     nPath'     = fromCutPath cfg nPath
