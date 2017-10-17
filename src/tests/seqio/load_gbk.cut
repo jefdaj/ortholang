@@ -1,1 +1,3 @@
-result = "pending"
+single = load_gbk       "data/6803genome.gbff"
+mapped = load_gbk_each ["data/6803genome.gbff"]
+result = [single] | mapped

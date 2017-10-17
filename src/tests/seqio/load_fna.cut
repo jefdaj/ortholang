@@ -1,1 +1,3 @@
-result = "pending"
+single = load_fna       "data/6803genes.fna"
+mapped = load_fna_each ["data/6803genes.fna"]
+result = [single] | mapped

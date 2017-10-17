@@ -8,9 +8,10 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config (wrappedCmd)
 import ShortCut.Core.Debug  (debug, debugTrackWrite, debugAction)
+import ShortCut.Core.Compile.Each (rEach)
 import ShortCut.Core.Paths (exprPath, cacheDir, toCutPath, fromCutPath, readPaths, CutPath)
 import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
-                             rOneArgScript, rOneArgListScript)
+                             rOneArgScript, rOneArgListScript, rSimple)
 import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
@@ -28,6 +29,7 @@ cutModule = CutModule
     , extractSeqs
     , extractSeqIDs
     , translate
+    , translateEach
     , concatFastas
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
@@ -216,7 +218,15 @@ translate = CutFunction
   { fName      = "translate"
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
-  , fRules  = rConvert "translate.py"
+  , fRules     = rSimple $ aConvert "translate.py"
+  }
+
+translateEach :: CutFunction
+translateEach = CutFunction
+  { fName      = "translate_each"
+  , fFixity    = Prefix
+  , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
+  , fRules     = rEach $ aConvert "translate.py"
   }
 
 -- TODO remove as biologically invalid?
@@ -229,18 +239,18 @@ translate = CutFunction
 --   }
 
 -- TODO can this use rOneArgScript?
-rConvert :: String -> CutState -> CutExpr -> Rules ExprPath
-rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
-  (ExprPath faPath) <- rExpr s fa
-  let oPath = exprPath s e
-      out'  = fromCutPath cfg oPath
-      fa'   = toCutPath cfg faPath
-  out' %> \_ -> aConvert cfg oPath script fa'
-  return (ExprPath out')
-rConvert _ _ _ = error "bad argument to rConvert"
+-- rConvert :: String -> CutState -> CutExpr -> Rules ExprPath
+-- rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
+--   (ExprPath faPath) <- rExpr s fa
+--   let oPath = exprPath s e
+--       out'  = fromCutPath cfg oPath
+--       fa'   = toCutPath cfg faPath
+--   out' %> \_ -> aConvert cfg oPath script fa'
+--   return (ExprPath out')
+-- rConvert _ _ _ = error "bad argument to rConvert"
 
-aConvert :: CutConfig -> CutPath -> String -> CutPath -> Action ()
-aConvert cfg oPath script faPath = do
+aConvert :: String -> CutConfig -> [CutPath] -> Action ()
+aConvert script cfg [oPath, faPath] = do
   need [faPath']
   unit $ wrappedCmd cfg [out''] [] script [out'', faPath']
   debugTrackWrite cfg [out''] -- TODO is this implied?
@@ -248,6 +258,7 @@ aConvert cfg oPath script faPath = do
     out'    = fromCutPath cfg oPath
     faPath' = fromCutPath cfg faPath
     out'' = debugAction cfg "aConvert" out' [out', script, faPath']
+aConvert _ _ _ = error "bad argument to aConvert"
 
 ------------------------
 -- concat fasta files --
