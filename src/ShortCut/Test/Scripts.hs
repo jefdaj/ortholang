@@ -18,7 +18,7 @@ import ShortCut.Core.Util         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
                                    takeFileName, (</>), (<.>))
-import System.IO                  (stdout, stderr, writeFile, hFlush)
+import System.IO                  (stdout, stderr, writeFile)
 import System.IO.LockFile         (withLockFile)
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
@@ -94,20 +94,14 @@ mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
       return $ out ++ err
 
--- TODO set TASTY_NUM_THREADS=1 when creating golden files to fix it?
+-- Without the delays, Tasty messages sometimes get captured in the output
+-- If it still happens, try TASTY_HIDE_SUCCESSES=True or TASTY_NUM_THREADS=1.
+-- hFlush does not seem to help.
 runCut :: CutConfig -> IO String
 runCut cfg = withLock cfg $ do
-
-  -- TODO these aren't ALL necessary along with single threading are they??
-  delay 1000 -- without this, Tasty messages sometimes get captured in the output
-  hFlush stdout
-  hFlush stderr
-  delay 1000
+  delay 100
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg
-  delay 1000
-  hFlush stdout
-  hFlush stderr
-
+  delay 100
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail "script failed")
   return out
