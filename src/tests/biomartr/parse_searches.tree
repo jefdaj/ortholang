@@ -1,0 +1,16 @@
+.
+|-- cache
+|   `-- list
+|       `-- 3f9e25e706.txt
+|-- exprs
+|   |-- list
+|   |   `-- 67a015f49b.str.list -> ../../cache/list/3f9e25e706.txt
+|   |-- parse_searches
+|   |   `-- 1221bbdbf0.search
+|   `-- str
+|       |-- 45914ff33c.str
+|       `-- 4c2f2d9385.str
+`-- vars
+    `-- result -> ../exprs/parse_searches/1221bbdbf0.search
+
+7 directories, 6 files

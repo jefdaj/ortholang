@@ -15,7 +15,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath, readLits)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Config (wrappedCmd)
 import Control.Monad (void)
@@ -39,7 +39,8 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "biomartr"
   , mFunctions =
-    [ parseSearch -- TODO hide from end users?
+    [ parseSearches -- TODO hide from end users?
+    -- TODO single and _each versions?
     , getGenomes
     , getProteomes
     -- , getGenome
@@ -50,7 +51,7 @@ search :: CutType
 search = CutType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
-  , tShow  = undefined
+  , tShow = readFile
   }
 
 -- TODO unify with fna? or replace it?
@@ -58,7 +59,7 @@ fnagz :: CutType
 fnagz = CutType
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tShow  = \_ -> return "tShow not implemented yet for fnagz"
+  , tShow = \_ -> return "tShow not implemented yet for fnagz"
   }
 
 -- TODO unify with faa? or replace it?
@@ -66,37 +67,45 @@ faagz :: CutType
 faagz = CutType
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
-  , tShow  = \_ -> return "tShow not implemented yet for faagz"
+  , tShow = \_ -> return "tShow not implemented yet for faagz"
   }
 
 -- TODO does this work at all?
-parseSearch :: CutFunction
-parseSearch = CutFunction
-  { fName      = "parse_search"
-  , fTypeCheck = defaultTypeCheck [str] search
+parseSearches :: CutFunction
+parseSearches = CutFunction
+  { fName      = "parse_searches"
+  , fTypeCheck = defaultTypeCheck [ListOf str] search
   , fFixity    = Prefix
-  , fRules  = rParseSearches
+  , fRules     = rParseSearches
   }
+
+-----------------
+-- get_genomes --
+-----------------
 
 getGenomes :: CutFunction
 getGenomes = CutFunction
   { fName      = "get_genomes"
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fFixity    = Prefix
-  , fRules  = rBioMartR "getGenome"
+  , fRules     = rBioMartR "getGenome"
   }
+
+-------------------
+-- get_proteomes --
+-------------------
 
 getProteomes :: CutFunction
 getProteomes = CutFunction
   { fName      = "get_proteomes"
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
   , fFixity    = Prefix
-  , fRules  = rBioMartR "getProteome"
+  , fRules     = rBioMartR "getProteome"
   }
 
---------------------------
--- parse search strings --
---------------------------
+--------------------
+-- parse_searches --
+--------------------
 
 type Parser a = Parsec String () a
 
@@ -105,6 +114,7 @@ type Database   = String
 type Identifier = String
 
 data Search = Search Species (Maybe Database) (Maybe Identifier)
+  deriving (Eq, Show)
 
 -- from http://stackoverflow.com/a/6270337
 trim :: String -> String
@@ -149,12 +159,10 @@ pSearch = do
 -- TODO bug: this is getting passed a filepath and is partially parsing it
 --           it expects a single filepath but gets a list of them
 --           then when it reads the list it gets more filenames. doh!
-readSearch :: FilePath -> IO (Either String Search)
-readSearch p = do
-  txt <- readFile p
-  return $ case runParser pSearch () "search string" txt of
-    Left  e -> Left  $ show e
-    Right s@(Search _ _ _) -> Right s
+readSearch :: String -> Either String Search
+readSearch txt = case runParser pSearch () "search string" txt of
+  Left  e -> Left  $ show e
+  Right s@(Search _ _ _) -> Right s
 
 -- TODO use cassava?
 toTsv :: [Search] -> String
@@ -164,8 +172,8 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: CutState -> CutExpr -> Rules ExprPath
-rParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
-  (ExprPath sList) <- rExpr s expr
+rParseSearches s@(_,cfg) expr@(CutFun _ _ _ _ [searches]) = do
+  (ExprPath sList) <- rExpr s searches
   -- TODO should this be a cacheFile instead?
   -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path [show expr, sList]
   -- let searchTable = fromCutPath cfg $ exprPathExplicit s "parse_searches" search salt []
@@ -174,14 +182,14 @@ rParseSearches s@(_,cfg) expr@(CutList _ _ _ _) = do
       sList' = toCutPath cfg sList
   searchTable' %> \_ -> aParseSearches cfg sList' searchTable
   return (ExprPath searchTable')
-rParseSearches _ _ = error "bad arguments to rParseSearches"
+rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
 aParseSearches :: CutConfig -> CutPath -> CutPath -> Action ()
 aParseSearches cfg sList out = do
-  tmp <- readFile' sList'
-  let sLines = map (cfgTmpDir cfg </>) (lines tmp)
-  need sLines
-  parses <- liftIO $ mapM readSearch sLines
+  parses <- (fmap . map) readSearch (readLits cfg sList')
+  -- let sLines = map (cfgTmpDir cfg </>) (lines tmp)
+  -- need sLines
+  -- parses <- liftIO $ mapM readSearch sLines
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
@@ -195,6 +203,8 @@ aParseSearches cfg sList out = do
 ------------------
 -- run biomartr --
 ------------------
+
+-- TODO move nearer the top?
 
 -- TODO this is where to parse the searches?
 -- cGetGenome :: CutConfig -> CutExpr -> Rules ExprPath
