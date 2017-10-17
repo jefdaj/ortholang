@@ -29,7 +29,8 @@ import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Debug (debugAction, debugTrackWrite)
--- import System.FilePath (takeDirectory, takeFileName)
+import System.Directory           (createDirectoryIfMissing)
+import System.FilePath (takeDirectory)
 
 ------------------------
 -- module description --
@@ -194,7 +195,9 @@ aParseSearches cfg sList out = do
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    else liftIO $ writeFile out'' $ toTsv searches'
+    else liftIO $ do -- TODO rewrite in newer writePaths/Lits?
+      createDirectoryIfMissing True $ takeDirectory out''
+      writeFile out'' $ toTsv searches'
   where
     sList' = fromCutPath cfg sList
     out'   = fromCutPath cfg out
@@ -211,11 +214,12 @@ aParseSearches cfg sList out = do
 -- cGetGenome (_,cfg) expr@(CutFun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
--- TODO factor out a "trivial string file" function?
+-- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-rBioMartR fn s@(_,cfg) expr@(CutFun _ _ _ _ [ss]) = do
+rBioMartR fn s@(_,cfg) expr@(CutFun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
-  (ExprPath sTable) <- rParseSearches s ss
+  -- (ExprPath sTable) <- rParseSearches s ss
+  (ExprPath sTable) <- rExpr s $ CutFun rtn salt (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
       tmp'    = toCutPath cfg bmTmp
@@ -231,6 +235,7 @@ aBioMartR :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aBioMartR cfg out bmFn bmTmp sTable = do
   need [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
+  liftIO $ createDirectoryIfMissing True bmTmp'
   quietly $ wrappedCmd cfg [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
   debugTrackWrite cfg [out'']
   where

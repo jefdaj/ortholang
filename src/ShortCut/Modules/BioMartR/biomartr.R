@@ -37,8 +37,9 @@ assert_single_matches <- function(schTable) {
 # 'Synechococcus sp. strain PCC 7002'. Thus, download for this species has been
 # omitted.
 
-download_matches <- function(tmpDir, fnName, schTable)
+download_matches <- function(fnName, schTable)
   # Calls biomartr and collects the output files
+  # print(system("pwd"))
   apply(schTable, 1, function(row) {
 	  # sink("/dev/null", type=c("output", "message"))
     # g <- capture.output(suppressMessages(
@@ -47,7 +48,8 @@ download_matches <- function(tmpDir, fnName, schTable)
 		# cat(paste0(c("Got '", g, "'\n")))
 		# return(g)
 		# getGenome(row["organism"], db=row["database"], path=tmpDir)
-		do.call(fnName, list(row["organism"], db=row["database"], path=tmpDir))
+		# do.call(fnName, list(row["organism"], db=row["database"], path=tmpDir))
+		do.call(fnName, list(row["organism"], db=row["database"]))
   })
 
 save_list <- function(files, outPath) {
@@ -58,12 +60,12 @@ save_list <- function(files, outPath) {
 
 main <- function() {
   args     <- commandArgs(trailingOnly = TRUE)
-  tmpDir   <- args[[1]]
-  outPath  <- args[[2]]
-  fnName   <- readLines(args[[3]])
-  schTable <- read.table(args[[4]], sep="\t", header=TRUE) 
+  # tmpDir   <- args[[1]]
+  outPath  <- args[[1]]
+  fnName   <- readLines(args[[2]])
+  schTable <- read.table(args[[3]], sep="\t", header=TRUE) 
   assert_single_matches(schTable)
-  download_matches(tmpDir, fnName, schTable) %>% save_list(outPath)
+  download_matches(fnName, schTable) %>% save_list(outPath)
 }
 
 main()
