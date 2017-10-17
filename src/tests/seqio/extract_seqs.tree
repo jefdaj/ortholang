@@ -1,6 +1,4 @@
 .
-|-- cache
-|   `-- seqio
 |-- exprs
 |   |-- difference
 |   |   `-- a1c70b9c47_bdfc405260.str.list
@@ -21,4 +19,4 @@
     |-- result -> ../vars/diff.str.list
     `-- seqs10.faa -> ../exprs/extract_seqs/6e8bd8b7c6_bdfc405260.faa
 
-9 directories, 12 files
+7 directories, 12 files

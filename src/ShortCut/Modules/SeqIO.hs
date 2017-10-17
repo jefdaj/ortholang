@@ -7,13 +7,11 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
-import ShortCut.Core.Paths         (exprPath, cacheDir, toCutPath,
+import ShortCut.Core.Paths         (exprPath, toCutPath,
                                     fromCutPath, readPaths, CutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, rLoadOne,
-                                    rLoadList,
-                                    rOneArgListScript, rSimpleScript)
-import ShortCut.Core.Compile.Each  (rSimpleScriptEach)
-import System.Directory            (createDirectoryIfMissing)
+                                    rLoadList, rSimple, rSimpleScript)
+import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -27,7 +25,7 @@ cutModule = CutModule
     , extractSeqs
     , extractIds
     , translate, translateEach
-    , concatFastas
+    , concatFastas, concatFastasEach
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
@@ -154,7 +152,7 @@ extractIds = CutFunction
   { fName      = "extract_ids"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqIDs
-  , fRules     = rExtractSeqIDs
+  , fRules     = rSimpleScript "extract_ids.py"
   }
 
 -- TODO write this
@@ -170,71 +168,23 @@ tExtractSeqIDs :: [CutType] -> Either String CutType
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
 
--- tExtractSeqIDsEach :: [CutType] -> Either String CutType
--- tExtractSeqIDsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
--- tExtractSeqIDsEach _ = Left "expected a fasta file"
-
--- TODO these should put their tmpfiles in cache/extract_ids!
-rExtractSeqIDs :: CutState -> CutExpr -> Rules ExprPath
-rExtractSeqIDs = rOneArgListScript "seqio" "extract_ids.py"
-
 ----------------------------------------------
 -- extract sequences from FASTA files by ID --
 ----------------------------------------------
 
 -- TODO also extract them from genbank files
 
--- TODO replace rExtractSeqs with rSimpleScript
-
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
   { fName      = "extract_seqs"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
-  , fRules     = rExtractSeqs
+  , fRules     = rSimpleScript "extract_seqs.py"
   }
 
--- TODO does ListOf str match on the value or just the constructor?
 tExtractSeqs  :: [CutType] -> Either String CutType
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
-
--- TODO can this be replaced with rOneArgListScript?
-rExtractSeqs :: CutState -> CutExpr -> Rules ExprPath
-rExtractSeqs s@(_,cfg) e@(CutFun _ _ _ _ [fa, ids]) = do
-  (ExprPath faPath ) <- rExpr s fa
-  (ExprPath idsPath) <- rExpr s ids
-  -- liftIO . putStrLn $ "extracting sequences from " ++ faPath
-  let tmpDir   = cacheDir cfg "seqio"
-      outPath  = exprPath s e
-      out'     = fromCutPath cfg outPath
-      faPath'  = toCutPath cfg faPath
-      idsPath' = toCutPath cfg idsPath
-      -- tmpList = cacheFile cfg "seqio" ids "txt"
-  -- TODO remove extra tmpdir here if possible, and put file somewhere standard
-  -- tmpList %> \_ -> do
-  out' %> \_ -> aExtractSeqs cfg outPath tmpDir faPath' idsPath'
-  return (ExprPath out')
-rExtractSeqs _ _ = error "bad argument to extractSeqs"
-
-aExtractSeqs :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
-aExtractSeqs cfg outPath tmpDir faPath idsPath = do
-  -- liftIO $ createDirectoryIfMissing True tmpDir -- TODO put in fromShortCutList?
-  -- fromShortCutList cfg idsPath (ExprPath tmpList)
--- outPath %> \_ -> do
-  -- need [faPath, tmpList]
-  -- liftIO $ createDirectoryIfMissing True tmpDir
-  need [faPath', idsPath']
-  liftIO $ createDirectoryIfMissing True tmp'
-  quietly $ wrappedCmd cfg [out'] [Cwd tmp']
-                       "extract_seqs.py" [out', faPath', idsPath']
-  debugTrackWrite cfg [out']
-  where
-    out      = fromCutPath cfg outPath
-    tmp'     = fromCutPath cfg tmpDir
-    faPath'  = fromCutPath cfg faPath
-    idsPath' = fromCutPath cfg idsPath
-    out' = debugAction cfg "aExtractSeqs" out [out, tmp', faPath', idsPath']
 
 ----------------------
 -- translate(_each) --
@@ -266,25 +216,27 @@ concatFastas = CutFunction
   { fName      = "concat_fastas"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
-  , fRules  = rConcat -- TODO rSimple . aConcat?
+  , fRules  = rSimple aConcat
+  }
+
+concatFastasEach :: CutFunction
+concatFastasEach = CutFunction
+  { fName      = "concat_fastas_each"
+  , fFixity    = Prefix
+  , fTypeCheck = tConcatFastasEach
+  , fRules  = rEach aConcat
   }
 
 tConcatFastas :: [CutType] -> Either String CutType
 tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
 tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
 
-rConcat :: CutState -> CutExpr -> Rules ExprPath
-rConcat s@(_,cfg) e@(CutFun _ _ _ _ [fs]) = do
-  (ExprPath fsPath) <- rExpr s fs
-  let oPath = exprPath s e
-      out'  = fromCutPath cfg oPath
-      fs'   = toCutPath cfg fsPath
-  out' %> \_ -> aConcat cfg oPath fs'
-  return (ExprPath out')
-rConcat _ _ = error "bad argument to rConcat"
+tConcatFastasEach :: [CutType] -> Either String CutType
+tConcatFastasEach [ListOf (ListOf x)] | elem x [faa, fna] = Right $ ListOf x
+tConcatFastasEach _ = Left "expected a list of fasta files (of the same type)"
 
-aConcat :: CutConfig -> CutPath -> CutPath -> Action ()
-aConcat cfg oPath fsPath = do
+aConcat :: CutConfig -> [CutPath] -> Action ()
+aConcat cfg [oPath, fsPath] = do
   faPaths <- readPaths cfg fs'
   let faPaths' = map (fromCutPath cfg) faPaths
   need (debug cfg ("faPaths: " ++ show faPaths) faPaths')
@@ -296,3 +248,4 @@ aConcat cfg oPath fsPath = do
   debugTrackWrite cfg [out'']
   where
     fs' = fromCutPath cfg fsPath
+aConcat _ _ = error "bad argument to aConcat"
