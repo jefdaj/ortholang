@@ -1,0 +1,16 @@
+.
+|-- cache
+|   `-- seqio
+|-- exprs
+|   |-- extract_ids
+|   |   `-- 6e8bd8b7c6.str.list
+|   |-- load_faa
+|   |   `-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
+|   `-- str
+|       `-- 50dbefb6d6.str
+`-- vars
+    |-- faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
+    |-- result -> ../vars/single.str.list
+    `-- single.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
+
+7 directories, 6 files

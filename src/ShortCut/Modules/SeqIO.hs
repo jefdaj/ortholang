@@ -4,15 +4,16 @@ module ShortCut.Modules.SeqIO where
 
 import Development.Shake
 import ShortCut.Core.Types
--- import Path (fromCutPath cfg, fromCutPath cfg) -- TODO remove and use Path everywhere
 
-import ShortCut.Core.Config (wrappedCmd)
-import ShortCut.Core.Debug  (debug, debugTrackWrite, debugAction)
-import ShortCut.Core.Compile.Each (rEach)
-import ShortCut.Core.Paths (exprPath, cacheDir, toCutPath, fromCutPath, readPaths, CutPath)
-import ShortCut.Core.Compile.Basic  (rExpr, defaultTypeCheck, rLoadOne, rLoadList,
-                             rOneArgScript, rOneArgListScript, rSimple)
-import System.Directory           (createDirectoryIfMissing)
+import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
+import ShortCut.Core.Compile.Each  (rEach)
+import ShortCut.Core.Paths         (exprPath, cacheDir, toCutPath,
+                                    fromCutPath, readPaths, CutPath)
+import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, rLoadOne,
+                                    rLoadList, rOneArgScript,
+                                    rOneArgListScript, rSimple)
+import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -27,9 +28,9 @@ cutModule = CutModule
     , gbkToFaa -- TODO each?
     , gbkToFna -- TODO each?
     , extractSeqs
-    , extractSeqIDs
+    , extractIds
     , translate
-    , translateEach
+    -- TODO , translateEach
     , concatFastas
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
@@ -136,17 +137,30 @@ loadGbkEach = mkLoadList "load_gbk_each" gbk
 -- TODO this needs to do relative paths again, not absolute!
 -- TODO also extract them from genbank files
 
-extractSeqIDs :: CutFunction
-extractSeqIDs = CutFunction
+extractIds :: CutFunction
+extractIds = CutFunction
   { fName      = "extract_ids"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqIDs
-  , fRules  = rExtractSeqIDs
+  , fRules     = rExtractSeqIDs
   }
+
+-- TODO write this
+-- extractIdsEach :: CutFunction
+-- extractIdsEach = CutFunction
+--   { fName      = "extract_ids_each"
+--   , fFixity    = Prefix
+--   , fTypeCheck = tExtractSeqIDsEach
+--   , fRules     = rExtractSeqIDs
+--   }
 
 tExtractSeqIDs :: [CutType] -> Either String CutType
 tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractSeqIDs _ = Left "expected a fasta file"
+
+-- tExtractSeqIDsEach :: [CutType] -> Either String CutType
+-- tExtractSeqIDsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
+-- tExtractSeqIDsEach _ = Left "expected a fasta file"
 
 -- TODO these should put their tmpfiles in cache/extract_ids!
 rExtractSeqIDs :: CutState -> CutExpr -> Rules ExprPath

@@ -282,6 +282,15 @@ rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
   return (ExprPath oPath)
 rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
 
+aOneArgScript :: CutConfig -> String
+              -> FilePath -> FilePath -> FilePath -> Action ()
+aOneArgScript cfg oPath script tmpDir argPath = do
+  need [argPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
+  quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
+  let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
+  trackWrite [oPath']
+
 -- for scripts that take one arg and return a list of lits
 -- TODO this should put tmpfiles in cache/<script name>!
 -- TODO name something more explicitly about fasta files?
@@ -293,6 +302,15 @@ rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
   outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
   return (ExprPath outPath)
 rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
+
+aOneArgListScript :: CutConfig -> FilePath
+                  -> String -> FilePath -> FilePath -> Action ()
+aOneArgListScript cfg outPath script tmpDir faPath = do
+  need [faPath]
+  liftIO $ createDirectoryIfMissing True tmpDir
+  wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
+  let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
+  debugTrackWrite cfg [out]
 
 --------------------------
 -- links to input files --
@@ -436,27 +454,3 @@ aSimple' cfg outPath actFn mTmpDir argPaths = do
                 Just dir -> (toCutPath cfg d, d)
                   where
                     d = fromCutPath cfg dir </> hashes
-
--------------
--- actions --
--------------
-
--- from ModuleAPI --
-
-aOneArgScript :: CutConfig -> String
-              -> FilePath -> FilePath -> FilePath -> Action ()
-aOneArgScript cfg oPath script tmpDir argPath = do
-  need [argPath]
-  liftIO $ createDirectoryIfMissing True tmpDir
-  quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
-  let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
-  trackWrite [oPath']
-
-aOneArgListScript :: CutConfig -> FilePath
-                  -> String -> FilePath -> FilePath -> Action ()
-aOneArgListScript cfg outPath script tmpDir faPath = do
-  need [faPath]
-  liftIO $ createDirectoryIfMissing True tmpDir
-  wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
-  let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
-  debugTrackWrite cfg [out]
