@@ -71,21 +71,21 @@ gbk :: CutType
 gbk = CutType
   { tExt  = "gbk"
   , tDesc = "genbank file"
-  , tShow  = defaultShow
+  , tShow = defaultShow
   }
 
 faa :: CutType
 faa = CutType
   { tExt  = "faa"
   , tDesc = "FASTA (amino acid)"
-  , tShow  = defaultShow
+  , tShow = defaultShow
   }
 
 fna :: CutType
 fna = CutType
   { tExt  = "fna"
   , tDesc = "FASTA (nucleic acid)"
-  , tShow  = defaultShow
+  , tShow = defaultShow
   }
 
 gbkToFaa :: CutFunction
@@ -184,12 +184,14 @@ rExtractSeqIDs = rOneArgListScript "seqio" "extract_ids.py"
 
 -- TODO also extract them from genbank files
 
+-- TODO replace rExtractSeqs with rSimpleScript
+
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
   { fName      = "extract_seqs"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
-  , fRules  = rExtractSeqs
+  , fRules     = rExtractSeqs
   }
 
 -- TODO does ListOf str match on the value or just the constructor?
@@ -234,9 +236,9 @@ aExtractSeqs cfg outPath tmpDir faPath idsPath = do
     idsPath' = fromCutPath cfg idsPath
     out' = debugAction cfg "aExtractSeqs" out [out, tmp', faPath', idsPath']
 
--------------------------------------
--- convert between DNA and protein --
--------------------------------------
+----------------------
+-- translate(_each) --
+----------------------
 
 -- TODO name something else like fna_to_faa?
 translate :: CutFunction
@@ -255,40 +257,9 @@ translateEach = CutFunction
   , fRules     = rSimpleScriptEach "translate.py"
   }
 
--- TODO remove as biologically invalid?
--- back_transcribe :: CutFunction
--- back_transcribe = CutFunction
---   { fName      = "back_transcribe"
---   , fFixity    = Prefix
---   , fTypeCheck = defaultTypeCheck [faa] fna
---   , fRules  = rConvert "back_transcribe.py"
---   }
-
--- TODO can this use rOneArgScript?
--- rConvert :: String -> CutState -> CutExpr -> Rules ExprPath
--- rConvert script s@(_,cfg) e@(CutFun _ _ _ _ [fa]) = do
---   (ExprPath faPath) <- rExpr s fa
---   let oPath = exprPath s e
---       out'  = fromCutPath cfg oPath
---       fa'   = toCutPath cfg faPath
---   out' %> \_ -> aConvert cfg oPath script fa'
---   return (ExprPath out')
--- rConvert _ _ _ = error "bad argument to rConvert"
-
--- aConvert :: String -> CutConfig -> [CutPath] -> Action ()
--- aConvert script cfg [oPath, faPath] = do
---   need [faPath']
---   unit $ wrappedCmd cfg [out''] [] script [out'', faPath']
---   debugTrackWrite cfg [out''] -- TODO is this implied?
---   where
---     out'    = fromCutPath cfg oPath
---     faPath' = fromCutPath cfg faPath
---     out'' = debugAction cfg "aConvert" out' [out', script, faPath']
--- aConvert _ _ _ = error "bad argument to aConvert"
-
-------------------------
--- concat fasta files --
-------------------------
+-------------------
+-- concat_fastas --
+-------------------
 
 concatFastas :: CutFunction
 concatFastas = CutFunction

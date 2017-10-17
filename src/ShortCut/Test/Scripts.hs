@@ -104,7 +104,7 @@ runCut cfg = withLock cfg $ do
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg
   delay 100000 -- 1 second
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
-  when (not result) (fail "script failed")
+  when (not result) (fail out)
   return out
 
 -- TODO is the IO return type needed?
