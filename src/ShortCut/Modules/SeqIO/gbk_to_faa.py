@@ -15,9 +15,9 @@ import warnings
 from Bio import BiopythonParserWarning
 warnings.simplefilter('ignore', BiopythonParserWarning)
 
-tmpdir = argv[1] # passed by convention but not used (TODO: remove?)
-outfaa = argv[2]
-ingbk  = argv[3]
+# tmpdir = argv[1] # passed by convention but not used (TODO: remove?)
+outfaa = argv[1]
+ingbk  = argv[2]
 
 def seqid(seq_feature):
     seqid = []

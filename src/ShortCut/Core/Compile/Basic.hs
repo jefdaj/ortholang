@@ -420,6 +420,21 @@ rSimpleTmp :: String
            -> RulesFn
 rSimpleTmp prefix = rSimple' (Just prefix)
 
+{- For scripts that just need some args passed to them. The first will be the
+ - outPath, and the rest actual args. The string is the script name.
+ -}
+rSimpleScript :: String -> RulesFn
+rSimpleScript = rSimple . aSimpleScript
+
+aSimpleScript :: String -> (CutConfig -> [CutPath] -> Action ())
+aSimpleScript script cfg (out:args) = aSimple' cfg out actFn Nothing args
+  where
+    actFn c o as = wrappedCmd cfg [fromCutPath c o] [] script
+                 $ map (fromCutPath c) as
+aSimpleScript _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
+
+-- TODO rSimpleScriptTmp?
+
 rSimple' :: Maybe String
          -> (CutConfig -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
@@ -433,6 +448,9 @@ rSimple' mTmpPrefix actFn s@(_,cfg) e@(CutFun _ _ _ _ exprs) = do
     outPath  = exprPath s e
     outPath' = fromCutPath cfg outPath
 rSimple' _ _ _ _ = error "bad argument to rSimple'"
+
+-- TODO aSimpleScript that calls aSimple' with a wrappedCmd as the actFn
+-- TODO rSimpleScript that calls rSimple + that
 
 aSimple' :: CutConfig -> CutPath
          -> (CutConfig -> CutPath -> [CutPath] -> Action ())

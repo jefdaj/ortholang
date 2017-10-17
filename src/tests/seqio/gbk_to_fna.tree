@@ -1,0 +1,14 @@
+.
+|-- exprs
+|   |-- gbk_to_fna
+|   |   `-- 31df2be117.fna
+|   |-- load_gbk
+|   |   `-- ddba013b80.gbk -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
+|   `-- str
+|       `-- 0507961f5b.str
+`-- vars
+    |-- fna6803.fna -> ../exprs/gbk_to_fna/31df2be117.fna
+    |-- gbk6803.gbk -> ../exprs/load_gbk/ddba013b80.gbk
+    `-- result -> ../vars/fna6803.fna
+
+5 directories, 6 files

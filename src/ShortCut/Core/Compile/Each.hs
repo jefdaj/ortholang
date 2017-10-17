@@ -2,6 +2,7 @@ module ShortCut.Core.Compile.Each
   ( rEach
   , rEachTmp
   , rEachTmps
+  , rSimpleScriptEach
   )
   where
 
@@ -54,6 +55,12 @@ rEachTmps actFn tmpPrefix s@(_,cfg) e = rEachMain (Just tmpFn) actFn s e
       let base = concat $ intersperse "_" $ map digest args'
           dir  = fromCutPath cfg $ cacheDir cfg tmpPrefix
       return $ toCutPath cfg (dir </> base)
+
+{- Like rSimpleScript, but the last argument should be a list.
+ - It will be evaluated and one call made to aSimpleScript with each element.
+ -}
+rSimpleScriptEach :: String -> RulesFn
+rSimpleScriptEach = rEach . aSimpleScript
 
 --------------------
 -- main algorithm --

@@ -7,30 +7,26 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
-import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Paths         (exprPath, cacheDir, toCutPath,
                                     fromCutPath, readPaths, CutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, rLoadOne,
-                                    rLoadList, rOneArgScript,
-                                    rOneArgListScript, rSimple)
+                                    rLoadList,
+                                    rOneArgListScript, rSimpleScript)
+import ShortCut.Core.Compile.Each  (rSimpleScriptEach)
 import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-    [ loadGbk
-    , loadGbkEach
-    , loadFaa
-    , loadFaaEach
-    , loadFna
-    , loadFnaEach
-    , gbkToFaa -- TODO each?
-    , gbkToFna -- TODO each?
+    [ loadGbk , loadGbkEach
+    , loadFaa , loadFaaEach
+    , loadFna , loadFnaEach
+    , gbkToFaa, gbkToFaaEach
+    , gbkToFna, gbkToFnaEach
     , extractSeqs
     , extractIds
-    , translate
-    -- TODO , translateEach
+    , translate, translateEach
     , concatFastas
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
@@ -49,7 +45,7 @@ mkLoad name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fFixity    = Prefix
-  , fRules  = rLoadOne
+  , fRules     = rLoadOne
   }
 
 -- load a list of files --
@@ -68,7 +64,7 @@ mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
-  , fRules  = rLoadList
+  , fRules     = rLoadList
   }
 
 gbk :: CutType
@@ -97,7 +93,15 @@ gbkToFaa = CutFunction
   { fName      = "gbk_to_faa"
   , fTypeCheck = defaultTypeCheck [gbk] faa
   , fFixity    = Prefix
-  , fRules  = rOneArgScript "seqio" "gbk_to_faa.py"
+  , fRules     = rSimpleScript "gbk_to_faa.py"
+  }
+
+gbkToFaaEach :: CutFunction
+gbkToFaaEach = CutFunction
+  { fName      = "gbk_to_faa_each"
+  , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
+  , fFixity    = Prefix
+  , fRules     = rSimpleScriptEach "gbk_to_faa.py"
   }
 
 gbkToFna :: CutFunction
@@ -105,7 +109,15 @@ gbkToFna = CutFunction
   { fName      = "gbk_to_fna"
   , fTypeCheck = defaultTypeCheck [gbk] fna
   , fFixity    = Prefix
-  , fRules  = rOneArgScript "seqio" "gbk_to_fna.py"
+  , fRules     = rSimpleScript "gbk_to_fna.py"
+  }
+
+gbkToFnaEach :: CutFunction
+gbkToFnaEach = CutFunction
+  { fName      = "gbk_to_fna_each"
+  , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
+  , fFixity    = Prefix
+  , fRules     = rSimpleScriptEach "gbk_to_fna.py"
   }
 
 --------------------
@@ -232,7 +244,7 @@ translate = CutFunction
   { fName      = "translate"
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
-  , fRules     = rSimple $ aConvert "translate.py"
+  , fRules     = rSimpleScript "translate.py"
   }
 
 translateEach :: CutFunction
@@ -240,7 +252,7 @@ translateEach = CutFunction
   { fName      = "translate_each"
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
-  , fRules     = rEach $ aConvert "translate.py"
+  , fRules     = rSimpleScriptEach "translate.py"
   }
 
 -- TODO remove as biologically invalid?
@@ -263,16 +275,16 @@ translateEach = CutFunction
 --   return (ExprPath out')
 -- rConvert _ _ _ = error "bad argument to rConvert"
 
-aConvert :: String -> CutConfig -> [CutPath] -> Action ()
-aConvert script cfg [oPath, faPath] = do
-  need [faPath']
-  unit $ wrappedCmd cfg [out''] [] script [out'', faPath']
-  debugTrackWrite cfg [out''] -- TODO is this implied?
-  where
-    out'    = fromCutPath cfg oPath
-    faPath' = fromCutPath cfg faPath
-    out'' = debugAction cfg "aConvert" out' [out', script, faPath']
-aConvert _ _ _ = error "bad argument to aConvert"
+-- aConvert :: String -> CutConfig -> [CutPath] -> Action ()
+-- aConvert script cfg [oPath, faPath] = do
+--   need [faPath']
+--   unit $ wrappedCmd cfg [out''] [] script [out'', faPath']
+--   debugTrackWrite cfg [out''] -- TODO is this implied?
+--   where
+--     out'    = fromCutPath cfg oPath
+--     faPath' = fromCutPath cfg faPath
+--     out'' = debugAction cfg "aConvert" out' [out', script, faPath']
+-- aConvert _ _ _ = error "bad argument to aConvert"
 
 ------------------------
 -- concat fasta files --

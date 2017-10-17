@@ -1,7 +1,7 @@
+fna = load_fna "data/6803genes10.fna"
 faa = load_faa "data/6803genes10.faa"
-single = extract_ids       faa
-result = single
+result = any [extract_ids fna, extract_ids faa]
 
 # TODO write this:
-# mapped = extract_ids_each [faa]
+# mapped = extract_ids_each [fna]
 # result = [single] | mapped
