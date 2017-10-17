@@ -1,8 +1,33 @@
 .
+|-- cache
+|   `-- blastdb
+|       `-- 9754c305d1
+|           |-- 9754c305d1.ndb.nhr
+|           |-- 9754c305d1.ndb.nin
+|           `-- 9754c305d1.ndb.nsq
 |-- exprs
+|   |-- blastn_db
+|   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
+|   |-- extract_queries
+|   |   `-- b0f284360a.str.list
+|   |-- filter_evalue
+|   |   `-- 5fbeb4e044_9994288dcd.bht
+|   |-- load_fna
+|   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
+|   |   `-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
+|   |-- makeblastdb_nucl
+|   |   `-- f5e661a4be.ndb
+|   |-- num
+|   |   |-- 3e281fad0f.num
+|   |   `-- a53b190835.num
 |   `-- str
-|       `-- b0458da0ae.str
+|       |-- 4cdbcfa070.str
+|       `-- 8fa8ede325.str
 `-- vars
-    `-- result -> ../exprs/str/b0458da0ae.str
+    |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
+    |-- hits.bht -> ../exprs/blastn_db/8158675169_bc4ea1fc06_d326247d21.bht
+    |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
+    |-- result -> ../vars/single.str.list
+    `-- single.str.list -> ../exprs/extract_queries/b0f284360a.str.list
 
-3 directories, 2 files
+12 directories, 18 files

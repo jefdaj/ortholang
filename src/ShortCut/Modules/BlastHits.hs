@@ -1,6 +1,6 @@
 module ShortCut.Modules.BlastHits where
 
--- TODO rename to BlastHits?
+-- TODO rename to BlastExtract?
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -23,14 +23,15 @@ cutModule = CutModule
     , extractTargets
     , extractTargetsEach
     , filterEvalue
+    , filterEvalueEach
     , bestHits
     , bestHitsEach
     ]
   }
 
----------------------------------
--- extract results from tables --
----------------------------------
+----------------------
+-- extract_*(_each) --
+----------------------
 
 tExtract :: TypeChecker
 tExtract [x] | elem x [crb, bht] = Right $ ListOf str
@@ -85,16 +86,24 @@ aTsvColumn n cfg [outPath, tsvPath] = do
     tsvPath'  = fromCutPath cfg tsvPath
 aTsvColumn _ _ _ = error "bad arguments to aTsvColumn"
 
----------------------------
--- filter hits by evalue --
----------------------------
+--------------------------
+-- filter_evalue(_each) --
+--------------------------
 
 filterEvalue :: CutFunction
 filterEvalue = CutFunction
   { fName      = "filter_evalue"
   , fTypeCheck = defaultTypeCheck [num, bht] bht
   , fFixity    = Prefix
-  , fRules  = rSimple aFilterEvalue
+  , fRules     = rSimple aFilterEvalue
+  }
+
+filterEvalueEach :: CutFunction
+filterEvalueEach = CutFunction
+  { fName      = "filter_evalue_each"
+  , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = rEach aFilterEvalue
   }
 
 aFilterEvalue :: CutConfig -> [CutPath] -> Action ()
@@ -121,7 +130,7 @@ bestHits = CutFunction
   { fName      = "best_hits"
   , fTypeCheck = defaultTypeCheck [bht] bht
   , fFixity    = Prefix
-  , fRules     = rSimple aBestHits
+  , fRules     = rSimple aBestExtract
   }
 
 bestHitsEach :: CutFunction
@@ -129,15 +138,15 @@ bestHitsEach = CutFunction
   { fName      = "best_hits_each"
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rEach aBestHits
+  , fRules     = rEach aBestExtract
   }
 
-aBestHits :: CutConfig -> [CutPath] -> Action ()
-aBestHits cfg [out, hits] = do
+aBestExtract :: CutConfig -> [CutPath] -> Action ()
+aBestExtract cfg [out, hits] = do
   unit $ quietly $ wrappedCmd cfg [out'] [] "best_hits.R" [out', hits']
   debugTrackWrite cfg [out'']
   where
     out'  = fromCutPath cfg out
-    out'' = debugAction cfg "aBestHits" out' [out', hits']
+    out'' = debugAction cfg "aBestExtract" out' [out', hits']
     hits' = fromCutPath cfg hits
-aBestHits _ args = error $ "bad argument to aBestHits: " ++ show args
+aBestExtract _ args = error $ "bad argument to aBestExtract: " ++ show args
