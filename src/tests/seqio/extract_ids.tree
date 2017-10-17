@@ -1,16 +1,26 @@
 .
 |-- cache
+|   |-- list
+|   |   `-- de703b91cc.txt
 |   `-- seqio
 |-- exprs
+|   |-- any
+|   |   `-- 2dd3593812.str.list
 |   |-- extract_ids
-|   |   `-- 6e8bd8b7c6.str.list
+|   |   |-- 6e8bd8b7c6.str.list
+|   |   `-- 8df2fbb1a8.str.list
+|   |-- list
+|   |   `-- 9b1f4a70ea.str.list.list -> ../../cache/list/de703b91cc.txt
 |   |-- load_faa
 |   |   `-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
+|   |-- load_fna
+|   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
 |   `-- str
-|       `-- 50dbefb6d6.str
+|       |-- 50dbefb6d6.str
+|       `-- 7da80bde02.str
 `-- vars
     |-- faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
-    |-- result -> ../vars/single.str.list
-    `-- single.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
+    |-- fna.fna -> ../exprs/load_fna/9b7934c579.fna
+    `-- result -> ../exprs/any/2dd3593812.str.list
 
-7 directories, 6 files
+11 directories, 12 files

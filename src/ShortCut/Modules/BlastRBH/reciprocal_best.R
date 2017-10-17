@@ -19,16 +19,6 @@ write_hits <- function(hits, filename)
   write.table(hits, filename, sep="\t",
               quote=FALSE, row.names=FALSE, col.names=FALSE)
 
-# best_hits <- function(out, bht) {
-#   print(head(bht))
-#   read_hits(bht) %>%
-#     arrange(evalue) %>%
-#     group_by(queryid) %>%
-#     filter(n() == 1) %>%
-#     ungroup() %>%
-#     write_hits(out)
-# }
-
 # TODO do this the proper way in its own cut function, man!
 best_hits <- function(df)
   df %>%

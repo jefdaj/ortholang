@@ -266,7 +266,7 @@ concatFastas = CutFunction
   { fName      = "concat_fastas"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
-  , fRules  = rConcat
+  , fRules  = rConcat -- TODO rSimple . aConcat?
   }
 
 tConcatFastas :: [CutType] -> Either String CutType
