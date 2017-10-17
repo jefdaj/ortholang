@@ -1,1 +1,5 @@
-result = "pending"
+small6803fna = load_fna "data/6803genes10.fna"
+large6803fna = load_fna "data/6803genes.fna"
+single = blastn_db      1e-5 small6803fna (makeblastdb_nucl       large6803fna )
+mapped = blastn_db_each 1e-5 small6803fna (makeblastdb_nucl_each [large6803fna])
+result = all (extract_queries_each ([single] | mapped))

@@ -1,8 +1,66 @@
 .
+|-- cache
+|   |-- blastdb
+|   |   `-- ce746b5c13
+|   |       |-- ce746b5c13.ndb.nhr
+|   |       |-- ce746b5c13.ndb.nin
+|   |       `-- ce746b5c13.ndb.nsq
+|   |-- each
+|   |   |-- 0501877d43
+|   |   |   |-- e9db34afaa.str.list -> $TMPDIR/exprs/extract_queries/e9db34afaa.str.list
+|   |   |   |-- e9db34afaa.str.list.args
+|   |   |   |-- f9c4b4092b.str.list -> $TMPDIR/exprs/extract_queries/f9c4b4092b.str.list
+|   |   |   `-- f9c4b4092b.str.list.args
+|   |   |-- 236517ad86
+|   |   |   |-- 40d4c0b452.bht -> $TMPDIR/exprs/blastn_db/8158675169_237bf736b9_40d4c0b452.bht
+|   |   |   `-- 40d4c0b452.bht.args
+|   |   `-- db9e608215
+|   |       |-- 68f4ddeb65.ndb -> $TMPDIR/exprs/makeblastdb_nucl/68f4ddeb65.ndb
+|   |       `-- 68f4ddeb65.ndb.args
+|   |-- list
+|   |   |-- 0aac195355.txt
+|   |   `-- c7e80436b4.txt
+|   `-- makeblastdb
+|       `-- ce746b5c13
+|           |-- ce746b5c13.ndb.nhr
+|           |-- ce746b5c13.ndb.nin
+|           `-- ce746b5c13.ndb.nsq
 |-- exprs
-|   `-- str
-|       `-- b0458da0ae.str
+|   |-- all
+|   |   `-- b3a04fca10.str.list
+|   |-- blastn_db
+|   |   |-- 8158675169_237bf736b9_40d4c0b452.bht
+|   |   `-- 8158675169_8df2fbb1a8_a78dfa6d35.bht
+|   |-- blastn_db_each
+|   |   `-- 8158675169_8df2fbb1a8_5ab45b9cad.bht.list
+|   |-- extract_queries
+|   |   |-- e9db34afaa.str.list
+|   |   `-- f9c4b4092b.str.list
+|   |-- extract_queries_each
+|   |   `-- ab95548da1.str.list.list
+|   |-- list
+|   |   |-- 4975b1851b.bht.list -> ../../cache/list/c7e80436b4.txt
+|   |   `-- b72d792449.fna.list -> ../../cache/list/0aac195355.txt
+|   |-- load_fna
+|   |   |-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
+|   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
+|   |-- makeblastdb_nucl
+|   |   |-- 68f4ddeb65.ndb
+|   |   `-- fddf135b43.ndb
+|   |-- makeblastdb_nucl_each
+|   |   `-- 611e5b4cfb.ndb.list
+|   |-- num
+|   |   `-- a53b190835.num
+|   |-- str
+|   |   |-- 7da80bde02.str
+|   |   `-- a2fd369878.str
+|   `-- union
+|       `-- 3ac197dd7e_3b9249fd83.bht.list
 `-- vars
-    `-- result -> ../exprs/str/b0458da0ae.str
+    |-- large6803fna.fna -> ../exprs/load_fna/f110b4b1c9.fna
+    |-- mapped.bht.list -> ../exprs/blastn_db_each/8158675169_8df2fbb1a8_5ab45b9cad.bht.list
+    |-- result -> ../exprs/all/b3a04fca10.str.list
+    |-- single.bht -> ../exprs/blastn_db/8158675169_8df2fbb1a8_a78dfa6d35.bht
+    `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-3 directories, 2 files
+24 directories, 39 files
