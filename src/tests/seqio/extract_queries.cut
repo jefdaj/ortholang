@@ -1,6 +1,7 @@
 hits = blastp 1e-5 (load_faa "data/6803genes10.faa")
                    (load_faa "data/6803genes.faa")
-single  = extract_queries       hits
-mapped  = extract_queries_each [hits]
+single = extract_queries       hits
+mapped = extract_queries_each [hits]
 # TODO it's not deduping... because of rOneArgScript?
-result  = [single] | mapped
+# Note this should be the same output as extract_targets.cut
+result = [single] | mapped
