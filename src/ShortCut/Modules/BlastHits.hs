@@ -1,31 +1,25 @@
 module ShortCut.Modules.BlastHits where
 
--- TODO rename to BlastExtract?
-
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Config      (wrappedCmd)
-import ShortCut.Core.Compile.Basic       (rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Each       (rEach)
-import ShortCut.Modules.Blast    (bht)
-import ShortCut.Modules.BlastCRB (crb)
-import Data.List                  (nub, sort)
-import ShortCut.Core.Paths (CutPath, fromCutPath, writeLits)
-import ShortCut.Core.Debug        (debugAction, debugTrackWrite)
+import Data.List                   (nub, sort)
+import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
+import ShortCut.Core.Compile.Each  (rEach)
+import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
+import ShortCut.Core.Paths         (CutPath, fromCutPath, writeLits)
+import ShortCut.Modules.Blast      (bht)
+import ShortCut.Modules.BlastCRB   (crb)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "tables"
   , mFunctions =
-    [ extractQueries
-    , extractQueriesEach
-    , extractTargets
-    , extractTargetsEach
-    , filterEvalue
-    , filterEvalueEach
-    , bestHits
-    , bestHitsEach
+    [ extractQueries, extractQueriesEach
+    , extractTargets, extractTargetsEach
+    , filterEvalue  , filterEvalueEach
+    , bestHits      , bestHitsEach
     ]
   }
 
@@ -73,7 +67,7 @@ extractTargetsEach = CutFunction
   , fRules     = rEach $ aTsvColumn 2
   }
 
--- TODO rewrite this awk -> haskell, and using wrappedCmd
+-- TODO rewrite this awk -> haskell for cross platform compatibility?
 aTsvColumn :: Int -> CutConfig -> [CutPath] -> Action ()
 aTsvColumn n cfg [outPath, tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"

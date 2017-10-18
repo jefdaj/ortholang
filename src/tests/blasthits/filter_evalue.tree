@@ -1,33 +1,55 @@
 .
 |-- cache
-|   `-- blastdb
-|       `-- 9754c305d1
-|           |-- 9754c305d1.ndb.nhr
-|           |-- 9754c305d1.ndb.nin
-|           `-- 9754c305d1.ndb.nsq
+|   |-- blastdb
+|   |   `-- 9754c305d1
+|   |       |-- 9754c305d1.ndb.nhr
+|   |       |-- 9754c305d1.ndb.nin
+|   |       `-- 9754c305d1.ndb.nsq
+|   |-- each
+|   |   |-- 339d9360c5
+|   |   |   |-- 934a55faaa.bht -> $TMPDIR/exprs/filter_evalue/62073b9981_934a55faaa.bht
+|   |   |   `-- 934a55faaa.bht.args
+|   |   `-- 884e828d51
+|   |       |-- 47dbdd12ad.str.list -> $TMPDIR/exprs/extract_queries/47dbdd12ad.str.list
+|   |       `-- 47dbdd12ad.str.list.args
+|   `-- list
+|       |-- 2e1e4f7124.txt
+|       `-- c334e769ca.txt
 |-- exprs
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- extract_queries
-|   |   `-- b0f284360a.str.list
+|   |   |-- 45fa12f6df.str.list
+|   |   `-- 47dbdd12ad.str.list
+|   |-- extract_queries_each
+|   |   `-- e417dbfa53.str.list.list
 |   |-- filter_evalue
-|   |   `-- 5fbeb4e044_9994288dcd.bht
+|   |   |-- 62073b9981_934a55faaa.bht
+|   |   `-- 62073b9981_9994288dcd.bht
+|   |-- filter_evalue_each
+|   |   `-- 62073b9981_3777a36cf9.bht.list
+|   |-- list
+|   |   |-- 26890dda4f.bht.list -> ../../cache/list/2e1e4f7124.txt
+|   |   `-- 3bbbf950a3.str.list.list -> ../../cache/list/c334e769ca.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
 |   |-- makeblastdb_nucl
 |   |   `-- f5e661a4be.ndb
 |   |-- num
-|   |   |-- 3e281fad0f.num
+|   |   |-- 6de785566e.num
 |   |   `-- a53b190835.num
-|   `-- str
-|       |-- 4cdbcfa070.str
-|       `-- 8fa8ede325.str
+|   |-- str
+|   |   |-- 4cdbcfa070.str
+|   |   `-- 8fa8ede325.str
+|   `-- union
+|       `-- b06eb41dbe_5c5852a0c6.str.list.list
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- hits.bht -> ../exprs/blastn_db/8158675169_bc4ea1fc06_d326247d21.bht
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/e417dbfa53.str.list.list
     |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
-    |-- result -> ../vars/single.str.list
-    `-- single.str.list -> ../exprs/extract_queries/b0f284360a.str.list
+    |-- result -> ../exprs/union/b06eb41dbe_5c5852a0c6.str.list.list
+    `-- single.str.list -> ../exprs/extract_queries/45fa12f6df.str.list
 
-12 directories, 18 files
+20 directories, 32 files

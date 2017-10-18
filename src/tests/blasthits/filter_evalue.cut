@@ -1,7 +1,7 @@
 mini7942 = load_fna "data/7942genes10.fna"
 full7942 = load_fna "data/7942genes.fna"
 hits = blastn 1e-5 mini7942 full7942
-single = extract_queries      (filter_evalue      1e-10  hits)
-result = single
-# mapped = extract_queries_each (filter_evalue_each 1e-10 [hits])
-# result = all ([single] | mapped)
+single = extract_queries      (filter_evalue      1e-50  hits)
+mapped = extract_queries_each (filter_evalue_each 1e-50 [hits])
+# TODO mapped version not properly deduped yet
+result = [single] | mapped

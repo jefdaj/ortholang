@@ -23,9 +23,9 @@ cutModule = CutModule
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
     map mkBlastFromFaRev     blastDescsRev ++
     map mkBlastFromFaRevEach blastDescsRev ++
-    [ reciprocalBest
-    , reciprocalBestEach
-    ] ++
+
+    [reciprocalBest, reciprocalBestEach] ++
+
     map mkBlastRbh     blastDescsRev ++
     map mkBlastRbhEach blastDescsRev
   }
