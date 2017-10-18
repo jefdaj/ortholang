@@ -1,0 +1,6 @@
+# make one fasta file from multiple genbank files
+# TODO convenience function for this?
+result = concat_fastas
+  [ gbk_to_fna (load_gbk "data/SynPCC7942_chr.gbk")
+  , gbk_to_fna (load_gbk "data/SynPCC7942_pANL.gbk")
+  ]

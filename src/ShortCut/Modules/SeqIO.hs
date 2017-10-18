@@ -1,4 +1,4 @@
--- TODO rename something more general like SeqUtils
+-- TODO rename something more general like SeqUtils?
 
 module ShortCut.Modules.SeqIO where
 
@@ -7,9 +7,8 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Config        (wrappedCmd)
 import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
-import ShortCut.Core.Paths         (exprPath, toCutPath,
-                                    fromCutPath, readPaths, CutPath)
-import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, rLoadOne,
+import ShortCut.Core.Paths         (fromCutPath, readPaths, CutPath)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rLoadOne,
                                     rLoadList, rSimple, rSimpleScript)
 import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
 
@@ -17,52 +16,18 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-    [ loadGbk , loadGbkEach
-    , loadFaa , loadFaaEach
-    , loadFna , loadFnaEach
-    , gbkToFaa, gbkToFaaEach
-    , gbkToFna, gbkToFnaEach
-    , extractSeqs
-    , extractIds
-    , translate, translateEach
+    [ loadGbk     , loadGbkEach
+    , loadFaa     , loadFaaEach
+    , loadFna     , loadFnaEach
+    , gbkToFaa    , gbkToFaaEach
+    , gbkToFna    , gbkToFnaEach
+    , extractSeqs , extractSeqsEach
+    , extractIds  , extractIdsEach
+    , translate   , translateEach
     , concatFastas, concatFastasEach
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-  }
-
--- load a single file --
-
-{- Takes a string with the filepath to load. Creates a trivial expression file
- - that's just a symlink to the given path. These should be the only absolute
- - links, and the only ones that point outside the temp dir.
- - TODO still true?
- -}
-mkLoad :: String -> CutType -> CutFunction
-mkLoad name rtn = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [str] rtn
-  , fFixity    = Prefix
-  , fRules     = rLoadOne
-  }
-
--- load a list of files --
-
-{- Like cLoad, except it operates on a list of strings. Note that you can also
- - load lists using cLoad, but it's not recommended because then you have to
- - write the list in a file, whereas this can handle literal lists in the
- - source code.
- -}
-
--- TODO fix it putting both the initial files and lists of them in the same dir!
---      (.faa and .faa.list are together in exprs/load_faa_each,
---       when the former should be in exprs/load_faa)
-mkLoadList :: String -> CutType -> CutFunction
-mkLoadList name rtn = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
-  , fFixity    = Prefix
-  , fRules     = rLoadList
   }
 
 gbk :: CutType
@@ -85,6 +50,60 @@ fna = CutType
   , tDesc = "FASTA (nucleic acid)"
   , tShow = defaultShow
   }
+
+-------------------
+-- load_*(_each) --
+-------------------
+
+-- TODO move somewhere in Core
+
+{- Takes a string with the filepath to load. Creates a trivial expression file
+ - that's just a symlink to the given path. These should be the only absolute
+ - links, and the only ones that point outside the temp dir.
+ - TODO still true?
+ -}
+mkLoad :: String -> CutType -> CutFunction
+mkLoad name rtn = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str] rtn
+  , fFixity    = Prefix
+  , fRules     = rLoadOne
+  }
+
+{- Like cLoad, except it operates on a list of strings. Note that you can also
+ - load lists using cLoad, but it's not recommended because then you have to
+ - write the list in a file, whereas this can handle literal lists in the
+ - source code.
+ -}
+mkLoadList :: String -> CutType -> CutFunction
+mkLoadList name rtn = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
+  , fFixity    = Prefix
+  , fRules     = rLoadList
+  }
+
+loadFaa :: CutFunction
+loadFaa = mkLoad "load_faa" faa
+
+loadFaaEach :: CutFunction
+loadFaaEach = mkLoadList "load_faa_each" faa
+
+loadFna :: CutFunction
+loadFna = mkLoad "load_fna" fna
+
+loadFnaEach :: CutFunction
+loadFnaEach = mkLoadList "load_fna_each" fna
+
+loadGbk :: CutFunction
+loadGbk = mkLoad "load_gbk" gbk
+
+loadGbkEach :: CutFunction
+loadGbkEach = mkLoadList "load_gbk_each" gbk
+
+-----------------------
+-- gbk_to_f*a(_each) --
+-----------------------
 
 gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
@@ -118,31 +137,9 @@ gbkToFnaEach = CutFunction
   , fRules     = rSimpleScriptEach "gbk_to_fna.py"
   }
 
---------------------
--- load sequences --
---------------------
-
-loadFaa :: CutFunction
-loadFaa = mkLoad "load_faa" faa
-
-loadFaaEach :: CutFunction
-loadFaaEach = mkLoadList "load_faa_each" faa
-
-loadFna :: CutFunction
-loadFna = mkLoad "load_fna" fna
-
-loadFnaEach :: CutFunction
-loadFnaEach = mkLoadList "load_fna_each" fna
-
-loadGbk :: CutFunction
-loadGbk = mkLoad "load_gbk" gbk
-
-loadGbkEach :: CutFunction
-loadGbkEach = mkLoadList "load_gbk_each" gbk
-
--------------------------------------------
--- extract sequence IDs from FASTA files --
--------------------------------------------
+------------------------
+-- extract_ids(_each) --
+------------------------
 
 -- TODO this needs to do relative paths again, not absolute!
 -- TODO also extract them from genbank files
@@ -151,26 +148,29 @@ extractIds :: CutFunction
 extractIds = CutFunction
   { fName      = "extract_ids"
   , fFixity    = Prefix
-  , fTypeCheck = tExtractSeqIDs
+  , fTypeCheck = tExtractIds
   , fRules     = rSimpleScript "extract_ids.py"
   }
 
--- TODO write this
--- extractIdsEach :: CutFunction
--- extractIdsEach = CutFunction
---   { fName      = "extract_ids_each"
---   , fFixity    = Prefix
---   , fTypeCheck = tExtractSeqIDsEach
---   , fRules     = rExtractSeqIDs
---   }
+extractIdsEach :: CutFunction
+extractIdsEach = CutFunction
+  { fName      = "extract_ids_each"
+  , fFixity    = Prefix
+  , fTypeCheck = tExtractIdsEach
+  , fRules     = rSimpleScriptEach "extract_ids.py"
+  }
 
-tExtractSeqIDs :: [CutType] -> Either String CutType
-tExtractSeqIDs [x] | elem x [faa, fna] = Right (ListOf str)
-tExtractSeqIDs _ = Left "expected a fasta file"
+tExtractIds :: [CutType] -> Either String CutType
+tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
+tExtractIds _ = Left "expected a fasta file"
 
-----------------------------------------------
--- extract sequences from FASTA files by ID --
-----------------------------------------------
+tExtractIdsEach :: [CutType] -> Either String CutType
+tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
+tExtractIdsEach _ = Left "expected a fasta file"
+
+-------------------------
+-- extract_seqs(_each) --
+-------------------------
 
 -- TODO also extract them from genbank files
 
@@ -182,9 +182,22 @@ extractSeqs = CutFunction
   , fRules     = rSimpleScript "extract_seqs.py"
   }
 
+extractSeqsEach :: CutFunction
+extractSeqsEach = CutFunction
+  { fName      = "extract_seqs_each"
+  , fFixity    = Prefix
+  , fTypeCheck = tExtractSeqsEach
+  , fRules     = rSimpleScriptEach "extract_seqs.py"
+  }
+
 tExtractSeqs  :: [CutType] -> Either String CutType
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
+
+tExtractSeqsEach  :: [CutType] -> Either String CutType
+tExtractSeqsEach [x, ListOf (ListOf s)]
+  | s == str && elem x [faa, fna] = Right $ ListOf x
+tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 
 ----------------------
 -- translate(_each) --
@@ -207,16 +220,16 @@ translateEach = CutFunction
   , fRules     = rSimpleScriptEach "translate.py"
   }
 
--------------------
--- concat_fastas --
--------------------
+--------------------------
+-- concat_fastas(_each) --
+--------------------------
 
 concatFastas :: CutFunction
 concatFastas = CutFunction
   { fName      = "concat_fastas"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
-  , fRules  = rSimple aConcat
+  , fRules     = rSimple aConcat
   }
 
 concatFastasEach :: CutFunction
@@ -224,7 +237,7 @@ concatFastasEach = CutFunction
   { fName      = "concat_fastas_each"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastasEach
-  , fRules  = rEach aConcat
+  , fRules     = rEach aConcat
   }
 
 tConcatFastas :: [CutType] -> Either String CutType
