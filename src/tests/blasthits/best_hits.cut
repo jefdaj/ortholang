@@ -1,1 +1,6 @@
-result = "pending"
+# TODO make a smaller set of genes that will match to speed tests
+pcc7942 = load_faa "data/7942genes.faa"
+pcc6803 = load_faa "data/6803genes.faa"
+hits    = blastp 1e-5 pcc7942 pcc6803
+best    = best_hits hits
+result  = length hits - length best

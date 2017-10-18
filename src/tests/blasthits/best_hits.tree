@@ -1,8 +1,36 @@
 .
+|-- cache
+|   `-- blastdb
+|       `-- 63b6fa9145
+|           |-- 63b6fa9145.pdb.phr
+|           |-- 63b6fa9145.pdb.pin
+|           `-- 63b6fa9145.pdb.psq
 |-- exprs
-|   `-- str
-|       `-- b0458da0ae.str
+|   |-- best_hits
+|   |   `-- b33baa5d21.bht
+|   |-- blastp_db
+|   |   `-- 8158675169_c08cc19988_67b1500345.bht
+|   |-- length
+|   |   |-- 98bb342bb5.num
+|   |   `-- b33baa5d21.num
+|   |-- load_faa
+|   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
+|   |-- makeblastdb_prot
+|   |   `-- c14344af19.pdb
+|   |-- num
+|   |   `-- a53b190835.num
+|   |-- str
+|   |   |-- 1d8a61c770.str
+|   |   |-- b0458da0ae.str
+|   |   `-- ec3b181d8a.str
+|   `-- subtract
+|       `-- 96843f3249_43ecafbf3b.num
 `-- vars
-    `-- result -> ../exprs/str/b0458da0ae.str
+    |-- best.bht -> ../exprs/best_hits/b33baa5d21.bht
+    |-- hits.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
+    |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
+    |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
+    `-- result -> ../exprs/subtract/96843f3249_43ecafbf3b.num
 
-3 directories, 2 files
+13 directories, 20 files
