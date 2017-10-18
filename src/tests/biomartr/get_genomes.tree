@@ -1,8 +1,11 @@
 .
+|-- cache
+|   `-- list
+|       `-- e8e4e0696f.txt
 |-- exprs
 |   `-- str
-|       `-- 26d75f2bb4.str
+|       `-- 26d75f2bb4.str -> ../../cache/list/e8e4e0696f.txt
 `-- vars
     `-- result -> ../exprs/str/26d75f2bb4.str
 
-3 directories, 2 files
+5 directories, 3 files

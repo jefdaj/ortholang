@@ -8,9 +8,11 @@
 |   |       |-- 89c1f12bb3.str.list -> $TMPDIR/exprs/extract_ids/89c1f12bb3.str.list
 |   |       `-- 89c1f12bb3.str.list.args
 |   `-- list
+|       |-- 0815de9417.txt
 |       |-- 3d74a0df3f.txt
 |       |-- 54a2bf7098.txt
 |       |-- 8d8f73bf83.txt
+|       |-- c8be8722f2.txt
 |       `-- f2b04c697f.txt
 |-- exprs
 |   |-- extract_ids
@@ -31,8 +33,8 @@
 |   |-- load_fna
 |   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
 |   |-- str
-|   |   |-- 50dbefb6d6.str
-|   |   `-- 7da80bde02.str
+|   |   |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|   |   `-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
 |   `-- union
 |       |-- 70f9985367_74d82b669a.str.list.list
 |       |-- 76f9150524_617eb7e1c9.str.list.list
@@ -48,4 +50,4 @@
     |-- singleFaa.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
     `-- singleFna.str.list -> ../exprs/extract_ids/8df2fbb1a8.str.list
 
-14 directories, 34 files
+14 directories, 36 files

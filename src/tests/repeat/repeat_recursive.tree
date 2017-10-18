@@ -5,6 +5,7 @@
 |       |-- 2a13ac791a.txt
 |       |-- 308602d525.txt
 |       |-- 3bd20a193b.txt
+|       |-- 558d528228.txt
 |       |-- b92299bb10.txt
 |       `-- f669890081.txt
 |-- exprs
@@ -25,12 +26,12 @@
 |   |   |-- df9846a7f4_6d57e8642a.num
 |   |   `-- f8d5fefdd1_6d57e8642a.num
 |   |-- num
-|   |   |-- a629005e3c.num
-|   |   |-- ea11b49459_1.num
-|   |   |-- ea11b49459_2.num
-|   |   |-- ea11b49459_3.num
-|   |   |-- ea11b49459_4.num
-|   |   `-- ea11b49459_5.num
+|   |   |-- a629005e3c.num -> ../../cache/list/558d528228.txt
+|   |   |-- ea11b49459_1.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- ea11b49459_2.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- ea11b49459_3.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- ea11b49459_4.num -> ../../cache/list/2a13ac791a.txt
+|   |   `-- ea11b49459_5.num -> ../../cache/list/2a13ac791a.txt
 |   `-- repeat
 |       |-- 0adcafcfa1_b3385062cc_9cf109b089.num.list
 |       |-- 3fc10e4dd3_f8d5fefdd1_9cf109b089.num.list
@@ -77,4 +78,4 @@
     |-- var2.a910eea1e0.num.list -> ../exprs/repeat/fd7315e8d4_df9846a7f4_9cf109b089.num.list
     `-- var2.af72dc906e.num.list -> ../exprs/repeat/3fc10e4dd3_f8d5fefdd1_9cf109b089.num.list
 
-8 directories, 69 files
+8 directories, 70 files

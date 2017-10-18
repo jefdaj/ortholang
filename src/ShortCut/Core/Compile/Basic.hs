@@ -97,7 +97,7 @@ rLit s@(_,cfg) expr = do
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> CutExpr -> CutPath -> Action ()
-aLit cfg expr out = writeLits cfg out'' [ePath]
+aLit cfg expr out = writeDeduped cfg writeLits out'' [ePath] -- TODO too much dedup?
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
@@ -110,8 +110,8 @@ rList :: CutState -> CutExpr -> Rules ExprPath
 -- TODO is this the bug? refers to a list of other empty lists, no?
 -- rList s e@(CutList Empty _ _ _) = rListEmpty s e -- TODO remove?
 rList s e@(CutList rtn _ _ _)
-  | rtn `elem` [str, num] = rListLits s e
-  | otherwise = rListPaths s e
+  | rtn `elem` [str, num] = rListLits  s e
+  | otherwise             = rListPaths s e
 rList _ _ = error "bad arguemnt to rList"
 
 -- special case for empty lists
@@ -153,6 +153,7 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
  -
  - TODO does it need to handle a race condition when writing to the cache?
  - TODO any reason to keep original extensions instead of all using .txt?
+ -      oh, if we're testing extensions anywhere. lets not do that though
  -}
 writeDeduped :: Show a => CutConfig
              -> (CutConfig -> FilePath -> a -> Action ())
@@ -372,7 +373,7 @@ aLoadListLits cfg outPath litsPath = do
       out       = debugAction cfg "aLoadListLits" outPath' [outPath', litsPath']
   lits  <- readLits cfg litsPath'
   lits' <- liftIO $ mapM absolutize lits
-  writeLits cfg out lits'
+  writeDeduped cfg writeLits out lits'
   where
     outPath' = fromCutPath cfg outPath
 
@@ -398,7 +399,7 @@ aLoadListLinks cfg pathsPath outPath = do
   -- liftIO $ putStrLn $ "about to need: " ++ show paths''
   need paths''
   let paths''' = map (toCutPath cfg) paths''
-  writePaths cfg out paths'''
+  writeDeduped cfg writePaths out paths'''
   where
     outPath'   = fromCutPath cfg outPath
     pathsPath' = fromCutPath cfg pathsPath

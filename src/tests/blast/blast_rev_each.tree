@@ -7,25 +7,28 @@
 |   |       `-- 9754c305d1.ndb.nsq
 |   |-- each
 |   |   |-- 65be1ab9d7
-|   |   |   |-- 2731730014.str.list -> $TMPDIR/exprs/extract_queries/2731730014.str.list
-|   |   |   `-- 2731730014.str.list.args
+|   |   |   |-- 8435fc7e6d.str.list -> $TMPDIR/exprs/extract_queries/8435fc7e6d.str.list
+|   |   |   `-- 8435fc7e6d.str.list.args
 |   |   `-- ff83ea8a55
-|   |       |-- b23045213e.bht -> $TMPDIR/exprs/blastn_db_rev/8158675169_d326247d21_b23045213e.bht
+|   |       |-- b23045213e.bht -> $TMPDIR/exprs/blastn_db_rev/fe7dee10f6_d326247d21_b23045213e.bht
 |   |       `-- b23045213e.bht.args
 |   `-- list
 |       |-- 17387fd93a.txt
-|       `-- 2a267084df.txt
+|       |-- 2a267084df.txt
+|       |-- 778251fd80.txt
+|       |-- ba320796bf.txt
+|       `-- f530950d29.txt
 |-- exprs
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- blastn_db_rev
-|   |   `-- 8158675169_d326247d21_b23045213e.bht
+|   |   `-- fe7dee10f6_d326247d21_b23045213e.bht
 |   |-- blastn_db_rev_each
 |   |   `-- 8158675169_d326247d21_16f79b6458.bht.list
 |   |-- difference
 |   |   `-- f76d344a5c_4b0f916b3a.str.list.list
 |   |-- extract_queries
-|   |   |-- 2731730014.str.list
+|   |   |-- 8435fc7e6d.str.list
 |   |   `-- d04c524532.str.list
 |   |-- extract_queries_each
 |   |   `-- 68853b85c0.str.list.list
@@ -38,10 +41,10 @@
 |   |-- makeblastdb_nucl
 |   |   `-- f5e661a4be.ndb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   `-- str
-|       |-- 4cdbcfa070.str
-|       `-- 8fa8ede325.str
+|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|       `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 `-- vars
     |-- large.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- mrevs.str.list.list -> ../exprs/extract_queries_each/68853b85c0.str.list.list
@@ -49,4 +52,4 @@
     |-- small.fna -> ../exprs/load_fna/82b637da24.fna
     `-- srevs.str.list -> ../exprs/extract_queries/d04c524532.str.list
 
-20 directories, 29 files
+20 directories, 32 files

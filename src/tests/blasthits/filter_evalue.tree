@@ -7,25 +7,29 @@
 |   |       `-- 9754c305d1.ndb.nsq
 |   |-- each
 |   |   |-- 339d9360c5
-|   |   |   |-- 934a55faaa.bht -> $TMPDIR/exprs/filter_evalue/62073b9981_934a55faaa.bht
+|   |   |   |-- 934a55faaa.bht -> $TMPDIR/exprs/filter_evalue/eb8ad78bc4_934a55faaa.bht
 |   |   |   `-- 934a55faaa.bht.args
 |   |   `-- 884e828d51
-|   |       |-- 47dbdd12ad.str.list -> $TMPDIR/exprs/extract_queries/47dbdd12ad.str.list
-|   |       `-- 47dbdd12ad.str.list.args
+|   |       |-- 65f0dd18cd.str.list -> $TMPDIR/exprs/extract_queries/65f0dd18cd.str.list
+|   |       `-- 65f0dd18cd.str.list.args
 |   `-- list
 |       |-- 2e1e4f7124.txt
-|       `-- c334e769ca.txt
+|       |-- 778251fd80.txt
+|       |-- 78434cb2c5.txt
+|       |-- ba320796bf.txt
+|       |-- c334e769ca.txt
+|       `-- f530950d29.txt
 |-- exprs
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- extract_queries
 |   |   |-- 45fa12f6df.str.list
-|   |   `-- 47dbdd12ad.str.list
+|   |   `-- 65f0dd18cd.str.list
 |   |-- extract_queries_each
 |   |   `-- e417dbfa53.str.list.list
 |   |-- filter_evalue
-|   |   |-- 62073b9981_934a55faaa.bht
-|   |   `-- 62073b9981_9994288dcd.bht
+|   |   |-- 62073b9981_9994288dcd.bht
+|   |   `-- eb8ad78bc4_934a55faaa.bht
 |   |-- filter_evalue_each
 |   |   `-- 62073b9981_3777a36cf9.bht.list
 |   |-- list
@@ -37,11 +41,11 @@
 |   |-- makeblastdb_nucl
 |   |   `-- f5e661a4be.ndb
 |   |-- num
-|   |   |-- 6de785566e.num
-|   |   `-- a53b190835.num
+|   |   |-- 6de785566e.num -> ../../cache/list/78434cb2c5.txt
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 4cdbcfa070.str
-|   |   `-- 8fa8ede325.str
+|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 |   `-- union
 |       `-- b06eb41dbe_5c5852a0c6.str.list.list
 `-- vars
@@ -52,4 +56,4 @@
     |-- result -> ../exprs/union/b06eb41dbe_5c5852a0c6.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/45fa12f6df.str.list
 
-20 directories, 32 files
+20 directories, 36 files

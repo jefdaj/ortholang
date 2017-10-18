@@ -1,7 +1,10 @@
 .
 |-- cache
 |   `-- list
-|       `-- 4949eea072.txt
+|       |-- 2a13ac791a.txt
+|       |-- 42fb7081a8.txt
+|       |-- 4949eea072.txt
+|       `-- 558d528228.txt
 |-- exprs
 |   |-- leave_each_out
 |   |   `-- 4c347546d4.num.list.list
@@ -11,10 +14,10 @@
 |   |   |-- ee383407c9.num.list
 |   |   `-- f11e0b1ea5.num.list -> ../../cache/list/4949eea072.txt
 |   `-- num
-|       |-- a629005e3c.num
-|       |-- ea11b49459.num
-|       `-- ee383407c9.num
+|       |-- a629005e3c.num -> ../../cache/list/558d528228.txt
+|       |-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
+|       `-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
 `-- vars
     `-- result -> ../exprs/leave_each_out/4c347546d4.num.list.list
 
-7 directories, 10 files
+7 directories, 13 files

@@ -11,7 +11,10 @@
 |   |       `-- a8eb78180f.str.list.args
 |   `-- list
 |       |-- 51a2da0e58.txt
-|       `-- a8a68f2aa1.txt
+|       |-- 778251fd80.txt
+|       |-- a8a68f2aa1.txt
+|       |-- adfdb6bd8c.txt
+|       `-- c8be8722f2.txt
 |-- exprs
 |   |-- blastp_db
 |   |   `-- 8158675169_c14344af19_8c0afeae98.bht
@@ -29,10 +32,10 @@
 |   |-- makeblastdb_prot
 |   |   `-- 6e8bd8b7c6.pdb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 50dbefb6d6.str
-|   |   `-- ec3b181d8a.str
+|   |   |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|   |   `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 |   `-- union
 |       `-- 880a7de9f2_2f399024fc.str.list.list
 `-- vars
@@ -41,4 +44,4 @@
     |-- result -> ../exprs/union/880a7de9f2_2f399024fc.str.list.list
     `-- single.str.list -> ../exprs/extract_targets/c085e4cf5c.str.list
 
-17 directories, 24 files
+17 directories, 27 files

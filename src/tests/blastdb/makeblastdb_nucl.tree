@@ -7,18 +7,21 @@
 |   |       `-- ce746b5c13.ndb.nsq
 |   |-- each
 |   |   |-- 0501877d43
-|   |   |   |-- e9db34afaa.str.list -> $TMPDIR/exprs/extract_queries/e9db34afaa.str.list
-|   |   |   |-- e9db34afaa.str.list.args
+|   |   |   |-- 4cea93fbc9.str.list -> $TMPDIR/exprs/extract_queries/4cea93fbc9.str.list
+|   |   |   |-- 4cea93fbc9.str.list.args
 |   |   |   |-- f9c4b4092b.str.list -> $TMPDIR/exprs/extract_queries/f9c4b4092b.str.list
 |   |   |   `-- f9c4b4092b.str.list.args
 |   |   |-- 236517ad86
-|   |   |   |-- 40d4c0b452.bht -> $TMPDIR/exprs/blastn_db/8158675169_237bf736b9_40d4c0b452.bht
+|   |   |   |-- 40d4c0b452.bht -> $TMPDIR/exprs/blastn_db/fe7dee10f6_237bf736b9_40d4c0b452.bht
 |   |   |   `-- 40d4c0b452.bht.args
 |   |   `-- db9e608215
 |   |       |-- 68f4ddeb65.ndb -> $TMPDIR/exprs/makeblastdb_nucl/68f4ddeb65.ndb
 |   |       `-- 68f4ddeb65.ndb.args
 |   |-- list
+|   |   |-- 0815de9417.txt
 |   |   |-- 0aac195355.txt
+|   |   |-- 1f98704802.txt
+|   |   |-- 778251fd80.txt
 |   |   `-- c7e80436b4.txt
 |   `-- makeblastdb
 |       `-- ce746b5c13
@@ -29,12 +32,12 @@
 |   |-- all
 |   |   `-- b3a04fca10.str.list
 |   |-- blastn_db
-|   |   |-- 8158675169_237bf736b9_40d4c0b452.bht
-|   |   `-- 8158675169_8df2fbb1a8_a78dfa6d35.bht
+|   |   |-- 8158675169_8df2fbb1a8_a78dfa6d35.bht
+|   |   `-- fe7dee10f6_237bf736b9_40d4c0b452.bht
 |   |-- blastn_db_each
 |   |   `-- 8158675169_8df2fbb1a8_5ab45b9cad.bht.list
 |   |-- extract_queries
-|   |   |-- e9db34afaa.str.list
+|   |   |-- 4cea93fbc9.str.list
 |   |   `-- f9c4b4092b.str.list
 |   |-- extract_queries_each
 |   |   `-- ab95548da1.str.list.list
@@ -50,10 +53,10 @@
 |   |-- makeblastdb_nucl_each
 |   |   `-- 611e5b4cfb.ndb.list
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 7da80bde02.str
-|   |   `-- a2fd369878.str
+|   |   |-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
+|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 |   `-- union
 |       `-- 3ac197dd7e_3b9249fd83.bht.list
 `-- vars
@@ -63,4 +66,4 @@
     |-- single.bht -> ../exprs/blastn_db/8158675169_8df2fbb1a8_a78dfa6d35.bht
     `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-24 directories, 39 files
+24 directories, 42 files

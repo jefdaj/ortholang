@@ -1,11 +1,15 @@
 .
+|-- cache
+|   `-- list
+|       |-- 202270fe5b.txt
+|       `-- 2a13ac791a.txt
 |-- exprs
 |   |-- multiply
 |   |   `-- 4578706b58_5b85e6eec8.num
 |   `-- num
-|       |-- 992d750479.num
-|       `-- ea11b49459.num
+|       |-- 992d750479.num -> ../../cache/list/202270fe5b.txt
+|       `-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
 `-- vars
     `-- result -> ../exprs/multiply/4578706b58_5b85e6eec8.num
 
-4 directories, 4 files
+6 directories, 6 files

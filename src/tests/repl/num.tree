@@ -1,9 +1,18 @@
 .
 |-- cache
 |   `-- list
+|       |-- 086ca80bfb.txt
+|       |-- 0c1d624885.txt
+|       |-- 0c357755eb.txt
 |       |-- 1c441b2ccd.txt
+|       |-- 29a3174018.txt
+|       |-- 2a13ac791a.txt
 |       |-- 42fb7081a8.txt
-|       `-- 558d528228.txt
+|       |-- 54cb8e2e67.txt
+|       |-- 558d528228.txt
+|       |-- 58d21ca52f.txt
+|       |-- b6923cedaa.txt
+|       `-- eb6e874560.txt
 |-- exprs
 |   |-- add
 |   |   `-- fba69f6eb2_4578706b58.num
@@ -12,19 +21,19 @@
 |   |   |-- 6dd0733494.num.list -> ../../cache/list/1c441b2ccd.txt
 |   |   `-- b80c72ef6d.num.list -> ../../cache/list/558d528228.txt
 |   `-- num
-|       |-- 3b0978a4fa.num
-|       |-- 3bd2aa8a34.num
-|       |-- 4fc8c6d313.num
-|       |-- 528d27de63.num
-|       |-- 89fb8b4aed.num
-|       |-- a629005e3c.num
-|       |-- ae6e90f101.num
-|       |-- e4856eabbd.num
-|       |-- ea11b49459.num
-|       |-- eaad7f2e40.num
-|       `-- ee383407c9.num
+|       |-- 3b0978a4fa.num -> ../../cache/list/54cb8e2e67.txt
+|       |-- 3bd2aa8a34.num -> ../../cache/list/eb6e874560.txt
+|       |-- 4fc8c6d313.num -> ../../cache/list/b6923cedaa.txt
+|       |-- 528d27de63.num -> ../../cache/list/0c1d624885.txt
+|       |-- 89fb8b4aed.num -> ../../cache/list/58d21ca52f.txt
+|       |-- a629005e3c.num -> ../../cache/list/558d528228.txt
+|       |-- ae6e90f101.num -> ../../cache/list/29a3174018.txt
+|       |-- e4856eabbd.num -> ../../cache/list/086ca80bfb.txt
+|       |-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
+|       |-- eaad7f2e40.num -> ../../cache/list/0c357755eb.txt
+|       `-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
 |-- history.txt
 `-- vars
     `-- result -> ../exprs/list/6dd0733494.num.list
 
-7 directories, 20 files
+7 directories, 29 files

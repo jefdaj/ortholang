@@ -19,8 +19,11 @@
 |   |       |-- d75fa690e4.str.list -> $TMPDIR/exprs/extract_queries/d75fa690e4.str.list
 |   |       `-- d75fa690e4.str.list.args
 |   `-- list
+|       |-- 1f98704802.txt
+|       |-- 778251fd80.txt
 |       |-- 83f49e90f1.txt
-|       `-- 9b83172c90.txt
+|       |-- 9b83172c90.txt
+|       `-- ba320796bf.txt
 |-- exprs
 |   |-- all
 |   |   `-- c9463cb1e8.str.list
@@ -50,14 +53,14 @@
 |   |   |-- f5e661a4be.ndb
 |   |   `-- fddf135b43.ndb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- reciprocal_best
 |   |   |-- 71ee8f0fa5_7a08a6dc45.bht
 |   |   |-- d1ef2ec04e_52e9c434c8.bht
 |   |   `-- d1ef2ec04e_71ee8f0fa5.bht
 |   |-- str
-|   |   |-- 4cdbcfa070.str
-|   |   `-- a2fd369878.str
+|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 |   `-- union
 |       `-- 00be747cc4_d2aa534aa7.str.list.list
 `-- vars
@@ -74,4 +77,4 @@
     |-- rev1.bht -> ../exprs/blastn_db/8158675169_f5e661a4be_a78dfa6d35.bht
     `-- rev2.bht -> ../exprs/blastn_db/8158675169_f5e661a4be_a78dfa6d35.bht
 
-25 directories, 49 files
+25 directories, 52 files

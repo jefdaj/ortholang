@@ -28,7 +28,10 @@
 |   |       |-- e681e009f2.bht -> $TMPDIR/exprs/best_hits/e681e009f2.bht
 |   |       `-- e681e009f2.bht.args
 |   `-- list
-|       `-- 1c23867e0b.txt
+|       |-- 1c23867e0b.txt
+|       |-- 778251fd80.txt
+|       |-- adfdb6bd8c.txt
+|       `-- bdc783547b.txt
 |-- exprs
 |   |-- all
 |   |   |-- 27f77ad453.str.list
@@ -67,13 +70,12 @@
 |   |-- makeblastdb_prot
 |   |   `-- c14344af19.pdb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- repeat
 |   |   `-- b33baa5d21_c08cc19988_6a700d9587.bht.list
 |   `-- str
-|       |-- 1d8a61c770.str
-|       |-- b0458da0ae.str
-|       `-- ec3b181d8a.str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- best.bht.list -> ../exprs/best_hits_each/c1a28d1bfa.bht.list
     |-- diff.str.list -> ../exprs/difference/bff314cf1a_acd028ef1f.str.list
@@ -90,4 +92,4 @@
     |-- result.aec7294f1e.bht -> ../vars/hits.aec7294f1e.bht
     `-- result.e04b0e7815.bht -> ../vars/hits.e04b0e7815.bht
 
-24 directories, 66 files
+24 directories, 68 files

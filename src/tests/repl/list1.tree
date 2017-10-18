@@ -16,7 +16,7 @@
 |   |   |-- bc30498d24.num.list.list -> ../../cache/list/90f9deeaa9.txt
 |   |   `-- cd486695fb.empty.list.list -> ../../cache/list/bc0b5731cb.txt
 |   `-- num
-|       `-- ee383407c9.num
+|       `-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
 |-- history.txt
 `-- vars
     `-- result -> ../exprs/list/bc30498d24.num.list.list

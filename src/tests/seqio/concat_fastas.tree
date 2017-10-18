@@ -6,8 +6,10 @@
 |   |       `-- a17453dd06.fna.args
 |   `-- list
 |       |-- 5273b85b5d.txt
+|       |-- 691dd4d722.txt
 |       |-- 8a7e9a807c.txt
-|       `-- 9da25ac96a.txt
+|       |-- 9da25ac96a.txt
+|       `-- cad7634989.txt
 |-- exprs
 |   |-- concat_fastas
 |   |   |-- a17453dd06.fna
@@ -25,8 +27,8 @@
 |   |   |-- 4f798984f2.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
 |   |   `-- c5cc3f4b63.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
 |   |-- str
-|   |   |-- 7ec89da918.str
-|   |   `-- a8d18fa355.str
+|   |   |-- 7ec89da918.str -> ../../cache/list/cad7634989.txt
+|   |   `-- a8d18fa355.str -> ../../cache/list/691dd4d722.txt
 |   `-- union
 |       `-- fad55bcec8_e6b5396dff.fna.list
 `-- vars
@@ -34,4 +36,4 @@
     |-- result -> ../exprs/union/fad55bcec8_e6b5396dff.fna.list
     `-- single.fna -> ../exprs/concat_fastas/eb1aea4e88.fna
 
-13 directories, 21 files
+13 directories, 23 files

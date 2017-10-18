@@ -10,14 +10,17 @@
 |   |   |   |-- 3fae05ef93.pdb -> $TMPDIR/exprs/makeblastdb_prot/3fae05ef93.pdb
 |   |   |   `-- 3fae05ef93.pdb.args
 |   |   |-- b416063c3c
-|   |   |   |-- 70217470d2.str.list -> $TMPDIR/exprs/extract_queries/70217470d2.str.list
-|   |   |   `-- 70217470d2.str.list.args
+|   |   |   |-- daa402512a.str.list -> $TMPDIR/exprs/extract_queries/daa402512a.str.list
+|   |   |   `-- daa402512a.str.list.args
 |   |   `-- b960925b88
-|   |       |-- cb9490b5f5.bht -> $TMPDIR/exprs/blastp/8158675169_af8c96afe4_cb9490b5f5.bht
+|   |       |-- cb9490b5f5.bht -> $TMPDIR/exprs/blastp/fe7dee10f6_af8c96afe4_cb9490b5f5.bht
 |   |       `-- cb9490b5f5.bht.args
 |   |-- list
 |   |   |-- 176aefc67f.txt
-|   |   `-- 7a96a226a5.txt
+|   |   |-- 778251fd80.txt
+|   |   |-- 7a96a226a5.txt
+|   |   |-- bdc783547b.txt
+|   |   `-- ef87d3e725.txt
 |   `-- makeblastdb
 |       `-- f1e136eaf6
 |           |-- f1e136eaf6.pdb.phr
@@ -27,14 +30,14 @@
 |   |-- all
 |   |   `-- 8c2786f33e.str.list
 |   |-- blastp
-|   |   `-- 8158675169_af8c96afe4_cb9490b5f5.bht
+|   |   `-- fe7dee10f6_af8c96afe4_cb9490b5f5.bht
 |   |-- blastp_db
 |   |   `-- 8158675169_1af4d085e7_46b5852d89.bht
 |   |-- blastp_each
 |   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list
 |   |-- extract_queries
-|   |   |-- 70217470d2.str.list
-|   |   `-- b09bd7df49.str.list
+|   |   |-- b09bd7df49.str.list
+|   |   `-- daa402512a.str.list
 |   |-- extract_queries_each
 |   |   `-- 848b144734.str.list.list
 |   |-- list
@@ -49,10 +52,10 @@
 |   |-- makeblastdb_prot_each
 |   |   `-- ced061f0b2.pdb.list
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 1d8a61c770.str
-|   |   `-- db90f32127.str
+|   |   |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|   |   `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
 |   `-- union
 |       `-- b479abe1cc_2ed0e69e65.str.list.list
 `-- vars
@@ -62,4 +65,4 @@
     |-- result -> ../exprs/all/8c2786f33e.str.list
     `-- single.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
 
-25 directories, 37 files
+25 directories, 40 files

@@ -1,14 +1,17 @@
 .
+|-- cache
+|   `-- list
+|       `-- 1e97ed1574.txt
 |-- exprs
 |   |-- gbk_to_faa
 |   |   `-- 31df2be117.faa
 |   |-- load_gbk
 |   |   `-- ddba013b80.gbk -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
 |   `-- str
-|       `-- 0507961f5b.str
+|       `-- 0507961f5b.str -> ../../cache/list/1e97ed1574.txt
 `-- vars
     |-- faa6803.faa -> ../exprs/gbk_to_faa/31df2be117.faa
     |-- gbk6803.gbk -> ../exprs/load_gbk/ddba013b80.gbk
     `-- result -> ../vars/faa6803.faa
 
-5 directories, 6 files
+7 directories, 7 files

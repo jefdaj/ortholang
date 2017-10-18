@@ -8,7 +8,7 @@
 |   |   |-- 0bd7d20130.str.list -> ../../cache/list/d8166958d0.txt
 |   |   `-- b07a253658.str.list.list -> ../../cache/list/ac2cb07d42.txt
 |   `-- str
-|       `-- a2a665650c.str
+|       `-- a2a665650c.str -> ../../cache/list/d8166958d0.txt
 |-- history.txt
 `-- vars
     `-- result -> ../exprs/list/b07a253658.str.list.list

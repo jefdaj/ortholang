@@ -2,4 +2,4 @@ mini7942 = load_fna "data/7942genes10.fna"
 full7942 = load_fna "data/7942genes.fna"
 single = extract_queries      (blastn      1e-5 mini7942  full7942 )
 mapped = extract_queries_each (blastn_each 1e-5 mini7942 [full7942])
-result = all ([single] | mapped)
+result = [single] | mapped

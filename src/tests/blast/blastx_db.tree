@@ -7,24 +7,27 @@
 |   |       `-- f1e136eaf6.pdb.psq
 |   |-- each
 |   |   |-- 8641bd3b28
-|   |   |   |-- 7fd4089230.str.list -> $TMPDIR/exprs/extract_queries/7fd4089230.str.list
-|   |   |   `-- 7fd4089230.str.list.args
+|   |   |   |-- 0ddc313753.str.list -> $TMPDIR/exprs/extract_queries/0ddc313753.str.list
+|   |   |   `-- 0ddc313753.str.list.args
 |   |   `-- e1397ded9f
-|   |       |-- 46b5852d89.bht -> $TMPDIR/exprs/blastx_db/8158675169_b23045213e_46b5852d89.bht
+|   |       |-- 46b5852d89.bht -> $TMPDIR/exprs/blastx_db/fe7dee10f6_b23045213e_46b5852d89.bht
 |   |       `-- 46b5852d89.bht.args
 |   `-- list
+|       |-- 778251fd80.txt
 |       |-- af5b1fa4b5.txt
-|       `-- daecab170a.txt
+|       |-- bdc783547b.txt
+|       |-- daecab170a.txt
+|       `-- f530950d29.txt
 |-- exprs
 |   |-- all
 |   |   `-- 782f523b0c.str.list
 |   |-- blastx_db
-|   |   |-- 8158675169_b23045213e_46b5852d89.bht
-|   |   `-- 8158675169_bc4ea1fc06_46b5852d89.bht
+|   |   |-- 8158675169_bc4ea1fc06_46b5852d89.bht
+|   |   `-- fe7dee10f6_b23045213e_46b5852d89.bht
 |   |-- blastx_db_each
 |   |   `-- 8158675169_bc4ea1fc06_f2e2e6cab1.bht.list
 |   |-- extract_queries
-|   |   |-- 7fd4089230.str.list
+|   |   |-- 0ddc313753.str.list
 |   |   `-- ba961ef0a0.str.list
 |   |-- extract_queries_each
 |   |   `-- 3146559dc8.str.list.list
@@ -38,10 +41,10 @@
 |   |-- makeblastdb_prot
 |   |   `-- c08cc19988.pdb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 1d8a61c770.str
-|   |   `-- 8fa8ede325.str
+|   |   |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 |   `-- union
 |       `-- cf82e8ab2f_ba0d672bb8.str.list.list
 `-- vars
@@ -51,4 +54,4 @@
     |-- result -> ../exprs/all/782f523b0c.str.list
     `-- single.str.list -> ../exprs/extract_queries/ba961ef0a0.str.list
 
-21 directories, 30 files
+21 directories, 33 files

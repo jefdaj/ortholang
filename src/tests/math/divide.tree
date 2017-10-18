@@ -1,11 +1,15 @@
 .
+|-- cache
+|   `-- list
+|       |-- 558d528228.txt
+|       `-- 58d21ca52f.txt
 |-- exprs
 |   |-- divide
 |   |   `-- 6d57e8642a_58d3e9f8ea.num
 |   `-- num
-|       |-- 89fb8b4aed.num
-|       `-- a629005e3c.num
+|       |-- 89fb8b4aed.num -> ../../cache/list/58d21ca52f.txt
+|       `-- a629005e3c.num -> ../../cache/list/558d528228.txt
 `-- vars
     `-- result -> ../exprs/divide/6d57e8642a_58d3e9f8ea.num
 
-4 directories, 4 files
+6 directories, 6 files

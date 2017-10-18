@@ -5,13 +5,13 @@
 |       `-- adfdb6bd8c.txt
 |-- exprs
 |   |-- list
-|   |   |-- 0ec5fc193b.faa.list
+|   |   |-- 0ec5fc193b.faa.list -> ../../cache/list/1b0af3628d.txt
 |   |   |-- 49ae883ffc.faa.list -> ../../cache/list/1b0af3628d.txt
 |   |   `-- 9344405238.str.list -> ../../cache/list/adfdb6bd8c.txt
 |   |-- load_faa
 |   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
 |   |-- str
-|   |   `-- ec3b181d8a.str
+|   |   `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 |   `-- union
 |       `-- 27a934c58e_1c60d8b875.faa.list
 `-- vars

@@ -1,7 +1,9 @@
 .
 |-- cache
 |   `-- list
-|       `-- 5273b85b5d.txt
+|       |-- 5273b85b5d.txt
+|       |-- 691dd4d722.txt
+|       `-- cad7634989.txt
 |-- exprs
 |   |-- concat_fastas
 |   |   `-- eb1aea4e88.fna
@@ -14,9 +16,9 @@
 |   |   |-- 4f798984f2.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
 |   |   `-- c5cc3f4b63.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
 |   `-- str
-|       |-- 7ec89da918.str
-|       `-- a8d18fa355.str
+|       |-- 7ec89da918.str -> ../../cache/list/cad7634989.txt
+|       `-- a8d18fa355.str -> ../../cache/list/691dd4d722.txt
 `-- vars
     `-- result -> ../exprs/concat_fastas/eb1aea4e88.fna
 
-9 directories, 10 files
+9 directories, 12 files

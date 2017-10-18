@@ -20,7 +20,10 @@
 |   |       `-- 472c8a152d.str.list.args
 |   `-- list
 |       |-- 67045753f7.txt
-|       `-- a6ba15d651.txt
+|       |-- 778251fd80.txt
+|       |-- a6ba15d651.txt
+|       |-- adfdb6bd8c.txt
+|       `-- bdc783547b.txt
 |-- exprs
 |   |-- all
 |   |   `-- 93c342188f.str.list
@@ -50,14 +53,14 @@
 |   |   |-- c08cc19988.pdb
 |   |   `-- c14344af19.pdb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- reciprocal_best
 |   |   |-- b33baa5d21_85dc221d08.bht
 |   |   |-- d67a64b1be_b33baa5d21.bht
 |   |   `-- d67a64b1be_cfc42c6482.bht
 |   |-- str
-|   |   |-- 1d8a61c770.str
-|   |   `-- ec3b181d8a.str
+|   |   |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|   |   `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 |   `-- union
 |       `-- e7d8ca13f4_4ee36311e5.str.list.list
 `-- vars
@@ -74,4 +77,4 @@
     |-- rev1.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
     `-- rev2.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
 
-25 directories, 49 files
+25 directories, 52 files

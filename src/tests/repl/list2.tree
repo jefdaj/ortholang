@@ -6,7 +6,7 @@
 |   |-- list
 |   |   `-- 2b8dc08526.num.list -> ../../cache/list/42fb7081a8.txt
 |   `-- num
-|       `-- ee383407c9.num
+|       `-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
 |-- history.txt
 `-- vars
     `-- result -> ../exprs/list/2b8dc08526.num.list

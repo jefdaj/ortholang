@@ -1,14 +1,18 @@
 .
 |-- cache
-|   `-- blastdb
-|       |-- 63b6fa9145
-|       |   |-- 63b6fa9145.pdb.phr
-|       |   |-- 63b6fa9145.pdb.pin
-|       |   `-- 63b6fa9145.pdb.psq
-|       `-- f1e136eaf6
-|           |-- f1e136eaf6.pdb.phr
-|           |-- f1e136eaf6.pdb.pin
-|           `-- f1e136eaf6.pdb.psq
+|   |-- blastdb
+|   |   |-- 63b6fa9145
+|   |   |   |-- 63b6fa9145.pdb.phr
+|   |   |   |-- 63b6fa9145.pdb.pin
+|   |   |   `-- 63b6fa9145.pdb.psq
+|   |   `-- f1e136eaf6
+|   |       |-- f1e136eaf6.pdb.phr
+|   |       |-- f1e136eaf6.pdb.pin
+|   |       `-- f1e136eaf6.pdb.psq
+|   `-- list
+|       |-- 778251fd80.txt
+|       |-- adfdb6bd8c.txt
+|       `-- bdc783547b.txt
 |-- exprs
 |   |-- best_hits
 |   |   `-- b33baa5d21.bht
@@ -29,12 +33,12 @@
 |   |   |-- c08cc19988.pdb
 |   |   `-- c14344af19.pdb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- reciprocal_best
 |   |   `-- b33baa5d21_d67a64b1be.bht
 |   `-- str
-|       |-- 1d8a61c770.str
-|       `-- ec3b181d8a.str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- bestFwd.bht -> ../exprs/best_hits/b33baa5d21.bht
     |-- bestRec.bht -> ../exprs/reciprocal_best/b33baa5d21_d67a64b1be.bht
@@ -44,4 +48,4 @@
     |-- result -> ../exprs/length/1fb49ad06b.num
     `-- revHits.bht -> ../exprs/blastp_db/8158675169_c14344af19_46b5852d89.bht
 
-16 directories, 28 files
+17 directories, 31 files

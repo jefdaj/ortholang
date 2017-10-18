@@ -1,4 +1,8 @@
 .
+|-- cache
+|   `-- list
+|       |-- 0815de9417.txt
+|       `-- c8be8722f2.txt
 |-- exprs
 |   |-- difference
 |   |   |-- a1c70b9c47_bdfc405260.str.list
@@ -16,8 +20,8 @@
 |   |-- load_fna
 |   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
 |   |-- str
-|   |   |-- 50dbefb6d6.str
-|   |   `-- 7da80bde02.str
+|   |   |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|   |   `-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
 |   `-- union
 |       `-- 13e070dcc3_7c3cfd1b15.str.list
 `-- vars
@@ -33,4 +37,4 @@
     |-- fnaDiff.str.list -> ../exprs/difference/c7e6a2abfd_ca3a3da28a.str.list
     `-- result -> ../exprs/union/13e070dcc3_7c3cfd1b15.str.list
 
-9 directories, 24 files
+11 directories, 26 files

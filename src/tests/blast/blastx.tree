@@ -10,14 +10,17 @@
 |   |   |   |-- 3fae05ef93.pdb -> $TMPDIR/exprs/makeblastdb_prot/3fae05ef93.pdb
 |   |   |   `-- 3fae05ef93.pdb.args
 |   |   |-- 82763a9098
-|   |   |   |-- cb9490b5f5.bht -> $TMPDIR/exprs/blastx/8158675169_b23045213e_cb9490b5f5.bht
+|   |   |   |-- cb9490b5f5.bht -> $TMPDIR/exprs/blastx/fe7dee10f6_b23045213e_cb9490b5f5.bht
 |   |   |   `-- cb9490b5f5.bht.args
 |   |   `-- f207b45822
-|   |       |-- d79a235b21.str.list -> $TMPDIR/exprs/extract_queries/d79a235b21.str.list
-|   |       `-- d79a235b21.str.list.args
+|   |       |-- 6cb00a5a8e.str.list -> $TMPDIR/exprs/extract_queries/6cb00a5a8e.str.list
+|   |       `-- 6cb00a5a8e.str.list.args
 |   |-- list
 |   |   |-- 0f21cebe13.txt
-|   |   `-- 176aefc67f.txt
+|   |   |-- 176aefc67f.txt
+|   |   |-- 778251fd80.txt
+|   |   |-- bdc783547b.txt
+|   |   `-- f530950d29.txt
 |   `-- makeblastdb
 |       `-- f1e136eaf6
 |           |-- f1e136eaf6.pdb.phr
@@ -27,14 +30,14 @@
 |   |-- all
 |   |   `-- 08e62fefa6.str.list
 |   |-- blastx
-|   |   `-- 8158675169_b23045213e_cb9490b5f5.bht
+|   |   `-- fe7dee10f6_b23045213e_cb9490b5f5.bht
 |   |-- blastx_db
 |   |   `-- 8158675169_bc4ea1fc06_46b5852d89.bht
 |   |-- blastx_each
 |   |   `-- 8158675169_bc4ea1fc06_c28ea1492c.bht.list
 |   |-- extract_queries
 |   |   |-- 4acfd7717c.str.list
-|   |   `-- d79a235b21.str.list
+|   |   `-- 6cb00a5a8e.str.list
 |   |-- extract_queries_each
 |   |   `-- 2a9e607472.str.list.list
 |   |-- list
@@ -50,10 +53,10 @@
 |   |-- makeblastdb_prot_each
 |   |   `-- ced061f0b2.pdb.list
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 1d8a61c770.str
-|   |   `-- 8fa8ede325.str
+|   |   |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 |   `-- union
 |       `-- 6b2e46b7cc_e9163436b9.str.list.list
 `-- vars
@@ -63,4 +66,4 @@
     |-- result -> ../exprs/all/08e62fefa6.str.list
     `-- single.str.list -> ../exprs/extract_queries/4acfd7717c.str.list
 
-26 directories, 37 files
+26 directories, 40 files

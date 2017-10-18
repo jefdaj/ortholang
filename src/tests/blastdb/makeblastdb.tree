@@ -28,7 +28,15 @@
 |   |       |-- f9c4b4092b.str.list -> $TMPDIR/exprs/extract_queries/f9c4b4092b.str.list
 |   |       `-- f9c4b4092b.str.list.args
 |   `-- list
-|       `-- 1c3f98aadd.txt
+|       |-- 0815de9417.txt
+|       |-- 1c3f98aadd.txt
+|       |-- 1f98704802.txt
+|       |-- 778251fd80.txt
+|       |-- adfdb6bd8c.txt
+|       |-- ba320796bf.txt
+|       |-- c8be8722f2.txt
+|       |-- ef87d3e725.txt
+|       `-- f530950d29.txt
 |-- exprs
 |   |-- any
 |   |   `-- 3268821e92.str.list
@@ -67,15 +75,15 @@
 |   |-- makeblastdb_prot
 |   |   `-- c14344af19.pdb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   `-- str
-|       |-- 4cdbcfa070.str
-|       |-- 50dbefb6d6.str
-|       |-- 7da80bde02.str
-|       |-- 8fa8ede325.str
-|       |-- a2fd369878.str
-|       |-- db90f32127.str
-|       `-- ec3b181d8a.str
+|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|       |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|       |-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
+|       |-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
+|       |-- a2fd369878.str -> ../../cache/list/1f98704802.txt
+|       |-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
+|       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- hits6803n.bht -> ../exprs/blastn_db/8158675169_8df2fbb1a8_a78dfa6d35.bht
     |-- hits6803p.bht -> ../exprs/blastp_db/8158675169_6e8bd8b7c6_67b1500345.bht
@@ -92,4 +100,4 @@
     |-- small7942faa.faa -> ../exprs/load_faa/2d88028e40.faa
     `-- small7942fna.fna -> ../exprs/load_fna/82b637da24.fna
 
-23 directories, 69 files
+23 directories, 77 files

@@ -5,17 +5,18 @@
 |   |       |-- 68f4ddeb65.faa -> $TMPDIR/exprs/translate/68f4ddeb65.faa
 |   |       `-- 68f4ddeb65.faa.args
 |   `-- list
+|       |-- 0aac195355.txt
 |       |-- 1f98704802.txt
 |       `-- db35af74d8.txt
 |-- exprs
 |   |-- list
 |   |   |-- 49ae883ffc.faa.list -> ../../cache/list/db35af74d8.txt
-|   |   |-- 83c6cf693b.fna.list
+|   |   |-- 83c6cf693b.fna.list -> ../../cache/list/0aac195355.txt
 |   |   `-- fae5b667b7.str.list -> ../../cache/list/1f98704802.txt
 |   |-- load_fna
 |   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
 |   |-- str
-|   |   `-- a2fd369878.str
+|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 |   |-- translate
 |   |   |-- 68f4ddeb65.faa
 |   |   `-- fddf135b43.faa
@@ -28,4 +29,4 @@
     |-- result -> ../exprs/union/6c1170e158_620ea9c96e.faa.list
     `-- single.faa -> ../exprs/translate/fddf135b43.faa
 
-12 directories, 16 files
+12 directories, 17 files

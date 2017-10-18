@@ -1,10 +1,14 @@
 .
 |-- cache
-|   `-- blastdb
-|       `-- 9754c305d1
-|           |-- 9754c305d1.ndb.nhr
-|           |-- 9754c305d1.ndb.nin
-|           `-- 9754c305d1.ndb.nsq
+|   |-- blastdb
+|   |   `-- 9754c305d1
+|   |       |-- 9754c305d1.ndb.nhr
+|   |       |-- 9754c305d1.ndb.nin
+|   |       `-- 9754c305d1.ndb.nsq
+|   `-- list
+|       |-- 778251fd80.txt
+|       |-- ba320796bf.txt
+|       `-- f530950d29.txt
 |-- exprs
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
@@ -20,10 +24,10 @@
 |   |-- makeblastdb_nucl
 |   |   `-- f5e661a4be.ndb
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 4cdbcfa070.str
-|   |   `-- 8fa8ede325.str
+|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 |   `-- union
 |       `-- 5ea34bfbc2_7b4e6b5886.str.list
 `-- vars
@@ -33,4 +37,4 @@
     |-- small.fna -> ../exprs/load_fna/82b637da24.fna
     `-- srevs.str.list -> ../exprs/extract_queries/d04c524532.str.list
 
-13 directories, 20 files
+14 directories, 23 files

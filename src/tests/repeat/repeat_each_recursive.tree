@@ -1,8 +1,20 @@
 .
 |-- cache
 |   `-- list
+|       |-- 0e999774db.txt
+|       |-- 1a94f8ae33.txt
+|       |-- 1be57a1e78.txt
+|       |-- 22771d1e10.txt
+|       |-- 2d10d3a519.txt
+|       |-- 35546dbaaf.txt
+|       |-- 4d032ebb7b.txt
+|       |-- 6e2775f361.txt
+|       |-- 79994af925.txt
+|       |-- a46b696443.txt
 |       |-- c0001ec330.txt
-|       `-- e066bf52e0.txt
+|       |-- e066bf52e0.txt
+|       |-- e9506faa79.txt
+|       `-- e9bc8edfba.txt
 |-- exprs
 |   |-- list
 |   |   |-- 24a2410ed3.num.list -> ../../cache/list/c0001ec330.txt
@@ -59,18 +71,18 @@
 |   |   |-- ef252d779d_39ffd88962.num
 |   |   `-- ef252d779d_a2569eb013.num
 |   |-- num
-|   |   |-- 0860ce5bf5.num
-|   |   |-- 2482382866.num
-|   |   |-- 3fe358a96a.num
-|   |   |-- 59f1b7f000.num
-|   |   |-- 6b84b6406d.num
-|   |   |-- 766622757b.num
-|   |   |-- ba976d37df.num
-|   |   |-- c9a4411f47.num
-|   |   |-- d8c89348f5.num
-|   |   |-- ea3d4ddfd7.num
-|   |   |-- f377f6f247.num
-|   |   `-- f9bff1e348.num
+|   |   |-- 0860ce5bf5.num -> ../../cache/list/2d10d3a519.txt
+|   |   |-- 2482382866.num -> ../../cache/list/1be57a1e78.txt
+|   |   |-- 3fe358a96a.num -> ../../cache/list/0e999774db.txt
+|   |   |-- 59f1b7f000.num -> ../../cache/list/e9506faa79.txt
+|   |   |-- 6b84b6406d.num -> ../../cache/list/6e2775f361.txt
+|   |   |-- 766622757b.num -> ../../cache/list/79994af925.txt
+|   |   |-- ba976d37df.num -> ../../cache/list/35546dbaaf.txt
+|   |   |-- c9a4411f47.num -> ../../cache/list/1a94f8ae33.txt
+|   |   |-- d8c89348f5.num -> ../../cache/list/22771d1e10.txt
+|   |   |-- ea3d4ddfd7.num -> ../../cache/list/e9bc8edfba.txt
+|   |   |-- f377f6f247.num -> ../../cache/list/4d032ebb7b.txt
+|   |   `-- f9bff1e348.num -> ../../cache/list/a46b696443.txt
 |   `-- repeat_each
 |       |-- 107bc7089e_0a48307cb3_b412cd18e2.num.list
 |       |-- 2093f7a2b4_3ab9217435_7fe2e56c66.num.list.list.list
@@ -262,4 +274,4 @@
     |-- result.f8fd52c533.num.list -> ../vars/rep1.be00588729.f8fd52c533.num.list
     `-- result.f9a4a0eabe.num -> ../vars/dep.be00588729.2e9961938c.f9a4a0eabe.num
 
-8 directories, 254 files
+8 directories, 266 files

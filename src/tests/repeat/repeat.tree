@@ -1,4 +1,8 @@
 .
+|-- cache
+|   `-- list
+|       |-- 2a13ac791a.txt
+|       `-- 558d528228.txt
 |-- exprs
 |   |-- multiply
 |   |   |-- 07f5f6f02b_6d57e8642a.num
@@ -7,12 +11,12 @@
 |   |   |-- df9846a7f4_6d57e8642a.num
 |   |   `-- f8d5fefdd1_6d57e8642a.num
 |   |-- num
-|   |   |-- a629005e3c.num
-|   |   |-- ea11b49459_1.num
-|   |   |-- ea11b49459_2.num
-|   |   |-- ea11b49459_3.num
-|   |   |-- ea11b49459_4.num
-|   |   `-- ea11b49459_5.num
+|   |   |-- a629005e3c.num -> ../../cache/list/558d528228.txt
+|   |   |-- ea11b49459_1.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- ea11b49459_2.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- ea11b49459_3.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- ea11b49459_4.num -> ../../cache/list/2a13ac791a.txt
+|   |   `-- ea11b49459_5.num -> ../../cache/list/2a13ac791a.txt
 |   `-- repeat
 |       `-- eb9adbc94e_4578706b58_9cf109b089.num.list
 `-- vars
@@ -28,4 +32,4 @@
     |-- var1.914bd2723f.num -> ../exprs/num/ea11b49459_1.num
     `-- var1.a2a4cd42aa.num -> ../exprs/num/ea11b49459_3.num
 
-5 directories, 23 files
+7 directories, 25 files

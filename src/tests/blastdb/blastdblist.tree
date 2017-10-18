@@ -1,8 +1,13 @@
 .
 |-- cache
-|   `-- blastdb
-|       `-- blastdbget
-|           `-- dblist.txt
+|   |-- blastdb
+|   |   `-- blastdbget
+|   |       `-- dblist.txt
+|   `-- list
+|       |-- 399fc66708.txt
+|       |-- 637edad317.txt
+|       |-- 90aed1d1c9.txt
+|       `-- d42c6637eb.txt
 |-- exprs
 |   |-- blastdblist
 |   |   |-- 4c04f88f38.str.list
@@ -10,10 +15,10 @@
 |   |   |-- da67996088.str.list
 |   |   `-- fa437bd7a3.str.list
 |   |-- str
-|   |   |-- 072c64781f.str
-|   |   |-- 419a892f8b.str
-|   |   |-- 6634f1bc9a.str
-|   |   `-- 9d4568c009.str
+|   |   |-- 072c64781f.str -> ../../cache/list/d42c6637eb.txt
+|   |   |-- 419a892f8b.str -> ../../cache/list/637edad317.txt
+|   |   |-- 6634f1bc9a.str -> ../../cache/list/90aed1d1c9.txt
+|   |   `-- 9d4568c009.str -> ../../cache/list/399fc66708.txt
 |   `-- union
 |       |-- 1d547713ed_7a898deeb0.str.list
 |       |-- 3d6d858002_1c725bb84e.str.list
@@ -25,4 +30,4 @@
     |-- proks.str.list -> ../exprs/blastdblist/93c452e38f.str.list
     `-- result -> ../exprs/union/627a06b957_45f0826180.str.list
 
-8 directories, 17 files
+9 directories, 21 files

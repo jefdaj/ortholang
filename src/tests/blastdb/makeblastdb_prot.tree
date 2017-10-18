@@ -7,19 +7,22 @@
 |   |       `-- 63b6fa9145.pdb.psq
 |   |-- each
 |   |   |-- 535fc5bd48
+|   |   |   |-- 5b4cc82c6b.str.list -> $TMPDIR/exprs/extract_queries/5b4cc82c6b.str.list
+|   |   |   |-- 5b4cc82c6b.str.list.args
 |   |   |   |-- 65e9e47c08.str.list -> $TMPDIR/exprs/extract_queries/65e9e47c08.str.list
-|   |   |   |-- 65e9e47c08.str.list.args
-|   |   |   |-- bc15abd6d2.str.list -> $TMPDIR/exprs/extract_queries/bc15abd6d2.str.list
-|   |   |   `-- bc15abd6d2.str.list.args
+|   |   |   `-- 65e9e47c08.str.list.args
 |   |   |-- b105f34c8e
 |   |   |   |-- e91a93a5c0.pdb -> $TMPDIR/exprs/makeblastdb_prot/e91a93a5c0.pdb
 |   |   |   `-- e91a93a5c0.pdb.args
 |   |   `-- f7fb3562ee
-|   |       |-- 2b2b42018a.bht -> $TMPDIR/exprs/blastp_db/8158675169_89c1f12bb3_2b2b42018a.bht
+|   |       |-- 2b2b42018a.bht -> $TMPDIR/exprs/blastp_db/fe7dee10f6_89c1f12bb3_2b2b42018a.bht
 |   |       `-- 2b2b42018a.bht.args
 |   |-- list
 |   |   |-- 1b0af3628d.txt
-|   |   `-- 5ba0c6d6c3.txt
+|   |   |-- 5ba0c6d6c3.txt
+|   |   |-- 778251fd80.txt
+|   |   |-- adfdb6bd8c.txt
+|   |   `-- c8be8722f2.txt
 |   `-- makeblastdb
 |       `-- 63b6fa9145
 |           |-- 63b6fa9145.pdb.phr
@@ -30,12 +33,12 @@
 |   |   `-- 8e5174a32b.str.list
 |   |-- blastp_db
 |   |   |-- 8158675169_6e8bd8b7c6_67b1500345.bht
-|   |   `-- 8158675169_89c1f12bb3_2b2b42018a.bht
+|   |   `-- fe7dee10f6_89c1f12bb3_2b2b42018a.bht
 |   |-- blastp_db_each
 |   |   `-- 8158675169_6e8bd8b7c6_d4fb9c7327.bht.list
 |   |-- extract_queries
-|   |   |-- 65e9e47c08.str.list
-|   |   `-- bc15abd6d2.str.list
+|   |   |-- 5b4cc82c6b.str.list
+|   |   `-- 65e9e47c08.str.list
 |   |-- extract_queries_each
 |   |   `-- fb2cc7cc9b.str.list.list
 |   |-- list
@@ -50,10 +53,10 @@
 |   |-- makeblastdb_prot_each
 |   |   `-- 27a934c58e.pdb.list
 |   |-- num
-|   |   `-- a53b190835.num
+|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
-|   |   |-- 50dbefb6d6.str
-|   |   `-- ec3b181d8a.str
+|   |   |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|   |   `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 |   `-- union
 |       `-- c4a9b201d8_1510ecc809.bht.list
 `-- vars
@@ -63,4 +66,4 @@
     |-- single.bht -> ../exprs/blastp_db/8158675169_6e8bd8b7c6_67b1500345.bht
     `-- small6803faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
 
-24 directories, 39 files
+24 directories, 42 files
