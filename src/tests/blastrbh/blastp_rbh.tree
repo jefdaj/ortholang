@@ -19,21 +19,24 @@
 |   |       |-- 472c8a152d.str.list -> $TMPDIR/exprs/extract_targets/472c8a152d.str.list
 |   |       `-- 472c8a152d.str.list.args
 |   `-- list
+|       |-- 1a122e4c4a.txt
 |       |-- 67045753f7.txt
 |       |-- 778251fd80.txt
+|       |-- 79b8350871.txt
 |       |-- a6ba15d651.txt
 |       |-- adfdb6bd8c.txt
 |       `-- bdc783547b.txt
 |-- exprs
 |   |-- all
-|   |   `-- 93c342188f.str.list
+|   |   |-- 93c342188f.str.list
+|   |   `-- c08bf34a9e.str.list.list
 |   |-- any
 |   |   `-- 93c342188f.str.list
 |   |-- blastp_db
 |   |   |-- 8158675169_c08cc19988_67b1500345.bht
 |   |   `-- 8158675169_c14344af19_46b5852d89.bht
-|   |-- difference
-|   |   `-- caaf4adef6_738eed23d3.str.list
+|   |-- diff
+|   |   `-- a5ff8d02d2.str.list
 |   |-- extract_queries
 |   |   |-- 394b76567b.str.list
 |   |   `-- ee6f0b2c4c.str.list
@@ -45,7 +48,9 @@
 |   |   `-- 542378bf60.str.list.list
 |   |-- list
 |   |   |-- 13d70f4b06.bht.list -> ../../cache/list/67045753f7.txt
-|   |   `-- 1b9e06f27d.bht.list -> ../../cache/list/a6ba15d651.txt
+|   |   |-- 1b9e06f27d.bht.list -> ../../cache/list/a6ba15d651.txt
+|   |   |-- 7c44263038.str.list.list -> ../../cache/list/79b8350871.txt
+|   |   `-- e076c92f67.str.list.list.list -> ../../cache/list/1a122e4c4a.txt
 |   |-- load_faa
 |   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
 |   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
@@ -58,14 +63,12 @@
 |   |   |-- b33baa5d21_85dc221d08.bht
 |   |   |-- d67a64b1be_b33baa5d21.bht
 |   |   `-- d67a64b1be_cfc42c6482.bht
-|   |-- str
-|   |   |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
-|   |   `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
-|   `-- union
-|       `-- e7d8ca13f4_4ee36311e5.str.list.list
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- fwd.bht -> ../exprs/blastp_db/8158675169_c14344af19_46b5852d89.bht
-    |-- lists.str.list.list -> ../exprs/union/e7d8ca13f4_4ee36311e5.str.list.list
+    |-- lists.str.list.list -> ../exprs/all/c08bf34a9e.str.list.list
     |-- n.num -> ../exprs/num/a53b190835.num
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
     |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
@@ -73,8 +76,8 @@
     |-- rbh2.bht -> ../exprs/reciprocal_best/d67a64b1be_cfc42c6482.bht
     |-- rbh3.bht -> ../exprs/reciprocal_best/d67a64b1be_cfc42c6482.bht
     |-- rbh4.bht -> ../exprs/reciprocal_best/b33baa5d21_85dc221d08.bht
-    |-- result -> ../exprs/difference/caaf4adef6_738eed23d3.str.list
+    |-- result -> ../exprs/diff/a5ff8d02d2.str.list
     |-- rev1.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
     `-- rev2.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
 
-25 directories, 52 files
+24 directories, 56 files

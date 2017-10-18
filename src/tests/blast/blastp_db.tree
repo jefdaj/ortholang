@@ -17,9 +17,11 @@
 |       |-- 86231b6593.txt
 |       |-- af5b1fa4b5.txt
 |       |-- bdc783547b.txt
+|       |-- cdfcb5fe2a.txt
 |       `-- ef87d3e725.txt
 |-- exprs
 |   |-- all
+|   |   |-- 15584ef910.str.list.list
 |   |   `-- 8f49303cf5.str.list
 |   |-- blastp_db
 |   |   |-- 8158675169_1af4d085e7_46b5852d89.bht
@@ -33,6 +35,7 @@
 |   |   `-- a5fde3dd9d.str.list.list
 |   |-- list
 |   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/86231b6593.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/cdfcb5fe2a.txt
 |   |   `-- e214a4da42.pdb.list -> ../../cache/list/af5b1fa4b5.txt
 |   |-- load_faa
 |   |   |-- 2d88028e40.faa -> $WORKDIR/data/7942genes10.faa
@@ -41,11 +44,9 @@
 |   |   `-- c08cc19988.pdb
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
-|   |-- str
-|   |   |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
-|   |   `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
-|   `-- union
-|       `-- c6a8a2361b_f8f4a901cd.str.list.list
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
 `-- vars
     |-- full7942.pdb -> ../exprs/makeblastdb_prot/c08cc19988.pdb
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/a5fde3dd9d.str.list.list
@@ -53,4 +54,4 @@
     |-- result -> ../exprs/all/8f49303cf5.str.list
     `-- single.str.list -> ../exprs/extract_queries/2445e66ccd.str.list
 
-20 directories, 33 files
+19 directories, 35 files

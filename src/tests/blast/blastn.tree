@@ -16,6 +16,7 @@
 |   |       |-- c6d60672b8.str.list -> $TMPDIR/exprs/extract_queries/c6d60672b8.str.list
 |   |       `-- c6d60672b8.str.list.args
 |   |-- list
+|   |   |-- 0e312f92a1.txt
 |   |   |-- 72372e95e5.txt
 |   |   |-- 778251fd80.txt
 |   |   |-- ba320796bf.txt
@@ -28,7 +29,7 @@
 |           `-- 9754c305d1.ndb.nsq
 |-- exprs
 |   |-- all
-|   |   `-- 8c1bbf15e4.str.list
+|   |   `-- 7a8477bd0a.str.list.list
 |   |-- blastn
 |   |   `-- fe7dee10f6_b23045213e_9af4f0090e.bht
 |   |-- blastn_db
@@ -42,6 +43,7 @@
 |   |   `-- 81ee402009.str.list.list
 |   |-- list
 |   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/fd26bd47a8.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/0e312f92a1.txt
 |   |   `-- c6ba16cc62.fna.list -> ../../cache/list/72372e95e5.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
@@ -53,16 +55,14 @@
 |   |   `-- 17e9ac9897.ndb.list
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
-|   |-- str
-|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
-|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
-|   `-- union
-|       `-- fc6245b5c9_aca854d743.str.list.list
+|   `-- str
+|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|       `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/81ee402009.str.list.list
     |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
-    |-- result -> ../exprs/all/8c1bbf15e4.str.list
+    |-- result -> ../exprs/all/7a8477bd0a.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/9994288dcd.str.list
 
-25 directories, 40 files
+24 directories, 41 files

@@ -14,8 +14,11 @@
 |       |-- 778251fd80.txt
 |       |-- adfdb6bd8c.txt
 |       |-- c8be8722f2.txt
-|       `-- d827174c46.txt
+|       |-- d827174c46.txt
+|       `-- dafccdcab4.txt
 |-- exprs
+|   |-- all
+|   |   `-- 8afe49670a.str.list.list
 |   |-- blastp_db
 |   |   `-- 8158675169_6e8bd8b7c6_67b1500345.bht
 |   |-- extract_queries
@@ -25,7 +28,8 @@
 |   |   `-- d6886f5fa2.str.list.list
 |   |-- list
 |   |   |-- 26890dda4f.bht.list -> ../../cache/list/5ba0c6d6c3.txt
-|   |   `-- 3bbbf950a3.str.list.list -> ../../cache/list/d827174c46.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/d827174c46.txt
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/list/dafccdcab4.txt
 |   |-- load_faa
 |   |   |-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
 |   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
@@ -33,15 +37,13 @@
 |   |   `-- c14344af19.pdb
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
-|   |-- str
-|   |   |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
-|   |   `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
-|   `-- union
-|       `-- cb3f8fbf93_a49c959614.str.list.list
+|   `-- str
+|       |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- hits.bht -> ../exprs/blastp_db/8158675169_6e8bd8b7c6_67b1500345.bht
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/d6886f5fa2.str.list.list
-    |-- result -> ../exprs/union/cb3f8fbf93_a49c959614.str.list.list
+    |-- result -> ../exprs/all/8afe49670a.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/baffeec5f7.str.list
 
-17 directories, 27 files
+17 directories, 29 files

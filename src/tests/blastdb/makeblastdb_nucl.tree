@@ -22,7 +22,8 @@
 |   |   |-- 0aac195355.txt
 |   |   |-- 1f98704802.txt
 |   |   |-- 778251fd80.txt
-|   |   `-- c7e80436b4.txt
+|   |   |-- c7e80436b4.txt
+|   |   `-- da1aa07b4d.txt
 |   `-- makeblastdb
 |       `-- ce746b5c13
 |           |-- ce746b5c13.ndb.nhr
@@ -30,6 +31,7 @@
 |           `-- ce746b5c13.ndb.nsq
 |-- exprs
 |   |-- all
+|   |   |-- 0fc038e77d.bht.list
 |   |   `-- b3a04fca10.str.list
 |   |-- blastn_db
 |   |   |-- 8158675169_8df2fbb1a8_a78dfa6d35.bht
@@ -43,7 +45,8 @@
 |   |   `-- ab95548da1.str.list.list
 |   |-- list
 |   |   |-- 4975b1851b.bht.list -> ../../cache/list/c7e80436b4.txt
-|   |   `-- b72d792449.fna.list -> ../../cache/list/0aac195355.txt
+|   |   |-- b72d792449.fna.list -> ../../cache/list/0aac195355.txt
+|   |   `-- cc3e9bbae7.bht.list.list -> ../../cache/list/da1aa07b4d.txt
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
 |   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
@@ -54,11 +57,9 @@
 |   |   `-- 611e5b4cfb.ndb.list
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
-|   |-- str
-|   |   |-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
-|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
-|   `-- union
-|       `-- 3ac197dd7e_3b9249fd83.bht.list
+|   `-- str
+|       |-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
+|       `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 `-- vars
     |-- large6803fna.fna -> ../exprs/load_fna/f110b4b1c9.fna
     |-- mapped.bht.list -> ../exprs/blastn_db_each/8158675169_8df2fbb1a8_5ab45b9cad.bht.list
@@ -66,4 +67,4 @@
     |-- single.bht -> ../exprs/blastn_db/8158675169_8df2fbb1a8_a78dfa6d35.bht
     `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-24 directories, 42 files
+23 directories, 44 files

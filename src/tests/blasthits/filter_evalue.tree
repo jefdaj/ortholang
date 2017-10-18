@@ -13,6 +13,7 @@
 |   |       |-- 65f0dd18cd.str.list -> $TMPDIR/exprs/extract_queries/65f0dd18cd.str.list
 |   |       `-- 65f0dd18cd.str.list.args
 |   `-- list
+|       |-- 177bbc8421.txt
 |       |-- 2e1e4f7124.txt
 |       |-- 778251fd80.txt
 |       |-- 78434cb2c5.txt
@@ -20,6 +21,8 @@
 |       |-- c334e769ca.txt
 |       `-- f530950d29.txt
 |-- exprs
+|   |-- all
+|   |   `-- 8748af0ac5.str.list.list
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- extract_queries
@@ -34,7 +37,8 @@
 |   |   `-- 62073b9981_3777a36cf9.bht.list
 |   |-- list
 |   |   |-- 26890dda4f.bht.list -> ../../cache/list/2e1e4f7124.txt
-|   |   `-- 3bbbf950a3.str.list.list -> ../../cache/list/c334e769ca.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/c334e769ca.txt
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/list/177bbc8421.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
@@ -43,17 +47,15 @@
 |   |-- num
 |   |   |-- 6de785566e.num -> ../../cache/list/78434cb2c5.txt
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
-|   |-- str
-|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
-|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
-|   `-- union
-|       `-- b06eb41dbe_5c5852a0c6.str.list.list
+|   `-- str
+|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|       `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- hits.bht -> ../exprs/blastn_db/8158675169_bc4ea1fc06_d326247d21.bht
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/e417dbfa53.str.list.list
     |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
-    |-- result -> ../exprs/union/b06eb41dbe_5c5852a0c6.str.list.list
+    |-- result -> ../exprs/all/8748af0ac5.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/45fa12f6df.str.list
 
-20 directories, 36 files
+20 directories, 38 files

@@ -10,6 +10,7 @@
 |   |       |-- f1e136eaf6.pdb.pin
 |   |       `-- f1e136eaf6.pdb.psq
 |   `-- list
+|       |-- 2c46e47fe0.txt
 |       |-- 778251fd80.txt
 |       |-- adfdb6bd8c.txt
 |       `-- bdc783547b.txt
@@ -19,13 +20,15 @@
 |   |-- blastp_db
 |   |   |-- 8158675169_c08cc19988_67b1500345.bht
 |   |   `-- 8158675169_c14344af19_46b5852d89.bht
-|   |-- difference
-|   |   `-- 52563e14b6_dd948c3e3f.str.list
+|   |-- diff
+|   |   `-- 722073c63c.str.list
 |   |-- extract_queries
 |   |   |-- 98bb342bb5.str.list
 |   |   `-- ab5871d289.str.list
 |   |-- length
 |   |   `-- 1fb49ad06b.num
+|   |-- list
+|   |   `-- ab3899d92b.str.list.list -> ../../cache/list/2c46e47fe0.txt
 |   |-- load_faa
 |   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
 |   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
@@ -48,4 +51,4 @@
     |-- result -> ../exprs/length/1fb49ad06b.num
     `-- revHits.bht -> ../exprs/blastp_db/8158675169_c14344af19_46b5852d89.bht
 
-17 directories, 31 files
+18 directories, 33 files

@@ -20,6 +20,7 @@
 |   |   |-- 778251fd80.txt
 |   |   |-- 8a500302db.txt
 |   |   |-- ba320796bf.txt
+|   |   |-- d2cb2e0be2.txt
 |   |   `-- ef87d3e725.txt
 |   `-- makeblastdb
 |       `-- 9754c305d1
@@ -28,6 +29,7 @@
 |           `-- 9754c305d1.ndb.nsq
 |-- exprs
 |   |-- all
+|   |   |-- 2f55abeca9.str.list.list
 |   |   `-- d921d897be.str.list
 |   |-- extract_queries
 |   |   |-- 28400f02d5.str.list
@@ -36,6 +38,7 @@
 |   |   `-- 5274cd954f.str.list.list
 |   |-- list
 |   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/8a500302db.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/d2cb2e0be2.txt
 |   |   `-- c6ba16cc62.fna.list -> ../../cache/list/72372e95e5.txt
 |   |-- load_faa
 |   |   `-- 2d88028e40.faa -> $WORKDIR/data/7942genes10.faa
@@ -55,10 +58,8 @@
 |   |   `-- fe7dee10f6_af8c96afe4_9af4f0090e.bht
 |   |-- tblastn_db
 |   |   `-- 8158675169_1af4d085e7_d326247d21.bht
-|   |-- tblastn_each
-|   |   `-- 8158675169_1af4d085e7_48dd3bc743.bht.list
-|   `-- union
-|       `-- 30bb515f58_728f305918.str.list.list
+|   `-- tblastn_each
+|       `-- 8158675169_1af4d085e7_48dd3bc743.bht.list
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/5274cd954f.str.list.list
@@ -66,4 +67,4 @@
     |-- result -> ../exprs/all/d921d897be.str.list
     `-- single.str.list -> ../exprs/extract_queries/a9e460f873.str.list
 
-26 directories, 40 files
+25 directories, 42 files

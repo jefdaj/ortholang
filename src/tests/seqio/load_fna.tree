@@ -2,21 +2,23 @@
 |-- cache
 |   `-- list
 |       |-- 0aac195355.txt
-|       `-- 1f98704802.txt
+|       |-- 1f98704802.txt
+|       `-- d8c3985212.txt
 |-- exprs
+|   |-- all
+|   |   `-- e195560846.fna.list
 |   |-- list
+|   |   |-- 20812f3e16.fna.list.list -> ../../cache/list/d8c3985212.txt
 |   |   |-- 83c6cf693b.fna.list -> ../../cache/list/0aac195355.txt
 |   |   |-- de88435002.fna.list -> ../../cache/list/0aac195355.txt
 |   |   `-- fae5b667b7.str.list -> ../../cache/list/1f98704802.txt
 |   |-- load_fna
 |   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
-|   |-- str
-|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
-|   `-- union
-|       `-- 611e5b4cfb_283ecf7c50.fna.list
+|   `-- str
+|       `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 `-- vars
     |-- mapped.fna.list -> ../exprs/list/83c6cf693b.fna.list
-    |-- result -> ../exprs/union/611e5b4cfb_283ecf7c50.fna.list
+    |-- result -> ../exprs/all/e195560846.fna.list
     `-- single.fna -> ../exprs/load_fna/f110b4b1c9.fna
 
-8 directories, 11 files
+8 directories, 13 files

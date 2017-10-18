@@ -7,11 +7,15 @@
 |   `-- list
 |       |-- 0aac195355.txt
 |       |-- 1f98704802.txt
-|       `-- db35af74d8.txt
+|       |-- db35af74d8.txt
+|       `-- dcd3a69ac3.txt
 |-- exprs
+|   |-- all
+|   |   `-- 7f0a05b036.faa.list
 |   |-- list
 |   |   |-- 49ae883ffc.faa.list -> ../../cache/list/db35af74d8.txt
 |   |   |-- 83c6cf693b.fna.list -> ../../cache/list/0aac195355.txt
+|   |   |-- 98a7f2843e.faa.list.list -> ../../cache/list/dcd3a69ac3.txt
 |   |   `-- fae5b667b7.str.list -> ../../cache/list/1f98704802.txt
 |   |-- load_fna
 |   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
@@ -20,13 +24,11 @@
 |   |-- translate
 |   |   |-- 68f4ddeb65.faa
 |   |   `-- fddf135b43.faa
-|   |-- translate_each
-|   |   `-- 283ecf7c50.faa.list
-|   `-- union
-|       `-- 6c1170e158_620ea9c96e.faa.list
+|   `-- translate_each
+|       `-- 283ecf7c50.faa.list
 `-- vars
     |-- mapped.faa.list -> ../exprs/translate_each/283ecf7c50.faa.list
-    |-- result -> ../exprs/union/6c1170e158_620ea9c96e.faa.list
+    |-- result -> ../exprs/all/7f0a05b036.faa.list
     `-- single.faa -> ../exprs/translate/fddf135b43.faa
 
-12 directories, 17 files
+12 directories, 19 files

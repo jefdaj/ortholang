@@ -1,0 +1,56 @@
+# Test area for debugging whatever the current problem is.
+# Right now it's... list deduplication!
+
+# This is the simplest fn call I can think of, in single + mapped form:
+# single = load_faa       "data/7942genes.faa"
+# mapped = load_faa_each ["data/7942genes.faa"]
+# result = length ([single] | mapped)
+
+# And it does produce two different lists!
+# (Well 3, but the extra str.list is expected. Just one extra faa.list)
+# 49ae883ffc.faa.list is the correct (deduped by content) one, and
+# 73533f9c0f.faa.list is a copy written literally in the expr path.
+
+# What if I use different paths to distinguish them?
+# single = load_faa       "data/7942genes.faa"
+# mapped = load_faa_each ["data/7942genes10.faa"]
+# result = [single] | mapped
+
+# Now we still have 7b30786d44.faa.list but the other two change.
+# Ah, it's the only one written literally as a list in the source.
+# The odd thing is rListPaths does seem to writeDeduped properly.
+# So where's the non-deduped one coming from?
+# It's assigned by exprPath for the `load_faa_eac` expr,
+# then eventually written by `aLoadListLinks`.
+
+# I change that to use writeDeduped and run the tests.
+# It changes some tmpfiles nicely but also one result crb_blast_each.cut
+# ... uh nevermind, back to 40 on further inspection like it should be.
+
+# I also change the rest of the write* functions in Basic to dedup.
+# Looks OK! No results change, bunch of tmpfiles link into lists.
+# Maybe there's not need to do it with the lits though? Think about that.
+# And it fixes the initial list deduping!
+
+# Next up though, blastn.cut is still NOT deduping:
+mini7942 = load_fna "data/7942genes10.fna"
+full7942 = load_fna "data/7942genes.fna"
+single = extract_queries      (blastn      1e-5 mini7942  full7942 )
+mapped = extract_queries_each (blastn_each 1e-5 mini7942 [full7942])
+result = [single] | mapped
+
+# result is a union with two different extract_queries lists in it.
+# Both have the same content, but were written to separate paths...
+# Looks like the Each issue then? Weird part is blastn_each works fine!
+# What's different between that and extract_queries_each?
+# blastn_each uses rEach, and so does extract_queries_each
+
+# Maybe they're both exprPath hashes, but one is the blastn call and one the
+# blastn_db? Wait the 9994 one is the extract_queries. And that seems proper:
+# it's the hash of the blaastn bht, so it's the one arg to extract_queries.
+
+# Ah, looks like the 9994... one is a hash of the blastn_db expression itself
+# (as used in the exprPath), and then the c6d6... one is a hash of that *path*?
+# Which did I want to use? Probably the path one right?
+
+# Is it hashFun producing the second one? Maybe just replace that?

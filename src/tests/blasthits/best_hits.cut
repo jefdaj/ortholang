@@ -8,7 +8,7 @@ hits  = blastp 1e-5 pcc7942 pcc6803
 hits3 = repeat hits pcc7942 3
 
 best  = best_hits_each hits3
-diff  = all (extract_queries_each hits3)
-      ~ all (extract_queries_each best )
+bestonly = all (extract_queries_each hits3)
+         ~ all (extract_queries_each best )
 
-result = length diff
+result = length bestonly

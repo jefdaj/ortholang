@@ -6,18 +6,27 @@
 |   |       |-- 9754c305d1.ndb.nin
 |   |       `-- 9754c305d1.ndb.nsq
 |   `-- list
+|       |-- 389db1505d.txt
+|       |-- 56d55b5ce9.txt
 |       |-- 778251fd80.txt
 |       |-- ba320796bf.txt
+|       |-- e23802c768.txt
 |       `-- f530950d29.txt
 |-- exprs
+|   |-- all
+|   |   `-- d51537bc95.str.list
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
-|   |-- difference
-|   |   |-- 907f1d7a29_96fc936730.str.list
-|   |   `-- 96fc936730_907f1d7a29.str.list
+|   |-- diff
+|   |   |-- 1678a9e939.str.list
+|   |   `-- d27ff2fbe3.str.list
 |   |-- extract_queries
 |   |   |-- 9994288dcd.str.list
 |   |   `-- d04c524532.str.list
+|   |-- list
+|   |   |-- 3c068ef0f5.str.list.list -> ../../cache/list/56d55b5ce9.txt
+|   |   |-- ae41db6b0c.str.list.list -> ../../cache/list/e23802c768.txt
+|   |   `-- b9040a19fe.str.list.list -> ../../cache/list/389db1505d.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
@@ -25,16 +34,14 @@
 |   |   `-- f5e661a4be.ndb
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
-|   |-- str
-|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
-|   |   `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
-|   `-- union
-|       `-- 5ea34bfbc2_7b4e6b5886.str.list
+|   `-- str
+|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|       `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 `-- vars
     |-- fwds.str.list -> ../exprs/extract_queries/9994288dcd.str.list
     |-- large.fna -> ../exprs/load_fna/eb12539f1c.fna
-    |-- result -> ../exprs/union/5ea34bfbc2_7b4e6b5886.str.list
+    |-- result -> ../exprs/all/d51537bc95.str.list
     |-- small.fna -> ../exprs/load_fna/82b637da24.fna
     `-- srevs.str.list -> ../exprs/extract_queries/d04c524532.str.list
 
-14 directories, 23 files
+15 directories, 29 files

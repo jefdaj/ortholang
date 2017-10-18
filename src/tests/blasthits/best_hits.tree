@@ -28,6 +28,7 @@
 |   |       |-- e681e009f2.bht -> $TMPDIR/exprs/best_hits/e681e009f2.bht
 |   |       `-- e681e009f2.bht.args
 |   `-- list
+|       |-- 02d0cb1d5b.txt
 |       |-- 1c23867e0b.txt
 |       |-- 778251fd80.txt
 |       |-- adfdb6bd8c.txt
@@ -46,8 +47,8 @@
 |   |   |-- 8158675169_076832f40f_67b1500345.bht
 |   |   |-- 8158675169_613340465b_67b1500345.bht
 |   |   `-- 8158675169_ecf8c85a88_67b1500345.bht
-|   |-- difference
-|   |   `-- bff314cf1a_acd028ef1f.str.list
+|   |-- diff
+|   |   `-- 356752f289.str.list
 |   |-- extract_queries
 |   |   |-- 80f44000a3.str.list
 |   |   |-- 92d9a2fdaf.str.list
@@ -61,7 +62,8 @@
 |   |-- length
 |   |   `-- 1c5b0bbd10.num
 |   |-- list
-|   |   `-- 3bc82b423f.faa.list -> ../../cache/list/1c23867e0b.txt
+|   |   |-- 3bc82b423f.faa.list -> ../../cache/list/1c23867e0b.txt
+|   |   `-- 61355ce8e9.str.list.list -> ../../cache/list/02d0cb1d5b.txt
 |   |-- load_faa
 |   |   |-- 387f499ddc_1.faa -> $WORKDIR/data/7942genes.faa
 |   |   |-- 387f499ddc_2.faa -> $WORKDIR/data/7942genes.faa
@@ -78,7 +80,7 @@
 |       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- best.bht.list -> ../exprs/best_hits_each/c1a28d1bfa.bht.list
-    |-- diff.str.list -> ../exprs/difference/bff314cf1a_acd028ef1f.str.list
+    |-- bestonly.str.list -> ../exprs/diff/356752f289.str.list
     |-- hits.9a9de1df2a.bht -> ../exprs/blastp_db/8158675169_076832f40f_67b1500345.bht
     |-- hits.aec7294f1e.bht -> ../exprs/blastp_db/8158675169_ecf8c85a88_67b1500345.bht
     |-- hits.e04b0e7815.bht -> ../exprs/blastp_db/8158675169_613340465b_67b1500345.bht
@@ -92,4 +94,4 @@
     |-- result.aec7294f1e.bht -> ../vars/hits.aec7294f1e.bht
     `-- result.e04b0e7815.bht -> ../vars/hits.e04b0e7815.bht
 
-24 directories, 68 files
+24 directories, 70 files

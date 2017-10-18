@@ -22,18 +22,21 @@
 |       |-- 1f98704802.txt
 |       |-- 778251fd80.txt
 |       |-- 83f49e90f1.txt
+|       |-- 9b72ecc9f3.txt
 |       |-- 9b83172c90.txt
-|       `-- ba320796bf.txt
+|       |-- ba320796bf.txt
+|       `-- e1fb531430.txt
 |-- exprs
 |   |-- all
+|   |   |-- 31641588c2.str.list.list
 |   |   `-- c9463cb1e8.str.list
 |   |-- any
 |   |   `-- c9463cb1e8.str.list
 |   |-- blastn_db
 |   |   |-- 8158675169_f5e661a4be_a78dfa6d35.bht
 |   |   `-- 8158675169_fddf135b43_d326247d21.bht
-|   |-- difference
-|   |   `-- 20037e9ec4_2edf40164a.str.list
+|   |-- diff
+|   |   `-- 44a7128b5a.str.list
 |   |-- extract_queries
 |   |   |-- b5df3df818.str.list
 |   |   `-- d75fa690e4.str.list
@@ -45,7 +48,9 @@
 |   |   `-- a90b254b89.str.list.list
 |   |-- list
 |   |   |-- 13d70f4b06.bht.list -> ../../cache/list/83f49e90f1.txt
-|   |   `-- 1b9e06f27d.bht.list -> ../../cache/list/9b83172c90.txt
+|   |   |-- 1b9e06f27d.bht.list -> ../../cache/list/9b83172c90.txt
+|   |   |-- bbfa202ccf.str.list.list -> ../../cache/list/e1fb531430.txt
+|   |   `-- c39b73c751.str.list.list.list -> ../../cache/list/9b72ecc9f3.txt
 |   |-- load_fna
 |   |   |-- eb12539f1c.fna -> $WORKDIR/data/7942genes.fna
 |   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
@@ -58,14 +63,12 @@
 |   |   |-- 71ee8f0fa5_7a08a6dc45.bht
 |   |   |-- d1ef2ec04e_52e9c434c8.bht
 |   |   `-- d1ef2ec04e_71ee8f0fa5.bht
-|   |-- str
-|   |   |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
-|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
-|   `-- union
-|       `-- 00be747cc4_d2aa534aa7.str.list.list
+|   `-- str
+|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
+|       `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 `-- vars
     |-- fwd.bht -> ../exprs/blastn_db/8158675169_fddf135b43_d326247d21.bht
-    |-- lists.str.list.list -> ../exprs/union/00be747cc4_d2aa534aa7.str.list.list
+    |-- lists.str.list.list -> ../exprs/all/31641588c2.str.list.list
     |-- n.num -> ../exprs/num/a53b190835.num
     |-- pcc6803.fna -> ../exprs/load_fna/f110b4b1c9.fna
     |-- pcc7942.fna -> ../exprs/load_fna/eb12539f1c.fna
@@ -73,8 +76,8 @@
     |-- rbh2.bht -> ../exprs/reciprocal_best/d1ef2ec04e_52e9c434c8.bht
     |-- rbh3.bht -> ../exprs/reciprocal_best/d1ef2ec04e_52e9c434c8.bht
     |-- rbh4.bht -> ../exprs/reciprocal_best/71ee8f0fa5_7a08a6dc45.bht
-    |-- result -> ../exprs/difference/20037e9ec4_2edf40164a.str.list
+    |-- result -> ../exprs/diff/44a7128b5a.str.list
     |-- rev1.bht -> ../exprs/blastn_db/8158675169_f5e661a4be_a78dfa6d35.bht
     `-- rev2.bht -> ../exprs/blastn_db/8158675169_f5e661a4be_a78dfa6d35.bht
 
-25 directories, 52 files
+24 directories, 56 files
