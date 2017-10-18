@@ -1,1 +1,12 @@
-result = "pending"
+# TODO make a smaller set of genes that will match to speed tests
+
+pcc7942 = load_faa "data/7942genes.faa"
+pcc6803 = load_faa "data/6803genes.faa"
+
+fwdHits = blastp 1e-5 pcc7942 pcc6803
+revHits = blastp 1e-5 pcc6803 pcc7942
+
+bestFwd = best_hits fwdHits
+bestRec = reciprocal_best fwdHits revHits
+
+result = length (extract_queries bestFwd ~ extract_queries bestRec)

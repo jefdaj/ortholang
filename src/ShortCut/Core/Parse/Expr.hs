@@ -16,6 +16,7 @@ import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (optional, manyTill, eof, lookAhead, between,
                                choice, sepBy)
+import Data.Either (either)
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
@@ -74,21 +75,28 @@ operatorTable cfg = [map binary bops]
 --   in CutBop (typeOf e1) deps [o] e1 e2)
 
 -- TODO is there a better way than only taking one-char strings?
--- TODO check that typeOf e1 == typeOf e2 (error or skip on failure?)
+-- TODO how to fail gracefully (with fail, not error) here??
 pBop :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop [o] = pSym o *> (return $ \e1 e2 ->
   let deps  = union (depsOf e1) (depsOf e2)
-      t1    = typeOf e1
-      t2    = typeOf e2
-      eType = if isNonEmpty t1 then t1 else t2
-      rtn   = if typeMatches t1 t2 then eType else error $
-               -- TODO use bop name once unified with set folds
-               -- TODO don't crash the repl here!
-               o:" operator requires two arguments of the same type, but got:\n"
-                ++ "\t'" ++ render (pPrint e1) ++ "' (" ++ show t1 ++ ")\n"
-                ++ "\t'" ++ render (pPrint e2) ++ "' (" ++ show t2 ++ ")"
-  in CutBop rtn 0 deps [o] e1 e2)
-pBop  s  = fail $ "invalid binary op name '" ++ s ++ "'"
+  in case bopTypeCheck [typeOf e1, typeOf e2] of
+    Left  msg -> error msg -- TODO can't `fail` because not in monad here?
+    Right rtn -> CutBop rtn 0 deps [o] e1 e2)
+pBop s = fail $ "invalid binary op name '" ++ s ++ "'"
+
+-- if the user gives two lists but of different types, complain that they must
+-- be the same. if there aren't two lists at all, complain about that first
+-- TODO get this from the bop itself rather than duplicating here!
+bopTypeCheck :: [CutType] -> Either String CutType
+bopTypeCheck actual@[ListOf a, ListOf b]
+  | a == b    = Right $ ListOf a
+  | otherwise = Left $ typeError [ListOf a, ListOf a] actual
+bopTypeCheck _ = Left "Type error: expected two lists of the same type"
+
+typeError :: [CutType] -> [CutType] -> String
+typeError expected actual =
+  "Type error:\nexpected " ++ show expected
+           ++ "\nbut got " ++ show actual
 
 ---------------
 -- functions --
