@@ -2,12 +2,15 @@ module ShortCut.Modules.Sets where
 
 import Data.Set (Set, union, difference, intersection ,fromList, toList)
 import Development.Shake
-import ShortCut.Core.Paths (exprPath, fromCutPath, readPaths, readStrings, writeStrings)
-import ShortCut.Core.Compile.Basic (rBop, rExpr, typeError)
+import ShortCut.Core.Paths (exprPath, fromCutPath, readPaths, readStrings,
+                            writeStrings)
+import ShortCut.Core.Compile.Basic (rExpr, typeError)
 import ShortCut.Core.Types
-import ShortCut.Core.Debug (debugRules, debugAction)
+import ShortCut.Core.Debug (debugRules, debugAction, debugReadFile)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Util (resolveSymlinks, typeMatches, nonEmptyType)
+import ShortCut.Core.Util (resolveSymlinks, typeMatches, nonEmptyType, digest)
+import Data.List (nubBy)
+import Data.Function (on)
 -- import Path (fromCutPath cfg) -- TODO remove and use Path everywhere
 
 cutModule :: CutModule
@@ -25,9 +28,20 @@ cutModule = CutModule
 -- TODO remove this or shunt it into Paths.hs or something!
 canonicalLinks :: CutConfig -> CutType -> [FilePath] -> IO [FilePath]
 canonicalLinks cfg rtn =
-  if rtn `elem` [ListOf str, ListOf num]
+  if rtn `elem` [str, num]
     then return
     else \ps -> mapM (resolveSymlinks cfg) ps
+
+-- TODO would resolving symlinks be enough? if so, much less disk IO!
+-- see https://stackoverflow.com/a/8316542/429898
+dedupByContent :: CutConfig -> [FilePath] -> Action [FilePath]
+dedupByContent cfg paths = do
+  hashes <- mapM (digestFile cfg) paths
+  let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
+  return paths'
+
+digestFile :: CutConfig -> FilePath -> Action String
+digestFile cfg path = debugReadFile cfg path >>= return . digest
 
 ----------------------
 -- binary operators --
@@ -60,33 +74,6 @@ rSetBop name fn s (CutBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
     fun = CutFun  rtn salt deps name [lst]
     lst = CutList rtn salt deps [s1, s2]
 rSetBop _ _ _ _ = error "bad argument to rSetBop"
-
--- rSetBop fn s@(_,cfg) e@(CutBop _ _ _ _ s1 s2) = do
---   -- liftIO $ putStrLn "entering rSetBop"
---   -- let fixLinks = liftIO . canonicalLinks cfg (typeOf e)
---   let fixLinks = canonicalLinks cfg (typeOf e)
---       (ListOf t) = typeOf s1 -- element type for translating to/from string
---   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (s1, s2)
---   p3 %> aSetBop cfg fixLinks t fn p1 p2
---   return (ExprPath p3)
--- rSetBop _ _ _ = error "bad argument to rSetBop"
--- 
--- aSetBop :: CutConfig
---         -> ([String] -> IO [String])
---         -> CutType
---         -> (Set String -> Set String -> Set String)
---         -> FilePath -> FilePath -> FilePath -> Action ()
--- aSetBop cfg fixLinks etype fn p1 p2 out = do
---   need [p1, p2] -- this is required for parallel evaluation!
---   -- lines1 <- liftIO . fixLinks =<< readFileLines p1
---   -- lines2 <- liftIO . fixLinks =<< readFileLines p2
---   paths1 <- liftIO . fixLinks =<< readStrings etype cfg p1
---   paths2 <- liftIO . fixLinks =<< readStrings etype cfg p2
---   -- putQuiet $ unwords [fnName, p1, p2, p3]
---   let paths3 = fn (fromList paths1) (fromList paths2)
---       out' = debugAction cfg "aSetBop" out [p1, p2, out]
---   -- liftIO $ putStrLn $ "paths3: " ++ show paths3
---   writeStrings etype cfg out' $ toList paths3 -- TODO delete file on error (else it looks empty!)
 
 -- TODO rename these all -> union, any -> intersection?
 unionBop :: CutFunction
@@ -122,30 +109,47 @@ rSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
       oPath'   = cfgTmpDir cfg </> oPath
       oPath''  = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
-      fixLinks = canonicalLinks cfg (typeOf e) -- TODO move to aSetFold
-  oPath %> \_ -> aSetFold cfg fixLinks fn t oPath' setsPath
+      -- fixLinks = canonicalLinks cfg (typeOf e) -- TODO move to aSetFold
+  oPath %> \_ -> aSetFold cfg fn t oPath' setsPath
   return (ExprPath oPath'')
 rSetFold _ _ _ = error "bad argument to rSetFold"
 
+-- TODO dedup paths whose files are symlinks to the same thing?
 -- TODO writeStrings should delete the outfile on errors!
 aSetFold :: CutConfig
-         -> ([String] -> IO [String])
          -> ([Set String] -> Set String)
          -> CutType
          -> FilePath -> FilePath
          -> Action ()
-aSetFold cfg fixLinks fn (ListOf etype) oPath setsPath = do
+aSetFold cfg fn (ListOf etype) oPath setsPath = do
   -- liftIO $ putStrLn $ "aSetFold collapsing lists from " ++ extOf (ListOf etype) ++ " -> " ++ extOf etype
+  -- let fixLinks1 = canonicalLinks cfg (ListOf etype)
+  -- let fixLinks2 = canonicalLinks cfg etype
   setPaths  <- readPaths cfg setsPath
+  -- TODO aha! dedup set paths first, before reading anything else
+  -- nope gotta do it after we get down to one list i guess
+  -- setPaths' <- liftIO $ fixLinks1 $ map (fromCutPath cfg) setPaths
+  -- liftIO $ putStrLn $ "setPaths: " ++ show setPaths
+  -- liftIO $ putStrLn $ "deduped to setPaths': " ++ show setPaths'
   setElems  <- mapM (readStrings etype cfg) (map (fromCutPath cfg) setPaths)
-  setElems' <- liftIO $ mapM fixLinks setElems
+  setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   -- liftIO $ putStrLn $ "setElems: " ++ show setElems
-  -- liftIO $ putStrLn $ "setElems': " ++ show setElems'
+  -- liftIO $ putStrLn $ "deduped to setElems': " ++ show setElems'
   let sets = map fromList setElems'
       oLst = toList $ fn sets
       oPath' = debugAction cfg "aSetFold" oPath [oPath, setsPath]
-  writeStrings etype cfg oPath' oLst
-aSetFold _ _ _ _ _ _ = error "bad argument to aSetFold"
+
+  -- TODO almost there! just need to dedup additionally/instead using content
+  -- oLst' <- liftIO $ fixLinks1 oLst
+  oLst'' <- if etype `elem` [str, num]
+              then mapM return oLst
+              else dedupByContent cfg oLst -- TODO add the first dedup back?
+  -- liftIO $ putStrLn $ "oLst: " ++ show oLst
+  -- liftIO $ putStrLn $ "deduped to oLst': " ++ show oLst'
+  -- liftIO $ putStrLn $ "dedpuped to oLst'': " ++ show oLst''
+
+  writeStrings etype cfg oPath' oLst''
+aSetFold _ _ _ _ _ = error "bad argument to aSetFold"
 
 -- avoided calling it `all` because that's a Prelude function
 intersectionFold :: CutFunction

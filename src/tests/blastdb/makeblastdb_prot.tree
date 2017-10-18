@@ -7,8 +7,6 @@
 |   |       `-- 63b6fa9145.pdb.psq
 |   |-- each
 |   |   |-- 535fc5bd48
-|   |   |   |-- 5b4cc82c6b.str.list -> $TMPDIR/exprs/extract_queries/5b4cc82c6b.str.list
-|   |   |   |-- 5b4cc82c6b.str.list.args
 |   |   |   |-- 65e9e47c08.str.list -> $TMPDIR/exprs/extract_queries/65e9e47c08.str.list
 |   |   |   `-- 65e9e47c08.str.list.args
 |   |   |-- b105f34c8e
@@ -39,7 +37,6 @@
 |   |-- blastp_db_each
 |   |   `-- 8158675169_6e8bd8b7c6_d4fb9c7327.bht.list
 |   |-- extract_queries
-|   |   |-- 5b4cc82c6b.str.list
 |   |   `-- 65e9e47c08.str.list
 |   |-- extract_queries_each
 |   |   `-- fb2cc7cc9b.str.list.list
@@ -67,4 +64,4 @@
     |-- single.bht -> ../exprs/blastp_db/8158675169_6e8bd8b7c6_67b1500345.bht
     `-- small6803faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
 
-23 directories, 44 files
+23 directories, 41 files
