@@ -4,19 +4,19 @@ import ShortCut.Core.Types
 import ShortCut.Core.Parse.Basic
 
 import qualified Text.Parsec.Expr as E
-import Text.PrettyPrint.HughesPJClass (render, pPrint)
+-- import Text.PrettyPrint.HughesPJClass (render, pPrint)
 
 import Control.Applicative    ((<|>))
-import Control.Monad          (void, fail)
+import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.List              (find, union)
-import ShortCut.Core.Debug    (debugParser, debug)
-import ShortCut.Core.Util     (typeMatches)
+import ShortCut.Core.Debug    (debugParser)
+import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (optional, manyTill, eof, lookAhead, between,
                                choice, sepBy)
-import Data.Either (either)
+-- import Data.Either (either)
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
@@ -24,26 +24,11 @@ pList :: ParseM CutExpr
 pList = do
   terms <- between (pSym '[') (pSym ']')
                    (sepBy pExpr (pSym ',' <* optional pComment))
-  let eType = listElemType2 $ map typeOf terms
+  let eType = nonEmptyType $ map typeOf terms
       deps  = if null terms then [] else foldr1 union $ map depsOf terms
   case eType of
     Left err -> fail err
     Right t  -> return $ CutList t 0 deps terms
-
-listElemType2 :: [CutType] -> Either String CutType
-listElemType2 ts = if typesOK then Right elemType else Left errorMsg
-  where
-    nonEmpty = filter isNonEmpty ts
-    elemType = if      null ts       then Empty
-               else if null nonEmpty then head ts -- for example (ListOf Empty)
-               else    head nonEmpty
-    typesOK  = all (typeMatches elemType) ts
-    errorMsg = "all elements of a list must have the same type"
-
-isNonEmpty :: CutType -> Bool
-isNonEmpty Empty      = False
-isNonEmpty (ListOf t) = isNonEmpty t
-isNonEmpty _          = True
 
 ---------------
 -- operators --
@@ -62,7 +47,7 @@ operatorChars cfg = concat $ map fName $ filter (\f -> fFixity f == Infix)
 operatorTable :: CutConfig -> [[E.Operator String CutState Identity CutExpr]]
 operatorTable cfg = [map binary bops]
   where
-    binary f = E.Infix (pBop $ fName f) E.AssocLeft
+    binary f = E.Infix (pBop f) E.AssocLeft
     bops = filter (\f -> fFixity f == Infix) (concat $ map mFunctions mods)
     mods = cfgModules cfg
 
@@ -76,27 +61,14 @@ operatorTable cfg = [map binary bops]
 
 -- TODO is there a better way than only taking one-char strings?
 -- TODO how to fail gracefully (with fail, not error) here??
-pBop :: String -> ParseM (CutExpr -> CutExpr -> CutExpr)
-pBop [o] = pSym o *> (return $ \e1 e2 ->
-  let deps  = union (depsOf e1) (depsOf e2)
-  in case bopTypeCheck [typeOf e1, typeOf e2] of
-    Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-    Right rtn -> CutBop rtn 0 deps [o] e1 e2)
-pBop s = fail $ "invalid binary op name '" ++ s ++ "'"
-
--- if the user gives two lists but of different types, complain that they must
--- be the same. if there aren't two lists at all, complain about that first
--- TODO get this from the bop itself rather than duplicating here!
-bopTypeCheck :: [CutType] -> Either String CutType
-bopTypeCheck actual@[ListOf a, ListOf b]
-  | a == b    = Right $ ListOf a
-  | otherwise = Left $ typeError [ListOf a, ListOf a] actual
-bopTypeCheck _ = Left "Type error: expected two lists of the same type"
-
-typeError :: [CutType] -> [CutType] -> String
-typeError expected actual =
-  "Type error:\nexpected " ++ show expected
-           ++ "\nbut got " ++ show actual
+pBop :: CutFunction -> ParseM (CutExpr -> CutExpr -> CutExpr)
+pBop bop
+  | fFixity bop == Infix = pSym (head $ fName bop) *> (return $ \e1 e2 ->
+    let deps  = union (depsOf e1) (depsOf e2)
+    in case (fTypeCheck bop) [typeOf e1, typeOf e2] of
+      Left  msg -> error msg -- TODO can't `fail` because not in monad here?
+      Right rtn -> CutBop rtn 0 deps (fName bop) e1 e2)
+pBop _ = error "pBop only works with infix functions"
 
 ---------------
 -- functions --

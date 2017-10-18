@@ -9,7 +9,7 @@ import ShortCut.Core.Compile.Basic (rBop, rExpr, typeError)
 import ShortCut.Core.Types
 import ShortCut.Core.Debug (debugRules, debugAction)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Util (resolveSymlinks)
+import ShortCut.Core.Util (resolveSymlinks, typeMatches, nonEmptyType)
 -- import Path (fromCutPath cfg) -- TODO remove and use Path everywhere
 
 cutModule :: CutModule
@@ -48,7 +48,7 @@ mkSetBop name fn = CutFunction
 -- be the same. if there aren't two lists at all, complain about that first
 bopTypeCheck :: [CutType] -> Either String CutType
 bopTypeCheck actual@[ListOf a, ListOf b]
-  | a == b    = Right $ ListOf a
+  | typeMatches a b = fmap ListOf $ nonEmptyType [a, b]
   | otherwise = Left $ typeError [ListOf a, ListOf a] actual
 bopTypeCheck _ = Left "Type error: expected two lists of the same type"
 

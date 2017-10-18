@@ -22,7 +22,7 @@ module ShortCut.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
-  , listElemType
+  -- , nonEmptyType
   , extOf
   , depsOf
   , rDepsOf
@@ -165,17 +165,17 @@ typeOf (CutRef  t _ _ _    ) = t
 typeOf (CutBop  t _ _ _ _ _) = t
 typeOf (CutFun  t _ _ _ _  ) = t
 typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
--- typeOf (CutList _ _ _ ts     ) = ListOf $ listElemType $ map typeOf ts
+-- typeOf (CutList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
 -- typeOf (CutList _ _ _ []     ) = Empty
 -- typeOf (CutList _ _ _ []     ) = ListOf Empty
 
 -- Works around a bug where if the first element is an empty list but others
 -- have elements, it would call the whole thing an "emptylist.list".
 -- Note no typechecking happens here; heterogenous lists won't be noticed.
-listElemType :: [CutExpr] -> CutType
-listElemType    []  = Empty
-listElemType (x:[]) = typeOf x -- catches (ListOf Empty)
-listElemType (_:xs) = listElemType xs
+-- nonEmptyType :: [CutExpr] -> CutType
+-- nonEmptyType    []  = Empty
+-- nonEmptyType (x:[]) = typeOf x -- catches (ListOf Empty)
+-- nonEmptyType (_:xs) = nonEmptyType xs
 
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone

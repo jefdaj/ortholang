@@ -91,3 +91,20 @@ typesMatch as bs = sameLength && allMatch
   where
     sameLength = length as == length bs
     allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
+
+nonEmptyType :: [CutType] -> Either String CutType
+nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
+  where
+    nonEmpty = filter isNonEmpty ts
+    elemType = if      null ts       then Empty
+               else if null nonEmpty then head ts -- for example (ListOf Empty)
+               else    head nonEmpty
+    typesOK  = all (typeMatches elemType) ts
+    errorMsg = "all elements of a list must have the same type"
+
+isNonEmpty :: CutType -> Bool
+isNonEmpty Empty      = False
+isNonEmpty (ListOf t) = isNonEmpty t
+isNonEmpty _          = True
+
+

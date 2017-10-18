@@ -1,0 +1,8 @@
+.
+|-- exprs
+|   `-- str
+|       `-- b0458da0ae.str
+`-- vars
+    `-- result -> ../exprs/str/b0458da0ae.str
+
+3 directories, 2 files

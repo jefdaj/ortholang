@@ -43,7 +43,7 @@ import ShortCut.Core.Parse.Basic
 import ShortCut.Core.Parse.Expr
 import ShortCut.Core.Parse.Script
 
-import Control.Monad          (fail)
+-- import Control.Monad          (fail)
 import Data.Either            (isRight)
 import Text.Parsec            (ParseError)
 import Text.Parsec.Combinator (manyTill, eof, anyToken)

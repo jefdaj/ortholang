@@ -47,11 +47,11 @@ pResult = do
   return (CutVar "result", e')
 
 pStatement :: ParseM CutAssign
-pStatement = do
-  (_, cfg) <- getState
-  res <- pAssign <|> pResult
+pStatement = pAssign <|> pResult
+  -- (_, cfg) <- getState
+  -- res <- pAssign <|> pResult
   -- let res' = debugParser cfg "pStatement" res
-  return res
+  -- return res
 
 -------------
 -- scripts --
