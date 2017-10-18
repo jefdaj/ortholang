@@ -1,1 +1,13 @@
-result = "pending"
+mini7942 = load_fna "data/7942genes10.fna"
+full7942 = load_fna "data/7942genes.fna"
+n = 1e-5
+
+singleFwd = extract_queries      (blastn      n mini7942  full7942 )
+mappedFwd = extract_queries_each (blastn_each n mini7942 [full7942])
+
+singleRev = extract_queries      (blastn_rev      n full7942  mini7942 )
+mappedRev = extract_queries_each (blastn_rev_each n full7942 [mini7942])
+
+single = singleFwd | singleRev
+mapped = mappedFwd | mappedRev # should be one list, but isn't so far
+result = [single] | mapped     # should be one list, but isn't so far
