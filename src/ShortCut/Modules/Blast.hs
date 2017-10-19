@@ -54,11 +54,12 @@ type BlastDesc =
 
 blastDescs :: [BlastDesc]
 blastDescs =
-  [ ( "blastn", fna, fna, ndb)
-  , ( "blastp", faa, faa, pdb)
-  , ( "blastx", fna, faa, pdb)
-  , ("tblastn", faa, fna, ndb)
-  , ("tblastx", fna, fna, ndb)
+  [ ( "blastn"   , fna, fna, ndb) -- old blastn default for more distant sequences
+  , ( "megablast", fna, fna, ndb) -- new blastn default (highly similar sequences)
+  , ( "blastp"   , faa, faa, pdb)
+  , ( "blastx"   , fna, faa, pdb)
+  , ("tblastn"   , faa, fna, ndb)
+  , ("tblastx"   , fna, fna, ndb)
   ]
 
 ----------------

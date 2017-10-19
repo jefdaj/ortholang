@@ -102,9 +102,19 @@ def make_hits(args, db):
         q = '-'
     else:
         q = query
+
+    # it's crazy this isn't the default
+    # see http://www.sixthresearcher.com/when-blast-is-not-blast/
+    basecmd = args['--cmd']
+    if basecmd == 'blastn':
+        basecmd += ' -task blastn'
+    elif basecmd == 'megablast':
+        basecmd = 'blastn'
+
     cmd = \
         [ 'BLASTDB=%s' % dirname(db) # TODO error here with path separator?
-        , args['--cmd']
+        # , args['--cmd']
+        , basecmd
         , '-db', basename(db)
         , '-query', q
         , '-evalue', args['--evalue']
