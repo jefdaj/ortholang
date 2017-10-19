@@ -28,7 +28,7 @@
 |           |-- 9754c305d1.ndb.nin
 |           `-- 9754c305d1.ndb.nsq
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- 7a8477bd0a.str.list.list
 |   |-- blastn
 |   |   `-- fe7dee10f6_b23045213e_9af4f0090e.bht
@@ -62,7 +62,7 @@
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/81ee402009.str.list.list
     |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
-    |-- result -> ../exprs/all/7a8477bd0a.str.list.list
+    |-- result -> ../exprs/any/7a8477bd0a.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/9994288dcd.str.list
 
 24 directories, 41 files

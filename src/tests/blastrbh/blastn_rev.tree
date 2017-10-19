@@ -27,9 +27,9 @@
 |   |   |-- 4b79c77426.txt
 |   |   |-- 72372e95e5.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- b547466b29.txt
+|   |   |-- 7ce1f3f6aa.txt
+|   |   |-- a255d78cde.txt
 |   |   |-- ba320796bf.txt
-|   |   |-- c23f0d452c.txt
 |   |   `-- f530950d29.txt
 |   `-- makeblastdb
 |       `-- 9754c305d1
@@ -37,7 +37,7 @@
 |           |-- 9754c305d1.ndb.nin
 |           `-- 9754c305d1.ndb.nsq
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   |-- 0ebcc5da0a.str.list.list
 |   |   |-- c07cc5891e.str.list.list
 |   |   `-- d27ff2fbe3.str.list
@@ -61,10 +61,10 @@
 |   |   `-- 81ee402009.str.list.list
 |   |-- list
 |   |   |-- 2f85a9aaa6.str.list.list -> ../../cache/list/389db1505d.txt
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/c23f0d452c.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/7ce1f3f6aa.txt
 |   |   |-- 5da3a51daa.fna.list -> ../../cache/list/2a267084df.txt
 |   |   |-- 72b8307ffd.str.list.list.list -> ../../cache/list/4b79c77426.txt
-|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/b547466b29.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/a255d78cde.txt
 |   |   `-- c6ba16cc62.fna.list -> ../../cache/list/72372e95e5.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
@@ -81,13 +81,13 @@
 |       `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
-    |-- mapped.str.list.list -> ../exprs/all/0ebcc5da0a.str.list.list
+    |-- mapped.str.list.list -> ../exprs/any/0ebcc5da0a.str.list.list
     |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/81ee402009.str.list.list
     |-- mappedRev.str.list.list -> ../exprs/extract_queries_each/68853b85c0.str.list.list
     |-- mini7942.fna -> ../exprs/load_fna/82b637da24.fna
     |-- n.num -> ../exprs/num/a53b190835.num
-    |-- result -> ../exprs/all/c07cc5891e.str.list.list
-    |-- single.str.list -> ../exprs/all/d27ff2fbe3.str.list
+    |-- result -> ../exprs/any/c07cc5891e.str.list.list
+    |-- single.str.list -> ../exprs/any/d27ff2fbe3.str.list
     |-- singleFwd.str.list -> ../exprs/extract_queries/9994288dcd.str.list
     `-- singleRev.str.list -> ../exprs/extract_queries/d04c524532.str.list
 

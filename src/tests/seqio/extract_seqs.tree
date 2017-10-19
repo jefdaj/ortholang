@@ -7,7 +7,7 @@
 |       |-- c8be8722f2.txt
 |       `-- ffcb41a1dc.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- 39a6737de6.str.list
 |   |-- diff
 |   |   |-- 44c22a97d1.str.list
@@ -42,6 +42,6 @@
     |-- fna10ids.str.list -> ../exprs/extract_ids/8df2fbb1a8.str.list
     |-- fna10seqs.fna -> ../exprs/extract_seqs/8df2fbb1a8_ca3a3da28a.fna
     |-- fnaDiff.str.list -> ../exprs/diff/44c22a97d1.str.list
-    `-- result -> ../exprs/all/39a6737de6.str.list
+    `-- result -> ../exprs/any/39a6737de6.str.list
 
 12 directories, 32 files

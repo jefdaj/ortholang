@@ -21,7 +21,8 @@
 |       `-- f530950d29.txt
 |-- exprs
 |   |-- all
-|   |   |-- 14e5843645.str.list
+|   |   `-- 14e5843645.str.list
+|   |-- any
 |   |   `-- 8127cea96f.str.list.list
 |   |-- blastn_db
 |   |   |-- 8158675169_bc4ea1fc06_d326247d21.bht
@@ -54,4 +55,4 @@
     |-- result -> ../exprs/all/14e5843645.str.list
     `-- single.str.list -> ../exprs/extract_queries/934a55faaa.str.list
 
-19 directories, 35 files
+20 directories, 35 files

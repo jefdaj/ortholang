@@ -28,10 +28,10 @@
 |       `-- bdc783547b.txt
 |-- exprs
 |   |-- all
+|   |   `-- 93c342188f.str.list
+|   |-- any
 |   |   |-- 93c342188f.str.list
 |   |   `-- c08bf34a9e.str.list.list
-|   |-- any
-|   |   `-- 93c342188f.str.list
 |   |-- blastp_db
 |   |   |-- 8158675169_c08cc19988_67b1500345.bht
 |   |   `-- 8158675169_c14344af19_46b5852d89.bht
@@ -68,7 +68,7 @@
 |       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- fwd.bht -> ../exprs/blastp_db/8158675169_c14344af19_46b5852d89.bht
-    |-- lists.str.list.list -> ../exprs/all/c08bf34a9e.str.list.list
+    |-- lists.str.list.list -> ../exprs/any/c08bf34a9e.str.list.list
     |-- n.num -> ../exprs/num/a53b190835.num
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
     |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa

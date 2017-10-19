@@ -12,7 +12,7 @@
 |       |-- 9da25ac96a.txt
 |       `-- cad7634989.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- c227fdb068.fna.list
 |   |-- concat_fastas
 |   |   |-- a17453dd06.fna
@@ -35,7 +35,7 @@
 |       `-- a8d18fa355.str -> ../../cache/list/691dd4d722.txt
 `-- vars
     |-- mapped.fna.list -> ../exprs/concat_fastas_each/72514253ee.fna.list
-    |-- result -> ../exprs/all/c227fdb068.fna.list
+    |-- result -> ../exprs/any/c227fdb068.fna.list
     `-- single.fna -> ../exprs/concat_fastas/eb1aea4e88.fna
 
 13 directories, 25 files

@@ -5,7 +5,7 @@
 |       |-- 8dfc0381aa.txt
 |       `-- d638a30b27.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- cd4c4aeee8.gbk.list
 |   |-- list
 |   |   |-- 0f88494317.gbk.list -> ../../cache/list/3376392f1e.txt
@@ -18,7 +18,7 @@
 |       `-- 8b9871a6e5.str -> ../../cache/list/d638a30b27.txt
 `-- vars
     |-- mapped.gbk.list -> ../exprs/list/ee177ad95e.gbk.list
-    |-- result -> ../exprs/all/cd4c4aeee8.gbk.list
+    |-- result -> ../exprs/any/cd4c4aeee8.gbk.list
     `-- single.gbk -> ../exprs/load_gbk/7283470912.gbk
 
 8 directories, 13 files

@@ -25,19 +25,19 @@
 |   |   |-- 014b68a2dc.txt
 |   |   |-- 176aefc67f.txt
 |   |   |-- 4fca9f3a42.txt
-|   |   |-- 75a2d53919.txt
 |   |   |-- 778251fd80.txt
 |   |   |-- a77609ebaf.txt
+|   |   |-- b9f4259be4.txt
 |   |   |-- bdc783547b.txt
-|   |   |-- e5fb20d1d3.txt
-|   |   `-- ef87d3e725.txt
+|   |   |-- ef87d3e725.txt
+|   |   `-- f7add36d38.txt
 |   `-- makeblastdb
 |       `-- f1e136eaf6
 |           |-- f1e136eaf6.pdb.phr
 |           |-- f1e136eaf6.pdb.pin
 |           `-- f1e136eaf6.pdb.psq
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   |-- 4a4495639b.str.list.list
 |   |   |-- 98d5b4c81f.str.list
 |   |   `-- ca37349acc.str.list.list
@@ -62,9 +62,9 @@
 |   |-- list
 |   |   |-- 2b5e7336b5.faa.list -> ../../cache/list/4fca9f3a42.txt
 |   |   |-- 2f85a9aaa6.str.list.list -> ../../cache/list/a77609ebaf.txt
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/e5fb20d1d3.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/f7add36d38.txt
 |   |   |-- 72b8307ffd.str.list.list.list -> ../../cache/list/014b68a2dc.txt
-|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/75a2d53919.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/b9f4259be4.txt
 |   |   `-- cce65539fd.faa.list -> ../../cache/list/176aefc67f.txt
 |   |-- load_faa
 |   |   |-- 2d88028e40.faa -> $WORKDIR/data/7942genes10.faa
@@ -81,13 +81,13 @@
 |       `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
 `-- vars
     |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
-    |-- mapped.str.list.list -> ../exprs/all/4a4495639b.str.list.list
+    |-- mapped.str.list.list -> ../exprs/any/4a4495639b.str.list.list
     |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/848b144734.str.list.list
     |-- mappedRev.str.list.list -> ../exprs/extract_queries_each/f9707bd7f9.str.list.list
     |-- mini7942.faa -> ../exprs/load_faa/2d88028e40.faa
     |-- n.num -> ../exprs/num/a53b190835.num
-    |-- result -> ../exprs/all/ca37349acc.str.list.list
-    |-- single.str.list -> ../exprs/all/98d5b4c81f.str.list
+    |-- result -> ../exprs/any/ca37349acc.str.list.list
+    |-- single.str.list -> ../exprs/any/98d5b4c81f.str.list
     |-- singleFwd.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
     `-- singleRev.str.list -> ../exprs/extract_queries/a2aa077102.str.list
 

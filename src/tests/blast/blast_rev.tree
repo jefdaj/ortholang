@@ -13,7 +13,7 @@
 |       |-- e23802c768.txt
 |       `-- f530950d29.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- d51537bc95.str.list
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
@@ -40,7 +40,7 @@
 `-- vars
     |-- fwds.str.list -> ../exprs/extract_queries/9994288dcd.str.list
     |-- large.fna -> ../exprs/load_fna/eb12539f1c.fna
-    |-- result -> ../exprs/all/d51537bc95.str.list
+    |-- result -> ../exprs/any/d51537bc95.str.list
     |-- small.fna -> ../exprs/load_fna/82b637da24.fna
     `-- srevs.str.list -> ../exprs/extract_queries/d04c524532.str.list
 

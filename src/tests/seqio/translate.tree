@@ -10,7 +10,7 @@
 |       |-- db35af74d8.txt
 |       `-- dcd3a69ac3.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- 7f0a05b036.faa.list
 |   |-- list
 |   |   |-- 49ae883ffc.faa.list -> ../../cache/list/db35af74d8.txt
@@ -28,7 +28,7 @@
 |       `-- 283ecf7c50.faa.list
 `-- vars
     |-- mapped.faa.list -> ../exprs/translate_each/283ecf7c50.faa.list
-    |-- result -> ../exprs/all/7f0a05b036.faa.list
+    |-- result -> ../exprs/any/7f0a05b036.faa.list
     `-- single.faa -> ../exprs/translate/fddf135b43.faa
 
 12 directories, 19 files

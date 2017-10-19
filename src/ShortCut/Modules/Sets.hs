@@ -1,6 +1,10 @@
 module ShortCut.Modules.Sets where
 
+-- TODO unify bops and funs into one thing (all fns have optional infix version?)
+-- TODO writeStrings should delete the outfile on errors!
+
 import Development.Shake
+import ShortCut.Core.Types
 
 import Data.Function               (on)
 import Data.List                   (nubBy)
@@ -11,84 +15,63 @@ import ShortCut.Core.Compile.Basic (rExpr, typeError)
 import ShortCut.Core.Debug         (debugRules, debugAction, debugReadFile)
 import ShortCut.Core.Paths         (exprPath, fromCutPath, readPaths,
                                     readStrings, writeStrings)
-import ShortCut.Core.Types
 import ShortCut.Core.Util          (resolveSymlinks, typeMatches, nonEmptyType,
                                     digest)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "setops"
-  , mFunctions =
-    -- TODO unify bops and funs into one thing (all fns have optional infix version?)
-    [ unionBop       , unionFold
-    , intersectionBop, intersectionFold
-    , differenceBop  , differenceFold
-    ]
+  , mFunctions = concat $ map mkSetFunctions setOpDescs
   }
 
----------------------------------------
--- binary operators (infix versions) --
----------------------------------------
+type SetOpDesc =
+  ( String -- name of the prefix function
+  , Char   -- name of the infix/binary function
+  , Set String -> Set String -> Set String -- haskell set op
+  )
 
-mkSetBop :: String -> String
-         -> (Set String -> Set String -> Set String)
-         -> CutFunction
-mkSetBop name foldName fn = CutFunction
-  { fName      = name
-  , fTypeCheck = bopTypeCheck
-  , fFixity    = Infix
-  , fRules     = rSetBop foldName fn
-  }
+{- An awkward intermediate: until I get around to actually merging CutBops into
+ - CutFuns, we'll just create them from a common description. The Bop versions
+ - work on two lists and can be chained together; the prefix (regular function)
+ - ones work on lists of lists.
+ -
+ - TODO rename these all -> union, any -> intersection?
+ - TODO rename diff -> only? difference? missing?
+ -}
+setOpDescs :: [SetOpDesc]
+setOpDescs =
+  [ ("any" , '|', union)
+  , ("all" , '&', intersection)
+  , ("diff", '~', difference)
+  ]
+
+mkSetFunctions :: SetOpDesc -> [CutFunction]
+mkSetFunctions (foldName, opChar, setFn) = [setBop, setFold]
+  where
+    setBop = CutFunction
+      { fName      = [opChar]
+      , fTypeCheck = tSetBop
+      , fFixity    = Infix
+      , fRules     = rSetBop foldName setFn
+      }
+    setFold = CutFunction
+      { fName      = foldName
+      , fTypeCheck = tSetFold
+      , fFixity    = Prefix
+      , fRules     = rSetFold (foldr1 setFn)
+      }
 
 -- if the user gives two lists but of different types, complain that they must
 -- be the same. if there aren't two lists at all, complain about that first
-bopTypeCheck :: [CutType] -> Either String CutType
-bopTypeCheck actual@[ListOf a, ListOf b]
+tSetBop :: [CutType] -> Either String CutType
+tSetBop actual@[ListOf a, ListOf b]
   | typeMatches a b = fmap ListOf $ nonEmptyType [a, b]
   | otherwise = Left $ typeError [ListOf a, ListOf a] actual
-bopTypeCheck _ = Left "Type error: expected two lists of the same type"
-
--- TODO rename these all -> union, any -> intersection?
-unionBop :: CutFunction
-unionBop = mkSetBop "|" "all" union
-
-intersectionBop :: CutFunction
-intersectionBop = mkSetBop "&" "any" intersection
-
--- TODO rename diff -> only? difference? missing?
-differenceBop :: CutFunction
-differenceBop = mkSetBop "~" "diff" difference
-
------------------------------
--- folds (prefix versions) --
------------------------------
-
-mkSetFold :: String -> ([Set String] -> Set String) -> CutFunction
-mkSetFold name fn = CutFunction
-  { fName      = name
-  , fTypeCheck = tSetFold
-  , fFixity    = Prefix
-  , fRules  = rSetFold fn
-  }
+tSetBop _ = Left "Type error: expected two lists of the same type"
 
 tSetFold :: [CutType] -> Either String CutType
 tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
-
--- avoided calling it `all` because that's a Prelude function
-intersectionFold :: CutFunction
-intersectionFold = mkSetFold "all" $ foldr1 intersection
-
--- avoided calling it `any` because that's a Prelude function
-unionFold :: CutFunction
-unionFold = mkSetFold "any" $ foldr1 union
-
-differenceFold :: CutFunction
-differenceFold = mkSetFold "diff" $ foldr1 difference
-
---------------------
--- implementation --
---------------------
 
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
@@ -103,21 +86,16 @@ rSetBop _ _ _ _ = error "bad argument to rSetBop"
 rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
 rSetFold fn s@(_,cfg) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
-  let oPath    = fromCutPath cfg $ exprPath s e
-      oPath'   = cfgTmpDir cfg </> oPath
-      oPath''  = debugRules cfg "rSetFold" e oPath
+  let oPath      = fromCutPath cfg $ exprPath s e
+      oPath'     = cfgTmpDir cfg </> oPath
+      oPath''    = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
-      -- fixLinks = canonicalLinks cfg (typeOf e) -- TODO move to aSetFold
   oPath %> \_ -> aSetFold cfg fn t oPath' setsPath
   return (ExprPath oPath'')
 rSetFold _ _ _ = error "bad argument to rSetFold"
 
--- TODO writeStrings should delete the outfile on errors!
-aSetFold :: CutConfig
-         -> ([Set String] -> Set String)
-         -> CutType
-         -> FilePath -> FilePath
-         -> Action ()
+aSetFold :: CutConfig -> ([Set String] -> Set String)
+         -> CutType -> FilePath -> FilePath -> Action ()
 aSetFold cfg fn (ListOf etype) oPath setsPath = do
   setPaths  <- readPaths cfg setsPath
   setElems  <- mapM (readStrings etype cfg) (map (fromCutPath cfg) setPaths)

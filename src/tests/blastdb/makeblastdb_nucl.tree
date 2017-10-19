@@ -29,8 +29,9 @@
 |           `-- ce746b5c13.ndb.nsq
 |-- exprs
 |   |-- all
-|   |   |-- 0fc038e77d.bht.list
 |   |   `-- b3a04fca10.str.list
+|   |-- any
+|   |   `-- 0fc038e77d.bht.list
 |   |-- blastn_db
 |   |   |-- 8158675169_8df2fbb1a8_a78dfa6d35.bht
 |   |   `-- fe7dee10f6_237bf736b9_40d4c0b452.bht
@@ -64,4 +65,4 @@
     |-- single.bht -> ../exprs/blastn_db/8158675169_8df2fbb1a8_a78dfa6d35.bht
     `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-23 directories, 41 files
+24 directories, 41 files

@@ -5,7 +5,7 @@
 |       |-- 1f98704802.txt
 |       `-- d8c3985212.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- e195560846.fna.list
 |   |-- list
 |   |   |-- 20812f3e16.fna.list.list -> ../../cache/list/d8c3985212.txt
@@ -18,7 +18,7 @@
 |       `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
 `-- vars
     |-- mapped.fna.list -> ../exprs/list/83c6cf693b.fna.list
-    |-- result -> ../exprs/all/e195560846.fna.list
+    |-- result -> ../exprs/any/e195560846.fna.list
     `-- single.fna -> ../exprs/load_fna/f110b4b1c9.fna
 
 8 directories, 13 files

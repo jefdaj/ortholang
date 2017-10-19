@@ -21,7 +21,8 @@
 |       `-- f530950d29.txt
 |-- exprs
 |   |-- all
-|   |   |-- 782f523b0c.str.list
+|   |   `-- 782f523b0c.str.list
+|   |-- any
 |   |   `-- 99fd288f9d.str.list.list
 |   |-- blastx_db
 |   |   |-- 8158675169_bc4ea1fc06_46b5852d89.bht
@@ -55,4 +56,4 @@
     |-- result -> ../exprs/all/782f523b0c.str.list
     `-- single.str.list -> ../exprs/extract_queries/ba961ef0a0.str.list
 
-20 directories, 35 files
+21 directories, 35 files

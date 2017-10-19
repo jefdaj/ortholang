@@ -5,7 +5,7 @@
 |       |-- adfdb6bd8c.txt
 |       `-- d6a92c3168.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- b263221211.faa.list
 |   |-- list
 |   |   |-- 0ec5fc193b.faa.list -> ../../cache/list/1b0af3628d.txt
@@ -18,7 +18,7 @@
 |       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- mapped.faa.list -> ../exprs/list/0ec5fc193b.faa.list
-    |-- result -> ../exprs/all/b263221211.faa.list
+    |-- result -> ../exprs/any/b263221211.faa.list
     `-- single.faa -> ../exprs/load_faa/dee24d6c3c.faa
 
 8 directories, 13 files

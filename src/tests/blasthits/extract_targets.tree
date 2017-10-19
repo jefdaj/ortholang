@@ -17,7 +17,7 @@
 |       |-- c8be8722f2.txt
 |       `-- d1b96f6d99.txt
 |-- exprs
-|   |-- all
+|   |-- any
 |   |   `-- 9d8c34f5f0.str.list.list
 |   |-- blastp_db
 |   |   `-- 8158675169_c14344af19_8c0afeae98.bht
@@ -43,7 +43,7 @@
 `-- vars
     |-- hits.bht -> ../exprs/blastp_db/8158675169_c14344af19_8c0afeae98.bht
     |-- mapped.str.list.list -> ../exprs/extract_targets_each/e84e2d03d0.str.list.list
-    |-- result -> ../exprs/all/9d8c34f5f0.str.list.list
+    |-- result -> ../exprs/any/9d8c34f5f0.str.list.list
     `-- single.str.list -> ../exprs/extract_targets/c085e4cf5c.str.list
 
 17 directories, 29 files
