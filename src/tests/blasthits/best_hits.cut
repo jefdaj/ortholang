@@ -3,12 +3,12 @@ pcc7942 = load_faa "data/7942genes.faa"
 pcc6803 = load_faa "data/6803genes.faa"
 
 # This produces slightly different numbers each time,
-# so we repeat 3X and only keep the stable hits.
+# so we repeat 5X and only keep the stable hits.
 hits  = blastp 1e-5 pcc7942 pcc6803
-hits3 = repeat hits pcc7942 3
+hits5 = repeat hits pcc7942 5
 
-best  = best_hits_each hits3
-bestonly = all (extract_queries_each hits3)
+best  = best_hits_each hits5
+bestonly = all (extract_queries_each hits5)
          ~ all (extract_queries_each best )
 
 result = length bestonly

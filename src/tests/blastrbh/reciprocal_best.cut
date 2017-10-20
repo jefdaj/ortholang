@@ -9,4 +9,11 @@ revHits = blastp 1e-5 pcc6803 pcc7942
 bestFwd = best_hits fwdHits
 bestRec = reciprocal_best fwdHits revHits
 
-result = length (extract_queries bestFwd ~ extract_queries bestRec)
+# results sometimes vary slightly; repeat 3X to be sure
+best3fwd = repeat bestFwd pcc6803 3
+best3rec = repeat bestRec pcc6803 3
+
+solidFwd = all (extract_queries_each best3fwd)
+solidRec = all (extract_queries_each best3rec)
+
+result = length (solidFwd ~ solidRec)
