@@ -168,5 +168,5 @@ rMkBlastRbhEach (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, rs]) = rExpr s ma
   where
     main  = CutFun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
     lHits = CutFun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
-    rHits = CutFun (ListOf bht) salt deps (bCmd ++ "_each_rev")  [e, l, rs]
+    rHits = CutFun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
 rMkBlastRbhEach _ _ _ = error "bad argument to rMkBlastRbh"
