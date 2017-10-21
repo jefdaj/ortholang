@@ -29,7 +29,7 @@ import Control.Monad               (when)
 import Data.List                   (find, sort, intersperse)
 import Data.Maybe                  (fromJust)
 import Development.Shake.FilePath  ((</>), (<.>))
-import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules)
 import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
                                     digest, typesMatch)

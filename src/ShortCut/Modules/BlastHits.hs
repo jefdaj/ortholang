@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, writeLits)
 import ShortCut.Modules.Blast      (bht)

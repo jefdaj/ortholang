@@ -8,7 +8,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (when)
--- import ShortCut.Core.Config        (wrappedCmd)
+-- import ShortCut.Core.Cmd        (wrappedCmd)
 import ShortCut.Core.Debug         (debugAction, debugTrackWrite, debugRules)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEachTmp)

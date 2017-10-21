@@ -5,7 +5,7 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (fromCutPath, readPaths, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rLoadOne,
