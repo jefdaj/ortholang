@@ -215,8 +215,7 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   -- TODO was taxdb needed for anything else?
   -- TODO any way to get back the wrapping, since this takes a long time?
   -- quietly $ wrappedCmd cfg [dbPrefix'' ++ ".*"] [Cwd tmp']
-  (Stdout (_ :: String), Stderr (_ :: String)) <- quietly $
-    cmd [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
+  Stdouterr (_ :: String) <- quietly $ cmd [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
   writeLit cfg dbPrefix'' $ tmp' </> dbName
   where
@@ -292,7 +291,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
   let dbType' = if dbType == ndb then "nucl" else "prot"
   need [faPath']
-  faHash <- hashContent cfg faPath
+  faHash <- hashContent cfg faPath -- TODO replace with something faster!
   let dbPrefix  = cDir' </> faHash </> faHash <.> extOf dbType
       dbPrefix' = toCutPath cfg dbPrefix
       out'' = debugAction cfg "aMakeblastdb" out'

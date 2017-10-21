@@ -83,11 +83,11 @@ module ShortCut.Core.Paths
   )
   where
 
-import Development.Shake (Action, trackWrite)
+import Development.Shake (Action, trackWrite, cmd, Stdout(..), need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
-import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug, debugReadFile)
+import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
@@ -152,10 +152,21 @@ argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
 argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
 argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
 
+-- TODO fuck, this makes it reeeeealllly slow. remove!
+--      but what can we replace it with? maybe system md5sum? streaming hash?
+--      something a little cleverer? shake's internal ID? that might work
+--      ah, md5sum doesn't read the whole file. that might work too then!
 hashContent :: CutConfig -> CutPath -> Action String
 hashContent cfg path = do
-  txt <- debugReadFile cfg $ fromCutPath cfg path
-  return $ digest txt
+  -- txt <- debugReadFile cfg $ fromCutPath cfg path
+  -- return $ digest txt
+  need [path']
+  Stdout out <- cmd "md5sum" path'
+  let md5 = head $ words out -- TODO something safer
+  liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5
+  return md5
+  where
+    path' = fromCutPath cfg path
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
 -- resolveVar :: CutConfig -> CutPath -> IO CutPath
