@@ -1,9 +1,0 @@
-# Demo of running an existing cut vs loading it in the interpreter:
-#   source code (this file) and comments
-#   command line arguments
-#   running it on the command line
-#   print something in the interpreter
-#   :help, :load, :drop, :show, :!, tab completion
-
-string1 = "good morning!"
-result = string1

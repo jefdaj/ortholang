@@ -1,9 +1,0 @@
-# Demo of tmpfiles + links.
-#   everything gets a tmpfile, even if you type it live
-#   variables are symlinks (shortcuts!) to expression files (show debug info)
-#   cached files are recreated when you delete them
-#   can open them separately when needed
-#   latest thing is always linked from "result"
-
-string1 = "good morning!"
-result = string1
