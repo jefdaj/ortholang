@@ -17,8 +17,6 @@ import System.Directory      (setCurrentDirectory)
 
 main:: IO ()
 main = do
-  -- hSetBuffering stdin  LineBuffering -- TODO remove?
-  -- hSetBuffering stdout LineBuffering -- TODO remove?
   usage <- getUsage
   args  <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
