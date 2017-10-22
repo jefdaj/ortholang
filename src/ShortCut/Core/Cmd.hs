@@ -2,6 +2,7 @@ module ShortCut.Core.Cmd
   ( wrappedCmd
   , wrappedCmdExit
   , wrappedCmdOut
+  , wrappedCmdError -- for calling when a cmd is found to have failed
   )
   where
 
@@ -11,8 +12,8 @@ import ShortCut.Core.Types
 import System.Exit     (ExitCode(..))
 import System.FilePath (takeDirectory, takeFileName)
 
-failGracefully :: String -> Int -> [String] -> Action a
-failGracefully bin n ptns = do
+wrappedCmdError :: String -> Int -> [String] -> Action a
+wrappedCmdError bin n ptns = do
   -- toDel <- globs dir ptns -- TODO any better dir? absolute?
   -- liftIO $ removeFiles dir ptns
   liftIO $ mapM_ (\p -> removeFiles (takeDirectory p) [takeFileName p]) ptns
@@ -48,7 +49,7 @@ wrappedCmd :: CutConfig -> [String]
 wrappedCmd c ps os b as = do
   (_, code) <- wrappedCmd' c os b as
   case code of
-    ExitFailure n -> failGracefully b n ps
+    ExitFailure n -> wrappedCmdError b n ps
     ExitSuccess   -> return ()
 
 wrappedCmdOut :: CutConfig -> [String]
@@ -57,10 +58,10 @@ wrappedCmdOut :: CutConfig -> [String]
 wrappedCmdOut c ps os b as = do
   (out, code) <- wrappedCmd' c os b as
   case code of
-    ExitFailure n -> failGracefully b n ps
+    ExitFailure n -> wrappedCmdError b n ps
     ExitSuccess   -> return out
 
--- Note that this one desn't have failGracefully,
+-- Note that this one desn't have wrappedCmdError,
 -- because it's used for when you expect a nonzero exit code.
 -- TODO write some other error checking to go along with it!
 wrappedCmdExit :: CutConfig

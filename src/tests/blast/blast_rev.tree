@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- blastdb
-|   |   `-- 9754c305d1
-|   |       |-- 9754c305d1.ndb.nhr
-|   |       |-- 9754c305d1.ndb.nin
-|   |       `-- 9754c305d1.ndb.nsq
+|   |   `-- ff08c7f09eef0eb564ccfd5ac6a6551a
+|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
+|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
+|   |       `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |   `-- list
 |       |-- 389db1505d.txt
 |       |-- 56d55b5ce9.txt

@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- blastdb
-|   |   `-- f1e136eaf6
-|   |       |-- f1e136eaf6.pdb.phr
-|   |       |-- f1e136eaf6.pdb.pin
-|   |       `-- f1e136eaf6.pdb.psq
+|   |   `-- a810086108cd8211510df2ca12adf1fc
+|   |       |-- a810086108cd8211510df2ca12adf1fc.pdb.phr
+|   |       |-- a810086108cd8211510df2ca12adf1fc.pdb.pin
+|   |       `-- a810086108cd8211510df2ca12adf1fc.pdb.psq
 |   |-- each
 |   |   |-- 8641bd3b28
 |   |   |   |-- 0ddc313753.str.list -> $TMPDIR/exprs/extract_queries/0ddc313753.str.list

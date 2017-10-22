@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- blastdb
-|   |   `-- 9754c305d1
-|   |       |-- 9754c305d1.ndb.nhr
-|   |       |-- 9754c305d1.ndb.nin
-|   |       `-- 9754c305d1.ndb.nsq
+|   |   `-- ff08c7f09eef0eb564ccfd5ac6a6551a
+|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
+|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
+|   |       `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |   |-- each
 |   |   |-- 08e11db480
 |   |   |   |-- 9af4f0090e.bht -> $TMPDIR/exprs/megablast/fe7dee10f6_b23045213e_9af4f0090e.bht
@@ -23,10 +23,10 @@
 |   |   |-- bc029b6f19.txt
 |   |   `-- f530950d29.txt
 |   `-- makeblastdb
-|       `-- 9754c305d1
-|           |-- 9754c305d1.ndb.nhr
-|           |-- 9754c305d1.ndb.nin
-|           `-- 9754c305d1.ndb.nsq
+|       `-- ff08c7f09eef0eb564ccfd5ac6a6551a
+|           |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
+|           |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
+|           `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |-- exprs
 |   |-- any
 |   |   `-- 75fb36c62c.str.list.list

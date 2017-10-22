@@ -83,10 +83,11 @@ module ShortCut.Core.Paths
   )
   where
 
-import Development.Shake (Action, trackWrite, cmd, Stdout(..), need, liftIO)
+import Development.Shake (Action, trackWrite, Stdout(..), need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (lookupVar, digest)
+import ShortCut.Core.Cmd   (wrappedCmdOut)
 import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
@@ -161,9 +162,9 @@ hashContent cfg path = do
   -- txt <- debugReadFile cfg $ fromCutPath cfg path
   -- return $ digest txt
   need [path']
-  Stdout out <- cmd "md5sum" path'
-  let md5 = head $ words out -- TODO something safer
-  liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5
+  out <- wrappedCmdOut cfg [] [] "md5sum" [path']
+  let md5 = head $ words out -- TODO adapt failGracfully to work here
+  -- liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5
   return md5
   where
     path' = fromCutPath cfg path

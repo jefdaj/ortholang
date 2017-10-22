@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- blastdb
-|   |   `-- 9754c305d1
-|   |       |-- 9754c305d1.ndb.nhr
-|   |       |-- 9754c305d1.ndb.nin
-|   |       `-- 9754c305d1.ndb.nsq
+|   |   `-- ff08c7f09eef0eb564ccfd5ac6a6551a
+|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
+|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
+|   |       `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |   |-- each
 |   |   |-- 06c7b016e3
 |   |   |   |-- 28400f02d5.str.list -> $TMPDIR/exprs/extract_queries/28400f02d5.str.list
@@ -23,10 +23,10 @@
 |   |   |-- d2cb2e0be2.txt
 |   |   `-- ef87d3e725.txt
 |   `-- makeblastdb
-|       `-- 9754c305d1
-|           |-- 9754c305d1.ndb.nhr
-|           |-- 9754c305d1.ndb.nin
-|           `-- 9754c305d1.ndb.nsq
+|       `-- ff08c7f09eef0eb564ccfd5ac6a6551a
+|           |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
+|           |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
+|           `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |-- exprs
 |   |-- all
 |   |   `-- d921d897be.str.list

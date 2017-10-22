@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- blastdb
-|   |   `-- 24136de8aa
-|   |       |-- 24136de8aa.pdb.phr
-|   |       |-- 24136de8aa.pdb.pin
-|   |       `-- 24136de8aa.pdb.psq
+|   |   `-- 8a695c317a01632796e99e392591d93a
+|   |       |-- 8a695c317a01632796e99e392591d93a.pdb.phr
+|   |       |-- 8a695c317a01632796e99e392591d93a.pdb.pin
+|   |       `-- 8a695c317a01632796e99e392591d93a.pdb.psq
 |   |-- each
 |   |   `-- 411c8b9a42
 |   |       |-- a8eb78180f.str.list -> $TMPDIR/exprs/extract_targets/a8eb78180f.str.list

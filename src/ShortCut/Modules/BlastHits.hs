@@ -6,7 +6,7 @@ import ShortCut.Core.Types
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Cmd           (wrappedCmd)
+import ShortCut.Core.Cmd           (wrappedCmd, wrappedCmdOut)
 import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, writeLits)
 import ShortCut.Modules.Blast      (bht)
@@ -71,7 +71,7 @@ extractTargetsEach = CutFunction
 aTsvColumn :: Int -> CutConfig -> [CutPath] -> Action ()
 aTsvColumn n cfg [outPath, tsvPath] = do
   let awkCmd = "awk '{print $" ++ show n ++ "}'"
-  Stdout out <- quietly $ cmd Shell awkCmd tsvPath'
+  out <- wrappedCmdOut cfg [tsvPath'] [Shell] awkCmd [tsvPath']
   let out' = sort $ nub $ lines out
   writeLits cfg outPath'' out'
   where

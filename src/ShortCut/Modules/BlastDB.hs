@@ -8,7 +8,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (when)
--- import ShortCut.Core.Cmd        (wrappedCmd)
+import ShortCut.Core.Cmd           (wrappedCmd, wrappedCmdExit, wrappedCmdError)
 import ShortCut.Core.Debug         (debugAction, debugTrackWrite, debugRules)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEachTmp)
@@ -22,6 +22,7 @@ import System.FilePath             (takeFileName, (</>), (<.>), makeRelative,
 import System.Directory            (createDirectoryIfMissing)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
+import System.Exit                 (ExitCode(..))
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -171,10 +172,12 @@ aBlastdblist cfg oPath listTmp fPath = do
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True tmpDir
     -- This one is tricky because it exits 1 on success
-    -- (I guess listing the dbs is seen as a failure to download one?)
-    (Stderr (_ :: String), Exit _) <- cmd (Cwd tmpDir) Shell
-      "blastdbget"  tmpDir ">" listTmp'
-    debugTrackWrite cfg [listTmp']
+    code <- wrappedCmdExit cfg [Cwd tmpDir, Shell]
+      "blastdbget" [tmpDir, ">", listTmp']
+    case code of
+      ExitSuccess   -> debugTrackWrite cfg [listTmp'] -- never happens :(
+      ExitFailure 1 -> debugTrackWrite cfg [listTmp']
+      ExitFailure n -> wrappedCmdError "blastdbget" n [listTmp']
   filterStr <- readLit  cfg fPath'
   out       <- readLits cfg listTmp'
   let names  = if null out then [] else tail out
@@ -213,9 +216,7 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   dbName <- fmap stripWhiteSpace $ readLit cfg nPath' -- TODO need to strip?
   liftIO $ createDirectoryIfMissing True tmp' -- TODO remove?
   -- TODO was taxdb needed for anything else?
-  -- TODO any way to get back the wrapping, since this takes a long time?
-  -- quietly $ wrappedCmd cfg [dbPrefix'' ++ ".*"] [Cwd tmp']
-  Stdouterr (_ :: String) <- quietly $ cmd [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
+  quietly $ wrappedCmd cfg [] [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
   writeLit cfg dbPrefix'' $ tmp' </> dbName
   where
@@ -319,7 +320,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- TODO is there a need for wrapping or cleanup on errors here?
   -- TODO check files before too and skip if they exist? annoying but still...
   -- quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd cDir']
-  (Stdout (_ :: String), Stderr (_ :: String)) <- quietly $ cmd [Cwd cDir'] "makeblastdb"
+  quietly $ wrappedCmd cfg [ptn] [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
