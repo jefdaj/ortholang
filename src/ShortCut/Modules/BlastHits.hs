@@ -70,8 +70,9 @@ extractTargetsEach = CutFunction
 -- TODO rewrite this awk -> haskell for cross platform compatibility?
 aTsvColumn :: Int -> CutConfig -> [CutPath] -> Action ()
 aTsvColumn n cfg [outPath, tsvPath] = do
-  let awkCmd = "awk '{print $" ++ show n ++ "}'"
-  out <- wrappedCmdOut cfg [tsvPath'] [Shell] awkCmd [tsvPath']
+  -- let awkCmd = "awk '{print $" ++ show n ++ "}'"
+  -- let print1 = "\"{print $" ++ show n ++ "}\""
+  out <- wrappedCmdOut cfg [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
   let out' = sort $ nub $ lines out
   writeLits cfg outPath'' out'
   where
