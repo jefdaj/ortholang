@@ -40,7 +40,7 @@ extractQueries = CutFunction
   { fName      = "extract_queries"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fRules     = rSimple $ aTsvColumn 1
+  , fRules     = rSimple $ aCutCol 1
   }
 
 extractQueriesEach :: CutFunction
@@ -48,7 +48,7 @@ extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules     = rEach $ aTsvColumn 1
+  , fRules     = rEach $ aCutCol 1
   }
 
 extractTargets :: CutFunction
@@ -56,7 +56,7 @@ extractTargets = CutFunction
   { fName      = "extract_targets"
   , fTypeCheck = tExtract
   , fFixity    = Prefix
-  , fRules     = rSimple $ aTsvColumn 2
+  , fRules     = rSimple $ aCutCol 2
   }
 
 extractTargetsEach :: CutFunction
@@ -64,22 +64,19 @@ extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
   , fFixity    = Prefix
-  , fRules     = rEach $ aTsvColumn 2
+  , fRules     = rEach $ aCutCol 2
   }
 
--- TODO rewrite this awk -> haskell for cross platform compatibility?
-aTsvColumn :: Int -> CutConfig -> [CutPath] -> Action ()
-aTsvColumn n cfg [outPath, tsvPath] = do
-  -- let awkCmd = "awk '{print $" ++ show n ++ "}'"
-  -- let print1 = "\"{print $" ++ show n ++ "}\""
+aCutCol :: Int -> CutConfig -> [CutPath] -> Action ()
+aCutCol n cfg [outPath, tsvPath] = do
   out <- wrappedCmdOut cfg [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
   let out' = sort $ nub $ lines out
   writeLits cfg outPath'' out'
   where
     outPath'  = fromCutPath cfg outPath
-    outPath'' = debugAction cfg "aTsvColumn" outPath' [show n, outPath', tsvPath']
+    outPath'' = debugAction cfg "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aTsvColumn _ _ _ = error "bad arguments to aTsvColumn"
+aCutCol _ _ _ = error "bad arguments to aCutCol"
 
 --------------------------
 -- filter_evalue(_each) --

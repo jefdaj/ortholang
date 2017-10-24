@@ -8,8 +8,8 @@ import ShortCut.Core.Types
 import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (fromCutPath, readPaths, CutPath)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rLoadOne,
-                                    rLoadList, rSimple, rSimpleScript)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
+                                    mkLoadList, rSimple, rSimpleScript)
 import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
 
 cutModule :: CutModule
@@ -54,34 +54,6 @@ fna = CutType
 -------------------
 -- load_*(_each) --
 -------------------
-
--- TODO move somewhere in Core
-
-{- Takes a string with the filepath to load. Creates a trivial expression file
- - that's just a symlink to the given path. These should be the only absolute
- - links, and the only ones that point outside the temp dir.
- - TODO still true?
- -}
-mkLoad :: String -> CutType -> CutFunction
-mkLoad name rtn = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [str] rtn
-  , fFixity    = Prefix
-  , fRules     = rLoadOne
-  }
-
-{- Like cLoad, except it operates on a list of strings. Note that you can also
- - load lists using cLoad, but it's not recommended because then you have to
- - write the list in a file, whereas this can handle literal lists in the
- - source code.
- -}
-mkLoadList :: String -> CutType -> CutFunction
-mkLoadList name rtn = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
-  , fFixity    = Prefix
-  , fRules     = rLoadList
-  }
 
 loadFaa :: CutFunction
 loadFaa = mkLoad "load_faa" faa
