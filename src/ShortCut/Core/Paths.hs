@@ -159,9 +159,8 @@ argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
 --      ah, md5sum doesn't read the whole file. that might work too then!
 hashContent :: CutConfig -> CutPath -> Action String
 hashContent cfg path = do
-  -- txt <- debugReadFile cfg $ fromCutPath cfg path
-  -- return $ digest txt
   need [path']
+  -- liftIO $ putStrLn $ "hashing " ++ path'
   out <- wrappedCmdOut cfg [] [] "md5sum" [path']
   let md5 = head $ words out -- TODO adapt failGracfully to work here
   -- liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5

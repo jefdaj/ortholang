@@ -1,9 +1,11 @@
 .
 |-- cache
-|   `-- list
-|       |-- 3376392f1e.txt
-|       |-- 8dfc0381aa.txt
-|       `-- d638a30b27.txt
+|   |-- list
+|   |   |-- 3376392f1e.txt
+|   |   |-- 8dfc0381aa.txt
+|   |   `-- d638a30b27.txt
+|   `-- load
+|       `-- 88580a1accd5f43e9a0db90c63722806 -> $WORKDIR/data/6803genome.gbff
 |-- exprs
 |   |-- any
 |   |   `-- cd4c4aeee8.gbk.list
@@ -13,7 +15,7 @@
 |   |   |-- 97a9ed4a3c.str.list -> ../../cache/list/d638a30b27.txt
 |   |   `-- ee177ad95e.gbk.list -> ../../cache/list/3376392f1e.txt
 |   |-- load_gbk
-|   |   `-- 7283470912.gbk -> $WORKDIR/data/6803genome.gbff
+|   |   `-- 7283470912.gbk -> ../../cache/load/88580a1accd5f43e9a0db90c63722806
 |   `-- str
 |       `-- 8b9871a6e5.str -> ../../cache/list/d638a30b27.txt
 `-- vars
@@ -21,4 +23,4 @@
     |-- result -> ../exprs/any/cd4c4aeee8.gbk.list
     `-- single.gbk -> ../exprs/load_gbk/7283470912.gbk
 
-8 directories, 13 files
+9 directories, 14 files

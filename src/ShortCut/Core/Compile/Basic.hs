@@ -23,7 +23,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, writePaths, CutPath, readLitPaths,
-                            readLit, readLits, writeLits)
+                            readLit, readLits, writeLits, hashContent)
 
 import Control.Monad               (when)
 import Data.List                   (find, sort, intersperse)
@@ -214,7 +214,7 @@ rRef (_,cfg) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
 rRef _ _ = error "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.
--- TODO unify with rLink2, rLoadOne etc?
+-- TODO unify with rLink2, rLoad etc?
 -- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
 rVar :: CutState -> CutVar -> CutExpr -> CutPath -> Rules VarPath
 rVar (_,cfg) var expr dest = do
@@ -317,30 +317,6 @@ aOneArgListScript cfg outPath script tmpDir faPath = do
 -- links to input files --
 --------------------------
 
--- The paths here are a little confusing: expr is a str of the path we want to
--- link to. So after compiling it we get a path to *that str*, and have to read
--- the file to access it. Then we want to `ln` to the file it points to.
-rLink :: CutState -> CutExpr -> CutExpr -> Rules ExprPath
-rLink s@(_,cfg) outExpr strExpr = do
-  (ExprPath strPath) <- rExpr s strExpr
-  out' %> \_ -> aLink cfg (toCutPath cfg strPath) outPath
-  return (ExprPath out')
-  where
-    outPath = exprPath s outExpr
-    out'    = fromCutPath cfg outPath
-
-aLink :: CutConfig -> CutPath -> CutPath -> Action ()
-aLink cfg strPath outPath = do
-  pth <- readLitPaths cfg strPath'
-  src <- liftIO $ resolveSymlinks cfg $ fromCutPath cfg $ head pth
-  need [src]
-  unit $ quietly $ wrappedCmd cfg [outPath'] [] "ln" ["-fs", src, outPath']
-  debugTrackWrite cfg [out]
-  where
-    strPath' = fromCutPath cfg strPath
-    outPath' = fromCutPath cfg outPath
-    out = debugAction cfg "aLink" outPath' [outPath', strPath']
-
 {- Takes a string with the filepath to load. Creates a trivial expression file
  - that's just a symlink to the given path. These should be the only absolute
  - links, and the only ones that point outside the temp dir.
@@ -351,7 +327,7 @@ mkLoad name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fFixity    = Prefix
-  , fRules     = rLoadOne
+  , fRules     = rLoad
   }
 
 {- Like cLoad, except it operates on a list of strings. Note that you can also
@@ -367,11 +343,50 @@ mkLoadList name rtn = CutFunction
   , fRules     = rLoadList
   }
 
--- TODO remove this?
--- TODO is this where to convert string -> generic workdir path?
-rLoadOne :: RulesFn
-rLoadOne s e@(CutFun _ _ _ _ [p]) = rLink s e p
-rLoadOne _ _ = error "bad argument to rLoadOne"
+-- The paths here are a little confusing: expr is a str of the path we want to
+-- link to. So after compiling it we get a path to *that str*, and have to read
+-- the file to access it. Then we want to `ln` to the file it points to.
+rLoad :: CutState -> CutExpr -> Rules ExprPath
+rLoad s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
+  (ExprPath strPath) <- rExpr s p
+  out' %> \_ -> aLoad cfg (toCutPath cfg strPath) out
+  return (ExprPath out')
+  where
+    out  = exprPath s e
+    out' = fromCutPath cfg out
+rLoad _ _ = error "bad argument to rLoad"
+
+-- TODO add extensions?
+aLoadHash :: CutConfig -> CutPath -> Action CutPath
+aLoadHash cfg src = do
+  need [src']
+  md5 <- hashContent cfg src
+  let tmpDir'      = fromCutPath cfg $ cacheDir cfg "load"
+      hashPath'    = tmpDir' </> md5
+      hashPath     = toCutPath cfg hashPath'
+  done <- doesFileExist hashPath'
+  when (not done) $ do
+    liftIO $ createDirectoryIfMissing True tmpDir'
+    unit $ quietly $ wrappedCmd cfg [hashPath'] [] "ln" ["-fs", src', hashPath']
+    debugTrackWrite cfg [hashPath']
+  return hashPath
+  where
+    src' = fromCutPath cfg src
+
+aLoad :: CutConfig -> CutPath -> CutPath -> Action ()
+aLoad cfg strPath outPath = do
+  need [strPath']
+  pth <- readLitPaths cfg strPath'
+  src' <- liftIO $ resolveSymlinks cfg $ fromCutPath cfg $ head pth -- TODO safer!
+  hashPath <- aLoadHash cfg $ toCutPath cfg src'
+  let hashPath'    = fromCutPath cfg hashPath
+      hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
+  unit $ quietly $ wrappedCmd cfg [outPath''] [] "ln" ["-fs", hashPathRel', outPath'']
+  debugTrackWrite cfg [outPath'']
+  where
+    strPath' = fromCutPath cfg strPath
+    outPath' = fromCutPath cfg outPath
+    outPath'' = debugAction cfg "aLoad" outPath' [strPath', outPath']
 
 rLoadList :: RulesFn
 rLoadList s e@(CutFun r _ _ _ [es])
@@ -414,6 +429,7 @@ rLoadListLinks s@(_,cfg) (CutFun rtn salt _ _ [es]) = do
   return (ExprPath outPath')
 rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
 
+-- TODO add md5sum intermediates here too!
 aLoadListLinks :: CutConfig -> CutPath -> CutPath -> Action ()
 aLoadListLinks cfg pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
