@@ -1,19 +1,20 @@
 .
 |-- cache
 |   |-- list
+|   |   |-- 176248713b.txt
 |   |   |-- 1b0af3628d.txt
 |   |   |-- adfdb6bd8c.txt
-|   |   `-- d6a92c3168.txt
+|   |   `-- d8a28c98d9.txt
 |   `-- load
 |       `-- 8aa4a9d2fc29ad1145fbcced4c072940 -> $WORKDIR/data/6803genes.faa
 |-- exprs
 |   |-- any
 |   |   `-- b263221211.faa.list
 |   |-- list
-|   |   |-- 0ec5fc193b.faa.list -> ../../cache/list/1b0af3628d.txt
+|   |   |-- 0ec5fc193b.faa.list -> ../../cache/list/176248713b.txt
 |   |   |-- 49ae883ffc.faa.list -> ../../cache/list/1b0af3628d.txt
 |   |   |-- 9344405238.str.list -> ../../cache/list/adfdb6bd8c.txt
-|   |   `-- 98a7f2843e.faa.list.list -> ../../cache/list/d6a92c3168.txt
+|   |   `-- 98a7f2843e.faa.list.list -> ../../cache/list/d8a28c98d9.txt
 |   |-- load_faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
 |   `-- str
@@ -23,4 +24,4 @@
     |-- result -> ../exprs/any/b263221211.faa.list
     `-- single.faa -> ../exprs/load_faa/dee24d6c3c.faa
 
-9 directories, 14 files
+9 directories, 15 files

@@ -24,12 +24,15 @@
 |   |       |-- d32a12ff7d.str.list.args
 |   |       |-- ecf7deb09d.str.list -> $TMPDIR/exprs/extract_queries/ecf7deb09d.str.list
 |   |       `-- ecf7deb09d.str.list.args
-|   `-- list
-|       |-- 778251fd80.txt
-|       |-- ac169c078d.txt
-|       |-- adfdb6bd8c.txt
-|       |-- bdc783547b.txt
-|       `-- c931882c44.txt
+|   |-- list
+|   |   |-- 778251fd80.txt
+|   |   |-- ac169c078d.txt
+|   |   |-- adfdb6bd8c.txt
+|   |   |-- bdc783547b.txt
+|   |   `-- c931882c44.txt
+|   `-- load
+|       |-- 8aa4a9d2fc29ad1145fbcced4c072940 -> $WORKDIR/data/6803genes.faa
+|       `-- a810086108cd8211510df2ca12adf1fc -> $WORKDIR/data/7942genes.faa
 |-- exprs
 |   |-- all
 |   |   |-- 44465f9b68.str.list
@@ -63,10 +66,10 @@
 |   |   |-- 86c989da97.str.list.list -> ../../cache/list/ac169c078d.txt
 |   |   `-- c98dbc5f6b.faa.list -> ../../cache/list/c931882c44.txt
 |   |-- load_faa
-|   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
-|   |   |-- dee24d6c3c_1.faa -> $WORKDIR/data/6803genes.faa
-|   |   |-- dee24d6c3c_2.faa -> $WORKDIR/data/6803genes.faa
-|   |   `-- dee24d6c3c_3.faa -> $WORKDIR/data/6803genes.faa
+|   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108cd8211510df2ca12adf1fc
+|   |   |-- dee24d6c3c_1.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
+|   |   |-- dee24d6c3c_2.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
+|   |   `-- dee24d6c3c_3.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
 |   |-- makeblastdb_prot
 |   |   |-- 4acc4c870e.pdb
 |   |   |-- 73946534c6.pdb
@@ -122,4 +125,4 @@
     |-- solidFwd.str.list -> ../exprs/all/44465f9b68.str.list
     `-- solidRec.str.list -> ../exprs/all/8f69d7513a.str.list
 
-24 directories, 98 files
+25 directories, 100 files

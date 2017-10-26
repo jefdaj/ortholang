@@ -22,6 +22,9 @@
 |   |   |-- 778251fd80.txt
 |   |   |-- c7e80436b4.txt
 |   |   `-- da1aa07b4d.txt
+|   |-- load
+|   |   |-- 6ea57f12083af2071f0eb12fdc9642a6 -> $WORKDIR/data/6803genes10.fna
+|   |   `-- 737dfdb34eed1fb6a6e2ad63cd99eb7b -> $WORKDIR/data/6803genes.fna
 |   `-- makeblastdb
 |       `-- 737dfdb34eed1fb6a6e2ad63cd99eb7b
 |           |-- 737dfdb34eed1fb6a6e2ad63cd99eb7b.ndb.nhr
@@ -46,8 +49,8 @@
 |   |   |-- b72d792449.fna.list -> ../../cache/list/0aac195355.txt
 |   |   `-- cc3e9bbae7.bht.list.list -> ../../cache/list/da1aa07b4d.txt
 |   |-- load_fna
-|   |   |-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
-|   |   `-- f110b4b1c9.fna -> $WORKDIR/data/6803genes.fna
+|   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f12083af2071f0eb12fdc9642a6
+|   |   `-- f110b4b1c9.fna -> ../../cache/load/737dfdb34eed1fb6a6e2ad63cd99eb7b
 |   |-- makeblastdb_nucl
 |   |   |-- 68f4ddeb65.ndb
 |   |   `-- fddf135b43.ndb
@@ -65,4 +68,4 @@
     |-- single.bht -> ../exprs/blastn_db/8158675169_8df2fbb1a8_a78dfa6d35.bht
     `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-24 directories, 41 files
+25 directories, 43 files

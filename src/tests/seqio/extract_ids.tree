@@ -7,16 +7,19 @@
 |   |   `-- e2d1834580
 |   |       |-- 89c1f12bb3.str.list -> $TMPDIR/exprs/extract_ids/89c1f12bb3.str.list
 |   |       `-- 89c1f12bb3.str.list.args
-|   `-- list
-|       |-- 0815de9417.txt
-|       |-- 3c431f121f.txt
-|       |-- 3d74a0df3f.txt
-|       |-- 54a2bf7098.txt
-|       |-- 88aa4b2fae.txt
-|       |-- 8d8f73bf83.txt
-|       |-- c8be8722f2.txt
-|       |-- eb68d94c66.txt
-|       `-- f2b04c697f.txt
+|   |-- list
+|   |   |-- 0815de9417.txt
+|   |   |-- 3c431f121f.txt
+|   |   |-- 3d74a0df3f.txt
+|   |   |-- 54a2bf7098.txt
+|   |   |-- 88aa4b2fae.txt
+|   |   |-- 8d8f73bf83.txt
+|   |   |-- c8be8722f2.txt
+|   |   |-- eb68d94c66.txt
+|   |   `-- f2b04c697f.txt
+|   `-- load
+|       |-- 6ea57f12083af2071f0eb12fdc9642a6 -> $WORKDIR/data/6803genes10.fna
+|       `-- 8a695c317a01632796e99e392591d93a -> $WORKDIR/data/6803genes10.faa
 |-- exprs
 |   |-- any
 |   |   |-- b9c67f5ccd.str.list.list
@@ -39,9 +42,9 @@
 |   |   |-- b7cc684382.str.list.list -> ../../cache/list/8d8f73bf83.txt
 |   |   `-- e34fcef70b.str.list.list.list -> ../../cache/list/3c431f121f.txt
 |   |-- load_faa
-|   |   `-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- bb54df8bd7.faa -> ../../cache/load/8a695c317a01632796e99e392591d93a
 |   |-- load_fna
-|   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
+|   |   `-- 9b7934c579.fna -> ../../cache/load/6ea57f12083af2071f0eb12fdc9642a6
 |   `-- str
 |       |-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
 |       `-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
@@ -56,4 +59,4 @@
     |-- singleFaa.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
     `-- singleFna.str.list -> ../exprs/extract_ids/8df2fbb1a8.str.list
 
-14 directories, 42 files
+15 directories, 44 files

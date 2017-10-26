@@ -31,6 +31,9 @@
 |   |   |-- bdc783547b.txt
 |   |   |-- ef87d3e725.txt
 |   |   `-- f7add36d38.txt
+|   |-- load
+|   |   |-- 32841598b2ee4ef87d2669fc9e31cb5a -> $WORKDIR/data/7942genes10.faa
+|   |   `-- a810086108cd8211510df2ca12adf1fc -> $WORKDIR/data/7942genes.faa
 |   `-- makeblastdb
 |       `-- a810086108cd8211510df2ca12adf1fc
 |           |-- a810086108cd8211510df2ca12adf1fc.pdb.phr
@@ -67,8 +70,8 @@
 |   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/b9f4259be4.txt
 |   |   `-- cce65539fd.faa.list -> ../../cache/list/176aefc67f.txt
 |   |-- load_faa
-|   |   |-- 2d88028e40.faa -> $WORKDIR/data/7942genes10.faa
-|   |   `-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2ee4ef87d2669fc9e31cb5a
+|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108cd8211510df2ca12adf1fc
 |   |-- makeblastdb_prot
 |   |   |-- 3fae05ef93.pdb
 |   |   `-- c08cc19988.pdb
@@ -91,4 +94,4 @@
     |-- singleFwd.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
     `-- singleRev.str.list -> ../exprs/extract_queries/a2aa077102.str.list
 
-28 directories, 63 files
+29 directories, 65 files

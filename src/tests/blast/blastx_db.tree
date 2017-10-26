@@ -12,13 +12,16 @@
 |   |   `-- e1397ded9f
 |   |       |-- 46b5852d89.bht -> $TMPDIR/exprs/blastx_db/fe7dee10f6_b23045213e_46b5852d89.bht
 |   |       `-- 46b5852d89.bht.args
-|   `-- list
-|       |-- 572e0669fc.txt
-|       |-- 778251fd80.txt
-|       |-- af5b1fa4b5.txt
-|       |-- bdc783547b.txt
-|       |-- daecab170a.txt
-|       `-- f530950d29.txt
+|   |-- list
+|   |   |-- 572e0669fc.txt
+|   |   |-- 778251fd80.txt
+|   |   |-- af5b1fa4b5.txt
+|   |   |-- bdc783547b.txt
+|   |   |-- daecab170a.txt
+|   |   `-- f530950d29.txt
+|   `-- load
+|       |-- 0238b7dcead3bc80b7338694813bd290 -> $WORKDIR/data/7942genes10.fna
+|       `-- a810086108cd8211510df2ca12adf1fc -> $WORKDIR/data/7942genes.faa
 |-- exprs
 |   |-- all
 |   |   `-- 782f523b0c.str.list
@@ -39,9 +42,9 @@
 |   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/572e0669fc.txt
 |   |   `-- e214a4da42.pdb.list -> ../../cache/list/af5b1fa4b5.txt
 |   |-- load_faa
-|   |   `-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108cd8211510df2ca12adf1fc
 |   |-- load_fna
-|   |   `-- 82b637da24.fna -> $WORKDIR/data/7942genes10.fna
+|   |   `-- 82b637da24.fna -> ../../cache/load/0238b7dcead3bc80b7338694813bd290
 |   |-- makeblastdb_prot
 |   |   `-- c08cc19988.pdb
 |   |-- num
@@ -56,4 +59,4 @@
     |-- result -> ../exprs/all/782f523b0c.str.list
     `-- single.str.list -> ../exprs/extract_queries/ba961ef0a0.str.list
 
-21 directories, 35 files
+22 directories, 37 files

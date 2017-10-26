@@ -125,6 +125,7 @@ rListEmpty s@(_,cfg) e@(CutList Empty _ _ _) = do
 rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 
 -- TODO is this actually needed? seems the same as lits or paths really
+--      (also, is there a need to write empty lists at all?)
 aListEmpty :: CutConfig -> CutPath -> Action ()
 aListEmpty cfg link = do
   -- TODO should the wrappedCmd stuff be CutPaths or plain FilePaths?
@@ -429,7 +430,6 @@ rLoadListLinks s@(_,cfg) (CutFun rtn salt _ _ [es]) = do
   return (ExprPath outPath')
 rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
 
--- TODO add md5sum intermediates here too!
 aLoadListLinks :: CutConfig -> CutPath -> CutPath -> Action ()
 aLoadListLinks cfg pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
@@ -438,10 +438,12 @@ aLoadListLinks cfg pathsPath outPath = do
   paths <- readLitPaths cfg pathsPath'
   let paths' = map (fromCutPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks cfg) paths'
-  -- liftIO $ putStrLn $ "about to need: " ++ show paths''
-  need paths''
   let paths''' = map (toCutPath cfg) paths''
-  writeDeduped cfg writePaths out paths'''
+  hashPaths <- mapM (aLoadHash cfg) paths'''
+  let hashPaths' = map (fromCutPath cfg) hashPaths
+  -- liftIO $ putStrLn $ "about to need: " ++ show paths''
+  need hashPaths'
+  writeDeduped cfg writePaths out hashPaths
   where
     outPath'   = fromCutPath cfg outPath
     pathsPath' = fromCutPath cfg pathsPath
