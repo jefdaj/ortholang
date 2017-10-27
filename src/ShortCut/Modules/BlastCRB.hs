@@ -4,10 +4,10 @@ module ShortCut.Modules.BlastCRB where
 
 import ShortCut.Core.Types
 import Development.Shake       -- (quietly, Action, CmdOption(..), need, unit)
-import Development.Shake.FilePath ((</>), (<.>), takeExtension)
+import Development.Shake.FilePath ((</>), (<.>), takeExtension, makeRelative)
 import System.Directory (createDirectoryIfMissing)
-import ShortCut.Core.Paths     (CutPath, fromCutPath, hashContent)
--- import ShortCut.Core.Util      (digest)
+import ShortCut.Core.Paths     (CutPath, fromCutPath)
+import ShortCut.Core.Util      (digest, resolveSymlinks)
 import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each (rEachTmp)
@@ -75,28 +75,33 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   -- CRB-BLAST has pretty bad file naming practices, so to prevent
   -- conflicts it needs to be run on unique filenames in a unique directory.
   -- TODO do we need to check for existence of the files first?
-  need $ map (fromCutPath cfg) [q, t]
-  qHash <- hashContent cfg q
-  tHash <- hashContent cfg t
+  need [q', t']
+  qHash <- fmap digest $ liftIO $ resolveSymlinks cfg q'
+  tHash <- fmap digest $ liftIO $ resolveSymlinks cfg t'
   let tDir  = fromCutPath cfg tmpDir </> qHash ++ "_" ++ tHash
       qLink = tDir </> qHash <.> takeExtension q'
       tLink = tDir </> tHash <.> takeExtension t'
+      -- qLinkRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) qLink
+      -- tLinkRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) tLink
       oPath = tDir </> "results.crb"
+      oRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) oPath
   -- liftIO $ putStrLn $ "tDir: " ++ tDir
   liftIO $ createDirectoryIfMissing True tDir
-  unit $ quietly $ wrappedCmd cfg [q'] [] "ln" ["-fs", q', qLink]
-  unit $ quietly $ wrappedCmd cfg [t'] [] "ln" ["-fs", t', tLink]
+  unit $ quietly $ wrappedCmd cfg [q'] [] "ln" ["-fs", qRel', qLink]
+  unit $ quietly $ wrappedCmd cfg [t'] [] "ln" ["-fs", tRel', tLink]
   debugTrackWrite cfg [qLink, tLink]
   -- Once that's set up we can finally run it.
   -- TODO relative path from actual out path to the hashed cached one?
   quietly $ wrappedCmd cfg [o'] [Cwd tDir]
     "crb-blast" ["--query", qLink, "--target", tLink, "--output", oPath]
   debugTrackWrite cfg [oPath]
-  unit $ quietly $ wrappedCmd cfg [t'] [] "ln" ["-fs", oPath, o'']
+  unit $ quietly $ wrappedCmd cfg [oRel'] [] "ln" ["-fs", oRel', o'']
   debugTrackWrite cfg [o'']
   where
     o'   = fromCutPath cfg o
     o''  = debugAction cfg "aBlastCRB" o' [fromCutPath cfg tmpDir, o', q', t']
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t
+    qRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) q'
+    tRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) t'
 aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
