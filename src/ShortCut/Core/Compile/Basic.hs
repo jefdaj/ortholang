@@ -152,6 +152,7 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
  - properly deduplicated when used in a set operation. It also makes the .tree
  - test files much stricter, since they'll change if any list element changes.
  -
+ - TODO switch to md5sum/hashContent?
  - TODO does it need to handle a race condition when writing to the cache?
  - TODO any reason to keep original extensions instead of all using .txt?
  -      oh, if we're testing extensions anywhere. lets not do that though
@@ -390,8 +391,8 @@ aLoad cfg strPath outPath = do
     outPath'' = debugAction cfg "aLoad" outPath' [strPath', outPath']
 
 rLoadList :: RulesFn
-rLoadList s e@(CutFun r _ _ _ [es])
-  | r `elem` [ListOf str, ListOf num] = rLoadListLits s es
+rLoadList s e@(CutFun (ListOf r) _ _ _ [es])
+  | r `elem` [str, num] = rLoadListLits s es
   | otherwise = rLoadListLinks s e
 rLoadList _ _ = error "bad arguments to rLoadList"
 
