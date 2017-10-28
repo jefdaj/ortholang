@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- blastdb
-|   |   |-- 63b6fa9145
-|   |   |   |-- 63b6fa9145.pdb.phr
-|   |   |   |-- 63b6fa9145.pdb.pin
-|   |   |   `-- 63b6fa9145.pdb.psq
-|   |   `-- f1e136eaf6
-|   |       |-- f1e136eaf6.pdb.phr
-|   |       |-- f1e136eaf6.pdb.pin
-|   |       `-- f1e136eaf6.pdb.psq
+|   |   |-- 8aa4a9d2fc29ad1145fbcced4c072940
+|   |   |   |-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.phr
+|   |   |   |-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.pin
+|   |   |   `-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.psq
+|   |   `-- a810086108cd8211510df2ca12adf1fc
+|   |       |-- a810086108cd8211510df2ca12adf1fc.pdb.phr
+|   |       |-- a810086108cd8211510df2ca12adf1fc.pdb.pin
+|   |       `-- a810086108cd8211510df2ca12adf1fc.pdb.psq
 |   |-- each
 |   |   |-- 373cb5605f
 |   |   |   |-- 394b76567b.str.list -> $TMPDIR/exprs/extract_queries/394b76567b.str.list
@@ -18,14 +18,17 @@
 |   |   `-- a7030e5acc
 |   |       |-- 472c8a152d.str.list -> $TMPDIR/exprs/extract_targets/472c8a152d.str.list
 |   |       `-- 472c8a152d.str.list.args
-|   `-- list
-|       |-- 1a122e4c4a.txt
-|       |-- 67045753f7.txt
-|       |-- 778251fd80.txt
-|       |-- 79b8350871.txt
-|       |-- a6ba15d651.txt
-|       |-- adfdb6bd8c.txt
-|       `-- bdc783547b.txt
+|   |-- list
+|   |   |-- 1a122e4c4a.txt
+|   |   |-- 67045753f7.txt
+|   |   |-- 778251fd80.txt
+|   |   |-- 79b8350871.txt
+|   |   |-- a6ba15d651.txt
+|   |   |-- adfdb6bd8c.txt
+|   |   `-- bdc783547b.txt
+|   `-- load
+|       |-- 8aa4a9d2fc29ad1145fbcced4c072940 -> $WORKDIR/data/6803genes.faa
+|       `-- a810086108cd8211510df2ca12adf1fc -> $WORKDIR/data/7942genes.faa
 |-- exprs
 |   |-- all
 |   |   `-- 93c342188f.str.list
@@ -52,8 +55,8 @@
 |   |   |-- 7c44263038.str.list.list -> ../../cache/list/79b8350871.txt
 |   |   `-- e076c92f67.str.list.list.list -> ../../cache/list/1a122e4c4a.txt
 |   |-- load_faa
-|   |   |-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
-|   |   `-- dee24d6c3c.faa -> $WORKDIR/data/6803genes.faa
+|   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108cd8211510df2ca12adf1fc
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
 |   |-- makeblastdb_prot
 |   |   |-- c08cc19988.pdb
 |   |   `-- c14344af19.pdb
@@ -80,4 +83,4 @@
     |-- rev1.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
     `-- rev2.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
 
-24 directories, 56 files
+25 directories, 58 files

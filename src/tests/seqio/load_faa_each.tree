@@ -1,9 +1,12 @@
 .
 |-- cache
-|   `-- list
-|       |-- 51236a4a80.txt
-|       |-- c8be8722f2.txt
-|       `-- f2b04c697f.txt
+|   |-- list
+|   |   |-- aee21620e8.txt
+|   |   |-- b88593c522.txt
+|   |   |-- c8be8722f2.txt
+|   |   `-- f2b04c697f.txt
+|   `-- load
+|       `-- 8a695c317a01632796e99e392591d93a -> $WORKDIR/data/6803genes10.faa
 |-- exprs
 |   |-- any
 |   |   `-- 7fcf2bb2a7.faa.list
@@ -12,10 +15,10 @@
 |   |-- list
 |   |   |-- 92a442b0d4.faa.list -> ../../cache/list/f2b04c697f.txt
 |   |   |-- c5991bd883.str.list -> ../../cache/list/c8be8722f2.txt
-|   |   |-- f9b061f43f.faa.list.list -> ../../cache/list/51236a4a80.txt
-|   |   `-- fff391d510.faa.list -> ../../cache/list/f2b04c697f.txt
+|   |   |-- f9b061f43f.faa.list.list -> ../../cache/list/aee21620e8.txt
+|   |   `-- fff391d510.faa.list -> ../../cache/list/b88593c522.txt
 |   |-- load_faa
-|   |   `-- bb54df8bd7.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- bb54df8bd7.faa -> ../../cache/load/8a695c317a01632796e99e392591d93a
 |   `-- str
 |       `-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
 `-- vars
@@ -23,4 +26,4 @@
     |-- list2.faa.list -> ../exprs/list/92a442b0d4.faa.list
     `-- result -> ../exprs/length/10b40f299a.num
 
-9 directories, 14 files
+10 directories, 16 files

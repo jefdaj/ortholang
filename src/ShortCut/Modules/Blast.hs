@@ -14,8 +14,8 @@ import ShortCut.Core.Types
 
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Each   (rEach)
-import ShortCut.Core.Config        (wrappedCmd)
+import ShortCut.Core.Compile.Each  (rEach)
+import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
 import ShortCut.Core.Paths         (readLit, readPath, fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb)

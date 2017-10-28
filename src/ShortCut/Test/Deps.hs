@@ -30,9 +30,9 @@ mkTests _ = do
          $ map (mkTestDep testDir) depCmds
 
 mkTestDep :: FilePath -> (TestName, String) -> TestTree
-mkTestDep dir (name, wrappedCmd) = goldenVsString name gld act
+mkTestDep dir (name, cmd) = goldenVsString name gld act
   where
     gld = dir </> name <.> "txt"
     act = do
-      (_, out, err) <- readCreateProcessWithExitCode (shell wrappedCmd) ""
+      (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""
       return $ pack $ err ++ out

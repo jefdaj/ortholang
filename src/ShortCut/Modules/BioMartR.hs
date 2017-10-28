@@ -17,7 +17,7 @@ import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath, readLits)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
-import ShortCut.Core.Config (wrappedCmd)
+import ShortCut.Core.Cmd           (wrappedCmd)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)

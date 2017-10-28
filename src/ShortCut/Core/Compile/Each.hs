@@ -17,7 +17,7 @@ import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), takeDirectory)
-import ShortCut.Core.Config       (wrappedCmd)
+import ShortCut.Core.Cmd          (wrappedCmd)
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    readPaths, writePaths, CutPath,
