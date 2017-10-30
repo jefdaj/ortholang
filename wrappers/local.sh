@@ -8,8 +8,8 @@ log() { [[ -z $SHORTCUT_LOGLEVEL ]] || echo "[$(date '+%Y-%m-%d %H:%M:%S')] $@";
 
 case "$(basename "$1")" in
   crb-blast) CMD="$@ --verbose --split --threads=$(nproc)"; log "$CMD";;
-	cat|ln) CMD="$@";; # TODO does anything echoed here get sent to the output file??
-	*) CMD="$@"; log "$CMD";; # run the command as-is in this shell
+  cat|ln) CMD="$@";; # TODO does anything echoed here get sent to the output file??
+  *) CMD="$@"; log "$CMD";; # run the command as-is in this shell
 esac
 
 $CMD
