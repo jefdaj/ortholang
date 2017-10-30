@@ -1,37 +1,42 @@
 .
 |-- cache
-|   `-- crbblast
-|       `-- 4d628a7b21_8097f4a369
-|           `-- 6306b9726c_f1e136eaf6
-|               |-- 6306b9726c.fna -> $WORKDIR/data/6803genes10.fna
-|               |-- 6306b9726c.nhr
-|               |-- 6306b9726c.nin
-|               |-- 6306b9726c.nsq
-|               |-- 6306b9726c_into_f1e136eaf6.1.blast
-|               |-- evalues_data
-|               |-- f1e136eaf6.faa -> $WORKDIR/data/7942genes.faa
-|               |-- f1e136eaf6.phr
-|               |-- f1e136eaf6.pin
-|               |-- f1e136eaf6.psq
-|               |-- f1e136eaf6_into_6306b9726c.2.blast
-|               |-- fitting_data
-|               `-- results.crb
+|   |-- crbblast
+|   |   `-- f4ed70a2e2_cde8d05a44
+|   |       |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|   |       |-- 6ea57f1208.nhr
+|   |       |-- 6ea57f1208.nin
+|   |       |-- 6ea57f1208.nsq
+|   |       |-- 6ea57f1208_into_a810086108.1.blast
+|   |       |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |       |-- a810086108.phr
+|   |       |-- a810086108.pin
+|   |       |-- a810086108.psq
+|   |       |-- a810086108_into_6ea57f1208.2.blast
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       `-- results.crb
+|   |-- list
+|   |   |-- 0815de9417.txt
+|   |   `-- bdc783547b.txt
+|   `-- load
+|       |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|       `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
 |-- exprs
 |   |-- crb_blast
-|   |   `-- 8df2fbb1a8_c08cc19988.crb -> $TMPDIR/cache/crbblast/4d628a7b21_8097f4a369/6306b9726c_f1e136eaf6/results.crb
+|   |   `-- 8df2fbb1a8_c08cc19988.crb -> ../../cache/crbblast/f4ed70a2e2_cde8d05a44/results.crb
 |   |-- extract_targets
 |   |   `-- 937952d031.str.list
 |   |-- load_faa
-|   |   `-- 387f499ddc.faa -> $WORKDIR/data/7942genes.faa
+|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- load_fna
-|   |   `-- 9b7934c579.fna -> $WORKDIR/data/6803genes10.fna
+|   |   `-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   `-- str
-|       |-- 1d8a61c770.str
-|       `-- 7da80bde02.str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       `-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
 `-- vars
     |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- hits.crb -> ../exprs/crb_blast/8df2fbb1a8_c08cc19988.crb
     |-- mini6803.fna -> ../exprs/load_fna/9b7934c579.fna
     `-- result -> ../exprs/extract_targets/937952d031.str.list
 
-11 directories, 23 files
+12 directories, 27 files

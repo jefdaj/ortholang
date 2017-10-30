@@ -19,11 +19,14 @@ import System.FilePath            ((</>), takeDirectory)
 
 -- TODO fn to makeRelative to config dir
 
+digestLength :: Int
+digestLength = 10
+
 -- Note that MD5 is no longer considered secure
 -- But for our purposes (checking for updated files) it doesn't matter.
 -- See https://en.wikipedia.org/wiki/MD5
 digest :: (Show a) => a -> String
-digest val = take 10 $ show (hash asBytes :: Digest MD5)
+digest val = take digestLength $ show (hash asBytes :: Digest MD5)
   where
     asBytes = (pack . show) val
 
@@ -32,8 +35,8 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- follows zero or more symlinks until it finds the original file
 -- TODO actually just one now... which should always be enough right?
-resolveSymlinks :: CutConfig -> FilePath -> IO FilePath
-resolveSymlinks cfg path = do
+resolveSymlinks :: CutConfig -> Bool -> FilePath -> IO FilePath
+resolveSymlinks cfg tmpOnly path = do
   isLink <- pathIsSymbolicLink path
   if not isLink
     then return path
@@ -41,9 +44,10 @@ resolveSymlinks cfg path = do
     else do
       relPath <- readSymbolicLink path
       absPath <- absolutize $ takeDirectory path </> relPath
-      -- don't follow outside the "known" dirs
-      if cfgTmpDir cfg `isPrefixOf` absPath || cfgWorkDir cfg `isPrefixOf` absPath
-        then resolveSymlinks cfg absPath
+      -- putStrLn $ "resolveSymlinks absPath: " ++ absPath
+      -- don't follow outside TMPDIR
+      if cfgTmpDir cfg `isPrefixOf` absPath || not tmpOnly
+        then resolveSymlinks cfg tmpOnly absPath
         else return path
 
 -- kind of silly that haskell doesn't have this built in, but whatever

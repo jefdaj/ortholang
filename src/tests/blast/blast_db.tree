@@ -1,31 +1,18 @@
 .
 |-- cache
-|   |-- blastdb
-|   |   |-- 8aa4a9d2fc29ad1145fbcced4c072940
-|   |   |   |-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.phr
-|   |   |   |-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.pin
-|   |   |   `-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.psq
-|   |   |-- a810086108cd8211510df2ca12adf1fc
-|   |   |   |-- a810086108cd8211510df2ca12adf1fc.pdb.phr
-|   |   |   |-- a810086108cd8211510df2ca12adf1fc.pdb.pin
-|   |   |   `-- a810086108cd8211510df2ca12adf1fc.pdb.psq
-|   |   `-- ff08c7f09eef0eb564ccfd5ac6a6551a
-|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
-|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
-|   |       `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |   |-- each
 |   |   `-- c56e6b4ee8
-|   |       |-- 124e9063de.str.list -> $TMPDIR/exprs/extract_queries/124e9063de.str.list
+|   |       |-- 124e9063de.str.list -> ../../../exprs/extract_queries/124e9063de.str.list
 |   |       |-- 124e9063de.str.list.args
-|   |       |-- 1c78118a6f.str.list -> $TMPDIR/exprs/extract_queries/1c78118a6f.str.list
+|   |       |-- 1c78118a6f.str.list -> ../../../exprs/extract_queries/1c78118a6f.str.list
 |   |       |-- 1c78118a6f.str.list.args
-|   |       |-- 217d76f66f.str.list -> $TMPDIR/exprs/extract_queries/217d76f66f.str.list
+|   |       |-- 217d76f66f.str.list -> ../../../exprs/extract_queries/217d76f66f.str.list
 |   |       |-- 217d76f66f.str.list.args
-|   |       |-- 4dcfad3c69.str.list -> $TMPDIR/exprs/extract_queries/4dcfad3c69.str.list
+|   |       |-- 4dcfad3c69.str.list -> ../../../exprs/extract_queries/4dcfad3c69.str.list
 |   |       |-- 4dcfad3c69.str.list.args
-|   |       |-- 934a55faaa.str.list -> $TMPDIR/exprs/extract_queries/934a55faaa.str.list
+|   |       |-- 934a55faaa.str.list -> ../../../exprs/extract_queries/934a55faaa.str.list
 |   |       |-- 934a55faaa.str.list.args
-|   |       |-- e9b730c3ee.str.list -> $TMPDIR/exprs/extract_queries/e9b730c3ee.str.list
+|   |       |-- e9b730c3ee.str.list -> ../../../exprs/extract_queries/e9b730c3ee.str.list
 |   |       `-- e9b730c3ee.str.list.args
 |   |-- list
 |   |   |-- 0815de9417.txt
@@ -37,14 +24,27 @@
 |   |   |-- c8be8722f2.txt
 |   |   |-- ef87d3e725.txt
 |   |   `-- f530950d29.txt
-|   `-- load
-|       |-- 0238b7dcead3bc80b7338694813bd290 -> $WORKDIR/data/7942genes10.fna
-|       |-- 32841598b2ee4ef87d2669fc9e31cb5a -> $WORKDIR/data/7942genes10.faa
-|       |-- 6ea57f12083af2071f0eb12fdc9642a6 -> $WORKDIR/data/6803genes10.fna
-|       |-- 8a695c317a01632796e99e392591d93a -> $WORKDIR/data/6803genes10.faa
-|       |-- 8aa4a9d2fc29ad1145fbcced4c072940 -> $WORKDIR/data/6803genes.faa
-|       |-- a810086108cd8211510df2ca12adf1fc -> $WORKDIR/data/7942genes.faa
-|       `-- ff08c7f09eef0eb564ccfd5ac6a6551a -> $WORKDIR/data/7942genes.fna
+|   |-- load
+|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
+|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|   |   |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|   |   |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
+|   `-- makeblastdb
+|       |-- 8aa4a9d2fc
+|       |   |-- 8aa4a9d2fc.pdb.phr
+|       |   |-- 8aa4a9d2fc.pdb.pin
+|       |   `-- 8aa4a9d2fc.pdb.psq
+|       |-- a810086108
+|       |   |-- a810086108.pdb.phr
+|       |   |-- a810086108.pdb.pin
+|       |   `-- a810086108.pdb.psq
+|       `-- ff08c7f09e
+|           |-- ff08c7f09e.ndb.nhr
+|           |-- ff08c7f09e.ndb.nin
+|           `-- ff08c7f09e.ndb.nsq
 |-- exprs
 |   |-- any
 |   |   `-- eb0be40455.str.list
@@ -69,14 +69,14 @@
 |   |-- list
 |   |   `-- 6dc0612e56.bht.list -> ../../cache/list/6018b4aff5.txt
 |   |-- load_faa
-|   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2ee4ef87d2669fc9e31cb5a
-|   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108cd8211510df2ca12adf1fc
-|   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a01632796e99e392591d93a
-|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
+|   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2.faa
+|   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
+|   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- load_fna
-|   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcead3bc80b7338694813bd290
-|   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f12083af2071f0eb12fdc9642a6
-|   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09eef0eb564ccfd5ac6a6551a
+|   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
+|   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
+|   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
 |   |   `-- f5e661a4be.ndb
 |   |-- makeblastdb_prot

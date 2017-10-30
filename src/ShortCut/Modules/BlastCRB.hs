@@ -1,18 +1,21 @@
 module ShortCut.Modules.BlastCRB where
 
--- TODO expose the e-value cutoff, since it is an option? does it make a difference?
+-- TODO expose the e-value cutoff, since it is an option?
+--      does it make a difference?
 
 import ShortCut.Core.Types
-import Development.Shake       -- (quietly, Action, CmdOption(..), need, unit)
-import Development.Shake.FilePath ((</>), (<.>), takeExtension, makeRelative)
-import System.Directory (createDirectoryIfMissing)
-import ShortCut.Core.Paths     (CutPath, fromCutPath)
-import ShortCut.Core.Util      (digest, resolveSymlinks)
+import Development.Shake
+
+import Development.Shake.FilePath  ((</>), takeFileName)
 import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
-import ShortCut.Core.Compile.Each (rEachTmp)
-import ShortCut.Modules.SeqIO  (faa, fna)
-import ShortCut.Core.Debug (debugAction, debugTrackWrite)
+import ShortCut.Core.Compile.Each  (rEachTmps)
+import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
+import ShortCut.Core.Paths         (CutPath, fromCutPath, tmpLink)
+import ShortCut.Core.Util          (resolveSymlinks)
+import ShortCut.Modules.SeqIO      (faa, fna)
+import System.Directory            (createDirectoryIfMissing)
+-- import System.Posix.Files          (readSymbolicLink)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -45,7 +48,7 @@ crb = CutType
 
 blastCRB :: CutFunction
 blastCRB = CutFunction
-  { fName      = "crb_blast" -- TODO match the other no-underscore blast binaries?
+  { fName      = "crb_blast"
   , fTypeCheck = tCrbBlast
   , fFixity    = Prefix
   , fRules     = rSimpleTmp "crbblast" aBlastCRB
@@ -58,7 +61,7 @@ blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fFixity    = Prefix
-  , fRules     = rEachTmp aBlastCRB "crbblast"
+  , fRules     = rEachTmps aBlastCRB "crbblast"
   }
 
 -- TODO split into two functions with different type signatures?
@@ -70,38 +73,40 @@ tCrbBlastEach :: [CutType] -> Either String CutType
 tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
 tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or faa targets"
 
+{- CRB-BLAST has pretty bad file naming practices, so to prevent conflicts it
+ - needs to be run on unique filenames in a unique directory. Also, it only
+ - resolves one level of symlink, so we have to point directly to the input
+ - files rather than to the canonical $TMPDIR/cache/load... paths.
+ -}
 aBlastCRB :: CutConfig -> CutPath -> [CutPath] -> Action ()
 aBlastCRB cfg tmpDir [o, q, t] = do
-  -- CRB-BLAST has pretty bad file naming practices, so to prevent
-  -- conflicts it needs to be run on unique filenames in a unique directory.
-  -- TODO do we need to check for existence of the files first?
   need [q', t']
-  qHash <- fmap digest $ liftIO $ resolveSymlinks cfg q'
-  tHash <- fmap digest $ liftIO $ resolveSymlinks cfg t'
-  let tDir  = fromCutPath cfg tmpDir </> qHash ++ "_" ++ tHash
-      qLink = tDir </> qHash <.> takeExtension q'
-      tLink = tDir </> tHash <.> takeExtension t'
-      -- qLinkRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) qLink
-      -- tLinkRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) tLink
-      oPath = tDir </> "results.crb"
-      oRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) oPath
-  -- liftIO $ putStrLn $ "tDir: " ++ tDir
-  liftIO $ createDirectoryIfMissing True tDir
-  unit $ quietly $ wrappedCmd cfg [q'] [] "ln" ["-fs", qRel', qLink]
-  unit $ quietly $ wrappedCmd cfg [t'] [] "ln" ["-fs", tRel', tLink]
-  debugTrackWrite cfg [qLink, tLink]
-  -- Once that's set up we can finally run it.
-  -- TODO relative path from actual out path to the hashed cached one?
-  quietly $ wrappedCmd cfg [o'] [Cwd tDir]
-    "crb-blast" ["--query", qLink, "--target", tLink, "--output", oPath]
+  -- get the hashes from the cacnonical path, but can't link to that
+  qName <- fmap takeFileName $ liftIO $ resolveSymlinks cfg True q'
+  tName <- fmap takeFileName $ liftIO $ resolveSymlinks cfg True t'
+  -- instead, need to link to the actual input files
+  qDst <- liftIO $ resolveSymlinks cfg False q' -- link directly to the file
+  tDst <- liftIO $ resolveSymlinks cfg False t' -- link directly to the file
+  let qSrc  = tmp' </> qName
+      tSrc  = tmp' </> tName
+      oPath = tmp' </> "results.crb"
+      oRel' = tmpLink cfg o' oPath
+  liftIO $ createDirectoryIfMissing True tmp'
+  -- These links aren't required, just helpful for a sane tmpfile tree.
+  -- But if used, they have to have file extensions for some reason.
+  -- Otherwise you get "Too many positional arguments".
+  unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
+  unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
+  debugTrackWrite cfg [qSrc, tSrc]
+  wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast"
+    [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   debugTrackWrite cfg [oPath]
-  unit $ quietly $ wrappedCmd cfg [oRel'] [] "ln" ["-fs", oRel', o'']
+  unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
   debugTrackWrite cfg [o'']
   where
     o'   = fromCutPath cfg o
     o''  = debugAction cfg "aBlastCRB" o' [fromCutPath cfg tmpDir, o', q', t']
+    tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t
-    qRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) q'
-    tRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) t'
 aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

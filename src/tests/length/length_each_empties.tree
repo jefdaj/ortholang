@@ -2,10 +2,10 @@
 |-- cache
 |   |-- each
 |   |   |-- 8a613b228e
-|   |   |   |-- d090b1fa2c.num -> $TMPDIR/exprs/length/d090b1fa2c.num
+|   |   |   |-- d090b1fa2c.num -> ../../../exprs/length/d090b1fa2c.num
 |   |   |   `-- d090b1fa2c.num.args
 |   |   `-- d6f0125f22
-|   |       |-- d090b1fa2c.num -> $TMPDIR/exprs/length/d090b1fa2c.num
+|   |       |-- d090b1fa2c.num -> ../../../exprs/length/d090b1fa2c.num
 |   |       `-- d090b1fa2c.num.args
 |   `-- list
 |       |-- bc0b5731cb.txt

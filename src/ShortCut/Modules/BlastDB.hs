@@ -14,11 +14,11 @@ import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEachTmp)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath, readLit,
                                     writeLit, readLits, writePath, writeLits,
-                                    toCutPath, CutPath, hashContent)
-import ShortCut.Core.Util          (stripWhiteSpace)
+                                    toCutPath, CutPath)
+import ShortCut.Core.Util          (stripWhiteSpace, resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
-import System.FilePath             (takeFileName, (</>), (<.>), makeRelative,
-                                    takeDirectory)
+import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
+                                    makeRelative, takeDirectory)
 import System.Directory            (createDirectoryIfMissing)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
@@ -151,6 +151,14 @@ filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
+-- we use two different ones here because it matches the rEach behavior of using just fn name
+blastdbgetCache :: CutConfig -> CutPath
+blastdbgetCache cfg = cacheDir cfg "blastdbget"
+
+-- we use two different ones here because it matches the rEach behavior of using just fn name
+makeblastdbCache :: CutConfig -> CutPath
+makeblastdbCache cfg = cacheDir cfg "makeblastdb"
+
 rBlastdblist :: RulesFn
 rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
@@ -159,7 +167,7 @@ rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
   return (ExprPath oPath')
   where
     oPath   = exprPath s e
-    tmpDir  = cacheDir cfg $ "blastdb" </> "blastdbget"
+    tmpDir  = blastdbgetCache cfg
     tmpDir' = fromCutPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
     oPath'  = fromCutPath cfg oPath
@@ -202,7 +210,7 @@ blastdbget = CutFunction
 rBlastdbget :: RulesFn
 rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
-  let tmpDir    = cacheDir cfg $ "blastdb" </> "blastdbget"
+  let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath st e -- final prefix
       dbPrefix' = fromCutPath cfg dbPrefix
       nPath'    = toCutPath cfg nPath
@@ -265,7 +273,7 @@ rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdb" e $ fromCutPath cfg out
-      cDir      = cacheDir cfg $ "blastdb"
+      cDir      = makeblastdbCache cfg
       -- dbType    = if rtn == ndb then "_nucl" else "_prot"
       -- dbPrefix  = (fromCutPath cfg cDir) </> digest (exprPath s fa)
       -- dbPrefix' = toCutPath cfg dbPrefix
@@ -292,7 +300,14 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
   let dbType' = if dbType == ndb then "nucl" else "prot"
   need [faPath']
-  faHash <- hashContent cfg faPath -- TODO replace with something faster!
+  {- The idea was to hash content here, but it took a long time.
+   - So now it gets hashed only once, in another thread, by a load_* function,
+   - and from then on we pick the hash out of the filename.
+   -
+   - TODO oh no it goes one link too far still
+   -}
+  faHash <- fmap takeBaseName $ liftIO $ resolveSymlinks cfg True faPath'
+  -- liftIO $ putStrLn $ "aMakeblastdb faHash: " ++ faHash
   let dbPrefix  = cDir' </> faHash </> faHash <.> extOf dbType
       dbPrefix' = toCutPath cfg dbPrefix
       out'' = debugAction cfg "aMakeblastdb" out'

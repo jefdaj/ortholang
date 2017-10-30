@@ -115,7 +115,7 @@ canonicalLinks :: CutConfig -> CutType -> [FilePath] -> IO [FilePath]
 canonicalLinks cfg rtn =
   if rtn `elem` [str, num]
     then return
-    else \ps -> mapM (resolveSymlinks cfg) ps
+    else \ps -> mapM (resolveSymlinks cfg True) ps
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898

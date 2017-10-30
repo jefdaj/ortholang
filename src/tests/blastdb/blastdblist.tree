@@ -1,8 +1,7 @@
 .
 |-- cache
-|   |-- blastdb
-|   |   `-- blastdbget
-|   |       `-- dblist.txt
+|   |-- blastdbget
+|   |   `-- dblist.txt
 |   `-- list
 |       |-- 399fc66708.txt
 |       |-- 56c1d3faed.txt
@@ -37,4 +36,4 @@
     |-- proks.str.list -> ../exprs/blastdblist/93c452e38f.str.list
     `-- result -> ../exprs/any/b7c6f17408.str.list
 
-10 directories, 27 files
+9 directories, 27 files

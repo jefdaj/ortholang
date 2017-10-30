@@ -34,7 +34,7 @@ import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules)
 import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
                                     digest, typesMatch)
 import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             (takeDirectory, makeRelative)
+import System.FilePath             (takeDirectory, makeRelative, takeExtension)
 
 
 ------------------------------
@@ -198,7 +198,7 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 aListPaths :: CutConfig -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg paths outPath = do
   need paths'
-  paths'' <- liftIO $ mapM (resolveSymlinks cfg) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks cfg True) paths'
   need paths''
   let paths''' = map (toCutPath cfg) paths''
   writeDeduped cfg writePaths out'' paths'''
@@ -359,12 +359,12 @@ rLoad s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
 rLoad _ _ = error "bad argument to rLoad"
 
 -- TODO add extensions?
-aLoadHash :: CutConfig -> CutPath -> Action CutPath
-aLoadHash cfg src = do
+aLoadHash :: CutConfig -> CutPath -> String -> Action CutPath
+aLoadHash cfg src ext = do
   need [src']
   md5 <- hashContent cfg src
   let tmpDir'      = fromCutPath cfg $ cacheDir cfg "load"
-      hashPath'    = tmpDir' </> md5
+      hashPath'    = tmpDir' </> md5 <.> ext
       hashPath     = toCutPath cfg hashPath'
   done <- doesFileExist hashPath'
   when (not done) $ do
@@ -379,8 +379,8 @@ aLoad :: CutConfig -> CutPath -> CutPath -> Action ()
 aLoad cfg strPath outPath = do
   need [strPath']
   pth <- readLitPaths cfg strPath'
-  src' <- liftIO $ resolveSymlinks cfg $ fromCutPath cfg $ head pth -- TODO safer!
-  hashPath <- aLoadHash cfg $ toCutPath cfg src'
+  src' <- liftIO $ resolveSymlinks cfg True $ fromCutPath cfg $ head pth -- TODO safer!
+  hashPath <- aLoadHash cfg (toCutPath cfg src') (takeExtension outPath')
   let hashPath'    = fromCutPath cfg hashPath
       hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   unit $ quietly $ wrappedCmd cfg [outPath''] [] "ln" ["-fs", hashPathRel', outPath'']
@@ -438,9 +438,10 @@ aLoadListLinks cfg pathsPath outPath = do
   -- CutPaths
   paths <- readLitPaths cfg pathsPath'
   let paths' = map (fromCutPath cfg) paths
-  paths'' <- liftIO $ mapM (resolveSymlinks cfg) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks cfg True) paths'
   let paths''' = map (toCutPath cfg) paths''
-  hashPaths <- mapM (aLoadHash cfg) paths'''
+  hashPaths <- mapM (\p -> aLoadHash cfg p
+                         $ takeExtension $ fromCutPath cfg p) paths'''
   let hashPaths' = map (fromCutPath cfg) hashPaths
   -- liftIO $ putStrLn $ "about to need: " ++ show paths''
   need hashPaths'
@@ -503,7 +504,7 @@ aSimple' :: CutConfig -> CutPath
          -> Maybe CutPath -> [CutPath] -> Action ()
 aSimple' cfg outPath actFn mTmpDir argPaths = do
   need argPaths'
-  argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks cfg) argPaths'
+  argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks cfg True) argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir'
   actFn cfg tmpDir (outPath:argPaths'')
   trackWrite [out]

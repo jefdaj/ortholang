@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- blastdb
-|   |   `-- ff08c7f09eef0eb564ccfd5ac6a6551a
-|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nhr
-|   |       |-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nin
-|   |       `-- ff08c7f09eef0eb564ccfd5ac6a6551a.ndb.nsq
 |   |-- list
 |   |   |-- 389db1505d.txt
 |   |   |-- 56d55b5ce9.txt
@@ -12,9 +7,14 @@
 |   |   |-- ba320796bf.txt
 |   |   |-- e23802c768.txt
 |   |   `-- f530950d29.txt
-|   `-- load
-|       |-- 0238b7dcead3bc80b7338694813bd290 -> $WORKDIR/data/7942genes10.fna
-|       `-- ff08c7f09eef0eb564ccfd5ac6a6551a -> $WORKDIR/data/7942genes.fna
+|   |-- load
+|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
+|   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
+|   `-- makeblastdb
+|       `-- ff08c7f09e
+|           |-- ff08c7f09e.ndb.nhr
+|           |-- ff08c7f09e.ndb.nin
+|           `-- ff08c7f09e.ndb.nsq
 |-- exprs
 |   |-- any
 |   |   `-- d51537bc95.str.list
@@ -31,8 +31,8 @@
 |   |   |-- ae41db6b0c.str.list.list -> ../../cache/list/e23802c768.txt
 |   |   `-- b9040a19fe.str.list.list -> ../../cache/list/389db1505d.txt
 |   |-- load_fna
-|   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcead3bc80b7338694813bd290
-|   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09eef0eb564ccfd5ac6a6551a
+|   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
+|   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
 |   |   `-- f5e661a4be.ndb
 |   |-- num

@@ -33,7 +33,7 @@ nonDeterministicCut path = testDir `elem` badDirs
   where
     testDir = (takeFileName . takeDirectory) path
     -- TODO will regular blast be nondeterministic at large scales too?
-    badDirs = ["blastcrb", "each"]
+    badDirs = ["blastcrb"]
 
 getTestCuts :: IO [FilePath]
 getTestCuts = do

@@ -3,12 +3,12 @@
 |   |-- list
 |   |   `-- 1e97ed1574.txt
 |   `-- load
-|       `-- fb223a32faa6e7c8854a1fc7056fecb9 -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
+|       `-- fb223a32fa.gbk -> $WORKDIR/data/Synechocystis-PCC-6803-uid159873.gbk
 |-- exprs
 |   |-- gbk_to_faa
 |   |   `-- 31df2be117.faa
 |   |-- load_gbk
-|   |   `-- ddba013b80.gbk -> ../../cache/load/fb223a32faa6e7c8854a1fc7056fecb9
+|   |   `-- ddba013b80.gbk -> ../../cache/load/fb223a32fa.gbk
 |   `-- str
 |       `-- 0507961f5b.str -> ../../cache/list/1e97ed1574.txt
 `-- vars

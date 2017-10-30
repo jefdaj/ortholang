@@ -7,8 +7,8 @@ import qualified Data.Configurator as C
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
-import Development.Shake          (command, Action, CmdOption(..), Exit(..),
-                                   removeFiles, liftIO)
+-- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
+                                   -- removeFiles, liftIO)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
 import ShortCut.Core.Util         (absolutize)

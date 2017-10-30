@@ -16,13 +16,13 @@ import Text.PrettyPrint.HughesPJClass
 import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
-import Development.Shake.FilePath ((</>), (<.>), takeDirectory)
+import Development.Shake.FilePath ((</>), (<.>), takeDirectory, makeRelative)
 import ShortCut.Core.Cmd          (wrappedCmd)
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    readPaths, writePaths, CutPath,
                                    exprPathExplicit, argHashes,
-                                   readLit, writeLits)
+                                   readLit, writeLits, tmpLink)
 import ShortCut.Core.Util         (digest, resolveSymlinks)
 import System.Directory           (createDirectoryIfMissing)
 
@@ -50,7 +50,7 @@ rEachTmps :: (CutConfig -> CutPath -> [CutPath] -> Action ()) -> String -> Rules
 rEachTmps actFn tmpPrefix s@(_,cfg) e = rEachMain (Just tmpFn) actFn s e
   where
     tmpFn args = do
-      args' <- liftIO $ mapM (resolveSymlinks cfg . fromCutPath cfg) args
+      args' <- liftIO $ mapM (resolveSymlinks cfg True . fromCutPath cfg) args
       -- TODO hey is this where the nondeterminism gets in? use argHashes!
       let base = concat $ intersperse "_" $ map digest args'
           dir  = fromCutPath cfg $ cacheDir cfg tmpPrefix
@@ -107,13 +107,13 @@ aEachMain :: CutConfig
          -> Action ()
 aEachMain cfg inits eachTmp eType lastsPath outPath = do
   need inits'
-  inits''    <- liftIO $ mapM (resolveSymlinks cfg) inits'
+  inits''    <- liftIO $ mapM (resolveSymlinks cfg True) inits'
   lastPaths  <- readPaths cfg lasts' -- TODO this needs a lit variant?
-  lastPaths' <- liftIO $ mapM (resolveSymlinks cfg) (map (fromCutPath cfg) lastPaths)
+  lastPaths' <- liftIO $ mapM (resolveSymlinks cfg True) (map (fromCutPath cfg) lastPaths)
   mapM_ (aEachArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
   let outPaths = map (eachPath cfg tmp' eType) lastPaths'
   need outPaths
-  outPaths' <- liftIO $ mapM (resolveSymlinks cfg) outPaths
+  outPaths' <- liftIO $ mapM (resolveSymlinks cfg True) outPaths
   let out = debugAction cfg "aEachMain" outPath (outPath:inits' ++ [tmp', lasts'])
   if eType `elem` [str, num]
     then mapM (readLit cfg) outPaths' >>= writeLits cfg out
@@ -165,7 +165,7 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
   args <- readPaths cfg argsPath
   let args' = map (fromCutPath cfg) args
-  args'' <- liftIO $ mapM (resolveSymlinks cfg) args' -- TODO remove?
+  args'' <- liftIO $ mapM (resolveSymlinks cfg True) args' -- TODO remove?
   need args'
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
@@ -180,6 +180,9 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
       single  = exprPathExplicit cfg singleName eType salt hashes
       single' = fromCutPath cfg single
+      -- TODO need to determine specifically how many dots
+      -- singleRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) single'
+      singleRel' = tmpLink cfg out' single'
       args''' = single:map (toCutPath cfg) args''
   done <- doesFileExist single'
   when (not done) $ do
@@ -187,5 +190,5 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
     actFn cfg dir args'''
     trackWrite [single']
   -- TODO utility/paths fn "symlink" (unless that's aLink?)
-  unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", single', out']
+  unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", singleRel', out']
   trackWrite [out']

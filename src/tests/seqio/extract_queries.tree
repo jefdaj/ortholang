@@ -1,13 +1,8 @@
 .
 |-- cache
-|   |-- blastdb
-|   |   `-- 8aa4a9d2fc29ad1145fbcced4c072940
-|   |       |-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.phr
-|   |       |-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.pin
-|   |       `-- 8aa4a9d2fc29ad1145fbcced4c072940.pdb.psq
 |   |-- each
 |   |   `-- 7b6be1084d
-|   |       |-- 65e9e47c08.str.list -> $TMPDIR/exprs/extract_queries/65e9e47c08.str.list
+|   |       |-- 65e9e47c08.str.list -> ../../../exprs/extract_queries/65e9e47c08.str.list
 |   |       `-- 65e9e47c08.str.list.args
 |   |-- list
 |   |   |-- 5ba0c6d6c3.txt
@@ -16,9 +11,14 @@
 |   |   |-- c8be8722f2.txt
 |   |   |-- d827174c46.txt
 |   |   `-- dafccdcab4.txt
-|   `-- load
-|       |-- 8a695c317a01632796e99e392591d93a -> $WORKDIR/data/6803genes10.faa
-|       `-- 8aa4a9d2fc29ad1145fbcced4c072940 -> $WORKDIR/data/6803genes.faa
+|   |-- load
+|   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|   `-- makeblastdb
+|       `-- 8aa4a9d2fc
+|           |-- 8aa4a9d2fc.pdb.phr
+|           |-- 8aa4a9d2fc.pdb.pin
+|           `-- 8aa4a9d2fc.pdb.psq
 |-- exprs
 |   |-- any
 |   |   `-- 8afe49670a.str.list.list
@@ -34,8 +34,8 @@
 |   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/d827174c46.txt
 |   |   `-- c2036af94d.str.list.list.list -> ../../cache/list/dafccdcab4.txt
 |   |-- load_faa
-|   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a01632796e99e392591d93a
-|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc29ad1145fbcced4c072940
+|   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot
 |   |   `-- c14344af19.pdb
 |   |-- num

@@ -1,16 +1,11 @@
 .
 |-- cache
-|   |-- blastdb
-|   |   `-- a810086108cd8211510df2ca12adf1fc
-|   |       |-- a810086108cd8211510df2ca12adf1fc.pdb.phr
-|   |       |-- a810086108cd8211510df2ca12adf1fc.pdb.pin
-|   |       `-- a810086108cd8211510df2ca12adf1fc.pdb.psq
 |   |-- each
 |   |   |-- 8641bd3b28
-|   |   |   |-- 0ddc313753.str.list -> $TMPDIR/exprs/extract_queries/0ddc313753.str.list
-|   |   |   `-- 0ddc313753.str.list.args
+|   |   |   |-- f1aa5517a1.str.list -> ../../../exprs/extract_queries/f1aa5517a1.str.list
+|   |   |   `-- f1aa5517a1.str.list.args
 |   |   `-- e1397ded9f
-|   |       |-- 46b5852d89.bht -> $TMPDIR/exprs/blastx_db/fe7dee10f6_b23045213e_46b5852d89.bht
+|   |       |-- 46b5852d89.bht -> ../../../exprs/blastx_db/fe7dee10f6_3d999d2434_46b5852d89.bht
 |   |       `-- 46b5852d89.bht.args
 |   |-- list
 |   |   |-- 572e0669fc.txt
@@ -19,9 +14,14 @@
 |   |   |-- bdc783547b.txt
 |   |   |-- daecab170a.txt
 |   |   `-- f530950d29.txt
-|   `-- load
-|       |-- 0238b7dcead3bc80b7338694813bd290 -> $WORKDIR/data/7942genes10.fna
-|       `-- a810086108cd8211510df2ca12adf1fc -> $WORKDIR/data/7942genes.faa
+|   |-- load
+|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
+|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   `-- makeblastdb
+|       `-- a810086108
+|           |-- a810086108.pdb.phr
+|           |-- a810086108.pdb.pin
+|           `-- a810086108.pdb.psq
 |-- exprs
 |   |-- all
 |   |   `-- 782f523b0c.str.list
@@ -29,12 +29,12 @@
 |   |   `-- 99fd288f9d.str.list.list
 |   |-- blastx_db
 |   |   |-- 8158675169_bc4ea1fc06_46b5852d89.bht
-|   |   `-- fe7dee10f6_b23045213e_46b5852d89.bht
+|   |   `-- fe7dee10f6_3d999d2434_46b5852d89.bht
 |   |-- blastx_db_each
 |   |   `-- 8158675169_bc4ea1fc06_f2e2e6cab1.bht.list
 |   |-- extract_queries
-|   |   |-- 0ddc313753.str.list
-|   |   `-- ba961ef0a0.str.list
+|   |   |-- ba961ef0a0.str.list
+|   |   `-- f1aa5517a1.str.list
 |   |-- extract_queries_each
 |   |   `-- 3146559dc8.str.list.list
 |   |-- list
@@ -42,9 +42,9 @@
 |   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/572e0669fc.txt
 |   |   `-- e214a4da42.pdb.list -> ../../cache/list/af5b1fa4b5.txt
 |   |-- load_faa
-|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108cd8211510df2ca12adf1fc
+|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- load_fna
-|   |   `-- 82b637da24.fna -> ../../cache/load/0238b7dcead3bc80b7338694813bd290
+|   |   `-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
 |   |-- makeblastdb_prot
 |   |   `-- c08cc19988.pdb
 |   |-- num

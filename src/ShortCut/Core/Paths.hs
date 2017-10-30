@@ -63,6 +63,7 @@ module ShortCut.Core.Paths
   , exprPath
   , exprPathExplicit
   , varPath
+  , tmpLink
   -- , resolveVar
   -- , resolveVars
   -- file io
@@ -83,15 +84,17 @@ module ShortCut.Core.Paths
   )
   where
 
-import Development.Shake (Action, trackWrite, Stdout(..), need, liftIO)
+import Development.Shake (Action, trackWrite, need)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
-import ShortCut.Core.Util (lookupVar, digest)
+import ShortCut.Core.Util (lookupVar, digest, digestLength)
 import ShortCut.Core.Cmd   (wrappedCmdOut)
 import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
 import Data.String.Utils          (replace)
-import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
+import Development.Shake.FilePath ((</>), (<.>), isAbsolute, pathSeparators,
+                                   makeRelative)
 import Data.List                  (intersperse, isPrefixOf)
+import Data.List.Split            (splitOneOf)
 
 --------------
 -- cutpaths --
@@ -162,7 +165,7 @@ hashContent cfg path = do
   need [path']
   -- liftIO $ putStrLn $ "hashing " ++ path'
   out <- wrappedCmdOut cfg [] [] "md5sum" [path']
-  let md5 = head $ words out -- TODO adapt failGracfully to work here
+  let md5 = take digestLength $ head $ words out -- TODO adapt failGracfully to work here
   -- liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5
   return md5
   where
@@ -173,7 +176,7 @@ hashContent cfg path = do
 -- resolveVar cfg p@(CutPath path) =
 --   -- TODO is just using CutPath directly here OK?
 --   if "$TMPDIR/vars" `isPrefixOf` path
---     then resolveSymlinks cfg (fromCutPath cfg p) >>= resolveVar cfg . toCutPath cfg
+--     then resolveSymlinks cfg True (fromCutPath cfg p) >>= resolveVar cfg . toCutPath cfg
 --     else return p
 
 -- resolveVars :: CutConfig -> [CutPath] -> IO [CutPath]
@@ -203,6 +206,16 @@ varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
 varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
+
+-- takes source and destination paths in the tmpdir and makes a path between
+-- them with the right number of dots
+-- TODO check that the CutPath is in TMPDIR, not WORKDIR!
+tmpLink :: CutConfig -> FilePath -> FilePath -> FilePath
+tmpLink cfg src dst = dots </> tmpRel dst
+  where
+    tmpRel  = makeRelative $ cfgTmpDir cfg
+    dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
+    nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
 
 ---------------
 -- io checks --

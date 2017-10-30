@@ -5,7 +5,7 @@
 , tasty, tasty-golden, tasty-quickcheck, temporary, text
 , transformers, strict, utility-ht, safe-exceptions, unix, lock-file
 , data-default-class, tagged-exception-core, tasty-hunit
-, path, path-io, tasty-hspec, hspec, unbounded-delays
+, path, path-io, tasty-hspec, hspec, unbounded-delays, split
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -20,7 +20,7 @@ mkDerivation {
     scientific shake silently tasty tasty-golden tasty-quickcheck
     temporary text transformers strict utility-ht safe-exceptions
     unix lock-file data-default-class tagged-exception-core tasty-hunit
-    path path-io tasty-hspec hspec unbounded-delays
+    path path-io tasty-hspec hspec unbounded-delays split
   ];
   description = "A scripting language that makes short work of phylogenomic cuts";
   license = stdenv.lib.licenses.gpl3;
