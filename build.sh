@@ -4,10 +4,12 @@
 export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_HIDE_SUCCESSES=True
 
-# this builds everything at once, which is simpler.
-# minor downside though: it rebuilds the haskell package each time
-nix-build && ./result/bin/shortcut --test
+# Only run certain tests; see https://github.com/feuerbach/tasty#patterns
+# export TASTY_PATTERN=testpatternhere
 
-# this does incremental builds of the haskell package,
-# but has to be run inside nix-shell for the other dependencies
-# cd src && stack build && ./.stack-work/install/*/*/*/bin/shortcut --test
+# this builds everything at once, which is simpler.
+# the downside is it rebuilds the haskell code each time, which is slow
+# nix-build && ./result/bin/shortcut --test
+
+# this does an incremental build of the haskell code for faster testing
+nix-shell --command '(cd src && stack build && ./.stack-work/install/*/*/*/bin/shortcut --test) || exit'
