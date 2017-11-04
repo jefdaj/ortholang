@@ -50,9 +50,9 @@ rEachTmps :: (CutConfig -> CutPath -> [CutPath] -> Action ()) -> String -> Rules
 rEachTmps actFn tmpPrefix s@(_,cfg) e = rEachMain (Just tmpFn) actFn s e
   where
     tmpFn args = do
-      args' <- liftIO $ mapM (resolveSymlinks cfg True . fromCutPath cfg) args
+      -- args' <- liftIO $ mapM (resolveSymlinks cfg True . fromCutPath cfg) args
       -- TODO hey is this where the nondeterminism gets in? use argHashes!
-      let base = concat $ intersperse "_" $ map digest args'
+      let base = concat $ intersperse "_" $ map digest args
           dir  = fromCutPath cfg $ cacheDir cfg tmpPrefix
       return $ toCutPath cfg (dir </> base)
 
