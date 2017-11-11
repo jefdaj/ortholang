@@ -1,6 +1,7 @@
 .
 |-- cache
 |   `-- list
+|       |-- 00c882823d.txt
 |       |-- 1a9693a989.txt
 |       |-- 2a898dcf6a.txt
 |       |-- 309e7807e1.txt
@@ -9,14 +10,13 @@
 |       |-- 3f71f1c3dc.txt
 |       |-- 4c96bbc0e2.txt
 |       |-- 4e6648cb79.txt
+|       |-- 500ebf2218.txt
 |       |-- 50adad5c9c.txt
 |       |-- 53824af082.txt
 |       |-- 597a69ea2f.txt
 |       |-- 5d4e25a37f.txt
-|       |-- 6b31695827.txt
 |       |-- 6eaceb40c2.txt
 |       |-- 7300f245ce.txt
-|       |-- 8de9a8687f.txt
 |       |-- 914fe5e0a7.txt
 |       |-- b92738ba6c.txt
 |       |-- c9265798e8.txt
@@ -28,9 +28,9 @@
 |       `-- f3f2ee2bf7.txt
 |-- exprs
 |   |-- list
-|   |   |-- 0b85a1d6fa.str.list -> ../../cache/list/8de9a8687f.txt
+|   |   |-- 0b85a1d6fa.str.list -> ../../cache/list/500ebf2218.txt
 |   |   |-- 4c1f2f14a0.str.list -> ../../cache/list/914fe5e0a7.txt
-|   |   `-- e98e8cf304.str.list -> ../../cache/list/6b31695827.txt
+|   |   `-- e98e8cf304.str.list -> ../../cache/list/00c882823d.txt
 |   `-- str
 |       |-- 0a47f01093.str -> ../../cache/list/4e6648cb79.txt
 |       |-- 0ec5091ee0.str -> ../../cache/list/ebbc0abed4.txt

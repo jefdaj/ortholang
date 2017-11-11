@@ -5,26 +5,26 @@ shortcut >> "stuff"
 shortcut >> ["more", "stuff"]
 ["more", "stuff"]
 shortcut >> ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
-["a",
+["what",
  "about",
- "be",
- "distributed",
+ "a",
  "large",
- "lines?",
  "number",
  "of",
- "over",
- "several",
  "short",
  "strings?",
+ "will",
  "they",
- "what",
- "will"]
+ "be",
+ "distributed",
+ "over",
+ "several",
+ "lines?"]
 shortcut >> ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
-["and now some longer ones",
- "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones",
- "one",
+["one",
+ "two",
  "three",
- "two"]
+ "and now some longer ones",
+ "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
 shortcut >> :q
 Bye for now!

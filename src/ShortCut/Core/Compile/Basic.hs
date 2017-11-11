@@ -26,7 +26,7 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             readLit, readLits, writeLits, hashContent)
 
 import Control.Monad               (when)
-import Data.List                   (find, sort, intersperse)
+import Data.List                   (find, intersperse)
 import Data.Maybe                  (fromJust)
 import Development.Shake.FilePath  ((</>), (<.>))
 import ShortCut.Core.Cmd           (wrappedCmd)
@@ -175,7 +175,7 @@ aListLits :: CutConfig -> [CutPath] -> CutPath -> Action ()
 aListLits cfg paths outPath = do
   need paths'
   lits <- mapM (readLit cfg) paths'
-  let lits' = sort $ map stripWhiteSpace lits
+  let lits' = map stripWhiteSpace lits
   writeDeduped cfg writeLits out'' lits'
   where
     out'   = fromCutPath cfg outPath
