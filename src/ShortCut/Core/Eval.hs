@@ -26,7 +26,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Exception.Enclosed     (catchAny)
-import Data.Maybe                     (fromJust, maybeToList)
+import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic          (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty (prettyNum)
@@ -98,12 +98,13 @@ eval hdl cfg rtype = ignoreErrors . eval'
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as,c) = eval hdl c rtn $ compileScript s Nothing
-  where
-    res = fromJust $ lookup (CutVar "result") as
-    rtn = typeOf res
+evalScript hdl s@(as,c) = case lookup (CutVar "result") as of
+  Nothing  -> putStrLn "no result variable. that's not right!"
+  Just res -> eval hdl c (typeOf res) (compileScript s Nothing)
 
 evalFile :: Handle -> CutConfig -> IO ()
-evalFile hdl cfg = do
-  s <- parseFileIO cfg $ fromJust $ cfgScript cfg -- TODO something safer!
-  evalScript hdl (s,cfg)
+evalFile hdl cfg = case cfgScript cfg of
+  Nothing  -> putStrLn "no script. that's not right!"
+  Just scr -> do
+    s <- parseFileIO cfg scr
+    evalScript hdl (s,cfg)

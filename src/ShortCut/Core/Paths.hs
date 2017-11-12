@@ -87,7 +87,7 @@ module ShortCut.Core.Paths
 import Development.Shake (Action, trackWrite, need)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
-import ShortCut.Core.Util (lookupVar, digest, digestLength)
+import ShortCut.Core.Util (digest, digestLength)
 import ShortCut.Core.Cmd   (wrappedCmdOut)
 import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
 import Data.String.Utils          (replace)
@@ -150,7 +150,9 @@ cacheDir cfg modName = toCutPath cfg path
 -- This is just a convenience used in exprPath
 -- TODO rename hSomething?
 argHashes :: CutState -> CutExpr -> [String]
-argHashes s@(scr,_) (CutRef _ _ _ v) = argHashes s $ lookupVar v scr
+argHashes s@(scr,_) (CutRef _ _ _ v) = case lookup v scr of
+                                         Nothing -> error $ "no such var " ++ show v
+                                         Just e  -> argHashes s e
 argHashes _ (CutLit  _ _     v    ) = [digest v]
 argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
 argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
@@ -184,7 +186,9 @@ hashContent cfg path = do
 
 -- TODO rename to tmpPath?
 exprPath :: CutState -> CutExpr -> CutPath
-exprPath s@(scr, _) (CutRef _ _ _ v) = exprPath s $ lookupVar v scr
+exprPath s@(scr, _) (CutRef _ _ _ v) = case lookup v scr of
+                                         Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
+                                         Just e  -> exprPath s e
 exprPath s@(_, cfg) expr = debugPath cfg "exprPath" expr res
   where
     prefix = prefixOf expr

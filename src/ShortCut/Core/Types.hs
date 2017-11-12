@@ -55,7 +55,6 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
-import Data.Maybe            (fromJust)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 -- TODO where should these go?
@@ -185,12 +184,12 @@ extOf (ListOf t) = extOf t ++ ".list"
 extOf t          = tExt t
 
 varOf :: CutExpr -> [CutVar]
-varOf (CutRef _ _ vs _) = vs
-varOf _                 = []
+varOf (CutRef _ _ _ v) = [v]
+varOf _                = [ ]
 
 depsOf :: CutExpr -> [CutVar]
 depsOf (CutLit  _ _ _         ) = []
-depsOf (CutRef  _ _ vs v      ) = v:vs
+depsOf (CutRef  _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
 depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
@@ -314,7 +313,9 @@ instance Show CutModule where
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: CutScript -> CutExpr -> [CutExpr]
 extractExprs  _  (CutList _ _ _ es) = es
-extractExprs scr (CutRef  _ _ _ v ) = extractExprs scr $ fromJust $ lookup v scr
+extractExprs scr (CutRef  _ _ _ v ) = case lookup v scr of
+                                        Nothing -> error $ "no such var " ++ show v
+                                        Just e  -> extractExprs scr e
 extractExprs _   (CutFun _ _ _ _ _) = error explainFnBug
 extractExprs scr (CutBop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show e

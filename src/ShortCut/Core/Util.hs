@@ -78,8 +78,9 @@ mkTestGroup cfg name trees = do
   trees'' <- trees'
   return $ testGroup name trees''
 
-lookupVar :: CutVar -> CutScript -> CutExpr
-lookupVar var scr = fromJust $ lookup var scr
+-- TODO bring this back?
+-- lookupVar :: CutVar -> CutScript -> CutExpr
+-- lookupVar var scr = fromJust $ lookup var scr
 
 -- this mostly checks equality, but also has to deal with how an empty list can
 -- be any kind of list

@@ -27,7 +27,6 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
 
 import Control.Monad               (when)
 import Data.List                   (find, intersperse)
-import Data.Maybe                  (fromJust)
 import Development.Shake.FilePath  ((</>), (<.>))
 import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules)
@@ -77,10 +76,9 @@ compileScript s@(as,_) permHash = do
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (rAssign s) as
-  -- liftIO $ putStrLn $ "trying to look up result"
-  let (VarPath r) = fromJust $ lookup (CutVar res) rpaths
-  -- return $ ResPath $ makeRelative (cfgTmpDir cfg) r
-  return $ ResPath r
+  case lookup (CutVar res) rpaths of
+    Nothing -> fail "no result variable. that's not right!"
+    Just (VarPath r) -> return $ ResPath r
   where
     -- p here is "result" + the permutation name/hash if there is one right?
     res = case permHash of

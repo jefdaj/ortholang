@@ -4,34 +4,34 @@
 |   |   |-- 09a0849cb3
 |   |   |   |-- 025f038f11.str.list -> ../../../exprs/extract_queries/025f038f11.str.list
 |   |   |   |-- 025f038f11.str.list.args
-|   |   |   |-- 1b2c83e71c.str.list -> ../../../exprs/extract_queries/1b2c83e71c.str.list
-|   |   |   |-- 1b2c83e71c.str.list.args
 |   |   |   |-- 92d9a2fdaf.str.list -> ../../../exprs/extract_queries/92d9a2fdaf.str.list
 |   |   |   |-- 92d9a2fdaf.str.list.args
 |   |   |   |-- b010c12ed5.str.list -> ../../../exprs/extract_queries/b010c12ed5.str.list
 |   |   |   |-- b010c12ed5.str.list.args
+|   |   |   |-- b45616db39.str.list -> ../../../exprs/extract_queries/b45616db39.str.list
+|   |   |   |-- b45616db39.str.list.args
 |   |   |   |-- e681e009f2.str.list -> ../../../exprs/extract_queries/e681e009f2.str.list
 |   |   |   `-- e681e009f2.str.list.args
 |   |   |-- 31470de841
 |   |   |   |-- 025f038f11.bht -> ../../../exprs/best_hits/025f038f11.bht
 |   |   |   |-- 025f038f11.bht.args
-|   |   |   |-- 1b2c83e71c.bht -> ../../../exprs/best_hits/1b2c83e71c.bht
-|   |   |   |-- 1b2c83e71c.bht.args
 |   |   |   |-- 92d9a2fdaf.bht -> ../../../exprs/best_hits/92d9a2fdaf.bht
 |   |   |   |-- 92d9a2fdaf.bht.args
 |   |   |   |-- b010c12ed5.bht -> ../../../exprs/best_hits/b010c12ed5.bht
 |   |   |   |-- b010c12ed5.bht.args
+|   |   |   |-- b45616db39.bht -> ../../../exprs/best_hits/b45616db39.bht
+|   |   |   |-- b45616db39.bht.args
 |   |   |   |-- e681e009f2.bht -> ../../../exprs/best_hits/e681e009f2.bht
 |   |   |   `-- e681e009f2.bht.args
 |   |   `-- 95dd7861ae
+|   |       |-- 046c252318.str.list -> ../../../exprs/extract_queries/046c252318.str.list
+|   |       |-- 046c252318.str.list.args
 |   |       |-- 0be2156664.str.list -> ../../../exprs/extract_queries/0be2156664.str.list
 |   |       |-- 0be2156664.str.list.args
 |   |       |-- 80f44000a3.str.list -> ../../../exprs/extract_queries/80f44000a3.str.list
 |   |       |-- 80f44000a3.str.list.args
 |   |       |-- 968803b31d.str.list -> ../../../exprs/extract_queries/968803b31d.str.list
 |   |       |-- 968803b31d.str.list.args
-|   |       |-- c6a019588f.str.list -> ../../../exprs/extract_queries/c6a019588f.str.list
-|   |       |-- c6a019588f.str.list.args
 |   |       |-- e83823026a.str.list -> ../../../exprs/extract_queries/e83823026a.str.list
 |   |       `-- e83823026a.str.list.args
 |   |-- list
@@ -54,9 +54,9 @@
 |   |   `-- dbb951ec63.str.list
 |   |-- best_hits
 |   |   |-- 025f038f11.bht
-|   |   |-- 1b2c83e71c.bht
 |   |   |-- 92d9a2fdaf.bht
 |   |   |-- b010c12ed5.bht
+|   |   |-- b45616db39.bht
 |   |   `-- e681e009f2.bht
 |   |-- best_hits_each
 |   |   `-- 640b55891c.bht.list
@@ -64,19 +64,19 @@
 |   |   |-- 8158675169_076832f40f_67b1500345.bht
 |   |   |-- 8158675169_08889524a2_67b1500345.bht
 |   |   |-- 8158675169_613340465b_67b1500345.bht
-|   |   |-- 8158675169_c747d896a2_67b1500345.bht
+|   |   |-- 8158675169_c08cc19988_67b1500345.bht
 |   |   `-- 8158675169_ecf8c85a88_67b1500345.bht
 |   |-- diff
 |   |   `-- 6cce968232.str.list
 |   |-- extract_queries
 |   |   |-- 025f038f11.str.list
+|   |   |-- 046c252318.str.list
 |   |   |-- 0be2156664.str.list
-|   |   |-- 1b2c83e71c.str.list
 |   |   |-- 80f44000a3.str.list
 |   |   |-- 92d9a2fdaf.str.list
 |   |   |-- 968803b31d.str.list
 |   |   |-- b010c12ed5.str.list
-|   |   |-- c6a019588f.str.list
+|   |   |-- b45616db39.str.list
 |   |   |-- e681e009f2.str.list
 |   |   `-- e83823026a.str.list
 |   |-- extract_queries_each
@@ -85,44 +85,44 @@
 |   |-- length
 |   |   `-- 7e0b52ff09.num
 |   |-- list
-|   |   |-- 174863a975.faa.list -> ../../cache/list/3cc975a9ae.txt
+|   |   |-- 93dec00873.faa.list -> ../../cache/list/3cc975a9ae.txt
 |   |   `-- bbec55fd0d.str.list.list -> ../../cache/list/e2013d65ca.txt
 |   |-- load_faa
+|   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |   |-- 387f499ddc_1.faa -> ../../cache/load/a810086108.faa
 |   |   |-- 387f499ddc_2.faa -> ../../cache/load/a810086108.faa
 |   |   |-- 387f499ddc_3.faa -> ../../cache/load/a810086108.faa
 |   |   |-- 387f499ddc_4.faa -> ../../cache/load/a810086108.faa
-|   |   |-- 387f499ddc_5.faa -> ../../cache/load/a810086108.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot
 |   |   `-- c14344af19.pdb
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- repeat
-|   |   `-- b33baa5d21_c08cc19988_d07d9ca61e.bht.list
+|   |   `-- b33baa5d21_c08cc19988_03f094fa75.bht.list
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
 |       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
 `-- vars
     |-- best.bht.list -> ../exprs/best_hits_each/640b55891c.bht.list
     |-- bestonly.str.list -> ../exprs/diff/6cce968232.str.list
+    |-- hits.75bbda110b.bht -> ../exprs/blastp_db/8158675169_c08cc19988_67b1500345.bht
     |-- hits.818516cf55.bht -> ../exprs/blastp_db/8158675169_08889524a2_67b1500345.bht
     |-- hits.9a9de1df2a.bht -> ../exprs/blastp_db/8158675169_076832f40f_67b1500345.bht
     |-- hits.aec7294f1e.bht -> ../exprs/blastp_db/8158675169_ecf8c85a88_67b1500345.bht
     |-- hits.e04b0e7815.bht -> ../exprs/blastp_db/8158675169_613340465b_67b1500345.bht
-    |-- hits.f896e32e2c.bht -> ../exprs/blastp_db/8158675169_c747d896a2_67b1500345.bht
-    |-- hits5.bht.list -> ../exprs/repeat/b33baa5d21_c08cc19988_d07d9ca61e.bht.list
+    |-- hits5.bht.list -> ../exprs/repeat/b33baa5d21_c08cc19988_03f094fa75.bht.list
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
     |-- pcc7942.818516cf55.faa -> ../exprs/load_faa/387f499ddc_4.faa
     |-- pcc7942.9a9de1df2a.faa -> ../exprs/load_faa/387f499ddc_3.faa
     |-- pcc7942.aec7294f1e.faa -> ../exprs/load_faa/387f499ddc_2.faa
     |-- pcc7942.e04b0e7815.faa -> ../exprs/load_faa/387f499ddc_1.faa
-    |-- pcc7942.f896e32e2c.faa -> ../exprs/load_faa/387f499ddc_5.faa
+    |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- result -> ../exprs/length/7e0b52ff09.num
+    |-- result.75bbda110b.bht -> ../vars/hits.75bbda110b.bht
     |-- result.818516cf55.bht -> ../vars/hits.818516cf55.bht
     |-- result.9a9de1df2a.bht -> ../vars/hits.9a9de1df2a.bht
     |-- result.aec7294f1e.bht -> ../vars/hits.aec7294f1e.bht
-    |-- result.e04b0e7815.bht -> ../vars/hits.e04b0e7815.bht
-    `-- result.f896e32e2c.bht -> ../vars/hits.f896e32e2c.bht
+    `-- result.e04b0e7815.bht -> ../vars/hits.e04b0e7815.bht
 
 25 directories, 100 files

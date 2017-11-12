@@ -1,5 +1,7 @@
 module ShortCut.Modules.Permute where
 
+-- TODO put this in Core because with the salts it's not separable
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -45,7 +47,7 @@ aPermute :: CutState
          -> ([String] -> [[String]])
          -> FilePath -> CutType -> Int
          -> FilePath -> Action ()
-aPermute s@(_,cfg) comboFn iPath eType salt out = do
+aPermute (_,cfg) comboFn iPath eType salt out = do
   need [iPath]
   elements <- readStrings eType cfg iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?

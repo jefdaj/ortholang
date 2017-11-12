@@ -1,5 +1,13 @@
 module ShortCut.Core.Compile.Repeat where
 
+{- Why can't we use an obvious var mangling scheme again?
+ -   vars/<varname>.<salt>.<ext>
+ -   vars/<salt>/<varname>.<ext>
+ -   vars/<varname>/<varname>.<salt>.<ext>
+ - Maybe just have to delete all var links when starting?
+ - Start by moving to prefix dirs, then rename to ints if possible
+ -}
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -61,7 +69,8 @@ cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules ExprPath
 cRepeat (script,cfg) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)
       sub  = (subVar, subExpr)
-      deps = filter (\(v,_) -> (elem v $ depsOf resExpr)) script
+      deps = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
+      -- TODO this should be very different right?
       pre  = digest $ map show $ res:sub:deps
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
