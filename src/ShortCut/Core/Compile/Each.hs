@@ -18,7 +18,7 @@ import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), takeDirectory, makeRelative)
 import ShortCut.Core.Cmd          (wrappedCmd)
-import ShortCut.Core.Debug        (debugAction, debugRules, debug)
+import ShortCut.Core.Debug        (debugAction, debugRules, debug, symlinkSafe)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    readPaths, writePaths, CutPath,
                                    exprPathExplicit, argHashes,
@@ -190,5 +190,6 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
     actFn cfg dir args'''
     trackWrite [single']
   -- TODO utility/paths fn "symlink" (unless that's aLink?)
-  unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", singleRel', out']
-  trackWrite [out']
+  -- unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", singleRel', out']
+  -- trackWrite [out']
+  symlinkSafe cfg out' singleRel'

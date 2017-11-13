@@ -14,10 +14,13 @@ module ShortCut.Core.Debug
   , debugTrackWrite
   , readFileStrict
   , readLinesStrict
+  , symlinkSafe
   )
   where
 
 import Development.Shake
+
+import ShortCut.Core.Cmd (wrappedCmd)
 import ShortCut.Core.Pretty ()
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
@@ -110,13 +113,18 @@ unlessExists path act = do
 -- 1. It skips writing if the file is already being written by another thread
 -- 2. If some other error occurs it deletes the file, which is important
 --    because it prevents it being interpreted as an empty list later
-writeFileSafe :: FilePath -> String -> Action ()
-writeFileSafe name x = liftIO $ catchIOError (writeFile name x) handler
+withErrorHandling :: Action () -> Action ()
+withErrorHandling fn = liftIO $ catchIOError fn handler
   where
     handler e = if isAlreadyInUseError e
                   then return ()
                   else removeIfExists name >> ioError e
 
+-- TODO debugTrackWrite after?
+writeFileSafe :: FilePath -> String -> Action ()
+writeFileSafe name x = withErrorHandling $ writeFile name x
+
+-- TODO debugTrackWrite after?
 writeLinesSafe :: FilePath -> [String] -> Action ()
 writeLinesSafe name = writeFileSafe name . unlines
 
@@ -168,3 +176,17 @@ debugWriteChanged cfg f s = unlessExists f
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
+
+----------------------------
+-- untested symlink stuff --
+----------------------------
+
+-- TODO this should definitely be in a separate module right?
+-- TODO which is src and which dst in this, and which in the rest of the code?
+
+symlinkSafe :: CutConfig -> FilePath -> FilePath -> Action ()
+symlinkSafe cfg src dst = withErrorHandling makeLink
+  where
+    makeLink = do
+      unit $ quietly $ wrappedCmd cfg [dst] "ln" ["-fs", src, dst]
+      debugTrackWrite cfg [src]

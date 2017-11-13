@@ -29,7 +29,8 @@ import Control.Monad               (when)
 import Data.List                   (find, intersperse)
 import Development.Shake.FilePath  ((</>), (<.>))
 import ShortCut.Core.Cmd           (wrappedCmd)
-import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules)
+import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules,
+                                    symlinkSafe)
 import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
                                     digest, typesMatch)
 import System.Directory            (createDirectoryIfMissing)
@@ -165,8 +166,9 @@ writeDeduped cfg writeFn outPath content = do
   done <- doesFileExist cache
   liftIO $ createDirectoryIfMissing True cDir
   when (not done) (writeFn cfg cache content)
-  wrappedCmd cfg [outPath] [] "ln" ["-fs", cacheRel, outPath] -- TODO quietly?
-  debugTrackWrite cfg [outPath]
+  -- wrappedCmd cfg [outPath] [] "ln" ["-fs", cacheRel, outPath] -- TODO quietly?
+  -- debugTrackWrite cfg [outPath]
+  symlinkSafe cfg outPath cacheRel -- TODO src and dst right?
 
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: CutConfig -> [CutPath] -> CutPath -> Action ()
@@ -229,8 +231,9 @@ aVar cfg dest link = do
   alwaysRerun
   need [dest']
   liftIO $ createDirectoryIfMissing True $ takeDirectory link'
-  wrappedCmd cfg [link'] [] "ln" ["-fs", destr, link''] -- TODO quietly?
-  debugTrackWrite cfg [link'']
+  -- wrappedCmd cfg [link'] [] "ln" ["-fs", destr, link''] -- TODO quietly?
+  -- debugTrackWrite cfg [link'']
+  symlinkSafe cfg destr link'' -- TODO src and dst right?
   where
     dest'  = fromCutPath cfg dest
     link'  = fromCutPath cfg link
@@ -367,8 +370,9 @@ aLoadHash cfg src ext = do
   done <- doesFileExist hashPath'
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True tmpDir'
-    unit $ quietly $ wrappedCmd cfg [hashPath'] [] "ln" ["-fs", src', hashPath']
-    debugTrackWrite cfg [hashPath']
+    -- unit $ quietly $ wrappedCmd cfg [hashPath'] [] "ln" ["-fs", src', hashPath']
+    -- debugTrackWrite cfg [hashPath']
+    symlinkSafe cfg hashPath' src' -- TODO src and dst right?
   return hashPath
   where
     src' = fromCutPath cfg src
@@ -381,8 +385,9 @@ aLoad cfg strPath outPath = do
   hashPath <- aLoadHash cfg (toCutPath cfg src') (takeExtension outPath')
   let hashPath'    = fromCutPath cfg hashPath
       hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
-  unit $ quietly $ wrappedCmd cfg [outPath''] [] "ln" ["-fs", hashPathRel', outPath'']
-  debugTrackWrite cfg [outPath'']
+  -- unit $ quietly $ wrappedCmd cfg [outPath''] [] "ln" ["-fs", hashPathRel', outPath'']
+  -- debugTrackWrite cfg [outPath'']
+  symlinkSafe cfg outPath'' hashPathRel'
   where
     strPath' = fromCutPath cfg strPath
     outPath' = fromCutPath cfg outPath
