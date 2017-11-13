@@ -109,7 +109,7 @@ unlessExists path act = do
 -- This is safe in two ways:
 -- 1. It skips writing if the file is already being written by another thread
 -- 2. If some other error occurs it deletes the file, which is important
---    because it prevents it being interreted as an empty list later
+--    because it prevents it being interpreted as an empty list later
 writeFileSafe :: FilePath -> String -> Action ()
 writeFileSafe name x = liftIO $ catchIOError (writeFile name x) handler
   where
@@ -164,7 +164,7 @@ debugWriteLines cfg f ss = unlessExists f
 debugWriteChanged :: CutConfig -> FilePath -> String -> Action ()
 debugWriteChanged cfg f s = unlessExists f
                           $ debug cfg ("write '" ++ f ++ "'")
-                          $ writeFileChanged f s
+                          $ writeFileSafe f s
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
