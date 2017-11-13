@@ -1,15 +1,29 @@
 .
 |-- cache
 |   `-- list
+|       |-- 2a13ac791a.txt
+|       |-- 31703c5ab9.txt
+|       |-- 3d03d881a9.txt
+|       |-- 42fb7081a8.txt
 |       |-- 558d528228.txt
 |       `-- 58d21ca52f.txt
 |-- exprs
 |   |-- divide
-|   |   `-- 6d57e8642a_58d3e9f8ea.num
+|   |   |-- 58d3e9f8ea_de6d9e4871.num
+|   |   |-- 6d57e8642a_58d3e9f8ea.num
+|   |   `-- fba69f6eb2_4578706b58.num
+|   |-- list
+|   |   `-- 2cb75e062f.num.list -> ../../cache/list/3d03d881a9.txt
 |   `-- num
 |       |-- 89fb8b4aed.num -> ../../cache/list/58d21ca52f.txt
-|       `-- a629005e3c.num -> ../../cache/list/558d528228.txt
+|       |-- a629005e3c.num -> ../../cache/list/558d528228.txt
+|       |-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
+|       |-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
+|       `-- f57a78d737.num -> ../../cache/list/31703c5ab9.txt
 `-- vars
-    `-- result -> ../exprs/divide/6d57e8642a_58d3e9f8ea.num
+    |-- harder.num -> ../exprs/divide/58d3e9f8ea_de6d9e4871.num
+    |-- one_half.num -> ../exprs/divide/fba69f6eb2_4578706b58.num
+    |-- result -> ../exprs/list/2cb75e062f.num.list
+    `-- three_quarters.num -> ../exprs/divide/6d57e8642a_58d3e9f8ea.num
 
-6 directories, 6 files
+7 directories, 19 files

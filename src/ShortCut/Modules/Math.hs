@@ -5,11 +5,11 @@ module ShortCut.Modules.Math where
 import ShortCut.Core.Types
 import Development.Shake
 
-import Data.Scientific       (Scientific)
-import Data.String.Utils     (strip)
+import Data.Scientific             (Scientific, toRealFloat)
+import Data.String.Utils           (strip)
 import ShortCut.Core.Compile.Basic (rBop, defaultTypeCheck)
-import ShortCut.Core.Paths   (writeLit)
-import ShortCut.Core.Debug   (debugAction)
+import ShortCut.Core.Debug         (debugAction)
+import ShortCut.Core.Paths         (writeLit)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -18,16 +18,23 @@ cutModule = CutModule
     [ mkMathFn "+" (+)
     , mkMathFn "-" (-)
     , mkMathFn "*" (*)
-    , mkMathFn "/" (/)
+    , mkMathFn "/" (divDouble)
     ]
   }
+
+-- for some reason division is a lot harder than I expected!
+-- TODO is there a more elegant way without converting to string?
+divDouble :: Scientific -> Scientific -> Scientific
+divDouble n1 n2 = read $ show (answer :: Double)
+  where
+    answer = toRealFloat n1 / toRealFloat n2
 
 mkMathFn :: String -> (Scientific -> Scientific -> Scientific) -> CutFunction
 mkMathFn name fn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, num] num
   , fFixity    = Infix
-  , fRules  = rMath fn
+  , fRules     = rMath fn
   }
 
 -- apply a math operation to two numbers
