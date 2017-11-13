@@ -10,7 +10,7 @@ import Development.Shake.FilePath  ((</>), takeFileName)
 import ShortCut.Core.Cmd           (wrappedCmd)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each  (rEachTmps)
-import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
+import ShortCut.Core.Debug         (debugAction, debugTrackWrite, symlinkSafe)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, tmpLink)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
@@ -95,14 +95,16 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   -- These links aren't required, just helpful for a sane tmpfile tree.
   -- But if used, they have to have file extensions for some reason.
   -- Otherwise you get "Too many positional arguments".
-  unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
-  unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
-  debugTrackWrite cfg [qSrc, tSrc]
-  wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast"
-    [ "-q", qSrc, "-t", tSrc, "-o", oPath]
+  -- unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
+  -- unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
+  -- debugTrackWrite cfg [qSrc, tSrc]
+  symlinkSafe cfg qDst qSrc -- TODO src and dst flipped?
+  symlinkSafe cfg tDst tSrc -- TODO src and dst flipped?
+  wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   debugTrackWrite cfg [oPath]
-  unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
-  debugTrackWrite cfg [o'']
+  -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
+  -- debugTrackWrite cfg [o'']
+  symlinkSafe cfg o'' oRel'
   where
     o'   = fromCutPath cfg o
     o''  = debugAction cfg "aBlastCRB" o' [fromCutPath cfg tmpDir, o', q', t']
