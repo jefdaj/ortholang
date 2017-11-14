@@ -1,5 +1,6 @@
 *.sw*
 .stack-work
+.stack-root
 result
 tmp
 *.log
