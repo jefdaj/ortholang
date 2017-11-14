@@ -1,21 +1,20 @@
 module ShortCut.Core.Util where
 
+import Crypto.Hash           (hash, Digest, MD5)
+import Data.ByteString.Char8 (pack)
 import Data.Char             (isSpace)
 import Data.List             (dropWhileEnd)
 import Data.List             (isPrefixOf)
 import Data.List.Utils       (replace)
 import Data.Maybe            (fromJust)
-import ShortCut.Core.Types   (CutConfig(..), CutExpr, CutVar, CutScript,
-                              CutType(..))
+import ShortCut.Core.Types   (CutConfig(..), CutType(..))
 import System.Directory      (getHomeDirectory, makeAbsolute,
                               pathIsSymbolicLink)
+import System.FilePath       ((</>), takeDirectory)
 import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
-import Test.Tasty            (testGroup, TestTree)
-import Crypto.Hash           (hash, Digest, MD5)
-import Data.ByteString.Char8 (pack)
 import System.Posix.Files    (readSymbolicLink)
-import System.FilePath            ((</>), takeDirectory)
+import Test.Tasty            (testGroup, TestTree)
 
 -- TODO fn to makeRelative to config dir
 

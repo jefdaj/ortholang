@@ -110,9 +110,6 @@ wsProps cfg = testGroup "consume randomly generated whitespace"
       parseWithLeftOver pQuoted ([], cfg) (q ++ w) == Right (read q, "")
   , testProperty "after numbers" $
     \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg (n ++ w)
-  , testProperty "before the first identifier on a new line" $
-    \(ExComment c) (ExVar (CutVar s)) ->
-      parseWithLeftOver pComment ([], cfg) (c ++ "\n" ++ s) == Right ((), s)
   ]
 
 -- TODO use round-trip here too
@@ -127,8 +124,6 @@ acProps cfg = testGroup "parse randomly generated cut code"
         parseWithLeftOver pVarEq ([], cfg) a == Right (takeVar a, "")
   , testProperty "quoted strings" $
       \(ExQuoted q) -> regularParse pQuoted cfg q == Right (read q)
-  , testProperty "comments" $
-      \(ExComment c) -> parseWithLeftOver pComment ([], cfg) c == Right ((), "")
   , testProperty "positive numbers" $
       \(ExNum n) -> isRight $ regularParse pNum cfg n
   ]

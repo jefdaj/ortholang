@@ -18,7 +18,6 @@ module ShortCut.Core.Parse
   , escapeChars
   -- , fnNames -- TODO load these from modules
   , literalChars
-  , pComment
   , pNum
   , pBop
   , pTerm

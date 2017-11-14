@@ -15,7 +15,6 @@ import ShortCut.Modules.SeqIO (faa)
 -- TODO example function calls
 -- TODO example bop expressions
 -- TODO everything with and without parens
--- TODO everything with comments and newlines inturrupting
 -- TODO test operator precedence
 
 ---------------------------------
@@ -112,10 +111,6 @@ exExprs = exTerms ++ map addParens exTerms ++
   -- should be able to put fn calls in bops, with or without parens
   , ("(load_faa_each [\"some.faa\"]) ~ (load_faa_each [\"some.faa\"])", loadbop1)
   , ( "load_faa_each [\"some.faa\"]  ~  load_faa_each [\"some.faa\"] ", loadbop1)
-
-  -- comments are allowed in lsts
-  , ("[length [], # comment\nlength []]" , CutList num 0 [] [len [lst0], len [lst0]])
-  , ("[length [] # comment\n, length []]", CutList num 0 [] [len [lst0], len [lst0]])
   ]
 
 -- TODO list of pairs of expressions that should parse the same;

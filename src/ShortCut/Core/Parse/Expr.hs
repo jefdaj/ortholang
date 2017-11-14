@@ -14,8 +14,7 @@ import ShortCut.Core.Debug    (debugParser)
 import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
-import Text.Parsec.Combinator (optional, manyTill, eof, lookAhead, between,
-                               choice, sepBy)
+import Text.Parsec.Combinator (manyTill, eof, lookAhead, between, choice, sepBy)
 -- import Data.Either (either)
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
@@ -23,7 +22,7 @@ import Text.Parsec.Combinator (optional, manyTill, eof, lookAhead, between,
 pList :: ParseM CutExpr
 pList = do
   terms <- between (pSym '[') (pSym ']')
-                   (sepBy pExpr (pSym ',' <* optional pComment))
+                   (sepBy pExpr (pSym ','))
   let eType = nonEmptyType $ map typeOf terms
       deps  = if null terms then [] else foldr1 union $ map depsOf terms
   case eType of
@@ -83,7 +82,6 @@ pEnd = do
   (_, cfg) <- getState
   res <- lookAhead $ void $ choice
     [ eof
-    , pComment -- TODO shouldn't this not end it?
     , void $ try $ choice $ map pSym $ operatorChars cfg ++ ")],"
     , void $ try pVarEq
     ]
@@ -110,7 +108,6 @@ pFun :: ParseM CutExpr
 pFun = do
   (_, cfg) <- getState
   name <- try $ pName
-  void $ optional pComment
   args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fn   = find (\f -> fName f == name) fns
@@ -136,7 +133,7 @@ pParens = between (pSym '(') (pSym ')') pExpr <?> "parens"
 --      if none of them work it moves on to others
 --      without that we get silly errors like "no such variable" for any of them!
 pTerm :: ParseM CutExpr
-pTerm = choice [pList, pParens, pNum, pStr, pFun, pRef] <* optional pComment
+pTerm = choice [pList, pParens, pNum, pStr, pFun, pRef]
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
@@ -146,5 +143,4 @@ pTerm = choice [pList, pParens, pNum, pStr, pFun, pRef] <* optional pComment
 pExpr :: ParseM CutExpr
 pExpr = do
   (_, cfg) <- getState
-  optional pComment
   E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"

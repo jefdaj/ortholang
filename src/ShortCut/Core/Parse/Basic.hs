@@ -7,8 +7,8 @@ import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
 import Text.Parsec            (getState, (<?>))
-import Text.Parsec.Char       (char, digit ,letter, spaces, anyChar, newline, oneOf)
-import Text.Parsec.Combinator (optional, many1, manyTill, eof, between, notFollowedBy)
+import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
+import Text.Parsec.Combinator (many1, between, notFollowedBy)
 
 -- There's a convention in parsers that each one should consume whitespace
 -- after itself (handled by this function), and you only skip leading
@@ -28,16 +28,6 @@ spaces1 = void $ many1 $ oneOf spaceChars
 pSym :: Char -> ParseM ()
 pSym c = void $ lexeme $ char c
 
---------------
--- comments --
---------------
-
--- Tricky bit: # should NOT be a lexeme
-pComment :: ParseM ()
-pComment = (lexeme $ void $ char '#' >> restOfLine) <?> "comment"
-  where
-    restOfLine = manyTill anyChar (void newline <|> eof)
-
 -----------------
 -- identifiers --
 -----------------
@@ -54,7 +44,7 @@ pEq :: ParseM ()
 pEq = void $ spaces <* pSym '='
 
 pVarEq :: ParseM CutVar
-pVarEq = pVar <* (optional pComment) <* pEq <* (optional pComment) <?> "vareq"
+pVarEq = pVar <* pEq <?> "vareq"
 
 -- A reference is just a variable name, but that variable has to be in the script.
 -- TODO why does it fail after this, but only sometimes??

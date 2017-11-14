@@ -13,6 +13,21 @@ import Text.Parsec.Combinator (optional, lookAhead)
 import Text.Parsec            (ParseError)
 import ShortCut.Core.Debug    (debug)
 
+{- New overall script parse idea:
+ -
+ - 0. take an initial script, because may be parsing an import
+ - 1. strip comments
+ - 2. recursively parse imported scripts
+ - 3. pass the rest of the string to the existing parser
+ -    (which can be simplified by removing comment code)
+ -}
+
+-- untested, but should strip all comments from a script leaving whitespace
+stripComments :: String -> String
+stripComments = unlines . map stripComment . lines
+  where
+    stripComment = takeWhile (/= '#')
+
 ----------------
 -- statements --
 ----------------
@@ -57,14 +72,15 @@ pStatement = pAssign <|> pResult
 -- scripts --
 -------------
 
+-- TODO add a preprocessing step that strips comments + recurses on imports?
+
 -- TODO message in case it doesn't parse?
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
 pScript = do
   (_, cfg) <- getState
   optional spaces
-  void $ many pComment
-  scr <- many (pStatement <* many pComment)
+  scr <- many pStatement
   putState (scr, cfg)
   return scr
 
@@ -82,7 +98,7 @@ parseString c = runParseM pScript ([], c)
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: CutConfig -> FilePath -> IO (Either ParseError CutScript)
-parseFile cfg path = readFile path' >>= return . parseString cfg
+parseFile cfg path = readFile path' >>= return . parseString cfg . stripComments
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
 
