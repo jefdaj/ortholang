@@ -63,7 +63,6 @@ module ShortCut.Core.Paths
   , exprPath
   , exprPathExplicit
   , varPath
-  , tmpLink
   -- , resolveVar
   -- , resolveVars
   -- file io
@@ -81,20 +80,26 @@ module ShortCut.Core.Paths
   , readStrings
   , writeString
   , writeStrings
+  -- symlink stuff
+  -- , tmpLink
+  , symlink
   )
   where
 
-import Development.Shake (Action, trackWrite, need)
+import Development.Shake (Action, trackWrite, need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (digest, digestLength)
 import ShortCut.Core.Cmd   (wrappedCmdOut)
-import ShortCut.Core.Debug (debugPath, debugReadLines, debugWriteLines, debug)
+import ShortCut.Core.Debug        (debugPath, debugReadLines, debugWriteLines, debug,
+                                   withErrorHandling, debugTrackWrite)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute, pathSeparators,
-                                   makeRelative)
+                                   makeRelative, takeDirectory)
 import Data.List                  (intersperse, isPrefixOf)
 import Data.List.Split            (splitOneOf)
+import System.Directory           (createDirectoryIfMissing)
+import System.Posix.Files         (createSymbolicLink)
 
 --------------
 -- cutpaths --
@@ -211,16 +216,6 @@ varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> bas
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
 
--- takes source and destination paths in the tmpdir and makes a path between
--- them with the right number of dots
--- TODO check that the CutPath is in TMPDIR, not WORKDIR!
-tmpLink :: CutConfig -> FilePath -> FilePath -> FilePath
-tmpLink cfg src dst = dots </> tmpRel dst
-  where
-    tmpRel  = makeRelative $ cfgTmpDir cfg
-    dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
-    nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
-
 ---------------
 -- io checks --
 ---------------
@@ -321,3 +316,37 @@ writeStrings etype cfg out whatevers = if etype' `elem` [str, num]
 
 writeString :: CutType -> CutConfig -> FilePath -> String -> Action ()
 writeString etype cfg out whatever = writeStrings etype cfg out [whatever]
+
+----------------------------
+-- untested symlink stuff --
+----------------------------
+
+-- TODO separate module like Core.Actions?
+-- TODO which is src and which dst in this, and which in the rest of the code?
+
+-- takes source and destination paths in the tmpdir and makes a path between
+-- them with the right number of dots
+-- TODO check that the CutPath is in TMPDIR, not WORKDIR!
+tmpLink :: CutConfig -> FilePath -> FilePath -> FilePath
+tmpLink cfg src dst = dots </> tmpRel dst
+  where
+    tmpRel  = makeRelative $ cfgTmpDir cfg
+    dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
+    nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
+
+-- Note that src here means what's sometimes called the destination.
+-- The first arg should be the symlink path and the second the file it points to.
+-- (it was going to be kind of confusing either way)
+--
+-- TODO fix error on race condition: if src exists already, just skip it
+symlink :: CutConfig -> CutPath -> CutPath -> Action ()
+symlink cfg src dst = do
+  need [dst'] -- TODO wrapper that uses cutpaths
+  liftIO $ do
+    createDirectoryIfMissing True $ takeDirectory dst'
+    withErrorHandling src' $ createSymbolicLink dstr src' -- TODO handle dups!
+  debugTrackWrite cfg [src'] -- TODO wrapper that uses cutpaths
+  where
+    src' = fromCutPath cfg src
+    dst' = fromCutPath cfg dst
+    dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?

@@ -29,12 +29,13 @@ import Control.Monad               (when)
 import Data.List                   (find, intersperse)
 import Development.Shake.FilePath  ((</>), (<.>))
 import ShortCut.Core.Cmd           (wrappedCmd)
+import ShortCut.Core.Paths         (symlink)
 import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules,
-                                    symlinkSafe)
+                                    removeIfExists)
 import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
                                     digest, typesMatch)
 import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             (takeDirectory, makeRelative, takeExtension)
+import System.FilePath             (takeExtension)
 
 
 ------------------------------
@@ -155,6 +156,8 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
  - TODO does it need to handle a race condition when writing to the cache?
  - TODO any reason to keep original extensions instead of all using .txt?
  -      oh, if we're testing extensions anywhere. lets not do that though
+ -
+ - TODO move to new Actions module
  -}
 writeDeduped :: Show a => CutConfig
              -> (CutConfig -> FilePath -> a -> Action ())
@@ -162,13 +165,14 @@ writeDeduped :: Show a => CutConfig
 writeDeduped cfg writeFn outPath content = do
   let cDir     = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
       cache    = cDir </> digest content <.> "txt"
-      cacheRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) cache
-  done <- doesFileExist cache
+      cache'   = toCutPath cfg cache
+      out'     = toCutPath cfg outPath
+      -- cacheRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) cache
   liftIO $ createDirectoryIfMissing True cDir
-  when (not done) (writeFn cfg cache content)
-  -- wrappedCmd cfg [outPath] [] "ln" ["-fs", cacheRel, outPath] -- TODO quietly?
-  -- debugTrackWrite cfg [outPath]
-  symlinkSafe cfg outPath cacheRel -- TODO src and dst right?
+  done1 <- doesFileExist cache
+  done2 <- doesFileExist outPath
+  when (not done1) (writeFn cfg cache content)
+  when (not done2) (symlink cfg out' cache')
 
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: CutConfig -> [CutPath] -> CutPath -> Action ()
@@ -219,27 +223,26 @@ rRef _ _ = error "bad argument to rRef"
 -- TODO unify with rLink2, rLoad etc?
 -- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
 rVar :: CutState -> CutVar -> CutExpr -> CutPath -> Rules VarPath
-rVar (_,cfg) var expr dest = do
-  link' %> \_ -> aVar cfg dest link
-  return (VarPath link')
+rVar (_,cfg) var expr oPath = do
+  vPath' %> \_ -> aVar cfg vPath oPath
+  return (VarPath vPath')
   where
-    link  = varPath cfg var expr
-    link' = debugRules cfg "rVar" var $ fromCutPath cfg link
+    vPath  = varPath cfg var expr
+    vPath' = debugRules cfg "rVar" var $ fromCutPath cfg vPath
 
 aVar :: CutConfig -> CutPath -> CutPath -> Action ()
-aVar cfg dest link = do
+aVar cfg vPath oPath = do
   alwaysRerun
-  need [dest']
-  liftIO $ createDirectoryIfMissing True $ takeDirectory link'
-  -- wrappedCmd cfg [link'] [] "ln" ["-fs", destr, link''] -- TODO quietly?
-  -- debugTrackWrite cfg [link'']
-  symlinkSafe cfg destr link'' -- TODO src and dst right?
+  liftIO $ removeIfExists vPath'
+  -- need [oPath']
+  -- liftIO $ createDirectoryIfMissing True $ takeDirectory link'
+  symlink cfg vPath'' oPath
   where
-    dest'  = fromCutPath cfg dest
-    link'  = fromCutPath cfg link
-    link'' = debugAction cfg "aVar" link' [link', dest']
+    oPath'  = fromCutPath cfg oPath
+    vPath'  = fromCutPath cfg vPath
+    vPath'' = debugAction cfg "aVar" vPath [vPath', oPath']
     -- TODO utility fn for these? and also for ln using them?
-    destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest')
+    -- destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest')
     -- linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link')
 
 -- Handles the actual rule generation for all binary operators.
@@ -359,20 +362,17 @@ rLoad s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
     out' = fromCutPath cfg out
 rLoad _ _ = error "bad argument to rLoad"
 
--- TODO add extensions?
 aLoadHash :: CutConfig -> CutPath -> String -> Action CutPath
 aLoadHash cfg src ext = do
   need [src']
   md5 <- hashContent cfg src
-  let tmpDir'      = fromCutPath cfg $ cacheDir cfg "load"
-      hashPath'    = tmpDir' </> md5 <.> ext
-      hashPath     = toCutPath cfg hashPath'
+  let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
+      hashPath' = tmpDir' </> md5 <.> ext
+      hashPath  = toCutPath cfg hashPath'
   done <- doesFileExist hashPath'
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True tmpDir'
-    -- unit $ quietly $ wrappedCmd cfg [hashPath'] [] "ln" ["-fs", src', hashPath']
-    -- debugTrackWrite cfg [hashPath']
-    symlinkSafe cfg hashPath' src' -- TODO src and dst right?
+    symlink cfg hashPath src
   return hashPath
   where
     src' = fromCutPath cfg src
@@ -383,15 +383,13 @@ aLoad cfg strPath outPath = do
   pth <- readLitPaths cfg strPath'
   src' <- liftIO $ resolveSymlinks cfg True $ fromCutPath cfg $ head pth -- TODO safer!
   hashPath <- aLoadHash cfg (toCutPath cfg src') (takeExtension outPath')
-  let hashPath'    = fromCutPath cfg hashPath
-      hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
-  -- unit $ quietly $ wrappedCmd cfg [outPath''] [] "ln" ["-fs", hashPathRel', outPath'']
-  -- debugTrackWrite cfg [outPath'']
-  symlinkSafe cfg outPath'' hashPathRel'
+  -- let hashPath'    = fromCutPath cfg hashPath
+      -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
+  symlink cfg outPath'' hashPath
   where
-    strPath' = fromCutPath cfg strPath
-    outPath' = fromCutPath cfg outPath
-    outPath'' = debugAction cfg "aLoad" outPath' [strPath', outPath']
+    strPath'  = fromCutPath cfg strPath
+    outPath'  = fromCutPath cfg outPath
+    outPath'' = debugAction cfg "aLoad" outPath [strPath', outPath']
 
 rLoadList :: RulesFn
 rLoadList s e@(CutFun (ListOf r) _ _ _ [es])

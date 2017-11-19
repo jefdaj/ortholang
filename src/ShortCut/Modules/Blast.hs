@@ -21,6 +21,7 @@ import ShortCut.Core.Paths         (readLit, readPath, fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb)
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeDirectory, takeFileName, (</>))
+import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -88,8 +89,12 @@ aMkBlastFromDb bCmd cfg [o, e, q, p] = do
       dbg     = if cfgDebug cfg then ["-v"] else []
       args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  unit $ quietly $ wrappedCmd cfg [o'] [Cwd $ takeDirectory prefix']
-                     "parallelblast.py" args
+
+  -- TODO redundant?
+  liftIO $ createDirectoryIfMissing True cDir
+  liftIO $ createDirectoryIfMissing True $ takeDirectory o'
+
+  unit $ quietly $ wrappedCmd cfg [o'] [Cwd cDir] "parallelblast.py" args
   debugTrackWrite cfg [o'']
   where
     o'  = fromCutPath cfg o

@@ -11,6 +11,7 @@ import ShortCut.Core.Types
 
 import System.Exit     (ExitCode(..))
 import System.FilePath (takeDirectory, takeFileName)
+import System.Directory (createDirectoryIfMissing)
 
 wrappedCmdError :: String -> Int -> [String] -> Action a
 wrappedCmdError bin n ptns = do
@@ -47,6 +48,8 @@ wrappedCmd :: CutConfig -> [String]
            -> [CmdOption] -> FilePath -> [String]
            -> Action ()
 wrappedCmd c ps os b as = do
+  -- TODO would this help anything?
+  -- liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) ps
   (_, code) <- wrappedCmd' c os b as
   case code of
     ExitFailure n -> wrappedCmdError b n ps

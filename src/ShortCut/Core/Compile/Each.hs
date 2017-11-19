@@ -16,13 +16,13 @@ import Text.PrettyPrint.HughesPJClass
 import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
-import Development.Shake.FilePath ((</>), (<.>), takeDirectory, makeRelative)
-import ShortCut.Core.Cmd          (wrappedCmd)
-import ShortCut.Core.Debug        (debugAction, debugRules, debug, symlinkSafe)
+import Development.Shake.FilePath ((</>), (<.>), takeDirectory)
+-- import ShortCut.Core.Cmd          (wrappedCmd)
+import ShortCut.Core.Debug        (debugAction, debugRules, debug)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    readPaths, writePaths, CutPath,
-                                   exprPathExplicit, argHashes,
-                                   readLit, writeLits, tmpLink)
+                                   exprPathExplicit, argHashes, symlink,
+                                   readLit, writeLits)
 import ShortCut.Core.Util         (digest, resolveSymlinks)
 import System.Directory           (createDirectoryIfMissing)
 
@@ -174,7 +174,7 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
       let d' = fromCutPath cfg d
       createDirectoryIfMissing True d'
       return d
-  let out' = debugAction cfg "aEachElem" out args''
+  let out' = debugAction cfg "aEachElem" (toCutPath cfg out) args''
       -- dir' = fromCutPath cfg dir
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
@@ -182,14 +182,14 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
       single' = fromCutPath cfg single
       -- TODO need to determine specifically how many dots
       -- singleRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) single'
-      singleRel' = tmpLink cfg out' single'
+      -- singleRel' = tmpLink cfg out' single'
       args''' = single:map (toCutPath cfg) args''
   done <- doesFileExist single'
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True $ takeDirectory single'
     actFn cfg dir args'''
-    trackWrite [single']
+    trackWrite [single'] -- TODO debugTrackWrite?
   -- TODO utility/paths fn "symlink" (unless that's aLink?)
   -- unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", singleRel', out']
   -- trackWrite [out']
-  symlinkSafe cfg out' singleRel'
+  symlink cfg out' single
