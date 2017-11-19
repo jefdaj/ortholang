@@ -8,10 +8,11 @@ import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
 import ShortCut.Core.Cmd           (wrappedCmd)
+import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each  (rEachTmps)
-import ShortCut.Core.Debug         (debugAction, debugTrackWrite, symlinkSafe)
-import ShortCut.Core.Paths         (CutPath, fromCutPath, tmpLink)
+import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
+import ShortCut.Core.Paths         (CutPath, fromCutPath, symlink)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.Directory            (createDirectoryIfMissing)
@@ -89,8 +90,13 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   tDst <- liftIO $ resolveSymlinks cfg False t' -- link directly to the file
   let qSrc  = tmp' </> qName
       tSrc  = tmp' </> tName
+      qSrc' = toCutPath cfg qSrc
+      qDst' = toCutPath cfg qDst
+      tSrc' = toCutPath cfg tSrc
+      tDst' = toCutPath cfg tDst
       oPath = tmp' </> "results.crb"
-      oRel' = tmpLink cfg o' oPath
+      oPath' = toCutPath cfg oPath
+      -- oRel' = tmpLink cfg o' oPath
   liftIO $ createDirectoryIfMissing True tmp'
   -- These links aren't required, just helpful for a sane tmpfile tree.
   -- But if used, they have to have file extensions for some reason.
@@ -98,16 +104,16 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   -- unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
   -- unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
   -- debugTrackWrite cfg [qSrc, tSrc]
-  symlinkSafe cfg qDst qSrc -- TODO src and dst flipped?
-  symlinkSafe cfg tDst tSrc -- TODO src and dst flipped?
+  symlink cfg qSrc' qDst' -- TODO src and dst flipped?
+  symlink cfg tSrc' tDst' -- TODO src and dst flipped?
   wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   debugTrackWrite cfg [oPath]
   -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
   -- debugTrackWrite cfg [o'']
-  symlinkSafe cfg o'' oRel'
+  symlink cfg o'' oPath'
   where
     o'   = fromCutPath cfg o
-    o''  = debugAction cfg "aBlastCRB" o' [fromCutPath cfg tmpDir, o', q', t']
+    o''  = debugAction cfg "aBlastCRB" o [fromCutPath cfg tmpDir, o', q', t']
     tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t
