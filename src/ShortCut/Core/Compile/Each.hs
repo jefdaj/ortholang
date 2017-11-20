@@ -17,12 +17,11 @@ import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), takeDirectory)
--- import ShortCut.Core.Cmd          (wrappedCmd)
+-- import ShortCut.Core.Actions          (wrappedCmd)
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
+import ShortCut.Core.Actions      (readPaths, writePaths, symlink, readLit, writeLits)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
-                                   readPaths, writePaths, CutPath,
-                                   exprPathExplicit, argHashes, symlink,
-                                   readLit, writeLits)
+                                   CutPath, exprPathExplicit, argHashes)
 import ShortCut.Core.Util         (digest, resolveSymlinks)
 import System.Directory           (createDirectoryIfMissing)
 

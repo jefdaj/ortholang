@@ -53,53 +53,55 @@ module ShortCut.Core.Paths
   ( CutPath()
   , toCutPath
   , fromCutPath
+  , cutPathString
+  , stringCutPath
   , toGeneric
   , fromGeneric
   -- cache dirs
   , cacheDir
   -- tmpfiles
   , argHashes
-  , hashContent
+  -- , hashContent
   , exprPath
   , exprPathExplicit
   , varPath
+  , checkLit
+  , checkLits
+  , checkPath
+  , checkPaths
   -- , resolveVar
   -- , resolveVars
   -- file io
-  , readPath
-  , readPaths
-  , readLitPaths
-  , writePath
-  , writePaths
-  , readLit
-  , readLits
-  , writeLit
-  , writeLits
+  -- , readPath
+  -- , readPaths
+  -- , readLitPaths
+  -- , writePath
+  -- , writePaths
+  -- , readLit
+  -- , readLits
+  -- , writeLit
+  -- , writeLits
   -- read and write tmpfiles as strings
-  , readString
-  , readStrings
-  , writeString
-  , writeStrings
+  -- , readString
+  -- , readStrings
+  -- , writeString
+  -- , writeStrings
   -- symlink stuff
   -- , tmpLink
-  , symlink
+  -- , symlink
   )
   where
 
-import Development.Shake (Action, trackWrite, need, liftIO)
+-- import Development.Shake (Action, trackWrite, need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
-import ShortCut.Core.Util (digest, digestLength)
-import ShortCut.Core.Cmd   (wrappedCmdOut)
-import ShortCut.Core.Debug        (debugPath, debugReadLines, debugWriteLines, debug,
-                                   withErrorHandling, debugTrackWrite)
+import ShortCut.Core.Util (digest)
+-- import ShortCut.Core.Actions   (wrappedCmdOut, debugReadLines, debugWriteLines,
+                                   -- withErrorHandling, debugTrackWrite)
+import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
-import Development.Shake.FilePath ((</>), (<.>), isAbsolute, pathSeparators,
-                                   makeRelative, takeDirectory)
+import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
-import Data.List.Split            (splitOneOf)
-import System.Directory           (createDirectoryIfMissing)
-import System.Posix.Files         (createSymbolicLink)
 
 --------------
 -- cutpaths --
@@ -128,7 +130,7 @@ isGeneric path = "$TMPDIR" `isPrefixOf` path || "$WORKDIR" `isPrefixOf` path
 
 -- TODO print warning on failure?
 toCutPath :: CutConfig -> FilePath -> CutPath
-toCutPath cfg = CutPath . toGeneric cfg . normalize
+toCutPath cfg = CutPath . checkPath . toGeneric cfg . normalize
   where
     normalize p = case parseAbsFile p of
       Nothing -> error $ "toCutPath can't parse: " ++ p
@@ -136,6 +138,14 @@ toCutPath cfg = CutPath . toGeneric cfg . normalize
 
 fromCutPath :: CutConfig -> CutPath -> FilePath
 fromCutPath cfg (CutPath path) = fromGeneric cfg path
+
+-- weird, but needed for writing cutpaths to files in Actions.hs
+cutPathString :: CutPath -> String
+cutPathString (CutPath path) = path
+
+-- TODO this is basically just exporting CutPath right? any better way?
+stringCutPath :: String -> CutPath
+stringCutPath = CutPath
 
 ----------------
 -- cache dirs --
@@ -162,21 +172,6 @@ argHashes _ (CutLit  _ _     v    ) = [digest v]
 argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
 argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
 argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
-
--- TODO fuck, this makes it reeeeealllly slow. remove!
---      but what can we replace it with? maybe system md5sum? streaming hash?
---      something a little cleverer? shake's internal ID? that might work
---      ah, md5sum doesn't read the whole file. that might work too then!
-hashContent :: CutConfig -> CutPath -> Action String
-hashContent cfg path = do
-  need [path']
-  -- liftIO $ putStrLn $ "hashing " ++ path'
-  out <- wrappedCmdOut cfg [] [] "md5sum" [path']
-  let md5 = take digestLength $ head $ words out -- TODO adapt failGracfully to work here
-  -- liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5
-  return md5
-  where
-    path' = fromCutPath cfg path
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
 -- resolveVar :: CutConfig -> CutPath -> IO CutPath
@@ -238,115 +233,3 @@ checkPath path = if isAbsolute path || isGeneric path
 
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath
-
-
--------------
--- file io --
--------------
-
-readPaths :: CutConfig -> FilePath -> Action [CutPath]
-readPaths cfg path = fmap (map CutPath . checkPaths) (debugReadLines cfg path)
-
--- TODO something safer than head!
-readPath :: CutConfig -> FilePath -> Action CutPath
-readPath cfg path = readPaths cfg path >>= return . head
-
--- read a file as lines, convert to absolute paths, then parse those as cutpaths
--- used by the load_* functions to convert user-friendly relative paths to absolute
-readLitPaths :: CutConfig -> FilePath -> Action [CutPath]
-readLitPaths cfg path = do
-  ls <- debugReadLines cfg path
-  return $ map (toCutPath cfg . toAbs) ls
-  where
-    toAbs line = if isAbsolute line
-                   then line
-                   else cfgWorkDir cfg </> line
-
--- TODO take a CutPath for the out file too
--- TODO take Path Abs File and convert them... or Path Rel File?
-writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
-writePaths cfg out cpaths = debugWriteLines cfg out paths >> trackWrite paths
-  where
-    paths = map (\(CutPath path) -> path) cpaths
-
-writePath :: CutConfig -> FilePath -> CutPath -> Action ()
-writePath cfg out path = writePaths cfg out [path]
-
-readLits :: CutConfig -> FilePath -> Action [String]
-readLits cfg path = debugReadLines cfg path >>= return . checkLits
-
--- TODO something safer than head!
--- TODO error if they contain $TMPDIR or $WORKDIR?
-readLit :: CutConfig -> FilePath -> Action String
-readLit cfg path = readLits cfg path >>= return . head
-
--- TODO error if they contain $TMPDIR or $WORKDIR?
-writeLits :: CutConfig -> FilePath -> [String] -> Action ()
-writeLits cfg path lits = debugWriteLines cfg path $ checkLits lits
-
-writeLit :: CutConfig -> FilePath -> String -> Action ()
-writeLit cfg path lit = writeLits cfg path [lit]
-
-----------------------------------------
--- read and write tmpfiles as strings --
-----------------------------------------
-
--- These are useful for generic functions like in Sets.hs which operate on
--- "lists of whatever". You include the CutType (of each element, not the
--- list!) so it knows how to convert to/from String, and then within the
--- function you treat them as Strings.
-
-readStrings :: CutType -> CutConfig -> FilePath -> Action [String]
-readStrings etype cfg path = if etype' `elem` [str, num]
-  then readLits cfg path
-  else (fmap . map) (fromCutPath cfg) (readPaths cfg path)
-  where
-    etype' = debug cfg ("readStrings (each " ++ extOf etype ++ ") from " ++ path) etype
-
-readString :: CutType -> CutConfig -> FilePath -> Action String
-readString etype cfg path = readStrings etype cfg path >>= return . head
-
--- TODO if given paths and writing lits, should this read them?
-writeStrings :: CutType -> CutConfig -> FilePath -> [String] -> Action ()
-writeStrings etype cfg out whatevers = if etype' `elem` [str, num]
-  then writeLits cfg out whatevers
-  else writePaths cfg out $ map (toCutPath cfg) whatevers
-  where
-    etype' = debug cfg ("writeStrings (each " ++ extOf etype ++ "): " ++ show (take 3 whatevers)) etype
-
-writeString :: CutType -> CutConfig -> FilePath -> String -> Action ()
-writeString etype cfg out whatever = writeStrings etype cfg out [whatever]
-
-----------------------------
--- untested symlink stuff --
-----------------------------
-
--- TODO separate module like Core.Actions?
--- TODO which is src and which dst in this, and which in the rest of the code?
-
--- takes source and destination paths in the tmpdir and makes a path between
--- them with the right number of dots
--- TODO check that the CutPath is in TMPDIR, not WORKDIR!
-tmpLink :: CutConfig -> FilePath -> FilePath -> FilePath
-tmpLink cfg src dst = dots </> tmpRel dst
-  where
-    tmpRel  = makeRelative $ cfgTmpDir cfg
-    dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
-    nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
-
--- Note that src here means what's sometimes called the destination.
--- The first arg should be the symlink path and the second the file it points to.
--- (it was going to be kind of confusing either way)
---
--- TODO fix error on race condition: if src exists already, just skip it
-symlink :: CutConfig -> CutPath -> CutPath -> Action ()
-symlink cfg src dst = do
-  need [dst'] -- TODO wrapper that uses cutpaths
-  liftIO $ do
-    createDirectoryIfMissing True $ takeDirectory dst'
-    withErrorHandling src' $ createSymbolicLink dstr src' -- TODO handle dups!
-  debugTrackWrite cfg [src'] -- TODO wrapper that uses cutpaths
-  where
-    src' = fromCutPath cfg src
-    dst' = fromCutPath cfg dst
-    dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?

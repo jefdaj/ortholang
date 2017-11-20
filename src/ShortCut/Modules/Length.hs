@@ -3,9 +3,10 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug     (debugAction, debugReadLines)
+import ShortCut.Core.Actions  (debugReadLines, writeLit)
+import ShortCut.Core.Debug    (debugAction)
 import ShortCut.Core.Paths    (exprPath, fromCutPath,
-                               toCutPath, writeLit, CutPath)
+                               toCutPath, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Each     (rEach)
 import ShortCut.Modules.Blast  (bht)

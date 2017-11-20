@@ -7,12 +7,12 @@ import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import ShortCut.Core.Cmd           (wrappedCmd)
+import ShortCut.Core.Actions       (wrappedCmd, debugTrackWrite, symlink)
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each  (rEachTmps)
-import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
-import ShortCut.Core.Paths         (CutPath, fromCutPath, symlink)
+import ShortCut.Core.Debug         (debugAction)
+import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.Directory            (createDirectoryIfMissing)

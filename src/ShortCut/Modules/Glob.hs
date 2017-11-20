@@ -3,8 +3,8 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
-import ShortCut.Core.Paths (exprPath, CutPath, toCutPath,
-                            fromCutPath, readLit, writeLits)
+import ShortCut.Core.Actions (readLit, writeLits)
+import ShortCut.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)

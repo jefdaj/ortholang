@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic      (rExpr)
-import ShortCut.Core.Paths (writeLits)
+import ShortCut.Core.Actions (writeLits)
 import ShortCut.Core.Debug (debugAction)
 import Development.Shake.FilePath ((</>))
 

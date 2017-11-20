@@ -8,12 +8,13 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (when)
-import ShortCut.Core.Cmd           (wrappedCmd, wrappedCmdExit, wrappedCmdError)
-import ShortCut.Core.Debug         (debugAction, debugTrackWrite, debugRules)
+import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdExit, wrappedCmdError,
+                                    debugTrackWrite, readLit, writeLit, readLits,
+                                    writeLits, writePath)
+import ShortCut.Core.Debug         (debugAction, debugRules)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEachTmp)
-import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath, readLit,
-                                    writeLit, readLits, writePath, writeLits,
+import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
                                     toCutPath, CutPath)
 import ShortCut.Core.Util          (stripWhiteSpace, resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
@@ -335,7 +336,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- TODO is there a need for wrapping or cleanup on errors here?
   -- TODO check files before too and skip if they exist? annoying but still...
   -- quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd cDir']
-  quietly $ wrappedCmd cfg [ptn] [Cwd cDir'] "makeblastdb"
+  quietly $ wrappedCmd cfg [dbPrefix, ptn] [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
