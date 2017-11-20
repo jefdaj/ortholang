@@ -9,7 +9,7 @@ import Data.Scientific             (Scientific, toRealFloat)
 import Data.String.Utils           (strip)
 import ShortCut.Core.Compile.Basic (rBop, defaultTypeCheck)
 import ShortCut.Core.Debug         (debugAction)
-import ShortCut.Core.Paths         (writeLit)
+import ShortCut.Core.Actions       (writeLit)
 
 cutModule :: CutModule
 cutModule = CutModule

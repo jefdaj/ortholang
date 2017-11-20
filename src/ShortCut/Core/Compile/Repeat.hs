@@ -11,8 +11,9 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths  (exprPath, fromCutPath, writeLits, writePaths,
-                             readLit, CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Actions (writeLits, writePaths, readLit)
+import ShortCut.Core.Paths  (exprPath, fromCutPath,
+                             CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript)
 import ShortCut.Core.Debug   (debugRules, debugAction)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)

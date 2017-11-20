@@ -73,12 +73,12 @@ executable shortcut
   hs-source-dirs:   .
   other-modules:    Paths_ShortCut,
                     ShortCut.Core,
+                    ShortCut.Core.Actions,
                     ShortCut.Core.Compile,
                     ShortCut.Core.Compile.Basic,
                     ShortCut.Core.Compile.Each,
                     ShortCut.Core.Compile.Repeat,
                     ShortCut.Core.Paths,
-                    ShortCut.Core.Cmd,
                     ShortCut.Core.Config,
                     ShortCut.Core.Debug,
                     ShortCut.Core.Eval,

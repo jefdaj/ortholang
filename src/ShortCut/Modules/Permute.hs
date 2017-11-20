@@ -7,7 +7,8 @@ import ShortCut.Core.Types
 
 import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
-import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath, readStrings, writeStrings)
+import ShortCut.Core.Actions (readStrings, writeStrings)
+import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath)
 import ShortCut.Core.Debug          (debugAction, debug)
 import ShortCut.Core.Util           (digest)
 

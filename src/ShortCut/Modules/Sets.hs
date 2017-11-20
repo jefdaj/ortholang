@@ -12,9 +12,10 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Compile.Basic (rExpr, typeError)
-import ShortCut.Core.Debug         (debugRules, debugAction, debugReadFile)
-import ShortCut.Core.Paths         (exprPath, fromCutPath, readPaths,
-                                    readStrings, writeStrings)
+import ShortCut.Core.Actions       (debugReadFile, readStrings, readPaths,
+                                    writeStrings)
+import ShortCut.Core.Debug         (debugRules, debugAction)
+import ShortCut.Core.Paths         (exprPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks, typeMatches, nonEmptyType,
                                     digest)
 

@@ -22,20 +22,20 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
-                            fromCutPath, varPath, writePaths, CutPath, readLitPaths,
-                            readLit, readLits, writeLits, hashContent)
+                            fromCutPath, varPath, CutPath)
 
-import Control.Monad               (when)
-import Data.List                   (find, intersperse)
-import Development.Shake.FilePath  ((</>), (<.>))
-import ShortCut.Core.Cmd           (wrappedCmd)
-import ShortCut.Core.Paths         (symlink)
-import ShortCut.Core.Debug         (debugTrackWrite, debugAction, debugRules,
-                                    removeIfExists)
-import ShortCut.Core.Util          (absolutize, resolveSymlinks, stripWhiteSpace,
-                                    digest, typesMatch)
-import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             (takeExtension)
+import Control.Monad              (when)
+import Data.List                  (find, intersperse)
+import Development.Shake.FilePath ((</>), (<.>))
+import ShortCut.Core.Debug        (debugAction, debugRules)
+import ShortCut.Core.Actions      (debugTrackWrite, removeIfExists, wrappedCmd,
+                                   readLit, readLits, writeLits, hashContent,
+                                   readLitPaths, hashContent, writePaths, symlink,
+                                   writeDeduped)
+import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
+                                   digest, typesMatch)
+import System.Directory           (createDirectoryIfMissing)
+import System.FilePath            (takeExtension)
 
 
 ------------------------------
@@ -147,33 +147,6 @@ rListLits s@(_,cfg) e@(CutList _ _ _ exprs) = do
     outPath' = debugRules cfg "rListLits" e $ fromCutPath cfg outPath
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
-{- This ensures that when two lists have the same content, their expression
- - paths will be links to the same cached path. That causes them to get
- - properly deduplicated when used in a set operation. It also makes the .tree
- - test files much stricter, since they'll change if any list element changes.
- -
- - TODO switch to md5sum/hashContent?
- - TODO does it need to handle a race condition when writing to the cache?
- - TODO any reason to keep original extensions instead of all using .txt?
- -      oh, if we're testing extensions anywhere. lets not do that though
- -
- - TODO move to new Actions module
- -}
-writeDeduped :: Show a => CutConfig
-             -> (CutConfig -> FilePath -> a -> Action ())
-             -> FilePath -> a -> Action ()
-writeDeduped cfg writeFn outPath content = do
-  let cDir     = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
-      cache    = cDir </> digest content <.> "txt"
-      cache'   = toCutPath cfg cache
-      out'     = toCutPath cfg outPath
-      -- cacheRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) cache
-  liftIO $ createDirectoryIfMissing True cDir
-  done1 <- doesFileExist cache
-  done2 <- doesFileExist outPath
-  when (not done1) (writeFn cfg cache content)
-  when (not done2) (symlink cfg out' cache')
-
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: CutConfig -> [CutPath] -> CutPath -> Action ()
 aListLits cfg paths outPath = do
@@ -204,7 +177,7 @@ aListPaths cfg paths outPath = do
   need paths'
   paths'' <- liftIO $ mapM (resolveSymlinks cfg True) paths'
   need paths''
-  let paths''' = map (toCutPath cfg) paths''
+  let paths''' = map (toCutPath cfg) paths'' -- TODO not working?
   writeDeduped cfg writePaths out'' paths'''
   where
     out'   = fromCutPath cfg outPath
