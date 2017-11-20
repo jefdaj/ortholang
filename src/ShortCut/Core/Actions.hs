@@ -44,12 +44,14 @@ import ShortCut.Core.Types
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators,
                                    makeRelative)
 
-import qualified Control.Monad.TaggedException as TE
+-- import qualified Control.Monad.TaggedException as TE
 
-import Data.Default.Class (Default(def))
+import Control.Monad.IO.Class (MonadIO)
+-- import Data.Default.Class (Default(def))
 import System.Exit        (ExitCode(..))
 import System.FilePath    (takeDirectory, takeFileName, (<.>))
-import System.IO.LockFile (withLockFile)
+-- import System.IO.LockFile (withLockFileFile', withLockFileExt)
+import System.FileLock   (tryLockFile, unlockFile, SharedExclusive(..))
 import System.IO         (IOMode(..), withFile)
 import Control.Monad     (unless, when)
 import Control.Exception (catch, throwIO)
@@ -64,6 +66,26 @@ import ShortCut.Core.Util  (digest, digestLength)
 import Data.List.Split            (splitOneOf)
 import System.Directory           (createDirectoryIfMissing)
 import System.Posix.Files         (createSymbolicLink)
+
+---------------
+-- lockfiles --
+---------------
+
+-- TODO put these around every write operation! will probably help a ton
+-- TODO but first need to make this compatible with Action
+-- TODO switch to tryFileLock
+
+-- TODO any particular corner cases to be aware of? (what if inturrupted?)
+-- TODO what happens if the process is inturrupted? should delete both
+withLockFile :: MonadIO m => FilePath -> m () -> m ()
+withLockFile path act = do
+  lock <- liftIO $ tryLockFile (path <.> "lock") Exclusive
+  case lock of
+    Nothing -> return () -- TODO also need to unlock here? seems an odd way
+    Just l  -> do
+      res <- act -- TODO also recover from other errors here? if so, rename
+      liftIO $ unlockFile l
+      return res
 
 ---------
 -- cmd --
@@ -85,12 +107,6 @@ rmPrefixFiles ptn = do
   mapM_ rmFile files
   where
     rmFile p = liftIO $ removeFiles (takeDirectory p) [takeFileName p]
-
--- TODO any particular corner cases to be aware of? (what if inturrupted?)
-withLock :: CutConfig -> FilePath -> IO a -> IO a
-withLock _ path act = withErr $ withLockFile def (path <.> "lock") act
-  where
-    withErr = TE.handle $ fail . ("Locking failed with: " ++) . show
 
 wrappedCmdError :: String -> Int -> [String] -> Action a
 wrappedCmdError bin n ptns = do
@@ -124,16 +140,20 @@ wrappedCmd' cfg opts bin args = do
   (Stdouterr out, Exit code) <- fn
   return (out, code)
 
+-- TODO what if ps is empty? should that not be allowed? add another arg?
+-- TODO rename to just cmd? systemCmd? something like that
 wrappedCmd :: CutConfig -> [String]
            -> [CmdOption] -> FilePath -> [String]
            -> Action ()
 wrappedCmd c ps os b as = do
-  -- TODO would this help anything?
-  -- liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) ps
-  (_, code) <- wrappedCmd' c os b as
-  case code of
-    ExitFailure n -> wrappedCmdError b n ps
-    ExitSuccess   -> return ()
+  liftIO $ createDirectoryIfMissing True $ takeDirectory (head ps)
+  withLockFile (head ps) $ do
+    -- TODO would this help anything?
+    -- liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) ps
+    (_, code) <- wrappedCmd' c os b as
+    case code of
+      ExitFailure n -> wrappedCmdError b n ps
+      ExitSuccess   -> return ()
 
 wrappedCmdOut :: CutConfig -> [String]
               -> [CmdOption] -> FilePath -> [String]
