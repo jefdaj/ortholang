@@ -1,5 +1,7 @@
 module ShortCut.Test.Scripts where
 
+-- TODO go with filelock here too?
+
 import Prelude hiding (writeFile)
 import qualified Control.Monad.TaggedException as TE
 
@@ -63,7 +65,7 @@ mkOutTest cfg gld = goldenDiff "prints expected output" gld scriptAct
 mkTreeTest :: CutConfig -> FilePath -> TestTree
 mkTreeTest cfg t = goldenDiff "creates expected tmpfiles" t treeAct
   where
-    treeCmd = (shell $ "tree") { cwd = Just $ cfgTmpDir cfg }
+    treeCmd = (shell $ "tree -I '*.lock'") { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg
       out <- readCreateProcess treeCmd ""
