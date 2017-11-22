@@ -84,7 +84,16 @@ withLockFile path act = do
       liftIO (unlockFile l >> removeIfExists lockPath)
       return res
 
--- TODO failing tests: blast_db_each
+-- TODO failing tests:
+--        blast_db_each (parallelblast.py race? also fails to delete files)
+--        no rule available for final outfile:
+--          crb_blast_each
+--          best_hits (924 vs 926 hits)
+--          extract_ids
+--          concat_fasta
+--          extract_seqs
+--          gba_to_fna_concat
+--          translate
 
 ---------
 -- cmd --
@@ -152,7 +161,7 @@ wrappedCmd c ps os b as = do
     (_, code) <- wrappedCmd' c os b as
     case code of
       ExitFailure n -> wrappedCmdError b n ps
-      ExitSuccess   -> return ()
+      ExitSuccess   -> debugTrackWrite c ps
 
 wrappedCmdOut :: CutConfig -> [String]
               -> [CmdOption] -> FilePath -> [String]
@@ -161,11 +170,12 @@ wrappedCmdOut c ps os b as = do
   (out, code) <- wrappedCmd' c os b as
   case code of
     ExitFailure n -> liftIO (putStrLn out) >> wrappedCmdError b n ps
-    ExitSuccess   -> return out
+    ExitSuccess   -> debugTrackWrite c ps >> return out
 
 -- Note that this one doesn't have wrappedCmdError,
 -- because it's used for when you expect a nonzero exit code.
 -- TODO write some other error checking to go along with it!
+-- TODO track writes?
 wrappedCmdExit :: CutConfig
                -> [CmdOption] -> FilePath -> [String]
                -> Action ExitCode
