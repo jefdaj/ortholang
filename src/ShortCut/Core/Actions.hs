@@ -41,51 +41,50 @@ module ShortCut.Core.Actions
 
 import Development.Shake
 import ShortCut.Core.Types
+
+import Control.Monad              (unless, when)
+import Control.Monad.Catch        (MonadCatch, catch, throwM, catchIOError)
+import Control.Monad.IO.Class     (MonadIO)
+import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators,
                                    makeRelative)
-
--- import qualified Control.Monad.TaggedException as TE
-
-import Control.Monad.IO.Class (MonadIO)
--- import Data.Default.Class (Default(def))
-import System.Exit        (ExitCode(..))
-import System.FilePath    (takeDirectory, takeFileName, (<.>))
--- import System.IO.LockFile (withLockFileFile', withLockFileExt)
-import System.FileLock   (tryLockFile, unlockFile, SharedExclusive(..))
-import System.IO         (IOMode(..), withFile)
-import Control.Monad     (unless, when)
-import Control.Exception (catch, throwIO)
-import System.Directory  (removeFile)
-import System.IO.Error   (isAlreadyInUseError, isAlreadyExistsError,
-                          isDoesNotExistError, ioError)
-import System.IO.Strict  (hGetContents)
-import ShortCut.Core.Debug (debug)
-import ShortCut.Core.Paths (CutPath, toCutPath, fromCutPath, checkLits,
-                            cacheDir, cutPathString, stringCutPath)
-import ShortCut.Core.Util  (digest, digestLength)
-import Data.List.Split            (splitOneOf)
-import System.Directory           (createDirectoryIfMissing)
+import ShortCut.Core.Debug        (debug)
+import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
+                                   cacheDir, cutPathString, stringCutPath)
+import ShortCut.Core.Util         (digest, digestLength)
+import System.Directory           (createDirectoryIfMissing, removeFile)
+import System.Exit                (ExitCode(..))
+import System.FileLock            (tryLockFile, unlockFile, SharedExclusive(..))
+import System.FilePath            (takeDirectory, takeFileName, (<.>))
+import System.IO                  (IOMode(..), withFile)
+import System.IO.Error            (isAlreadyInUseError, isAlreadyExistsError,
+                                   isDoesNotExistError, ioError)
+import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
 
----------------
--- lockfiles --
----------------
+------------------------
+-- write files safely --
+------------------------
+
+-- TODO combine this with withErrorHandling into one big "safe write" fn
+-- TODO if the action fails, still remove the lockfile (and the outfile patterns!)
 
 -- TODO put these around every write operation! will probably help a ton
--- TODO but first need to make this compatible with Action
--- TODO switch to tryFileLock
-
--- TODO any particular corner cases to be aware of? (what if inturrupted?)
 -- TODO what happens if the process is inturrupted? should delete both
+-- TODO are they being removed properly afterward?
+-- TODO should you use the outfiles themselves as the lockfiles too? might simplify a bit
 withLockFile :: MonadIO m => FilePath -> m () -> m ()
 withLockFile path act = do
-  lock <- liftIO $ tryLockFile (path <.> "lock") Exclusive
+  let lockPath = path <.> "lock"
+  lock <- liftIO $ tryLockFile lockPath Exclusive
   case lock of
     Nothing -> return () -- TODO also need to unlock here? seems an odd way
     Just l  -> do
       res <- act -- TODO also recover from other errors here? if so, rename
-      liftIO $ unlockFile l
+      liftIO (unlockFile l >> removeIfExists lockPath)
       return res
+
+-- TODO failing tests: blast_db_each
 
 ---------
 -- cmd --
@@ -184,12 +183,12 @@ wrappedCmdExit c os b as = wrappedCmd' c os b as >>= return . snd
  -}
 
 -- TODO call this module something besides Debug now that it also handles errors?
-
-removeIfExists :: FilePath -> IO ()
-removeIfExists fileName = removeFile fileName `catch` handleExists
+-- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
+removeIfExists :: (MonadIO m, MonadCatch m) => FilePath -> m ()
+removeIfExists fileName = (liftIO (removeFile fileName)) `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
-          | otherwise = throwIO e
+          | otherwise = throwM e
 
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
@@ -200,8 +199,8 @@ unlessExists path act = do
 -- 1. It skips writing if the file is already being written by another thread
 -- 2. If some other error occurs it deletes the file, which is important
 --    because it prevents it being interpreted as an empty list later
-withErrorHandling :: FilePath -> IO () -> IO ()
-withErrorHandling path fn = catch fn handler
+withErrorHandling :: (MonadIO m, MonadCatch m) => FilePath -> m () -> m ()
+withErrorHandling path fn = fn `catchIOError` (liftIO . handler)
   where
     handler e = if      isAlreadyInUseError  e then return ()
                 else if isAlreadyExistsError e then return ()
@@ -384,7 +383,7 @@ symlink cfg src dst = do
   need [dst'] -- TODO wrapper that uses cutpaths
   liftIO $ do
     createDirectoryIfMissing True $ takeDirectory dst'
-    withErrorHandling src' $ createSymbolicLink dstr src' -- TODO handle dups!
+    withLockFile src' $ withErrorHandling src' $ createSymbolicLink dstr src' -- TODO handle dups!
   debugTrackWrite cfg [src'] -- TODO wrapper that uses cutpaths
   where
     src' = fromCutPath cfg src
