@@ -94,7 +94,7 @@ aBlastCRB cfg tmpDir [o, q, t] = do
       qDst' = toCutPath cfg qDst
       tSrc' = toCutPath cfg tSrc
       tDst' = toCutPath cfg tDst
-      oPath = tmp' </> "results.crb"
+      oPath = tmp' </> "results.crb" -- TODO what's `need`ing this? stop it! ahh, symlink
       oPath' = toCutPath cfg oPath
       -- oRel' = tmpLink cfg o' oPath
   liftIO $ createDirectoryIfMissing True tmp'
@@ -104,13 +104,16 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   -- unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
   -- unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
   -- debugTrackWrite cfg [qSrc, tSrc]
-  symlink cfg qSrc' qDst' -- TODO src and dst flipped?
-  symlink cfg tSrc' tDst' -- TODO src and dst flipped?
+  need [qDst, tDst]
+  symlink cfg qSrc' qDst'
+  symlink cfg tSrc' tDst'
+  -- debugTrackWrite cfg [qSrc, tSrc] -- TODO why doesn't symlnk handle these??
   wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   debugTrackWrite cfg [oPath]
   -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
   -- debugTrackWrite cfg [o'']
   symlink cfg o'' oPath'
+  -- debugTrackWrite cfg [o'] --- TODO why doesn't symlink handle this??
   where
     o'   = fromCutPath cfg o
     o''  = debugAction cfg "aBlastCRB" o [fromCutPath cfg tmpDir, o', q', t']
