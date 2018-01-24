@@ -30,7 +30,7 @@ import Test.Hspec                 (it)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
--- import ShortCut.Core.Actions      (withErrorHandling)
+import ShortCut.Core.Actions      (withErrorHandling)
 
 nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
@@ -88,8 +88,7 @@ mkTripTest cfg = goldenDiff "unchanged by round-trip to file" tripShow tripAct
       writeFile tripShow $ show scr1
     tripAct = do
       -- _    <- withLockFile (cfgTmpDir cfg) tripSetup
-      -- _ <- withErrorHandling (cfgTmpDir cfg) tripSetup
-      _ <- tripSetup
+      _ <- withErrorHandling (cfgTmpDir cfg) () tripSetup
       scr2 <- parseFileIO cfg tripCut
       return $ pack $ show scr2
 
@@ -109,8 +108,8 @@ mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
 -- TASTY_NUM_THREADS=1 (actually seems to make it worse).
 runCut :: CutConfig -> IO String
 -- runCut cfg = withLockFile (cfgTmpDir cfg) $ do
--- runCut cfg = withErrorHandling (cfgTmpdir cfg) $ do
-runCut cfg = do
+-- runCut cfg = do
+runCut cfg = withErrorHandling (cfgTmpDir cfg <.> "lock") "" $ do
   -- delay 50000; hFlush stdout; hFlush stderr; delay 50000 -- 1 second total
   delay 100000 -- 1 second
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg

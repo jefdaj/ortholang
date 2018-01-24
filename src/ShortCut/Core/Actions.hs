@@ -93,8 +93,8 @@ withLockFile path act = do
   -- case lock of
     -- Nothing -> return () -- TODO also need to unlock here? seems an odd way
     -- Just l  -> do
-  -- res <- E.catch act (\(e :: IOError) -> liftIO (unlockFile lock))
   res <- act
+  -- res <- E.catch act (\(e :: IOError) -> liftIO (unlockFile lock))
   -- res <- catchIOError act (\e -> liftIO (tryIO (removeFile lockPath)) >> throwM e)
   -- TODO why does removing the lockfiles after cause errors in the OTHER withLockFile (Test/Scripts)??
   -- liftIO (unlockFile l >> tryIO (removeIfExists lockPath))
@@ -235,12 +235,13 @@ unlessExists path act = do
   e <- doesFileExist path
   unless e act
 
+-- TODO need to delete the entire dir if given one?
 -- This is safe in two ways:
 -- 1. It skips writing if the file is already being written by another thread
 -- 2. If some other error occurs it deletes the file, which is important
 --    because it prevents it being interpreted as an empty list later
-withErrorHandling :: (MonadIO m, MonadCatch m) => FilePath -> m () -> m ()
-withErrorHandling path fn = fn `catchIOError` (liftIO . handler)
+withErrorHandling :: (MonadIO m, MonadCatch m) => FilePath -> a -> m a -> m a
+withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> return def)
   where
     handler e = if      isAlreadyInUseError  e then return ()
                 else if isAlreadyExistsError e then return ()
@@ -248,7 +249,7 @@ withErrorHandling path fn = fn `catchIOError` (liftIO . handler)
 
 -- TODO debugTrackWrite after?
 writeFileSafe :: FilePath -> String -> Action ()
-writeFileSafe path x = liftIO $ withErrorHandling path $ writeFile path x
+writeFileSafe path x = liftIO $ withLockFile path $ withErrorHandling path () $ writeFile path x
 
 -- TODO debugTrackWrite after?
 writeLinesSafe :: FilePath -> [String] -> Action ()
@@ -423,7 +424,7 @@ symlink cfg src dst = do
   -- need [dst'] -- TODO wrapper that uses cutpaths
   liftIO $ do
     createDirectoryIfMissing True $ takeDirectory dst'
-    withLockFile src' $ withErrorHandling src' $ createSymbolicLink dstr src' -- TODO handle dups!
+    withLockFile src' $ withErrorHandling src' () $ createSymbolicLink dstr src' -- TODO handle dups!
   debugTrackWrite cfg [src'] -- TODO wrapper that uses cutpaths
   where
     src' = fromCutPath cfg src
