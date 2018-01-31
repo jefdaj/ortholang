@@ -34,6 +34,7 @@ in stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     makeWrapper ${env}/bin/crb-blast $out/bin/crb-blast \
-      --prefix PATH "${ncbi-blast}/bin" : "${coreutils}/bin"
+      --prefix PATH : "${ncbi-blast}/bin" \
+      --prefix PATH : "${coreutils}/bin"
   '';
 }
