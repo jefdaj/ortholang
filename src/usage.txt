@@ -9,7 +9,7 @@ Options:
   --version          Print version number and exit.
   --debug            Print debugging messages to stderr
   --test             Run self-tests and exit.
-	--interactive      Start the interpreter, and load SCRIPT if any. This is
+  --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
   --script SCRIPT    ShortCut script to run, or load with --interactive
   --tmpdir TMPDIR    Where to cache results, including many large
@@ -19,9 +19,9 @@ Options:
                      [default: ~/.shortcut/config]
   --workdir WORKDIR  Working directory and start point for relative paths.
                      [default: .]
-	--wrapper WRAPPER  Script to wrap arbitrary system commands. Use this to
-										 optimize concurrency and work around other quirks of your
+  --wrapper WRAPPER  Script to wrap arbitrary system commands. Use this to
+                     optimize concurrency and work around other quirks of your
                      system.
   --report HTML      Write an interactive HTML report that helps optimize
-										 performance. Not sure whether this works well with SLURM
+                     performance. Not sure whether this works well with SLURM
                      or not yet.
