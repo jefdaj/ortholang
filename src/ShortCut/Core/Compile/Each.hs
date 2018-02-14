@@ -190,5 +190,5 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
     trackWrite [single'] -- TODO debugTrackWrite?
   -- TODO utility/paths fn "symlink" (unless that's aLink?)
   -- unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", singleRel', out']
-  -- trackWrite [out']
   symlink cfg out' single
+  -- debugTrackWrite cfg [out]

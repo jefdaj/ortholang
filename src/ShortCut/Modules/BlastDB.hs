@@ -181,6 +181,7 @@ aBlastdblist cfg oPath listTmp fPath = do
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True tmpDir
     -- This one is tricky because it exits 1 on success
+    -- TODO still use a lockfile and wrack writes!
     code <- wrappedCmdExit cfg [Cwd tmpDir, Shell]
       "blastdbget" [tmpDir, ">", listTmp']
     case code of

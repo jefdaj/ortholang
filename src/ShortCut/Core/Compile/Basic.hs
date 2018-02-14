@@ -207,9 +207,10 @@ aVar :: CutConfig -> CutPath -> CutPath -> Action ()
 aVar cfg vPath oPath = do
   alwaysRerun
   liftIO $ removeIfExists vPath'
-  -- need [oPath']
+  need [oPath']
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory link'
   symlink cfg vPath'' oPath
+  -- debugTrackWrite cfg [vPath'] -- TODO why doesn't symlink handle this??
   where
     oPath'  = fromCutPath cfg oPath
     vPath'  = fromCutPath cfg vPath
@@ -346,6 +347,7 @@ aLoadHash cfg src ext = do
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True tmpDir'
     symlink cfg hashPath src
+    -- debugTrackWrite cfg [hashPath'] -- TODO WTF? why does this not get called by symlink?
   return hashPath
   where
     src' = fromCutPath cfg src
@@ -359,6 +361,7 @@ aLoad cfg strPath outPath = do
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   symlink cfg outPath'' hashPath
+  -- debugTrackWrite cfg [outPath'] -- TODO WTF? why does this not get called by symlink?
   where
     strPath'  = fromCutPath cfg strPath
     outPath'  = fromCutPath cfg outPath

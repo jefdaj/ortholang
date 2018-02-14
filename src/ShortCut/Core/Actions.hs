@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 {- Some Shake Actions wrapped with ShortCut-specific additions,
  - and some other stuff. Eventually, it would be nice if all IO happened here.
  -
@@ -36,14 +38,18 @@ module ShortCut.Core.Actions
   , hashContent
   , symlink
   , writeDeduped
+  , withLockFile
+  -- , tryIO -- TODO move to Util
   )
   where
 
 import Development.Shake
 import ShortCut.Core.Types
 
+import qualified Control.Exception as E
+
 import Control.Monad              (unless, when)
-import Control.Monad.Catch        (MonadCatch, catch, throwM, catchIOError)
+import Control.Monad.Catch        (MonadThrow, MonadCatch, catch, throwM, catchIOError)
 import Control.Monad.IO.Class     (MonadIO)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators,
@@ -54,7 +60,7 @@ import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
 import ShortCut.Core.Util         (digest, digestLength)
 import System.Directory           (createDirectoryIfMissing, removeFile)
 import System.Exit                (ExitCode(..))
-import System.FileLock            (tryLockFile, unlockFile, SharedExclusive(..))
+import System.FileLock            (lockFile, unlockFile, SharedExclusive(..))
 import System.FilePath            (takeDirectory, takeFileName, (<.>))
 import System.IO                  (IOMode(..), withFile)
 import System.IO.Error            (isAlreadyInUseError, isAlreadyExistsError,
@@ -66,6 +72,12 @@ import System.Posix.Files         (createSymbolicLink)
 -- write files safely --
 ------------------------
 
+instance MonadThrow Action where
+  throwM = liftIO . throwM
+
+instance MonadCatch Action where
+  catch = catch
+
 -- TODO combine this with withErrorHandling into one big "safe write" fn
 -- TODO if the action fails, still remove the lockfile (and the outfile patterns!)
 
@@ -73,27 +85,41 @@ import System.Posix.Files         (createSymbolicLink)
 -- TODO what happens if the process is inturrupted? should delete both
 -- TODO are they being removed properly afterward?
 -- TODO should you use the outfiles themselves as the lockfiles too? might simplify a bit
-withLockFile :: MonadIO m => FilePath -> m () -> m ()
+withLockFile :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
 withLockFile path act = do
-  let lockPath = path <.> "lock"
-  lock <- liftIO $ tryLockFile lockPath Exclusive
-  case lock of
-    Nothing -> return () -- TODO also need to unlock here? seems an odd way
-    Just l  -> do
-      res <- act -- TODO also recover from other errors here? if so, rename
-      liftIO (unlockFile l >> removeIfExists lockPath)
-      return res
+  let lockPath  = path <.> "lock"
+  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
+  lock <- liftIO $ lockFile lockPath Exclusive -- TODO oh no! need to remove lock on errors
+  -- case lock of
+    -- Nothing -> return () -- TODO also need to unlock here? seems an odd way
+    -- Just l  -> do
+  -- res <- E.catch act (\(e :: IOError) -> liftIO (unlockFile lock))
+  res <- act
+  -- res <- catchIOError act (\e -> liftIO (tryIO (removeFile lockPath)) >> throwM e)
+  -- TODO why does removing the lockfiles after cause errors in the OTHER withLockFile (Test/Scripts)??
+  -- liftIO (unlockFile l >> tryIO (removeIfExists lockPath))
+  liftIO $ unlockFile lock
+  return res
+  
+-- try an IO action and ignore if it fails
+-- TODO is there a standard name for this?
+-- TODO use catchIOError instead?
+tryIO :: (MonadIO m, MonadCatch m) => m () -> m ()
+tryIO fn = fn `catchIOError` (\_ -> return ())
 
 -- TODO failing tests:
 --        blast_db_each (parallelblast.py race? also fails to delete files)
 --        no rule available for final outfile:
---          crb_blast_each
+--          crb_blast_each.lock "Cought IO exception: removeLink: does not exist (No such file or directory)"
 --          best_hits (924 vs 926 hits)
 --          extract_ids
---          concat_fasta
+--          concat_fastas
 --          extract_seqs
+--          gba_to_faa
+--          gba_to_fna
 --          gba_to_fna_concat
 --          translate
+--          repeat_recursive "openFile: resource busy (file is locked)"
 
 ---------
 -- cmd --
@@ -148,20 +174,24 @@ wrappedCmd' cfg opts bin args = do
   (Stdouterr out, Exit code) <- fn
   return (out, code)
 
+{- OK I think this is an issue of immediately returning rather than waiting for
+ - another thread to write the same output file? then it hasn't been tracked as
+ - written yet or something?
+ -}
+
 -- TODO what if ps is empty? should that not be allowed? add another arg?
 -- TODO rename to just cmd? systemCmd? something like that
 wrappedCmd :: CutConfig -> [String]
            -> [CmdOption] -> FilePath -> [String]
            -> Action ()
-wrappedCmd c ps os b as = do
-  liftIO $ createDirectoryIfMissing True $ takeDirectory (head ps)
-  withLockFile (head ps) $ do
-    -- TODO would this help anything?
-    -- liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) ps
-    (_, code) <- wrappedCmd' c os b as
-    case code of
-      ExitFailure n -> wrappedCmdError b n ps
-      ExitSuccess   -> debugTrackWrite c ps
+wrappedCmd c ps os b as = withLockFile (head ps) $ do -- TODO why the "failed to build" errors?
+-- wrappedCmd c ps os b as = do
+  -- TODO would this help anything?
+  -- liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) ps
+  (_, code) <- wrappedCmd' c os b as
+  case code of
+    ExitFailure n -> wrappedCmdError b n ps
+    ExitSuccess   -> debugTrackWrite c ps
 
 wrappedCmdOut :: CutConfig -> [String]
               -> [CmdOption] -> FilePath -> [String]
@@ -390,7 +420,7 @@ tmpLink cfg src dst = dots </> tmpRel dst
 -- TODO fix error on race condition: if src exists already, just skip it
 symlink :: CutConfig -> CutPath -> CutPath -> Action ()
 symlink cfg src dst = do
-  need [dst'] -- TODO wrapper that uses cutpaths
+  -- need [dst'] -- TODO wrapper that uses cutpaths
   liftIO $ do
     createDirectoryIfMissing True $ takeDirectory dst'
     withLockFile src' $ withErrorHandling src' $ createSymbolicLink dstr src' -- TODO handle dups!
@@ -428,5 +458,7 @@ writeDeduped cfg writeFn outPath content = do
   liftIO $ createDirectoryIfMissing True cDir
   done1 <- doesFileExist cache
   done2 <- doesFileExist outPath
+  -- when (not done1) (writeFn cfg cache content >> debugTrackWrite cfg [cache])
+  -- when (not done2) (symlink cfg out' cache' >> debugTrackWrite cfg [outPath])
   when (not done1) (writeFn cfg cache content)
   when (not done2) (symlink cfg out' cache')
