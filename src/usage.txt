@@ -2,13 +2,15 @@ A scripting language that makes short work of phylogenomic cuts.
 
 Usage:
   shortcut --help | --version
+  shortcut --test [--pattern PATTERN]
   shortcut [options]
 
 Options:
   --help             Print this help text and exit.
   --version          Print version number and exit.
   --debug            Print debugging messages to stderr
-  --test [PATTERN]   Run all self-tests, or just those matching PATTERN.
+  --test             Run tests. May be combined with a wrapper script.
+  --pattern PATTERN  Only run tests matching PATTERN. [default: all]
   --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
   --script SCRIPT    ShortCut script to run, or load with --interactive

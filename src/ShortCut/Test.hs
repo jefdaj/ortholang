@@ -20,14 +20,17 @@ import qualified ShortCut.Test.Parse   as P
 import qualified ShortCut.Test.Repl    as R
 import qualified ShortCut.Test.Scripts as S
 
--- TODO reorder these to start with the latest scripts?
+-- This is weird because all tests are always created;
+-- filtering is done according to the TASTY_PATTERN environment var.
+-- Gotcha: can't print the test pattern in place of "all tests"
+-- because then they all match, ruining the filter.
 mkTests :: CutConfig -> IO TestTree
-mkTests cfg = mkTestGroup cfg "all tests"
-  [ D.mkTests
-  , P.mkTests
-  , R.mkTests
-  , S.mkTests
-  ]
+mkTests cfg = setPtn >> mkTestGroup cfg "all tests" tests
+  where
+    tests  = [D.mkTests, P.mkTests, R.mkTests, S.mkTests]
+    setPtn = case cfgTestPtn cfg of
+               Nothing  -> return ()
+               Just ptn -> setEnv "TASTY_PATTERN" ptn
 
 mkTestConfig :: CutConfig -> FilePath -> CutConfig
 mkTestConfig cfg dir = cfg
@@ -45,11 +48,8 @@ runTests cfg = withSystemTempDirectory "shortcut" $ \td -> do
   wd <- getDataFileName ""
   setCurrentDirectory wd -- TODO issue with this in the stack tests?
   -- TODO check exit code?
-  (_,_,_) <- readCreateProcessWithExitCode
-               (shell $ unwords ["ln -s", wd </> "data", (td </> "data")]) ""
-  tests <- mkTests $ mkTestConfig cfg td
-  case cfgTestPtn cfg of
-    Nothing  -> return ()
-    Just ptn -> setEnv "TASTY_PATTERN" ptn
   setEnv "LANG" "C"
+  (_,_,_) <- readCreateProcessWithExitCode
+    (shell $ unwords ["ln -s", wd </> "data", (td </> "data")]) ""
+  tests <- mkTests $ mkTestConfig cfg td
   defaultMain tests
