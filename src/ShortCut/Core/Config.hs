@@ -34,6 +34,7 @@ loadConfig mods args = do
   cwd <- mapM absolutize =<< loadField args cfg "workdir"
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
+  ptn <- loadField args cfg "test"
   return CutConfig
     { cfgScript  = csc'
     , cfgTmpDir  = fromJust ctd
@@ -42,6 +43,7 @@ loadConfig mods args = do
     , cfgModules = mods
     , cfgWrapper = cls
     , cfgReport  = rep
+    , cfgTestPtn = ptn
     }
 
 getUsage :: IO Docopt
