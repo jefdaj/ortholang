@@ -48,5 +48,8 @@ runTests cfg = withSystemTempDirectory "shortcut" $ \td -> do
   (_,_,_) <- readCreateProcessWithExitCode
                (shell $ unwords ["ln -s", wd </> "data", (td </> "data")]) ""
   tests <- mkTests $ mkTestConfig cfg td
+  case cfgTestPtn cfg of
+    Nothing  -> return ()
+    Just ptn -> setEnv "TASTY_PATTERN" ptn
   setEnv "LANG" "C"
   defaultMain tests

@@ -234,6 +234,7 @@ data CutConfig = CutConfig
   , cfgModules :: [CutModule]
   , cfgWrapper :: Maybe FilePath
   , cfgReport  :: Maybe String
+  , cfgTestPtn :: Maybe String
   }
   deriving Show
 
