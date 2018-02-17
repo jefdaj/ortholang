@@ -7,10 +7,10 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Debug (debug)
+-- import ShortCut.Core.Debug (debug)
 
 import Control.Monad               (when)
-import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdWrite, wrappedCmdExit, wrappedCmdError,
+import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdExit, wrappedCmdError,
                                     debugTrackWrite, readLit, writeLit, readLits,
                                     writeLits, writePath)
 import ShortCut.Core.Debug         (debugAction, debugRules)
@@ -25,7 +25,7 @@ import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
 import System.Directory            (createDirectoryIfMissing)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
-import System.Exit                 (ExitCode(..))
+-- import System.Exit                 (ExitCode(..))
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -187,9 +187,9 @@ aBlastdblist cfg oPath listTmp fPath = do
     code <- wrappedCmdExit cfg listTmp' [Cwd tmpDir, Shell] -- TODO remove stderr?
       "blastdbget" [tmpDir, ">", listTmp']
     case code of
-      ExitSuccess   -> debugTrackWrite cfg [listTmp'] -- never happens :(
-      ExitFailure 1 -> debugTrackWrite cfg [listTmp']
-      ExitFailure n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
+      0 -> debugTrackWrite cfg [listTmp'] -- never happens :(
+      1 -> debugTrackWrite cfg [listTmp']
+      n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
   filterStr <- readLit  cfg fPath'
   out       <- readLits cfg listTmp'
   let names  = if null out then [] else tail out
@@ -230,8 +230,7 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   -- TODO was taxdb needed for anything else?
   -- TODO does this need to lock on a separate file from dbPrefix''?
   -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
-  (Stdout (_ :: String)) <- 
-    wrappedCmd cfg dbPrefix'' [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
+  _ <- wrappedCmd cfg dbPrefix'' [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
   writeLit cfg dbPrefix'' $ tmp' </> dbName
   where
@@ -352,7 +351,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- liftIO $ putStrLn $ "this is ptn: " ++ ptn
   -- liftIO $ putStrLn $ "it matched these files: " ++ show before
   -- liftIO $ putStrLn $ "this will be dbPrefix: " ++ dbPrefix
-  Stdout (_ :: String) <- quietly $ wrappedCmd cfg dbPrefix [Cwd cDir'] "makeblastdb"
+  _ <- quietly $ wrappedCmd cfg dbPrefix [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?

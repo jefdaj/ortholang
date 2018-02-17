@@ -142,6 +142,7 @@ rmPrefixFiles ptn = do
   where
     rmFile p = liftIO $ removeFiles (takeDirectory p) [takeFileName p]
 
+-- TODO is the a type a good way to do this? it never actually gets evaluated
 wrappedCmdError :: String -> Int -> [String] -> Action a
 wrappedCmdError bin n ptns = do
   -- toDel <- globs dir ptns -- TODO any better dir? absolute?
@@ -167,14 +168,18 @@ wrappedCmdError bin n ptns = do
 -- wrappedCmd' :: CutConfig -> FilePath
 --             -> [CmdOption] -> FilePath -> [String]
 --             -> Action (String, ExitCode)
-wrappedCmd :: CmdResult a => CutConfig -> FilePath
-           -> [CmdOption] -> String -> [String] -> Action a
+wrappedCmd :: CutConfig -> FilePath -> [CmdOption] -> String -> [String]
+           -> Action (String, String, Int)
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
 -- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
-wrappedCmd cfg path opts bin args = withLockFile path $
-  case cfgWrapper cfg of
+wrappedCmd cfg path opts bin args = withLockFile path $ do
+  (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
     Nothing -> command opts bin args
     Just w  -> command opts w (bin:args)
+  let code' = case code of
+                ExitSuccess   -> 0
+                ExitFailure n -> n
+  return (out, err, code')
 
 {- OK I think this is an issue of immediately returning rather than waiting for
  - another thread to write the same output file? then it hasn't been tracked as
@@ -187,31 +192,30 @@ wrappedCmd cfg path opts bin args = withLockFile path $
 -- TODO track writes?
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
-wrappedCmdExit :: CutConfig -> FilePath
-               -> [CmdOption] -> FilePath -> [String]
-               -> Action ExitCode
+wrappedCmdExit :: CutConfig -> FilePath -> [CmdOption] -> FilePath -> [String]
+               -> Action Int
 wrappedCmdExit c l os b as = do
-  (Stdout (_ :: String),
-   Stderr (_ :: String), Exit code) <- wrappedCmd c l os b as
+  (_, _, code) <- wrappedCmd c l os b as
   return code
 
-wrappedCmdWrite :: CutConfig -> FilePath -> [String]
-                -> [CmdOption] -> FilePath -> [String]
-                -> Action ()
+wrappedCmdWrite :: CutConfig -> FilePath -> [String] -> [CmdOption] -> FilePath
+                -> [String] -> Action ()
 wrappedCmdWrite c l ps os b as = do -- TODO why the "failed to build" errors?
   code <- wrappedCmdExit c l os b as
   case code of
-    ExitFailure n -> wrappedCmdError b n (ps ++ [l])
-    ExitSuccess   -> debugTrackWrite c ps
+    0 -> debugTrackWrite c ps
+    n -> wrappedCmdError b n (ps ++ [l])
 
-wrappedCmdOut :: CutConfig -> FilePath -> [String]
-              -> [CmdOption] -> FilePath -> [String]
-              -> Action String
+-- TODO should this be assuming write? maybe don't debugTrackWrite, or change name!
+wrappedCmdOut :: CutConfig -> FilePath -> [String] -> [CmdOption] -> FilePath
+              -> [String] -> Action String
 wrappedCmdOut c l ps os b as = do
-  (Stdout out, Exit code) <- wrappedCmd c l os b as
+  (out, err, code) <- wrappedCmd c l os b as
   case code of
-    ExitFailure n -> liftIO (putStrLn out) >> wrappedCmdError b n (ps ++ [l])
-    ExitSuccess   -> debugTrackWrite c ps >> return out
+    0 -> debugTrackWrite c ps  >> return out
+    n -> do
+      liftIO $ putStrLn $ unlines [out, err]
+      wrappedCmdError b n (ps ++ [l])
 
 -----------------------------
 -- handle duplicate writes --
@@ -242,10 +246,10 @@ withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> r
                 else    removeIfExists path >> ioError e
 
 -- TODO remove after integrating new withLockFile code
-withErrorHandling2 :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
-withErrorHandling2 path fn = fn `catchIOError` (\e -> liftIO (handler e))
-  where
-    handler e = removeIfExists (path <.> "lock") >> ioError e
+-- withErrorHandling2 :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
+-- withErrorHandling2 path fn = fn `catchIOError` (\e -> liftIO (handler e))
+--   where
+--     handler e = removeIfExists (path <.> "lock") >> ioError e
 
 -- TODO debugTrackWrite after?
 writeFileSafe :: FilePath -> String -> Action ()
