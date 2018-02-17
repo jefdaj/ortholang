@@ -39,7 +39,7 @@ module ShortCut.Core.Actions
   , hashContent
   , symlink
   , writeDeduped
-  , withLockFile
+  -- , withLockFile
   -- , tryIO -- TODO move to Util
   )
   where
@@ -59,7 +59,7 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, removeIfExists)
-import System.Directory           (createDirectoryIfMissing)
+import System.Directory           (createDirectoryIfMissing, doesPathExist, removePathForcibly)
 import System.Exit                (ExitCode(..))
 import System.FileLock            (lockFile, unlockFile, SharedExclusive(..))
 import System.FilePath            (takeDirectory, takeFileName, (<.>))
@@ -67,6 +67,31 @@ import System.IO                  (IOMode(..), withFile)
 import System.IO.Error            (isAlreadyInUseError, isAlreadyExistsError, ioError)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
+
+-----------------
+-- from mockup --
+-----------------
+
+withLock :: FilePath -> Action a -> Action a
+withLock lockPath actFn = do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
+  lock <- liftIO $ lockFile lockPath Exclusive
+  actFn `actionFinally` unlockFile lock
+
+-- TODO do these actually work infix?
+-- TODO what if only some of the files exist? do we want to re-run the action?
+-- TODO should this handle debugTrackWrite on all the outPaths?
+lockAndWriteOnce :: CutConfig -> FilePath -> [FilePath] -> Action () -> Action ()
+lockAndWriteOnce cfg lockPath outPaths writeFn = do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
+  lock  <- liftIO $ lockFile lockPath Exclusive
+  exist <- liftIO $ mapM doesPathExist outPaths
+  let none = not $ any id exist
+  when none $ writeFn' `actionOnException` rmFiles `actionFinally` unlockFile lock
+  where
+    rmFiles  = liftIO $ mapM_ removePathForcibly outPaths
+    writeFn' = writeFn >> debugTrackWrite cfg outPaths
+
 
 ------------------------
 -- write files safely --
@@ -85,21 +110,21 @@ instance MonadCatch Action where
 -- TODO what happens if the process is inturrupted? should delete both
 -- TODO are they being removed properly afterward?
 -- TODO should you use the outfiles themselves as the lockfiles too? might simplify a bit
-withLockFile :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
-withLockFile path act = do
-  let lockPath  = path <.> "lock"
-  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
-  lock <- liftIO $ lockFile lockPath Exclusive -- TODO oh no! need to remove lock on errors
-  -- case lock of
-    -- Nothing -> return () -- TODO also need to unlock here? seems an odd way
-    -- Just l  -> do
-  res <- act
-  -- res <- E.catch act (\(e :: IOError) -> liftIO (unlockFile lock))
-  -- res <- catchIOError act (\e -> liftIO (tryIO (removeFile lockPath)) >> throwM e)
-  -- TODO why does removing the lockfiles after cause errors in the OTHER withLockFile (Test/Scripts)??
-  -- liftIO (unlockFile l >> tryIO (removeIfExists lockPath))
-  liftIO (unlockFile lock >> removeIfExists lockPath)
-  return res
+-- withLockFile :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
+-- withLockFile path act = do
+--   let lockPath  = path <.> "lock"
+--   liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
+--   lock <- liftIO $ lockFile lockPath Exclusive -- TODO oh no! need to remove lock on errors
+--   -- case lock of
+--     -- Nothing -> return () -- TODO also need to unlock here? seems an odd way
+--     -- Just l  -> do
+--   res <- act
+--   -- res <- E.catch act (\(e :: IOError) -> liftIO (unlockFile lock))
+--   -- res <- catchIOError act (\e -> liftIO (tryIO (removeFile lockPath)) >> throwM e)
+--   -- TODO why does removing the lockfiles after cause errors in the OTHER withLockFile (Test/Scripts)??
+--   -- liftIO (unlockFile l >> tryIO (removeIfExists lockPath))
+--   liftIO (unlockFile lock >> removeIfExists lockPath)
+--   return res
   
 -- try an IO action and ignore if it fails
 -- TODO is there a standard name for this?
@@ -149,7 +174,7 @@ wrappedCmd :: CutConfig -> FilePath -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
 -- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
-wrappedCmd cfg path opts bin args = withLockFile path $ do
+wrappedCmd cfg path opts bin args = withLock (path <.> "lock") $ do
   (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
     Nothing -> command opts bin args
     Just w  -> command opts w (bin:args)
@@ -236,12 +261,13 @@ withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> r
 --     handler e = removeIfExists (path <.> "lock") >> ioError e
 
 -- TODO debugTrackWrite after?
-writeFileSafe :: FilePath -> String -> Action ()
-writeFileSafe path x = liftIO $ withLockFile path $ withErrorHandling path () $ writeFile path x
+writeFileSafe :: CutConfig -> FilePath -> String -> Action ()
+writeFileSafe cfg path x =
+  lockAndWriteOnce cfg (path <.> "lock") [path] $ liftIO $ writeFile path x
 
 -- TODO debugTrackWrite after?
-writeLinesSafe :: FilePath -> [String] -> Action ()
-writeLinesSafe path = writeFileSafe path . unlines
+writeLinesSafe :: CutConfig -> FilePath -> [String] -> Action ()
+writeLinesSafe cfg path = writeFileSafe cfg path . unlines
 
 -----------------------------------
 -- handle large numbers of reads --
@@ -272,7 +298,7 @@ debugReadFile cfg f = debug cfg ("read '" ++ f ++ "'") (readFileStrict f)
 debugWriteFile :: CutConfig -> FilePath -> String -> Action ()
 debugWriteFile cfg f s = unlessExists f
                        $ debug cfg ("write '" ++ f ++ "'")
-                       $ writeFileSafe f s
+                       $ writeFileSafe cfg f s
 
 debugReadLines :: CutConfig -> FilePath -> Action [String]
 debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
@@ -282,12 +308,12 @@ debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
 debugWriteLines cfg f ss = unlessExists f
                          $ debug cfg ("write '" ++ f ++ "'")
-                         $ writeLinesSafe f ss
+                         $ writeLinesSafe cfg f ss
 
 debugWriteChanged :: CutConfig -> FilePath -> String -> Action ()
 debugWriteChanged cfg f s = unlessExists f
                           $ debug cfg ("write '" ++ f ++ "'")
-                          $ writeFileSafe f s
+                          $ writeFileSafe cfg f s
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
@@ -411,13 +437,10 @@ tmpLink cfg src dst = dots </> tmpRel dst
 --
 -- TODO fix error on race condition: if src exists already, just skip it
 symlink :: CutConfig -> CutPath -> CutPath -> Action ()
-symlink cfg src dst = do
-  -- need [dst'] -- TODO wrapper that uses cutpaths
-  liftIO $ do
-    createDirectoryIfMissing True $ takeDirectory dst'
-    withLockFile src' $ withErrorHandling src' () $ createSymbolicLink dstr src' -- TODO handle dups!
-  debugTrackWrite cfg [src'] -- TODO wrapper that uses cutpaths
+symlink cfg src dst =
+  lockAndWriteOnce cfg lPath [src'] $ liftIO $ createSymbolicLink dstr src'
   where
+    lPath = src' <.> "lock"
     src' = fromCutPath cfg src
     dst' = fromCutPath cfg dst
     dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
