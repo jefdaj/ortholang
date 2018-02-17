@@ -125,34 +125,15 @@ withLockFile path act = do
 -- cmd --
 ---------
 
-listPrefixFiles :: FilePattern -> Action [FilePath]
-listPrefixFiles prefix = do
-  let pDir  = takeDirectory prefix
-      pName = takeFileName  prefix
-  e1 <- doesDirectoryExist pDir
-  if e1
-    then getDirectoryFiles pDir [pName] >>= return . map (pDir </>)
-    else return []
-
-rmPrefixFiles :: FilePattern -> Action ()
-rmPrefixFiles ptn = do
-  files <- listPrefixFiles ptn
-  liftIO $ putStrLn $ "deleting " ++ show files ++ " (pattern '" ++ show ptn ++ "')"
-  mapM_ rmFile files
-  where
-    rmFile p = liftIO $ removeFiles (takeDirectory p) [takeFileName p]
-
 -- TODO is the a type a good way to do this? it never actually gets evaluated
 wrappedCmdError :: String -> Int -> [String] -> Action a
-wrappedCmdError bin n ptns = do
-  -- toDel <- globs dir ptns -- TODO any better dir? absolute?
-  -- liftIO $ removeFiles dir ptns
-  -- liftIO $ mapM_ (\p -> removeFiles (takeDirectory p) [takeFileName p]) ptns
-  mapM_ rmPrefixFiles ptns
+wrappedCmdError bin n files = do
+  let rmFile p = liftIO $ removeFiles (takeDirectory p) [takeFileName p]
+  mapM_ rmFile files
   error $ unlines $
     [ "Oh no! " ++ bin ++ " failed with error code " ++ show n ++ "."
     , "The files it was working on have been deleted:"
-    ] ++ ptns
+    ] ++ files
 
 -- TODO call this when exiting nonzero and/or exception thrown
 -- TODO take a list of globs and resolve them to files
@@ -164,10 +145,6 @@ wrappedCmdError bin n ptns = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- ptns is a list of patterns for files to delete in case the cmd fails
--- TODO any way to propogate Shake cmd's cool stdout, stderr, exit feature?
--- wrappedCmd' :: CutConfig -> FilePath
---             -> [CmdOption] -> FilePath -> [String]
---             -> Action (String, ExitCode)
 wrappedCmd :: CutConfig -> FilePath -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
@@ -194,28 +171,35 @@ wrappedCmd cfg path opts bin args = withLockFile path $ do
 -- TODO issue with not re-raising errors here?
 wrappedCmdExit :: CutConfig -> FilePath -> [CmdOption] -> FilePath -> [String]
                -> Action Int
-wrappedCmdExit c l os b as = do
-  (_, _, code) <- wrappedCmd c l os b as
+wrappedCmdExit c p os b as = do
+  (_, _, code) <- wrappedCmd c p os b as
   return code
 
+{- wrappedCmd specialized for commands that write one or more files. If the
+ - command succeeds it tells Shake which files were written, and if it fails
+ - they get deleted.
+ - TODO skip the command if the files already exist?
+ -}
 wrappedCmdWrite :: CutConfig -> FilePath -> [String] -> [CmdOption] -> FilePath
                 -> [String] -> Action ()
-wrappedCmdWrite c l ps os b as = do -- TODO why the "failed to build" errors?
-  code <- wrappedCmdExit c l os b as
+wrappedCmdWrite c p ps os b as = do -- TODO why the "failed to build" errors?
+  code <- wrappedCmdExit c p os b as
   case code of
     0 -> debugTrackWrite c ps
-    n -> wrappedCmdError b n (ps ++ [l])
+    n -> wrappedCmdError b n (ps ++ [p])
 
--- TODO should this be assuming write? maybe don't debugTrackWrite, or change name!
+{- wrappedCmd specialized for commands that return their output as a string.
+ - TODO remove this? it's only used to get columns from blast hit tables
+ -}
 wrappedCmdOut :: CutConfig -> FilePath -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut c l ps os b as = do
-  (out, err, code) <- wrappedCmd c l os b as
+wrappedCmdOut c p ps os b as = do
+  (out, err, code) <- wrappedCmd c p os b as
   case code of
-    0 -> debugTrackWrite c ps  >> return out
+    0 -> return out
     n -> do
       liftIO $ putStrLn $ unlines [out, err]
-      wrappedCmdError b n (ps ++ [l])
+      wrappedCmdError b n (ps ++ [p])
 
 -----------------------------
 -- handle duplicate writes --

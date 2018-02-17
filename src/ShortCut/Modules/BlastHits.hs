@@ -69,6 +69,7 @@ extractTargetsEach = CutFunction
 
 aCutCol :: Int -> CutConfig -> [CutPath] -> Action ()
 aCutCol n cfg [outPath, tsvPath] = do
+  -- TODO is the lockfile necessary here? even if not, might be simplest to leave it
   out <- wrappedCmdOut cfg tsvPath' [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
   let out' = sort $ nub $ lines out
   writeLits cfg outPath'' out'

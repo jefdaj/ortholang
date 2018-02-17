@@ -96,8 +96,6 @@ module ShortCut.Core.Paths
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Util (digest)
--- import ShortCut.Core.Actions   (wrappedCmdOut, debugReadLines, debugWriteLines,
-                                   -- withErrorHandling, debugTrackWrite)
 import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
