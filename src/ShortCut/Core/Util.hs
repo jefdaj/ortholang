@@ -15,6 +15,10 @@ import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
 import System.Posix.Files    (readSymbolicLink)
 import Test.Tasty            (testGroup, TestTree)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Catch    (MonadCatch, catch, throwM)
+import System.Directory       (removeFile)
+import System.IO.Error        (isDoesNotExistError)
 
 -- TODO fn to makeRelative to config dir
 
@@ -111,4 +115,10 @@ isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True
 
-
+-- TODO call this module something besides Debug now that it also handles errors?
+-- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
+removeIfExists :: (MonadIO m, MonadCatch m) => FilePath -> m ()
+removeIfExists fileName = (liftIO (removeFile fileName)) `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwM e

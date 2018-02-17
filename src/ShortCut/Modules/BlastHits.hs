@@ -6,8 +6,7 @@ import ShortCut.Core.Types
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdOut, debugTrackWrite,
-                                    writeLits)
+import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits)
 import ShortCut.Core.Debug         (debugAction )
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
@@ -70,7 +69,7 @@ extractTargetsEach = CutFunction
 
 aCutCol :: Int -> CutConfig -> [CutPath] -> Action ()
 aCutCol n cfg [outPath, tsvPath] = do
-  out <- wrappedCmdOut cfg [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
+  out <- wrappedCmdOut cfg tsvPath' [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
   let out' = sort $ nub $ lines out
   writeLits cfg outPath'' out'
   where
@@ -101,9 +100,9 @@ filterEvalueEach = CutFunction
 
 aFilterEvalue :: CutConfig -> [CutPath] -> Action ()
 aFilterEvalue cfg [out, evalue, hits] = do
-  unit $ quietly $ wrappedCmd cfg [out'] []
+  quietly $ wrappedCmdWrite cfg out'' [out''] []
                      "filter_evalue.R" [out', evalue', hits']
-  debugTrackWrite cfg [out'']
+  -- debugTrackWrite cfg [out'']
   where
     out'    = fromCutPath cfg out
     out''   = debugAction cfg "aFilterEvalue" out' [out', evalue', hits']
@@ -136,8 +135,8 @@ bestHitsEach = CutFunction
 
 aBestExtract :: CutConfig -> [CutPath] -> Action ()
 aBestExtract cfg [out, hits] = do
-  unit $ quietly $ wrappedCmd cfg [out'] [] "best_hits.R" [out', hits']
-  debugTrackWrite cfg [out'']
+  quietly $ wrappedCmdWrite cfg out'' [out''] [] "best_hits.R" [out', hits']
+  -- debugTrackWrite cfg [out'']
   where
     out'  = fromCutPath cfg out
     out'' = debugAction cfg "aBestExtract" out' [out', hits']

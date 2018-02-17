@@ -15,7 +15,7 @@ import ShortCut.Core.Types
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Actions       (wrappedCmd, debugTrackWrite, readLit, readPath)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath)
 import ShortCut.Core.Debug         (debugAction)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb)
@@ -94,8 +94,10 @@ aMkBlastFromDb bCmd cfg [o, e, q, p] = do
   liftIO $ createDirectoryIfMissing True cDir
   liftIO $ createDirectoryIfMissing True $ takeDirectory o'
 
-  unit $ quietly $ wrappedCmd cfg [o'] [Cwd cDir] "parallelblast.py" args
-  debugTrackWrite cfg [o'']
+  -- TODO when parallelblast fails, does it properly remove the lockfile?
+  -- TODO maybe when this fails, the error isn't re-raised and withLockFile just hangs?
+  quietly $ wrappedCmdWrite cfg o'' [o''] [Cwd cDir] "parallelblast.py" args
+  -- debugTrackWrite cfg [o'']
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

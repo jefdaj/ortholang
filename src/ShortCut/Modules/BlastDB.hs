@@ -7,8 +7,10 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
+import ShortCut.Core.Debug (debug)
+
 import Control.Monad               (when)
-import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdExit, wrappedCmdError,
+import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdWrite, wrappedCmdExit, wrappedCmdError,
                                     debugTrackWrite, readLit, writeLit, readLits,
                                     writeLits, writePath)
 import ShortCut.Core.Debug         (debugAction, debugRules)
@@ -182,12 +184,12 @@ aBlastdblist cfg oPath listTmp fPath = do
     liftIO $ createDirectoryIfMissing True tmpDir
     -- This one is tricky because it exits 1 on success
     -- TODO still use a lockfile and wrack writes!
-    code <- wrappedCmdExit cfg [Cwd tmpDir, Shell]
+    code <- wrappedCmdExit cfg listTmp' [Cwd tmpDir, Shell] -- TODO remove stderr?
       "blastdbget" [tmpDir, ">", listTmp']
     case code of
       ExitSuccess   -> debugTrackWrite cfg [listTmp'] -- never happens :(
       ExitFailure 1 -> debugTrackWrite cfg [listTmp']
-      ExitFailure n -> wrappedCmdError "blastdbget" n [listTmp']
+      ExitFailure n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
   filterStr <- readLit  cfg fPath'
   out       <- readLits cfg listTmp'
   let names  = if null out then [] else tail out
@@ -226,7 +228,10 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   dbName <- fmap stripWhiteSpace $ readLit cfg nPath' -- TODO need to strip?
   liftIO $ createDirectoryIfMissing True tmp' -- TODO remove?
   -- TODO was taxdb needed for anything else?
-  quietly $ wrappedCmd cfg [] [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
+  -- TODO does this need to lock on a separate file from dbPrefix''?
+  -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
+  (Stdout (_ :: String)) <- 
+    wrappedCmd cfg dbPrefix'' [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
   writeLit cfg dbPrefix'' $ tmp' </> dbName
   where
@@ -301,7 +306,11 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
   let dbType' = if dbType == ndb then "nucl" else "prot"
+
+  -- TODO probably put this back??
+  -- debug cfg ("needing: " ++ faPath') (need [faPath'])
   need [faPath']
+
   {- The idea was to hash content here, but it took a long time.
    - So now it gets hashed only once, in another thread, by a load_* function,
    - and from then on we pick the hash out of the filename.
@@ -328,6 +337,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
 
   let ptn = dbPrefix ++ ".*" -- TODO is this failing because of the TMPDIR?
   -- before <- getDirectoryFiles (takeDirectory ptn) [takeFileName ptn]
+  -- TODO is this picking up the .lock file too? maybe that causes the loop?
   before <- listPrefixFiles ptn
   -- liftIO $ putStrLn $ "before: " ++ show before
 
@@ -337,7 +347,12 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- TODO is there a need for wrapping or cleanup on errors here?
   -- TODO check files before too and skip if they exist? annoying but still...
   -- quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd cDir']
-  quietly $ wrappedCmd cfg [dbPrefix, ptn] [Cwd cDir'] "makeblastdb"
+  -- quietly $ wrappedCmd cfg dbPrefix [dbPrefix, ptn] [Cwd cDir'] "makeblastdb"
+  -- TODO probably don't need the _lock then? bet it's a separate issue causing the loop
+  -- liftIO $ putStrLn $ "this is ptn: " ++ ptn
+  -- liftIO $ putStrLn $ "it matched these files: " ++ show before
+  -- liftIO $ putStrLn $ "this will be dbPrefix: " ++ dbPrefix
+  Stdout (_ :: String) <- quietly $ wrappedCmd cfg dbPrefix [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?

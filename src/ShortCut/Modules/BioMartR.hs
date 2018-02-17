@@ -18,7 +18,7 @@ import Development.Shake
 import ShortCut.Core.Actions (readLits)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
-import ShortCut.Core.Actions           (wrappedCmd)
+import ShortCut.Core.Actions           (wrappedCmdWrite)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -29,7 +29,6 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Actions (debugTrackWrite)
 import ShortCut.Core.Debug   (debugAction)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath (takeDirectory)
@@ -238,8 +237,7 @@ aBioMartR cfg out bmFn bmTmp sTable = do
   need [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
-  quietly $ wrappedCmd cfg [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
-  debugTrackWrite cfg [out'']
+  quietly $ wrappedCmdWrite cfg out'' [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
   where
     out'    = fromCutPath cfg out
     bmFn'   = fromCutPath cfg bmFn

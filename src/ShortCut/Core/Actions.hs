@@ -8,6 +8,7 @@
 
 module ShortCut.Core.Actions
   ( wrappedCmd
+  , wrappedCmdWrite
   , wrappedCmdExit
   , wrappedCmdOut
   , wrappedCmdError -- for calling when a cmd is found to have failed
@@ -46,7 +47,7 @@ module ShortCut.Core.Actions
 import Development.Shake
 import ShortCut.Core.Types
 
-import qualified Control.Exception as E
+-- import qualified Control.Exception as E
 
 import Control.Monad              (unless, when)
 import Control.Monad.Catch        (MonadThrow, MonadCatch, catch, throwM, catchIOError)
@@ -57,14 +58,13 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators,
 import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
-import ShortCut.Core.Util         (digest, digestLength)
-import System.Directory           (createDirectoryIfMissing, removeFile)
+import ShortCut.Core.Util         (digest, digestLength, removeIfExists)
+import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FileLock            (lockFile, unlockFile, SharedExclusive(..))
 import System.FilePath            (takeDirectory, takeFileName, (<.>))
 import System.IO                  (IOMode(..), withFile)
-import System.IO.Error            (isAlreadyInUseError, isAlreadyExistsError,
-                                   isDoesNotExistError, ioError)
+import System.IO.Error            (isAlreadyInUseError, isAlreadyExistsError, ioError)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
 
@@ -98,14 +98,14 @@ withLockFile path act = do
   -- res <- catchIOError act (\e -> liftIO (tryIO (removeFile lockPath)) >> throwM e)
   -- TODO why does removing the lockfiles after cause errors in the OTHER withLockFile (Test/Scripts)??
   -- liftIO (unlockFile l >> tryIO (removeIfExists lockPath))
-  liftIO $ unlockFile lock
+  liftIO (unlockFile lock >> removeIfExists lockPath)
   return res
   
 -- try an IO action and ignore if it fails
 -- TODO is there a standard name for this?
 -- TODO use catchIOError instead?
-tryIO :: (MonadIO m, MonadCatch m) => m () -> m ()
-tryIO fn = fn `catchIOError` (\_ -> return ())
+-- tryIO :: (MonadIO m, MonadCatch m) => m () -> m ()
+-- tryIO fn = fn `catchIOError` (\_ -> return ())
 
 -- TODO failing tests:
 --        blast_db_each (parallelblast.py race? also fails to delete files)
@@ -164,52 +164,54 @@ wrappedCmdError bin n ptns = do
 --      could have config, debug, wrappedCmd, eval...
 -- ptns is a list of patterns for files to delete in case the cmd fails
 -- TODO any way to propogate Shake cmd's cool stdout, stderr, exit feature?
-wrappedCmd' :: CutConfig
-            -> [CmdOption] -> FilePath -> [String]
-            -> Action (String, ExitCode)
-wrappedCmd' cfg opts bin args = do
-  let fn = case cfgWrapper cfg of
-             Nothing -> command opts bin args
-             Just w  -> command opts w (bin:args)
-  (Stdouterr out, Exit code) <- fn
-  return (out, code)
+-- wrappedCmd' :: CutConfig -> FilePath
+--             -> [CmdOption] -> FilePath -> [String]
+--             -> Action (String, ExitCode)
+wrappedCmd :: CmdResult a => CutConfig -> FilePath
+           -> [CmdOption] -> String -> [String] -> Action a
+-- TODO withErrorHandling2 is blocking on some MVar related thing :(
+-- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
+wrappedCmd cfg path opts bin args = withLockFile path $
+  case cfgWrapper cfg of
+    Nothing -> command opts bin args
+    Just w  -> command opts w (bin:args)
 
 {- OK I think this is an issue of immediately returning rather than waiting for
  - another thread to write the same output file? then it hasn't been tracked as
  - written yet or something?
  -}
 
--- TODO what if ps is empty? should that not be allowed? add another arg?
--- TODO rename to just cmd? systemCmd? something like that
-wrappedCmd :: CutConfig -> [String]
-           -> [CmdOption] -> FilePath -> [String]
-           -> Action ()
-wrappedCmd c ps os b as = withLockFile (head ps) $ do -- TODO why the "failed to build" errors?
--- wrappedCmd c ps os b as = do
-  -- TODO would this help anything?
-  -- liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) ps
-  (_, code) <- wrappedCmd' c os b as
-  case code of
-    ExitFailure n -> wrappedCmdError b n ps
-    ExitSuccess   -> debugTrackWrite c ps
-
-wrappedCmdOut :: CutConfig -> [String]
-              -> [CmdOption] -> FilePath -> [String]
-              -> Action String
-wrappedCmdOut c ps os b as = do
-  (out, code) <- wrappedCmd' c os b as
-  case code of
-    ExitFailure n -> liftIO (putStrLn out) >> wrappedCmdError b n ps
-    ExitSuccess   -> debugTrackWrite c ps >> return out
-
 -- Note that this one doesn't have wrappedCmdError,
 -- because it's used for when you expect a nonzero exit code.
 -- TODO write some other error checking to go along with it!
 -- TODO track writes?
-wrappedCmdExit :: CutConfig
+-- TODO just return the output + exit code directly and let the caller handle it
+-- TODO issue with not re-raising errors here?
+wrappedCmdExit :: CutConfig -> FilePath
                -> [CmdOption] -> FilePath -> [String]
                -> Action ExitCode
-wrappedCmdExit c os b as = wrappedCmd' c os b as >>= return . snd
+wrappedCmdExit c l os b as = do
+  (Stdout (_ :: String),
+   Stderr (_ :: String), Exit code) <- wrappedCmd c l os b as
+  return code
+
+wrappedCmdWrite :: CutConfig -> FilePath -> [String]
+                -> [CmdOption] -> FilePath -> [String]
+                -> Action ()
+wrappedCmdWrite c l ps os b as = do -- TODO why the "failed to build" errors?
+  code <- wrappedCmdExit c l os b as
+  case code of
+    ExitFailure n -> wrappedCmdError b n (ps ++ [l])
+    ExitSuccess   -> debugTrackWrite c ps
+
+wrappedCmdOut :: CutConfig -> FilePath -> [String]
+              -> [CmdOption] -> FilePath -> [String]
+              -> Action String
+wrappedCmdOut c l ps os b as = do
+  (Stdout out, Exit code) <- wrappedCmd c l os b as
+  case code of
+    ExitFailure n -> liftIO (putStrLn out) >> wrappedCmdError b n (ps ++ [l])
+    ExitSuccess   -> debugTrackWrite c ps >> return out
 
 -----------------------------
 -- handle duplicate writes --
@@ -221,14 +223,6 @@ wrappedCmdExit c os b as = wrappedCmd' c os b as >>= return . snd
  - conflict in the middle of the operation anyway, ignore the error. Whichever
  - thread got there first will be writing the same exact text anyway.
  -}
-
--- TODO call this module something besides Debug now that it also handles errors?
--- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
-removeIfExists :: (MonadIO m, MonadCatch m) => FilePath -> m ()
-removeIfExists fileName = (liftIO (removeFile fileName)) `catch` handleExists
-  where handleExists e
-          | isDoesNotExistError e = return ()
-          | otherwise = throwM e
 
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
@@ -246,6 +240,12 @@ withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> r
     handler e = if      isAlreadyInUseError  e then return ()
                 else if isAlreadyExistsError e then return ()
                 else    removeIfExists path >> ioError e
+
+-- TODO remove after integrating new withLockFile code
+withErrorHandling2 :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
+withErrorHandling2 path fn = fn `catchIOError` (\e -> liftIO (handler e))
+  where
+    handler e = removeIfExists (path <.> "lock") >> ioError e
 
 -- TODO debugTrackWrite after?
 writeFileSafe :: FilePath -> String -> Action ()
@@ -390,7 +390,10 @@ hashContent :: CutConfig -> CutPath -> Action String
 hashContent cfg path = do
   need [path']
   -- liftIO $ putStrLn $ "hashing " ++ path'
-  out <- wrappedCmdOut cfg [] [] "md5sum" [path']
+  -- Removed wrappedCmdOut because it caused a permissions error during tests,
+  -- probably by accessing the data dir to make a lock. Besides no lock is actually needed.
+  -- out <- wrappedCmdOut cfg (path' <.> "md5") [] [] "md5sum" [path']
+  Stdout out <- command [] "md5sum" [path']
   let md5 = take digestLength $ head $ words out -- TODO adapt failGracfully to work here
   -- liftIO $ putStrLn $ "md5sum of " ++ path' ++ " is " ++ md5
   return md5

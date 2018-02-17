@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import ShortCut.Core.Actions       (wrappedCmd, debugTrackWrite, symlink)
+import ShortCut.Core.Actions       (wrappedCmdWrite, symlink)
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each  (rEachTmps)
@@ -108,8 +108,8 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   symlink cfg qSrc' qDst'
   symlink cfg tSrc' tDst'
   -- debugTrackWrite cfg [qSrc, tSrc] -- TODO why doesn't symlnk handle these??
-  wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
-  debugTrackWrite cfg [oPath]
+  wrappedCmdWrite cfg oPath [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
+  -- debugTrackWrite cfg [oPath]
   -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
   -- debugTrackWrite cfg [o'']
   symlink cfg o'' oPath'

@@ -29,17 +29,21 @@ import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic    (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
+import ShortCut.Core.Util             (removeIfExists)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                      (Handle, hPutStrLn)
+import System.FilePath                ((</>))
 import Text.PrettyPrint.HughesPJClass
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
 myShake :: CutConfig -> Rules () -> IO ()
-myShake cfg = shake myOpts . alternatives
+myShake cfg rules = do
+  (shake myOpts . alternatives) rules
+  removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
   where
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg

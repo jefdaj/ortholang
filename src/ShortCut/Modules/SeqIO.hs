@@ -5,7 +5,7 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions       (wrappedCmd, debugTrackWrite, readPaths)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readPaths)
 import ShortCut.Core.Debug         (debug, debugAction)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
@@ -228,9 +228,9 @@ aConcat cfg [oPath, fsPath] = do
   let out'    = fromCutPath cfg oPath
       out''   = debugAction cfg "aConcat" out' [out', fs']
       catArgs = faPaths' ++ [">", out']
-  unit $ quietly $ wrappedCmd cfg [out''] [Shell] "cat"
+  unit $ quietly $ wrappedCmdWrite cfg out'' [out''] [Shell] "cat"
                      (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-  debugTrackWrite cfg [out'']
+  -- debugTrackWrite cfg [out'']
   where
     fs' = fromCutPath cfg fsPath
 aConcat _ _ = error "bad argument to aConcat"

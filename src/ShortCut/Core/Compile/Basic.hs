@@ -28,7 +28,7 @@ import Control.Monad              (when)
 import Data.List                  (find, intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Debug        (debugAction, debugRules)
-import ShortCut.Core.Actions      (debugTrackWrite, removeIfExists, wrappedCmd,
+import ShortCut.Core.Actions      (removeIfExists, wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink,
                                    writeDeduped)
@@ -129,8 +129,8 @@ rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 aListEmpty :: CutConfig -> CutPath -> Action ()
 aListEmpty cfg link = do
   -- TODO should the wrappedCmd stuff be CutPaths or plain FilePaths?
-  wrappedCmd cfg [link'] [] "touch" [link'] -- TODO quietly?
-  debugTrackWrite cfg [link''] -- TODO this should use CutPaths
+  wrappedCmdWrite cfg link'' [link''] [] "touch" [link'] -- TODO quietly?
+  -- debugTrackWrite cfg [link''] -- TODO this should use CutPaths
   where
     link'  = fromCutPath cfg link
     link'' = debugAction cfg "aListEmpty" link' [link']
@@ -268,9 +268,9 @@ aOneArgScript :: CutConfig -> String
 aOneArgScript cfg oPath script tmpDir argPath = do
   need [argPath]
   liftIO $ createDirectoryIfMissing True tmpDir
-  quietly $ unit $ wrappedCmd cfg [oPath] [] script [tmpDir, oPath, argPath]
   let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
-  trackWrite [oPath']
+  quietly $ wrappedCmdWrite cfg oPath' [oPath'] [] script [tmpDir, oPath, argPath]
+  -- trackWrite [oPath']
 
 -- for scripts that take one arg and return a list of lits
 -- TODO this should put tmpfiles in cache/<script name>!
@@ -289,9 +289,9 @@ aOneArgListScript :: CutConfig -> FilePath
 aOneArgListScript cfg outPath script tmpDir faPath = do
   need [faPath]
   liftIO $ createDirectoryIfMissing True tmpDir
-  wrappedCmd cfg [outPath] [Cwd tmpDir] script [outPath, faPath]
   let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
-  debugTrackWrite cfg [out]
+  wrappedCmdWrite cfg out [out] [Cwd tmpDir] script [out, faPath]
+  -- debugTrackWrite cfg [out]
 
 --------------------------
 -- links to input files --
@@ -339,7 +339,7 @@ rLoad _ _ = error "bad argument to rLoad"
 aLoadHash :: CutConfig -> CutPath -> String -> Action CutPath
 aLoadHash cfg src ext = do
   need [src']
-  md5 <- hashContent cfg src
+  md5 <- hashContent cfg src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
@@ -453,8 +453,8 @@ rSimpleScript = rSimple . aSimpleScript
 aSimpleScript :: String -> (CutConfig -> [CutPath] -> Action ())
 aSimpleScript script cfg (out:args) = aSimple' cfg out actFn Nothing args
   where
-    actFn c o as = wrappedCmd cfg [fromCutPath c o] [] script
-                 $ map (fromCutPath c) as
+    actFn c o as = let o' = fromCutPath c o
+                   in wrappedCmdWrite cfg o' [o'] [] script $ map (fromCutPath c) as
 aSimpleScript _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 
 -- TODO rSimpleScriptTmp?

@@ -49,6 +49,7 @@ runTests cfg = withSystemTempDirectory "shortcut" $ \td -> do
   setCurrentDirectory wd -- TODO issue with this in the stack tests?
   -- TODO check exit code?
   setEnv "LANG" "C"
+  -- setEnv "TASTY_NUM_THREADS" "10"
   (_,_,_) <- readCreateProcessWithExitCode
     (shell $ unwords ["ln -s", wd </> "data", (td </> "data")]) ""
   tests <- mkTests $ mkTestConfig cfg td
