@@ -21,7 +21,7 @@ import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
                                    takeFileName, (</>), (<.>))
 import System.IO                  (stdout, stderr, writeFile)
--- import System.IO.LockFile         (withLockFile, LockingParameters(..),
+-- import System.IO.LockFile         (withFileLock, LockingParameters(..),
                                    -- RetryStrategy(..))
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
@@ -30,7 +30,7 @@ import Test.Hspec                 (it)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
-import ShortCut.Core.Actions      (withErrorHandling)
+-- import System.FileLock            (withFileLock, SharedExclusive(..))
 
 nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
@@ -47,7 +47,7 @@ getTestCuts = do
 
 -- TODO any particular corner cases to be aware of? (what if inturrupted?)
 -- withLock :: CutConfig -> IO a -> IO a
--- withLock cfg act = handler $ withLockFile params path act
+-- withLock cfg act = handler $ withFileLock params path act
 --   where
 --     path    = cfgTmpDir cfg <.> "lock"
 --     handler = TE.handle $ fail . ("Locking failed with: " ++) . show
@@ -71,7 +71,9 @@ mkOutTest cfg gld = goldenDiff "prints expected output" gld scriptAct
 mkTreeTest :: CutConfig -> FilePath -> TestTree
 mkTreeTest cfg t = goldenDiff "creates expected tmpfiles" t treeAct
   where
-    treeCmd = (shell $ "tree -I '*.lock'") { cwd = Just $ cfgTmpDir cfg }
+    -- Note that Test/Repl.hs also has a matching tree command
+    -- TODO refactor them to come from the same fn
+    treeCmd = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg
       out <- readCreateProcess treeCmd ""
@@ -86,9 +88,10 @@ mkTripTest cfg = goldenDiff "unchanged by round-trip to file" tripShow tripAct
       scr1 <- parseFileIO cfg $ fromJust $ cfgScript cfg
       writeScript tripCut scr1
       writeFile tripShow $ show scr1
+    -- tripAct = withLockIO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
-      -- _    <- withLockFile (cfgTmpDir cfg) tripSetup
-      _ <- withErrorHandling (cfgTmpDir cfg) () tripSetup
+      -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
+      _ <- tripSetup
       scr2 <- parseFileIO cfg tripCut
       return $ pack $ show scr2
 
@@ -107,9 +110,10 @@ mkAbsTest cfg = testSpecs $ it "tmpfiles free of absolute paths" $
 -- it still happens try TASTY_HIDE_SUCCESSES=True, not hFlush (doesn't help) or
 -- TASTY_NUM_THREADS=1 (actually seems to make it worse).
 runCut :: CutConfig -> IO String
--- runCut cfg = withLockFile (cfgTmpDir cfg) $ do
+-- runCut cfg = withFileLock (cfgTmpDir cfg) $ do
 -- runCut cfg = do
-runCut cfg = withErrorHandling (cfgTmpDir cfg <.> "lock") "" $ do
+-- runCut cfg = withLockIO (cfgTmpDir cfg <.> "lock") $ do
+runCut cfg =  do
   -- delay 50000; hFlush stdout; hFlush stderr; delay 50000 -- 1 second total
   delay 100000 -- 1 second
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg
@@ -119,6 +123,9 @@ runCut cfg = withErrorHandling (cfgTmpDir cfg <.> "lock") "" $ do
   return out
 
 -- TODO is the IO return type needed?
+-- TODO FIGURE OUT HOW TO HAVE EACH STEP LOCK THE DIR IF IT ISN'T YET!
+-- TODO OH, EXCEPT WHAT IF THAT'S WHAT'S MAKING THEM FREEZE? CHECK BOTH IDEAS
+--      (LOOKS LIKE THEY NEVER REMOVE THE LOCKFILES? HAHA EXPLAINS OTHER ERRORS? FIX IT)
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath)) -> CutConfig -> IO TestTree
 mkScriptTests (cut, gld, mtre) cfg = do
   absTests <- mkAbsTest cfg' -- just one, but comes as a list

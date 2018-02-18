@@ -20,8 +20,9 @@ module ShortCut.Core.Actions
   , debugTrackWrite
   , readFileStrict
   , readLinesStrict
-  , withErrorHandling
-  , unlessExists
+  -- , withErrorHandling
+  -- , unlessExists
+  -- , unlessAnyExist
   , removeIfExists
   , readPath
   , readPaths
@@ -39,7 +40,7 @@ module ShortCut.Core.Actions
   , hashContent
   , symlink
   , writeDeduped
-  -- , withLockFile
+  -- , withLock
   -- , tryIO -- TODO move to Util
   )
   where
@@ -47,61 +48,31 @@ module ShortCut.Core.Actions
 import Development.Shake
 import ShortCut.Core.Types
 
--- import qualified Control.Exception as E
-
-import Control.Monad              (unless, when)
-import Control.Monad.Catch        (MonadThrow, MonadCatch, catch, throwM, catchIOError)
-import Control.Monad.IO.Class     (MonadIO)
+import Control.Monad              (when)
 import Data.List.Split            (splitOneOf)
-import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators,
-                                   makeRelative)
+import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
-import ShortCut.Core.Util         (digest, digestLength, removeIfExists)
-import System.Directory           (createDirectoryIfMissing, doesPathExist, removePathForcibly)
+import ShortCut.Core.Util         (digest, digestLength, removeIfExists, withLock,
+                                   writeAllOnce, unlessExists, rmAll)
+import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
-import System.FileLock            (lockFile, unlockFile, SharedExclusive(..))
-import System.FilePath            (takeDirectory, takeFileName, (<.>))
+import System.FilePath            ((<.>))
 import System.IO                  (IOMode(..), withFile)
-import System.IO.Error            (isAlreadyInUseError, isAlreadyExistsError, ioError)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
-
------------------
--- from mockup --
------------------
-
-withLock :: FilePath -> Action a -> Action a
-withLock lockPath actFn = do
-  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
-  lock <- liftIO $ lockFile lockPath Exclusive
-  actFn `actionFinally` unlockFile lock
-
--- TODO do these actually work infix?
--- TODO what if only some of the files exist? do we want to re-run the action?
--- TODO should this handle debugTrackWrite on all the outPaths?
-lockAndWriteOnce :: CutConfig -> FilePath -> [FilePath] -> Action () -> Action ()
-lockAndWriteOnce cfg lockPath outPaths writeFn = do
-  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
-  lock  <- liftIO $ lockFile lockPath Exclusive
-  exist <- liftIO $ mapM doesPathExist outPaths
-  let none = not $ any id exist
-  when none $ writeFn' `actionOnException` rmFiles `actionFinally` unlockFile lock
-  where
-    rmFiles  = liftIO $ mapM_ removePathForcibly outPaths
-    writeFn' = writeFn >> debugTrackWrite cfg outPaths
-
+-- import System.FileLock            (withFileLock, SharedExclusive(..))
 
 ------------------------
 -- write files safely --
 ------------------------
 
-instance MonadThrow Action where
-  throwM = liftIO . throwM
+-- instance MonadThrow Action where
+  -- throwM = liftIO . throwM
 
-instance MonadCatch Action where
-  catch = catch
+-- instance MonadCatch Action where
+  -- catch = catch
 
 -- TODO combine this with withErrorHandling into one big "safe write" fn
 -- TODO if the action fails, still remove the lockfile (and the outfile patterns!)
@@ -153,8 +124,7 @@ instance MonadCatch Action where
 -- TODO is the a type a good way to do this? it never actually gets evaluated
 wrappedCmdError :: String -> Int -> [String] -> Action a
 wrappedCmdError bin n files = do
-  let rmFile p = liftIO $ removeFiles (takeDirectory p) [takeFileName p]
-  mapM_ rmFile files
+  liftIO $ rmAll files
   error $ unlines $
     [ "Oh no! " ++ bin ++ " failed with error code " ++ show n ++ "."
     , "The files it was working on have been deleted:"
@@ -237,22 +207,17 @@ wrappedCmdOut c p ps os b as = do
  - thread got there first will be writing the same exact text anyway.
  -}
 
-unlessExists :: FilePath -> Action () -> Action ()
-unlessExists path act = do
-  e <- doesFileExist path
-  unless e act
-
 -- TODO need to delete the entire dir if given one?
 -- This is safe in two ways:
 -- 1. It skips writing if the file is already being written by another thread
 -- 2. If some other error occurs it deletes the file, which is important
 --    because it prevents it being interpreted as an empty list later
-withErrorHandling :: (MonadIO m, MonadCatch m) => FilePath -> a -> m a -> m a
-withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> return def)
-  where
-    handler e = if      isAlreadyInUseError  e then return ()
-                else if isAlreadyExistsError e then return ()
-                else    removeIfExists path >> ioError e
+-- withErrorHandling :: (MonadIO m, MonadCatch m) => FilePath -> a -> m a -> m a
+-- withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> return def)
+--   where
+--     handler e = if      isAlreadyInUseError  e then return ()
+--                 else if isAlreadyExistsError e then return ()
+--                 else    removeIfExists path >> ioError e
 
 -- TODO remove after integrating new withLockFile code
 -- withErrorHandling2 :: (MonadIO m, MonadCatch m) => FilePath -> m a -> m a
@@ -263,7 +228,9 @@ withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> r
 -- TODO debugTrackWrite after?
 writeFileSafe :: CutConfig -> FilePath -> String -> Action ()
 writeFileSafe cfg path x =
-  lockAndWriteOnce cfg (path <.> "lock") [path] $ liftIO $ writeFile path x
+  writeAllOnce (path <.> "lock") [path] $ writeFile'' path x -- TODO lock error here?
+  where
+    writeFile'' p = debug cfg ("writing '" ++ p ++ "'") (writeFile' p)
 
 -- TODO debugTrackWrite after?
 writeLinesSafe :: CutConfig -> FilePath -> [String] -> Action ()
@@ -280,7 +247,10 @@ writeLinesSafe cfg path = writeFileSafe cfg path . unlines
 
 -- TODO don't use this since you should be needing whole groups of files?
 readFileStrict :: FilePath -> Action String
-readFileStrict path = need [path] >> liftIO (withFile path ReadMode hGetContents)
+readFileStrict path = do
+  need [path]
+  -- liftIO $ withFileLock (path <.> "lock") Shared $ \_ ->
+  liftIO $ withFile path ReadMode hGetContents
 {-# INLINE readFileStrict #-}
 
 readLinesStrict :: FilePath -> Action [String]
@@ -438,9 +408,11 @@ tmpLink cfg src dst = dots </> tmpRel dst
 -- TODO fix error on race condition: if src exists already, just skip it
 symlink :: CutConfig -> CutPath -> CutPath -> Action ()
 symlink cfg src dst =
-  lockAndWriteOnce cfg lPath [src'] $ liftIO $ createSymbolicLink dstr src'
+  writeAllOnce (src' <.> "lock") [src'] $ do
+    liftIO $ createSymbolicLink dstr src'
+    -- debugTrackWrite cfg [src']) TODO add this and remove elsewhere?
+  -- liftIO $ createSymbolicLink dstr src'
   where
-    lPath = src' <.> "lock"
     src' = fromCutPath cfg src
     dst' = fromCutPath cfg dst
     dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?

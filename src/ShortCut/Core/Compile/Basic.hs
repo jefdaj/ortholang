@@ -31,7 +31,7 @@ import ShortCut.Core.Debug        (debugAction, debugRules)
 import ShortCut.Core.Actions      (removeIfExists, wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink,
-                                   writeDeduped)
+                                   writeDeduped, debugTrackWrite)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, typesMatch)
 import System.Directory           (createDirectoryIfMissing)
@@ -343,11 +343,14 @@ aLoadHash cfg src ext = do
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
+  -- Careful! Removing some of this once caused lockfiles to conflict and some
+  -- tests froze until I figured it out :(
   done <- doesFileExist hashPath'
   when (not done) $ do
     liftIO $ createDirectoryIfMissing True tmpDir'
     symlink cfg hashPath src
-    -- debugTrackWrite cfg [hashPath'] -- TODO WTF? why does this not get called by symlink?
+    debugTrackWrite cfg [hashPath'] -- TODO WTF? why does this not get called by symlink?
+
   return hashPath
   where
     src' = fromCutPath cfg src
@@ -361,7 +364,7 @@ aLoad cfg strPath outPath = do
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   symlink cfg outPath'' hashPath
-  -- debugTrackWrite cfg [outPath'] -- TODO WTF? why does this not get called by symlink?
+  debugTrackWrite cfg [outPath'] -- TODO WTF? why does this not get called by symlink?
   where
     strPath'  = fromCutPath cfg strPath
     outPath'  = fromCutPath cfg outPath

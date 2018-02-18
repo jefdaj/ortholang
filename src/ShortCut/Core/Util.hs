@@ -1,5 +1,6 @@
 module ShortCut.Core.Util where
 
+import Control.Monad         (unless, when)
 import Crypto.Hash           (hash, Digest, MD5)
 import Data.ByteString.Char8 (pack)
 import Data.Char             (isSpace)
@@ -19,6 +20,60 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Catch    (MonadCatch, catch, throwM)
 import System.Directory       (removeFile)
 import System.IO.Error        (isDoesNotExistError)
+import System.FileLock            (withFileLock, lockFile, unlockFile, SharedExclusive(..), FileLock)
+import Development.Shake
+import System.Directory           (createDirectoryIfMissing, doesPathExist, removePathForcibly)
+
+-- locking --
+
+-- TODO unlessAnyExist version
+unlessExists :: FilePath -> Action () -> Action ()
+unlessExists path act = do
+  e <- doesFileExist path
+  unless e act
+
+-- TODO should it be unlessAllExist instead?
+-- TODO use it in the wrappedCmds
+unlessAnyExist :: [FilePath] -> Action () -> Action ()
+unlessAnyExist paths act = do
+  tests <- liftIO $ mapM doesPathExist paths
+  unless (any id tests) act
+
+withLock :: FilePath -> Action a -> Action a
+withLock lockPath actFn = do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
+  lock <- liftIO $ lockFile lockPath Exclusive
+  actFn `actionFinally` rmLock lockPath lock
+
+withLockIO :: FilePath -> IO a -> IO a
+withLockIO lockPath actFn = do
+  createDirectoryIfMissing True $ takeDirectory lockPath
+  res <- withFileLock lockPath Exclusive $ \_ -> actFn
+  removePathForcibly lockPath
+  -- rmLock lockPath lock -- make sure this gets called on errors!
+  return res
+
+-- Keeps lockfiles from laying around cluttering up trees
+rmLock :: FilePath -> FileLock -> IO ()
+rmLock lockPath lockToken = do
+  unlockFile lockToken
+  removePathForcibly lockPath
+  -- remains <- doesPathExist lockPath
+  -- when remains $ removePathForcibly lockPath
+
+-- TODO do these actually work infix?
+-- TODO what if only some of the files exist? do we want to re-run the action?
+-- TODO should this handle debugTrackWrite on all the outPaths?
+writeAllOnce :: FilePath -> [FilePath] -> Action () -> Action ()
+writeAllOnce lockPath outPaths writeFn = do
+  lock <- liftIO $ lockFile lockPath Exclusive
+  unlessAnyExist outPaths $
+    writeFn `actionOnException` liftIO (rmAll outPaths)
+            `actionFinally` rmLock lockPath lock
+  -- liftIO $ rmLock lockPath lock
+
+rmAll :: [FilePath] -> IO ()
+rmAll = mapM_ removePathForcibly
 
 -- TODO fn to makeRelative to config dir
 

@@ -43,7 +43,7 @@ import Text.PrettyPrint.HughesPJClass
 myShake :: CutConfig -> Rules () -> IO ()
 myShake cfg rules = do
   (shake myOpts . alternatives) rules
-  removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
+  -- removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
   where
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg

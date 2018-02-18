@@ -80,7 +80,7 @@ goldenReplTree cfg ses = do
       stdin  = extractPrompted "shortcut >> " txt
       tmpDir = cfgTmpDir cfg'
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
-      cmd    = (shell "tree") { cwd = Just $ tmpDir }
+      cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
       action = do
                  _ <- mockRepl stdin tmpOut cfg'
                  createDirectoryIfMissing True tmpDir
