@@ -155,4 +155,5 @@ executable shortcut
                     transformers,
                     unbounded-delays,
                     unix,
-                    utility-ht
+                    utility-ht,
+                    time
