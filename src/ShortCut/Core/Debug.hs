@@ -1,5 +1,6 @@
 module ShortCut.Core.Debug
   ( debug
+  , debugIO
   , debugShow
   , debugParser
   , debugRules
@@ -16,9 +17,31 @@ import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
 
 import Debug.Trace       (trace, traceShow)
+import System.Directory  (removeFile)
+import System.IO         (IOMode(..), withFile)
+import System.IO.Error   (isAlreadyInUseError, isAlreadyExistsError,
+                          isDoesNotExistError, ioError)
+import System.IO.Strict  (hGetContents)
+import Data.Time.LocalTime (getZonedTime)
+import Data.Time.Format    (formatTime, defaultTimeLocale)
 
 -- TODO add tags/description for filtering the output? (plus docopt to read them)
 -- TODO rename to Shake.hs or something if it gathers more than debugging? combine with Eval.hs?
+
+--------------------
+-- get timestamps --
+--------------------
+
+getTimeStamp :: IO String
+getTimeStamp = getZonedTime >>= return . formatTime defaultTimeLocale fmt
+  where
+    fmt = "[%Y-%m-%d %H:%M:%S %q]"
+
+-- TODO remove if you can figure out a way to put stamps in regular debug
+debugIO :: CutConfig -> String -> a -> IO a
+debugIO cfg msg rtn = do
+  stamp <- getTimeStamp
+  return $ debug cfg (stamp ++ " " ++ msg) rtn
 
 ---------------------------------
 -- basic wrappers around trace --
