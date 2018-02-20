@@ -14,9 +14,9 @@ module ShortCut.Core.Actions
   , wrappedCmdError -- for calling when a cmd is found to have failed
   , debugReadFile
   , debugReadLines
-  , debugWriteFile
-  , debugWriteLines
-  , debugWriteChanged
+  -- , debugWriteFile
+  -- , debugWriteLines
+  -- , debugWriteChanged
   , debugTrackWrite
   , readFileStrict
   , readLinesStrict
@@ -226,16 +226,16 @@ wrappedCmdOut c p ps os b as = do
 --     handler e = removeIfExists (path <.> "lock") >> ioError e
 
 -- TODO debugTrackWrite after?
-writeFileSafe :: CutConfig -> FilePath -> String -> Action ()
-writeFileSafe cfg path x =
+writeLines :: CutConfig -> FilePath -> [String] -> Action ()
+writeLines cfg path ls =
   -- writeAllOnce (path <.> "lock") [path] $ writeFile'' path x -- TODO lock error here?
-  writeFile'' path x -- TODO lock error here?
+  writeFile'' path $ unlines ls -- TODO lock error here?
   where
     writeFile'' p = debug cfg ("writing '" ++ p ++ "'") (writeFile' p)
 
 -- TODO debugTrackWrite after?
-writeLinesSafe :: CutConfig -> FilePath -> [String] -> Action ()
-writeLinesSafe cfg path = writeFileSafe cfg path . unlines
+-- writeLinesSafe :: CutConfig -> FilePath -> [String] -> Action ()
+-- writeLinesSafe cfg path = writeLines cfg path . unlines
 
 -----------------------------------
 -- handle large numbers of reads --
@@ -266,25 +266,25 @@ readLinesStrict = fmap lines . readFileStrict
 debugReadFile :: CutConfig -> FilePath -> Action String
 debugReadFile cfg f = debug cfg ("read '" ++ f ++ "'") (readFileStrict f)
 
-debugWriteFile :: CutConfig -> FilePath -> String -> Action ()
-debugWriteFile cfg f s = unlessExists f
-                       $ debug cfg ("write '" ++ f ++ "'")
-                       $ writeFileSafe cfg f s
+-- debugWriteFile :: CutConfig -> FilePath -> String -> Action ()
+-- debugWriteFile cfg f s = unlessExists f
+--                        $ debug cfg ("write '" ++ f ++ "'")
+--                        $ writeLines cfg f s
 
 debugReadLines :: CutConfig -> FilePath -> Action [String]
 debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 
 -- TODO track written in these!
 -- TODO remote in favor of only the Paths version?
-debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
-debugWriteLines cfg f ss = unlessExists f
-                         $ debug cfg ("write '" ++ f ++ "'")
-                         $ writeLinesSafe cfg f ss
+-- debugWriteLines :: CutConfig -> FilePath -> [String] -> Action ()
+-- debugWriteLines cfg f ss = unlessExists f
+--                          $ debug cfg ("write '" ++ f ++ "'")
+--                          $ writeLinesSafe cfg f ss
 
-debugWriteChanged :: CutConfig -> FilePath -> String -> Action ()
-debugWriteChanged cfg f s = unlessExists f
-                          $ debug cfg ("write '" ++ f ++ "'")
-                          $ writeFileSafe cfg f s
+-- debugWriteChanged :: CutConfig -> FilePath -> String -> Action ()
+-- debugWriteChanged cfg f s = unlessExists f
+--                           $ debug cfg ("write '" ++ f ++ "'")
+--                           $ writeLines cfg f s
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
@@ -315,7 +315,7 @@ readLitPaths cfg path = do
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
-writePaths cfg out cpaths = debugWriteLines cfg out paths >> trackWrite paths
+writePaths cfg out cpaths = writeLines cfg out paths >> trackWrite paths
   where
     paths = map cutPathString cpaths
 
@@ -332,7 +332,7 @@ readLit cfg path = readLits cfg path >>= return . head
 
 -- TODO error if they contain $TMPDIR or $WORKDIR?
 writeLits :: CutConfig -> FilePath -> [String] -> Action ()
-writeLits cfg path lits = debugWriteLines cfg path $ checkLits lits
+writeLits cfg path lits = writeLines cfg path $ checkLits lits
 
 writeLit :: CutConfig -> FilePath -> String -> Action ()
 writeLit cfg path lit = writeLits cfg path [lit]
