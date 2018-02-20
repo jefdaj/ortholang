@@ -228,7 +228,8 @@ wrappedCmdOut c p ps os b as = do
 -- TODO debugTrackWrite after?
 writeFileSafe :: CutConfig -> FilePath -> String -> Action ()
 writeFileSafe cfg path x =
-  writeAllOnce (path <.> "lock") [path] $ writeFile'' path x -- TODO lock error here?
+  -- writeAllOnce (path <.> "lock") [path] $ writeFile'' path x -- TODO lock error here?
+  writeFile'' path x -- TODO lock error here?
   where
     writeFile'' p = debug cfg ("writing '" ++ p ++ "'") (writeFile' p)
 
