@@ -31,7 +31,7 @@ import ShortCut.Core.Debug        (debugAction, debugRules)
 import ShortCut.Core.Actions      (removeIfExists, wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink,
-                                   writeDeduped, debugTrackWrite)
+                                   debugTrackWrite)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, typesMatch)
 import System.Directory           (createDirectoryIfMissing)
@@ -97,7 +97,7 @@ rLit s@(_,cfg) expr = do
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> CutExpr -> CutPath -> Action ()
-aLit cfg expr out = writeDeduped cfg writeLits out'' [ePath] -- TODO too much dedup?
+aLit cfg expr out = writeLits cfg out'' [ePath] -- TODO too much dedup?
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
@@ -153,7 +153,7 @@ aListLits cfg paths outPath = do
   need paths'
   lits <- mapM (readLit cfg) paths'
   let lits' = map stripWhiteSpace lits
-  writeDeduped cfg writeLits out'' lits'
+  writeLits cfg out'' lits'
   where
     out'   = fromCutPath cfg outPath
     out''  = debugAction cfg "aListLits" out' (out':paths')
@@ -178,7 +178,7 @@ aListPaths cfg paths outPath = do
   paths'' <- liftIO $ mapM (resolveSymlinks cfg True) paths'
   need paths''
   let paths''' = map (toCutPath cfg) paths'' -- TODO not working?
-  writeDeduped cfg writePaths out'' paths'''
+  writePaths cfg out'' paths'''
   where
     out'   = fromCutPath cfg outPath
     out''  = debugAction cfg "aListPaths" out' (out':paths')
@@ -396,7 +396,7 @@ aLoadListLits cfg outPath litsPath = do
       out       = debugAction cfg "aLoadListLits" outPath' [outPath', litsPath']
   lits  <- readLits cfg litsPath'
   lits' <- liftIO $ mapM absolutize lits
-  writeDeduped cfg writeLits out lits'
+  writeLits cfg out lits'
   where
     outPath' = fromCutPath cfg outPath
 
@@ -425,7 +425,7 @@ aLoadListLinks cfg pathsPath outPath = do
   let hashPaths' = map (fromCutPath cfg) hashPaths
   -- liftIO $ putStrLn $ "about to need: " ++ show paths''
   need hashPaths'
-  writeDeduped cfg writePaths out hashPaths
+  writePaths cfg out hashPaths
   where
     outPath'   = fromCutPath cfg outPath
     pathsPath' = fromCutPath cfg pathsPath

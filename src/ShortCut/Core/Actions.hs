@@ -39,7 +39,7 @@ module ShortCut.Core.Actions
   , writePaths
   , hashContent
   , symlink
-  , writeDeduped
+  , writeCachedLines
   -- , withLock
   -- , tryIO -- TODO move to Util
   )
@@ -55,7 +55,7 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, removeIfExists, withLock,
-                                   writeAllOnce, unlessExists, rmAll)
+                                   writeAllOnce, rmAll)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>))
@@ -226,16 +226,14 @@ wrappedCmdOut c p ps os b as = do
 --     handler e = removeIfExists (path <.> "lock") >> ioError e
 
 -- TODO debugTrackWrite after?
-writeLines :: CutConfig -> FilePath -> [String] -> Action ()
-writeLines cfg path ls =
-  -- writeAllOnce (path <.> "lock") [path] $ writeFile'' path x -- TODO lock error here?
-  writeFile'' path $ unlines ls -- TODO lock error here?
-  where
-    writeFile'' p = debug cfg ("writing '" ++ p ++ "'") (writeFile' p)
+-- tmpWriteFn :: CutConfig -> FilePath -> [String] -> Action ()
+-- tmpWriteFn cfg path ls =
+--   debug cfg ("writing '" ++ path ++ "'") (writeFile' path $ unlines ls)
+--   -- writeAllOnce (path <.> "lock") [path] $ writeFile'' path x -- TODO lock error here?
 
 -- TODO debugTrackWrite after?
 -- writeLinesSafe :: CutConfig -> FilePath -> [String] -> Action ()
--- writeLinesSafe cfg path = writeLines cfg path . unlines
+-- writeLinesSafe cfg path = tmpWriteFn cfg path . unlines
 
 -----------------------------------
 -- handle large numbers of reads --
@@ -269,7 +267,7 @@ debugReadFile cfg f = debug cfg ("read '" ++ f ++ "'") (readFileStrict f)
 -- debugWriteFile :: CutConfig -> FilePath -> String -> Action ()
 -- debugWriteFile cfg f s = unlessExists f
 --                        $ debug cfg ("write '" ++ f ++ "'")
---                        $ writeLines cfg f s
+--                        $ tmpWriteFn cfg f s
 
 debugReadLines :: CutConfig -> FilePath -> Action [String]
 debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
@@ -284,7 +282,7 @@ debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
 -- debugWriteChanged :: CutConfig -> FilePath -> String -> Action ()
 -- debugWriteChanged cfg f s = unlessExists f
 --                           $ debug cfg ("write '" ++ f ++ "'")
---                           $ writeLines cfg f s
+--                           $ tmpWriteFn cfg f s
 
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
@@ -315,7 +313,7 @@ readLitPaths cfg path = do
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
-writePaths cfg out cpaths = writeLines cfg out paths >> trackWrite paths
+writePaths cfg out cpaths = writeCachedLines cfg out paths >> trackWrite paths
   where
     paths = map cutPathString cpaths
 
@@ -332,7 +330,7 @@ readLit cfg path = readLits cfg path >>= return . head
 
 -- TODO error if they contain $TMPDIR or $WORKDIR?
 writeLits :: CutConfig -> FilePath -> [String] -> Action ()
-writeLits cfg path lits = writeLines cfg path $ checkLits lits
+writeLits cfg path lits = writeCachedLines cfg path $ checkLits lits
 
 writeLit :: CutConfig -> FilePath -> String -> Action ()
 writeLit cfg path lit = writeLits cfg path [lit]
@@ -418,6 +416,15 @@ symlink cfg src dst =
     dst' = fromCutPath cfg dst
     dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
 
+symlinkNoLock :: CutConfig -> CutPath -> CutPath -> Action ()
+symlinkNoLock cfg src dst = liftIO $ createSymbolicLink dstr src'
+    -- debugTrackWrite cfg [src']) TODO add this and remove elsewhere?
+  -- liftIO $ createSymbolicLink dstr src'
+  where
+    src' = fromCutPath cfg src
+    dst' = fromCutPath cfg dst
+    dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
+
 -------------------
 -- write deduped --
 -------------------
@@ -431,13 +438,9 @@ symlink cfg src dst =
  - TODO does it need to handle a race condition when writing to the cache?
  - TODO any reason to keep original extensions instead of all using .txt?
  -      oh, if we're testing extensions anywhere. lets not do that though
- -
- - TODO move to new Actions module
  -}
-writeDeduped :: Show a => CutConfig
-             -> (CutConfig -> FilePath -> a -> Action ())
-             -> FilePath -> a -> Action ()
-writeDeduped cfg writeFn outPath content = do
+writeCachedLines :: CutConfig -> FilePath -> [String] -> Action ()
+writeCachedLines cfg outPath content = do
   let cDir     = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
       cache    = cDir </> digest content <.> "txt"
       cache'   = toCutPath cfg cache
@@ -446,7 +449,10 @@ writeDeduped cfg writeFn outPath content = do
   liftIO $ createDirectoryIfMissing True cDir
   done1 <- doesFileExist cache
   done2 <- doesFileExist outPath
-  -- when (not done1) (writeFn cfg cache content >> debugTrackWrite cfg [cache])
+  -- when (not done1) (tmpWriteFn cfg cache content >> debugTrackWrite cfg [cache])
   -- when (not done2) (symlink cfg out' cache' >> debugTrackWrite cfg [outPath])
-  when (not done1) (writeFn cfg cache content)
+  when (not done1) (write cfg cache content)
   when (not done2) (symlink cfg out' cache')
+  where
+    write c p ls = debug c ("writing '" ++ p ++ "'")
+                           (writeFile' p $ unlines ls)
