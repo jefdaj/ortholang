@@ -5,13 +5,16 @@
 |       |-- 31703c5ab9.txt
 |       |-- 3d03d881a9.txt
 |       |-- 42fb7081a8.txt
+|       |-- 43daa8a032.txt
 |       |-- 558d528228.txt
-|       `-- 58d21ca52f.txt
+|       |-- 58d21ca52f.txt
+|       |-- d539b3c735.txt
+|       `-- e8f7aab99a.txt
 |-- exprs
 |   |-- divide
-|   |   |-- 58d3e9f8ea_de6d9e4871.num
-|   |   |-- 6d57e8642a_58d3e9f8ea.num
-|   |   `-- fba69f6eb2_4578706b58.num
+|   |   |-- 58d3e9f8ea_de6d9e4871.num -> ../../cache/list/43daa8a032.txt
+|   |   |-- 6d57e8642a_58d3e9f8ea.num -> ../../cache/list/e8f7aab99a.txt
+|   |   `-- fba69f6eb2_4578706b58.num -> ../../cache/list/d539b3c735.txt
 |   |-- list
 |   |   `-- 2cb75e062f.num.list -> ../../cache/list/3d03d881a9.txt
 |   `-- num
@@ -26,4 +29,4 @@
     |-- result -> ../exprs/list/2cb75e062f.num.list
     `-- three_quarters.num -> ../exprs/divide/6d57e8642a_58d3e9f8ea.num
 
-7 directories, 19 files
+7 directories, 22 files

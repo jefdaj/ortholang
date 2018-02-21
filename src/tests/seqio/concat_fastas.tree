@@ -2,34 +2,35 @@
 |-- cache
 |   |-- each
 |   |   `-- b5cb0f3e70
-|   |       |-- a17453dd06.fna -> ../../../exprs/concat_fastas/a17453dd06.fna
-|   |       `-- a17453dd06.fna.args
+|   |       |-- 9ab758684b.fna -> ../../../exprs/concat_fastas/9ab758684b.fna
+|   |       `-- 9ab758684b.fna.args -> ../../../cache/list/68fbcb4fbe.txt
 |   |-- list
-|   |   |-- 03424c9995.txt
-|   |   |-- 5273b85b5d.txt
+|   |   |-- 38a9755ea9.txt
+|   |   |-- 5bb3f27328.txt
+|   |   |-- 68fbcb4fbe.txt
 |   |   |-- 691dd4d722.txt
-|   |   |-- 8a7e9a807c.txt
-|   |   |-- 9da25ac96a.txt
+|   |   |-- 7a51188591.txt
+|   |   |-- 9f23b43f2e.txt
 |   |   `-- cad7634989.txt
 |   `-- load
 |       |-- d8da51f7cd.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
 |       `-- ec9540d17e.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
 |-- exprs
 |   |-- any
-|   |   `-- c227fdb068.fna.list
+|   |   `-- c227fdb068.fna.list -> ../../cache/list/38a9755ea9.txt
 |   |-- concat_fastas
-|   |   |-- a17453dd06.fna
+|   |   |-- 9ab758684b.fna
 |   |   `-- eb1aea4e88.fna
 |   |-- concat_fastas_each
-|   |   `-- 72514253ee.fna.list
+|   |   `-- 72514253ee.fna.list -> ../../cache/list/38a9755ea9.txt
 |   |-- gbk_to_fna
 |   |   |-- 1a2d376906.fna
 |   |   `-- 455f27117a.fna
 |   |-- list
-|   |   |-- 20812f3e16.fna.list.list -> ../../cache/list/03424c9995.txt
-|   |   |-- 51e8fbf7e2.fna.list.list -> ../../cache/list/9da25ac96a.txt
-|   |   |-- 53aa247bf9.fna.list -> ../../cache/list/5273b85b5d.txt
-|   |   `-- de88435002.fna.list -> ../../cache/list/8a7e9a807c.txt
+|   |   |-- 20812f3e16.fna.list.list -> ../../cache/list/9f23b43f2e.txt
+|   |   |-- 51e8fbf7e2.fna.list.list -> ../../cache/list/68fbcb4fbe.txt
+|   |   |-- 53aa247bf9.fna.list -> ../../cache/list/5bb3f27328.txt
+|   |   `-- de88435002.fna.list -> ../../cache/list/7a51188591.txt
 |   |-- load_gbk
 |   |   |-- 4f798984f2.gbk -> ../../cache/load/d8da51f7cd.gbk
 |   |   `-- c5cc3f4b63.gbk -> ../../cache/load/ec9540d17e.gbk
@@ -41,4 +42,4 @@
     |-- result -> ../exprs/any/c227fdb068.fna.list
     `-- single.fna -> ../exprs/concat_fastas/eb1aea4e88.fna
 
-14 directories, 27 files
+14 directories, 28 files

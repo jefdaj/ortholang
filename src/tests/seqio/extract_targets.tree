@@ -3,14 +3,16 @@
 |   |-- each
 |   |   `-- 411c8b9a42
 |   |       |-- a8eb78180f.str.list -> ../../../exprs/extract_targets/a8eb78180f.str.list
-|   |       `-- a8eb78180f.str.list.args
+|   |       `-- a8eb78180f.str.list.args -> ../../../cache/list/6dea99a695.txt
 |   |-- list
-|   |   |-- 51a2da0e58.txt
+|   |   |-- 56cf88df4d.txt
+|   |   |-- 6dea99a695.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- a8a68f2aa1.txt
+|   |   |-- 83a63c6c45.txt
+|   |   |-- 8d7e93ae3d.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- c8be8722f2.txt
-|   |   `-- d1b96f6d99.txt
+|   |   `-- f12c7f6a4d.txt
 |   |-- load
 |   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
 |   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -21,23 +23,23 @@
 |           `-- 8a695c317a.pdb.psq
 |-- exprs
 |   |-- any
-|   |   `-- 9d8c34f5f0.str.list.list
+|   |   `-- 9d8c34f5f0.str.list.list -> ../../cache/list/56cf88df4d.txt
 |   |-- blastp_db
 |   |   `-- 8158675169_c14344af19_8c0afeae98.bht
 |   |-- extract_targets
-|   |   |-- a8eb78180f.str.list
-|   |   `-- c085e4cf5c.str.list
+|   |   |-- a8eb78180f.str.list -> ../../cache/list/f12c7f6a4d.txt
+|   |   `-- c085e4cf5c.str.list -> ../../cache/list/f12c7f6a4d.txt
 |   |-- extract_targets_each
-|   |   `-- e84e2d03d0.str.list.list
+|   |   `-- e84e2d03d0.str.list.list -> ../../cache/list/56cf88df4d.txt
 |   |-- list
-|   |   |-- 26890dda4f.bht.list -> ../../cache/list/a8a68f2aa1.txt
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/51a2da0e58.txt
-|   |   `-- c2036af94d.str.list.list.list -> ../../cache/list/d1b96f6d99.txt
+|   |   |-- 26890dda4f.bht.list -> ../../cache/list/6dea99a695.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/56cf88df4d.txt
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/list/83a63c6c45.txt
 |   |-- load_faa
 |   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot
-|   |   `-- 6e8bd8b7c6.pdb
+|   |   `-- 6e8bd8b7c6.pdb -> ../../cache/list/8d7e93ae3d.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   `-- str
@@ -49,4 +51,4 @@
     |-- result -> ../exprs/any/9d8c34f5f0.str.list.list
     `-- single.str.list -> ../exprs/extract_targets/c085e4cf5c.str.list
 
-18 directories, 31 files
+18 directories, 33 files

@@ -1,12 +1,14 @@
 .
 |-- cache
 |   |-- list
-|   |   |-- 389db1505d.txt
-|   |   |-- 56d55b5ce9.txt
+|   |   |-- 34c986b6ac.txt
+|   |   |-- 38cb049e4b.txt
 |   |   |-- 778251fd80.txt
+|   |   |-- 8361942acc.txt
 |   |   |-- ba320796bf.txt
-|   |   |-- e23802c768.txt
-|   |   `-- f530950d29.txt
+|   |   |-- d751713988.txt
+|   |   |-- f530950d29.txt
+|   |   `-- f6b547993f.txt
 |   |-- load
 |   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
@@ -17,24 +19,24 @@
 |           `-- ff08c7f09e.ndb.nsq
 |-- exprs
 |   |-- any
-|   |   `-- d51537bc95.str.list
+|   |   `-- d51537bc95.str.list -> ../../cache/list/d751713988.txt
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- diff
-|   |   |-- 1678a9e939.str.list
-|   |   `-- d27ff2fbe3.str.list
+|   |   |-- 1678a9e939.str.list -> ../../cache/list/d751713988.txt
+|   |   `-- d27ff2fbe3.str.list -> ../../cache/list/d751713988.txt
 |   |-- extract_queries
-|   |   |-- 9994288dcd.str.list
-|   |   `-- d04c524532.str.list
+|   |   |-- 9994288dcd.str.list -> ../../cache/list/38cb049e4b.txt
+|   |   `-- d04c524532.str.list -> ../../cache/list/38cb049e4b.txt
 |   |-- list
-|   |   |-- 3c068ef0f5.str.list.list -> ../../cache/list/56d55b5ce9.txt
-|   |   |-- ae41db6b0c.str.list.list -> ../../cache/list/e23802c768.txt
-|   |   `-- b9040a19fe.str.list.list -> ../../cache/list/389db1505d.txt
+|   |   |-- 3c068ef0f5.str.list.list -> ../../cache/list/34c986b6ac.txt
+|   |   |-- ae41db6b0c.str.list.list -> ../../cache/list/8361942acc.txt
+|   |   `-- b9040a19fe.str.list.list -> ../../cache/list/34c986b6ac.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
 |   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
-|   |   `-- f5e661a4be.ndb
+|   |   `-- f5e661a4be.ndb -> ../../cache/list/f6b547993f.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   `-- str
@@ -47,4 +49,4 @@
     |-- small.fna -> ../exprs/load_fna/82b637da24.fna
     `-- srevs.str.list -> ../exprs/extract_queries/d04c524532.str.list
 
-16 directories, 31 files
+16 directories, 33 files

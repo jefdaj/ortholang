@@ -19,23 +19,26 @@ import Test.Tasty            (testGroup, TestTree)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Catch    (MonadCatch, catch, throwM)
 import System.Directory       (removeFile)
-import System.IO.Error        (isDoesNotExistError)
+import System.IO.Error        (isDoesNotExistError, catchIOError,
+                               isAlreadyExistsError, ioError)
 import System.FileLock            (withFileLock, lockFile, unlockFile, SharedExclusive(..), FileLock)
 import Development.Shake
 import System.Directory           (createDirectoryIfMissing, doesPathExist, removePathForcibly)
 
 -- locking --
 
--- TODO unlessAnyExist version
+ignoreExistsError :: IO () -> IO ()
+ignoreExistsError act = catchIOError act $ \e ->
+  if isAlreadyExistsError e then return () else ioError e
+
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
   e <- doesFileExist path
   unless e act
 
--- TODO should it be unlessAllExist instead?
--- TODO use it in the wrappedCmds
-unlessAnyExist :: [FilePath] -> Action () -> Action ()
-unlessAnyExist paths act = do
+-- TODO use FilePatterns here rather than plain FilePaths
+unlessMatch :: [FilePath] -> Action () -> Action ()
+unlessMatch paths act = do
   tests <- liftIO $ mapM doesPathExist paths
   unless (any id tests) act
 
@@ -44,14 +47,6 @@ withLock lockPath actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
   lock <- liftIO $ lockFile lockPath Exclusive
   actFn `actionFinally` rmLock lockPath lock
-
-withLockIO :: FilePath -> IO a -> IO a
-withLockIO lockPath actFn = do
-  createDirectoryIfMissing True $ takeDirectory lockPath
-  res <- withFileLock lockPath Exclusive $ \_ -> actFn
-  removePathForcibly lockPath
-  -- rmLock lockPath lock -- make sure this gets called on errors!
-  return res
 
 -- Keeps lockfiles from laying around cluttering up trees
 rmLock :: FilePath -> FileLock -> IO ()
@@ -67,7 +62,7 @@ rmLock lockPath lockToken = do
 writeAllOnce :: FilePath -> [FilePath] -> Action () -> Action ()
 writeAllOnce lockPath outPaths writeFn = do
   lock <- liftIO $ lockFile lockPath Exclusive
-  unlessAnyExist outPaths $
+  unlessMatch outPaths $
     writeFn `actionOnException` liftIO (rmAll outPaths)
             `actionFinally` rmLock lockPath lock
   -- liftIO $ rmLock lockPath lock

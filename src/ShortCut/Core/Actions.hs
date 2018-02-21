@@ -1,5 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-- TODO blast_rev_each gives wrongly empty list!
+-- TODO length_each_empties openFile resource busy (file is locked)
+
 {- Some Shake Actions wrapped with ShortCut-specific additions,
  - and some other stuff. Eventually, it would be nice if all IO happened here.
  -
@@ -55,7 +58,7 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, removeIfExists, withLock,
-                                   writeAllOnce, rmAll)
+                                   writeAllOnce, rmAll, unlessExists, ignoreExistsError)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>))
@@ -406,19 +409,9 @@ tmpLink cfg src dst = dots </> tmpRel dst
 --
 -- TODO fix error on race condition: if src exists already, just skip it
 symlink :: CutConfig -> CutPath -> CutPath -> Action ()
-symlink cfg src dst =
-  writeAllOnce (src' <.> "lock") [src'] $ do
-    liftIO $ createSymbolicLink dstr src'
-    -- debugTrackWrite cfg [src']) TODO add this and remove elsewhere?
-  -- liftIO $ createSymbolicLink dstr src'
-  where
-    src' = fromCutPath cfg src
-    dst' = fromCutPath cfg dst
-    dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
-
-symlinkNoLock :: CutConfig -> CutPath -> CutPath -> Action ()
-symlinkNoLock cfg src dst = liftIO $ createSymbolicLink dstr src'
-    -- debugTrackWrite cfg [src']) TODO add this and remove elsewhere?
+symlink cfg src dst = do
+   liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
+   debugTrackWrite cfg [src'] -- TODO anything wrong with duplicate calls?
   -- liftIO $ createSymbolicLink dstr src'
   where
     src' = fromCutPath cfg src
@@ -441,18 +434,13 @@ symlinkNoLock cfg src dst = liftIO $ createSymbolicLink dstr src'
  -}
 writeCachedLines :: CutConfig -> FilePath -> [String] -> Action ()
 writeCachedLines cfg outPath content = do
-  let cDir     = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
-      cache    = cDir </> digest content <.> "txt"
-      cache'   = toCutPath cfg cache
-      out'     = toCutPath cfg outPath
-      -- cacheRel = ".." </> ".." </> makeRelative (cfgTmpDir cfg) cache
+  let cDir  = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
+      cache = cDir </> digest content <.> "txt"
   liftIO $ createDirectoryIfMissing True cDir
-  done1 <- doesFileExist cache
-  done2 <- doesFileExist outPath
-  -- when (not done1) (tmpWriteFn cfg cache content >> debugTrackWrite cfg [cache])
-  -- when (not done2) (symlink cfg out' cache' >> debugTrackWrite cfg [outPath])
-  when (not done1) (write cfg cache content)
-  when (not done2) (symlink cfg out' cache')
-  where
-    write c p ls = debug c ("writing '" ++ p ++ "'")
-                           (writeFile' p $ unlines ls)
+  cached <- doesFileExist cache
+  when (not cached)
+    $ withLock (cache <.> "lock")
+    $ unlessExists cache -- might have been created before we got the lock
+    $ debug cfg ("writing '" ++ cache ++ "'")
+    $ writeFile' cache (unlines content)
+  symlink cfg (toCutPath cfg outPath) (toCutPath cfg cache)

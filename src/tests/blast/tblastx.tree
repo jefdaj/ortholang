@@ -3,7 +3,9 @@
 |   |-- list
 |   |   |-- 0815de9417.txt
 |   |   |-- 171edb7413.txt
-|   |   `-- 778251fd80.txt
+|   |   |-- 3aa7cdbb74.txt
+|   |   |-- 778251fd80.txt
+|   |   `-- da3ab843af.txt
 |   |-- load
 |   |   |-- 597257619d.fna -> $WORKDIR/data/7942genome.fna
 |   |   `-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
@@ -14,12 +16,12 @@
 |           `-- 597257619d.ndb.nsq
 |-- exprs
 |   |-- extract_queries
-|   |   `-- e35860dc63.str.list
+|   |   `-- e35860dc63.str.list -> ../../cache/list/da3ab843af.txt
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   |   `-- dd2257687c.fna -> ../../cache/load/597257619d.fna
 |   |-- makeblastdb_nucl
-|   |   `-- 14a4649153.ndb
+|   |   `-- 14a4649153.ndb -> ../../cache/list/3aa7cdbb74.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
 |   |-- str
@@ -33,4 +35,4 @@
     |-- mini6803.fna -> ../exprs/load_fna/9b7934c579.fna
     `-- result -> ../vars/hits6803.str.list
 
-13 directories, 20 files
+13 directories, 22 files

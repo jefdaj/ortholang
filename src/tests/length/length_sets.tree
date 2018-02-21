@@ -1,19 +1,20 @@
 .
 |-- cache
 |   `-- list
-|       |-- be7310e980.txt
+|       |-- 8361942acc.txt
+|       |-- 8fe17a01cf.txt
 |       `-- d751713988.txt
 |-- exprs
 |   |-- any
-|   |   `-- 9678607df3.empty.list
+|   |   `-- 9678607df3.empty.list -> ../../cache/list/d751713988.txt
 |   |-- length
-|   |   `-- 77f1e33752.num
+|   |   `-- 77f1e33752.num -> ../../cache/list/8fe17a01cf.txt
 |   `-- list
-|       |-- 5e1abb69af.empty.list.list -> ../../cache/list/be7310e980.txt
+|       |-- 5e1abb69af.empty.list.list -> ../../cache/list/8361942acc.txt
 |       `-- 9d4568c009.empty.list -> ../../cache/list/d751713988.txt
 `-- vars
     |-- result -> ../vars/sets.num
     |-- sets.num -> ../exprs/length/77f1e33752.num
     `-- two.empty.list.list -> ../exprs/list/5e1abb69af.empty.list.list
 
-7 directories, 9 files
+7 directories, 10 files

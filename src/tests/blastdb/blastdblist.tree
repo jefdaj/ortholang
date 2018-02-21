@@ -3,27 +3,31 @@
 |   |-- blastdbget
 |   |   `-- dblist.txt
 |   `-- list
+|       |-- 01fe5efbb0.txt
 |       |-- 399fc66708.txt
-|       |-- 56c1d3faed.txt
+|       |-- 437201a5f9.txt
+|       |-- 5e4552e422.txt
 |       |-- 637edad317.txt
+|       |-- 6fd530afbb.txt
+|       |-- 7c7cb8bd0b.txt
+|       |-- 898b042104.txt
 |       |-- 90aed1d1c9.txt
-|       |-- c62c24554f.txt
-|       |-- d42c6637eb.txt
-|       `-- d88cc18df4.txt
+|       |-- 91942e737d.txt
+|       `-- d42c6637eb.txt
 |-- exprs
 |   |-- any
-|   |   |-- 494dd67ab7.str.list
-|   |   |-- b7c6f17408.str.list
-|   |   `-- e14d4b6f8e.str.list
+|   |   |-- 494dd67ab7.str.list -> ../../cache/list/91942e737d.txt
+|   |   |-- b7c6f17408.str.list -> ../../cache/list/91942e737d.txt
+|   |   `-- e14d4b6f8e.str.list -> ../../cache/list/91942e737d.txt
 |   |-- blastdblist
-|   |   |-- 4c04f88f38.str.list
-|   |   |-- 93c452e38f.str.list
-|   |   |-- da67996088.str.list
-|   |   `-- fa437bd7a3.str.list
+|   |   |-- 4c04f88f38.str.list -> ../../cache/list/91942e737d.txt
+|   |   |-- 93c452e38f.str.list -> ../../cache/list/01fe5efbb0.txt
+|   |   |-- da67996088.str.list -> ../../cache/list/7c7cb8bd0b.txt
+|   |   `-- fa437bd7a3.str.list -> ../../cache/list/6fd530afbb.txt
 |   |-- list
-|   |   |-- 1b9c3d73be.str.list.list -> ../../cache/list/56c1d3faed.txt
-|   |   |-- c8c6ad6b02.str.list.list -> ../../cache/list/c62c24554f.txt
-|   |   `-- d7da3216eb.str.list.list -> ../../cache/list/d88cc18df4.txt
+|   |   |-- 1b9c3d73be.str.list.list -> ../../cache/list/898b042104.txt
+|   |   |-- c8c6ad6b02.str.list.list -> ../../cache/list/5e4552e422.txt
+|   |   `-- d7da3216eb.str.list.list -> ../../cache/list/437201a5f9.txt
 |   `-- str
 |       |-- 072c64781f.str -> ../../cache/list/d42c6637eb.txt
 |       |-- 419a892f8b.str -> ../../cache/list/637edad317.txt
@@ -36,4 +40,4 @@
     |-- proks.str.list -> ../exprs/blastdblist/93c452e38f.str.list
     `-- result -> ../exprs/any/b7c6f17408.str.list
 
-9 directories, 27 files
+9 directories, 31 files
