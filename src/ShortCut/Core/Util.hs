@@ -11,7 +11,7 @@ import Data.Maybe            (fromJust)
 import ShortCut.Core.Types   (CutConfig(..), CutType(..))
 import System.Directory      (getHomeDirectory, makeAbsolute,
                               pathIsSymbolicLink)
-import System.FilePath       ((</>), takeDirectory)
+import System.FilePath       ((</>), (<.>), takeDirectory)
 import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
 import System.Posix.Files    (readSymbolicLink)
@@ -30,6 +30,13 @@ import System.Directory           (createDirectoryIfMissing, doesPathExist, remo
 ignoreExistsError :: IO () -> IO ()
 ignoreExistsError act = catchIOError act $ \e ->
   if isAlreadyExistsError e then return () else ioError e
+
+waitAndVerify :: FilePath -> FilePath -> Action ()
+waitAndVerify lockPath outPath = withLock lockPath $ do
+  stillThere <- doesFileExist outPath
+  if not stillThere
+    then error $ "file was deleted: '" ++ outPath ++ "'"
+    else return ()
 
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do

@@ -58,7 +58,8 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, removeIfExists, withLock,
-                                   writeAllOnce, rmAll, unlessExists, ignoreExistsError)
+                                   writeAllOnce, rmAll, unlessExists,
+                                   ignoreExistsError, waitAndVerify)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>))
@@ -436,11 +437,12 @@ writeCachedLines :: CutConfig -> FilePath -> [String] -> Action ()
 writeCachedLines cfg outPath content = do
   let cDir  = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
       cache = cDir </> digest content <.> "txt"
+      lock  = cache <.> "lock"
   liftIO $ createDirectoryIfMissing True cDir
-  cached <- doesFileExist cache
-  when (not cached)
-    $ withLock (cache <.> "lock")
-    $ unlessExists cache -- might have been created before we got the lock
-    $ debug cfg ("writing '" ++ cache ++ "'")
-    $ writeFile' cache (unlines content)
+  notFirst <- doesFileExist cache -- another thread was/is here
+  if notFirst
+    then waitAndVerify lock cache -- maybe immediate, or wait for a write to finish
+    else withLock lock
+       $ debug cfg ("writing '" ++ cache ++ "'")
+       $ writeFile' cache (unlines content)
   symlink cfg (toCutPath cfg outPath) (toCutPath cfg cache)
