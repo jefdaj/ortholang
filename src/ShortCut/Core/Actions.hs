@@ -53,8 +53,7 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, removeIfExists, withLock,
-                                   rmAll, unlessExists,
-                                   ignoreExistsError, digest)
+                                   rmAll, unlessExists, ignoreExistsError, digest)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>))
@@ -431,16 +430,14 @@ symlink cfg src dst = do
  - TODO any reason to keep original extensions instead of all using .txt?
  -      oh, if we're testing extensions anywhere. lets not do that though
  -}
+-- TODO why is this running multiple times per file?? sometimes they conflict too
+--      hey would ignoreExistsError help?
 writeCachedLines :: CutConfig -> FilePath -> [String] -> Action ()
 writeCachedLines cfg outPath content = do
   let cDir  = fromCutPath cfg $ cacheDir cfg "lines" -- TODO make relative to expr
       cache = cDir </> digest content <.> "txt"
       lock  = cache <.> "lock"
   liftIO $ createDirectoryIfMissing True cDir
-  -- notFirst <- doesFileExist cache -- another thread was/is here
-  -- if notFirst
-    -- then waitAndVerify lock cache -- maybe immediate, or wait for a write to finish
-    -- else withLock lock
   withLock Exclusive lock
     $ unlessExists cache
     $ debug cfg ("writing '" ++ cache ++ "'")

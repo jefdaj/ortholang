@@ -9,7 +9,7 @@ import Data.Scientific             (Scientific, toRealFloat)
 import Data.String.Utils           (strip)
 import ShortCut.Core.Compile.Basic (rBop, defaultTypeCheck)
 import ShortCut.Core.Debug         (debugAction)
-import ShortCut.Core.Actions       (writeLit)
+import ShortCut.Core.Actions       (readLit, writeLit)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -52,8 +52,8 @@ aMath :: CutConfig -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()
 aMath cfg fn p1 p2 out = do
     need [p1, p2]
-    num1 <- fmap strip $ readFile' p1
-    num2 <- fmap strip $ readFile' p2
+    num1 <- fmap strip $ readLit cfg p1
+    num2 <- fmap strip $ readLit cfg p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
     let out' = debugAction cfg "aMath" out [p1, p2, out]

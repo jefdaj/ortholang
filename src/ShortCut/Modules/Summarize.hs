@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic      (rExpr)
-import ShortCut.Core.Actions (writeLits)
+import ShortCut.Core.Actions (readLits, writeLits)
 import ShortCut.Core.Debug (debugAction)
 import Development.Shake.FilePath ((</>))
 
@@ -50,8 +50,8 @@ aSummary :: CutConfig -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()
 aSummary cfg summaryFn iPath out = do
   need [iPath]
-  iLists <- fmap lines $ readFile' iPath
-  iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
+  iLists <- readLits cfg iPath
+  iElems <- mapM (readLits cfg . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
       out' = debugAction cfg "aSummary" out [out, iPath]
   writeLits cfg out' oElems

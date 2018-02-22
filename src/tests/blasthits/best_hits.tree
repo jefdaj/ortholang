@@ -36,13 +36,11 @@
 |   |       `-- e83823026a.str.list.args -> ../../../cache/lines/a43078c4ce.txt
 |   |-- lines
 |   |   |-- 0280f02633.txt
-|   |   |-- 02bd7b36ef.txt
 |   |   |-- 08811efa68.txt
 |   |   |-- 17f9ab631f.txt
 |   |   |-- 1953980b06.txt
 |   |   |-- 309629df84.txt
 |   |   |-- 33d425f33a.txt
-|   |   |-- 381e15e5fe.txt
 |   |   |-- 3b0ef995fd.txt
 |   |   |-- 466e4410de.txt
 |   |   |-- 46858358b1.txt
@@ -51,14 +49,15 @@
 |   |   |-- 6dd92c5f0d.txt
 |   |   |-- 778251fd80.txt
 |   |   |-- 7e98718a65.txt
-|   |   |-- 861047051b.txt
 |   |   |-- 8b134b2766.txt
-|   |   |-- 90032bf211.txt
+|   |   |-- 8efd97f1b1.txt
 |   |   |-- 936bd5cc62.txt
 |   |   |-- a43078c4ce.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
+|   |   |-- dacfeb19c5.txt
 |   |   |-- daf692d272.txt
+|   |   |-- fb12141443.txt
 |   |   `-- ff6ee1a970.txt
 |   |-- load
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -71,7 +70,7 @@
 |-- exprs
 |   |-- all
 |   |   |-- a733b111c1.str.list -> ../../cache/lines/ff6ee1a970.txt
-|   |   `-- dbb951ec63.str.list -> ../../cache/lines/02bd7b36ef.txt
+|   |   `-- dbb951ec63.str.list -> ../../cache/lines/08811efa68.txt
 |   |-- best_hits
 |   |   |-- 025f038f11.bht
 |   |   |-- 92d9a2fdaf.bht
@@ -87,7 +86,7 @@
 |   |   |-- 8158675169_c08cc19988_67b1500345.bht
 |   |   `-- 8158675169_ecf8c85a88_67b1500345.bht
 |   |-- diff
-|   |   `-- 6cce968232.str.list -> ../../cache/lines/381e15e5fe.txt
+|   |   `-- 6cce968232.str.list -> ../../cache/lines/dacfeb19c5.txt
 |   |-- extract_queries
 |   |   |-- 025f038f11.str.list -> ../../cache/lines/08811efa68.txt
 |   |   |-- 046c252318.str.list -> ../../cache/lines/ff6ee1a970.txt
@@ -103,10 +102,10 @@
 |   |   |-- 26400c7682.str.list.list -> ../../cache/lines/0280f02633.txt
 |   |   `-- 640b55891c.str.list.list -> ../../cache/lines/46858358b1.txt
 |   |-- length
-|   |   `-- 7e0b52ff09.num -> ../../cache/lines/90032bf211.txt
+|   |   `-- 7e0b52ff09.num -> ../../cache/lines/fb12141443.txt
 |   |-- list
 |   |   |-- 93dec00873.faa.list -> ../../cache/lines/936bd5cc62.txt
-|   |   `-- bbec55fd0d.str.list.list -> ../../cache/lines/861047051b.txt
+|   |   `-- bbec55fd0d.str.list.list -> ../../cache/lines/8efd97f1b1.txt
 |   |-- load_faa
 |   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |   |-- 387f499ddc_1.faa -> ../../cache/load/a810086108.faa
@@ -145,4 +144,4 @@
     |-- result.aec7294f1e.bht -> ../vars/hits.aec7294f1e.bht
     `-- result.e04b0e7815.bht -> ../vars/hits.e04b0e7815.bht
 
-25 directories, 120 files
+25 directories, 119 files
