@@ -61,6 +61,7 @@ import System.FilePath            ((<.>))
 import System.IO                  (IOMode(..), withFile)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
+import System.FileLock            (SharedExclusive(..))
 -- import System.FileLock            (withFileLock, SharedExclusive(..))
 
 ------------------------
@@ -143,7 +144,8 @@ wrappedCmd :: CutConfig -> FilePath -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
 -- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
-wrappedCmd cfg path opts bin args = withLock (path <.> "lock") $ do
+-- TODO separate wrappedReadCmd with a shared lock?
+wrappedCmd cfg path opts bin args = withLock Exclusive (path <.> "lock") $ do
   (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
     Nothing -> command opts bin args
     Just w  -> command opts w (bin:args)
@@ -243,12 +245,11 @@ wrappedCmdOut c p ps os b as = do
  - See: https://github.com/ndmitchell/shake/issues/37
  -}
 
--- TODO don't use this since you should be needing whole groups of files?
 readFileStrict :: FilePath -> Action String
 readFileStrict path = do
   need [path]
-  -- liftIO $ withFileLock (path <.> "lock") Shared $ \_ ->
-  liftIO $ withFile path ReadMode hGetContents
+  withLock Shared (path <.> "lock") $
+    liftIO $ withFile path ReadMode hGetContents
 {-# INLINE readFileStrict #-}
 
 -------------------------------------------------------
@@ -440,7 +441,7 @@ writeCachedLines cfg outPath content = do
   -- if notFirst
     -- then waitAndVerify lock cache -- maybe immediate, or wait for a write to finish
     -- else withLock lock
-  withLock lock
+  withLock Exclusive lock
     $ unlessExists cache
     $ debug cfg ("writing '" ++ cache ++ "'")
     $ writeFile' cache (unlines content)

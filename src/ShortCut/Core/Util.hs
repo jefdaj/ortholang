@@ -32,12 +32,12 @@ ignoreExistsError :: IO () -> IO ()
 ignoreExistsError act = catchIOError act $ \e ->
   if isAlreadyExistsError e then return () else ioError e
 
-waitAndVerify :: FilePath -> FilePath -> Action ()
-waitAndVerify lockPath outPath = withLock lockPath $ do
-  stillThere <- doesFileExist outPath
-  if not stillThere
-    then error $ "file was deleted: '" ++ outPath ++ "'"
-    else return ()
+-- waitAndVerify :: FilePath -> FilePath -> Action ()
+-- waitAndVerify lockPath outPath = withLock Exclusive lockPath $ do
+--   stillThere <- doesFileExist outPath
+--   if not stillThere
+--     then error $ "file was deleted: '" ++ outPath ++ "'"
+--     else return ()
 
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
@@ -50,10 +50,10 @@ unlessMatch paths act = do
   tests <- liftIO $ mapM doesPathExist paths
   unless (any id tests) act
 
-withLock :: FilePath -> Action a -> Action a
-withLock lockPath actFn = do
+withLock :: SharedExclusive -> FilePath -> Action a -> Action a
+withLock lockType lockPath actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
-  lock <- liftIO $ lockFile lockPath Exclusive
+  lock <- liftIO $ lockFile lockPath lockType
   actFn `actionFinally` rmLock lockPath lock
 
 -- Keeps lockfiles from laying around cluttering up trees
