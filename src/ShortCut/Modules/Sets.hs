@@ -12,12 +12,10 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Compile.Basic (rExpr, typeError)
-import ShortCut.Core.Actions       (debugReadFile, readStrings, readPaths,
-                                    writeStrings)
+import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, digestFile)
 import ShortCut.Core.Debug         (debugRules, debugAction)
 import ShortCut.Core.Paths         (exprPath, fromCutPath)
-import ShortCut.Core.Util          (resolveSymlinks, typeMatches, nonEmptyType,
-                                    digest)
+import ShortCut.Core.Util          (resolveSymlinks, typeMatches, nonEmptyType)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -125,6 +123,3 @@ dedupByContent cfg paths = do
   hashes <- mapM (digestFile cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
-
-digestFile :: CutConfig -> FilePath -> Action String
-digestFile cfg path = debugReadFile cfg path >>= return . digest

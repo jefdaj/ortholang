@@ -15,14 +15,9 @@ module ShortCut.Core.Actions
   , wrappedCmdExit
   , wrappedCmdOut
   , wrappedCmdError -- for calling when a cmd is found to have failed
-  , debugReadFile
-  , debugReadLines
-  -- , debugWriteFile
-  -- , debugWriteLines
-  -- , debugWriteChanged
   , debugTrackWrite
   , readFileStrict
-  , readLinesStrict
+  -- , readLinesStrict
   -- , withErrorHandling
   -- , unlessExists
   -- , unlessAnyExist
@@ -45,21 +40,21 @@ module ShortCut.Core.Actions
   , writeCachedLines
   -- , withLock
   -- , tryIO -- TODO move to Util
+  , digestFile
   )
   where
 
 import Development.Shake
 import ShortCut.Core.Types
 
-import Control.Monad              (when)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, removeIfExists, withLock,
-                                   writeAllOnce, rmAll, unlessExists,
-                                   ignoreExistsError, waitAndVerify)
+                                   rmAll, unlessExists,
+                                   ignoreExistsError, digest)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>))
@@ -256,9 +251,6 @@ readFileStrict path = do
   liftIO $ withFile path ReadMode hGetContents
 {-# INLINE readFileStrict #-}
 
-readLinesStrict :: FilePath -> Action [String]
-readLinesStrict = fmap lines . readFileStrict
-
 -------------------------------------------------------
 -- re-export Shake functions with new stuff attached --
 -------------------------------------------------------
@@ -274,7 +266,8 @@ debugReadFile cfg f = debug cfg ("read '" ++ f ++ "'") (readFileStrict f)
 --                        $ tmpWriteFn cfg f s
 
 debugReadLines :: CutConfig -> FilePath -> Action [String]
-debugReadLines cfg f = debug cfg ("read: " ++ f) (readLinesStrict f)
+debugReadLines cfg f = debug cfg ("read: " ++ f) 
+                     $ (fmap lines . readFileStrict) f
 
 -- TODO track written in these!
 -- TODO remote in favor of only the Paths version?
@@ -295,6 +288,10 @@ debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
 -------------
 -- file io --
 -------------
+
+-- TODO don't use readString because type doesn't matter?
+digestFile :: CutConfig -> FilePath -> Action String
+digestFile cfg path = debugReadFile cfg path >>= return . digest
 
 readPaths :: CutConfig -> FilePath -> Action [CutPath]
 readPaths cfg path = (fmap . map) stringCutPath (debugReadLines cfg path)

@@ -3,7 +3,7 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions  (debugReadLines, writeLit)
+import ShortCut.Core.Actions  (readPaths, writeLit)
 import ShortCut.Core.Debug    (debugAction)
 import ShortCut.Core.Paths    (exprPath, fromCutPath,
                                toCutPath, CutPath)
@@ -65,7 +65,7 @@ tLenEach _ = Left $ "length_each requires a list of things with lengths"
 aLen :: CutConfig -> [CutPath] -> Action ()
 aLen cfg [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
-  n <- fmap count $ debugReadLines cfg lst'
+  n <- fmap count $ readPaths cfg lst'
   liftIO $ createDirectoryIfMissing True $ takeDirectory out'
   -- liftIO $ putStrLn $ "length of " ++ lst' ++ " is " ++ show n
   writeLit cfg out'' $ show n

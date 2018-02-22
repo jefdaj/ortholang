@@ -1,6 +1,8 @@
 module ShortCut.Core.Util where
 
-import Control.Monad         (unless, when)
+import Development.Shake
+
+import Control.Monad         (unless)
 import Crypto.Hash           (hash, Digest, MD5)
 import Data.ByteString.Char8 (pack)
 import Data.Char             (isSpace)
@@ -11,7 +13,7 @@ import Data.Maybe            (fromJust)
 import ShortCut.Core.Types   (CutConfig(..), CutType(..))
 import System.Directory      (getHomeDirectory, makeAbsolute,
                               pathIsSymbolicLink)
-import System.FilePath       ((</>), (<.>), takeDirectory)
+import System.FilePath       ((</>), takeDirectory)
 import System.FilePath       (addTrailingPathSeparator, normalise)
 import System.Path.NameManip (guess_dotdot, absolute_path)
 import System.Posix.Files    (readSymbolicLink)
@@ -21,8 +23,7 @@ import Control.Monad.Catch    (MonadCatch, catch, throwM)
 import System.Directory       (removeFile)
 import System.IO.Error        (isDoesNotExistError, catchIOError,
                                isAlreadyExistsError, ioError)
-import System.FileLock            (withFileLock, lockFile, unlockFile, SharedExclusive(..), FileLock)
-import Development.Shake
+import System.FileLock            (lockFile, unlockFile, SharedExclusive(..), FileLock)
 import System.Directory           (createDirectoryIfMissing, doesPathExist, removePathForcibly)
 
 -- locking --
