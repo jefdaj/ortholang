@@ -1,23 +1,23 @@
 .
 |-- cache
-|   |-- list
-|   |   |-- 5ed31d9a6b.txt
+|   |-- lines
+|   |   |-- 4179d85ff6.txt
 |   |   |-- a1512fc008.txt
 |   |   `-- adfdb6bd8c.txt
 |   `-- load
 |       `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
 |-- exprs
 |   |-- any
-|   |   `-- b263221211.faa.list -> ../../cache/list/a1512fc008.txt
+|   |   `-- b263221211.faa.list -> ../../cache/lines/a1512fc008.txt
 |   |-- list
-|   |   |-- 0ec5fc193b.faa.list -> ../../cache/list/a1512fc008.txt
-|   |   |-- 49ae883ffc.faa.list -> ../../cache/list/a1512fc008.txt
-|   |   |-- 9344405238.str.list -> ../../cache/list/adfdb6bd8c.txt
-|   |   `-- 98a7f2843e.faa.list.list -> ../../cache/list/5ed31d9a6b.txt
+|   |   |-- 0ec5fc193b.faa.list -> ../../cache/lines/a1512fc008.txt
+|   |   |-- 49ae883ffc.faa.list -> ../../cache/lines/a1512fc008.txt
+|   |   |-- 9344405238.str.list -> ../../cache/lines/adfdb6bd8c.txt
+|   |   `-- 98a7f2843e.faa.list.list -> ../../cache/lines/4179d85ff6.txt
 |   |-- load_faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   `-- str
-|       `-- ec3b181d8a.str -> ../../cache/list/adfdb6bd8c.txt
+|       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
 `-- vars
     |-- mapped.faa.list -> ../exprs/list/0ec5fc193b.faa.list
     |-- result -> ../exprs/any/b263221211.faa.list

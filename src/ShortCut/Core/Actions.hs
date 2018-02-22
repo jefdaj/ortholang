@@ -435,14 +435,16 @@ symlink cfg src dst = do
  -}
 writeCachedLines :: CutConfig -> FilePath -> [String] -> Action ()
 writeCachedLines cfg outPath content = do
-  let cDir  = fromCutPath cfg $ cacheDir cfg "list" -- TODO make relative to expr
+  let cDir  = fromCutPath cfg $ cacheDir cfg "lines" -- TODO make relative to expr
       cache = cDir </> digest content <.> "txt"
       lock  = cache <.> "lock"
   liftIO $ createDirectoryIfMissing True cDir
-  notFirst <- doesFileExist cache -- another thread was/is here
-  if notFirst
-    then waitAndVerify lock cache -- maybe immediate, or wait for a write to finish
-    else withLock lock
-       $ debug cfg ("writing '" ++ cache ++ "'")
-       $ writeFile' cache (unlines content)
+  -- notFirst <- doesFileExist cache -- another thread was/is here
+  -- if notFirst
+    -- then waitAndVerify lock cache -- maybe immediate, or wait for a write to finish
+    -- else withLock lock
+  withLock lock
+    $ unlessExists cache
+    $ debug cfg ("writing '" ++ cache ++ "'")
+    $ writeFile' cache (unlines content)
   symlink cfg (toCutPath cfg outPath) (toCutPath cfg cache)

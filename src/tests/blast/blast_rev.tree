@@ -1,10 +1,10 @@
 .
 |-- cache
-|   |-- list
-|   |   |-- 34c986b6ac.txt
+|   |-- lines
+|   |   |-- 16c24364ea.txt
 |   |   |-- 38cb049e4b.txt
+|   |   |-- 58e2a5aeeb.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- 8361942acc.txt
 |   |   |-- ba320796bf.txt
 |   |   |-- d751713988.txt
 |   |   |-- f530950d29.txt
@@ -19,29 +19,29 @@
 |           `-- ff08c7f09e.ndb.nsq
 |-- exprs
 |   |-- any
-|   |   `-- d51537bc95.str.list -> ../../cache/list/d751713988.txt
+|   |   `-- d51537bc95.str.list -> ../../cache/lines/d751713988.txt
 |   |-- blastn_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- diff
-|   |   |-- 1678a9e939.str.list -> ../../cache/list/d751713988.txt
-|   |   `-- d27ff2fbe3.str.list -> ../../cache/list/d751713988.txt
+|   |   |-- 1678a9e939.str.list -> ../../cache/lines/d751713988.txt
+|   |   `-- d27ff2fbe3.str.list -> ../../cache/lines/d751713988.txt
 |   |-- extract_queries
-|   |   |-- 9994288dcd.str.list -> ../../cache/list/38cb049e4b.txt
-|   |   `-- d04c524532.str.list -> ../../cache/list/38cb049e4b.txt
+|   |   |-- 9994288dcd.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   `-- d04c524532.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |-- list
-|   |   |-- 3c068ef0f5.str.list.list -> ../../cache/list/34c986b6ac.txt
-|   |   |-- ae41db6b0c.str.list.list -> ../../cache/list/8361942acc.txt
-|   |   `-- b9040a19fe.str.list.list -> ../../cache/list/34c986b6ac.txt
+|   |   |-- 3c068ef0f5.str.list.list -> ../../cache/lines/16c24364ea.txt
+|   |   |-- ae41db6b0c.str.list.list -> ../../cache/lines/58e2a5aeeb.txt
+|   |   `-- b9040a19fe.str.list.list -> ../../cache/lines/16c24364ea.txt
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
 |   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
-|   |   `-- f5e661a4be.ndb -> ../../cache/list/f6b547993f.txt
+|   |   `-- f5e661a4be.ndb -> ../../cache/lines/f6b547993f.txt
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   `-- str
-|       |-- 4cdbcfa070.str -> ../../cache/list/ba320796bf.txt
-|       `-- 8fa8ede325.str -> ../../cache/list/f530950d29.txt
+|       |-- 4cdbcfa070.str -> ../../cache/lines/ba320796bf.txt
+|       `-- 8fa8ede325.str -> ../../cache/lines/f530950d29.txt
 `-- vars
     |-- fwds.str.list -> ../exprs/extract_queries/9994288dcd.str.list
     |-- large.fna -> ../exprs/load_fna/eb12539f1c.fna

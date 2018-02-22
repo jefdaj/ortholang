@@ -1,13 +1,13 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       |-- 8fe17a01cf.txt
 |       `-- d751713988.txt
 |-- exprs
 |   |-- length
-|   |   `-- 761608b24a.num -> ../../cache/list/8fe17a01cf.txt
+|   |   `-- 761608b24a.num -> ../../cache/lines/8fe17a01cf.txt
 |   `-- list
-|       `-- 9d4568c009.empty.list -> ../../cache/list/d751713988.txt
+|       `-- 9d4568c009.empty.list -> ../../cache/lines/d751713988.txt
 `-- vars
     `-- result -> ../exprs/length/761608b24a.num
 

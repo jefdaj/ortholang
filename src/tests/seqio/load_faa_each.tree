@@ -1,26 +1,26 @@
 .
 |-- cache
-|   |-- list
+|   |-- lines
 |   |   |-- 42fb7081a8.txt
-|   |   |-- a440c26889.txt
+|   |   |-- 55ae510bce.txt
 |   |   |-- c8be8722f2.txt
 |   |   `-- e768cae869.txt
 |   `-- load
 |       `-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
 |-- exprs
 |   |-- any
-|   |   `-- 7fcf2bb2a7.faa.list -> ../../cache/list/e768cae869.txt
+|   |   `-- 7fcf2bb2a7.faa.list -> ../../cache/lines/e768cae869.txt
 |   |-- length
-|   |   `-- 10b40f299a.num -> ../../cache/list/42fb7081a8.txt
+|   |   `-- 10b40f299a.num -> ../../cache/lines/42fb7081a8.txt
 |   |-- list
-|   |   |-- 92a442b0d4.faa.list -> ../../cache/list/e768cae869.txt
-|   |   |-- c5991bd883.str.list -> ../../cache/list/c8be8722f2.txt
-|   |   |-- f9b061f43f.faa.list.list -> ../../cache/list/a440c26889.txt
-|   |   `-- fff391d510.faa.list -> ../../cache/list/e768cae869.txt
+|   |   |-- 92a442b0d4.faa.list -> ../../cache/lines/e768cae869.txt
+|   |   |-- c5991bd883.str.list -> ../../cache/lines/c8be8722f2.txt
+|   |   |-- f9b061f43f.faa.list.list -> ../../cache/lines/55ae510bce.txt
+|   |   `-- fff391d510.faa.list -> ../../cache/lines/e768cae869.txt
 |   |-- load_faa
 |   |   `-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
 |   `-- str
-|       `-- 50dbefb6d6.str -> ../../cache/list/c8be8722f2.txt
+|       `-- 50dbefb6d6.str -> ../../cache/lines/c8be8722f2.txt
 `-- vars
     |-- list1.faa.list -> ../exprs/list/fff391d510.faa.list
     |-- list2.faa.list -> ../exprs/list/92a442b0d4.faa.list

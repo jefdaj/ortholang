@@ -1,14 +1,14 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       `-- dd81c4f27d.txt
 |-- exprs
 |   |-- list
-|   |   `-- df2095ac89.str.list -> ../../cache/list/dd81c4f27d.txt
+|   |   `-- df2095ac89.str.list -> ../../cache/lines/dd81c4f27d.txt
 |   |-- parse_searches
 |   |   `-- 42a03b76c5.search
 |   `-- str
-|       `-- 45914ff33c.str -> ../../cache/list/dd81c4f27d.txt
+|       `-- 45914ff33c.str -> ../../cache/lines/dd81c4f27d.txt
 `-- vars
     `-- result -> ../exprs/parse_searches/42a03b76c5.search
 

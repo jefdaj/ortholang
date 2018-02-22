@@ -1,15 +1,15 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       |-- 2a13ac791a.txt
 |       |-- 42fb7081a8.txt
 |       `-- 6cee4bd73e.txt
 |-- exprs
 |   |-- num
-|   |   |-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
-|   |   `-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
+|   |   |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
+|   |   `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
 |   `-- subtract
-|       `-- fba69f6eb2_4578706b58.num -> ../../cache/list/6cee4bd73e.txt
+|       `-- fba69f6eb2_4578706b58.num -> ../../cache/lines/6cee4bd73e.txt
 `-- vars
     `-- result -> ../exprs/subtract/fba69f6eb2_4578706b58.num
 

@@ -2,41 +2,41 @@
 |-- cache
 |   |-- each
 |   |   `-- b5cb0f3e70
-|   |       |-- 9ab758684b.fna -> ../../../exprs/concat_fastas/9ab758684b.fna
-|   |       `-- 9ab758684b.fna.args -> ../../../cache/list/68fbcb4fbe.txt
-|   |-- list
-|   |   |-- 38a9755ea9.txt
+|   |       |-- f61974bf8f.fna -> ../../../exprs/concat_fastas/f61974bf8f.fna
+|   |       `-- f61974bf8f.fna.args -> ../../../cache/lines/6fde87b86e.txt
+|   |-- lines
+|   |   |-- 45b3d7046f.txt
 |   |   |-- 5bb3f27328.txt
-|   |   |-- 68fbcb4fbe.txt
 |   |   |-- 691dd4d722.txt
+|   |   |-- 6fde87b86e.txt
+|   |   |-- 7682e9f0dc.txt
 |   |   |-- 7a51188591.txt
-|   |   |-- 9f23b43f2e.txt
 |   |   `-- cad7634989.txt
 |   `-- load
 |       |-- d8da51f7cd.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
 |       `-- ec9540d17e.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
 |-- exprs
 |   |-- any
-|   |   `-- c227fdb068.fna.list -> ../../cache/list/38a9755ea9.txt
+|   |   `-- c227fdb068.fna.list -> ../../cache/lines/7a51188591.txt
 |   |-- concat_fastas
-|   |   |-- 9ab758684b.fna
-|   |   `-- eb1aea4e88.fna
+|   |   |-- eb1aea4e88.fna
+|   |   `-- f61974bf8f.fna
 |   |-- concat_fastas_each
-|   |   `-- 72514253ee.fna.list -> ../../cache/list/38a9755ea9.txt
+|   |   `-- 72514253ee.fna.list -> ../../cache/lines/45b3d7046f.txt
 |   |-- gbk_to_fna
 |   |   |-- 1a2d376906.fna
 |   |   `-- 455f27117a.fna
 |   |-- list
-|   |   |-- 20812f3e16.fna.list.list -> ../../cache/list/9f23b43f2e.txt
-|   |   |-- 51e8fbf7e2.fna.list.list -> ../../cache/list/68fbcb4fbe.txt
-|   |   |-- 53aa247bf9.fna.list -> ../../cache/list/5bb3f27328.txt
-|   |   `-- de88435002.fna.list -> ../../cache/list/7a51188591.txt
+|   |   |-- 20812f3e16.fna.list.list -> ../../cache/lines/7682e9f0dc.txt
+|   |   |-- 51e8fbf7e2.fna.list.list -> ../../cache/lines/6fde87b86e.txt
+|   |   |-- 53aa247bf9.fna.list -> ../../cache/lines/5bb3f27328.txt
+|   |   `-- de88435002.fna.list -> ../../cache/lines/7a51188591.txt
 |   |-- load_gbk
 |   |   |-- 4f798984f2.gbk -> ../../cache/load/d8da51f7cd.gbk
 |   |   `-- c5cc3f4b63.gbk -> ../../cache/load/ec9540d17e.gbk
 |   `-- str
-|       |-- 7ec89da918.str -> ../../cache/list/cad7634989.txt
-|       `-- a8d18fa355.str -> ../../cache/list/691dd4d722.txt
+|       |-- 7ec89da918.str -> ../../cache/lines/cad7634989.txt
+|       `-- a8d18fa355.str -> ../../cache/lines/691dd4d722.txt
 `-- vars
     |-- mapped.fna.list -> ../exprs/concat_fastas_each/72514253ee.fna.list
     |-- result -> ../exprs/any/c227fdb068.fna.list

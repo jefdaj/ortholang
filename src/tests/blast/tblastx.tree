@@ -1,6 +1,6 @@
 .
 |-- cache
-|   |-- list
+|   |-- lines
 |   |   |-- 0815de9417.txt
 |   |   |-- 171edb7413.txt
 |   |   |-- 3aa7cdbb74.txt
@@ -16,17 +16,17 @@
 |           `-- 597257619d.ndb.nsq
 |-- exprs
 |   |-- extract_queries
-|   |   `-- e35860dc63.str.list -> ../../cache/list/da3ab843af.txt
+|   |   `-- e35860dc63.str.list -> ../../cache/lines/da3ab843af.txt
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   |   `-- dd2257687c.fna -> ../../cache/load/597257619d.fna
 |   |-- makeblastdb_nucl
-|   |   `-- 14a4649153.ndb -> ../../cache/list/3aa7cdbb74.txt
+|   |   `-- 14a4649153.ndb -> ../../cache/lines/3aa7cdbb74.txt
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   |-- str
-|   |   |-- 7a3218e1ab.str -> ../../cache/list/171edb7413.txt
-|   |   `-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
+|   |   |-- 7a3218e1ab.str -> ../../cache/lines/171edb7413.txt
+|   |   `-- 7da80bde02.str -> ../../cache/lines/0815de9417.txt
 |   `-- tblastx_db
 |       `-- 8158675169_8df2fbb1a8_83fd95c847.bht
 `-- vars

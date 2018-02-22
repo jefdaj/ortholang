@@ -1,6 +1,6 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       |-- 2a13ac791a.txt
 |       |-- 42fb7081a8.txt
 |       |-- 480677cd38.txt
@@ -11,16 +11,16 @@
 |       `-- 916460dd58.txt
 |-- exprs
 |   |-- leave_each_out
-|   |   `-- 4c347546d4.num.list.list -> ../../cache/list/480677cd38.txt
+|   |   `-- 4c347546d4.num.list.list -> ../../cache/lines/480677cd38.txt
 |   |-- list
-|   |   |-- a629005e3c.num.list -> ../../cache/list/8983684a67.txt
-|   |   |-- ea11b49459.num.list -> ../../cache/list/916460dd58.txt
-|   |   |-- ee383407c9.num.list -> ../../cache/list/4c70001c7d.txt
-|   |   `-- f11e0b1ea5.num.list -> ../../cache/list/4949eea072.txt
+|   |   |-- a629005e3c.num.list -> ../../cache/lines/8983684a67.txt
+|   |   |-- ea11b49459.num.list -> ../../cache/lines/916460dd58.txt
+|   |   |-- ee383407c9.num.list -> ../../cache/lines/4c70001c7d.txt
+|   |   `-- f11e0b1ea5.num.list -> ../../cache/lines/4949eea072.txt
 |   `-- num
-|       |-- a629005e3c.num -> ../../cache/list/558d528228.txt
-|       |-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
-|       `-- ee383407c9.num -> ../../cache/list/42fb7081a8.txt
+|       |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
+|       |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
+|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
 `-- vars
     `-- result -> ../exprs/leave_each_out/4c347546d4.num.list.list
 

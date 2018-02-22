@@ -1,26 +1,26 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       |-- 2a13ac791a.txt
 |       |-- 54cb8e2e67.txt
 |       |-- 558d528228.txt
 |       `-- cf3d328c91.txt
 |-- exprs
 |   |-- multiply
-|   |   |-- 4578706b58_6d57e8642a.num -> ../../cache/list/54cb8e2e67.txt
-|   |   |-- 839f0ba255_6d57e8642a.num -> ../../cache/list/54cb8e2e67.txt
-|   |   |-- b3385062cc_6d57e8642a.num -> ../../cache/list/54cb8e2e67.txt
-|   |   |-- df9846a7f4_6d57e8642a.num -> ../../cache/list/54cb8e2e67.txt
-|   |   `-- f8d5fefdd1_6d57e8642a.num -> ../../cache/list/54cb8e2e67.txt
+|   |   |-- 4578706b58_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
+|   |   |-- 839f0ba255_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
+|   |   |-- b3385062cc_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
+|   |   |-- df9846a7f4_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
+|   |   `-- f8d5fefdd1_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
 |   |-- num
-|   |   |-- a629005e3c.num -> ../../cache/list/558d528228.txt
-|   |   |-- ea11b49459.num -> ../../cache/list/2a13ac791a.txt
-|   |   |-- ea11b49459_1.num -> ../../cache/list/2a13ac791a.txt
-|   |   |-- ea11b49459_2.num -> ../../cache/list/2a13ac791a.txt
-|   |   |-- ea11b49459_3.num -> ../../cache/list/2a13ac791a.txt
-|   |   `-- ea11b49459_4.num -> ../../cache/list/2a13ac791a.txt
+|   |   |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
+|   |   |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
+|   |   |-- ea11b49459_1.num -> ../../cache/lines/2a13ac791a.txt
+|   |   |-- ea11b49459_2.num -> ../../cache/lines/2a13ac791a.txt
+|   |   |-- ea11b49459_3.num -> ../../cache/lines/2a13ac791a.txt
+|   |   `-- ea11b49459_4.num -> ../../cache/lines/2a13ac791a.txt
 |   `-- repeat
-|       `-- eb9adbc94e_4578706b58_608bde82c3.num.list -> ../../cache/list/cf3d328c91.txt
+|       `-- eb9adbc94e_4578706b58_608bde82c3.num.list -> ../../cache/lines/cf3d328c91.txt
 `-- vars
     |-- result -> ../exprs/repeat/eb9adbc94e_4578706b58_608bde82c3.num.list
     |-- result.2027ab9dca.num -> ../exprs/multiply/f8d5fefdd1_6d57e8642a.num
