@@ -237,7 +237,7 @@ aBioMartR cfg out bmFn bmTmp sTable = do
   need [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
-  quietly $ wrappedCmdWrite cfg out'' [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
+  quietly $ wrappedCmdWrite cfg out'' [] [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
   where
     out'    = fromCutPath cfg out
     bmFn'   = fromCutPath cfg bmFn

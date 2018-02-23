@@ -5,7 +5,7 @@ module ShortCut.Core.Util
   , unlessExists
   , unlessMatch
   , withLock
-  , rmLock
+  , withLocks
   -- , writeAllOnce
   , rmAll
 
@@ -72,13 +72,25 @@ unlessMatch paths act = do
 
 withLock :: SharedExclusive -> FilePath -> Action a -> Action a
 withLock lockType lockPath actFn = do
-  liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
-  lock <- liftIO $ lockFile lockPath lockType
-  actFn `actionFinally` rmLock lockPath lock
+  -- liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
+  -- lock <- liftIO $ lockFile lockPath lockType
+  lock <- liftIO $ mkLock lockType lockPath
+  actFn `actionFinally` rmLock lock lockPath
+
+-- Mostly for locking all inputs and outputs used by a wrappedCmdWrite
+withLocks :: SharedExclusive -> [FilePath] -> Action a -> Action a
+withLocks lockType lockPaths actFn = do
+  locks <- liftIO $ mapM (mkLock lockType) lockPaths
+  actFn `actionFinally` (mapM_ (\(l, p) -> rmLock l p) $ zip locks lockPaths)
+
+mkLock :: SharedExclusive -> FilePath -> IO FileLock
+mkLock lockType lockPath = do
+  createDirectoryIfMissing True $ takeDirectory lockPath
+  lockFile lockPath lockType
 
 -- Keeps lockfiles from laying around cluttering up trees
-rmLock :: FilePath -> FileLock -> IO ()
-rmLock lockPath lockToken = do
+rmLock :: FileLock -> FilePath -> IO ()
+rmLock lockToken lockPath = do
   unlockFile lockToken
   removePathForcibly lockPath
   -- remains <- doesPathExist lockPath

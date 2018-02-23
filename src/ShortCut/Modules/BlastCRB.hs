@@ -108,7 +108,7 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   symlink cfg qSrc' qDst'
   symlink cfg tSrc' tDst'
   -- debugTrackWrite cfg [qSrc, tSrc] -- TODO why doesn't symlnk handle these??
-  wrappedCmdWrite cfg oPath [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
+  wrappedCmdWrite cfg oPath [] [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   -- debugTrackWrite cfg [oPath]
   -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
   -- debugTrackWrite cfg [o'']

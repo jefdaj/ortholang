@@ -70,7 +70,7 @@ extractTargetsEach = CutFunction
 aCutCol :: Int -> CutConfig -> [CutPath] -> Action ()
 aCutCol n cfg [outPath, tsvPath] = do
   -- TODO is the lockfile necessary here? even if not, might be simplest to leave it
-  out <- wrappedCmdOut cfg tsvPath' [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
+  out <- wrappedCmdOut cfg tsvPath' [] [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
   let out' = sort $ nub $ lines out
   writeLits cfg outPath'' out'
   where
@@ -101,7 +101,7 @@ filterEvalueEach = CutFunction
 
 aFilterEvalue :: CutConfig -> [CutPath] -> Action ()
 aFilterEvalue cfg [out, evalue, hits] = do
-  quietly $ wrappedCmdWrite cfg out'' [out''] []
+  quietly $ wrappedCmdWrite cfg out'' [] [out''] []
                      "filter_evalue.R" [out', evalue', hits']
   -- debugTrackWrite cfg [out'']
   where
@@ -136,7 +136,7 @@ bestHitsEach = CutFunction
 
 aBestExtract :: CutConfig -> [CutPath] -> Action ()
 aBestExtract cfg [out, hits] = do
-  quietly $ wrappedCmdWrite cfg out'' [out''] [] "best_hits.R" [out', hits']
+  quietly $ wrappedCmdWrite cfg out'' [] [out''] [] "best_hits.R" [out', hits']
   -- debugTrackWrite cfg [out'']
   where
     out'  = fromCutPath cfg out

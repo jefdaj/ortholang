@@ -228,7 +228,7 @@ aConcat cfg [oPath, fsPath] = do
   let out'    = fromCutPath cfg oPath
       out''   = debugAction cfg "aConcat" out' [out', fs']
       catArgs = faPaths' ++ [">", out']
-  unit $ quietly $ wrappedCmdWrite cfg out'' [out''] [Shell] "cat"
+  unit $ quietly $ wrappedCmdWrite cfg out'' [] [out''] [Shell] "cat"
                      (debug cfg ("catArgs: " ++ show catArgs) catArgs)
   -- debugTrackWrite cfg [out'']
   where

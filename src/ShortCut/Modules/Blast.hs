@@ -96,7 +96,7 @@ aMkBlastFromDb bCmd cfg [o, e, q, p] = do
 
   -- TODO when parallelblast fails, does it properly remove the lockfile?
   -- TODO maybe when this fails, the error isn't re-raised and withLockFile just hangs?
-  quietly $ wrappedCmdWrite cfg o'' [o''] [Cwd cDir] "parallelblast.py" args
+  quietly $ wrappedCmdWrite cfg o'' [] [o''] [Cwd cDir] "parallelblast.py" args
   -- debugTrackWrite cfg [o'']
   where
     o'  = fromCutPath cfg o

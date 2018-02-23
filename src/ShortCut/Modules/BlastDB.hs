@@ -184,7 +184,7 @@ aBlastdblist cfg oPath listTmp fPath = do
     liftIO $ createDirectoryIfMissing True tmpDir
     -- This one is tricky because it exits 1 on success
     -- TODO still use a lockfile and wrack writes!
-    code <- wrappedCmdExit cfg listTmp' [Cwd tmpDir, Shell] -- TODO remove stderr?
+    code <- wrappedCmdExit cfg listTmp' [] [Cwd tmpDir, Shell] -- TODO remove stderr?
       "blastdbget" [tmpDir, ">", listTmp']
     case code of
       0 -> debugTrackWrite cfg [listTmp'] -- never happens :(
@@ -230,7 +230,7 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   -- TODO was taxdb needed for anything else?
   -- TODO does this need to lock on a separate file from dbPrefix''?
   -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
-  _ <- wrappedCmd cfg dbPrefix'' [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
+  _ <- wrappedCmd cfg dbPrefix'' [] [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
   writeLit cfg dbPrefix'' $ tmp' </> dbName
   where
@@ -351,7 +351,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- liftIO $ putStrLn $ "this is ptn: " ++ ptn
   -- liftIO $ putStrLn $ "it matched these files: " ++ show before
   -- liftIO $ putStrLn $ "this will be dbPrefix: " ++ dbPrefix
-  _ <- quietly $ wrappedCmd cfg dbPrefix [Cwd cDir'] "makeblastdb"
+  _ <- quietly $ wrappedCmd cfg dbPrefix [] [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?

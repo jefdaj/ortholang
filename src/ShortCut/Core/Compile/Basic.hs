@@ -128,7 +128,7 @@ rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 aListEmpty :: CutConfig -> CutPath -> Action ()
 aListEmpty cfg link = do
   -- TODO should the wrappedCmd stuff be CutPaths or plain FilePaths?
-  wrappedCmdWrite cfg link'' [link''] [] "touch" [link'] -- TODO quietly?
+  wrappedCmdWrite cfg link'' [] [link''] [] "touch" [link'] -- TODO quietly?
   -- debugTrackWrite cfg [link''] -- TODO this should use CutPaths
   where
     link'  = fromCutPath cfg link
@@ -251,46 +251,47 @@ defaultTypeCheck expected returned actual =
 -- functions to make whole CutFunctions --
 ------------------------------------------
 
-rOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
-rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
-  (ExprPath argPath) <- rExpr s arg
-  -- let tmpDir = cacheDir cfg </> tmpName
-  -- TODO get tmpDir from a Paths funcion
-  let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
-      oPath  = fromCutPath cfg $ exprPath s expr
-  oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
-  return (ExprPath oPath)
-rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
+-- rOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+-- rOneArgScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [arg]) = do
+--   (ExprPath argPath) <- rExpr s arg
+--   -- let tmpDir = cacheDir cfg </> tmpName
+--   -- TODO get tmpDir from a Paths funcion
+--   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
+--       oPath  = fromCutPath cfg $ exprPath s expr
+--   oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
+--   return (ExprPath oPath)
+-- rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
+-- 
+-- -- TODO shit, this needs to distinguish between input and output args?
+-- aOneArgScript :: CutConfig -> String
+--               -> FilePath -> FilePath -> FilePath -> Action ()
+-- aOneArgScript cfg oPath script tmpDir argPath = do
+--   need [argPath]
+--   liftIO $ createDirectoryIfMissing True tmpDir
+--   let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
+--   quietly $ wrappedCmdWrite cfg oPath' [oPath'] [] script [tmpDir, oPath, argPath]
+--   -- trackWrite [oPath']
+-- 
+-- -- for scripts that take one arg and return a list of lits
+-- -- TODO this should put tmpfiles in cache/<script name>!
+-- -- TODO name something more explicitly about fasta files?
+-- rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+-- rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
+--   (ExprPath faPath) <- rExpr s fa
+--   let tmpDir  = fromCutPath cfg $ cacheDir cfg tmpName
+--       outPath = fromCutPath cfg $ exprPath s expr
+--   outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
+--   return (ExprPath outPath)
+-- rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
 
-aOneArgScript :: CutConfig -> String
-              -> FilePath -> FilePath -> FilePath -> Action ()
-aOneArgScript cfg oPath script tmpDir argPath = do
-  need [argPath]
-  liftIO $ createDirectoryIfMissing True tmpDir
-  let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
-  quietly $ wrappedCmdWrite cfg oPath' [oPath'] [] script [tmpDir, oPath, argPath]
-  -- trackWrite [oPath']
-
--- for scripts that take one arg and return a list of lits
--- TODO this should put tmpfiles in cache/<script name>!
--- TODO name something more explicitly about fasta files?
-rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
-rOneArgListScript tmpName script s@(_,cfg) expr@(CutFun _ _ _ _ [fa]) = do
-  (ExprPath faPath) <- rExpr s fa
-  let tmpDir  = fromCutPath cfg $ cacheDir cfg tmpName
-      outPath = fromCutPath cfg $ exprPath s expr
-  outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
-  return (ExprPath outPath)
-rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
-
-aOneArgListScript :: CutConfig -> FilePath
-                  -> String -> FilePath -> FilePath -> Action ()
-aOneArgListScript cfg outPath script tmpDir faPath = do
-  need [faPath]
-  liftIO $ createDirectoryIfMissing True tmpDir
-  let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
-  wrappedCmdWrite cfg out [out] [Cwd tmpDir] script [out, faPath]
-  -- debugTrackWrite cfg [out]
+-- aOneArgListScript :: CutConfig -> FilePath
+--                   -> String -> FilePath -> FilePath -> Action ()
+-- aOneArgListScript cfg outPath script tmpDir faPath = do
+--   need [faPath]
+--   liftIO $ createDirectoryIfMissing True tmpDir
+--   let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
+--   wrappedCmdWrite cfg out [out] [Cwd tmpDir] script [out, faPath]
+--   -- debugTrackWrite cfg [out]
 
 --------------------------
 -- links to input files --
@@ -450,7 +451,7 @@ aSimpleScript :: String -> (CutConfig -> [CutPath] -> Action ())
 aSimpleScript script cfg (out:args) = aSimple' cfg out actFn Nothing args
   where
     actFn c o as = let o' = fromCutPath c o
-                   in wrappedCmdWrite cfg o' [o'] [] script $ map (fromCutPath c) as
+                   in wrappedCmdWrite cfg o' [] [o'] [] script $ map (fromCutPath c) as
 aSimpleScript _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 
 -- TODO rSimpleScriptTmp?
