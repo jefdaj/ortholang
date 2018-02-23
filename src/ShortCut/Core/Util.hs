@@ -1,43 +1,63 @@
-module ShortCut.Core.Util where
+module ShortCut.Core.Util
+
+  -- locking
+  ( ignoreExistsError
+  , unlessExists
+  , unlessMatch
+  , withLock
+  , rmLock
+  -- , writeAllOnce
+  , rmAll
+
+  -- hashing
+  , digestLength
+  , digest
+
+  , stripWhiteSpace
+  , resolveSymlinks
+  , absolutize
+  , expandTildes
+  , mkTestGroup
+  , typeMatches
+  , typesMatch
+  , nonEmptyType
+  , isNonEmpty
+  , removeIfExists
+  )
+  where
 
 import Development.Shake
 
-import Control.Monad         (unless)
-import Crypto.Hash           (hash, Digest, MD5)
-import Data.ByteString.Char8 (pack)
-import Data.Char             (isSpace)
-import Data.List             (dropWhileEnd)
-import Data.List             (isPrefixOf)
-import Data.List.Utils       (replace)
-import Data.Maybe            (fromJust)
-import ShortCut.Core.Types   (CutConfig(..), CutType(..))
-import System.Directory      (getHomeDirectory, makeAbsolute,
-                              pathIsSymbolicLink)
-import System.FilePath       ((</>), takeDirectory)
-import System.FilePath       (addTrailingPathSeparator, normalise)
-import System.Path.NameManip (guess_dotdot, absolute_path)
-import System.Posix.Files    (readSymbolicLink)
-import Test.Tasty            (testGroup, TestTree)
-import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad          (unless)
 import Control.Monad.Catch    (MonadCatch, catch, throwM)
-import System.Directory       (removeFile)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Crypto.Hash            (hash, Digest, MD5)
+import Data.ByteString.Char8  (pack)
+import Data.Char              (isSpace)
+import Data.List              (dropWhileEnd, isPrefixOf)
+import Data.List.Utils        (replace)
+import Data.Maybe             (fromJust)
+import ShortCut.Core.Types    (CutConfig(..), CutType(..))
+import System.Directory       (createDirectoryIfMissing, doesPathExist,
+                               removePathForcibly, getHomeDirectory,
+                               makeAbsolute, removeFile, pathIsSymbolicLink)
+import System.FileLock        (lockFile, unlockFile, SharedExclusive(..),
+                               FileLock)
+import System.FilePath        ((</>), takeDirectory, addTrailingPathSeparator,
+                               normalise)
 import System.IO.Error        (isDoesNotExistError, catchIOError,
                                isAlreadyExistsError, ioError)
-import System.FileLock            (lockFile, unlockFile, SharedExclusive(..), FileLock)
-import System.Directory           (createDirectoryIfMissing, doesPathExist, removePathForcibly)
+import System.Path.NameManip  (guess_dotdot, absolute_path)
+import System.Posix.Files     (readSymbolicLink)
+import Test.Tasty             (testGroup, TestTree)
 
+-------------
 -- locking --
+-------------
 
 ignoreExistsError :: IO () -> IO ()
 ignoreExistsError act = catchIOError act $ \e ->
   if isAlreadyExistsError e then return () else ioError e
-
--- waitAndVerify :: FilePath -> FilePath -> Action ()
--- waitAndVerify lockPath outPath = withLock Exclusive lockPath $ do
---   stillThere <- doesFileExist outPath
---   if not stillThere
---     then error $ "file was deleted: '" ++ outPath ++ "'"
---     else return ()
 
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
@@ -64,21 +84,25 @@ rmLock lockPath lockToken = do
   -- remains <- doesPathExist lockPath
   -- when remains $ removePathForcibly lockPath
 
--- TODO do these actually work infix?
--- TODO what if only some of the files exist? do we want to re-run the action?
--- TODO should this handle debugTrackWrite on all the outPaths?
-writeAllOnce :: FilePath -> [FilePath] -> Action () -> Action ()
-writeAllOnce lockPath outPaths writeFn = do
-  lock <- liftIO $ lockFile lockPath Exclusive
-  unlessMatch outPaths $
-    writeFn `actionOnException` liftIO (rmAll outPaths)
-            `actionFinally` rmLock lockPath lock
-  -- liftIO $ rmLock lockPath lock
+-- -- TODO do these actually work infix?
+-- -- TODO what if only some of the files exist? do we want to re-run the action?
+-- -- TODO should this handle debugTrackWrite on all the outPaths?
+-- writeAllOnce :: FilePath -> [FilePath] -> Action () -> Action ()
+-- writeAllOnce lockPath outPaths writeFn = do
+--   lock <- liftIO $ lockFile lockPath Exclusive
+--   unlessMatch outPaths $
+--     writeFn `actionOnException` liftIO (rmAll outPaths)
+--             `actionFinally` rmLock lockPath lock
+--   -- liftIO $ rmLock lockPath lock
 
 rmAll :: [FilePath] -> IO ()
 rmAll = mapM_ removePathForcibly
 
 -- TODO fn to makeRelative to config dir
+
+-------------
+-- hashing --
+-------------
 
 digestLength :: Int
 digestLength = 10
@@ -138,10 +162,6 @@ mkTestGroup cfg name trees = do
   let trees' = mapM (\t -> t cfg) trees
   trees'' <- trees'
   return $ testGroup name trees''
-
--- TODO bring this back?
--- lookupVar :: CutVar -> CutScript -> CutExpr
--- lookupVar var scr = fromJust $ lookup var scr
 
 -- this mostly checks equality, but also has to deal with how an empty list can
 -- be any kind of list

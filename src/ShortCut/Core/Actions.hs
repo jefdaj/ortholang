@@ -236,6 +236,7 @@ wrappedCmd :: CutConfig -> FilePath -> [CmdOption] -> String -> [String]
 -- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
 -- TODO separate wrappedReadCmd with a shared lock?
 wrappedCmd cfg path opts bin args = withLock Exclusive (path <.> "lock") $ do
+  liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
   (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
     Nothing -> command opts bin args
     Just w  -> command opts w (bin:args)
