@@ -61,6 +61,7 @@ import System.IO                  (IOMode(..), withFile)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
 import System.FileLock            (SharedExclusive(..))
+import Control.Monad              (when)
 -- import System.FileLock            (withFileLock, SharedExclusive(..))
 
 ------------------------
@@ -151,6 +152,8 @@ wrappedCmd cfg path opts bin args = withLock Exclusive (path <.> "lock") $ do
   let code' = case code of
                 ExitSuccess   -> 0
                 ExitFailure n -> n
+  -- TODO does this properly go somewhere else? what handles multiple output files?
+  when (code' == 0) (debugTrackWrite cfg [path])
   return (out, err, code')
 
 {- OK I think this is an issue of immediately returning rather than waiting for
