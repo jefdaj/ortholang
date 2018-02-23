@@ -28,11 +28,11 @@ import Control.Monad              (when)
 import Data.List                  (find, intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Debug        (debugAction, debugRules)
-import ShortCut.Core.Actions      (removeIfExists, wrappedCmdWrite,
+import ShortCut.Core.Actions      (wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, typesMatch)
+                                   digest, typesMatch, removeIfExists)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath            (takeExtension)
 
@@ -342,14 +342,8 @@ aLoadHash cfg src ext = do
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  -- Careful! Removing some of this once caused lockfiles to conflict and some
-  -- tests froze until I figured it out :(
-  -- done <- doesFileExist hashPath'
-  -- when (not done) $ do
   liftIO $ createDirectoryIfMissing True tmpDir'
   symlink cfg hashPath src
-    -- debugTrackWrite cfg [hashPath'] -- TODO WTF? why does this not get called by symlink?
-
   return hashPath
   where
     src' = fromCutPath cfg src
