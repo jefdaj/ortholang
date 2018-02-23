@@ -15,12 +15,9 @@ module ShortCut.Core.Actions
   , wrappedCmdExit
   , wrappedCmdOut
   , wrappedCmdError -- for calling when a cmd is found to have failed
+
   , debugTrackWrite
   , readFileStrict
-  -- , readLinesStrict
-  -- , withErrorHandling
-  -- , unlessExists
-  -- , unlessAnyExist
   , removeIfExists
   , readPath
   , readPaths
