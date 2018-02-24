@@ -44,6 +44,7 @@ module ShortCut.Core.Actions
 import Development.Shake
 import ShortCut.Core.Types
 
+import Data.List                  (sort, nub)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 import ShortCut.Core.Debug        (debug)
@@ -213,11 +214,12 @@ debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
 -- TODO is the a type a good way to do this? it never actually gets evaluated
 wrappedCmdError :: String -> Int -> [String] -> Action a
 wrappedCmdError bin n files = do
-  liftIO $ rmAll files -- TODO should these be patterns to match first?
+  let files' = sort $ nub files
+  liftIO $ rmAll files' -- TODO should these be patterns to match first?
   error $ unlines $
     [ "Oh no! " ++ bin ++ " failed with error code " ++ show n ++ "."
     , "The files it was working on have been deleted:"
-    ] ++ files
+    ] ++ files'
 
 -- TODO call this when exiting nonzero and/or exception thrown
 -- TODO take a list of globs and resolve them to files
@@ -264,8 +266,7 @@ wrappedCmd cfg outPath inPaths opts bin args = do
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
 wrappedCmdExit :: CutConfig -> FilePath -> [FilePath]
-               -> [CmdOption] -> FilePath -> [String]
-               -> Action Int
+               -> [CmdOption] -> FilePath -> [String] -> Action Int
 wrappedCmdExit c p inPaths os b as = do
   (_, _, code) <- wrappedCmd c p inPaths os b as
   return code
@@ -276,13 +277,12 @@ wrappedCmdExit c p inPaths os b as = do
  - TODO skip the command if the files already exist?
  - TODO should outPaths be outPatterns??
  -}
-wrappedCmdWrite :: CutConfig -> FilePath -> [FilePath]
-                -> [String] -> [CmdOption] -> FilePath
-                -> [String] -> Action ()
-wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "failed to build" errors?
-  code <- wrappedCmdExit c lockPath inPaths opts bin args
+wrappedCmdWrite :: CutConfig -> FilePath -> [FilePath] -> [FilePath]
+                -> [CmdOption] -> FilePath -> [String] -> Action ()
+wrappedCmdWrite cfg lockPath inPaths outPaths opts bin args = do
+  code <- wrappedCmdExit cfg lockPath inPaths opts bin args
   case code of
-    0 -> debugTrackWrite c outPaths
+    0 -> debugTrackWrite cfg outPaths
     n -> wrappedCmdError bin n (outPaths ++ [lockPath])
 
 {- wrappedCmd specialized for commands that return their output as a string.
@@ -291,8 +291,8 @@ wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "
 wrappedCmdOut :: CutConfig -> FilePath -> [FilePath]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut c outLock inPaths outPaths os b as = do
-  (out, err, code) <- wrappedCmd c outLock inPaths os b as
+wrappedCmdOut cfg outLock inPaths outPaths os b as = do
+  (out, err, code) <- wrappedCmd cfg outLock inPaths os b as
   case code of
     0 -> return out
     n -> do

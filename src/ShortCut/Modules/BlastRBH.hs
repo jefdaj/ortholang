@@ -109,7 +109,7 @@ reciprocalBest = CutFunction
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 aReciprocalBest :: CutConfig -> [CutPath] -> Action ()
 aReciprocalBest cfg [out, left, right] = do
-  quietly $ wrappedCmdWrite cfg out'' [left', right'] [out''] []
+  quietly $ wrappedCmdWrite cfg out'' [left', right'] [out'] []
     "reciprocal_best.R" [out', left', right']
   -- debugTrackWrite cfg [out'']
   where

@@ -16,4 +16,7 @@ best3rec = repeat bestRec pcc6803 3
 solidFwd = all (extract_queries_each best3fwd)
 solidRec = all (extract_queries_each best3rec)
 
-result = length (solidFwd ~ solidRec)
+# reciprocal_best should produce a subset of the original forward hits and
+# nothing new, giving [some number, 0].
+result = length_each [solidFwd ~ solidRec,
+                      solidRec ~ solidFwd]
