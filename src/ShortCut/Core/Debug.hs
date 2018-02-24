@@ -19,9 +19,6 @@ import Text.PrettyPrint.HughesPJClass
 import Debug.Trace       (trace, traceShow)
 import System.Directory  (removeFile)
 import System.IO         (IOMode(..), withFile)
-import System.IO.Error   (isAlreadyInUseError, isAlreadyExistsError,
-                          isDoesNotExistError, ioError)
-import System.IO.Strict  (hGetContents)
 import Data.Time.LocalTime (getZonedTime)
 import Data.Time.Format    (formatTime, defaultTimeLocale)
 
@@ -91,4 +88,3 @@ debugAction :: Show a => CutConfig -> String -> a -> [String] -> a
 debugAction cfg name outPath args = debug cfg msg outPath
   where
     msg = name ++ " creating " ++ show outPath ++ " from " ++ show args
-

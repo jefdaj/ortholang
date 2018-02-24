@@ -7,7 +7,7 @@ module ShortCut.Test
 
 import Paths_ShortCut        (getDataFileName)
 import ShortCut.Core.Types   (CutConfig(..))
-import ShortCut.Core.Util    (mkTestGroup)
+import ShortCut.Test.Repl    (mkTestGroup)
 import System.Directory      (setCurrentDirectory)
 import System.Environment    (setEnv)
 import System.FilePath.Posix ((</>))

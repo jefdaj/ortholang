@@ -22,7 +22,6 @@ module ShortCut.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
-  -- , nonEmptyType
   , extOf
   , depsOf
   , rDepsOf
@@ -43,6 +42,10 @@ module ShortCut.Core.Types
   , ActionFn
   , RulesFn
   , TypeChecker
+  , typeMatches
+  , typesMatch
+  , nonEmptyType
+  , isNonEmpty
   )
   where
 
@@ -330,3 +333,33 @@ explainFnBug =
   \it can only manipulate lists whose elements are known *before* running the \
   \program. If you want Jeff to consider rewriting some things to fix that, \
   \drop him a line!"
+
+-- this mostly checks equality, but also has to deal with how an empty list can
+-- be any kind of list
+-- TODO is there any more elegant way? this seems error-prone...
+typeMatches :: CutType -> CutType -> Bool
+typeMatches Empty _ = True
+typeMatches _ Empty = True
+typeMatches (ListOf a) (ListOf b) = typeMatches a b
+typeMatches a b = a == b
+
+typesMatch :: [CutType] -> [CutType] -> Bool
+typesMatch as bs = sameLength && allMatch
+  where
+    sameLength = length as == length bs
+    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
+
+nonEmptyType :: [CutType] -> Either String CutType
+nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
+  where
+    nonEmpty = filter isNonEmpty ts
+    elemType = if      null ts       then Empty
+               else if null nonEmpty then head ts -- for example (ListOf Empty)
+               else    head nonEmpty
+    typesOK  = all (typeMatches elemType) ts
+    errorMsg = "all elements of a list must have the same type"
+
+isNonEmpty :: CutType -> Bool
+isNonEmpty Empty      = False
+isNonEmpty (ListOf t) = isNonEmpty t
+isNonEmpty _          = True

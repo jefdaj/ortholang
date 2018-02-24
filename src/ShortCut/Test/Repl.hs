@@ -8,7 +8,6 @@ import Data.List                  (isPrefixOf)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Types        (CutConfig(..), ReplM)
-import ShortCut.Core.Util         (mkTestGroup)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
@@ -16,6 +15,12 @@ import System.IO.Silently         (hCapture_)
 import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
+
+mkTestGroup :: CutConfig -> String -> [CutConfig -> IO TestTree] -> IO TestTree
+mkTestGroup cfg name trees = do
+  let trees' = mapM (\t -> t cfg) trees
+  trees'' <- trees'
+  return $ testGroup name trees''
 
 mkTests :: CutConfig -> IO TestTree
 mkTests cfg = mkTestGroup cfg "mock REPL interaction"

@@ -15,7 +15,7 @@ import ShortCut.Core.Compile.Basic (rExpr, typeError)
 import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, digestFile)
 import ShortCut.Core.Debug         (debugRules, debugAction)
 import ShortCut.Core.Paths         (exprPath, fromCutPath)
-import ShortCut.Core.Util          (resolveSymlinks, typeMatches, nonEmptyType)
+import ShortCut.Core.Util          (resolveSymlinks)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -115,7 +115,7 @@ canonicalLinks :: CutConfig -> CutType -> [FilePath] -> IO [FilePath]
 canonicalLinks cfg rtn =
   if rtn `elem` [str, num]
     then return
-    else \ps -> mapM (resolveSymlinks cfg True) ps
+    else \ps -> mapM (resolveSymlinks (Just $ cfgTmpDir cfg)) ps
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898

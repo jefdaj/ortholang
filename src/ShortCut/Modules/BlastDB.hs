@@ -317,7 +317,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
    -
    - TODO oh no it goes one link too far still
    -}
-  faHash <- fmap takeBaseName $ liftIO $ resolveSymlinks cfg True faPath'
+  faHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) faPath'
   -- liftIO $ putStrLn $ "aMakeblastdb faHash: " ++ faHash
   let dbPrefix  = cDir' </> faHash </> faHash <.> extOf dbType
       dbPrefix' = toCutPath cfg dbPrefix

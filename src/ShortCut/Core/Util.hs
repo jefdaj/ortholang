@@ -21,11 +21,6 @@ module ShortCut.Core.Util
 
   -- misc
   , stripWhiteSpace
-  , mkTestGroup
-  , typeMatches
-  , typesMatch
-  , nonEmptyType
-  , isNonEmpty
   , removeIfExists
   )
   where
@@ -41,7 +36,6 @@ import Data.Char              (isSpace)
 import Data.List              (dropWhileEnd, isPrefixOf, nub)
 import Data.List.Utils        (replace)
 import Data.Maybe             (fromJust)
-import ShortCut.Core.Types    (CutConfig(..), CutType(..))
 import System.Directory       (createDirectoryIfMissing, doesPathExist,
                                removePathForcibly, getHomeDirectory,
                                makeAbsolute, removeFile, pathIsSymbolicLink)
@@ -142,24 +136,27 @@ digest val = take digestLength $ show (hash asBytes :: Digest MD5)
 -- paths --
 -----------
 
--- follows zero or more symlinks until it finds the original file
--- TODO actually just one now... which should always be enough right?
--- TODO why would there ever be a "does not exist" error?
-resolveSymlinks :: CutConfig -> Bool -> FilePath -> IO FilePath
-resolveSymlinks cfg tmpOnly path = do
+{- Follows zero or more symlinks until it finds the original file.
+ - Takes an optional prefix not to follow outside, which will usually be
+ - Nothing or the main tmpdir.
+ -
+ - TODO why would there ever be a "does not exist" error?
+ -}
+resolveSymlinks :: Maybe FilePath -> FilePath -> IO FilePath
+resolveSymlinks mPrefix path = do
   -- liftIO $ putStrLn $ "resolveSymlinks path: '" ++ path ++ "'"
   isLink <- pathIsSymbolicLink path
   if not isLink
     then return path
-    -- TODO is it OK/desirable to follow more than once?
     else do
       relPath <- readSymbolicLink path
       absPath <- absolutize $ takeDirectory path </> relPath
       -- putStrLn $ "resolveSymlinks absPath: " ++ absPath
-      -- don't follow outside TMPDIR
-      if cfgTmpDir cfg `isPrefixOf` absPath || not tmpOnly
-        then resolveSymlinks cfg tmpOnly absPath
-        else return path
+      case mPrefix of
+        Nothing -> resolveSymlinks mPrefix absPath
+        Just p  -> if p `isPrefixOf` absPath
+                     then resolveSymlinks mPrefix absPath
+                     else return path
 
 -- kind of silly that haskell doesn't have this built in, but whatever
 -- TODO also follow symlinks? is there a time that would be bad?
@@ -192,42 +189,6 @@ globFiles ptn = expandTildes ptn >>= glob >>= mapM absolutize
 
 stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
-
-mkTestGroup :: CutConfig -> String -> [CutConfig -> IO TestTree] -> IO TestTree
-mkTestGroup cfg name trees = do
-  let trees' = mapM (\t -> t cfg) trees
-  trees'' <- trees'
-  return $ testGroup name trees''
-
--- this mostly checks equality, but also has to deal with how an empty list can
--- be any kind of list
--- TODO is there any more elegant way? this seems error-prone...
-typeMatches :: CutType -> CutType -> Bool
-typeMatches Empty _ = True
-typeMatches _ Empty = True
-typeMatches (ListOf a) (ListOf b) = typeMatches a b
-typeMatches a b = a == b
-
-typesMatch :: [CutType] -> [CutType] -> Bool
-typesMatch as bs = sameLength && allMatch
-  where
-    sameLength = length as == length bs
-    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
-
-nonEmptyType :: [CutType] -> Either String CutType
-nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
-  where
-    nonEmpty = filter isNonEmpty ts
-    elemType = if      null ts       then Empty
-               else if null nonEmpty then head ts -- for example (ListOf Empty)
-               else    head nonEmpty
-    typesOK  = all (typeMatches elemType) ts
-    errorMsg = "all elements of a list must have the same type"
-
-isNonEmpty :: CutType -> Bool
-isNonEmpty Empty      = False
-isNonEmpty (ListOf t) = isNonEmpty t
-isNonEmpty _          = True
 
 -- TODO call this module something besides Debug now that it also handles errors?
 -- TODO can you remove the liftIO part? does the monadcatch part help vs just io?

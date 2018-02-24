@@ -106,13 +106,14 @@ aEachMain :: CutConfig
          -> Action ()
 aEachMain cfg inits eachTmp eType lastsPath outPath = do
   need inits'
-  inits''    <- liftIO $ mapM (resolveSymlinks cfg True) inits'
+  let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
+  inits''    <- liftIO $ mapM resolve inits'
   lastPaths  <- readPaths cfg lasts' -- TODO this needs a lit variant?
-  lastPaths' <- liftIO $ mapM (resolveSymlinks cfg True) (map (fromCutPath cfg) lastPaths)
+  lastPaths' <- liftIO $ mapM resolve (map (fromCutPath cfg) lastPaths)
   mapM_ (aEachArgs cfg eType inits'' tmp') (map (toCutPath cfg) lastPaths')
   let outPaths = map (eachPath cfg tmp' eType) lastPaths'
   need outPaths
-  outPaths' <- liftIO $ mapM (resolveSymlinks cfg True) outPaths
+  outPaths' <- liftIO $ mapM resolve outPaths
   let out = debugAction cfg "aEachMain" outPath (outPath:inits' ++ [tmp', lasts'])
   if eType `elem` [str, num]
     then mapM (readLit cfg) outPaths' >>= writeLits cfg out
@@ -164,7 +165,7 @@ aEachElem cfg eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
   args <- readPaths cfg argsPath
   let args' = map (fromCutPath cfg) args
-  args'' <- liftIO $ mapM (resolveSymlinks cfg True) args' -- TODO remove?
+  args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
   need args'
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?

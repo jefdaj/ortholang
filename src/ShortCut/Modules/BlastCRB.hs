@@ -83,11 +83,11 @@ aBlastCRB :: CutConfig -> CutPath -> [CutPath] -> Action ()
 aBlastCRB cfg tmpDir [o, q, t] = do
   need [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
-  qName <- fmap takeFileName $ liftIO $ resolveSymlinks cfg True q'
-  tName <- fmap takeFileName $ liftIO $ resolveSymlinks cfg True t'
+  qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
+  tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
   -- instead, need to link to the actual input files
-  qDst <- liftIO $ resolveSymlinks cfg False q' -- link directly to the file
-  tDst <- liftIO $ resolveSymlinks cfg False t' -- link directly to the file
+  qDst <- liftIO $ resolveSymlinks Nothing q' -- link directly to the file
+  tDst <- liftIO $ resolveSymlinks Nothing t' -- link directly to the file
   let qSrc  = tmp' </> qName
       tSrc  = tmp' </> tName
       qSrc' = toCutPath cfg qSrc

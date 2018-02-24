@@ -32,7 +32,7 @@ import ShortCut.Core.Actions      (wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, typesMatch, removeIfExists)
+                                   digest, removeIfExists)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath            (takeExtension)
 
@@ -174,7 +174,7 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 aListPaths :: CutConfig -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg paths outPath = do
   need paths'
-  paths'' <- liftIO $ mapM (resolveSymlinks cfg True) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   need paths''
   let paths''' = map (toCutPath cfg) paths'' -- TODO not working?
   writePaths cfg out'' paths'''
@@ -353,7 +353,7 @@ aLoad :: CutConfig -> CutPath -> CutPath -> Action ()
 aLoad cfg strPath outPath = do
   need [strPath']
   pth <- readLitPaths cfg strPath'
-  src' <- liftIO $ resolveSymlinks cfg True $ fromCutPath cfg $ head pth -- TODO safer!
+  src' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) $ fromCutPath cfg $ head pth -- TODO safer!
   -- liftIO $ putStrLn $ "aLoad src': '" ++ src' ++ "'"
   -- liftIO $ putStrLn $ "aLoad outPath': '" ++ outPath' ++ "'"
   hashPath <- aLoadHash cfg (toCutPath cfg src') (takeExtension outPath')
@@ -414,7 +414,7 @@ aLoadListLinks cfg pathsPath outPath = do
   -- CutPaths
   paths <- readLitPaths cfg pathsPath'
   let paths' = map (fromCutPath cfg) paths
-  paths'' <- liftIO $ mapM (resolveSymlinks cfg True) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   let paths''' = map (toCutPath cfg) paths''
   hashPaths <- mapM (\p -> aLoadHash cfg p
                          $ takeExtension $ fromCutPath cfg p) paths'''
@@ -490,7 +490,7 @@ aSimple' :: CutConfig -> CutPath
          -> Maybe CutPath -> [CutPath] -> Action ()
 aSimple' cfg outPath actFn mTmpDir argPaths = do
   need argPaths'
-  argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks cfg True) argPaths'
+  argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir'
   -- actFn c o as -- TODO hey is tmpDir being used as outPath??
   let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath; as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths'' in actFn cfg tmpDir (o':as)

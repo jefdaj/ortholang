@@ -16,7 +16,7 @@ import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
 import ShortCut.Core.Pretty       (writeScript)
 import ShortCut.Core.Types        (CutConfig(..))
-import ShortCut.Core.Util         (mkTestGroup)
+import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
                                    takeFileName, (</>), (<.>))
