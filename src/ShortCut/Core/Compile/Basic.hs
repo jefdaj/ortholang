@@ -454,9 +454,10 @@ aSimpleScript script cfg (out:ins) = aSimple' cfg out actFn Nothing ins
   where
     -- TODO is tmpDir used here at all? should it be?
     -- TODO match []?
-    actFn c _ (o:is) = let o'  = fromCutPath c o
+    actFn c t (o:is) = let o'  = fromCutPath c o
+                           t'  = fromCutPath c t
                            is' = map (fromCutPath c) is
-                       in wrappedCmdWrite cfg o' is' [o'] [] script (o':is')
+                       in wrappedCmdWrite cfg o' is' [o'] [Cwd t'] script (o':is')
 --     actFn c t (o:as) = let o' = (let r = fromCutPath c o
 --                                  in debug c ("actFn o': '" ++ r ++ "'") r)
 --                            ins' = map (fromCutPath c) as
