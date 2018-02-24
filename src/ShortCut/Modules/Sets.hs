@@ -42,6 +42,7 @@ setOpDescs =
   [ ("any" , '|', union)
   , ("all" , '&', intersection)
   , ("diff", '~', difference)
+  , ("some", '?', \s1 s2 -> difference (union s1 s2) (intersection s1 s2))
   ]
 
 mkSetFunctions :: SetOpDesc -> [CutFunction]
