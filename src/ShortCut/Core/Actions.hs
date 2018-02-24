@@ -235,11 +235,15 @@ wrappedCmd :: CutConfig -> FilePath -> [FilePath]
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
 -- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
 -- TODO separate wrappedReadCmd with a shared lock?
-wrappedCmd cfg outLock inPaths opts bin args =
-  withLock Exclusive (outLock <.> "lock") $ withLocks Shared inPaths $ do
-    -- liftIO $ putStrLn $ "wrappedCmd outLock: " ++ outLock -- TODO remove
-    -- liftIO $ putStrLn $ "wrappedCmd inPaths: " ++ show inPaths -- TODO remove
-    -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
+wrappedCmd cfg outPath inPaths opts bin args = do
+  let outLock = outPath <.> "lock"
+      inLocks = map (<.> "lock") inPaths
+  -- liftIO $ putStrLn $ "wrappedCmd bin: " ++ bin -- TODO remove
+  -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
+  -- liftIO $ putStrLn $ "wrappedCmd outLock: " ++ outLock -- TODO remove
+  -- liftIO $ putStrLn $ "wrappedCmd inPaths: " ++ show inPaths -- TODO remove
+  -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
+  withLock Exclusive outLock $ withLocks Shared inLocks $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command opts w (bin:args)
@@ -270,15 +274,16 @@ wrappedCmdExit c p inPaths os b as = do
  - command succeeds it tells Shake which files were written, and if it fails
  - they get deleted.
  - TODO skip the command if the files already exist?
+ - TODO should outPaths be outPatterns??
  -}
 wrappedCmdWrite :: CutConfig -> FilePath -> [FilePath]
                 -> [String] -> [CmdOption] -> FilePath
                 -> [String] -> Action ()
-wrappedCmdWrite c p inPaths ps os b as = do -- TODO why the "failed to build" errors?
-  code <- wrappedCmdExit c p inPaths os b as
+wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "failed to build" errors?
+  code <- wrappedCmdExit c lockPath inPaths opts bin args
   case code of
-    0 -> debugTrackWrite c ps
-    n -> wrappedCmdError b n (ps ++ [p])
+    0 -> debugTrackWrite c outPaths
+    n -> wrappedCmdError bin n (outPaths ++ [lockPath])
 
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables

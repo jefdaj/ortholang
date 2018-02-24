@@ -83,9 +83,12 @@ withLocks lockType lockPaths actFn = do
   locks <- liftIO $ mapM (mkLock lockType) lockPaths
   actFn `actionFinally` (mapM_ (\(l, p) -> rmLock l p) $ zip locks lockPaths)
 
+-- TODO need to not have the .lock on there until the actual file is found!
+-- TODO rather than custom logic here, make the calls make sense!
 mkLock :: SharedExclusive -> FilePath -> IO FileLock
 mkLock lockType lockPath = do
   createDirectoryIfMissing True $ takeDirectory lockPath
+  -- liftIO $ putStrLn $ "locking: (" ++ show lockType ++ ") "++ lockPath
   lockFile lockPath lockType
 
 -- Keeps lockfiles from laying around cluttering up trees
@@ -132,8 +135,10 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- follows zero or more symlinks until it finds the original file
 -- TODO actually just one now... which should always be enough right?
+-- TODO why would there ever be a "does not exist" error?
 resolveSymlinks :: CutConfig -> Bool -> FilePath -> IO FilePath
 resolveSymlinks cfg tmpOnly path = do
+  -- liftIO $ putStrLn $ "resolveSymlinks path: '" ++ path ++ "'"
   isLink <- pathIsSymbolicLink path
   if not isLink
     then return path

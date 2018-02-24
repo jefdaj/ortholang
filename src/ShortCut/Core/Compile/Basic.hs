@@ -24,10 +24,10 @@ import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
-import Control.Monad              (when)
+-- import Control.Monad              (when)
 import Data.List                  (find, intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Debug        (debugAction, debugRules)
+import ShortCut.Core.Debug        (debugAction, debugRules, debug)
 import ShortCut.Core.Actions      (wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
@@ -354,6 +354,8 @@ aLoad cfg strPath outPath = do
   need [strPath']
   pth <- readLitPaths cfg strPath'
   src' <- liftIO $ resolveSymlinks cfg True $ fromCutPath cfg $ head pth -- TODO safer!
+  -- liftIO $ putStrLn $ "aLoad src': '" ++ src' ++ "'"
+  -- liftIO $ putStrLn $ "aLoad outPath': '" ++ outPath' ++ "'"
   hashPath <- aLoadHash cfg (toCutPath cfg src') (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
@@ -448,10 +450,19 @@ rSimpleScript :: String -> RulesFn
 rSimpleScript = rSimple . aSimpleScript
 
 aSimpleScript :: String -> (CutConfig -> [CutPath] -> Action ())
-aSimpleScript script cfg (out:args) = aSimple' cfg out actFn Nothing args
+aSimpleScript script cfg (out:ins) = aSimple' cfg out actFn Nothing ins
   where
-    actFn c o as = let o' = fromCutPath c o
-                   in wrappedCmdWrite cfg o' [] [o'] [] script $ map (fromCutPath c) as
+    -- TODO is tmpDir used here at all? should it be?
+    -- TODO match []?
+    actFn c _ (o:is) = let o'  = fromCutPath c o
+                           is' = map (fromCutPath c) is
+                       in wrappedCmdWrite cfg o' is' [o'] [] script (o':is')
+--     actFn c t (o:as) = let o' = (let r = fromCutPath c o
+--                                  in debug c ("actFn o': '" ++ r ++ "'") r)
+--                            ins' = map (fromCutPath c) as
+--                        in (let s' = debug c ("actFn script: '" ++ script ++ "'") script
+-- --                            wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "failed to build" errors?
+--                            in wrappedCmdWrite cfg o' ins' [o'] [] s' (o':ins'))
 aSimpleScript _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 
 -- TODO rSimpleScriptTmp?
@@ -480,7 +491,8 @@ aSimple' cfg outPath actFn mTmpDir argPaths = do
   need argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks cfg True) argPaths'
   liftIO $ createDirectoryIfMissing True tmpDir'
-  actFn cfg tmpDir (outPath:argPaths'')
+  -- actFn c o as -- TODO hey is tmpDir being used as outPath??
+  let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath; as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths'' in actFn cfg tmpDir (o':as)
   trackWrite [out]
   where
     -- TODO probably not "simple tmp" anymore... remove? rename?
