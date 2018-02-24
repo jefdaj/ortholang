@@ -136,7 +136,7 @@ bestHitsEach = CutFunction
 
 aBestExtract :: CutConfig -> [CutPath] -> Action ()
 aBestExtract cfg [out, hits] = do
-  quietly $ wrappedCmdWrite cfg out'' [hits'] [] [] "best_hits.R" [out', hits']
+  quietly $ wrappedCmdWrite cfg out'' [hits'] [out''] [] "best_hits.R" [out', hits']
   -- debugTrackWrite cfg [out'']
   where
     out'  = fromCutPath cfg out
