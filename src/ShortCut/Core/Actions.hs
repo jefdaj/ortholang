@@ -51,7 +51,7 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, withLock, withLocks, rmAll,
-                                   unlessExists, ignoreExistsError, digest)
+                                   unlessExists, ignoreExistsError, digest, globFiles)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FileLock            (SharedExclusive(..))
@@ -231,13 +231,14 @@ wrappedCmdError bin n files = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- ptns is a list of patterns for files to delete in case the cmd fails
-wrappedCmd :: CutConfig -> FilePath -> [FilePath]
+wrappedCmd :: CutConfig -> FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
 -- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
 -- TODO separate wrappedReadCmd with a shared lock?
-wrappedCmd cfg outPath inPaths opts bin args = do
+wrappedCmd cfg outPath inPtns opts bin args = do
+  inPaths <- fmap concat $ liftIO $ mapM globFiles inPtns
   let outLock = outPath <.> "lock"
       inLocks = map (<.> "lock") inPaths
   -- liftIO $ putStrLn $ "wrappedCmd bin: " ++ bin -- TODO remove
@@ -265,10 +266,10 @@ wrappedCmd cfg outPath inPaths opts bin args = do
 -- TODO track writes?
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
-wrappedCmdExit :: CutConfig -> FilePath -> [FilePath]
+wrappedCmdExit :: CutConfig -> FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> Action Int
-wrappedCmdExit c p inPaths os b as = do
-  (_, _, code) <- wrappedCmd c p inPaths os b as
+wrappedCmdExit c p inPtns os b as = do
+  (_, _, code) <- wrappedCmd c p inPtns os b as
   return code
 
 {- wrappedCmd specialized for commands that write one or more files. If the
@@ -279,8 +280,8 @@ wrappedCmdExit c p inPaths os b as = do
  -}
 wrappedCmdWrite :: CutConfig -> FilePath -> [FilePath] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
-wrappedCmdWrite cfg lockPath inPaths outPaths opts bin args = do
-  code <- wrappedCmdExit cfg lockPath inPaths opts bin args
+wrappedCmdWrite cfg lockPath inPtns outPaths opts bin args = do
+  code <- wrappedCmdExit cfg lockPath inPtns opts bin args
   case code of
     0 -> debugTrackWrite cfg outPaths
     n -> wrappedCmdError bin n (outPaths ++ [lockPath])
@@ -288,11 +289,11 @@ wrappedCmdWrite cfg lockPath inPaths outPaths opts bin args = do
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables
  -}
-wrappedCmdOut :: CutConfig -> FilePath -> [FilePath]
+wrappedCmdOut :: CutConfig -> FilePath -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut cfg outLock inPaths outPaths os b as = do
-  (out, err, code) <- wrappedCmd cfg outLock inPaths os b as
+wrappedCmdOut cfg outLock inPtns outPaths os b as = do
+  (out, err, code) <- wrappedCmd cfg outLock inPtns os b as
   case code of
     0 -> return out
     n -> do

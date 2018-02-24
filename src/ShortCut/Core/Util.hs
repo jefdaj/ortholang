@@ -13,10 +13,14 @@ module ShortCut.Core.Util
   , digestLength
   , digest
 
-  , stripWhiteSpace
+  -- paths
   , resolveSymlinks
   , absolutize
   , expandTildes
+  , globFiles
+
+  -- misc
+  , stripWhiteSpace
   , mkTestGroup
   , typeMatches
   , typesMatch
@@ -50,6 +54,7 @@ import System.IO.Error        (isDoesNotExistError, catchIOError,
 import System.Path.NameManip  (guess_dotdot, absolute_path)
 import System.Posix.Files     (readSymbolicLink)
 import Test.Tasty             (testGroup, TestTree)
+import System.FilePath.Glob   (glob)
 
 -------------
 -- locking --
@@ -133,8 +138,9 @@ digest val = take digestLength $ show (hash asBytes :: Digest MD5)
   where
     asBytes = (pack . show) val
 
-stripWhiteSpace :: String -> String
-stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
+-----------
+-- paths --
+-----------
 
 -- follows zero or more symlinks until it finds the original file
 -- TODO actually just one now... which should always be enough right?
@@ -176,6 +182,16 @@ expandTildes :: String -> IO String
 expandTildes s = do
   home <- getHomeDirectory
   return $ replace "~" home s
+
+globFiles :: String -> IO [FilePath]
+globFiles ptn = expandTildes ptn >>= glob >>= mapM absolutize
+
+----------
+-- misc --
+----------
+
+stripWhiteSpace :: String -> String
+stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 mkTestGroup :: CutConfig -> String -> [CutConfig -> IO TestTree] -> IO TestTree
 mkTestGroup cfg name trees = do
