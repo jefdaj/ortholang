@@ -34,7 +34,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
-import Data.List              (dropWhileEnd, isPrefixOf)
+import Data.List              (dropWhileEnd, isPrefixOf, nub)
 import Data.List.Utils        (replace)
 import Data.Maybe             (fromJust)
 import ShortCut.Core.Types    (CutConfig(..), CutType(..))
@@ -80,8 +80,11 @@ withLock lockType lockPath actFn = do
 -- Mostly for locking all inputs and outputs used by a wrappedCmdWrite
 withLocks :: SharedExclusive -> [FilePath] -> Action a -> Action a
 withLocks lockType lockPaths actFn = do
-  locks <- liftIO $ mapM (mkLock lockType) lockPaths
-  actFn `actionFinally` (mapM_ (\(l, p) -> rmLock l p) $ zip locks lockPaths)
+  let lockPaths' = nub lockPaths -- TODO dedup these earlier if needed
+  -- liftIO $ putStrLn $ "before nub: " ++ show (length lockPaths)
+  -- liftIO $ putStrLn $ "after  nub: " ++ show (length lockPaths')
+  locks <- liftIO $ mapM (mkLock lockType) lockPaths'
+  actFn `actionFinally` (mapM_ (\(l, p) -> rmLock l p) $ zip locks lockPaths')
 
 -- TODO need to not have the .lock on there until the actual file is found!
 -- TODO rather than custom logic here, make the calls make sense!

@@ -10,7 +10,7 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Debug (debug)
 
 import Control.Monad               (when)
-import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdExit, wrappedCmdError,
+import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdWrite, wrappedCmdExit, wrappedCmdError,
                                     debugTrackWrite, readLit, writeLit, readLits,
                                     writeLits, writePath)
 import ShortCut.Core.Debug         (debugAction, debugRules)
@@ -230,6 +230,7 @@ aBlastdbget cfg dbPrefix tmpDir nPath = do
   -- TODO was taxdb needed for anything else?
   -- TODO does this need to lock on a separate file from dbPrefix''?
   -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
+  -- TODO wrappedCmdWrite and delete the file on errors?
   _ <- wrappedCmd cfg dbPrefix'' [] [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
   writeLit cfg dbPrefix'' $ tmp' </> dbName
@@ -351,7 +352,10 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- liftIO $ putStrLn $ "this is ptn: " ++ ptn
   -- liftIO $ putStrLn $ "it matched these files: " ++ show before
   -- liftIO $ putStrLn $ "this will be dbPrefix: " ++ dbPrefix
-  _ <- quietly $ wrappedCmd cfg dbPrefix [faPath'] [Cwd cDir'] "makeblastdb"
+  --
+  -- TODO make wrappedCmd list files from a pattern and delete them as needed
+  -- liftIO $ putStrLn $ "aMakeblastdb faPath': " ++ faPath'
+  quietly $ wrappedCmdWrite cfg dbPrefix [faPath'] [ptn] [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
