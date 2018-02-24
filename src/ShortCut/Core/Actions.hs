@@ -291,13 +291,13 @@ wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "
 wrappedCmdOut :: CutConfig -> FilePath -> [FilePath]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut c p inPaths ps os b as = do
-  (out, err, code) <- wrappedCmd c p inPaths os b as
+wrappedCmdOut c outLock inPaths outPaths os b as = do
+  (out, err, code) <- wrappedCmd c outLock inPaths os b as
   case code of
     0 -> return out
     n -> do
       liftIO $ putStrLn $ unlines [out, err]
-      wrappedCmdError b n (ps ++ [p])
+      wrappedCmdError b n (outPaths ++ [outLock])
 
 ----------
 -- misc --

@@ -351,7 +351,7 @@ aMakeblastdb dbType cfg cDir [out, faPath] = do
   -- liftIO $ putStrLn $ "this is ptn: " ++ ptn
   -- liftIO $ putStrLn $ "it matched these files: " ++ show before
   -- liftIO $ putStrLn $ "this will be dbPrefix: " ++ dbPrefix
-  _ <- quietly $ wrappedCmd cfg dbPrefix [] [Cwd cDir'] "makeblastdb"
+  _ <- quietly $ wrappedCmd cfg dbPrefix [faPath'] [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
     , "-out"   , dbPrefix
     , "-title" , takeFileName dbPrefix -- TODO does this make sense?
