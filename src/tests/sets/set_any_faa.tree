@@ -1,0 +1,30 @@
+.
+|-- cache
+|   `-- list
+|       |-- 0acbe54d39.txt
+|       |-- 4dc1af43cb.txt
+|       |-- 6785e2593e.txt
+|       |-- 954a24e2cf.txt
+|       |-- bdc783547b.txt
+|       |-- bf977728fe.txt
+|       `-- ef87d3e725.txt
+|-- exprs
+|   |-- any
+|   |   `-- 6f7da1da66.str.list
+|   |-- list
+|   |   |-- 6fbe36f9fa.str.list -> ../../cache/list/4dc1af43cb.txt
+|   |   |-- b883840e2c.str.list -> ../../cache/list/6785e2593e.txt
+|   |   |-- c974d30b2b.str.list.list -> ../../cache/list/0acbe54d39.txt
+|   |   `-- efd1761a9f.str.list.list -> ../../cache/list/bf977728fe.txt
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       |-- cb201cf4f8.str -> ../../cache/list/954a24e2cf.txt
+|       `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
+`-- vars
+    |-- res1.str.list -> ../exprs/any/6f7da1da66.str.list
+    |-- res2.str.list -> ../exprs/any/6f7da1da66.str.list
+    |-- result -> ../exprs/list/c974d30b2b.str.list.list
+    |-- set1.str.list -> ../exprs/list/6fbe36f9fa.str.list
+    `-- set2.str.list -> ../exprs/list/b883840e2c.str.list
+
+7 directories, 20 files
