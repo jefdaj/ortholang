@@ -1,0 +1,11 @@
+# Basic test of the some function and its binary operator equivalent, ?.
+# These need to be tested separately with literals and path-based types
+# because they're implemented separately.
+
+set1 = ["data/7942genes.faa", "data/7942genes10.faa", "data/7942genes50.faa"]
+set2 = ["data/7942genes.faa", "data/7942genes10.faa"]
+
+res1 = some [set1, set2]
+res2 = set1 ? set2
+
+result = [res1, res2]
