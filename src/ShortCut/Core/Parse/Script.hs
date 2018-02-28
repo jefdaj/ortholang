@@ -12,7 +12,7 @@ import Text.Parsec.Char       (spaces, newline)
 import Text.Parsec.Combinator (optional, lookAhead)
 import Text.Parsec            (ParseError)
 import ShortCut.Core.Debug    (debug)
-import Data.IORef             (IORef)
+-- import Data.IORef             (IORef)
 
 {- New overall script parse idea:
  -
@@ -92,21 +92,21 @@ parseStatement = runParseM pStatement
 -- The name doesn't do a good job of explaining this, but it's expected to be
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
-parseString :: CutConfig -> IORef CutLocks -> String
+parseString :: CutConfig -> Locks -> String
             -> Either ParseError CutScript
 parseString c r = runParseM pScript ([], c, r)
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: CutConfig -> IORef CutLocks -> FilePath
+parseFile :: CutConfig -> Locks -> FilePath
           -> IO (Either ParseError CutScript)
 parseFile cfg ref path = readFile path' >>= return . parseString cfg ref . stripComments
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: CutConfig -> IORef CutLocks -> FilePath -> IO CutScript
+parseFileIO :: CutConfig -> Locks -> FilePath -> IO CutScript
 parseFileIO cfg ref scr = do
   mscr1 <- parseFile cfg ref scr
   case mscr1 of

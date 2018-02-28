@@ -100,7 +100,7 @@ import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
-import Data.IORef                 (IORef)
+-- import Data.IORef                 (IORef)
 
 --------------
 -- cutpaths --

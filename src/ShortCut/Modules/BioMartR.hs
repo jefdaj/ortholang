@@ -174,7 +174,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: CutState -> CutExpr -> Rules ExprPath
-rParseSearches s@(_,cfg,_) expr@(CutFun _ _ _ _ [searches]) = do
+rParseSearches s@(_,cfg,ref) expr@(CutFun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   -- TODO should this be a cacheFile instead?
   -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path [show expr, sList]
@@ -182,13 +182,13 @@ rParseSearches s@(_,cfg,_) expr@(CutFun _ _ _ _ [searches]) = do
   let searchTable  = exprPath s expr
       searchTable' = fromCutPath cfg searchTable
       sList' = toCutPath cfg sList
-  searchTable' %> \_ -> aParseSearches cfg sList' searchTable
+  searchTable' %> \_ -> aParseSearches cfg ref sList' searchTable
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
-aParseSearches :: CutConfig -> CutPath -> CutPath -> Action ()
-aParseSearches cfg sList out = do
-  parses <- (fmap . map) readSearch (readLits cfg sList')
+aParseSearches :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
+aParseSearches cfg ref sList out = do
+  parses <- (fmap . map) readSearch (readLits cfg ref sList')
   -- let sLines = map (cfgTmpDir cfg </>) (lines tmp)
   -- need sLines
   -- parses <- liftIO $ mapM readSearch sLines
@@ -196,6 +196,7 @@ aParseSearches cfg sList out = do
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
+    -- TODO use a proper write fn here!
     else liftIO $ do -- TODO rewrite in newer writePaths/Lits?
       createDirectoryIfMissing True $ takeDirectory out''
       writeFile out'' $ toTsv searches'
@@ -217,7 +218,7 @@ aParseSearches cfg sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-rBioMartR fn s@(_,cfg,_) expr@(CutFun rtn salt _ _ [ss]) = do
+rBioMartR fn s@(_,cfg,ref) expr@(CutFun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
   -- (ExprPath sTable) <- rParseSearches s ss
   (ExprPath sTable) <- rExpr s $ CutFun rtn salt (depsOf ss) "parse_searches" [ss]
@@ -228,16 +229,18 @@ rBioMartR fn s@(_,cfg,_) expr@(CutFun rtn salt _ _ [ss]) = do
       out'    = fromCutPath cfg out
       sTable' = toCutPath cfg sTable
       bmFn'   = toCutPath cfg bmFn
-  out' %> \_ -> aBioMartR cfg out bmFn' tmp' sTable'
+  out' %> \_ -> aBioMartR cfg ref out bmFn' tmp' sTable'
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: CutConfig -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
-aBioMartR cfg out bmFn bmTmp sTable = do
+aBioMartR :: CutConfig -> Locks
+          -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
+aBioMartR cfg ref out bmFn bmTmp sTable = do
   need [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
-  quietly $ wrappedCmdWrite cfg out'' [bmFn', sTable'] [out''] [Cwd bmTmp'] "biomartr.R" [out'', bmFn', sTable']
+  wrappedCmdWrite cfg ref out'' [bmFn', sTable'] [out''] [Cwd bmTmp']
+    "biomartr.R" [out'', bmFn', sTable']
   where
     out'    = fromCutPath cfg out
     bmFn'   = fromCutPath cfg bmFn

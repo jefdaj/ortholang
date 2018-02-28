@@ -41,20 +41,20 @@ mkMathFn name fn = CutFunction
 -- TODO can a lot of this be moved back into compile while leaving something?
 rMath :: (Scientific -> Scientific -> Scientific) -- in this module
       -> CutState -> CutExpr -> Rules ExprPath    -- in Compile module
-rMath fn s@(_,cfg,_) e@(CutBop _ _ _ _ n1 n2) = do
+rMath fn s@(_,cfg,ref) e@(CutBop _ _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering rMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (n1, n2)
-  p3 %> aMath cfg fn p1 p2
+  p3 %> aMath cfg ref fn p1 p2
   return (ExprPath p3)
 rMath _ _ _ = error "bad argument to rMath"
 
-aMath :: CutConfig -> (Scientific -> Scientific -> Scientific)
+aMath :: CutConfig -> Locks -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()
-aMath cfg fn p1 p2 out = do
+aMath cfg ref fn p1 p2 out = do
     need [p1, p2]
-    num1 <- fmap strip $ readLit cfg p1
-    num2 <- fmap strip $ readLit cfg p2
+    num1 <- fmap strip $ readLit cfg ref p1
+    num2 <- fmap strip $ readLit cfg ref p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
     let out' = debugAction cfg "aMath" out [p1, p2, out]
-    writeLit cfg out' $ show num3
+    writeLit cfg ref out' $ show num3

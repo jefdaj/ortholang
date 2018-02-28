@@ -31,11 +31,12 @@ import ShortCut.Core.Compile.Basic    (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Locks            (withReadLock)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                      (Handle, hPutStrLn)
 import Text.PrettyPrint.HughesPJClass
-import Data.IORef                     (IORef)
+-- import Data.IORef                     (IORef)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -64,30 +65,31 @@ myShake cfg rules = do
  - TODO idea for sets: if any element contains "\n", just add blank lines between them
  - TODO clean this up!
  -}
-prettyResult :: CutConfig -> CutType -> CutPath -> Action Doc
-prettyResult _ Empty  _ = return $ text "[]"
-prettyResult cfg (ListOf t) f
+prettyResult :: CutConfig -> Locks -> CutType -> CutPath -> Action Doc
+prettyResult _ _ Empty  _ = return $ text "[]"
+prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits cfg $ fromCutPath cfg f
+    lits <- readLits cfg ref $ fromCutPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths cfg $ fromCutPath cfg f
-    pretties <- mapM (prettyResult cfg t) paths
+    paths <- readPaths cfg ref $ fromCutPath cfg f
+    pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg t f = liftIO $ fmap showFn $ (tShow t) (fromCutPath cfg f)
+prettyResult cfg ref t f = withReadLock ref f' $ liftIO $ fmap showFn $ (tShow t) f'
   where
     showFn = if t == num then prettyNum else text
+    f' = fromCutPath cfg f
 
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
 -- TODO rename `runRules` or `runShake`?
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
-eval :: Handle -> CutConfig -> CutType -> Rules ResPath -> IO ()
-eval hdl cfg rtype = ignoreErrors . eval'
+eval :: Handle -> CutConfig -> Locks -> CutType -> Rules ResPath -> IO ()
+eval hdl cfg ref rtype = ignoreErrors . eval'
   where
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
     eval' rpath = myShake cfg $ do
@@ -96,16 +98,16 @@ eval hdl cfg rtype = ignoreErrors . eval'
       "eval" ~> do
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
-        res <- prettyResult cfg rtype $ toCutPath cfg path
+        res <- prettyResult cfg ref rtype $ toCutPath cfg path
         liftIO $ hPutStrLn hdl $ render res
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as,c,_) = case lookup (CutVar "result") as of
+evalScript hdl s@(as,c,ref) = case lookup (CutVar "result") as of
   Nothing  -> putStrLn "no result variable. that's not right!"
-  Just res -> eval hdl c (typeOf res) (compileScript s Nothing)
+  Just res -> eval hdl c ref (typeOf res) (compileScript s Nothing)
 
-evalFile :: Handle -> CutConfig -> IORef CutLocks -> IO ()
+evalFile :: Handle -> CutConfig -> Locks -> IO ()
 evalFile hdl cfg ref = case cfgScript cfg of
   Nothing  -> putStrLn "no script. that's not right!"
   Just scr -> do

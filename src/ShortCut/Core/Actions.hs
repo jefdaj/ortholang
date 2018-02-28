@@ -50,16 +50,18 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
-import ShortCut.Core.Util         (digest, digestLength, withLock, withLocks, rmAll,
+import ShortCut.Core.Util         (digest, digestLength, rmAll,
                                    unlessExists, ignoreExistsError, digest, globFiles)
+import ShortCut.Core.Locks        (withReadLock, withReadLocks,
+                                   withWriteLock, withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
-import System.FileLock            (SharedExclusive(..))
 import System.FilePath            ((<.>))
 import System.IO                  (IOMode(..), withFile)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
 import Control.Concurrent.Thread.Delay (delay)
+import Data.IORef                      (IORef)
 
 ----------------
 -- read files --
@@ -72,33 +74,33 @@ import Control.Concurrent.Thread.Delay (delay)
  - See: https://github.com/ndmitchell/shake/issues/37
  - All reads should eventually go through this function to be safe!
  -}
-readFileStrict :: FilePath -> Action String
-readFileStrict path = do
+readFileStrict :: Locks -> FilePath -> Action String
+readFileStrict ref path = do
   need [path]
-  withLock Shared (path <.> "lock") $
-    liftIO $ withFile path ReadMode hGetContents
+  withReadLock ref path $
+    liftIO $ withFile path ReadMode hGetContents -- TODO is this just readFile?
 {-# INLINE readFileStrict #-}
 
 -- TODO something safer than head!
 -- TODO error if they contain $TMPDIR or $WORKDIR?
-readLit :: CutConfig -> FilePath -> Action String
-readLit cfg path = readLits cfg path >>= return . head
+readLit :: CutConfig -> Locks -> FilePath -> Action String
+readLit cfg ref path = readLits cfg ref path >>= return . head
 
-readLits :: CutConfig -> FilePath -> Action [String]
-readLits cfg path = debugReadLines cfg path >>= return . checkLits
+readLits :: CutConfig -> Locks -> FilePath -> Action [String]
+readLits cfg ref path = debugReadLines cfg ref path >>= return . checkLits
 
 -- TODO something safer than head!
-readPath :: CutConfig -> FilePath -> Action CutPath
-readPath cfg path = readPaths cfg path >>= return . head
+readPath :: CutConfig -> Locks -> FilePath -> Action CutPath
+readPath cfg ref path = readPaths cfg ref path >>= return . head
 
-readPaths :: CutConfig -> FilePath -> Action [CutPath]
-readPaths cfg path = (fmap . map) stringCutPath (debugReadLines cfg path)
+readPaths :: CutConfig -> Locks -> FilePath -> Action [CutPath]
+readPaths cfg ref path = (fmap . map) stringCutPath (debugReadLines cfg ref path)
 
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
-readLitPaths :: CutConfig -> FilePath -> Action [CutPath]
-readLitPaths cfg path = do
-  ls <- debugReadLines cfg path
+readLitPaths :: CutConfig -> Locks -> FilePath -> Action [CutPath]
+readLitPaths cfg ref path = do
+  ls <- debugReadLines cfg ref path
   return $ map (toCutPath cfg . toAbs) ls
   where
     toAbs line = if isAbsolute line
@@ -106,27 +108,27 @@ readLitPaths cfg path = do
                    else cfgWorkDir cfg </> line
 
 -- TODO something safer than head!
-readString :: CutType -> CutConfig -> FilePath -> Action String
-readString etype cfg path = readStrings etype cfg path >>= return . head
+readString :: CutType -> CutConfig -> Locks -> FilePath -> Action String
+readString etype cfg ref path = readStrings etype cfg ref path >>= return . head
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
  - the CutType (of each element, not the list!) so it knows how to convert from
  - String, and then within the function you treat them as Strings.
  -}
-readStrings :: CutType -> CutConfig -> FilePath -> Action [String]
-readStrings etype cfg path = if etype' `elem` [str, num]
-  then readLits cfg path
-  else (fmap . map) (fromCutPath cfg) (readPaths cfg path)
+readStrings :: CutType -> CutConfig -> Locks -> FilePath -> Action [String]
+readStrings etype cfg ref path = if etype' `elem` [str, num]
+  then readLits cfg ref path
+  else (fmap . map) (fromCutPath cfg) (readPaths cfg ref path)
   where
     etype' = debug cfg ("readStrings (each "
           ++ extOf etype ++ ") from " ++ path) etype
 
-debugReadFile :: CutConfig -> FilePath -> Action String
-debugReadFile cfg f = debug cfg ("read '" ++ f ++ "'") (readFileStrict f)
+debugReadFile :: CutConfig -> Locks -> FilePath -> Action String
+debugReadFile cfg ref f = debug cfg ("read '" ++ f ++ "'") (readFileStrict ref f)
 
-debugReadLines :: CutConfig -> FilePath -> Action [String]
-debugReadLines cfg f = debug cfg ("read: " ++ f) 
-                     $ (fmap lines . readFileStrict) f
+debugReadLines :: CutConfig -> Locks -> FilePath -> Action [String]
+debugReadLines cfg ref f = debug cfg ("read: " ++ f) 
+                         $ (fmap lines . readFileStrict ref) f
 
 -----------------
 -- write files --
@@ -142,48 +144,49 @@ debugReadLines cfg f = debug cfg ("read: " ++ f)
  - TODO any reason to keep original extensions instead of all using .txt?
  -      oh, if we're testing extensions anywhere. lets not do that though
  -}
-writeCachedLines :: CutConfig -> FilePath -> [String] -> Action ()
-writeCachedLines cfg outPath content = do
+writeCachedLines :: CutConfig -> Locks -> FilePath -> [String] -> Action ()
+writeCachedLines cfg ref outPath content = do
   let cDir  = fromCutPath cfg $ cacheDir cfg "lines" -- TODO make relative to expr
       cache = cDir </> digest content <.> "txt"
-      lock  = cache <.> "lock"
+      -- lock  = cache <.> "lock"
   liftIO $ createDirectoryIfMissing True cDir
-  withLock Exclusive lock
-    $ unlessExists cache
+  withWriteOnce ref cache
     $ debug cfg ("writing '" ++ cache ++ "'")
     $ writeFile' cache (unlines content)
-  symlink cfg (toCutPath cfg outPath) (toCutPath cfg cache)
+  symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
 
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
-writePaths :: CutConfig -> FilePath -> [CutPath] -> Action ()
-writePaths cfg out cpaths = writeCachedLines cfg out paths >> trackWrite paths
+writePaths :: CutConfig -> Locks -> FilePath -> [CutPath] -> Action ()
+writePaths cfg ref out cpaths = writeCachedLines cfg ref out paths >> trackWrite paths
   where
     paths = map cutPathString cpaths
 
-writePath :: CutConfig -> FilePath -> CutPath -> Action ()
-writePath cfg out path = writePaths cfg out [path]
+writePath :: CutConfig -> Locks -> FilePath -> CutPath -> Action ()
+writePath cfg ref out path = writePaths cfg ref out [path]
 
 -- TODO error if they contain $TMPDIR or $WORKDIR?
-writeLits :: CutConfig -> FilePath -> [String] -> Action ()
-writeLits cfg path lits = writeCachedLines cfg path $ checkLits lits
+writeLits :: CutConfig -> Locks -> FilePath -> [String] -> Action ()
+writeLits cfg ref path lits = writeCachedLines cfg ref path $ checkLits lits
 
-writeLit :: CutConfig -> FilePath -> String -> Action ()
-writeLit cfg path lit = writeLits cfg path [lit]
+writeLit :: CutConfig -> Locks -> FilePath -> String -> Action ()
+writeLit cfg ref path lit = writeLits cfg ref path [lit]
 
 {- Write a "list of whatever". Mostly for generic set operations. You include
  - the CutType (of each element, not the list!) so it knows how to convert
  - to/from String, and then within the function you treat them as Strings.
  -}
-writeStrings :: CutType -> CutConfig -> FilePath -> [String] -> Action ()
-writeStrings etype cfg out whatevers = if etype' `elem` [str, num]
-  then writeLits cfg out whatevers
-  else writePaths cfg out $ map (toCutPath cfg) whatevers
+writeStrings :: CutType -> CutConfig -> Locks
+             -> FilePath -> [String] -> Action ()
+writeStrings etype cfg ref out whatevers = if etype' `elem` [str, num]
+  then writeLits cfg ref out whatevers
+  else writePaths cfg ref out $ map (toCutPath cfg) whatevers
   where
     etype' = debug cfg ("writeStrings (each " ++ extOf etype ++ "): " ++ show (take 3 whatevers)) etype
 
-writeString :: CutType -> CutConfig -> FilePath -> String -> Action ()
-writeString etype cfg out whatever = writeStrings etype cfg out [whatever]
+writeString :: CutType -> CutConfig -> Locks
+            -> FilePath -> String -> Action ()
+writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whatever]
 
 {- Turns out there's a race condition during `repeat` calls, because the same
  - literals are being compiled in each thread at roughly the same time. The way
@@ -232,22 +235,22 @@ wrappedCmdError bin n files = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- ptns is a list of patterns for files to delete in case the cmd fails
-wrappedCmd :: CutConfig -> FilePath -> [String]
+wrappedCmd :: CutConfig -> Locks -> FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 -- TODO withErrorHandling2 is blocking on some MVar related thing :(
--- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withLockFile path $
+-- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withWriteOnceFile path $
 -- TODO separate wrappedReadCmd with a shared lock?
-wrappedCmd cfg outPath inPtns opts bin args = do
+wrappedCmd cfg ref outPath inPtns opts bin args = do
   inPaths <- fmap concat $ liftIO $ mapM globFiles inPtns
-  let outLock = outPath <.> "lock"
-      inLocks = map (<.> "lock") inPaths
+  -- let outLock = outPath <.> "lock"
+      -- inLocks = map (<.> "lock") inPaths
   -- liftIO $ putStrLn $ "wrappedCmd bin: " ++ bin -- TODO remove
   -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
   -- liftIO $ putStrLn $ "wrappedCmd outLock: " ++ outLock -- TODO remove
   -- liftIO $ putStrLn $ "wrappedCmd inPaths: " ++ show inPaths -- TODO remove
   -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
-  withLock Exclusive outLock $ withLocks Shared inLocks $ do
+  withWriteLock ref outPath $ withReadLocks ref inPaths $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command opts w (bin:args)
@@ -267,10 +270,10 @@ wrappedCmd cfg outPath inPtns opts bin args = do
 -- TODO track writes?
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
-wrappedCmdExit :: CutConfig -> FilePath -> [String]
+wrappedCmdExit :: CutConfig -> Locks -> FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> Action Int
-wrappedCmdExit c p inPtns os b as = do
-  (_, _, code) <- wrappedCmd c p inPtns os b as
+wrappedCmdExit c r p inPtns os b as = do
+  (_, _, code) <- wrappedCmd c r p inPtns os b as
   return code
 
 {- wrappedCmd specialized for commands that write one or more files. If the
@@ -279,10 +282,10 @@ wrappedCmdExit c p inPtns os b as = do
  - TODO skip the command if the files already exist?
  - TODO should outPaths be outPatterns??
  -}
-wrappedCmdWrite :: CutConfig -> FilePath -> [String] -> [FilePath]
+wrappedCmdWrite :: CutConfig -> Locks -> FilePath -> [String] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
-wrappedCmdWrite cfg lockPath inPtns outPaths opts bin args = do
-  code <- wrappedCmdExit cfg lockPath inPtns opts bin args
+wrappedCmdWrite cfg ref lockPath inPtns outPaths opts bin args = do
+  code <- wrappedCmdExit cfg ref lockPath inPtns opts bin args
   case code of
     0 -> debugTrackWrite cfg outPaths
     n -> wrappedCmdError bin n (outPaths ++ [lockPath])
@@ -290,11 +293,11 @@ wrappedCmdWrite cfg lockPath inPtns outPaths opts bin args = do
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables
  -}
-wrappedCmdOut :: CutConfig -> FilePath -> [String]
+wrappedCmdOut :: CutConfig -> Locks -> FilePath -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut cfg outLock inPtns outPaths os b as = do
-  (out, err, code) <- wrappedCmd cfg outLock inPtns os b as
+wrappedCmdOut cfg ref outLock inPtns outPaths os b as = do
+  (out, err, code) <- wrappedCmd cfg ref outLock inPtns os b as
   case code of
     0 -> return out
     n -> do
@@ -305,13 +308,13 @@ wrappedCmdOut cfg outLock inPtns outPaths os b as = do
 -- misc --
 ----------
 
-digestFile :: CutConfig -> FilePath -> Action String
-digestFile cfg path = debugReadFile cfg path >>= return . digest
+digestFile :: CutConfig -> Locks -> FilePath -> Action String
+digestFile cfg ref path = debugReadFile cfg ref path >>= return . digest
 
-hashContent :: CutConfig -> CutPath -> Action String
-hashContent cfg path = do
+hashContent :: CutConfig -> Locks -> CutPath -> Action String
+hashContent cfg ref path = do
   need [path']
-  Stdout out <- command [] "md5sum" [path']
+  Stdout out <- withReadLock ref path' $ command [] "md5sum" [path']
   let md5 = take digestLength $ head $ words out
   return md5
   where
@@ -332,8 +335,8 @@ tmpLink cfg src dst = dots </> tmpRel dst
  - arg should be the symlink path and the second the file it points to. (it
  - was going to be kind of confusing either way)
  -}
-symlink :: CutConfig -> CutPath -> CutPath -> Action ()
-symlink cfg src dst = do
+symlink :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
+symlink cfg ref src dst = withWriteOnce ref src' $ do
   liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
   debugTrackWrite cfg [src'] -- TODO anything wrong with duplicate calls?
   where

@@ -40,19 +40,19 @@ import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
 import Control.Exception.Safe   -- (throwM)
-import Data.IORef                     (IORef)
+-- import Data.IORef                     (IORef)
 
 --------------------
 -- main interface --
 --------------------
 
-runRepl :: CutConfig -> IORef CutLocks -> IO ()
+runRepl :: CutConfig -> Locks -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> CutConfig -> IORef CutLocks -> IO ()
+       -> CutConfig -> Locks -> IO ()
 mkRepl promptFns hdl cfg ref = do
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\

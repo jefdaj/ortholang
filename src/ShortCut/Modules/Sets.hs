@@ -84,30 +84,30 @@ rSetBop name fn s (CutBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
 rSetBop _ _ _ _ = error "bad argument to rSetBop"
 
 rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
-rSetFold fn s@(_,cfg,_) e@(CutFun _ _ _ _ [lol]) = do
+rSetFold fn s@(_,cfg,ref) e@(CutFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
   let oPath      = fromCutPath cfg $ exprPath s e
       oPath'     = cfgTmpDir cfg </> oPath
       oPath''    = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
-  oPath %> \_ -> aSetFold cfg fn t oPath' setsPath
+  oPath %> \_ -> aSetFold cfg ref fn t oPath' setsPath
   return (ExprPath oPath'')
 rSetFold _ _ _ = error "bad argument to rSetFold"
 
-aSetFold :: CutConfig -> ([Set String] -> Set String)
+aSetFold :: CutConfig -> Locks -> ([Set String] -> Set String)
          -> CutType -> FilePath -> FilePath -> Action ()
-aSetFold cfg fn (ListOf etype) oPath setsPath = do
-  setPaths  <- readPaths cfg setsPath
-  setElems  <- mapM (readStrings etype cfg) (map (fromCutPath cfg) setPaths)
+aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
+  setPaths  <- readPaths cfg ref setsPath
+  setElems  <- mapM (readStrings etype cfg ref) (map (fromCutPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   let sets = map fromList setElems'
       oLst = toList $ fn sets
       oPath' = debugAction cfg "aSetFold" oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
-              else dedupByContent cfg oLst
-  writeStrings etype cfg oPath' oLst''
-aSetFold _ _ _ _ _ = error "bad argument to aSetFold"
+              else dedupByContent cfg ref oLst
+  writeStrings etype cfg ref oPath' oLst''
+aSetFold _ _ _ _ _ _ = error "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
@@ -119,8 +119,8 @@ canonicalLinks cfg rtn =
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898
-dedupByContent :: CutConfig -> [FilePath] -> Action [FilePath]
-dedupByContent cfg paths = do
-  hashes <- mapM (digestFile cfg) paths
+dedupByContent :: CutConfig -> Locks -> [FilePath] -> Action [FilePath]
+dedupByContent cfg ref paths = do
+  hashes <- mapM (digestFile cfg ref) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'

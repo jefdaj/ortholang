@@ -15,7 +15,7 @@ import Test.Tasty.HUnit      ((@=?), testCase)
 import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
-import Data.IORef            (IORef)
+-- import Data.IORef            (IORef)
 
 -- import Test.Tasty            (TestTree, testGroup)
 -- import Test.Tasty.QuickCheck (testProperty)
@@ -39,21 +39,21 @@ import Data.IORef            (IORef)
 
 -- TODO round-trip function!
 
-regularParse :: ParseM a -> CutConfig -> IORef CutLocks -> String
+regularParse :: ParseM a -> CutConfig -> Locks -> String
              -> Either ParseError a
 regularParse p cfg ref = parseWithEof p ([], cfg, ref)
 
 takeVar :: String -> CutVar
 takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> CutConfig -> IORef CutLocks -> String -> Bool
+parsedItAll :: ParseM a -> CutConfig -> Locks -> String -> Bool
 parsedItAll p cfg ref str' = case parseWithLeftOver p ([], cfg, ref) str' of
   Right (_, "") -> True
   _ -> False
 
 -- parse some cut code, pretty-print it, parse again,
 -- and check that the two parsed ASTs are equal
-roundTrip :: (Eq a, Show a, Pretty a) => CutConfig -> IORef CutLocks
+roundTrip :: (Eq a, Show a, Pretty a) => CutConfig -> Locks
           -> ParseM a -> String -> Either (String, String) a
 roundTrip cfg ref psr code = case regularParse psr cfg ref code of
   Left  l1 -> Left (code, show l1)
@@ -65,7 +65,7 @@ roundTrip cfg ref psr code = case regularParse psr cfg ref code of
 
 -- Test that a list of example strings can be parsed + printed + parsed,
 -- and both parses come out correctly, or return the first error.
-tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> IORef CutLocks -> ParseM a
+tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> ParseM a
              -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ _ [] = Right ()
 tripExamples cfg ref p ((a,b):xs) = case roundTrip cfg ref p a of
@@ -78,16 +78,16 @@ tripExamples cfg ref p ((a,b):xs) = case roundTrip cfg ref p a of
 -- tests --
 -----------
 
-mkTests :: CutConfig -> IORef CutLocks -> IO TestTree
+mkTests :: CutConfig -> Locks -> IO TestTree
 mkTests cfg ref = return $ testGroup "test parser"
                              [exTests cfg ref, wsProps cfg ref, acProps cfg ref]
 
-mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> IORef CutLocks
+mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> Locks
        -> String -> ParseM a -> [(String, a)] -> TestTree
 mkCase cfg ref name parser examples = 
   testCase name $ Right () @=? tripExamples cfg ref parser examples
 
-exTests :: CutConfig -> IORef CutLocks -> TestTree
+exTests :: CutConfig -> Locks -> TestTree
 exTests cfg ref = testGroup "round-trip handwritten cut code"
   [ mkCase cfg ref "function calls"   pFun       exFuns
   , mkCase cfg ref "terms"            pTerm      exTerms
@@ -96,7 +96,7 @@ exTests cfg ref = testGroup "round-trip handwritten cut code"
   -- , mkCase cfg "binary operators" pBop       exBops
   ]
 
-wsProps :: CutConfig -> IORef CutLocks -> TestTree
+wsProps :: CutConfig -> Locks -> TestTree
 wsProps cfg ref = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar s)) (ExSpace w) ->
@@ -115,7 +115,7 @@ wsProps cfg ref = testGroup "consume randomly generated whitespace"
   ]
 
 -- TODO use round-trip here too
-acProps :: CutConfig -> IORef CutLocks -> TestTree
+acProps :: CutConfig -> Locks -> TestTree
 acProps cfg ref = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
       \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg, ref) s == Right (v, "")

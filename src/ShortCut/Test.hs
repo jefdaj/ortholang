@@ -6,7 +6,7 @@ module ShortCut.Test
   where
 
 import Paths_ShortCut        (getDataFileName)
-import ShortCut.Core.Types   (CutConfig(..), CutLocks)
+import ShortCut.Core.Types   (CutConfig(..), Locks)
 import ShortCut.Test.Repl    (mkTestGroup)
 import System.Directory      (setCurrentDirectory)
 import System.Environment    (setEnv)
@@ -14,7 +14,7 @@ import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withSystemTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
-import Data.IORef            (IORef)
+-- import Data.IORef            (IORef)
 
 import qualified ShortCut.Test.Deps    as D
 import qualified ShortCut.Test.Parse   as P
@@ -25,7 +25,7 @@ import qualified ShortCut.Test.Scripts as S
 -- filtering is done according to the TASTY_PATTERN environment var.
 -- Gotcha: can't print the test pattern in place of "all tests"
 -- because then they all match, ruining the filter.
-mkTests :: CutConfig -> IORef CutLocks -> IO TestTree
+mkTests :: CutConfig -> Locks -> IO TestTree
 mkTests cfg ref = setPtn >> mkTestGroup cfg ref "all tests" tests
   where
     tests  = [D.mkTests, P.mkTests, R.mkTests, S.mkTests]
@@ -44,7 +44,7 @@ mkTestConfig cfg dir = cfg
   -- , cfgReport  = Nothing
   }
 
-runTests :: CutConfig -> IORef CutLocks -> IO ()
+runTests :: CutConfig -> Locks -> IO ()
 runTests cfg ref = withSystemTempDirectory "shortcut" $ \td -> do
   wd <- getDataFileName ""
   setCurrentDirectory wd -- TODO issue with this in the stack tests?

@@ -87,10 +87,10 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
 rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
-aMkBlastFromDbRev :: String -> (CutConfig -> [CutPath] -> Action ())
-aMkBlastFromDbRev bCmd cfg [oPath, eValue, dbPrefix, queryFa] =
-  aMkBlastFromDb  bCmd cfg [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ _ = error "bad argument to aMkBlastFromDbRev"
+aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aMkBlastFromDbRev bCmd cfg ref [oPath, eValue, dbPrefix, queryFa] =
+  aMkBlastFromDb  bCmd cfg ref [oPath, eValue, queryFa, dbPrefix]
+aMkBlastFromDbRev _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
 
 ---------------------
 -- reciprocal_best --
@@ -107,9 +107,9 @@ reciprocalBest = CutFunction
   }
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
-aReciprocalBest :: CutConfig -> [CutPath] -> Action ()
-aReciprocalBest cfg [out, left, right] = do
-  wrappedCmdWrite cfg out'' [left', right'] [out'] []
+aReciprocalBest :: CutConfig -> Locks -> [CutPath] -> Action ()
+aReciprocalBest cfg ref [out, left, right] = do
+  wrappedCmdWrite cfg ref out'' [left', right'] [out'] []
     "reciprocal_best.R" [out', left', right']
   -- debugTrackWrite cfg [out'']
   where
@@ -117,7 +117,7 @@ aReciprocalBest cfg [out, left, right] = do
     left'  = fromCutPath cfg left
     right' = fromCutPath cfg right
     out''  = debugAction cfg "aReciprocalBest" out' [out', left', right']
-aReciprocalBest _ args = error $ "bad argument to aReciprocalBest: " ++ show args
+aReciprocalBest _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
 
 --------------------------
 -- reciprocal_best_each --

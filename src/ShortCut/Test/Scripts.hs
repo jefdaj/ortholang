@@ -15,7 +15,7 @@ import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
 import ShortCut.Core.Pretty       (writeScript)
-import ShortCut.Core.Types        (CutConfig(..), CutLocks)
+import ShortCut.Core.Types        (CutConfig(..), Locks)
 import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
@@ -31,7 +31,7 @@ import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 -- import System.FileLock            (withFileLock, SharedExclusive(..))
-import Data.IORef                     (IORef)
+-- import Data.IORef                     (IORef)
 
 nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
@@ -47,8 +47,8 @@ getTestCuts = do
   return testCuts
 
 -- TODO any particular corner cases to be aware of? (what if inturrupted?)
--- withLock :: CutConfig -> IO a -> IO a
--- withLock cfg act = handler $ withFileLock params path act
+-- withWriteLock :: CutConfig -> IO a -> IO a
+-- withWriteLock cfg act = handler $ withFileLock params path act
 --   where
 --     path    = cfgTmpDir cfg <.> "lock"
 --     handler = TE.handle $ fail . ("Locking failed with: " ++) . show
@@ -63,13 +63,13 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     -- this is taken from the Tasty docs
     fn ref new = ["diff", "-u", ref, new]
 
-mkOutTest :: CutConfig -> IORef CutLocks -> FilePath -> TestTree
+mkOutTest :: CutConfig -> Locks -> FilePath -> TestTree
 mkOutTest cfg ref gld = goldenDiff "prints expected output" gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = runCut cfg ref >>= return . pack
 
-mkTreeTest :: CutConfig -> IORef CutLocks -> FilePath -> TestTree
+mkTreeTest :: CutConfig -> Locks -> FilePath -> TestTree
 mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
@@ -80,7 +80,7 @@ mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
       out <- readCreateProcess treeCmd ""
       return $ pack $ toGeneric cfg out
 
-mkTripTest :: CutConfig -> IORef CutLocks -> TestTree
+mkTripTest :: CutConfig -> Locks -> TestTree
 mkTripTest cfg ref = goldenDiff "unchanged by round-trip to file" tripShow tripAct
   where
     tripCut   = cfgTmpDir cfg <.> "cut"
@@ -89,7 +89,7 @@ mkTripTest cfg ref = goldenDiff "unchanged by round-trip to file" tripShow tripA
       scr1 <- parseFileIO cfg ref $ fromJust $ cfgScript cfg
       writeScript tripCut scr1
       writeFile tripShow $ show scr1
-    -- tripAct = withLockIO (cfgTmpDir cfg <.> "lock") $ do
+    -- tripAct = withWriteLockIO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
@@ -97,7 +97,7 @@ mkTripTest cfg ref = goldenDiff "unchanged by round-trip to file" tripShow tripA
       return $ pack $ show scr2
 
 -- test that no absolute paths snuck into the tmpfiles
-mkAbsTest :: CutConfig -> IORef CutLocks -> IO [TestTree]
+mkAbsTest :: CutConfig -> Locks -> IO [TestTree]
 mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
   absGrep `shouldReturn` ""
   where
@@ -110,10 +110,10 @@ mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
 -- Without the delays, Tasty messages sometimes get captured in the output. If
 -- it still happens try TASTY_HIDE_SUCCESSES=True, not hFlush (doesn't help) or
 -- TASTY_NUM_THREADS=1 (actually seems to make it worse).
-runCut :: CutConfig -> IORef CutLocks -> IO String
+runCut :: CutConfig -> Locks -> IO String
 -- runCut cfg = withFileLock (cfgTmpDir cfg) $ do
 -- runCut cfg = do
--- runCut cfg = withLockIO (cfgTmpDir cfg <.> "lock") $ do
+-- runCut cfg = withWriteLockIO (cfgTmpDir cfg <.> "lock") $ do
 runCut cfg ref =  do
   -- delay 50000; hFlush stdout; hFlush stderr; delay 50000 -- 1 second total
   delay 100000 -- 1 second
@@ -128,7 +128,7 @@ runCut cfg ref =  do
 -- TODO OH, EXCEPT WHAT IF THAT'S WHAT'S MAKING THEM FREEZE? CHECK BOTH IDEAS
 --      (LOOKS LIKE THEY NEVER REMOVE THE LOCKFILES? HAHA EXPLAINS OTHER ERRORS? FIX IT)
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath))
-              -> CutConfig -> IORef CutLocks -> IO TestTree
+              -> CutConfig -> Locks -> IO TestTree
 mkScriptTests (cut, gld, mtre) cfg ref = do
   absTests <- mkAbsTest cfg' ref -- just one, but comes as a list
   return $ testGroup name $ otherTests ++ absTests
@@ -140,7 +140,7 @@ mkScriptTests (cut, gld, mtre) cfg ref = do
                    Just t  -> [mkTreeTest cfg' ref t]
                    Nothing -> []
 
-mkTests :: CutConfig -> IORef CutLocks -> IO TestTree
+mkTests :: CutConfig -> Locks -> IO TestTree
 mkTests cfg ref = do
   cuts <- getTestCuts
   let outs     = map findOutFile  cuts

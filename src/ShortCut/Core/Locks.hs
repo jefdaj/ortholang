@@ -1,7 +1,8 @@
 module ShortCut.Core.Locks
-  ( CutLocks
+  ( Locks
   , initLocks
   , withReadLock
+  , withReadLocks
   , withWriteLock
   , withWriteOnce
   )
@@ -12,7 +13,7 @@ module ShortCut.Core.Locks
  - started "cheating" by keeping my own cache that Shake doesn't know about.
  - Which means I also need my own supplemental read/write locks to prevent
  - conflicts in those files. Use initLocks to create it at the top level of the
- - program and withReadLock or withWriteOnce when reading and writing files
+ - program and withWriteLockor withWriteOnce when reading and writing files
  - respectively. It should handle the rest.
  -}
 
@@ -21,36 +22,47 @@ module ShortCut.Core.Locks
 import qualified Data.Map.Strict                  as Map
 import qualified Control.Concurrent.ReadWriteLock as RWLock
 
+-- import Control.Applicative     (liftA2)
+import Development.Shake -- (Action, liftIO)
 import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
+import Data.List                        (nub)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef)
 import Data.Map.Strict                  (Map)
 -- import ShortCut.Core.Paths              (CutPath, fromCutPath)
-import System.Directory                 (doesFileExist)
+-- import System.Directory                 (doesFileExist)
+-- import Control.Exception                (bracket_)
 
-type CutLocks = Map FilePath RWLock
+type Locks = IORef (Map FilePath RWLock)
 
-initLocks :: IO (IORef CutLocks)
+initLocks :: IO Locks
 initLocks = newIORef Map.empty
 
-getLock :: FilePath -> IORef CutLocks -> IO RWLock
-getLock path ref = do
+getLock :: Locks -> FilePath -> IO RWLock
+getLock ref path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   atomicModifyIORef ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path l c, l)
     Just l' -> (c, l')
 
-withReadLock :: IORef CutLocks -> FilePath -> IO a -> IO a
-withReadLock ref path action = do
-  l <- getLock path ref
-  RWLock.withRead l action
+withReadLock :: Locks -> FilePath -> Action a -> Action a
+withReadLock ref path actFn = do
+  l <- liftIO $ getLock ref path
+  liftIO $ RWLock.acquireRead l
+  actFn `actionFinally` RWLock.releaseRead l
 
-withWriteLock :: IORef CutLocks -> FilePath -> IO a -> IO a
-withWriteLock ref path action = do
-  l <- getLock path ref
-  RWLock.withRead l action
+withReadLocks :: Locks -> [FilePath] -> Action a -> Action a
+withReadLocks ref paths actFn = do
+  locks <- liftIO $ mapM (getLock ref) (nub paths)
+  actFn `actionFinally` (mapM_ RWLock.releaseRead locks)
 
-withWriteOnce :: IORef CutLocks -> FilePath -> IO () -> IO ()
-withWriteOnce ref path action = withWriteLock ref path $ do
+withWriteLock :: Locks -> FilePath -> Action a -> Action a
+withWriteLock ref path actFn = do
+  l <- liftIO $ getLock ref path
+  liftIO $ RWLock.acquireWrite l
+  actFn `actionFinally` (RWLock.releaseWrite l)
+
+withWriteOnce :: Locks -> FilePath -> Action () -> Action ()
+withWriteOnce ref path actFn = withWriteLock ref path $ do
   exists <- doesFileExist path
-  when (not exists) action
+  when (not exists) actFn

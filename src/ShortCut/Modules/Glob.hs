@@ -35,22 +35,22 @@ globFiles = CutFunction
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
-rGlobFiles s@(_,cfg,_) e@(CutFun _ _ _ _ [p]) = do
+rGlobFiles s@(_,cfg,ref) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
   let outPath = exprPath s e
       out'    = fromCutPath cfg outPath
       path'   = toCutPath cfg path
-  out' %> \_ -> aGlobFiles cfg outPath path'
+  out' %> \_ -> aGlobFiles cfg ref outPath path'
   return (ExprPath out')
 rGlobFiles _ _ = error "bad arguments to rGlobFiles"
 
-aGlobFiles :: CutConfig -> CutPath -> CutPath -> Action ()
-aGlobFiles cfg outPath path = do
-  ptn   <- fmap strip $ readLit cfg path'
+aGlobFiles :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
+aGlobFiles cfg ref outPath path = do
+  ptn   <- fmap strip $ readLit cfg ref path'
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   paths <- liftIO $ mapM absolutize =<< glob ptn
   -- toShortCutListStr cfg str (ExprPath outPath) paths
-  writeLits cfg out'' paths
+  writeLits cfg ref out'' paths
   where
     out'  = fromCutPath cfg outPath
     path' = fromCutPath cfg path

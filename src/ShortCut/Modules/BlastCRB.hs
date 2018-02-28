@@ -79,8 +79,8 @@ tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or
  - resolves one level of symlink, so we have to point directly to the input
  - files rather than to the canonical $TMPDIR/cache/load... paths.
  -}
-aBlastCRB :: CutConfig -> CutPath -> [CutPath] -> Action ()
-aBlastCRB cfg tmpDir [o, q, t] = do
+aBlastCRB :: CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
+aBlastCRB cfg ref tmpDir [o, q, t] = do
   need [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
@@ -105,14 +105,14 @@ aBlastCRB cfg tmpDir [o, q, t] = do
   -- unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
   -- debugTrackWrite cfg [qSrc, tSrc]
   need [qDst, tDst]
-  symlink cfg qSrc' qDst'
-  symlink cfg tSrc' tDst'
+  symlink cfg ref qSrc' qDst'
+  symlink cfg ref tSrc' tDst'
   -- debugTrackWrite cfg [qSrc, tSrc] -- TODO why doesn't symlnk handle these??
-  wrappedCmdWrite cfg oPath [qSrc, tSrc] [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
+  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   -- debugTrackWrite cfg [oPath]
   -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
   -- debugTrackWrite cfg [o'']
-  symlink cfg o'' oPath'
+  symlink cfg ref o'' oPath'
   -- debugTrackWrite cfg [o'] --- TODO why doesn't symlink handle this??
   where
     o'   = fromCutPath cfg o
@@ -120,4 +120,4 @@ aBlastCRB cfg tmpDir [o, q, t] = do
     tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t
-aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
+aBlastCRB _ _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
