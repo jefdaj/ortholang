@@ -59,6 +59,7 @@ import System.FilePath            ((<.>))
 import System.IO                  (IOMode(..), withFile)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
+import Control.Concurrent.Thread.Delay (delay)
 
 ----------------
 -- read files --
@@ -278,7 +279,7 @@ wrappedCmdExit c p inPtns os b as = do
  - TODO skip the command if the files already exist?
  - TODO should outPaths be outPatterns??
  -}
-wrappedCmdWrite :: CutConfig -> FilePath -> [FilePath] -> [FilePath]
+wrappedCmdWrite :: CutConfig -> FilePath -> [String] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
 wrappedCmdWrite cfg lockPath inPtns outPaths opts bin args = do
   code <- wrappedCmdExit cfg lockPath inPtns opts bin args

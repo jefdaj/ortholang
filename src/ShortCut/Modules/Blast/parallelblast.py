@@ -136,6 +136,8 @@ def make_hits(args, db):
         if exists(hits):
             remove(hits)
         raise
+    finally:
+        check_call(["sync"])
 
 def resolve_link(path):
     while True:
