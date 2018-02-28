@@ -161,4 +161,6 @@ executable shortcut
                     unbounded-delays,
                     unix,
                     utility-ht,
-                    time
+                    time,
+                    concurrent-extra,
+                    parallel-io
