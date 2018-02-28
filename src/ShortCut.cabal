@@ -85,6 +85,7 @@ executable shortcut
                     ShortCut.Core.Config,
                     ShortCut.Core.Debug,
                     ShortCut.Core.Eval,
+                    ShortCut.Core.Locks,
                     ShortCut.Core.Parse,
                     ShortCut.Core.Parse.Basic,
                     ShortCut.Core.Parse.Expr,
