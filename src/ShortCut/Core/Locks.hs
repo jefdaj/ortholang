@@ -16,7 +16,7 @@ module ShortCut.Core.Locks
  - respectively. It should handle the rest.
  -}
 
-import ShortCut.Core.Types
+-- import ShortCut.Core.Types
 
 import qualified Data.Map.Strict                  as Map
 import qualified Control.Concurrent.ReadWriteLock as RWLock
@@ -25,32 +25,32 @@ import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef)
 import Data.Map.Strict                  (Map)
-import ShortCut.Core.Paths              (CutPath, fromCutPath)
+-- import ShortCut.Core.Paths              (CutPath, fromCutPath)
 import System.Directory                 (doesFileExist)
 
-type CutLocks = Map CutPath RWLock
+type CutLocks = Map FilePath RWLock
 
 initLocks :: IO (IORef CutLocks)
 initLocks = newIORef Map.empty
 
-getLock :: CutPath -> IORef CutLocks -> IO RWLock
+getLock :: FilePath -> IORef CutLocks -> IO RWLock
 getLock path ref = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   atomicModifyIORef ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path l c, l)
     Just l' -> (c, l')
 
-withReadLock :: IORef CutLocks -> CutPath -> IO a -> IO a
+withReadLock :: IORef CutLocks -> FilePath -> IO a -> IO a
 withReadLock ref path action = do
   l <- getLock path ref
   RWLock.withRead l action
 
-withWriteLock :: IORef CutLocks -> CutPath -> IO a -> IO a
+withWriteLock :: IORef CutLocks -> FilePath -> IO a -> IO a
 withWriteLock ref path action = do
   l <- getLock path ref
   RWLock.withRead l action
 
-withWriteOnce :: CutConfig -> IORef CutLocks -> CutPath -> IO () -> IO ()
-withWriteOnce cfg ref path action = withWriteLock ref path $ do
-  exists <- doesFileExist $ fromCutPath cfg path
+withWriteOnce :: IORef CutLocks -> FilePath -> IO () -> IO ()
+withWriteOnce ref path action = withWriteLock ref path $ do
+  exists <- doesFileExist path
   when (not exists) action

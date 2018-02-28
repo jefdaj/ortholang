@@ -40,25 +40,27 @@ import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
 import Control.Exception.Safe   -- (throwM)
+import Data.IORef                     (IORef)
 
 --------------------
 -- main interface --
 --------------------
 
-runRepl :: CutConfig -> IO ()
+runRepl :: CutConfig -> IORef CutLocks -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
-mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> CutConfig -> IO ()
-mkRepl promptFns hdl cfg = do
+mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
+       -> CutConfig -> IORef CutLocks -> IO ()
+mkRepl promptFns hdl cfg ref = do
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
   -- load initial script if any
   st <- case cfgScript cfg of
-          Nothing   -> return  ([],cfg)
-          Just path -> cmdLoad ([],cfg) hdl path
+          Nothing   -> return  ([],cfg,ref)
+          Just path -> cmdLoad ([],cfg,ref) hdl path
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
@@ -121,10 +123,10 @@ step st hdl line = case stripWhiteSpace line of
   statement -> runStatement st hdl statement
 
 runStatement :: CutState -> Handle -> String -> IO CutState
-runStatement st@(scr,cfg) hdl line = case parseStatement st line of
+runStatement st@(scr,cfg, ref) hdl line = case parseStatement st line of
   Left  e -> hPutStrLn hdl (show e) >> return st
   Right r -> do
-    let st' = (updateScript scr r, cfg)
+    let st' = (updateScript scr r, cfg, ref)
     when (isExpr st line) (evalScript hdl st')
     return st'
 
@@ -192,19 +194,19 @@ cmdHelp st hdl _ = hPutStrLn hdl msg >> return st
 
 -- TODO this is totally duplicating code from putAssign; factor out
 cmdLoad :: CutState -> Handle -> String -> IO CutState
-cmdLoad st@(_,cfg) hdl path = do
+cmdLoad st@(_,cfg,ref) hdl path = do
   path' <- absolutize path
   dfe   <- doesFileExist path'
   if not dfe
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
-      new <- parseFile cfg path'
+      new <- parseFile cfg ref path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> return (s, cfg { cfgScript = Just path' })
+        Right s -> return (s, cfg { cfgScript = Just path' }, ref)
 
 cmdSave :: CutState -> Handle -> String -> IO CutState
-cmdSave st@(scr,_) hdl line = do
+cmdSave st@(scr,_,_) hdl line = do
   case words line of
     [path] -> saveScript scr path
     [var, path] -> case lookup (CutVar var) scr of
@@ -227,7 +229,7 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
 cmdDeps :: CutState -> Handle -> String -> IO CutState
-cmdDeps st@(scr,_) hdl var = do
+cmdDeps st@(scr,_,_) hdl var = do
   hPutStrLn hdl $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyAssigns (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
@@ -238,7 +240,7 @@ prettyAssigns :: (CutAssign -> Bool) -> CutScript -> String
 prettyAssigns fn scr = stripWhiteSpace $ unlines $ map prettyShow $ filter fn scr
 
 cmdRDeps :: CutState -> Handle -> String -> IO CutState
-cmdRDeps st@(scr,_) hdl var = do
+cmdRDeps st@(scr,_,_) hdl var = do
   let var' = CutVar var
   hPutStrLn hdl $ case lookup var' scr of
     Nothing -> "Var '" ++ var ++ "' not found"
@@ -247,12 +249,12 @@ cmdRDeps st@(scr,_) hdl var = do
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: CutState -> Handle -> String -> IO CutState
-cmdDrop (_,cfg) _ [] = return ([], cfg)
-cmdDrop st@(scr,cfg) hdl var = do
+cmdDrop (_,cfg,ref) _ [] = return ([], cfg,ref)
+cmdDrop st@(scr,cfg,ref) hdl var = do
   let v = CutVar var
   case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
-    Just _  -> return (delFromAL scr v, cfg)
+    Just _  -> return (delFromAL scr v, cfg, ref)
 
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
@@ -265,8 +267,8 @@ cmdType state hdl s = do
 
 -- TODO factor out the variable lookup stuff
 cmdShow :: CutState -> Handle -> String -> IO CutState
-cmdShow st@(s,_) hdl [] = mapM_ (hPutStrLn hdl . prettyShow) s >> return st
-cmdShow st@(scr,_) hdl var = do
+cmdShow st@(s,_,_) hdl [] = mapM_ (hPutStrLn hdl . prettyShow) s >> return st
+cmdShow st@(scr,_,_) hdl var = do
   hPutStrLn hdl $ case lookup (CutVar var) scr of
     Nothing -> "Var '" ++ var ++ "' not found"
     Just e  -> prettyShow e
@@ -283,7 +285,7 @@ cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
 cmdConfig :: CutState -> Handle -> String -> IO CutState
-cmdConfig st@(scr,cfg) hdl s = do
+cmdConfig st@(scr,cfg,ref) hdl s = do
   let ws = words s
   if (length ws == 0)
     then hPutStrLn hdl (prettyShow cfg) >> return st -- TODO Pretty instance
@@ -293,7 +295,7 @@ cmdConfig st@(scr,cfg) hdl s = do
         then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st
         else case setConfigField cfg (head ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
-               Right cfg' -> return (scr, cfg')
+               Right cfg' -> return (scr, cfg', ref)
 
 --------------------
 -- tab completion --
@@ -307,7 +309,7 @@ cmdConfig st@(scr,cfg) hdl s = do
 -- TODO sort functions alphabetically
 
 listCompletions :: MonadIO m => CutState -> String -> m [Completion]
-listCompletions (scr,cfg) txt = do
+listCompletions (scr,cfg,_) txt = do
   files <- listFiles txt
   let misc = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
   return (files ++ misc)
@@ -326,7 +328,7 @@ myComplete s = completeQuotedWord (Just '\\') "\"'" (listCompletions s)
 -- This is separate from the CutConfig because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
 replSettings :: CutState -> Settings IO
-replSettings s@(_,cfg) = Settings
+replSettings s@(_,cfg,_) = Settings
   { complete       = myComplete s
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
   , autoAddHistory = True

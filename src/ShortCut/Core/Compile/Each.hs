@@ -38,7 +38,7 @@ rEach actFn = rEachMain Nothing actFn'
 -- for action functions that need one tmpdir reused between calls
 rEachTmp :: (CutConfig -> CutPath -> [CutPath] -> Action ())
         -> String -> RulesFn
-rEachTmp actFn tmpPrefix s@(_,cfg) = rEachMain (Just tmpFn) actFn s
+rEachTmp actFn tmpPrefix s@(_,cfg,_) = rEachMain (Just tmpFn) actFn s
   where
     tmpDir = cacheDir cfg tmpPrefix
     tmpFn  = return . const tmpDir
@@ -46,7 +46,7 @@ rEachTmp actFn tmpPrefix s@(_,cfg) = rEachMain (Just tmpFn) actFn s
 -- for action functions that need a unique tmpdir each call
 -- TODO use a hash for the cached path rather than the name, which changes!
 rEachTmps :: (CutConfig -> CutPath -> [CutPath] -> Action ()) -> String -> RulesFn
-rEachTmps actFn tmpPrefix s@(_,cfg) e = rEachMain (Just tmpFn) actFn s e
+rEachTmps actFn tmpPrefix s@(_,cfg,_) e = rEachMain (Just tmpFn) actFn s e
   where
     tmpFn args = do
       -- args' <- liftIO $ mapM (resolveSymlinks cfg True . fromCutPath cfg) args
@@ -77,7 +77,7 @@ rSimpleScriptEach = rEach . aSimpleScript
 rEachMain :: Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
-rEachMain mTmpFn actFn s@(_,cfg) e@(CutFun r salt _ name exprs) = do
+rEachMain mTmpFn actFn s@(_,cfg,_) e@(CutFun r salt _ name exprs) = do
   argInitPaths <- mapM (rExpr s) (init exprs)
   (ExprPath argsLastsPath) <- rExpr s (last exprs)
   let singleName     = replace "_each" "" name

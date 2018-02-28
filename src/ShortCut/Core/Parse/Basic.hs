@@ -51,7 +51,7 @@ pVarEq = pVar <* pEq <?> "vareq"
 pRef :: ParseM CutExpr
 pRef = do
   v@(CutVar var) <- pVar <* notFollowedBy pEq
-  (scr, _) <- getState
+  (scr, _, _) <- getState
   case lookup v scr of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
     Just e -> return $ CutRef (typeOf e) 0 (depsOf e) v

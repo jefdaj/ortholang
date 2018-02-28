@@ -34,7 +34,7 @@ cutModule = CutModule
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
          -> CutState -> CutExpr -> Rules ExprPath
-rPermute comboFn s@(_, cfg) expr@(CutFun _ salt _ _ [iList]) = do
+rPermute comboFn s@(_, cfg, _) expr@(CutFun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oList      = fromCutPath cfg $ exprPath s expr
       (ListOf t) = typeOf iList
@@ -48,7 +48,7 @@ aPermute :: CutState
          -> ([String] -> [[String]])
          -> FilePath -> CutType -> Int
          -> FilePath -> Action ()
-aPermute (_,cfg) comboFn iPath eType salt out = do
+aPermute (_,cfg,_) comboFn iPath eType salt out = do
   need [iPath]
   elements <- readStrings eType cfg iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?

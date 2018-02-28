@@ -104,7 +104,7 @@ mkLoadDBEach name rtn = CutFunction
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(_,cfg) e@(CutFun _ _ _ _ [s]) = do
+rLoadDB st@(_,cfg,_) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
   let sPath' = toCutPath cfg sPath
   oPath' %> \_ -> aLoadDB cfg oPath sPath'
@@ -163,7 +163,7 @@ makeblastdbCache :: CutConfig -> CutPath
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(_,cfg) e@(CutFun _ _ _ _ [f]) = do
+rBlastdblist s@(_,cfg,_) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toCutPath   cfg fPath
   oPath' %> \_ -> aBlastdblist cfg oPath lTmp' fPath'
@@ -212,7 +212,7 @@ blastdbget = CutFunction
   }
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(_,cfg) e@(CutFun _ _ _ _ [name]) = do
+rBlastdbget st@(_,cfg,_) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath st e -- final prefix
@@ -276,7 +276,7 @@ tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdb :: RulesFn
-rMakeblastdb s@(_, cfg) e@(CutFun rtn _ _ _ [fa]) = do
+rMakeblastdb s@(_, cfg, _) e@(CutFun rtn _ _ _ [fa]) = do
   (ExprPath faPath) <- rExpr s fa
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdb" e $ fromCutPath cfg out

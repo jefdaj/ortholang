@@ -7,6 +7,7 @@ import ShortCut.Core         (runRepl, evalFile)
 import ShortCut.Core.Config  (getUsage, loadConfig, hasArg)
 import ShortCut.Core.Debug   (debug)
 import ShortCut.Core.Types   (CutConfig(..))
+import ShortCut.Core.Locks   (initLocks)
 import ShortCut.Modules      (modules)
 import ShortCut.Test         (runTests)
 import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
@@ -24,10 +25,11 @@ main = do
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
   cfg <- loadConfig modules args
+  ref <- initLocks
   let cfg' = debug cfg ("config: " ++ show cfg) cfg
   setCurrentDirectory $ cfgWorkDir cfg'
   when (hasArg args "test")
-    (withArgs [] $ runTests cfg')
+    (withArgs [] $ runTests cfg' ref)
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile stdout cfg'
-    else runRepl  cfg'
+    then evalFile stdout cfg' ref
+    else runRepl  cfg' ref

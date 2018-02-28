@@ -35,6 +35,7 @@ import ShortCut.Core.Actions          (readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                      (Handle, hPutStrLn)
 import Text.PrettyPrint.HughesPJClass
+import Data.IORef                     (IORef)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -100,13 +101,13 @@ eval hdl cfg rtype = ignoreErrors . eval'
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as,c) = case lookup (CutVar "result") as of
+evalScript hdl s@(as,c,_) = case lookup (CutVar "result") as of
   Nothing  -> putStrLn "no result variable. that's not right!"
   Just res -> eval hdl c (typeOf res) (compileScript s Nothing)
 
-evalFile :: Handle -> CutConfig -> IO ()
-evalFile hdl cfg = case cfgScript cfg of
+evalFile :: Handle -> CutConfig -> IORef CutLocks -> IO ()
+evalFile hdl cfg ref = case cfgScript cfg of
   Nothing  -> putStrLn "no script. that's not right!"
   Just scr -> do
-    s <- parseFileIO cfg scr
-    evalScript hdl (s,cfg)
+    s <- parseFileIO cfg ref scr -- TODO just take a CutState?
+    evalScript hdl (s,cfg,ref)

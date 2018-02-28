@@ -174,7 +174,7 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: CutState -> CutExpr -> Rules ExprPath
-rParseSearches s@(_,cfg) expr@(CutFun _ _ _ _ [searches]) = do
+rParseSearches s@(_,cfg,_) expr@(CutFun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   -- TODO should this be a cacheFile instead?
   -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path [show expr, sList]
@@ -217,7 +217,7 @@ aParseSearches cfg sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-rBioMartR fn s@(_,cfg) expr@(CutFun rtn salt _ _ [ss]) = do
+rBioMartR fn s@(_,cfg,_) expr@(CutFun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
   -- (ExprPath sTable) <- rParseSearches s ss
   (ExprPath sTable) <- rExpr s $ CutFun rtn salt (depsOf ss) "parse_searches" [ss]

@@ -7,6 +7,7 @@ module ShortCut.Core.Types
   , CutType(..)
   , CutVar(..)
   , CutScript
+  , CutLocks
   , CutState
   -- , Assoc(..) -- we reuse this from Parsec
   , CutFixity(..)
@@ -52,12 +53,15 @@ module ShortCut.Core.Types
 -- import Prelude hiding (print)
 import qualified Text.Parsec as P
 
+import ShortCut.Core.Locks (CutLocks)
+
 import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
+import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 -- TODO where should these go?
@@ -245,7 +249,7 @@ data CutConfig = CutConfig
 -- Parse monad --
 -----------------
 
-type CutState = (CutScript, CutConfig)
+type CutState = (CutScript, CutConfig, IORef CutLocks)
 type ParseM a = P.Parsec String CutState a
 
 runParseM :: ParseM a -> CutState -> String -> Either ParseError a
@@ -296,7 +300,7 @@ data CutFunction = CutFunction
   { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
   , fFixity    :: CutFixity
-  , fRules  :: CutState -> CutExpr -> Rules ExprPath
+  , fRules     :: CutState -> CutExpr -> Rules ExprPath
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)

@@ -12,6 +12,7 @@ import Text.Parsec.Char       (spaces, newline)
 import Text.Parsec.Combinator (optional, lookAhead)
 import Text.Parsec            (ParseError)
 import ShortCut.Core.Debug    (debug)
+import Data.IORef             (IORef)
 
 {- New overall script parse idea:
  -
@@ -37,12 +38,12 @@ stripComments = unlines . map stripComment . lines
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
 pAssign = do
-  (scr, cfg) <- getState
+  (scr, cfg, ref) <- getState
   optional newline
   void $ lookAhead $ try pVarEq
   v <- pVarEq -- TODO use lookAhead here to decide whether to commit to it
   e <- lexeme pExpr
-  putState (scr ++ [(v,e)], cfg)
+  putState (scr ++ [(v,e)], cfg, ref)
   let res  = (v,e)
       res' = debugParser cfg "pAssign" res
   return res'
@@ -56,7 +57,7 @@ pAssign = do
 --      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM CutAssign
 pResult = do
-  (_, cfg) <- getState
+  (_, cfg, _) <- getState
   e <- pExpr
   let e' = debugParser cfg "pResult" e
   return (CutVar "result", e')
@@ -78,10 +79,10 @@ pStatement = pAssign <|> pResult
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
 pScript = do
-  (_, cfg) <- getState
+  (_, cfg, ref) <- getState
   optional spaces
   scr <- many pStatement
-  putState (scr, cfg)
+  putState (scr, cfg, ref)
   return scr
 
 -- TODO need CutState here? or just CutConfig?
@@ -91,21 +92,23 @@ parseStatement = runParseM pStatement
 -- The name doesn't do a good job of explaining this, but it's expected to be
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
-parseString :: CutConfig -> String -> Either ParseError CutScript
-parseString c = runParseM pScript ([], c)
+parseString :: CutConfig -> IORef CutLocks -> String
+            -> Either ParseError CutScript
+parseString c r = runParseM pScript ([], c, r)
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: CutConfig -> FilePath -> IO (Either ParseError CutScript)
-parseFile cfg path = readFile path' >>= return . parseString cfg . stripComments
+parseFile :: CutConfig -> IORef CutLocks -> FilePath
+          -> IO (Either ParseError CutScript)
+parseFile cfg ref path = readFile path' >>= return . parseString cfg ref . stripComments
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: CutConfig -> FilePath -> IO CutScript
-parseFileIO cfg scr = do
-  mscr1 <- parseFile cfg scr
+parseFileIO :: CutConfig -> IORef CutLocks -> FilePath -> IO CutScript
+parseFileIO cfg ref scr = do
+  mscr1 <- parseFile cfg ref scr
   case mscr1 of
     Left  e -> fail $ show e
     Right s -> return s

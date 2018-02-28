@@ -100,6 +100,7 @@ import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
+import Data.IORef                 (IORef)
 
 --------------
 -- cutpaths --
@@ -163,7 +164,7 @@ cacheDir cfg modName = toCutPath cfg path
 -- This is just a convenience used in exprPath
 -- TODO rename hSomething?
 argHashes :: CutState -> CutExpr -> [String]
-argHashes s@(scr,_) (CutRef _ _ _ v) = case lookup v scr of
+argHashes s@(scr,_, _) (CutRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v
                                          Just e  -> argHashes s e
 argHashes _ (CutLit  _ _     v    ) = [digest v]
@@ -184,10 +185,10 @@ argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
 
 -- TODO rename to tmpPath?
 exprPath :: CutState -> CutExpr -> CutPath
-exprPath s@(scr, _) (CutRef _ _ _ v) = case lookup v scr of
+exprPath s@(scr, _, _) (CutRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
                                          Just e  -> exprPath s e
-exprPath s@(_, cfg) expr = debugPath cfg "exprPath" expr res
+exprPath s@(_, cfg, _) expr = debugPath cfg "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr

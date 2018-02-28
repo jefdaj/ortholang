@@ -35,7 +35,7 @@ globFiles = CutFunction
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
-rGlobFiles s@(_,cfg) e@(CutFun _ _ _ _ [p]) = do
+rGlobFiles s@(_,cfg,_) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
   let outPath = exprPath s e
       out'    = fromCutPath cfg outPath
