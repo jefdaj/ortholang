@@ -34,7 +34,6 @@ import ShortCut.Core.Actions      (wrappedCmdWrite,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
-import System.Directory           (createDirectoryIfMissing)
 import System.FilePath            (takeExtension)
 
 
@@ -243,52 +242,6 @@ defaultTypeCheck expected returned actual =
     then Right returned
     else Left $ typeError expected actual
 
-------------------------------------------
--- functions to make whole CutFunctions --
-------------------------------------------
-
--- rOneArgScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
--- rOneArgScript tmpName script s@(_,cfg,_) expr@(CutFun _ _ _ _ [arg]) = do
---   (ExprPath argPath) <- rExpr s arg
---   -- let tmpDir = cacheDir cfg </> tmpName
---   -- TODO get tmpDir from a Paths funcion
---   let tmpDir = cfgTmpDir cfg </> "cache" </> tmpName
---       oPath  = fromCutPath cfg $ exprPath s expr
---   oPath %> \_ -> aOneArgScript cfg oPath script tmpDir argPath
---   return (ExprPath oPath)
--- rOneArgScript _ _ _ _ = error "bad argument to rOneArgScript"
--- 
--- -- TODO shit, this needs to distinguish between input and output args?
--- aOneArgScript :: CutConfig -> String
---               -> FilePath -> FilePath -> FilePath -> Action ()
--- aOneArgScript cfg oPath script tmpDir argPath = do
---   need [argPath]
---   liftIO $ createDirectoryIfMissing True tmpDir
---   let oPath' = debugAction cfg "aOneArgScript" oPath [oPath,script,tmpDir,argPath]
---   quietly $ wrappedCmdWrite cfg oPath' [oPath'] [] script [tmpDir, oPath, argPath]
---   -- trackWrite [oPath']
--- 
--- -- for scripts that take one arg and return a list of lits
--- -- TODO this should put tmpfiles in cache/<script name>!
--- -- TODO name something more explicitly about fasta files?
--- rOneArgListScript :: FilePath -> FilePath -> CutState -> CutExpr -> Rules ExprPath
--- rOneArgListScript tmpName script s@(_,cfg,_) expr@(CutFun _ _ _ _ [fa]) = do
---   (ExprPath faPath) <- rExpr s fa
---   let tmpDir  = fromCutPath cfg $ cacheDir cfg tmpName
---       outPath = fromCutPath cfg $ exprPath s expr
---   outPath %> \_ -> aOneArgListScript cfg outPath script tmpDir faPath
---   return (ExprPath outPath)
--- rOneArgListScript _ _ _ _ = error "bad argument to rOneArgListScript"
-
--- aOneArgListScript :: CutConfig -> FilePath
---                   -> String -> FilePath -> FilePath -> Action ()
--- aOneArgListScript cfg outPath script tmpDir faPath = do
---   need [faPath]
---   liftIO $ createDirectoryIfMissing True tmpDir
---   let out = debugAction cfg "aOneArgListScript" outPath [outPath, script, tmpDir, faPath]
---   wrappedCmdWrite cfg out [out] [Cwd tmpDir] script [out, faPath]
---   -- debugTrackWrite cfg [out]
-
 --------------------------
 -- links to input files --
 --------------------------
@@ -339,7 +292,6 @@ aLoadHash cfg ref src ext = do
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  liftIO $ createDirectoryIfMissing True tmpDir'
   symlink cfg ref hashPath src
   return hashPath
   where
@@ -487,12 +439,10 @@ aSimple' ::  CutConfig -> Locks -> CutPath
 aSimple' cfg ref outPath actFn mTmpDir argPaths = do
   need argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
-  liftIO $ createDirectoryIfMissing True tmpDir'
-  -- actFn c o as -- TODO hey is tmpDir being used as outPath??
   let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath
       as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths''
   actFn cfg ref tmpDir (o':as)
-  trackWrite [out]
+  trackWrite [out] -- TODO remove?
   where
     -- TODO probably not "simple tmp" anymore... remove? rename?
     hashes     = concat $ intersperse "_" $ map digest argPaths'

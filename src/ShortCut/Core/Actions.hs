@@ -24,6 +24,7 @@ module ShortCut.Core.Actions
   , writePaths
   , writeString
   , writeStrings
+  , writeCachedLines
   , debugTrackWrite
 
   -- run system commands
@@ -56,7 +57,7 @@ import ShortCut.Core.Locks        (withReadLock, withReadLocks,
                                    withWriteLock, withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
-import System.FilePath            ((<.>))
+import System.FilePath            ((<.>), takeDirectory)
 import System.IO                  (IOMode(..), withFile)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
@@ -193,18 +194,6 @@ writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whateve
  - thread got there first will be writing the same exact text anyway.
  -}
 
--- TODO need to delete the entire dir if given one?
--- This is safe in two ways:
--- 1. It skips writing if the file is already being written by another thread
--- 2. If some other error occurs it deletes the file, which is important
---    because it prevents it being interpreted as an empty list later
--- withErrorHandling :: (MonadIO m, MonadCatch m) => FilePath -> a -> m a -> m a
--- withErrorHandling path def fn = fn `catchIOError` (\e -> liftIO (handler e) >> return def)
---   where
---     handler e = if      isAlreadyInUseError  e then return ()
---                 else if isAlreadyExistsError e then return ()
---                 else    removeIfExists path >> ioError e
-
 -- TODO rename like myReadFile, myReadLines?
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = debug cfg ("write " ++ show fs) (trackWrite fs)
@@ -229,25 +218,17 @@ wrappedCmdError bin n files = do
 -- TODO print a message for the user
 -- TODO raise/re-raise an exception
 
--- Shake's command_ adapted to work with wrapperScript and wrapperLimit if used
+-- Shake's command_ adapted to work with wrapperScript and wrapperLimit if used.
+-- ptns is a list of patterns for files to delete in case the cmd fails.
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
--- ptns is a list of patterns for files to delete in case the cmd fails
+-- TODO separate wrappedReadCmd with a shared lock?
 wrappedCmd :: CutConfig -> Locks -> FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
--- TODO withErrorHandling2 is blocking on some MVar related thing :(
--- wrappedCmd cfg path opts bin args = withErrorHandling2 path $ withWriteOnceFile path $
--- TODO separate wrappedReadCmd with a shared lock?
 wrappedCmd cfg ref outPath inPtns opts bin args = do
   inPaths <- fmap concat $ liftIO $ mapM globFiles inPtns
-  -- let outLock = outPath <.> "lock"
-      -- inLocks = map (<.> "lock") inPaths
-  -- liftIO $ putStrLn $ "wrappedCmd bin: " ++ bin -- TODO remove
-  -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
-  -- liftIO $ putStrLn $ "wrappedCmd outLock: " ++ outLock -- TODO remove
-  -- liftIO $ putStrLn $ "wrappedCmd inPaths: " ++ show inPaths -- TODO remove
-  -- liftIO $ putStrLn $ "wrappedCmd args: " ++ show args -- TODO remove
+  liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
   withWriteLock ref outPath $ withReadLocks ref inPaths $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
@@ -335,8 +316,9 @@ tmpLink cfg src dst = dots </> tmpRel dst
  -}
 symlink :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 symlink cfg ref src dst = withWriteOnce ref src' $ do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory src'
   liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
-  debugTrackWrite cfg [src'] -- TODO anything wrong with duplicate calls?
+  debugTrackWrite cfg [src']
   where
     src' = fromCutPath cfg src
     dst' = fromCutPath cfg dst

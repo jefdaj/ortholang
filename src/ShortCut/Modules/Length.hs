@@ -11,10 +11,7 @@ import ShortCut.Core.Compile.Basic     (rExpr)
 import ShortCut.Core.Compile.Each     (rEach)
 import ShortCut.Modules.Blast  (bht)
 import ShortCut.Modules.BlastCRB (crb)
-import System.FilePath         (takeDirectory)
-import System.Directory           (createDirectoryIfMissing)
 import Data.Scientific (Scientific())
--- import Path (fromAbsFile, fromAbsDir)
 
 cutModule :: CutModule
 cutModule = CutModule {mName = "length", mFunctions = [len, lenEach]}
@@ -66,8 +63,6 @@ aLen :: CutConfig -> Locks -> [CutPath] -> Action ()
 aLen cfg ref [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
   n <- fmap count $ readPaths cfg ref lst'
-  liftIO $ createDirectoryIfMissing True $ takeDirectory out'
-  -- liftIO $ putStrLn $ "length of " ++ lst' ++ " is " ++ show n
   writeLit cfg ref out'' $ show n
   where
     out'  = fromCutPath cfg out

@@ -22,7 +22,6 @@ import ShortCut.Core.Util          (stripWhiteSpace, resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
                                     makeRelative, takeDirectory)
-import System.Directory            (createDirectoryIfMissing)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 -- import System.Exit                 (ExitCode(..))
@@ -181,7 +180,6 @@ aBlastdblist :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdblist cfg ref oPath listTmp fPath = do
   done <- doesFileExist listTmp'
   when (not done) $ do
-    liftIO $ createDirectoryIfMissing True tmpDir
     -- This one is tricky because it exits 1 on success
     -- TODO still use a lockfile and wrack writes!
     code <- wrappedCmdExit cfg ref listTmp' [listTmp'] [Cwd tmpDir, Shell] -- TODO remove stderr?
@@ -226,7 +224,6 @@ aBlastdbget :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref dbPrefix tmpDir nPath = do
   need [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
-  liftIO $ createDirectoryIfMissing True tmp' -- TODO remove?
   -- TODO was taxdb needed for anything else?
   -- TODO does this need to lock on a separate file from dbPrefix''?
   -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
@@ -323,7 +320,6 @@ aMakeblastdb dbType cfg ref cDir [out, faPath] = do
       dbPrefix' = toCutPath cfg dbPrefix
       out'' = debugAction cfg "aMakeblastdb" out'
                 [extOf dbType, out', dbPrefix, faPath']
-  liftIO $ createDirectoryIfMissing True cDir'
 
   -- TODO somehow out' still has the TMPDIR prefix in it! wtf?
   --      ah the cfgTmpDir itself is set to $TMPDIR! real wtf

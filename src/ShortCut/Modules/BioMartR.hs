@@ -15,7 +15,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Actions (readLits)
+import ShortCut.Core.Actions (readLits, writeCachedLines)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions           (wrappedCmdWrite)
@@ -30,7 +30,6 @@ import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Debug   (debugAction)
-import System.Directory           (createDirectoryIfMissing)
 import System.FilePath (takeDirectory)
 
 ------------------------
@@ -167,8 +166,8 @@ readSearch txt = case runParser pSearch () "search string" txt of
   Right s@(Search _ _ _) -> Right s
 
 -- TODO use cassava?
-toTsv :: [Search] -> String
-toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
+toTsvRows :: [Search] -> [String]
+toTsvRows ss = map (intercalate "\t") (header:map row ss)
   where
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
@@ -176,9 +175,6 @@ toTsv ss = unlines $ map (intercalate "\t") (header:map row ss)
 rParseSearches :: CutState -> CutExpr -> Rules ExprPath
 rParseSearches s@(_,cfg,ref) expr@(CutFun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
-  -- TODO should this be a cacheFile instead?
-  -- exprPathExplicit (_, cfg) prefix rtype salt hashes = toCutPath cfg path [show expr, sList]
-  -- let searchTable = fromCutPath cfg $ exprPathExplicit s "parse_searches" search salt []
   let searchTable  = exprPath s expr
       searchTable' = fromCutPath cfg searchTable
       sList' = toCutPath cfg sList
@@ -189,17 +185,11 @@ rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 aParseSearches :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aParseSearches cfg ref sList out = do
   parses <- (fmap . map) readSearch (readLits cfg ref sList')
-  -- let sLines = map (cfgTmpDir cfg </>) (lines tmp)
-  -- need sLines
-  -- parses <- liftIO $ mapM readSearch sLines
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    -- TODO use a proper write fn here!
-    else liftIO $ do -- TODO rewrite in newer writePaths/Lits?
-      createDirectoryIfMissing True $ takeDirectory out''
-      writeFile out'' $ toTsv searches'
+    else writeCachedLines cfg ref out'' $ toTsvRows searches'
   where
     sList' = fromCutPath cfg sList
     out'   = fromCutPath cfg out
@@ -238,7 +228,6 @@ aBioMartR :: CutConfig -> Locks
 aBioMartR cfg ref out bmFn bmTmp sTable = do
   need [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
-  liftIO $ createDirectoryIfMissing True bmTmp'
   wrappedCmdWrite cfg ref out'' [bmFn', sTable'] [out''] [Cwd bmTmp']
     "biomartr.R" [out'', bmFn', sTable']
   where

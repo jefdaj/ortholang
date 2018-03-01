@@ -1,19 +1,15 @@
 module ShortCut.Core.Util
 
-  -- locking
-  ( ignoreExistsError
-  , unlessExists
-  , unlessMatch
-  , withLock
-  , withLocks
-  -- , writeAllOnce
-  , rmAll
-
   -- hashing
-  , digestLength
+  ( digestLength
   , digest
 
   -- paths
+  , ignoreExistsError
+  , unlessExists
+  , unlessMatch
+  , removeIfExists
+  , rmAll
   , resolveSymlinks
   , absolutize
   , expandTildes
@@ -21,7 +17,6 @@ module ShortCut.Core.Util
 
   -- misc
   , stripWhiteSpace
-  , removeIfExists
   )
   where
 
@@ -33,89 +28,19 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
-import Data.List              (dropWhileEnd, isPrefixOf, nub)
+import Data.List              (dropWhileEnd, isPrefixOf)
 import Data.List.Utils        (replace)
 import Data.Maybe             (fromJust)
-import System.Directory       (createDirectoryIfMissing, doesPathExist,
-                               removePathForcibly, getHomeDirectory,
-                               makeAbsolute, removeFile, pathIsSymbolicLink)
-import System.FileLock        (lockFile, unlockFile, SharedExclusive(..),
-                               FileLock)
+import System.Directory       (doesPathExist, removePathForcibly,
+                               getHomeDirectory, makeAbsolute, removeFile,
+                               pathIsSymbolicLink)
 import System.FilePath        ((</>), takeDirectory, addTrailingPathSeparator,
                                normalise)
 import System.IO.Error        (isDoesNotExistError, catchIOError,
                                isAlreadyExistsError, ioError)
 import System.Path.NameManip  (guess_dotdot, absolute_path)
 import System.Posix.Files     (readSymbolicLink)
-import Test.Tasty             (testGroup, TestTree)
 import System.FilePath.Glob   (glob)
-
--------------
--- locking --
--------------
-
-ignoreExistsError :: IO () -> IO ()
-ignoreExistsError act = catchIOError act $ \e ->
-  if isAlreadyExistsError e then return () else ioError e
-
-unlessExists :: FilePath -> Action () -> Action ()
-unlessExists path act = do
-  e <- doesFileExist path
-  unless e act
-
--- TODO use FilePatterns here rather than plain FilePaths
-unlessMatch :: [FilePath] -> Action () -> Action ()
-unlessMatch paths act = do
-  tests <- liftIO $ mapM doesPathExist paths
-  unless (any id tests) act
-
-withLock :: SharedExclusive -> FilePath -> Action a -> Action a
-withLock lockType lockPath actFn = do
-  -- liftIO $ createDirectoryIfMissing True $ takeDirectory lockPath
-  -- lock <- liftIO $ lockFile lockPath lockType
-  lock <- liftIO $ mkLock lockType lockPath
-  actFn `actionFinally` rmLock lock lockPath
-
--- Mostly for locking all inputs and outputs used by a wrappedCmdWrite
-withLocks :: SharedExclusive -> [FilePath] -> Action a -> Action a
-withLocks lockType lockPaths actFn = do
-  let lockPaths' = nub lockPaths -- TODO dedup these earlier if needed
-  -- liftIO $ putStrLn $ "before nub: " ++ show (length lockPaths)
-  -- liftIO $ putStrLn $ "after  nub: " ++ show (length lockPaths')
-  locks <- liftIO $ mapM (mkLock lockType) lockPaths'
-  actFn `actionFinally` (mapM_ (\(l, p) -> rmLock l p) $ zip locks lockPaths')
-
--- TODO need to not have the .lock on there until the actual file is found!
--- TODO rather than custom logic here, make the calls make sense!
-mkLock :: SharedExclusive -> FilePath -> IO FileLock
-mkLock lockType lockPath = do
-  createDirectoryIfMissing True $ takeDirectory lockPath
-  -- liftIO $ putStrLn $ "locking: (" ++ show lockType ++ ") "++ lockPath
-  lockFile lockPath lockType
-
--- Keeps lockfiles from laying around cluttering up trees
-rmLock :: FileLock -> FilePath -> IO ()
-rmLock lockToken lockPath = do
-  unlockFile lockToken
-  removePathForcibly lockPath
-  -- remains <- doesPathExist lockPath
-  -- when remains $ removePathForcibly lockPath
-
--- -- TODO do these actually work infix?
--- -- TODO what if only some of the files exist? do we want to re-run the action?
--- -- TODO should this handle debugTrackWrite on all the outPaths?
--- writeAllOnce :: FilePath -> [FilePath] -> Action () -> Action ()
--- writeAllOnce lockPath outPaths writeFn = do
---   lock <- liftIO $ lockFile lockPath Exclusive
---   unlessMatch outPaths $
---     writeFn `actionOnException` liftIO (rmAll outPaths)
---             `actionFinally` rmLock lockPath lock
---   -- liftIO $ rmLock lockPath lock
-
-rmAll :: [FilePath] -> IO ()
-rmAll = mapM_ removePathForcibly
-
--- TODO fn to makeRelative to config dir
 
 -------------
 -- hashing --
@@ -135,6 +60,34 @@ digest val = take digestLength $ show (hash asBytes :: Digest MD5)
 -----------
 -- paths --
 -----------
+
+ignoreExistsError :: IO () -> IO ()
+ignoreExistsError act = catchIOError act $ \e ->
+  if isAlreadyExistsError e then return () else ioError e
+
+unlessExists :: FilePath -> Action () -> Action ()
+unlessExists path act = do
+  e <- doesFileExist path
+  unless e act
+
+-- TODO use FilePatterns here rather than plain FilePaths
+unlessMatch :: [FilePath] -> Action () -> Action ()
+unlessMatch paths act = do
+  tests <- liftIO $ mapM doesPathExist paths
+  unless (any id tests) act
+
+-- TODO call this module something besides Debug now that it also handles errors?
+-- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
+removeIfExists :: (MonadIO m, MonadCatch m) => FilePath -> m ()
+removeIfExists fileName = (liftIO (removeFile fileName)) `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwM e
+
+rmAll :: [FilePath] -> IO ()
+rmAll = mapM_ removePathForcibly
+
+-- TODO fn to makeRelative to config dir
 
 {- Follows zero or more symlinks until it finds the original file.
  - Takes an optional prefix not to follow outside, which will usually be
@@ -189,11 +142,3 @@ globFiles ptn = expandTildes ptn >>= glob >>= mapM absolutize
 
 stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
-
--- TODO call this module something besides Debug now that it also handles errors?
--- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
-removeIfExists :: (MonadIO m, MonadCatch m) => FilePath -> m ()
-removeIfExists fileName = (liftIO (removeFile fileName)) `catch` handleExists
-  where handleExists e
-          | isDoesNotExistError e = return ()
-          | otherwise = throwM e

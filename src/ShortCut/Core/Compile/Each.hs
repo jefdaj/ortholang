@@ -6,23 +6,20 @@ module ShortCut.Core.Compile.Each
   )
   where
 
--- TODO rename to Each?
-
 import Development.Shake
 import ShortCut.Core.Compile.Basic
 import ShortCut.Core.Types
 import Text.PrettyPrint.HughesPJClass
 
-import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), takeDirectory)
--- import ShortCut.Core.Actions          (wrappedCmd)
+import ShortCut.Core.Actions      (readPaths, writePaths, symlink,
+                                   readLit, writeLits)
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
-import ShortCut.Core.Actions      (readPaths, writePaths, symlink, readLit, writeLits)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    CutPath, exprPathExplicit, argHashes)
-import ShortCut.Core.Util         (digest, resolveSymlinks)
+import ShortCut.Core.Util         (digest, resolveSymlinks, unlessExists)
 import System.Directory           (createDirectoryIfMissing)
 
 ------------------------------------
@@ -49,8 +46,6 @@ rEachTmps :: (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()) -> String
 rEachTmps actFn tmpPrefix s@(_,cfg,_) e = rEachMain (Just tmpFn) actFn s e
   where
     tmpFn args = do
-      -- args' <- liftIO $ mapM (resolveSymlinks cfg True . fromCutPath cfg) args
-      -- TODO hey is this where the nondeterminism gets in? use argHashes!
       let base = concat $ intersperse "_" $ map digest args
           dir  = fromCutPath cfg $ cacheDir cfg tmpPrefix
       return $ toCutPath cfg (dir </> base)
@@ -75,8 +70,8 @@ rSimpleScriptEach = rEach . aSimpleScript
  - but am open to alternatives if anyone thinks of something!
  -}
 rEachMain :: Maybe ([CutPath] -> IO CutPath)
-         -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
-         -> RulesFn
+          -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
+          -> RulesFn
 rEachMain mTmpFn actFn s@(_,cfg,ref) e@(CutFun r salt _ name exprs) = do
   argInitPaths <- mapM (rExpr s) (init exprs)
   (ExprPath argsLastsPath) <- rExpr s (last exprs)
@@ -141,7 +136,6 @@ aEachArgs cfg ref eType inits' tmp' p = do
       argsPath  = eachPath cfg tmp' eType p' <.> "args"
       argPaths  = inits' ++ [p'] -- TODO abs path bug here?
       argPaths' = map (toCutPath cfg) argPaths
-  liftIO $ createDirectoryIfMissing True $ tmp'
   writePaths cfg ref argsPath argPaths'
 
 {- This gathers together Rules-time and Action-time arguments and passes
@@ -175,21 +169,11 @@ aEachElem cfg ref eType tmpFn actFn singleName salt out = do
       createDirectoryIfMissing True d'
       return d
   let out' = debugAction cfg "aEachElem" (toCutPath cfg out) args''
-      -- dir' = fromCutPath cfg dir
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
       single  = exprPathExplicit cfg singleName eType salt hashes
       single' = fromCutPath cfg single
-      -- TODO need to determine specifically how many dots
-      -- singleRel' = ".." </> ".." </> ".." </> makeRelative (cfgTmpDir cfg) single'
-      -- singleRel' = tmpLink cfg out' single'
       args''' = single:map (toCutPath cfg) args''
-  done <- doesFileExist single'
-  when (not done) $ do
-    liftIO $ createDirectoryIfMissing True $ takeDirectory single'
-    actFn cfg ref dir args'''
-    trackWrite [single'] -- TODO debugTrackWrite?
-  -- TODO utility/paths fn "symlink" (unless that's aLink?)
-  -- unit $ quietly $ wrappedCmd cfg [out'] [] "ln" ["-fs", singleRel', out']
+  -- TODO any risk of single' being made after we test for it here?
+  unlessExists single' $ actFn cfg ref dir args'''
   symlink cfg ref out' single
-  -- debugTrackWrite cfg [out]

@@ -15,7 +15,6 @@ import System.IO.Silently         (hCapture_)
 import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
--- import Data.IORef                 (IORef)
 
 mkTestGroup ::  CutConfig -> Locks -> String
             -> [CutConfig -> Locks -> IO TestTree] -> IO TestTree

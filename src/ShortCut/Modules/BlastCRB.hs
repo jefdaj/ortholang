@@ -15,8 +15,6 @@ import ShortCut.Core.Debug         (debugAction)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
-import System.Directory            (createDirectoryIfMissing)
--- import System.Posix.Files          (readSymbolicLink)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -94,26 +92,14 @@ aBlastCRB cfg ref tmpDir [o, q, t] = do
       qDst' = toCutPath cfg qDst
       tSrc' = toCutPath cfg tSrc
       tDst' = toCutPath cfg tDst
-      oPath = tmp' </> "results.crb" -- TODO what's `need`ing this? stop it! ahh, symlink
+      oPath = tmp' </> "results.crb"
       oPath' = toCutPath cfg oPath
-      -- oRel' = tmpLink cfg o' oPath
-  liftIO $ createDirectoryIfMissing True tmp'
-  -- These links aren't required, just helpful for a sane tmpfile tree.
-  -- But if used, they have to have file extensions for some reason.
-  -- Otherwise you get "Too many positional arguments".
-  -- unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
-  -- unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
-  -- debugTrackWrite cfg [qSrc, tSrc]
   need [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
-  -- debugTrackWrite cfg [qSrc, tSrc] -- TODO why doesn't symlnk handle these??
-  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
-  -- debugTrackWrite cfg [oPath]
-  -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
-  -- debugTrackWrite cfg [o'']
+  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [o'] [Cwd tmp']
+    "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   symlink cfg ref o'' oPath'
-  -- debugTrackWrite cfg [o'] --- TODO why doesn't symlink handle this??
   where
     o'   = fromCutPath cfg o
     o''  = debugAction cfg "aBlastCRB" o [fromCutPath cfg tmpDir, o', q', t']
