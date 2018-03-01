@@ -28,6 +28,7 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
 import Data.List                  (find, intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
+import ShortCut.Core.Locks        (withWriteLock)
 import ShortCut.Core.Actions      (wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
@@ -205,18 +206,13 @@ rVar (_,cfg,ref) var expr oPath = do
 aVar :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aVar cfg ref vPath oPath = do
   alwaysRerun
-  liftIO $ removeIfExists vPath'
   need [oPath']
-  -- liftIO $ createDirectoryIfMissing True $ takeDirectory link'
+  withWriteLock ref vPath' $ liftIO $ removeIfExists vPath'
   symlink cfg ref vPath'' oPath
-  -- debugTrackWrite cfg [vPath'] -- TODO why doesn't symlink handle this??
   where
     oPath'  = fromCutPath cfg oPath
     vPath'  = fromCutPath cfg vPath
     vPath'' = debugAction cfg "aVar" vPath [vPath', oPath']
-    -- TODO utility fn for these? and also for ln using them?
-    -- destr  = ".." </> (makeRelative (cfgTmpDir cfg) dest')
-    -- linkr  = ".." </> (makeRelative (cfgTmpDir cfg) link')
 
 -- Handles the actual rule generation for all binary operators.
 -- TODO can it be factored out somehow? seems almost trivial now...

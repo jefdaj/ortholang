@@ -51,7 +51,7 @@ import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, rmAll,
-                                   unlessExists, ignoreExistsError, digest, globFiles)
+                                   ignoreExistsError, digest, globFiles)
 import ShortCut.Core.Locks        (withReadLock, withReadLocks,
                                    withWriteLock, withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
@@ -60,8 +60,6 @@ import System.FilePath            ((<.>))
 import System.IO                  (IOMode(..), withFile)
 import System.IO.Strict           (hGetContents)
 import System.Posix.Files         (createSymbolicLink)
-import Control.Concurrent.Thread.Delay (delay)
-import Data.IORef                      (IORef)
 
 ----------------
 -- read files --

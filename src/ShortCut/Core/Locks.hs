@@ -17,22 +17,17 @@ module ShortCut.Core.Locks
  - respectively. It should handle the rest.
  -}
 
--- import ShortCut.Core.Types
-
 import qualified Data.Map.Strict                  as Map
 import qualified Control.Concurrent.ReadWriteLock as RWLock
 
--- import Control.Applicative     (liftA2)
 import Development.Shake -- (Action, liftIO)
 import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
 import Data.List                        (nub)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef)
 import Data.Map.Strict                  (Map)
--- import ShortCut.Core.Paths              (CutPath, fromCutPath)
--- import System.Directory                 (doesFileExist)
--- import Control.Exception                (bracket_)
 
+-- TODO parametarize FilePath and re-export with CutPath in Types.hs?
 type Locks = IORef (Map FilePath RWLock)
 
 initLocks :: IO Locks
@@ -54,6 +49,7 @@ withReadLock ref path actFn = do
 withReadLocks :: Locks -> [FilePath] -> Action a -> Action a
 withReadLocks ref paths actFn = do
   locks <- liftIO $ mapM (getLock ref) (nub paths)
+  liftIO $ mapM_ RWLock.acquireRead locks
   actFn `actionFinally` (mapM_ RWLock.releaseRead locks)
 
 withWriteLock :: Locks -> FilePath -> Action a -> Action a

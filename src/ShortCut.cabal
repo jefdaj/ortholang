@@ -163,5 +163,4 @@ executable shortcut
                     unix,
                     utility-ht,
                     time,
-                    concurrent-extra,
-                    parallel-io
+                    concurrent-extra
