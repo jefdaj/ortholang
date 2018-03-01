@@ -12,4 +12,5 @@ srevs =      extract_queries      (blastn_rev      1e-5 large  small )
 mrevs = any (extract_queries_each (blastn_rev_each 1e-5 large [small]))
 
 # List hits in some but not all of the lists. Should be [].
+# (Equivalent to any [fwds, srevs, mrevs] ~ all [fwds, srevs, mrevs])
 result = some [fwds, srevs, mrevs]

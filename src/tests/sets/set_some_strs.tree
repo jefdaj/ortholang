@@ -2,12 +2,13 @@
 |-- cache
 |   `-- lines
 |       |-- 07f7f85b2a.txt
-|       |-- 08e51b13c4.txt
-|       |-- 0a57bf9b50.txt
+|       |-- 1757c8f425.txt
 |       |-- 2a478fbad2.txt
 |       |-- 303d7c623d.txt
+|       |-- 30f2d6ae2d.txt
 |       |-- 345a830504.txt
 |       |-- 46c01f638a.txt
+|       |-- 4ccf40592b.txt
 |       |-- 4d8a15e3cc.txt
 |       |-- 60cad69e0c.txt
 |       |-- 6396be1875.txt
@@ -19,16 +20,23 @@
 |       |-- aa2393b424.txt
 |       |-- b3e8c14e71.txt
 |       |-- b4f15431e0.txt
+|       |-- bdcd00c4fe.txt
 |       |-- cd314db7df.txt
+|       |-- e552203367.txt
 |       `-- f88e6f3ffc.txt
 |-- exprs
+|   |-- all
+|   |   `-- 1921ae7f90.str.list -> ../../cache/lines/e552203367.txt
+|   |-- any
+|   |   `-- 1921ae7f90.str.list -> ../../cache/lines/bdcd00c4fe.txt
+|   |-- diff
+|   |   `-- a356f971d8.str.list -> ../../cache/lines/6396be1875.txt
 |   |-- list
-|   |   |-- c974d30b2b.str.list.list -> ../../cache/lines/08e51b13c4.txt
+|   |   |-- 2e997cc9d9.str.list.list -> ../../cache/lines/1757c8f425.txt
+|   |   |-- b77738cc21.str.list.list -> ../../cache/lines/30f2d6ae2d.txt
 |   |   |-- d0cf31c7bd.str.list -> ../../cache/lines/f88e6f3ffc.txt
 |   |   |-- e6603f41db.str.list -> ../../cache/lines/2a478fbad2.txt
-|   |   `-- efd1761a9f.str.list.list -> ../../cache/lines/0a57bf9b50.txt
-|   |-- some
-|   |   `-- 94df747296.str.list -> ../../cache/lines/6396be1875.txt
+|   |   `-- eafddd0969.str.list -> ../../cache/lines/4ccf40592b.txt
 |   `-- str
 |       |-- 151a835cea.str -> ../../cache/lines/aa2393b424.txt
 |       |-- 1ec18a394c.str -> ../../cache/lines/b4f15431e0.txt
@@ -46,10 +54,9 @@
 |       |-- e4a7afdacb.str -> ../../cache/lines/9ab1070dec.txt
 |       `-- f27d5f6e3d.str -> ../../cache/lines/a77bc9a309.txt
 `-- vars
-    |-- res1.str.list -> ../exprs/some/94df747296.str.list
-    |-- res2.str.list -> ../exprs/some/94df747296.str.list
-    |-- result -> ../exprs/list/c974d30b2b.str.list.list
+    |-- result -> ../exprs/diff/a356f971d8.str.list
     |-- set1.str.list -> ../exprs/list/d0cf31c7bd.str.list
-    `-- set2.str.list -> ../exprs/list/e6603f41db.str.list
+    |-- set2.str.list -> ../exprs/list/e6603f41db.str.list
+    `-- set3.str.list -> ../exprs/list/eafddd0969.str.list
 
-7 directories, 45 files
+9 directories, 50 files

@@ -20,7 +20,7 @@ import ShortCut.Core.Util          (resolveSymlinks)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "setops"
-  , mFunctions = concat $ map mkSetFunctions setOpDescs
+  , mFunctions = some : (concat $ map mkSetFunctions setOpDescs)
   }
 
 type SetOpDesc =
@@ -42,7 +42,6 @@ setOpDescs =
   [ ("any" , '|', union)
   , ("all" , '&', intersection)
   , ("diff", '~', difference)
-  , ("some", '?', \s1 s2 -> difference (union s1 s2) (intersection s1 s2))
   ]
 
 mkSetFunctions :: SetOpDesc -> [CutFunction]
@@ -124,3 +123,19 @@ dedupByContent cfg ref paths = do
   hashes <- mapM (digestFile cfg ref) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
+
+some :: CutFunction
+some = CutFunction
+  { fName      = "some"
+  , fTypeCheck = tSetFold
+  , fFixity    = Prefix
+  , fRules     = rSome
+  }
+
+rSome :: CutState -> CutExpr -> Rules ExprPath
+rSome s (CutFun rtn salt deps _ lol) = rExpr s diffExpr
+  where
+    anyExpr  = CutFun rtn salt deps "any" lol
+    allExpr  = CutFun rtn salt deps "all" lol
+    diffExpr = CutBop rtn salt deps "~" anyExpr allExpr
+rSome _ _ = error "bad argument to rSome"
