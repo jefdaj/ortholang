@@ -1,18 +1,19 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       |-- 3f9e25e706.txt
+|       |-- 513d013fa0.txt
 |       |-- be6008d455.txt
 |       `-- dd81c4f27d.txt
 |-- exprs
 |   |-- list
-|   |   `-- 67a015f49b.str.list -> ../../cache/list/3f9e25e706.txt
+|   |   `-- 67a015f49b.str.list -> ../../cache/lines/3f9e25e706.txt
 |   |-- parse_searches
-|   |   `-- 1221bbdbf0.search
+|   |   `-- 1221bbdbf0.search -> ../../cache/lines/513d013fa0.txt
 |   `-- str
-|       |-- 45914ff33c.str -> ../../cache/list/dd81c4f27d.txt
-|       `-- 4c2f2d9385.str -> ../../cache/list/be6008d455.txt
+|       |-- 45914ff33c.str -> ../../cache/lines/dd81c4f27d.txt
+|       `-- 4c2f2d9385.str -> ../../cache/lines/be6008d455.txt
 `-- vars
     `-- result -> ../exprs/parse_searches/1221bbdbf0.search
 
-7 directories, 8 files
+7 directories, 9 files

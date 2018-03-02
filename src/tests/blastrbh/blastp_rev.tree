@@ -3,29 +3,35 @@
 |   |-- each
 |   |   |-- 1b3c4c085e
 |   |   |   |-- d7f5b78e8e.pdb -> ../../../exprs/makeblastdb_prot/d7f5b78e8e.pdb
-|   |   |   `-- d7f5b78e8e.pdb.args
+|   |   |   `-- d7f5b78e8e.pdb.args -> ../../../cache/lines/e00fb07ddb.txt
 |   |   |-- 40084d0c1d
-|   |   |   |-- 6b304f493c.bht -> ../../../exprs/blastp_db_rev/fe7dee10f6_46b5852d89_6b304f493c.bht
-|   |   |   `-- 6b304f493c.bht.args
+|   |   |   |-- 6b304f493c.bht -> ../../../exprs/blastp_db_rev/ce1c174684_f19449102b_6b304f493c.bht
+|   |   |   `-- 6b304f493c.bht.args -> ../../../cache/lines/368df336bf.txt
 |   |   |-- b416063c3c
-|   |   |   |-- ba1a6a22a1.str.list -> ../../../exprs/extract_queries/ba1a6a22a1.str.list
-|   |   |   `-- ba1a6a22a1.str.list.args
+|   |   |   |-- 05a1c8acf2.str.list -> ../../../exprs/extract_queries/05a1c8acf2.str.list
+|   |   |   `-- 05a1c8acf2.str.list.args -> ../../../cache/lines/d69baeec82.txt
 |   |   |-- b960925b88
-|   |   |   |-- 3fd2d1ee14.bht -> ../../../exprs/blastp/fe7dee10f6_6b304f493c_3fd2d1ee14.bht
-|   |   |   `-- 3fd2d1ee14.bht.args
+|   |   |   |-- f19449102b.bht -> ../../../exprs/blastp/ce1c174684_6b304f493c_f19449102b.bht
+|   |   |   `-- f19449102b.bht.args -> ../../../cache/lines/b8c77109fd.txt
 |   |   `-- bec4998f1a
-|   |       |-- a21487f676.str.list -> ../../../exprs/extract_queries/a21487f676.str.list
-|   |       `-- a21487f676.str.list.args
-|   |-- list
-|   |   |-- 014b68a2dc.txt
+|   |       |-- 16cd87c6ad.str.list -> ../../../exprs/extract_queries/16cd87c6ad.str.list
+|   |       `-- 16cd87c6ad.str.list.args -> ../../../cache/lines/be5d46f86c.txt
+|   |-- lines
+|   |   |-- 11867b459f.txt
+|   |   |-- 14135d2aeb.txt
+|   |   |-- 16c24364ea.txt
+|   |   |-- 21be25c2fd.txt
+|   |   |-- 368df336bf.txt
+|   |   |-- 38cb049e4b.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- a77609ebaf.txt
-|   |   |-- b9f4259be4.txt
+|   |   |-- 7b52c5112b.txt
+|   |   |-- a167755408.txt
+|   |   |-- b8c77109fd.txt
 |   |   |-- bdc783547b.txt
-|   |   |-- c3f727206f.txt
-|   |   |-- ca55994d42.txt
-|   |   |-- ef87d3e725.txt
-|   |   `-- f7add36d38.txt
+|   |   |-- be5d46f86c.txt
+|   |   |-- d69baeec82.txt
+|   |   |-- e00fb07ddb.txt
+|   |   `-- ef87d3e725.txt
 |   |-- load
 |   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -36,47 +42,47 @@
 |           `-- a810086108.pdb.psq
 |-- exprs
 |   |-- any
-|   |   |-- 4a4495639b.str.list.list
-|   |   |-- 98d5b4c81f.str.list
-|   |   `-- ca37349acc.str.list.list
+|   |   |-- 4a4495639b.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   |-- 98d5b4c81f.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   `-- ca37349acc.str.list.list -> ../../cache/lines/14135d2aeb.txt
 |   |-- blastp
-|   |   `-- fe7dee10f6_6b304f493c_3fd2d1ee14.bht
+|   |   `-- ce1c174684_6b304f493c_f19449102b.bht
 |   |-- blastp_db
 |   |   `-- 8158675169_1af4d085e7_46b5852d89.bht
 |   |-- blastp_db_rev
-|   |   `-- fe7dee10f6_46b5852d89_6b304f493c.bht
+|   |   `-- ce1c174684_f19449102b_6b304f493c.bht
 |   |-- blastp_db_rev_each
-|   |   `-- 8158675169_46b5852d89_71c16ee95c.bht.list
+|   |   `-- 8158675169_46b5852d89_71c16ee95c.bht.list -> ../../cache/lines/be5d46f86c.txt
 |   |-- blastp_each
-|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list
+|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list -> ../../cache/lines/d69baeec82.txt
 |   |-- extract_queries
-|   |   |-- a21487f676.str.list
-|   |   |-- a2aa077102.str.list
-|   |   |-- b09bd7df49.str.list
-|   |   `-- ba1a6a22a1.str.list
+|   |   |-- 05a1c8acf2.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   |-- 16cd87c6ad.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   |-- a2aa077102.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   `-- b09bd7df49.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |-- extract_queries_each
-|   |   |-- 848b144734.str.list.list
-|   |   `-- f9707bd7f9.str.list.list
+|   |   |-- 848b144734.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   `-- f9707bd7f9.str.list.list -> ../../cache/lines/14135d2aeb.txt
 |   |-- list
-|   |   |-- 2b5e7336b5.faa.list -> ../../cache/list/ca55994d42.txt
-|   |   |-- 2f85a9aaa6.str.list.list -> ../../cache/list/a77609ebaf.txt
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/f7add36d38.txt
-|   |   |-- 72b8307ffd.str.list.list.list -> ../../cache/list/014b68a2dc.txt
-|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/b9f4259be4.txt
-|   |   `-- cce65539fd.faa.list -> ../../cache/list/c3f727206f.txt
+|   |   |-- 2b5e7336b5.faa.list -> ../../cache/lines/11867b459f.txt
+|   |   |-- 2f85a9aaa6.str.list.list -> ../../cache/lines/16c24364ea.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   |-- 72b8307ffd.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
+|   |   `-- cce65539fd.faa.list -> ../../cache/lines/e00fb07ddb.txt
 |   |-- load_faa
 |   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2.faa
 |   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- makeblastdb_prot
-|   |   |-- c08cc19988.pdb
-|   |   `-- d7f5b78e8e.pdb
+|   |   |-- c08cc19988.pdb -> ../../cache/lines/a167755408.txt
+|   |   `-- d7f5b78e8e.pdb -> ../../cache/lines/a167755408.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- ced061f0b2.pdb.list
+|   |   `-- ced061f0b2.pdb.list -> ../../cache/lines/7b52c5112b.txt
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
-|       `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
+|       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
 `-- vars
     |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- mapped.str.list.list -> ../exprs/any/4a4495639b.str.list.list
@@ -89,4 +95,4 @@
     |-- singleFwd.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
     `-- singleRev.str.list -> ../exprs/extract_queries/a2aa077102.str.list
 
-27 directories, 62 files
+27 directories, 68 files

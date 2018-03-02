@@ -5,9 +5,9 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Cmd           (wrappedCmd)
-import ShortCut.Core.Debug         (debug, debugTrackWrite, debugAction)
-import ShortCut.Core.Paths         (fromCutPath, readPaths, CutPath)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readPaths)
+import ShortCut.Core.Debug         (debug, debugAction)
+import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
                                     mkLoadList, rSimple, rSimpleScript)
 import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
@@ -220,17 +220,17 @@ tConcatFastasEach :: [CutType] -> Either String CutType
 tConcatFastasEach [ListOf (ListOf x)] | elem x [faa, fna] = Right $ ListOf x
 tConcatFastasEach _ = Left "expected a list of fasta files (of the same type)"
 
-aConcat :: CutConfig -> [CutPath] -> Action ()
-aConcat cfg [oPath, fsPath] = do
-  faPaths <- readPaths cfg fs'
+aConcat :: CutConfig -> Locks -> [CutPath] -> Action ()
+aConcat cfg ref [oPath, fsPath] = do
+  faPaths <- readPaths cfg ref fs'
   let faPaths' = map (fromCutPath cfg) faPaths
   need (debug cfg ("faPaths: " ++ show faPaths) faPaths')
   let out'    = fromCutPath cfg oPath
       out''   = debugAction cfg "aConcat" out' [out', fs']
       catArgs = faPaths' ++ [">", out']
-  unit $ quietly $ wrappedCmd cfg [out''] [Shell] "cat"
-                     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-  debugTrackWrite cfg [out'']
+  wrappedCmdWrite cfg ref out'' faPaths' [out''] [Shell] "cat"
+    (debug cfg ("catArgs: " ++ show catArgs) catArgs)
+  -- debugTrackWrite cfg [out'']
   where
     fs' = fromCutPath cfg fsPath
-aConcat _ _ = error "bad argument to aConcat"
+aConcat _ _ _ = error "bad argument to aConcat"

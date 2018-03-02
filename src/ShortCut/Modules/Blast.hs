@@ -15,13 +15,12 @@ import ShortCut.Core.Types
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Cmd           (wrappedCmd)
-import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
-import ShortCut.Core.Paths         (readLit, readPath, fromCutPath, CutPath)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath)
+import ShortCut.Core.Debug         (debugAction)
+import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb)
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeDirectory, takeFileName, (</>))
-import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -79,30 +78,25 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
 rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (CutConfig -> [CutPath] -> Action ())
-aMkBlastFromDb bCmd cfg [o, e, q, p] = do
-  eStr   <- readLit cfg e'
-  prefix <- readPath cfg p'
+aMkBlastFromDb :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
+  eStr   <- readLit cfg ref e'
+  prefix <- readPath cfg ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
       dbg     = if cfgDebug cfg then ["-v"] else []
       args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
                 , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-
-  -- TODO redundant?
-  liftIO $ createDirectoryIfMissing True cDir
-  liftIO $ createDirectoryIfMissing True $ takeDirectory o'
-
-  unit $ quietly $ wrappedCmd cfg [o'] [Cwd cDir] "parallelblast.py" args
-  debugTrackWrite cfg [o'']
+  wrappedCmdWrite cfg ref o'' [prefix' ++ ".*"] [o''] [Cwd cDir]
+    "parallelblast.py" args
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
     p'  = fromCutPath cfg p
     e'  = fromCutPath cfg e
     o'' = debugAction cfg "aMkBlastFromDb" o' [bCmd, e', o', q', p']
-aMkBlastFromDb _ _ _ = error $ "bad argument to aMkBlastFromDb"
+aMkBlastFromDb _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------
 -- *blast* --

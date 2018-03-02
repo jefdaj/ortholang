@@ -7,6 +7,7 @@ module ShortCut.Core.Types
   , CutType(..)
   , CutVar(..)
   , CutScript
+  , Locks
   , CutState
   -- , Assoc(..) -- we reuse this from Parsec
   , CutFixity(..)
@@ -22,7 +23,6 @@ module ShortCut.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , typeOf
-  -- , nonEmptyType
   , extOf
   , depsOf
   , rDepsOf
@@ -43,11 +43,17 @@ module ShortCut.Core.Types
   , ActionFn
   , RulesFn
   , TypeChecker
+  , typeMatches
+  , typesMatch
+  , nonEmptyType
+  , isNonEmpty
   )
   where
 
 -- import Prelude hiding (print)
 import qualified Text.Parsec as P
+
+import ShortCut.Core.Locks (Locks)
 
 import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
@@ -55,6 +61,7 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
+-- import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 -- TODO where should these go?
@@ -242,7 +249,7 @@ data CutConfig = CutConfig
 -- Parse monad --
 -----------------
 
-type CutState = (CutScript, CutConfig)
+type CutState = (CutScript, CutConfig, Locks)
 type ParseM a = P.Parsec String CutState a
 
 runParseM :: ParseM a -> CutState -> String -> Either ParseError a
@@ -293,7 +300,7 @@ data CutFunction = CutFunction
   { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
   , fFixity    :: CutFixity
-  , fRules  :: CutState -> CutExpr -> Rules ExprPath
+  , fRules     :: CutState -> CutExpr -> Rules ExprPath
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)
@@ -330,3 +337,33 @@ explainFnBug =
   \it can only manipulate lists whose elements are known *before* running the \
   \program. If you want Jeff to consider rewriting some things to fix that, \
   \drop him a line!"
+
+-- this mostly checks equality, but also has to deal with how an empty list can
+-- be any kind of list
+-- TODO is there any more elegant way? this seems error-prone...
+typeMatches :: CutType -> CutType -> Bool
+typeMatches Empty _ = True
+typeMatches _ Empty = True
+typeMatches (ListOf a) (ListOf b) = typeMatches a b
+typeMatches a b = a == b
+
+typesMatch :: [CutType] -> [CutType] -> Bool
+typesMatch as bs = sameLength && allMatch
+  where
+    sameLength = length as == length bs
+    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
+
+nonEmptyType :: [CutType] -> Either String CutType
+nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
+  where
+    nonEmpty = filter isNonEmpty ts
+    elemType = if      null ts       then Empty
+               else if null nonEmpty then head ts -- for example (ListOf Empty)
+               else    head nonEmpty
+    typesOK  = all (typeMatches elemType) ts
+    errorMsg = "all elements of a list must have the same type"
+
+isNonEmpty :: CutType -> Bool
+isNonEmpty Empty      = False
+isNonEmpty (ListOf t) = isNonEmpty t
+isNonEmpty _          = True

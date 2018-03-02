@@ -3,34 +3,35 @@
 |   |-- each
 |   |   `-- 5a0cbc306e
 |   |       |-- f162cc899d.faa -> ../../../exprs/translate/f162cc899d.faa
-|   |       `-- f162cc899d.faa.args
-|   |-- list
+|   |       `-- f162cc899d.faa.args -> ../../../cache/lines/e1e5fdbeba.txt
+|   |-- lines
 |   |   |-- 1f98704802.txt
-|   |   |-- 4184c57702.txt
-|   |   |-- db35af74d8.txt
-|   |   `-- dcd3a69ac3.txt
+|   |   |-- 3d0f4d048d.txt
+|   |   |-- 8581ed1b73.txt
+|   |   |-- cc1b6a7aa4.txt
+|   |   `-- e1e5fdbeba.txt
 |   `-- load
 |       `-- 737dfdb34e.fna -> $WORKDIR/data/6803genes.fna
 |-- exprs
 |   |-- any
-|   |   `-- 7f0a05b036.faa.list
+|   |   `-- 7f0a05b036.faa.list -> ../../cache/lines/cc1b6a7aa4.txt
 |   |-- list
-|   |   |-- 49ae883ffc.faa.list -> ../../cache/list/db35af74d8.txt
-|   |   |-- 83c6cf693b.fna.list -> ../../cache/list/4184c57702.txt
-|   |   |-- 98a7f2843e.faa.list.list -> ../../cache/list/dcd3a69ac3.txt
-|   |   `-- fae5b667b7.str.list -> ../../cache/list/1f98704802.txt
+|   |   |-- 49ae883ffc.faa.list -> ../../cache/lines/8581ed1b73.txt
+|   |   |-- 83c6cf693b.fna.list -> ../../cache/lines/e1e5fdbeba.txt
+|   |   |-- 98a7f2843e.faa.list.list -> ../../cache/lines/3d0f4d048d.txt
+|   |   `-- fae5b667b7.str.list -> ../../cache/lines/1f98704802.txt
 |   |-- load_fna
 |   |   `-- f110b4b1c9.fna -> ../../cache/load/737dfdb34e.fna
 |   |-- str
-|   |   `-- a2fd369878.str -> ../../cache/list/1f98704802.txt
+|   |   `-- a2fd369878.str -> ../../cache/lines/1f98704802.txt
 |   |-- translate
 |   |   |-- f162cc899d.faa
 |   |   `-- fddf135b43.faa
 |   `-- translate_each
-|       `-- 283ecf7c50.faa.list
+|       `-- 283ecf7c50.faa.list -> ../../cache/lines/cc1b6a7aa4.txt
 `-- vars
     |-- mapped.faa.list -> ../exprs/translate_each/283ecf7c50.faa.list
     |-- result -> ../exprs/any/7f0a05b036.faa.list
     `-- single.faa -> ../exprs/translate/fddf135b43.faa
 
-13 directories, 20 files
+13 directories, 21 files

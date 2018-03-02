@@ -7,16 +7,14 @@ import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import ShortCut.Core.Cmd           (wrappedCmd)
+import ShortCut.Core.Actions       (wrappedCmdWrite, symlink)
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each  (rEachTmps)
-import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
-import ShortCut.Core.Paths         (CutPath, fromCutPath, symlink)
+import ShortCut.Core.Debug         (debugAction)
+import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
-import System.Directory            (createDirectoryIfMissing)
--- import System.Posix.Files          (readSymbolicLink)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -79,15 +77,15 @@ tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or
  - resolves one level of symlink, so we have to point directly to the input
  - files rather than to the canonical $TMPDIR/cache/load... paths.
  -}
-aBlastCRB :: CutConfig -> CutPath -> [CutPath] -> Action ()
-aBlastCRB cfg tmpDir [o, q, t] = do
+aBlastCRB :: CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
+aBlastCRB cfg ref tmpDir [o, q, t] = do
   need [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
-  qName <- fmap takeFileName $ liftIO $ resolveSymlinks cfg True q'
-  tName <- fmap takeFileName $ liftIO $ resolveSymlinks cfg True t'
+  qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
+  tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
   -- instead, need to link to the actual input files
-  qDst <- liftIO $ resolveSymlinks cfg False q' -- link directly to the file
-  tDst <- liftIO $ resolveSymlinks cfg False t' -- link directly to the file
+  qDst <- liftIO $ resolveSymlinks Nothing q' -- link directly to the file
+  tDst <- liftIO $ resolveSymlinks Nothing t' -- link directly to the file
   let qSrc  = tmp' </> qName
       tSrc  = tmp' </> tName
       qSrc' = toCutPath cfg qSrc
@@ -96,25 +94,16 @@ aBlastCRB cfg tmpDir [o, q, t] = do
       tDst' = toCutPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toCutPath cfg oPath
-      -- oRel' = tmpLink cfg o' oPath
-  liftIO $ createDirectoryIfMissing True tmp'
-  -- These links aren't required, just helpful for a sane tmpfile tree.
-  -- But if used, they have to have file extensions for some reason.
-  -- Otherwise you get "Too many positional arguments".
-  -- unit $ wrappedCmd cfg [q'] [] "ln" ["-fs", qDst, qSrc]
-  -- unit $ wrappedCmd cfg [t'] [] "ln" ["-fs", tDst, tSrc]
-  -- debugTrackWrite cfg [qSrc, tSrc]
-  symlink cfg qSrc' qDst' -- TODO src and dst flipped?
-  symlink cfg tSrc' tDst' -- TODO src and dst flipped?
-  wrappedCmd cfg [o'] [Cwd tmp'] "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
-  debugTrackWrite cfg [oPath]
-  -- unit $ quietly $ wrappedCmd cfg [o''] [] "ln" ["-fs", oRel', o'']
-  -- debugTrackWrite cfg [o'']
-  symlink cfg o'' oPath'
+  need [qDst, tDst]
+  symlink cfg ref qSrc' qDst'
+  symlink cfg ref tSrc' tDst'
+  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [o'] [Cwd tmp']
+    "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
+  symlink cfg ref o'' oPath'
   where
     o'   = fromCutPath cfg o
     o''  = debugAction cfg "aBlastCRB" o [fromCutPath cfg tmpDir, o', q', t']
     tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t
-aBlastCRB _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
+aBlastCRB _ _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

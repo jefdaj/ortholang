@@ -11,7 +11,7 @@ import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.List              (find, union)
 import ShortCut.Core.Debug    (debugParser)
-import ShortCut.Core.Util     (nonEmptyType)
+-- import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, lookAhead, between, choice, sepBy)
@@ -79,7 +79,7 @@ pBop _ = error "pBop only works with infix functions"
 -- TODO can factor the try out to be by void right?
 pEnd :: ParseM ()
 pEnd = do
-  (_, cfg) <- getState
+  (_, cfg, _) <- getState
   res <- lookAhead $ void $ choice
     [ eof
     , void $ try $ choice $ map pSym $ operatorChars cfg ++ ")],"
@@ -93,7 +93,7 @@ pEnd = do
 -- TODO get function names from modules
 pName :: ParseM String
 pName = do
-  (_, cfg) <- getState
+  (_, cfg, _) <- getState
   (choice $ map (try . str') $ fnNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
@@ -106,7 +106,7 @@ fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 -- TODO should be able to commit after parsing the fn name, which would allow real failure
 pFun :: ParseM CutExpr
 pFun = do
-  (_, cfg) <- getState
+  (_, cfg, _) <- getState
   name <- try $ pName
   args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
@@ -142,5 +142,5 @@ pTerm = choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM CutExpr
 pExpr = do
-  (_, cfg) <- getState
+  (_, cfg, _) <- getState
   E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"

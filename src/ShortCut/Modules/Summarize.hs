@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic      (rExpr)
-import ShortCut.Core.Paths (writeLits)
+import ShortCut.Core.Actions (readLits, writeLits)
 import ShortCut.Core.Debug (debugAction)
 import Development.Shake.FilePath ((</>))
 
@@ -36,22 +36,22 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 rSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPath
-rSummary summaryFn s@(_,cfg) expr@(CutFun _ _ _ _ [iList]) = do
+rSummary summaryFn s@(_,cfg,ref) expr@(CutFun _ _ _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   -- let (ListOf (ListOf eType)) = typeOf iList
       -- (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
                                           -- [show expr, iPath]
   let oPath = fromCutPath cfg $ exprPath s expr
-  oPath %> aSummary cfg summaryFn iPath
+  oPath %> aSummary cfg ref summaryFn iPath
   return (ExprPath oPath)
 rSummary _ _ _ = error "bad argument to rSummary"
 
-aSummary :: CutConfig -> ([[String]] -> [String])
+aSummary :: CutConfig -> Locks -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()
-aSummary cfg summaryFn iPath out = do
+aSummary cfg ref summaryFn iPath out = do
   need [iPath]
-  iLists <- fmap lines $ readFile' iPath
-  iElems <- mapM (fmap lines . readFile' . (\p -> cfgTmpDir cfg </> p)) iLists
+  iLists <- readLits cfg ref iPath
+  iElems <- mapM (readLits cfg ref . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
       out' = debugAction cfg "aSummary" out [out, iPath]
-  writeLits cfg out' oElems
+  writeLits cfg ref out' oElems

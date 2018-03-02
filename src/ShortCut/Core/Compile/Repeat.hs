@@ -11,8 +11,9 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Paths  (exprPath, fromCutPath, writeLits, writePaths,
-                             readLit, CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Actions (writeLits, writePaths, readLit)
+import ShortCut.Core.Paths  (exprPath, fromCutPath,
+                             CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript)
 import ShortCut.Core.Debug   (debugRules, debugAction)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
@@ -66,18 +67,18 @@ tRepeatEach _ = Left "invalid args to repeat_each" -- TODO better errors here
 --      messing with it for now
 -- TODO can this be parallelized better?
 cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules ExprPath
-cRepeat (script,cfg) resExpr subVar subExpr = do
+cRepeat (script,cfg,ref) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)
       sub  = (subVar, subExpr)
       deps = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       -- TODO this should be very different right?
       pre  = digest $ map show $ res:sub:deps
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
-  (ResPath resPath) <- compileScript (scr',cfg) (Just pre)
+  (ResPath resPath) <- compileScript (scr',cfg,ref) (Just pre)
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
 rRepeatEach :: CutState -> CutExpr -> Rules ExprPath
-rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
+rRepeatEach s@(scr,cfg,ref) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
@@ -89,18 +90,18 @@ rRepeatEach s@(scr,cfg) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subL
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aRepeatEachLits (typeOf expr)
                   else aRepeatEachLinks
-    in actFn cfg outPath subPaths' resPaths'
+    in actFn cfg ref outPath subPaths' resPaths'
   return (ExprPath outPath')
 rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 
 -- TODO factor out, and maybe unify with rListLits
 -- TODO subPaths is only one path? if so, rename it
-aRepeatEachLits :: CutType -> CutConfig
+aRepeatEachLits :: CutType -> CutConfig -> Locks
                 -> CutPath -> CutPath -> [CutPath] -> Action ()
-aRepeatEachLits _ cfg outPath subPaths resPaths = do
-  lits <- mapM (readLit cfg) resPaths'
+aRepeatEachLits _ cfg ref outPath subPaths resPaths = do
+  lits <- mapM (readLit cfg ref) resPaths'
   let lits' = map stripWhiteSpace lits
-  writeLits cfg out lits'
+  writeLits cfg ref out lits'
   where
     outPath'  = fromCutPath cfg outPath
     subPaths' = fromCutPath cfg subPaths
@@ -108,10 +109,10 @@ aRepeatEachLits _ cfg outPath subPaths resPaths = do
     out = debugAction cfg "aRepeatEachLits" outPath' (outPath':subPaths':resPaths')
 
 -- TODO factor out, and maybe unify with rListLinks
-aRepeatEachLinks :: CutConfig -> CutPath -> CutPath -> [CutPath] -> Action ()
-aRepeatEachLinks cfg outPath subPaths resPaths = do
+aRepeatEachLinks :: CutConfig -> Locks -> CutPath -> CutPath -> [CutPath] -> Action ()
+aRepeatEachLinks cfg ref outPath subPaths resPaths = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
-  writePaths cfg out resPaths
+  writePaths cfg ref out resPaths
   where
     outPath'  = fromCutPath cfg outPath
     subPaths' = fromCutPath cfg subPaths

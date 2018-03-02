@@ -5,8 +5,8 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Cmd           (wrappedCmd)
-import ShortCut.Core.Debug         (debugTrackWrite, debugAction)
+import ShortCut.Core.Actions       (wrappedCmdWrite)
+import ShortCut.Core.Debug         (debugAction)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
@@ -87,10 +87,10 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
 rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
-aMkBlastFromDbRev :: String -> (CutConfig -> [CutPath] -> Action ())
-aMkBlastFromDbRev bCmd cfg [oPath, eValue, dbPrefix, queryFa] =
-  aMkBlastFromDb  bCmd cfg [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ _ = error "bad argument to aMkBlastFromDbRev"
+aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aMkBlastFromDbRev bCmd cfg ref [oPath, eValue, dbPrefix, queryFa] =
+  aMkBlastFromDb  bCmd cfg ref [oPath, eValue, queryFa, dbPrefix]
+aMkBlastFromDbRev _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
 
 ---------------------
 -- reciprocal_best --
@@ -107,16 +107,17 @@ reciprocalBest = CutFunction
   }
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
-aReciprocalBest :: CutConfig -> [CutPath] -> Action ()
-aReciprocalBest cfg [out, left, right] = do
-  unit $ quietly $ wrappedCmd cfg [out'] [] "reciprocal_best.R" [out', left', right']
-  debugTrackWrite cfg [out'']
+aReciprocalBest :: CutConfig -> Locks -> [CutPath] -> Action ()
+aReciprocalBest cfg ref [out, left, right] = do
+  wrappedCmdWrite cfg ref out'' [left', right'] [out'] []
+    "reciprocal_best.R" [out', left', right']
+  -- debugTrackWrite cfg [out'']
   where
     out'   = fromCutPath cfg out
     left'  = fromCutPath cfg left
     right' = fromCutPath cfg right
     out''  = debugAction cfg "aReciprocalBest" out' [out', left', right']
-aReciprocalBest _ args = error $ "bad argument to aReciprocalBest: " ++ show args
+aReciprocalBest _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
 
 --------------------------
 -- reciprocal_best_each --

@@ -1,10 +1,10 @@
 .
 |-- cache
-|   `-- list
+|   `-- lines
 |       `-- e8e4e0696f.txt
 |-- exprs
 |   `-- str
-|       `-- 26d75f2bb4.str -> ../../cache/list/e8e4e0696f.txt
+|       `-- 26d75f2bb4.str -> ../../cache/lines/e8e4e0696f.txt
 `-- vars
     `-- result -> ../exprs/str/26d75f2bb4.str
 

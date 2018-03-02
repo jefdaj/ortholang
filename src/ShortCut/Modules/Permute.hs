@@ -7,7 +7,8 @@ import ShortCut.Core.Types
 
 import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
-import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath, readStrings, writeStrings)
+import ShortCut.Core.Actions (readStrings, writeStrings)
+import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath)
 import ShortCut.Core.Debug          (debugAction, debug)
 import ShortCut.Core.Util           (digest)
 
@@ -33,7 +34,7 @@ cutModule = CutModule
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
          -> CutState -> CutExpr -> Rules ExprPath
-rPermute comboFn s@(_, cfg) expr@(CutFun _ salt _ _ [iList]) = do
+rPermute comboFn s@(_, cfg, _) expr@(CutFun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oList      = fromCutPath cfg $ exprPath s expr
       (ListOf t) = typeOf iList
@@ -47,9 +48,9 @@ aPermute :: CutState
          -> ([String] -> [[String]])
          -> FilePath -> CutType -> Int
          -> FilePath -> Action ()
-aPermute (_,cfg) comboFn iPath eType salt out = do
+aPermute (_,cfg,ref) comboFn iPath eType salt out = do
   need [iPath]
-  elements <- readStrings eType cfg iPath
+  elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   -- TODO will this match other files?
@@ -57,9 +58,9 @@ aPermute (_,cfg) comboFn iPath eType salt out = do
       oPaths  = map mkOut elements
       oPaths' = map (fromCutPath cfg) oPaths
       combos  = comboFn elements
-  mapM_ (\(p,ps) -> writeStrings eType cfg p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths' combos)
+  mapM_ (\(p,ps) -> writeStrings eType cfg ref p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths' combos)
   let out' = debugAction cfg "aPermute" out [iPath, extOf eType, out]
-  writeStrings (ListOf eType) cfg out' oPaths'
+  writeStrings (ListOf eType) cfg ref out' oPaths'
 
 --------------------
 -- leave_each_out --

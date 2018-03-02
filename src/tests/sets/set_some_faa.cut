@@ -1,0 +1,10 @@
+# Basic test of the some function and its binary operator equivalent, ?.
+# These need to be tested separately with literals and path-based types
+# because they're implemented separately.
+
+set1 = ["data/7942genes.faa"]
+set2 = ["data/7942genes.faa", "data/7942genes10.faa"]
+set3 = ["data/7942genes.faa", "data/7942genes10.faa", "data/7942genes50.faa"]
+
+# should be ["data/7942genes.faa", "data/7942genes50.faa"]
+result = some [set1, set2, set3]

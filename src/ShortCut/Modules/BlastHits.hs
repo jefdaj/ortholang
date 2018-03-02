@@ -6,9 +6,9 @@ import ShortCut.Core.Types
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Cmd           (wrappedCmd, wrappedCmdOut)
-import ShortCut.Core.Debug         (debugAction, debugTrackWrite)
-import ShortCut.Core.Paths         (CutPath, fromCutPath, writeLits)
+import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits)
+import ShortCut.Core.Debug         (debugAction )
+import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.BlastCRB   (crb)
 
@@ -67,16 +67,16 @@ extractTargetsEach = CutFunction
   , fRules     = rEach $ aCutCol 2
   }
 
-aCutCol :: Int -> CutConfig -> [CutPath] -> Action ()
-aCutCol n cfg [outPath, tsvPath] = do
-  out <- wrappedCmdOut cfg [tsvPath'] [] "cut" ["-f" ++ show n, tsvPath']
-  let out' = sort $ nub $ lines out
-  writeLits cfg outPath'' out'
+aCutCol :: Int -> CutConfig -> Locks -> [CutPath] -> Action ()
+aCutCol n cfg ref [outPath, tsvPath] = do
+  out <- wrappedCmdOut cfg ref outPath' [tsvPath'] [] []
+           "cut" ["-f", show n, tsvPath']
+  writeLits cfg ref outPath'' $ sort $ nub $ lines out
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugAction cfg "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aCutCol _ _ _ = error "bad arguments to aCutCol"
+aCutCol _ _ _ _ = error "bad arguments to aCutCol"
 
 --------------------------
 -- filter_evalue(_each) --
@@ -98,17 +98,17 @@ filterEvalueEach = CutFunction
   , fRules     = rEach aFilterEvalue
   }
 
-aFilterEvalue :: CutConfig -> [CutPath] -> Action ()
-aFilterEvalue cfg [out, evalue, hits] = do
-  unit $ quietly $ wrappedCmd cfg [out'] []
-                     "filter_evalue.R" [out', evalue', hits']
-  debugTrackWrite cfg [out'']
+aFilterEvalue :: CutConfig -> Locks -> [CutPath] -> Action ()
+aFilterEvalue cfg ref [out, evalue, hits] = do
+  wrappedCmdWrite cfg ref out'' [evalue', hits'] [out''] []
+    "filter_evalue.R" [out', evalue', hits']
+  -- debugTrackWrite cfg [out'']
   where
     out'    = fromCutPath cfg out
     out''   = debugAction cfg "aFilterEvalue" out' [out', evalue', hits']
     evalue' = fromCutPath cfg evalue
     hits'   = fromCutPath cfg hits
-aFilterEvalue _ args = error $ "bad argument to aFilterEvalue: " ++ show args
+aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 
 -------------------------------
 -- get the best hit per gene --
@@ -133,12 +133,12 @@ bestHitsEach = CutFunction
   , fRules     = rEach aBestExtract
   }
 
-aBestExtract :: CutConfig -> [CutPath] -> Action ()
-aBestExtract cfg [out, hits] = do
-  unit $ quietly $ wrappedCmd cfg [out'] [] "best_hits.R" [out', hits']
-  debugTrackWrite cfg [out'']
+aBestExtract :: CutConfig -> Locks -> [CutPath] -> Action ()
+aBestExtract cfg ref [out, hits] = do
+  wrappedCmdWrite cfg ref out'' [hits'] [out''] [] "best_hits.R" [out', hits']
+  -- debugTrackWrite cfg [out'']
   where
     out'  = fromCutPath cfg out
     out'' = debugAction cfg "aBestExtract" out' [out', hits']
     hits' = fromCutPath cfg hits
-aBestExtract _ args = error $ "bad argument to aBestExtract: " ++ show args
+aBestExtract _ _ args = error $ "bad argument to aBestExtract: " ++ show args

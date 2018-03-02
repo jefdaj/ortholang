@@ -15,6 +15,7 @@ import Test.Tasty.HUnit      ((@=?), testCase)
 import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
+-- import Data.IORef            (IORef)
 
 -- import Test.Tasty            (TestTree, testGroup)
 -- import Test.Tasty.QuickCheck (testProperty)
@@ -38,24 +39,25 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
 -- TODO round-trip function!
 
-regularParse :: ParseM a -> CutConfig -> String -> Either ParseError a
-regularParse p cfg = parseWithEof p ([], cfg)
+regularParse :: ParseM a -> CutConfig -> Locks -> String
+             -> Either ParseError a
+regularParse p cfg ref = parseWithEof p ([], cfg, ref)
 
 takeVar :: String -> CutVar
 takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> CutConfig -> String -> Bool
-parsedItAll p cfg str' = case parseWithLeftOver p ([], cfg) str' of
+parsedItAll :: ParseM a -> CutConfig -> Locks -> String -> Bool
+parsedItAll p cfg ref str' = case parseWithLeftOver p ([], cfg, ref) str' of
   Right (_, "") -> True
   _ -> False
 
 -- parse some cut code, pretty-print it, parse again,
 -- and check that the two parsed ASTs are equal
-roundTrip :: (Eq a, Show a, Pretty a) => CutConfig
+roundTrip :: (Eq a, Show a, Pretty a) => CutConfig -> Locks
           -> ParseM a -> String -> Either (String, String) a
-roundTrip cfg psr code = case regularParse psr cfg code of
+roundTrip cfg ref psr code = case regularParse psr cfg ref code of
   Left  l1 -> Left (code, show l1)
-  Right r1 -> case regularParse psr cfg $ prettyShow r1 of
+  Right r1 -> case regularParse psr cfg ref $ prettyShow r1 of
     Left  l2 -> Left (code, show l2)
     Right r2 -> if r1 == r2
                   then Right r2
@@ -63,67 +65,67 @@ roundTrip cfg psr code = case regularParse psr cfg code of
 
 -- Test that a list of example strings can be parsed + printed + parsed,
 -- and both parses come out correctly, or return the first error.
-tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> ParseM a
+tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> ParseM a
              -> [(String, a)] -> Either (String, String) ()
-tripExamples _ _ [] = Right ()
-tripExamples cfg p ((a,b):xs) = case roundTrip cfg p a of
+tripExamples _ _ _ [] = Right ()
+tripExamples cfg ref p ((a,b):xs) = case roundTrip cfg ref p a of
   Left  l -> Left (a, show l)
   Right r -> if r == b
-    then tripExamples cfg p xs
+    then tripExamples cfg ref p xs
     else Left (a, show r)
 
 -----------
 -- tests --
 -----------
 
-mkTests :: CutConfig -> IO TestTree
-mkTests cfg = return $ testGroup "test parser"
-                         [exTests cfg, wsProps cfg, acProps cfg]
+mkTests :: CutConfig -> Locks -> IO TestTree
+mkTests cfg ref = return $ testGroup "test parser"
+                             [exTests cfg ref, wsProps cfg ref, acProps cfg ref]
 
-mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> String -> ParseM a
-       -> [(String, a)] -> TestTree
-mkCase cfg name parser examples = 
-  testCase name $ Right () @=? tripExamples cfg parser examples
+mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> Locks
+       -> String -> ParseM a -> [(String, a)] -> TestTree
+mkCase cfg ref name parser examples = 
+  testCase name $ Right () @=? tripExamples cfg ref parser examples
 
-exTests :: CutConfig -> TestTree
-exTests cfg = testGroup "round-trip handwritten cut code"
-  [ mkCase cfg "function calls"   pFun       exFuns
-  , mkCase cfg "terms"            pTerm      exTerms
-  , mkCase cfg "expressions"      pExpr      exExprs
-  , mkCase cfg "statements"       pStatement exStatements
+exTests :: CutConfig -> Locks -> TestTree
+exTests cfg ref = testGroup "round-trip handwritten cut code"
+  [ mkCase cfg ref "function calls"   pFun       exFuns
+  , mkCase cfg ref "terms"            pTerm      exTerms
+  , mkCase cfg ref "expressions"      pExpr      exExprs
+  , mkCase cfg ref "statements"       pStatement exStatements
   -- , mkCase cfg "binary operators" pBop       exBops
   ]
 
-wsProps :: CutConfig -> TestTree
-wsProps cfg = testGroup "consume randomly generated whitespace"
+wsProps :: CutConfig -> Locks -> TestTree
+wsProps cfg ref = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar s)) (ExSpace w) ->
-      parseWithLeftOver pVar ([], cfg) (s ++ w) == Right (v, "")
+      parseWithLeftOver pVar ([], cfg, ref) (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
-      parseWithLeftOver (pSym c) ([], cfg) (c:w) == Right ((), "")
+      parseWithLeftOver (pSym c) ([], cfg, ref) (c:w) == Right ((), "")
   , testProperty "after equals signs in assignment statements" $
     \(ExAssign a) (ExSpace w) ->
-      parseWithLeftOver pVarEq ([], cfg) (a ++ w) == Right (takeVar a, "")
+      parseWithLeftOver pVarEq ([], cfg, ref) (a ++ w) == Right (takeVar a, "")
   , testProperty "after quoted strings" $
     \(ExQuoted q) (ExSpace w) ->
-      parseWithLeftOver pQuoted ([], cfg) (q ++ w) == Right (read q, "")
+      parseWithLeftOver pQuoted ([], cfg, ref) (q ++ w) == Right (read q, "")
   , testProperty "after numbers" $
-    \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg (n ++ w)
+    \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg ref (n ++ w)
   ]
 
 -- TODO use round-trip here too
-acProps :: CutConfig -> TestTree
-acProps cfg = testGroup "parse randomly generated cut code"
+acProps :: CutConfig -> Locks -> TestTree
+acProps cfg ref = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
-      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg) s == Right (v, "")
+      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg, ref) s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
-      \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg) [c] == Right ((), "")
+      \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg, ref) [c] == Right ((), "")
   , testProperty "variables with equal signs after" $
       \(ExAssign a) ->
-        parseWithLeftOver pVarEq ([], cfg) a == Right (takeVar a, "")
+        parseWithLeftOver pVarEq ([], cfg, ref) a == Right (takeVar a, "")
   , testProperty "quoted strings" $
-      \(ExQuoted q) -> regularParse pQuoted cfg q == Right (read q)
+      \(ExQuoted q) -> regularParse pQuoted cfg ref q == Right (read q)
   , testProperty "positive numbers" $
-      \(ExNum n) -> isRight $ regularParse pNum cfg n
+      \(ExNum n) -> isRight $ regularParse pNum cfg ref n
   ]

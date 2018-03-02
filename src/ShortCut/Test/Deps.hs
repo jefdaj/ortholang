@@ -6,10 +6,11 @@ module ShortCut.Test.Deps where
 import Data.ByteString.Lazy.Char8 (pack)
 import Development.Shake.FilePath ((<.>), (</>))
 import Paths_ShortCut             (getDataFileName)
-import ShortCut.Core.Types        (CutConfig(..))
+import ShortCut.Core.Types        (CutConfig(..), Locks)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
+-- import Data.IORef                 (IORef)
 
 depCmds :: [(String, String)]
 depCmds =
@@ -23,8 +24,8 @@ depCmds =
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
-mkTests :: CutConfig -> IO TestTree
-mkTests _ = do
+mkTests :: CutConfig -> Locks -> IO TestTree
+mkTests _ _ = do
   testDir <- getDataFileName $ "tests" </> "dependencies"
   return $ testGroup "check dependency versions"
          $ map (mkTestDep testDir) depCmds

@@ -1,16 +1,16 @@
-# This tests the *blast*_rev* functions. They aren't very useful on their own,
-# but make it easier to write reciprocal best hits because you can write the
-# reverse call by pasting the forward one and adding "_rev".
+# This tests that the *blast*_rev* functions work like their forward
+# equivalents. They make writing reciprocal hits simpler: just paste the same
+# line and add "_rev".
 
 small = load_fna "data/7942genes10.fna"
 large = load_fna "data/7942genes.fna"
 
-# these have flipped args, so after _rev flips them again both should be equal
-# TODO disallow attempting to do set operations on hits!
-# fwds = blastn     small large 1e-5
-# revs = blastn_rev large small 1e-5
+# fwds and srevs have flipped args, so after _rev flips them again both should
+# be equal. mrevs should also equal srevs, just wrapped in a list + unwrapped.
+fwds  =      extract_queries      (blastn          1e-5 small  large )
+srevs =      extract_queries      (blastn_rev      1e-5 large  small )
+mrevs = any (extract_queries_each (blastn_rev_each 1e-5 large [small]))
 
-fwds  = extract_queries      (blastn          1e-5 small  large )
-srevs = extract_queries      (blastn_rev      1e-5 large  small )
-# mrevs = extract_queries_each (blastn_rev_each 1e-5 large [small])
-result = (fwds ~ srevs) | (srevs ~ fwds) # | (mrevs ~ [srevs])
+# List hits in some but not all of the lists. Should be [].
+# (Equivalent to any [fwds, srevs, mrevs] ~ all [fwds, srevs, mrevs])
+result = some [fwds, srevs, mrevs]

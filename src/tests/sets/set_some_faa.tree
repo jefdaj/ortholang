@@ -1,0 +1,35 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 4dc1af43cb.txt
+|       |-- 622cde6fe7.txt
+|       |-- 6785e2593e.txt
+|       |-- 954a24e2cf.txt
+|       |-- 9d3ce041b3.txt
+|       |-- b9f21d3743.txt
+|       |-- bdc783547b.txt
+|       `-- ef87d3e725.txt
+|-- exprs
+|   |-- all
+|   |   `-- 6154ca9dc6.str.list -> ../../cache/lines/bdc783547b.txt
+|   |-- any
+|   |   `-- 6154ca9dc6.str.list -> ../../cache/lines/6785e2593e.txt
+|   |-- diff
+|   |   `-- 2d4aa724a6.str.list -> ../../cache/lines/622cde6fe7.txt
+|   |-- list
+|   |   |-- 2e997cc9d9.str.list.list -> ../../cache/lines/9d3ce041b3.txt
+|   |   |-- 6de6e540dd.str.list.list -> ../../cache/lines/b9f21d3743.txt
+|   |   |-- 6fbe36f9fa.str.list -> ../../cache/lines/4dc1af43cb.txt
+|   |   |-- b883840e2c.str.list -> ../../cache/lines/6785e2593e.txt
+|   |   `-- dac593434f.str.list -> ../../cache/lines/bdc783547b.txt
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
+|       |-- cb201cf4f8.str -> ../../cache/lines/954a24e2cf.txt
+|       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
+`-- vars
+    |-- result -> ../exprs/diff/2d4aa724a6.str.list
+    |-- set1.str.list -> ../exprs/list/dac593434f.str.list
+    |-- set2.str.list -> ../exprs/list/6fbe36f9fa.str.list
+    `-- set3.str.list -> ../exprs/list/b883840e2c.str.list
+
+9 directories, 23 files

@@ -3,19 +3,24 @@
 |   |-- each
 |   |   |-- 1b3c4c085e
 |   |   |   |-- d7f5b78e8e.pdb -> ../../../exprs/makeblastdb_prot/d7f5b78e8e.pdb
-|   |   |   `-- d7f5b78e8e.pdb.args
+|   |   |   `-- d7f5b78e8e.pdb.args -> ../../../cache/lines/e00fb07ddb.txt
 |   |   |-- b416063c3c
-|   |   |   |-- ba1a6a22a1.str.list -> ../../../exprs/extract_queries/ba1a6a22a1.str.list
-|   |   |   `-- ba1a6a22a1.str.list.args
+|   |   |   |-- 05a1c8acf2.str.list -> ../../../exprs/extract_queries/05a1c8acf2.str.list
+|   |   |   `-- 05a1c8acf2.str.list.args -> ../../../cache/lines/d69baeec82.txt
 |   |   `-- b960925b88
-|   |       |-- 3fd2d1ee14.bht -> ../../../exprs/blastp/fe7dee10f6_6b304f493c_3fd2d1ee14.bht
-|   |       `-- 3fd2d1ee14.bht.args
-|   |-- list
-|   |   |-- 37bc21a38c.txt
+|   |       |-- f19449102b.bht -> ../../../exprs/blastp/ce1c174684_6b304f493c_f19449102b.bht
+|   |       `-- f19449102b.bht.args -> ../../../cache/lines/b8c77109fd.txt
+|   |-- lines
+|   |   |-- 14135d2aeb.txt
+|   |   |-- 21be25c2fd.txt
+|   |   |-- 38cb049e4b.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- 7a96a226a5.txt
+|   |   |-- 7b52c5112b.txt
+|   |   |-- a167755408.txt
+|   |   |-- b8c77109fd.txt
 |   |   |-- bdc783547b.txt
-|   |   |-- c3f727206f.txt
+|   |   |-- d69baeec82.txt
+|   |   |-- e00fb07ddb.txt
 |   |   `-- ef87d3e725.txt
 |   |-- load
 |   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
@@ -27,37 +32,37 @@
 |           `-- a810086108.pdb.psq
 |-- exprs
 |   |-- all
-|   |   `-- 8c2786f33e.str.list
+|   |   `-- 8c2786f33e.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |-- any
-|   |   `-- dcf07c8c99.str.list.list
+|   |   `-- dcf07c8c99.str.list.list -> ../../cache/lines/14135d2aeb.txt
 |   |-- blastp
-|   |   `-- fe7dee10f6_6b304f493c_3fd2d1ee14.bht
+|   |   `-- ce1c174684_6b304f493c_f19449102b.bht
 |   |-- blastp_db
 |   |   `-- 8158675169_1af4d085e7_46b5852d89.bht
 |   |-- blastp_each
-|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list
+|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list -> ../../cache/lines/d69baeec82.txt
 |   |-- extract_queries
-|   |   |-- b09bd7df49.str.list
-|   |   `-- ba1a6a22a1.str.list
+|   |   |-- 05a1c8acf2.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   `-- b09bd7df49.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |-- extract_queries_each
-|   |   `-- 848b144734.str.list.list
+|   |   `-- 848b144734.str.list.list -> ../../cache/lines/14135d2aeb.txt
 |   |-- list
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/list/7a96a226a5.txt
-|   |   |-- c2036af94d.str.list.list.list -> ../../cache/list/37bc21a38c.txt
-|   |   `-- cce65539fd.faa.list -> ../../cache/list/c3f727206f.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
+|   |   `-- cce65539fd.faa.list -> ../../cache/lines/e00fb07ddb.txt
 |   |-- load_faa
 |   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2.faa
 |   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- makeblastdb_prot
-|   |   |-- c08cc19988.pdb
-|   |   `-- d7f5b78e8e.pdb
+|   |   |-- c08cc19988.pdb -> ../../cache/lines/a167755408.txt
+|   |   `-- d7f5b78e8e.pdb -> ../../cache/lines/a167755408.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- ced061f0b2.pdb.list
+|   |   `-- ced061f0b2.pdb.list -> ../../cache/lines/7b52c5112b.txt
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/list/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
-|       `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
+|       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
 `-- vars
     |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/848b144734.str.list.list
@@ -65,4 +70,4 @@
     |-- result -> ../exprs/all/8c2786f33e.str.list
     `-- single.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
 
-24 directories, 41 files
+24 directories, 46 files
