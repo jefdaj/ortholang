@@ -61,6 +61,7 @@ mockRepl stdinLines path cfg ref = withFile path WriteMode $ \handle -> do
 -- TODO include goldenTree here too (should pass both at once)
 goldenRepl :: CutConfig -> Locks -> FilePath -> IO TestTree
 goldenRepl cfg ref goldenFile = do
+  -- TODO use a safe read function here
   txt <- readFile goldenFile
   let name   = takeBaseName goldenFile
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
@@ -79,6 +80,7 @@ goldenRepls cfg ref = do
 
 goldenReplTree :: CutConfig -> Locks -> FilePath -> IO TestTree
 goldenReplTree cfg ref ses = do
+  -- TODO use a safe read function here
   txt <- readFile ses
   let name   = takeBaseName ses
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }

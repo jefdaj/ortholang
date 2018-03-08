@@ -145,6 +145,7 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultShow :: FilePath -> IO String
+-- TODO use a safe read function with locks here
 defaultShow = fmap (unlines . fmtLines . lines) . readFile
   where
     nLines      = 5
@@ -216,6 +217,7 @@ str = CutType
   { tExt  = "str"
   , tDesc = "string"
   -- the init is for removing newlines
+  -- TODO use a safe read function with locks here
   , tShow = \f -> readFile f >>= (return . (\x -> "\"" ++ x ++ "\"") . init)
   }
 
@@ -223,6 +225,7 @@ num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
+  -- TODO use a safe read function with locks here
   , tShow = \f -> readFile f >>= return . init
   }
 

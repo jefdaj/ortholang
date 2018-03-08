@@ -49,6 +49,7 @@ loadConfig mods args = do
 getUsage :: IO Docopt
 getUsage = do
   path <- getDataFileName "usage.txt"
+  -- TODO use a safe read function with locks here
   txt  <- absolutize =<< readFile path
   parseUsageOrExit txt
 
