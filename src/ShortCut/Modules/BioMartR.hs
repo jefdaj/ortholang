@@ -17,6 +17,7 @@ import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Actions (readLits, writeCachedLines)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
+-- import ShortCut.Core.Locks  (withReadLock)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions           (wrappedCmdWrite)
 import Control.Monad (void)
@@ -53,6 +54,7 @@ search = CutType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
   -- TODO use a safe read function here
+  -- TODO and for that, need to pass ref to all tShow fns
   , tShow = readFile
   }
 

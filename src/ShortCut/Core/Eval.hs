@@ -31,7 +31,7 @@ import ShortCut.Core.Compile.Basic    (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Locks            (withReadLock)
+import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Actions          (readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                      (Handle, hPutStrLn)
@@ -78,7 +78,7 @@ prettyResult cfg ref (ListOf t) f
     paths <- readPaths cfg ref $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg ref t f = withReadLock ref f' $ liftIO $ fmap showFn $ (tShow t) f'
+prettyResult cfg ref t f = withReadLock' ref f' $ liftIO $ fmap showFn $ (tShow t) f'
   where
     showFn = if t == num then prettyNum else text
     f' = fromCutPath cfg f

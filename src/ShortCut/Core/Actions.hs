@@ -53,7 +53,7 @@ import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, rmAll,
                                    ignoreExistsError, digest, globFiles)
-import ShortCut.Core.Locks        (withReadLock, withReadLocks,
+import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock, withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
@@ -76,7 +76,7 @@ import System.Posix.Files         (createSymbolicLink)
 readFileStrict :: Locks -> FilePath -> Action String
 readFileStrict ref path = do
   need [path]
-  withReadLock ref path $
+  withReadLock' ref path $
     liftIO $ withFile path ReadMode hGetContents -- TODO is this just readFile?
 {-# INLINE readFileStrict #-}
 
@@ -229,7 +229,7 @@ wrappedCmd :: CutConfig -> Locks -> FilePath -> [String]
 wrappedCmd cfg ref outPath inPtns opts bin args = do
   inPaths <- fmap concat $ liftIO $ mapM globFiles inPtns
   liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
-  withWriteLock ref outPath $ withReadLocks ref inPaths $ do
+  withWriteLock ref outPath $ withReadLocks' ref inPaths $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command opts w (bin:args)
@@ -293,7 +293,7 @@ digestFile cfg ref path = debugReadFile cfg ref path >>= return . digest
 hashContent :: CutConfig -> Locks -> CutPath -> Action String
 hashContent cfg ref path = do
   need [path']
-  Stdout out <- withReadLock ref path' $ command [] "md5sum" [path']
+  Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
   let md5 = take digestLength $ head $ words out
   return md5
   where

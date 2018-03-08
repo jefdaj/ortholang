@@ -2,7 +2,8 @@ module ShortCut.Core.Locks
   ( Locks
   , initLocks
   , withReadLock
-  , withReadLocks
+  , withReadLock'
+  , withReadLocks'
   , withWriteLock
   , withWriteOnce
   )
@@ -26,6 +27,7 @@ import Control.Monad                    (when)
 import Data.List                        (nub)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef)
 import Data.Map.Strict                  (Map)
+import Control.Exception (bracket_)
 
 -- TODO parametarize FilePath and re-export with CutPath in Types.hs?
 type Locks = IORef (Map FilePath RWLock)
@@ -40,14 +42,22 @@ getLock ref path = do
     Nothing -> (Map.insert path l c, l)
     Just l' -> (c, l')
 
-withReadLock :: Locks -> FilePath -> Action a -> Action a
-withReadLock ref path actFn = do
+withReadLock :: Locks -> FilePath -> IO a -> IO a
+withReadLock ref path ioFn = do
+  l <- liftIO $ getLock ref path
+  bracket_
+    (RWLock.acquireRead l)
+    (RWLock.releaseRead l)
+    ioFn
+
+withReadLock' :: Locks -> FilePath -> Action a -> Action a
+withReadLock' ref path actFn = do
   l <- liftIO $ getLock ref path
   liftIO $ RWLock.acquireRead l
   actFn `actionFinally` RWLock.releaseRead l
 
-withReadLocks :: Locks -> [FilePath] -> Action a -> Action a
-withReadLocks ref paths actFn = do
+withReadLocks' :: Locks -> [FilePath] -> Action a -> Action a
+withReadLocks' ref paths actFn = do
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   liftIO $ mapM_ RWLock.acquireRead locks
   actFn `actionFinally` (mapM_ RWLock.releaseRead locks)
