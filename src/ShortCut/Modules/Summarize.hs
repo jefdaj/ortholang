@@ -33,7 +33,6 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- takes a list of lists and summarizes (flattens?) it to a single list
 -- using the given summaryFn
 -- TODO are paths hashes unique now??
--- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 rSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPath
 rSummary summaryFn s@(_,cfg,ref) expr@(CutFun _ _ _ _ [iList]) = do

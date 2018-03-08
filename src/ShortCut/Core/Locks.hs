@@ -5,6 +5,7 @@ module ShortCut.Core.Locks
   , withReadLock'
   , withReadLocks'
   , withWriteLock
+  , withWriteLock'
   , withWriteOnce
   )
   where
@@ -14,7 +15,7 @@ module ShortCut.Core.Locks
  - started "cheating" by keeping my own cache that Shake doesn't know about.
  - Which means I also need my own supplemental read/write locks to prevent
  - conflicts in those files. Use initLocks to create it at the top level of the
- - program and withWriteLockor withWriteOnce when reading and writing files
+ - program and withWriteLock'or withWriteOnce when reading and writing files
  - respectively. It should handle the rest.
  -}
 
@@ -62,13 +63,21 @@ withReadLocks' ref paths actFn = do
   liftIO $ mapM_ RWLock.acquireRead locks
   actFn `actionFinally` (mapM_ RWLock.releaseRead locks)
 
-withWriteLock :: Locks -> FilePath -> Action a -> Action a
-withWriteLock ref path actFn = do
+withWriteLock :: Locks -> FilePath -> IO a -> IO a
+withWriteLock ref path ioFn = do
+  l <- liftIO $ getLock ref path
+  bracket_
+    (RWLock.acquireWrite l)
+    (RWLock.releaseWrite l)
+    ioFn
+
+withWriteLock' :: Locks -> FilePath -> Action a -> Action a
+withWriteLock' ref path actFn = do
   l <- liftIO $ getLock ref path
   liftIO $ RWLock.acquireWrite l
   actFn `actionFinally` (RWLock.releaseWrite l)
 
 withWriteOnce :: Locks -> FilePath -> Action () -> Action ()
-withWriteOnce ref path actFn = withWriteLock ref path $ do
+withWriteOnce ref path actFn = withWriteLock' ref path $ do
   exists <- doesFileExist path
   when (not exists) actFn

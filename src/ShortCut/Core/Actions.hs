@@ -42,6 +42,7 @@ module ShortCut.Core.Actions
   )
   where
 
+import Prelude hiding (readFile)
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -53,13 +54,13 @@ import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLits,
                                    cacheDir, cutPathString, stringCutPath)
 import ShortCut.Core.Util         (digest, digestLength, rmAll,
                                    ignoreExistsError, digest, globFiles)
-import ShortCut.Core.Locks        (withReadLock', withReadLocks',
-                                   withWriteLock, withWriteOnce)
+import ShortCut.Core.Locks        (withReadLock, withReadLock', withReadLocks',
+                                   withWriteLock', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory)
-import System.IO                  (IOMode(..), withFile)
-import System.IO.Strict           (hGetContents)
+-- import System.IO                  (IOMode(..), withFile)
+import System.IO.Strict           (readFile)
 import System.Posix.Files         (createSymbolicLink)
 
 ----------------
@@ -76,9 +77,9 @@ import System.Posix.Files         (createSymbolicLink)
 readFileStrict :: Locks -> FilePath -> Action String
 readFileStrict ref path = do
   need [path]
-  withReadLock' ref path $
-    liftIO $ withFile path ReadMode hGetContents -- TODO is this just readFile?
-{-# INLINE readFileStrict #-}
+  -- withReadLock' ref path $ liftIO $ readFile path -- this is a strict readFile
+  liftIO $ withReadLock ref path $ readFile path -- this is a strict readFile
+-- {-# INLINE readFileStrict #-}
 
 -- TODO something safer than head!
 -- TODO error if they contain $TMPDIR or $WORKDIR?
@@ -151,7 +152,7 @@ writeCachedLines cfg ref outPath content = do
   liftIO $ createDirectoryIfMissing True cDir
   withWriteOnce ref cache
     $ debug cfg ("writing '" ++ cache ++ "'")
-    $ writeFile' cache (unlines content)
+    $ writeFile' cache (unlines content) -- TODO is this strict?
   symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
 
 -- TODO take a CutPath for the out file too
@@ -229,7 +230,7 @@ wrappedCmd :: CutConfig -> Locks -> FilePath -> [String]
 wrappedCmd cfg ref outPath inPtns opts bin args = do
   inPaths <- fmap concat $ liftIO $ mapM globFiles inPtns
   liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
-  withWriteLock ref outPath $ withReadLocks' ref inPaths $ do
+  withWriteLock' ref outPath $ withReadLocks' ref inPaths $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command opts w (bin:args)

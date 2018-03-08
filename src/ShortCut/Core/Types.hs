@@ -53,7 +53,7 @@ module ShortCut.Core.Types
 -- import Prelude hiding (print)
 import qualified Text.Parsec as P
 
-import ShortCut.Core.Locks (Locks)
+import ShortCut.Core.Locks (Locks, withReadLock)
 
 import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
@@ -140,13 +140,12 @@ data CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tShow :: FilePath -> IO String
+    , tShow :: Locks -> FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
 
-defaultShow :: FilePath -> IO String
--- TODO use a safe read function with locks here
-defaultShow = fmap (unlines . fmtLines . lines) . readFile
+defaultShow :: Locks -> FilePath -> IO String
+defaultShow locks = fmap (unlines . fmtLines . lines) . (\f -> withReadLock locks f $ readFile f)
   where
     nLines      = 5
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
@@ -217,16 +216,14 @@ str = CutType
   { tExt  = "str"
   , tDesc = "string"
   -- the init is for removing newlines
-  -- TODO use a safe read function with locks here
-  , tShow = \f -> readFile f >>= (return . (\x -> "\"" ++ x ++ "\"") . init)
+  , tShow = \ls f -> withReadLock ls f (readFile f) >>= (return . (\x -> "\"" ++ x ++ "\"") . init)
   }
 
 num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  -- TODO use a safe read function with locks here
-  , tShow = \f -> readFile f >>= return . init
+  , tShow = \ls f -> withReadLock ls f (readFile f) >>= return . init
   }
 
 ------------

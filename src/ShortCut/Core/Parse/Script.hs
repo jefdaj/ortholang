@@ -1,5 +1,6 @@
 module ShortCut.Core.Parse.Script where
 
+import ShortCut.Core.Locks (withReadLock)
 import ShortCut.Core.Types
 import ShortCut.Core.Parse.Basic
 import ShortCut.Core.Parse.Expr
@@ -101,8 +102,9 @@ parseString c r = runParseM pScript ([], c, r)
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: CutConfig -> Locks -> FilePath
           -> IO (Either ParseError CutScript)
--- TODO use a safe read function with locks here
-parseFile cfg ref path = readFile path' >>= return . parseString cfg ref . stripComments
+parseFile cfg ref path = do
+  txt <- withReadLock ref path' (readFile path')
+  return $ (parseString cfg ref . stripComments) txt
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
 

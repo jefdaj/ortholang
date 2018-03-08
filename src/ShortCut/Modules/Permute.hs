@@ -30,7 +30,6 @@ cutModule = CutModule
 -- splits a list into a list of lists using the provided function
 -- TODO produce each output list in a separate Shake monad section?
 -- TODO are paths hashes unique now??
--- TODO use writeFileChanged instead of writeFileLines?
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
          -> CutState -> CutExpr -> Rules ExprPath

@@ -66,7 +66,7 @@ ndb :: CutType
 ndb = CutType
   { tExt  = "ndb"
   , tDesc = "BLAST nucleotide database"
-  , tShow  = \f -> return $ "BLAST nucleotide database " ++ f
+  , tShow  = \_ f -> return $ "BLAST nucleotide database " ++ f
   }
 
 -- TODO will people confuse this with PDB files for viewing molecules?
@@ -74,7 +74,7 @@ pdb :: CutType
 pdb = CutType
   { tExt  = "pdb"
   , tDesc = "BLAST protein database"
-  , tShow  = \f -> return $ "BLAST protein database " ++ f
+  , tShow  = \_ f -> return $ "BLAST protein database " ++ f
   }
 
 ---------------------

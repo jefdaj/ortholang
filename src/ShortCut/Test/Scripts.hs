@@ -15,7 +15,8 @@ import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
 import ShortCut.Core.Pretty       (writeScript)
-import ShortCut.Core.Types        (CutConfig(..), Locks)
+import ShortCut.Core.Types        (CutConfig(..))
+import ShortCut.Core.Locks        (Locks, withWriteLock)
 import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
@@ -47,8 +48,8 @@ getTestCuts = do
   return testCuts
 
 -- TODO any particular corner cases to be aware of? (what if inturrupted?)
--- withWriteLock :: CutConfig -> IO a -> IO a
--- withWriteLock cfg act = handler $ withFileLock params path act
+-- withWriteLock' :: CutConfig -> IO a -> IO a
+-- withWriteLock' cfg act = handler $ withFileLock params path act
 --   where
 --     path    = cfgTmpDir cfg <.> "lock"
 --     handler = TE.handle $ fail . ("Locking failed with: " ++) . show
@@ -80,6 +81,7 @@ mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
       out <- readCreateProcess treeCmd ""
       return $ pack $ toGeneric cfg out
 
+-- TODO use safe writes here
 mkTripTest :: CutConfig -> Locks -> TestTree
 mkTripTest cfg ref = goldenDiff "unchanged by round-trip to file" tripShow tripAct
   where
@@ -88,8 +90,8 @@ mkTripTest cfg ref = goldenDiff "unchanged by round-trip to file" tripShow tripA
     tripSetup = do
       scr1 <- parseFileIO cfg ref $ fromJust $ cfgScript cfg
       writeScript tripCut scr1
-      writeFile tripShow $ show scr1
-    -- tripAct = withWriteLockIO (cfgTmpDir cfg <.> "lock") $ do
+      withWriteLock ref tripShow $ writeFile tripShow $ show scr1
+    -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
@@ -113,7 +115,7 @@ mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
 runCut :: CutConfig -> Locks -> IO String
 -- runCut cfg = withFileLock (cfgTmpDir cfg) $ do
 -- runCut cfg = do
--- runCut cfg = withWriteLockIO (cfgTmpDir cfg <.> "lock") $ do
+-- runCut cfg = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
 runCut cfg ref =  do
   -- delay 50000; hFlush stdout; hFlush stderr; delay 50000 -- 1 second total
   delay 100000 -- 1 second

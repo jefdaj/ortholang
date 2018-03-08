@@ -42,6 +42,7 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint as = fsep $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
+-- TODO use safe write here?
 writeScript :: FilePath -> CutScript -> IO ()
 writeScript path scr = writeFile path $ unlines $ map prettyShow scr
 

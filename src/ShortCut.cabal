@@ -166,4 +166,5 @@ executable shortcut
                     unix,
                     utility-ht,
                     time,
-                    concurrent-extra
+                    concurrent-extra,
+                    retry

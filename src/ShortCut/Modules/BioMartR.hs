@@ -17,7 +17,7 @@ import ShortCut.Core.Types
 import Development.Shake
 import ShortCut.Core.Actions (readLits, writeCachedLines)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
--- import ShortCut.Core.Locks  (withReadLock)
+import ShortCut.Core.Locks  (withReadLock)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions           (wrappedCmdWrite)
 import Control.Monad (void)
@@ -31,7 +31,6 @@ import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
 import ShortCut.Core.Debug   (debugAction)
-import System.FilePath (takeDirectory)
 
 ------------------------
 -- module description --
@@ -53,9 +52,7 @@ search :: CutType
 search = CutType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
-  -- TODO use a safe read function here
-  -- TODO and for that, need to pass ref to all tShow fns
-  , tShow = readFile
+  , tShow = \ls f -> withReadLock ls f (readFile f)
   }
 
 -- TODO unify with fna? or replace it?
@@ -63,7 +60,7 @@ fnagz :: CutType
 fnagz = CutType
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tShow = \_ -> return "tShow not implemented yet for fnagz"
+  , tShow = \_ _ -> return "tShow not implemented yet for fnagz"
   }
 
 -- TODO unify with faa? or replace it?
@@ -71,7 +68,7 @@ faagz :: CutType
 faagz = CutType
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
-  , tShow = \_ -> return "tShow not implemented yet for faagz"
+  , tShow = \_ _ -> return "tShow not implemented yet for faagz"
   }
 
 -- TODO does this work at all?

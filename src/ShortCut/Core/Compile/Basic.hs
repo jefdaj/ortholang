@@ -28,7 +28,7 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
 import Data.List                  (find, intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Debug        (debugAction, debugRules, debug)
-import ShortCut.Core.Locks        (withWriteLock)
+import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Actions      (wrappedCmdWrite,
                                    readLit, readLits, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
@@ -206,7 +206,7 @@ aVar :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aVar cfg ref vPath oPath = do
   alwaysRerun
   need [oPath']
-  withWriteLock ref vPath' $ liftIO $ removeIfExists vPath'
+  withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
   symlink cfg ref vPath'' oPath
   where
     oPath'  = fromCutPath cfg oPath

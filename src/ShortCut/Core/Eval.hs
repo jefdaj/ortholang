@@ -25,13 +25,15 @@ module ShortCut.Core.Eval
 import Development.Shake
 import ShortCut.Core.Types
 
+import Control.Retry
+
 import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic    (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Locks            (withReadLock')
+-- import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Actions          (readLits, readPaths)
 import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                      (Handle, hPutStrLn)
@@ -78,7 +80,7 @@ prettyResult cfg ref (ListOf t) f
     paths <- readPaths cfg ref $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg ref t f = withReadLock' ref f' $ liftIO $ fmap showFn $ (tShow t) f'
+prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t ref) f'
   where
     showFn = if t == num then prettyNum else text
     f' = fromCutPath cfg f
@@ -88,10 +90,21 @@ prettyResult cfg ref t f = withReadLock' ref f' $ liftIO $ fmap showFn $ (tShow 
 -- TODO rename `runRules` or `runShake`?
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
+-- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: Handle -> CutConfig -> Locks -> CutType -> Rules ResPath -> IO ()
-eval hdl cfg ref rtype = ignoreErrors . eval'
+eval hdl cfg ref rtype = retryIgnore . eval'
   where
+    -- This isn't as bad as it sounds. It just prints an error message instead
+    -- of crashing the rest of the program but the error will be visible.
     ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
+
+    -- This one is as bad as it sounds, so remove it when able! It's the only
+    -- way I've managed to solve the occasional "openFile" lock conflicts.
+    -- TODO at least log when a retry happens for debugging
+    -- TODO ask Niel if individual actions can be retried instead
+    -- TODO could always fork Shake to put it in if needed too
+    retryIgnore fn = ignoreErrors $ recoverAll (limitRetries 5) $ const fn
+
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath
       want ["eval"]
