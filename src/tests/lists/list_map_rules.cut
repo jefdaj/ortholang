@@ -1,0 +1,7 @@
+# Mapping a function over a list should be the same as making a list of
+# individual function applications. That's currently not true though, because
+# of some problem with the map function.
+
+list1 = load_faa_each ["data/6803genes10.faa"]
+list2 = [load_faa "data/6803genes10.faa"]
+result = length (list1 | list2) # should be 1, not 2!

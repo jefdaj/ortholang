@@ -1,0 +1,18 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 2a13ac791a.txt
+|       |-- 42fb7081a8.txt
+|       |-- 4949eea072.txt
+|       `-- 558d528228.txt
+|-- exprs
+|   |-- list
+|   |   `-- f11e0b1ea5.num.list -> ../../cache/lines/4949eea072.txt
+|   `-- num
+|       |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
+|       |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
+|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+`-- vars
+    `-- result -> ../exprs/list/f11e0b1ea5.num.list
+
+6 directories, 9 files

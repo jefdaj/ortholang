@@ -1,0 +1,17 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 42fb7081a8.txt
+|       |-- bd24d24178.txt
+|       `-- d751713988.txt
+|-- exprs
+|   |-- list
+|   |   |-- 2b8dc08526.num.list -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 9d4568c009.empty.list -> ../../cache/lines/d751713988.txt
+|   |   `-- bc30498d24.num.list.list -> ../../cache/lines/bd24d24178.txt
+|   `-- num
+|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+`-- vars
+    `-- result -> ../exprs/list/bc30498d24.num.list.list
+
+6 directories, 8 files

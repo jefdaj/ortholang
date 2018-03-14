@@ -1,0 +1,18 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 6eaceb40c2.txt
+|       |-- b92738ba6c.txt
+|       |-- d8166958d0.txt
+|       `-- e7888db3aa.txt
+|-- exprs
+|   |-- list
+|   |   `-- 643e82ccfc.str.list -> ../../cache/lines/e7888db3aa.txt
+|   `-- str
+|       |-- 6f237ec7b7.str -> ../../cache/lines/6eaceb40c2.txt
+|       |-- 812e7a8e73.str -> ../../cache/lines/b92738ba6c.txt
+|       `-- a2a665650c.str -> ../../cache/lines/d8166958d0.txt
+`-- vars
+    `-- result -> ../exprs/list/643e82ccfc.str.list
+
+6 directories, 9 files
