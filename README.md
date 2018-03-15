@@ -1,9 +1,6 @@
 ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
-Note that this README is based on [the poster][1], and most of the
-same information will also be available as a series of screencasts.
-
 Phylogenomic cuts are lists of genes whose distribution suggests they may be
 important for a trait of interest, such as virulence or drought tolerance. They
 have historically been successful at identifying candidate genes for further
@@ -17,6 +14,9 @@ rearranged to make a wide variety of cuts, as well as a novel method of
 measuring their robustness to changes in the search parameters. Cut scripts are
 reproducible, automatically parallelized, and facilitate quick comparison of
 many possible mehods to arrive at a reliable list of candidate genes.
+
+Note that this README is based on [the poster][1], and most of the
+same information will also be available as a series of screencasts.
 
 Build and Test
 --------------
@@ -73,7 +73,7 @@ Another common task is to perform set operations on lists of things.
 It works with genes and genomes, but is easier to demonstrate with numbers.
 We can quickly describe anything that could be shown in a Venn Diagram:
 
-![](venn-sets.png)
+<img src="https://github.com/jefdaj/ShortCut/raw/master/poster/venn-sets.png" width="300">
 
 ~~~
 >> # For example, starting with these lists...
@@ -101,9 +101,9 @@ numbers and strings or strings and blast hit tables.
 Evaluation mechanics
 --------------------
 
-Although ShortCut feels like a scripting language, the way it actually runs
-commands is more closely analogous to a Makefile or a pipeline manager like
-Galaxy. When you ask it to calculate something, it:
+While ShortCut feels like a scripting language, the way it runs commands is
+more closely analogous to [Make][7]. (Actually, it uses [Shake][8].) When you
+ask it to calculate something, it:
 
 1. Maps each variable in the script to a filename like `<varname>.<type>`.
    For example `pcc6803.fna` or `cutoffs.num.list`.
@@ -124,8 +124,7 @@ BLAST+
 ------
 
 ShortCut provides the most common NCBI BLAST programs, which differ in their
-subject and query types. It has several variants of each function, named with
-suffixes.
+subject and query types.
 
 | Function | Query | Subject |
 | :------- | :---- | :------ |
@@ -135,7 +134,7 @@ suffixes.
 | tblastn  | prot  | trans   |
 | tblastx  | trans | trans   |
 
-There are several variants of each function, named with suffixes:
+There are several variants of each one, named with suffixes:
 
 | Format            | Meaning |
 | :-----            | :------ |
@@ -150,7 +149,7 @@ A couple examples:
 
 ```python
 # BLAST against the NCBI nonredundant database
-hits = tblastn pcc7942 (blastdbget "nr") 1e-50
+hits = tblastn 1e-50 pcc7942 (blastdbget "nr")
 
 # find Synechococcus orthologs of Synechocystis genes
 # (this lists the Synechococcus genes themselves;
@@ -171,11 +170,13 @@ pair of genomes, it:
    a curve to it
 3. Adds non-reciprocal hits whose e-values are at least as good 
 
-According to the authors, this significantly improves the accuracy of ortholog
-assignment. Another useful feature is that it picks the e-value cutoff
-automatically, as illustrated in figure 2F from their paper:
+This is illustrated in the paper:
 
-![](poster/crb-blast.png)
+<img src="https://github.com/jefdaj/ShortCut/raw/master/poster/crb-blast.png" height="400">
+
+According to the authors it significantly improves the accuracy of ortholog
+assignment. Another useful feature is that it prevents having to pick e-value
+cutoffs.
 
 Example:
 
@@ -187,12 +188,13 @@ shared_with_diatoms = any (extract_queries_each (crb_blast_each chlamy diatoms))
 Codifying the Greencut
 ----------------------
 
-Consider the Greencut ([Merchant _et al._ 2007][3]), a list of genes likely to
-be important for photosynthesis because they are conserved in the "green
-lineage". From their paper, here are the species used to make the original
-Greencut, along with related cuts for diatoms and plastids:
+For a more complete example, consider the Greencut ([Merchant _et al._
+2007][3]), a list of genes likely to be important for photosynthesis because
+they are conserved in the "green lineage". From their paper, here are the
+species used to make the original Greencut, along with related cuts for diatoms
+and plastids:
 
-![](poster/greencut-species.jpg)
+<img src="https://github.com/jefdaj/ShortCut/raw/master/poster/greencut-species.jpg" width="500">
 
 > Evolutionary relationships of 20 species with sequenced genomes used
 > for the comparative analyses in [their] study include cyanobacteria and
@@ -200,7 +202,7 @@ Greencut, along with related cuts for diatoms and plastids:
 > diatoms, rhodophytes, plants, amoebae and opisthokonts. 
 
 To do something similar in ShortCut, a proteome (FASTA amino acid file) is
-loaded for each species. They are put grouped into lists representing the most
+loaded for each species. They are grouped into lists representing the most
 specific taxa, and higher taxa are represented by unions of those lists:
 
 ```python
@@ -269,7 +271,7 @@ eukaryotes    = plantae | heterokonts | unikonts
 
 Next, here is an exerpt of how the authors describe the cuts themselves:
 
-![](poster/greencut-venn-diagram.jpg)
+<img src="https://github.com/jefdaj/ShortCut/raw/master/poster/greencut-venn.jpg" width="400">
 
 > The Greencut comprises 349 _Chlamydomonas_ proteins with homologs in
 > representatives of the green lineage of the Plantae (_Chlamydomonas_,
@@ -328,7 +330,7 @@ values, and see how the results change.
 Suppose you have the original program in the box on the left, and want to know,
 "What happens to `var6` if I change `var1`?"
 
-![](poster/prs.png)
+<img src="https://github.com/jefdaj/ShortCut/raw/master/poster/prs.png" width="800">
 
 `repeat_each` recalculates `var6` starting from 3 alternate versions of `var1`,
 and reports a list of results.
@@ -371,7 +373,9 @@ questions can be easily tranlated to code:
 * ...
 
 Even better, that code can be added interactively and without changing the
-existing cut.
+existing cut! It also works recursively, so you can repeat your 1000 BLAST runs
+with different parameters, then use only the best version as input to the next
+stage of the cut.
 
 Next: Cross-Validation
 ----------------------
@@ -407,15 +411,17 @@ from them, then clustering the trees and picking out the genes that cluster
 with your positive controls. TreeCl ([Gori, Dessimoz _et al._ 2016][6])
 automates much of the process:
 
-![](poster/treecl.png)
+<img src="https://github.com/jefdaj/ShortCut/raw/master/poster/treecl.jpeg" width="800">
 
 Integrating it with ShortCut will improve them both, since TreeCl offers
 a large number of tree building and clustering parameters that would benefit
 from comparison using the PRS functions.
 
-[1]: poster/shortcut-poster.svg
+[1]: https://github.com/jefdaj/ShortCut/blob/master/poster/shortcut-poster.pdf
 [2]: https://nixos.org/nix/
 [3]: http://science.sciencemag.org/content/318/5848/245.full
 [4]: http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1004365
 [5]: src/usage.txt
 [6]: https://academic.oup.com/mbe/article/33/6/1590/2579727
+[7]: https://en.wikipedia.org/wiki/Make_(software)
+[8]: https://shakebuild.com/
