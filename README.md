@@ -1,257 +1,403 @@
-# ShortCut
+ShortCut: short, reproducible phylogenomic cuts
+===============================================
 
-ShortCut is a simple scripting language for making phylogenomic "cuts". It aims
-to eliminate a few of the pain points I've run into while doing them manually:
+Note that this README is based on [the poster][1], and most of the
+same information will also be available as a series of screencasts.
 
-* Keeping track of a large number of temporary files
-* Running slight variations on the same CPU-intensive code over and over
-* Coming back to check on a long-running pipeline, only to find that it's
-  stopped because I gave a wrong arguments to one of the later steps
-* Explaining the pipeline accurately without resorting to large flowcharts
-  or cryptic makefiles
+Phylogenomic cuts are lists of genes whose distribution suggests they may be
+important for a trait of interest, such as virulence or drought tolerance. They
+have historically been successful at identifying candidate genes for further
+study, but no standard methodology exists for making them or measuring their
+quality. They tend to involve a small number of tools--BLAST searches, set
+subtraction, perhaps gene trees, and manual curation--combined in unique ways
+depending on the organisms and traits involved. That makes the overall process
+difficult to automate with a single program. ShortCut attempts to overcome that
+using a domain-specific language. It provides simple functions that can be
+rearranged to make a wide variety of cuts, as well as a novel method of
+measuring their robustness to changes in the search parameters. Cut scripts are
+reproducible, automatically parallelized, and facilitate quick comparison of
+many possible mehods to arrive at a reliable list of candidate genes.
 
-Beyond those specific improvements, the goal is to create a pleasant
-environment that removes as much of the "busywork" as possible so you can focus
-on biology instead. Biology is notoriously difficult to automate, of course, so
-I opted for a language rather than a one-off website or CLI tool with the hope
-that the extra flexibility can overcome some initial setup + learning cost.
+Build and Test
+--------------
 
-## Install
+ShortCut is best built using [Nix][2], which ensures that all dependencies are
+exactly satisfied. Not much human work is required, but it will download and/or
+build a lot of packages and store them in `/nix`.
 
-I do all my coding these days in reproducible per-project build environments
-set up by [Nix](https://nixos.org/nix/). Use `nix-build` to build the entire
-project, then `./result/bin/shortcut` to launch the interpreter. You can also
-use `nix-shell` to enter a development shell for working on the interpreter
-code, or `cd scripts && nix-shell` to work on one of the scripts called by it.
+First you need the package manager itself. See [the website][2] for
+instructions, or just run this:
 
-## Learn the language
+    curl https://nixos.org/nix/install | sh
 
-ShortCut is very easy to learn compared to "real" programming languages like
-Python or R, but it also executes code in a unique way that may take some
-getting used to. So read through this short tutorial, try it out, and contact
-me if/when you find things that don't make sense or could be clearer. Emails,
-github issues, and pull requests welcome!
+Next, clone this repository and run `nix-build -j$(nproc)` inside it. It will
+eventually create a symlink called `result` that points to the finished
+package.
 
-### Interpreter
+Before using it, run the test suite to check that everything works:
 
-You can run ShortCut scripts ("cuts") the same way you run code in other
-scripting languages, by passing a filename to the interpreter: `shortcut
-my.cut`. After probably a long time computing, it will print results. 
+    ./result/bin/shortcut --test
 
-But most of the time you won't be running a finished script. Instead you'll
-start in interactive mode by typing just `shortcut`:
+Run and edit scripts
+--------------------
 
-~~~
-Welcome to the ShortCut interpreter!
-Type :help for a list of the available commands.
-shortcut >>
-~~~
+These commands will run an existing script, load an existing script in the
+interpreter, and start a new script in the interpreter respectively:
 
-As the `:help` says, from there you can load a script and play around with it.
-This is one I've been working on to find likely photosystem II assembly
-factors:
+* `shortcut --script your-existing.cut`
+* `shortcut --script your-existing.cut --interactive`
+* `shortcut`
 
-~~~
-shortcut >> :load cuts/psII.cut 
-shortcut >> :show
-plastidcut = load_genes "genes/tair-plastidcut2.faa"
-knowngenes = load_genes "genes/tair-known-ps2genes.faa"
-knowngenomes = load_genomes "lists/shi-falkowski-cyanos.txt"
-cutoff = worst_best_evalue knowngenes knowngenomes
-ucyna = load_genomes "lists/ucyna-genomes.txt"
-othercyanos = load_genomes "lists/ncbi-cyanos.txt" + load_genomes "lists/img-cyanos.txt" - ucyna
-goodcyanos = filter_genomes othercyanos knowngenes 1.0e-15
-ingoodcyanos = filter_genes plastidcut goodcyanos 1.0e-12
-inucyna = filter_genes plastidcut ucyna 0.1
-psIIcut = ingoodcyanos - inucyna
-~~~
+See [usage.txt][5] for other command line options, and type `:help` in the
+interpreter for a list of special commands. Note that unlike most languages, in
+`shortcut` you can always save a valid script from your current interpreter
+session with something like `:write your-updated.cut`.
 
-By the end of the tutorial you should understand everything going on in it, and
-be able to write you own, similar cuts for any biological process you're
-interested in. But first, we should start from the basics.
+Basics
+------
 
-#### Part 1: Commands
+You can load gene lists and genomes, and convert them between several common
+formats:
 
-<!-- TODO make this later, after variables and stuff -->
+```python
+# load a FASTA nucleic acid file (transcriptome)
+pcc6803 = load_fna "Synechocystis_PCC_6803.fna"
 
-ShortCut works mostly the same whether you're running a script or loading it
-interactively, but the interactive version also has some extra commands
-starting with colons (`:`). The most important is `:help`, which explains the
-others:
+# load a genome distributed as separate genbank files,
+# and convert it to one FASTA
+pcc7942 = concat_fastas [gbk_to_faa (load_gbk "SynPCC7942_chr.gbk"),
+                         gbk_to_faa (load_gbk "SynPCC7942_pANL.gbk")]
+```
+
+Another common task is to perform set operations on lists of things.
+It works with genes and genomes, but is easier to demonstrate with numbers.
+We can quickly describe anything that could be shown in a Venn Diagram:
+
+![](venn-sets.png)
 
 ~~~
-shortcut >> :help
-You can type or paste ShortCut code here to run it, same as in a script.
-There are also some extra commands:
-
-:help  to print this help text
-:load  to load a script (same as typing the file contents)
-:write to write the current script to a file
-:drop  to discard the current script and start fresh
-:quit  to discard the current script and exit the interpreter
-:type  to print the type of an expression
-:show  to print an expression along with its type
-:!     to run the rest of the line as a shell command
-shortcut >> 
+>> # For example, starting with these lists...
+>> A = [1, 2, 3]
+>> B = [2, 4, 6]
+>> C = [45, 2, 1e23, 3e-9]
+>> 
+>> A | B
+[1, 2, 3, 4, 6]
+>> A & B
+[2]
+>> A ~ B
+[1, 3]
+>> all [A, B, C]
+[2]
+>> any [A, B, C]
+[1, 1.0e23, 2, 3, 3.0e-9, 4, 45, 6]
+>> B ~ (A & C)
+[4, 6]
 ~~~
 
-Let's clear out the `psII.cut` script so we can start over.
+The type system will stop you from combining lists of different types, like
+numbers and strings or strings and blast hit tables.
 
-~~~
-shortcut >> :drop
-shortcut >> :show
-shortcut >>
-~~~
+Evaluation mechanics
+--------------------
 
-After `:drop`ping all the loaded variables, there's nothing left to `:show`.
-Now, let's start with the 
+Although ShortCut feels like a scripting language, the way it actually runs
+commands is more closely analogous to a Makefile or a pipeline manager like
+Galaxy. When you ask it to calculate something, it:
 
-~~~
-~~~
+1. Maps each variable in the script to a filename like `<varname>.<type>`.
+   For example `pcc6803.fna` or `cutoffs.num.list`.
+2. Makes a graph of which files are used as inputs and outputs of each command
+3. Runs the commands in whatever order is needed to "build" the variable you
+   asked for
 
-### Math
+Most of the interesting properties of the language, like lazy evaluation and
+automatic deduplication + parallelization, follow from this design. It also
+lets you view or edit the result of any function call in another program if
+needed. They're stored by default in `~/.shortcut`.
 
-The simplest thing you can do in ShortCut is probably math. It works more
-or less like you expect.
+The special variable `result` automatically tracks your most recent expression.
+You can also assign it expclicitly. It's the only thing that will actually be
+evaluated when running a script.
 
-~~~
-shortcut >> 1 + 1
-2.0
-shortcut >> 2 * 3.45234e-8
-6.90468e-8
-shortcut >> 2 * 3.45234e-8 - 3.5
--3.4999999309532
-shortcut >>
-~~~
+BLAST+
+------
 
-Unlike in some languages, there’s only one type of number. It’s called
-“number”. You can write integers, decimals, or scientific notation. The
-only gotcha is that math doesn’t follow normal order of operations—instead,
-everything is just left to right. For example, `3 + 1 / 2` is `2`, not
-`3.5`. PEMDAS could be added fairly easily, but I haven’t done it because the
-`+` and `-` functions are also used with sets, and I think it would be
-confusing if they switched behavior depending on the type you call them with.
-More on that later. Most phylogenomic cuts won’t involve long equations, and if
-you do need one you can use parentheses.
+ShortCut provides the most common NCBI BLAST programs, which differ in their
+subject and query types. It has several variants of each function, named with
+suffixes.
 
-### Lazy evaluation
+| Function | Query | Subject |
+| :------- | :---- | :------ |
+| blastn   | nucl  | nucl    |
+| blastp   | prot  | prot    |
+| blastx   | trans | prot    |
+| tblastn  | prot  | trans   |
+| tblastx  | trans | trans   |
 
-Let's try assigning a variable.
+There are several variants of each function, named with suffixes:
 
-~~~
-shortcut >> var1 = 1 + 1
-shortcut >>
-~~~
+| Format            | Meaning |
+| :-----            | :------ |
+| function          | "Regular" version (no suffix) automatically creates a database from the subject FASTA file before searching |
+| function_db       | Uses a prebuilt BLAST database as the subject. Useful for searching the larger NCBI databases, such as nr or refseq_rna |
+| function_rbh      | Does forward and reverse searches (query -> subject, subject -> query), and keeps only the reciprocal best hits (those where each gene is the other's top hit) |
+| function_each     | BLASTs the query against a list of subjects and returns a list of hit tables |
+| function_db_each  | Searches against a list of prebuilt databases |
+| function_rbh_each | Reciprocal best hits against a list of FASTA files |
 
-If you do `:show var1`, what do you expect it will say? Most people would
-guess `2.0`. But actually:
+CRB-BLAST
+---------
 
-~~~
-shortcut >> :show var1
-1.0 + 1.0
-~~~
+Reciprocal best hits are the most common method used to find orthologs, but
+they can sometimes be overly conservative, missing true orthologs. For that
+reason, ShortCut also includes CRB-BLAST ([Aubry _et al._ 2014][4]). For each
+pair of genomes, it:
 
-ShortCut has “lazy” evaluation, which means nothing is computed until you ask
-to see the result.  When we created `var1` it just said “OK, now var1 is
-defined”. Now you’ve asked “How is var1 defined?”, and it says “var1 is the
-result of 1 + 1, which will be a number”.
+1. Does a standard reciprocal BLAST search
+2. Plots e-value vs sequence length of the reciprocal best hits and fits
+   a curve to it
+3. Adds non-reciprocal hits whose e-values are at least as good 
 
-This makes more sense when you consider expensive computations.
-If `var1` were a huge table of 10,000,000 BLAST results, you might want to
-finish setting up the rest of the script, then go home and let it run
-everything at once overnight. But since we know `1+1` is easy, we’ll go
-ahead and tell it “Yes, I really do want to know what the number is”.
+According to the authors, this significantly improves the accuracy of ortholog
+assignment. Another useful feature is that it picks the e-value cutoff
+automatically, as illustrated in figure 2F from their paper:
 
-~~~
-shortcut >> var1
-2.0
-shortcut >>
-~~~
+![](poster/crb-blast.png)
 
-You can call any function with the results of previous functions. This doesn't
-force evaluation. When you finally ask to see the result of one of them,
-ShortCut will go back and calculate everything needed in the right order. It
-will also do steps that don't depend on each other in parallel.
+Codifying the Greencut
+----------------------
 
-If you've ever written a makefile, assigning the variable is similar to writing
-a rule that will generate the `var1` file, and asking for the answer is like
-running `make var1`. In fact, this is very close to how it works internally.
+Consider the Greencut ([Merchant _et al._ 2007][3]), a list of genes likely to
+be important for photosynthesis because they are conserved in the "green
+lineage". From their paper, here are the species used to make the original
+Greencut, along with related cuts for diatoms and plastids:
 
-### Types
+![](poster/greencut-species.jpg)
 
-Before we get to that though, let's consider the situation where you have
-a series of expensive computations you want to run overnight. How do you know
-your script won't crash at some point because you gave one function a gene name
-when it was expecting a number? That's what the type system is for. As you
-write your code, ShortCut checks that every function is called with values of
-the right type. If you try to call the `+` function with a number and a string,
-it will refuse:
+> Evolutionary relationships of 20 species with sequenced genomes used
+> for the comparative analyses in [their] study include cyanobacteria and
+> nonphotosynthetic eubacteria, Archaea and eukaryotes from the oomycetes,
+> diatoms, rhodophytes, plants, amoebae and opisthokonts. 
 
-~~~
-shortcut >> var2 = 1 + "bob"
-Wrong argument types for the function '+'.
-  Need: number, number
-  Got:  number, string
+To do something similar in ShortCut, a proteome (FASTA amino acid file) is
+loaded for each species. They are put grouped into lists representing the most
+specific taxa, and higher taxa are represented by unions of those lists:
 
-shortcut >> 
-~~~
+```python
+cyanobacteria = load_faa_each
+  [ "ncbi_Synechocystis-PCC-6803-uid57659_NC_000911.faa"
+  , "ncbi_Prochlorococcus-marinus-MIT-9303-uid58305_NC_008820.faa"
+  ]
 
-The combination of lazy evaluation and a strong type system let you know that
-your entire script is reasonable before you run it. Of course it might still
-fail for reasons that can't be known beforehand, like maybe one of your BLAST
-searches won't return any hits. But at least it will catch the obvious
-mistakes.
+other_bacteria = load_faa_each
+  [ "Pseudomonas_aeruginosa_PAO1_107.faa"
+  , "Staphylococcus_aureus.faa"
+  , "Mathanosarcina_acetovorans.faa"
+  , "Sulfolobus_solfataricus.faa"
+  ]
 
-Besides numbers and strings the available types are: gene names, genome
-names, blast hit tables, FASTA files (nucleic or amino acid), and sets of
-any of those. I plan to add phylogenetic trees (gene and species) soon too.
+# JGI distributes the diatom genomes as a separate mapped and unmapped fasta
+# file each, so we have to concatenate them to get whole genomes.
+# (Alternately, we could ignore unmapped reads.)
+ptr = concat_fastas (load_faa_each
+  [ "Phatr2_chromosomes_GeneModels_AllModels_20070523_aa.fasta"
+  , "Phatr2_bd_unmapped_GeneModels_AllModels_20070514_aa.fasta"
+  ])
 
-### Scripts and Temporary files
+tps = concat_fastas (load_faa_each
+  [ "Thaps3_chromosomes_geneModels_AllModels_20060913_aa.fasta"
+  , "Thaps3_bd_unmapped_GeneModels_AllModels_20070514_aa.fasta"
+  ])
 
-There's one more important difference between ShortCut and other languages you
-might be used to. Well, two really: functions correspond to programs, and
-variables correspond to files. ShortCut itself doesn't do much computing. It
-does have built-in math and set operations, but everything else is a matter of
-calling other programs in the right order with the right filenames. Consider
-this line:
+diatoms = [ptr, tps]
 
-~~~
-ingoodcyanos = filter_genes plastidcut goodcyanos 1e-12
-~~~
+oomycetes = load_faa_each
+  [ "ramorum1.proteins.fasta"
+  , "Physo3/Physo3_each_proteins_20110401.aa.fasta"
+  ]
 
-It calls the function `filter_genes` with three arguments and assigns the
-result to the variable `ingoodcyanos`. But really, there's a script
-`filter_genes.R` that gets called with three temporary files and creates
-a fourth. Everything gets a temporary file! By default, they go in the
-`_shortcut` folder. When we asked ShortCut to calculate `var1` above, it
-created a text file `_shortcut/var1.num` with "2.0" in it. This function call
-will create `_shortcut/ingoodcyanos.genes`, which will contain a list of gene
-names. There are lots of other unnamed temporary files too. They go in
-`_shortcut/cache` to minimize clutter.
+# We separate Chlamydomonas from the other Chlorophytes because it will be
+# used as the reference, and load it as DNA rather than AA sequences because
+# CRB-BLAST requires it.
+chlamy = load_fna "Creinhardtii_281_v5.5.protein.fa"
 
-### Examples
+chlorophyta = load_faa_each
+  [ "2507525004/2507525004.genes.faa"
+  , "Ost9901_3_GeneModels_AllModels_20111212_aa.fasta"
+  , "OstreococcusRCC809v2.allModels.proteins.fasta"
+  ]
+  
+streptophyta = load_faa_each
+  [ "Araport11_genes.201606.cds.fasta"
+  , "Ppatens_318_v3.3.protein.fa"
+  ]
 
-### Developing Shortcut
+cmerolae = load_faa "Cyanidioschyzon_merolae_cds.fasta"
 
-The interpreter is a Haskell package, and it calls scripts written in various
-languages---Python, R, Bash, Ruby... I use the [Nix](https://nixos.org/nix)
-package manager to make sure everything builds reproducibly.
+unikonts = load_faa_each
+  [ "Dictyostelium_discoideum.dicty_2.7.cds.all.fa"
+  , "GRCh38_latest_protein.faa"
+  , "Neurospora_crassa.faa"      # TODO download
+  , "Caenorhabditis_elegans.faa" # TODO download
+  ]
 
-You can `nix-build` the main package. I find that to be annoyingly slow for
-Haskell though, because it recompiles them from scratch each time. So I
-normally enter `nix-shell default.nix`, then keep `stack test --file-watch`
-open in one terminal to do incremental builds + tests, and `stack repl` in
-another for playing around with the types.
+heterokonts   = diatoms | oomycetes
+bacteria      = cyanobacteria | other_bacteria
+viridiplantae = chlorophyta | streptophyta
+plantae       = viridiplantae | [cmerolae]
+eukaryotes    = plantae | heterokonts | unikonts
+```
 
-You have to write a little Haskell to extend ShortCut with new
-scripts/functions, but not much! I include well-commented examples, and it
-should be safe to muddle through editing them, then check that it compiles.
+Next, here is an exerpt of how the authors describe the cuts themselves:
 
-To build and test everything:
+![](poster/greencut-venn-diagram.jpg)
 
-nix-build && ./result/bin/shortcut --test
+> The Greencut comprises 349 _Chlamydomonas_ proteins with homologs in
+> representatives of the green lineage of the Plantae (_Chlamydomonas_,
+> _Physcomitrella_, and _Ostreococcus tauri_ and _O. lucimarinus_), but not in
+> nonphotosynthetic organisms. Genes encoding proteins of unknown function that
+> were not previously annotated were given names on the basis of their occurrence
+> in various cuts. CGL refers to conserved only in the green lineage. The
+> Greencut protein families, which also include members from the red alga
+> _Cyanidioschyzon_ within the Plantae, were assigned to the PlantCut (blue plus
+> green rectangles). CPL refers to conserved in the Plantae. Greencut proteins
+> also present in at least one diatom (_Thalassiosira_ and _Phaeodactylum_) were
+> assigned to the DiatomCut (yellow plus green rectangle). CGLD refers to
+> conserved in the green lineage and diatoms. Proteins present in all of the
+> eukaryotic plastid-containing organisms in this analysis were assigned to the
+> PlastidCut (green rectangle). CPLD refers to conserved in the Plantae and
+> diatoms. The criteria used for the groupings associated with the Greencut are
+> given in the lower table.
 
-Looks like stack build + test works, but you have to do it from inside
-nix-shell to get non-haskell depndencies like crb-blast.
+In roughly equivalent ShortCut code, two more groups (lists of proteomes)
+are defined for convenience: "greens" and "others".
 
-### Reference
+```python
+greens = plantae | cyanobacteria
+others = unikonts | heterokonts | other_bacteria
+```
+
+Then CRB-BLAST searches are done between Chlamydomonas and each of the other
+genomes. Finally, the cuts are made by extracting the list of Chlamy genes
+with homologs in each species, and doing set operations on them.
+
+```python
+green_hits  = extract_each_queries (crb_blast_each chlamy greens )
+diatom_hits = extract_each_queries (crb_blast_each chlamy diatoms)
+other_hits  = extract_each_queries (crb_blast_each chlamy others )
+
+greencut   = all green_hits ~ any other_hits
+plantcut   = greencut & extract_queries (crb_blast chlamy cmerolae)
+diatomcut  = greencut & any diatom_hits
+plastidcut = plantcut & diatomcut
+```
+
+Note that even if many duplicate BLAST searches are specified, caching ensures
+each operation is only done once. It is also possible to calculate one cut at
+a time, skipping any steps whose results aren't used in that one.
+
+Permute, Repeat, Summarize
+--------------------------
+
+Making a cut involves choices: which genomes to include, whether to trust their
+gene annotations, which BLAST functions to use, which e-value cutoffs to apply
+at each step... How can you be sure the parameters you picked are reasonable?
+ShortCut implements a novel solution made possible by lazy evaluation and
+caching: duplicate parts of the program, re-run them starting from alternate
+values, and see how the results change.
+
+Suppose you have the original program in the box on the left, and want to know,
+"What happens to `var6` if I change `var1`?"
+
+![](poster/prs.png)
+
+`repeat_each` recalculates `var6` starting from 3 alternate versions of `var1`,
+and reports a list of results.
+
+Note that this is all "repeat"; the "permute" and "summarize" steps would be
+separate functions to generate the list of `var1` permutations and aggregate
+the final results in some way, perhaps filtering or plotting them. The overall
+strategy is similar to "split apply combine" in R.
+
+Here is a simpler and more practical example:
+
+```python
+# BLAST Synechococcus genes against Synechocystis with a standard cutoff
+cutoff = 1e-10
+hits = extract_queries (blastp cutoff pcc7942 pcc6803)
+
+# Re-run it with a range of cutoffs and report the number of hits for each
+cutoffs = [1e-5, 1e-10, 1e-20, 1e-50, 1e-100, 0]
+lengths = repeat_each (length hits) cutoff cutoffs
+```
+
+By using different permute and summarize functions, many biologically relevant
+questions can be easily tranlated to code:
+
+* "How long does it take to run my cut with only a few of the available cyano
+  genomes?"
+
+* "Do I really need all those genomes, or would using just a couple produce the
+  same results?"
+
+* "If I remove the known PSII assembly factors one by one, which would be
+  rediscovered in the results?"
+
+* Which search parameters maximize the number of known PSII assembly factors
+  (positive controls) rediscovered?
+
+* "If I re-run the same BLAST search 1000 times, which hits always appear and
+  which ones only show up occasionally?"
+
+* ...
+
+Even better, that code can be added interactively and without changing the
+existing cut.
+
+Next: Cross-Validation
+----------------------
+
+The PRS methodology will be extended to automatically optimize parameters
+(questions 3 and 4 above). For example you could try a range of e-values and
+pick the one the maximizes the number of known genes rediscovered while
+minimizing the number of total candidates.
+
+It is considered good practice when training an algorithm to hold some of the
+test data in reserve for measuring performance at the end. This guards against
+over-fitting: optimizing the algorithm for your exact test data, only to find
+later that other data are different. This could also be done fairly easily in
+ShortCut by splitting a list of known positive-control genes into training and
+validation lists, optimizing to discover genes in the training list, and
+finally reporting the number of validation genes rediscovered at the same time.
+
+Finally, that could be refined into cross-validation: splitting the known genes
+into some number of sublists and using each one as validation for the others.
+For example:
+
+1. start with 50 known genes
+2. split into 5 random lists of 10
+3. for each list of 10, train on the other 40 and test on those 10
+4. plot the results
+
+Next: build and cluster gene trees
+----------------------------------
+
+After finding a large list of initial candidates with BLAST, one good way to
+narrow them down is by aligning each set of homologs and building gene trees
+from them, then clustering the trees and picking out the genes that cluster
+with your positive controls. TreeCl ([Gori, Dessimoz _et al._ 2016][6])
+automates much of the process:
+
+![](poster/treecl.png)
+
+Integrating it with ShortCut will improve them both, since TreeCl offers
+a large number of tree building and clustering parameters that would benefit
+from comparison using the PRS functions.
+
+[1]: poster/shortcut-poster.svg
+[2]: https://nixos.org/nix/
+[3]: http://science.sciencemag.org/content/318/5848/245.full
+[4]: http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1004365
+[5]: src/usage.txt
+[6]: https://academic.oup.com/mbe/article/33/6/1590/2579727
