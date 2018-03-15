@@ -186,12 +186,12 @@ specific taxa, and higher taxa are represented by unions of those lists:
 
 ```python
 cyanobacteria = load_faa_each
-  [ "ncbi_Synechocystis-PCC-6803-uid57659_NC_000911.faa"
-  , "ncbi_Prochlorococcus-marinus-MIT-9303-uid58305_NC_008820.faa"
+  [ "Synechocystis_sp_PCC-6803.faa"
+  , "Prochlorococcus-marinus.faa"
   ]
 
 other_bacteria = load_faa_each
-  [ "Pseudomonas_aeruginosa_PAO1_107.faa"
+  [ "Pseudomonas_aeruginosa.faa"
   , "Staphylococcus_aureus.faa"
   , "Mathanosarcina_acetovorans.faa"
   , "Sulfolobus_solfataricus.faa"
@@ -201,45 +201,44 @@ other_bacteria = load_faa_each
 # file each, so we have to concatenate them to get whole genomes.
 # (Alternately, we could ignore unmapped reads.)
 ptr = concat_fastas (load_faa_each
-  [ "Phatr2_chromosomes_GeneModels_AllModels_20070523_aa.fasta"
-  , "Phatr2_bd_unmapped_GeneModels_AllModels_20070514_aa.fasta"
+  [ "Phaeodactylum_tricornatum_mapped.faa"
+  , "Phaeodactylum_tricornatum_unmapped.faa"
   ])
 
 tps = concat_fastas (load_faa_each
-  [ "Thaps3_chromosomes_geneModels_AllModels_20060913_aa.fasta"
-  , "Thaps3_bd_unmapped_GeneModels_AllModels_20070514_aa.fasta"
+  [ "Thalassiosira_pseudonana_mapped.faa"
+  , "Thalassiosira_pseudonana_unmapped.faa"
   ])
 
 diatoms = [ptr, tps]
 
 oomycetes = load_faa_each
-  [ "ramorum1.proteins.fasta"
-  , "Physo3/Physo3_each_proteins_20110401.aa.fasta"
+  [ "Phytophthora_ramorum.faa"
+  , "Phytophthora_sojae.faa"
   ]
 
 # We separate Chlamydomonas from the other Chlorophytes because it will be
 # used as the reference, and load it as DNA rather than AA sequences because
 # CRB-BLAST requires it.
-chlamy = load_fna "Creinhardtii_281_v5.5.protein.fa"
+chlamy = load_fna "Chlamydomonas_reinhardtii.fna"
 
 chlorophyta = load_faa_each
-  [ "2507525004/2507525004.genes.faa"
-  , "Ost9901_3_GeneModels_AllModels_20111212_aa.fasta"
-  , "OstreococcusRCC809v2.allModels.proteins.fasta"
-  ]
-  
-streptophyta = load_faa_each
-  [ "Araport11_genes.201606.cds.fasta"
-  , "Ppatens_318_v3.3.protein.fa"
+  [ "Ostreococcus_taurii.faa"
+  , "Ostreococcus_lucimarinus.faa"
   ]
 
-cmerolae = load_faa "Cyanidioschyzon_merolae_cds.fasta"
+streptophyta = load_faa_each
+  [ "Arabidopsis_thaliana.faa"
+  , "Physcomitrella_patens.faa"
+  ]
+
+cmerolae = load_faa "Cyanidioschyzon_merolae.faa"
 
 unikonts = load_faa_each
-  [ "Dictyostelium_discoideum.dicty_2.7.cds.all.fa"
-  , "GRCh38_latest_protein.faa"
-  , "Neurospora_crassa.faa"      # TODO download
-  , "Caenorhabditis_elegans.faa" # TODO download
+  [ "Dictyostelium_discoideum.faa"
+  , "Homo_sapiens.faa"
+  , "Neurospora_crassa.faa"
+  , "Caenorhabditis_elegans.faa"
   ]
 
 heterokonts   = diatoms | oomycetes
