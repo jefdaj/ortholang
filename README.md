@@ -146,6 +146,18 @@ There are several variants of each function, named with suffixes:
 | function_db_each  | Searches against a list of prebuilt databases |
 | function_rbh_each | Reciprocal best hits against a list of FASTA files |
 
+A couple examples:
+
+```python
+# BLAST against the NCBI nonredundant database
+hits = tblastn pcc7942 (blastdbget "nr") 1e-50
+
+# find Synechococcus orthologs of Synechocystis genes
+# (this lists the Synechococcus genes themselves;
+#  for the Synechocystis genes that have orthologs, use extract_queries)
+genes = extract_targets (blastx 1e-20 pcc6803 pcc7942)
+```
+
 CRB-BLAST
 ---------
 
@@ -164,6 +176,13 @@ assignment. Another useful feature is that it picks the e-value cutoff
 automatically, as illustrated in figure 2F from their paper:
 
 ![](poster/crb-blast.png)
+
+Example:
+
+```python
+# make a list of Chlamy genes with a reliable ortholog in at least one diatom
+shared_with_diatoms = any (extract_queries_each (crb_blast_each chlamy diatoms))
+```
 
 Codifying the Greencut
 ----------------------
