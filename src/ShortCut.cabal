@@ -1,6 +1,8 @@
 name:               ShortCut
 version:            0.7.0.0
-synopsis:           A scripting language that makes short work of phylogenomic cuts
+license:            AGPL-3
+license-file:       license.txt
+synopsis:           Short, reproducible phylogenomic cuts
 author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
 build-type:         Simple
