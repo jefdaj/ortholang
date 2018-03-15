@@ -63,8 +63,7 @@ formats:
 # load a FASTA nucleic acid file (transcriptome)
 pcc6803 = load_fna "Synechocystis_PCC_6803.fna"
 
-# load a genome distributed as separate genbank files,
-# and convert it to one FASTA
+# load a genome distributed as separate genbank files, and convert it to one FASTA
 pcc7942 = concat_fastas [gbk_to_faa (load_gbk "SynPCC7942_chr.gbk"),
                          gbk_to_faa (load_gbk "SynPCC7942_pANL.gbk")]
 ```
@@ -126,13 +125,14 @@ BLAST+
 ShortCut provides the most common NCBI BLAST programs, which differ in their
 subject and query types.
 
-| Function | Query | Subject |
-| :------- | :---- | :------ |
-| blastn   | nucl  | nucl    |
-| blastp   | prot  | prot    |
-| blastx   | trans | prot    |
-| tblastn  | prot  | trans   |
-| tblastx  | trans | trans   |
+| Function  | Query | Subject |
+| :-------  | :---- | :------ |
+| blastn    | nucl  | nucl    |
+| blastp    | prot  | prot    |
+| blastx    | trans | prot    |
+| tblastn   | prot  | trans   |
+| tblastx   | trans | trans   |
+| megablast | nucl  | nucl    |
 
 There are several variants of each one, named with suffixes:
 
@@ -156,6 +156,8 @@ hits = tblastn 1e-50 pcc7942 (blastdbget "nr")
 #  for the Synechocystis genes that have orthologs, use extract_queries)
 genes = extract_targets (blastx 1e-20 pcc6803 pcc7942)
 ```
+
+Not all functions come in all variants, because some of them wouldn't make sense.
 
 CRB-BLAST
 ---------
@@ -338,7 +340,7 @@ and reports a list of results.
 Note that this is all "repeat"; the "permute" and "summarize" steps would be
 separate functions to generate the list of `var1` permutations and aggregate
 the final results in some way, perhaps filtering or plotting them. The overall
-strategy is similar to "split apply combine" in R.
+strategy is similar to ["split apply combine"][9] in R.
 
 Here is a simpler and more practical example:
 
@@ -425,3 +427,4 @@ from comparison using the PRS functions.
 [6]: https://academic.oup.com/mbe/article/33/6/1590/2579727
 [7]: https://en.wikipedia.org/wiki/Make_(software)
 [8]: https://shakebuild.com/
+[9]: https://www.jstatsoft.org/article/view/v040i01
