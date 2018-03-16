@@ -63,8 +63,7 @@ formats:
 # load a FASTA nucleic acid file (transcriptome)
 pcc6803 = load_fna "Synechocystis_PCC_6803.fna"
 
-# load a genome distributed as separate genbank files,
-# and convert it to one FASTA
+# load a genome distributed as separate genbank files, and convert it to one FASTA transcriptome
 pcc7942 = concat_fastas [gbk_to_faa (load_gbk "SynPCC7942_chr.gbk"),
                          gbk_to_faa (load_gbk "SynPCC7942_pANL.gbk")]
 ```
@@ -80,7 +79,7 @@ We can quickly describe anything that could be shown in a Venn Diagram:
 >> A = [1, 2, 3]
 >> B = [2, 4, 6]
 >> C = [45, 2, 1e23, 3e-9]
->> 
+>>
 >> A | B
 [1, 2, 3, 4, 6]
 >> A & B
@@ -169,7 +168,7 @@ pair of genomes, it:
 1. Does a standard reciprocal BLAST search
 2. Plots e-value vs sequence length of the reciprocal best hits and fits
    a curve to it
-3. Adds non-reciprocal hits whose e-values are at least as good 
+3. Adds non-reciprocal hits whose e-values are at least as good
 
 According to the authors, this significantly improves the accuracy of ortholog
 assignment. Another useful feature is that it picks the e-value cutoff
@@ -197,7 +196,7 @@ Greencut, along with related cuts for diatoms and plastids:
 > Evolutionary relationships of 20 species with sequenced genomes used
 > for the comparative analyses in [their] study include cyanobacteria and
 > nonphotosynthetic eubacteria, Archaea and eukaryotes from the oomycetes,
-> diatoms, rhodophytes, plants, amoebae and opisthokonts. 
+> diatoms, rhodophytes, plants, amoebae and opisthokonts.
 
 To do something similar in ShortCut, a proteome (FASTA amino acid file) is
 loaded for each species. They are put grouped into lists representing the most
@@ -292,8 +291,8 @@ In roughly equivalent ShortCut code, two more groups (lists of proteomes)
 are defined for convenience: "greens" and "others".
 
 ```python
-greens = plantae | cyanobacteria
-others = unikonts | heterokonts | other_bacteria
+greens = plantae | cyanobacteria | diatoms
+others = unikonts | oomycetes | other_bacteria
 ```
 
 Then CRB-BLAST searches are done between Chlamydomonas and each of the other
