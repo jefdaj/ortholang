@@ -1,14 +1,10 @@
 module ShortCut.Test.Scripts where
 
--- TODO go with filelock here too?
-
 import Prelude hiding (writeFile)
--- import qualified Control.Monad.TaggedException as TE
 
 import Control.Concurrent.Thread.Delay (delay)
 import Control.Monad              (when)
 import Data.ByteString.Lazy.Char8 (pack, ByteString)
--- import Data.Default.Class         (Default(def))
 import Data.Maybe                 (fromJust)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
@@ -22,8 +18,6 @@ import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
                                    takeFileName, (</>), (<.>))
 import System.IO                  (stdout, stderr, writeFile)
--- import System.IO.LockFile         (withFileLock, LockingParameters(..),
-                                   -- RetryStrategy(..))
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
                                    cwd, shell)
@@ -31,8 +25,6 @@ import Test.Hspec                 (it)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
--- import System.FileLock            (withFileLock, SharedExclusive(..))
--- import Data.IORef                     (IORef)
 
 nonDeterministicCut :: FilePath -> Bool
 nonDeterministicCut path = testDir `elem` badDirs
@@ -46,17 +38,6 @@ getTestCuts = do
   testDir  <- getDataFileName "tests"
   testCuts <- findByExtension [".cut"] testDir
   return testCuts
-
--- TODO any particular corner cases to be aware of? (what if inturrupted?)
--- withWriteLock' :: CutConfig -> IO a -> IO a
--- withWriteLock' cfg act = handler $ withFileLock params path act
---   where
---     path    = cfgTmpDir cfg <.> "lock"
---     handler = TE.handle $ fail . ("Locking failed with: " ++) . show
---     params  = LockingParameters
---       { retryToAcquireLock = Indefinitely
---       , sleepBetweenRetires = 1000000 -- 1 second in microseconds
---       }
 
 goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
@@ -109,26 +90,14 @@ mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
       return $ out ++ err
 
--- Without the delays, Tasty messages sometimes get captured in the output. If
--- it still happens try TASTY_HIDE_SUCCESSES=True, not hFlush (doesn't help) or
--- TASTY_NUM_THREADS=1 (actually seems to make it worse).
 runCut :: CutConfig -> Locks -> IO String
--- runCut cfg = withFileLock (cfgTmpDir cfg) $ do
--- runCut cfg = do
--- runCut cfg = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
 runCut cfg ref =  do
-  -- delay 50000; hFlush stdout; hFlush stderr; delay 50000 -- 1 second total
-  delay 100000 -- 1 second
+  delay 100000 -- wait 1/10 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref
-  delay 100000 -- 1 second
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
   return out
 
--- TODO is the IO return type needed?
--- TODO FIGURE OUT HOW TO HAVE EACH STEP LOCK THE DIR IF IT ISN'T YET!
--- TODO OH, EXCEPT WHAT IF THAT'S WHAT'S MAKING THEM FREEZE? CHECK BOTH IDEAS
---      (LOOKS LIKE THEY NEVER REMOVE THE LOCKFILES? HAHA EXPLAINS OTHER ERRORS? FIX IT)
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath))
               -> CutConfig -> Locks -> IO TestTree
 mkScriptTests (cut, gld, mtre) cfg ref = do

@@ -1,6 +1,7 @@
 module ShortCut.Core.Parse.Expr where
 
 import ShortCut.Core.Types
+import ShortCut.Core.Pretty()
 import ShortCut.Core.Parse.Basic
 
 import qualified Text.Parsec.Expr as E
@@ -10,7 +11,7 @@ import Control.Applicative    ((<|>))
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.List              (find, union)
-import ShortCut.Core.Debug    (debugParser)
+-- import ShortCut.Core.Debug    (debugParser)
 -- import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)

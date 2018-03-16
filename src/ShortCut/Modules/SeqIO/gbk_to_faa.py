@@ -45,6 +45,7 @@ def seqid(seq_feature):
 
 # adapted from:
 # http://www2.warwick.ac.uk/fac/sci/moac/people/students/peter_cock/python/genbank2fasta
+# TODO can this be empty? does it need an explicit <<emptyfaa>> or whatever?
 with open(outfaa, 'w') as out:
   for seq_record in SeqIO.parse(ingbk, 'genbank'):
     for seq_feature in seq_record.features:

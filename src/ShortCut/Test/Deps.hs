@@ -14,8 +14,8 @@ import Test.Tasty.Golden          (goldenVsString)
 
 depCmds :: [(String, String)]
 depCmds =
-  [ ("ncbi_blast", "blastx -version")
-  , ("crb_blast" , "crb-blast --version")
+  [ ("ncbi-blast", "blastx -version")
+  , ("crb-blast" , "crb-blast --version")
   , ("python"    , "python --version")
   , ("r"         , "R --version")
   , ("biopython" , "python -c \"import Bio; print Bio.__version__\"")

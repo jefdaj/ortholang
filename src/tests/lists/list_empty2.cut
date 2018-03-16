@@ -6,7 +6,7 @@ emptytwo   = [[ ], [ ]]
 emptyfirst = [[ ], [1]]
 emptylast  = [[1], [ ]]
 
-# this should be the num.list.list [[1.0], []]
+# this should be the num.list.list [[1], []]
 # not a type error about empty.list.list vs num.list.list
 # and not some abomination like [[], []] or [[[]], []]
 elems = emptyzero | emptyone | emptytwo | emptyfirst | emptylast

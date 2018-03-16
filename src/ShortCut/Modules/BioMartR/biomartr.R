@@ -54,6 +54,9 @@ download_matches <- function(fnName, schTable)
 
 save_list <- function(files, outPath) {
 	con <- file(outPath)
+  if (length(files) == 0) {
+      files <- "<<emptylist>>"
+  }
   writeLines(files, con)
 	close(con)
 }

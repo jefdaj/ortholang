@@ -6,6 +6,11 @@ module ShortCut.Core.Pretty
   , writeScript
   , CutExpr(..)
   , prettyNum -- TODO get rid of this?
+
+  -- re-export for convenience
+  , Pretty()
+  , render
+  , pPrint
   )
   where
 

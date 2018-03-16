@@ -11,9 +11,9 @@ import Data.List                   (nubBy)
 import Data.Set                    (Set, union, difference, intersection, fromList,
                                     toList)
 import Development.Shake.FilePath  ((</>))
-import ShortCut.Core.Compile.Basic (rExpr, typeError)
-import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, digestFile)
-import ShortCut.Core.Debug         (debugRules, debugAction)
+import ShortCut.Core.Compile.Basic (rExpr, typeError, debugRules)
+import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, digestFile, debugA)
+-- import ShortCut.Core.Debug         (debugRules, debugA)
 import ShortCut.Core.Paths         (exprPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 
@@ -101,7 +101,7 @@ aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   let sets = map fromList setElems'
       oLst = toList $ fn sets
-      oPath' = debugAction cfg "aSetFold" oPath [oPath, setsPath]
+      oPath' = debugA cfg "aSetFold" oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
               else dedupByContent cfg ref oLst

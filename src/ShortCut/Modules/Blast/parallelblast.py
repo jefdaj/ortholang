@@ -29,7 +29,7 @@ Options:
 from distutils.dir_util import mkpath
 from docopt             import docopt
 from glob               import glob
-from os                 import remove, devnull, readlink
+from os                 import remove, devnull, readlink, stat
 from os.path            import exists, join, basename, dirname, splitext
 from subprocess         import check_call
 from hashlib            import md5
@@ -86,6 +86,11 @@ def make_db(args, tmpdir, fasta, dbtype):
             remove(f)
         raise
 
+def explicit_empty_list(filename):
+    if stat(filename).st_size == 0: # TODO any reason to worry about whitespace?
+        with open(filename, 'w') as f:
+            f.write("<<emptylist>>\n")
+
 def make_hits(args, db):
     '''
     takes the path to a fasta query file and a blast db
@@ -94,7 +99,7 @@ def make_hits(args, db):
     '''
     query = args['--query']
     hits  = args['--outcsv']
-    if exists(hits):
+    if exists(hits): # TODO remove this? only useful outside shortcut
         return hits
     if not exists(dirname(hits)):
         mkpath(dirname(hits))
@@ -104,6 +109,7 @@ def make_hits(args, db):
         q = query
 
     # it's crazy this isn't the default
+    # TODO but test whether it really makes a difference
     # see http://www.sixthresearcher.com/when-blast-is-not-blast/
     basecmd = args['--cmd']
     if basecmd == 'blastn':
@@ -131,13 +137,13 @@ def make_hits(args, db):
         log(args, cmd)
         with open(hits, 'w') as out:
             check_call(cmd, shell=True, stdout=out)
+        check_call(["sync"])
+        explicit_empty_list(hits)
         return hits
     except:
         if exists(hits):
             remove(hits)
         raise
-    finally:
-        check_call(["sync"])
 
 def resolve_link(path):
     while True:

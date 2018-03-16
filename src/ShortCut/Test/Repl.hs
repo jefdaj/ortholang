@@ -7,7 +7,7 @@ import Data.ByteString.Lazy.Char8 (pack)
 import Data.List                  (isPrefixOf)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
-import ShortCut.Core.Locks        (withReadLock)
+import ShortCut.Core.Util         (readFileStrict)
 import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>))
@@ -62,7 +62,7 @@ mockRepl stdinLines path cfg ref = withFile path WriteMode $ \handle -> do
 -- TODO include goldenTree here too (should pass both at once)
 goldenRepl :: CutConfig -> Locks -> FilePath -> IO TestTree
 goldenRepl cfg ref goldenFile = do
-  txt <- withReadLock ref goldenFile $ readFile goldenFile
+  txt <- readFileStrict ref goldenFile
   let name   = takeBaseName goldenFile
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tstOut = cfgTmpDir cfg' ++ name ++ ".out"
@@ -80,7 +80,7 @@ goldenRepls cfg ref = do
 
 goldenReplTree :: CutConfig -> Locks -> FilePath -> IO TestTree
 goldenReplTree cfg ref ses = do
-  txt <- withReadLock ref ses $ readFile ses
+  txt <- readFileStrict ref ses
   let name   = takeBaseName ses
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tree   = replaceExtension ses "tree"

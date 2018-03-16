@@ -11,11 +11,11 @@ module ShortCut.Core.Compile.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions (writeLits, writePaths, readLit)
+import ShortCut.Core.Actions (writeLits, writePaths, readLit, debugA)
 import ShortCut.Core.Paths  (exprPath, fromCutPath,
                              CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Compile.Basic (rExpr, compileScript)
-import ShortCut.Core.Debug   (debugRules, debugAction)
+import ShortCut.Core.Compile.Basic (rExpr, compileScript, debugRules)
+-- import ShortCut.Core.Debug   (debugRules, debugA)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
 
 --------------------------------------------------------
@@ -106,7 +106,7 @@ aRepeatEachLits _ cfg ref outPath subPaths resPaths = do
     outPath'  = fromCutPath cfg outPath
     subPaths' = fromCutPath cfg subPaths
     resPaths' = map (fromCutPath cfg) resPaths
-    out = debugAction cfg "aRepeatEachLits" outPath' (outPath':subPaths':resPaths')
+    out = debugA cfg "aRepeatEachLits" outPath' (outPath':subPaths':resPaths')
 
 -- TODO factor out, and maybe unify with rListLinks
 aRepeatEachLinks :: CutConfig -> Locks -> CutPath -> CutPath -> [CutPath] -> Action ()
@@ -117,4 +117,4 @@ aRepeatEachLinks cfg ref outPath subPaths resPaths = do
     outPath'  = fromCutPath cfg outPath
     subPaths' = fromCutPath cfg subPaths
     resPaths' = map (fromCutPath cfg) resPaths
-    out = debugAction cfg "aRepeatEachLinks" outPath' (outPath':subPaths':resPaths')
+    out = debugA cfg "aRepeatEachLinks" outPath' (outPath':subPaths':resPaths')

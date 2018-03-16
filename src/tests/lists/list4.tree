@@ -2,19 +2,19 @@
 |-- cache
 |   `-- lines
 |       |-- 303341643f.txt
-|       |-- d751713988.txt
-|       |-- d8166958d0.txt
-|       `-- facd23e623.txt
+|       |-- 3f3fbf57f1.txt
+|       |-- d59cb63de9.txt
+|       `-- d8166958d0.txt
 |-- exprs
 |   |-- list
 |   |   |-- 0bd7d20130.str.list -> ../../cache/lines/d8166958d0.txt
-|   |   |-- 9d4568c009.empty.list -> ../../cache/lines/d751713988.txt
+|   |   |-- a28c9e706d.empty.list.list -> ../../cache/lines/3f3fbf57f1.txt
 |   |   |-- b07a253658.str.list.list -> ../../cache/lines/303341643f.txt
-|   |   `-- cd486695fb.empty.list.list -> ../../cache/lines/facd23e623.txt
+|   |   `-- d751713988.empty.list -> ../../cache/lines/d59cb63de9.txt
 |   `-- str
 |       `-- a2a665650c.str -> ../../cache/lines/d8166958d0.txt
 |-- history.txt
 `-- vars
-    `-- result -> ../exprs/list/cd486695fb.empty.list.list
+    `-- result -> ../exprs/list/a28c9e706d.empty.list.list
 
 6 directories, 11 files

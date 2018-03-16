@@ -15,8 +15,8 @@ import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), takeDirectory)
 import ShortCut.Core.Actions      (readPaths, writePaths, symlink,
-                                   readLit, writeLits)
-import ShortCut.Core.Debug        (debugAction, debugRules, debug)
+                                   readLit, writeLits, debugA, debugNeed)
+-- import ShortCut.Core.Debug        (debugA, debugRules, debug)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    CutPath, exprPathExplicit, argHashes)
 import ShortCut.Core.Util         (digest, resolveSymlinks, unlessExists)
@@ -100,16 +100,16 @@ aEachMain :: CutConfig -> Locks
          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
          -> Action ()
 aEachMain cfg ref inits eachTmp eType lastsPath outPath = do
-  need inits'
+  debugNeed cfg "aEachMain" inits'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   inits''    <- liftIO $ mapM resolve inits'
   lastPaths  <- readPaths cfg ref lasts' -- TODO this needs a lit variant?
   lastPaths' <- liftIO $ mapM resolve (map (fromCutPath cfg) lastPaths)
   mapM_ (aEachArgs cfg ref eType inits'' tmp') (map (toCutPath cfg) lastPaths')
   let outPaths = map (eachPath cfg tmp' eType) lastPaths'
-  need outPaths
+  debugNeed cfg "aEachMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
-  let out = debugAction cfg "aEachMain" outPath (outPath:inits' ++ [tmp', lasts'])
+  let out = debugA cfg "aEachMain" outPath (outPath:inits' ++ [tmp', lasts'])
   if eType `elem` [str, num]
     then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
     else writePaths cfg ref out $ map (toCutPath cfg) outPaths'
@@ -160,7 +160,7 @@ aEachElem cfg ref eType tmpFn actFn singleName salt out = do
   args <- readPaths cfg ref argsPath
   let args' = map (fromCutPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
-  need args'
+  debugNeed cfg "aEachElem" args'
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do
@@ -168,7 +168,7 @@ aEachElem cfg ref eType tmpFn actFn singleName salt out = do
       let d' = fromCutPath cfg d
       createDirectoryIfMissing True d'
       return d
-  let out' = debugAction cfg "aEachElem" (toCutPath cfg out) args''
+  let out' = debugA cfg "aEachElem" (toCutPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
       single  = exprPathExplicit cfg singleName eType salt hashes

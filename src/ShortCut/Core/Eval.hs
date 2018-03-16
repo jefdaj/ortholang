@@ -23,7 +23,11 @@ module ShortCut.Core.Eval
   where
 
 import Development.Shake
+import Text.PrettyPrint.HughesPJClass
+
 import ShortCut.Core.Types
+import ShortCut.Core.Pretty (render)
+import ShortCut.Core.Config (debug)
 
 import Control.Retry
 
@@ -35,9 +39,7 @@ import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 -- import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Actions          (readLits, readPaths)
-import Text.PrettyPrint.HughesPJClass (render)
 import System.IO                      (Handle, hPutStrLn)
-import Text.PrettyPrint.HughesPJClass
 -- import Data.IORef                     (IORef)
 
 -- TODO use hashes + dates to decide which files to regenerate?
@@ -92,6 +94,10 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t ref) f'
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: Handle -> CutConfig -> Locks -> CutType -> Rules ResPath -> IO ()
+
+-- TODO put this back once done debugging (duplicates everything annoyingly)
+-- eval hdl cfg ref rtype = retryIgnore . eval'
+
 eval hdl cfg ref rtype = retryIgnore . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
@@ -103,7 +109,13 @@ eval hdl cfg ref rtype = retryIgnore . eval'
     -- TODO at least log when a retry happens for debugging
     -- TODO ask Niel if individual actions can be retried instead
     -- TODO could always fork Shake to put it in if needed too
-    retryIgnore fn = ignoreErrors $ recoverAll (limitRetries 5) $ const fn
+    retryIgnore fn = ignoreErrors $ recoverAll (limitRetries 4) $ report fn
+
+    -- Reports how many failures so far and runs the main fn normally
+    -- TODO debug rather than putStrLn?
+    report fn status = case rsIterNumber status of
+      0 -> fn
+      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath

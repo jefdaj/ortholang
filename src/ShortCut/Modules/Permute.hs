@@ -4,12 +4,13 @@ module ShortCut.Modules.Permute where
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Config (debug)
 
 import Development.Shake.FilePath   (makeRelative)
 import ShortCut.Core.Compile.Basic  (rExpr)
-import ShortCut.Core.Actions (readStrings, writeStrings)
+import ShortCut.Core.Actions (readStrings, writeStrings, debugA, debugNeed)
 import ShortCut.Core.Paths (exprPath, exprPathExplicit, fromCutPath)
-import ShortCut.Core.Debug          (debugAction, debug)
+-- import ShortCut.Core.Debug          (debugA, debug)
 import ShortCut.Core.Util           (digest)
 
 cutModule :: CutModule
@@ -48,7 +49,7 @@ aPermute :: CutState
          -> FilePath -> CutType -> Int
          -> FilePath -> Action ()
 aPermute (_,cfg,ref) comboFn iPath eType salt out = do
-  need [iPath]
+  debugNeed cfg "aPermute" [iPath]
   elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
@@ -58,7 +59,7 @@ aPermute (_,cfg,ref) comboFn iPath eType salt out = do
       oPaths' = map (fromCutPath cfg) oPaths
       combos  = comboFn elements
   mapM_ (\(p,ps) -> writeStrings eType cfg ref p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths' combos)
-  let out' = debugAction cfg "aPermute" out [iPath, extOf eType, out]
+  let out' = debugA cfg "aPermute" out [iPath, extOf eType, out]
   writeStrings (ListOf eType) cfg ref out' oPaths'
 
 --------------------

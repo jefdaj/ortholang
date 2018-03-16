@@ -1,7 +1,10 @@
 module ShortCut.Core.Util
 
+  -- read files
+  ( readFileStrict
+
   -- hashing
-  ( digestLength
+  , digestLength
   , digest
 
   -- paths
@@ -17,10 +20,12 @@ module ShortCut.Core.Util
 
   -- misc
   , stripWhiteSpace
+  , isEmpty
   )
   where
 
 import Development.Shake
+import qualified System.IO.Strict as Strict
 
 import Control.Monad          (unless)
 import Control.Monad.Catch    (MonadCatch, catch, throwM)
@@ -41,6 +46,51 @@ import System.IO.Error        (isDoesNotExistError, catchIOError,
 import System.Path.NameManip  (guess_dotdot, absolute_path)
 import System.Posix.Files     (readSymbolicLink)
 import System.FilePath.Glob   (glob)
+import Data.Time.LocalTime (getZonedTime)
+import Data.Time.Format    (formatTime, defaultTimeLocale)
+import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
+
+---------------
+-- debugging --
+---------------
+
+-- TODO put this in Util
+getTimeStamp :: IO String
+getTimeStamp = getZonedTime >>= return . formatTime defaultTimeLocale fmt
+  where
+    fmt = "[%Y-%m-%d %H:%M:%S %q]"
+
+-- TODO should this go in Util too?
+-- TODO remove if you can figure out a way to put stamps in regular debug
+-- debugIO :: CutConfig -> String -> a -> IO a
+-- debugIO cfg msg rtn = do
+--   stamp <- getTimeStamp
+--   return $ debug cfg (stamp ++ " " ++ msg) rtn
+
+-- TODO ok this goes in Util
+--debug :: CutConfig -> String -> a -> a
+--debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
+
+-- TODO and this one 
+-- TODO stop exporting this in favor of the ones below?
+-- debugShow :: Show a => CutConfig -> a -> b -> b
+-- debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
+
+----------------
+-- read files --
+----------------
+
+{- Lazy IO turns out not to work well for printing large lists of literals
+ - (couple hundred thousand at once). The solution is to use strict IO. And
+ - also to write literal lists as single files, which is part of why there are
+ - so many read/write functions. This is the IO verion, which shouldn't be used
+ - in the actual evaluation of cuts. Use one of the read* functions from
+ - Actions.hs instead.
+ - See: https://github.com/ndmitchell/shake/issues/37
+ - TODO All (haskell) reads should eventually go through this function
+ -}
+readFileStrict :: Locks -> FilePath -> IO String
+readFileStrict ref path = withReadLock ref path $ Strict.readFile path
 
 -------------
 -- hashing --
@@ -142,3 +192,10 @@ globFiles ptn = expandTildes ptn >>= glob >>= mapM absolutize
 
 stripWhiteSpace :: String -> String
 stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
+
+-- Note that this is the only lazy read function. Will it mess anything up?
+-- TODO should readLit and readList be based on this?
+isEmpty :: Locks -> FilePath -> Action Bool
+isEmpty ref path = do
+  txt <- withReadLock' ref path $ readFile' path
+  return $ "<<empty" `isPrefixOf` txt

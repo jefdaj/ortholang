@@ -5,8 +5,8 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Paths (exprPath, fromCutPath)
 import ShortCut.Core.Compile.Basic      (rExpr)
-import ShortCut.Core.Actions (readLits, writeLits)
-import ShortCut.Core.Debug (debugAction)
+import ShortCut.Core.Actions (readLits, writeLits, debugA, debugNeed)
+-- import ShortCut.Core.Debug (debugA)
 import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule
@@ -48,9 +48,9 @@ rSummary _ _ _ = error "bad argument to rSummary"
 aSummary :: CutConfig -> Locks -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()
 aSummary cfg ref summaryFn iPath out = do
-  need [iPath]
+  debugNeed cfg "aSummary" [iPath]
   iLists <- readLits cfg ref iPath
   iElems <- mapM (readLits cfg ref . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
-      out' = debugAction cfg "aSummary" out [out, iPath]
+      out' = debugA cfg "aSummary" out [out, iPath]
   writeLits cfg ref out' oElems

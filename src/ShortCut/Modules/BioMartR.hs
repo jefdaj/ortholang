@@ -15,9 +15,8 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Actions (readLits, writeCachedLines)
+import ShortCut.Core.Actions (readLits, writeLits, writeCachedLines, debugA, debugNeed)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Locks  (withReadLock)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions           (wrappedCmdWrite)
 import Control.Monad (void)
@@ -30,7 +29,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
-import ShortCut.Core.Debug   (debugAction)
+-- import ShortCut.Core.Debug   (debugA)
 
 ------------------------
 -- module description --
@@ -52,7 +51,8 @@ search :: CutType
 search = CutType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
-  , tShow = \ls f -> withReadLock ls f (readFile f)
+  -- , tShow = \ls f -> readFileStrict ls f
+  , tShow = defaultShow
   }
 
 -- TODO unify with fna? or replace it?
@@ -60,7 +60,7 @@ fnagz :: CutType
 fnagz = CutType
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tShow = \_ _ -> return "tShow not implemented yet for fnagz"
+  , tShow = \_ f -> return $ "gzipped fna file '" ++ f ++ "'"
   }
 
 -- TODO unify with faa? or replace it?
@@ -68,7 +68,7 @@ faagz :: CutType
 faagz = CutType
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
-  , tShow = \_ _ -> return "tShow not implemented yet for faagz"
+  , tShow = \_ f -> return $ "gzipped faa file '" ++ f ++ "'"
   }
 
 -- TODO does this work at all?
@@ -189,11 +189,11 @@ aParseSearches cfg ref sList out = do
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    else writeCachedLines cfg ref out'' $ toTsvRows searches'
+    else writeLits cfg ref out'' $ toTsvRows searches'
   where
     sList' = fromCutPath cfg sList
     out'   = fromCutPath cfg out
-    out''  = debugAction cfg "aParseSearches" out' [sList', out']
+    out''  = debugA cfg "aParseSearches" out' [sList', out']
 
 ------------------
 -- run biomartr --
@@ -226,13 +226,13 @@ rBioMartR _ _ _ = error "bad rBioMartR call"
 aBioMartR :: CutConfig -> Locks
           -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aBioMartR cfg ref out bmFn bmTmp sTable = do
-  need [bmFn', sTable']
+  debugNeed cfg "aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
-  wrappedCmdWrite cfg ref out'' [bmFn', sTable'] [out''] [Cwd bmTmp']
+  wrappedCmdWrite cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
     "biomartr.R" [out'', bmFn', sTable']
   where
     out'    = fromCutPath cfg out
     bmFn'   = fromCutPath cfg bmFn
     bmTmp'  = fromCutPath cfg bmTmp
     sTable' = fromCutPath cfg sTable
-    out'' = debugAction cfg "aBioMartR" out' [out', bmFn', bmTmp', sTable']
+    out'' = debugA cfg "aBioMartR" out' [out', bmFn', bmTmp', sTable']

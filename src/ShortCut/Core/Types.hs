@@ -54,6 +54,7 @@ module ShortCut.Core.Types
 import qualified Text.Parsec as P
 
 import ShortCut.Core.Locks (Locks, withReadLock)
+import ShortCut.Core.Util  (readFileStrict)
 
 import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
@@ -145,7 +146,7 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultShow :: Locks -> FilePath -> IO String
-defaultShow locks = fmap (unlines . fmtLines . lines) . (\f -> withReadLock locks f $ readFile f)
+defaultShow locks = fmap (unlines . fmtLines . lines) . (readFileStrict locks)
   where
     nLines      = 5
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
@@ -215,15 +216,21 @@ str :: CutType
 str = CutType
   { tExt  = "str"
   , tDesc = "string"
-  -- the init is for removing newlines
-  , tShow = \ls f -> withReadLock ls f (readFile f) >>= (return . (\x -> "\"" ++ x ++ "\"") . init)
+  -- TODO make one of the read functions be IO for this instead
+  , tShow = \ls f -> do
+      -- putStrLn $ "reading " ++ f
+      txt <- fmap init $ withReadLock ls f $ readFileStrict ls f
+      let txt' = if txt == "<<emptystr>>" then "" else txt
+      return $ "\"" ++ txt' ++ "\""
   }
 
 num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tShow = \ls f -> withReadLock ls f (readFile f) >>= return . init
+  , tShow = \ls f -> do
+      txt <- withReadLock ls f $ readFileStrict ls f
+      return $ init txt -- TODO prettyNum?
   }
 
 ------------

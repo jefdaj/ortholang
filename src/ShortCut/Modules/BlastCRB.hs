@@ -7,11 +7,11 @@ import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import ShortCut.Core.Actions       (wrappedCmdWrite, symlink)
+import ShortCut.Core.Actions       (wrappedCmdWrite, symlink, debugA, debugNeed)
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
 import ShortCut.Core.Compile.Each  (rEachTmps)
-import ShortCut.Core.Debug         (debugAction)
+-- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
@@ -79,7 +79,7 @@ tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or
  -}
 aBlastCRB :: CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
 aBlastCRB cfg ref tmpDir [o, q, t] = do
-  need [q', t']
+  debugNeed cfg "aBlastCRB" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
@@ -94,15 +94,15 @@ aBlastCRB cfg ref tmpDir [o, q, t] = do
       tDst' = toCutPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toCutPath cfg oPath
-  need [qDst, tDst]
+  debugNeed cfg "aBlastCRB" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
-  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [o'] [Cwd tmp']
+  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [] [Cwd tmp']
     "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   symlink cfg ref o'' oPath'
   where
     o'   = fromCutPath cfg o
-    o''  = debugAction cfg "aBlastCRB" o [fromCutPath cfg tmpDir, o', q', t']
+    o''  = debugA cfg "aBlastCRB" o [fromCutPath cfg tmpDir, o', q', t']
     tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t

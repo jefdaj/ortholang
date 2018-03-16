@@ -14,10 +14,14 @@ read_hits <- function(filename) {
     'bitscore')) %>% tbl_df
 }
 
-write_hits <- function(hits, filename)
+write_hits <- function(hits, filename) {
   # TODO move to a separate utilities file?
+  if (length(hits) == 0) {
+      hits <- "<<emptyhits>>" # TODO <<emptylist>>?
+  }
   write.table(hits, filename, sep="\t",
               quote=FALSE, row.names=FALSE, col.names=FALSE)
+}
 
 # TODO do this the proper way in its own cut function, man!
 best_hits <- function(df)

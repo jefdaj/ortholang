@@ -1,18 +1,19 @@
 module ShortCut.Core.Parse.Script where
 
-import ShortCut.Core.Locks (withReadLock)
+import ShortCut.Core.Util (readFileStrict)
 import ShortCut.Core.Types
+import ShortCut.Core.Config (debug)
 import ShortCut.Core.Parse.Basic
 import ShortCut.Core.Parse.Expr
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void)
-import ShortCut.Core.Debug    (debugParser)
+-- import ShortCut.Core.Debug    (debugParser)
 import Text.Parsec            (try, getState, putState)
 import Text.Parsec.Char       (spaces, newline)
 import Text.Parsec.Combinator (optional, lookAhead)
 import Text.Parsec            (ParseError)
-import ShortCut.Core.Debug    (debug)
+-- import ShortCut.Core.Debug    (debug)
 -- import Data.IORef             (IORef)
 
 {- New overall script parse idea:
@@ -103,7 +104,7 @@ parseString c r = runParseM pScript ([], c, r)
 parseFile :: CutConfig -> Locks -> FilePath
           -> IO (Either ParseError CutScript)
 parseFile cfg ref path = do
-  txt <- withReadLock ref path' (readFile path')
+  txt <- readFileStrict ref path'
   return $ (parseString cfg ref . stripComments) txt
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path

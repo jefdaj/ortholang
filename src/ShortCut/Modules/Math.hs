@@ -8,8 +8,8 @@ import Development.Shake
 import Data.Scientific             (Scientific, toRealFloat)
 import Data.String.Utils           (strip)
 import ShortCut.Core.Compile.Basic (rBop, defaultTypeCheck)
-import ShortCut.Core.Debug         (debugAction)
-import ShortCut.Core.Actions       (readLit, writeLit)
+-- import ShortCut.Core.Debug         (debugA)
+import ShortCut.Core.Actions       (readLit, writeLit, debugA, debugNeed)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -51,10 +51,10 @@ rMath _ _ _ = error "bad argument to rMath"
 aMath :: CutConfig -> Locks -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()
 aMath cfg ref fn p1 p2 out = do
-    need [p1, p2]
+    debugNeed cfg "aMath" [p1, p2]
     num1 <- fmap strip $ readLit cfg ref p1
     num2 <- fmap strip $ readLit cfg ref p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]
     let num3 = fn (read num1 :: Scientific) (read num2 :: Scientific)
-    let out' = debugAction cfg "aMath" out [p1, p2, out]
+    let out' = debugA cfg "aMath" out [p1, p2, out]
     writeLit cfg ref out' $ show num3

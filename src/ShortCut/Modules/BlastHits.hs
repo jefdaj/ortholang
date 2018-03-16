@@ -6,8 +6,8 @@ import ShortCut.Core.Types
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits)
-import ShortCut.Core.Debug         (debugAction )
+import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, debugA)
+-- import ShortCut.Core.Debug         (debugA )
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.BlastCRB   (crb)
@@ -74,7 +74,7 @@ aCutCol n cfg ref [outPath, tsvPath] = do
   writeLits cfg ref outPath'' $ sort $ nub $ lines out
   where
     outPath'  = fromCutPath cfg outPath
-    outPath'' = debugAction cfg "aCutCol" outPath' [show n, outPath', tsvPath']
+    outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
 aCutCol _ _ _ _ = error "bad arguments to aCutCol"
 
@@ -100,12 +100,11 @@ filterEvalueEach = CutFunction
 
 aFilterEvalue :: CutConfig -> Locks -> [CutPath] -> Action ()
 aFilterEvalue cfg ref [out, evalue, hits] = do
-  wrappedCmdWrite cfg ref out'' [evalue', hits'] [out''] []
+  wrappedCmdWrite cfg ref out'' [evalue', hits'] [] []
     "filter_evalue.R" [out', evalue', hits']
-  -- debugTrackWrite cfg [out'']
   where
     out'    = fromCutPath cfg out
-    out''   = debugAction cfg "aFilterEvalue" out' [out', evalue', hits']
+    out''   = debugA cfg "aFilterEvalue" out' [out', evalue', hits']
     evalue' = fromCutPath cfg evalue
     hits'   = fromCutPath cfg hits
 aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
@@ -135,10 +134,9 @@ bestHitsEach = CutFunction
 
 aBestExtract :: CutConfig -> Locks -> [CutPath] -> Action ()
 aBestExtract cfg ref [out, hits] = do
-  wrappedCmdWrite cfg ref out'' [hits'] [out''] [] "best_hits.R" [out', hits']
-  -- debugTrackWrite cfg [out'']
+  wrappedCmdWrite cfg ref out'' [hits'] [] [] "best_hits.R" [out', hits']
   where
     out'  = fromCutPath cfg out
-    out'' = debugAction cfg "aBestExtract" out' [out', hits']
+    out'' = debugA cfg "aBestExtract" out' [out', hits']
     hits' = fromCutPath cfg hits
 aBestExtract _ _ args = error $ "bad argument to aBestExtract: " ++ show args

@@ -10,11 +10,11 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Debug (debug)
 
 import Control.Monad               (when)
-import ShortCut.Core.Actions       (wrappedCmd, wrappedCmdWrite, wrappedCmdExit, wrappedCmdError,
+import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
                                     debugTrackWrite, readLit, writeLit, readLits,
-                                    writeLits, writePath)
-import ShortCut.Core.Debug         (debugAction, debugRules)
-import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
+                                    writeLits, writePath, debugA, debugL, debugNeed)
+-- import ShortCut.Core.Debug         (debugA, debugRules)
+import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
 import ShortCut.Core.Compile.Each  (rEachTmp)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
                                     toCutPath, CutPath)
@@ -25,6 +25,7 @@ import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 -- import System.Exit                 (ExitCode(..))
+import System.Directory           (createDirectoryIfMissing)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -121,7 +122,7 @@ aLoadDB cfg ref oPath sPath = do
   where
     oPath'  = fromCutPath cfg oPath
     sPath'  = fromCutPath cfg sPath
-    oPath'' = debugAction cfg "aLoadDB" oPath' [oPath', sPath']
+    oPath'' = debugA cfg "aLoadDB" oPath' [oPath', sPath']
 
 loadNuclDB :: CutFunction
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -178,27 +179,27 @@ rBlastdblist _ _ = error "bad argument to rBlastdblist"
 
 aBlastdblist :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdblist cfg ref oPath listTmp fPath = do
-  done <- doesFileExist listTmp'
-  when (not done) $ do
+  -- liftIO $ putStrLn $ "aBlastdblist acquiring write lock on '" ++ listTmp' ++ "'"
+  -- withWriteOnce ref listTmp' $ do
     -- This one is tricky because it exits 1 on success
-    -- TODO still use a lockfile and wrack writes!
-    code <- wrappedCmdExit cfg ref listTmp' [listTmp'] [Cwd tmpDir, Shell] -- TODO remove stderr?
-      "blastdbget" [tmpDir, ">", listTmp']
-    case code of
-      0 -> debugTrackWrite cfg [listTmp'] -- never happens :(
-      1 -> debugTrackWrite cfg [listTmp']
-      n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
+    -- case code of
+      -- 0 -> debugTrackWrite cfg [listTmp'] -- never happens :(
+      -- 1 -> debugTrackWrite cfg [listTmp']
+      -- n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
+  _ <- wrappedCmdExit cfg ref listTmp' [] [Cwd tmpDir, Shell] -- TODO remove stderr?
+    "blastdbget" [tmpDir, ">", listTmp'] [1]
   filterStr <- readLit  cfg ref fPath'
   out       <- readLits cfg ref listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
+  debugL cfg $ "aBlastdblist names': " ++ show names'
   writeLits cfg ref oPath'' names'
   where
     fPath'   = fromCutPath cfg fPath
     oPath'   = fromCutPath cfg oPath
     listTmp' = fromCutPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
-    oPath''  = debugAction cfg "aBlastdblist" oPath' [oPath', tmpDir, listTmp', fPath']
+    oPath''  = debugA cfg "aBlastdblist" oPath' [oPath', tmpDir, listTmp', fPath']
 
 -- TODO do I need to adjust the timeout? try on the cluster first
 blastdbget :: CutFunction
@@ -220,22 +221,28 @@ rBlastdbget st@(_,cfg,ref) e@(CutFun _ _ _ _ [name]) = do
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = error "bad argument to rBlastdbget"
 
+-- TODO STOP BOTHER WITH THIS FOR NOW; SHORTCUT NEVER GETS TO IT!
+
 aBlastdbget :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref dbPrefix tmpDir nPath = do
-  need [nPath']
+  debugNeed cfg "aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
+  let dbPath = tmp' </> dbName
   -- TODO was taxdb needed for anything else?
   -- TODO does this need to lock on a separate file from dbPrefix''?
   -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
   -- TODO wrappedCmdWrite and delete the file on errors?
-  _ <- wrappedCmd cfg ref dbPrefix'' [] [Cwd tmp'] "blastdbget" ["-d", dbName, "."]
+  debugL cfg $ "aBlastdbget dbPrefix'': " ++ dbPrefix''
+  debugL cfg $ "aBlastdbget dbPath: " ++ dbPath
+  _ <- wrappedCmdWrite cfg ref dbPrefix'' [] [] [Cwd tmp']
+         "blastdbget" ["-d", dbName, "."]
   -- TODO switch to writePath
-  writeLit cfg ref dbPrefix'' $ tmp' </> dbName
+  writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
   where
     tmp'       = fromCutPath cfg tmpDir
     nPath'     = fromCutPath cfg nPath
     dbPrefix'  = fromCutPath cfg dbPrefix
-    dbPrefix'' = debugAction cfg "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
+    dbPrefix'' = debugA cfg "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
 
 --------------------------
 -- make from FASTA file --
@@ -301,12 +308,12 @@ listPrefixFiles prefix = do
 aMakeblastdb :: CutType -> CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
 aMakeblastdb dbType cfg ref cDir [out, faPath] = do
   -- TODO exprPath handles this now?
-  -- let relDb = makeRelative (cfgTmpDir cfg) dbPrefix
+  -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
   let dbType' = if dbType == ndb then "nucl" else "prot"
 
   -- TODO probably put this back??
   -- debug cfg ("needing: " ++ faPath') (need [faPath'])
-  need [faPath']
+  debugNeed cfg "aMakeblastdb" [faPath']
 
   {- The idea was to hash content here, but it took a long time.
    - So now it gets hashed only once, in another thread, by a load_* function,
@@ -315,57 +322,64 @@ aMakeblastdb dbType cfg ref cDir [out, faPath] = do
    - TODO oh no it goes one link too far still
    -}
   faHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) faPath'
-  -- liftIO $ putStrLn $ "aMakeblastdb faHash: " ++ faHash
-  let dbPrefix  = cDir' </> faHash </> faHash <.> extOf dbType
-      dbPrefix' = toCutPath cfg dbPrefix
-      out'' = debugAction cfg "aMakeblastdb" out'
-                [extOf dbType, out', dbPrefix, faPath']
+  -- debugL cfg $ "aMakeblastdb faHash: " ++ faHash
+  let dbDir  = cDir' </> faHash
+      dbOut  = dbDir </> faHash <.> extOf dbType
+      dbOut' = toCutPath cfg dbOut -- TODO is this wrong? maybe should be using out??
+      out''  = debugA cfg "aMakeblastdb" out' [extOf dbType, out', dbOut, faPath']
+      dbIns  = dbOut <.> "*" -- TODO does this actually help?
 
   -- TODO somehow out' still has the TMPDIR prefix in it! wtf?
   --      ah the cfgTmpDir itself is set to $TMPDIR! real wtf
-  -- liftIO $ putStrLn $ "aMakeblastdb out': "      ++ out'
-  -- liftIO $ putStrLn $ "aMakeblastdb cDir: "     ++ show cDir
-  -- liftIO $ putStrLn $ "aMakeblastdb cDir': "     ++ cDir'
-  -- liftIO $ putStrLn $ "aMakeblastdb dbPrefix': " ++ show dbPrefix'
-  -- liftIO $ putStrLn $ "aMakeblastdb dbPrefix: "  ++ dbPrefix
-  -- liftIO $ putStrLn $ "aMakeblastdb dbType': "   ++ dbType'
-  -- liftIO $ putStrLn $ "aMakeblastdb cfg: "   ++ show cfg
+  debugL cfg $ "aMakeblastdb out': "      ++ out'
+  debugL cfg $ "aMakeblastdb cDir: "     ++ show cDir
+  debugL cfg $ "aMakeblastdb cDir': "     ++ cDir'
+  debugL cfg $ "aMakeblastdb dbOut': " ++ show dbOut'
+  -- debugL cfg $ "aMakeblastdb dbOut: "  ++ dbOut
+  debugL cfg $ "aMakeblastdb dbType': "   ++ dbType'
+  debugL cfg $ "aMakeblastdb cfg: "   ++ show cfg
 
-  let ptn = dbPrefix ++ ".*" -- TODO is this failing because of the TMPDIR?
   -- before <- getDirectoryFiles (takeDirectory ptn) [takeFileName ptn]
   -- TODO is this picking up the .lock file too? maybe that causes the loop?
-  before <- listPrefixFiles ptn
-  -- liftIO $ putStrLn $ "before: " ++ show before
+  liftIO $ createDirectoryIfMissing True dbDir
+  before <- listPrefixFiles dbIns
+  -- debugL cfg $ "before: " ++ show before
 
   -- TODO why can't shake detect that they exist already? am I not using trackWrite?
   when (not $ null before) (return ())
 
   -- TODO is there a need for wrapping or cleanup on errors here?
   -- TODO check files before too and skip if they exist? annoying but still...
-  -- quietly $ wrappedCmd cfg [dbPrefix, dbPrefix ++ ".*"] [Cwd cDir']
-  -- quietly $ wrappedCmd cfg dbPrefix [dbPrefix, ptn] [Cwd cDir'] "makeblastdb"
+  -- quietly $ wrappedCmd cfg [dbOut, dbOut ++ ".*"] [Cwd cDir']
+  -- quietly $ wrappedCmd cfg dbOut [dbOut, dbIns] [Cwd cDir'] "makeblastdb"
   -- TODO probably don't need the _lock then? bet it's a separate issue causing the loop
-  -- liftIO $ putStrLn $ "this is ptn: " ++ ptn
-  -- liftIO $ putStrLn $ "it matched these files: " ++ show before
-  -- liftIO $ putStrLn $ "this will be dbPrefix: " ++ dbPrefix
+  debugL cfg $ "this is dbIns: " ++ dbIns
+  -- debugL cfg $ "these files will be read locked: " ++ show before -- TODO is that how it works?
+  debugL cfg $ "this will be dbOut: " ++ dbOut
   --
   -- TODO make wrappedCmd list files from a pattern and delete them as needed
-  -- liftIO $ putStrLn $ "aMakeblastdb faPath': " ++ faPath'
-  wrappedCmdWrite cfg ref dbPrefix [faPath'] [ptn] [Cwd cDir'] "makeblastdb"
+  -- debugL cfg $ "aMakeblastdb faPath': " ++ faPath'
+  wrappedCmdWrite cfg ref out' before [] [Cwd cDir'] "makeblastdb"
     [ "-in"    , faPath'
-    , "-out"   , dbPrefix
-    , "-title" , takeFileName dbPrefix -- TODO does this make sense?
+    , "-out"   , dbOut
+    , "-title" , takeFileName dbOut -- TODO does this make sense?
     , "-dbtype", dbType'
     ]
+
+  -- TODO oh, it never gets here! that's bad
+  debugL cfg "wrappedWriteCmd finally worked"
 
   -- TODO why does after never work? maybe the command hasn't finished when called?
   -- when (cfgDebug cfg) (liftIO $ putStrLn $ out)
   -- after <- getDirectoryFiles (takeDirectory ptn) [takeFileName ptn]
-  after <- listPrefixFiles ptn
+  after <- listPrefixFiles dbIns
+  -- debugTrackWrite cfg (dbOut:after)
+  debugL cfg $ "these actual db files were created: " ++ show after
   debugTrackWrite cfg after
   -- liftIO $ putStrLn $ "after: " ++ show after
   -- when (null after) (fail $ "makeblastdb failed to create " ++ ptn)
-  writePath cfg ref out'' dbPrefix'
+  debugL cfg $ "dbOut was also created: " ++ dbOut
+  writePath cfg ref out'' dbOut'
   where
     out'    = fromCutPath cfg out
     cDir'   = fromCutPath cfg cDir

@@ -16,6 +16,14 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
+import Debug.Trace       (trace)
+
+{- The base debugging function used in other modules too. This is admittedly a
+ - weird place to put it, but makes everything much easier as far as avoiding
+ - import cycles.
+ -}
+debug :: CutConfig -> String -> a -> a
+debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
 loadField args cfg key

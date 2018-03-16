@@ -3,12 +3,12 @@ module ShortCut.Modules.Glob where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
-import ShortCut.Core.Actions (readLit, writeLits)
+import ShortCut.Core.Actions (readLit, writeLits, debugA)
 import ShortCut.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
-import ShortCut.Core.Debug        (debugAction)
+-- import ShortCut.Core.Debug        (debugA)
 import ShortCut.Core.Util         (absolutize)
 
 cutModule :: CutModule
@@ -54,4 +54,4 @@ aGlobFiles cfg ref outPath path = do
   where
     out'  = fromCutPath cfg outPath
     path' = fromCutPath cfg path
-    out'' = debugAction cfg "aGlobFiles" out' [out', path']
+    out'' = debugA cfg "aGlobFiles" out' [out', path']

@@ -1,6 +1,7 @@
 module ShortCut.Core.Parse.Basic where
 
 import ShortCut.Core.Types
+import ShortCut.Core.Pretty (Pretty, pPrint, render)
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
@@ -9,6 +10,13 @@ import Data.Scientific        (Scientific())
 import Text.Parsec            (getState, (<?>))
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy)
+import Debug.Trace       (trace)
+
+debugParser :: Pretty a => CutConfig -> String -> a -> a
+debugParser cfg name res = if cfgDebug cfg then trace msg res else res
+  where
+    ren = render $ pPrint res
+    msg = name ++ " parsed '" ++ ren ++ "'"
 
 -- There's a convention in parsers that each one should consume whitespace
 -- after itself (handled by this function), and you only skip leading

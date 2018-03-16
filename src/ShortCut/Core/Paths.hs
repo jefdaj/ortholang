@@ -95,12 +95,20 @@ module ShortCut.Core.Paths
 -- import Development.Shake (Action, trackWrite, need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
+import ShortCut.Core.Config (debug)
+import ShortCut.Core.Pretty (render, pPrint)
 import ShortCut.Core.Util (digest)
-import ShortCut.Core.Debug        (debugPath)
+-- import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
 -- import Data.IORef                 (IORef)
+
+debugPath :: Show a => CutConfig -> String -> CutExpr -> a -> a
+debugPath cfg name expr path = debug cfg msg path
+  where
+    ren = render $ pPrint expr
+    msg = name ++ " for '" ++ ren ++ "' is " ++ show path -- TODO include types?
 
 --------------
 -- cutpaths --
@@ -125,7 +133,10 @@ fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
                     $ checkPath txt
 
 isGeneric :: FilePath -> Bool
-isGeneric path = "$TMPDIR" `isPrefixOf` path || "$WORKDIR" `isPrefixOf` path
+isGeneric path
+  = path == "<<emptylist>>" -- TODO could this be <<emptystr>>?
+  || "$TMPDIR"  `isPrefixOf` path
+  || "$WORKDIR" `isPrefixOf` path
 
 -- TODO print warning on failure?
 toCutPath :: CutConfig -> FilePath -> CutPath

@@ -5,8 +5,8 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Actions       (wrappedCmdWrite)
-import ShortCut.Core.Debug         (debugAction)
+import ShortCut.Core.Actions       (wrappedCmdWrite, debugA)
+-- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
@@ -109,14 +109,13 @@ reciprocalBest = CutFunction
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 aReciprocalBest :: CutConfig -> Locks -> [CutPath] -> Action ()
 aReciprocalBest cfg ref [out, left, right] = do
-  wrappedCmdWrite cfg ref out'' [left', right'] [out'] []
+  wrappedCmdWrite cfg ref out'' [left', right'] [] []
     "reciprocal_best.R" [out', left', right']
-  -- debugTrackWrite cfg [out'']
   where
     out'   = fromCutPath cfg out
     left'  = fromCutPath cfg left
     right' = fromCutPath cfg right
-    out''  = debugAction cfg "aReciprocalBest" out' [out', left', right']
+    out''  = debugA cfg "aReciprocalBest" out' [out', left', right']
 aReciprocalBest _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
 
 --------------------------

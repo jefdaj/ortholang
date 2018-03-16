@@ -1,42 +1,42 @@
 .
 |-- cache
 |   `-- lines
-|       |-- 16672c51db.txt
-|       |-- 316c5281e8.txt
+|       |-- 0c85d3872b.txt
+|       |-- 26e34186dc.txt
+|       |-- 2c834d1178.txt
+|       |-- 3f3fbf57f1.txt
 |       |-- 42fb7081a8.txt
-|       |-- 54655a8d55.txt
-|       |-- 58e2a5aeeb.txt
-|       |-- 75454a1bad.txt
-|       |-- b668be600f.txt
-|       |-- bd24d24178.txt
-|       |-- d751713988.txt
-|       `-- facd23e623.txt
+|       |-- 4d288d2faa.txt
+|       |-- 564bc68933.txt
+|       |-- 5f28dde30b.txt
+|       |-- ae0b85b55f.txt
+|       `-- d59cb63de9.txt
 |-- exprs
 |   |-- any
-|   |   |-- 23e5208f0f.empty.list -> ../../cache/lines/facd23e623.txt
-|   |   |-- 2a108c9d4f.empty.list -> ../../cache/lines/facd23e623.txt
-|   |   |-- 2c2a9113aa.num.list.list -> ../../cache/lines/54655a8d55.txt
-|   |   `-- fe8b72d60e.num.list.list -> ../../cache/lines/54655a8d55.txt
+|   |   |-- 23e5208f0f.empty.list -> ../../cache/lines/3f3fbf57f1.txt
+|   |   |-- 2a108c9d4f.empty.list -> ../../cache/lines/3f3fbf57f1.txt
+|   |   |-- 2c2a9113aa.num.list.list -> ../../cache/lines/ae0b85b55f.txt
+|   |   `-- fe8b72d60e.num.list.list -> ../../cache/lines/ae0b85b55f.txt
 |   |-- list
-|   |   |-- 1eb2e5ddd6.empty.list.list -> ../../cache/lines/b668be600f.txt
+|   |   |-- 1665356975.empty.list.list -> ../../cache/lines/4d288d2faa.txt
+|   |   |-- 1eb2e5ddd6.empty.list.list -> ../../cache/lines/0c85d3872b.txt
 |   |   |-- 2b8dc08526.num.list -> ../../cache/lines/42fb7081a8.txt
-|   |   |-- 3d324f81a9.num.list.list.list -> ../../cache/lines/75454a1bad.txt
-|   |   |-- 5e1abb69af.empty.list.list -> ../../cache/lines/58e2a5aeeb.txt
-|   |   |-- 7091fa07f9.num.list.list -> ../../cache/lines/54655a8d55.txt
-|   |   |-- 859f0292b0.num.list.list.list -> ../../cache/lines/16672c51db.txt
-|   |   |-- 88b92eb4c0.empty.list.list -> ../../cache/lines/316c5281e8.txt
-|   |   |-- 9d4568c009.empty.list -> ../../cache/lines/d751713988.txt
-|   |   |-- bc30498d24.num.list.list -> ../../cache/lines/bd24d24178.txt
-|   |   `-- cd486695fb.empty.list.list -> ../../cache/lines/facd23e623.txt
+|   |   |-- 2eddce7150.num.list.list -> ../../cache/lines/564bc68933.txt
+|   |   |-- 3d324f81a9.num.list.list.list -> ../../cache/lines/2c834d1178.txt
+|   |   |-- 7580e65ddc.num.list.list -> ../../cache/lines/ae0b85b55f.txt
+|   |   |-- 859f0292b0.num.list.list.list -> ../../cache/lines/26e34186dc.txt
+|   |   |-- 88b92eb4c0.empty.list.list -> ../../cache/lines/5f28dde30b.txt
+|   |   |-- a28c9e706d.empty.list.list -> ../../cache/lines/3f3fbf57f1.txt
+|   |   `-- d751713988.empty.list -> ../../cache/lines/d59cb63de9.txt
 |   `-- num
 |       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
 `-- vars
     |-- elems.num.list.list -> ../exprs/any/2c2a9113aa.num.list.list
-    |-- emptyfirst.num.list.list -> ../exprs/list/bc30498d24.num.list.list
-    |-- emptylast.num.list.list -> ../exprs/list/7091fa07f9.num.list.list
-    |-- emptyone.empty.list.list -> ../exprs/list/cd486695fb.empty.list.list
-    |-- emptytwo.empty.list.list -> ../exprs/list/5e1abb69af.empty.list.list
-    |-- emptyzero.empty.list -> ../exprs/list/9d4568c009.empty.list
+    |-- emptyfirst.num.list.list -> ../exprs/list/2eddce7150.num.list.list
+    |-- emptylast.num.list.list -> ../exprs/list/7580e65ddc.num.list.list
+    |-- emptyone.empty.list.list -> ../exprs/list/a28c9e706d.empty.list.list
+    |-- emptytwo.empty.list.list -> ../exprs/list/1665356975.empty.list.list
+    |-- emptyzero.empty.list -> ../exprs/list/d751713988.empty.list
     `-- result -> ../vars/elems.num.list.list
 
 7 directories, 32 files

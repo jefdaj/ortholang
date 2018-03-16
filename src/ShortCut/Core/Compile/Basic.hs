@@ -20,6 +20,7 @@ module ShortCut.Core.Compile.Basic
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Pretty
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
@@ -27,15 +28,27 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
 -- import Control.Monad              (when)
 import Data.List                  (find, intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Debug        (debugAction, debugRules, debug)
+-- import ShortCut.Core.Debug        (debugA, debugRules, debug)
 import ShortCut.Core.Locks        (withWriteLock')
-import ShortCut.Core.Actions      (wrappedCmdWrite,
-                                   readLit, readLits, writeLits, hashContent,
+import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugIO, debugNeed,
+                                   readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
+import Debug.Trace       (trace)
 
+
+debug :: CutConfig -> String -> a -> a
+debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
+
+-- TODO restrict to CutExpr?
+-- TODO put in rExpr to catch everything at once? but misses which fn was called
+debugRules :: (Pretty a, Show b) => CutConfig -> String -> a -> b -> b
+debugRules cfg name input out = debug cfg msg out
+  where
+    ren = render $ pPrint input
+    msg = name ++ " compiled '" ++ ren ++ "' to " ++ show out
 
 ------------------------------
 -- compile the ShortCut AST --
@@ -96,43 +109,40 @@ rLit s@(_,cfg,ref) expr = do
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> Locks -> CutExpr -> CutPath -> Action ()
-aLit cfg ref expr out = writeLits cfg ref out'' [ePath] -- TODO too much dedup?
+aLit cfg ref expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
     paths _ = error "bad argument to paths"
     ePath = paths expr
     out'  = fromCutPath cfg out
-    out'' = debugAction cfg "aLit" out' [ePath, out']
+    out'' = debugA cfg "aLit" out' [ePath, out']
 
 rList :: CutState -> CutExpr -> Rules ExprPath
 -- TODO is this the bug? refers to a list of other empty lists, no?
--- rList s e@(CutList Empty _ _ _) = rListEmpty s e -- TODO remove?
+-- rList s e@(CutList Empty _ _ _) = rListLits s e -- TODO remove? rListPaths?
 rList s e@(CutList rtn _ _ _)
-  | rtn `elem` [str, num] = rListLits  s e
-  | otherwise             = rListPaths s e
+  | rtn `elem` [Empty, str, num] = rListLits  s e -- TODO does Empty fit here?
+  | otherwise                    = rListPaths s e
 rList _ _ = error "bad arguemnt to rList"
 
 -- special case for empty lists
 -- TODO is a special type for this really needed?
-rListEmpty :: CutState -> CutExpr -> Rules ExprPath
-rListEmpty s@(_,cfg,ref) e@(CutList Empty _ _ _) = do
-  let link  = exprPath s e
-      link' = debugRules cfg "rListEmpty" e $ fromCutPath cfg link
-  link' %> \_ -> aListEmpty cfg ref link
-  return (ExprPath link')
-rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
+-- rListEmpty :: CutState -> CutExpr -> Rules ExprPath
+-- rListEmpty s@(_,cfg,ref) e@(CutList Empty _ _ _) = do
+--   let link  = exprPath s e
+--       link' = debugRules cfg "rListEmpty" e $ fromCutPath cfg link
+--   link' %> \_ -> aListEmpty cfg ref link
+--   return (ExprPath link')
+-- rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
 
 -- TODO is this actually needed? seems the same as lits or paths really
 --      (also, is there a need to write empty lists at all?)
-aListEmpty :: CutConfig -> Locks -> CutPath -> Action ()
-aListEmpty cfg ref link = do
-  -- TODO should the wrappedCmd stuff be CutPaths or plain FilePaths?
-  wrappedCmdWrite cfg ref link'' [] [link''] [] "touch" [link'] -- TODO quietly?
-  -- debugTrackWrite cfg [link''] -- TODO this should use CutPaths
-  where
-    link'  = fromCutPath cfg link
-    link'' = debugAction cfg "aListEmpty" link' [link']
+-- aListEmpty :: CutConfig -> Locks -> CutPath -> Action ()
+-- aListEmpty cfg ref link = writeLits cfg ref link'' [] -- TODO error here?
+--   where
+--     link'  = fromCutPath cfg link
+--     link'' = debugAction cfg "aListEmpty" link' [link']
 
 -- special case for writing lists of strings or numbers as a single file
 rListLits :: CutState -> CutExpr -> Rules ExprPath
@@ -149,13 +159,14 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: CutConfig -> Locks -> [CutPath] -> CutPath -> Action ()
 aListLits cfg ref paths outPath = do
-  need paths'
+  -- need paths'
   lits <- mapM (readLit cfg ref) paths'
-  let lits' = map stripWhiteSpace lits
+  let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
+  liftIO $ debugIO cfg $ "aListLits lits': " ++ show lits'
   writeLits cfg ref out'' lits'
   where
     out'   = fromCutPath cfg outPath
-    out''  = debugAction cfg "aListLits" out' (out':paths')
+    out''  = debugA cfg "aListLits" out' (out':paths')
     paths' = map (fromCutPath cfg) paths
 
 -- regular case for writing a list of links to some other file type
@@ -173,14 +184,14 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 -- works on everything but lits: paths or empty lists
 aListPaths :: CutConfig -> Locks -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg ref paths outPath = do
-  need paths'
+  debugNeed cfg "aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  need paths''
+  debugNeed cfg "aListPaths" paths''
   let paths''' = map (toCutPath cfg) paths'' -- TODO not working?
   writePaths cfg ref out'' paths'''
   where
     out'   = fromCutPath cfg outPath
-    out''  = debugAction cfg "aListPaths" out' (out':paths')
+    out''  = debugA cfg "aListPaths" out' (out':paths')
     paths' = map (fromCutPath cfg) paths -- TODO remove this
 
 -- return a link to an existing named variable
@@ -205,13 +216,13 @@ rVar (_,cfg,ref) var expr oPath = do
 aVar :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aVar cfg ref vPath oPath = do
   alwaysRerun
-  need [oPath']
+  debugNeed cfg "aVar" [oPath']
   withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
   symlink cfg ref vPath'' oPath
   where
     oPath'  = fromCutPath cfg oPath
     vPath'  = fromCutPath cfg vPath
-    vPath'' = debugAction cfg "aVar" vPath [vPath', oPath']
+    vPath'' = debugA cfg "aVar" vPath [vPath', oPath']
 
 -- Handles the actual rule generation for all binary operators.
 -- TODO can it be factored out somehow? seems almost trivial now...
@@ -287,7 +298,7 @@ rLoad _ _ = error "bad argument to rLoad"
 
 aLoadHash :: CutConfig -> Locks -> CutPath -> String -> Action CutPath
 aLoadHash cfg ref src ext = do
-  need [src']
+  debugNeed cfg "aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext
@@ -299,11 +310,11 @@ aLoadHash cfg ref src ext = do
 
 aLoad :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aLoad cfg ref strPath outPath = do
-  need [strPath']
+  debugNeed cfg "aLoad" [strPath']
   pth <- readLitPaths cfg ref strPath'
   src' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) $ fromCutPath cfg $ head pth -- TODO safer!
-  -- liftIO $ putStrLn $ "aLoad src': '" ++ src' ++ "'"
-  -- liftIO $ putStrLn $ "aLoad outPath': '" ++ outPath' ++ "'"
+  -- liftIO $ debugIO cfg $ "aLoad src': '" ++ src' ++ "'"
+  -- liftIO $ debugIO cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
   hashPath <- aLoadHash cfg ref (toCutPath cfg src') (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
@@ -312,7 +323,7 @@ aLoad cfg ref strPath outPath = do
   where
     strPath'  = fromCutPath cfg strPath
     outPath'  = fromCutPath cfg outPath
-    outPath'' = debugAction cfg "aLoad" outPath [strPath', outPath']
+    outPath'' = debugA cfg "aLoad" outPath [strPath', outPath']
 
 rLoadList :: RulesFn
 rLoadList s e@(CutFun (ListOf r) _ _ _ [es])
@@ -337,7 +348,7 @@ rLoadListLits s@(_,cfg,ref) expr = do
 aLoadListLits :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aLoadListLits cfg ref outPath litsPath = do
   let litsPath' = fromCutPath cfg litsPath
-      out       = debugAction cfg "aLoadListLits" outPath' [outPath', litsPath']
+      out       = debugA cfg "aLoadListLits" outPath' [outPath', litsPath']
   lits  <- readLits cfg ref litsPath'
   lits' <- liftIO $ mapM absolutize lits
   writeLits cfg ref out lits'
@@ -367,13 +378,13 @@ aLoadListLinks cfg ref pathsPath outPath = do
   hashPaths <- mapM (\p -> aLoadHash cfg ref p
                          $ takeExtension $ fromCutPath cfg p) paths'''
   let hashPaths' = map (fromCutPath cfg) hashPaths
-  -- liftIO $ putStrLn $ "about to need: " ++ show paths''
-  need hashPaths'
+  -- liftIO $ debugIO cfg $ "about to need: " ++ show paths''
+  debugNeed cfg "aLoadListLinks" hashPaths'
   writePaths cfg ref out hashPaths
   where
     outPath'   = fromCutPath cfg outPath
     pathsPath' = fromCutPath cfg pathsPath
-    out = debugAction cfg "aLoadListLinks" outPath' [outPath', pathsPath']
+    out = debugA cfg "aLoadListLinks" outPath' [outPath', pathsPath']
 
 -- based on https://stackoverflow.com/a/18627837
 -- uniqLines :: Ord a => [a] -> [a]
@@ -405,7 +416,7 @@ aSimpleScript script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins
     actFn c r t (o:is) = let o'  = fromCutPath c o
                              t'  = fromCutPath c t
                              is' = map (fromCutPath c) is
-                         in wrappedCmdWrite c r o' is' [o'] [Cwd t'] script (o':is')
+                         in wrappedCmdWrite c r o' is' [] [Cwd t'] script (o':is')
 --     actFn c t (o:as) = let o' = (let r = fromCutPath c o
 --                                  in debug c ("actFn o': '" ++ r ++ "'") r)
 --                            ins' = map (fromCutPath c) as
@@ -433,11 +444,12 @@ rSimple' _ _ _ _ = error "bad argument to rSimple'"
 -- TODO aSimpleScript that calls aSimple' with a wrappedCmd as the actFn
 -- TODO rSimpleScript that calls rSimple + that
 
+-- TODO need to handle empty lists here?
 aSimple' ::  CutConfig -> Locks -> CutPath
          -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
          -> Maybe CutPath -> [CutPath] -> Action ()
 aSimple' cfg ref outPath actFn mTmpDir argPaths = do
-  need argPaths'
+  debugNeed cfg "aSimple'" argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
   let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath
       as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths''
@@ -448,7 +460,7 @@ aSimple' cfg ref outPath actFn mTmpDir argPaths = do
     hashes     = concat $ intersperse "_" $ map digest argPaths'
     argPaths'  = map (fromCutPath cfg) argPaths
     outPath'   = fromCutPath cfg outPath
-    out = debugAction cfg "aSimple'" outPath' (outPath':tmpDir':argPaths')
+    out = debugA cfg "aSimple'" outPath' (outPath':tmpDir':argPaths')
     (tmpDir, tmpDir') = case mTmpDir of
                 Nothing  -> (toCutPath cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
                 Just dir -> (toCutPath cfg d, d)

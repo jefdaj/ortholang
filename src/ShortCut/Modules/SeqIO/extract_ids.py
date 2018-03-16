@@ -20,6 +20,9 @@ for seq in SeqIO.parse(infasta, 'fasta'):
     line = '%s\n' % seq.id
     uniq.add(line)
 
+# if len(uniq) == 0:
+    # uniq = ["<<emptylist>>"]
+# else:
 uniq = list(uniq)
 uniq.sort()
 

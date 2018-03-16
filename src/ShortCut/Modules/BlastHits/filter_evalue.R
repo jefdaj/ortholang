@@ -12,10 +12,14 @@ read_hits <- function(filename)
     'mismatches', 'gapopens', 'qstart', 'qend', 'sstart', 'send', 'evalue',
     'bitscore')))
 
-write_hits <- function(hits, filename)
+write_hits <- function(hits, filename) {
   # TODO move to a separate utilities file?
+  if (length(hits) == 0) {
+      hits <- "<<emptyhits>>" # TODO <<emptylist>>?
+  }
   write.table(hits, filename, sep="\t",
               quote=FALSE, row.names=FALSE, col.names=FALSE)
+}
 
 filter_evalue <- function(out, num, bht) {
   cutoff <- as.numeric(read.table(num)) # TODO fail if this doesn't parse!

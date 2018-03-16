@@ -3,12 +3,10 @@
 # content)
 
 # TODO include a repl test for the types?
-
-# TODO maybe don't dedup lists themselves, just in set ops?
 # TODO there's also a potentially serious bug: type "[[], [1]]", get [[], []]
 
-zero = length_each []
-one  = length_each [[]]
-two  = length_each [[], []]
+zero = length_each []       # []
+one  = length_each [[]]     # [0]
+two  = length_each [[], []] # [0, 0]
 
-result = zero | one | two # should be [0.0]
+result = [zero, one, two] # [[], [0], [0, 0]]

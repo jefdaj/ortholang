@@ -3,8 +3,8 @@ module ShortCut.Modules.Length where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions  (readPaths, writeLit)
-import ShortCut.Core.Debug    (debugAction)
+import ShortCut.Core.Actions  (readPaths, writeLit, debugA)
+-- import ShortCut.Core.Debug    (debugA)
 import ShortCut.Core.Paths    (exprPath, fromCutPath,
                                toCutPath, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
@@ -67,5 +67,5 @@ aLen cfg ref [out, lst] = do
   where
     out'  = fromCutPath cfg out
     lst'  = fromCutPath cfg lst
-    out'' = debugAction cfg "aLen" out' [out', lst']
+    out'' = debugA cfg "aLen" out' [out', lst']
 aLen _ _ args = error $ "bad arguments to aLen: " ++ show args

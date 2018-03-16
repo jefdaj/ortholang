@@ -4,9 +4,10 @@ module ShortCut.Modules.SeqIO where
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Actions       (wrappedCmdWrite, readPaths)
-import ShortCut.Core.Debug         (debug, debugAction)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readPaths, debugA, debugNeed)
+-- import ShortCut.Core.Debug         (debug, debugA)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
                                     mkLoadList, rSimple, rSimpleScript)
@@ -224,13 +225,12 @@ aConcat :: CutConfig -> Locks -> [CutPath] -> Action ()
 aConcat cfg ref [oPath, fsPath] = do
   faPaths <- readPaths cfg ref fs'
   let faPaths' = map (fromCutPath cfg) faPaths
-  need (debug cfg ("faPaths: " ++ show faPaths) faPaths')
+  debugNeed cfg "aConcat" faPaths'
   let out'    = fromCutPath cfg oPath
-      out''   = debugAction cfg "aConcat" out' [out', fs']
+      out''   = debugA cfg "aConcat" out' [out', fs']
       catArgs = faPaths' ++ [">", out']
-  wrappedCmdWrite cfg ref out'' faPaths' [out''] [Shell] "cat"
+  wrappedCmdWrite cfg ref out'' faPaths' [] [Shell] "cat"
     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-  -- debugTrackWrite cfg [out'']
   where
     fs' = fromCutPath cfg fsPath
 aConcat _ _ _ = error "bad argument to aConcat"
