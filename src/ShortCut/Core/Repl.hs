@@ -89,7 +89,7 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 -- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
 loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
-  Just line <- promptFn "shortcut >> " -- TODO can this fail?
+  Just line <- promptFn ">> " -- TODO can this fail?
   st  <- get
   st' <- liftIO $ try $ step st hdl line
   case st' of
