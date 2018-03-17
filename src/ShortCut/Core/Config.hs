@@ -52,6 +52,7 @@ loadConfig mods args = do
     , cfgWrapper = cls
     , cfgReport  = rep
     , cfgTestPtn = ctp
+    , cfgWidth   = Nothing -- not used except in testing
     }
 
 getUsage :: IO Docopt

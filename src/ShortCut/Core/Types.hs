@@ -249,6 +249,7 @@ data CutConfig = CutConfig
   , cfgWrapper :: Maybe FilePath
   , cfgReport  :: Maybe String
   , cfgTestPtn :: Maybe String
+  , cfgWidth   :: Maybe Int -- for testing
   }
   deriving Show
 

@@ -124,7 +124,7 @@ eval hdl cfg ref rtype = retryIgnore . eval'
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
         res  <- prettyResult cfg ref rtype $ toCutPath cfg path
-        res' <- liftIO $ renderIO res
+        res' <- liftIO $ renderIO cfg res
         liftIO $ hPutStrLn hdl res'
 
 -- TODO get the type of result and pass to eval

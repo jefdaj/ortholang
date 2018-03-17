@@ -32,11 +32,15 @@ getWidth = do
     Just (Window {width = w}) -> w
 
 -- Render with my custom style (just width so far)
-renderIO :: Doc -> IO String
-renderIO doc = do
-  w <- getWidth
+-- Needs to have the optional constant width for the REPL tests
+renderIO :: CutConfig -> Doc -> IO String
+renderIO cfg doc = do
+  currentWidth <- getWidth
+  let renderWidth = case cfgWidth cfg of
+                      Nothing -> currentWidth
+                      Just w  -> w
   -- let s = style {lineLength = w, ribbonsPerLine = 1}
-  let s = style {lineLength = w}
+  let s = style {lineLength = renderWidth}
   return $ renderStyle s doc
 
 instance Pretty CutType where

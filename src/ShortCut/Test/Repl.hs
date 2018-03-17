@@ -10,7 +10,7 @@ import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
 import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM)
 import System.Directory           (createDirectoryIfMissing)
-import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>))
+import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
 import System.Process             (cwd, readCreateProcess, shell)
@@ -65,7 +65,8 @@ goldenRepl cfg ref goldenFile = do
   txt <- readFileStrict ref goldenFile
   let name   = takeBaseName goldenFile
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
-      tstOut = cfgTmpDir cfg' ++ name ++ ".out"
+      -- tstOut = cfgTmpDir cfg' ++ name ++ ".out"
+      tstOut = cfgTmpDir cfg' <.> "out"
       stdin  = extractPrompted "shortcut >> " txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut cfg' ref
   return $ goldenVsFile name goldenFile tstOut action

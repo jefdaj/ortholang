@@ -229,17 +229,17 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
 cmdDeps :: CutState -> Handle -> String -> IO CutState
-cmdDeps st@(scr,_,_) hdl var = do
+cmdDeps st@(scr, cfg, _) hdl var = do
   case lookup (CutVar var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
-    Just e  -> pPrintHdl hdl $ filter (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
   return st
 
 -- Print something pretty to a handle, rendering with custom style from Pretty.hs
 -- TODO move to Pretty.hs?
-pPrintHdl :: Pretty a => Handle -> a -> IO ()
-pPrintHdl hdl prettyThing = renderIO (pPrint prettyThing) >>= hPutStrLn hdl
+pPrintHdl :: Pretty a => CutConfig -> Handle -> a -> IO ()
+pPrintHdl cfg hdl prettyThing = renderIO cfg (pPrint prettyThing) >>= hPutStrLn hdl
 
 -- TODO move to Pretty.hs
 -- prettyAssigns :: Handle -> (CutAssign -> Bool) -> CutScript -> IO ()
@@ -248,11 +248,11 @@ pPrintHdl hdl prettyThing = renderIO (pPrint prettyThing) >>= hPutStrLn hdl
   -- hPutStrLn hdl txt
 
 cmdRDeps :: CutState -> Handle -> String -> IO CutState
-cmdRDeps st@(scr,_,_) hdl var = do
+cmdRDeps st@(scr, cfg, _) hdl var = do
   let var' = CutVar var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    Just _  -> pPrintHdl hdl $ filter (\(v,_) -> elem v $ (CutVar var):rDepsOf scr var') scr
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar var):rDepsOf scr var') scr
   return st
 
 -- TODO factor out the variable lookup stuff
@@ -275,11 +275,11 @@ cmdType state hdl s = do
 
 -- TODO factor out the variable lookup stuff
 cmdShow :: CutState -> Handle -> String -> IO CutState
-cmdShow st@(s,_,_) hdl [] = mapM_ (pPrintHdl hdl) s >> return st
-cmdShow st@(scr,_,_) hdl var = do
+cmdShow st@(s,c,_) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
+cmdShow st@(scr,cfg,_) hdl var = do
   case lookup (CutVar var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    Just e  -> pPrintHdl hdl e
+    Just e  -> pPrintHdl cfg hdl e
   return st
 
 -- TODO does this one need to be a special case now?
@@ -296,7 +296,7 @@ cmdConfig :: CutState -> Handle -> String -> IO CutState
 cmdConfig st@(scr,cfg,ref) hdl s = do
   let ws = words s
   if (length ws == 0)
-    then pPrintHdl hdl cfg >> return st -- TODO Pretty instance
+    then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
     else if (length ws  > 2)
       then hPutStrLn hdl "too many variables" >> return st
       else if (length ws == 1)

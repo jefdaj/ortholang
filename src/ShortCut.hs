@@ -29,7 +29,7 @@ main = do
   when (cfgDebug cfg) $ putStrLn $ "config: " ++ show cfg
   setCurrentDirectory $ cfgWorkDir cfg
   when (hasArg args "test")
-    (withArgs [] $ runTests cfg ref)
+    (withArgs [] $ runTests (cfg {cfgWidth = Just 100}) ref)
   if (hasArg args "script" && (not $ hasArg args "interactive"))
     then evalFile stdout cfg ref
     else runRepl  cfg ref
