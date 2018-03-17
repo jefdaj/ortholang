@@ -168,4 +168,5 @@ executable shortcut
                     utility-ht,
                     time,
                     concurrent-extra,
-                    retry
+                    retry,
+                    terminal-size

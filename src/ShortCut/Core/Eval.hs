@@ -26,7 +26,7 @@ import Development.Shake
 import Text.PrettyPrint.HughesPJClass
 
 import ShortCut.Core.Types
-import ShortCut.Core.Pretty (render)
+import ShortCut.Core.Pretty (renderIO)
 import ShortCut.Core.Config (debug)
 
 import Control.Retry
@@ -123,8 +123,9 @@ eval hdl cfg ref rtype = retryIgnore . eval'
       "eval" ~> do
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
-        res <- prettyResult cfg ref rtype $ toCutPath cfg path
-        liftIO $ hPutStrLn hdl $ render res
+        res  <- prettyResult cfg ref rtype $ toCutPath cfg path
+        res' <- liftIO $ renderIO res
+        liftIO $ hPutStrLn hdl res'
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()

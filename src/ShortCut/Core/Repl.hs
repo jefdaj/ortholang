@@ -32,7 +32,7 @@ import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
-import ShortCut.Core.Pretty     (prettyShow, writeScript)
+import ShortCut.Core.Pretty     (Pretty, pPrint, renderIO, writeScript)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import ShortCut.Core.Config     (showConfigField, setConfigField)
 import System.Command           (runCommand, waitForProcess)
@@ -230,21 +230,29 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 -- TODO except, this should work with expressions too!
 cmdDeps :: CutState -> Handle -> String -> IO CutState
 cmdDeps st@(scr,_,_) hdl var = do
-  hPutStrLn hdl $ case lookup (CutVar var) scr of
-    Nothing -> "Var '" ++ var ++ "' not found"
-    Just e  -> prettyAssigns (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
+  case lookup (CutVar var) scr of
+    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
+    Just e  -> pPrintHdl hdl $ filter (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
   return st
 
+-- Print something pretty to a handle, rendering with custom style from Pretty.hs
+-- TODO move to Pretty.hs?
+pPrintHdl :: Pretty a => Handle -> a -> IO ()
+pPrintHdl hdl prettyThing = renderIO (pPrint prettyThing) >>= hPutStrLn hdl
+
 -- TODO move to Pretty.hs
-prettyAssigns :: (CutAssign -> Bool) -> CutScript -> String
-prettyAssigns fn scr = stripWhiteSpace $ unlines $ map prettyShow $ filter fn scr
+-- prettyAssigns :: Handle -> (CutAssign -> Bool) -> CutScript -> IO ()
+-- prettyAssigns hdl fn scr = do
+  -- txt <- renderIO $ pPrint $ filter fn scr
+  -- hPutStrLn hdl txt
 
 cmdRDeps :: CutState -> Handle -> String -> IO CutState
 cmdRDeps st@(scr,_,_) hdl var = do
   let var' = CutVar var
-  hPutStrLn hdl $ case lookup var' scr of
-    Nothing -> "Var '" ++ var ++ "' not found"
-    Just _  -> prettyAssigns (\(v,_) -> elem v $ (CutVar var):rDepsOf scr var') scr
+  case lookup var' scr of
+    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Just _  -> pPrintHdl hdl $ filter (\(v,_) -> elem v $ (CutVar var):rDepsOf scr var') scr
   return st
 
 -- TODO factor out the variable lookup stuff
@@ -267,11 +275,11 @@ cmdType state hdl s = do
 
 -- TODO factor out the variable lookup stuff
 cmdShow :: CutState -> Handle -> String -> IO CutState
-cmdShow st@(s,_,_) hdl [] = mapM_ (hPutStrLn hdl . prettyShow) s >> return st
+cmdShow st@(s,_,_) hdl [] = mapM_ (pPrintHdl hdl) s >> return st
 cmdShow st@(scr,_,_) hdl var = do
-  hPutStrLn hdl $ case lookup (CutVar var) scr of
-    Nothing -> "Var '" ++ var ++ "' not found"
-    Just e  -> prettyShow e
+  case lookup (CutVar var) scr of
+    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Just e  -> pPrintHdl hdl e
   return st
 
 -- TODO does this one need to be a special case now?
@@ -288,7 +296,7 @@ cmdConfig :: CutState -> Handle -> String -> IO CutState
 cmdConfig st@(scr,cfg,ref) hdl s = do
   let ws = words s
   if (length ws == 0)
-    then hPutStrLn hdl (prettyShow cfg) >> return st -- TODO Pretty instance
+    then pPrintHdl hdl cfg >> return st -- TODO Pretty instance
     else if (length ws  > 2)
       then hPutStrLn hdl "too many variables" >> return st
       else if (length ws == 1)
