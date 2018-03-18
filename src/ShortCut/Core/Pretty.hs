@@ -12,6 +12,7 @@ module ShortCut.Core.Pretty
   , render
   , renderIO
   , pPrint
+  , pPrintHdl
   )
   where
 
@@ -21,6 +22,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
 import System.Console.Terminal.Size (Window(..), size)
+import System.IO (Handle, hPutStrLn)
 -- import Control.Monad.Trans (liftIO)
 -- import Data.String.Utils          (replace)
 
@@ -39,9 +41,14 @@ renderIO cfg doc = do
   let renderWidth = case cfgWidth cfg of
                       Nothing -> currentWidth
                       Just w  -> w
-  -- let s = style {lineLength = w, ribbonsPerLine = 1}
-  let s = style {lineLength = renderWidth}
+  let s = style {lineLength = renderWidth, ribbonsPerLine = 0.2}
+  -- let s = style {lineLength = renderWidth}
   return $ renderStyle s doc
+
+-- Print something pretty to a handle, rendering with custom style from Pretty.hs
+-- TODO move to Pretty.hs?
+pPrintHdl :: Pretty a => CutConfig -> Handle -> a -> IO ()
+pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl
 
 instance Pretty CutType where
   pPrint Empty          = error "should never need to print Empty"
@@ -65,7 +72,7 @@ instance {-# OVERLAPPING #-} Pretty CutAssign where
 instance {-# OVERLAPPING #-} Pretty CutScript where
   pPrint [] = empty
   -- pPrint as = text $ unlines $ map prettyShow as
-  pPrint as = sep $ map pPrint as
+  pPrint as = vcat $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?
@@ -81,17 +88,13 @@ instance Pretty CutExpr where
   pPrint (CutFun _ _ _ s es) = text s <+> sep (map pNested es)
   pPrint (CutList _ _ _ es)  = pList es
 
-  -- TODO figure this one out a little better
-  -- pPrint (CutBop _ _ _ c e1 e2) = sep [pPrint e1, nest (-2) (text c), pPrint e2]
-  -- pPrint (CutBop _ _ _ c e1 e2) = hang (pPrint e1) (-2) ((text c) <+> pPrint e2)
-  -- pPrint (CutBop _ _ _ c e1 e2) = pPrint e1 <+> (nest (-2) (text c)) <+> pPrint e2
-  -- pPrint (CutBop _ _ _ c e1 e2) = sep [pPrint e1, nest (-2) ((text c) <+> pPrint e2)]
-  -- this one is almost right, just one extra fn call on first line:
-  -- pPrint (CutBop _ _ _ c e1 e2) = sep [pPrint e1, nest (-2) (text c), pPrint e2]
-  -- pPrint (CutBop _ _ _ c e1 e2) = fsep [pPrint e1, text c $$ pPrint e2]
-  -- this is almost right except it breaks lines too early (always nesting?):
-  pPrint (CutBop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (text c) $$ pPrint e2
+  -- this is almost right except it breaks lines too early (always nesting),
+  -- which looks super weird for short bops:
+  -- pPrint (CutBop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (text c) $$ pPrint e2
 
+  -- this one is a little better: the first line is right and *then* it starts doing that
+  -- TODO ask on stackoverflow if there's any better way, but later
+  pPrint (CutBop _ _ _ c e1 e2) = sep $ punctuate (text $ " " ++ c) [pPrint e1, pPrint e2]
 
 pList :: (Pretty a) => [a] -> Doc
 pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"

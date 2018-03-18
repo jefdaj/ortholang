@@ -1,22 +1,22 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
-shortcut >> []
+>> []
 []
-shortcut >> :t []
+>> :t []
 empty.list
-shortcut >> :t [[]]
+>> :t [[]]
 empty.list.list
-shortcut >> [[]]
+>> [[]]
 [[]]
-shortcut >> [[1]]
+>> [[1]]
 [[1]]
-shortcut >> :t [[1], []]
+>> :t [[1], []]
 num.list.list
-shortcut >> [[1], []]
+>> [[1], []]
 [[1], []]
-shortcut >> :t [[], [1]]
+>> :t [[], [1]]
 num.list.list
-shortcut >> [[], [1]]
+>> [[], [1]]
 [[], [1]]
-shortcut >> :quit
+>> :quit
 Bye for now!

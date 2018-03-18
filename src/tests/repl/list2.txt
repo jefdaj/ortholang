@@ -1,6 +1,6 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
-shortcut >> [1.0]
+>> [1.0]
 [1]
-shortcut >> :q
+>> :q
 Bye for now!

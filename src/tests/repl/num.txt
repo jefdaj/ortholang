@@ -1,14 +1,14 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
-shortcut >> 1
+>> 1
 1
-shortcut >> [1]
+>> [1]
 [1]
-shortcut >> 1 + 2
+>> 1 + 2
 3
-shortcut >> [(1 + 2)]
+>> [(1 + 2)]
 [3]
-shortcut >> [1,2,3,4,5,6,7,5,34,32,45,2,2,2,3e56]
+>> [1,2,3,4,5,6,7,5,34,32,45,2,2,2,3e56]
 [1, 2, 3, 4, 5, 6, 7, 5, 34, 32, 45, 2, 2, 2, 3.0e56]
-shortcut >> :q
+>> :q
 Bye for now!

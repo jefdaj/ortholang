@@ -67,7 +67,7 @@ goldenRepl cfg ref goldenFile = do
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       -- tstOut = cfgTmpDir cfg' ++ name ++ ".out"
       tstOut = cfgTmpDir cfg' <.> "out"
-      stdin  = extractPrompted "shortcut >> " txt -- TODO pass the prompt here
+      stdin  = extractPrompted ">> " txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut cfg' ref
   return $ goldenVsFile name goldenFile tstOut action
 
@@ -76,7 +76,7 @@ goldenRepls cfg ref = do
   tDir  <- getDataFileName "tests/repl"
   golds <- findByExtension [".txt"] tDir
   let tests = mapM (goldenRepl cfg ref) golds
-      group = testGroup "print expected responses"
+      group = testGroup "prints expected output"
   fmap group tests
 
 goldenReplTree :: CutConfig -> Locks -> FilePath -> IO TestTree
@@ -85,7 +85,7 @@ goldenReplTree cfg ref ses = do
   let name   = takeBaseName ses
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tree   = replaceExtension ses "tree"
-      stdin  = extractPrompted "shortcut >> " txt
+      stdin  = extractPrompted ">> " txt
       tmpDir = cfgTmpDir cfg'
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
       cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
@@ -101,5 +101,5 @@ goldenReplTrees cfg ref = do
   tDir  <- getDataFileName "tests/repl"
   txts  <- findByExtension [".txt"] tDir
   let tests = mapM (goldenReplTree cfg ref) txts
-      group = testGroup "create expected tmpfiles"
+      group = testGroup "creates expected tmpfiles"
   fmap group tests

@@ -1,25 +1,25 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
-shortcut >> v1 = "one"
-shortcut >> v2 = "two"
-shortcut >> v3 = [v1, v2]
-shortcut >> :show 
+>> v1 = "one"
+>> v2 = "two"
+>> v3 = [v1, v2]
+>> :show
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
-shortcut >> :depends v1
+>> :depends v1
 v1 = "one"
-shortcut >> :depends v2
+>> :depends v2
 v2 = "two"
-shortcut >> :depends v3
+>> :depends v3
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
-shortcut >> v4 = v3
-shortcut >> :depends v4
+>> v4 = v3
+>> :depends v4
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 v4 = v3
-shortcut >> :q
+>> :q
 Bye for now!

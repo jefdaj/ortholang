@@ -32,7 +32,7 @@ import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
-import ShortCut.Core.Pretty     (Pretty, pPrint, renderIO, writeScript)
+import ShortCut.Core.Pretty     (pPrintHdl, writeScript)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import ShortCut.Core.Config     (showConfigField, setConfigField)
 import System.Command           (runCommand, waitForProcess)
@@ -235,11 +235,6 @@ cmdDeps st@(scr, cfg, _) hdl var = do
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
     Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
   return st
-
--- Print something pretty to a handle, rendering with custom style from Pretty.hs
--- TODO move to Pretty.hs?
-pPrintHdl :: Pretty a => CutConfig -> Handle -> a -> IO ()
-pPrintHdl cfg hdl prettyThing = renderIO cfg (pPrint prettyThing) >>= hPutStrLn hdl
 
 -- TODO move to Pretty.hs
 -- prettyAssigns :: Handle -> (CutAssign -> Bool) -> CutScript -> IO ()
