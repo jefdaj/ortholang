@@ -186,6 +186,7 @@ aBlastdblist cfg ref oPath listTmp fPath = do
       -- 0 -> debugTrackWrite cfg [listTmp'] -- never happens :(
       -- 1 -> debugTrackWrite cfg [listTmp']
       -- n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
+  liftIO $ createDirectoryIfMissing True tmpDir
   _ <- wrappedCmdExit cfg ref listTmp' [] [Cwd tmpDir, Shell] -- TODO remove stderr?
     "blastdbget" [tmpDir, ">", listTmp'] [1]
   filterStr <- readLit  cfg ref fPath'
@@ -228,6 +229,7 @@ aBlastdbget cfg ref dbPrefix tmpDir nPath = do
   debugNeed cfg "aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
+  liftIO $ createDirectoryIfMissing True tmp'
   -- TODO was taxdb needed for anything else?
   -- TODO does this need to lock on a separate file from dbPrefix''?
   -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
