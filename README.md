@@ -21,6 +21,10 @@ same information will also be available as a series of screencasts.
 Build and Test
 --------------
 
+<a href="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap" target="_blank">
+  <img src="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap.png" />
+</a>
+
 ShortCut is best built using [Nix][2], which ensures that all dependencies are
 exactly satisfied. Not much human work is required, but it will download and/or
 build a lot of packages and store them in `/nix`.
@@ -34,12 +38,20 @@ Next, clone this repository and run `nix-build -j$(nproc)` inside it. It will
 eventually create a symlink called `result` that points to the finished
 package.
 
+<a href="https://asciinema.org/a/mS8way8pStBVJ1rWQrHMAC8wN" target="_blank">
+  <img src="https://asciinema.org/a/mS8way8pStBVJ1rWQrHMAC8wN.png" />
+</a>
+
 Before using it, run the test suite to check that everything works:
 
     ./result/bin/shortcut --test
 
 Run and edit scripts
 --------------------
+
+<a href="https://asciinema.org/a/g5GErr9NQQABK6jfVHD3oX0cU" target="_blank">
+  <img src="https://asciinema.org/a/g5GErr9NQQABK6jfVHD3oX0cU.png" />
+</a>
 
 These commands will run an existing script, load an existing script in the
 interpreter, and start a new script in the interpreter respectively:
@@ -55,6 +67,10 @@ session with something like `:write your-updated.cut`.
 
 Basics
 ------
+
+<a href="https://asciinema.org/a/euimAp0wYpVFfhZBqFaHoYc5h" target="_blank">
+  <img src="https://asciinema.org/a/euimAp0wYpVFfhZBqFaHoYc5h.png" />
+</a>
 
 You can load gene lists and genomes, and convert them between several common
 formats:
