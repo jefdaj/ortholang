@@ -132,6 +132,10 @@ numbers and strings or strings and blast hit tables.
 Evaluation mechanics
 --------------------
 
+<a href="https://asciinema.org/a/170999" target="_blank">
+  <img src="https://asciinema.org/a/170999.png" width="300"/>
+</a>
+
 While ShortCut feels like a scripting language, the way it runs commands is
 more closely analogous to [Make][7]. (Actually, it uses [Shake][8].) When you
 ask it to calculate something, it:
