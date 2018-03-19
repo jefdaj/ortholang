@@ -22,7 +22,7 @@ Build and Test
 --------------
 
 <a href="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap" target="_blank">
-  <img src="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap.png" />
+  <img src="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap.png" width="300"/>
 </a>
 
 ShortCut is best built using [Nix][2], which ensures that all dependencies are
@@ -39,7 +39,7 @@ eventually create a symlink called `result` that points to the finished
 package.
 
 <a href="https://asciinema.org/a/mS8way8pStBVJ1rWQrHMAC8wN" target="_blank">
-  <img src="https://asciinema.org/a/mS8way8pStBVJ1rWQrHMAC8wN.png" />
+  <img src="https://asciinema.org/a/mS8way8pStBVJ1rWQrHMAC8wN.png" width="300"/>
 </a>
 
 Before using it, run the test suite to check that everything works:
@@ -50,7 +50,11 @@ Run and edit scripts
 --------------------
 
 <a href="https://asciinema.org/a/g5GErr9NQQABK6jfVHD3oX0cU" target="_blank">
-  <img src="https://asciinema.org/a/g5GErr9NQQABK6jfVHD3oX0cU.png" />
+  <img src="https://asciinema.org/a/g5GErr9NQQABK6jfVHD3oX0cU.png" width="300"/>
+</a>
+
+<a href="https://asciinema.org/a/euimAp0wYpVFfhZBqFaHoYc5h" target="_blank">
+  <img src="https://asciinema.org/a/euimAp0wYpVFfhZBqFaHoYc5h.png" width="300"/>
 </a>
 
 These commands will run an existing script, load an existing script in the
@@ -68,8 +72,8 @@ session with something like `:write your-updated.cut`.
 Basics
 ------
 
-<a href="https://asciinema.org/a/euimAp0wYpVFfhZBqFaHoYc5h" target="_blank">
-  <img src="https://asciinema.org/a/euimAp0wYpVFfhZBqFaHoYc5h.png" />
+<a href="https://asciinema.org/a/170962" target="_blank">
+  <img src="https://asciinema.org/a/170962.png" width="300"/>
 </a>
 
 You can load gene lists and genomes, and convert them between several common
@@ -82,6 +86,14 @@ pcc6803 = load_fna "Synechocystis_PCC_6803.fna"
 # load a genome distributed as separate genbank files, and convert it to one FASTA transcriptome
 pcc7942 = concat_fastas [gbk_to_faa (load_gbk "SynPCC7942_chr.gbk"),
                          gbk_to_faa (load_gbk "SynPCC7942_pANL.gbk")]
+
+# list available BLAST databases with "human" in their names
+blastdblist "human"
+["est_human", "human_genomic"]
+
+
+# download the SwissProt BLAST database
+sp = blastdbget "swissprot"
 ```
 
 Another common task is to perform set operations on lists of things.
@@ -89,6 +101,10 @@ It works with genes and genomes, but is easier to demonstrate with numbers.
 We can quickly describe anything that could be shown in a Venn Diagram:
 
 <img src="https://github.com/jefdaj/ShortCut/raw/master/poster/venn-sets.png" width="300">
+
+<a href="https://asciinema.org/a/170970" target="_blank">
+  <img src="https://asciinema.org/a/170970.png" width="300"/>
+</a>
 
 ~~~
 >> # For example, starting with these lists...
@@ -102,10 +118,10 @@ We can quickly describe anything that could be shown in a Venn Diagram:
 [2]
 >> A ~ B
 [1, 3]
->> all [A, B, C]
-[2]
 >> any [A, B, C]
 [1, 1.0e23, 2, 3, 3.0e-9, 4, 45, 6]
+>> all [A, B, C]
+[2]
 >> B ~ (A & C)
 [4, 6]
 ~~~
