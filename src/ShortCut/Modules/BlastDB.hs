@@ -3,6 +3,7 @@
 module ShortCut.Modules.BlastDB where
 
 -- TODO should makeblastdb be just one fn? no, make everything else stricter later!
+-- TODO need to remove tmpfiles in /tmp on quit to save space?
 
 import Development.Shake
 import ShortCut.Core.Types
