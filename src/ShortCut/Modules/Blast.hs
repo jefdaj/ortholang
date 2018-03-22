@@ -85,13 +85,12 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
-  let addDb = AddEnv "BLASTDB" $ takeFileName prefix'
-      args  = [ "-db", takeFileName prefix'
-              , "-query", q'
-              , "-evalue", eDec
-              , "-out", o'' -- TODO use stdout?
-              , "-outfmt", "6" -- tab-separated values
-              ]
+      ptn     = prefix' ++ ".*"
+      args    = [ "-db", takeFileName prefix'
+                , "-evalue", eDec
+                , "-outfmt", "6" -- tab-separated values
+                , "-query", "-"
+                ]
       -- NCBI defaults to megablast for speed at the expense of sensitivity. My
       -- view is users should have to ask for that explicitly, so in ShortCut
       -- "blastn" is actual blastn! Use "megablast" if you want faster results.
@@ -100,7 +99,19 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
         "blastn"    -> ("blastn", ["-task","blastn"] ++ args)
         "megablast" -> ("blastn", args)
         _           -> (bCmd, args)
-  wrappedCmdWrite cfg ref o'' [prefix' ++ ".*"] [] [addDb, Cwd cDir] bCmd' args'
+      -- Terrible hack, but seems to parallelize BLAST commands without error.
+      -- It should also allow each part of the overall BLAST to be run with srun.
+      -- TODO proper quoting of args' at least
+      -- TODO can addDb env var be removed?
+      -- TODO what's the optimal --block size? does it need to adjust?
+      pCmd = [ "parallel"
+             , "--no-notice"
+             , "--block", "100k"
+             , "--recstart", "\'>\'"
+             , "--pipe"
+             ]
+      args'' = [q', "|"] ++ pCmd ++ [unwords (bCmd':args'), ">", o'']
+  wrappedCmdWrite cfg ref o'' [ptn] [] [Cwd cDir, Shell] "cat" args''
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

@@ -10,7 +10,6 @@ let
   myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
     dplyr
   ];};
-  # TODO remove parallel and include at top level for wrapper instead?
   runDepends = [ parallel ncbi-blast myPython myR ];
 
 in stdenv.mkDerivation {
