@@ -22,8 +22,8 @@ SRUN="$SRUN --chdir $(pwd) --quiet"
 srun_single() {
   # This is mostly for debugging but should also be useful for crb-blast
   cmd="$@"
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
-  cmd="$srun '$cmd'"
+  srun="$SRUN --cpus-per-task=4 --nodes=1-1 --ntasks=1 --time=99:00:00"
+  cmd="$srun $cmd"
   echo "$cmd"
 }
 
@@ -39,23 +39,17 @@ srun_parallel() {
   echo "$cmd"
 }
 
-# if [[ "$CMD" =~ recstart ]]; then
-    # TODO does this ever error out? if not, make sure it does first!
-    # exit 3
-# fi
+# If none of the special cases below match, this will run as-is.
+CMD="$@"
+
+if [[ $CMD =~ "--recstart" ]]; then
+  # Make parallel blast run individual commands via srun
+  CMD="$(srun_parallel "$CMD")"
+elif [[ $CMD =~ "crb-blast" ]]; then
+  # crb-blast spawns parallel jobs itself, so run in a single srun
+  CMD="$(srun_single "$CMD")"
+fi
 
 # Run the finished command
-# eval "$CMD"
-
-# OK it's almost certainly a quoting issue!
-# Why does only the cat ... part come through in $@?
-# I guess we're just running the cat through test.sh and the rest directly?
-echo "$@" >> /tmp/test.log
-
-if [[ $@ =~ recstart ]]; then
-  cmd="$(srun_parallel "$@")"
-  echo "$cmd" >> /tmp/test.log
-  eval "$cmd"
-else
-  eval "$@"
-fi
+echo "$CMD" >> /tmp/test.log
+eval "$CMD"
