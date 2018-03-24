@@ -169,4 +169,5 @@ executable shortcut
                     time,
                     concurrent-extra,
                     retry,
-                    terminal-size
+                    terminal-size,
+                    posix-escape

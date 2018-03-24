@@ -15,12 +15,13 @@ import ShortCut.Core.Types
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
-import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
 -- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeDirectory, takeFileName, (</>))
+import System.Posix.Escape         (escape)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -102,16 +103,17 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
       -- Terrible hack, but seems to parallelize BLAST commands without error.
       -- It should also allow each part of the overall BLAST to be run with srun.
       -- TODO proper quoting of args' at least
-      -- TODO can addDb env var be removed?
-      -- TODO what's the optimal --block size? does it need to adjust?
       pCmd = [ "parallel"
              , "--no-notice"
-             , "--block", "100k"
-             , "--recstart", "\'>\'"
+             , "--block", "100k" -- TODO how to tell what's good here?
+             , "--recstart", "'>'"
              , "--pipe"
              ]
-      args'' = [q', "|"] ++ pCmd ++ [unwords (bCmd':args'), ">", o'']
-  wrappedCmdWrite cfg ref o'' [ptn] [] [Cwd cDir, Shell] "cat" args''
+      args'' = ["cat", q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
+      final  = escape $ unwords args''
+  debugL cfg $ "args'': " ++ show args''
+  debugL cfg $ "final: " ++ show final
+  wrappedCmdWrite cfg ref o'' [ptn] [] [Cwd cDir, Shell] final []
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

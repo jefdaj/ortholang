@@ -302,10 +302,11 @@ wrappedCmd cfg ref outPath inPtns opts bin args = do
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
   debugL cfg $ "wrappedCmd acquiring write lock on '" ++ outPath ++ "'"
   debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
+  -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
   withWriteLock' ref outPath $ withReadLocks' ref inPaths' $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
-      Just w  -> command opts w (bin:args)
+      Just w  -> command opts w [unwords (bin:args)]
     let code' = case code of
                   ExitSuccess   -> 0
                   ExitFailure n -> n
