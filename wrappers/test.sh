@@ -22,7 +22,7 @@ SRUN="$SRUN --chdir $(pwd) --quiet"
 srun_single() {
   # This is mostly for debugging but should also be useful for crb-blast
   cmd="$@"
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:10:00"
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
   cmd="$srun '$cmd'"
   echo "$cmd"
 }
@@ -34,7 +34,7 @@ srun_parallel() {
   after="$(echo "$cmd" | cut -d' ' -f11-)"
   # before="$(echo "$cmd" | cut -d"\'" -f-9)"
   # after="$(echo "$cmd" | cut -d"\'" -f10-)"
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:10:00"
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
   cmd="${before} $srun ${after}"
   echo "$cmd"
 }
@@ -53,11 +53,9 @@ srun_parallel() {
 echo "$@" >> /tmp/test.log
 
 if [[ $@ =~ recstart ]]; then
-  # exit 4
   cmd="$(srun_parallel "$@")"
   echo "$cmd" >> /tmp/test.log
   eval "$cmd"
 else
-  # exit 5
   eval "$@"
 fi

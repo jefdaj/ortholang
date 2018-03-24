@@ -109,11 +109,9 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              , "--recstart", "'>'"
              , "--pipe"
              ]
-      args'' = ["cat", q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
-      final  = escape $ unwords args''
+      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
   debugL cfg $ "args'': " ++ show args''
-  debugL cfg $ "final: " ++ show final
-  wrappedCmdWrite cfg ref o'' [ptn] [] [Cwd cDir, Shell] final []
+  wrappedCmdWrite cfg ref o'' [ptn] [] [Cwd cDir, Shell] "cat" args''
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
