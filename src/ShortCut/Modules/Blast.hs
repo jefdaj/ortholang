@@ -22,6 +22,7 @@ import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeDirectory, takeFileName, (</>))
 import System.Posix.Escape         (escape)
+-- import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -110,8 +111,13 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              , "--pipe"
              ]
       args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
+      -- TODO use another tmpfile here?
+      -- args''' = args'' ++ ["&&", "sort", o'', "-o", o''] -- for consistent .tree files
   debugL cfg $ "args'': " ++ show args''
-  wrappedCmdWrite cfg ref o'' [ptn] [] [Cwd cDir, Shell] "cat" args''
+  -- TODO wait how could this not exist? need issue then?
+  -- liftIO $ createDirectoryIfMissing True cDir
+  -- TODO create dir or BLASTDB env var not needed after all then? check
+  wrappedCmdWrite cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

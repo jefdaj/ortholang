@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mkdir -p $(pwd) # wtf why is this needed
+sleep 1
+
 # print a message if log level is set (from within ShortCut or by the user)
 # TODO send this to a file rather than stdout?
 # log() { [[ -z $SHORTCUT_LOGLEVEL ]] || echo "[$(date '+%Y-%m-%d %H:%M:%S')] $@"; }
@@ -7,6 +10,7 @@
 # Common options for all srun commands
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
+# SRUN="$SRUN --quiet"
 # TODO CMD="$SRUN --exclusive -N1 -n1"?
 
 # If none of the conditions match, this will run unaltered at the end
@@ -45,11 +49,12 @@ CMD="$@"
 if [[ $CMD =~ "--recstart" ]]; then
   # Make parallel blast run individual commands via srun
   CMD="$(srun_parallel "$CMD")"
-elif [[ $CMD =~ "crb-blast" ]]; then
+# elif [[ $CMD == "crb-blast"* ]]; then
   # crb-blast spawns parallel jobs itself, so run in a single srun
-  CMD="$(srun_single "$CMD")"
+  # CMD="$(srun_single "$CMD")"
 fi
 
 # Run the finished command
 echo "$CMD" >> /tmp/test.log
-eval "$CMD"
+eval "$CMD" 2>> /tmp/test.log
+# eval "$CMD"
