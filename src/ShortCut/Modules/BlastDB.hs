@@ -192,13 +192,6 @@ aBlastdblist cfg ref listTmp = do
 
 aBlastdbfilter :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbfilter cfg ref oPath listTmp fPath = do
-  -- liftIO $ putStrLn $ "aBlastdbfilter acquiring write lock on '" ++ listTmp' ++ "'"
-  -- withWriteOnce ref listTmp' $ do
-    -- This one is tricky because it exits 1 on success
-    -- case code of
-      -- 0 -> debugTrackWrite cfg [listTmp'] -- never happens :(
-      -- 1 -> debugTrackWrite cfg [listTmp']
-      -- n -> wrappedCmdError "blastdbget" n [listTmp'] -- TODO also the lockfile?
   filterStr <- readLit  cfg ref fPath'
   out       <- readLits cfg ref listTmp'
   let names  = if null out then [] else tail out
@@ -211,7 +204,6 @@ aBlastdbfilter cfg ref oPath listTmp fPath = do
     listTmp' = fromCutPath cfg listTmp
     oPath''  = debugA cfg "aBlastdbfilter" oPath' [oPath', listTmp', fPath']
 
--- TODO do I need to adjust the timeout? try on the cluster first
 blastdbget :: CutFunction
 blastdbget = CutFunction
   { fName      = "blastdbget"
@@ -231,8 +223,6 @@ rBlastdbget st@(_,cfg,ref) e@(CutFun _ _ _ _ [name]) = do
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = error "bad argument to rBlastdbget"
 
--- TODO STOP BOTHER WITH THIS FOR NOW; SHORTCUT NEVER GETS TO IT!
-
 aBlastdbget :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref dbPrefix tmpDir nPath = do
   debugNeed cfg "aBlastdbget" [nPath']
@@ -240,14 +230,10 @@ aBlastdbget cfg ref dbPrefix tmpDir nPath = do
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
   -- TODO was taxdb needed for anything else?
-  -- TODO does this need to lock on a separate file from dbPrefix''?
-  -- TODO does it need to be given a dbPrefix'' + "*" pattern to delete on errors?
-  -- TODO wrappedCmdWrite and delete the file on errors?
   debugL cfg $ "aBlastdbget dbPrefix'': " ++ dbPrefix''
   debugL cfg $ "aBlastdbget dbPath: " ++ dbPath
   _ <- wrappedCmdWrite cfg ref dbPrefix'' [] [] [Cwd tmp']
          "blastdbget" ["-d", dbName, "."]
-  -- TODO switch to writePath
   writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
   where
     tmp'       = fromCutPath cfg tmpDir

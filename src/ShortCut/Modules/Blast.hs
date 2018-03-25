@@ -16,13 +16,11 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
--- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeDirectory, takeFileName, (</>))
 import System.Posix.Escape         (escape)
--- import System.Directory           (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -110,13 +108,9 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              , "--recstart", "'>'"
              , "--pipe"
              ]
-      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
-      -- TODO use another tmpfile here?
-      -- args''' = args'' ++ ["&&", "sort", o'', "-o", o''] -- for consistent .tree files
+      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'),
+                "|", "sort", ">", o''] -- sort for a more deterministic outfile
   debugL cfg $ "args'': " ++ show args''
-  -- TODO wait how could this not exist? need issue then?
-  -- liftIO $ createDirectoryIfMissing True cDir
-  -- TODO create dir or BLASTDB env var not needed after all then? check
   wrappedCmdWrite cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where
     o'  = fromCutPath cfg o
