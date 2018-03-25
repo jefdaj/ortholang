@@ -311,7 +311,8 @@ wrappedCmd cfg ref outPath inPtns opts bin args = do
     let code' = case code of
                   ExitSuccess   -> 0
                   ExitFailure n -> n
-    debugL cfg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
+    -- This is disabled because it can make the logs really big
+    -- debugL cfg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
     return (out, err, code')
 
 {- OK I think this is an issue of immediately returning rather than waiting for
