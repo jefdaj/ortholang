@@ -15,10 +15,7 @@ inids  = argv[3]
 with open(inids, 'r') as iis:
     ids = set(i.strip() for i in iis.readlines())
 
-outs = [s.id for s in SeqIO.parse(infa , 'fasta') if s in ids]
-# if len(outs) == 0:
-    # print "<<emptylist>>"
-# else:
 with open(outfa, 'wb') as out:
-    for s in outs:
-        SeqIO.write(s, out, 'fasta')
+    for s in SeqIO.parse(infa , 'fasta'):
+        if s.id in ids:
+            SeqIO.write(s, out, 'fasta')

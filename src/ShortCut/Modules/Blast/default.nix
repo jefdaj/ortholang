@@ -4,14 +4,12 @@
 with import ../../../../nixpkgs;
 
 let
-  # parallelblast = callPackage ./parallelblast {};
   myPython = pkgs.pythonPackages.python.withPackages (ps: with ps; [
     docopt
   ]);
   myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
     dplyr
   ];};
-  # runDepends = [ myR parallelblast ];
   runDepends = [ parallel ncbi-blast myPython myR ];
 
 in stdenv.mkDerivation {

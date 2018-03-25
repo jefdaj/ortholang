@@ -16,11 +16,11 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
--- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
-import ShortCut.Modules.BlastDB    (ndb, pdb)
+import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeDirectory, takeFileName, (</>))
+import System.Posix.Escape         (escape)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -85,16 +85,33 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
-      dbg     = if cfgDebug cfg then ["-v"] else []
-      args    = [ "-c", bCmd, "-t", cDir, "-q", q', "-d", takeFileName prefix'
-                , "-o", o'  , "-e", eDec, "-p"] ++ dbg
-  debugL cfg $ "aMakeblastFromDb eStr: " ++ eStr
-  debugL cfg $ "aMakeblastFromDb prefix': " ++ prefix'
-  debugL cfg $ "aMakeblastFromDb cDir: " ++ cDir
-  debugL cfg $ "aMakeblastFromDb args: " ++ show args
-  wrappedCmdWrite cfg ref o'' [prefix' ++ ".*"] [] [Cwd cDir]
-    "parallelblast.py" args
-  debugL cfg $ "aMakeblastFromDb finished wrappedCmdWrite"
+      ptn     = prefix' ++ ".*"
+      args    = [ "-db", takeFileName prefix'
+                , "-evalue", eDec
+                , "-outfmt", "6" -- tab-separated values
+                , "-query", "-"
+                ]
+      -- NCBI defaults to megablast for speed at the expense of sensitivity. My
+      -- view is users should have to ask for that explicitly, so in ShortCut
+      -- "blastn" is actual blastn! Use "megablast" if you want faster results.
+      -- See http://www.sixthresearcher.com/when-blast-is-not-blast/
+      (bCmd', args') = case bCmd of
+        "blastn"    -> ("blastn", ["-task","blastn"] ++ args)
+        "megablast" -> ("blastn", args)
+        _           -> (bCmd, args)
+      -- Terrible hack, but seems to parallelize BLAST commands without error.
+      -- It should also allow each part of the overall BLAST to be run with srun.
+      -- TODO proper quoting of args' at least
+      pCmd = [ "parallel"
+             , "--no-notice"
+             , "--block", "100k" -- TODO how to tell what's good here?
+             , "--recstart", "'>'"
+             , "--pipe"
+             ]
+      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'),
+                "|", "sort", ">", o''] -- sort for a more deterministic outfile
+  debugL cfg $ "args'': " ++ show args''
+  wrappedCmdWrite cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
