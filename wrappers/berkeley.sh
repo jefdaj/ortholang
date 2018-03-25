@@ -1,11 +1,13 @@
 #!/bin/bash
 
-mkdir -p $(pwd) # wtf why is this needed
-sleep 1
+# Wrapper for the Berkeley Computational Genomics Resource Laboratory (CGRL).
+# It should work with minor changes on any system that uses the SLURM scheduler
+# though if you adjust the SRUN variable below.
 
-# print a message if log level is set (from within ShortCut or by the user)
-# TODO send this to a file rather than stdout?
-# log() { [[ -z $SHORTCUT_LOGLEVEL ]] || echo "[$(date '+%Y-%m-%d %H:%M:%S')] $@"; }
+# Note that you also need to set TMPDIR to something shared across machines
+# before invoking shortcut. For example I use:
+# export TMPDIR=/global/scratch/jefdaj/shortcut-test
+# Otherwise you'll get lots of srun errors "cannot chdir to /tmp/whatever..."
 
 # Common options for all srun commands
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
@@ -43,6 +45,6 @@ elif [[ $CMD == "crb-blast"* ]]; then
 fi
 
 # Run the finished command
-# TODO incorporate a proper logfile
-echo "$CMD"  >> /tmp/test.log
-eval "$CMD" 2>> /tmp/test.log
+# TODO proper logfile
+echo "$CMD"  >> /tmp/wrapper.log
+eval "$CMD" 2>> /tmp/wrapper.log

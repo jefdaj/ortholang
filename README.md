@@ -146,8 +146,8 @@ subject and query types.
 | blastn    | nucl  | nucl    |
 | blastp    | prot  | prot    |
 | blastx    | trans | prot    |
-| tblastn   | prot  | trans   |
-| tblastx   | trans | trans   |
+| tblastn   | prot  | nucl (translated) |
+| tblastx   | nucl (translated) | nucl (translated) |
 | megablast | nucl  | nucl    |
 
 There are several variants of each one, named with suffixes:
