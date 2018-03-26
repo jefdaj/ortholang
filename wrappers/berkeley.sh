@@ -9,6 +9,8 @@
 # export TMPDIR=/global/scratch/jefdaj/shortcut-test
 # Otherwise you'll get lots of srun errors "cannot chdir to /tmp/whatever..."
 
+# TODO set logfile from shortcut config
+
 # Common options for all srun commands
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
@@ -81,7 +83,10 @@ elif [[ $CMD == md5sum*      ||
 
 fi
 
+run() {
+ echo "$@"  >> /tmp/wrapper.log
+ eval "$@" 2>> /tmp/wrapper.log
+}
+
 # Run the finished command
-# TODO proper logfile
-echo "$CMD"  >> /tmp/wrapper.log
-eval "$CMD" 2>> /tmp/wrapper.log
+run "$CMD"
