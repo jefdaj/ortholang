@@ -64,8 +64,9 @@ blastCRBEach = CutFunction
   }
 
 -- TODO split into two functions with different type signatures?
+-- TODO what types are actually allowed? (can subject be fna?)
 tCrbBlast :: [CutType] -> Either String CutType
-tCrbBlast [x, y] | x == fna && y `elem` [fna, faa] = Right crb
+tCrbBlast [x, y] | x `elem` [fna, faa] && y `elem` [fna, faa] = Right crb
 tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
 
 tCrbBlastEach :: [CutType] -> Either String CutType

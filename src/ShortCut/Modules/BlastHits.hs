@@ -69,8 +69,7 @@ extractTargetsEach = CutFunction
 
 aCutCol :: Int -> CutConfig -> Locks -> [CutPath] -> Action ()
 aCutCol n cfg ref [outPath, tsvPath] = do
-  out <- wrappedCmdOut cfg ref outPath' [tsvPath'] [] []
-           "cut" ["-f", show n, tsvPath']
+  out <- wrappedCmdOut cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
   writeLits cfg ref outPath'' $ sort $ nub $ lines out
   where
     outPath'  = fromCutPath cfg outPath

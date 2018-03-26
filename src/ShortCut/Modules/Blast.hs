@@ -19,7 +19,7 @@ import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, 
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna)
-import System.FilePath             (takeDirectory, takeFileName, (</>))
+import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
 import System.Posix.Escape         (escape)
 
 cutModule :: CutModule
@@ -102,9 +102,17 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
       -- Terrible hack, but seems to parallelize BLAST commands without error.
       -- It should also allow each part of the overall BLAST to be run with srun.
       -- TODO proper quoting of args' at least
+      jobl = o'' <.> "log"
       pCmd = [ "parallel"
              , "--no-notice"
-             , "--block", "100k" -- TODO how to tell what's good here?
+
+             -- TODO should these be part of the berkeley.sh wrapper instead?
+             -- , "--block", "100k" -- TODO how to tell what's good here?
+             -- , "-j20"            -- TODO how to tell what's good here?
+             -- , "--delay", "1"    -- TODO how to tell what's good here?
+
+             , "--joblog", jobl
+             -- , "--resume" TODO get this working?
              , "--recstart", "'>'"
              , "--pipe"
              ]
