@@ -20,7 +20,7 @@ SRUN="$SRUN --chdir $(pwd) --quiet"
 srun_single() {
   # This is mostly for crb-blast so far
   cmd="$@"
-  srun="$SRUN --cpus-per-task=4 --nodes=1-1 --ntasks=1 --mem=20G --time=99:00:00"
+  srun="$SRUN --cpus-per-task=7 --nodes=1-1 --ntasks=1 --mem=50G --time=99:00:00"
   cmd="$srun $cmd"
   echo "$cmd"
 }
@@ -29,10 +29,11 @@ srun_parallel() {
   # monkey-patches a parallel call to run its individual commands via slurm
   # note that it's brittle and only works on shortcut-generated blast commands
   cmd="$@"
-  before="$(echo "$cmd" | cut -d' ' -f-16)" # ... --pipe
-  after="$(echo "$cmd" | cut -d' ' -f17-)"  # '*blast* ...
+  before="$(echo "$cmd" | cut -d' ' -f-10)" # ... --pipe
+  after="$(echo "$cmd" | cut -d' ' -f11-)"  # '*blast* ...
+  pargs="--block 100k -j40 --delay 1"
   srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
-  cmd="${before} $srun ${after}"
+  cmd="${before} ${pargs} ${srun} ${after}"
   echo "$cmd"
 }
 

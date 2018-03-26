@@ -107,12 +107,12 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              , "--no-notice"
 
              -- TODO should these be part of the berkeley.sh wrapper instead?
-             , "--block", "100k" -- TODO how to tell what's good here?
-             , "-j20"            -- TODO how to tell what's good here?
-             , "--delay", "1"    -- TODO how to tell what's good here?
+             -- , "--block", "100k" -- TODO how to tell what's good here?
+             -- , "-j20"            -- TODO how to tell what's good here?
+             -- , "--delay", "1"    -- TODO how to tell what's good here?
 
              , "--joblog", jobl
-             , "--resume"
+             -- , "--resume" TODO get this working?
              , "--recstart", "'>'"
              , "--pipe"
              ]
