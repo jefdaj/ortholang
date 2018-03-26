@@ -294,17 +294,21 @@ fixEmptyFile cfg ref path = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- TODO separate wrappedReadCmd with a shared lock?
-wrappedCmd :: CutConfig -> Locks -> FilePath -> [String]
+wrappedCmd :: CutConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
-wrappedCmd cfg ref outPath inPtns opts bin args = do
+wrappedCmd cfg ref mOut inPtns opts bin args = do
   inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
   inPaths' <- mapM (fixEmptyFile cfg ref) inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
-  debugL cfg $ "wrappedCmd acquiring write lock on '" ++ outPath ++ "'"
   debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
-  withWriteLock' ref outPath $ withReadLocks' ref inPaths' $ do
+  let writeLockFn = case mOut of
+                      Nothing -> id
+                      Just o  -> \fn -> do
+                        debugL cfg $ "wrappedCmd acquiring write lock on '" ++ o ++ "'"
+                        withWriteLock' ref o fn
+  writeLockFn $ withReadLocks' ref inPaths' $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command (Shell:opts) w [escape $ unwords (bin:args)]
@@ -329,7 +333,7 @@ wrappedCmd cfg ref outPath inPtns opts bin args = do
 wrappedCmdExit :: CutConfig -> Locks -> FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
 wrappedCmdExit cfg r outPath inPtns opts bin as allowedExitCodes = do
-  (_, _, code) <- wrappedCmd cfg r outPath inPtns opts bin as
+  (_, _, code) <- wrappedCmd cfg r (Just outPath) inPtns opts bin as
   if code `elem` allowedExitCodes
     then debugTrackWrite cfg [outPath] -- >> assertNonEmptyFile cfg r outPath -- TODO why recursive need here?
     else wrappedCmdError bin code [outPath]
@@ -365,16 +369,16 @@ wrappedCmdWrite cfg ref outPath inPtns outPaths opts bin args = do
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables
  -}
-wrappedCmdOut :: CutConfig -> Locks -> FilePath -> [String]
+wrappedCmdOut :: CutConfig -> Locks -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut cfg ref outLock inPtns outPaths os b as = do
-  (out, err, code) <- wrappedCmd cfg ref outLock inPtns os b as
+wrappedCmdOut cfg ref inPtns outPaths os b as = do
+  (out, err, code) <- wrappedCmd cfg ref Nothing inPtns os b as
   case code of
     0 -> return out
     n -> do
       debugL cfg $ unlines [out, err]
-      wrappedCmdError b n (outPaths ++ [outLock])
+      wrappedCmdError b n outPaths
 
 ----------
 -- misc --
@@ -389,7 +393,8 @@ digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 hashContent :: CutConfig -> Locks -> CutPath -> Action String
 hashContent cfg ref path = do
   debugNeed cfg "hashContent" [path']
-  Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
+  -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
+  out <- wrappedCmdOut cfg ref [path'] [] [] "md5sum" [path']
   let md5 = take digestLength $ head $ words out
   return md5
   where

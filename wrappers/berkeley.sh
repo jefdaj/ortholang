@@ -9,7 +9,7 @@
 # export TMPDIR=/global/scratch/jefdaj/shortcut-test
 # Otherwise you'll get lots of srun errors "cannot chdir to /tmp/whatever..."
 
-# TODO offload hashing with srun_single too if possible
+# TODO offload hashing with srun_crb too if possible
 # TODO control number of parallel jobs in srun_parallel rather than haskell!
 
 # Common options for all srun commands
@@ -17,10 +17,16 @@ SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_norm
 SRUN="$SRUN --chdir $(pwd) --quiet"
 # TODO --exclusive -N1 -n1?
 
-srun_single() {
-  # This is mostly for crb-blast so far
+srun_crb() {
   cmd="$@"
   srun="$SRUN --cpus-per-task=7 --nodes=1-1 --ntasks=1 --mem=50G --time=99:00:00"
+  cmd="$srun $cmd"
+  echo "$cmd"
+}
+
+srun_quick() {
+  cmd="$@"
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:10:00"
   cmd="$srun $cmd"
   echo "$cmd"
 }
@@ -31,7 +37,7 @@ srun_parallel() {
   cmd="$@"
   before="$(echo "$cmd" | cut -d' ' -f-10)" # ... --pipe
   after="$(echo "$cmd" | cut -d' ' -f11-)"  # '*blast* ...
-  pargs="--block 100k -j40 --delay 1"
+  pargs="--block 100k -j50 --delay 1"
   srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
   cmd="${before} ${pargs} ${srun} ${after}"
   echo "$cmd"
@@ -45,7 +51,9 @@ if [[ $CMD =~ "--recstart" ]]; then
   CMD="$(srun_parallel "$CMD")"
 elif [[ $CMD == "crb-blast"* ]]; then
   # crb-blast spawns parallel jobs itself, so run in a single srun
-  CMD="$(srun_single "$CMD")"
+  CMD="$(srun_crb "$CMD")"
+elif [[ $CMD == md5sum* ]]; then
+  CMD="$(srun_quick "$CMD")"
 fi
 
 # Run the finished command
