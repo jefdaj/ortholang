@@ -105,19 +105,14 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
       jobl = o'' <.> "log"
       pCmd = [ "parallel"
              , "--no-notice"
-
-             -- TODO should these be part of the berkeley.sh wrapper instead?
-             -- , "--block", "100k" -- TODO how to tell what's good here?
-             -- , "-j20"            -- TODO how to tell what's good here?
-             -- , "--delay", "1"    -- TODO how to tell what's good here?
-
              , "--joblog", jobl
-             -- , "--resume" TODO get this working?
+             -- , "--resume TODO can this work without making many more tmpfiles?
+             , "--resume-failed" -- TODO does this work with --pipe?
              , "--recstart", "'>'"
+             , "-k" -- preserve order in the output (more deterministic)
              , "--pipe"
              ]
-      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'),
-                "|", "sort", ">", o''] -- sort for a more deterministic outfile
+      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
   debugL cfg $ "args'': " ++ show args''
   wrappedCmdWrite cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where

@@ -24,9 +24,9 @@ limit_total_jobs() {
   # operation, you'll only get -j jobs at once. This script is set to spawn up
   # to 80 jobs per parallel operation and never more than 180 total.
 
-  maxjobs=100
-  while [[ "$(squeue -u $(whoami) | grep $(whoami) | wc -l)" -ge $maxjobs ]]; do
-    sleep 10
+  maxjobs=50
+  while [[ "$(squeue -u $(whoami) | wc -l)" -gt $maxjobs ]]; do
+    sleep 5
   done
 }
 
@@ -44,13 +44,24 @@ srun_quick() {
 srun_parallel() {
   # monkey-patches a parallel call to run its individual commands via slurm
   # note that it's brittle and only works on shortcut-generated blast commands
-  # TODO put in a test for total squeue commands and wait when > 100
+  sleep $(shuf -i 0-300 -n1) # prevent all trying to limit_total_jobs at once
   limit_total_jobs
   cmd="$@"
-  before="$(echo "$cmd" | cut -d' ' -f-10)" # ... --pipe
-  after="$(echo "$cmd" | cut -d' ' -f11-)"  # '*blast* ...
-  pargs="--block 100k -j80 --delay 1" # additional parallel args
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
+  before="$(echo "$cmd" | cut -d' ' -f-12)" # ... --pipe
+  after="$(echo "$cmd" | cut -d' ' -f13-)"  # '*blast* ...
+
+  # Using -N1 here says to run each record (sequence) separately. That slows it
+  # down significantly, but on the rare occasion a sequence has an error like
+  # an invalid amino acid, only that one will be exluded from the hits.
+  # Instead, you might want to watch the output for errors, then fix them and
+  # re-run any affected genomes.
+  # TODO can/should I make it fail if one task fails?
+  #      (possibly fixed in newer blast+ than 2.2.29?)
+  pargs="-j10 -N1 --delay 0.5" # additional parallel args
+
+  # TODO --exclusive?
+  # TODO any chance one will take more than 10 min?
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:10:00"
   cmd="${before} ${pargs} ${srun} ${after}"
   echo "$cmd"
 }
