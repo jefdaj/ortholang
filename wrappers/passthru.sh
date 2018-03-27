@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
-# Just want to check that wrapping system calls in an empty script doesn't
-# change any of the test cases.
-# TODO also log commands here
+# Tests that wrapping system calls doesn't break anything.
 
-$@
+# TODO should this be the default when no --wrapper is specified?
+# TODO set logfile from shortcut conig
+
+run() {
+ echo "$@"  >> /tmp/wrapper.log
+ eval "$@" 2>> /tmp/wrapper.log
+}
+
+run "$@"
