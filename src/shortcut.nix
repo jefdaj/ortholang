@@ -1,13 +1,12 @@
-{ mkDerivation, base, bytestring, Command, configurator, containers
-, cryptohash, directory, docopt, enclosed-exceptions, filepath
-, Glob, haskeline, MissingH, mtl, parsec, pretty, process
-, QuickCheck, regex-compat, scientific, shake, silently, stdenv
-, tasty, tasty-golden, tasty-quickcheck, temporary, text
-, transformers, strict, utility-ht, safe-exceptions, unix, lock-file
-, data-default-class, tagged-exception-core, tasty-hunit
-, path, path-io, tasty-hspec, hspec, unbounded-delays, split
-, filelock, exceptions, time, concurrent-extra, retry, terminal-size
-, posix-escape
+{ mkDerivation, base, bytestring, Command, concurrent-extra
+, configurator, containers, cryptohash, data-default-class
+, directory, docopt, enclosed-exceptions, exceptions, filelock
+, filepath, Glob, haskeline, hspec, MissingH, mtl, parsec, path
+, path-io, posix-escape, pretty, process, QuickCheck, regex-compat
+, retry, safe-exceptions, scientific, shake, silently, split
+, stdenv, strict, tasty, tasty-golden, tasty-hspec, tasty-hunit
+, tasty-quickcheck, temporary, terminal-size, text, time
+, transformers, unbounded-delays, unix, utility-ht
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -15,16 +14,17 @@ mkDerivation {
   src = ./.;
   isLibrary = false;
   isExecutable = true;
+  enableSeparateDataOutput = true;
   executableHaskellDepends = [
-    base bytestring Command configurator containers cryptohash
-    directory docopt enclosed-exceptions filepath Glob haskeline
-    MissingH mtl parsec pretty process QuickCheck regex-compat
-    scientific shake silently tasty tasty-golden tasty-quickcheck
-    temporary text transformers strict utility-ht safe-exceptions
-    unix lock-file data-default-class tagged-exception-core tasty-hunit
-    path path-io tasty-hspec hspec unbounded-delays split filelock
-    exceptions time concurrent-extra retry terminal-size posix-escape
+    base bytestring Command concurrent-extra configurator containers
+    cryptohash data-default-class directory docopt enclosed-exceptions
+    exceptions filelock filepath Glob haskeline hspec MissingH mtl
+    parsec path path-io posix-escape pretty process QuickCheck
+    regex-compat retry safe-exceptions scientific shake silently split
+    strict tasty tasty-golden tasty-hspec tasty-hunit tasty-quickcheck
+    temporary terminal-size text time transformers unbounded-delays
+    unix utility-ht
   ];
-  description = "A scripting language that makes short work of phylogenomic cuts";
-  license = stdenv.lib.licenses.gpl3;
+  description = "Short, reproducible phylogenomic cuts";
+  license = stdenv.lib.licenses.agpl3;
 }
