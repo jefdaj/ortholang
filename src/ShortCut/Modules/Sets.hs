@@ -12,9 +12,9 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Compile.Basic (rExpr, typeError, debugRules)
-import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, digestFile, debugA)
+import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, debugA, hashContent)
 -- import ShortCut.Core.Debug         (debugRules, debugA)
-import ShortCut.Core.Paths         (exprPath, fromCutPath)
+import ShortCut.Core.Paths         (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 
 cutModule :: CutModule
@@ -120,7 +120,8 @@ canonicalLinks cfg rtn =
 -- see https://stackoverflow.com/a/8316542/429898
 dedupByContent :: CutConfig -> Locks -> [FilePath] -> Action [FilePath]
 dedupByContent cfg ref paths = do
-  hashes <- mapM (digestFile cfg ref) paths
+  -- TODO if the paths are already in the load cache, no need for content?
+  hashes <- mapM (hashContent cfg ref) $ map (toCutPath cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
 

@@ -2,6 +2,7 @@ module ShortCut.Core.Util
 
   -- read files
   ( readFileStrict
+  , readFileLazy
 
   -- hashing
   , digestLength
@@ -91,6 +92,10 @@ getTimeStamp = getZonedTime >>= return . formatTime defaultTimeLocale fmt
  -}
 readFileStrict :: Locks -> FilePath -> IO String
 readFileStrict ref path = withReadLock ref path $ Strict.readFile path
+
+-- sometimes you do want the lazy version though, like when showing big files
+readFileLazy :: Locks -> FilePath -> IO String
+readFileLazy ls p = withReadLock ls p $ readFile p
 
 -------------
 -- hashing --
