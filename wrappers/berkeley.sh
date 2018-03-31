@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO ah is the group QoS limit 100? And I'm running 96 of them lol
+
 # Wrapper for the Berkeley Computational Genomics Resource Laboratory (CGRL).
 # It should work with minor changes on any system that uses the SLURM scheduler
 # though if you adjust the SRUN command to match your system requirements.
@@ -19,7 +21,7 @@ JOBSFILE="/tmp/jobs.txt" # use main tmpdir to share between instances
 start_jobs() {
   # Try to add jobs to the jobs file, and fail if that exceeds the max.
   nnewjobs="$1"
-  nmaxjobs=160 # TODO how many are typically going before errors start?
+  nmaxjobs=999 # TODO how many are typically going before errors start?
   (
     flock -x 13
     ncurjobs=$(cat "$JOBSFILE")
@@ -84,13 +86,13 @@ srun_parallel() {
   # TODO can/should I make it fail if one task fails?
   #      (possibly fixed in newer blast+ than 2.2.29?)
   # pargs="-j50 -N1 --delay 0.2" # additional parallel args
-  pargs="-j20 --block-size 100k --delay 0.2" # additional parallel args
+  pargs="-j199 --block-size 50k --delay 0.2" # additional parallel args
 
   # TODO --exclusive?
   # TODO any chance one will take more than 10 min?
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=99:00:00"
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:30:00"
   cmd="${before} ${pargs} ${srun} ${after}"
-  run 50 "$cmd"
+  run 199 "$cmd"
 }
 
 
