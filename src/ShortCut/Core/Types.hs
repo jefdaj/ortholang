@@ -54,7 +54,7 @@ module ShortCut.Core.Types
 import qualified Text.Parsec as P
 
 import ShortCut.Core.Locks (Locks, withReadLock)
-import ShortCut.Core.Util  (readFileStrict)
+import ShortCut.Core.Util  (readFileStrict, readFileLazy)
 
 import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
@@ -146,7 +146,7 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultShow :: Locks -> FilePath -> IO String
-defaultShow locks = fmap (unlines . fmtLines . lines) . (readFileStrict locks)
+defaultShow locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
     nLines      = 5
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l

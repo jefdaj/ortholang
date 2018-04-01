@@ -41,7 +41,7 @@ module ShortCut.Core.Actions
   , wrappedCmdWrite
 
   -- misc
-  , digestFile  -- TODO what's the difference with hashContent?
+  -- , digestFile  -- TODO what's the difference with hashContent?
   , hashContent -- TODO what's the difference with digestFile?
   , symlink
 
@@ -173,7 +173,8 @@ readList cfg locks path = do
     then return []
     else debug cfg ("read list '" ++ path ++ "'")
        $ fmap lines
-       $ readFileStrict' cfg locks path
+       $ withReadLock' locks path $ readFile' path -- TODO be strict here??
+       -- $ readFileStrict' cfg locks path
 
 
 -----------------
@@ -387,8 +388,8 @@ wrappedCmdOut cfg ref inPtns outPaths os b as = do
 -- This is the only function that should access readFileStrict' directly;
 -- all others go through readStr and readList.
 -- TODO use a CutPath here?
-digestFile :: CutConfig -> Locks -> FilePath -> Action String
-digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
+-- digestFile :: CutConfig -> Locks -> FilePath -> Action String
+-- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 
 hashContent :: CutConfig -> Locks -> CutPath -> Action String
 hashContent cfg ref path = do

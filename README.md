@@ -455,6 +455,26 @@ Integrating it with ShortCut will improve them both, since TreeCl offers
 a large number of tree building and clustering parameters that would benefit
 from comparison using the PRS functions.
 
+TODO
+----
+
+These are the things I plan to work on next, in no particular order.
+
+Add features:
+
+* PSI-BLAST and PSSM functions
+* validate fasta files when loading them (all, or just the first few lines?)
+* optimizing summary functions: `minimize` and `maximize` to pick the best cutoffs
+* plotting summary functions: `scatterplot`, `bargraph`, `venndiagram`
+* set membership spreadsheet function (needed for venn diagrams anyway?)
+
+Fix bugs:
+
+* inability to `repeat_each` from a list which is itself a variable
+* `filter_evalue` is broken?
+* Parse errors are always reported as from "somefile", but there are actual cut files now
+* `crb_blast` is typed more strictly than needed... what files does it actually accept?
+
 [1]: https://github.com/jefdaj/ShortCut/blob/master/poster/shortcut-poster.pdf
 [2]: https://nixos.org/nix/
 [3]: http://science.sciencemag.org/content/318/5848/245.full
