@@ -1,0 +1,13 @@
+Welcome to the ShortCut interpreter!                 
+Type :help for a list of the available commands.     
+>> v1 = "first var"
+>> v2 = "second var"
+>> :show
+v1 = "first var"
+v2 = "second var"
+>> v1 = "replacement var"
+>> :show
+v1 = "replacement var"
+v2 = "second var"
+>> :quit
+Bye for now!

@@ -138,7 +138,11 @@ updateScript :: CutScript -> CutAssign -> CutScript
 updateScript scr asn@(var, expr) =
   if var `elem` depsOf expr then scr else scr'
   where
-    scr' = delFromAL scr var ++ [asn]
+    scr' = if var `elem` map fst scr then replaceVar asn scr else scr ++ [asn]
+
+-- replace an existing var in a script
+replaceVar :: CutAssign -> CutScript -> CutScript
+replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
 
 --------------------------
 -- dispatch to commands --
