@@ -18,10 +18,17 @@ SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_norm
 SRUN="$SRUN --chdir $(pwd) --quiet"
 JOBSFILE="/tmp/jobs.txt" # use main tmpdir to share between instances
 
+kill_jobs() {
+  # In case of errors, make sure not to leave zombie srun jobs.
+  # TODO kill only jobs from this process, in case multiple cuts running
+  scancel -u $(whoami) --ctld --full
+  finish_jobs 9999 # set jobs to 0
+}
+
 start_jobs() {
   # Try to add jobs to the jobs file, and fail if that exceeds the max.
   nnewjobs="$1"
-  nmaxjobs=999 # TODO how many are typically going before errors start?
+  nmaxjobs=99 # TODO how many are typically going before errors start?
   (
     flock -x 13
     ncurjobs=$(cat "$JOBSFILE")
@@ -43,6 +50,7 @@ finish_jobs() {
     flock -x 13
     ncurjobs="$(cat "$JOBSFILE")"
     ntotjobs="$(( $ncurjobs - $ndonejobs ))"
+    [[ $ntotjobs < 0 ]] && ntotjobs=0
     echo "$ntotjobs" > "$JOBSFILE"
     # sync # TODO remove?
   ) 13>"${JOBSFILE}.lock"
@@ -57,7 +65,7 @@ run() {
     start_jobs $njobs && break || sleep 5
   done
   echo "$cmd" >> /tmp/wrapper.log
-  eval "$cmd; finish_jobs $njobs" 2>> /tmp/wrapper.log
+  eval "trap kill_jobs INT ERR; $cmd && finish_jobs $njobs" 2>> /tmp/wrapper.log
 }
 
 srun_crb() {
@@ -86,13 +94,13 @@ srun_parallel() {
   # TODO can/should I make it fail if one task fails?
   #      (possibly fixed in newer blast+ than 2.2.29?)
   # pargs="-j50 -N1 --delay 0.2" # additional parallel args
-  pargs="-j199 --block-size 50k --delay 0.2" # additional parallel args
+  pargs="-j20 --block-size 50k --delay 0.2" # additional parallel args
 
   # TODO --exclusive?
   # TODO any chance one will take more than 10 min?
   srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:30:00"
   cmd="${before} ${pargs} ${srun} ${after}"
-  run 199 "$cmd"
+  run 20 "$cmd"
 }
 
 
