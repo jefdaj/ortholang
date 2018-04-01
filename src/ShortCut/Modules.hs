@@ -17,6 +17,7 @@ import qualified ShortCut.Modules.Repeat    as Repeat
 import qualified ShortCut.Modules.SeqIO     as SeqIO
 import qualified ShortCut.Modules.Sets      as Sets
 import qualified ShortCut.Modules.Summarize as Summarize
+import qualified ShortCut.Modules.LoadList  as LoadList
 
 modules :: [CutModule]
 modules =
@@ -35,4 +36,5 @@ modules =
   , SeqIO.cutModule
   , Sets.cutModule
   , Summarize.cutModule
+  , LoadList.cutModule
   ]
