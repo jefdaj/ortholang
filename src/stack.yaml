@@ -9,6 +9,7 @@ extra-deps:
 - tagged-exception-core-2.2.0.0
 - concurrent-extra-0.7.0.11
 - posix-escape-0.1
+- temporary-1.2.1.1
 flags: {}
 extra-package-dbs: []
 nix:

@@ -1,16 +1,16 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 >> glob_files "data/*.faa"
-["/global/home/users/jefdaj/shortcut/src/data/7942genes.faa",
- "/global/home/users/jefdaj/shortcut/src/data/7942genes50.faa",
- "/global/home/users/jefdaj/shortcut/src/data/7122genes.faa",
- "/global/home/users/jefdaj/shortcut/src/data/7942genes10.faa",
- "/global/home/users/jefdaj/shortcut/src/data/6803genes.faa",
- "/global/home/users/jefdaj/shortcut/src/data/6803genes10.faa",
- "/global/home/users/jefdaj/shortcut/src/data/7002genes.faa"]
+["data/7942genes.faa",
+ "data/7942genes50.faa",
+ "data/7122genes.faa",
+ "data/7942genes10.faa",
+ "data/6803genes.faa",
+ "data/6803genes10.faa",
+ "data/7002genes.faa"]
 >> glob_files "data/7942*.faa"
-["/global/home/users/jefdaj/shortcut/src/data/7942genes.faa", "/global/home/users/jefdaj/shortcut/src/data/7942genes50.faa", "/global/home/users/jefdaj/shortcut/src/data/7942genes10.faa"]
+["data/7942genes.faa", "data/7942genes50.faa", "data/7942genes10.faa"]
 >> glob_files "data/*10.fna"
-["/global/home/users/jefdaj/shortcut/src/data/7942genes10.fna", "/global/home/users/jefdaj/shortcut/src/data/6803genes10.fna"]
+["data/7942genes10.fna", "data/6803genes10.fna"]
 >> :q
 Bye for now!

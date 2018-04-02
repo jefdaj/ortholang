@@ -8,8 +8,8 @@ import ShortCut.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
+import System.Directory (makeRelativeToCurrentDirectory)
 -- import ShortCut.Core.Debug        (debugA)
-import ShortCut.Core.Util         (absolutize)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -48,9 +48,11 @@ aGlobFiles :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aGlobFiles cfg ref outPath path = do
   ptn   <- fmap strip $ readLit cfg ref path'
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
-  paths <- liftIO $ mapM absolutize =<< glob ptn
+  -- paths <- liftIO $ mapM absolutize =<< glob ptn
+  paths  <- liftIO $ glob ptn
+  paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
   -- toShortCutListStr cfg str (ExprPath outPath) paths
-  writeLits cfg ref out'' paths
+  writeLits cfg ref out'' paths'
   where
     out'  = fromCutPath cfg outPath
     path' = fromCutPath cfg path

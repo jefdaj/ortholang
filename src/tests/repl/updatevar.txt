@@ -1,13 +1,28 @@
-Welcome to the ShortCut interpreter!                 
-Type :help for a list of the available commands.     
->> v1 = "first var"
+Welcome to the ShortCut interpreter!
+Type :help for a list of the available commands.
+>> v1 = "original first var"
 >> v2 = "second var"
 >> :show
-v1 = "first var"
+v1 = "original first var"
 v2 = "second var"
->> v1 = "replacement var"
+>> v1 = "replacement first var"
 >> :show
-v1 = "replacement var"
+v1 = "replacement first var"
 v2 = "second var"
+>> v2
+"second var"
+>> v3 = "third var, inserted after result"
+>> :show
+v1 = "replacement first var"
+v2 = "second var"
+result = v2
+v3 = "third var, inserted after result"
+>> v3
+"third var, inserted after result"
+>> :show
+v1 = "replacement first var"
+v2 = "second var"
+v3 = "third var, inserted after result"
+result = v3
 >> :quit
 Bye for now!

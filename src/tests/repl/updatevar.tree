@@ -1,0 +1,16 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 0e9108a56d.txt
+|       `-- 1e8e8ce27b.txt
+|-- exprs
+|   `-- str
+|       |-- c8362326da.str -> ../../cache/lines/0e9108a56d.txt
+|       `-- d9c432ba64.str -> ../../cache/lines/1e8e8ce27b.txt
+|-- history.txt
+`-- vars
+    |-- result -> ../vars/v3.str
+    |-- v2.str -> ../exprs/str/d9c432ba64.str
+    `-- v3.str -> ../exprs/str/c8362326da.str
+
+5 directories, 8 files
