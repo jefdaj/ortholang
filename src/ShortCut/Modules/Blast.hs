@@ -70,6 +70,7 @@ mkBlastFromDb :: BlastDesc -> CutFunction
 mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
   { fName      = bCmd ++ "_db"
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDb d
   }
@@ -131,6 +132,7 @@ mkBlastFromFa :: BlastDesc -> CutFunction
 mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFa d
   }
@@ -154,6 +156,7 @@ mkBlastFromDbEach :: BlastDesc -> CutFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
   { fName      = bCmd ++ "_db_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDbEach d
   }
@@ -169,6 +172,7 @@ mkBlastFromFaEach :: BlastDesc -> CutFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
   { fName      = bCmd ++ "_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaEach d
   }

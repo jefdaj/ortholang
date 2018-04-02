@@ -73,6 +73,7 @@ leaveEachOut = CutFunction
   { fName      = "leave_each_out"
   , fFixity    = Prefix
   , fTypeCheck = combosTypeCheck
+  , fTypeDesc  = undefined
   , fRules     = rPermute dropEach
   }
 

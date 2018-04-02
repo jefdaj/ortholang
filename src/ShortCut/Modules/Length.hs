@@ -21,6 +21,7 @@ len :: CutFunction
 len = CutFunction
   { fName      = "length"
   , fTypeCheck = tLen
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules  = rLen
   }
@@ -29,6 +30,7 @@ lenEach :: CutFunction
 lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules  = rEach aLen
   }

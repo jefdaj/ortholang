@@ -21,6 +21,7 @@ globFiles :: CutFunction
 globFiles = CutFunction
   { fName      = "glob_files"
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules  = rGlobFiles
   }

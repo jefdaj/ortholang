@@ -82,6 +82,7 @@ gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
   { fName      = "gbk_to_faa"
   , fTypeCheck = defaultTypeCheck [gbk] faa
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimpleScript "gbk_to_faa.py"
   }
@@ -90,6 +91,7 @@ gbkToFaaEach :: CutFunction
 gbkToFaaEach = CutFunction
   { fName      = "gbk_to_faa_each"
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimpleScriptEach "gbk_to_faa.py"
   }
@@ -98,6 +100,7 @@ gbkToFna :: CutFunction
 gbkToFna = CutFunction
   { fName      = "gbk_to_fna"
   , fTypeCheck = defaultTypeCheck [gbk] fna
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimpleScript "gbk_to_fna.py"
   }
@@ -106,6 +109,7 @@ gbkToFnaEach :: CutFunction
 gbkToFnaEach = CutFunction
   { fName      = "gbk_to_fna_each"
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimpleScriptEach "gbk_to_fna.py"
   }
@@ -122,6 +126,7 @@ extractIds = CutFunction
   { fName      = "extract_ids"
   , fFixity    = Prefix
   , fTypeCheck = tExtractIds
+  , fTypeDesc  = undefined
   , fRules     = rSimpleScript "extract_ids.py"
   }
 
@@ -130,6 +135,7 @@ extractIdsEach = CutFunction
   { fName      = "extract_ids_each"
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
+  , fTypeDesc  = undefined
   , fRules     = rSimpleScriptEach "extract_ids.py"
   }
 
@@ -152,6 +158,7 @@ extractSeqs = CutFunction
   { fName      = "extract_seqs"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
+  , fTypeDesc  = undefined
   , fRules     = rSimpleScript "extract_seqs.py"
   }
 
@@ -160,6 +167,7 @@ extractSeqsEach = CutFunction
   { fName      = "extract_seqs_each"
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
+  , fTypeDesc  = undefined
   , fRules     = rSimpleScriptEach "extract_seqs.py"
   }
 
@@ -182,6 +190,7 @@ translate = CutFunction
   { fName      = "translate"
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
+  , fTypeDesc  = undefined
   , fRules     = rSimpleScript "translate.py"
   }
 
@@ -190,6 +199,7 @@ translateEach = CutFunction
   { fName      = "translate_each"
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
+  , fTypeDesc  = undefined
   , fRules     = rSimpleScriptEach "translate.py"
   }
 
@@ -202,6 +212,7 @@ concatFastas = CutFunction
   { fName      = "concat_fastas"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
+  , fTypeDesc  = undefined
   , fRules     = rSimple aConcat
   }
 
@@ -210,6 +221,7 @@ concatFastasEach = CutFunction
   { fName      = "concat_fastas_each"
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastasEach
+  , fTypeDesc  = undefined
   , fRules     = rEach aConcat
   }
 

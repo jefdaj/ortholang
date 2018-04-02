@@ -15,7 +15,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Actions (readLits, writeLits, writeCachedLines, debugA, debugNeed)
+import ShortCut.Core.Actions (readLits, writeLits, debugA, debugNeed)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions           (wrappedCmdWrite)
@@ -73,9 +73,10 @@ faagz = CutType
 
 -- TODO does this work at all?
 parseSearches :: CutFunction
-parseSearches = CutFunction
-  { fName      = "parse_searches"
+parseSearches = let name = "parse_searches" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] search
+  , fTypeDesc  = mkTypeDesc name [ListOf str] search
   , fFixity    = Prefix
   , fRules     = rParseSearches
   }
@@ -85,9 +86,10 @@ parseSearches = CutFunction
 -----------------
 
 getGenomes :: CutFunction
-getGenomes = CutFunction
-  { fName      = "get_genomes"
+getGenomes = let name = "get_genomes" in CutFunction
+  { fName      = name 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
+  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   , fFixity    = Prefix
   , fRules     = rBioMartR "getGenome"
   }
@@ -97,9 +99,10 @@ getGenomes = CutFunction
 -------------------
 
 getProteomes :: CutFunction
-getProteomes = CutFunction
-  { fName      = "get_proteomes"
+getProteomes = let name = "get_proteomes" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
+  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   , fFixity    = Prefix
   , fRules     = rBioMartR "getProteome"
   }

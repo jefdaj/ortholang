@@ -28,6 +28,7 @@ repeatN = CutFunction
   { fName      = "repeat"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatN
+  , fTypeDesc  = undefined
   , fRules  = rRepeatN
   }
 

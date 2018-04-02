@@ -49,6 +49,7 @@ blastCRB :: CutFunction
 blastCRB = CutFunction
   { fName      = "crb_blast"
   , fTypeCheck = tCrbBlast
+  , fTypeDesc  = "crb_blast : fa -> fa -> crb"
   , fFixity    = Prefix
   , fRules     = rSimpleTmp "crbblast" aBlastCRB
   }
@@ -59,6 +60,7 @@ blastCRBEach :: CutFunction
 blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
+  , fTypeDesc  = "crb_blast_each : fa.list -> fa.list -> crb.list"
   , fFixity    = Prefix
   , fRules     = rEachTmps aBlastCRB "crbblast"
   }

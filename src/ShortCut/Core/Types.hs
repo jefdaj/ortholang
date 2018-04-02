@@ -29,6 +29,7 @@ module ShortCut.Core.Types
   , defaultShow
   -- module stuff (in flux)
   , CutFunction(..)
+  , mkTypeDesc
   , CutModule(..)
   , saltOf
   , setSalt
@@ -300,18 +301,20 @@ prompt = lift . lift . getInputLine
 data CutFixity = Prefix | Infix
   deriving (Eq, Show, Read)
 
--- type CutSignature = CutType -> (CutType, [CutType])
-
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data CutFunction = CutFunction
   { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
+  , fTypeDesc  :: String
   , fFixity    :: CutFixity
   , fRules     :: CutState -> CutExpr -> Rules ExprPath
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)
+
+mkTypeDesc :: String -> [CutType] -> CutType -> String
+mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
 
 -- TODO does eq make sense here?
 data CutModule = CutModule

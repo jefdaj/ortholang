@@ -39,6 +39,7 @@ extractQueries :: CutFunction
 extractQueries = CutFunction
   { fName      = "extract_queries"
   , fTypeCheck = tExtract
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol 1
   }
@@ -47,6 +48,7 @@ extractQueriesEach :: CutFunction
 extractQueriesEach = CutFunction
   { fName      = "extract_queries_each"
   , fTypeCheck = tExtractEach
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rEach $ aCutCol 1
   }
@@ -55,6 +57,7 @@ extractTargets :: CutFunction
 extractTargets = CutFunction
   { fName      = "extract_targets"
   , fTypeCheck = tExtract
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol 2
   }
@@ -63,6 +66,7 @@ extractTargetsEach :: CutFunction
 extractTargetsEach = CutFunction
   { fName      = "extract_targets_each"
   , fTypeCheck = tExtractEach
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rEach $ aCutCol 2
   }
@@ -85,6 +89,7 @@ filterEvalue :: CutFunction
 filterEvalue = CutFunction
   { fName      = "filter_evalue"
   , fTypeCheck = defaultTypeCheck [num, bht] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimple aFilterEvalue
   }
@@ -93,6 +98,7 @@ filterEvalueEach :: CutFunction
 filterEvalueEach = CutFunction
   { fName      = "filter_evalue_each"
   , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rEach aFilterEvalue
   }
@@ -119,6 +125,7 @@ bestHits :: CutFunction
 bestHits = CutFunction
   { fName      = "best_hits"
   , fTypeCheck = defaultTypeCheck [bht] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
   }
@@ -127,6 +134,7 @@ bestHitsEach :: CutFunction
 bestHitsEach = CutFunction
   { fName      = "best_hits_each"
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rEach aBestExtract
   }

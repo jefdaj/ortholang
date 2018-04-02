@@ -44,6 +44,7 @@ mkBlastFromFaRev :: BlastDesc -> CutFunction
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd ++ "_rev"
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRev d
   }
@@ -65,6 +66,7 @@ mkBlastFromFaRevEach :: BlastDesc -> CutFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
   { fName      = bCmd ++ "_rev_each"
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRevEach d
   }
@@ -102,6 +104,7 @@ reciprocalBest :: CutFunction
 reciprocalBest = CutFunction
   { fName      = "reciprocal_best"
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rSimple aReciprocalBest
   }
@@ -126,6 +129,7 @@ reciprocalBestEach :: CutFunction
 reciprocalBestEach = CutFunction
   { fName      = "reciprocal_best_each"
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rEach aReciprocalBest
   }
@@ -138,6 +142,7 @@ mkBlastRbh :: BlastDesc -> CutFunction
 mkBlastRbh d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd ++ "_rbh"
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastRbh d
   }
@@ -159,6 +164,7 @@ mkBlastRbhEach :: BlastDesc -> CutFunction
 mkBlastRbhEach d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd ++ "_rbh_each"
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
+  , fTypeDesc  = undefined
   , fFixity    = Prefix
   , fRules     = rMkBlastRbhEach d
   }

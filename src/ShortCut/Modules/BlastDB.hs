@@ -92,6 +92,7 @@ mkLoadDB :: String -> CutType -> CutFunction
 mkLoadDB name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
+  , fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix
   , fRules  = rLoadDB
   }
@@ -100,6 +101,7 @@ mkLoadDBEach :: String -> CutType -> CutFunction
 mkLoadDBEach name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
+  , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   , fFixity    = Prefix
   , fRules  = undefined -- TODO write this!
   }
@@ -143,11 +145,12 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 
 -- takes a filter string (leave empty for all results)
 blastdblist :: CutFunction
-blastdblist = CutFunction
-  { fName      = "blastdblist"
+blastdblist = let name = "blastdblist" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+  , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix
-  , fRules  = rBlastdblist
+  , fRules     = rBlastdblist
   }
 
 filterNames :: String -> [String] -> [String]
@@ -205,9 +208,10 @@ aBlastdbfilter cfg ref oPath listTmp fPath = do
     oPath''  = debugA cfg "aBlastdbfilter" oPath' [oPath', listTmp', fPath']
 
 blastdbget :: CutFunction
-blastdbget = CutFunction
-  { fName      = "blastdbget"
+blastdbget = let name = "blastdbget" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [str] ndb -- TODO are there protein ones too?
+  , fTypeDesc  = mkTypeDesc name  [str] ndb -- TODO are there protein ones too?
   , fFixity    = Prefix
   , fRules  = rBlastdbget
   }
@@ -254,6 +258,7 @@ makeblastdbNucl :: CutFunction
 makeblastdbNucl = CutFunction
   { fName      = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
+  , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -262,6 +267,7 @@ makeblastdbProt :: CutFunction
 makeblastdbProt = CutFunction
   { fName      = "makeblastdb_prot"
   , fTypeCheck = tMakeblastdb pdb
+  , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -358,13 +364,17 @@ aMakeblastdb _ _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show pa
 
 mkMakeblastdbEach :: CutType -> CutFunction
 mkMakeblastdbEach dbType = CutFunction
-  { fName      = singleName ++ "_each"
+  { fName      = name
   , fTypeCheck = tMakeblastdbEach dbType
+  , fTypeDesc  = desc
   , fFixity    = Prefix
   , fRules  = rMakeblastdbEach dbType
   }
   where
     singleName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+    faExt = if dbType == ndb then "fa" else "faa"
+    name = singleName ++ "_each"
+    desc = name ++ " : " ++ faExt ++ ".list -> " ++ extOf dbType
 
 -- TODO no! depends on an arg
 tMakeblastdbEach :: CutType -> TypeChecker
