@@ -28,8 +28,8 @@ repeatN = CutFunction
   { fName      = "repeat"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatN
-  , fTypeDesc  = undefined
-  , fRules  = rRepeatN
+  , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
+  , fRules     = rRepeatN
   }
 
 -- takes a result type, a starting type, and an int,

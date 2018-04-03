@@ -19,12 +19,14 @@ cutModule = CutModule
 
 globFiles :: CutFunction
 globFiles = CutFunction
-  { fName      = "glob_files"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix
   , fRules  = rGlobFiles
   }
+  where
+    name = "glob_files"
 
 -- TODO ok first part looks good, but now need another step?
 -- 1. user gives glob as a str

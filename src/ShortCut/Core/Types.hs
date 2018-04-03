@@ -3,6 +3,7 @@ module ShortCut.Core.Types
   ( CutAssign
   , CutExpr(..)
   , CutConfig(..)
+  , findFunction
   -- , WrapperConfig(..)
   , CutType(..)
   , CutVar(..)
@@ -60,7 +61,7 @@ import ShortCut.Core.Util  (readFileStrict, readFileLazy)
 import Development.Shake              (Rules, Action)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
-import Data.List                      (nub)
+import Data.List                      (nub, find)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
 -- import Data.IORef                     (IORef)
@@ -253,6 +254,14 @@ data CutConfig = CutConfig
   , cfgWidth   :: Maybe Int -- for testing
   }
   deriving Show
+
+-- used by the compiler and repl
+-- TODO find bops by char or name too
+findFunction :: CutConfig -> String -> Maybe CutFunction
+findFunction cfg name = find (\f -> fName f == name) fs
+  where
+    ms = cfgModules cfg
+    fs = concatMap mFunctions ms
 
 -----------------
 -- Parse monad --

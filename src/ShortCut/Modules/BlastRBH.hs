@@ -41,10 +41,10 @@ blastDescsRev = filter isReversible blastDescs
 -----------------
 
 mkBlastFromFaRev :: BlastDesc -> CutFunction
-mkBlastFromFaRev d@(bCmd, qType, sType, _) = CutFunction
-  { fName      = bCmd ++ "_rev"
+mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRev d
   }
@@ -64,12 +64,14 @@ rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
 
 mkBlastFromFaRevEach :: BlastDesc -> CutFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
-  { fName      = bCmd ++ "_rev_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRevEach d
   }
+  where
+    name = bCmd ++ "_rev_each"
 
 -- The most confusing one! Edits the expression to make the subject into a db,
 -- and the action fn to take the query and subject flipped, then maps the new
@@ -102,12 +104,14 @@ aMkBlastFromDbRev _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
 
 reciprocalBest :: CutFunction
 reciprocalBest = CutFunction
-  { fName      = "reciprocal_best"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
   , fFixity    = Prefix
   , fRules     = rSimple aReciprocalBest
   }
+  where
+    name = "reciprocal_best"
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 aReciprocalBest :: CutConfig -> Locks -> [CutPath] -> Action ()
@@ -127,12 +131,14 @@ aReciprocalBest _ _ args = error $ "bad argument to aReciprocalBest: " ++ show a
 
 reciprocalBestEach :: CutFunction
 reciprocalBestEach = CutFunction
-  { fName      = "reciprocal_best_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rEach aReciprocalBest
   }
+  where
+    name = "reciprocal_best_each"
 
 -----------------
 -- *blast*_rbh --
@@ -140,12 +146,14 @@ reciprocalBestEach = CutFunction
 
 mkBlastRbh :: BlastDesc -> CutFunction
 mkBlastRbh d@(bCmd, qType, sType, _) = CutFunction
-  { fName      = bCmd ++ "_rbh"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastRbh d
   }
+  where
+    name = bCmd ++ "_rbh"
 
 -- TODO this only works with symmetric fns so far... either fix or restrict to those!
 rMkBlastRbh :: BlastDesc -> RulesFn
@@ -162,12 +170,14 @@ rMkBlastRbh _ _ _ = error "bad argument to rMkBlastRbh"
 
 mkBlastRbhEach :: BlastDesc -> CutFunction
 mkBlastRbhEach d@(bCmd, qType, sType, _) = CutFunction
-  { fName      = bCmd ++ "_rbh_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastRbhEach d
   }
+  where
+    name = bCmd ++ "_rbh_each"
 
 rMkBlastRbhEach :: BlastDesc -> RulesFn
 rMkBlastRbhEach (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, rs]) = rExpr s main

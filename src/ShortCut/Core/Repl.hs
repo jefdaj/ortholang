@@ -268,11 +268,13 @@ cmdDrop st@(scr,cfg,ref) hdl var = do
 -- TODO show the type description here too once that's ready
 --      (add to the pretty instance?)
 cmdType :: CutState -> Handle -> String -> IO CutState
-cmdType state hdl s = do
-  hPutStrLn hdl $ case parseExpr state s of
-    Right expr -> show $ typeOf expr
-    Left  err  -> show err
-  return state
+cmdType st@(_, cfg, _) hdl s = do
+  hPutStrLn hdl $ case findFunction cfg (stripWhiteSpace s) of
+    Just f -> fTypeDesc f
+    Nothing -> case parseExpr st s of
+      Right expr -> show $ typeOf expr
+      Left  err  -> show err
+  return st
 
 -- TODO factor out the variable lookup stuff
 cmdShow :: CutState -> Handle -> String -> IO CutState

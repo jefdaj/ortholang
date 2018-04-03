@@ -26,7 +26,7 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
 -- import Control.Monad              (when)
-import Data.List                  (find, intersperse)
+import Data.List                  (intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 -- import ShortCut.Core.Debug        (debugA, debugRules, debug)
 import ShortCut.Core.Locks        (withWriteLock')
@@ -63,16 +63,9 @@ rExpr s e@(CutFun _ _ _ n _  ) = rulesByName s e n
 
 -- TODO remove once no longer needed (parser should find fns)
 rulesByName :: CutState -> CutExpr -> String -> Rules ExprPath
-rulesByName s@(_,cfg,_) expr name = case findByName cfg name of
+rulesByName s@(_,cfg,_) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> (fRules f) s expr
-
--- TODO remove once no longer needed (parser should find fns)
-findByName :: CutConfig -> String -> Maybe CutFunction
-findByName cfg name = find (\f -> fName f == name) fs
-  where
-    ms = cfgModules cfg
-    fs = concatMap mFunctions ms
 
 rAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
 rAssign s@(_,cfg,_) (var, expr) = do

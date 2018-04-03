@@ -36,37 +36,37 @@ tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
 tExtractEach  _ = Left "expected a list of blast hits tables"
 
 extractQueries :: CutFunction
-extractQueries = CutFunction
-  { fName      = "extract_queries"
+extractQueries = let name = "extract_queries" in CutFunction
+  { fName      = name
   , fTypeCheck = tExtract
-  , fTypeDesc  = undefined
+  , fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol 1
   }
 
 extractQueriesEach :: CutFunction
-extractQueriesEach = CutFunction
-  { fName      = "extract_queries_each"
+extractQueriesEach = let name = "extract_queries_each" in CutFunction
+  { fName      = name
   , fTypeCheck = tExtractEach
-  , fTypeDesc  = undefined
+  , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
   , fRules     = rEach $ aCutCol 1
   }
 
 extractTargets :: CutFunction
-extractTargets = CutFunction
-  { fName      = "extract_targets"
+extractTargets = let name = "extract_targets" in CutFunction
+  { fName      = name
   , fTypeCheck = tExtract
-  , fTypeDesc  = undefined
+  , fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol 2
   }
 
 extractTargetsEach :: CutFunction
-extractTargetsEach = CutFunction
-  { fName      = "extract_targets_each"
+extractTargetsEach = let name = "extract_targets_each" in CutFunction
+  { fName      = name
   , fTypeCheck = tExtractEach
-  , fTypeDesc  = undefined
+  , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
   , fRules     = rEach $ aCutCol 2
   }
@@ -86,19 +86,19 @@ aCutCol _ _ _ _ = error "bad arguments to aCutCol"
 --------------------------
 
 filterEvalue :: CutFunction
-filterEvalue = CutFunction
-  { fName      = "filter_evalue"
+filterEvalue = let name = "filter_evalue" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, bht] bht
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [num, bht] bht
   , fFixity    = Prefix
   , fRules     = rSimple aFilterEvalue
   }
 
 filterEvalueEach :: CutFunction
-filterEvalueEach = CutFunction
-  { fName      = "filter_evalue_each"
+filterEvalueEach = let name = "filter_evalue_each" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rEach aFilterEvalue
   }
@@ -122,19 +122,19 @@ aFilterEvalue _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 -- TODO rename to just "best" and "best_each"?
 
 bestHits :: CutFunction
-bestHits = CutFunction
-  { fName      = "best_hits"
+bestHits = let name = "best_hits" in CutFunction
+  { fName      = name 
   , fTypeCheck = defaultTypeCheck [bht] bht
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [bht] bht
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
   }
 
 bestHitsEach :: CutFunction
-bestHitsEach = CutFunction
-  { fName      = "best_hits_each"
+bestHitsEach = let name = "best_hits_each" in CutFunction
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
-  , fTypeDesc  = undefined
+  , fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rEach aBestExtract
   }
