@@ -8,7 +8,7 @@ import qualified ShortCut.Modules.BlastCRB  as BlastCRB
 import qualified ShortCut.Modules.BlastDB   as BlastDB
 import qualified ShortCut.Modules.BlastHits as BlastHits
 import qualified ShortCut.Modules.BlastRBH  as BlastRBH
-import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
+-- import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
 import qualified ShortCut.Modules.Glob      as Glob
 import qualified ShortCut.Modules.Length    as Length
 import qualified ShortCut.Modules.Math      as Math
@@ -27,7 +27,7 @@ modules =
   , BlastDB.cutModule
   , BlastHits.cutModule
   , BlastRBH.cutModule
-  , Cheat.cutModule
+  -- , Cheat.cutModule
   , Glob.cutModule
   , Length.cutModule
   , Math.cutModule
