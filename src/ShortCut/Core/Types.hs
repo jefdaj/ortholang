@@ -140,6 +140,7 @@ type CutScript = [CutAssign]
 data CutType
   = Empty -- TODO remove this? should never be a need to define an empty list
   | ListOf CutType
+  | ScoresOf CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -161,9 +162,10 @@ defaultShow locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
 --      maybe we need to assert no duplicates while loading modules?
 -- TODO should this use typesMatch?
 instance Eq CutType where
-  Empty      == Empty      = True
-  (ListOf a) == (ListOf b) = a == b
-  t1         == t2         = extOf t1 == extOf t2
+  Empty        == Empty        = True
+  (ListOf a)   == (ListOf b)   = a == b
+  (ScoresOf a) == (ScoresOf b) = a == b
+  t1           == t2           = extOf t1 == extOf t2
 
 instance Show CutType where
   show = extOf
