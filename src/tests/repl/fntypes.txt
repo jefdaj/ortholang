@@ -1,0 +1,210 @@
+Welcome to the ShortCut interpreter!
+Type :help for a list of the available commands.
+>> :t |
+| : <whatever.list> -> <whatever>.list -> <whatever>.list
+>> :t ~
+~ : <whatever.list> -> <whatever>.list -> <whatever>.list
+>> :t &
+& : <whatever.list> -> <whatever>.list -> <whatever>.list
+>> :t *
+* : num num -> num
+>> :t +
++ : num num -> num
+>> :t -
+- : num num -> num
+>> :t /
+/ : num num -> num
+>> :t all
+all : <whatever.list> -> <whatever>.list -> <whatever>.list
+>> :t any
+any : <whatever.list> -> <whatever>.list -> <whatever>.list
+>> :t best_hits
+best_hits : bht -> bht
+>> :t best_hits_each
+best_hits_each : bht.list -> bht.list
+>> :t blastdbget
+blastdbget : str -> ndb
+>> :t blastdblist
+blastdblist : str -> str.list
+>> :t blastn
+blastn : num fna fna -> bht
+>> :t blastn_db
+blastn_db : num fna ndb -> bht
+>> :t blastn_db_each
+blastn_db_each : num fna ndb.list -> bht.list
+>> :t blastn_each
+blastn_each : num fna fna.list -> bht.list
+>> :t blastn_rbh
+blastn_rbh : num fna fna -> bht
+>> :t blastn_rbh_each
+blastn_rbh_each : num fna fna.list -> bht.list
+>> :t blastn_rev
+blastn_rev : num fna fna -> bht
+>> :t blastn_rev_each
+blastn_rev_each : num fna fna.list -> bht.list
+>> :t blastp
+blastp : num faa faa -> bht
+>> :t blastp_db
+blastp_db : num faa pdb -> bht
+>> :t blastp_db_each
+blastp_db_each : num faa pdb.list -> bht.list
+>> :t blastp_each
+blastp_each : num faa faa.list -> bht.list
+>> :t blastp_rbh
+blastp_rbh : num faa faa -> bht
+>> :t blastp_rbh_each
+blastp_rbh_each : num faa faa.list -> bht.list
+>> :t blastp_rev
+blastp_rev : num faa faa -> bht
+>> :t blastp_rev_each
+blastp_rev_each : num faa faa.list -> bht.list
+>> :t blastx
+blastx : num fna faa -> bht
+>> :t blastx_db
+blastx_db : num fna pdb -> bht
+>> :t blastx_db_each
+blastx_db_each : num fna pdb.list -> bht.list
+>> :t blastx_each
+blastx_each : num fna faa.list -> bht.list
+>> :t cheat
+"somefile" (line 1, column 6):
+unexpected end of input
+expecting digit, letter, "_", white space or "="
+no such variable 'cheat'
+
+>> :t concat_fastas
+concat_fastas : fa.list -> fa
+>> :t concat_fastas_each
+concat_fastas_each : fa.list.list -> fa.list
+>> :t crb_blast
+crb_blast : fa -> fa -> crb
+>> :t crb_blast_each
+crb_blast_each : fa.list -> fa.list -> crb.list
+>> :t diff
+diff : <whatever.list> -> <whatever>.list -> <whatever>.list
+>> :t extract_ids
+extract_ids : fa -> str.list
+>> :t extract_ids_each
+extract_ids_each : fa.list -> str.list.list
+>> :t extract_queries
+extract_queries : <crb/bht> -> str.list
+>> :t extract_queries_each
+extract_queries_each : <crb/bht>.list -> str.list.list
+>> :t extract_seqs
+extract_seqs : fa -> str.list
+>> :t extract_seqs_each
+extract_seqs_each : fa.list -> str.list.list
+>> :t extract_targets
+extract_targets : <crb/bht> -> str.list
+>> :t extract_targets_each
+extract_targets_each : <crb/bht>.list -> str.list.list
+>> :t filter_evalue
+filter_evalue : num bht -> bht
+>> :t filter_evalue_each
+filter_evalue_each : num bht.list -> bht.list
+>> :t gbk_to_faa
+gbk_to_faa : gbk -> faa
+>> :t gbk_to_faa_each
+gbk_to_faa_each : gbk.list -> faa.list
+>> :t gbk_to_fna
+gbk_to_fna : gbk -> fna
+>> :t gbk_to_fna_each
+gbk_to_fna_each : gbk.list -> fna.list
+>> :t get_genomes
+get_genomes : str.list -> fna.gz.list
+>> :t get_proteomes
+get_proteomes : str.list -> faa.gz.list
+>> :t glob_files
+glob_files : str -> str.list
+>> :t leave_each_out
+leave_each_out : <whatever>.list -> <whatever>.list.list
+>> :t length
+length : <whatever>.list -> num
+>> :t length_each
+length : <whatever>.list.list -> num.list
+>> :t load_faa
+load_faa : str -> faa
+>> :t load_faa_each
+load_faa_each : str.list -> faa.list
+>> :t load_fna
+load_fna : str -> fna
+>> :t load_fna_each
+load_fna_each : str.list -> fna.list
+>> :t load_gbk
+load_gbk : str -> gbk
+>> :t load_gbk_each
+load_gbk_each : str.list -> gbk.list
+>> :t load_list
+load_list : str -> str.list
+>> :t load_nucl_db
+load_nucl_db : str -> ndb
+>> :t load_nucl_db_each
+load_nucl_db_each : str.list -> ndb.list
+>> :t load_prot_db
+load_prot_db : str -> pdb
+>> :t load_prot_db_each
+load_prot_db_each : str.list -> pdb.list
+>> :t makeblastdb_nucl
+makeblastdb_nucl : fa -> ndb
+>> :t makeblastdb_nucl_each
+makeblastdb_nucl_each : fa.list -> ndb
+>> :t makeblastdb_prot
+makeblastdb_prot : faa -> pdb
+>> :t makeblastdb_prot_each
+makeblastdb_prot_each : faa.list -> pdb
+>> :t megablast
+megablast : num fna fna -> bht
+>> :t megablast_db
+megablast_db : num fna ndb -> bht
+>> :t megablast_db_each
+megablast_db_each : num fna ndb.list -> bht.list
+>> :t megablast_each
+megablast_each : num fna fna.list -> bht.list
+>> :t megablast_rbh
+megablast_rbh : num fna fna -> bht
+>> :t megablast_rbh_each
+megablast_rbh_each : num fna fna.list -> bht.list
+>> :t megablast_rev
+megablast_rev : num fna fna -> bht
+>> :t megablast_rev_each
+megablast_rev_each : num fna fna.list -> bht.list
+>> :t parse_searches
+parse_searches : str.list -> search
+>> :t reciprocal_best
+reciprocal_best : bht bht -> bht
+>> :t reciprocal_best_each
+reciprocal_best_each : bht bht.list -> bht.list
+>> :t repeat
+repeat : <outputvar> <inputvar> num -> <output>.list
+>> :t repeat_each
+repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list
+>> :t some
+some : <whatever>.list.list -> <whatever>.list
+>> :t tblastn
+tblastn : num faa fna -> bht
+>> :t tblastn_db
+tblastn_db : num faa ndb -> bht
+>> :t tblastn_db_each
+tblastn_db_each : num faa ndb.list -> bht.list
+>> :t tblastn_each
+tblastn_each : num faa fna.list -> bht.list
+>> :t tblastx
+tblastx : num fna fna -> bht
+>> :t tblastx_db
+tblastx_db : num fna ndb -> bht
+>> :t tblastx_db_each
+tblastx_db_each : num fna ndb.list -> bht.list
+>> :t tblastx_each
+tblastx_each : num fna fna.list -> bht.list
+>> :t tblastx_rbh
+tblastx_rbh : num fna fna -> bht
+>> :t tblastx_rbh_each
+tblastx_rbh_each : num fna fna.list -> bht.list
+>> :t tblastx_rev
+tblastx_rev : num fna fna -> bht
+>> :t tblastx_rev_each
+tblastx_rev_each : num fna fna.list -> bht.list
+>> :t translate
+translate : fna -> faa
+>> :t translate_each
+translate_each : fna.list -> faa.list
