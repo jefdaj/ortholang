@@ -56,12 +56,16 @@ repeatEach = CutFunction
   { fName      = "repeat_each"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatEach
+  , fTypeDesc  = dRepeatEach
   , fRules  = rRepeatEach
   }
 
 tRepeatEach :: [CutType] -> Either String CutType
 tRepeatEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 tRepeatEach _ = Left "invalid args to repeat_each" -- TODO better errors here
+
+dRepeatEach :: String
+dRepeatEach = "repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list"
 
 -- TODO ideally, this shouldn't need any custom digesting? but whatever no
 --      messing with it for now

@@ -69,10 +69,11 @@ aPermute (_,cfg,ref) comboFn iPath eType salt out = do
 -- TODO rename actual function to drop_each?
 
 leaveEachOut :: CutFunction
-leaveEachOut = CutFunction
-  { fName      = "leave_each_out"
+leaveEachOut = let name = "leave_each_out" in CutFunction
+  { fName      = name 
   , fFixity    = Prefix
   , fTypeCheck = combosTypeCheck
+  , fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list.list"
   , fRules     = rPermute dropEach
   }
 

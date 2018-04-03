@@ -80,35 +80,47 @@ loadGbkEach = mkLoadList "load_gbk_each" gbk
 
 gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
-  { fName      = "gbk_to_faa"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [gbk] faa
+  , fTypeDesc  = mkTypeDesc name  [gbk] faa
   , fFixity    = Prefix
   , fRules     = rSimpleScript "gbk_to_faa.py"
   }
+  where
+    name = "gbk_to_faa"
 
 gbkToFaaEach :: CutFunction
 gbkToFaaEach = CutFunction
-  { fName      = "gbk_to_faa_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
+  , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
   , fRules     = rSimpleScriptEach "gbk_to_faa.py"
   }
+  where
+    name = "gbk_to_faa_each"
 
 gbkToFna :: CutFunction
 gbkToFna = CutFunction
-  { fName      = "gbk_to_fna"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [gbk] fna
+  , fTypeDesc  = mkTypeDesc name  [gbk] fna
   , fFixity    = Prefix
   , fRules     = rSimpleScript "gbk_to_fna.py"
   }
+  where
+    name = "gbk_to_fna"
 
 gbkToFnaEach :: CutFunction
 gbkToFnaEach = CutFunction
-  { fName      = "gbk_to_fna_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
+  , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
   , fFixity    = Prefix
   , fRules     = rSimpleScriptEach "gbk_to_fna.py"
   }
+  where
+    name = "gbk_to_fna_each"
 
 ------------------------
 -- extract_ids(_each) --
@@ -119,19 +131,25 @@ gbkToFnaEach = CutFunction
 
 extractIds :: CutFunction
 extractIds = CutFunction
-  { fName      = "extract_ids"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractIds
+  , fTypeDesc  = name ++ " : fa -> str.list"
   , fRules     = rSimpleScript "extract_ids.py"
   }
+  where
+    name = "extract_ids"
 
 extractIdsEach :: CutFunction
 extractIdsEach = CutFunction
-  { fName      = "extract_ids_each"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
+  , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fRules     = rSimpleScriptEach "extract_ids.py"
   }
+  where
+    name = "extract_ids_each"
 
 tExtractIds :: [CutType] -> Either String CutType
 tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
@@ -149,19 +167,25 @@ tExtractIdsEach _ = Left "expected a fasta file"
 
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
-  { fName      = "extract_seqs"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
+  , fTypeDesc  = name ++ " : fa -> str.list"
   , fRules     = rSimpleScript "extract_seqs.py"
   }
+  where
+    name = "extract_seqs"
 
 extractSeqsEach :: CutFunction
 extractSeqsEach = CutFunction
-  { fName      = "extract_seqs_each"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
+  , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fRules     = rSimpleScriptEach "extract_seqs.py"
   }
+  where
+    name = "extract_seqs_each"
 
 tExtractSeqs  :: [CutType] -> Either String CutType
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
@@ -179,19 +203,25 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 -- TODO name something else like fna_to_faa?
 translate :: CutFunction
 translate = CutFunction
-  { fName      = "translate"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
+  , fTypeDesc  = mkTypeDesc name  [fna] faa
   , fRules     = rSimpleScript "translate.py"
   }
+  where
+    name = "translate"
 
 translateEach :: CutFunction
 translateEach = CutFunction
-  { fName      = "translate_each"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
+  , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
   , fRules     = rSimpleScriptEach "translate.py"
   }
+  where
+    name = "translate_each"
 
 --------------------------
 -- concat_fastas(_each) --
@@ -199,19 +229,25 @@ translateEach = CutFunction
 
 concatFastas :: CutFunction
 concatFastas = CutFunction
-  { fName      = "concat_fastas"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastas
+  , fTypeDesc  = name ++ " : fa.list -> fa"
   , fRules     = rSimple aConcat
   }
+  where
+    name = "concat_fastas"
 
 concatFastasEach :: CutFunction
 concatFastasEach = CutFunction
-  { fName      = "concat_fastas_each"
+  { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tConcatFastasEach
+  , fTypeDesc  = name ++ " : fa.list.list -> fa.list"
   , fRules     = rEach aConcat
   }
+  where
+    name = "concat_fastas_each"
 
 tConcatFastas :: [CutType] -> Either String CutType
 tConcatFastas [ListOf x] | elem x [faa, fna] = Right x

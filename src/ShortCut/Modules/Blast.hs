@@ -68,11 +68,14 @@ blastDescs =
 
 mkBlastFromDb :: BlastDesc -> CutFunction
 mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
-  { fName      = bCmd ++ "_db"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
+  , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDb d
   }
+  where
+    name = bCmd ++ "_db"
 
 -- TODO remove tmp?
 rMkBlastFromDb :: BlastDesc -> RulesFn
@@ -131,6 +134,7 @@ mkBlastFromFa :: BlastDesc -> CutFunction
 mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFa d
   }
@@ -152,11 +156,14 @@ rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
 mkBlastFromDbEach :: BlastDesc -> CutFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
-  { fName      = bCmd ++ "_db_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDbEach d
   }
+  where
+    name = bCmd ++ "_db_each"
 
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
 rMkBlastFromDbEach (bCmd, _, _, _) = rEach $ aMkBlastFromDb bCmd
@@ -167,11 +174,14 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rEach $ aMkBlastFromDb bCmd
 
 mkBlastFromFaEach :: BlastDesc -> CutFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
-  { fName      = bCmd ++ "_each"
+  { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaEach d
   }
+  where
+    name = bCmd ++ "_each"
 
 -- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn

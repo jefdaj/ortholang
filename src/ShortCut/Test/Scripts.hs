@@ -49,7 +49,7 @@ mkOutTest :: CutConfig -> Locks -> FilePath -> TestTree
 mkOutTest cfg ref gld = goldenDiff "prints expected output" gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
-    scriptAct = runCut cfg ref >>= return . pack
+    scriptAct = runCut cfg ref >>= return . pack -- . toGeneric cfg
 
 mkTreeTest :: CutConfig -> Locks -> FilePath -> TestTree
 mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
@@ -89,7 +89,7 @@ mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
     absGrep = do
       _ <- runCut cfg ref
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
-      return $ out ++ err
+      return $ toGeneric cfg $ out ++ err
 
 runCut :: CutConfig -> Locks -> IO String
 runCut cfg ref =  do
@@ -97,7 +97,7 @@ runCut cfg ref =  do
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
-  return out
+  return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath))
               -> CutConfig -> Locks -> IO TestTree

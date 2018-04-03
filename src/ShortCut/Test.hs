@@ -56,4 +56,5 @@ runTests cfg ref = do
     (_,_,_) <- readCreateProcessWithExitCode
       (shell $ unwords ["ln -s", wd </> "data", (tmpSubDir </> "data")]) ""
     tests <- mkTests (mkTestConfig cfg tmpSubDir) ref
+    -- setCurrentDirectory $ cfgWorkDir cfg
     defaultMain tests

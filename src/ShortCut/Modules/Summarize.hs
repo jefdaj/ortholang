@@ -23,6 +23,7 @@ cutModule = CutModule
 --   { fName      = "common_elements" -- TODO rename to `all`?
 --   , fFixity    = Prefix
 --   , fTypeCheck = summaryTypeCheck
+--   , fTypeDesc  = undefined
 --   , fRules  = rSummary (foldr1 intersect)
 --   }
 

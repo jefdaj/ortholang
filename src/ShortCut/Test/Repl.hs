@@ -2,6 +2,8 @@ module ShortCut.Test.Repl where
 
 -- TODO could the mock repl be implemented more cleanly with Haskeline's Behaviors?
 
+import System.IO.Temp             (emptySystemTempFile)
+import ShortCut.Core.Paths        (toGeneric)
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.List                  (isPrefixOf)
@@ -9,7 +11,7 @@ import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
 import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM)
-import System.Directory           (createDirectoryIfMissing)
+import System.Directory           (createDirectoryIfMissing, removeFile)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -49,10 +51,16 @@ mockPrompt handle stdinStr promptStr = do
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
 mockRepl :: [String] -> FilePath -> CutConfig -> Locks -> IO ()
-mockRepl stdinLines path cfg ref = withFile path WriteMode $ \handle -> do
-  -- putStrLn ("stdin: '" ++ unlines stdin ++ "'")
-  _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref
-  -- putStrLn $ "stdout: '" ++ out ++ "'"
+mockRepl stdinLines path cfg ref = do
+  tmpPath <- emptySystemTempFile "mockrepl"
+  withFile tmpPath WriteMode $ \handle -> do
+    -- putStrLn ("stdin: '" ++ unlines stdin ++ "'")
+    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref
+    -- putStrLn $ "stdout: '" ++ out ++ "'"
+    return ()
+  out <- readFile tmpPath
+  writeFile path $ toGeneric cfg out
+  removeFile tmpPath
   return ()
 
 
@@ -93,7 +101,7 @@ goldenReplTree cfg ref ses = do
                  _ <- mockRepl stdin tmpOut cfg' ref
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
-                 return $ pack out
+                 return $ pack $ toGeneric cfg out
   return $ goldenVsString name tree action
 
 goldenReplTrees :: CutConfig -> Locks -> IO TestTree

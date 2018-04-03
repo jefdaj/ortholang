@@ -95,6 +95,7 @@ fields =
   , ("debug"  , (show . cfgDebug  , setDebug  ))
   , ("wrapper", (show . cfgWrapper, setWrapper))
   , ("report" , (show . cfgReport , setReport ))
+  , ("width"  , (show . cfgWidth  , setWidth  ))
   ]
 
 showConfig :: CutConfig -> String
@@ -133,3 +134,9 @@ setReport :: CutConfig -> String -> Either String CutConfig
 setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   v       -> Right $ cfg { cfgReport = v }
+
+setWidth :: CutConfig -> String -> Either String CutConfig
+setWidth cfg "Nothing" = Right $ cfg { cfgWidth = Nothing }
+setWidth cfg val = case maybeRead val of
+  Nothing -> Left  $ "invalid: " ++ val
+  Just n  -> Right $ cfg { cfgWidth = Just n }

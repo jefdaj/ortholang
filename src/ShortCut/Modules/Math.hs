@@ -33,6 +33,7 @@ mkMathFn :: String -> (Scientific -> Scientific -> Scientific) -> CutFunction
 mkMathFn name fn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, num] num
+  , fTypeDesc  = mkTypeDesc name  [num, num] num
   , fFixity    = Infix
   , fRules     = rMath fn
   }
