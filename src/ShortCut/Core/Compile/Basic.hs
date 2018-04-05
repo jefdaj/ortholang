@@ -32,7 +32,7 @@ import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, hashContent, writePaths, symlink)
+                                   readLitPaths, hashContent, writePaths, symlink, readStrings)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
@@ -397,10 +397,14 @@ aLoadListLinks cfg ref pathsPath outPath = do
  - I couldn't figure out what a generic compiler should look like, so for now
  - they only have the corresponding Action; other modules do the prep work.
  -}
-aScores :: CutConfig -> Locks -> [CutPath] -> [CutPath] -> CutPath -> Action ()
-aScores cfg ref scorePaths otherPaths outPath = do
-  scores <- mapM (readLit cfg ref) scorePaths' -- also others BTW
-  others <- mapM (readLit cfg ref) otherPaths'
+aScores :: CutConfig -> Locks -> CutPath -> CutPath -> CutType -> CutPath -> Action ()
+aScores cfg ref scoresPath othersPath othersType outPath = do
+  scorePaths <- readLits               cfg ref $ fromCutPath cfg scoresPath
+  otherPaths <- readStrings othersType cfg ref $ fromCutPath cfg othersPath
+  let out'        = fromCutPath cfg outPath
+      out''       = debugA cfg "aScores" out' (out':scorePaths)
+  scores <- mapM (readLit cfg ref) scorePaths -- also others BTW
+  others <- mapM (readLit cfg ref) otherPaths
   let scores' = map stripWhiteSpace scores -- TODO insert <<emptylist>> here?
       others' = map stripWhiteSpace scores -- TODO insert <<emptylist>> here?
       rows    = map (\(a,b) -> unwords [a,b]) $ zip scores' others'
@@ -410,11 +414,6 @@ aScores cfg ref scorePaths otherPaths outPath = do
   debugL cfg $ "aScores others': " ++ show others'
   debugL cfg $ "aScores rows: "    ++ show rows
   writeLits cfg ref out'' rows
-  where
-    out'   = fromCutPath cfg outPath
-    out''  = debugA cfg "aScores" out' (out':scorePaths')
-    scorePaths' = map (fromCutPath cfg) scorePaths
-    otherPaths' = map (fromCutPath cfg) otherPaths
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
 -- TODO rename something that goes with the map fns?

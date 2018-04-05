@@ -191,9 +191,10 @@ typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
 extOf :: CutType -> String
-extOf Empty      = "empty" -- for lists with nothing in them yet
-extOf (ListOf t) = extOf t ++ ".list"
-extOf t          = tExt t
+extOf Empty        = "empty" -- for lists with nothing in them yet
+extOf (ListOf   t) = extOf t ++ ".list"
+extOf (ScoresOf t) = extOf t ++ ".scores"
+extOf t            = tExt t
 
 varOf :: CutExpr -> [CutVar]
 varOf (CutRef _ _ _ v) = [v]
@@ -366,7 +367,8 @@ explainFnBug =
 typeMatches :: CutType -> CutType -> Bool
 typeMatches Empty _ = True
 typeMatches _ Empty = True
-typeMatches (ListOf a) (ListOf b) = typeMatches a b
+typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
+typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
 typeMatches a b = a == b
 
 typesMatch :: [CutType] -> [CutType] -> Bool
