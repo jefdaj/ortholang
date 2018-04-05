@@ -82,6 +82,7 @@ prettyResult cfg ref (ListOf t) f
     paths <- readPaths cfg ref $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
+prettyResult _ _ (ScoresOf t)  _ = return $ text "should write a ScoresOf function here!"
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t ref) f'
   where
     showFn = if t == num then prettyNum else text

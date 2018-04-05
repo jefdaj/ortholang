@@ -11,10 +11,14 @@
 }:
 mkDerivation {
   pname = "ShortCut";
+  description = "Short, reproducible phylogenomic cuts";
   version = "0.7.0.0";
+  license = stdenv.lib.licenses.gpl3;
   src = ./.;
   isLibrary = false;
   isExecutable = true;
+  enableLibraryProfiling = true;
+  enableExecutableProfiling = true;
   executableHaskellDepends = [
     base bytestring Command configurator containers cryptohash
     directory docopt enclosed-exceptions filepath Glob haskeline
@@ -25,6 +29,4 @@ mkDerivation {
     path path-io tasty-hspec hspec unbounded-delays split filelock
     exceptions time concurrent-extra retry terminal-size posix-escape
   ];
-  description = "A scripting language that makes short work of phylogenomic cuts";
-  license = stdenv.lib.licenses.gpl3;
 }
