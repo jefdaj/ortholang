@@ -5,9 +5,7 @@ module ShortCut.Modules.Repeat where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Basic (rExpr, debugRules, aScores)
 import ShortCut.Core.Compile.Repeat
-import ShortCut.Core.Paths (toCutPath, fromCutPath, exprPath)
 
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
@@ -18,7 +16,6 @@ cutModule = CutModule
   , mFunctions =
     [ repeatEach -- TODO export this from the Core directly?
     , repeatN
-    , scoreRepeats
     ]
   }
 
@@ -67,39 +64,3 @@ rRepeatN s@(scr,_,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v),
     subs    = zipWith setSalt [salt .. salt+nReps-1] (repeat subExpr)
     subList = CutList (typeOf subExpr) 0 (depsOf subExpr) subs
 rRepeatN _ _ = error "bad argument to rRepeatN"
-
------------------------------------------------------
--- repeat_each and score the inputs by the outputs --
------------------------------------------------------
-
--- (No need to score repeatN because it already produces a num.list)
-
-scoreRepeats :: CutFunction
-scoreRepeats = CutFunction
-  { fName      = name
-  , fFixity    = Prefix
-  , fTypeCheck = tScoreRepeats
-  , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
-  , fRules     = rScoreRepeats
-  }
-  where
-    name = "score_repeats"
-
-tScoreRepeats :: [CutType] -> Either String CutType 
-tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
-tScoreRepeats _ = Left "invalid args to scoreRepeats"
-
-rScoreRepeats :: CutState -> CutExpr -> Rules ExprPath
-rScoreRepeats s@(_,cfg,ref) expr@(CutFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
-  inputs <- rExpr s subList
-  scores <- rExpr s repEachExpr
-  let hack    = \(ExprPath p) -> toCutPath cfg p -- TODO remove! but how?
-      inputs' = hack inputs
-      scores' = hack scores
-  outPath' %> \_ -> aScores cfg ref scores' inputs' t outPath
-  return $ ExprPath $ outPath'
-  where
-    repEachExpr = CutFun (ListOf t) salt deps "repeat_each" as
-    outPath  = exprPath s expr
-    outPath' = debugRules cfg "rScoreRepeats" expr $ fromCutPath cfg outPath
-rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
