@@ -34,7 +34,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
-import Data.List              (dropWhileEnd, isPrefixOf)
+import Data.List              (dropWhileEnd, isPrefixOf, isInfixOf)
 import Data.List.Utils        (replace)
 import Data.Maybe             (fromJust)
 import System.Directory       (doesPathExist, removePathForcibly,
@@ -202,5 +202,9 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 -- TODO should readLit and readList be based on this?
 isEmpty :: Locks -> FilePath -> Action Bool
 isEmpty ref path = do
-  txt <- withReadLock' ref path $ readFile' path
-  return $ "<<empty" `isPrefixOf` txt
+  -- TODO remove? prevents "invalid byte sequence" error reading binary files
+  if "cache/bin" `isInfixOf` path
+    then return False
+    else do
+      txt <- withReadLock' ref path $ readFile' path
+      return $ "<<empty" `isPrefixOf` txt

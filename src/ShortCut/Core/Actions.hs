@@ -42,7 +42,8 @@ module ShortCut.Core.Actions
 
   -- misc
   -- , digestFile  -- TODO what's the difference with hashContent?
-  , hashContent -- TODO what's the difference with digestFile?
+  , hashContent
+  , withBinHash
   , symlink
 
   )
@@ -67,10 +68,11 @@ import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
-import System.FilePath            ((<.>), takeDirectory)
+import System.FilePath            ((<.>), takeDirectory, takeExtension)
 -- import System.IO                  (IOMode(..), withFile)
 import System.Posix.Files         (createSymbolicLink)
 import System.Posix.Escape         (escape)
+-- import System.IO.Temp (emptyTempFile)
 -- import Control.Concurrent.Thread.Delay (delay)
 -- import Debug.Trace       (trace)
 
@@ -278,9 +280,9 @@ wrappedCmdError bin n files = do
  - actual empty files before passing them to a script, so logic for that
  - doesn't have to be duplicated over and over.
  -}
-fixEmptyFile :: CutConfig -> Locks -> FilePath -> Action FilePath
-fixEmptyFile cfg ref path = do
-  debugNeed cfg "fixEmptyFile" [path] -- Note isEmpty does this too
+fixEmptyText :: CutConfig -> Locks -> FilePath -> Action FilePath
+fixEmptyText cfg ref path = do
+  debugNeed cfg "fixEmptyText" [path] -- Note isEmpty does this too
   empty <- isEmpty ref path
   return $ if empty then "/dev/null" else path -- TODO will /dev/null work?
 
@@ -300,7 +302,7 @@ wrappedCmd :: CutConfig -> Locks -> Maybe FilePath -> [String]
            -> Action (String, String, Int)
 wrappedCmd cfg ref mOut inPtns opts bin args = do
   inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
-  inPaths' <- mapM (fixEmptyFile cfg ref) inPaths
+  inPaths' <- mapM (fixEmptyText cfg ref) inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
   debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
@@ -400,6 +402,36 @@ hashContent cfg ref path = do
   return md5
   where
     path' = fromCutPath cfg path
+
+{- Hashing doesn't save any space here, but it puts the hashes in
+ - src/tests/plots/*.tree so we can test that the plots don't change.
+ -
+ - What it does:
+ -   1. make a random temporary path
+ -   2. pass that to actFn to make the actual output
+ -   3. hash the output to determine cache path
+ -   4. symlink hash path -> tmp path, actual outPath -> hash path
+ -
+ - TODO remove if ggplot turns out to be nondeterministic
+ - TODO use hash of expr + original ext instead so it looks nicer?
+ -}
+withBinHash :: CutConfig -> Locks -> CutExpr -> CutPath
+            -> (CutPath -> Action ()) -> Action ()
+withBinHash cfg ref expr outPath actFn = do
+  let binDir'  = fromCutPath cfg $ cacheDir cfg "bin"
+      outPath' = fromCutPath cfg outPath
+  liftIO $ createDirectoryIfMissing True binDir'
+  let binTmp' = binDir' </> digest expr <.> takeExtension outPath'
+      binTmp  = toCutPath cfg binTmp'
+  debugL cfg $ "withBinHash binTmp': " ++ show binTmp'
+  _ <- actFn binTmp
+  md5 <- hashContent cfg ref binTmp
+  let binOut' = binDir' </> md5 <.> takeExtension outPath'
+      binOut  = toCutPath cfg binOut'
+  debugL cfg $ "withBinHash binOut: "  ++ show binOut
+  debugL cfg $ "withBinHash binOut': " ++ show binOut'
+  symlink cfg ref binOut  binTmp
+  symlink cfg ref outPath binOut
 
 {- Takes source and destination paths in the tmpdir and makes a path between
  - them with the right number of dots.

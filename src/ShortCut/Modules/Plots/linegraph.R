@@ -4,18 +4,23 @@ suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(ggplot2))
 suppressPackageStartupMessages(require(readr))
 
+# TODO read scores and plot two variables here
+
 read_nums <- function(numsPath)
-  read.table(numsPath, as.is=TRUE) %>% tbl_df
+  read.table(numsPath, col.names=c('score', 'value')) %>% tbl_df
 
 plot_nums <- function(nums, titlePath, xlabPath) {
-  p <- ggplot(data=nums, aes(x=V1)) + geom_histogram()
+  p <- ggplot(data=nums, aes(x=value, y=score)) +
+         geom_line() +
+	 geom_point(size=2)
   title <- read_string(titlePath)
   label <- read_string(xlabPath)
   if (title != "<<emptystr>>") { p <- p + ggtitle(title) }
+  # TODO do this in read_nums?
   if (label != "<<emptystr>>") {
     p <- p + xlab(label)
   } else {
-    p <- p + xlab("") # remove V1
+    p <- p + xlab("") # remove 'value'
   }
   return(p)
 }
@@ -27,8 +32,8 @@ save_plot <- function(plot, plotPath)
   ggsave(plot, filename=plotPath, device="png")
 
 main <- function() {
-  args <- commandArgs(trailingOnly = TRUE)
   # args <- c('testplot.png', 'testtitle.txt', 'testnums.txt', 'testxlab.txt')
+  args <- commandArgs(trailingOnly = TRUE)
   plotPath  <- args[[1]]
   titlePath <- args[[2]] # might contain "<<emptystr>>"
   numsPath  <- args[[3]]

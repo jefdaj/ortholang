@@ -9,36 +9,29 @@ module ShortCut.Modules.Plots where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
+import ShortCut.Core.Actions (withBinHash)
+import ShortCut.Core.Paths (CutPath, exprPath, toCutPath, fromCutPath, cacheDir)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript)
+-- import System.Directory (createDirectoryIfMissing)
+-- import System.FilePath  ((</>), (<.>))
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "plots"
   -- , mFunctions = [histogram, linegraph, bargraph, scatterplot, venndiagram]
-  , mFunctions = [histogram]
+  , mFunctions = [histogram, linegraph, scatterplot]
   }
 
 plot :: CutType
 plot = CutType
   { tExt  = "png"
   , tDesc = "png image of a plot"
-  , tShow = \_ f -> return $ "png image '" ++ f ++ "'"
+  , tShow = \_ f -> return $ "plot image '" ++ f ++ "'"
   }
 
-linegraph = undefined
-bargraph = undefined
-scatterplot = undefined
-venndiagram = undefined
-
-histogram :: CutFunction
-histogram = let name = "histogram" in CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [str, ListOf num] plot
-  , fTypeDesc  = name ++ " : str num.list -> plot"
-  , fFixity    = Prefix
-  , fRules     = rHistogram
-  }
+-------------------
+-- get var names --
+-------------------
 
 {- If the user calls a plotting function with a named variable like
  - "num_genomes", this will write that name to a string for use in the plot.
@@ -49,16 +42,119 @@ varName st expr = rLit st $ CutLit str 0 $ case expr of
   (CutRef _ _ _ (CutVar name)) -> name
   _ -> ""
 
-rHistogram :: CutState -> CutExpr -> Rules ExprPath
-rHistogram st@(_,cfg,ref) expr@(CutFun _ _ deps _ [title, nums]) = do
+-- Like varName, but for a list of names
+varNames :: CutState -> CutExpr -> Rules ExprPath
+varNames st expr = undefined
+  where
+    lits = CutLit str 0 $ case expr of
+             (CutRef _ _ _ (CutVar name)) -> name
+             _ -> ""
+
+---------------------
+-- plot a num.list --
+---------------------
+
+histogram :: CutFunction
+histogram = let name = "histogram" in CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str, ListOf num] plot
+  , fTypeDesc  = name ++ " : str num.list -> plot"
+  , fFixity    = Prefix
+  , fRules     = rPlotNumList "histogram.R"
+  }
+
+-- for reference:
+-- dedupByContent :: CutConfig -> Locks -> [FilePath] -> Action [FilePath]
+-- dedupByContent cfg ref paths = do
+--   -- TODO if the paths are already in the load cache, no need for content?
+--   hashes <- mapM (hashContent cfg ref) $ map (toCutPath cfg) paths
+--   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
+--   return paths'
+
+rPlotNumList :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotNumList script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- varName st nums
   let outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'
-      args      = [outPath'', titlePath, numsPath, xlabPath]
+      args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toCutPath cfg p) args
-  outPath' %> \_ -> aSimpleScript "histogram.R" cfg ref args'
+  outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
+                      aSimpleScript script cfg ref (out:args')
   return outPath''
-rHistogram _ _ = error "bad argument to rHistogram"
+rPlotNumList _ _ _ = error "bad argument to rPlotNumList"
+
+---------------------
+-- plot num.scores --
+---------------------
+
+tPlotScores :: TypeChecker
+tPlotScores [s, ScoresOf n] | s == str && n == num = Right plot
+tPlotScores _ = Left "expected a title and scores"
+
+-- TODO line graph should label axis by input var name (always there!)
+linegraph :: CutFunction
+linegraph = let name = "linegraph" in CutFunction
+  { fName      = name
+  , fTypeCheck = tPlotScores
+  , fTypeDesc  = name ++ " : str num.scores -> plot"
+  , fFixity    = Prefix
+  , fRules     = rPlotRepeatScores "linegraph.R"
+  }
+
+-- TODO scatterplot should label axis by input var name (always there!)
+scatterplot :: CutFunction
+scatterplot = let name = "scatterplot" in CutFunction
+  { fName      = name
+  , fTypeCheck = tPlotScores
+  , fTypeDesc  = name ++ " : str num.scores -> plot"
+  , fFixity    = Prefix
+  , fRules     = rPlotRepeatScores "scatterplot.R"
+  }
+
+-- TODO take an argument for extracting the axis name
+-- TODO also get y axis from dependent variable?
+rPlotNumScores :: (CutState -> CutExpr -> Rules ExprPath)
+               -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotNumScores xFn script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
+  titlePath <- rExpr st title
+  numsPath  <- rExpr st nums
+  xlabPath  <- xFn   st nums
+  -- ylabPath  <- yFn   st nums
+  let outPath   = exprPath st expr
+      outPath'  = fromCutPath cfg outPath
+      outPath'' = ExprPath outPath'
+      args      = [titlePath, numsPath, xlabPath]
+      args'     = map (\(ExprPath p) -> toCutPath cfg p) args
+  outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
+                      aSimpleScript script cfg ref (out:args')
+  return outPath''
+rPlotNumScores _ _ _ _ = error "bad argument to rPlotNumScores"
+
+rPlotRepeatScores :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotRepeatScores = rPlotNumScores indRepeatVarName
+
+indRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
+indRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
+  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
+  _ -> ""
+
+depRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
+depRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
+  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
+  _ -> ""
+
+
+----------------------------
+-- plot <whatever>.scores --
+----------------------------
+
+bargraph = undefined
+
+-------------------------------
+-- plot <whatever>.list.list --
+-------------------------------
+
+venndiagram = undefined
