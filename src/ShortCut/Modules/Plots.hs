@@ -157,9 +157,10 @@ rPlotNumScores xFn script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = d
   let outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'
-      args      = [outPath'', titlePath, numsPath, xlabPath]
+      args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toCutPath cfg p) args
-  outPath' %> \_ -> aSimpleScript script cfg ref args'
+  outPath' %> \_ -> withBinHash cfg ref outPath $ \out ->
+                      aSimpleScript script cfg ref (out:args')
   return outPath''
 rPlotNumScores _ _ _ _ = error "bad argument to rPlotNumScores"
 
