@@ -53,8 +53,8 @@ pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl
 instance Pretty CutType where
   pPrint Empty          = error "should never need to print Empty"
   pPrint (ListOf Empty) = text "empty list"
-  pPrint (ListOf     t) = text "list of"    <+> pPrint t <> text "s"
-  pPrint (ScoresOf   t) = text "scores for" <+> pPrint t <> text "s"
+  pPrint (ListOf     t) = text "list of" <+> pPrint t <> text "s"
+  pPrint (ScoresOf   t) = text "list of" <+> pPrint t <> text "s with scores"
   pPrint t              = text (tExt t) <+> parens (text $ tDesc t)
 
 instance Pretty CutVar where

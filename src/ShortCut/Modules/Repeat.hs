@@ -90,34 +90,16 @@ tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf n
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: CutState -> CutExpr -> Rules ExprPath
-rScoreRepeats s@(_,cfg,ref) expr@(CutFun _ _ _ _ (resExpr:_:subList:[])) = do
+rScoreRepeats s@(_,cfg,ref) expr@(CutFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr s subList
-  scores <- rRepeatEach s expr
-  let eType   = typeOf resExpr
-      hack    = \(ExprPath p) -> toCutPath cfg p -- TODO remove! but how?
+  scores <- rExpr s repEachExpr
+  let hack    = \(ExprPath p) -> toCutPath cfg p -- TODO remove! but how?
       inputs' = hack inputs
       scores' = hack scores
-  outPath' %> \_ -> aScores cfg ref scores' inputs' eType outPath
-  return $ ExprPath outPath'
+  outPath' %> \_ -> aScores cfg ref scores' inputs' t outPath
+  return $ ExprPath $ outPath'
   where
+    repEachExpr = CutFun (ListOf t) salt deps "repeat_each" as
     outPath  = exprPath s expr
     outPath' = debugRules cfg "rScoreRepeats" expr $ fromCutPath cfg outPath
 rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
-
--- for reference:
--- rRepeatEach :: RulesFn -- aka CutState -> CutExpr -> Rules ExprPath
--- rRepeatEach s@(scr,cfg,ref) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
---   subPaths <- rExpr s subList
---   let subExprs = extractExprs scr subList
---   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
---   let subPaths' = (\(ExprPath p) -> toCutPath cfg p) subPaths
---       resPaths' = map (\(ExprPath p) -> toCutPath cfg p) resPaths
---       outPath   = exprPath s expr
---       outPath'  = debugRules cfg "rRepeatEach" expr $ fromCutPath cfg outPath
---   outPath' %> \_ ->
---     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
---                   then aRepeatEachLits (typeOf expr)
---                   else aRepeatEachLinks
---     in actFn cfg ref outPath subPaths' resPaths'
---   return (ExprPath outPath')
--- rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr

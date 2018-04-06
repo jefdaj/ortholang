@@ -399,21 +399,16 @@ aLoadListLinks cfg ref pathsPath outPath = do
  -}
 aScores :: CutConfig -> Locks -> CutPath -> CutPath -> CutType -> CutPath -> Action ()
 aScores cfg ref scoresPath othersPath othersType outPath = do
-  scorePaths <- readLits               cfg ref $ fromCutPath cfg scoresPath
-  otherPaths <- readStrings othersType cfg ref $ fromCutPath cfg othersPath
-  let out'        = fromCutPath cfg outPath
-      out''       = debugA cfg "aScores" out' (out':scorePaths)
-  scores <- mapM (readLit cfg ref) scorePaths -- also others BTW
-  others <- mapM (readLit cfg ref) otherPaths
-  let scores' = map stripWhiteSpace scores -- TODO insert <<emptylist>> here?
-      others' = map stripWhiteSpace scores -- TODO insert <<emptylist>> here?
-      rows    = map (\(a,b) -> unwords [a,b]) $ zip scores' others'
+  scores <- readLits cfg ref $ fromCutPath cfg scoresPath
+  others <- readStrings othersType cfg ref $ fromCutPath cfg othersPath
+  let out' = fromCutPath cfg outPath
+      rows = map (\(a,b) -> unwords [a,b]) $ zip scores others
   when (length scores /= length others) $ error $ unlines
-     ["mismatched scores and others in aScores:", show scores', show others']
-  debugL cfg $ "aScores scores': " ++ show scores'
-  debugL cfg $ "aScores others': " ++ show others'
+     ["mismatched scores and others in aScores:", show scores, show others]
+  debugL cfg $ "aScores scores': " ++ show scores
+  debugL cfg $ "aScores others': " ++ show others
   debugL cfg $ "aScores rows: "    ++ show rows
-  writeLits cfg ref out'' rows
+  writeLits cfg ref out' rows
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
 -- TODO rename something that goes with the map fns?
