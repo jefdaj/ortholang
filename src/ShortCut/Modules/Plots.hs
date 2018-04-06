@@ -40,22 +40,20 @@ histogram = let name = "histogram" in CutFunction
   , fRules     = rHistogram
   }
 
-
-{- If the user calls the histogram function with a named variable like
- - "num_genomes", this will write that to a string and pass it to histogram.R
- - for use as the X axis title. Otherwise it will create an empty one to
- - ignore.
+{- If the user calls a plotting function with a named variable like
+ - "num_genomes", this will write that name to a string for use in the plot.
+ - Otherwise it will return an empty string, which the script should ignore.
  -}
-axisTitle :: CutState -> [CutVar] -> Rules ExprPath
-axisTitle st deps = rLit st $ CutLit str 0 $ case deps of
-  (_:(CutVar name):[]) -> name
+varName :: CutState -> CutExpr -> Rules ExprPath
+varName st expr = rLit st $ CutLit str 0 $ case expr of
+  (CutRef _ _ _ (CutVar name)) -> name
   _ -> ""
 
 rHistogram :: CutState -> CutExpr -> Rules ExprPath
 rHistogram st@(_,cfg,ref) expr@(CutFun _ _ deps _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
-  xlabPath  <- axisTitle st deps
+  xlabPath  <- varName st nums
   let outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'

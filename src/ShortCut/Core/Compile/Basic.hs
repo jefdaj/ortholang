@@ -25,14 +25,14 @@ import ShortCut.Core.Pretty
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
-import Control.Monad              (when)
+-- import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 -- import ShortCut.Core.Debug        (debugA, debugRules, debug)
 import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, hashContent, writePaths, symlink, readStrings)
+                                   readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
