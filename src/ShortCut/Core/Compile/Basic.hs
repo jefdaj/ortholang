@@ -25,14 +25,14 @@ import ShortCut.Core.Pretty
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
--- import Control.Monad              (when)
+import Control.Monad              (when)
 import Data.List                  (intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
 -- import ShortCut.Core.Debug        (debugA, debugRules, debug)
 import ShortCut.Core.Locks        (withWriteLock')
-import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugIO, debugNeed,
+import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, hashContent, writePaths, symlink)
+                                   readLitPaths, hashContent, writePaths, symlink, readStrings)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
@@ -155,7 +155,7 @@ aListLits cfg ref paths outPath = do
   -- need paths'
   lits <- mapM (readLit cfg ref) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
-  liftIO $ debugIO cfg $ "aListLits lits': " ++ show lits'
+  debugL cfg $ "aListLits lits': " ++ show lits'
   writeLits cfg ref out'' lits'
   where
     out'   = fromCutPath cfg outPath
@@ -308,8 +308,8 @@ aLoad cfg ref strPath outPath = do
   debugNeed cfg "aLoad" [strPath']
   pth <- readLitPaths cfg ref strPath'
   src' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) $ fromCutPath cfg $ head pth -- TODO safer!
-  -- liftIO $ debugIO cfg $ "aLoad src': '" ++ src' ++ "'"
-  -- liftIO $ debugIO cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
+  -- debugL cfg $ "aLoad src': '" ++ src' ++ "'"
+  -- debugL cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
   hashPath <- aLoadHash cfg ref (toCutPath cfg src') (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
@@ -373,7 +373,7 @@ aLoadListLinks cfg ref pathsPath outPath = do
   hashPaths <- mapM (\p -> aLoadHash cfg ref p
                          $ takeExtension $ fromCutPath cfg p) paths'''
   let hashPaths' = map (fromCutPath cfg) hashPaths
-  -- liftIO $ debugIO cfg $ "about to need: " ++ show paths''
+  -- debugL cfg $ "about to need: " ++ show paths''
   debugNeed cfg "aLoadListLinks" hashPaths'
   writePaths cfg ref out hashPaths
   where
@@ -384,6 +384,31 @@ aLoadListLinks cfg ref pathsPath outPath = do
 -- based on https://stackoverflow.com/a/18627837
 -- uniqLines :: Ord a => [a] -> [a]
 -- uniqLines = unlines . toList . fromList . lines
+
+------------
+-- scores --
+------------
+
+{- Scores are lists of pairs of num and some other type "zipped" together.
+ - They're are a little odd: not quite a core type because you only create and
+ - use them with functions (no source code literal), but not quite modular
+ - because they require some minor changes in Core to work.
+ -
+ - I couldn't figure out what a generic compiler should look like, so for now
+ - they only have the corresponding Action; other modules do the prep work.
+ -}
+aScores :: CutConfig -> Locks -> CutPath -> CutPath -> CutType -> CutPath -> Action ()
+aScores cfg ref scoresPath othersPath othersType outPath = do
+  scores <- readLits cfg ref $ fromCutPath cfg scoresPath
+  others <- readStrings othersType cfg ref $ fromCutPath cfg othersPath
+  let out' = fromCutPath cfg outPath
+      rows = map (\(a,b) -> unwords [a,b]) $ zip scores others
+  when (length scores /= length others) $ error $ unlines
+     ["mismatched scores and others in aScores:", show scores, show others]
+  debugL cfg $ "aScores scores': " ++ show scores
+  debugL cfg $ "aScores others': " ++ show others
+  debugL cfg $ "aScores rows: "    ++ show rows
+  writeLits cfg ref out' rows
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
 -- TODO rename something that goes with the map fns?

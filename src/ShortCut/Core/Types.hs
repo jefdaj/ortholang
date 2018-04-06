@@ -140,6 +140,7 @@ type CutScript = [CutAssign]
 data CutType
   = Empty -- TODO remove this? should never be a need to define an empty list
   | ListOf CutType
+  | ScoresOf CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -161,9 +162,10 @@ defaultShow locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
 --      maybe we need to assert no duplicates while loading modules?
 -- TODO should this use typesMatch?
 instance Eq CutType where
-  Empty      == Empty      = True
-  (ListOf a) == (ListOf b) = a == b
-  t1         == t2         = extOf t1 == extOf t2
+  Empty        == Empty        = True
+  (ListOf a)   == (ListOf b)   = a == b
+  (ScoresOf a) == (ScoresOf b) = a == b
+  t1           == t2           = extOf t1 == extOf t2
 
 instance Show CutType where
   show = extOf
@@ -189,9 +191,10 @@ typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
 extOf :: CutType -> String
-extOf Empty      = "empty" -- for lists with nothing in them yet
-extOf (ListOf t) = extOf t ++ ".list"
-extOf t          = tExt t
+extOf Empty        = "empty" -- for lists with nothing in them yet
+extOf (ListOf   t) = extOf t ++ ".list"
+extOf (ScoresOf t) = extOf t ++ ".scores"
+extOf t            = tExt t
 
 varOf :: CutExpr -> [CutVar]
 varOf (CutRef _ _ _ v) = [v]
@@ -364,7 +367,8 @@ explainFnBug =
 typeMatches :: CutType -> CutType -> Bool
 typeMatches Empty _ = True
 typeMatches _ Empty = True
-typeMatches (ListOf a) (ListOf b) = typeMatches a b
+typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
+typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
 typeMatches a b = a == b
 
 typesMatch :: [CutType] -> [CutType] -> Bool
