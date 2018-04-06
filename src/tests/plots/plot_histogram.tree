@@ -1,10 +1,14 @@
 .
 |-- cache
 |   |-- bin
-|   |   |-- 2cc2b57cd1.png
-|   |   |-- d7d0a621bf.png
-|   |   `-- dd3ba6dc2a.png
+|   |   |-- 2cc2b57cd1.png -> ../../cache/bin/d56728dae7.png
+|   |   |-- 6844b98de2.png
+|   |   |-- d56728dae7.png
+|   |   |-- d7d0a621bf.png -> ../../cache/bin/e385991648.png
+|   |   |-- dd3ba6dc2a.png -> ../../cache/bin/6844b98de2.png
+|   |   `-- e385991648.png
 |   `-- lines
+|       |-- 04c1edbf97.txt
 |       |-- 0c357755eb.txt
 |       |-- 27dd9afc3d.txt
 |       |-- 2a13ac791a.txt
@@ -16,7 +20,6 @@
 |       |-- 42fb7081a8.txt
 |       |-- 558d528228.txt
 |       |-- 58d21ca52f.txt
-|       |-- 6a44dcf2ff.txt
 |       |-- 74fbe58143.txt
 |       |-- 79d5dfbfcb.txt
 |       |-- 8c30f23bbf.txt
@@ -35,7 +38,7 @@
 |   |   |-- 4d801aaf9f_f47d3663b4.png -> ../../cache/bin/d7d0a621bf.png
 |   |   `-- efa6e25299_71d6f77708.png -> ../../cache/bin/2cc2b57cd1.png
 |   |-- list
-|   |   |-- 4183d34238.png.list -> ../../cache/lines/6a44dcf2ff.txt
+|   |   |-- 4183d34238.png.list -> ../../cache/lines/04c1edbf97.txt
 |   |   `-- ab2a4ac070.num.list -> ../../cache/lines/74fbe58143.txt
 |   |-- multiply
 |   |   |-- 719eb2d0c0_4578706b58.num -> ../../cache/lines/3801d19d03.txt
@@ -83,4 +86,4 @@
     |-- yvar.703f4d696d.num -> ../exprs/multiply/719eb2d0c0_6d57e8642a.num
     `-- yvars.num.list -> ../exprs/extract_scores/2e034e4bcd.num.list
 
-14 directories, 69 files
+14 directories, 72 files

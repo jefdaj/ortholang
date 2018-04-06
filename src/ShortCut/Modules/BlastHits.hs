@@ -3,6 +3,7 @@ module ShortCut.Modules.BlastHits where
 import Development.Shake
 import ShortCut.Core.Types
 
+import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, debugA)
@@ -40,7 +41,7 @@ extractQueries = let name = "extract_queries" in CutFunction
   , fTypeCheck = tExtract
   , fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aCutCol 1
+  , fRules     = rSimple $ aCutCol True 1
   }
 
 extractQueriesEach :: CutFunction
@@ -49,7 +50,7 @@ extractQueriesEach = let name = "extract_queries_each" in CutFunction
   , fTypeCheck = tExtractEach
   , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rEach $ aCutCol 1
+  , fRules     = rEach $ aCutCol True 1
   }
 
 extractTargets :: CutFunction
@@ -58,7 +59,7 @@ extractTargets = let name = "extract_targets" in CutFunction
   , fTypeCheck = tExtract
   , fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aCutCol 2
+  , fRules     = rSimple $ aCutCol True 2
   }
 
 extractTargetsEach :: CutFunction
@@ -67,18 +68,19 @@ extractTargetsEach = let name = "extract_targets_each" in CutFunction
   , fTypeCheck = tExtractEach
   , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rEach $ aCutCol 2
+  , fRules     = rEach $ aCutCol True 2
   }
 
-aCutCol :: Int -> CutConfig -> Locks -> [CutPath] -> Action ()
-aCutCol n cfg ref [outPath, tsvPath] = do
+aCutCol :: Bool -> Int -> CutConfig -> Locks -> [CutPath] -> Action ()
+aCutCol uniq n cfg ref [outPath, tsvPath] = do
   out <- wrappedCmdOut cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
-  writeLits cfg ref outPath'' $ lines out
+  let results = if uniq then sort $ nub $ lines out else lines out
+  writeLits cfg ref outPath'' results
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aCutCol _ _ _ _ = error "bad arguments to aCutCol"
+aCutCol _ _ _ _ _ = error "bad arguments to aCutCol"
 
 --------------------------
 -- filter_evalue(_each) --

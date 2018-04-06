@@ -1,10 +1,13 @@
 .
 |-- cache
 |   |-- bin
-|   |   |-- 54870e20ac.png
-|   |   `-- 6ef95409be.png
+|   |   |-- 00e746fd61.png
+|   |   |-- 54870e20ac.png -> ../../cache/bin/00e746fd61.png
+|   |   |-- 6ef95409be.png -> ../../cache/bin/749dd8f121.png
+|   |   `-- 749dd8f121.png
 |   `-- lines
 |       |-- 0c357755eb.txt
+|       |-- 1ca14f13f6.txt
 |       |-- 2a13ac791a.txt
 |       |-- 2a8f7e5cdc.txt
 |       |-- 3801d19d03.txt
@@ -17,13 +20,12 @@
 |       |-- 74fbe58143.txt
 |       |-- 79d5dfbfcb.txt
 |       |-- 8c30f23bbf.txt
-|       |-- 9b36b29d87.txt
 |       |-- a24f3e974e.txt
 |       |-- a666b523ca.txt
 |       `-- ba3ffe3dda.txt
 |-- exprs
 |   |-- list
-|   |   |-- 68ecc797de.png.list -> ../../cache/lines/9b36b29d87.txt
+|   |   |-- 68ecc797de.png.list -> ../../cache/lines/1ca14f13f6.txt
 |   |   `-- ab2a4ac070.num.list -> ../../cache/lines/74fbe58143.txt
 |   |-- multiply
 |   |   |-- 719eb2d0c0_4578706b58.num -> ../../cache/lines/3801d19d03.txt
@@ -70,4 +72,4 @@
     |-- yvar.65c833ec6e.num -> ../exprs/multiply/719eb2d0c0_58d3e9f8ea.num
     `-- yvar.703f4d696d.num -> ../exprs/multiply/719eb2d0c0_6d57e8642a.num
 
-12 directories, 58 files
+12 directories, 60 files

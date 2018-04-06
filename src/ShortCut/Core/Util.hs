@@ -34,7 +34,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
-import Data.List              (dropWhileEnd, isPrefixOf)
+import Data.List              (dropWhileEnd, isPrefixOf, isInfixOf)
 import Data.List.Utils        (replace)
 import Data.Maybe             (fromJust)
 import System.Directory       (doesPathExist, removePathForcibly,
@@ -50,7 +50,6 @@ import System.FilePath.Glob   (glob)
 import Data.Time.LocalTime (getZonedTime)
 import Data.Time.Format    (formatTime, defaultTimeLocale)
 import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
-import System.Posix (getFileStatus, fileSize)
 
 ---------------
 -- debugging --
@@ -201,13 +200,11 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- Note that this is the only lazy read function. Will it mess anything up?
 -- TODO should readLit and readList be based on this?
--- isEmpty :: Locks -> FilePath -> Action Bool
--- isEmpty ref path = do
-  -- txt <- withReadLock' ref path $ readFile' path
-  -- return $ "<<empty" `isPrefixOf` txt
-
--- see https://stackoverflow.com/a/48219010
 isEmpty :: Locks -> FilePath -> Action Bool
-isEmpty ref fp = withReadLock' ref fp $ liftIO $ do
-  stat <- getFileStatus fp
-  return (fileSize stat == 0)
+isEmpty ref path = do
+  -- TODO remove? prevents "invalid byte sequence" error reading binary files
+  if "cache/bin" `isInfixOf` path
+    then return False
+    else do
+      txt <- withReadLock' ref path $ readFile' path
+      return $ "<<empty" `isPrefixOf` txt

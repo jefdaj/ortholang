@@ -95,7 +95,7 @@ extractScores = let name = "extract_scores" in CutFunction
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : <whatever>.scores -> num.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aCutCol 1
+  , fRules     = rSimple $ aCutCol False 1
   }
 
 -- TODO deduplicate with extractTargets?
@@ -105,7 +105,7 @@ extractScored = let name = "extract_scored" in CutFunction
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : <whatever>.scores -> <whatever>.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aCutCol 2
+  , fRules     = rSimple $ aCutCol False 2
   }
 
 tExtractScores :: TypeChecker
