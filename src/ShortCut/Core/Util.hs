@@ -50,6 +50,7 @@ import System.FilePath.Glob   (glob)
 import Data.Time.LocalTime (getZonedTime)
 import Data.Time.Format    (formatTime, defaultTimeLocale)
 import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
+import System.Posix (getFileStatus, fileSize)
 
 ---------------
 -- debugging --
@@ -200,7 +201,13 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- Note that this is the only lazy read function. Will it mess anything up?
 -- TODO should readLit and readList be based on this?
+-- isEmpty :: Locks -> FilePath -> Action Bool
+-- isEmpty ref path = do
+  -- txt <- withReadLock' ref path $ readFile' path
+  -- return $ "<<empty" `isPrefixOf` txt
+
+-- see https://stackoverflow.com/a/48219010
 isEmpty :: Locks -> FilePath -> Action Bool
-isEmpty ref path = do
-  txt <- withReadLock' ref path $ readFile' path
-  return $ "<<empty" `isPrefixOf` txt
+isEmpty ref fp = withReadLock' ref fp $ liftIO $ do
+  stat <- getFileStatus fp
+  return (fileSize stat == 0)

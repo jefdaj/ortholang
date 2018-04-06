@@ -9,8 +9,12 @@ module ShortCut.Modules.Plots where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
+import ShortCut.Core.Actions (hashContent, symlink, debugL)
+import ShortCut.Core.Paths (CutPath, exprPath, toCutPath, fromCutPath, cacheDir)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript)
+import System.IO.Temp (emptyTempFile)
+import System.Directory (createDirectoryIfMissing, renameFile)
+import System.FilePath  (takeExtension, (</>), (<.>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -60,6 +64,44 @@ histogram = let name = "histogram" in CutFunction
   , fRules     = rPlotNumList "histogram.R"
   }
 
+-- for reference:
+-- dedupByContent :: CutConfig -> Locks -> [FilePath] -> Action [FilePath]
+-- dedupByContent cfg ref paths = do
+--   -- TODO if the paths are already in the load cache, no need for content?
+--   hashes <- mapM (hashContent cfg ref) $ map (toCutPath cfg) paths
+--   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
+--   return paths'
+
+{- Hashing doesn't save any space here, but it puts the hashes in
+ - src/tests/plots/*.tree so we can test that the plots don't change.
+ -
+ - What it does:
+ -   1. make a random temporary path
+ -   2. pass that to actFn to make the actual output
+ -   3. hash the output to determine cache path and move the output there
+ -   4. symlink actual outPath -> hash path
+ -
+ - TODO remove if ggplot turns out to be nondeterministic
+ -}
+withBinHash :: CutConfig -> Locks -> CutPath
+            -> (CutPath -> Action ()) -> Action ()
+withBinHash cfg ref outPath actFn = do
+  let binDir'  = fromCutPath cfg $ cacheDir cfg "bin"
+      outPath' = fromCutPath cfg outPath
+  liftIO $ createDirectoryIfMissing True binDir'
+  binTmp <- liftIO $ emptyTempFile binDir' "tmp"
+  let binTmp' = toCutPath cfg binTmp
+  debugL cfg $ "withBinHash binTmp: " ++ show binTmp
+  debugL cfg $ "withBinHash binTmp': " ++ show binTmp'
+  _ <- actFn binTmp'
+  md5 <- hashContent cfg ref binTmp'
+  let binOut' = binDir' </> md5 <.> takeExtension outPath'
+      binOut  = toCutPath cfg binOut'
+  debugL cfg $ "withBinHash binOut: " ++ show binOut
+  debugL cfg $ "withBinHash binOut': " ++ show binOut'
+  liftIO $ renameFile binTmp binOut'
+  symlink cfg ref outPath binOut
+
 rPlotNumList :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rPlotNumList script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
@@ -68,9 +110,10 @@ rPlotNumList script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
   let outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'
-      args      = [outPath'', titlePath, numsPath, xlabPath]
+      args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toCutPath cfg p) args
-  outPath' %> \_ -> aSimpleScript script cfg ref args'
+  outPath' %> \_ -> withBinHash cfg ref outPath $ \out ->
+                      aSimpleScript script cfg ref (out:args')
   return outPath''
 rPlotNumList _ _ _ = error "bad argument to rPlotNumList"
 

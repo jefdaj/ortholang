@@ -24,7 +24,7 @@ read_string <- function(textFile)
   read_file(textFile) %>% trimws
 
 save_plot <- function(plot, plotPath)
-  ggsave(plot, filename=plotPath)
+  ggsave(plot, filename=plotPath, device="png")
 
 main <- function() {
   args <- commandArgs(trailingOnly = TRUE)

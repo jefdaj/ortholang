@@ -14,6 +14,7 @@ plot_nums <- function(nums, titlePath, xlabPath) {
   title <- read_string(titlePath)
   label <- read_string(xlabPath)
   if (title != "<<emptystr>>") { p <- p + ggtitle(title) }
+  # TODO do this in read_nums?
   if (label != "<<emptystr>>") {
     p <- p + xlab(label)
   } else {
@@ -26,7 +27,7 @@ read_string <- function(textFile)
   read_file(textFile) %>% trimws
 
 save_plot <- function(plot, plotPath)
-  ggsave(plot, filename=plotPath)
+  ggsave(plot, filename=plotPath, device="png")
 
 main <- function() {
   # args <- c('testplot.png', 'testtitle.txt', 'testnums.txt', 'testxlab.txt')
