@@ -117,6 +117,7 @@ executable shortcut
                     ShortCut.Modules.Sets,
                     ShortCut.Modules.LoadList,
                     ShortCut.Modules.Scores,
+                    ShortCut.Modules.Plots,
                     ShortCut.Test,
                     ShortCut.Test.Deps
                     ShortCut.Test.Scripts,

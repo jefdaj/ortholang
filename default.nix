@@ -4,6 +4,7 @@ let
   blast      = import ./src/ShortCut/Modules/Blast;
   blastrbh   = import ./src/ShortCut/Modules/BlastRBH;
   seqio      = import ./src/ShortCut/Modules/SeqIO;
+  plots      = import ./src/ShortCut/Modules/Plots;
   blasthits  = import ./src/ShortCut/Modules/BlastHits;
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
@@ -14,6 +15,7 @@ let
     blast
     blastrbh
     seqio
+    plots
     blasthits
     ncbi-blast
     crb-blast
@@ -25,7 +27,8 @@ let
     ++ blast.runDepends
     ++ blastrbh.runDepends
     ++ blasthits.runDepends
-    ++ seqio.runDepends;
+    ++ seqio.runDepends
+    ++ plots.runDepends;
 
 # see https://github.com/jml/nix-haskell-example
 in haskell.lib.overrideCabal cabalPkg (drv: {

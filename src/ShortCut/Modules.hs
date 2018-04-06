@@ -19,6 +19,7 @@ import qualified ShortCut.Modules.Sets      as Sets
 import qualified ShortCut.Modules.Summarize as Summarize
 import qualified ShortCut.Modules.LoadList  as LoadList
 import qualified ShortCut.Modules.Scores    as Scores
+import qualified ShortCut.Modules.Plots     as Plots
 
 modules :: [CutModule]
 modules =
@@ -39,4 +40,5 @@ modules =
   , Summarize.cutModule
   , LoadList.cutModule
   , Scores.cutModule
+  , Plots.cutModule
   ]
