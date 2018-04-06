@@ -26,9 +26,9 @@ plot = CutType
   , tShow = \_ f -> return $ "png image '" ++ f ++ "'"
   }
 
----------------
--- utilities --
----------------
+-------------------
+-- get var names --
+-------------------
 
 {- If the user calls a plotting function with a named variable like
  - "num_genomes", this will write that name to a string for use in the plot.
@@ -40,22 +40,12 @@ varName st expr = rLit st $ CutLit str 0 $ case expr of
   _ -> ""
 
 -- Like varName, but for a list of names
-varNames :: CutState -> [CutExpr] -> Rules ExprPath
-varNames = undefined
-
-rPlot :: FilePath -> CutState -> CutExpr -> Rules ExprPath
-rPlot script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
-  titlePath <- rExpr st title
-  numsPath  <- rExpr st nums
-  xlabPath  <- varName st nums
-  let outPath   = exprPath st expr
-      outPath'  = fromCutPath cfg outPath
-      outPath'' = ExprPath outPath'
-      args      = [outPath'', titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toCutPath cfg p) args
-  outPath' %> \_ -> aSimpleScript script cfg ref args'
-  return outPath''
-rPlot _ _ _ = error "bad argument to rPlot"
+varNames :: CutState -> CutExpr -> Rules ExprPath
+varNames st expr = undefined
+  where
+    lits = CutLit str 0 $ case expr of
+             (CutRef _ _ _ (CutVar name)) -> name
+             _ -> ""
 
 ---------------------
 -- plot a num.list --
@@ -67,8 +57,22 @@ histogram = let name = "histogram" in CutFunction
   , fTypeCheck = defaultTypeCheck [str, ListOf num] plot
   , fTypeDesc  = name ++ " : str num.list -> plot"
   , fFixity    = Prefix
-  , fRules     = rPlot "histogram.R"
+  , fRules     = rPlotNumList "histogram.R"
   }
+
+rPlotNumList :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotNumList script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
+  titlePath <- rExpr st title
+  numsPath  <- rExpr st nums
+  xlabPath  <- varName st nums
+  let outPath   = exprPath st expr
+      outPath'  = fromCutPath cfg outPath
+      outPath'' = ExprPath outPath'
+      args      = [outPath'', titlePath, numsPath, xlabPath]
+      args'     = map (\(ExprPath p) -> toCutPath cfg p) args
+  outPath' %> \_ -> aSimpleScript script cfg ref args'
+  return outPath''
+rPlotNumList _ _ _ = error "bad argument to rPlotNumList"
 
 ---------------------
 -- plot num.scores --
@@ -78,25 +82,51 @@ tPlotScores :: TypeChecker
 tPlotScores [s, ScoresOf n] | s == str && n == num = Right plot
 tPlotScores _ = Left "expected a title and scores"
 
--- TODO use varNames instead of varName
+-- TODO line graph should label axis by input var name (always there!)
 linegraph :: CutFunction
 linegraph = let name = "linegraph" in CutFunction
   { fName      = name
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> plot"
   , fFixity    = Prefix
-  , fRules     = rPlot "linegraph.R"
+  , fRules     = rPlotRepeatScores "linegraph.R"
   }
 
--- TODO use varNames instead of varName
+-- TODO scatterplot should label axis by input var name (always there!)
 scatterplot :: CutFunction
 scatterplot = let name = "scatterplot" in CutFunction
   { fName      = name
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> plot"
   , fFixity    = Prefix
-  , fRules     = rPlot "scatterplot.R"
+  , fRules     = rPlotRepeatScores "scatterplot.R"
   }
+
+-- TODO take an argument for extracting the axis name
+-- TODO also get y axis from dependent variable?
+rPlotNumScores :: (CutState -> CutExpr -> Rules ExprPath)
+               -> FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotNumScores xFn script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
+  titlePath <- rExpr st title
+  numsPath  <- rExpr st nums
+  xlabPath  <- xFn   st nums
+  let outPath   = exprPath st expr
+      outPath'  = fromCutPath cfg outPath
+      outPath'' = ExprPath outPath'
+      args      = [outPath'', titlePath, numsPath, xlabPath]
+      args'     = map (\(ExprPath p) -> toCutPath cfg p) args
+  outPath' %> \_ -> aSimpleScript script cfg ref args'
+  return outPath''
+rPlotNumScores _ _ _ _ = error "bad argument to rPlotNumScores"
+
+rPlotRepeatScores :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotRepeatScores = rPlotNumScores indRepeatVarName
+
+indRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
+indRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
+  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
+  _ -> ""
+
 
 ----------------------------
 -- plot <whatever>.scores --
