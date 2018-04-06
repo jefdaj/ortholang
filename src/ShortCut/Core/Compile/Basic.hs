@@ -403,6 +403,7 @@ rSimpleTmp prefix = rSimple' (Just prefix)
 rSimpleScript :: String -> RulesFn
 rSimpleScript = rSimple . aSimpleScript
 
+
 aSimpleScript :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
 aSimpleScript script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins
   where
