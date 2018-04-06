@@ -23,7 +23,7 @@ plot :: CutType
 plot = CutType
   { tExt  = "png"
   , tDesc = "png image of a plot"
-  , tShow = \_ f -> return $ "png image '" ++ f ++ "'"
+  , tShow = \_ f -> return $ "plot image '" ++ f ++ "'"
   }
 
 -------------------
@@ -110,6 +110,7 @@ rPlotNumScores xFn script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = d
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- xFn   st nums
+  -- ylabPath  <- yFn   st nums
   let outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'
@@ -124,6 +125,11 @@ rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
 indRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
+  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
+  _ -> ""
+
+depRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
+depRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
   (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
   _ -> ""
 

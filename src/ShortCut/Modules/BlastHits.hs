@@ -3,7 +3,6 @@ module ShortCut.Modules.BlastHits where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, debugA)
@@ -74,7 +73,7 @@ extractTargetsEach = let name = "extract_targets_each" in CutFunction
 aCutCol :: Int -> CutConfig -> Locks -> [CutPath] -> Action ()
 aCutCol n cfg ref [outPath, tsvPath] = do
   out <- wrappedCmdOut cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
-  writeLits cfg ref outPath'' $ sort $ nub $ lines out
+  writeLits cfg ref outPath'' $ lines out
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
