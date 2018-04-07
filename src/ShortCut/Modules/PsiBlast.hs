@@ -97,6 +97,10 @@ aPsiblastTrainDb cfg ref oPath ePath faPath dbPath = do
     [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
     "psiblast" args         -- TODO package and find psiblast-exb (in wrapper?)
 
+------------------------
+-- psiblast_train_all --
+------------------------
+
 psiblastTrainAll :: CutFunction
 psiblastTrainAll = CutFunction
   { fName      = name
@@ -115,20 +119,9 @@ rPsiblastTrainAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st trainExpr
     trainExpr = CutFun pssm salt (depsOf dbExpr) "psiblast_train_db" [e, fa, dbExpr]
 rPsiblastTrainAll _ _ = error "bad argument to rPsiblastTrainAll"
 
--- for reference:
--- inserts a "makeblastdb" call and reuses the _db compiler from above
--- rMkBlastFromFa :: BlastDesc -> RulesFn
--- rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
---   = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
---   where
---     rules = fRules $ mkBlastFromDb d
---     name1 = fName  $ mkBlastFromDb d
---     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
---     faList = CutList (typeOf s) salt (depsOf s) [s]
---     dbExpr = CutFun dbType salt (depsOf faList) name2 [faList] 
--- rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
-
-
+--------------------
+-- psiblast_train --
+--------------------
 
 psiblastTrain :: CutFunction
 psiblastTrain = CutFunction
@@ -136,11 +129,18 @@ psiblastTrain = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   , fFixity    = Prefix
-  , fRules     = undefined
+  , fRules     = rPsiblastTrain
   }
   where
     name = "psiblast_train"
 
+rPsiblastTrain :: RulesFn
+rPsiblastTrain st (CutFun _ salt _ _ [e, q, s]) = rExpr st trainExpr
+  where
+    listExpr  = CutList pdb salt (depsOf s) [s]
+    dbExpr    = CutFun  pdb salt (depsOf listExpr) "makeblastdb_prot" [listExpr]
+    trainExpr = CutFun pssm salt (depsOf dbExpr) "psiblast_train_db" [e, q, dbExpr]
+rPsiblastTrain _ _ = error "bad argument to rPsiblastTrain"
 
 -- TODO psiblast              : faa  faa      -> bht
 -- TODO psiblast_all          : faa  faa.list -> bht
