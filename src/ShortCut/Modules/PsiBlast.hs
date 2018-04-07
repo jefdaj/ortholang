@@ -34,55 +34,29 @@ pssm = CutType
   , tShow  = defaultShow
   }
 
------------------------
--- psiblast_train_db --
------------------------
-
-psiblastTrainDb :: CutFunction
-psiblastTrainDb = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
-  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
-  , fFixity    = Prefix
-  , fRules     = rPsiblastTrainDb
-  }
-  where
-    name = "psiblast_train_db"
+----------------------------
+-- main psiblast function --
+----------------------------
 
 psiblastCache :: CutConfig -> CutPath
 psiblastCache cfg = cacheDir cfg "psiblast"
 
--- All the psiblast_train* functions eventually call this,
--- but they might edit the expression to build the db from fastas first
-rPsiblastTrainDb :: RulesFn
-rPsiblastTrainDb st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, fa, db]) = do
+-- All the psiblast* functions eventually call this,
+-- but they might edit the expression first or pass different args
+rPsiblast :: [String] -> RulesFn
+rPsiblast args st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
   (ExprPath ePath' ) <- rExpr st e
-  (ExprPath faPath') <- rExpr st fa
+  (ExprPath qPath' ) <- rExpr st q
   (ExprPath dbPath') <- rExpr st db
   let ePath  = toCutPath cfg ePath'
-      faPath = toCutPath cfg faPath'
+      qPath  = toCutPath cfg qPath'
       dbPath = toCutPath cfg dbPath'
       oPath  = exprPath st expr
-      oPath' = debugRules cfg "rPsiblastTrainDb" expr $ fromCutPath cfg oPath
-  oPath' %> \_ -> aPsiblastTrainDb cfg ref oPath ePath faPath dbPath
+      oPath' = debugRules cfg "rPsiblast" expr $ fromCutPath cfg oPath
+  oPath' %> \_ -> aPsiblast args cfg ref oPath ePath qPath dbPath
   return (ExprPath oPath')
-rPsiblastTrainDb _ _ = error "bad argument to rPsiblastTrainDb"
+rPsiblast _ _ _ = error "bad argument to rPsiblast"
 
-aPsiblastTrainDb :: CutConfig -> Locks
-                 -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
-aPsiblastTrainDb = aPsiblast
-  [ "-comp_based_stats", "1"  -- prevent an unnecessary warning
-  , "-num_alignments"  , "0"  -- don't print actual alignments (huge text)
-  , "-num_iterations"  , "99" -- keep iterating until convergence
-  , "-save_pssm_after_last_round"
-  , "-out_ascii_pssm" -- < outPath will be appended here
-  ]
-
-{- This is the main function that eventually gets called by all the others.
- - Because the PSSM training and final BLAST use different arguments, it takes
- - those as... an arugument. They go after the shared args but before the
- - outfile.
- -}
 aPsiblast :: [String] -> CutConfig -> Locks
           -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aPsiblast args cfg ref oPath ePath qPath dbPath = do
@@ -112,6 +86,34 @@ aPsiblast args cfg ref oPath ePath qPath dbPath = do
     []                      -- extra outPaths to lock TODO more -out stuff?
     [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
     psiblastBin args'       -- TODO package and find psiblast-exb (in wrapper?)
+
+-----------------------
+-- psiblast_train_db --
+-----------------------
+
+psiblastTrainDb :: CutFunction
+psiblastTrainDb = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
+  , fFixity    = Prefix
+  , fRules     = rPsiblastTrainDb
+  }
+  where
+    name = "psiblast_train_db"
+
+{- Because the PSSM training and final BLAST use different arguments, their
+ - shared compiler takes those as... an argument. These go after the shared
+ - args but before the outfile. It's a little weird but DRYs up the code a lot.
+ -}
+rPsiblastTrainDb :: RulesFn
+rPsiblastTrainDb = rPsiblast
+  [ "-comp_based_stats", "1"  -- prevent an unnecessary warning
+  , "-num_alignments"  , "0"  -- don't print actual alignments (huge text)
+  , "-num_iterations"  , "99" -- keep iterating until convergence
+  , "-save_pssm_after_last_round"
+  , "-out_ascii_pssm" -- < outPath will be appended here
+  ]
 
 ------------------------
 -- psiblast_train_all --
@@ -162,6 +164,7 @@ rPsiblastTrain _ _ = error "bad argument to rPsiblastTrain"
 -- psiblast_pssm_db --
 ----------------------
 
+-- TODO would be nice to name the pssm so it doesnt just say Query_1
 psiblastPssmDb :: CutFunction
 psiblastPssmDb = CutFunction
   { fName      = name
@@ -173,38 +176,13 @@ psiblastPssmDb = CutFunction
   where
     name = "psiblast_pssm_db"
 
--- TODO unify with the training version?
 rPsiblastPssmDb :: RulesFn
-rPsiblastPssmDb st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, m, db]) = do
-  (ExprPath ePath' ) <- rExpr st e
-  (ExprPath mPath' ) <- rExpr st m
-  (ExprPath dbPath') <- rExpr st db
-  let mPath  = toCutPath cfg mPath'
-      ePath  = toCutPath cfg ePath'
-      dbPath = toCutPath cfg dbPath'
-      oPath  = exprPath st expr
-      oPath' = debugRules cfg "rPsiblastPssmDb" expr $ fromCutPath cfg oPath
-  oPath' %> \_ -> aPsiblastPssmDb cfg ref oPath ePath mPath dbPath
-  return (ExprPath oPath')
-rPsiblastPssmDb _ _ = error "bad argument to rPsiblastPssmDb"
-
--- TODO would be nice to name the pssm so it doesnt just say Query_1
-aPsiblastPssmDb :: CutConfig -> Locks
-                 -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
-aPsiblastPssmDb = aPsiblast
-  -- [ "-comp_based_stats", "1"  -- prevent an unnecessary warning
-  -- , "-num_alignments"  , "0"  -- don't print actual alignments (huge text)
-  -- , "-num_iterations"  , "99" -- keep iterating until convergence
-  [ "-outfmt", "6" -- tabular (TODO customize?)
-  , "-out"         -- < outPath will be appended here
-  ]
-
+rPsiblastPssmDb = rPsiblast ["-outfmt", "6", "-out"]
 
 -- TODO psiblast              : faa  faa      -> bht
 -- TODO psiblast_all          : faa  faa.list -> bht
 -- TODO psiblast_db           : faa  pdb      -> bht
 -- TODO psiblast_pssm         : pssm faa      -> bht
--- TODO psiblast_pssm_db      : pssm pdb      -> bht
 -- TODO psiblast_db_each      : faa  pdb.list -> bht.list
 -- TODO psiblast_pssm_each    : pssm faa.list -> bht.list
 -- TODO psiblast_pssm_db_each : pssm pdb.list -> bht.list
