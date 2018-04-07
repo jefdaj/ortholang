@@ -24,6 +24,9 @@ cutModule = CutModule
     , psiblastTrainAll
     , psiblastTrainDb
     , psiblastPssmDb
+    , psiblastDb
+    , psiblastPssm
+    , psiblastAll
     ]
   }
 
@@ -179,10 +182,76 @@ psiblastPssmDb = CutFunction
 rPsiblastPssmDb :: RulesFn
 rPsiblastPssmDb = rPsiblast ["-outfmt", "6", "-out"]
 
--- TODO psiblast              : faa  faa      -> bht
--- TODO psiblast_all          : faa  faa.list -> bht
--- TODO psiblast_db           : faa  pdb      -> bht
--- TODO psiblast_pssm         : pssm faa      -> bht
--- TODO psiblast_db_each      : faa  pdb.list -> bht.list
--- TODO psiblast_pssm_each    : pssm faa.list -> bht.list
--- TODO psiblast_pssm_db_each : pssm pdb.list -> bht.list
+-----------------
+-- psiblast_db --
+-----------------
+
+psiblastDb :: CutFunction
+psiblastDb = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, pdb] pdb
+  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pdb
+  , fFixity    = Prefix
+  , fRules     = rPsiblastDb
+  }
+  where
+    name = "psiblast_db"
+
+rPsiblastDb :: RulesFn
+rPsiblastDb st expr@(CutFun _ salt _ _ [e, fa, db]) = rExpr st bhtExpr
+  where
+    pssmExpr = CutFun pssm salt (depsOf expr)     "psiblast_train"   [e, fa      , db]
+    bhtExpr  = CutFun bht  salt (depsOf pssmExpr) "psiblast_pssm_db" [e, pssmExpr, db]
+rPsiblastDb _ _ = error "bad argument to rPsiblastDb"
+
+-------------------
+-- psiblast_pssm --
+-------------------
+
+psiblastPssm :: CutFunction
+psiblastPssm = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
+  , fFixity    = Prefix
+  , fRules     = rPsiblastPssm
+  }
+  where
+    name = "psiblast_pssm"
+
+rPsiblastPssm :: RulesFn
+rPsiblastPssm st expr@(CutFun _ salt _ _ [e, q, fas]) = rExpr st bhtExpr
+  where
+    dbExpr  = CutFun pdb salt (depsOf fas ) "makeblastdb_prot" [fas]
+    bhtExpr = CutFun bht salt (depsOf expr) "psiblast_pssm_db" [e, q, dbExpr]
+rPsiblastPssm _ _ = error "bad argument to rPsiblastPssm"
+
+------------------
+-- psiblast_all --
+------------------
+
+psiblastAll :: CutFunction
+psiblastAll = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] bht
+  , fFixity    = Prefix
+  , fRules     = rPsiblastAll
+  }
+  where
+    name = "psiblast_all"
+
+rPsiblastAll :: RulesFn
+rPsiblastAll st expr@(CutFun _ salt _ _ [e, fa, fas]) = rExpr st bhtExpr
+  where
+    listExpr = CutList pdb salt (depsOf fa) [fa]
+    dbExpr   = CutFun  pdb salt (depsOf listExpr) "makeblastdb_prot" [listExpr]
+    bhtExpr  = CutFun  bht salt (depsOf expr) "psiblast_pssm" [e, dbExpr, fas]
+rPsiblastAll _ _ = error "bad argument to rPsiblastAll"
+
+-- TODO write split_fastas so you can try actually running this!
+-- TODO and the rest of these, which should straightforward now:
+-- psiblast              : faa  faa      -> bht
+-- psiblast_db_each      : faa  pdb.list -> bht.list
+-- psiblast_pssm_each    : pssm faa.list -> bht.list
+-- psiblast_pssm_db_each : pssm pdb.list -> bht.list
