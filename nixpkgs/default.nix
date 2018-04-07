@@ -5,8 +5,12 @@ let
   nixpkgs = import <nixpkgs> {};
   inherit (nixpkgs) pkgs;
 
-  # crb-blast only supports this version, and there are reports of a bug in newer ones (still? not sure)
-  # TODO patch crb-blast to use the newest one
+  # this is used in place of ncbi-blast everywhere except in crb-blast...
+  psiblast-exb = pkgs.callPackage ./psiblast-exb { };
+
+  # ... because it only supports exactly 2.2.29
+  # and there are reports of a bug in newer ones (still?)
+  # TODO patch crb-blast to use the newest one?
   ncbi-blast = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
     version="2.2.29";
     name="ncbi-blast-${version}";
@@ -15,7 +19,6 @@ let
       sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
     };
   });
-
   crb-blast  = pkgs.callPackage ./crb-blast  { inherit ncbi-blast; };
 
   myPython = pkgs.pythonPackages // {
@@ -27,6 +30,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast crb-blast;
+  inherit crb-blast psiblast-exb;
   pythonPackages = myPython;
 }

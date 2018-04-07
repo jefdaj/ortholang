@@ -1,2 +1,2 @@
-blastx: 2.2.29+
-Package: blast 2.2.29, build Dec 10 2013 14:41:40
+blastx: 2.5.0+
+ Package: blast 2.5.0, build Feb  9 2017 17:20:36
