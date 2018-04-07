@@ -15,13 +15,13 @@ large7942fna = load_fna "data/7942genes.fna"
 small7942faa = load_faa "data/7942genes10.faa"
 small7942fna = load_fna "data/7942genes10.fna"
 
-hits6803n = blastn_db 1e-5 small6803fna (makeblastdb_nucl large6803fna)
-hits6803p = blastp_db 1e-5 small6803faa (makeblastdb_prot large6803faa)
-hits6803x = blastx_db 1e-5 small6803fna (makeblastdb_prot large6803faa)
+hits6803n = blastn_db 1e-5 small6803fna (makeblastdb_nucl [large6803fna])
+hits6803p = blastp_db 1e-5 small6803faa (makeblastdb_prot [large6803faa])
+hits6803x = blastx_db 1e-5 small6803fna (makeblastdb_prot [large6803faa])
 
-hits7942n = blastn_db 1e-5 small7942fna (makeblastdb_nucl large7942fna)
-hits7942p = blastp_db 1e-5 small7942faa (makeblastdb_prot large6803faa)
-hits7942x = blastx_db 1e-5 small7942fna (makeblastdb_prot large6803faa)
+hits7942n = blastn_db 1e-5 small7942fna (makeblastdb_nucl [large7942fna])
+hits7942p = blastp_db 1e-5 small7942faa (makeblastdb_prot [large6803faa])
+hits7942x = blastx_db 1e-5 small7942fna (makeblastdb_prot [large6803faa])
 
 # TODO add tblastn? (does that make sense?)
 # TODO add tblastx? (does that make sense?)

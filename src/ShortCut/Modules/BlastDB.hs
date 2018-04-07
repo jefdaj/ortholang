@@ -258,7 +258,7 @@ makeblastdbNucl :: CutFunction
 makeblastdbNucl = CutFunction
   { fName      = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
-  , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
+  , fTypeDesc  = "makeblastdb_nucl : fa.list -> ndb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -267,16 +267,16 @@ makeblastdbProt :: CutFunction
 makeblastdbProt = CutFunction
   { fName      = "makeblastdb_prot"
   , fTypeCheck = tMakeblastdb pdb
-  , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  , fTypeDesc  = "makeblastdb_prot : faa.list -> pdb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
 
 tMakeblastdb :: CutType -> TypeChecker
-tMakeblastdb dbType [faType]
+tMakeblastdb dbType [ListOf faType]
   | dbType == pdb && faType   ==    faa       = Right pdb
   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
-tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
+tMakeblastdb _ _ = error "makeblastdb requires a list of fasta files" -- TODO typed error
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
 -- TODO is rtn always the same as dbType?
@@ -378,8 +378,8 @@ mkMakeblastdbEach dbType = CutFunction
 
 -- TODO no! depends on an arg
 tMakeblastdbEach :: CutType -> TypeChecker
-tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
-tMakeblastdbEach _ _ = error "makeblastdb_each requires a list of fasta files" -- TODO typed error
+tMakeblastdbEach dbType [ListOf (ListOf x)] | x `elem` [fna, faa] = Right (ListOf dbType)
+tMakeblastdbEach _ _ = error "makeblastdb_each requires a list lists of of fasta files" -- TODO typed error
 
 rMakeblastdbEach :: CutType -> RulesFn
 rMakeblastdbEach dbType = rEachTmp (aMakeblastdb dbType) "makeblastdb"
