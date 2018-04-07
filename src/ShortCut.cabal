@@ -121,6 +121,7 @@ executable shortcut
                     ShortCut.Modules.LoadList,
                     ShortCut.Modules.Scores,
                     ShortCut.Modules.Plots,
+                    ShortCut.Modules.PsiBlast,
                     ShortCut.Test,
                     ShortCut.Test.Deps
                     ShortCut.Test.Scripts,
