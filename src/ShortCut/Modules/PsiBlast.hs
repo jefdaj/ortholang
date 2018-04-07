@@ -97,27 +97,23 @@ aPsiblastTrainDb cfg ref oPath ePath faPath dbPath = do
     [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
     "psiblast" args         -- TODO package and find psiblast-exb (in wrapper?)
 
-psiblastTrain :: CutFunction
-psiblastTrain = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [faa, faa] pssm
-  , fTypeDesc  = mkTypeDesc name  [faa, faa] pssm
-  , fFixity    = Prefix
-  , fRules     = undefined
-  }
-  where
-    name = "psiblast_train"
-
 psiblastTrainAll :: CutFunction
 psiblastTrainAll = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [faa, ListOf faa] pssm
-  , fTypeDesc  = mkTypeDesc name  [faa, ListOf faa] pssm
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   , fFixity    = Prefix
-  , fRules     = undefined
+  , fRules     = rPsiblastTrainAll
   }
   where
     name = "psiblast_train_all"
+
+rPsiblastTrainAll :: RulesFn
+rPsiblastTrainAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st trainExpr
+  where
+    dbExpr    = CutFun pdb  salt (depsOf fas) "makeblastdb_prot" [fas]
+    trainExpr = CutFun pssm salt (depsOf dbExpr) "psiblast_train_db" [e, fa, dbExpr]
+rPsiblastTrainAll _ _ = error "bad argument to rPsiblastTrainAll"
 
 -- for reference:
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
@@ -132,6 +128,18 @@ psiblastTrainAll = CutFunction
 --     dbExpr = CutFun dbType salt (depsOf faList) name2 [faList] 
 -- rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
+
+
+psiblastTrain :: CutFunction
+psiblastTrain = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
+  , fFixity    = Prefix
+  , fRules     = undefined
+  }
+  where
+    name = "psiblast_train"
 
 
 -- TODO psiblast              : faa  faa      -> bht
