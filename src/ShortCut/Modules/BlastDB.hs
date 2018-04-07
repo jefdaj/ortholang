@@ -12,7 +12,7 @@ import ShortCut.Core.Types
 
 import Control.Monad               (when)
 import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
-                                    debugTrackWrite, readLit, writeLit, readLits,
+                                    debugTrackWrite, readLit, readPaths, writeLit, readLits,
                                     writeLits, writePath, debugA, debugL, debugNeed)
 -- import ShortCut.Core.Debug         (debugA, debugRules)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
@@ -283,17 +283,17 @@ tMakeblastdb _ _ = error "makeblastdb requires a list of fasta files" -- TODO ty
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdb :: RulesFn
-rMakeblastdb s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fa]) = do
-  (ExprPath faPath) <- rExpr s fa
+rMakeblastdb s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fas]) = do
+  (ExprPath fasPath) <- rExpr s fas
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdb" e $ fromCutPath cfg out
       cDir      = makeblastdbCache cfg
       -- dbType    = if rtn == ndb then "_nucl" else "_prot"
       -- dbPrefix  = (fromCutPath cfg cDir) </> digest (exprPath s fa)
       -- dbPrefix' = toCutPath cfg dbPrefix
-      faPath'   = toCutPath cfg faPath
-  -- out' %> \_ -> aMakeblastdb rtn cfg cDir [out, dbPrefix', faPath']
-  out' %> \_ -> aMakeblastdb rtn cfg ref cDir [out, faPath']
+      fasPath'   = toCutPath cfg fasPath
+  -- out' %> \_ -> aMakeblastdb rtn cfg cDir [out, dbPrefix', fasPath']
+  out' %> \_ -> aMakeblastdb rtn cfg ref cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
 rMakeblastdb _ _ = error "bad argument to makeblastdb"
@@ -309,40 +309,45 @@ listPrefixFiles prefix = do
 
 -- TODO why is cDir just the top-level cache without its last dir component?
 aMakeblastdb :: CutType -> CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
-aMakeblastdb dbType cfg ref cDir [out, faPath] = do
+aMakeblastdb dbType cfg ref cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
   let dbType' = if dbType == ndb then "nucl" else "prot"
+  debugNeed cfg "aMakeblastdb" [fasPath']
 
-  -- TODO probably put this back??
-  -- debug cfg ("needing: " ++ faPath') (need [faPath'])
-  debugNeed cfg "aMakeblastdb" [faPath']
+  -- The idea was to hash content here, but it took a long time.
+  -- So now it gets hashed only once, in another thread, by a load_* function,
+  -- and from then on we pick the hash out of the filename.
+  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) fasPath'
 
-  {- The idea was to hash content here, but it took a long time.
-   - So now it gets hashed only once, in another thread, by a load_* function,
-   - and from then on we pick the hash out of the filename.
-   -
-   - TODO oh no it goes one link too far still
-   -}
-  faHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) faPath'
-  let dbDir  = cDir' </> faHash
-      dbOut  = dbDir </> faHash <.> extOf dbType
+  let dbDir  = cDir' </> fasHash
+      dbOut  = dbDir </> fasHash <.> extOf dbType
       dbOut' = toCutPath cfg dbOut
-      out''  = debugA cfg "aMakeblastdb" out' [extOf dbType, out', dbOut, faPath']
+      out''  = debugA cfg "aMakeblastdb" out' [extOf dbType, out', dbOut, fasPath']
       dbIns  = dbOut <.> "*" -- TODO does this actually help?
-  debugL cfg $ "aMakeblastdb out': "      ++ out'
-  debugL cfg $ "aMakeblastdb cDir: "     ++ show cDir
-  debugL cfg $ "aMakeblastdb cDir': "     ++ cDir'
-  debugL cfg $ "aMakeblastdb dbOut': " ++ show dbOut'
-  debugL cfg $ "aMakeblastdb dbType': "   ++ dbType'
-  debugL cfg $ "aMakeblastdb cfg: "   ++ show cfg
+
+  -- TODO will no (manual) quotes at all work with multiple fastas?
+  faPaths <- readPaths cfg ref fasPath'
+  -- let quotePath p = "\"" ++ fromCutPath cfg p ++ "\""
+  --     quotedPaths = "'" ++ unwords (map quotePath faPaths) ++ "'"
+  let quotePath p = fromCutPath cfg p
+      quotedPaths = unwords (map quotePath faPaths)
+
+  debugL cfg $ "aMakeblastdb out': "    ++ out'
+  debugL cfg $ "aMakeblastdb cDir: "    ++ show cDir
+  debugL cfg $ "aMakeblastdb cDir': "   ++ cDir'
+  debugL cfg $ "aMakeblastdb dbOut': "  ++ show dbOut'
+  debugL cfg $ "aMakeblastdb dbType': " ++ dbType'
+  debugL cfg $ "aMakeblastdb cfg: "     ++ show cfg
+  debugL cfg $ "aMakeblastdb quotedPaths: "     ++ show quotedPaths
+
   liftIO $ createDirectoryIfMissing True dbDir
   before <- listPrefixFiles dbIns
   when (null before) $ do
     debugL cfg $ "this is dbIns: " ++ dbIns
     debugL cfg $ "this will be dbOut: " ++ dbOut
     wrappedCmdWrite cfg ref out' before [] [Cwd cDir'] "makeblastdb"
-      [ "-in"    , faPath'
+      [ "-in"    , quotedPaths
       , "-out"   , dbOut
       , "-title" , takeFileName dbOut
       , "-dbtype", dbType'
@@ -353,9 +358,9 @@ aMakeblastdb dbType cfg ref cDir [out, faPath] = do
     debugL cfg $ "dbOut was also created: " ++ dbOut
     writePath cfg ref out'' dbOut'
     where
-      out'    = fromCutPath cfg out
-      cDir'   = fromCutPath cfg cDir
-      faPath' = fromCutPath cfg faPath
+      out'     = fromCutPath cfg out
+      cDir'    = fromCutPath cfg cDir
+      fasPath' = fromCutPath cfg fasPath
 aMakeblastdb _ _ _ _ paths = error $ "bad argument to aMakeblastdb: " ++ show paths
 
 --------------------------------
