@@ -1,11 +1,16 @@
 module ShortCut.Modules.PsiBlast where
 
+-- TODO incorporate deltablast too?
+-- TODO checkpoint PSSM type? not unless needed
+
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions       (readLit, readPath, wrappedCmdWrite, debugA, debugNeed)
+import ShortCut.Core.Actions       (readLit, readPath, wrappedCmdOut,
+                                    wrappedCmdWrite, debugL, debugA, debugNeed)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, debugRules)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, toCutPath, cacheDir, exprPath)
+import ShortCut.Core.Util          (stripWhiteSpace)
 import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
@@ -19,8 +24,6 @@ cutModule = CutModule
     , psiblastTrainDb
     ]
   }
-
--- TODO checkpoint PSSM type? not unless needed
 
 pssm :: CutType
 pssm = CutType
@@ -90,12 +93,17 @@ aPsiblastTrainDb cfg ref oPath ePath faPath dbPath = do
         , "-db"              , dbPre'
         , "-out_ascii_pssm"  , oPath'
         ]
+  -- make sure to get the exb version instead of whatever the system assumes
+  -- TODO is this needed, or will it end up the default?
+  psiblastBin <- fmap stripWhiteSpace $
+                   wrappedCmdOut cfg ref [] [] [] "which" ["psiblast"]
+  debugL cfg $ "psiblast binary: " ++ psiblastBin
   let oPath'' = debugA cfg "aPsiblastTrainDb" oPath' [faPath', eDec, dbPath']
   wrappedCmdWrite cfg ref oPath''
     [dbPre' ++ ".*"]        -- inPtns TODO is this right?
     []                      -- extra outPaths to lock TODO more -out stuff?
     [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
-    "psiblast" args         -- TODO package and find psiblast-exb (in wrapper?)
+    psiblastBin args        -- TODO package and find psiblast-exb (in wrapper?)
 
 ------------------------
 -- psiblast_train_all --

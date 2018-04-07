@@ -73,6 +73,14 @@ srun_crb() {
   run 1 "$srun $@"
 }
 
+srun_psiblast() {
+  # TODO any advantage of 7 vs all 8 cores?
+  # TODO how much memory is realistically needed?
+  # TODO how much wall time is realistically needed?
+  srun="$SRUN --cpus-per-task=7 --nodes=1-1 --ntasks=1 --mem=50G --time=99:00:00"
+  run 1 "$srun $@"
+}
+
 srun_quick() {
   srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:10:00"
   run 1 "$srun $@"
@@ -108,6 +116,11 @@ srun_parallel() {
 # This one is tricky and may run better with adjustments to the -j parameter.
 if [[ $@ =~ "--recstart" ]]; then
   srun_parallel "$@"
+
+# psiblast is already done per gene, and can use threads on one node
+# TODO would this run faster on savio than savio2_htc with more cores?
+elif [[ $1 == *"psiblast"* ]]; then
+  srun_psiblast "$@"
 
 # crb-blast spawns parallel jobs itself, so run in a single srun.
 # TODO would this run faster on savio than savio2_htc with more cores?

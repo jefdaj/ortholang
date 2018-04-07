@@ -10,6 +10,7 @@ import ShortCut.Core.Types
 
 -- import ShortCut.Core.Debug (debug)
 
+import Data.Maybe                  (isJust)
 import Control.Monad               (when)
 import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
                                     debugTrackWrite, readLit, readPaths, writeLit, readLits,
@@ -326,20 +327,29 @@ aMakeblastdb dbType cfg ref cDir [out, fasPath] = do
       out''  = debugA cfg "aMakeblastdb" out' [extOf dbType, out', dbOut, fasPath']
       dbIns  = dbOut <.> "*" -- TODO does this actually help?
 
-  -- TODO will no (manual) quotes at all work with multiple fastas?
+  -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
+  -- be passed as one quoted arg, but we also have to take into account Shake's
+  -- built-in quoting and a possible wrapper script, which may in turn be
+  -- running SLURM commands. These settings work on my system in all cases, but
+  -- quoteInner may also be needed if you have spaces in your paths.... best
+  -- solution is just to avoid that for now?
+  --
+  -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
   faPaths <- readPaths cfg ref fasPath'
-  -- let quotePath p = "\"" ++ fromCutPath cfg p ++ "\""
-  --     quotedPaths = "'" ++ unwords (map quotePath faPaths) ++ "'"
-  let quotePath p = fromCutPath cfg p
-      quotedPaths = unwords (map quotePath faPaths)
+  let noQuoting  = unwords $ map (fromCutPath cfg) faPaths
+      quoteOuter = "\"" ++ noQuoting ++ "\""
+      fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
+      -- quoteInner = "\"" ++ unwords
+      --              (map (\p -> "'" ++ fromCutPath cfg p ++ "'") faPaths)
+      --              ++ "\""
 
-  debugL cfg $ "aMakeblastdb out': "    ++ out'
-  debugL cfg $ "aMakeblastdb cDir: "    ++ show cDir
-  debugL cfg $ "aMakeblastdb cDir': "   ++ cDir'
-  debugL cfg $ "aMakeblastdb dbOut': "  ++ show dbOut'
-  debugL cfg $ "aMakeblastdb dbType': " ++ dbType'
-  debugL cfg $ "aMakeblastdb cfg: "     ++ show cfg
-  debugL cfg $ "aMakeblastdb quotedPaths: "     ++ show quotedPaths
+  debugL cfg $ "aMakeblastdb out': "       ++ out'
+  debugL cfg $ "aMakeblastdb cDir: "       ++ show cDir
+  debugL cfg $ "aMakeblastdb cDir': "      ++ cDir'
+  debugL cfg $ "aMakeblastdb dbOut': "     ++ show dbOut'
+  debugL cfg $ "aMakeblastdb dbType': "    ++ dbType'
+  debugL cfg $ "aMakeblastdb cfg: "        ++ show cfg
+  debugL cfg $ "aMakeblastdb fixedPaths: " ++ show fixedPaths
 
   liftIO $ createDirectoryIfMissing True dbDir
   before <- listPrefixFiles dbIns
@@ -347,7 +357,7 @@ aMakeblastdb dbType cfg ref cDir [out, fasPath] = do
     debugL cfg $ "this is dbIns: " ++ dbIns
     debugL cfg $ "this will be dbOut: " ++ dbOut
     wrappedCmdWrite cfg ref out' before [] [Cwd cDir'] "makeblastdb"
-      [ "-in"    , quotedPaths
+      [ "-in"    , fixedPaths
       , "-out"   , dbOut
       , "-title" , takeFileName dbOut
       , "-dbtype", dbType'
@@ -379,7 +389,7 @@ mkMakeblastdbEach dbType = CutFunction
     singleName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
     faExt = if dbType == ndb then "fa" else "faa"
     name = singleName ++ "_each"
-    desc = name ++ " : " ++ faExt ++ ".list -> " ++ extOf dbType
+    desc = name ++ " : " ++ faExt ++ ".list.list -> " ++ extOf dbType ++ ".list"
 
 -- TODO no! depends on an arg
 tMakeblastdbEach :: CutType -> TypeChecker
