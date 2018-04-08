@@ -1,0 +1,5 @@
+query    = load_faa "data/7942gene.faa"
+pcc6803  = makeblastdb_prot [load_faa "data/6803genes.faa"]
+pcc7942  = makeblastdb_prot [load_faa "data/7942genes.faa"]
+hitlists = psiblast_db_each 1e-10 query [pcc6803, pcc7942]
+result   = hitlists
