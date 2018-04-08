@@ -172,10 +172,11 @@ psiblast = CutFunction
     name = "psiblast"
 
 rPsiblast :: RulesFn
-rPsiblast st expr@(CutFun _ salt _ _ [e, q, s]) = rExpr st bhtExpr
+rPsiblast st (CutFun _ salt _ _ [e, q, s]) = rExpr st expr
   where
-    dbExpr  = CutFun  pdb salt (depsOf s) "makeblastdb_prot" [s]
-    bhtExpr = CutFun  bht salt (depsOf expr) "psiblast_db" [e, q, dbExpr]
+    ss   = CutList faa salt (depsOf s ) [s]
+    db   = CutFun  pdb salt (depsOf ss) "makeblastdb_prot" [ss]
+    expr = CutFun  bht salt (depsOf db) "psiblast_db" [e, q, db]
 rPsiblast _ _ = error "bad argument to rPsiblast"
 
 psiblastEach :: CutFunction
@@ -206,11 +207,10 @@ psiblastAll = CutFunction
     name = "psiblast_all"
 
 rPsiblastAll :: RulesFn
-rPsiblastAll st expr@(CutFun _ salt _ _ [e, fa, fas]) = rExpr st bhtExpr
+rPsiblastAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st expr
   where
-    listExpr = CutList pdb salt (depsOf fa) [fa]
-    dbExpr   = CutFun  pdb salt (depsOf listExpr) "makeblastdb_prot" [listExpr]
-    bhtExpr  = CutFun  bht salt (depsOf expr) "psiblast_pssm" [e, dbExpr, fas]
+    db   = CutFun pdb salt (depsOf fas ) "makeblastdb_prot" [fas]
+    expr = CutFun bht salt (depsOf expr) "psiblast_db" [e, fa, db]
 rPsiblastAll _ _ = error "bad argument to rPsiblastAll"
 
 psiblastDb :: CutFunction
@@ -225,10 +225,10 @@ psiblastDb = CutFunction
     name = "psiblast_db"
 
 rPsiblastDb :: RulesFn
-rPsiblastDb st expr@(CutFun _ salt _ _ [e, fa, db]) = rExpr st bhtExpr
+rPsiblastDb st expr@(CutFun _ salt _ _ [e, fa, db]) = rExpr st expr'
   where
-    pssmExpr = CutFun pssm salt (depsOf expr)     "psiblast_train"   [e, fa      , db]
-    bhtExpr  = CutFun bht  salt (depsOf pssmExpr) "psiblast_pssm_db" [e, pssmExpr, db]
+    query = CutFun pssm salt (depsOf expr ) "psiblast_train_db" [e, fa   , db]
+    expr' = CutFun bht  salt (depsOf query) "psiblast_pssm_db"  [e, query, db]
 rPsiblastDb _ _ = error "bad argument to rPsiblastDb"
 
 psiblastDbEach :: CutFunction
@@ -278,6 +278,7 @@ rPsiblastTrain st (CutFun _ salt _ _ [e, q, s]) = rExpr st expr
     expr = CutFun  pssm salt (depsOf db) "psiblast_train_db" [e, q, db]
 rPsiblastTrain _ _ = error "bad argument to rPsiblastTrain"
 
+-- convert faa.list -> pdb.list with _db_each, then call _train_db_each
 psiblastTrainEach :: CutFunction
 psiblastTrainEach = CutFunction
   { fName      = name
@@ -290,11 +291,12 @@ psiblastTrainEach = CutFunction
     name = "psiblast_train_each"
 
 rPsiblastTrainEach :: RulesFn
-rPsiblastTrainEach st (CutFun _ salt _ _ [e, q, ss]) = rExpr st pssms
+rPsiblastTrainEach st expr@(CutFun _ n _ _ [e, q, ss]) = rExpr st pssms
   where
-    dbs   = CutFun  pdb salt (depsOf ss ) "makeblastdb_prot_each"  [ss]
-    pssms = CutFun pssm salt (depsOf dbs) "psiblast_train_db_each" [e, q, dbs]
-rPsiblastTrainEach _ _ = error "bad argument to rPsiblastTrain"
+    sss   = CutList (ListOf faa ) n (depsOf ss  ) [ss]
+    dbs   = CutFun  (ListOf pdb ) n (depsOf sss ) "makeblastdb_prot_each"  [sss]
+    pssms = CutFun  (ListOf pssm) n (depsOf expr) "psiblast_train_db_each" [e, q, dbs]
+rPsiblastTrainEach _ _ = error "bad argument to rPsiblastTrainEach"
 
 psiblastTrainAll :: CutFunction
 psiblastTrainAll = CutFunction
@@ -325,7 +327,7 @@ psiblastTrainDb = CutFunction
   where
     name = "psiblast_train_db"
 
--- TODO remove? not sure when you would use this one
+-- TODO why is this broken? something in rEach :(
 psiblastTrainDbEach :: CutFunction
 psiblastTrainDbEach = CutFunction
   { fName      = name
