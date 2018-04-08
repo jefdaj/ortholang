@@ -1,0 +1,6 @@
+query   = load_faa "data/7942gene.faa"
+pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+cyanodb = makeblastdb_prot [pcc6803, pcc7942]
+pssm    = psiblast_train_db 1e-10 query cyanodb
+result  = psiblast_pssm_db  1e-10 pssm  cyanodb

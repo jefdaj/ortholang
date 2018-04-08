@@ -3,19 +3,20 @@
 |   |-- lines
 |   |   |-- 0815de9417.txt
 |   |   |-- 171edb7413.txt
-|   |   |-- 3aa7cdbb74.txt
 |   |   |-- 778251fd80.txt
+|   |   |-- 8c1aa61169.txt
 |   |   |-- 8db9b2927b.txt
+|   |   |-- b664eacb7a.txt
 |   |   |-- c0178c7096.txt
 |   |   `-- da3ab843af.txt
 |   |-- load
 |   |   |-- 597257619d.fna -> $WORKDIR/data/7942genome.fna
 |   |   `-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
 |   `-- makeblastdb
-|       `-- 597257619d
-|           |-- 597257619d.ndb.nhr
-|           |-- 597257619d.ndb.nin
-|           `-- 597257619d.ndb.nsq
+|       `-- 8c1aa61169
+|           |-- 8c1aa61169.ndb.nhr
+|           |-- 8c1aa61169.ndb.nin
+|           `-- 8c1aa61169.ndb.nsq
 |-- exprs
 |   |-- all
 |   |   `-- 9ad6e8d943.str.list -> ../../cache/lines/da3ab843af.txt
@@ -31,7 +32,8 @@
 |   |   |-- e35860dc63.str.list -> ../../cache/lines/da3ab843af.txt
 |   |   `-- ed8b182730.str.list -> ../../cache/lines/da3ab843af.txt
 |   |-- list
-|   |   `-- ab95ba87aa.fna.list -> ../../cache/lines/c0178c7096.txt
+|   |   |-- ab95ba87aa.fna.list -> ../../cache/lines/c0178c7096.txt
+|   |   `-- c6ba16cc62.fna.list -> ../../cache/lines/8c1aa61169.txt
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   |   |-- 9b7934c579_1.fna -> ../../cache/load/6ea57f1208.fna
@@ -45,7 +47,7 @@
 |   |   |-- 9b7934c579_9.fna -> ../../cache/load/6ea57f1208.fna
 |   |   `-- dd2257687c.fna -> ../../cache/load/597257619d.fna
 |   |-- makeblastdb_nucl
-|   |   `-- 14a4649153.ndb -> ../../cache/lines/3aa7cdbb74.txt
+|   |   `-- 4916ffb22b.ndb -> ../../cache/lines/b664eacb7a.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   |-- repeat
@@ -54,16 +56,16 @@
 |   |   |-- 7a3218e1ab.str -> ../../cache/lines/171edb7413.txt
 |   |   `-- 7da80bde02.str -> ../../cache/lines/0815de9417.txt
 |   `-- tblastx_db
-|       |-- 8158675169_1cd42e0fa7_83fd95c847.bht
-|       |-- 8158675169_1e6cf89106_83fd95c847.bht
-|       |-- 8158675169_444c0f9c75_83fd95c847.bht
-|       |-- 8158675169_8c624d9757_83fd95c847.bht
-|       |-- 8158675169_8c85ed3831_83fd95c847.bht
-|       |-- 8158675169_8df2fbb1a8_83fd95c847.bht
-|       |-- 8158675169_aefa52ee05_83fd95c847.bht
-|       |-- 8158675169_c780ea950b_83fd95c847.bht
-|       |-- 8158675169_eb7d251397_83fd95c847.bht
-|       `-- 8158675169_ff796373c8_83fd95c847.bht
+|       |-- 8158675169_1cd42e0fa7_4210b6e703.bht
+|       |-- 8158675169_1e6cf89106_4210b6e703.bht
+|       |-- 8158675169_444c0f9c75_4210b6e703.bht
+|       |-- 8158675169_8c624d9757_4210b6e703.bht
+|       |-- 8158675169_8c85ed3831_4210b6e703.bht
+|       |-- 8158675169_8df2fbb1a8_4210b6e703.bht
+|       |-- 8158675169_aefa52ee05_4210b6e703.bht
+|       |-- 8158675169_c780ea950b_4210b6e703.bht
+|       |-- 8158675169_eb7d251397_4210b6e703.bht
+|       `-- 8158675169_ff796373c8_4210b6e703.bht
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/dd2257687c.fna
     |-- hits6803.0ec76add21.str.list -> ../exprs/extract_queries/66233767f2.str.list
@@ -98,4 +100,4 @@
     |-- result.e4f4ccff39.str.list -> ../vars/hits6803.e4f4ccff39.str.list
     `-- result.ef22f5255f.str.list -> ../vars/hits6803.ef22f5255f.str.list
 
-16 directories, 82 files
+16 directories, 84 files

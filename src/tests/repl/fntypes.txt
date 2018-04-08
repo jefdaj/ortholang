@@ -145,13 +145,13 @@ load_prot_db : str -> pdb
 >> :t load_prot_db_each
 load_prot_db_each : str.list -> pdb.list
 >> :t makeblastdb_nucl
-makeblastdb_nucl : fa -> ndb
+makeblastdb_nucl : fa.list -> ndb
 >> :t makeblastdb_nucl_each
-makeblastdb_nucl_each : fa.list -> ndb
+makeblastdb_nucl_each : fa.list.list -> ndb.list
 >> :t makeblastdb_prot
-makeblastdb_prot : faa -> pdb
+makeblastdb_prot : faa.list -> pdb
 >> :t makeblastdb_prot_each
-makeblastdb_prot_each : faa.list -> pdb
+makeblastdb_prot_each : faa.list.list -> pdb.list
 >> :t megablast
 megablast : num fna fna -> bht
 >> :t megablast_db
@@ -208,3 +208,33 @@ tblastx_rev_each : num fna fna.list -> bht.list
 translate : fna -> faa
 >> :t translate_each
 translate_each : fna.list -> faa.list
+>> :t psiblast
+psiblast : num faa faa -> bht
+>> :t psiblast_all
+psiblast_all : num faa faa.list -> bht
+>> :t psiblast_db
+psiblast_db : num faa pdb -> bht
+>> :t psiblast_db_each
+psiblast_db_each : num faa pdb.list -> bht.list
+>> :t psiblast_each
+psiblast_each : num faa faa.list -> bht.list
+>> :t psiblast_pssm
+psiblast_pssm : num pssm faa -> bht
+>> :t psiblast_pssm_all
+psiblast_pssm_all : num pssm faa.list -> bht
+>> :t psiblast_pssm_db
+psiblast_pssm_db : num pssm pdb -> bht
+>> :t psiblast_pssm_db_each
+psiblast_pssm_db_each : num pssm pdb.list -> bht.list
+>> :t psiblast_pssm_each
+psiblast_pssm_each : num pssm faa.list -> bht.list
+>> :t psiblast_train
+psiblast_train : num faa faa -> pssm
+>> :t psiblast_train_all
+psiblast_train_all : num faa faa.list -> pssm
+>> :t psiblast_train_db
+psiblast_train_db : num faa pdb -> pssm
+>> :t psiblast_train_db_each
+psiblast_train_db_each : num faa pdb.list -> pssm.list
+>> :t psiblast_train_each
+psiblast_train_each : num faa faa.list -> pssm.list

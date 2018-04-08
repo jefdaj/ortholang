@@ -1,0 +1,5 @@
+pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+query   = load_faa "data/7942gene.faa"
+pssms   = psiblast_train_each 1.0e-10 query [pcc6803, pcc7942]
+result  = pssms

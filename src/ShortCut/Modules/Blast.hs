@@ -142,12 +142,13 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
 rMkBlastFromFa :: BlastDesc -> RulesFn
 rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
-  = rules st (CutFun rtn salt deps name1 [e, q, expr])
+  = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fRules $ mkBlastFromDb d
     name1 = fName  $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-    expr  = CutFun dbType salt (depsOf s) name2 [s] -- TODO deps OK?
+    faList = CutList (typeOf s) salt (depsOf s) [s]
+    dbExpr = CutFun dbType salt (depsOf faList) name2 [faList] 
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
 ---------------------
@@ -188,8 +189,9 @@ rMkBlastFromFaEach :: BlastDesc -> RulesFn
 rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, ss])
   = rules st (CutFun rtn salt deps name1 [e, q, ss'])
   where
+    ssList = CutList (typeOf ss) salt (depsOf ss) [ss]
     rules = rMkBlastFromDbEach d
-    ss'   = CutFun (ListOf dbType) salt (depsOf ss) name2 [ss]
+    ss'   = CutFun (ListOf dbType) salt (depsOf ssList) name2 [ssList]
     name1 = (fName $ mkBlastFromFa d) ++ "_each"
     name2 = "makeblastdb"
               ++ (if dbType == ndb then "_nucl" else "_prot")

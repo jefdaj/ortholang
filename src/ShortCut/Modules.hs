@@ -20,6 +20,7 @@ import qualified ShortCut.Modules.Summarize as Summarize
 import qualified ShortCut.Modules.LoadList  as LoadList
 import qualified ShortCut.Modules.Scores    as Scores
 import qualified ShortCut.Modules.Plots     as Plots
+import qualified ShortCut.Modules.PsiBlast  as PsiBlast
 
 modules :: [CutModule]
 modules =
@@ -41,4 +42,5 @@ modules =
   , LoadList.cutModule
   , Scores.cutModule
   , Plots.cutModule
+  , PsiBlast.cutModule
   ]

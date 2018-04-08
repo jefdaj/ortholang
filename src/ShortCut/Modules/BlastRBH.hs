@@ -82,7 +82,8 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
   = rEach revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
-    subjDbExpr = CutFun dbType salt (depsOf s) dbFnName [s]
+    sList      = CutList (typeOf s) salt (depsOf s) [s]
+    subjDbExpr = CutFun dbType salt (depsOf sList) dbFnName [sList]
     editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
     editedName = bCmd ++ "_db_rev_each"
     (dbFnName, dbType) = if qType == faa

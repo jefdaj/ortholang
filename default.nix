@@ -17,11 +17,11 @@ let
     seqio
     plots
     blasthits
-    ncbi-blast
     crb-blast
     ncurses # TODO is this needed?
     pythonPackages.blastdbget
     myPython
+    psiblast-exb # TODO does this conflict with ncbi-blast+?
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
