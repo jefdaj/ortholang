@@ -29,23 +29,6 @@ module ShortCut.Modules.PsiBlast where
  -   runs a final psiblast search against each one using the pssm
  -   returns a list of hit tables
  -
- - Here are all the types so far:
- -   psiblast_train         : num faa  faa      -> pssm
- -   psiblast_train_db      : num faa  pdb      -> pssm
- -   psiblast_train_all     : num faa  faa.list -> pssm
- -   psiblast_train_db_each : num faa  pdb.list -> pssm.list
- -   psiblast               : num faa  faa      -> bht      (TODO fix vectorizing)
- -   psiblast_all           : num faa  faa.list -> bht      (TODO what's wrong with it?)
- -   psiblast_each          : num faa  faa.list -> bht.list (TODO write this)
- -   psiblast_db            : num faa  pdb      -> bht      (TODO fix this)
- -   psiblast_pssm          : num pssm faa      -> bht      (TODO fix this)
- -   psiblast_pssm_each     : num pssm faa.list -> bht.list (TODO fix this)
- -   psiblast_pssm_all      : num pssm faa.list -> bht      (TODO fix this)
- -   psiblast_pssm_db       : num pssm pdb      -> bht
- -
- - These aren't all the functions that could be written, just the ones that
- - seemed relatively easy and useful at the time.
- -
  - The most explicit ones (like psiblast_pssm_db) are simplest to implement.
  - The others generally edit the AST to auto-build PSSMs and/or databases
  - before calling the explicit ones.
@@ -82,9 +65,9 @@ cutModule = CutModule
     -- explicitly train pssms
     , psiblastTrain       -- num faa faa      -> pssm
     , psiblastTrainEach   -- num faa faa.list -> pssm.list
+    , psiblastTrainAll    -- num faa faa.list -> pssm
     , psiblastTrainDb     -- num faa pdb      -> pssm
     , psiblastTrainDbEach -- num faa pdb.list -> pssm.list
-    , psiblastTrainAll    -- num faa faa.list -> pssm
 
     -- search with explicit pssm queries
     , psiblastPssm       -- num pssm faa      -> bht
@@ -110,7 +93,6 @@ pssm = CutType
   , tDesc = "PSI-BLAST position-specific substitution matrix as ASCII"
   , tShow  = defaultShow
   }
-
 
 --------------------
 -- base functions --
@@ -173,7 +155,6 @@ aPsiblastBase args cfg ref oPath ePath qPath dbPath = do
     []                      -- extra outPaths to lock TODO more -out stuff?
     [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
     psiblastBin args'       -- TODO package and find psiblast-exb (in wrapper?)
-
 
 -------------------------------
 -- search with fasta queries --
@@ -261,7 +242,6 @@ psiblastDbEach = CutFunction
   where
     name = "psiblast_db_each"
 
-
 ----------------------------
 -- explicitly train pssms --
 ----------------------------
@@ -316,6 +296,24 @@ rPsiblastTrainEach st (CutFun _ salt _ _ [e, q, ss]) = rExpr st pssms
     pssms = CutFun pssm salt (depsOf dbs) "psiblast_train_db_each" [e, q, dbs]
 rPsiblastTrainEach _ _ = error "bad argument to rPsiblastTrain"
 
+psiblastTrainAll :: CutFunction
+psiblastTrainAll = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
+  , fFixity    = Prefix
+  , fRules     = rPsiblastTrainAll
+  }
+  where
+    name = "psiblast_train_all"
+
+rPsiblastTrainAll :: RulesFn
+rPsiblastTrainAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st trainExpr
+  where
+    dbExpr    = CutFun pdb  salt (depsOf fas) "makeblastdb_prot" [fas]
+    trainExpr = CutFun pssm salt (depsOf dbExpr) "psiblast_train_db" [e, fa, dbExpr]
+rPsiblastTrainAll _ _ = error "bad argument to rPsiblastTrainAll"
+
 psiblastTrainDb :: CutFunction
 psiblastTrainDb = CutFunction
   { fName      = name
@@ -338,25 +336,6 @@ psiblastTrainDbEach = CutFunction
   }
   where
     name = "psiblast_train_db_each"
-
-psiblastTrainAll :: CutFunction
-psiblastTrainAll = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
-  , fFixity    = Prefix
-  , fRules     = rPsiblastTrainAll
-  }
-  where
-    name = "psiblast_train_all"
-
-rPsiblastTrainAll :: RulesFn
-rPsiblastTrainAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st trainExpr
-  where
-    dbExpr    = CutFun pdb  salt (depsOf fas) "makeblastdb_prot" [fas]
-    trainExpr = CutFun pssm salt (depsOf dbExpr) "psiblast_train_db" [e, fa, dbExpr]
-rPsiblastTrainAll _ _ = error "bad argument to rPsiblastTrainAll"
-
 
 ---------------------------------------
 -- search with explicit pssm queries --
