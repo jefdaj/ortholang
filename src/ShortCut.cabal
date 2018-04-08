@@ -164,7 +164,7 @@ executable shortcut
                     shake,
                     split,
                     strict,
-                    tagged-exception-core,
+                    -- tagged-exception-core,
                     hspec,
                     tasty,
                     tasty-hunit,
@@ -182,3 +182,4 @@ executable shortcut
                     retry,
                     terminal-size,
                     posix-escape
+                    -- mmorph >=1.0.0 && <1.1
