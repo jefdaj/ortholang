@@ -71,15 +71,15 @@ cutModule = CutModule
 
     -- search with explicit pssm queries
     , psiblastPssm       -- num pssm faa      -> bht
-    , psiblastPssmEach   -- num pssm faa.list -> bht.list (TODO write this)
+    , psiblastPssmEach   -- num pssm faa.list -> bht.list
+    , psiblastPssmAll    -- num pssm faa.list -> bht
     , psiblastPssmDb     -- num pssm pdb      -> bht
-    , psiblastPssmDbEach -- num pssm pdb.list -> bht.list (TODO write this)
+    , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
 
     -- TODO _all functions that just concatenate the hit tables?
-    -- (not unless I can figure out how to do it without misleading evalues)
+    -- not unless I can figure out how to do it without misleading evalues
 
     -- TODO functions that combine multiple dbs using blast_aliastool?
-    -- psiblastPssmAll
     -- psiblastDbAll
     -- psiblastPssmDbAll
     -- psiblastTrainDbAll
@@ -341,15 +341,11 @@ psiblastTrainDbEach = CutFunction
 -- search with explicit pssm queries --
 ---------------------------------------
 
-searchArgs :: [String]
-searchArgs = ["-outfmt", "6", "-out"]
-
--- TODO should this be a single and psiblast_pssm_each the map version?
 psiblastPssm :: CutFunction
 psiblastPssm = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
-  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
+  , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   , fFixity    = Prefix
   , fRules     = rPsiblastPssm
   }
@@ -357,22 +353,44 @@ psiblastPssm = CutFunction
     name = "psiblast_pssm"
 
 rPsiblastPssm :: RulesFn
-rPsiblastPssm st expr@(CutFun _ salt _ _ [e, q, fas]) = rExpr st bhtExpr
+rPsiblastPssm st expr@(CutFun _ salt _ _ [e, q, fa]) = rExpr st expr'
+  where
+    fas   = CutList pdb salt (depsOf fa  ) [fa]
+    db    = CutFun  pdb salt (depsOf fas ) "makeblastdb_prot" [fas]
+    expr' = CutFun  bht salt (depsOf expr) "psiblast_pssm_db" [e, q, db]
+rPsiblastPssm _ _ = error "bad argument to rPsiblastPssm"
+
+psiblastPssmAll :: CutFunction
+psiblastPssmAll = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
+  , fFixity    = Prefix
+  , fRules     = rPsiblastPssmAll
+  }
+  where
+    name = "psiblast_pssm_all"
+
+rPsiblastPssmAll :: RulesFn
+rPsiblastPssmAll st expr@(CutFun _ salt _ _ [e, q, fas]) = rExpr st bhtExpr
   where
     dbExpr  = CutFun pdb salt (depsOf fas ) "makeblastdb_prot" [fas]
     bhtExpr = CutFun bht salt (depsOf expr) "psiblast_pssm_db" [e, q, dbExpr]
-rPsiblastPssm _ _ = error "bad argument to rPsiblastPssm"
+rPsiblastPssmAll _ _ = error "bad argument to rPsiblastPssm"
 
 psiblastPssmEach :: CutFunction
 psiblastPssmEach = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rPsiblastPssmEach
   }
   where
-    name = "psiblast_each"
+    name = "psiblast_pssm_each"
+
+searchArgs :: [String]
+searchArgs = ["-outfmt", "6", "-out"]
 
 rPsiblastPssmEach :: RulesFn
 rPsiblastPssmEach st expr = rPsiblastBaseEach searchArgs st expr'
@@ -394,13 +412,13 @@ psiblastPssmDb = CutFunction
 psiblastPssmDbEach :: CutFunction
 psiblastPssmDbEach = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rPsiblastPssmDbEach
   }
   where
-    name = "psiblast_each"
+    name = "psiblast_pssm_db_each"
 
 rPsiblastPssmDbEach :: RulesFn
 rPsiblastPssmDbEach st expr = rPsiblastBaseEach searchArgs st expr'
