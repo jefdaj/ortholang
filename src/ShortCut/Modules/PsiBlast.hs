@@ -1,41 +1,15 @@
 module ShortCut.Modules.PsiBlast where
 
+-- TODO write more detailed help descriptions for each function
 -- TODO incorporate deltablast too?
 -- TODO checkpoint PSSM type? not unless needed
 -- TODO would be nice to name the pssms so it doesnt just say "Query_1"
 
-{- There are a lot of these and it gets confusing! Some naming conventions:
- -
- - anything with "train" trains and returns one or more pssms
- - anything without "train" runs a regular blast search and returns hits
- - anything with "_all" takes a list of fastas and creates one db from it
- - anything with "_db" takes a blast database directly
- - anything without "_db" auto-builds the db from one or more fastas
- - anything with "_each" vectorizes its last argument
- -
- - The difference between "_each" and "_all" is that "_each" returns a list of
- - results, whereas "_all" collapses it into one big result. Of course that's
- - only meaningful for a couple functions.
- -
- - So for example...
- -
- - psiblast_train_all : num faa faa.list -> pssm
- -   auto-builds one blast db from a list of fasta files
- -   trains a pssm for the query fasta on it
- -   returns the pssm
- -
- - psiblast_each : num faa faa.list -> bht.list
- -   auto-builds one db per subject fasta
- -   trains a pssm for the query fasta against each one
- -   runs a final psiblast search against each one using the pssm
- -   returns a list of hit tables
- -
- - The most explicit ones (like psiblast_pssm_db) are simplest to implement.
- - The others generally edit the AST to auto-build PSSMs and/or databases
- - before calling the explicit ones.
- -
- - TODO write more detailed help descriptions for each function
- -}
+-- TODO _all functions that just concatenate the hit tables?
+--      not unless I can figure out how to do it without misleading evalues
+
+-- TODO functions that combine multiple dbs using blast_aliastool?
+--      psiblastDbAll, psiblastPssmDbAll, psiblastTrainDbAll...
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -56,6 +30,34 @@ cutModule = CutModule
   { mName = "psiblast"
   , mFunctions =
 
+    {- There are a lot of these! Some naming conventions:
+     -
+     - A fn with "train" trains and returns one or more pssms ; one without
+     - "train" runs a regular blast search and returns hits.
+     -
+     - A fn with "db" takesone or more blast databases directly; one without
+     - "db" auto-builds the db(s) from one or more fastas.
+     -
+     - A fn with "all" takes a list of fastas and creates one db from it.
+     -
+     - A fn with "each" vectorizes its last argument. The difference between
+     - "each" and "all" is that "each" returns a list of results, whereas "all"
+     - collapses it into one big result.
+     -
+     - So for example...
+     -
+     - psiblast_train_all : num faa faa.list -> pssm
+     -   auto-builds one blast db from a list of fasta files
+     -   trains a pssm for the query fasta on it
+     -   returns the pssm
+     -
+     - psiblast_each : num faa faa.list -> bht.list
+     -   auto-builds one db per subject fasta
+     -   trains a pssm for the query fasta against each one
+     -   runs a final psiblast search against each one using the pssm
+     -   returns a list of hit tables
+     -}
+  
     -- search with fasta queries (pssm stuff hidden)
     [ psiblast       -- num faa faa      -> bht
     , psiblastEach   -- num faa faa.list -> bht.list
@@ -77,14 +79,6 @@ cutModule = CutModule
     , psiblastPssmDb     -- num pssm pdb      -> bht
     , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
 
-    -- TODO _all functions that just concatenate the hit tables?
-    -- not unless I can figure out how to do it without misleading evalues
-
-    -- TODO functions that combine multiple dbs using blast_aliastool?
-    -- psiblastDbAll
-    -- psiblastPssmDbAll
-    -- psiblastTrainDbAll
-    -- ...
     ]
   }
 
