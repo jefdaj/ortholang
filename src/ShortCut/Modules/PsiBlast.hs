@@ -2,6 +2,7 @@ module ShortCut.Modules.PsiBlast where
 
 -- TODO incorporate deltablast too?
 -- TODO checkpoint PSSM type? not unless needed
+-- TODO would be nice to name the pssms so it doesnt just say "Query_1"
 
 {- There are a lot of these and it gets confusing! Some naming conventions:
  -
@@ -191,9 +192,12 @@ psiblastEach = CutFunction
     name = "psiblast_each"
 
 rPsiblastEach :: RulesFn
-rPsiblastEach st expr = rPsiblastBaseEach searchArgs st expr'
+rPsiblastEach st expr@(CutFun _ n _ _ [e, q, ss]) = rExpr st pssms
   where
-    expr' = undefined expr -- TODO convert single faa -> db here right?
+    sss   = CutList (ListOf faa ) n (depsOf ss  ) [ss]
+    dbs   = CutFun  (ListOf pdb ) n (depsOf sss ) "makeblastdb_prot_each"  [sss]
+    pssms = CutFun  (ListOf pssm) n (depsOf expr) "psiblast_db_each" [e, q, dbs]
+rPsiblastEach _ _ = error "bad argument to rPsiblastEach"
 
 psiblastAll :: CutFunction
 psiblastAll = CutFunction
@@ -278,7 +282,6 @@ rPsiblastTrain st (CutFun _ salt _ _ [e, q, s]) = rExpr st expr
     expr = CutFun  pssm salt (depsOf db) "psiblast_train_db" [e, q, db]
 rPsiblastTrain _ _ = error "bad argument to rPsiblastTrain"
 
--- convert faa.list -> pdb.list with _db_each, then call _train_db_each
 psiblastTrainEach :: CutFunction
 psiblastTrainEach = CutFunction
   { fName      = name
@@ -327,7 +330,6 @@ psiblastTrainDb = CutFunction
   where
     name = "psiblast_train_db"
 
--- TODO why is this broken? something in rEach :(
 psiblastTrainDbEach :: CutFunction
 psiblastTrainDbEach = CutFunction
   { fName      = name
@@ -391,15 +393,17 @@ psiblastPssmEach = CutFunction
   where
     name = "psiblast_pssm_each"
 
+rPsiblastPssmEach :: RulesFn
+rPsiblastPssmEach st expr@(CutFun _ n _ _ [e, q, ss]) = rExpr st pssms
+  where
+    sss   = CutList (ListOf faa ) n (depsOf ss  ) [ss]
+    dbs   = CutFun  (ListOf pdb ) n (depsOf sss ) "makeblastdb_prot_each" [sss]
+    pssms = CutFun  (ListOf pssm) n (depsOf expr) "psiblast_pssm_db_each" [e, q, dbs]
+rPsiblastPssmEach _ _ = error "bad argument to rPsiblastPssmEach"
+
 searchArgs :: [String]
 searchArgs = ["-outfmt", "6", "-out"]
 
-rPsiblastPssmEach :: RulesFn
-rPsiblastPssmEach st expr = rPsiblastBaseEach searchArgs st expr'
-  where
-    expr' = undefined expr -- TODO convert single faa -> db here right?
-
--- TODO would be nice to name the pssm so it doesnt just say Query_1
 psiblastPssmDb :: CutFunction
 psiblastPssmDb = CutFunction
   { fName      = name
@@ -417,12 +421,7 @@ psiblastPssmDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastPssmDbEach
+  , fRules     = rPsiblastBaseEach searchArgs
   }
   where
     name = "psiblast_pssm_db_each"
-
-rPsiblastPssmDbEach :: RulesFn
-rPsiblastPssmDbEach st expr = rPsiblastBaseEach searchArgs st expr'
-  where
-    expr' = undefined expr -- TODO convert single faa -> db here right?
