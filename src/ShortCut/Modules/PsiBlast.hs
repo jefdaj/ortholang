@@ -3,6 +3,52 @@ module ShortCut.Modules.PsiBlast where
 -- TODO incorporate deltablast too?
 -- TODO checkpoint PSSM type? not unless needed
 
+{- There are a lot of these and it gets confusing! Some naming conventions:
+ -
+ - anything with "train" trains and returns one or more pssms
+ - anything without "train" runs a regular blast search and returns hits
+ - anything with "_all" takes a list of fastas and creates one db from it
+ - anything with "_db" takes a blast database directly
+ - anything without "_db" auto-builds the db from one or more fastas
+ - anything with "_each" vectorizes its last argument
+ -
+ - The difference between "_each" and "_all" is that "_each" returns a list of
+ - results, whereas "_all" collapses it into one big result. Of course that's
+ - only meaningful for a couple functions.
+ -
+ - So for example...
+ -
+ - psiblast_train_all : num faa faa.list -> pssm
+ -   auto-builds one blast db from a list of fasta files
+ -   trains a pssm for the query fasta on it
+ -   returns the pssm
+ -
+ - psiblast_each : num faa faa.list -> bht.list
+ -   auto-builds one db per subject fasta
+ -   trains a pssm for the query fasta against each one
+ -   runs a final psiblast search against each one using the pssm
+ -   returns a list of hit tables
+ -
+ - Here are all the types so far:
+ -   psiblast_train         : num faa  faa      -> pssm
+ -   psiblast_train_db      : num faa  pdb      -> pssm
+ -   psiblast_train_all     : num faa  faa.list -> pssm
+ -   psiblast_train_db_each : num faa  pdb.list -> pssm.list
+ -   psiblast               : num faa  faa      -> bht      (TODO fix vectorizing)
+ -   psiblast_all           : num faa  faa.list -> bht      (TODO what's wrong with it?)
+ -   psiblast_each          : num faa  faa.list -> bht.list (TODO write this)
+ -   psiblast_db            : num faa  pdb      -> bht      (TODO fix this)
+ -   psiblast_pssm          : num pssm faa      -> bht      (TODO fix this)
+ -   psiblast_pssm_each     : num pssm faa.list -> bht.list (TODO fix this)
+ -   psiblast_pssm_all      : num pssm faa.list -> bht      (TODO fix this)
+ -   psiblast_pssm_db       : num pssm pdb      -> bht
+ -
+ - These aren't all the functions that could be written, just the ones that
+ - seemed relatively easy and useful at the time.
+ -
+ - TODO write more detailed help descriptions for each function
+ -}
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -15,6 +61,7 @@ import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
+import ShortCut.Core.Compile.Each  (rEach)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -27,6 +74,10 @@ cutModule = CutModule
     , psiblastDb
     , psiblastPssm
     , psiblastAll
+    , psiblastOne
+    , psiblastTrainDbEach -- TODO remove? not sure if useful
+    , psiblastDbEach
+    , psiblastEach
     ]
   }
 
@@ -100,7 +151,7 @@ psiblastTrainDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix
-  , fRules     = rPsiblastTrainDb
+  , fRules     = rPsiblast trainingArgs
   }
   where
     name = "psiblast_train_db"
@@ -109,8 +160,8 @@ psiblastTrainDb = CutFunction
  - shared compiler takes those as... an argument. These go after the shared
  - args but before the outfile. It's a little weird but DRYs up the code a lot.
  -}
-rPsiblastTrainDb :: RulesFn
-rPsiblastTrainDb = rPsiblast
+trainingArgs :: [String]
+trainingArgs =
   [ "-comp_based_stats", "1"  -- prevent an unnecessary warning
   , "-num_alignments"  , "0"  -- don't print actual alignments (huge text)
   , "-num_iterations"  , "99" -- keep iterating until convergence
@@ -174,13 +225,13 @@ psiblastPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rPsiblastPssmDb
+  , fRules     = rPsiblast searchArgs
   }
   where
     name = "psiblast_pssm_db"
 
-rPsiblastPssmDb :: RulesFn
-rPsiblastPssmDb = rPsiblast ["-outfmt", "6", "-out"]
+searchArgs :: [String]
+searchArgs = ["-outfmt", "6", "-out"]
 
 -----------------
 -- psiblast_db --
@@ -189,8 +240,8 @@ rPsiblastPssmDb = rPsiblast ["-outfmt", "6", "-out"]
 psiblastDb :: CutFunction
 psiblastDb = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, faa, pdb] pdb
-  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pdb
+  , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
+  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   , fFixity    = Prefix
   , fRules     = rPsiblastDb
   }
@@ -208,6 +259,7 @@ rPsiblastDb _ _ = error "bad argument to rPsiblastDb"
 -- psiblast_pssm --
 -------------------
 
+-- TODO should this be a single and psiblast_pssm_each the map version?
 psiblastPssm :: CutFunction
 psiblastPssm = CutFunction
   { fName      = name
@@ -249,9 +301,92 @@ rPsiblastAll st expr@(CutFun _ salt _ _ [e, fa, fas]) = rExpr st bhtExpr
     bhtExpr  = CutFun  bht salt (depsOf expr) "psiblast_pssm" [e, dbExpr, fas]
 rPsiblastAll _ _ = error "bad argument to rPsiblastAll"
 
+--------------
+-- psiblast --
+--------------
+
+-- can't call it just rPsiblast because that was taken
+psiblastOne :: CutFunction
+psiblastOne = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
+  , fFixity    = Prefix
+  , fRules     = rPsiblastOne
+  }
+  where
+    name = "psiblast"
+
+rPsiblastOne :: RulesFn
+rPsiblastOne st expr@(CutFun _ salt _ _ [e, q, s]) = rExpr st bhtExpr
+  where
+    dbExpr  = CutFun  pdb salt (depsOf s) "makeblastdb_prot" [s]
+    bhtExpr = CutFun  bht salt (depsOf expr) "psiblast_db" [e, q, dbExpr]
+rPsiblastOne _ _ = error "bad argument to rPsiblastOne"
+
+--------------------
+-- psiblast*_each --
+--------------------
+
+-- This vectorizes aPsiblast calls so they work on list expressions...
+-- it's a little mind-bending, but hey at least the code is short!
+mkPsiblastEach :: [String] -> RulesFn
+mkPsiblastEach args = rEach aPsiblastHack
+  where
+    aPsiblastHack cfg ref [o,e,q,d] = aPsiblast args cfg ref o e q d
+    aPsiblastHack _ _ _ = error "bad argument to mkPsiblastEach"
+
+-- TODO remove? not sure when you would use this one
+psiblastTrainDbEach :: CutFunction
+psiblastTrainDbEach = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
+  , fFixity    = Prefix
+  , fRules     = mkPsiblastEach trainingArgs
+  }
+  where
+    name = "psiblast_train_db_each"
+
+psiblastDbEach :: CutFunction
+psiblastDbEach = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = mkPsiblastEach searchArgs
+  }
+  where
+    name = "psiblast_db_each"
+
+psiblastEach :: CutFunction
+psiblastEach = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = rPsiblastEach
+  }
+  where
+    name = "psiblast_each"
+
+rPsiblastEach :: RulesFn
+rPsiblastEach st expr = mkPsiblastEach searchArgs st expr'
+  where
+    expr' = undefined expr -- TODO convert single faa -> db here right?
+
+-- TODO shit, guess I need to copy from above, but substitute in the rEach call?
+-- TODO or better, make each versions of the basic fns and edit their exprs
+
+-- rPsiblastDbEach :: RulesFn
+-- rPsiblastDbEach = rEach aPsiblastDb
+
+-- rPsiblastPssmEach :: RulesFn
+-- rPsiblastPssmEach = rEach aPsiblastPssm
+
 -- TODO write split_fastas so you can try actually running this!
 -- TODO and the rest of these, which should straightforward now:
--- psiblast              : faa  faa      -> bht
 -- psiblast_db_each      : faa  pdb.list -> bht.list
 -- psiblast_pssm_each    : pssm faa.list -> bht.list
 -- psiblast_pssm_db_each : pssm pdb.list -> bht.list
+-- psiblast_each         : faa faa.list -> bht.list
