@@ -6,12 +6,17 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Actions       (wrappedCmdWrite, readPaths, debugA, debugNeed)
--- import ShortCut.Core.Debug         (debug, debugA)
-import ShortCut.Core.Paths         (fromCutPath, CutPath)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
-                                    mkLoadList, rSimple, rSimpleScript)
-import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
+import ShortCut.Core.Util          (digest)
+import ShortCut.Core.Locks         (withWriteLock')
+import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
+                                    wrappedCmdExit, wrappedCmdWrite, debugTrackWrite)
+import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath, cacheDir)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad, aLoadHash,
+                                    mkLoadList, rSimple, rSimpleScript,
+                                    aLoadListLinks)
+import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach, rEach)
+import System.FilePath             ((</>), takeExtension)
+import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -26,6 +31,7 @@ cutModule = CutModule
     , extractIds  , extractIdsEach
     , translate   , translateEach
     , concatFastas, concatFastasEach
+    , splitFasta  , splitFastaEach
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
@@ -270,3 +276,61 @@ aConcat cfg ref [oPath, fsPath] = do
   where
     fs' = fromCutPath cfg fsPath
 aConcat _ _ _ = error "bad argument to aConcat"
+
+------------------------
+-- split_fasta(_each) --
+------------------------
+
+splitFasta :: CutFunction
+splitFasta = CutFunction
+  { fName      = name
+  , fFixity    = Prefix
+  , fTypeCheck = tSplit
+  , fTypeDesc  = name ++ " : fa -> fa.list"
+  , fRules     = rSimple aSplit -- TODO write rSimpleTmps?
+  }
+  where
+    name = "split_fasta"
+
+splitFastaEach :: CutFunction
+splitFastaEach = CutFunction
+  { fName      = name
+  , fFixity    = Prefix
+  , fTypeCheck = tSplitEach
+  , fTypeDesc  = name ++ " : fa.list -> fa.list.list"
+  , fRules     = rEach aSplit -- TODO rSimpleTmps, but above first
+  }
+  where
+    name = "split_fasta_each"
+
+tSplit :: [CutType] -> Either String CutType
+tSplit [x] | elem x [faa, fna] = Right $ ListOf x
+tSplit _ = Left "expected a fasta file"
+
+tSplitEach :: [CutType] -> Either String CutType
+tSplitEach [ListOf x] | elem x [faa, fna] = Right $ ListOf $ ListOf x
+tSplitEach _ = Left "expected a list of fasta files"
+
+aSplit :: CutConfig -> Locks -> [CutPath] -> Action ()
+aSplit cfg ref [oPath, faPath] = do
+  let faPath' = fromCutPath cfg faPath
+      oPath'  = fromCutPath cfg oPath
+      oPath'' = debugA cfg "aSplit" oPath [oPath', faPath']
+      cDir'   = fromCutPath cfg (cacheDir cfg "split_fasta") </> digest faPath
+      seqs'   = cDir' </> "sequences.txt"
+      seqs    = toCutPath cfg seqs'
+      args    = [cDir', faPath']
+  -- run script and make a list of new fastas it creates
+  liftIO $ createDirectoryIfMissing True cDir' -- TODO remove?
+  withWriteLock' ref cDir' $ do
+    _ <- wrappedCmdExit cfg ref Nothing [faPath'] [] "split_fasta.py" args [0]
+    paths <- getDirectoryFiles cDir' ["*.fna", "*.faa"] -- TODO others too?
+    let fullPaths' = map (cDir' </>) paths
+        fullPaths  = map (toCutPath cfg) fullPaths'
+    debugTrackWrite cfg fullPaths'
+    let loadSeq p = aLoadHash cfg ref p $ takeExtension $ fromCutPath cfg p
+    hashPaths <- mapM loadSeq fullPaths
+    writePaths cfg ref seqs' hashPaths
+  -- load those fastas the usual way (creates many links!)
+  aLoadListLinks cfg ref seqs oPath''
+aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths
