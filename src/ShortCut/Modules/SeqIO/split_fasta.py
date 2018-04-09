@@ -4,15 +4,14 @@
 # Names sequences sequentially to avoid any quoting issues.
 # Usage: split_fasta.py <outdir> <infasta>
 
-# TODO any issues with relative filepaths? should be OK with Cwd
-
 from sys     import argv
 from glob    import glob
 from os.path import basename, join, splitext, realpath
 
 def template(infasta, outdir):
     base, ext = splitext(basename(infasta))
-    prefix = join(outdir, base + '_')
+    # TODO add basename? prefix = join(outdir, base + '_')
+    prefix = join(outdir, '')
     return (prefix, ext)
 
 def split_fasta(infasta, prefix, suffix):

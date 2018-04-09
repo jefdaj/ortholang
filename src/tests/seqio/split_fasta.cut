@@ -1,3 +1,4 @@
-pcc6803 = load_faa "data/6803genes.faa"
-pcc6803seqs = split_fasta pcc6803
-result = pcc6803seqs
+multifa = load_faa "data/7942genes10.faa"
+genes   = split_fasta multifa
+mapped  = split_fasta_each [multifa]
+result  = [genes] | mapped
