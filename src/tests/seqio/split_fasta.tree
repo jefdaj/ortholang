@@ -1,0 +1,59 @@
+.
+|-- cache
+|   |-- each
+|   |   `-- b0c194357c
+|   |       |-- 6b304f493c.faa.list -> ../../../exprs/split_fasta/6b304f493c.faa.list
+|   |       `-- 6b304f493c.faa.list.args -> ../../../cache/lines/11867b459f.txt
+|   |-- lines
+|   |   |-- 11867b459f.txt
+|   |   |-- 1fd94e7688.txt
+|   |   |-- c0368540e0.txt
+|   |   |-- eb9900cf6f.txt
+|   |   `-- ef87d3e725.txt
+|   |-- load
+|   |   |-- 18a54fafca.faa -> ../../cache/split_fasta/6b304f493c/4.faa
+|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|   |   |-- 55895cbd9e.faa -> ../../cache/split_fasta/6b304f493c/1.faa
+|   |   |-- 5b31609163.faa -> ../../cache/split_fasta/6b304f493c/10.faa
+|   |   |-- 6f29186ec9.faa -> ../../cache/split_fasta/6b304f493c/8.faa
+|   |   |-- 82645ed6f6.faa -> ../../cache/split_fasta/6b304f493c/2.faa
+|   |   |-- 9500e84b09.faa -> ../../cache/split_fasta/6b304f493c/6.faa
+|   |   |-- a3a4226717.faa -> ../../cache/split_fasta/6b304f493c/5.faa
+|   |   |-- b2a261c0c1.faa -> ../../cache/split_fasta/6b304f493c/7.faa
+|   |   |-- cab744a6f9.faa -> ../../cache/split_fasta/6b304f493c/3.faa
+|   |   `-- e225e53d82.faa -> ../../cache/split_fasta/6b304f493c/9.faa
+|   `-- split_fasta
+|       `-- 6b304f493c
+|           |-- 1.faa
+|           |-- 10.faa
+|           |-- 2.faa
+|           |-- 3.faa
+|           |-- 4.faa
+|           |-- 5.faa
+|           |-- 6.faa
+|           |-- 7.faa
+|           |-- 8.faa
+|           `-- 9.faa
+|-- exprs
+|   |-- any
+|   |   `-- 252a9e2429.faa.list.list -> ../../cache/lines/1fd94e7688.txt
+|   |-- list
+|   |   |-- 0c65c651f6.faa.list.list.list -> ../../cache/lines/eb9900cf6f.txt
+|   |   |-- 7289342c27.faa.list.list -> ../../cache/lines/1fd94e7688.txt
+|   |   `-- 903b902e8a.faa.list -> ../../cache/lines/11867b459f.txt
+|   |-- load_faa
+|   |   `-- 2d88028e40.faa -> ../../cache/load/32841598b2.faa
+|   |-- split_fasta
+|   |   |-- 1af4d085e7.faa.list -> ../../cache/lines/c0368540e0.txt
+|   |   `-- 6b304f493c.faa.list -> ../../cache/lines/c0368540e0.txt
+|   |-- split_fasta_each
+|   |   `-- 71c16ee95c.faa.list.list -> ../../cache/lines/1fd94e7688.txt
+|   `-- str
+|       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
+`-- vars
+    |-- genes.faa.list -> ../exprs/split_fasta/1af4d085e7.faa.list
+    |-- mapped.faa.list.list -> ../exprs/split_fasta_each/71c16ee95c.faa.list.list
+    |-- multifa.faa -> ../exprs/load_faa/2d88028e40.faa
+    `-- result -> ../exprs/any/252a9e2429.faa.list.list
+
+15 directories, 41 files
