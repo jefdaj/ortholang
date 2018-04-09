@@ -134,7 +134,7 @@ elif [[ $@ == "crb-blast"* ]]; then
 
 # split_fasta hashes many small files that aren't worth the srun overhead
 # (you can try it though with srun_tiny)
-elif [[ $@ == md5sum* && $@ =~ split_fasta ]]; then
+elif [[ $@ == md5sum* && $@ =~ 'cache/split_fasta' ]]; then
   run 0 "$@"
   # srun_tiny "$@"
 
