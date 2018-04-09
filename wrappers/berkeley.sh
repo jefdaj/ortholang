@@ -81,8 +81,13 @@ srun_psiblast() {
   run 1 "$srun $@"
 }
 
-srun_quick() {
+srun_small() {
   srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:10:00"
+  run 1 "$srun $@"
+}
+
+srun_tiny() {
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:00:30"
   run 1 "$srun $@"
 }
 
@@ -127,6 +132,12 @@ elif [[ $1 == *"psiblast"* ]]; then
 elif [[ $@ == "crb-blast"* ]]; then
   srun_crb "$@"
 
+# split_fasta hashes many small files that aren't worth the srun overhead
+# (you can try it though with srun_tiny)
+elif [[ $@ == md5sum* && $@ =~ 'cache/split_fasta' ]]; then
+  run 0 "$@"
+  # srun_tiny "$@"
+
 # These are quick commands that may be better to run locally depending on the
 # queue. Check `squeue` and remove any that are piling up. Some that seem
 # trivial like `cat` and `cut` can be IO-bound when many run at once on the
@@ -138,7 +149,7 @@ elif [[ $@ == md5sum*      ||
         $@ == cat*         ||
         $@ =~ ".py"        ||
         $@ =~ ".R"         ]]; then
-  srun_quick "$@"
+  srun_small "$@"
 
 # If nothing else matches run the command locally
 else

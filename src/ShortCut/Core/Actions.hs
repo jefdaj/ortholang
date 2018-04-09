@@ -54,6 +54,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
+import Data.Maybe                 (maybeToList)
 import Control.Monad              (when)
 import Data.List                  (sort, nub)
 import Data.List.Split            (splitOneOf)
@@ -333,14 +334,16 @@ wrappedCmd cfg ref mOut inPtns opts bin args = do
 -- TODO track writes?
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
-wrappedCmdExit :: CutConfig -> Locks -> FilePath -> [String]
+wrappedCmdExit :: CutConfig -> Locks -> Maybe FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
-wrappedCmdExit cfg r outPath inPtns opts bin as allowedExitCodes = do
-  (_, _, code) <- wrappedCmd cfg r (Just outPath) inPtns opts bin as
+wrappedCmdExit cfg r mOut inPtns opts bin as allowedExitCodes = do
+  (_, _, code) <- wrappedCmd cfg r mOut inPtns opts bin as
+  case mOut of
+    Nothing -> return ()
+    Just o  -> debugTrackWrite cfg [o] -- >> assertNonEmptyFile cfg r outPath
   if code `elem` allowedExitCodes
-    then debugTrackWrite cfg [outPath] -- >> assertNonEmptyFile cfg r outPath -- TODO why recursive need here?
-    else wrappedCmdError bin code [outPath]
-  return code
+    then return code
+    else wrappedCmdError bin code $ maybeToList mOut
 
 {- wrappedCmd specialized for commands that write one or more files. If the
  - command succeeds it tells Shake which files were written, and if it fails
@@ -358,7 +361,7 @@ wrappedCmdWrite cfg ref outPath inPtns outPaths opts bin args = do
   debugL cfg $ "wrappedCmdWrite inPtns: "   ++ show inPtns
   debugL cfg $ "wrappedCmdWrite outPaths: " ++ show outPaths
   debugL cfg $ "wrappedCmdWrite args: "     ++ show args
-  code <- wrappedCmdExit cfg ref outPath inPtns opts bin args [0]
+  code <- wrappedCmdExit cfg ref (Just outPath) inPtns opts bin args [0]
   -- TODO can this be handled in wrappedCmdExit too?
   -- liftIO $ delay 10000
   case code of

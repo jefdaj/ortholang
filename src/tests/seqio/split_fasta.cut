@@ -1,0 +1,4 @@
+multifa = load_faa "data/7942genes10.faa"
+genes   = split_fasta multifa
+mapped  = split_fasta_each [multifa]
+result  = [genes] | mapped

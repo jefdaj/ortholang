@@ -6,12 +6,18 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Actions       (wrappedCmdWrite, readPaths, debugA, debugNeed)
--- import ShortCut.Core.Debug         (debug, debugA)
-import ShortCut.Core.Paths         (fromCutPath, CutPath)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
+import ShortCut.Core.Util          (digest)
+import ShortCut.Core.Locks         (withWriteLock')
+import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
+                                    wrappedCmdExit, wrappedCmdWrite,
+                                    debugTrackWrite)
+import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath, cacheDir)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad, aLoadHash,
                                     mkLoadList, rSimple, rSimpleScript)
-import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
+import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach, rEach)
+import System.FilePath             ((</>), takeExtension)
+import System.Directory            (createDirectoryIfMissing)
+import Control.Monad               (when)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -26,6 +32,7 @@ cutModule = CutModule
     , extractIds  , extractIdsEach
     , translate   , translateEach
     , concatFastas, concatFastasEach
+    , splitFasta  , splitFastaEach
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
@@ -270,3 +277,59 @@ aConcat cfg ref [oPath, fsPath] = do
   where
     fs' = fromCutPath cfg fsPath
 aConcat _ _ _ = error "bad argument to aConcat"
+
+------------------------
+-- split_fasta(_each) --
+------------------------
+
+splitFasta :: CutFunction
+splitFasta = CutFunction
+  { fName      = name
+  , fFixity    = Prefix
+  , fTypeCheck = tSplit
+  , fTypeDesc  = name ++ " : fa -> fa.list"
+  , fRules     = rSimple aSplit
+  }
+  where
+    name = "split_fasta"
+
+splitFastaEach :: CutFunction
+splitFastaEach = CutFunction
+  { fName      = name
+  , fFixity    = Prefix
+  , fTypeCheck = tSplitEach
+  , fTypeDesc  = name ++ " : fa.list -> fa.list.list"
+  , fRules     = rEach aSplit
+  }
+  where
+    name = "split_fasta_each"
+
+tSplit :: [CutType] -> Either String CutType
+tSplit [x] | elem x [faa, fna] = Right $ ListOf x
+tSplit _ = Left "expected a fasta file"
+
+tSplitEach :: [CutType] -> Either String CutType
+tSplitEach [ListOf x] | elem x [faa, fna] = Right $ ListOf $ ListOf x
+tSplitEach _ = Left "expected a list of fasta files"
+
+aSplit :: CutConfig -> Locks -> [CutPath] -> Action ()
+aSplit cfg ref [oPath, faPath] = do
+  let faPath' = fromCutPath cfg faPath
+      oPath'  = fromCutPath cfg oPath
+      oPath'' = debugA cfg "aSplit" oPath' [oPath', faPath']
+      cDir'   = fromCutPath cfg (cacheDir cfg "split_fasta") </> digest faPath
+      args    = [cDir', faPath']
+  -- TODO is this locking stuff redundant? should it be a util function?
+  withWriteLock' ref cDir' $ do
+    done <- doesFileExist oPath''
+    when (not done) $ do
+      liftIO $ createDirectoryIfMissing True cDir'
+      _ <- wrappedCmdExit cfg ref Nothing [faPath'] [] "split_fasta.py" args [0]
+      paths <- getDirectoryFiles cDir' ["*"]
+      let fullPaths' = map (cDir' </>) paths
+          fullPaths  = map (toCutPath cfg) fullPaths'
+          loadExt    = takeExtension faPath'
+      debugTrackWrite cfg fullPaths'
+      hashPaths <- forP fullPaths $ \p -> aLoadHash cfg ref p loadExt
+      writePaths cfg ref oPath'' hashPaths
+aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths

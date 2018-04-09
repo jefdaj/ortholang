@@ -186,7 +186,7 @@ rBlastdblist _ _ = error "bad argument to rBlastdblist"
 aBlastdblist :: CutConfig -> Locks -> CutPath -> Action ()
 aBlastdblist cfg ref listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
-  _ <- wrappedCmdExit cfg ref oPath [] [Cwd tmpDir, Shell] -- TODO remove stderr?
+  _ <- wrappedCmdExit cfg ref (Just oPath) [] [Cwd tmpDir, Shell] -- TODO remove stderr?
     "blastdbget" [tmpDir, ">", listTmp'] [1]
   return ()
   where
