@@ -88,7 +88,7 @@ cutModule = CutModule
 
     -- search with lists of explicit pssm queries and concat hits
     -- TODO for psiblast_pssms, make a list of psiblast_pssm calls plus one concat_bht
-    -- , psiblastPssms       -- num pssm.list faa      -> bht
+    , psiblastPssms       -- num pssm.list faa      -> bht
     -- , psiblastPssmsEach   -- num pssm.list faa.list -> bht.list
     -- , psiblastPssmsAll    -- num pssm.list faa.list -> bht
     , psiblastEachPssmDb  -- num pssm.list pdb -> bht.list (TODO better name!)
@@ -499,3 +499,23 @@ rPsiblastPssmsDb st expr@(CutFun _ salt _ _ [n, qs, s]) = rExpr st expr'
     bhts  = CutFun (ListOf bht) salt (depsOf expr) "psiblast_each_pssm_db" [n, qs, s]
     expr' = CutFun bht  salt (depsOf bhts) "concat_bht" [bhts]
 rPsiblastPssmsDb _ _ = error "bad argument to rPsiblastPssmsDb"
+
+psiblastPssms :: CutFunction
+psiblastPssms = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] bht
+  , fFixity    = Prefix
+  , fRules     = rPsiblastPssms
+  }
+  where
+    name = "psiblast_pssms"
+
+-- TODO deduplicate this from rPsiblastPssm
+rPsiblastPssms :: RulesFn
+rPsiblastPssms st expr@(CutFun _ salt _ _ [e, qs, fa]) = rExpr st expr'
+  where
+    fas   = CutList pdb salt (depsOf fa  ) [fa]
+    db    = CutFun  pdb salt (depsOf fas ) "makeblastdb_prot" [fas]
+    expr' = CutFun  bht salt (depsOf expr) "psiblast_pssms_db" [e, qs, db]
+rPsiblastPssms _ _ = error "bad argument to rPsiblastPssms"
