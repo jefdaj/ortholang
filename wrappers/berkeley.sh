@@ -16,7 +16,11 @@
 # Common options for all srun commands
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
-JOBSFILE="/tmp/jobs.txt" # use main tmpdir to share between instances
+
+export TMPDIR="/clusterfs/rosalind/users/jefdaj/shortcut-tmpdir"
+mkdir -p "$TMPDIR"
+JOBSFILE="${TMPDIR}/jobs.txt"
+WRAPPERLOG="${TMPDIR}/wrapper.log"
 
 kill_jobs() {
   # In case of errors, make sure not to leave zombie srun jobs.
@@ -64,8 +68,8 @@ run() {
   while true; do
     start_jobs $njobs && break || sleep 5
   done
-  echo "$cmd" >> /tmp/wrapper.log
-  eval "trap kill_jobs INT ERR; $cmd && finish_jobs $njobs" 2>> /tmp/wrapper.log
+  echo "$cmd" >> "$WRAPPERLOG"
+  eval "trap kill_jobs INT ERR; $cmd && finish_jobs $njobs" 2>> "$WRAPPERLOG"
 }
 
 srun_crb() {
