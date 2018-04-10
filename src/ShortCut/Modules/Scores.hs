@@ -17,7 +17,7 @@ import ShortCut.Core.Actions (readStrings, readLits, writeLits, debugL)
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath)
 
--- import ShortCut.Core.Compile.Each  (rEach)
+-- import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import ShortCut.Modules.BlastHits (aCutCol)
 import ShortCut.Core.Compile.Basic (rSimple)
 

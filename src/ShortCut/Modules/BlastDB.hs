@@ -17,7 +17,7 @@ import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
                                     writeLits, writePath, debugA, debugL, debugNeed)
 -- import ShortCut.Core.Debug         (debugA, debugRules)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
-import ShortCut.Core.Compile.Each  (rEachTmp)
+import ShortCut.Core.Compile.Vectorize  (rVectorizeTmp)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
                                     toCutPath, CutPath)
 import ShortCut.Core.Util          (stripWhiteSpace, resolveSymlinks)
@@ -159,11 +159,11 @@ filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
--- we use two different ones here because it matches the rEach behavior of using just fn name
+-- we use two different ones here because it matches the rVectorize behavior of using just fn name
 blastdbgetCache :: CutConfig -> CutPath
 blastdbgetCache cfg = cacheDir cfg "blastdbget"
 
--- we use two different ones here because it matches the rEach behavior of using just fn name
+-- we use two different ones here because it matches the rVectorize behavior of using just fn name
 makeblastdbCache :: CutConfig -> CutPath
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
@@ -397,4 +397,4 @@ tMakeblastdbEach dbType [ListOf (ListOf x)] | x `elem` [fna, faa] = Right (ListO
 tMakeblastdbEach _ _ = error "makeblastdb_each requires a list lists of of fasta files" -- TODO typed error
 
 rMakeblastdbEach :: CutType -> RulesFn
-rMakeblastdbEach dbType = rEachTmp 1 (aMakeblastdb dbType) "makeblastdb"
+rMakeblastdbEach dbType = rVectorizeTmp 1 (aMakeblastdb dbType) "makeblastdb"

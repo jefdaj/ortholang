@@ -16,7 +16,7 @@ import ShortCut.Core.Types
 
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Each  (rEach)
+import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
@@ -170,7 +170,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
     name = bCmd ++ "_db_each"
 
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach (bCmd, _, _, _) = rEach 3 $ aMkBlastFromDb bCmd
+rMkBlastFromDbEach (bCmd, _, _, _) = rVectorize 3 $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --

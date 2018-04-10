@@ -24,7 +24,7 @@ import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
-import ShortCut.Core.Compile.Each  (rEach)
+import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
@@ -127,7 +127,7 @@ rPsiblastBase _ _ _ _ = error "bad argument to rPsiblast"
 -- Base rules for running psiblast with one query and a list of subjects
 -- to get a list of hit tables or pssms
 rPsiblastBaseEach :: Bool -> [String] -> RulesFn
-rPsiblastBaseEach w args = rEach 3 aPsiblastHack
+rPsiblastBaseEach w args = rVectorize 3 aPsiblastHack
   where
     aPsiblastHack cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
     aPsiblastHack _ _ _ = error "bad argument to rPsiblastBaseEach"
