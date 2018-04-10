@@ -86,14 +86,16 @@ cutModule = CutModule
     , psiblastPssmDb     -- num pssm pdb      -> bht
     , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
 
-    -- search with lists of explicit pssm queries and concat hits
-    -- TODO for psiblast_pssms, make a list of psiblast_pssm calls plus one concat_bht
-    , psiblastPssms       -- num pssm.list faa      -> bht
+    -- search with lists of explicit pssm queries
+    , psiblastPssms      -- num pssm.list faa -> bht
+    , psiblastEachPssmDb -- num pssm.list pdb -> bht.list (TODO better name)
+    , psiblastPssmsDb    -- num pssm.list pdb -> bht
+
+    -- twice-vectorized functions (figure these out)
+    -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
     -- , psiblastPssmsEach   -- num pssm.list faa.list -> bht.list
     -- , psiblastPssmsAll    -- num pssm.list faa.list -> bht
-    , psiblastEachPssmDb  -- num pssm.list pdb -> bht.list (TODO better name!)
-    , psiblastPssmsDb     -- num pssm.list pdb -> bht
-    -- , psiblastEachPssmDbEach -- num pssm.list pdb.list -> bht.list
+    -- , psiblastPssmsDbEach -- num pssm.list pdb.list -> bht.list
 
     ]
   }
@@ -127,11 +129,20 @@ rPsiblastBase _ _ _ _ = error "bad argument to rPsiblast"
 
 -- Base rules for running psiblast with one query and a list of subjects
 -- to get a list of hit tables or pssms
-rPsiblastBaseEach :: Bool -> [String] -> RulesFn
-rPsiblastBaseEach w args = rVectorize 3 aPsiblastHack
+rPsiblastVec3 :: Bool -> [String] -> RulesFn
+rPsiblastVec3 w args = rVectorize 3 actFn
   where
-    aPsiblastHack cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
-    aPsiblastHack _ _ _ = error "bad argument to rPsiblastBaseEach"
+    actFn cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
+    actFn _ _ _ = error "bad argument to rPsiblastVec3 actFn"
+
+-- Base rules for running psiblast with a list of pssm queries against one
+-- subject to get a list of hit tables or pssms.
+rPsiblastVec2 :: Bool -> [String] -> RulesFn
+rPsiblastVec2 w args = rVectorize 2 actFn
+  where
+    -- this part just corrects the weirdness of also passing a bool and args
+    actFn cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
+    actFn _ _ _ = error "bad argument to rPsiblastVec2 actFn"
 
 -- All the other functions eventually call this one or more times after some
 -- prep work. It runs psiblast with an evalue, query, and subject and returns a
@@ -271,7 +282,7 @@ psiblastDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastBaseEach False searchArgs
+  , fRules     = rPsiblastVec3 False searchArgs
   }
   where
     name = "psiblast_db_each"
@@ -366,7 +377,7 @@ psiblastTrainDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = rPsiblastBaseEach True trainingArgs
+  , fRules     = rPsiblastVec3 True trainingArgs
   }
   where
     name = "psiblast_train_db_each"
@@ -451,7 +462,7 @@ psiblastPssmDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastBaseEach False searchArgs
+  , fRules     = rPsiblastVec3 False searchArgs
   }
   where
     name = "psiblast_pssm_db_each"
@@ -467,20 +478,10 @@ psiblastEachPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastEachPssmDb False searchArgs
+  , fRules     = rPsiblastVec2 False searchArgs
   }
   where
     name = "psiblast_each_pssm_db"
-
--- Base rules for running psiblast with a list of pssm queries against one
--- subject to get a list of hit tables or pssms. Meant to be used as part of
--- rPsiblastPssmsDb below
-rPsiblastEachPssmDb :: Bool -> [String] -> RulesFn
-rPsiblastEachPssmDb w args = rVectorize 2 actFn
-  where
-    -- this part just corrects the weirdness of also passing a bool and args
-    actFn cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
-    actFn _ _ _ = error "bad argument to rPsiblastEachPssmDb actFn"
 
 psiblastPssmsDb :: CutFunction
 psiblastPssmsDb = CutFunction
