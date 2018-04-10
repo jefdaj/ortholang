@@ -7,17 +7,14 @@ import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
 import ShortCut.Core.Util          (digest)
-import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
-                                    wrappedCmdExit, wrappedCmdWrite,
-                                    debugTrackWrite)
-import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath, cacheDir)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad, aLoadHash,
+                                    wrappedCmdOut, wrappedCmdWrite)
+import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
                                     mkLoadList, rSimple, rSimpleScript)
 import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach, rEach)
-import System.FilePath             ((</>), takeExtension)
+import System.FilePath             ((</>))
 import System.Directory            (createDirectoryIfMissing)
-import Control.Monad               (when)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -32,7 +29,8 @@ cutModule = CutModule
     , extractIds  , extractIdsEach
     , translate   , translateEach
     , concatFastas, concatFastasEach
-    , splitFasta  , splitFastaEach
+    , splitFasta faa, splitFastaEach faa
+    , splitFasta fna, splitFastaEach fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
@@ -282,54 +280,45 @@ aConcat _ _ _ = error "bad argument to aConcat"
 -- split_fasta(_each) --
 ------------------------
 
-splitFasta :: CutFunction
-splitFasta = CutFunction
+splitFasta :: CutType -> CutFunction
+splitFasta faType = CutFunction
   { fName      = name
   , fFixity    = Prefix
-  , fTypeCheck = tSplit
-  , fTypeDesc  = name ++ " : fa -> fa.list"
-  , fRules     = rSimple aSplit
+  , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
+  , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
+  , fRules     = rSimple $ aSplit name ext
   }
   where
-    name = "split_fasta"
+    ext  = extOf faType
+    name = "split_" ++ ext
 
-splitFastaEach :: CutFunction
-splitFastaEach = CutFunction
+splitFastaEach :: CutType -> CutFunction
+splitFastaEach faType = CutFunction
   { fName      = name
   , fFixity    = Prefix
-  , fTypeCheck = tSplitEach
-  , fTypeDesc  = name ++ " : fa.list -> fa.list.list"
-  , fRules     = rEach aSplit
+  , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
+  , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
+  , fRules     = rEach $ aSplit name ext
   }
   where
-    name = "split_fasta_each"
+    ext  = extOf faType
+    name = "split_" ++ ext ++ "_each"
 
-tSplit :: [CutType] -> Either String CutType
-tSplit [x] | elem x [faa, fna] = Right $ ListOf x
-tSplit _ = Left "expected a fasta file"
-
-tSplitEach :: [CutType] -> Either String CutType
-tSplitEach [ListOf x] | elem x [faa, fna] = Right $ ListOf $ ListOf x
-tSplitEach _ = Left "expected a list of fasta files"
-
-aSplit :: CutConfig -> Locks -> [CutPath] -> Action ()
-aSplit cfg ref [oPath, faPath] = do
-  let faPath' = fromCutPath cfg faPath
-      oPath'  = fromCutPath cfg oPath
-      oPath'' = debugA cfg "aSplit" oPath' [oPath', faPath']
-      cDir'   = fromCutPath cfg (cacheDir cfg "split_fasta") </> digest faPath
-      args    = [cDir', faPath']
-  -- TODO is this locking stuff redundant? should it be a util function?
-  withWriteLock' ref cDir' $ do
-    done <- doesFileExist oPath''
-    when (not done) $ do
-      liftIO $ createDirectoryIfMissing True cDir'
-      _ <- wrappedCmdExit cfg ref Nothing [faPath'] [] "split_fasta.py" args [0]
-      paths <- getDirectoryFiles cDir' ["*"]
-      let fullPaths' = map (cDir' </>) paths
-          fullPaths  = map (toCutPath cfg) fullPaths'
-          loadExt    = takeExtension faPath'
-      debugTrackWrite cfg fullPaths'
-      hashPaths <- forP fullPaths $ \p -> aLoadHash cfg ref p loadExt
-      writePaths cfg ref oPath'' hashPaths
-aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths
+aSplit :: String -> String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aSplit name ext cfg ref [outPath, faPath] = do
+  let faPath'   = fromCutPath cfg faPath
+      exprDir'  = cfgTmpDir cfg </> "exprs"
+      tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
+      prefix'   = tmpDir' </> digest faPath ++ "_"
+      outDir'   = exprDir' </> "load_" ++ ext
+      outPath'  = fromCutPath cfg outPath
+      outPath'' = debugA cfg "aSplit" outPath' [outPath', faPath']
+      args      = [outDir', prefix', faPath']
+  -- TODO make sure stderr doesn't come through?
+  -- TODO any locking needed here?
+  liftIO $ createDirectoryIfMissing True tmpDir'
+  liftIO $ createDirectoryIfMissing True outDir'
+  out <- wrappedCmdOut cfg ref [faPath'] [] [] "split_fasta.py" args
+  let loadPaths = map (toCutPath cfg) $ lines out
+  writePaths cfg ref outPath'' loadPaths
+aSplit _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths

@@ -1,4 +1,4 @@
-multifa = load_faa "data/7942genes10.faa"
-genes   = split_fasta multifa
-mapped  = split_fasta_each [multifa]
-result  = [genes] | mapped
+multifa = load_faa "data/7942genes.faa"
+genes   = split_faa multifa
+mapped  = split_faa_each [multifa]
+result  = length_each ([genes] | mapped) # should be [2662]
