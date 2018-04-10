@@ -62,7 +62,7 @@ blastCRBEach = CutFunction
   , fTypeCheck = tCrbBlastEach
   , fTypeDesc  = "crb_blast_each : fa.list -> fa.list -> crb.list"
   , fFixity    = Prefix
-  , fRules     = rEachTmps aBlastCRB "crbblast"
+  , fRules     = rEachTmps 2 aBlastCRB "crbblast"
   }
 
 -- TODO split into two functions with different type signatures?

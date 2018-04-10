@@ -170,7 +170,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
     name = bCmd ++ "_db_each"
 
 rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach (bCmd, _, _, _) = rEach $ aMkBlastFromDb bCmd
+rMkBlastFromDbEach (bCmd, _, _, _) = rEach 3 $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --

@@ -127,7 +127,7 @@ rPsiblastBase _ _ _ _ = error "bad argument to rPsiblast"
 -- Base rules for running psiblast with one query and a list of subjects
 -- to get a list of hit tables or pssms
 rPsiblastBaseEach :: Bool -> [String] -> RulesFn
-rPsiblastBaseEach w args = rEach aPsiblastHack
+rPsiblastBaseEach w args = rEach 3 aPsiblastHack
   where
     aPsiblastHack cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
     aPsiblastHack _ _ _ = error "bad argument to rPsiblastBaseEach"

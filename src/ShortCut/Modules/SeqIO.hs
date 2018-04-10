@@ -14,7 +14,7 @@ import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
                                     mkLoadList, rSimple, rSimpleScript)
-import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach, rEach)
+import ShortCut.Core.Compile.Each  (rEach, rSimpleScriptEach)
 import System.FilePath             ((</>))
 import System.Directory            (createDirectoryIfMissing)
 
@@ -103,7 +103,7 @@ gbkToFaaEach = CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
-  , fRules     = rSimpleScriptEach "gbk_to_faa.py"
+  , fRules     = rSimpleScriptEach 1 "gbk_to_faa.py"
   }
   where
     name = "gbk_to_faa_each"
@@ -125,7 +125,7 @@ gbkToFnaEach = CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
   , fFixity    = Prefix
-  , fRules     = rSimpleScriptEach "gbk_to_fna.py"
+  , fRules     = rSimpleScriptEach 1 "gbk_to_fna.py"
   }
   where
     name = "gbk_to_fna_each"
@@ -154,7 +154,7 @@ extractIdsEach = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fRules     = rSimpleScriptEach "extract_ids.py"
+  , fRules     = rSimpleScriptEach 1 "extract_ids.py"
   }
   where
     name = "extract_ids_each"
@@ -190,7 +190,7 @@ extractSeqsEach = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fRules     = rSimpleScriptEach "extract_seqs.py"
+  , fRules     = rSimpleScriptEach 1 "extract_seqs.py"
   }
   where
     name = "extract_seqs_each"
@@ -226,7 +226,7 @@ translateEach = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
-  , fRules     = rSimpleScriptEach "translate.py"
+  , fRules     = rSimpleScriptEach 1 "translate.py"
   }
   where
     name = "translate_each"
@@ -253,7 +253,7 @@ concatEach cType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
-  , fRules     = rEach aConcat
+  , fRules     = rEach 1 aConcat
   }
   where
     ext  = extOf cType
@@ -295,7 +295,7 @@ splitFastaEach faType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
-  , fRules     = rEach $ aSplit name ext
+  , fRules     = rEach 1 $ aSplit name ext
   }
   where
     ext  = extOf faType

@@ -50,7 +50,7 @@ extractQueriesEach = let name = "extract_queries_each" in CutFunction
   , fTypeCheck = tExtractEach
   , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rEach $ aCutCol True 1
+  , fRules     = rEach 1 $ aCutCol True 1
   }
 
 extractTargets :: CutFunction
@@ -68,7 +68,7 @@ extractTargetsEach = let name = "extract_targets_each" in CutFunction
   , fTypeCheck = tExtractEach
   , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rEach $ aCutCol True 2
+  , fRules     = rEach 1 $ aCutCol True 2
   }
 
 aCutCol :: Bool -> Int -> CutConfig -> Locks -> [CutPath] -> Action ()
@@ -101,7 +101,7 @@ filterEvalueEach = let name = "filter_evalue_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rEach aFilterEvalue
+  , fRules     = rEach 2 aFilterEvalue
   }
 
 aFilterEvalue :: CutConfig -> Locks -> [CutPath] -> Action ()
@@ -137,7 +137,7 @@ bestHitsEach = let name = "best_hits_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rEach aBestExtract
+  , fRules     = rEach 1 aBestExtract
   }
 
 aBestExtract :: CutConfig -> Locks -> [CutPath] -> Action ()

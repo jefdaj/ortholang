@@ -32,7 +32,7 @@ lenEach = CutFunction
   , fTypeCheck = tLenEach
   , fTypeDesc  = "length : <whatever>.list.list -> num.list"
   , fFixity    = Prefix
-  , fRules  = rEach aLen
+  , fRules  = rEach 1 aLen
   }
 
 tLen :: [CutType] -> Either String CutType
