@@ -14,7 +14,8 @@ module ShortCut.Modules.PsiBlast where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPath, wrappedCmdOut,
-                                    wrappedCmdWrite, debugL, debugA, debugNeed)
+                                    wrappedCmdWrite, debugL, debugA, debugNeed,
+                                    writeCachedLines)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, debugRules)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, toCutPath, cacheDir,
                                     exprPath)
@@ -24,6 +25,9 @@ import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Each  (rEach)
+import System.FilePath             ((<.>), takeFileName)
+import System.Directory            (removeFile)
+import Control.Monad               (when)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -95,8 +99,8 @@ pssm = CutType
 
 -- Base rules for running psiblast with a single query and subject to get a
 -- single hit table or pssm
-rPsiblastBase :: [String] -> RulesFn
-rPsiblastBase args st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
+rPsiblastBase :: Bool -> [String] -> RulesFn
+rPsiblastBase writingPssm args st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
   (ExprPath ePath' ) <- rExpr st e
   (ExprPath qPath' ) <- rExpr st q
   (ExprPath dbPath') <- rExpr st db
@@ -105,51 +109,71 @@ rPsiblastBase args st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
       dbPath = toCutPath cfg dbPath'
       oPath  = exprPath st expr
       oPath' = debugRules cfg "rPsiblast" expr $ fromCutPath cfg oPath
-  oPath' %> \_ -> aPsiblastBase args cfg ref oPath ePath qPath dbPath
+  oPath' %> \_ -> aPsiblastBase writingPssm args cfg ref oPath ePath qPath dbPath
   return (ExprPath oPath')
-rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
+rPsiblastBase _ _ _ _ = error "bad argument to rPsiblast"
 
 -- Base rules for running psiblast with one query and a list of subjects
 -- to get a list of hit tables or pssms
-rPsiblastBaseEach :: [String] -> RulesFn
-rPsiblastBaseEach args = rEach aPsiblastHack
+rPsiblastBaseEach :: Bool -> [String] -> RulesFn
+rPsiblastBaseEach w args = rEach aPsiblastHack
   where
-    aPsiblastHack cfg ref [o,e,q,d] = aPsiblastBase args cfg ref o e q d
+    aPsiblastHack cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
     aPsiblastHack _ _ _ = error "bad argument to rPsiblastBaseEach"
 
 -- All the other functions eventually call this one or more times after some
 -- prep work. It runs psiblast with an evalue, query, and subject and returns a
 -- pssm or blast hits table depending on the args
-aPsiblastBase :: [String] -> CutConfig -> Locks
+aPsiblastBase :: Bool -> [String] -> CutConfig -> Locks
               -> CutPath -> CutPath -> CutPath -> CutPath
               -> Action ()
-aPsiblastBase args cfg ref oPath ePath qPath dbPath = do
+aPsiblastBase writingPssm args cfg ref oPath ePath qPath dbPath = do
+
   let oPath'  = fromCutPath cfg oPath
+      tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
       ePath'  = fromCutPath cfg ePath
       qPath'  = fromCutPath cfg qPath -- might be a fasta or pssm
       dbPath' = fromCutPath cfg dbPath
   debugNeed cfg "aPsiblastTrainDb" [ePath', qPath', dbPath']
+
   eStr  <- readLit  cfg ref ePath' -- TODO is converting to decimal needed?
   dbPre <- readPath cfg ref dbPath'
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromCutPath cfg $ cacheDir cfg "psiblast"
       dbPre' = fromCutPath cfg dbPre
       args' =
-        ["-query", qPath', "-evalue", eDec, "-db", dbPre'] ++ args ++ [oPath']
+        ["-query", qPath', "-evalue", eDec, "-db", dbPre'] ++ args ++ [tPath']
         -- , "-num_threads", "8"    -- TODO add this in the wrapper script
         -- , "-out", undefined      -- TODO include this?
         -- , "-out_pssm", undefined -- TODO include this?
+
   -- make sure to get the exb version instead of whatever the system assumes
   -- TODO is this needed, or will it end up the default?
   psiblastBin <- fmap stripWhiteSpace $
                    wrappedCmdOut cfg ref [] [] [] "which" ["psiblast"]
   debugL cfg $ "psiblast binary: " ++ psiblastBin
+
   let oPath'' = debugA cfg "aPsiblastTrainDb" oPath' [eDec, qPath', dbPath']
-  wrappedCmdWrite cfg ref oPath''
+  wrappedCmdWrite cfg ref tPath'
     [dbPre' ++ ".*"]        -- inPtns TODO is this right?
     []                      -- extra outPaths to lock TODO more -out stuff?
     [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
     psiblastBin args'       -- TODO package and find psiblast-exb (in wrapper?)
+
+  {- By default PSSMs get a blank first line, but I figured out that you can
+   - also put a sequence ID there and it will use it in place of the annoying
+   - "Query_1" in hit tables. So here we write the PSSM to a tempfile, replace
+   - the first line, then write that to the final outfile.
+   - (If we aren't writing a PSSM, then tPath' is already the final file)
+   -}
+  when writingPssm $ do
+    querySeqId <- fmap (head . lines) $ readFile' qPath'
+    pssmLines  <- fmap         lines  $ readFile' tPath'
+    let dbName     = takeFileName dbPre'
+        queryInfo  = unwords [querySeqId, "(trained on " ++ dbName ++ ")"]
+        pssmWithId = queryInfo : tail pssmLines
+    writeCachedLines cfg ref oPath'' pssmWithId
+    liftIO $ removeFile tPath'
 
 -------------------------------
 -- search with fasta queries --
@@ -235,7 +259,7 @@ psiblastDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastBaseEach searchArgs
+  , fRules     = rPsiblastBaseEach False searchArgs
   }
   where
     name = "psiblast_db_each"
@@ -319,7 +343,7 @@ psiblastTrainDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix
-  , fRules     = rPsiblastBase trainingArgs
+  , fRules     = rPsiblastBase True trainingArgs
   }
   where
     name = "psiblast_train_db"
@@ -330,7 +354,7 @@ psiblastTrainDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = rPsiblastBaseEach trainingArgs
+  , fRules     = rPsiblastBaseEach True trainingArgs
   }
   where
     name = "psiblast_train_db_each"
@@ -404,7 +428,7 @@ psiblastPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rPsiblastBase searchArgs
+  , fRules     = rPsiblastBase False searchArgs
   }
   where
     name = "psiblast_pssm_db"
@@ -415,7 +439,7 @@ psiblastPssmDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastBaseEach searchArgs
+  , fRules     = rPsiblastBaseEach False searchArgs
   }
   where
     name = "psiblast_pssm_db_each"

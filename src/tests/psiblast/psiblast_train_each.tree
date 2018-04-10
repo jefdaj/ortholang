@@ -10,10 +10,11 @@
 |   |-- lines
 |   |   |-- 0cf27272d3.txt
 |   |   |-- 3f62a639a8.txt
+|   |   |-- 4d395ef46f.txt
 |   |   |-- 886c0ddb70.txt
 |   |   |-- 8abd22b6c2.txt
+|   |   |-- 9460d203d5.txt
 |   |   |-- 9d5ff49e8b.txt
-|   |   |-- a11e180840.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
 |   |   |-- bf39825c66.txt
@@ -42,9 +43,9 @@
 |   |-- num
 |   |   `-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
 |   |-- psiblast_train_db
-|   |   `-- 9e754c0ec7_ee63720be0_86d15b07be.pssm
+|   |   `-- 9e754c0ec7_ee63720be0_86d15b07be.pssm -> ../../cache/lines/4d395ef46f.txt
 |   |-- psiblast_train_db_each
-|   |   `-- 5fbeb4e044_4d0e43d616_0ccec80321.pssm.list -> ../../cache/lines/a11e180840.txt
+|   |   `-- 5fbeb4e044_4d0e43d616_0ccec80321.pssm.list -> ../../cache/lines/9460d203d5.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -56,4 +57,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/pssms.pssm.list
 
-18 directories, 38 files
+18 directories, 39 files

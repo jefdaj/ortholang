@@ -5,7 +5,8 @@
 |   |   |-- 8abd22b6c2.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- bdc783547b.txt
-|   |   `-- e00fb07ddb.txt
+|   |   |-- e00fb07ddb.txt
+|   |   `-- f530067413.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -27,7 +28,8 @@
 |   |-- psiblast_pssm_db
 |   |   `-- 5fbeb4e044_858a41407a_aefb289407.bht
 |   |-- psiblast_train_db
-|   |   `-- 5fbeb4e044_4d0e43d616_aefb289407.pssm
+|   |   |-- 5fbeb4e044_4d0e43d616_aefb289407.pssm -> ../../cache/lines/f530067413.txt
+|   |   `-- 5fbeb4e044_4d0e43d616_aefb289407.pssm.tmp
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       `-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -37,4 +39,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hits.bht
 
-14 directories, 23 files
+14 directories, 25 files
