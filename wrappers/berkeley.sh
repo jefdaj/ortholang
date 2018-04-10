@@ -86,8 +86,8 @@ srun_small() {
   run 1 "$srun $@"
 }
 
-srun_tiny() {
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:00:30"
+srun_split() {
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:30:00"
   run 1 "$srun $@"
 }
 
@@ -132,11 +132,8 @@ elif [[ $1 == *"psiblast"* ]]; then
 elif [[ $@ == "crb-blast"* ]]; then
   srun_crb "$@"
 
-# split_fasta hashes many small files that aren't worth the srun overhead
-# (you can try it though with srun_tiny)
-elif [[ $@ == md5sum* && $@ =~ 'cache/split_fasta' ]]; then
-  run 0 "$@"
-  # srun_tiny "$@"
+elif [[ $1 == *"split_fasta.py" ]]; then
+  srun_split "$@"
 
 # These are quick commands that may be better to run locally depending on the
 # queue. Check `squeue` and remove any that are piling up. Some that seem
