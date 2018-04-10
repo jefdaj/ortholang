@@ -72,10 +72,18 @@ unexpected end of input
 expecting digit, letter, "_", white space or "="
 no such variable 'cheat'
 
->> :t concat_fastas
-concat_fastas : fa.list -> fa
->> :t concat_fastas_each
-concat_fastas_each : fa.list.list -> fa.list
+>> :t concat_faa
+concat_faa : faa.list -> faa
+>> :t concat_faa_each
+concat_faa_each : faa.list.list -> faa.list
+>> :t concat_fna
+concat_fna : fna.list -> fna
+>> :t concat_fna_each
+concat_fna_each : fna.list.list -> fna.list
+>> :t concat_bht
+concat_bht : bht.list -> bht
+>> :t concat_bht_each
+concat_bht_each : bht.list.list -> bht.list
 >> :t crb_blast
 crb_blast : fa -> fa -> crb
 >> :t crb_blast_each

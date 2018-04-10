@@ -9,6 +9,8 @@ module ShortCut.Modules.Blast
   )
   where
 
+import Prelude hiding (concat)
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -18,7 +20,7 @@ import ShortCut.Core.Compile.Each  (rEach)
 import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
-import ShortCut.Modules.SeqIO      (faa, fna)
+import ShortCut.Modules.SeqIO      (faa, fna, concat, concatEach)
 import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
 import System.Posix.Escape         (escape)
 
@@ -31,7 +33,8 @@ cutModule = CutModule
     map mkBlastFromFa     blastDescs ++
     map mkBlastFromFaEach blastDescs ++
     map mkBlastFromDb     blastDescs ++
-    map mkBlastFromDbEach blastDescs
+    map mkBlastFromDbEach blastDescs ++
+    [concat bht, concatEach bht]
   }
 
 -- tsv with these columns:

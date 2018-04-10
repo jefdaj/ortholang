@@ -2,6 +2,8 @@
 
 module ShortCut.Modules.SeqIO where
 
+import Prelude hiding (concat)
+
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
@@ -28,7 +30,8 @@ cutModule = CutModule
     , extractSeqs , extractSeqsEach
     , extractIds  , extractIdsEach
     , translate   , translateEach
-    , concatFastas, concatFastasEach
+    , concat fna  , concatEach fna
+    , concat faa  , concatEach faa
     , splitFasta faa, splitFastaEach faa
     , splitFasta fna, splitFastaEach fna
     -- TODO combo that loads multiple fnas or faas and concats them?
@@ -228,49 +231,43 @@ translateEach = CutFunction
   where
     name = "translate_each"
 
---------------------------
--- concat_fastas(_each) --
---------------------------
+--------------
+-- concat_* --
+--------------
 
-concatFastas :: CutFunction
-concatFastas = CutFunction
+concat :: CutType -> CutFunction
+concat cType = CutFunction
   { fName      = name
   , fFixity    = Prefix
-  , fTypeCheck = tConcatFastas
-  , fTypeDesc  = name ++ " : fa.list -> fa"
+  , fTypeCheck = defaultTypeCheck [ListOf cType] cType
+  , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
   , fRules     = rSimple aConcat
   }
   where
-    name = "concat_fastas"
+    ext  = extOf cType
+    name = "concat_" ++ ext
 
-concatFastasEach :: CutFunction
-concatFastasEach = CutFunction
+concatEach :: CutType -> CutFunction
+concatEach cType = CutFunction
   { fName      = name
   , fFixity    = Prefix
-  , fTypeCheck = tConcatFastasEach
-  , fTypeDesc  = name ++ " : fa.list.list -> fa.list"
+  , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
+  , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
   , fRules     = rEach aConcat
   }
   where
-    name = "concat_fastas_each"
-
-tConcatFastas :: [CutType] -> Either String CutType
-tConcatFastas [ListOf x] | elem x [faa, fna] = Right x
-tConcatFastas _ = Left "expected a list of fasta files (of the same type)"
-
-tConcatFastasEach :: [CutType] -> Either String CutType
-tConcatFastasEach [ListOf (ListOf x)] | elem x [faa, fna] = Right $ ListOf x
-tConcatFastasEach _ = Left "expected a list of fasta files (of the same type)"
+    ext  = extOf cType
+    name = "concat_" ++ ext ++ "_each"
 
 aConcat :: CutConfig -> Locks -> [CutPath] -> Action ()
 aConcat cfg ref [oPath, fsPath] = do
-  faPaths <- readPaths cfg ref fs'
-  let faPaths' = map (fromCutPath cfg) faPaths
-  debugNeed cfg "aConcat" faPaths'
+  fPaths <- readPaths cfg ref fs'
+  let fPaths' = map (fromCutPath cfg) fPaths
+  debugNeed cfg "aConcat" fPaths'
   let out'    = fromCutPath cfg oPath
       out''   = debugA cfg "aConcat" out' [out', fs']
-      catArgs = faPaths' ++ [">", out']
-  wrappedCmdWrite cfg ref out'' faPaths' [] [Shell] "cat"
+      catArgs = fPaths' ++ [">", out']
+  wrappedCmdWrite cfg ref out'' fPaths' [] [Shell] "cat"
     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
   where
     fs' = fromCutPath cfg fsPath
