@@ -53,8 +53,7 @@
 |   |-- psiblast_pssm_db_each
 |   |   `-- f51c91829c_9e2fe7fa6d_cc9df7267d.bht.list -> ../../cache/lines/ac40df00f5.txt
 |   |-- psiblast_train_db
-|   |   |-- f51c91829c_4d0e43d616_2133c6113b.pssm -> ../../cache/lines/86c900eddd.txt
-|   |   `-- f51c91829c_4d0e43d616_2133c6113b.pssm.tmp
+|   |   `-- f51c91829c_4d0e43d616_2133c6113b.pssm -> ../../cache/lines/86c900eddd.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -67,4 +66,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlists.bht.list
 
-18 directories, 49 files
+18 directories, 48 files

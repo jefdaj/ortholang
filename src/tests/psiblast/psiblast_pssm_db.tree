@@ -31,8 +31,7 @@
 |   |-- psiblast_pssm_db
 |   |   `-- 5fbeb4e044_df58784e25_0aa7a0990a.bht
 |   |-- psiblast_train_db
-|   |   |-- 5fbeb4e044_4d0e43d616_0aa7a0990a.pssm -> ../../cache/lines/4d395ef46f.txt
-|   |   `-- 5fbeb4e044_4d0e43d616_0aa7a0990a.pssm.tmp
+|   |   `-- 5fbeb4e044_4d0e43d616_0aa7a0990a.pssm -> ../../cache/lines/4d395ef46f.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -45,4 +44,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../exprs/psiblast_pssm_db/5fbeb4e044_df58784e25_0aa7a0990a.bht
 
-14 directories, 31 files
+14 directories, 30 files
