@@ -91,8 +91,9 @@ cutModule = CutModule
     -- , psiblastPssms       -- num pssm.list faa      -> bht
     -- , psiblastPssmsEach   -- num pssm.list faa.list -> bht.list
     -- , psiblastPssmsAll    -- num pssm.list faa.list -> bht
-    -- , psiblastPssmsDb     -- num pssm.list pdb      -> bht
-    -- , psiblastPssmsDbEach -- num pssm.list pdb.list -> bht.list
+    , psiblastEachPssmDb  -- num pssm.list pdb -> bht.list (TODO better name!)
+    , psiblastPssmsDb     -- num pssm.list pdb -> bht
+    -- , psiblastEachPssmDbEach -- num pssm.list pdb.list -> bht.list
 
     ]
   }
@@ -454,3 +455,47 @@ psiblastPssmDbEach = CutFunction
   }
   where
     name = "psiblast_pssm_db_each"
+
+---------------------------------------
+-- search with lists of pssm queries --
+---------------------------------------
+
+-- TODO add concat_bht to collapse to one hit table?
+psiblastEachPssmDb :: CutFunction
+psiblastEachPssmDb = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = rPsiblastEachPssmDb False searchArgs
+  }
+  where
+    name = "psiblast_each_pssm_db"
+
+-- Base rules for running psiblast with a list of pssm queries against one
+-- subject to get a list of hit tables or pssms. Meant to be used as part of
+-- rPsiblastPssmsDb below
+rPsiblastEachPssmDb :: Bool -> [String] -> RulesFn
+rPsiblastEachPssmDb w args = rVectorize 2 actFn
+  where
+    -- this part just corrects the weirdness of also passing a bool and args
+    actFn cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
+    actFn _ _ _ = error "bad argument to rPsiblastEachPssmDb actFn"
+
+psiblastPssmsDb :: CutFunction
+psiblastPssmsDb = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] bht
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] bht
+  , fFixity    = Prefix
+  , fRules     = rPsiblastPssmsDb -- False searchArgs
+  }
+  where
+    name = "psiblast_pssms_db"
+
+rPsiblastPssmsDb :: RulesFn
+rPsiblastPssmsDb st expr@(CutFun _ salt _ _ [n, qs, s]) = rExpr st expr'
+  where
+    bhts  = CutFun (ListOf bht) salt (depsOf expr) "psiblast_each_pssm_db" [n, qs, s]
+    expr' = CutFun bht  salt (depsOf bhts) "concat_bht" [bhts]
+rPsiblastPssmsDb _ _ = error "bad argument to rPsiblastPssmsDb"
