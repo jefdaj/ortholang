@@ -14,9 +14,8 @@ import Text.PrettyPrint.HughesPJClass
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Actions      (readPaths, readStrings, writePaths, symlink,
-                                   readLit, writeLits, debugA, debugNeed)
--- import ShortCut.Core.Debug        (debugA, debugRules, debug)
+import ShortCut.Core.Actions      (readPaths, writePaths, symlink,
+                                   readLit, writeLits, debugA, debugL, debugNeed)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    CutPath, exprPathExplicit, argHashes)
 import ShortCut.Core.Util         (digest, resolveSymlinks, unlessExists,
@@ -108,17 +107,16 @@ aEachMain cfg ref mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   debugNeed cfg "aEachMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
-  -- Is readStrings actually needed here? Maybe they're always paths?
-  mappedPaths   <- readStrings eType cfg ref mappedArgList'
-  mappedPaths'  <- if eType `elem` [str, num]
-                     then return mappedPaths
-                     else liftIO $ mapM resolve mappedPaths
+  mappedPaths  <- readPaths cfg ref mappedArgList'
+  mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
+  debugL cfg $ "aEachMain mappedPaths': " ++ show mappedPaths'
   mapM_ (aEachArgs cfg ref mapIndex eType regularArgs'' mapTmpDir')
         (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
   debugNeed cfg "aEachMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
-  let out = debugA cfg "aEachMain" outPath (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
+  let out = debugA cfg "aEachMain" outPath
+              (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
     then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
     else writePaths cfg ref out $ map (toCutPath cfg) outPaths'

@@ -259,6 +259,7 @@ concatEach cType = CutFunction
     ext  = extOf cType
     name = "concat_" ++ ext ++ "_each"
 
+-- TODO specific error handling here, since cat errors are usually transitory?
 aConcat :: CutConfig -> Locks -> [CutPath] -> Action ()
 aConcat cfg ref [oPath, fsPath] = do
   fPaths <- readPaths cfg ref fs'
@@ -295,7 +296,7 @@ splitFastaEach faType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
-  , fRules     = rEach 1 $ aSplit name ext
+  , fRules     = rEach 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where
     ext  = extOf faType
