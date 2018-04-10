@@ -17,7 +17,7 @@
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
 
-export TMPDIR="/clusterfs/rosalind/users/jefdaj/shortcut-tmpdir"
+export TMPDIR="/clusterfs/rosalind/users/jefdaj/shortcut/shortcut-tmpdir"
 mkdir -p "$TMPDIR"
 JOBSFILE="${TMPDIR}/jobs.txt"
 WRAPPERLOG="${TMPDIR}/wrapper.log"

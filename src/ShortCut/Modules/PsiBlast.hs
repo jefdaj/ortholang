@@ -48,6 +48,9 @@ cutModule = CutModule
      - "each" and "all" is that "each" returns a list of results, whereas "all"
      - collapses it into one big result.
      -
+     - A fn with "pssms" (not "pssm") takes a list of pssm queries and combines
+     - their hits into one big table. TODO less confusing name for that?
+     -
      - So for example...
      -
      - psiblast_train_all : num faa faa.list -> pssm
@@ -76,12 +79,20 @@ cutModule = CutModule
     , psiblastTrainDb     -- num faa pdb      -> pssm
     , psiblastTrainDbEach -- num faa pdb.list -> pssm.list
 
-    -- search with explicit pssm queries
+    -- search with explicit single pssm queries
     , psiblastPssm       -- num pssm faa      -> bht
     , psiblastPssmEach   -- num pssm faa.list -> bht.list
     , psiblastPssmAll    -- num pssm faa.list -> bht
     , psiblastPssmDb     -- num pssm pdb      -> bht
     , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
+
+    -- search with lists of explicit pssm queries and concat hits
+    -- TODO for psiblast_pssms, make a list of psiblast_pssm calls plus one concat_bht
+    -- , psiblastPssms       -- num pssm.list faa      -> bht
+    -- , psiblastPssmsEach   -- num pssm.list faa.list -> bht.list
+    -- , psiblastPssmsAll    -- num pssm.list faa.list -> bht
+    -- , psiblastPssmsDb     -- num pssm.list pdb      -> bht
+    -- , psiblastPssmsDbEach -- num pssm.list pdb.list -> bht.list
 
     ]
   }
