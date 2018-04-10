@@ -132,7 +132,7 @@ elif [[ $1 == *"psiblast"* ]]; then
 elif [[ $@ == "crb-blast"* ]]; then
   srun_crb "$@"
 
-elif [[ $1 == *"split_fasta.py" ]]; then
+elif [[ $@ =~ "split_fasta.py" ]]; then
   srun_split "$@"
 
 # These are quick commands that may be better to run locally depending on the
