@@ -4,7 +4,6 @@ module ShortCut.Core.Compile.Map
   ( map1of1
   , map1of2, map2of2
   , map1of3, map2of3, map3of3
-  , map1of4, map2of4, map3of4, map4of4
 
   -- concat a list of expressions
   , concatExprs
@@ -20,6 +19,10 @@ module ShortCut.Core.Compile.Map
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
+import ShortCut.Core.Util (digest)
+import ShortCut.Core.Actions (readStrings, writeStrings)
+import Control.Monad (forM_)
+import System.FilePath ((</>))
 
 -----------------------------------------
 -- map an action over a list of inputs --
@@ -45,20 +48,15 @@ map1of3 = undefined
 map2of3 :: Action3 -> Action3
 map2of3 = undefined
 
-map3of3 :: Action3 -> Action3
-map3of3 = undefined
-
-map1of4 :: Action4 -> Action4
-map1of4 = undefined
-
-map2of4 :: Action4 -> Action4
-map2of4 = undefined
-
-map3of4 :: Action4 -> Action4
-map3of4 = undefined
-
-map4of4 :: Action4 -> Action4
-map4of4 = undefined
+-- TODO shit, need to come up with the outPaths separately because act3 returns ()?
+map3of3 :: CutType -> CutType -> Action3 -> Action3
+map3of3 inType outType act3 cfg locks out a1 a2 a3 = do
+  inPaths <- readStrings inType cfg locks $ fromCutPath cfg a3
+  let tmpDir   = cfgTmpDir cfg </> "cache" </> "map" -- TODO figure this out better
+      outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toCutPath cfg i]
+      ioPairs  = zip inPaths outPaths
+  forM_ ioPairs $ \(i,o) -> act3 cfg locks (toCutPath cfg o) a1 a2 (toCutPath cfg i)
+  writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 ----------------------------------
 -- concat a list of expressions --
