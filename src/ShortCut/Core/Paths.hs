@@ -114,9 +114,6 @@ debugPath cfg name expr path = debug cfg msg path
 -- cutpaths --
 --------------
 
--- TODO move to Types.hs once settled
-newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
-
 -- Replace current absolute paths with generic placeholders that won't change
 -- when the tmpDir is moved later or whatever.
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
