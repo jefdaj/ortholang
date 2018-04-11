@@ -236,22 +236,22 @@ psiblastEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
-  -- TODO why is an faa.list being passed to makeblastdb?
-  --      oh, of course it is. thats' what this does. rethink!
-  , fRules = \st expr -> rFun3 (map3of3 faa bht $ aPsiblastSearch) st (withBlastdbProt expr)
+  , fRules = \s e -> rFun3 (map3of3 faa bht $ aPsiblastSearch) s (withProtDBs e)
   }
   where
     name = "psiblast_each"
 
 -- Wrap the 3rd arg of a function call in makeblastdb_prot
 -- TODO do the first arg in BlastDB.hs and import here?
-withBlastdbProt :: CutExpr -> CutExpr
-withBlastdbProt (CutFun rtn salt deps name [a1, a2, a3fa])
-  =         (CutFun rtn salt deps name [a1, a2, a3db])
+-- TODO write a non-mapped version based on this too?
+-- TODO name prot or nucl properly?
+withProtDBs :: CutExpr -> CutExpr
+withProtDBs (CutFun rtn salt deps name [a1, a2, fas])
+  =          (CutFun rtn salt deps name [a1, a2, dbs])
   where
-    a3fas = CutList (typeOf a3fa) salt (depsOf a3fa) [a3fa]
-    a3db  = CutFun  pdb salt (depsOf a3fas) "makeblastdb_prot" [a3fas]
-withBlastdbProt _ = error "bad argument to withBlastdbProt"
+    fass = CutList (typeOf fas) salt (depsOf fas) [fas]
+    dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
+withProtDBs e = error $ "bad argument to withProtDBs: " ++ show e
 
 -- Converts a psiblast function that needs a premade blast db into one that
 -- starts from faa. The db/faa is always the 3rd arg.
