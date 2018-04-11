@@ -29,10 +29,6 @@ import ShortCut.Core.Paths
  - a GADT again.
  -}
 
-type Action1 = CutConfig -> Locks -> CutPath -> Action ()
-type Action2 = CutConfig -> Locks -> CutPath -> CutPath -> Action ()
-type Action3 = CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
-
 map1of1 :: Action1 -> Action1
 map1of1 = undefined
 
