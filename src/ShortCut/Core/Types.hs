@@ -4,6 +4,7 @@ module ShortCut.Core.Types
   , Action1
   , Action2
   , Action3
+  , Action4
   , ActionFn
   , RulesFn
   , TypeChecker
@@ -83,6 +84,7 @@ newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
 type Action1 = CutConfig -> Locks -> CutPath -> Action ()
 type Action2 = CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 type Action3 = CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
+type Action4 = CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 
 -- TODO remove when able in favor of well-typed versions above
 type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
