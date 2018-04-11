@@ -6,6 +6,8 @@ module ShortCut.Core.Compile.Vectorize
   )
   where
 
+-- If all goes well, this module will soon be phased out in favor of Compile.Map
+
 import Development.Shake
 import ShortCut.Core.Compile.Basic
 import ShortCut.Core.Types
