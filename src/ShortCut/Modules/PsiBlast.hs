@@ -28,7 +28,7 @@ import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
-import ShortCut.Core.Compile.Map   (map3of4)
+import ShortCut.Core.Compile.Map   (map3of3)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -116,8 +116,8 @@ pssm = CutType
 
 -- Base rules for running psiblast with a single query and subject to get a
 -- single hit table or pssm
-rPsiblastBase :: Action4 -> RulesFn
-rPsiblastBase act4 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
+rPsiblastBase :: Action3 -> RulesFn
+rPsiblastBase act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
   (ExprPath ePath' ) <- rExpr st e
   (ExprPath qPath' ) <- rExpr st q
   (ExprPath dbPath') <- rExpr st db
@@ -126,7 +126,7 @@ rPsiblastBase act4 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
       dbPath = toCutPath cfg dbPath'
       oPath  = exprPath st expr
       oPath' = debugRules cfg "rPsiblast" expr $ fromCutPath cfg oPath
-  oPath' %> \_ -> act4 cfg ref oPath ePath qPath dbPath
+  oPath' %> \_ -> act3 cfg ref oPath ePath qPath dbPath
   return (ExprPath oPath')
 rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
 
@@ -150,16 +150,16 @@ rPsiblastVec2 w args = rVectorize 2 actFn
     actFn _ _ _ = error "bad argument to rPsiblastVec2 actFn"
 
 -- Train a PSSM on a blast database
-aPsiblastTrain :: Action4
+aPsiblastTrain :: Action3
 aPsiblastTrain = aPsiblastBase True trainingArgs
 
 -- Psiblast search with a PSSM against a BLAST database
-aPsiblastSearch :: Action4
+aPsiblastSearch :: Action3
 aPsiblastSearch = aPsiblastBase False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrain to train a PSSM, or
 -- aPsiblastSearch to search with an existing PSSM.
-aPsiblastBase :: Bool -> [String] -> Action4
+aPsiblastBase :: Bool -> [String] -> Action3
 aPsiblastBase writingPssm args cfg ref oPath ePath qPath dbPath = do
 
   let oPath'  = fromCutPath cfg oPath
@@ -238,7 +238,7 @@ psiblastEach = CutFunction
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
   -- , fRules     = rPsiblastEach
-  , fRules     = rPsiblastBase $ map3of4 aPsiblastSearch
+  , fRules     = rPsiblastBase $ map3of3 faa bht aPsiblastSearch
   }
   where
     name = "psiblast_each"
