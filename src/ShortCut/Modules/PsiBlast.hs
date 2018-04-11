@@ -16,9 +16,8 @@ import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPath, wrappedCmdOut,
                                     wrappedCmdWrite, debugL, debugA, debugNeed,
                                     writeCachedLines)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, debugRules)
-import ShortCut.Core.Paths         (CutPath, fromCutPath, toCutPath, cacheDir,
-                                    exprPath)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr)
+import ShortCut.Core.Paths         (fromCutPath, cacheDir)
 import ShortCut.Core.Util          (stripWhiteSpace)
 import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.Blast      (bht)
@@ -28,7 +27,7 @@ import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
-import ShortCut.Core.Compile.Map   (map3of3)
+import ShortCut.Core.Compile.Map   (map3of3, rFun3)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -116,19 +115,19 @@ pssm = CutType
 
 -- Base rules for running psiblast with a single query and subject to get a
 -- single hit table or pssm
-rPsiblastBase :: Action3 -> RulesFn
-rPsiblastBase act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
-  (ExprPath ePath' ) <- rExpr st e
-  (ExprPath qPath' ) <- rExpr st q
-  (ExprPath dbPath') <- rExpr st db
-  let ePath  = toCutPath cfg ePath'
-      qPath  = toCutPath cfg qPath'
-      dbPath = toCutPath cfg dbPath'
-      oPath  = exprPath st expr
-      oPath' = debugRules cfg "rPsiblast" expr $ fromCutPath cfg oPath
-  oPath' %> \_ -> act3 cfg ref oPath ePath qPath dbPath
-  return (ExprPath oPath')
-rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
+-- rPsiblastBase :: Action3 -> RulesFn
+-- rPsiblastBase act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
+--   (ExprPath ePath' ) <- rExpr st e
+--   (ExprPath qPath' ) <- rExpr st q
+--   (ExprPath dbPath') <- rExpr st db
+--   let ePath  = toCutPath cfg ePath'
+--       qPath  = toCutPath cfg qPath'
+--       dbPath = toCutPath cfg dbPath'
+--       oPath  = exprPath st expr
+--       oPath' = debugRules cfg "rPsiblast" expr $ fromCutPath cfg oPath
+--   oPath' %> \_ -> act3 cfg ref oPath ePath qPath dbPath
+--   return (ExprPath oPath')
+-- rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
 
 -- Base rules for running psiblast with one query and a list of subjects
 -- to get a list of hit tables or pssms
@@ -136,7 +135,7 @@ rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
 rPsiblastVec3 :: Bool -> [String] -> RulesFn
 rPsiblastVec3 w args = rVectorize 3 actFn
   where
-    actFn cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
+    actFn cfg ref [o,e,q,d] = aPsiblastDb w args cfg ref o e q d
     actFn _ _ _ = error "bad argument to rPsiblastVec3 actFn"
 
 -- Base rules for running psiblast with a list of pssm queries against one
@@ -146,28 +145,28 @@ rPsiblastVec2 :: Bool -> [String] -> RulesFn
 rPsiblastVec2 w args = rVectorize 2 actFn
   where
     -- this part just corrects the weirdness of also passing a bool and args
-    actFn cfg ref [o,e,q,d] = aPsiblastBase w args cfg ref o e q d
+    actFn cfg ref [o,e,q,d] = aPsiblastDb w args cfg ref o e q d
     actFn _ _ _ = error "bad argument to rPsiblastVec2 actFn"
 
 -- Train a PSSM on a blast database
 aPsiblastTrain :: Action3
-aPsiblastTrain = aPsiblastBase True trainingArgs
+aPsiblastTrain = aPsiblastDb True trainingArgs
 
 -- Psiblast search with a PSSM against a BLAST database
 aPsiblastSearch :: Action3
-aPsiblastSearch = aPsiblastBase False searchArgs
+aPsiblastSearch = aPsiblastDb False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrain to train a PSSM, or
 -- aPsiblastSearch to search with an existing PSSM.
-aPsiblastBase :: Bool -> [String] -> Action3
-aPsiblastBase writingPssm args cfg ref oPath ePath qPath dbPath = do
+aPsiblastDb :: Bool -> [String] -> Action3
+aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
 
   let oPath'  = fromCutPath cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
       ePath'  = fromCutPath cfg ePath
       qPath'  = fromCutPath cfg qPath -- might be a fasta or pssm
       dbPath' = fromCutPath cfg dbPath
-  debugNeed cfg "aPsiblastTrainDb" [ePath', qPath', dbPath']
+  debugNeed cfg "aPsiblastDb" [ePath', qPath', dbPath']
 
   eStr  <- readLit  cfg ref ePath' -- TODO is converting to decimal needed?
   dbPre <- readPath cfg ref dbPath'
@@ -186,7 +185,7 @@ aPsiblastBase writingPssm args cfg ref oPath ePath qPath dbPath = do
                    wrappedCmdOut cfg ref [] [] [] "which" ["psiblast"]
   debugL cfg $ "psiblast binary: " ++ psiblastBin
 
-  let oPath'' = debugA cfg "aPsiblastTrainDb" oPath' [eDec, qPath', dbPath']
+  let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
   wrappedCmdWrite cfg ref tPath'
     [dbPre' ++ ".*"]        -- inPtns TODO is this right?
     []                      -- extra outPaths to lock TODO more -out stuff?
@@ -237,11 +236,29 @@ psiblastEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
-  -- , fRules     = rPsiblastEach
-  , fRules     = rPsiblastBase $ map3of3 faa bht aPsiblastSearch
+  -- TODO why is an faa.list being passed to makeblastdb?
+  --      oh, of course it is. thats' what this does. rethink!
+  , fRules = \st expr -> rFun3 (map3of3 faa bht $ aPsiblastSearch) st (withBlastdbProt expr)
   }
   where
     name = "psiblast_each"
+
+-- Wrap the 3rd arg of a function call in makeblastdb_prot
+-- TODO do the first arg in BlastDB.hs and import here?
+withBlastdbProt :: CutExpr -> CutExpr
+withBlastdbProt (CutFun rtn salt deps name [a1, a2, a3fa])
+  =         (CutFun rtn salt deps name [a1, a2, a3db])
+  where
+    a3fas = CutList (typeOf a3fa) salt (depsOf a3fa) [a3fa]
+    a3db  = CutFun  pdb salt (depsOf a3fas) "makeblastdb_prot" [a3fas]
+withBlastdbProt _ = error "bad argument to withBlastdbProt"
+
+-- Converts a psiblast function that needs a premade blast db into one that
+-- starts from faa. The db/faa is always the 3rd arg.
+-- TODO wrap the expr and compile like before instead of doing it in terms of Actions?
+-- TODO if keeping this, how to make the tmpfile names stay useful?
+-- makeblastdbAnd :: Action3 -> Action3
+-- makeblastdbAnd act3 = \cfg locks out a1 a2 a3 -> do
 
 psiblastAll :: CutFunction
 psiblastAll = CutFunction
@@ -369,7 +386,7 @@ psiblastTrainDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix
-  , fRules     = rPsiblastBase $ aPsiblastTrain
+  , fRules     = rFun3 $ aPsiblastTrain
   }
   where
     name = "psiblast_train_db"
@@ -454,7 +471,7 @@ psiblastPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rPsiblastBase aPsiblastSearch
+  , fRules     = rFun3 aPsiblastSearch
   }
   where
     name = "psiblast_pssm_db"
