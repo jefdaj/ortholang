@@ -88,6 +88,7 @@ executable shortcut
                     ShortCut.Core.Compile,
                     ShortCut.Core.Compile.Basic,
                     ShortCut.Core.Compile.Vectorize,
+                    ShortCut.Core.Compile.Map,
                     ShortCut.Core.Compile.Repeat,
                     ShortCut.Core.Compile.Compose,
                     ShortCut.Core.Paths,
