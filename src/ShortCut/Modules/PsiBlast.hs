@@ -129,15 +129,6 @@ pssm = CutType
 --   return (ExprPath oPath')
 -- rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
 
--- Base rules for running psiblast with one query and a list of subjects
--- to get a list of hit tables or pssms
--- TODO remove once parameterized compilers work
-rPsiblastVec3 :: Bool -> [String] -> RulesFn
-rPsiblastVec3 w args = rVectorize 3 actFn
-  where
-    actFn cfg ref [o,e,q,d] = aPsiblastDb w args cfg ref o e q d
-    actFn _ _ _ = error "bad argument to rPsiblastVec3 actFn"
-
 -- Base rules for running psiblast with a list of pssm queries against one
 -- subject to get a list of hit tables or pssms.
 -- TODO remove once parameterized compilers work
@@ -302,7 +293,7 @@ psiblastDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastVec3 False searchArgs
+  , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearch
   }
   where
     name = "psiblast_db_each"
@@ -397,7 +388,7 @@ psiblastTrainDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = rPsiblastVec3 True trainingArgs
+  , fRules     = rFun3 $ map3of3 pdb pssm aPsiblastTrain
   }
   where
     name = "psiblast_train_db_each"
@@ -482,7 +473,7 @@ psiblastPssmDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastVec3 False searchArgs
+  , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearch
   }
   where
     name = "psiblast_pssm_db_each"
