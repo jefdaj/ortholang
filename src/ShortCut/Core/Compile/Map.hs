@@ -4,6 +4,7 @@ module ShortCut.Core.Compile.Map
   ( map1of1
   , map1of2, map2of2
   , map1of3, map2of3, map3of3
+  , map1of4, map2of4, map3of4, map4of4
 
   -- concat a list of expressions
   , concatExprs
@@ -46,6 +47,18 @@ map2of3 = undefined
 
 map3of3 :: Action3 -> Action3
 map3of3 = undefined
+
+map1of4 :: Action4 -> Action4
+map1of4 = undefined
+
+map2of4 :: Action4 -> Action4
+map2of4 = undefined
+
+map3of4 :: Action4 -> Action4
+map3of4 = undefined
+
+map4of4 :: Action4 -> Action4
+map4of4 = undefined
 
 ----------------------------------
 -- concat a list of expressions --
