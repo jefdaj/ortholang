@@ -82,14 +82,14 @@ map3of3 = map3Base -- because it's already the 3rd
 
 map3Base :: CutType -> CutType -> Action3 -> Action3
 map3Base inType outType act3 cfg locks out a1 a2 a3 = do
-  -- debugL cfg $ "map3of3 arg paths: " ++ show [a1, a2, a3]
+  debugL cfg $ "map3of3 arg paths: " ++ show [a1, a2, a3]
   inPaths <- readStrings inType cfg locks $ fromCutPath cfg a3
-  -- debugL cfg $ "map3of3 inPaths read from a3: " ++ show inPaths
+  debugL cfg $ "map3of3 inPaths read from a3: " ++ show inPaths
   let tmpDir   = cfgTmpDir cfg </> "cache" </> "map" -- TODO figure this out better
       outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
       ioPairs  = zip inPaths outPaths
-  -- debugL cfg $ "map3of3 outPaths: " ++ show outPaths
-  -- debugL cfg $ "map3of3 out: " ++ show out
+  debugL cfg $ "map3of3 outPaths: " ++ show outPaths
+  debugL cfg $ "map3of3 out: " ++ show out
   forM_ ioPairs $ \(i,o) -> act3 cfg locks (toCutPath cfg o) a1 a2 (toCutPath cfg i)
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
