@@ -23,7 +23,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
 import ShortCut.Core.Util (digest)
-import ShortCut.Core.Actions (readStrings, writeStrings, debugL)
+import ShortCut.Core.Actions (readPath, readStrings, writeStrings, debugL)
 import Control.Monad (forM_)
 import System.FilePath ((</>), (<.>))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
@@ -89,15 +89,21 @@ map3of3 = map3Base -- because it's already the 3rd
 -- TODO match the single outpaths with exprPathExplicit! otherwise loooots of duplication
 map3Base :: CutType -> CutType -> Action3 -> Action3
 map3Base inType outType act3 cfg locks out a1 a2 a3 = do
-  debugL cfg $ "map3of3 arg paths: " ++ show [a1, a2, a3]
-  inPaths <- readStrings inType cfg locks $ fromCutPath cfg a3
-  debugL cfg $ "map3of3 inPaths read from a3: " ++ show inPaths
+  debugL cfg $ "map3Base arg paths: " ++ show [a1, a2, a3]
+
+  -- TODO is this right? read a3 to get one path, then that path to get the list?
+  a3path  <- readPath cfg locks $ fromCutPath cfg a3
+  inPaths <- readStrings inType cfg locks $ fromCutPath cfg a3path
+  debugL cfg $ "map3Base inPaths read from list: " ++ show inPaths
+
   let tmpDir   = cfgTmpDir cfg </> "cache" </> "map" -- TODO figure this out better
       outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
       ioPairs  = zip inPaths outPaths
-  debugL cfg $ "map3of3 outPaths: " ++ show outPaths
-  debugL cfg $ "map3of3 out: " ++ show out
-  forM_ ioPairs $ \(i,o) -> act3 cfg locks (toCutPath cfg o) a1 a2 (toCutPath cfg i)
+  debugL cfg $ "map3Base outPaths: " ++ show outPaths
+  debugL cfg $ "map3Base out: " ++ show out
+  forM_ ioPairs $ \(i,o) -> do
+    debugL cfg $ "map3Base input and output: " ++ show i ++ ", " ++ show o
+    act3 cfg locks (toCutPath cfg o) a1 a2 (toCutPath cfg i)
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 ----------------------------------
@@ -128,7 +134,12 @@ rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
       arg3   = toCutPath cfg arg3'
       oPath  = exprPath st expr
       oPath' = debugRules cfg "rFun3" expr $ fromCutPath cfg oPath
-  oPath' %> \_ -> act3 cfg ref oPath arg1 arg2 arg3
+  oPath' %> \_ -> do
+    debugL cfg $ "rFun3 arg1: "  ++ show arg1
+    debugL cfg $ "rFun3 arg2: "  ++ show arg2
+    debugL cfg $ "rFun3 arg3: "  ++ show arg3
+    debugL cfg $ "rFun3 oPath: " ++ show oPath
+    act3 cfg ref oPath arg1 arg2 arg3
   return $ ExprPath oPath'
 rFun3 _ _ e = error $ "bad argument to rFun3: " ++ show e
 
