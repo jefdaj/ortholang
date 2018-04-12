@@ -15,9 +15,9 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPath, wrappedCmdOut,
                                     wrappedCmdWrite, debugL, debugA, debugNeed,
-                                    writeCachedLines, writePaths)
+                                    writeCachedLines)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck)
-import ShortCut.Core.Paths         (fromCutPath, toCutPath, cacheDir, exprPath)
+import ShortCut.Core.Paths         (fromCutPath, cacheDir)
 import ShortCut.Core.Util          (stripWhiteSpace)
 import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.Blast      (bht)
@@ -27,7 +27,7 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
-import ShortCut.Core.Compile.Map   (rFun3, map2of3, map3of3)
+import ShortCut.Core.Compile.Map   (rFun3, map2of3, map3of3, rApply1)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -251,7 +251,7 @@ psiblastAll = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] bht
   , fFixity    = Prefix
-  -- , fRules     = \s e -> rConcatFun3 (map3of3 faa bht aPsiblastSearch) s
+  -- , fRules     = \s e -> rApplyConcatBht (map3of3 faa bht aPsiblastSearch) s
   --                                    (withPssmQuery $ withPdbSubject e)
   , fRules     = \s e -> rFun3 (map3of3 faa bht aPsiblastSearch) s
                                (withPssmQuery $ withPdbSubject e)
@@ -446,7 +446,7 @@ psiblastPssmsDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rConcatFun3 $ map2of3 pssm bht $ aPsiblastSearch
+  , fRules     = rApplyConcatBht $ rFun3 $ map2of3 pssm bht $ aPsiblastSearch
   }
   where
     name = "psiblast_pssms_db"
@@ -465,7 +465,7 @@ psiblastPssmsDb = CutFunction
  - But if skipping this, need to try to do the twice-vectorized ones without it.
  -}
 
--- Temporary workaround to get rConcatFun3 working
+-- Temporary workaround to get rApplyConcatBht working
 -- rListFun3 :: Action3 -> RulesFn
 -- rListFun3 act3 st@(_,cfg,ref) expr@(CutFun _ _ _ _ [exprs]) = do
 --   -- elems <- mapM (rFun3 act3 st) exprs
@@ -477,16 +477,25 @@ psiblastPssmsDb = CutFunction
 --   return $ ExprPath out'
 -- rListFun3 _ _ _ = error "bad argument to rListFun3"
 
-rConcatFun3 :: Action3 -> RulesFn
-rConcatFun3 = undefined
--- rConcatFun3 act3 st@(_,cfg,ref) e@(CutFun _ _ _ _ _) = do
+-- rApply1 fnName fnAct fnType rules st@(_,cfg,ref) expr = do
+-- rApplyConcatBht :: String -> CutType -> Action3 -> RulesFn
+-- rApply1 :: String -> Action1 -> CutType -> RulesFn -> RulesFn
+-- rApply1 fnName fnAct fnType rules st@(_,cfg,ref) expr = do
+rApplyConcatBht :: RulesFn -> RulesFn
+rApplyConcatBht = rApply1 "concat_bht" aConcat' bht
+  where
+    aConcat' c r o fs = aConcat c r [o, fs]
+-- aConcat :: CutConfig -> Locks -> [CutPath] -> Action ()
+-- aConcat cfg ref [oPath, fsPath] = do
+
+-- rApplyConcatBht act3 st@(_,cfg,ref) e@(CutFun _ _ _ _ _) = do
 --   (ExprPath list') <- rListFun3 act3 st e
 --   let out  = exprPath st e -- TODO use a new path for the overall expression!
 --       out' = fromCutPath cfg out
 --       list = toCutPath cfg list'
 --   out' %> \_ -> do aConcat cfg ref [out, list]
 --   return $ ExprPath out'
--- rConcatFun3 _ _ e = error $ "bad argument to rConcatFun3: " ++ show e
+-- rApplyConcatBht _ _ e = error $ "bad argument to rApplyConcatBht: " ++ show e
 
 -- wrap a <whatever>.list in concat_<whatever> to make a <whatever>
 -- Note that the initial expr will be mis-annotated a s rtn when it's really a rtn.list;
@@ -495,8 +504,8 @@ rConcatFun3 = undefined
 --      SHOULD HAVE A BUILT-IN RLIST INSTEAD?
 -- I think it's OK to have this take an Action3 and apply it to each list element,
 -- since it's a special case that will come up a lot in this module at least.
--- rConcatFun3 :: Action3 -> RulesFn
--- rConcatFun3 act3 st@(_,cfg,ref) e@(CutList _ _ deps exprs) = do
+-- rApplyConcatBht :: Action3 -> RulesFn
+-- rApplyConcatBht act3 st@(_,cfg,ref) e@(CutList _ _ deps exprs) = do
 -- 
 --   -- first, have to compile elems with specifically (rFun3 act3),
 --   -- not the regular rExpr
@@ -514,7 +523,7 @@ rConcatFun3 = undefined
 --     writePaths cfg ref tmp elems'
 --     aConcat cfg ref [out, tmp]
 --   return $ ExprPath out'
--- rConcatFun3 _ _ e = error $ "bad argument to rConcat: " ++ show e
+-- rApplyConcatBht _ _ e = error $ "bad argument to rConcat: " ++ show e
 
 psiblastPssms :: CutFunction
 psiblastPssms = CutFunction
@@ -522,7 +531,7 @@ psiblastPssms = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] bht
   , fFixity    = Prefix
-  , fRules     = rConcatFun3 $ map2of3 pssm bht $ aPsiblastSearch
+  , fRules     = rApplyConcatBht $ rFun3 $ map2of3 pssm bht $ aPsiblastSearch
   }
   where
     name = "psiblast_pssms"
