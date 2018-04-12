@@ -1,3 +1,13 @@
+# all-in-one function to search one query against a list of subjects
+# takes everything as fasta files
+# makes a blast datbase from each subject fasta
+# trains a pssm of the query against each subject
+# runs a search against each subject
+# returns one big hit table with all results
+# note that scores with different subjects in the table come from different databases,
+# so you probably want to be careful when comparing them
+# (use psiblast_each instead if you want one hit table per subject)
+
 query    = load_faa "data/7942gene.faa"
 pcc6803  = load_faa "data/6803genes.faa"
 pcc7942  = load_faa "data/7942genes.faa"

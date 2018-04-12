@@ -65,18 +65,29 @@ cutModule = CutModule
      -   returns a list of hit tables
      -}
 
+    -- TODO update tests
+    -- one per psiblast fn so its easy to isolate the failures
+    -- see if there's an easy way to remove psiblast_train_db from the others
+    -- also test the mapNofN and rapply1 fns
+    --
+    -- TODO fix the 6 failing functions!
+    -- TODO LOOK NOT IN RAPPLY1 FIRST, SINCE SOME OF THESE DON'T USE IT
+    -- TODO WAIT DAMMIT PROBABLY THOSE MAP FUNCTIONS YOU DIDN'T TEST!!
+    -- TODO hey and some of these don't have separate test cuts, so do that!
+    --      (better than single + mapped together because that's confusing)
+
     -- TODO test/practice mapping with psiblastEach
   
     -- search with fasta queries (pssm stuff hidden)
     [ psiblast       -- num faa faa      -> bht
-    , psiblastEach   -- num faa faa.list -> bht.list
-    -- , psiblastAll    -- num faa faa.list -> bht
+    , psiblastEach   -- num faa faa.list -> bht.list TODO fix script failure
+    , psiblastAll    -- num faa faa.list -> bht      TODO fix no rule for pdb.list
     , psiblastDb     -- num faa pdb      -> bht
-    , psiblastDbEach -- num faa pdb.list -> bht.list
+    , psiblastDbEach -- num faa pdb.list -> bht.list TODO fix script failure
 
     -- explicitly train pssms
-    , psiblastTrain       -- num faa faa      -> pssm
-    , psiblastTrainEach   -- num faa faa.list -> pssm.list
+    , psiblastTrain       -- num faa faa      -> pssm      TODO fix script failure
+    , psiblastTrainEach   -- num faa faa.list -> pssm.list TODO fix script failure
     , psiblastTrainAll    -- num faa faa.list -> pssm
     , psiblastTrainDb     -- num faa pdb      -> pssm
     , psiblastTrainDbEach -- num faa pdb.list -> pssm.list
@@ -89,15 +100,15 @@ cutModule = CutModule
     , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
 
     -- search with lists of explicit pssm queries
-    -- , psiblastPssms      -- num pssm.list faa -> bht
-    , psiblastEachPssmDb -- num pssm.list pdb -> bht.list (TODO better name)
-    -- , psiblastPssmsDb    -- num pssm.list pdb -> bht
+    , psiblastPssms      -- num pssm.list faa -> bht      TODO fix no rule for bht
+    , psiblastEachPssmDb -- num pssm.list pdb -> bht.list TODO fix no rule for pssm.tmp
+    , psiblastPssmsDb    -- num pssm.list pdb -> bht      TODO fix no rule for bht
 
     -- twice-vectorized functions (figure these out)
-    -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
-    -- , psiblastPssmsEach   -- num pssm.list faa.list -> bht.list
-    -- , psiblastPssmsAll    -- num pssm.list faa.list -> bht
-    -- , psiblastPssmsDbEach -- num pssm.list pdb.list -> bht.list
+    -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list TODO write, test
+    -- , psiblastPssmsEach   -- num pssm.list faa.list -> bht.list       TODO write, test
+    -- , psiblastPssmsAll    -- num pssm.list faa.list -> bht            TODO write, test
+    -- , psiblastPssmsDbEach -- num pssm.list pdb.list -> bht.list       TODO write, test
 
     ]
   }
@@ -162,9 +173,11 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
    - "Query_1" in hit tables. So here we write the PSSM to a tempfile, replace
    - the first line, then write that to the final outfile.
    - (If we aren't writing a PSSM, then tPath' is already the final file)
+   -
+   - TODO why would there ever be duplicate "(trained on..." messages? that's weird
    -}
   when writingPssm $ do
-    querySeqId <- fmap (head . lines) $ readFile' qPath'
+    querySeqId <- fmap (head . words) $ readFile' qPath'
     pssmLines  <- fmap         lines  $ readFile' tPath'
     let dbName     = takeFileName dbPre'
         queryInfo  = unwords [querySeqId, "(trained on " ++ dbName ++ ")"]
@@ -231,11 +244,12 @@ withPssmQuery (CutFun rtn salt deps name [n, q, s])
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 -- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
+-- TODO is this needed? it certainly doesn't work without that fn existing yet
 withPssmQueries :: CutExpr -> CutExpr
 withPssmQueries (CutFun rtn salt deps name [n, qs, s])
   =             (CutFun rtn salt deps name [n, ps, s])
   where
-    ps = CutFun pssm salt (depsOf qs) "psiblast_train_pssms_db" [n, qs, s]
+    ps = CutFun pssm salt (depsOf qs) "psiblast_train_pssms" [n, qs, s]
 withPssmQueries e = error $ "bad argument to withPssmQueries: " ++ show e
 
 -- Converts a psiblast function that needs a premade blast db into one that
@@ -251,15 +265,12 @@ psiblastAll = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] bht
   , fFixity    = Prefix
-  -- , fRules     = \s e -> rApplyConcatBht (map3of3 faa bht aPsiblastSearch) s
-  --                                    (withPssmQuery $ withPdbSubject e)
-  , fRules     = \s e -> rFun3 (map3of3 faa bht aPsiblastSearch) s
-                               (withPssmQuery $ withPdbSubject e)
+  , fRules = rApplyConcatBht $ \s e ->
+      rFun3 (map3of3 faa bht aPsiblastSearch) s (withPssmQuery $ withPdbSubject e)
   }
   where
     name = "psiblast_all"
 
--- TODO update to new style
 psiblastDb :: CutFunction
 psiblastDb = CutFunction
   { fName      = name
@@ -271,6 +282,7 @@ psiblastDb = CutFunction
   where
     name = "psiblast_db"
 
+-- TODO fix failing fn
 psiblastDbEach :: CutFunction
 psiblastDbEach = CutFunction
   { fName      = name
@@ -396,7 +408,7 @@ psiblastPssmEach = CutFunction
 searchArgs :: [String]
 searchArgs = ["-outfmt", "6", "-out"]
 
--- TODO fix failure
+-- TODO this is the easiest one! why is it failing??
 psiblastPssmDb :: CutFunction
 psiblastPssmDb = CutFunction
   { fName      = name
@@ -424,6 +436,9 @@ psiblastPssmDbEach = CutFunction
 ---------------------------------------
 
 -- TODO remove now that it's not used to implement the others?
+-- TODO or rename psiblast_pssms_dbs? that's much less confusing if you adjust others to match
+-- TODO does it work with the new sketchy map2of3?
+-- TODO make a test cut i guess
 psiblastEachPssmDb :: CutFunction
 psiblastEachPssmDb = CutFunction
   { fName      = name
@@ -440,6 +455,7 @@ psiblastEachPssmDb = CutFunction
   where
     name = "psiblast_each_pssm_db"
 
+-- TODO does this work with the new map2of3?
 psiblastPssmsDb :: CutFunction
 psiblastPssmsDb = CutFunction
   { fName      = name

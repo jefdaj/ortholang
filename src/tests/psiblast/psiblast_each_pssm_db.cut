@@ -1,0 +1,15 @@
+# TODO this is a confusing name right?
+
+query   = load_faa "data/7942gene.faa"
+pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+
+db6803 = makeblastdb_prot [pcc6803]
+db7942 = makeblastdb_prot [pcc7942]
+dbboth = makeblastdb_prot [pcc6803, pcc7942]
+
+pssm6803 = psiblast_train_db 1e-10 query db6803
+pssm7942 = psiblast_train_db 1e-10 query db7942
+
+tables = psiblast_each_pssm_db 1e-10 [pssm6803, pssm7942] dbboth
+result = tables
