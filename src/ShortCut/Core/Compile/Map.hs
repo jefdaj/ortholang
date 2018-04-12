@@ -10,6 +10,7 @@ module ShortCut.Core.Compile.Map
 
   -- base functions (move somewhere else)
   , rFun3
+  , rApply1
   )
   where
 
