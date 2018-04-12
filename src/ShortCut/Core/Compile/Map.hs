@@ -26,6 +26,7 @@ import ShortCut.Core.Actions (readStrings, writeStrings, debugL)
 import Control.Monad (forM_)
 import System.FilePath ((</>), (<.>))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
+import ShortCut.Core.Paths (exprPathExplicit)
 
 -----------------------------------------
 -- map an action over a list of inputs --
@@ -104,9 +105,9 @@ concatExprs lst = case typeOf lst of
   (ListOf _) -> undefined
   x -> error $ "bad argument to concatExprs. type was " ++ show x
 
-------------------------------------------
--- base functions (move somewhere else) --
-------------------------------------------
+---------------------------------------------
+-- general functions (move somewhere else) --
+---------------------------------------------
 
 -- Compile a CutFunction with 3 arguments
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
@@ -124,3 +125,20 @@ rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
   oPath' %> \_ -> act3 cfg ref oPath arg1 arg2 arg3
   return $ ExprPath oPath'
 rFun3 _ _ e = error $ "bad argument to rFun3: " ++ show e
+
+{- Writing an apply function with Shake stuff is hard because of the barrier
+ - between Rules and Actions. But I think this is a good start. It applies most
+ - of the individual parts of a RulesFn to another RulesFn, as long as you pass
+ - them individually. Pretty OK for now! Should be able to do rApply2 etc
+ - easily too; only the final action applied to them needs to be Ruleless.
+ -}
+rApply1 :: String -> Action1 -> CutType -> RulesFn -> RulesFn
+rApply1 fnName fnAct fnType rules st@(_,cfg,ref) expr = do
+  (ExprPath arg') <- rules st expr
+  -- TODO any need to do symlink stuff to make the hashes match?
+  -- args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args'
+  let arg  = toCutPath cfg arg'
+      out  = exprPathExplicit cfg fnName fnType (saltOf expr) [digest arg]
+      out' = fromCutPath cfg out
+  out' %> \_ -> fnAct cfg ref out arg
+  return $ ExprPath out'
