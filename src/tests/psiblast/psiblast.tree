@@ -2,19 +2,19 @@
 |-- cache
 |   |-- lines
 |   |   |-- 0cf27272d3.txt
+|   |   |-- 74a09cfaee.txt
 |   |   |-- 8abd22b6c2.txt
-|   |   |-- 902cb58552.txt
 |   |   |-- bdc783547b.txt
-|   |   |-- e00fb07ddb.txt
-|   |   `-- f530067413.txt
+|   |   |-- cc9146b8e4.txt
+|   |   `-- e00fb07ddb.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
 |   `-- makeblastdb
 |       `-- e00fb07ddb
-|           |-- e00fb07ddb.pdb.phr
-|           |-- e00fb07ddb.pdb.pin
-|           `-- e00fb07ddb.pdb.psq
+|           |-- e00fb07ddb.pdb.list.phr
+|           |-- e00fb07ddb.pdb.list.pin
+|           `-- e00fb07ddb.pdb.list.psq
 |-- exprs
 |   |-- list
 |   |   `-- fa4677789c.faa.list -> ../../cache/lines/e00fb07ddb.txt
@@ -22,18 +22,18 @@
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- makeblastdb_prot
-|   |   `-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
+|   |   `-- ced061f0b2.pdb.list -> ../../cache/lines/74a09cfaee.txt
 |   |-- num
 |   |   `-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
-|   |-- psiblast_pssm_db
-|   |   `-- 5fbeb4e044_858a41407a_aefb289407.bht
+|   |-- psiblast
+|   |   `-- 5fbeb4e044_acf49bf78b_8a72f50db3.bht
 |   |-- psiblast_train_db
-|   |   `-- 5fbeb4e044_4d0e43d616_aefb289407.pssm -> ../../cache/lines/f530067413.txt
+|   |   `-- 5fbeb4e044_4d0e43d616_8a72f50db3.pssm -> ../../cache/lines/cc9146b8e4.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       `-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
 `-- vars
-    |-- hits.bht -> ../exprs/psiblast_pssm_db/5fbeb4e044_858a41407a_aefb289407.bht
+    |-- hits.bht -> ../exprs/psiblast/5fbeb4e044_acf49bf78b_8a72f50db3.bht
     |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hits.bht

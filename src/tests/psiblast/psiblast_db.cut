@@ -1,3 +1,11 @@
+# like psiblast, except it uses a premade blast database as the subject
+# see also makeblastdb_prot to make your own,
+# and blastdblist + blastdbget to download standard ones from NCBI
+
+# takes a fasta amino acid query and a premade protein database subject
+# trains a pssm of the query against the database
+# runs a final search and returns the hit table
+
 query   = load_faa "data/7942gene.faa"
 pcc7942 = makeblastdb_prot [load_faa "data/7942genes.faa"]
 hits    = psiblast_db 1e-10 query pcc7942

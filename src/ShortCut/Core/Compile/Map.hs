@@ -51,6 +51,7 @@ map1of3 :: CutType -> CutType -> Action3 -> Action3
 map1of3 = undefined
 
 -- TODO does this need to be more elaborate?
+-- TODO use it or remove it
 mapCache :: CutConfig -> FilePath
 mapCache cfg = cfgTmpDir cfg </> "cache" </> "map"
 
@@ -73,6 +74,9 @@ mapCache cfg = cfgTmpDir cfg </> "cache" </> "map"
 --   forM_ ioPairs $ \(i,o) -> act3 cfg locks (toCutPath cfg o) a1 (toCutPath cfg i) a3
 --   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
+-- TODO test this!
+-- It's got confusing arguments, but if it works should allow
+-- reusing the same basic code for all the mapNofM functions.
 map2of3 :: CutType -> CutType -> Action3 -> Action3
 map2of3    inType outType act3  cfg locks out a1 a2 a3 =
   map3Base inType outType act3' cfg locks out a1 a3 a2 -- move arg2 to the end
@@ -82,6 +86,7 @@ map2of3    inType outType act3  cfg locks out a1 a2 a3 =
 map3of3 :: CutType -> CutType -> Action3 -> Action3
 map3of3 = map3Base -- because it's already the 3rd
 
+-- TODO match the single outpaths with exprPathExplicit! otherwise loooots of duplication
 map3Base :: CutType -> CutType -> Action3 -> Action3
 map3Base inType outType act3 cfg locks out a1 a2 a3 = do
   debugL cfg $ "map3of3 arg paths: " ++ show [a1, a2, a3]
@@ -141,5 +146,8 @@ rApply1 fnName fnAct fnType rules st@(_,cfg,ref) expr = do
   let arg  = toCutPath cfg arg'
       out  = exprPathExplicit cfg fnName fnType (saltOf expr) [digest arg]
       out' = fromCutPath cfg out
-  out' %> \_ -> fnAct cfg ref out arg
+  out' %> \_ -> do
+    debugL cfg $ "rApply1 out: " ++ show out
+    debugL cfg $ "rApply1 arg: " ++ show arg
+    fnAct cfg ref out arg
   return $ ExprPath out'
