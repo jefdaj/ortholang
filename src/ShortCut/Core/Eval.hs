@@ -101,7 +101,8 @@ eval :: Handle -> CutConfig -> Locks -> CutType -> Rules ResPath -> IO ()
 -- TODO put this back once done debugging (duplicates everything annoyingly)
 -- eval hdl cfg ref rtype = retryIgnore . eval'
 
-eval hdl cfg ref rtype = retryIgnore . eval'
+-- TODO retry the individual actions, not the overall cut! it makes it confusing
+eval hdl cfg ref rtype = ignoreErrors . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program but the error will be visible.

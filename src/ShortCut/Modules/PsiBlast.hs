@@ -77,6 +77,10 @@ cutModule = CutModule
     --      (better than single + mapped together because that's confusing)
 
     -- TODO test/practice mapping with psiblastEach
+
+    -- TODO these failing ones all use rFun3 + withPssmQuery:
+    -- psiblast_each
+    -- psiblast_db_each
   
     -- search with fasta queries (pssm stuff hidden)
     [ psiblast       -- num faa faa      -> bht
@@ -86,7 +90,7 @@ cutModule = CutModule
     , psiblastDbEach -- num faa pdb.list -> bht.list TODO fix script failure
 
     -- explicitly train pssms
-    , psiblastTrain       -- num faa faa      -> pssm      TODO fix script failure
+    , psiblastTrain       -- num faa faa      -> pssm
     , psiblastTrainEach   -- num faa faa.list -> pssm.list TODO fix script failure
     , psiblastTrainAll    -- num faa faa.list -> pssm
     , psiblastTrainDb     -- num faa pdb      -> pssm
@@ -125,15 +129,15 @@ pssm = CutType
 --------------------
 
 -- Train a PSSM on a blast database
-aPsiblastTrain :: Action3
-aPsiblastTrain = aPsiblastDb True trainingArgs
+aPsiblastTrainDb :: Action3
+aPsiblastTrainDb = aPsiblastDb True trainingArgs
 
 -- Psiblast search with a PSSM against a BLAST database
-aPsiblastSearch :: Action3
-aPsiblastSearch = aPsiblastDb False searchArgs
+aPsiblastSearchDb :: Action3
+aPsiblastSearchDb = aPsiblastDb False searchArgs
 
--- Base action for running psiblast. Use aPsiblastTrain to train a PSSM, or
--- aPsiblastSearch to search with an existing PSSM.
+-- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
+-- aPsiblastSearchDb to search with an existing PSSM.
 aPsiblastDb :: Bool -> [String] -> Action3
 aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
 
@@ -195,7 +199,7 @@ psiblast = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 aPsiblastSearch s $ withPssmQuery $ withPdbSubject e
+  , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
   }
   where
     name = "psiblast"
@@ -206,16 +210,17 @@ psiblastEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
-  , fRules = \s e -> rFun3 (map3of3 faa bht $ aPsiblastSearch) s (withPssmQuery $ withPdbSubjects e)
+  , fRules = \s e -> rFun3 (map3of3 faa bht $ aPsiblastSearchDb) s (withPssmQuery $ withPdbSubjects e)
   }
   where
     name = "psiblast_each"
 
 -- Wrap the 3rd arg of a function call in makeblastdb_prot_each
 -- TODO do the first arg in BlastDB.hs and import here?
+-- TODO fix passing dbprefix as db itself
 withPdbSubjects :: CutExpr -> CutExpr
 withPdbSubjects (CutFun rtn salt deps name [a1, a2, fas])
-  =          (CutFun rtn salt deps name [a1, a2, dbs])
+  =             (CutFun rtn salt deps name [a1, a2, dbs])
   where
     fass = CutList (typeOf fas) salt (depsOf fas) [fas]
     dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
@@ -236,11 +241,12 @@ withPdbSubject (CutFun rtn salt deps name [a1, a2, x ])
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
 -- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
+-- TODO sometimes tries to use path to path of db as path to db... where to fix?
 withPssmQuery :: CutExpr -> CutExpr
 withPssmQuery (CutFun rtn salt deps name [n, q, s])
   =           (CutFun rtn salt deps name [n, p, s])
   where
-    p = CutFun pssm salt (depsOf q) "psiblast_train_db" [n, q, s]
+    p = CutFun pssm salt deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 -- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
@@ -249,7 +255,7 @@ withPssmQueries :: CutExpr -> CutExpr
 withPssmQueries (CutFun rtn salt deps name [n, qs, s])
   =             (CutFun rtn salt deps name [n, ps, s])
   where
-    ps = CutFun pssm salt (depsOf qs) "psiblast_train_pssms" [n, qs, s]
+    ps = CutFun (ListOf pssm) salt deps "psiblast_train_each" [n, qs, s]
 withPssmQueries e = error $ "bad argument to withPssmQueries: " ++ show e
 
 -- Converts a psiblast function that needs a premade blast db into one that
@@ -266,7 +272,7 @@ psiblastAll = CutFunction
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] bht
   , fFixity    = Prefix
   , fRules = rApplyConcatBht $ \s e ->
-      rFun3 (map3of3 faa bht aPsiblastSearch) s (withPssmQuery $ withPdbSubject e)
+      rFun3 (map3of3 faa bht aPsiblastSearchDb) s (withPssmQuery $ withPdbSubject e)
   }
   where
     name = "psiblast_all"
@@ -277,19 +283,20 @@ psiblastDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rFun3 aPsiblastSearch
+  , fRules     = rFun3 aPsiblastSearchDb
   }
   where
     name = "psiblast_db"
 
--- TODO fix failing fn
+-- TODO withPssmQuery -> script fails trying to use dbprefix lines as the db itself in train_db
+-- TODO withPssmQueries -> no fn psiblast_train_pssms (true, not implemented!)
 psiblastDbEach :: CutFunction
 psiblastDbEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map3of3 pdb bht aPsiblastSearch) s (withPssmQuery e)
+  , fRules     = \s e -> rFun3 (map3of3 pdb bht aPsiblastSearchDb) s (withPssmQueries e)
   }
   where
     name = "psiblast_db_each"
@@ -311,14 +318,13 @@ trainingArgs =
   , "-out_ascii_pssm" -- < outPath will be appended here
   ]
 
--- TODO fix failure
 psiblastTrain :: CutFunction
 psiblastTrain = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 aPsiblastTrain s $ withPssmQuery e
+  , fRules     = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
   where
     name = "psiblast_train"
@@ -329,8 +335,8 @@ psiblastTrainEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map3of3 faa pssm $ aPsiblastTrain) s
-                               (withPssmQuery $ withPdbSubjects e)
+  , fRules     = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s
+                               (withPdbSubjects e)
   }
   where
     name = "psiblast_train_each"
@@ -341,18 +347,20 @@ psiblastTrainAll = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 aPsiblastTrain s $ withPssmQuery $ withPdbSubject e
+  , fRules     = \s e -> rFun3 aPsiblastTrainDb s $ withPssmQuery $ withPdbSubject e
   }
   where
     name = "psiblast_train_all"
 
+-- TODO this fails as part of psiblast_db_each but not alone?
+--      (maybe that edits the type to be wrong?)
 psiblastTrainDb :: CutFunction
 psiblastTrainDb = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix
-  , fRules     = rFun3 $ aPsiblastTrain
+  , fRules     = rFun3 $ aPsiblastTrainDb
   }
   where
     name = "psiblast_train_db"
@@ -363,7 +371,7 @@ psiblastTrainDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = rFun3 $ map3of3 pdb pssm aPsiblastTrain
+  , fRules     = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
   where
     name = "psiblast_train_db_each"
@@ -378,7 +386,7 @@ psiblastPssm = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 aPsiblastSearch s $ withPdbSubject e
+  , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
     name = "psiblast_pssm"
@@ -389,7 +397,7 @@ psiblastPssmAll = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 aPsiblastSearch s $ withPdbSubject e
+  , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
     name = "psiblast_pssm_all"
@@ -400,7 +408,7 @@ psiblastPssmEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearch) s (withPdbSubjects e)
+  , fRules     = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_pssm_each"
@@ -415,7 +423,7 @@ psiblastPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rFun3 aPsiblastSearch
+  , fRules     = rFun3 aPsiblastSearchDb
   }
   where
     name = "psiblast_pssm_db"
@@ -426,7 +434,7 @@ psiblastPssmDbEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearch
+  , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
   where
     name = "psiblast_pssm_db_each"
@@ -448,8 +456,8 @@ psiblastEachPssmDb = CutFunction
 
   -- TODO oh i get it, this needs to make a single protein db not a list:
   -- TODO wait no, it doesn't need one at all
-  -- , fRules = \s e -> rFun3 (map2of3 pssm bht $ aPsiblastSearch) s (withPdbSubject e)
-  , fRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearch
+  -- , fRules = \s e -> rFun3 (map2of3 pssm bht $ aPsiblastSearchDb) s (withPdbSubject e)
+  , fRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
 
   }
   where
@@ -462,7 +470,7 @@ psiblastPssmsDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] bht
   , fFixity    = Prefix
-  , fRules     = rApplyConcatBht $ rFun3 $ map2of3 pssm bht $ aPsiblastSearch
+  , fRules     = rApplyConcatBht $ rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
   }
   where
     name = "psiblast_pssms_db"
@@ -547,7 +555,7 @@ psiblastPssms = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] bht
   , fFixity    = Prefix
-  , fRules     = rApplyConcatBht $ rFun3 $ map2of3 pssm bht $ aPsiblastSearch
+  , fRules     = rApplyConcatBht $ rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
   }
   where
     name = "psiblast_pssms"
