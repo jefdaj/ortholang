@@ -79,6 +79,7 @@ cutModule = CutModule
     -- TODO test/practice mapping with psiblastEach
 
     -- TODO these failing ones all use rFun3 + withPssmQuery:
+    -- learned to use withPssmQueries to match final type
     -- psiblast_each
     -- psiblast_db_each
   
@@ -91,22 +92,22 @@ cutModule = CutModule
 
     -- explicitly train pssms
     , psiblastTrain       -- num faa faa      -> pssm
-    , psiblastTrainEach   -- num faa faa.list -> pssm.list TODO fix script failure
+    , psiblastTrainEach   -- num faa faa.list -> pssm.list
     , psiblastTrainAll    -- num faa faa.list -> pssm
     , psiblastTrainDb     -- num faa pdb      -> pssm
     , psiblastTrainDbEach -- num faa pdb.list -> pssm.list
 
     -- search with explicit single pssm queries
     , psiblastPssm       -- num pssm faa      -> bht
-    , psiblastPssmEach   -- num pssm faa.list -> bht.list
+    , psiblastPssmEach   -- num pssm faa.list -> bht.list TODO fix no rule for pdb (broken by map changes)
     , psiblastPssmAll    -- num pssm faa.list -> bht
     , psiblastPssmDb     -- num pssm pdb      -> bht
     , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
 
     -- search with lists of explicit pssm queries
-    , psiblastPssms      -- num pssm.list faa -> bht      TODO fix no rule for bht
+    , psiblastPssms      -- num pssm.list faa -> bht      TODO fix no rule for pssm.tmp
     , psiblastEachPssmDb -- num pssm.list pdb -> bht.list TODO fix no rule for pssm.tmp
-    , psiblastPssmsDb    -- num pssm.list pdb -> bht      TODO fix no rule for bht
+    , psiblastPssmsDb    -- num pssm.list pdb -> bht      TODO fix reading non-list as list
 
     -- twice-vectorized functions (figure these out)
     -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list TODO write, test
@@ -148,8 +149,9 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
       dbPath' = fromCutPath cfg dbPath
   debugNeed cfg "aPsiblastDb" [ePath', qPath', dbPath']
 
-  eStr  <- readLit  cfg ref ePath' -- TODO is converting to decimal needed?
-  dbPre <- readPath cfg ref dbPath'
+  eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
+  dbPre <- readPath cfg ref dbPath' -- TODO also need to read this? (that's not right...)
+  debugL cfg $ "aPsiblastDb dbPre: " ++ show dbPre
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromCutPath cfg $ cacheDir cfg "psiblast"
       dbPre' = fromCutPath cfg dbPre
@@ -186,8 +188,8 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
     let dbName     = takeFileName dbPre'
         queryInfo  = unwords [querySeqId, "(trained on " ++ dbName ++ ")"]
         pssmWithId = queryInfo : tail pssmLines
-    writeCachedLines cfg ref oPath'' pssmWithId
-    liftIO $ removeFile tPath'
+    debugL cfg $ "aPsiblastDb added seq ID to " ++ show tPath' ++ " and moved to " ++ show oPath''
+    writeCachedLines cfg ref oPath'' pssmWithId liftIO $ removeFile tPath'
 
 -------------------------------
 -- search with fasta queries --
@@ -288,15 +290,17 @@ psiblastDb = CutFunction
   where
     name = "psiblast_db"
 
--- TODO withPssmQuery -> script fails trying to use dbprefix lines as the db itself in train_db
--- TODO withPssmQueries -> no fn psiblast_train_pssms (true, not implemented!)
+-- looks like aPsiblastDb is getting a pssm.list as the query, which won't work ... withPssmQuery fixes
+-- and also a cached lines/*.txt file as the database (ah it's a pdb.list!)
+-- means there's a problem in map3of3 right, because it should be getting each pdb separately
+-- maybe it's always like that, and the others have just been working because singletons or something?
 psiblastDbEach :: CutFunction
 psiblastDbEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map3of3 pdb bht aPsiblastSearchDb) s (withPssmQueries e)
+  , fRules     = \s e -> rFun3 (map3of3 pdb bht aPsiblastSearchDb) s (withPssmQuery e)
   }
   where
     name = "psiblast_db_each"
@@ -464,6 +468,8 @@ psiblastEachPssmDb = CutFunction
     name = "psiblast_each_pssm_db"
 
 -- TODO does this work with the new map2of3?
+-- error reading a pssm as a pssm.list
+-- OOH this could be an issue with the 2of3 adapter
 psiblastPssmsDb :: CutFunction
 psiblastPssmsDb = CutFunction
   { fName      = name
