@@ -10,6 +10,7 @@ module ShortCut.Core.Types
   -- data structures
   , CutAssign
   , CutExpr(..)
+  , CompiledExpr(..)
   , CutConfig(..)
   , findFunction
   -- , WrapperConfig(..)
@@ -112,7 +113,22 @@ data CutExpr
   | CutBop CutType Int [CutVar] String  CutExpr CutExpr
   | CutFun CutType Int [CutVar] String [CutExpr]
   | CutList CutType Int [CutVar] [CutExpr]
+  | CutRules CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
+
+-- An expression that has already been compiled to Rules, wrapped so it can be
+-- passed to another function. Because Rules can't be shown or compared, we
+-- also carry around the original CutExpr. TODO is that necessary? helpful?
+-- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
+data CompiledExpr = CompiledExpr CutExpr (Rules ExprPath)
+
+-- TODO parens necessary?
+instance Show CompiledExpr where
+  show (CompiledExpr e _) = "CompiledExpr (" ++ show e ++ ") " ++ " <<rules>>"
+
+-- CompiledExprs are compared by the expressions they were compiled from.
+instance Eq CompiledExpr where
+  (CompiledExpr a _) == (CompiledExpr b _) = a == b
 
 -- TODO is this not actually needed? seems "show expr" handles it?
 saltOf :: CutExpr -> Int

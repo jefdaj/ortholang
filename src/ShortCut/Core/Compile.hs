@@ -6,3 +6,4 @@ import ShortCut.Core.Compile.Basic
 import ShortCut.Core.Compile.Vectorize
 import ShortCut.Core.Compile.Map
 import ShortCut.Core.Compile.Repeat
+import ShortCut.Core.Compile.Apply
