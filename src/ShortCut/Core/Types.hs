@@ -137,6 +137,7 @@ saltOf (CutRef _ n _ _)     = n
 saltOf (CutBop _ n _ _ _ _) = n
 saltOf (CutFun _ n _ _ _)   = n
 saltOf (CutList _ n _ _)     = n
+saltOf (CutRules (CompiledExpr e _)) = saltOf e
 
 setSalt :: Int -> CutExpr -> CutExpr
 setSalt n (CutLit t _ s)          = CutLit t n s
@@ -144,6 +145,7 @@ setSalt n (CutRef t _ ds v)       = CutRef t n ds v
 setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
 setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
 setSalt n (CutList t _ ds es)      = CutList t n ds es
+setSalt n (CutRules (CompiledExpr e _)) = error "setSalt not implemented for compiled rules yet"
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String
@@ -151,6 +153,7 @@ prefixOf (CutLit rtn _ _     ) = extOf rtn
 prefixOf (CutFun _ _ _ name _) = name
 prefixOf (CutList _ _ _ _    ) = "list"
 prefixOf (CutRef _ _ _ _     ) = error  "CutRefs don't need a prefix"
+prefixOf (CutRules (CompiledExpr e _)) = prefixOf e
 prefixOf (CutBop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -205,6 +208,7 @@ typeOf (CutRef  t _ _ _    ) = t
 typeOf (CutBop  t _ _ _ _ _) = t
 typeOf (CutFun  t _ _ _ _  ) = t
 typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (CutRules (CompiledExpr e _)) = typeOf e
 -- typeOf (CutList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
 -- typeOf (CutList _ _ _ []     ) = Empty
 -- typeOf (CutList _ _ _ []     ) = ListOf Empty
@@ -235,6 +239,7 @@ depsOf (CutRef  _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
 depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (CutRules (CompiledExpr e _)) = depsOf e
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
