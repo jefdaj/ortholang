@@ -17,14 +17,16 @@ import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
 import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
 import System.FilePath             ((</>))
 import System.Directory            (createDirectoryIfMissing)
+import ShortCut.Core.Compile.Compose (compose1)
+import ShortCut.Modules.Glob (globFiles)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-    [ loadGbk     , loadGbkEach
-    , loadFaa     , loadFaaEach
-    , loadFna     , loadFnaEach
+    [ loadGbk     , loadGbkEach, globGbk
+    , loadFaa     , loadFaaEach, globFaa
+    , loadFna     , loadFnaEach, globFna
     , gbkToFaa    , gbkToFaaEach
     , gbkToFna    , gbkToFnaEach
     , extractSeqs , extractSeqsEach
@@ -81,6 +83,28 @@ loadGbk = mkLoad "load_gbk" gbk
 
 loadGbkEach :: CutFunction
 loadGbkEach = mkLoadList "load_gbk_each" gbk
+
+------------
+-- glob_* --
+------------
+
+mkLoadGlob :: String -> CutType -> CutFunction
+mkLoadGlob name loadType = compose1 globFiles loadList name type1 check desc
+  where
+    listName = "load_" ++ extOf loadType ++ "_each" -- TODO unsafe?
+    loadList = mkLoadList listName loadType
+    type1    = (ListOf loadType)
+    check    = defaultTypeCheck [str] type1
+    desc     = mkTypeDesc name  [str] type1
+
+globFaa :: CutFunction
+globFaa = mkLoadGlob "glob_faa" faa
+
+globFna :: CutFunction
+globFna = mkLoadGlob "glob_fna" fna
+
+globGbk :: CutFunction
+globGbk = mkLoadGlob "glob_gbk" gbk
 
 -----------------------
 -- gbk_to_f*a(_each) --
