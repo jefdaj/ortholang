@@ -11,10 +11,13 @@ import System.FilePath.Glob       (glob)
 import System.Directory (makeRelativeToCurrentDirectory)
 -- import ShortCut.Core.Debug        (debugA)
 
+import ShortCut.Modules.SeqIO (fna, loadFnaEach)
+-- import ShortCut.Core.Compile.Apply (rApply1)
+
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "glob"
-  , mFunctions = [globFiles]
+  , mFunctions = [globFiles, globFna]
   }
 
 globFiles :: CutFunction
@@ -60,3 +63,52 @@ aGlobFiles cfg ref outPath path = do
     out'  = fromCutPath cfg outPath
     path' = fromCutPath cfg path
     out'' = debugA cfg "aGlobFiles" out' [out', path']
+
+--------------
+-- glob_fna --
+--------------
+
+{- This is a test of the rApply1 function,
+ - to see if I can compose glob_files with load_fna_each
+ -}
+
+-- globFna :: CutFunction
+-- globFna = CutFunction
+--   { fName      = name
+--   , fTypeCheck = defaultTypeCheck [str] (ListOf fna)
+--   , fTypeDesc  = mkTypeDesc name  [str] (ListOf fna)
+--   , fFixity    = Prefix
+--   , fRules     = rApply1 globFiles loadFnaEach
+--   }
+--   where
+--     name = "glob_fna"
+
+compose1 :: String -> CutFunction -> CutFunction -> CutType -> TypeChecker -> String -> CutFunction
+compose1 name fn1 fn2 type1 typeChecker typeDesc = CutFunction
+  { fName = name
+  , fTypeCheck = typeChecker
+  , fTypeDesc  = typeDesc
+  , fFixity    = Infix
+  -- , fRules     = rCompose (fRules fn1) (fRules fn2)
+  , fRules     = rCompose1 fn1 fn2 type1
+  }
+
+-- rCompose :: RulesFn -> RulesFn -> RulesFn
+-- rCompose rules1 rules2 st expr = rules2 st expr'
+--   where
+--     expr' = CutRules (CompiledExpr expr $ rules1 st expr)
+
+rCompose1 :: CutFunction -> CutFunction -> CutType -> RulesFn
+rCompose1 fn1 fn2 type1 st (CutFun rtn salt deps name args) = (fRules fn2) st expr2
+  where
+    expr1'  = CutFun type1 salt deps (fName fn1) args
+    expr1'' = CutRules $ CompiledExpr expr1' $ (fRules fn1) st expr1'
+    expr2   = CutFun rtn salt deps name [expr1'']
+rCompose1 _ _ _ _ _ = error "bad argument to rCompose1"
+
+globFna :: CutFunction
+globFna =
+  let name = "glob_fna"
+  in compose1 name globFiles loadFnaEach (ListOf str)
+       (defaultTypeCheck [str] (ListOf fna))
+       (mkTypeDesc name  [str] (ListOf fna))

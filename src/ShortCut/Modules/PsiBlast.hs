@@ -189,7 +189,8 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
         queryInfo  = unwords [querySeqId, "(trained on " ++ dbName ++ ")"]
         pssmWithId = queryInfo : tail pssmLines
     debugL cfg $ "aPsiblastDb added seq ID to " ++ show tPath' ++ " and moved to " ++ show oPath''
-    writeCachedLines cfg ref oPath'' pssmWithId liftIO $ removeFile tPath'
+    writeCachedLines cfg ref oPath'' pssmWithId
+    liftIO $ removeFile tPath'
 
 -------------------------------
 -- search with fasta queries --
