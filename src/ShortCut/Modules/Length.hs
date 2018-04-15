@@ -36,10 +36,11 @@ lenEach = CutFunction
   }
 
 tLen :: [CutType] -> Either String CutType
+tLen [] = error "no types given"
 tLen [Empty ] = Right num
 tLen [(ListOf _)] = Right num
-tLen [x] | x == bht = Right num
-tLen _ = Left $ "length requires a list"
+tLen [x] | x == bht = Right num -- TODO remove?
+tLen t = Left $ "length requires a list, but got " ++ show t
 
 rLen :: CutState -> CutExpr -> Rules ExprPath
 rLen s@(_,cfg,ref) e@(CutFun _ _ _ _ [l]) = do

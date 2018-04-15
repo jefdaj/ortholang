@@ -70,6 +70,7 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
+import Development.Shake.FilePath (makeRelative)
 -- import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
@@ -118,13 +119,13 @@ data CutExpr
 
 -- An expression that has already been compiled to Rules, wrapped so it can be
 -- passed to another function. Because Rules can't be shown or compared, we
--- also carry around the original CutExpr. TODO is that necessary? helpful?
+-- also carry around the original CutExpr. TODO is the expr necessary? helpful?
 -- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
 data CompiledExpr = CompiledExpr CutExpr (Rules ExprPath)
 
--- TODO parens necessary?
+-- TODO is it a bad idea to hide the compiled-ness?
 instance Show CompiledExpr where
-  show (CompiledExpr e _) = "CompiledExpr (" ++ show e ++ ") " ++ " <<rules>>"
+  show (CompiledExpr e _) = "Compiled (" ++ show e ++ ")"
 
 -- CompiledExprs are compared by the expressions they were compiled from.
 instance Eq CompiledExpr where
@@ -145,7 +146,7 @@ setSalt n (CutRef t _ ds v)       = CutRef t n ds v
 setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
 setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
 setSalt n (CutList t _ ds es)      = CutList t n ds es
-setSalt n (CutRules (CompiledExpr e _)) = error "setSalt not implemented for compiled rules yet"
+setSalt _ (CutRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules yet"
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String
@@ -203,11 +204,11 @@ instance Show CutType where
   show = extOf
 
 typeOf :: CutExpr -> CutType
-typeOf (CutLit  t _ _      ) = t
-typeOf (CutRef  t _ _ _    ) = t
-typeOf (CutBop  t _ _ _ _ _) = t
-typeOf (CutFun  t _ _ _ _  ) = t
-typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (CutLit   t _ _      ) = t
+typeOf (CutRef   t _ _ _    ) = t
+typeOf (CutBop   t _ _ _ _ _) = t
+typeOf (CutFun   t _ _ _ _  ) = t
+typeOf (CutList  t _ _ _    ) = ListOf t -- t can be Empty
 typeOf (CutRules (CompiledExpr e _)) = typeOf e
 -- typeOf (CutList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
 -- typeOf (CutList _ _ _ []     ) = Empty
@@ -308,7 +309,11 @@ type CutState = (CutScript, CutConfig, Locks)
 type ParseM a = P.Parsec String CutState a
 
 runParseM :: ParseM a -> CutState -> String -> Either ParseError a
-runParseM p s = P.runParser p s "somefile"
+runParseM p s@(_, cfg, _) = P.runParser p s file
+  where
+    file = case cfgScript cfg of
+             Nothing -> "repl"
+             Just f  -> makeRelative (cfgWorkDir cfg) f
 
 ----------------
 -- Repl monad --

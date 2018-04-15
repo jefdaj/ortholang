@@ -1,0 +1,30 @@
+.
+|-- cache
+|   |-- lines
+|   |   |-- 2ac2c93a4b.txt
+|   |   |-- 4d13e8c51d.txt
+|   |   |-- 6de6114b3f.txt
+|   |   `-- 9e020c6cd8.txt
+|   `-- load
+|       |-- 0469ad867e.faa -> $WORKDIR/data/7002genes.faa
+|       |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|       |-- 4bdf8fb9a8.faa -> $WORKDIR/data/7122genes.faa
+|       |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
+|       |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|       |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|       |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|       `-- de2033f5c0.faa -> $WORKDIR/data/7942genes50.faa
+|-- exprs
+|   |-- glob_files
+|   |   `-- ca1dad5c15.str.list -> ../../cache/lines/2ac2c93a4b.txt
+|   |-- length
+|   |   `-- ead407d745.num -> ../../cache/lines/6de6114b3f.txt
+|   |-- list
+|   |   `-- a55ac49820.faa.list -> ../../cache/lines/9e020c6cd8.txt
+|   `-- str
+|       `-- 4749080868.str -> ../../cache/lines/4d13e8c51d.txt
+`-- vars
+    |-- n.num -> ../exprs/length/ead407d745.num
+    `-- result -> ../vars/n.num
+
+9 directories, 18 files

@@ -1,0 +1,6 @@
+faa7942 = load_faa_glob "data/7942*.faa"
+fna7942 = load_fna_glob "data/7942*.fna"
+gbk7942 = load_gbk_glob "data/7942*.gbk"
+
+# result = [length faa7942, length fna7942, length gbk7942]
+result = faa7942

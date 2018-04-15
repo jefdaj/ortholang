@@ -1,1 +1,17 @@
-result = "function not finished yet"
+faa7942 = glob_files "data/7942*.faa"
+fna7942 = glob_files "data/7942*.fna"
+gbk7942 = glob_files "data/7942*.gbk"
+
+faaAll = glob_files "data/*.faa"
+fnaAll = glob_files "data/*.fna"
+gbkAll = glob_files "data/*.gbk"
+
+#dataAll = glob_files "data/*"
+
+# TODO problem is definitely with variables, since this works:
+#      (or could be specifically pResult)
+result = glob_files "data/*.faa"
+
+# ...but this doesn't:
+#ll = glob_files "data/*.faa"
+#result = ll

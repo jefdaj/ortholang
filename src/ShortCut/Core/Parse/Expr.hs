@@ -18,17 +18,22 @@ import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, lookAhead, between, choice, sepBy)
 -- import Data.Either (either)
 
+import Debug.Trace
+
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
 pList :: ParseM CutExpr
 pList = do
+  (_, cfg, _) <- getState
   terms <- between (pSym '[') (pSym ']')
                    (sepBy pExpr (pSym ','))
   let eType = nonEmptyType $ map typeOf terms
       deps  = if null terms then [] else foldr1 union $ map depsOf terms
-  case eType of
+  res <- case eType of
     Left err -> fail err
     Right t  -> return $ CutList t 0 deps terms
+  let res' = debugParser cfg "pList" res
+  return res'
 
 ---------------
 -- operators --
@@ -114,12 +119,24 @@ pFun = do
       fn   = find (\f -> fName f == name) fns
       deps = foldr1 union $ map depsOf args
   case fn of
-    Nothing -> fail name
-    Just f  -> case (fTypeCheck f) (map typeOf args) of
-      Left  err -> fail err
-      Right rtn -> let res  = CutFun rtn 0 deps (fName f) args
-                       res' = debugParser cfg "pFun" res
-                   in return res'
+    Nothing -> fail $ trace ("invalid fn name: " ++ name) name
+    -- Just f  -> let check = (fTypeCheck $ trace ("found fn: " ++ fName f) f) (map typeOf args)
+    --            in case debugParser cfg "pFun typechecker" check of
+    -- Just f  -> case (fTypeCheck f) (map typeOf args) of
+    Just f  -> case typeCheckArgs f args of
+                 Left  err -> fail err
+                 Right rtn -> let res  = CutFun rtn 0 deps (fName f) args
+                                  res' = debugParser cfg "pFun" res
+                              in return res'
+
+typeCheckArgs :: CutFunction -> [CutExpr] -> Either String CutType
+typeCheckArgs fn args = trace ("return type: " ++ show rtn) rtn
+  where
+    fn'    = trace ("typechecking fn: " ++ fName fn) fn
+    args'  = trace ("args: " ++ unwords (map show args)) args
+    types  = map typeOf args'
+    types' = trace ("types: " ++ show types) types
+    rtn    = fTypeCheck fn' types'
 
 -----------------
 -- expressions --

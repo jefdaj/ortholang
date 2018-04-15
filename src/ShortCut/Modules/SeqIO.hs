@@ -88,23 +88,24 @@ loadGbkEach = mkLoadList "load_gbk_each" gbk
 -- glob_* --
 ------------
 
+-- TODO bug! length breaks with "length requires a list"
+--      only happens when the result of this is assigned to a var; inline works
+--      printing types in repl seems to work
+--      error happens when parsing 'length faas'
 mkLoadGlob :: String -> CutType -> CutFunction
-mkLoadGlob name loadType = compose1 globFiles loadList name type1 check desc
+mkLoadGlob name loadType = compose1 globFiles loadList name (ListOf str) desc
   where
-    listName = "load_" ++ extOf loadType ++ "_each" -- TODO unsafe?
-    loadList = mkLoadList listName loadType
-    type1    = (ListOf loadType)
-    check    = defaultTypeCheck [str] type1
-    desc     = mkTypeDesc name  [str] type1
+    loadList = mkLoadList ("load_" ++ extOf loadType ++ "_each") loadType
+    desc     = mkTypeDesc name [str] (ListOf loadType)
 
 globFaa :: CutFunction
-globFaa = mkLoadGlob "glob_faa" faa
+globFaa = mkLoadGlob "load_faa_glob" faa
 
 globFna :: CutFunction
-globFna = mkLoadGlob "glob_fna" fna
+globFna = mkLoadGlob "load_fna_glob" fna
 
 globGbk :: CutFunction
-globGbk = mkLoadGlob "glob_gbk" gbk
+globGbk = mkLoadGlob "load_gbk_glob" gbk
 
 -----------------------
 -- gbk_to_f*a(_each) --

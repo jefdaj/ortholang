@@ -1,0 +1,20 @@
+# Put this in because of some trouble typechecking length of precompiled
+# expressions.
+
+n = length (load_faa_glob "data/*.faa")
+result = n
+
+# faa7942 = glob_files "data/7942*.faa"
+# fna7942 = glob_files "data/7942*.fna"
+# gbk7942 = glob_files "data/7942*.gbk"
+# 
+# faaAll = glob_files "data/*.faa"
+# fnaAll = glob_files "data/*.fna"
+# gbkAll = glob_files "data/*.gbk"
+# 
+# dataAll = glob_files "data/*"
+# 
+# lists = [fnaAll, faaAll, fna7942, faa7942, gbk7942, gbkAll, dataAll]
+# 
+# # TODO aha! length_each fails on this too
+# # result = length_each lists

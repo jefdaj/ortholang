@@ -27,15 +27,6 @@ globFiles = CutFunction
   where
     name = "glob_files"
 
--- TODO ok first part looks good, but now need another step?
--- 1. user gives glob as a str
--- 2. compiler saves that to (ExprPath path)
--- 3. this fn needs path, then reads it to ptn
--- 4. this fn does the actual globbing, creating paths
--- 5. toShortCutListStr puts them in ShortCut literal format
---    (should use str rather than elemRtnType tho)
--- ... looks like this is actually rGlobFiles!
--- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
 rGlobFiles s@(_,cfg,ref) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
@@ -49,11 +40,8 @@ rGlobFiles _ _ = error "bad arguments to rGlobFiles"
 aGlobFiles :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aGlobFiles cfg ref outPath path = do
   ptn   <- fmap strip $ readLit cfg ref path'
-  -- liftIO $ putStrLn $ "ptn: " ++ show ptn
-  -- paths <- liftIO $ mapM absolutize =<< glob ptn
   paths  <- liftIO $ glob ptn
   paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
-  -- toShortCutListStr cfg str (ExprPath outPath) paths
   writeLits cfg ref out'' paths'
   where
     out'  = fromCutPath cfg outPath
