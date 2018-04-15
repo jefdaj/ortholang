@@ -182,6 +182,7 @@ argHashes _ (CutLit  _ _     v    ) = [digest v]
 argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
 argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
 argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
+argHashes s (CutRules (CompiledExpr e _)) = argHashes s e
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
 -- resolveVar :: CutConfig -> CutPath -> IO CutPath

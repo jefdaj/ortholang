@@ -1,7 +1,12 @@
 module ShortCut.Core.Types
+  -- type aliases and newtypes
+  ( ActionFn
+  , RulesFn
+  , TypeChecker
   -- data structures
-  ( CutAssign
+  , CutAssign
   , CutExpr(..)
+  , CompiledExpr(..)
   , CutConfig(..)
   , listFunctionNames
   , findFunction
@@ -43,9 +48,6 @@ module ShortCut.Core.Types
   , ResPath(..)
   -- misc experimental stuff
   , extractExprs
-  , ActionFn
-  , RulesFn
-  , TypeChecker
   , typeMatches
   , typesMatch
   , nonEmptyType
@@ -65,11 +67,10 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
+import Development.Shake.FilePath (makeRelative)
 -- import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
--- TODO where should these go?
--- TODO edit ActionFn?
 type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
 type RulesFn     = CutState -> CutExpr -> Rules ExprPath
 type TypeChecker = [CutType] -> Either String CutType
@@ -100,7 +101,22 @@ data CutExpr
   | CutBop CutType Int [CutVar] String  CutExpr CutExpr
   | CutFun CutType Int [CutVar] String [CutExpr]
   | CutList CutType Int [CutVar] [CutExpr]
+  | CutRules CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
+
+-- An expression that has already been compiled to Rules, wrapped so it can be
+-- passed to another function. Because Rules can't be shown or compared, we
+-- also carry around the original CutExpr. TODO is the expr necessary? helpful?
+-- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
+data CompiledExpr = CompiledExpr CutExpr (Rules ExprPath)
+
+-- TODO is it a bad idea to hide the compiled-ness?
+instance Show CompiledExpr where
+  show (CompiledExpr e _) = "Compiled (" ++ show e ++ ")"
+
+-- CompiledExprs are compared by the expressions they were compiled from.
+instance Eq CompiledExpr where
+  (CompiledExpr a _) == (CompiledExpr b _) = a == b
 
 -- TODO is this not actually needed? seems "show expr" handles it?
 saltOf :: CutExpr -> Int
@@ -109,6 +125,7 @@ saltOf (CutRef _ n _ _)     = n
 saltOf (CutBop _ n _ _ _ _) = n
 saltOf (CutFun _ n _ _ _)   = n
 saltOf (CutList _ n _ _)     = n
+saltOf (CutRules (CompiledExpr e _)) = saltOf e
 
 setSalt :: Int -> CutExpr -> CutExpr
 setSalt n (CutLit t _ s)          = CutLit t n s
@@ -116,6 +133,7 @@ setSalt n (CutRef t _ ds v)       = CutRef t n ds v
 setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
 setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
 setSalt n (CutList t _ ds es)      = CutList t n ds es
+setSalt _ (CutRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules yet"
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String
@@ -123,6 +141,7 @@ prefixOf (CutLit rtn _ _     ) = extOf rtn
 prefixOf (CutFun _ _ _ name _) = name
 prefixOf (CutList _ _ _ _    ) = "list"
 prefixOf (CutRef _ _ _ _     ) = error  "CutRefs don't need a prefix"
+prefixOf (CutRules (CompiledExpr e _)) = prefixOf e
 prefixOf (CutBop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -172,11 +191,12 @@ instance Show CutType where
   show = extOf
 
 typeOf :: CutExpr -> CutType
-typeOf (CutLit  t _ _      ) = t
-typeOf (CutRef  t _ _ _    ) = t
-typeOf (CutBop  t _ _ _ _ _) = t
-typeOf (CutFun  t _ _ _ _  ) = t
-typeOf (CutList t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (CutLit   t _ _      ) = t
+typeOf (CutRef   t _ _ _    ) = t
+typeOf (CutBop   t _ _ _ _ _) = t
+typeOf (CutFun   t _ _ _ _  ) = t
+typeOf (CutList  t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (CutRules (CompiledExpr e _)) = typeOf e
 -- typeOf (CutList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
 -- typeOf (CutList _ _ _ []     ) = Empty
 -- typeOf (CutList _ _ _ []     ) = ListOf Empty
@@ -207,6 +227,7 @@ depsOf (CutRef  _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
 depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (CutRules (CompiledExpr e _)) = depsOf e
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
@@ -279,7 +300,11 @@ type CutState = (CutScript, CutConfig, Locks)
 type ParseM a = P.Parsec String CutState a
 
 runParseM :: ParseM a -> CutState -> String -> Either ParseError a
-runParseM p s = P.runParser p s "somefile"
+runParseM p s@(_, cfg, _) = P.runParser p s file
+  where
+    file = case cfgScript cfg of
+             Nothing -> "repl"
+             Just f  -> makeRelative (cfgWorkDir cfg) f
 
 ----------------
 -- Repl monad --
