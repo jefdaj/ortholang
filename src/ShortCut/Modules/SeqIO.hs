@@ -105,13 +105,12 @@ mkLoadGlob name loadType eachFn = compose1 globFiles eachFn name (ListOf str) de
 -- loadGbkGlob = mkLoadGlob "load_gbk_glob" gbk
 
 mkLoaders :: CutType -> [CutFunction]
--- mkLoaders loadType = [single, each, glob]
-mkLoaders loadType = [single, each]
+mkLoaders loadType = [single, each, glob]
   where
     ext    = extOf loadType
     single = mkLoad     ("load_" ++ ext           ) loadType
     each   = mkLoadList ("load_" ++ ext ++ "_each") loadType
-    globFn = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each
+    glob   = mkLoadGlob ("oad_" ++ ext ++ "_glob") loadType each
 
 -----------------------
 -- gbk_to_f*a(_each) --

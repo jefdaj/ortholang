@@ -10,6 +10,7 @@ extra-deps:
 - concurrent-extra-0.7.0.11
 - posix-escape-0.1
 - temporary-1.2.1.1
+- parsec-3.1.13.0 # for parserTraced
 flags: {}
 extra-package-dbs: []
 nix:

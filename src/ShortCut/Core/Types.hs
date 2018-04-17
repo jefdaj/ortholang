@@ -10,6 +10,7 @@ module ShortCut.Core.Types
   , CutConfig(..)
   , listFunctionNames
   , findFunction
+  , operatorChars
   -- , WrapperConfig(..)
   , CutType(..)
   , CutVar(..)
@@ -70,6 +71,8 @@ import Text.Parsec                    (ParseError)
 import Development.Shake.FilePath (makeRelative)
 -- import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+
+import Debug.Trace
 
 type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
 type RulesFn     = CutState -> CutExpr -> Rules ExprPath
@@ -291,6 +294,19 @@ findFunction cfg name = find (\f -> fName f == name) fs
   where
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
+
+
+listFunctions :: CutConfig -> [CutFunction]
+listFunctions cfg = concat $ map mFunctions $ cfgModules cfg
+
+-- Now with guard against accidentally including parts of prefix fn names!
+operatorChars :: CutConfig -> [Char]
+operatorChars cfg = if cfgDebug cfg then chars' else chars
+  where
+    bops    = filter (\f -> fFixity f == Infix) $ listFunctions cfg
+    bChar n = if length n == 1 then head n else error $ "bad bop name: " ++ n
+    chars   = map (bChar . fName) bops
+    chars'  = trace ("operatorChars: '" ++ chars ++ "'") chars
 
 -----------------
 -- Parse monad --

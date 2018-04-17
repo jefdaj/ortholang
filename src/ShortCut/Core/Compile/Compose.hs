@@ -26,7 +26,7 @@ compose1 fn1 fn2 name type1 typeDesc = CutFunction
   { fName      = name
   , fTypeCheck = tCompose1 type1 fn1 fn2
   , fTypeDesc  = typeDesc
-  , fFixity    = Infix
+  , fFixity    = Prefix
   , fRules     = rCompose1 fn1 fn2 type1
   }
 

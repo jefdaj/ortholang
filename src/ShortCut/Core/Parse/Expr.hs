@@ -15,7 +15,7 @@ import Data.List              (union)
 -- import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
-import Text.Parsec.Combinator (manyTill, eof, lookAhead, between, choice, sepBy)
+import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 -- import Data.Either (either)
 
 -- import Debug.Trace (traceM)
@@ -126,7 +126,8 @@ pFunArgs name args = debugParser "pFun" $ do
 -- Since this is the last term parser, it can actually error instead of failing
 pRef :: ParseM CutExpr
 pRef = debugParser "pRef" $ do
-  v@(CutVar var) <- pVarOnly
+  -- v@(CutVar var) <- pVarOnly
+  v@(CutVar var) <- pVar
   -- let v = CutVar var
   (scr, _, _) <- getState
   debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr

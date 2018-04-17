@@ -7,29 +7,19 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
-import Text.Parsec            (getState, (<?>), getParserState, stateInput, try)
+import Text.Parsec            (getState, (<?>), getParserState, stateInput, try, parserTraced)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof)
 import Debug.Trace       (trace, traceM)
-
-operatorChars :: CutConfig -> [Char]
-operatorChars cfg = concat $ map fName $ filter (\f -> fFixity f == Infix)
-                  $ concat $ map mFunctions $ cfgModules cfg
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
   (_, cfg, _) <- getState
   if cfgDebug cfg
-    then do
-      inp <- fmap stateInput getParserState
-      let nxt = take 10 inp ++ if length inp > 10 then "..." else ""
-      res  <- pFn
-      inp' <- fmap stateInput getParserState
-      let nxt' = take 10 inp' ++ if length inp' > 10 then "..." else ""
-          msg  = name ++ " " ++ show nxt ++ " -> (" ++ show res ++ ", " ++ show nxt' ++ ")"
-      return $ trace msg res
+    then parserTraced name pFn
     else pFn
 
+-- TODO remove?
 debugParseM :: String -> ParseM ()
 debugParseM msg = do
   (_, cfg, _) <- getState
@@ -77,20 +67,21 @@ pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
   (_, cfg, _) <- getState
-  lookAhead $ try $ choice
+  try $ lookAhead $ choice
     [ eof
-    , try $ void $ choice $ map pSym $ operatorChars cfg ++ ")],"
+    , void $ choice $ map pSym $ operatorChars cfg ++ ")],"
     , try $ void $ pVarEq
     ]
 
 -- TODO need to handle pEnd here?? like in [full7942]
 pIden :: ParseM String
-pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest <* (spaces1 <|> pEnd)) <?> "variable name")
+-- pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest <* lookAhead (spaces1 <|> pEnd)) <?> "variable name")
+pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest <* try (notFollowedBy rest)) <?> "variable name")
   where
     -- iden c cs = CutVar (c:cs)
     -- TODO allow variable names that start with numbers too?
-    first = letter <|> char '_'
-    rest  = digit  <|> first
+    first = letter
+    rest  = letter <|> digit <|> oneOf "-_"
 
 pVar :: ParseM CutVar
 pVar = debugParser "pVar" (CutVar <$> pIden)

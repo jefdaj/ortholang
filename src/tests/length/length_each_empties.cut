@@ -5,20 +5,8 @@
 # TODO include a repl test for the types?
 # TODO there's also a potentially serious bug: type "[[], [1]]", get [[], []]
 
-# interesting! two breaks it, but only when it's not the first assignment:
-# shit it's probably some complicated evaluation order thing right?
-# or maybe not... get a similar error when var lookup fails here on `but`
-# which could mean this is the error for whenever the thing parsed after = fails?
-# in which case it just means the fn parse failed... which i knew! type error.
-# so back to this just being a type error then.
-
-# oh are parsec errors in reverse order?
-
-# questionis = "why" # <- does it break after this??
-# do comments help?
 zero = length_each []       # []
 one  = length_each [[]]     # [0]
 two  = length_each [[], []] # [0, 0]
 
 result = [zero, one, two] # [[], [0], [0, 0]]
-# result = [zero, one] # [[], [0], [0, 0]]
