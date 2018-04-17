@@ -92,26 +92,21 @@ pEnd = do
 -- TODO load names from modules, of course
 -- TODO put this in terms of "keyword" or something?
 -- TODO get function names from modules
-pName :: ParseM String
-pName = do
+pFunName :: ParseM String
+pFunName = do
   (_, cfg, _) <- getState
-  (choice $ map (try . str') $ fnNames cfg) <?> "fn name"
+  (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
-
--- TODO move to types? utils?
-fnNames :: CutConfig -> [String]
-fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
 -- TODO any way to do this last so "function not found" error comes through??
 -- TODO should be able to commit after parsing the fn name, which would allow real failure
 pFun :: ParseM CutExpr
 pFun = do
   (_, cfg, _) <- getState
-  name <- try $ pName
+  name <- try $ pFunName
   args <- manyTill pTerm pEnd
-  let fns  = concat $ map mFunctions $ cfgModules cfg
-      fn   = find (\f -> fName f == name) fns
+  let fn   = findFunction cfg name
       deps = foldr1 union $ map depsOf args
   case fn of
     Nothing -> fail name

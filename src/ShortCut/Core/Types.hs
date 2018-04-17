@@ -3,6 +3,7 @@ module ShortCut.Core.Types
   ( CutAssign
   , CutExpr(..)
   , CutConfig(..)
+  , listFunctionNames
   , findFunction
   -- , WrapperConfig(..)
   , CutType(..)
@@ -258,8 +259,12 @@ data CutConfig = CutConfig
   }
   deriving Show
 
+listFunctionNames :: CutConfig -> [String]
+listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
+
 -- used by the compiler and repl
 -- TODO find bops by char or name too
+-- TODO filter to get a list and assert length == 1fs
 findFunction :: CutConfig -> String -> Maybe CutFunction
 findFunction cfg name = find (\f -> fName f == name) fs
   where
