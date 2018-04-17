@@ -14,11 +14,11 @@ import Data.List              (union)
 -- import ShortCut.Core.Debug    (debugParser)
 -- import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
-import Text.Parsec.Char       (string, char, spaces)
+import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, lookAhead, between, choice, sepBy)
 -- import Data.Either (either)
 
-import Debug.Trace (traceM)
+-- import Debug.Trace (traceM)
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
@@ -85,7 +85,7 @@ pBop _ = error "pBop only works with infix functions"
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
   (_, cfg, _) <- getState
-  try $ choice
+  lookAhead $ try $ choice
     [ eof
     , try $ void $ choice $ map pSym $ operatorChars cfg ++ ")],"
     , try $ void $ pVarEq
@@ -112,23 +112,26 @@ fnNames :: CutConfig -> [String]
 fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
 -- TODO main parse error is in here, when pTerm fails on an arg??
+-- TODO so is pTerm failing on it, or pEnd succeeding?
 pArgs :: ParseM [CutExpr]
-pArgs = debugParser "pArgs" $ manyTill (lexeme pTerm) (lookAhead pEnd)
+pArgs = debugParser "pArgs" $ manyTill (try pTerm) pEnd
 
 pFun :: ParseM CutExpr
 pFun = do
   name <- try pFunName -- TODO try?
   debugParseM $ "pFun committed to parsing " ++ name
-  pFunArgs name
+  args <- pArgs
+  debugParseM $ "pFun " ++ name ++ " args: " ++ show args
+  pFunArgs name args
 
 -- This function uses error rather than fail to prevent parsec from trying anything more
 -- (TODO is there a better way?)
-pFunArgs :: String -> ParseM CutExpr
-pFunArgs name = debugParser "pFun" $ do
+pFunArgs :: String -> [CutExpr] -> ParseM CutExpr
+pFunArgs name args = debugParser "pFun" $ do
   (_, cfg, _) <- getState
   -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
   -- args <- pArgs
-  args <- manyTill pTerm pEnd
+  -- args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fns' = filter (\f -> fName f == name) fns
   case fns' of
@@ -145,11 +148,10 @@ pFunArgs name = debugParser "pFun" $ do
 -- Since this is the last term parser, it can actually error instead of failing
 pRef :: ParseM CutExpr
 pRef = debugParser "pRef" $ do
-  -- v@(CutVar var) <- pVarOnly
-  v@(CutVar var) <- try pVar
+  v@(CutVar var) <- pVarOnly
   -- let v = CutVar var
   (scr, _, _) <- getState
-  traceM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
+  debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v scr of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
     Just e -> return $ CutRef (typeOf e) 0 (depsOf e) v
@@ -188,8 +190,8 @@ pParens = debugParser "pParens" (between (pSym '(') (pSym ')') pExpr <?> "parens
 
 pTerm :: ParseM CutExpr
 -- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFunOrRef]
--- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
-pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pRef]
+pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
+-- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pRef]
 
 -- This function automates building complicated nested grammars that parse
 -- operators correctly. It's kind of annoying, but I haven't figured out how
@@ -200,7 +202,7 @@ pExpr :: ParseM CutExpr
 pExpr = debugParser "pExpr" $ do
   (_, cfg, _) <- getState
   -- debugParseM "expr"
-  res <- pFun <|> E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
+  res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- let res' = debugParser cfg "pExpr" res
   return res

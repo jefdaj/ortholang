@@ -17,10 +17,8 @@
 # questionis = "why" # <- does it break after this??
 # do comments help?
 zero = length_each []       # []
-two  = length_each [[]] # [0, 0]
-
-zero = length_each []       # []
 one  = length_each [[]]     # [0]
+two  = length_each [[], []] # [0, 0]
 
 result = [zero, one, two] # [[], [0], [0, 0]]
 # result = [zero, one] # [[], [0], [0, 0]]

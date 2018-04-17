@@ -66,7 +66,7 @@ pResult = debugParser "pResult" $ do
   return (CutVar "result", e)
 
 pStatement :: ParseM CutAssign
-pStatement = debugParser "pStatement" (pAssign <|> pResult)
+pStatement = debugParser "pStatement" (try pAssign <|> pResult)
   -- (_, cfg) <- getState
   -- res <- pAssign <|> pResult
   -- let res' = debugParser cfg "pStatement" res

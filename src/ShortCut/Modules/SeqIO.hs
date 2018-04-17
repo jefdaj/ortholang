@@ -89,10 +89,10 @@ fna = CutType
 -- glob_* --
 ------------
 
-mkLoadGlob :: String -> CutType -> CutFunction
-mkLoadGlob name loadType = compose1 globFiles loadList name (ListOf str) desc
+mkLoadGlob :: String -> CutType -> CutFunction -> CutFunction
+mkLoadGlob name loadType eachFn = compose1 globFiles eachFn name (ListOf str) desc
   where
-    loadList = mkLoadList ("load_" ++ extOf loadType ++ "_each") loadType
+    -- loadList = mkLoadList ("load_" ++ extOf loadType ++ "_each") loadType
     desc     = mkTypeDesc name [str] (ListOf loadType)
 
 -- loadFaaGlob :: CutFunction
@@ -105,12 +105,13 @@ mkLoadGlob name loadType = compose1 globFiles loadList name (ListOf str) desc
 -- loadGbkGlob = mkLoadGlob "load_gbk_glob" gbk
 
 mkLoaders :: CutType -> [CutFunction]
-mkLoaders loadType = [single, each, glob]
+-- mkLoaders loadType = [single, each, glob]
+mkLoaders loadType = [single, each]
   where
     ext    = extOf loadType
     single = mkLoad     ("load_" ++ ext           ) loadType
     each   = mkLoadList ("load_" ++ ext ++ "_each") loadType
-    glob   = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType
+    globFn = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each
 
 -----------------------
 -- gbk_to_f*a(_each) --

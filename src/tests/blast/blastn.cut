@@ -1,33 +1,35 @@
 mini = load_fna "data/7942genes10.fna"
-
-loaner = load_fna "data/7942genes.fna"
-mapped = extract_queries_each (blastn_each 1e-5 mini [loaner])
+full = load_fna "data/7942genes.fna"
 
 # things to think about in the morning (early only! move on to CLOOOONING!):
-# - why would adding the glob fn specifically turn loaner into oaner?? might be the key there
+# - why would adding the glob fn specifically turn full into oaner?? might be the key there
 #   (any heads or tails around?)
 #   it's nothing to do with the fancy compose stuff itself because that doesn't get called right?
 #   changing its name changes the parse error! load_ different from oad_
 # - should pFun be in pTerm at all without parens around it?
 
 # this fixes is somehow. maybe because pParens comes earlier in the list?
-# single = extract_queries      (blastn      1e-5 mini (loaner))
+# single = extract_queries      (blastn      1e-5 mini (x))
 
-# this still breaks on loaner, not mini! meaning it's specific
-# single = extract_queries      (blastn 1e-5 loaner mini)
+# this still breaks on x, not mini! meaning it's specific
+# single = extract_queries      (blastn 1e-5 full mini)
 
-# renaming to something besides loaner fixes it
+# renaming to something besides full fixes it
 # ... in fact is can be anything that doesn't start with f?
 # the only fn that starts with f is filter_evalue... removing doesn't help
 # wait, it also can't start with g
 # must be something about the parser consuming input or not based on fn names??
-# names that fail by no pRef: loaner, filbert, boader
-# names that fail differently: loaner causes an error on load_fna instead,
+# names that fail by no pRef: x, filbert, boader
+# names that fail differently: full causes an error on load_fna instead,
 #                              or tries to parse 'oader' depending on code
 # names that don't: zzx, x4, xoader, woader
 # must be a problem with `try` or a related fn somewhere right? conflicting with load_*?
 # what if it has to do with function order?
 
-# single = extract_queries      (blastn 1e-5 loaner mini)
-single = extract_queries      (blastn mini loaner mini)
+# the main bug seems to be parsing varnames that have a char in common with fn names?
+# full fails here, xxx is fine, lxxx fails
+# single = extract_queries      (blastn 1e-5 full mini)
+# single = extract_queries      (blastn 1e-5 xxx mini)
+single = extract_queries      (blastn      1e-5 mini  full )
+mapped = extract_queries_each (blastn_each 1e-5 mini [full])
 result = [single] | mapped
