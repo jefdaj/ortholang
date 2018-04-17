@@ -42,11 +42,12 @@ stripComments = unlines . map stripComment . lines
 pAssign :: ParseM CutAssign
 pAssign = debugParser "pAssign" $ do
   (scr, cfg, ref) <- getState
-  optional newline
-  void $ lookAhead $ debugParser "first pVarEq" pVarEq
-  v <- debugParser "second pVarEq" pVarEq -- TODO use lookAhead here to decide whether to commit to it
-  e <- debugParser "first pExpr" (lexeme pExpr)
+  -- optional newline
+  -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
+  v <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
+  e <- debugParseM "first pExpr" >> (lexeme pExpr)
   putState (scr ++ [(v,e)], cfg, ref)
+  debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
       -- res' = debugParser cfg "pAssign" res
   return res

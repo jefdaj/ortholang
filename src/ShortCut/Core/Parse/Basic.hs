@@ -9,8 +9,12 @@ import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
 import Text.Parsec            (getState, (<?>), getParserState, stateInput, try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
-import Text.Parsec.Combinator (many1, between, notFollowedBy)
+import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof)
 import Debug.Trace       (trace, traceM)
+
+operatorChars :: CutConfig -> [Char]
+operatorChars cfg = concat $ map fName $ filter (\f -> fFixity f == Infix)
+                  $ concat $ map mFunctions $ cfgModules cfg
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
@@ -55,8 +59,33 @@ pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++
 -- identifiers --
 -----------------
 
+-- Tests for the end of a single argument: space, comma, close bracket of some kind, or eof.
+-- Doesn't consume any input or return a value.
+-- TODO use this in pEnd? and rename that pEndArgs
+-- TODO is there any reason not to use pEnd itself for this?
+-- pEndArg :: ParseM ()
+-- pEndArg = do
+--   (_, cfg, _) <- getState
+--   lookAhead $ void $ choice $ map (try . pSym) $ operatorChars cfg ++ ")],"
+
+-- This is a kludge to make my "interesting" preference for spaces as function
+-- application work right. It's used to test whether we've reached the end of a
+-- list of arguments for the function currently being parsed.
+-- TODO can factor the try out to be by void right?
+-- TODO error in here when it somehow succeeds on full7942?
+-- TODO this must be succeding on 'loaner... right?
+pEnd :: ParseM ()
+pEnd = debugParser "pEnd" $ do
+  (_, cfg, _) <- getState
+  lookAhead $ try $ choice
+    [ eof
+    , try $ void $ choice $ map pSym $ operatorChars cfg ++ ")],"
+    , try $ void $ pVarEq
+    ]
+
+-- TODO need to handle pEnd here?? like in [full7942]
 pIden :: ParseM String
-pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest) <?> "variable name")
+pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest <* (spaces1 <|> pEnd)) <?> "variable name")
   where
     -- iden c cs = CutVar (c:cs)
     -- TODO allow variable names that start with numbers too?

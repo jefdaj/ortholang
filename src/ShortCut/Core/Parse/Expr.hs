@@ -36,13 +36,6 @@ pList = debugParser "pList" $ do
 -- operators --
 ---------------
 
--- TODO load from modules somehow... or do individual fn parsers make it obsolete?
--- operatorChars :: [Char]
--- operatorChars = "+-*/&|~"
-operatorChars :: CutConfig -> [Char]
-operatorChars cfg = concat $ map fName $ filter (\f -> fFixity f == Infix)
-                  $ concat $ map mFunctions $ cfgModules cfg
-
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
@@ -75,21 +68,6 @@ pBop _ = error "pBop only works with infix functions"
 ---------------
 -- functions --
 ---------------
-
--- This is a kludge to make my "interesting" preference for spaces as function
--- application work right. It's used to test whether we've reached the end of a
--- list of arguments for the function currently being parsed.
--- TODO can factor the try out to be by void right?
--- TODO error in here when it somehow succeeds on full7942?
--- TODO this must be succeding on 'loaner... right?
-pEnd :: ParseM ()
-pEnd = debugParser "pEnd" $ do
-  (_, cfg, _) <- getState
-  lookAhead $ try $ choice
-    [ eof
-    , try $ void $ choice $ map pSym $ operatorChars cfg ++ ")],"
-    , try $ void $ pVarEq
-    ]
 
 -- TODO load names from modules, of course
 -- TODO put this in terms of "keyword" or something?
