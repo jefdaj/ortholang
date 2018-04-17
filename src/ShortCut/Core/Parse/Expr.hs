@@ -73,27 +73,14 @@ pBop _ = error "pBop only works with infix functions"
 -- TODO put this in terms of "keyword" or something?
 -- TODO get function names from modules
 pFunName :: ParseM String
-pFunName = debugParser "pFunName" $ do
+pFunName = do
   (_, cfg, _) <- getState
-  -- res <- (choice $ map (try . str') $ fnNames cfg) <?> "fn name"
-  -- TODO looks like length_each is failing here?
-  -- choice $ map (\n -> trace ("trying to parse name '" ++ n ++ "'") $ try $ str' n) $ fnNames cfg
-  -- choice $ map (try . str') $ fnNames cfg
-  choice $ map (try . str') $ fnNames cfg
-  -- let res' = debugParser cfg "pFunName" res
-  -- return res'
+  (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
 
--- TODO move to types? utils?
-fnNames :: CutConfig -> [String]
-fnNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
-
--- TODO main parse error is in here, when pTerm fails on an arg??
--- TODO so is pTerm failing on it, or pEnd succeeding?
-pArgs :: ParseM [CutExpr]
-pArgs = debugParser "pArgs" $ manyTill (try pTerm) pEnd
-
+-- TODO any way to do this last so "function not found" error comes through??
+-- TODO should be able to commit after parsing the fn name, which would allow real failure
 pFun :: ParseM CutExpr
 pFun = do
   name <- try pFunName -- TODO try?
@@ -101,6 +88,11 @@ pFun = do
   args <- pArgs
   debugParseM $ "pFun " ++ name ++ " args: " ++ show args
   pFunArgs name args
+
+-- TODO main parse error is in here, when pTerm fails on an arg??
+-- TODO so is pTerm failing on it, or pEnd succeeding?
+pArgs :: ParseM [CutExpr]
+pArgs = debugParser "pArgs" $ manyTill (try pTerm) pEnd
 
 -- This function uses error rather than fail to prevent parsec from trying anything more
 -- (TODO is there a better way?)
