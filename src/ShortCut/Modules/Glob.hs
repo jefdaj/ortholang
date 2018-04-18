@@ -5,6 +5,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions (readLit, writeLits, debugA)
 import ShortCut.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
+import Data.List                  (sort)
 import Data.String.Utils          (strip)
 
 import System.FilePath.Glob       (glob)
@@ -52,7 +53,7 @@ aGlobFiles cfg ref outPath path = do
   ptn   <- fmap strip $ readLit cfg ref path'
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   -- paths <- liftIO $ mapM absolutize =<< glob ptn
-  paths  <- liftIO $ glob ptn
+  paths  <- liftIO $ fmap sort $ glob ptn
   paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
   -- toShortCutListStr cfg str (ExprPath outPath) paths
   writeLits cfg ref out'' paths'

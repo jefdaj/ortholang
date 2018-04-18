@@ -236,8 +236,8 @@ rBop _ _ _ = error "bad argument to rBop"
 
 typeError :: [CutType] -> [CutType] -> String
 typeError expected actual =
-  "Type error:\nexpected " ++ show expected
-           ++ "\nbut got " ++ show actual
+  "Type error: expected " ++ show expected
+           ++ " but got " ++ show actual
 
 -- TODO this should fail for type errors like multiplying a list by a num!
 defaultTypeCheck :: [CutType] -> CutType

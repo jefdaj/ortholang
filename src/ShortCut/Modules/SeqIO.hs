@@ -17,15 +17,18 @@ import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
 import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
 import System.FilePath             ((</>))
 import System.Directory            (createDirectoryIfMissing)
+import ShortCut.Core.Compile.Compose (compose1)
+import ShortCut.Modules.Glob (globFiles)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-    [ loadGbk     , loadGbkEach
-    , loadFaa     , loadFaaEach
-    , loadFna     , loadFnaEach
-    , gbkToFaa    , gbkToFaaEach
+    -- [ loadGbk     , loadGbkEach, loadGbkGlob
+    -- , loadFaa     , loadFaaEach, loadFaaGlob
+    -- , loadFna     , loadFnaEach, loadFnaGlob
+    mkLoaders fna ++ mkLoaders faa ++ mkLoaders gbk ++
+    [ gbkToFaa    , gbkToFaaEach
     , gbkToFna    , gbkToFnaEach
     , extractSeqs , extractSeqsEach
     , extractIds  , extractIdsEach
@@ -64,23 +67,50 @@ fna = CutType
 -- load_*(_each) --
 -------------------
 
-loadFaa :: CutFunction
-loadFaa = mkLoad "load_faa" faa
+-- loadFaa :: CutFunction
+-- loadFaa = mkLoad "load_faa" faa
+-- 
+-- loadFaaEach :: CutFunction
+-- loadFaaEach = mkLoadList "load_faa_each" faa
+-- 
+-- loadFna :: CutFunction
+-- loadFna = mkLoad "load_fna" fna
+-- 
+-- loadFnaEach :: CutFunction
+-- loadFnaEach = mkLoadList "load_fna_each" fna
+-- 
+-- loadGbk :: CutFunction
+-- loadGbk = mkLoad "load_gbk" gbk
+-- 
+-- loadGbkEach :: CutFunction
+-- loadGbkEach = mkLoadList "load_gbk_each" gbk
 
-loadFaaEach :: CutFunction
-loadFaaEach = mkLoadList "load_faa_each" faa
+------------
+-- glob_* --
+------------
 
-loadFna :: CutFunction
-loadFna = mkLoad "load_fna" fna
+mkLoadGlob :: String -> CutType -> CutFunction -> CutFunction
+mkLoadGlob name loadType eachFn = compose1 globFiles eachFn name (ListOf str) desc
+  where
+    -- loadList = mkLoadList ("load_" ++ extOf loadType ++ "_each") loadType
+    desc     = mkTypeDesc name [str] (ListOf loadType)
 
-loadFnaEach :: CutFunction
-loadFnaEach = mkLoadList "load_fna_each" fna
+-- loadFaaGlob :: CutFunction
+-- loadFaaGlob = mkLoadGlob "load_faa_glob" faa
+-- 
+-- loadFnaGlob :: CutFunction
+-- loadFnaGlob = mkLoadGlob "load_fna_glob" fna
+-- 
+-- loadGbkGlob :: CutFunction
+-- loadGbkGlob = mkLoadGlob "load_gbk_glob" gbk
 
-loadGbk :: CutFunction
-loadGbk = mkLoad "load_gbk" gbk
-
-loadGbkEach :: CutFunction
-loadGbkEach = mkLoadList "load_gbk_each" gbk
+mkLoaders :: CutType -> [CutFunction]
+mkLoaders loadType = [single, each, glob]
+  where
+    ext    = extOf loadType
+    single = mkLoad     ("load_" ++ ext           ) loadType
+    each   = mkLoadList ("load_" ++ ext ++ "_each") loadType
+    glob   = mkLoadGlob ("oad_" ++ ext ++ "_glob") loadType each
 
 -----------------------
 -- gbk_to_f*a(_each) --

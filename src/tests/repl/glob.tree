@@ -1,17 +1,17 @@
 .
 |-- cache
 |   `-- lines
-|       |-- 2ac2c93a4b.txt
-|       |-- 3e97f37872.txt
 |       |-- 4d13e8c51d.txt
 |       |-- 52d4bfc245.txt
-|       |-- 6bd11be148.txt
-|       `-- 7f395760ef.txt
+|       |-- 7f395760ef.txt
+|       |-- 9587c7dcc7.txt
+|       |-- e5404eebaf.txt
+|       `-- ffa88db5ee.txt
 |-- exprs
 |   |-- glob_files
-|   |   |-- 336b58f002.str.list -> ../../cache/lines/3e97f37872.txt
-|   |   |-- ca1dad5c15.str.list -> ../../cache/lines/2ac2c93a4b.txt
-|   |   `-- e1ee7a1528.str.list -> ../../cache/lines/6bd11be148.txt
+|   |   |-- 336b58f002.str.list -> ../../cache/lines/9587c7dcc7.txt
+|   |   |-- ca1dad5c15.str.list -> ../../cache/lines/e5404eebaf.txt
+|   |   `-- e1ee7a1528.str.list -> ../../cache/lines/ffa88db5ee.txt
 |   `-- str
 |       |-- 4749080868.str -> ../../cache/lines/4d13e8c51d.txt
 |       |-- f57a39dc38.str -> ../../cache/lines/52d4bfc245.txt

@@ -24,14 +24,20 @@ compose1 :: CutFunction -> CutFunction
          -> CutFunction
 compose1 fn1 fn2 name type1 typeDesc = CutFunction
   { fName      = name
-  , fTypeCheck = tCompose1 fn1 fn2
+  , fTypeCheck = tCompose1 type1 fn1 fn2
   , fTypeDesc  = typeDesc
-  , fFixity    = Infix
+  , fFixity    = Prefix
   , fRules     = rCompose1 fn1 fn2 type1
   }
 
-tCompose1 :: CutFunction -> CutFunction -> TypeChecker
-tCompose1 fn1 fn2 types = fTypeCheck fn1 types >>= \t -> fTypeCheck fn2 [t]
+tCompose1 :: CutType -> CutFunction -> CutFunction -> TypeChecker
+tCompose1 expected fn1 fn2 types = case fTypeCheck fn1 types of
+  (Left  errMsg) -> Left errMsg
+  (Right actual) -> if actual == expected
+                      then fTypeCheck fn2 [expected]
+                      else Left $ "error: composed fn " ++ fName fn1
+                             ++ " produces a " ++ extOf actual
+                             ++ ", not " ++ extOf expected
 
 rCompose1 :: CutFunction -> CutFunction -> CutType -> RulesFn
 rCompose1 fn1 fn2 rtn1 st (CutFun rtn2 salt deps _ args) = (fRules fn2) st expr2

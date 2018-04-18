@@ -26,6 +26,7 @@ import Text.Parsec            (ParseError)
  -}
 
 -- untested, but should strip all comments from a script leaving whitespace
+-- TODO could this be lobbing off the first char?
 stripComments :: String -> String
 stripComments = unlines . map stripComment . lines
   where
@@ -39,16 +40,17 @@ stripComments = unlines . map stripComment . lines
 
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
-pAssign = do
+pAssign = debugParser "pAssign" $ do
   (scr, cfg, ref) <- getState
-  optional newline
-  void $ lookAhead $ try pVarEq
-  v <- pVarEq -- TODO use lookAhead here to decide whether to commit to it
-  e <- lexeme pExpr
+  -- optional newline
+  -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
+  v <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
+  e <- debugParseM "first pExpr" >> (lexeme pExpr)
   putState (scr ++ [(v,e)], cfg, ref)
+  debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
-      res' = debugParser cfg "pAssign" res
-  return res'
+      -- res' = debugParser cfg "pAssign" res
+  return res
 
 -- Handles the special case of a naked top-level expression, which is treated
 -- as being assigned to "result". This parses the same in a script or the repl,
@@ -58,14 +60,14 @@ pAssign = do
 -- TODO if the statement is literally `result`, what do we do?
 --      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM CutAssign
-pResult = do
-  (_, cfg, _) <- getState
+pResult = debugParser "pResult" $ do
+  -- (_, cfg, _) <- getState
   e <- pExpr
-  let e' = debugParser cfg "pResult" e
-  return (CutVar "result", e')
+  -- let e' = debugParser cfg "pResult" e
+  return (CutVar "result", e)
 
 pStatement :: ParseM CutAssign
-pStatement = pAssign <|> pResult
+pStatement = debugParser "pStatement" (try pAssign <|> pResult)
   -- (_, cfg) <- getState
   -- res <- pAssign <|> pResult
   -- let res' = debugParser cfg "pStatement" res
@@ -80,7 +82,7 @@ pStatement = pAssign <|> pResult
 -- TODO message in case it doesn't parse?
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
-pScript = do
+pScript = debugParser "pScript" $ do
   (_, cfg, ref) <- getState
   optional spaces
   scr <- many pStatement
