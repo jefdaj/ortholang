@@ -66,12 +66,6 @@ blastx_db : num fna pdb -> bht
 blastx_db_each : num fna pdb.list -> bht.list
 >> :t blastx_each
 blastx_each : num fna faa.list -> bht.list
->> :t cheat
-"somefile" (line 1, column 6):
-unexpected end of input
-expecting digit, letter, "_", white space or "="
-no such variable 'cheat'
-
 >> :t concat_faa
 concat_faa : faa.list -> faa
 >> :t concat_faa_each
