@@ -6,7 +6,7 @@ module ShortCut.Core.Compile.Map
   , map1of3, map2of3, map3of3
 
   -- concat a list of expressions
-  , concatExprs
+  -- , concatExprs
 
   -- base functions (move somewhere else)
   , rFun3
@@ -74,10 +74,10 @@ map3of3 inType outType act3 = \cfg locks out a1 a2 a3 -> do
 
 -- This goes well with any of the above map functions for writing a "concatMap"
 
-concatExprs :: CutExpr -> CutExpr
-concatExprs lst = case typeOf lst of
-  (ListOf _) -> undefined
-  x -> error $ "bad argument to concatExprs. type was " ++ show x
+-- concatExprs :: CutExpr -> CutExpr
+-- concatExprs lst = case typeOf lst of
+--   (ListOf _) -> undefined
+--   x -> error $ "bad argument to concatExprs. type was " ++ show x
 
 ------------------------------------------
 -- base functions (move somewhere else) --
