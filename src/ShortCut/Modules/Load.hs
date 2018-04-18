@@ -1,5 +1,7 @@
 module ShortCut.Modules.Load where
 
+-- TODO move all the mkLoad* stuff from Core here? it's still kind of core
+
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck, mkLoad,
@@ -16,7 +18,7 @@ import System.Directory (makeRelativeToCurrentDirectory)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "glob"
+  { mName = "load"
   , mFunctions = [loadList, globFiles]
   }
 

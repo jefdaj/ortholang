@@ -1,1 +1,1 @@
-result = "function not finished yet"
+result = glob_files "data/*.faa"
