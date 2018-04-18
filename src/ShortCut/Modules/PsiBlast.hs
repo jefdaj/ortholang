@@ -236,6 +236,7 @@ psiblastAll = CutFunction
   where
     name = "psiblast_all"
 
+-- TODO rewrite with new functions
 rPsiblastAll :: RulesFn
 rPsiblastAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st expr
   where
@@ -254,6 +255,7 @@ psiblastDb = CutFunction
   where
     name = "psiblast_db"
 
+-- TODO rewrite with new functions
 rPsiblastDb :: RulesFn
 rPsiblastDb st expr@(CutFun _ salt _ _ [e, fa, db]) = rExpr st expr'
   where
@@ -300,6 +302,7 @@ psiblastTrain = CutFunction
   where
     name = "psiblast_train"
 
+-- TODO rewrite with new functions
 rPsiblastTrain :: RulesFn
 rPsiblastTrain st (CutFun _ salt _ _ [e, q, s]) = rExpr st expr
   where
@@ -319,6 +322,7 @@ psiblastTrainEach = CutFunction
   where
     name = "psiblast_train_each"
 
+-- TODO rewrite with new functions
 rPsiblastTrainEach :: RulesFn
 rPsiblastTrainEach st expr@(CutFun _ n _ _ [e, q, ss]) = rExpr st pssms
   where
@@ -338,6 +342,7 @@ psiblastTrainAll = CutFunction
   where
     name = "psiblast_train_all"
 
+-- TODO rewrite with new functions
 rPsiblastTrainAll :: RulesFn
 rPsiblastTrainAll st (CutFun _ salt _ _ [e, fa, fas]) = rExpr st trainExpr
   where
@@ -401,6 +406,7 @@ psiblastPssmAll = CutFunction
   where
     name = "psiblast_pssm_all"
 
+-- TODO rewrite with new functions
 rPsiblastPssmAll :: RulesFn
 rPsiblastPssmAll st expr@(CutFun _ salt _ _ [e, q, fas]) = rExpr st bhtExpr
   where
@@ -419,6 +425,7 @@ psiblastPssmEach = CutFunction
   where
     name = "psiblast_pssm_each"
 
+-- TODO rewrite with new functions
 rPsiblastPssmEach :: RulesFn
 rPsiblastPssmEach st expr@(CutFun _ n _ _ [e, q, ss]) = rExpr st pssms
   where
@@ -484,6 +491,7 @@ psiblastPssmsDb = CutFunction
   where
     name = "psiblast_pssms_db"
 
+-- TODO rewrite with new functions
 rPsiblastPssmsDb :: RulesFn
 rPsiblastPssmsDb st expr@(CutFun _ salt _ _ [n, qs, s]) = rExpr st expr'
   where
@@ -502,6 +510,7 @@ psiblastPssms = CutFunction
   where
     name = "psiblast_pssms"
 
+-- TODO rewrite with new functions
 -- TODO deduplicate this from rPsiblastPssm
 rPsiblastPssms :: RulesFn
 rPsiblastPssms st expr@(CutFun _ salt _ _ [e, qs, fa]) = rExpr st expr'
