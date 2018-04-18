@@ -42,10 +42,10 @@ import Test.QuickCheck
 -- TODO should dashes be valid in names too? probably
 -- TODO starting with a capital should be ok too right?
 vFirstChars :: [Char]
-vFirstChars = '_':['a'..'z']
+vFirstChars = ['a'..'z']
 
 vNonFirstChars :: [Char]
-vNonFirstChars = vFirstChars ++ ['0'..'9']
+vNonFirstChars = vFirstChars ++ '_':'-':['0'..'9']
 
 -- TODO make sure the var isn't accidentally a fn name? (unlikely)
 gVar :: Gen String

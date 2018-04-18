@@ -73,13 +73,13 @@ pEnd = debugParser "pEnd" $ do
     , try $ void $ pVarEq
     ]
 
--- TODO need to handle pEnd here?? like in [full7942]
 pIden :: ParseM String
--- pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest <* lookAhead (spaces1 <|> pEnd)) <?> "variable name")
-pIden = debugParser "pIden" (lexeme ((:) <$> first <*> many rest <* try (notFollowedBy rest)) <?> "variable name")
+pIden = debugParser "pIden" $ lexeme $ do
+  c  <- first
+  cs <- many rest <* try (notFollowedBy rest)
+  return (c:cs)
   where
-    -- iden c cs = CutVar (c:cs)
-    -- TODO allow variable names that start with numbers too?
+    -- TODO allow variable names that start with numbers too? capital letters?
     first = letter
     rest  = letter <|> digit <|> oneOf "-_"
 
