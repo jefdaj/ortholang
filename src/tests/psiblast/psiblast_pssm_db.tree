@@ -1,20 +1,10 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- cc6e2cc38b
-|   |       |-- 65da746a35.bht -> ../../../exprs/psiblast_pssm_db/9e754c0ec7_65da746a35_86d15b07be.bht
-|   |       `-- 65da746a35.bht.args -> ../../../cache/lines/4046478349.txt
 |   |-- lines
 |   |   |-- 0cf27272d3.txt
-|   |   |-- 132a50369d.txt
-|   |   |-- 31b0167b06.txt
 |   |   |-- 3f62a639a8.txt
-|   |   |-- 4046478349.txt
-|   |   |-- 434c890907.txt
 |   |   |-- 4d395ef46f.txt
-|   |   |-- 796a662331.txt
 |   |   |-- 8abd22b6c2.txt
-|   |   |-- 9460d203d5.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
 |   |   `-- c3ae472116.txt
@@ -28,15 +18,7 @@
 |           |-- c3ae472116.pdb.pin
 |           `-- c3ae472116.pdb.psq
 |-- exprs
-|   |-- any
-|   |   `-- 79cfbeeab3.bht.list -> ../../cache/lines/132a50369d.txt
-|   |-- concat_bht
-|   |   `-- 8a5c468afd.bht
 |   |-- list
-|   |   |-- 279b4ed79f.pssm.list -> ../../cache/lines/9460d203d5.txt
-|   |   |-- 4975b1851b.bht.list -> ../../cache/lines/796a662331.txt
-|   |   |-- 561796e876.bht.list -> ../../cache/lines/132a50369d.txt
-|   |   |-- 61fdf64cef.bht.list.list -> ../../cache/lines/31b0167b06.txt
 |   |   `-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
 |   |-- load_faa
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
@@ -46,11 +28,8 @@
 |   |   `-- a76d25f4b5.pdb -> ../../cache/lines/3f62a639a8.txt
 |   |-- num
 |   |   `-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
-|   |-- psiblast_each_pssm_db
-|   |   `-- 5fbeb4e044_e33a28ad1f_0aa7a0990a.bht.list -> ../../cache/lines/434c890907.txt
 |   |-- psiblast_pssm_db
-|   |   |-- 5fbeb4e044_df58784e25_0aa7a0990a.bht
-|   |   `-- 9e754c0ec7_65da746a35_86d15b07be.bht
+|   |   `-- 5fbeb4e044_df58784e25_0aa7a0990a.bht
 |   |-- psiblast_train_db
 |   |   `-- 5fbeb4e044_4d0e43d616_0aa7a0990a.pssm -> ../../cache/lines/4d395ef46f.txt
 |   `-- str
@@ -59,12 +38,11 @@
 |       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
 `-- vars
     |-- cyanodb.pdb -> ../exprs/makeblastdb_prot/a76d25f4b5.pdb
-    |-- mapped.bht -> ../exprs/concat_bht/8a5c468afd.bht
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
     |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- pssm.pssm -> ../exprs/psiblast_train_db/5fbeb4e044_4d0e43d616_0aa7a0990a.pssm
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
-    |-- result -> ../exprs/any/79cfbeeab3.bht.list
+    |-- result -> ../vars/single.bht
     `-- single.bht -> ../exprs/psiblast_pssm_db/5fbeb4e044_df58784e25_0aa7a0990a.bht
 
-19 directories, 48 files
+14 directories, 31 files

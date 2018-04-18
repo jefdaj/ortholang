@@ -23,11 +23,10 @@ import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
-import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
-import ShortCut.Core.Compile.Map   (map3of3, rFun3)
+import ShortCut.Core.Compile.Map   (rFun3, map2of3, map3of3)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -89,9 +88,9 @@ cutModule = CutModule
     , psiblastPssmDbEach -- num pssm pdb.list -> bht.list
 
     -- search with lists of explicit pssm queries
-    , psiblastPssms      -- num pssm.list faa -> bht
+    , psiblastPssms      -- num pssm.list faa -> bht (TODO fix)
     , psiblastEachPssmDb -- num pssm.list pdb -> bht.list (TODO better name)
-    , psiblastPssmsDb    -- num pssm.list pdb -> bht
+    , psiblastPssmsDb    -- num pssm.list pdb -> bht (TODO fix)
 
     -- twice-vectorized functions (figure these out)
     -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
@@ -112,32 +111,6 @@ pssm = CutType
 --------------------
 -- base functions --
 --------------------
-
--- Base rules for running psiblast with a single query and subject to get a
--- single hit table or pssm
--- rPsiblastBase :: Action3 -> RulesFn
--- rPsiblastBase act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [e, q, db]) = do
---   (ExprPath ePath' ) <- rExpr st e
---   (ExprPath qPath' ) <- rExpr st q
---   (ExprPath dbPath') <- rExpr st db
---   let ePath  = toCutPath cfg ePath'
---       qPath  = toCutPath cfg qPath'
---       dbPath = toCutPath cfg dbPath'
---       oPath  = exprPath st expr
---       oPath' = debugRules cfg "rPsiblast" expr $ fromCutPath cfg oPath
---   oPath' %> \_ -> act3 cfg ref oPath ePath qPath dbPath
---   return (ExprPath oPath')
--- rPsiblastBase _ _ _ = error "bad argument to rPsiblast"
-
--- Base rules for running psiblast with a list of pssm queries against one
--- subject to get a list of hit tables or pssms.
--- TODO remove once parameterized compilers work
-rPsiblastVec2 :: Bool -> [String] -> RulesFn
-rPsiblastVec2 w args = rVectorize 2 actFn
-  where
-    -- this part just corrects the weirdness of also passing a bool and args
-    actFn cfg ref [o,e,q,d] = aPsiblastDb w args cfg ref o e q d
-    actFn _ _ _ = error "bad argument to rPsiblastVec2 actFn"
 
 -- Train a PSSM on a blast database
 aPsiblastTrain :: Action3
@@ -244,12 +217,13 @@ withProtDBs (CutFun rtn salt deps name [a1, a2, fas])
     dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
 withProtDBs e = error $ "bad argument to withProtDBs: " ++ show e
 
--- Converts a psiblast function that needs a premade blast db into one that
--- starts from faa. The db/faa is always the 3rd arg.
--- TODO wrap the expr and compile like before instead of doing it in terms of Actions?
--- TODO if keeping this, how to make the tmpfile names stay useful?
--- makeblastdbAnd :: Action3 -> Action3
--- makeblastdbAnd act3 = \cfg locks out a1 a2 a3 -> do
+withProtDB :: CutExpr -> CutExpr
+withProtDB (CutFun rtn salt deps name [a1, a2, fa])
+  =        (CutFun rtn salt deps name [a1, a2, db])
+  where
+    fas = CutList (typeOf fas) salt (depsOf fa ) [fa]
+    db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot" [fas]
+withProtDB e = error $ "bad argument to withProtDB: " ++ show e
 
 psiblastAll :: CutFunction
 psiblastAll = CutFunction
@@ -489,7 +463,12 @@ psiblastEachPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rPsiblastVec2 False searchArgs
+
+  -- TODO oh i get it, this needs to make a single protein db not a list:
+  -- TODO wait no, it doesn't need one at all
+  -- , fRules = \s e -> rFun3 (map2of3 pssm bht $ aPsiblastSearch) s (withProtDB e)
+  , fRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearch
+
   }
   where
     name = "psiblast_each_pssm_db"
