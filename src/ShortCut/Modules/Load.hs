@@ -1,12 +1,14 @@
-module ShortCut.Modules.Glob where
+module ShortCut.Modules.Load where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck)
+import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck, mkLoad,
+                                    mkLoadList, )
 import ShortCut.Core.Actions (readLit, writeLits, debugA)
 import ShortCut.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
 import Data.List                  (sort)
 import Data.String.Utils          (strip)
+import ShortCut.Core.Compile.Compose (compose1)
 
 import System.FilePath.Glob       (glob)
 import System.Directory (makeRelativeToCurrentDirectory)
@@ -15,8 +17,22 @@ import System.Directory (makeRelativeToCurrentDirectory)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "glob"
-  , mFunctions = [globFiles]
+  , mFunctions = [loadList, globFiles]
   }
+
+-- See also the mkLoaders fn at the bottom, which should be used whenever
+-- another module introduces a loadable type
+
+---------------
+-- load_list --
+---------------
+
+loadList :: CutFunction
+loadList = mkLoad "load_list" (ListOf str)
+
+----------------
+-- glob_files --
+----------------
 
 globFiles :: CutFunction
 globFiles = CutFunction
@@ -61,3 +77,23 @@ aGlobFiles cfg ref outPath path = do
     out'  = fromCutPath cfg outPath
     path' = fromCutPath cfg path
     out'' = debugA cfg "aGlobFiles" out' [out', path']
+
+------------
+-- load_* --
+------------
+
+-- These are the Haskell functions for generating the CutFunctions;
+-- They should be called in other modules with specific types to make loaders for
+
+mkLoadGlob :: String -> CutType -> CutFunction -> CutFunction
+mkLoadGlob name loadType eachFn = compose1 globFiles eachFn name (ListOf str) desc
+  where
+    desc     = mkTypeDesc name [str] (ListOf loadType)
+
+mkLoaders :: CutType -> [CutFunction]
+mkLoaders loadType = [single, each, glob]
+  where
+    ext    = extOf loadType
+    single = mkLoad     ("load_" ++ ext           ) loadType
+    each   = mkLoadList ("load_" ++ ext ++ "_each") loadType
+    glob   = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each
