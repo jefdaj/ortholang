@@ -1,0 +1,6 @@
+mini_faas = load_list "data/mini-genelists-faa.txt"
+mini_fnas = load_list "data/mini-genelists-fna.txt"
+
+# note that you shouldn't really do this,
+# because you probably want to do separate things on faa and faa
+result = mini_faas | mini_fnas

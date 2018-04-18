@@ -37,10 +37,7 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- utility functions --
 -----------------------
 
--- TODO round-trip function!
-
-regularParse :: ParseM a -> CutConfig -> Locks -> String
-             -> Either ParseError a
+regularParse :: ParseM a -> CutConfig -> Locks -> String -> Either ParseError a
 regularParse p cfg ref = parseWithEof p ([], cfg, ref)
 
 takeVar :: String -> CutVar
@@ -128,4 +125,8 @@ acProps cfg ref = testGroup "parse randomly generated cut code"
       \(ExQuoted q) -> regularParse pQuoted cfg ref q == Right (read q)
   , testProperty "positive numbers" $
       \(ExNum n) -> isRight $ regularParse pNum cfg ref n
+  -- TODO shouldn't have to parse it all since there's a random iden added too
+  -- TODO (but why did I do that? lol)
+  , testProperty "function names" $
+      \(ExFun f) -> isRight $ regularParse pFunName cfg ref f
   ]

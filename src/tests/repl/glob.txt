@@ -1,17 +1,17 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 >> glob_files "data/*.faa"
-["data/7942genes.faa",
- "data/7942genes50.faa",
+["data/6803genes.faa",
+ "data/6803genes10.faa",
+ "data/7002genes.faa",
  "data/7122genes.faa",
  "data/7942gene.faa",
+ "data/7942genes.faa",
  "data/7942genes10.faa",
- "data/6803genes.faa",
- "data/6803genes10.faa",
- "data/7002genes.faa"]
+ "data/7942genes50.faa"]
 >> glob_files "data/7942*.faa"
-["data/7942genes.faa", "data/7942genes50.faa", "data/7942gene.faa", "data/7942genes10.faa"]
+["data/7942gene.faa", "data/7942genes.faa", "data/7942genes10.faa", "data/7942genes50.faa"]
 >> glob_files "data/*10.fna"
-["data/7942genes10.fna", "data/6803genes10.fna"]
+["data/6803genes10.fna", "data/7942genes10.fna"]
 >> :q
 Bye for now!

@@ -24,6 +24,7 @@ module ShortCut.Core.Parse
   , pExpr
   , pStatement
   , pFun
+  , pFunName
   , pQuoted
   , pSym
   , pList

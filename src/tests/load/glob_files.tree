@@ -1,0 +1,14 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 4d13e8c51d.txt
+|       `-- e5404eebaf.txt
+|-- exprs
+|   |-- glob_files
+|   |   `-- ca1dad5c15.str.list -> ../../cache/lines/e5404eebaf.txt
+|   `-- str
+|       `-- 4749080868.str -> ../../cache/lines/4d13e8c51d.txt
+`-- vars
+    `-- result -> ../exprs/glob_files/ca1dad5c15.str.list
+
+6 directories, 5 files

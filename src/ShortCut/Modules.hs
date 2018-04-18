@@ -9,7 +9,7 @@ import qualified ShortCut.Modules.BlastDB   as BlastDB
 import qualified ShortCut.Modules.BlastHits as BlastHits
 import qualified ShortCut.Modules.BlastRBH  as BlastRBH
 -- import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
-import qualified ShortCut.Modules.Glob      as Glob
+import qualified ShortCut.Modules.Load      as Load
 import qualified ShortCut.Modules.Length    as Length
 import qualified ShortCut.Modules.Math      as Math
 import qualified ShortCut.Modules.Permute   as Permute
@@ -17,7 +17,6 @@ import qualified ShortCut.Modules.Repeat    as Repeat
 import qualified ShortCut.Modules.SeqIO     as SeqIO
 import qualified ShortCut.Modules.Sets      as Sets
 import qualified ShortCut.Modules.Summarize as Summarize
-import qualified ShortCut.Modules.LoadList  as LoadList
 import qualified ShortCut.Modules.Scores    as Scores
 import qualified ShortCut.Modules.Plots     as Plots
 import qualified ShortCut.Modules.PsiBlast  as PsiBlast
@@ -31,7 +30,7 @@ modules =
   , BlastHits.cutModule
   , BlastRBH.cutModule
   -- , Cheat.cutModule
-  , Glob.cutModule
+  , Load.cutModule
   , Length.cutModule
   , Math.cutModule
   , Permute.cutModule
@@ -39,7 +38,6 @@ modules =
   , SeqIO.cutModule
   , Sets.cutModule
   , Summarize.cutModule
-  , LoadList.cutModule
   , Scores.cutModule
   , Plots.cutModule
   , PsiBlast.cutModule

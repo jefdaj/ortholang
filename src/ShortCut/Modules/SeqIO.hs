@@ -2,9 +2,8 @@
 
 module ShortCut.Modules.SeqIO where
 
-import Prelude hiding (concat)
-
 import Development.Shake
+
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
@@ -12,31 +11,31 @@ import ShortCut.Core.Util          (digest)
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
                                     wrappedCmdOut, wrappedCmdWrite)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, mkLoad,
-                                    mkLoadList, rSimple, rSimpleScript)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
 import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
 import System.FilePath             ((</>))
 import System.Directory            (createDirectoryIfMissing)
+import ShortCut.Modules.Load       (mkLoaders)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "seqio"
   , mFunctions =
-    [ loadGbk     , loadGbkEach
-    , loadFaa     , loadFaaEach
-    , loadFna     , loadFnaEach
-    , gbkToFaa    , gbkToFaaEach
+    [ gbkToFaa    , gbkToFaaEach
     , gbkToFna    , gbkToFnaEach
     , extractSeqs , extractSeqsEach
     , extractIds  , extractIdsEach
     , translate   , translateEach
-    , concat fna  , concatEach fna
-    , concat faa  , concatEach faa
+    , mkConcat fna  , mkConcatEach fna
+    , mkConcat faa  , mkConcatEach faa
     , splitFasta faa, splitFastaEach faa
     , splitFasta fna, splitFastaEach fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
+    ++ mkLoaders fna
+    ++ mkLoaders faa
+    ++ mkLoaders gbk
   }
 
 gbk :: CutType
@@ -59,28 +58,6 @@ fna = CutType
   , tDesc = "FASTA (nucleic acid)"
   , tShow = defaultShow
   }
-
--------------------
--- load_*(_each) --
--------------------
-
-loadFaa :: CutFunction
-loadFaa = mkLoad "load_faa" faa
-
-loadFaaEach :: CutFunction
-loadFaaEach = mkLoadList "load_faa_each" faa
-
-loadFna :: CutFunction
-loadFna = mkLoad "load_fna" fna
-
-loadFnaEach :: CutFunction
-loadFnaEach = mkLoadList "load_fna_each" fna
-
-loadGbk :: CutFunction
-loadGbk = mkLoad "load_gbk" gbk
-
-loadGbkEach :: CutFunction
-loadGbkEach = mkLoadList "load_gbk_each" gbk
 
 -----------------------
 -- gbk_to_f*a(_each) --
@@ -235,8 +212,10 @@ translateEach = CutFunction
 -- concat_* --
 --------------
 
-concat :: CutType -> CutFunction
-concat cType = CutFunction
+-- TODO separate concat module?
+
+mkConcat :: CutType -> CutFunction
+mkConcat cType = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
@@ -247,8 +226,8 @@ concat cType = CutFunction
     ext  = extOf cType
     name = "concat_" ++ ext
 
-concatEach :: CutType -> CutFunction
-concatEach cType = CutFunction
+mkConcatEach :: CutType -> CutFunction
+mkConcatEach cType = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)

@@ -1,10 +1,23 @@
 module ShortCut.Test.Parse.Arbitrary where
 
 -- The generators can also be tested manually in ghci like so:
+--
 -- > generate gQuoted
 -- "\"\\^bx\\ng_!vd\""
--- > generate arbitrary :: IO Quoted
--- Quoted "\"PkGN>.@T\""
+-- > generate arbitrary :: IO ExQuoted
+-- ExQuoted "\"PkGN>.@T\""
+-- > sample (arbitrary :: Gen ExQuoted)
+-- ExQuoted "\"\""
+-- ExQuoted "\"kc\""
+-- ExQuoted "\"4\""
+-- ExQuoted "\"[S\""
+-- ExQuoted "\")M=;pe\""
+-- ExQuoted "\"i\\\"5,gvrU\\\"\\\"\""
+-- ExQuoted "\".s8Kq/#Z`J\""
+-- ExQuoted "\"{L2[{2}.NEO\""
+-- ExQuoted "\"\\\"\""
+-- ExQuoted "\"j\""
+-- ExQuoted "\"s\\\\G8g4Dm\""
 
 -- Function naming conventions:
 --
@@ -25,12 +38,16 @@ import Test.QuickCheck
 
 -- variable names --
 
+-- TODO any reason you would need to start with _?
+-- TODO should dashes be valid in names too? probably
+-- TODO starting with a capital should be ok too right?
 vFirstChars :: [Char]
-vFirstChars = '_':['a'..'z']
+vFirstChars = ['a'..'z']
 
 vNonFirstChars :: [Char]
-vNonFirstChars = vFirstChars ++ ['0'..'9']
+vNonFirstChars = vFirstChars ++ '_':'-':['0'..'9']
 
+-- TODO make sure the var isn't accidentally a fn name? (unlikely)
 gVar :: Gen String
 gVar = (:) <$> first <*> listOf rest
   where
@@ -138,25 +155,57 @@ instance Arbitrary ExNum where
 gFunName :: Gen String
 gFunName = elements fnNames
 
--- TODO remove once gFunName takes a CutConfig
+-- TODO is it possible to have an Arbitrary instance depend on a cfg?
+--      if not, the best we can do is list them all manually
 fnNames :: [String]
 fnNames =
-  [ "load_aa_seqs"
-  , "load_na_seqs"
-  , "load_genes"
-  , "load_genomes"
-  , "filter_genomes"
-  , "filter_genes"
-  , "worst_best_evalue"
+  [ "all", "any", "best_hits", "best_hits_each", "blastdbget", "blastdblist",
+  "blastn", "blastn_db", "blastn_db_each", "blastn_each", "blastn_rbh",
+  "blastn_rbh_each", "blastn_rev", "blastn_rev_each", "blastp", "blastp_db",
+  "blastp_db_each", "blastp_each", "blastp_rbh", "blastp_rbh_each", "blastp_rev",
+  "blastp_rev_each", "blastx", "blastx_db", "blastx_db_each", "blastx_each",
+  "concat_bht", "concat_bht_each", "concat_faa", "concat_faa_each", "concat_fna",
+  "concat_fna_each", "crb_blast", "crb_blast_each", "diff", "extract_ids",
+  "extract_ids_each", "extract_queries", "extract_queries_each",
+  "extract_scored", "extract_scores", "extract_seqs", "extract_seqs_each",
+  "extract_targets", "extract_targets_each", "filter_evalue",
+  "filter_evalue_each", "gbk_to_faa", "gbk_to_faa_each", "gbk_to_fna",
+  "gbk_to_fna_each", "get_genomes", "get_proteomes", "glob_files", "histogram",
+  "leave_each_out", "length", "length_each", "linegraph", "load_faa",
+  "load_faa_each", "load_fna", "load_fna_each", "load_gbk", "load_gbk_each",
+  "load_list", "load_nucl_db", "load_nucl_db_each", "load_prot_db",
+  "load_prot_db_each", "makeblastdb_nucl", "makeblastdb_nucl_each",
+  "makeblastdb_prot", "makeblastdb_prot_each", "megablast", "megablast_db",
+  "megablast_db_each", "megablast_each", "megablast_rbh", "megablast_rbh_each",
+  "megablast_rev", "megablast_rev_each", "parse_searches", "psiblast",
+  "psiblast_all", "psiblast_db", "psiblast_db_each", "psiblast_each",
+  "psiblast_each_pssm_db", "psiblast_pssm", "psiblast_pssm_all",
+  "psiblast_pssm_db", "psiblast_pssm_db_each", "psiblast_pssm_each",
+  "psiblast_pssms", "psiblast_pssms_db", "psiblast_train", "psiblast_train_all",
+  "psiblast_train_db", "psiblast_train_db_each", "psiblast_train_each",
+  "reciprocal_best", "reciprocal_best_each", "repeat", "repeat_each",
+  "scatterplot", "score_repeats", "some", "split_faa", "split_faa_each",
+  "split_fna", "split_fna_each", "tblastn", "tblastn_db", "tblastn_db_each",
+  "tblastn_each", "tblastx", "tblastx_db", "tblastx_db_each", "tblastx_each",
+  "tblastx_rbh", "tblastx_rbh_each", "tblastx_rev", "tblastx_rev_each",
+  "translate", "translate_each",
+
+  -- and these ones which have been giving so much trouble:
+  "load_faa_glob", "load_fna_glob", "load_gbk_glob"
   ]
 
+-- TODO why the one argument? can't do typechecking here anyway
 gFun :: Gen String
 gFun = do
-  n  <- gFunName
-  as <- listOf1 gTerm
-  ws <- infiniteListOf gWhite
-  let args = concat $ zipWith (++) ws as
-  return $ n ++ (head ws) ++ args
+  n <- gFunName
+  w <- gWhite
+  return $ n ++ w
+-- gFun = do
+--   n  <- gFunName
+--   as <- listOf1 gTerm
+--   ws <- infiniteListOf gWhite
+--   let args = concat $ zipWith (++) ws as
+--   return $ n ++ (head ws) ++ args
 
 newtype ExFun = ExFun String deriving (Eq, Show)
 
@@ -169,7 +218,7 @@ instance Arbitrary ExFun where
 -- TODO add another one of these for the set operators
 gBop :: Gen String
 gBop = do
-  op <- elements ["+", "-", "*", "/"]
+  op <- elements ["+", "-", "*", "/", "&", "~", "|"]
   s1 <- gExpr
   s2 <- gExpr
   return $ concat $ zipWith (++) [s1,op,s2] (repeat " ")
