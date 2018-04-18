@@ -32,7 +32,7 @@ import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
-import ShortCut.Core.Pretty     (pPrintHdl, writeScript)
+import ShortCut.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
 import ShortCut.Core.Config     (showConfigField, setConfigField)
 import System.Command           (runCommand, waitForProcess)
@@ -206,10 +206,11 @@ cmdLoad st@(_,cfg,ref) hdl path = do
   if not dfe
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
-      new <- parseFile cfg ref path'
+      let cfg' = cfg { cfgScript = Just path' }
+      new <- parseFile cfg' ref path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> return (s, cfg { cfgScript = Just path' }, ref)
+        Right s -> return (s, cfg', ref)
 
 cmdSave :: CutState -> Handle -> String -> IO CutState
 cmdSave st@(scr,_,_) hdl line = do
@@ -265,16 +266,29 @@ cmdDrop st@(scr,cfg,ref) hdl var = do
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just _  -> return (delFromAL scr v, cfg, ref)
 
--- TODO show the type description here too once that's ready
---      (add to the pretty instance?)
 cmdType :: CutState -> Handle -> String -> IO CutState
-cmdType st@(_, cfg, _) hdl s = do
-  hPutStrLn hdl $ case findFunction cfg (stripWhiteSpace s) of
-    Just f -> fTypeDesc f
-    Nothing -> case parseExpr st s of
-      Right expr -> show $ typeOf expr
-      Left  err  -> show err
-  return st
+cmdType st@(scr, cfg, _) hdl s = hPutStrLn hdl typeInfo >> return st
+  where
+    typeInfo = case stripWhiteSpace s of
+      "" -> allTypes
+      s' -> oneType s'
+    oneType e = case findFunction cfg e of
+      Just f  -> fTypeDesc f
+      Nothing -> showExprType st e -- TODO also show the expr itself?
+    allTypes = init $ unlines $ map showAssignType scr
+
+showExprType :: CutState -> String -> String
+showExprType st e = case parseExpr st e of
+  Right expr -> show $ typeOf expr
+  Left  err  -> show err
+
+showAssignType :: CutAssign -> String
+showAssignType (CutVar v, e) = unwords [typedVar, "=", prettyExpr]
+  where
+    -- parentheses also work:
+    -- typedVar = v ++ " (" ++ show (typeOf e) ++ ")"
+    typedVar = v ++ "." ++ show (typeOf e)
+    prettyExpr = render $ pPrint e
 
 -- TODO factor out the variable lookup stuff
 cmdShow :: CutState -> Handle -> String -> IO CutState

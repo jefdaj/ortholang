@@ -5,19 +5,20 @@
 |   |   |   |-- d0840f2b61.pdb -> ../../../exprs/makeblastdb_prot/d0840f2b61.pdb
 |   |   |   `-- d0840f2b61.pdb.args -> ../../../cache/lines/9d5ff49e8b.txt
 |   |   `-- 742d1833ba
-|   |       |-- 86d15b07be.pssm -> ../../../exprs/psiblast_pssm_db/d08318db81_c92b22d9fa_86d15b07be.pssm
-|   |       `-- 86d15b07be.pssm.args -> ../../../cache/lines/078680fee4.txt
+|   |       |-- 86d15b07be.pssm -> ../../../exprs/psiblast_pssm_db/d08318db81_cfb8efd83c_86d15b07be.pssm
+|   |       `-- 86d15b07be.pssm.args -> ../../../cache/lines/54ffe1f463.txt
 |   |-- lines
-|   |   |-- 078680fee4.txt
 |   |   |-- 33ec325d48.txt
+|   |   |-- 347284d2d3.txt
 |   |   |-- 3f62a639a8.txt
+|   |   |-- 54ffe1f463.txt
 |   |   |-- 886c0ddb70.txt
 |   |   |-- 8abd22b6c2.txt
 |   |   |-- 9d5ff49e8b.txt
 |   |   |-- adfdb6bd8c.txt
+|   |   |-- b167806db2.txt
 |   |   |-- bdc783547b.txt
-|   |   |-- c3ae472116.txt
-|   |   `-- f049a7fe85.txt
+|   |   `-- c3ae472116.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -43,11 +44,11 @@
 |   |-- num
 |   |   `-- c23938f494.num -> ../../cache/lines/33ec325d48.txt
 |   |-- psiblast_pssm_db
-|   |   `-- d08318db81_c92b22d9fa_86d15b07be.pssm
+|   |   `-- d08318db81_cfb8efd83c_86d15b07be.pssm
 |   |-- psiblast_pssm_db_each
-|   |   `-- f51c91829c_c92b22d9fa_0ccec80321.pssm.list -> ../../cache/lines/f049a7fe85.txt
+|   |   `-- f51c91829c_c92b22d9fa_0ccec80321.pssm.list -> ../../cache/lines/b167806db2.txt
 |   |-- psiblast_train_db
-|   |   `-- f51c91829c_4d0e43d616_0aa7a0990a.pssm
+|   |   `-- f51c91829c_4d0e43d616_0aa7a0990a.pssm -> ../../cache/lines/347284d2d3.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -61,4 +62,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlists.bht.list
 
-19 directories, 42 files
+19 directories, 43 files

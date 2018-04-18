@@ -10,7 +10,7 @@ import Development.Shake.FilePath  ((</>), takeFileName)
 import ShortCut.Core.Actions       (wrappedCmdWrite, symlink, debugA, debugNeed)
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp)
-import ShortCut.Core.Compile.Each  (rEachTmps)
+import ShortCut.Core.Compile.Vectorize  (rVectorizeTmps)
 -- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
@@ -62,7 +62,7 @@ blastCRBEach = CutFunction
   , fTypeCheck = tCrbBlastEach
   , fTypeDesc  = "crb_blast_each : fa.list -> fa.list -> crb.list"
   , fFixity    = Prefix
-  , fRules     = rEachTmps aBlastCRB "crbblast"
+  , fRules     = rVectorizeTmps 2 aBlastCRB "crbblast"
   }
 
 -- TODO split into two functions with different type signatures?

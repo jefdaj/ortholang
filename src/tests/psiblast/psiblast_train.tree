@@ -5,7 +5,8 @@
 |   |   |-- 8abd22b6c2.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- bdc783547b.txt
-|   |   `-- e00fb07ddb.txt
+|   |   |-- e00fb07ddb.txt
+|   |   `-- f530067413.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -25,7 +26,7 @@
 |   |-- num
 |   |   `-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
 |   |-- psiblast_train_db
-|   |   `-- 5fbeb4e044_4d0e43d616_5bbf7cb328.pssm
+|   |   `-- 5fbeb4e044_4d0e43d616_5bbf7cb328.pssm -> ../../cache/lines/f530067413.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       `-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -35,4 +36,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/pssm7942.pssm
 
-13 directories, 22 files
+13 directories, 23 files

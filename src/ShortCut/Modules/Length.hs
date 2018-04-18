@@ -8,7 +8,7 @@ import ShortCut.Core.Actions  (readPaths, writeLit, debugA)
 import ShortCut.Core.Paths    (exprPath, fromCutPath,
                                toCutPath, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
-import ShortCut.Core.Compile.Each     (rEach)
+import ShortCut.Core.Compile.Vectorize     (rVectorize)
 import ShortCut.Modules.Blast  (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.Scientific (Scientific())
@@ -32,7 +32,7 @@ lenEach = CutFunction
   , fTypeCheck = tLenEach
   , fTypeDesc  = "length : <whatever>.list.list -> num.list"
   , fFixity    = Prefix
-  , fRules  = rEach aLen
+  , fRules  = rVectorize 1 aLen -- TODO is 1 wrong?
   }
 
 tLen :: [CutType] -> Either String CutType

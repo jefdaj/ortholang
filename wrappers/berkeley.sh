@@ -16,7 +16,11 @@
 # Common options for all srun commands
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
-JOBSFILE="/tmp/jobs.txt" # use main tmpdir to share between instances
+
+export TMPDIR="/clusterfs/rosalind/users/jefdaj/shortcut/shortcut-tmpdir"
+mkdir -p "$TMPDIR"
+JOBSFILE="${TMPDIR}/jobs.txt"
+WRAPPERLOG="${TMPDIR}/wrapper.log"
 
 kill_jobs() {
   # In case of errors, make sure not to leave zombie srun jobs.
@@ -64,8 +68,8 @@ run() {
   while true; do
     start_jobs $njobs && break || sleep 5
   done
-  echo "$cmd" >> /tmp/wrapper.log
-  eval "trap kill_jobs INT ERR; $cmd && finish_jobs $njobs" 2>> /tmp/wrapper.log
+  echo "$cmd" >> "$WRAPPERLOG"
+  eval "trap kill_jobs INT ERR; $cmd && finish_jobs $njobs" 2>> "$WRAPPERLOG"
 }
 
 srun_crb() {
@@ -86,8 +90,8 @@ srun_small() {
   run 1 "$srun $@"
 }
 
-srun_tiny() {
-  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:00:30"
+srun_split() {
+  srun="$SRUN --cpus-per-task=1 --nodes=1-1 --ntasks=1 --time=00:30:00"
   run 1 "$srun $@"
 }
 
@@ -132,11 +136,8 @@ elif [[ $1 == *"psiblast"* ]]; then
 elif [[ $@ == "crb-blast"* ]]; then
   srun_crb "$@"
 
-# split_fasta hashes many small files that aren't worth the srun overhead
-# (you can try it though with srun_tiny)
-elif [[ $@ == md5sum* && $@ =~ 'cache/split_fasta' ]]; then
-  run 0 "$@"
-  # srun_tiny "$@"
+elif [[ $@ =~ "split_fasta.py" ]]; then
+  srun_split "$@"
 
 # These are quick commands that may be better to run locally depending on the
 # queue. Check `squeue` and remove any that are piling up. Some that seem

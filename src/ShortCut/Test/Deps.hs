@@ -14,10 +14,11 @@ import Test.Tasty.Golden          (goldenVsString)
 
 depCmds :: [(String, String)]
 depCmds =
-  [ ("ncbi_blast", "blastx -version")
-  , ("crb_blast" , "crb-blast --version")
-  , ("python"    , "python --version")
-  , ("r"         , "R --version")
+  [ ("psiblast"  , "psiblast -version")   -- should be psiblast-exb 2.5.0
+  , ("ncbi_blast", "blastn -version")     -- should also come from psiblast-exb
+  , ("crb_blast" , "crb-blast --version") -- should be older NCBI v2.2.29
+  , ("python"    , "python --version")    -- exact version not important
+  , ("r"         , "R --version")         -- exact version not important
   , ("biopython" , "python -c \"import Bio; print Bio.__version__\"")
   , ("biomartr"  , "Rscript -e \"require(biomartr); packageVersion('biomartr')\"")
   , ("dplyr"     , "Rscript -e \"require(dplyr); packageVersion('dplyr')\"")

@@ -4,7 +4,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Each  (rEach)
+import ShortCut.Core.Compile.Vectorize  (rVectorize)
 import ShortCut.Core.Actions       (wrappedCmdWrite, debugA)
 -- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
@@ -79,7 +79,7 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
 rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
-  = rEach revDbAct st editedExpr
+  = rVectorize 3 revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
     sList      = CutList (typeOf s) salt (depsOf s) [s]
@@ -136,7 +136,7 @@ reciprocalBestEach = CutFunction
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rEach aReciprocalBest
+  , fRules     = rVectorize 2 aReciprocalBest
   }
   where
     name = "reciprocal_best_each"

@@ -1,2 +1,2 @@
-blastn: 2.5.0+
+psiblast: 2.5.0+
  Package: blast 2.5.0, build Feb  9 2017 17:20:36

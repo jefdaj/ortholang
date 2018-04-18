@@ -22,19 +22,22 @@ module ShortCut.Core.Util
   -- misc
   , stripWhiteSpace
   , isEmpty
+  , popFrom
+  , insertAt
   )
   where
 
 import Development.Shake
 import qualified System.IO.Strict as Strict
 
+import Data.Monoid ((<>))
 import Control.Monad          (unless)
 import Control.Monad.Catch    (MonadCatch, catch, throwM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
-import Data.List              (dropWhileEnd, isPrefixOf, isInfixOf)
+import Data.List              (dropWhileEnd, isPrefixOf, isInfixOf, splitAt)
 import Data.List.Utils        (replace)
 import Data.Maybe             (fromJust)
 import System.Directory       (doesPathExist, removePathForcibly,
@@ -208,3 +211,21 @@ isEmpty ref path = do
     else do
       txt <- withReadLock' ref path $ readFile' path
       return $ "<<empty" `isPrefixOf` txt
+
+popFrom :: Int -> [a] -> (a, [a])
+popFrom _ [] = error "attempt to pop elem from empty list"
+popFrom n xs
+  | n < length xs = (xs !! n, take n xs ++ drop (n+1) xs)
+  | otherwise = error $ "attempt to pop elem "
+                  ++ show n ++ " from a list with "
+                  ++ show (length xs) ++ " elements"
+
+-- based on https://stackoverflow.com/a/43291593
+-- should reconstruct a list after using popFrom with the same index
+insertAt :: Int -> a -> [a] -> [a]
+insertAt i newElement as
+  | null as && i /= 0 = error "Cannot insert into empty list other than position 0."
+  | null as && i == 0 = [newElement]
+  | i >= 0 = let (prefix, suffix) = splitAt i as
+             in prefix <> [newElement] <> suffix
+insertAt _ _ _ = error "bad arg to insertAt"
