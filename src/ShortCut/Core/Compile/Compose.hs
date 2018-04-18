@@ -18,20 +18,22 @@ import ShortCut.Core.Types
 -- `compose fn1 fn2` is kind of lie `fn2 . fn1` in Haskell
 -- TODO can it figure out the types automatically from fn1 and fn2?
 
--- TODO this type1 thing seems like a bad idea
-compose1 :: CutFunction -> CutFunction
-         -> String -> CutType -> String
-         -> CutFunction
-compose1 fn1 fn2 name type1 typeDesc = CutFunction
+compose1 :: String      -- overall function name
+         -> String      -- overall type description for :type command
+         -> CutFunction -- first function (takes inputs, returns intermediate)
+         -> CutType     -- intermediate type to be passed from fn1 to fn2
+         -> CutFunction -- second function (takes intermediate, returns output)
+         -> CutFunction -- overall fn (runs fn1, then fn2 on its output)
+compose1 name desc fn1 type1 fn2 = CutFunction
   { fName      = name
-  , fTypeCheck = tCompose1 type1 fn1 fn2
-  , fTypeDesc  = typeDesc
+  , fTypeCheck = tCompose1 fn1 type1 fn2
+  , fRules     = rCompose1 fn1 type1 fn2
+  , fTypeDesc  = desc
   , fFixity    = Prefix
-  , fRules     = rCompose1 fn1 fn2 type1
   }
 
-tCompose1 :: CutType -> CutFunction -> CutFunction -> TypeChecker
-tCompose1 expected fn1 fn2 types = case fTypeCheck fn1 types of
+tCompose1 :: CutFunction -> CutType -> CutFunction -> TypeChecker
+tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
   (Left  errMsg) -> Left errMsg
   (Right actual) -> if actual == expected
                       then fTypeCheck fn2 [expected]
@@ -39,8 +41,8 @@ tCompose1 expected fn1 fn2 types = case fTypeCheck fn1 types of
                              ++ " produces a " ++ extOf actual
                              ++ ", not " ++ extOf expected
 
-rCompose1 :: CutFunction -> CutFunction -> CutType -> RulesFn
-rCompose1 fn1 fn2 rtn1 st (CutFun rtn2 salt deps _ args) = (fRules fn2) st expr2
+rCompose1 :: CutFunction -> CutType -> CutFunction -> RulesFn
+rCompose1 fn1 rtn1 fn2 st (CutFun rtn2 salt deps _ args) = (fRules fn2) st expr2
   where
     expr1'  = CutFun rtn1 salt deps (fName fn1) args
     expr1'' = CutRules $ CompiledExpr expr1' $ (fRules fn1) st expr1'

@@ -88,9 +88,9 @@ aGlobFiles cfg ref outPath path = do
 -- They should be called in other modules with specific types to make loaders for
 
 mkLoadGlob :: String -> CutType -> CutFunction -> CutFunction
-mkLoadGlob name loadType eachFn = compose1 globFiles eachFn name (ListOf str) desc
+mkLoadGlob name loadType eachFn = compose1 name desc globFiles (ListOf str) eachFn
   where
-    desc     = mkTypeDesc name [str] (ListOf loadType)
+    desc = mkTypeDesc name [str] (ListOf loadType)
 
 mkLoaders :: CutType -> [CutFunction]
 mkLoaders loadType = [single, each, glob]
