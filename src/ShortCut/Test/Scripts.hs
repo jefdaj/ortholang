@@ -93,7 +93,7 @@ mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
 
 runCut :: CutConfig -> Locks -> IO String
 runCut cfg ref =  do
-  delay 100000 -- wait 1/10 second so we don't capture output from tasty
+  delay 1000000 -- wait 1 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
