@@ -1,5 +1,7 @@
 module ShortCut.Modules.Length where
 
+-- TODO what should happen with length of a bht? currently it just prints itself!
+
 import Development.Shake
 import ShortCut.Core.Types
 
