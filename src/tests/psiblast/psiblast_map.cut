@@ -1,0 +1,24 @@
+# psiblast functions that use mapNofM but no expr-editing helpers
+# (this is an implementation detail, not something important to know as a user)
+
+# setup
+query   = load_faa "data/7942gene.faa"
+queries = split_faa (load_faa "data/7942genes10.faa")
+pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+db6803  = makeblastdb_prot [pcc6803]
+db7942  = makeblastdb_prot [pcc7942]
+pssm    = psiblast_train_db 1e-2 query db7942
+
+# training fns
+pssms1 = psiblast_train_db_each 1e-2 query [db7942, db6803]
+pssms2 = psiblast_train_pssms_db 1e-2 queries db7942
+
+# search fns
+tables1 = psiblast_pssm_db_each 0.1 pssm [db6803, db7942]
+tables2 = psiblast_each_pssm_db 0.1 pssms1 db7942
+tables3 = psiblast_each_pssm    0.1 pssms1 pcc7942
+
+# using length here to get a list that depends on everything
+result = [length pssms1, length pssms2,
+          length tables1, length tables2, length tables3]
