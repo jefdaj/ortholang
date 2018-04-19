@@ -1,3 +1,5 @@
+# TODO should be training 2 pssms, not one
+
 pcc6803 = load_faa "data/6803genes.faa"
 pcc7942 = load_faa "data/7942genes.faa"
 query   = load_faa "data/7942gene.faa"

@@ -87,11 +87,11 @@ cutModule = CutModule
 
     -- working except when withPdbSubject broken:
     , psiblastTrain        -- num faa      faa      -> pssm
-    , psiblast             -- num faa      faa      -> bht
-    , psiblastPssm         -- num pssm     faa      -> bht
-    , psiblastTrainAll     -- num faa      faa.list -> pssm
     , psiblastTrainPssms   -- num faa.list faa      -> pssm.list
+    , psiblastTrainAll     -- num faa      faa.list -> pssm
+    , psiblastPssm         -- num pssm     faa      -> bht
     , psiblastPssmAll      -- num pssm     faa.list -> bht
+    , psiblast             -- num faa      faa      -> bht
 
     -- not working, reason unknown but use withPdbSubjects:
     , psiblastEach         -- num faa  faa.list -> bht.list
@@ -105,7 +105,7 @@ cutModule = CutModule
     -- not working, probably because psiblastEach doesn't
     , psiblastAll             -- num faa       faa.list -> bht
 
-    -- not sure:
+    -- not written yet (may not be needed):
     -- , psiblastPssms        -- num pssm.list faa      -> bht.list TODO write/fix
     -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
     -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list

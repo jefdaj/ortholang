@@ -7,6 +7,7 @@
 |   |-- lines
 |   |   |-- 0cf27272d3.txt
 |   |   |-- 3f62a639a8.txt
+|   |   |-- 42fb7081a8.txt
 |   |   |-- 4d395ef46f.txt
 |   |   |-- 886c0ddb70.txt
 |   |   |-- 8abd22b6c2.txt
@@ -27,6 +28,8 @@
 |   `-- map
 |       `-- 36258e1917.pssm -> ../../cache/lines/4d395ef46f.txt
 |-- exprs
+|   |-- length
+|   |   `-- be0caa88dc.num -> ../../cache/lines/42fb7081a8.txt
 |   |-- list
 |   |   |-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
 |   |   `-- d9e603bafa.faa.list.list -> ../../cache/lines/9d5ff49e8b.txt
@@ -51,6 +54,6 @@
     |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- pssms.pssm.list -> ../exprs/psiblast_train_each/5fbeb4e044_4d0e43d616_0ccec80321.pssm.list
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
-    `-- result -> ../vars/pssms.pssm.list
+    `-- result -> ../exprs/length/be0caa88dc.num
 
-17 directories, 36 files
+18 directories, 38 files

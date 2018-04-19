@@ -1,11 +1,9 @@
 query    = load_faa "data/7942gene.faa"
 db6803   = makeblastdb_prot [load_faa "data/6803genes.faa"]
 db7942   = makeblastdb_prot [load_faa "data/7942genes.faa"]
-
-# wait why is this only one long?
 cyanodbs = [db6803, db7942]
 
 # TODO this with a lower evalue is a good test for "no hits found"
-hitlists = psiblast_db_each 0.1 query cyanodbs
+hitlists = psiblast_db_each 0.5 query cyanodbs
 
 result   = hitlists

@@ -31,9 +31,9 @@
 |       `-- abe181d74e.pssm -> ../../cache/lines/9076e70b45.txt
 |-- exprs
 |   |-- list
-|   |   |-- 94f9daed94.faa.list -> ../../cache/lines/a1512fc008.txt
+|   |   |-- 10cb52d92f.faa.list -> ../../cache/lines/e00fb07ddb.txt
 |   |   |-- 9c1c85aca7.pdb.list -> ../../cache/lines/45121d690b.txt
-|   |   `-- fa4677789c.faa.list -> ../../cache/lines/e00fb07ddb.txt
+|   |   `-- d557a7caa8.faa.list -> ../../cache/lines/a1512fc008.txt
 |   |-- load_faa
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
@@ -52,10 +52,8 @@
 `-- vars
     |-- db6803.pdb -> ../exprs/makeblastdb_prot/27a934c58e.pdb
     |-- db7942.pdb -> ../exprs/makeblastdb_prot/ced061f0b2.pdb
-    |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
-    |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/f51c91829c_4d0e43d616_cc9df7267d.pssm.list
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/pssm.pssm.list
 
-15 directories, 43 files
+15 directories, 41 files
