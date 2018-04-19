@@ -9,7 +9,10 @@ module ShortCut.Core.Compile.Map
   -- , concatExprs
 
   -- base functions (move somewhere else)
-  , rFun3
+  , rFun1, rFun3
+
+  -- misc
+  , singleton
   )
   where
 
@@ -37,7 +40,15 @@ import ShortCut.Core.Compile.Basic (rExpr, debugRules)
  -}
 
 map1of1 :: CutType -> CutType -> Action1 -> Action1
-map1of1 = undefined
+map1of1 inType outType act1 cfg locks out a1 = do
+  inPaths <- readStrings inType cfg locks $ fromCutPath cfg a1
+  let tmpDir   = mapCache cfg
+      outPaths = (flip map) inPaths $ \i ->
+                   tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
+      ioPairs  = zip inPaths outPaths
+  -- TODO is forP OK here since there aren't any shared input files to conflict on locking?
+  _ <- forP ioPairs $ \(i,o) -> act1 cfg locks (toCutPath cfg o) (toCutPath cfg i)
+  writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 map1of2 :: CutType -> CutType -> Action2 -> Action2
 map1of2 = undefined
@@ -146,6 +157,22 @@ map3Base inType outType act3 cfg locks out a1 a2 a3 = do
 -- Compile a CutFunction with 3 arguments
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
+rFun1 :: Action1 -> RulesFn
+rFun1 act1 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1]) = do
+  (ExprPath arg1') <- rExpr st a1
+  let arg1   = toCutPath cfg arg1'
+      oPath  = exprPath st expr
+      oPath' = debugRules cfg "rFun1" expr $ fromCutPath cfg oPath
+  oPath' %> \_ -> do
+    debugL cfg $ "rFun1 arg1: "  ++ show arg1
+    debugL cfg $ "rFun1 oPath: " ++ show oPath
+    act1 cfg ref oPath arg1
+  return $ ExprPath oPath'
+rFun1 _ _ e = error $ "bad argument to rFun1: " ++ show e
+
+-- Compile a CutFunction with 3 arguments
+-- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
+-- TODO include the fn name when debugging
 rFun3 :: Action3 -> RulesFn
 rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
   (ExprPath arg1') <- rExpr st a1
@@ -164,3 +191,12 @@ rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
     act3 cfg ref oPath arg1 arg2 arg3
   return $ ExprPath oPath'
 rFun3 _ _ e = error $ "bad argument to rFun3: " ++ show e
+
+----------
+-- misc --
+----------
+
+singleton :: CutExpr -> CutExpr
+singleton e = CutList (typeOf e) (saltOf e) (depsOf e) [e]
+
+

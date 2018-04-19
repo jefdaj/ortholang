@@ -137,20 +137,19 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   , fFixity    = Prefix
-  , fRules     = rMkBlastFromFa d
+  , fRules     = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
   }
 
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
+-- TODO check this works after writing the new non- _all makeblastdb fns
 rMkBlastFromFa :: BlastDesc -> RulesFn
 rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
   = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fRules $ mkBlastFromDb d
     name1 = fName  $ mkBlastFromDb d
-    -- TODO use the non _all version here?
-    name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot" ++ "_all"
-    faList = CutList (typeOf s) salt (depsOf s) [s]
-    dbExpr = CutFun dbType salt (depsOf faList) name2 [faList] 
+    name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+    dbExpr = CutFun dbType salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
 ---------------------

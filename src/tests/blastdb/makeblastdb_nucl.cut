@@ -1,6 +1,6 @@
 small6803fna = load_fna "data/6803genes10.fna"
 large6803fna = load_fna "data/6803genes.fna"
-single = blastn_db      1e-5 small6803fna (makeblastdb_nucl_all       [large6803fna] )
+single = blastn_db      1e-5 small6803fna (makeblastdb_nucl large6803fna)
 result = single
 
 # TODO any reason to keep this stuff?

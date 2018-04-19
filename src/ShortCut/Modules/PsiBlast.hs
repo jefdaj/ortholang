@@ -28,7 +28,7 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
-import ShortCut.Core.Compile.Map   (rFun3, map2of3, map3of3)
+import ShortCut.Core.Compile.Map   (rFun3, map2of3, map3of3, singleton)
 import ShortCut.Modules.SeqIO      (mkConcat)
 import ShortCut.Core.Compile.Compose (compose1)
 
@@ -215,9 +215,6 @@ withPdbSubjects (CutFun rtn salt deps name [a1, a2, fas])
     -- TODO fix this using _all :D
     dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
-
-singleton :: CutExpr -> CutExpr
-singleton e = CutList (typeOf e) (saltOf e) (depsOf e) [e]
 
 -- Wraps a single faa or an faa.list in makeblastdb_prot
 withPdbSubject :: CutExpr -> CutExpr

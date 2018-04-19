@@ -1,6 +1,6 @@
 query    = load_faa "data/7942gene.faa"
-db6803   = makeblastdb_prot_all [load_faa "data/6803genes.faa"]
-db7942   = makeblastdb_prot_all [load_faa "data/7942genes.faa"]
+db6803   = makeblastdb_prot (load_faa "data/6803genes.faa")
+db7942   = makeblastdb_prot (load_faa "data/7942genes.faa")
 cyanodbs = [db6803, db7942]
 
 # TODO this with a lower evalue is a good test for "no hits found"

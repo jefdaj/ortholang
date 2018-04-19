@@ -7,6 +7,7 @@ module ShortCut.Core.Compile.Vectorize
   where
 
 -- If all goes well, this module will soon be phased out in favor of Compile.Map
+-- TODO also it's named badly since this isn't vectorization!
 
 import Development.Shake
 import ShortCut.Core.Compile.Basic

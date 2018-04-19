@@ -3,7 +3,7 @@
 # need an explicit makeblastdb call to make the db first.
 
 # TODO test the results too, not just that it runs!
-# TODO makeblastdb_nucl_all should only accept fna, not faa?
+# TODO makeblastdb_nucl should only accept fna, not faa?
 # TODO why does hits6803n not have any results??
 # TODO download the 6803 genbank to get fna genes
 
@@ -19,14 +19,14 @@ small7942faa = load_faa "data/7942genes10.faa"
 small6803fna = load_fna "data/6803genes10.fna"
 small7942fna = load_fna "data/7942genes10.fna"
 
-hits6803n = blastn_db 1e-5 small6803fna (makeblastdb_nucl_all [large7942fna])
-hits7942n = blastn_db 1e-5 small7942fna (makeblastdb_nucl_all [large7942fna])
+hits6803n = blastn_db 1e-5 small6803fna (makeblastdb_nucl large7942fna)
+hits7942n = blastn_db 1e-5 small7942fna (makeblastdb_nucl large7942fna)
 
-hits6803p = blastp_db 1e-5 small6803faa (makeblastdb_prot_all [large7942faa])
-hits7942p = blastp_db 1e-5 small7942faa (makeblastdb_prot_all [large6803faa])
+hits6803p = blastp_db 1e-5 small6803faa (makeblastdb_prot large7942faa)
+hits7942p = blastp_db 1e-5 small7942faa (makeblastdb_prot large6803faa)
 
-hits6803x = blastx_db 1e-5 small6803fna (makeblastdb_prot_all [large7942faa])
-hits7942x = blastx_db 1e-5 small7942fna (makeblastdb_prot_all [large6803faa])
+hits6803x = blastx_db 1e-5 small6803fna (makeblastdb_prot large7942faa)
+hits7942x = blastx_db 1e-5 small7942fna (makeblastdb_prot large6803faa)
 
 result = any (extract_queries_each
   [ hits6803n, hits7942n
