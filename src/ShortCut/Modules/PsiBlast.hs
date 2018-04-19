@@ -212,6 +212,7 @@ withPdbSubjects (CutFun rtn salt deps name [a1, a2, fas])
   =             (CutFun rtn salt deps name [a1, a2, dbs])
   where
     fass = CutList (typeOf fas) salt (depsOf fas) [fas]
+    -- TODO fix this using _all :D
     dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
@@ -226,17 +227,18 @@ withPdbSubject (CutFun rtn salt deps name [a1, a2, x ])
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> singleton x
+    -- TODO fix this using regular or _all?
     db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot" [fas]
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
 -- TODO remove this, or withPdbSubject?
-withProtDB :: CutExpr -> CutExpr
-withProtDB (CutFun rtn salt deps name [a1, a2, fa])
-  =        (CutFun rtn salt deps name [a1, a2, db])
-  where
-    fas = CutList (typeOf fas) salt (depsOf fa ) [fa]
-    db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot" [fas]
-withProtDB e = error $ "bad argument to withProtDB: " ++ show e
+-- withProtDB :: CutExpr -> CutExpr
+-- withProtDB (CutFun rtn salt deps name [a1, a2, fa])
+--   =        (CutFun rtn salt deps name [a1, a2, db])
+--   where
+--     fas = CutList (typeOf fas) salt (depsOf fa ) [fa]
+--     db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot" [fas]
+-- withProtDB e = error $ "bad argument to withProtDB: " ++ show e
 
 -- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
@@ -260,13 +262,13 @@ withPssmQueries e = error $ "bad argument to withPssmQueries: " ++ show e
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO write a non-mapped version based on this too?
 -- TODO name prot or nucl properly?
-withProtDBs :: CutExpr -> CutExpr
-withProtDBs (CutFun rtn salt deps name [a1, a2, fas])
-  =          (CutFun rtn salt deps name [a1, a2, dbs])
-  where
-    fass = CutList (typeOf fas) salt (depsOf fas) [fas]
-    dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
-withProtDBs e = error $ "bad argument to withProtDBs: " ++ show e
+-- withProtDBs :: CutExpr -> CutExpr
+-- withProtDBs (CutFun rtn salt deps name [a1, a2, fas])
+--   =          (CutFun rtn salt deps name [a1, a2, dbs])
+--   where
+--     fass = CutList (typeOf fas) salt (depsOf fas) [fas]
+--     dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
+-- withProtDBs e = error $ "bad argument to withProtDBs: " ++ show e
 
 
 -------------------------------

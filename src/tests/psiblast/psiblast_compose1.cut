@@ -5,8 +5,8 @@
 query   = load_faa "data/7942gene.faa"
 pcc6803 = load_faa "data/6803genes.faa"
 pcc7942 = load_faa "data/7942genes.faa"
-db6803  = makeblastdb_prot [pcc6803]
-db7942  = makeblastdb_prot [pcc7942]
+db6803  = makeblastdb_prot_all [pcc6803]
+db7942  = makeblastdb_prot_all [pcc7942]
 pssms   = psiblast_train_db_each 1e-2 query [db7942, db6803]
 
 # compose1-based fns to test

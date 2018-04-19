@@ -1,6 +1,6 @@
 query  = load_faa "data/7942gene.faa"
-db6803 = makeblastdb_prot [load_faa "data/6803genes.faa"]
-db7942 = makeblastdb_prot [load_faa "data/7942genes.faa"]
+db6803 = makeblastdb_prot_all [load_faa "data/6803genes.faa"]
+db7942 = makeblastdb_prot_all [load_faa "data/7942genes.faa"]
 # pssm   = psiblast_train_db 1.0e-2 query db7942
 pssm   = psiblast_train_db_each 1.0e-2 query [db6803, db7942]
 result = pssm

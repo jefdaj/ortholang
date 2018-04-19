@@ -1,5 +1,8 @@
 small6803faa = load_faa "data/6803genes10.faa"
 large6803faa = load_faa "data/6803genes.faa"
-single = blastp_db      1e-5 small6803faa (makeblastdb_prot       [large6803faa] )
-mapped = blastp_db_each 1e-5 small6803faa (makeblastdb_prot_each [[large6803faa]])
-result = all (extract_queries_each ([single] | mapped))
+single = blastp_db      1e-5 small6803faa (makeblastdb_prot_all       [large6803faa] )
+result = single
+
+# TODO any reason to keep this stuff?
+#mapped = blastp_db_each 1e-5 small6803faa (makeblastdb_prot_each [[large6803faa]])
+#result = all (extract_queries_each ([single] | mapped))

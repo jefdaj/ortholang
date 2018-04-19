@@ -147,7 +147,8 @@ rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
   where
     rules = fRules $ mkBlastFromDb d
     name1 = fName  $ mkBlastFromDb d
-    name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+    -- TODO use the non _all version here?
+    name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot" ++ "_all"
     faList = CutList (typeOf s) salt (depsOf s) [s]
     dbExpr = CutFun dbType salt (depsOf faList) name2 [faList] 
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
@@ -196,5 +197,5 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, ss])
     name1 = (fName $ mkBlastFromFa d) ++ "_each"
     name2 = "makeblastdb"
               ++ (if dbType == ndb then "_nucl" else "_prot")
-              ++ "_each"
+              ++ "_each" -- TODO use regular (non _each) one here?
 rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"

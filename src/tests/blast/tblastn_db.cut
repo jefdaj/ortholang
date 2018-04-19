@@ -1,5 +1,5 @@
 mini7942 = load_faa "data/7942genes10.faa"
-full7942 = makeblastdb_prot [load_faa "data/7942genes.faa"]
+full7942 = makeblastdb_prot_all [load_faa "data/7942genes.faa"]
 single = extract_queries      (blastp_db      1e-5 mini7942  full7942 )
 mapped = extract_queries_each (blastp_db_each 1e-5 mini7942 [full7942])
 result = all ([single] | mapped)

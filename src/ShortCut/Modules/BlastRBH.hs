@@ -87,8 +87,8 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
     editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
     editedName = bCmd ++ "_db_rev_each"
     (dbFnName, dbType) = if qType == faa
-                           then ("makeblastdb_prot", pdb)
-                           else ("makeblastdb_nucl", ndb)
+                           then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
+                           else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
 rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
