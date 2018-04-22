@@ -196,5 +196,5 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, ss])
     name1 = (fName $ mkBlastFromFa d) ++ "_each"
     name2 = "makeblastdb"
               ++ (if dbType == ndb then "_nucl" else "_prot")
-              ++ "_each" -- TODO use regular (non _each) one here?
+              ++ "_each" -- TODO which new makeblastdb fn goes here?
 rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"

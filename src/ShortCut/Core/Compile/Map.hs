@@ -25,8 +25,8 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths
 import ShortCut.Core.Util (digest)
-import ShortCut.Core.Actions (readPath, readStrings, writeStrings, debugL)
-import Control.Monad (forM_)
+import Control.Monad (forM, forM_)
+import ShortCut.Core.Actions (readStrings, writeStrings, debugL)
 import System.FilePath ((</>), (<.>))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 
@@ -35,19 +35,20 @@ import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 -----------------------------------------
 
 {- These take explicit path arguments rather than a [CutPath] in order to be
- - better-typed, now and in the future if I get around to making the whole AST
- - a GADT again.
+ - better-typed, now and in the future when the whole AST will be a GADT.
  -}
 
+-- TODO is forP OK here since there aren't any shared input files to conflict on locking?
+--      might have to sort afterward, or is order automatically preserved?
+-- TODO make sure hashes match the single versions or there will be trouble?
 map1of1 :: CutType -> CutType -> Action1 -> Action1
 map1of1 inType outType act1 cfg locks out a1 = do
   inPaths <- readStrings inType cfg locks $ fromCutPath cfg a1
-  let tmpDir   = mapCache cfg
-      outPaths = (flip map) inPaths $ \i ->
-                   tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
-      ioPairs  = zip inPaths outPaths
-  -- TODO is forP OK here since there aren't any shared input files to conflict on locking?
-  _ <- forP ioPairs $ \(i,o) -> act1 cfg locks (toCutPath cfg o) (toCutPath cfg i)
+  let tmpDir = mapCache cfg
+  outPaths <- forM inPaths $ \i -> do
+    let o = tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
+    act1 cfg locks (toCutPath cfg o) (toCutPath cfg i)
+    return o
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 map1of2 :: CutType -> CutType -> Action2 -> Action2
@@ -192,11 +193,9 @@ rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
   return $ ExprPath oPath'
 rFun3 _ _ e = error $ "bad argument to rFun3: " ++ show e
 
-----------
--- misc --
-----------
+----------------
+-- singletons --
+----------------
 
 singleton :: CutExpr -> CutExpr
 singleton e = CutList (typeOf e) (saltOf e) (depsOf e) [e]
-
-

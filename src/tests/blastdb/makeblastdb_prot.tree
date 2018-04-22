@@ -1,74 +1,93 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 06e85e731a
-|   |   |   |-- 3a3f99549b.str.list -> ../../../exprs/extract_queries/3a3f99549b.str.list
-|   |   |   `-- 3a3f99549b.str.list.args -> ../../../cache/lines/99c8b97df6.txt
-|   |   |-- 4c663d1692
-|   |   |   |-- b0508dfb79.pdb -> ../../../exprs/makeblastdb_prot/b0508dfb79.pdb
-|   |   |   `-- b0508dfb79.pdb.args -> ../../../cache/lines/71eade04d0.txt
-|   |   `-- ea66d6986e
-|   |       |-- d67a110ed4.bht -> ../../../exprs/blastp_db/ce1c174684_b3106ff9d5_d67a110ed4.bht
-|   |       `-- d67a110ed4.bht.args -> ../../../cache/lines/0a0427766d.txt
+|   |   `-- 37c57f4bce
+|   |       |-- 298203e56d.num -> ../../../exprs/length/298203e56d.num
+|   |       |-- 298203e56d.num.args -> ../../../cache/lines/e44555fc47.txt
+|   |       |-- 91616583df.num -> ../../../exprs/length/91616583df.num
+|   |       |-- 91616583df.num.args -> ../../../cache/lines/0368754d04.txt
+|   |       |-- fd9f8de62d.num -> ../../../exprs/length/fd9f8de62d.num
+|   |       `-- fd9f8de62d.num.args -> ../../../cache/lines/01cfc9a470.txt
 |   |-- lines
-|   |   |-- 0a0427766d.txt
-|   |   |-- 0ffbacf506.txt
-|   |   |-- 5e95abb824.txt
-|   |   |-- 71eade04d0.txt
-|   |   |-- 778251fd80.txt
-|   |   |-- 8b524e10c4.txt
+|   |   |-- 01cfc9a470.txt
+|   |   |-- 02f6e9d85f.txt -> ../../cache/lines/e768cae869.txt
+|   |   |-- 0368754d04.txt
+|   |   |-- 1873a7cad0.txt
+|   |   |-- 21c1b42ad7.txt
+|   |   |-- 2a13ac791a.txt
+|   |   |-- 3b47a14219.txt
+|   |   |-- 4013469028.txt
+|   |   |-- 42fb7081a8.txt
+|   |   |-- 52446b2682.txt
+|   |   |-- 5b8733fa59.txt
 |   |   |-- 908f92d67a.txt
-|   |   |-- 99c8b97df6.txt
+|   |   |-- 9f6ec46f3f.txt -> ../../cache/lines/a1512fc008.txt
 |   |   |-- a1512fc008.txt
+|   |   |-- a7d8f25c5c.txt
+|   |   |-- abb1880c51.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- c8be8722f2.txt
-|   |   |-- da1e86d2c2.txt
-|   |   `-- f12c7f6a4d.txt
+|   |   |-- dd3a220ad9.txt
+|   |   |-- e44555fc47.txt
+|   |   |-- e768cae869.txt
+|   |   `-- f01020ac88.txt
 |   |-- load
 |   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
 |   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
-|   `-- makeblastdb
-|       `-- a1512fc008
-|           |-- a1512fc008.pdb.phr
-|           |-- a1512fc008.pdb.pin
-|           `-- a1512fc008.pdb.psq
+|   |-- makeblastdb
+|   |   |-- a1512fc008
+|   |   |   |-- a1512fc008.pdb.phr
+|   |   |   |-- a1512fc008.pdb.pin
+|   |   |   `-- a1512fc008.pdb.psq
+|   |   |-- e768cae869
+|   |   |   |-- e768cae869.pdb.phr
+|   |   |   |-- e768cae869.pdb.pin
+|   |   |   `-- e768cae869.pdb.psq
+|   |   `-- f01020ac88
+|   |       |-- f01020ac88.pdb.phr
+|   |       |-- f01020ac88.pdb.pin
+|   |       `-- f01020ac88.pdb.psq
+|   `-- map
+|       |-- 741a82b7fb.pdb -> ../../cache/lines/52446b2682.txt
+|       `-- 933ecb1331.pdb -> ../../cache/lines/908f92d67a.txt
 |-- exprs
-|   |-- all
-|   |   `-- e21edac025.str.list -> ../../cache/lines/f12c7f6a4d.txt
 |   |-- any
-|   |   `-- c42e9306be.bht.list -> ../../cache/lines/99c8b97df6.txt
-|   |-- blastp_db
-|   |   |-- 8158675169_6e8bd8b7c6_2133c6113b.bht
-|   |   `-- ce1c174684_b3106ff9d5_d67a110ed4.bht
-|   |-- blastp_db_each
-|   |   `-- 8158675169_6e8bd8b7c6_a80484dcc2.bht.list -> ../../cache/lines/5e95abb824.txt
-|   |-- extract_queries
-|   |   `-- 3a3f99549b.str.list -> ../../cache/lines/f12c7f6a4d.txt
-|   |-- extract_queries_each
-|   |   `-- 72712dfc7c.str.list.list -> ../../cache/lines/da1e86d2c2.txt
+|   |   `-- 6e97034d39.pdb.list -> ../../cache/lines/dd3a220ad9.txt
+|   |-- length
+|   |   |-- 298203e56d.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 91616583df.num -> ../../cache/lines/2a13ac791a.txt
+|   |   `-- fd9f8de62d.num -> ../../cache/lines/2a13ac791a.txt
+|   |-- length_each
+|   |   `-- edd201db35.num.list -> ../../cache/lines/4013469028.txt
 |   |-- list
-|   |   |-- 4975b1851b.bht.list -> ../../cache/lines/99c8b97df6.txt
-|   |   |-- 7efa7582bf.faa.list.list -> ../../cache/lines/71eade04d0.txt
+|   |   |-- 6a04b0f0fd.pdb.list -> ../../cache/lines/21c1b42ad7.txt
+|   |   |-- 7f5a7cdc93.pdb.list -> ../../cache/lines/dd3a220ad9.txt
+|   |   |-- b0a90800bb.pdb.list.list -> ../../cache/lines/3b47a14219.txt
+|   |   |-- b6bfc9cf65.faa.list -> ../../cache/lines/f01020ac88.txt
 |   |   |-- c5595751e2.faa.list -> ../../cache/lines/a1512fc008.txt
-|   |   `-- cc3e9bbae7.bht.list.list -> ../../cache/lines/0ffbacf506.txt
+|   |   |-- d7090f5315.faa.list -> ../../cache/lines/e768cae869.txt
+|   |   `-- df0f272938.pdb.list.list -> ../../cache/lines/5b8733fa59.txt
 |   |-- load_faa
 |   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot
 |   |   |-- 27a934c58e.pdb -> ../../cache/lines/908f92d67a.txt
-|   |   `-- b0508dfb79.pdb -> ../../cache/lines/908f92d67a.txt
+|   |   `-- 320f081082.pdb -> ../../cache/lines/52446b2682.txt
+|   |-- makeblastdb_prot_all
+|   |   `-- 9396c945e4.pdb -> ../../cache/lines/1873a7cad0.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- 141ebb392f.pdb.list -> ../../cache/lines/8b524e10c4.txt
-|   |-- num
-|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   |   `-- de98df50ea.pdb.list -> ../../cache/lines/abb1880c51.txt
+|   |-- singletons
+|   |   `-- 9396c945e4.faa.list.list -> ../../cache/lines/a7d8f25c5c.txt
 |   `-- str
 |       |-- 50dbefb6d6.str -> ../../cache/lines/c8be8722f2.txt
 |       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
 `-- vars
+    |-- both.pdb -> ../exprs/makeblastdb_prot_all/9396c945e4.pdb
+    |-- each.pdb.list -> ../exprs/makeblastdb_prot_each/de98df50ea.pdb.list
     |-- large6803faa.faa -> ../exprs/load_faa/dee24d6c3c.faa
-    |-- mapped.bht.list -> ../exprs/blastp_db_each/8158675169_6e8bd8b7c6_a80484dcc2.bht.list
-    |-- result -> ../exprs/all/e21edac025.str.list
-    |-- single.bht -> ../exprs/blastp_db/8158675169_6e8bd8b7c6_2133c6113b.bht
+    |-- result -> ../exprs/length_each/edd201db35.num.list
+    |-- singles.pdb.list -> ../exprs/list/7f5a7cdc93.pdb.list
     `-- small6803faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
 
-23 directories, 48 files
+22 directories, 68 files

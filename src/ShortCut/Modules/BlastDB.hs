@@ -8,16 +8,13 @@ module ShortCut.Modules.BlastDB where
 import Development.Shake
 import ShortCut.Core.Types
 
--- import ShortCut.Core.Debug (debug)
-
 import Data.Maybe                  (isJust)
-import Control.Monad               (when)
+import Control.Monad               (when, forM)
 import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
                                     debugTrackWrite, readLit, readPaths, writeLit, readLits,
-                                    writeLits, writePath, debugA, debugL, debugNeed)
--- import ShortCut.Core.Debug         (debugA, debugRules)
+                                    writeLits, writePath, debugA, debugL, debugNeed,
+                                    cachedLinesPath, debugL, writeStrings, readStrings, writePaths)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
-import ShortCut.Core.Compile.Vectorize  (rVectorizeTmp)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
                                     toCutPath, CutPath)
 import ShortCut.Core.Util          (stripWhiteSpace, resolveSymlinks)
@@ -26,9 +23,8 @@ import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
                                     makeRelative, takeDirectory)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
--- import System.Exit                 (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Compile.Map  (singleton)
+import ShortCut.Core.Compile.Map  (singleton, map1of1, rFun1)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -51,15 +47,6 @@ cutModule = CutModule
   { mName = "blastdb"
   , mFunctions =
 
-    -- these would be map1of1 over the regular ones with their singleton lists?
-    -- or they could be implemented as the current _each ones starting from lists of lists?
-    -- TODO makeblastdb_nucl_each : fa.list  -> ndb.list (needed for psiblast)
-    -- TODO makeblastdb_prot_each : faa.list -> pdb.list (needed for psiblast)
-    --
-    -- wait, when would these be needed? remove unless used by rbh stuff
-    -- TODO makeblastdb_nucl_groups : fa.list.list  -> ndb.list
-    -- TODO makeblastdb_prot_groups : faa.list.list -> pdb.list
-
     [ loadNuclDB
     , loadProtDB
     , loadNuclDBEach
@@ -67,21 +54,30 @@ cutModule = CutModule
     -- , mkMakeblastdb ndb
     -- , mkMakeblastdb pdb
 
+    -- these are actually the most basic ones, because that way we can have
+    -- only one main action function that takes a quoted list of paths, rather
+    -- than that + a regular non-quoted one
+    , makeblastdbNuclAll -- makeblastdb_nucl_all : fa.list  -> ndb
+    , makeblastdbProtAll -- makeblastdb_prot_all : faa.list -> pdb
+
+    -- these are implemented using the _all versions above and singleton lists
     -- you can make a nucl db from either, but a protein db only from faa.. backward?
     -- TODO replace most of the singleton lists in test cuts with these
     , makeblastdbNucl    -- makeblastdb_nucl     : fa       -> ndb
     , makeblastdbProt    -- makeblastdb_prot     : faa      -> pdb
 
-    , makeblastdbNuclAll -- makeblastdb_nucl_all : fa.list  -> ndb
-    , makeblastdbProtAll -- makeblastdb_prot_all : faa.list -> pdb
-
-    -- TODO bring these back, or remove completely?
-    -- , mkMakeblastdbEach ndb
-    -- , mkMakeblastdbEach pdb
+    -- these are used in the _rbh machinery
+    -- they're a little weird because they are implemented using the non _all
+    -- versions, so they internally make their args into lists of singleton lists
+    , mkMakeblastdbEach ndb -- makeblastdb_nucl_each : fa.list  -> ndb.list
+    , mkMakeblastdbEach pdb -- makeblastdb_prot_each : faa.list -> pdb.list
 
     , blastdbget -- TODO mapped version so you can list -> git at once?
     , blastdblist
     -- , TODO write loadBlastDB
+
+    -- TODO hide this from users?
+    , singletons
     ]
   }
 
@@ -266,45 +262,9 @@ aBlastdbget cfg ref dbPrefix tmpDir nPath = do
     dbPrefix'  = fromCutPath cfg dbPrefix
     dbPrefix'' = debugA cfg "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
 
---------------------------------------
--- makeblastdb from single fa files --
---------------------------------------
-
--- these are oddly implemented in terms of the _all ones below,
--- because that turned out to be easier
-
-makeblastdbNucl :: CutFunction
-makeblastdbNucl = CutFunction
-  { fName      = "makeblastdb_nucl"
-  , fTypeCheck = tMakeblastdb ndb
-  , fTypeDesc  = "makeblastdb_nucl: fa -> ndb"
-  , fFixity    = Prefix
-  , fRules     = \s e -> rMakeblastdbAll s $ withSingletonSubject e
-  }
-
-makeblastdbProt :: CutFunction
-makeblastdbProt = CutFunction
-  { fName      = "makeblastdb_prot"
-  , fTypeCheck = tMakeblastdb pdb
-  , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
-  , fFixity    = Prefix
-  , fRules     = \s e -> rMakeblastdbAll s $ withSingletonSubject e
-  }
-
-tMakeblastdb :: CutType -> TypeChecker
-tMakeblastdb dbType [faType]
-  | dbType == pdb && faType   ==    faa       = Right pdb
-  | dbType == ndb && faType `elem` [faa, fna] = Right dbType
-tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
-
-withSingletonSubject :: CutExpr -> CutExpr
-withSingletonSubject (CutFun rtn salt deps name [s])
-  =                  (CutFun rtn salt deps name [singleton s])
-withSingletonSubject e = error $ "bad argument to withSingletonSubject: " ++ show e
-
---------------------------
--- make from FASTA file --
---------------------------
+--------------------------------------------
+-- make one db from a list of FASTA files --
+--------------------------------------------
 
 -- TODO put the database files themselves in the cache dir and only prefix in exprs?
 
@@ -313,27 +273,33 @@ withSingletonSubject e = error $ "bad argument to withSingletonSubject: " ++ sho
 --      in addition to actual inputs?
 makeblastdbNuclAll :: CutFunction
 makeblastdbNuclAll = CutFunction
-  { fName      = "makeblastdb_nucl_all"
-  , fTypeCheck = tMakeblastdbAll ndb
-  , fTypeDesc  = "makeblastdb_nucl_all : fa.list -> ndb"
+  { fName      = name
+  , fTypeCheck = tMakeblastdbAll name ndb
+  , fTypeDesc  = name ++ " : fa.list -> ndb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdbAll
   }
+  where
+    name = "makeblastdb_nucl_all"
 
 makeblastdbProtAll :: CutFunction
 makeblastdbProtAll = CutFunction
-  { fName      = "makeblastdb_prot_all"
-  , fTypeCheck = tMakeblastdbAll pdb
-  , fTypeDesc  = "makeblastdb_prot_all : faa.list -> pdb"
+  { fName      = name
+  , fTypeCheck = tMakeblastdbAll name pdb
+  , fTypeDesc  = name ++ " : faa.list -> pdb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdbAll
   }
+  where
+    name = "makeblastdb_prot_all"
 
-tMakeblastdbAll :: CutType -> TypeChecker
-tMakeblastdbAll dbType [ListOf faType]
+-- TODO allow fna.list -> pdb.list using translate?
+tMakeblastdbAll :: String -> CutType -> TypeChecker
+tMakeblastdbAll _ dbType [ListOf faType]
   | dbType == pdb && faType   ==    faa       = Right pdb
   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
-tMakeblastdbAll _ _ = error "makeblastdb requires a list of fasta files" -- TODO typed error
+tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files, but got "
+                                            ++ show types
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
 -- TODO is rtn always the same as dbType?
@@ -345,11 +311,7 @@ rMakeblastdbAll s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fas]) = do
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
       cDir      = makeblastdbCache cfg
-      -- dbType    = if rtn == ndb then "_nucl" else "_prot"
-      -- dbPrefix  = (fromCutPath cfg cDir) </> digest (exprPath s fa)
-      -- dbPrefix' = toCutPath cfg dbPrefix
       fasPath'   = toCutPath cfg fasPath
-  -- out' %> \_ -> aMakeblastdbAll rtn cfg cDir [out, dbPrefix', fasPath']
   out' %> \_ -> aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
@@ -429,28 +391,128 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
       fasPath' = fromCutPath cfg fasPath
 aMakeblastdbAll _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
---------------------------------
--- make many from FASTA files --
---------------------------------
+----------------------------------------
+-- make a db from a single FASTA file --
+----------------------------------------
 
--- mkMakeblastdbEach :: CutType -> CutFunction
--- mkMakeblastdbEach dbType = CutFunction
---   { fName      = name
---   , fTypeCheck = tMakeblastdbEach dbType
---   , fTypeDesc  = desc
---   , fFixity    = Prefix
---   , fRules  = rMakeblastdbEach dbType
---   }
---   where
---     singleName = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
---     faExt = if dbType == ndb then "fa" else "faa"
---     name = singleName ++ "_each"
---     desc = name ++ " : " ++ faExt ++ ".list.list -> " ++ extOf dbType ++ ".list"
--- 
--- -- TODO no! depends on an arg
--- tMakeblastdbEach :: CutType -> TypeChecker
--- tMakeblastdbEach dbType [ListOf (ListOf x)] | x `elem` [fna, faa] = Right (ListOf dbType)
--- tMakeblastdbEach _ _ = error "makeblastdb_each requires a list lists of of fasta files" -- TODO typed error
--- 
--- rMakeblastdbEach :: CutType -> RulesFn
--- rMakeblastdbEach dbType = rVectorizeTmp 1 (aMakeblastdbAll dbType) "makeblastdb"
+-- these are oddly implemented in terms of the _all ones above,
+-- because that turned out to be easier
+
+makeblastdbNucl :: CutFunction
+makeblastdbNucl = CutFunction
+  { fName      = "makeblastdb_nucl"
+  , fTypeCheck = tMakeblastdb ndb
+  , fTypeDesc  = "makeblastdb_nucl: fa -> ndb"
+  , fFixity    = Prefix
+  , fRules     = rMakeblastdb
+  }
+
+makeblastdbProt :: CutFunction
+makeblastdbProt = CutFunction
+  { fName      = "makeblastdb_prot"
+  , fTypeCheck = tMakeblastdb pdb
+  , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  , fFixity    = Prefix
+  , fRules     = rMakeblastdb
+  }
+
+tMakeblastdb :: CutType -> TypeChecker
+tMakeblastdb dbType [faType]
+  | dbType == pdb && faType   ==    faa       = Right pdb
+  | dbType == ndb && faType `elem` [faa, fna] = Right dbType
+tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
+
+rMakeblastdb :: RulesFn
+rMakeblastdb s e = rMakeblastdbAll s $ withSingleton e
+
+-- TODO is this map1of1?
+withSingleton :: CutExpr -> CutExpr
+withSingleton (CutFun rtn salt deps name [s])
+  =           (CutFun rtn salt deps name [singleton s])
+withSingleton e = error $ "bad argument to withSingleton: " ++ show e
+
+-----------------------------------------------
+-- make list of dbs from list of FASTA files --
+-----------------------------------------------
+
+mkMakeblastdbEach :: CutType -> CutFunction
+mkMakeblastdbEach dbType = CutFunction
+  { fName      = name
+  , fTypeCheck = tMakeblastdbEach dbType
+  , fTypeDesc  = desc
+  , fFixity    = Prefix
+  , fRules     = rMakeblastdbEach
+  }
+  where
+    desc = name ++ " : " ++ ext ++ ".list.list -> " ++ extOf dbType ++ ".list"
+    name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+    ext  = if dbType == ndb then "fa" else "faa"
+
+-- TODO no! depends on an arg
+tMakeblastdbEach :: CutType -> TypeChecker
+tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
+tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
+
+rMakeblastdbEach :: RulesFn
+rMakeblastdbEach st@(_,cfg,_) (CutFun (ListOf dbType) salt deps name [e]) =
+  rFun1 (map1of1 faType dbType act1) st expr'
+  where
+    faType = typeOf e
+    tmpDir = makeblastdbCache cfg 
+    act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
+    expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
+    -- expr'' = trace ("expr':" ++ show expr') expr'
+rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
+
+----------------
+-- singletons --
+----------------
+
+-- TODO move this to its own module? remove it when possible?
+
+withSingletons :: CutExpr -> CutExpr
+withSingletons e = CutFun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
+
+-- Only used for the makeblastdb_*_each functions so far
+-- TODO hide from users?
+singletons :: CutFunction
+singletons = CutFunction
+  { fName      = name
+  , fFixity    = Prefix
+  , fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list.list"
+  , fTypeCheck = tSingletons
+  , fRules     = rSingletons
+  }
+  where
+    name = "singletons"
+
+tSingletons :: [CutType] -> Either String CutType
+tSingletons [ListOf x] = Right $ ListOf $ ListOf x
+tSingletons _ = Left "tSingletons expected a list"
+
+rSingletons :: RulesFn
+rSingletons st@(_, cfg, ref) expr@(CutFun rtn _ _ _ [listExpr]) = do
+  (ExprPath listPath') <- rExpr st listExpr
+  let outPath  = exprPath st expr
+      outPath' = fromCutPath cfg outPath
+      listPath = toCutPath cfg listPath'
+      (ListOf (ListOf t)) = rtn
+  outPath' %> \_ -> aSingletons t cfg ref outPath listPath
+  return $ ExprPath outPath'
+rSingletons _ _ = error "bad argument to rSingletons"
+
+aSingletons :: CutType -> Action1
+aSingletons elemType cfg ref outPath listPath = do
+  let listPath' = fromCutPath cfg listPath
+      outPath'  = fromCutPath cfg outPath
+  debugL cfg $ "aSingletons listpath': " ++ listPath'
+  debugL cfg $ "aSingletons outpath': " ++ outPath'
+  elems <- readStrings elemType cfg ref listPath'
+  debugL cfg $ "aSingletons elems: " ++ show elems
+  singletonPaths <- forM elems $ \e -> do
+    let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
+        singletonPath  = toCutPath cfg singletonPath'
+    debugL cfg $ "aSingletons singletonPath': " ++ singletonPath'
+    writeStrings elemType cfg ref singletonPath' [e]
+    return singletonPath
+  writePaths cfg ref outPath' singletonPaths

@@ -1,8 +1,13 @@
+# Combines the single, _each and _all tests to check that they're compatible.
+
 small6803faa = load_faa "data/6803genes10.faa"
 large6803faa = load_faa "data/6803genes.faa"
-single = blastp_db      1e-5 small6803faa (makeblastdb_prot large6803faa)
-result = single
 
-# TODO any reason to keep this stuff?
-#mapped = blastp_db_each 1e-5 small6803faa (makeblastdb_prot_each [[large6803faa]])
-#result = all (extract_queries_each ([single] | mapped))
+singles = [makeblastdb_prot small6803faa, makeblastdb_prot large6803faa]
+each = makeblastdb_prot_each [small6803faa, large6803faa]
+both = makeblastdb_prot_all  [small6803faa, large6803faa]
+
+# should be [2, 2, 2, 1] but mainly want to evaluate them all;
+# the real test is that only 3 databases should be in cache/makeblastdb
+# and singles should point to the same ones as each
+result = length_each [singles, each, (singles | each), [both]]

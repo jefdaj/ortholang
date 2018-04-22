@@ -1,8 +1,13 @@
+# Combines the single, _each and _all tests to check that they're compatible.
+
 small6803fna = load_fna "data/6803genes10.fna"
 large6803fna = load_fna "data/6803genes.fna"
-single = blastn_db      1e-5 small6803fna (makeblastdb_nucl large6803fna)
-result = single
 
-# TODO any reason to keep this stuff?
-# mapped = blastn_db_each 1e-5 small6803fna (makeblastdb_nucl_each [[large6803fna]])
-# result = all (extract_queries_each ([single] | mapped))
+singles = [makeblastdb_nucl small6803fna, makeblastdb_nucl large6803fna]
+each = makeblastdb_nucl_each [small6803fna, large6803fna]
+both = makeblastdb_nucl_all  [small6803fna, large6803fna]
+
+# should be [2, 2, 2, 1] but mainly want to evaluate them all;
+# the real test is that only 3 databases should be in cache/makeblastdb
+# and singles should point to the same ones as each
+result = length_each [singles, each, (singles | each), [both]]

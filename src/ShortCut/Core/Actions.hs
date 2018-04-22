@@ -45,6 +45,7 @@ module ShortCut.Core.Actions
   , hashContent
   , withBinHash
   , symlink
+  , cachedLinesPath
 
   )
   where
@@ -184,6 +185,11 @@ readList cfg locks path = do
 -- write files --
 -----------------
 
+cachedLinesPath :: CutConfig -> [String] -> FilePath
+cachedLinesPath cfg content = cDir </> digest content <.> "txt"
+  where
+    cDir = fromCutPath cfg $ cacheDir cfg "lines"
+
 {- This ensures that when two lists have the same content, their expression
  - paths will be links to the same cached path. That causes them to get
  - properly deduplicated when used in a set operation. It also makes the .tree
@@ -196,8 +202,7 @@ readList cfg locks path = do
  -}
 writeCachedLines :: CutConfig -> Locks -> FilePath -> [String] -> Action ()
 writeCachedLines cfg ref outPath content = do
-  let cDir  = fromCutPath cfg $ cacheDir cfg "lines" -- TODO make relative to expr
-      cache = cDir </> digest content <.> "txt"
+  let cache = cachedLinesPath cfg content
       -- lock  = cache <.> "lock"
   -- liftIO $ createDirectoryIfMissing True cDir
   withWriteOnce ref cache

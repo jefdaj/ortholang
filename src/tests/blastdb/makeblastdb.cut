@@ -1,7 +1,8 @@
-# Tests the *blast*_db functions, which are the basis of everything else.
-# They're probably not the ones you want to call directly though, because they
-# need an explicit makeblastdb call to make the db first.
+# Tests the all the BLAST+ *blast*_db functions, which are the basis of
+# everything else.  They're probably not the ones you want to call directly
+# though, because they need an explicit makeblastdb call to make the db first.
 
+# TODO remove/move to blast module tests?
 # TODO test the results too, not just that it runs!
 # TODO remove once the individual tests work
 
