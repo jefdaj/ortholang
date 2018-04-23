@@ -343,7 +343,7 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
       dbOut  = dbDir </> fasHash <.> extOf dbType
       dbOut' = toCutPath cfg dbOut
       out''  = debugA cfg "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
-      dbIns  = dbOut <.> "*" -- TODO does this actually help?
+      dbPtn  = dbOut ++ "*" -- TODO does this actually help?
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
   -- be passed as one quoted arg, but we also have to take into account Shake's
@@ -370,17 +370,17 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
   debugL cfg $ "aMakeblastdbAll fixedPaths: " ++ show fixedPaths
 
   liftIO $ createDirectoryIfMissing True dbDir
-  before <- listPrefixFiles dbIns
+  before <- listPrefixFiles dbPtn
   when (null before) $ do
-    debugL cfg $ "this is dbIns: " ++ dbIns
+    debugL cfg $ "this is dbPtn: " ++ dbPtn
     debugL cfg $ "this will be dbOut: " ++ dbOut
-    wrappedCmdWrite cfg ref out' before [] [Cwd cDir'] "makeblastdb"
+    wrappedCmdWrite cfg ref out' [dbPtn] [] [Cwd cDir'] "makeblastdb"
       [ "-in"    , fixedPaths
       , "-out"   , dbOut
       , "-title" , takeFileName dbOut
       , "-dbtype", dbType'
       ]
-    after <- listPrefixFiles dbIns
+    after <- listPrefixFiles dbPtn
     debugL cfg $ "these actual db files were created: " ++ show after
     debugTrackWrite cfg after
     debugL cfg $ "dbOut was also created: " ++ dbOut
