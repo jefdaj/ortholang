@@ -4,10 +4,11 @@ n = 1e-5
 
 singleFwd = extract_queries      (blastp      n mini7942  full7942 )
 mappedFwd = extract_queries_each (blastp_each n mini7942 [full7942])
+result = mappedFwd # error in makeblastdb_prot_each
 
 singleRev = extract_queries      (blastp_rev      n full7942  mini7942 )
-mappedRev = extract_queries_each (blastp_rev_each n full7942 [mini7942])
+# mappedRev = extract_queries_each (blastp_rev_each n full7942 [mini7942])
 
 single = singleFwd | singleRev
-mapped = mappedFwd | mappedRev # should be one list, but isn't so far
-result = [single] | mapped     # should be one list, but isn't so far
+# mapped = mappedFwd | mappedRev # should be one list, but isn't so far
+# result = [single] | mapped     # should be one list, but isn't so far

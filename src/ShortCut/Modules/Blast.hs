@@ -9,6 +9,8 @@ module ShortCut.Modules.Blast
   )
   where
 
+-- TODO _all versions to go with the _each ones?
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -187,14 +189,11 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
 
 -- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, ss])
-  = rules st (CutFun rtn salt deps name1 [e, q, ss'])
+rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _   [e, q, ss])
+  =                              rules st (CutFun rtn salt deps fn2 [e, q, ss'])
   where
-    ssList = CutList (typeOf ss) salt (depsOf ss) [ss]
     rules = rMkBlastFromDbEach d
-    ss'   = CutFun (ListOf dbType) salt (depsOf ssList) name2 [ssList]
-    name1 = (fName $ mkBlastFromFa d) ++ "_each"
-    name2 = "makeblastdb"
-              ++ (if dbType == ndb then "_nucl" else "_prot")
-              ++ "_each" -- TODO which new makeblastdb fn goes here?
+    ss'   = CutFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
+    fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+    fn2   = (fName $ mkBlastFromFa d) ++ "_each"
 rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"

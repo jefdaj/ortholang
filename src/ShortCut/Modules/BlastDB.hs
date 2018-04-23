@@ -444,7 +444,7 @@ mkMakeblastdbEach dbType = CutFunction
   , fRules     = rMakeblastdbEach
   }
   where
-    desc = name ++ " : " ++ ext ++ ".list.list -> " ++ extOf dbType ++ ".list"
+    desc = name ++ " : " ++ ext ++ ".list -> " ++ extOf dbType ++ ".list"
     name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     ext  = if dbType == ndb then "fa" else "faa"
 
@@ -515,4 +515,4 @@ aSingletons elemType cfg ref outPath listPath = do
     debugL cfg $ "aSingletons singletonPath': " ++ singletonPath'
     writeStrings elemType cfg ref singletonPath' [e]
     return singletonPath
-  writePaths cfg ref outPath' singletonPaths
+  writePaths cfg ref outPath' singletonPaths -- TODO nondeterministic?

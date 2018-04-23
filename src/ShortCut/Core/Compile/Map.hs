@@ -44,11 +44,17 @@ import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 map1of1 :: CutType -> CutType -> Action1 -> Action1
 map1of1 inType outType act1 cfg locks out a1 = do
   inPaths <- readStrings inType cfg locks $ fromCutPath cfg a1
+  debugL cfg $ "map1of1 a1: " ++ show a1
+  debugL cfg $ "map1of1 inPaths: " ++ show inPaths
   let tmpDir = mapCache cfg
+  debugL cfg $ "map1of1 tmpDir: " ++ show tmpDir
   outPaths <- forM inPaths $ \i -> do
     let o = tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
+    debugL cfg $ "map1of1 o: " ++ show o
     act1 cfg locks (toCutPath cfg o) (toCutPath cfg i)
     return o
+  debugL cfg $ "map1of1 outPaths: " ++ show outPaths
+  debugL cfg $ "map1of1 out: " ++ show out
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 map1of2 :: CutType -> CutType -> Action2 -> Action2
