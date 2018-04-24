@@ -1,0 +1,34 @@
+# When training a pssm fails because the e-value is too low/db too distantly
+# related, ShortCut creates an "empty" pssm to track that fact rather than
+# failing. This tests that it works properly by trying searches that would fail
+# otherwise.
+
+# the (7942) query gene has an exact match in its own genome,
+# so there should be a hit at any e-value
+query   = load_faa "data/7942gene.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+db7942  = makeblastdb_prot pcc7942
+
+# there's no perfect hit in another cyano though,
+# so below a certain cutoff an empty pssm will be created if trained on 6803
+pcc6803 = load_faa "data/6803genes.faa"
+db6803  = makeblastdb_prot pcc6803
+
+# check that psiblast itself works by training a pssm on each
+cutoff   = 0.5
+pssm7942 = psiblast_train_db cutoff query db7942
+pssm6803 = psiblast_train_db cutoff query db6803
+
+# check that it keeps working on 7942 with increasingly strict cutoffs
+# (note: a cutoff of 0 will break this, but give results in a regular search)
+cutoffs   = [1, 0.5, 0.1, 1e-2, 1e-3, 1e-5, 1e-10, 1e-20, 1e-50, 1e-100]
+pssms7942 = repeat_each pssm7942 cutoff cutoffs
+
+# finally, break it by trying an overly strict cutoff with 6803...
+# (note: which one actually throws the error depends on evaluation order)
+pssms6803 = repeat_each pssm6803 cutoff cutoffs
+
+# this forces everything to be evaluated
+# the real test is a lack of errors
+# overall result should be [10, 10, 10] though
+result = [length cutoffs, length pssms7942, length pssms6803]
