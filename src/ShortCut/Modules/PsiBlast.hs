@@ -106,7 +106,7 @@ cutModule = CutModule
     , psiblastAll             -- num faa       faa.list -> bht
 
     -- not written yet (may not be needed):
-    -- , psiblastPssms        -- num pssm.list faa      -> bht.list TODO write/fix
+    , psiblastPssms        -- num pssm.list faa      -> bht.list TODO write/fix
     -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
     -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list
     -- , psiblastPssmsAll     -- num pssm.list faa.list -> bht
@@ -548,14 +548,14 @@ psiblastEachPssm = CutFunction
     name = "psiblast_each_pssm"
 
 -- TODO write this!
--- psiblastPssms :: CutFunction
--- psiblastPssms = compose1 name
---   (mkTypeDesc name [num, ListOf pssm, faa] bht)
---   psiblastEachPssm
---   (ListOf bht)
---   (mkConcat bht)
---   where
---     name = "psiblast_pssms"
+psiblastPssms :: CutFunction
+psiblastPssms = compose1 name
+  (mkTypeDesc name [num, ListOf pssm, faa] bht)
+  psiblastEachPssm
+  (ListOf bht)
+  (mkConcat bht)
+  where
+    name = "psiblast_pssms"
 
 psiblastPssmsAll :: CutFunction
 psiblastPssmsAll = compose1 name
