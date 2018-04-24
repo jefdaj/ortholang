@@ -79,34 +79,35 @@ cutModule = CutModule
     , psiblastTrainPssmsDb -- num faa.list  pdb      -> pssm.list
     , psiblastPssmDbEach   -- num pssm      pdb.list -> bht.list
     , psiblastEachPssmDb   -- num pssm.list pdb      -> bht.list
-    , psiblastEachPssm     -- num pssm.list faa      -> bht.list
+    , psiblastEachPssm     -- num pssm.list faa      -> bht.list FAIL
 
     -- working with compose1 of a working fn above + concat
     , psiblastPssmsDb  -- num pssm.list pdb -> bht
     , psiblastPssmsAll -- num pssm.list faa -> bht
 
     -- working except when withPdbSubject broken:
+    -- TODO separate withPdbSubject into _all and regular versions?
     , psiblastTrain        -- num faa      faa      -> pssm
     , psiblastTrainPssms   -- num faa.list faa      -> pssm.list
     , psiblastTrainAll     -- num faa      faa.list -> pssm
     , psiblastPssm         -- num pssm     faa      -> bht
     , psiblastPssmAll      -- num pssm     faa.list -> bht
-    , psiblast             -- num faa      faa      -> bht
+    , psiblast             -- num faa      faa      -> bht FAIL
 
     -- not working, reason unknown but use withPdbSubjects:
-    , psiblastEach         -- num faa  faa.list -> bht.list
-    , psiblastPssmEach     -- num pssm faa.list -> bht.list
-    , psiblastTrainEach    -- num faa  faa.list -> pssm.list TODO fix accidental singleton
+    , psiblastEach         -- num faa  faa.list -> bht.list FAIL
+    , psiblastPssmEach     -- num pssm faa.list -> bht.list FAIL
+    , psiblastTrainEach    -- num faa  faa.list -> pssm.list FAIL TODO fix accidental singleton
 
     -- not working, reason unknown but use withPssmQuery:
     , psiblastDb           -- num faa      pdb      -> bht
     , psiblastDbEach       -- num faa      pdb.list -> bht.list
 
     -- not working, probably because psiblastEach doesn't
-    , psiblastAll             -- num faa       faa.list -> bht
+    , psiblastAll             -- num faa       faa.list -> bht FAIL
 
     -- not written yet (may not be needed):
-    , psiblastPssms        -- num pssm.list faa      -> bht.list TODO write/fix
+    , psiblastPssms        -- num pssm.list faa      -> bht.list (why does it work? lol)
     -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
     -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list
     -- , psiblastPssmsAll     -- num pssm.list faa.list -> bht
@@ -221,11 +222,10 @@ withPdbSubject :: CutExpr -> CutExpr
 withPdbSubject (CutFun rtn salt deps name [a1, a2, x ])
   =            (CutFun rtn salt deps name [a1, a2, db])
   where
+    db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> singleton x
-    -- TODO fix this using regular or _all?
-    db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot" [fas]
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
 -- TODO remove this, or withPdbSubject?
