@@ -21,7 +21,7 @@ import ShortCut.Core.Actions       (readLit, readPath, wrappedCmdOut,
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr)
 import ShortCut.Core.Paths         (fromCutPath, cacheDir)
 import ShortCut.Core.Util          (stripWhiteSpace)
-import ShortCut.Modules.BlastDB    (pdb)
+import ShortCut.Modules.BlastDB    (pdb, withSingletons)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
@@ -68,8 +68,6 @@ cutModule = CutModule
      -   returns a list of hit tables
      -}
 
-    -- TODO test/practice mapping with psiblastEach
-  
     -- working base cases (no helper fns used):
     [ psiblastTrainDb      -- num faa      pdb      -> pssm
     , psiblastPssmDb       -- num pssm     pdb      -> bht
@@ -79,7 +77,7 @@ cutModule = CutModule
     , psiblastTrainPssmsDb -- num faa.list  pdb      -> pssm.list
     , psiblastPssmDbEach   -- num pssm      pdb.list -> bht.list
     , psiblastEachPssmDb   -- num pssm.list pdb      -> bht.list
-    , psiblastEachPssm     -- num pssm.list faa      -> bht.list FAIL
+    , psiblastEachPssm     -- num pssm.list faa      -> bht.list
 
     -- working with compose1 of a working fn above + concat
     , psiblastPssmsDb  -- num pssm.list pdb -> bht
@@ -89,22 +87,24 @@ cutModule = CutModule
     -- TODO separate withPdbSubject into _all and regular versions?
     , psiblastTrain        -- num faa      faa      -> pssm
     , psiblastTrainPssms   -- num faa.list faa      -> pssm.list
+    , psiblastTrainEach    -- num faa      faa.list -> pssm.list
     , psiblastTrainAll     -- num faa      faa.list -> pssm
     , psiblastPssm         -- num pssm     faa      -> bht
+    , psiblastPssmEach     -- num pssm     faa.list -> bht.list
     , psiblastPssmAll      -- num pssm     faa.list -> bht
-    , psiblast             -- num faa      faa      -> bht FAIL
 
-    -- not working, reason unknown but use withPdbSubjects:
-    , psiblastEach         -- num faa  faa.list -> bht.list FAIL
-    , psiblastPssmEach     -- num pssm faa.list -> bht.list FAIL
-    , psiblastTrainEach    -- num faa  faa.list -> pssm.list FAIL TODO fix accidental singleton
-
-    -- not working, reason unknown but use withPssmQuery:
+    -- working with withPssmQuery
     , psiblastDb           -- num faa      pdb      -> bht
-    , psiblastDbEach       -- num faa      pdb.list -> bht.list
 
-    -- not working, probably because psiblastEach doesn't
-    , psiblastAll             -- num faa       faa.list -> bht FAIL
+    , psiblast             -- num faa      faa      -> bht
+    , psiblastEach         -- num faa      faa.list -> bht.list
+    , psiblastAll          -- num faa      faa.list -> bht
+
+    -- not working:
+    -- , psiblastEachPssmDb   -- num pssm.list pdb      -> bht.list
+    , psiblastDbEach       -- FAIL num faa      pdb.list -> bht.list
+
+    -- psiblast_db_each idea: 
 
     -- not written yet (may not be needed):
     , psiblastPssms        -- num pssm.list faa      -> bht.list (why does it work? lol)
@@ -209,12 +209,15 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO fix passing dbprefix as db itself
 withPdbSubjects :: CutExpr -> CutExpr
-withPdbSubjects (CutFun rtn salt deps name [a1, a2, fas])
+withPdbSubjects (CutFun rtn salt deps name [a1, a2, xs ])
   =             (CutFun rtn salt deps name [a1, a2, dbs])
   where
-    fass = CutList (typeOf fas) salt (depsOf fas) [fas]
+    -- fass = CutList (typeOf fas) salt (depsOf fas) [fas]
     -- TODO fix this using _all :D
-    dbs  = CutFun  (ListOf pdb) salt (depsOf fass) "makeblastdb_prot_each" [fass]
+    dbs  = CutFun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
+    -- fass = case typeOf xs of
+    --          (ListOf (ListOf _)) -> xs -- no need to wrap since already a list
+    --          _ -> withSingletons xs
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
 -- Wraps a single faa or an faa.list in makeblastdb_prot
@@ -245,6 +248,15 @@ withPssmQuery (CutFun rtn salt deps name [n, q, s])
   where
     p = CutFun pssm salt deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
+
+-- TODO deduplicate this if possible!
+-- makes a pssm.list query
+withPssmQueryEach :: CutExpr -> CutExpr
+withPssmQueryEach (CutFun rtn salt deps name [n, q , ss])
+  =               (CutFun rtn salt deps name [n, ps, ss])
+  where
+    ps = CutFun pssm salt deps "psiblast_train_db_each" [n, q, ss]
+withPssmQueryEach e = error $ "bad argument to withPssmQueryEach: " ++ show e
 
 -- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
 -- TODO is this needed? it certainly doesn't work without that fn existing yet
@@ -284,18 +296,35 @@ psiblast = CutFunction
   where
     name = "psiblast"
 
+-- how does it work?
+-- 1. inserts a call to makeblastdb_prot_each around the subject fastas expr
+-- 2. inserts a call to psiblast_train_db around the query fasta expr
+-- 3. edits the rules to take a list of subject fastas and apply the rules on each element
+--
+-- why does it fail?
+-- withPssmQuery needs to also be applied to the pdb subjects!
+-- currently it tries to psiblast_train_db ... on the list of databases
+-- what it should do is psiblast_train_db_each
+-- guess the right way is to make it more monolithic and reuse the intermediate dbs expr?
 psiblastEach :: CutFunction
 psiblastEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
-  -- , fRules = \s e -> rFun3 (map3of3 faa bht $ aPsiblastSearch) s (withProtDBs e)
-  , fRules = \s e -> rFun3 (map3of3 faa bht $ aPsiblastSearchDb) s
-                           (withPssmQuery $ withPdbSubjects e)
+  , fRules     = rPsiblastEach
   }
   where
     name = "psiblast_each"
+
+rPsiblastEach :: RulesFn
+rPsiblastEach st (CutFun rtn salt deps name [e, fa, fas])
+  = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
+  where
+    ps    = CutFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
+    dbs   = CutFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
+    expr' = CutFun rtn salt deps name [e, ps, dbs]
+rPsiblastEach _ _ = error "bad argument to rPsiblastEach"
 
 psiblastAll :: CutFunction
 psiblastAll = compose1 name
@@ -340,16 +369,38 @@ psiblastDb = CutFunction
 
 -- TODO want map3of3 to read a pdb.list here and pass the individual paths,
 --      but that interferes with one of the others right?
+-- wait can psiblast just take a faa and pdb directly?
 psiblastDbEach :: CutFunction
 psiblastDbEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map3of3 pdb bht aPsiblastSearchDb) s (withPssmQuery e)
+  -- , fRules     = rPsiblastDbEach
+  , fRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
   }
   where
     name = "psiblast_db_each"
+
+-- ok we need to train one pssm against each pdb, and have that mapped
+-- problem is there will be a single pdb each at action time, but at rules time it's a list
+-- one solution would be to write map23of3 ("map args 2 and 3 of 3")
+-- another might be to write a compose2of3... do the training fn to get a pssm.list, sub it in?
+rPsiblastDbEach :: RulesFn
+rPsiblastDbEach st (CutFun rtn salt deps name [e, fa, dbs])
+  = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
+  where
+    ps    = CutFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
+    expr' = CutFun rtn salt deps name [e, ps, dbs]
+rPsiblastDbEach _ _ = error "bad argument to rPsiblastDbEach"
+
+-- rPsiblastDbEach :: RulesFn
+-- rPsiblastDbEach st (CutFun rtn salt deps name [e, fa, dbs]) = 
+--   rFun3 (map3of3 pdb bht aPsiblastSearchDb) st expr'
+--   where
+--     ps    = CutFun _ _ _ "psiblast_each_pssm_db" [e, fa, dbs] -- TODO use this instead?
+--     expr' = CutFun rtn salt deps name [e, ps, dbs]
+-- rPsiblastDbEach _ _ = error "bad argument to rPsiblastDbEach"
 
 ----------------------------
 -- explicitly train pssms --
@@ -399,7 +450,7 @@ psiblastTrainEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules = \s e -> rFun3 (map3of3 faa pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
+  , fRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_train_each"
@@ -480,7 +531,7 @@ psiblastPssmEach = CutFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map3of3 faa bht $ aPsiblastSearchDb) s (withPdbSubjects e)
+  , fRules     = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_pssm_each"

@@ -1,5 +1,8 @@
 module ShortCut.Core.Compile.Map
 
+-- TODO should output files in an identifyable folder by final fn name,
+--      and link intermediate outputs from their single locations
+
   -- map an action over a list of inputs
   ( map1of1
   , map1of2, map2of2
