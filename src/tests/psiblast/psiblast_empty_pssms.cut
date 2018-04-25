@@ -24,11 +24,16 @@ pssm6803 = psiblast_train_db cutoff query db6803
 cutoffs   = [1, 0.5, 0.1, 1e-2, 1e-3, 1e-5, 1e-10, 1e-20, 1e-50, 1e-100]
 pssms7942 = repeat_each pssm7942 cutoff cutoffs
 
-# finally, break it by trying an overly strict cutoff with 6803...
-# (note: which one actually throws the error depends on evaluation order)
+# try overly strict cutoffs with 6803, which would break without empty pssms
+# (note: which training command actually throws the error depends on evaluation order)
 pssms6803 = repeat_each pssm6803 cutoff cutoffs
 
-# this forces everything to be evaluated
-# the real test is a lack of errors
-# overall result should be [10, 10, 10] though
-result = [length cutoffs, length pssms7942, length pssms6803]
+# finally, try doing searches on all of them.
+# the overly strict ones should have 0 hits rather than throwing an error
+hits7942 = psiblast_each_pssm cutoff pssms7942 pcc7942
+hits6803 = psiblast_each_pssm cutoff pssms6803 pcc6803
+
+# we only need to evaluate the 6803 ones
+# but if they break try the 7942 ones to be sure it's not a general issue
+# should be [2, 2, 2, 2, 2, 0, 0, 0, 0, 0]
+result = length_each hits6803

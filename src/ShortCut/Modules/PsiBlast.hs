@@ -76,7 +76,7 @@ cutModule = CutModule
     , psiblastPssmDb       -- num pssm      pdb      -> bht
     , psiblastPssmDbEach   -- num pssm      pdb.list -> bht.list
     , psiblastPssmEach     -- num pssm      faa.list -> bht.list
-    , psiblastPssms        -- num pssm.list faa      -> bht.list
+    , psiblastPssms        -- num pssm.list faa      -> bht
     , psiblastPssmsAll     -- num pssm.list faa      -> bht
     , psiblastPssmsDb      -- num pssm.list pdb      -> bht
     , psiblastTrain        -- num faa       faa      -> pssm
@@ -139,8 +139,9 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromCutPath cfg $ cacheDir cfg "psiblast"
       dbPre' = fromCutPath cfg dbPre
-      args' =
-        ["-query", qPath', "-evalue", eDec, "-db", dbPre'] ++ args ++ [tPath']
+      args' = ["-query", qPath', "-evalue", eDec, "-db", dbPre'] ++ args ++ [tPath']
+           ++ ["&&", "touch", tPath'] -- in case no pssm created because no hits
+
         -- , "-num_threads", "8"    -- TODO add this in the wrapper script
         -- , "-out", undefined      -- TODO include this?
         -- , "-out_pssm", undefined -- TODO include this?
@@ -154,33 +155,42 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
   -- TODO what to do when no hits found? use seqid + nothing as output format
   --      and check for that in the search fn?
 
-  let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
-  wrappedCmdWrite cfg ref tPath'
-    [dbPre' ++ ".*"]        -- inPtns TODO is this right?
-    []                      -- extra outPaths to lock TODO more -out stuff?
-    [AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
-    -- psiblastBin args'
-    "psiblast" args'
+  -- before running psiblast, check whether the query is an empty pssm
+  -- and if so, just return empty hits immediately
+  lines2 <- fmap (take 2 . lines) $ readFile' qPath'
+  if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
+    then writeCachedLines cfg ref oPath' ["<<emptyhits>>"]
+    else do
 
-  -- TODO instead of wrappedCmdWrite, check explicitly for tPath'
-  --      and write a "no hits, empty pssm" message if needed
-  -- TODO actually, do that as part of the if writing pssm thing below
-
-  {- By default PSSMs get a blank first line, but I figured out that you can
-   - also put a sequence ID there and it will use it in place of the annoying
-   - "Query_1" in hit tables. So here we write the PSSM to a tempfile, replace
-   - the first line, then write that to the final outfile.
-   - (If we aren't writing a PSSM, then tPath' is already the final file)
-   -}
-  when writingPssm $ do
-    querySeqId <- fmap (head . lines) $ readFile' qPath'
-    pssmLines  <- fmap (tail . lines) $ readFile' tPath'
-    let dbName     = takeFileName dbPre'
-        queryInfo  = unwords [querySeqId, "(trained on " ++ dbName ++ ")"]
-        pssmWithId = queryInfo : pssmLines
-    writeCachedLines cfg ref oPath'' pssmWithId
-    -- TODO put back? liftIO $ removeFile tPath'
-
+      let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
+      wrappedCmdWrite cfg ref tPath'
+        [dbPre' ++ ".*"]        -- inPtns TODO is this right?
+        []                      -- extra outPaths to lock TODO more -out stuff?
+        [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
+        -- psiblastBin args'
+        "psiblast" args'
+    
+      -- TODO instead of wrappedCmdWrite, check explicitly for tPath'
+      --      and write a "no hits, empty pssm" message if needed
+      -- TODO actually, do that as part of the if writing pssm thing below
+    
+      {- By default PSSMs get a blank first line, but I figured out that you can
+       - also put a sequence ID there and it will use it in place of the annoying
+       - "Query_1" in hit tables. So here we write the PSSM to a tempfile, replace
+       - the first line, then write that to the final outfile.
+       - (If we aren't writing a PSSM, then tPath' is already the final file)
+       -}
+      when writingPssm $ do
+        querySeqId <- fmap (head . lines) $ readFile' qPath'
+        pssmLines <- fmap lines $ readFile' tPath'
+        let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
+            dbName     = takeFileName dbPre'
+            trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"
+            queryInfo  = unwords [querySeqId, trainInfo]
+            pssmWithId = queryInfo : pssmLines'
+        writeCachedLines cfg ref oPath'' pssmWithId
+        -- TODO put back? liftIO $ removeFile tPath'
+    
 ----------------------------------------------
 -- helpers that make blast dbs and/or pssms --
 ----------------------------------------------
@@ -483,6 +493,7 @@ psiblastEachPssm = CutFunction
   where
     name = "psiblast_each_pssm"
 
+-- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
 psiblastPssms :: CutFunction
 psiblastPssms = compose1 name
   (mkTypeDesc name [num, ListOf pssm, faa] bht)
