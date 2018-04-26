@@ -90,6 +90,7 @@ map2of3 inType outType act3 cfg locks out a1 a2 a3 = do
                    tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
       ioPairs  = zip inPaths outPaths
   -- TODO can this be done with forP in parallel? have to only do one overall read lock on input
+  -- might need to pass a list of already-locked files to skip locking inside?
   forM_ ioPairs $ \(i,o) -> act3 cfg locks (toCutPath cfg o) a1 (toCutPath cfg i) a3
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 

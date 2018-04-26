@@ -6,13 +6,25 @@
 # Usage: split_fasta.py <outdir> <inprefix> <infasta>
 
 from sys     import argv
-from os      import rename, remove
-from os.path import join, splitext, realpath, exists
+from os      import rename, remove, makedirs
+from os.path import join, splitext, realpath, exists, dirname
 from hashlib import md5
+
+def break_up_hash(md5hash):
+    # break into a hierarchy of subdirs to speed file access
+    # TODO generalize this in Haskell for other dirs too if needed
+    return md5hash
+
+def split_len(seq, length):
+    # http://code.activestate.com/recipes/496784-split-string-into-n-size-pieces/
+    return [seq[i:i+length] for i in range(0, len(seq), length)]
 
 def place_by_hash(tmpfile, outdir, md5sum, suffix):
     md5hash = str(md5sum.hexdigest())[:11] # TODO make longer?
-    outfile = join(outdir, md5hash + suffix)
+    outfile = join(outdir, join(*split_len(md5hash, 2)) + suffix)
+    outdir  = dirname(outfile)
+    if not exists(outdir):
+        makedirs(outdir)
     if exists(outfile):
         remove(tmpfile)
     else:

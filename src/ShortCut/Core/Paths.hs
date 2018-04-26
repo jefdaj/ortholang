@@ -192,6 +192,20 @@ argHashes s (CutRules (CompiledExpr e _)) = argHashes s e
 -- resolveVars :: CutConfig -> [CutPath] -> IO [CutPath]
 -- resolveVars cfg = mapM (resolveVar cfg)
 
+{- An attempt to speed up file access by making a tree of smaller dirs instead
+ - of one giant one with a million+ files in it. Since it would complicate the
+ - .tree files to split everything up, for now I just have a list of dirs that
+ - are likely to benefit from it.
+ - TODO write this in haskell instead of python! (currently in split_faa)
+ -}
+-- expandHashDirs :: FilePath -> FilePath
+-- expandHashDirs = joinPath . map expandDir . splitPath 
+--   where
+--     expandDir d = if d `elem` dirsToExpand then undefined else d
+--     dirsToExpand = ["load_faa"]
+--     splitPath = undefined
+--     joinPath = undefined
+
 -- TODO rename to tmpPath?
 exprPath :: CutState -> CutExpr -> CutPath
 exprPath s@(scr, _, _) (CutRef _ _ _ v) = case lookup v scr of
