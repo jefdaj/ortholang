@@ -5,8 +5,9 @@
 # Usage: demo.sh <cut script to demo>
 
 SCRIPT="$1"
-TMPSRC="/tmp/shortcut-demo-tmpsrc"
-TMPDST="/tmp/shortcut-demo-tmpdst"
+TMPSRC="/global/scratch/jefdaj/shortcut-demo-tmpsrc"
+TMPDST="/global/scratch/jefdaj/shortcut-demo-tmpdst"
+DATADIR="/global/home/users/jefdaj/shortcut/src"
 cd poster
 # [[ -z "$@" ]] && SCRIPT="$(ls *.cut)" || SCRIPT="$@"
 
@@ -14,7 +15,7 @@ if [[ ! -d "$TMPSRC" ]]; then
     mkdir -p "$TMPSRC"
     echo "running script once to create tmpfiles..."
     # for cut in $SCRIPT; do
-    cmd="shortcut --script '$SCRIPT' --tmpdir '$TMPSRC'"
+    cmd="shortcut --script '$SCRIPT' --tmpdir '$TMPSRC' --workdir '$DATADIR'"
     echo "$cmd" && eval "$cmd"
     # done
 fi
@@ -23,5 +24,5 @@ fi
 
 # for cut in $SCRIPT; do
 echo "launching the demo with $SCRIPT..."
-./demo.py -s "$TMPSRC" -t "$TMPDST" -c "$SCRIPT"
+./demo.py -s "$TMPSRC" -t "$TMPDST" -c "$SCRIPT" -d "$DATADIR"
 # done

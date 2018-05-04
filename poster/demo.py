@@ -24,14 +24,14 @@ from distutils.dir_util import mkpath
 from os.path import exists, abspath, expanduser
 
 def rsync(src, dst):
-    src = abspath(expanduser(src)).rstrip('/') + '/*'
+    src = abspath(expanduser(src)).rstrip('/') # + '/*'
     dst = abspath(expanduser(dst)).rstrip('/')
     if not exists(dst):
         mkpath(dst)
     dst = dst + '/'
     cmd = ['rsync', '-aEvrz', '--delete', '--exclude=history.txt', src, dst]
     cmd = ' '.join(cmd)
-    # print cmd
+    print cmd
     check_call([cmd], shell=True)
 
 def clear():
