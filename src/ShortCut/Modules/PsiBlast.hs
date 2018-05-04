@@ -23,9 +23,10 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import System.FilePath             ((<.>), takeFileName)
 import System.Directory            (removeFile)
 import Control.Monad               (when)
-import ShortCut.Core.Compile.Map   (rFun3, map2of3, map3of3, singleton)
+import ShortCut.Core.Compile.Map   (rFun3, map3of3, singleton)
 import ShortCut.Modules.SeqIO      (mkConcat)
 import ShortCut.Core.Compile.Compose (compose1)
+import ShortCut.Core.Compile.Vectorize (rVectorize)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -113,6 +114,14 @@ aPsiblastTrainDb = aPsiblastDb True trainingArgs
 -- Psiblast search with a PSSM against a BLAST database
 aPsiblastSearchDb :: Action3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
+
+aPsiblastDb' :: Bool -> [String] -> CutConfig -> Locks -> [CutPath] -> Action ()
+aPsiblastDb' writingPssm args cfg ref [oPath, ePath,  qPath, dbPath] =
+  aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath
+aPsiblastDb' _ _ _ _ _ = error "bad argument to aPsiblastDb'"
+
+aPsiblastTrainDb'  = aPsiblastDb' True  trainingArgs
+aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
 -- aPsiblastSearchDb to search with an existing PSSM.
@@ -254,7 +263,8 @@ psiblastEach = CutFunction
 
 rPsiblastEach :: RulesFn
 rPsiblastEach st (CutFun rtn salt deps name [e, fa, fas])
-  = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
+  -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
+  = (rVectorize 3 aPsiblastSearchDb') st expr'
   where
     ps    = CutFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
     dbs   = CutFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
@@ -292,7 +302,8 @@ psiblastDbEach = CutFunction
   , fFixity    = Prefix
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
-  , fRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
+  -- , fRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
+  , fRules     = rVectorize 3 aPsiblastSearchDb'
   }
   where
     name = "psiblast_db_each"
@@ -332,7 +343,8 @@ psiblastTrainPssms = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
+  -- , fRules     = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
+  , fRules     = \s e -> (rVectorize 2 aPsiblastTrainDb') s $ withPdbSubject e
   }
   where
     name = "psiblast_train_pssms"
@@ -389,7 +401,8 @@ psiblastTrainPssmsDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
   , fFixity    = Prefix
-  , fRules     = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
+  -- , fRules     = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
+  , fRules     = rVectorize 2 aPsiblastTrainDb'
   }
   where
     name = "psiblast_train_pssms_db"
@@ -409,6 +422,7 @@ psiblastPssm = CutFunction
   where
     name = "psiblast_pssm"
 
+-- TODO why does this one fail? it's not even using rVectorize
 psiblastPssmAll :: CutFunction
 psiblastPssmAll = CutFunction
   { fName      = name
@@ -468,7 +482,8 @@ psiblastEachPssmDb = CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
+  -- , fRules     = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
+  , fRules     = rVectorize 2 aPsiblastSearchDb'
   }
   where
     name = "psiblast_each_pssm_db"
@@ -482,13 +497,16 @@ psiblastPssmsDb = compose1 name
   where
     name = "psiblast_pssms_db"
 
+-- TODO withPdbSubject fails with rVectorize? psiblastTrainPssms and psiblastEachPssm
+-- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
+--      specific incompatibility with withPdbSubject?
 psiblastEachPssm :: CutFunction
 psiblastEachPssm = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = \s e -> rFun3 (map2of3 pssm bht aPsiblastSearchDb) s (withPdbSubject e)
+  , fRules     = \s e -> (rVectorize 2 aPsiblastSearchDb') s (withPdbSubject e)
   }
   where
     name = "psiblast_each_pssm"

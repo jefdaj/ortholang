@@ -24,7 +24,8 @@ import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Compile.Map  (singleton, map1of1, rFun1)
+import ShortCut.Core.Compile.Map  (singleton)
+import ShortCut.Core.Compile.Vectorize (rVectorize)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -453,13 +454,24 @@ tMakeblastdbEach :: CutType -> TypeChecker
 tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
 
+-- rFun1 :: Action1 -> RulesFn
+-- rFun1 act1 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1]) = do
+
+-- map1of1 :: CutType -> CutType -> Action1 -> Action1
+-- map1of1 inType outType act1 cfg locks out a1 = do
+
+-- rVectorize :: Int -> (CutConfig -> Locks -> [CutPath] -> Action ()) -> RulesFn
+-- rVectorize index actFn = rVecMain index Nothing actFn'
+
 rMakeblastdbEach :: RulesFn
 rMakeblastdbEach st@(_,cfg,_) (CutFun (ListOf dbType) salt deps name [e]) =
-  rFun1 (map1of1 faType dbType act1) st expr'
+  -- rFun1 (map1of1 faType dbType act1) st expr'
+  (rVectorize 1 act1) st expr'
   where
     faType = typeOf e
     tmpDir = makeblastdbCache cfg 
-    act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
+    -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
+    act1 c r = aMakeblastdbAll dbType c r tmpDir
     expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
     -- expr'' = trace ("expr':" ++ show expr') expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e

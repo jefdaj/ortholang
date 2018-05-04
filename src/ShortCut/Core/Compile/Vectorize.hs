@@ -148,6 +148,10 @@ aVecArgs cfg ref mapIndex eType regularArgs' tmp' mappedArg = do
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
       argPaths   = insertAt mapIndex mappedArg' regularArgs'
       argPaths'  = map (toCutPath cfg) argPaths
+  debugL cfg $ "aVecArgs mappedArg': " ++ show mappedArg'
+  debugL cfg $ "aVecArgs argsPath: " ++ show argsPath
+  debugL cfg $ "aVecArgs argPaths: " ++ show argPaths
+  debugL cfg $ "aVecArgs argPaths': " ++ show argPaths'
   writePaths cfg ref argsPath argPaths'
 
 {- This gathers together Rules-time and Action-time arguments and passes
