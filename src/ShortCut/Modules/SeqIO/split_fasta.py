@@ -23,8 +23,10 @@ def place_by_hash(tmpfile, outdir, md5sum, suffix):
     md5hash = str(md5sum.hexdigest())[:11] # TODO make longer?
     outfile = join(outdir, join(*split_len(md5hash, 2)) + suffix)
     outdir  = dirname(outfile)
-    if not exists(outdir):
+    try:
         makedirs(outdir)
+    except OSError:
+        pass
     if exists(outfile):
         remove(tmpfile)
     else:
