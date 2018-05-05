@@ -11,6 +11,7 @@ extra-deps:
 - posix-escape-0.1
 - temporary-1.2.1.1
 - parsec-3.1.13.0 # for parserTraced
+- git: git@github.com:ndmitchell/shake.git
 flags: {}
 extra-package-dbs: []
 nix:
