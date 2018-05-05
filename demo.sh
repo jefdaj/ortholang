@@ -11,14 +11,16 @@ DATADIR="/global/home/users/jefdaj/shortcut/src"
 cd poster
 # [[ -z "$@" ]] && SCRIPT="$(ls *.cut)" || SCRIPT="$@"
 
-if [[ ! -d "$TMPSRC" ]]; then
-    mkdir -p "$TMPSRC"
-    echo "running script once to create tmpfiles..."
-    # for cut in $SCRIPT; do
-    cmd="shortcut --script '$SCRIPT' --tmpdir '$TMPSRC' --workdir '$DATADIR'"
-    echo "$cmd" && eval "$cmd"
+#if [[ ! -d "$TMPSRC" ]]; then
+mkdir -p "$TMPSRC"
+echo "running script once to create tmpfiles..."
+# for cut in $SCRIPT; do
+cmd="shortcut --script '$SCRIPT' --tmpdir '$TMPSRC' --workdir '$DATADIR'"
+echo "$cmd" && eval "$cmd"
+
+rsync -aEvrz "$TMPSRC"/ "$TMPDST"/
     # done
-fi
+#fi
 # cmd="shortcut --script "$SCRIPT" --tmpdir /tmp/shortcut-demo-tmpsrc"
 # echo "$cmd" && eval "$cmd"
 
