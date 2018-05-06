@@ -10,7 +10,9 @@ read_nums <- function(numsPath)
   read.table(numsPath, col.names=c('score', 'value')) %>% tbl_df
 
 plot_nums <- function(nums, titlePath, xlabPath) {
-  p <- ggplot(data=nums, aes(x=value, y=score)) + geom_point(size=2)
+  p <- ggplot(data=nums, aes(x=value, y=score)) +
+         geom_point(size=2) +
+	 scale_x_log10()
   title <- read_string(titlePath)
   label <- read_string(xlabPath)
   if (title != "<<emptystr>>") { p <- p + ggtitle(title) }
