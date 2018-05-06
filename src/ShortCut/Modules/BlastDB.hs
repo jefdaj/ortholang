@@ -318,7 +318,7 @@ rMakeblastdbAll s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fas]) = do
       out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
       cDir      = makeblastdbCache cfg
       fasPath'   = toCutPath cfg fasPath
-  out' %> \_ -> actionRetry $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+  out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
 rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
@@ -347,8 +347,7 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
       dbOut  = dbDir </> fasHash <.> extOf dbType
       dbOut' = toCutPath cfg dbOut
       out''  = debugA cfg "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
-      -- dbPtn  = dbOut ++ ".*" -- TODO does this actually help?
-      dbPtn  = dbOut <.> "*" -- TODO does this actually help?
+      dbPtn  = cDir' </> fasHash </> "*" -- TODO does this actually help?
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
   -- be passed as one quoted arg, but we also have to take into account Shake's
@@ -376,7 +375,7 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
 
   liftIO $ createDirectoryIfMissing True dbDir
   before <- listPrefixFiles dbPtn
-  when (null before) $ do
+  when (length before < 3) $ do
     debugL cfg $ "this is dbPtn: " ++ dbPtn
     debugL cfg $ "this will be dbOut: " ++ dbOut
     wrappedCmdWrite cfg ref out' [dbPtn] [] [Cwd cDir'] "makeblastdb"
@@ -390,11 +389,12 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
     when (length after < 3) (error "makeblastdb failed (< 3 db files created)")
     debugTrackWrite cfg after
     debugL cfg $ "dbOut was also created: " ++ dbOut
-    writePath cfg ref out'' dbOut'
-    where
-      out'     = fromCutPath cfg out
-      cDir'    = fromCutPath cfg cDir
-      fasPath' = fromCutPath cfg fasPath
+  -- TODO why should this work when outside the when block but not inside?? something about retries?
+  writePath cfg ref out'' dbOut'
+  where
+    out'     = fromCutPath cfg out
+    cDir'    = fromCutPath cfg cDir
+    fasPath' = fromCutPath cfg fasPath
 aMakeblastdbAll _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
 ----------------------------------------
@@ -468,6 +468,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 -- rVectorize :: Int -> (CutConfig -> Locks -> [CutPath] -> Action ()) -> RulesFn
 -- rVectorize index actFn = rVecMain index Nothing actFn'
 
+-- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
 rMakeblastdbEach st@(_,cfg,_) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
