@@ -1,17 +1,19 @@
 # TODO load all the nix dependencies in here, including the scripts?
 
-resolver: lts-8.6
+#resolver: lts-8.6
+resolver: lts-11.7
 packages:
 - '.'
 extra-deps:
 - Command-0.0.7
-- lock-file-0.5.0.2 # TODO remove if using concurrent-extra
-- tagged-exception-core-2.2.0.0
-- concurrent-extra-0.7.0.11
 - posix-escape-0.1
-- temporary-1.2.1.1
-- parsec-3.1.13.0 # for parserTraced
 - git: git@github.com:ndmitchell/shake.git
+  commit: 52bb7608d37413a9df5e4bc45073a55fe307b831
+        #- lock-file-0.5.0.2 # TODO remove if using concurrent-extra
+        #- tagged-exception-core-2.2.0.0
+        #- concurrent-extra-0.7.0.11
+        #- temporary-1.2.1.1
+        #- parsec-3.1.13.0 # for parserTraced
 flags: {}
 extra-package-dbs: []
 nix:
