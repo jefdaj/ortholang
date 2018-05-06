@@ -178,4 +178,6 @@ executable shortcut
                     concurrent-extra,
                     retry,
                     terminal-size,
-                    posix-escape
+                    posix-escape,
+                    random,
+                    random-shuffle

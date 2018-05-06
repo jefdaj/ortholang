@@ -1,11 +1,15 @@
 module ShortCut.Modules.Sample where
 
+-- TODO single sample works, but why doesn't the salt change when repeating??
+
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic  (rExpr)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Actions (readLit, readStrings, writeStrings)
 import Data.Scientific
+import System.Random (mkStdGen)
+import System.Random.Shuffle (shuffle')
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -52,6 +56,8 @@ aSample fn t cfg ref outPath nPath lstPath = do
       elements' = fn n lst
   writeStrings t cfg ref outPath' elements'
 
--- TODO actually sample lol
 randomSample :: Int -> Int -> [String] -> [String]
-randomSample seed n lst = take n lst
+randomSample seed n lst = take n $ shuffle lst gen
+  where
+    shuffle xs = shuffle' xs $ length xs
+    gen = mkStdGen seed
