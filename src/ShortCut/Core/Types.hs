@@ -144,6 +144,7 @@ saltOf (CutFun _ n _ _ _)   = n
 saltOf (CutList _ n _ _)     = n
 saltOf (CutRules (CompiledExpr e _)) = saltOf e
 
+-- TODO this needs to be recursive?
 setSalt :: Int -> CutExpr -> CutExpr
 setSalt n (CutLit t _ s)          = CutLit t n s
 setSalt n (CutRef t _ ds v)       = CutRef t n ds v
