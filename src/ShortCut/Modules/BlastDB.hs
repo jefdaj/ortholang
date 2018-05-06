@@ -318,20 +318,18 @@ rMakeblastdbAll s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fas]) = do
       out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
       cDir      = makeblastdbCache cfg
       fasPath'   = toCutPath cfg fasPath
-  out' %> \_ -> aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+  out' %> \_ -> actionRetry $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
 rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
 
 listPrefixFiles :: FilePattern -> Action [FilePath]
-listPrefixFiles prefix = do
-  let pDir  = takeDirectory prefix
-      pName = takeFileName  prefix
-  e1 <- doesDirectoryExist pDir
-  if e1
-    then getDirectoryFiles pDir [pName] >>= return . map (pDir </>)
-    else return []
+listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . map (pDir </>)
+  where
+    pDir  = takeDirectory prefix
+    pName = takeFileName  prefix
 
+-- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
 aMakeblastdbAll :: CutType -> CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
 aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
@@ -349,7 +347,8 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
       dbOut  = dbDir </> fasHash <.> extOf dbType
       dbOut' = toCutPath cfg dbOut
       out''  = debugA cfg "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
-      dbPtn  = dbOut ++ "*" -- TODO does this actually help?
+      -- dbPtn  = dbOut ++ ".*" -- TODO does this actually help?
+      dbPtn  = dbOut <.> "*" -- TODO does this actually help?
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
   -- be passed as one quoted arg, but we also have to take into account Shake's
@@ -388,6 +387,7 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
       ]
     after <- listPrefixFiles dbPtn
     debugL cfg $ "these actual db files were created: " ++ show after
+    when (length after < 3) (error "makeblastdb failed (< 3 db files created)")
     debugTrackWrite cfg after
     debugL cfg $ "dbOut was also created: " ++ dbOut
     writePath cfg ref out'' dbOut'
