@@ -25,7 +25,12 @@ import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Compile.Map  (singleton)
+import ShortCut.Core.Paths (fromGeneric)
 import ShortCut.Core.Compile.Vectorize (rVectorize)
+import ShortCut.Core.Locks (withReadLock)
+import System.Process
+import Data.String.Utils (split)
+import Data.List (isPrefixOf)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -86,7 +91,7 @@ ndb :: CutType
 ndb = CutType
   { tExt  = "ndb"
   , tDesc = "BLAST nucleotide database"
-  , tShow  = \_ f -> return $ "BLAST nucleotide database " ++ f
+  , tShow  = showBlastDb
   }
 
 -- TODO will people confuse this with PDB files for viewing molecules?
@@ -94,7 +99,7 @@ pdb :: CutType
 pdb = CutType
   { tExt  = "pdb"
   , tDesc = "BLAST protein database"
-  , tShow  = \_ f -> return $ "BLAST protein database " ++ f
+  , tShow  = showBlastDb
   }
 
 ---------------------
@@ -468,7 +473,7 @@ rMakeblastdbEach st@(_,cfg,_) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rVectorize 1 act1) st expr'
   where
-    faType = typeOf e
+    -- faType = typeOf e
     tmpDir = makeblastdbCache cfg 
     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
     act1 c r = aMakeblastdbAll dbType c r tmpDir
@@ -528,3 +533,24 @@ aSingletons elemType cfg ref outPath listPath = do
     writeStrings elemType cfg ref singletonPath' [e]
     return singletonPath
   writePaths cfg ref outPath' singletonPaths -- TODO nondeterministic?
+
+------------------
+-- show db info --
+------------------
+
+-- TODO remove the Volumes... lines too?
+showBlastDb :: CutConfig -> Locks -> FilePath -> IO String
+showBlastDb cfg ref path = do
+  path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFile path
+  let dbDir  = takeDirectory path'
+      dbBase = takeFileName  path'
+      cmdStr = "blastdbcmd -info -db '" ++ dbBase ++ "'"
+  out <- withReadLock ref path' $
+           readCreateProcess (shell (cmdStr))
+             { cwd = Just dbDir, env = Just [("BLASTDB", dbDir)] } ""
+  let out1 = lines out
+      out2 = concatMap (split "\t") out1
+      out3 = filter (not . null) out2
+      out4 = filter (\l -> not $ "Date" `isPrefixOf` l) out3
+      out5 = unlines out4
+  return out5

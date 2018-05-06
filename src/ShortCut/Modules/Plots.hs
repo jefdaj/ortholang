@@ -26,7 +26,7 @@ plot :: CutType
 plot = CutType
   { tExt  = "png"
   , tDesc = "png image of a plot"
-  , tShow = \_ f -> return $ "plot image '" ++ f ++ "'"
+  , tShow = \_ _ f -> return $ "plot image '" ++ f ++ "'"
   }
 
 -------------------

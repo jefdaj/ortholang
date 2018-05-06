@@ -181,12 +181,12 @@ data CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tShow :: Locks -> FilePath -> IO String
+    , tShow :: CutConfig -> Locks -> FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
 
-defaultShow :: Locks -> FilePath -> IO String
-defaultShow locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
+defaultShow :: CutConfig -> Locks -> FilePath -> IO String
+defaultShow _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
     nLines      = 5
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
@@ -261,7 +261,7 @@ str = CutType
   { tExt  = "str"
   , tDesc = "string"
   -- TODO make one of the read functions be IO for this instead
-  , tShow = \ls f -> do
+  , tShow = \_ ls f -> do
       -- putStrLn $ "reading " ++ f
       txt <- fmap init $ withReadLock ls f $ readFileStrict ls f
       let txt' = if txt == "<<emptystr>>" then "" else txt
@@ -272,7 +272,7 @@ num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tShow = \ls f -> do
+  , tShow = \_ ls f -> do
       txt <- withReadLock ls f $ readFileStrict ls f
       return $ init txt -- TODO prettyNum?
   }
