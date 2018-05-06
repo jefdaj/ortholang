@@ -21,7 +21,7 @@ import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
 import Data.Scientific             (formatScientific, FPFormat(..))
 import System.FilePath             ((<.>), takeFileName)
-import System.Directory            (removeFile)
+-- import System.Directory            (removeFile)
 import Control.Monad               (when)
 import ShortCut.Core.Compile.Map   (rFun3, map3of3, singleton)
 import ShortCut.Modules.SeqIO      (mkConcat)
@@ -198,7 +198,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
             queryInfo  = unwords [querySeqId, trainInfo]
             pssmWithId = queryInfo : pssmLines'
         writeCachedLines cfg ref oPath'' pssmWithId
-        liftIO $ removeFile tPath'
+        -- liftIO $ removeFile tPath'
     
 ----------------------------------------------
 -- helpers that make blast dbs and/or pssms --
