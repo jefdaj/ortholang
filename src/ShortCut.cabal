@@ -119,6 +119,7 @@ executable shortcut
                     ShortCut.Modules.Summarize,
                     ShortCut.Modules.SeqIO,
                     ShortCut.Modules.Sets,
+                    ShortCut.Modules.Sample,
                     ShortCut.Modules.Scores,
                     ShortCut.Modules.Plots,
                     ShortCut.Modules.PsiBlast,

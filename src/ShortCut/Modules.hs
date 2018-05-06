@@ -16,6 +16,7 @@ import qualified ShortCut.Modules.Permute   as Permute
 import qualified ShortCut.Modules.Repeat    as Repeat
 import qualified ShortCut.Modules.SeqIO     as SeqIO
 import qualified ShortCut.Modules.Sets      as Sets
+import qualified ShortCut.Modules.Sample    as Sample
 import qualified ShortCut.Modules.Summarize as Summarize
 import qualified ShortCut.Modules.Scores    as Scores
 import qualified ShortCut.Modules.Plots     as Plots
@@ -37,6 +38,7 @@ modules =
   , Repeat.cutModule
   , SeqIO.cutModule
   , Sets.cutModule
+  , Sample.cutModule
   , Summarize.cutModule
   , Scores.cutModule
   , Plots.cutModule
