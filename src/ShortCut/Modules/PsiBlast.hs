@@ -77,8 +77,12 @@ cutModule = CutModule
     , psiblastPssmDb       -- num pssm      pdb      -> bht
     , psiblastPssmDbEach   -- num pssm      pdb.list -> bht.list
     , psiblastPssmEach     -- num pssm      faa.list -> bht.list
+
+    -- TODO these are all duplicated?
     , psiblastPssms        -- num pssm.list faa      -> bht
     , psiblastPssmsAll     -- num pssm.list faa      -> bht
+    -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list
+
     , psiblastPssmsDb      -- num pssm.list pdb      -> bht
     , psiblastTrain        -- num faa       faa      -> pssm
     , psiblastTrainAll     -- num faa       faa.list -> pssm
@@ -90,7 +94,6 @@ cutModule = CutModule
 
     -- not written yet (may not be needed):
     -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
-    -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list
     -- , psiblastPssmsAll     -- num pssm.list faa.list -> bht
     -- , psiblastPssmsDbEach  -- num pssm.list pdb.list -> bht.list
    ]
@@ -190,7 +193,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
        - (If we aren't writing a PSSM, then tPath' is already the final file)
        -}
       when writingPssm $ do
-        querySeqId <- fmap (head . lines) $ readFile' qPath'
+        querySeqId <- fmap (head . words . head . lines) $ readFile' qPath'
         pssmLines <- fmap lines $ readFile' tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName dbPre'
@@ -529,3 +532,18 @@ psiblastPssmsAll = compose1 name
   (mkConcat bht)
   where
     name = "psiblast_pssms_all"
+
+-- TODO think how to write this!
+--      it needs the effect of map3of3 psiblast_pssms_all ^
+--      but can't actually do that the straightforward way
+--      could it use psiblastPssmAll and concat_each?
+-- TODO test this
+psiblastPssmsEach :: CutFunction
+psiblastPssmsEach = compose1 name
+  -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
+  (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))
+  psiblastEachPssm
+  (ListOf bht)
+  (mkConcat bht)
+  where
+    name = "psiblast_pssms_each"

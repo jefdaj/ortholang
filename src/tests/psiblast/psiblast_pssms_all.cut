@@ -1,0 +1,7 @@
+queries = split_faa (load_faa "data/7942genes10.faa")
+pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+cyanodb = makeblastdb_prot_all [pcc6803, pcc7942]
+pssms = psiblast_train_pssms_db 1.0e-10 queries cyanodb
+table6803 = psiblast_pssms_all 1.0e-10 pssms pcc6803
+result = table6803
