@@ -3,7 +3,7 @@
 , directory, docopt, enclosed-exceptions, exceptions, filelock
 , filepath, Glob, haskeline, hspec, lock-file, MissingH, mtl
 , parsec, path, path-io, posix-escape, pretty, process, QuickCheck
-, regex-compat, retry, safe-exceptions, scientific, silently
+, regex-compat, retry, safe-exceptions, scientific, shake, silently
 , split, stdenv, strict, tasty, tasty-golden, tasty-hspec
 , tasty-hunit, tasty-quickcheck, temporary, terminal-size, text
 , time, transformers, unbounded-delays, unix, utility-ht
@@ -20,7 +20,7 @@ mkDerivation {
     cryptohash data-default-class directory docopt enclosed-exceptions
     exceptions filelock filepath Glob haskeline hspec lock-file
     MissingH mtl parsec path path-io posix-escape pretty process
-    QuickCheck regex-compat retry safe-exceptions scientific
+    QuickCheck regex-compat retry safe-exceptions scientific shake
     silently split strict tasty tasty-golden tasty-hspec tasty-hunit
     tasty-quickcheck temporary terminal-size text time transformers
     unbounded-delays unix utility-ht

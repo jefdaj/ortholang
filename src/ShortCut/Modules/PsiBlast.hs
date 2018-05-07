@@ -70,7 +70,7 @@ cutModule = CutModule
     , psiblastDb           -- num faa       pdb      -> bht
     , psiblastDbEach       -- num faa       pdb.list -> bht.list
     , psiblastEach         -- num faa       faa.list -> bht.list (TODO test broken?)
-    , psiblastEachPssm     -- num pssm.list faa      -> bht.list
+    , psiblastEachPssm     -- num pssm.list faa      -> bht.list (TODO fix broken)
     , psiblastEachPssmDb   -- num pssm.list pdb      -> bht.list
     , psiblastPssm         -- num pssm      faa      -> bht
     , psiblastPssmAll      -- num pssm      faa.list -> bht

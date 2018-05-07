@@ -318,7 +318,11 @@ rMakeblastdbAll s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fas]) = do
       out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
       cDir      = makeblastdbCache cfg
       fasPath'   = toCutPath cfg fasPath
-  out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+
+  -- TODO need new shake first:
+  -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+
+  out' %> \_ -> aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
 rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e

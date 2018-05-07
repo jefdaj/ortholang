@@ -317,7 +317,11 @@ wrappedCmd cfg ref mOut inPtns opts bin args = do
                       Just o  -> \fn -> do
                         debugL cfg $ "wrappedCmd acquiring write lock on '" ++ o ++ "'"
                         withWriteLock' ref o fn
-  writeLockFn $ withReadLocks' ref inPaths' $ actionRetry 3 $ do
+
+  -- TODO need to upgrade shake first, and maybe nixpkgs to get shake:
+  -- writeLockFn $ withReadLocks' ref inPaths' $ actionRetry 3 $ do
+
+  writeLockFn $ withReadLocks' ref inPaths' $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command (Shell:opts) w [escape $ unwords (bin:args)]

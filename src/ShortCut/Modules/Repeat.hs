@@ -10,7 +10,7 @@ import ShortCut.Core.Compile.Repeat
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
 
-import Debug.Trace
+-- import Debug.Trace
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -64,6 +64,6 @@ rRepeatN s@(scr,_,_) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v),
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = zipWith setSalt [salt .. salt+nReps-1] (repeat subExpr)
-    subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
-    subList = CutList (typeOf subExpr) salt (depsOf subExpr) subs' -- TODO salt right?
+    -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
+    subList = CutList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
 rRepeatN _ _ = error "bad argument to rRepeatN"
