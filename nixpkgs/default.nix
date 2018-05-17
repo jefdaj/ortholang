@@ -30,6 +30,6 @@ let
   };
 
 in nixpkgs // {
-  inherit crb-blast psiblast-exb;
+  inherit ncbi-blast crb-blast psiblast-exb;
   pythonPackages = myPython;
 }
