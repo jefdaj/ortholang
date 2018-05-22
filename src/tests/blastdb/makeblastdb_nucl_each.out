@@ -1,2 +1,12 @@
-[BLAST nucleotide database $TMPDIR/cache/map/53fe259f1b.ndb,
- BLAST nucleotide database $TMPDIR/cache/map/52c6bf3aa8.ndb]
+[Database: d860635d17.ndb
+10 sequences; 10,932 total bases
+Longest sequence: 2,010 bases
+Volumes:
+$TMPDIR/cache/makeblastdb/d860635d17/d860635d17.ndb
+,
+ Database: e1e5fdbeba.ndb
+3,564 sequences; 3,421,566 total bases
+Longest sequence: 12,600 bases
+Volumes:
+$TMPDIR/cache/makeblastdb/e1e5fdbeba/e1e5fdbeba.ndb
+]

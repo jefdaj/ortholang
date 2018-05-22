@@ -1,2 +1,12 @@
-[BLAST protein database $TMPDIR/cache/map/6fcde5cb55.pdb,
- BLAST protein database $TMPDIR/cache/map/141bd5d928.pdb]
+[Database: e768cae869.pdb
+10 sequences; 3,634 total residues
+Longest sequence: 669 residues
+Volumes:
+$TMPDIR/cache/makeblastdb/e768cae869/e768cae869.pdb
+,
+ Database: a1512fc008.pdb
+3,564 sequences; 1,136,958 total residues
+Longest sequence: 4,199 residues
+Volumes:
+$TMPDIR/cache/makeblastdb/a1512fc008/a1512fc008.pdb
+]

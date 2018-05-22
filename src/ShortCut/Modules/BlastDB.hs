@@ -12,7 +12,7 @@ import Data.Maybe                  (isJust)
 import Control.Monad               (when, forM)
 import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
                                     debugTrackWrite, readLit, readPaths, writeLit, readLits,
-                                    writeLits, writePath, debugA, debugL, debugNeed,
+                                    writeLits, writePath, debugA, debugL, debugIO, debugNeed,
                                     cachedLinesPath, debugL, writeStrings, readStrings, writePaths)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
@@ -549,9 +549,11 @@ showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFile path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
-      cmdStr = "blastdbcmd -info -db '" ++ dbBase ++ "'"
+      args = ["-info", "-db", dbBase]
+  debugIO cfg $ "showBlastDb dbDir: '" ++ dbDir ++ "'"
+  debugIO cfg $ "showBlastDb args: " ++ show args
   out <- withReadLock ref path' $
-           readCreateProcess (shell (cmdStr))
+           readCreateProcess (proc "blastdbcmd" args)
              { cwd = Just dbDir, env = Just [("BLASTDB", dbDir)] } ""
   let out1 = lines out
       out2 = concatMap (split "\t") out1

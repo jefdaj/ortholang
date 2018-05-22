@@ -1,42 +1,50 @@
 .
 |-- cache
+|   |-- each
+|   |   `-- a136f03deb
+|   |       |-- 19a38cbc93.pdb -> ../../../exprs/makeblastdb_prot/19a38cbc93.pdb
+|   |       |-- 19a38cbc93.pdb.args -> ../../../cache/lines/fa6c1381fc.txt
+|   |       |-- b0508dfb79.pdb -> ../../../exprs/makeblastdb_prot/b0508dfb79.pdb
+|   |       `-- b0508dfb79.pdb.args -> ../../../cache/lines/71eade04d0.txt
 |   |-- lines
-|   |   |-- 01feb57a57.txt
-|   |   |-- 468248d03f.txt -> ../../cache/lines/a1512fc008.txt
-|   |   |-- 4c292999c1.txt
 |   |   |-- 52446b2682.txt
-|   |   |-- 65bd47f624.txt -> ../../cache/lines/e768cae869.txt
+|   |   |-- 647ed94e51.txt -> ../../cache/lines/a1512fc008.txt
+|   |   |-- 71eade04d0.txt
 |   |   |-- 908f92d67a.txt
 |   |   |-- a1512fc008.txt
+|   |   |-- a7fc81f033.txt
 |   |   |-- adfdb6bd8c.txt
+|   |   |-- bff5307e85.txt -> ../../cache/lines/e768cae869.txt
 |   |   |-- c8be8722f2.txt
+|   |   |-- dd3a220ad9.txt
 |   |   |-- e768cae869.txt
-|   |   `-- f01020ac88.txt
+|   |   |-- f01020ac88.txt
+|   |   `-- fa6c1381fc.txt
 |   |-- load
 |   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
 |   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
-|   |-- makeblastdb
-|   |   |-- a1512fc008
-|   |   |   |-- a1512fc008.pdb.phr
-|   |   |   |-- a1512fc008.pdb.pin
-|   |   |   `-- a1512fc008.pdb.psq
-|   |   `-- e768cae869
-|   |       |-- e768cae869.pdb.phr
-|   |       |-- e768cae869.pdb.pin
-|   |       `-- e768cae869.pdb.psq
-|   `-- map
-|       |-- 141bd5d928.pdb -> ../../cache/lines/908f92d67a.txt
-|       `-- 6fcde5cb55.pdb -> ../../cache/lines/52446b2682.txt
+|   `-- makeblastdb
+|       |-- a1512fc008
+|       |   |-- a1512fc008.pdb.phr
+|       |   |-- a1512fc008.pdb.pin
+|       |   `-- a1512fc008.pdb.psq
+|       `-- e768cae869
+|           |-- e768cae869.pdb.phr
+|           |-- e768cae869.pdb.pin
+|           `-- e768cae869.pdb.psq
 |-- exprs
 |   |-- list
 |   |   `-- b6bfc9cf65.faa.list -> ../../cache/lines/f01020ac88.txt
 |   |-- load_faa
 |   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- makeblastdb_prot
+|   |   |-- 19a38cbc93.pdb -> ../../cache/lines/52446b2682.txt
+|   |   `-- b0508dfb79.pdb -> ../../cache/lines/908f92d67a.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- de98df50ea.pdb.list -> ../../cache/lines/4c292999c1.txt
+|   |   `-- de98df50ea.pdb.list -> ../../cache/lines/dd3a220ad9.txt
 |   |-- singletons
-|   |   `-- 9396c945e4.faa.list.list -> ../../cache/lines/01feb57a57.txt
+|   |   `-- 9396c945e4.faa.list.list -> ../../cache/lines/a7fc81f033.txt
 |   `-- str
 |       |-- 50dbefb6d6.str -> ../../cache/lines/c8be8722f2.txt
 |       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
@@ -46,4 +54,4 @@
     |-- result -> ../vars/dbs.pdb.list
     `-- small6803faa.faa -> ../exprs/load_faa/bb54df8bd7.faa
 
-14 directories, 32 files
+16 directories, 38 files
