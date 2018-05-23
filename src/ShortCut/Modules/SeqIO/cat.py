@@ -16,11 +16,19 @@ def cat(infile, wfd):
         #10MB per writing chunk to avoid reading big file into memory.
         copyfileobj(fd, wfd, 1024*1024*10)
 
-def same_symlink(emptylink, filetotest):
-    # because shortcut deduplicates all the <<empty...>> files,
-    # theoretically we can just test if each thing to concat is the same
-    # as the example without opening it. any reason that would be unsafe?
-    return islink(filetotest) and realpath(filetotest) == realpath(emptylink)
+# def is_empty(emptylink, filetotest):
+#     # because shortcut deduplicates all the <<empty...>> files,
+#     # theoretically we can just test if each thing to concat is the same
+#     # as the example without opening it. any reason that would be unsafe?
+#     return islink(filetotest) and realpath(filetotest) == realpath(emptylink)
+
+def is_empty(filetotest):
+    # this will be slower than the symlink-based approach above,
+    # but that seems like it might not be working
+    # TODO speed it up by only opening the file once and checking first line?
+    with open(filetotest, 'r') as f:
+        line = f.readline()
+        return line.startswith('<<empty')
 
 def main(outpath, inlist, emptylink):
     print 'args:', outpath, emptylink, inlist
@@ -29,7 +37,8 @@ def main(outpath, inlist, emptylink):
         with open(inlist, 'r') as infiles:
             for infile in infiles:
                 infile = infile.strip()
-                if not same_symlink(emptylink, infile):
+                # if not is_empty(emptylink, infile):
+                if not is_empty(infile):
                     all_empty = False
                     cat(infile, outfile)
         if all_empty:
