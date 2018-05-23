@@ -1,12 +1,12 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 71d7c7776c
-|   |   |   |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
-|   |   |   `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
-|   |   |-- bafe8ac802
+|   |   |-- 82763a9098
 |   |   |   |-- 58ea568aa7.bht -> ../../../exprs/blastx/ce1c174684_3d999d2434_58ea568aa7.bht
 |   |   |   `-- 58ea568aa7.bht.args -> ../../../cache/lines/2ac5d33127.txt
+|   |   |-- dd5b7db02a
+|   |   |   |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
+|   |   |   `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
 |   |   `-- f207b45822
 |   |       |-- 6fced8e42e.str.list -> ../../../exprs/extract_queries/6fced8e42e.str.list
 |   |       `-- 6fced8e42e.str.list.args -> ../../../cache/lines/bc38a64817.txt
@@ -17,7 +17,9 @@
 |   |   |-- 38cb049e4b.txt
 |   |   |-- 6f77e28b65.txt
 |   |   |-- 778251fd80.txt
+|   |   |-- 8abe298b5a.txt -> ../../cache/lines/e00fb07ddb.txt
 |   |   |-- 902cb58552.txt
+|   |   |-- a6d4ecf95e.txt
 |   |   |-- bc38a64817.txt
 |   |   |-- bdc783547b.txt
 |   |   |-- e00fb07ddb.txt
@@ -39,9 +41,9 @@
 |   |-- blastx
 |   |   `-- ce1c174684_3d999d2434_58ea568aa7.bht
 |   |-- blastx_db
-|   |   `-- 8158675169_bc4ea1fc06_aefb289407.bht
+|   |   `-- 8158675169_bc4ea1fc06_46b5852d89.bht
 |   |-- blastx_each
-|   |   `-- 8158675169_bc4ea1fc06_0057535ac4.bht.list -> ../../cache/lines/bc38a64817.txt
+|   |   `-- 8158675169_bc4ea1fc06_c28ea1492c.bht.list -> ../../cache/lines/bc38a64817.txt
 |   |-- extract_queries
 |   |   |-- 4acfd7717c.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |   `-- 6fced8e42e.str.list -> ../../cache/lines/38cb049e4b.txt
@@ -49,7 +51,6 @@
 |   |   `-- 2a9e607472.str.list.list -> ../../cache/lines/14135d2aeb.txt
 |   |-- list
 |   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/14135d2aeb.txt
-|   |   |-- 5e3ebf325a.faa.list.list -> ../../cache/lines/fadeddbb2a.txt
 |   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
 |   |   `-- cce65539fd.faa.list -> ../../cache/lines/e00fb07ddb.txt
 |   |-- load_faa
@@ -60,9 +61,11 @@
 |   |   |-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
 |   |   `-- e51c741dc5.pdb -> ../../cache/lines/902cb58552.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- ee2ae6fef5.pdb.list -> ../../cache/lines/6f77e28b65.txt
+|   |   `-- 821bb6fb09.pdb.list -> ../../cache/lines/6f77e28b65.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   |-- singletons
+|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/a6d4ecf95e.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       `-- 8fa8ede325.str -> ../../cache/lines/f530950d29.txt
@@ -73,4 +76,4 @@
     |-- result -> ../exprs/all/08e62fefa6.str.list
     `-- single.str.list -> ../exprs/extract_queries/4acfd7717c.str.list
 
-25 directories, 48 files
+26 directories, 50 files

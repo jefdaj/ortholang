@@ -2,6 +2,7 @@
 |-- cache
 |   |-- lines
 |   |   |-- 33ec325d48.txt
+|   |   |-- 39005f8006.txt
 |   |   |-- 45121d690b.txt
 |   |   |-- 7c5139160d.txt
 |   |   |-- 8abd22b6c2.txt
@@ -10,8 +11,7 @@
 |   |   |-- a1512fc008.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
-|   |   |-- e00fb07ddb.txt
-|   |   `-- fab546a940.txt
+|   |   `-- e00fb07ddb.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -45,7 +45,7 @@
 |   |-- psiblast_pssm_db_each
 |   |   `-- f51c91829c_42ae9893e2_94686d4973.bht.list -> ../../cache/lines/7c5139160d.txt
 |   |-- psiblast_train_db
-|   |   `-- f51c91829c_4d0e43d616_67b1500345.pssm -> ../../cache/lines/fab546a940.txt
+|   |   `-- f51c91829c_4d0e43d616_67b1500345.pssm -> ../../cache/lines/39005f8006.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt

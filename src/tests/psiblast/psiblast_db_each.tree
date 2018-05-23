@@ -1,11 +1,19 @@
 .
 |-- cache
+|   |-- each
+|   |   `-- f0dc2ce87f
+|   |       |-- 58ea568aa7.bht -> ../../../exprs/psiblast_db/d8d2eb1dde_ee63720be0_58ea568aa7.bht
+|   |       |-- 58ea568aa7.bht.args -> ../../../cache/lines/5a100a6d77.txt
+|   |       |-- d67a110ed4.bht -> ../../../exprs/psiblast_db/d8d2eb1dde_ee63720be0_d67a110ed4.bht
+|   |       `-- d67a110ed4.bht.args -> ../../../cache/lines/a0ad61c173.txt
 |   |-- lines
-|   |   |-- 19adc55c5b.txt
 |   |   |-- 45121d690b.txt
+|   |   |-- 5a100a6d77.txt
+|   |   |-- 697a52b2ad.txt
 |   |   |-- 8abd22b6c2.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- 908f92d67a.txt
+|   |   |-- a0ad61c173.txt
 |   |   |-- a1512fc008.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
@@ -15,18 +23,15 @@
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
-|   |-- makeblastdb
-|   |   |-- a1512fc008
-|   |   |   |-- a1512fc008.pdb.phr
-|   |   |   |-- a1512fc008.pdb.pin
-|   |   |   `-- a1512fc008.pdb.psq
-|   |   `-- e00fb07ddb
-|   |       |-- e00fb07ddb.pdb.phr
-|   |       |-- e00fb07ddb.pdb.pin
-|   |       `-- e00fb07ddb.pdb.psq
-|   `-- map
-|       |-- a56635482d.bht
-|       `-- c3208e2182.bht
+|   `-- makeblastdb
+|       |-- a1512fc008
+|       |   |-- a1512fc008.pdb.phr
+|       |   |-- a1512fc008.pdb.pin
+|       |   `-- a1512fc008.pdb.psq
+|       `-- e00fb07ddb
+|           |-- e00fb07ddb.pdb.phr
+|           |-- e00fb07ddb.pdb.pin
+|           `-- e00fb07ddb.pdb.psq
 |-- exprs
 |   |-- list
 |   |   |-- 10cb52d92f.faa.list -> ../../cache/lines/e00fb07ddb.txt
@@ -41,8 +46,11 @@
 |   |   `-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
 |   |-- num
 |   |   `-- ffc99d74eb.num -> ../../cache/lines/d539b3c735.txt
+|   |-- psiblast_db
+|   |   |-- d8d2eb1dde_ee63720be0_58ea568aa7.bht
+|   |   `-- d8d2eb1dde_ee63720be0_d67a110ed4.bht
 |   |-- psiblast_db_each
-|   |   `-- 607d77c6ef_4d0e43d616_94686d4973.bht.list -> ../../cache/lines/19adc55c5b.txt
+|   |   `-- 607d77c6ef_4d0e43d616_94686d4973.bht.list -> ../../cache/lines/697a52b2ad.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -55,4 +63,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlists.bht.list
 
-15 directories, 40 files
+17 directories, 46 files

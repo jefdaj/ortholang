@@ -1,16 +1,21 @@
 .
 |-- cache
+|   |-- concat
+|   |   |-- emptyfna.txt -> ../../cache/lines/4b84fa0567.txt
+|   |   `-- f61974bf8f.txt -> ../../cache/lines/d88c94965e.txt
 |   |-- each
 |   |   `-- a2ff74da29
 |   |       |-- f61974bf8f.fna -> ../../../exprs/concat_fna/f61974bf8f.fna
 |   |       `-- f61974bf8f.fna.args -> ../../../cache/lines/6fde87b86e.txt
 |   |-- lines
 |   |   |-- 0229d38a63.txt
+|   |   |-- 4b84fa0567.txt
 |   |   |-- 5bb3f27328.txt
 |   |   |-- 5c59577fb3.txt
 |   |   |-- 691dd4d722.txt
 |   |   |-- 6fde87b86e.txt
 |   |   |-- cad7634989.txt
+|   |   |-- d88c94965e.txt
 |   |   `-- eed7b93561.txt
 |   `-- load
 |       |-- d8da51f7cd.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
@@ -42,4 +47,4 @@
     |-- result -> ../exprs/any/debc54b62a.fna.list
     `-- single.fna -> ../exprs/concat_fna/eb1aea4e88.fna
 
-14 directories, 28 files
+15 directories, 32 files

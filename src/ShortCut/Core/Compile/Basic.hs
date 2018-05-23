@@ -404,23 +404,31 @@ rSimpleTmp prefix = rSimple' (Just prefix)
 rSimpleScript :: String -> RulesFn
 rSimpleScript = rSimple . aSimpleScript
 
+rSimpleScriptNoFix :: String -> RulesFn
+rSimpleScriptNoFix = rSimple . aSimpleScriptNoFix
+
+aSimpleScriptNoFix :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aSimpleScriptNoFix = aSimpleScript' False
 
 aSimpleScript :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
-aSimpleScript script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins
+aSimpleScript = aSimpleScript' True
+
+aSimpleScript' :: Bool -> String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins
   where
     -- TODO is tmpDir used here at all? should it be?
     -- TODO match []?
     actFn c r t (o:is) = let o'  = fromCutPath c o
                              t'  = fromCutPath c t
                              is' = map (fromCutPath c) is
-                         in wrappedCmdWrite c r o' is' [] [Cwd t'] script (o':is')
+                         in wrappedCmdWrite fixEmpties c r o' is' [] [Cwd t'] script (o':is')
 --     actFn c t (o:as) = let o' = (let r = fromCutPath c o
 --                                  in debug c ("actFn o': '" ++ r ++ "'") r)
 --                            ins' = map (fromCutPath c) as
 --                        in (let s' = debug c ("actFn script: '" ++ script ++ "'") script
 -- --                            wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "failed to build" errors?
 --                            in wrappedCmdWrite cfg o' ins' [o'] [] s' (o':ins'))
-aSimpleScript _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
+aSimpleScript' _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 
 -- TODO rSimpleScriptTmp?
 

@@ -1,12 +1,12 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 65be1ab9d7
-|   |   |   |-- d9a137f1f1.str.list -> ../../../exprs/extract_queries/d9a137f1f1.str.list
-|   |   |   `-- d9a137f1f1.str.list.args -> ../../../cache/lines/591400849c.txt
-|   |   `-- c3029b35e5
-|   |       |-- 3d999d2434.bht -> ../../../exprs/blastn_db_rev/ce1c174684_67ef4ead59_3d999d2434.bht
-|   |       `-- 3d999d2434.bht.args -> ../../../cache/lines/fd9d8aeef6.txt
+|   |   |-- 5b020f738d
+|   |   |   |-- 3d999d2434.bht -> ../../../exprs/blastn_db_rev/ce1c174684_67ef4ead59_3d999d2434.bht
+|   |   |   `-- 3d999d2434.bht.args -> ../../../cache/lines/fd9d8aeef6.txt
+|   |   `-- 65be1ab9d7
+|   |       |-- d9a137f1f1.str.list -> ../../../exprs/extract_queries/d9a137f1f1.str.list
+|   |       `-- d9a137f1f1.str.list.args -> ../../../cache/lines/591400849c.txt
 |   |-- lines
 |   |   |-- 14135d2aeb.txt
 |   |   |-- 16c24364ea.txt
@@ -36,11 +36,11 @@
 |   |   |-- aa2a321e48.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |   `-- f76d344a5c.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |-- blastn_db
-|   |   `-- 8158675169_bc4ea1fc06_5a5ebda04e.bht
+|   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- blastn_db_rev
 |   |   `-- ce1c174684_67ef4ead59_3d999d2434.bht
 |   |-- blastn_db_rev_each
-|   |   `-- 8158675169_5a5ebda04e_16f79b6458.bht.list -> ../../cache/lines/591400849c.txt
+|   |   `-- 8158675169_c3449ba565_16f79b6458.bht.list -> ../../cache/lines/591400849c.txt
 |   |-- diff
 |   |   `-- d59c8674fd.str.list -> ../../cache/lines/d59cb63de9.txt
 |   |-- extract_queries
@@ -59,6 +59,8 @@
 |   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
 |   |   `-- 17e9ac9897.ndb -> ../../cache/lines/4709207142.txt
+|   |-- makeblastdb_nucl_all
+|   |   `-- 17e9ac9897.ndb -> ../../cache/lines/4709207142.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   `-- str
@@ -72,4 +74,4 @@
     |-- small.fna -> ../exprs/load_fna/82b637da24.fna
     `-- srevs.str.list -> ../exprs/extract_queries/d04c524532.str.list
 
-23 directories, 49 files
+24 directories, 50 files

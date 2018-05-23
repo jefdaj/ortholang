@@ -1,6 +1,9 @@
 .
 |-- cache
 |   |-- each
+|   |   |-- 066cb14c8d
+|   |   |   |-- 947877ffa6.ndb -> ../../../exprs/makeblastdb_nucl/947877ffa6.ndb
+|   |   |   `-- 947877ffa6.ndb.args -> ../../../cache/lines/a68b303bbe.txt
 |   |   |-- 3b4bd90111
 |   |   |   |-- 67ef4ead59.bht -> ../../../exprs/blastn/ce1c174684_3d999d2434_67ef4ead59.bht
 |   |   |   `-- 67ef4ead59.bht.args -> ../../../cache/lines/3868abee11.txt
@@ -8,29 +11,29 @@
 |   |       |-- 6af3464344.str.list -> ../../../exprs/extract_queries/6af3464344.str.list
 |   |       `-- 6af3464344.str.list.args -> ../../../cache/lines/905b0f9efd.txt
 |   |-- lines
-|   |   |-- 099ed097d9.txt -> ../../cache/lines/d24c42156b.txt
+|   |   |-- 08d6f05c35.txt
 |   |   |-- 14135d2aeb.txt
 |   |   |-- 21be25c2fd.txt
 |   |   |-- 3868abee11.txt
+|   |   |-- 387e23bd4a.txt -> ../../cache/lines/d24c42156b.txt
 |   |   |-- 38cb049e4b.txt
-|   |   |-- 3ccc83d680.txt
 |   |   |-- 4709207142.txt
+|   |   |-- 650ff35aaf.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- 82555bfddd.txt
 |   |   |-- 905b0f9efd.txt
+|   |   |-- a68b303bbe.txt
 |   |   |-- ba320796bf.txt
 |   |   |-- d24c42156b.txt
+|   |   |-- d59cb63de9.txt
 |   |   `-- f530950d29.txt
 |   |-- load
 |   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
-|   |-- makeblastdb
-|   |   `-- d24c42156b
-|   |       |-- d24c42156b.ndb.nhr
-|   |       |-- d24c42156b.ndb.nin
-|   |       `-- d24c42156b.ndb.nsq
-|   `-- map
-|       `-- f87fbd98fc.ndb -> ../../cache/lines/4709207142.txt
+|   `-- makeblastdb
+|       `-- d24c42156b
+|           |-- d24c42156b.ndb.nhr
+|           |-- d24c42156b.ndb.nin
+|           `-- d24c42156b.ndb.nsq
 |-- exprs
 |   |-- any
 |   |   `-- 7a8477bd0a.str.list.list -> ../../cache/lines/14135d2aeb.txt
@@ -53,13 +56,14 @@
 |   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
 |   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
-|   |   `-- 17e9ac9897.ndb -> ../../cache/lines/4709207142.txt
+|   |   |-- 17e9ac9897.ndb -> ../../cache/lines/4709207142.txt
+|   |   `-- 947877ffa6.ndb -> ../../cache/lines/4709207142.txt
 |   |-- makeblastdb_nucl_each
-|   |   `-- 79cf50e1c0.ndb.list -> ../../cache/lines/3ccc83d680.txt
+|   |   `-- 79cf50e1c0.ndb.list -> ../../cache/lines/08d6f05c35.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   |-- singletons
-|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/82555bfddd.txt
+|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/650ff35aaf.txt
 |   `-- str
 |       |-- 4cdbcfa070.str -> ../../cache/lines/ba320796bf.txt
 |       `-- 8fa8ede325.str -> ../../cache/lines/f530950d29.txt
@@ -70,4 +74,4 @@
     |-- result -> ../exprs/any/7a8477bd0a.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/9994288dcd.str.list
 
-24 directories, 46 files
+24 directories, 50 files

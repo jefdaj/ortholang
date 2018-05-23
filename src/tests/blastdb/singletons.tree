@@ -1,0 +1,130 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 2eee7c9e0d
+|   |   |   |-- 344072dab5.num -> ../../../exprs/length/344072dab5.num
+|   |   |   |-- 344072dab5.num.args -> ../../../cache/lines/e6ed2c660c.txt
+|   |   |   |-- 4451f7603d.num -> ../../../exprs/length/4451f7603d.num
+|   |   |   |-- 4451f7603d.num.args -> ../../../cache/lines/bb92a42283.txt
+|   |   |   |-- a20305d73d.num -> ../../../exprs/length/a20305d73d.num
+|   |   |   `-- a20305d73d.num.args -> ../../../cache/lines/911691d29c.txt
+|   |   |-- 32b481ea59
+|   |   |   |-- cfd351e424.pdb -> ../../../exprs/makeblastdb_prot/cfd351e424.pdb
+|   |   |   |-- cfd351e424.pdb.args -> ../../../cache/lines/a8bf08d187.txt
+|   |   |   |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
+|   |   |   `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
+|   |   |-- bb96b6c6fe
+|   |   |   |-- 37264721b9.num -> ../../../exprs/length/37264721b9.num
+|   |   |   |-- 37264721b9.num.args -> ../../../cache/lines/6d1f330dff.txt
+|   |   |   |-- abae9c7c0e.num -> ../../../exprs/length/abae9c7c0e.num
+|   |   |   `-- abae9c7c0e.num.args -> ../../../cache/lines/dd4e8e101a.txt
+|   |   `-- f0ee97bcb6
+|   |       |-- 1dcf964d9a.num -> ../../../exprs/length/1dcf964d9a.num
+|   |       |-- 1dcf964d9a.num.args -> ../../../cache/lines/0e2ca14537.txt
+|   |       |-- a0af6add46.num -> ../../../exprs/length/a0af6add46.num
+|   |       |-- a0af6add46.num.args -> ../../../cache/lines/3a83f0fc11.txt
+|   |       |-- e299d084df.num -> ../../../exprs/length/e299d084df.num
+|   |       `-- e299d084df.num.args -> ../../../cache/lines/37ea048fe7.txt
+|   |-- lines
+|   |   |-- 0650be0155.txt
+|   |   |-- 0bc1d8f75e.txt
+|   |   |-- 0e2ca14537.txt
+|   |   |-- 11867b459f.txt
+|   |   |-- 26c4d3d45a.txt -> ../../cache/lines/11867b459f.txt
+|   |   |-- 2a13ac791a.txt
+|   |   |-- 37ea048fe7.txt
+|   |   |-- 3a83f0fc11.txt
+|   |   |-- 42fb7081a8.txt
+|   |   |-- 4949eea072.txt
+|   |   |-- 4d8a15e3cc.txt
+|   |   |-- 5022e50883.txt -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- 558d528228.txt
+|   |   |-- 5815176f74.txt
+|   |   |-- 5ccfe43130.txt
+|   |   |-- 5d2c155590.txt -> ../../cache/lines/6f77e28b65.txt
+|   |   |-- 5e1b2f39aa.txt
+|   |   |-- 68b434ff88.txt
+|   |   |-- 6cd51d031c.txt
+|   |   |-- 6cee7ca073.txt -> ../../cache/lines/0650be0155.txt
+|   |   |-- 6d1f330dff.txt
+|   |   |-- 6f77e28b65.txt
+|   |   |-- 8db6e7a65e.txt
+|   |   |-- 902cb58552.txt
+|   |   |-- 911691d29c.txt
+|   |   |-- a8bf08d187.txt
+|   |   |-- a95789a98a.txt
+|   |   |-- ab760f8666.txt
+|   |   |-- bb92a42283.txt
+|   |   |-- bdc783547b.txt
+|   |   |-- c6129a78ac.txt
+|   |   |-- cd314db7df.txt
+|   |   |-- dd4e8e101a.txt
+|   |   |-- e00fb07ddb.txt
+|   |   |-- e0ca653b15.txt
+|   |   |-- e6ed2c660c.txt
+|   |   |-- ef87d3e725.txt
+|   |   |-- f99426adea.txt
+|   |   `-- fadeddbb2a.txt
+|   |-- load
+|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   `-- makeblastdb
+|       |-- 11867b459f
+|       |   |-- 11867b459f.pdb.phr
+|       |   |-- 11867b459f.pdb.pin
+|       |   `-- 11867b459f.pdb.psq
+|       `-- e00fb07ddb
+|           |-- e00fb07ddb.pdb.phr
+|           |-- e00fb07ddb.pdb.pin
+|           `-- e00fb07ddb.pdb.psq
+|-- exprs
+|   |-- length
+|   |   |-- 1dcf964d9a.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 344072dab5.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 37264721b9.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 4451f7603d.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- a0af6add46.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- a20305d73d.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- abae9c7c0e.num -> ../../cache/lines/42fb7081a8.txt
+|   |   `-- e299d084df.num -> ../../cache/lines/42fb7081a8.txt
+|   |-- length_each
+|   |   |-- 480d8edc62.num.list -> ../../cache/lines/f99426adea.txt
+|   |   |-- 864182ac52.num.list -> ../../cache/lines/ab760f8666.txt
+|   |   `-- 90652aea25.num.list -> ../../cache/lines/f99426adea.txt
+|   |-- list
+|   |   |-- 54a1a836a4.num.list.list -> ../../cache/lines/e0ca653b15.txt
+|   |   |-- a2eb5c485f.faa.list -> ../../cache/lines/c6129a78ac.txt
+|   |   |-- b7637aeee9.str.list -> ../../cache/lines/0bc1d8f75e.txt
+|   |   `-- f11e0b1ea5.num.list -> ../../cache/lines/4949eea072.txt
+|   |-- load_faa
+|   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2.faa
+|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
+|   |-- makeblastdb_prot
+|   |   |-- cfd351e424.pdb -> ../../cache/lines/5e1b2f39aa.txt
+|   |   `-- e51c741dc5.pdb -> ../../cache/lines/902cb58552.txt
+|   |-- makeblastdb_prot_each
+|   |   `-- 668bd70425.pdb.list -> ../../cache/lines/8db6e7a65e.txt
+|   |-- num
+|   |   |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
+|   |   |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
+|   |   `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|   |-- singletons
+|   |   |-- 4c347546d4.num.list.list -> ../../cache/lines/5815176f74.txt
+|   |   |-- 58dcc89995.faa.list.list -> ../../cache/lines/6cd51d031c.txt
+|   |   |-- 7d5928d171.pdb.list.list -> ../../cache/lines/5ccfe43130.txt
+|   |   `-- ce6a38bc9b.str.list.list -> ../../cache/lines/a95789a98a.txt
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
+|       |-- 2f7bb230c7.str -> ../../cache/lines/4d8a15e3cc.txt
+|       |-- 39c6844c92.str -> ../../cache/lines/cd314db7df.txt
+|       |-- 3cf3aef990.str -> ../../cache/lines/68b434ff88.txt
+|       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
+`-- vars
+    |-- dbs.pdb.list -> ../exprs/makeblastdb_prot_each/668bd70425.pdb.list
+    |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- mini7942.faa -> ../exprs/load_faa/2d88028e40.faa
+    |-- nums.num.list -> ../exprs/list/f11e0b1ea5.num.list
+    |-- result -> ../exprs/list/54a1a836a4.num.list.list
+    `-- strs.str.list -> ../exprs/list/b7637aeee9.str.list
+
+22 directories, 105 files

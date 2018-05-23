@@ -161,7 +161,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
   -- make sure to get the exb version instead of whatever the system assumes
   -- TODO is this needed, or will it end up the default?
   -- psiblastBin <- fmap stripWhiteSpace $
-  --                  wrappedCmdOut cfg ref [] [] [] "which" ["psiblast"]
+  --                  wrappedCmdOut True cfg ref [] [] [] "which" ["psiblast"]
   -- debugL cfg $ "psiblast binary: " ++ psiblastBin
 
   -- TODO what to do when no hits found? use seqid + nothing as output format
@@ -175,7 +175,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
     else do
 
       let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
-      wrappedCmdWrite cfg ref tPath'
+      wrappedCmdWrite True cfg ref tPath'
         [dbPre' ++ ".*"]        -- inPtns TODO is this right?
         []                      -- extra outPaths to lock TODO more -out stuff?
         [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?

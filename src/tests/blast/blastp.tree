@@ -1,15 +1,15 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 71d7c7776c
-|   |   |   |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
-|   |   |   `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
-|   |   |-- 80128ed60f
+|   |   |-- b416063c3c
+|   |   |   |-- ce492d3420.str.list -> ../../../exprs/extract_queries/ce492d3420.str.list
+|   |   |   `-- ce492d3420.str.list.args -> ../../../cache/lines/74bb057972.txt
+|   |   |-- b960925b88
 |   |   |   |-- 58ea568aa7.bht -> ../../../exprs/blastp/ce1c174684_6b304f493c_58ea568aa7.bht
 |   |   |   `-- 58ea568aa7.bht.args -> ../../../cache/lines/0e6ef7636e.txt
-|   |   `-- b416063c3c
-|   |       |-- ce492d3420.str.list -> ../../../exprs/extract_queries/ce492d3420.str.list
-|   |       `-- ce492d3420.str.list.args -> ../../../cache/lines/74bb057972.txt
+|   |   `-- dd5b7db02a
+|   |       |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
+|   |       `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
 |   |-- lines
 |   |   |-- 0e6ef7636e.txt
 |   |   |-- 14135d2aeb.txt
@@ -19,7 +19,9 @@
 |   |   |-- 74bb057972.txt
 |   |   |-- 778251fd80.txt
 |   |   |-- 902cb58552.txt
+|   |   |-- 9bc7b88ee3.txt
 |   |   |-- bdc783547b.txt
+|   |   |-- d96ed9cd46.txt -> ../../cache/lines/e00fb07ddb.txt
 |   |   |-- e00fb07ddb.txt
 |   |   |-- ef87d3e725.txt
 |   |   `-- fadeddbb2a.txt
@@ -39,9 +41,9 @@
 |   |-- blastp
 |   |   `-- ce1c174684_6b304f493c_58ea568aa7.bht
 |   |-- blastp_db
-|   |   `-- 8158675169_1af4d085e7_aefb289407.bht
+|   |   `-- 8158675169_1af4d085e7_46b5852d89.bht
 |   |-- blastp_each
-|   |   `-- 8158675169_1af4d085e7_0057535ac4.bht.list -> ../../cache/lines/74bb057972.txt
+|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list -> ../../cache/lines/74bb057972.txt
 |   |-- extract_queries
 |   |   |-- b09bd7df49.str.list -> ../../cache/lines/38cb049e4b.txt
 |   |   `-- ce492d3420.str.list -> ../../cache/lines/38cb049e4b.txt
@@ -49,7 +51,6 @@
 |   |   `-- 848b144734.str.list.list -> ../../cache/lines/14135d2aeb.txt
 |   |-- list
 |   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/14135d2aeb.txt
-|   |   |-- 5e3ebf325a.faa.list.list -> ../../cache/lines/fadeddbb2a.txt
 |   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
 |   |   `-- cce65539fd.faa.list -> ../../cache/lines/e00fb07ddb.txt
 |   |-- load_faa
@@ -59,9 +60,11 @@
 |   |   |-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
 |   |   `-- e51c741dc5.pdb -> ../../cache/lines/902cb58552.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- ee2ae6fef5.pdb.list -> ../../cache/lines/6f77e28b65.txt
+|   |   `-- 821bb6fb09.pdb.list -> ../../cache/lines/6f77e28b65.txt
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   |-- singletons
+|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/9bc7b88ee3.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
@@ -72,4 +75,4 @@
     |-- result -> ../exprs/all/8c2786f33e.str.list
     `-- single.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
 
-24 directories, 48 files
+25 directories, 50 files

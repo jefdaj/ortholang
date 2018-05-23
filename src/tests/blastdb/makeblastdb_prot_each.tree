@@ -7,19 +7,19 @@
 |   |       |-- b0508dfb79.pdb -> ../../../exprs/makeblastdb_prot/b0508dfb79.pdb
 |   |       `-- b0508dfb79.pdb.args -> ../../../cache/lines/71eade04d0.txt
 |   |-- lines
+|   |   |-- 020b40db17.txt
+|   |   |-- 20dae7d082.txt -> ../../cache/lines/a1512fc008.txt
 |   |   |-- 52446b2682.txt
-|   |   |-- 647ed94e51.txt -> ../../cache/lines/a1512fc008.txt
 |   |   |-- 71eade04d0.txt
 |   |   |-- 908f92d67a.txt
 |   |   |-- a1512fc008.txt
-|   |   |-- a7fc81f033.txt
 |   |   |-- adfdb6bd8c.txt
-|   |   |-- bff5307e85.txt -> ../../cache/lines/e768cae869.txt
 |   |   |-- c8be8722f2.txt
 |   |   |-- dd3a220ad9.txt
 |   |   |-- e768cae869.txt
 |   |   |-- f01020ac88.txt
-|   |   `-- fa6c1381fc.txt
+|   |   |-- fa6c1381fc.txt
+|   |   `-- fbe0254048.txt -> ../../cache/lines/e768cae869.txt
 |   |-- load
 |   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
 |   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -44,7 +44,7 @@
 |   |-- makeblastdb_prot_each
 |   |   `-- de98df50ea.pdb.list -> ../../cache/lines/dd3a220ad9.txt
 |   |-- singletons
-|   |   `-- 9396c945e4.faa.list.list -> ../../cache/lines/a7fc81f033.txt
+|   |   `-- 9396c945e4.faa.list.list -> ../../cache/lines/020b40db17.txt
 |   `-- str
 |       |-- 50dbefb6d6.str -> ../../cache/lines/c8be8722f2.txt
 |       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt

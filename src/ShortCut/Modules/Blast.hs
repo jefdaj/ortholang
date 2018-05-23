@@ -120,7 +120,7 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              ]
       args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
   debugL cfg $ "args'': " ++ show args''
-  wrappedCmdWrite cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
+  wrappedCmdWrite True cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

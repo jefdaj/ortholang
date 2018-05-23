@@ -1,7 +1,12 @@
 .
 |-- cache
+|   |-- concat
+|   |   |-- emptyfna.txt -> ../../cache/lines/4b84fa0567.txt
+|   |   `-- f61974bf8f.txt -> ../../cache/lines/6054b987e2.txt
 |   |-- lines
+|   |   |-- 4b84fa0567.txt
 |   |   |-- 5bb3f27328.txt
+|   |   |-- 6054b987e2.txt
 |   |   |-- 691dd4d722.txt
 |   |   `-- cad7634989.txt
 |   `-- load
@@ -24,4 +29,4 @@
 `-- vars
     `-- result -> ../exprs/concat_fna/eb1aea4e88.fna
 
-10 directories, 14 files
+11 directories, 18 files

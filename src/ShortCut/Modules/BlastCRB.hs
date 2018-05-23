@@ -100,7 +100,7 @@ aBlastCRB cfg ref tmpDir [o, q, t] = do
   debugNeed cfg "aBlastCRB" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
-  wrappedCmdWrite cfg ref oPath [qSrc, tSrc] [] [Cwd tmp']
+  wrappedCmdWrite True cfg ref oPath [qSrc, tSrc] [] [Cwd tmp']
     "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   symlink cfg ref o'' oPath'
   where

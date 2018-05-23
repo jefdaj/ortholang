@@ -303,12 +303,14 @@ fixEmptyText cfg ref path = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- TODO separate wrappedReadCmd with a shared lock?
-wrappedCmd :: CutConfig -> Locks -> Maybe FilePath -> [String]
+wrappedCmd :: Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
-wrappedCmd cfg ref mOut inPtns opts bin args = do
+wrappedCmd fixEmpties cfg ref mOut inPtns opts bin args = do
   inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
-  inPaths' <- mapM (fixEmptyText cfg ref) inPaths
+  inPaths' <- if fixEmpties
+                then mapM (fixEmptyText cfg ref) inPaths
+                else return inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
   debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
@@ -343,10 +345,10 @@ wrappedCmd cfg ref mOut inPtns opts bin args = do
 -- TODO track writes?
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
-wrappedCmdExit :: CutConfig -> Locks -> Maybe FilePath -> [String]
+wrappedCmdExit :: Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
-wrappedCmdExit cfg r mOut inPtns opts bin as allowedExitCodes = do
-  (_, _, code) <- wrappedCmd cfg r mOut inPtns opts bin as
+wrappedCmdExit fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = do
+  (_, _, code) <- wrappedCmd fixEmpties cfg r mOut inPtns opts bin as
   case mOut of
     Nothing -> return ()
     Just o  -> debugTrackWrite cfg [o] -- >> assertNonEmptyFile cfg r outPath
@@ -363,14 +365,14 @@ wrappedCmdExit cfg r mOut inPtns opts bin as allowedExitCodes = do
  - TODO if assertNonEmptyFile fails, will other outfiles be deleted?
  - TODO rename wrappedCmdMulti because it has multiple outfiles?
  -}
-wrappedCmdWrite :: CutConfig -> Locks -> FilePath -> [String] -> [FilePath]
+wrappedCmdWrite :: Bool -> CutConfig -> Locks -> FilePath -> [String] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
-wrappedCmdWrite cfg ref outPath inPtns outPaths opts bin args = do
+wrappedCmdWrite fixEmpties cfg ref outPath inPtns outPaths opts bin args = do
   debugL cfg $ "wrappedCmdWrite outPath: "  ++ outPath
   debugL cfg $ "wrappedCmdWrite inPtns: "   ++ show inPtns
   debugL cfg $ "wrappedCmdWrite outPaths: " ++ show outPaths
   debugL cfg $ "wrappedCmdWrite args: "     ++ show args
-  code <- wrappedCmdExit cfg ref (Just outPath) inPtns opts bin args [0]
+  code <- wrappedCmdExit fixEmpties cfg ref (Just outPath) inPtns opts bin args [0]
   -- TODO can this be handled in wrappedCmdExit too?
   -- liftIO $ delay 10000
   case code of
@@ -384,11 +386,11 @@ wrappedCmdWrite cfg ref outPath inPtns outPaths opts bin args = do
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables
  -}
-wrappedCmdOut :: CutConfig -> Locks -> [String]
+wrappedCmdOut :: Bool -> CutConfig -> Locks -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut cfg ref inPtns outPaths os b as = do
-  (out, err, code) <- wrappedCmd cfg ref Nothing inPtns os b as
+wrappedCmdOut fixEmpties cfg ref inPtns outPaths os b as = do
+  (out, err, code) <- wrappedCmd fixEmpties cfg ref Nothing inPtns os b as
   case code of
     0 -> return out
     n -> do
@@ -405,11 +407,12 @@ wrappedCmdOut cfg ref inPtns outPaths os b as = do
 -- digestFile :: CutConfig -> Locks -> FilePath -> Action String
 -- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 
+-- TODO fixEmpties should be False here, but don't want to break existing tmpdir just yet
 hashContent :: CutConfig -> Locks -> CutPath -> Action String
 hashContent cfg ref path = do
   debugNeed cfg "hashContent" [path']
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
-  out <- wrappedCmdOut cfg ref [path'] [] [] "md5sum" [path']
+  out <- wrappedCmdOut True cfg ref [path'] [] [] "md5sum" [path']
   let md5 = take digestLength $ head $ words out
   return md5
   where

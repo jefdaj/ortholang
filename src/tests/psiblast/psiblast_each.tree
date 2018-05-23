@@ -1,23 +1,38 @@
 .
 |-- cache
+|   |-- each
+|   |   |-- 67b5c2947c
+|   |   |   |-- 58ea568aa7.bht -> ../../../exprs/psiblast/d43bcc627f_24b7c83986_58ea568aa7.bht
+|   |   |   |-- 58ea568aa7.bht.args -> ../../../cache/lines/e538d3a702.txt
+|   |   |   |-- d67a110ed4.bht -> ../../../exprs/psiblast/d43bcc627f_24b7c83986_d67a110ed4.bht
+|   |   |   `-- d67a110ed4.bht.args -> ../../../cache/lines/ae425e67df.txt
+|   |   `-- 899c32d4b6
+|   |       |-- b0508dfb79.pdb -> ../../../exprs/makeblastdb_prot/b0508dfb79.pdb
+|   |       |-- b0508dfb79.pdb.args -> ../../../cache/lines/71eade04d0.txt
+|   |       |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
+|   |       `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
 |   |-- lines
-|   |   |-- 009254d58e.txt
-|   |   |-- 3597c18148.txt -> ../../cache/lines/a1512fc008.txt
-|   |   |-- 3785ab3b33.txt
-|   |   |-- 7ada13656d.txt
+|   |   |-- 041bec10cb.txt
+|   |   |-- 17395c6454.txt
+|   |   |-- 2c9f6045fe.txt
+|   |   |-- 39b749c8e3.txt -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- 45121d690b.txt
+|   |   |-- 71eade04d0.txt
 |   |   |-- 8abd22b6c2.txt
-|   |   |-- 8dc47ed7a0.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- 908f92d67a.txt
-|   |   |-- 9c1b4a95e0.txt -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- 9cdb1802d1.txt -> ../../cache/lines/a1512fc008.txt
 |   |   |-- a1512fc008.txt
 |   |   |-- adfdb6bd8c.txt
+|   |   |-- ae425e67df.txt
+|   |   |-- b8bba4c764.txt
 |   |   |-- bdc783547b.txt
 |   |   |-- c3ae472116.txt
-|   |   |-- db1b4a4426.txt
-|   |   |-- df30a7d551.txt
 |   |   |-- e00fb07ddb.txt
-|   |   `-- e9819ea256.txt
+|   |   |-- e538d3a702.txt
+|   |   |-- e9819ea256.txt
+|   |   |-- eac12e66e9.txt
+|   |   `-- fadeddbb2a.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -32,12 +47,8 @@
 |   |       |-- e00fb07ddb.pdb.pin
 |   |       `-- e00fb07ddb.pdb.psq
 |   `-- map
-|       |-- 003a5b3e24.pssm -> ../../cache/lines/3785ab3b33.txt
-|       |-- 14d91a66d8.pdb -> ../../cache/lines/908f92d67a.txt
-|       |-- 55f1dd67e1.bht
-|       |-- 65a815f322.bht
-|       |-- b02da459a7.pdb -> ../../cache/lines/902cb58552.txt
-|       `-- de72b8622c.pssm -> ../../cache/lines/df30a7d551.txt
+|       |-- 82c60041b1.pssm -> ../../cache/lines/2c9f6045fe.txt
+|       `-- bd95722be8.pssm -> ../../cache/lines/eac12e66e9.txt
 |-- exprs
 |   |-- list
 |   |   `-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
@@ -45,16 +56,22 @@
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- makeblastdb_prot
+|   |   |-- b0508dfb79.pdb -> ../../cache/lines/908f92d67a.txt
+|   |   `-- e51c741dc5.pdb -> ../../cache/lines/902cb58552.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- 42bd040284.pdb.list -> ../../cache/lines/7ada13656d.txt
+|   |   `-- 42bd040284.pdb.list -> ../../cache/lines/45121d690b.txt
 |   |-- num
 |   |   `-- efc8362dcc.num -> ../../cache/lines/e9819ea256.txt
+|   |-- psiblast
+|   |   |-- d43bcc627f_24b7c83986_58ea568aa7.bht
+|   |   `-- d43bcc627f_24b7c83986_d67a110ed4.bht
 |   |-- psiblast_each
-|   |   `-- 4f7795b38a_01116a4ea8_c31e5a8571.bht.list -> ../../cache/lines/8dc47ed7a0.txt
+|   |   `-- 4f7795b38a_01116a4ea8_c31e5a8571.bht.list -> ../../cache/lines/17395c6454.txt
 |   |-- psiblast_train_db_each
-|   |   `-- 4f7795b38a_4d0e43d616_c31e5a8571.pdb.list -> ../../cache/lines/db1b4a4426.txt
+|   |   `-- 4f7795b38a_4d0e43d616_c31e5a8571.pdb.list -> ../../cache/lines/b8bba4c764.txt
 |   |-- singletons
-|   |   `-- a76d25f4b5.faa.list.list -> ../../cache/lines/009254d58e.txt
+|   |   `-- a76d25f4b5.faa.list.list -> ../../cache/lines/041bec10cb.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -66,4 +83,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlists.bht.list
 
-17 directories, 49 files
+22 directories, 61 files

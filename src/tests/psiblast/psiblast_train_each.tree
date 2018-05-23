@@ -1,23 +1,31 @@
 .
 |-- cache
+|   |-- each
+|   |   `-- 899c32d4b6
+|   |       |-- b0508dfb79.pdb -> ../../../exprs/makeblastdb_prot/b0508dfb79.pdb
+|   |       |-- b0508dfb79.pdb.args -> ../../../cache/lines/71eade04d0.txt
+|   |       |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
+|   |       `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
 |   |-- lines
-|   |   |-- 06683f3d95.txt
+|   |   |-- 016797ce3b.txt
 |   |   |-- 2a13ac791a.txt
-|   |   |-- 3785ab3b33.txt
+|   |   |-- 2c9f6045fe.txt
+|   |   |-- 349842160e.txt
+|   |   |-- 45121d690b.txt
+|   |   |-- 71eade04d0.txt
 |   |   |-- 8abd22b6c2.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- 908f92d67a.txt
+|   |   |-- 9ad426831b.txt -> ../../cache/lines/e00fb07ddb.txt
 |   |   |-- a1512fc008.txt
-|   |   |-- a4f300f643.txt -> ../../cache/lines/a1512fc008.txt
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
 |   |   |-- c3ae472116.txt
-|   |   |-- d9d972f144.txt
-|   |   |-- df30a7d551.txt
+|   |   |-- d80216c213.txt -> ../../cache/lines/a1512fc008.txt
 |   |   |-- e00fb07ddb.txt
 |   |   |-- e9819ea256.txt
-|   |   |-- ec36c96d59.txt
-|   |   `-- fc7024c56c.txt -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- eac12e66e9.txt
+|   |   `-- fadeddbb2a.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -32,10 +40,8 @@
 |   |       |-- e00fb07ddb.pdb.pin
 |   |       `-- e00fb07ddb.pdb.psq
 |   `-- map
-|       |-- b5c4c40848.pssm -> ../../cache/lines/3785ab3b33.txt
-|       |-- c0d591cb83.pdb -> ../../cache/lines/902cb58552.txt
-|       |-- d05ae50a7e.pdb -> ../../cache/lines/908f92d67a.txt
-|       `-- ee1bf7074a.pssm -> ../../cache/lines/df30a7d551.txt
+|       |-- e051e915cb.pssm -> ../../cache/lines/eac12e66e9.txt
+|       `-- e839b13d5c.pssm -> ../../cache/lines/2c9f6045fe.txt
 |-- exprs
 |   |-- length
 |   |   `-- e87e92a071.num -> ../../cache/lines/2a13ac791a.txt
@@ -45,14 +51,17 @@
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- makeblastdb_prot
+|   |   |-- b0508dfb79.pdb -> ../../cache/lines/908f92d67a.txt
+|   |   `-- e51c741dc5.pdb -> ../../cache/lines/902cb58552.txt
 |   |-- makeblastdb_prot_each
-|   |   `-- 42bd040284.pdb.list -> ../../cache/lines/ec36c96d59.txt
+|   |   `-- 42bd040284.pdb.list -> ../../cache/lines/45121d690b.txt
 |   |-- num
 |   |   `-- efc8362dcc.num -> ../../cache/lines/e9819ea256.txt
 |   |-- psiblast_train_each
-|   |   `-- 4f7795b38a_4d0e43d616_c31e5a8571.pssm.list -> ../../cache/lines/06683f3d95.txt
+|   |   `-- 4f7795b38a_4d0e43d616_c31e5a8571.pssm.list -> ../../cache/lines/016797ce3b.txt
 |   |-- singletons
-|   |   `-- a76d25f4b5.faa.list.list -> ../../cache/lines/d9d972f144.txt
+|   |   `-- a76d25f4b5.faa.list.list -> ../../cache/lines/349842160e.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
@@ -64,4 +73,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../exprs/length/e87e92a071.num
 
-17 directories, 47 files
+20 directories, 53 files

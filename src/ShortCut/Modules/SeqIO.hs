@@ -9,9 +9,9 @@ import ShortCut.Core.Config (debug)
 
 import ShortCut.Core.Util          (digest, isReallyEmpty)
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
-                                    wrappedCmdOut, wrappedCmdWrite)
+                                    wrappedCmdOut, wrappedCmdWrite, writeCachedLines)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
 import System.FilePath             ((</>), (<.>))
 import System.Directory            (createDirectoryIfMissing)
@@ -238,34 +238,55 @@ mkConcatEach cType = CutFunction
     ext  = extOf cType
     name = "concat_" ++ ext ++ "_each"
 
--- TODO fix bug where <<emptybht>> get concatted on!
--- TODO except if they're ALL empty, then you want to still say empty
--- TODO fix it a safer way where we actually read the files in haskell?
--- TODO specific error handling here, since cat errors are usually transitory?
-aConcat :: CutType -> CutConfig -> Locks -> [CutPath] -> Action ()
-aConcat cType cfg ref [oPath, fsPath] = do
-  fPaths <- readPaths cfg ref fs'
-  let fPaths' = map (fromCutPath cfg) fPaths
-  debugNeed cfg "aConcat" fPaths'
-  let out'    = fromCutPath cfg oPath
-      out''   = debugA cfg "aConcat" out' [out', fs']
-      outTmp  = out'' <.> "tmp"
-      emptyStr = "<<empty" ++ extOf cType ++ ">>"
-      grepCmd = "egrep -v '^" ++ emptyStr ++ "$'"
-      catArgs = fPaths' ++ ["|", grepCmd, ">", outTmp]
-  -- TODO write to a tmpfile first, then move
-  -- TODO use isEmpty to check if changes needed first
-  -- TODO and if so just add one line
-  wrappedCmdWrite cfg ref outTmp fPaths' [] [Shell] "cat"
-    (debug cfg ("catArgs: " ++ show catArgs) catArgs)
-  -- TODO write an <<empty line if needed
-  needsFix <- isReallyEmpty outTmp
-  if needsFix
-    then liftIO $ writeFile out'' emptyStr
-    else copyFile' outTmp out''
-  where
-    fs' = fromCutPath cfg fsPath
+{- This is just a fancy `cat`, with handling for a couple cases:
+ - * some args are empty and their <<emptywhatever>> should be removed
+ - * all args are empty and they should be collapsed to one <<emptywhatever>>
+ -
+ - TODO special case of error handling here, since cat errors are usually temporary?
+ -}
+-- aConcat :: CutType -> CutConfig -> Locks -> [CutPath] -> Action ()
+-- aConcat cType cfg ref [oPath, fsPath] = do
+--   fPaths <- readPaths cfg ref fs'
+--   let fPaths' = map (fromCutPath cfg) fPaths
+--   debugNeed cfg "aConcat" fPaths'
+--   let out'    = fromCutPath cfg oPath
+--       out''   = debugA cfg "aConcat" out' [out', fs']
+--       outTmp  = out'' <.> "tmp"
+--       emptyStr = "<<empty" ++ extOf cType ++ ">>"
+--       grepCmd = "egrep -v '^" ++ emptyStr ++ "$'"
+--       catArgs = fPaths' ++ ["|", grepCmd, ">", outTmp]
+--   wrappedCmdWrite cfg ref outTmp fPaths' [] [Shell] "cat"
+--     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
+--   needsFix <- isReallyEmpty outTmp
+--   if needsFix
+--     then liftIO $ writeFile out'' emptyStr
+--     else copyFile' outTmp out''
+--   where
+--     fs' = fromCutPath cfg fsPath
+-- aConcat _ _ _ _ = error "bad argument to aConcat"
+
+aConcat :: CutType -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aConcat cType cfg ref [outPath, inList] = do
+  -- This is all so we can get an example <<emptywhatever>> to cat.py
+  -- ... there's gotta be a simpler way right?
+  let tmpDir'   = cfgTmpDir cfg </> "cache" </> "concat"
+      emptyPath = tmpDir' </> ("empty" ++ extOf cType) <.> "txt"
+      emptyStr  = "<<empty" ++ extOf cType ++ ">>"
+      inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
+  liftIO $ createDirectoryIfMissing True tmpDir'
+  writeCachedLines cfg ref emptyPath [emptyStr]
+  inPaths <- readPaths cfg ref $ fromCutPath cfg inList
+  writeCachedLines cfg ref inList' $ map (fromCutPath cfg) inPaths
+  aSimpleScriptNoFix "cat.py" cfg ref [ outPath
+                                      , toCutPath cfg inList'
+                                      , toCutPath cfg emptyPath]
 aConcat _ _ _ _ = error "bad argument to aConcat"
+
+-- writeCachedLines cfg ref outPath content = do
+
+-- TODO would it work to just directly creat a string and tack onto paths here?
+-- aSimpleScript' :: Bool -> String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+-- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins
 
 ------------------------
 -- split_fasta(_each) --
@@ -309,7 +330,7 @@ aSplit name ext cfg ref [outPath, faPath] = do
   -- TODO any locking needed here?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
-  out <- wrappedCmdOut cfg ref [faPath'] [] [] "split_fasta.py" args
+  out <- wrappedCmdOut True cfg ref [faPath'] [] [] "split_fasta.py" args
   let loadPaths = map (toCutPath cfg) $ lines out
   writePaths cfg ref outPath'' loadPaths
 aSplit _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths
