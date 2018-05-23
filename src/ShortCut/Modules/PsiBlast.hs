@@ -174,11 +174,12 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
     then writeCachedLines cfg ref oPath' ["<<emptybht>>"]
     else do
 
+      -- TODO need Cwd here too, or maybe instead?
       let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
       wrappedCmdWrite True cfg ref tPath'
         [dbPre' ++ ".*"]        -- inPtns TODO is this right?
         []                      -- extra outPaths to lock TODO more -out stuff?
-        [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
+        [Shell, AddEnv "BLASTDB" cDir, Cwd cDir] -- opts TODO Shell? more specific cache?
         -- psiblastBin args'
         "psiblast" args'
     

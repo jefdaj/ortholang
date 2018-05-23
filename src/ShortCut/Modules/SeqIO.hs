@@ -13,7 +13,7 @@ import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
-import System.FilePath             ((</>), (<.>))
+import System.FilePath             ((</>), (<.>), takeDirectory)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
 
@@ -265,6 +265,7 @@ mkConcatEach cType = CutFunction
 --     fs' = fromCutPath cfg fsPath
 -- aConcat _ _ _ _ = error "bad argument to aConcat"
 
+-- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
 aConcat :: CutType -> (CutConfig -> Locks -> [CutPath] -> Action ())
 aConcat cType cfg ref [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
@@ -274,6 +275,7 @@ aConcat cType cfg ref [outPath, inList] = do
       emptyStr  = "<<empty" ++ extOf cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
+  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromCutPath cfg outPath
   writeCachedLines cfg ref emptyPath [emptyStr]
   inPaths <- readPaths cfg ref $ fromCutPath cfg inList
   writeCachedLines cfg ref inList' $ map (fromCutPath cfg) inPaths
