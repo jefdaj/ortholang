@@ -7,13 +7,13 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Util          (digest)
+import ShortCut.Core.Util          (digest, isReallyEmpty)
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
                                     wrappedCmdOut, wrappedCmdWrite)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
 import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
-import System.FilePath             ((</>))
+import System.FilePath             ((</>), (<.>))
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
 
@@ -220,7 +220,7 @@ mkConcat cType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
-  , fRules     = rSimple aConcat
+  , fRules     = rSimple $ aConcat cType
   }
   where
     ext  = extOf cType
@@ -232,26 +232,40 @@ mkConcatEach cType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
-  , fRules     = rVectorize 1 aConcat
+  , fRules     = rVectorize 1 $ aConcat cType
   }
   where
     ext  = extOf cType
     name = "concat_" ++ ext ++ "_each"
 
+-- TODO fix bug where <<emptybht>> get concatted on!
+-- TODO except if they're ALL empty, then you want to still say empty
+-- TODO fix it a safer way where we actually read the files in haskell?
 -- TODO specific error handling here, since cat errors are usually transitory?
-aConcat :: CutConfig -> Locks -> [CutPath] -> Action ()
-aConcat cfg ref [oPath, fsPath] = do
+aConcat :: CutType -> CutConfig -> Locks -> [CutPath] -> Action ()
+aConcat cType cfg ref [oPath, fsPath] = do
   fPaths <- readPaths cfg ref fs'
   let fPaths' = map (fromCutPath cfg) fPaths
   debugNeed cfg "aConcat" fPaths'
   let out'    = fromCutPath cfg oPath
       out''   = debugA cfg "aConcat" out' [out', fs']
-      catArgs = fPaths' ++ [">", out']
-  wrappedCmdWrite cfg ref out'' fPaths' [] [Shell] "cat"
+      outTmp  = out'' <.> "tmp"
+      emptyStr = "<<empty" ++ extOf cType ++ ">>"
+      grepCmd = "egrep -v '^" ++ emptyStr ++ "$'"
+      catArgs = fPaths' ++ ["|", grepCmd, ">", outTmp]
+  -- TODO write to a tmpfile first, then move
+  -- TODO use isEmpty to check if changes needed first
+  -- TODO and if so just add one line
+  wrappedCmdWrite cfg ref outTmp fPaths' [] [Shell] "cat"
     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
+  -- TODO write an <<empty line if needed
+  needsFix <- isReallyEmpty outTmp
+  if needsFix
+    then liftIO $ writeFile out'' emptyStr
+    else copyFile' outTmp out''
   where
     fs' = fromCutPath cfg fsPath
-aConcat _ _ _ = error "bad argument to aConcat"
+aConcat _ _ _ _ = error "bad argument to aConcat"
 
 ------------------------
 -- split_fasta(_each) --

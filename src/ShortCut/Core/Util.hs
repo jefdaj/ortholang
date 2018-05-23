@@ -22,6 +22,7 @@ module ShortCut.Core.Util
   -- misc
   , stripWhiteSpace
   , isEmpty
+  , isReallyEmpty
   , popFrom
   , insertAt
   )
@@ -48,6 +49,7 @@ import System.FilePath        ((</>), takeDirectory, addTrailingPathSeparator,
 import System.IO.Error        (isDoesNotExistError, catchIOError,
                                isAlreadyExistsError, ioError)
 import System.Path.NameManip  (guess_dotdot, absolute_path)
+import System.Posix           (getFileStatus, fileSize)
 import System.Posix.Files     (readSymbolicLink)
 import System.FilePath.Glob   (glob)
 import Data.Time.LocalTime (getZonedTime)
@@ -211,6 +213,14 @@ isEmpty ref path = do
     else do
       txt <- withReadLock' ref path $ readFile' path
       return $ "<<empty" `isPrefixOf` txt
+
+isReallyEmpty :: FilePath -> Action Bool
+isReallyEmpty path = do
+  if "cache/bin" `isInfixOf` path
+    then return False
+    else liftIO $ do
+      stat <- getFileStatus path
+      return (fileSize stat == 0)
 
 popFrom :: Int -> [a] -> (a, [a])
 popFrom _ [] = error "attempt to pop elem from empty list"

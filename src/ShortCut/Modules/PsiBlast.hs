@@ -171,7 +171,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
   -- and if so, just return empty hits immediately
   lines2 <- fmap (take 2 . lines) $ readFile' qPath'
   if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
-    then writeCachedLines cfg ref oPath' ["<<emptyhits>>"]
+    then writeCachedLines cfg ref oPath' ["<<emptybht>>"]
     else do
 
       let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
