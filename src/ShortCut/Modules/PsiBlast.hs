@@ -27,6 +27,7 @@ import ShortCut.Core.Compile.Map   (rFun3, map3of3, singleton)
 import ShortCut.Modules.SeqIO      (mkConcat)
 import ShortCut.Core.Compile.Compose (compose1)
 import ShortCut.Core.Compile.Vectorize (rVectorize)
+import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -167,6 +168,9 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
   -- TODO what to do when no hits found? use seqid + nothing as output format
   --      and check for that in the search fn?
 
+  -- TODO why would this be needed anyway?
+  liftIO $ createDirectoryIfMissing True cDir
+
   -- before running psiblast, check whether the query is an empty pssm
   -- and if so, just return empty hits immediately
   lines2 <- fmap (take 2 . lines) $ readFile' qPath'
@@ -179,7 +183,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
       wrappedCmdWrite True cfg ref tPath'
         [dbPre' ++ ".*"]        -- inPtns TODO is this right?
         []                      -- extra outPaths to lock TODO more -out stuff?
-        [Shell, AddEnv "BLASTDB" cDir, Cwd cDir] -- opts TODO Shell? more specific cache?
+        [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
         -- psiblastBin args'
         "psiblast" args'
     

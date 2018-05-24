@@ -278,7 +278,9 @@ aConcat cType cfg ref [outPath, inList] = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromCutPath cfg outPath
   writeCachedLines cfg ref emptyPath [emptyStr]
   inPaths <- readPaths cfg ref $ fromCutPath cfg inList
-  writeCachedLines cfg ref inList' $ map (fromCutPath cfg) inPaths
+  let inPaths' = map (fromCutPath cfg) inPaths
+  debugNeed cfg "aConcat" inPaths'
+  writeCachedLines cfg ref inList' inPaths'
   aSimpleScriptNoFix "cat.py" cfg ref [ outPath
                                       , toCutPath cfg inList'
                                       , toCutPath cfg emptyPath]
