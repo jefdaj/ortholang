@@ -183,7 +183,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
       wrappedCmdWrite True cfg ref tPath'
         [dbPre' ++ ".*"]        -- inPtns TODO is this right?
         []                      -- extra outPaths to lock TODO more -out stuff?
-        [Shell, AddEnv "BLASTDB" cDir, Cwd cDir] -- opts TODO Shell? more specific cache?
+        [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
         -- psiblastBin args'
         "psiblast" args'
     
