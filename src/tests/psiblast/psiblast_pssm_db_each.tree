@@ -25,9 +25,10 @@
 |   |       |-- e00fb07ddb.pdb.phr
 |   |       |-- e00fb07ddb.pdb.pin
 |   |       `-- e00fb07ddb.pdb.psq
-|   `-- map
-|       |-- 66cbeeced8.bht
-|       `-- d6523cd4d2.bht
+|   |-- map
+|   |   |-- 66cbeeced8.bht
+|   |   `-- d6523cd4d2.bht
+|   `-- psiblast
 |-- exprs
 |   |-- list
 |   |   |-- 10cb52d92f.faa.list -> ../../cache/lines/e00fb07ddb.txt
@@ -58,4 +59,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlists.bht.list
 
-16 directories, 42 files
+17 directories, 42 files

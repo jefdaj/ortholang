@@ -60,6 +60,7 @@
 |   |       |-- c3ae472116.pdb.phr
 |   |       |-- c3ae472116.pdb.pin
 |   |       `-- c3ae472116.pdb.psq
+|   |-- psiblast
 |   `-- split_faa
 |-- exprs
 |   |-- list
@@ -158,4 +159,4 @@
     |-- queries.faa.list -> ../exprs/split_faa/1af4d085e7.faa.list
     `-- result -> ../vars/pssms.pssm.list
 
-67 directories, 91 files
+68 directories, 91 files

@@ -10,11 +10,12 @@
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
-|   `-- makeblastdb
-|       `-- e00fb07ddb
-|           |-- e00fb07ddb.pdb.phr
-|           |-- e00fb07ddb.pdb.pin
-|           `-- e00fb07ddb.pdb.psq
+|   |-- makeblastdb
+|   |   `-- e00fb07ddb
+|   |       |-- e00fb07ddb.pdb.phr
+|   |       |-- e00fb07ddb.pdb.pin
+|   |       `-- e00fb07ddb.pdb.psq
+|   `-- psiblast
 |-- exprs
 |   |-- list
 |   |   `-- fa4677789c.faa.list -> ../../cache/lines/e00fb07ddb.txt
@@ -40,4 +41,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hittable.bht
 
-14 directories, 26 files
+15 directories, 26 files

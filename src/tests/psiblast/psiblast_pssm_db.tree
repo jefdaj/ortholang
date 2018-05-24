@@ -12,11 +12,12 @@
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
-|   `-- makeblastdb
-|       `-- c3ae472116
-|           |-- c3ae472116.pdb.phr
-|           |-- c3ae472116.pdb.pin
-|           `-- c3ae472116.pdb.psq
+|   |-- makeblastdb
+|   |   `-- c3ae472116
+|   |       |-- c3ae472116.pdb.phr
+|   |       |-- c3ae472116.pdb.pin
+|   |       `-- c3ae472116.pdb.psq
+|   `-- psiblast
 |-- exprs
 |   |-- list
 |   |   `-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
@@ -45,4 +46,4 @@
     |-- result -> ../vars/single.bht
     `-- single.bht -> ../exprs/psiblast_pssm_db/5fbeb4e044_31ea1e075b_e15f764d92.bht
 
-14 directories, 31 files
+15 directories, 31 files

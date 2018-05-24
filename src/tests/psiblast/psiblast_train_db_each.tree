@@ -26,9 +26,10 @@
 |   |       |-- e00fb07ddb.pdb.phr
 |   |       |-- e00fb07ddb.pdb.pin
 |   |       `-- e00fb07ddb.pdb.psq
-|   `-- map
-|       |-- 3d6441b9b3.pssm -> ../../cache/lines/39005f8006.txt
-|       `-- c7f54bfe5e.pssm -> ../../cache/lines/40e919f730.txt
+|   |-- map
+|   |   |-- 3d6441b9b3.pssm -> ../../cache/lines/39005f8006.txt
+|   |   `-- c7f54bfe5e.pssm -> ../../cache/lines/40e919f730.txt
+|   `-- psiblast
 |-- exprs
 |   |-- list
 |   |   |-- 10cb52d92f.faa.list -> ../../cache/lines/e00fb07ddb.txt
@@ -56,4 +57,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/pssm.pssm.list
 
-15 directories, 41 files
+16 directories, 41 files

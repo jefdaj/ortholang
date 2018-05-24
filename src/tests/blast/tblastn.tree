@@ -11,20 +11,19 @@
 |   |       |-- 67ef4ead59.bht -> ../../../exprs/tblastn/ce1c174684_6b304f493c_67ef4ead59.bht
 |   |       `-- 67ef4ead59.bht.args -> ../../../cache/lines/55340c400a.txt
 |   |-- lines
+|   |   |-- 055b3826c2.txt -> ../../cache/lines/d24c42156b.txt
 |   |   |-- 08d6f05c35.txt
 |   |   |-- 0b657cc362.txt
-|   |   |-- 0e21faecb7.txt -> ../../cache/lines/d24c42156b.txt
 |   |   |-- 14135d2aeb.txt
 |   |   |-- 21be25c2fd.txt
 |   |   |-- 38cb049e4b.txt
-|   |   |-- 449f0f57aa.txt
 |   |   |-- 4709207142.txt
 |   |   |-- 55340c400a.txt
 |   |   |-- 778251fd80.txt
+|   |   |-- 8acfdd77af.txt
 |   |   |-- a68b303bbe.txt
 |   |   |-- ba320796bf.txt
 |   |   |-- d24c42156b.txt
-|   |   |-- d59cb63de9.txt
 |   |   `-- ef87d3e725.txt
 |   |-- load
 |   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
@@ -60,7 +59,7 @@
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   |-- singletons
-|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/449f0f57aa.txt
+|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/8acfdd77af.txt
 |   |-- str
 |   |   |-- 4cdbcfa070.str -> ../../cache/lines/ba320796bf.txt
 |   |   `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
@@ -77,4 +76,4 @@
     |-- result -> ../exprs/all/d921d897be.str.list
     `-- single.str.list -> ../exprs/extract_queries/a9e460f873.str.list
 
-26 directories, 51 files
+26 directories, 50 files

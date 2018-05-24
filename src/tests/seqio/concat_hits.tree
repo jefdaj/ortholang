@@ -2,7 +2,7 @@
 |-- cache
 |   |-- concat
 |   |   |-- emptybht.txt -> ../../cache/lines/47745ea386.txt
-|   |   `-- fe89e44950.txt -> ../../cache/lines/7c207d69b5.txt
+|   |   `-- fe89e44950.txt -> ../../cache/lines/fafd859785.txt
 |   |-- each
 |   |   `-- e91cdf80df
 |   |       |-- 58ea568aa7.bht -> ../../../exprs/psiblast_db/d08318db81_ee63720be0_58ea568aa7.bht
@@ -15,7 +15,6 @@
 |   |   |-- 33ec325d48.txt
 |   |   |-- 45121d690b.txt
 |   |   |-- 47745ea386.txt
-|   |   |-- 7c207d69b5.txt
 |   |   |-- 8abd22b6c2.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- 908f92d67a.txt
@@ -23,20 +22,22 @@
 |   |   |-- adfdb6bd8c.txt
 |   |   |-- bdc783547b.txt
 |   |   |-- d73e44fe06.txt
-|   |   `-- e00fb07ddb.txt
+|   |   |-- e00fb07ddb.txt
+|   |   `-- fafd859785.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
-|   `-- makeblastdb
-|       |-- a1512fc008
-|       |   |-- a1512fc008.pdb.phr
-|       |   |-- a1512fc008.pdb.pin
-|       |   `-- a1512fc008.pdb.psq
-|       `-- e00fb07ddb
-|           |-- e00fb07ddb.pdb.phr
-|           |-- e00fb07ddb.pdb.pin
-|           `-- e00fb07ddb.pdb.psq
+|   |-- makeblastdb
+|   |   |-- a1512fc008
+|   |   |   |-- a1512fc008.pdb.phr
+|   |   |   |-- a1512fc008.pdb.pin
+|   |   |   `-- a1512fc008.pdb.psq
+|   |   `-- e00fb07ddb
+|   |       |-- e00fb07ddb.pdb.phr
+|   |       |-- e00fb07ddb.pdb.pin
+|   |       `-- e00fb07ddb.pdb.psq
+|   `-- psiblast
 |-- exprs
 |   |-- concat_bht
 |   |   `-- 87717c62b0.bht
@@ -69,4 +70,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../exprs/concat_bht/87717c62b0.bht
 
-19 directories, 50 files
+20 directories, 50 files
