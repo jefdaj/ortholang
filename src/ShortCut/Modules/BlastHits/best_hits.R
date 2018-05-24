@@ -28,7 +28,8 @@ best_hits <- function(out, bht) {
   read_hits(bht) %>%
     arrange(evalue) %>%
     group_by(queryid) %>%
-    filter(n() == 1) %>%
+    # TODO go through and fix any others like this!
+    filter(row_number() == 1) %>%
     ungroup() %>%
     write_hits(out)
 }
