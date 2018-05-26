@@ -27,3 +27,6 @@ Options:
   --report HTML      Write an interactive HTML report that helps optimize
                      performance. Not sure whether this works well with SLURM
                      or not yet.
+  --secure           Make things a little more secure for webserver use.
+                     So far, it just disables shell access through the :! command.
+                     

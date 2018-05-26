@@ -151,16 +151,16 @@ replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
 --------------------------
 
 runCmd :: CutState -> Handle -> String -> IO CutState
-runCmd st hdl line = case matches of
+runCmd st@(_,cfg,_) hdl line = case matches of
   [(_, fn)] -> fn st hdl $ stripWhiteSpace args
   []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
   _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
   where
     (cmd, args) = break isSpace line
-    matches = filter ((isPrefixOf cmd) . fst) cmds
+    matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
 
-cmds :: [(String, CutState -> Handle -> String -> IO CutState)]
-cmds =
+cmds :: CutConfig -> [(String, CutState -> Handle -> String -> IO CutState)]
+cmds cfg =
   [ ("help"    , cmdHelp  )
   , ("load"    , cmdLoad  )
   , ("write"   , cmdSave  )
@@ -170,9 +170,9 @@ cmds =
   , ("type"    , cmdType  )
   , ("show"    , cmdShow  )
   , ("quit"    , cmdQuit  )
-  , ("!"       , cmdBang  )
   , ("config"  , cmdConfig)
   ]
+  ++ if cfgSecure cfg then [] else [("!", cmdBang)]
 
 ---------------------------
 -- run specific commands --
@@ -181,7 +181,7 @@ cmds =
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
 cmdHelp :: CutState -> Handle -> String -> IO CutState
-cmdHelp st hdl _ = hPutStrLn hdl msg >> return st
+cmdHelp st@(_,cfg,_) hdl _ = hPutStrLn hdl msg >> return st
   where
     -- TODO extract this to a file alonside usage.txt
     msg = "You can type or paste ShortCut code here to run it, \
@@ -195,8 +195,10 @@ cmdHelp st hdl _ = hPutStrLn hdl msg >> return st
           \:drop     to discard the current script (or a specific variable)\n\
           \:quit     to discard the current script and exit the interpreter\n\
           \:type     to print the type of an expression\n\
-          \:show     to print an expression along with its type\n\
-          \:!        to run the rest of the line as a shell command"
+          \:show     to print an expression along with its type"
+          ++ if cfgSecure cfg
+               then ""
+               else "\n:!        to run the rest of the line as a shell command"
 
 -- TODO this is totally duplicating code from putAssign; factor out
 cmdLoad :: CutState -> Handle -> String -> IO CutState
@@ -342,7 +344,7 @@ listCompletions (scr,cfg,_) txt = do
     wordList = fnNames ++ varNames ++ cmdNames
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
     varNames = map ((\(CutVar v) -> v) . fst) scr
-    cmdNames = map ((':':) . fst) cmds
+    cmdNames = map ((':':) . fst) (cmds cfg)
 
 -- this is mostly lifted from Haskeline's completeFile
 myComplete :: MonadIO m => CutState -> CompletionFunc m

@@ -295,6 +295,7 @@ data CutConfig = CutConfig
   , cfgReport  :: Maybe String
   , cfgTestPtn :: Maybe String
   , cfgWidth   :: Maybe Int -- for testing
+  , cfgSecure  :: Bool
   }
   deriving Show
 

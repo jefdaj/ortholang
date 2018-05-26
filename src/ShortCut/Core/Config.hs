@@ -53,6 +53,7 @@ loadConfig mods args = do
     , cfgReport  = rep
     , cfgTestPtn = ctp
     , cfgWidth   = Nothing -- not used except in testing
+    , cfgSecure  = isPresent args $ longOption "secure"
     }
 
 getUsage :: IO Docopt
@@ -72,6 +73,8 @@ hasArg as a = isPresent as $ longOption a
 {- These are done the simple, repetitive way for now to avoid lenses.  That
  - might change in the future though, because turns out getters and setters are
  - horrible!
+ -
+ - Note that cfgSecure is purposely not avialable here.
  -}
 
 -- This is mainly for use in the REPL so no need to return usable data
