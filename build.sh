@@ -9,9 +9,9 @@ export TASTY_HIDE_SUCCESSES=True
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
-nix-build && ./result/bin/shortcut --test $@ # 2>&1 | tee test.log
+# nix-build && ./result/bin/shortcut --test $@ # 2>&1 | tee test.log
 
 # this does an incremental build of the haskell code for faster testing
-# export STACK_ROOT=$PWD/src/.stack-work
-# mkdir -p $STACK_ROOT
-# nix-shell --command '(cd src && stack build && ./.stack-work/install/*/*/*/bin/shortcut --test) || exit'
+export STACK_ROOT=$PWD/src/.stack-work
+mkdir -p $STACK_ROOT
+nix-shell --command '(cd src && stack build && ./.stack-work/install/*/*/*/bin/shortcut --test) || exit'
