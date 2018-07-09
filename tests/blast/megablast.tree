@@ -12,6 +12,8 @@
 |   |       `-- 4d8b00f718.str.list.args -> ../../../cache/lines/a3601ba8b0.txt
 |   |-- lines
 |   |   |-- 08d6f05c35.txt
+|   |   |-- 0c2aa56383.txt
+|   |   |-- 1183f9b6f8.txt -> ../../cache/lines/d24c42156b.txt
 |   |   |-- 14135d2aeb.txt
 |   |   |-- 21be25c2fd.txt
 |   |   |-- 3868abee11.txt
@@ -21,9 +23,8 @@
 |   |   |-- a3601ba8b0.txt
 |   |   |-- a68b303bbe.txt
 |   |   |-- ba320796bf.txt
-|   |   |-- bb21e6a6e6.txt -> ../../cache/lines/d24c42156b.txt
 |   |   |-- d24c42156b.txt
-|   |   |-- d2a65f4ba0.txt
+|   |   |-- d59cb63de9.txt
 |   |   `-- f530950d29.txt
 |   |-- load
 |   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
@@ -62,7 +63,7 @@
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   |-- singletons
-|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/d2a65f4ba0.txt
+|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/0c2aa56383.txt
 |   `-- str
 |       |-- 4cdbcfa070.str -> ../../cache/lines/ba320796bf.txt
 |       `-- 8fa8ede325.str -> ../../cache/lines/f530950d29.txt
@@ -73,4 +74,4 @@
     |-- result -> ../exprs/any/75fb36c62c.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/abf61cfcc9.str.list
 
-24 directories, 49 files
+24 directories, 50 files

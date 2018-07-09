@@ -147,13 +147,13 @@ load_prot_db : str -> pdb
 >> :t load_prot_db_each
 load_prot_db_each : str.list -> pdb.list
 >> :t makeblastdb_nucl
-makeblastdb_nucl : fa.list -> ndb
+makeblastdb_nucl: fa -> ndb
 >> :t makeblastdb_nucl_each
-makeblastdb_nucl_each : fa.list.list -> ndb.list
+makeblastdb_nucl_each : fa.list -> ndb.list
 >> :t makeblastdb_prot
-makeblastdb_prot : faa.list -> pdb
+makeblastdb_prot : faa -> pdb
 >> :t makeblastdb_prot_each
-makeblastdb_prot_each : faa.list.list -> pdb.list
+makeblastdb_prot_each : faa.list -> pdb.list
 >> :t megablast
 megablast : num fna fna -> bht
 >> :t megablast_db
