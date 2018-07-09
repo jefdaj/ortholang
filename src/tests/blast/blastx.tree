@@ -12,19 +12,20 @@
 |   |       `-- 6fced8e42e.str.list.args -> ../../../cache/lines/bc38a64817.txt
 |   |-- lines
 |   |   |-- 14135d2aeb.txt
+|   |   |-- 1dd0d9e5d8.txt
 |   |   |-- 21be25c2fd.txt
 |   |   |-- 2ac5d33127.txt
 |   |   |-- 38cb049e4b.txt
 |   |   |-- 6f77e28b65.txt
 |   |   |-- 778251fd80.txt
-|   |   |-- 7822a5e458.txt
+|   |   |-- 893a0bf129.txt -> ../../cache/lines/e00fb07ddb.txt
 |   |   |-- 902cb58552.txt
 |   |   |-- bc38a64817.txt
 |   |   |-- bdc783547b.txt
+|   |   |-- d59cb63de9.txt
 |   |   |-- e00fb07ddb.txt
 |   |   |-- f530950d29.txt
-|   |   |-- fadeddbb2a.txt
-|   |   `-- fb2f2b5a44.txt -> ../../cache/lines/e00fb07ddb.txt
+|   |   `-- fadeddbb2a.txt
 |   |-- load
 |   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -65,7 +66,7 @@
 |   |-- num
 |   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
 |   |-- singletons
-|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/7822a5e458.txt
+|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/1dd0d9e5d8.txt
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
 |       `-- 8fa8ede325.str -> ../../cache/lines/f530950d29.txt
@@ -76,4 +77,4 @@
     |-- result -> ../exprs/all/08e62fefa6.str.list
     `-- single.str.list -> ../exprs/extract_queries/4acfd7717c.str.list
 
-26 directories, 50 files
+26 directories, 51 files
