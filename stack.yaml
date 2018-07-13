@@ -14,3 +14,6 @@ extra-deps:
 - temporary-1.2.1.1
 - parsec-3.1.13.0
 resolver: lts-11.17
+# ghc-options:
+#     "$targets": -Werror
+#     "$everything": -O2 -N -IO

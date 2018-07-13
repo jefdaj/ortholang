@@ -110,14 +110,17 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
       -- TODO proper quoting of args' at least
       jobl = o'' <.> "log"
       pCmd = [ "parallel"
-             , "--block-size", "1k", "-j8" -- TODO adjust to the machine
-             , "--no-notice"
+             , "--pipe"
+             , "--round-robin"
+             , "--block-size", "1"
+             -- , "-j8" -- TODO match number of cores
+             -- , "--block-size", "1k"
              , "--joblog", jobl
              -- , "--resume TODO can this work without making many more tmpfiles?
-             , "--resume-failed" -- TODO does this work with --pipe?
+             -- , "--resume-failed" -- TODO does this work with --pipe?
              , "--recstart", "'>'"
              , "-k" -- preserve order in the output (more deterministic)
-             , "--pipe"
+             , "--will-cite"
              ]
       args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
   debugL cfg $ "args'': " ++ show args''

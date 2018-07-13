@@ -31,6 +31,7 @@ let
     ++ plots.runDepends;
 
 # see https://github.com/jml/nix-haskell-example
+# TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
   buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
   postInstall = ''
