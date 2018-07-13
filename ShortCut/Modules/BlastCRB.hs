@@ -60,7 +60,7 @@ blastCRBEach :: CutFunction
 blastCRBEach = CutFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
-  , fTypeDesc  = "crb_blast_each : fa.list -> fa.list -> crb.list"
+  , fTypeDesc  = "crb_blast_each : fa -> fa.list -> crb.list"
   , fFixity    = Prefix
   , fRules     = rVectorizeTmps 2 aBlastCRB "crbblast"
   }
