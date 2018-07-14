@@ -55,7 +55,8 @@
 |       |-- b4a2cfacde.str -> ../../cache/lines/357c50b510.txt
 |       `-- f898d1fc03.str -> ../../cache/lines/50adad5c9c.txt
 |-- history.txt
+|-- profile.html
 `-- vars
     `-- result -> ../exprs/list/0b85a1d6fa.str.list
 
-6 directories, 52 files
+6 directories, 53 files

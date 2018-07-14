@@ -56,7 +56,7 @@ mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
-    treeCmd = (shell "tree -aI '*.lock|*.database|*.log|*.tmp'")
+    treeCmd = (shell "tree -aI '*.lock|*.database|*.log|*.tmp|*.html'")
                 { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg ref
