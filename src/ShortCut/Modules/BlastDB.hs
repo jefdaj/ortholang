@@ -208,7 +208,7 @@ rBlastdblist _ _ = error "bad argument to rBlastdblist"
 aBlastdblist :: CutConfig -> Locks -> CutPath -> Action ()
 aBlastdblist cfg ref listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
-  _ <- wrappedCmdExit True cfg ref (Just oPath) [] [Cwd tmpDir, Shell] -- TODO remove stderr?
+  _ <- wrappedCmdExit False True cfg ref (Just oPath) [] [Cwd tmpDir, Shell] -- TODO remove stderr?
     "blastdbget" [tmpDir, ">", listTmp'] [1]
   return ()
   where
@@ -259,7 +259,7 @@ aBlastdbget cfg ref dbPrefix tmpDir nPath = do
   -- TODO was taxdb needed for anything else?
   debugL cfg $ "aBlastdbget dbPrefix'': " ++ dbPrefix''
   debugL cfg $ "aBlastdbget dbPath: " ++ dbPath
-  _ <- wrappedCmdWrite True cfg ref dbPrefix'' [] [] [Cwd tmp']
+  _ <- wrappedCmdWrite False True cfg ref dbPrefix'' [] [] [Cwd tmp']
          "blastdbget" ["-d", dbName, "."]
   writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
   where
@@ -382,7 +382,7 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
   when (length before < 3) $ do
     debugL cfg $ "this is dbPtn: " ++ dbPtn
     debugL cfg $ "this will be dbOut: " ++ dbOut
-    wrappedCmdWrite True cfg ref out' [dbPtn] [] [Cwd cDir'] "makeblastdb"
+    wrappedCmdWrite False True cfg ref out' [dbPtn] [] [Cwd cDir'] "makeblastdb"
       [ "-in"    , fixedPaths
       , "-out"   , dbOut
       , "-title" , takeFileName dbOut

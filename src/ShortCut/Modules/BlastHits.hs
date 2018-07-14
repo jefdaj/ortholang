@@ -73,7 +73,7 @@ extractTargetsEach = let name = "extract_targets_each" in CutFunction
 
 aCutCol :: Bool -> Int -> CutConfig -> Locks -> [CutPath] -> Action ()
 aCutCol uniq n cfg ref [outPath, tsvPath] = do
-  out <- wrappedCmdOut True cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
+  out <- wrappedCmdOut False True cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
   let results = if uniq then sort $ nub $ lines out else lines out
   writeLits cfg ref outPath'' results
   where
@@ -106,7 +106,7 @@ filterEvalueEach = let name = "filter_evalue_each" in CutFunction
 
 aFilterEvalue :: CutConfig -> Locks -> [CutPath] -> Action ()
 aFilterEvalue cfg ref [out, evalue, hits] = do
-  wrappedCmdWrite True cfg ref out'' [evalue', hits'] [] []
+  wrappedCmdWrite False True cfg ref out'' [evalue', hits'] [] []
     "filter_evalue.R" [out', evalue', hits']
   where
     out'    = fromCutPath cfg out
@@ -142,7 +142,7 @@ bestHitsEach = let name = "best_hits_each" in CutFunction
 
 aBestExtract :: CutConfig -> Locks -> [CutPath] -> Action ()
 aBestExtract cfg ref [out, hits] = do
-  wrappedCmdWrite True cfg ref out'' [hits'] [] [] "best_hits.R" [out', hits']
+  wrappedCmdWrite False True cfg ref out'' [hits'] [] [] "best_hits.R" [out', hits']
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aBestExtract" out' [out', hits']

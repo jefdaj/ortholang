@@ -88,6 +88,9 @@ cutModule = CutModule
     , psiblastTrain        -- num faa       faa      -> pssm
     , psiblastTrainAll     -- num faa       faa.list -> pssm
     , psiblastTrainDb      -- num faa       pdb      -> pssm
+
+    -- TODO remove all these if using multi-pssm files?
+    --      or just rewrite the fn signatures to have .pssms or something?
     , psiblastTrainDbEach  -- num faa       pdb.list -> pssm.list
     , psiblastTrainEach    -- num faa       faa.list -> pssm.list
     , psiblastTrainPssms   -- num faa.list  faa      -> pssm.list
@@ -180,7 +183,7 @@ aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
 
       -- TODO need Cwd here too, or maybe instead?
       let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
-      wrappedCmdWrite True cfg ref tPath'
+      wrappedCmdWrite False True cfg ref tPath'
         [dbPre' ++ ".*"]        -- inPtns TODO is this right?
         []                      -- extra outPaths to lock TODO more -out stuff?
         [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?

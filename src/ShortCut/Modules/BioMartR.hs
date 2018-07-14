@@ -231,7 +231,7 @@ aBioMartR :: CutConfig -> Locks
 aBioMartR cfg ref out bmFn bmTmp sTable = do
   debugNeed cfg "aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
-  wrappedCmdWrite True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
+  wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
     "biomartr.R" [out'', bmFn', sTable']
   where
     out'    = fromCutPath cfg out

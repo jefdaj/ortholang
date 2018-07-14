@@ -66,7 +66,7 @@ import qualified Text.Parsec as P
 import ShortCut.Core.Locks (Locks, withReadLock)
 import ShortCut.Core.Util  (readFileStrict, readFileLazy)
 
-import Development.Shake              (Rules, Action)
+import Development.Shake              (Rules, Action, Resource)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find)
@@ -296,6 +296,7 @@ data CutConfig = CutConfig
   , cfgTestPtn :: Maybe String
   , cfgWidth   :: Maybe Int -- for testing
   , cfgSecure  :: Bool
+  , cfgParLock :: Resource
   }
   deriving Show
 
