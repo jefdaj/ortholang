@@ -7,6 +7,7 @@ import qualified Data.Configurator as C
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (fromJust)
 import Data.Text                  (pack)
+import Development.Shake           (newResourceIO)
 -- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
                                    -- removeFiles, liftIO)
 import Paths_ShortCut             (getDataFileName)
@@ -43,6 +44,7 @@ loadConfig mods args = do
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   ctp <- loadField args cfg "pattern"
+  par <- newResourceIO "parallel" 1
   return CutConfig
     { cfgScript  = csc'
     , cfgTmpDir  = fromJust ctd
@@ -54,6 +56,7 @@ loadConfig mods args = do
     , cfgTestPtn = ctp
     , cfgWidth   = Nothing -- not used except in testing
     , cfgSecure  = isPresent args $ longOption "secure"
+    , cfgParLock = par
     }
 
 getUsage :: IO Docopt

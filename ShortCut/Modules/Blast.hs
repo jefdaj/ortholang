@@ -118,13 +118,14 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              , "--joblog", jobl
              -- , "--resume TODO can this work without making many more tmpfiles?
              -- , "--resume-failed" -- TODO does this work with --pipe?
+             , "--halt now,fail=1" -- TODO be more lax in production?
              , "--recstart", "'>'"
              , "-k" -- preserve order in the output (more deterministic)
              , "--will-cite"
              ]
       args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
   debugL cfg $ "args'': " ++ show args''
-  wrappedCmdWrite True cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
+  wrappedCmdWrite True True cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

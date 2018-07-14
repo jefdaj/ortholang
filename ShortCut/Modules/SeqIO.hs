@@ -334,7 +334,7 @@ aSplit name ext cfg ref [outPath, faPath] = do
   -- TODO any locking needed here?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
-  out <- wrappedCmdOut True cfg ref [faPath'] [] [] "split_fasta.py" args
+  out <- wrappedCmdOut False True cfg ref [faPath'] [] [] "split_fasta.py" args
   let loadPaths = map (toCutPath cfg) $ lines out
   writePaths cfg ref outPath'' loadPaths
 aSplit _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths
