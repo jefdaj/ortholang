@@ -55,6 +55,7 @@ myShake cfg rules = do
       , shakeVerbosity = if cfgDebug cfg then Chatty else Quiet
       , shakeThreads   = 0 -- TODO make customizable? increase?
       , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ (maybeToList $ cfgReport cfg)
+      , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
       -- , shakeChange    = ChangeModtimeAndDigest -- TODO test this
       -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeProgress = progressSimple
