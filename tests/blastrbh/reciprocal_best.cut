@@ -1,4 +1,5 @@
 # TODO make a smaller set of genes that will match to speed tests
+# TODO is this actually nondeterministic? seems to come out the same each time
 
 pcc7942 = load_faa "data/7942genes.faa"
 pcc6803 = load_faa "data/6803genes.faa"
