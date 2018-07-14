@@ -112,7 +112,9 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
       pCmd = [ "parallel"
              , "--pipe"
              , "--round-robin"
-             , "--block-size", "1"
+             , "--line-buffer"
+             , "-N1"
+             -- , "--block-size", "1k"
              -- , "-j8" -- TODO match number of cores
              -- , "--block-size", "1k"
              , "--joblog", jobl
@@ -120,7 +122,7 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              -- , "--resume-failed" -- TODO does this work with --pipe?
              , "--halt now,fail=1" -- TODO be more lax in production?
              , "--recstart", "'>'"
-             , "-k" -- preserve order in the output (more deterministic)
+             -- , "-k" -- preserve order in the output (more deterministic)
              , "--will-cite"
              ]
       args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
