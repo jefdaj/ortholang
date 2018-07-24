@@ -22,6 +22,7 @@ let
     pythonPackages.blastdbget
     myPython
     psiblast-exb # TODO does this conflict with ncbi-blast+?
+    muscle
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
