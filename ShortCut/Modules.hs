@@ -22,6 +22,7 @@ import qualified ShortCut.Modules.Summarize as Summarize
 import qualified ShortCut.Modules.Scores    as Scores
 import qualified ShortCut.Modules.Plots     as Plots
 import qualified ShortCut.Modules.PsiBlast  as PsiBlast
+import qualified ShortCut.Modules.Hmmer     as Hmmer
 
 modules :: [CutModule]
 modules =
@@ -45,4 +46,5 @@ modules =
   , Scores.cutModule
   , Plots.cutModule
   , PsiBlast.cutModule
+  , Hmmer.cutModule
   ]

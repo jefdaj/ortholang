@@ -23,6 +23,7 @@ let
     myPython
     psiblast-exb # TODO does this conflict with ncbi-blast+?
     muscle
+    hmmer
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
