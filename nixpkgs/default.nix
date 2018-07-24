@@ -8,6 +8,8 @@ let
   # this is used in place of ncbi-blast everywhere except in crb-blast...
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
+  hmmer = pkgs.callPackage ./hmmer { };
+
   # ... because it only supports exactly 2.2.29
   # and there are reports of a bug in newer ones (still?)
   # TODO patch crb-blast to use the newest one?
@@ -30,6 +32,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast crb-blast psiblast-exb;
+  inherit ncbi-blast crb-blast psiblast-exb hmmer;
   pythonPackages = myPython;
 }
