@@ -116,6 +116,7 @@ executable shortcut
                     ShortCut.Modules.Load,
                     ShortCut.Modules.Length,
                     ShortCut.Modules.Math,
+                    ShortCut.Modules.Muscle,
                     ShortCut.Modules.Permute,
                     ShortCut.Modules.Repeat,
                     ShortCut.Modules.Summarize,
