@@ -7,9 +7,11 @@ import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.Muscle (aln)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
-import ShortCut.Core.Actions (debugA, wrappedCmdWrite, readLit, readLits, writeLits)
+import ShortCut.Core.Actions (debugA, wrappedCmdWrite, wrappedCmdOut, readLit, readLits, writeLits)
 import Data.Scientific (formatScientific, FPFormat(..))
 import Data.List (isPrefixOf, nub, sort)
+import System.Directory           (createDirectoryIfMissing)
+import System.FilePath             (takeFileName, (</>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -29,7 +31,7 @@ hht :: CutType
 hht = CutType
   { tExt  = "hht"
   , tDesc = "HMMER hits table"
-  , tShow = defaultShow -- TODO is this OK?
+  , tShow = defaultShow
   }
 
 hmmbuild :: CutFunction
@@ -61,14 +63,18 @@ aHmmbuild cfg ref [out, fa] = do
     fa'   = fromCutPath cfg fa
 aHmmbuild _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
--- TODO is it parallel?
--- TODO reverse order? currently matches blast fns but not native hmmsearch args
+-- TODO make it parallel and mark as such if possible
 aHmmsearch :: CutConfig -> Locks -> [CutPath] -> Action ()
 aHmmsearch cfg ref [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
-  let eDec = formatScientific Fixed Nothing (read eStr) -- format as decimal
-  wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [] []
-    "hmmsearch" ["-E", eDec, "--tblout", out', hm', fa']
+  let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
+      tmpDir = cfgTmpDir cfg </> "cache" </> "hmmsearch"
+      tmpOut = tmpDir </> takeFileName out'
+  liftIO $ createDirectoryIfMissing True tmpDir
+  wrappedCmdWrite False True cfg ref tmpOut [e', hm', fa'] [] []
+    "hmmsearch" ["-E", eDec, "--tblout", tmpOut, hm', fa']
+  results <- wrappedCmdOut False True cfg ref [tmpOut] [] [] "sed" ["/^#/d", tmpOut]
+  writeLits cfg ref out'' $ lines results
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aHmmsearch" out' [out', fa']

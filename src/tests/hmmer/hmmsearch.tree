@@ -1,5 +1,7 @@
 .
 |-- cache
+|   |-- hmmsearch
+|   |   `-- 5fbeb4e044_3be03e977b_c08cc19988.hht
 |   |-- lines
 |   |   |-- 0cf27272d3.txt
 |   |   |-- 8abd22b6c2.txt
@@ -9,7 +11,8 @@
 |   |   |-- d59cb63de9.txt
 |   |   |-- d751b6766e.txt
 |   |   |-- e00fb07ddb.txt
-|   |   `-- e9819ea256.txt
+|   |   |-- e9819ea256.txt
+|   |   `-- ef515ff638.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -32,7 +35,7 @@
 |   |-- hmmbuild
 |   |   `-- ad58775037.hmm
 |   |-- hmmsearch
-|   |   `-- 5fbeb4e044_3be03e977b_c08cc19988.hht
+|   |   `-- 5fbeb4e044_3be03e977b_c08cc19988.hht -> ../../cache/lines/ef515ff638.txt
 |   |-- list
 |   |   |-- f1651820d3.str.list.list -> ../../cache/lines/d751b6766e.txt
 |   |   `-- fa4677789c.faa.list -> ../../cache/lines/e00fb07ddb.txt
@@ -61,4 +64,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../exprs/diff/ba6294c2e4.str.list
 
-20 directories, 41 files
+21 directories, 43 files
