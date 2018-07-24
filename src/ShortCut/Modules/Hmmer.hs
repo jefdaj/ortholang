@@ -7,13 +7,14 @@ import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.Muscle (aln)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
-import ShortCut.Core.Actions (debugA, wrappedCmdWrite, readLit)
+import ShortCut.Core.Actions (debugA, wrappedCmdWrite, readLit, readLits, writeLits)
 import Data.Scientific (formatScientific, FPFormat(..))
+import Data.List (isPrefixOf, nub, sort)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "hmmer"
-  , mFunctions = [hmmbuild, hmmsearch]
+  , mFunctions = [hmmbuild, hmmsearch, extractHmmTargets]
   }
 
 hmm :: CutType
@@ -75,3 +76,26 @@ aHmmsearch cfg ref [out, e, hm, fa] = do
     hm'   = fromCutPath cfg hm
     fa'   = fromCutPath cfg fa
 aHmmsearch _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
+
+extractHmmTargets :: CutFunction
+extractHmmTargets = let name = "extract_hmm_targets" in CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
+  , fTypeDesc  = name ++ " : hht -> str.list"
+  , fFixity    = Prefix
+  , fRules     = rSimple $ aExtractHmm True 1
+  }
+
+-- TODO clean this up! it's pretty ugly
+aExtractHmm :: Bool -> Int -> CutConfig -> Locks -> [CutPath] -> Action ()
+aExtractHmm uniq n cfg ref [outPath, tsvPath] = do
+  lits <- readLits cfg ref tsvPath'
+  let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
+      lits''  = if uniq then sort $ nub lits' else lits'
+      lits''' = map (\l -> (words l) !! (n - 1)) lits''
+  writeLits cfg ref outPath'' lits'''
+  where
+    outPath'  = fromCutPath cfg outPath
+    outPath'' = debugA cfg "aExtractHmm" outPath' [show n, outPath', tsvPath']
+    tsvPath'  = fromCutPath cfg tsvPath
+aExtractHmm _ _ _ _ _ = error "bad arguments to aExtractHmm"
