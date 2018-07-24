@@ -12,6 +12,7 @@ import qualified ShortCut.Modules.BlastRBH  as BlastRBH
 import qualified ShortCut.Modules.Load      as Load
 import qualified ShortCut.Modules.Length    as Length
 import qualified ShortCut.Modules.Math      as Math
+import qualified ShortCut.Modules.Muscle      as Muscle
 import qualified ShortCut.Modules.Permute   as Permute
 import qualified ShortCut.Modules.Repeat    as Repeat
 import qualified ShortCut.Modules.SeqIO     as SeqIO
@@ -34,6 +35,7 @@ modules =
   , Load.cutModule
   , Length.cutModule
   , Math.cutModule
+  , Muscle.cutModule
   , Permute.cutModule
   , Repeat.cutModule
   , SeqIO.cutModule

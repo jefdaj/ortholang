@@ -29,12 +29,12 @@ version :: Version
 version = Version [0,8,0,1] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "/global/home/users/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/bin"
-libdir     = "/global/home/users/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/lib/x86_64-linux-ghc-8.0.2/ShortCut-0.8.0.1"
-dynlibdir  = "/global/home/users/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/lib/x86_64-linux-ghc-8.0.2"
-datadir    = "/global/home/users/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/share/x86_64-linux-ghc-8.0.2/ShortCut-0.8.0.1"
-libexecdir = "/global/home/users/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/libexec"
-sysconfdir = "/global/home/users/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-8.6/8.0.2/etc"
+bindir     = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/bin"
+libdir     = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/lib/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.1-1XoKmp4UnrhG3PwAGcOPag-shortcut"
+dynlibdir  = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/lib/x86_64-linux-ghc-8.2.2"
+datadir    = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/share/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.1"
+libexecdir = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/libexec/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.1"
+sysconfdir = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "ShortCut_bindir") (\_ -> return bindir)
