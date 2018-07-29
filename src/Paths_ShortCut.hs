@@ -26,14 +26,14 @@ catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
 catchIO = Exception.catch
 
 version :: Version
-version = Version [0,8,0,1] []
+version = Version [0,8,0,2] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/bin"
-libdir     = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/lib/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.1-1XoKmp4UnrhG3PwAGcOPag-shortcut"
+libdir     = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/lib/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.2-46fdpJg4ycN5uz4b3WBp6F-shortcut"
 dynlibdir  = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/lib/x86_64-linux-ghc-8.2.2"
-datadir    = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/share/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.1"
-libexecdir = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/libexec/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.1"
+datadir    = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/share/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.2"
+libexecdir = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/libexec/x86_64-linux-ghc-8.2.2/ShortCut-0.8.0.2"
 sysconfdir = "/home/jefdaj/shortcut/src/.stack-work/install/x86_64-linux-nix/lts-11.17/8.2.2/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
