@@ -15,6 +15,11 @@ import Text.Parsec.Combinator (optional, lookAhead)
 import Text.Parsec            (ParseError)
 -- import ShortCut.Core.Debug    (debug)
 -- import Data.IORef             (IORef)
+import System.FilePath ((</>), takeDirectory)
+
+-------------------
+-- preprocessing --
+-------------------
 
 {- New overall script parse idea:
  -
@@ -31,6 +36,18 @@ stripComments :: String -> String
 stripComments = unlines . map stripComment . lines
   where
     stripComment = takeWhile (/= '#')
+
+-- TODO make this parser nicer like the others? or leave simple like other languages?
+readScriptWithIncludes :: Locks -> FilePath -> IO String
+readScriptWithIncludes ref path = do
+  txt <- readFileStrict ref path
+  fmap unlines $ mapM processInclude $ lines txt
+  where
+    processInclude :: String -> IO String
+    processInclude line = case words (stripComments line) of
+                           ("include":relpath:_) ->
+                             readScriptWithIncludes ref $ takeDirectory path </> relpath
+                           ws -> return line
 
 ----------------
 -- statements --
@@ -106,7 +123,7 @@ parseString c r = runParseM pScript ([], c, r)
 parseFile :: CutConfig -> Locks -> FilePath
           -> IO (Either ParseError CutScript)
 parseFile cfg ref path = do
-  txt <- readFileStrict ref path'
+  txt <- readScriptWithIncludes ref path'
   return $ (parseString cfg ref . stripComments) txt
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
