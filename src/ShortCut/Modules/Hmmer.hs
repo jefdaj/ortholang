@@ -12,11 +12,14 @@ import Data.Scientific (formatScientific, FPFormat(..))
 import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
+import ShortCut.Core.Compile.Vectorize  (rVectorize)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "hmmer"
-  , mFunctions = [hmmbuild, hmmsearch, extractHmmTargets]
+  , mFunctions = [hmmbuild, hmmbuildEach,
+                  hmmsearch, hmmsearchEach,
+                  extractHmmTargets, extractHmmTargetsEach]
   }
 
 hmm :: CutType
@@ -43,6 +46,15 @@ hmmbuild = let name = "hmmbuild" in CutFunction
   , fRules     = rSimple aHmmbuild
   }
 
+hmmbuildEach :: CutFunction
+hmmbuildEach = let name = "hmmbuild_each" in CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
+  , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
+  , fFixity    = Prefix
+  , fRules     = rVectorize 1 aHmmbuild
+  }
+
 hmmsearch :: CutFunction
 hmmsearch = let name = "hmmsearch" in CutFunction
   { fName      = name
@@ -51,6 +63,26 @@ hmmsearch = let name = "hmmsearch" in CutFunction
   , fFixity    = Prefix
   , fRules     = rSimple aHmmsearch
   }
+
+-- TODO is this the right name for mapping over arg 2?
+hmmsearchEach :: CutFunction
+hmmsearchEach = let name = "hmmsearch_each" in CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
+  , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
+  , fFixity    = Prefix
+  , fRules     = rVectorize 2 aHmmsearch
+  }
+
+-- TODO better name, or is this actually the most descriptive way?
+-- hmmsearchEachEach :: CutFunction
+-- hmmsearchEachEach = let name = "hmmsearch_each_each" in CutFunction
+--   { fName      = name
+--   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
+--   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
+--   , fFixity    = Prefix
+--   , fRules     = rVectorize 2 aHmmsearch -- TODO this won't work right?
+--   }
 
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
@@ -90,6 +122,15 @@ extractHmmTargets = let name = "extract_hmm_targets" in CutFunction
   , fTypeDesc  = name ++ " : hht -> str.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aExtractHmm True 1
+  }
+
+extractHmmTargetsEach :: CutFunction
+extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
+  , fTypeDesc  = name ++ " : hht.list -> str.list.list"
+  , fFixity    = Prefix
+  , fRules     = rVectorize 1 $ aExtractHmm True 1
   }
 
 -- TODO clean this up! it's pretty ugly
