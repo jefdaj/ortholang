@@ -1,5 +1,5 @@
 name:               ShortCut
-version:            0.8.0.1
+version:            0.8.0.2
 license:            AGPL-3
 license-file:       license.txt
 synopsis:           Short, reproducible phylogenomic cuts
