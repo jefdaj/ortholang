@@ -1,24 +1,23 @@
 name:               ShortCut
-version:            0.7.0.0
-license:            AGPL-3
-license-file:       license.txt
 synopsis:           Short, reproducible phylogenomic cuts
 author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
+version:            0.7.0.0
+license:            AGPL-3
+license-file:       LICENSE
 build-type:         Simple
 cabal-version:      >=1.10
-data-files:         usage.txt,
-                    data/*.faa,
+data-files:         data/*.faa,
                     data/*.fna,
-                    data/*.gbk,
                     data/*.gbff,
+                    data/*.gbk,
                     data/*.txt,
-                    tests/blast/*.cut,
-                    tests/blast/*.out,
-                    tests/blast/*.tree,
                     tests/biomartr/*.cut,
                     tests/biomartr/*.out,
                     tests/biomartr/*.tree,
+                    tests/blast/*.cut,
+                    tests/blast/*.out,
+                    tests/blast/*.tree,
                     tests/blastcrb/*.cut,
                     tests/blastcrb/*.out,
                     tests/blastdb/*.cut,
@@ -29,23 +28,23 @@ data-files:         usage.txt,
                     tests/blastrbh/*.cut,
                     tests/blastrbh/*.out,
                     tests/dependencies/*.txt,
-                    tests/load/*.cut,
-                    tests/load/*.out,
-                    tests/load/*.tree,
                     tests/length/*.cut,
                     tests/length/*.out,
                     tests/length/*.tree,
                     tests/lists/*.cut,
                     tests/lists/*.out,
                     tests/lists/*.tree,
+                    tests/load/*.cut,
+                    tests/load/*.out,
+                    tests/load/*.tree,
                     tests/math/*.cut,
                     tests/math/*.out,
                     tests/math/*.tree,
-                    tests/plots/*.cut,
-                    tests/plots/*.out,
                     tests/permute/*.cut,
                     tests/permute/*.out,
                     tests/permute/*.tree,
+                    tests/plots/*.cut,
+                    tests/plots/*.out,
                     tests/psiblast/*.cut,
                     tests/psiblast/*.out,
                     tests/psiblast/*.tree,
@@ -54,26 +53,27 @@ data-files:         usage.txt,
                     tests/repeat/*.tree,
                     tests/repl/*.tree,
                     tests/repl/*.txt,
-                    tests/sets/*.cut,
-                    tests/sets/*.out,
-                    tests/sets/*.tree,
                     tests/seqio/*.cut,
                     tests/seqio/*.out,
                     tests/seqio/*.tree,
                     tests/sets/*.cut,
+                    tests/sets/*.cut,
                     tests/sets/*.out,
+                    tests/sets/*.out,
+                    tests/sets/*.tree,
                     tests/sets/*.tree,
                     -- tests/summarize/*.cut,
                     -- tests/summarize/*.out,
                     -- tests/summarize/*.tree,
                     tests/vars/*.cut,
                     tests/vars/*.out,
-                    tests/vars/*.tree
+                    tests/vars/*.tree,
+                    usage.txt,
+                    wrappers/*.sh
 
+-- no separate test binary; run tests with shortcut --test
 executable shortcut
   main-is:          ShortCut.hs
-  -- TODO adjust -N to the actual number of cores!
-  -- TODO get the tests to work with this! (make them single-threaded?)
   ghc-options: 
         -threaded
         -rtsopts

@@ -1,15 +1,15 @@
 with import ./nixpkgs;
 let
-  biomartr   = import ./src/ShortCut/Modules/BioMartR;
-  blast      = import ./src/ShortCut/Modules/Blast;
-  blastrbh   = import ./src/ShortCut/Modules/BlastRBH;
-  seqio      = import ./src/ShortCut/Modules/SeqIO;
-  plots      = import ./src/ShortCut/Modules/Plots;
-  blasthits  = import ./src/ShortCut/Modules/BlastHits;
+  biomartr   = import ./ShortCut/Modules/BioMartR;
+  blast      = import ./ShortCut/Modules/Blast;
+  blastrbh   = import ./ShortCut/Modules/BlastRBH;
+  seqio      = import ./ShortCut/Modules/SeqIO;
+  plots      = import ./ShortCut/Modules/Plots;
+  blasthits  = import ./ShortCut/Modules/BlastHits;
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
-  cabalPkg   = haskellPackages.callPackage ./src/shortcut.nix {};
+  cabalPkg   = haskellPackages.callPackage ./shortcut.nix {};
   runDepends = [
     biomartr
     blast

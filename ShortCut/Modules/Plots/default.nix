@@ -1,18 +1,18 @@
 # TODO pass proper arguments
 # TODO shells for working on individual scripts (split by language?)
 
-with import ../../../../nixpkgs;
+with import ../../../nixpkgs;
 
 let
-  myPython = pkgs.pythonPackages.python.withPackages (ps: with ps; [
-    biopython
-  ]);
-  runDepends = [
-    myPython
-  ];
+  myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
+    dplyr
+    ggplot2
+    readr
+  ];};
+  runDepends = [ myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-seqio";
+  name = "shortcut-plots";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;
@@ -20,7 +20,7 @@ in stdenv.mkDerivation {
     #!/usr/bin/env bash
     source ${stdenv}/setup
     mkdir -p $out/bin
-    for script in $src/*.py; do
+    for script in $src/*.R; do
       dest="$out/bin/$(basename "$script")"
       install -m755 $script $dest
       wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
