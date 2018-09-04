@@ -14,6 +14,6 @@ export TASTY_QUICKCHECK_SHOW_REPLAY=True
 # (nix-build && ./result/bin/shortcut --test $@ +RTS -IO -N -RTS) 2>&1 | tee build.log
 
 # this does an incremental build of the haskell code for faster testing
-export STACK_ROOT=$PWD/src/.stack-work
+export STACK_ROOT=$PWD/.stack-work
 mkdir -p $STACK_ROOT
-nix-shell --command '(cd src && stack build && stack exec shortcut -- --test +RTS -IO -N -RTS) || exit' 2>&1 | tee build.log
+nix-shell --command '(stack build && ./.stack-work/install/*/*/*/bin/shortcut --test) || exit'
