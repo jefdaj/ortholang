@@ -46,7 +46,7 @@ readScriptWithIncludes ref path = do
     processInclude :: String -> IO String
     processInclude line = case words (stripComments line) of
                            ("include":relpath:_) ->
-                             readScriptWithIncludes ref $ takeDirectory path </> relpath
+                             readScriptWithIncludes ref $ takeDirectory path </> (filter (/= '\"') relpath)
                            ws -> return line
 
 ----------------
