@@ -46,8 +46,11 @@ readScriptWithIncludes ref path = do
     processInclude :: String -> IO String
     processInclude line = case words (stripComments line) of
                            ("include":relpath:_) ->
-                             readScriptWithIncludes ref $ takeDirectory path </> (filter (/= '\"') relpath)
+                             readScriptWithIncludes ref $ takeDirectory path </> (stripQuotes relpath)
                            ws -> return line
+
+stripQuotes :: String -> String
+stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 
 ----------------
 -- statements --
