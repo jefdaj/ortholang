@@ -32,7 +32,7 @@ import System.Directory            (createDirectoryIfMissing)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "PsiBLAST"
-  , mDesc = "PsiBLAST (BLAST+) searches using position-specific sequence matrixes"
+  , mDesc = "PsiBLAST (BLAST+) searches using position-specific substitution matrixes"
   , mTypes = [faa, pdb, bht, pssm]
   , mFunctions =
 
