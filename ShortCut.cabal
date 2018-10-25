@@ -77,6 +77,36 @@ data-files:         data/*.faa,
                     usage.txt,
                     wrappers/*.sh
 
+executable reference
+  main-is:          Reference.hs
+  ghc-options:      -Wall
+  default-language: Haskell2010
+  other-modules:    Paths_ShortCut,
+                    ShortCut.Core,
+                    ShortCut.Core.Types,
+                    ShortCut.Modules,
+                    ShortCut.Modules.BioMartR,
+                    ShortCut.Modules.Blast,
+                    ShortCut.Modules.BlastCRB,
+                    ShortCut.Modules.BlastDB,
+                    ShortCut.Modules.BlastHits,
+                    ShortCut.Modules.BlastRBH,
+                    ShortCut.Modules.Cheat,
+                    ShortCut.Modules.Load,
+                    ShortCut.Modules.Length,
+                    ShortCut.Modules.Math,
+                    ShortCut.Modules.Muscle,
+                    ShortCut.Modules.Permute,
+                    ShortCut.Modules.Repeat,
+                    ShortCut.Modules.Summarize,
+                    ShortCut.Modules.SeqIO,
+                    ShortCut.Modules.Sets,
+                    ShortCut.Modules.Sample,
+                    ShortCut.Modules.Scores,
+                    ShortCut.Modules.Plots,
+                    ShortCut.Modules.PsiBlast,
+                    ShortCut.Modules.Hmmer,
+
 -- no separate test binary; run tests with shortcut --test
 executable shortcut
   main-is:          ShortCut.hs
