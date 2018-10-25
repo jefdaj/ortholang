@@ -20,7 +20,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
-  , mTypes = [crb]
+  , mTypes = [fna, faa, crb]
   , mFunctions =
     [ blastCRB
     , blastCRBEach -- TODO someting nicer than this!

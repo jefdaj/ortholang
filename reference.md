@@ -69,6 +69,8 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
+| `fna` | FASTA (nucleic acid) |
+| `faa` | FASTA (amino acid) |
 | `crb` | tab-separated table of conditional reciprocal blast best hits |
 
 Functions:
@@ -87,6 +89,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
+| `str` | string |
 | `ndb` | BLAST nucleotide database |
 | `pdb` | BLAST protein database |
 
@@ -113,6 +116,12 @@ Functions:
 
 Work with BLAST hit tables.
 
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
+| `crb` | tab-separated table of conditional reciprocal blast best hits |
 
 Functions:
 
