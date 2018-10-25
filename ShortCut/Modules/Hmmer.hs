@@ -18,7 +18,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "HMMER"
   , mDesc = "Search sequences with hidden Markov models"
-  , mTypes = [hmm, hht]
+  , mTypes = [faa, aln, hmm, hht]
   , mFunctions = [hmmbuild, hmmbuildEach,
                   hmmsearch, hmmsearchEach,
                   extractHmmTargets, extractHmmTargetsEach]

@@ -13,7 +13,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "MUSCLE"
   , mDesc = "Align sequences with MUSCLE"
-  , mTypes = [aln]
+  , mTypes = [faa, aln]
   , mFunctions = [muscle, muscleEach]
   }
 

@@ -28,7 +28,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
-  , mTypes = [bht]
+  , mTypes = [ndb, pdb, bht]
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?

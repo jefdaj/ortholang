@@ -27,6 +27,8 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
+| `ndb` | BLAST nucleotide database |
+| `pdb` | BLAST protein database |
 | `bht` | tab-separated table of blast hits (outfmt 6) |
 
 Functions:
@@ -89,7 +91,6 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| `str` | string |
 | `ndb` | BLAST nucleotide database |
 | `pdb` | BLAST protein database |
 
@@ -141,6 +142,14 @@ Functions:
 
 Reciprocal BLAST+ best hits.
 
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `faa` | FASTA (amino acid) |
+| `ndb` | BLAST nucleotide database |
+| `pdb` | BLAST protein database |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
 
 Functions:
 
@@ -183,6 +192,12 @@ Functions:
 
 Get the lengths of lists and tables without printing them.
 
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
+| `crb` | tab-separated table of conditional reciprocal blast best hits |
 
 Functions:
 
@@ -215,6 +230,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
+| `faa` | FASTA (amino acid) |
 | `aln` | multiple sequence alignment |
 
 Functions:
@@ -373,6 +389,9 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
+| `faa` | FASTA (amino acid) |
+| `pdb` | BLAST protein database |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
 | `pssm` | PSI-BLAST position-specific substitution matrix as ASCII |
 
 Functions:
@@ -411,6 +430,8 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
+| `faa` | FASTA (amino acid) |
+| `aln` | multiple sequence alignment |
 | `hmm` | hidden markov model |
 | `hht` | HMMER hits table |
 

@@ -19,7 +19,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Length"
   , mDesc = "Get the lengths of lists and tables without printing them"
-  , mTypes = []
+  , mTypes = [bht, crb]
   , mFunctions = [len, lenEach]
   }
 
