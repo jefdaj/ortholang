@@ -4,7 +4,8 @@ module Main where
 -- import ShortCut.Core         (runRepl, evalFile)
 import ShortCut.Core.Types
 import ShortCut.Modules (modules)
-import Data.Maybe (fromMaybe)
+-- import Data.Maybe (fromMaybe)
+import Data.List.Utils (join)
 import Data.List.Split (splitOn)
 
 -- TODO should this generate markdown or html? markdown probably easier
@@ -32,24 +33,28 @@ typesTable :: CutModule -> [String]
 typesTable m =
   [ "Types:"
   , ""
-  , "| Ext | Meaning |"
-  , "| :-- | :------ |"
+  , "| Extension | Meaning |"
+  , "| :-------- | :------ |"
   ]
   -- ++ map (\f -> "| " ++ fName f ++ " | " ++ (fromMaybe "" $ fDesc f) ++ " |") (mFunctions m)
   ++ map (\f -> "| " ++ fName f ++ " | " ++ "" ++ " |") (mFunctions m)
   ++ [""]
 
 functionType :: CutFunction -> String
-functionType = concat . tail . splitOn ":" . fTypeDesc
+functionType = join " | " . barred . map quoted . elems
+  where
+    elems  f  = filter (not . (`elem` [":", "->"])) $ splitOn " " $ fTypeDesc f
+    barred es = [head es, join ", " $ init $ tail es, last es]
+    quoted t  = "`" ++ t ++ "`"
 
 functionsTable :: CutModule -> [String]
 functionsTable m =
   [ "Functions:"
   , ""
-  , "| Name | Type |"
-  , "| :--- | :--- |"
+  , "| Name | Inputs | Output |"
+  , "| :--- | :----- | :----- |"
   ]
-  ++ map (\f -> "| `" ++ fName f ++ "` | `" ++ functionType f ++ "` |") (mFunctions m)
+  ++ map (\f -> "| " ++ functionType f ++ " |") (mFunctions m)
   ++ [""]
 
 -- TODO only use this as default if there's no custom markdown description written?
