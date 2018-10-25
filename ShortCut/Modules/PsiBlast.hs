@@ -33,6 +33,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "PsiBLAST"
   , mDesc = "PsiBLAST (BLAST+) searches using position-specific sequence matrixes"
+  , mTypes = [pssm]
   , mFunctions =
 
     {- There are a lot of these! Some naming conventions:

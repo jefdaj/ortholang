@@ -16,6 +16,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "BlastHits"
   , mDesc = "Work with BLAST hit tables"
+  , mTypes = []
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach

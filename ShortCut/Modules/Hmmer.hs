@@ -18,6 +18,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "HMMER"
   , mDesc = "Search sequences with hidden Markov models"
+  , mTypes = [hmm, hht]
   , mFunctions = [hmmbuild, hmmbuildEach,
                   hmmsearch, hmmsearchEach,
                   extractHmmTargets, extractHmmTargetsEach]
@@ -31,6 +32,7 @@ hmm = CutType
   , tShow = defaultShow
   }
 
+-- TODO add to hit tables types in length, extract_hits etc.
 hht :: CutType
 hht = CutType
   { tExt  = "hht"

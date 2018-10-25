@@ -39,6 +39,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
+  , mTypes = [search, fnagz, faagz]
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
     -- TODO single and _each versions?

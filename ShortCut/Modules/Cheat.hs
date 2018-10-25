@@ -42,6 +42,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Cheat"
   , mDesc = "Run your own script and ShortCut will assume the types are valid"
+  , mTypes = []
   , mFunctions = [cheat]
   }
 

@@ -20,6 +20,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Load"
   , mDesc = "Load generic lists"
+  , mTypes = [] -- TODO include str?
   , mFunctions = [loadList, globFiles]
   }
 

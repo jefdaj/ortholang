@@ -6,9 +6,9 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| parse_searches |  |
-| get_genomes |  |
-| get_proteomes |  |
+| `search` | intermediate table describing biomartr searches |
+| `fna.gz` | gzipped fasta nucleic acid acid (gene list or genome) |
+| `faa.gz` | gzipped fasta amino acid (proteome) |
 
 Functions:
 
@@ -27,32 +27,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| blastn |  |
-| megablast |  |
-| blastp |  |
-| blastx |  |
-| tblastn |  |
-| tblastx |  |
-| blastn_each |  |
-| megablast_each |  |
-| blastp_each |  |
-| blastx_each |  |
-| tblastn_each |  |
-| tblastx_each |  |
-| blastn_db |  |
-| megablast_db |  |
-| blastp_db |  |
-| blastx_db |  |
-| tblastn_db |  |
-| tblastx_db |  |
-| blastn_db_each |  |
-| megablast_db_each |  |
-| blastp_db_each |  |
-| blastx_db_each |  |
-| tblastn_db_each |  |
-| tblastx_db_each |  |
-| concat_bht |  |
-| concat_bht_each |  |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
 
 Functions:
 
@@ -94,8 +69,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| crb_blast |  |
-| crb_blast_each |  |
+| `crb` | tab-separated table of conditional reciprocal blast best hits |
 
 Functions:
 
@@ -113,19 +87,8 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| load_nucl_db |  |
-| load_prot_db |  |
-| load_nucl_db_each |  |
-| load_prot_db_each |  |
-| makeblastdb_nucl_all |  |
-| makeblastdb_prot_all |  |
-| makeblastdb_nucl |  |
-| makeblastdb_prot |  |
-| makeblastdb_nucl_each |  |
-| makeblastdb_prot_each |  |
-| blastdbget |  |
-| blastdblist |  |
-| singletons |  |
+| `ndb` | BLAST nucleotide database |
+| `pdb` | BLAST protein database |
 
 Functions:
 
@@ -150,18 +113,6 @@ Functions:
 
 Work with BLAST hit tables.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| extract_queries |  |
-| extract_queries_each |  |
-| extract_targets |  |
-| extract_targets_each |  |
-| filter_evalue |  |
-| filter_evalue_each |  |
-| best_hits |  |
-| best_hits_each |  |
 
 Functions:
 
@@ -181,28 +132,6 @@ Functions:
 
 Reciprocal BLAST+ best hits.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| blastn_rev |  |
-| megablast_rev |  |
-| blastp_rev |  |
-| tblastx_rev |  |
-| blastn_rev_each |  |
-| megablast_rev_each |  |
-| blastp_rev_each |  |
-| tblastx_rev_each |  |
-| reciprocal_best |  |
-| reciprocal_best_each |  |
-| blastn_rbh |  |
-| megablast_rbh |  |
-| blastp_rbh |  |
-| tblastx_rbh |  |
-| blastn_rbh_each |  |
-| megablast_rbh_each |  |
-| blastp_rbh_each |  |
-| tblastx_rbh_each |  |
 
 Functions:
 
@@ -232,12 +161,6 @@ Functions:
 
 Load generic lists.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| load_list |  |
-| glob_files |  |
 
 Functions:
 
@@ -251,12 +174,6 @@ Functions:
 
 Get the lengths of lists and tables without printing them.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| length |  |
-| length_each |  |
 
 Functions:
 
@@ -270,14 +187,6 @@ Functions:
 
 Basic math.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| + |  |
-| - |  |
-| * |  |
-| / |  |
 
 Functions:
 
@@ -297,8 +206,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| muscle |  |
-| muscle_each |  |
+| `aln` | multiple sequence alignment |
 
 Functions:
 
@@ -312,11 +220,6 @@ Functions:
 
 Generate random permutations of lists.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| leave_each_out |  |
 
 Functions:
 
@@ -329,12 +232,6 @@ Functions:
 
 Repeatdly re-calculate variables using different random seeds.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| repeat_each |  |
-| repeat |  |
 
 Functions:
 
@@ -352,33 +249,9 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| gbk_to_faa |  |
-| gbk_to_faa_each |  |
-| gbk_to_fna |  |
-| gbk_to_fna_each |  |
-| extract_seqs |  |
-| extract_seqs_each |  |
-| extract_ids |  |
-| extract_ids_each |  |
-| translate |  |
-| translate_each |  |
-| concat_fna |  |
-| concat_fna_each |  |
-| concat_faa |  |
-| concat_faa_each |  |
-| split_faa |  |
-| split_faa_each |  |
-| split_fna |  |
-| split_fna_each |  |
-| load_fna |  |
-| load_fna_each |  |
-| load_fna_glob |  |
-| load_faa |  |
-| load_faa_each |  |
-| load_faa_glob |  |
-| load_gbk |  |
-| load_gbk_each |  |
-| load_gbk_glob |  |
+| `gbk` | genbank file |
+| `faa` | FASTA (amino acid) |
+| `fna` | FASTA (nucleic acid) |
 
 Functions:
 
@@ -417,17 +290,6 @@ Functions:
 
 Set operations for use with lists.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| some |  |
-| | |  |
-| any |  |
-| & |  |
-| all |  |
-| ~ |  |
-| diff |  |
 
 Functions:
 
@@ -446,11 +308,6 @@ Functions:
 
 Random (but reproducable) sampling of list elements.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| sample |  |
 
 Functions:
 
@@ -463,28 +320,13 @@ Functions:
 
 Collapse a list of results into a single summary.
 
-Types:
 
-| Extension | Meaning |
-| :-------- | :------ |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
 
 
 ## Scores module
 
 Score repeated variables for plotting.
 
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| score_repeats |  |
-| extract_scores |  |
-| extract_scored |  |
 
 Functions:
 
@@ -503,9 +345,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| histogram |  |
-| linegraph |  |
-| scatterplot |  |
+| `png` | png image of a plot |
 
 Functions:
 
@@ -524,28 +364,7 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| psiblast |  |
-| psiblast_all |  |
-| psiblast_db |  |
-| psiblast_db_each |  |
-| psiblast_each |  |
-| psiblast_each_pssm |  |
-| psiblast_each_pssm_db |  |
-| psiblast_pssm |  |
-| psiblast_pssm_all |  |
-| psiblast_pssm_db |  |
-| psiblast_pssm_db_each |  |
-| psiblast_pssm_each |  |
-| psiblast_pssms |  |
-| psiblast_pssms_all |  |
-| psiblast_pssms_db |  |
-| psiblast_train |  |
-| psiblast_train_all |  |
-| psiblast_train_db |  |
-| psiblast_train_db_each |  |
-| psiblast_train_each |  |
-| psiblast_train_pssms |  |
-| psiblast_train_pssms_db |  |
+| `pssm` | PSI-BLAST position-specific substitution matrix as ASCII |
 
 Functions:
 
@@ -583,12 +402,8 @@ Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| hmmbuild |  |
-| hmmbuild_each |  |
-| hmmsearch |  |
-| hmmsearch_each |  |
-| extract_hmm_targets |  |
-| extract_hmm_targets_each |  |
+| `hmm` | hidden markov model |
+| `hht` | HMMER hits table |
 
 Functions:
 

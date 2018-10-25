@@ -13,6 +13,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Summarize"
   , mDesc = "Collapse a list of results into a single summary"
+  , mTypes = []
   , mFunctions =
     [
     ]

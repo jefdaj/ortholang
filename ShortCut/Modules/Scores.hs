@@ -25,6 +25,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Scores"
   , mDesc = "Score repeated variables for plotting"
+  , mTypes = []
   , mFunctions =
     [ scoreRepeats
     , extractScores

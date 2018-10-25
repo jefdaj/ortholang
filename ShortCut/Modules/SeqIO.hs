@@ -21,6 +21,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
+  , mTypes = [gbk, faa, fna]
   , mFunctions =
     [ gbkToFaa    , gbkToFaaEach
     , gbkToFna    , gbkToFnaEach

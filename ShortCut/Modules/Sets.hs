@@ -2,6 +2,7 @@ module ShortCut.Modules.Sets where
 
 -- TODO unify bops and funs into one thing (all fns have optional infix version?)
 -- TODO writeStrings should delete the outfile on errors!
+-- TODO remove long form of diff?
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -21,6 +22,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Sets"
   , mDesc = "Set operations for use with lists"
+  , mTypes = []
   , mFunctions = some : (concat $ map mkSetFunctions setOpDescs)
   }
 

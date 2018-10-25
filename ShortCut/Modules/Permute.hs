@@ -17,6 +17,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Permute"
   , mDesc = "Generate random permutations of lists"
+  , mTypes = []
   , mFunctions =
     [ leaveEachOut
     -- TODO sample n elements n times

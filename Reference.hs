@@ -28,33 +28,40 @@ import Data.List.Split (splitOn)
 
 -- write short module descriptions for all of them
 
+explainType :: CutType -> String
+explainType Empty = error "explain empty type"
+explainType (ListOf   t) = explainType t -- TODO add the list part?
+explainType (ScoresOf t) = explainType t -- TODO add the scores part?
+explainType t = "| `" ++ tExt t ++ "` | " ++ tDesc t ++ " |"
+
 -- TODO these aren't functions!
 typesTable :: CutModule -> [String]
-typesTable m =
+typesTable m = if null (mTypes m) then [""] else
   [ "Types:"
   , ""
   , "| Extension | Meaning |"
   , "| :-------- | :------ |"
   ]
   -- ++ map (\f -> "| " ++ fName f ++ " | " ++ (fromMaybe "" $ fDesc f) ++ " |") (mFunctions m)
-  ++ map (\f -> "| " ++ fName f ++ " | " ++ "" ++ " |") (mFunctions m)
+  -- ++ map (\f -> "| " ++ fName f ++ " | " ++ "" ++ " |") (mFunctions m)
+  ++ map explainType (mTypes m)
   ++ [""]
 
-functionType :: CutFunction -> String
-functionType = join " | " . barred . map quoted . elems
+explainFunction :: CutFunction -> String
+explainFunction = join " | " . barred . map quoted . elems
   where
     elems  f  = filter (not . (`elem` [":", "->"])) $ splitOn " " $ fTypeDesc f
     barred es = [head es, join ", " $ init $ tail es, last es]
     quoted t  = "`" ++ t ++ "`"
 
 functionsTable :: CutModule -> [String]
-functionsTable m =
+functionsTable m = if null (mFunctions m) then [""] else
   [ "Functions:"
   , ""
   , "| Name | Inputs | Output |"
   , "| :--- | :----- | :----- |"
   ]
-  ++ map (\f -> "| " ++ functionType f ++ " |") (mFunctions m)
+  ++ map (\f -> "| " ++ explainFunction f ++ " |") (mFunctions m)
   ++ [""]
 
 -- TODO only use this as default if there's no custom markdown description written?

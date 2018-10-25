@@ -19,6 +19,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
+  , mTypes = [plot]
   -- , mFunctions = [histogram, linegraph, bargraph, scatterplot, venndiagram]
   , mFunctions = [histogram, linegraph, scatterplot]
   }

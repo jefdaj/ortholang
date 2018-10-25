@@ -15,6 +15,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Math"
   , mDesc = "Basic math"
+  , mTypes = [] -- TODO include num?
   , mFunctions =
     [ mkMathFn "+" (+)
     , mkMathFn "-" (-)

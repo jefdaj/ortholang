@@ -52,6 +52,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
+  , mTypes = [ndb, pdb]
   , mFunctions =
 
     [ loadNuclDB

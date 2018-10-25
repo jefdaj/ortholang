@@ -396,6 +396,7 @@ mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
 data CutModule = CutModule
   { mName :: String
   , mDesc :: String
+  , mTypes     :: [CutType]
   , mFunctions :: [CutFunction]
   }
   -- deriving (Eq, Read)

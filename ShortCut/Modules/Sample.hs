@@ -15,6 +15,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Sample"
   , mDesc = "Random (but reproducable) sampling of list elements"
+  , mTypes = []
   , mFunctions = [sample]
   }
 

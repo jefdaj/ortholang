@@ -16,6 +16,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random seeds"
+  , mTypes = []
   , mFunctions =
     [ repeatEach -- TODO export this from the Core directly?
     , repeatN

@@ -20,6 +20,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "BlastRBH"
   , mDesc = "Reciprocal BLAST+ best hits"
+  , mTypes = []
   , mFunctions =
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
     map mkBlastFromFaRev     blastDescsRev ++
