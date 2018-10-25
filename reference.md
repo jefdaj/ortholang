@@ -1,212 +1,3 @@
-## BiomartR module
-
-Search + download genomes and proteomes from Biomart.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `search` | intermediate table describing biomartr searches |
-| `fna.gz` | gzipped fasta nucleic acid acid (gene list or genome) |
-| `faa.gz` | gzipped fasta amino acid (proteome) |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `parse_searches` | `str.list` | `search` |
-| `get_genomes` | `str.list` | `fna.gz.list` |
-| `get_proteomes` | `str.list` | `faa.gz.list` |
-
-
-## BLAST+ module
-
-Standard NCBI BLAST+ functions.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `ndb` | BLAST nucleotide database |
-| `pdb` | BLAST protein database |
-| `bht` | tab-separated table of blast hits (outfmt 6) |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `blastn` | `num`, `fna`, `fna` | `bht` |
-| `megablast` | `num`, `fna`, `fna` | `bht` |
-| `blastp` | `num`, `faa`, `faa` | `bht` |
-| `blastx` | `num`, `fna`, `faa` | `bht` |
-| `tblastn` | `num`, `faa`, `fna` | `bht` |
-| `tblastx` | `num`, `fna`, `fna` | `bht` |
-| `blastn_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `megablast_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `blastp_each` | `num`, `faa`, `faa.list` | `bht.list` |
-| `blastx_each` | `num`, `fna`, `faa.list` | `bht.list` |
-| `tblastn_each` | `num`, `faa`, `fna.list` | `bht.list` |
-| `tblastx_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `blastn_db` | `num`, `fna`, `ndb` | `bht` |
-| `megablast_db` | `num`, `fna`, `ndb` | `bht` |
-| `blastp_db` | `num`, `faa`, `pdb` | `bht` |
-| `blastx_db` | `num`, `fna`, `pdb` | `bht` |
-| `tblastn_db` | `num`, `faa`, `ndb` | `bht` |
-| `tblastx_db` | `num`, `fna`, `ndb` | `bht` |
-| `blastn_db_each` | `num`, `fna`, `ndb.list` | `bht.list` |
-| `megablast_db_each` | `num`, `fna`, `ndb.list` | `bht.list` |
-| `blastp_db_each` | `num`, `faa`, `pdb.list` | `bht.list` |
-| `blastx_db_each` | `num`, `fna`, `pdb.list` | `bht.list` |
-| `tblastn_db_each` | `num`, `faa`, `ndb.list` | `bht.list` |
-| `tblastx_db_each` | `num`, `fna`, `ndb.list` | `bht.list` |
-| `concat_bht` | `bht.list` | `bht` |
-| `concat_bht_each` | `bht.list.list` | `bht.list` |
-
-
-## CRB-BLAST module
-
-Conditional reciprocal BLAST best hits (Aubry et al. 2014).
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `fna` | FASTA (nucleic acid) |
-| `faa` | FASTA (amino acid) |
-| `crb` | tab-separated table of conditional reciprocal blast best hits |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `crb_blast` | `fa`, `fa` | `crb` |
-| `crb_blast_each` | `fa`, `fa.list` | `crb.list` |
-
-
-## BlastDB module
-
-Create, load, and download BLAST databases.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `ndb` | BLAST nucleotide database |
-| `pdb` | BLAST protein database |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `load_nucl_db` | `str` | `ndb` |
-| `load_prot_db` | `str` | `pdb` |
-| `load_nucl_db_each` | `str.list` | `ndb.list` |
-| `load_prot_db_each` | `str.list` | `pdb.list` |
-| `makeblastdb_nucl_all` | `fa.list` | `ndb` |
-| `makeblastdb_prot_all` | `faa.list` | `pdb` |
-| `makeblastdb_nucl:` | `fa` | `ndb` |
-| `makeblastdb_prot` | `faa` | `pdb` |
-| `makeblastdb_nucl_each` | `fa.list` | `ndb.list` |
-| `makeblastdb_prot_each` | `faa.list` | `pdb.list` |
-| `blastdbget` | `str` | `ndb` |
-| `blastdblist` | `str` | `str.list` |
-| `singletons` | `<whatever>.list` | `<whatever>.list.list` |
-
-
-## BlastHits module
-
-Work with BLAST hit tables.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `bht` | tab-separated table of blast hits (outfmt 6) |
-| `crb` | tab-separated table of conditional reciprocal blast best hits |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `extract_queries` | `<crb/bht>` | `str.list` |
-| `extract_queries_each` | `<crb/bht>.list` | `str.list.list` |
-| `extract_targets` | `<crb/bht>` | `str.list` |
-| `extract_targets_each` | `<crb/bht>.list` | `str.list.list` |
-| `filter_evalue` | `num`, `bht` | `bht` |
-| `filter_evalue_each` | `num`, `bht.list` | `bht.list` |
-| `best_hits` | `bht` | `bht` |
-| `best_hits_each` | `bht.list` | `bht.list` |
-
-
-## BlastRBH module
-
-Reciprocal BLAST+ best hits.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `faa` | FASTA (amino acid) |
-| `ndb` | BLAST nucleotide database |
-| `pdb` | BLAST protein database |
-| `bht` | tab-separated table of blast hits (outfmt 6) |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `blastn_rev` | `num`, `fna`, `fna` | `bht` |
-| `megablast_rev` | `num`, `fna`, `fna` | `bht` |
-| `blastp_rev` | `num`, `faa`, `faa` | `bht` |
-| `tblastx_rev` | `num`, `fna`, `fna` | `bht` |
-| `blastn_rev_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `megablast_rev_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `blastp_rev_each` | `num`, `faa`, `faa.list` | `bht.list` |
-| `tblastx_rev_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `reciprocal_best` | `bht`, `bht` | `bht` |
-| `reciprocal_best_each` | `bht`, `bht.list` | `bht.list` |
-| `blastn_rbh` | `num`, `fna`, `fna` | `bht` |
-| `megablast_rbh` | `num`, `fna`, `fna` | `bht` |
-| `blastp_rbh` | `num`, `faa`, `faa` | `bht` |
-| `tblastx_rbh` | `num`, `fna`, `fna` | `bht` |
-| `blastn_rbh_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `megablast_rbh_each` | `num`, `fna`, `fna.list` | `bht.list` |
-| `blastp_rbh_each` | `num`, `faa`, `faa.list` | `bht.list` |
-| `tblastx_rbh_each` | `num`, `fna`, `fna.list` | `bht.list` |
-
-
-## Load module
-
-Load generic lists.
-
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `load_list` | `str` | `str.list` |
-| `glob_files` | `str` | `str.list` |
-
-
-## Length module
-
-Get the lengths of lists and tables without printing them.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `bht` | tab-separated table of blast hits (outfmt 6) |
-| `crb` | tab-separated table of conditional reciprocal blast best hits |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `length` | `<whatever>.list` | `num` |
-| `length` | `<whatever>.list.list` | `num.list` |
-
-
 ## Math module
 
 Basic math.
@@ -222,48 +13,35 @@ Functions:
 | `/` | `num`, `num` | `num` |
 
 
-## MUSCLE module
+## Load module
 
-Align sequences with MUSCLE.
-
-Types:
-
-| Extension | Meaning |
-| :-------- | :------ |
-| `faa` | FASTA (amino acid) |
-| `aln` | multiple sequence alignment |
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `muscle` | `faa` | `aln` |
-| `muscle_each` | `faa.list` | `aln.list` |
-
-
-## Permute module
-
-Generate random permutations of lists.
+Load generic lists.
 
 
 Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `leave_each_out` | `<whatever>.list` | `<whatever>.list.list` |
+| `load_list` | `str` | `str.list` |
+| `glob_files` | `str` | `str.list` |
 
 
-## Repeat module
+## Sets module
 
-Repeatdly re-calculate variables using different random seeds.
+Set operations for use with lists.
 
 
 Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `repeat_each` | `<outputvar>`, `<inputvar>`, `<inputvars>` | `<output>.list` |
-| `repeat` | `<outputvar>`, `<inputvar>`, `num` | `<output>.list` |
+| `some` | `<whatever>.list.list` | `<whatever>.list` |
+| `|` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
+| `any` | `<whatever>.list.list` | `<whatever>.list` |
+| `&` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
+| `all` | `<whatever>.list.list` | `<whatever>.list` |
+| `~` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
+| `diff` | `<whatever>.list.list` | `<whatever>.list` |
 
 
 ## SeqIO module
@@ -311,74 +89,143 @@ Functions:
 | `load_gbk_glob` | `str` | `gbk.list` |
 
 
-## Sets module
+## BiomartR module
 
-Set operations for use with lists.
-
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `some` | `<whatever>.list.list` | `<whatever>.list` |
-| `|` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
-| `any` | `<whatever>.list.list` | `<whatever>.list` |
-| `&` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
-| `all` | `<whatever>.list.list` | `<whatever>.list` |
-| `~` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
-| `diff` | `<whatever>.list.list` | `<whatever>.list` |
-
-
-## Sample module
-
-Random (but reproducable) sampling of list elements.
-
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `sample` | `<whatever>.list` | `<whatever>.list` |
-
-
-## Summarize module
-
-Collapse a list of results into a single summary.
-
-
-
-
-## Scores module
-
-Score repeated variables for plotting.
-
-
-Functions:
-
-| Name | Inputs | Output |
-| :--- | :----- | :----- |
-| `score_repeats` | `<outputnum>`, `<inputvar>`, `<inputlist>` | `<input>.scores` |
-| `extract_scores` | `<whatever>.scores` | `num.list` |
-| `extract_scored` | `<whatever>.scores` | `<whatever>.list` |
-
-
-## Plots module
-
-Generate half-decent plots.
+Search + download genomes and proteomes from Biomart.
 
 Types:
 
 | Extension | Meaning |
 | :-------- | :------ |
-| `png` | png image of a plot |
+| `search` | intermediate table describing biomartr searches |
+| `fna.gz` | gzipped fasta nucleic acid acid (gene list or genome) |
+| `faa.gz` | gzipped fasta amino acid (proteome) |
 
 Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `histogram` | `str`, `num.list` | `plot` |
-| `linegraph` | `str`, `num.scores` | `plot` |
-| `scatterplot` | `str`, `num.scores` | `plot` |
+| `parse_searches` | `str.list` | `search` |
+| `get_genomes` | `str.list` | `fna.gz.list` |
+| `get_proteomes` | `str.list` | `faa.gz.list` |
+
+
+## BlastDB module
+
+Create, load, and download BLAST databases.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `ndb` | BLAST nucleotide database |
+| `pdb` | BLAST protein database |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `load_nucl_db` | `str` | `ndb` |
+| `load_prot_db` | `str` | `pdb` |
+| `load_nucl_db_each` | `str.list` | `ndb.list` |
+| `load_prot_db_each` | `str.list` | `pdb.list` |
+| `makeblastdb_nucl_all` | `fa.list` | `ndb` |
+| `makeblastdb_prot_all` | `faa.list` | `pdb` |
+| `makeblastdb_nucl:` | `fa` | `ndb` |
+| `makeblastdb_prot` | `faa` | `pdb` |
+| `makeblastdb_nucl_each` | `fa.list` | `ndb.list` |
+| `makeblastdb_prot_each` | `faa.list` | `pdb.list` |
+| `blastdbget` | `str` | `ndb` |
+| `blastdblist` | `str` | `str.list` |
+| `singletons` | `<whatever>.list` | `<whatever>.list.list` |
+
+
+## BLAST+ module
+
+Standard NCBI BLAST+ functions.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `ndb` | BLAST nucleotide database |
+| `pdb` | BLAST protein database |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `blastn` | `num`, `fna`, `fna` | `bht` |
+| `megablast` | `num`, `fna`, `fna` | `bht` |
+| `blastp` | `num`, `faa`, `faa` | `bht` |
+| `blastx` | `num`, `fna`, `faa` | `bht` |
+| `tblastn` | `num`, `faa`, `fna` | `bht` |
+| `tblastx` | `num`, `fna`, `fna` | `bht` |
+| `blastn_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `megablast_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `blastp_each` | `num`, `faa`, `faa.list` | `bht.list` |
+| `blastx_each` | `num`, `fna`, `faa.list` | `bht.list` |
+| `tblastn_each` | `num`, `faa`, `fna.list` | `bht.list` |
+| `tblastx_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `blastn_db` | `num`, `fna`, `ndb` | `bht` |
+| `megablast_db` | `num`, `fna`, `ndb` | `bht` |
+| `blastp_db` | `num`, `faa`, `pdb` | `bht` |
+| `blastx_db` | `num`, `fna`, `pdb` | `bht` |
+| `tblastn_db` | `num`, `faa`, `ndb` | `bht` |
+| `tblastx_db` | `num`, `fna`, `ndb` | `bht` |
+| `blastn_db_each` | `num`, `fna`, `ndb.list` | `bht.list` |
+| `megablast_db_each` | `num`, `fna`, `ndb.list` | `bht.list` |
+| `blastp_db_each` | `num`, `faa`, `pdb.list` | `bht.list` |
+| `blastx_db_each` | `num`, `fna`, `pdb.list` | `bht.list` |
+| `tblastn_db_each` | `num`, `faa`, `ndb.list` | `bht.list` |
+| `tblastx_db_each` | `num`, `fna`, `ndb.list` | `bht.list` |
+| `concat_bht` | `bht.list` | `bht` |
+| `concat_bht_each` | `bht.list.list` | `bht.list` |
+
+
+## BlastHits module
+
+Work with BLAST hit tables.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
+| `crb` | tab-separated table of conditional reciprocal blast best hits |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `extract_queries` | `<crb/bht>` | `str.list` |
+| `extract_queries_each` | `<crb/bht>.list` | `str.list.list` |
+| `extract_targets` | `<crb/bht>` | `str.list` |
+| `extract_targets_each` | `<crb/bht>.list` | `str.list.list` |
+| `filter_evalue` | `num`, `bht` | `bht` |
+| `filter_evalue_each` | `num`, `bht.list` | `bht.list` |
+| `best_hits` | `bht` | `bht` |
+| `best_hits_each` | `bht.list` | `bht.list` |
+
+
+## Length module
+
+Get the lengths of lists and tables without printing them.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
+| `crb` | tab-separated table of conditional reciprocal blast best hits |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `length` | `<whatever>.list` | `num` |
+| `length` | `<whatever>.list.list` | `num.list` |
 
 
 ## PsiBLAST module
@@ -422,6 +269,26 @@ Functions:
 | `psiblast_train_pssms_db` | `num`, `faa.list`, `pdb` | `pssm.list` |
 
 
+## CRB-BLAST module
+
+Conditional reciprocal BLAST best hits (Aubry et al. 2014).
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `fna` | FASTA (nucleic acid) |
+| `faa` | FASTA (amino acid) |
+| `crb` | tab-separated table of conditional reciprocal blast best hits |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `crb_blast` | `fa`, `fa` | `crb` |
+| `crb_blast_each` | `fa`, `fa.list` | `crb.list` |
+
+
 ## HMMER module
 
 Search sequences with hidden Markov models.
@@ -445,5 +312,138 @@ Functions:
 | `hmmsearch_each` | `num`, `hmm.list`, `faa` | `hht.list` |
 | `extract_hmm_targets` | `hht` | `str.list` |
 | `extract_hmm_targets_each` | `hht.list` | `str.list.list` |
+
+
+## BlastRBH module
+
+Reciprocal BLAST+ best hits.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `faa` | FASTA (amino acid) |
+| `ndb` | BLAST nucleotide database |
+| `pdb` | BLAST protein database |
+| `bht` | tab-separated table of blast hits (outfmt 6) |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `blastn_rev` | `num`, `fna`, `fna` | `bht` |
+| `megablast_rev` | `num`, `fna`, `fna` | `bht` |
+| `blastp_rev` | `num`, `faa`, `faa` | `bht` |
+| `tblastx_rev` | `num`, `fna`, `fna` | `bht` |
+| `blastn_rev_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `megablast_rev_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `blastp_rev_each` | `num`, `faa`, `faa.list` | `bht.list` |
+| `tblastx_rev_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `reciprocal_best` | `bht`, `bht` | `bht` |
+| `reciprocal_best_each` | `bht`, `bht.list` | `bht.list` |
+| `blastn_rbh` | `num`, `fna`, `fna` | `bht` |
+| `megablast_rbh` | `num`, `fna`, `fna` | `bht` |
+| `blastp_rbh` | `num`, `faa`, `faa` | `bht` |
+| `tblastx_rbh` | `num`, `fna`, `fna` | `bht` |
+| `blastn_rbh_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `megablast_rbh_each` | `num`, `fna`, `fna.list` | `bht.list` |
+| `blastp_rbh_each` | `num`, `faa`, `faa.list` | `bht.list` |
+| `tblastx_rbh_each` | `num`, `fna`, `fna.list` | `bht.list` |
+
+
+## MUSCLE module
+
+Align sequences with MUSCLE.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `faa` | FASTA (amino acid) |
+| `aln` | multiple sequence alignment |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `muscle` | `faa` | `aln` |
+| `muscle_each` | `faa.list` | `aln.list` |
+
+
+## Sample module
+
+Random (but reproducable) sampling of list elements.
+
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `sample` | `<whatever>.list` | `<whatever>.list` |
+
+
+## Permute module
+
+Generate random permutations of lists.
+
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `leave_each_out` | `<whatever>.list` | `<whatever>.list.list` |
+
+
+## Repeat module
+
+Repeatdly re-calculate variables using different random seeds.
+
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `repeat_each` | `<outputvar>`, `<inputvar>`, `<inputvars>` | `<output>.list` |
+| `repeat` | `<outputvar>`, `<inputvar>`, `num` | `<output>.list` |
+
+
+## Summarize module
+
+Collapse a list of results into a single summary.
+
+
+
+
+## Scores module
+
+Score repeated variables for plotting.
+
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `score_repeats` | `<outputnum>`, `<inputvar>`, `<inputlist>` | `<input>.scores` |
+| `extract_scores` | `<whatever>.scores` | `num.list` |
+| `extract_scored` | `<whatever>.scores` | `<whatever>.list` |
+
+
+## Plots module
+
+Generate half-decent plots.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `png` | png image of a plot |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `histogram` | `str`, `num.list` | `plot` |
+| `linegraph` | `str`, `num.scores` | `plot` |
+| `scatterplot` | `str`, `num.scores` | `plot` |
 
 

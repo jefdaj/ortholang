@@ -26,25 +26,25 @@ import qualified ShortCut.Modules.Hmmer     as Hmmer
 
 modules :: [CutModule]
 modules =
-  [ BioMartR.cutModule
-  , Blast.cutModule
-  , BlastCRB.cutModule
+  [ Math.cutModule
+  , Load.cutModule
+  , Sets.cutModule
+  , SeqIO.cutModule
+  , BioMartR.cutModule
   , BlastDB.cutModule
+  , Blast.cutModule
   , BlastHits.cutModule
+  , Length.cutModule
+  , PsiBlast.cutModule
+  , BlastCRB.cutModule
+  , Hmmer.cutModule
   , BlastRBH.cutModule
   -- , Cheat.cutModule
-  , Load.cutModule
-  , Length.cutModule
-  , Math.cutModule
   , Muscle.cutModule
+  , Sample.cutModule
   , Permute.cutModule
   , Repeat.cutModule
-  , SeqIO.cutModule
-  , Sets.cutModule
-  , Sample.cutModule
   , Summarize.cutModule
   , Scores.cutModule
   , Plots.cutModule
-  , PsiBlast.cutModule
-  , Hmmer.cutModule
   ]
