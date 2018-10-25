@@ -16,7 +16,8 @@ import ShortCut.Core.Compile.Vectorize  (rVectorize)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "hmmer"
+  { mName = "HMMER"
+  , mDesc = "Search sequences with hidden Markov models"
   , mFunctions = [hmmbuild, hmmbuildEach,
                   hmmsearch, hmmsearchEach,
                   extractHmmTargets, extractHmmTargetsEach]

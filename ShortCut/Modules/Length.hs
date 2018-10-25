@@ -16,7 +16,11 @@ import ShortCut.Modules.BlastCRB (crb)
 import Data.Scientific (Scientific())
 
 cutModule :: CutModule
-cutModule = CutModule {mName = "length", mFunctions = [len, lenEach]}
+cutModule = CutModule
+  { mName = "Length"
+  , mDesc = "Get the lengths of lists and tables without printing them"
+  , mFunctions = [len, lenEach]
+  }
 
 -- can't name it length because that's a standard Haskell function
 len :: CutFunction

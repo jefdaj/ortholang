@@ -39,7 +39,11 @@ import Development.Shake
 import ShortCut.Core.Types
 
 cutModule :: CutModule
-cutModule = CutModule { mName = "cheat", mFunctions = [cheat]}
+cutModule = CutModule
+  { mName = "Cheat"
+  , mDesc = "Run your own script and ShortCut will assume the types are valid"
+  , mFunctions = [cheat]
+  }
 
 cheat :: CutFunction
 cheat = CutFunction

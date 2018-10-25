@@ -13,7 +13,8 @@ import System.Random.Shuffle (shuffle')
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "sample"
+  { mName = "Sample"
+  , mDesc = "Random (but reproducable) sampling of list elements"
   , mFunctions = [sample]
   }
 

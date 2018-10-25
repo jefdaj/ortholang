@@ -14,7 +14,8 @@ import ShortCut.Modules.BlastCRB   (crb)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "tables"
+  { mName = "BlastHits"
+  , mDesc = "Work with BLAST hit tables"
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach

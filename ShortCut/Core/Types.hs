@@ -394,6 +394,7 @@ mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
 -- TODO does eq make sense here?
 data CutModule = CutModule
   { mName :: String
+  , mDesc :: String
   , mFunctions :: [CutFunction]
   }
   -- deriving (Eq, Read)

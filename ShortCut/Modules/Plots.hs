@@ -17,7 +17,8 @@ import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "plots"
+  { mName = "Plots"
+  , mDesc = "Generate half-decent plots"
   -- , mFunctions = [histogram, linegraph, bargraph, scatterplot, venndiagram]
   , mFunctions = [histogram, linegraph, scatterplot]
   }

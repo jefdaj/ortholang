@@ -14,7 +14,8 @@ import Data.Scientific (Scientific(), toBoundedInteger)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "repeat"
+  { mName = "Repeat"
+  , mDesc = "Repeatdly re-calculate variables using different random seeds"
   , mFunctions =
     [ repeatEach -- TODO export this from the Core directly?
     , repeatN

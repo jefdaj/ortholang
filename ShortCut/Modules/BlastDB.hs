@@ -50,7 +50,8 @@ import Data.List (isPrefixOf)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "blastdb"
+  { mName = "BlastDB"
+  , mDesc = "Create, load, and download BLAST databases"
   , mFunctions =
 
     [ loadNuclDB

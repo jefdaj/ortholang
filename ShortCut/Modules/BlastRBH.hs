@@ -18,7 +18,8 @@ import ShortCut.Modules.SeqIO      (faa)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "blastrbh"
+  { mName = "BlastRBH"
+  , mDesc = "Reciprocal BLAST+ best hits"
   , mFunctions =
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
     map mkBlastFromFaRev     blastDescsRev ++

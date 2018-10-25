@@ -18,7 +18,8 @@ import ShortCut.Modules.SeqIO      (faa, fna)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "crb-blast"
+  { mName = "CRB-BLAST"
+  , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
   , mFunctions =
     [ blastCRB
     , blastCRBEach -- TODO someting nicer than this!

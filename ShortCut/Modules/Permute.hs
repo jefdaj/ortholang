@@ -15,7 +15,8 @@ import ShortCut.Core.Util           (digest)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "permute"
+  { mName = "Permute"
+  , mDesc = "Generate random permutations of lists"
   , mFunctions =
     [ leaveEachOut
     -- TODO sample n elements n times

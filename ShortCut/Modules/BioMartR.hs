@@ -37,7 +37,8 @@ import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "biomartr"
+  { mName = "BiomartR"
+  , mDesc = "Search + download genomes and proteomes from Biomart"
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
     -- TODO single and _each versions?

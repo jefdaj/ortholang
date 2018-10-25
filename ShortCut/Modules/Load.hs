@@ -18,7 +18,8 @@ import System.Directory (makeRelativeToCurrentDirectory)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "load"
+  { mName = "Load"
+  , mDesc = "Load generic lists"
   , mFunctions = [loadList, globFiles]
   }
 

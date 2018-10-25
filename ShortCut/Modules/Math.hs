@@ -13,7 +13,8 @@ import ShortCut.Core.Actions       (readLit, writeLit, debugA, debugNeed)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "math"
+  { mName = "Math"
+  , mDesc = "Basic math"
   , mFunctions =
     [ mkMathFn "+" (+)
     , mkMathFn "-" (-)

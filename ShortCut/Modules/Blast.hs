@@ -26,7 +26,8 @@ import System.Posix.Escape         (escape)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "blast"
+  { mName = "BLAST+"
+  , mDesc = "Standard NCBI BLAST+ functions"
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?

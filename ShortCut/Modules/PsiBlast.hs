@@ -31,7 +31,8 @@ import System.Directory            (createDirectoryIfMissing)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "psiblast"
+  { mName = "PsiBLAST"
+  , mDesc = "PsiBLAST (BLAST+) searches using position-specific sequence matrixes"
   , mFunctions =
 
     {- There are a lot of these! Some naming conventions:

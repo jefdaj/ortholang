@@ -11,7 +11,8 @@ import Development.Shake.FilePath ((</>))
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "summarize"
+  { mName = "Summarize"
+  , mDesc = "Collapse a list of results into a single summary"
   , mFunctions =
     [
     ]

@@ -11,7 +11,8 @@ import ShortCut.Core.Compile.Vectorize  (rVectorize)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "muscle"
+  { mName = "MUSCLE"
+  , mDesc = "Align sequences with MUSCLE"
   , mFunctions = [muscle, muscleEach]
   }
 
