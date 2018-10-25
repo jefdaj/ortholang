@@ -41,7 +41,7 @@ extractQueries :: CutFunction
 extractQueries = let name = "extract_queries" in CutFunction
   { fName      = name
   , fTypeCheck = tExtract
-  , fTypeDesc  = name ++ " : <crb/bht> -> str.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 1
   }
@@ -50,7 +50,7 @@ extractQueriesEach :: CutFunction
 extractQueriesEach = let name = "extract_queries_each" in CutFunction
   { fName      = name
   , fTypeCheck = tExtractEach
-  , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
   , fRules     = rVectorize 1 $ aCutCol True 1
   }
@@ -59,7 +59,7 @@ extractTargets :: CutFunction
 extractTargets = let name = "extract_targets" in CutFunction
   { fName      = name
   , fTypeCheck = tExtract
-  , fTypeDesc  = name ++ " : <crb/bht> -> str.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 2
   }
@@ -68,7 +68,7 @@ extractTargetsEach :: CutFunction
 extractTargetsEach = let name = "extract_targets_each" in CutFunction
   { fName      = name
   , fTypeCheck = tExtractEach
-  , fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
   , fRules     = rVectorize 1 $ aCutCol True 2
   }
@@ -92,7 +92,7 @@ filterEvalue :: CutFunction
 filterEvalue = let name = "filter_evalue" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, bht] bht
-  , fTypeDesc  = mkTypeDesc name  [num, bht] bht
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, bht] bht
   , fFixity    = Prefix
   , fRules     = rSimple aFilterEvalue
   }
@@ -101,7 +101,7 @@ filterEvalueEach :: CutFunction
 filterEvalueEach = let name = "filter_evalue_each" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rVectorize 2 aFilterEvalue
   }
@@ -128,7 +128,7 @@ bestHits :: CutFunction
 bestHits = let name = "best_hits" in CutFunction
   { fName      = name 
   , fTypeCheck = defaultTypeCheck [bht] bht
-  , fTypeDesc  = mkTypeDesc name  [bht] bht
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht] bht
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
   }
@@ -137,7 +137,7 @@ bestHitsEach :: CutFunction
 bestHitsEach = let name = "best_hits_each" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rVectorize 1 aBestExtract
   }

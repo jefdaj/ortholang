@@ -56,7 +56,7 @@ repeatEach = CutFunction
   { fName      = "repeat_each"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatEach
-  , fTypeDesc  = dRepeatEach
+  , fDesc = Nothing, fTypeDesc  = dRepeatEach
   , fRules  = rRepeatEach
   }
 

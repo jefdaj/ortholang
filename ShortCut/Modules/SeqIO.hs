@@ -69,7 +69,7 @@ gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [gbk] faa
-  , fTypeDesc  = mkTypeDesc name  [gbk] faa
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [gbk] faa
   , fFixity    = Prefix
   , fRules     = rSimpleScript "gbk_to_faa.py"
   }
@@ -80,7 +80,7 @@ gbkToFaaEach :: CutFunction
 gbkToFaaEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
-  , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
   , fRules     = rVectorizeSimpleScript 1 "gbk_to_faa.py"
   }
@@ -91,7 +91,7 @@ gbkToFna :: CutFunction
 gbkToFna = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [gbk] fna
-  , fTypeDesc  = mkTypeDesc name  [gbk] fna
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [gbk] fna
   , fFixity    = Prefix
   , fRules     = rSimpleScript "gbk_to_fna.py"
   }
@@ -102,7 +102,7 @@ gbkToFnaEach :: CutFunction
 gbkToFnaEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
-  , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
   , fFixity    = Prefix
   , fRules     = rVectorizeSimpleScript 1 "gbk_to_fna.py"
   }
@@ -121,7 +121,7 @@ extractIds = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractIds
-  , fTypeDesc  = name ++ " : fa -> str.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : fa -> str.list"
   , fRules     = rSimpleScript "extract_ids.py"
   }
   where
@@ -132,7 +132,7 @@ extractIdsEach = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
-  , fTypeDesc  = name ++ " : fa.list -> str.list.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fRules     = rVectorizeSimpleScript 1 "extract_ids.py"
   }
   where
@@ -157,7 +157,7 @@ extractSeqs = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
-  , fTypeDesc  = name ++ " : fa -> str.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : fa -> str.list"
   , fRules     = rSimpleScript "extract_seqs.py"
   }
   where
@@ -168,7 +168,7 @@ extractSeqsEach = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
-  , fTypeDesc  = name ++ " : fa.list -> str.list.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fRules     = rVectorizeSimpleScript 1 "extract_seqs.py"
   }
   where
@@ -193,7 +193,7 @@ translate = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
-  , fTypeDesc  = mkTypeDesc name  [fna] faa
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [fna] faa
   , fRules     = rSimpleScript "translate.py"
   }
   where
@@ -204,7 +204,7 @@ translateEach = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
-  , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
   , fRules     = rVectorizeSimpleScript 1 "translate.py"
   }
   where
@@ -221,7 +221,7 @@ mkConcat cType = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
-  , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
   , fRules     = rSimple $ aConcat cType
   }
   where
@@ -233,7 +233,7 @@ mkConcatEach cType = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
-  , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
   , fRules     = rVectorize 1 $ aConcat cType
   }
   where
@@ -303,7 +303,7 @@ splitFasta faType = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
-  , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
   , fRules     = rSimple $ aSplit name ext
   }
   where
@@ -315,7 +315,7 @@ splitFastaEach faType = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
-  , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
   , fRules     = rVectorize 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where

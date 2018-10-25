@@ -60,7 +60,7 @@ histogram :: CutFunction
 histogram = let name = "histogram" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str, ListOf num] plot
-  , fTypeDesc  = name ++ " : str num.list -> plot"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : str num.list -> plot"
   , fFixity    = Prefix
   , fRules     = rPlotNumList "histogram.R"
   }
@@ -101,7 +101,7 @@ linegraph :: CutFunction
 linegraph = let name = "linegraph" in CutFunction
   { fName      = name
   , fTypeCheck = tPlotScores
-  , fTypeDesc  = name ++ " : str num.scores -> plot"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : str num.scores -> plot"
   , fFixity    = Prefix
   , fRules     = rPlotRepeatScores "linegraph.R"
   }
@@ -111,7 +111,7 @@ scatterplot :: CutFunction
 scatterplot = let name = "scatterplot" in CutFunction
   { fName      = name
   , fTypeCheck = tPlotScores
-  , fTypeDesc  = name ++ " : str num.scores -> plot"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : str num.scores -> plot"
   , fFixity    = Prefix
   , fRules     = rPlotRepeatScores "scatterplot.R"
   }

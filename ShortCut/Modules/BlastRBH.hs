@@ -46,7 +46,7 @@ mkBlastFromFaRev :: BlastDesc -> CutFunction
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
-  , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRev d
   }
@@ -68,7 +68,7 @@ mkBlastFromFaRevEach :: BlastDesc -> CutFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaRevEach d
   }
@@ -109,7 +109,7 @@ reciprocalBest :: CutFunction
 reciprocalBest = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
-  , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht, bht] bht
   , fFixity    = Prefix
   , fRules     = rSimple aReciprocalBest
   }
@@ -136,7 +136,7 @@ reciprocalBestEach :: CutFunction
 reciprocalBestEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [bht, ListOf bht] (ListOf bht)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rVectorize 2 aReciprocalBest
   }
@@ -151,7 +151,7 @@ mkBlastRbh :: BlastDesc -> CutFunction
 mkBlastRbh d@(bCmd, qType, sType, _) = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
-  , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastRbh d
   }
@@ -175,7 +175,7 @@ mkBlastRbhEach :: BlastDesc -> CutFunction
 mkBlastRbhEach d@(bCmd, qType, sType, _) = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastRbhEach d
   }

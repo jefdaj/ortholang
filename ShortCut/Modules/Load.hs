@@ -42,7 +42,7 @@ globFiles :: CutFunction
 globFiles = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
-  , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix
   , fRules  = rGlobFiles
   }

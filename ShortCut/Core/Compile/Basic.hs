@@ -260,7 +260,7 @@ mkLoad :: String -> CutType -> CutFunction
 mkLoad name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
-  , fTypeDesc  = mkTypeDesc name [str] rtn
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix
   , fRules     = rLoad
   }
@@ -274,7 +274,7 @@ mkLoadList :: String -> CutType -> CutFunction
 mkLoadList name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
-  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
+  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
   , fRules     = rLoadList
   }

@@ -61,7 +61,7 @@ scoreRepeats = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tScoreRepeats
-  , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
   , fRules     = rScoreRepeats
   }
   where
@@ -95,7 +95,7 @@ extractScores :: CutFunction
 extractScores = let name = "extract_scores" in CutFunction
   { fName      = name
   , fTypeCheck = tExtractScores
-  , fTypeDesc  = name ++ " : <whatever>.scores -> num.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <whatever>.scores -> num.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol False 1
   }
@@ -105,7 +105,7 @@ extractScored :: CutFunction
 extractScored = let name = "extract_scored" in CutFunction
   { fName      = name
   , fTypeCheck = tExtractScored
-  , fTypeDesc  = name ++ " : <whatever>.scores -> <whatever>.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <whatever>.scores -> <whatever>.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol False 2
   }

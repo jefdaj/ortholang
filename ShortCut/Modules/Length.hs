@@ -28,7 +28,7 @@ len :: CutFunction
 len = CutFunction
   { fName      = "length"
   , fTypeCheck = tLen
-  , fTypeDesc  = "length : <whatever>.list -> num"
+  , fDesc = Nothing, fTypeDesc  = "length : <whatever>.list -> num"
   , fFixity    = Prefix
   , fRules  = rLen
   }
@@ -37,7 +37,7 @@ lenEach :: CutFunction
 lenEach = CutFunction
   { fName      = "length_each"
   , fTypeCheck = tLenEach
-  , fTypeDesc  = "length : <whatever>.list.list -> num.list"
+  , fDesc = Nothing, fTypeDesc  = "length : <whatever>.list.list -> num.list"
   , fFixity    = Prefix
   , fRules  = rVectorize 1 aLen -- TODO is 1 wrong?
   }

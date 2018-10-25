@@ -24,7 +24,7 @@ sample = CutFunction
   { fName      = name 
   , fFixity    = Prefix
   , fTypeCheck = tSample
-  , fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list"
   , fRules     = rSample
   }
   where
