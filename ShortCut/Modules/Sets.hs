@@ -19,7 +19,8 @@ import ShortCut.Core.Util          (resolveSymlinks)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "setops"
+  { mName = "Sets"
+  , mDesc = "Set operations for use with lists"
   , mFunctions = some : (concat $ map mkSetFunctions setOpDescs)
   }
 

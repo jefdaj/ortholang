@@ -19,7 +19,8 @@ import ShortCut.Modules.Load       (mkLoaders)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "seqio"
+  { mName = "SeqIO"
+  , mDesc = "Sequence file manipulations using BioPython's SeqIO"
   , mFunctions =
     [ gbkToFaa    , gbkToFaaEach
     , gbkToFna    , gbkToFnaEach

@@ -23,7 +23,8 @@ import ShortCut.Core.Compile.Basic (rSimple)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "scores"
+  { mName = "Scores"
+  , mDesc = "Score repeated variables for plotting"
   , mFunctions =
     [ scoreRepeats
     , extractScores
