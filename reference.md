@@ -230,7 +230,7 @@ Functions:
 
 ## PsiBLAST module
 
-PsiBLAST (BLAST+) searches using position-specific sequence matrixes.
+PsiBLAST (BLAST+) searches using position-specific substitution matrixes.
 
 Types:
 
