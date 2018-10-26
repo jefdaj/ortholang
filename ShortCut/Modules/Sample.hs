@@ -24,8 +24,13 @@ sample = CutFunction
   { fName      = name 
   , fFixity    = Prefix
   , fTypeCheck = tSample
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list"
   , fRules     = rSample
+  , fTypeDesc  = name ++ " : num <whatever>.list -> <whatever>.list"
+  , fDesc = Just "Take a random sample from a list. Can be used to test your\n\
+                 \algorithm on a smaller set of genes/genomes, or as the 'permute'\n\
+                 \step in the permute, repeat, summarize (PRS) pattern. Because of the\n\
+                 \way ShortCut caches tempfiles, calling it more than once will\n\
+                 \give the same sublist each time! For different sublists, use PRS."
   }
   where
     name = "sample"

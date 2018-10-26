@@ -184,10 +184,14 @@ cmds cfg =
 cmdHelp :: CutState -> Handle -> String -> IO CutState
 cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
   where
+    fHelp f = fTypeDesc f ++ case fDesc f of
+                Nothing -> ""
+                Just s  -> "\n\n" ++ s
+    tHelp t = tDesc t
     msg = case words line of
             [w] -> head $ catMaybes
-                     [ fmap fTypeDesc $ findFunction cfg w
-                     , fmap tDesc $ findType     cfg w
+                     [ fmap fHelp $ findFunction cfg w
+                     , fmap tHelp $ findType     cfg w
                      , Just $ "sorry, no function or filetype is named '" ++ w ++ "'"
                      ]
             _ -> def
