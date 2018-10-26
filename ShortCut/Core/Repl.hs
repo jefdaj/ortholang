@@ -186,7 +186,7 @@ cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
   where
     fHelp f = fTypeDesc f ++ case fDesc f of
                 Nothing -> ""
-                Just s  -> "\n\n" ++ s
+                Just s  -> "\n\n" ++ s ++ "\n"
     tHelp t = tDesc t
     msg = case words line of
             [w] -> head $ catMaybes
