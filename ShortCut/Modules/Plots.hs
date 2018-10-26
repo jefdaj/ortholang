@@ -149,14 +149,14 @@ depRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
   _ -> ""
 
 
-----------------------------
--- plot <whatever>.scores --
-----------------------------
+-------------------
+-- plot X.scores --
+-------------------
 
 bargraph = undefined
 
--------------------------------
--- plot <whatever>.list.list --
--------------------------------
+----------------------
+-- plot X.list.list --
+----------------------
 
 venndiagram = undefined

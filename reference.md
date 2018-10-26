@@ -35,13 +35,13 @@ Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `some` | `<whatever>.list.list` | `<whatever>.list` |
-| `|` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
-| `any` | `<whatever>.list.list` | `<whatever>.list` |
-| `&` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
-| `all` | `<whatever>.list.list` | `<whatever>.list` |
-| `~` | `<whatever>.list`, `<whatever>.list` | `<whatever>.list` |
-| `diff` | `<whatever>.list.list` | `<whatever>.list` |
+| `some` | `X.list.list` | `X.list` |
+| `|` | `X.list`, `X.list` | `X.list` |
+| `any` | `X.list.list` | `X.list` |
+| `&` | `X.list`, `X.list` | `X.list` |
+| `all` | `X.list.list` | `X.list` |
+| `~` | `X.list`, `X.list` | `X.list` |
+| `diff` | `X.list.list` | `X.list` |
 
 
 ## SeqIO module
@@ -137,7 +137,7 @@ Functions:
 | `makeblastdb_prot_each` | `faa.list` | `pdb.list` |
 | `blastdbget` | `str` | `ndb` |
 | `blastdblist` | `str` | `str.list` |
-| `singletons` | `<whatever>.list` | `<whatever>.list.list` |
+| `singletons` | `X.list` | `X.list.list` |
 
 
 ## BLAST+ module
@@ -224,8 +224,8 @@ Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `length` | `<whatever>.list` | `num` |
-| `length` | `<whatever>.list.list` | `num.list` |
+| `length` | `X.list` | `num` |
+| `length` | `X.list.list` | `num.list` |
 
 
 ## PsiBLAST module
@@ -379,7 +379,7 @@ Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `sample` | `<whatever>.list` | `<whatever>.list` |
+| `sample` | `num`, `X.list` | `X.list` |
 
 
 ## Permute module
@@ -391,7 +391,7 @@ Functions:
 
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
-| `leave_each_out` | `<whatever>.list` | `<whatever>.list.list` |
+| `leave_each_out` | `X.list` | `X.list.list` |
 
 
 ## Repeat module
@@ -424,8 +424,8 @@ Functions:
 | Name | Inputs | Output |
 | :--- | :----- | :----- |
 | `score_repeats` | `<outputnum>`, `<inputvar>`, `<inputlist>` | `<input>.scores` |
-| `extract_scores` | `<whatever>.scores` | `num.list` |
-| `extract_scored` | `<whatever>.scores` | `<whatever>.list` |
+| `extract_scores` | `X.scores` | `num.list` |
+| `extract_scored` | `X.scores` | `X.list` |
 
 
 ## Plots module

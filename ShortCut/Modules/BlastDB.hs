@@ -503,7 +503,7 @@ singletons :: CutFunction
 singletons = CutFunction
   { fName      = name
   , fFixity    = Prefix
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : X.list -> X.list.list"
   , fTypeCheck = tSingletons
   , fRules     = rSingletons
   }

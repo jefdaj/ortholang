@@ -50,8 +50,8 @@ setOpDescs =
 mkSetFunctions :: SetOpDesc -> [CutFunction]
 mkSetFunctions (foldName, opChar, setFn) = [setBop, setFold]
   where
-    mkBopDesc  name = name ++ " : <whatever>.list -> <whatever>.list -> <whatever>.list"
-    mkFoldDesc name = name ++ " : <whatever>.list.list -> <whatever>.list"
+    mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
+    mkFoldDesc name = name ++ " : X.list.list -> X.list"
     setBop = CutFunction
       { fName      = [opChar]
       , fTypeCheck = tSetBop
@@ -136,7 +136,7 @@ some :: CutFunction
 some = CutFunction
   { fName      = "some"
   , fTypeCheck = tSetFold
-  , fDesc = Nothing, fTypeDesc  = "some : <whatever>.list.list -> <whatever>.list"
+  , fDesc = Nothing, fTypeDesc  = "some : X.list.list -> X.list"
   , fFixity    = Prefix
   , fRules     = rSome
   }

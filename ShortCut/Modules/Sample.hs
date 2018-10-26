@@ -25,7 +25,7 @@ sample = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = tSample
   , fRules     = rSample
-  , fTypeDesc  = name ++ " : num <whatever>.list -> <whatever>.list"
+  , fTypeDesc  = name ++ " : num X.list -> X.list"
   , fDesc = Just "Take a random sample from a list. Can be used to test your\n\
                  \algorithm on a smaller set of genes/genomes, or as the 'permute'\n\
                  \step in the permute, repeat, summarize (PRS) pattern.\n\n\

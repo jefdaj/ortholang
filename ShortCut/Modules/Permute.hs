@@ -75,7 +75,7 @@ leaveEachOut = let name = "leave_each_out" in CutFunction
   { fName      = name 
   , fFixity    = Prefix
   , fTypeCheck = combosTypeCheck
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <whatever>.list -> <whatever>.list.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : X.list -> X.list.list"
   , fRules     = rPermute dropEach
   }
 
