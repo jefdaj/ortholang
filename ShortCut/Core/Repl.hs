@@ -28,6 +28,7 @@ import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf, filter)
 import Data.List.Utils          (delFromAL)
+import Data.Maybe               (catMaybes)
 import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
@@ -181,13 +182,20 @@ cmds cfg =
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
 cmdHelp :: CutState -> Handle -> String -> IO CutState
-cmdHelp st@(_,cfg,_) hdl _ = hPutStrLn hdl msg >> return st
+cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
   where
-    -- TODO extract this to a file alonside usage.txt
-    msg = "You can type or paste ShortCut code here to run it, \
+    msg = case words line of
+            [w] -> head $ catMaybes
+                     [ fmap fTypeDesc $ findFunction cfg w
+                     , fmap tDesc $ findType     cfg w
+                     , Just $ "sorry, no function or filetype is named '" ++ w ++ "'"
+                     ]
+            _ -> def
+    -- TODO extract this to a file alonside usage.txt?
+    def = "You can type or paste ShortCut code here to run it, \
           \same as in a script.\n\
           \There are also some extra commands:\n\n\
-          \:help     to print this help text\n\
+          \:help     to print info about a function or filetype\n\
           \:load     to load a script (same as typing the file contents)\n\
           \:write    to write the current script to a file\n\
           \:depends  to show which variables a given variable depends on\n\

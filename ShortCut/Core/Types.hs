@@ -12,8 +12,9 @@ module ShortCut.Core.Types
   , CutExpr(..)
   , CompiledExpr(..)
   , CutConfig(..)
-  , listFunctionNames
+  , findType
   , findFunction
+  , listFunctionNames
   , operatorChars
   -- , WrapperConfig(..)
   , CutType(..)
@@ -175,6 +176,7 @@ prefixOf (CutBop _ _ _ n _ _ ) = case n of
 type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
+-- TODO tExt etc aren't well defined for the other constructors... is that a problem?
 data CutType
   = Empty -- TODO remove this? should never be a need to define an empty list
   | ListOf CutType
@@ -312,6 +314,11 @@ findFunction cfg name = find (\f -> fName f == name) fs
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
 
+findType :: CutConfig -> String -> Maybe CutType
+findType cfg ext = find (\t -> tExt t == ext) ts
+  where
+    ms = cfgModules cfg
+    ts = concatMap mTypes ms
 
 listFunctions :: CutConfig -> [CutFunction]
 listFunctions cfg = concat $ map mFunctions $ cfgModules cfg

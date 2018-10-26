@@ -1,12 +1,12 @@
 A scripting language that makes short work of phylogenomic cuts.
 
 Usage:
-  shortcut --help | --version
+  shortcut --help FNORTYPE | --version
   shortcut --test [--pattern PATTERN]
   shortcut [options]
 
 Options:
-  --help             Print this help text and exit.
+  --help FNORTYPE    Print possibly-helpful info about a function or filetype.
   --version          Print version number and exit.
   --debug            Print debugging messages to stderr
   --test             Run tests. May be combined with a wrapper script.
