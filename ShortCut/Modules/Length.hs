@@ -10,7 +10,7 @@ import ShortCut.Core.Actions  (readPaths, writeLit, debugA)
 import ShortCut.Core.Paths    (exprPath, fromCutPath,
                                toCutPath, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr)
-import ShortCut.Core.Compile.Vectorize     (rVectorize)
+import ShortCut.Core.Compile.Map     (rMap)
 import ShortCut.Modules.Blast  (bht)
 import ShortCut.Modules.BlastCRB (crb)
 import Data.Scientific (Scientific())
@@ -39,7 +39,7 @@ lenEach = CutFunction
   , fTypeCheck = tLenEach
   , fDesc = Nothing, fTypeDesc  = "length : X.list.list -> num.list"
   , fFixity    = Prefix
-  , fRules  = rVectorize 1 aLen -- TODO is 1 wrong?
+  , fRules  = rMap 1 aLen -- TODO is 1 wrong?
   }
 
 tLen :: [CutType] -> Either String CutType

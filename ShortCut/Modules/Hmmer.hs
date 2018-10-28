@@ -12,7 +12,7 @@ import Data.Scientific (formatScientific, FPFormat(..))
 import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
-import ShortCut.Core.Compile.Vectorize  (rVectorize)
+import ShortCut.Core.Compile.Map  (rMap)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -55,7 +55,7 @@ hmmbuildEach = let name = "hmmbuild_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   , fFixity    = Prefix
-  , fRules     = rVectorize 1 aHmmbuild
+  , fRules     = rMap 1 aHmmbuild
   }
 
 hmmsearch :: CutFunction
@@ -74,7 +74,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
   , fFixity    = Prefix
-  , fRules     = rVectorize 2 aHmmsearch
+  , fRules     = rMap 2 aHmmsearch
   }
 
 -- TODO better name, or is this actually the most descriptive way?
@@ -84,7 +84,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
 --   , fFixity    = Prefix
---   , fRules     = rVectorize 2 aHmmsearch -- TODO this won't work right?
+--   , fRules     = rMap 2 aHmmsearch -- TODO this won't work right?
 --   }
 
 -- TODO is it parallel?
@@ -133,7 +133,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fDesc = Nothing, fTypeDesc  = name ++ " : hht.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rVectorize 1 $ aExtractHmm True 1
+  , fRules     = rMap 1 $ aExtractHmm True 1
   }
 
 -- TODO clean this up! it's pretty ugly

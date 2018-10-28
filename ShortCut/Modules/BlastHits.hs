@@ -5,7 +5,7 @@ import ShortCut.Core.Types
 
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
-import ShortCut.Core.Compile.Vectorize  (rVectorize)
+import ShortCut.Core.Compile.Map  (rMap)
 import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, debugA)
 -- import ShortCut.Core.Debug         (debugA )
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
@@ -52,7 +52,7 @@ extractQueriesEach = let name = "extract_queries_each" in CutFunction
   , fTypeCheck = tExtractEach
   , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rVectorize 1 $ aCutCol True 1
+  , fRules     = rMap 1 $ aCutCol True 1
   }
 
 extractTargets :: CutFunction
@@ -70,7 +70,7 @@ extractTargetsEach = let name = "extract_targets_each" in CutFunction
   , fTypeCheck = tExtractEach
   , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rVectorize 1 $ aCutCol True 2
+  , fRules     = rMap 1 $ aCutCol True 2
   }
 
 aCutCol :: Bool -> Int -> CutConfig -> Locks -> [CutPath] -> Action ()
@@ -103,7 +103,7 @@ filterEvalueEach = let name = "filter_evalue_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rVectorize 2 aFilterEvalue
+  , fRules     = rMap 2 aFilterEvalue
   }
 
 aFilterEvalue :: CutConfig -> Locks -> [CutPath] -> Action ()
@@ -139,7 +139,7 @@ bestHitsEach = let name = "best_hits_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rVectorize 1 aBestExtract
+  , fRules     = rMap 1 aBestExtract
   }
 
 aBestExtract :: CutConfig -> Locks -> [CutPath] -> Action ()

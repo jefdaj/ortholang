@@ -12,7 +12,7 @@ import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
                                     wrappedCmdOut, wrappedCmdWrite, writeCachedLines)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
-import ShortCut.Core.Compile.Vectorize  (rVectorize, rVectorizeSimpleScript)
+import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
 import System.FilePath             ((</>), (<.>), takeDirectory)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
@@ -82,7 +82,7 @@ gbkToFaaEach = CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
-  , fRules     = rVectorizeSimpleScript 1 "gbk_to_faa.py"
+  , fRules     = rMapSimpleScript 1 "gbk_to_faa.py"
   }
   where
     name = "gbk_to_faa_each"
@@ -104,7 +104,7 @@ gbkToFnaEach = CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
   , fFixity    = Prefix
-  , fRules     = rVectorizeSimpleScript 1 "gbk_to_fna.py"
+  , fRules     = rMapSimpleScript 1 "gbk_to_fna.py"
   }
   where
     name = "gbk_to_fna_each"
@@ -133,7 +133,7 @@ extractIdsEach = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
   , fDesc = Nothing, fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fRules     = rVectorizeSimpleScript 1 "extract_ids.py"
+  , fRules     = rMapSimpleScript 1 "extract_ids.py"
   }
   where
     name = "extract_ids_each"
@@ -169,7 +169,7 @@ extractSeqsEach = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
   , fDesc = Nothing, fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fRules     = rVectorizeSimpleScript 1 "extract_seqs.py"
+  , fRules     = rMapSimpleScript 1 "extract_seqs.py"
   }
   where
     name = "extract_seqs_each"
@@ -205,7 +205,7 @@ translateEach = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
-  , fRules     = rVectorizeSimpleScript 1 "translate.py"
+  , fRules     = rMapSimpleScript 1 "translate.py"
   }
   where
     name = "translate_each"
@@ -234,7 +234,7 @@ mkConcatEach cType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
-  , fRules     = rVectorize 1 $ aConcat cType
+  , fRules     = rMap 1 $ aConcat cType
   }
   where
     ext  = extOf cType
@@ -316,7 +316,7 @@ splitFastaEach faType = CutFunction
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
-  , fRules     = rVectorize 1 $ aSplit name ext -- TODO is 1 wrong?
+  , fRules     = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where
     ext  = extOf faType

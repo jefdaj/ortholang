@@ -24,9 +24,9 @@ import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Compile.Map  (singleton)
+import ShortCut.Core.Compile.Map2 (singleton)
 import ShortCut.Core.Paths (fromGeneric)
-import ShortCut.Core.Compile.Vectorize (rVectorize)
+import ShortCut.Core.Compile.Map (rMap)
 import ShortCut.Core.Locks (withReadLock)
 import System.Process
 import Data.String.Utils (split)
@@ -183,11 +183,11 @@ filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
--- we use two different ones here because it matches the rVectorize behavior of using just fn name
+-- we use two different ones here because it matches the rMap behavior of using just fn name
 blastdbgetCache :: CutConfig -> CutPath
 blastdbgetCache cfg = cacheDir cfg "blastdbget"
 
--- we use two different ones here because it matches the rVectorize behavior of using just fn name
+-- we use two different ones here because it matches the rMap behavior of using just fn name
 makeblastdbCache :: CutConfig -> CutPath
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
@@ -471,14 +471,14 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 -- map1of1 :: CutType -> CutType -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
--- rVectorize :: Int -> (CutConfig -> Locks -> [CutPath] -> Action ()) -> RulesFn
--- rVectorize index actFn = rVecMain index Nothing actFn'
+-- rMap :: Int -> (CutConfig -> Locks -> [CutPath] -> Action ()) -> RulesFn
+-- rMap index actFn = rVecMain index Nothing actFn'
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
 rMakeblastdbEach st@(_,cfg,_) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
-  (rVectorize 1 act1) st expr'
+  (rMap 1 act1) st expr'
   where
     -- faType = typeOf e
     tmpDir = makeblastdbCache cfg 

@@ -7,7 +7,7 @@ import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
 import ShortCut.Core.Actions (debugA, wrappedCmdWrite)
-import ShortCut.Core.Compile.Vectorize  (rVectorize)
+import ShortCut.Core.Compile.Map  (rMap)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -40,7 +40,7 @@ muscleEach = let name = "muscle_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf aln)
   , fDesc = Nothing, fTypeDesc  = name ++ " : faa.list -> aln.list"
   , fFixity    = Prefix
-  , fRules     = rVectorize 1 aMuscle
+  , fRules     = rMap 1 aMuscle
   }
 
 -- TODO is it parallel?
