@@ -32,40 +32,46 @@ import System.Directory            (createDirectoryIfMissing)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "PsiBLAST"
-  , mDesc = "PsiBLAST (BLAST+) searches using position-specific substitution matrixes"
+  , mDesc = "Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.\n\
+            \\n\
+            \There are a lot of these! Some naming conventions:\n\
+            \\n\
+            \* A fn with `train` trains and returns one or more pssms ; one without\n\
+            \`train` runs a regular blast search and returns hits.\n\
+            \\n\
+            \* A fn with `db` takes one or more blast databases directly; one without\n\
+            \`db` auto-builds the db(s) from one or more fastas.\n\
+            \\n\
+            \* A fn with `all` takes a list of fastas and creates one db from it.\n\
+            \\n\
+            \* A fn with `each` maps over its last argument. The difference between\n\
+            \`each` and `all` is that `each` returns a list of results, whereas `all`\n\
+            \summarizes them into one thing.\n\
+            \\n\
+            \* A fn with `pssms` (plural) takes a list of pssm queries and combines\n\
+            \their hits into one big table.\n\
+            \\n\
+            \So for example...\n\n\
+            \\n\
+            \```\n\
+            \psiblast_train_all : num faa faa.list -> pssm\n\
+            \  auto-builds one blast db from a list of fasta files\n\
+            \  trains a pssm for the query fasta on it\n\
+            \  returns the pssm\n\
+            \```\n\
+            \\n\
+            \```\n\
+            \psiblast_each : num faa faa.list -> bht.list\n\
+            \  auto-builds one db per subject fasta\n\
+            \  trains a pssm for the query fasta against each one\n\
+            \  runs a final psiblast search against each one using the pssm\n\
+            \  returns a list of hit tables\n\
+            \```\n\
+            \\n\
+            \TODO individual help descriptions for each fn"
+
   , mTypes = [faa, pdb, bht, pssm]
   , mFunctions =
-
-    {- There are a lot of these! Some naming conventions:
-     -
-     - A fn with "train" trains and returns one or more pssms ; one without
-     - "train" runs a regular blast search and returns hits.
-     -
-     - A fn with "db" takesone or more blast databases directly; one without
-     - "db" auto-builds the db(s) from one or more fastas.
-     -
-     - A fn with "all" takes a list of fastas and creates one db from it.
-     -
-     - A fn with "each" vectorizes its last argument. The difference between
-     - "each" and "all" is that "each" returns a list of results, whereas "all"
-     - collapses it into one big result.
-     -
-     - A fn with "pssms" (not "pssm") takes a list of pssm queries and combines
-     - their hits into one big table. TODO less confusing name for that?
-     -
-     - So for example...
-     -
-     - psiblast_train_all : num faa faa.list -> pssm
-     -   auto-builds one blast db from a list of fasta files
-     -   trains a pssm for the query fasta on it
-     -   returns the pssm
-     -
-     - psiblast_each : num faa faa.list -> bht.list
-     -   auto-builds one db per subject fasta
-     -   trains a pssm for the query fasta against each one
-     -   runs a final psiblast search against each one using the pssm
-     -   returns a list of hit tables
-     -}
 
     -- runs without obvious errors, but needs more careful verification:
     [ psiblast             -- num faa       faa      -> bht

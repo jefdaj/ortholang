@@ -230,7 +230,44 @@ Functions:
 
 ## PsiBLAST module
 
-PsiBLAST (BLAST+) searches using position-specific substitution matrixes.
+Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.
+
+There are a lot of these! Some naming conventions:
+
+* A fn with `train` trains and returns one or more pssms ; one without
+`train` runs a regular blast search and returns hits.
+
+* A fn with `db` takes one or more blast databases directly; one without
+`db` auto-builds the db(s) from one or more fastas.
+
+* A fn with `all` takes a list of fastas and creates one db from it.
+
+* A fn with `each` maps over its last argument. The difference between
+`each` and `all` is that `each` returns a list of results, whereas `all`
+summarizes them into one thing.
+
+* A fn with `pssms` (plural) takes a list of pssm queries and combines
+their hits into one big table.
+
+So for example...
+
+
+```
+psiblast_train_all : num faa faa.list -> pssm
+  auto-builds one blast db from a list of fasta files
+  trains a pssm for the query fasta on it
+  returns the pssm
+```
+
+```
+psiblast_each : num faa faa.list -> bht.list
+  auto-builds one db per subject fasta
+  trains a pssm for the query fasta against each one
+  runs a final psiblast search against each one using the pssm
+  returns a list of hit tables
+```
+
+TODO individual help descriptions for each fn.
 
 Types:
 
