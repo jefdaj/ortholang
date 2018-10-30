@@ -14,7 +14,10 @@ import System.Random.Shuffle (shuffle')
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Sample"
-  , mDesc = "Random (but reproducable) sampling of list elements"
+  , mDesc = "Random (but reproducable) sampling of list elements.\n\n\
+            \WARNING: Because of the way ShortCut caches tempfiles, calling these\n\
+            \more than once will give the same sublist each time! For different\n\
+            \sublists, use in combination with the 'repeat' function"
   , mTypes = []
   , mFunctions = [sample]
   }
@@ -28,10 +31,7 @@ sample = CutFunction
   , fTypeDesc  = name ++ " : num X.list -> X.list"
   , fDesc = Just "Take a random sample from a list. Can be used to test your\n\
                  \algorithm on a smaller set of genes/genomes, or as the 'permute'\n\
-                 \step in the permute, repeat, summarize (PRS) pattern.\n\n\
-                 \WARNING: Because of the way ShortCut caches tempfiles, calling it\n\
-                 \more than once will give the same sublist each time! For different\n\
-                 \sublists, use it in combination with the 'repeat' function."
+                 \step in the permute, repeat, summarize (PRS) pattern."
   }
   where
     name = "sample"

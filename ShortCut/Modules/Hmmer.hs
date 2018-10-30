@@ -40,6 +40,9 @@ hht = CutType
   , tShow = defaultShow
   }
 
+-- TODO hmmfetch : str -> hmm
+-- TODO hmmfetch_each : str.list -> hmm.list
+
 hmmbuild :: CutFunction
 hmmbuild = let name = "hmmbuild" in CutFunction
   { fName      = name

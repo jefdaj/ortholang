@@ -411,6 +411,10 @@ Functions:
 
 Random (but reproducable) sampling of list elements.
 
+WARNING: Because of the way ShortCut caches tempfiles, calling these
+more than once will give the same sublist each time! For different
+sublists, use in combination with the 'repeat' function.
+
 
 Functions:
 
