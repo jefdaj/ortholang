@@ -14,6 +14,7 @@ module ShortCut.Core.Types
   , CutConfig(..)
   , findType
   , findFunction
+  , listFunctions
   , listFunctionNames
   , operatorChars
   -- , WrapperConfig(..)

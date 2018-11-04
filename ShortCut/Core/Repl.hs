@@ -26,7 +26,8 @@ import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
-import Data.List                (isPrefixOf, filter)
+import Data.List                (isPrefixOf, isInfixOf, filter)
+import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (catMaybes)
 import Prelude           hiding (print)
@@ -187,7 +188,12 @@ cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
     fHelp f = fTypeDesc f ++ case fDesc f of
                 Nothing -> ""
                 Just s  -> "\n\n" ++ s ++ "\n"
-    tHelp t = tDesc t
+    tHelp t = "The " ++ tExt t ++ " extension is for " ++ tDesc t ++ " files.\n\n" ++ tFnList t
+    tFnList t = unlines $ ["You can create them with these functions:"] ++ outputs ++ ["", "And consume them with these functions:"] ++ inputs
+                where
+                  descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
+                  outputs = filter (\d -> (tExt t) `isInfixOf` (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
+                  inputs  = filter (\d -> (tExt t) `isInfixOf` (head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
     msg = case words line of
             [w] -> head $ catMaybes
                      [ fmap fHelp $ findFunction cfg w

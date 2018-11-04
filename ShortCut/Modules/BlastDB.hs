@@ -414,7 +414,7 @@ makeblastdbNucl :: CutFunction
 makeblastdbNucl = CutFunction
   { fName      = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
-  , fDesc = Nothing, fTypeDesc  = "makeblastdb_nucl: fa -> ndb"
+  , fDesc = Nothing, fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
