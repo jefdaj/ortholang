@@ -11,7 +11,7 @@ import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
 import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM)
-import System.Directory           (createDirectoryIfMissing, removeFile)
+import System.Directory           (createDirectoryIfMissing, removeFile, copyFile)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -60,6 +60,8 @@ mockRepl stdinLines path cfg ref = do
     return ()
   out <- readFile tmpPath
   writeFile path $ toGeneric cfg out
+  -- this is sometimes helpful when developing tests:
+  -- copyFile tmpPath "/tmp/latest.txt"
   removeFile tmpPath
   return ()
 

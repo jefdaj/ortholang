@@ -1,11 +1,11 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 >> :t |
-| : <whatever.list> -> <whatever>.list -> <whatever>.list
+| : X.list -> X.list -> X.list
 >> :t ~
-~ : <whatever.list> -> <whatever>.list -> <whatever>.list
+~ : X.list -> X.list -> X.list
 >> :t &
-& : <whatever.list> -> <whatever>.list -> <whatever>.list
+& : X.list -> X.list -> X.list
 >> :t *
 * : num num -> num
 >> :t +
@@ -15,9 +15,9 @@ Type :help for a list of the available commands.
 >> :t /
 / : num num -> num
 >> :t all
-all : <whatever.list> -> <whatever>.list -> <whatever>.list
+all : X.list.list -> X.list
 >> :t any
-any : <whatever.list> -> <whatever>.list -> <whatever>.list
+any : X.list.list -> X.list
 >> :t best_hits
 best_hits : bht -> bht
 >> :t best_hits_each
@@ -81,9 +81,9 @@ concat_bht_each : bht.list.list -> bht.list
 >> :t crb_blast
 crb_blast : fa -> fa -> crb
 >> :t crb_blast_each
-crb_blast_each : fa.list -> fa.list -> crb.list
+crb_blast_each : fa -> fa.list -> crb.list
 >> :t diff
-diff : <whatever.list> -> <whatever>.list -> <whatever>.list
+diff : X.list.list -> X.list
 >> :t extract_ids
 extract_ids : fa -> str.list
 >> :t extract_ids_each
@@ -119,11 +119,11 @@ get_proteomes : str.list -> faa.gz.list
 >> :t glob_files
 glob_files : str -> str.list
 >> :t leave_each_out
-leave_each_out : <whatever>.list -> <whatever>.list.list
+leave_each_out : X.list -> X.list.list
 >> :t length
-length : <whatever>.list -> num
+length : X.list -> num
 >> :t length_each
-length : <whatever>.list.list -> num.list
+length : X.list.list -> num.list
 >> :t load_faa
 load_faa : str -> faa
 >> :t load_faa_each
@@ -147,7 +147,7 @@ load_prot_db : str -> pdb
 >> :t load_prot_db_each
 load_prot_db_each : str.list -> pdb.list
 >> :t makeblastdb_nucl
-makeblastdb_nucl: fa -> ndb
+makeblastdb_nucl : fa -> ndb
 >> :t makeblastdb_nucl_each
 makeblastdb_nucl_each : fa.list -> ndb.list
 >> :t makeblastdb_prot
@@ -181,7 +181,7 @@ repeat : <outputvar> <inputvar> num -> <output>.list
 >> :t repeat_each
 repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list
 >> :t some
-some : <whatever>.list.list -> <whatever>.list
+some : X.list.list -> X.list
 >> :t tblastn
 tblastn : num faa fna -> bht
 >> :t tblastn_db
