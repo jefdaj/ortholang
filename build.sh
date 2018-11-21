@@ -7,13 +7,17 @@
 export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
-# export TASTY_HIDE_SUCCESSES=True
+export TASTY_HIDE_SUCCESSES=True
+[[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
-# (nix-build && ./result/bin/shortcut --test $@ +RTS -IO -N -RTS) 2>&1 | tee build.log
+echo "testing nix build..."
+(nix-build -j$(nproc) && ./result/bin/shortcut --test --pattern output $@ +RTS -IO -N -RTS) 2>&1 | tee nix-build.log
 
 # this does an incremental build of the haskell code for faster testing
+echo "testing stack build..."
 export STACK_ROOT=$PWD/.stack-work
 mkdir -p $STACK_ROOT
-nix-shell --command '(stack build && ./.stack-work/install/*/*/*/bin/shortcut --test) || exit'
+cmd='(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut --test) || exit'
+nix-shell --command "$cmd" 2>&1 | tee stack-build.log
