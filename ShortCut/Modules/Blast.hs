@@ -106,6 +106,8 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
       (bCmd', args') = case bCmd of
         "blastn"    -> ("blastn", ["-task","blastn"] ++ args)
         "megablast" -> ("blastn", args)
+        -- TODO is this possible/helpful in newer version of blast?
+        -- "blastp"    -> ("blastp", ["-f'm S'", "-s T"] ++ args) -- see doi:10.1093/bioinformatics/btm585
         _           -> (bCmd, args)
       -- Terrible hack, but seems to parallelize BLAST commands without error.
       -- It should also allow each part of the overall BLAST to be run with srun.
@@ -115,8 +117,8 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
              , "--pipe"
              , "--round-robin"
              , "--line-buffer"
-             , "-N1"
-             -- , "--block-size", "1k"
+             -- , "-N1"
+             , "--block-size", "100"
              -- , "-j8" -- TODO match number of cores
              -- , "--block-size", "1k"
              , "--joblog", jobl
