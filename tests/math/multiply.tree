@@ -1,16 +1,12 @@
 .
 |-- cache
-|   `-- lines
-|       |-- 0c1d624885.txt
-|       |-- 202270fe5b.txt
-|       `-- 2a13ac791a.txt
 |-- exprs
 |   |-- multiply
-|   |   `-- 4578706b58_5b85e6eec8.num -> ../../cache/lines/0c1d624885.txt
+|   |   `-- 4578706b58_5b85e6eec8.num -> ../../cache/lines/...
 |   `-- num
-|       |-- 992d750479.num -> ../../cache/lines/202270fe5b.txt
-|       `-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
+|       |-- 992d750479.num -> ../../cache/lines/...
+|       `-- ea11b49459.num -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/multiply/4578706b58_5b85e6eec8.num
 
-6 directories, 7 files
+5 directories, 4 files

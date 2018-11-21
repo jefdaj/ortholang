@@ -2,17 +2,6 @@
 |-- cache
 |   |-- hmmsearch
 |   |   `-- 5fbeb4e044_3be03e977b_c08cc19988.hht
-|   |-- lines
-|   |   |-- 0cf27272d3.txt
-|   |   |-- 8abd22b6c2.txt
-|   |   |-- 902cb58552.txt
-|   |   |-- bdc783547b.txt
-|   |   |-- ca30601c48.txt
-|   |   |-- d59cb63de9.txt
-|   |   |-- d751b6766e.txt
-|   |   |-- e00fb07ddb.txt
-|   |   |-- e9819ea256.txt
-|   |   `-- ef515ff638.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -25,33 +14,33 @@
 |   |-- blastp_db
 |   |   `-- 4f7795b38a_4d0e43d616_46b5852d89.bht
 |   |-- diff
-|   |   `-- ba6294c2e4.str.list -> ../../cache/lines/d59cb63de9.txt
+|   |   `-- ba6294c2e4.str.list -> ../../cache/lines/...
 |   |-- extract_hmm_targets
-|   |   `-- c9c168ad05.str.list -> ../../cache/lines/ca30601c48.txt
+|   |   `-- c9c168ad05.str.list -> ../../cache/lines/...
 |   |-- extract_seqs
 |   |   `-- c08cc19988_86fa47f1b5.faa
 |   |-- extract_targets
-|   |   `-- 84cae9923d.str.list -> ../../cache/lines/ca30601c48.txt
+|   |   `-- 84cae9923d.str.list -> ../../cache/lines/...
 |   |-- hmmbuild
 |   |   `-- ad58775037.hmm
 |   |-- hmmsearch
-|   |   `-- 5fbeb4e044_3be03e977b_c08cc19988.hht -> ../../cache/lines/ef515ff638.txt
+|   |   `-- 5fbeb4e044_3be03e977b_c08cc19988.hht -> ../../cache/lines/...
 |   |-- list
-|   |   |-- f1651820d3.str.list.list -> ../../cache/lines/d751b6766e.txt
-|   |   `-- fa4677789c.faa.list -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- f1651820d3.str.list.list -> ../../cache/lines/...
+|   |   `-- fa4677789c.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- makeblastdb_prot
-|   |   `-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
+|   |   `-- ced061f0b2.pdb -> ../../cache/lines/...
 |   |-- muscle
 |   |   `-- a8af1a2fe0.aln
 |   |-- num
-|   |   |-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
-|   |   `-- efc8362dcc.num -> ../../cache/lines/e9819ea256.txt
+|   |   |-- 3e281fad0f.num -> ../../cache/lines/...
+|   |   `-- efc8362dcc.num -> ../../cache/lines/...
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
-|       `-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       `-- b9eaf59b0c.str -> ../../cache/lines/...
 `-- vars
     |-- hits.bht -> ../exprs/blastp_db/4f7795b38a_4d0e43d616_46b5852d89.bht
     |-- hits2.hht -> ../exprs/hmmsearch/5fbeb4e044_3be03e977b_c08cc19988.hht
@@ -64,4 +53,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../exprs/diff/ba6294c2e4.str.list
 
-21 directories, 43 files
+20 directories, 33 files

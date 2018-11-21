@@ -1,14 +1,8 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- emptyfna.txt -> ../../cache/lines/4b84fa0567.txt
-|   |   `-- f61974bf8f.txt -> ../../cache/lines/50eca95f06.txt
-|   |-- lines
-|   |   |-- 4b84fa0567.txt
-|   |   |-- 50eca95f06.txt
-|   |   |-- 5bb3f27328.txt
-|   |   |-- 691dd4d722.txt
-|   |   `-- cad7634989.txt
+|   |   |-- emptyfna.txt -> ../../cache/lines/...
+|   |   `-- f61974bf8f.txt -> ../../cache/lines/...
 |   `-- load
 |       |-- d8da51f7cd.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
 |       `-- ec9540d17e.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
@@ -19,14 +13,14 @@
 |   |   |-- 1a2d376906.fna
 |   |   `-- 455f27117a.fna
 |   |-- list
-|   |   `-- 53aa247bf9.fna.list -> ../../cache/lines/5bb3f27328.txt
+|   |   `-- 53aa247bf9.fna.list -> ../../cache/lines/...
 |   |-- load_gbk
 |   |   |-- 4f798984f2.gbk -> ../../cache/load/d8da51f7cd.gbk
 |   |   `-- c5cc3f4b63.gbk -> ../../cache/load/ec9540d17e.gbk
 |   `-- str
-|       |-- 7ec89da918.str -> ../../cache/lines/cad7634989.txt
-|       `-- a8d18fa355.str -> ../../cache/lines/691dd4d722.txt
+|       |-- 7ec89da918.str -> ../../cache/lines/...
+|       `-- a8d18fa355.str -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/concat_fna/eb1aea4e88.fna
 
-11 directories, 18 files
+10 directories, 13 files

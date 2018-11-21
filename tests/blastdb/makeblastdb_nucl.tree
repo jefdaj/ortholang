@@ -3,41 +3,16 @@
 |   |-- each
 |   |   |-- 3b3e2bc4a4
 |   |   |   |-- 0412f21d46.ndb -> ../../../exprs/makeblastdb_nucl/0412f21d46.ndb
-|   |   |   |-- 0412f21d46.ndb.args -> ../../../cache/lines/b076b419bd.txt
+|   |   |   |-- 0412f21d46.ndb.args -> ../../../cache/lines/...
 |   |   |   |-- 23f474a06c.ndb -> ../../../exprs/makeblastdb_nucl/23f474a06c.ndb
-|   |   |   `-- 23f474a06c.ndb.args -> ../../../cache/lines/77cfba7b0f.txt
+|   |   |   `-- 23f474a06c.ndb.args -> ../../../cache/lines/...
 |   |   `-- 7d30f74bea
 |   |       |-- 6dcad54f42.num -> ../../../exprs/length/6dcad54f42.num
-|   |       |-- 6dcad54f42.num.args -> ../../../cache/lines/2001686c6d.txt
+|   |       |-- 6dcad54f42.num.args -> ../../../cache/lines/...
 |   |       |-- be3449585f.num -> ../../../exprs/length/be3449585f.num
-|   |       |-- be3449585f.num.args -> ../../../cache/lines/73ce63218a.txt
+|   |       |-- be3449585f.num.args -> ../../../cache/lines/...
 |   |       |-- e4d8547734.num -> ../../../exprs/length/e4d8547734.num
-|   |       `-- e4d8547734.num.args -> ../../../cache/lines/57bf151e59.txt
-|   |-- lines
-|   |   |-- 0815de9417.txt
-|   |   |-- 0d8c78081b.txt -> ../../cache/lines/d860635d17.txt
-|   |   |-- 181f13624a.txt
-|   |   |-- 1f98704802.txt
-|   |   |-- 2001686c6d.txt
-|   |   |-- 2a13ac791a.txt
-|   |   |-- 3c6da16f12.txt
-|   |   |-- 3ce4648d84.txt
-|   |   |-- 4013469028.txt
-|   |   |-- 42fb7081a8.txt
-|   |   |-- 57bf151e59.txt
-|   |   |-- 615fc32080.txt
-|   |   |-- 73ce63218a.txt
-|   |   |-- 77cfba7b0f.txt
-|   |   |-- 878a78d9d7.txt
-|   |   |-- 955ad728c3.txt
-|   |   |-- a565568821.txt -> ../../cache/lines/e1e5fdbeba.txt
-|   |   |-- acb31eab14.txt
-|   |   |-- b076b419bd.txt
-|   |   |-- b3af6e63c4.txt
-|   |   |-- c9fce61422.txt
-|   |   |-- d860635d17.txt
-|   |   |-- dbf5c71df7.txt
-|   |   `-- e1e5fdbeba.txt
+|   |       `-- e4d8547734.num.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
 |   |   `-- 737dfdb34e.fna -> $WORKDIR/data/6803genes.fna
@@ -56,38 +31,38 @@
 |           `-- e1e5fdbeba.ndb.nsq
 |-- exprs
 |   |-- any
-|   |   `-- 87febd70b0.ndb.list -> ../../cache/lines/b3af6e63c4.txt
+|   |   `-- 87febd70b0.ndb.list -> ../../cache/lines/...
 |   |-- length
-|   |   |-- 6dcad54f42.num -> ../../cache/lines/2a13ac791a.txt
-|   |   |-- be3449585f.num -> ../../cache/lines/42fb7081a8.txt
-|   |   `-- e4d8547734.num -> ../../cache/lines/2a13ac791a.txt
+|   |   |-- 6dcad54f42.num -> ../../cache/lines/...
+|   |   |-- be3449585f.num -> ../../cache/lines/...
+|   |   `-- e4d8547734.num -> ../../cache/lines/...
 |   |-- length_each
-|   |   `-- 899a0f7071.num.list -> ../../cache/lines/4013469028.txt
+|   |   `-- 899a0f7071.num.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 337c5e4400.ndb.list -> ../../cache/lines/878a78d9d7.txt
-|   |   |-- 38cf091dcc.fna.list -> ../../cache/lines/d860635d17.txt
-|   |   |-- b72d792449.fna.list -> ../../cache/lines/e1e5fdbeba.txt
-|   |   |-- cde7968bf5.ndb.list -> ../../cache/lines/3c6da16f12.txt
-|   |   |-- dce833455e.ndb.list.list -> ../../cache/lines/181f13624a.txt
-|   |   |-- edaff2a24b.ndb.list.list -> ../../cache/lines/acb31eab14.txt
-|   |   `-- f283a14ffc.fna.list -> ../../cache/lines/3ce4648d84.txt
+|   |   |-- 337c5e4400.ndb.list -> ../../cache/lines/...
+|   |   |-- 38cf091dcc.fna.list -> ../../cache/lines/...
+|   |   |-- b72d792449.fna.list -> ../../cache/lines/...
+|   |   |-- cde7968bf5.ndb.list -> ../../cache/lines/...
+|   |   |-- dce833455e.ndb.list.list -> ../../cache/lines/...
+|   |   |-- edaff2a24b.ndb.list.list -> ../../cache/lines/...
+|   |   `-- f283a14ffc.fna.list -> ../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   |   `-- f110b4b1c9.fna -> ../../cache/load/737dfdb34e.fna
 |   |-- makeblastdb_nucl
-|   |   |-- 0412f21d46.ndb -> ../../cache/lines/c9fce61422.txt
-|   |   |-- 23f474a06c.ndb -> ../../cache/lines/615fc32080.txt
-|   |   |-- 34a61e93f2.ndb -> ../../cache/lines/c9fce61422.txt
-|   |   `-- 611e5b4cfb.ndb -> ../../cache/lines/615fc32080.txt
+|   |   |-- 0412f21d46.ndb -> ../../cache/lines/...
+|   |   |-- 23f474a06c.ndb -> ../../cache/lines/...
+|   |   |-- 34a61e93f2.ndb -> ../../cache/lines/...
+|   |   `-- 611e5b4cfb.ndb -> ../../cache/lines/...
 |   |-- makeblastdb_nucl_all
-|   |   `-- bb5d85d845.ndb -> ../../cache/lines/955ad728c3.txt
+|   |   `-- bb5d85d845.ndb -> ../../cache/lines/...
 |   |-- makeblastdb_nucl_each
-|   |   `-- 9087a5152d.ndb.list -> ../../cache/lines/878a78d9d7.txt
+|   |   `-- 9087a5152d.ndb.list -> ../../cache/lines/...
 |   |-- singletons
-|   |   `-- bb5d85d845.fna.list.list -> ../../cache/lines/dbf5c71df7.txt
+|   |   `-- bb5d85d845.fna.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 7da80bde02.str -> ../../cache/lines/0815de9417.txt
-|       `-- a2fd369878.str -> ../../cache/lines/1f98704802.txt
+|       |-- 7da80bde02.str -> ../../cache/lines/...
+|       `-- a2fd369878.str -> ../../cache/lines/...
 `-- vars
     |-- both.ndb -> ../exprs/makeblastdb_nucl_all/bb5d85d845.ndb
     |-- each.ndb.list -> ../exprs/makeblastdb_nucl_each/9087a5152d.ndb.list
@@ -96,4 +71,4 @@
     |-- singles.ndb.list -> ../exprs/list/337c5e4400.ndb.list
     `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-22 directories, 74 files
+21 directories, 50 files

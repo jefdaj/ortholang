@@ -3,28 +3,13 @@
 |   |-- each
 |   |   |-- 066cb14c8d
 |   |   |   |-- 947877ffa6.ndb -> ../../../exprs/makeblastdb_nucl/947877ffa6.ndb
-|   |   |   `-- 947877ffa6.ndb.args -> ../../../cache/lines/a68b303bbe.txt
+|   |   |   `-- 947877ffa6.ndb.args -> ../../../cache/lines/...
 |   |   |-- 08e11db480
 |   |   |   |-- 67ef4ead59.bht -> ../../../exprs/megablast/ce1c174684_3d999d2434_67ef4ead59.bht
-|   |   |   `-- 67ef4ead59.bht.args -> ../../../cache/lines/3868abee11.txt
+|   |   |   `-- 67ef4ead59.bht.args -> ../../../cache/lines/...
 |   |   `-- 2b1914960c
 |   |       |-- 4d8b00f718.str.list -> ../../../exprs/extract_queries/4d8b00f718.str.list
-|   |       `-- 4d8b00f718.str.list.args -> ../../../cache/lines/a3601ba8b0.txt
-|   |-- lines
-|   |   |-- 08d6f05c35.txt
-|   |   |-- 14135d2aeb.txt
-|   |   |-- 21be25c2fd.txt
-|   |   |-- 3868abee11.txt
-|   |   |-- 38cb049e4b.txt
-|   |   |-- 4709207142.txt
-|   |   |-- 778251fd80.txt
-|   |   |-- a3601ba8b0.txt
-|   |   |-- a68b303bbe.txt
-|   |   |-- ba320796bf.txt
-|   |   |-- be6eb89cd7.txt -> ../../cache/lines/d24c42156b.txt
-|   |   |-- c01644c87e.txt
-|   |   |-- d24c42156b.txt
-|   |   `-- f530950d29.txt
+|   |       `-- 4d8b00f718.str.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
 |   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
@@ -35,37 +20,37 @@
 |           `-- d24c42156b.ndb.nsq
 |-- exprs
 |   |-- any
-|   |   `-- 75fb36c62c.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   `-- 75fb36c62c.str.list.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 4d8b00f718.str.list -> ../../cache/lines/38cb049e4b.txt
-|   |   `-- abf61cfcc9.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   |-- 4d8b00f718.str.list -> ../../cache/lines/...
+|   |   `-- abf61cfcc9.str.list -> ../../cache/lines/...
 |   |-- extract_queries_each
-|   |   `-- a89992b2e6.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   `-- a89992b2e6.str.list.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/14135d2aeb.txt
-|   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
-|   |   `-- c6ba16cc62.fna.list -> ../../cache/lines/d24c42156b.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/...
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/...
+|   |   `-- c6ba16cc62.fna.list -> ../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 82b637da24.fna -> ../../cache/load/0238b7dcea.fna
 |   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- makeblastdb_nucl
-|   |   |-- 17e9ac9897.ndb -> ../../cache/lines/4709207142.txt
-|   |   `-- 947877ffa6.ndb -> ../../cache/lines/4709207142.txt
+|   |   |-- 17e9ac9897.ndb -> ../../cache/lines/...
+|   |   `-- 947877ffa6.ndb -> ../../cache/lines/...
 |   |-- makeblastdb_nucl_each
-|   |   `-- 79cf50e1c0.ndb.list -> ../../cache/lines/08d6f05c35.txt
+|   |   `-- 79cf50e1c0.ndb.list -> ../../cache/lines/...
 |   |-- megablast
 |   |   `-- ce1c174684_3d999d2434_67ef4ead59.bht
 |   |-- megablast_db
 |   |   `-- 8158675169_bc4ea1fc06_d326247d21.bht
 |   |-- megablast_each
-|   |   `-- 8158675169_bc4ea1fc06_48dd3bc743.bht.list -> ../../cache/lines/a3601ba8b0.txt
+|   |   `-- 8158675169_bc4ea1fc06_48dd3bc743.bht.list -> ../../cache/lines/...
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/...
 |   |-- singletons
-|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/c01644c87e.txt
+|   |   `-- 17e9ac9897.fna.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 4cdbcfa070.str -> ../../cache/lines/ba320796bf.txt
-|       `-- 8fa8ede325.str -> ../../cache/lines/f530950d29.txt
+|       |-- 4cdbcfa070.str -> ../../cache/lines/...
+|       `-- 8fa8ede325.str -> ../../cache/lines/...
 `-- vars
     |-- full7942.fna -> ../exprs/load_fna/eb12539f1c.fna
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/a89992b2e6.str.list.list
@@ -73,4 +58,4 @@
     |-- result -> ../exprs/any/75fb36c62c.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/abf61cfcc9.str.list
 
-24 directories, 49 files
+23 directories, 35 files

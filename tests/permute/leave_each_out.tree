@@ -1,37 +1,23 @@
 .
 |-- cache
-|   `-- lines
-|       |-- 002ed9e614.txt
-|       |-- 04751a855a.txt
-|       |-- 0c357755eb.txt
-|       |-- 27915ef454.txt
-|       |-- 2a13ac791a.txt
-|       |-- 42fb7081a8.txt
-|       |-- 4949eea072.txt
-|       |-- 558d528228.txt
-|       |-- 57ead42262.txt
-|       |-- 58d21ca52f.txt
-|       |-- af22e8e347.txt
-|       |-- b7c6cd4689.txt
-|       `-- f097330334.txt
 |-- exprs
 |   |-- leave_each_out
-|   |   `-- aa40b826ea.num.list.list.list -> ../../cache/lines/f097330334.txt
+|   |   `-- aa40b826ea.num.list.list.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 46dcadb3b5.num.list.list -> ../../cache/lines/04751a855a.txt
-|   |   |-- 4f607539e9.num.list.list -> ../../cache/lines/27915ef454.txt
-|   |   |-- 7472d1bd6c.num.list -> ../../cache/lines/57ead42262.txt
-|   |   |-- 7ea939691d.num.list.list -> ../../cache/lines/b7c6cd4689.txt
-|   |   |-- 8948348393.num.list.list -> ../../cache/lines/af22e8e347.txt
-|   |   |-- f11e0b1ea5.num.list -> ../../cache/lines/4949eea072.txt
-|   |   `-- fe5a87b3e4.num.list -> ../../cache/lines/002ed9e614.txt
+|   |   |-- 46dcadb3b5.num.list.list -> ../../cache/lines/...
+|   |   |-- 4f607539e9.num.list.list -> ../../cache/lines/...
+|   |   |-- 7472d1bd6c.num.list -> ../../cache/lines/...
+|   |   |-- 7ea939691d.num.list.list -> ../../cache/lines/...
+|   |   |-- 8948348393.num.list.list -> ../../cache/lines/...
+|   |   |-- f11e0b1ea5.num.list -> ../../cache/lines/...
+|   |   `-- fe5a87b3e4.num.list -> ../../cache/lines/...
 |   `-- num
-|       |-- 89fb8b4aed.num -> ../../cache/lines/58d21ca52f.txt
-|       |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
-|       |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
-|       |-- eaad7f2e40.num -> ../../cache/lines/0c357755eb.txt
-|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|       |-- 89fb8b4aed.num -> ../../cache/lines/...
+|       |-- a629005e3c.num -> ../../cache/lines/...
+|       |-- ea11b49459.num -> ../../cache/lines/...
+|       |-- eaad7f2e40.num -> ../../cache/lines/...
+|       `-- ee383407c9.num -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/leave_each_out/aa40b826ea.num.list.list.list
 
-7 directories, 27 files
+6 directories, 14 files

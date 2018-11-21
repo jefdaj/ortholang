@@ -1,14 +1,11 @@
 .
 |-- cache
-|   `-- lines
-|       |-- 8fe17a01cf.txt
-|       `-- d59cb63de9.txt
 |-- exprs
 |   |-- length
-|   |   `-- 761608b24a.num -> ../../cache/lines/8fe17a01cf.txt
+|   |   `-- 761608b24a.num -> ../../cache/lines/...
 |   `-- list
-|       `-- d751713988.empty.list -> ../../cache/lines/d59cb63de9.txt
+|       `-- d751713988.empty.list -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/length/761608b24a.num
 
-6 directories, 5 files
+5 directories, 3 files

@@ -1,95 +1,51 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 761b2be8c4.txt -> ../../cache/lines/2cd94f2bd6.txt
-|   |   `-- emptybht.txt -> ../../cache/lines/47745ea386.txt
+|   |   |-- 761b2be8c4.txt -> ../../cache/lines/...
+|   |   `-- emptybht.txt -> ../../cache/lines/...
 |   |-- each
 |   |   |-- 6d1f577275
 |   |   |   |-- 12fb00864f.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_12fb00864f_e1b8ada54c.bht
-|   |   |   |-- 12fb00864f.bht.args -> ../../../cache/lines/7018b1b138.txt
+|   |   |   |-- 12fb00864f.bht.args -> ../../../cache/lines/...
 |   |   |   |-- 1b01341fc4.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_1b01341fc4_e1b8ada54c.bht
-|   |   |   |-- 1b01341fc4.bht.args -> ../../../cache/lines/87d0f59013.txt
+|   |   |   |-- 1b01341fc4.bht.args -> ../../../cache/lines/...
 |   |   |   |-- 1ff655f857.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_1ff655f857_e1b8ada54c.bht
-|   |   |   |-- 1ff655f857.bht.args -> ../../../cache/lines/33e567e296.txt
+|   |   |   |-- 1ff655f857.bht.args -> ../../../cache/lines/...
 |   |   |   |-- 29308a8704.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_29308a8704_e1b8ada54c.bht
-|   |   |   |-- 29308a8704.bht.args -> ../../../cache/lines/64b529a627.txt
+|   |   |   |-- 29308a8704.bht.args -> ../../../cache/lines/...
 |   |   |   |-- 5f5bdd614e.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_5f5bdd614e_e1b8ada54c.bht
-|   |   |   |-- 5f5bdd614e.bht.args -> ../../../cache/lines/8033d41524.txt
+|   |   |   |-- 5f5bdd614e.bht.args -> ../../../cache/lines/...
 |   |   |   |-- 6db613714d.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_6db613714d_e1b8ada54c.bht
-|   |   |   |-- 6db613714d.bht.args -> ../../../cache/lines/8372d9d9cf.txt
+|   |   |   |-- 6db613714d.bht.args -> ../../../cache/lines/...
 |   |   |   |-- 90f379dfc6.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_90f379dfc6_e1b8ada54c.bht
-|   |   |   |-- 90f379dfc6.bht.args -> ../../../cache/lines/9b145080e6.txt
+|   |   |   |-- 90f379dfc6.bht.args -> ../../../cache/lines/...
 |   |   |   |-- d9c4fd8408.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_d9c4fd8408_e1b8ada54c.bht
-|   |   |   |-- d9c4fd8408.bht.args -> ../../../cache/lines/617cffcdb5.txt
+|   |   |   |-- d9c4fd8408.bht.args -> ../../../cache/lines/...
 |   |   |   |-- eaae666ef5.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_eaae666ef5_e1b8ada54c.bht
-|   |   |   |-- eaae666ef5.bht.args -> ../../../cache/lines/e8386a2d9a.txt
+|   |   |   |-- eaae666ef5.bht.args -> ../../../cache/lines/...
 |   |   |   |-- efebd16e72.bht -> ../../../exprs/psiblast_pssm/9e754c0ec7_efebd16e72_e1b8ada54c.bht
-|   |   |   `-- efebd16e72.bht.args -> ../../../cache/lines/4c364185c6.txt
+|   |   |   `-- efebd16e72.bht.args -> ../../../cache/lines/...
 |   |   `-- 7a152f8b02
 |   |       |-- 074e75c6fb.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_074e75c6fb_86d15b07be.pssm
-|   |       |-- 074e75c6fb.pssm.args -> ../../../cache/lines/26ff7bc6fa.txt
+|   |       |-- 074e75c6fb.pssm.args -> ../../../cache/lines/...
 |   |       |-- 1cf587675f.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_1cf587675f_86d15b07be.pssm
-|   |       |-- 1cf587675f.pssm.args -> ../../../cache/lines/c7bc4c1b7d.txt
+|   |       |-- 1cf587675f.pssm.args -> ../../../cache/lines/...
 |   |       |-- 31a1bb8e44.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_31a1bb8e44_86d15b07be.pssm
-|   |       |-- 31a1bb8e44.pssm.args -> ../../../cache/lines/1aed11b39e.txt
+|   |       |-- 31a1bb8e44.pssm.args -> ../../../cache/lines/...
 |   |       |-- 452c75e69e.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_452c75e69e_86d15b07be.pssm
-|   |       |-- 452c75e69e.pssm.args -> ../../../cache/lines/49b66e85b0.txt
+|   |       |-- 452c75e69e.pssm.args -> ../../../cache/lines/...
 |   |       |-- 6cff7e52c2.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_6cff7e52c2_86d15b07be.pssm
-|   |       |-- 6cff7e52c2.pssm.args -> ../../../cache/lines/749a430fbd.txt
+|   |       |-- 6cff7e52c2.pssm.args -> ../../../cache/lines/...
 |   |       |-- 94e26f7884.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_94e26f7884_86d15b07be.pssm
-|   |       |-- 94e26f7884.pssm.args -> ../../../cache/lines/2955bf81d5.txt
+|   |       |-- 94e26f7884.pssm.args -> ../../../cache/lines/...
 |   |       |-- 992e7fa31b.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_992e7fa31b_86d15b07be.pssm
-|   |       |-- 992e7fa31b.pssm.args -> ../../../cache/lines/88016f7406.txt
+|   |       |-- 992e7fa31b.pssm.args -> ../../../cache/lines/...
 |   |       |-- b0ecf6f058.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_b0ecf6f058_86d15b07be.pssm
-|   |       |-- b0ecf6f058.pssm.args -> ../../../cache/lines/a5bb1a8bb8.txt
+|   |       |-- b0ecf6f058.pssm.args -> ../../../cache/lines/...
 |   |       |-- c4ee1f6a9a.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_c4ee1f6a9a_86d15b07be.pssm
-|   |       |-- c4ee1f6a9a.pssm.args -> ../../../cache/lines/0e72979a68.txt
+|   |       |-- c4ee1f6a9a.pssm.args -> ../../../cache/lines/...
 |   |       |-- d8dbe517c2.pssm -> ../../../exprs/psiblast_train_pssms_db/9e754c0ec7_d8dbe517c2_86d15b07be.pssm
-|   |       `-- d8dbe517c2.pssm.args -> ../../../cache/lines/82afdd4daf.txt
-|   |-- lines
-|   |   |-- 08add1fa44.txt
-|   |   |-- 0cf27272d3.txt
-|   |   |-- 0e72979a68.txt
-|   |   |-- 1aed11b39e.txt
-|   |   |-- 1b570b5c95.txt
-|   |   |-- 26ff7bc6fa.txt
-|   |   |-- 2955bf81d5.txt
-|   |   |-- 2cd94f2bd6.txt
-|   |   |-- 32ee44c616.txt
-|   |   |-- 33e567e296.txt
-|   |   |-- 381fbbbdba.txt
-|   |   |-- 3f62a639a8.txt
-|   |   |-- 47745ea386.txt
-|   |   |-- 49b66e85b0.txt
-|   |   |-- 4a02f07084.txt
-|   |   |-- 4c364185c6.txt
-|   |   |-- 617cffcdb5.txt
-|   |   |-- 64b529a627.txt
-|   |   |-- 7018b1b138.txt
-|   |   |-- 705d785b11.txt
-|   |   |-- 749a430fbd.txt
-|   |   |-- 7af3848d3d.txt
-|   |   |-- 7fed2c1eba.txt
-|   |   |-- 8033d41524.txt
-|   |   |-- 82afdd4daf.txt
-|   |   |-- 8372d9d9cf.txt
-|   |   |-- 87d0f59013.txt
-|   |   |-- 88016f7406.txt
-|   |   |-- 8a8a1dc488.txt
-|   |   |-- 932b4fb17d.txt
-|   |   |-- 942fb825c9.txt
-|   |   |-- 9b145080e6.txt
-|   |   |-- 9ed52f0121.txt
-|   |   |-- a1512fc008.txt
-|   |   |-- a5bb1a8bb8.txt
-|   |   |-- adfdb6bd8c.txt
-|   |   |-- bdc783547b.txt
-|   |   |-- c3ae472116.txt
-|   |   |-- c7bc4c1b7d.txt
-|   |   |-- cd7881cdf9.txt
-|   |   |-- e8386a2d9a.txt
-|   |   |-- ef87d3e725.txt
-|   |   `-- fda56c8059.txt
+|   |       `-- d8dbe517c2.pssm.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -109,8 +65,8 @@
 |   |-- concat_bht
 |   |   `-- 8f7061b4ac.bht
 |   |-- list
-|   |   |-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
-|   |   `-- 94f9daed94.faa.list -> ../../cache/lines/a1512fc008.txt
+|   |   |-- 7d562183ce.faa.list -> ../../cache/lines/...
+|   |   `-- 94f9daed94.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 18
 |   |   |   `-- a5
@@ -176,12 +132,12 @@
 |   |                   `-- 82
 |   |                       `-- b.faa
 |   |-- makeblastdb_prot_all
-|   |   |-- 27a934c58e.pdb.list -> ../../cache/lines/7af3848d3d.txt
-|   |   `-- a76d25f4b5.pdb -> ../../cache/lines/3f62a639a8.txt
+|   |   |-- 27a934c58e.pdb.list -> ../../cache/lines/...
+|   |   `-- a76d25f4b5.pdb -> ../../cache/lines/...
 |   |-- num
-|   |   `-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
+|   |   `-- 3e281fad0f.num -> ../../cache/lines/...
 |   |-- psiblast_each_pssm
-|   |   `-- 5fbeb4e044_ef7788b175_28e0df471c.bht.list -> ../../cache/lines/1b570b5c95.txt
+|   |   `-- 5fbeb4e044_ef7788b175_28e0df471c.bht.list -> ../../cache/lines/...
 |   |-- psiblast_pssm
 |   |   |-- 9e754c0ec7_12fb00864f_e1b8ada54c.bht
 |   |   |-- 9e754c0ec7_1b01341fc4_e1b8ada54c.bht
@@ -194,23 +150,23 @@
 |   |   |-- 9e754c0ec7_eaae666ef5_e1b8ada54c.bht
 |   |   `-- 9e754c0ec7_efebd16e72_e1b8ada54c.bht
 |   |-- psiblast_train_pssms_db
-|   |   |-- 5fbeb4e044_a726be61de_e15f764d92.pssm.list -> ../../cache/lines/fda56c8059.txt
-|   |   |-- 9e754c0ec7_074e75c6fb_86d15b07be.pssm -> ../../cache/lines/942fb825c9.txt
-|   |   |-- 9e754c0ec7_1cf587675f_86d15b07be.pssm -> ../../cache/lines/32ee44c616.txt
-|   |   |-- 9e754c0ec7_31a1bb8e44_86d15b07be.pssm -> ../../cache/lines/705d785b11.txt
-|   |   |-- 9e754c0ec7_452c75e69e_86d15b07be.pssm -> ../../cache/lines/4a02f07084.txt
-|   |   |-- 9e754c0ec7_6cff7e52c2_86d15b07be.pssm -> ../../cache/lines/7fed2c1eba.txt
-|   |   |-- 9e754c0ec7_94e26f7884_86d15b07be.pssm -> ../../cache/lines/9ed52f0121.txt
-|   |   |-- 9e754c0ec7_992e7fa31b_86d15b07be.pssm -> ../../cache/lines/8a8a1dc488.txt
-|   |   |-- 9e754c0ec7_b0ecf6f058_86d15b07be.pssm -> ../../cache/lines/cd7881cdf9.txt
-|   |   |-- 9e754c0ec7_c4ee1f6a9a_86d15b07be.pssm -> ../../cache/lines/08add1fa44.txt
-|   |   `-- 9e754c0ec7_d8dbe517c2_86d15b07be.pssm -> ../../cache/lines/381fbbbdba.txt
+|   |   |-- 5fbeb4e044_a726be61de_e15f764d92.pssm.list -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_074e75c6fb_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_1cf587675f_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_31a1bb8e44_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_452c75e69e_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_6cff7e52c2_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_94e26f7884_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_992e7fa31b_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_b0ecf6f058_86d15b07be.pssm -> ../../cache/lines/...
+|   |   |-- 9e754c0ec7_c4ee1f6a9a_86d15b07be.pssm -> ../../cache/lines/...
+|   |   `-- 9e754c0ec7_d8dbe517c2_86d15b07be.pssm -> ../../cache/lines/...
 |   |-- split_faa
-|   |   `-- 1af4d085e7.faa.list -> ../../cache/lines/932b4fb17d.txt
+|   |   `-- 1af4d085e7.faa.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
-|       |-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
-|       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- db90f32127.str -> ../../cache/lines/...
+|       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
     |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/a76d25f4b5.pdb
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
@@ -220,4 +176,4 @@
     |-- result -> ../vars/table6803.bht
     `-- table6803.bht -> ../exprs/concat_bht/8f7061b4ac.bht
 
-74 directories, 146 files
+73 directories, 103 files

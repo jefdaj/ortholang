@@ -1,26 +1,21 @@
 .
 |-- cache
-|   `-- lines
-|       |-- 2a13ac791a.txt
-|       |-- 54cb8e2e67.txt
-|       |-- 558d528228.txt
-|       `-- cf3d328c91.txt
 |-- exprs
 |   |-- multiply
-|   |   |-- 4578706b58_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
-|   |   |-- 839f0ba255_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
-|   |   |-- b3385062cc_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
-|   |   |-- df9846a7f4_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
-|   |   `-- f8d5fefdd1_6d57e8642a.num -> ../../cache/lines/54cb8e2e67.txt
+|   |   |-- 4578706b58_6d57e8642a.num -> ../../cache/lines/...
+|   |   |-- 839f0ba255_6d57e8642a.num -> ../../cache/lines/...
+|   |   |-- b3385062cc_6d57e8642a.num -> ../../cache/lines/...
+|   |   |-- df9846a7f4_6d57e8642a.num -> ../../cache/lines/...
+|   |   `-- f8d5fefdd1_6d57e8642a.num -> ../../cache/lines/...
 |   |-- num
-|   |   |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
-|   |   |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
-|   |   |-- ea11b49459_1.num -> ../../cache/lines/2a13ac791a.txt
-|   |   |-- ea11b49459_2.num -> ../../cache/lines/2a13ac791a.txt
-|   |   |-- ea11b49459_3.num -> ../../cache/lines/2a13ac791a.txt
-|   |   `-- ea11b49459_4.num -> ../../cache/lines/2a13ac791a.txt
+|   |   |-- a629005e3c.num -> ../../cache/lines/...
+|   |   |-- ea11b49459.num -> ../../cache/lines/...
+|   |   |-- ea11b49459_1.num -> ../../cache/lines/...
+|   |   |-- ea11b49459_2.num -> ../../cache/lines/...
+|   |   |-- ea11b49459_3.num -> ../../cache/lines/...
+|   |   `-- ea11b49459_4.num -> ../../cache/lines/...
 |   `-- repeat
-|       `-- eb9adbc94e_4578706b58_608bde82c3.num.list -> ../../cache/lines/cf3d328c91.txt
+|       `-- eb9adbc94e_4578706b58_608bde82c3.num.list -> ../../cache/lines/...
 `-- vars
     |-- result -> ../exprs/repeat/eb9adbc94e_4578706b58_608bde82c3.num.list
     |-- result.2027ab9dca.num -> ../exprs/multiply/f8d5fefdd1_6d57e8642a.num
@@ -34,4 +29,4 @@
     |-- var1.a2a4cd42aa.num -> ../exprs/num/ea11b49459_3.num
     `-- var1.a35a937923.num -> ../exprs/num/ea11b49459.num
 
-7 directories, 27 files
+6 directories, 23 files

@@ -1,14 +1,5 @@
 .
 |-- cache
-|   |-- lines
-|   |   |-- 0815de9417.txt
-|   |   |-- 171edb7413.txt
-|   |   |-- 778251fd80.txt
-|   |   |-- 8c1aa61169.txt
-|   |   |-- 8db9b2927b.txt
-|   |   |-- b664eacb7a.txt
-|   |   |-- c0178c7096.txt
-|   |   `-- da3ab843af.txt
 |   |-- load
 |   |   |-- 597257619d.fna -> $WORKDIR/data/7942genome.fna
 |   |   `-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
@@ -19,21 +10,21 @@
 |           `-- 8c1aa61169.ndb.nsq
 |-- exprs
 |   |-- all
-|   |   `-- 9ad6e8d943.str.list -> ../../cache/lines/da3ab843af.txt
+|   |   `-- 9ad6e8d943.str.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 324ba3f28d.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- 4cde94be12.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- 5844d43623.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- 66233767f2.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- 8d89abd21f.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- 936313478d.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- a35bfdf3cc.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- afa6b983ff.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   |-- e35860dc63.str.list -> ../../cache/lines/da3ab843af.txt
-|   |   `-- ed8b182730.str.list -> ../../cache/lines/da3ab843af.txt
+|   |   |-- 324ba3f28d.str.list -> ../../cache/lines/...
+|   |   |-- 4cde94be12.str.list -> ../../cache/lines/...
+|   |   |-- 5844d43623.str.list -> ../../cache/lines/...
+|   |   |-- 66233767f2.str.list -> ../../cache/lines/...
+|   |   |-- 8d89abd21f.str.list -> ../../cache/lines/...
+|   |   |-- 936313478d.str.list -> ../../cache/lines/...
+|   |   |-- a35bfdf3cc.str.list -> ../../cache/lines/...
+|   |   |-- afa6b983ff.str.list -> ../../cache/lines/...
+|   |   |-- e35860dc63.str.list -> ../../cache/lines/...
+|   |   `-- ed8b182730.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- ab95ba87aa.fna.list -> ../../cache/lines/c0178c7096.txt
-|   |   `-- c6ba16cc62.fna.list -> ../../cache/lines/8c1aa61169.txt
+|   |   |-- ab95ba87aa.fna.list -> ../../cache/lines/...
+|   |   `-- c6ba16cc62.fna.list -> ../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   |   |-- 9b7934c579_1.fna -> ../../cache/load/6ea57f1208.fna
@@ -47,14 +38,14 @@
 |   |   |-- 9b7934c579_9.fna -> ../../cache/load/6ea57f1208.fna
 |   |   `-- dd2257687c.fna -> ../../cache/load/597257619d.fna
 |   |-- makeblastdb_nucl
-|   |   `-- 4916ffb22b.ndb -> ../../cache/lines/b664eacb7a.txt
+|   |   `-- 4916ffb22b.ndb -> ../../cache/lines/...
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/...
 |   |-- repeat
-|   |   `-- 6d9e140aac_8df2fbb1a8_929df4c402.str.list.list -> ../../cache/lines/8db9b2927b.txt
+|   |   `-- 6d9e140aac_8df2fbb1a8_929df4c402.str.list.list -> ../../cache/lines/...
 |   |-- str
-|   |   |-- 7a3218e1ab.str -> ../../cache/lines/171edb7413.txt
-|   |   `-- 7da80bde02.str -> ../../cache/lines/0815de9417.txt
+|   |   |-- 7a3218e1ab.str -> ../../cache/lines/...
+|   |   `-- 7da80bde02.str -> ../../cache/lines/...
 |   `-- tblastx_db
 |       |-- 8158675169_1cd42e0fa7_83fd95c847.bht
 |       |-- 8158675169_1e6cf89106_83fd95c847.bht
@@ -100,4 +91,4 @@
     |-- result.e4f4ccff39.str.list -> ../vars/hits6803.e4f4ccff39.str.list
     `-- result.ef22f5255f.str.list -> ../vars/hits6803.ef22f5255f.str.list
 
-16 directories, 84 files
+15 directories, 76 files

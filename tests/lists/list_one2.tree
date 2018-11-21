@@ -1,13 +1,11 @@
 .
 |-- cache
-|   `-- lines
-|       `-- d8166958d0.txt
 |-- exprs
 |   |-- list
-|   |   `-- 0bd7d20130.str.list -> ../../cache/lines/d8166958d0.txt
+|   |   `-- 0bd7d20130.str.list -> ../../cache/lines/...
 |   `-- str
-|       `-- a2a665650c.str -> ../../cache/lines/d8166958d0.txt
+|       `-- a2a665650c.str -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/list/0bd7d20130.str.list
 
-6 directories, 4 files
+5 directories, 3 files

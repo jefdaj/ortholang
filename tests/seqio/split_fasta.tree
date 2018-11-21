@@ -3,32 +3,25 @@
 |   |-- each
 |   |   |-- 497a42ce2c
 |   |   |   |-- fc8957dff9.num -> ../../../exprs/length/fc8957dff9.num
-|   |   |   `-- fc8957dff9.num.args -> ../../../cache/lines/a8177328f8.txt
+|   |   |   `-- fc8957dff9.num.args -> ../../../cache/lines/...
 |   |   `-- 77601a8302
 |   |       |-- d7f5b78e8e.faa.list -> ../../../exprs/split_faa/d7f5b78e8e.faa.list
-|   |       `-- d7f5b78e8e.faa.list.args -> ../../../cache/lines/e00fb07ddb.txt
-|   |-- lines
-|   |   |-- 687d0923da.txt
-|   |   |-- a8177328f8.txt
-|   |   |-- ace39fd014.txt
-|   |   |-- bdc783547b.txt
-|   |   |-- e00fb07ddb.txt
-|   |   `-- e5dbd29d70.txt
+|   |       `-- d7f5b78e8e.faa.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
 |   |-- split_faa
 |   `-- split_faa_each
 |-- exprs
 |   |-- any
-|   |   `-- 0817faf9fe.faa.list.list -> ../../cache/lines/a8177328f8.txt
+|   |   `-- 0817faf9fe.faa.list.list -> ../../cache/lines/...
 |   |-- length
-|   |   `-- fc8957dff9.num -> ../../cache/lines/ace39fd014.txt
+|   |   `-- fc8957dff9.num -> ../../cache/lines/...
 |   |-- length_each
-|   |   `-- ab15236a3e.num.list -> ../../cache/lines/ace39fd014.txt
+|   |   `-- ab15236a3e.num.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 0c65c651f6.faa.list.list.list -> ../../cache/lines/687d0923da.txt
-|   |   |-- 7289342c27.faa.list.list -> ../../cache/lines/a8177328f8.txt
-|   |   `-- 903b902e8a.faa.list -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- 0c65c651f6.faa.list.list.list -> ../../cache/lines/...
+|   |   |-- 7289342c27.faa.list.list -> ../../cache/lines/...
+|   |   `-- 903b902e8a.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 00
 |   |   |   |-- 0a
@@ -13552,16 +13545,16 @@
 |   |                   `-- 3c
 |   |                       `-- 2.faa
 |   |-- split_faa
-|   |   |-- c08cc19988.faa.list -> ../../cache/lines/e5dbd29d70.txt
-|   |   `-- d7f5b78e8e.faa.list -> ../../cache/lines/e5dbd29d70.txt
+|   |   |-- c08cc19988.faa.list -> ../../cache/lines/...
+|   |   `-- d7f5b78e8e.faa.list -> ../../cache/lines/...
 |   |-- split_faa_each
-|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/a8177328f8.txt
+|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/...
 |   `-- str
-|       `-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
+|       `-- 1d8a61c770.str -> ../../cache/lines/...
 `-- vars
     |-- genes.faa.list -> ../exprs/split_faa/c08cc19988.faa.list
     |-- mapped.faa.list.list -> ../exprs/split_faa_each/ced061f0b2.faa.list.list
     |-- multifa.faa -> ../exprs/load_faa/387f499ddc.faa
     `-- result -> ../exprs/length_each/ab15236a3e.num.list
 
-10876 directories, 2688 files
+10875 directories, 2682 files

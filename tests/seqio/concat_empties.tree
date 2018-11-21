@@ -1,11 +1,9 @@
 .
 |-- cache
-|   `-- lines
-|       `-- df4de04874.txt
 |-- exprs
 |   `-- str
-|       `-- 846bcd9593.str -> ../../cache/lines/df4de04874.txt
+|       `-- 846bcd9593.str -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/str/846bcd9593.str
 
-5 directories, 3 files
+4 directories, 2 files

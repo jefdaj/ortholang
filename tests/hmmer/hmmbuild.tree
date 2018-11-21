@@ -1,12 +1,5 @@
 .
 |-- cache
-|   |-- lines
-|   |   |-- 8abd22b6c2.txt
-|   |   |-- 902cb58552.txt
-|   |   |-- bdc783547b.txt
-|   |   |-- ca30601c48.txt
-|   |   |-- e00fb07ddb.txt
-|   |   `-- e9819ea256.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -21,23 +14,23 @@
 |   |-- extract_seqs
 |   |   `-- c08cc19988_86fa47f1b5.faa
 |   |-- extract_targets
-|   |   `-- 84cae9923d.str.list -> ../../cache/lines/ca30601c48.txt
+|   |   `-- 84cae9923d.str.list -> ../../cache/lines/...
 |   |-- hmmbuild
 |   |   `-- ad58775037.hmm
 |   |-- list
-|   |   `-- fa4677789c.faa.list -> ../../cache/lines/e00fb07ddb.txt
+|   |   `-- fa4677789c.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- makeblastdb_prot
-|   |   `-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
+|   |   `-- ced061f0b2.pdb -> ../../cache/lines/...
 |   |-- muscle
 |   |   `-- a8af1a2fe0.aln
 |   |-- num
-|   |   `-- efc8362dcc.num -> ../../cache/lines/e9819ea256.txt
+|   |   `-- efc8362dcc.num -> ../../cache/lines/...
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
-|       `-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       `-- b9eaf59b0c.str -> ../../cache/lines/...
 `-- vars
     |-- hits.bht -> ../exprs/blastp_db/4f7795b38a_4d0e43d616_46b5852d89.bht
     |-- hits_aln.aln -> ../exprs/muscle/a8af1a2fe0.aln
@@ -47,4 +40,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hits_hmm.hmm
 
-17 directories, 30 files
+16 directories, 24 files

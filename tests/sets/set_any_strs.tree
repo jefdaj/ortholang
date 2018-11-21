@@ -1,50 +1,29 @@
 .
 |-- cache
-|   `-- lines
-|       |-- 07f7f85b2a.txt
-|       |-- 0a57bf9b50.txt
-|       |-- 2a478fbad2.txt
-|       |-- 303d7c623d.txt
-|       |-- 345a830504.txt
-|       |-- 46c01f638a.txt
-|       |-- 4d8a15e3cc.txt
-|       |-- 58ef9b78af.txt
-|       |-- 60cad69e0c.txt
-|       |-- 68b434ff88.txt
-|       |-- 8b2f2930ca.txt
-|       |-- 99944bf070.txt
-|       |-- 9ab1070dec.txt
-|       |-- a77bc9a309.txt
-|       |-- aa2393b424.txt
-|       |-- b3e8c14e71.txt
-|       |-- b4f15431e0.txt
-|       |-- bdcd00c4fe.txt
-|       |-- cd314db7df.txt
-|       `-- f88e6f3ffc.txt
 |-- exprs
 |   |-- any
-|   |   `-- 94df747296.str.list -> ../../cache/lines/bdcd00c4fe.txt
+|   |   `-- 94df747296.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- c974d30b2b.str.list.list -> ../../cache/lines/58ef9b78af.txt
-|   |   |-- d0cf31c7bd.str.list -> ../../cache/lines/f88e6f3ffc.txt
-|   |   |-- e6603f41db.str.list -> ../../cache/lines/2a478fbad2.txt
-|   |   `-- efd1761a9f.str.list.list -> ../../cache/lines/0a57bf9b50.txt
+|   |   |-- c974d30b2b.str.list.list -> ../../cache/lines/...
+|   |   |-- d0cf31c7bd.str.list -> ../../cache/lines/...
+|   |   |-- e6603f41db.str.list -> ../../cache/lines/...
+|   |   `-- efd1761a9f.str.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 151a835cea.str -> ../../cache/lines/aa2393b424.txt
-|       |-- 1ec18a394c.str -> ../../cache/lines/b4f15431e0.txt
-|       |-- 2f7bb230c7.str -> ../../cache/lines/4d8a15e3cc.txt
-|       |-- 39c6844c92.str -> ../../cache/lines/cd314db7df.txt
-|       |-- 3cf3aef990.str -> ../../cache/lines/68b434ff88.txt
-|       |-- 3eaf50782c.str -> ../../cache/lines/07f7f85b2a.txt
-|       |-- 5237f8bc4c.str -> ../../cache/lines/99944bf070.txt
-|       |-- 57205b919a.str -> ../../cache/lines/60cad69e0c.txt
-|       |-- 5964a48430.str -> ../../cache/lines/8b2f2930ca.txt
-|       |-- c76a2042f6.str -> ../../cache/lines/46c01f638a.txt
-|       |-- cab41a8b78.str -> ../../cache/lines/345a830504.txt
-|       |-- d5d957647c.str -> ../../cache/lines/b3e8c14e71.txt
-|       |-- d9ccf0f8a3.str -> ../../cache/lines/303d7c623d.txt
-|       |-- e4a7afdacb.str -> ../../cache/lines/9ab1070dec.txt
-|       `-- f27d5f6e3d.str -> ../../cache/lines/a77bc9a309.txt
+|       |-- 151a835cea.str -> ../../cache/lines/...
+|       |-- 1ec18a394c.str -> ../../cache/lines/...
+|       |-- 2f7bb230c7.str -> ../../cache/lines/...
+|       |-- 39c6844c92.str -> ../../cache/lines/...
+|       |-- 3cf3aef990.str -> ../../cache/lines/...
+|       |-- 3eaf50782c.str -> ../../cache/lines/...
+|       |-- 5237f8bc4c.str -> ../../cache/lines/...
+|       |-- 57205b919a.str -> ../../cache/lines/...
+|       |-- 5964a48430.str -> ../../cache/lines/...
+|       |-- c76a2042f6.str -> ../../cache/lines/...
+|       |-- cab41a8b78.str -> ../../cache/lines/...
+|       |-- d5d957647c.str -> ../../cache/lines/...
+|       |-- d9ccf0f8a3.str -> ../../cache/lines/...
+|       |-- e4a7afdacb.str -> ../../cache/lines/...
+|       `-- f27d5f6e3d.str -> ../../cache/lines/...
 `-- vars
     |-- res1.str.list -> ../exprs/any/94df747296.str.list
     |-- res2.str.list -> ../exprs/any/94df747296.str.list
@@ -52,4 +31,4 @@
     |-- set1.str.list -> ../exprs/list/d0cf31c7bd.str.list
     `-- set2.str.list -> ../exprs/list/e6603f41db.str.list
 
-7 directories, 45 files
+6 directories, 25 files

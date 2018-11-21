@@ -1,14 +1,5 @@
 .
 |-- cache
-|   |-- lines
-|   |   |-- 1225bb4525.txt
-|   |   |-- 4d13e8c51d.txt
-|   |   |-- b1224e2231.txt
-|   |   |-- b633b427c4.txt
-|   |   |-- c3709b5c4e.txt
-|   |   |-- e5404eebaf.txt
-|   |   |-- f7dfffdd85.txt
-|   |   `-- fee06257a5.txt
 |   `-- load
 |       |-- 0469ad867e.faa -> $WORKDIR/data/7002genes.faa
 |       |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
@@ -20,20 +11,20 @@
 |       `-- de2033f5c0.faa -> $WORKDIR/data/7942genes50.faa
 |-- exprs
 |   |-- diff
-|   |   `-- 386cf03923.faa.list -> ../../cache/lines/f7dfffdd85.txt
+|   |   `-- 386cf03923.faa.list -> ../../cache/lines/...
 |   |-- glob_files
-|   |   |-- 82c873c4a6.str.list -> ../../cache/lines/c3709b5c4e.txt
-|   |   `-- ca1dad5c15.str.list -> ../../cache/lines/e5404eebaf.txt
+|   |   |-- 82c873c4a6.str.list -> ../../cache/lines/...
+|   |   `-- ca1dad5c15.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 626202f93c.faa.list -> ../../cache/lines/fee06257a5.txt
-|   |   |-- a55ac49820.faa.list -> ../../cache/lines/b1224e2231.txt
-|   |   `-- d2e44904ac.faa.list.list -> ../../cache/lines/1225bb4525.txt
+|   |   |-- 626202f93c.faa.list -> ../../cache/lines/...
+|   |   |-- a55ac49820.faa.list -> ../../cache/lines/...
+|   |   `-- d2e44904ac.faa.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 4749080868.str -> ../../cache/lines/4d13e8c51d.txt
-|       `-- 4f98ee567d.str -> ../../cache/lines/b633b427c4.txt
+|       |-- 4749080868.str -> ../../cache/lines/...
+|       `-- 4f98ee567d.str -> ../../cache/lines/...
 `-- vars
     |-- all_faas.faa.list -> ../exprs/list/a55ac49820.faa.list
     |-- mini_faas.faa.list -> ../exprs/list/626202f93c.faa.list
     `-- result -> ../exprs/diff/386cf03923.faa.list
 
-9 directories, 27 files
+8 directories, 19 files

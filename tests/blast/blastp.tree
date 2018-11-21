@@ -3,28 +3,13 @@
 |   |-- each
 |   |   |-- b416063c3c
 |   |   |   |-- ce492d3420.str.list -> ../../../exprs/extract_queries/ce492d3420.str.list
-|   |   |   `-- ce492d3420.str.list.args -> ../../../cache/lines/74bb057972.txt
+|   |   |   `-- ce492d3420.str.list.args -> ../../../cache/lines/...
 |   |   |-- b960925b88
 |   |   |   |-- 58ea568aa7.bht -> ../../../exprs/blastp/ce1c174684_6b304f493c_58ea568aa7.bht
-|   |   |   `-- 58ea568aa7.bht.args -> ../../../cache/lines/0e6ef7636e.txt
+|   |   |   `-- 58ea568aa7.bht.args -> ../../../cache/lines/...
 |   |   `-- dd5b7db02a
 |   |       |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
-|   |       `-- e51c741dc5.pdb.args -> ../../../cache/lines/fadeddbb2a.txt
-|   |-- lines
-|   |   |-- 0e6ef7636e.txt
-|   |   |-- 14135d2aeb.txt
-|   |   |-- 21be25c2fd.txt
-|   |   |-- 38cb049e4b.txt
-|   |   |-- 6f77e28b65.txt
-|   |   |-- 72f3bd458f.txt
-|   |   |-- 74bb057972.txt
-|   |   |-- 778251fd80.txt
-|   |   |-- 902cb58552.txt
-|   |   |-- bdc783547b.txt
-|   |   |-- da6561d847.txt -> ../../cache/lines/e00fb07ddb.txt
-|   |   |-- e00fb07ddb.txt
-|   |   |-- ef87d3e725.txt
-|   |   `-- fadeddbb2a.txt
+|   |       `-- e51c741dc5.pdb.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
 |   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
@@ -35,39 +20,39 @@
 |           `-- e00fb07ddb.pdb.psq
 |-- exprs
 |   |-- all
-|   |   `-- 8c2786f33e.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   `-- 8c2786f33e.str.list -> ../../cache/lines/...
 |   |-- any
-|   |   `-- dcf07c8c99.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   `-- dcf07c8c99.str.list.list -> ../../cache/lines/...
 |   |-- blastp
 |   |   `-- ce1c174684_6b304f493c_58ea568aa7.bht
 |   |-- blastp_db
 |   |   `-- 8158675169_1af4d085e7_46b5852d89.bht
 |   |-- blastp_each
-|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list -> ../../cache/lines/74bb057972.txt
+|   |   `-- 8158675169_1af4d085e7_c28ea1492c.bht.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- b09bd7df49.str.list -> ../../cache/lines/38cb049e4b.txt
-|   |   `-- ce492d3420.str.list -> ../../cache/lines/38cb049e4b.txt
+|   |   |-- b09bd7df49.str.list -> ../../cache/lines/...
+|   |   `-- ce492d3420.str.list -> ../../cache/lines/...
 |   |-- extract_queries_each
-|   |   `-- 848b144734.str.list.list -> ../../cache/lines/14135d2aeb.txt
+|   |   `-- 848b144734.str.list.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/14135d2aeb.txt
-|   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/21be25c2fd.txt
-|   |   `-- cce65539fd.faa.list -> ../../cache/lines/e00fb07ddb.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/...
+|   |   |-- c2036af94d.str.list.list.list -> ../../cache/lines/...
+|   |   `-- cce65539fd.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 2d88028e40.faa -> ../../cache/load/32841598b2.faa
 |   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |-- makeblastdb_prot
-|   |   |-- ced061f0b2.pdb -> ../../cache/lines/902cb58552.txt
-|   |   `-- e51c741dc5.pdb -> ../../cache/lines/902cb58552.txt
+|   |   |-- ced061f0b2.pdb -> ../../cache/lines/...
+|   |   `-- e51c741dc5.pdb -> ../../cache/lines/...
 |   |-- makeblastdb_prot_each
-|   |   `-- 821bb6fb09.pdb.list -> ../../cache/lines/6f77e28b65.txt
+|   |   `-- 821bb6fb09.pdb.list -> ../../cache/lines/...
 |   |-- num
-|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   |   `-- a53b190835.num -> ../../cache/lines/...
 |   |-- singletons
-|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/72f3bd458f.txt
+|   |   `-- ced061f0b2.faa.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
-|       `-- db90f32127.str -> ../../cache/lines/ef87d3e725.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       `-- db90f32127.str -> ../../cache/lines/...
 `-- vars
     |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/848b144734.str.list.list
@@ -75,4 +60,4 @@
     |-- result -> ../exprs/all/8c2786f33e.str.list
     `-- single.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
 
-25 directories, 50 files
+24 directories, 36 files

@@ -1,13 +1,5 @@
 .
 |-- cache
-|   |-- lines
-|   |   |-- 0cf27272d3.txt
-|   |   |-- 381fbbbdba.txt
-|   |   |-- 3f62a639a8.txt
-|   |   |-- 8abd22b6c2.txt
-|   |   |-- adfdb6bd8c.txt
-|   |   |-- bdc783547b.txt
-|   |   `-- c3ae472116.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -20,21 +12,21 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
+|   |   `-- 7d562183ce.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot_all
-|   |   `-- a76d25f4b5.pdb -> ../../cache/lines/3f62a639a8.txt
+|   |   `-- a76d25f4b5.pdb -> ../../cache/lines/...
 |   |-- num
-|   |   `-- 3e281fad0f.num -> ../../cache/lines/0cf27272d3.txt
+|   |   `-- 3e281fad0f.num -> ../../cache/lines/...
 |   |-- psiblast_train_db
-|   |   `-- 5fbeb4e044_4d0e43d616_e15f764d92.pssm -> ../../cache/lines/381fbbbdba.txt
+|   |   `-- 5fbeb4e044_4d0e43d616_e15f764d92.pssm -> ../../cache/lines/...
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
-|       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
-|       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- b9eaf59b0c.str -> ../../cache/lines/...
+|       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
     |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/a76d25f4b5.pdb
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
@@ -43,4 +35,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/pssm.pssm
 
-14 directories, 29 files
+13 directories, 22 files

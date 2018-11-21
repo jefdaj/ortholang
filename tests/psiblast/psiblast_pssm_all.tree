@@ -1,14 +1,5 @@
 .
 |-- cache
-|   |-- lines
-|   |   |-- 088141e1ef.txt
-|   |   |-- 33ec325d48.txt
-|   |   |-- 3f62a639a8.txt
-|   |   |-- 4f1ff757e9.txt
-|   |   |-- 8abd22b6c2.txt
-|   |   |-- adfdb6bd8c.txt
-|   |   |-- bdc783547b.txt
-|   |   `-- c3ae472116.txt
 |   |-- load
 |   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
 |   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
@@ -24,24 +15,24 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 7d562183ce.faa.list -> ../../cache/lines/c3ae472116.txt
+|   |   `-- 7d562183ce.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
 |   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
 |   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot_all
-|   |   |-- a76d25f4b5.pdb -> ../../cache/lines/3f62a639a8.txt
-|   |   `-- a76d25f4b5.pdb.list -> ../../cache/lines/4f1ff757e9.txt
+|   |   |-- a76d25f4b5.pdb -> ../../cache/lines/...
+|   |   `-- a76d25f4b5.pdb.list -> ../../cache/lines/...
 |   |-- num
-|   |   `-- c23938f494.num -> ../../cache/lines/33ec325d48.txt
+|   |   `-- c23938f494.num -> ../../cache/lines/...
 |   |-- psiblast_pssm_all
 |   |   `-- f51c91829c_a1c103bda2_f3f0381c51.bht
 |   |-- psiblast_train_db
-|   |   `-- f51c91829c_4d0e43d616_e15f764d92.pssm -> ../../cache/lines/088141e1ef.txt
+|   |   `-- f51c91829c_4d0e43d616_e15f764d92.pssm -> ../../cache/lines/...
 |   `-- str
-|       |-- 1d8a61c770.str -> ../../cache/lines/bdc783547b.txt
-|       |-- b9eaf59b0c.str -> ../../cache/lines/8abd22b6c2.txt
-|       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- b9eaf59b0c.str -> ../../cache/lines/...
+|       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
     |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/a76d25f4b5.pdb
     |-- hitlist.bht -> ../exprs/psiblast_pssm_all/f51c91829c_a1c103bda2_f3f0381c51.bht
@@ -51,4 +42,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlist.bht
 
-15 directories, 36 files
+14 directories, 28 files

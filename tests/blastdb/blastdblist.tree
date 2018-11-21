@@ -1,38 +1,26 @@
 .
 |-- cache
-|   |-- blastdbget
-|   |   `-- dblist.txt
-|   `-- lines
-|       |-- 01fe5efbb0.txt
-|       |-- 3c027c5965.txt
-|       |-- 637edad317.txt
-|       |-- 69f5e32ea6.txt
-|       |-- 6fd530afbb.txt
-|       |-- 7c7cb8bd0b.txt
-|       |-- 90aed1d1c9.txt
-|       |-- 91942e737d.txt
-|       |-- c64c0c165c.txt
-|       |-- d42c6637eb.txt
-|       `-- d66939bd19.txt
+|   `-- blastdbget
+|       `-- dblist.txt
 |-- exprs
 |   |-- any
-|   |   |-- 494dd67ab7.str.list -> ../../cache/lines/91942e737d.txt
-|   |   |-- b7c6f17408.str.list -> ../../cache/lines/91942e737d.txt
-|   |   `-- e14d4b6f8e.str.list -> ../../cache/lines/91942e737d.txt
+|   |   |-- 494dd67ab7.str.list -> ../../cache/lines/...
+|   |   |-- b7c6f17408.str.list -> ../../cache/lines/...
+|   |   `-- e14d4b6f8e.str.list -> ../../cache/lines/...
 |   |-- blastdblist
-|   |   |-- 4c04f88f38.str.list -> ../../cache/lines/91942e737d.txt
-|   |   |-- 93c452e38f.str.list -> ../../cache/lines/01fe5efbb0.txt
-|   |   |-- da67996088.str.list -> ../../cache/lines/7c7cb8bd0b.txt
-|   |   `-- fa437bd7a3.str.list -> ../../cache/lines/6fd530afbb.txt
+|   |   |-- 4c04f88f38.str.list -> ../../cache/lines/...
+|   |   |-- 93c452e38f.str.list -> ../../cache/lines/...
+|   |   |-- da67996088.str.list -> ../../cache/lines/...
+|   |   `-- fa437bd7a3.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 1b9c3d73be.str.list.list -> ../../cache/lines/c64c0c165c.txt
-|   |   |-- c8c6ad6b02.str.list.list -> ../../cache/lines/69f5e32ea6.txt
-|   |   `-- d7da3216eb.str.list.list -> ../../cache/lines/d66939bd19.txt
+|   |   |-- 1b9c3d73be.str.list.list -> ../../cache/lines/...
+|   |   |-- c8c6ad6b02.str.list.list -> ../../cache/lines/...
+|   |   `-- d7da3216eb.str.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 072c64781f.str -> ../../cache/lines/d42c6637eb.txt
-|       |-- 419a892f8b.str -> ../../cache/lines/637edad317.txt
-|       |-- 6634f1bc9a.str -> ../../cache/lines/90aed1d1c9.txt
-|       `-- 9d4568c009.str -> ../../cache/lines/3c027c5965.txt
+|       |-- 072c64781f.str -> ../../cache/lines/...
+|       |-- 419a892f8b.str -> ../../cache/lines/...
+|       |-- 6634f1bc9a.str -> ../../cache/lines/...
+|       `-- 9d4568c009.str -> ../../cache/lines/...
 `-- vars
     |-- dbs.str.list -> ../exprs/blastdblist/4c04f88f38.str.list
     |-- human.str.list -> ../exprs/blastdblist/da67996088.str.list
@@ -40,4 +28,4 @@
     |-- proks.str.list -> ../exprs/blastdblist/93c452e38f.str.list
     `-- result -> ../exprs/any/b7c6f17408.str.list
 
-9 directories, 31 files
+8 directories, 20 files

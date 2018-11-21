@@ -3,23 +3,9 @@
 |   |-- each
 |   |   `-- 3b3e2bc4a4
 |   |       |-- 0412f21d46.ndb -> ../../../exprs/makeblastdb_nucl/0412f21d46.ndb
-|   |       |-- 0412f21d46.ndb.args -> ../../../cache/lines/b076b419bd.txt
+|   |       |-- 0412f21d46.ndb.args -> ../../../cache/lines/...
 |   |       |-- 23f474a06c.ndb -> ../../../exprs/makeblastdb_nucl/23f474a06c.ndb
-|   |       `-- 23f474a06c.ndb.args -> ../../../cache/lines/77cfba7b0f.txt
-|   |-- lines
-|   |   |-- 0815de9417.txt
-|   |   |-- 0a9f1eabc4.txt -> ../../cache/lines/e1e5fdbeba.txt
-|   |   |-- 1f98704802.txt
-|   |   |-- 3ce4648d84.txt
-|   |   |-- 615fc32080.txt
-|   |   |-- 77cfba7b0f.txt
-|   |   |-- 798008f778.txt -> ../../cache/lines/d860635d17.txt
-|   |   |-- 878a78d9d7.txt
-|   |   |-- 9504792ef7.txt
-|   |   |-- b076b419bd.txt
-|   |   |-- c9fce61422.txt
-|   |   |-- d860635d17.txt
-|   |   `-- e1e5fdbeba.txt
+|   |       `-- 23f474a06c.ndb.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
 |   |   `-- 737dfdb34e.fna -> $WORKDIR/data/6803genes.fna
@@ -34,24 +20,24 @@
 |           `-- e1e5fdbeba.ndb.nsq
 |-- exprs
 |   |-- list
-|   |   `-- f283a14ffc.fna.list -> ../../cache/lines/3ce4648d84.txt
+|   |   `-- f283a14ffc.fna.list -> ../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
 |   |   `-- f110b4b1c9.fna -> ../../cache/load/737dfdb34e.fna
 |   |-- makeblastdb_nucl
-|   |   |-- 0412f21d46.ndb -> ../../cache/lines/c9fce61422.txt
-|   |   `-- 23f474a06c.ndb -> ../../cache/lines/615fc32080.txt
+|   |   |-- 0412f21d46.ndb -> ../../cache/lines/...
+|   |   `-- 23f474a06c.ndb -> ../../cache/lines/...
 |   |-- makeblastdb_nucl_each
-|   |   `-- 9087a5152d.ndb.list -> ../../cache/lines/878a78d9d7.txt
+|   |   `-- 9087a5152d.ndb.list -> ../../cache/lines/...
 |   |-- singletons
-|   |   `-- bb5d85d845.fna.list.list -> ../../cache/lines/9504792ef7.txt
+|   |   `-- bb5d85d845.fna.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- 7da80bde02.str -> ../../cache/lines/0815de9417.txt
-|       `-- a2fd369878.str -> ../../cache/lines/1f98704802.txt
+|       |-- 7da80bde02.str -> ../../cache/lines/...
+|       `-- a2fd369878.str -> ../../cache/lines/...
 `-- vars
     |-- dbs.ndb.list -> ../exprs/makeblastdb_nucl_each/9087a5152d.ndb.list
     |-- large6803fna.fna -> ../exprs/load_fna/f110b4b1c9.fna
     |-- result -> ../vars/dbs.ndb.list
     `-- small6803fna.fna -> ../exprs/load_fna/9b7934c579.fna
 
-16 directories, 38 files
+15 directories, 25 files

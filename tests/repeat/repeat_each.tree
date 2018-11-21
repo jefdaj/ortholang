@@ -1,33 +1,21 @@
 .
 |-- cache
-|   `-- lines
-|       |-- 0c357755eb.txt
-|       |-- 2a13ac791a.txt
-|       |-- 2a8f7e5cdc.txt
-|       |-- 3801d19d03.txt
-|       |-- 42b60c3a20.txt
-|       |-- 42fb7081a8.txt
-|       |-- 558d528228.txt
-|       |-- 58d21ca52f.txt
-|       |-- 79d5dfbfcb.txt
-|       |-- 8c30f23bbf.txt
-|       `-- a666b523ca.txt
 |-- exprs
 |   |-- multiply
-|   |   |-- 719eb2d0c0_4578706b58.num -> ../../cache/lines/3801d19d03.txt
-|   |   |-- 719eb2d0c0_58d3e9f8ea.num -> ../../cache/lines/a666b523ca.txt
-|   |   |-- 719eb2d0c0_6d57e8642a.num -> ../../cache/lines/8c30f23bbf.txt
-|   |   |-- 719eb2d0c0_f3d001a54f.num -> ../../cache/lines/2a8f7e5cdc.txt
-|   |   `-- 719eb2d0c0_fba69f6eb2.num -> ../../cache/lines/79d5dfbfcb.txt
+|   |   |-- 719eb2d0c0_4578706b58.num -> ../../cache/lines/...
+|   |   |-- 719eb2d0c0_58d3e9f8ea.num -> ../../cache/lines/...
+|   |   |-- 719eb2d0c0_6d57e8642a.num -> ../../cache/lines/...
+|   |   |-- 719eb2d0c0_f3d001a54f.num -> ../../cache/lines/...
+|   |   `-- 719eb2d0c0_fba69f6eb2.num -> ../../cache/lines/...
 |   |-- num
-|   |   |-- 254e420f28.num -> ../../cache/lines/79d5dfbfcb.txt
-|   |   |-- 89fb8b4aed.num -> ../../cache/lines/58d21ca52f.txt
-|   |   |-- a629005e3c.num -> ../../cache/lines/558d528228.txt
-|   |   |-- ea11b49459.num -> ../../cache/lines/2a13ac791a.txt
-|   |   |-- eaad7f2e40.num -> ../../cache/lines/0c357755eb.txt
-|   |   `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 254e420f28.num -> ../../cache/lines/...
+|   |   |-- 89fb8b4aed.num -> ../../cache/lines/...
+|   |   |-- a629005e3c.num -> ../../cache/lines/...
+|   |   |-- ea11b49459.num -> ../../cache/lines/...
+|   |   |-- eaad7f2e40.num -> ../../cache/lines/...
+|   |   `-- ee383407c9.num -> ../../cache/lines/...
 |   `-- repeat_each
-|       `-- f424b3e07d_fba69f6eb2_99bd86decc.num.list -> ../../cache/lines/42b60c3a20.txt
+|       `-- f424b3e07d_fba69f6eb2_99bd86decc.num.list -> ../../cache/lines/...
 `-- vars
     |-- dep.3fdc2637e9.num -> ../exprs/multiply/719eb2d0c0_58d3e9f8ea.num
     |-- dep.5bcb6e47cd.num -> ../exprs/multiply/719eb2d0c0_6d57e8642a.num
@@ -47,4 +35,4 @@
     |-- result.9da8219458.num -> ../vars/dep.9da8219458.num
     `-- result.f5365ef375.num -> ../vars/dep.f5365ef375.num
 
-7 directories, 40 files
+6 directories, 29 files

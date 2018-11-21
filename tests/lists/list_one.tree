@@ -1,13 +1,11 @@
 .
 |-- cache
-|   `-- lines
-|       `-- 42fb7081a8.txt
 |-- exprs
 |   |-- list
-|   |   `-- 2b8dc08526.num.list -> ../../cache/lines/42fb7081a8.txt
+|   |   `-- 2b8dc08526.num.list -> ../../cache/lines/...
 |   `-- num
-|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|       `-- ee383407c9.num -> ../../cache/lines/...
 `-- vars
     `-- result -> ../exprs/list/2b8dc08526.num.list
 
-6 directories, 4 files
+5 directories, 3 files
