@@ -23,6 +23,7 @@ import qualified ShortCut.Modules.Scores    as Scores
 import qualified ShortCut.Modules.Plots     as Plots
 import qualified ShortCut.Modules.PsiBlast  as PsiBlast
 import qualified ShortCut.Modules.Hmmer     as Hmmer
+import qualified ShortCut.Modules.OrthoFinder as OrthoFinder
 
 modules :: [CutModule]
 modules =
@@ -47,4 +48,5 @@ modules =
   , Summarize.cutModule
   , Scores.cutModule
   , Plots.cutModule
+  , OrthoFinder.cutModule
   ]

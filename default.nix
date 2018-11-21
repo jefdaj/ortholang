@@ -24,6 +24,7 @@ let
     psiblast-exb # TODO does this conflict with ncbi-blast+?
     muscle
     hmmer
+    orthofinder
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends

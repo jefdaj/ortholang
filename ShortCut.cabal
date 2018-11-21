@@ -106,6 +106,7 @@ executable reference
                     ShortCut.Modules.Plots,
                     ShortCut.Modules.PsiBlast,
                     ShortCut.Modules.Hmmer
+                    ShortCut.Modules.OrthoFinder
   build-depends:    Command,
                     Glob,
                     MissingH,
@@ -213,6 +214,7 @@ executable shortcut
                     ShortCut.Modules.Plots,
                     ShortCut.Modules.PsiBlast,
                     ShortCut.Modules.Hmmer,
+                    ShortCut.Modules.OrthoFinder,
                     ShortCut.Test,
                     ShortCut.Test.Deps
                     ShortCut.Test.Scripts,

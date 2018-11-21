@@ -23,6 +23,10 @@ let
   });
   crb-blast  = pkgs.callPackage ./crb-blast  { inherit ncbi-blast; };
 
+  mcl = pkgs.callPackage ./mcl { };
+  fastme = pkgs.callPackage ./fastme { };
+  orthofinder = pkgs.callPackage ./orthofinder { inherit mcl fastme psiblast-exb; };
+
   myPython = pkgs.pythonPackages // {
     blastdbget = pkgs.callPackage ./blastdbget {};
     biopython  = pkgs.callPackage ./biopython {
@@ -32,6 +36,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast crb-blast psiblast-exb hmmer;
+  inherit ncbi-blast crb-blast psiblast-exb hmmer orthofinder;
   pythonPackages = myPython;
 }
