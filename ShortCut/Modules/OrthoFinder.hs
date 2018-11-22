@@ -3,6 +3,7 @@ module ShortCut.Modules.OrthoFinder
 
 -- TODO write a function to extract_seqs from multiple fastas at once, useful here + elsewhere?
 -- TODO can all "extract" functions be renamed with "list"?
+-- TODO try DIAMOND, MMseqs2
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -66,6 +67,7 @@ aOrthofinder cfg ref [out, faListPath] = do
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
     (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "orthofinder"
       [ "-f", tmpDir'
+      , "-S", "diamond" -- use DIAMOND instead of BLAST+
       , "-t", "8" -- TODO figure out with shake or ghc
       , "-a", "8" -- TODO figure out with shake or ghc
       ]

@@ -25,6 +25,7 @@ let
     muscle
     hmmer
     orthofinder
+    diamond
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends

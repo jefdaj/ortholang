@@ -1,4 +1,4 @@
-{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb }:
+{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb, diamond }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
 # I'm not sure if this is the proper way to set libPath but it seems to work
@@ -12,7 +12,8 @@ stdenv.mkDerivation rec {
   };
   buildInputs = [ makeWrapper ] ++ runDepends;
   runDepends = [
-    psiblast-exb # TODO is regular ncbi-blast required?
+    psiblast-exb # TODO remove in favor of diamond/mmseqs2?
+    diamond
     fastme
     mcl
   ];
