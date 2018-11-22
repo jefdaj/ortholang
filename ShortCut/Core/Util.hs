@@ -127,7 +127,7 @@ ignoreExistsError act = catchIOError act $ \e ->
 
 unlessExists :: FilePath -> Action () -> Action ()
 unlessExists path act = do
-  e <- doesFileExist path
+  e <- liftIO $ doesPathExist path
   unless e act
 
 -- TODO use FilePatterns here rather than plain FilePaths
