@@ -64,7 +64,7 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
                                    stringCutPath)
-import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict,
+import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, unlessExists,
                                    ignoreExistsError, digest, globFiles, isEmpty)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteOnce)
@@ -194,6 +194,8 @@ cachedLinesPath cfg content = cDir </> digest content <.> "txt"
  - paths will be links to the same cached path. That causes them to get
  - properly deduplicated when used in a set operation. It also makes the .tree
  - test files much stricter, since they'll change if any list element changes.
+ - The Maybe is in case you only need to write lists as part of a larger list
+ - and don't want individual outpaths.
  -
  - TODO switch to md5sum/hashContent?
  - TODO does it need to handle a race condition when writing to the cache?
@@ -208,7 +210,8 @@ writeCachedLines cfg ref outPath content = do
   withWriteOnce ref cache
     $ debug cfg ("writing '" ++ cache ++ "'")
     $ writeFile' cache (unlines content) -- TODO is this strict?
-  symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
+  unlessExists outPath $
+    symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
 
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
