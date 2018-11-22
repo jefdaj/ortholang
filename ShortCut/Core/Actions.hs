@@ -168,6 +168,8 @@ readStrings etype cfg ref path = if etype' `elem` [str, num]
  - distinguish them from the empty files that might result from a script
  - failing, and from empty strings in case of an error in the typechecker.
  - This also gives empty lists and strings distinct hashes.
+ -
+ - Note that strict reading is important to avoid "too many open files" on long lists.
  -}
 readList :: CutConfig -> Locks -> FilePath -> Action [String]
 readList cfg locks path = do
@@ -177,8 +179,9 @@ readList cfg locks path = do
     then return []
     else debug cfg ("read list '" ++ path ++ "'")
        $ fmap lines
-       $ withReadLock' locks path $ readFile' path -- TODO be strict here??
-       -- $ readFileStrict' cfg locks path
+       $ withReadLock' locks path
+       $ liftIO
+       $ readFileStrict locks path
 
 
 -----------------
