@@ -189,7 +189,7 @@ cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
                 Nothing -> ""
                 Just s  -> "\n\n" ++ s ++ "\n"
     tHelp t = "The " ++ tExt t ++ " extension is for " ++ tDesc t ++ " files.\n\n" ++ tFnList t
-    tFnList t = unlines $ ["You can create them with these functions:"] ++ outputs ++ ["", "And consume them with these functions:"] ++ inputs
+    tFnList t = unlines $ ["You can create them with these functions:"] ++ outputs ++ ["", "And use them with these functions:"] ++ inputs
                 where
                   descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
                   outputs = filter (\d -> (tExt t) `isInfixOf` (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
