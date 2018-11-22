@@ -20,5 +20,5 @@ echo "testing nix build..."
 echo "testing stack build..."
 export STACK_ROOT=$PWD/.stack-work
 mkdir -p $STACK_ROOT
-cmd='(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit'
+cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit"
 nix-shell --command "$cmd" 2>&1 | tee stack-build.log
