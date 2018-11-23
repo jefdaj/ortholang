@@ -1,5 +1,3 @@
-# TODO get tiny genomes to try this with like M. genitalium
-
-paths = load_faa_each ["data/6803genes.faa", "data/7942genes.faa"]
-ofres = orthofinder paths
-result = orthogroup_containing ofres "Synpcc7942_0001" # TODO is this deterministic?
+smallbacteria = load_faa_each (glob_files "data/Mycoplasma/*")
+ofres = orthofinder smallbacteria
+result = orthogroup_containing ofres "AKO50238"

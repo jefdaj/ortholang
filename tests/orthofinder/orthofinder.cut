@@ -1,2 +1,2 @@
-paths = load_faa_each ["data/6803genes.faa", "data/7942genes.faa"]
-result = orthofinder paths
+smallbacteria = load_faa_each (glob_files "data/Mycoplasma/*")
+result = orthofinder smallbacteria

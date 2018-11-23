@@ -131,7 +131,7 @@ Functions:
 | `load_prot_db_each` | `str.list` | `pdb.list` |
 | `makeblastdb_nucl_all` | `fa.list` | `ndb` |
 | `makeblastdb_prot_all` | `faa.list` | `pdb` |
-| `makeblastdb_nucl:` | `fa` | `ndb` |
+| `makeblastdb_nucl` | `fa` | `ndb` |
 | `makeblastdb_prot` | `faa` | `pdb` |
 | `makeblastdb_nucl_each` | `fa.list` | `ndb.list` |
 | `makeblastdb_prot_each` | `faa.list` | `pdb.list` |
@@ -486,5 +486,26 @@ Functions:
 | `histogram` | `str`, `num.list` | `plot` |
 | `linegraph` | `str`, `num.scores` | `plot` |
 | `scatterplot` | `str`, `num.scores` | `plot` |
+
+
+## OrthoFinder module
+
+Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree.
+
+Types:
+
+| Extension | Meaning |
+| :-------- | :------ |
+| `faa` | FASTA (amino acid) |
+| `ofr` | OrthoFinder results |
+
+Functions:
+
+| Name | Inputs | Output |
+| :--- | :----- | :----- |
+| `orthofinder` | `faa.list` | `ofr` |
+| `orthogroups` | `ofr` | `str.list.list` |
+| `orthogroup_containing` | `ofr`, `str` | `str.list` |
+| `orthogroups_containing` | `ofr`, `str.list` | `str.list.list` |
 
 
