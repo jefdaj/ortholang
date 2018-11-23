@@ -7,3 +7,5 @@ tmp
 .nfs*
 *.egg-info
 *.*~
+nixpkgs/inparanoid/*.zip
+nixpkgs/inparanoid/*.tar.gz
