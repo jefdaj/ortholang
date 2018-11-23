@@ -6068,11 +6068,15 @@
 |   |   `-- c1ebc246d1.faa.list -> ../../cache/lines/...
 |   |-- orthofinder
 |   |   `-- 86302fc20f.ofr -> ../../cache/orthofinder/d0840f2b61/result/Comparative_Genomics_Statistics/Statistics_Overall.tsv
+|   |-- orthogroup_containing
+|   |   `-- 5d82bb8391_879bb10b1d.str.list -> ../../cache/lines/...
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- cd472b5bd3.str -> ../../cache/lines/...
 |       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
+    |-- ofres.ofr -> ../exprs/orthofinder/86302fc20f.ofr
     |-- paths.faa.list -> ../exprs/list/c1ebc246d1.faa.list
-    `-- result -> ../exprs/orthofinder/86302fc20f.ofr
+    `-- result -> ../exprs/orthogroup_containing/5d82bb8391_879bb10b1d.str.list
 
-25 directories, 6050 files
+26 directories, 6053 files

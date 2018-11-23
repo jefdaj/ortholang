@@ -1,0 +1,5 @@
+# TODO get tiny genomes to try this with like M. genitalium
+
+paths = load_faa_each ["data/6803genes.faa", "data/7942genes.faa"]
+ofres = orthofinder paths
+result = orthogroup_containing ofres "Synpcc7942_0001" # TODO is this deterministic?

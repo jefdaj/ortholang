@@ -1,0 +1,7 @@
+# TODO get tiny genomes to try this with like M. genitalium
+
+paths = load_faa_each ["data/6803genes.faa", "data/7942genes.faa"]
+ofres = orthofinder paths
+
+# TODO should it work if they contain an id that contains this text? or just the whole text?
+result = orthogroups_containing ofres ["Synpcc7942_0001", "BAA10018.2"] # TODO is this deterministic?
