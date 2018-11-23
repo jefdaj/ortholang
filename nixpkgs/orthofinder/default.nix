@@ -3,16 +3,18 @@
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
 # I'm not sure if this is the proper way to set libPath but it seems to work
 
+# TODO include the newer diamond in the repo until nixpkgs updates it
+
 stdenv.mkDerivation rec {
   name = "orthofinder-${version}";
-  version = "2.2.6";
+  version = "2.3.1";
   src = fetchurl {
-    url = "https://github.com/davidemms/OrthoFinder/releases/download/v${version}/OrthoFinder-${version}.tar.gz";
-    sha256 = "1avbpswkv8ggmvqgbp08z1dl5n3h21wmqm87pxgk2m28nw013ikv";
+    url = "https://github.com/davidemms/OrthoFinder/releases/download/v${version}-beta/OrthoFinder-${version}.tar.gz";
+    sha256 = "08mq8aa42c24w967zfb478fswq8h5fb4crvlsi1h8jls8kr0bqhz";
   };
   buildInputs = [ makeWrapper ] ++ runDepends;
   runDepends = [
-    psiblast-exb # TODO remove in favor of diamond/mmseqs2?
+    #psiblast-exb # TODO remove in favor of diamond/mmseqs2?
     diamond
     fastme
     mcl
@@ -23,10 +25,13 @@ stdenv.mkDerivation rec {
     cd $TMPDIR
     tar xvzf $src
   '';
+  # TODO why does the libPath come from PsiBlast?
+  # TODO need to add config.json to the same dir... and maybe other stuff at the same time?
   installPhase = ''
     mkdir -p $out/bin
     exe="$out/bin/orthofinder"
     cp OrthoFinder-${version}/orthofinder "$exe"
+    cp OrthoFinder-${version}/config.json $out/bin/
     linker="$(cat $NIX_CC/nix-support/dynamic-linker)"
     echo "patching $exe"
     patchelf --interpreter "$linker"  "$exe"

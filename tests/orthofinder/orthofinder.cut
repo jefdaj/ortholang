@@ -1,3 +1,4 @@
 paths = load_faa_each ["data/6803genes.faa", "data/7942genes.faa"]
 resdir = orthofinder paths
-result = extract_groups resdir
+groups = extract_groups resdir
+result = groups

@@ -33,7 +33,7 @@ ofr = CutType
   , tDesc = "OrthoFinder results"
   , tShow = \_ ref path -> do
       txt <- readFileStrict ref path
-      return $ unlines $ take 16 $ lines txt
+      return $ unlines $ take 17 $ lines txt
   }
 
 -----------------
@@ -71,10 +71,10 @@ aOrthofinder cfg ref [out, faListPath] = do
       , "-t", "8" -- TODO figure out with shake or ghc
       , "-a", "8" -- TODO figure out with shake or ghc
       ]
-    putNormal $ unlines [o, e]
-    resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents tmpDir'
-    liftIO $ renameDirectory (tmpDir' </> resName) resDir'
-  symlink cfg ref out $ toCutPath cfg $ resDir' </> "Statistics_Overall.csv"
+    putNormal $ unlines [o, e] -- TODO remove
+    resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir' </> "OrthoFinder"
+    liftIO $ renameDirectory (tmpDir' </> "OrthoFinder" </> resName) resDir'
+  symlink cfg ref out $ toCutPath cfg $ resDir' </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
@@ -102,8 +102,8 @@ extractGroups = let name = "extract_groups" in CutFunction
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 aExtractGroups :: CutConfig -> Locks -> [CutPath] -> Action ()
 aExtractGroups cfg ref [out, ofrPath] = do
-  resDir' <- fmap takeDirectory $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) (fromCutPath cfg ofrPath)
-  let orthoPath = resDir' </> "Orthogroups.txt"
+  resDir' <- fmap (takeDirectory . takeDirectory) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) (fromCutPath cfg ofrPath)
+  let orthoPath = resDir' </> "Orthogroups" </> "Orthogroups.txt"
   txt <- readFile' orthoPath -- TODO openFile error during this?
   let groups = map (words . drop 11) (lines txt)
   paths <- forM groups $ \group -> do

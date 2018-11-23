@@ -25,7 +25,8 @@ let
 
   mcl = pkgs.callPackage ./mcl { };
   fastme = pkgs.callPackage ./fastme { };
-  orthofinder = pkgs.callPackage ./orthofinder { inherit mcl fastme psiblast-exb; };
+  diamond = pkgs.callPackage ./diamond { };
+  orthofinder = pkgs.callPackage ./orthofinder { inherit mcl fastme psiblast-exb diamond; };
 
   myPython = pkgs.pythonPackages // {
     blastdbget = pkgs.callPackage ./blastdbget {};
@@ -36,6 +37,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast crb-blast psiblast-exb hmmer orthofinder;
+  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder;
   pythonPackages = myPython;
 }
