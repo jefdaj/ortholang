@@ -10,7 +10,7 @@ import ShortCut.Core.Types
 
 import Data.List                   (isPrefixOf)
 import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmd,
-                                    writeLits, cachedLinesPath, writePaths)
+                                    readLit, writeLits, cachedLinesPath, writePaths)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Util          (digest, readFileStrict, unlessExists, resolveSymlinks)
@@ -24,7 +24,7 @@ cutModule = CutModule
   { mName = "OrthoFinder"
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
   , mTypes = [faa, ofr]
-  , mFunctions = [orthofinder, extractGroups]
+  , mFunctions = [orthofinder, extractGroups, extractGroup]
   }
 
 ofr :: CutType
@@ -56,25 +56,25 @@ orthofinder = let name = "orthofinder" in CutFunction
 -- TODO what's diamond blast? do i need to add it?
 aOrthofinder :: CutConfig -> Locks -> [CutPath] -> Action ()
 aOrthofinder cfg ref [out, faListPath] = do
-  let tmpDir' = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
-      resDir' = tmpDir' </> "result"
-  unlessExists resDir' $ do
-    liftIO $ createDirectoryIfMissing True tmpDir'
+  let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
+      resDir = tmpDir </> "result"
+  unlessExists resDir $ do
+    liftIO $ createDirectoryIfMissing True tmpDir
     faPaths <- readPaths cfg ref faListPath'
     let faPaths' = map (fromCutPath cfg) faPaths
     debugNeed cfg "aOrthofinder" faPaths'
-    let faLinks = map (\p -> toCutPath cfg $ tmpDir' </> (takeFileName $ fromCutPath cfg p)) faPaths
+    let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
     (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "orthofinder"
-      [ "-f", tmpDir'
+      [ "-f", tmpDir
       , "-S", "diamond" -- use DIAMOND instead of BLAST+
       , "-t", "8" -- TODO figure out with shake or ghc
       , "-a", "8" -- TODO figure out with shake or ghc
       ]
     putNormal $ unlines [o, e] -- TODO remove
-    resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir' </> "OrthoFinder"
-    liftIO $ renameDirectory (tmpDir' </> "OrthoFinder" </> resName) resDir'
-  symlink cfg ref out $ toCutPath cfg $ resDir' </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
+    resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
+    liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
+  symlink cfg ref out $ toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
@@ -98,17 +98,55 @@ extractGroups = let name = "extract_groups" in CutFunction
   , fRules     = rSimple aExtractGroups
   }
 
--- TODO something wrong with the paths/lits here, and it breaks parsing the script??
--- TODO separate haskell fn to just list groups, useful for extracting only one too?
-aExtractGroups :: CutConfig -> Locks -> [CutPath] -> Action ()
-aExtractGroups cfg ref [out, ofrPath] = do
-  resDir' <- fmap (takeDirectory . takeDirectory) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) (fromCutPath cfg ofrPath)
-  let orthoPath = resDir' </> "Orthogroups" </> "Orthogroups.txt"
+findResDir :: CutConfig -> FilePath -> IO FilePath
+findResDir cfg outPath = do
+  statsPath <- resolveSymlinks (Just $ cfgTmpDir cfg) outPath
+  return $ takeDirectory $ takeDirectory statsPath
+
+readOrthogroups :: FilePath -> Action [[String]]
+readOrthogroups resDir = do
+  let orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   txt <- readFile' orthoPath -- TODO openFile error during this?
   let groups = map (words . drop 11) (lines txt)
+  return groups
+
+writeOrthogroups :: CutConfig -> Locks -> CutPath -> [[String]] -> Action ()
+writeOrthogroups cfg ref out groups = do
   paths <- forM groups $ \group -> do
     let path = cachedLinesPath cfg group
     writeLits cfg ref path group -- TODO maybe this should be strings? lits with str type?
     return $ toCutPath cfg path
   writePaths cfg ref (fromCutPath cfg out) paths
+
+-- TODO something wrong with the paths/lits here, and it breaks parsing the script??
+-- TODO separate haskell fn to just list groups, useful for extracting only one too?
+aExtractGroups :: CutConfig -> Locks -> [CutPath] -> Action ()
+aExtractGroups cfg ref [out, ofrPath] = do
+  resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
+  groups <- readOrthogroups resDir
+  writeOrthogroups cfg ref out groups
 aExtractGroups _ _ args = error $ "bad argument to aExtractGroups: " ++ show args
+
+-------------------
+-- extract_group --
+-------------------
+
+-- TODO better name for this: orthogroup_matching?
+
+extractGroup :: CutFunction
+extractGroup = let name = "extract_group" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [ofr, str] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [ofr, str] (ListOf (ListOf str))
+  , fDesc      = Just "Given one gene ID, list others in the same orthogroup."
+  , fFixity    = Prefix
+  , fRules     = rSimple aExtractGroup
+  }
+
+aExtractGroup :: CutConfig -> Locks -> [CutPath] -> Action ()
+aExtractGroup cfg ref [out, ofrPath, idPath] = do
+  geneId <- readLit cfg ref $ fromCutPath cfg idPath
+  resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
+  groups <- fmap (filter $ elem geneId) $ readOrthogroups resDir
+  writeOrthogroups cfg ref out groups
+aExtractGroup _ _ args = error $ "bad argument to aExtractGroups: " ++ show args
