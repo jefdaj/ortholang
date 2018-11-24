@@ -26,6 +26,7 @@ let
     hmmer
     orthofinder
     diamond
+    sonicparanoid
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
