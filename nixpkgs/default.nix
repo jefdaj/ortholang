@@ -23,13 +23,14 @@ let
   });
   crb-blast  = pkgs.callPackage ./crb-blast  { inherit ncbi-blast; };
 
+  cdhit = pkgs.callPackage ./cdhit { };
   mcl = pkgs.callPackage ./mcl { };
   fastme = pkgs.callPackage ./fastme { };
   # muscle = pkgs.callPackage ./muscle { }; # TODO got this already somewhere!
   diamond = pkgs.callPackage ./diamond { };
   mmseqs2 = pkgs.callPackage ./mmseqs2 { };
   orthofinder = pkgs.callPackage ./orthofinder { inherit mcl fastme psiblast-exb diamond; };
-  sonicparanoid = pkgs.callPackage ./sonicparanoid { inherit mcl diamond hmmer; }; # TODO muscle
+  sonicparanoid = pkgs.callPackage ./sonicparanoid { inherit mcl diamond hmmer mmseqs2 cdhit; }; # TODO muscle
 
   myPython = pkgs.pythonPackages // {
     blastdbget = pkgs.callPackage ./blastdbget {};
@@ -40,6 +41,6 @@ let
   };
 
 in nixpkgs // {
-  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder sonicparanoid;
+  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder mmseqs2 sonicparanoid cdhit;
   pythonPackages = myPython;
 }
