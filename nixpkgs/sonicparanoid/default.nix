@@ -1,70 +1,54 @@
-{ mcl, diamond, hmmer, pythonPackages }: # TODO muscle
-with pythonPackages;
+with import <nixpkgs> {};
+let
+  diamond = callPackage ../diamond {};
+  mcl = callPackage ../mcl {};
+  # biopython = callPackage ../biopython {};
+  mmseqs2 = callPackage ../mmseqs2 {};
+  hmmer = callPackage ../hmmer {};
+  p =
 
-# from inparanoid:
-# stdenv.mkDerivation rec {
-#   name = "sonicparanoid-${version}";
-#   version = "0.2.2";
-# 
-#   src = 
-# 
-#   buildInputs = [
-#     diamond
-#     psiblast-exb
-#     perlPackages.perl
-#     perlPackages.XMLParser
-#     openssl    # for the patch script i downloaded
-#     gnupg1orig # for the patch script i downloaded
-#     parallel
-#     unzip
-#   ];
-# 
-#   builder = writeScript "builder.sh" ''
-#     #!/usr/bin/env bash
-#     source $stdenv/setup
-#     mkdir -p $TMPDIR
-#     cd $TMPDIR
-#     tar xvf ${official_tarball}
-#     unzip ${encrypted_patch}
-#     # yes, the tmpdir is hardcoded in the source
-#     mv patches-master/*.sh tmp/tmpmFSaYO/
-#     cd tmp/tmpmFSaYO
-#     sed -i 's/bin\/bash/usr\/bin\/env\ bash/g' *.sh
-#     export GNUPGHOME=$TMPDIR/gnupg
-#     mkdir -p $GNUPGHOME
-#     chmod 700 $GNUPGHOME
-#     ./apply-patch-inparanoid_4.1.sh
-#   '';
-# }
-
-# from biopython:
-# { lib
-# , buildPythonPackage
-# , fetchPypi
-# , numpy
-# }:
+# TODO muscle?
+# TODO is python3Packages not necessary? or should everything be done through it?
+{ mcl, diamond, hmmer, mmseqs2, python3Packages }:
+with python3Packages;
 
 buildPythonPackage rec {
   pname = "sonicparanoid";
-  version = "0.2.2";
+  version = "1.0.14";
 
-  src = ./sonicparanoid;
-  # src = fetchPypi {
-  #   inherit pname version;
-  #   sha256 = "4a7c5298f03d1a45523f32bae1fffcff323ea9dce007fb1241af092f5ab2e45b";
-  # };
+  src = fetchurl {
+    url = "https://files.pythonhosted.org/packages/a2/29/deabc1920ab6c59fa199b848ab8a0956c1b6612070842d5ce5174320b7bc/${pname}-${version}.tar.gz";
+    sha256 = "0nvnvgjc45y7rdfvlmgwyc5xv3xv3lmxcny1z1ilj1hwdjlh1dbx";
+  };
 
   # TODO just regular buildInputs? or wrap the exe?
-  propagatedBuildInputs = [
-    diamond
-    hmmer
-    mcl
+  propagatedBuildInputs = with python3Packages; [
+    sh # TODO add updated version to this repo + upstream
+    numpy
+    cython
+    pandas
+    biopython
+    mmseqs2
+  ];
+  buildInputs = [
+    numpy
+    cython
+    pandas
+    biopython
+    diamond # TODO remove?
+    hmmer # TODO remove?
+    mcl # TODO remove?
+    # mmseqs2
     # TODO muscle 
     # TODO package cd-hit? http://weizhongli-lab.org/cd-hit/
   ];
 
-  # Checks try to write to $HOME, which does not work with nix
-  # doCheck = false;
+  # TODO get the tests working! issue with not loading cython files?
+  doCheck = false;
+
+  patches = [
+    ./find-mmseqs-bin.patch
+  ];
 
   meta = {
     # description = "Python library for bioinformatics";
@@ -80,3 +64,5 @@ buildPythonPackage rec {
     # license = lib.licenses.bsd3;
   };
 }
+
+; in callPackage p { inherit diamond mcl hmmer mmseqs2; }

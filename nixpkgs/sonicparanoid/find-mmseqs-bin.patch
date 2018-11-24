@@ -1,0 +1,19 @@
+--- a/sonicparanoid/sonic_paranoid.py
++++ b/sonicparanoid/sonic_paranoid.py
+@@ -4,6 +4,7 @@
+ import sys
+ import platform
+ import subprocess
++import shutil
+ #### IMPORT TO GENERATE PyPi package
+ #'''
+ from sonicparanoid import seq_tools as seqtools
+@@ -153,7 +154,7 @@
+     #print('\n-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-')
+     #print('Checking bundled mmseqs...')
+     binDir = os.path.join(root, 'bin/')
+-    mmseqsPath = os.path.join(binDir, 'mmseqs')
++    mmseqsPath = shutil.which('mmseqs')
+     # first check if the file exists
+     if not os.path.isfile(mmseqsPath):
+         sys.stderr.write('\nWARNING: the MMseqs2 version supported by SonicParanoid was not found.\n')
