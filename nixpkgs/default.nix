@@ -27,6 +27,7 @@ let
   fastme = pkgs.callPackage ./fastme { };
   # muscle = pkgs.callPackage ./muscle { }; # TODO got this already somewhere!
   diamond = pkgs.callPackage ./diamond { };
+  mmseqs2 = pkgs.callPackage ./mmseqs2 { };
   orthofinder = pkgs.callPackage ./orthofinder { inherit mcl fastme psiblast-exb diamond; };
   sonicparanoid = pkgs.callPackage ./sonicparanoid { inherit mcl diamond hmmer; }; # TODO muscle
 

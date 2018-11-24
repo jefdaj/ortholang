@@ -26,6 +26,7 @@ let
     hmmer
     orthofinder
     diamond
+    mmseqs2
     sonicparanoid
   ]
     ++ biomartr.runDepends
