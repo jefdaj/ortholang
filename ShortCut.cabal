@@ -110,8 +110,9 @@ executable reference
                     ShortCut.Modules.Scores,
                     ShortCut.Modules.Plots,
                     ShortCut.Modules.PsiBlast,
-                    ShortCut.Modules.Hmmer
-                    ShortCut.Modules.OrthoFinder
+                    ShortCut.Modules.Hmmer,
+                    ShortCut.Modules.OrthoFinder,
+                    ShortCut.Modules.Diamond
   build-depends:    Command,
                     Glob,
                     MissingH,
