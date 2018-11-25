@@ -1,5 +1,110 @@
---- a/sonicparanoid/sonic_paranoid.py
-+++ b/sonicparanoid/sonic_paranoid.py
+diff -ruN sonicparanoid_old/sonicparanoid/ortholog_detection.py sonicparanoid_new/sonicparanoid/ortholog_detection.py
+--- sonicparanoid_old/sonicparanoid/ortholog_detection.py
++++ sonicparanoid_new/sonicparanoid/ortholog_detection.py
+@@ -50,7 +50,7 @@
+ # Config file paths
+ cfgPath = os.path.join(pySrcDir, 'config.json')
+ # directory in which the mmseqs binaries are located
+-mmseqsPath = 'mmseqs'
++mmseqsPath = shutil.which('mmseqs')
+ 
+ 
+ 
+diff -ruN sonicparanoid_old/sonicparanoid/set_mmseqs2.py sonicparanoid_new/sonicparanoid/set_mmseqs2.py
+--- sonicparanoid_old/sonicparanoid/set_mmseqs2.py
++++ sonicparanoid_new/sonicparanoid/set_mmseqs2.py
+@@ -50,7 +50,7 @@
+     # bin dir inside SonicParanoid's directory
+     binDir = os.path.join(root, 'bin/')
+     # path to the MMseqs2 binaries
+-    mmseqsPath = os.path.realpath(args.mmseqs_path)
++    mmseqsPath = shutil.which('mmseqs')
+ 
+     # Make some checks before extracting the package
+     if not os.path.isfile(mmseqsPath):
+@@ -58,7 +58,7 @@
+         sys.stderr.write('\nPlease, provide a valid path to the compiled MMseqs2 binary file.\n')
+         sys.exit(-5)
+ 
+-    overwrite = True
++    overwrite = False
+     # check if the binaries are already available
+     internalPath = os.path.join(binDir, 'mmseqs')
+     if os.path.isfile(internalPath):
+diff -ruN sonicparanoid_old/sonicparanoid/setup_sonicparanoid.py sonicparanoid_new/sonicparanoid/setup_sonicparanoid.py
+--- sonicparanoid_old/sonicparanoid/setup_sonicparanoid.py
++++ sonicparanoid_new/sonicparanoid/setup_sonicparanoid.py
+@@ -2,6 +2,7 @@
+ import sys
+ import subprocess
+ import json
++import shutil
+ 
+ # import other modules
+ #import ortholog_detection as orthodetect
+@@ -39,7 +40,7 @@
+     #print('\n-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-')
+     #print('Checking bundled mmseqs...')
+     binDir = os.path.join(root, 'bin/')
+-    mmseqsPath = '{:s}mmseqs'.format(binDir)
++    mmseqsPath = shutil.which('mmseqs')
+     cmd = '%s'%mmseqsPath
+     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+     stdout_val, stderr_val = process.communicate() #get stdout and stderr
+@@ -415,29 +416,29 @@
+     bundledOk, bundledPath = check_bundled_mmseqs(os=OS)
+ 
+     from sh import which
+-    mmseqsInstallPath = None
+-    mmseqsInstalled = False
++    mmseqsInstallPath = which('mmseqs')
++    mmseqsInstalled = True
+ 
+     # if the bundled version is working suggest to copy to the working path
+-    if bundledOk:
+-        # move the binary file to the main bin directory
+-        print('The mmseqs binaries included with SonicParanoid are properly working on your %s computer'%OS)
+-        #print('We suggest you to include it to your binary path.\n')
+-        #print('If you are using a bash terminal type (ON ANOTHER TERMINAl WINDOW):')
+-        #'''
+-        if OS == 'Linux':
+-            if 'red hat' in osDist[0].lower():
+-                print('export PATH=%s:$PATH'%bundledPath)
+-            elif 'ubuntu' in osDist[0].lower():
+-                print('sudo cp -v %s /usr/local/bin/'%bundledPath)
+-                #print('export PATH=%s:$PATH'%bundledPath)
+-        else: # OSX
+-            print('sudo cp -v %s /usr/local/bin/'%bundledPath)
+-        #'''
+-        mmseqsInstallPath = bundledPath
+-    else:
+-        print('WARNING: The bundled MMseqs2 installation is not working.')
+-        print('Please provide the path to the MMseqs2 installation')
++#     if bundledOk:
++#         # move the binary file to the main bin directory
++#         print('The mmseqs binaries included with SonicParanoid are properly working on your %s computer'%OS)
++#         #print('We suggest you to include it to your binary path.\n')
++#         #print('If you are using a bash terminal type (ON ANOTHER TERMINAl WINDOW):')
++#         #'''
++#         if OS == 'Linux':
++#             if 'red hat' in osDist[0].lower():
++#                 print('export PATH=%s:$PATH'%bundledPath)
++#             elif 'ubuntu' in osDist[0].lower():
++#                 print('sudo cp -v %s /usr/local/bin/'%bundledPath)
++#                 #print('export PATH=%s:$PATH'%bundledPath)
++#         else: # OSX
++#             print('sudo cp -v %s /usr/local/bin/'%bundledPath)
++#         #'''
++#         mmseqsInstallPath = bundledPath
++#     else:
++#         print('WARNING: The bundled MMseqs2 installation is not working.')
++#         print('Please provide the path to the MMseqs2 installation')
+ 
+ 
+     # reset cwd
+diff -ruN sonicparanoid_old/sonicparanoid/sonic_paranoid.py sonicparanoid_new/sonicparanoid/sonic_paranoid.py
+--- sonicparanoid_old/sonicparanoid/sonic_paranoid.py
++++ sonicparanoid_new/sonicparanoid/sonic_paranoid.py
 @@ -4,6 +4,7 @@
  import sys
  import platform
@@ -8,7 +113,7 @@
  #### IMPORT TO GENERATE PyPi package
  #'''
  from sonicparanoid import seq_tools as seqtools
-@@ -153,7 +154,7 @@
+@@ -154,7 +155,7 @@
      #print('\n-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-')
      #print('Checking bundled mmseqs...')
      binDir = os.path.join(root, 'bin/')
@@ -17,3 +122,49 @@
      # first check if the file exists
      if not os.path.isfile(mmseqsPath):
          sys.stderr.write('\nWARNING: the MMseqs2 version supported by SonicParanoid was not found.\n')
+diff -ruN sonicparanoid_old/sonicparanoid/test_sonicparanoid.py sonicparanoid_new/sonicparanoid/test_sonicparanoid.py
+--- sonicparanoid_old/sonicparanoid/test_sonicparanoid.py
++++ sonicparanoid_new/sonicparanoid/test_sonicparanoid.py
+@@ -137,18 +137,18 @@
+         mmseqsInstallPath = shOut.strip(' ')
+ 
+     # if the bundled version is working suggest to copy to the working path
+-    if bundledOk:
+-        # move the binary file to the main bin directory
+-        print('The mmseqs binaries shipped shipping with SonicParanoid are properly working on your %s installation'%OS)
+-        print('We suggest you to include it to your binary path.\n')
+-        print('If you are using a bash terminal type (ON ANOTHER TERMINAl WINDOW):')
+-        if OS == 'Linux':
+-            if 'red hat' in osDist[0].lower():
+-                print('export PATH=%s:$PATH'%bundledPath)
+-            elif 'ubuntu' in osDist[0].lower():
+-                print('export PATH=%s:$PATH'%bundledPath)
+-        else: # OSX
+-            print('sudo cp -v %s /usr/local/bin/'%bundledPath)
++#     if bundledOk:
++#         # move the binary file to the main bin directory
++#         print('The mmseqs binaries shipped shipping with SonicParanoid are properly working on your %s installation'%OS)
++#         print('We suggest you to include it to your binary path.\n')
++#         print('If you are using a bash terminal type (ON ANOTHER TERMINAl WINDOW):')
++#         if OS == 'Linux':
++#             if 'red hat' in osDist[0].lower():
++#                 print('export PATH=%s:$PATH'%bundledPath)
++#             elif 'ubuntu' in osDist[0].lower():
++#                 print('export PATH=%s:$PATH'%bundledPath)
++#         else: # OSX
++#             print('sudo cp -v %s /usr/local/bin/'%bundledPath)
+ 
+ 
+     sys.exit('DEBUG')
+diff -ruN sonicparanoid_old/sonicparanoid/workers.py sonicparanoid_new/sonicparanoid/workers.py
+--- sonicparanoid_old/sonicparanoid/workers.py
++++ sonicparanoid_new/sonicparanoid/workers.py
+@@ -309,7 +309,7 @@
+     elif ostype == 'Linux':
+         mmseqsPath = os.path.join(pySrcDir, 'bin/linux/mmseqs')
+     '''
+-    mmseqsPath = os.path.join(pySrcDir, 'bin/mmseqs')
++    mmseqsPath = shutil.which('mmseqs')
+     if not os.path.isfile(mmseqsPath):
+         sys.stderr.write('\nERROR: mmseqs2 was not found, please install it and execute setup_sonicparanoid.py.')
+     # return the path
