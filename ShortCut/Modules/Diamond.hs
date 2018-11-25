@@ -1,15 +1,17 @@
 module ShortCut.Modules.Diamond
   where
 
-import Development.Shake
+import System.Command (readProcess)
 import ShortCut.Core.Types
-import ShortCut.Modules.SeqIO (faa)
+
+import ShortCut.Modules.SeqIO (fna, faa)
+import ShortCut.Core.Locks (withReadLock)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Diamond"
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
-  , mTypes = [faa]
+  , mTypes = [fna, faa, dmnd]
   , mFunctions = []
       -- [ diamondMakedb
       -- , diamondBlastp
@@ -21,6 +23,14 @@ cutModule = CutModule
       -- ]
   }
 
+dmnd :: CutType
+dmnd = CutType
+  { tExt  = "dmnd"
+  , tDesc = "DIAMOND database"
+  , tShow = \_ ref path -> withReadLock ref path $ readProcess "diamond" ["dbinfo", path] []
+  }
+
+
 -- TODO are these needed, or should we convert to blast output immediately?
 -- daa :: CutType
 -- daa = CutType
@@ -31,6 +41,12 @@ cutModule = CutModule
 --       -- txt <- readFileStrict ref path
 --       -- return $ unlines $ take 17 $ lines txt
 --   }
+
+--------------------
+-- diamond_makedb --
+--------------------
+
+
 
 --------------------
 -- diamond_blastp --

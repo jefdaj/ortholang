@@ -32,10 +32,11 @@ sunday:
         diamond_blastx_db_sensitive
         diamond_blastx_more_sensitive
         diamond_blastx_db_more_sensitive
+      something to load existing databases? maybe not important yet
 
     print data:
+      x diamond dbinfo to print dbs
       diamond view to print results
-      diamond dbinfo to print dbs
 
     write tests
 
