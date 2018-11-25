@@ -6,6 +6,7 @@ let
   seqio      = import ./ShortCut/Modules/SeqIO;
   plots      = import ./ShortCut/Modules/Plots;
   blasthits  = import ./ShortCut/Modules/BlastHits;
+  diamond    = import ./ShortCut/Modules/Diamond;
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
@@ -35,7 +36,8 @@ let
     ++ blastrbh.runDepends
     ++ blasthits.runDepends
     ++ seqio.runDepends
-    ++ plots.runDepends;
+    ++ plots.runDepends
+    ++ diamond.runDepends;
 
 # see https://github.com/jml/nix-haskell-example
 # TODO final wrapper with +RTS -N -RTS?

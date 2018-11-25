@@ -43,7 +43,7 @@ cutModule = CutModule
 gbk :: CutType
 gbk = CutType
   { tExt  = "gbk"
-  , tDesc = "genbank file"
+  , tDesc = "genbank"
   , tShow = defaultShow
   }
 

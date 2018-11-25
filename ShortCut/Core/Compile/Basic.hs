@@ -404,6 +404,9 @@ rSimpleTmp prefix = rSimple' (Just prefix)
 rSimpleScript :: String -> RulesFn
 rSimpleScript = rSimple . aSimpleScript
 
+rSimpleScriptPar :: String -> RulesFn
+rSimpleScriptPar = rSimple . aSimpleScriptPar
+
 rSimpleScriptNoFix :: String -> RulesFn
 rSimpleScriptNoFix = rSimple . aSimpleScriptNoFix
 
@@ -412,6 +415,9 @@ aSimpleScriptNoFix = aSimpleScript' False False
 
 aSimpleScript :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
 aSimpleScript = aSimpleScript' False True
+
+aSimpleScriptPar :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+aSimpleScriptPar = aSimpleScript' True True
 
 aSimpleScript' :: Bool -> Bool -> String -> (CutConfig -> Locks -> [CutPath] -> Action ())
 aSimpleScript' par fixEmpties script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins

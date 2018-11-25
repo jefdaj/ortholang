@@ -398,13 +398,13 @@ wrappedCmdWrite par fixEmpties cfg ref outPath inPtns outPaths opts bin args = d
 wrappedCmdOut :: Bool -> Bool -> CutConfig -> Locks -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut par fixEmpties cfg ref inPtns outPaths os b as = do
-  (out, err, code) <- wrappedCmd par fixEmpties cfg ref Nothing inPtns os b as
+wrappedCmdOut par fixEmpties cfg ref inPtns outPaths opts bin args = do
+  (out, err, code) <- wrappedCmd par fixEmpties cfg ref Nothing inPtns opts bin args
   case code of
     0 -> return out
     n -> do
       debugL cfg $ unlines [out, err]
-      wrappedCmdError b n outPaths
+      wrappedCmdError bin n outPaths
 
 ----------
 -- misc --
