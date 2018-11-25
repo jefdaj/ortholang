@@ -18,7 +18,8 @@ sunday:
     write scaffolding code
 
     write useful functions
-      diamond_makedb
+      x diamond_makedb
+      x diamond_makedb_all
       search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
         diamond_blastp
         diamond_blastp_db
