@@ -28,7 +28,7 @@ let
     diamond
     mmseqs2
     cdhit
-    sonicparanoid
+    # sonicparanoid
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends

@@ -41,6 +41,7 @@ buildPythonPackage rec {
   buildInputs = [
     numpy
     cython
+    python3Packages.cython
     pandas
     biopython
     hmmer # TODO remove?
@@ -50,8 +51,8 @@ buildPythonPackage rec {
     # TODO package cd-hit? http://weizhongli-lab.org/cd-hit/
   ];
 
-  # TODO get the tests working! issue with not loading cython files?
   doCheck = false;
+  checkInputs = []; # TODO get the tests working! probably just need packages here?
 
   patches = ./find-mmseqs-bin.patch;
 

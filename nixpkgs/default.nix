@@ -34,6 +34,7 @@ let
   # TODO push new sh-1.12.14 upstream! haven't managed to include it properly here
   sonicparanoid = pkgs.callPackage ./sonicparanoid {
     inherit mcl hmmer mmseqs2 cdhit; # TODO muscle?
+    python3Packages = myPython3;
   };
 
   myPython = pkgs.pythonPackages // {
@@ -44,12 +45,12 @@ let
     };
   };
 
-  # myPython3 = pkgs.python3Packages // {
-    # sh = pkgs.callPackage ./sh {};
-  # };
+  myPython3 = pkgs.python3Packages // {
+    sh = pkgs.callPackage ./sh {};
+  };
 
 in nixpkgs // {
-  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder mmseqs2 cdhit sonicparanoid;
+  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder mmseqs2 cdhit;
   pythonPackages = myPython;
-  # python3Packages = myPython3;
+  python3Packages = myPython3;
 }
