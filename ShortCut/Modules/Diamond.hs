@@ -9,8 +9,8 @@ import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleS
                                     rExpr, debugRules, rSimple)
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Util          (resolveSymlinks)
-import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions       (readPaths, readLit, readPath, debugA, wrappedCmdWrite)
+import ShortCut.Core.Paths         (CutPath, fromCutPath, exprPath)
+import ShortCut.Core.Actions       (readPaths, readLit, debugA, wrappedCmdWrite)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Modules.Blast      (bht)
 import System.Command              (readProcess)
@@ -26,8 +26,8 @@ cutModule = CutModule
       -- TODO any point in a diamond_makedb_each fn?
       , diamondblastpdb
       , diamondblastxdb
-      -- , diamondBlastp
-      -- , diamondBlastx
+      , diamondblastp
+      , diamondblastx
       -- , diamondBlastp_sensitive
       -- , diamondBlastx_sensitive
       -- , diamondBlastp_more_sensitive
@@ -92,19 +92,17 @@ diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
 rDiamondmakedbAll :: RulesFn
 rDiamondmakedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
-  let out      = exprPath s e
-      out'     = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
-      fasPath' = toCutPath cfg fasPath
+  let out  = exprPath s e
+      out' = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths cfg ref fasPath
-    let faPaths' = map (fromCutPath cfg) faPaths
     aSimpleScriptPar "diamond_makedb_all.sh" cfg ref (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
  
---------------------
--- diamond_blastp --
---------------------
+-----------------------
+-- diamond_blastp_db --
+-----------------------
 
 diamondblastpdb :: CutFunction
 diamondblastpdb = let name = "diamond_blastp_db" in CutFunction
@@ -127,10 +125,10 @@ aDiamondFromDb dCmd cfg ref [o, e, q, db] = do
     db' = fromCutPath cfg db
     o'' = debugA cfg "aDiamondblastpdb" o' [dCmd, e', o', q', db']
 aDiamondFromDb _ _ _ _ = error $ "bad argument to aDiamondFromDb"
- 
---------------------
--- diamond_blastx --
---------------------
+
+-----------------------
+-- diamond_blastx_db --
+-----------------------
 
 diamondblastxdb :: CutFunction
 diamondblastxdb = let name = "diamond_blastx_db" in CutFunction
@@ -140,4 +138,43 @@ diamondblastxdb = let name = "diamond_blastx_db" in CutFunction
   , fDesc      = Just "Like blastx_db, but uses DIAMOND for speed."
   , fFixity    = Prefix
   , fRules     = rSimple $ aDiamondFromDb "blastx"
+  }
+
+--------------------
+-- diamond_blastp --
+--------------------
+
+diamondblastp :: CutFunction
+diamondblastp = let name = "diamond_blastp" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht 
+  , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
+  , fDesc      = Just "Like blastp, but uses DIAMOND for speed."
+  , fFixity    = Prefix
+  , fRules     = rDiamondFromFa "blastp"
+  }
+
+-- inserts a "makedb" call and reuses the _db compiler from above
+-- based on the version in Blast.hs but a little simpler
+rDiamondFromFa :: String -> RulesFn
+rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
+  where
+    rules  = rSimple $ aDiamondFromDb dCmd
+    name1  = "diamond_" ++ dCmd
+    dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
+rDiamondFromFa _ _ _ = error "bad argument to rDiamondFromFa"
+
+--------------------
+-- diamond_blastx --
+--------------------
+
+diamondblastx :: CutFunction
+diamondblastx = let name = "diamond_blastx" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc name  [num, fna, faa] bht 
+  , fTypeCheck = defaultTypeCheck [num, fna, faa] bht
+  , fDesc      = Just "Like blastx, but uses DIAMOND for speed."
+  , fFixity    = Prefix
+  , fRules     = rDiamondFromFa "blastx"
   }
