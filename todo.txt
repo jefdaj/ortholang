@@ -1,0 +1,45 @@
+sunday:
+  diamond module
+
+    read manual
+      handles temporary files itself; output only appears at the end and is thrown away if inturrupted
+      looks to be deterministic! same input -> same output according to the author
+      things that can be set to speed it up/improve results:
+        -e as low as possible
+        -k as low as possible, or use --top instead
+      later, optional taxonomy features?
+      looks to be multithreaded by default
+      any need to set the scoring matrix?
+      can output the same regular blast results. winning!
+        but there's an intermediate DAA (diamond alignment archive) format too. not sure if needed?
+      can gzip the output
+
+    test running diamond and getting blast output
+    write scaffolding code
+
+    write useful functions
+      diamond_makedb
+      search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
+        diamond_blastp
+        diamond_blastp_db
+        diamond_blastp_sensitive
+        diamond_blastp_db_sensitive
+        diamond_blastp_more_sensitive
+        diamond_blastp_db_more_sensitive
+        diamond_blastx
+        diamond_blastx_db
+        diamond_blastx_sensitive
+        diamond_blastx_db_sensitive
+        diamond_blastx_more_sensitive
+        diamond_blastx_db_more_sensitive
+
+    print data:
+      diamond view to print results
+      diamond dbinfo to print dbs
+
+    write tests
+
+  mmseqs module
+    scaffolding
+  sonicparanoid module
+    scaffolding
