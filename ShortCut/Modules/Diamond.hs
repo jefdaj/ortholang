@@ -2,12 +2,15 @@ module ShortCut.Modules.Diamond
   where
 
 
--- import Development.Shake
+import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleScriptPar,
+                                    rExpr, debugRules)
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Util          (resolveSymlinks)
+import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath)
+import ShortCut.Core.Actions       (readPaths)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import System.Command              (readProcess)
 
@@ -71,6 +74,7 @@ diamondmakedb = let name = "diamond_makedb" in CutFunction
 ------------------------
 
 -- TODO need to figure out how to pass it the individual paths rather than a shortcut list
+
 diamondmakedbAll :: CutFunction
 diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
   { fName      = name
@@ -78,8 +82,23 @@ diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
   , fDesc      = Just "Create one DIAMOND database from mutliple protein FASTA files."
   , fFixity    = Prefix
-  , fRules     = rSimpleScriptPar "diamond_makedb_all.sh"
+  , fRules     = rDiamondmakedbAll
   }
+
+-- TODO should the reading the list + paths thing be included in rSimpleScript?
+rDiamondmakedbAll :: RulesFn
+rDiamondmakedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
+  (ExprPath fasPath) <- rExpr s fas
+  let out      = exprPath s e
+      out'     = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
+      fasPath' = toCutPath cfg fasPath
+  out' %> \_ -> do
+    faPaths <- readPaths cfg ref fasPath
+    let faPaths' = map (fromCutPath cfg) faPaths
+    aSimpleScriptPar "diamond_makedb_all.sh" cfg ref (out:faPaths)
+  return (ExprPath out')
+rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
+
  
 --------------------
 -- diamond_blastp --
