@@ -30,7 +30,11 @@ let
   diamond = pkgs.callPackage ./diamond { };
   mmseqs2 = pkgs.callPackage ./mmseqs2 { };
   orthofinder = pkgs.callPackage ./orthofinder { inherit mcl fastme psiblast-exb diamond; };
-  sonicparanoid = pkgs.callPackage ./sonicparanoid { inherit mcl diamond hmmer mmseqs2 cdhit; }; # TODO muscle
+
+  # TODO push new sh-1.12.14 upstream! haven't managed to include it properly here
+  sonicparanoid = pkgs.callPackage ./sonicparanoid {
+    inherit mcl hmmer mmseqs2 cdhit; # TODO muscle?
+  };
 
   myPython = pkgs.pythonPackages // {
     blastdbget = pkgs.callPackage ./blastdbget {};
@@ -40,7 +44,12 @@ let
     };
   };
 
+  # myPython3 = pkgs.python3Packages // {
+    # sh = pkgs.callPackage ./sh {};
+  # };
+
 in nixpkgs // {
-  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder mmseqs2 sonicparanoid cdhit;
+  inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder mmseqs2 cdhit sonicparanoid;
   pythonPackages = myPython;
+  # python3Packages = myPython3;
 }

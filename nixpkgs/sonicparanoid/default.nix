@@ -1,15 +1,19 @@
-with import <nixpkgs> {};
-let
-  diamond = callPackage ../diamond {};
-  mcl = callPackage ../mcl {};
-  # biopython = callPackage ../biopython {};
-  mmseqs2 = callPackage ../mmseqs2 {};
-  hmmer = callPackage ../hmmer {};
-  p =
+# with import <nixpkgs> {};
+# let
+#   mcl = callPackage ../mcl {};
+#   # biopython = callPackage ../biopython {};
+#   mmseqs2 = callPackage ../mmseqs2 {};
+#   hmmer = callPackage ../hmmer {};
+#   p =
+
+# with import ./..;
+# with pkgs;
+# with pythonPackages;
+# let p =
 
 # TODO muscle?
-# TODO is python3Packages not necessary? or should everything be done through it?
-{ mcl, diamond, hmmer, mmseqs2, python3Packages }:
+# TODO is pythonPackages not necessary? or should everything be done through it?
+{ fetchurl, mcl, hmmer, mmseqs2, cdhit, python3Packages }:
 with python3Packages;
 
 buildPythonPackage rec {
@@ -22,20 +26,23 @@ buildPythonPackage rec {
   };
 
   # TODO just regular buildInputs? or wrap the exe?
-  propagatedBuildInputs = with python3Packages; [
+  # TODO can some of these be removed?
+  propagatedBuildInputs = [
     sh # TODO add updated version to this repo + upstream
     numpy
     cython
     pandas
     biopython
     mmseqs2
+    cdhit
   ];
+
+  # TODO can some of these be removed?
   buildInputs = [
     numpy
     cython
     pandas
     biopython
-    diamond # TODO remove?
     hmmer # TODO remove?
     mcl # TODO remove?
     # mmseqs2
@@ -46,9 +53,7 @@ buildPythonPackage rec {
   # TODO get the tests working! issue with not loading cython files?
   doCheck = false;
 
-  patches = [
-    ./find-mmseqs-bin.patch
-  ];
+  patches = ./find-mmseqs-bin.patch;
 
   meta = {
     # description = "Python library for bioinformatics";
@@ -65,4 +70,5 @@ buildPythonPackage rec {
   };
 }
 
-; in callPackage p { inherit diamond mcl hmmer mmseqs2; }
+#; in callPackage p { inherit mcl hmmer mmseqs2; }
+# ; in callPackage p { }

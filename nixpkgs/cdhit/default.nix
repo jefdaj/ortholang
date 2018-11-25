@@ -1,4 +1,4 @@
-with import <nixpkgs> {};
+{ stdenv, fetchurl }:
 
 stdenv.mkDerivation rec {
   name = "cdhit-${version}";
