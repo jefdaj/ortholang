@@ -1,6 +1,6 @@
 sunday:
-  diamond module
 
+  diamond module
     read manual
       handles temporary files itself; output only appears at the end and is thrown away if inturrupted
       looks to be deterministic! same input -> same output according to the author
@@ -13,14 +13,12 @@ sunday:
       can output the same regular blast results. winning!
         but there's an intermediate DAA (diamond alignment archive) format too. not sure if needed?
       can gzip the output
-
-    test running diamond and getting blast output
-    write scaffolding code
-
-    write useful functions
+    x test running diamond and getting blast output
+    x write scaffolding code
+    x write useful functions
       x diamond_makedb
       x diamond_makedb_all
-      search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
+      x search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
         x diamond_blastp
         x diamond_blastp_db
         x diamond_blastx
@@ -33,13 +31,11 @@ sunday:
         x diamond_blastx_db_sensitive
         x diamond_blastx_more_sensitive
         x diamond_blastx_db_more_sensitive
-      something to load existing databases? maybe not important yet
-
-    print data:
+      x something to load existing databases? maybe not important yet
+    x print data:
       x diamond dbinfo to print dbs
-      diamond view to print results
-
-    write tests
+      x diamond view to print results
+    x write tests
 
   mmseqs module
     scaffolding
