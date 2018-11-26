@@ -1,6 +1,8 @@
 module ShortCut.Modules.Diamond
   where
 
+-- TODO any point in a diamond_makedb_each fn?
+-- TODO any point in adding a daa type?
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -23,16 +25,8 @@ cutModule = CutModule
   , mFunctions =
       [ diamondmakedb
       , diamondmakedbAll
-      -- TODO any point in a diamond_makedb_each fn?
-      , diamondblastpdb
-      , diamondblastxdb
-      , diamondblastp
-      , diamondblastx
-      -- , diamondBlastp_sensitive
-      -- , diamondBlastx_sensitive
-      -- , diamondBlastp_more_sensitive
-      -- , diamondBlastx_more_sensitive
       ]
+      ++ map mkDiamondBlast variants
   }
 
 dmnd :: CutType
@@ -45,18 +39,6 @@ dmnd = CutType
       let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
       return desc
   }
-
-
--- TODO are these needed, or should we convert to blast output immediately?
--- daa :: CutType
--- daa = CutType
---   { tExt  = "daa"
---   , tDesc = "DIAMOND alignment archive"
---   , tShow = \_ ref path -> do
---       undefined
---       -- txt <- readFileStrict ref path
---       -- return $ unlines $ take 17 $ lines txt
---   }
 
 --------------------
 -- diamond_makedb --
@@ -75,8 +57,6 @@ diamondmakedb = let name = "diamond_makedb" in CutFunction
 ------------------------
 -- diamond_makedb_all --
 ------------------------
-
--- TODO need to figure out how to pass it the individual paths rather than a shortcut list
 
 diamondmakedbAll :: CutFunction
 diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
@@ -100,81 +80,60 @@ rDiamondmakedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
  
------------------------
--- diamond_blastp_db --
------------------------
+--------------------
+-- diamond_blast* --
+--------------------
 
-diamondblastpdb :: CutFunction
-diamondblastpdb = let name = "diamond_blastp_db" in CutFunction
-  { fName      = name
-  , fTypeDesc  = mkTypeDesc name  [num, faa, dmnd] bht 
-  , fTypeCheck = defaultTypeCheck [num, faa, dmnd] bht
-  , fDesc      = Just "Like blastp_db, but uses DIAMOND for speed."
+type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType)
+
+variants :: [DiamondBlastDesc]
+variants =
+  [ ("blastp"                  , rDiamondFromFa, ["blastp"                    ], faa , faa )
+  , ("blastp_sensitive"        , rDiamondFromFa, ["blastp", "--sensitive"     ], faa , faa )
+  , ("blastp_more_sensitive"   , rDiamondFromFa, ["blastp", "--more-sensitive"], faa , faa )
+  , ("blastp_db"               , rDiamondFromDb, ["blastp"                    ], faa , dmnd)
+  , ("blastp_db_sensitive"     , rDiamondFromDb, ["blastp", "--sensitive"     ], faa , dmnd)
+  , ("blastp_db_more_sensitive", rDiamondFromDb, ["blastp", "--more-sensitive"], faa , dmnd)
+  , ("blastx"                  , rDiamondFromFa, ["blastx"                    ], fna , faa )
+  , ("blastx_sensitive"        , rDiamondFromFa, ["blastx", "--sensitive"     ], fna , faa )
+  , ("blastx_more_sensitive"   , rDiamondFromFa, ["blastx", "--more-sensitive"], fna , faa )
+  , ("blastx_db"               , rDiamondFromDb, ["blastx"                    ], fna , dmnd)
+  , ("blastx_db_sensitive"     , rDiamondFromDb, ["blastx", "--sensitive"     ], fna , dmnd)
+  , ("blastx_db_more_sensitive", rDiamondFromDb, ["blastx", "--more-sensitive"], fna , dmnd)
+  ]
+
+mkDiamondBlast :: DiamondBlastDesc -> CutFunction
+mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name in CutFunction
+  { fName      = name'
+  , fTypeDesc  = mkTypeDesc name' [num, qType, sType] bht 
+  , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  , fDesc      = Just $ "Like " ++ head dCmd ++ ", but uses DIAMOND for speed."
   , fFixity    = Prefix
-  , fRules     = rSimple $ aDiamondFromDb "blastp"
+  , fRules     = rFn dCmd
   }
 
-aDiamondFromDb :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
+rDiamondFromDb :: [String] -> RulesFn
+rDiamondFromDb = rSimple . aDiamondFromDb
+
+aDiamondFromDb :: [String] -> (CutConfig -> Locks -> [CutPath] -> Action ())
 aDiamondFromDb dCmd cfg ref [o, e, q, db] = do
   eStr <- readLit  cfg ref e'
-  wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond" [dCmd, "-q", q', "-o", o'', "-e", eStr, "-d", db']
+  wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond" $ dCmd ++ ["-q", q', "-o", o'', "-e", eStr, "-d", db']
   where
     o'  = fromCutPath cfg o
     e'  = fromCutPath cfg e
     q'  = fromCutPath cfg q
     db' = fromCutPath cfg db
-    o'' = debugA cfg "aDiamondblastpdb" o' [dCmd, e', o', q', db']
+    o'' = debugA cfg "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
 aDiamondFromDb _ _ _ _ = error $ "bad argument to aDiamondFromDb"
-
------------------------
--- diamond_blastx_db --
------------------------
-
-diamondblastxdb :: CutFunction
-diamondblastxdb = let name = "diamond_blastx_db" in CutFunction
-  { fName      = name
-  , fTypeDesc  = mkTypeDesc name  [num, fna, dmnd] bht 
-  , fTypeCheck = defaultTypeCheck [num, fna, dmnd] bht
-  , fDesc      = Just "Like blastx_db, but uses DIAMOND for speed."
-  , fFixity    = Prefix
-  , fRules     = rSimple $ aDiamondFromDb "blastx"
-  }
-
---------------------
--- diamond_blastp --
---------------------
-
-diamondblastp :: CutFunction
-diamondblastp = let name = "diamond_blastp" in CutFunction
-  { fName      = name
-  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht 
-  , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
-  , fDesc      = Just "Like blastp, but uses DIAMOND for speed."
-  , fFixity    = Prefix
-  , fRules     = rDiamondFromFa "blastp"
-  }
 
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler
-rDiamondFromFa :: String -> RulesFn
+rDiamondFromFa :: [String] -> RulesFn
 rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
   = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules  = rSimple $ aDiamondFromDb dCmd
-    name1  = "diamond_" ++ dCmd
+    name1  = "diamond_" ++ head dCmd
     dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = error "bad argument to rDiamondFromFa"
-
---------------------
--- diamond_blastx --
---------------------
-
-diamondblastx :: CutFunction
-diamondblastx = let name = "diamond_blastx" in CutFunction
-  { fName      = name
-  , fTypeDesc  = mkTypeDesc name  [num, fna, faa] bht 
-  , fTypeCheck = defaultTypeCheck [num, fna, faa] bht
-  , fDesc      = Just "Like blastx, but uses DIAMOND for speed."
-  , fFixity    = Prefix
-  , fRules     = rDiamondFromFa "blastx"
-  }

@@ -21,18 +21,18 @@ sunday:
       x diamond_makedb
       x diamond_makedb_all
       search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
-        diamond_blastp
-        diamond_blastp_db
-        diamond_blastp_sensitive
-        diamond_blastp_db_sensitive
-        diamond_blastp_more_sensitive
-        diamond_blastp_db_more_sensitive
-        diamond_blastx
-        diamond_blastx_db
-        diamond_blastx_sensitive
-        diamond_blastx_db_sensitive
-        diamond_blastx_more_sensitive
-        diamond_blastx_db_more_sensitive
+        x diamond_blastp
+        x diamond_blastp_db
+        x diamond_blastx
+        x diamond_blastx_db
+        x diamond_blastp_sensitive
+        x diamond_blastp_db_sensitive
+        x diamond_blastp_more_sensitive
+        x diamond_blastp_db_more_sensitive
+        x diamond_blastx_sensitive
+        x diamond_blastx_db_sensitive
+        x diamond_blastx_more_sensitive
+        x diamond_blastx_db_more_sensitive
       something to load existing databases? maybe not important yet
 
     print data:
