@@ -36,8 +36,14 @@ sunday:
       x diamond dbinfo to print dbs
       x diamond view to print results
     x write tests
+      test dependency
 
   mmseqs module
-    scaffolding
+    read about it
+    write scaffolding code
+    write useful functions
+      test dependency and abort if illegal instruction
+    write tests
+
   sonicparanoid module
     scaffolding

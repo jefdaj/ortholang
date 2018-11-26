@@ -115,7 +115,8 @@ executable reference
                     ShortCut.Modules.PsiBlast,
                     ShortCut.Modules.Hmmer,
                     ShortCut.Modules.OrthoFinder,
-                    ShortCut.Modules.Diamond
+                    ShortCut.Modules.Diamond,
+                    ShortCut.Modules.MMSeqs
   build-depends:    Command,
                     Glob,
                     MissingH,

@@ -25,6 +25,7 @@ import qualified ShortCut.Modules.PsiBlast  as PsiBlast
 import qualified ShortCut.Modules.Hmmer     as Hmmer
 import qualified ShortCut.Modules.OrthoFinder as OrthoFinder
 import qualified ShortCut.Modules.Diamond   as Diamond
+import qualified ShortCut.Modules.MMSeqs    as MMSeqs
 
 modules :: [CutModule]
 modules =
@@ -51,4 +52,5 @@ modules =
   , Plots.cutModule
   , OrthoFinder.cutModule
   , Diamond.cutModule
+  , MMSeqs.cutModule
   ]
