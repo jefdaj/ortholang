@@ -39,10 +39,50 @@ sunday:
       test dependency
 
   mmseqs module
+
     read about it
-    write scaffolding code
+      should i be working with plass + linclust to get protein sequences from metagenomics datasets?
+        cool for later, maybe
+        megahit + prodigal is the standard alternative
+      does a large number of things with a lot of internal commands
+        looks like it can act like blast or psi-blast, but is also for clustering?
+      can do easy-clust from fasta, but generally want to convert to mmseq db first?
+        database is multiple files like blast
+        is there a different kind of db file for each function output?
+      there are "update" functions which in shortcut should copy + update
+      any way to get it working on the demo server? if not, might be a reason to get a new one eventually
+        should be doable from lab funds really!
+        might not need it tho, only missing avx2 but SSE4.1 is ok
+          just need to add a compiler flag?
+      might require up to 500GB free space for large runs? i can get that if needed
+      example use here: https://github.com/soedinglab/MMseqs2/issues/79
+
+      read the readme
+      skim the paper
+
+    try some functions
+      try the webserver!
+      make sure you understand how the db stuff works
+
+    x write scaffolding code
+
     write useful functions
-      test dependency and abort if illegal instruction
+      variants: regular and _db like blast
+      variants: sensitive, default, fast, faster?
+      x test dependency and abort if illegal instruction
+      do these first:
+        mmseqs_createdb
+        mmseqs_search
+      then the rest if needed:
+        mmseqs_easy_search
+        mmseqs_easy_cluster
+        mmseqs_easy_linclust?
+        mmseqs_createseqfiledb?
+        mmseqs_cluster? not sure if needed
+        mmseqs_result2flat
+        mmseqs_mergeclusters?
+        mmseqs_search_profile (with --iterations)?
+
     write tests
 
   sonicparanoid module
