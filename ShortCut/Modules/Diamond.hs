@@ -20,7 +20,7 @@ import System.Command              (readProcess)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Diamond"
-  , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
+  , mDesc = "Accelerated BLAST compatible local sequence aligner."
   , mTypes = [fna, faa, dmnd]
   , mFunctions =
       [ diamondmakedb
@@ -88,18 +88,18 @@ type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType
 
 variants :: [DiamondBlastDesc]
 variants =
-  [ ("blastp"                  , rDiamondFromFa, ["blastp"                    ], faa , faa )
-  , ("blastp_sensitive"        , rDiamondFromFa, ["blastp", "--sensitive"     ], faa , faa )
-  , ("blastp_more_sensitive"   , rDiamondFromFa, ["blastp", "--more-sensitive"], faa , faa )
-  , ("blastp_db"               , rDiamondFromDb, ["blastp"                    ], faa , dmnd)
-  , ("blastp_db_sensitive"     , rDiamondFromDb, ["blastp", "--sensitive"     ], faa , dmnd)
-  , ("blastp_db_more_sensitive", rDiamondFromDb, ["blastp", "--more-sensitive"], faa , dmnd)
-  , ("blastx"                  , rDiamondFromFa, ["blastx"                    ], fna , faa )
-  , ("blastx_sensitive"        , rDiamondFromFa, ["blastx", "--sensitive"     ], fna , faa )
-  , ("blastx_more_sensitive"   , rDiamondFromFa, ["blastx", "--more-sensitive"], fna , faa )
-  , ("blastx_db"               , rDiamondFromDb, ["blastx"                    ], fna , dmnd)
-  , ("blastx_db_sensitive"     , rDiamondFromDb, ["blastx", "--sensitive"     ], fna , dmnd)
-  , ("blastx_db_more_sensitive", rDiamondFromDb, ["blastx", "--more-sensitive"], fna , dmnd)
+  [ ("blastp"                  , rDiamondFromFa, ["blastp"                    ], faa, faa )
+  , ("blastp_sensitive"        , rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa )
+  , ("blastp_more_sensitive"   , rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa )
+  , ("blastp_db"               , rDiamondFromDb, ["blastp"                    ], faa, dmnd)
+  , ("blastp_db_sensitive"     , rDiamondFromDb, ["blastp", "--sensitive"     ], faa, dmnd)
+  , ("blastp_db_more_sensitive", rDiamondFromDb, ["blastp", "--more-sensitive"], faa, dmnd)
+  , ("blastx"                  , rDiamondFromFa, ["blastx"                    ], fna, faa )
+  , ("blastx_sensitive"        , rDiamondFromFa, ["blastx", "--sensitive"     ], fna, faa )
+  , ("blastx_more_sensitive"   , rDiamondFromFa, ["blastx", "--more-sensitive"], fna, faa )
+  , ("blastx_db"               , rDiamondFromDb, ["blastx"                    ], fna, dmnd)
+  , ("blastx_db_sensitive"     , rDiamondFromDb, ["blastx", "--sensitive"     ], fna, dmnd)
+  , ("blastx_db_more_sensitive", rDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd)
   ]
 
 mkDiamondBlast :: DiamondBlastDesc -> CutFunction
