@@ -30,7 +30,8 @@ import ShortCut.Core.Paths         (toCutPath, fromCutPath, exprPath)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>))
-import ShortCut.Core.Util          (digest)
+import ShortCut.Core.Util          (digest, unlessExists)
+import ShortCut.Modules.BlastDB    (withSingleton) -- TODO move to core?
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -77,16 +78,17 @@ rMmseqscreatedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out      = exprPath s e
       out'     = debugRules cfg "rMmseqscreatedbAll" e $ fromCutPath cfg out
-      dbDir    = cfgTmpDir cfg </> "cache" </> "mmseqs" </> digest fas
+      dbDir    = cfgTmpDir cfg </> "cache" </> "mmseqs" </> digest fas -- TODO be more or less specific?
       dbPrefix = dbDir </> "db" -- TODO any reason for a more descriptive name?
+      dbPath   = dbPrefix <.> "lookup"
   out' %> \_ -> do
-    faPaths <- readPaths cfg ref fasPath
-    let faPaths' = map (fromCutPath cfg) faPaths
-    liftIO $ createDirectoryIfMissing True dbDir
-    wrappedCmdWrite False True cfg ref out' [dbPrefix ++ "*"] [] [Cwd dbDir]
-      "mmseqs" $ ["createdb"] ++ faPaths' ++ [dbPrefix]
-    symlink cfg ref out $ toCutPath cfg $ dbPrefix <.> "lookup"
-    --      should also list the rest + mark them written tho (does wrappedCmdWrite handle that?)
+    unlessExists dbPath $ do
+      faPaths <- readPaths cfg ref fasPath
+      let faPaths' = map (fromCutPath cfg) faPaths
+      liftIO $ createDirectoryIfMissing True dbDir
+      wrappedCmdWrite False True cfg ref out' [dbPrefix ++ "*"] [] [Cwd dbDir]
+        "mmseqs" $ ["createdb"] ++ faPaths' ++ [dbPrefix]
+    symlink cfg ref out $ toCutPath cfg dbPath
   return (ExprPath out')
 rMmseqscreatedbAll _ e = error $ "bad argument to rMmseqscreatedbAll: " ++ show e
 
@@ -101,13 +103,12 @@ mmseqscreatedb = let name = "mmseqs_createdb" in CutFunction
   , fTypeCheck = tMmseqscreatedb name
   , fDesc      = Just "Create an MMSeqs2 sequence database from a FASTA file."
   , fFixity    = Prefix
-  , fRules     = undefined
+  , fRules     = rMmseqscreatedb
   }
 
 tMmseqscreatedb :: String -> TypeChecker
 tMmseqscreatedb _ [x] | x `elem` [fna, faa] = Right mms
 tMmseqscreatedb name types = error $ name ++ " requires a fasta file, but got " ++ show types
 
--- TODO implement using above fn + singleton
 rMmseqscreatedb :: RulesFn
-rMmseqscreatedb = undefined
+rMmseqscreatedb s e = rMmseqscreatedbAll s $ withSingleton e
