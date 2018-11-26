@@ -22,6 +22,8 @@ depCmds =
   , ("biopython" , "python -c \"import Bio; print Bio.__version__\"")
   , ("biomartr"  , "Rscript -e \"require(biomartr); packageVersion('biomartr')\"")
   , ("dplyr"     , "Rscript -e \"require(dplyr); packageVersion('dplyr')\"")
+  , ("diamond"   , "diamond --version")
+  , ("mmseqs"    , "mmseqs --help | grep Version")
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
