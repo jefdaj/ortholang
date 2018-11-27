@@ -1,22 +1,10 @@
-# with import <nixpkgs> {};
-# let
-#   mcl = callPackage ../mcl {};
-#   # biopython = callPackage ../biopython {};
-#   mmseqs2 = callPackage ../mmseqs2 {};
-#   hmmer = callPackage ../hmmer {};
-#   p =
+{ pkgs, python3Packages, fetchurl, mmseqs2 }:
 
-# with import ./..;
-# with pkgs;
-# with pythonPackages;
-# let p =
+let
+  # this is only needed for sh >= 1.12.14; remove once nixpkgs includes it
+  pypiPython = import ./requirements.nix { inherit pkgs; };
 
-# TODO muscle?
-# TODO is pythonPackages not necessary? or should everything be done through it?
-{ fetchurl, mcl, hmmer, mmseqs2, cdhit, python3Packages }:
-with python3Packages;
-
-buildPythonPackage rec {
+in python3Packages.buildPythonPackage rec {
   pname = "sonicparanoid";
   version = "1.0.14";
 
@@ -25,51 +13,35 @@ buildPythonPackage rec {
     sha256 = "0nvnvgjc45y7rdfvlmgwyc5xv3xv3lmxcny1z1ilj1hwdjlh1dbx";
   };
 
-  # TODO just regular buildInputs? or wrap the exe?
-  # TODO can some of these be removed?
   propagatedBuildInputs = [
-    sh # TODO add updated version to this repo + upstream
-    numpy
-    cython
-    pandas
-    biopython
     mmseqs2
-    cdhit
+    python3Packages.biopython
+    python3Packages.numpy
+    python3Packages.pandas
+    pypiPython.packages.sh
   ];
 
-  # TODO can some of these be removed?
   buildInputs = [
-    numpy
-    cython
-    python3Packages.cython
-    pandas
-    biopython
-    hmmer # TODO remove?
-    mcl # TODO remove?
+    # not sure if useful:
+    # cd-hit http://weizhongli-lab.org/cd-hit/
+    # muscle
+    # biopython
+    # hmmer
+    # mcl
     # mmseqs2
-    # TODO muscle 
-    # TODO package cd-hit? http://weizhongli-lab.org/cd-hit/
+    # numpy
+    # pandas
+    python3Packages.cython
+    pypiPython.packages.sh
   ];
 
+  # TODO get the tests working! probably just need packages here?
   doCheck = false;
-  checkInputs = []; # TODO get the tests working! probably just need packages here?
+  # checkInputs = with pypiPython.packages; [];
 
   patches = ./find-mmseqs-bin.patch;
 
   meta = {
-    # description = "Python library for bioinformatics";
-    # longDescription = ''
-    #   Biopython is a set of freely available tools for biological computation
-    #   written in Python by an international team of developers. It is a
-    #   distributed collaborative effort to develop Python libraries and
-    #   applications which address the needs of current and future work in
-    #   bioinformatics.
-    # '';
-    # homepage = http://biopython.org/wiki/Documentation;
-    # maintainers = with lib.maintainers; [ luispedro ];
-    # license = lib.licenses.bsd3;
+    # TODO write this
   };
 }
-
-#; in callPackage p { inherit mcl hmmer mmseqs2; }
-# ; in callPackage p { }
