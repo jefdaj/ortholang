@@ -22,15 +22,15 @@ module ShortCut.Modules.MMSeqs
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions       (readPaths, wrappedCmdWrite, symlink)
+import ShortCut.Core.Actions       (readLit, readPaths, wrappedCmdWrite, symlink)
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, exprPath)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Modules.Blast      (bht)
-import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             ((</>), (<.>))
-import ShortCut.Core.Util          (digest, unlessExists)
+import System.Directory            (createDirectoryIfMissing, removeDirectoryRecursive)
+import System.FilePath             ((</>), (<.>), dropExtension, takeDirectory)
+import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
 import ShortCut.Modules.BlastDB    (withSingleton) -- TODO move to core?
 
 cutModule :: CutModule
@@ -39,11 +39,10 @@ cutModule = CutModule
   , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite."
   , mTypes = [faa, fna, bht, mms]
   , mFunctions =
-      [ mmseqsCreateDb
-      , mmseqsCreateDbAll
-      -- , mmseqsConvertalis
-      -- , mmseqsSearch
-      -- , mmseqsSearchDb
+      [ mmseqsCreateDbAll
+      , mmseqsCreateDb
+      , mmseqsSearchDb
+      , mmseqsSearch
       ]
   }
 
@@ -85,7 +84,7 @@ rMmseqsCreateDbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
       dbPrefix = dbDir </> "db" -- TODO any reason for a more descriptive name?
       dbPath   = dbPrefix <.> "lookup"
   out' %> \_ -> do
-    unlessExists dbPath $ do
+    unlessExists dbPath $ do -- TODO any reason it would exist already?
       faPaths <- readPaths cfg ref fasPath
       let faPaths' = map (fromCutPath cfg) faPaths
       liftIO $ createDirectoryIfMissing True dbDir
@@ -116,12 +115,6 @@ tMmseqsCreateDb name types = error $ name ++ " requires a fasta file, but got " 
 rMmseqsCreateDb :: RulesFn
 rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 
-------------------------
--- mmseqs_convertalis --
-------------------------
-
--- TODO write this as a separate function, then use it as part of the main search
-
 ----------------------
 -- mmseqs_search_db --
 ----------------------
@@ -129,66 +122,90 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 -- TODO for now this should also handle the convertalis step
 -- TODO any reason to have a version that takes the query as a db? seems unnecessary
 
--- mmseqsSearchDb :: CutFunction
--- mmseqsSearchDb = let name = "mmseqs_search_db" in CutFunction
---   { fName      = name
---   , fTypeDesc  = name ++ " : fa mms -> bht"
---   , fTypeCheck = tMmseqsSearchDb name
---   , fDesc      = Just "Search a target database for sequences matching the query FASTA, similar to BLAST."
---   , fFixity    = Prefix
---   , fRules     = rMmseqsSearchDb
---   }
+mmseqsSearchDb :: CutFunction
+mmseqsSearchDb = let name = "mmseqs_search_db" in CutFunction
+  { fName      = name
+  , fTypeDesc  = name ++ " : fa mms -> bht"
+  , fTypeCheck = tMmseqsSearchDb name
+  , fDesc      = Just "Search a target database for sequences matching the query FASTA, similar to BLAST."
+  , fFixity    = Prefix
+  , fRules     = rMmseqsSearchDb
+  }
 
--- tMmseqsSearchDb :: String -> TypeChecker
--- -- TODO can this error be maintained despite the vague mms type? maybe not...
--- -- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."
--- tMmseqsSearchDb _ [x, y] | x `elem` [fna, faa] && y == mms = Right bht
--- tMmseqsSearchDb n types = error $ n ++ " requires fasta and mmseqs2 db files, but got " ++ show types
+tMmseqsSearchDb :: String -> TypeChecker
+-- TODO can this error be maintained despite the vague mms type? maybe not...
+-- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."
+tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Right bht
+tMmseqsSearchDb n types = error $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
 
--- rMmseqsSearchDb :: RulesFn
--- -- rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
--- -- aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
--- rMmseqsSearchDb (_, cfg, ref) e@(CutFun _ _ _ _ [n, q, s]) = do
---   (ExprPath nPath) <- rExpr cfg n
---   (ExprPath qPath) <- rExpr cfg q -- TODO this one is converted to db automatically
---   (ExprPath sPath) <- rExpr cfg s -- TODO but this one is assumed to have been done already
---   qDb    <- undefined -- TODO wrap these in createdb calls and compile
---   sDb    <- undefined -- TODO wrap these in createdb calls and compile
--- 
---   let out   = exprPath s e
---       outDb = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
---       out'  = debugRules cfg "rMmseqsSearch" e $ fromCutPath cfg out
--- 
---   outDb %> \_ -> aMmseqsearch      cfg ref nPath qPath sPath outDbPath
---   out'  %> \_ -> aMmseqconvertalis cfg ref       qPath sPath outDbPath out'
--- 
---   return (ExprPath out')
---   -- where
---     -- nDb'  = fromCutPath cfg nDb
--- rMmseqsSearchDb _ e = error $ "bad argument to rMmseqsSearch: " ++ show e
+-- TODO maybe the .lookup file isn't always there.. depend on the main db file instead?
+rMmseqsSearchDb :: RulesFn
+-- rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
+-- aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
+rMmseqsSearchDb st@(_, cfg, ref) e@(CutFun _ salt _ _ [n, q, s]) = do
+  -- TODO remove the .lookup from these to get prefixes
+  -- TODO and make them real paths from cutpaths
+  (ExprPath ePath) <- rExpr st n
+  (ExprPath qPath) <- rExpr st $ CutFun mms salt (depsOf q) "mmseqs_createdb" [q]
+  (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db
+  -- let qPath' = dropExtension qPath
+  --     sPath' = dropExtension sPath
+  let out    = exprPath st e
+      out'   = debugRules cfg "rMmseqsSearch" e $ fromCutPath cfg out
 
--- note this only does the search itself; the next fn converts output to bht format
--- aMmseqsearchDb cfg ref qDb sDb outDb = undefined
+      -- TODO rework this similarly to the createdb_all one that works well above
+      outDbDir = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
+      outDb' = outDbDir </> "db" -- TODO error here?
 
--- aMmseqconvertalis cfg ref qDb sDb outDb outTab = do
---   wrappedCmdWrite False True cfg ref outTab [] [] []
---     "mmseqs" ["convertalis", qDb, sDb, outDb, outTab]
+  outDb' %> \_ -> aMmseqSearchDb    cfg ref ePath qPath sPath outDb'
+  out'   %> \_ -> aMmseqConvertAlis cfg ref       qPath sPath outDb' out'
+  return (ExprPath out')
+rMmseqsSearchDb _ e = error $ "bad argument to rMmseqsSearch: " ++ show e
+
+-- TODO symlink to main db file instead, because that will always exist; print using .lookup later
+resolveMmseqsDb :: FilePath -> Action FilePath
+resolveMmseqsDb path = do
+  need [path] -- path is to a symlink to the .lookup file
+  liftIO $ fmap dropExtension $ resolveSymlinks Nothing path
+
+aMmseqSearchDb :: CutConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqSearchDb cfg ref ePath qDb sDb outDb = do
+  qDb' <- resolveMmseqsDb qDb
+  sDb' <- resolveMmseqsDb sDb
+  eStr <- readLit cfg ref ePath
+  let tmpDir = takeDirectory outDb </> "tmp"
+  liftIO $ createDirectoryIfMissing True tmpDir
+  wrappedCmdWrite True True cfg ref outDb [ePath, qDb, sDb] [] []
+    "mmseqs" ["search", "-e", eStr, qDb', sDb', outDb, tmpDir]
+  liftIO $ removeDirectoryRecursive tmpDir
+
+aMmseqConvertAlis :: CutConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqConvertAlis cfg ref qDb sDb outDb outTab = do
+  qDb' <- resolveMmseqsDb qDb
+  sDb' <- resolveMmseqsDb sDb
+  oDb' <- resolveMmseqsDb outDb
+  wrappedCmdWrite False True cfg ref outTab [qDb, sDb, outDb] [] [] "mmseqs"
+    [ "convertalis"
+    , qDb', sDb', oDb', outTab
+    -- TODO check this matches my existing blast hit tables
+    , "--format-output", "query target pident alnlen mismatch gapopen qstart qend tstart tend evalue bits"
+    ]
 
 -------------------
 -- mmseqs_search --
 -------------------
 
--- mmseqsSearch :: CutFunction
--- mmseqsSearch = let name = "mmseqs_search" in CutFunction
---   { fName      = name
---   , fTypeDesc  = name ++ " : fa fa -> bht"
---   , fTypeCheck = tMmseqsCreateDb name
---   , fDesc      = Just "Find matching sequences in two fasta files, similar to BLAST."
---   , fFixity    = Prefix
---   , fRules     = rMmseqsSearch
---   }
--- 
--- 
+mmseqsSearch :: CutFunction
+mmseqsSearch = let name = "mmseqs_search" in CutFunction
+  { fName      = name
+  , fTypeDesc  = name ++ " : fa fa -> bht"
+  , fTypeCheck = tMmseqsCreateDb name
+  , fDesc      = Just "Find matching sequences in two fasta files, similar to BLAST."
+  , fFixity    = Prefix
+  , fRules     = undefined
+  }
+
+
 -- rMkBlastFromFa :: BlastDesc -> RulesFn
 -- rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
 --   = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
@@ -198,5 +215,3 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 --     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
 --     dbExpr = CutFun dbType salt (depsOf s) name2 [s] 
 -- rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
-
-
