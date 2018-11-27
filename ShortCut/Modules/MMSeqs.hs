@@ -5,7 +5,6 @@ module ShortCut.Modules.MMSeqs
 -- TODO separate types for na vs aa databases? or just let it handle them?
 -- TODO both subject and query fastas need to be made into dbs before searching
 -- TODO and the dbs need prefixes like blast ones
--- TODO mmseqs_createdb : fa -> mms
 -- TODO mmseqs_search : fa mms -> mmr (this is mmseqs search with a singleton list)
 -- TODO mmseqs_search_all : fa.list mms -> mmr (this is mmseqs search)
 -- TODO mmseqs_search_profile?
@@ -28,6 +27,7 @@ import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, exprPath)
 import ShortCut.Modules.SeqIO      (fna, faa)
+import ShortCut.Modules.Blast      (bht)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>))
 import ShortCut.Core.Util          (digest, unlessExists)
@@ -37,10 +37,13 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "MMSeqs"
   , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite."
-  , mTypes = [faa, fna, mms]
+  , mTypes = [faa, fna, bht, mms]
   , mFunctions =
-      [ mmseqscreatedb
-      , mmseqscreatedbAll
+      [ mmseqsCreateDb
+      , mmseqsCreateDbAll
+      -- , mmseqsConvertalis
+      -- , mmseqsSearch
+      -- , mmseqsSearchDb
       ]
   }
 
@@ -59,26 +62,26 @@ mms = CutType
 -- mmseqs_createdb_all --
 -------------------------
 
-mmseqscreatedbAll :: CutFunction
-mmseqscreatedbAll = let name = "mmseqs_createdb_all" in CutFunction
+mmseqsCreateDbAll :: CutFunction
+mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : fa.list -> mms"
-  , fTypeCheck = tMmseqscreatedbAll name
+  , fTypeCheck = tMmseqsCreateDbAll name
   , fDesc      = Just "Create one MMSeqs2 sequence database from mutiple FASTA files."
   , fFixity    = Prefix
-  , fRules     = rMmseqscreatedbAll
+  , fRules     = rMmseqsCreateDbAll
   }
 
-tMmseqscreatedbAll :: String -> TypeChecker
-tMmseqscreatedbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
-tMmseqscreatedbAll name types = error $ name ++ " requires a list of fasta files, but got " ++ show types
+tMmseqsCreateDbAll :: String -> TypeChecker
+tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
+tMmseqsCreateDbAll name types = error $ name ++ " requires a list of fasta files, but got " ++ show types
 
-rMmseqscreatedbAll :: RulesFn
-rMmseqscreatedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
+rMmseqsCreateDbAll :: RulesFn
+rMmseqsCreateDbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out      = exprPath s e
-      out'     = debugRules cfg "rMmseqscreatedbAll" e $ fromCutPath cfg out
-      dbDir    = cfgTmpDir cfg </> "cache" </> "mmseqs" </> digest fas -- TODO be more or less specific?
+      out'     = debugRules cfg "rMmseqsCreateDbAll" e $ fromCutPath cfg out
+      dbDir    = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas -- TODO be more or less specific?
       dbPrefix = dbDir </> "db" -- TODO any reason for a more descriptive name?
       dbPath   = dbPrefix <.> "lookup"
   out' %> \_ -> do
@@ -90,25 +93,110 @@ rMmseqscreatedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
         "mmseqs" $ ["createdb"] ++ faPaths' ++ [dbPrefix]
     symlink cfg ref out $ toCutPath cfg dbPath
   return (ExprPath out')
-rMmseqscreatedbAll _ e = error $ "bad argument to rMmseqscreatedbAll: " ++ show e
+rMmseqsCreateDbAll _ e = error $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
 ---------------------
 -- mmseqs_createdb --
 ---------------------
 
-mmseqscreatedb :: CutFunction
-mmseqscreatedb = let name = "mmseqs_createdb" in CutFunction
+mmseqsCreateDb :: CutFunction
+mmseqsCreateDb = let name = "mmseqs_createdb" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : fa -> mms"
-  , fTypeCheck = tMmseqscreatedb name
+  , fTypeCheck = tMmseqsCreateDb name
   , fDesc      = Just "Create an MMSeqs2 sequence database from a FASTA file."
   , fFixity    = Prefix
-  , fRules     = rMmseqscreatedb
+  , fRules     = rMmseqsCreateDb
   }
 
-tMmseqscreatedb :: String -> TypeChecker
-tMmseqscreatedb _ [x] | x `elem` [fna, faa] = Right mms
-tMmseqscreatedb name types = error $ name ++ " requires a fasta file, but got " ++ show types
+tMmseqsCreateDb :: String -> TypeChecker
+tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
+tMmseqsCreateDb name types = error $ name ++ " requires a fasta file, but got " ++ show types
 
-rMmseqscreatedb :: RulesFn
-rMmseqscreatedb s e = rMmseqscreatedbAll s $ withSingleton e
+rMmseqsCreateDb :: RulesFn
+rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
+
+------------------------
+-- mmseqs_convertalis --
+------------------------
+
+-- TODO write this as a separate function, then use it as part of the main search
+
+----------------------
+-- mmseqs_search_db --
+----------------------
+
+-- TODO for now this should also handle the convertalis step
+-- TODO any reason to have a version that takes the query as a db? seems unnecessary
+
+-- mmseqsSearchDb :: CutFunction
+-- mmseqsSearchDb = let name = "mmseqs_search_db" in CutFunction
+--   { fName      = name
+--   , fTypeDesc  = name ++ " : fa mms -> bht"
+--   , fTypeCheck = tMmseqsSearchDb name
+--   , fDesc      = Just "Search a target database for sequences matching the query FASTA, similar to BLAST."
+--   , fFixity    = Prefix
+--   , fRules     = rMmseqsSearchDb
+--   }
+
+-- tMmseqsSearchDb :: String -> TypeChecker
+-- -- TODO can this error be maintained despite the vague mms type? maybe not...
+-- -- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."
+-- tMmseqsSearchDb _ [x, y] | x `elem` [fna, faa] && y == mms = Right bht
+-- tMmseqsSearchDb n types = error $ n ++ " requires fasta and mmseqs2 db files, but got " ++ show types
+
+-- rMmseqsSearchDb :: RulesFn
+-- -- rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
+-- -- aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
+-- rMmseqsSearchDb (_, cfg, ref) e@(CutFun _ _ _ _ [n, q, s]) = do
+--   (ExprPath nPath) <- rExpr cfg n
+--   (ExprPath qPath) <- rExpr cfg q -- TODO this one is converted to db automatically
+--   (ExprPath sPath) <- rExpr cfg s -- TODO but this one is assumed to have been done already
+--   qDb    <- undefined -- TODO wrap these in createdb calls and compile
+--   sDb    <- undefined -- TODO wrap these in createdb calls and compile
+-- 
+--   let out   = exprPath s e
+--       outDb = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
+--       out'  = debugRules cfg "rMmseqsSearch" e $ fromCutPath cfg out
+-- 
+--   outDb %> \_ -> aMmseqsearch      cfg ref nPath qPath sPath outDbPath
+--   out'  %> \_ -> aMmseqconvertalis cfg ref       qPath sPath outDbPath out'
+-- 
+--   return (ExprPath out')
+--   -- where
+--     -- nDb'  = fromCutPath cfg nDb
+-- rMmseqsSearchDb _ e = error $ "bad argument to rMmseqsSearch: " ++ show e
+
+-- note this only does the search itself; the next fn converts output to bht format
+-- aMmseqsearchDb cfg ref qDb sDb outDb = undefined
+
+-- aMmseqconvertalis cfg ref qDb sDb outDb outTab = do
+--   wrappedCmdWrite False True cfg ref outTab [] [] []
+--     "mmseqs" ["convertalis", qDb, sDb, outDb, outTab]
+
+-------------------
+-- mmseqs_search --
+-------------------
+
+-- mmseqsSearch :: CutFunction
+-- mmseqsSearch = let name = "mmseqs_search" in CutFunction
+--   { fName      = name
+--   , fTypeDesc  = name ++ " : fa fa -> bht"
+--   , fTypeCheck = tMmseqsCreateDb name
+--   , fDesc      = Just "Find matching sequences in two fasta files, similar to BLAST."
+--   , fFixity    = Prefix
+--   , fRules     = rMmseqsSearch
+--   }
+-- 
+-- 
+-- rMkBlastFromFa :: BlastDesc -> RulesFn
+-- rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
+--   = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
+--   where
+--     rules = fRules $ mkBlastFromDb d
+--     name1 = fName  $ mkBlastFromDb d
+--     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
+--     dbExpr = CutFun dbType salt (depsOf s) name2 [s] 
+-- rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
+
+
