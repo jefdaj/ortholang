@@ -20,12 +20,12 @@
 |       |       |-- db_h
 |       |       `-- db_h.index
 |       `-- search
-|           `-- 701bd3cb9f
+|           `-- 706c43d2bb
 |               |-- db
 |               `-- db.index
 |-- exprs
 |   |-- length
-|   |   `-- 4abf276948.num -> ../../cache/lines/...
+|   |   `-- 3e6f1abd1c.num -> ../../cache/lines/...
 |   |-- list
 |   |   |-- 94f9daed94.faa.list -> ../../cache/lines/...
 |   |   `-- fa4677789c.faa.list -> ../../cache/lines/...
@@ -35,7 +35,7 @@
 |   |-- mmseqs_createdb
 |   |   |-- 27a934c58e.mms -> ../../cache/mmseqs/createdb/eec4a7931b/db
 |   |   `-- ced061f0b2.mms -> ../../cache/mmseqs/createdb/65424a76fa/db
-|   |-- mmseqs_search_db
+|   |-- mmseqs_search
 |   |   `-- fb53ff1f79_c08cc19988_d7e65da8ac.bht
 |   |-- num
 |   |   `-- ac9644e51f.num -> ../../cache/lines/...
@@ -43,10 +43,9 @@
 |       |-- 1d8a61c770.str -> ../../cache/lines/...
 |       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
-    |-- db6803.mms -> ../exprs/mmseqs_createdb/27a934c58e.mms
-    |-- hits.bht -> ../exprs/mmseqs_search_db/fb53ff1f79_c08cc19988_d7e65da8ac.bht
+    |-- hits.bht -> ../exprs/mmseqs_search/fb53ff1f79_c08cc19988_d7e65da8ac.bht
     |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
     |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
-    `-- result -> ../exprs/length/4abf276948.num
+    `-- result -> ../exprs/length/3e6f1abd1c.num
 
-17 directories, 32 files
+17 directories, 31 files
