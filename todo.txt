@@ -1,3 +1,23 @@
+tuesday:
+
+  sanitize fasta ids:
+    design/think it through
+    when loading fasta files:
+      replace seqids with hashes
+      create a hash -> seqid map for each fasta
+      write the map to a cache dir with the filename hash
+      add to a global map for putting them back later
+    when printing:
+      get the text to print same as now
+      then find and replace the hashes in it before actually printing
+    start by only undoing the hashes at the end, then move to every step if fast + easy
+    when making a named variable:
+      replace final symlink with read + write unhashed in vars/
+
+  sonicparanoid module
+    scaffolding
+
+
 sunday:
 
   diamond module
@@ -84,6 +104,3 @@ sunday:
         mmseqs_search_profile (with --iterations)?
 
     write tests
-
-  sonicparanoid module
-    scaffolding
