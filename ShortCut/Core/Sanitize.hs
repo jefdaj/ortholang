@@ -1,6 +1,8 @@
 module ShortCut.Core.Sanitize
   ( hashIDsFile
   , writeHashedIDs
+  , unhashIDs
+  , unhashIDsFile
   )
   where
 
@@ -16,6 +18,7 @@ module ShortCut.Core.Sanitize
 -- import Debug.Trace
 import qualified Data.DList as D
 import qualified Data.Map   as M
+import qualified Text.Regex as R
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -65,3 +68,16 @@ writeHashedIDs cfg ref path ids
   where
     path' = fromCutPath cfg path
     toLine (h, i) = h ++ "\t" ++ i
+
+-- see https://stackoverflow.com/q/48571481
+unhashIDs :: HashedSeqIDs -> String -> String
+unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
+
+unhashIDsFile :: CutConfig -> Locks -> HashedSeqIDs -> CutPath -> CutPath -> Action ()
+unhashIDsFile cfg ref ids inPath outPath = do
+  let inPath'  = fromCutPath cfg inPath
+      outPath' = fromCutPath cfg outPath
+  txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  let txt' = unhashIDs ids txt
+  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt'
+  debugTrackWrite cfg [outPath']

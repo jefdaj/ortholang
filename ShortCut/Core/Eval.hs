@@ -39,6 +39,7 @@ import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 -- import ShortCut.Core.Locks            (withReadLock')
+import ShortCut.Core.Sanitize         (unhashIDs)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
@@ -99,12 +100,12 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> CutConfig -> Locks -> CutType -> Rules ResPath -> IO ()
+eval :: Handle -> CutConfig -> Locks -> HashedSeqIDs -> CutType -> Rules ResPath -> IO ()
 
 -- TODO put this back once done debugging (duplicates everything annoyingly)
 -- eval hdl cfg ref rtype = retryIgnore . eval'
 
-eval hdl cfg ref rtype = retryIgnore . eval'
+eval hdl cfg ref ids rtype = retryIgnore . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program but the error will be visible.
@@ -130,14 +131,14 @@ eval hdl cfg ref rtype = retryIgnore . eval'
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
         res  <- prettyResult cfg ref rtype $ toCutPath cfg path
-        res' <- liftIO $ renderIO cfg res
+        res' <- fmap (unhashIDs ids) $ liftIO $ renderIO cfg res
         liftIO $ hPutStrLn hdl res'
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as, c, ref, _) = case lookup (CutVar "result") as of
+evalScript hdl s@(as, c, ref, ids) = case lookup (CutVar "result") as of
   Nothing  -> putStrLn "no result variable. that's not right!"
-  Just res -> eval hdl c ref (typeOf res) (compileScript s Nothing)
+  Just res -> eval hdl c ref ids (typeOf res) (compileScript s Nothing)
 
 evalFile :: Handle -> CutConfig -> Locks -> IO ()
 evalFile hdl cfg ref = case cfgScript cfg of
