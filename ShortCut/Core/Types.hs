@@ -87,9 +87,9 @@ newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
 
 -- Note that each ActionN takes N+1 CutPaths, because the first is the output
 -- TODO take the output last instead?
-type Action1 = CutConfig -> Locks -> CutPath -> CutPath -> Action ()
-type Action2 = CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
-type Action3 = CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
+type Action1 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+type Action2 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+type Action3 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 
 -- TODO remove when able in favor of well-typed versions above
 type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
@@ -188,12 +188,12 @@ data CutType
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tShow :: CutConfig -> Locks -> FilePath -> IO String
+    , tShow :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
 
-defaultShow :: CutConfig -> Locks -> FilePath -> IO String
-defaultShow _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
+defaultShow :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO String
+defaultShow _ locks _ = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
     nLines      = 5
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
@@ -268,7 +268,7 @@ str = CutType
   { tExt  = "str"
   , tDesc = "string"
   -- TODO make one of the read functions be IO for this instead
-  , tShow = \_ ls f -> do
+  , tShow = \_ ls _ f -> do
       -- putStrLn $ "reading " ++ f
       txt <- fmap init $ withReadLock ls f $ readFileStrict ls f
       let txt' = if txt == "<<emptystr>>" then "" else txt
@@ -279,7 +279,7 @@ num :: CutType
 num = CutType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
-  , tShow = \_ ls f -> do
+  , tShow = \_ ls _ f -> do
       txt <- withReadLock ls f $ readFileStrict ls f
       return $ init txt -- TODO prettyNum?
   }

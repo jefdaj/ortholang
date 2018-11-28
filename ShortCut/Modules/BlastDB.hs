@@ -132,18 +132,18 @@ mkLoadDBEach name rtn = CutFunction
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [s]) = do
+rLoadDB st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
   let sPath' = toCutPath cfg sPath
-  oPath' %> \_ -> aLoadDB cfg ref oPath sPath'
+  oPath' %> \_ -> aLoadDB cfg ref ids oPath sPath'
   return (ExprPath oPath')
   where
     oPath  = exprPath st e
     oPath' = fromCutPath cfg oPath
 rLoadDB _ _ = error "bad argument to rLoadDB"
 
-aLoadDB :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
-aLoadDB cfg ref oPath sPath = do
+aLoadDB :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoadDB cfg ref _ oPath sPath = do
   pattern <- readLit cfg ref sPath'
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
   writeLit cfg ref oPath'' pattern'
@@ -192,11 +192,11 @@ makeblastdbCache :: CutConfig -> CutPath
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [f]) = do
+rBlastdblist s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toCutPath   cfg fPath
-  listTmp %> \_ -> aBlastdblist   cfg ref lTmp'
-  oPath'  %> \_ -> aBlastdbfilter cfg ref oPath lTmp' fPath'
+  listTmp %> \_ -> aBlastdblist   cfg ref ids lTmp'
+  oPath'  %> \_ -> aBlastdbfilter cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
     oPath   = exprPath s e
@@ -207,8 +207,8 @@ rBlastdblist s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [f]) = do
     lTmp'   = toCutPath   cfg listTmp
 rBlastdblist _ _ = error "bad argument to rBlastdblist"
 
-aBlastdblist :: CutConfig -> Locks -> CutPath -> Action ()
-aBlastdblist cfg ref listTmp = do
+aBlastdblist :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
+aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
   _ <- wrappedCmdExit False True cfg ref (Just oPath) [] [Cwd tmpDir, Shell] -- TODO remove stderr?
     "blastdbget" [tmpDir, ">", listTmp'] [1]
@@ -218,8 +218,8 @@ aBlastdblist cfg ref listTmp = do
     tmpDir   = takeDirectory $ listTmp'
     oPath    = debugA cfg "aBlastdblist" listTmp' [listTmp']
 
-aBlastdbfilter :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
-aBlastdbfilter cfg ref oPath listTmp fPath = do
+aBlastdbfilter :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+aBlastdbfilter cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
   out       <- readLits cfg ref listTmp'
   let names  = if null out then [] else tail out
@@ -242,18 +242,18 @@ blastdbget = let name = "blastdbget" in CutFunction
   }
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [name]) = do
+rBlastdbget st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath st e -- final prefix
       dbPrefix' = fromCutPath cfg dbPrefix
       nPath'    = toCutPath cfg nPath
-  dbPrefix' %> \_ -> aBlastdbget cfg ref dbPrefix tmpDir nPath'
+  dbPrefix' %> \_ -> aBlastdbget cfg ref ids dbPrefix tmpDir nPath'
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = error "bad argument to rBlastdbget"
 
-aBlastdbget :: CutConfig -> Locks -> CutPath -> CutPath -> CutPath -> Action ()
-aBlastdbget cfg ref dbPrefix tmpDir nPath = do
+aBlastdbget :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
   debugNeed cfg "aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
@@ -314,7 +314,7 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdbAll :: RulesFn
-rMakeblastdbAll s@(_, cfg, ref, _) e@(CutFun rtn _ _ _ [fas]) = do
+rMakeblastdbAll s@(_, cfg, ref, ids) e@(CutFun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
@@ -324,7 +324,7 @@ rMakeblastdbAll s@(_, cfg, ref, _) e@(CutFun rtn _ _ _ [fas]) = do
   -- TODO need new shake first:
   -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
 
-  out' %> \_ -> aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+  out' %> \_ -> aMakeblastdbAll rtn cfg ref ids cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
 rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
@@ -337,8 +337,8 @@ listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . 
 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
-aMakeblastdbAll :: CutType -> CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
-aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
+aMakeblastdbAll :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ()
+aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
   let dbType' = if dbType == ndb then "nucl" else "prot"
@@ -401,7 +401,7 @@ aMakeblastdbAll dbType cfg ref cDir [out, fasPath] = do
     out'     = fromCutPath cfg out
     cDir'    = fromCutPath cfg cDir
     fasPath' = fromCutPath cfg fasPath
-aMakeblastdbAll _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
+aMakeblastdbAll _ _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
 ----------------------------------------
 -- make a db from a single FASTA file --
@@ -471,19 +471,19 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 -- map1of1 :: CutType -> CutType -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
--- rMap :: Int -> (CutConfig -> Locks -> [CutPath] -> Action ()) -> RulesFn
+-- rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
 -- rMap index actFn = rVecMain index Nothing actFn'
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, ids) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
     -- faType = typeOf e
     tmpDir = makeblastdbCache cfg 
     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
-    act1 c r = aMakeblastdbAll dbType c r tmpDir
+    act1 c r is = aMakeblastdbAll dbType c r ids tmpDir
     expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
     -- expr'' = trace ("expr':" ++ show expr') expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
@@ -515,18 +515,18 @@ tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
-rSingletons st@(_, cfg, ref, _) expr@(CutFun rtn _ _ _ [listExpr]) = do
+rSingletons st@(_, cfg, ref, ids) expr@(CutFun rtn _ _ _ [listExpr]) = do
   (ExprPath listPath') <- rExpr st listExpr
   let outPath  = exprPath st expr
       outPath' = fromCutPath cfg outPath
       listPath = toCutPath cfg listPath'
       (ListOf (ListOf t)) = rtn
-  outPath' %> \_ -> aSingletons t cfg ref outPath listPath
+  outPath' %> \_ -> aSingletons t cfg ref ids outPath listPath
   return $ ExprPath outPath'
 rSingletons _ _ = error "bad argument to rSingletons"
 
 aSingletons :: CutType -> Action1
-aSingletons elemType cfg ref outPath listPath = do
+aSingletons elemType cfg ref _ outPath listPath = do
   let listPath' = fromCutPath cfg listPath
       outPath'  = fromCutPath cfg outPath
   debugL cfg $ "aSingletons listpath': " ++ listPath'
@@ -546,8 +546,8 @@ aSingletons elemType cfg ref outPath listPath = do
 ------------------
 
 -- TODO remove the Volumes... lines too?
-showBlastDb :: CutConfig -> Locks -> FilePath -> IO String
-showBlastDb cfg ref path = do
+showBlastDb :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO String
+showBlastDb cfg ref _ path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFile path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'

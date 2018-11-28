@@ -130,10 +130,10 @@ aPsiblastTrainDb = aPsiblastDb True trainingArgs
 aPsiblastSearchDb :: Action3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
 
-aPsiblastDb' :: Bool -> [String] -> CutConfig -> Locks -> [CutPath] -> Action ()
-aPsiblastDb' writingPssm args cfg ref [oPath, ePath,  qPath, dbPath] =
-  aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath
-aPsiblastDb' _ _ _ _ _ = error "bad argument to aPsiblastDb'"
+aPsiblastDb' :: Bool -> [String] -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
+  aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
+aPsiblastDb' _ _ _ _ _ _ = error "bad argument to aPsiblastDb'"
 
 aPsiblastTrainDb'  = aPsiblastDb' True  trainingArgs
 aPsiblastSearchDb' = aPsiblastDb' False searchArgs
@@ -141,7 +141,7 @@ aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
 -- aPsiblastSearchDb to search with an existing PSSM.
 aPsiblastDb :: Bool -> [String] -> Action3
-aPsiblastDb writingPssm args cfg ref oPath ePath qPath dbPath = do
+aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
   let oPath'  = fromCutPath cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below

@@ -41,7 +41,7 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(_, cfg, ref, _) expr@(CutFun _ salt _ _ [n, lst]) = do
+rSample st@(_, cfg, ref, ids) expr@(CutFun _ salt _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr st n
   (ExprPath inPath') <- rExpr st lst
   let nPath    = toCutPath cfg nPath'
@@ -49,12 +49,12 @@ rSample st@(_, cfg, ref, _) expr@(CutFun _ salt _ _ [n, lst]) = do
       outPath  = exprPath st expr
       outPath' = fromCutPath cfg outPath
       (ListOf t) = typeOf lst
-  outPath' %> \_ -> aSample salt t cfg ref outPath nPath inPath
+  outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath
   return $ ExprPath outPath'
 rSample _ _ = error "bad argument to rSample"
 
 aSample :: Int -> CutType -> Action2
-aSample salt t cfg ref outPath nPath lstPath = do
+aSample salt t cfg ref _ outPath nPath lstPath = do
   let nPath'   = fromCutPath cfg nPath
       lstPath' = fromCutPath cfg lstPath
       outPath' = fromCutPath cfg outPath

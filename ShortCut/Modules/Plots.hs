@@ -28,7 +28,7 @@ plot :: CutType
 plot = CutType
   { tExt  = "png"
   , tDesc = "png image of a plot"
-  , tShow = \_ _ f -> return $ "plot image '" ++ f ++ "'"
+  , tShow = \_ _ _ f -> return $ "plot image '" ++ f ++ "'"
   }
 
 -------------------
@@ -74,7 +74,7 @@ histogram = let name = "histogram" in CutFunction
 --   return paths'
 
 rPlotNumList :: FilePath -> CutState -> CutExpr -> Rules ExprPath
-rPlotNumList script st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [title, nums]) = do
+rPlotNumList script st@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- varName st nums
@@ -84,7 +84,7 @@ rPlotNumList script st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [title, nums]) = do
       args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toCutPath cfg p) args
   outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
-                      aSimpleScript script cfg ref (out:args')
+                      aSimpleScript script cfg ref ids (out:args')
   return outPath''
 rPlotNumList _ _ _ = error "bad argument to rPlotNumList"
 
@@ -120,7 +120,7 @@ scatterplot = let name = "scatterplot" in CutFunction
 -- TODO also get y axis from dependent variable?
 rPlotNumScores :: (CutState -> CutExpr -> Rules ExprPath)
                -> FilePath -> CutState -> CutExpr -> Rules ExprPath
-rPlotNumScores xFn script st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [title, nums]) = do
+rPlotNumScores xFn script st@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- xFn   st nums
@@ -131,7 +131,7 @@ rPlotNumScores xFn script st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [title, nums]
       args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toCutPath cfg p) args
   outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
-                      aSimpleScript script cfg ref (out:args')
+                      aSimpleScript script cfg ref ids (out:args')
   return outPath''
 rPlotNumScores _ _ _ _ = error "bad argument to rPlotNumScores"
 

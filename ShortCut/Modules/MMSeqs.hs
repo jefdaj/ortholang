@@ -44,7 +44,7 @@ mms :: CutType
 mms = CutType
   { tExt  = "mms"
   , tDesc = "MMSeqs2 sequence database"
-  , tShow = \_ ref path -> do
+  , tShow = \_ ref _ path -> do -- TODO unhashIDs here (TODO or should that come after? much simpler!)
       path' <- fmap (<.> "lookup") $ resolveSymlinks Nothing path
       h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFile path'
       let desc = unlines $ ["MMSeqs2 sequence database " ++ path ++ ":"] ++ h5 ++ ["..."]

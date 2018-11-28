@@ -44,12 +44,12 @@ muscleEach = let name = "muscle_each" in CutFunction
   }
 
 -- TODO is it parallel?
-aMuscle :: CutConfig -> Locks -> [CutPath] -> Action ()
-aMuscle cfg ref [out, fa] = do
+aMuscle :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aMuscle cfg ref _ [out, fa] = do
   wrappedCmdWrite False True cfg ref out'' [fa'] [] []
     "muscle" ["-clwstrict", "-in", fa', "-out", out']
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aMuscle" out' [out', fa']
     fa'   = fromCutPath cfg fa
-aMuscle _ _ args = error $ "bad argument to aMuscle: " ++ show args
+aMuscle _ _ _ args = error $ "bad argument to aMuscle: " ++ show args

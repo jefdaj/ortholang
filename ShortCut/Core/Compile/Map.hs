@@ -30,13 +30,13 @@ import System.Directory           (createDirectoryIfMissing)
 ------------------------------------
 
 -- for action functions that don't need a tmpdir
-rMap :: Int -> (CutConfig -> Locks -> [CutPath] -> Action ()) -> RulesFn
+rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
 rMap index actFn = rVecMain index Nothing actFn'
   where
-    actFn' cfg ref _ args = actFn cfg ref args -- drops unused tmpdir
+    actFn' cfg ref ids _ args = actFn cfg ref ids args -- drops unused tmpdir
 
 -- for action functions that need one tmpdir reused between calls
-rMapTmp :: Int -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
+rMapTmp :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
         -> String -> RulesFn
 rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rVecMain index (Just tmpFn) actFn s
   where
@@ -46,7 +46,7 @@ rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rVecMain index (Just tmpFn) act
 -- for action functions that need a unique tmpdir each call
 -- TODO use a hash for the cached path rather than the name, which changes!
 rMapTmps :: Int
-          -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
+          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
           -> String -> RulesFn
 rMapTmps index actFn tmpPrefix s@(_, cfg, _, _) e = rVecMain index (Just tmpFn) actFn s e
   where
@@ -75,9 +75,9 @@ rMapSimpleScript index = rMap index . aSimpleScript
  - but am open to alternatives if anyone thinks of something!
  -}
 rVecMain :: Int -> Maybe ([CutPath] -> IO CutPath)
-         -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
+         -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
-rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, _) e@(CutFun r salt _ name exprs) = do
+rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, regularExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) regularExprs
@@ -91,8 +91,8 @@ rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, _) e@(CutFun r salt _ name exprs)
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
       (ListOf eType) = debug cfg ("type of '" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show r) r
-  elemCachePtn %> aVecElem cfg ref eType mTmpFn actFn singleName salt
-  mainOutPath  %> aVecMain cfg ref mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
+  elemCachePtn %> aVecElem cfg ref ids eType mTmpFn actFn singleName salt
+  mainOutPath  %> aVecMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rVecMain" e $ ExprPath mainOutPath
 rVecMain _ _ _ _ _ = error "bad argument to rVecMain"
 
@@ -103,17 +103,17 @@ hashFun _ _ = error "hashFun only hashes function calls so far"
 {- This calls aVecArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
  -}
-aVecMain :: CutConfig -> Locks -> Int
+aVecMain :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
          -> Action ()
-aVecMain cfg ref mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
+aVecMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   debugNeed cfg "aVecMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths cfg ref mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
   debugL cfg $ "aVecMain mappedPaths': " ++ show mappedPaths'
-  mapM_ (aVecArgs cfg ref mapIndex eType regularArgs'' mapTmpDir')
+  mapM_ (aVecArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
         (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
   debugNeed cfg "aVecMain" outPaths
@@ -139,10 +139,10 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' <.> extOf eType
 
 -- This leaves arguments in .args files for aVecElem to find.
 -- TODO put mapIndex and mappedArg together, and rename that something with path
-aVecArgs :: CutConfig -> Locks -> Int
+aVecArgs :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
          -> CutType -> [FilePath] -> FilePath -> CutPath
          -> Action ()
-aVecArgs cfg ref mapIndex eType regularArgs' tmp' mappedArg = do
+aVecArgs cfg ref ids mapIndex eType regularArgs' tmp' mappedArg = do
   let mappedArg' = fromCutPath cfg mappedArg
       argsPath   = eachPath cfg tmp' eType mappedArg' <.> "args"
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
@@ -167,11 +167,11 @@ aVecArgs cfg ref mapIndex eType regularArgs' tmp' mappedArg = do
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
  - TODO after singleFn works, can we remove tmpFn? (ok if not)
  -}
-aVecElem :: CutConfig -> Locks -> CutType
+aVecElem :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType
          -> Maybe ([CutPath] -> IO CutPath)
-         -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
+         -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
          -> String -> Int -> FilePath -> Action ()
-aVecElem cfg ref eType tmpFn actFn singleName salt out = do
+aVecElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
   args <- readPaths cfg ref argsPath
   let args' = map (fromCutPath cfg) args
@@ -191,5 +191,5 @@ aVecElem cfg ref eType tmpFn actFn singleName salt out = do
       single' = fromCutPath cfg single
       args''' = single:map (toCutPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?
-  unlessExists single' $ actFn cfg ref dir args'''
+  unlessExists single' $ actFn cfg ref ids dir args'''
   symlink cfg ref out' single

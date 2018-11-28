@@ -33,7 +33,7 @@ dmnd :: CutType
 dmnd = CutType
   { tExt  = "dmnd"
   , tDesc = "DIAMOND database"
-  , tShow = \_ ref path -> do
+  , tShow = \_ ref _ path -> do -- TODO unhashIDs here?
       path' <- resolveSymlinks Nothing path
       out <- withReadLock ref path' $ readProcess "diamond" ["dbinfo", "--db", path'] []
       let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
@@ -70,13 +70,13 @@ diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
 rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
+rDiamondmakedbAll s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out  = exprPath s e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths cfg ref fasPath
-    aSimpleScriptPar "diamond_makedb_all.sh" cfg ref (out:faPaths)
+    aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
  
@@ -115,8 +115,8 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name 
 rDiamondFromDb :: [String] -> RulesFn
 rDiamondFromDb = rSimple . aDiamondFromDb
 
-aDiamondFromDb :: [String] -> (CutConfig -> Locks -> [CutPath] -> Action ())
-aDiamondFromDb dCmd cfg ref [o, e, q, db] = do
+aDiamondFromDb :: [String] -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
   eStr <- readLit  cfg ref e'
   wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond" $ dCmd ++ ["-q", q', "-o", o'', "-e", eStr, "-d", db']
   where
@@ -125,7 +125,7 @@ aDiamondFromDb dCmd cfg ref [o, e, q, db] = do
     q'  = fromCutPath cfg q
     db' = fromCutPath cfg db
     o'' = debugA cfg "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
-aDiamondFromDb _ _ _ _ = error $ "bad argument to aDiamondFromDb"
+aDiamondFromDb _ _ _ _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler

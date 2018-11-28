@@ -62,7 +62,7 @@ fnagz :: CutType
 fnagz = CutType
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tShow = \_ _ f -> return $ "gzipped fna file '" ++ f ++ "'"
+  , tShow = \_ _ _ f -> return $ "gzipped fna file '" ++ f ++ "'"
   }
 
 -- TODO unify with faa? or replace it?
@@ -70,7 +70,7 @@ faagz :: CutType
 faagz = CutType
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
-  , tShow = \_ _ f -> return $ "gzipped faa file '" ++ f ++ "'"
+  , tShow = \_ _ _ f -> return $ "gzipped faa file '" ++ f ++ "'"
   }
 
 -- TODO does this work at all?
@@ -178,17 +178,17 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: CutState -> CutExpr -> Rules ExprPath
-rParseSearches s@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [searches]) = do
+rParseSearches s@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   let searchTable  = exprPath s expr
       searchTable' = fromCutPath cfg searchTable
       sList' = toCutPath cfg sList
-  searchTable' %> \_ -> aParseSearches cfg ref sList' searchTable
+  searchTable' %> \_ -> aParseSearches cfg ref ids sList' searchTable
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
-aParseSearches :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
-aParseSearches cfg ref sList out = do
+aParseSearches :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aParseSearches cfg ref _ sList out = do
   parses <- (fmap . map) readSearch (readLits cfg ref sList')
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
@@ -213,7 +213,7 @@ aParseSearches cfg ref sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-rBioMartR fn s@(_, cfg, ref, _) expr@(CutFun rtn salt _ _ [ss]) = do
+rBioMartR fn s@(_, cfg, ref, ids) expr@(CutFun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
   -- (ExprPath sTable) <- rParseSearches s ss
   (ExprPath sTable) <- rExpr s $ CutFun rtn salt (depsOf ss) "parse_searches" [ss]
@@ -224,13 +224,13 @@ rBioMartR fn s@(_, cfg, ref, _) expr@(CutFun rtn salt _ _ [ss]) = do
       out'    = fromCutPath cfg out
       sTable' = toCutPath cfg sTable
       bmFn'   = toCutPath cfg bmFn
-  out' %> \_ -> aBioMartR cfg ref out bmFn' tmp' sTable'
+  out' %> \_ -> aBioMartR cfg ref ids out bmFn' tmp' sTable'
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: CutConfig -> Locks
+aBioMartR :: CutConfig -> Locks -> HashedSeqIDsRef
           -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
-aBioMartR cfg ref out bmFn bmTmp sTable = do
+aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   debugNeed cfg "aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']

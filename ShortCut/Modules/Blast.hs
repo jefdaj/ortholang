@@ -86,8 +86,8 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
 rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (CutConfig -> Locks -> [CutPath] -> Action ())
-aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
+aMkBlastFromDb :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
   prefix <- readPath cfg ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
@@ -138,7 +138,7 @@ aMkBlastFromDb bCmd cfg ref [o, e, q, p] = do
     p'  = fromCutPath cfg p
     e'  = fromCutPath cfg e
     o'' = debugA cfg "aMkBlastFromDb" o' [bCmd, e', o', q', p']
-aMkBlastFromDb _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
+aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------
 -- *blast* --
