@@ -33,9 +33,9 @@ type HashedSeqIDList = D.DList (String, String)
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
 hashIDsLine :: String -> (String, HashedSeqIDList)
-hashIDsLine ('>':seqID) = (">id:" ++ idHash, D.singleton (idHash, seqID))
+hashIDsLine ('>':seqID) = (">" ++ idHash, D.singleton (idHash, seqID))
   where
-    idHash = digest seqID
+    idHash = "id:" ++ digest seqID
 hashIDsLine txt = (txt, D.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs

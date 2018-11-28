@@ -132,7 +132,7 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
         need [path] -- TODO is this done automatically in the case of result?
         res  <- prettyResult cfg ref ids rtype $ toCutPath cfg path
         ids' <- liftIO $ readIORef ids
-        liftIO $ putStrLn $ show ids'
+        -- liftIO $ putStrLn $ show ids'
         res' <- fmap (unhashIDs ids') $ liftIO $ renderIO cfg res
         liftIO $ hPutStrLn hdl res'
 

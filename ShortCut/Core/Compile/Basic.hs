@@ -24,6 +24,7 @@ import Debug.Trace       (trace)
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty
+import qualified Data.Map as M
 
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
@@ -40,7 +41,7 @@ import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs)
 import System.FilePath            (takeExtension, dropExtension)
-import Data.IORef                 (atomicModifyIORef')
+import Data.IORef                 (atomicModifyIORef)
 
 
 debug :: CutConfig -> String -> a -> a
@@ -306,8 +307,7 @@ aLoadHash cfg ref ids src ext = do
   -- symlink cfg ref ids hashPath src -- TODO read + write with hashed IDs here instead of symlinking
   newIDs <- hashIDsFile cfg ref src hashPath
   writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") newIDs
-  -- TODO merge old ids with newIDs here
-  -- putStrLn $ show ids
+  liftIO $ atomicModifyIORef ids $ \is -> (M.union is newIDs, ())
   return hashPath
   where
     src' = fromCutPath cfg src
