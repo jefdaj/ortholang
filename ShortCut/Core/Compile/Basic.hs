@@ -35,7 +35,8 @@ import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
-import System.FilePath            (takeExtension)
+import ShortCut.Core.Sanitize     (hashIDsFile)
+import System.FilePath            (takeExtension, dropExtension)
 import Debug.Trace       (trace)
 
 
@@ -299,7 +300,9 @@ aLoadHash cfg ref src ext = do
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  symlink cfg ref hashPath src -- TODO read + write with hashed IDs here instead of symlinking
+  -- symlink cfg ref hashPath src -- TODO read + write with hashed IDs here instead of symlinking
+  _ <- hashIDsFile cfg ref src hashPath
+  -- putStrLn $ show ids
   return hashPath
   where
     src' = fromCutPath cfg src

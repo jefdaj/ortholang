@@ -205,6 +205,7 @@ executable shortcut
                     ShortCut.Core.Repl,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
+                    ShortCut.Core.Sanitize,
                     ShortCut.Modules,
                     ShortCut.Modules.BioMartR,
                     ShortCut.Modules.Blast,
