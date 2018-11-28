@@ -286,4 +286,5 @@ executable shortcut
                     terminal-size,
                     posix-escape,
                     random,
-                    random-shuffle
+                    random-shuffle,
+                    dlist

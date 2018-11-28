@@ -3,39 +3,43 @@ module ShortCut.Core.Sanitize
   )
   where
 
-import Debug.Trace
-
 {- This tries to prevent various programs from choking on badly formatted FASTA
- - sequence IDs.  It replaces them with hashes before running anything, keeps a
- - hash -> ID map, and puts them back in the output.
+ - sequence IDs. It replaces them with hashes before running anything, keeps a
+ - hash -> ID map, and puts them back in the final output.
  -}
+
+-- TODO this is almost fast enough to be usable, but tweak performance some more
+--      (getting rid of debug helps, as does DList)
+
+-- import Debug.Trace
+import qualified Data.DList as D
+import qualified Data.Map   as M
 
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.Map              (fromList)
 import ShortCut.Core.Util    (digest)
 import ShortCut.Core.Locks   (withReadLock', withWriteLock')
 import ShortCut.Core.Actions (debugTrackWrite)
 import ShortCut.Core.Paths   (fromCutPath)
 
-type HashedSeqIDList = [(String, String)]
+type HashedSeqIDList = D.DList (String, String)
 
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
 hashIDsLine :: String -> (String, HashedSeqIDList)
-hashIDsLine ('>':seqID) = (">id:" ++ idHash, [(idHash, seqID)])
+hashIDsLine ('>':seqID) = (">id:" ++ idHash, D.singleton (idHash, seqID))
   where
     idHash = digest seqID
-hashIDsLine text = (text, [])
+hashIDsLine txt = (txt, D.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
 hashIDsFasta :: String -> (String, HashedSeqIDs)
-hashIDsFasta txt = joinFn $ foldl accFn ([], []) $ map hashIDsLine' $ lines txt
+hashIDsFasta txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ lines txt
   where
-    hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
-    accFn  (oldLines, oldIDs) (newLine, newIDs) = (oldLines ++ '\n':newLine, oldIDs ++ newIDs)
-    joinFn (hashedLines, ids) = (hashedLines, fromList ids)
+    -- hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
+    accFn  (oldLines, oldIDs) (newLine, newIDs) = (D.snoc oldLines newLine, D.append oldIDs newIDs)
+    joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, M.fromList $ D.toList ids)
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
 hashIDsFile :: CutConfig -> Locks -> CutPath -> CutPath -> Action HashedSeqIDs
