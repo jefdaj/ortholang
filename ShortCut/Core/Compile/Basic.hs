@@ -18,6 +18,9 @@ module ShortCut.Core.Compile.Basic
 --   )
   where
 
+-- TODO does turning of traces radically speed up the interpreter?
+import Debug.Trace       (trace)
+
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty
@@ -35,9 +38,8 @@ import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
-import ShortCut.Core.Sanitize     (hashIDsFile)
+import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs)
 import System.FilePath            (takeExtension, dropExtension)
-import Debug.Trace       (trace)
 
 
 debug :: CutConfig -> String -> a -> a
@@ -301,7 +303,8 @@ aLoadHash cfg ref src ext = do
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
   -- symlink cfg ref hashPath src -- TODO read + write with hashed IDs here instead of symlinking
-  _ <- hashIDsFile cfg ref src hashPath
+  ids <- hashIDsFile cfg ref src hashPath
+  writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") ids
   -- putStrLn $ show ids
   return hashPath
   where

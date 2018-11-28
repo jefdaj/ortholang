@@ -18,8 +18,8 @@ tuesday:
       test after and make sure the same things still pass
     steps to get there:
       x add it to the CutState and fix all the resulting type errors, but don't use it yet
-      read into it from aLoadHash without altering the files yet
-      write it to multiple tmpfiles while creating it based on the relevant load hashes
+      x read into it from aLoadHash without altering the files yet
+      x write it to multiple tmpfiles while creating it based on the relevant load hashes
       use it to put the IDs back when printing
       use it to put the IDs back when writing named vars
       see how the tests fared and fix any errors

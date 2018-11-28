@@ -1,5 +1,6 @@
 module ShortCut.Core.Sanitize
   ( hashIDsFile
+  , writeHashedIDs
   )
   where
 
@@ -10,6 +11,7 @@ module ShortCut.Core.Sanitize
 
 -- TODO this is almost fast enough to be usable, but tweak performance some more
 --      (getting rid of debug helps, as does DList)
+-- TODO would having it be a set from the beginning be faster still?
 
 -- import Debug.Trace
 import qualified Data.DList as D
@@ -51,3 +53,15 @@ hashIDsFile cfg ref inPath outPath = do
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta'
   debugTrackWrite cfg [outPath']
   return ids
+
+writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedSeqIDs -> Action ()
+writeHashedIDs cfg ref path ids
+  = withWriteLock' ref path'
+  $ liftIO
+  $ writeFile path'
+  $ unlines
+  $ map toLine
+  $ M.toList ids
+  where
+    path' = fromCutPath cfg path
+    toLine (h, i) = h ++ "\t" ++ i
