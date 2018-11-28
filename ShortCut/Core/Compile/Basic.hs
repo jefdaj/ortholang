@@ -38,7 +38,7 @@ import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists)
+                                   digest, removeIfExists, unlessExists)
 import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs)
 import System.FilePath            (takeExtension, dropExtension)
 import Data.IORef                 (atomicModifyIORef)
@@ -304,10 +304,11 @@ aLoadHash cfg ref ids src ext = do
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  -- symlink cfg ref ids hashPath src -- TODO read + write with hashed IDs here instead of symlinking
-  newIDs <- hashIDsFile cfg ref src hashPath
-  writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") newIDs
-  liftIO $ atomicModifyIORef ids $ \is -> (M.union is newIDs, ())
+  unlessExists hashPath' $ do
+    -- symlink cfg ref ids hashPath src -- TODO read + write with hashed IDs here instead of symlinking
+    newIDs <- hashIDsFile cfg ref src hashPath
+    writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") newIDs
+    liftIO $ atomicModifyIORef ids $ \is -> (M.union is newIDs, ())
   return hashPath
   where
     src' = fromCutPath cfg src

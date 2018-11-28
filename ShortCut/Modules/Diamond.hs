@@ -33,7 +33,7 @@ dmnd :: CutType
 dmnd = CutType
   { tExt  = "dmnd"
   , tDesc = "DIAMOND database"
-  , tShow = \_ ref _ path -> do -- TODO unhashIDs here?
+  , tShow = \_ ref path -> do
       path' <- resolveSymlinks Nothing path
       out <- withReadLock ref path' $ readProcess "diamond" ["dbinfo", "--db", path'] []
       let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)

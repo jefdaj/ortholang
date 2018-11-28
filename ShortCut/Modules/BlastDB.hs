@@ -546,8 +546,8 @@ aSingletons elemType cfg ref _ outPath listPath = do
 ------------------
 
 -- TODO remove the Volumes... lines too?
-showBlastDb :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO String
-showBlastDb cfg ref _ path = do
+showBlastDb :: CutConfig -> Locks -> FilePath -> IO String
+showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFile path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'

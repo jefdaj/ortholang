@@ -73,9 +73,9 @@ myShake cfg rules = do
  - TODO idea for sets: if any element contains "\n", just add blank lines between them
  - TODO clean this up!
  -}
-prettyResult :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> CutPath -> Action Doc
-prettyResult _ _ _ Empty  _ = return $ text "[]"
-prettyResult cfg ref ids (ListOf t) f
+prettyResult :: CutConfig -> Locks -> CutType -> CutPath -> Action Doc
+prettyResult _ _ Empty  _ = return $ text "[]"
+prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
     lits <- readLits cfg ref $ fromCutPath cfg f
     let lits' = if t == str
@@ -84,12 +84,12 @@ prettyResult cfg ref ids (ListOf t) f
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
     paths <- readPaths cfg ref $ fromCutPath cfg f
-    pretties <- mapM (prettyResult cfg ref ids t) paths
+    pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
-prettyResult cfg ref ids (ScoresOf _)  f = do
-  s <- liftIO (defaultShow cfg ref ids $ fromCutPath cfg f)
+prettyResult cfg ref (ScoresOf _)  f = do
+  s <- liftIO (defaultShow cfg ref $ fromCutPath cfg f)
   return $ text s
-prettyResult cfg ref ids t f = liftIO $ fmap showFn $ (tShow t cfg ref ids) f'
+prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
     showFn = if t == num then prettyNum else text
     f' = fromCutPath cfg f
@@ -130,7 +130,7 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
       "eval" ~> do
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
-        res  <- prettyResult cfg ref ids rtype $ toCutPath cfg path
+        res  <- prettyResult cfg ref rtype $ toCutPath cfg path
         ids' <- liftIO $ readIORef ids
         -- liftIO $ putStrLn $ show ids'
         res' <- fmap (unhashIDs ids') $ liftIO $ renderIO cfg res

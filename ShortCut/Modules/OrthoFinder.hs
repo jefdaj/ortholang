@@ -36,7 +36,7 @@ ofr :: CutType
 ofr = CutType
   { tExt  = "ofr"
   , tDesc = "OrthoFinder results"
-  , tShow = \_ ref _ path -> do -- TODO unhashIDs here
+  , tShow = \_ ref path -> do
       txt <- readFileStrict ref path
       return $ unlines $ take 17 $ lines txt
   }
