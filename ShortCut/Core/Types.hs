@@ -23,6 +23,7 @@ module ShortCut.Core.Types
   , CutScript
   , Locks
   , HashedSeqIDs
+  , HashedSeqIDsRef
   , CutState
   -- , Assoc(..) -- we reuse this from Parsec
   , CutFixity(..)
@@ -77,7 +78,7 @@ import Data.Map                       (Map(..))
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
 import Development.Shake.FilePath (makeRelative)
--- import Data.IORef                     (IORef)
+import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 import Debug.Trace
@@ -343,7 +344,11 @@ operatorChars cfg = if cfgDebug cfg then chars' else chars
 -- then use this hash -> seqid map to put the original ids back at the end
 type HashedSeqIDs = Map String String
 
-type CutState = (CutScript, CutConfig, Locks, HashedSeqIDs)
+-- this lets me cheat and not bother threading the ID map through all the monad stuff
+-- TODO go back and do it right
+type HashedSeqIDsRef = IORef HashedSeqIDs
+
+type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
 type ParseM a = P.Parsec String CutState a
 
 runParseM :: ParseM a -> CutState -> String -> Either ParseError a

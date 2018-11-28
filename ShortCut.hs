@@ -1,5 +1,7 @@
 module Main where
 
+import qualified Data.Map as M
+
 import Control.Monad         (when)
 import Data.Version          (showVersion)
 import Paths_ShortCut        (version)
@@ -15,6 +17,7 @@ import System.Environment    (getArgs, withArgs)
 import System.Exit           (exitSuccess)
 import System.IO             (stdout)
 import System.Directory      (setCurrentDirectory)
+import Data.IORef            (newIORef)
 
 main:: IO ()
 main = do
@@ -28,8 +31,9 @@ main = do
   ref <- initLocks
   when (cfgDebug cfg) $ putStrLn $ "config: " ++ show cfg
   setCurrentDirectory $ cfgWorkDir cfg
+  ids <- newIORef M.empty
   when (hasArg args "test")
-    (withArgs [] $ runTests (cfg {cfgWidth = Just 100}) ref)
+    (withArgs [] $ runTests (cfg {cfgWidth = Just 100}) ref ids)
   if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile stdout cfg ref
-    else runRepl  cfg ref
+    then evalFile stdout cfg ref ids
+    else runRepl  cfg ref ids

@@ -117,25 +117,25 @@ parseStatement = runParseM pStatement
 -- The name doesn't do a good job of explaining this, but it's expected to be
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
-parseString :: CutConfig -> Locks -> String
+parseString :: CutConfig -> Locks -> HashedSeqIDsRef -> String
             -> Either ParseError CutScript
-parseString c r = runParseM pScript ([], c, r, empty)
+parseString c r ids = runParseM pScript ([], c, r, ids)
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: CutConfig -> Locks -> FilePath
+parseFile :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath
           -> IO (Either ParseError CutScript)
-parseFile cfg ref path = do
+parseFile cfg ref ids path = do
   txt <- readScriptWithIncludes ref path'
-  return $ (parseString cfg ref . stripComments) txt
+  return $ (parseString cfg ref ids . stripComments) txt
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: CutConfig -> Locks -> FilePath -> IO CutScript
-parseFileIO cfg ref scr = do
-  mscr1 <- parseFile cfg ref scr
+parseFileIO :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO CutScript
+parseFileIO cfg ref ids scr = do
+  mscr1 <- parseFile cfg ref ids scr
   case mscr1 of
     Left  e -> fail $ show e
     Right s -> return s

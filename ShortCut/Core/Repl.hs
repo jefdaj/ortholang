@@ -49,21 +49,21 @@ import Control.Exception.Safe   -- (throwM)
 -- main interface --
 --------------------
 
-runRepl :: CutConfig -> Locks -> IO ()
+runRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> CutConfig -> Locks -> IO ()
-mkRepl promptFns hdl cfg ref = do
+       -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+mkRepl promptFns hdl cfg ref ids = do
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
   -- load initial script if any
   st <- case cfgScript cfg of
-          Nothing   -> return  ([], cfg, ref, empty)
-          Just path -> cmdLoad ([], cfg, ref, empty) hdl path
+          Nothing   -> return  ([], cfg, ref, ids)
+          Just path -> cmdLoad ([], cfg, ref, ids) hdl path
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
@@ -228,7 +228,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
       let cfg' = cfg { cfgScript = Just path' }
-      new <- parseFile cfg' ref path'
+      new <- parseFile cfg' ref ids path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         Right s -> return (s, cfg', ref, ids)
