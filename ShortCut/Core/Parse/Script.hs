@@ -16,6 +16,7 @@ import Text.Parsec            (ParseError)
 -- import ShortCut.Core.Debug    (debug)
 -- import Data.IORef             (IORef)
 import System.FilePath ((</>), takeDirectory)
+import Data.Map               (empty)
 
 -------------------
 -- preprocessing --
@@ -61,12 +62,12 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 -- TODO message in case it doesn't parse?
 pAssign :: ParseM CutAssign
 pAssign = debugParser "pAssign" $ do
-  (scr, cfg, ref) <- getState
+  (scr, cfg, ref, ids) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   v <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
   e <- debugParseM "first pExpr" >> (lexeme pExpr)
-  putState (scr ++ [(v,e)], cfg, ref)
+  putState (scr ++ [(v,e)], cfg, ref, ids)
   debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
       -- res' = debugParser cfg "pAssign" res
@@ -103,10 +104,10 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
 pScript = debugParser "pScript" $ do
-  (_, cfg, ref) <- getState
+  (_, cfg, ref, ids) <- getState
   optional spaces
   scr <- many pStatement
-  putState (scr, cfg, ref)
+  putState (scr, cfg, ref, ids)
   return scr
 
 -- TODO need CutState here? or just CutConfig?
@@ -118,7 +119,7 @@ parseStatement = runParseM pStatement
 -- TODO clarify that
 parseString :: CutConfig -> Locks -> String
             -> Either ParseError CutScript
-parseString c r = runParseM pScript ([], c, r)
+parseString c r = runParseM pScript ([], c, r, empty)
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?

@@ -15,6 +15,7 @@ import Test.Tasty.HUnit      ((@=?), testCase)
 import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
+import Data.Map              (empty)
 -- import Data.IORef            (IORef)
 
 -- import Test.Tasty            (TestTree, testGroup)
@@ -38,13 +39,13 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -----------------------
 
 regularParse :: ParseM a -> CutConfig -> Locks -> String -> Either ParseError a
-regularParse p cfg ref = parseWithEof p ([], cfg, ref)
+regularParse p cfg ref = parseWithEof p ([], cfg, ref, empty)
 
 takeVar :: String -> CutVar
 takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: ParseM a -> CutConfig -> Locks -> String -> Bool
-parsedItAll p cfg ref str' = case parseWithLeftOver p ([], cfg, ref) str' of
+parsedItAll p cfg ref str' = case parseWithLeftOver p ([], cfg, ref, empty) str' of
   Right (_, "") -> True
   _ -> False
 
@@ -97,16 +98,16 @@ wsProps :: CutConfig -> Locks -> TestTree
 wsProps cfg ref = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar s)) (ExSpace w) ->
-      parseWithLeftOver pVar ([], cfg, ref) (s ++ w) == Right (v, "")
+      parseWithLeftOver pVar ([], cfg, ref, empty) (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
-      parseWithLeftOver (pSym c) ([], cfg, ref) (c:w) == Right ((), "")
+      parseWithLeftOver (pSym c) ([], cfg, ref, empty) (c:w) == Right ((), "")
   , testProperty "after equals signs in assignment statements" $
     \(ExAssign a) (ExSpace w) ->
-      parseWithLeftOver pVarEq ([], cfg, ref) (a ++ w) == Right (takeVar a, "")
+      parseWithLeftOver pVarEq ([], cfg, ref, empty) (a ++ w) == Right (takeVar a, "")
   , testProperty "after quoted strings" $
     \(ExQuoted q) (ExSpace w) ->
-      parseWithLeftOver pQuoted ([], cfg, ref) (q ++ w) == Right (read q, "")
+      parseWithLeftOver pQuoted ([], cfg, ref, empty) (q ++ w) == Right (read q, "")
   , testProperty "after numbers" $
     \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg ref (n ++ w)
   ]
@@ -115,12 +116,12 @@ wsProps cfg ref = testGroup "consume randomly generated whitespace"
 acProps :: CutConfig -> Locks -> TestTree
 acProps cfg ref = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
-      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg, ref) s == Right (v, "")
+      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg, ref, empty) s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
-      \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg, ref) [c] == Right ((), "")
+      \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg, ref, empty) [c] == Right ((), "")
   , testProperty "variables with equal signs after" $
       \(ExAssign a) ->
-        parseWithLeftOver pVarEq ([], cfg, ref) a == Right (takeVar a, "")
+        parseWithLeftOver pVarEq ([], cfg, ref, empty) a == Right (takeVar a, "")
   , testProperty "quoted strings" $
       \(ExQuoted q) -> regularParse pQuoted cfg ref q == Right (read q)
   , testProperty "positive numbers" $

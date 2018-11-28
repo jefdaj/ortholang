@@ -64,12 +64,12 @@ rExpr s e@(CutRules (CompiledExpr _ rules)) = rules
 
 -- TODO remove once no longer needed (parser should find fns)
 rulesByName :: CutState -> CutExpr -> String -> Rules ExprPath
-rulesByName s@(_,cfg,_) expr name = case findFunction cfg name of
+rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> (fRules f) s expr
 
 rAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
-rAssign s@(_,cfg,_) (var, expr) = do
+rAssign s@(_, cfg, _, _) (var, expr) = do
   (ExprPath path) <- rExpr s expr
   path' <- rVar s var expr $ toCutPath cfg path
   let res  = (var, path')
@@ -79,7 +79,7 @@ rAssign s@(_,cfg,_) (var, expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 compileScript :: CutState -> Maybe String -> Rules ResPath
-compileScript s@(as,_,_) permHash = do
+compileScript s@(as, _, _, _) permHash = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
@@ -95,7 +95,7 @@ compileScript s@(as,_,_) permHash = do
 
 -- write a literal value from ShortCut source code to file
 rLit :: CutState -> CutExpr -> Rules ExprPath
-rLit s@(_,cfg,ref) expr = do
+rLit s@(_, cfg, ref, _) expr = do
   let path  = exprPath s expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromCutPath cfg path
   path' %> \_ -> aLit cfg ref expr path
@@ -140,7 +140,7 @@ rList _ _ = error "bad arguemnt to rList"
 
 -- special case for writing lists of strings or numbers as a single file
 rListLits :: CutState -> CutExpr -> Rules ExprPath
-rListLits s@(_,cfg,ref) e@(CutList _ _ _ exprs) = do
+rListLits s@(_, cfg, ref, _) e@(CutList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> toCutPath cfg p) litPaths
   outPath' %> \_ -> aListLits cfg ref litPaths' outPath
@@ -165,7 +165,7 @@ aListLits cfg ref paths outPath = do
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: CutState -> CutExpr -> Rules ExprPath
-rListPaths s@(_,cfg,ref) e@(CutList rtn salt _ exprs) = do
+rListPaths s@(_, cfg, ref, _) e@(CutList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toCutPath cfg p) paths
       hash     = digest $ concat $ map digest paths'
@@ -191,7 +191,7 @@ aListPaths cfg ref paths outPath = do
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 rRef :: CutState -> CutExpr -> Rules ExprPath
-rRef (_,cfg,_) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
+rRef (_, cfg, _, _) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
     ePath p = ExprPath $ debugRules cfg "rRef" e $ fromCutPath cfg p
 rRef _ _ = error "bad argument to rRef"
@@ -200,7 +200,7 @@ rRef _ _ = error "bad argument to rRef"
 -- TODO unify with rLink2, rLoad etc?
 -- TODO do we need both the CutExpr and ExprPath? seems like CutExpr would do
 rVar :: CutState -> CutVar -> CutExpr -> CutPath -> Rules VarPath
-rVar (_,cfg,ref) var expr oPath = do
+rVar (_, cfg, ref, _) var expr oPath = do
   vPath' %> \_ -> aVar cfg ref vPath oPath
   return (VarPath vPath')
   where
@@ -222,7 +222,7 @@ aVar cfg ref vPath oPath = do
 -- TODO can it be factored out somehow? seems almost trivial now...
 rBop :: CutState -> CutExpr -> (CutExpr, CutExpr)
       -> Rules (ExprPath, ExprPath, ExprPath)
-rBop s@(_,cfg,_) e@(CutBop _ _ _ _ _ _) (n1, n2) = do
+rBop s@(_, cfg, _, _) e@(CutBop _ _ _ _ _ _) (n1, n2) = do
   (ExprPath p1) <- rExpr s n1
   (ExprPath p2) <- rExpr s n2
   let path  = fromCutPath cfg $ exprPath s e
@@ -283,7 +283,7 @@ mkLoadList name rtn = CutFunction
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
 rLoad :: CutState -> CutExpr -> Rules ExprPath
-rLoad s@(_,cfg,ref) e@(CutFun _ _ _ _ [p]) = do
+rLoad s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr s p
   out' %> \_ -> aLoad cfg ref (toCutPath cfg strPath) out
   return (ExprPath out')
@@ -296,10 +296,10 @@ aLoadHash :: CutConfig -> Locks -> CutPath -> String -> Action CutPath
 aLoadHash cfg ref src ext = do
   debugNeed cfg "aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
-  let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load"
+  let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  symlink cfg ref hashPath src
+  symlink cfg ref hashPath src -- TODO read + write with hashed IDs here instead of symlinking
   return hashPath
   where
     src' = fromCutPath cfg src
@@ -332,7 +332,7 @@ rLoadList _ _ = error "bad arguments to rLoadList"
 -- TODO is this different from rListOne, except in its return type?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 rLoadListLits :: RulesFn
-rLoadListLits s@(_,cfg,ref) expr = do
+rLoadListLits s@(_, cfg, ref, _) expr = do
   (ExprPath litsPath') <- rExpr s expr
   let litsPath = toCutPath cfg litsPath'
   outPath' %> \_ -> aLoadListLits cfg ref outPath litsPath
@@ -353,7 +353,7 @@ aLoadListLits cfg ref outPath litsPath = do
 
 -- regular case for lists of any other file type
 rLoadListLinks :: RulesFn
-rLoadListLinks s@(_,cfg,ref) (CutFun rtn salt _ _ [es]) = do
+rLoadListLinks s@(_, cfg, ref, _) (CutFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   let hash     = digest $ toCutPath cfg pathsPath
       outPath  = exprPathExplicit cfg "list" rtn salt [hash]
@@ -441,7 +441,7 @@ aSimpleScript' _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show 
 rSimple' :: Maybe String
          -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
-rSimple' mTmpPrefix actFn s@(_,cfg,ref) e@(CutFun _ _ _ _ exprs) = do
+rSimple' mTmpPrefix actFn s@(_, cfg, ref, _) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
   let argPaths' = map (\(ExprPath p) -> toCutPath cfg p) argPaths
   outPath' %> \_ -> aSimple' cfg ref outPath actFn mTmpDir argPaths'

@@ -38,7 +38,7 @@ rMap index actFn = rVecMain index Nothing actFn'
 -- for action functions that need one tmpdir reused between calls
 rMapTmp :: Int -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
         -> String -> RulesFn
-rMapTmp index actFn tmpPrefix s@(_,cfg,_) = rVecMain index (Just tmpFn) actFn s
+rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rVecMain index (Just tmpFn) actFn s
   where
     tmpDir = cacheDir cfg tmpPrefix
     tmpFn  = return . const tmpDir
@@ -48,7 +48,7 @@ rMapTmp index actFn tmpPrefix s@(_,cfg,_) = rVecMain index (Just tmpFn) actFn s
 rMapTmps :: Int
           -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
           -> String -> RulesFn
-rMapTmps index actFn tmpPrefix s@(_,cfg,_) e = rVecMain index (Just tmpFn) actFn s e
+rMapTmps index actFn tmpPrefix s@(_, cfg, _, _) e = rVecMain index (Just tmpFn) actFn s e
   where
     tmpFn args = do
       let base = concat $ intersperse "_" $ map digest args
@@ -77,7 +77,7 @@ rMapSimpleScript index = rMap index . aSimpleScript
 rVecMain :: Int -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
-rVecMain mapIndex mTmpFn actFn s@(_,cfg,ref) e@(CutFun r salt _ name exprs) = do
+rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, _) e@(CutFun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, regularExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) regularExprs

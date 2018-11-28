@@ -13,8 +13,19 @@ tuesday:
     start by only undoing the hashes at the end, then move to every step if fast + easy
     when making a named variable:
       replace final symlink with read + write unhashed in vars/
+    make sure tests still pass except the trees will be different of course
+      x test before for comparison (fails on laptop already)
+      test after and make sure the same things still pass
+    steps to get there:
+      x add it to the CutState and fix all the resulting type errors, but don't use it yet
+      read into it from aLoadHash without altering the files yet
+      write it to multiple tmpfiles while creating it based on the relevant load hashes
+      use it to put the IDs back when printing
+      use it to put the IDs back when writing named vars
+      see how the tests fared and fix any errors
 
   sonicparanoid module
+    needs IDs sanitized first, probably
     scaffolding
 
 

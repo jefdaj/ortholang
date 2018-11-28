@@ -74,7 +74,7 @@ histogram = let name = "histogram" in CutFunction
 --   return paths'
 
 rPlotNumList :: FilePath -> CutState -> CutExpr -> Rules ExprPath
-rPlotNumList script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
+rPlotNumList script st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- varName st nums
@@ -120,7 +120,7 @@ scatterplot = let name = "scatterplot" in CutFunction
 -- TODO also get y axis from dependent variable?
 rPlotNumScores :: (CutState -> CutExpr -> Rules ExprPath)
                -> FilePath -> CutState -> CutExpr -> Rules ExprPath
-rPlotNumScores xFn script st@(_,cfg,ref) expr@(CutFun _ _ _ _ [title, nums]) = do
+rPlotNumScores xFn script st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- xFn   st nums

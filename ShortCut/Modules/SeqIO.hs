@@ -35,8 +35,8 @@ cutModule = CutModule
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-    ++ mkLoaders fna
-    ++ mkLoaders faa
+    ++ mkLoaders fna -- TODO replace with custom one that hashes IDs
+    ++ mkLoaders faa -- TODO replace with custom one that hashes IDs
     ++ mkLoaders gbk
   }
 

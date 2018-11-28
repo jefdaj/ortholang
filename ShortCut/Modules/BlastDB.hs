@@ -132,7 +132,7 @@ mkLoadDBEach name rtn = CutFunction
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(_,cfg,ref) e@(CutFun _ _ _ _ [s]) = do
+rLoadDB st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
   let sPath' = toCutPath cfg sPath
   oPath' %> \_ -> aLoadDB cfg ref oPath sPath'
@@ -192,7 +192,7 @@ makeblastdbCache :: CutConfig -> CutPath
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(_,cfg,ref) e@(CutFun _ _ _ _ [f]) = do
+rBlastdblist s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toCutPath   cfg fPath
   listTmp %> \_ -> aBlastdblist   cfg ref lTmp'
@@ -242,7 +242,7 @@ blastdbget = let name = "blastdbget" in CutFunction
   }
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(_,cfg,ref) e@(CutFun _ _ _ _ [name]) = do
+rBlastdbget st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath st e -- final prefix
@@ -314,7 +314,7 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdbAll :: RulesFn
-rMakeblastdbAll s@(_, cfg, ref) e@(CutFun rtn _ _ _ [fas]) = do
+rMakeblastdbAll s@(_, cfg, ref, _) e@(CutFun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out       = exprPath s e
       out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
@@ -476,7 +476,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_,cfg,_) (CutFun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
@@ -515,7 +515,7 @@ tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
-rSingletons st@(_, cfg, ref) expr@(CutFun rtn _ _ _ [listExpr]) = do
+rSingletons st@(_, cfg, ref, _) expr@(CutFun rtn _ _ _ [listExpr]) = do
   (ExprPath listPath') <- rExpr st listExpr
   let outPath  = exprPath st expr
       outPath' = fromCutPath cfg outPath

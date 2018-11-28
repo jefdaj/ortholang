@@ -44,7 +44,7 @@ mkMathFn name fn = CutFunction
 -- TODO can a lot of this be moved back into compile while leaving something?
 rMath :: (Scientific -> Scientific -> Scientific) -- in this module
       -> CutState -> CutExpr -> Rules ExprPath    -- in Compile module
-rMath fn s@(_,cfg,ref) e@(CutBop _ _ _ _ n1 n2) = do
+rMath fn s@(_, cfg, ref, _) e@(CutBop _ _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering rMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (n1, n2)
   p3 %> aMath cfg ref fn p1 p2

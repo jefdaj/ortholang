@@ -14,7 +14,7 @@ import Debug.Trace       (trace, traceM)
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
-  (_, cfg, _) <- getState
+  (_, cfg, _, _) <- getState
   if cfgDebug cfg
     then parserTraced name pFn
     else pFn
@@ -22,7 +22,7 @@ debugParser name pFn = do
 -- TODO remove?
 debugParseM :: String -> ParseM ()
 debugParseM msg = do
-  (_, cfg, _) <- getState
+  (_, cfg, _, _) <- getState
   if cfgDebug cfg
     then traceM msg
     else return ()
@@ -55,7 +55,7 @@ pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++
 -- TODO is there any reason not to use pEnd itself for this?
 -- pEndArg :: ParseM ()
 -- pEndArg = do
---   (_, cfg, _) <- getState
+--   (_, cfg, _, _) <- getState
 --   lookAhead $ void $ choice $ map (try . pSym) $ operatorChars cfg ++ ")],"
 
 -- This is a kludge to make my "interesting" preference for spaces as function
@@ -66,7 +66,7 @@ pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++
 -- TODO this must be succeding on 'loaner... right?
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
-  (_, cfg, _) <- getState
+  (_, cfg, _, _) <- getState
   try $ lookAhead $ choice
     [ eof
     , void $ choice $ map pSym $ operatorChars cfg ++ ")],"

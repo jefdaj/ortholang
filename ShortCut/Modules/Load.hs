@@ -59,7 +59,7 @@ globFiles = CutFunction
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
-rGlobFiles s@(_,cfg,ref) e@(CutFun _ _ _ _ [p]) = do
+rGlobFiles s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
   let outPath = exprPath s e
       out'    = fromCutPath cfg outPath
@@ -95,9 +95,9 @@ mkLoadGlob name loadType eachFn = compose1 name desc globFiles (ListOf str) each
     desc = mkTypeDesc name [str] (ListOf loadType)
 
 mkLoaders :: CutType -> [CutFunction]
-mkLoaders loadType = [single, each, glob]
+mkLoaders loadType = [single, each, glb]
   where
     ext    = extOf loadType
     single = mkLoad     ("load_" ++ ext           ) loadType
     each   = mkLoadList ("load_" ++ ext ++ "_each") loadType
-    glob   = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each
+    glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each

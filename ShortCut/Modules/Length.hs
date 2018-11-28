@@ -49,7 +49,7 @@ tLen [x] | x == bht = Right num
 tLen _ = Left $ "length requires a list"
 
 rLen :: CutState -> CutExpr -> Rules ExprPath
-rLen s@(_,cfg,ref) e@(CutFun _ _ _ _ [l]) = do
+rLen s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr s l
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath

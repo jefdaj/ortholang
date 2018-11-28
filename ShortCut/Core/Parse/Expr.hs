@@ -74,7 +74,7 @@ pBop _ = error "pBop only works with infix functions"
 -- TODO get function names from modules
 pFunName :: ParseM String
 pFunName = do
-  (_, cfg, _) <- getState
+  (_, cfg, _, _) <- getState
   (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
@@ -98,7 +98,7 @@ pArgs = debugParser "pArgs" $ manyTill (try pTerm) pEnd
 -- (TODO is there a better way?)
 pFunArgs :: String -> [CutExpr] -> ParseM CutExpr
 pFunArgs name args = debugParser "pFun" $ do
-  (_, cfg, _) <- getState
+  (_, cfg, _, _) <- getState
   -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
   -- args <- pArgs
   -- args <- manyTill pTerm pEnd
@@ -121,7 +121,7 @@ pRef = debugParser "pRef" $ do
   -- v@(CutVar var) <- pVarOnly
   v@(CutVar var) <- pVar
   -- let v = CutVar var
-  (scr, _, _) <- getState
+  (scr, _, _, _) <- getState
   debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v scr of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
@@ -131,7 +131,7 @@ pRef = debugParser "pRef" $ do
 -- pFunOrRef = debugParser "pFunOrRef" $ do
 --   name <- try pIden -- TODO when it gets here, loader is cut off to oader
 --   traceM $ "parsed name: " ++ name
---   (_, cfg, _) <- getState
+--   (_, cfg, _, _) <- getState
 --   if name `elem` fnNames cfg
 --     then pFunArgs name
 --     else pRef name
@@ -171,7 +171,7 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM CutExpr
 pExpr = debugParser "pExpr" $ do
-  (_, cfg, _) <- getState
+  (_, cfg, _, _) <- getState
   -- debugParseM "expr"
   res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"

@@ -30,6 +30,7 @@ import ShortCut.Core.Pretty (renderIO)
 import ShortCut.Core.Config (debug)
 
 import Control.Retry
+import qualified Data.Map as M
 
 import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (maybeToList)
@@ -134,7 +135,7 @@ eval hdl cfg ref rtype = retryIgnore . eval'
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as,c,ref) = case lookup (CutVar "result") as of
+evalScript hdl s@(as, c, ref, _) = case lookup (CutVar "result") as of
   Nothing  -> putStrLn "no result variable. that's not right!"
   Just res -> eval hdl c ref (typeOf res) (compileScript s Nothing)
 
@@ -143,4 +144,4 @@ evalFile hdl cfg ref = case cfgScript cfg of
   Nothing  -> putStrLn "no script. that's not right!"
   Just scr -> do
     s <- parseFileIO cfg ref scr -- TODO just take a CutState?
-    evalScript hdl (s,cfg,ref)
+    evalScript hdl (s, cfg, ref, M.empty)

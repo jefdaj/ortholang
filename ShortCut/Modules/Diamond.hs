@@ -70,7 +70,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
 rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
+rDiamondmakedbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out  = exprPath s e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
