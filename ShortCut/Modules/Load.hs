@@ -32,7 +32,7 @@ cutModule = CutModule
 ---------------
 
 loadList :: CutFunction
-loadList = mkLoad "load_list" (ListOf str)
+loadList = mkLoad False "load_list" (ListOf str)
 
 ----------------
 -- glob_files --
@@ -94,10 +94,10 @@ mkLoadGlob name loadType eachFn = compose1 name desc globFiles (ListOf str) each
   where
     desc = mkTypeDesc name [str] (ListOf loadType)
 
-mkLoaders :: CutType -> [CutFunction]
-mkLoaders loadType = [single, each, glb]
+mkLoaders :: Bool -> CutType -> [CutFunction]
+mkLoaders hashSeqIDs loadType = [single, each, glb]
   where
     ext    = extOf loadType
-    single = mkLoad     ("load_" ++ ext           ) loadType
-    each   = mkLoadList ("load_" ++ ext ++ "_each") loadType
+    single = mkLoad     hashSeqIDs ("load_" ++ ext           ) loadType
+    each   = mkLoadList hashSeqIDs ("load_" ++ ext ++ "_each") loadType
     glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each

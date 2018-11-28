@@ -261,13 +261,13 @@ defaultTypeCheck expected returned actual =
  - links, and the only ones that point outside the temp dir.
  - TODO still true?
  -}
-mkLoad :: String -> CutType -> CutFunction
-mkLoad name rtn = CutFunction
+mkLoad :: Bool -> String -> CutType -> CutFunction
+mkLoad hashSeqIDs name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix
-  , fRules     = rLoad
+  , fRules     = rLoad hashSeqIDs
   }
 
 {- Like cLoad, except it operates on a list of strings. Note that you can also
@@ -275,52 +275,54 @@ mkLoad name rtn = CutFunction
  - write the list in a file, whereas this can handle literal lists in the
  - source code.
  -}
-mkLoadList :: String -> CutType -> CutFunction
-mkLoadList name rtn = CutFunction
+mkLoadList :: Bool -> String -> CutType -> CutFunction
+mkLoadList hashSeqIDs name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
-  , fRules     = rLoadList
+  , fRules     = rLoadList hashSeqIDs
   }
 
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
-rLoad :: CutState -> CutExpr -> Rules ExprPath
-rLoad s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [p]) = do
+rLoad :: Bool -> CutState -> CutExpr -> Rules ExprPath
+rLoad hashSeqIDs s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr s p
-  out' %> \_ -> aLoad cfg ref ids (toCutPath cfg strPath) out
+  out' %> \_ -> aLoad hashSeqIDs cfg ref ids (toCutPath cfg strPath) out
   return (ExprPath out')
   where
     out  = exprPath s e
     out' = fromCutPath cfg out
-rLoad _ _ = error "bad argument to rLoad"
+rLoad _ _ _ = error "bad argument to rLoad"
 
-aLoadHash :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
-aLoadHash cfg ref ids src ext = do
+aLoadHash :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
+aLoadHash hashSeqIDs cfg ref ids src ext = do
   debugNeed cfg "aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  unlessExists hashPath' $ do
-    -- symlink cfg ref ids hashPath src -- TODO read + write with hashed IDs here instead of symlinking
-    newIDs <- hashIDsFile cfg ref src hashPath
-    writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") newIDs
-    liftIO $ atomicModifyIORef ids $ \is -> (M.union is newIDs, ())
+  if hashSeqIDs
+    then unlessExists hashPath' $ do
+      newIDs <- hashIDsFile cfg ref src hashPath
+      writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") newIDs
+      liftIO $ atomicModifyIORef ids $ \is -> (M.union is newIDs, ())
+    else
+      symlink cfg ref hashPath src
   return hashPath
   where
     src' = fromCutPath cfg src
 
-aLoad :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
-aLoad cfg ref ids strPath outPath = do
+aLoad :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoad hashSeqIDs cfg ref ids strPath outPath = do
   debugNeed cfg "aLoad" [strPath']
   pth <- readLitPaths cfg ref strPath'
   src' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) $ fromCutPath cfg $ head pth -- TODO safer!
   -- debugL cfg $ "aLoad src': '" ++ src' ++ "'"
   -- debugL cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
-  hashPath <- aLoadHash cfg ref ids (toCutPath cfg src') (takeExtension outPath')
+  hashPath <- aLoadHash hashSeqIDs cfg ref ids (toCutPath cfg src') (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   symlink cfg ref outPath'' hashPath
@@ -330,16 +332,17 @@ aLoad cfg ref ids strPath outPath = do
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aLoad" outPath [strPath', outPath']
 
-rLoadList :: RulesFn
-rLoadList s e@(CutFun (ListOf r) _ _ _ [es])
+rLoadList :: Bool -> RulesFn
+rLoadList hashSeqIDs s e@(CutFun (ListOf r) _ _ _ [es])
   | r `elem` [str, num] = rLoadListLits s es
-  | otherwise = rLoadListLinks s e
-rLoadList _ _ = error "bad arguments to rLoadList"
+  | otherwise = rLoadListLinks hashSeqIDs s e
+rLoadList _ _ _ = error "bad arguments to rLoadList"
 
 -- special case for lists of str and num
 -- TODO remove rtn and use (typeOf expr)?
 -- TODO is this different from rListOne, except in its return type?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
+-- TODO don't need to hash seqids here right?
 rLoadListLits :: RulesFn
 rLoadListLits s@(_, cfg, ref, ids) expr = do
   (ExprPath litsPath') <- rExpr s expr
@@ -361,18 +364,18 @@ aLoadListLits cfg ref _ outPath litsPath = do
     outPath' = fromCutPath cfg outPath
 
 -- regular case for lists of any other file type
-rLoadListLinks :: RulesFn
-rLoadListLinks s@(_, cfg, ref, ids) (CutFun rtn salt _ _ [es]) = do
+rLoadListLinks :: Bool -> RulesFn
+rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   let hash     = digest $ toCutPath cfg pathsPath
       outPath  = exprPathExplicit cfg "list" rtn salt [hash]
       outPath' = fromCutPath cfg outPath
-  outPath' %> \_ -> aLoadListLinks cfg ref ids (toCutPath cfg pathsPath) outPath
+  outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toCutPath cfg pathsPath) outPath
   return (ExprPath outPath')
-rLoadListLinks _ _ = error "bad arguments to rLoadListLinks"
+rLoadListLinks _ _ _ = error "bad arguments to rLoadListLinks"
 
-aLoadListLinks :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
-aLoadListLinks cfg ref ids pathsPath outPath = do
+aLoadListLinks :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
   -- through as a (ListOf str) here; have to read as Strings and convert to
   -- CutPaths
@@ -380,7 +383,7 @@ aLoadListLinks cfg ref ids pathsPath outPath = do
   let paths' = map (fromCutPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   let paths''' = map (toCutPath cfg) paths''
-  hashPaths <- mapM (\p -> aLoadHash cfg ref ids p
+  hashPaths <- mapM (\p -> aLoadHash hashSeqIDs cfg ref ids p
                          $ takeExtension $ fromCutPath cfg p) paths'''
   let hashPaths' = map (fromCutPath cfg) hashPaths
   -- debugL cfg $ "about to need: " ++ show paths''
