@@ -31,7 +31,7 @@ import Data.Map.Strict                  (Map)
 import Control.Exception (bracket_)
 import System.Directory           (createDirectoryIfMissing, doesFileExist)
 import System.FilePath            (takeDirectory)
-import Control.Concurrent.Thread.Delay (delay)
+-- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO parametarize FilePath and re-export with CutPath in Types.hs?
 type Locks = IORef (Map FilePath RWLock)

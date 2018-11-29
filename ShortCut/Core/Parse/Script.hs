@@ -7,16 +7,16 @@ import ShortCut.Core.Parse.Basic
 import ShortCut.Core.Parse.Expr
 
 import Control.Applicative    ((<|>), many)
-import Control.Monad          (void)
+-- import Control.Monad          (void)
 -- import ShortCut.Core.Debug    (debugParser)
 import Text.Parsec            (try, getState, putState)
 import Text.Parsec.Char       (spaces, newline)
-import Text.Parsec.Combinator (optional, lookAhead)
+import Text.Parsec.Combinator (optional)
 import Text.Parsec            (ParseError)
 -- import ShortCut.Core.Debug    (debug)
 -- import Data.IORef             (IORef)
 import System.FilePath ((</>), takeDirectory)
-import Data.Map               (empty)
+-- import Data.Map               (empty)
 
 -------------------
 -- preprocessing --
@@ -48,7 +48,7 @@ readScriptWithIncludes ref path = do
     processInclude line = case words (stripComments line) of
                            ("include":relpath:_) ->
                              readScriptWithIncludes ref $ takeDirectory path </> (stripQuotes relpath)
-                           ws -> return line
+                           _ -> return line
 
 stripQuotes :: String -> String
 stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s

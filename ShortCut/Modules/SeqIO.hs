@@ -5,11 +5,11 @@ module ShortCut.Modules.SeqIO where
 import Development.Shake
 
 import ShortCut.Core.Types
-import ShortCut.Core.Config (debug)
+-- import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Util          (digest, isReallyEmpty)
+import ShortCut.Core.Util          (digest)
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
-                                    wrappedCmdOut, wrappedCmdWrite, writeCachedLines)
+                                    wrappedCmdOut, writeCachedLines)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)

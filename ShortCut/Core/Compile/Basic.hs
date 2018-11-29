@@ -29,19 +29,17 @@ import qualified Data.Map as M
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
--- import Control.Monad              (when)
+import Data.IORef                 (atomicModifyIORef)
 import Data.List                  (intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
--- import ShortCut.Core.Debug        (debugA, debugRules, debug)
-import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
+import ShortCut.Core.Locks        (withWriteLock')
+import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, unlessExists)
-import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, unhashIDsFile, readHashedIDs)
-import System.FilePath            (takeExtension, dropExtension)
-import Data.IORef                 (readIORef, atomicModifyIORef)
+                                   digest, removeIfExists)
+import System.FilePath            (takeExtension)
 
 
 debug :: CutConfig -> String -> a -> a
@@ -65,7 +63,7 @@ rExpr s e@(CutRef _ _ _ _    ) = rRef s e
 rExpr s e@(CutList _ _ _ _   ) = rList s e
 rExpr s e@(CutBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(CutFun _ _ _ n _  ) = rulesByName s e n
-rExpr s e@(CutRules (CompiledExpr _ rules)) = rules
+rExpr _   (CutRules (CompiledExpr _ rules)) = rules
 
 -- TODO remove once no longer needed (parser should find fns)
 rulesByName :: CutState -> CutExpr -> String -> Rules ExprPath
@@ -108,7 +106,7 @@ rLit s@(_, cfg, ref, ids) expr = do
 
 -- TODO take the path, not the expression?
 aLit :: CutConfig -> Locks -> HashedSeqIDsRef -> CutExpr -> CutPath -> Action ()
-aLit cfg ref ids expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
+aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
@@ -157,7 +155,7 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> CutPath -> Action ()
-aListLits cfg ref ids paths outPath = do
+aListLits cfg ref _ paths outPath = do
   -- need paths'
   lits <- mapM (readLit cfg ref) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
@@ -182,7 +180,7 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 -- works on everything but lits: paths or empty lists
 aListPaths :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> CutPath -> Action ()
-aListPaths cfg ref ids paths outPath = do
+aListPaths cfg ref _ paths outPath = do
   debugNeed cfg "aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   debugNeed cfg "aListPaths" paths''
@@ -213,7 +211,7 @@ rVar (_, cfg, ref, ids) var expr oPath = do
     vPath' = debugRules cfg "rVar" var $ fromCutPath cfg vPath
 
 aVar :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
-aVar cfg ref ids vPath oPath = do
+aVar cfg ref _ vPath oPath = do
   alwaysRerun
   debugNeed cfg "aVar" [oPath']
   withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
@@ -450,23 +448,16 @@ aSimpleScriptPar :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath
 aSimpleScriptPar = aSimpleScript' True True
 
 aSimpleScript' :: Bool -> Bool -> String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
-aSimpleScript' par fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
+aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
   where
     -- TODO is tmpDir used here at all? should it be?
     -- TODO match []?
     actFn c r _ t (o:is) = let o'  = fromCutPath c o -- TODO better var names here
                                t'  = fromCutPath c t
                                is' = map (fromCutPath c) is
-                           in wrappedCmdWrite par fixEmpties c r o' is' [] [Cwd t'] script (o':is')
---     actFn c t (o:as) = let o' = (let r = fromCutPath c o
---                                  in debug c ("actFn o': '" ++ r ++ "'") r)
---                            ins' = map (fromCutPath c) as
---                        in (let s' = debug c ("actFn script: '" ++ script ++ "'") script
--- --                            wrappedCmdWrite c lockPath inPaths outPaths opts bin args = do -- TODO why the "failed to build" errors?
---                            in wrappedCmdWrite cfg o' ins' [o'] [] s' (o':ins'))
+                           in wrappedCmdWrite parCmd fixEmpties c r o' is' [] [Cwd t'] script (o':is')
+    actFn _ _ _ _ _ = error "bad argument to aSimpleScript actFn"
 aSimpleScript' _ _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
-
--- TODO rSimpleScriptTmp?
 
 rSimple' :: Maybe String
          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())

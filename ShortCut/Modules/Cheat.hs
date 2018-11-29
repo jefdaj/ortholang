@@ -50,6 +50,8 @@ cheat :: CutFunction
 cheat = CutFunction
   { fName      = "cheat"
   , fTypeCheck = cheatTypeCheck
+  , fDesc      = Nothing
+  , fTypeDesc  = "cheat : ??? (implement this)"
   , fFixity    = Prefix
   , fRules  = rCheat
   }

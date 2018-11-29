@@ -30,6 +30,7 @@ mangleExpr fn (CutRef  t n vs v      ) = CutRef  t n (map fn vs)   (fn v)
 mangleExpr fn (CutBop  t n vs s e1 e2) = CutBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
 mangleExpr fn (CutFun  t n vs s es   ) = CutFun  t n (map fn vs) s (map (mangleExpr fn) es)
 mangleExpr fn (CutList t n vs   es   ) = CutList t n (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr _ (CutRules _) = error "implement this!"
 
 mangleAssign :: (CutVar -> CutVar) -> CutAssign -> CutAssign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)

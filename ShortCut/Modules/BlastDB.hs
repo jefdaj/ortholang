@@ -476,14 +476,14 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, ids) (CutFun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
     -- faType = typeOf e
     tmpDir = makeblastdbCache cfg 
     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
-    act1 c r is = aMakeblastdbAll dbType c r ids tmpDir
+    act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
     expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
     -- expr'' = trace ("expr':" ++ show expr') expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e

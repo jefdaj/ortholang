@@ -65,6 +65,7 @@ module ShortCut.Core.Types
   where
 
 -- import Prelude hiding (print)
+import qualified Data.Map    as M
 import qualified Text.Parsec as P
 
 import ShortCut.Core.Locks (Locks, withReadLock)
@@ -74,7 +75,6 @@ import Development.Shake              (Rules, Action, Resource)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find)
-import Data.Map                       (Map(..))
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Text.Parsec                    (ParseError)
 import Development.Shake.FilePath (makeRelative)
@@ -342,7 +342,7 @@ operatorChars cfg = if cfgDebug cfg then chars' else chars
 
 -- we sanitize the input fasta files to prevent various bugs,
 -- then use this hash -> seqid map to put the original ids back at the end
-type HashedSeqIDs = Map String String
+type HashedSeqIDs = M.Map String String
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right

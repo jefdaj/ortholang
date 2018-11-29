@@ -4,13 +4,13 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Pretty (Pretty, pPrint, render)
 
 import Control.Applicative    ((<|>), many)
-import Control.Monad          (void, fail)
+import Control.Monad          (void)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
-import Text.Parsec            (getState, (<?>), getParserState, stateInput, try, parserTraced)
+import Debug.Trace            (traceM)
+import Text.Parsec            (getState, (<?>), try, parserTraced)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof)
-import Debug.Trace       (trace, traceM)
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do

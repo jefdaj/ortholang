@@ -52,8 +52,8 @@ import System.Path.NameManip  (guess_dotdot, absolute_path)
 import System.Posix           (getFileStatus, fileSize)
 import System.Posix.Files     (readSymbolicLink)
 import System.FilePath.Glob   (glob)
-import Data.Time.LocalTime (getZonedTime)
-import Data.Time.Format    (formatTime, defaultTimeLocale)
+-- import Data.Time.LocalTime (getZonedTime)
+-- import Data.Time.Format    (formatTime, defaultTimeLocale)
 import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
 
 ---------------
@@ -61,10 +61,11 @@ import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
 ---------------
 
 -- TODO put this in Util
-getTimeStamp :: IO String
-getTimeStamp = getZonedTime >>= return . formatTime defaultTimeLocale fmt
-  where
-    fmt = "[%Y-%m-%d %H:%M:%S %q]"
+-- TODO this works, but isn't used yet
+-- getTimeStamp :: IO String
+-- getTimeStamp = getZonedTime >>= return . formatTime defaultTimeLocale fmt
+--   where
+--     fmt = "[%Y-%m-%d %H:%M:%S %q]"
 
 -- TODO should this go in Util too?
 -- TODO remove if you can figure out a way to put stamps in regular debug

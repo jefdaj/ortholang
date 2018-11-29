@@ -142,7 +142,7 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' <.> extOf eType
 aVecArgs :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
          -> CutType -> [FilePath] -> FilePath -> CutPath
          -> Action ()
-aVecArgs cfg ref ids mapIndex eType regularArgs' tmp' mappedArg = do
+aVecArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
   let mappedArg' = fromCutPath cfg mappedArg
       argsPath   = eachPath cfg tmp' eType mappedArg' <.> "args"
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?

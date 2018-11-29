@@ -135,7 +135,10 @@ aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
   aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
 aPsiblastDb' _ _ _ _ _ _ = error "bad argument to aPsiblastDb'"
 
-aPsiblastTrainDb'  = aPsiblastDb' True  trainingArgs
+aPsiblastTrainDb' :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
+
+aPsiblastSearchDb' :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or

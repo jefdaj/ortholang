@@ -10,7 +10,7 @@ module ShortCut.Modules.Plots where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Actions (withBinHash)
-import ShortCut.Core.Paths (CutPath, exprPath, toCutPath, fromCutPath, cacheDir)
+import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript)
 -- import System.Directory (createDirectoryIfMissing)
 -- import System.FilePath  ((</>), (<.>))
@@ -46,7 +46,7 @@ varName st expr = rLit st $ CutLit str 0 $ case expr of
 
 -- Like varName, but for a list of names
 varNames :: CutState -> CutExpr -> Rules ExprPath
-varNames st expr = undefined
+varNames _ expr = undefined lits -- TODO implement this
   where
     lits = CutLit str 0 $ case expr of
              (CutRef _ _ _ (CutVar name)) -> name
@@ -153,10 +153,12 @@ depRepeatVarName st expr = rLit st $ CutLit str 0 $ case expr of
 -- plot X.scores --
 -------------------
 
+bargraph :: CutFunction
 bargraph = undefined
 
 ----------------------
 -- plot X.list.list --
 ----------------------
 
+venndiagram :: CutFunction
 venndiagram = undefined
