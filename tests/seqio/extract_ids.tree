@@ -8,8 +8,10 @@
 |   |       |-- b3106ff9d5.str.list -> ../../../exprs/extract_ids/b3106ff9d5.str.list
 |   |       `-- b3106ff9d5.str.list.args -> ../../../cache/lines/...
 |   `-- load
-|       |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
-|       `-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|       |-- 6ea57f1208.fna
+|       |-- 6ea57f1208.fna.ids
+|       |-- 8a695c317a.faa
+|       `-- 8a695c317a.faa.ids
 |-- exprs
 |   |-- any
 |   |   |-- b9c67f5ccd.str.list.list -> ../../cache/lines/...
@@ -49,4 +51,4 @@
     |-- singleFaa.str.list -> ../exprs/extract_ids/6e8bd8b7c6.str.list
     `-- singleFna.str.list -> ../exprs/extract_ids/8df2fbb1a8.str.list
 
-14 directories, 35 files
+14 directories, 37 files

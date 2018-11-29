@@ -10,9 +10,12 @@
 |   |       |-- d67a110ed4.bht -> ../../../exprs/psiblast_db/d08318db81_ee63720be0_d67a110ed4.bht
 |   |       `-- d67a110ed4.bht.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
-|   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
-|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- 82645ed6f6.faa
+|   |   |-- 82645ed6f6.faa.ids
+|   |   |-- 8aa4a9d2fc.faa
+|   |   |-- 8aa4a9d2fc.faa.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
 |   |-- makeblastdb
 |   |   |-- a1512fc008
 |   |   |   |-- a1512fc008.pdb.phr
@@ -55,4 +58,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../exprs/concat_bht/87717c62b0.bht
 
-19 directories, 36 files
+19 directories, 39 files

@@ -5,8 +5,10 @@
 |   |       |-- 65e9e47c08.str.list -> ../../../exprs/extract_queries/65e9e47c08.str.list
 |   |       `-- 65e9e47c08.str.list.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
-|   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|   |   |-- 8a695c317a.faa
+|   |   |-- 8a695c317a.faa.ids
+|   |   |-- 8aa4a9d2fc.faa
+|   |   `-- 8aa4a9d2fc.faa.ids
 |   `-- makeblastdb
 |       `-- a1512fc008
 |           |-- a1512fc008.pdb.phr
@@ -43,4 +45,4 @@
     |-- result -> ../exprs/any/8afe49670a.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/baffeec5f7.str.list
 
-17 directories, 26 files
+17 directories, 28 files

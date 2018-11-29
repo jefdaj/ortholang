@@ -79,13 +79,15 @@ writeHashedIDs cfg ref path ids = do
 -- unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
 
 -- hackier than the regex, but also faster
--- TODO fix bug where it removes the first char after each split! (quote or newline)
-unhashIDs :: HashedSeqIDs -> String -> String
-unhashIDs ids txt = before ++ concatMap replaceOne after
+-- TODO add a config setting for long or short IDs
+unhashIDs :: CutConfig -> HashedSeqIDs -> String -> String
+unhashIDs _ ids txt = before ++ concatMap replaceOne after
   where
     (before:after) = split "seqid:" txt
     replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
-                           in (fromJust $ M.lookup idAndTab ids) ++ rest
+                               origID  = fromJust $ M.lookup idAndTab ids
+                               shortID = head $ words origID
+                           in shortID ++ rest
 
 unhashIDsFile :: CutConfig -> Locks -> HashedSeqIDs -> CutPath -> CutPath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do
@@ -93,7 +95,7 @@ unhashIDsFile cfg ref ids inPath outPath = do
       outPath' = fromCutPath cfg outPath
   txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   -- let txt' = unhashIDs ids txt
-  let txt' = unhashIDs ids txt
+  let txt' = unhashIDs cfg ids txt
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt'
   debugTrackWrite cfg [outPath']
 

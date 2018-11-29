@@ -11,8 +11,10 @@
 |   |       |-- e51c741dc5.pdb -> ../../../exprs/makeblastdb_prot/e51c741dc5.pdb
 |   |       `-- e51c741dc5.pdb.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
-|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- 32841598b2.faa
+|   |   |-- 32841598b2.faa.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
 |   `-- makeblastdb
 |       `-- e00fb07ddb
 |           |-- e00fb07ddb.pdb.phr
@@ -60,4 +62,4 @@
     |-- result -> ../exprs/all/8c2786f33e.str.list
     `-- single.str.list -> ../exprs/extract_queries/b09bd7df49.str.list
 
-24 directories, 36 files
+24 directories, 38 files

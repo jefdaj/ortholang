@@ -72,12 +72,18 @@
 |   |       |-- 9e08b54850.str.list -> ../../../exprs/extract_queries/9e08b54850.str.list
 |   |       `-- 9e08b54850.str.list.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
-|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
-|   |   |-- 737dfdb34e.fna -> $WORKDIR/data/6803genes.fna
-|   |   |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
-|   |   |-- de2033f5c0.faa -> $WORKDIR/data/7942genes50.faa
-|   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
+|   |   |-- 0238b7dcea.fna
+|   |   |-- 0238b7dcea.fna.ids
+|   |   |-- 32841598b2.faa
+|   |   |-- 32841598b2.faa.ids
+|   |   |-- 737dfdb34e.fna
+|   |   |-- 737dfdb34e.fna.ids
+|   |   |-- a810086108.faa
+|   |   |-- a810086108.faa.ids
+|   |   |-- de2033f5c0.faa
+|   |   |-- de2033f5c0.faa.ids
+|   |   |-- ff08c7f09e.fna
+|   |   `-- ff08c7f09e.fna.ids
 |   `-- makeblastdb
 |       |-- b025a78684
 |       |   |-- b025a78684.pdb.phr
@@ -220,4 +226,4 @@
     |-- sfna1.fna -> ../exprs/load_fna/eb12539f1c.fna
     `-- sfna2.fna -> ../exprs/load_fna/f110b4b1c9.fna
 
-45 directories, 175 files
+45 directories, 181 files

@@ -11,8 +11,10 @@
 |   |       |-- 67ef4ead59.bht -> ../../../exprs/tblastn/ce1c174684_6b304f493c_67ef4ead59.bht
 |   |       `-- 67ef4ead59.bht.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
-|   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
+|   |   |-- 32841598b2.faa
+|   |   |-- 32841598b2.faa.ids
+|   |   |-- ff08c7f09e.fna
+|   |   `-- ff08c7f09e.fna.ids
 |   `-- makeblastdb
 |       `-- d24c42156b
 |           |-- d24c42156b.ndb.nhr
@@ -61,4 +63,4 @@
     |-- result -> ../exprs/all/d921d897be.str.list
     `-- single.str.list -> ../exprs/extract_queries/a9e460f873.str.list
 
-25 directories, 36 files
+25 directories, 38 files

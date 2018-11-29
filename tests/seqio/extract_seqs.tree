@@ -1,8 +1,10 @@
 .
 |-- cache
 |   `-- load
-|       |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
-|       `-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|       |-- 6ea57f1208.fna
+|       |-- 6ea57f1208.fna.ids
+|       |-- 8a695c317a.faa
+|       `-- 8a695c317a.faa.ids
 |-- exprs
 |   |-- any
 |   |   `-- 39a6737de6.str.list -> ../../cache/lines/...
@@ -41,4 +43,4 @@
     |-- fnaDiff.str.list -> ../exprs/diff/44c22a97d1.str.list
     `-- result -> ../exprs/any/39a6737de6.str.list
 
-12 directories, 29 files
+12 directories, 31 files

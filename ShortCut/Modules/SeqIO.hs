@@ -65,6 +65,7 @@ fna = CutType
 -- gbk_to_f*a(_each) --
 -----------------------
 
+-- TODO need to hash IDs afterward!
 gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
   { fName      = name
@@ -76,6 +77,7 @@ gbkToFaa = CutFunction
   where
     name = "gbk_to_faa"
 
+-- TODO need to hash IDs afterward!
 gbkToFaaEach :: CutFunction
 gbkToFaaEach = CutFunction
   { fName      = name
@@ -87,6 +89,7 @@ gbkToFaaEach = CutFunction
   where
     name = "gbk_to_faa_each"
 
+-- TODO need to hash IDs afterward!
 gbkToFna :: CutFunction
 gbkToFna = CutFunction
   { fName      = name
@@ -98,6 +101,7 @@ gbkToFna = CutFunction
   where
     name = "gbk_to_fna"
 
+-- TODO need to hash IDs afterward!
 gbkToFnaEach :: CutFunction
 gbkToFnaEach = CutFunction
   { fName      = name

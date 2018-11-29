@@ -1,7 +1,8 @@
 .
 |-- cache
 |   `-- load
-|       `-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|       |-- 8a695c317a.faa
+|       `-- 8a695c317a.faa.ids
 |-- exprs
 |   |-- any
 |   |   `-- 7fcf2bb2a7.faa.list -> ../../cache/lines/...
@@ -21,4 +22,4 @@
     |-- list2.faa.list -> ../exprs/list/92a442b0d4.faa.list
     `-- result -> ../exprs/length/10b40f299a.num
 
-9 directories, 12 files
+9 directories, 13 files
