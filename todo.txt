@@ -2,9 +2,10 @@ wednesday:
 
   sonicparanoid module
     x needs IDs sanitized first, probably
-    go straight to module, where ids will work
-    approx command: sonicparanoid -i <indir> -o <outdir> -sh <tmpdir> -m fast/default/etc. -noidx -d (if debug)
-    scaffolding
+    x scaffolding
+    x go straight to module, where ids will work
+    x approx command: sonicparanoid -i <indir> -o <outdir> -sh <tmpdir> -m fast/default/etc. -noidx -d (if debug)
+    outputs pairwise orthologs only; need to read them and make groups
 
   demo faster blast alternatives with cuts on laptop:
     diamond
@@ -17,6 +18,13 @@ wednesday:
     orthogroups            ::             any result -> str.list.list
     orthogroups_containing :: str.list -> any result -> str.list.list
     orthogroup_containing  :: str      -> any result -> str.list
+    the main thing to add today is probably interpretation of the results:
+      which genes appear in all sets and which don't?
+      which appear in at least N sets or are missing from N sets?
+      venn diagram of genes in common between sets
+      to get those, will need to extract from each format + do common munging on list of lists
+
+  fix plots too in general and start showing more of them
 
 sunday:
 
@@ -104,3 +112,9 @@ sunday:
         mmseqs_search_profile (with --iterations)?
 
     write tests
+
+bad bug!
+  eval leave_each_out [1,2,3,4,5]
+  then leave_each_out [1,2,3,4,5, 1e-45]
+  the second result will be wrong:
+  [[2, 3, 4, 5], [1, 3, 4, 5], [1, 2, 4, 5], [1, 2, 3, 5], [1, 2, 3, 4], [1, 2, 3, 4, 5]]

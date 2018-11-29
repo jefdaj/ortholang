@@ -1,0 +1,4 @@
+mycoplasma = load_faa_each (glob_files "data/Mycoplasma/*")
+mycosets   = leave_each_out mycoplasma
+orthologs  = orthofinder mycoplasma
+orthosets  = repeat_each orthologs mycoplasma mycosets
