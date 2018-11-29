@@ -26,6 +26,7 @@ import qualified ShortCut.Modules.Hmmer     as Hmmer
 import qualified ShortCut.Modules.OrthoFinder as OrthoFinder
 import qualified ShortCut.Modules.Diamond   as Diamond
 import qualified ShortCut.Modules.MMSeqs    as MMSeqs
+import qualified ShortCut.Modules.SonicParanoid as SonicParanoid
 
 modules :: [CutModule]
 modules =
@@ -53,4 +54,5 @@ modules =
   , OrthoFinder.cutModule
   , Diamond.cutModule
   , MMSeqs.cutModule
+  , SonicParanoid.cutModule
   ]

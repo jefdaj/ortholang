@@ -119,7 +119,8 @@ executable reference
                     ShortCut.Modules.Hmmer,
                     ShortCut.Modules.OrthoFinder,
                     ShortCut.Modules.Diamond,
-                    ShortCut.Modules.MMSeqs
+                    ShortCut.Modules.MMSeqs,
+                    ShortCut.Modules.SonicParanoid
   build-depends:    Command,
                     Glob,
                     MissingH,

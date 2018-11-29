@@ -86,6 +86,7 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 
 type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType)
 
+-- TODO can some of these be replaced by a numeric sensitivity arg?
 variants :: [DiamondBlastDesc]
 variants =
   [ ("blastp"                  , rDiamondFromFa, ["blastp"                    ], faa, faa )

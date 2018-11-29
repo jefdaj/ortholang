@@ -1,33 +1,22 @@
-tuesday:
-
-  sanitize fasta ids:
-    design/think it through
-    when loading fasta files:
-      replace seqids with hashes
-      create a hash -> seqid map for each fasta
-      write the map to a cache dir with the filename hash
-      add to a global map for putting them back later
-    when printing:
-      get the text to print same as now
-      then find and replace the hashes in it before actually printing
-    start by only undoing the hashes at the end, then move to every step if fast + easy
-    when making a named variable:
-      replace final symlink with read + write unhashed in vars/
-    make sure tests still pass except the trees will be different of course
-      x test before for comparison (fails on laptop already)
-      test after and make sure the same things still pass
-    steps to get there:
-      x add it to the CutState and fix all the resulting type errors, but don't use it yet
-      x read into it from aLoadHash without altering the files yet
-      x write it to multiple tmpfiles while creating it based on the relevant load hashes
-      x use it to put the IDs back when printing
-      use it to put the IDs back when writing named vars
-      see how the tests fared and fix any errors
+wednesday:
 
   sonicparanoid module
-    needs IDs sanitized first, probably
+    x needs IDs sanitized first, probably
+    go straight to module, where ids will work
+    approx command: sonicparanoid -i <indir> -o <outdir> -sh <tmpdir> -m fast/default/etc. -noidx -d (if debug)
     scaffolding
 
+  demo faster blast alternatives with cuts on laptop:
+    diamond
+      will it require _each variants? hold off for now
+    mmseqs2
+
+  orthogroup functions
+    common interface for: orthofinder, sonicparanoid, mmseqs2
+    how to make the types work? should the "orthogroups" fn just pull common info from any result?
+    orthogroups            ::             any result -> str.list.list
+    orthogroups_containing :: str.list -> any result -> str.list.list
+    orthogroup_containing  :: str      -> any result -> str.list
 
 sunday:
 
