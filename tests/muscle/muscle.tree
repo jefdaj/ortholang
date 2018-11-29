@@ -1,8 +1,10 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
-|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- 82645ed6f6.faa
+|   |   |-- 82645ed6f6.faa.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
 |   `-- makeblastdb
 |       `-- e00fb07ddb
 |           |-- e00fb07ddb.pdb.phr
@@ -37,4 +39,4 @@
     |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hits_aln.aln
 
-15 directories, 22 files
+15 directories, 24 files

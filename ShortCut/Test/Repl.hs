@@ -10,8 +10,8 @@ import Data.List                  (isPrefixOf)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
-import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM)
-import System.Directory           (createDirectoryIfMissing, removeFile, copyFile)
+import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM, HashedSeqIDsRef)
+import System.Directory           (createDirectoryIfMissing, removeFile)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -19,15 +19,15 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
-mkTestGroup ::  CutConfig -> Locks -> String
-            -> [CutConfig -> Locks -> IO TestTree] -> IO TestTree
-mkTestGroup cfg ref name trees = do
-  let trees' = mapM (\t -> t cfg ref) trees
+mkTestGroup ::  CutConfig -> Locks -> HashedSeqIDsRef -> String
+            -> [CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree] -> IO TestTree
+mkTestGroup cfg ref ids name trees = do
+  let trees' = mapM (\t -> t cfg ref ids) trees
   trees'' <- trees'
   return $ testGroup name trees''
 
-mkTests :: CutConfig -> Locks -> IO TestTree
-mkTests cfg ref = mkTestGroup cfg ref "mock REPL interaction"
+mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests cfg ref ids = mkTestGroup cfg ref ids "mock REPL interaction"
                 [goldenRepls, goldenReplTrees]
 
 -- TODO have to fix eLine before getting anything out of the repl at all!
@@ -50,12 +50,12 @@ mockPrompt handle stdinStr promptStr = do
 
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
-mockRepl :: [String] -> FilePath -> CutConfig -> Locks -> IO ()
-mockRepl stdinLines path cfg ref = do
+mockRepl :: [String] -> FilePath -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+mockRepl stdinLines path cfg ref ids = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
     -- putStrLn ("stdin: '" ++ unlines stdin ++ "'")
-    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref
+    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids
     -- putStrLn $ "stdout: '" ++ out ++ "'"
     return ()
   out <- readFile tmpPath
@@ -70,27 +70,27 @@ mockRepl stdinLines path cfg ref = do
 -- TODO 
 --
 -- TODO include goldenTree here too (should pass both at once)
-goldenRepl :: CutConfig -> Locks -> FilePath -> IO TestTree
-goldenRepl cfg ref goldenFile = do
+goldenRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
+goldenRepl cfg ref ids goldenFile = do
   txt <- readFileStrict ref goldenFile
   let name   = takeBaseName goldenFile
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       -- tstOut = cfgTmpDir cfg' ++ name ++ ".out"
       tstOut = cfgTmpDir cfg' <.> "out"
       stdin  = extractPrompted ">> " txt -- TODO pass the prompt here
-      action = mockRepl stdin tstOut cfg' ref
+      action = mockRepl stdin tstOut cfg' ref ids
   return $ goldenVsFile name goldenFile tstOut action
 
-goldenRepls :: CutConfig -> Locks -> IO TestTree
-goldenRepls cfg ref = do
+goldenRepls :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+goldenRepls cfg ref ids = do
   tDir  <- getDataFileName "tests/repl"
   golds <- findByExtension [".txt"] tDir
-  let tests = mapM (goldenRepl cfg ref) golds
+  let tests = mapM (goldenRepl cfg ref ids) golds
       group = testGroup "prints expected output"
   fmap group tests
 
-goldenReplTree :: CutConfig -> Locks -> FilePath -> IO TestTree
-goldenReplTree cfg ref ses = do
+goldenReplTree :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
+goldenReplTree cfg ref ids ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
@@ -100,16 +100,16 @@ goldenReplTree cfg ref ses = do
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
       cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
       action = do
-                 _ <- mockRepl stdin tmpOut cfg' ref
+                 _ <- mockRepl stdin tmpOut cfg' ref ids
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString name tree action
 
-goldenReplTrees :: CutConfig -> Locks -> IO TestTree
-goldenReplTrees cfg ref = do
+goldenReplTrees :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+goldenReplTrees cfg ref ids = do
   tDir  <- getDataFileName "tests/repl"
   txts  <- findByExtension [".txt"] tDir
-  let tests = mapM (goldenReplTree cfg ref) txts
+  let tests = mapM (goldenReplTree cfg ref ids) txts
       group = testGroup "creates expected tmpfiles"
   fmap group tests

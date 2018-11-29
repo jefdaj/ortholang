@@ -59,8 +59,8 @@ orthofinder = let name = "orthofinder" in CutFunction
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
 -- TODO what's diamond blast? do i need to add it?
-aOrthofinder :: CutConfig -> Locks -> [CutPath] -> Action ()
-aOrthofinder cfg ref [out, faListPath] = do
+aOrthofinder :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthofinder cfg ref _ [out, faListPath] = do
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
       resDir = tmpDir </> "result"
   unlessExists resDir $ do
@@ -84,7 +84,7 @@ aOrthofinder cfg ref [out, faListPath] = do
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
     out''       = debugA cfg "aOrthofinder" out' [out', faListPath']
-aOrthofinder _ _ args = error $ "bad argument to aOrthofinder: " ++ show args
+aOrthofinder _ _ _ args = error $ "bad argument to aOrthofinder: " ++ show args
 
 -----------------
 -- orthogroups --
@@ -115,8 +115,8 @@ readOrthogroups resDir = do
   let groups = map (words . drop 11) (lines txt)
   return groups
 
-writeOrthogroups :: CutConfig -> Locks -> CutPath -> [[String]] -> Action ()
-writeOrthogroups cfg ref out groups = do
+writeOrthogroups :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [[String]] -> Action ()
+writeOrthogroups cfg ref _ out groups = do
   paths <- forM groups $ \group -> do
     let path = cachedLinesPath cfg group
     writeLits cfg ref path group
@@ -125,12 +125,12 @@ writeOrthogroups cfg ref out groups = do
 
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
-aOrthogroups :: CutConfig -> Locks -> [CutPath] -> Action ()
-aOrthogroups cfg ref [out, ofrPath] = do
+aOrthogroups :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroups cfg ref ids [out, ofrPath] = do
   resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
   groups <- readOrthogroups resDir
-  writeOrthogroups cfg ref out groups
-aOrthogroups _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
+  writeOrthogroups cfg ref ids out groups
+aOrthogroups _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
 ---------------------------
 -- orthogroup_containing --
@@ -148,14 +148,14 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   , fRules     = rSimple aOrthogroupContaining
   }
 
-aOrthogroupContaining :: CutConfig -> Locks -> [CutPath] -> Action ()
-aOrthogroupContaining cfg ref [out, ofrPath, idPath] = do
+aOrthogroupContaining :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroupContaining cfg ref _ [out, ofrPath, idPath] = do
   geneId <- readLit cfg ref $ fromCutPath cfg idPath
   resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
   groups <- fmap (filter $ elem geneId) $ readOrthogroups resDir
   let group = if null groups then [] else head groups -- TODO check for more?
   writeLits cfg ref (fromCutPath cfg out) group
-aOrthogroupContaining _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ----------------------------
 -- orthogroups_containing --
@@ -175,10 +175,10 @@ orthogroupsContaining = let name = "orthogroups_containing" in CutFunction
 filterContainsOne :: Eq a => [a] -> [[a]] -> [[a]]
 filterContainsOne elems lists = filter (flip any elems . flip elem) lists
 
-aOrthogroupsContaining :: CutConfig -> Locks -> [CutPath] -> Action ()
-aOrthogroupsContaining cfg ref [out, ofrPath, idsPath] = do
+aOrthogroupsContaining :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroupsContaining cfg ref ids [out, ofrPath, idsPath] = do
   geneIds <- readLits cfg ref $ fromCutPath cfg idsPath
   resDir  <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
   groups  <- fmap (filterContainsOne geneIds) $ readOrthogroups resDir
-  writeOrthogroups cfg ref out groups
-aOrthogroupsContaining _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+  writeOrthogroups cfg ref ids out groups
+aOrthogroupsContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args

@@ -70,7 +70,7 @@ tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
 tMmseqsCreateDbAll name types = error $ name ++ " requires a list of fasta files, but got " ++ show types
 
 rMmseqsCreateDbAll :: RulesFn
-rMmseqsCreateDbAll s@(_, cfg, ref) e@(CutFun _ _ _ _ [fas]) = do
+rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out    = exprPath s e
       out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromCutPath cfg out
@@ -132,7 +132,7 @@ tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Righ
 tMmseqsSearchDb n types = error $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
 
 rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb st@(_, cfg, ref) e@(CutFun _ salt _ _ [n, q, s]) = do
+rMmseqsSearchDb st@(_, cfg, ref, _) e@(CutFun _ salt _ _ [n, q, s]) = do
   (ExprPath ePath) <- rExpr st n
   (ExprPath qPath) <- rExpr st $ CutFun mms salt (depsOf q) "mmseqs_createdb" [q]
   (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db

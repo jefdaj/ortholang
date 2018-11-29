@@ -4,9 +4,11 @@
 |   |   |-- 73939f983c.txt
 |   |   `-- 94f45cf82e.txt
 |   `-- load
-|       |-- 0238b7dcea.fna -> $TMPDIR/data/7942genes10.fna
+|       |-- 0238b7dcea.fna
+|       |-- 0238b7dcea.fna.ids
 |       |-- 4778463da6.list -> $TMPDIR/data/mini-genelists-fna.txt
-|       `-- 6ea57f1208.fna -> $TMPDIR/data/6803genes10.fna
+|       |-- 6ea57f1208.fna
+|       `-- 6ea57f1208.fna.ids
 |-- exprs
 |   |-- list
 |   |   `-- 65d237c234.fna.list -> ../../cache/lines/73939f983c.txt
@@ -19,4 +21,4 @@
 `-- vars
     `-- result -> ../exprs/list/65d237c234.fna.list
 
-8 directories, 11 files
+8 directories, 13 files

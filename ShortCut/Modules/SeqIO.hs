@@ -35,9 +35,9 @@ cutModule = CutModule
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-    ++ mkLoaders fna
-    ++ mkLoaders faa
-    ++ mkLoaders gbk
+    ++ mkLoaders True fna
+    ++ mkLoaders True faa
+    ++ mkLoaders False gbk
   }
 
 gbk :: CutType
@@ -65,6 +65,7 @@ fna = CutType
 -- gbk_to_f*a(_each) --
 -----------------------
 
+-- TODO need to hash IDs afterward!
 gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
   { fName      = name
@@ -76,6 +77,7 @@ gbkToFaa = CutFunction
   where
     name = "gbk_to_faa"
 
+-- TODO need to hash IDs afterward!
 gbkToFaaEach :: CutFunction
 gbkToFaaEach = CutFunction
   { fName      = name
@@ -87,6 +89,7 @@ gbkToFaaEach = CutFunction
   where
     name = "gbk_to_faa_each"
 
+-- TODO need to hash IDs afterward!
 gbkToFna :: CutFunction
 gbkToFna = CutFunction
   { fName      = name
@@ -98,6 +101,7 @@ gbkToFna = CutFunction
   where
     name = "gbk_to_fna"
 
+-- TODO need to hash IDs afterward!
 gbkToFnaEach :: CutFunction
 gbkToFnaEach = CutFunction
   { fName      = name
@@ -246,8 +250,8 @@ mkConcatEach cType = CutFunction
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
--- aConcat :: CutType -> CutConfig -> Locks -> [CutPath] -> Action ()
--- aConcat cType cfg ref [oPath, fsPath] = do
+-- aConcat :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+-- aConcat cType cfg ref ids [oPath, fsPath] = do
 --   fPaths <- readPaths cfg ref fs'
 --   let fPaths' = map (fromCutPath cfg) fPaths
 --   debugNeed cfg "aConcat" fPaths'
@@ -268,8 +272,8 @@ mkConcatEach cType = CutFunction
 -- aConcat _ _ _ _ = error "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
-aConcat :: CutType -> (CutConfig -> Locks -> [CutPath] -> Action ())
-aConcat cType cfg ref [outPath, inList] = do
+aConcat :: CutType -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aConcat cType cfg ref ids [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
   let tmpDir'   = cfgTmpDir cfg </> "cache" </> "concat"
@@ -283,16 +287,16 @@ aConcat cType cfg ref [outPath, inList] = do
   let inPaths' = map (fromCutPath cfg) inPaths
   debugNeed cfg "aConcat" inPaths'
   writeCachedLines cfg ref inList' inPaths'
-  aSimpleScriptNoFix "cat.py" cfg ref [ outPath
+  aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
                                       , toCutPath cfg inList'
                                       , toCutPath cfg emptyPath]
-aConcat _ _ _ _ = error "bad argument to aConcat"
+aConcat _ _ _ _ _ = error "bad argument to aConcat"
 
 -- writeCachedLines cfg ref outPath content = do
 
 -- TODO would it work to just directly creat a string and tack onto paths here?
--- aSimpleScript' :: Bool -> String -> (CutConfig -> Locks -> [CutPath] -> Action ())
--- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref out actFn Nothing ins
+-- aSimpleScript' :: Bool -> String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+-- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
 
 ------------------------
 -- split_fasta(_each) --
@@ -322,8 +326,8 @@ splitFastaEach faType = CutFunction
     ext  = extOf faType
     name = "split_" ++ ext ++ "_each"
 
-aSplit :: String -> String -> (CutConfig -> Locks -> [CutPath] -> Action ())
-aSplit name ext cfg ref [outPath, faPath] = do
+aSplit :: String -> String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aSplit name ext cfg ref _ [outPath, faPath] = do
   let faPath'   = fromCutPath cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
       tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
@@ -339,4 +343,4 @@ aSplit name ext cfg ref [outPath, faPath] = do
   out <- wrappedCmdOut False True cfg ref [faPath'] [] [] "split_fasta.py" args
   let loadPaths = map (toCutPath cfg) $ lines out
   writePaths cfg ref outPath'' loadPaths
-aSplit _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths
+aSplit _ _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths

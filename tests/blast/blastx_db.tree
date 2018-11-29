@@ -8,8 +8,10 @@
 |   |       |-- 58ea568aa7.bht -> ../../../exprs/blastx_db/ce1c174684_3d999d2434_58ea568aa7.bht
 |   |       `-- 58ea568aa7.bht.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
-|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |   |-- 0238b7dcea.fna
+|   |   |-- 0238b7dcea.fna.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
 |   `-- makeblastdb
 |       `-- e00fb07ddb
 |           |-- e00fb07ddb.pdb.phr
@@ -53,4 +55,4 @@
     |-- result -> ../exprs/all/782f523b0c.str.list
     `-- single.str.list -> ../exprs/extract_queries/ba961ef0a0.str.list
 
-21 directories, 32 files
+21 directories, 34 files

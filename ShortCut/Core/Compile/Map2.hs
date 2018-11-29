@@ -45,7 +45,7 @@ import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 --      might have to sort afterward, or is order automatically preserved?
 -- TODO make sure hashes match the single versions or there will be trouble?
 map1of1 :: CutType -> CutType -> Action1 -> Action1
-map1of1 inType outType act1 cfg locks out a1 = do
+map1of1 inType outType act1 cfg locks ids out a1 = do
   inPaths <- readStrings inType cfg locks $ fromCutPath cfg a1
   debugL cfg $ "map1of1 a1: " ++ show a1
   debugL cfg $ "map1of1 inPaths: " ++ show inPaths
@@ -54,7 +54,7 @@ map1of1 inType outType act1 cfg locks out a1 = do
   outPaths <- forM inPaths $ \i -> do
     let o = tmpDir </> digest [out, toCutPath cfg i] <.> extOf outType
     debugL cfg $ "map1of1 o: " ++ show o
-    act1 cfg locks (toCutPath cfg o) (toCutPath cfg i)
+    act1 cfg locks ids (toCutPath cfg o) (toCutPath cfg i)
     return o
   debugL cfg $ "map1of1 outPaths: " ++ show outPaths
   debugL cfg $ "map1of1 out: " ++ show out
@@ -83,7 +83,7 @@ mapCache cfg = cfgTmpDir cfg </> "cache" </> "map"
 --        map2of3 act3 a1 a2 a3 = mapBase a2 a1 a3 $ \a3' a1' a2' -> act3 a1' a2' a3'
 
 map2of3 :: CutType -> CutType -> Action3 -> Action3
-map2of3 inType outType act3 cfg locks out a1 a2 a3 = do
+map2of3 inType outType act3 cfg locks ids out a1 a2 a3 = do
   inPaths <- readStrings inType cfg locks $ fromCutPath cfg a2
   let tmpDir   = mapCache cfg
       outPaths = (flip map) inPaths $ \i ->
@@ -91,7 +91,7 @@ map2of3 inType outType act3 cfg locks out a1 a2 a3 = do
       ioPairs  = zip inPaths outPaths
   -- TODO can this be done with forP in parallel? have to only do one overall read lock on input
   -- might need to pass a list of already-locked files to skip locking inside?
-  forM_ ioPairs $ \(i,o) -> act3 cfg locks (toCutPath cfg o) a1 (toCutPath cfg i) a3
+  forM_ ioPairs $ \(i,o) -> act3 cfg locks ids (toCutPath cfg o) a1 (toCutPath cfg i) a3
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 -- TODO fix this
@@ -105,7 +105,7 @@ map3of3 :: CutType -> CutType -> Action3 -> Action3
 map3of3 = map3Base -- because it's already the 3rd
 
 map3Base :: CutType -> CutType -> Action3 -> Action3
-map3Base inType outType act3 cfg locks out a1 a2 a3 = do
+map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
   -- debugL cfg $ "map3Base arg paths: " ++ show [a1, a2, a3]
 
   -- this way breaks psiblast_db_each
@@ -126,7 +126,7 @@ map3Base inType outType act3 cfg locks out a1 a2 a3 = do
   -- TODO can this be done with forP in parallel? have to only do one overall read lock on input
   forM_ ioPairs $ \(i,o) -> do
     debugL cfg $ "map3Base input and output: " ++ show i ++ ", " ++ show o
-    act3 cfg locks (toCutPath cfg o) a1 a2 (toCutPath cfg i)
+    act3 cfg locks ids (toCutPath cfg o) a1 a2 (toCutPath cfg i)
   writeStrings outType cfg locks (fromCutPath cfg out) outPaths
 
 -- TODO match the single outpaths with exprPathExplicit! otherwise loooots of duplication
@@ -169,7 +169,7 @@ map3Base inType outType act3 cfg locks out a1 a2 a3 = do
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
 rFun1 :: Action1 -> RulesFn
-rFun1 act1 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1]) = do
+rFun1 act1 st@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [a1]) = do
   (ExprPath arg1') <- rExpr st a1
   let arg1   = toCutPath cfg arg1'
       oPath  = exprPath st expr
@@ -177,7 +177,7 @@ rFun1 act1 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1]) = do
   oPath' %> \_ -> do
     debugL cfg $ "rFun1 arg1: "  ++ show arg1
     debugL cfg $ "rFun1 oPath: " ++ show oPath
-    act1 cfg ref oPath arg1
+    act1 cfg ref ids oPath arg1
   return $ ExprPath oPath'
 rFun1 _ _ e = error $ "bad argument to rFun1: " ++ show e
 
@@ -185,7 +185,7 @@ rFun1 _ _ e = error $ "bad argument to rFun1: " ++ show e
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
 rFun3 :: Action3 -> RulesFn
-rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
+rFun3 act3 st@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
   (ExprPath arg1') <- rExpr st a1
   (ExprPath arg2') <- rExpr st a2
   (ExprPath arg3') <- rExpr st a3
@@ -199,7 +199,7 @@ rFun3 act3 st@(_, cfg, ref) expr@(CutFun _ _ _ _ [a1, a2, a3]) = do
     debugL cfg $ "rFun3 arg2: "  ++ show arg2
     debugL cfg $ "rFun3 arg3: "  ++ show arg3
     debugL cfg $ "rFun3 oPath: " ++ show oPath
-    act3 cfg ref oPath arg1 arg2 arg3
+    act3 cfg ref ids oPath arg1 arg2 arg3
   return $ ExprPath oPath'
 rFun3 _ _ e = error $ "bad argument to rFun3: " ++ show e
 

@@ -71,18 +71,18 @@ dRepeatEach = "repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list
 --      messing with it for now
 -- TODO can this be parallelized better?
 cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules ExprPath
-cRepeat (script,cfg,ref) resExpr subVar subExpr = do
+cRepeat (script, cfg, ref, ids) resExpr subVar subExpr = do
   let res  = (CutVar "result", resExpr)
       sub  = (subVar, subExpr)
       deps = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       -- TODO this should be very different right?
       pre  = digest $ map show $ res:sub:deps
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
-  (ResPath resPath) <- compileScript (scr',cfg,ref) (Just pre)
+  (ResPath resPath) <- compileScript (scr', cfg, ref, ids) (Just pre)
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
 rRepeatEach :: CutState -> CutExpr -> Rules ExprPath
-rRepeatEach s@(scr,cfg,ref) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
+rRepeatEach s@(scr, cfg, ref, _) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs

@@ -82,8 +82,8 @@ tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or
  - resolves one level of symlink, so we have to point directly to the input
  - files rather than to the canonical $TMPDIR/cache/load... paths.
  -}
-aBlastCRB :: CutConfig -> Locks -> CutPath -> [CutPath] -> Action ()
-aBlastCRB cfg ref tmpDir [o, q, t] = do
+aBlastCRB :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ()
+aBlastCRB cfg ref _ tmpDir [o, q, t] = do
   debugNeed cfg "aBlastCRB" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
@@ -111,4 +111,4 @@ aBlastCRB cfg ref tmpDir [o, q, t] = do
     tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t
-aBlastCRB _ _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
+aBlastCRB _ _ _ _ args = error $ "bad argument to aBlastCRB: " ++ show args

@@ -6,7 +6,7 @@ module ShortCut.Test
   where
 
 import Paths_ShortCut        (getDataFileName)
-import ShortCut.Core.Types   (CutConfig(..), Locks)
+import ShortCut.Core.Types   (CutConfig(..), Locks, HashedSeqIDsRef)
 import ShortCut.Test.Repl    (mkTestGroup)
 import System.Directory      (setCurrentDirectory)
 import System.Environment    (getEnv, setEnv)
@@ -25,8 +25,8 @@ import qualified ShortCut.Test.Scripts as S
 -- filtering is done according to the TASTY_PATTERN environment var.
 -- Gotcha: can't print the test pattern in place of "all tests"
 -- because then they all match, ruining the filter.
-mkTests :: CutConfig -> Locks -> IO TestTree
-mkTests cfg ref = setPtn >> mkTestGroup cfg ref "all tests" tests
+mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests cfg ref ids = setPtn >> mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [D.mkTests, P.mkTests, R.mkTests, S.mkTests]
     setPtn = case cfgTestPtn cfg of
@@ -44,8 +44,8 @@ mkTestConfig cfg dir = cfg
   -- , cfgReport  = Nothing
   }
 
-runTests :: CutConfig -> Locks -> IO ()
-runTests cfg ref = do
+runTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+runTests cfg ref ids = do
   tmpRootDir <- getEnv "TMPDIR" -- can't share /tmp on the Berkeley cluster!
   withTempDirectory tmpRootDir "shortcut" $ \tmpSubDir -> do
     wd <- getDataFileName ""
@@ -56,6 +56,6 @@ runTests cfg ref = do
     -- setEnv "TASTY_QUIET" "True"
     (_,_,_) <- readCreateProcessWithExitCode
       (shell $ unwords ["ln -s", wd </> "data", (tmpSubDir </> "data")]) ""
-    tests <- mkTests (mkTestConfig cfg tmpSubDir) ref
+    tests <- mkTests (mkTestConfig cfg tmpSubDir) ref ids
     -- setCurrentDirectory $ cfgWorkDir cfg
     defaultMain tests

@@ -30,6 +30,7 @@ import ShortCut.Core.Pretty (renderIO)
 import ShortCut.Core.Config (debug)
 
 import Control.Retry
+-- import qualified Data.Map as M
 
 import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (maybeToList)
@@ -38,10 +39,11 @@ import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 -- import ShortCut.Core.Locks            (withReadLock')
+import ShortCut.Core.Sanitize         (unhashIDs)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
--- import Data.IORef                     (IORef)
+import Data.IORef                     (readIORef)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -98,12 +100,12 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> CutConfig -> Locks -> CutType -> Rules ResPath -> IO ()
+eval :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> Rules ResPath -> IO ()
 
 -- TODO put this back once done debugging (duplicates everything annoyingly)
 -- eval hdl cfg ref rtype = retryIgnore . eval'
 
-eval hdl cfg ref rtype = retryIgnore . eval'
+eval hdl cfg ref ids rtype = retryIgnore . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program but the error will be visible.
@@ -129,18 +131,25 @@ eval hdl cfg ref rtype = retryIgnore . eval'
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
         res  <- prettyResult cfg ref rtype $ toCutPath cfg path
-        res' <- liftIO $ renderIO cfg res
+        ids' <- liftIO $ readIORef ids
+        -- liftIO $ putStrLn $ show ids'
+        -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids') ++ " keys)..."
+
+        -- TODO fix the bug that causes this to remove newlines after seqids:
+        res' <- fmap (unhashIDs cfg ids') $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
+
         liftIO $ hPutStrLn hdl res'
+        -- liftIO $ putStrLn $ "done rendering with unhashIDs"
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as,c,ref) = case lookup (CutVar "result") as of
+evalScript hdl s@(as, c, ref, ids) = case lookup (CutVar "result") as of
   Nothing  -> putStrLn "no result variable. that's not right!"
-  Just res -> eval hdl c ref (typeOf res) (compileScript s Nothing)
+  Just res -> eval hdl c ref ids (typeOf res) (compileScript s Nothing)
 
-evalFile :: Handle -> CutConfig -> Locks -> IO ()
-evalFile hdl cfg ref = case cfgScript cfg of
+evalFile :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+evalFile hdl cfg ref ids = case cfgScript cfg of
   Nothing  -> putStrLn "no script. that's not right!"
   Just scr -> do
-    s <- parseFileIO cfg ref scr -- TODO just take a CutState?
-    evalScript hdl (s,cfg,ref)
+    s <- parseFileIO cfg ref ids scr -- TODO just take a CutState?
+    evalScript hdl (s, cfg, ref, ids)

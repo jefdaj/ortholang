@@ -30,6 +30,7 @@ import Data.List                (isPrefixOf, isInfixOf, filter)
 import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (catMaybes)
+import Data.Map                 (empty)
 import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
@@ -48,21 +49,21 @@ import Control.Exception.Safe   -- (throwM)
 -- main interface --
 --------------------
 
-runRepl :: CutConfig -> Locks -> IO ()
+runRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> CutConfig -> Locks -> IO ()
-mkRepl promptFns hdl cfg ref = do
+       -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+mkRepl promptFns hdl cfg ref ids = do
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
   -- load initial script if any
   st <- case cfgScript cfg of
-          Nothing   -> return  ([],cfg,ref)
-          Just path -> cmdLoad ([],cfg,ref) hdl path
+          Nothing   -> return  ([], cfg, ref, ids)
+          Just path -> cmdLoad ([], cfg, ref, ids) hdl path
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
@@ -125,10 +126,10 @@ step st hdl line = case stripWhiteSpace line of
   statement -> runStatement st hdl statement
 
 runStatement :: CutState -> Handle -> String -> IO CutState
-runStatement st@(scr,cfg, ref) hdl line = case parseStatement st line of
+runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
   Left  e -> hPutStrLn hdl (show e) >> return st
   Right r -> do
-    let st' = (updateScript scr r, cfg, ref)
+    let st' = (updateScript scr r, cfg, ref, ids)
     when (isExpr st line) (evalScript hdl st')
     return st'
 
@@ -153,7 +154,7 @@ replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
 --------------------------
 
 runCmd :: CutState -> Handle -> String -> IO CutState
-runCmd st@(_,cfg,_) hdl line = case matches of
+runCmd st@(_, cfg, _, _) hdl line = case matches of
   [(_, fn)] -> fn st hdl $ stripWhiteSpace args
   []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
   _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
@@ -183,7 +184,7 @@ cmds cfg =
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
 cmdHelp :: CutState -> Handle -> String -> IO CutState
-cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
+cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
   where
     fHelp f = fTypeDesc f ++ case fDesc f of
                 Nothing -> ""
@@ -220,20 +221,20 @@ cmdHelp st@(_,cfg,_) hdl line = hPutStrLn hdl msg >> return st
 
 -- TODO this is totally duplicating code from putAssign; factor out
 cmdLoad :: CutState -> Handle -> String -> IO CutState
-cmdLoad st@(_,cfg,ref) hdl path = do
+cmdLoad st@(_, cfg, ref, ids) hdl path = do
   path' <- absolutize path
   dfe   <- doesFileExist path'
   if not dfe
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
       let cfg' = cfg { cfgScript = Just path' }
-      new <- parseFile cfg' ref path'
+      new <- parseFile cfg' ref ids path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> return (s, cfg', ref)
+        Right s -> return (s, cfg', ref, ids)
 
 cmdSave :: CutState -> Handle -> String -> IO CutState
-cmdSave st@(scr,_,_) hdl line = do
+cmdSave st@(scr, _, _, _) hdl line = do
   case words line of
     [path] -> saveScript scr path
     [var, path] -> case lookup (CutVar var) scr of
@@ -256,7 +257,7 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
 cmdDeps :: CutState -> Handle -> String -> IO CutState
-cmdDeps st@(scr, cfg, _) hdl var = do
+cmdDeps st@(scr, cfg, _, _) hdl var = do
   case lookup (CutVar var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
@@ -270,7 +271,7 @@ cmdDeps st@(scr, cfg, _) hdl var = do
   -- hPutStrLn hdl txt
 
 cmdRDeps :: CutState -> Handle -> String -> IO CutState
-cmdRDeps st@(scr, cfg, _) hdl var = do
+cmdRDeps st@(scr, cfg, _, _) hdl var = do
   let var' = CutVar var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
@@ -279,15 +280,15 @@ cmdRDeps st@(scr, cfg, _) hdl var = do
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: CutState -> Handle -> String -> IO CutState
-cmdDrop (_,cfg,ref) _ [] = return ([], cfg,ref)
-cmdDrop st@(scr,cfg,ref) hdl var = do
+cmdDrop (_, cfg, ref, ids) _ [] = return ([], cfg, ref, ids) -- TODO drop ids too?
+cmdDrop st@(scr, cfg, ref, ids) hdl var = do
   let v = CutVar var
   case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
-    Just _  -> return (delFromAL scr v, cfg, ref)
+    Just _  -> return (delFromAL scr v, cfg, ref, ids)
 
 cmdType :: CutState -> Handle -> String -> IO CutState
-cmdType st@(scr, cfg, _) hdl s = hPutStrLn hdl typeInfo >> return st
+cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
   where
     typeInfo = case stripWhiteSpace s of
       "" -> allTypes
@@ -312,8 +313,8 @@ showAssignType (CutVar v, e) = unwords [typedVar, "=", prettyExpr]
 
 -- TODO factor out the variable lookup stuff
 cmdShow :: CutState -> Handle -> String -> IO CutState
-cmdShow st@(s,c,_) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
-cmdShow st@(scr,cfg,_) hdl var = do
+cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
+cmdShow st@(scr, cfg, _, _) hdl var = do
   case lookup (CutVar var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
@@ -330,7 +331,7 @@ cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
 cmdConfig :: CutState -> Handle -> String -> IO CutState
-cmdConfig st@(scr,cfg,ref) hdl s = do
+cmdConfig st@(scr, cfg, ref, ids) hdl s = do
   let ws = words s
   if (length ws == 0)
     then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
@@ -340,7 +341,7 @@ cmdConfig st@(scr,cfg,ref) hdl s = do
         then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st
         else case setConfigField cfg (head ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
-               Right cfg' -> return (scr, cfg', ref)
+               Right cfg' -> return (scr, cfg', ref, ids)
 
 --------------------
 -- tab completion --
@@ -354,7 +355,7 @@ cmdConfig st@(scr,cfg,ref) hdl s = do
 -- TODO sort functions alphabetically
 
 listCompletions :: MonadIO m => CutState -> String -> m [Completion]
-listCompletions (scr,cfg,_) txt = do
+listCompletions (scr, cfg, _, _) txt = do
   files <- listFiles txt
   let misc = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
   return (files ++ misc)
@@ -373,7 +374,7 @@ myComplete s = completeQuotedWord (Just '\\') "\"'" (listCompletions s)
 -- This is separate from the CutConfig because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
 replSettings :: CutState -> Settings IO
-replSettings s@(_,cfg,_) = Settings
+replSettings s@(_, cfg, _, _) = Settings
   { complete       = myComplete s
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
   , autoAddHistory = True

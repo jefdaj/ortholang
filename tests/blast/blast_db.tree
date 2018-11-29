@@ -15,13 +15,20 @@
 |   |       |-- e9b730c3ee.str.list -> ../../../exprs/extract_queries/e9b730c3ee.str.list
 |   |       `-- e9b730c3ee.str.list.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
-|   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
-|   |   |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
-|   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
-|   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
-|   |   |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
-|   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
+|   |   |-- 0238b7dcea.fna
+|   |   |-- 0238b7dcea.fna.ids
+|   |   |-- 32841598b2.faa
+|   |   |-- 32841598b2.faa.ids
+|   |   |-- 6ea57f1208.fna
+|   |   |-- 6ea57f1208.fna.ids
+|   |   |-- 8a695c317a.faa
+|   |   |-- 8a695c317a.faa.ids
+|   |   |-- 8aa4a9d2fc.faa
+|   |   |-- 8aa4a9d2fc.faa.ids
+|   |   |-- a810086108.faa
+|   |   |-- a810086108.faa.ids
+|   |   |-- ff08c7f09e.fna
+|   |   `-- ff08c7f09e.fna.ids
 |   `-- makeblastdb
 |       |-- a1512fc008
 |       |   |-- a1512fc008.pdb.phr
@@ -101,4 +108,4 @@
     |-- small7942faa.faa -> ../exprs/load_faa/2d88028e40.faa
     `-- small7942fna.fna -> ../exprs/load_fna/82b637da24.fna
 
-23 directories, 78 files
+23 directories, 85 files

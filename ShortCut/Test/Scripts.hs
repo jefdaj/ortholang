@@ -11,7 +11,7 @@ import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
 import ShortCut.Core.Pretty       (writeScript)
-import ShortCut.Core.Types        (CutConfig(..))
+import ShortCut.Core.Types        (CutConfig(..), HashedSeqIDsRef)
 import ShortCut.Core.Locks        (Locks, withWriteLock)
 import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
@@ -45,14 +45,14 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     -- this is taken from the Tasty docs
     fn ref new = ["diff", "-u", ref, new]
 
-mkOutTest :: CutConfig -> Locks -> FilePath -> TestTree
-mkOutTest cfg ref gld = goldenDiff "prints expected output" gld scriptAct
+mkOutTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
+mkOutTest cfg ref ids gld = goldenDiff "prints expected output" gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
-    scriptAct = runCut cfg ref >>= return . pack -- . toGeneric cfg
+    scriptAct = runCut cfg ref ids >>= return . pack -- . toGeneric cfg
 
-mkTreeTest :: CutConfig -> Locks -> FilePath -> TestTree
-mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
+mkTreeTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
+mkTreeTest cfg ref ids t = goldenDiff "creates expected tmpfiles" t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
@@ -60,69 +60,69 @@ mkTreeTest cfg ref t = goldenDiff "creates expected tmpfiles" t treeAct
     treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|lines' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
-      _ <- runCut cfg ref
+      _ <- runCut cfg ref ids
       out <- readCreateProcess treeCmd ""
       -- sometimes useful for debugging tests:
       -- writeFile "/tmp/latest.txt" out
       return $ pack $ toGeneric cfg out
 
 -- TODO use safe writes here
-mkTripTest :: CutConfig -> Locks -> TestTree
-mkTripTest cfg ref = goldenDiff "unchanged by round-trip to file" tripShow tripAct
+mkTripTest :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
+mkTripTest cfg ref ids = goldenDiff "unchanged by round-trip to file" tripShow tripAct
   where
     tripCut   = cfgTmpDir cfg <.> "cut"
     tripShow  = cfgTmpDir cfg <.> "show"
     tripSetup = do
-      scr1 <- parseFileIO cfg ref $ fromJust $ cfgScript cfg
+      scr1 <- parseFileIO cfg ref ids $ fromJust $ cfgScript cfg
       writeScript tripCut scr1
       withWriteLock ref tripShow $ writeFile tripShow $ show scr1
     -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
-      scr2 <- parseFileIO cfg ref tripCut
+      scr2 <- parseFileIO cfg ref ids tripCut
       return $ pack $ show scr2
 
 -- test that no absolute paths snuck into the tmpfiles
-mkAbsTest :: CutConfig -> Locks -> IO [TestTree]
-mkAbsTest cfg ref = testSpecs $ it "tmpfiles free of absolute paths" $
+mkAbsTest :: CutConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
+mkAbsTest cfg ref ids = testSpecs $ it "tmpfiles free of absolute paths" $
   absGrep `shouldReturn` ""
   where
     absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
     absGrep = do
-      _ <- runCut cfg ref
+      _ <- runCut cfg ref ids
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
       return $ toGeneric cfg $ out ++ err
 
-runCut :: CutConfig -> Locks -> IO String
-runCut cfg ref =  do
+runCut :: CutConfig -> Locks -> HashedSeqIDsRef -> IO String
+runCut cfg ref ids =  do
   delay 1000000 -- wait 1 second so we don't capture output from tasty
-  (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref
+  (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, (Maybe FilePath))
-              -> CutConfig -> Locks -> IO TestTree
-mkScriptTests (cut, gld, mtre) cfg ref = do
-  absTests <- mkAbsTest cfg' ref -- just one, but comes as a list
+              -> CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkScriptTests (cut, gld, mtre) cfg ref ids = do
+  absTests <- mkAbsTest cfg' ref ids -- just one, but comes as a list
   return $ testGroup name $ otherTests ++ absTests
   where
     name       = takeBaseName cut
     cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
-    otherTests = [mkTripTest cfg' ref, mkOutTest cfg' ref gld] ++ genTests
+    otherTests = [mkTripTest cfg' ref ids, mkOutTest cfg' ref ids gld] ++ genTests
     genTests   = case mtre of
-                   Just t  -> [mkTreeTest cfg' ref t]
+                   Just t  -> [mkTreeTest cfg' ref ids t]
                    Nothing -> []
 
-mkTests :: CutConfig -> Locks -> IO TestTree
-mkTests cfg ref = do
+mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests cfg ref ids = do
   cuts <- getTestCuts
   let outs     = map findOutFile  cuts
       mtrees   = map findTreeFile cuts
       triples  = zip3 cuts outs mtrees
       groups   = map mkScriptTests triples
-  mkTestGroup cfg ref "interpret test scripts" groups
+  mkTestGroup cfg ref ids "interpret test scripts" groups
   where
     findOutFile  c = replaceExtension c "out"
     findTreeFile c = if nonDeterministicCut c

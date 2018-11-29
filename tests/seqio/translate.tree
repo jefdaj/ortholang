@@ -5,7 +5,8 @@
 |   |       |-- f162cc899d.faa -> ../../../exprs/translate/f162cc899d.faa
 |   |       `-- f162cc899d.faa.args -> ../../../cache/lines/...
 |   `-- load
-|       `-- 737dfdb34e.fna -> $WORKDIR/data/6803genes.fna
+|       |-- 737dfdb34e.fna
+|       `-- 737dfdb34e.fna.ids
 |-- exprs
 |   |-- any
 |   |   `-- 7f0a05b036.faa.list -> ../../cache/lines/...
@@ -28,4 +29,4 @@
     |-- result -> ../exprs/any/7f0a05b036.faa.list
     `-- single.faa -> ../exprs/translate/fddf135b43.faa
 
-12 directories, 16 files
+12 directories, 17 files

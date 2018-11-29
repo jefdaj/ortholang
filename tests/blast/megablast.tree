@@ -11,8 +11,10 @@
 |   |       |-- 4d8b00f718.str.list -> ../../../exprs/extract_queries/4d8b00f718.str.list
 |   |       `-- 4d8b00f718.str.list.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 0238b7dcea.fna -> $WORKDIR/data/7942genes10.fna
-|   |   `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
+|   |   |-- 0238b7dcea.fna
+|   |   |-- 0238b7dcea.fna.ids
+|   |   |-- ff08c7f09e.fna
+|   |   `-- ff08c7f09e.fna.ids
 |   `-- makeblastdb
 |       `-- d24c42156b
 |           |-- d24c42156b.ndb.nhr
@@ -58,4 +60,4 @@
     |-- result -> ../exprs/any/75fb36c62c.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/abf61cfcc9.str.list
 
-23 directories, 35 files
+23 directories, 37 files

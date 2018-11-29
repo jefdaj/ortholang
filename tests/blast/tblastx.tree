@@ -1,8 +1,10 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 597257619d.fna -> $WORKDIR/data/7942genome.fna
-|   |   `-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|   |   |-- 597257619d.fna
+|   |   |-- 597257619d.fna.ids
+|   |   |-- 6ea57f1208.fna
+|   |   `-- 6ea57f1208.fna.ids
 |   `-- makeblastdb
 |       `-- 8c1aa61169
 |           |-- 8c1aa61169.ndb.nhr
@@ -91,4 +93,4 @@
     |-- result.e4f4ccff39.str.list -> ../vars/hits6803.e4f4ccff39.str.list
     `-- result.ef22f5255f.str.list -> ../vars/hits6803.ef22f5255f.str.list
 
-15 directories, 76 files
+15 directories, 78 files
