@@ -125,7 +125,6 @@ executable shortcut
                     ShortCut.Core.Sanitize,
                     ShortCut.Core.Types,
                     ShortCut.Core.Util,
-                    ShortCut.Docs,
                     ShortCut.Modules,
                     ShortCut.Modules.BioMartR,
                     ShortCut.Modules.Blast,
@@ -153,6 +152,7 @@ executable shortcut
                     ShortCut.Modules.Sets,
                     ShortCut.Modules.SonicParanoid,
                     ShortCut.Modules.Summarize,
+                    ShortCut.Reference,
                     ShortCut.Test,
                     ShortCut.Test.Deps
                     ShortCut.Test.Parse,

@@ -28,7 +28,7 @@ main = do
     (exitWithUsage usage)
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
-  when (hasArg args "docs")
+  when (hasArg args "reference")
     (writeReference >> exitSuccess)
   cfg <- loadConfig modules args
   ref <- initLocks
