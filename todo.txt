@@ -20,7 +20,7 @@ tuesday:
       x add it to the CutState and fix all the resulting type errors, but don't use it yet
       x read into it from aLoadHash without altering the files yet
       x write it to multiple tmpfiles while creating it based on the relevant load hashes
-      use it to put the IDs back when printing
+      x use it to put the IDs back when printing
       use it to put the IDs back when writing named vars
       see how the tests fared and fix any errors
 

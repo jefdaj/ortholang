@@ -30,7 +30,7 @@ import ShortCut.Core.Pretty (renderIO)
 import ShortCut.Core.Config (debug)
 
 import Control.Retry
-import qualified Data.Map as M
+-- import qualified Data.Map as M
 
 import Control.Exception.Enclosed     (catchAny)
 import Data.Maybe                     (maybeToList)
@@ -133,8 +133,13 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
         res  <- prettyResult cfg ref rtype $ toCutPath cfg path
         ids' <- liftIO $ readIORef ids
         -- liftIO $ putStrLn $ show ids'
-        res' <- fmap (unhashIDs ids') $ liftIO $ renderIO cfg res
+        -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids') ++ " keys)..."
+
+        -- TODO fix the bug that causes this to remove newlines after seqids:
+        res' <- fmap (unhashIDs ids') $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
+
         liftIO $ hPutStrLn hdl res'
+        -- liftIO $ putStrLn $ "done rendering with unhashIDs"
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()

@@ -1,4 +1,4 @@
--- Once text has been parsed into an abstract syntax tree (Parse.hs), this
+
 -- module "compiles" it by translating it into a set of Shake build rules. To
 -- actually run the rules, use `eval` in the Interpret module.
 
@@ -39,9 +39,9 @@ import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists, unlessExists)
-import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs)
+import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, unhashIDsFile, readHashedIDs)
 import System.FilePath            (takeExtension, dropExtension)
-import Data.IORef                 (atomicModifyIORef)
+import Data.IORef                 (readIORef, atomicModifyIORef)
 
 
 debug :: CutConfig -> String -> a -> a
@@ -217,7 +217,11 @@ aVar cfg ref ids vPath oPath = do
   alwaysRerun
   debugNeed cfg "aVar" [oPath']
   withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
+  -- TODO should it sometimes symlink and sometimes copy?
+  -- TODO before copying, think about how you might have to re-hash again!
   symlink cfg ref vPath'' oPath
+  -- ids' <- liftIO $ readIORef ids
+  -- unhashIDsFile cfg ref ids' oPath vPath''
   where
     oPath'  = fromCutPath cfg oPath
     vPath'  = fromCutPath cfg vPath
@@ -299,18 +303,32 @@ rLoad _ _ _ = error "bad argument to rLoad"
 
 aLoadHash :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
 aLoadHash hashSeqIDs cfg ref ids src ext = do
+  alwaysRerun
+  -- liftIO $ putStrLn $ "running aLoadHash"
   debugNeed cfg "aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toCutPath cfg hashPath'
-  if hashSeqIDs
-    then unlessExists hashPath' $ do
-      newIDs <- hashIDsFile cfg ref src hashPath
-      writeHashedIDs cfg ref (toCutPath cfg $ hashPath' <.> "ids") newIDs
-      liftIO $ atomicModifyIORef ids $ \is -> (M.union is newIDs, ())
-    else
-      symlink cfg ref hashPath src
+  if not hashSeqIDs
+    then symlink cfg ref hashPath src
+    else do
+      let idsPath' = hashPath' <.> "ids"
+          idsPath  = toCutPath cfg idsPath'
+      done <- doesFileExist idsPath'
+      newIDs <- if done
+        then do 
+          -- liftIO $ putStrLn "reading previously hashed ids"
+          readHashedIDs cfg ref idsPath
+        else do
+          -- liftIO $ putStrLn "hashing ids for the first time"
+          newIDs <- hashIDsFile cfg ref src hashPath
+          writeHashedIDs cfg ref idsPath newIDs
+          return newIDs
+      liftIO $ atomicModifyIORef ids $ \is -> (M.union newIDs is, ())
+  -- ids' <- liftIO $ readIORef ids
+  -- liftIO $ putStrLn $ "total is now " ++ show (length $ M.keys ids') ++ " ids"
+  -- liftIO $ putStrLn $ show $ M.keys ids'
   return hashPath
   where
     src' = fromCutPath cfg src

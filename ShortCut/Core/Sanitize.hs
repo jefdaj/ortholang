@@ -1,8 +1,10 @@
 module ShortCut.Core.Sanitize
   ( hashIDsFile
   , writeHashedIDs
+  -- , unhashIDs
   , unhashIDs
   , unhashIDsFile
+  , readHashedIDs
   )
   where
 
@@ -18,24 +20,26 @@ module ShortCut.Core.Sanitize
 -- import Debug.Trace
 import qualified Data.DList as D
 import qualified Data.Map   as M
-import qualified Text.Regex as R
+-- import qualified Text.Regex as R
 
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Util    (digest)
+import ShortCut.Core.Util    (digest, digestLength)
 import ShortCut.Core.Locks   (withReadLock', withWriteLock')
 import ShortCut.Core.Actions (debugTrackWrite)
 import ShortCut.Core.Paths   (fromCutPath)
+import Data.List.Utils       (split)
+import Data.Maybe (fromJust)
 
 type HashedSeqIDList = D.DList (String, String)
 
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
 hashIDsLine :: String -> (String, HashedSeqIDList)
-hashIDsLine ('>':seqID) = (">" ++ idHash, D.singleton (idHash, seqID))
+hashIDsLine ('>':seqID) = (">seqid:" ++ idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
   where
-    idHash = "id:" ++ digest seqID
+    idHash = digest seqID
 hashIDsLine txt = (txt, D.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
@@ -58,26 +62,46 @@ hashIDsFile cfg ref inPath outPath = do
   return ids
 
 writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedSeqIDs -> Action ()
-writeHashedIDs cfg ref path ids
-  = withWriteLock' ref path'
-  $ liftIO
-  $ writeFile path'
-  $ unlines
-  $ map toLine
-  $ M.toList ids
+writeHashedIDs cfg ref path ids = do
+  withWriteLock' ref path'
+    $ liftIO
+    $ writeFile path'
+    $ unlines
+    $ map toLine
+    $ M.toList ids
+  debugTrackWrite cfg [path']
   where
     path' = fromCutPath cfg path
     toLine (h, i) = h ++ "\t" ++ i
 
 -- see https://stackoverflow.com/q/48571481
+-- unhashIDs :: HashedSeqIDs -> String -> String
+-- unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
+
+-- hackier than the regex, but also faster
+-- TODO fix bug where it removes the first char after each split! (quote or newline)
 unhashIDs :: HashedSeqIDs -> String -> String
-unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
+unhashIDs ids txt = before ++ concatMap replaceOne after
+  where
+    (before:after) = split "seqid:" txt
+    replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
+                           in (fromJust $ M.lookup idAndTab ids) ++ rest
 
 unhashIDsFile :: CutConfig -> Locks -> HashedSeqIDs -> CutPath -> CutPath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
   txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  -- let txt' = unhashIDs ids txt
   let txt' = unhashIDs ids txt
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt'
   debugTrackWrite cfg [outPath']
+
+-- TODO should this be IO or Action?
+readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedSeqIDs
+readHashedIDs cfg ref path = do
+  let path' = fromCutPath cfg path
+  txt <- withReadLock' ref path' $ readFile' path'
+  let ids = map (\(i, si) -> (i, tail si)) $ map (splitAt digestLength) $ lines txt
+  -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
+  return $ M.fromList ids
