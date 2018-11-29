@@ -1,32 +1,10 @@
-module Main where
+module ShortCut.Reference where
 
--- import Paths_ShortCut        (version)
--- import ShortCut.Core         (runRepl, evalFile)
 import ShortCut.Core.Types
+
+import Data.List.Split  (splitOn)
+import Data.List.Utils  (join)
 import ShortCut.Modules (modules)
--- import Data.Maybe (fromMaybe)
-import Data.List.Utils (join)
-import Data.List.Split (splitOn)
-
--- TODO should this generate markdown or html? markdown probably easier
-
--- generate reference page:
---   load config? or does it not matter?
---   cfgModules cfg -> list of modules
---   for each module:
---     first print the list with markdown sections
---     add a general description of the module here
-
---     for each type:
---       print its desc
---       later: iterate through listFunctions and try to find ones that take/accept it? (not if hard)
---       later: hyperlink to them if easy
-
---     for each function:
---       mFunctions mod -> fName etc to get info
---       later: write help for each one (just the important, confusing ones for now)
-
--- write short module descriptions for all of them
 
 explainType :: CutType -> String
 explainType Empty = error "explain empty type"
@@ -78,5 +56,5 @@ moduleReference m =
   ++ [""]
 
 -- TODO pick module order to print the reference nicely
-main :: IO ()
-main = writeFile "reference.md" $ unlines $ concatMap moduleReference modules
+writeReference :: IO ()
+writeReference = writeFile "reference.md" $ unlines $ concatMap moduleReference modules
