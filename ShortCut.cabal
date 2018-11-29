@@ -120,7 +120,8 @@ executable reference
                     ShortCut.Modules.OrthoFinder,
                     ShortCut.Modules.Diamond,
                     ShortCut.Modules.MMSeqs,
-                    ShortCut.Modules.SonicParanoid
+                    ShortCut.Modules.SonicParanoid,
+                    ShortCut.Modules.OrthoGroups
   build-depends:    Command,
                     Glob,
                     MissingH,
