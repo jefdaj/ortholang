@@ -20,13 +20,14 @@ module ShortCut.Core.Repl
   -- )
   where
 
+import qualified Data.Map as M
 import System.Console.Haskeline hiding (catch)
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
-import Data.List                (isPrefixOf, isInfixOf, filter)
+import Data.List                (isPrefixOf, isInfixOf, isSuffixOf, filter)
 import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (catMaybes)
@@ -44,7 +45,7 @@ import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
 import Control.Exception.Safe   -- (throwM)
 import System.Console.ANSI      (clearScreen, cursorUp)
--- import Data.IORef                     (IORef)
+import Data.IORef               (readIORef)
 
 --------------------
 -- main interface --
@@ -359,29 +360,32 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
 -- tab completion --
 --------------------
 
--- TODO decide when to complete files vs variables and stuff:
---      files only if inside quotation marks?
---      or if started with one of the file-related commands (:!, :write, etc.)
---      otherwise shortcut entities only?
+-- complete things in quotes: filenames, seqids
+quotedCompletions :: MonadIO m => CutState -> String -> m [Completion]
+quotedCompletions (_, _, _, idRef) wordSoFar = do
+  files  <- listFiles wordSoFar
+  seqIDs <- fmap (map $ head . words) $ fmap M.elems $ liftIO $ readIORef idRef
+  let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
+  return $ files ++ seqIDs'
 
--- TODO sort functions alphabetically
-
-listCompletions :: MonadIO m => CutState -> String -> m [Completion]
-listCompletions (scr, cfg, _, _) txt = do
-  files <- listFiles txt
-  let misc = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
-  return (files ++ misc)
+-- complete everything else: fn names, var names, :commands, types
+-- these can be filenames too, but only if the line starts with a :command
+nakedCompletions :: MonadIO m => CutState -> String -> String -> m [Completion]
+nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
+  files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
+  return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
   where
-    wordList = fnNames ++ varNames ++ cmdNames
+    wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
     varNames = map ((\(CutVar v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
+    typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 
 -- this is mostly lifted from Haskeline's completeFile
 myComplete :: MonadIO m => CutState -> CompletionFunc m
-myComplete s = completeQuotedWord (Just '\\') "\"'" (listCompletions s)
-             $ completeWord (Just '\\') ("\"\'" ++ filenameWordBreakChars)
-                            (listCompletions s)
+myComplete s = completeQuotedWord   (Just '\\') "\"'" (quotedCompletions s)
+             $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
+                                    (nakedCompletions s)
 
 -- This is separate from the CutConfig because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
