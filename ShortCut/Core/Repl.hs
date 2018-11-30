@@ -43,11 +43,15 @@ import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
 import Control.Exception.Safe   -- (throwM)
+import System.Console.ANSI      (clearScreen, cursorUp)
 -- import Data.IORef                     (IORef)
 
 --------------------
 -- main interface --
 --------------------
+
+reallyClearScreen :: IO ()
+reallyClearScreen = clearScreen >> cursorUp 1000
 
 runRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
@@ -57,6 +61,7 @@ runRepl = mkRepl (repeat prompt) stdout
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
        -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids = do
+  reallyClearScreen
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
@@ -67,6 +72,13 @@ mkRepl promptFns hdl cfg ref ids = do
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
+
+shortCutPrompt :: String
+-- shortCutPrompt = "--‣ "
+-- shortCutPrompt = "❱❱❱ "
+-- shortCutPrompt = "--❱ "
+-- shortCutPrompt = "⋺  "
+shortCutPrompt = ">>> "
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -92,7 +104,7 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 -- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
 loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
-  Just line <- promptFn ">> " -- TODO can this fail?
+  Just line <- promptFn shortCutPrompt -- TODO can this fail?
   st  <- get
   st' <- liftIO $ try $ step st hdl line
   case st' of
