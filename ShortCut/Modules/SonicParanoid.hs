@@ -53,18 +53,20 @@ sonicparanoid = let name = "sonicparanoid" in CutFunction
 aSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
-  let tmpDir      = cfgTmpDir cfg </> "cache" </> "sonicparanoid" </> digest faListPath
-      inDir       = tmpDir </> "input"
-      sharedDir   = tmpDir </> "shared"
-      mmseqsDir   = sharedDir </> "mmseqs2_db"
-      outDir      = tmpDir </> "result"
-      opPath'     = outDir </> "ortholog_relations" </> "ortholog_pairs.tsv"
+  let cacheDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
+      sharedDir   = cacheDir </> "shared"
+      tmpDir      = cacheDir </> digest faListPath
+      -- mmseqsDir   = sharedDir </> "mmseqs2_db"
+      dbDir       = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
+      -- outDir      = tmpDir </> "result" -- TODO copy input files here?
+      inDir       = tmpDir </> "input_links" -- TODO can you prevent it duplicating this to input?
+      opPath'     = tmpDir </> "ortholog_relations" </> "ortholog_pairs.tsv"
       opPath      = toCutPath cfg opPath'
       faListPath' = fromCutPath cfg faListPath
       out'        = fromCutPath cfg out
       out''       = debugA cfg "aSonicParanoid" out' [out', faListPath']
 
-  unlessExists outDir $ do
+  unlessExists opPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
     faPaths <- readPaths cfg ref faListPath'
@@ -75,13 +77,14 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
     (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
       [ "-sh", sharedDir
-      , "-db", mmseqsDir -- TODO is this the best place?
+      , "-db", dbDir -- TODO share this with the mmseqs2 module
       , "-i", inDir
-      , "-o", outDir
+      , "-o", tmpDir
       , "-m", "fast" -- TODO set this based on fn name
       , "-noidx" -- TODO optional?
       , "-d" -- TODO set based on cfgDebug
       , "-op" -- write ortholog pairs
+      -- , "-ka" -- TODO is this good?
       ]
     putNormal $ unlines [o, e] -- TODO remove
 
