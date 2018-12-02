@@ -185,17 +185,17 @@ runCmd st@(_, cfg, _, _) hdl line = case matches of
 
 cmds :: CutConfig -> [(String, CutState -> Handle -> String -> IO CutState)]
 cmds cfg =
-  [ ("help"    , cmdHelp  )
-  , ("load"    , cmdLoad  )
-  , ("write"   , cmdWrite ) -- TODO do more people expect 'save' or 'write'?
-  , ("depends" , cmdDeps  )
-  , ("rdepends", cmdRDeps )
-  , ("drop"    , cmdDrop  )
-  , ("type"    , cmdType  )
-  , ("show"    , cmdShow  )
-  , ("reload"  , cmdReload)
-  , ("quit"    , cmdQuit  )
-  , ("config"  , cmdConfig)
+  [ ("help"    , cmdHelp    )
+  , ("load"    , cmdLoad    )
+  , ("write"   , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
+  , ("needs"   , cmdNeeds   )
+  , ("neededby", cmdNeededBy)
+  , ("drop"    , cmdDrop    )
+  , ("type"    , cmdType    )
+  , ("show"    , cmdShow    )
+  , ("reload"  , cmdReload  )
+  , ("quit"    , cmdQuit    )
+  , ("config"  , cmdConfig  )
   ]
   ++ if cfgSecure cfg then [] else [("!", cmdBang)]
 
@@ -232,8 +232,8 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
           \:load     to load a script (same as typing the file contents)\n\
           \:reload   to reload the current script\n\
           \:write    to write the current script to a file\n\
-          \:depends  to show which variables a given variable depends on\n\
-          \:rdepends to show which variables depend on the given variable\n\
+          \:needs    to show which variables depend on the given variable\n\
+          \:neededby to show which variables a given variable depends on\n\
           \:drop     to discard the current script (or a specific variable)\n\
           \:quit     to discard the current script and exit the interpreter\n\
           \:type     to print the type of an expression\n\
@@ -284,8 +284,8 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdDeps :: CutState -> Handle -> String -> IO CutState
-cmdDeps st@(scr, cfg, _, _) hdl var = do
+cmdNeededBy :: CutState -> Handle -> String -> IO CutState
+cmdNeededBy st@(scr, cfg, _, _) hdl var = do
   case lookup (CutVar var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
@@ -298,8 +298,8 @@ cmdDeps st@(scr, cfg, _, _) hdl var = do
   -- txt <- renderIO $ pPrint $ filter fn scr
   -- hPutStrLn hdl txt
 
-cmdRDeps :: CutState -> Handle -> String -> IO CutState
-cmdRDeps st@(scr, cfg, _, _) hdl var = do
+cmdNeeds :: CutState -> Handle -> String -> IO CutState
+cmdNeeds st@(scr, cfg, _, _) hdl var = do
   let var' = CutVar var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
