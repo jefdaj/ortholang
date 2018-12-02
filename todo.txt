@@ -1,3 +1,32 @@
+saturday, aim to:
+  1) get sonicparanoid and mmseqs to share tmpfiles
+  2) get sonicparanoid and orthofinder sharing common extraction function(s)
+  3) draft a greencut-like algorithm using diamond or mmseqs, not necessarily in haskell
+
+write a function to extract_seqs from multiple fastas at once, useful here + elsewhere?
+can all "extract" functions be renamed with "list"?
+try DIAMOND, MMseqs2
+
+how to open the result cluster files?
+swap _ for : in seqid: because orthofinder does that already (or is it messing up and considering those 2 species?)
+  maybe better just remove it for now instead
+
+should i edit orthofinder to use shortcut conventions? might be the fastest/clearest way if no options
+  how important are the numeric indexes? if those could be made hashes everything would be easy
+  and store blast hits as plain txt without the gzip for now
+
+easy functions to write now that you've found the output files:
+  orthogroup_seqs : ofr -> faa.list (directly return fasta files)
+  orthogroup_ids  : ofr -> str..listlist (extract_ids . orthogroups seqs)
+  orthogroups_containing (reimplement this, or what? and should it return ids?)
+  orthogroup_gene_trees : ofr -> tree.list
+  species_tree : ofr -> tree
+  orthogroup_tree_containing : ofr -> str -> ? (can this be done easily? what if none?)
+  single_copy_orthogroups : ofr -> str.list.list
+  single_copy_orthogroup_sequences : ofr -> faa.list (this would be used to write the above)
+
+should i make a thing to list + extract orthogroups by name? or will that just confuse because they're numeric?
+
 wednesday:
 
   sonicparanoid module
