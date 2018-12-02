@@ -11,7 +11,7 @@ import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
 import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM, HashedSeqIDsRef)
-import System.Directory           (createDirectoryIfMissing, removeFile)
+import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -58,10 +58,10 @@ mockRepl stdinLines path cfg ref ids = do
     _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids
     -- putStrLn $ "stdout: '" ++ out ++ "'"
     return ()
-  out <- readFile tmpPath
+  out <- readFile tmpPath -- TODO have to handle unicode here with the new prompt?
   writeFile path $ toGeneric cfg out
   -- this is sometimes helpful when developing tests:
-  -- copyFile tmpPath "/tmp/latest.txt"
+  -- copyFile tmpPath $ "/tmp" </> takeBaseName path
   removeFile tmpPath
   return ()
 
@@ -72,7 +72,7 @@ mockRepl stdinLines path cfg ref ids = do
 -- TODO include goldenTree here too (should pass both at once)
 goldenRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
 goldenRepl cfg ref ids goldenFile = do
-  txt <- readFileStrict ref goldenFile
+  txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       -- tstOut = cfgTmpDir cfg' ++ name ++ ".out"

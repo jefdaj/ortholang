@@ -1,9 +1,13 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
->> result = 1 + 3
->> result
+
+shortcut ❱❱❱ result = 1 + 3
+
+shortcut ❱❱❱ result
 4
->> :show result
+
+shortcut ❱❱❱ :show result
 1 + 3
->> :q
+
+shortcut ❱❱❱ :q
 Bye for now!

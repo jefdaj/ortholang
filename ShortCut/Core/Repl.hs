@@ -78,7 +78,7 @@ mkRepl promptFns hdl cfg ref ids = do
   return ()
 
 shortCutPrompt :: CutConfig -> String
-shortCutPrompt cfg = "\n" ++ name ++ arrow
+shortCutPrompt cfg = "\n" ++ name ++ arrow -- TODO no newline if last command didn't print anything
   where
     -- arrow = " --‣ "
     arrow = " ❱❱❱ "

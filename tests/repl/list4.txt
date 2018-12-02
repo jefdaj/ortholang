@@ -1,8 +1,11 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
->> [["one"]]
+
+shortcut ❱❱❱ [["one"]]
 [["one"]]
->> :t [["one"]]
+
+shortcut ❱❱❱ :t [["one"]]
 str.list.list
->> :quit
+
+shortcut ❱❱❱ :quit
 Bye for now!
