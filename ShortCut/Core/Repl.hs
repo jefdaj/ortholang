@@ -82,11 +82,11 @@ mkRepl promptFns hdl cfg ref ids = do
 shortCutPrompt :: CutConfig -> String
 shortCutPrompt cfg = name ++ arrow
   where
-    -- arrow = "--‣ "
-    -- arrow = "❱❱❱ "
-    -- arrow = "--❱ "
-    -- arrow = "⋺  "
-    arrow = " >> "
+    -- arrow = " --‣ "
+    arrow = " ❱❱❱ "
+    -- arrow = " --❱ "
+    -- arrow = " ⋺  "
+    -- arrow = " >> "
     name = case cfgScript cfg of
       Nothing -> "shortcut"
       Just s  -> takeFileName s
