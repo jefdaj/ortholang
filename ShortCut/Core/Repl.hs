@@ -150,7 +150,7 @@ runStatement :: CutState -> Handle -> String -> IO CutState
 runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
   Left  e -> hPutStrLn hdl (show e) >> return st
   Right r -> do
-    let st' = (updateScript scr r, cfg, ref, ids)
+    let st' = (updateVars scr r, cfg, ref, ids)
     when (isExpr st line) (evalScript hdl st')
     return st'
 
@@ -158,8 +158,8 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
 -- which is especially a problem when auto-assigning "result"
 -- TODO you should actually be able to do that, but it should replace
 --      the `result` var with its current expression first
-updateScript :: CutScript -> CutAssign -> CutScript
-updateScript scr asn@(var, expr) =
+updateVars :: CutScript -> CutAssign -> CutScript
+updateVars scr asn@(var, expr) =
   if var `elem` depsOf expr then scr else scr'
   where
     scr' = if var /= CutVar "result" && var `elem` map fst scr
@@ -262,14 +262,14 @@ cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
   Just s  -> cmdLoad st hdl s
 
 cmdWrite :: CutState -> Handle -> String -> IO CutState
-cmdWrite st@(scr, _, _, _) hdl line = do
-  case words line of
-    [path] -> saveScript scr path
-    [var, path] -> case lookup (CutVar var) scr of
-      Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-      Just e  -> saveScript (depsOnly e scr) path
-    _ -> hPutStrLn hdl $ "invalid save command: '" ++ line ++ "'"
-  return st
+cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
+  [path] -> do
+    saveScript scr path
+    return (scr, cfg { cfgScript = Just path }, locks, ids)
+  [var, path] -> case lookup (CutVar var) scr of
+    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Just e  -> saveScript (depsOnly e scr) path >> return st
+  _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
 
 -- TODO where should this go?
 depsOnly :: CutExpr -> CutScript -> CutScript
