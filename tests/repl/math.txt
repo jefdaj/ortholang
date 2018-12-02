@@ -1,6 +1,8 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
->> 1 + 1
+
+shortcut ❱❱❱ 1 + 1
 2
->> :q
+
+shortcut ❱❱❱ :q
 Bye for now!

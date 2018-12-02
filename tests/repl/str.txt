@@ -1,10 +1,13 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
->> "stuff"
+
+shortcut ❱❱❱ "stuff"
 "stuff"
->> ["more", "stuff"]
+
+shortcut ❱❱❱ ["more", "stuff"]
 ["more", "stuff"]
->> ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
+
+shortcut ❱❱❱ ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
 ["what",
  "about",
  "a",
@@ -20,11 +23,13 @@ Type :help for a list of the available commands.
  "over",
  "several",
  "lines?"]
->> ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
+
+shortcut ❱❱❱ ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
 ["one",
  "two",
  "three",
  "and now some longer ones",
  "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
->> :q
+
+shortcut ❱❱❱ :q
 Bye for now!

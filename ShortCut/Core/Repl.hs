@@ -20,13 +20,14 @@ module ShortCut.Core.Repl
   -- )
   where
 
+import qualified Data.Map as M
 import System.Console.Haskeline hiding (catch)
 
 import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
-import Data.List                (isPrefixOf, isInfixOf, filter)
+import Data.List                (isPrefixOf, isInfixOf, isSuffixOf, filter)
 import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (catMaybes)
@@ -44,14 +45,15 @@ import System.Directory         (doesFileExist)
 import System.FilePath.Posix    ((</>))
 import Control.Exception.Safe   -- (throwM)
 import System.Console.ANSI      (clearScreen, cursorUp)
--- import Data.IORef                     (IORef)
+import Data.IORef               (readIORef)
+import Development.Shake.FilePath (takeFileName)
 
 --------------------
 -- main interface --
 --------------------
 
-reallyClearScreen :: IO ()
-reallyClearScreen = clearScreen >> cursorUp 1000
+clear :: IO ()
+clear = clearScreen >> cursorUp 1000
 
 runRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
@@ -61,7 +63,7 @@ runRepl = mkRepl (repeat prompt) stdout
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
        -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids = do
-  reallyClearScreen
+  clear
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
@@ -73,12 +75,17 @@ mkRepl promptFns hdl cfg ref ids = do
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
 
-shortCutPrompt :: String
--- shortCutPrompt = "--‣ "
--- shortCutPrompt = "❱❱❱ "
--- shortCutPrompt = "--❱ "
--- shortCutPrompt = "⋺  "
-shortCutPrompt = ">>> "
+shortCutPrompt :: CutConfig -> String
+shortCutPrompt cfg = "\n" ++ name ++ arrow -- TODO no newline if last command didn't print anything
+  where
+    -- arrow = " --‣ "
+    arrow = " ❱❱❱ "
+    -- arrow = " --❱ "
+    -- arrow = " ⋺  "
+    -- arrow = " >> "
+    name = case cfgScript cfg of
+      Nothing -> "shortcut"
+      Just s  -> takeFileName s
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -104,8 +111,8 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 -- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
 loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
-  Just line <- promptFn shortCutPrompt -- TODO can this fail?
-  st  <- get
+  st@(_, cfg, _, _)  <- get
+  Just line <- promptFn $ shortCutPrompt cfg -- TODO can this fail?
   st' <- liftIO $ try $ step st hdl line
   case st' of
     Right s -> put s >> loop promptFns hdl
@@ -141,7 +148,7 @@ runStatement :: CutState -> Handle -> String -> IO CutState
 runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
   Left  e -> hPutStrLn hdl (show e) >> return st
   Right r -> do
-    let st' = (updateScript scr r, cfg, ref, ids)
+    let st' = (updateVars scr r, cfg, ref, ids)
     when (isExpr st line) (evalScript hdl st')
     return st'
 
@@ -149,8 +156,8 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
 -- which is especially a problem when auto-assigning "result"
 -- TODO you should actually be able to do that, but it should replace
 --      the `result` var with its current expression first
-updateScript :: CutScript -> CutAssign -> CutScript
-updateScript scr asn@(var, expr) =
+updateVars :: CutScript -> CutAssign -> CutScript
+updateVars scr asn@(var, expr) =
   if var `elem` depsOf expr then scr else scr'
   where
     scr' = if var /= CutVar "result" && var `elem` map fst scr
@@ -176,16 +183,17 @@ runCmd st@(_, cfg, _, _) hdl line = case matches of
 
 cmds :: CutConfig -> [(String, CutState -> Handle -> String -> IO CutState)]
 cmds cfg =
-  [ ("help"    , cmdHelp  )
-  , ("load"    , cmdLoad  )
-  , ("write"   , cmdSave  )
-  , ("depends" , cmdDeps  )
-  , ("rdepends", cmdRDeps )
-  , ("drop"    , cmdDrop  )
-  , ("type"    , cmdType  )
-  , ("show"    , cmdShow  )
-  , ("quit"    , cmdQuit  )
-  , ("config"  , cmdConfig)
+  [ ("help"    , cmdHelp    )
+  , ("load"    , cmdLoad    )
+  , ("write"   , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
+  , ("needs"   , cmdNeeds   )
+  , ("neededby", cmdNeededBy)
+  , ("drop"    , cmdDrop    )
+  , ("type"    , cmdType    )
+  , ("show"    , cmdShow    )
+  , ("reload"  , cmdReload  )
+  , ("quit"    , cmdQuit    )
+  , ("config"  , cmdConfig  )
   ]
   ++ if cfgSecure cfg then [] else [("!", cmdBang)]
 
@@ -220,9 +228,10 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
           \There are also some extra commands:\n\n\
           \:help     to print info about a function or filetype\n\
           \:load     to load a script (same as typing the file contents)\n\
+          \:reload   to reload the current script\n\
           \:write    to write the current script to a file\n\
-          \:depends  to show which variables a given variable depends on\n\
-          \:rdepends to show which variables depend on the given variable\n\
+          \:needs    to show which variables depend on the given variable\n\
+          \:neededby to show which variables a given variable depends on\n\
           \:drop     to discard the current script (or a specific variable)\n\
           \:quit     to discard the current script and exit the interpreter\n\
           \:type     to print the type of an expression\n\
@@ -243,17 +252,22 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
       new <- parseFile cfg' ref ids path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> return (s, cfg', ref, ids)
+        Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
 
-cmdSave :: CutState -> Handle -> String -> IO CutState
-cmdSave st@(scr, _, _, _) hdl line = do
-  case words line of
-    [path] -> saveScript scr path
-    [var, path] -> case lookup (CutVar var) scr of
-      Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-      Just e  -> saveScript (depsOnly e scr) path
-    _ -> hPutStrLn hdl $ "invalid save command: '" ++ line ++ "'"
-  return st
+cmdReload :: CutState -> Handle -> String -> IO CutState
+cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
+  Nothing -> cmdDrop st hdl ""
+  Just s  -> cmdLoad st hdl s
+
+cmdWrite :: CutState -> Handle -> String -> IO CutState
+cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
+  [path] -> do
+    saveScript scr path
+    return (scr, cfg { cfgScript = Just path }, locks, ids)
+  [var, path] -> case lookup (CutVar var) scr of
+    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Just e  -> saveScript (depsOnly e scr) path >> return st
+  _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
 
 -- TODO where should this go?
 depsOnly :: CutExpr -> CutScript -> CutScript
@@ -268,8 +282,8 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdDeps :: CutState -> Handle -> String -> IO CutState
-cmdDeps st@(scr, cfg, _, _) hdl var = do
+cmdNeededBy :: CutState -> Handle -> String -> IO CutState
+cmdNeededBy st@(scr, cfg, _, _) hdl var = do
   case lookup (CutVar var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
@@ -282,8 +296,8 @@ cmdDeps st@(scr, cfg, _, _) hdl var = do
   -- txt <- renderIO $ pPrint $ filter fn scr
   -- hPutStrLn hdl txt
 
-cmdRDeps :: CutState -> Handle -> String -> IO CutState
-cmdRDeps st@(scr, cfg, _, _) hdl var = do
+cmdNeeds :: CutState -> Handle -> String -> IO CutState
+cmdNeeds st@(scr, cfg, _, _) hdl var = do
   let var' = CutVar var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
@@ -359,29 +373,32 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
 -- tab completion --
 --------------------
 
--- TODO decide when to complete files vs variables and stuff:
---      files only if inside quotation marks?
---      or if started with one of the file-related commands (:!, :write, etc.)
---      otherwise shortcut entities only?
+-- complete things in quotes: filenames, seqids
+quotedCompletions :: MonadIO m => CutState -> String -> m [Completion]
+quotedCompletions (_, _, _, idRef) wordSoFar = do
+  files  <- listFiles wordSoFar
+  seqIDs <- fmap (map $ head . words) $ fmap M.elems $ liftIO $ readIORef idRef
+  let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
+  return $ files ++ seqIDs'
 
--- TODO sort functions alphabetically
-
-listCompletions :: MonadIO m => CutState -> String -> m [Completion]
-listCompletions (scr, cfg, _, _) txt = do
-  files <- listFiles txt
-  let misc = map simpleCompletion $ filter (txt `isPrefixOf`) wordList
-  return (files ++ misc)
+-- complete everything else: fn names, var names, :commands, types
+-- these can be filenames too, but only if the line starts with a :command
+nakedCompletions :: MonadIO m => CutState -> String -> String -> m [Completion]
+nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
+  files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
+  return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
   where
-    wordList = fnNames ++ varNames ++ cmdNames
+    wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
     varNames = map ((\(CutVar v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
+    typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 
 -- this is mostly lifted from Haskeline's completeFile
 myComplete :: MonadIO m => CutState -> CompletionFunc m
-myComplete s = completeQuotedWord (Just '\\') "\"'" (listCompletions s)
-             $ completeWord (Just '\\') ("\"\'" ++ filenameWordBreakChars)
-                            (listCompletions s)
+myComplete s = completeQuotedWord   (Just '\\') "\"'" (quotedCompletions s)
+             $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
+                                    (nakedCompletions s)
 
 -- This is separate from the CutConfig because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess

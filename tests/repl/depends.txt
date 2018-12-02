@@ -1,25 +1,35 @@
 Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
->> v1 = "one"
->> v2 = "two"
->> v3 = [v1, v2]
->> :show
+
+shortcut ❱❱❱ v1 = "one"
+
+shortcut ❱❱❱ v2 = "two"
+
+shortcut ❱❱❱ v3 = [v1, v2]
+
+shortcut ❱❱❱ :show
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
->> :depends v1
+
+shortcut ❱❱❱ :neededby v1
 v1 = "one"
->> :depends v2
+
+shortcut ❱❱❱ :neededby v2
 v2 = "two"
->> :depends v3
+
+shortcut ❱❱❱ :neededby v3
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
->> v4 = v3
->> :depends v4
+
+shortcut ❱❱❱ v4 = v3
+
+shortcut ❱❱❱ :neededby v4
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 v4 = v3
->> :q
+
+shortcut ❱❱❱ :q
 Bye for now!

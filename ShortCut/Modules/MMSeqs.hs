@@ -1,6 +1,9 @@
 module ShortCut.Modules.MMSeqs
   where
 
+-- TODO keep intermediate files at least until we can line them up with sonicparanoid if needed
+-- TODO default to the same settings sonicparanoid uses at first, both to be compatible and until you know better
+
 -- TODO mmseqs_search_all : fa.list mms -> mmr (this is mmseqs search)
 -- TODO mmseqs_search_profile?
 -- TODO mmseqs_cluster
@@ -74,8 +77,8 @@ rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out    = exprPath s e
       out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromCutPath cfg out
-      dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas -- TODO be more or less specific?
-      dbPath = dbDir </> "db" -- TODO any reason for a more descriptive name?
+      dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
+      dbPath = dbDir </> digest fas <.> "mmseqs2db" -- TODO take hash from somewhere else?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
       faPaths <- readPaths cfg ref fasPath
@@ -118,7 +121,7 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 mmseqsSearchDb :: CutFunction
 mmseqsSearchDb = let name = "mmseqs_search_db" in CutFunction
   { fName      = name
-  , fTypeDesc  = name ++ " : fa mms -> bht"
+  , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
   , fDesc      = Just "Search a target database for sequences matching the query FASTA, similar to BLAST."
   , fFixity    = Prefix
@@ -138,8 +141,10 @@ rMmseqsSearchDb st@(_, cfg, ref, _) e@(CutFun _ salt _ _ [n, q, s]) = do
   (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db
   let out    = exprPath st e
       out'   = debugRules cfg "rMmseqsSearch" e $ fromCutPath cfg out
-      dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
-      outDb' = dbDir </> "db" -- TODO error here?
+      -- dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
+      dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
+      -- outDb' = dbDir </> "db" -- TODO error here?
+      outDb' = dbDir </> digest out <.> "mmseqs2db" -- TODO does this hash match the ones from createdb_all?
   outDb' %> \_ -> aMmseqSearchDb    cfg ref ePath qPath sPath outDb'
   out'   %> \_ -> aMmseqConvertAlis cfg ref       qPath sPath outDb' out'
   return (ExprPath out')
@@ -155,7 +160,7 @@ aMmseqSearchDb cfg ref ePath qDb sDb outDb = do
   qDb' <- resolveMmseqsDb qDb
   sDb' <- resolveMmseqsDb sDb
   eStr <- readLit cfg ref ePath
-  let tmpDir = takeDirectory outDb </> "tmp"
+  let tmpDir = takeDirectory outDb </> "tmp" -- TODO align this with sonicparanoid
   liftIO $ createDirectoryIfMissing True tmpDir
   wrappedCmdWrite True True cfg ref outDb [ePath, qDb, sDb] [] []
     "mmseqs" ["search", "-e", eStr, qDb', sDb', outDb, tmpDir]
@@ -180,7 +185,7 @@ aMmseqConvertAlis cfg ref qDb sDb outDb outTab = do
 mmseqsSearch :: CutFunction
 mmseqsSearch = let name = "mmseqs_search" in CutFunction
   { fName      = name
-  , fTypeDesc  = name ++ " : fa fa -> bht"
+  , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
   , fDesc      = Just "Find matching sequences in two fasta files, similar to BLAST."
   , fFixity    = Prefix
