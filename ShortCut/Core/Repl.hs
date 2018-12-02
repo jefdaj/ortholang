@@ -15,7 +15,6 @@
 -- TODO should be able to :reload the current script, if any
 
 -- TODO :reload command
--- TODO :show on :load or :reload
 -- TODO set script on :write
 
 module ShortCut.Core.Repl
@@ -56,8 +55,8 @@ import Development.Shake.FilePath (takeFileName)
 -- main interface --
 --------------------
 
-reallyClearScreen :: IO ()
-reallyClearScreen = clearScreen >> cursorUp 1000
+clear :: IO ()
+clear = clearScreen >> cursorUp 1000
 
 runRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
@@ -67,7 +66,7 @@ runRepl = mkRepl (repeat prompt) stdout
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
        -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids = do
-  reallyClearScreen
+  clear
   hPutStrLn hdl
     "Welcome to the ShortCut interpreter!\n\
     \Type :help for a list of the available commands."
@@ -254,7 +253,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
       new <- parseFile cfg' ref ids path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> return (s, cfg', ref, ids)
+        Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
 
 cmdSave :: CutState -> Handle -> String -> IO CutState
 cmdSave st@(scr, _, _, _) hdl line = do
