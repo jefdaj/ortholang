@@ -34,8 +34,9 @@ mkTests _ _ _ = do
          $ map (mkTestDep testDir) depCmds
 
 mkTestDep :: FilePath -> (TestName, String) -> TestTree
-mkTestDep dir (name, cmd) = goldenVsString name gld act
+mkTestDep dir (name, cmd) = goldenVsString desc gld act
   where
+    desc = "found expected version of " ++ name
     gld = dir </> name <.> "txt"
     act = do
       (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""

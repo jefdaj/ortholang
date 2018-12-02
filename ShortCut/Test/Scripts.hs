@@ -46,16 +46,19 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "-u", ref, new]
 
 mkOutTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
-mkOutTest cfg ref ids gld = goldenDiff "prints expected output" gld scriptAct
+mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = runCut cfg ref ids >>= return . pack -- . toGeneric cfg
+    cut  = takeBaseName gld <.> "cut"
+    desc = cut ++ " prints expected output"
 
 mkTreeTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
-mkTreeTest cfg ref ids t = goldenDiff "creates expected tmpfiles" t treeAct
+mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
+    desc = takeBaseName t ++ " creates expected tmpfiles"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|lines' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
@@ -68,8 +71,9 @@ mkTreeTest cfg ref ids t = goldenDiff "creates expected tmpfiles" t treeAct
 
 -- TODO use safe writes here
 mkTripTest :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
-mkTripTest cfg ref ids = goldenDiff "unchanged by round-trip to file" tripShow tripAct
+mkTripTest cfg ref ids = goldenDiff desc tripShow tripAct
   where
+    desc = takeFileName tripCut ++ " unchanged by round-trip to file"
     tripCut   = cfgTmpDir cfg <.> "cut"
     tripShow  = cfgTmpDir cfg <.> "show"
     tripSetup = do
@@ -85,9 +89,11 @@ mkTripTest cfg ref ids = goldenDiff "unchanged by round-trip to file" tripShow t
 
 -- test that no absolute paths snuck into the tmpfiles
 mkAbsTest :: CutConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
-mkAbsTest cfg ref ids = testSpecs $ it "tmpfiles free of absolute paths" $
+mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
+    path = takeBaseName $ cfgTmpDir cfg
+    desc = path ++ " tmpfiles free of absolute paths"
     absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
     absGrep = do
       _ <- runCut cfg ref ids
@@ -108,7 +114,7 @@ mkScriptTests (cut, gld, mtre) cfg ref ids = do
   absTests <- mkAbsTest cfg' ref ids -- just one, but comes as a list
   return $ testGroup name $ otherTests ++ absTests
   where
-    name       = takeBaseName cut
+    name       = takeFileName cut
     cfg'       = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
     otherTests = [mkTripTest cfg' ref ids, mkOutTest cfg' ref ids gld] ++ genTests
     genTests   = case mtre of

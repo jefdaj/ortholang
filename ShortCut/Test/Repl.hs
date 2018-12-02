@@ -74,12 +74,13 @@ goldenRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
 goldenRepl cfg ref ids goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
+      desc   = "repl output matches " ++ name <.> "txt"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       -- tstOut = cfgTmpDir cfg' ++ name ++ ".out"
       tstOut = cfgTmpDir cfg' <.> "out"
       stdin  = extractPrompted ">> " txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut cfg' ref ids
-  return $ goldenVsFile name goldenFile tstOut action
+  return $ goldenVsFile desc goldenFile tstOut action
 
 goldenRepls :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 goldenRepls cfg ref ids = do
@@ -93,6 +94,7 @@ goldenReplTree :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTr
 goldenReplTree cfg ref ids ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
+      desc   = name <.> "txt" ++ " creates expected tmpfiles"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tree   = replaceExtension ses "tree"
       stdin  = extractPrompted ">> " txt
@@ -104,12 +106,12 @@ goldenReplTree cfg ref ids ses = do
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  return $ pack $ toGeneric cfg out
-  return $ goldenVsString name tree action
+  return $ goldenVsString desc tree action
 
 goldenReplTrees :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 goldenReplTrees cfg ref ids = do
   tDir  <- getDataFileName "tests/repl"
   txts  <- findByExtension [".txt"] tDir
   let tests = mapM (goldenReplTree cfg ref ids) txts
-      group = testGroup "creates expected tmpfiles"
+      group = testGroup "repl creates expected tmpfiles"
   fmap group tests

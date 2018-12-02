@@ -10,6 +10,7 @@ module ShortCut.Modules.Blast
   where
 
 -- TODO _all versions to go with the _each ones?
+-- TODO can i reuse most of this code for DIAMOND?
 
 import Development.Shake
 import ShortCut.Core.Types
