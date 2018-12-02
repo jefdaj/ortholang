@@ -14,8 +14,7 @@
 -- TODO why doesn't prettyShow work anymore? what changed??
 -- TODO should be able to :reload the current script, if any
 
--- TODO :reload command
--- TODO set script on :write
+-- TODO set script on :write, but only if Nothing so far?
 
 module ShortCut.Core.Repl
   -- ( mkRepl
@@ -188,12 +187,13 @@ cmds :: CutConfig -> [(String, CutState -> Handle -> String -> IO CutState)]
 cmds cfg =
   [ ("help"    , cmdHelp  )
   , ("load"    , cmdLoad  )
-  , ("write"   , cmdSave  )
+  , ("write"   , cmdWrite ) -- TODO do more people expect 'save' or 'write'?
   , ("depends" , cmdDeps  )
   , ("rdepends", cmdRDeps )
   , ("drop"    , cmdDrop  )
   , ("type"    , cmdType  )
   , ("show"    , cmdShow  )
+  , ("reload"  , cmdReload)
   , ("quit"    , cmdQuit  )
   , ("config"  , cmdConfig)
   ]
@@ -230,6 +230,7 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
           \There are also some extra commands:\n\n\
           \:help     to print info about a function or filetype\n\
           \:load     to load a script (same as typing the file contents)\n\
+          \:reload   to reload the current script\n\
           \:write    to write the current script to a file\n\
           \:depends  to show which variables a given variable depends on\n\
           \:rdepends to show which variables depend on the given variable\n\
@@ -255,8 +256,13 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
         Left  e -> hPutStrLn hdl (show e) >> return st
         Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
 
-cmdSave :: CutState -> Handle -> String -> IO CutState
-cmdSave st@(scr, _, _, _) hdl line = do
+cmdReload :: CutState -> Handle -> String -> IO CutState
+cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
+  Nothing -> cmdDrop st hdl ""
+  Just s  -> cmdLoad st hdl s
+
+cmdWrite :: CutState -> Handle -> String -> IO CutState
+cmdWrite st@(scr, _, _, _) hdl line = do
   case words line of
     [path] -> saveScript scr path
     [var, path] -> case lookup (CutVar var) scr of
