@@ -14,6 +14,10 @@
 -- TODO why doesn't prettyShow work anymore? what changed??
 -- TODO should be able to :reload the current script, if any
 
+-- TODO :reload command
+-- TODO :show on :load or :reload
+-- TODO set script on :write
+
 module ShortCut.Core.Repl
   -- ( mkRepl
   -- , runRepl
@@ -46,6 +50,7 @@ import System.FilePath.Posix    ((</>))
 import Control.Exception.Safe   -- (throwM)
 import System.Console.ANSI      (clearScreen, cursorUp)
 import Data.IORef               (readIORef)
+import Development.Shake.FilePath (takeFileName)
 
 --------------------
 -- main interface --
@@ -74,12 +79,17 @@ mkRepl promptFns hdl cfg ref ids = do
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
 
-shortCutPrompt :: String
--- shortCutPrompt = "--‣ "
--- shortCutPrompt = "❱❱❱ "
--- shortCutPrompt = "--❱ "
--- shortCutPrompt = "⋺  "
-shortCutPrompt = ">>> "
+shortCutPrompt :: CutConfig -> String
+shortCutPrompt cfg = name ++ arrow
+  where
+    -- arrow = "--‣ "
+    -- arrow = "❱❱❱ "
+    -- arrow = "--❱ "
+    -- arrow = "⋺  "
+    arrow = " >> "
+    name = case cfgScript cfg of
+      Nothing -> "shortcut"
+      Just s  -> takeFileName s
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -105,8 +115,8 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 -- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
 loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
-  Just line <- promptFn shortCutPrompt -- TODO can this fail?
-  st  <- get
+  st@(_, cfg, _, _)  <- get
+  Just line <- promptFn $ shortCutPrompt cfg -- TODO can this fail?
   st' <- liftIO $ try $ step st hdl line
   case st' of
     Right s -> put s >> loop promptFns hdl
