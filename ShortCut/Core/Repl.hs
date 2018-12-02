@@ -78,7 +78,7 @@ mkRepl promptFns hdl cfg ref ids = do
   return ()
 
 shortCutPrompt :: CutConfig -> String
-shortCutPrompt cfg = name ++ arrow
+shortCutPrompt cfg = "\n" ++ name ++ arrow
   where
     -- arrow = " --‣ "
     arrow = " ❱❱❱ "
