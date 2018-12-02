@@ -58,7 +58,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
-    desc = takeBaseName t ++ " creates expected tmpfiles"
+    desc = takeFileName t ++ " creates expected tmpfiles"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|lines' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
