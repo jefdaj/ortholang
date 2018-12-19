@@ -256,7 +256,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
         Left  e -> hPutStrLn hdl (show e) >> return st
         -- TODO put this back? not sure if it makes repl better
         -- Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
-        Right s -> clear >> return (s, cfg', ref, ids)
+        Right s -> return (s, cfg', ref, ids)
 
 cmdReload :: CutState -> Handle -> String -> IO CutState
 cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
