@@ -79,10 +79,12 @@ shortCutPrompt :: CutConfig -> String
 shortCutPrompt cfg = "\n" ++ name ++ arrow -- TODO no newline if last command didn't print anything
   where
     -- arrow = " --‣ "
-    arrow = " ❱❱❱ "
+    -- arrow = " ❱❱❱ "
     -- arrow = " --❱ "
     -- arrow = " ⋺  "
     -- arrow = " >> "
+    -- arrow = "-> "
+    arrow = " —▶ "
     name = case cfgScript cfg of
       Nothing -> "shortcut"
       Just s  -> takeFileName s
@@ -252,7 +254,9 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
       new <- parseFile cfg' ref ids path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
+        -- TODO put this back? not sure if it makes repl better
+        -- Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
+        Right s -> clear >> return (s, cfg', ref, ids)
 
 cmdReload :: CutState -> Handle -> String -> IO CutState
 cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
