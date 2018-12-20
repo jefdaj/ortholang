@@ -37,7 +37,7 @@ type HashedSeqIDList = D.DList (String, String)
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
 hashIDsLine :: String -> (String, HashedSeqIDList)
-hashIDsLine ('>':seqID) = (">seqid:" ++ idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
+hashIDsLine ('>':seqID) = (">seqid_" ++ idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
   where
     idHash = digest seqID
 hashIDsLine txt = (txt, D.empty)
@@ -83,7 +83,7 @@ writeHashedIDs cfg ref path ids = do
 unhashIDs :: CutConfig -> HashedSeqIDs -> String -> String
 unhashIDs _ ids txt = before ++ concatMap replaceOne after
   where
-    (before:after) = split "seqid:" txt
+    (before:after) = split "seqid_" txt
     replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
                                origID  = fromJust $ M.lookup idAndTab ids
                                shortID = head $ words origID
