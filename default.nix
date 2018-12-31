@@ -1,16 +1,16 @@
 with import ./nixpkgs;
 let
-  biomartr   = import ./ShortCut/Modules/BioMartR;
-  blast      = import ./ShortCut/Modules/Blast;
-  blastrbh   = import ./ShortCut/Modules/BlastRBH;
-  seqio      = import ./ShortCut/Modules/SeqIO;
-  plots      = import ./ShortCut/Modules/Plots;
-  blasthits  = import ./ShortCut/Modules/BlastHits;
-  diamond    = import ./ShortCut/Modules/Diamond;
+  biomartr   = import ./Detourrr/Modules/BioMartR;
+  blast      = import ./Detourrr/Modules/Blast;
+  blastrbh   = import ./Detourrr/Modules/BlastRBH;
+  seqio      = import ./Detourrr/Modules/SeqIO;
+  plots      = import ./Detourrr/Modules/Plots;
+  blasthits  = import ./Detourrr/Modules/BlastHits;
+  diamond    = import ./Detourrr/Modules/Diamond;
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
-  cabalPkg   = haskellPackages.callPackage ./shortcut.nix {};
+  cabalPkg   = haskellPackages.callPackage ./detourrr.nix {};
   runDepends = [
     biomartr
     blast
@@ -45,7 +45,7 @@ in haskell.lib.overrideCabal cabalPkg (drv: {
   buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
   postInstall = ''
     ${drv.postInstall or ""}
-    wrapProgram "$out/bin/shortcut" \
+    wrapProgram "$out/bin/detourrr" \
       --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 })
