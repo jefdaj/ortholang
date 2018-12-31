@@ -185,17 +185,17 @@ runCmd st@(_, cfg, _, _) hdl line = case matches of
 
 cmds :: CutConfig -> [(String, CutState -> Handle -> String -> IO CutState)]
 cmds cfg =
-  [ ("help"    , cmdHelp    )
-  , ("load"    , cmdLoad    )
-  , ("write"   , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
-  , ("needs"   , cmdNeeds   )
-  , ("neededby", cmdNeededBy)
-  , ("drop"    , cmdDrop    )
-  , ("type"    , cmdType    )
-  , ("show"    , cmdShow    )
-  , ("reload"  , cmdReload  )
-  , ("quit"    , cmdQuit    )
-  , ("config"  , cmdConfig  )
+  [ ("help"     , cmdHelp    )
+  , ("load"     , cmdLoad    )
+  , ("write"    , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
+  , ("needs"    , cmdNeeds   )
+  , ("neededfor", cmdNeededBy)
+  , ("drop"     , cmdDrop    )
+  , ("type"     , cmdType    )
+  , ("show"     , cmdShow    )
+  , ("reload"   , cmdReload  )
+  , ("quit"     , cmdQuit    )
+  , ("config"   , cmdConfig  )
   ]
   ++ if cfgSecure cfg then [] else [("!", cmdBang)]
 
@@ -233,7 +233,7 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
           \:reload   to reload the current script\n\
           \:write    to write the current script to a file\n\
           \:needs    to show which variables depend on the given variable\n\
-          \:neededby to show which variables a given variable depends on\n\
+          \:neededfor to show which variables a given variable depends on\n\
           \:drop     to discard the current script (or a specific variable)\n\
           \:quit     to discard the current script and exit the interpreter\n\
           \:type     to print the type of an expression\n\

@@ -12,20 +12,20 @@ v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-shortcut ❱❱❱ :neededby v1
+shortcut ❱❱❱ :neededfor v1
 v1 = "one"
 
-shortcut ❱❱❱ :neededby v2
+shortcut ❱❱❱ :neededfor v2
 v2 = "two"
 
-shortcut ❱❱❱ :neededby v3
+shortcut ❱❱❱ :neededfor v3
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
 shortcut ❱❱❱ v4 = v3
 
-shortcut ❱❱❱ :neededby v4
+shortcut ❱❱❱ :neededfor v4
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
