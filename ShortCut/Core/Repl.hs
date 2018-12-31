@@ -255,8 +255,8 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         -- TODO put this back? not sure if it makes repl better
-        -- Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
-        Right s -> return (s, cfg', ref, ids)
+        Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
+        -- Right s -> return (s, cfg', ref, ids)
 
 cmdReload :: CutState -> Handle -> String -> IO CutState
 cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
@@ -310,7 +310,7 @@ cmdNeeds st@(scr, cfg, _, _) hdl var = do
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: CutState -> Handle -> String -> IO CutState
-cmdDrop (_, cfg, ref, ids) _ [] = return ([], cfg, ref, ids) -- TODO drop ids too?
+cmdDrop (_, cfg, ref, ids) _ [] = clear >> return ([], cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
 cmdDrop st@(scr, cfg, ref, ids) hdl var = do
   let v = CutVar var
   case lookup v scr of
