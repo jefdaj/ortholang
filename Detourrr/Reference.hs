@@ -5,6 +5,7 @@ import Detourrr.Core.Types
 import Data.List.Split  (splitOn)
 import Data.List.Utils  (join)
 import Detourrr.Modules (modules)
+import Data.Char        (toLower)
 
 explainType :: DtrType -> String
 explainType Empty = error "explain empty type"
@@ -42,6 +43,19 @@ functionsTable m = if null (mFunctions m) then [""] else
   ++ map (\f -> "| " ++ explainFunction f ++ " |") (mFunctions m)
   ++ [""]
 
+exampleMacro :: String
+exampleMacro = 
+  "{%- macro load_example(module) -%}\n\
+  \  {%- with path='tests/' + module + '/example.dtr' -%}\n\
+  \    {%- include \"loadcode.html\" -%}\n\
+  \  {%- endwith -%}\n\
+  \{%- endmacro -%}"
+
+loadExample :: DtrModule -> [String]
+loadExample m = ["Example:", "", "{{ load_example('" ++ name ++ "') }}"]
+  where
+    name = map toLower $ mName m
+
 -- TODO only use this as default if there's no custom markdown description written?
 -- TODO or move that stuff to the tutorial maybe?
 moduleReference :: DtrModule -> [String]
@@ -53,8 +67,13 @@ moduleReference m =
   ]
   ++ typesTable m
   ++ functionsTable m
+  ++ loadExample m
   ++ [""]
 
 -- TODO pick module order to print the reference nicely
 writeReference :: IO ()
-writeReference = writeFile "reference.md" $ unlines $ concatMap moduleReference modules
+writeReference = writeFile "reference.md" $ unlines $ 
+  [ exampleMacro
+  , ""
+  ] ++
+  concatMap moduleReference modules
