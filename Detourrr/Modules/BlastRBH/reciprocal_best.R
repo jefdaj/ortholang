@@ -23,7 +23,7 @@ write_hits <- function(hits, filename) {
               quote=FALSE, row.names=FALSE, col.names=FALSE)
 }
 
-# TODO do this the proper way in its own cut function, man!
+# TODO do this the proper way in its own dtr function, man!
 best_hits <- function(df)
   df %>%
     arrange(evalue) %>%

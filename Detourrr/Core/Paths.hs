@@ -37,7 +37,7 @@
  -
  - Expression paths are determined by `exprPath` or `exprPathExplicit`. They
  - get the base name by `show`ing the expression and `digest`ing the resulting
- - `String`, the extension based on the `CutType`, and the folder based on
+ - `String`, the extension based on the `DtrType`, and the folder based on
  - constructor + function name if a function. Some made up examples:
  -
  -   ~/.detourrr/exprs/cut_list/f987e9b98a.str.list
@@ -45,16 +45,16 @@
  -   ~/.detourrr/exprs/crb_blast/38978s9a79.crb
  -   ~/.detourrr/exprs/gbk_to_fna/289379af7a.fna
  -
- - Var links are determined by `varPath` using the user-given name and `CutType`.
+ - Var links are determined by `varPath` using the user-given name and `DtrType`.
  -}
 
 module Detourrr.Core.Paths
-  -- cutpaths
-  ( CutPath()
-  , toCutPath
-  , fromCutPath
-  , cutPathString
-  , stringCutPath
+  -- dtrpaths
+  ( DtrPath()
+  , toDtrPath
+  , fromDtrPath
+  , dtrPathString
+  , stringDtrPath
   , toGeneric
   , fromGeneric
   -- cache dirs
@@ -94,7 +94,7 @@ module Detourrr.Core.Paths
 
 -- import Development.Shake (Action, trackWrite, need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
-import Detourrr.Core.Types -- (CutConfig)
+import Detourrr.Core.Types -- (DtrConfig)
 import Detourrr.Core.Config (debug)
 import Detourrr.Core.Pretty (render, pPrint)
 import Detourrr.Core.Util (digest)
@@ -104,27 +104,27 @@ import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
 -- import Data.IORef                 (IORef)
 
-debugPath :: Show a => CutConfig -> String -> CutExpr -> a -> a
+debugPath :: Show a => DtrConfig -> String -> DtrExpr -> a -> a
 debugPath cfg name expr path = debug cfg msg path
   where
     ren = render $ pPrint expr
     msg = name ++ " for '" ++ ren ++ "' is " ++ show path -- TODO include types?
 
 --------------
--- cutpaths --
+-- dtrpaths --
 --------------
 
 -- Replace current absolute paths with generic placeholders that won't change
 -- when the tmpDir is moved later or whatever.
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
-toGeneric :: CutConfig -> String -> String
+toGeneric :: DtrConfig -> String -> String
 toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
                   $ replace (cfgTmpDir  cfg) "$TMPDIR"
                   $ txt
 
 -- Replace generic path placeholders with current paths
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
-fromGeneric :: CutConfig -> String -> String
+fromGeneric :: DtrConfig -> String -> String
 fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
                     $ replace "$TMPDIR"  (cfgTmpDir  cfg)
                     $ checkPath txt
@@ -136,30 +136,30 @@ isGeneric path
   || "$WORKDIR" `isPrefixOf` path
 
 -- TODO print warning on failure?
-toCutPath :: CutConfig -> FilePath -> CutPath
-toCutPath cfg = CutPath . checkPath . toGeneric cfg . normalize
+toDtrPath :: DtrConfig -> FilePath -> DtrPath
+toDtrPath cfg = DtrPath . checkPath . toGeneric cfg . normalize
   where
     normalize p = case parseAbsFile p of
-      Nothing -> error $ "toCutPath can't parse: " ++ p
+      Nothing -> error $ "toDtrPath can't parse: " ++ p
       Just p' -> fromAbsFile p'
 
-fromCutPath :: CutConfig -> CutPath -> FilePath
-fromCutPath cfg (CutPath path) = fromGeneric cfg path
+fromDtrPath :: DtrConfig -> DtrPath -> FilePath
+fromDtrPath cfg (DtrPath path) = fromGeneric cfg path
 
--- weird, but needed for writing cutpaths to files in Actions.hs
-cutPathString :: CutPath -> String
-cutPathString (CutPath path) = path
+-- weird, but needed for writing dtrpaths to files in Actions.hs
+dtrPathString :: DtrPath -> String
+dtrPathString (DtrPath path) = path
 
--- TODO this is basically just exporting CutPath right? any better way?
-stringCutPath :: String -> CutPath
-stringCutPath = CutPath
+-- TODO this is basically just exporting DtrPath right? any better way?
+stringDtrPath :: String -> DtrPath
+stringDtrPath = DtrPath
 
 ----------------
 -- cache dirs --
 ----------------
 
-cacheDir :: CutConfig -> String -> CutPath
-cacheDir cfg modName = toCutPath cfg path
+cacheDir :: DtrConfig -> String -> DtrPath
+cacheDir cfg modName = toDtrPath cfg path
   where
     path = cfgTmpDir cfg </> "cache" </> modName
 
@@ -171,25 +171,25 @@ cacheDir cfg modName = toCutPath cfg path
 
 -- This is just a convenience used in exprPath
 -- TODO rename hSomething?
-argHashes :: CutState -> CutExpr -> [String]
-argHashes s@(scr,_, _, _) (CutRef _ _ _ v) = case lookup v scr of
+argHashes :: DtrState -> DtrExpr -> [String]
+argHashes s@(scr,_, _, _) (DtrRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v
                                          Just e  -> argHashes s e
-argHashes _ (CutLit  _ _     v    ) = [digest v]
-argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
-argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
-argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
-argHashes s (CutRules (CompiledExpr e _)) = argHashes s e
+argHashes _ (DtrLit  _ _     v    ) = [digest v]
+argHashes s (DtrFun  _ _ _ _ es   ) = map (digest . exprPath s) es
+argHashes s (DtrBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
+argHashes s (DtrList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
+argHashes s (DtrRules (CompiledExpr e _)) = argHashes s e
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
--- resolveVar :: CutConfig -> CutPath -> IO CutPath
--- resolveVar cfg p@(CutPath path) =
---   -- TODO is just using CutPath directly here OK?
+-- resolveVar :: DtrConfig -> DtrPath -> IO DtrPath
+-- resolveVar cfg p@(DtrPath path) =
+--   -- TODO is just using DtrPath directly here OK?
 --   if "$TMPDIR/vars" `isPrefixOf` path
---     then resolveSymlinks cfg True (fromCutPath cfg p) >>= resolveVar cfg . toCutPath cfg
+--     then resolveSymlinks cfg True (fromDtrPath cfg p) >>= resolveVar cfg . toDtrPath cfg
 --     else return p
 
--- resolveVars :: CutConfig -> [CutPath] -> IO [CutPath]
+-- resolveVars :: DtrConfig -> [DtrPath] -> IO [DtrPath]
 -- resolveVars cfg = mapM (resolveVar cfg)
 
 {- An attempt to speed up file access by making a tree of smaller dirs instead
@@ -207,8 +207,8 @@ argHashes s (CutRules (CompiledExpr e _)) = argHashes s e
 --     joinPath = undefined
 
 -- TODO rename to tmpPath?
-exprPath :: CutState -> CutExpr -> CutPath
-exprPath s@(scr, _, _, _) (CutRef _ _ _ v) = case lookup v scr of
+exprPath :: DtrState -> DtrExpr -> DtrPath
+exprPath s@(scr, _, _, _) (DtrRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
                                          Just e  -> exprPath s e
 exprPath s@(_, cfg, _, _) expr = debugPath cfg "exprPath" expr res
@@ -219,17 +219,17 @@ exprPath s@(_, cfg, _, _) expr = debugPath cfg "exprPath" expr res
     hashes = argHashes s expr
     res    = exprPathExplicit cfg prefix rtype salt hashes
 
-exprPathExplicit :: CutConfig -> String -> CutType -> Int -> [String] -> CutPath
-exprPathExplicit cfg prefix rtype salt hashes = toCutPath cfg path
+exprPathExplicit :: DtrConfig -> String -> DtrType -> Int -> [String] -> DtrPath
+exprPathExplicit cfg prefix rtype salt hashes = toDtrPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = (concat $ intersperse "_" hashes) ++ suf
     suf  = if salt == 0 then "" else "_" ++ show salt
     path = dir </> base <.> extOf rtype
 
--- TODO remove VarPath, ExprPath types once CutPath works everywhere
-varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
-varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base
+-- TODO remove VarPath, ExprPath types once DtrPath works everywhere
+varPath :: DtrConfig -> DtrVar -> DtrExpr -> DtrPath
+varPath cfg (DtrVar var) expr = toDtrPath cfg $ cfgTmpDir cfg </> "vars" </> base
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
 

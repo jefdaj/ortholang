@@ -7,7 +7,7 @@ import Detourrr.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
 import Detourrr.Core.Compile.Map  (rMap)
 import Detourrr.Core.Actions       (wrappedCmdWrite, debugA)
 -- import Detourrr.Core.Debug         (debugA)
-import Detourrr.Core.Paths         (CutPath, fromCutPath)
+import Detourrr.Core.Paths         (DtrPath, fromDtrPath)
 import Detourrr.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
 import Detourrr.Modules.BlastDB    (ndb, pdb)
@@ -16,8 +16,8 @@ import Detourrr.Modules.SeqIO      (faa)
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
 
-cutModule :: CutModule
-cutModule = CutModule
+dtrModule :: DtrModule
+dtrModule = DtrModule
   { mName = "BlastRBH"
   , mDesc = "Reciprocal BLAST+ best hits"
   , mTypes = [faa, ndb, pdb, bht]
@@ -42,8 +42,8 @@ blastDescsRev = filter isReversible blastDescs
 -- *blast*_rev --
 -----------------
 
-mkBlastFromFaRev :: BlastDesc -> CutFunction
-mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFunction
+mkBlastFromFaRev :: BlastDesc -> DtrFunction
+mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
@@ -53,8 +53,8 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFun
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
-  = rules st (CutFun rtn salt deps name [e, s, q])
+rMkBlastFromFaRev d st (DtrFun rtn salt deps _ [e, q, s])
+  = rules st (DtrFun rtn salt deps name [e, s, q])
   where
     rules = fRules $ mkBlastFromFa d
     name  = fName  $ mkBlastFromFa d
@@ -64,8 +64,8 @@ rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
 -- *blast*_rev_each --
 ----------------------
 
-mkBlastFromFaRevEach :: BlastDesc -> CutFunction
-mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
+mkBlastFromFaRevEach :: BlastDesc -> DtrFunction
+mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
@@ -80,13 +80,13 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
 -- expression over the new action fn.
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
+rMkBlastFromFaRevEach (bCmd, qType, _, _) st (DtrFun rtn salt deps _ [e, s, qs])
   = rMap 3 revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
-    sList      = CutList (typeOf s) salt (depsOf s) [s]
-    subjDbExpr = CutFun dbType salt (depsOf sList) dbFnName [sList]
-    editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
+    sList      = DtrList (typeOf s) salt (depsOf s) [s]
+    subjDbExpr = DtrFun dbType salt (depsOf sList) dbFnName [sList]
+    editedExpr = DtrFun rtn salt deps editedName [e, subjDbExpr, qs]
     editedName = bCmd ++ "_db_rev_each"
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
@@ -94,7 +94,7 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
 rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
-aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aMkBlastFromDbRev :: String -> (DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]
 aMkBlastFromDbRev _ _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
@@ -105,8 +105,8 @@ aMkBlastFromDbRev _ _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
 
 -- TODO move to Tables.hs? And rename that to BlastHits?
 
-reciprocalBest :: CutFunction
-reciprocalBest = CutFunction
+reciprocalBest :: DtrFunction
+reciprocalBest = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht, bht] bht
@@ -116,15 +116,15 @@ reciprocalBest = CutFunction
   where
     name = "reciprocal_best"
 
--- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
-aReciprocalBest :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+-- TODO how are $TMPDIR paths getting through after conversion from dtrpaths??
+aReciprocalBest :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
 aReciprocalBest cfg ref _ [out, left, right] = do
   wrappedCmdWrite False True cfg ref out'' [left', right'] [] []
     "reciprocal_best.R" [out', left', right']
   where
-    out'   = fromCutPath cfg out
-    left'  = fromCutPath cfg left
-    right' = fromCutPath cfg right
+    out'   = fromDtrPath cfg out
+    left'  = fromDtrPath cfg left
+    right' = fromDtrPath cfg right
     out''  = debugA cfg "aReciprocalBest" out' [out', left', right']
 aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
 
@@ -132,8 +132,8 @@ aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show
 -- reciprocal_best_each --
 --------------------------
 
-reciprocalBestEach :: CutFunction
-reciprocalBestEach = CutFunction
+reciprocalBestEach :: DtrFunction
+reciprocalBestEach = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht, ListOf bht] (ListOf bht)
@@ -147,8 +147,8 @@ reciprocalBestEach = CutFunction
 -- *blast*_rbh --
 -----------------
 
-mkBlastRbh :: BlastDesc -> CutFunction
-mkBlastRbh d@(bCmd, qType, sType, _) = CutFunction
+mkBlastRbh :: BlastDesc -> DtrFunction
+mkBlastRbh d@(bCmd, qType, sType, _) = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
@@ -160,19 +160,19 @@ mkBlastRbh d@(bCmd, qType, sType, _) = CutFunction
 
 -- TODO this only works with symmetric fns so far... either fix or restrict to those!
 rMkBlastRbh :: BlastDesc -> RulesFn
-rMkBlastRbh (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, r]) = rExpr s main
+rMkBlastRbh (bCmd, _, _, _) s (DtrFun _ salt deps _ [e, l, r]) = rExpr s main
   where
-    main  = CutFun bht salt deps "reciprocal_best" [lHits, rHits]
-    lHits = CutFun bht salt deps  bCmd            [e, l, r]
-    rHits = CutFun bht salt deps (bCmd ++ "_rev") [e, l, r]
+    main  = DtrFun bht salt deps "reciprocal_best" [lHits, rHits]
+    lHits = DtrFun bht salt deps  bCmd            [e, l, r]
+    rHits = DtrFun bht salt deps (bCmd ++ "_rev") [e, l, r]
 rMkBlastRbh _ _ _ = error "bad argument to rMkBlastRbh"
 
 ----------------------
 -- *blast*_rbh_each --
 ----------------------
 
-mkBlastRbhEach :: BlastDesc -> CutFunction
-mkBlastRbhEach d@(bCmd, qType, sType, _) = CutFunction
+mkBlastRbhEach :: BlastDesc -> DtrFunction
+mkBlastRbhEach d@(bCmd, qType, sType, _) = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
@@ -183,9 +183,9 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = CutFunction
     name = bCmd ++ "_rbh_each"
 
 rMkBlastRbhEach :: BlastDesc -> RulesFn
-rMkBlastRbhEach (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, rs]) = rExpr s main
+rMkBlastRbhEach (bCmd, _, _, _) s (DtrFun _ salt deps _ [e, l, rs]) = rExpr s main
   where
-    main  = CutFun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
-    lHits = CutFun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
-    rHits = CutFun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
+    main  = DtrFun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
+    lHits = DtrFun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
+    rHits = DtrFun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
 rMkBlastRbhEach _ _ _ = error "bad argument to rMkBlastRbh"

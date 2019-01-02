@@ -10,7 +10,7 @@ let
   runDepends = [ myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-tables";
+  name = "detourrr-tables";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

@@ -60,7 +60,7 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 -- TODO combine pVar and pVarEq somehow to reduce try issues?
 
 -- TODO message in case it doesn't parse?
-pAssign :: ParseM CutAssign
+pAssign :: ParseM DtrAssign
 pAssign = debugParser "pAssign" $ do
   (scr, cfg, ref, ids) <- getState
   -- optional newline
@@ -80,14 +80,14 @@ pAssign = debugParser "pAssign" $ do
 --      (later when working on statement issues)
 -- TODO if the statement is literally `result`, what do we do?
 --      maybe we need a separate type of assignment statement for this?
-pResult :: ParseM CutAssign
+pResult :: ParseM DtrAssign
 pResult = debugParser "pResult" $ do
   -- (_, cfg, _) <- getState
   e <- pExpr
   -- let e' = debugParser cfg "pResult" e
-  return (CutVar "result", e)
+  return (DtrVar "result", e)
 
-pStatement :: ParseM CutAssign
+pStatement :: ParseM DtrAssign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)
   -- (_, cfg) <- getState
   -- res <- pAssign <|> pResult
@@ -102,7 +102,7 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 
 -- TODO message in case it doesn't parse?
 -- TODO should it get automatically `put` here, or manually in the repl?
-pScript :: ParseM CutScript
+pScript :: ParseM DtrScript
 pScript = debugParser "pScript" $ do
   (_, cfg, ref, ids) <- getState
   optional spaces
@@ -110,22 +110,22 @@ pScript = debugParser "pScript" $ do
   putState (scr, cfg, ref, ids)
   return scr
 
--- TODO need CutState here? or just CutConfig?
-parseStatement :: CutState -> String -> Either ParseError CutAssign
+-- TODO need DtrState here? or just DtrConfig?
+parseStatement :: DtrState -> String -> Either ParseError DtrAssign
 parseStatement = runParseM pStatement
 
 -- The name doesn't do a good job of explaining this, but it's expected to be
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
-parseString :: CutConfig -> Locks -> HashedSeqIDsRef -> String
-            -> Either ParseError CutScript
+parseString :: DtrConfig -> Locks -> HashedSeqIDsRef -> String
+            -> Either ParseError DtrScript
 parseString c r ids = runParseM pScript ([], c, r, ids)
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath
-          -> IO (Either ParseError CutScript)
+parseFile :: DtrConfig -> Locks -> HashedSeqIDsRef -> FilePath
+          -> IO (Either ParseError DtrScript)
 parseFile cfg ref ids path = do
   txt <- readScriptWithIncludes ref path'
   return $ (parseString cfg ref ids . stripComments) txt
@@ -133,7 +133,7 @@ parseFile cfg ref ids path = do
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO CutScript
+parseFileIO :: DtrConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO DtrScript
 parseFileIO cfg ref ids scr = do
   mscr1 <- parseFile cfg ref ids scr
   case mscr1 of

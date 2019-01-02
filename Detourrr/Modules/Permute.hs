@@ -9,12 +9,12 @@ import Detourrr.Core.Config (debug)
 import Development.Shake.FilePath   (makeRelative)
 import Detourrr.Core.Compile.Basic  (rExpr)
 import Detourrr.Core.Actions (readStrings, writeStrings, debugA, debugNeed)
-import Detourrr.Core.Paths (exprPath, exprPathExplicit, fromCutPath)
+import Detourrr.Core.Paths (exprPath, exprPathExplicit, fromDtrPath)
 -- import Detourrr.Core.Debug          (debugA, debug)
 import Detourrr.Core.Util           (digest)
 
-cutModule :: CutModule
-cutModule = CutModule
+dtrModule :: DtrModule
+dtrModule = DtrModule
   { mName = "Permute"
   , mDesc = "Generate random permutations of lists"
   , mTypes = []
@@ -35,10 +35,10 @@ cutModule = CutModule
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
-         -> CutState -> CutExpr -> Rules ExprPath
-rPermute comboFn s@(_, cfg, _, _) expr@(CutFun _ salt _ _ [iList]) = do
+         -> DtrState -> DtrExpr -> Rules ExprPath
+rPermute comboFn s@(_, cfg, _, _) expr@(DtrFun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
-  let oList      = fromCutPath cfg $ exprPath s expr
+  let oList      = fromDtrPath cfg $ exprPath s expr
       (ListOf t) = typeOf iList
   oList %> aPermute s comboFn iPath t salt
   return (ExprPath oList)
@@ -46,9 +46,9 @@ rPermute _ _ _ = error "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
-aPermute :: CutState
+aPermute :: DtrState
          -> ([String] -> [[String]])
-         -> FilePath -> CutType -> Int
+         -> FilePath -> DtrType -> Int
          -> FilePath -> Action ()
 aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
   debugNeed cfg "aPermute" [iPath]
@@ -58,7 +58,7 @@ aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
   -- TODO will this match other files?
   let mkOut p = exprPathExplicit cfg "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
-      oPaths' = map (fromCutPath cfg) oPaths
+      oPaths' = map (fromDtrPath cfg) oPaths
       combos  = comboFn elements
   mapM_ (\(p,ps) -> writeStrings eType cfg ref p $ debug cfg ("combo: " ++ show ps) ps) (zip oPaths' combos)
   let out' = debugA cfg "aPermute" out [iPath, extOf eType, out]
@@ -70,8 +70,8 @@ aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
 
 -- TODO rename actual function to drop_each?
 
-leaveEachOut :: CutFunction
-leaveEachOut = let name = "leave_each_out" in CutFunction
+leaveEachOut :: DtrFunction
+leaveEachOut = let name = "leave_each_out" in DtrFunction
   { fName      = name 
   , fFixity    = Prefix
   , fTypeCheck = combosTypeCheck
@@ -79,7 +79,7 @@ leaveEachOut = let name = "leave_each_out" in CutFunction
   , fRules     = rPermute dropEach
   }
 
-combosTypeCheck :: [CutType] -> Either String CutType
+combosTypeCheck :: [DtrType] -> Either String DtrType
 combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t
 combosTypeCheck _ = Left "type error in leave_each_out!"
 

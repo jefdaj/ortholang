@@ -83,18 +83,18 @@ pIden = debugParser "pIden" $ lexeme $ do
     first = letter
     rest  = letter <|> digit <|> oneOf "-_"
 
-pVar :: ParseM CutVar
-pVar = debugParser "pVar" (CutVar <$> pIden)
+pVar :: ParseM DtrVar
+pVar = debugParser "pVar" (DtrVar <$> pIden)
 
 -- TODO is the error in here?? maybe it consumes a space and therefore doesn't fail?
 pEq :: ParseM ()
 -- pEq = debugParser "pEq" ((void $ spaces <* pSym '=') <?> "equals sign")
 pEq = debugParser "pEq" $ pSym '='
 
-pVarEq :: ParseM CutVar
+pVarEq :: ParseM DtrVar
 pVarEq = debugParser "pVarEq" ((pVar <* pEq) <?> "variable assignment")
 
-pVarOnly :: ParseM CutVar
+pVarOnly :: ParseM DtrVar
 pVarOnly = debugParser "pVarOnly " (pVar <* notFollowedBy pEq)
 
 --------------
@@ -102,7 +102,7 @@ pVarOnly = debugParser "pVarOnly " (pVar <* notFollowedBy pEq)
 --------------
 
 -- TODO hey Scientific has its own parser, would it work to add?
-pNum :: ParseM CutExpr
+pNum :: ParseM DtrExpr
 pNum = debugParser "pNum" $ do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
@@ -111,7 +111,7 @@ pNum = debugParser "pNum" $ do
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
   let lit = show (read (n:ns) :: Scientific)
-  return $ CutLit num 0 lit
+  return $ DtrLit num 0 lit
 
 -- list of chars which can be escaped in Detourrr
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -134,5 +134,5 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
-pStr :: ParseM CutExpr
-pStr = debugParser "pStr" (CutLit str 0 <$> pQuoted <?> "string literal")
+pStr :: ParseM DtrExpr
+pStr = debugParser "pStr" (DtrLit str 0 <$> pQuoted <?> "string literal")

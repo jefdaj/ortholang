@@ -6,14 +6,14 @@ import Data.List.Split  (splitOn)
 import Data.List.Utils  (join)
 import Detourrr.Modules (modules)
 
-explainType :: CutType -> String
+explainType :: DtrType -> String
 explainType Empty = error "explain empty type"
 explainType (ListOf   t) = explainType t -- TODO add the list part?
 explainType (ScoresOf t) = explainType t -- TODO add the scores part?
 explainType t = "| `" ++ tExt t ++ "` | " ++ tDesc t ++ " |"
 
 -- TODO these aren't functions!
-typesTable :: CutModule -> [String]
+typesTable :: DtrModule -> [String]
 typesTable m = if null (mTypes m) then [""] else
   [ "Types:"
   , ""
@@ -25,14 +25,14 @@ typesTable m = if null (mTypes m) then [""] else
   ++ map explainType (mTypes m)
   ++ [""]
 
-explainFunction :: CutFunction -> String
+explainFunction :: DtrFunction -> String
 explainFunction = join " | " . barred . map quoted . elems
   where
     elems  f  = filter (not . (`elem` [":", "->"])) $ splitOn " " $ fTypeDesc f
     barred es = [head es, join ", " $ init $ tail es, last es]
     quoted t  = "`" ++ t ++ "`"
 
-functionsTable :: CutModule -> [String]
+functionsTable :: DtrModule -> [String]
 functionsTable m = if null (mFunctions m) then [""] else
   [ "Functions:"
   , ""
@@ -44,7 +44,7 @@ functionsTable m = if null (mFunctions m) then [""] else
 
 -- TODO only use this as default if there's no custom markdown description written?
 -- TODO or move that stuff to the tutorial maybe?
-moduleReference :: CutModule -> [String]
+moduleReference :: DtrModule -> [String]
 moduleReference m =
   [ "## " ++ mName m ++ " module"
   , ""

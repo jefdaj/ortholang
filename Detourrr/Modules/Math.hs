@@ -1,6 +1,6 @@
 module Detourrr.Modules.Math where
 
--- TODO is math ever actually needed in a cut script?
+-- TODO is math ever actually needed in a dtr script?
 
 import Detourrr.Core.Types
 import Development.Shake
@@ -11,8 +11,8 @@ import Detourrr.Core.Compile.Basic (rBop, defaultTypeCheck)
 -- import Detourrr.Core.Debug         (debugA)
 import Detourrr.Core.Actions       (readLit, writeLit, debugA, debugNeed)
 
-cutModule :: CutModule
-cutModule = CutModule
+dtrModule :: DtrModule
+dtrModule = DtrModule
   { mName = "Math"
   , mDesc = "Basic math"
   , mTypes = [] -- TODO include num?
@@ -31,8 +31,8 @@ divDouble n1 n2 = read $ show (answer :: Double)
   where
     answer = toRealFloat n1 / toRealFloat n2
 
-mkMathFn :: String -> (Scientific -> Scientific -> Scientific) -> CutFunction
-mkMathFn name fn = CutFunction
+mkMathFn :: String -> (Scientific -> Scientific -> Scientific) -> DtrFunction
+mkMathFn name fn = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, num] num
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, num] num
@@ -43,15 +43,15 @@ mkMathFn name fn = CutFunction
 -- apply a math operation to two numbers
 -- TODO can a lot of this be moved back into compile while leaving something?
 rMath :: (Scientific -> Scientific -> Scientific) -- in this module
-      -> CutState -> CutExpr -> Rules ExprPath    -- in Compile module
-rMath fn s@(_, cfg, ref, _) e@(CutBop _ _ _ _ n1 n2) = do
+      -> DtrState -> DtrExpr -> Rules ExprPath    -- in Compile module
+rMath fn s@(_, cfg, ref, _) e@(DtrBop _ _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering rMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (n1, n2)
   p3 %> aMath cfg ref fn p1 p2
   return (ExprPath p3)
 rMath _ _ _ = error "bad argument to rMath"
 
-aMath :: CutConfig -> Locks -> (Scientific -> Scientific -> Scientific)
+aMath :: DtrConfig -> Locks -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()
 aMath cfg ref fn p1 p2 out = do
     debugNeed cfg "aMath" [p1, p2]

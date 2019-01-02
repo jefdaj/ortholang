@@ -7,7 +7,7 @@ import Detourrr.Core.Types
 import Detourrr.Core.Compile.Basic        (rExpr, defaultTypeCheck, mkLoad,
                                     mkLoadList, )
 import Detourrr.Core.Actions (readLit, writeLits, debugA)
-import Detourrr.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
+import Detourrr.Core.Paths (exprPath, DtrPath, toDtrPath, fromDtrPath)
 import Data.List                  (sort)
 import Data.String.Utils          (strip)
 import Detourrr.Core.Compile.Compose (compose1)
@@ -16,8 +16,8 @@ import System.FilePath.Glob       (glob)
 import System.Directory (makeRelativeToCurrentDirectory)
 -- import Detourrr.Core.Debug        (debugA)
 
-cutModule :: CutModule
-cutModule = CutModule
+dtrModule :: DtrModule
+dtrModule = DtrModule
   { mName = "Load"
   , mDesc = "Load generic lists"
   , mTypes = [] -- TODO include str?
@@ -31,15 +31,15 @@ cutModule = CutModule
 -- load_list --
 ---------------
 
-loadList :: CutFunction
+loadList :: DtrFunction
 loadList = mkLoad False "load_list" (ListOf str)
 
 ----------------
 -- glob_files --
 ----------------
 
-globFiles :: CutFunction
-globFiles = CutFunction
+globFiles :: DtrFunction
+globFiles = DtrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
@@ -58,17 +58,17 @@ globFiles = CutFunction
 --    (should use str rather than elemRtnType tho)
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
-rGlobFiles :: CutState -> CutExpr -> Rules ExprPath
-rGlobFiles s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [p]) = do
+rGlobFiles :: DtrState -> DtrExpr -> Rules ExprPath
+rGlobFiles s@(_, cfg, ref, _) e@(DtrFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
   let outPath = exprPath s e
-      out'    = fromCutPath cfg outPath
-      path'   = toCutPath cfg path
+      out'    = fromDtrPath cfg outPath
+      path'   = toDtrPath cfg path
   out' %> \_ -> aGlobFiles cfg ref outPath path'
   return (ExprPath out')
 rGlobFiles _ _ = error "bad arguments to rGlobFiles"
 
-aGlobFiles :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
+aGlobFiles :: DtrConfig -> Locks -> DtrPath -> DtrPath -> Action ()
 aGlobFiles cfg ref outPath path = do
   ptn   <- fmap strip $ readLit cfg ref path'
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
@@ -78,23 +78,23 @@ aGlobFiles cfg ref outPath path = do
   -- toDetourrrListStr cfg str (ExprPath outPath) paths
   writeLits cfg ref out'' paths'
   where
-    out'  = fromCutPath cfg outPath
-    path' = fromCutPath cfg path
+    out'  = fromDtrPath cfg outPath
+    path' = fromDtrPath cfg path
     out'' = debugA cfg "aGlobFiles" out' [out', path']
 
 ------------
 -- load_* --
 ------------
 
--- These are the Haskell functions for generating the CutFunctions;
+-- These are the Haskell functions for generating the DtrFunctions;
 -- They should be called in other modules with specific types to make loaders for
 
-mkLoadGlob :: String -> CutType -> CutFunction -> CutFunction
+mkLoadGlob :: String -> DtrType -> DtrFunction -> DtrFunction
 mkLoadGlob name loadType eachFn = compose1 name desc globFiles (ListOf str) eachFn
   where
     desc = mkTypeDesc name [str] (ListOf loadType)
 
-mkLoaders :: Bool -> CutType -> [CutFunction]
+mkLoaders :: Bool -> DtrType -> [DtrFunction]
 mkLoaders hashSeqIDs loadType = [single, each, glb]
   where
     ext    = extOf loadType

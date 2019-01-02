@@ -7,13 +7,13 @@ import Detourrr.Core.Types
 import Detourrr.Modules.SeqIO      (fna, faa)
 import Detourrr.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import System.FilePath             ((</>), takeBaseName)
-import Detourrr.Core.Paths         (CutPath, toCutPath, fromCutPath)
+import Detourrr.Core.Paths         (DtrPath, toDtrPath, fromDtrPath)
 import Detourrr.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmd)
 import System.Directory            (createDirectoryIfMissing)
 import Detourrr.Core.Util          (digest, unlessExists)
 
-cutModule :: CutModule
-cutModule = CutModule
+dtrModule :: DtrModule
+dtrModule = DtrModule
   { mName = "SonicParanoid"
   , mDesc = "Very fast, accurate, and easy orthology."
   , mTypes = [faa, fna, spr]
@@ -22,8 +22,8 @@ cutModule = CutModule
       ]
   }
 
-spr :: CutType
-spr = CutType
+spr :: DtrType
+spr = DtrType
   { tExt  = "spr"
   , tDesc = "SonicParanoid results"
   , tShow = defaultShow
@@ -36,8 +36,8 @@ spr = CutType
 -- sonicparanoid --
 -------------------
 
-sonicparanoid :: CutFunction
-sonicparanoid = let name = "sonicparanoid" in CutFunction
+sonicparanoid :: DtrFunction
+sonicparanoid = let name = "sonicparanoid" in DtrFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
@@ -50,7 +50,7 @@ sonicparanoid = let name = "sonicparanoid" in CutFunction
 
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
-aSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aSonicParanoid :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
   let cacheDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
@@ -61,18 +61,18 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       -- outDir      = tmpDir </> "result" -- TODO copy input files here?
       inDir       = tmpDir </> "input_links" -- TODO can you prevent it duplicating this to input?
       opPath'     = tmpDir </> "ortholog_relations" </> "ortholog_pairs.tsv"
-      opPath      = toCutPath cfg opPath'
-      faListPath' = fromCutPath cfg faListPath
-      out'        = fromCutPath cfg out
+      opPath      = toDtrPath cfg opPath'
+      faListPath' = fromDtrPath cfg faListPath
+      out'        = fromDtrPath cfg out
       out''       = debugA cfg "aSonicParanoid" out' [out', faListPath']
 
   unlessExists opPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
     faPaths <- readPaths cfg ref faListPath'
-    let faPaths' = map (fromCutPath cfg) faPaths
+    let faPaths' = map (fromDtrPath cfg) faPaths
     debugNeed cfg "aSonicParanoid" faPaths'
-    let faLinks = map (\p -> toCutPath cfg $ inDir </> (takeBaseName $ fromCutPath cfg p)) faPaths
+    let faLinks = map (\p -> toDtrPath cfg $ inDir </> (takeBaseName $ fromDtrPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
     (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"

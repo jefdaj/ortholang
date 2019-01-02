@@ -28,7 +28,7 @@ import Detourrr.Core.Types
 import Detourrr.Core.Util    (digest, digestLength)
 import Detourrr.Core.Locks   (withReadLock', withWriteLock')
 import Detourrr.Core.Actions (debugTrackWrite)
-import Detourrr.Core.Paths   (fromCutPath)
+import Detourrr.Core.Paths   (fromDtrPath)
 import Data.List.Utils       (split)
 import Data.Maybe (fromJust)
 
@@ -51,17 +51,17 @@ hashIDsFasta txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ l
     joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, M.fromList $ D.toList ids)
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
-hashIDsFile :: CutConfig -> Locks -> CutPath -> CutPath -> Action HashedSeqIDs
+hashIDsFile :: DtrConfig -> Locks -> DtrPath -> DtrPath -> Action HashedSeqIDs
 hashIDsFile cfg ref inPath outPath = do
-  let inPath'  = fromCutPath cfg inPath
-      outPath' = fromCutPath cfg outPath
-  txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  let inPath'  = fromDtrPath cfg inPath
+      outPath' = fromDtrPath cfg outPath
+  txt <- withReadLock' ref inPath' $ readFile' $ fromDtrPath cfg inPath
   let (fasta', ids) = hashIDsFasta txt
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta'
   debugTrackWrite cfg [outPath']
   return ids
 
-writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedSeqIDs -> Action ()
+writeHashedIDs :: DtrConfig -> Locks -> DtrPath -> HashedSeqIDs -> Action ()
 writeHashedIDs cfg ref path ids = do
   withWriteLock' ref path'
     $ liftIO
@@ -71,7 +71,7 @@ writeHashedIDs cfg ref path ids = do
     $ M.toList ids
   debugTrackWrite cfg [path']
   where
-    path' = fromCutPath cfg path
+    path' = fromDtrPath cfg path
     toLine (h, i) = h ++ "\t" ++ i
 
 -- see https://stackoverflow.com/q/48571481
@@ -80,7 +80,7 @@ writeHashedIDs cfg ref path ids = do
 
 -- hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
-unhashIDs :: CutConfig -> HashedSeqIDs -> String -> String
+unhashIDs :: DtrConfig -> HashedSeqIDs -> String -> String
 unhashIDs _ ids txt = before ++ concatMap replaceOne after
   where
     (before:after) = split "seqid_" txt
@@ -89,20 +89,20 @@ unhashIDs _ ids txt = before ++ concatMap replaceOne after
                                shortID = head $ words origID
                            in shortID ++ rest
 
-unhashIDsFile :: CutConfig -> Locks -> HashedSeqIDs -> CutPath -> CutPath -> Action ()
+unhashIDsFile :: DtrConfig -> Locks -> HashedSeqIDs -> DtrPath -> DtrPath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do
-  let inPath'  = fromCutPath cfg inPath
-      outPath' = fromCutPath cfg outPath
-  txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  let inPath'  = fromDtrPath cfg inPath
+      outPath' = fromDtrPath cfg outPath
+  txt <- withReadLock' ref inPath' $ readFile' $ fromDtrPath cfg inPath
   -- let txt' = unhashIDs ids txt
   let txt' = unhashIDs cfg ids txt
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt'
   debugTrackWrite cfg [outPath']
 
 -- TODO should this be IO or Action?
-readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedSeqIDs
+readHashedIDs :: DtrConfig -> Locks -> DtrPath -> Action HashedSeqIDs
 readHashedIDs cfg ref path = do
-  let path' = fromCutPath cfg path
+  let path' = fromDtrPath cfg path
   txt <- withReadLock' ref path' $ readFile' path'
   let ids = map (\(i, si) -> (i, tail si)) $ map (splitAt digestLength) $ lines txt
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"

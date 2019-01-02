@@ -40,20 +40,20 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- utility functions --
 -----------------------
 
-regularParse :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> Either ParseError a
+regularParse :: ParseM a -> DtrConfig -> Locks -> HashedSeqIDsRef -> String -> Either ParseError a
 regularParse p cfg ref ids = parseWithEof p ([], cfg, ref, ids)
 
-takeVar :: String -> CutVar
-takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
+takeVar :: String -> DtrVar
+takeVar = DtrVar . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> Bool
+parsedItAll :: ParseM a -> DtrConfig -> Locks -> HashedSeqIDsRef -> String -> Bool
 parsedItAll p cfg ref ids str' = case parseWithLeftOver p ([], cfg, ref, ids) str' of
   Right (_, "") -> True
   _ -> False
 
--- parse some cut code, pretty-print it, parse again,
+-- parse some dtr code, pretty-print it, parse again,
 -- and check that the two parsed ASTs are equal
-roundTrip :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> HashedSeqIDsRef
+roundTrip :: (Eq a, Show a, Pretty a) => DtrConfig -> Locks -> HashedSeqIDsRef
           -> ParseM a -> String -> Either (String, String) a
 roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
   Left  l1 -> Left (code, show l1)
@@ -65,7 +65,7 @@ roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
 
 -- Test that a list of example strings can be parsed + printed + parsed,
 -- and both parses come out correctly, or return the first error.
-tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> HashedSeqIDsRef -> ParseM a
+tripExamples :: (Eq a, Show a, Pretty a) => DtrConfig -> Locks -> HashedSeqIDsRef -> ParseM a
              -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ _ _ [] = Right ()
 tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
@@ -78,17 +78,17 @@ tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
 -- tests --
 -----------
 
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: DtrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests cfg ref ids = return $ testGroup "test parser"
                                [exTests cfg ref ids, wsProps cfg ref ids, acProps cfg ref ids]
 
-mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> Locks -> HashedSeqIDsRef
+mkCase :: (Show a, Eq a, Pretty a) => DtrConfig -> Locks -> HashedSeqIDsRef
        -> String -> ParseM a -> [(String, a)] -> TestTree
 mkCase cfg ref ids name parser examples = 
   testCase name $ Right () @=? tripExamples cfg ref ids parser examples
 
-exTests :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
-exTests cfg ref ids = testGroup "round-trip handwritten cut code"
+exTests :: DtrConfig -> Locks -> HashedSeqIDsRef -> TestTree
+exTests cfg ref ids = testGroup "round-trip handwritten dtr code"
   [ mkCase cfg ref ids "function calls"   pFun       exFuns
   , mkCase cfg ref ids "terms"            pTerm      exTerms
   , mkCase cfg ref ids "expressions"      pExpr      exExprs
@@ -96,10 +96,10 @@ exTests cfg ref ids = testGroup "round-trip handwritten cut code"
   -- , mkCase cfg "binary operators" pBop       exBops
   ]
 
-wsProps :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
+wsProps :: DtrConfig -> Locks -> HashedSeqIDsRef -> TestTree
 wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
-    \(ExVar v@(CutVar s)) (ExSpace w) ->
+    \(ExVar v@(DtrVar s)) (ExSpace w) ->
       parseWithLeftOver pVar ([], cfg, ref, ids) (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
@@ -115,10 +115,10 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   ]
 
 -- TODO use round-trip here too
-acProps :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
-acProps cfg ref ids = testGroup "parse randomly generated cut code"
+acProps :: DtrConfig -> Locks -> HashedSeqIDsRef -> TestTree
+acProps cfg ref ids = testGroup "parse randomly generated dtr code"
   [ testProperty "variable names" $
-      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg, ref, ids) s == Right (v, "")
+      \(ExVar v@(DtrVar s)) -> parseWithLeftOver pVar ([], cfg, ref, ids) s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
       \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg, ref, ids) [c] == Right ((), "")
   , testProperty "variables with equal signs after" $

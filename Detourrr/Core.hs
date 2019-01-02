@@ -1,8 +1,8 @@
 module Detourrr.Core
   ( runRepl
   , evalFile
-  , CutConfig(..)
-  , CutModule(..)
+  , DtrConfig(..)
+  , DtrModule(..)
   , prettyShow
   )
   where
@@ -13,4 +13,4 @@ module Detourrr.Core
 import Detourrr.Core.Pretty (prettyShow)
 import Detourrr.Core.Eval   (evalFile)
 import Detourrr.Core.Repl   (runRepl)
-import Detourrr.Core.Types  (CutConfig(..), CutModule(..)) 
+import Detourrr.Core.Types  (DtrConfig(..), DtrModule(..)) 

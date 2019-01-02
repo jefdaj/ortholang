@@ -6,7 +6,7 @@ module Detourrr.Test.Deps where
 import Data.ByteString.Lazy.Char8 (pack)
 import Development.Shake.FilePath ((<.>), (</>))
 import Paths_Detourrr             (getDataFileName)
-import Detourrr.Core.Types        (CutConfig(..), Locks, HashedSeqIDsRef)
+import Detourrr.Core.Types        (DtrConfig(..), Locks, HashedSeqIDsRef)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
@@ -27,7 +27,7 @@ depCmds =
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: DtrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests _ _ _ = do
   testDir <- getDataFileName $ "tests" </> "dependencies"
   return $ testGroup "check dependency versions"

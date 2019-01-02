@@ -32,7 +32,7 @@ def place_by_hash(tmpfile, outdir, md5sum, suffix):
     else:
         #print "%s -> %s" % (tmpfile, outfile)
         rename(tmpfile, outfile)
-    print outfile # goes to output list in shortcut
+    print outfile # goes to output list in detourrr
 
 def split_fasta(outdir, infasta, prefix, suffix):
     # Based on:
