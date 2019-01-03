@@ -1,2 +1,3 @@
-pcc7942 = load_faa "data/7942genes.faa"
-result = mmseqs_createdb pcc7942
+maga = load_faa "data/Mycoplasma/Mycoplasma_agalactiae_small.faa"
+db = mmseqs_createdb maga
+result = db

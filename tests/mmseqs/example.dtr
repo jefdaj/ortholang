@@ -1,1 +1,13 @@
-result = "example not written yet"
+# list M. agalactiae genes with good hits in M. bovis
+maga   = load_faa "data/Mycoplasma/Mycoplasma_agalactiae_small.faa"
+mbov   = load_faa "data/Mycoplasma/Mycoplasma_bovis_small.fa"
+hits1  = mmseqs_search 1.0e-20 maga mbov
+genes1 = extract_queries (best_hits hits1)
+
+# list M. agalactiae genes with good hits in every Mycoplasma species
+others = load_faa_each (glob_files "data/Mycoplasma/*.faa") ~ [maga]
+hits2  = mmseqs_search_db 1e-20 maga (mmseqs_createdb_all others)
+genes2 = extract_queries (best_hits hits2)
+
+# how many genes are found in maga and mbov but not one of the others?
+result = length genes1 - length genes2

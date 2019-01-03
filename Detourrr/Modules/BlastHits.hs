@@ -75,7 +75,7 @@ extractTargetsEach = let name = "extract_targets_each" in DtrFunction
 
 aDtrCol :: Bool -> Int -> DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
 aDtrCol uniq n cfg ref _ [outPath, tsvPath] = do
-  out <- wrappedCmdOut False True cfg ref [tsvPath'] [] [] "dtr" ["-f", show n, tsvPath']
+  out <- wrappedCmdOut False True cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
   let results = if uniq then sort $ nub $ lines out else lines out
   writeLits cfg ref outPath'' results
   where

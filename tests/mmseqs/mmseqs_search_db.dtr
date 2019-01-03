@@ -1,5 +1,6 @@
-pcc7942 = load_faa "data/7942genes.faa"
-pcc6803 = load_faa "data/6803genes.faa"
-db6803 = mmseqs_createdb pcc6803
-hits = mmseqs_search_db 1.0e-30 pcc7942 db6803
-result = length hits
+maga = load_faa "data/Mycoplasma/Mycoplasma_agalactiae_small.faa"
+db1 = mmseqs_createdb_all [maga]
+db2 = mmseqs_createdb_all (load_faa_each (glob_files "data/Mycoplasma/*.faa"))
+hits1 = mmseqs_search_db 1.0e-30 maga db1
+hits2 = mmseqs_search_db 1.0e-30 maga db2
+result = length_each [hits1, hits2]

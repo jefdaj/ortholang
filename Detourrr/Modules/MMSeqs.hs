@@ -32,7 +32,7 @@ import System.FilePath             ((</>), (<.>), takeDirectory)
 dtrModule :: DtrModule
 dtrModule = DtrModule
   { mName = "MMSeqs"
-  , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite."
+  , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite"
   , mTypes = [faa, fna, bht, mms]
   , mFunctions =
       [ mmseqsCreateDbAll
