@@ -1,5 +1,7 @@
 module Detourrr.Modules.BioMartR where
 
+-- TODO rename to start with biomartr_?
+
 -- TODO put nix and R stuff in here too (ask how best on StackOverflow/Nix ML)
 -- TODO parse strings into "search tables" (name + optional db + optional id)
 -- TODO separate cache dir for this stuff, and "load"/link results to it

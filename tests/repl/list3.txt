@@ -1,8 +1,0 @@
-Welcome to the ShortCut interpreter!
-Type :help for a list of the available commands.
-
-shortcut ❱❱❱ ["one"]
-["one"]
-
-shortcut ❱❱❱ :quit
-Bye for now!

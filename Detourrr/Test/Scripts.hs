@@ -33,10 +33,10 @@ nonDeterministicDtr path = testDir `elem` badDirs
     -- TODO will regular blast be nondeterministic at large scales too?
     badDirs = ["blastcrb", "blastrbh", "blasthits", "plots"] -- TODO blast? blastdb?
 
-getTestDtrs :: IO [FilePath]
-getTestDtrs = do
-  testDir  <- getDataFileName "tests"
-  testDtrs <- findByExtension [".dtr"] testDir
+getTestScripts :: IO [FilePath]
+getTestScripts = do
+  exDir    <- getDataFileName "data"
+  testDtrs <- findByExtension [".dtr"] exDir
   return testDtrs
 
 goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
@@ -73,7 +73,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
 mkTripTest :: DtrConfig -> Locks -> HashedSeqIDsRef -> TestTree
 mkTripTest cfg ref ids = goldenDiff desc tripShow tripAct
   where
-    desc = takeFileName tripDtr ++ " unchanged by round-trip to file"
+    desc = takeBaseName tripDtr ++ " unchanged by round-trip to file"
     tripDtr   = cfgTmpDir cfg <.> "dtr"
     tripShow  = cfgTmpDir cfg <.> "show"
     tripSetup = do
@@ -92,7 +92,7 @@ mkAbsTest :: DtrConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
-    path = takeBaseName $ cfgTmpDir cfg
+    path = takeFileName $ cfgTmpDir cfg
     desc = path ++ " tmpfiles free of absolute paths"
     absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
     absGrep = do
@@ -123,7 +123,7 @@ mkScriptTests (dtr, gld, mtre) cfg ref ids = do
 
 mkTests :: DtrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests cfg ref ids = do
-  dtrs <- getTestDtrs
+  dtrs <- getTestScripts
   let outs     = map findOutFile  dtrs
       mtrees   = map findTreeFile dtrs
       triples  = zip3 dtrs outs mtrees

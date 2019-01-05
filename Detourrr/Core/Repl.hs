@@ -75,16 +75,18 @@ mkRepl promptFns hdl cfg ref ids = do
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
 
+-- promptArrow = " --‣ "
+-- promptArrow = " ❱❱❱ "
+-- promptArrow = " --❱ "
+-- promptArrow = " ⋺  "
+-- promptArrow = " >> "
+-- promptArrow = "-> "
+promptArrow :: String
+promptArrow = " —▶ "
+
 shortDtrPrompt :: DtrConfig -> String
-shortDtrPrompt cfg = "\n" ++ name ++ arrow -- TODO no newline if last command didn't print anything
+shortDtrPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command didn't print anything
   where
-    -- arrow = " --‣ "
-    -- arrow = " ❱❱❱ "
-    -- arrow = " --❱ "
-    -- arrow = " ⋺  "
-    -- arrow = " >> "
-    -- arrow = "-> "
-    arrow = " —▶ "
     name = case cfgScript cfg of
       Nothing -> "detourrr"
       Just s  -> takeFileName s
