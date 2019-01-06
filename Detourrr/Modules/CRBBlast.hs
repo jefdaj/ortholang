@@ -1,4 +1,4 @@
-module Detourrr.Modules.BlastCRB where
+module Detourrr.Modules.CRBBlast where
 
 -- TODO expose the e-value cutoff, since it is an option?
 --      does it make a difference?
@@ -53,7 +53,7 @@ blastCRB = DtrFunction
   , fTypeCheck = tCrbBlast
   , fDesc = Nothing, fTypeDesc  = "crb_blast : fa -> fa -> crb"
   , fFixity    = Prefix
-  , fRules     = rSimpleTmp "crbblast" aBlastCRB
+  , fRules     = rSimpleTmp "crbblast" aCRBBlast
   }
 
 -- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
@@ -64,7 +64,7 @@ blastCRBEach = DtrFunction
   , fTypeCheck = tCrbBlastEach
   , fDesc = Nothing, fTypeDesc  = "crb_blast_each : fa -> fa.list -> crb.list"
   , fFixity    = Prefix
-  , fRules     = rMapTmps 2 aBlastCRB "crbblast"
+  , fRules     = rMapTmps 2 aCRBBlast "crbblast"
   }
 
 -- TODO split into two functions with different type signatures?
@@ -82,9 +82,9 @@ tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or
  - resolves one level of symlink, so we have to point directly to the input
  - files rather than to the canonical $TMPDIR/cache/load... paths.
  -}
-aBlastCRB :: DtrConfig -> Locks -> HashedSeqIDsRef -> DtrPath -> [DtrPath] -> Action ()
-aBlastCRB cfg ref _ tmpDir [o, q, t] = do
-  debugNeed cfg "aBlastCRB" [q', t']
+aCRBBlast :: DtrConfig -> Locks -> HashedSeqIDsRef -> DtrPath -> [DtrPath] -> Action ()
+aCRBBlast cfg ref _ tmpDir [o, q, t] = do
+  debugNeed cfg "aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
@@ -99,7 +99,7 @@ aBlastCRB cfg ref _ tmpDir [o, q, t] = do
       tDst' = toDtrPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toDtrPath cfg oPath
-  debugNeed cfg "aBlastCRB" [qDst, tDst]
+  debugNeed cfg "aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
   wrappedCmdWrite True True cfg ref oPath [qSrc, tSrc] [] [Cwd tmp'] -- TODO is it parallel?
@@ -107,8 +107,8 @@ aBlastCRB cfg ref _ tmpDir [o, q, t] = do
   symlink cfg ref o'' oPath'
   where
     o'   = fromDtrPath cfg o
-    o''  = debugA cfg "aBlastCRB" o [fromDtrPath cfg tmpDir, o', q', t']
+    o''  = debugA cfg "aCRBBlast" o [fromDtrPath cfg tmpDir, o', q', t']
     tmp' = fromDtrPath cfg tmpDir
     q'   = fromDtrPath cfg q
     t'   = fromDtrPath cfg t
-aBlastCRB _ _ _ _ args = error $ "bad argument to aBlastCRB: " ++ show args
+aCRBBlast _ _ _ _ args = error $ "bad argument to aCRBBlast: " ++ show args

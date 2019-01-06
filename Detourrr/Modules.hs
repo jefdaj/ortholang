@@ -4,7 +4,7 @@ import Detourrr.Core.Types (DtrModule(..))
 
 import qualified Detourrr.Modules.BioMartR  as BioMartR
 import qualified Detourrr.Modules.Blast     as Blast
-import qualified Detourrr.Modules.BlastCRB  as BlastCRB
+import qualified Detourrr.Modules.CRBBlast  as CRBBlast
 import qualified Detourrr.Modules.BlastDB   as BlastDB
 import qualified Detourrr.Modules.BlastHits as BlastHits
 import qualified Detourrr.Modules.BlastRBH  as BlastRBH
@@ -41,7 +41,7 @@ modules =
   , BlastHits.dtrModule
   , Length.dtrModule
   , PsiBlast.dtrModule
-  , BlastCRB.dtrModule
+  , CRBBlast.dtrModule
   , Hmmer.dtrModule
   , BlastRBH.dtrModule
   -- , Cheat.dtrModule

@@ -12,7 +12,7 @@ import Paths_Detourrr             (getDataFileName)
 import Detourrr.Core.Repl         (mkRepl)
 import Detourrr.Core.Util         (readFileStrict)
 import Detourrr.Core.Types        (DtrConfig(..), Locks, ReplM, HashedSeqIDsRef)
-import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
+import System.Directory           (createDirectoryIfMissing, removeFile, copyFile)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -60,7 +60,7 @@ mockRepl stdinLines path cfg ref ids = do
   out <- readFile tmpPath -- TODO have to handle unicode here with the new prompt?
   writeFile path $ toGeneric cfg out
   -- this is sometimes helpful when developing tests:
-  -- copyFile tmpPath $ "/tmp" </> takeBaseName path
+  copyFile tmpPath $ "/tmp" </> takeBaseName path
   removeFile tmpPath
   return ()
 

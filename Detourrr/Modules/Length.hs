@@ -12,7 +12,7 @@ import Detourrr.Core.Paths    (exprPath, fromDtrPath,
 import Detourrr.Core.Compile.Basic     (rExpr)
 import Detourrr.Core.Compile.Map     (rMap)
 import Detourrr.Modules.Blast  (bht)
-import Detourrr.Modules.BlastCRB (crb)
+import Detourrr.Modules.CRBBlast (crb)
 import Data.Scientific (Scientific())
 
 dtrModule :: DtrModule

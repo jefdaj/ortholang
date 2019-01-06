@@ -10,7 +10,7 @@ import Detourrr.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, d
 -- import Detourrr.Core.Debug         (debugA )
 import Detourrr.Core.Paths         (DtrPath, fromDtrPath)
 import Detourrr.Modules.Blast      (bht)
-import Detourrr.Modules.BlastCRB   (crb)
+import Detourrr.Modules.CRBBlast   (crb)
 
 dtrModule :: DtrModule
 dtrModule = DtrModule

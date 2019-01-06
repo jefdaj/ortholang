@@ -1,6 +1,9 @@
 module Detourrr.Modules.BioMartR where
 
 -- TODO rename to start with biomartr_?
+-- TODO show progress downloading stuff first
+-- TODO can you just add refseq on the end of the query itself? wtf
+-- TODO fix "invalid path: 'Not available'" (pass error on to user)
 
 -- TODO put nix and R stuff in here too (ask how best on StackOverflow/Nix ML)
 -- TODO parse strings into "search tables" (name + optional db + optional id)
@@ -32,6 +35,7 @@ import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
 -- import Detourrr.Core.Debug   (debugA)
+import System.Directory (createDirectoryIfMissing)
 
 ------------------------
 -- module description --
@@ -235,6 +239,7 @@ aBioMartR :: DtrConfig -> Locks -> HashedSeqIDsRef
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   debugNeed cfg "aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
+  liftIO $ createDirectoryIfMissing True bmTmp'
   wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
     "biomartr.R" [out'', bmFn', sTable']
   where

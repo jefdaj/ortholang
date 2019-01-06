@@ -35,8 +35,8 @@ nonDeterministicDtr path = testDir `elem` badDirs
 
 getTestScripts :: IO [FilePath]
 getTestScripts = do
-  exDir    <- getDataFileName "data"
-  testDtrs <- findByExtension [".dtr"] exDir
+  testDir  <- getDataFileName "tests"
+  testDtrs <- findByExtension [".dtr"] testDir
   return testDtrs
 
 goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
