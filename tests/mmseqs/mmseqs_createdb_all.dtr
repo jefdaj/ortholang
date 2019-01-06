@@ -1,4 +1,6 @@
-maga = load_faa "data/Mycoplasma/Mycoplasma_agalactiae_small.faa"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
 db1 = mmseqs_createdb_all [maga]
-db2 = mmseqs_createdb_all (load_faa_each (glob_files "data/Mycoplasma/*.faa"))
+db2 = mmseqs_createdb_all (load_faa_each (glob_files "data/Mycoplasma_*.fa*"))
+
+# TODO how to print this deterministically? need mmseqs_dbsize/length fn maybe
 result = [db1, db2]

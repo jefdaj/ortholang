@@ -1,11 +1,11 @@
 # list M. agalactiae genes with good hits in M. bovis
-maga   = load_faa "data/Mycoplasma/Mycoplasma_agalactiae_small.faa"
-mbov   = load_faa "data/Mycoplasma/Mycoplasma_bovis_small.fa"
+maga   = load_faa "data/Mycoplasma_agalactiae_small.faa"
+mbov   = load_faa "data/Mycoplasma_bovis_small.fa"
 hits1  = mmseqs_search 1.0e-20 maga mbov
 genes1 = extract_queries hits1
 
 # list M. agalactiae genes with good hits in every Mycoplasma species
-others = load_faa_each (glob_files "data/Mycoplasma/*.faa") ~ [maga]
+others = load_faa_each (glob_files "data/Mycoplasma_*.fa*") ~ [maga]
 hits2  = mmseqs_search_db 1e-20 maga (mmseqs_createdb_all others)
 genes2 = extract_queries hits2
 
