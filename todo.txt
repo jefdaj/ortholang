@@ -1,3 +1,14 @@
+add optional varnames to all cache + expr files? if not too hard it would help manual exploration
+remove all cyano genomes/proteomes from examples + tests in favor of mycoplasma?
+list specific functions that are nondeterministic, and maybe have conditions each should satisfy instead?
+add simplest possible "typeclasses" to combine types, then remove fTypeDesc stuff
+
+bugs to fix:
+  x extract_queries is failing?
+  parse errors (including type errors) shouldn't crash the interpreter!
+  when a var fails to parse the error shouldn't be "no such variable <var that failed to parse>"
+  parentheses need to follow the left -> right rule!
+
 saturday, aim to:
   1) get sonicparanoid and mmseqs to share tmpfiles
   2) get sonicparanoid and orthofinder sharing common extraction function(s)
