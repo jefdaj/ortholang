@@ -10,15 +10,15 @@ import Detourrr.Core.Types
 import Detourrr.Core.Util          (digest)
 import Detourrr.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
                                     wrappedCmdOut, writeCachedLines)
-import Detourrr.Core.Paths         (toDtrPath, fromDtrPath, DtrPath)
+import Detourrr.Core.Paths         (toRrrPath, fromRrrPath, RrrPath)
 import Detourrr.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import Detourrr.Core.Compile.Map  (rMap, rMapSimpleScript)
 import System.FilePath             ((</>), (<.>), takeDirectory)
 import System.Directory            (createDirectoryIfMissing)
 import Detourrr.Modules.Load       (mkLoaders)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
   , mTypes = [gbk, faa, fna]
@@ -40,22 +40,22 @@ dtrModule = DtrModule
     ++ mkLoaders False gbk
   }
 
-gbk :: DtrType
-gbk = DtrType
+gbk :: RrrType
+gbk = RrrType
   { tExt  = "gbk"
   , tDesc = "genbank"
   , tShow = defaultShow
   }
 
-faa :: DtrType
-faa = DtrType
+faa :: RrrType
+faa = RrrType
   { tExt  = "faa"
   , tDesc = "FASTA (amino acid)"
   , tShow = defaultShow
   }
 
-fna :: DtrType
-fna = DtrType
+fna :: RrrType
+fna = RrrType
   { tExt  = "fna"
   , tDesc = "FASTA (nucleic acid)"
   , tShow = defaultShow
@@ -66,8 +66,8 @@ fna = DtrType
 -----------------------
 
 -- TODO need to hash IDs afterward!
-gbkToFaa :: DtrFunction
-gbkToFaa = DtrFunction
+gbkToFaa :: RrrFunction
+gbkToFaa = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [gbk] faa
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [gbk] faa
@@ -78,8 +78,8 @@ gbkToFaa = DtrFunction
     name = "gbk_to_faa"
 
 -- TODO need to hash IDs afterward!
-gbkToFaaEach :: DtrFunction
-gbkToFaaEach = DtrFunction
+gbkToFaaEach :: RrrFunction
+gbkToFaaEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
@@ -90,8 +90,8 @@ gbkToFaaEach = DtrFunction
     name = "gbk_to_faa_each"
 
 -- TODO need to hash IDs afterward!
-gbkToFna :: DtrFunction
-gbkToFna = DtrFunction
+gbkToFna :: RrrFunction
+gbkToFna = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [gbk] fna
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [gbk] fna
@@ -102,8 +102,8 @@ gbkToFna = DtrFunction
     name = "gbk_to_fna"
 
 -- TODO need to hash IDs afterward!
-gbkToFnaEach :: DtrFunction
-gbkToFnaEach = DtrFunction
+gbkToFnaEach :: RrrFunction
+gbkToFnaEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
@@ -120,8 +120,8 @@ gbkToFnaEach = DtrFunction
 -- TODO this needs to do relative paths again, not absolute!
 -- TODO also extract them from genbank files
 
-extractIds :: DtrFunction
-extractIds = DtrFunction
+extractIds :: RrrFunction
+extractIds = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractIds
@@ -131,8 +131,8 @@ extractIds = DtrFunction
   where
     name = "extract_ids"
 
-extractIdsEach :: DtrFunction
-extractIdsEach = DtrFunction
+extractIdsEach :: RrrFunction
+extractIdsEach = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
@@ -142,11 +142,11 @@ extractIdsEach = DtrFunction
   where
     name = "extract_ids_each"
 
-tExtractIds :: [DtrType] -> Either String DtrType
+tExtractIds :: [RrrType] -> Either String RrrType
 tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractIds _ = Left "expected a fasta file"
 
-tExtractIdsEach :: [DtrType] -> Either String DtrType
+tExtractIdsEach :: [RrrType] -> Either String RrrType
 tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
 tExtractIdsEach _ = Left "expected a fasta file"
 
@@ -156,8 +156,8 @@ tExtractIdsEach _ = Left "expected a fasta file"
 
 -- TODO also extract them from genbank files
 
-extractSeqs :: DtrFunction
-extractSeqs = DtrFunction
+extractSeqs :: RrrFunction
+extractSeqs = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
@@ -167,8 +167,8 @@ extractSeqs = DtrFunction
   where
     name = "extract_seqs"
 
-extractSeqsEach :: DtrFunction
-extractSeqsEach = DtrFunction
+extractSeqsEach :: RrrFunction
+extractSeqsEach = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
@@ -178,11 +178,11 @@ extractSeqsEach = DtrFunction
   where
     name = "extract_seqs_each"
 
-tExtractSeqs  :: [DtrType] -> Either String DtrType
+tExtractSeqs  :: [RrrType] -> Either String RrrType
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
 
-tExtractSeqsEach  :: [DtrType] -> Either String DtrType
+tExtractSeqsEach  :: [RrrType] -> Either String RrrType
 tExtractSeqsEach [x, ListOf (ListOf s)]
   | s == str && elem x [faa, fna] = Right $ ListOf x
 tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
@@ -192,8 +192,8 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 ----------------------
 
 -- TODO name something else like fna_to_faa?
-translate :: DtrFunction
-translate = DtrFunction
+translate :: RrrFunction
+translate = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
@@ -203,8 +203,8 @@ translate = DtrFunction
   where
     name = "translate"
 
-translateEach :: DtrFunction
-translateEach = DtrFunction
+translateEach :: RrrFunction
+translateEach = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
@@ -220,8 +220,8 @@ translateEach = DtrFunction
 
 -- TODO separate concat module?
 
-mkConcat :: DtrType -> DtrFunction
-mkConcat cType = DtrFunction
+mkConcat :: RrrType -> RrrFunction
+mkConcat cType = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
@@ -232,8 +232,8 @@ mkConcat cType = DtrFunction
     ext  = extOf cType
     name = "concat_" ++ ext
 
-mkConcatEach :: DtrType -> DtrFunction
-mkConcatEach cType = DtrFunction
+mkConcatEach :: RrrType -> RrrFunction
+mkConcatEach cType = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
@@ -250,12 +250,12 @@ mkConcatEach cType = DtrFunction
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
--- aConcat :: DtrType -> DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+-- aConcat :: RrrType -> RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
 --   fPaths <- readPaths cfg ref fs'
---   let fPaths' = map (fromDtrPath cfg) fPaths
+--   let fPaths' = map (fromRrrPath cfg) fPaths
 --   debugNeed cfg "aConcat" fPaths'
---   let out'    = fromDtrPath cfg oPath
+--   let out'    = fromRrrPath cfg oPath
 --       out''   = debugA cfg "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
 --       emptyStr = "<<empty" ++ extOf cType ++ ">>"
@@ -268,11 +268,11 @@ mkConcatEach cType = DtrFunction
 --     then liftIO $ writeFile out'' emptyStr
 --     else copyFile' outTmp out''
 --   where
---     fs' = fromDtrPath cfg fsPath
+--     fs' = fromRrrPath cfg fsPath
 -- aConcat _ _ _ _ = error "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
-aConcat :: DtrType -> (DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ())
+aConcat :: RrrType -> (RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ())
 aConcat cType cfg ref ids [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
@@ -281,29 +281,29 @@ aConcat cType cfg ref ids [outPath, inList] = do
       emptyStr  = "<<empty" ++ extOf cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
-  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromDtrPath cfg outPath
+  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromRrrPath cfg outPath
   writeCachedLines cfg ref emptyPath [emptyStr]
-  inPaths <- readPaths cfg ref $ fromDtrPath cfg inList
-  let inPaths' = map (fromDtrPath cfg) inPaths
+  inPaths <- readPaths cfg ref $ fromRrrPath cfg inList
+  let inPaths' = map (fromRrrPath cfg) inPaths
   debugNeed cfg "aConcat" inPaths'
   writeCachedLines cfg ref inList' inPaths'
   aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
-                                      , toDtrPath cfg inList'
-                                      , toDtrPath cfg emptyPath]
+                                      , toRrrPath cfg inList'
+                                      , toRrrPath cfg emptyPath]
 aConcat _ _ _ _ _ = error "bad argument to aConcat"
 
 -- writeCachedLines cfg ref outPath content = do
 
 -- TODO would it work to just directly creat a string and tack onto paths here?
--- aSimpleScript' :: Bool -> String -> (DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ())
+-- aSimpleScript' :: Bool -> String -> (RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ())
 -- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
 
 ------------------------
 -- split_fasta(_each) --
 ------------------------
 
-splitFasta :: DtrType -> DtrFunction
-splitFasta faType = DtrFunction
+splitFasta :: RrrType -> RrrFunction
+splitFasta faType = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
@@ -314,8 +314,8 @@ splitFasta faType = DtrFunction
     ext  = extOf faType
     name = "split_" ++ ext
 
-splitFastaEach :: DtrType -> DtrFunction
-splitFastaEach faType = DtrFunction
+splitFastaEach :: RrrType -> RrrFunction
+splitFastaEach faType = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
@@ -326,14 +326,14 @@ splitFastaEach faType = DtrFunction
     ext  = extOf faType
     name = "split_" ++ ext ++ "_each"
 
-aSplit :: String -> String -> (DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ())
+aSplit :: String -> String -> (RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ())
 aSplit name ext cfg ref _ [outPath, faPath] = do
-  let faPath'   = fromDtrPath cfg faPath
+  let faPath'   = fromRrrPath cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
       tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
       prefix'   = tmpDir' </> digest faPath ++ "_"
       outDir'   = exprDir' </> "load_" ++ ext
-      outPath'  = fromDtrPath cfg outPath
+      outPath'  = fromRrrPath cfg outPath
       outPath'' = debugA cfg "aSplit" outPath' [outPath', faPath']
       args      = [outDir', prefix', faPath']
   -- TODO make sure stderr doesn't come through?
@@ -341,6 +341,6 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
   out <- wrappedCmdOut False True cfg ref [faPath'] [] [] "split_fasta.py" args
-  let loadPaths = map (toDtrPath cfg) $ lines out
+  let loadPaths = map (toRrrPath cfg) $ lines out
   writePaths cfg ref outPath'' loadPaths
 aSplit _ _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths

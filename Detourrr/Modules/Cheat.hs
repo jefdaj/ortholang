@@ -38,16 +38,16 @@ import Development.Shake
 -- import Detourrr.Core.Parse (typeError)
 import Detourrr.Core.Types
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Cheat"
   , mDesc = "Run your own script and Detourrr will assume the types are valid"
   , mTypes = []
   , mFunctions = [cheat]
   }
 
-cheat :: DtrFunction
-cheat = DtrFunction
+cheat :: RrrFunction
+cheat = RrrFunction
   { fName      = "cheat"
   , fTypeCheck = cheatTypeCheck
   , fDesc      = Nothing
@@ -60,7 +60,7 @@ cheat = DtrFunction
 --      and make a new temporary type if the given one doesn't exist
 -- TODO guess that requires either compile-time or runtime list of types?
 --      do you keep a global runtime list of them, or have separate "cheat" types?
-cheatTypeCheck :: [DtrType] -> Either String DtrType
+cheatTypeCheck :: [RrrType] -> Either String RrrType
 cheatTypeCheck (script : rtype : _)
   | script == str && rtype == str = findOrMake $ tExt rtype
   where
@@ -68,5 +68,5 @@ cheatTypeCheck (script : rtype : _)
 cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
                           \be strings specifying the script path and return type"
 
-rCheat :: DtrState -> DtrExpr -> Rules ExprPath
+rCheat :: RrrState -> RrrExpr -> Rules ExprPath
 rCheat = undefined

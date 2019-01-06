@@ -52,31 +52,31 @@ import Text.Parsec.Combinator (manyTill, eof, anyToken)
 -- functions for export --
 --------------------------
 
-isExpr :: DtrState -> String -> Bool
+isExpr :: RrrState -> String -> Bool
 isExpr state line = isRight $ runParseM pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: DtrState -> String -> Either ParseError DtrExpr
+parseExpr :: RrrState -> String -> Either ParseError RrrExpr
 parseExpr = runParseM pExpr
 
 --------------------------------
 -- helpers to simplify parsec --
 --------------------------------
 
--- TODO make an empty DtrState so you can run these in ghci again
+-- TODO make an empty RrrState so you can run these in ghci again
 
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
-parseWithEof :: ParseM a -> DtrState -> String -> Either ParseError a
+parseWithEof :: ParseM a -> RrrState -> String -> Either ParseError a
 parseWithEof p s = runParseM (p <* eof) s
 
-parseAndShow :: (Show a) => ParseM a -> DtrState -> String -> String
+parseAndShow :: (Show a) => ParseM a -> RrrState -> String -> String
 parseAndShow p s str' = case runParseM p s str' of
   Left err -> show err
   Right s2 -> show s2
 
-parseWithLeftOver :: ParseM a -> DtrState -> String -> Either ParseError (a,String)
+parseWithLeftOver :: ParseM a -> RrrState -> String -> Either ParseError (a,String)
 parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof

@@ -21,7 +21,7 @@ module Detourrr.Modules.BioMartR where
 import Detourrr.Core.Types
 import Development.Shake
 import Detourrr.Core.Actions (readLits, writeLits, debugA, debugNeed)
-import Detourrr.Core.Paths  (exprPath, DtrPath, toDtrPath, fromDtrPath)
+import Detourrr.Core.Paths  (exprPath, RrrPath, toRrrPath, fromRrrPath)
 import Detourrr.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import Detourrr.Core.Actions           (wrappedCmdWrite)
 import Control.Monad (void)
@@ -41,8 +41,8 @@ import System.Directory (createDirectoryIfMissing)
 -- module description --
 ------------------------
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
   , mTypes = [search, fnagz, faagz]
@@ -55,8 +55,8 @@ dtrModule = DtrModule
     ]
   }
 
-search :: DtrType
-search = DtrType
+search :: RrrType
+search = RrrType
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
   -- , tShow = \ls f -> readFileStrict ls f
@@ -64,24 +64,24 @@ search = DtrType
   }
 
 -- TODO unify with fna? or replace it?
-fnagz :: DtrType
-fnagz = DtrType
+fnagz :: RrrType
+fnagz = RrrType
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
   , tShow = \_ _ f -> return $ "gzipped fna file '" ++ f ++ "'"
   }
 
 -- TODO unify with faa? or replace it?
-faagz :: DtrType
-faagz = DtrType
+faagz :: RrrType
+faagz = RrrType
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
   , tShow = \_ _ f -> return $ "gzipped faa file '" ++ f ++ "'"
   }
 
 -- TODO does this work at all?
-parseSearches :: DtrFunction
-parseSearches = let name = "parse_searches" in DtrFunction
+parseSearches :: RrrFunction
+parseSearches = let name = "parse_searches" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] search
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [ListOf str] search
@@ -93,8 +93,8 @@ parseSearches = let name = "parse_searches" in DtrFunction
 -- get_genomes --
 -----------------
 
-getGenomes :: DtrFunction
-getGenomes = let name = "get_genomes" in DtrFunction
+getGenomes :: RrrFunction
+getGenomes = let name = "get_genomes" in RrrFunction
   { fName      = name 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
@@ -106,8 +106,8 @@ getGenomes = let name = "get_genomes" in DtrFunction
 -- get_proteomes --
 -------------------
 
-getProteomes :: DtrFunction
-getProteomes = let name = "get_proteomes" in DtrFunction
+getProteomes :: RrrFunction
+getProteomes = let name = "get_proteomes" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
@@ -183,17 +183,17 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
-rParseSearches :: DtrState -> DtrExpr -> Rules ExprPath
-rParseSearches s@(_, cfg, ref, ids) expr@(DtrFun _ _ _ _ [searches]) = do
+rParseSearches :: RrrState -> RrrExpr -> Rules ExprPath
+rParseSearches s@(_, cfg, ref, ids) expr@(RrrFun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   let searchTable  = exprPath s expr
-      searchTable' = fromDtrPath cfg searchTable
-      sList' = toDtrPath cfg sList
+      searchTable' = fromRrrPath cfg searchTable
+      sList' = toRrrPath cfg sList
   searchTable' %> \_ -> aParseSearches cfg ref ids sList' searchTable
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
-aParseSearches :: DtrConfig -> Locks -> HashedSeqIDsRef -> DtrPath -> DtrPath -> Action ()
+aParseSearches :: RrrConfig -> Locks -> HashedSeqIDsRef -> RrrPath -> RrrPath -> Action ()
 aParseSearches cfg ref _ sList out = do
   parses <- (fmap . map) readSearch (readLits cfg ref sList')
   let (errors, searches') = partitionEithers parses
@@ -202,8 +202,8 @@ aParseSearches cfg ref _ sList out = do
     then error "invalid search!"
     else writeLits cfg ref out'' $ toTsvRows searches'
   where
-    sList' = fromDtrPath cfg sList
-    out'   = fromDtrPath cfg out
+    sList' = fromRrrPath cfg sList
+    out'   = fromRrrPath cfg out
     out''  = debugA cfg "aParseSearches" out' [sList', out']
 
 ------------------
@@ -213,29 +213,29 @@ aParseSearches cfg ref _ sList out = do
 -- TODO move nearer the top?
 
 -- TODO this is where to parse the searches?
--- cGetGenome :: DtrConfig -> DtrExpr -> Rules ExprPath
--- cGetGenome (_,cfg) expr@(DtrFun _ _ _ [s]) = undefined
+-- cGetGenome :: RrrConfig -> RrrExpr -> Rules ExprPath
+-- cGetGenome (_,cfg) expr@(RrrFun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO rewrite in expression editing style, inserting parse_searches
-rBioMartR :: String -> DtrState -> DtrExpr -> Rules ExprPath
-rBioMartR fn s@(_, cfg, ref, ids) expr@(DtrFun rtn salt _ _ [ss]) = do
-  (ExprPath bmFn  ) <- rExpr s (DtrLit str 0 fn)
+rBioMartR :: String -> RrrState -> RrrExpr -> Rules ExprPath
+rBioMartR fn s@(_, cfg, ref, ids) expr@(RrrFun rtn salt _ _ [ss]) = do
+  (ExprPath bmFn  ) <- rExpr s (RrrLit str 0 fn)
   -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr s $ DtrFun rtn salt (depsOf ss) "parse_searches" [ss]
+  (ExprPath sTable) <- rExpr s $ RrrFun rtn salt (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
-      tmp'    = toDtrPath cfg bmTmp
+      tmp'    = toRrrPath cfg bmTmp
       out     = exprPath s expr
-      out'    = fromDtrPath cfg out
-      sTable' = toDtrPath cfg sTable
-      bmFn'   = toDtrPath cfg bmFn
+      out'    = fromRrrPath cfg out
+      sTable' = toRrrPath cfg sTable
+      bmFn'   = toRrrPath cfg bmFn
   out' %> \_ -> aBioMartR cfg ref ids out bmFn' tmp' sTable'
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: DtrConfig -> Locks -> HashedSeqIDsRef
-          -> DtrPath -> DtrPath -> DtrPath -> DtrPath -> Action ()
+aBioMartR :: RrrConfig -> Locks -> HashedSeqIDsRef
+          -> RrrPath -> RrrPath -> RrrPath -> RrrPath -> Action ()
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   debugNeed cfg "aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
@@ -243,8 +243,8 @@ aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
     "biomartr.R" [out'', bmFn', sTable']
   where
-    out'    = fromDtrPath cfg out
-    bmFn'   = fromDtrPath cfg bmFn
-    bmTmp'  = fromDtrPath cfg bmTmp
-    sTable' = fromDtrPath cfg sTable
+    out'    = fromRrrPath cfg out
+    bmFn'   = fromRrrPath cfg bmFn
+    bmTmp'  = fromRrrPath cfg bmTmp
+    sTable' = fromRrrPath cfg sTable
     out'' = debugA cfg "aBioMartR" out' [out', bmFn', bmTmp', sTable']

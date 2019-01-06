@@ -12,8 +12,8 @@ import Data.Scientific (Scientific(), toBoundedInteger)
 
 -- import Debug.Trace
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random seeds"
   , mTypes = []
@@ -27,8 +27,8 @@ dtrModule = DtrModule
 -- repeat without permutation (to test robustness) --
 -----------------------------------------------------
 
-repeatN :: DtrFunction
-repeatN = DtrFunction
+repeatN :: RrrFunction
+repeatN = RrrFunction
   { fName      = "repeat"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatN
@@ -39,7 +39,7 @@ repeatN = DtrFunction
 -- takes a result type, a starting type, and an int,
 -- and returns a list of the result var type. start type can be whatever
 -- TODO does num here refer to actual num, or is it shadowing it?
-tRepeatN :: [DtrType] -> Either String DtrType 
+tRepeatN :: [RrrType] -> Either String RrrType 
 tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
 tRepeatN _ = Left "invalid args to repeatN"
 
@@ -49,9 +49,9 @@ readSciInt s = case toBoundedInteger (read s :: Scientific) of
   Just n  -> n
 
 -- TODO is the bug here? might need to convert string -> sci -> int
-extractNum :: DtrScript -> DtrExpr -> Int
-extractNum _   (DtrLit x _ n) | x == num = readSciInt n
-extractNum scr (DtrRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
+extractNum :: RrrScript -> RrrExpr -> Int
+extractNum _   (RrrLit x _ n) | x == num = readSciInt n
+extractNum scr (RrrRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
 
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
@@ -59,13 +59,13 @@ extractNum _ _ = error "bad argument to extractNum"
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the salts should work?
-rRepeatN :: DtrState -> DtrExpr -> Rules ExprPath
-rRepeatN s@(scr, _, _, _) (DtrFun t salt deps name [resExpr, subVar@(DtrRef _ _ _ v), repsExpr]) =
-  rRepeatEach s (DtrFun t salt deps name [resExpr, subVar, subList])
+rRepeatN :: RrrState -> RrrExpr -> Rules ExprPath
+rRepeatN s@(scr, _, _, _) (RrrFun t salt deps name [resExpr, subVar@(RrrRef _ _ _ v), repsExpr]) =
+  rRepeatEach s (RrrFun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = zipWith setSalt [salt .. salt+nReps-1] (repeat subExpr)
     -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
-    subList = DtrList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
+    subList = RrrList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
 rRepeatN _ _ = error "bad argument to rRepeatN"

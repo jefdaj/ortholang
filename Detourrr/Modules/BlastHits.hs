@@ -8,12 +8,12 @@ import Detourrr.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import Detourrr.Core.Compile.Map  (rMap)
 import Detourrr.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, debugA)
 -- import Detourrr.Core.Debug         (debugA )
-import Detourrr.Core.Paths         (DtrPath, fromDtrPath)
+import Detourrr.Core.Paths         (RrrPath, fromRrrPath)
 import Detourrr.Modules.Blast      (bht)
 import Detourrr.Modules.CRBBlast   (crb)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "BlastHits"
   , mDesc = "Work with BLAST hit tables"
   , mTypes = [bht, crb]
@@ -33,63 +33,63 @@ tExtract :: TypeChecker
 tExtract [x] | elem x [crb, bht] = Right $ ListOf str
 tExtract  _ = Left "expected a blast hits table"
 
-tExtractEach :: [DtrType] -> Either String DtrType
+tExtractEach :: [RrrType] -> Either String RrrType
 tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
 tExtractEach  _ = Left "expected a list of blast hits tables"
 
-extractQueries :: DtrFunction
-extractQueries = let name = "extract_queries" in DtrFunction
+extractQueries :: RrrFunction
+extractQueries = let name = "extract_queries" in RrrFunction
   { fName      = name
   , fTypeCheck = tExtract
   , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aDtrCol True 1
+  , fRules     = rSimple $ aRrrCol True 1
   }
 
-extractQueriesEach :: DtrFunction
-extractQueriesEach = let name = "extract_queries_each" in DtrFunction
+extractQueriesEach :: RrrFunction
+extractQueriesEach = let name = "extract_queries_each" in RrrFunction
   { fName      = name
   , fTypeCheck = tExtractEach
   , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rMap 1 $ aDtrCol True 1
+  , fRules     = rMap 1 $ aRrrCol True 1
   }
 
-extractTargets :: DtrFunction
-extractTargets = let name = "extract_targets" in DtrFunction
+extractTargets :: RrrFunction
+extractTargets = let name = "extract_targets" in RrrFunction
   { fName      = name
   , fTypeCheck = tExtract
   , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht> -> str.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aDtrCol True 2
+  , fRules     = rSimple $ aRrrCol True 2
   }
 
-extractTargetsEach :: DtrFunction
-extractTargetsEach = let name = "extract_targets_each" in DtrFunction
+extractTargetsEach :: RrrFunction
+extractTargetsEach = let name = "extract_targets_each" in RrrFunction
   { fName      = name
   , fTypeCheck = tExtractEach
   , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rMap 1 $ aDtrCol True 2
+  , fRules     = rMap 1 $ aRrrCol True 2
   }
 
-aDtrCol :: Bool -> Int -> DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
-aDtrCol uniq n cfg ref _ [outPath, tsvPath] = do
+aRrrCol :: Bool -> Int -> RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
+aRrrCol uniq n cfg ref _ [outPath, tsvPath] = do
   out <- wrappedCmdOut False True cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
   let results = if uniq then sort $ nub $ lines out else lines out
   writeLits cfg ref outPath'' results
   where
-    outPath'  = fromDtrPath cfg outPath
-    outPath'' = debugA cfg "aDtrCol" outPath' [show n, outPath', tsvPath']
-    tsvPath'  = fromDtrPath cfg tsvPath
-aDtrCol _ _ _ _ _ _ = error "bad arguments to aDtrCol"
+    outPath'  = fromRrrPath cfg outPath
+    outPath'' = debugA cfg "aRrrCol" outPath' [show n, outPath', tsvPath']
+    tsvPath'  = fromRrrPath cfg tsvPath
+aRrrCol _ _ _ _ _ _ = error "bad arguments to aRrrCol"
 
 --------------------------
 -- filter_evalue(_each) --
 --------------------------
 
-filterEvalue :: DtrFunction
-filterEvalue = let name = "filter_evalue" in DtrFunction
+filterEvalue :: RrrFunction
+filterEvalue = let name = "filter_evalue" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, bht] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, bht] bht
@@ -97,8 +97,8 @@ filterEvalue = let name = "filter_evalue" in DtrFunction
   , fRules     = rSimple aFilterEvalue
   }
 
-filterEvalueEach :: DtrFunction
-filterEvalueEach = let name = "filter_evalue_each" in DtrFunction
+filterEvalueEach :: RrrFunction
+filterEvalueEach = let name = "filter_evalue_each" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
@@ -106,15 +106,15 @@ filterEvalueEach = let name = "filter_evalue_each" in DtrFunction
   , fRules     = rMap 2 aFilterEvalue
   }
 
-aFilterEvalue :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+aFilterEvalue :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aFilterEvalue cfg ref _ [out, evalue, hits] = do
   wrappedCmdWrite False True cfg ref out'' [evalue', hits'] [] []
     "filter_evalue.R" [out', evalue', hits']
   where
-    out'    = fromDtrPath cfg out
+    out'    = fromRrrPath cfg out
     out''   = debugA cfg "aFilterEvalue" out' [out', evalue', hits']
-    evalue' = fromDtrPath cfg evalue
-    hits'   = fromDtrPath cfg hits
+    evalue' = fromRrrPath cfg evalue
+    hits'   = fromRrrPath cfg hits
 aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
 
 -------------------------------
@@ -124,8 +124,8 @@ aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show arg
 -- TODO move to BlastRBH?
 -- TODO rename to just "best" and "best_each"?
 
-bestHits :: DtrFunction
-bestHits = let name = "best_hits" in DtrFunction
+bestHits :: RrrFunction
+bestHits = let name = "best_hits" in RrrFunction
   { fName      = name 
   , fTypeCheck = defaultTypeCheck [bht] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht] bht
@@ -133,8 +133,8 @@ bestHits = let name = "best_hits" in DtrFunction
   , fRules     = rSimple aBestExtract
   }
 
-bestHitsEach :: DtrFunction
-bestHitsEach = let name = "best_hits_each" in DtrFunction
+bestHitsEach :: RrrFunction
+bestHitsEach = let name = "best_hits_each" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
@@ -142,11 +142,11 @@ bestHitsEach = let name = "best_hits_each" in DtrFunction
   , fRules     = rMap 1 aBestExtract
   }
 
-aBestExtract :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+aBestExtract :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aBestExtract cfg ref _ [out, hits] = do
   wrappedCmdWrite False True cfg ref out'' [hits'] [] [] "best_hits.R" [out', hits']
   where
-    out'  = fromDtrPath cfg out
+    out'  = fromRrrPath cfg out
     out'' = debugA cfg "aBestExtract" out' [out', hits']
-    hits' = fromDtrPath cfg hits
+    hits' = fromRrrPath cfg hits
 aBestExtract _ _ _ args = error $ "bad argument to aBestExtract: " ++ show args

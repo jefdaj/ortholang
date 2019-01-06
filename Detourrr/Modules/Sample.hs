@@ -5,14 +5,14 @@ module Detourrr.Modules.Sample where
 import Development.Shake
 import Detourrr.Core.Types
 import Detourrr.Core.Compile.Basic  (rExpr)
-import Detourrr.Core.Paths (exprPath, toDtrPath, fromDtrPath)
+import Detourrr.Core.Paths (exprPath, toRrrPath, fromRrrPath)
 import Detourrr.Core.Actions (readLit, readStrings, writeStrings, debugL)
 import Data.Scientific
 import System.Random (mkStdGen)
 import System.Random.Shuffle (shuffle')
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Sample"
   , mDesc = "Random (but reproducable) sampling of list elements.\n\n\
             \WARNING: Because of the way Detourrr caches tempfiles, calling these\n\
@@ -22,8 +22,8 @@ dtrModule = DtrModule
   , mFunctions = [sample]
   }
 
-sample :: DtrFunction
-sample = DtrFunction
+sample :: RrrFunction
+sample = RrrFunction
   { fName      = name 
   , fFixity    = Prefix
   , fTypeCheck = tSample
@@ -36,28 +36,28 @@ sample = DtrFunction
   where
     name = "sample"
 
-tSample :: [DtrType] -> Either String DtrType
+tSample :: [RrrType] -> Either String RrrType
 tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(_, cfg, ref, ids) expr@(DtrFun _ salt _ _ [n, lst]) = do
+rSample st@(_, cfg, ref, ids) expr@(RrrFun _ salt _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr st n
   (ExprPath inPath') <- rExpr st lst
-  let nPath    = toDtrPath cfg nPath'
-      inPath   = toDtrPath cfg inPath'
+  let nPath    = toRrrPath cfg nPath'
+      inPath   = toRrrPath cfg inPath'
       outPath  = exprPath st expr
-      outPath' = fromDtrPath cfg outPath
+      outPath' = fromRrrPath cfg outPath
       (ListOf t) = typeOf lst
   outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath
   return $ ExprPath outPath'
 rSample _ _ = error "bad argument to rSample"
 
-aSample :: Int -> DtrType -> Action2
+aSample :: Int -> RrrType -> Action2
 aSample salt t cfg ref _ outPath nPath lstPath = do
-  let nPath'   = fromDtrPath cfg nPath
-      lstPath' = fromDtrPath cfg lstPath
-      outPath' = fromDtrPath cfg outPath
+  let nPath'   = fromRrrPath cfg nPath
+      lstPath' = fromRrrPath cfg lstPath
+      outPath' = fromRrrPath cfg outPath
   nStr <- readLit cfg ref nPath'
   lst  <- readStrings t cfg ref lstPath'
   debugL cfg $ "aSample salt: " ++ show salt

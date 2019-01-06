@@ -8,16 +8,16 @@ import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
 import Detourrr.Core.Actions       (wrappedCmdWrite, symlink, debugA, debugNeed)
-import Detourrr.Core.Paths         (toDtrPath)
+import Detourrr.Core.Paths         (toRrrPath)
 import Detourrr.Core.Compile.Basic (rSimpleTmp)
 import Detourrr.Core.Compile.Map  (rMapTmps)
 -- import Detourrr.Core.Debug         (debugA)
-import Detourrr.Core.Paths         (DtrPath, fromDtrPath)
+import Detourrr.Core.Paths         (RrrPath, fromRrrPath)
 import Detourrr.Core.Util          (resolveSymlinks)
 import Detourrr.Modules.SeqIO      (faa, fna)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
   , mTypes = [fna, faa, crb]
@@ -40,15 +40,15 @@ dtrModule = DtrModule
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
-crb :: DtrType
-crb = DtrType
+crb :: RrrType
+crb = RrrType
   { tExt  = "crb"
   , tDesc = "tab-separated table of conditional reciprocal blast best hits"
   , tShow  = defaultShow
   }
 
-blastCRB :: DtrFunction
-blastCRB = DtrFunction
+blastCRB :: RrrFunction
+blastCRB = RrrFunction
   { fName      = "crb_blast"
   , fTypeCheck = tCrbBlast
   , fDesc = Nothing, fTypeDesc  = "crb_blast : fa -> fa -> crb"
@@ -58,8 +58,8 @@ blastCRB = DtrFunction
 
 -- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
 -- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
-blastCRBEach :: DtrFunction
-blastCRBEach = DtrFunction
+blastCRBEach :: RrrFunction
+blastCRBEach = RrrFunction
   { fName      = "crb_blast_each"
   , fTypeCheck = tCrbBlastEach
   , fDesc = Nothing, fTypeDesc  = "crb_blast_each : fa -> fa.list -> crb.list"
@@ -69,11 +69,11 @@ blastCRBEach = DtrFunction
 
 -- TODO split into two functions with different type signatures?
 -- TODO what types are actually allowed? (can subject be fna?)
-tCrbBlast :: [DtrType] -> Either String DtrType
+tCrbBlast :: [RrrType] -> Either String RrrType
 tCrbBlast [x, y] | x `elem` [fna, faa] && y `elem` [fna, faa] = Right crb
 tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
 
-tCrbBlastEach :: [DtrType] -> Either String DtrType
+tCrbBlastEach :: [RrrType] -> Either String RrrType
 tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
 tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or faa targets"
 
@@ -82,7 +82,7 @@ tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or
  - resolves one level of symlink, so we have to point directly to the input
  - files rather than to the canonical $TMPDIR/cache/load... paths.
  -}
-aCRBBlast :: DtrConfig -> Locks -> HashedSeqIDsRef -> DtrPath -> [DtrPath] -> Action ()
+aCRBBlast :: RrrConfig -> Locks -> HashedSeqIDsRef -> RrrPath -> [RrrPath] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   debugNeed cfg "aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
@@ -93,12 +93,12 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   tDst <- liftIO $ resolveSymlinks Nothing t' -- link directly to the file
   let qSrc  = tmp' </> qName
       tSrc  = tmp' </> tName
-      qSrc' = toDtrPath cfg qSrc
-      qDst' = toDtrPath cfg qDst
-      tSrc' = toDtrPath cfg tSrc
-      tDst' = toDtrPath cfg tDst
+      qSrc' = toRrrPath cfg qSrc
+      qDst' = toRrrPath cfg qDst
+      tSrc' = toRrrPath cfg tSrc
+      tDst' = toRrrPath cfg tDst
       oPath = tmp' </> "results.crb"
-      oPath' = toDtrPath cfg oPath
+      oPath' = toRrrPath cfg oPath
   debugNeed cfg "aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
@@ -106,9 +106,9 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
     "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
   symlink cfg ref o'' oPath'
   where
-    o'   = fromDtrPath cfg o
-    o''  = debugA cfg "aCRBBlast" o [fromDtrPath cfg tmpDir, o', q', t']
-    tmp' = fromDtrPath cfg tmpDir
-    q'   = fromDtrPath cfg q
-    t'   = fromDtrPath cfg t
+    o'   = fromRrrPath cfg o
+    o''  = debugA cfg "aCRBBlast" o [fromRrrPath cfg tmpDir, o', q', t']
+    tmp' = fromRrrPath cfg tmpDir
+    q'   = fromRrrPath cfg q
+    t'   = fromRrrPath cfg t
 aCRBBlast _ _ _ _ args = error $ "bad argument to aCRBBlast: " ++ show args

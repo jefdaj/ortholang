@@ -61,9 +61,9 @@ import Data.List                  (sort, nub)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 -- import Detourrr.Core.Debug        (debug)
-import Detourrr.Core.Paths        (DtrPath, toDtrPath, fromDtrPath, checkLit,
-                                   checkLits, cacheDir, dtrPathString,
-                                   stringDtrPath)
+import Detourrr.Core.Paths        (RrrPath, toRrrPath, fromRrrPath, checkLit,
+                                   checkLits, cacheDir, rrrPathString,
+                                   stringRrrPath)
 import Detourrr.Core.Util         (digest, digestLength, rmAll, readFileStrict, unlessExists,
                                    ignoreExistsError, digest, globFiles, isEmpty)
 import Detourrr.Core.Locks        (withReadLock', withReadLocks',
@@ -82,18 +82,18 @@ import System.Posix.Escape         (escape)
 -- debugging --
 ---------------
 
-debugIO :: DtrConfig -> String -> IO ()
+debugIO :: RrrConfig -> String -> IO ()
 debugIO cfg msg = when (cfgDebug cfg) (putStrLn msg)
 
-debugL :: DtrConfig -> String -> Action ()
+debugL :: RrrConfig -> String -> Action ()
 debugL cfg msg = liftIO $ debugIO cfg msg
 
-debugA :: Show a => DtrConfig -> String -> a -> [String] -> a
+debugA :: Show a => RrrConfig -> String -> a -> [String] -> a
 debugA cfg name out args = debug cfg msg out
   where
     msg = name ++ " creating " ++ show out ++ " from " ++ show args
 
-debugNeed :: DtrConfig -> String -> [FilePath] -> Action ()
+debugNeed :: RrrConfig -> String -> [FilePath] -> Action ()
 debugNeed cfg fnName paths = debug cfg msg $ need paths
   where
     msg = fnName ++ " needs " ++ show paths
@@ -102,9 +102,9 @@ debugNeed cfg fnName paths = debug cfg msg $ need paths
 -- read files --
 ----------------
 
--- Action version of readFileStrict. This is used for all reads during a dtr;
+-- Action version of readFileStrict. This is used for all reads during a rrr;
 -- the raw one is just for showing results, reading script files etc.
-readFileStrict' :: DtrConfig -> Locks -> FilePath -> Action String
+readFileStrict' :: RrrConfig -> Locks -> FilePath -> Action String
 readFileStrict' cfg ref path = do
   debugNeed cfg "readFileStrict'" [path]
   liftIO (readFileStrict ref path)
@@ -115,7 +115,7 @@ readFileStrict' cfg ref path = do
  - failing, and from empty lists in case of an error in the typechecker.  This
  - also gives empty lists and strings distinct hashes.
  -}
-readLit :: DtrConfig -> Locks -> FilePath -> Action String
+readLit :: RrrConfig -> Locks -> FilePath -> Action String
 readLit cfg locks path = do
   need [path] -- Note isEmpty also does this
   empty <- isEmpty locks path
@@ -125,23 +125,23 @@ readLit cfg locks path = do
       else fmap (checkLit . init) -- TODO safe? already checked if empty
          $ readFileStrict' cfg locks path
 
-readLits :: DtrConfig -> Locks -> FilePath -> Action [String]
+readLits :: RrrConfig -> Locks -> FilePath -> Action [String]
 readLits cfg ref path = readList cfg ref path >>= return . checkLits
 
 -- TODO something safer than head!
-readPath :: DtrConfig -> Locks -> FilePath -> Action DtrPath
+readPath :: RrrConfig -> Locks -> FilePath -> Action RrrPath
 readPath cfg ref path = readPaths cfg ref path >>= return . head
 
 -- TODO should this have checkPaths?
-readPaths :: DtrConfig -> Locks -> FilePath -> Action [DtrPath]
-readPaths cfg ref path = (fmap . map) stringDtrPath (readList cfg ref path)
+readPaths :: RrrConfig -> Locks -> FilePath -> Action [RrrPath]
+readPaths cfg ref path = (fmap . map) stringRrrPath (readList cfg ref path)
 
--- read a file as lines, convert to absolute paths, then parse those as dtrpaths
+-- read a file as lines, convert to absolute paths, then parse those as rrrpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
-readLitPaths :: DtrConfig -> Locks -> FilePath -> Action [DtrPath]
+readLitPaths :: RrrConfig -> Locks -> FilePath -> Action [RrrPath]
 readLitPaths cfg ref path = do
   ls <- readList cfg ref path
-  return $ map (toDtrPath cfg . toAbs) ls
+  return $ map (toRrrPath cfg . toAbs) ls
   where
     toAbs line = if isAbsolute line
                    then line
@@ -149,17 +149,17 @@ readLitPaths cfg ref path = do
 
 -- TODO something safer than head!
 -- TODO how should this relate to readLit and readStr?
-readString :: DtrType -> DtrConfig -> Locks -> FilePath -> Action String
+readString :: RrrType -> RrrConfig -> Locks -> FilePath -> Action String
 readString etype cfg ref path = readStrings etype cfg ref path >>= return . head
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
- - the DtrType (of each element, not the list!) so it knows how to convert from
+ - the RrrType (of each element, not the list!) so it knows how to convert from
  - String, and then within the function you treat them as Strings.
  -}
-readStrings :: DtrType -> DtrConfig -> Locks -> FilePath -> Action [String]
+readStrings :: RrrType -> RrrConfig -> Locks -> FilePath -> Action [String]
 readStrings etype cfg ref path = if etype' `elem` [str, num]
   then readLits cfg ref path
-  else (fmap . map) (fromDtrPath cfg) (readPaths cfg ref path)
+  else (fmap . map) (fromRrrPath cfg) (readPaths cfg ref path)
   where
     etype' = debug cfg ("readStrings (each "
           ++ extOf etype ++ ") from " ++ path) etype
@@ -171,7 +171,7 @@ readStrings etype cfg ref path = if etype' `elem` [str, num]
  -
  - Note that strict reading is important to avoid "too many open files" on long lists.
  -}
-readList :: DtrConfig -> Locks -> FilePath -> Action [String]
+readList :: RrrConfig -> Locks -> FilePath -> Action [String]
 readList cfg locks path = do
   debugNeed cfg "readList" [path] -- Note isEmpty also does this
   empty <- isEmpty locks path
@@ -188,10 +188,10 @@ readList cfg locks path = do
 -- write files --
 -----------------
 
-cachedLinesPath :: DtrConfig -> [String] -> FilePath
+cachedLinesPath :: RrrConfig -> [String] -> FilePath
 cachedLinesPath cfg content = cDir </> digest content <.> "txt"
   where
-    cDir = fromDtrPath cfg $ cacheDir cfg "lines"
+    cDir = fromRrrPath cfg $ cacheDir cfg "lines"
 
 {- This ensures that when two lists have the same content, their expression
  - paths will be links to the same cached path. That causes them to get
@@ -205,7 +205,7 @@ cachedLinesPath cfg content = cDir </> digest content <.> "txt"
  - TODO any reason to keep original extensions instead of all using .txt?
  -      oh, if we're testing extensions anywhere. lets not do that though
  -}
-writeCachedLines :: DtrConfig -> Locks -> FilePath -> [String] -> Action ()
+writeCachedLines :: RrrConfig -> Locks -> FilePath -> [String] -> Action ()
 writeCachedLines cfg ref outPath content = do
   let cache = cachedLinesPath cfg content
       -- lock  = cache <.> "lock"
@@ -214,29 +214,29 @@ writeCachedLines cfg ref outPath content = do
     $ debug cfg ("writing '" ++ cache ++ "'")
     $ writeFile' cache (unlines content) -- TODO is this strict?
   unlessExists outPath $
-    symlink cfg ref (toDtrPath cfg outPath) (toDtrPath cfg cache)
+    symlink cfg ref (toRrrPath cfg outPath) (toRrrPath cfg cache)
 
--- TODO take a DtrPath for the out file too
+-- TODO take a RrrPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
-writePaths :: DtrConfig -> Locks -> FilePath -> [DtrPath] -> Action ()
+writePaths :: RrrConfig -> Locks -> FilePath -> [RrrPath] -> Action ()
 writePaths cfg ref out cpaths = writeCachedLines cfg ref out paths >> trackWrite paths
   where
-    paths = if null cpaths then ["<<emptylist>>"] else map dtrPathString cpaths
+    paths = if null cpaths then ["<<emptylist>>"] else map rrrPathString cpaths
 
-writePath :: DtrConfig -> Locks -> FilePath -> DtrPath -> Action ()
+writePath :: RrrConfig -> Locks -> FilePath -> RrrPath -> Action ()
 writePath cfg ref out path = do
   debugL cfg ("writePath path: " ++ show path)
   writePaths cfg ref out [path]
 
-writeLits :: DtrConfig -> Locks -> FilePath -> [String] -> Action ()
+writeLits :: RrrConfig -> Locks -> FilePath -> [String] -> Action ()
 writeLits cfg ref path lits = writeCachedLines cfg ref path lits'
   where
     lits' = if null lits then ["<<emptylist>>"] else checkLits lits
 
 -- TODO any need to prevent writing <<emptystr>> in a .num?
 --      (seems almost certain to be caught on reading later)
-writeLit :: DtrConfig -> Locks -> FilePath -> String -> Action ()
+writeLit :: RrrConfig -> Locks -> FilePath -> String -> Action ()
 writeLit cfg ref path lit = do
   debugL cfg $ "writeLit lit: '" ++ lit ++ "'"
   debugL cfg $ "writeLit lit': '" ++ lit' ++ "'"
@@ -245,18 +245,18 @@ writeLit cfg ref path lit = do
     lit' = if null lit then "<<emptystr>>" else lit
 
 {- Write a "list of whatever". Mostly for generic set operations. You include
- - the DtrType (of each element, not the list!) so it knows how to convert
+ - the RrrType (of each element, not the list!) so it knows how to convert
  - to/from String, and then within the function you treat them as Strings.
  -}
-writeStrings :: DtrType -> DtrConfig -> Locks
+writeStrings :: RrrType -> RrrConfig -> Locks
              -> FilePath -> [String] -> Action ()
 writeStrings etype cfg ref out whatevers = if etype' `elem` [str, num]
   then writeLits  cfg ref out whatevers
-  else writePaths cfg ref out $ map (toDtrPath cfg) whatevers
+  else writePaths cfg ref out $ map (toRrrPath cfg) whatevers
   where
     etype' = debug cfg ("writeStrings (each " ++ extOf etype ++ "): " ++ show (take 3 whatevers)) etype
 
-writeString :: DtrType -> DtrConfig -> Locks
+writeString :: RrrType -> RrrConfig -> Locks
             -> FilePath -> String -> Action ()
 writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whatever]
 
@@ -268,7 +268,7 @@ writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whateve
  -}
 
 -- TODO rename like myReadFile, myReadLines?
-debugTrackWrite :: DtrConfig -> [FilePath] -> Action ()
+debugTrackWrite :: RrrConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
   debug cfg ("wrote " ++ show fs) (trackWrite fs)
@@ -292,7 +292,7 @@ wrappedCmdError bin n files = do
  - actual empty files before passing them to a script, so logic for that
  - doesn't have to be duplicated over and over.
  -}
-fixEmptyText :: DtrConfig -> Locks -> FilePath -> Action FilePath
+fixEmptyText :: RrrConfig -> Locks -> FilePath -> Action FilePath
 fixEmptyText cfg ref path = do
   debugNeed cfg "fixEmptyText" [path] -- Note isEmpty does this too
   empty <- isEmpty ref path
@@ -309,7 +309,7 @@ fixEmptyText cfg ref path = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- TODO separate wrappedReadCmd with a shared lock?
-wrappedCmd :: Bool -> Bool -> DtrConfig -> Locks -> Maybe FilePath -> [String]
+wrappedCmd :: Bool -> Bool -> RrrConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = do
@@ -354,7 +354,7 @@ wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = do
 -- TODO track writes?
 -- TODO just return the output + exit code directly and let the caller handle it
 -- TODO issue with not re-raising errors here?
-wrappedCmdExit :: Bool -> Bool -> DtrConfig -> Locks -> Maybe FilePath -> [String]
+wrappedCmdExit :: Bool -> Bool -> RrrConfig -> Locks -> Maybe FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
 wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = do
   (_, _, code) <- wrappedCmd parCmd fixEmpties cfg r mOut inPtns opts bin as
@@ -374,7 +374,7 @@ wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes 
  - TODO if assertNonEmptyFile fails, will other outfiles be deleted?
  - TODO rename wrappedCmdMulti because it has multiple outfiles?
  -}
-wrappedCmdWrite :: Bool -> Bool -> DtrConfig -> Locks -> FilePath -> [String] -> [FilePath]
+wrappedCmdWrite :: Bool -> Bool -> RrrConfig -> Locks -> FilePath -> [String] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
 wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args = do
   debugL cfg $ "wrappedCmdWrite outPath: "  ++ outPath
@@ -395,7 +395,7 @@ wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args 
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables
  -}
-wrappedCmdOut :: Bool -> Bool -> DtrConfig -> Locks -> [String]
+wrappedCmdOut :: Bool -> Bool -> RrrConfig -> Locks -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
 wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = do
@@ -412,12 +412,12 @@ wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = do
 
 -- This is the only function that should access readFileStrict' directly;
 -- all others go through readStr and readList.
--- TODO use a DtrPath here?
--- digestFile :: DtrConfig -> Locks -> FilePath -> Action String
+-- TODO use a RrrPath here?
+-- digestFile :: RrrConfig -> Locks -> FilePath -> Action String
 -- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 
 -- TODO fixEmpties should be False here, but don't want to break existing tmpdir just yet
-hashContent :: DtrConfig -> Locks -> DtrPath -> Action String
+hashContent :: RrrConfig -> Locks -> RrrPath -> Action String
 hashContent cfg ref path = do
   debugNeed cfg "hashContent" [path']
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
@@ -425,7 +425,7 @@ hashContent cfg ref path = do
   let md5 = take digestLength $ head $ words out
   return md5
   where
-    path' = fromDtrPath cfg path
+    path' = fromRrrPath cfg path
 
 {- Hashing doesn't save any space here, but it puts the hashes in
  - src/tests/plots/*.tree so we can test that the plots don't change.
@@ -439,19 +439,19 @@ hashContent cfg ref path = do
  - TODO remove if ggplot turns out to be nondeterministic
  - TODO use hash of expr + original ext instead so it looks nicer?
  -}
-withBinHash :: DtrConfig -> Locks -> DtrExpr -> DtrPath
-            -> (DtrPath -> Action ()) -> Action ()
+withBinHash :: RrrConfig -> Locks -> RrrExpr -> RrrPath
+            -> (RrrPath -> Action ()) -> Action ()
 withBinHash cfg ref expr outPath actFn = do
-  let binDir'  = fromDtrPath cfg $ cacheDir cfg "bin"
-      outPath' = fromDtrPath cfg outPath
+  let binDir'  = fromRrrPath cfg $ cacheDir cfg "bin"
+      outPath' = fromRrrPath cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
   let binTmp' = binDir' </> digest expr <.> takeExtension outPath'
-      binTmp  = toDtrPath cfg binTmp'
+      binTmp  = toRrrPath cfg binTmp'
   debugL cfg $ "withBinHash binTmp': " ++ show binTmp'
   _ <- actFn binTmp
   md5 <- hashContent cfg ref binTmp
   let binOut' = binDir' </> md5 <.> takeExtension outPath'
-      binOut  = toDtrPath cfg binOut'
+      binOut  = toRrrPath cfg binOut'
   debugL cfg $ "withBinHash binOut: "  ++ show binOut
   debugL cfg $ "withBinHash binOut': " ++ show binOut'
   symlink cfg ref binOut  binTmp
@@ -459,9 +459,9 @@ withBinHash cfg ref expr outPath actFn = do
 
 {- Takes source and destination paths in the tmpdir and makes a path between
  - them with the right number of dots.
- - TODO check that the DtrPath is in TMPDIR, not WORKDIR!
+ - TODO check that the RrrPath is in TMPDIR, not WORKDIR!
  -}
-tmpLink :: DtrConfig -> FilePath -> FilePath -> FilePath
+tmpLink :: RrrConfig -> FilePath -> FilePath -> FilePath
 tmpLink cfg src dst = dots </> tmpRel dst
   where
     tmpRel  = makeRelative $ cfgTmpDir cfg
@@ -472,12 +472,12 @@ tmpLink cfg src dst = dots </> tmpRel dst
  - arg should be the symlink path and the second the file it points to. (it
  - was going to be kind of confusing either way)
  -}
-symlink :: DtrConfig -> Locks -> DtrPath -> DtrPath -> Action ()
+symlink :: RrrConfig -> Locks -> RrrPath -> RrrPath -> Action ()
 symlink cfg ref src dst = withWriteOnce ref src' $ do
   liftIO $ createDirectoryIfMissing True $ takeDirectory src'
   liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
   debugTrackWrite cfg [src']
   where
-    src' = fromDtrPath cfg src
-    dst' = fromDtrPath cfg dst
-    dstr = tmpLink cfg src' dst' -- TODO use dtrpaths here too?
+    src' = fromRrrPath cfg src
+    dst' = fromRrrPath cfg dst
+    dstr = tmpLink cfg src' dst' -- TODO use rrrpaths here too?

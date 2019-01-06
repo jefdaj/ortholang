@@ -7,14 +7,14 @@ import Data.List.Utils  (join)
 import Detourrr.Modules (modules)
 import Data.Char        (toLower, isAlphaNum)
 
-explainType :: DtrType -> String
+explainType :: RrrType -> String
 explainType Empty = error "explain empty type"
 explainType (ListOf   t) = explainType t -- TODO add the list part?
 explainType (ScoresOf t) = explainType t -- TODO add the scores part?
 explainType t = "| `" ++ tExt t ++ "` | " ++ tDesc t ++ " |"
 
 -- TODO these aren't functions!
-typesTable :: DtrModule -> [String]
+typesTable :: RrrModule -> [String]
 typesTable m = if null (mTypes m) then [""] else
   [ "Types:"
   , ""
@@ -26,14 +26,14 @@ typesTable m = if null (mTypes m) then [""] else
   ++ map explainType (mTypes m)
   ++ [""]
 
-explainFunction :: DtrFunction -> String
+explainFunction :: RrrFunction -> String
 explainFunction = join " | " . barred . map quoted . elems
   where
     elems  f  = filter (not . (`elem` [":", "->"])) $ splitOn " " $ fTypeDesc f
     barred es = [head es, join ", " $ init $ tail es, last es]
     quoted t  = "`" ++ t ++ "`"
 
-functionsTable :: DtrModule -> [String]
+functionsTable :: RrrModule -> [String]
 functionsTable m = if null (mFunctions m) then [""] else
   [ "Functions:"
   , ""
@@ -46,14 +46,14 @@ functionsTable m = if null (mFunctions m) then [""] else
 header :: String
 header = "{% import \"macros.jinja\" as macros with context %}"
 
-loadExample :: DtrModule -> [String]
-loadExample m = ["Examples:", "", "{{ macros.load_example('" ++ name ++ ".dtr') }}"]
+loadExample :: RrrModule -> [String]
+loadExample m = ["Examples:", "", "{{ macros.load_example('" ++ name ++ ".rrr') }}"]
   where
     name = filter isAlphaNum $ map toLower $ mName m
 
 -- TODO only use this as default if there's no custom markdown description written?
 -- TODO or move that stuff to the tutorial maybe?
-moduleReference :: DtrModule -> [String]
+moduleReference :: RrrModule -> [String]
 moduleReference m =
   [ "## " ++ mName m ++ " module"
   , ""

@@ -1,6 +1,6 @@
 module Detourrr.Modules where
 
-import Detourrr.Core.Types (DtrModule(..))
+import Detourrr.Core.Types (RrrModule(..))
 
 import qualified Detourrr.Modules.BioMartR  as BioMartR
 import qualified Detourrr.Modules.Blast     as Blast
@@ -29,32 +29,32 @@ import qualified Detourrr.Modules.MMSeqs    as MMSeqs
 import qualified Detourrr.Modules.SonicParanoid as SonicParanoid
 import qualified Detourrr.Modules.OrthoGroups as OrthoGroups
 
-modules :: [DtrModule]
+modules :: [RrrModule]
 modules =
-  [ Math.dtrModule
-  , Load.dtrModule
-  , Sets.dtrModule
-  , SeqIO.dtrModule
-  , BioMartR.dtrModule
-  , BlastDB.dtrModule
-  , Blast.dtrModule
-  , BlastHits.dtrModule
-  , Length.dtrModule
-  , PsiBlast.dtrModule
-  , CRBBlast.dtrModule
-  , Hmmer.dtrModule
-  , BlastRBH.dtrModule
-  -- , Cheat.dtrModule
-  , Muscle.dtrModule
-  , Sample.dtrModule
-  , Permute.dtrModule
-  , Repeat.dtrModule
-  , Summarize.dtrModule
-  , Scores.dtrModule
-  , Plots.dtrModule
-  , OrthoFinder.dtrModule
-  , Diamond.dtrModule
-  , MMSeqs.dtrModule
-  , SonicParanoid.dtrModule
-  , OrthoGroups.dtrModule
+  [ Math.rrrModule
+  , Load.rrrModule
+  , Sets.rrrModule
+  , SeqIO.rrrModule
+  , BioMartR.rrrModule
+  , BlastDB.rrrModule
+  , Blast.rrrModule
+  , BlastHits.rrrModule
+  , Length.rrrModule
+  , PsiBlast.rrrModule
+  , CRBBlast.rrrModule
+  , Hmmer.rrrModule
+  , BlastRBH.rrrModule
+  -- , Cheat.rrrModule
+  , Muscle.rrrModule
+  , Sample.rrrModule
+  , Permute.rrrModule
+  , Repeat.rrrModule
+  , Summarize.rrrModule
+  , Scores.rrrModule
+  , Plots.rrrModule
+  , OrthoFinder.rrrModule
+  , Diamond.rrrModule
+  , MMSeqs.rrrModule
+  , SonicParanoid.rrrModule
+  , OrthoGroups.rrrModule
   ]

@@ -11,7 +11,7 @@ import Development.Shake           (newResourceIO)
 -- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
                                    -- removeFiles, liftIO)
 import Paths_Detourrr             (getDataFileName)
-import Detourrr.Core.Types        (DtrConfig(..), DtrModule(..))
+import Detourrr.Core.Types        (RrrConfig(..), RrrModule(..))
 import Detourrr.Core.Util         (absolutize)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption)
@@ -23,7 +23,7 @@ import Debug.Trace       (trace)
  - weird place to put it, but makes everything much easier as far as avoiding
  - import cycles.
  -}
-debug :: DtrConfig -> String -> a -> a
+debug :: RrrConfig -> String -> a -> a
 debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 
 loadField :: Arguments -> Config -> String -> IO (Maybe String)
@@ -31,7 +31,7 @@ loadField args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
   | otherwise = C.lookup cfg $ pack key
 
-loadConfig :: [DtrModule] -> Arguments -> IO DtrConfig
+loadConfig :: [RrrModule] -> Arguments -> IO RrrConfig
 loadConfig mods args = do
   let path = fromJust $ getArg args $ longOption "config"
   cfg <- C.load [Optional path]
@@ -45,7 +45,7 @@ loadConfig mods args = do
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   ctp <- loadField args cfg "pattern"
   par <- newResourceIO "parallel" 1
-  return DtrConfig
+  return RrrConfig
     { cfgScript  = csc'
     , cfgTmpDir  = fromJust ctd
     , cfgWorkDir = fromJust cwd
@@ -81,19 +81,19 @@ hasArg as a = isPresent as $ longOption a
  -}
 
 -- This is mainly for use in the REPL so no need to return usable data
-showConfigField :: DtrConfig -> String -> String
+showConfigField :: RrrConfig -> String -> String
 showConfigField cfg key = case lookup key fields of
   Nothing -> "no such config setting: " ++ key
   Just (getter, _) -> getter cfg
 
-setConfigField :: DtrConfig -> String -> String -> Either String DtrConfig
+setConfigField :: RrrConfig -> String -> String -> Either String RrrConfig
 setConfigField cfg key val = case lookup key fields of
   Nothing -> Left $ "no such config setting: " ++ key
   Just (_, setter) -> setter cfg val
 
 -- TODO add modules? maybe not much need
-fields :: [(String, (DtrConfig -> String,
-                     DtrConfig -> String -> Either String DtrConfig))]
+fields :: [(String, (RrrConfig -> String,
+                     RrrConfig -> String -> Either String RrrConfig))]
 fields =
   [ ("script" , (show . cfgScript , setScript ))
   , ("tmpdir" , (show . cfgTmpDir , setTmpdir ))
@@ -104,44 +104,44 @@ fields =
   , ("width"  , (show . cfgWidth  , setWidth  ))
   ]
 
-showConfig :: DtrConfig -> String
+showConfig :: RrrConfig -> String
 showConfig cfg = unlines $ map showField fields
   where
     showField (name, (getter, _)) = name ++ " = " ++ getter cfg
 
-setDebug :: DtrConfig -> String -> Either String DtrConfig
+setDebug :: RrrConfig -> String -> Either String RrrConfig
 setDebug cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgDebug = v }
 
-setScript :: DtrConfig -> String -> Either String DtrConfig
+setScript :: RrrConfig -> String -> Either String RrrConfig
 setScript cfg "Nothing" = Right $ cfg { cfgScript = Nothing }
 setScript cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgScript = Just v }
 
-setTmpdir :: DtrConfig -> String -> Either String DtrConfig
+setTmpdir :: RrrConfig -> String -> Either String RrrConfig
 setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgTmpDir = v }
 
-setWorkdir :: DtrConfig -> String -> Either String DtrConfig
+setWorkdir :: RrrConfig -> String -> Either String RrrConfig
 setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgWorkDir = v }
 
-setWrapper :: DtrConfig -> String -> Either String DtrConfig
+setWrapper :: RrrConfig -> String -> Either String RrrConfig
 setWrapper cfg "Nothing" = Right $ cfg { cfgWrapper = Nothing }
 setWrapper cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgWrapper = Just v }
 
-setReport :: DtrConfig -> String -> Either String DtrConfig
+setReport :: RrrConfig -> String -> Either String RrrConfig
 setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   v       -> Right $ cfg { cfgReport = v }
 
-setWidth :: DtrConfig -> String -> Either String DtrConfig
+setWidth :: RrrConfig -> String -> Either String RrrConfig
 setWidth cfg "Nothing" = Right $ cfg { cfgWidth = Nothing }
 setWidth cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val

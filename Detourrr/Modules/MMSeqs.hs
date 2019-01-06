@@ -21,7 +21,7 @@ import Detourrr.Core.Types
 import Detourrr.Core.Actions       (readLit, readPaths, wrappedCmdWrite, symlink)
 import Detourrr.Core.Compile.Basic (rExpr, debugRules)
 import Detourrr.Core.Locks         (withReadLock)
-import Detourrr.Core.Paths         (toDtrPath, fromDtrPath, exprPath)
+import Detourrr.Core.Paths         (toRrrPath, fromRrrPath, exprPath)
 import Detourrr.Core.Util          (digest, unlessExists, resolveSymlinks)
 import Detourrr.Modules.Blast      (bht)
 import Detourrr.Modules.BlastDB    (withSingleton) -- TODO move to core?
@@ -29,8 +29,8 @@ import Detourrr.Modules.SeqIO      (fna, faa)
 import System.Directory            (createDirectoryIfMissing, removeDirectoryRecursive)
 import System.FilePath             ((</>), (<.>), takeDirectory)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "MMSeqs"
   , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite"
   , mTypes = [faa, fna, bht, mms]
@@ -43,8 +43,8 @@ dtrModule = DtrModule
   }
 
 -- note that this has an internal nucleic or amino acid type, but the program always handles either
-mms :: DtrType
-mms = DtrType
+mms :: RrrType
+mms = RrrType
   { tExt  = "mms"
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \_ ref path -> do
@@ -58,8 +58,8 @@ mms = DtrType
 -- mmseqs_createdb_all --
 -------------------------
 
-mmseqsCreateDbAll :: DtrFunction
-mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in DtrFunction
+mmseqsCreateDbAll :: RrrFunction
+mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in RrrFunction
   { fName      = name
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
@@ -73,20 +73,20 @@ tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
 tMmseqsCreateDbAll name types = error $ name ++ " requires a list of fasta files, but got " ++ show types
 
 rMmseqsCreateDbAll :: RulesFn
-rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(DtrFun _ _ _ _ [fas]) = do
+rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(RrrFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out    = exprPath s e
-      out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromDtrPath cfg out
+      out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromRrrPath cfg out
       dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       dbPath = dbDir </> digest fas <.> "mmseqs2db" -- TODO take hash from somewhere else?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
       faPaths <- readPaths cfg ref fasPath
-      let faPaths' = map (fromDtrPath cfg) faPaths
+      let faPaths' = map (fromRrrPath cfg) faPaths
       liftIO $ createDirectoryIfMissing True dbDir
       wrappedCmdWrite False True cfg ref out' [dbPath ++ "*"] [] [Cwd dbDir]
         "mmseqs" $ ["createdb"] ++ faPaths' ++ [dbPath]
-    symlink cfg ref out $ toDtrPath cfg dbPath
+    symlink cfg ref out $ toRrrPath cfg dbPath
   return (ExprPath out')
 rMmseqsCreateDbAll _ e = error $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
@@ -94,8 +94,8 @@ rMmseqsCreateDbAll _ e = error $ "bad argument to rMmseqsCreateDbAll: " ++ show 
 -- mmseqs_createdb --
 ---------------------
 
-mmseqsCreateDb :: DtrFunction
-mmseqsCreateDb = let name = "mmseqs_createdb" in DtrFunction
+mmseqsCreateDb :: RrrFunction
+mmseqsCreateDb = let name = "mmseqs_createdb" in RrrFunction
   { fName      = name
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
@@ -118,8 +118,8 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 -- TODO for now this should also handle the convertalis step
 -- TODO any reason to have a version that takes the query as a db? seems unnecessary
 
-mmseqsSearchDb :: DtrFunction
-mmseqsSearchDb = let name = "mmseqs_search_db" in DtrFunction
+mmseqsSearchDb :: RrrFunction
+mmseqsSearchDb = let name = "mmseqs_search_db" in RrrFunction
   { fName      = name
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
@@ -135,12 +135,12 @@ tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Righ
 tMmseqsSearchDb n types = error $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
 
 rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb st@(_, cfg, ref, _) e@(DtrFun _ salt _ _ [n, q, s]) = do
+rMmseqsSearchDb st@(_, cfg, ref, _) e@(RrrFun _ salt _ _ [n, q, s]) = do
   (ExprPath ePath) <- rExpr st n
-  (ExprPath qPath) <- rExpr st $ DtrFun mms salt (depsOf q) "mmseqs_createdb" [q]
+  (ExprPath qPath) <- rExpr st $ RrrFun mms salt (depsOf q) "mmseqs_createdb" [q]
   (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db
   let out    = exprPath st e
-      out'   = debugRules cfg "rMmseqsSearch" e $ fromDtrPath cfg out
+      out'   = debugRules cfg "rMmseqsSearch" e $ fromRrrPath cfg out
       -- dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
       dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       -- outDb' = dbDir </> "db" -- TODO error here?
@@ -155,7 +155,7 @@ resolveMmseqsDb path = do
   need [path] -- path is to a symlink to the main db file
   liftIO $ resolveSymlinks Nothing path
 
-aMmseqSearchDb :: DtrConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqSearchDb :: RrrConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 aMmseqSearchDb cfg ref ePath qDb sDb outDb = do
   qDb' <- resolveMmseqsDb qDb
   sDb' <- resolveMmseqsDb sDb
@@ -166,7 +166,7 @@ aMmseqSearchDb cfg ref ePath qDb sDb outDb = do
     "mmseqs" ["search", "-e", eStr, qDb', sDb', outDb, tmpDir]
   liftIO $ removeDirectoryRecursive tmpDir
 
-aMmseqConvertAlis :: DtrConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqConvertAlis :: RrrConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 aMmseqConvertAlis cfg ref qDb sDb outDb outTab = do
   qDb' <- resolveMmseqsDb qDb
   sDb' <- resolveMmseqsDb sDb
@@ -182,8 +182,8 @@ aMmseqConvertAlis cfg ref qDb sDb outDb outTab = do
 -- mmseqs_search --
 -------------------
 
-mmseqsSearch :: DtrFunction
-mmseqsSearch = let name = "mmseqs_search" in DtrFunction
+mmseqsSearch :: RrrFunction
+mmseqsSearch = let name = "mmseqs_search" in RrrFunction
   { fName      = name
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
@@ -198,9 +198,9 @@ tMmseqsSearch _ [x, y, z] | x == num && y `elem` [fna, faa] && z `elem` [fna, fa
 tMmseqsSearch n types = error $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
 
 rMmseqsSearch :: RulesFn
-rMmseqsSearch st (DtrFun rtn salt deps name [e, q, s])
-  = rules st (DtrFun rtn salt deps name [e, q, sDb])
+rMmseqsSearch st (RrrFun rtn salt deps name [e, q, s])
+  = rules st (RrrFun rtn salt deps name [e, q, sDb])
   where
     rules = fRules mmseqsSearchDb
-    sDb = DtrFun mms salt (depsOf s) "mmseqs_createdb" [s] 
+    sDb = RrrFun mms salt (depsOf s) "mmseqs_createdb" [s] 
 rMmseqsSearch _ _ = error "bad argument to rMmseqsSearch"

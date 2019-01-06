@@ -11,14 +11,14 @@ import Detourrr.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleS
                                     rExpr, debugRules, rSimple)
 import Detourrr.Core.Locks         (withReadLock)
 import Detourrr.Core.Util          (resolveSymlinks)
-import Detourrr.Core.Paths         (DtrPath, fromDtrPath, exprPath)
+import Detourrr.Core.Paths         (RrrPath, fromRrrPath, exprPath)
 import Detourrr.Core.Actions       (readPaths, readLit, debugA, wrappedCmdWrite)
 import Detourrr.Modules.SeqIO      (fna, faa)
 import Detourrr.Modules.Blast      (bht)
 import System.Command              (readProcess)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Diamond"
   , mDesc = "Accelerated BLAST compatible local sequence aligner."
   , mTypes = [fna, faa, dmnd]
@@ -29,8 +29,8 @@ dtrModule = DtrModule
       ++ map mkDiamondBlast variants
   }
 
-dmnd :: DtrType
-dmnd = DtrType
+dmnd :: RrrType
+dmnd = RrrType
   { tExt  = "dmnd"
   , tDesc = "DIAMOND database"
   , tShow = \_ ref path -> do
@@ -44,8 +44,8 @@ dmnd = DtrType
 -- diamond_makedb --
 --------------------
 
-diamondmakedb :: DtrFunction
-diamondmakedb = let name = "diamond_makedb" in DtrFunction
+diamondmakedb :: RrrFunction
+diamondmakedb = let name = "diamond_makedb" in RrrFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck [faa] dmnd
@@ -58,8 +58,8 @@ diamondmakedb = let name = "diamond_makedb" in DtrFunction
 -- diamond_makedb_all --
 ------------------------
 
-diamondmakedbAll :: DtrFunction
-diamondmakedbAll = let name = "diamond_makedb_all" in DtrFunction
+diamondmakedbAll :: RrrFunction
+diamondmakedbAll = let name = "diamond_makedb_all" in RrrFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
@@ -70,10 +70,10 @@ diamondmakedbAll = let name = "diamond_makedb_all" in DtrFunction
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
 rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll s@(_, cfg, ref, ids) e@(DtrFun _ _ _ _ [fas]) = do
+rDiamondmakedbAll s@(_, cfg, ref, ids) e@(RrrFun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out  = exprPath s e
-      out' = debugRules cfg "rDiamondmakedbAll" e $ fromDtrPath cfg out
+      out' = debugRules cfg "rDiamondmakedbAll" e $ fromRrrPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths cfg ref fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
@@ -84,7 +84,7 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 -- diamond_blast* --
 --------------------
 
-type DiamondBlastDesc = (String, [String] -> RulesFn, [String], DtrType, DtrType)
+type DiamondBlastDesc = (String, [String] -> RulesFn, [String], RrrType, RrrType)
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?
 variants :: [DiamondBlastDesc]
@@ -103,8 +103,8 @@ variants =
   , ("blastx_db_more_sensitive", rDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd)
   ]
 
-mkDiamondBlast :: DiamondBlastDesc -> DtrFunction
-mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name in DtrFunction
+mkDiamondBlast :: DiamondBlastDesc -> RrrFunction
+mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name in RrrFunction
   { fName      = name'
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] bht 
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
@@ -116,25 +116,25 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name 
 rDiamondFromDb :: [String] -> RulesFn
 rDiamondFromDb = rSimple . aDiamondFromDb
 
-aDiamondFromDb :: [String] -> (DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ())
+aDiamondFromDb :: [String] -> (RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ())
 aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
   eStr <- readLit  cfg ref e'
   wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond" $ dCmd ++ ["-q", q', "-o", o'', "-e", eStr, "-d", db']
   where
-    o'  = fromDtrPath cfg o
-    e'  = fromDtrPath cfg e
-    q'  = fromDtrPath cfg q
-    db' = fromDtrPath cfg db
+    o'  = fromRrrPath cfg o
+    e'  = fromRrrPath cfg e
+    q'  = fromRrrPath cfg q
+    db' = fromRrrPath cfg db
     o'' = debugA cfg "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
 aDiamondFromDb _ _ _ _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler
 rDiamondFromFa :: [String] -> RulesFn
-rDiamondFromFa dCmd st (DtrFun rtn salt deps _ [e, q, s])
-  = rules st (DtrFun rtn salt deps name1 [e, q, dbExpr])
+rDiamondFromFa dCmd st (RrrFun rtn salt deps _ [e, q, s])
+  = rules st (RrrFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules  = rSimple $ aDiamondFromDb dCmd
     name1  = "diamond_" ++ head dCmd
-    dbExpr = DtrFun dmnd salt (depsOf s) "diamond_makedb" [s]
+    dbExpr = RrrFun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = error "bad argument to rDiamondFromFa"

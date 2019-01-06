@@ -12,8 +12,8 @@ import Development.Shake
 import Detourrr.Core.Types
 
 import Detourrr.Core.Actions (writeLits, writePaths, readLit, debugA)
-import Detourrr.Core.Paths  (exprPath, fromDtrPath,
-                             DtrPath, toDtrPath, fromDtrPath)
+import Detourrr.Core.Paths  (exprPath, fromRrrPath,
+                             RrrPath, toRrrPath, fromRrrPath)
 import Detourrr.Core.Compile.Basic (rExpr, compileScript, debugRules)
 -- import Detourrr.Core.Debug   (debugRules, debugA)
 import Detourrr.Core.Util    (digest, stripWhiteSpace)
@@ -24,36 +24,36 @@ import Detourrr.Core.Util    (digest, stripWhiteSpace)
 
 -- TODO only mangle the specific vars we want changed!
 
-mangleExpr :: (DtrVar -> DtrVar) -> DtrExpr -> DtrExpr
-mangleExpr _ e@(DtrLit  _ _ _) = e
-mangleExpr fn (DtrRef  t n vs v      ) = DtrRef  t n (map fn vs)   (fn v)
-mangleExpr fn (DtrBop  t n vs s e1 e2) = DtrBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
-mangleExpr fn (DtrFun  t n vs s es   ) = DtrFun  t n (map fn vs) s (map (mangleExpr fn) es)
-mangleExpr fn (DtrList t n vs   es   ) = DtrList t n (map fn vs)   (map (mangleExpr fn) es)
-mangleExpr _ (DtrRules _) = error "implement this!"
+mangleExpr :: (RrrVar -> RrrVar) -> RrrExpr -> RrrExpr
+mangleExpr _ e@(RrrLit  _ _ _) = e
+mangleExpr fn (RrrRef  t n vs v      ) = RrrRef  t n (map fn vs)   (fn v)
+mangleExpr fn (RrrBop  t n vs s e1 e2) = RrrBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (RrrFun  t n vs s es   ) = RrrFun  t n (map fn vs) s (map (mangleExpr fn) es)
+mangleExpr fn (RrrList t n vs   es   ) = RrrList t n (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr _ (RrrRules _) = error "implement this!"
 
-mangleAssign :: (DtrVar -> DtrVar) -> DtrAssign -> DtrAssign
+mangleAssign :: (RrrVar -> RrrVar) -> RrrAssign -> RrrAssign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
 
-mangleScript :: (DtrVar -> DtrVar) -> DtrScript -> DtrScript
+mangleScript :: (RrrVar -> RrrVar) -> RrrScript -> RrrScript
 mangleScript fn = map (mangleAssign fn)
 
 -- TODO pad with zeros?
 -- Add a "dupN." prefix to each variable name in the path from independent
 -- -> dependent variable, using a list of those varnames
-addPrefix :: String -> (DtrVar -> DtrVar)
-addPrefix p (DtrVar s) = DtrVar $ s ++ "." ++ p
+addPrefix :: String -> (RrrVar -> RrrVar)
+addPrefix p (RrrVar s) = RrrVar $ s ++ "." ++ p
 
 -- TODO should be able to just apply this to a duplicate script section right?
-addPrefixes :: String -> DtrScript -> DtrScript
+addPrefixes :: String -> RrrScript -> RrrScript
 addPrefixes p = mangleScript (addPrefix p)
 
 ----------------------------------
 -- main repeat function for PRS --
 ----------------------------------
 
-repeatEach :: DtrFunction
-repeatEach = DtrFunction
+repeatEach :: RrrFunction
+repeatEach = RrrFunction
   { fName      = "repeat_each"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatEach
@@ -61,7 +61,7 @@ repeatEach = DtrFunction
   , fRules  = rRepeatEach
   }
 
-tRepeatEach :: [DtrType] -> Either String DtrType
+tRepeatEach :: [RrrType] -> Either String RrrType
 tRepeatEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 tRepeatEach _ = Left "invalid args to repeat_each" -- TODO better errors here
 
@@ -71,9 +71,9 @@ dRepeatEach = "repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list
 -- TODO ideally, this shouldn't need any custom digesting? but whatever no
 --      messing with it for now
 -- TODO can this be parallelized better?
-cRepeat :: DtrState -> DtrExpr -> DtrVar -> DtrExpr -> Rules ExprPath
+cRepeat :: RrrState -> RrrExpr -> RrrVar -> RrrExpr -> Rules ExprPath
 cRepeat (script, cfg, ref, ids) resExpr subVar subExpr = do
-  let res  = (DtrVar "result", resExpr)
+  let res  = (RrrVar "result", resExpr)
       sub  = (subVar, subExpr)
       deps = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       -- TODO this should be very different right?
@@ -82,15 +82,15 @@ cRepeat (script, cfg, ref, ids) resExpr subVar subExpr = do
   (ResPath resPath) <- compileScript (scr', cfg, ref, ids) (Just pre)
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?
 
-rRepeatEach :: DtrState -> DtrExpr -> Rules ExprPath
-rRepeatEach s@(scr, cfg, ref, _) expr@(DtrFun _ _ _ _ (resExpr:(DtrRef _ _ _ subVar):subList:[])) = do
+rRepeatEach :: RrrState -> RrrExpr -> Rules ExprPath
+rRepeatEach s@(scr, cfg, ref, _) expr@(RrrFun _ _ _ _ (resExpr:(RrrRef _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (cRepeat s resExpr subVar) subExprs
-  let subPaths' = (\(ExprPath p) -> toDtrPath cfg p) subPaths
-      resPaths' = map (\(ExprPath p) -> toDtrPath cfg p) resPaths
+  let subPaths' = (\(ExprPath p) -> toRrrPath cfg p) subPaths
+      resPaths' = map (\(ExprPath p) -> toRrrPath cfg p) resPaths
       outPath   = exprPath s expr
-      outPath'  = debugRules cfg "rRepeatEach" expr $ fromDtrPath cfg outPath
+      outPath'  = debugRules cfg "rRepeatEach" expr $ fromRrrPath cfg outPath
   outPath' %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aRepeatEachLits (typeOf expr)
@@ -101,25 +101,25 @@ rRepeatEach _ expr = error $ "bad argument to rRepeatEach: " ++ show expr
 
 -- TODO factor out, and maybe unify with rListLits
 -- TODO subPaths is only one path? if so, rename it
-aRepeatEachLits :: DtrType -> DtrConfig -> Locks
-                -> DtrPath -> DtrPath -> [DtrPath] -> Action ()
+aRepeatEachLits :: RrrType -> RrrConfig -> Locks
+                -> RrrPath -> RrrPath -> [RrrPath] -> Action ()
 aRepeatEachLits _ cfg ref outPath subPaths resPaths = do
   lits <- mapM (readLit cfg ref) resPaths'
   let lits' = map stripWhiteSpace lits
   writeLits cfg ref out lits'
   where
-    outPath'  = fromDtrPath cfg outPath
-    subPaths' = fromDtrPath cfg subPaths
-    resPaths' = map (fromDtrPath cfg) resPaths
+    outPath'  = fromRrrPath cfg outPath
+    subPaths' = fromRrrPath cfg subPaths
+    resPaths' = map (fromRrrPath cfg) resPaths
     out = debugA cfg "aRepeatEachLits" outPath' (outPath':subPaths':resPaths')
 
 -- TODO factor out, and maybe unify with rListLinks
-aRepeatEachLinks :: DtrConfig -> Locks -> DtrPath -> DtrPath -> [DtrPath] -> Action ()
+aRepeatEachLinks :: RrrConfig -> Locks -> RrrPath -> RrrPath -> [RrrPath] -> Action ()
 aRepeatEachLinks cfg ref outPath subPaths resPaths = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
   writePaths cfg ref out resPaths
   where
-    outPath'  = fromDtrPath cfg outPath
-    subPaths' = fromDtrPath cfg subPaths
-    resPaths' = map (fromDtrPath cfg) resPaths
+    outPath'  = fromRrrPath cfg outPath
+    subPaths' = fromRrrPath cfg subPaths
+    resPaths' = map (fromRrrPath cfg) resPaths
     out = debugA cfg "aRepeatEachLinks" outPath' (outPath':subPaths':resPaths')

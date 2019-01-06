@@ -11,14 +11,14 @@ import Detourrr.Core.Types
 import Data.List                   (isPrefixOf)
 import Detourrr.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmd)
 import Detourrr.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import Detourrr.Core.Paths         (DtrPath, toDtrPath, fromDtrPath)
+import Detourrr.Core.Paths         (RrrPath, toRrrPath, fromRrrPath)
 import Detourrr.Core.Util          (digest, readFileStrict, unlessExists)
 import Detourrr.Modules.SeqIO      (faa)
 import System.Directory            (createDirectoryIfMissing, renameDirectory)
 import System.FilePath             ((</>), takeFileName)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "OrthoFinder"
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
   , mTypes = [faa, ofr]
@@ -27,8 +27,8 @@ dtrModule = DtrModule
       ]
   }
 
-ofr :: DtrType
-ofr = DtrType
+ofr :: RrrType
+ofr = RrrType
   { tExt  = "ofr"
   , tDesc = "OrthoFinder results"
   , tShow = \_ ref path -> do
@@ -40,8 +40,8 @@ ofr = DtrType
 -- orthofinder --
 -----------------
 
-orthofinder :: DtrFunction
-orthofinder = let name = "orthofinder" in DtrFunction
+orthofinder :: RrrFunction
+orthofinder = let name = "orthofinder" in RrrFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
@@ -54,7 +54,7 @@ orthofinder = let name = "orthofinder" in DtrFunction
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
 -- TODO what's diamond blast? do i need to add it?
-aOrthofinder :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+aOrthofinder :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aOrthofinder cfg ref _ [out, faListPath] = do
 
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
@@ -64,9 +64,9 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     liftIO $ createDirectoryIfMissing True tmpDir
 
     faPaths <- readPaths cfg ref faListPath'
-    let faPaths' = map (fromDtrPath cfg) faPaths
+    let faPaths' = map (fromRrrPath cfg) faPaths
     debugNeed cfg "aOrthofinder" faPaths'
-    let faLinks = map (\p -> toDtrPath cfg $ tmpDir </> (takeFileName $ fromDtrPath cfg p)) faPaths
+    let faLinks = map (\p -> toRrrPath cfg $ tmpDir </> (takeFileName $ fromRrrPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
     (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "orthofinder"
@@ -80,11 +80,11 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
     liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
 
-  symlink cfg ref out $ toDtrPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
+  symlink cfg ref out $ toRrrPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
 
   where
-    out'        = fromDtrPath cfg out
-    faListPath' = fromDtrPath cfg faListPath
+    out'        = fromRrrPath cfg out
+    faListPath' = fromRrrPath cfg faListPath
     out''       = debugA cfg "aOrthofinder" out' [out', faListPath']
 
 aOrthofinder _ _ _ args = error $ "bad argument to aOrthofinder: " ++ show args

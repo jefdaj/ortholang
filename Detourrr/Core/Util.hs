@@ -69,18 +69,18 @@ import Detourrr.Core.Locks    (Locks, withReadLock, withReadLock')
 
 -- TODO should this go in Util too?
 -- TODO remove if you can figure out a way to put stamps in regular debug
--- debugIO :: DtrConfig -> String -> a -> IO a
+-- debugIO :: RrrConfig -> String -> a -> IO a
 -- debugIO cfg msg rtn = do
 --   stamp <- getTimeStamp
 --   return $ debug cfg (stamp ++ " " ++ msg) rtn
 
 -- TODO ok this goes in Util
---debug :: DtrConfig -> String -> a -> a
+--debug :: RrrConfig -> String -> a -> a
 --debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 
 -- TODO and this one 
 -- TODO stop exporting this in favor of the ones below?
--- debugShow :: Show a => DtrConfig -> a -> b -> b
+-- debugShow :: Show a => RrrConfig -> a -> b -> b
 -- debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
 
 ----------------
@@ -91,7 +91,7 @@ import Detourrr.Core.Locks    (Locks, withReadLock, withReadLock')
  - (couple hundred thousand at once). The solution is to use strict IO. And
  - also to write literal lists as single files, which is part of why there are
  - so many read/write functions. This is the IO verion, which shouldn't be used
- - in the actual evaluation of dtrs. Use one of the read* functions from
+ - in the actual evaluation of rrrs. Use one of the read* functions from
  - Actions.hs instead.
  - See: https://github.com/ndmitchell/shake/issues/37
  - TODO All (haskell) reads should eventually go through this function

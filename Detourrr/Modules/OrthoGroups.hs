@@ -7,7 +7,7 @@ import Detourrr.Core.Types
 import Control.Monad               (forM)
 import Detourrr.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, writePaths)
 import Detourrr.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import Detourrr.Core.Paths         (DtrPath, toDtrPath, fromDtrPath)
+import Detourrr.Core.Paths         (RrrPath, toRrrPath, fromRrrPath)
 import Detourrr.Core.Util          (resolveSymlinks)
 import Detourrr.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
@@ -16,8 +16,8 @@ import Data.IORef                  (readIORef)
 import Detourrr.Modules.OrthoFinder   (ofr)
 import Detourrr.Modules.SonicParanoid (spr)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
   , mTypes = [ofr, spr]
@@ -35,8 +35,8 @@ dtrModule = DtrModule
 -- TODO list_groups?
 -- TODO separate module that works with multiple ortholog programs?
 -- TODO version to get the group matching an ID
-orthogroups :: DtrFunction
-orthogroups = let name = "orthogroups" in DtrFunction
+orthogroups :: RrrFunction
+orthogroups = let name = "orthogroups" in RrrFunction
   { fName      = name
   , fTypeDesc  = name ++ " : ofr/spr -> str.list.list"
   , fTypeCheck = defaultTypeCheck [ofr] (ListOf (ListOf str))
@@ -45,13 +45,13 @@ orthogroups = let name = "orthogroups" in DtrFunction
   , fRules     = rSimple aOrthogroups
   }
 
-findResDir :: DtrConfig -> FilePath -> IO FilePath
+findResDir :: RrrConfig -> FilePath -> IO FilePath
 findResDir cfg outPath = do
   statsPath <- resolveSymlinks (Just $ cfgTmpDir cfg) outPath
   return $ takeDirectory $ takeDirectory statsPath
 
 -- TODO write one of these for sonicparanoid too
-parseOrthoFinder :: DtrConfig -> HashedSeqIDsRef -> FilePath -> Action [[String]]
+parseOrthoFinder :: RrrConfig -> HashedSeqIDsRef -> FilePath -> Action [[String]]
 parseOrthoFinder cfg idref resDir = do
   let orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   ids <- liftIO $ readIORef idref
@@ -59,7 +59,7 @@ parseOrthoFinder cfg idref resDir = do
   let groups = map (words . drop 11) (lines txt)
   return groups
 
-writeOrthogroups :: DtrConfig -> Locks -> HashedSeqIDsRef -> DtrPath -> [[String]] -> Action ()
+writeOrthogroups :: RrrConfig -> Locks -> HashedSeqIDsRef -> RrrPath -> [[String]] -> Action ()
 writeOrthogroups cfg ref _ out groups = do
   -- let groups' = (map . map) (unhashIDs cfg ids) groups
   -- ids   <- liftIO $ readIORef idsref
@@ -68,15 +68,15 @@ writeOrthogroups cfg ref _ out groups = do
         -- group' = map (unhashIDs cfg ids) group
     -- liftIO $ putStrLn $ "group': " ++ show group'
     writeLits cfg ref path group
-    return $ toDtrPath cfg path
-  writePaths cfg ref (fromDtrPath cfg out) paths
+    return $ toRrrPath cfg path
+  writePaths cfg ref (fromRrrPath cfg out) paths
 
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
-aOrthogroups :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+aOrthogroups :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aOrthogroups cfg ref idsref [out, ofrPath] = do
-  resDir <- liftIO $ findResDir cfg $ fromDtrPath cfg ofrPath
+  resDir <- liftIO $ findResDir cfg $ fromRrrPath cfg ofrPath
   groups <- parseOrthoFinder cfg idsref resDir
   writeOrthogroups cfg ref idsref out groups
 aOrthogroups _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
@@ -87,8 +87,8 @@ aOrthogroups _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
 -- TODO this should only return a str.list
 
-orthogroupContaining :: DtrFunction
-orthogroupContaining = let name = "orthogroup_containing" in DtrFunction
+orthogroupContaining :: RrrFunction
+orthogroupContaining = let name = "orthogroup_containing" in RrrFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ofr, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck [ofr, str] (ListOf str)
@@ -97,21 +97,21 @@ orthogroupContaining = let name = "orthogroup_containing" in DtrFunction
   , fRules     = rSimple aOrthogroupContaining
   }
 
-aOrthogroupContaining :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+aOrthogroupContaining :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
-  geneId <- readLit cfg ref $ fromDtrPath cfg idPath
-  resDir <- liftIO $ findResDir cfg $ fromDtrPath cfg ofrPath
+  geneId <- readLit cfg ref $ fromRrrPath cfg idPath
+  resDir <- liftIO $ findResDir cfg $ fromRrrPath cfg ofrPath
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ids resDir
   let group = if null groups' then [] else head groups' -- TODO check for more?
-  writeLits cfg ref (fromDtrPath cfg out) group
+  writeLits cfg ref (fromRrrPath cfg out) group
 aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ----------------------------
 -- orthogroups_containing --
 ----------------------------
 
-orthogroupsContaining :: DtrFunction
-orthogroupsContaining = let name = "orthogroups_containing" in DtrFunction
+orthogroupsContaining :: RrrFunction
+orthogroupsContaining = let name = "orthogroups_containing" in RrrFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ofr, ListOf str] (ListOf (ListOf str))
   , fTypeCheck = defaultTypeCheck [ofr, ListOf str] (ListOf (ListOf str))
@@ -124,10 +124,10 @@ orthogroupsContaining = let name = "orthogroups_containing" in DtrFunction
 filterContainsOne :: Eq a => [a] -> [[a]] -> [[a]]
 filterContainsOne elems lists = filter (flip any elems . flip elem) lists
 
-aOrthogroupsContaining :: DtrConfig -> Locks -> HashedSeqIDsRef -> [DtrPath] -> Action ()
+aOrthogroupsContaining :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aOrthogroupsContaining cfg ref ids [out, ofrPath, idsPath] = do
-  geneIds <- readLits cfg ref $ fromDtrPath cfg idsPath
-  resDir  <- liftIO $ findResDir cfg $ fromDtrPath cfg ofrPath
+  geneIds <- readLits cfg ref $ fromRrrPath cfg idsPath
+  resDir  <- liftIO $ findResDir cfg $ fromRrrPath cfg ofrPath
   groups  <- fmap (filterContainsOne geneIds) $ parseOrthoFinder cfg ids resDir -- TODO handle sonicparanoid
   writeOrthogroups cfg ref ids out groups
 aOrthogroupsContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args

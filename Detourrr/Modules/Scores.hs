@@ -15,14 +15,14 @@ import Detourrr.Core.Types
 import Control.Monad (when)
 import Detourrr.Core.Actions (readStrings, readLits, writeLits, debugL)
 import Detourrr.Core.Compile.Basic (rExpr, debugRules)
-import Detourrr.Core.Paths         (DtrPath, toDtrPath, fromDtrPath, exprPath)
+import Detourrr.Core.Paths         (RrrPath, toRrrPath, fromRrrPath, exprPath)
 
 -- import Detourrr.Core.Compile.Map  (rMap)
-import Detourrr.Modules.BlastHits (aDtrCol)
+import Detourrr.Modules.BlastHits (aRrrCol)
 import Detourrr.Core.Compile.Basic (rSimple)
 
-dtrModule :: DtrModule
-dtrModule = DtrModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Scores"
   , mDesc = "Score repeated variables for plotting"
   , mTypes = []
@@ -37,11 +37,11 @@ dtrModule = DtrModule
 -- scores --
 ------------
 
-aScores :: DtrConfig -> Locks -> DtrPath -> DtrPath -> DtrType -> DtrPath -> Action ()
+aScores :: RrrConfig -> Locks -> RrrPath -> RrrPath -> RrrType -> RrrPath -> Action ()
 aScores cfg ref scoresPath othersPath othersType outPath = do
-  scores <- readLits cfg ref $ fromDtrPath cfg scoresPath
-  others <- readStrings othersType cfg ref $ fromDtrPath cfg othersPath
-  let out' = fromDtrPath cfg outPath
+  scores <- readLits cfg ref $ fromRrrPath cfg scoresPath
+  others <- readStrings othersType cfg ref $ fromRrrPath cfg othersPath
+  let out' = fromRrrPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others
   when (length scores /= length others) $ error $ unlines
      ["mismatched scores and others in aScores:", show scores, show others]
@@ -56,8 +56,8 @@ aScores cfg ref scoresPath othersPath othersType outPath = do
 
 -- (No need to score repeatN because it already produces a num.list)
 
-scoreRepeats :: DtrFunction
-scoreRepeats = DtrFunction
+scoreRepeats :: RrrFunction
+scoreRepeats = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tScoreRepeats
@@ -67,23 +67,23 @@ scoreRepeats = DtrFunction
   where
     name = "score_repeats"
 
-tScoreRepeats :: [DtrType] -> Either String DtrType
+tScoreRepeats :: [RrrType] -> Either String RrrType
 tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
-rScoreRepeats :: DtrState -> DtrExpr -> Rules ExprPath
-rScoreRepeats s@(_, cfg, ref, _) expr@(DtrFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
+rScoreRepeats :: RrrState -> RrrExpr -> Rules ExprPath
+rScoreRepeats s@(_, cfg, ref, _) expr@(RrrFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr s subList
   scores <- rExpr s repEachExpr
-  let hack    = \(ExprPath p) -> toDtrPath cfg p -- TODO remove! but how?
+  let hack    = \(ExprPath p) -> toRrrPath cfg p -- TODO remove! but how?
       inputs' = hack inputs
       scores' = hack scores
   outPath' %> \_ -> aScores cfg ref scores' inputs' t outPath
   return $ ExprPath $ outPath'
   where
-    repEachExpr = DtrFun (ListOf t) salt deps "repeat_each" as
+    repEachExpr = RrrFun (ListOf t) salt deps "repeat_each" as
     outPath  = exprPath s expr
-    outPath' = debugRules cfg "rScoreRepeats" expr $ fromDtrPath cfg outPath
+    outPath' = debugRules cfg "rScoreRepeats" expr $ fromRrrPath cfg outPath
 rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 
 ----------------------------------
@@ -91,23 +91,23 @@ rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 ----------------------------------
 
 -- TODO deduplicate with extractQueries?
-extractScores :: DtrFunction
-extractScores = let name = "extract_scores" in DtrFunction
+extractScores :: RrrFunction
+extractScores = let name = "extract_scores" in RrrFunction
   { fName      = name
   , fTypeCheck = tExtractScores
   , fDesc = Nothing, fTypeDesc  = name ++ " : X.scores -> num.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aDtrCol False 1
+  , fRules     = rSimple $ aRrrCol False 1
   }
 
 -- TODO deduplicate with extractTargets?
-extractScored :: DtrFunction
-extractScored = let name = "extract_scored" in DtrFunction
+extractScored :: RrrFunction
+extractScored = let name = "extract_scored" in RrrFunction
   { fName      = name
   , fTypeCheck = tExtractScored
   , fDesc = Nothing, fTypeDesc  = name ++ " : X.scores -> X.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aDtrCol False 2
+  , fRules     = rSimple $ aRrrCol False 2
   }
 
 tExtractScores :: TypeChecker
