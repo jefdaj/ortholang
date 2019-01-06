@@ -1,0 +1,9 @@
+.
+|-- cache
+|-- exprs
+|   `-- str
+|       `-- cd40d15fed.str -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/str/cd40d15fed.str
+
+4 directories, 2 files

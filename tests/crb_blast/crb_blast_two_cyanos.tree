@@ -1,0 +1,41 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   `-- 2e58eea1dc_888b3820cc
+|   |       |-- 6ea57f1208.fna -> ../../../cache/load/6ea57f1208.fna
+|   |       |-- 6ea57f1208.nhr
+|   |       |-- 6ea57f1208.nin
+|   |       |-- 6ea57f1208.nsq
+|   |       |-- 6ea57f1208_into_a810086108.1.blast
+|   |       |-- a810086108.faa -> ../../../cache/load/a810086108.faa
+|   |       |-- a810086108.phr
+|   |       |-- a810086108.pin
+|   |       |-- a810086108.psq
+|   |       |-- a810086108_into_6ea57f1208.2.blast
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       `-- results.crb
+|   `-- load
+|       |-- 6ea57f1208.fna
+|       |-- 6ea57f1208.fna.ids
+|       |-- a810086108.faa
+|       `-- a810086108.faa.ids
+|-- exprs
+|   |-- crb_blast
+|   |   `-- 271ff0a5ee_6bab92ca3c.crb -> ../../cache/crbblast/2e58eea1dc_888b3820cc/results.crb
+|   |-- extract_targets
+|   |   `-- 299b95b3f0.str.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
+|   |-- load_fna
+|   |   `-- 45126bfa2b.fna -> ../../cache/load/6ea57f1208.fna
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       `-- 7da80bde02.str -> ../../cache/lines/...
+`-- vars
+    |-- full7942.faa -> ../exprs/load_faa/31f6f3bb53.faa
+    |-- hits.crb -> ../exprs/crb_blast/271ff0a5ee_6bab92ca3c.crb
+    |-- mini6803.fna -> ../exprs/load_fna/45126bfa2b.fna
+    `-- result -> ../exprs/extract_targets/299b95b3f0.str.list
+
+11 directories, 27 files

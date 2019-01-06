@@ -1,0 +1,40 @@
+.
+|-- cache
+|   |-- concat
+|   |   |-- 2bc1da4f5c.txt -> ../../cache/lines/...
+|   |   `-- emptyfna.txt -> ../../cache/lines/...
+|   |-- each
+|   |   `-- ee6b6365f7
+|   |       |-- 2bc1da4f5c.fna -> ../../../exprs/concat_fna/2bc1da4f5c.fna
+|   |       `-- 2bc1da4f5c.fna.args -> ../../../cache/lines/...
+|   `-- load
+|       |-- d8da51f7cd.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
+|       `-- ec9540d17e.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
+|-- exprs
+|   |-- any
+|   |   `-- 063e026f65.fna.list -> ../../cache/lines/...
+|   |-- concat_fna
+|   |   |-- 2bc1da4f5c.fna
+|   |   `-- 94145284a3.fna
+|   |-- concat_fna_each
+|   |   `-- 9fa6b61622.fna.list -> ../../cache/lines/...
+|   |-- gbk_to_fna
+|   |   |-- 6393343d1a.fna
+|   |   `-- bcccc23ad1.fna
+|   |-- list
+|   |   |-- 0e506f60ac.fna.list -> ../../cache/lines/...
+|   |   |-- 11244066da.fna.list.list -> ../../cache/lines/...
+|   |   |-- 777e3c6c61.fna.list.list -> ../../cache/lines/...
+|   |   `-- cb805840d5.fna.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   |-- 778da7d248.gbk -> ../../cache/load/ec9540d17e.gbk
+|   |   `-- eeddb991c5.gbk -> ../../cache/load/d8da51f7cd.gbk
+|   `-- str
+|       |-- 7ec89da918.str -> ../../cache/lines/...
+|       `-- a8d18fa355.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.fna.list -> ../exprs/concat_fna_each/9fa6b61622.fna.list
+    |-- result -> ../exprs/any/063e026f65.fna.list
+    `-- single.fna -> ../exprs/concat_fna/94145284a3.fna
+
+14 directories, 23 files

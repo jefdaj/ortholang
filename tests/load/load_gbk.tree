@@ -1,0 +1,23 @@
+.
+|-- cache
+|   `-- load
+|       |-- 88580a1acc.gbff -> $WORKDIR/data/6803genome.gbff
+|       `-- 88580a1acc.gbk -> $WORKDIR/data/6803genome.gbff
+|-- exprs
+|   |-- any
+|   |   `-- 922bd82915.gbk.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 099900d5f6.str.list -> ../../cache/lines/...
+|   |   |-- 529a549153.gbk.list -> ../../cache/lines/...
+|   |   |-- ab80ff7222.gbk.list.list -> ../../cache/lines/...
+|   |   `-- d54fb5fa24.gbk.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   `-- 209a724799.gbk -> ../../cache/load/88580a1acc.gbk
+|   `-- str
+|       `-- 8b9871a6e5.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.gbk.list -> ../exprs/list/529a549153.gbk.list
+    |-- result -> ../exprs/any/922bd82915.gbk.list
+    `-- single.gbk -> ../exprs/load_gbk/209a724799.gbk
+
+8 directories, 12 files

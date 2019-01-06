@@ -1,0 +1,5 @@
+error! Error when running Shake build system:
+* eval
+Detourrr/Core/Sanitize.hs:86:5-39: Irrefutable pattern failed for pattern before : after
+
+

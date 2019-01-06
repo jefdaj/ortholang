@@ -1,0 +1,11 @@
+.
+|-- cache
+|-- exprs
+|   |-- glob_files
+|   |   `-- e98b828d23.str.list -> ../../cache/lines/...
+|   `-- str
+|       `-- 4749080868.str -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/glob_files/e98b828d23.str.list
+
+5 directories, 3 files

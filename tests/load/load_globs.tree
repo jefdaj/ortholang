@@ -1,0 +1,44 @@
+.
+|-- cache
+|   `-- load
+|       |-- 0469ad867e.faa
+|       |-- 0469ad867e.faa.ids
+|       |-- 10ffe0cf0f.faa
+|       |-- 10ffe0cf0f.faa.ids
+|       |-- 32841598b2.faa
+|       |-- 32841598b2.faa.ids
+|       |-- 36189032ad.faa
+|       |-- 36189032ad.faa.ids
+|       |-- 39b21a8bf4.faa
+|       |-- 39b21a8bf4.faa.ids
+|       |-- 4bdf8fb9a8.faa
+|       |-- 4bdf8fb9a8.faa.ids
+|       |-- 82645ed6f6.faa
+|       |-- 82645ed6f6.faa.ids
+|       |-- 8a695c317a.faa
+|       |-- 8a695c317a.faa.ids
+|       |-- 8aa4a9d2fc.faa
+|       |-- 8aa4a9d2fc.faa.ids
+|       |-- a810086108.faa
+|       |-- a810086108.faa.ids
+|       |-- de2033f5c0.faa
+|       `-- de2033f5c0.faa.ids
+|-- exprs
+|   |-- diff
+|   |   `-- cc4d6cf7b8.faa.list -> ../../cache/lines/...
+|   |-- glob_files
+|   |   |-- 57b047f7a4.str.list -> ../../cache/lines/...
+|   |   `-- e98b828d23.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 4a7746f75b.faa.list -> ../../cache/lines/...
+|   |   |-- 51925f5f26.faa.list -> ../../cache/lines/...
+|   |   `-- ee5f4fc38f.faa.list.list -> ../../cache/lines/...
+|   `-- str
+|       |-- 4749080868.str -> ../../cache/lines/...
+|       `-- 4f98ee567d.str -> ../../cache/lines/...
+`-- vars
+    |-- all_faas.faa.list -> ../exprs/list/51925f5f26.faa.list
+    |-- mini_faas.faa.list -> ../exprs/list/4a7746f75b.faa.list
+    `-- result -> ../exprs/diff/cc4d6cf7b8.faa.list
+
+8 directories, 33 files

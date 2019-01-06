@@ -1,0 +1,32 @@
+.
+|-- cache
+|   |-- each
+|   |   `-- 3c2fa3c291
+|   |       |-- a5f50cf046.faa -> ../../../exprs/translate/a5f50cf046.faa
+|   |       `-- a5f50cf046.faa.args -> ../../../cache/lines/...
+|   `-- load
+|       |-- 737dfdb34e.fna
+|       `-- 737dfdb34e.fna.ids
+|-- exprs
+|   |-- any
+|   |   `-- 02a42b359e.faa.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 4e012d4306.faa.list.list -> ../../cache/lines/...
+|   |   |-- 556607931c.str.list -> ../../cache/lines/...
+|   |   |-- 5730090ccf.fna.list -> ../../cache/lines/...
+|   |   `-- 71e62a8b0b.faa.list -> ../../cache/lines/...
+|   |-- load_fna
+|   |   `-- 34a32d8e2f.fna -> ../../cache/load/737dfdb34e.fna
+|   |-- str
+|   |   `-- a2fd369878.str -> ../../cache/lines/...
+|   |-- translate
+|   |   |-- a5f50cf046.faa
+|   |   `-- b5aafcfde1.faa
+|   `-- translate_each
+|       `-- 93cddf3bc4.faa.list -> ../../cache/lines/...
+`-- vars
+    |-- mapped.faa.list -> ../exprs/translate_each/93cddf3bc4.faa.list
+    |-- result -> ../exprs/any/02a42b359e.faa.list
+    `-- single.faa -> ../exprs/translate/b5aafcfde1.faa
+
+12 directories, 17 files

@@ -1,0 +1,27 @@
+.
+|-- cache
+|   `-- load
+|       |-- 8aa4a9d2fc.faa
+|       |-- 8aa4a9d2fc.faa.ids
+|       |-- ff08c7f09e.fna
+|       `-- ff08c7f09e.fna.ids
+|-- exprs
+|   |-- diamond_blastx
+|   |   `-- adac5a17c1_b929187763_d839a3278f.bht
+|   |-- diamond_makedb
+|   |   `-- f15f504b2e.dmnd
+|   |-- load_faa
+|   |   `-- 498816b813.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- load_fna
+|   |   `-- 806cbad617.fna -> ../../cache/load/ff08c7f09e.fna
+|   |-- num
+|   |   `-- 6de785566e.num -> ../../cache/lines/...
+|   `-- str
+|       |-- 4cdbcfa070.str -> ../../cache/lines/...
+|       `-- ec3b181d8a.str -> ../../cache/lines/...
+`-- vars
+    |-- pcc6803.faa -> ../exprs/load_faa/498816b813.faa
+    |-- pcc7942.fna -> ../exprs/load_fna/806cbad617.fna
+    `-- result -> ../exprs/diamond_blastx/adac5a17c1_b929187763_d839a3278f.bht
+
+10 directories, 14 files

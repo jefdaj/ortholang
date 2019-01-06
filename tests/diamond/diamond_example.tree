@@ -1,0 +1,9 @@
+.
+|-- cache
+|-- exprs
+|   `-- str
+|       `-- 580da7c080.str -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/str/580da7c080.str
+
+4 directories, 2 files

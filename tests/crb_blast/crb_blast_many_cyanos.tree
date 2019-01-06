@@ -1,0 +1,106 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   |-- a21117bcee_49a0c8f722
+|   |   |   |-- 4bdf8fb9a8.faa -> ../../../cache/load/4bdf8fb9a8.faa
+|   |   |   |-- 4bdf8fb9a8.phr
+|   |   |   |-- 4bdf8fb9a8.pin
+|   |   |   |-- 4bdf8fb9a8.psq
+|   |   |   |-- 4bdf8fb9a8_into_6ea57f1208.2.blast
+|   |   |   |-- 6ea57f1208.fna -> ../../../cache/load/6ea57f1208.fna
+|   |   |   |-- 6ea57f1208.nhr
+|   |   |   |-- 6ea57f1208.nin
+|   |   |   |-- 6ea57f1208.nsq
+|   |   |   |-- 6ea57f1208_into_4bdf8fb9a8.1.blast
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   `-- results.crb
+|   |   |-- a21117bcee_cf571aa50b
+|   |   |   |-- 6ea57f1208.fna -> ../../../cache/load/6ea57f1208.fna
+|   |   |   |-- 6ea57f1208.nhr
+|   |   |   |-- 6ea57f1208.nin
+|   |   |   |-- 6ea57f1208.nsq
+|   |   |   |-- 6ea57f1208_into_a810086108.1.blast
+|   |   |   |-- a810086108.faa -> ../../../cache/load/a810086108.faa
+|   |   |   |-- a810086108.phr
+|   |   |   |-- a810086108.pin
+|   |   |   |-- a810086108.psq
+|   |   |   |-- a810086108_into_6ea57f1208.2.blast
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   `-- results.crb
+|   |   `-- a21117bcee_effbd7c307
+|   |       |-- 0469ad867e.faa -> ../../../cache/load/0469ad867e.faa
+|   |       |-- 0469ad867e.phr
+|   |       |-- 0469ad867e.pin
+|   |       |-- 0469ad867e.psq
+|   |       |-- 0469ad867e_into_6ea57f1208.2.blast
+|   |       |-- 6ea57f1208.fna -> ../../../cache/load/6ea57f1208.fna
+|   |       |-- 6ea57f1208.nhr
+|   |       |-- 6ea57f1208.nin
+|   |       |-- 6ea57f1208.nsq
+|   |       |-- 6ea57f1208_into_0469ad867e.1.blast
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       `-- results.crb
+|   |-- each
+|   |   |-- 500dcb7ae0
+|   |   |   |-- 5ba2bdc36f.str.list -> ../../../exprs/extract_queries/5ba2bdc36f.str.list
+|   |   |   |-- 5ba2bdc36f.str.list.args -> ../../../cache/lines/...
+|   |   |   |-- 9dc32417d4.str.list -> ../../../exprs/extract_queries/9dc32417d4.str.list
+|   |   |   |-- 9dc32417d4.str.list.args -> ../../../cache/lines/...
+|   |   |   |-- f83d10f5f2.str.list -> ../../../exprs/extract_queries/f83d10f5f2.str.list
+|   |   |   `-- f83d10f5f2.str.list.args -> ../../../cache/lines/...
+|   |   `-- 9b17063c09
+|   |       |-- 49a0c8f722.crb -> ../../../exprs/crb_blast/a21117bcee_49a0c8f722.crb
+|   |       |-- 49a0c8f722.crb.args -> ../../../cache/lines/...
+|   |       |-- cf571aa50b.crb -> ../../../exprs/crb_blast/a21117bcee_cf571aa50b.crb
+|   |       |-- cf571aa50b.crb.args -> ../../../cache/lines/...
+|   |       |-- effbd7c307.crb -> ../../../exprs/crb_blast/a21117bcee_effbd7c307.crb
+|   |       `-- effbd7c307.crb.args -> ../../../cache/lines/...
+|   `-- load
+|       |-- 0469ad867e.faa
+|       |-- 0469ad867e.faa.ids
+|       |-- 4bdf8fb9a8.faa
+|       |-- 4bdf8fb9a8.faa.ids
+|       |-- 6ea57f1208.fna
+|       |-- 6ea57f1208.fna.ids
+|       |-- a810086108.faa
+|       `-- a810086108.faa.ids
+|-- exprs
+|   |-- all
+|   |   `-- 0534d2dc21.str.list -> ../../cache/lines/...
+|   |-- crb_blast
+|   |   |-- a21117bcee_49a0c8f722.crb -> ../../cache/crbblast/a21117bcee_49a0c8f722/results.crb
+|   |   |-- a21117bcee_cf571aa50b.crb -> ../../cache/crbblast/a21117bcee_cf571aa50b/results.crb
+|   |   `-- a21117bcee_effbd7c307.crb -> ../../cache/crbblast/a21117bcee_effbd7c307/results.crb
+|   |-- crb_blast_each
+|   |   `-- 271ff0a5ee_17e98f616a.crb.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 5ba2bdc36f.str.list -> ../../cache/lines/...
+|   |   |-- 9dc32417d4.str.list -> ../../cache/lines/...
+|   |   `-- f83d10f5f2.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- 05e4a4e25e.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 8ec1278139.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 2d2ccac5a6.faa -> ../../cache/load/4bdf8fb9a8.faa
+|   |   |-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
+|   |   `-- b2eac6bd92.faa -> ../../cache/load/0469ad867e.faa
+|   |-- load_fna
+|   |   `-- 45126bfa2b.fna -> ../../cache/load/6ea57f1208.fna
+|   `-- str
+|       |-- 0398321ac5.str -> ../../cache/lines/...
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- 7da80bde02.str -> ../../cache/lines/...
+|       `-- d8926fd3ed.str -> ../../cache/lines/...
+`-- vars
+    |-- full7002.faa -> ../exprs/load_faa/b2eac6bd92.faa
+    |-- full7122.faa -> ../exprs/load_faa/2d2ccac5a6.faa
+    |-- full7942.faa -> ../exprs/load_faa/31f6f3bb53.faa
+    |-- hitlists.crb.list -> ../exprs/crb_blast_each/271ff0a5ee_17e98f616a.crb.list
+    |-- mini6803.fna -> ../exprs/load_fna/45126bfa2b.fna
+    `-- result -> ../exprs/all/0534d2dc21.str.list
+
+20 directories, 83 files

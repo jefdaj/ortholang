@@ -1,0 +1,25 @@
+.
+|-- cache
+|   `-- load
+|       |-- 0469ad867e.faa
+|       |-- 0469ad867e.faa.ids
+|       |-- 4bdf8fb9a8.faa
+|       |-- 4bdf8fb9a8.faa.ids
+|       |-- 8aa4a9d2fc.faa
+|       |-- 8aa4a9d2fc.faa.ids
+|       |-- a810086108.faa
+|       `-- a810086108.faa.ids
+|-- exprs
+|   |-- diamond_makedb_all
+|   |   `-- 795f6e2510.dmnd
+|   |-- glob_files
+|   |   `-- ddbf6077af.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- b7471d75c9.faa.list -> ../../cache/lines/...
+|   `-- str
+|       `-- 4840e705d7.str -> ../../cache/lines/...
+`-- vars
+    |-- cyanos.faa.list -> ../exprs/list/b7471d75c9.faa.list
+    `-- result -> ../exprs/diamond_makedb_all/795f6e2510.dmnd
+
+8 directories, 14 files

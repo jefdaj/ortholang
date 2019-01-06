@@ -1,0 +1,35 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 82645ed6f6.faa
+|   |   |-- 82645ed6f6.faa.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
+|   |-- makeblastdb
+|   |   `-- e00fb07ddb
+|   |       |-- e00fb07ddb.pdb.list.phr
+|   |       |-- e00fb07ddb.pdb.list.pin
+|   |       `-- e00fb07ddb.pdb.list.psq
+|   `-- psiblast
+|-- exprs
+|   |-- list
+|   |   `-- 7457454eb1.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 10437ca3c2.faa -> ../../cache/load/82645ed6f6.faa
+|   |   `-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
+|   |-- makeblastdb_prot_all
+|   |   `-- 0224291d8f.pdb.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- 3e281fad0f.num -> ../../cache/lines/...
+|   |-- psiblast_train
+|   |   `-- a4970f4a95_0c1e884aa3_6b052fc6ca.pssm -> ../../cache/lines/...
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       `-- b9eaf59b0c.str -> ../../cache/lines/...
+`-- vars
+    |-- pcc7942.faa -> ../exprs/load_faa/31f6f3bb53.faa
+    |-- pssm.pssm -> ../exprs/psiblast_train/a4970f4a95_0c1e884aa3_6b052fc6ca.pssm
+    |-- query.faa -> ../exprs/load_faa/10437ca3c2.faa
+    `-- result -> ../vars/pssm.pssm
+
+13 directories, 19 files

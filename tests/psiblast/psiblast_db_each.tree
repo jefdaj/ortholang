@@ -1,0 +1,57 @@
+.
+|-- cache
+|   |-- each
+|   |   `-- 317865beb1
+|   |       |-- 066206a65b.bht -> ../../../exprs/psiblast_db/5d033b2fc4_73347c9520_066206a65b.bht
+|   |       |-- 066206a65b.bht.args -> ../../../cache/lines/...
+|   |       |-- 827ba469fb.bht -> ../../../exprs/psiblast_db/5d033b2fc4_73347c9520_827ba469fb.bht
+|   |       `-- 827ba469fb.bht.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 82645ed6f6.faa
+|   |   |-- 82645ed6f6.faa.ids
+|   |   |-- 8aa4a9d2fc.faa
+|   |   |-- 8aa4a9d2fc.faa.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
+|   |-- makeblastdb
+|   |   |-- a1512fc008
+|   |   |   |-- a1512fc008.pdb.phr
+|   |   |   |-- a1512fc008.pdb.pin
+|   |   |   `-- a1512fc008.pdb.psq
+|   |   `-- e00fb07ddb
+|   |       |-- e00fb07ddb.pdb.phr
+|   |       |-- e00fb07ddb.pdb.pin
+|   |       `-- e00fb07ddb.pdb.psq
+|   `-- psiblast
+|-- exprs
+|   |-- list
+|   |   |-- 2ed8b39407.pdb.list -> ../../cache/lines/...
+|   |   |-- 6843dd9ca6.faa.list -> ../../cache/lines/...
+|   |   `-- be3ee52ec0.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 10437ca3c2.faa -> ../../cache/load/82645ed6f6.faa
+|   |   |-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
+|   |   `-- 498816b813.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- makeblastdb_prot
+|   |   |-- 0224291d8f.pdb -> ../../cache/lines/...
+|   |   `-- f978ad52af.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- ffc99d74eb.num -> ../../cache/lines/...
+|   |-- psiblast_db
+|   |   |-- 5d033b2fc4_73347c9520_066206a65b.bht
+|   |   `-- 5d033b2fc4_73347c9520_827ba469fb.bht
+|   |-- psiblast_db_each
+|   |   `-- 947c692eb7_0c1e884aa3_973fbe93d3.bht.list -> ../../cache/lines/...
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- b9eaf59b0c.str -> ../../cache/lines/...
+|       `-- ec3b181d8a.str -> ../../cache/lines/...
+`-- vars
+    |-- cyanodbs.pdb.list -> ../exprs/list/2ed8b39407.pdb.list
+    |-- db6803.pdb -> ../exprs/makeblastdb_prot/f978ad52af.pdb
+    |-- db7942.pdb -> ../exprs/makeblastdb_prot/0224291d8f.pdb
+    |-- hitlists.bht.list -> ../exprs/psiblast_db_each/947c692eb7_0c1e884aa3_973fbe93d3.bht.list
+    |-- query.faa -> ../exprs/load_faa/10437ca3c2.faa
+    `-- result -> ../vars/hitlists.bht.list
+
+17 directories, 37 files

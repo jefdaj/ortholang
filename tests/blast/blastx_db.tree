@@ -1,0 +1,58 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- e72b042cb9
+|   |   |   |-- 066206a65b.bht -> ../../../exprs/blastx_db/707ad90e5a_ffdd3d31dc_066206a65b.bht
+|   |   |   `-- 066206a65b.bht.args -> ../../../cache/lines/...
+|   |   `-- f2a4277269
+|   |       |-- 74aef0e36b.str.list -> ../../../exprs/extract_queries/74aef0e36b.str.list
+|   |       `-- 74aef0e36b.str.list.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 0238b7dcea.fna
+|   |   |-- 0238b7dcea.fna.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
+|   `-- makeblastdb
+|       `-- e00fb07ddb
+|           |-- e00fb07ddb.pdb.phr
+|           |-- e00fb07ddb.pdb.pin
+|           `-- e00fb07ddb.pdb.psq
+|-- exprs
+|   |-- all
+|   |   `-- f0ed83fb0f.str.list -> ../../cache/lines/...
+|   |-- any
+|   |   `-- 8065b60e1d.str.list.list -> ../../cache/lines/...
+|   |-- blastx_db
+|   |   |-- 3f1211d845_d0d5a04bb2_a4373c87dd.bht
+|   |   `-- 707ad90e5a_ffdd3d31dc_066206a65b.bht
+|   |-- blastx_db_each
+|   |   `-- 3f1211d845_d0d5a04bb2_98f04b61c2.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 74aef0e36b.str.list -> ../../cache/lines/...
+|   |   `-- ec6e60d05d.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- ca7c6b7720.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 87add16ee8.pdb.list -> ../../cache/lines/...
+|   |   |-- be3ee52ec0.faa.list -> ../../cache/lines/...
+|   |   |-- c3175f57aa.str.list.list -> ../../cache/lines/...
+|   |   `-- e0821f0969.str.list.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
+|   |-- load_fna
+|   |   `-- 1f4bcb64b6.fna -> ../../cache/load/0238b7dcea.fna
+|   |-- makeblastdb_prot
+|   |   `-- 0224291d8f.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       `-- 8fa8ede325.str -> ../../cache/lines/...
+`-- vars
+    |-- full7942.pdb -> ../exprs/makeblastdb_prot/0224291d8f.pdb
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/ca7c6b7720.str.list.list
+    |-- mini7942.fna -> ../exprs/load_fna/1f4bcb64b6.fna
+    |-- result -> ../exprs/all/f0ed83fb0f.str.list
+    `-- single.str.list -> ../exprs/extract_queries/ec6e60d05d.str.list
+
+21 directories, 34 files

@@ -1,0 +1,13 @@
+.
+|-- cache
+|-- exprs
+|   |-- list
+|   |   |-- a73a67db15.num.list -> ../../cache/lines/...
+|   |   |-- d751713988.empty.list -> ../../cache/lines/...
+|   |   `-- f56e238765.num.list.list -> ../../cache/lines/...
+|   `-- num
+|       `-- ee383407c9.num -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/list/f56e238765.num.list.list
+
+5 directories, 5 files

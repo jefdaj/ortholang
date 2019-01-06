@@ -1,0 +1,60 @@
+.
+|-- cache
+|   |-- each
+|   |   `-- ca5c9b8c76
+|   |       |-- 56f8b1fbfd.pdb -> ../../../exprs/makeblastdb_prot/56f8b1fbfd.pdb
+|   |       |-- 56f8b1fbfd.pdb.args -> ../../../cache/lines/...
+|   |       |-- 5ababf765e.pdb -> ../../../exprs/makeblastdb_prot/5ababf765e.pdb
+|   |       `-- 5ababf765e.pdb.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 82645ed6f6.faa
+|   |   |-- 82645ed6f6.faa.ids
+|   |   |-- 8aa4a9d2fc.faa
+|   |   |-- 8aa4a9d2fc.faa.ids
+|   |   |-- a810086108.faa
+|   |   `-- a810086108.faa.ids
+|   |-- makeblastdb
+|   |   |-- a1512fc008
+|   |   |   |-- a1512fc008.pdb.phr
+|   |   |   |-- a1512fc008.pdb.pin
+|   |   |   `-- a1512fc008.pdb.psq
+|   |   `-- e00fb07ddb
+|   |       |-- e00fb07ddb.pdb.phr
+|   |       |-- e00fb07ddb.pdb.pin
+|   |       `-- e00fb07ddb.pdb.psq
+|   |-- map
+|   |   |-- 7a409f2151.pssm -> ../../cache/lines/...
+|   |   `-- 8cf8b613f2.pssm -> ../../cache/lines/...
+|   `-- psiblast
+|-- exprs
+|   |-- length
+|   |   `-- 92acff1e63.num -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 68fdec7a83.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 10437ca3c2.faa -> ../../cache/load/82645ed6f6.faa
+|   |   |-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
+|   |   `-- 498816b813.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- makeblastdb_prot
+|   |   |-- 56f8b1fbfd.pdb -> ../../cache/lines/...
+|   |   `-- 5ababf765e.pdb -> ../../cache/lines/...
+|   |-- makeblastdb_prot_each
+|   |   `-- cf63ab94f4.pdb.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- efc8362dcc.num -> ../../cache/lines/...
+|   |-- psiblast_train_each
+|   |   `-- 6a37fc5f23_0c1e884aa3_85ee8575c6.pssm.list -> ../../cache/lines/...
+|   |-- singletons
+|   |   `-- 52c5afb2d6.faa.list.list -> ../../cache/lines/...
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/lines/...
+|       |-- b9eaf59b0c.str -> ../../cache/lines/...
+|       `-- ec3b181d8a.str -> ../../cache/lines/...
+`-- vars
+    |-- pcc6803.faa -> ../exprs/load_faa/498816b813.faa
+    |-- pcc7942.faa -> ../exprs/load_faa/31f6f3bb53.faa
+    |-- pssms.pssm.list -> ../exprs/psiblast_train_each/6a37fc5f23_0c1e884aa3_85ee8575c6.pssm.list
+    |-- query.faa -> ../exprs/load_faa/10437ca3c2.faa
+    `-- result -> ../exprs/length/92acff1e63.num
+
+20 directories, 37 files
