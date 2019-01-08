@@ -3,6 +3,7 @@ module Detourrr.Modules.MMSeqs
 
 -- TODO keep intermediate files at least until we can line them up with sonicparanoid if needed
 -- TODO default to the same settings sonicparanoid uses at first, both to be compatible and until you know better
+-- TODO length function should be polymorphic enough to also do dbs
 
 -- TODO mmseqs_search_all : fa.list mms -> mmr (this is mmseqs search)
 -- TODO mmseqs_search_profile?
@@ -20,9 +21,9 @@ import Detourrr.Core.Types
 
 import Detourrr.Core.Actions       (readLit, readPaths, wrappedCmdWrite, symlink)
 import Detourrr.Core.Compile.Basic (rExpr, debugRules)
-import Detourrr.Core.Locks         (withReadLock)
 import Detourrr.Core.Paths         (toRrrPath, fromRrrPath, exprPath)
 import Detourrr.Core.Util          (digest, unlessExists, resolveSymlinks)
+import Detourrr.Core.Locks         (withReadLock)
 import Detourrr.Modules.Blast      (bht)
 import Detourrr.Modules.BlastDB    (withSingleton) -- TODO move to core?
 import Detourrr.Modules.SeqIO      (fna, faa)
@@ -49,8 +50,10 @@ mms = RrrType
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \_ ref path -> do
       path' <- fmap (<.> "lookup") $ resolveSymlinks Nothing path
-      h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFile path'
-      let desc = unlines $ ["MMSeqs2 sequence database " ++ path ++ ":"] ++ h5 ++ ["..."]
+      Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
+      let n = head $ words out
+      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFile path'
+      let desc = "MMSeqs2 database (" ++ n ++ " sequences)"
       return desc
   }
 
@@ -145,7 +148,7 @@ rMmseqsSearchDb st@(_, cfg, ref, _) e@(RrrFun _ salt _ _ [n, q, s]) = do
       dbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       -- outDb' = dbDir </> "db" -- TODO error here?
       outDb' = dbDir </> digest out <.> "mmseqs2db" -- TODO does this hash match the ones from createdb_all?
-  outDb' %> \_ -> aMmseqSearchDb    cfg ref ePath qPath sPath outDb'
+  outDb' %> \_ -> aMmseqsSearchDb    cfg ref ePath qPath sPath outDb'
   out'   %> \_ -> aMmseqConvertAlis cfg ref       qPath sPath outDb' out'
   return (ExprPath out')
 rMmseqsSearchDb _ e = error $ "bad argument to rMmseqsSearch: " ++ show e
@@ -155,11 +158,13 @@ resolveMmseqsDb path = do
   need [path] -- path is to a symlink to the main db file
   liftIO $ resolveSymlinks Nothing path
 
-aMmseqSearchDb :: RrrConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
-aMmseqSearchDb cfg ref ePath qDb sDb outDb = do
+-- TODO is the db being passed in place of the fa too?
+-- TODO interesting! it works in stack repl but not stack exec
+aMmseqsSearchDb :: RrrConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqsSearchDb cfg ref ePath qDb sDb outDb = do
+  eStr <- readLit cfg ref ePath
   qDb' <- resolveMmseqsDb qDb
   sDb' <- resolveMmseqsDb sDb
-  eStr <- readLit cfg ref ePath
   let tmpDir = takeDirectory outDb </> "tmp" -- TODO align this with sonicparanoid
   liftIO $ createDirectoryIfMissing True tmpDir
   wrappedCmdWrite True True cfg ref outDb [ePath, qDb, sDb] [] []
@@ -202,5 +207,5 @@ rMmseqsSearch st (RrrFun rtn salt deps name [e, q, s])
   = rules st (RrrFun rtn salt deps name [e, q, sDb])
   where
     rules = fRules mmseqsSearchDb
-    sDb = RrrFun mms salt (depsOf s) "mmseqs_createdb" [s] 
+    sDb = RrrFun mms salt (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
 rMmseqsSearch _ _ = error "bad argument to rMmseqsSearch"

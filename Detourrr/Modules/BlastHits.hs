@@ -46,6 +46,7 @@ extractQueries = let name = "extract_queries" in RrrFunction
   , fRules     = rSimple $ aRrrCol True 1
   }
 
+-- TODO this should have a typeclass
 extractQueriesEach :: RrrFunction
 extractQueriesEach = let name = "extract_queries_each" in RrrFunction
   { fName      = name
@@ -55,6 +56,7 @@ extractQueriesEach = let name = "extract_queries_each" in RrrFunction
   , fRules     = rMap 1 $ aRrrCol True 1
   }
 
+-- TODO this should have a typeclass
 extractTargets :: RrrFunction
 extractTargets = let name = "extract_targets" in RrrFunction
   { fName      = name

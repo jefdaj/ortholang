@@ -31,7 +31,7 @@ nonDeterministicRrr path = testDir `elem` badDirs
   where
     testDir = (takeFileName . takeDirectory) path
     -- TODO will regular blast be nondeterministic at large scales too?
-    badDirs = ["blastcrb", "blastrbh", "blasthits", "plots"] -- TODO blast? blastdb?
+    badDirs = ["crb_blast", "blastrbh", "blasthits", "plots", "mmseqs"] -- TODO blast? blastdb?
 
 getTestScripts :: IO [FilePath]
 getTestScripts = do

@@ -1,6 +1,7 @@
 module Detourrr.Modules.Length where
 
 -- TODO what should happen with length of a bht? currently it just prints itself!
+-- TODO make this the first typeclass
 
 import Development.Shake
 import Detourrr.Core.Types
@@ -11,7 +12,8 @@ import Detourrr.Core.Paths    (exprPath, fromRrrPath,
                                toRrrPath, RrrPath)
 import Detourrr.Core.Compile.Basic     (rExpr)
 import Detourrr.Core.Compile.Map     (rMap)
-import Detourrr.Modules.Blast  (bht)
+import Detourrr.Modules.Blast    (bht)
+import Detourrr.Modules.MMSeqs   (mms)
 import Detourrr.Modules.CRBBlast (crb)
 import Data.Scientific (Scientific())
 
@@ -19,7 +21,7 @@ rrrModule :: RrrModule
 rrrModule = RrrModule
   { mName = "Length"
   , mDesc = "Get the lengths of lists and tables without printing them"
-  , mTypes = [bht, crb]
+  , mTypes = [bht, crb, mms]
   , mFunctions = [len, lenEach]
   }
 
@@ -46,7 +48,7 @@ lenEach = RrrFunction
 tLen :: [RrrType] -> Either String RrrType
 tLen [Empty ] = Right num
 tLen [(ListOf _)] = Right num
-tLen [x] | x == bht = Right num
+tLen [x] | x `elem` [bht, mms] = Right num
 tLen _ = Left $ "length requires a list"
 
 rLen :: RrrState -> RrrExpr -> Rules ExprPath
@@ -65,10 +67,11 @@ rLen _ _ = error "bad arguments to rLen"
 tLenEach :: [RrrType] -> Either String RrrType
 tLenEach [ ListOf  Empty     ] = Right (ListOf num) -- specifically, []
 tLenEach [(ListOf (ListOf _))] = Right (ListOf num)
-tLenEach [ListOf  x] | x `elem` [bht, crb] = Right (ListOf num)
+tLenEach [ListOf  x] | x `elem` [bht, crb, mms] = Right (ListOf num)
 tLenEach _ = Left $ "length_each requires a list of things with lengths"
 
 -- TODO if given a list with empty lists, should return zeros!
+-- TODO account for the last empty line in mms files! (currently returns length + 1)
 aLen :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aLen cfg ref _ [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
