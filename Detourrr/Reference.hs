@@ -47,7 +47,7 @@ header :: String
 header = "{% import \"macros.jinja\" as macros with context %}"
 
 loadExample :: RrrModule -> [String]
-loadExample m = ["Examples:", "", "{{ macros.load_example('" ++ name ++ ".rrr') }}"]
+loadExample m = ["Examples:", "", "{{ macros.load_rrr(user, 'examples/" ++ name ++ ".rrr') }}"]
   where
     name = filter isAlphaNum $ map toLower $ mName m
 
