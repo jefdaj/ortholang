@@ -1,44 +1,30 @@
 .
 |-- cache
 |   `-- load
-|       |-- 0469ad867e.faa
-|       |-- 0469ad867e.faa.ids
-|       |-- 10ffe0cf0f.faa
-|       |-- 10ffe0cf0f.faa.ids
-|       |-- 32841598b2.faa
-|       |-- 32841598b2.faa.ids
-|       |-- 36189032ad.faa
-|       |-- 36189032ad.faa.ids
-|       |-- 39b21a8bf4.faa
-|       |-- 39b21a8bf4.faa.ids
-|       |-- 4bdf8fb9a8.faa
-|       |-- 4bdf8fb9a8.faa.ids
-|       |-- 82645ed6f6.faa
-|       |-- 82645ed6f6.faa.ids
-|       |-- 8a695c317a.faa
-|       |-- 8a695c317a.faa.ids
-|       |-- 8aa4a9d2fc.faa
-|       |-- 8aa4a9d2fc.faa.ids
-|       |-- a810086108.faa
-|       |-- a810086108.faa.ids
-|       |-- de2033f5c0.faa
-|       `-- de2033f5c0.faa.ids
+|       |-- 0469ad867e.faa -> $WORKDIR/data/7002genes.faa
+|       |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|       |-- 4bdf8fb9a8.faa -> $WORKDIR/data/7122genes.faa
+|       |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
+|       |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|       |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|       |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|       `-- de2033f5c0.faa -> $WORKDIR/data/7942genes50.faa
 |-- exprs
 |   |-- diff
-|   |   `-- cc4d6cf7b8.faa.list -> ../../cache/lines/...
+|   |   `-- 386cf03923.faa.list -> ../../cache/lines/...
 |   |-- glob_files
-|   |   |-- 57b047f7a4.str.list -> ../../cache/lines/...
-|   |   `-- e98b828d23.str.list -> ../../cache/lines/...
+|   |   |-- 82c873c4a6.str.list -> ../../cache/lines/...
+|   |   `-- ca1dad5c15.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 4a7746f75b.faa.list -> ../../cache/lines/...
-|   |   |-- 51925f5f26.faa.list -> ../../cache/lines/...
-|   |   `-- ee5f4fc38f.faa.list.list -> ../../cache/lines/...
+|   |   |-- 626202f93c.faa.list -> ../../cache/lines/...
+|   |   |-- a55ac49820.faa.list -> ../../cache/lines/...
+|   |   `-- d2e44904ac.faa.list.list -> ../../cache/lines/...
 |   `-- str
 |       |-- 4749080868.str -> ../../cache/lines/...
 |       `-- 4f98ee567d.str -> ../../cache/lines/...
 `-- vars
-    |-- all_faas.faa.list -> ../exprs/list/51925f5f26.faa.list
-    |-- mini_faas.faa.list -> ../exprs/list/4a7746f75b.faa.list
-    `-- result -> ../exprs/diff/cc4d6cf7b8.faa.list
+    |-- all_faas.faa.list -> ../exprs/list/a55ac49820.faa.list
+    |-- mini_faas.faa.list -> ../exprs/list/626202f93c.faa.list
+    `-- result -> ../exprs/diff/386cf03923.faa.list
 
-8 directories, 33 files
+8 directories, 19 files

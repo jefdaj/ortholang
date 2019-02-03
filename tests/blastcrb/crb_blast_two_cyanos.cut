@@ -1,0 +1,4 @@
+mini6803 = load_fna "data/6803genes10.fna" # first 10 6803 genes
+full7942 = load_faa "data/7942genes.faa"   # all 7942 genes
+hits = crb_blast mini6803 full7942
+result = extract_targets hits

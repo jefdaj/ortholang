@@ -1,9 +1,0 @@
-.
-|-- cache
-|-- exprs
-|   `-- str
-|       `-- fac57328ef.str -> ../../cache/lines/...
-`-- vars
-    `-- result -> ../exprs/str/fac57328ef.str
-
-4 directories, 2 files

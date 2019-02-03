@@ -1,12 +1,9 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 82645ed6f6.faa
-|   |   |-- 82645ed6f6.faa.ids
-|   |   |-- 8aa4a9d2fc.faa
-|   |   |-- 8aa4a9d2fc.faa.ids
-|   |   |-- a810086108.faa
-|   |   `-- a810086108.faa.ids
+|   |   |-- 82645ed6f6.faa -> $WORKDIR/data/7942gene.faa
+|   |   |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|   |   `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
 |   |-- makeblastdb
 |   |   `-- c3ae472116
 |   |       |-- c3ae472116.pdb.list.phr
@@ -18,31 +15,31 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 68fdec7a83.faa.list -> ../../cache/lines/...
+|   |   `-- 7d562183ce.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 10437ca3c2.faa -> ../../cache/load/82645ed6f6.faa
-|   |   |-- 31f6f3bb53.faa -> ../../cache/load/a810086108.faa
-|   |   `-- 498816b813.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |   |-- 33c746245c.faa -> ../../cache/load/82645ed6f6.faa
+|   |   |-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- makeblastdb_prot_all
-|   |   |-- 52c5afb2d6.pdb -> ../../cache/lines/...
-|   |   `-- 52c5afb2d6.pdb.list -> ../../cache/lines/...
+|   |   |-- a76d25f4b5.pdb -> ../../cache/lines/...
+|   |   `-- a76d25f4b5.pdb.list -> ../../cache/lines/...
 |   |-- num
 |   |   `-- c23938f494.num -> ../../cache/lines/...
 |   |-- psiblast_pssm_all
-|   |   `-- 5b8e7a7dce_ff30ba36b7_92295032ae.bht
+|   |   `-- f51c91829c_a1c103bda2_f3f0381c51.bht
 |   |-- psiblast_train_db
-|   |   `-- 5b8e7a7dce_0c1e884aa3_7e8d747689.pssm -> ../../cache/lines/...
+|   |   `-- f51c91829c_4d0e43d616_e15f764d92.pssm -> ../../cache/lines/...
 |   `-- str
 |       |-- 1d8a61c770.str -> ../../cache/lines/...
 |       |-- b9eaf59b0c.str -> ../../cache/lines/...
 |       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
-    |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/52c5afb2d6.pdb
-    |-- hitlist.bht -> ../exprs/psiblast_pssm_all/5b8e7a7dce_ff30ba36b7_92295032ae.bht
-    |-- pcc6803.faa -> ../exprs/load_faa/498816b813.faa
-    |-- pcc7942.faa -> ../exprs/load_faa/31f6f3bb53.faa
-    |-- pssm.pssm -> ../exprs/psiblast_train_db/5b8e7a7dce_0c1e884aa3_7e8d747689.pssm
-    |-- query.faa -> ../exprs/load_faa/10437ca3c2.faa
+    |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/a76d25f4b5.pdb
+    |-- hitlist.bht -> ../exprs/psiblast_pssm_all/f51c91829c_a1c103bda2_f3f0381c51.bht
+    |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
+    |-- pcc7942.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- pssm.pssm -> ../exprs/psiblast_train_db/f51c91829c_4d0e43d616_e15f764d92.pssm
+    |-- query.faa -> ../exprs/load_faa/33c746245c.faa
     `-- result -> ../vars/hitlist.bht
 
-14 directories, 31 files
+14 directories, 28 files

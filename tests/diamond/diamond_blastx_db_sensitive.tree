@@ -1,28 +1,26 @@
 .
 |-- cache
 |   `-- load
-|       |-- 8aa4a9d2fc.faa
-|       |-- 8aa4a9d2fc.faa.ids
-|       |-- ff08c7f09e.fna
-|       `-- ff08c7f09e.fna.ids
+|       |-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|       `-- ff08c7f09e.fna -> $WORKDIR/data/7942genes.fna
 |-- exprs
 |   |-- diamond_blastx_db_sensitive
-|   |   `-- adac5a17c1_b929187763_d839a3278f.bht
+|   |   `-- 62073b9981_f5e661a4be_d16eedcd6a.bht
 |   |-- diamond_makedb
-|   |   `-- f15f504b2e.dmnd
+|   |   `-- c14344af19.dmnd
 |   |-- load_faa
-|   |   `-- 498816b813.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   |-- load_fna
-|   |   `-- 806cbad617.fna -> ../../cache/load/ff08c7f09e.fna
+|   |   `-- eb12539f1c.fna -> ../../cache/load/ff08c7f09e.fna
 |   |-- num
 |   |   `-- 6de785566e.num -> ../../cache/lines/...
 |   `-- str
 |       |-- 4cdbcfa070.str -> ../../cache/lines/...
 |       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/f15f504b2e.dmnd
-    |-- pcc6803.faa -> ../exprs/load_faa/498816b813.faa
-    |-- pcc7942.fna -> ../exprs/load_fna/806cbad617.fna
-    `-- result -> ../exprs/diamond_blastx_db_sensitive/adac5a17c1_b929187763_d839a3278f.bht
+    |-- db.dmnd -> ../exprs/diamond_makedb/c14344af19.dmnd
+    |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
+    |-- pcc7942.fna -> ../exprs/load_fna/eb12539f1c.fna
+    `-- result -> ../exprs/diamond_blastx_db_sensitive/62073b9981_f5e661a4be_d16eedcd6a.bht
 
-10 directories, 15 files
+10 directories, 13 files

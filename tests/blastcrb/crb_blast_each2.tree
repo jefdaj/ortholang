@@ -1,0 +1,73 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   |-- 81dec1f840_44e4bab524
+|   |   |   |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|   |   |   |-- 6ea57f1208.nhr
+|   |   |   |-- 6ea57f1208.nin
+|   |   |   |-- 6ea57f1208.nsq
+|   |   |   |-- 6ea57f1208_into_a810086108.1.blast
+|   |   |   |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |   |   |-- a810086108.phr
+|   |   |   |-- a810086108.pin
+|   |   |   |-- a810086108.psq
+|   |   |   |-- a810086108_into_6ea57f1208.2.blast
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   `-- results.crb
+|   |   `-- 9b524ff71d_9a37249327
+|   |       |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|   |       |-- 6ea57f1208.nhr
+|   |       |-- 6ea57f1208.nin
+|   |       |-- 6ea57f1208.nsq
+|   |       |-- 6ea57f1208_into_a810086108.1.blast
+|   |       |-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|   |       |-- a810086108.phr
+|   |       |-- a810086108.pin
+|   |       |-- a810086108.psq
+|   |       |-- a810086108_into_6ea57f1208.2.blast
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       `-- results.crb
+|   |-- each
+|   |   `-- 3eaee328fe
+|   |       |-- d7f5b78e8e.crb -> ../../../exprs/crb_blast/1b6099b365_d7f5b78e8e.crb
+|   |       `-- d7f5b78e8e.crb.args
+|   |-- list
+|   |   |-- 0815de9417.txt
+|   |   |-- 2cfde0bb97.txt
+|   |   |-- 97e066e3d6.txt
+|   |   |-- bdc783547b.txt
+|   |   `-- c3f727206f.txt
+|   `-- load
+|       |-- 6ea57f1208.fna -> $WORKDIR/data/6803genes10.fna
+|       `-- a810086108.faa -> $WORKDIR/data/7942genes.faa
+|-- exprs
+|   |-- any
+|   |   `-- 2fa4f52a51.crb.list
+|   |-- crb_blast
+|   |   |-- 1b6099b365_d7f5b78e8e.crb -> ../../cache/crbblast/9b524ff71d_9a37249327/results.crb
+|   |   `-- 8df2fbb1a8_c08cc19988.crb -> ../../cache/crbblast/81dec1f840_44e4bab524/results.crb
+|   |-- crb_blast_each
+|   |   `-- 8df2fbb1a8_ced061f0b2.crb.list
+|   |-- length
+|   |   `-- bf3abdc222.num
+|   |-- list
+|   |   |-- 140fbe67f6.crb.list -> ../../cache/list/2cfde0bb97.txt
+|   |   |-- 85b95661cd.crb.list.list -> ../../cache/list/97e066e3d6.txt
+|   |   `-- cce65539fd.faa.list -> ../../cache/list/c3f727206f.txt
+|   |-- load_faa
+|   |   `-- 387f499ddc.faa -> ../../cache/load/a810086108.faa
+|   |-- load_fna
+|   |   `-- 9b7934c579.fna -> ../../cache/load/6ea57f1208.fna
+|   `-- str
+|       |-- 1d8a61c770.str -> ../../cache/list/bdc783547b.txt
+|       `-- 7da80bde02.str -> ../../cache/list/0815de9417.txt
+`-- vars
+    |-- full7942.faa -> ../exprs/load_faa/387f499ddc.faa
+    |-- mapped.crb.list -> ../exprs/crb_blast_each/8df2fbb1a8_ced061f0b2.crb.list
+    |-- mini6803.fna -> ../exprs/load_fna/9b7934c579.fna
+    |-- result -> ../exprs/length/bf3abdc222.num
+    `-- single.crb -> ../exprs/crb_blast/8df2fbb1a8_c08cc19988.crb
+
+18 directories, 52 files

@@ -1,0 +1,105 @@
+.
+|-- cache
+|   |-- crbblast
+|   |   |-- 03831b21e0_210525afba
+|   |   |   |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|   |   |   |-- 32841598b2.phr
+|   |   |   |-- 32841598b2.pin
+|   |   |   |-- 32841598b2.psq
+|   |   |   |-- 32841598b2_into_455f27117a.2.blast
+|   |   |   |-- 455f27117a.fna -> $TMPDIR/exprs/gbk_to_fna/455f27117a.fna
+|   |   |   |-- 455f27117a.nhr
+|   |   |   |-- 455f27117a.nin
+|   |   |   |-- 455f27117a.nsq
+|   |   |   |-- 455f27117a_into_32841598b2.1.blast
+|   |   |   |-- evalues_data
+|   |   |   |-- fitting_data
+|   |   |   `-- results.crb
+|   |   `-- 03831b21e0_98cbd66ef4
+|   |       |-- 455f27117a.fna -> $TMPDIR/exprs/gbk_to_fna/455f27117a.fna
+|   |       |-- 455f27117a.nhr
+|   |       |-- 455f27117a.nin
+|   |       |-- 455f27117a.nsq
+|   |       |-- 455f27117a_into_de2033f5c0.1.blast
+|   |       |-- de2033f5c0.faa -> $WORKDIR/data/7942genes50.faa
+|   |       |-- de2033f5c0.phr
+|   |       |-- de2033f5c0.pin
+|   |       |-- de2033f5c0.psq
+|   |       |-- de2033f5c0_into_455f27117a.2.blast
+|   |       |-- evalues_data
+|   |       |-- fitting_data
+|   |       `-- results.crb
+|   |-- each
+|   |   |-- 07a81b32c2
+|   |   |   |-- 6b304f493c.crb -> ../../../exprs/crb_blast/3da29fd2a6_6b304f493c.crb
+|   |   |   |-- 6b304f493c.crb.args
+|   |   |   |-- 80177d486e.crb -> ../../../exprs/crb_blast/3da29fd2a6_80177d486e.crb
+|   |   |   `-- 80177d486e.crb.args
+|   |   |-- 663ac96862
+|   |   |   |-- 2a85f93afe.str.list -> ../../../exprs/extract_queries/2a85f93afe.str.list
+|   |   |   `-- 2a85f93afe.str.list.args
+|   |   |-- 997b95f693
+|   |   |   |-- 6b304f493c.crb -> ../../../exprs/crb_blast/3da29fd2a6_6b304f493c.crb
+|   |   |   `-- 6b304f493c.crb.args
+|   |   `-- 9b2bf573c4
+|   |       |-- 2a85f93afe.str.list -> ../../../exprs/extract_queries/2a85f93afe.str.list
+|   |       |-- 2a85f93afe.str.list.args
+|   |       |-- edd1bdcd6e.str.list -> ../../../exprs/extract_queries/edd1bdcd6e.str.list
+|   |       `-- edd1bdcd6e.str.list.args
+|   |-- list
+|   |   |-- 08c4af1030.txt
+|   |   |-- 7fd29ef19d.txt
+|   |   |-- 954a24e2cf.txt
+|   |   |-- adbf286dfe.txt
+|   |   |-- ca55994d42.txt
+|   |   |-- cad7634989.txt
+|   |   `-- ef87d3e725.txt
+|   `-- load
+|       |-- 32841598b2.faa -> $WORKDIR/data/7942genes10.faa
+|       |-- de2033f5c0.faa -> $WORKDIR/data/7942genes50.faa
+|       `-- ec9540d17e.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
+|-- exprs
+|   |-- any
+|   |   |-- 833d3bf631.str.list
+|   |   |-- c8e1a83419.str.list
+|   |   `-- f4a39cdc42.faa.list
+|   |-- crb_blast
+|   |   |-- 3da29fd2a6_6b304f493c.crb -> ../../cache/crbblast/03831b21e0_210525afba/results.crb
+|   |   `-- 3da29fd2a6_80177d486e.crb -> ../../cache/crbblast/03831b21e0_98cbd66ef4/results.crb
+|   |-- crb_blast_each
+|   |   |-- 3da29fd2a6_1acf3d485d.crb.list
+|   |   `-- 3da29fd2a6_5d1e025ade.crb.list
+|   |-- diff
+|   |   `-- c08bebe23d.str.list
+|   |-- extract_queries
+|   |   |-- 2a85f93afe.str.list
+|   |   `-- edd1bdcd6e.str.list
+|   |-- extract_queries_each
+|   |   |-- 1bdde65c25.str.list.list
+|   |   `-- 88e4050535.str.list.list
+|   |-- gbk_to_fna
+|   |   `-- 455f27117a.fna
+|   |-- length
+|   |   `-- 74071cd273.num
+|   |-- list
+|   |   |-- 2105d7fdf5.faa.list.list -> ../../cache/list/7fd29ef19d.txt
+|   |   |-- 3465d10d54.str.list -> ../../cache/list/954a24e2cf.txt
+|   |   |-- 39a71010c0.faa.list -> ../../cache/list/08c4af1030.txt
+|   |   |-- 5d3cbccb6a.str.list -> ../../cache/list/ef87d3e725.txt
+|   |   |-- 7b30786d44.faa.list -> ../../cache/list/ca55994d42.txt
+|   |   `-- afc685d3da.str.list.list -> ../../cache/list/adbf286dfe.txt
+|   |-- load_gbk
+|   |   `-- c5cc3f4b63.gbk -> ../../cache/load/ec9540d17e.gbk
+|   `-- str
+|       |-- 7ec89da918.str -> ../../cache/list/cad7634989.txt
+|       |-- cb201cf4f8.str -> ../../cache/list/954a24e2cf.txt
+|       `-- db90f32127.str -> ../../cache/list/ef87d3e725.txt
+`-- vars
+    |-- large.faa.list -> ../exprs/any/f4a39cdc42.faa.list
+    |-- large_hits.str.list.list -> ../exprs/extract_queries_each/88e4050535.str.list.list
+    |-- reference.fna -> ../exprs/gbk_to_fna/455f27117a.fna
+    |-- result -> ../exprs/length/74071cd273.num
+    |-- small.faa.list -> ../exprs/list/7b30786d44.faa.list
+    `-- small_hits.str.list.list -> ../exprs/extract_queries_each/1bdde65c25.str.list.list
+
+24 directories, 78 files

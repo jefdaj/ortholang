@@ -1,0 +1,54 @@
+.
+|-- cache
+|   |-- each
+|   |   `-- 7b6be1084d
+|   |       |-- 65e9e47c08.str.list -> ../../../exprs/extract_queries/65e9e47c08.str.list
+|   |       `-- 65e9e47c08.str.list.args -> ../../../cache/lines/0aafd42abf.txt
+|   |-- lines
+|   |   |-- 0aafd42abf.txt
+|   |   |-- 778251fd80.txt
+|   |   |-- 8b134b2766.txt
+|   |   |-- adfdb6bd8c.txt
+|   |   |-- c8be8722f2.txt
+|   |   |-- da1e86d2c2.txt
+|   |   |-- f12c7f6a4d.txt
+|   |   `-- fb5b40e51f.txt
+|   |-- load
+|   |   |-- 8a695c317a.faa -> $WORKDIR/data/6803genes10.faa
+|   |   `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
+|   `-- makeblastdb
+|       `-- 8aa4a9d2fc
+|           |-- 8aa4a9d2fc.pdb.phr
+|           |-- 8aa4a9d2fc.pdb.pin
+|           `-- 8aa4a9d2fc.pdb.psq
+|-- exprs
+|   |-- any
+|   |   `-- 8afe49670a.str.list.list -> ../../cache/lines/da1e86d2c2.txt
+|   |-- blastp_db
+|   |   `-- 8158675169_6e8bd8b7c6_67b1500345.bht
+|   |-- extract_queries
+|   |   |-- 65e9e47c08.str.list -> ../../cache/lines/f12c7f6a4d.txt
+|   |   `-- baffeec5f7.str.list -> ../../cache/lines/f12c7f6a4d.txt
+|   |-- extract_queries_each
+|   |   `-- d6886f5fa2.str.list.list -> ../../cache/lines/da1e86d2c2.txt
+|   |-- list
+|   |   |-- 26890dda4f.bht.list -> ../../cache/lines/0aafd42abf.txt
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/da1e86d2c2.txt
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/lines/fb5b40e51f.txt
+|   |-- load_faa
+|   |   |-- bb54df8bd7.faa -> ../../cache/load/8a695c317a.faa
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |-- makeblastdb_prot
+|   |   `-- c14344af19.pdb -> ../../cache/lines/8b134b2766.txt
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/778251fd80.txt
+|   `-- str
+|       |-- 50dbefb6d6.str -> ../../cache/lines/c8be8722f2.txt
+|       `-- ec3b181d8a.str -> ../../cache/lines/adfdb6bd8c.txt
+`-- vars
+    |-- hits.bht -> ../exprs/blastp_db/8158675169_6e8bd8b7c6_67b1500345.bht
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/d6886f5fa2.str.list.list
+    |-- result -> ../exprs/any/8afe49670a.str.list.list
+    `-- single.str.list -> ../exprs/extract_queries/baffeec5f7.str.list
+
+18 directories, 33 files

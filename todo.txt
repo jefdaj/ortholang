@@ -1,20 +1,15 @@
-saturday, aim to:
-  1) get sonicparanoid and mmseqs to share tmpfiles
-  2) get sonicparanoid and orthofinder sharing common extraction function(s)
-  3) draft a greencut-like algorithm using diamond or mmseqs, not necessarily in haskell
-
+simplify plots to look more figure like
+get sonicparanoid and mmseqs to share tmpfiles
+get sonicparanoid and orthofinder sharing common extraction function(s)
+draft a greencut-like algorithm using diamond or mmseqs, not necessarily in haskell
 write a function to extract_seqs from multiple fastas at once, useful here + elsewhere?
 can all "extract" functions be renamed with "list"?
-try DIAMOND, MMseqs2
-
 how to open the result cluster files?
 swap _ for : in seqid: because orthofinder does that already (or is it messing up and considering those 2 species?)
   maybe better just remove it for now instead
-
-should i edit orthofinder to use shortcut conventions? might be the fastest/clearest way if no options
+should i edit orthofinder to use detourrr conventions? might be the fastest/clearest way if no options
   how important are the numeric indexes? if those could be made hashes everything would be easy
   and store blast hits as plain txt without the gzip for now
-
 easy functions to write now that you've found the output files:
   orthogroup_seqs : ofr -> faa.list (directly return fasta files)
   orthogroup_ids  : ofr -> str..listlist (extract_ids . orthogroups seqs)
@@ -24,124 +19,101 @@ easy functions to write now that you've found the output files:
   orthogroup_tree_containing : ofr -> str -> ? (can this be done easily? what if none?)
   single_copy_orthogroups : ofr -> str.list.list
   single_copy_orthogroup_sequences : ofr -> faa.list (this would be used to write the above)
-
 should i make a thing to list + extract orthogroups by name? or will that just confuse because they're numeric?
-
-wednesday:
-
-  sonicparanoid module
-    x needs IDs sanitized first, probably
-    x scaffolding
-    x go straight to module, where ids will work
-    x approx command: sonicparanoid -i <indir> -o <outdir> -sh <tmpdir> -m fast/default/etc. -noidx -d (if debug)
-    outputs pairwise orthologs only; need to read them and make groups
-
-  demo faster blast alternatives with cuts on laptop:
-    diamond
-      will it require _each variants? hold off for now
-    mmseqs2
-
-  orthogroup functions
-    common interface for: orthofinder, sonicparanoid, mmseqs2
-    how to make the types work? should the "orthogroups" fn just pull common info from any result?
-    orthogroups            ::             any result -> str.list.list
-    orthogroups_containing :: str.list -> any result -> str.list.list
-    orthogroup_containing  :: str      -> any result -> str.list
-    the main thing to add today is probably interpretation of the results:
-      which genes appear in all sets and which don't?
-      which appear in at least N sets or are missing from N sets?
-      venn diagram of genes in common between sets
-      to get those, will need to extract from each format + do common munging on list of lists
-
-  fix plots too in general and start showing more of them
-
-sunday:
-
-  diamond module
-    read manual
-      handles temporary files itself; output only appears at the end and is thrown away if inturrupted
-      looks to be deterministic! same input -> same output according to the author
-      things that can be set to speed it up/improve results:
-        -e as low as possible
-        -k as low as possible, or use --top instead
-      later, optional taxonomy features?
-      looks to be multithreaded by default
-      any need to set the scoring matrix?
-      can output the same regular blast results. winning!
-        but there's an intermediate DAA (diamond alignment archive) format too. not sure if needed?
-      can gzip the output
-    x test running diamond and getting blast output
-    x write scaffolding code
-    x write useful functions
-      x diamond_makedb
-      x diamond_makedb_all
-      x search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
-        x diamond_blastp
-        x diamond_blastp_db
-        x diamond_blastx
-        x diamond_blastx_db
-        x diamond_blastp_sensitive
-        x diamond_blastp_db_sensitive
-        x diamond_blastp_more_sensitive
-        x diamond_blastp_db_more_sensitive
-        x diamond_blastx_sensitive
-        x diamond_blastx_db_sensitive
-        x diamond_blastx_more_sensitive
-        x diamond_blastx_db_more_sensitive
-      x something to load existing databases? maybe not important yet
-    x print data:
-      x diamond dbinfo to print dbs
-      x diamond view to print results
-    x write tests
-      test dependency
-
-  mmseqs module
-
-    read about it
-      should i be working with plass + linclust to get protein sequences from metagenomics datasets?
-        cool for later, maybe
-        megahit + prodigal is the standard alternative
-      does a large number of things with a lot of internal commands
-        looks like it can act like blast or psi-blast, but is also for clustering?
-      can do easy-clust from fasta, but generally want to convert to mmseq db first?
-        database is multiple files like blast
-        is there a different kind of db file for each function output?
-      there are "update" functions which in shortcut should copy + update
-      any way to get it working on the demo server? if not, might be a reason to get a new one eventually
-        should be doable from lab funds really!
-        might not need it tho, only missing avx2 but SSE4.1 is ok
-          just need to add a compiler flag?
-      might require up to 500GB free space for large runs? i can get that if needed
-      example use here: https://github.com/soedinglab/MMseqs2/issues/79
-
-      read the readme
-      skim the paper
-
-    try some functions
-      try the webserver!
-      make sure you understand how the db stuff works
-
-    x write scaffolding code
-
-    write useful functions
-      variants: regular and _db like blast
-      variants: sensitive, default, fast, faster?
-      x test dependency and abort if illegal instruction
-      do these first:
-        mmseqs_createdb
-        mmseqs_search
-      then the rest if needed:
-        mmseqs_easy_search
-        mmseqs_easy_cluster
-        mmseqs_easy_linclust?
-        mmseqs_createseqfiledb?
-        mmseqs_cluster? not sure if needed
-        mmseqs_result2flat
-        mmseqs_mergeclusters?
-        mmseqs_search_profile (with --iterations)?
-
-    write tests
-
+sonicparanoid module
+  x needs IDs sanitized first, probably
+  x scaffolding
+  x go straight to module, where ids will work
+  x approx command: sonicparanoid -i <indir> -o <outdir> -sh <tmpdir> -m fast/default/etc. -noidx -d (if debug)
+  outputs pairwise orthologs only; need to read them and make groups
+orthogroup functions
+  common interface for: orthofinder, sonicparanoid, mmseqs2
+  how to make the types work? should the "orthogroups" fn just pull common info from any result?
+  orthogroups            ::             any result -> str.list.list
+  orthogroups_containing :: str.list -> any result -> str.list.list
+  orthogroup_containing  :: str      -> any result -> str.list
+  the main thing to add today is probably interpretation of the results:
+    which genes appear in all sets and which don't?
+    which appear in at least N sets or are missing from N sets?
+    venn diagram of genes in common between sets
+    to get those, will need to extract from each format + do common munging on list of lists
+fix plots too in general and start showing more of them
+diamond module
+  read manual
+    handles temporary files itself; output only appears at the end and is thrown away if inturrupted
+    looks to be deterministic! same input -> same output according to the author
+    things that can be set to speed it up/improve results:
+      -e as low as possible
+      -k as low as possible, or use --top instead
+    later, optional taxonomy features?
+    looks to be multithreaded by default
+    any need to set the scoring matrix?
+    can output the same regular blast results. winning!
+      but there's an intermediate DAA (diamond alignment archive) format too. not sure if needed?
+    can gzip the output
+  x test running diamond and getting blast output
+  x write scaffolding code
+  x write useful functions
+    x diamond_makedb
+    x diamond_makedb_all
+    x search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
+      x diamond_blastp
+      x diamond_blastp_db
+      x diamond_blastx
+      x diamond_blastx_db
+      x diamond_blastp_sensitive
+      x diamond_blastp_db_sensitive
+      x diamond_blastp_more_sensitive
+      x diamond_blastp_db_more_sensitive
+      x diamond_blastx_sensitive
+      x diamond_blastx_db_sensitive
+      x diamond_blastx_more_sensitive
+      x diamond_blastx_db_more_sensitive
+    x something to load existing databases? maybe not important yet
+  x print data:
+    x diamond dbinfo to print dbs
+    x diamond view to print results
+  x write tests
+    test dependency
+mmseqs module
+  read about it
+    should i be working with plass + linclust to get protein sequences from metagenomics datasets?
+      cool for later, maybe
+      megahit + prodigal is the standard alternative
+    does a large number of things with a lot of internal commands
+      looks like it can act like blast or psi-blast, but is also for clustering?
+    can do easy-clust from fasta, but generally want to convert to mmseq db first?
+      database is multiple files like blast
+      is there a different kind of db file for each function output?
+    there are "update" functions which in detourrr should copy + update
+    any way to get it working on the demo server? if not, might be a reason to get a new one eventually
+      should be doable from lab funds really!
+      might not need it tho, only missing avx2 but SSE4.1 is ok
+        just need to add a compiler flag?
+    might require up to 500GB free space for large runs? i can get that if needed
+    example use here: https://github.com/soedinglab/MMseqs2/issues/79
+    read the readme
+    skim the paper
+  try some functions
+    try the webserver!
+    make sure you understand how the db stuff works
+  write useful functions
+    variants: regular and _db like blast
+    variants: sensitive, default, fast, faster?
+    x test dependency and abort if illegal instruction
+    do these first:
+      mmseqs_createdb
+      mmseqs_search
+    then the rest if needed:
+      mmseqs_easy_search
+      mmseqs_easy_cluster
+      mmseqs_easy_linclust?
+      mmseqs_createseqfiledb?
+      mmseqs_cluster? not sure if needed
+      mmseqs_result2flat
+      mmseqs_mergeclusters?
+      mmseqs_search_profile (with --iterations)?
+  write tests
 bad bug!
   eval leave_each_out [1,2,3,4,5]
   then leave_each_out [1,2,3,4,5, 1e-45]

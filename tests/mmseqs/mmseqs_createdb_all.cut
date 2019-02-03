@@ -1,0 +1,2 @@
+pcc7942 = load_faa "data/7942genes.faa"
+result = mmseqs_createdb_all [pcc7942]

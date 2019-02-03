@@ -1,17 +1,16 @@
 .
 |-- cache
 |   `-- load
-|       |-- 8aa4a9d2fc.faa
-|       `-- 8aa4a9d2fc.faa.ids
+|       `-- 8aa4a9d2fc.faa -> $WORKDIR/data/6803genes.faa
 |-- exprs
 |   |-- diamond_makedb
-|   |   `-- f15f504b2e.dmnd
+|   |   `-- c14344af19.dmnd
 |   |-- load_faa
-|   |   `-- 498816b813.faa -> ../../cache/load/8aa4a9d2fc.faa
+|   |   `-- dee24d6c3c.faa -> ../../cache/load/8aa4a9d2fc.faa
 |   `-- str
 |       `-- ec3b181d8a.str -> ../../cache/lines/...
 `-- vars
-    |-- pcc6803.faa -> ../exprs/load_faa/498816b813.faa
-    `-- result -> ../exprs/diamond_makedb/f15f504b2e.dmnd
+    |-- pcc6803.faa -> ../exprs/load_faa/dee24d6c3c.faa
+    `-- result -> ../exprs/diamond_makedb/c14344af19.dmnd
 
-7 directories, 7 files
+7 directories, 6 files
