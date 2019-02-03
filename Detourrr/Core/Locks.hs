@@ -33,10 +33,10 @@ import System.Directory           (createDirectoryIfMissing, doesFileExist)
 import System.FilePath            (takeDirectory)
 -- import Control.Concurrent.Thread.Delay (delay)
 
--- TODO parametarize FilePath and re-export with CutPath in Types.hs?
+-- TODO parametarize FilePath and re-export with RrrPath in Types.hs?
 type Locks = IORef (Map FilePath RWLock)
 
-{- A horrible hack to avoid import the import cycle caused by using a CutConfig
+{- A horrible hack to avoid import the import cycle caused by using a RrrConfig
  - here. For now, just change the code to enable.
  - TODO think of something better
  -}

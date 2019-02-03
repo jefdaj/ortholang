@@ -1,2 +1,0 @@
-# TODO is anything wrong with this, or does the rest just need updating?
-result = leave_each_out [1,2,3]

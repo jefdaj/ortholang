@@ -3,14 +3,14 @@ module Detourrr.Modules.Summarize where
 import Development.Shake
 import Detourrr.Core.Types
 
-import Detourrr.Core.Paths (exprPath, fromCutPath)
+import Detourrr.Core.Paths (exprPath, fromRrrPath)
 import Detourrr.Core.Compile.Basic      (rExpr)
 import Detourrr.Core.Actions (readLits, writeLits, debugA, debugNeed)
 -- import Detourrr.Core.Debug (debugA)
 import Development.Shake.FilePath ((</>))
 
-cutModule :: CutModule
-cutModule = CutModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Summarize"
   , mDesc = "Collapse a list of results into a single summary"
   , mTypes = []
@@ -20,8 +20,8 @@ cutModule = CutModule
   }
 
 -- TODO remove once a couple others are finished
--- commonElements :: CutFunction
--- commonElements = CutFunction
+-- commonElements :: RrrFunction
+-- commonElements = RrrFunction
 --   { fName      = "common_elements" -- TODO rename to `all`?
 --   , fFixity    = Prefix
 --   , fTypeCheck = summaryTypeCheck
@@ -29,7 +29,7 @@ cutModule = CutModule
 --   , fRules  = rSummary (foldr1 intersect)
 --   }
 
-summaryTypeCheck :: [CutType] -> Either String CutType
+summaryTypeCheck :: [RrrType] -> Either String RrrType
 summaryTypeCheck [(ListOf (ListOf t))] = Right $ ListOf t
 summaryTypeCheck _ = Left "type error in summary!"
 
@@ -37,18 +37,18 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- using the given summaryFn
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
-rSummary :: ([[FilePath]] -> [FilePath]) -> CutState -> CutExpr -> Rules ExprPath
-rSummary summaryFn s@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [iList]) = do
+rSummary :: ([[FilePath]] -> [FilePath]) -> RrrState -> RrrExpr -> Rules ExprPath
+rSummary summaryFn s@(_, cfg, ref, _) expr@(RrrFun _ _ _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   -- let (ListOf (ListOf eType)) = typeOf iList
       -- (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
                                           -- [show expr, iPath]
-  let oPath = fromCutPath cfg $ exprPath s expr
+  let oPath = fromRrrPath cfg $ exprPath s expr
   oPath %> aSummary cfg ref summaryFn iPath
   return (ExprPath oPath)
 rSummary _ _ _ = error "bad argument to rSummary"
 
-aSummary :: CutConfig -> Locks -> ([[String]] -> [String])
+aSummary :: RrrConfig -> Locks -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()
 aSummary cfg ref summaryFn iPath out = do
   debugNeed cfg "aSummary" [iPath]

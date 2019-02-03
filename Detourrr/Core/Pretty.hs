@@ -4,7 +4,7 @@ module Detourrr.Core.Pretty
   ( prettyShow
   -- , prettyResult (moved to Eval)
   , writeScript
-  , CutExpr(..)
+  , RrrExpr(..)
   , prettyNum -- TODO get rid of this?
 
   -- re-export for convenience
@@ -35,7 +35,7 @@ getWidth = do
 
 -- Render with my custom style (just width so far)
 -- Needs to have the optional constant width for the REPL tests
-renderIO :: CutConfig -> Doc -> IO String
+renderIO :: RrrConfig -> Doc -> IO String
 renderIO cfg doc = do
   currentWidth <- getWidth
   let renderWidth = case cfgWidth cfg of
@@ -47,56 +47,56 @@ renderIO cfg doc = do
 
 -- Print something pretty to a handle, rendering with custom style from Pretty.hs
 -- TODO move to Pretty.hs?
-pPrintHdl :: Pretty a => CutConfig -> Handle -> a -> IO ()
+pPrintHdl :: Pretty a => RrrConfig -> Handle -> a -> IO ()
 pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl
 
-instance Pretty CutType where
+instance Pretty RrrType where
   pPrint Empty          = error "should never need to print Empty"
   pPrint (ListOf Empty) = text "empty list"
   pPrint (ListOf     t) = text "list of" <+> pPrint t <> text "s"
   pPrint (ScoresOf   t) = text "list of" <+> pPrint t <> text "s with scores"
   pPrint t              = text (tExt t) <+> parens (text $ tDesc t)
 
-instance Pretty CutVar where
-  pPrint (CutVar s) = text s
+instance Pretty RrrVar where
+  pPrint (RrrVar s) = text s
 
 -- TODO add descriptions here? if so, need to separate actual extension code
 -- instance Pretty Ext where
 --   pPrint (ListOf e) = pPrint e <> text "s"
 --   pPrint (Ext   e) = text e
 
-instance {-# OVERLAPPING #-} Pretty CutAssign where
+instance {-# OVERLAPPING #-} Pretty RrrAssign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
-instance {-# OVERLAPPING #-} Pretty CutScript where
+instance {-# OVERLAPPING #-} Pretty RrrScript where
   pPrint [] = empty
   -- pPrint as = text $ unlines $ map prettyShow as
   pPrint as = vcat $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?
-writeScript :: FilePath -> CutScript -> IO ()
+writeScript :: FilePath -> RrrScript -> IO ()
 writeScript path scr = writeFile path $ unlines $ map prettyShow scr
 
 -- TODO actual Eq instance, or what? how do we compare types?
-instance Pretty CutExpr where
-  pPrint e@(CutLit _ _ s)
+instance Pretty RrrExpr where
+  pPrint e@(RrrLit _ _ s)
     | typeOf e == num = prettyNum s
     | otherwise = text $ show s
-  pPrint (CutRef _ _ _ v)    = pPrint v
-  pPrint (CutFun _ _ _ s es) = text s <+> sep (map pNested es)
-  pPrint (CutList _ _ _ es)  = pList es
-  pPrint (CutRules (CompiledExpr e _)) = pPrint e -- TODO is this right?
+  pPrint (RrrRef _ _ _ v)    = pPrint v
+  pPrint (RrrFun _ _ _ s es) = text s <+> sep (map pNested es)
+  pPrint (RrrList _ _ _ es)  = pList es
+  pPrint (RrrRules (CompiledExpr e _)) = pPrint e -- TODO is this right?
 
   -- this is almost right except it breaks lines too early (always nesting),
   -- which looks super weird for short bops:
-  -- pPrint (CutBop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (text c) $$ pPrint e2
+  -- pPrint (RrrBop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (text c) $$ pPrint e2
 
   -- this one is a little better: the first line is right and *then* it starts doing that
   -- TODO ask on stackoverflow if there's any better way, but later
-  pPrint (CutBop _ _ _ c e1 e2) = sep $ punctuate (text $ " " ++ c) [pPrint e1, pPrint e2]
+  pPrint (RrrBop _ _ _ c e1 e2) = sep $ punctuate (text $ " " ++ c) [pPrint e1, pPrint e2]
 
 pList :: (Pretty a) => [a] -> Doc
 pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
@@ -111,25 +111,25 @@ prettyNum s = text $
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
-pNested :: CutExpr -> Doc
-pNested e@(CutFun  _ _ _ _ _  ) = parens $ pPrint e
-pNested e@(CutBop  _ _ _ _ _ _) = parens $ pPrint e
+pNested :: RrrExpr -> Doc
+pNested e@(RrrFun  _ _ _ _ _  ) = parens $ pPrint e
+pNested e@(RrrBop  _ _ _ _ _ _) = parens $ pPrint e
 pNested e = pPrint e
 
 -- TODO update this by mapping over the fields
-instance Pretty CutConfig where
+instance Pretty RrrConfig where
   pPrint = text . showConfig
 
 -- TODO change this to something useful
-instance Pretty CutFunction where
-  pPrint fn = text $ "CutFunction '" ++ fName fn ++ "'"
+instance Pretty RrrFunction where
+  pPrint fn = text $ "RrrFunction '" ++ fName fn ++ "'"
 
-instance Show CutFunction where
+instance Show RrrFunction where
   show = prettyShow
 
 -- TODO change this to something useful
-instance Pretty CutModule where
-  pPrint fn = text $ "CutModule '" ++ mName fn ++ "'"
+instance Pretty RrrModule where
+  pPrint fn = text $ "RrrModule '" ++ mName fn ++ "'"
 
--- instance Show CutModule where
+-- instance Show RrrModule where
   -- show = prettyShow

@@ -15,11 +15,11 @@ import Development.Shake.FilePath  ((</>))
 import Detourrr.Core.Compile.Basic (rExpr, typeError, debugRules)
 import Detourrr.Core.Actions       (readStrings, readPaths, writeStrings, debugA, hashContent)
 -- import Detourrr.Core.Debug         (debugRules, debugA)
-import Detourrr.Core.Paths         (exprPath, toCutPath, fromCutPath)
+import Detourrr.Core.Paths         (exprPath, toRrrPath, fromRrrPath)
 import Detourrr.Core.Util          (resolveSymlinks)
 
-cutModule :: CutModule
-cutModule = CutModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "Sets"
   , mDesc = "Set operations for use with lists"
   , mTypes = []
@@ -32,8 +32,8 @@ type SetOpDesc =
   , Set String -> Set String -> Set String -- haskell set op
   )
 
-{- An awkward intermediate: until I get around to actually merging CutBops into
- - CutFuns, we'll just create them from a common description. The Bop versions
+{- An awkward intermediate: until I get around to actually merging RrrBops into
+ - RrrFuns, we'll just create them from a common description. The Bop versions
  - work on two lists and can be chained together; the prefix (regular function)
  - ones work on lists of lists.
  -
@@ -47,19 +47,19 @@ setOpDescs =
   , ("diff", '~', difference)
   ]
 
-mkSetFunctions :: SetOpDesc -> [CutFunction]
+mkSetFunctions :: SetOpDesc -> [RrrFunction]
 mkSetFunctions (foldName, opChar, setFn) = [setBop, setFold]
   where
     mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
     mkFoldDesc name = name ++ " : X.list.list -> X.list"
-    setBop = CutFunction
+    setBop = RrrFunction
       { fName      = [opChar]
       , fTypeCheck = tSetBop
       , fDesc = Nothing, fTypeDesc  = mkBopDesc [opChar]
       , fFixity    = Infix
       , fRules     = rSetBop foldName setFn
       }
-    setFold = CutFunction
+    setFold = RrrFunction
       { fName      = foldName
       , fTypeCheck = tSetFold
       , fDesc = Nothing, fTypeDesc  = mkFoldDesc foldName
@@ -69,30 +69,30 @@ mkSetFunctions (foldName, opChar, setFn) = [setBop, setFold]
 
 -- if the user gives two lists but of different types, complain that they must
 -- be the same. if there aren't two lists at all, complain about that first
-tSetBop :: [CutType] -> Either String CutType
+tSetBop :: [RrrType] -> Either String RrrType
 tSetBop actual@[ListOf a, ListOf b]
   | typeMatches a b = fmap ListOf $ nonEmptyType [a, b]
   | otherwise = Left $ typeError [ListOf a, ListOf a] actual
 tSetBop _ = Left "Type error: expected two lists of the same type"
 
-tSetFold :: [CutType] -> Either String CutType
+tSetFold :: [RrrType] -> Either String RrrType
 tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
 
 -- apply a set operation to two lists (converted to sets first)
--- TODO if order turns out to be important in cuts, call them lists
+-- TODO if order turns out to be important in rrrs, call them lists
 rSetBop :: String -> (Set String -> Set String -> Set String)
-     -> CutState -> CutExpr -> Rules ExprPath
-rSetBop name fn s (CutBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
+     -> RrrState -> RrrExpr -> Rules ExprPath
+rSetBop name fn s (RrrBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
   where
-    fun = CutFun  rtn salt deps name [lst]
-    lst = CutList rtn salt deps [s1, s2]
+    fun = RrrFun  rtn salt deps name [lst]
+    lst = RrrList rtn salt deps [s1, s2]
 rSetBop _ _ _ _ = error "bad argument to rSetBop"
 
-rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
-rSetFold fn s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [lol]) = do
+rSetFold :: ([Set String] -> Set String) -> RrrState -> RrrExpr -> Rules ExprPath
+rSetFold fn s@(_, cfg, ref, _) e@(RrrFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
-  let oPath      = fromCutPath cfg $ exprPath s e
+  let oPath      = fromRrrPath cfg $ exprPath s e
       oPath'     = cfgTmpDir cfg </> oPath
       oPath''    = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
@@ -100,11 +100,11 @@ rSetFold fn s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [lol]) = do
   return (ExprPath oPath'')
 rSetFold _ _ _ = error "bad argument to rSetFold"
 
-aSetFold :: CutConfig -> Locks -> ([Set String] -> Set String)
-         -> CutType -> FilePath -> FilePath -> Action ()
+aSetFold :: RrrConfig -> Locks -> ([Set String] -> Set String)
+         -> RrrType -> FilePath -> FilePath -> Action ()
 aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
   setPaths  <- readPaths cfg ref setsPath
-  setElems  <- mapM (readStrings etype cfg ref) (map (fromCutPath cfg) setPaths)
+  setElems  <- mapM (readStrings etype cfg ref) (map (fromRrrPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   let sets = map fromList setElems'
       oLst = toList $ fn sets
@@ -117,7 +117,7 @@ aSetFold _ _ _ _ _ _ = error "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
-canonicalLinks :: CutConfig -> CutType -> [FilePath] -> IO [FilePath]
+canonicalLinks :: RrrConfig -> RrrType -> [FilePath] -> IO [FilePath]
 canonicalLinks cfg rtn =
   if rtn `elem` [str, num]
     then return
@@ -125,15 +125,15 @@ canonicalLinks cfg rtn =
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898
-dedupByContent :: CutConfig -> Locks -> [FilePath] -> Action [FilePath]
+dedupByContent :: RrrConfig -> Locks -> [FilePath] -> Action [FilePath]
 dedupByContent cfg ref paths = do
   -- TODO if the paths are already in the load cache, no need for content?
-  hashes <- mapM (hashContent cfg ref) $ map (toCutPath cfg) paths
+  hashes <- mapM (hashContent cfg ref) $ map (toRrrPath cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
 
-some :: CutFunction
-some = CutFunction
+some :: RrrFunction
+some = RrrFunction
   { fName      = "some"
   , fTypeCheck = tSetFold
   , fDesc = Nothing, fTypeDesc  = "some : X.list.list -> X.list"
@@ -141,10 +141,10 @@ some = CutFunction
   , fRules     = rSome
   }
 
-rSome :: CutState -> CutExpr -> Rules ExprPath
-rSome s (CutFun rtn salt deps _ lol) = rExpr s diffExpr
+rSome :: RrrState -> RrrExpr -> Rules ExprPath
+rSome s (RrrFun rtn salt deps _ lol) = rExpr s diffExpr
   where
-    anyExpr  = CutFun rtn salt deps "any" lol
-    allExpr  = CutFun rtn salt deps "all" lol
-    diffExpr = CutBop rtn salt deps "~" anyExpr allExpr
+    anyExpr  = RrrFun rtn salt deps "any" lol
+    allExpr  = RrrFun rtn salt deps "all" lol
+    diffExpr = RrrBop rtn salt deps "~" anyExpr allExpr
 rSome _ _ = error "bad argument to rSome"

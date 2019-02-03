@@ -1,4 +1,0 @@
-query   = load_faa "data/7942gene.faa"
-pcc7942 = makeblastdb_prot (load_faa "data/7942genes.faa")
-hits    = psiblast_db 1e-10 query pcc7942
-result  = hits

@@ -1,7 +1,0 @@
-queries  = split_faa (load_faa "data/7942genes10.faa")
-pcc6803  = load_faa "data/6803genes.faa"
-pcc7942  = load_faa "data/7942genes.faa"
-cyanodb  = makeblastdb_prot_all [pcc6803, pcc7942]
-profiles = psiblast_train_pssms_db 1e-10 queries  cyanodb
-hittable = psiblast_pssms_db       1e-10 profiles cyanodb
-result   = hittable

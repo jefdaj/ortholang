@@ -1,4 +1,0 @@
-pcc6803 = load_faa "data/6803genes.faa"
-pcc7942 = load_fna "data/7942genes.fna"
-db = diamond_makedb pcc6803
-result = diamond_blastx_db_more_sensitive 1e-50 pcc7942 db

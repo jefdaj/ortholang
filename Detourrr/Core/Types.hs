@@ -1,6 +1,6 @@
 module Detourrr.Core.Types
   -- type aliases and newtypes
-  ( CutPath(..)
+  ( RrrPath(..)
   , Action1
   , Action2
   , Action3
@@ -8,25 +8,25 @@ module Detourrr.Core.Types
   , RulesFn
   , TypeChecker
   -- data structures
-  , CutAssign
-  , CutExpr(..)
+  , RrrAssign
+  , RrrExpr(..)
   , CompiledExpr(..)
-  , CutConfig(..)
+  , RrrConfig(..)
   , findType
   , findFunction
   , listFunctions
   , listFunctionNames
   , operatorChars
   -- , WrapperConfig(..)
-  , CutType(..)
-  , CutVar(..)
-  , CutScript
+  , RrrType(..)
+  , RrrVar(..)
+  , RrrScript
   , Locks
   , HashedSeqIDs
   , HashedSeqIDsRef
-  , CutState
+  , RrrState
   -- , Assoc(..) -- we reuse this from Parsec
-  , CutFixity(..)
+  , RrrFixity(..)
   -- parse monad
   , ParseM
   , runParseM
@@ -44,9 +44,9 @@ module Detourrr.Core.Types
   , rDepsOf
   , defaultShow
   -- module stuff (in flux)
-  , CutFunction(..)
+  , RrrFunction(..)
   , mkTypeDesc
-  , CutModule(..)
+  , RrrModule(..)
   , saltOf
   , setSalt
   , prefixOf
@@ -83,19 +83,19 @@ import Data.IORef                     (IORef)
 
 import Debug.Trace
 
-newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
+newtype RrrPath = RrrPath FilePath deriving (Eq, Ord, Show)
 
--- Note that each ActionN takes N+1 CutPaths, because the first is the output
+-- Note that each ActionN takes N+1 RrrPaths, because the first is the output
 -- TODO take the output last instead?
-type Action1 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
-type Action2 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
-type Action3 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
+type Action1 = RrrConfig -> Locks -> HashedSeqIDsRef -> RrrPath -> RrrPath -> Action ()
+type Action2 = RrrConfig -> Locks -> HashedSeqIDsRef -> RrrPath -> RrrPath -> RrrPath -> Action ()
+type Action3 = RrrConfig -> Locks -> HashedSeqIDsRef -> RrrPath -> RrrPath -> RrrPath -> RrrPath -> Action ()
 
 -- TODO remove when able in favor of well-typed versions above
-type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
+type ActionFn    = RrrConfig -> CacheDir -> [ExprPath] -> Action ()
 
-type RulesFn     = CutState -> CutExpr -> Rules ExprPath
-type TypeChecker = [CutType] -> Either String CutType
+type RulesFn     = RrrState -> RrrExpr -> Rules ExprPath
+type TypeChecker = [RrrType] -> Either String RrrType
 
 newtype CacheDir = CacheDir FilePath deriving Show -- ~/.detourrr/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving Show -- ~/.detourrr/exprs/<fnname>/<hash>.<type>
@@ -107,7 +107,7 @@ newtype ResPath  = ResPath  FilePath deriving Show -- ~/.detourrr/vars/result[.<
 -- data Ext = ListOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
-newtype CutVar = CutVar String deriving (Eq, Show, Read)
+newtype RrrVar = RrrVar String deriving (Eq, Show, Read)
  
 -- the common fields are:
 -- * return type
@@ -117,20 +117,20 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
 -- TODO test that it works correctly! in particular, it should go thru refs!
 --      (do we need to add salts of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
-data CutExpr
-  = CutLit CutType Int String
-  | CutRef CutType Int [CutVar] CutVar -- do refs need a salt? yes! (i think?)
-  | CutBop CutType Int [CutVar] String  CutExpr CutExpr
-  | CutFun CutType Int [CutVar] String [CutExpr]
-  | CutList CutType Int [CutVar] [CutExpr]
-  | CutRules CompiledExpr -- wrapper around previously-compiled rules (see below)
+data RrrExpr
+  = RrrLit RrrType Int String
+  | RrrRef RrrType Int [RrrVar] RrrVar -- do refs need a salt? yes! (i think?)
+  | RrrBop RrrType Int [RrrVar] String  RrrExpr RrrExpr
+  | RrrFun RrrType Int [RrrVar] String [RrrExpr]
+  | RrrList RrrType Int [RrrVar] [RrrExpr]
+  | RrrRules CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
 -- An expression that has already been compiled to Rules, wrapped so it can be
 -- passed to another function. Because Rules can't be shown or compared, we
--- also carry around the original CutExpr. TODO is the expr necessary? helpful?
+-- also carry around the original RrrExpr. TODO is the expr necessary? helpful?
 -- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
-data CompiledExpr = CompiledExpr CutExpr (Rules ExprPath)
+data CompiledExpr = CompiledExpr RrrExpr (Rules ExprPath)
 
 -- TODO is it a bad idea to hide the compiled-ness?
 instance Show CompiledExpr where
@@ -141,31 +141,31 @@ instance Eq CompiledExpr where
   (CompiledExpr a _) == (CompiledExpr b _) = a == b
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-saltOf :: CutExpr -> Int
-saltOf (CutLit _ n _)       = n
-saltOf (CutRef _ n _ _)     = n
-saltOf (CutBop _ n _ _ _ _) = n
-saltOf (CutFun _ n _ _ _)   = n
-saltOf (CutList _ n _ _)     = n
-saltOf (CutRules (CompiledExpr e _)) = saltOf e
+saltOf :: RrrExpr -> Int
+saltOf (RrrLit _ n _)       = n
+saltOf (RrrRef _ n _ _)     = n
+saltOf (RrrBop _ n _ _ _ _) = n
+saltOf (RrrFun _ n _ _ _)   = n
+saltOf (RrrList _ n _ _)     = n
+saltOf (RrrRules (CompiledExpr e _)) = saltOf e
 
 -- TODO this needs to be recursive?
-setSalt :: Int -> CutExpr -> CutExpr
-setSalt n (CutLit t _ s)          = CutLit t n s
-setSalt n (CutRef t _ ds v)       = CutRef t n ds v
-setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
-setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
-setSalt n (CutList t _ ds es)      = CutList t n ds es
-setSalt _ (CutRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules yet"
+setSalt :: Int -> RrrExpr -> RrrExpr
+setSalt n (RrrLit t _ s)          = RrrLit t n s
+setSalt n (RrrRef t _ ds v)       = RrrRef t n ds v
+setSalt n (RrrBop t _ ds s e1 e2) = RrrBop t n ds s e1 e2
+setSalt n (RrrFun t _ ds s es)    = RrrFun t n ds s es
+setSalt n (RrrList t _ ds es)      = RrrList t n ds es
+setSalt _ (RrrRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules yet"
 
--- TODO add names to the CutBops themselves... or associate with prefix versions?
-prefixOf :: CutExpr -> String
-prefixOf (CutLit rtn _ _     ) = extOf rtn
-prefixOf (CutFun _ _ _ name _) = name
-prefixOf (CutList _ _ _ _    ) = "list"
-prefixOf (CutRef _ _ _ _     ) = error  "CutRefs don't need a prefix"
-prefixOf (CutRules (CompiledExpr e _)) = prefixOf e
-prefixOf (CutBop _ _ _ n _ _ ) = case n of
+-- TODO add names to the RrrBops themselves... or associate with prefix versions?
+prefixOf :: RrrExpr -> String
+prefixOf (RrrLit rtn _ _     ) = extOf rtn
+prefixOf (RrrFun _ _ _ name _) = name
+prefixOf (RrrList _ _ _ _    ) = "list"
+prefixOf (RrrRef _ _ _ _     ) = error  "RrrRefs don't need a prefix"
+prefixOf (RrrRules (CompiledExpr e _)) = prefixOf e
+prefixOf (RrrBop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
                                    "*" -> "multiply"
@@ -173,26 +173,26 @@ prefixOf (CutBop _ _ _ n _ _ ) = case n of
                                    "~" -> "difference"
                                    "&" -> "intersection"
                                    "|" -> "union"
-                                   _   -> error "unknown CutBop"
+                                   _   -> error "unknown RrrBop"
 
 
--- TODO have a separate CutAssign for "result"?
-type CutAssign = (CutVar, CutExpr)
-type CutScript = [CutAssign]
+-- TODO have a separate RrrAssign for "result"?
+type RrrAssign = (RrrVar, RrrExpr)
+type RrrScript = [RrrAssign]
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
-data CutType
+data RrrType
   = Empty -- TODO remove this? should never be a need to define an empty list
-  | ListOf CutType
-  | ScoresOf CutType
-  | CutType
+  | ListOf RrrType
+  | ScoresOf RrrType
+  | RrrType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tShow :: CutConfig -> Locks -> FilePath -> IO String
+    , tShow :: RrrConfig -> Locks -> FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
 
-defaultShow :: CutConfig -> Locks -> FilePath -> IO String
+defaultShow :: RrrConfig -> Locks -> FilePath -> IO String
 defaultShow _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
     nLines      = 5
@@ -205,55 +205,55 @@ defaultShow _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 -- TODO should this use typesMatch?
-instance Eq CutType where
+instance Eq RrrType where
   Empty        == Empty        = True
   (ListOf a)   == (ListOf b)   = a == b
   (ScoresOf a) == (ScoresOf b) = a == b
   t1           == t2           = extOf t1 == extOf t2
 
-instance Show CutType where
+instance Show RrrType where
   show = extOf
 
-typeOf :: CutExpr -> CutType
-typeOf (CutLit   t _ _      ) = t
-typeOf (CutRef   t _ _ _    ) = t
-typeOf (CutBop   t _ _ _ _ _) = t
-typeOf (CutFun   t _ _ _ _  ) = t
-typeOf (CutList  t _ _ _    ) = ListOf t -- t can be Empty
-typeOf (CutRules (CompiledExpr e _)) = typeOf e
--- typeOf (CutList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
--- typeOf (CutList _ _ _ []     ) = Empty
--- typeOf (CutList _ _ _ []     ) = ListOf Empty
+typeOf :: RrrExpr -> RrrType
+typeOf (RrrLit   t _ _      ) = t
+typeOf (RrrRef   t _ _ _    ) = t
+typeOf (RrrBop   t _ _ _ _ _) = t
+typeOf (RrrFun   t _ _ _ _  ) = t
+typeOf (RrrList  t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (RrrRules (CompiledExpr e _)) = typeOf e
+-- typeOf (RrrList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
+-- typeOf (RrrList _ _ _ []     ) = Empty
+-- typeOf (RrrList _ _ _ []     ) = ListOf Empty
 
 -- Works around a bug where if the first element is an empty list but others
 -- have elements, it would call the whole thing an "emptylist.list".
 -- Note no typechecking happens here; heterogenous lists won't be noticed.
--- nonEmptyType :: [CutExpr] -> CutType
+-- nonEmptyType :: [RrrExpr] -> RrrType
 -- nonEmptyType    []  = Empty
 -- nonEmptyType (x:[]) = typeOf x -- catches (ListOf Empty)
 -- nonEmptyType (_:xs) = nonEmptyType xs
 
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
-extOf :: CutType -> String
+extOf :: RrrType -> String
 extOf Empty        = "empty" -- for lists with nothing in them yet
 extOf (ListOf   t) = extOf t ++ ".list"
 extOf (ScoresOf t) = extOf t ++ ".scores"
 extOf t            = tExt t
 
-varOf :: CutExpr -> [CutVar]
-varOf (CutRef _ _ _ v) = [v]
+varOf :: RrrExpr -> [RrrVar]
+varOf (RrrRef _ _ _ v) = [v]
 varOf _                = [ ]
 
-depsOf :: CutExpr -> [CutVar]
-depsOf (CutLit  _ _ _         ) = []
-depsOf (CutRef  _ _ vs v      ) = v:vs -- TODO redundant?
-depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
-depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
-depsOf (CutRules (CompiledExpr e _)) = depsOf e
+depsOf :: RrrExpr -> [RrrVar]
+depsOf (RrrLit  _ _ _         ) = []
+depsOf (RrrRef  _ _ vs v      ) = v:vs -- TODO redundant?
+depsOf (RrrBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
+depsOf (RrrFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
+depsOf (RrrList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (RrrRules (CompiledExpr e _)) = depsOf e
 
-rDepsOf :: CutScript -> CutVar -> [CutVar]
+rDepsOf :: RrrScript -> RrrVar -> [RrrVar]
 rDepsOf scr var = map fst rDeps
   where
     rDeps = filter (\(_,e) -> isRDep e) scr
@@ -263,8 +263,8 @@ rDepsOf scr var = map fst rDeps
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
 -- TODO how about lists/sets, are those core too?
 
-str :: CutType
-str = CutType
+str :: RrrType
+str = RrrType
   { tExt  = "str"
   , tDesc = "string"
   -- TODO make one of the read functions be IO for this instead
@@ -275,8 +275,8 @@ str = CutType
       return $ "\"" ++ txt' ++ "\""
   }
 
-num :: CutType
-num = CutType
+num :: RrrType
+num = RrrType
   { tExt  = "num"
   , tDesc = "number in scientific notation"
   , tShow = \_ ls f -> do
@@ -291,12 +291,12 @@ num = CutType
 -- TODO always load defaults for WorkDir, TmpDir, Verbose
 -- TODO make these into FilePaths and an Int/Bool
 -- TODO rename cfg prefix to just c?
-data CutConfig = CutConfig
+data RrrConfig = RrrConfig
   { cfgScript  :: Maybe FilePath
   , cfgTmpDir  :: FilePath
   , cfgWorkDir :: FilePath
   , cfgDebug   :: Bool
-  , cfgModules :: [CutModule]
+  , cfgModules :: [RrrModule]
   , cfgWrapper :: Maybe FilePath
   , cfgReport  :: Maybe String
   , cfgTestPtn :: Maybe String
@@ -306,29 +306,29 @@ data CutConfig = CutConfig
   }
   deriving Show
 
-listFunctionNames :: CutConfig -> [String]
+listFunctionNames :: RrrConfig -> [String]
 listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
 -- used by the compiler and repl
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
-findFunction :: CutConfig -> String -> Maybe CutFunction
+findFunction :: RrrConfig -> String -> Maybe RrrFunction
 findFunction cfg name = find (\f -> fName f == name) fs
   where
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
 
-findType :: CutConfig -> String -> Maybe CutType
+findType :: RrrConfig -> String -> Maybe RrrType
 findType cfg ext = find (\t -> tExt t == ext) ts
   where
     ms = cfgModules cfg
     ts = concatMap mTypes ms
 
-listFunctions :: CutConfig -> [CutFunction]
+listFunctions :: RrrConfig -> [RrrFunction]
 listFunctions cfg = concat $ map mFunctions $ cfgModules cfg
 
 -- Now with guard against accidentally including parts of prefix fn names!
-operatorChars :: CutConfig -> [Char]
+operatorChars :: RrrConfig -> [Char]
 operatorChars cfg = if cfgDebug cfg then chars' else chars
   where
     bops    = filter (\f -> fFixity f == Infix) $ listFunctions cfg
@@ -348,10 +348,10 @@ type HashedSeqIDs = M.Map String String
 -- TODO go back and do it right
 type HashedSeqIDsRef = IORef HashedSeqIDs
 
-type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
-type ParseM a = P.Parsec String CutState a
+type RrrState = (RrrScript, RrrConfig, Locks, HashedSeqIDsRef)
+type ParseM a = P.Parsec String RrrState a
 
-runParseM :: ParseM a -> CutState -> String -> Either ParseError a
+runParseM :: ParseM a -> RrrState -> String -> Either ParseError a
 runParseM p s@(_, cfg, _, _) = P.runParser p s file
   where
     file = case cfgScript cfg of
@@ -362,11 +362,11 @@ runParseM p s@(_, cfg, _, _) = P.runParser p s file
 -- Repl monad --
 ----------------
 
-type ReplM a = StateT CutState (MaybeT (InputT IO)) a
+type ReplM a = StateT RrrState (MaybeT (InputT IO)) a
 
 -- TODO use useFile(Handle) for stdin?
 -- TODO use getExternalPrint to safely print during Tasty tests!
-runReplM :: Settings IO -> ReplM a -> CutState -> IO (Maybe CutState)
+runReplM :: Settings IO -> ReplM a -> RrrState -> IO (Maybe RrrState)
 runReplM settings replm state =
   runInputT settings $ runMaybeT $ execStateT replm state
 
@@ -382,9 +382,9 @@ prompt = lift . lift . getInputLine
 -- Module stuff (all in flux) --
 --------------------------------
 
--- TODO replace current CutType with something like this:
+-- TODO replace current RrrType with something like this:
 -- TODO does eq make sense here?
--- data CutType = CutType
+-- data RrrType = RrrType
 --   { tName :: String
 --   , tExt  :: String
 --   , tDesc :: String
@@ -392,48 +392,48 @@ prompt = lift . lift . getInputLine
 --   deriving (Eq, Show, Read)
 
 -- TODO should there be any more fundamental difference between fns and bops?
-data CutFixity = Prefix | Infix
+data RrrFixity = Prefix | Infix
   deriving (Eq, Show, Read)
 
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
-data CutFunction = CutFunction
+data RrrFunction = RrrFunction
   { fName      :: String
-  , fTypeCheck :: [CutType] -> Either String CutType
+  , fTypeCheck :: [RrrType] -> Either String RrrType
   , fDesc      :: Maybe String -- TODO take out the maybe once they're written
   , fTypeDesc  :: String
-  , fFixity    :: CutFixity
-  , fRules     :: CutState -> CutExpr -> Rules ExprPath
+  , fFixity    :: RrrFixity
+  , fRules     :: RrrState -> RrrExpr -> Rules ExprPath
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)
 
-mkTypeDesc :: String -> [CutType] -> CutType -> String
+mkTypeDesc :: String -> [RrrType] -> RrrType -> String
 mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
 
 -- TODO does eq make sense here?
-data CutModule = CutModule
+data RrrModule = RrrModule
   { mName :: String
   , mDesc :: String
-  , mTypes     :: [CutType]
-  , mFunctions :: [CutFunction]
+  , mTypes     :: [RrrType]
+  , mFunctions :: [RrrFunction]
   }
   -- deriving (Eq, Read)
 
 -- TODO what about prettyShow in Pretty.hs?
-instance Show CutModule where
+instance Show RrrModule where
   show = mName
 
 -- TODO what if it's a function call?
 -- do we have to make a rule that you can't use those?
 -- (uuuugly! but not a show-stopper for now)
-extractExprs :: CutScript -> CutExpr -> [CutExpr]
-extractExprs  _  (CutList _ _ _ es) = es
-extractExprs scr (CutRef  _ _ _ v ) = case lookup v scr of
+extractExprs :: RrrScript -> RrrExpr -> [RrrExpr]
+extractExprs  _  (RrrList _ _ _ es) = es
+extractExprs scr (RrrRef  _ _ _ v ) = case lookup v scr of
                                         Nothing -> error $ "no such var " ++ show v
                                         Just e  -> extractExprs scr e
-extractExprs _   (CutFun _ _ _ _ _) = error explainFnBug
-extractExprs scr (CutBop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
+extractExprs _   (RrrFun _ _ _ _ _) = error explainFnBug
+extractExprs scr (RrrBop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show e
 
 -- TODO will this get printed, or will there just be a parse error?
@@ -449,20 +449,20 @@ explainFnBug =
 -- this mostly checks equality, but also has to deal with how an empty list can
 -- be any kind of list
 -- TODO is there any more elegant way? this seems error-prone...
-typeMatches :: CutType -> CutType -> Bool
+typeMatches :: RrrType -> RrrType -> Bool
 typeMatches Empty _ = True
 typeMatches _ Empty = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
 typeMatches a b = a == b
 
-typesMatch :: [CutType] -> [CutType] -> Bool
+typesMatch :: [RrrType] -> [RrrType] -> Bool
 typesMatch as bs = sameLength && allMatch
   where
     sameLength = length as == length bs
     allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
 
-nonEmptyType :: [CutType] -> Either String CutType
+nonEmptyType :: [RrrType] -> Either String RrrType
 nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
   where
     nonEmpty = filter isNonEmpty ts
@@ -472,7 +472,7 @@ nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
     typesOK  = all (typeMatches elemType) ts
     errorMsg = "all elements of a list must have the same type"
 
-isNonEmpty :: CutType -> Bool
+isNonEmpty :: RrrType -> Bool
 isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True

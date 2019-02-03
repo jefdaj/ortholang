@@ -6,7 +6,7 @@ let
   runDepends = [ diamond ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-diamond";
+  name = "detourrr-diamond";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

@@ -6,7 +6,7 @@ module Detourrr.Test
   where
 
 import Paths_Detourrr        (getDataFileName)
-import Detourrr.Core.Types   (CutConfig(..), Locks, HashedSeqIDsRef)
+import Detourrr.Core.Types   (RrrConfig(..), Locks, HashedSeqIDsRef)
 import Detourrr.Test.Repl    (mkTestGroup)
 import System.Directory      (setCurrentDirectory)
 import System.Environment    (getEnv, setEnv)
@@ -25,7 +25,7 @@ import qualified Detourrr.Test.Scripts as S
 -- filtering is done according to the TASTY_PATTERN environment var.
 -- Gotcha: can't print the test pattern in place of "all tests"
 -- because then they all match, ruining the filter.
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests cfg ref ids = setPtn >> mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [D.mkTests, P.mkTests, R.mkTests, S.mkTests]
@@ -33,7 +33,7 @@ mkTests cfg ref ids = setPtn >> mkTestGroup cfg ref ids "all tests" tests
                Nothing  -> return ()
                Just ptn -> setEnv "TASTY_PATTERN" ptn
 
-mkTestConfig :: CutConfig -> FilePath -> CutConfig
+mkTestConfig :: RrrConfig -> FilePath -> RrrConfig
 mkTestConfig cfg dir = cfg
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
@@ -44,7 +44,7 @@ mkTestConfig cfg dir = cfg
   -- , cfgReport  = Nothing
   }
 
-runTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+runTests :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runTests cfg ref ids = do
   tmpRootDir <- getEnv "TMPDIR" -- can't share /tmp on the Berkeley cluster!
   withTempDirectory tmpRootDir "detourrr" $ \tmpSubDir -> do

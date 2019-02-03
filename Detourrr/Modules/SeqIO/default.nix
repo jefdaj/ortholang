@@ -12,7 +12,7 @@ let
   ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-seqio";
+  name = "detourrr-seqio";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

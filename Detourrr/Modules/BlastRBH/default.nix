@@ -16,7 +16,7 @@ let
   runDepends = [ myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-blastrbh";
+  name = "detourrr-blastrbh";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

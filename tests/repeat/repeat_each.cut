@@ -1,4 +1,0 @@
-ind = 1
-dep = 1.2e3 * ind
-rep = repeat_each dep ind [1,2,3,4,5]
-result = rep

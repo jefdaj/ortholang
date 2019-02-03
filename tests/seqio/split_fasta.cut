@@ -1,4 +1,0 @@
-multifa = load_faa "data/7942genes.faa"
-genes   = split_faa multifa
-mapped  = split_faa_each [multifa]
-result  = length_each ([genes] | mapped) # should be [2662]

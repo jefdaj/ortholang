@@ -54,10 +54,10 @@ gVar = (:) <$> first <*> listOf rest
     first = elements vFirstChars
     rest  = elements vNonFirstChars
 
-newtype ExVar = ExVar CutVar deriving (Eq, Show)
+newtype ExVar = ExVar RrrVar deriving (Eq, Show)
 
 instance Arbitrary ExVar where
-  arbitrary = (ExVar . CutVar) <$> gVar
+  arbitrary = (ExVar . RrrVar) <$> gVar
 
 -- references --
 
@@ -150,7 +150,7 @@ instance Arbitrary ExNum where
 
 -- commands --
 
--- TODO need to use forAll with another function with CutConfig arg rather than
+-- TODO need to use forAll with another function with RrrConfig arg rather than
 -- an Arbitrary instance here? for now, just faking it...
 gFunName :: Gen String
 gFunName = elements fnNames

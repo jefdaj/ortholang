@@ -1,0 +1,13 @@
+Welcome to the Detourrr interpreter!
+Type :help for a list of the available commands.
+
+detourrr —▶ result = 1 + 3
+
+detourrr —▶ result
+4
+
+detourrr —▶ :show result
+1 + 3
+
+detourrr —▶ :q
+Bye for now!

@@ -1,4 +1,0 @@
-mini6803 = load_fna "data/6803genes10.fna"
-full7942 = load_fna "data/7942genome.fna"
-hits6803 = extract_queries (tblastx 1e-5 mini6803 full7942)
-result = all (repeat hits6803 mini6803 10)

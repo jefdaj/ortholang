@@ -6,7 +6,7 @@ import Detourrr.Core.Types
 import Detourrr.Modules.SeqIO (faa)
 import Detourrr.Modules.Muscle (aln)
 import Detourrr.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import Detourrr.Core.Paths (CutPath, fromCutPath)
+import Detourrr.Core.Paths (RrrPath, fromRrrPath)
 import Detourrr.Core.Actions (debugA, wrappedCmdWrite, wrappedCmdOut, readLit, readLits, writeLits)
 import Data.Scientific (formatScientific, FPFormat(..))
 import Data.List (isPrefixOf, nub, sort)
@@ -14,8 +14,8 @@ import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
 import Detourrr.Core.Compile.Map  (rMap)
 
-cutModule :: CutModule
-cutModule = CutModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "HMMER"
   , mDesc = "Search sequences with hidden Markov models"
   , mTypes = [faa, aln, hmm, hht]
@@ -24,8 +24,8 @@ cutModule = CutModule
                   extractHmmTargets, extractHmmTargetsEach]
   }
 
-hmm :: CutType
-hmm = CutType
+hmm :: RrrType
+hmm = RrrType
   { tExt  = "hmm"
   , tDesc = "hidden markov model"
   -- , tShow = \_ _ f -> return $ "hidden markov model '" ++ f ++ "'"
@@ -33,8 +33,8 @@ hmm = CutType
   }
 
 -- TODO add to hit tables types in length, extract_hits etc.
-hht :: CutType
-hht = CutType
+hht :: RrrType
+hht = RrrType
   { tExt  = "hht"
   , tDesc = "HMMER hits table"
   , tShow = defaultShow
@@ -43,8 +43,8 @@ hht = CutType
 -- TODO hmmfetch : str -> hmm
 -- TODO hmmfetch_each : str.list -> hmm.list
 
-hmmbuild :: CutFunction
-hmmbuild = let name = "hmmbuild" in CutFunction
+hmmbuild :: RrrFunction
+hmmbuild = let name = "hmmbuild" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
@@ -52,8 +52,8 @@ hmmbuild = let name = "hmmbuild" in CutFunction
   , fRules     = rSimple aHmmbuild
   }
 
-hmmbuildEach :: CutFunction
-hmmbuildEach = let name = "hmmbuild_each" in CutFunction
+hmmbuildEach :: RrrFunction
+hmmbuildEach = let name = "hmmbuild_each" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
@@ -61,8 +61,8 @@ hmmbuildEach = let name = "hmmbuild_each" in CutFunction
   , fRules     = rMap 1 aHmmbuild
   }
 
-hmmsearch :: CutFunction
-hmmsearch = let name = "hmmsearch" in CutFunction
+hmmsearch :: RrrFunction
+hmmsearch = let name = "hmmsearch" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
   , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
@@ -71,8 +71,8 @@ hmmsearch = let name = "hmmsearch" in CutFunction
   }
 
 -- TODO is this the right name for mapping over arg 2?
-hmmsearchEach :: CutFunction
-hmmsearchEach = let name = "hmmsearch_each" in CutFunction
+hmmsearchEach :: RrrFunction
+hmmsearchEach = let name = "hmmsearch_each" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
@@ -81,8 +81,8 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
   }
 
 -- TODO better name, or is this actually the most descriptive way?
--- hmmsearchEachEach :: CutFunction
--- hmmsearchEachEach = let name = "hmmsearch_each_each" in CutFunction
+-- hmmsearchEachEach :: RrrFunction
+-- hmmsearchEachEach = let name = "hmmsearch_each_each" in RrrFunction
 --   { fName      = name
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
@@ -92,17 +92,17 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
-aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aHmmbuild :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aHmmbuild cfg ref _ [out, fa] = do
   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
   where
-    out'  = fromCutPath cfg out
+    out'  = fromRrrPath cfg out
     out'' = debugA cfg "aHmmbuild" out' [out', fa']
-    fa'   = fromCutPath cfg fa
+    fa'   = fromRrrPath cfg fa
 aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
-aHmmsearch :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aHmmsearch :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aHmmsearch cfg ref _ [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
@@ -114,15 +114,15 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
   results <- wrappedCmdOut False True cfg ref [tmpOut] [] [] "sed" ["/^#/d", tmpOut]
   writeLits cfg ref out'' $ lines results
   where
-    out'  = fromCutPath cfg out
+    out'  = fromRrrPath cfg out
     out'' = debugA cfg "aHmmsearch" out' [out', fa']
-    e'    = fromCutPath cfg e
-    hm'   = fromCutPath cfg hm
-    fa'   = fromCutPath cfg fa
+    e'    = fromRrrPath cfg e
+    hm'   = fromRrrPath cfg hm
+    fa'   = fromRrrPath cfg fa
 aHmmsearch _ _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
 
-extractHmmTargets :: CutFunction
-extractHmmTargets = let name = "extract_hmm_targets" in CutFunction
+extractHmmTargets :: RrrFunction
+extractHmmTargets = let name = "extract_hmm_targets" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fDesc = Nothing, fTypeDesc  = name ++ " : hht -> str.list"
@@ -130,8 +130,8 @@ extractHmmTargets = let name = "extract_hmm_targets" in CutFunction
   , fRules     = rSimple $ aExtractHmm True 1
   }
 
-extractHmmTargetsEach :: CutFunction
-extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
+extractHmmTargetsEach :: RrrFunction
+extractHmmTargetsEach = let name = "extract_hmm_targets_each" in RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fDesc = Nothing, fTypeDesc  = name ++ " : hht.list -> str.list.list"
@@ -140,7 +140,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
   }
 
 -- TODO clean this up! it's pretty ugly
-aExtractHmm :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aExtractHmm :: Bool -> Int -> RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aExtractHmm uniq n cfg ref _ [outPath, tsvPath] = do
   lits <- readLits cfg ref tsvPath'
   let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
@@ -148,7 +148,7 @@ aExtractHmm uniq n cfg ref _ [outPath, tsvPath] = do
       lits''' = map (\l -> (words l) !! (n - 1)) lits''
   writeLits cfg ref outPath'' lits'''
   where
-    outPath'  = fromCutPath cfg outPath
+    outPath'  = fromRrrPath cfg outPath
     outPath'' = debugA cfg "aExtractHmm" outPath' [show n, outPath', tsvPath']
-    tsvPath'  = fromCutPath cfg tsvPath
+    tsvPath'  = fromRrrPath cfg tsvPath
 aExtractHmm _ _ _ _ _ _ = error "bad arguments to aExtractHmm"

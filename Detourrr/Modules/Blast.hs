@@ -1,5 +1,5 @@
 module Detourrr.Modules.Blast
-  ( cutModule
+  ( rrrModule
   , bht
   -- the rest is for blastrbh, which is pretty intimately related:
   , BlastDesc
@@ -19,14 +19,14 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import Detourrr.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import Detourrr.Core.Compile.Map  (rMap)
 import Detourrr.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
-import Detourrr.Core.Paths         (fromCutPath, CutPath)
+import Detourrr.Core.Paths         (fromRrrPath, RrrPath)
 import Detourrr.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import Detourrr.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
 import System.Posix.Escape         (escape)
 
-cutModule :: CutModule
-cutModule = CutModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
   , mTypes = [ndb, pdb, bht]
@@ -43,8 +43,8 @@ cutModule = CutModule
 -- tsv with these columns:
 -- qseqid sseqid pident length mismatch gapopen
 -- qstart qend sstart send evalue bitscore
-bht :: CutType
-bht = CutType
+bht :: RrrType
+bht = RrrType
   { tExt  = "bht"
   , tDesc = "tab-separated table of blast hits (outfmt 6)"
   , tShow  = defaultShow
@@ -53,9 +53,9 @@ bht = CutType
 -- TODO need a separate db type for reverse fns?
 type BlastDesc =
   ( String  -- name and also system command to call
-  , CutType -- query fasta type
-  , CutType -- subject type when starting from fasta
-  , CutType -- subject type when starting from db
+  , RrrType -- query fasta type
+  , RrrType -- subject type when starting from fasta
+  , RrrType -- subject type when starting from db
   )
 
 blastDescs :: [BlastDesc]
@@ -72,8 +72,8 @@ blastDescs =
 -- *blast*_db --
 ----------------
 
-mkBlastFromDb :: BlastDesc -> CutFunction
-mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
+mkBlastFromDb :: BlastDesc -> RrrFunction
+mkBlastFromDb d@(bCmd, qType, _, dbType) = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
@@ -87,12 +87,12 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
 rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aMkBlastFromDb :: String -> (RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ())
 aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
   prefix <- readPath cfg ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
-      prefix' = fromCutPath cfg prefix
+      prefix' = fromRrrPath cfg prefix
       cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
       ptn     = prefix' ++ ".*"
       args    = [ "-db", takeFileName prefix'
@@ -134,10 +134,10 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   debugL cfg $ "args'': " ++ show args''
   wrappedCmdWrite True True cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
   where
-    o'  = fromCutPath cfg o
-    q'  = fromCutPath cfg q
-    p'  = fromCutPath cfg p
-    e'  = fromCutPath cfg e
+    o'  = fromRrrPath cfg o
+    q'  = fromRrrPath cfg q
+    p'  = fromRrrPath cfg p
+    e'  = fromRrrPath cfg e
     o'' = debugA cfg "aMkBlastFromDb" o' [bCmd, e', o', q', p']
 aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
@@ -145,8 +145,8 @@ aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 -- *blast* --
 -------------
 
-mkBlastFromFa :: BlastDesc -> CutFunction
-mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
+mkBlastFromFa :: BlastDesc -> RrrFunction
+mkBlastFromFa d@(bCmd, qType, sType, _) = RrrFunction
   { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
@@ -157,21 +157,21 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
 -- TODO check this works after writing the new non- _all makeblastdb fns
 rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
-  = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
+rMkBlastFromFa d@(_, _, _, dbType) st (RrrFun rtn salt deps _ [e, q, s])
+  = rules st (RrrFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fRules $ mkBlastFromDb d
     name1 = fName  $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-    dbExpr = CutFun dbType salt (depsOf s) name2 [s] 
+    dbExpr = RrrFun dbType salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
 
 ---------------------
 -- *blast*_db_each --
 ---------------------
 
-mkBlastFromDbEach :: BlastDesc -> CutFunction
-mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
+mkBlastFromDbEach :: BlastDesc -> RrrFunction
+mkBlastFromDbEach d@(bCmd, qType, _, dbType) = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
@@ -188,8 +188,8 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 -- *blast*_each --
 ------------------
 
-mkBlastFromFaEach :: BlastDesc -> CutFunction
-mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
+mkBlastFromFaEach :: BlastDesc -> RrrFunction
+mkBlastFromFaEach d@(bCmd, qType, faType, _) = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
@@ -201,11 +201,11 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
 
 -- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _   [e, q, ss])
-  =                              rules st (CutFun rtn salt deps fn2 [e, q, ss'])
+rMkBlastFromFaEach d@(_, _, _, dbType) st (RrrFun rtn salt deps _   [e, q, ss])
+  =                              rules st (RrrFun rtn salt deps fn2 [e, q, ss'])
   where
     rules = rMkBlastFromDbEach d
-    ss'   = CutFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
+    ss'   = RrrFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_each"
 rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"

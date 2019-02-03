@@ -11,7 +11,7 @@ let
   runDepends = [ myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-biomartr";
+  name = "detourrr-biomartr";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

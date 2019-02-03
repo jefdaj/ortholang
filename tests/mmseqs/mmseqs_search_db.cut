@@ -1,5 +1,0 @@
-pcc7942 = load_faa "data/7942genes.faa"
-pcc6803 = load_faa "data/6803genes.faa"
-db6803 = mmseqs_createdb pcc6803
-hits = mmseqs_search_db 1.0e-30 pcc7942 db6803
-result = length hits

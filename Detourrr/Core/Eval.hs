@@ -37,7 +37,7 @@ import Data.Maybe                     (maybeToList)
 import Detourrr.Core.Compile.Basic    (compileScript)
 import Detourrr.Core.Parse            (parseFileIO)
 import Detourrr.Core.Pretty           (prettyNum)
-import Detourrr.Core.Paths            (CutPath, toCutPath, fromCutPath)
+import Detourrr.Core.Paths            (RrrPath, toRrrPath, fromRrrPath)
 -- import Detourrr.Core.Locks            (withReadLock')
 import Detourrr.Core.Sanitize         (unhashIDs)
 import Detourrr.Core.Actions          (readLits, readPaths)
@@ -47,7 +47,7 @@ import Data.IORef                     (readIORef)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
-myShake :: CutConfig -> Rules () -> IO ()
+myShake :: RrrConfig -> Rules () -> IO ()
 myShake cfg rules = do
   (shake myOpts . alternatives) rules
   -- removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
@@ -73,26 +73,26 @@ myShake cfg rules = do
  - TODO idea for sets: if any element contains "\n", just add blank lines between them
  - TODO clean this up!
  -}
-prettyResult :: CutConfig -> Locks -> CutType -> CutPath -> Action Doc
+prettyResult :: RrrConfig -> Locks -> RrrType -> RrrPath -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits cfg ref $ fromCutPath cfg f
+    lits <- readLits cfg ref $ fromRrrPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths cfg ref $ fromCutPath cfg f
+    paths <- readPaths cfg ref $ fromRrrPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg ref (ScoresOf _)  f = do
-  s <- liftIO (defaultShow cfg ref $ fromCutPath cfg f)
+  s <- liftIO (defaultShow cfg ref $ fromRrrPath cfg f)
   return $ text s
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
     showFn = if t == num then prettyNum else text
-    f' = fromCutPath cfg f
+    f' = fromRrrPath cfg f
 
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
@@ -100,7 +100,7 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> Rules ResPath -> IO ()
+eval :: Handle -> RrrConfig -> Locks -> HashedSeqIDsRef -> RrrType -> Rules ResPath -> IO ()
 
 -- TODO put this back once done debugging (duplicates everything annoyingly)
 -- eval hdl cfg ref rtype = retryIgnore . eval'
@@ -130,7 +130,7 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
       "eval" ~> do
         alwaysRerun
         need [path] -- TODO is this done automatically in the case of result?
-        res  <- prettyResult cfg ref rtype $ toCutPath cfg path
+        res  <- prettyResult cfg ref rtype $ toRrrPath cfg path
         ids' <- liftIO $ readIORef ids
         -- liftIO $ putStrLn $ show ids'
         -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids') ++ " keys)..."
@@ -142,14 +142,14 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
         -- liftIO $ putStrLn $ "done rendering with unhashIDs"
 
 -- TODO get the type of result and pass to eval
-evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as, c, ref, ids) = case lookup (CutVar "result") as of
+evalScript :: Handle -> RrrState -> IO ()
+evalScript hdl s@(as, c, ref, ids) = case lookup (RrrVar "result") as of
   Nothing  -> putStrLn "no result variable. that's not right!"
   Just res -> eval hdl c ref ids (typeOf res) (compileScript s Nothing)
 
-evalFile :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+evalFile :: Handle -> RrrConfig -> Locks -> HashedSeqIDsRef -> IO ()
 evalFile hdl cfg ref ids = case cfgScript cfg of
   Nothing  -> putStrLn "no script. that's not right!"
   Just scr -> do
-    s <- parseFileIO cfg ref ids scr -- TODO just take a CutState?
+    s <- parseFileIO cfg ref ids scr -- TODO just take a RrrState?
     evalScript hdl (s, cfg, ref, ids)

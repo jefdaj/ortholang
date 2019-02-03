@@ -13,7 +13,7 @@ let
   runDepends = [ parallel ncbi-blast myPython myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-blast";
+  name = "detourrr-blast";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

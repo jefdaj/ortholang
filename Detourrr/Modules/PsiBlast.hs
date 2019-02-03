@@ -15,7 +15,7 @@ import Detourrr.Core.Actions       (readLit, readPath,
                                     wrappedCmdWrite, debugL, debugA, debugNeed,
                                     writeCachedLines)
 import Detourrr.Core.Compile.Basic (defaultTypeCheck)
-import Detourrr.Core.Paths         (fromCutPath, cacheDir)
+import Detourrr.Core.Paths         (fromRrrPath, cacheDir)
 import Detourrr.Modules.BlastDB    (pdb)
 import Detourrr.Modules.Blast      (bht)
 import Detourrr.Modules.SeqIO      (faa)
@@ -29,8 +29,8 @@ import Detourrr.Core.Compile.Compose (compose1)
 import Detourrr.Core.Compile.Map (rMap)
 import System.Directory            (createDirectoryIfMissing)
 
-cutModule :: CutModule
-cutModule = CutModule
+rrrModule :: RrrModule
+rrrModule = RrrModule
   { mName = "PsiBLAST"
   , mDesc = "Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.\n\
             \\n\
@@ -111,8 +111,8 @@ cutModule = CutModule
    ]
   }
 
-pssm :: CutType
-pssm = CutType
+pssm :: RrrType
+pssm = RrrType
   { tExt  = "pssm"
   , tDesc = "PSI-BLAST position-specific substitution matrix as ASCII"
   , tShow  = defaultShow
@@ -130,15 +130,15 @@ aPsiblastTrainDb = aPsiblastDb True trainingArgs
 aPsiblastSearchDb :: Action3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
 
-aPsiblastDb' :: Bool -> [String] -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aPsiblastDb' :: Bool -> [String] -> RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
   aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
 aPsiblastDb' _ _ _ _ _ _ = error "bad argument to aPsiblastDb'"
 
-aPsiblastTrainDb' :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aPsiblastTrainDb' :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
 
-aPsiblastSearchDb' :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aPsiblastSearchDb' :: RrrConfig -> Locks -> HashedSeqIDsRef -> [RrrPath] -> Action ()
 aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
@@ -146,26 +146,26 @@ aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 aPsiblastDb :: Bool -> [String] -> Action3
 aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
-  let oPath'  = fromCutPath cfg oPath
+  let oPath'  = fromRrrPath cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
-      ePath'  = fromCutPath cfg ePath
-      qPath'  = fromCutPath cfg qPath -- might be a fasta or pssm
-      dbPath' = fromCutPath cfg dbPath
+      ePath'  = fromRrrPath cfg ePath
+      qPath'  = fromRrrPath cfg qPath -- might be a fasta or pssm
+      dbPath' = fromRrrPath cfg dbPath
   debugNeed cfg "aPsiblastDb" [ePath', qPath', dbPath']
 
   eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
 
   -- TODO is there something wrong with the map handlign here? or general makeblastdb?
   -- dbPrePath <- readPath cfg ref dbPath' -- TODO is this right?
-  -- let dbPrePath' = fromCutPath cfg dbPrePath
+  -- let dbPrePath' = fromRrrPath cfg dbPrePath
 
   -- this version works for withPdbSubject, but breaks something else?
   dbPre     <- readPath cfg ref dbPath' -- TODO is this right?
   debugL cfg $ "aPsiblastDb dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
-      cDir = fromCutPath cfg $ cacheDir cfg "psiblast"
-      dbPre' = fromCutPath cfg dbPre
+      cDir = fromRrrPath cfg $ cacheDir cfg "psiblast"
+      dbPre' = fromRrrPath cfg dbPre
       args' = ["-query", qPath', "-evalue", eDec, "-db", dbPre'] ++ args ++ [tPath']
            ++ ["&&", "touch", tPath'] -- in case no pssm created because no hits
 
@@ -229,39 +229,39 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 -- Wrap the 3rd arg of a function call in makeblastdb_prot_each
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO fix passing dbprefix as db itself
-withPdbSubjects :: CutExpr -> CutExpr
-withPdbSubjects (CutFun rtn salt deps name [a1, a2, xs ])
-  =             (CutFun rtn salt deps name [a1, a2, dbs])
+withPdbSubjects :: RrrExpr -> RrrExpr
+withPdbSubjects (RrrFun rtn salt deps name [a1, a2, xs ])
+  =             (RrrFun rtn salt deps name [a1, a2, dbs])
   where
-    dbs = CutFun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
+    dbs = RrrFun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
 -- Wraps a single faa or an faa.list in makeblastdb_prot
-withPdbSubject :: CutExpr -> CutExpr
-withPdbSubject (CutFun rtn salt deps name [a1, a2, x ])
-  =            (CutFun rtn salt deps name [a1, a2, db])
+withPdbSubject :: RrrExpr -> RrrExpr
+withPdbSubject (RrrFun rtn salt deps name [a1, a2, x ])
+  =            (RrrFun rtn salt deps name [a1, a2, db])
   where
-    db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
+    db  = RrrFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> singleton x
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
--- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
+-- Wrap the faa query argument of a psiblast RrrFunction in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
-withPssmQuery :: CutExpr -> CutExpr
-withPssmQuery (CutFun rtn salt deps name [n, q, s])
-  =           (CutFun rtn salt deps name [n, p, s])
+withPssmQuery :: RrrExpr -> RrrExpr
+withPssmQuery (RrrFun rtn salt deps name [n, q, s])
+  =           (RrrFun rtn salt deps name [n, p, s])
   where
-    p = CutFun pssm salt deps "psiblast_train_db" [n, q, s]
+    p = RrrFun pssm salt deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 -------------------------------
 -- search with fasta queries --
 -------------------------------
 
-psiblast :: CutFunction
-psiblast = CutFunction
+psiblast :: RrrFunction
+psiblast = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
@@ -272,8 +272,8 @@ psiblast = CutFunction
   where
     name = "psiblast"
 
-psiblastEach :: CutFunction
-psiblastEach = CutFunction
+psiblastEach :: RrrFunction
+psiblastEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
@@ -284,16 +284,16 @@ psiblastEach = CutFunction
     name = "psiblast_each"
 
 rPsiblastEach :: RulesFn
-rPsiblastEach st (CutFun rtn salt deps name [e, fa, fas])
+rPsiblastEach st (RrrFun rtn salt deps name [e, fa, fas])
   -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
   = (rMap 3 aPsiblastSearchDb') st expr'
   where
-    ps    = CutFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
-    dbs   = CutFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
-    expr' = CutFun rtn salt deps name [e, ps, dbs]
+    ps    = RrrFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
+    dbs   = RrrFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
+    expr' = RrrFun rtn salt deps name [e, ps, dbs]
 rPsiblastEach _ _ = error "bad argument to rPsiblastEach"
 
-psiblastAll :: CutFunction
+psiblastAll :: RrrFunction
 psiblastAll = compose1 name
   (mkTypeDesc name [num, faa, ListOf faa] bht)
   psiblastEach
@@ -302,8 +302,8 @@ psiblastAll = compose1 name
   where
     name = "psiblast_all"
 
-psiblastDb :: CutFunction
-psiblastDb = CutFunction
+psiblastDb :: RrrFunction
+psiblastDb = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
@@ -316,8 +316,8 @@ psiblastDb = CutFunction
 -- TODO want map3of3 to read a pdb.list here and pass the individual paths,
 --      but that interferes with one of the others right?
 -- wait can psiblast just take a faa and pdb directly?
-psiblastDbEach :: CutFunction
-psiblastDbEach = CutFunction
+psiblastDbEach :: RrrFunction
+psiblastDbEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
@@ -347,8 +347,8 @@ trainingArgs =
   , "-out_ascii_pssm" -- < outPath will be appended here
   ]
 
-psiblastTrain :: CutFunction
-psiblastTrain = CutFunction
+psiblastTrain :: RrrFunction
+psiblastTrain = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
@@ -359,8 +359,8 @@ psiblastTrain = CutFunction
     name = "psiblast_train"
 
 -- TODO better name!
-psiblastTrainPssms :: CutFunction
-psiblastTrainPssms = CutFunction
+psiblastTrainPssms :: RrrFunction
+psiblastTrainPssms = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
@@ -373,8 +373,8 @@ psiblastTrainPssms = CutFunction
 
 -- TODO appears to succeed, but something is messed up about the mapping?
 --      (makes a list of length 1 from multiple faa subjects)
-psiblastTrainEach :: CutFunction
-psiblastTrainEach = CutFunction
+psiblastTrainEach :: RrrFunction
+psiblastTrainEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
@@ -384,8 +384,8 @@ psiblastTrainEach = CutFunction
   where
     name = "psiblast_train_each"
 
-psiblastTrainAll :: CutFunction
-psiblastTrainAll = CutFunction
+psiblastTrainAll :: RrrFunction
+psiblastTrainAll = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
@@ -395,8 +395,8 @@ psiblastTrainAll = CutFunction
   where
     name = "psiblast_train_all"
 
-psiblastTrainDb :: CutFunction
-psiblastTrainDb = CutFunction
+psiblastTrainDb :: RrrFunction
+psiblastTrainDb = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
@@ -406,8 +406,8 @@ psiblastTrainDb = CutFunction
   where
     name = "psiblast_train_db"
 
-psiblastTrainDbEach :: CutFunction
-psiblastTrainDbEach = CutFunction
+psiblastTrainDbEach :: RrrFunction
+psiblastTrainDbEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
@@ -417,8 +417,8 @@ psiblastTrainDbEach = CutFunction
   where
     name = "psiblast_train_db_each"
 
-psiblastTrainPssmsDb :: CutFunction
-psiblastTrainPssmsDb = CutFunction
+psiblastTrainPssmsDb :: RrrFunction
+psiblastTrainPssmsDb = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
@@ -433,8 +433,8 @@ psiblastTrainPssmsDb = CutFunction
 -- search with explicit pssm queries --
 ---------------------------------------
 
-psiblastPssm :: CutFunction
-psiblastPssm = CutFunction
+psiblastPssm :: RrrFunction
+psiblastPssm = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
@@ -445,8 +445,8 @@ psiblastPssm = CutFunction
     name = "psiblast_pssm"
 
 -- TODO why does this one fail? it's not even using rMap
-psiblastPssmAll :: CutFunction
-psiblastPssmAll = CutFunction
+psiblastPssmAll :: RrrFunction
+psiblastPssmAll = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
@@ -456,8 +456,8 @@ psiblastPssmAll = CutFunction
   where
     name = "psiblast_pssm_all"
 
-psiblastPssmEach :: CutFunction
-psiblastPssmEach = CutFunction
+psiblastPssmEach :: RrrFunction
+psiblastPssmEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
@@ -470,8 +470,8 @@ psiblastPssmEach = CutFunction
 searchArgs :: [String]
 searchArgs = ["-outfmt", "6", "-out"]
 
-psiblastPssmDb :: CutFunction
-psiblastPssmDb = CutFunction
+psiblastPssmDb :: RrrFunction
+psiblastPssmDb = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
@@ -481,8 +481,8 @@ psiblastPssmDb = CutFunction
   where
     name = "psiblast_pssm_db"
 
-psiblastPssmDbEach :: CutFunction
-psiblastPssmDbEach = CutFunction
+psiblastPssmDbEach :: RrrFunction
+psiblastPssmDbEach = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
@@ -498,8 +498,8 @@ psiblastPssmDbEach = CutFunction
 
 -- TODO better name? this one's pretty bad!
 -- TODO would a user ever want to use this one directly?
-psiblastEachPssmDb :: CutFunction
-psiblastEachPssmDb = CutFunction
+psiblastEachPssmDb :: RrrFunction
+psiblastEachPssmDb = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
@@ -510,7 +510,7 @@ psiblastEachPssmDb = CutFunction
   where
     name = "psiblast_each_pssm_db"
 
-psiblastPssmsDb :: CutFunction
+psiblastPssmsDb :: RrrFunction
 psiblastPssmsDb = compose1 name
   (mkTypeDesc name [num, ListOf pssm, pdb] bht)
   psiblastEachPssmDb
@@ -522,8 +522,8 @@ psiblastPssmsDb = compose1 name
 -- TODO withPdbSubject fails with rMap? psiblastTrainPssms and psiblastEachPssm
 -- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
 --      specific incompatibility with withPdbSubject?
-psiblastEachPssm :: CutFunction
-psiblastEachPssm = CutFunction
+psiblastEachPssm :: RrrFunction
+psiblastEachPssm = RrrFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
   , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
@@ -534,7 +534,7 @@ psiblastEachPssm = CutFunction
     name = "psiblast_each_pssm"
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
-psiblastPssms :: CutFunction
+psiblastPssms :: RrrFunction
 psiblastPssms = compose1 name
   (mkTypeDesc name [num, ListOf pssm, faa] bht)
   psiblastEachPssm
@@ -543,7 +543,7 @@ psiblastPssms = compose1 name
   where
     name = "psiblast_pssms"
 
-psiblastPssmsAll :: CutFunction
+psiblastPssmsAll :: RrrFunction
 psiblastPssmsAll = compose1 name
   (mkTypeDesc name [num, ListOf pssm, faa] bht)
   psiblastEachPssm
@@ -557,7 +557,7 @@ psiblastPssmsAll = compose1 name
 --      but can't actually do that the straightforward way
 --      could it use psiblastPssmAll and concat_each?
 -- TODO test this
-psiblastPssmsEach :: CutFunction
+psiblastPssmsEach :: RrrFunction
 psiblastPssmsEach = compose1 name
   -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
   (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))

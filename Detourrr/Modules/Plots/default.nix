@@ -12,7 +12,7 @@ let
   runDepends = [ myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-plots";
+  name = "detourrr-plots";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;
