@@ -1,4 +1,5 @@
-remove all cyano genomes/proteomes from examples + tests in favor of mycoplasma
+rewrite all tests to use mycoplasma for speed and consistency
+spend some time thinking of a better name
 add optional varnames to all cache + expr files? if not too hard it would help manual exploration
 list specific functions that are nondeterministic, and maybe have conditions each should satisfy instead?
 add simplest possible "typeclasses" to combine types, then remove fTypeDesc stuff
