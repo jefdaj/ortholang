@@ -1,0 +1,16 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 2a13ac791a.txt
+|       `-- 42fb7081a8.txt
+|-- exprs
+|   |-- add
+|   |   `-- eed75671b1_eed75671b1.num -> ../../cache/lines/2a13ac791a.txt
+|   `-- num
+|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|-- history.txt
+|-- profile.html
+`-- vars
+    `-- result -> ../exprs/add/eed75671b1_eed75671b1.num
+
+6 directories, 7 files

@@ -1,7 +1,11 @@
 rewrite all tests to use mycoplasma for speed and consistency
   start from the ones use by mmseqs
+  need their full genomes though
+  and in faa + fna format
   also include any other from https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1801-0
   also include Nanoarchaeum equitans
+parse errors (including type errors) shouldn't crash the interpreter!
+biomartr: get working and improve to handle IDs from papers
 spend some time thinking of a better name
 add optional varnames to all cache + expr files? if not too hard it would help manual exploration
 list specific functions that are nondeterministic, and maybe have conditions each should satisfy instead?
@@ -12,7 +16,6 @@ bugs to fix:
     then leave_each_out [1,2,3,4,5, 1e-45]
     the second result will be wrong:
     [[2, 3, 4, 5], [1, 3, 4, 5], [1, 2, 4, 5], [1, 2, 3, 5], [1, 2, 3, 4], [1, 2, 3, 4, 5]]
-  parse errors (including type errors) shouldn't crash the interpreter!
   when a var fails to parse the error shouldn't be "no such variable <var that failed to parse>"
   parentheses need to follow the left -> right rule!
 simplify plots to look more figure like

@@ -1,0 +1,23 @@
+# TODO make a smaller set of genes that will match to speed tests
+# TODO is this actually nondeterministic? seems to come out the same each time
+
+pcc7942 = load_faa "data/7942genes.faa"
+pcc6803 = load_faa "data/6803genes.faa"
+
+fwdHits = blastp 1e-5 pcc7942 pcc6803
+revHits = blastp 1e-5 pcc6803 pcc7942
+
+bestFwd = best_hits fwdHits
+bestRec = reciprocal_best fwdHits revHits
+
+# results sometimes vary slightly; repeat 3X to be sure
+best3fwd = repeat bestFwd pcc6803 3
+best3rec = repeat bestRec pcc6803 3
+
+solidFwd = all (extract_queries_each best3fwd)
+solidRec = all (extract_queries_each best3rec)
+
+# reciprocal_best should produce a subset of the original forward hits and
+# nothing new, giving [some number, 0].
+result = length_each [solidFwd ~ solidRec,
+                      solidRec ~ solidFwd]

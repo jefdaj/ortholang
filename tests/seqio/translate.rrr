@@ -1,0 +1,4 @@
+# TODO mapped single faa file has the wrong hash
+single = translate      (load_fna       "data/6803genes.fna" )
+mapped = translate_each (load_fna_each ["data/6803genes.fna"])
+result = [single] | mapped

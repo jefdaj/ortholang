@@ -1,0 +1,15 @@
+.
+|-- cache
+|   `-- lines
+|       `-- d8166958d0.txt
+|-- exprs
+|   |-- list
+|   |   `-- 4090d46dcc.str.list -> ../../cache/lines/d8166958d0.txt
+|   `-- str
+|       `-- a2a665650c.str -> ../../cache/lines/d8166958d0.txt
+|-- history.txt
+|-- profile.html
+`-- vars
+    `-- result -> ../exprs/list/4090d46dcc.str.list
+
+6 directories, 6 files

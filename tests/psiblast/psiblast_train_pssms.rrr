@@ -1,0 +1,8 @@
+# pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_faa "data/7942genes.faa"
+queries = split_faa (load_faa "data/7942genes10.faa")
+
+# TODO write this:
+pssms   = psiblast_train_pssms 0.1 queries pcc7942
+
+result  = pssms

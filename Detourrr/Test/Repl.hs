@@ -83,7 +83,7 @@ goldenRepl cfg ref ids goldenFile = do
 
 goldenRepls :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 goldenRepls cfg ref ids = do
-  tDir  <- getDataFileName "tests/repl"
+  tDir  <- getDataFileName "tests2/repl"
   golds <- findByExtension [".txt"] tDir
   let tests = mapM (goldenRepl cfg ref ids) golds
       group = testGroup "prints expected output"
@@ -109,7 +109,7 @@ goldenReplTree cfg ref ids ses = do
 
 goldenReplTrees :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 goldenReplTrees cfg ref ids = do
-  tDir  <- getDataFileName "tests/repl"
+  tDir  <- getDataFileName "tests2/repl"
   txts  <- findByExtension [".txt"] tDir
   let tests = mapM (goldenReplTree cfg ref ids) txts
       group = testGroup "repl creates expected tmpfiles"

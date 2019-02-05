@@ -1,0 +1,8 @@
+Welcome to the Detourrr interpreter!
+Type :help for a list of the available commands.
+
+detourrr —▶ ["one"]
+["one"]
+
+detourrr —▶ :quit
+Bye for now!

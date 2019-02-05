@@ -1,0 +1,4 @@
+small6803fna = load_fna "data/6803genes10.fna"
+large6803fna = load_fna "data/6803genes.fna"
+db = makeblastdb_nucl_all [small6803fna, large6803fna]
+result = db

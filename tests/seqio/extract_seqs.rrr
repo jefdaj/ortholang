@@ -1,0 +1,16 @@
+fna10 = load_fna "data/6803genes10.fna"
+faa10 = load_faa "data/6803genes10.faa"
+
+fna10ids = extract_ids fna10
+faa10ids = extract_ids faa10
+
+fna10seqs = extract_seqs fna10 fna10ids
+faa10seqs = extract_seqs faa10 faa10ids
+
+fna10all = extract_ids fna10seqs
+faa10all = extract_ids faa10seqs
+
+fnaDiff = fna10all ~ fna10ids
+faaDiff = faa10all ~ faa10ids
+
+result = fnaDiff | faaDiff # should be empty

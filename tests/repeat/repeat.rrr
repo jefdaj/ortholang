@@ -1,0 +1,7 @@
+# Tests the repeat function, which is like repeat_each except without any
+# explicit permutations. That's trickier than it sounds because we have to
+# make a list of permutations with different salts. Otherwise it will just
+# return the first evaluation N times, which is useless.
+
+var1 = 2 # will be repeated 5 times with salts 1..5
+result = repeat (var1 * 3) var1 5

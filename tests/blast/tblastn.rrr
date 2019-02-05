@@ -1,0 +1,5 @@
+mini7942 = load_faa "data/7942genes10.faa"
+full7942 = load_fna "data/7942genes.fna"
+single = extract_queries      (tblastn      1e-5 mini7942  full7942 )
+mapped = extract_queries_each (tblastn_each 1e-5 mini7942 [full7942])
+result = all ([single] | mapped)

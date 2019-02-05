@@ -1,0 +1,11 @@
+# This tests what can go in a list. That should include any valid expression
+# (function call, another list, whatever).
+
+# this is the hard one: does a mapped function match its regular counterpart?
+# TODO that's a test of the each module though, not lists!
+list1  = load_faa_each
+                   ["data/6803genes10.faa"]     # strings
+list2  = [(load_faa "data/6803genes10.faa")]    # expr in parens
+list3  =  [load_faa "data/6803genes10.faa"]     # raw expr
+list4  = [ load_faa "data/6803genes10.faa" ]    # same with spaces
+result = length (list1 | list2 | list3 | list4) # should be 1 aka all same

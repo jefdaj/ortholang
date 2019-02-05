@@ -1,0 +1,10 @@
+pcc7942 = load_faa "data/7942genes.faa"
+pcc6803 = load_faa "data/6803genes.faa"
+
+# This produces slightly different numbers each time,
+# so we repeat 10X and only keep the stable hits.
+hits   = blastp 1e-5 pcc7942 pcc6803
+hits10 = repeat hits pcc7942 10
+best10 = best_hits_each hits10
+
+result = length (all (extract_targets_each best10))

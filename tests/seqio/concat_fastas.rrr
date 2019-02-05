@@ -1,0 +1,16 @@
+# Note there's no reason these should be genbank files,
+# except they're the first split genome I had on hand.
+
+# TODO mapped version isn't deduping properly yet
+
+single = concat_fna
+  [ gbk_to_fna (load_gbk "data/SynPCC7942_chr.gbk")
+  , gbk_to_fna (load_gbk "data/SynPCC7942_pANL.gbk")
+  ]
+
+mapped = concat_fna_each
+  [[ gbk_to_fna (load_gbk "data/SynPCC7942_chr.gbk")
+   , gbk_to_fna (load_gbk "data/SynPCC7942_pANL.gbk")
+  ]]
+
+result = [single] | mapped

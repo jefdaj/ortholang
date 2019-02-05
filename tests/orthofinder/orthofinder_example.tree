@@ -1,9 +1,0 @@
-.
-|-- cache
-|-- exprs
-|   `-- str
-|       `-- 6974038e36.str -> ../../cache/lines/...
-`-- vars
-    `-- result -> ../exprs/str/6974038e36.str
-
-4 directories, 2 files

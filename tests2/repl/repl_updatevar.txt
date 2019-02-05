@@ -1,0 +1,39 @@
+Welcome to the Detourrr interpreter!
+Type :help for a list of the available commands.
+
+detourrr —▶ v1 = "original first var"
+
+detourrr —▶ v2 = "second var"
+
+detourrr —▶ :show
+v1 = "original first var"
+v2 = "second var"
+
+detourrr —▶ v1 = "replacement first var"
+
+detourrr —▶ :show
+v1 = "replacement first var"
+v2 = "second var"
+
+detourrr —▶ v2
+"second var"
+
+detourrr —▶ v3 = "third var, inserted after result"
+
+detourrr —▶ :show
+v1 = "replacement first var"
+v2 = "second var"
+result = v2
+v3 = "third var, inserted after result"
+
+detourrr —▶ v3
+"third var, inserted after result"
+
+detourrr —▶ :show
+v1 = "replacement first var"
+v2 = "second var"
+v3 = "third var, inserted after result"
+result = v3
+
+detourrr —▶ :quit
+Bye for now!

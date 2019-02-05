@@ -1,0 +1,12 @@
+# Test recursive use of repeat_each, which is tricky! Prime numbers are used so
+# we can check what was multiplied by what using the final output.
+# TODO actually do all the multiplication
+
+ind  = 547
+ind2 = 557
+ind3 = 563
+dep  = 569 * ind * ind2 * ind3
+rep1 = repeat_each dep  ind  [571,577]
+rep2 = repeat_each rep1 ind2 [587,701,709,719,727,733]
+rep3 = repeat_each rep2 ind3 [739,743,877]
+result = rep3

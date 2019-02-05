@@ -31,11 +31,13 @@ nonDeterministicRrr path = testDir `elem` badDirs
   where
     testDir = (takeFileName . takeDirectory) path
     -- TODO will regular blast be nondeterministic at large scales too?
+    -- TODO make these individual tests, or substrings
+    -- TODO eventually replace deterministic or not with custom shell predicates
     badDirs = ["crb_blast", "blastrbh", "blasthits", "plots", "mmseqs"] -- TODO blast? blastdb?
 
 getTestScripts :: IO [FilePath]
 getTestScripts = do
-  testDir  <- getDataFileName "tests"
+  testDir  <- getDataFileName "tests2"
   testRrrs <- findByExtension [".rrr"] testDir
   return testRrrs
 

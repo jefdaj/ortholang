@@ -1,0 +1,5 @@
+query    = load_faa "data/7942gene.faa"
+pcc6803  = load_faa "data/6803genes.faa"
+pcc7942  = load_faa "data/7942genes.faa"
+hitlists = psiblast_each 0.1 query [pcc6803, pcc7942]
+result   = hitlists

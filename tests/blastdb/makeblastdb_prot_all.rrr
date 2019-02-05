@@ -1,0 +1,4 @@
+small6803faa = load_faa "data/6803genes10.faa"
+large6803faa = load_faa "data/6803genes.faa"
+db = makeblastdb_prot_all [small6803faa, large6803faa]
+result = db

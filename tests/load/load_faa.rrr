@@ -1,0 +1,3 @@
+single = load_faa       "data/6803genes.faa"
+mapped = load_faa_each ["data/6803genes.faa"]
+result = [single] | mapped

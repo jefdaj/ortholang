@@ -1,0 +1,25 @@
+.
+|-- cache
+|   `-- lines
+|       |-- 0e2ca14537.txt
+|       |-- 3f3fbf57f1.txt
+|       |-- 42fb7081a8.txt
+|       |-- 564bc68933.txt
+|       |-- ae0b85b55f.txt
+|       `-- d59cb63de9.txt
+|-- exprs
+|   |-- list
+|   |   |-- 82c1698040.num.list.list -> ../../cache/lines/ae0b85b55f.txt
+|   |   |-- 94ae918f1c.num.list -> ../../cache/lines/42fb7081a8.txt
+|   |   |-- 97afe0f32d.empty.list.list -> ../../cache/lines/3f3fbf57f1.txt
+|   |   |-- 985e70bde5.num.list.list -> ../../cache/lines/564bc68933.txt
+|   |   |-- d751713988.empty.list -> ../../cache/lines/d59cb63de9.txt
+|   |   `-- fce5f499b7.num.list.list -> ../../cache/lines/0e2ca14537.txt
+|   `-- num
+|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|-- history.txt
+|-- profile.html
+`-- vars
+    `-- result -> ../exprs/list/985e70bde5.num.list.list
+
+6 directories, 16 files

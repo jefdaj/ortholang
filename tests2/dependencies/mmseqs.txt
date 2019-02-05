@@ -1,0 +1,1 @@
+MMseqs2 Version: 6.f5a1c

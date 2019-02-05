@@ -1,0 +1,3 @@
+pcc6803 = load_faa "data/6803genes.faa"
+pcc7942 = load_fna "data/7942genes.fna"
+result = diamond_blastx_sensitive 1e-50 pcc7942 pcc6803

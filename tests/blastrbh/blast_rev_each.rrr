@@ -1,0 +1,17 @@
+# This tests that identical lists of strings are deduplicated in set ops.
+# It's important when testing for equality, for example "are these gene lists
+# the same?". And in turn that's important for any type of validation.
+
+# TODO it can work by putting the actual lists in the cache,
+#      named by content hash, and linking to that from the expr
+
+# TODO make one for nums too, or include that here
+# TODO should also work for lists of paths i guess
+
+small = load_fna "data/7942genes10.fna"
+large = load_fna "data/7942genes.fna"
+
+# TODO do the fwds too here?
+srevs = extract_queries      (blastn_rev      1e-5 large  small )
+mrevs = extract_queries_each (blastn_rev_each 1e-5 large [small])
+result = mrevs ~ [srevs] # should be []
