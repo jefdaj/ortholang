@@ -1,2 +1,0 @@
-smallbacteria = load_faa_each (glob_files "data/Mycoplasma/*")
-result = orthofinder smallbacteria
