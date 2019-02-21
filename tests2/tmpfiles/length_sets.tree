@@ -1,0 +1,16 @@
+.
+|-- cache
+|-- exprs
+|   |-- any
+|   |   `-- 56cc10a694.empty.list -> ../../cache/lines/...
+|   |-- length
+|   |   `-- b5920c6f1a.num -> ../../cache/lines/...
+|   `-- list
+|       |-- bbceb30a25.empty.list.list -> ../../cache/lines/...
+|       `-- d751713988.empty.list -> ../../cache/lines/...
+`-- vars
+    |-- result -> ../vars/sets.num
+    |-- sets.num -> ../exprs/length/b5920c6f1a.num
+    `-- two.empty.list.list -> ../exprs/list/bbceb30a25.empty.list.list
+
+6 directories, 7 files

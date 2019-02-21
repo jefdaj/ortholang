@@ -1,0 +1,11 @@
+.
+|-- cache
+|-- exprs
+|   |-- add
+|   |   `-- eed75671b1_eed75671b1.num -> ../../cache/lines/...
+|   `-- num
+|       `-- ee383407c9.num -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/add/eed75671b1_eed75671b1.num
+
+5 directories, 3 files
