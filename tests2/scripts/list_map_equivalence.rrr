@@ -2,6 +2,6 @@
 # individual function applications. That's currently not true though, because
 # of some problem with the map function.
 
-list1 = load_faa_each ["data/6803genes10.faa"]
-list2 = [load_faa "data/6803genes10.faa"]
+list1 = load_faa_each ["data/Mycoplasma_agalactiae_small.faa"]
+list2 = [load_faa "data/Mycoplasma_agalactiae_small.faa"]
 result = length (list1 | list2) # should be 1, not 2!

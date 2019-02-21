@@ -1,5 +1,0 @@
-Welcome to the Detourrr interpreter!
-Type :help for a list of the available commands.
-
-detourrr —▶ :q
-Bye for now!
