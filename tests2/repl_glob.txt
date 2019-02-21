@@ -1,0 +1,32 @@
+Welcome to the Detourrr interpreter!
+Type :help for a list of the available commands.
+
+detourrr —▶ glob_files "data/*.faa"
+["data/Mycoplasma_agalactiae_PG2_protein_refseq.faa",
+ "data/Mycoplasma_agalactiae_protein_refseq.faa",
+ "data/Mycoplasma_agalactiae_small.faa",
+ "data/Mycoplasma_arthritidis_protein_refseq.faa",
+ "data/Mycoplasma_capricolum_protein_refseq.faa",
+ "data/Mycoplasma_conjunctivae_protein_refseq.faa",
+ "data/Mycoplasma_crocodyli_protein_refseq.faa",
+ "data/Mycoplasma_gallisepticum_protein_refseq.faa",
+ "data/Mycoplasma_genitalium_G37_protein_refseq.faa",
+ "data/Mycoplasma_genitalium_protein_refseq.faa",
+ "data/Mycoplasma_genitalium_small.faa",
+ "data/Mycoplasma_hyopneumoniae_J_protein_refseq.faa",
+ "data/Mycoplasma_hyopneumoniae_protein_refseq.faa",
+ "data/Mycoplasma_hyopneumoniae_small.faa",
+ "data/Mycoplasma_mobile_protein_refseq.faa",
+ "data/Mycoplasma_mycoides_protein_refseq.faa",
+ "data/Mycoplasma_penetrans_protein_refseq.faa",
+ "data/Mycoplasma_pulmonis_protein_refseq.faa",
+ "data/Mycoplasma_synoviae_protein_refseq.faa"]
+
+detourrr —▶ glob_files "data/*7942*"
+["data/SynPCC7942_chr.gbk", "data/SynPCC7942_pANL.gbk"]
+
+detourrr —▶ glob_files "data/*.txt"
+["data/genomes-genbank.txt", "data/proteomes-mmseqs.txt", "data/proteomes-refseq.txt"]
+
+detourrr —▶ :q
+Bye for now!

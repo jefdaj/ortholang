@@ -5,6 +5,7 @@ import Prelude hiding (writeFile)
 import Control.Concurrent.Thread.Delay (delay)
 import Control.Monad              (when)
 import Data.ByteString.Lazy.Char8 (pack, ByteString)
+import Data.List                  (isPrefixOf)
 import Data.Maybe                 (fromJust)
 import Paths_Detourrr             (getDataFileName)
 import Detourrr.Core.Eval         (evalFile)
@@ -15,8 +16,7 @@ import Detourrr.Core.Types        (RrrConfig(..), HashedSeqIDsRef)
 import Detourrr.Core.Locks        (Locks, withWriteLock)
 import Detourrr.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
-import System.FilePath.Posix      (replaceExtension, takeBaseName, takeDirectory,
-                                   takeFileName, (</>), (<.>))
+import System.FilePath.Posix      (replaceExtension, takeBaseName, takeFileName, (</>), (<.>))
 import System.IO                  (stdout, stderr, writeFile)
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
@@ -27,13 +27,12 @@ import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 
 nonDeterministicRrr :: FilePath -> Bool
-nonDeterministicRrr path = testDir `elem` badDirs
+nonDeterministicRrr path = any (\s -> s `isPrefixOf` (takeBaseName path)) badSigns
   where
-    testDir = (takeFileName . takeDirectory) path
     -- TODO will regular blast be nondeterministic at large scales too?
     -- TODO make these individual tests, or substrings
     -- TODO eventually replace deterministic or not with custom shell predicates
-    badDirs = ["crb_blast", "blastrbh", "blasthits", "plots", "mmseqs"] -- TODO blast? blastdb?
+    badSigns = ["crb_blast", "blastrbh", "blasthits", "plot", "mmseqs"] -- TODO blast? blastdb?
 
 getTestScripts :: IO [FilePath]
 getTestScripts = do
@@ -51,7 +50,10 @@ mkOutTest :: RrrConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
 mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
-    scriptAct = runRrr cfg ref ids >>= return . pack -- . toGeneric cfg
+    scriptAct = do
+      out <- runRrr cfg ref ids
+      writeFile ("/tmp" </> takeBaseName gld <.> "out") out
+      return $ pack out
     rrr  = takeBaseName gld <.> "rrr"
     desc = rrr ++ " prints expected output"
 
@@ -68,7 +70,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       _ <- runRrr cfg ref ids
       out <- readCreateProcess treeCmd ""
       -- sometimes useful for debugging tests:
-      -- writeFile "/tmp/latest.txt" out
+      -- writeFile ("/tmp" </> takeBaseName t <.> "tree") out
       return $ pack $ toGeneric cfg out
 
 -- TODO use safe writes here

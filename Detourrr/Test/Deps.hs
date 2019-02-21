@@ -29,7 +29,7 @@ depCmds =
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests _ _ _ = do
-  testDir <- getDataFileName $ "tests2" </> "dependencies"
+  testDir <- getDataFileName $ "tests2"
   return $ testGroup "check dependency versions"
          $ map (mkTestDep testDir) depCmds
 
@@ -37,7 +37,7 @@ mkTestDep :: FilePath -> (TestName, String) -> TestTree
 mkTestDep dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
-    gld = dir </> name <.> "txt"
+    gld = dir </> "depend_" ++ name <.> "txt"
     act = do
       (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""
       return $ pack $ err ++ out

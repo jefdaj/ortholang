@@ -12,7 +12,7 @@ import Paths_Detourrr             (getDataFileName)
 import Detourrr.Core.Repl         (mkRepl)
 import Detourrr.Core.Util         (readFileStrict)
 import Detourrr.Core.Types        (RrrConfig(..), Locks, ReplM, HashedSeqIDsRef)
-import System.Directory           (createDirectoryIfMissing, removeFile, copyFile)
+import System.Directory           (createDirectoryIfMissing, removeFile)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -53,21 +53,15 @@ mockRepl :: [String] -> FilePath -> RrrConfig -> Locks -> HashedSeqIDsRef -> IO 
 mockRepl stdinLines path cfg ref ids = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
-    -- putStrLn ("stdin: '" ++ unlines stdin ++ "'")
+    -- putStrLn ("stdin: '" ++ unlines stdinLines ++ "'")
     _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids
     -- putStrLn $ "stdout: '" ++ out ++ "'"
     return ()
-  out <- readFile tmpPath -- TODO have to handle unicode here with the new prompt?
+  out <- readFile tmpPath
   writeFile path $ toGeneric cfg out
-  -- this is sometimes helpful when developing tests:
-  copyFile tmpPath $ "/tmp" </> takeBaseName path
   removeFile tmpPath
   return ()
 
-
--- TODO convert to using goldenVsFile, where the file is the .out created by the mock repl
--- TODO 
---
 -- TODO include goldenTree here too (should pass both at once)
 goldenRepl :: RrrConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
 goldenRepl cfg ref ids goldenFile = do
@@ -75,16 +69,22 @@ goldenRepl cfg ref ids goldenFile = do
   let name   = takeBaseName goldenFile
       desc   = "repl output matches " ++ name <.> "txt"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
-      -- tstOut = cfgTmpDir cfg' ++ name ++ ".out"
-      tstOut = cfgTmpDir cfg' <.> "out"
+      tstOut = cfgTmpDir cfg' <.> "txt"
       stdin  = extractPrompted ("detourrr" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut cfg' ref ids
+               -- uncomment to update repl golden files:
+               -- >> copyFile tstOut goldenFile
   return $ goldenVsFile desc goldenFile tstOut action
+
+findGoldenFiles :: IO [FilePath]
+findGoldenFiles = do
+  testDir  <- getDataFileName "tests2"
+  txtFiles <- findByExtension [".txt"] testDir
+  return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles
 
 goldenRepls :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 goldenRepls cfg ref ids = do
-  tDir  <- getDataFileName "tests2/repl"
-  golds <- findByExtension [".txt"] tDir
+  golds <- findGoldenFiles
   let tests = mapM (goldenRepl cfg ref ids) golds
       group = testGroup "prints expected output"
   fmap group tests
@@ -109,8 +109,7 @@ goldenReplTree cfg ref ids ses = do
 
 goldenReplTrees :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 goldenReplTrees cfg ref ids = do
-  tDir  <- getDataFileName "tests2/repl"
-  txts  <- findByExtension [".txt"] tDir
+  txts <- findGoldenFiles
   let tests = mapM (goldenReplTree cfg ref ids) txts
       group = testGroup "repl creates expected tmpfiles"
   fmap group tests
