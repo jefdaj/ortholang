@@ -1,4 +1,4 @@
-smallbacteria = load_faa_each (glob_files "data/Mycoplasma/*")
+smallbacteria = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
 ofres = orthofinder smallbacteria
 
 # TODO should it work if they contain an id that contains this text? or just the whole text?
