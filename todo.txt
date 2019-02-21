@@ -1,3 +1,6 @@
+bugs identified while updating tests:
+  extracts_seqs broken, possibly because of the seqid_ hashing
+
 rewrite all tests to use mycoplasma for speed and consistency
   start from the ones use by mmseqs
   need their full genomes though

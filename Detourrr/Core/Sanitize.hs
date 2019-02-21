@@ -81,13 +81,14 @@ writeHashedIDs cfg ref path ids = do
 -- hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
 unhashIDs :: RrrConfig -> HashedSeqIDs -> String -> String
-unhashIDs _ ids txt = before ++ concatMap replaceOne after
-  where
-    (before:after) = split "seqid_" txt
-    replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
-                               origID  = fromJust $ M.lookup idAndTab ids
-                               shortID = head $ words origID
-                           in shortID ++ rest
+unhashIDs _ ids txt = case split "seqid_" txt of
+  (before:after) -> before ++ concatMap replaceOne after
+    where
+      replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
+                                 origID  = fromJust $ M.lookup idAndTab ids
+                                 shortID = head $ words origID
+                             in shortID ++ rest
+  _ -> txt
 
 unhashIDsFile :: RrrConfig -> Locks -> HashedSeqIDs -> RrrPath -> RrrPath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do

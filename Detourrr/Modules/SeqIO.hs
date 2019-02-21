@@ -161,7 +161,7 @@ extractSeqs = RrrFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
-  , fDesc = Nothing, fTypeDesc  = name ++ " : fa -> str.list"
+  , fDesc = Nothing, fTypeDesc  = name ++ " : fa str.list -> fa"
   , fRules     = rSimpleScript "extract_seqs.py"
   }
   where
