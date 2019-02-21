@@ -1,0 +1,8 @@
+mgen = load_faa "data/Mycoplasma_genitalium_small.faa"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+
+hits = blastp 1e-1 mgen maga
+hits_faa = extract_seqs maga (extract_targets hits)
+hits_aln = muscle hits_faa
+
+result = hits_aln
