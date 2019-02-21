@@ -1,0 +1,27 @@
+.
+|-- cache
+|   |-- concat
+|   |   |-- 404ec77cfb.txt -> ../../cache/lines/...
+|   |   `-- emptyfaa.txt -> ../../cache/lines/...
+|   `-- load
+|       |-- d8da51f7cd.gbk -> $WORKDIR/data/SynPCC7942_pANL.gbk
+|       `-- ec9540d17e.gbk -> $WORKDIR/data/SynPCC7942_chr.gbk
+|-- exprs
+|   |-- concat_faa
+|   |   `-- 74aaf9d0bd.faa
+|   |-- gbk_to_faa
+|   |   |-- 4847ed5297.faa
+|   |   `-- abb9aaaba8.faa
+|   |-- list
+|   |   `-- af8f9a98cf.faa.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   |-- 03749b1e57.gbk -> ../../cache/load/d8da51f7cd.gbk
+|   |   `-- c95d790768.gbk -> ../../cache/load/ec9540d17e.gbk
+|   `-- str
+|       |-- 7ec89da918.str -> ../../cache/lines/...
+|       `-- a8d18fa355.str -> ../../cache/lines/...
+`-- vars
+    |-- pcc7942.faa -> ../exprs/concat_faa/74aaf9d0bd.faa
+    `-- result -> ../vars/pcc7942.faa
+
+10 directories, 14 files
