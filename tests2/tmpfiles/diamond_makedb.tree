@@ -1,0 +1,17 @@
+.
+|-- cache
+|   `-- load
+|       |-- 10ffe0cf0f.faa
+|       `-- 10ffe0cf0f.faa.ids
+|-- exprs
+|   |-- diamond_makedb
+|   |   `-- 2d9739e2da.dmnd
+|   |-- load_faa
+|   |   `-- 6c22003dbf.faa -> ../../cache/load/10ffe0cf0f.faa
+|   `-- str
+|       `-- d03a6ca5fb.str -> ../../cache/lines/...
+`-- vars
+    |-- mgen.faa -> ../exprs/load_faa/6c22003dbf.faa
+    `-- result -> ../exprs/diamond_makedb/2d9739e2da.dmnd
+
+7 directories, 7 files

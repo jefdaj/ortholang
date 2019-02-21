@@ -1,0 +1,2 @@
+mycoplasma = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
+result = diamond_makedb_all mycoplasma

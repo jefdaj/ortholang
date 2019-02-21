@@ -1,2 +1,0 @@
-pcc6803 = load_faa "data/6803genes.faa"
-result = diamond_makedb pcc6803

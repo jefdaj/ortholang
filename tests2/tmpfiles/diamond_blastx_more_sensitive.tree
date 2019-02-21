@@ -1,0 +1,28 @@
+.
+|-- cache
+|   `-- load
+|       |-- 10ffe0cf0f.faa
+|       |-- 10ffe0cf0f.faa.ids
+|       `-- bb17ca9dfe.gbk -> $WORKDIR/data/Mycoplasma_agalactiae_PG2.gbk
+|-- exprs
+|   |-- diamond_blastx
+|   |   `-- 2f03be62c0_c532d04995_8d0c903592.bht
+|   |-- diamond_makedb
+|   |   `-- 2d9739e2da.dmnd
+|   |-- gbk_to_fna
+|   |   `-- 6bea0f2429.fna
+|   |-- load_faa
+|   |   `-- 6c22003dbf.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |-- load_gbk
+|   |   `-- 783d70b65a.gbk -> ../../cache/load/bb17ca9dfe.gbk
+|   |-- num
+|   |   `-- 6de785566e.num -> ../../cache/lines/...
+|   `-- str
+|       |-- 0ca5a7d687.str -> ../../cache/lines/...
+|       `-- d03a6ca5fb.str -> ../../cache/lines/...
+`-- vars
+    |-- maga.fna -> ../exprs/gbk_to_fna/6bea0f2429.fna
+    |-- mgen.faa -> ../exprs/load_faa/6c22003dbf.faa
+    `-- result -> ../exprs/diamond_blastx/2f03be62c0_c532d04995_8d0c903592.bht
+
+11 directories, 14 files
