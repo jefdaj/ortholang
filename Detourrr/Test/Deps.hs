@@ -37,7 +37,7 @@ mkTestDep :: FilePath -> (TestName, String) -> TestTree
 mkTestDep dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
-    gld = dir </> "depend_" ++ name <.> "txt"
+    gld = dir </> "depend" </> "depend_" ++ name <.> "txt"
     act = do
       (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""
       return $ pack $ err ++ out

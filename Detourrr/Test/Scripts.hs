@@ -16,6 +16,7 @@ import Detourrr.Core.Types        (RrrConfig(..), HashedSeqIDsRef)
 import Detourrr.Core.Locks        (Locks, withWriteLock)
 import Detourrr.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
+import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (replaceExtension, takeBaseName, takeFileName, (</>), (<.>))
 import System.IO                  (stdout, stderr, writeFile)
 import System.IO.Silently         (hCapture)
@@ -62,7 +63,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
-    desc = takeFileName t ++ " creates expected tmpfiles"
+    desc = takeBaseName t ++ ".rrr creates expected tmpfiles"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|lines' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
@@ -106,13 +107,13 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
 
 runRrr :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO String
 runRrr cfg ref ids =  do
-  delay 10000 -- wait 0.01 second so we don't capture output from tasty
+  delay 10000 -- wait 0.01 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
   return $ toGeneric cfg out
 
-mkScriptTests :: (FilePath, FilePath, (Maybe FilePath))
+mkScriptTests :: (FilePath, FilePath, Maybe FilePath)
               -> RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkScriptTests (rrr, gld, mtre) cfg ref ids = do
   absTests <- mkAbsTest cfg' ref ids -- just one, but comes as a list
@@ -134,7 +135,10 @@ mkTests cfg ref ids = do
       groups   = map mkScriptTests triples
   mkTestGroup cfg ref ids "interpret test scripts" groups
   where
-    findOutFile  c = replaceExtension c "out"
+    -- findOutFile  c = takeDirectory c </> replaceExtension c "out"
+    findOutFile c = joinPath $ (init $ init $ splitDirectories c)
+                      ++ ["stdout", replaceExtension (takeBaseName c) "out"]
     findTreeFile c = if nonDeterministicRrr c
       then Nothing
-      else Just $ replaceExtension c "tree"
+      else Just $ joinPath $ (init $ init $ splitDirectories c)
+                    ++ ["tmpfiles", replaceExtension (takeBaseName c) "tree"]
