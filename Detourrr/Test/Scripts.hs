@@ -107,7 +107,7 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
 
 runRrr :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO String
 runRrr cfg ref ids =  do
-  delay 10000 -- wait 0.01 second so we don't capture output from tasty (TODO is that long enough?)
+  delay 1000 -- wait 0.001 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
