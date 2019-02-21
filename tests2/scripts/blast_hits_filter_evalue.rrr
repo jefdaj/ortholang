@@ -1,6 +1,7 @@
-mini7942 = load_fna "data/7942genes10.fna"
-full7942 = load_fna "data/7942genes.fna"
-hits = blastn 1e-5 mini7942 full7942
+small = load_faa "data/Mycoplasma_genitalium_small.faa"
+mgen  = load_faa "data/Mycoplasma_genitalium_G37_protein_refseq.faa"
+
+hits = blastp 1e-5 small mgen
 single = extract_queries      (filter_evalue      1e-50  hits)
 mapped = extract_queries_each (filter_evalue_each 1e-50 [hits])
 # TODO mapped version not properly deduped yet
