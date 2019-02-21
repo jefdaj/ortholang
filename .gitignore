@@ -9,3 +9,4 @@ tmp
 *.*~
 nixpkgs/inparanoid/*.zip
 nixpkgs/inparanoid/*.tar.gz
+Paths_*
