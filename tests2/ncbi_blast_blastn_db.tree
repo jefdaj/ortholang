@@ -1,0 +1,56 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 8721fca70c
+|   |   |   |-- c7700fa72a.str.list -> ../../../exprs/extract_queries/c7700fa72a.str.list
+|   |   |   `-- c7700fa72a.str.list.args -> ../../../cache/lines/...
+|   |   `-- e2927c8a1f
+|   |       |-- e333679aa2.bht -> ../../../exprs/blastn_db/dd99bfd8d7_4d791a2bc2_e333679aa2.bht
+|   |       `-- e333679aa2.bht.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 1e7afd22cf.gbk -> $WORKDIR/data/Mycoplasma_bovis_HB0801-P115.gbk
+|   |   `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|   `-- makeblastdb
+|       `-- 6559c0f9dc
+|           |-- 6559c0f9dc.ndb.nhr
+|           |-- 6559c0f9dc.ndb.nin
+|           `-- 6559c0f9dc.ndb.nsq
+|-- exprs
+|   |-- any
+|   |   `-- 788de6b13c.str.list.list -> ../../cache/lines/...
+|   |-- blastn_db
+|   |   |-- 256c9a6f83_4d791a2bc2_db2a0a8120.bht
+|   |   `-- dd99bfd8d7_4d791a2bc2_e333679aa2.bht
+|   |-- blastn_db_each
+|   |   `-- 256c9a6f83_4d791a2bc2_8cb667928a.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 491210d4ba.str.list -> ../../cache/lines/...
+|   |   `-- c7700fa72a.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- 85605c38c9.str.list.list -> ../../cache/lines/...
+|   |-- gbk_to_fna
+|   |   |-- 651413eaca.fna
+|   |   `-- 76240427e5.fna
+|   |-- list
+|   |   |-- 3e74014c0e.ndb.list -> ../../cache/lines/...
+|   |   |-- 649a5af32e.fna.list -> ../../cache/lines/...
+|   |   |-- 79319385a1.str.list.list.list -> ../../cache/lines/...
+|   |   `-- b6484c7fe4.str.list.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   |-- b09bab9c12.gbk -> ../../cache/load/1e7afd22cf.gbk
+|   |   `-- c2d4e57d18.gbk -> ../../cache/load/28ce925871.gbk
+|   |-- makeblastdb_nucl
+|   |   `-- dbc3c2554d.ndb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   `-- str
+|       |-- b4da62b027.str -> ../../cache/lines/...
+|       `-- b81c880be5.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/85605c38c9.str.list.list
+    |-- mbov.fna -> ../exprs/gbk_to_fna/651413eaca.fna
+    |-- mgen.ndb -> ../exprs/makeblastdb_nucl/dbc3c2554d.ndb
+    |-- result -> ../exprs/any/788de6b13c.str.list.list
+    `-- single.str.list -> ../exprs/extract_queries/491210d4ba.str.list
+
+20 directories, 33 files
