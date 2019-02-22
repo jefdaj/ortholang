@@ -46,11 +46,8 @@ knownFailing =
   , "mmseqs_search_db"
   , "sonicparanoid_basic"
 
-  -- TODO fix interaction with seqid_ extraction?
-  , "seqio_extract_targets"
-
   -- still nondeterministic despite repeats
-  -- TODO are these related to the extract_targets issue?
+  -- TODO is there a bug here or is BLAST just like this?
   , "blast_hits_best_hits"
   , "ncbi_blast_reciprocal_best"
 
