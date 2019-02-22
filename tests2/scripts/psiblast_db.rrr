@@ -1,0 +1,4 @@
+query   = load_faa "data/Mycoplasma_genitalium_single.faa"
+maga = makeblastdb_prot (load_faa "data/Mycoplasma_agalactiae_small.faa")
+hits    = psiblast_db 1e-10 query maga
+result  = hits

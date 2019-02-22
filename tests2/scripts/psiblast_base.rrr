@@ -1,0 +1,9 @@
+# "base" psiblast functions that don't use any fancy helpers
+# the first one trains a pssm, and the second uses it to search a db
+
+query    = load_faa "data/Mycoplasma_genitalium_single.faa"
+maga  = load_faa "data/Mycoplasma_agalactiae_small.faa"
+magadb   = makeblastdb_prot maga
+pssm     = psiblast_train_db 1e-2 query magadb
+hittable = psiblast_pssm_db  1e-2 pssm  magadb
+result   = hittable

@@ -1,10 +1,10 @@
-pcc6803 = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
-pcc7942 = concat_faa [gbk_to_faa (load_gbk "data/SynPCC7942_chr.gbk"),
-                      gbk_to_faa (load_gbk "data/SynPCC7942_pANL.gbk")]
+mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
+maga = concat_faa [gbk_to_faa (load_gbk "data/SynPCCmaga_chr.gbk"),
+                      gbk_to_faa (load_gbk "data/SynPCCmaga_pANL.gbk")]
 
 A = [1, 2, 3]
 B = [2, 4, 6]
 C = [3, 2, 1e23, 3e-9]
 
 # just to print something
-result = pcc7942
+result = maga

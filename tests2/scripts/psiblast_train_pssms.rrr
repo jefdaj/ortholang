@@ -1,0 +1,8 @@
+# mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+queries = split_faa (load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa")
+
+# TODO write this:
+pssms   = psiblast_train_pssms 0.1 queries maga
+
+result  = pssms

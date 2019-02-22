@@ -1,0 +1,7 @@
+# TODO fix withProtDB/withPdbSubject first
+# TODO then get it not to think the single subject is a list!
+
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+query   = load_faa "data/Mycoplasma_genitalium_single.faa"
+pssm    = psiblast_train 1.0e-10 query maga
+result  = pssm

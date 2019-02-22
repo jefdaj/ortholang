@@ -1,0 +1,14 @@
+# Train a pssm per gene against a list of genomes, search them all against one
+# genome, and return a list of hit tables. Depending on your specific purpose
+# you might want priblast_pssms_all, which returns one big table.
+
+queries    = split_faa (load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa")
+mgen    = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
+maga    = load_faa "data/Mycoplasma_agalactiae_small.faa"
+cyanodb    = makeblastdb_prot_all [mgen, maga]
+pssms      = psiblast_train_pssms_db 1e-10 queries cyanodb
+
+# TODO write/rewrite:
+tablesmgen = psiblast_pssms          1e-10 pssms mgen
+
+result     = tablesmgen

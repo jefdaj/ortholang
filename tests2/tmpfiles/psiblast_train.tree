@@ -1,0 +1,35 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 28e059b2a9.faa
+|   |   |-- 28e059b2a9.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
+|   |-- makeblastdb
+|   |   `-- d77632b774
+|   |       |-- d77632b774.pdb.list.phr
+|   |       |-- d77632b774.pdb.list.pin
+|   |       `-- d77632b774.pdb.list.psq
+|   `-- psiblast
+|-- exprs
+|   |-- list
+|   |   `-- e3e362eb0b.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 97f390f2f1.faa -> ../../cache/load/28e059b2a9.faa
+|   |   `-- d3fe8211c6.faa -> ../../cache/load/36189032ad.faa
+|   |-- makeblastdb_prot_all
+|   |   `-- e9575b5242.pdb.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- 3e281fad0f.num -> ../../cache/lines/...
+|   |-- psiblast_train
+|   |   `-- a7b2a97fb5_5d4be7ba4f_52ef7f18f7.pssm -> ../../cache/lines/...
+|   `-- str
+|       |-- b9e2f5fbe2.str -> ../../cache/lines/...
+|       `-- c156278223.str -> ../../cache/lines/...
+`-- vars
+    |-- maga.faa -> ../exprs/load_faa/d3fe8211c6.faa
+    |-- pssm.pssm -> ../exprs/psiblast_train/a7b2a97fb5_5d4be7ba4f_52ef7f18f7.pssm
+    |-- query.faa -> ../exprs/load_faa/97f390f2f1.faa
+    `-- result -> ../vars/pssm.pssm
+
+13 directories, 19 files

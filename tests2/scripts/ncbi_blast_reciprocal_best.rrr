@@ -1,18 +1,18 @@
 # TODO make a smaller set of genes that will match to speed tests
 # TODO is this actually nondeterministic? seems to come out the same each time
 
-pcc7942 = load_faa "data/Mycoplasma_agalactiae_small.faa"
-pcc6803 = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
 
-fwdHits = blastp 1e-5 pcc7942 pcc6803
-revHits = blastp 1e-5 pcc6803 pcc7942
+fwdHits = blastp 1e-5 maga mgen
+revHits = blastp 1e-5 mgen maga
 
 bestFwd = best_hits fwdHits
 bestRec = reciprocal_best fwdHits revHits
 
 # results sometimes vary slightly; repeat 3X to be sure
-best3fwd = repeat bestFwd pcc6803 3
-best3rec = repeat bestRec pcc6803 3
+best3fwd = repeat bestFwd mgen 3
+best3rec = repeat bestRec mgen 3
 
 solidFwd = all (extract_queries_each best3fwd)
 solidRec = all (extract_queries_each best3rec)
