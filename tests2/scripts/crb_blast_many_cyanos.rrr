@@ -1,0 +1,4 @@
+mgen10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+mycoplasma = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
+hitlists = crb_blast_each mgen10 mycoplasma
+result = all (extract_queries_each hitlists)

@@ -1,0 +1,4 @@
+mini6803 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+hits = crb_blast mini6803 maga
+result = extract_targets hits

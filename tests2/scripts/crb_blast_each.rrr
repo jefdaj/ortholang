@@ -4,12 +4,10 @@
 # TODO Is it having the same issue the overall cut is having? Maybe crb-blast
 #      fails partway through and returns [] instead of actually failing!
 
-reference = gbk_to_fna (load_gbk "data/SynPCC7942_chr.gbk")
+reference = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
 
-# TODO how does this have 12 hits? shouldn't it be up to 10?
-small = load_faa_each ["data/7942genes10.faa"]
-
-large = load_faa_each ["data/7942genes50.faa"] | small
+small = load_faa_each ["data/Mycoplasma_genitalium_M2321_10genes.faa"]
+large = load_faa_each ["data/Mycoplasma_agalactiae_small.faa"] | small
 
 # Only one BLAST search should be done against each of the genomes
 # in "small" because the result should be reused in "large".

@@ -6,8 +6,8 @@
 # TODO fix (minor) race condition between mapped and single tmpfile trees
 # TODO don't use crb-blast for this since it's still nondeterministic?
 
-mini6803 = load_fna "data/6803genes10.fna"
-full7942 = load_faa "data/7942genes.faa"
-single = crb_blast      mini6803  full7942
-mapped = crb_blast_each mini6803 [full7942]
+mini6803 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+single = crb_blast      mini6803  maga
+mapped = crb_blast_each mini6803 [maga]
 result = length ([single] | mapped) # should be 1
