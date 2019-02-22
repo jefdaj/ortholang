@@ -38,15 +38,27 @@ nonDeterministicRrr path = any (\s -> s `isPrefixOf` (takeBaseName path)) badSig
 
 knownFailing :: [FilePath]
 knownFailing =
-  [ "blast_hits_best_hits"
-  , "demo_basics"
-  , "mmseqs_createdb"
+
+  -- TODO test + ask if mmseqs can be compiled on the server
+  [ "mmseqs_createdb"
   , "mmseqs_createdb_all"
   , "mmseqs_search"
   , "mmseqs_search_db"
+  , "sonicparanoid_basic"
+
+  -- TODO fix interaction with seqid_ extraction?
+  , "seqio_extract_targets"
+
+  -- still nondeterministic despite repeats
+  -- TODO are these related to the extract_targets issue?
+  , "blast_hits_best_hits"
   , "ncbi_blast_reciprocal_best"
+
+  -- TODO what's up with these? they may only fail sometimes
   , "orthofinder_orthofinder_sets"
   , "orthofinder_orthogroups"
+
+  -- TODO what's up with these?
   , "psiblast_each_pssm"
   , "psiblast_each_pssm"
   , "psiblast_empty_pssms"
@@ -54,8 +66,7 @@ knownFailing =
   , "psiblast_map"
   , "psiblast_map"
   , "psiblast_pssm_all"
-  , "seqio_extract_targets"
-  , "sonicparanoid_basic"
+
   ]
 
 getTestScripts :: IO [FilePath]
@@ -79,15 +90,14 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
       out <- runRrr cfg ref ids
       writeFile ("/tmp" </> takeBaseName gld <.> "out") out
       return $ pack out
-    rrr  = takeBaseName gld <.> "rrr"
-    desc = rrr ++ " prints expected output"
+    desc = "prints expected output"
 
 mkTreeTest :: RrrConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
 mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
-    desc = takeBaseName t ++ ".rrr creates expected tmpfiles"
+    desc = "creates expected tmpfiles"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|lines' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
@@ -102,8 +112,8 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
 mkTripTest :: RrrConfig -> Locks -> HashedSeqIDsRef -> TestTree
 mkTripTest cfg ref ids = goldenDiff desc tripShow tripAct
   where
-    desc = takeBaseName tripRrr ++ " unchanged by round-trip to file"
-    tripRrr   = cfgTmpDir cfg <.> "rrr"
+    desc = "unchanged by round-trip to file"
+    tripRrr = cfgTmpDir cfg <.> "rrr"
     tripShow  = cfgTmpDir cfg <.> "show"
     tripSetup = do
       scr1 <- parseFileIO cfg ref ids $ fromJust $ cfgScript cfg
@@ -121,8 +131,7 @@ mkAbsTest :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
-    path = takeFileName $ cfgTmpDir cfg
-    desc = path ++ " tmpfiles free of absolute paths"
+    desc = "tmpfiles free of absolute paths"
     absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
     absGrep = do
       _ <- runRrr cfg ref ids
@@ -131,7 +140,7 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
 
 runRrr :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO String
 runRrr cfg ref ids =  do
-  delay 1000 -- wait 0.001 second so we don't capture output from tasty (TODO is that long enough?)
+  delay 10000 -- wait 0.01 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
