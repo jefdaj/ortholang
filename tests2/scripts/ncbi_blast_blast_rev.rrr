@@ -2,8 +2,8 @@
 # equivalents. They make writing reciprocal hits simpler: just paste the same
 # line and add "_rev".
 
-small = load_fna "data/7942genes10.fna"
-large = load_fna "data/7942genes.fna"
+small = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+large = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
 
 # fwds and srevs have flipped args, so after _rev flips them again both should
 # be equal. mrevs should also equal srevs, just wrapped in a list + unwrapped.

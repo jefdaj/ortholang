@@ -2,14 +2,14 @@
 
 # TODO mapped hashes still aren't matching non-mapped ones??
 
-qfna = load_fna "data/7942genes10.fna"
-qfaa = load_faa "data/7942genes10.faa"
+qfna = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+qfaa = load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa"
 
-sfna1 = load_fna "data/7942genes.fna"
-sfaa1 = load_faa "data/7942genes.faa"
+sfna1 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+sfaa1 = load_faa "data/Mycoplasma_agalactiae_small.faa"
 
-sfna2 = load_fna "data/6803genes.fna"
-sfaa2 = load_faa "data/7942genes50.faa"
+sfna2 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+sfaa2 = load_faa "data/Mycoplasma_agalactiae_small.faa"
 
 # run each _db search individually
 sdbfna = [blastn_db 1e-5 qfna (makeblastdb_nucl sfna1), blastn_db 1e-5 qfna (makeblastdb_nucl sfna2)]

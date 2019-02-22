@@ -1,0 +1,57 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 04d01ee833
+|   |   |   |-- cc1e125c02.bht -> ../../../exprs/blastp_db/dd99bfd8d7_72f9d28b4e_cc1e125c02.bht
+|   |   |   `-- cc1e125c02.bht.args -> ../../../cache/lines/...
+|   |   `-- 39716f7a19
+|   |       |-- c4f21b1ff4.str.list -> ../../../exprs/extract_queries/c4f21b1ff4.str.list
+|   |       `-- c4f21b1ff4.str.list.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 36189032ad.faa
+|   |   |-- 36189032ad.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
+|   `-- makeblastdb
+|       `-- d77632b774
+|           |-- d77632b774.pdb.phr
+|           |-- d77632b774.pdb.pin
+|           `-- d77632b774.pdb.psq
+|-- exprs
+|   |-- all
+|   |   `-- ed52df0ed4.str.list -> ../../cache/lines/...
+|   |-- any
+|   |   `-- f528d8aeb6.str.list.list -> ../../cache/lines/...
+|   |-- blastp_db
+|   |   |-- 256c9a6f83_463652943c_a03a0fa80d.bht
+|   |   `-- dd99bfd8d7_72f9d28b4e_cc1e125c02.bht
+|   |-- blastp_db_each
+|   |   `-- 256c9a6f83_463652943c_2b21fb49f6.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- c4f21b1ff4.str.list -> ../../cache/lines/...
+|   |   `-- d832fcf12e.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- 580962f3aa.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 53a3365d98.faa.list -> ../../cache/lines/...
+|   |   |-- 65359694ce.pdb.list -> ../../cache/lines/...
+|   |   |-- 79319385a1.str.list.list.list -> ../../cache/lines/...
+|   |   `-- b6484c7fe4.str.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- d3fe8211c6.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- de87e52522.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- makeblastdb_prot
+|   |   `-- e9575b5242.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   `-- str
+|       |-- c156278223.str -> ../../cache/lines/...
+|       `-- dc7b129bbc.str -> ../../cache/lines/...
+`-- vars
+    |-- maga.pdb -> ../exprs/makeblastdb_prot/e9575b5242.pdb
+    |-- maga10.faa -> ../exprs/load_faa/de87e52522.faa
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/580962f3aa.str.list.list
+    |-- result -> ../exprs/all/ed52df0ed4.str.list
+    `-- single.str.list -> ../exprs/extract_queries/d832fcf12e.str.list
+
+20 directories, 34 files
