@@ -1,0 +1,7 @@
+# make one fasta file from multiple genbank files
+# useful when a genome is distributed as chromosomes or mapped + unmapped reads
+# TODO convenience function for this?
+result = concat_fna
+  [ gbk_to_fna (load_gbk "data/Mycoplasma_genitalium_M2321.gbk")
+  , gbk_to_fna (load_gbk "data/Mycoplasma_canadense_HAZ360_1.gbk")
+  ]

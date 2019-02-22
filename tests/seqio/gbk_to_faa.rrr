@@ -1,3 +1,0 @@
-gbk6803 = load_gbk "data/Synechocystis-PCC-6803-uid159873.gbk"
-faa6803 = gbk_to_faa gbk6803
-result  = faa6803

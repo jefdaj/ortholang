@@ -1,5 +1,5 @@
-fna = load_fna "data/6803genes10.fna"
-faa = load_faa "data/6803genes10.faa"
+fna = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+faa = load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa"
 
 singleFna = extract_ids       fna
 singleFaa = extract_ids       faa

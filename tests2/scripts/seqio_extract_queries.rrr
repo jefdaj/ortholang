@@ -1,5 +1,5 @@
-hits = blastp 1e-5 (load_faa "data/6803genes10.faa")
-                   (load_faa "data/6803genes.faa")
+hits = blastp 1e-5 (load_faa "data/Mycoplasma_genitalium_small.faa")
+                   (load_faa "data/Mycoplasma_genitalium_G37_protein_refseq.faa")
 single = extract_queries       hits
 mapped = extract_queries_each [hits]
 # TODO it's not deduping... because of rOneArgScript?

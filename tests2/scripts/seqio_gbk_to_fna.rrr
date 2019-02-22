@@ -1,0 +1,5 @@
+gbk # test comment after varname
+  = load_gbk "data/Mycoplasma_genitalium_M2321.gbk"
+fna = # test comment after = sign
+  gbk_to_fna gbk
+result  = fna
