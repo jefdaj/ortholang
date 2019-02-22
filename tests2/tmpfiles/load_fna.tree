@@ -1,0 +1,23 @@
+.
+|-- cache
+|   `-- load
+|       |-- 8723e7ac8c.fna
+|       `-- 8723e7ac8c.fna.ids
+|-- exprs
+|   |-- any
+|   |   `-- 5a70814116.fna.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 36e3c90828.fna.list -> ../../cache/lines/...
+|   |   |-- 41d69b5e26.fna.list -> ../../cache/lines/...
+|   |   |-- c182800175.str.list -> ../../cache/lines/...
+|   |   `-- c782736bb3.fna.list.list -> ../../cache/lines/...
+|   |-- load_fna
+|   |   `-- 706aed743e.fna -> ../../cache/load/8723e7ac8c.fna
+|   `-- str
+|       `-- 29d22d084f.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.fna.list -> ../exprs/list/41d69b5e26.fna.list
+    |-- result -> ../exprs/any/5a70814116.fna.list
+    `-- single.fna -> ../exprs/load_fna/706aed743e.fna
+
+8 directories, 12 files

@@ -1,3 +1,0 @@
-all_faas  = load_faa_glob "data/*.faa"
-mini_faas = load_faa_glob "data/*10.faa"
-result = all_faas ~ mini_faas # non-mini faas

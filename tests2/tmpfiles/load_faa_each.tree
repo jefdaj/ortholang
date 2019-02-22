@@ -1,0 +1,25 @@
+.
+|-- cache
+|   `-- load
+|       |-- 28e059b2a9.faa
+|       `-- 28e059b2a9.faa.ids
+|-- exprs
+|   |-- any
+|   |   `-- 2bfabd3ecf.faa.list -> ../../cache/lines/...
+|   |-- length
+|   |   `-- f549c1e38f.num -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 380d0bbd63.faa.list -> ../../cache/lines/...
+|   |   |-- df034aab8b.faa.list -> ../../cache/lines/...
+|   |   |-- eb70286f34.str.list -> ../../cache/lines/...
+|   |   `-- ecb7208cf7.faa.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- 97f390f2f1.faa -> ../../cache/load/28e059b2a9.faa
+|   `-- str
+|       `-- b9e2f5fbe2.str -> ../../cache/lines/...
+`-- vars
+    |-- list1.faa.list -> ../exprs/list/df034aab8b.faa.list
+    |-- list2.faa.list -> ../exprs/list/380d0bbd63.faa.list
+    `-- result -> ../exprs/length/f549c1e38f.num
+
+9 directories, 13 files

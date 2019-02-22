@@ -1,0 +1,3 @@
+single = load_faa       "data/Mycoplasma_genitalium_single.faa"
+mapped = load_faa_each ["data/Mycoplasma_genitalium_single.faa"]
+result = [single] | mapped

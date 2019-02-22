@@ -5,6 +5,6 @@
 # TODO simple(ish) solution: limit to 1 symlink by following them when linking
 #      there are only 3 places they're made; not too bad
 
-list1 = load_faa_each ["data/6803genes10.faa"]
-list2 = [load_faa "data/6803genes10.faa"]
+list1 = load_faa_each ["data/Mycoplasma_genitalium_single.faa"]
+list2 = [load_faa "data/Mycoplasma_genitalium_single.faa"]
 result = length (list1 | list2) # should be 1, since they're the same

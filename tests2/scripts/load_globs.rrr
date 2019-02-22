@@ -1,0 +1,3 @@
+all_faas  = load_faa_glob "data/*.faa"
+small_faas = load_faa_glob "data/*_small.faa"
+result = all_faas ~ small_faas # non-small faas
