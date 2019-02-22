@@ -78,7 +78,7 @@ goldenRepl cfg ref ids goldenFile = do
 
 findGoldenFiles :: IO [FilePath]
 findGoldenFiles = do
-  testDir  <- getDataFileName "tests2"
+  testDir  <- getDataFileName "tests"
   txtFiles <- findByExtension [".txt"] testDir
   return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles
 

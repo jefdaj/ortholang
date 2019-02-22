@@ -1,3 +1,0 @@
-smallbacteria = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
-ofres = orthofinder smallbacteria
-result = orthogroups ofres # TODO is this deterministic?

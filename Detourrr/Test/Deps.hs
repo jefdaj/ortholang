@@ -29,7 +29,7 @@ depCmds =
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: RrrConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests _ _ _ = do
-  testDir <- getDataFileName $ "tests2"
+  testDir <- getDataFileName $ "tests"
   return $ testGroup "check dependency versions"
          $ map (mkTestDep testDir) depCmds
 

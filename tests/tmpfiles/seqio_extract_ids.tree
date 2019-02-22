@@ -1,0 +1,54 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- c7abe0912f
+|   |   |   |-- b52947c1ab.str.list -> ../../../exprs/extract_ids/b52947c1ab.str.list
+|   |   |   `-- b52947c1ab.str.list.args -> ../../../cache/lines/...
+|   |   `-- fb731bf9b8
+|   |       |-- 72f9d28b4e.str.list -> ../../../exprs/extract_ids/72f9d28b4e.str.list
+|   |       `-- 72f9d28b4e.str.list.args -> ../../../cache/lines/...
+|   `-- load
+|       |-- 6046a54e92.fna
+|       |-- 6046a54e92.fna.ids
+|       |-- cb3e90dc00.faa
+|       `-- cb3e90dc00.faa.ids
+|-- exprs
+|   |-- any
+|   |   |-- 62447f1502.str.list.list -> ../../cache/lines/...
+|   |   |-- 8ef1fa335f.str.list.list -> ../../cache/lines/...
+|   |   `-- cda06e02e7.str.list.list -> ../../cache/lines/...
+|   |-- extract_ids
+|   |   |-- 463652943c.str.list
+|   |   |-- 72f9d28b4e.str.list
+|   |   |-- 940aeb61c0.str.list
+|   |   `-- b52947c1ab.str.list
+|   |-- extract_ids_each
+|   |   |-- 51126747d0.str.list.list -> ../../cache/lines/...
+|   |   `-- d70afd37e3.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 0c9918f9fb.faa.list -> ../../cache/lines/...
+|   |   |-- 1135248746.str.list.list -> ../../cache/lines/...
+|   |   |-- 3a52be6cae.str.list.list.list -> ../../cache/lines/...
+|   |   |-- 8509776813.fna.list -> ../../cache/lines/...
+|   |   |-- d81c816d90.str.list.list -> ../../cache/lines/...
+|   |   |-- ede165de26.str.list.list.list -> ../../cache/lines/...
+|   |   `-- f734436e80.str.list.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- de87e52522.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- load_fna
+|   |   `-- 4c422c7cdb.fna -> ../../cache/load/6046a54e92.fna
+|   `-- str
+|       |-- 402cb8b0f8.str -> ../../cache/lines/...
+|       `-- dc7b129bbc.str -> ../../cache/lines/...
+`-- vars
+    |-- bothFaa.str.list.list -> ../exprs/any/62447f1502.str.list.list
+    |-- bothFna.str.list.list -> ../exprs/any/8ef1fa335f.str.list.list
+    |-- faa.faa -> ../exprs/load_faa/de87e52522.faa
+    |-- fna.fna -> ../exprs/load_fna/4c422c7cdb.fna
+    |-- mappedFaa.str.list.list -> ../exprs/extract_ids_each/d70afd37e3.str.list.list
+    |-- mappedFna.str.list.list -> ../exprs/extract_ids_each/51126747d0.str.list.list
+    |-- result -> ../exprs/any/cda06e02e7.str.list.list
+    |-- singleFaa.str.list -> ../exprs/extract_ids/463652943c.str.list
+    `-- singleFna.str.list -> ../exprs/extract_ids/940aeb61c0.str.list
+
+14 directories, 37 files

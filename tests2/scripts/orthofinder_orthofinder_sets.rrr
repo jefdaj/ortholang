@@ -1,6 +1,0 @@
-mycoplasma = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
-mycosets = leave_each_out mycoplasma
-orthologs = orthofinder mycoplasma
-# TODO have to rewrite repeat_each before this will work :(
-orthosets = repeat_each orthologs mycoplasma mycosets
-result = orthosets

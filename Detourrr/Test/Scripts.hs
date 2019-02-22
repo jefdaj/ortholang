@@ -37,7 +37,7 @@ nonDeterministicRrr path = any (\s -> s `isPrefixOf` (takeBaseName path)) badSig
 
 getTestScripts :: IO [FilePath]
 getTestScripts = do
-  testDir  <- getDataFileName "tests2"
+  testDir  <- getDataFileName "tests"
   testRrrs <- findByExtension [".rrr"] testDir
   return testRrrs
 
