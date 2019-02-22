@@ -40,14 +40,19 @@ knownFailing :: [FilePath]
 knownFailing =
 
   -- TODO test + ask if mmseqs can be compiled on the server
-  [ "mmseqs_createdb"
-  , "mmseqs_createdb_all"
-  , "mmseqs_search"
-  , "mmseqs_search_db"
-  , "sonicparanoid_basic"
+  -- TODO test only when it's installed?
+  -- [ "mmseqs_createdb"
+  -- , "mmseqs_createdb_all"
+  -- , "mmseqs_search"
+  -- , "mmseqs_search_db"
+
+  [ "sonicparanoid_basic"
+
+  -- TODO fix interaction with seqid_ extraction?
+  , "seqio_extract_targets"
 
   -- still nondeterministic despite repeats
-  -- TODO is there a bug here or is BLAST just like this?
+  -- TODO are these related to the extract_targets issue?
   , "blast_hits_best_hits"
   , "ncbi_blast_reciprocal_best"
 
