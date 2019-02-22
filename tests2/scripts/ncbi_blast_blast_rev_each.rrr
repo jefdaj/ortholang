@@ -8,8 +8,8 @@
 # TODO make one for nums too, or include that here
 # TODO should also work for lists of paths i guess
 
-small = load_fna "data/7942genes10.fna"
-large = load_fna "data/7942genes.fna"
+small = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+large = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
 
 # TODO do the fwds too here?
 srevs = extract_queries      (blastn_rev      1e-5 large  small )

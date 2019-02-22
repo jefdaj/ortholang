@@ -1,0 +1,13 @@
+maga10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+maga = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+n = 1e-5
+
+singleFwd = extract_queries      (blastn      n maga10  maga )
+mappedFwd = extract_queries_each (blastn_each n maga10 [maga])
+
+singleRev = extract_queries      (blastn_rev      n maga  maga10 )
+mappedRev = extract_queries_each (blastn_rev_each n maga [maga10])
+
+single = singleFwd | singleRev
+mapped = mappedFwd | mappedRev # should be one list, but isn't so far
+result = [single] | mapped     # should be one list, but isn't so far
