@@ -1,0 +1,2 @@
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+result = mmseqs_createdb_all [maga]
