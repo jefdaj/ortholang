@@ -1,11 +1,11 @@
 # Combines the single, _each and _all tests to check that they're compatible.
 
-small6803faa = load_faa "data/6803genes10.faa"
-large6803faa = load_faa "data/6803genes.faa"
+single  = load_faa "data/Mycoplasma_genitalium_single.faa"
+genes10 = load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa"
 
-singles = [makeblastdb_prot small6803faa, makeblastdb_prot large6803faa]
-each = makeblastdb_prot_each [small6803faa, large6803faa]
-both = makeblastdb_prot_all  [small6803faa, large6803faa]
+singles = [makeblastdb_prot single, makeblastdb_prot genes10]
+each = makeblastdb_prot_each [single, genes10]
+both = makeblastdb_prot_all  [single, genes10]
 
 # should be [2, 2, 2, 1] but mainly want to evaluate them all;
 # the real test is that only 3 databases should be in cache/makeblastdb
