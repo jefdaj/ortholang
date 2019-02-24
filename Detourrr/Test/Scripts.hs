@@ -48,10 +48,14 @@ knownFailing =
 
   [ "sonicparanoid_basic"
 
-  -- still nondeterministic despite repeats
-  -- TODO are these related to the extract_targets issue?
-  , "blast_hits_best_hits"
-  , "ncbi_blast_reciprocal_best"
+  -- TODO get this to run on the server! (can it be done?)
+  -- , "mmseqs_createdb"
+  -- , "mmseqs_createdb_all"
+  -- , "mmseqs_search"
+  -- , "mmseqs_search_db"
+
+  -- TODO what's up with this? "indirect recursion detected" but only sometimes
+  -- , "ncbi_blast_reciprocal_best"
 
   -- TODO what's up with these? they may only fail sometimes
   , "orthofinder_orthofinder_sets"
