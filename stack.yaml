@@ -5,15 +5,10 @@ nix:
 extra-package-dbs: []
 packages:
 - .
+resolver: lts-11.22
 extra-deps:
 - Command-0.0.7
-- lock-file-0.5.0.2
-- tagged-exception-core-2.2.0.0
-- concurrent-extra-0.7.0.11
 - posix-escape-0.1
-- temporary-1.2.1.1
-- parsec-3.1.13.0
-resolver: lts-11.17
 # ghc-options:
 #     "$targets": -Werror
 #     "$everything": -O2 -N -IO
