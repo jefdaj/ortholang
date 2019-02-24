@@ -89,7 +89,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runRrr cfg ref ids
-      writeFile ("/tmp" </> takeBaseName gld <.> "out") out
+      -- writeFile ("/tmp" </> takeBaseName gld <.> "out") out
       return $ pack out
     desc = "prints expected output"
 

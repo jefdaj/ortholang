@@ -107,6 +107,7 @@ eval :: Handle -> RrrConfig -> Locks -> HashedSeqIDsRef -> RrrType -> Rules ResP
 -- TODO put this back once done debugging (duplicates everything annoyingly)
 -- eval hdl cfg ref rtype = retryIgnore . eval'
 
+-- eval hdl cfg ref ids rtype = ignoreErrors . eval'
 eval hdl cfg ref ids rtype = retryIgnore . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead

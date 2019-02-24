@@ -5,7 +5,7 @@ nix:
 extra-package-dbs: []
 packages:
 - .
-resolver: lts-13.8
+resolver: lts-12.26
 # extra-deps:
         # - Command-0.0.7
         # - posix-escape-0.1
