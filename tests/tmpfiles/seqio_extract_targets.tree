@@ -1,0 +1,50 @@
+.
+|-- cache
+|   |-- each
+|   |   `-- bd6a6cf157
+|   |       |-- f420f61695.str.list -> ../../../exprs/extract_targets/f420f61695.str.list
+|   |       `-- f420f61695.str.list.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
+|   `-- makeblastdb
+|       `-- 29aa3e211f
+|           |-- 29aa3e211f.pdb.phr
+|           |-- 29aa3e211f.pdb.pin
+|           `-- 29aa3e211f.pdb.psq
+|-- exprs
+|   |-- any
+|   |   `-- d2e9185616.str.list.list -> ../../cache/lines/...
+|   |-- blastp_db
+|   |   `-- 256c9a6f83_463652943c_6f415dd3f9.bht
+|   |-- extract_targets
+|   |   |-- 3f37da3d35.str.list -> ../../cache/lines/...
+|   |   `-- f420f61695.str.list -> ../../cache/lines/...
+|   |-- extract_targets_each
+|   |   `-- 314cbac142.str.list.list -> ../../cache/lines/...
+|   |-- gbk_to_faa
+|   |   `-- 76240427e5.faa
+|   |-- list
+|   |   |-- 79319385a1.str.list.list.list -> ../../cache/lines/...
+|   |   |-- 9060fa6bbe.faa.list -> ../../cache/lines/...
+|   |   |-- b6484c7fe4.str.list.list -> ../../cache/lines/...
+|   |   `-- fea917137a.bht.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- de87e52522.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- load_gbk
+|   |   `-- c2d4e57d18.gbk -> ../../cache/load/28ce925871.gbk
+|   |-- makeblastdb_prot
+|   |   `-- 1cd8de579f.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   `-- str
+|       |-- b4da62b027.str -> ../../cache/lines/...
+|       `-- dc7b129bbc.str -> ../../cache/lines/...
+`-- vars
+    |-- hits.bht -> ../exprs/blastp_db/256c9a6f83_463652943c_6f415dd3f9.bht
+    |-- mapped.str.list.list -> ../exprs/extract_targets_each/314cbac142.str.list.list
+    |-- result -> ../exprs/any/d2e9185616.str.list.list
+    `-- single.str.list -> ../exprs/extract_targets/3f37da3d35.str.list
+
+19 directories, 28 files

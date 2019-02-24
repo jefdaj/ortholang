@@ -48,9 +48,6 @@ knownFailing =
 
   [ "sonicparanoid_basic"
 
-  -- TODO fix interaction with seqid_ extraction?
-  , "seqio_extract_targets"
-
   -- still nondeterministic despite repeats
   -- TODO are these related to the extract_targets issue?
   , "blast_hits_best_hits"
