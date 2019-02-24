@@ -22,6 +22,7 @@ module Detourrr.Core.Eval
   )
   where
 
+import Prelude hiding ((<>))
 import Development.Shake
 import Text.PrettyPrint.HughesPJClass
 

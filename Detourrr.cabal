@@ -92,8 +92,7 @@ executable detourrr
                     Detourrr.Test.Parse.Examples,
                     Detourrr.Test.Repl,
                     Detourrr.Test.Scripts
-  build-depends:    Command,
-                    Glob,
+  build-depends:    Glob,
                     MissingH,
                     QuickCheck,
                     base,

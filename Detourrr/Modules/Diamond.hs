@@ -15,7 +15,8 @@ import Detourrr.Core.Paths         (RrrPath, fromRrrPath, exprPath)
 import Detourrr.Core.Actions       (readPaths, readLit, debugA, wrappedCmdWrite)
 import Detourrr.Modules.SeqIO      (fna, faa)
 import Detourrr.Modules.Blast      (bht)
-import System.Command              (readProcess)
+-- import System.Command              (readProcess)
+import System.Process              (readProcess)
 
 rrrModule :: RrrModule
 rrrModule = RrrModule

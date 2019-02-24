@@ -16,6 +16,7 @@ module Detourrr.Core.Pretty
   )
   where
 
+import Prelude hiding ((<>))
 import Data.Scientific            (Scientific(), toBoundedInteger)
 -- import Development.Shake.FilePath ((</>))
 import Detourrr.Core.Types

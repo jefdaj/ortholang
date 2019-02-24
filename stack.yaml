@@ -5,10 +5,10 @@ nix:
 extra-package-dbs: []
 packages:
 - .
-resolver: lts-11.22
-extra-deps:
-- Command-0.0.7
-- posix-escape-0.1
+resolver: lts-13.8
+# extra-deps:
+        # - Command-0.0.7
+        # - posix-escape-0.1
 # ghc-options:
 #     "$targets": -Werror
 #     "$everything": -O2 -N -IO
