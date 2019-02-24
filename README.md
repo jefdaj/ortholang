@@ -1,11 +1,11 @@
-Detourrr: short, reproducible phylogenomic cuts
+ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
-Detourrr is a scripting language meant to simplify a very common task in
+ShortCut is a scripting language meant to simplify a very common task in
 bioinformatics: making a list of candidate genes likely to be related to a
 biological process of interest. These are sometimes called phylogenomic cuts.
 
-Detourrr downloads, installs, and runs the same command line tools you would
+ShortCut downloads, installs, and runs the same command line tools you would
 use manually but hides most of the details. That lets you quickly perform
 searches too complex for a website without getting so far into the weeds that
 you lose days programming. It should also be suitable for users with minimal to
@@ -25,16 +25,16 @@ These 3 steps should get you going on any Linux machine:
     curl https://nixos.org/nix/install | sh
     source ~/.nix-profile/etc/profile.d/nix.sh
 
-    # 2. build Detourrr and run self-tests
-    git clone https://github.com/jefdaj/detourrr.git
-    cd detourrr
+    # 2. build ShortCut and run self-tests
+    git clone https://github.com/jefdaj/shortcut.git
+    cd shortcut
     nix-build -j$(nproc)
     export PATH=$PWD/result/bin:$PATH
-    detourrr --test
+    shortcut --test
 
     # 3. Try it out
-    detourrr --script myfirst.cut
-    detourrr
+    shortcut --script myfirst.cut
+    shortcut
 
 The rest of this document gives more details about each of them.
 
@@ -42,7 +42,7 @@ The rest of this document gives more details about each of them.
 Install Nix
 -----------
 
-Detourrr is best built using [Nix][2], which ensures that all dependencies are
+ShortCut is best built using [Nix][2], which ensures that all dependencies are
 exactly satisfied. Not much human work is required, but it will download and/or
 build a lot of packages and store them in `/nix`.
 
@@ -52,14 +52,14 @@ instructions, or just run this:
     curl https://nixos.org/nix/install | sh
     source ~/.nix-profile/etc/profile.d/nix.sh
 
-Installing Detourrr without this is theoretically possible, but much harder and less reliable.
+Installing ShortCut without this is theoretically possible, but much harder and less reliable.
 Email Jeff if you want/need to try it so he can update the README with instructions!
 
-To remove all Nix and Detourrr files later, edit the Nix line out of your `~/.bashrc` and run:
+To remove all Nix and ShortCut files later, edit the Nix line out of your `~/.bashrc` and run:
 
     rm -rf /nix
     rm -rf ~/.nix*
-    rm -rf ~/.detourrr
+    rm -rf ~/.shortcut
 
 
 Build Shortcut and run self-tests
@@ -79,9 +79,9 @@ finished package.
 
 Before using it, run the test suite to check that everything works:
 
-    ./result/bin/detourrr --test
+    ./result/bin/shortcut --test
 
-You might also want to add that to your `PATH` so you can call `detourrr` anywhere.
+You might also want to add that to your `PATH` so you can call `shortcut` anywhere.
 Add this line to your `~/.bashrc`.
 
     export PATH=$PWD/result/bin:$PATH
@@ -101,9 +101,9 @@ Try it out
 These commands will run an existing script, load an existing script in the
 interpreter, and start a new script in the interpreter respectively:
 
-* `detourrr --script your-existing.cut`
-* `detourrr --script your-existing.cut --interactive`
-* `detourrr`
+* `shortcut --script your-existing.cut`
+* `shortcut --script your-existing.cut --interactive`
+* `shortcut`
 
 See [usage.txt][3] for other command line options, and type `:help` in the
 interpreter for a list of special `:` commands (things you can only do in the live interpreter).
