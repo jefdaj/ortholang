@@ -44,6 +44,7 @@ import Detourrr.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
+import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -122,7 +123,7 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
     -- TODO debug rather than putStrLn?
     report fn status = case rsIterNumber status of
       0 -> fn
-      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn
+      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn >> delay 100000
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath
