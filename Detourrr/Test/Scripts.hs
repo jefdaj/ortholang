@@ -57,9 +57,8 @@ knownFailing =
   -- TODO what's up with this? "indirect recursion detected" but only sometimes
   -- , "ncbi_blast_reciprocal_best"
 
-  -- TODO what's up with these? they may only fail sometimes
+  -- TODO fix repeat_each to work with generated lists
   , "orthofinder_orthofinder_sets"
-  , "orthofinder_orthogroups"
 
   -- TODO what's up with these?
   , "psiblast_each_pssm"
