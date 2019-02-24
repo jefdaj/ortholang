@@ -117,7 +117,7 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
     -- TODO at least log when a retry happens for debugging
     -- TODO ask Niel if individual actions can be retried instead
     -- TODO could always fork Shake to put it in if needed too
-    retryIgnore fn = ignoreErrors $ recoverAll (limitRetries 4) $ report fn
+    retryIgnore fn = ignoreErrors $ recoverAll (limitRetries 9) $ report fn
 
     -- Reports how many failures so far and runs the main fn normally
     -- TODO debug rather than putStrLn?
