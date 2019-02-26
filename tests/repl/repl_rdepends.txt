@@ -1,36 +1,36 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ v1 = "one"
+shortcut —▶ v1 = "one"
 
-detourrr —▶ v2 = "two"
+shortcut —▶ v2 = "two"
 
-detourrr —▶ v3 = [v1, v2]
+shortcut —▶ v3 = [v1, v2]
 
-detourrr —▶ :show
+shortcut —▶ :show
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-detourrr —▶ :needs v1
+shortcut —▶ :needs v1
 v1 = "one"
 v3 = [v1, v2]
 
-detourrr —▶ :rdep v2
+shortcut —▶ :rdep v2
 unknown command: rdep
 
-detourrr —▶ :rdep v3
+shortcut —▶ :rdep v3
 unknown command: rdep
 
-detourrr —▶ v4 = v3
+shortcut —▶ v4 = v3
 
-detourrr —▶ :rdep v3
+shortcut —▶ :rdep v3
 unknown command: rdep
 
-detourrr —▶ v5 = v4
+shortcut —▶ v5 = v4
 
-detourrr —▶ :rdep v3
+shortcut —▶ :rdep v3
 unknown command: rdep
 
-detourrr —▶ :quit
+shortcut —▶ :quit
 Bye for now!

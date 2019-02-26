@@ -13,6 +13,7 @@ import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
 import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM, HashedSeqIDsRef)
 import System.Directory           (createDirectoryIfMissing, removeFile)
+import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
 import System.IO.Silently         (hCapture_)
@@ -103,7 +104,9 @@ goldenReplTree cfg ref ids ses = do
   let name   = takeBaseName ses
       desc   = name <.> "txt" ++ " creates expected tmpfiles"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
-      tree   = replaceExtension ses "tree"
+      -- tree   = replaceExtension (takeDi) "tree"
+      tree   = joinPath $ (init $ init $ splitDirectories ses)
+                      ++ ["tmpfiles", replaceExtension (takeBaseName ses) "tree"]
       stdin  = extractPrompted promptArrow txt
       tmpDir = cfgTmpDir cfg'
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
@@ -112,6 +115,8 @@ goldenReplTree cfg ref ids ses = do
                  _ <- mockRepl stdin tmpOut cfg' ref ids
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
+                 -- helpful for updating tests
+                 -- writeFile ("/tmp" </> takeBaseName ses <.> "tree") $ toGeneric cfg out
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 

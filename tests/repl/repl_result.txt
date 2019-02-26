@@ -1,13 +1,13 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ result = 1 + 3
+shortcut —▶ result = 1 + 3
 
-detourrr —▶ result
+shortcut —▶ result
 4
 
-detourrr —▶ :show result
+shortcut —▶ :show result
 1 + 3
 
-detourrr —▶ :q
+shortcut —▶ :q
 Bye for now!

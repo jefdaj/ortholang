@@ -1,7 +1,7 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ glob_files "data/*.faa"
+shortcut —▶ glob_files "data/*.faa"
 ["data/Mycoplasma_agalactiae_PG2_protein_refseq.faa",
  "data/Mycoplasma_agalactiae_protein_refseq.faa",
  "data/Mycoplasma_agalactiae_small.faa",
@@ -22,11 +22,11 @@ detourrr —▶ glob_files "data/*.faa"
  "data/Mycoplasma_pulmonis_protein_refseq.faa",
  "data/Mycoplasma_synoviae_protein_refseq.faa"]
 
-detourrr —▶ glob_files "data/*7942*"
+shortcut —▶ glob_files "data/*7942*"
 ["data/SynPCC7942_chr.gbk", "data/SynPCC7942_pANL.gbk"]
 
-detourrr —▶ glob_files "data/*.txt"
+shortcut —▶ glob_files "data/*.txt"
 ["data/genomes-genbank.txt", "data/proteomes-mmseqs.txt", "data/proteomes-refseq.txt"]
 
-detourrr —▶ :q
+shortcut —▶ :q
 Bye for now!

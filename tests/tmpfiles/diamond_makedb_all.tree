@@ -9,15 +9,15 @@
 |       `-- 39b21a8bf4.faa.ids
 |-- exprs
 |   |-- diamond_makedb_all
-|   |   `-- 4ab4e8d916.dmnd
+|   |   `-- d59d8bf71e.dmnd
 |   |-- glob_files
-|   |   `-- ab76994459.str.list -> ../../cache/lines/...
+|   |   `-- ca0574a57d.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   `-- 98d402de37.faa.list -> ../../cache/lines/...
+|   |   `-- 9eabbfd68d.faa.list -> ../../cache/lines/...
 |   `-- str
 |       `-- b4fd58abbf.str -> ../../cache/lines/...
 `-- vars
-    |-- mycoplasma.faa.list -> ../exprs/list/98d402de37.faa.list
-    `-- result -> ../exprs/diamond_makedb_all/4ab4e8d916.dmnd
+    |-- mycoplasma.faa.list -> ../exprs/list/9eabbfd68d.faa.list
+    `-- result -> ../exprs/diamond_makedb_all/d59d8bf71e.dmnd
 
 8 directories, 12 files

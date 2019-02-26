@@ -1,32 +1,32 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ []
+shortcut —▶ []
 []
 
-detourrr —▶ :t []
+shortcut —▶ :t []
 empty.list
 
-detourrr —▶ :t [[]]
+shortcut —▶ :t [[]]
 empty.list.list
 
-detourrr —▶ [[]]
+shortcut —▶ [[]]
 [[]]
 
-detourrr —▶ [[1]]
+shortcut —▶ [[1]]
 [[1]]
 
-detourrr —▶ :t [[1], []]
+shortcut —▶ :t [[1], []]
 num.list.list
 
-detourrr —▶ [[1], []]
+shortcut —▶ [[1], []]
 [[1], []]
 
-detourrr —▶ :t [[], [1]]
+shortcut —▶ :t [[], [1]]
 num.list.list
 
-detourrr —▶ [[], [1]]
+shortcut —▶ [[], [1]]
 [[], [1]]
 
-detourrr —▶ :quit
+shortcut —▶ :quit
 Bye for now!

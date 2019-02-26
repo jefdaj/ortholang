@@ -1,39 +1,39 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ v1 = "original first var"
+shortcut —▶ v1 = "original first var"
 
-detourrr —▶ v2 = "second var"
+shortcut —▶ v2 = "second var"
 
-detourrr —▶ :show
+shortcut —▶ :show
 v1 = "original first var"
 v2 = "second var"
 
-detourrr —▶ v1 = "replacement first var"
+shortcut —▶ v1 = "replacement first var"
 
-detourrr —▶ :show
+shortcut —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
 
-detourrr —▶ v2
+shortcut —▶ v2
 "second var"
 
-detourrr —▶ v3 = "third var, inserted after result"
+shortcut —▶ v3 = "third var, inserted after result"
 
-detourrr —▶ :show
+shortcut —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
 result = v2
 v3 = "third var, inserted after result"
 
-detourrr —▶ v3
+shortcut —▶ v3
 "third var, inserted after result"
 
-detourrr —▶ :show
+shortcut —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
 v3 = "third var, inserted after result"
 result = v3
 
-detourrr —▶ :quit
+shortcut —▶ :quit
 Bye for now!

@@ -1,13 +1,13 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ "stuff"
+shortcut —▶ "stuff"
 "stuff"
 
-detourrr —▶ ["more", "stuff"]
+shortcut —▶ ["more", "stuff"]
 ["more", "stuff"]
 
-detourrr —▶ ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
+shortcut —▶ ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
 ["what",
  "about",
  "a",
@@ -24,12 +24,12 @@ detourrr —▶ ["what", "about", "a", "large", "number", "of", "short", "string
  "several",
  "lines?"]
 
-detourrr —▶ ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
+shortcut —▶ ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
 ["one",
  "two",
  "three",
  "and now some longer ones",
  "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
 
-detourrr —▶ :q
+shortcut —▶ :q
 Bye for now!

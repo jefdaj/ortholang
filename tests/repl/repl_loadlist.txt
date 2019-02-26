@@ -1,13 +1,13 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ load_list "data/proteomes-mmseqs.txt" 
+shortcut —▶ load_list "data/proteomes-mmseqs.txt" 
 ["data/Mycoplasma_agalactiae_small.faa",
  "data/Mycoplasma_bovis_small.fa",
  "data/Mycoplasma_genitalium_small.faa",
  "data/Mycoplasma_hyopneumoniae_small.faa"]
 
-detourrr —▶ load_faa_each (load_list "data/proteomes-mmseqs.txt")
+shortcut —▶ load_faa_each (load_list "data/proteomes-mmseqs.txt")
 [>gi|290752267|emb|CBH40238.1|
 MNINSPNDKEIALKSYTETFLDILRQELGDQMLYKNFFANFEIKDVSKIGHITIGTTNVTPNSQYVIRAY
 ESSIQKSLDETFERKCTFSFVLLDSAVKKKVKRERKEAAIENIELSNREVDKTKTFENYVEGNFNKEAIR
@@ -37,7 +37,7 @@ DAFLFDDIQGLANKQQTSIVALEILNRFIEEDKTVIITSDKSPSLLGGFEERFITRFSSGLHIKLNKPKK
 ...
 ]
 
-detourrr —▶ load_list "data/proteomes-refseq.txt"  
+shortcut —▶ load_list "data/proteomes-refseq.txt"  
 ["data/Mycoplasma_agalactiae_PG2_protein_refseq.faa",
  "data/Mycoplasma_agalactiae_protein_refseq.faa",
  "data/Mycoplasma_arthritidis_protein_refseq.faa",
@@ -55,7 +55,7 @@ detourrr —▶ load_list "data/proteomes-refseq.txt"
  "data/Mycoplasma_pulmonis_protein_refseq.faa",
  "data/Mycoplasma_synoviae_protein_refseq.faa"]
 
-detourrr —▶ load_list "data/genomes-genbank.txt" 
+shortcut —▶ load_list "data/genomes-genbank.txt" 
 ["data/Mycoplasma_agalactiae_PG2.gbk",
  "data/Mycoplasma_arthritidis_158L3-1.gbk",
  "data/Mycoplasma_bovis_HB0801-P115.gbk",
@@ -64,7 +64,7 @@ detourrr —▶ load_list "data/genomes-genbank.txt"
  "data/SynPCC7942_chr.gbk",
  "data/SynPCC7942_pANL.gbk"]
 
-detourrr —▶ load_gbk_each (load_list "data/genomes-genbank.txt")
+shortcut —▶ load_gbk_each (load_list "data/genomes-genbank.txt")
 [LOCUS       CU179680              877438 bp    DNA     circular BCT 27-FEB-2015
 DEFINITION  Mycoplasma agalactiae PG2 chromosome, complete sequence.
 ACCESSION   CU179680
@@ -115,5 +115,5 @@ VERSION     CP000101.1
 ...
 ]
 
-detourrr —▶ :q
+shortcut —▶ :q
 Bye for now!

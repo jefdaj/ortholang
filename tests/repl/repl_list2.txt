@@ -1,8 +1,8 @@
-Welcome to the Detourrr interpreter!
+Welcome to the ShortCut interpreter!
 Type :help for a list of the available commands.
 
-detourrr —▶ [1.0]
+shortcut —▶ [1.0]
 [1]
 
-detourrr —▶ :q
+shortcut —▶ :q
 Bye for now!

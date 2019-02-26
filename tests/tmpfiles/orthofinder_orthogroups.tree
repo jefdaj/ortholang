@@ -6,7 +6,7 @@
 |   |   |-- 36189032ad.faa
 |   |   `-- 36189032ad.faa.ids
 |   `-- orthofinder
-|       `-- ed15abbd16
+|       `-- 1553eeea0a
 |           |-- 10ffe0cf0f.faa -> ../../../cache/load/10ffe0cf0f.faa
 |           |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |           |-- OrthoFinder
@@ -435,18 +435,18 @@
 |                   `-- pickle
 |-- exprs
 |   |-- list
-|   |   |-- c779427414.str.list -> ../../cache/lines/...
-|   |   `-- c847066e32.faa.list -> ../../cache/lines/...
+|   |   |-- 40050742b5.faa.list -> ../../cache/lines/...
+|   |   `-- 6307882e70.str.list -> ../../cache/lines/...
 |   |-- orthofinder
-|   |   `-- c7d59fd5aa.ofr -> ../../cache/orthofinder/ed15abbd16/result/Comparative_Genomics_Statistics/Statistics_Overall.tsv
+|   |   `-- b69016e690.ofr -> ../../cache/orthofinder/1553eeea0a/result/Comparative_Genomics_Statistics/Statistics_Overall.tsv
 |   |-- orthogroups
-|   |   `-- 49189a7446.str.list.list -> ../../cache/lines/...
+|   |   `-- 42d62fe27b.str.list.list -> ../../cache/lines/...
 |   `-- str
 |       |-- c156278223.str -> ../../cache/lines/...
 |       `-- d03a6ca5fb.str -> ../../cache/lines/...
 `-- vars
-    |-- ofres.ofr -> ../exprs/orthofinder/c7d59fd5aa.ofr
-    |-- result -> ../exprs/orthogroups/49189a7446.str.list.list
-    `-- smallbacteria.faa.list -> ../exprs/list/c847066e32.faa.list
+    |-- ofres.ofr -> ../exprs/orthofinder/b69016e690.ofr
+    |-- result -> ../exprs/orthogroups/42d62fe27b.str.list.list
+    `-- smallbacteria.faa.list -> ../exprs/list/40050742b5.faa.list
 
 26 directories, 423 files
