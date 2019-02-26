@@ -9,8 +9,10 @@ let
   # to update the the sha256sum, use nix-prefetch-url --unpack
   # (see https://github.com/NixOS/nix/issues/1381#issuecomment-300755992)
   pkgs = import (fetchTarball {
-    url = "https://github.com/jefdaj/nixpkgs/archive/2018-12-02_shortcut-demo.tar.gz";
-    sha256 = "1s9q5r4rar0j5xsyr6d7cr09p98pxx3lbnhryk8ch5qy1h0klp4h";
+    # url = "https://github.com/jefdaj/nixpkgs/archive/2018-12-02_shortcut-demo.tar.gz";
+    # sha256 = "1s9q5r4rar0j5xsyr6d7cr09p98pxx3lbnhryk8ch5qy1h0klp4h";
+    url = "https://github.com/NixOS/nixpkgs-channels/archive/nixos-18.09.tar.gz";
+    sha256 = "043npvvr8zxndhq6mfyzriv3b363biy2cnskpngv9fkxmizszrfl";
   }) {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };

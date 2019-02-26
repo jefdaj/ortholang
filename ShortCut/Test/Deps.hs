@@ -10,6 +10,8 @@ import ShortCut.Core.Types        (CutConfig(..), Locks, HashedSeqIDsRef)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
+import ShortCut.Core.Paths        (toGeneric)
+import System.FilePath.Posix      (takeBaseName)
 -- import Data.IORef                 (IORef)
 
 depCmds :: [(String, String)]
@@ -24,6 +26,8 @@ depCmds =
   , ("dplyr"     , "Rscript -e \"require(dplyr); packageVersion('dplyr')\"")
   , ("diamond"   , "diamond --version")
   , ("mmseqs"    , "mmseqs --help | grep Version")
+  -- TODO sonicparanoid
+  -- TODO orthofinder
   ]
 
 knownFailing :: [FilePath]
@@ -34,16 +38,18 @@ knownFailing =
 
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
-mkTests _ _ _ = do
+mkTests cfg _ _ = do
   testDir <- getDataFileName $ "tests"
   return $ testGroup "check dependency versions"
-         $ map (mkTestDep testDir) $ filter (\(d, _) -> not $ ("depend_" ++ d) `elem` knownFailing) depCmds
+         $ map (mkTestDep cfg testDir) $ filter (\(d, _) -> not $ ("depend_" ++ d) `elem` knownFailing) depCmds
 
-mkTestDep :: FilePath -> (TestName, String) -> TestTree
-mkTestDep dir (name, cmd) = goldenVsString desc gld act
+mkTestDep :: CutConfig -> FilePath -> (TestName, String) -> TestTree
+mkTestDep cfg dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
     gld = dir </> "depend" </> "depend_" ++ name <.> "txt"
     act = do
       (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""
+      -- helpful for updating tests
+      -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") $ toGeneric cfg $ err ++ out
       return $ pack $ err ++ out
