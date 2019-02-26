@@ -10,7 +10,12 @@ let
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
-  cabalPkg   = haskellPackages.callPackage ./shortcut.nix {};
+  # it works best if the ghc version here matches the resolve in stack.yaml
+  cabalPkg = haskell.packages.ghc844.callPackage ./shortcut.nix {};
+  devDepends = [
+    haskell.compiler.ghc844
+    stack
+  ];
   runDepends = [
     biomartr
     blast
@@ -42,7 +47,10 @@ let
 # see https://github.com/jml/nix-haskell-example
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
-  buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
+  buildDepends = (drv.buildDepends or [])
+    ++ [ makeWrapper ]
+    ++ runDepends
+    ++ (if pkgs.lib.inNixShell then devDepends else []);
   postInstall = ''
     ${drv.postInstall or ""}
     wrapProgram "$out/bin/shortcut" \
