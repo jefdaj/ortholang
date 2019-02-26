@@ -2,12 +2,18 @@
 # the main upstream repository at https://github.com/nixos/nixpkgs
 
 let
-  nixpkgs = import <nixpkgs> {};
-  inherit (nixpkgs) pkgs;
+  # fetch my pinned nixpkgs and build everything using that for reproducibility.
+  # note that it might take a really long time on your system.
+  # use this instead to try to build it with your system's current nixpkgs:
+  # pkgs = import <nixpkgs> {};
+  # to update the the sha256sum, use nix-prefetch-url --unpack
+  # (see https://github.com/NixOS/nix/issues/1381#issuecomment-300755992)
+  pkgs = import (fetchTarball {
+    url = "https://github.com/jefdaj/nixpkgs/archive/2018-12-02_shortcut-demo.tar.gz";
+    sha256 = "1s9q5r4rar0j5xsyr6d7cr09p98pxx3lbnhryk8ch5qy1h0klp4h";
+  }) {};
 
-  # this is used in place of ncbi-blast everywhere except in crb-blast...
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
-
   hmmer = pkgs.callPackage ./hmmer { };
 
   # ... because it only supports exactly 2.2.29
@@ -49,7 +55,7 @@ let
 #     sh = pkgs.callPackage ./sh {};
 #   };
 
-in nixpkgs // {
+in pkgs // {
   inherit ncbi-blast crb-blast psiblast-exb diamond hmmer orthofinder mmseqs2 sonicparanoid;
   pythonPackages = myPython;
   # python3Packages = myPython3;
