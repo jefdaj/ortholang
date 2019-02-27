@@ -45,7 +45,7 @@ import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
-import Control.Concurrent.Thread.Delay (delay)
+-- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -105,27 +105,25 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 eval :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> Rules ResPath -> IO ()
 
 -- TODO put this back once done debugging (duplicates everything annoyingly)
--- eval hdl cfg ref rtype = retryIgnore . eval'
-
 -- eval hdl cfg ref ids rtype = ignoreErrors . eval'
 eval hdl cfg ref ids rtype = retryIgnore . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program but the error will be visible.
-    ignoreErrors fn = catchAny fn (\e -> putStrLn $ "error! " ++ show e)
+    ignoreErrors fn = catchAny fn (\e -> putStrLn ("error! " ++ show e))
 
     -- This one is as bad as it sounds, so remove it when able! It's the only
     -- way I've managed to solve the occasional "openFile" lock conflicts.
     -- TODO at least log when a retry happens for debugging
     -- TODO ask Niel if individual actions can be retried instead
     -- TODO could always fork Shake to put it in if needed too
-    retryIgnore fn = ignoreErrors $ recoverAll (limitRetries 9) $ report fn
+    retryIgnore fn = ignoreErrors $ recoverAll (limitRetriesByDelay 10000000 $ fullJitterBackoff 10000) $ report fn
 
     -- Reports how many failures so far and runs the main fn normally
     -- TODO debug rather than putStrLn?
     report fn status = case rsIterNumber status of
       0 -> fn
-      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn >> delay 100000
+      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn -- >> delay 1000000
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath
