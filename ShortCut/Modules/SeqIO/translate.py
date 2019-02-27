@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# TODO fix this for newer biopython, and remove my version?
+
 # Tranlate a FASTA nulceic acid file to amino acids.
 # Assumes the first reading frame.
 # see http://biopython.org/wiki/Seq

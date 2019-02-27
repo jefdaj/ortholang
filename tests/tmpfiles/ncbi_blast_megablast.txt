@@ -1,0 +1,59 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 26c880c5e2
+|   |   |   |-- fdbe669d5b.bht -> ../../../exprs/megablast/ce1c174684_ee6834ffce_fdbe669d5b.bht
+|   |   |   `-- fdbe669d5b.bht.args -> ../../../cache/lines/...
+|   |   |-- 4bad1fd03d
+|   |   |   |-- dc3d692d58.str.list -> ../../../exprs/extract_queries/dc3d692d58.str.list
+|   |   |   `-- dc3d692d58.str.list.args -> ../../../cache/lines/...
+|   |   `-- d08e9884f0
+|   |       |-- c236ed843c.ndb -> ../../../exprs/makeblastdb_nucl/c236ed843c.ndb
+|   |       `-- c236ed843c.ndb.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 6046a54e92.fna
+|   |   `-- 6046a54e92.fna.ids
+|   `-- makeblastdb
+|       `-- 933216e8a2
+|           |-- 933216e8a2.ndb.nhr
+|           |-- 933216e8a2.ndb.nin
+|           `-- 933216e8a2.ndb.nsq
+|-- exprs
+|   |-- any
+|   |   `-- e1d5405999.str.list.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 79682ef614.str.list -> ../../cache/lines/...
+|   |   `-- dc3d692d58.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- f89c2df45e.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/...
+|   |   |-- 52c3c37aa1.fna.list -> ../../cache/lines/...
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/lines/...
+|   |-- load_fna
+|   |   `-- c1012bac1e.fna -> ../../cache/load/6046a54e92.fna
+|   |-- makeblastdb_nucl
+|   |   |-- c236ed843c.ndb -> ../../cache/lines/...
+|   |   `-- d1151e83e5.ndb -> ../../cache/lines/...
+|   |-- makeblastdb_nucl_each
+|   |   `-- 298044c5b6.ndb.list -> ../../cache/lines/...
+|   |-- megablast
+|   |   `-- ce1c174684_ee6834ffce_fdbe669d5b.bht
+|   |-- megablast_db
+|   |   `-- 8158675169_60a3af05e3_7883a016eb.bht
+|   |-- megablast_each
+|   |   `-- 8158675169_60a3af05e3_2504210c9b.bht.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   |-- singletons
+|   |   `-- d1151e83e5.fna.list.list -> ../../cache/lines/...
+|   `-- str
+|       `-- 402cb8b0f8.str -> ../../cache/lines/...
+`-- vars
+    |-- maga.fna -> ../exprs/load_fna/c1012bac1e.fna
+    |-- maga10.fna -> ../exprs/load_fna/c1012bac1e.fna
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/f89c2df45e.str.list.list
+    |-- result -> ../exprs/any/e1d5405999.str.list.list
+    `-- single.str.list -> ../exprs/extract_queries/79682ef614.str.list
+
+23 directories, 33 files

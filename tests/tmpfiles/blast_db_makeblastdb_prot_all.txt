@@ -1,0 +1,30 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 28e059b2a9.faa
+|   |   |-- 28e059b2a9.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
+|   `-- makeblastdb
+|       `-- 8948446e38
+|           |-- 8948446e38.pdb.phr
+|           |-- 8948446e38.pdb.pin
+|           `-- 8948446e38.pdb.psq
+|-- exprs
+|   |-- list
+|   |   `-- bc888dc027.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- a992387d15.faa -> ../../cache/load/28e059b2a9.faa
+|   |   `-- f43d7c92d4.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- makeblastdb_prot_all
+|   |   `-- 22906a21f5.pdb -> ../../cache/lines/...
+|   `-- str
+|       |-- b9e2f5fbe2.str -> ../../cache/lines/...
+|       `-- dc7b129bbc.str -> ../../cache/lines/...
+`-- vars
+    |-- db.pdb -> ../exprs/makeblastdb_prot_all/22906a21f5.pdb
+    |-- genes10.faa -> ../exprs/load_faa/f43d7c92d4.faa
+    |-- result -> ../vars/db.pdb
+    `-- single.faa -> ../exprs/load_faa/a992387d15.faa
+
+10 directories, 17 files

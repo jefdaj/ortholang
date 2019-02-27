@@ -10,9 +10,6 @@ import ShortCut.Core.Types        (CutConfig(..), Locks, HashedSeqIDsRef)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
-import ShortCut.Core.Paths        (toGeneric)
-import System.FilePath.Posix      (takeBaseName)
--- import Data.IORef                 (IORef)
 
 depCmds :: [(String, String)]
 depCmds =
@@ -44,7 +41,7 @@ mkTests cfg _ _ = do
          $ map (mkTestDep cfg testDir) $ filter (\(d, _) -> not $ ("depend_" ++ d) `elem` knownFailing) depCmds
 
 mkTestDep :: CutConfig -> FilePath -> (TestName, String) -> TestTree
-mkTestDep cfg dir (name, cmd) = goldenVsString desc gld act
+mkTestDep _ dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
     gld = dir </> "depend" </> "depend_" ++ name <.> "txt"

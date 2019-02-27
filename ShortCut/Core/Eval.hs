@@ -63,7 +63,7 @@ myShake cfg rules = do
       -- , shakeChange    = ChangeModtimeAndDigest -- TODO test this
       -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeProgress = progressSimple
-      -- , shakeLineBuffering = False
+      , shakeLineBuffering = True
       }
 
 {- This seems to be separately required to show the final result of eval.

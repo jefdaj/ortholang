@@ -1,0 +1,58 @@
+.
+|-- cache
+|   |-- hmmsearch
+|   |   `-- 5fbeb4e044_1a1877f992_edd2d318ca.hht
+|   |-- load
+|   |   |-- 11bbf54fc6.faa
+|   |   |-- 11bbf54fc6.faa.ids
+|   |   |-- 28e059b2a9.faa
+|   |   `-- 28e059b2a9.faa.ids
+|   `-- makeblastdb
+|       `-- c1b08194e1
+|           |-- c1b08194e1.pdb.phr
+|           |-- c1b08194e1.pdb.pin
+|           `-- c1b08194e1.pdb.psq
+|-- exprs
+|   |-- blastp_db
+|   |   `-- 4f7795b38a_0e0ad3a989_a9348062e4.bht
+|   |-- diff
+|   |   `-- b15abcb12f.str.list -> ../../cache/lines/...
+|   |-- extract_hmm_targets
+|   |   `-- 4da673ce91.str.list -> ../../cache/lines/...
+|   |-- extract_seqs
+|   |   `-- edd2d318ca_27a2df1101.faa
+|   |-- extract_targets
+|   |   `-- bd3f77a3d5.str.list -> ../../cache/lines/...
+|   |-- hmmbuild
+|   |   `-- c30b273682.hmm
+|   |-- hmmsearch
+|   |   `-- 5fbeb4e044_1a1877f992_edd2d318ca.hht -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 2ba1eb8e63.faa.list -> ../../cache/lines/...
+|   |   `-- f1651820d3.str.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- a992387d15.faa -> ../../cache/load/28e059b2a9.faa
+|   |   `-- e80c37ebc1.faa -> ../../cache/load/11bbf54fc6.faa
+|   |-- makeblastdb_prot
+|   |   `-- b06c1ee1fc.pdb -> ../../cache/lines/...
+|   |-- muscle
+|   |   `-- c816fca379.aln
+|   |-- num
+|   |   |-- 3e281fad0f.num -> ../../cache/lines/...
+|   |   `-- efc8362dcc.num -> ../../cache/lines/...
+|   `-- str
+|       |-- 4aa6e4da56.str -> ../../cache/lines/...
+|       `-- b9e2f5fbe2.str -> ../../cache/lines/...
+`-- vars
+    |-- hits.bht -> ../exprs/blastp_db/4f7795b38a_0e0ad3a989_a9348062e4.bht
+    |-- hits2.hht -> ../exprs/hmmsearch/5fbeb4e044_1a1877f992_edd2d318ca.hht
+    |-- hits2_ids.str.list -> ../exprs/extract_hmm_targets/4da673ce91.str.list
+    |-- hits_aln.aln -> ../exprs/muscle/c816fca379.aln
+    |-- hits_faa.faa -> ../exprs/extract_seqs/edd2d318ca_27a2df1101.faa
+    |-- hits_hmm.hmm -> ../exprs/hmmbuild/c30b273682.hmm
+    |-- hits_ids.str.list -> ../exprs/extract_targets/bd3f77a3d5.str.list
+    |-- mgen.faa -> ../exprs/load_faa/e80c37ebc1.faa
+    |-- query.faa -> ../exprs/load_faa/a992387d15.faa
+    `-- result -> ../exprs/diff/b15abcb12f.str.list
+
+20 directories, 35 files

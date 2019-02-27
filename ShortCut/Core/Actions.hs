@@ -282,6 +282,8 @@ wrappedCmdError :: String -> Int -> [String] -> Action a
 wrappedCmdError bin n files = do
   let files' = sort $ nub files
   liftIO $ rmAll files' -- TODO should these be patterns to match first?
+  -- TODO does this get caught by recoverAll in eval? make sure it does!
+  -- TODO also try adding a manual flush before each external command in case it's an io delay thing
   error $ unlines $
     [ "Oh no! " ++ bin ++ " failed with error code " ++ show n ++ "."
     , "The files it was working on have been deleted:"
@@ -309,10 +311,12 @@ fixEmptyText cfg ref path = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- TODO separate wrappedReadCmd with a shared lock?
+
 wrappedCmd :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
 wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = do
+  -- liftIO $ delay 1000000
   inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
   inPaths' <- if fixEmpties
                 then mapM (fixEmptyText cfg ref) inPaths

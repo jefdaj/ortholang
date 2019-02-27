@@ -1,0 +1,14 @@
+.
+|-- cache
+|-- exprs
+|   |-- list
+|   |   `-- 159ff53152.str.list -> ../../cache/lines/...
+|   |-- parse_searches
+|   |   `-- 89e60a6c19.search -> ../../cache/lines/...
+|   `-- str
+|       |-- 76894069fd.str -> ../../cache/lines/...
+|       `-- a2d23e27c8.str -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/parse_searches/89e60a6c19.search
+
+6 directories, 5 files

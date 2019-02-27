@@ -1,0 +1,23 @@
+.
+|-- cache
+|   `-- load
+|       |-- 28e059b2a9.faa
+|       `-- 28e059b2a9.faa.ids
+|-- exprs
+|   |-- any
+|   |   `-- b2d32e2c20.faa.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 107c63a073.str.list -> ../../cache/lines/...
+|   |   |-- 49ae883ffc.faa.list -> ../../cache/lines/...
+|   |   |-- 98a7f2843e.faa.list.list -> ../../cache/lines/...
+|   |   `-- e24b9b8325.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- a992387d15.faa -> ../../cache/load/28e059b2a9.faa
+|   `-- str
+|       `-- b9e2f5fbe2.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.faa.list -> ../exprs/list/e24b9b8325.faa.list
+    |-- result -> ../exprs/any/b2d32e2c20.faa.list
+    `-- single.faa -> ../exprs/load_faa/a992387d15.faa
+
+8 directories, 12 files

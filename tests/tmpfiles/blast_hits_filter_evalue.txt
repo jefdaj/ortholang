@@ -1,0 +1,59 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- e885e1ae9f
+|   |   |   |-- 775e53664d.str.list -> ../../../exprs/extract_queries/775e53664d.str.list
+|   |   |   `-- 775e53664d.str.list.args -> ../../../cache/lines/...
+|   |   `-- f5a2710248
+|   |       |-- 9fad2a8831.bht -> ../../../exprs/filter_evalue/a92c167465_9fad2a8831.bht
+|   |       `-- 9fad2a8831.bht.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 10ffe0cf0f.faa
+|   |   |-- 10ffe0cf0f.faa.ids
+|   |   |-- 11bbf54fc6.faa
+|   |   `-- 11bbf54fc6.faa.ids
+|   `-- makeblastdb
+|       `-- c1b08194e1
+|           |-- c1b08194e1.pdb.phr
+|           |-- c1b08194e1.pdb.pin
+|           `-- c1b08194e1.pdb.psq
+|-- exprs
+|   |-- any
+|   |   `-- ec04246f5c.str.list.list -> ../../cache/lines/...
+|   |-- blastp_db
+|   |   `-- 8158675169_0674510e2a_a9348062e4.bht
+|   |-- extract_queries
+|   |   |-- 775e53664d.str.list -> ../../cache/lines/...
+|   |   `-- e469f6f7dc.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- 4cff381ba0.str.list.list -> ../../cache/lines/...
+|   |-- filter_evalue
+|   |   |-- 62073b9981_783f4eff4f.bht
+|   |   `-- a92c167465_9fad2a8831.bht
+|   |-- filter_evalue_each
+|   |   `-- 62073b9981_d35b12355d.bht.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 26890dda4f.bht.list -> ../../cache/lines/...
+|   |   |-- 2ba1eb8e63.faa.list -> ../../cache/lines/...
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/...
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 41efeeb6a7.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- e80c37ebc1.faa -> ../../cache/load/11bbf54fc6.faa
+|   |-- makeblastdb_prot
+|   |   `-- b06c1ee1fc.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   |-- 6de785566e.num -> ../../cache/lines/...
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   `-- str
+|       |-- 4aa6e4da56.str -> ../../cache/lines/...
+|       `-- d03a6ca5fb.str -> ../../cache/lines/...
+`-- vars
+    |-- hits.bht -> ../exprs/blastp_db/8158675169_0674510e2a_a9348062e4.bht
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/4cff381ba0.str.list.list
+    |-- mgen.faa -> ../exprs/load_faa/e80c37ebc1.faa
+    |-- result -> ../exprs/any/ec04246f5c.str.list.list
+    |-- single.str.list -> ../exprs/extract_queries/e469f6f7dc.str.list
+    `-- small.faa -> ../exprs/load_faa/41efeeb6a7.faa
+
+20 directories, 36 files

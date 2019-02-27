@@ -16,12 +16,15 @@ import ShortCut.Reference    (writeReference)
 import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
 import System.Environment    (getArgs, withArgs)
 import System.Exit           (exitSuccess)
-import System.IO             (stdout)
+import System.IO             (hSetBuffering, BufferMode(..), stdin, stdout)
 import System.Directory      (setCurrentDirectory)
 import Data.IORef            (newIORef)
 
 main:: IO ()
 main = do
+  -- TODO is this helpful?
+  hSetBuffering stdin  LineBuffering
+  hSetBuffering stdout LineBuffering
   usage <- getUsage
   args  <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")

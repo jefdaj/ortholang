@@ -1,0 +1,22 @@
+.
+|-- cache
+|   `-- load
+|       `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|-- exprs
+|   |-- any
+|   |   `-- f95ec8c892.gbk.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 0f88494317.gbk.list -> ../../cache/lines/...
+|   |   |-- 31fe4bf836.gbk.list.list -> ../../cache/lines/...
+|   |   |-- 96a7c10140.str.list -> ../../cache/lines/...
+|   |   `-- 9db60eb091.gbk.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   `-- 5ab123378b.gbk -> ../../cache/load/28ce925871.gbk
+|   `-- str
+|       `-- b4da62b027.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.gbk.list -> ../exprs/list/9db60eb091.gbk.list
+    |-- result -> ../exprs/any/f95ec8c892.gbk.list
+    `-- single.gbk -> ../exprs/load_gbk/5ab123378b.gbk
+
+8 directories, 11 files

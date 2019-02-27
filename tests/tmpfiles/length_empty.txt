@@ -1,0 +1,11 @@
+.
+|-- cache
+|-- exprs
+|   |-- length
+|   |   `-- 761608b24a.num -> ../../cache/lines/...
+|   `-- list
+|       `-- d751713988.empty.list -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/length/761608b24a.num
+
+5 directories, 3 files

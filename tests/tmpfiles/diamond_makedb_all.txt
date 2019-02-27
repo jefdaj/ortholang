@@ -1,0 +1,23 @@
+.
+|-- cache
+|   `-- load
+|       |-- 10ffe0cf0f.faa
+|       |-- 10ffe0cf0f.faa.ids
+|       |-- 36189032ad.faa
+|       |-- 36189032ad.faa.ids
+|       |-- 39b21a8bf4.faa
+|       `-- 39b21a8bf4.faa.ids
+|-- exprs
+|   |-- diamond_makedb_all
+|   |   `-- d59d8bf71e.dmnd
+|   |-- glob_files
+|   |   `-- ca0574a57d.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 9eabbfd68d.faa.list -> ../../cache/lines/...
+|   `-- str
+|       `-- b4fd58abbf.str -> ../../cache/lines/...
+`-- vars
+    |-- mycoplasma.faa.list -> ../exprs/list/9eabbfd68d.faa.list
+    `-- result -> ../exprs/diamond_makedb_all/d59d8bf71e.dmnd
+
+8 directories, 12 files

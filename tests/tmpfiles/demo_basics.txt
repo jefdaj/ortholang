@@ -1,0 +1,15 @@
+.
+|-- cache
+|   `-- load
+|       |-- 11bbf54fc6.faa
+|       `-- 11bbf54fc6.faa.ids
+|-- exprs
+|   |-- load_faa
+|   |   `-- 7d5caf4e96.faa -> ../../cache/load/11bbf54fc6.faa
+|   `-- str
+|       `-- 967a681a55.str -> ../../cache/lines/...
+`-- vars
+    |-- mgen.faa -> ../exprs/load_faa/7d5caf4e96.faa
+    `-- result -> ../vars/mgen.faa
+
+6 directories, 6 files

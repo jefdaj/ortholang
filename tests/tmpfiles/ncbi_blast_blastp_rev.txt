@@ -1,0 +1,55 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 60556586be
+|   |   |   |-- c729b8db64.pdb -> ../../../exprs/makeblastdb_prot/c729b8db64.pdb
+|   |   |   `-- c729b8db64.pdb.args -> ../../../cache/lines/...
+|   |   |-- 9adb49e6fe
+|   |   |   |-- 5f8cbeaa95.str.list -> ../../../exprs/extract_queries/5f8cbeaa95.str.list
+|   |   |   `-- 5f8cbeaa95.str.list.args -> ../../../cache/lines/...
+|   |   `-- dcb8533152
+|   |       |-- b62abf3ff8.bht -> ../../../exprs/blastp/ce1c174684_4c3a8ed07a_b62abf3ff8.bht
+|   |       `-- b62abf3ff8.bht.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 36189032ad.faa
+|   |   |-- 36189032ad.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
+|   `-- makeblastdb
+|       `-- d77632b774
+|           |-- d77632b774.pdb.phr
+|           |-- d77632b774.pdb.pin
+|           `-- d77632b774.pdb.psq
+|-- exprs
+|   |-- blastp
+|   |   `-- ce1c174684_4c3a8ed07a_b62abf3ff8.bht
+|   |-- blastp_each
+|   |   `-- 8158675169_bbe44d6c71_bdd6a266b8.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   `-- 5f8cbeaa95.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- d740348574.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 66644cae34.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 7a2bdf0c77.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- f43d7c92d4.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- makeblastdb_prot
+|   |   `-- c729b8db64.pdb -> ../../cache/lines/...
+|   |-- makeblastdb_prot_each
+|   |   `-- f6a80bf1bf.pdb.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   |-- singletons
+|   |   `-- fd205d76d5.faa.list.list -> ../../cache/lines/...
+|   `-- str
+|       |-- c156278223.str -> ../../cache/lines/...
+|       `-- dc7b129bbc.str -> ../../cache/lines/...
+`-- vars
+    |-- maga.faa -> ../exprs/load_faa/7a2bdf0c77.faa
+    |-- maga10.faa -> ../exprs/load_faa/f43d7c92d4.faa
+    |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/d740348574.str.list.list
+    |-- n.num -> ../exprs/num/a53b190835.num
+    `-- result -> ../vars/mappedFwd.str.list.list
+
+21 directories, 31 files

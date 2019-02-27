@@ -1,0 +1,65 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 016a20eac0
+|   |   |   |-- bc3ed31acc.str.list -> ../../../exprs/extract_queries/bc3ed31acc.str.list
+|   |   |   `-- bc3ed31acc.str.list.args -> ../../../cache/lines/...
+|   |   |-- 409be732cc
+|   |   |   |-- 93ee583a3f.pdb -> ../../../exprs/makeblastdb_prot/93ee583a3f.pdb
+|   |   |   `-- 93ee583a3f.pdb.args -> ../../../cache/lines/...
+|   |   `-- fef489c6a6
+|   |       |-- add81855bb.bht -> ../../../exprs/blastx/ce1c174684_868aaf0d05_add81855bb.bht
+|   |       `-- add81855bb.bht.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 1e7afd22cf.gbk -> $WORKDIR/data/Mycoplasma_bovis_HB0801-P115.gbk
+|   |   `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|   `-- makeblastdb
+|       `-- 57d7c23a56
+|           |-- 57d7c23a56.pdb.phr
+|           |-- 57d7c23a56.pdb.pin
+|           `-- 57d7c23a56.pdb.psq
+|-- exprs
+|   |-- any
+|   |   `-- 56d39de6c2.str.list.list -> ../../cache/lines/...
+|   |-- blastx
+|   |   `-- ce1c174684_868aaf0d05_add81855bb.bht
+|   |-- blastx_db
+|   |   `-- 8158675169_868aaf0d05_bf876ecd56.bht
+|   |-- blastx_each
+|   |   `-- 8158675169_868aaf0d05_04640ab2db.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 9ce7cf3f2c.str.list -> ../../cache/lines/...
+|   |   `-- bc3ed31acc.str.list -> ../../cache/lines/...
+|   |-- extract_queries_each
+|   |   `-- 8492ca61b2.str.list.list -> ../../cache/lines/...
+|   |-- gbk_to_faa
+|   |   `-- 6ead908eb0.faa
+|   |-- gbk_to_fna
+|   |   `-- 8c896eec2f.fna
+|   |-- list
+|   |   |-- 2ba1eb8e63.faa.list -> ../../cache/lines/...
+|   |   |-- 3bbbf950a3.str.list.list -> ../../cache/lines/...
+|   |   `-- c2036af94d.str.list.list.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   |-- 5ab123378b.gbk -> ../../cache/load/28ce925871.gbk
+|   |   `-- 69a419099a.gbk -> ../../cache/load/1e7afd22cf.gbk
+|   |-- makeblastdb_prot
+|   |   |-- 5d9ed64635.pdb -> ../../cache/lines/...
+|   |   `-- 93ee583a3f.pdb -> ../../cache/lines/...
+|   |-- makeblastdb_prot_each
+|   |   `-- 8347c5d3a6.pdb.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835.num -> ../../cache/lines/...
+|   |-- singletons
+|   |   `-- 5d9ed64635.faa.list.list -> ../../cache/lines/...
+|   `-- str
+|       |-- b4da62b027.str -> ../../cache/lines/...
+|       `-- b81c880be5.str -> ../../cache/lines/...
+`-- vars
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/8492ca61b2.str.list.list
+    |-- mbov.fna -> ../exprs/gbk_to_fna/8c896eec2f.fna
+    |-- mgen.faa -> ../exprs/gbk_to_faa/6ead908eb0.faa
+    |-- result -> ../exprs/any/56d39de6c2.str.list.list
+    `-- single.str.list -> ../exprs/extract_queries/9ce7cf3f2c.str.list
+
+25 directories, 37 files
