@@ -4,6 +4,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Pretty()
 import ShortCut.Core.Parse.Basic
 
+
 import qualified Text.Parsec.Expr as E
 -- import Text.PrettyPrint.HughesPJClass (render, pPrint)
 
@@ -58,12 +59,13 @@ operatorTable cfg = [map binary bops]
 -- TODO how to fail gracefully (with fail, not error) here??
 pBop :: CutFunction -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop bop
-  | fFixity bop == Infix = (debugParser ("pBop " ++ fName bop) (pSym (head $ fName bop))) *> (return $ \e1 e2 ->
-    let deps  = union (depsOf e1) (depsOf e2)
-    in case (fTypeCheck bop) [typeOf e1, typeOf e2] of
-      Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-      Right rtn -> CutBop rtn 0 deps (fName bop) e1 e2)
-pBop _ = error "pBop only works with infix functions"
+  | fFixity bop == Infix = (debugParser ("pBop " ++ fName bop) (pSym (head $ fName bop))) *> return (pBop' bop)
+pBop _ = fail "pBop only works with infix functions"
+
+pBop' :: CutFunction -> (CutExpr -> CutExpr -> CutExpr)
+pBop' bop e1 e2 = case (fTypeCheck bop) [typeOf e1, typeOf e2] of
+  Left  msg -> error msg -- TODO can't `fail` because not in monad here?
+  Right rtn -> CutBop rtn 0 (union (depsOf e1) (depsOf e2)) (fName bop) e1 e2
 
 ---------------
 -- functions --
@@ -105,9 +107,9 @@ pFunArgs name args = debugParser "pFun" $ do
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fns' = filter (\f -> fName f == name) fns
   case fns' of
-    []      -> error $ "no function found with name '" ++ name ++ "'"
+    []      -> fail $ "no function found with name '" ++ name ++ "'"
     (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
-    _       -> error $ "function name collision! multiple fns match '" ++ name ++ "'"
+    _       -> fail $ "function name collision! multiple fns match '" ++ name ++ "'"
 
 -- A reference is just a variable name, but that variable has to be in the script.
 -- TODO why does it fail after this, but only sometimes??
@@ -138,7 +140,7 @@ pRef = debugParser "pRef" $ do
 
 typecheckArgs :: CutFunction -> [CutExpr] -> ParseM CutExpr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
-  Left  msg -> error msg
+  Left  msg -> fail msg
   Right rtn -> let deps = foldr1 union $ map depsOf args
                in return $ CutFun rtn 0 deps (fName fn) args
 
