@@ -4,10 +4,10 @@ file leaking bug:
     so randomly there will be some error, then they'll pile up and most remaining tests fail
     this is probably a big source of actual scripts failing too!
   also just learned that enclosed-exceptions is resource heavy and no longer recommended
-  rewrite everything with safe-exceptions!
-    find all instances of error, throw, throwIO, bracket, recoverAll, etc.
-    replace them with proper functions :D
-    probably make a hierarchy of explicit exceptions and always throw them by name
+  x rewrite everything with safe-exceptions!
+    x find all instances of error, throw, throwIO, bracket, recoverAll, etc.
+    x replace them with proper functions :D
+    x eval failures having to do with the file not existing shouldn't have to be repeated
   prevent file descriptor leaks
     wrap all instances of reading or writing a file with cleanup (close handles)
     remember that stdin/stdout/everything else in the tests counts too

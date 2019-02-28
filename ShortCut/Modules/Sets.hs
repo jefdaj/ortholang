@@ -87,7 +87,7 @@ rSetBop name fn s (CutBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
   where
     fun = CutFun  rtn salt deps name [lst]
     lst = CutList rtn salt deps [s1, s2]
-rSetBop _ _ _ _ = error "bad argument to rSetBop"
+rSetBop _ _ _ _ = fail "bad argument to rSetBop"
 
 rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
 rSetFold fn s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [lol]) = do
@@ -98,7 +98,7 @@ rSetFold fn s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [lol]) = do
       (ListOf t) = typeOf lol
   oPath %> \_ -> aSetFold cfg ref fn t oPath' setsPath
   return (ExprPath oPath'')
-rSetFold _ _ _ = error "bad argument to rSetFold"
+rSetFold _ _ _ = fail "bad argument to rSetFold"
 
 aSetFold :: CutConfig -> Locks -> ([Set String] -> Set String)
          -> CutType -> FilePath -> FilePath -> Action ()
@@ -113,7 +113,7 @@ aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
               then mapM return oLst
               else dedupByContent cfg ref oLst
   writeStrings etype cfg ref oPath' oLst''
-aSetFold _ _ _ _ _ _ = error "bad argument to aSetFold"
+aSetFold _ _ _ _ _ _ = fail "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
@@ -147,4 +147,4 @@ rSome s (CutFun rtn salt deps _ lol) = rExpr s diffExpr
     anyExpr  = CutFun rtn salt deps "any" lol
     allExpr  = CutFun rtn salt deps "all" lol
     diffExpr = CutBop rtn salt deps "~" anyExpr allExpr
-rSome _ _ = error "bad argument to rSome"
+rSome _ _ = fail "bad argument to rSome"

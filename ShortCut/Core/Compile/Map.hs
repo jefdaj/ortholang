@@ -94,7 +94,7 @@ rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name expr
   elemCachePtn %> aVecElem cfg ref ids eType mTmpFn actFn singleName salt
   mainOutPath  %> aVecMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rVecMain" e $ ExprPath mainOutPath
-rVecMain _ _ _ _ _ = error "bad argument to rVecMain"
+rVecMain _ _ _ _ _ = fail "bad argument to rVecMain"
 
 hashFun :: CutState -> CutExpr -> String
 hashFun st e@(CutFun _ s _ n _) = digest $ [n, show s] ++ argHashes st e

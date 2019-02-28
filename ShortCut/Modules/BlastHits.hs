@@ -84,7 +84,7 @@ aCutCol uniq n cfg ref _ [outPath, tsvPath] = do
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aCutCol _ _ _ _ _ _ = error "bad arguments to aCutCol"
+aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 
 --------------------------
 -- filter_evalue(_each) --

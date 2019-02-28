@@ -133,7 +133,7 @@ aPsiblastSearchDb = aPsiblastDb False searchArgs
 aPsiblastDb' :: Bool -> [String] -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
   aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
-aPsiblastDb' _ _ _ _ _ _ = error "bad argument to aPsiblastDb'"
+aPsiblastDb' _ _ _ _ _ _ = fail "bad argument to aPsiblastDb'"
 
 aPsiblastTrainDb' :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
@@ -291,7 +291,7 @@ rPsiblastEach st (CutFun rtn salt deps name [e, fa, fas])
     ps    = CutFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
     dbs   = CutFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
     expr' = CutFun rtn salt deps name [e, ps, dbs]
-rPsiblastEach _ _ = error "bad argument to rPsiblastEach"
+rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 psiblastAll :: CutFunction
 psiblastAll = compose1 name

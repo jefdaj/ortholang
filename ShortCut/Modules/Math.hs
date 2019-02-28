@@ -49,7 +49,7 @@ rMath fn s@(_, cfg, ref, _) e@(CutBop _ _ _ _ n1 n2) = do
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (n1, n2)
   p3 %> aMath cfg ref fn p1 p2
   return (ExprPath p3)
-rMath _ _ _ = error "bad argument to rMath"
+rMath _ _ _ = fail "bad argument to rMath"
 
 aMath :: CutConfig -> Locks -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()

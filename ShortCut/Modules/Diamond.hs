@@ -138,4 +138,4 @@ rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
     rules  = rSimple $ aDiamondFromDb dCmd
     name1  = "diamond_" ++ head dCmd
     dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
-rDiamondFromFa _ _ _ = error "bad argument to rDiamondFromFa"
+rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"

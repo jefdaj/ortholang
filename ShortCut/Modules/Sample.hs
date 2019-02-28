@@ -51,7 +51,7 @@ rSample st@(_, cfg, ref, ids) expr@(CutFun _ salt _ _ [n, lst]) = do
       (ListOf t) = typeOf lst
   outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath
   return $ ExprPath outPath'
-rSample _ _ = error "bad argument to rSample"
+rSample _ _ = fail "bad argument to rSample"
 
 aSample :: Int -> CutType -> Action2
 aSample salt t cfg ref _ outPath nPath lstPath = do

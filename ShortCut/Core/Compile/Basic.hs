@@ -110,7 +110,7 @@ aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
   where
     paths :: CutExpr -> FilePath
     paths (CutLit _ _ p) = p
-    paths _ = error "bad argument to paths"
+    paths _ = fail "bad argument to paths"
     ePath = paths expr
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aLit" out' [ePath, out']
@@ -197,7 +197,7 @@ rRef :: CutState -> CutExpr -> Rules ExprPath
 rRef (_, cfg, _, _) e@(CutRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
     ePath p = ExprPath $ debugRules cfg "rRef" e $ fromCutPath cfg p
-rRef _ _ = error "bad argument to rRef"
+rRef _ _ = fail "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.
 -- TODO unify with rLink2, rLoad etc?
@@ -235,7 +235,7 @@ rBop s@(_, cfg, _, _) e@(CutBop _ _ _ _ _ _) (n1, n2) = do
   let path  = fromCutPath cfg $ exprPath s e
       path' = debugRules cfg "rBop" e path
   return (ExprPath p1, ExprPath p2, ExprPath path')
-rBop _ _ _ = error "bad argument to rBop"
+rBop _ _ _ = fail "bad argument to rBop"
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -297,7 +297,7 @@ rLoad hashSeqIDs s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [p]) = do
   where
     out  = exprPath s e
     out' = fromCutPath cfg out
-rLoad _ _ _ = error "bad argument to rLoad"
+rLoad _ _ _ = fail "bad argument to rLoad"
 
 aLoadHash :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
 aLoadHash hashSeqIDs cfg ref ids src ext = do
@@ -352,7 +352,7 @@ rLoadList :: Bool -> RulesFn
 rLoadList hashSeqIDs s e@(CutFun (ListOf r) _ _ _ [es])
   | r `elem` [str, num] = rLoadListLits s es
   | otherwise = rLoadListLinks hashSeqIDs s e
-rLoadList _ _ _ = error "bad arguments to rLoadList"
+rLoadList _ _ _ = fail "bad arguments to rLoadList"
 
 -- special case for lists of str and num
 -- TODO remove rtn and use (typeOf expr)?
@@ -388,7 +388,7 @@ rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn salt _ _ [es]) = do
       outPath' = fromCutPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toCutPath cfg pathsPath) outPath
   return (ExprPath outPath')
-rLoadListLinks _ _ _ = error "bad arguments to rLoadListLinks"
+rLoadListLinks _ _ _ = fail "bad arguments to rLoadListLinks"
 
 aLoadListLinks :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
 aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
@@ -456,7 +456,7 @@ aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref
                                t'  = fromCutPath c t
                                is' = map (fromCutPath c) is
                            in wrappedCmdWrite parCmd fixEmpties c r o' is' [] [Cwd t'] script (o':is')
-    actFn _ _ _ _ _ = error "bad argument to aSimpleScript actFn"
+    actFn _ _ _ _ _ = fail "bad argument to aSimpleScript actFn"
 aSimpleScript' _ _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 
 rSimple' :: Maybe String
@@ -471,7 +471,7 @@ rSimple' mTmpPrefix actFn s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ exprs) = do
     mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
     outPath  = exprPath s e
     outPath' = fromCutPath cfg outPath
-rSimple' _ _ _ _ = error "bad argument to rSimple'"
+rSimple' _ _ _ _ = fail "bad argument to rSimple'"
 
 -- TODO aSimpleScript that calls aSimple' with a wrappedCmd as the actFn
 -- TODO rSimpleScript that calls rSimple + that

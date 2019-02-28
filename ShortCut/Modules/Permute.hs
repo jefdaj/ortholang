@@ -42,7 +42,7 @@ rPermute comboFn s@(_, cfg, _, _) expr@(CutFun _ salt _ _ [iList]) = do
       (ListOf t) = typeOf iList
   oList %> aPermute s comboFn iPath t salt
   return (ExprPath oList)
-rPermute _ _ _ = error "bad argument to rCombos"
+rPermute _ _ _ = fail "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??

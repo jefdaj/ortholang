@@ -269,7 +269,7 @@ mkConcatEach cType = CutFunction
 --     else copyFile' outTmp out''
 --   where
 --     fs' = fromCutPath cfg fsPath
--- aConcat _ _ _ _ = error "bad argument to aConcat"
+-- aConcat _ _ _ _ = fail "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
 aConcat :: CutType -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
@@ -290,7 +290,7 @@ aConcat cType cfg ref ids [outPath, inList] = do
   aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
                                       , toCutPath cfg inList'
                                       , toCutPath cfg emptyPath]
-aConcat _ _ _ _ _ = error "bad argument to aConcat"
+aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 
 -- writeCachedLines cfg ref outPath content = do
 

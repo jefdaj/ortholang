@@ -315,7 +315,7 @@ fixEmptyText cfg ref path = do
 wrappedCmd :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
-wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = do
+wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = actionRetry 5 $ do
   -- liftIO $ delay 1000000
   inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
   inPaths' <- if fixEmpties
@@ -333,9 +333,7 @@ wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = do
                     then \f -> withResource (cfgParLock cfg) 1 $ writeLockFn f
                     else writeLockFn
 
-  -- TODO need to upgrade shake first, and maybe nixpkgs to get shake:
-  -- writeLockFn $ withReadLocks' ref inPaths' $ actionRetry 3 $ do
-
+  -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   parLockFn $ withReadLocks' ref inPaths' $ do
     (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
       Nothing -> command opts bin args

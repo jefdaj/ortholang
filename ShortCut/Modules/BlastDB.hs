@@ -140,7 +140,7 @@ rLoadDB st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [s]) = do
   where
     oPath  = exprPath st e
     oPath' = fromCutPath cfg oPath
-rLoadDB _ _ = error "bad argument to rLoadDB"
+rLoadDB _ _ = fail "bad argument to rLoadDB"
 
 aLoadDB :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
 aLoadDB cfg ref _ oPath sPath = do
@@ -205,7 +205,7 @@ rBlastdblist s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [f]) = do
     listTmp = tmpDir' </> "dblist" <.> "txt"
     oPath'  = fromCutPath cfg oPath
     lTmp'   = toCutPath   cfg listTmp
-rBlastdblist _ _ = error "bad argument to rBlastdblist"
+rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 
 aBlastdblist :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
 aBlastdblist cfg ref _ listTmp = do
@@ -250,7 +250,7 @@ rBlastdbget st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [name]) = do
       nPath'    = toCutPath cfg nPath
   dbPrefix' %> \_ -> aBlastdbget cfg ref ids dbPrefix tmpDir nPath'
   return (ExprPath dbPrefix')
-rBlastdbget _ _ = error "bad argument to rBlastdbget"
+rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
 aBlastdbget :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
@@ -523,7 +523,7 @@ rSingletons st@(_, cfg, ref, ids) expr@(CutFun rtn _ _ _ [listExpr]) = do
       (ListOf (ListOf t)) = rtn
   outPath' %> \_ -> aSingletons t cfg ref ids outPath listPath
   return $ ExprPath outPath'
-rSingletons _ _ = error "bad argument to rSingletons"
+rSingletons _ _ = fail "bad argument to rSingletons"
 
 aSingletons :: CutType -> Action1
 aSingletons elemType cfg ref _ outPath listPath = do

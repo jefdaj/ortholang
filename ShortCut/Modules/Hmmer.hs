@@ -151,4 +151,4 @@ aExtractHmm uniq n cfg ref _ [outPath, tsvPath] = do
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aExtractHmm" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aExtractHmm _ _ _ _ _ _ = error "bad arguments to aExtractHmm"
+aExtractHmm _ _ _ _ _ _ = fail "bad arguments to aExtractHmm"

@@ -164,7 +164,7 @@ rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
     name1 = fName  $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
     dbExpr = CutFun dbType salt (depsOf s) name2 [s] 
-rMkBlastFromFa _ _ _ = error "bad argument to rMkBlastFromFa"
+rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 ---------------------
 -- *blast*_db_each --
@@ -208,4 +208,4 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _   [e, q, ss])
     ss'   = CutFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_each"
-rMkBlastFromFaEach _ _ _ = error "bad argument to rMkBlastFromFaEach"
+rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

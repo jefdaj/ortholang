@@ -86,7 +86,7 @@ rPlotNumList script st@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [title, nums]) = 
   outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
                       aSimpleScript script cfg ref ids (out:args')
   return outPath''
-rPlotNumList _ _ _ = error "bad argument to rPlotNumList"
+rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
 
 ---------------------
 -- plot num.scores --
@@ -133,7 +133,7 @@ rPlotNumScores xFn script st@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [title, num
   outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
                       aSimpleScript script cfg ref ids (out:args')
   return outPath''
-rPlotNumScores _ _ _ _ = error "bad argument to rPlotNumScores"
+rPlotNumScores _ _ _ _ = fail "bad argument to rPlotNumScores"
 
 rPlotRepeatScores :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rPlotRepeatScores = rPlotNumScores indRepeatVarName

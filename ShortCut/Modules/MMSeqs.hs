@@ -208,4 +208,4 @@ rMmseqsSearch st (CutFun rtn salt deps name [e, q, s])
   where
     rules = fRules mmseqsSearchDb
     sDb = CutFun mms salt (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
-rMmseqsSearch _ _ = error "bad argument to rMmseqsSearch"
+rMmseqsSearch _ _ = fail "bad argument to rMmseqsSearch"

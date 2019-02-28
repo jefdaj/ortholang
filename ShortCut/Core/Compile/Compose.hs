@@ -47,4 +47,4 @@ rCompose1 fn1 rtn1 fn2 st (CutFun rtn2 salt deps _ args) = (fRules fn2) st expr2
     expr1'  = CutFun rtn1 salt deps (fName fn1) args
     expr1'' = CutRules $ CompiledExpr expr1' $ (fRules fn1) st expr1'
     expr2   = CutFun rtn2 salt deps (fName fn2) [expr1'']
-rCompose1 _ _ _ _ _ = error "bad argument to rCompose1"
+rCompose1 _ _ _ _ _ = fail "bad argument to rCompose1"

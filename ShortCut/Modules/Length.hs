@@ -62,7 +62,7 @@ rLen s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [l]) = do
       lPath'  = toCutPath   cfg lPath
   out' %> \_ -> aLen cfg ref ids [outPath, lPath']
   return (ExprPath out')
-rLen _ _ = error "bad arguments to rLen"
+rLen _ _ = fail "bad arguments to rLen"
 
 tLenEach :: [CutType] -> Either String CutType
 tLenEach [ ListOf  Empty     ] = Right (ListOf num) -- specifically, []

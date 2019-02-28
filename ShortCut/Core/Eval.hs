@@ -28,9 +28,9 @@ import Text.PrettyPrint.HughesPJClass
 
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty (renderIO)
-import ShortCut.Core.Config (debug)
+-- import ShortCut.Core.Config (debug)
 
-import Control.Retry
+-- import Control.Retry
 -- import qualified Data.Map as M
 
 import Control.Exception.Safe         (catchAny)
@@ -103,27 +103,11 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> Rules ResPath -> IO ()
-
--- TODO put this back once done debugging (duplicates everything annoyingly)
--- eval hdl cfg ref ids rtype = ignoreErrors . eval'
-eval hdl cfg ref ids rtype = retryIgnore . eval'
+eval hdl cfg ref ids rtype = ignoreErrors . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
-    -- of crashing the rest of the program but the error will be visible.
+    -- of crashing the rest of the program. The error will still be visible.
     ignoreErrors fn = catchAny fn (\e -> putStrLn ("error! " ++ show e))
-
-    -- This one is as bad as it sounds, so remove it when able! It's the only
-    -- way I've managed to solve the occasional "openFile" lock conflicts.
-    -- TODO at least log when a retry happens for debugging
-    -- TODO ask Niel if individual actions can be retried instead
-    -- TODO could always fork Shake to put it in if needed too
-    retryIgnore fn = ignoreErrors $ recoverAll (limitRetriesByDelay 10000000 $ fullJitterBackoff 100) $ report fn
-
-    -- Reports how many failures so far and runs the main fn normally
-    -- TODO debug rather than putStrLn?
-    report fn status = case rsIterNumber status of
-      0 -> fn
-      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn -- >> delay 1000000
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath

@@ -58,7 +58,7 @@ rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
   where
     rules = fRules $ mkBlastFromFa d
     name  = fName  $ mkBlastFromFa d
-rMkBlastFromFaRev _ _ _ = error "bad argument to rMkBlastFromFaRev"
+rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 ----------------------
 -- *blast*_rev_each --
@@ -91,13 +91,13 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
                            else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
-rMkBlastFromFaRevEach _ _ _ = error "bad argument to rMkBlastFromFaRevEach"
+rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
 aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ _ _ _ = error "bad argument to aMkBlastFromDbRev"
+aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
 
 ---------------------
 -- reciprocal_best --
@@ -165,7 +165,7 @@ rMkBlastRbh (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, r]) = rExpr s main
     main  = CutFun bht salt deps "reciprocal_best" [lHits, rHits]
     lHits = CutFun bht salt deps  bCmd            [e, l, r]
     rHits = CutFun bht salt deps (bCmd ++ "_rev") [e, l, r]
-rMkBlastRbh _ _ _ = error "bad argument to rMkBlastRbh"
+rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 
 ----------------------
 -- *blast*_rbh_each --
@@ -188,4 +188,4 @@ rMkBlastRbhEach (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, rs]) = rExpr s ma
     main  = CutFun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
     lHits = CutFun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
     rHits = CutFun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
-rMkBlastRbhEach _ _ _ = error "bad argument to rMkBlastRbh"
+rMkBlastRbhEach _ _ _ = fail "bad argument to rMkBlastRbh"

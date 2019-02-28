@@ -11,6 +11,7 @@ system-ghc: true
 resolver: lts-12.26
 extra-deps:
 - posix-escape-0.1
+- shake-0.17.5
 # ghc-options:
 #     "$targets": -Werror
 #     "$everything": -O2 -N -IO

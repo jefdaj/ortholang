@@ -68,4 +68,4 @@ rRepeatN s@(scr, _, _, _) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ 
     subs    = zipWith setSalt [salt .. salt+nReps-1] (repeat subExpr)
     -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
     subList = CutList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
-rRepeatN _ _ = error "bad argument to rRepeatN"
+rRepeatN _ _ = fail "bad argument to rRepeatN"

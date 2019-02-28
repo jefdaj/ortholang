@@ -66,7 +66,7 @@ rGlobFiles s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [p]) = do
       path'   = toCutPath cfg path
   out' %> \_ -> aGlobFiles cfg ref outPath path'
   return (ExprPath out')
-rGlobFiles _ _ = error "bad arguments to rGlobFiles"
+rGlobFiles _ _ = fail "bad arguments to rGlobFiles"
 
 aGlobFiles :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
 aGlobFiles cfg ref outPath path = do

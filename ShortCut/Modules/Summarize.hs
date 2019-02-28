@@ -46,7 +46,7 @@ rSummary summaryFn s@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [iList]) = do
   let oPath = fromCutPath cfg $ exprPath s expr
   oPath %> aSummary cfg ref summaryFn iPath
   return (ExprPath oPath)
-rSummary _ _ _ = error "bad argument to rSummary"
+rSummary _ _ _ = fail "bad argument to rSummary"
 
 aSummary :: CutConfig -> Locks -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()

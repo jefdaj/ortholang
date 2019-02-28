@@ -119,7 +119,7 @@ executable shortcut
                     regex-compat,
                     silently,
                     scientific,
-                    shake,
+                    shake >= 0.17.5,
                     split,
                     strict,
                     -- tagged-exception-core,
