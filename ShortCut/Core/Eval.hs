@@ -64,6 +64,9 @@ myShake cfg rules = do
       -- , shakeCommandOptions = [EchoStdout True]
       -- , shakeProgress = progressSimple
       , shakeLineBuffering = True
+      -- , shakeStaunch = True
+      -- , shakeColor = True
+      -- TODO shakeShare to implement shared cache on the demo site!
       }
 
 {- This seems to be separately required to show the final result of eval.

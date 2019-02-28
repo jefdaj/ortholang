@@ -9,9 +9,11 @@ file leaking bug:
     x replace them with proper functions :D
     x eval failures having to do with the file not existing shouldn't have to be repeated
   prevent file descriptor leaks
+    any reason not to make all reads strict?
     wrap all instances of reading or writing a file with cleanup (close handles)
     remember that stdin/stdout/everything else in the tests counts too
     check that number of open file desciptors stays low during --test
+  try re-implementing the disk resource now and see if it keeps open files in check
 
 bugs identified while updating tests:
   extracts_seqs broken, possibly because of the seqid_ hashing
