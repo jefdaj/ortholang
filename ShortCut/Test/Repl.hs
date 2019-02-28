@@ -58,7 +58,7 @@ mockRepl stdinLines path cfg ref ids = do
     _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids
     -- putStrLn $ "stdout: '" ++ out ++ "'"
     return ()
-  out <- readFile tmpPath
+  out <- readFileStrict ref tmpPath
   writeFile path $ toGeneric cfg out
   removeFile tmpPath
   return ()

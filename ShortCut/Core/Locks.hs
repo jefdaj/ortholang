@@ -82,6 +82,7 @@ withReadLocks' ref paths actFn = do
     `actionFinally`
     (debugLock ("withReadLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseRead locks)
 
+-- TODO should this be strict too, even though just need one char?
 isActuallyEmpty :: Locks -> FilePath -> IO Bool
 isActuallyEmpty ref path = do
   txt <- withReadLock ref path $ readFile path

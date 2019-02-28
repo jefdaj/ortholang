@@ -13,7 +13,8 @@ import Control.Monad               (when, forM)
 import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
                                     debugTrackWrite, readLit, readPaths, writeLit, readLits,
                                     writeLits, writePath, debugA, debugL, debugIO, debugNeed,
-                                    cachedLinesPath, debugL, writeStrings, readStrings, writePaths)
+                                    cachedLinesPath, debugL, writeStrings, readStrings, writePaths,
+                                    readFileStrict)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
                                     toCutPath, CutPath)
@@ -548,7 +549,7 @@ aSingletons elemType cfg ref _ outPath listPath = do
 -- TODO remove the Volumes... lines too?
 showBlastDb :: CutConfig -> Locks -> FilePath -> IO String
 showBlastDb cfg ref path = do
-  path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFile path
+  path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
       args = ["-info", "-db", dbBase]

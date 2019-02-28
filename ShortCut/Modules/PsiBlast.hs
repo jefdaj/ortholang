@@ -13,7 +13,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPath, 
                                     wrappedCmdWrite, debugL, debugA, debugNeed,
-                                    writeCachedLines)
+                                    writeCachedLines, readFileStrict')
 import ShortCut.Core.Compile.Basic (defaultTypeCheck)
 import ShortCut.Core.Paths         (fromCutPath, cacheDir)
 import ShortCut.Modules.BlastDB    (pdb)
@@ -187,7 +187,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
   -- before running psiblast, check whether the query is an empty pssm
   -- and if so, just return empty hits immediately
-  lines2 <- fmap (take 2 . lines) $ readFile' qPath'
+  lines2 <- fmap (take 2 . lines) $ readFileStrict' cfg ref qPath'
   if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
     then writeCachedLines cfg ref oPath' ["<<emptybht>>"]
     else do
@@ -212,8 +212,8 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
        - (If we aren't writing a PSSM, then tPath' is already the final file)
        -}
       when writingPssm $ do
-        querySeqId <- fmap (head . words . head . lines) $ readFile' qPath'
-        pssmLines <- fmap lines $ readFile' tPath'
+        querySeqId <- fmap (head . words . head . lines) $ readFileStrict' cfg ref qPath'
+        pssmLines <- fmap lines $ readFileStrict' cfg ref tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName dbPre'
             trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"

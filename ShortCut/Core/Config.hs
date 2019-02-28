@@ -12,7 +12,7 @@ import Development.Shake           (newResourceIO)
                                    -- removeFiles, liftIO)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
-import ShortCut.Core.Util         (absolutize)
+import ShortCut.Core.Util         (absolutize, readFileStrict)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)

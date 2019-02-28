@@ -26,8 +26,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Util    (digest, digestLength)
-import ShortCut.Core.Locks   (withReadLock', withWriteLock')
-import ShortCut.Core.Actions (debugTrackWrite)
+import ShortCut.Core.Locks   (withWriteLock')
+import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.List.Utils       (split)
 import Data.Maybe (fromJust)
@@ -55,9 +55,10 @@ hashIDsFile :: CutConfig -> Locks -> CutPath -> CutPath -> Action HashedSeqIDs
 hashIDsFile cfg ref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
-  txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  txt <- readFileStrict' cfg ref inPath'
   let (fasta', ids) = hashIDsFasta txt
-  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta'
+  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
   debugTrackWrite cfg [outPath']
   return ids
 
@@ -65,7 +66,7 @@ writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedSeqIDs -> Action ()
 writeHashedIDs cfg ref path ids = do
   withWriteLock' ref path'
     $ liftIO
-    $ writeFile path'
+    $ writeFile path' -- TODO be strict?
     $ unlines
     $ map toLine
     $ M.toList ids
@@ -94,17 +95,19 @@ unhashIDsFile :: CutConfig -> Locks -> HashedSeqIDs -> CutPath -> CutPath -> Act
 unhashIDsFile cfg ref ids inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
-  txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
+  txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
   let txt' = unhashIDs cfg ids txt
-  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt'
+  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt' -- TODO be strict?
   debugTrackWrite cfg [outPath']
 
 -- TODO should this be IO or Action?
 readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedSeqIDs
 readHashedIDs cfg ref path = do
   let path' = fromCutPath cfg path
-  txt <- withReadLock' ref path' $ readFile' path'
+  -- txt <- withReadLock' ref path' $ readFile' path'
+  txt <- readFileStrict' cfg ref path'
   let ids = map (\(i, si) -> (i, tail si)) $ map (splitAt digestLength) $ lines txt
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
   return $ M.fromList ids

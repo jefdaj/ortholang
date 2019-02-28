@@ -16,6 +16,8 @@ module ShortCut.Core.Actions
   , readLitPaths
   , readString
   , readStrings
+  , readFileStrict
+  , readFileStrict'
 
   -- write files
   , writeLit
@@ -413,7 +415,7 @@ wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = do
 ----------
 
 -- This is the only function that should access readFileStrict' directly;
--- all others go through readStr and readList.
+-- all others go through readStr and readList. TODO no longer true?
 -- TODO use a CutPath here?
 -- digestFile :: CutConfig -> Locks -> FilePath -> Action String
 -- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest

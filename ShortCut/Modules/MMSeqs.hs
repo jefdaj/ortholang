@@ -52,7 +52,7 @@ mms = CutType
       path' <- fmap (<.> "lookup") $ resolveSymlinks Nothing path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = head $ words out
-      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFile path'
+      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' cfg ref path'
       let desc = "MMSeqs2 database (" ++ n ++ " sequences)"
       return desc
   }
