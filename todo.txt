@@ -11,8 +11,11 @@ file leaking bug:
   prevent file descriptor leaks
     any reason not to make all reads strict?
     wrap all instances of reading or writing a file with cleanup (close handles)
-    remember that stdin/stdout/everything else in the tests counts too
     check that number of open file desciptors stays low during --test
+      remember that stdin/stdout/everything else in the tests counts too
+      things to handle:
+        .show files
+        makeblastdb seems to have particular issues
   try re-implementing the disk resource now and see if it keeps open files in check
 
 bugs identified while updating tests:
