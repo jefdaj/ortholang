@@ -33,7 +33,7 @@ import ShortCut.Core.Config (debug)
 import Control.Retry
 -- import qualified Data.Map as M
 
-import Control.Exception.Enclosed     (catchAny)
+import Control.Exception.Safe         (catchAny)
 import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic    (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)

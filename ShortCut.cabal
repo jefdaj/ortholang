@@ -103,8 +103,8 @@ executable shortcut
                     directory,
                     data-default-class,
                     docopt,
-                    exceptions,
-                    enclosed-exceptions,
+                    -- exceptions,
+                    -- enclosed-exceptions,
                     safe-exceptions,
                     -- TODO remove in favor of path
                     filelock,

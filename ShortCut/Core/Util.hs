@@ -33,7 +33,7 @@ import qualified System.IO.Strict as Strict
 
 import Data.Monoid ((<>))
 import Control.Monad          (unless)
-import Control.Monad.Catch    (MonadCatch, catch, throwM)
+import Control.Exception.Safe (MonadCatch, catch, throwM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.ByteString.Char8  (pack)
