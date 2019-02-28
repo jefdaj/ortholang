@@ -12,6 +12,7 @@ resolver: lts-12.26
 extra-deps:
 - posix-escape-0.1
 - shake-0.17.5
-# ghc-options:
-#     "$targets": -Werror
-#     "$everything": -O2 -N -IO
+ghc-options:
+        # "$everything": -no-rtsopts
+        # "$targets": -Werror
+        "$everything": -threaded -rtsopts -Wall -Wno-orphans -O2 "-with-rtsopts=-N -IO"

@@ -143,6 +143,7 @@ runCut :: CutConfig -> Locks -> HashedSeqIDsRef -> IO String
 runCut cfg ref ids =  do
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
+  delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
   return $ toGeneric cfg out
