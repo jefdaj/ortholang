@@ -117,7 +117,7 @@ eval hdl cfg ref ids rtype = ignoreErrors . eval'
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        need [path] -- TODO is this done automatically in the case of result?
+        actionRetry 3 $ need [path] -- TODO is this done automatically in the case of result?
         res  <- prettyResult cfg ref rtype $ toCutPath cfg path
         ids' <- liftIO $ readIORef ids
         -- liftIO $ putStrLn $ show ids'

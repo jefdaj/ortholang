@@ -360,7 +360,7 @@ wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = actionRetry 5 $
 -- TODO issue with not re-raising errors here?
 wrappedCmdExit :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
-wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = do
+wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = actionRetry 3 $ do
   (_, _, code) <- wrappedCmd parCmd fixEmpties cfg r mOut inPtns opts bin as
   case mOut of
     Nothing -> return ()
@@ -380,7 +380,7 @@ wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes 
  -}
 wrappedCmdWrite :: Bool -> Bool -> CutConfig -> Locks -> FilePath -> [String] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
-wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args = do
+wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args = actionRetry 3 $ do
   debugL cfg $ "wrappedCmdWrite outPath: "  ++ outPath
   debugL cfg $ "wrappedCmdWrite inPtns: "   ++ show inPtns
   debugL cfg $ "wrappedCmdWrite outPaths: " ++ show outPaths
@@ -402,7 +402,7 @@ wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args 
 wrappedCmdOut :: Bool -> Bool -> CutConfig -> Locks -> [String]
               -> [String] -> [CmdOption] -> FilePath
               -> [String] -> Action String
-wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = do
+wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = actionRetry 3 $ do
   (out, err, code) <- wrappedCmd parCmd fixEmpties cfg ref Nothing inPtns opts bin args
   case code of
     0 -> return out
