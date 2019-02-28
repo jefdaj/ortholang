@@ -34,7 +34,7 @@ import System.FilePath            (takeDirectory)
 -- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO parametarize FilePath and re-export with CutPath in Types.hs?
-type Locks = IORef (Map FilePath RWLock)
+type Locks = (Resource, IORef (Map FilePath RWLock))
 
 {- A horrible hack to avoid import the import cycle caused by using a CutConfig
  - here. For now, just change the code to enable.
@@ -48,10 +48,15 @@ debugLock' :: String -> Action ()
 debugLock' = liftIO . debugLock
 
 initLocks :: IO Locks
-initLocks = newIORef Map.empty
+initLocks = do
+  -- only approximately related to the number of files open,
+  -- but keeps them in check at least
+  disk  <- newResourceIO "disk" 20
+  locks <- newIORef Map.empty
+  return (disk, locks)
 
 getLock :: Locks -> FilePath -> IO RWLock
-getLock ref path = do
+getLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   debugLock $ "getLock getting lock for '" ++ path ++ "'"
   atomicModifyIORef ref $ \c -> case Map.lookup path c of
@@ -59,7 +64,7 @@ getLock ref path = do
     Just l' -> (c, l')
 
 withReadLock :: Locks -> FilePath -> IO a -> IO a
-withReadLock ref path ioFn = do
+withReadLock ref path ioFn = do -- TODO IO issue here?
   l <- liftIO $ getLock ref path
   bracket_
     (debugLock ("withReadLock acquiring '" ++ path ++ "'") >> RWLock.acquireRead l)

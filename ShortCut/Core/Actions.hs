@@ -317,7 +317,7 @@ fixEmptyText cfg ref path = do
 wrappedCmd :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
            -> Action (String, String, Int)
-wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = actionRetry 5 $ do
+wrappedCmd parCmd fixEmpties cfg ref@(disk, _) mOut inPtns opts bin args = actionRetry 5 $ do
   -- liftIO $ delay 1000000
   inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
   inPaths' <- if fixEmpties
@@ -337,7 +337,7 @@ wrappedCmd parCmd fixEmpties cfg ref mOut inPtns opts bin args = actionRetry 5 $
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   parLockFn $ withReadLocks' ref inPaths' $ do
-    (Stdout out, Stderr err, Exit code) <- case cfgWrapper cfg of
+    (Stdout out, Stderr err, Exit code) <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
       Nothing -> command opts bin args
       Just w  -> command (Shell:opts) w [escape $ unwords (bin:args)]
     let code' = case code of
