@@ -59,7 +59,7 @@ instance Pretty CutType where
   pPrint t              = text (tExt t) <+> parens (text $ tDesc t)
 
 instance Pretty CutVar where
-  pPrint (CutVar s) = text s
+  pPrint (CutVar _ s) = text s -- TODO show the seed?
 
 -- TODO add descriptions here? if so, need to separate actual extension code
 -- instance Pretty Ext where

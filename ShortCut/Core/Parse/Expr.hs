@@ -121,7 +121,7 @@ pFunArgs name args = debugParser "pFun" $ do
 pRef :: ParseM CutExpr
 pRef = debugParser "pRef" $ do
   -- v@(CutVar var) <- pVarOnly
-  v@(CutVar var) <- pVar
+  v@(CutVar _ var) <- pVar
   -- let v = CutVar var
   (scr, _, _, _) <- getState
   debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr

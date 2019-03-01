@@ -89,7 +89,7 @@ pIden = debugParser "pIden" $ lexeme $ do
     rest  = letter <|> digit <|> oneOf "-_"
 
 pVar :: ParseM CutVar
-pVar = debugParser "pVar" (CutVar <$> pIden)
+pVar = debugParser "pVar" (CutVar initialRandomSeed <$> pIden)
 
 -- TODO is the error in here?? maybe it consumes a space and therefore doesn't fail?
 pEq :: ParseM ()

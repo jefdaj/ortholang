@@ -31,6 +31,7 @@ import Data.Scientific
 import ShortCut.Core.Types
 import ShortCut.Core.Parse   (spaceChars, escapeChars, literalChars)
 import Test.QuickCheck
+import ShortCut.Core.Parse.Basic (initialRandomSeed)
 
 -------------------------
 -- Arbitrary instances --
@@ -57,7 +58,7 @@ gVar = (:) <$> first <*> listOf rest
 newtype ExVar = ExVar CutVar deriving (Eq, Show)
 
 instance Arbitrary ExVar where
-  arbitrary = (ExVar . CutVar) <$> gVar
+  arbitrary = (ExVar . CutVar initialRandomSeed) <$> gVar
 
 -- references --
 

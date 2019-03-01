@@ -48,6 +48,7 @@ import Control.Exception.Safe   (Typeable, throw, try)
 import System.Console.ANSI      (clearScreen, cursorUp)
 import Data.IORef               (readIORef)
 import Development.Shake.FilePath (takeFileName)
+import ShortCut.Core.Parse.Basic (initialRandomSeed)
 
 --------------------
 -- main interface --
@@ -165,7 +166,7 @@ updateVars :: CutScript -> CutAssign -> CutScript
 updateVars scr asn@(var, expr) =
   if var `elem` depsOf expr then scr else scr'
   where
-    scr' = if var /= CutVar "result" && var `elem` map fst scr
+    scr' = if var /= CutVar initialRandomSeed "result" && var `elem` map fst scr
              then replaceVar asn scr
              else delFromAL scr var ++ [asn]
 
@@ -271,7 +272,7 @@ cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
   [path] -> do
     saveScript scr path
     return (scr, cfg { cfgScript = Just path }, locks, ids)
-  [var, path] -> case lookup (CutVar var) scr of
+  [var, path] -> case lookup (CutVar initialRandomSeed var) scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just e  -> saveScript (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
@@ -281,7 +282,7 @@ depsOnly :: CutExpr -> CutScript -> CutScript
 depsOnly expr scr = deps ++ [res]
   where
     deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
-    res  = (CutVar "result", expr)
+    res  = (CutVar initialRandomSeed "result", expr)
 
 -- TODO where should this go?
 saveScript :: CutScript -> FilePath -> IO ()
@@ -291,10 +292,10 @@ saveScript scr path = absolutize path >>= \p -> writeScript p scr
 -- TODO except, this should work with expressions too!
 cmdNeededBy :: CutState -> Handle -> String -> IO CutState
 cmdNeededBy st@(scr, cfg, _, _) hdl var = do
-  case lookup (CutVar var) scr of
+  case lookup (CutVar initialRandomSeed var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar var):depsOf e) scr
+    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar initialRandomSeed var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar initialRandomSeed var):depsOf e) scr
   return st
 
 -- TODO move to Pretty.hs
@@ -305,17 +306,17 @@ cmdNeededBy st@(scr, cfg, _, _) hdl var = do
 
 cmdNeeds :: CutState -> Handle -> String -> IO CutState
 cmdNeeds st@(scr, cfg, _, _) hdl var = do
-  let var' = CutVar var
+  let var' = CutVar initialRandomSeed var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar var):rDepsOf scr var') scr
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar initialRandomSeed var):rDepsOf scr var') scr
   return st
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: CutState -> Handle -> String -> IO CutState
 cmdDrop (_, cfg, ref, ids) _ [] = clear >> return ([], cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
 cmdDrop st@(scr, cfg, ref, ids) hdl var = do
-  let v = CutVar var
+  let v = CutVar initialRandomSeed var
   case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just _  -> return (delFromAL scr v, cfg, ref, ids)
@@ -337,7 +338,7 @@ showExprType st e = case parseExpr st e of
   Left  err  -> show err
 
 showAssignType :: CutAssign -> String
-showAssignType (CutVar v, e) = unwords [typedVar, "=", prettyExpr]
+showAssignType (CutVar _ v, e) = unwords [typedVar, "=", prettyExpr]
   where
     -- parentheses also work:
     -- typedVar = v ++ " (" ++ show (typeOf e) ++ ")"
@@ -348,7 +349,7 @@ showAssignType (CutVar v, e) = unwords [typedVar, "=", prettyExpr]
 cmdShow :: CutState -> Handle -> String -> IO CutState
 cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
 cmdShow st@(scr, cfg, _, _) hdl var = do
-  case lookup (CutVar var) scr of
+  case lookup (CutVar initialRandomSeed var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
   return st
@@ -397,7 +398,7 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
   where
     wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
-    varNames = map ((\(CutVar v) -> v) . fst) scr
+    varNames = map ((\(CutVar _ v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 

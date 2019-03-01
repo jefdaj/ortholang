@@ -85,7 +85,7 @@ pResult = debugParser "pResult" $ do
   -- (_, cfg, _) <- getState
   e <- pExpr
   -- let e' = debugParser cfg "pResult" e
-  return (CutVar "result", e)
+  return (CutVar initialRandomSeed "result", e)
 
 pStatement :: ParseM CutAssign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)

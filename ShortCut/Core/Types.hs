@@ -110,7 +110,8 @@ newtype ResPath  = ResPath  FilePath deriving Show -- ~/.shortcut/vars/result[.<
 
 newtype RandomSeed = RandomSeed String deriving (Eq, Show, Read)
 
-newtype CutVar = CutVar String deriving (Eq, Show, Read)
+data CutVar = CutVar RandomSeed String
+  deriving (Eq, Show, Read)
  
 -- the common fields are:
 -- * return type

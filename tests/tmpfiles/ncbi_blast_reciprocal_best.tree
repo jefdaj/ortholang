@@ -51,13 +51,13 @@
 |   |-- length
 |   |   `-- df76ed2a87.num -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 172c483aa8.faa.list -> ../../cache/lines/...
+|   |   |-- 034dd16cad.faa.list -> ../../cache/lines/...
 |   |   |-- 1a1463808a.faa.list -> ../../cache/lines/...
+|   |   |-- 41e7eb2c19.faa.list -> ../../cache/lines/...
+|   |   |-- 494080a10f.faa.list -> ../../cache/lines/...
 |   |   |-- 66644cae34.faa.list -> ../../cache/lines/...
-|   |   |-- 672cecb9a7.faa.list -> ../../cache/lines/...
-|   |   |-- 7912455d5d.faa.list -> ../../cache/lines/...
-|   |   |-- af857e25cf.faa.list -> ../../cache/lines/...
-|   |   `-- fb081c11d9.faa.list -> ../../cache/lines/...
+|   |   |-- a88828dba0.faa.list -> ../../cache/lines/...
+|   |   `-- c302dcd726.faa.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 7d5caf4e96_RandomSeed\ "1346387766\ 2147361323".faa -> ../../cache/load/11bbf54fc6.faa
 |   |   |-- 7d5caf4e96_RandomSeed\ "1601120197\ 2147402015".faa -> ../../cache/load/11bbf54fc6.faa
@@ -87,43 +87,43 @@
 |       `-- 967a681a55.str -> ../../cache/lines/...
 `-- vars
     |-- best5rec.bht.list -> ../exprs/repeat/c0e8e27de2_84bfe482c3_25d7f567ea.bht.list
-    |-- bestRec.033dcb2273.bht -> ../exprs/reciprocal_best/57c1751a87_45ef8b3b5a.bht
-    |-- bestRec.942882d5cc.bht -> ../exprs/reciprocal_best/c9d4cf91bc_8bd2f7eab8.bht
-    |-- bestRec.b35ea25999.bht -> ../exprs/reciprocal_best/0242b74b27_e66317a189.bht
-    |-- bestRec.c9204205cd.bht -> ../exprs/reciprocal_best/f98e037b20_c24a192a77.bht
-    |-- bestRec.f6031586e0.bht -> ../exprs/reciprocal_best/d0df12efe2_d5df6df6c3.bht
-    |-- fwdHits.033dcb2273.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_2efabe4531.bht
-    |-- fwdHits.942882d5cc.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_7007a07b3e.bht
-    |-- fwdHits.b35ea25999.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_e121bfcf2e.bht
-    |-- fwdHits.c9204205cd.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_a2cf89e688.bht
-    |-- fwdHits.f6031586e0.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_aa57596f6c.bht
-    |-- maga.0597204c14.faa -> ../exprs/load_faa/c07f15ac3f.faa
-    |-- maga.4bba1303c1.faa -> ../exprs/load_faa/c07f15ac3f.faa
-    |-- maga.5364e2e403.faa -> ../exprs/load_faa/c07f15ac3f.faa
-    |-- maga.6070760afe.faa -> ../exprs/load_faa/c07f15ac3f.faa
-    |-- maga.f0ad90d0b5.faa -> ../exprs/load_faa/c07f15ac3f.faa
+    |-- bestRec.582252acaa.bht -> ../exprs/reciprocal_best/d0df12efe2_d5df6df6c3.bht
+    |-- bestRec.625071609d.bht -> ../exprs/reciprocal_best/57c1751a87_45ef8b3b5a.bht
+    |-- bestRec.b5f41434f9.bht -> ../exprs/reciprocal_best/0242b74b27_e66317a189.bht
+    |-- bestRec.c673ee01b9.bht -> ../exprs/reciprocal_best/c9d4cf91bc_8bd2f7eab8.bht
+    |-- bestRec.e20c3c2ea2.bht -> ../exprs/reciprocal_best/f98e037b20_c24a192a77.bht
+    |-- fwdHits.582252acaa.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_aa57596f6c.bht
+    |-- fwdHits.625071609d.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_2efabe4531.bht
+    |-- fwdHits.b5f41434f9.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_e121bfcf2e.bht
+    |-- fwdHits.c673ee01b9.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_7007a07b3e.bht
+    |-- fwdHits.e20c3c2ea2.bht -> ../exprs/blastp_db/8158675169_6cb0d133f7_a2cf89e688.bht
+    |-- maga.0e8d49244d.faa -> ../exprs/load_faa/c07f15ac3f.faa
+    |-- maga.41d97b11fb.faa -> ../exprs/load_faa/c07f15ac3f.faa
+    |-- maga.a3c6daf238.faa -> ../exprs/load_faa/c07f15ac3f.faa
+    |-- maga.a7982c4c47.faa -> ../exprs/load_faa/c07f15ac3f.faa
+    |-- maga.d0651bfa26.faa -> ../exprs/load_faa/c07f15ac3f.faa
     |-- maga.faa -> ../exprs/load_faa/c07f15ac3f.faa
-    |-- mgen.033dcb2273.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1601120197\ 2147402015".faa
-    |-- mgen.0597204c14.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "2\ 40692".faa
-    |-- mgen.4bba1303c1.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1601120197\ 2147402015".faa
-    |-- mgen.5364e2e403.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1346387766\ 2147361323".faa
-    |-- mgen.6070760afe.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "40015\ 2147442707".faa
-    |-- mgen.942882d5cc.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "439883730\ 2147320631".faa
-    |-- mgen.b35ea25999.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1346387766\ 2147361323".faa
-    |-- mgen.c9204205cd.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "2\ 40692".faa
-    |-- mgen.f0ad90d0b5.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "439883730\ 2147320631".faa
-    |-- mgen.f6031586e0.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "40015\ 2147442707".faa
+    |-- mgen.0e8d49244d.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "439883730\ 2147320631".faa
+    |-- mgen.41d97b11fb.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1346387766\ 2147361323".faa
+    |-- mgen.582252acaa.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "40015\ 2147442707".faa
+    |-- mgen.625071609d.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1601120197\ 2147402015".faa
+    |-- mgen.a3c6daf238.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "40015\ 2147442707".faa
+    |-- mgen.a7982c4c47.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1601120197\ 2147402015".faa
+    |-- mgen.b5f41434f9.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "1346387766\ 2147361323".faa
+    |-- mgen.c673ee01b9.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "439883730\ 2147320631".faa
+    |-- mgen.d0651bfa26.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "2\ 40692".faa
+    |-- mgen.e20c3c2ea2.faa -> ../exprs/load_faa/7d5caf4e96_RandomSeed\ "2\ 40692".faa
     |-- result -> ../exprs/length/df76ed2a87.num
-    |-- result.033dcb2273.bht -> ../vars/bestRec.033dcb2273.bht
-    |-- result.942882d5cc.bht -> ../vars/bestRec.942882d5cc.bht
-    |-- result.b35ea25999.bht -> ../vars/bestRec.b35ea25999.bht
-    |-- result.c9204205cd.bht -> ../vars/bestRec.c9204205cd.bht
-    |-- result.f6031586e0.bht -> ../vars/bestRec.f6031586e0.bht
-    |-- revHits.033dcb2273.bht -> ../exprs/blastp_db/8158675169_8e62430aad_cafd3a46ec.bht
-    |-- revHits.942882d5cc.bht -> ../exprs/blastp_db/8158675169_e204c61ec6_cafd3a46ec.bht
-    |-- revHits.b35ea25999.bht -> ../exprs/blastp_db/8158675169_e8ddc44add_cafd3a46ec.bht
-    |-- revHits.c9204205cd.bht -> ../exprs/blastp_db/8158675169_a26a809e97_cafd3a46ec.bht
-    |-- revHits.f6031586e0.bht -> ../exprs/blastp_db/8158675169_214dfb0e9e_cafd3a46ec.bht
+    |-- result.582252acaa.bht -> ../vars/bestRec.582252acaa.bht
+    |-- result.625071609d.bht -> ../vars/bestRec.625071609d.bht
+    |-- result.b5f41434f9.bht -> ../vars/bestRec.b5f41434f9.bht
+    |-- result.c673ee01b9.bht -> ../vars/bestRec.c673ee01b9.bht
+    |-- result.e20c3c2ea2.bht -> ../vars/bestRec.e20c3c2ea2.bht
+    |-- revHits.582252acaa.bht -> ../exprs/blastp_db/8158675169_214dfb0e9e_cafd3a46ec.bht
+    |-- revHits.625071609d.bht -> ../exprs/blastp_db/8158675169_8e62430aad_cafd3a46ec.bht
+    |-- revHits.b5f41434f9.bht -> ../exprs/blastp_db/8158675169_e8ddc44add_cafd3a46ec.bht
+    |-- revHits.c673ee01b9.bht -> ../exprs/blastp_db/8158675169_e204c61ec6_cafd3a46ec.bht
+    |-- revHits.e20c3c2ea2.bht -> ../exprs/blastp_db/8158675169_a26a809e97_cafd3a46ec.bht
     `-- solidRec.str.list -> ../exprs/all/bed9fd6c41.str.list
 
 21 directories, 105 files

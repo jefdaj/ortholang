@@ -42,7 +42,7 @@ plot = CutType
  -}
 varName :: CutState -> CutExpr -> Rules ExprPath
 varName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
-  (CutRef _ _ _ (CutVar name)) -> name
+  (CutRef _ _ _ (CutVar _ name)) -> name
   _ -> ""
 
 -- Like varName, but for a list of names
@@ -50,7 +50,7 @@ varNames :: CutState -> CutExpr -> Rules ExprPath
 varNames _ expr = undefined lits -- TODO implement this
   where
     lits = CutLit str initialRandomSeed $ case expr of
-             (CutRef _ _ _ (CutVar name)) -> name
+             (CutRef _ _ _ (CutVar _ name)) -> name
              _ -> ""
 
 ---------------------
@@ -141,12 +141,12 @@ rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
 indRepeatVarName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
-  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
+  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar _ v)), _]) -> v
   _ -> ""
 
 depRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
 depRepeatVarName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
-  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar v)), _]) -> v
+  (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar _ v)), _]) -> v
   _ -> ""
 
 

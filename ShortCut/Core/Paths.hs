@@ -230,7 +230,7 @@ exprPathExplicit cfg prefix rtype seed hashes = toCutPath cfg path
 
 -- TODO remove VarPath, ExprPath types once CutPath works everywhere
 varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
-varPath cfg (CutVar var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base
+varPath cfg (CutVar _ var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base -- TODO use seed here!
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
 

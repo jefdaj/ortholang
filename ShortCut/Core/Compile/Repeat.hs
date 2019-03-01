@@ -17,12 +17,14 @@ import ShortCut.Core.Paths  (exprPath, fromCutPath,
 import ShortCut.Core.Compile.Basic (rExpr, compileScript, debugRules)
 -- import ShortCut.Core.Debug   (debugRules, debugA)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
+import ShortCut.Core.Parse.Basic (initialRandomSeed)
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
 --------------------------------------------------------
 
 -- TODO only mangle the specific vars we want changed!
+-- TODO can all this silliness be avoided using random seeds?
 
 mangleExpr :: (CutVar -> CutVar) -> CutExpr -> CutExpr
 mangleExpr _ e@(CutLit  _ _ _) = e
@@ -42,7 +44,7 @@ mangleScript fn = map (mangleAssign fn)
 -- Add a "dupN." prefix to each variable name in the path from independent
 -- -> dependent variable, using a list of those varnames
 addPrefix :: String -> (CutVar -> CutVar)
-addPrefix p (CutVar s) = CutVar $ s ++ "." ++ p
+addPrefix p (CutVar r s) = CutVar r $ s ++ "." ++ p
 
 -- TODO should be able to just apply this to a duplicate script section right?
 addPrefixes :: String -> CutScript -> CutScript
@@ -73,7 +75,7 @@ dRepeatEach = "repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list
 -- TODO can this be parallelized better?
 cRepeat :: CutState -> CutExpr -> CutVar -> CutExpr -> Rules ExprPath
 cRepeat (script, cfg, ref, ids) resExpr subVar subExpr = do
-  let res  = (CutVar "result", resExpr)
+  let res  = (CutVar initialRandomSeed "result", resExpr) -- TODO is this the right seed?
       sub  = (subVar, subExpr)
       deps = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       -- TODO this should be very different right?

@@ -24,6 +24,8 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- import Test.Tasty.QuickCheck (testProperty)
 -- import Text.Parsec           (ParseError)
 
+import ShortCut.Core.Parse.Basic (initialRandomSeed)
+
 -- TODO add pretty-printing round trips to everything
 -- TODO move some of the test utilties here to Utils.hs?
 -- TODO adjust generators to handle script state!
@@ -44,7 +46,7 @@ regularParse :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> E
 regularParse p cfg ref ids = parseWithEof p ([], cfg, ref, ids)
 
 takeVar :: String -> CutVar
-takeVar = CutVar . takeWhile (flip elem $ vNonFirstChars)
+takeVar = CutVar initialRandomSeed . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> Bool
 parsedItAll p cfg ref ids str' = case parseWithLeftOver p ([], cfg, ref, ids) str' of
@@ -99,7 +101,7 @@ exTests cfg ref ids = testGroup "round-trip handwritten cut code"
 wsProps :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
 wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
-    \(ExVar v@(CutVar s)) (ExSpace w) ->
+    \(ExVar v@(CutVar _ s)) (ExSpace w) ->
       parseWithLeftOver pVar ([], cfg, ref, ids) (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
@@ -118,7 +120,7 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
 acProps :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
 acProps cfg ref ids = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
-      \(ExVar v@(CutVar s)) -> parseWithLeftOver pVar ([], cfg, ref, ids) s == Right (v, "")
+      \(ExVar v@(CutVar _ s)) -> parseWithLeftOver pVar ([], cfg, ref, ids) s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
       \(ExSymbol c) -> parseWithLeftOver (pSym c) ([], cfg, ref, ids) [c] == Right ((), "")
   , testProperty "variables with equal signs after" $
