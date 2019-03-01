@@ -5,7 +5,7 @@ module ShortCut.Modules.Repeat where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Repeat
+import ShortCut.Core.Compile.RepeatEach
 import ShortCut.Core.Random (unfoldRandomSeed)
 
 import Data.Maybe      (fromJust)

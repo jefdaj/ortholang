@@ -43,7 +43,7 @@ executable shortcut
                     ShortCut.Core.Compile.Compose,
                     ShortCut.Core.Compile.Map,
                     ShortCut.Core.Compile.Map2,
-                    ShortCut.Core.Compile.Repeat,
+                    ShortCut.Core.Compile.RepeatEach,
                     ShortCut.Core.Config,
                     ShortCut.Core.Eval,
                     ShortCut.Core.Locks,

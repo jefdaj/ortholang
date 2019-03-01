@@ -1,4 +1,4 @@
-module ShortCut.Core.Compile.Repeat where
+module ShortCut.Core.Compile.RepeatEach where
 
 {- Why can't we use an obvious var mangling scheme again?
  -   vars/<varname>.<seed>.<ext>
