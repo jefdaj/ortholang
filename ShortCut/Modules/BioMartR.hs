@@ -219,10 +219,10 @@ aParseSearches cfg ref _ sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-rBioMartR fn s@(_, cfg, ref, ids) expr@(CutFun rtn salt _ _ [ss]) = do
+rBioMartR fn s@(_, cfg, ref, ids) expr@(CutFun rtn seed _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (CutLit str 0 fn)
   -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr s $ CutFun rtn salt (depsOf ss) "parse_searches" [ss]
+  (ExprPath sTable) <- rExpr s $ CutFun rtn seed (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
       tmp'    = toCutPath cfg bmTmp

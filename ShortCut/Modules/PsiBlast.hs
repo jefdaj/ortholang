@@ -230,18 +230,18 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO fix passing dbprefix as db itself
 withPdbSubjects :: CutExpr -> CutExpr
-withPdbSubjects (CutFun rtn salt deps name [a1, a2, xs ])
-  =             (CutFun rtn salt deps name [a1, a2, dbs])
+withPdbSubjects (CutFun rtn seed deps name [a1, a2, xs ])
+  =             (CutFun rtn seed deps name [a1, a2, dbs])
   where
-    dbs = CutFun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
+    dbs = CutFun  (ListOf pdb) seed (depsOf xs) "makeblastdb_prot_each" [xs]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
 -- Wraps a single faa or an faa.list in makeblastdb_prot
 withPdbSubject :: CutExpr -> CutExpr
-withPdbSubject (CutFun rtn salt deps name [a1, a2, x ])
-  =            (CutFun rtn salt deps name [a1, a2, db])
+withPdbSubject (CutFun rtn seed deps name [a1, a2, x ])
+  =            (CutFun rtn seed deps name [a1, a2, db])
   where
-    db  = CutFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
+    db  = CutFun  (ListOf pdb) seed (depsOf fas) "makeblastdb_prot_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> singleton x
@@ -250,10 +250,10 @@ withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 -- Wrap the faa query argument of a psiblast CutFunction in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
 withPssmQuery :: CutExpr -> CutExpr
-withPssmQuery (CutFun rtn salt deps name [n, q, s])
-  =           (CutFun rtn salt deps name [n, p, s])
+withPssmQuery (CutFun rtn seed deps name [n, q, s])
+  =           (CutFun rtn seed deps name [n, p, s])
   where
-    p = CutFun pssm salt deps "psiblast_train_db" [n, q, s]
+    p = CutFun pssm seed deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 -------------------------------
@@ -284,13 +284,13 @@ psiblastEach = CutFunction
     name = "psiblast_each"
 
 rPsiblastEach :: RulesFn
-rPsiblastEach st (CutFun rtn salt deps name [e, fa, fas])
+rPsiblastEach st (CutFun rtn seed deps name [e, fa, fas])
   -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
   = (rMap 3 aPsiblastSearchDb') st expr'
   where
-    ps    = CutFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
-    dbs   = CutFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
-    expr' = CutFun rtn salt deps name [e, ps, dbs]
+    ps    = CutFun (ListOf pdb) seed deps "psiblast_train_db_each" [e, fa, dbs]
+    dbs   = CutFun (ListOf pdb) seed (depsOf fas) "makeblastdb_prot_each" [fas]
+    expr' = CutFun rtn seed deps name [e, ps, dbs]
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 psiblastAll :: CutFunction

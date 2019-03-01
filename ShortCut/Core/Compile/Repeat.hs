@@ -1,9 +1,9 @@
 module ShortCut.Core.Compile.Repeat where
 
 {- Why can't we use an obvious var mangling scheme again?
- -   vars/<varname>.<salt>.<ext>
- -   vars/<salt>/<varname>.<ext>
- -   vars/<varname>/<varname>.<salt>.<ext>
+ -   vars/<varname>.<seed>.<ext>
+ -   vars/<seed>/<varname>.<ext>
+ -   vars/<varname>/<varname>.<seed>.<ext>
  - Maybe just have to delete all var links when starting?
  - Start by moving to prefix dirs, then rename to ints if possible
  -}

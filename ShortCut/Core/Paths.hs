@@ -215,16 +215,16 @@ exprPath s@(_, cfg, _, _) expr = debugPath cfg "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr
-    salt   = saltOf expr
+    seed   = seedOf expr
     hashes = argHashes s expr
-    res    = exprPathExplicit cfg prefix rtype salt hashes
+    res    = exprPathExplicit cfg prefix rtype seed hashes
 
 exprPathExplicit :: CutConfig -> String -> CutType -> Int -> [String] -> CutPath
-exprPathExplicit cfg prefix rtype salt hashes = toCutPath cfg path
+exprPathExplicit cfg prefix rtype seed hashes = toCutPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = (concat $ intersperse "_" hashes) ++ suf
-    suf  = if salt == 0 then "" else "_" ++ show salt
+    suf  = if seed == 0 then "" else "_" ++ show seed
     path = dir </> base <.> extOf rtype
 
 -- TODO remove VarPath, ExprPath types once CutPath works everywhere

@@ -58,14 +58,14 @@ extractNum _ _ = error "bad argument to extractNum"
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
--- TODO is this how the salts should work?
+-- TODO is this how the seeds should work?
 rRepeatN :: CutState -> CutExpr -> Rules ExprPath
-rRepeatN s@(scr, _, _, _) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
-  rRepeatEach s (CutFun t salt deps name [resExpr, subVar, subList])
+rRepeatN s@(scr, _, _, _) (CutFun t seed deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
+  rRepeatEach s (CutFun t seed deps name [resExpr, subVar, subList])
   where
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
-    subs    = zipWith setSalt [salt .. salt+nReps-1] (repeat subExpr)
-    -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
-    subList = CutList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
+    subs    = zipWith setSeed [seed .. seed+nReps-1] (repeat subExpr)
+    -- subs'   = trace ("rRepeatN seeds: " ++ show (map seedOf subs)) subs
+    subList = CutList (typeOf subExpr) seed (depsOf subExpr) subs -- TODO seed right?
 rRepeatN _ _ = fail "bad argument to rRepeatN"

@@ -72,7 +72,7 @@ tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf n
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: CutState -> CutExpr -> Rules ExprPath
-rScoreRepeats s@(_, cfg, ref, _) expr@(CutFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
+rScoreRepeats s@(_, cfg, ref, _) expr@(CutFun (ScoresOf t) seed deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr s subList
   scores <- rExpr s repEachExpr
   let hack    = \(ExprPath p) -> toCutPath cfg p -- TODO remove! but how?
@@ -81,7 +81,7 @@ rScoreRepeats s@(_, cfg, ref, _) expr@(CutFun (ScoresOf t) salt deps _ as@(_:_:s
   outPath' %> \_ -> aScores cfg ref scores' inputs' t outPath
   return $ ExprPath $ outPath'
   where
-    repEachExpr = CutFun (ListOf t) salt deps "repeat_each" as
+    repEachExpr = CutFun (ListOf t) seed deps "repeat_each" as
     outPath  = exprPath s expr
     outPath' = debugRules cfg "rScoreRepeats" expr $ fromCutPath cfg outPath
 rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr

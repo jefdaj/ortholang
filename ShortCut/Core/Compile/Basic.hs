@@ -168,11 +168,11 @@ aListLits cfg ref _ paths outPath = do
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: CutState -> CutExpr -> Rules ExprPath
-rListPaths s@(_, cfg, ref, ids) e@(CutList rtn salt _ exprs) = do
+rListPaths s@(_, cfg, ref, ids) e@(CutList rtn seed _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toCutPath cfg p) paths
       hash     = digest $ concat $ map digest paths'
-      outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
+      outPath  = exprPathExplicit cfg "list" (ListOf rtn) seed [hash]
       outPath' = debugRules cfg "rListPaths" e $ fromCutPath cfg outPath
   outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
@@ -381,10 +381,10 @@ aLoadListLits cfg ref _ outPath litsPath = do
 
 -- regular case for lists of any other file type
 rLoadListLinks :: Bool -> RulesFn
-rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn salt _ _ [es]) = do
+rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn seed _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   let hash     = digest $ toCutPath cfg pathsPath
-      outPath  = exprPathExplicit cfg "list" rtn salt [hash]
+      outPath  = exprPathExplicit cfg "list" rtn seed [hash]
       outPath' = fromCutPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toCutPath cfg pathsPath) outPath
   return (ExprPath outPath')

@@ -47,8 +47,8 @@ module ShortCut.Core.Types
   , CutFunction(..)
   , mkTypeDesc
   , CutModule(..)
-  , saltOf
-  , setSalt
+  , seedOf
+  , setSeed
   , prefixOf
   -- wrappers to prevent confusing the various paths
   , CacheDir(..)
@@ -111,15 +111,15 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
  
 -- the common fields are:
 -- * return type
--- * salt, which can be changed to force re-evaluation of an expr + all depends
+-- * seed, which can be changed to force re-evaluation of an expr + all depends
 --   (it should start at 0 and be incremented, though that doesn't really matter)
 -- TODO start from 1 instead of 0?
 -- TODO test that it works correctly! in particular, it should go thru refs!
---      (do we need to add salts of subepxressions or something? or use randoms?)
+--      (do we need to add seeds of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
 data CutExpr
   = CutLit CutType Int String
-  | CutRef CutType Int [CutVar] CutVar -- do refs need a salt? yes! (i think?)
+  | CutRef CutType Int [CutVar] CutVar -- do refs need a seed? yes! (i think?)
   | CutBop CutType Int [CutVar] String  CutExpr CutExpr
   | CutFun CutType Int [CutVar] String [CutExpr]
   | CutList CutType Int [CutVar] [CutExpr]
@@ -141,22 +141,22 @@ instance Eq CompiledExpr where
   (CompiledExpr a _) == (CompiledExpr b _) = a == b
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-saltOf :: CutExpr -> Int
-saltOf (CutLit _ n _)       = n
-saltOf (CutRef _ n _ _)     = n
-saltOf (CutBop _ n _ _ _ _) = n
-saltOf (CutFun _ n _ _ _)   = n
-saltOf (CutList _ n _ _)     = n
-saltOf (CutRules (CompiledExpr e _)) = saltOf e
+seedOf :: CutExpr -> Int
+seedOf (CutLit _ n _)       = n
+seedOf (CutRef _ n _ _)     = n
+seedOf (CutBop _ n _ _ _ _) = n
+seedOf (CutFun _ n _ _ _)   = n
+seedOf (CutList _ n _ _)     = n
+seedOf (CutRules (CompiledExpr e _)) = seedOf e
 
 -- TODO this needs to be recursive?
-setSalt :: Int -> CutExpr -> CutExpr
-setSalt n (CutLit t _ s)          = CutLit t n s
-setSalt n (CutRef t _ ds v)       = CutRef t n ds v
-setSalt n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
-setSalt n (CutFun t _ ds s es)    = CutFun t n ds s es
-setSalt n (CutList t _ ds es)      = CutList t n ds es
-setSalt _ (CutRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules yet"
+setSeed :: Int -> CutExpr -> CutExpr
+setSeed n (CutLit t _ s)          = CutLit t n s
+setSeed n (CutRef t _ ds v)       = CutRef t n ds v
+setSeed n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
+setSeed n (CutFun t _ ds s es)    = CutFun t n ds s es
+setSeed n (CutList t _ ds es)      = CutList t n ds es
+setSeed _ (CutRules (CompiledExpr _ _)) = error "setSeed not implemented for compiled rules yet"
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String
