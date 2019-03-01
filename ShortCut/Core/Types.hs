@@ -154,13 +154,14 @@ seedOf (CutList _ n _ _)     = n
 seedOf (CutRules (CompiledExpr e _)) = seedOf e
 
 -- TODO this needs to be recursive?
+-- TODO would a recursive version be able to replace addPrefixes in RepeatEach?
 setSeed :: RandomSeed -> CutExpr -> CutExpr
-setSeed n (CutLit t _ s)          = CutLit t n s
-setSeed n (CutRef t _ ds v)       = CutRef t n ds v
-setSeed n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2
-setSeed n (CutFun t _ ds s es)    = CutFun t n ds s es
-setSeed n (CutList t _ ds es)      = CutList t n ds es
-setSeed _ (CutRules (CompiledExpr _ _)) = error "setSeed not implemented for compiled rules yet"
+setSeed r (CutLit t _ s)          = CutLit t r s
+setSeed r (CutRef t _ ds v)       = CutRef t r ds v
+setSeed r (CutBop t _ ds s e1 e2) = CutBop t r ds s e1 e2
+setSeed r (CutFun t _ ds s es)    = CutFun t r ds s es
+setSeed r (CutList t _ ds es)      = CutList t r ds es
+setSeed _ (CutRules (CompiledExpr _ _)) = error "setSeed not implemented for compiled rules" -- TODO should it be?
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String
