@@ -12,7 +12,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Actions (withBinHash)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript)
-import ShortCut.Core.Parse.Basic (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
 -- import System.Directory (createDirectoryIfMissing)
 -- import System.FilePath  ((</>), (<.>))
 

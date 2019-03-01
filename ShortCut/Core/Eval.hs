@@ -46,7 +46,7 @@ import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
 -- import Control.Concurrent.Thread.Delay (delay)
-import ShortCut.Core.Parse.Basic      (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error

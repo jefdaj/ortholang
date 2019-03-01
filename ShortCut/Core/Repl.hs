@@ -48,7 +48,7 @@ import Control.Exception.Safe   (Typeable, throw, try)
 import System.Console.ANSI      (clearScreen, cursorUp)
 import Data.IORef               (readIORef)
 import Development.Shake.FilePath (takeFileName)
-import ShortCut.Core.Parse.Basic (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 --------------------
 -- main interface --

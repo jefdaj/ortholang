@@ -98,7 +98,7 @@ import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Config (debug)
 import ShortCut.Core.Pretty (render, pPrint)
 import ShortCut.Core.Util (digest)
-import ShortCut.Core.Parse.Basic (initialRandomSeed) -- TODO move to util?
+import ShortCut.Core.Random   (initialRandomSeed)
 -- import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
@@ -224,15 +224,18 @@ exprPathExplicit :: CutConfig -> String -> CutType -> RandomSeed -> [String] -> 
 exprPathExplicit cfg prefix rtype seed hashes = toCutPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
-    base = (concat $ intersperse "_" hashes) ++ suf
-    suf  = if seed == initialRandomSeed then "" else "_" ++ show seed
+    base = (concat $ intersperse "_" $ pre:hashes)
+    pre  = digest seed -- is this the best place to put it?
     path = dir </> base <.> extOf rtype
 
 -- TODO remove VarPath, ExprPath types once CutPath works everywhere
 varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
-varPath cfg (CutVar _ var) expr = toCutPath cfg $ cfgTmpDir cfg </> "vars" </> base -- TODO use seed here!
+varPath cfg (CutVar seed var) expr = toCutPath cfg $ cfgTmpDir cfg </> repDir </> base
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
+    repDir = if seed == initialRandomSeed
+               then "vars"
+               else "reps" </> digest seed -- TODO digest other stuff too, like the expr?
 
 ---------------
 -- io checks --

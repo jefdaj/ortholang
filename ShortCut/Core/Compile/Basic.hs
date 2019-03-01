@@ -40,7 +40,7 @@ import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
-import ShortCut.Core.Parse.Basic  (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 
 debug :: CutConfig -> String -> a -> a

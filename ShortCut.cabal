@@ -53,6 +53,7 @@ executable shortcut
                     ShortCut.Core.Parse.Script,
                     ShortCut.Core.Paths,
                     ShortCut.Core.Pretty,
+                    ShortCut.Core.Random,
                     ShortCut.Core.Repl,
                     ShortCut.Core.Sanitize,
                     ShortCut.Core.Types,

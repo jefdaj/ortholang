@@ -10,7 +10,7 @@ module ShortCut.Test.Parse.Examples
 
 import ShortCut.Core.Types
 import ShortCut.Modules.SeqIO (faa)
-import ShortCut.Core.Parse.Basic (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 -- TODO example function calls
 -- TODO example bop expressions

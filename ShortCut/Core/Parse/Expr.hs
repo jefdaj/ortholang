@@ -18,6 +18,7 @@ import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 -- import Data.Either (either)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 -- import Debug.Trace (traceM)
 

@@ -17,7 +17,8 @@ import ShortCut.Core.Paths  (exprPath, fromCutPath,
 import ShortCut.Core.Compile.Basic (rExpr, compileScript, debugRules)
 -- import ShortCut.Core.Debug   (debugRules, debugA)
 import ShortCut.Core.Util    (digest, stripWhiteSpace)
-import ShortCut.Core.Parse.Basic (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
+import System.Random (StdGen, next)
 
 --------------------------------------------------------
 -- prefix variable names so duplicates don't conflict --
@@ -45,6 +46,7 @@ mangleScript fn = map (mangleAssign fn)
 -- -> dependent variable, using a list of those varnames
 addPrefix :: String -> (CutVar -> CutVar)
 addPrefix p (CutVar r s) = CutVar r $ s ++ "." ++ p
+-- addPrefix seed (CutVar _ s) = CutVar (RandomSeed seed) s
 
 -- TODO should be able to just apply this to a duplicate script section right?
 addPrefixes :: String -> CutScript -> CutScript
@@ -79,7 +81,9 @@ cRepeat (script, cfg, ref, ids) resExpr subVar subExpr = do
       sub  = (subVar, subExpr)
       deps = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       -- TODO this should be very different right?
-      pre  = digest $ map show $ res:sub:deps
+      -- pre  = digest $ map show $ res:sub:deps
+      (RandomSeed s) = seedOf resExpr
+      pre  = digest $ RandomSeed $ show $ fst $ next $ (read s :: StdGen)
       scr' = (addPrefixes pre ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr', cfg, ref, ids) (Just pre)
   return (ExprPath resPath) -- TODO this is supposed to convert result -> expr right?

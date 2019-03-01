@@ -24,7 +24,7 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- import Test.Tasty.QuickCheck (testProperty)
 -- import Text.Parsec           (ParseError)
 
-import ShortCut.Core.Parse.Basic (initialRandomSeed)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 -- TODO add pretty-printing round trips to everything
 -- TODO move some of the test utilties here to Utils.hs?

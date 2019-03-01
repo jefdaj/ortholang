@@ -17,6 +17,7 @@ import Text.Parsec            (ParseError)
 -- import Data.IORef             (IORef)
 import System.FilePath ((</>), takeDirectory)
 -- import Data.Map               (empty)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 -------------------
 -- preprocessing --

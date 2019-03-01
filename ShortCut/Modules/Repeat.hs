@@ -6,10 +6,10 @@ module ShortCut.Modules.Repeat where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Repeat
+import ShortCut.Core.Random (unfoldRandomSeed)
 
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
-import System.Random   (StdGen, split)
 
 -- import Debug.Trace
 
@@ -54,15 +54,6 @@ extractNum :: CutScript -> CutExpr -> Int
 extractNum _   (CutLit x _ n) | x == num = readSciInt n
 extractNum scr (CutRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
-
-unfoldRandomSeed :: RandomSeed -> Int -> [RandomSeed]
-unfoldRandomSeed (RandomSeed s) n
-  | n <  0 = error "can't make a negative-length list of random seeds"
-  | n == 0 = []
-  | otherwise = (RandomSeed $ show first) : unfoldRandomSeed (RandomSeed $ show rest) (n-1)
-    where
-      gen = read s :: StdGen
-      (first, rest) = split gen
 
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
 -- and a number of reps. returns a list of the result var re-evaluated that many times

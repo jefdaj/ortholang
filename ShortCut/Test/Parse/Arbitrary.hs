@@ -31,7 +31,7 @@ import Data.Scientific
 import ShortCut.Core.Types
 import ShortCut.Core.Parse   (spaceChars, escapeChars, literalChars)
 import Test.QuickCheck
-import ShortCut.Core.Parse.Basic (initialRandomSeed)
+import ShortCut.Core.Random (initialRandomSeed)
 
 -------------------------
 -- Arbitrary instances --

@@ -2,6 +2,7 @@ module ShortCut.Core.Parse.Basic where
 
 import ShortCut.Core.Types
 -- import ShortCut.Core.Pretty (Pretty, pPrint, render)
+import ShortCut.Core.Random   (initialRandomSeed)
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void)
@@ -11,11 +12,6 @@ import Debug.Trace            (traceM)
 import Text.Parsec            (getState, (<?>), try, parserTraced)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof)
-import System.Random          (StdGen, mkStdGen)
-
--- TODO any reason not to hardcode this?
-initialRandomSeed :: RandomSeed
-initialRandomSeed = RandomSeed $ show $ mkStdGen 0
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
