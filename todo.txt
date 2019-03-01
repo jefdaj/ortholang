@@ -1,3 +1,9 @@
+saner repeat file naming:
+  ideally, would salts and repeat hashes be equivalent?
+  there could be vars/ for the actual named variables
+  and reps/ for the rest of the junk being put in there now
+  could use reps/salt/ to group them too
+
 file leaking bug:
   what's happening?
     somewhere, opened files aren't being properly closed when an exception occurs
