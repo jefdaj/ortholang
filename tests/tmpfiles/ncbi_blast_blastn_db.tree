@@ -1,12 +1,12 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 48e19fc360
-|   |   |   |-- 8f4563ef10.bht -> ../../../exprs/blastn_db/ce1c174684_868aaf0d05_8f4563ef10.bht
-|   |   |   `-- 8f4563ef10.bht.args -> ../../../cache/lines/...
-|   |   `-- 7392fe28e4
-|   |       |-- 41e807e5eb.str.list -> ../../../exprs/extract_queries/41e807e5eb.str.list
-|   |       `-- 41e807e5eb.str.list.args -> ../../../cache/lines/...
+|   |   |-- 3c2b1a0373
+|   |   |   |-- 41e807e5eb.str.list -> ../../../exprs/extract_queries/41e807e5eb.str.list
+|   |   |   `-- 41e807e5eb.str.list.args -> ../../../cache/lines/...
+|   |   `-- c8fa2024a4
+|   |       |-- 8f4563ef10.bht -> ../../../exprs/blastn_db/ce1c174684_868aaf0d05_8f4563ef10.bht
+|   |       `-- 8f4563ef10.bht.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/data/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk

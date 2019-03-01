@@ -7,10 +7,9 @@ saner repeat file naming:
     move the actual links so they don't clutter up vars/ with rep hashes
     rewrite the salts in a better way so they, maybe unified with rep hashes and using System.Random
   theory about how to rewrite it:
-    start with a single System.Random seed like (mkStdGen 0) for all expressions literally in the cut script
-    should be able to show + read it to/from string without further modifications?
-      except have to make the seed strings into valid filenames
-    whenever there's a repeat, use System.Random.Split to create new sub-seeds
+    x x start with a single System.Random seed like (mkStdGen 0) for all expressions literally in the cut script
+    x should be able to show + read it to/from string without further modifications?
+    x whenever there's a repeat, use System.Random.Split to create new sub-seeds
     later, see if there's an optimization where you can prevent duplicating all vars
       maybe remove anything whose overall digest is already somewhere else?
 

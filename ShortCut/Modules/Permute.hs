@@ -48,7 +48,7 @@ rPermute _ _ _ = fail "bad argument to rCombos"
 -- TODO do something more obvious than writing to the "list" prefix??
 aPermute :: CutState
          -> ([String] -> [[String]])
-         -> FilePath -> CutType -> Int
+         -> FilePath -> CutType -> RandomSeed
          -> FilePath -> Action ()
 aPermute (_, cfg, ref, _) comboFn iPath eType seed out = do
   debugNeed cfg "aPermute" [iPath]

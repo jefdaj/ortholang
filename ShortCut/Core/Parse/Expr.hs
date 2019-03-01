@@ -31,7 +31,7 @@ pList = debugParser "pList" $ do
       deps  = if null terms then [] else foldr1 union $ map depsOf terms
   case eType of
     Left err -> fail err
-    Right t  -> return $ CutList t 0 deps terms
+    Right t  -> return $ CutList t initialRandomSeed deps terms
 
 ---------------
 -- operators --
@@ -65,7 +65,7 @@ pBop _ = fail "pBop only works with infix functions"
 pBop' :: CutFunction -> (CutExpr -> CutExpr -> CutExpr)
 pBop' bop e1 e2 = case (fTypeCheck bop) [typeOf e1, typeOf e2] of
   Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-  Right rtn -> CutBop rtn 0 (union (depsOf e1) (depsOf e2)) (fName bop) e1 e2
+  Right rtn -> CutBop rtn initialRandomSeed (union (depsOf e1) (depsOf e2)) (fName bop) e1 e2
 
 ---------------
 -- functions --
@@ -127,7 +127,7 @@ pRef = debugParser "pRef" $ do
   debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v scr of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
-    Just e -> return $ CutRef (typeOf e) 0 (depsOf e) v
+    Just e -> return $ CutRef (typeOf e) initialRandomSeed (depsOf e) v
 
 -- pFunOrRef :: ParseM CutExpr
 -- pFunOrRef = debugParser "pFunOrRef" $ do
@@ -142,7 +142,7 @@ typecheckArgs :: CutFunction -> [CutExpr] -> ParseM CutExpr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
   Left  msg -> fail msg
   Right rtn -> let deps = foldr1 union $ map depsOf args
-               in return $ CutFun rtn 0 deps (fName fn) args
+               in return $ CutFun rtn initialRandomSeed deps (fName fn) args
 
 -----------------
 -- expressions --

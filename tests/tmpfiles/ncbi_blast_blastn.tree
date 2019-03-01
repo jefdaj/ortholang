@@ -1,15 +1,15 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 0a1f9e22e2
+|   |   |-- 1dfc046aa8
 |   |   |   |-- 8f4563ef10.bht -> ../../../exprs/blastn/ce1c174684_868aaf0d05_8f4563ef10.bht
 |   |   |   `-- 8f4563ef10.bht.args -> ../../../cache/lines/...
-|   |   |-- d483c35888
-|   |   |   |-- 5e5066308c.str.list -> ../../../exprs/extract_queries/5e5066308c.str.list
-|   |   |   `-- 5e5066308c.str.list.args -> ../../../cache/lines/...
-|   |   `-- ecd990d662
-|   |       |-- 66c9ebfbcb.ndb -> ../../../exprs/makeblastdb_nucl/66c9ebfbcb.ndb
-|   |       `-- 66c9ebfbcb.ndb.args -> ../../../cache/lines/...
+|   |   |-- 9044029d65
+|   |   |   |-- 66c9ebfbcb.ndb -> ../../../exprs/makeblastdb_nucl/66c9ebfbcb.ndb
+|   |   |   `-- 66c9ebfbcb.ndb.args -> ../../../cache/lines/...
+|   |   `-- da86fb251e
+|   |       |-- 5e5066308c.str.list -> ../../../exprs/extract_queries/5e5066308c.str.list
+|   |       `-- 5e5066308c.str.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/data/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk

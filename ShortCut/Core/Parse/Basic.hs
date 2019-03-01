@@ -11,6 +11,11 @@ import Debug.Trace            (traceM)
 import Text.Parsec            (getState, (<?>), try, parserTraced)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof)
+import System.Random          (StdGen, mkStdGen)
+
+-- TODO any reason not to hardcode this?
+initialRandomSeed :: RandomSeed
+initialRandomSeed = RandomSeed $ show $ mkStdGen 0
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
@@ -111,7 +116,7 @@ pNum = debugParser "pNum" $ do
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
   let lit = show (read (n:ns) :: Scientific)
-  return $ CutLit num 0 lit
+  return $ CutLit num initialRandomSeed lit
 
 -- list of chars which can be escaped in ShortCut
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -135,4 +140,4 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
     esc = char '\\' *> oneOf escapeChars
 
 pStr :: ParseM CutExpr
-pStr = debugParser "pStr" (CutLit str 0 <$> pQuoted <?> "string literal")
+pStr = debugParser "pStr" (CutLit str initialRandomSeed <$> pQuoted <?> "string literal")

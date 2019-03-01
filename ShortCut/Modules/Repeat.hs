@@ -9,6 +9,7 @@ import ShortCut.Core.Compile.Repeat
 
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
+import System.Random   (StdGen, split)
 
 -- import Debug.Trace
 
@@ -54,6 +55,15 @@ extractNum _   (CutLit x _ n) | x == num = readSciInt n
 extractNum scr (CutRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
 
+unfoldRandomSeed :: RandomSeed -> Int -> [RandomSeed]
+unfoldRandomSeed (RandomSeed s) n
+  | n <  0 = error "can't make a negative-length list of random seeds"
+  | n == 0 = []
+  | otherwise = (RandomSeed $ show first) : unfoldRandomSeed (RandomSeed $ show rest) (n-1)
+    where
+      gen = read s :: StdGen
+      (first, rest) = split gen
+
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
@@ -65,7 +75,8 @@ rRepeatN s@(scr, _, _, _) (CutFun t seed deps name [resExpr, subVar@(CutRef _ _ 
   where
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
-    subs    = zipWith setSeed [seed .. seed+nReps-1] (repeat subExpr)
+    -- subs    = zipWith setSeed [seed .. seed+nReps-1] (repeat subExpr)
+    subs    = zipWith setSeed (unfoldRandomSeed seed nReps) (repeat subExpr)
     -- subs'   = trace ("rRepeatN seeds: " ++ show (map seedOf subs)) subs
     subList = CutList (typeOf subExpr) seed (depsOf subExpr) subs -- TODO seed right?
 rRepeatN _ _ = fail "bad argument to rRepeatN"

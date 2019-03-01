@@ -8,7 +8,7 @@ import ShortCut.Core.Compile.Basic  (rExpr)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Actions (readLit, readStrings, writeStrings, debugL)
 import Data.Scientific
-import System.Random (mkStdGen)
+import System.Random (StdGen)
 import System.Random.Shuffle (shuffle')
 
 cutModule :: CutModule
@@ -53,7 +53,7 @@ rSample st@(_, cfg, ref, ids) expr@(CutFun _ seed _ _ [n, lst]) = do
   return $ ExprPath outPath'
 rSample _ _ = fail "bad argument to rSample"
 
-aSample :: Int -> CutType -> Action2
+aSample :: RandomSeed -> CutType -> Action2
 aSample seed t cfg ref _ outPath nPath lstPath = do
   let nPath'   = fromCutPath cfg nPath
       lstPath' = fromCutPath cfg lstPath
@@ -65,8 +65,8 @@ aSample seed t cfg ref _ outPath nPath lstPath = do
       elements' = randomSample seed n lst
   writeStrings t cfg ref outPath' elements'
 
-randomSample :: Int -> Int -> [String] -> [String]
-randomSample seed n lst = take n $ shuffle lst gen
+randomSample :: RandomSeed -> Int -> [String] -> [String]
+randomSample (RandomSeed s) n lst = take n $ shuffle lst (read s :: StdGen)
   where
     shuffle xs = shuffle' xs $ length xs
-    gen = mkStdGen seed
+    -- gen = mkStdGen seed

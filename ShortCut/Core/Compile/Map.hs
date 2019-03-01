@@ -170,7 +170,7 @@ aVecArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
 aVecElem :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType
          -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
-         -> String -> Int -> FilePath -> Action ()
+         -> String -> RandomSeed -> FilePath -> Action ()
 aVecElem cfg ref ids eType tmpFn actFn singleName seed out = do
   let argsPath = out <.> "args"
   args <- readPaths cfg ref argsPath

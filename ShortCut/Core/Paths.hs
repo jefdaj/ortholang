@@ -98,6 +98,7 @@ import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Config (debug)
 import ShortCut.Core.Pretty (render, pPrint)
 import ShortCut.Core.Util (digest)
+import ShortCut.Core.Parse.Basic (initialRandomSeed) -- TODO move to util?
 -- import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
@@ -219,12 +220,12 @@ exprPath s@(_, cfg, _, _) expr = debugPath cfg "exprPath" expr res
     hashes = argHashes s expr
     res    = exprPathExplicit cfg prefix rtype seed hashes
 
-exprPathExplicit :: CutConfig -> String -> CutType -> Int -> [String] -> CutPath
+exprPathExplicit :: CutConfig -> String -> CutType -> RandomSeed -> [String] -> CutPath
 exprPathExplicit cfg prefix rtype seed hashes = toCutPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = (concat $ intersperse "_" hashes) ++ suf
-    suf  = if seed == 0 then "" else "_" ++ show seed
+    suf  = if seed == initialRandomSeed then "" else "_" ++ show seed
     path = dir </> base <.> extOf rtype
 
 -- TODO remove VarPath, ExprPath types once CutPath works everywhere

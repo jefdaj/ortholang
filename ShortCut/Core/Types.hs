@@ -19,6 +19,7 @@ module ShortCut.Core.Types
   , operatorChars
   -- , WrapperConfig(..)
   , CutType(..)
+  , RandomSeed(..)
   , CutVar(..)
   , CutScript
   , Locks
@@ -107,6 +108,8 @@ newtype ResPath  = ResPath  FilePath deriving Show -- ~/.shortcut/vars/result[.<
 -- data Ext = ListOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
+newtype RandomSeed = RandomSeed String deriving (Eq, Show, Read)
+
 newtype CutVar = CutVar String deriving (Eq, Show, Read)
  
 -- the common fields are:
@@ -118,11 +121,11 @@ newtype CutVar = CutVar String deriving (Eq, Show, Read)
 --      (do we need to add seeds of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
 data CutExpr
-  = CutLit CutType Int String
-  | CutRef CutType Int [CutVar] CutVar -- do refs need a seed? yes! (i think?)
-  | CutBop CutType Int [CutVar] String  CutExpr CutExpr
-  | CutFun CutType Int [CutVar] String [CutExpr]
-  | CutList CutType Int [CutVar] [CutExpr]
+  = CutLit CutType RandomSeed String
+  | CutRef CutType RandomSeed [CutVar] CutVar -- do refs need a seed? yes! (i think?)
+  | CutBop CutType RandomSeed [CutVar] String  CutExpr CutExpr
+  | CutFun CutType RandomSeed [CutVar] String [CutExpr]
+  | CutList CutType RandomSeed [CutVar] [CutExpr]
   | CutRules CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
@@ -141,7 +144,7 @@ instance Eq CompiledExpr where
   (CompiledExpr a _) == (CompiledExpr b _) = a == b
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-seedOf :: CutExpr -> Int
+seedOf :: CutExpr -> RandomSeed
 seedOf (CutLit _ n _)       = n
 seedOf (CutRef _ n _ _)     = n
 seedOf (CutBop _ n _ _ _ _) = n
@@ -150,7 +153,7 @@ seedOf (CutList _ n _ _)     = n
 seedOf (CutRules (CompiledExpr e _)) = seedOf e
 
 -- TODO this needs to be recursive?
-setSeed :: Int -> CutExpr -> CutExpr
+setSeed :: RandomSeed -> CutExpr -> CutExpr
 setSeed n (CutLit t _ s)          = CutLit t n s
 setSeed n (CutRef t _ ds v)       = CutRef t n ds v
 setSeed n (CutBop t _ ds s e1 e2) = CutBop t n ds s e1 e2

@@ -1,15 +1,15 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 60556586be
+|   |   |-- 25a1c48a55
 |   |   |   |-- c729b8db64.pdb -> ../../../exprs/makeblastdb_prot/c729b8db64.pdb
 |   |   |   `-- c729b8db64.pdb.args -> ../../../cache/lines/...
-|   |   |-- 9adb49e6fe
-|   |   |   |-- 5f8cbeaa95.str.list -> ../../../exprs/extract_queries/5f8cbeaa95.str.list
-|   |   |   `-- 5f8cbeaa95.str.list.args -> ../../../cache/lines/...
-|   |   `-- dcb8533152
-|   |       |-- b62abf3ff8.bht -> ../../../exprs/blastp/ce1c174684_4c3a8ed07a_b62abf3ff8.bht
-|   |       `-- b62abf3ff8.bht.args -> ../../../cache/lines/...
+|   |   |-- 2f0291a3af
+|   |   |   |-- b62abf3ff8.bht -> ../../../exprs/blastp/ce1c174684_4c3a8ed07a_b62abf3ff8.bht
+|   |   |   `-- b62abf3ff8.bht.args -> ../../../cache/lines/...
+|   |   `-- a2fb250c42
+|   |       |-- 5f8cbeaa95.str.list -> ../../../exprs/extract_queries/5f8cbeaa95.str.list
+|   |       `-- 5f8cbeaa95.str.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 36189032ad.faa
 |   |   |-- 36189032ad.faa.ids
