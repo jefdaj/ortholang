@@ -4,14 +4,14 @@
 |       `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
 |-- exprs
 |   |-- gbk_to_faa
-|   |   `-- 6ead908eb0.faa
+|   |   `-- cdab12f059_0.faa
 |   |-- load_gbk
-|   |   `-- 5ab123378b.gbk -> ../../cache/load/28ce925871.gbk
+|   |   `-- 15e3d91521_0.gbk -> ../../cache/load/28ce925871.gbk
 |   `-- str
-|       `-- b4da62b027.str -> ../../cache/lines/...
+|       `-- b4da62b027_0.str -> ../../cache/lines/...
 `-- vars
-    |-- faa.faa -> ../exprs/gbk_to_faa/6ead908eb0.faa
-    |-- gbk.gbk -> ../exprs/load_gbk/5ab123378b.gbk
+    |-- faa.faa -> ../exprs/gbk_to_faa/cdab12f059_0.faa
+    |-- gbk.gbk -> ../exprs/load_gbk/15e3d91521_0.gbk
     `-- result -> ../vars/faa.faa
 
 7 directories, 7 files

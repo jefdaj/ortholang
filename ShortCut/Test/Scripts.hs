@@ -89,7 +89,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runCut cfg ref ids
-      -- writeFile ("/tmp" </> takeBaseName gld <.> "out") out
+      -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") out
       return $ pack out
     desc = "prints expected output"
 
@@ -106,7 +106,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       _ <- runCut cfg ref ids
       out <- readCreateProcess treeCmd ""
       -- sometimes useful for debugging tests:
-      -- writeFile ("/tmp" </> takeBaseName t <.> "tree") out
+      -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
       return $ pack $ toGeneric cfg out
 
 -- TODO use safe writes here
@@ -170,10 +170,10 @@ mkTests cfg ref ids = do
       groups   = map mkScriptTests triples
   mkTestGroup cfg ref ids "interpret test scripts" groups
   where
-    -- findOutFile  c = takeDirectory c </> replaceExtension c "out"
+    -- findOutFile  c = takeDirectory c </> replaceExtension c "txt"
     findOutFile c = joinPath $ (init $ init $ splitDirectories c)
-                      ++ ["stdout", replaceExtension (takeBaseName c) "out"]
+                      ++ ["stdout", replaceExtension (takeBaseName c) "txt"]
     findTreeFile c = if nonDeterministicCut c
       then Nothing
       else Just $ joinPath $ (init $ init $ splitDirectories c)
-                    ++ ["tmpfiles", replaceExtension (takeBaseName c) "tree"]
+                    ++ ["tmpfiles", replaceExtension (takeBaseName c) "txt"]

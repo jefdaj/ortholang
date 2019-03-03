@@ -86,7 +86,7 @@ knownFailing =
 
 findGoldenFiles :: IO [FilePath]
 findGoldenFiles = do
-  testDir  <- getDataFileName "tests"
+  testDir  <- getDataFileName "tests/repl"
   txtFiles <- findByExtension [".txt"] testDir
   let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
   return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles'
@@ -104,9 +104,9 @@ goldenReplTree cfg ref ids ses = do
   let name   = takeBaseName ses
       desc   = name <.> "txt" ++ " creates expected tmpfiles"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
-      -- tree   = replaceExtension (takeDi) "tree"
+      -- tree   = replaceExtension (takeDi) "txt"
       tree   = joinPath $ (init $ init $ splitDirectories ses)
-                      ++ ["tmpfiles", replaceExtension (takeBaseName ses) "tree"]
+                      ++ ["tmpfiles", replaceExtension (takeBaseName ses) "txt"]
       stdin  = extractPrompted promptArrow txt
       tmpDir = cfgTmpDir cfg'
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
@@ -116,7 +116,7 @@ goldenReplTree cfg ref ids ses = do
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  -- helpful for updating tests
-                 -- writeFile ("/tmp" </> takeBaseName ses <.> "tree") $ toGeneric cfg out
+                 -- writeFile ("/tmp" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 

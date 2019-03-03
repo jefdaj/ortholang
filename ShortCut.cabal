@@ -15,8 +15,8 @@ data-files:         data/*.fa,
                     tests/depend/*.txt,
                     tests/repl/*.txt,
                     tests/scripts/*.cut,
-                    tests/stdout/*.out,
-                    tests/tmpfiles/*.tree,
+                    tests/stdout/*.txt,
+                    tests/tmpfiles/*.txt,
                     usage.txt,
                     wrappers/*.sh
 
