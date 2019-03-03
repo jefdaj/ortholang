@@ -53,7 +53,7 @@ blastCRB = CutFunction
   , fTypeCheck = tCrbBlast
   , fDesc = Nothing, fTypeDesc  = "crb_blast : fa -> fa -> crb"
   , fFixity    = Prefix
-  , fRules     = rSimpleTmp "crbblast" aCRBBlast
+  , fRules     = rSimpleTmp "crb_blast" aCRBBlast
   }
 
 -- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
@@ -64,7 +64,7 @@ blastCRBEach = CutFunction
   , fTypeCheck = tCrbBlastEach
   , fDesc = Nothing, fTypeDesc  = "crb_blast_each : fa -> fa.list -> crb.list"
   , fFixity    = Prefix
-  , fRules     = rMapTmps 2 aCRBBlast "crbblast"
+  , fRules     = rMapTmps 2 aCRBBlast "crb_blast"
   }
 
 -- TODO split into two functions with different type signatures?

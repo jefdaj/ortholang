@@ -14,6 +14,5 @@ large = load_faa_each ["data/Mycoplasma_agalactiae_small.faa"] | small
 small_hits = extract_queries_each (crb_blast_each reference small)
 large_hits = extract_queries_each (crb_blast_each reference large)
 
-# The real test is that it produces the expected tmpfiles,
-# but result should also be 40.
+# The real test is that it produces the expected tmpfiles (see check script).
 result = length (any large_hits ~ any small_hits)

@@ -48,13 +48,12 @@ knownFailing =
   -- , "mmseqs_search"
   -- , "mmseqs_search_db"
 
-  [ "sonicparanoid_basic"
-
   -- TODO get this to run on the server! (can it be done?)
-  , "mmseqs_createdb"
+  [ "mmseqs_createdb"
   , "mmseqs_createdb_all"
   , "mmseqs_search"
   , "mmseqs_search_db"
+  , "sonicparanoid_basic"
 
   -- TODO what's up with this? "indirect recursion detected" but only sometimes
   -- , "ncbi_blast_reciprocal_best"
@@ -107,7 +106,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     treeAct = do
       _ <- runCut cfg ref ids
       out <- readCreateProcess treeCmd ""
-      -- sometimes useful for debugging tests:
+      -- useful for debugging tests or updating the golden files
       -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
       return $ pack $ toGeneric cfg out
 
