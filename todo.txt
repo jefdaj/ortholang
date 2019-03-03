@@ -1,20 +1,5 @@
-saner repeat file naming:
-  ideally, would salts and repeat hashes be equivalent?
-    no! we want salts to be reused among different repeat* functions when possible
-    but can repeat hashes be reused too? think about that in the morning...
-    either way the result should probably be called a salt if it's repeated
-  there could be vars/ for the actual named variables
-  and reps/ for the rest of the junk being put in there now
-  could use reps/salt/ to group them too
-  two main things to do:
-    move the actual links so they don't clutter up vars/ with rep hashes
-    rewrite the salts in a better way so they, maybe unified with rep hashes and using System.Random
-  theory about how to rewrite it:
-    x x start with a single System.Random seed like (mkStdGen 0) for all expressions literally in the cut script
-    x should be able to show + read it to/from string without further modifications?
-    x whenever there's a repeat, use System.Random.Split to create new sub-seeds
-    later, see if there's an optimization where you can prevent duplicating all vars
-      maybe remove anything whose overall digest is already somewhere else?
+what should and shouldn't go in the rep digests? think about that for a few minutes, then move on
+more importantly for now, get the shell tests working quick so you can draft the orthogroup programs today!
 
 file leaking bug:
   what's happening?
