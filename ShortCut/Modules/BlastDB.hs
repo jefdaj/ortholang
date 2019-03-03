@@ -440,8 +440,8 @@ rMakeblastdb s e = rMakeblastdbAll s $ withSingleton e
 
 -- TODO is this map1of1?
 withSingleton :: CutExpr -> CutExpr
-withSingleton (CutFun rtn seed deps name [s])
-  =           (CutFun rtn seed deps name [singleton s])
+withSingleton (CutFun rtn salt deps name [s])
+  =           (CutFun rtn salt deps name [singleton s])
 withSingleton e = error $ "bad argument to withSingleton: " ++ show e
 
 -----------------------------------------------
@@ -477,7 +477,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) seed deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
@@ -485,7 +485,7 @@ rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) seed deps name [e]) =
     tmpDir = makeblastdbCache cfg 
     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
     act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
-    expr' = CutFun (ListOf dbType) seed deps name [withSingletons e]
+    expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
     -- expr'' = trace ("expr':" ++ show expr') expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
@@ -496,7 +496,7 @@ rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 -- TODO move this to its own module? remove it when possible?
 
 withSingletons :: CutExpr -> CutExpr
-withSingletons e = CutFun (ListOf $ typeOf e) (seedOf e) (depsOf e) "singletons" [e]
+withSingletons e = CutFun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
 
 -- Only used for the makeblastdb_*_each functions so far
 -- TODO hide from users?

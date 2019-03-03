@@ -22,11 +22,11 @@ pssmmgen = psiblast_train_db cutoff query mgendb
 # check that it keeps working on maga with increasingly strict cutoffs
 # (note: a cutoff of 0 will break this, but give results in a regular search)
 cutoffs   = [1, 0.5, 0.1, 1e-2, 1e-3, 1e-5, 1e-10, 1e-20, 1e-50, 1e-100]
-pssmsmaga = repeat_each pssmmaga cutoff cutoffs
+pssmsmaga = replace_each pssmmaga cutoff cutoffs
 
 # try overly strict cutoffs with mgen, which would break without empty pssms
 # (note: which training command actually throws the error depends on evaluation order)
-pssmsmgen = repeat_each pssmmgen cutoff cutoffs
+pssmsmgen = replace_each pssmmgen cutoff cutoffs
 
 # finally, try doing searches on all of them.
 # the overly strict ones should have 0 hits rather than throwing an error

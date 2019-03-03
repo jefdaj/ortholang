@@ -1,5 +1,8 @@
 saner repeat file naming:
   ideally, would salts and repeat hashes be equivalent?
+    no! we want salts to be reused among different repeat* functions when possible
+    but can repeat hashes be reused too? think about that in the morning...
+    either way the result should probably be called a salt if it's repeated
   there could be vars/ for the actual named variables
   and reps/ for the rest of the junk being put in there now
   could use reps/salt/ to group them too

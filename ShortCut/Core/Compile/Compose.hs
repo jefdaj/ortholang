@@ -42,9 +42,9 @@ tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
                              ++ ", not " ++ extOf expected
 
 rCompose1 :: CutFunction -> CutType -> CutFunction -> RulesFn
-rCompose1 fn1 rtn1 fn2 st (CutFun rtn2 seed deps _ args) = (fRules fn2) st expr2
+rCompose1 fn1 rtn1 fn2 st (CutFun rtn2 salt deps _ args) = (fRules fn2) st expr2
   where
-    expr1'  = CutFun rtn1 seed deps (fName fn1) args
+    expr1'  = CutFun rtn1 salt deps (fName fn1) args
     expr1'' = CutRules $ CompiledExpr expr1' $ (fRules fn1) st expr1'
-    expr2   = CutFun rtn2 seed deps (fName fn2) [expr1'']
+    expr2   = CutFun rtn2 salt deps (fName fn2) [expr1'']
 rCompose1 _ _ _ _ _ = fail "bad argument to rCompose1"

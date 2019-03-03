@@ -22,7 +22,7 @@
  - |   |-- gbk_to_fna
  - |   |-- leave_each_out
  - |   |-- repeat
- - |   |-- repeat_each
+ - |   |-- replace_each
  - |   |-- translate
  - |   `-- ...
  - `-- vars: symlinks from user variable names to hashed expressions
@@ -98,7 +98,6 @@ import ShortCut.Core.Types -- (CutConfig)
 import ShortCut.Core.Config (debug)
 import ShortCut.Core.Pretty (render, pPrint)
 import ShortCut.Core.Util (digest)
-import ShortCut.Core.Random   (initialRandomSeed)
 -- import ShortCut.Core.Debug        (debugPath)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
@@ -216,26 +215,25 @@ exprPath s@(_, cfg, _, _) expr = debugPath cfg "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr
-    seed   = seedOf expr
+    salt   = saltOf expr
     hashes = argHashes s expr
-    res    = exprPathExplicit cfg prefix rtype seed hashes
+    res    = exprPathExplicit cfg prefix rtype salt hashes
 
-exprPathExplicit :: CutConfig -> String -> CutType -> RandomSeed -> [String] -> CutPath
-exprPathExplicit cfg prefix rtype seed hashes = toCutPath cfg path
+exprPathExplicit :: CutConfig -> String -> CutType -> RepeatSalt -> [String] -> CutPath
+exprPathExplicit cfg prefix rtype (RepeatSalt s) hashes = toCutPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
-    base = (concat $ intersperse "_" $ pre:hashes)
-    pre  = digest seed -- is this the best place to put it?
+    base = (concat $ intersperse "_" $ hashes ++ [show s])
     path = dir </> base <.> extOf rtype
 
 -- TODO remove VarPath, ExprPath types once CutPath works everywhere
 varPath :: CutConfig -> CutVar -> CutExpr -> CutPath
-varPath cfg (CutVar seed var) expr = toCutPath cfg $ cfgTmpDir cfg </> repDir </> base
+varPath cfg (CutVar (ReplaceID rep) var) expr = toCutPath cfg $ cfgTmpDir cfg </> repDir </> base
   where
     base = if var == "result" then var else var <.> extOf (typeOf expr)
-    repDir = if seed == initialRandomSeed
-               then "vars"
-               else "reps" </> digest seed -- TODO digest other stuff too, like the expr?
+    repDir = case rep of
+               Nothing -> "vars"
+               Just r  -> "reps" </> r -- TODO digest other stuff too, like the expr?
 
 ---------------
 -- io checks --

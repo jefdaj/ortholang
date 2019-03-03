@@ -17,7 +17,6 @@ import Text.Parsec            (ParseError)
 -- import Data.IORef             (IORef)
 import System.FilePath ((</>), takeDirectory)
 -- import Data.Map               (empty)
-import ShortCut.Core.Random   (initialRandomSeed)
 
 -------------------
 -- preprocessing --
@@ -86,7 +85,7 @@ pResult = debugParser "pResult" $ do
   -- (_, cfg, _) <- getState
   e <- pExpr
   -- let e' = debugParser cfg "pResult" e
-  return (CutVar initialRandomSeed "result", e)
+  return (CutVar (ReplaceID Nothing) "result", e)
 
 pStatement :: ParseM CutAssign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)

@@ -208,4 +208,4 @@ rFun3 _ _ e = error $ "bad argument to rFun3: " ++ show e
 ----------------
 
 singleton :: CutExpr -> CutExpr
-singleton e = CutList (typeOf e) (seedOf e) (depsOf e) [e]
+singleton e = CutList (typeOf e) (saltOf e) (depsOf e) [e]

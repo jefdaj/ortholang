@@ -24,7 +24,6 @@ import ShortCut.Core.Actions (readLits, writeLits, debugA, debugNeed)
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import ShortCut.Core.Actions           (wrappedCmdWrite)
-import ShortCut.Core.Random   (initialRandomSeed)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -220,10 +219,10 @@ aParseSearches cfg ref _ sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> CutState -> CutExpr -> Rules ExprPath
-rBioMartR fn s@(_, cfg, ref, ids) expr@(CutFun rtn seed _ _ [ss]) = do
-  (ExprPath bmFn  ) <- rExpr s (CutLit str initialRandomSeed fn)
+rBioMartR fn s@(_, cfg, ref, ids) expr@(CutFun rtn salt _ _ [ss]) = do
+  (ExprPath bmFn  ) <- rExpr s (CutLit str (RepeatSalt 0) fn)
   -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr s $ CutFun rtn seed (depsOf ss) "parse_searches" [ss]
+  (ExprPath sTable) <- rExpr s $ CutFun rtn salt (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
       tmp'    = toCutPath cfg bmTmp

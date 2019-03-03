@@ -1,6 +1,6 @@
 module ShortCut.Modules.Sample where
 
--- TODO single sample works, but why doesn't the seed change when repeating??
+-- TODO single sample works, but why doesn't the salt change when repeating??
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -41,7 +41,7 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(_, cfg, ref, ids) expr@(CutFun _ seed _ _ [n, lst]) = do
+rSample st@(_, cfg, ref, ids) expr@(CutFun _ salt _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr st n
   (ExprPath inPath') <- rExpr st lst
   let nPath    = toCutPath cfg nPath'
@@ -49,24 +49,25 @@ rSample st@(_, cfg, ref, ids) expr@(CutFun _ seed _ _ [n, lst]) = do
       outPath  = exprPath st expr
       outPath' = fromCutPath cfg outPath
       (ListOf t) = typeOf lst
-  outPath' %> \_ -> aSample seed t cfg ref ids outPath nPath inPath
+  outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath
   return $ ExprPath outPath'
 rSample _ _ = fail "bad argument to rSample"
 
-aSample :: RandomSeed -> CutType -> Action2
-aSample seed t cfg ref _ outPath nPath lstPath = do
+aSample :: RepeatSalt -> CutType -> Action2
+aSample salt t cfg ref _ outPath nPath lstPath = do
   let nPath'   = fromCutPath cfg nPath
       lstPath' = fromCutPath cfg lstPath
       outPath' = fromCutPath cfg outPath
   nStr <- readLit cfg ref nPath'
   lst  <- readStrings t cfg ref lstPath'
-  debugL cfg $ "aSample seed: " ++ show seed
+  debugL cfg $ "aSample salt: " ++ show salt
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
-      elements' = randomSample seed n lst
+      elements' = randomSample salt n lst
   writeStrings t cfg ref outPath' elements'
 
-randomSample :: RandomSeed -> Int -> [String] -> [String]
-randomSample (RandomSeed s) n lst = take n $ shuffle lst (read s :: StdGen)
+randomSample :: RepeatSalt -> Int -> [String] -> [String]
+randomSample (RepeatSalt s) n lst = take n $ shuffle lst randGen
   where
     shuffle xs = shuffle' xs $ length xs
-    -- gen = mkStdGen seed
+    -- according to the docs, and string is OK as a random seed
+    randGen = read (show s) :: StdGen

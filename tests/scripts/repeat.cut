@@ -1,4 +1,4 @@
-# Tests the repeat function, which is like repeat_each except without any
+# Tests the repeat function, which is like replace_each except without any
 # explicit permutations. That's trickier than it sounds because we have to
 # make a list of permutations with different salts. Otherwise it will just
 # return the first evaluation N times, which is useless.

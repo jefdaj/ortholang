@@ -46,7 +46,6 @@ import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
 -- import Control.Concurrent.Thread.Delay (delay)
-import ShortCut.Core.Random   (initialRandomSeed)
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
@@ -148,13 +147,13 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as, c, ref, ids) = case lookup (CutVar initialRandomSeed "result") as of
-  Nothing  -> putStrLn "no result variable. that's not right!"
-  Just res -> eval hdl c ref ids (typeOf res) (compileScript s Nothing)
+evalScript hdl s@(as, c, ref, ids) = case lookup (CutVar (ReplaceID Nothing) "result") as of
+  Nothing  -> putStrLn "no result variable during eval. that's not right!"
+  Just res -> eval hdl c ref ids (typeOf res) (compileScript s $ ReplaceID Nothing)
 
 evalFile :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 evalFile hdl cfg ref ids = case cfgScript cfg of
-  Nothing  -> putStrLn "no script. that's not right!"
+  Nothing  -> putStrLn "no script during eval. that's not right!"
   Just scr -> do
     s <- parseFileIO cfg ref ids scr -- TODO just take a CutState?
     evalScript hdl (s, cfg, ref, ids)

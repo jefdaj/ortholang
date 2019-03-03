@@ -2,7 +2,6 @@ module ShortCut.Core.Parse.Basic where
 
 import ShortCut.Core.Types
 -- import ShortCut.Core.Pretty (Pretty, pPrint, render)
-import ShortCut.Core.Random   (initialRandomSeed)
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void)
@@ -85,7 +84,7 @@ pIden = debugParser "pIden" $ lexeme $ do
     rest  = letter <|> digit <|> oneOf "-_"
 
 pVar :: ParseM CutVar
-pVar = debugParser "pVar" (CutVar initialRandomSeed <$> pIden)
+pVar = debugParser "pVar" (CutVar (ReplaceID Nothing) <$> pIden)
 
 -- TODO is the error in here?? maybe it consumes a space and therefore doesn't fail?
 pEq :: ParseM ()
@@ -112,7 +111,7 @@ pNum = debugParser "pNum" $ do
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
   let lit = show (read (n:ns) :: Scientific)
-  return $ CutLit num initialRandomSeed lit
+  return $ CutLit num (RepeatSalt 0) lit
 
 -- list of chars which can be escaped in ShortCut
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -136,4 +135,4 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
     esc = char '\\' *> oneOf escapeChars
 
 pStr :: ParseM CutExpr
-pStr = debugParser "pStr" (CutLit str initialRandomSeed <$> pQuoted <?> "string literal")
+pStr = debugParser "pStr" (CutLit str (RepeatSalt 0) <$> pQuoted <?> "string literal")

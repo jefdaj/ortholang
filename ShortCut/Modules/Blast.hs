@@ -157,13 +157,13 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
 -- TODO check this works after writing the new non- _all makeblastdb fns
 rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn seed deps _ [e, q, s])
-  = rules st (CutFun rtn seed deps name1 [e, q, dbExpr])
+rMkBlastFromFa d@(_, _, _, dbType) st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fRules $ mkBlastFromDb d
     name1 = fName  $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-    dbExpr = CutFun dbType seed (depsOf s) name2 [s] 
+    dbExpr = CutFun dbType salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 ---------------------
@@ -201,11 +201,11 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
 
 -- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn seed deps _   [e, q, ss])
-  =                              rules st (CutFun rtn seed deps fn2 [e, q, ss'])
+rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _   [e, q, ss])
+  =                              rules st (CutFun rtn salt deps fn2 [e, q, ss'])
   where
     rules = rMkBlastFromDbEach d
-    ss'   = CutFun (ListOf dbType) seed (depsOf ss) fn1 [ss]
+    ss'   = CutFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

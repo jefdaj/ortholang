@@ -1,6 +1,6 @@
 module ShortCut.Modules.Permute where
 
--- TODO put this in Core because with the seeds it's not separable
+-- TODO put this in Core because with the salts it's not separable
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -36,11 +36,11 @@ cutModule = CutModule
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
          -> CutState -> CutExpr -> Rules ExprPath
-rPermute comboFn s@(_, cfg, _, _) expr@(CutFun _ seed _ _ [iList]) = do
+rPermute comboFn s@(_, cfg, _, _) expr@(CutFun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oList      = fromCutPath cfg $ exprPath s expr
       (ListOf t) = typeOf iList
-  oList %> aPermute s comboFn iPath t seed
+  oList %> aPermute s comboFn iPath t salt
   return (ExprPath oList)
 rPermute _ _ _ = fail "bad argument to rCombos"
 
@@ -48,15 +48,15 @@ rPermute _ _ _ = fail "bad argument to rCombos"
 -- TODO do something more obvious than writing to the "list" prefix??
 aPermute :: CutState
          -> ([String] -> [[String]])
-         -> FilePath -> CutType -> RandomSeed
+         -> FilePath -> CutType -> RepeatSalt
          -> FilePath -> Action ()
-aPermute (_, cfg, ref, _) comboFn iPath eType seed out = do
+aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
   debugNeed cfg "aPermute" [iPath]
   elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   -- TODO will this match other files?
-  let mkOut p = exprPathExplicit cfg "list" (ListOf eType) seed [digest $ makeRelative (cfgTmpDir cfg) p]
+  let mkOut p = exprPathExplicit cfg "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromCutPath cfg) oPaths
       combos  = comboFn elements

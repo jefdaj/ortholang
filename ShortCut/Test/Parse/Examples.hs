@@ -10,7 +10,6 @@ module ShortCut.Test.Parse.Examples
 
 import ShortCut.Core.Types
 import ShortCut.Modules.SeqIO (faa)
-import ShortCut.Core.Random   (initialRandomSeed)
 
 -- TODO example function calls
 -- TODO example bop expressions
@@ -22,41 +21,41 @@ import ShortCut.Core.Random   (initialRandomSeed)
 ---------------------------------
 
 n1, n2 :: CutExpr
-n1 = CutLit num initialRandomSeed "1.0"
-n2 = CutLit num initialRandomSeed "2.0"
+n1 = CutLit num (RepeatSalt 0) "1.0"
+n2 = CutLit num (RepeatSalt 0) "2.0"
 
 lst0, lst1, lst2, lst3 :: CutExpr
-lst0  = CutList Empty initialRandomSeed [] [] -- ah, this is getting empty.list instead of empty
-lst1  = CutList num initialRandomSeed [] [n1]
-lst2  = CutList num initialRandomSeed [] [n1, n2]
-lst3  = CutList (ListOf num) initialRandomSeed [] [lst1]
+lst0  = CutList Empty (RepeatSalt 0) [] [] -- ah, this is getting empty.list instead of empty
+lst1  = CutList num (RepeatSalt 0) [] [n1]
+lst2  = CutList num (RepeatSalt 0) [] [n1, n2]
+lst3  = CutList (ListOf num) (RepeatSalt 0) [] [lst1]
 
 s4, lst4 :: CutExpr
-s4   = CutLit str initialRandomSeed "four"
-lst4 = CutList str initialRandomSeed [] [s4]
+s4   = CutLit str (RepeatSalt 0) "four"
+lst4 = CutList str (RepeatSalt 0) [] [s4]
 
 -- TODO why do bops use the list type while lists use the elem type?
 bop00, bop10, bop01, bop40, bop04 :: CutExpr
-bop00 = CutBop (ListOf Empty) initialRandomSeed [] "|" lst0 lst0
-bop10 = CutBop (ListOf num  ) initialRandomSeed [] "|" lst1 lst0
-bop01 = CutBop (ListOf num  ) initialRandomSeed [] "|" lst0 lst1
-bop40 = CutBop (ListOf str  ) initialRandomSeed [] "|" lst4 lst0
-bop04 = CutBop (ListOf str  ) initialRandomSeed [] "|" lst0 lst4
+bop00 = CutBop (ListOf Empty) (RepeatSalt 0) [] "|" lst0 lst0
+bop10 = CutBop (ListOf num  ) (RepeatSalt 0) [] "|" lst1 lst0
+bop01 = CutBop (ListOf num  ) (RepeatSalt 0) [] "|" lst0 lst1
+bop40 = CutBop (ListOf str  ) (RepeatSalt 0) [] "|" lst4 lst0
+bop04 = CutBop (ListOf str  ) (RepeatSalt 0) [] "|" lst0 lst4
 
 len :: [CutExpr] -> CutExpr
-len es = CutFun num initialRandomSeed [] "length" es
+len es = CutFun num (RepeatSalt 0) [] "length" es
 
 addParens :: (String, a) -> (String, a)
 addParens (s, a) = ("(" ++ s ++ ")", a)
 
 faa0 :: CutExpr
-faa0  = CutFun (ListOf faa) initialRandomSeed [] "load_faa_each" [lst0]
+faa0  = CutFun (ListOf faa) (RepeatSalt 0) [] "load_faa_each" [lst0]
 
 -- TODO fix pretty-printing to write (ListOf faa) instead of faa.lst here
 somefaa, loadsome, loadbop1 :: CutExpr
-somefaa  = CutList str initialRandomSeed [] [CutLit str initialRandomSeed "some.faa"]
-loadsome = (CutFun (ListOf faa) initialRandomSeed [] "load_faa_each" [somefaa])
-loadbop1 = CutBop (ListOf faa) initialRandomSeed [] "~" loadsome loadsome
+somefaa  = CutList str (RepeatSalt 0) [] [CutLit str (RepeatSalt 0) "some.faa"]
+loadsome = (CutFun (ListOf faa) (RepeatSalt 0) [] "load_faa_each" [somefaa])
+loadbop1 = CutBop (ListOf faa) (RepeatSalt 0) [] "~" loadsome loadsome
 
 --------------
 -- examples --
@@ -99,14 +98,14 @@ exExprs = exTerms ++ map addParens exTerms ++
   , ("[] | [\"four\"]", bop04)
 
   -- bops should be left-associative, and type-picking-up should still work
-  , ("[1] | [] | []", CutBop (ListOf num) initialRandomSeed [] "|" bop10 lst0)
-  , ("[\"four\"] | [] | []", CutBop (ListOf str) initialRandomSeed [] "|" bop40 lst0)
+  , ("[1] | [] | []", CutBop (ListOf num) (RepeatSalt 0) [] "|" bop10 lst0)
+  , ("[\"four\"] | [] | []", CutBop (ListOf str) (RepeatSalt 0) [] "|" bop40 lst0)
 
   -- can put fn calls in lsts, with or without separators
-  , ("[ length [] ]", CutList num initialRandomSeed [] [len [lst0]])
-  , ("[(length [])]", CutList num initialRandomSeed [] [len [lst0]])
-  , ("[length [],  length []]", CutList num initialRandomSeed [] [len [lst0], len [lst0]])
-  , ("[length [],\nlength []]", CutList num initialRandomSeed [] [len [lst0], len [lst0]])
+  , ("[ length [] ]", CutList num (RepeatSalt 0) [] [len [lst0]])
+  , ("[(length [])]", CutList num (RepeatSalt 0) [] [len [lst0]])
+  , ("[length [],  length []]", CutList num (RepeatSalt 0) [] [len [lst0], len [lst0]])
+  , ("[length [],\nlength []]", CutList num (RepeatSalt 0) [] [len [lst0], len [lst0]])
 
   -- should be able to put fn calls in bops, with or without parens
   , ("(load_faa_each [\"some.faa\"]) ~ (load_faa_each [\"some.faa\"])", loadbop1)

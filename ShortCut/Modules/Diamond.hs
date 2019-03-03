@@ -132,10 +132,10 @@ aDiamondFromDb _ _ _ _ _ = error $ "bad argument to aDiamondFromDb"
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler
 rDiamondFromFa :: [String] -> RulesFn
-rDiamondFromFa dCmd st (CutFun rtn seed deps _ [e, q, s])
-  = rules st (CutFun rtn seed deps name1 [e, q, dbExpr])
+rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules  = rSimple $ aDiamondFromDb dCmd
     name1  = "diamond_" ++ head dCmd
-    dbExpr = CutFun dmnd seed (depsOf s) "diamond_makedb" [s]
+    dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"

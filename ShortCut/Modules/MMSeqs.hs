@@ -138,9 +138,9 @@ tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Righ
 tMmseqsSearchDb n types = error $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
 
 rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb st@(_, cfg, ref, _) e@(CutFun _ seed _ _ [n, q, s]) = do
+rMmseqsSearchDb st@(_, cfg, ref, _) e@(CutFun _ salt _ _ [n, q, s]) = do
   (ExprPath ePath) <- rExpr st n
-  (ExprPath qPath) <- rExpr st $ CutFun mms seed (depsOf q) "mmseqs_createdb" [q]
+  (ExprPath qPath) <- rExpr st $ CutFun mms salt (depsOf q) "mmseqs_createdb" [q]
   (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db
   let out    = exprPath st e
       out'   = debugRules cfg "rMmseqsSearch" e $ fromCutPath cfg out
@@ -203,9 +203,9 @@ tMmseqsSearch _ [x, y, z] | x == num && y `elem` [fna, faa] && z `elem` [fna, fa
 tMmseqsSearch n types = error $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
 
 rMmseqsSearch :: RulesFn
-rMmseqsSearch st (CutFun rtn seed deps name [e, q, s])
-  = rules st (CutFun rtn seed deps name [e, q, sDb])
+rMmseqsSearch st (CutFun rtn salt deps name [e, q, s])
+  = rules st (CutFun rtn salt deps name [e, q, sDb])
   where
     rules = fRules mmseqsSearchDb
-    sDb = CutFun mms seed (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
+    sDb = CutFun mms salt (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
 rMmseqsSearch _ _ = fail "bad argument to rMmseqsSearch"

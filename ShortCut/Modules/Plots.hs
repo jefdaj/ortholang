@@ -12,7 +12,6 @@ import ShortCut.Core.Types
 import ShortCut.Core.Actions (withBinHash)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript)
-import ShortCut.Core.Random   (initialRandomSeed)
 -- import System.Directory (createDirectoryIfMissing)
 -- import System.FilePath  ((</>), (<.>))
 
@@ -41,7 +40,7 @@ plot = CutType
  - Otherwise it will return an empty string, which the script should ignore.
  -}
 varName :: CutState -> CutExpr -> Rules ExprPath
-varName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
+varName st expr = rLit st $ CutLit str (RepeatSalt 0) $ case expr of
   (CutRef _ _ _ (CutVar _ name)) -> name
   _ -> ""
 
@@ -49,7 +48,7 @@ varName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
 varNames :: CutState -> CutExpr -> Rules ExprPath
 varNames _ expr = undefined lits -- TODO implement this
   where
-    lits = CutLit str initialRandomSeed $ case expr of
+    lits = CutLit str (RepeatSalt 0) $ case expr of
              (CutRef _ _ _ (CutVar _ name)) -> name
              _ -> ""
 
@@ -140,12 +139,12 @@ rPlotRepeatScores :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
-indRepeatVarName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
+indRepeatVarName st expr = rLit st $ CutLit str (RepeatSalt 0) $ case expr of
   (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar _ v)), _]) -> v
   _ -> ""
 
 depRepeatVarName :: CutState -> CutExpr -> Rules ExprPath
-depRepeatVarName st expr = rLit st $ CutLit str initialRandomSeed $ case expr of
+depRepeatVarName st expr = rLit st $ CutLit str (RepeatSalt 0) $ case expr of
   (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar _ v)), _]) -> v
   _ -> ""
 

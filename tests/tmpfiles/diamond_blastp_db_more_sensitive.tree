@@ -7,21 +7,21 @@
 |       `-- 36189032ad.faa.ids
 |-- exprs
 |   |-- diamond_blastp_db_more_sensitive
-|   |   `-- 62073b9981_eb44a81eae_ac3e8655ff.bht
+|   |   `-- bca777a01a_33392d8410_e6e16f079e_0.bht
 |   |-- diamond_makedb
-|   |   `-- 0674510e2a.dmnd
+|   |   `-- c8116966c3_0.dmnd
 |   |-- load_faa
-|   |   |-- 41efeeb6a7.faa -> ../../cache/load/10ffe0cf0f.faa
-|   |   `-- 7a2bdf0c77.faa -> ../../cache/load/36189032ad.faa
+|   |   |-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- a3d0ec3042_0.faa -> ../../cache/load/10ffe0cf0f.faa
 |   |-- num
-|   |   `-- 6de785566e.num -> ../../cache/lines/...
+|   |   `-- 6de785566e_0.num -> ../../cache/lines/...
 |   `-- str
-|       |-- c156278223.str -> ../../cache/lines/...
-|       `-- d03a6ca5fb.str -> ../../cache/lines/...
+|       |-- c156278223_0.str -> ../../cache/lines/...
+|       `-- d03a6ca5fb_0.str -> ../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/0674510e2a.dmnd
-    |-- maga.faa -> ../exprs/load_faa/7a2bdf0c77.faa
-    |-- mgen.faa -> ../exprs/load_faa/41efeeb6a7.faa
-    `-- result -> ../exprs/diamond_blastp_db_more_sensitive/62073b9981_eb44a81eae_ac3e8655ff.bht
+    |-- db.dmnd -> ../exprs/diamond_makedb/c8116966c3_0.dmnd
+    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/a3d0ec3042_0.faa
+    `-- result -> ../exprs/diamond_blastp_db_more_sensitive/bca777a01a_33392d8410_e6e16f079e_0.bht
 
 9 directories, 15 files

@@ -57,7 +57,7 @@ knownFailing =
   -- TODO what's up with this? "indirect recursion detected" but only sometimes
   -- , "ncbi_blast_reciprocal_best"
 
-  -- TODO fix repeat_each to work with generated lists
+  -- TODO fix replace_each to work with generated lists
   , "orthofinder_orthofinder_sets"
 
   -- TODO what's up with these?

@@ -5,8 +5,7 @@ module ShortCut.Modules.Repeat where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.RepeatEach
-import ShortCut.Core.Random (unfoldRandomSeed)
+import ShortCut.Core.Compile.Replace
 
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
@@ -16,10 +15,10 @@ import Data.Scientific (Scientific(), toBoundedInteger)
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Repeat"
-  , mDesc = "Repeatdly re-calculate variables using different random seeds"
+  , mDesc = "Repeatdly re-calculate variables using different random salts"
   , mTypes = []
   , mFunctions =
-    [ repeatEach -- TODO export this from the Core directly?
+    [ replaceEach -- TODO export this from the Core directly?
     , repeatN
     ]
   }
@@ -59,15 +58,15 @@ extractNum _ _ = error "bad argument to extractNum"
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
--- TODO is this how the seeds should work?
+-- TODO is this how the salts should work?
 rRepeatN :: CutState -> CutExpr -> Rules ExprPath
-rRepeatN s@(scr, _, _, _) (CutFun t seed deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
-  rRepeatEach s (CutFun t seed deps name [resExpr, subVar, subList])
+rRepeatN s@(scr, _, _, _) (CutFun t salt@(RepeatSalt n) deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
+  rReplaceEach s (CutFun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
-    -- subs    = zipWith setSeed [seed .. seed+nReps-1] (repeat subExpr)
-    subs    = zipWith setSeed (unfoldRandomSeed seed nReps) (repeat subExpr)
-    -- subs'   = trace ("rRepeatN seeds: " ++ show (map seedOf subs)) subs
-    subList = CutList (typeOf subExpr) seed (depsOf subExpr) subs -- TODO seed right?
+    subs    = zipWith setSalt [n .. n+nReps-1] (repeat subExpr) -- TODO always start from 0?
+    -- subs    = zipWith setSalt (unfoldReplaceID salt nReps) (repeat subExpr)
+    -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
+    subList = CutList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
 rRepeatN _ _ = fail "bad argument to rRepeatN"

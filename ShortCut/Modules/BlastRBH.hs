@@ -53,8 +53,8 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFun
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (CutFun rtn seed deps _ [e, q, s])
-  = rules st (CutFun rtn seed deps name [e, s, q])
+rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name [e, s, q])
   where
     rules = fRules $ mkBlastFromFa d
     name  = fName  $ mkBlastFromFa d
@@ -80,13 +80,13 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
 -- expression over the new action fn.
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn seed deps _ [e, s, qs])
+rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
   = rMap 3 revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
-    sList      = CutList (typeOf s) seed (depsOf s) [s]
-    subjDbExpr = CutFun dbType seed (depsOf sList) dbFnName [sList]
-    editedExpr = CutFun rtn seed deps editedName [e, subjDbExpr, qs]
+    sList      = CutList (typeOf s) salt (depsOf s) [s]
+    subjDbExpr = CutFun dbType salt (depsOf sList) dbFnName [sList]
+    editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
     editedName = bCmd ++ "_db_rev_each"
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
@@ -160,11 +160,11 @@ mkBlastRbh d@(bCmd, qType, sType, _) = CutFunction
 
 -- TODO this only works with symmetric fns so far... either fix or restrict to those!
 rMkBlastRbh :: BlastDesc -> RulesFn
-rMkBlastRbh (bCmd, _, _, _) s (CutFun _ seed deps _ [e, l, r]) = rExpr s main
+rMkBlastRbh (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, r]) = rExpr s main
   where
-    main  = CutFun bht seed deps "reciprocal_best" [lHits, rHits]
-    lHits = CutFun bht seed deps  bCmd            [e, l, r]
-    rHits = CutFun bht seed deps (bCmd ++ "_rev") [e, l, r]
+    main  = CutFun bht salt deps "reciprocal_best" [lHits, rHits]
+    lHits = CutFun bht salt deps  bCmd            [e, l, r]
+    rHits = CutFun bht salt deps (bCmd ++ "_rev") [e, l, r]
 rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 
 ----------------------
@@ -183,9 +183,9 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = CutFunction
     name = bCmd ++ "_rbh_each"
 
 rMkBlastRbhEach :: BlastDesc -> RulesFn
-rMkBlastRbhEach (bCmd, _, _, _) s (CutFun _ seed deps _ [e, l, rs]) = rExpr s main
+rMkBlastRbhEach (bCmd, _, _, _) s (CutFun _ salt deps _ [e, l, rs]) = rExpr s main
   where
-    main  = CutFun (ListOf bht) seed deps "reciprocal_best_each" [lHits, rHits]
-    lHits = CutFun (ListOf bht) seed deps (bCmd ++ "_each"    )  [e, l, rs]
-    rHits = CutFun (ListOf bht) seed deps (bCmd ++ "_rev_each")  [e, l, rs]
+    main  = CutFun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
+    lHits = CutFun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
+    rHits = CutFun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
 rMkBlastRbhEach _ _ _ = fail "bad argument to rMkBlastRbh"

@@ -83,10 +83,10 @@ tSetFold _ = Left "expecting a list of lists"
 -- TODO if order turns out to be important in cuts, call them lists
 rSetBop :: String -> (Set String -> Set String -> Set String)
      -> CutState -> CutExpr -> Rules ExprPath
-rSetBop name fn s (CutBop rtn seed deps _ s1 s2) = rSetFold (foldr1 fn) s fun
+rSetBop name fn s (CutBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
   where
-    fun = CutFun  rtn seed deps name [lst]
-    lst = CutList rtn seed deps [s1, s2]
+    fun = CutFun  rtn salt deps name [lst]
+    lst = CutList rtn salt deps [s1, s2]
 rSetBop _ _ _ _ = fail "bad argument to rSetBop"
 
 rSetFold :: ([Set String] -> Set String) -> CutState -> CutExpr -> Rules ExprPath
@@ -142,9 +142,9 @@ some = CutFunction
   }
 
 rSome :: CutState -> CutExpr -> Rules ExprPath
-rSome s (CutFun rtn seed deps _ lol) = rExpr s diffExpr
+rSome s (CutFun rtn salt deps _ lol) = rExpr s diffExpr
   where
-    anyExpr  = CutFun rtn seed deps "any" lol
-    allExpr  = CutFun rtn seed deps "all" lol
-    diffExpr = CutBop rtn seed deps "~" anyExpr allExpr
+    anyExpr  = CutFun rtn salt deps "any" lol
+    allExpr  = CutFun rtn salt deps "all" lol
+    diffExpr = CutBop rtn salt deps "~" anyExpr allExpr
 rSome _ _ = fail "bad argument to rSome"

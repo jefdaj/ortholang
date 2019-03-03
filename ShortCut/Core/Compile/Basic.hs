@@ -40,7 +40,6 @@ import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
-import ShortCut.Core.Random   (initialRandomSeed)
 
 
 debug :: CutConfig -> String -> a -> a
@@ -80,22 +79,33 @@ rAssign s@(_, cfg, _, _) (var, expr) = do
       res' = debugRules cfg "rAssign" (var, expr) res
   return res'
 
+varNameMatches :: Show a => String -> (CutVar, a) -> Bool
+-- varNameMatches name1 pair@((CutVar _ name2), _) = name1 == (trace ("pair: " ++ show pair) name2)
+varNameMatches name1 ((CutVar _ name2), _) = name1 == name2
+
+-- TODO how should this behave if there's more than one?
+lookupVar :: Show a => String -> [(CutVar, a)] -> Maybe a
+lookupVar name pairs = case filter (varNameMatches name) pairs of
+  ((_, result):[]) -> Just result
+  _ -> Nothing
+
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
-compileScript :: CutState -> Maybe String -> Rules ResPath
-compileScript s@(as, _, _, _) permHash = do
+-- TODO remove permHash
+compileScript :: CutState -> ReplaceID -> Rules ResPath
+compileScript s@(as, _, _, _) _ = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (rAssign s) as
-  case lookup (CutVar initialRandomSeed res) rpaths of
-    Nothing -> fail "no result variable. that's not right!"
+  case lookupVar "result" rpaths of
+    Nothing -> fail "no result variable during compile. that's not right!"
     Just (VarPath r) -> return $ ResPath r
-  where
+  -- where
     -- p here is "result" + the permutation name/hash if there is one right?
-    res = case permHash of
-      Nothing -> "result"
-      Just h  -> "result." ++ h
+    -- res = case permHash of
+      -- Nothing -> "result"
+      -- Just h  -> "result." ++ h
 
 -- write a literal value from ShortCut source code to file
 rLit :: CutState -> CutExpr -> Rules ExprPath
@@ -169,11 +179,11 @@ aListLits cfg ref _ paths outPath = do
 
 -- regular case for writing a list of links to some other file type
 rListPaths :: CutState -> CutExpr -> Rules ExprPath
-rListPaths s@(_, cfg, ref, ids) e@(CutList rtn seed _ exprs) = do
+rListPaths s@(_, cfg, ref, ids) e@(CutList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toCutPath cfg p) paths
       hash     = digest $ concat $ map digest paths'
-      outPath  = exprPathExplicit cfg "list" (ListOf rtn) seed [hash]
+      outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath' = debugRules cfg "rListPaths" e $ fromCutPath cfg outPath
   outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
@@ -382,10 +392,10 @@ aLoadListLits cfg ref _ outPath litsPath = do
 
 -- regular case for lists of any other file type
 rLoadListLinks :: Bool -> RulesFn
-rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn seed _ _ [es]) = do
+rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   let hash     = digest $ toCutPath cfg pathsPath
-      outPath  = exprPathExplicit cfg "list" rtn seed [hash]
+      outPath  = exprPathExplicit cfg "list" rtn salt [hash]
       outPath' = fromCutPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toCutPath cfg pathsPath) outPath
   return (ExprPath outPath')

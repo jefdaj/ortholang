@@ -24,8 +24,6 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- import Test.Tasty.QuickCheck (testProperty)
 -- import Text.Parsec           (ParseError)
 
-import ShortCut.Core.Random   (initialRandomSeed)
-
 -- TODO add pretty-printing round trips to everything
 -- TODO move some of the test utilties here to Utils.hs?
 -- TODO adjust generators to handle script state!
@@ -46,7 +44,7 @@ regularParse :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> E
 regularParse p cfg ref ids = parseWithEof p ([], cfg, ref, ids)
 
 takeVar :: String -> CutVar
-takeVar = CutVar initialRandomSeed . takeWhile (flip elem $ vNonFirstChars)
+takeVar = CutVar (ReplaceID Nothing) . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> Bool
 parsedItAll p cfg ref ids str' = case parseWithLeftOver p ([], cfg, ref, ids) str' of

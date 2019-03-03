@@ -5,12 +5,12 @@
 |       `-- 42fb7081a8.txt
 |-- exprs
 |   |-- add
-|   |   `-- fba69f6eb2_fba69f6eb2.num -> ../../cache/lines/2a13ac791a.txt
+|   |   `-- 698967e992_698967e992_0.num -> ../../cache/lines/2a13ac791a.txt
 |   `-- num
-|       `-- ee383407c9.num -> ../../cache/lines/42fb7081a8.txt
+|       `-- ee383407c9_0.num -> ../../cache/lines/42fb7081a8.txt
 |-- history.txt
 |-- profile.html
 `-- vars
-    `-- result -> ../exprs/add/fba69f6eb2_fba69f6eb2.num
+    `-- result -> ../exprs/add/698967e992_698967e992_0.num
 
 6 directories, 7 files

@@ -19,7 +19,8 @@ module ShortCut.Core.Types
   , operatorChars
   -- , WrapperConfig(..)
   , CutType(..)
-  , RandomSeed(..)
+  , ReplaceID(..)
+  , RepeatSalt(..)
   , CutVar(..)
   , CutScript
   , Locks
@@ -48,8 +49,8 @@ module ShortCut.Core.Types
   , CutFunction(..)
   , mkTypeDesc
   , CutModule(..)
-  , seedOf
-  , setSeed
+  , saltOf
+  , setSalt
   , prefixOf
   -- wrappers to prevent confusing the various paths
   , CacheDir(..)
@@ -108,25 +109,30 @@ newtype ResPath  = ResPath  FilePath deriving Show -- ~/.shortcut/vars/result[.<
 -- data Ext = ListOf Ext | Ext String
   -- deriving (Eq, Show, Read)
 
-newtype RandomSeed = RandomSeed String deriving (Eq, Show, Read)
+-- A digest identifying which replace_* call the variable is part of.
+-- TODO This isn't very elegant; can it be removed?
+newtype ReplaceID = ReplaceID (Maybe String) deriving (Eq, Show, Read)
 
-data CutVar = CutVar RandomSeed String
+-- A number that can be incremented to change the expression's hash, causing repeat evaluation.
+newtype RepeatSalt = RepeatSalt Int deriving (Eq, Show, Read)
+
+data CutVar = CutVar ReplaceID String
   deriving (Eq, Show, Read)
  
 -- the common fields are:
 -- * return type
--- * seed, which can be changed to force re-evaluation of an expr + all depends
+-- * salt, which can be changed to force re-evaluation of an expr + all depends
 --   (it should start at 0 and be incremented, though that doesn't really matter)
 -- TODO start from 1 instead of 0?
 -- TODO test that it works correctly! in particular, it should go thru refs!
---      (do we need to add seeds of subepxressions or something? or use randoms?)
+--      (do we need to add salts of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
 data CutExpr
-  = CutLit CutType RandomSeed String
-  | CutRef CutType RandomSeed [CutVar] CutVar -- do refs need a seed? yes! (i think?)
-  | CutBop CutType RandomSeed [CutVar] String  CutExpr CutExpr
-  | CutFun CutType RandomSeed [CutVar] String [CutExpr]
-  | CutList CutType RandomSeed [CutVar] [CutExpr]
+  = CutLit CutType RepeatSalt String
+  | CutRef CutType RepeatSalt [CutVar] CutVar -- do refs need a salt? yes! (i think?)
+  | CutBop CutType RepeatSalt [CutVar] String  CutExpr CutExpr
+  | CutFun CutType RepeatSalt [CutVar] String [CutExpr]
+  | CutList CutType RepeatSalt [CutVar] [CutExpr]
   | CutRules CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
@@ -145,23 +151,23 @@ instance Eq CompiledExpr where
   (CompiledExpr a _) == (CompiledExpr b _) = a == b
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-seedOf :: CutExpr -> RandomSeed
-seedOf (CutLit _ n _)       = n
-seedOf (CutRef _ n _ _)     = n
-seedOf (CutBop _ n _ _ _ _) = n
-seedOf (CutFun _ n _ _ _)   = n
-seedOf (CutList _ n _ _)     = n
-seedOf (CutRules (CompiledExpr e _)) = seedOf e
+saltOf :: CutExpr -> RepeatSalt
+saltOf (CutLit _ n _)       = n
+saltOf (CutRef _ n _ _)     = n
+saltOf (CutBop _ n _ _ _ _) = n
+saltOf (CutFun _ n _ _ _)   = n
+saltOf (CutList _ n _ _)     = n
+saltOf (CutRules (CompiledExpr e _)) = saltOf e
 
 -- TODO this needs to be recursive?
--- TODO would a recursive version be able to replace addPrefixes in RepeatEach?
-setSeed :: RandomSeed -> CutExpr -> CutExpr
-setSeed r (CutLit t _ s)          = CutLit t r s
-setSeed r (CutRef t _ ds v)       = CutRef t r ds v
-setSeed r (CutBop t _ ds s e1 e2) = CutBop t r ds s e1 e2
-setSeed r (CutFun t _ ds s es)    = CutFun t r ds s es
-setSeed r (CutList t _ ds es)      = CutList t r ds es
-setSeed _ (CutRules (CompiledExpr _ _)) = error "setSeed not implemented for compiled rules" -- TODO should it be?
+-- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
+setSalt :: Int -> CutExpr -> CutExpr
+setSalt r (CutLit t _ s)          = CutLit  t (RepeatSalt r) s
+setSalt r (CutRef t _ ds v)       = CutRef  t (RepeatSalt r) ds v
+setSalt r (CutBop t _ ds s e1 e2) = CutBop  t (RepeatSalt r) ds s e1 e2
+setSalt r (CutFun t _ ds s es)    = CutFun  t (RepeatSalt r) ds s es
+setSalt r (CutList t _ ds es)     = CutList t (RepeatSalt r) ds es
+setSalt _ (CutRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules" -- TODO should it be?
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String

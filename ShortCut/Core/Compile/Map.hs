@@ -65,6 +65,8 @@ rMapSimpleScript index = rMap index . aSimpleScript
 -- main algorithm --
 --------------------
 
+-- TODO rename these to mention map instead of vec
+
 {- This separately hooks up aVecElem to operate on any .args files, and aVec to
  - generate some .args files then gather them into the overall list. Those two
  - then need to agree on tmpfiles, communicating only through the .args files.
@@ -77,7 +79,7 @@ rMapSimpleScript index = rMap index . aSimpleScript
 rVecMain :: Int -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
-rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r seed _ name exprs) = do
+rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, regularExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) regularExprs
@@ -91,7 +93,7 @@ rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r seed _ name expr
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
       (ListOf eType) = debug cfg ("type of '" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show r) r
-  elemCachePtn %> aVecElem cfg ref ids eType mTmpFn actFn singleName seed
+  elemCachePtn %> aVecElem cfg ref ids eType mTmpFn actFn singleName salt
   mainOutPath  %> aVecMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rVecMain" e $ ExprPath mainOutPath
 rVecMain _ _ _ _ _ = fail "bad argument to rVecMain"
@@ -170,8 +172,8 @@ aVecArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
 aVecElem :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType
          -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
-         -> String -> RandomSeed -> FilePath -> Action ()
-aVecElem cfg ref ids eType tmpFn actFn singleName seed out = do
+         -> String -> RepeatSalt -> FilePath -> Action ()
+aVecElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
   args <- readPaths cfg ref argsPath
   let args' = map (fromCutPath cfg) args
@@ -187,7 +189,7 @@ aVecElem cfg ref ids eType tmpFn actFn singleName seed out = do
   let out' = debugA cfg "aVecElem" (toCutPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
-      single  = exprPathExplicit cfg singleName eType seed hashes
+      single  = exprPathExplicit cfg singleName eType salt hashes
       single' = fromCutPath cfg single
       args''' = single:map (toCutPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?

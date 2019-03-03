@@ -268,8 +268,8 @@ reciprocal_best_each : bht bht.list -> bht.list
 shortcut —▶ :t repeat
 repeat : <outputvar> <inputvar> num -> <output>.list
 
-shortcut —▶ :t repeat_each
-repeat_each : <outputvar> <inputvar> <inputvars> -> <output>.list
+shortcut —▶ :t replace_each
+replace_each : <outputvar> <inputvar> <inputvars> -> <output>.list
 
 shortcut —▶ :t some
 some : X.list.list -> X.list

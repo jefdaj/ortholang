@@ -31,7 +31,6 @@ import Data.Scientific
 import ShortCut.Core.Types
 import ShortCut.Core.Parse   (spaceChars, escapeChars, literalChars)
 import Test.QuickCheck
-import ShortCut.Core.Random (initialRandomSeed)
 
 -------------------------
 -- Arbitrary instances --
@@ -58,7 +57,7 @@ gVar = (:) <$> first <*> listOf rest
 newtype ExVar = ExVar CutVar deriving (Eq, Show)
 
 instance Arbitrary ExVar where
-  arbitrary = (ExVar . CutVar initialRandomSeed) <$> gVar
+  arbitrary = (ExVar . CutVar (ReplaceID Nothing)) <$> gVar
 
 -- references --
 
@@ -184,7 +183,7 @@ fnNames =
   "psiblast_pssm_db", "psiblast_pssm_db_each", "psiblast_pssm_each",
   "psiblast_pssms", "psiblast_pssms_db", "psiblast_train", "psiblast_train_all",
   "psiblast_train_db", "psiblast_train_db_each", "psiblast_train_each",
-  "reciprocal_best", "reciprocal_best_each", "repeat", "repeat_each",
+  "reciprocal_best", "reciprocal_best_each", "repeat", "replace_each",
   "scatterplot", "score_repeats", "some", "split_faa", "split_faa_each",
   "split_fna", "split_fna_each", "tblastn", "tblastn_db", "tblastn_db_each",
   "tblastn_each", "tblastx", "tblastx_db", "tblastx_db_each", "tblastx_each",
