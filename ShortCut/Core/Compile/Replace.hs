@@ -50,6 +50,17 @@ import ShortCut.Core.Paths         (exprPath, fromCutPath,
 import ShortCut.Core.Compile.Basic (rExpr, compileScript, debugRules)
 import ShortCut.Core.Util          (digest, stripWhiteSpace)
 
+cutModule :: CutModule
+cutModule = CutModule
+  { mName = "Replace"
+  , mDesc = "Replace variables in the script to see how the results change"
+  , mTypes = []
+  , mFunctions =
+      [ replaceEach
+      -- TODO plain replace that does one
+      ]
+  }
+
 ---------------------------
 -- mangle variable names --
 ---------------------------

@@ -1,11 +1,20 @@
-module ShortCut.Modules.Repeat where
+module ShortCut.Core.Compile.Repeat where
+
+{- They're named similarly, but repeat and replace mean different things. The
+ - Replace module copies the script and replaces a variable in each version of
+ - it without changing the salts, so many times no real work will need to be
+ - redone to get the new answer. Repeat (this module) is used when you want to
+ - redo the same work multiple times. It's implemented by duplicating a
+ - specific expression, changing its salt in each version, and passing those to
+ - replace_each. So far this is the only thing the salts are ever used for.
+ -}
 
 -- TODO which parts of this should go in Core/Repeat.hs?
 -- TODO debug transformations too!
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Compile.Replace
+import ShortCut.Core.Compile.Replace (rReplaceEach)
 
 import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
@@ -17,10 +26,7 @@ cutModule = CutModule
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random salts"
   , mTypes = []
-  , mFunctions =
-    [ replaceEach -- TODO export this from the Core directly?
-    , repeatN
-    ]
+  , mFunctions = [repeatN]
   }
 
 -----------------------------------------------------
