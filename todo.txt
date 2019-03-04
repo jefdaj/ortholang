@@ -1,9 +1,4 @@
-tests to update:
-  x hmmer_hmmbuild just needs output file updated?
-  blast_hits_best_hits gives different numbers of hits (always 10+?)
-
 what should and shouldn't go in the rep digests? think about that for a few minutes, then move on
-more importantly for now, get the shell tests working quick so you can draft the orthogroup programs today!
 
 file leaking bug:
   what's happening?
