@@ -116,7 +116,7 @@ dReplace = "replace : <outputvar> <vartoreplace> <exprtoreplacewith> -> <newoutp
 
 rReplace :: CutState -> CutExpr -> Rules ExprPath
 rReplace st (CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
-rReplace _ _ = error "bad argument to rReplace"
+rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
 
 {- This does the actual replace operation. It takes an expression to edit, the
  - variable to replace, and an expression to put in its place. While it does
@@ -249,4 +249,4 @@ rReplaceEach s@(scr, cfg, ref, _) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ su
                   else aReplaceEachLinks
     in actFn cfg ref outPath subPaths' resPaths'
   return (ExprPath outPath')
-rReplaceEach _ expr = error $ "bad argument to rReplaceEach: " ++ show expr
+rReplaceEach _ expr = fail $ "bad argument to rReplaceEach: " ++ show expr
