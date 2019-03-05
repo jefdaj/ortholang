@@ -12,11 +12,12 @@ stdenv.mkDerivation rec {
   version = "6-f5a1c"; # latest release version
 
   # src = ./mmseqs;
+  # latest master branch as of march 5
+  # no reason to think a later one won't work
+  gitRev = "67b4ca0708a5cd2a0f87220b97f11e562f6c7842";
   src = fetchurl {
-    # latest master branch as of march 5
-    # (rev 67b4ca0708a5cd2a0f87220b97f11e562f6c7842)
-    url = "https://github.com/soedinglab/MMseqs2/archive/master.zip";
-    sha256 = "143i31i90gk1vry9cdqc68yskcr78rbmfk6wlhxlzlfgbr7mffcv";
+    url = "https://github.com/soedinglab/MMseqs2/archive/${gitRev}.zip";
+    sha256 = "0fm3k2y4qc3830pvgixjjsra8ssfdsfr7yyzrcca42pmr750rwzc";
 
     # latest official release
     # url = "https://github.com/soedinglab/MMseqs2/archive/${version}.tar.gz";
@@ -37,7 +38,7 @@ stdenv.mkDerivation rec {
   #     tar xvzf ${src}
   #   '';
   postUnpack = ''
-    patchShebangs MMseqs2-master/cmake MMseqs2-master/lib
+    patchShebangs MMseqs2-${gitRev}
   '';
   preConfigure = ''
     cmakeFlags="$cmakeFlags -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$out -DHAVE_AVX_EXTENSIONS=0 -DHAVE_AVX2_EXTENSIONS=0"
