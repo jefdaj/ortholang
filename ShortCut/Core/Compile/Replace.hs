@@ -130,7 +130,22 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - impossible to repeat based on the results of a function call, limiting it to
  - just lists you explicitly write in the cut code.
  -
- - TODO plan the rewrite in detail, or at least try to
+ - The initial rewrite plan was:
+ - 1) separate out aReplaceEach for clarity
+ - 2) the main goal here is to replace extractExprs with an equivalent that evaluates the list and returns its paths
+ -    that needs to run in Action so it can use IO
+ -    and because of that so does the rReplace call? is that even possible?
+ - 3) then given paths we can build CompiledExprs using the known types
+ -
+ - But then I remembered Core.Compile.Map, which might be able to help:
+ - rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
+ - type Action1  = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+ - you give it a single function and an index for the argument to map over, and it does everything
+ - but it only works on Action functions, so it will take some adapting to use here
+ - it does seem promising though: write replace and get a proper replace_each almost for free?
+ -
+ - So the new plan is relatively simple: implement replace first, and then try replace_each again.
+ - I'm not that sure the rMap thing will work because it deals with Actions though.
  -}
 rReplaceEach :: CutState
              -> CutExpr -- the final result expression, which contains all the info we need
