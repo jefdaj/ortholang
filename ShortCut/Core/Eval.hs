@@ -19,6 +19,7 @@ module ShortCut.Core.Eval
   ( eval
   , evalFile
   , evalScript
+  , evalIntermediateExpr
   )
   where
 
@@ -35,10 +36,10 @@ import Control.Retry
 
 import Control.Exception.Safe         (catchAny)
 import Data.Maybe                     (maybeToList)
-import ShortCut.Core.Compile.Basic    (compileScript)
+import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
-import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath)
 -- import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Sanitize         (unhashIDs)
 import ShortCut.Core.Actions          (readLits, readPaths)
@@ -144,6 +145,23 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
 
         liftIO $ hPutStrLn hdl res'
         -- liftIO $ putStrLn $ "done rendering with unhashIDs"
+
+{- A hacky (attempted) solution to the inability to use results of function
+ - calls as inputs to the repeat* and replace* functions: pass the raw
+ - expression into the Action monad and separately evaluate it inside. Will it
+ - work? Sounds plausible... No rules or anything needed here I think.
+ - TODO do i need to pass the handle in from above?
+ - TODO factor out the common code with eval above?
+ -}
+evalIntermediateExpr :: CutState -> CutExpr -> IO CutPath
+evalIntermediateExpr st@(_, cfg, _, _) expr = do
+  myShake cfg $ do
+    (ExprPath path) <- rExpr st expr
+    want ["evalIntermediateExpr"]
+    "evalIntermediateExpr" ~> do
+      alwaysRerun
+      actionRetry 3 $ need [path]
+  return $ exprPath st expr
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
