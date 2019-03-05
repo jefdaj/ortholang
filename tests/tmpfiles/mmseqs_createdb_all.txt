@@ -18,7 +18,7 @@
 |   |-- load_faa
 |   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- mmseqs_createdb_all
-|   |   `-- 96d02905bd_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db
+|   |   `-- 96d02905bd_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db.index
 |   `-- str
 |       `-- c156278223_0.str -> ../../cache/lines/...
 `-- vars
