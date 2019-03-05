@@ -47,13 +47,13 @@ knownFailing =
   -- , "mmseqs_createdb_all"
   -- , "mmseqs_search"
   -- , "mmseqs_search_db"
-  [ "sonicparanoid_basic"
+  -- , "sonicparanoid_basic"
 
   -- TODO what's up with this? "indirect recursion detected" but only sometimes
   -- , "ncbi_blast_reciprocal_best"
 
   -- TODO fix replace_each to work with generated lists
-  , "orthofinder_orthofinder_sets"
+  [ "orthofinder_orthofinder_sets"
 
   -- TODO what's up with these?
   , "psiblast_each_pssm"

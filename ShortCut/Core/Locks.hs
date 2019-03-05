@@ -51,7 +51,8 @@ initLocks :: IO Locks
 initLocks = do
   -- only approximately related to the number of files open,
   -- but keeps them in check at least
-  disk  <- newResourceIO "disk" 20
+  -- TODO how high is high enough to allow all sonicparanoid but not hit the OS limit?
+  disk  <- newResourceIO "disk" 100
   locks <- newIORef Map.empty
   return (disk, locks)
 
