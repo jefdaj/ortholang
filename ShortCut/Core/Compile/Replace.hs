@@ -56,8 +56,8 @@ cutModule = CutModule
   , mDesc = "Replace variables in the script to see how the results change"
   , mTypes = []
   , mFunctions =
-      [ replaceEach
-      -- TODO plain replace that does one
+      [ replace
+      , replaceEach
       ]
   }
 
@@ -92,79 +92,31 @@ setReplaceID newID (CutVar _ name) = CutVar newID name
 setReplaceIDs :: ReplaceID -> CutScript -> CutScript
 setReplaceIDs newID = mangleScript (setReplaceID newID)
 
----------------
--- interface --
----------------
+-------------
+-- replace --
+-------------
 
-{- Standard ShortCut boilerplate to create user-facing functions.
- - TODO plain replace function that replaces one variable. easy to implement with a singleton
- -}
-
-replaceEach :: CutFunction
-replaceEach = CutFunction
-  { fName      = "replace_each"
+replace :: CutFunction
+replace = CutFunction
+  { fName      = "replace"
   , fFixity    = Prefix
-  , fTypeCheck = tReplaceEach
-  , fDesc      = Nothing
-  , fTypeDesc  = dReplaceEach
-  , fRules     = rReplaceEach
+  , fTypeCheck = tReplace
+  , fDesc      = Just "See what one (dependent) variable would be if you changed another (independent) variable."
+  , fTypeDesc  = dReplace
+  , fRules     = rReplace
   }
 
-tReplaceEach :: [CutType] -> Either String CutType
-tReplaceEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
-tReplaceEach _ = Left "invalid args to replace_each" -- TODO better errors here
+tReplace :: [CutType] -> Either String CutType
+tReplace (res:sub:sub':[]) | sub == sub' = Right res
+tReplace _ = Left "invalid args to replace" -- TODO better errors here
 
-dReplaceEach :: String
-dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.list"
+-- TODO write this is a way that will make sense to other people
+dReplace :: String
+dReplace = "replace : <outputvar> <vartoreplace> <exprtoreplacewith> -> <newoutput>"
 
---------------------
--- implementation --
---------------------
-
-{- This takes a list expression that includes the variable to replace and a
- - list of things to replace it with. It calls rReplace to do each replacement
- - operation, then gathers the results in a list.
- -
- - It has one major flaw that I'm trying to fix now: it assumes that the list
- - of expressions to substitute in are known at compile-time. That makes it
- - impossible to repeat based on the results of a function call, limiting it to
- - just lists you explicitly write in the cut code.
- -
- - The initial rewrite plan was:
- - 1) separate out aReplaceEach for clarity
- - 2) the main goal here is to replace extractExprs with an equivalent that evaluates the list and returns its paths
- -    that needs to run in Action so it can use IO
- -    and because of that so does the rReplace call? is that even possible?
- - 3) then given paths we can build CompiledExprs using the known types
- -
- - But then I remembered Core.Compile.Map, which might be able to help:
- - rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
- - type Action1  = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
- - you give it a single function and an index for the argument to map over, and it does everything
- - but it only works on Action functions, so it will take some adapting to use here
- - it does seem promising though: write replace and get a proper replace_each almost for free?
- -
- - So the new plan is relatively simple: implement replace first, and then try replace_each again.
- - I'm not that sure the rMap thing will work because it deals with Actions though.
- -}
-rReplaceEach :: CutState
-             -> CutExpr -- the final result expression, which contains all the info we need
-             -> Rules ExprPath
-rReplaceEach s@(scr, cfg, ref, _) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
-  subPaths <- rExpr s subList
-  let subExprs = extractExprs scr subList
-  resPaths <- mapM (rReplace s resExpr subVar) subExprs
-  let subPaths' = (\(ExprPath p) -> toCutPath cfg p) subPaths
-      resPaths' = map (\(ExprPath p) -> toCutPath cfg p) resPaths
-      outPath   = exprPath s expr
-      outPath'  = debugRules cfg "rReplaceEach" expr $ fromCutPath cfg outPath
-  outPath' %> \_ ->
-    let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
-                  then aReplaceEachLits (typeOf expr)
-                  else aReplaceEachLinks
-    in actFn cfg ref outPath subPaths' resPaths'
-  return (ExprPath outPath')
-rReplaceEach _ expr = error $ "bad argument to rReplaceEach: " ++ show expr
+rReplace :: CutState -> CutExpr -> Rules ExprPath
+rReplace st (CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
+rReplace _ _ = error "bad argument to rReplace"
 
 {- This does the actual replace operation. It takes an expression to edit, the
  - variable to replace, and an expression to put in its place. While it does
@@ -173,18 +125,14 @@ rReplaceEach _ expr = error $ "bad argument to rReplaceEach: " ++ show expr
  - conflicting with the existing ones. The copies go in a separate "reps"
  - folder named by the ID.
  -
- - TODO can this be wrapped and exported as-is to be the replace function?
- -      not quite, but if you add something to take a single expression that should work
- - TODO ideally, this shouldn't need any custom digesting? but whatever no
- -      messing with it for now
- - TODO can this be parallelized better?
+ - TODO any reason not to merge it into rReplace above?
  -}
-rReplace :: CutState
-         -> CutExpr -- the result expression for a single replacement, which *doesn't* contain all the info
-         -> CutVar  -- we also need the variable to be replaced
-         -> CutExpr -- and an expression to replace it with (which could be a ref to another variable)
-         -> Rules ExprPath
-rReplace st@(script, cfg, ref, ids) resExpr subVar@(CutVar _ _) subExpr = do
+rReplace' :: CutState
+          -> CutExpr -- the result expression for a single replacement, which *doesn't* contain all the info
+          -> CutVar  -- we also need the variable to be replaced
+          -> CutExpr -- and an expression to replace it with (which could be a ref to another variable)
+          -> Rules ExprPath
+rReplace' st@(script, cfg, ref, ids) resExpr subVar@(CutVar _ _) subExpr = do
   let res   = (CutVar (ReplaceID Nothing) "result", resExpr)
       sub   = (subVar, subExpr)
       deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
@@ -193,7 +141,7 @@ rReplace st@(script, cfg, ref, ids) resExpr subVar@(CutVar _ _) subExpr = do
   (ResPath resPath) <- compileScript (scr', cfg, ref, ids) newID -- TODO remove the ID here, or is it useful?
   return (ExprPath resPath)
 
-{- This decides the "replace ID" in rReplace above. It's important because the
+{- This decides the "replace ID" in rReplace' above. It's important because the
  - hash needs to be unique whenever we would want to return different results,
  - but the same between things that we actually want deduplicated. So far we
  - err on the side of uniqueness.
@@ -236,3 +184,69 @@ aReplaceEachLinks cfg ref outPath subPaths resPaths = do
     subPaths' = fromCutPath cfg subPaths
     resPaths' = map (fromCutPath cfg) resPaths
     out = debugA cfg "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
+
+------------------
+-- replace_each --
+------------------
+
+replaceEach :: CutFunction
+replaceEach = CutFunction
+  { fName      = "replace_each"
+  , fFixity    = Prefix
+  , fTypeCheck = tReplaceEach
+  , fDesc      = Nothing
+  , fTypeDesc  = dReplaceEach
+  , fRules     = rReplaceEach
+  }
+
+tReplaceEach :: [CutType] -> Either String CutType
+tReplaceEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
+tReplaceEach _ = Left "invalid args to replace_each" -- TODO better errors here
+
+dReplaceEach :: String
+dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.list"
+
+{- This takes a list expression that includes the variable to replace and a
+ - list of things to replace it with. It calls rReplace' to do each replacement
+ - operation, then gathers the results in a list.
+ -
+ - It has one major flaw that I'm trying to fix now: it assumes that the list
+ - of expressions to substitute in are known at compile-time. That makes it
+ - impossible to repeat based on the results of a function call, limiting it to
+ - just lists you explicitly write in the cut code.
+ -
+ - The initial rewrite plan was:
+ - 1) separate out aReplaceEach for clarity
+ - 2) the main goal here is to replace extractExprs with an equivalent that evaluates the list and returns its paths
+ -    that needs to run in Action so it can use IO
+ -    and because of that so does the rReplace' call? is that even possible?
+ - 3) then given paths we can build CompiledExprs using the known types
+ -
+ - But then I remembered Core.Compile.Map, which might be able to help:
+ - rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
+ - type Action1  = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+ - you give it a single function and an index for the argument to map over, and it does everything
+ - but it only works on Action functions, so it will take some adapting to use here
+ - it does seem promising though: write replace and get a proper replace_each almost for free?
+ -
+ - So the new plan is relatively simple: implement replace first, and then try replace_each again.
+ - I'm not that sure the rMap thing will work because it deals with Actions though.
+ -}
+rReplaceEach :: CutState
+             -> CutExpr -- the final result expression, which contains all the info we need
+             -> Rules ExprPath
+rReplaceEach s@(scr, cfg, ref, _) expr@(CutFun _ _ _ _ (resExpr:(CutRef _ _ _ subVar):subList:[])) = do
+  subPaths <- rExpr s subList
+  let subExprs = extractExprs scr subList
+  resPaths <- mapM (rReplace' s resExpr subVar) subExprs
+  let subPaths' = (\(ExprPath p) -> toCutPath cfg p) subPaths
+      resPaths' = map (\(ExprPath p) -> toCutPath cfg p) resPaths
+      outPath   = exprPath s expr
+      outPath'  = debugRules cfg "rReplaceEach" expr $ fromCutPath cfg outPath
+  outPath' %> \_ ->
+    let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
+                  then aReplaceEachLits (typeOf expr)
+                  else aReplaceEachLinks
+    in actFn cfg ref outPath subPaths' resPaths'
+  return (ExprPath outPath')
+rReplaceEach _ expr = error $ "bad argument to rReplaceEach: " ++ show expr
