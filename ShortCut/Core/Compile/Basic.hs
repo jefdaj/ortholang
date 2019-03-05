@@ -63,7 +63,7 @@ rExpr s e@(CutRef _ _ _ _    ) = rRef s e
 rExpr s e@(CutList _ _ _ _   ) = rList s e
 rExpr s e@(CutBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(CutFun _ _ _ n _  ) = rulesByName s e n
-rExpr _   (CutRules (CompiledExpr _ rules)) = rules
+rExpr _   (CutRules (CompiledExpr _ _ rules)) = rules
 
 -- TODO remove once no longer needed (parser should find fns)
 rulesByName :: CutState -> CutExpr -> String -> Rules ExprPath

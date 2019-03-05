@@ -179,7 +179,7 @@ argHashes _ (CutLit  _ _     v    ) = [digest v]
 argHashes s (CutFun  _ _ _ _ es   ) = map (digest . exprPath s) es
 argHashes s (CutBop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
 argHashes s (CutList _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
-argHashes s (CutRules (CompiledExpr e _)) = argHashes s e
+argHashes _ (CutRules (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
 -- resolveVar :: CutConfig -> CutPath -> IO CutPath
@@ -208,6 +208,7 @@ argHashes s (CutRules (CompiledExpr e _)) = argHashes s e
 
 -- TODO rename to tmpPath?
 exprPath :: CutState -> CutExpr -> CutPath
+exprPath (_, cfg, _, _) (CutRules (CompiledExpr _ (ExprPath p) _)) = toCutPath cfg p
 exprPath s@(scr, _, _, _) (CutRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
                                          Just e  -> exprPath s e

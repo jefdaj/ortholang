@@ -89,7 +89,7 @@ instance Pretty CutExpr where
   pPrint (CutRef _ _ _ v)    = pPrint v
   pPrint (CutFun _ _ _ s es) = text s <+> sep (map pNested es)
   pPrint (CutList _ _ _ es)  = pList es
-  pPrint (CutRules (CompiledExpr e _)) = pPrint e -- TODO is this right?
+  pPrint (CutRules (CompiledExpr t (ExprPath p) _)) = text $ "Compiled " ++ extOf t ++ " " ++ p
 
   -- this is almost right except it breaks lines too early (always nesting),
   -- which looks super weird for short bops:

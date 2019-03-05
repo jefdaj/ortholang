@@ -99,10 +99,10 @@ type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
 type RulesFn     = CutState -> CutExpr -> Rules ExprPath
 type TypeChecker = [CutType] -> Either String CutType
 
-newtype CacheDir = CacheDir FilePath deriving Show -- ~/.shortcut/cache/<modname>
-newtype ExprPath = ExprPath FilePath deriving Show -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
-newtype VarPath  = VarPath  FilePath deriving Show -- ~/.shortcut/vars/<varname>.<type>
-newtype ResPath  = ResPath  FilePath deriving Show -- ~/.shortcut/vars/result[.<hash>.<type>]
+newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.shortcut/cache/<modname>
+newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.shortcut/exprs/<fnname>/<hash>.<type>
+newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq) -- ~/.shortcut/vars/<varname>.<type>
+newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq) -- ~/.shortcut/vars/result[.<hash>.<type>]
 
 -- Filename extension, which in ShortCut is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -140,15 +140,18 @@ data CutExpr
 -- passed to another function. Because Rules can't be shown or compared, we
 -- also carry around the original CutExpr. TODO is the expr necessary? helpful?
 -- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
-data CompiledExpr = CompiledExpr CutExpr (Rules ExprPath)
+-- The extra ExprPath is weird, but seems to be required since we can't get at the second one.
+data CompiledExpr = CompiledExpr CutType ExprPath (Rules ExprPath)
 
 -- TODO is it a bad idea to hide the compiled-ness?
+-- TODO can this be made into a CutPath?
+-- TODO is show ever really needed?
 instance Show CompiledExpr where
-  show (CompiledExpr e _) = "Compiled (" ++ show e ++ ")"
+  show (CompiledExpr t p _) = "CompiledExpr " ++ extOf t ++ " " ++ show p ++ " <<Rules ExprPath>>"
 
 -- CompiledExprs are compared by the expressions they were compiled from.
 instance Eq CompiledExpr where
-  (CompiledExpr a _) == (CompiledExpr b _) = a == b
+  (CompiledExpr _ p1 _) == (CompiledExpr _ p2 _) = p1 == p2
 
 -- TODO is this not actually needed? seems "show expr" handles it?
 saltOf :: CutExpr -> RepeatSalt
@@ -157,7 +160,7 @@ saltOf (CutRef _ n _ _)     = n
 saltOf (CutBop _ n _ _ _ _) = n
 saltOf (CutFun _ n _ _ _)   = n
 saltOf (CutList _ n _ _)     = n
-saltOf (CutRules (CompiledExpr e _)) = saltOf e
+saltOf (CutRules (CompiledExpr _ _ _)) = error "CompiledExprs don't have salts" -- TODO is that OK?
 
 -- TODO this needs to be recursive?
 -- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
@@ -167,7 +170,7 @@ setSalt r (CutRef t _ ds v)       = CutRef  t (RepeatSalt r) ds v
 setSalt r (CutBop t _ ds s e1 e2) = CutBop  t (RepeatSalt r) ds s e1 e2
 setSalt r (CutFun t _ ds s es)    = CutFun  t (RepeatSalt r) ds s es
 setSalt r (CutList t _ ds es)     = CutList t (RepeatSalt r) ds es
-setSalt _ (CutRules (CompiledExpr _ _)) = error "setSalt not implemented for compiled rules" -- TODO should it be?
+setSalt _ (CutRules (CompiledExpr _ _ _)) = error "setSalt not implemented for compiled rules" -- TODO should it be?
 
 -- TODO add names to the CutBops themselves... or associate with prefix versions?
 prefixOf :: CutExpr -> String
@@ -175,7 +178,7 @@ prefixOf (CutLit rtn _ _     ) = extOf rtn
 prefixOf (CutFun _ _ _ name _) = name
 prefixOf (CutList _ _ _ _    ) = "list"
 prefixOf (CutRef _ _ _ _     ) = error  "CutRefs don't need a prefix"
-prefixOf (CutRules (CompiledExpr e _)) = prefixOf e
+prefixOf (CutRules (CompiledExpr _ _ _)) = error "CompiledExprs don't need a prefix"
 prefixOf (CutBop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -231,7 +234,7 @@ typeOf (CutRef   t _ _ _    ) = t
 typeOf (CutBop   t _ _ _ _ _) = t
 typeOf (CutFun   t _ _ _ _  ) = t
 typeOf (CutList  t _ _ _    ) = ListOf t -- t can be Empty
-typeOf (CutRules (CompiledExpr e _)) = typeOf e
+typeOf (CutRules (CompiledExpr t _ _)) = t
 -- typeOf (CutList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
 -- typeOf (CutList _ _ _ []     ) = Empty
 -- typeOf (CutList _ _ _ []     ) = ListOf Empty
@@ -262,7 +265,7 @@ depsOf (CutRef  _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (CutBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (CutFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
 depsOf (CutList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
-depsOf (CutRules (CompiledExpr e _)) = depsOf e
+depsOf (CutRules (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 rDepsOf :: CutScript -> CutVar -> [CutVar]
 rDepsOf scr var = map fst rDeps
