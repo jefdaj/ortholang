@@ -47,13 +47,7 @@ knownFailing =
   -- , "mmseqs_createdb_all"
   -- , "mmseqs_search"
   -- , "mmseqs_search_db"
-
-  -- TODO get this to run on the server! (can it be done?)
-  [ "mmseqs_createdb"
-  , "mmseqs_createdb_all"
-  , "mmseqs_search"
-  , "mmseqs_search_db"
-  , "sonicparanoid_basic"
+  [ "sonicparanoid_basic"
 
   -- TODO what's up with this? "indirect recursion detected" but only sometimes
   -- , "ncbi_blast_reciprocal_best"
