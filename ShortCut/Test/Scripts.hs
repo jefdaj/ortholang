@@ -1,6 +1,6 @@
 module ShortCut.Test.Scripts where
 
--- import Debug.Trace (trace)
+-- import Debug.Trace (trace, traceShow)
 
 import Prelude hiding (writeFile)
 
@@ -18,8 +18,7 @@ import ShortCut.Core.Types        (CutConfig(..), HashedSeqIDsRef)
 import ShortCut.Core.Locks        (Locks, withWriteLock)
 import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
-import System.FilePath            (splitDirectories, joinPath)
-import System.FilePath.Posix      (replaceExtension, takeBaseName, takeFileName, (</>), (<.>))
+import System.FilePath.Posix      (takeBaseName, (</>), (<.>))
 import System.IO                  (stdout, stderr, writeFile)
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
@@ -71,11 +70,10 @@ knownFailing =
 
   ]
 
-getTestScripts :: IO [FilePath]
-getTestScripts = do
-  testDir  <- getDataFileName "tests/scripts"
-  testCuts <- findByExtension [".cut"] testDir
-  let testCuts' = filter (\p -> not $ (takeBaseName p) `elem` knownFailing) testCuts
+getTestScripts :: FilePath -> IO [FilePath]
+getTestScripts testDir = do
+  testCuts <- fmap (map takeBaseName) $ findByExtension [".cut"] testDir
+  let testCuts' = filter (\p -> not $ p `elem` knownFailing) testCuts
   return testCuts'
 
 goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
@@ -91,6 +89,8 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runCut cfg ref ids
+      -- useful for debugging tests or updating the golden files
+      -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") out
       return $ pack out
     desc = "prints expected output"
 
@@ -101,7 +101,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     -- TODO refactor them to come from the same fn
     desc = "creates expected tmpfiles"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
-    treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|lines|output.txt' | " ++ sedCmd)
+    treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg ref ids
@@ -111,21 +111,20 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       return $ pack $ toGeneric cfg out
 
 -- TODO use safe writes here
-mkTripTest :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
-mkTripTest cfg ref ids = goldenDiff desc tripShow tripAct
+mkTripTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
+mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
   where
     desc = "unchanged by round-trip to file"
-    tripCut = cfgTmpDir cfg <.> "cut"
-    tripShow  = cfgTmpDir cfg <.> "show"
+    tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
       scr1 <- parseFileIO cfg ref ids $ fromJust $ cfgScript cfg
-      writeScript tripCut scr1
+      writeScript cut scr1
       withWriteLock ref tripShow $ writeFile tripShow $ show scr1
     -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
-      scr2 <- parseFileIO cfg ref ids tripCut
+      scr2 <- parseFileIO cfg ref ids cut
       return $ pack $ show scr2
 
 -- test that no absolute paths snuck into the tmpfiles
@@ -153,24 +152,20 @@ runCut cfg ref ids =  do
   writeFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out -- for the shell script tests
   return $ toGeneric cfg out
 
-mkScriptTests :: (FilePath, Maybe FilePath, Maybe FilePath, Maybe FilePath)
+mkScriptTests :: (FilePath, FilePath, FilePath, Maybe FilePath)
               -> CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
-mkScriptTests (cut, mout, mtre, mshell) cfg ref ids = do
+mkScriptTests (cut, out, tre, mchk) cfg ref ids = do
   absTests   <- mkAbsTest   cfg' ref ids -- just one, but comes as a list
-  shellTests <- case mshell of
-                  Just s  -> mkCheckTest cfg' ref ids s
+  checkTests <- case mchk of
                   Nothing -> return []
-  let tripTest   = mkTripTest cfg' ref ids
-      otherTests = [tripTest] ++ treeTests ++ shellTests ++ outTests
-      outTests   = case mout of
-                     Just o  -> [mkOutTest cfg' ref ids o]
-                     Nothing -> []
-      treeTests  = case mtre of
-                     Just t  -> [mkTreeTest cfg' ref ids t]
-                     Nothing -> []
-  return $ testGroup name $ otherTests ++ absTests -- ++ shellTests
+                  Just c  -> mkCheckTest cfg' ref ids c
+  let tripTest = mkTripTest cfg' ref ids cut
+      outTest  = mkOutTest  cfg' ref ids out -- TODO why is this trying to use the tree files as golden??
+      treeTest = mkTreeTest cfg' ref ids tre
+      tests    = [tripTest, outTest] ++ absTests ++ [treeTest] ++ checkTests
+  return $ testGroup name tests
   where
-    name = takeFileName cut
+    name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
 
 {- "check scripts" for handling the tricky cases:
@@ -187,21 +182,23 @@ mkCheckTest cfg ref ids scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
       (_, out, err) <- readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
-findTestFile :: String -> String -> FilePath -> IO (Maybe FilePath)
-findTestFile dir ext cut = do
-  exists <- doesFileExist testPath
-  return $ if exists then Just testPath else Nothing
-  where
-    testDir  = init $ init $ splitDirectories cut
-    testPath = joinPath $ testDir ++ [dir, replaceExtension (takeBaseName cut) ext]
+testFilePath :: FilePath -> FilePath -> FilePath -> FilePath -> FilePath
+testFilePath base dir ext name = base </> dir </> name <.> ext
+
+findTestFile :: FilePath -> FilePath -> FilePath -> FilePath -> IO (Maybe FilePath)
+findTestFile base dir ext name = do
+  let path = testFilePath base dir ext name
+  exists <- doesFileExist path
+  return $ if exists then Just path else Nothing
 
 mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests cfg ref ids = do
-  cuts    <- getTestScripts
-  mouts   <- mapM (findTestFile "stdout"   "txt") cuts
-  mtrees  <- mapM (findTestFile "tmpfiles" "txt") cuts
-  mchecks <- mapM (findTestFile "check"    "sh" ) cuts
-  let quads  = zip4 cuts mouts mtrees mchecks
-      -- groups = map mkScriptTests $ trace ("quads: " ++ show quads) quads
+  testDir <- getDataFileName "tests"
+  names   <- getTestScripts testDir
+  mchecks <- mapM (findTestFile testDir "check" "sh") names
+  let cuts   = map (testFilePath testDir "scripts"  "cut") names
+      outs   = map (testFilePath testDir "stdout"   "txt") names
+      trees  = map (testFilePath testDir "tmpfiles" "txt") names
+      quads  = zip4 cuts outs trees mchecks
       groups = map mkScriptTests quads
   mkTestGroup cfg ref ids "interpret test scripts" groups
