@@ -1,1 +1,1 @@
-MMseqs2 Version: GITDIR-NOTFOUND
+MMseqs2 Version: 44313b8fa1c2b183ed9a3f5c34ba3a0b1ba26688
