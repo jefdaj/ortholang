@@ -28,10 +28,7 @@ depCmds =
   ]
 
 knownFailing :: [FilePath]
-knownFailing =
-  [ "depend_mmseqs"
-  -- TODO sonicparanoid
-  ]
+knownFailing = []
 
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
