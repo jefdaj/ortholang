@@ -21,7 +21,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
-  , mTypes = [gbk, faa, fna]
+  , mTypes = [gbk, faa, fna, fa]
   , mFunctions =
     [ gbkToFaa    , gbkToFaaEach
     , gbkToFna    , gbkToFnaEach
@@ -45,6 +45,13 @@ gbk = CutType
   { tExt  = "gbk"
   , tDesc = "genbank"
   , tShow = defaultShow
+  }
+
+fa :: CutType
+fa = CutTypeGroup
+  { tgShort = "fa"
+  , tgLong  = "FASTA (nucleic OR amino acid)"
+  , tgMember = \t -> t `elem` [fna, faa]
   }
 
 faa :: CutType

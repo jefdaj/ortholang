@@ -69,7 +69,7 @@ executable shortcut
                     ShortCut.Modules.Cheat,
                     ShortCut.Modules.Diamond,
                     ShortCut.Modules.Hmmer,
-                    ShortCut.Modules.Length,
+                    ShortCut.Modules.ListLike,
                     ShortCut.Modules.Load,
                     ShortCut.Modules.MMSeqs,
                     ShortCut.Modules.Math,

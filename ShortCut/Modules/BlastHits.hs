@@ -1,5 +1,8 @@
 module ShortCut.Modules.BlastHits where
 
+-- TODO are crb files *exactly* in blast format? if so, no need for separate types
+-- TODO rename all extract_ functions to not have the extract part? or replace it with list_?
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -16,7 +19,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "BlastHits"
   , mDesc = "Work with BLAST hit tables"
-  , mTypes = [bht, crb]
+  , mTypes = [bht, crb, hittable]
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach
@@ -25,33 +28,44 @@ cutModule = CutModule
     ]
   }
 
+hittable :: CutType
+hittable = CutTypeGroup
+  { tgShort = "hittable"
+  , tgLong  = "files in "
+  , tgMember = \t -> t `elem` [bht, crb] -- TODO mms too
+  }
+
 ----------------------
 -- extract_*(_each) --
 ----------------------
 
-tExtract :: TypeChecker
-tExtract [x] | elem x [crb, bht] = Right $ ListOf str
-tExtract  _ = Left "expected a blast hits table"
+-- tExtract :: TypeChecker
+-- tExtract [x] | elem x [crb, bht] = Right $ ListOf str
+-- tExtract  _ = Left "expected a blast hits table"
 
-tExtractEach :: [CutType] -> Either String CutType
-tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
-tExtractEach  _ = Left "expected a list of blast hits tables"
+-- tExtractEach :: [CutType] -> Either String CutType
+-- tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
+-- tExtractEach  _ = Left "expected a list of blast hits tables"
 
 extractQueries :: CutFunction
-extractQueries = let name = "extract_queries" in CutFunction
+extractQueries = CutFunction
   { fName      = name
-  , fTypeCheck = tExtract
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht> -> str.list"
+  , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
+  , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 1
   }
+  where
+    name = "extract_queries"
 
 -- TODO this should have a typeclass
 extractQueriesEach :: CutFunction
 extractQueriesEach = let name = "extract_queries_each" in CutFunction
   { fName      = name
-  , fTypeCheck = tExtractEach
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
+  , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 $ aCutCol True 1
   }
@@ -60,20 +74,24 @@ extractQueriesEach = let name = "extract_queries_each" in CutFunction
 extractTargets :: CutFunction
 extractTargets = let name = "extract_targets" in CutFunction
   { fName      = name
-  , fTypeCheck = tExtract
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht> -> str.list"
+  , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
+  , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 2
   }
 
 extractTargetsEach :: CutFunction
-extractTargetsEach = let name = "extract_targets_each" in CutFunction
+extractTargetsEach = CutFunction
   { fName      = name
-  , fTypeCheck = tExtractEach
-  , fDesc = Nothing, fTypeDesc  = name ++ " : <crb/bht>.list -> str.list.list"
+  , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 $ aCutCol True 2
   }
+  where
+    name = "extract_targets_each"
 
 aCutCol :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aCutCol uniq n cfg ref _ [outPath, tsvPath] = do
@@ -93,8 +111,9 @@ aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 filterEvalue :: CutFunction
 filterEvalue = let name = "filter_evalue" in CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, bht] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, bht] bht
+  , fTypeCheck = defaultTypeCheck [num, hittable] bht
+  , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aFilterEvalue
   }
@@ -102,8 +121,9 @@ filterEvalue = let name = "filter_evalue" in CutFunction
 filterEvalueEach :: CutFunction
 filterEvalueEach = let name = "filter_evalue_each" in CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf bht] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf bht] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf hittable)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf hittable)
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 2 aFilterEvalue
   }
@@ -129,8 +149,9 @@ aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show arg
 bestHits :: CutFunction
 bestHits = let name = "best_hits" in CutFunction
   { fName      = name 
-  , fTypeCheck = defaultTypeCheck [bht] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [bht] bht
+  , fTypeCheck = defaultTypeCheck [hittable] hittable
+  , fTypeDesc  = mkTypeDesc name  [hittable] hittable
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
   }
@@ -138,8 +159,9 @@ bestHits = let name = "best_hits" in CutFunction
 bestHitsEach :: CutFunction
 bestHitsEach = let name = "best_hits_each" in CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [ListOf bht] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf bht] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf hittable)
+  , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf hittable)
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 aBestExtract
   }

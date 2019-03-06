@@ -67,6 +67,8 @@ module ShortCut.Core.Types
   )
   where
 
+-- import Debug.Trace (trace, traceShow)
+
 -- import Prelude hiding (print)
 import qualified Data.Map    as M
 import qualified Text.Parsec as P
@@ -208,10 +210,10 @@ data CutType
    - or fna)".
    -}
   | CutTypeGroup
-    { tgExt   :: String
-    , tgDesc  :: String
+    { tgShort   :: String
+    , tgLong  :: String
     -- , tgShow  :: CutConfig -> Locks -> FilePath -> IO String -- TODO remove?
-    , tgTypes :: [CutType]
+    , tgMember :: CutType -> Bool
     }
 
   | CutType
@@ -238,7 +240,9 @@ instance Eq CutType where
   Empty        == Empty        = True
   (ListOf a)   == (ListOf b)   = a == b
   (ScoresOf a) == (ScoresOf b) = a == b
-  t1           == t2           = extOf t1 == extOf t2
+  (CutType {tExt = t1}) == (CutType {tExt = t2}) = t1 == t2
+  (CutTypeGroup {tgShort = t1}) == (CutTypeGroup {tgShort = t2}) = t1 == t2
+  _ == _ = False -- TODO should this behave differently?
 
 instance Show CutType where
   show = extOf
@@ -268,14 +272,14 @@ extOf :: CutType -> String
 extOf Empty                      = "empty" -- for lists with nothing in them yet
 extOf (ListOf                t ) = extOf t ++ ".list"
 extOf (ScoresOf              t ) = extOf t ++ ".scores"
-extOf (CutTypeGroup {tgExt = t}) = t
+extOf (CutTypeGroup {tgShort = t}) = "<" ++ t ++ ">" -- TODO should this not be called an extension? it's never written to disk
 extOf (CutType      { tExt = t}) = t
 
 descOf :: CutType -> String
 descOf Empty         = "empty list" -- for lists with nothing in them yet
 descOf (ListOf   t ) = "list of " ++ descOf t
 descOf (ScoresOf t ) = "scores for " ++ descOf t
-descOf (CutTypeGroup {tgDesc = t}) = t
+descOf (CutTypeGroup {tgLong = t}) = t
 descOf (CutType      { tDesc = t}) = t
 
 varOf :: CutExpr -> [CutVar]
@@ -491,6 +495,7 @@ typeMatches Empty _ = True
 typeMatches _ Empty = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
+typeMatches a (CutTypeGroup {tgMember = fn}) = fn a
 typeMatches a b = a == b
 
 typesMatch :: [CutType] -> [CutType] -> Bool

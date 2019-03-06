@@ -56,7 +56,7 @@ instance Pretty CutType where
   pPrint (ListOf Empty) = text "empty list"
   pPrint (ListOf     t) = text "list of" <+> pPrint t <> text "s"
   pPrint (ScoresOf   t) = text "list of" <+> pPrint t <> text "s with scores"
-  pPrint (CutTypeGroup {tgExt = t, tgDesc = d}) = text t <+> parens (text d)
+  pPrint (CutTypeGroup {tgShort = t, tgLong = d}) = text t <+> parens (text d)
   pPrint (CutType      { tExt = t,  tDesc = d}) = text t <+> parens (text d)
 
 instance Pretty CutVar where
