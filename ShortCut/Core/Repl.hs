@@ -214,12 +214,12 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
     fHelp f = fTypeDesc f ++ case fDesc f of
                 Nothing -> ""
                 Just s  -> "\n\n" ++ s ++ "\n"
-    tHelp t = "The " ++ tExt t ++ " extension is for " ++ tDesc t ++ " files.\n\n" ++ tFnList t
+    tHelp t = "The " ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n" ++ tFnList t
     tFnList t = unlines $ ["You can create them with these functions:"] ++ outputs ++ ["", "And use them with these functions:"] ++ inputs
                 where
                   descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
-                  outputs = filter (\d -> (tExt t) `isInfixOf` (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
-                  inputs  = filter (\d -> (tExt t) `isInfixOf` (head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
+                  outputs = filter (\d -> (extOf t) `isInfixOf` (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
+                  inputs  = filter (\d -> (extOf t) `isInfixOf` (head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
     msg = case words line of
             [w] -> head $ catMaybes
                      [ fmap fHelp $ findFunction cfg w

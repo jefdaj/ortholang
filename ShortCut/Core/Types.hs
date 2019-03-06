@@ -42,6 +42,7 @@ module ShortCut.Core.Types
   , str, num -- TODO load these from modules
   , typeOf
   , extOf
+  , descOf
   , depsOf
   , rDepsOf
   , defaultShow
@@ -195,10 +196,24 @@ type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
+-- TODO how to make the record fields not partial functions?
 data CutType
   = Empty -- TODO remove this? should never be a need to define an empty list
   | ListOf CutType
   | ScoresOf CutType
+
+  {- These are kind of like simpler, less extensible typeclasses. They're just
+   - a list of types that can be treated similarly in some circumstances, for
+   - example "files whose length is their number of lines" or "FASTA files (faa
+   - or fna)".
+   -}
+  | CutTypeGroup
+    { tgExt   :: String
+    , tgDesc  :: String
+    -- , tgShow  :: CutConfig -> Locks -> FilePath -> IO String -- TODO remove?
+    , tgTypes :: [CutType]
+    }
+
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -250,10 +265,18 @@ typeOf (CutRules (CompiledExpr t _ _)) = t
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
 extOf :: CutType -> String
-extOf Empty        = "empty" -- for lists with nothing in them yet
-extOf (ListOf   t) = extOf t ++ ".list"
-extOf (ScoresOf t) = extOf t ++ ".scores"
-extOf t            = tExt t
+extOf Empty                      = "empty" -- for lists with nothing in them yet
+extOf (ListOf                t ) = extOf t ++ ".list"
+extOf (ScoresOf              t ) = extOf t ++ ".scores"
+extOf (CutTypeGroup {tgExt = t}) = t
+extOf (CutType      { tExt = t}) = t
+
+descOf :: CutType -> String
+descOf Empty                      = "empty list" -- for lists with nothing in them yet
+descOf (ListOf                t ) = "list of " ++ descOf t
+descOf (ScoresOf              t ) = "scores for " ++ descOf t
+descOf (CutTypeGroup {tgExt = t}) = t
+descOf (CutType      { tExt = t}) = t
 
 varOf :: CutExpr -> [CutVar]
 varOf (CutRef _ _ _ v) = [v]
@@ -334,7 +357,7 @@ findFunction cfg name = find (\f -> fName f == name) fs
     fs = concatMap mFunctions ms
 
 findType :: CutConfig -> String -> Maybe CutType
-findType cfg ext = find (\t -> tExt t == ext) ts
+findType cfg ext = find (\t -> extOf t == ext) ts
   where
     ms = cfgModules cfg
     ts = concatMap mTypes ms
