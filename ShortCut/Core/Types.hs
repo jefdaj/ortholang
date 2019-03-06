@@ -329,18 +329,17 @@ num = CutType
 -- TODO make these into FilePaths and an Int/Bool
 -- TODO rename cfg prefix to just c?
 data CutConfig = CutConfig
-  { cfgScript   :: Maybe FilePath
-  , cfgTmpDir   :: FilePath
-  , cfgShareDir :: Maybe FilePath
-  , cfgWorkDir  :: FilePath
-  , cfgDebug    :: Bool
-  , cfgModules  :: [CutModule]
-  , cfgWrapper  :: Maybe FilePath
-  , cfgReport   :: Maybe String
-  , cfgTestPtn  :: Maybe String
-  , cfgWidth    :: Maybe Int -- for testing
-  , cfgSecure   :: Bool
-  , cfgParLock  :: Resource
+  { cfgScript  :: Maybe FilePath
+  , cfgTmpDir  :: FilePath
+  , cfgWorkDir :: FilePath
+  , cfgDebug   :: Bool
+  , cfgModules :: [CutModule]
+  , cfgWrapper :: Maybe FilePath
+  , cfgReport  :: Maybe String
+  , cfgTestPtn :: Maybe String
+  , cfgWidth   :: Maybe Int -- for testing
+  , cfgSecure  :: Bool
+  , cfgParLock :: Resource
   }
   deriving Show
 
