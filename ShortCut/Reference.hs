@@ -18,14 +18,14 @@ explainType :: CutType -> String
 explainType Empty = error "explain empty type"
 explainType (ListOf   t) = explainType t -- TODO add the list part?
 explainType (ScoresOf t) = explainType t -- TODO add the scores part?
-explainType t = "| `" ++ tExt t ++ "` | " ++ tDesc t ++ " |"
+explainType t = "| `" ++ extOf t ++ "` | " ++ descOf t ++ " |"
 
 -- TODO these aren't functions!
 typesTable :: CutModule -> [String]
 typesTable m = if null (mTypes m) then [""] else
   [ "Types:"
   , ""
-  , "| Extension | Meaning |"
+  , "| Type      | Meaning |"
   , "| :-------- | :------ |"
   ]
   -- ++ map (\f -> "| " ++ fName f ++ " | " ++ (fromMaybe "" $ fDesc f) ++ " |") (mFunctions m)
