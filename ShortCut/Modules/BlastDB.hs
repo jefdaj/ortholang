@@ -84,7 +84,8 @@ cutModule = CutModule
     , mkMakeblastdbEach ndb -- makeblastdb_nucl_each : fa.list  -> ndb.list
     , mkMakeblastdbEach pdb -- makeblastdb_prot_each : faa.list -> pdb.list
 
-    , blastdbget -- TODO mapped version so you can list -> git at once?
+    , blastdbgetNucl -- TODO mapped version so you can list -> git at once?
+    , blastdbgetProt -- TODO mapped version so you can list -> git at once?
     , blastdblist
     -- , TODO write loadBlastDB
 
@@ -92,6 +93,8 @@ cutModule = CutModule
     , singletons
     ]
   }
+
+-- TODO add a blastdb type group? seems natural but i'm not sure you ever need to mix them
 
 ndb :: CutType
 ndb = CutType
@@ -121,7 +124,8 @@ mkLoadDB :: String -> CutType -> CutFunction
 mkLoadDB name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [str] rtn
+  , fTypeDesc  = mkTypeDesc name [str] rtn
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules  = rLoadDB
   }
@@ -130,7 +134,8 @@ mkLoadDBEach :: String -> CutType -> CutFunction
 mkLoadDBEach name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
+  , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules  = undefined -- TODO write this!
   }
@@ -177,7 +182,8 @@ blastdblist :: CutFunction
 blastdblist = let name = "blastdblist" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
+  , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rBlastdblist
   }
@@ -236,14 +242,21 @@ aBlastdbfilter cfg ref _ oPath listTmp fPath = do
     listTmp' = fromCutPath cfg listTmp
     oPath''  = debugA cfg "aBlastdbfilter" oPath' [oPath', listTmp', fPath']
 
-blastdbget :: CutFunction
-blastdbget = let name = "blastdbget" in CutFunction
+mkBlastdbget :: String -> CutType -> CutFunction
+mkBlastdbget name dbType = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [str] ndb -- TODO are there protein ones too?
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [str] ndb -- TODO are there protein ones too?
+  , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
+  , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
+  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules  = rBlastdbget
   }
+
+blastdbgetNucl :: CutFunction
+blastdbgetNucl = mkBlastdbget "blastdbget_nucl" ndb
+
+blastdbgetProt :: CutFunction
+blastdbgetProt = mkBlastdbget "blastdbget_prot" pdb
 
 rBlastdbget :: RulesFn
 rBlastdbget st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [name]) = do
@@ -287,7 +300,8 @@ makeblastdbNuclAll :: CutFunction
 makeblastdbNuclAll = CutFunction
   { fName      = name
   , fTypeCheck = tMakeblastdbAll name ndb
-  , fDesc = Nothing, fTypeDesc  = name ++ " : fa.list -> ndb"
+  , fTypeDesc  = name ++ " : fa.list -> ndb"
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdbAll
   }
@@ -298,7 +312,8 @@ makeblastdbProtAll :: CutFunction
 makeblastdbProtAll = CutFunction
   { fName      = name
   , fTypeCheck = tMakeblastdbAll name pdb
-  , fDesc = Nothing, fTypeDesc  = name ++ " : faa.list -> pdb"
+  , fTypeDesc  = name ++ " : faa.list -> pdb"
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdbAll
   }
@@ -418,7 +433,8 @@ makeblastdbNucl :: CutFunction
 makeblastdbNucl = CutFunction
   { fName      = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
-  , fDesc = Nothing, fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
+  , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -427,7 +443,8 @@ makeblastdbProt :: CutFunction
 makeblastdbProt = CutFunction
   { fName      = "makeblastdb_prot"
   , fTypeCheck = tMakeblastdb pdb
-  , fDesc = Nothing, fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -455,7 +472,8 @@ mkMakeblastdbEach :: CutType -> CutFunction
 mkMakeblastdbEach dbType = CutFunction
   { fName      = name
   , fTypeCheck = tMakeblastdbEach dbType
-  , fDesc = Nothing, fTypeDesc  = desc
+  , fTypeDesc  = desc
+  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdbEach
   }
@@ -507,7 +525,8 @@ singletons :: CutFunction
 singletons = CutFunction
   { fName      = name
   , fFixity    = Prefix
-  , fDesc = Nothing, fTypeDesc  = name ++ " : X.list -> X.list.list"
+  , fTypeDesc  = name ++ " : X.list -> X.list.list"
+  , fDesc = Nothing
   , fTypeCheck = tSingletons
   , fRules     = rSingletons
   }

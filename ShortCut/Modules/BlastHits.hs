@@ -61,7 +61,7 @@ extractQueries = CutFunction
 
 -- TODO this should have a typeclass
 extractQueriesEach :: CutFunction
-extractQueriesEach = let name = "extract_queries_each" in CutFunction
+extractQueriesEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
@@ -69,10 +69,12 @@ extractQueriesEach = let name = "extract_queries_each" in CutFunction
   , fFixity    = Prefix
   , fRules     = rMap 1 $ aCutCol True 1
   }
+  where
+    name = "extract_queries_each"
 
 -- TODO this should have a typeclass
 extractTargets :: CutFunction
-extractTargets = let name = "extract_targets" in CutFunction
+extractTargets = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
@@ -80,6 +82,8 @@ extractTargets = let name = "extract_targets" in CutFunction
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 2
   }
+  where
+    name = "extract_targets"
 
 extractTargetsEach :: CutFunction
 extractTargetsEach = CutFunction
@@ -109,7 +113,7 @@ aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 --------------------------
 
 filterEvalue :: CutFunction
-filterEvalue = let name = "filter_evalue" in CutFunction
+filterEvalue = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
@@ -117,9 +121,11 @@ filterEvalue = let name = "filter_evalue" in CutFunction
   , fFixity    = Prefix
   , fRules     = rSimple aFilterEvalue
   }
+  where
+    name = "filter_evalue"
 
 filterEvalueEach :: CutFunction
-filterEvalueEach = let name = "filter_evalue_each" in CutFunction
+filterEvalueEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf hittable)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf hittable)
@@ -127,6 +133,8 @@ filterEvalueEach = let name = "filter_evalue_each" in CutFunction
   , fFixity    = Prefix
   , fRules     = rMap 2 aFilterEvalue
   }
+  where
+    name = "filter_evalue_each"
 
 aFilterEvalue :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aFilterEvalue cfg ref _ [out, evalue, hits] = do
@@ -147,7 +155,7 @@ aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show arg
 -- TODO rename to just "best" and "best_each"?
 
 bestHits :: CutFunction
-bestHits = let name = "best_hits" in CutFunction
+bestHits =  CutFunction
   { fName      = name 
   , fTypeCheck = defaultTypeCheck [hittable] hittable
   , fTypeDesc  = mkTypeDesc name  [hittable] hittable
@@ -155,9 +163,11 @@ bestHits = let name = "best_hits" in CutFunction
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
   }
+  where
+    name = "best_hits"
 
 bestHitsEach :: CutFunction
-bestHitsEach = let name = "best_hits_each" in CutFunction
+bestHitsEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf hittable)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf hittable)
@@ -165,6 +175,8 @@ bestHitsEach = let name = "best_hits_each" in CutFunction
   , fFixity    = Prefix
   , fRules     = rMap 1 aBestExtract
   }
+  where
+    name = "best_hits_each"
 
 aBestExtract :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aBestExtract cfg ref _ [out, hits] = do

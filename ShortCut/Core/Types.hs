@@ -242,6 +242,7 @@ instance Eq CutType where
   (ScoresOf a) == (ScoresOf b) = a == b
   (CutType {tExt = t1}) == (CutType {tExt = t2}) = t1 == t2
   (CutTypeGroup {tgShort = t1}) == (CutTypeGroup {tgShort = t2}) = t1 == t2
+  (CutTypeGroup {tgMember = fn}) == t = fn t
   _ == _ = False -- TODO should this behave differently?
 
 instance Show CutType where
