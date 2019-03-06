@@ -214,7 +214,7 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
     fHelp f = fTypeDesc f ++ case fDesc f of
                 Nothing -> ""
                 Just s  -> "\n\n" ++ s ++ "\n"
-    tHelp t = "The " ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n" ++ tFnList t
+    tHelp t = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n" ++ tFnList t
     tFnList t = unlines $ ["You can create them with these functions:"] ++ outputs ++ ["", "And use them with these functions:"] ++ inputs
                 where
                   descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)

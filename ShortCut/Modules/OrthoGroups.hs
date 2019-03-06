@@ -1,6 +1,9 @@
 module ShortCut.Modules.OrthoGroups
   where
 
+-- TODO homologs module that lists homolog pairs
+-- TODO and make that homologs function work on orthogroups too if possible
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -20,12 +23,20 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
-  , mTypes = [ofr, spr]
+  , mTypes = [og]
   , mFunctions =
       [ orthogroups
       , orthogroupContaining
       , orthogroupsContaining
       ]
+  }
+
+-- TODO should there be single and plural versions?
+og :: CutType
+og = CutTypeGroup
+  { tgExt = "og"
+  , tgDesc = "orthogroups (orthofinder or sonicparanoid results)"
+  , tgTypes = [ofr, spr]
   }
 
 -----------------
@@ -38,7 +49,7 @@ cutModule = CutModule
 orthogroups :: CutFunction
 orthogroups = let name = "orthogroups" in CutFunction
   { fName      = name
-  , fTypeDesc  = name ++ " : ofr/spr -> str.list.list"
+  , fTypeDesc  = name ++ " : og -> str.list.list"
   , fTypeCheck = defaultTypeCheck [ofr] (ListOf (ListOf str))
   , fDesc      = Just "Parse results from an ortholog finder and list genes in all orthogroups."
   , fFixity    = Prefix

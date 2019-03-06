@@ -272,11 +272,11 @@ extOf (CutTypeGroup {tgExt = t}) = t
 extOf (CutType      { tExt = t}) = t
 
 descOf :: CutType -> String
-descOf Empty                      = "empty list" -- for lists with nothing in them yet
-descOf (ListOf                t ) = "list of " ++ descOf t
-descOf (ScoresOf              t ) = "scores for " ++ descOf t
-descOf (CutTypeGroup {tgExt = t}) = t
-descOf (CutType      { tExt = t}) = t
+descOf Empty         = "empty list" -- for lists with nothing in them yet
+descOf (ListOf   t ) = "list of " ++ descOf t
+descOf (ScoresOf t ) = "scores for " ++ descOf t
+descOf (CutTypeGroup {tgDesc = t}) = t
+descOf (CutType      { tDesc = t}) = t
 
 varOf :: CutExpr -> [CutVar]
 varOf (CutRef _ _ _ v) = [v]

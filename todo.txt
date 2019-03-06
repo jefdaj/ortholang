@@ -1,3 +1,13 @@
+type groups:
+  x add the basic data type
+  handle them in the parser/typechecker functions
+  add type groups for:
+    files with length in lines
+    fasta files
+    things that can have orthogroups extracted from them
+    things that can have homolog pairs extracted from them (new homologs module)
+  rework the type system to remove string type descriptions and describe everything with type groups instead
+
 what should and shouldn't go in the rep digests? think about that for a few minutes, then move on
 
 file leaking bug:
