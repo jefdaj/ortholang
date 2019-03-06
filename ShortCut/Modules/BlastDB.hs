@@ -2,6 +2,9 @@
 
 module ShortCut.Modules.BlastDB where
 
+-- TODO aha! errors are partially because i've been assuming blastdbget returns ndb when really it can be pdb?
+--      should be fixable by determining the type from the .ni* files or whatever
+
 -- TODO should makeblastdb be just one fn? no, make everything else stricter later!
 -- TODO need to remove tmpfiles in /tmp on quit to save space?
 
