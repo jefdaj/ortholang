@@ -40,23 +40,25 @@ loadConfig mods args = do
             Nothing -> return Nothing
             Just s  -> absolutize s >>= return . Just
   ctd <- mapM absolutize =<< loadField args cfg "tmpdir"
+  shd <- mapM absolutize =<< loadField args cfg "share"
   cwd <- mapM absolutize =<< loadField args cfg "workdir"
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   ctp <- loadField args cfg "pattern"
   par <- newResourceIO "parallel" 1
   return CutConfig
-    { cfgScript  = csc'
-    , cfgTmpDir  = fromJust ctd
-    , cfgWorkDir = fromJust cwd
-    , cfgDebug   = isPresent args $ longOption "debug"
-    , cfgModules = mods
-    , cfgWrapper = cls
-    , cfgReport  = rep
-    , cfgTestPtn = ctp
-    , cfgWidth   = Nothing -- not used except in testing
-    , cfgSecure  = isPresent args $ longOption "secure"
-    , cfgParLock = par
+    { cfgScript   = csc'
+    , cfgTmpDir   = fromJust ctd
+    , cfgShareDir = shd
+    , cfgWorkDir  = fromJust cwd
+    , cfgDebug    = isPresent args $ longOption "debug"
+    , cfgModules  = mods
+    , cfgWrapper  = cls
+    , cfgReport   = rep
+    , cfgTestPtn  = ctp
+    , cfgWidth    = Nothing -- not used except in testing
+    , cfgSecure   = isPresent args $ longOption "secure"
+    , cfgParLock  = par
     }
 
 getUsage :: IO Docopt
@@ -95,13 +97,14 @@ setConfigField cfg key val = case lookup key fields of
 fields :: [(String, (CutConfig -> String,
                      CutConfig -> String -> Either String CutConfig))]
 fields =
-  [ ("script" , (show . cfgScript , setScript ))
-  , ("tmpdir" , (show . cfgTmpDir , setTmpdir ))
-  , ("workdir", (show . cfgWorkDir, setWorkdir))
-  , ("debug"  , (show . cfgDebug  , setDebug  ))
-  , ("wrapper", (show . cfgWrapper, setWrapper))
-  , ("report" , (show . cfgReport , setReport ))
-  , ("width"  , (show . cfgWidth  , setWidth  ))
+  [ ("script"  , (show . cfgScript  , setScript  ))
+  , ("tmpdir"  , (show . cfgTmpDir  , setTmpdir  ))
+  , ("sharedir", (show . cfgShareDir, setShareDir))
+  , ("workdir" , (show . cfgWorkDir , setWorkdir ))
+  , ("debug"   , (show . cfgDebug   , setDebug   ))
+  , ("wrapper" , (show . cfgWrapper , setWrapper ))
+  , ("report"  , (show . cfgReport  , setReport  ))
+  , ("width"   , (show . cfgWidth   , setWidth   ))
   ]
 
 showConfig :: CutConfig -> String
@@ -124,6 +127,11 @@ setTmpdir :: CutConfig -> String -> Either String CutConfig
 setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ cfg { cfgTmpDir = v }
+
+setShareDir :: CutConfig -> String -> Either String CutConfig
+setShareDir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
+  Nothing -> Left  $ "invalid: " ++ val
+  Just v  -> Right $ cfg { cfgShareDir = v }
 
 setWorkdir :: CutConfig -> String -> Either String CutConfig
 setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
