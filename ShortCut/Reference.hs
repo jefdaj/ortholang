@@ -1,5 +1,12 @@
 module ShortCut.Reference where
 
+{- This isn't meant for end users. It's just an easy way to keep
+ - the module reference on the website in sync with the actual code.
+ - Run shortcut --reference to generate an updated templates/reference.md
+ -
+ - TODO put in a separate binary?
+ -}
+
 import ShortCut.Core.Types
 
 import Data.List.Split  (splitOn)
@@ -43,11 +50,18 @@ functionsTable m = if null (mFunctions m) then [""] else
   ++ map (\f -> "| " ++ explainFunction f ++ " |") (mFunctions m)
   ++ [""]
 
-header :: String
-header = "{% import \"macros.jinja\" as macros with context %}"
+header :: [String]
+header =
+ [ "{% import \"macros.jinja\" as macros with context %}"
+ , ""
+ , "<input id=\"modulesearch\" placeholder=\"Search the module documentation\" id=\"box\" type=\"text\"/>"
+ , ""
+ , "If you don't find what you're looking for, leave Jeff a comment about it! (bottom right)"
+ , "<br/>"
+ ]
 
 loadExample :: CutModule -> [String]
-loadExample m = ["Examples:", "", "{{ macros.load_cut(user, 'examples/" ++ name ++ ".cut') }}"]
+loadExample m = ["{{ macros.load_cut(user, 'examples/" ++ name ++ ".cut') }}"]
   where
     name = filter isAlphaNum $ map toLower $ mName m
 
@@ -55,18 +69,20 @@ loadExample m = ["Examples:", "", "{{ macros.load_cut(user, 'examples/" ++ name 
 -- TODO or move that stuff to the tutorial maybe?
 moduleReference :: CutModule -> [String]
 moduleReference m =
-  [ "## " ++ mName m ++ " module"
+  [ "<div class=\"moduleblock\">"
+  , "<h3>" ++ mName m ++ " module</h3>"
   , ""
   , mDesc m ++ "."
   , ""
   ]
   ++ typesTable m
   ++ functionsTable m
+  ++ ["<br/>"]
   ++ loadExample m
-  ++ [""]
+  ++ ["</div>"]
 
 -- TODO pick module order to print the reference nicely
 writeReference :: IO ()
 writeReference = writeFile "reference.md" $ unlines $ 
-  [ header, ""] ++
+  header ++
   concatMap moduleReference modules
