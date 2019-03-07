@@ -58,6 +58,7 @@ header =
  , ""
  , "If you don't find what you're looking for, leave Jeff a comment about it! (bottom right)"
  , "<br/>"
+ , ""
  ]
 
 loadExample :: CutModule -> [String]
