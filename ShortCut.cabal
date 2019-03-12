@@ -2,7 +2,7 @@ name:               ShortCut
 synopsis:           Rapid, robust, reproducible candidate gene searches
 author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
-version:            0.8.2.0
+version:            0.8.3.0
 license:            AGPL-3
 license-file:       LICENSE
 build-type:         Simple
