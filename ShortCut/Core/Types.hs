@@ -42,6 +42,7 @@ module ShortCut.Core.Types
   , str, num -- TODO load these from modules
   , typeOf
   , extOf
+  , descOf
   , depsOf
   , rDepsOf
   , defaultShow
@@ -65,6 +66,8 @@ module ShortCut.Core.Types
   , isNonEmpty
   )
   where
+
+-- import Debug.Trace (trace, traceShow)
 
 -- import Prelude hiding (print)
 import qualified Data.Map    as M
@@ -195,10 +198,24 @@ type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
+-- TODO how to make the record fields not partial functions?
 data CutType
   = Empty -- TODO remove this? should never be a need to define an empty list
   | ListOf CutType
   | ScoresOf CutType
+
+  {- These are kind of like simpler, less extensible typeclasses. They're just
+   - a list of types that can be treated similarly in some circumstances, for
+   - example "files whose length is their number of lines" or "FASTA files (faa
+   - or fna)".
+   -}
+  | CutTypeGroup
+    { tgShort   :: String
+    , tgLong  :: String
+    -- , tgShow  :: CutConfig -> Locks -> FilePath -> IO String -- TODO remove?
+    , tgMember :: CutType -> Bool
+    }
+
   | CutType
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -223,7 +240,10 @@ instance Eq CutType where
   Empty        == Empty        = True
   (ListOf a)   == (ListOf b)   = a == b
   (ScoresOf a) == (ScoresOf b) = a == b
-  t1           == t2           = extOf t1 == extOf t2
+  (CutType {tExt = t1}) == (CutType {tExt = t2}) = t1 == t2
+  (CutTypeGroup {tgShort = t1}) == (CutTypeGroup {tgShort = t2}) = t1 == t2
+  (CutTypeGroup {tgMember = fn}) == t = fn t
+  _ == _ = False -- TODO should this behave differently?
 
 instance Show CutType where
   show = extOf
@@ -250,10 +270,18 @@ typeOf (CutRules (CompiledExpr t _ _)) = t
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
 extOf :: CutType -> String
-extOf Empty        = "empty" -- for lists with nothing in them yet
-extOf (ListOf   t) = extOf t ++ ".list"
-extOf (ScoresOf t) = extOf t ++ ".scores"
-extOf t            = tExt t
+extOf Empty                      = "empty" -- for lists with nothing in them yet
+extOf (ListOf                t ) = extOf t ++ ".list"
+extOf (ScoresOf              t ) = extOf t ++ ".scores"
+extOf (CutTypeGroup {tgShort = t}) = "<" ++ t ++ ">" -- TODO should this not be called an extension? it's never written to disk
+extOf (CutType      { tExt = t}) = t
+
+descOf :: CutType -> String
+descOf Empty         = "empty list" -- for lists with nothing in them yet
+descOf (ListOf   t ) = "list of " ++ descOf t
+descOf (ScoresOf t ) = "scores for " ++ descOf t
+descOf (CutTypeGroup {tgLong = t}) = t
+descOf (CutType      { tDesc = t}) = t
 
 varOf :: CutExpr -> [CutVar]
 varOf (CutRef _ _ _ v) = [v]
@@ -306,18 +334,17 @@ num = CutType
 -- TODO make these into FilePaths and an Int/Bool
 -- TODO rename cfg prefix to just c?
 data CutConfig = CutConfig
-  { cfgScript   :: Maybe FilePath
-  , cfgTmpDir   :: FilePath
-  , cfgShareDir :: Maybe FilePath
-  , cfgWorkDir  :: FilePath
-  , cfgDebug    :: Bool
-  , cfgModules  :: [CutModule]
-  , cfgWrapper  :: Maybe FilePath
-  , cfgReport   :: Maybe String
-  , cfgTestPtn  :: Maybe String
-  , cfgWidth    :: Maybe Int -- for testing
-  , cfgSecure   :: Bool
-  , cfgParLock  :: Resource
+  { cfgScript  :: Maybe FilePath
+  , cfgTmpDir  :: FilePath
+  , cfgWorkDir :: FilePath
+  , cfgDebug   :: Bool
+  , cfgModules :: [CutModule]
+  , cfgWrapper :: Maybe FilePath
+  , cfgReport  :: Maybe String
+  , cfgTestPtn :: Maybe String
+  , cfgWidth   :: Maybe Int -- for testing
+  , cfgSecure  :: Bool
+  , cfgParLock :: Resource
   }
   deriving Show
 
@@ -334,7 +361,7 @@ findFunction cfg name = find (\f -> fName f == name) fs
     fs = concatMap mFunctions ms
 
 findType :: CutConfig -> String -> Maybe CutType
-findType cfg ext = find (\t -> tExt t == ext) ts
+findType cfg ext = find (\t -> extOf t == ext) ts
   where
     ms = cfgModules cfg
     ts = concatMap mTypes ms
@@ -469,6 +496,7 @@ typeMatches Empty _ = True
 typeMatches _ Empty = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
+typeMatches a (CutTypeGroup {tgMember = fn}) = fn a
 typeMatches a b = a == b
 
 typesMatch :: [CutType] -> [CutType] -> Bool

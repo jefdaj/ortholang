@@ -9,18 +9,18 @@ import Development.Shake
 import Development.Shake.FilePath  ((</>), takeFileName)
 import ShortCut.Core.Actions       (wrappedCmdWrite, symlink, debugA, debugNeed)
 import ShortCut.Core.Paths         (toCutPath)
-import ShortCut.Core.Compile.Basic (rSimpleTmp)
+import ShortCut.Core.Compile.Basic (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMapTmps)
 -- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
-import ShortCut.Modules.SeqIO      (faa, fna)
+import ShortCut.Modules.SeqIO      (faa, fna, fa)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
-  , mTypes = [fna, faa, crb]
+  , mTypes = [fna, faa, fa, crb]
   , mFunctions =
     [ blastCRB
     , blastCRBEach -- TODO someting nicer than this!
@@ -40,6 +40,7 @@ cutModule = CutModule
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
+-- TODO remove if these are exactly blast hit tables
 crb :: CutType
 crb = CutType
   { tExt  = "crb"
@@ -49,38 +50,36 @@ crb = CutType
 
 blastCRB :: CutFunction
 blastCRB = CutFunction
-  { fName      = "crb_blast"
-  , fTypeCheck = tCrbBlast
-  , fDesc = Nothing, fTypeDesc  = "crb_blast : fa -> fa -> crb"
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
+  , fTypeCheck = defaultTypeCheck [fna, fa] crb
+  , fDesc      = Nothing
   , fFixity    = Prefix
-  , fRules     = rSimpleTmp "crb_blast" aCRBBlast
+  , fRules     = rSimpleTmp name aCRBBlast
   }
+  where
+    name = "crb_blast"
 
 -- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
 -- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
 blastCRBEach :: CutFunction
 blastCRBEach = CutFunction
-  { fName      = "crb_blast_each"
-  , fTypeCheck = tCrbBlastEach
-  , fDesc = Nothing, fTypeDesc  = "crb_blast_each : fa -> fa.list -> crb.list"
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
+  , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
+  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rMapTmps 2 aCRBBlast "crb_blast"
   }
-
--- TODO split into two functions with different type signatures?
--- TODO what types are actually allowed? (can subject be fna?)
-tCrbBlast :: [CutType] -> Either String CutType
-tCrbBlast [x, y] | x `elem` [fna, faa] && y `elem` [fna, faa] = Right crb
-tCrbBlast _ = Left "crb_blast requires a fna query and fna or faa target"
-
-tCrbBlastEach :: [CutType] -> Either String CutType
-tCrbBlastEach [x, ListOf y] | x == fna && y `elem` [fna, faa] = Right (ListOf crb)
-tCrbBlastEach _ = Left "crb_blast_each requires a fna query and a list of fna or faa targets"
+  where
+    name = "crb_blast_each"
 
 {- CRB-BLAST has pretty bad file naming practices, so to prevent conflicts it
  - needs to be run on unique filenames in a unique directory. Also, it only
  - resolves one level of symlink, so we have to point directly to the input
  - files rather than to the canonical $TMPDIR/cache/load... paths.
+ -
+ - TODO adjust cache paths to be deterministic!
  -}
 aCRBBlast :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do

@@ -19,7 +19,7 @@ solidFwd = all (extract_queries_each best5fwd)
 solidRec = all (extract_queries_each best5rec)
 
 # reciprocal_best should produce a subset of the original forward hits and
-# nothing new, giving [some number, 0].
-# result = length_each [solidFwd ~ solidRec,
+nothing new, giving [some number, 0].
+result = length_each [solidFwd ~ solidRec,
                       #solidRec ~ solidFwd]
 result = length solidRec

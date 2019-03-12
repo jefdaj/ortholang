@@ -15,7 +15,7 @@ import qualified ShortCut.Modules.BlastHits as BlastHits
 import qualified ShortCut.Modules.BlastRBH  as BlastRBH
 -- import qualified ShortCut.Modules.Cheat     as Cheat -- TODO write this
 import qualified ShortCut.Modules.Load      as Load
-import qualified ShortCut.Modules.Length    as Length
+import qualified ShortCut.Modules.ListLike  as ListLike
 import qualified ShortCut.Modules.Math      as Math
 import qualified ShortCut.Modules.Muscle    as Muscle
 import qualified ShortCut.Modules.Permute   as Permute
@@ -46,7 +46,7 @@ modules =
   , BlastDB.cutModule
   , Blast.cutModule
   , BlastHits.cutModule
-  , Length.cutModule
+  , ListLike.cutModule
   , PsiBlast.cutModule
   , CRBBlast.cutModule
   , Hmmer.cutModule

@@ -17,8 +17,6 @@ Options:
   --tmpdir TMPDIR    Where to cache results, including many large
                      intermediate files.
                      [default: ~/.shortcut]
-  --share SHAREDIR   Path to an optional shared tmpfile cache.
-                     [default: Nothing]
   --config CONFIG    Load any/all of these options from a config file.
                      [default: ~/.shortcut/config]
   --workdir WORKDIR  Working directory and start point for relative paths.
