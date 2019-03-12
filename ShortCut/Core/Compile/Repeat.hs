@@ -66,12 +66,12 @@ extractNum _ _ = error "bad argument to extractNum"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the salts should work?
 rRepeatN :: CutState -> CutExpr -> Rules ExprPath
-rRepeatN s@(scr, _, _, _) (CutFun t salt@(RepeatSalt n) deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
+rRepeatN s@(scr, _, _, _) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
   rReplaceEach s (CutFun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = fromJust $ lookup v scr
     nReps   = extractNum scr repsExpr
-    subs    = zipWith setSalt [n .. n+nReps-1] (repeat subExpr) -- TODO always start from 0?
+    subs    = take nReps $ zipWith setSalt [0..] (repeat subExpr) -- TODO is always starting from 0 right?
     -- subs    = zipWith setSalt (unfoldReplaceID salt nReps) (repeat subExpr)
     -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
     subList = CutList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
