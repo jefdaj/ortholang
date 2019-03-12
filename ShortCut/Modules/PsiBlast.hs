@@ -105,7 +105,7 @@ cutModule = CutModule
     , psiblastTrainPssmsDb -- num faa.list  pdb      -> pssm.list
 
     -- not written yet (may not be needed):
-    -- , psiblastPssmsBothVec -- num pssm.list faa.list -> bht.list.list
+    -- , psiblastPssmsBothMap -- num pssm.list faa.list -> bht.list.list
     -- , psiblastPssmsAll     -- num pssm.list faa.list -> bht
     -- , psiblastPssmsDbEach  -- num pssm.list pdb.list -> bht.list
    ]

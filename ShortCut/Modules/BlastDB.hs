@@ -494,7 +494,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
 -- rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
--- rMap index actFn = rVecMain index Nothing actFn'
+-- rMap index actFn = rMapMain index Nothing actFn'
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn

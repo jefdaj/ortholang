@@ -6,9 +6,6 @@ module ShortCut.Core.Compile.Map
   )
   where
 
--- If all goes well, this module will soon be phased out in favor of Compile.Map
--- TODO also it's named badly since this isn't vectorization!
-
 import Development.Shake
 import ShortCut.Core.Compile.Basic
 import ShortCut.Core.Types
@@ -31,14 +28,14 @@ import System.Directory           (createDirectoryIfMissing)
 
 -- for action functions that don't need a tmpdir
 rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
-rMap index actFn = rVecMain index Nothing actFn'
+rMap index actFn = rMapMain index Nothing actFn'
   where
     actFn' cfg ref ids _ args = actFn cfg ref ids args -- drops unused tmpdir
 
 -- for action functions that need one tmpdir reused between calls
 rMapTmp :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
         -> String -> RulesFn
-rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rVecMain index (Just tmpFn) actFn s
+rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rMapMain index (Just tmpFn) actFn s
   where
     tmpDir = cacheDir cfg tmpPrefix
     tmpFn  = return . const tmpDir
@@ -48,7 +45,7 @@ rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rVecMain index (Just tmpFn) act
 rMapTmps :: Int
           -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
           -> String -> RulesFn
-rMapTmps index actFn tmpPrefix s@(_, cfg, _, _) e = rVecMain index (Just tmpFn) actFn s e
+rMapTmps index actFn tmpPrefix s@(_, cfg, _, _) e = rMapMain index (Just tmpFn) actFn s e
   where
     tmpFn args = do
       let base = concat $ intersperse "_" $ map digest args
@@ -67,7 +64,7 @@ rMapSimpleScript index = rMap index . aSimpleScript
 
 -- TODO rename these to mention map instead of vec
 
-{- This separately hooks up aVecElem to operate on any .args files, and aVec to
+{- This separately hooks up aMapElem to operate on any .args files, and aMap to
  - generate some .args files then gather them into the overall list. Those two
  - then need to agree on tmpfiles, communicating only through the .args files.
  -
@@ -76,10 +73,10 @@ rMapSimpleScript index = rMap index . aSimpleScript
  - over. Given that I'm not sure there's any way to avoid intermediate files,
  - but am open to alternatives if anyone thinks of something!
  -}
-rVecMain :: Int -> Maybe ([CutPath] -> IO CutPath)
+rMapMain :: Int -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
-rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name exprs) = do
+rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, regularExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) regularExprs
@@ -93,34 +90,34 @@ rVecMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name expr
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
       (ListOf eType) = debug cfg ("type of '" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show r) r
-  elemCachePtn %> aVecElem cfg ref ids eType mTmpFn actFn singleName salt
-  mainOutPath  %> aVecMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
-  return $ debugRules cfg "rVecMain" e $ ExprPath mainOutPath
-rVecMain _ _ _ _ _ = fail "bad argument to rVecMain"
+  elemCachePtn %> aMapElem cfg ref ids eType mTmpFn actFn singleName salt
+  mainOutPath  %> aMapMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
+  return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
+rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
 hashFun :: CutState -> CutExpr -> String
 hashFun st e@(CutFun _ s _ n _) = digest $ [n, show s] ++ argHashes st e
 hashFun _ _ = error "hashFun only hashes function calls so far"
 
-{- This calls aVecArgs to leave a .args file for each set of args, then gathers
+{- This calls aMapArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
  -}
-aVecMain :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
+aMapMain :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
          -> Action ()
-aVecMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
-  debugNeed cfg "aVecMain" regularArgs'
+aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
+  debugNeed cfg "aMapMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths cfg ref mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
-  debugL cfg $ "aVecMain mappedPaths': " ++ show mappedPaths'
-  mapM_ (aVecArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
+  debugL cfg $ "aMapMain mappedPaths': " ++ show mappedPaths'
+  mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
         (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
-  debugNeed cfg "aVecMain" outPaths
+  debugNeed cfg "aMapMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
-  let out = debugA cfg "aVecMain" outPath
+  let out = debugA cfg "aMapMain" outPath
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
     then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
@@ -139,21 +136,21 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' <.> extOf eType
     hash  = digest path'
     hash' = debug cfg ("hash of " ++ show path' ++ " is " ++ hash) hash
 
--- This leaves arguments in .args files for aVecElem to find.
+-- This leaves arguments in .args files for aMapElem to find.
 -- TODO put mapIndex and mappedArg together, and rename that something with path
-aVecArgs :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
+aMapArgs :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
          -> CutType -> [FilePath] -> FilePath -> CutPath
          -> Action ()
-aVecArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
+aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
   let mappedArg' = fromCutPath cfg mappedArg
       argsPath   = eachPath cfg tmp' eType mappedArg' <.> "args"
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
       argPaths   = insertAt mapIndex mappedArg' regularArgs'
       argPaths'  = map (toCutPath cfg) argPaths
-  debugL cfg $ "aVecArgs mappedArg': " ++ show mappedArg'
-  debugL cfg $ "aVecArgs argsPath: " ++ show argsPath
-  debugL cfg $ "aVecArgs argPaths: " ++ show argPaths
-  debugL cfg $ "aVecArgs argPaths': " ++ show argPaths'
+  debugL cfg $ "aMapArgs mappedArg': " ++ show mappedArg'
+  debugL cfg $ "aMapArgs argsPath: " ++ show argsPath
+  debugL cfg $ "aMapArgs argPaths: " ++ show argPaths
+  debugL cfg $ "aMapArgs argPaths': " ++ show argPaths'
   writePaths cfg ref argsPath argPaths'
 
 {- This gathers together Rules-time and Action-time arguments and passes
@@ -169,16 +166,16 @@ aVecArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
  - TODO after singleFn works, can we remove tmpFn? (ok if not)
  -}
-aVecElem :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType
+aMapElem :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType
          -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
          -> String -> RepeatSalt -> FilePath -> Action ()
-aVecElem cfg ref ids eType tmpFn actFn singleName salt out = do
+aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
   args <- readPaths cfg ref argsPath
   let args' = map (fromCutPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
-  debugNeed cfg "aVecElem" args'
+  debugNeed cfg "aMapElem" args'
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do
@@ -186,7 +183,7 @@ aVecElem cfg ref ids eType tmpFn actFn singleName salt out = do
       let d' = fromCutPath cfg d
       createDirectoryIfMissing True d'
       return d
-  let out' = debugA cfg "aVecElem" (toCutPath cfg out) args''
+  let out' = debugA cfg "aMapElem" (toCutPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
       single  = exprPathExplicit cfg singleName eType salt hashes
