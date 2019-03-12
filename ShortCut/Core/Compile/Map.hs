@@ -6,6 +6,31 @@ module ShortCut.Core.Compile.Map
   )
   where
 
+{- This is one of the most annoyingly-complicated-yet-useful parts of ShortCut.
+ - It lets you generate "mapped" variants of your normal functions. That is, if
+ - you wrote something to do a computation on one input file and make one
+ - output, this will turn it into something that does a computation on a list
+ - of inputs and gives a list of outputs. It can only map over one argument (at
+ - a time), but I haven't found any need for more than that yet. You decide
+ - which argument using an integer index. See Blast.hs for some examples of how
+ - it simplifies writing a large number of _each functions.
+ -
+ - Mapping is implemented by:
+ - 1. adding a special cache/each/<hash> dir
+ - 2. telling Shake that everything in that dir should be generated starting
+ -    from a matching .args file
+ - 3. telling Shake to generate a .args file per list element after evaluating
+ -    the mapped-over input list
+ - 4. telling Shake to need the output for each .args file and gather them into
+ -    a final output list
+ -
+ - The special dir seems to be needed to separate the things that should be
+ - made using .args files, so Shake doesn't get confused trying to need <every
+ - other output file>.args too.
+ -
+ - TODO can this be used to implement replace_each in a way that allows fn calls??
+ -}
+
 import Development.Shake
 import ShortCut.Core.Compile.Basic
 import ShortCut.Core.Types
