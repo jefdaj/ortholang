@@ -1,3 +1,10 @@
+more .args files idea:
+  another level of indirection solves the problem of mapping over a fn call in Compile.Map already
+  but it's ugly and adds a confusing extra convention of each/<hash>... cache files
+  feels like something similar will be needed to replace_each on fn calls
+  maybe the simplest thing is to extend the .args convention to more/even all fn calls?
+  it seems like it could also drastically simplify other maplike operations
+
 leave_each_out bug:
   leave_each_out [1,2,3,4,5] -> works as expected
   leave_each_out [1,2,3] -> does the first 3 elements of the first list! wtf
