@@ -29,6 +29,7 @@ module ShortCut.Test.Parse.Arbitrary where
 
 import Data.Scientific
 import ShortCut.Core.Types
+import ShortCut.Modules (modules)
 import ShortCut.Core.Parse   (spaceChars, escapeChars, literalChars)
 import Test.QuickCheck
 
@@ -155,44 +156,10 @@ instance Arbitrary ExNum where
 gFunName :: Gen String
 gFunName = elements fnNames
 
--- TODO is it possible to have an Arbitrary instance depend on a cfg?
---      if not, the best we can do is list them all manually
+-- this is duplicated from Types.hs without the CutConfig argument
+-- TODO should this version replace it?
 fnNames :: [String]
-fnNames =
-  [ "all", "any", "best_hits", "best_hits_each", "blastdbget", "blastdblist",
-  "blastn", "blastn_db", "blastn_db_each", "blastn_each", "blastn_rbh",
-  "blastn_rbh_each", "blastn_rev", "blastn_rev_each", "blastp", "blastp_db",
-  "blastp_db_each", "blastp_each", "blastp_rbh", "blastp_rbh_each", "blastp_rev",
-  "blastp_rev_each", "blastx", "blastx_db", "blastx_db_each", "blastx_each",
-  "concat_bht", "concat_bht_each", "concat_faa", "concat_faa_each", "concat_fna",
-  "concat_fna_each", "crb_blast", "crb_blast_each", "diff", "extract_ids",
-  "extract_ids_each", "extract_queries", "extract_queries_each",
-  "extract_scored", "extract_scores", "extract_seqs", "extract_seqs_each",
-  "extract_targets", "extract_targets_each", "filter_evalue",
-  "filter_evalue_each", "gbk_to_faa", "gbk_to_faa_each", "gbk_to_fna",
-  "gbk_to_fna_each", "get_genomes", "get_proteomes", "glob_files", "histogram",
-  "leave_each_out", "length", "length_each", "linegraph", "load_faa",
-  "load_faa_each", "load_fna", "load_fna_each", "load_gbk", "load_gbk_each",
-  "load_list", "load_nucl_db", "load_nucl_db_each", "load_prot_db",
-  "load_prot_db_each", "makeblastdb_nucl_all",
-  "makeblastdb_prot_all", "megablast", "megablast_db",
-  "megablast_db_each", "megablast_each", "megablast_rbh", "megablast_rbh_each",
-  "megablast_rev", "megablast_rev_each", "parse_searches", "psiblast",
-  "psiblast_all", "psiblast_db", "psiblast_db_each", "psiblast_each",
-  "psiblast_each_pssm_db", "psiblast_pssm", "psiblast_pssm_all",
-  "psiblast_pssm_db", "psiblast_pssm_db_each", "psiblast_pssm_each",
-  "psiblast_pssms", "psiblast_pssms_db", "psiblast_train", "psiblast_train_all",
-  "psiblast_train_db", "psiblast_train_db_each", "psiblast_train_each",
-  "reciprocal_best", "reciprocal_best_each", "repeat", "replace_each",
-  "scatterplot", "score_repeats", "some", "split_faa", "split_faa_each",
-  "split_fna", "split_fna_each", "tblastn", "tblastn_db", "tblastn_db_each",
-  "tblastn_each", "tblastx", "tblastx_db", "tblastx_db_each", "tblastx_each",
-  "tblastx_rbh", "tblastx_rbh_each", "tblastx_rev", "tblastx_rev_each",
-  "translate", "translate_each",
-
-  -- and these ones which have been giving so much trouble:
-  "load_faa_glob", "load_fna_glob", "load_gbk_glob"
-  ]
+fnNames = map fName $ concat $ map mFunctions modules
 
 -- TODO why the one argument? can't do typechecking here anyway
 gFun :: Gen String

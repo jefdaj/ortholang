@@ -32,7 +32,7 @@ import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 tmpfilesVary :: [FilePath]
 tmpfilesVary =
   [ "crb_blast_each2" -- TODO should this be fixable?
-  , "ncbi_blast_recpiprocal_best"
+  , "ncbi_blast_reciprocal_best"
   , "blast_hits_best_hits"
   ]
 
@@ -40,7 +40,7 @@ tmpfilesVary =
 stdoutVaries :: [FilePath]
 stdoutVaries =
   [ "crb_blast_each2"
-  , "ncbi_blast_recpiprocal_best" -- TODO should this be fixable?
+  , "ncbi_blast_reciprocal_best" -- TODO should this be fixable?
   , "blast_hits_best_hits"
   ]
 
