@@ -134,7 +134,7 @@ eval hdl cfg ref ids rtype = retryIgnore . eval'
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        actionRetry 3 $ need [path] -- TODO is this done automatically in the case of result?
+        actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
         res  <- prettyResult cfg ref rtype $ toCutPath cfg path
         ids' <- liftIO $ readIORef ids
         -- liftIO $ putStrLn $ show ids'
@@ -160,7 +160,7 @@ evalIntermediateExpr st@(_, cfg, _, _) expr = do
     want ["evalIntermediateExpr"]
     "evalIntermediateExpr" ~> do
       alwaysRerun
-      actionRetry 3 $ need [path]
+      actionRetry 9 $ need [path]
   return $ exprPath st expr
 
 -- TODO get the type of result and pass to eval

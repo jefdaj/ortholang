@@ -360,7 +360,7 @@ wrappedCmd parCmd fixEmpties cfg ref@(disk, _) mOut inPtns opts bin args = actio
 -- TODO issue with not re-raising errors here?
 wrappedCmdExit :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
-wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = actionRetry 3 $ do
+wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = actionRetry 9 $ do
   (_, _, code) <- wrappedCmd parCmd fixEmpties cfg r mOut inPtns opts bin as
   case mOut of
     Nothing -> return ()
