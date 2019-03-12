@@ -1,9 +1,3 @@
-fix broken tests:
-  crb_blast_{each2,two_cyanos} need to be marked nondeterministic and handled with check scripts (why not the others?)
-  same with ncbi_blast_reciprocal_best
-  same with blast_hits_best_hits, except is it sometimes 0? that's worrying
-  sonicparanoid still broken
-
 add mmseqs_rbh stuff!
 :write on its own should write to the current script after asking confirmation
 
