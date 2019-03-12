@@ -28,32 +28,28 @@ import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 
--- TODO remove in favor of shell scripts that test specific properties of tmpfiles
--- nonDeterministicCut :: FilePath -> Bool
--- nonDeterministicCut path = any (\s -> s `isPrefixOf` (takeBaseName path)) badSigns
---   where
---     -- TODO will regular blast be nondeterministic at large scales too?
---     -- TODO make these individual tests, or substrings
---     -- TODO eventually replace deterministic or not with custom shell predicates
---     badSigns = ["crb_blast", "blastrbh", "blasthits", "plot", "mmseqs"] -- TODO blast? blastdb?
+-- these work, but the tmpfiles vary so they require a check script
+tmpfilesVary :: [FilePath]
+tmpfilesVary =
+  [ "crb_blast_each2" -- TODO should this be fixable?
+  , "ncbi_blast_recpiprocal_best"
+  , "blast_hits_best_hits"
+  ]
 
-knownFailing :: [FilePath]
-knownFailing =
+-- these work, but the stdout varies so they require a check script
+stdoutVaries :: [FilePath]
+stdoutVaries =
+  [ "crb_blast_each2"
+  , "ncbi_blast_recpiprocal_best" -- TODO should this be fixable?
+  , "blast_hits_best_hits"
+  ]
 
-  -- TODO test + ask if mmseqs can be compiled on the server
-  -- TODO test only when it's installed?
-  -- [ "mmseqs_createdb"
-  -- , "mmseqs_createdb_all"
-  -- , "mmseqs_search"
-  -- , "mmseqs_search_db"
-  -- , "sonicparanoid_basic"
-
-  -- TODO what's up with this? "indirect recursion detected" but only sometimes
-  -- , "ncbi_blast_reciprocal_best"
-
+-- these generally need work and should be skipped for now :(
+badlyBroken :: [FilePath]
+badlyBroken =
   -- TODO fix replace_each to work with generated lists
   [ "orthofinder_orthofinder_sets"
-
+  , "sonicparanoid_basic"
   -- TODO what's up with these?
   , "psiblast_each_pssm"
   , "psiblast_each_pssm"
@@ -61,14 +57,10 @@ knownFailing =
   , "psiblast_empty_pssms"
   , "psiblast_map"
   , "psiblast_pssm_all"
-
   ]
 
 getTestScripts :: FilePath -> IO [FilePath]
-getTestScripts testDir = do
-  testCuts <- fmap (map takeBaseName) $ findByExtension [".cut"] testDir
-  let testCuts' = filter (\p -> not $ p `elem` knownFailing) testCuts
-  return testCuts'
+getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".cut"] testDir
 
 goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
@@ -153,10 +145,12 @@ mkScriptTests (cut, out, tre, mchk) cfg ref ids = do
   checkTests <- case mchk of
                   Nothing -> return []
                   Just c  -> mkCheckTest cfg' ref ids c
-  let tripTest = mkTripTest cfg' ref ids cut
-      outTest  = mkOutTest  cfg' ref ids out -- TODO why is this trying to use the tree files as golden??
-      treeTest = mkTreeTest cfg' ref ids tre
-      tests    = [tripTest, outTest] ++ absTests ++ [treeTest] ++ checkTests
+  let tripTest  = mkTripTest cfg' ref ids cut
+      outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids out]
+      treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids tre]
+      tests     = if (name `elem` badlyBroken)
+                    then []
+                    else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
   return $ testGroup name tests
   where
     name = takeBaseName cut

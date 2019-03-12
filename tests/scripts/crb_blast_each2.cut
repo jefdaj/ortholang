@@ -1,7 +1,6 @@
 # This tests that the tmpfiles produced by a mapped function include the ones
 # from its single equivalent. And also that the mapped tmpfile paths don't
-# include varnames. (There's no good way to confirm that other than manual
-# inspection of the tree for now, because of the tmpfiles race condition)
+# include varnames.
 
 # TODO fix (minor) race condition between mapped and single tmpfile trees
 # TODO don't use crb-blast for this since it's still nondeterministic?
