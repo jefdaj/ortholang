@@ -1,3 +1,6 @@
+add mmseqs_rbh stuff!
+:write on its own should write to the current script after asking confirmation
+
 type groups:
   x add the basic data type
   x handle them in the parser/typechecker functions
