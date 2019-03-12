@@ -1,3 +1,7 @@
+leave_each_out bug:
+  leave_each_out [1,2,3,4,5] -> works as expected
+  leave_each_out [1,2,3] -> does the first 3 elements of the first list! wtf
+
 add mmseqs_rbh stuff!
 :write on its own should write to the current script after asking confirmation
 

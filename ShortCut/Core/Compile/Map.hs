@@ -62,8 +62,6 @@ rMapSimpleScript index = rMap index . aSimpleScript
 -- main algorithm --
 --------------------
 
--- TODO rename these to mention map instead of vec
-
 {- This separately hooks up aMapElem to operate on any .args files, and aMap to
  - generate some .args files then gather them into the overall list. Those two
  - then need to agree on tmpfiles, communicating only through the .args files.
@@ -78,8 +76,8 @@ rMapMain :: Int -> Maybe ([CutPath] -> IO CutPath)
          -> RulesFn
 rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
-      (mappedExpr, regularExprs) = popFrom mapIndex' exprs
-  regularArgPaths <- mapM (rExpr s) regularExprs
+      (mappedExpr, normalExprs) = popFrom mapIndex' exprs
+  regularArgPaths <- mapM (rExpr s) normalExprs
   (ExprPath mappedArgsPath) <- rExpr s mappedExpr
   let singleName     = replace "_each" "" name
       mainOutPath    = fromCutPath cfg $ exprPath s e
@@ -137,6 +135,7 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' <.> extOf eType
     hash' = debug cfg ("hash of " ++ show path' ++ " is " ++ hash) hash
 
 -- This leaves arguments in .args files for aMapElem to find.
+-- TODO This should be done for each replace operation in replace_each
 -- TODO put mapIndex and mappedArg together, and rename that something with path
 aMapArgs :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
          -> CutType -> [FilePath] -> FilePath -> CutPath
