@@ -1,5 +1,5 @@
 name:               ShortCut
-synopsis:           Rapid, robust, reproducible candidate gene searches
+synopsis:           Short, reproducible phylogenomic cuts
 author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
 version:            0.8.3.0
@@ -23,7 +23,7 @@ data-files:         data/*.fa,
 
 -- everything is built into one binary:
 --   run tests with shortcut --test
---   write reference.md with shortcut --reference
+--   write website reference docs with shortcut --reference
 executable shortcut
   main-is:          ShortCut.hs
   ghc-options: 

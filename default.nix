@@ -10,7 +10,7 @@ let
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
-  # it works best if the ghc version here matches the resolve in stack.yaml
+  # it works best if the ghc version here matches the resolver in stack.yaml
   cabalPkg = haskell.packages.ghc844.callPackage ./shortcut.nix {};
   devDepends = [
     haskell.compiler.ghc844
