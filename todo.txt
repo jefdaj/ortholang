@@ -78,7 +78,7 @@ can all "extract" functions be renamed with "list"?
 how to open the result cluster files?
 swap _ for : in seqid: because orthofinder does that already (or is it messing up and considering those 2 species?)
   maybe better just remove it for now instead
-should i edit orthofinder to use detourrr conventions? might be the fastest/clearest way if no options
+should i edit orthofinder to use shortcut conventions? might be the fastest/clearest way if no options
   how important are the numeric indexes? if those could be made hashes everything would be easy
   and store blast hits as plain txt without the gzip for now
 easy functions to write now that you've found the output files:
@@ -156,7 +156,7 @@ mmseqs module
     can do easy-clust from fasta, but generally want to convert to mmseq db first?
       database is multiple files like blast
       is there a different kind of db file for each function output?
-    there are "update" functions which in detourrr should copy + update
+    there are "update" functions which in shortcut should copy + update
     any way to get it working on the demo server? if not, might be a reason to get a new one eventually
       should be doable from lab funds really!
       might not need it tho, only missing avx2 but SSE4.1 is ok

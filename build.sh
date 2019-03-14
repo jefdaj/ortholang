@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # remember to export TMPDIR=<some shared location> before testing on HPC clusters!
-# script arguments will be passed to detourrr --test
+# script arguments will be passed to shortcut --test
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
 
 export TASTY_QUICKCHECK_TESTS=1000
