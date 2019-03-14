@@ -21,7 +21,7 @@ module ShortCut.Core.Compile.Map
  -    from a matching .args file
  - 3. telling Shake to generate a .args file per list element after evaluating
  -    the mapped-over input list
- - 4. telling Shake to need the output for each .args file and gather them into
+ - 4. telling Shake to need the output for each output file and gather them into
  -    a final output list
  -
  - The special dir seems to be needed to separate the things that should be
