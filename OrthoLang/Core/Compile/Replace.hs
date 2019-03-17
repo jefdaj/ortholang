@@ -58,6 +58,7 @@ orthoLangModule = OrthoLangModule
   , mFunctions =
       [ replace
       , replaceEach
+      , replaceEach2
       ]
   }
 
@@ -248,3 +249,24 @@ rReplaceEach s@(scr, cfg, ref, _) expr@(OrthoLangFun _ _ _ _ (resExpr:(OrthoLang
     in actFn cfg ref outPath subPaths' resPaths'
   return (ExprPath outPath')
 rReplaceEach _ expr = fail $ "bad argument to rReplaceEach: " ++ show expr
+
+--------------------------
+-- replace_each rewrite --
+--------------------------
+
+{- Unlike the first version, this one should work without being able to extractExprs from subList.
+ - That is, subList shouldn't have to be known at rules-time but only when running the actions.
+ -}
+
+replaceEach2 :: CutFunction
+replaceEach2 = CutFunction
+  { fName      = "replace_each2"
+  , fFixity    = Prefix
+  , fTypeCheck = tReplaceEach
+  , fDesc      = Nothing
+  , fTypeDesc  = dReplaceEach2
+  , fRules     = rReplaceEach
+  }
+
+dReplaceEach2 :: String
+dReplaceEach2 = "replace_each2 : <outputvar> <inputvar> <inputvars> -> <output>.list"
