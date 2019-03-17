@@ -210,8 +210,7 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - operation, then gathers the results in a list.
  -
  - It has one major flaw that I'm trying to fix now: it assumes that the list
- - of expressions to substitute in are known at compile-time. That makes it
- - impossible to repeat based on the results of a function call, limiting it to
+ - of expressions to substitute in are known at compile-time. That makes it - impossible to repeat based on the results of a function call, limiting it to
  - just lists you explicitly write in the cut code.
  -
  - The initial rewrite plan was:
@@ -256,6 +255,18 @@ rReplaceEach _ expr = fail $ "bad argument to rReplaceEach: " ++ show expr
 
 {- Unlike the first version, this one should work without being able to extractExprs from subList.
  - That is, subList shouldn't have to be known at rules-time but only when running the actions.
+ - I plan to base the algorithm loosely on the Map module with its .args files, but only loosely.
+ - Like that it should have two separate action blocks:
+ -
+ - (1) need read the list of replacement expressions, generate a replace input for each one,
+ -     need the corresponding outputs, and return a final list
+ - (2) given a single input (replacement), generate the output
+ -
+ - Part (2) will also need access to all the rest of the standard information,
+ - but that can be encoded beforehand by making the pattern only match a specific hashed subfolder.
+ -
+ - TODO figure out the file naming scheme in more detail before/while implementing
+ - TODO once this works, rewrite replace using it + singleton
  -}
 
 replaceEach2 :: CutFunction
