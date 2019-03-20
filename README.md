@@ -87,6 +87,24 @@ Add this line to your `~/.bashrc`.
     export PATH=$PWD/result/bin:$PATH
 
 
+Build Docker image
+------------------
+
+`nix-build docker.nix` should do it.
+
+
+Build Singularity image
+-----------------------
+
+`nix-build singularity.nix` should get you most of the way there, but you may
+need to write your own definition file to customize the resulting image with
+bind dirs and mount points used by your institution's HPC environment.
+
+If you're using this, you may also want to write a custom wrapper script that
+tells ShortCut how to run system calls using your HPC scheduler (SLURM or
+similar).
+
+
 Try it out
 ----------
 
