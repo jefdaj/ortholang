@@ -266,6 +266,7 @@ rReplaceEach _ expr = fail $ "bad argument to rReplaceEach: " ++ show expr
  - but that can be encoded beforehand by making the pattern only match a specific hashed subfolder.
  -
  - TODO figure out the file naming scheme in more detail before/while implementing
+ - TODO think about whether a hybrid approach might be easier, where you call rMap on an action at the end
  - TODO once this works, rewrite replace using it + singleton
  -}
 
