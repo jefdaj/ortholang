@@ -1,27 +1,9 @@
-# There has been a long-standing bug in ShortCut that it can't do the repeat or
-# replace magic starting from the results of a function call. They have to be
-# passed as a literal list in the source code instead. This is bad because it
-# prevents writing a lot of useful permute functions, but until recently I
-# couldn't think of a way to fix it. Now I might have: it's a simpler version
-# of the problem solved by Compile/Map.hs, so that can be adapted to do it with
-# a couple extra tmpfiles. This script will test that the idea works, and
-# prevent future regressions.
-
-# This should still work, same as always: load one faa, then replace it with each from a list.
-faa_paths =
-  [ "data/Mycoplasma_agalactiae_PG2.gbk"
-  , "data/Mycoplasma_arthritidis_protein_refseq.faa"
-  , "data/Mycoplasma_capricolum_protein_refseq.faa"
-  , "data/Mycoplasma_genitalium_M2321_10genes.fna"
-  ]
-
+faa_paths = ["data/Mycoplasma_agalactiae_PG2.gbk",
+             "data/Mycoplasma_arthritidis_protein_refseq.faa",
+             "data/Mycoplasma_capricolum_protein_refseq.faa",
+             "data/Mycoplasma_genitalium_M2321_10genes.fna"]
 faa_path = "data/Mycoplasma_agalactiae_PG2_protein_refseq.faa"
-faa = load_faa faa_path # note you can name something the same as a type. doesn't matter
+faa = load_faa faa_path
 faa_alternatives = replace_each faa faa_path faa_paths
-
-# But if we get the list by doing a function call, the bug is triggered :(
-# We can't even parse the line without an immediate error!
 faa_paths_fn = glob_files "data/Mycoplasma_*.faa"
-# faa_alternatives_fn = replace_each faa faa_path faa_paths_fn
-
 result = faa_alternatives

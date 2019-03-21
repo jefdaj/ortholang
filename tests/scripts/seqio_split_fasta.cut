@@ -1,4 +1,4 @@
 multifa = load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa"
-genes   = split_faa multifa
-mapped  = split_faa_each [multifa]
-result  = length_each ([genes] | mapped) # should be [10]
+genes = split_faa multifa
+mapped = split_faa_each [multifa]
+result = length_each ([genes] | mapped)

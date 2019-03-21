@@ -1,1 +1,1 @@
-1 + 1 # implicitly assigned result
+result = 1 + 1

@@ -1,5 +1,5 @@
 maga10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
 maga = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
-single = extract_queries      (megablast      1e-5 maga10  maga )
-mapped = extract_queries_each (megablast_each 1e-5 maga10 [maga])
+single = extract_queries (megablast 1.0e-5 maga10 maga)
+mapped = extract_queries_each (megablast_each 1.0e-5 maga10 [maga])
 result = [single] | mapped

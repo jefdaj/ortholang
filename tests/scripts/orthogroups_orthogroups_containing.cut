@@ -1,5 +1,4 @@
 smallbacteria = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
 ofres = orthofinder smallbacteria
-
-# TODO should it work if they contain an id that contains this text? or just the whole text?
-result = orthogroups_containing ofres ["AKO50238", "AKO50242", "AKO50244"]
+result = orthogroups_containing ofres
+                                ["AKO50238", "AKO50242", "AKO50244"]

@@ -1,12 +1,8 @@
-# Basic test of the any function and its binary operator equivalent, |.
-# These need to be tested separately with literals and path-based types
-# because they're implemented separately.
-
-set1 = ["data/Mycoplasma_agalactiae_small.faa", "data/Mycoplasma_genitalium_small.faa"]
-set2 = ["data/Mycoplasma_agalactiae_small.faa", "data/Mycoplasma_genitalium_small.faa",
+set1 = ["data/Mycoplasma_agalactiae_small.faa",
+        "data/Mycoplasma_genitalium_small.faa"]
+set2 = ["data/Mycoplasma_agalactiae_small.faa",
+        "data/Mycoplasma_genitalium_small.faa",
         "data/Mycoplasma_hyopneumoniae_small.faa"]
-
 res1 = any [set1, set2]
 res2 = set1 | set2
-
 result = [res1, res2]

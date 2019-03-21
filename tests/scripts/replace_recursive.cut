@@ -1,24 +1,10 @@
-# what happens when you replace recursively?
-# there are a few things we could mean by that...
-
 ind = 1
-dep = 1.2e3 * ind
+dep = 1200 * ind
 dep2 = replace dep ind 2
-
-# one is you could replace the replace call itself
-# not very useful, but it behaves as you would expect:
-# it overwrites dep2 with 5 so we just have 5/3
 var_that_depends_on_replace_result = dep2 / 3
-var_that_ignores_first_replace_result = replace var_that_depends_on_replace_result dep2 5
-
-# another is you could reach back and replace something the first replace call was depending on
-# THAT'S CONFUSING AND SHOULD PROBABLY BE AVOIDED IN REAL CODE!
-# what happens in this case is it replaces dep in the first replace call with a constant number,
-# then that replace doesn't do anything because the number doesn't depend on any variables
-# ... so you end up with 4
+var_that_ignores_first_replace_result = replace var_that_depends_on_replace_result
+                                                dep2
+                                                5
 var_that_replaces_in_first_replace_call = replace dep2 dep 4
-
-# TODO what other cases are there?
-
 result = [var_that_ignores_first_replace_result,
           var_that_replaces_in_first_replace_call]

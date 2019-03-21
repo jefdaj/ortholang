@@ -1,4 +1,4 @@
 smallbacteria = load_faa_each ["data/Mycoplasma_agalactiae_small.faa",
                                "data/Mycoplasma_genitalium_small.faa"]
 ofres = orthofinder smallbacteria
-result = orthogroups ofres # TODO is this deterministic?
+result = orthogroups ofres

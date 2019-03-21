@@ -1,17 +1,9 @@
-# psiblast functions that use compose1 function
-# (this is an implementation detail, not something important to know as a user)
-
-# setup
-query   = load_faa "data/Mycoplasma_genitalium_single.faa"
+query = load_faa "data/Mycoplasma_genitalium_single.faa"
 mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
 maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
-mgendb  = makeblastdb_prot mgen
-magadb  = makeblastdb_prot maga
-pssms   = psiblast_train_db_each 1e-2 query [magadb, mgendb]
-
-# compose1-based fns to test
-table1 = psiblast_pssms_db  1e-2 pssms  magadb
-table2 = psiblast_pssms_all 1e-2 pssms maga
-
-# don't do this with real data unless comparable
+mgendb = makeblastdb_prot mgen
+magadb = makeblastdb_prot maga
+pssms = psiblast_train_db_each 1.0e-2 query [magadb, mgendb]
+table1 = psiblast_pssms_db 1.0e-2 pssms magadb
+table2 = psiblast_pssms_all 1.0e-2 pssms maga
 result = concat_bht [table1, table2]

@@ -1,10 +1,6 @@
 mgen = load_faa "data/Mycoplasma_genitalium_small.faa"
 maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
-
-# This produces slightly different numbers each time,
-# so we repeat 3X and only keep the stable hits.
-hits  = blastp 1e-5 mgen maga
+hits = blastp 1.0e-5 mgen maga
 hits3 = repeat hits mgen 3
 best3 = best_hits_each hits3
-
 result = length (all (extract_targets_each best3))

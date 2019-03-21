@@ -35,6 +35,9 @@ let
     mmseqs2
     # cdhit
     sonicparanoid
+    glibcLocales
+    tree
+    diffutils
   ]
     ++ biomartr.runDepends
     ++ blast.runDepends
@@ -47,14 +50,19 @@ let
 # see https://github.com/jml/nix-haskell-example
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
+  shellHook = ''
+      export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+      export LC_ALL="en_US.UTF-8"
+  '';
   buildDepends = (drv.buildDepends or [])
-    ++ [ makeWrapper glibcLocales ]
+    ++ [ makeWrapper ]
     ++ runDepends
     ++ (if pkgs.lib.inNixShell then devDepends else []);
   postInstall = ''
     ${drv.postInstall or ""}
     wrapProgram "$out/bin/shortcut" \
       --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
+      --set LC_ALL "en_US.UTF-8" \
       --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 })

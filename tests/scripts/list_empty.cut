@@ -1,3 +1,1 @@
-# should create an empty.list expr,
-# which links to an empty text file
 result = []

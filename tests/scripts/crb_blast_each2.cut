@@ -1,12 +1,5 @@
-# This tests that the tmpfiles produced by a mapped function include the ones
-# from its single equivalent. And also that the mapped tmpfile paths don't
-# include varnames.
-
-# TODO fix (minor) race condition between mapped and single tmpfile trees
-# TODO don't use crb-blast for this since it's still nondeterministic?
-
 minimgen = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
 maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
-single = crb_blast      minimgen  maga
+single = crb_blast minimgen maga
 mapped = crb_blast_each minimgen [maga]
-result = length ([single] | mapped) # should be 1
+result = length ([single] | mapped)

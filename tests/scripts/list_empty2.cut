@@ -1,14 +1,7 @@
-# TODO make a separate section for bop tests? sets?
-
-emptyzero  = []
-emptyone   = [[ ]]
-emptytwo   = [[ ], [ ]]
-emptyfirst = [[ ], [1]]
-emptylast  = [[1], [ ]]
-
-# this should be the num.list.list [[1], []]
-# not a type error about empty.list.list vs num.list.list
-# and not some abomination like [[], []] or [[[]], []]
+emptyzero = []
+emptyone = [[]]
+emptytwo = [[], []]
+emptyfirst = [[], [1]]
+emptylast = [[1], []]
 elems = emptyzero | emptyone | emptytwo | emptyfirst | emptylast
-
 result = elems

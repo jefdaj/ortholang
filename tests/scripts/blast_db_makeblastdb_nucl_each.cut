@@ -1,4 +1,4 @@
-single  = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
+single = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
 genes10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
 dbs = makeblastdb_nucl_each [single, genes10]
 result = dbs

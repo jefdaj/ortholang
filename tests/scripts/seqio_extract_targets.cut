@@ -1,7 +1,6 @@
-hits = blastp 1e-5 (load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa")
-                   (gbk_to_faa (load_gbk "data/Mycoplasma_genitalium_M2321.gbk"))
-single = extract_targets       hits
+hits = blastp 1.0e-5
+              (load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa")
+              (gbk_to_faa (load_gbk "data/Mycoplasma_genitalium_M2321.gbk"))
+single = extract_targets hits
 mapped = extract_targets_each [hits]
-# TODO it's not deduping... because of rOneArgScript?
-# Note this should be the same output as extract_queries.cut
 result = [single] | mapped

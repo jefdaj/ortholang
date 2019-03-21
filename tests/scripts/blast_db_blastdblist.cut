@@ -1,11 +1,5 @@
-# This tests that we can search for premade BLAST databases.
-
-# TODO warn before trying to download stuff during tests?
-
-dbs   = blastdblist ""
-nrs   = blastdblist "nr"
+dbs = blastdblist ""
+nrs = blastdblist "nr"
 proks = blastdblist "prok"
 human = blastdblist "human"
-
-# result itself doesn't matter much
 result = dbs | nrs | proks | human

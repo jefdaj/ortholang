@@ -1,25 +1,13 @@
 mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
 maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
-
-n = 1e-5
+n = 1.0e-5
 fwd = blastp n mgen maga
-
-# can do the reverse blast manually by flipping args, or use _rev
-rev1 = blastp     n maga mgen
+rev1 = blastp n maga mgen
 rev2 = blastp_rev n mgen maga
-
 rbh1 = reciprocal_best fwd rev1
 rbh2 = reciprocal_best fwd rev2
-
-# or, can do the entire thing with _rbh
 rbh3 = blastp_rbh n mgen maga
-
-# finally, doing it all in reverse should come out the same too
-# (but have to extract target IDs now)
 rbh4 = blastp_rbh n maga mgen
-
-# test that all 4 methods give the same results
-# (and also manually check that they share tmpfiles)
-lists = extract_queries_each [rbh1, rbh2, rbh3]
-      | extract_targets_each [rbh4]
+lists = extract_queries_each [rbh1, rbh2, rbh3] |
+        extract_targets_each [rbh4]
 result = any lists ~ all lists

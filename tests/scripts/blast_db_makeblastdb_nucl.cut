@@ -1,13 +1,6 @@
-# Combines the single, _each and _all tests to check that they're compatible.
-
-single  = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
+single = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
 genes10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
-
 singles = [makeblastdb_nucl single, makeblastdb_nucl genes10]
 each = makeblastdb_nucl_each [single, genes10]
-both = makeblastdb_nucl_all  [single, genes10]
-
-# should be [2, 2, 2, 1] but mainly want to evaluate them all;
-# the real test is that only 3 databases should be in cache/makeblastdb
-# and singles should point to the same ones as each
-result = length_each [singles, each, (singles | each), [both]]
+both = makeblastdb_nucl_all [single, genes10]
+result = length_each [singles, each, singles | each, [both]]

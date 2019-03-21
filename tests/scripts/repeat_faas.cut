@@ -1,14 +1,4 @@
-# Checks for a bug where repeated sampling would always give the same list.
-# Also, note that in ShortCut this "random" sampling should be entirely
-# deterministic (same tmpfiles + answer each time).
-
-# sample 5 of about 20 genomes randomly
 faa_names = glob_files "data/Mycoplasma_*.faa"
 use5 = sample 5 faa_names
-
-# repeat the sampling operation 100 times
 use5manytimes = repeat use5 faa_names 100
-
-# how many files got picked every time?
-# probably 0, but all 5 with the sampling bug :(
 result = all use5manytimes

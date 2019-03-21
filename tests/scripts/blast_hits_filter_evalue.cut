@@ -1,8 +1,6 @@
 small = load_faa "data/Mycoplasma_genitalium_small.faa"
-mgen  = load_faa "data/Mycoplasma_genitalium_G37_protein_refseq.faa"
-
-hits = blastp 1e-5 small mgen
-single = extract_queries      (filter_evalue      1e-50  hits)
-mapped = extract_queries_each (filter_evalue_each 1e-50 [hits])
-# TODO mapped version not properly deduped yet
+mgen = load_faa "data/Mycoplasma_genitalium_G37_protein_refseq.faa"
+hits = blastp 1.0e-5 small mgen
+single = extract_queries (filter_evalue 1.0e-50 hits)
+mapped = extract_queries_each (filter_evalue_each 1.0e-50 [hits])
 result = [single] | mapped
