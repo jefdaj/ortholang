@@ -48,12 +48,13 @@ let
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
   buildDepends = (drv.buildDepends or [])
-    ++ [ makeWrapper ]
+    ++ [ makeWrapper glibcLocales ]
     ++ runDepends
     ++ (if pkgs.lib.inNixShell then devDepends else []);
   postInstall = ''
     ${drv.postInstall or ""}
     wrapProgram "$out/bin/shortcut" \
+      --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
       --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 })
