@@ -26,6 +26,7 @@ import System.Console.Terminal.Size (Window(..), size)
 import System.IO (Handle, hPutStrLn)
 -- import Control.Monad.Trans (liftIO)
 -- import Data.String.Utils          (replace)
+import Test.Tasty.Golden (writeBinaryFile)
 
 getWidth :: IO Int
 getWidth = do
@@ -80,7 +81,7 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?
 writeScript :: FilePath -> CutScript -> IO ()
-writeScript path scr = writeFile path $ unlines $ map prettyShow scr
+writeScript path scr = writeBinaryFile path $ unlines $ map prettyShow scr
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where

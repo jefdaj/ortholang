@@ -52,7 +52,6 @@ let
 in haskell.lib.overrideCabal cabalPkg (drv: {
   shellHook = ''
       export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-      export LC_ALL="en_US.UTF-8"
   '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]
@@ -62,7 +61,6 @@ in haskell.lib.overrideCabal cabalPkg (drv: {
     ${drv.postInstall or ""}
     wrapProgram "$out/bin/shortcut" \
       --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
-      --set LC_ALL "en_US.UTF-8" \
       --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 })

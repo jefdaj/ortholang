@@ -1,11 +1,9 @@
 fix the unicode encoding issues!
-  things to try:
-    read/write in binary mode as suggested in golden-tasty source comments
-    hSetEncoding on every handle
-    open things with icu
-    use the setLocale package
-    figure out how to force locale in all the nix-shells
-  should work with:
+  things to do:
+    switch to binary read/write of golden tests as suggested in the docs
+    stop tasty from trying to overwrite the .cut scripts during round-trip
+    fix R tmpfile errors
+  tests should pass on:
     demo server
     laptop vm
     hpc singularity environment

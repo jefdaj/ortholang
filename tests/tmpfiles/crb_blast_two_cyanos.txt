@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- crb_blast
-|   |   `-- 7dd7099e4a_3cdae17a0a
+|   |   `-- 9e43acfc47_f5741fa4d7
 |   |       |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |   |       |-- 36189032ad.phr
 |   |       |-- 36189032ad.pin
@@ -22,7 +22,7 @@
 |       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- crb_blast
-|   |   `-- c476da3790_33392d8410_0.crb -> ../../cache/crb_blast/7dd7099e4a_3cdae17a0a/results.crb
+|   |   `-- c476da3790_33392d8410_0.crb -> ../../cache/crb_blast/9e43acfc47_f5741fa4d7/results.crb
 |   |-- extract_targets
 |   |   `-- 0e8d1d9cbe_0.str.list -> ../../cache/lines/...
 |   |-- load_faa

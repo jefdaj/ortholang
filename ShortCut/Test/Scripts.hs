@@ -6,26 +6,29 @@ import Prelude hiding (writeFile)
 
 import Control.Concurrent.Thread.Delay (delay)
 import Control.Monad              (when)
-import Data.ByteString.Lazy.Char8 (pack, ByteString)
+-- import Data.ByteString.Lazy.Char8 (pack, ByteString) -- TODO use binary?
+import qualified Data.ByteString.Lazy  as BL
+-- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
+import qualified Data.ByteString.Lazy.Char8 as B8
 import Data.List                  (zip4)
 import Data.Maybe                 (fromJust)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
-import ShortCut.Core.Pretty       (writeScript)
+-- import ShortCut.Core.Pretty       (writeScript)
 import ShortCut.Core.Types        (CutConfig(..), HashedSeqIDsRef)
 import ShortCut.Core.Locks        (Locks, withWriteLock)
 import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (takeBaseName, (</>), (<.>))
-import System.IO                  (stdout, stderr, writeFile)
+import System.IO                  (stdout, stderr)
 import System.IO.Silently         (hCapture)
 import System.Process             (readCreateProcess, readProcessWithExitCode,
                                    cwd, shell)
 import Test.Hspec                 (it)
 import Test.Tasty                 (TestTree, testGroup)
-import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension)
+import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension, writeBinaryFile)
 import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 
 -- these work, but the tmpfiles vary so they require a check script
@@ -62,7 +65,7 @@ badlyBroken =
 getTestScripts :: FilePath -> IO [FilePath]
 getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".cut"] testDir
 
-goldenDiff :: String -> FilePath -> IO ByteString -> TestTree
+goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
   where
     -- this is taken from the Tasty docs
@@ -77,7 +80,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
       out <- runCut cfg ref ids
       -- useful for debugging tests or updating the golden files
       -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") out
-      return $ pack out
+      return $ B8.pack out
     desc = "prints expected output"
 
 mkTreeTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
@@ -94,7 +97,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       out <- readCreateProcess treeCmd ""
       -- useful for debugging tests or updating the golden files
       -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
-      return $ pack $ toGeneric cfg out
+      return $ B8.pack $ toGeneric cfg out
 
 -- TODO use safe writes here
 mkTripTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
@@ -104,14 +107,15 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
     tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
       scr1 <- parseFileIO cfg ref ids $ fromJust $ cfgScript cfg
-      writeScript cut scr1
-      withWriteLock ref tripShow $ writeFile tripShow $ show scr1
+      -- this is useful for debugging
+      -- writeScript cut scr1
+      withWriteLock ref tripShow $ writeBinaryFile tripShow $ show scr1
     -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
       scr2 <- parseFileIO cfg ref ids cut
-      return $ pack $ show scr2
+      return $ B8.pack $ show scr2
 
 -- test that no absolute paths snuck into the tmpfiles
 mkAbsTest :: CutConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
@@ -135,7 +139,7 @@ runCut cfg ref ids =  do
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
-  writeFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out -- for the shell script tests
+  writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out -- for the shell script tests
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, FilePath, Maybe FilePath)
