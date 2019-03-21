@@ -6,15 +6,22 @@ in pkgs.singularity-tools.buildImage {
   name = "shortcut-${shortcut.version}";
   contents = [ binutils shortcut ];
 
-  # Seems to work better if I don't mess with this. Instead, run shortcut
-  # (or any of its runtime dependencies) from bash inside the container.
-  # runScript = "#!${stdenv.shell}\nexec /bin/sh";
-
+  # This is for the temporary build image; final output will be smaller
   diskSize = 10240;
-  # TODO is there a way to have these auto-bind when running the image too?
-  # these should be absolute paths but missing the leading slash:
-  bindDirs = [
+
+  runScript = "#!${shortcut.env}\nexec bash \"\$@\"";
+
+  # These should be absolute paths with the leading / removed.
+  # Consult your HPC admin/support for help determining what to bind,
+  # or build the image with none first and look for errors like this when run:
+  # WARNING: Non existent bind point (file) in container: '/etc/localtime'
+  extraBindDirs = [
+    "clusterfs/rosalind/users"
     "global/home/users"
     "global/scratch"
+  ];
+  extraBindFiles = [
+    "etc/hosts"
+    "etc/localtime"
   ];
 }
