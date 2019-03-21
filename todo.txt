@@ -1,3 +1,16 @@
+fix the unicode encoding issues!
+  things to try:
+    read/write in binary mode as suggested in golden-tasty source comments
+    hSetEncoding on every handle
+    open things with icu
+    use the setLocale package
+    figure out how to force locale in all the nix-shells
+  should work with:
+    demo server
+    laptop vm
+    hpc singularity environment
+    with nix-build or nix-shell + stack build on each one
+
 more .args files idea:
   another level of indirection solves the problem of mapping over a fn call in Compile.Map already
   but it's ugly and adds a confusing extra convention of each/<hash>... cache files
