@@ -7,7 +7,7 @@ in pkgs.singularity-tools.buildImage {
   contents = [
     coreutils
     binutils
-    util-linux # for flock in berkeley wrapper script
+    utillinux # for flock in berkeley wrapper script
     shortcut
   ];
 
@@ -20,6 +20,7 @@ in pkgs.singularity-tools.buildImage {
   # Consult your HPC admin/support for help determining what to bind,
   # or build the image with none first and look for errors like this when run:
   # WARNING: Non existent bind point (file) in container: '/etc/localtime'
+  # TODO should they all be done as files?
   extraBindDirs = [
     "clusterfs/rosalind/users"
     "global/home/users"
