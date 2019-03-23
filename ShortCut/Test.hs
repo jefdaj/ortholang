@@ -8,8 +8,8 @@ module ShortCut.Test
 import Paths_ShortCut        (getDataFileName)
 import ShortCut.Core.Types   (CutConfig(..), Locks, HashedSeqIDsRef)
 import ShortCut.Test.Repl    (mkTestGroup)
-import System.Directory      (setCurrentDirectory)
-import System.Environment    (getEnv, setEnv)
+import System.Directory      (getTemporaryDirectory, setCurrentDirectory)
+import System.Environment    (setEnv)
 import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
@@ -46,7 +46,7 @@ mkTestConfig cfg dir = cfg
 
 runTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
 runTests cfg ref ids = do
-  tmpRootDir <- getEnv "TMPDIR" -- can't share /tmp on the Berkeley cluster!
+  tmpRootDir <- getTemporaryDirectory -- can't share /tmp on the Berkeley cluster!
   withTempDirectory tmpRootDir "shortcut" $ \tmpSubDir -> do
     wd <- getDataFileName ""
     setCurrentDirectory wd -- TODO issue with this in the stack tests?
