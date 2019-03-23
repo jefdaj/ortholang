@@ -4,7 +4,7 @@ let shortcut = import ./default.nix;
 
 in pkgs.singularity-tools.buildImage {
   name = "shortcut-${shortcut.version}";
-  contents = [ binutils shortcut ];
+  contents = [ coreutils binutils shortcut ];
 
   # This is for the temporary build image; final output will be smaller
   diskSize = 10240;

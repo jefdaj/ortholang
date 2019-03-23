@@ -68,8 +68,8 @@ getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".cut"] test
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
   where
-    -- this is taken from the Tasty docs
-    fn ref new = ["diff", "-u", ref, new]
+    -- based on the Tasty docs
+    fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
 mkOutTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
