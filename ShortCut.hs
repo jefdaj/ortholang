@@ -1,5 +1,6 @@
 module Main where
 
+import System.Locale.SetLocale
 import qualified Data.Map as M
 
 import Control.Monad         (when)
@@ -22,9 +23,12 @@ import Data.IORef            (newIORef)
 
 main:: IO ()
 main = do
-  -- TODO is this helpful?
+  -- TODO does this work on all systems with the Nix package?
+  _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
   hSetBuffering stdin  LineBuffering
   hSetBuffering stdout LineBuffering
+
+  -- parse config
   usage <- getUsage
   args  <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
@@ -34,6 +38,7 @@ main = do
   when (hasArg args "reference")
     (writeReference >> exitSuccess)
   cfg <- loadConfig modules args
+
   ref <- initLocks
   when (cfgDebug cfg) $ putStrLn $ "config: " ++ show cfg
   setCurrentDirectory $ cfgWorkDir cfg
