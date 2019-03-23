@@ -40,6 +40,7 @@ main = do
   when (hasArg args "reference")
     (writeReference >> exitSuccess)
   cfg <- loadConfig modules args
+  setEnv "TMPDIR" $ cfgTmpDir cfg -- for subprocesses like R
 
   ref <- initLocks
   when (cfgDebug cfg) $ putStrLn $ "config: " ++ show cfg

@@ -4,7 +4,12 @@ let shortcut = import ./default.nix;
 
 in pkgs.singularity-tools.buildImage {
   name = "shortcut-${shortcut.version}";
-  contents = [ coreutils binutils shortcut ];
+  contents = [
+    coreutils
+    binutils
+    util-linux # for flock in berkeley wrapper script
+    shortcut
+  ];
 
   # This is for the temporary build image; final output will be smaller
   diskSize = 10240;
@@ -23,5 +28,9 @@ in pkgs.singularity-tools.buildImage {
   extraBindFiles = [
     "etc/hosts"
     "etc/localtime"
+    "bin/flock"
+    "bin/srun"
+    "bin/scancel"
+    "bin/squeue"
   ];
 }
