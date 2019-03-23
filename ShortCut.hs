@@ -20,11 +20,13 @@ import System.Exit           (exitSuccess)
 import System.IO             (hSetBuffering, BufferMode(..), stdin, stdout)
 import System.Directory      (setCurrentDirectory)
 import Data.IORef            (newIORef)
+import System.Environment    (setEnv)
 
 main:: IO ()
 main = do
   -- TODO does this work on all systems with the Nix package?
-  _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
+  _ <- setLocale LC_ALL $ Just "C"
+  setEnv "LANG" "C"
   hSetBuffering stdin  LineBuffering
   hSetBuffering stdout LineBuffering
 

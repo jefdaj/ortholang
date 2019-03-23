@@ -53,7 +53,6 @@ runTests cfg ref ids = do
     wd <- getDataFileName ""
     setCurrentDirectory wd -- TODO issue with this in the stack tests?
     -- TODO check exit code?
-    -- setEnv "LANG" "C" -- TODO would something UTF-8 be better?
     setEnv "TASTY_NUM_THREADS" "1" -- TODO can more be done without repl issues?
     -- setEnv "TASTY_QUIET" "True"
     (_,_,_) <- readCreateProcessWithExitCode
