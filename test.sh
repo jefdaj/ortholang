@@ -14,11 +14,11 @@ TEST_ARGS="--test $@ +RTS -IO -N -RTS"
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
 echo "testing nix build..."
-(nix-build -j$(nproc) && ./result/bin/detourrr $TEST_ARGS) 2>&1 | tee nix-build.log
+(nix-build -j$(nproc) && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee nix-test.log
 
 # this does an incremental build of the haskell code for faster testing
 echo "testing stack build..."
 export STACK_ROOT=$PWD/.stack-work
 mkdir -p $STACK_ROOT
-cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/detourrr $TEST_ARGS) || exit"
-nix-shell --command "$cmd" 2>&1 | tee stack-build.log
+cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit"
+nix-shell --command "$cmd" 2>&1 | tee stack-test.log
