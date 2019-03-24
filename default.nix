@@ -55,9 +55,9 @@ let
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
   src = builtins.filterSource notStack ./.;
-  shellHook = ''
-      export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-  '';
+  # shellHook = ''
+  #    export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+  # '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]
     ++ runDepends

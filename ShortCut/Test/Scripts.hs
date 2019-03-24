@@ -2,7 +2,7 @@ module ShortCut.Test.Scripts where
 
 -- import Debug.Trace (trace, traceShow)
 
-import Prelude hiding (writeFile)
+-- import Prelude hiding (writeFile)
 
 import Control.Concurrent.Thread.Delay (delay)
 import Control.Monad              (when)
@@ -97,6 +97,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       out <- readCreateProcess treeCmd ""
       -- useful for debugging tests or updating the golden files
       -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
+      -- writeBinaryFile ("/tmp" </> takeBaseName t <.> "txt.bin") out
       return $ B8.pack $ toGeneric cfg out
 
 -- TODO use safe writes here

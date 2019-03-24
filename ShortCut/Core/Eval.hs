@@ -107,7 +107,9 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> Rules ResPath -> IO ()
-eval hdl cfg ref ids rtype = retryIgnore . eval'
+eval hdl cfg ref ids rtype = if cfgDebug cfg
+  then ignoreErrors . eval'
+  else retryIgnore  . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program. The error will still be visible.

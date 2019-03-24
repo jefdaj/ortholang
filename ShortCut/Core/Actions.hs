@@ -360,7 +360,7 @@ wrappedCmd parCmd fixEmpties cfg ref@(disk, _) mOut inPtns opts bin args = actio
 -- TODO issue with not re-raising errors here?
 wrappedCmdExit :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
                -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
-wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = actionRetry 9 $ do
+wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = retryFn $ do
   (_, _, code) <- wrappedCmd parCmd fixEmpties cfg r mOut inPtns opts bin as
   case mOut of
     Nothing -> return ()
@@ -368,6 +368,8 @@ wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes 
   if code `elem` allowedExitCodes
     then return code
     else wrappedCmdError bin code $ maybeToList mOut
+  where
+    retryFn = if cfgDebug cfg then id else actionRetry 9
 
 {- wrappedCmd specialized for commands that write one or more files. If the
  - command succeeds it tells Shake which files were written, and if it fails
@@ -380,7 +382,7 @@ wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes 
  -}
 wrappedCmdWrite :: Bool -> Bool -> CutConfig -> Locks -> FilePath -> [String] -> [FilePath]
                 -> [CmdOption] -> FilePath -> [String] -> Action ()
-wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args = actionRetry 3 $ do
+wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args = retryFn $ do
   debugL cfg $ "wrappedCmdWrite outPath: "  ++ outPath
   debugL cfg $ "wrappedCmdWrite inPtns: "   ++ show inPtns
   debugL cfg $ "wrappedCmdWrite outPaths: " ++ show outPaths
@@ -395,6 +397,8 @@ wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args 
       -- liftIO $ delay 10000
       -- mapM_ (assertNonEmptyFile cfg ref) outPaths
     n -> wrappedCmdError bin n (outPath:outPaths)
+  where
+    retryFn = if cfgDebug cfg then id else actionRetry 3
 
 {- wrappedCmd specialized for commands that return their output as a string.
  - TODO remove this? it's only used to get columns from blast hit tables

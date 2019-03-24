@@ -96,9 +96,20 @@ Build Docker image
 Build Singularity image
 -----------------------
 
-`nix-build singularity.nix` should get you most of the way there, but you may
-need to write your own definition file to customize the resulting image with
-bind dirs and mount points used by your institution's HPC environment.
+`nix-build singularity.nix` should get you most of the way there, but you
+should edit that file first to include any bind dirs and mount points used by
+your institution's HPC environment.
+
+The resulting `.img` file can be run with a long command like this:
+
+```
+singularity run -B /path/to/your/mount/point:/path/to/your/mount/point shortcut.img
+```
+
+That will drop you in a shell with `shortcut` + all dependencies available.
+You'll only be able to use the host filesystem through the specified bind
+points. Note that your institution might automatically bind some paths. You
+don't need `-B` commands for those.
 
 If you're using this, you may also want to write a custom wrapper script that
 tells ShortCut how to run system calls using your HPC scheduler (SLURM or

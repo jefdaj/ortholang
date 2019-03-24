@@ -27,8 +27,11 @@ in pkgs.singularity-tools.buildImage {
     "global/scratch"
   ];
   extraBindFiles = [
+    # bind points expected by berkeley hpc config
     "etc/hosts"
     "etc/localtime"
+
+    # system binaries used in my berkeley wrapper script
     "bin/flock"
     "bin/srun"
     "bin/scancel"
