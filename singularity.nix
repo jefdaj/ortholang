@@ -9,6 +9,7 @@ in pkgs.singularity-tools.buildImage {
     binutils
     utillinux # for flock in berkeley wrapper script
     shortcut
+    slurm # will this enable me to interoperate with the hpc scheduler?
   ];
 
   # This is for the temporary build image; final output will be smaller
@@ -23,6 +24,11 @@ in pkgs.singularity-tools.buildImage {
   # TODO should they all be done as files?
   extraBindDirs = [
     "clusterfs/rosalind/users"
+
+    # part of an attempt to install slurm in the container,
+    # but it fails because the "slurm" user doesn't exist
+    "etc/slurm"
+
     "global/home/users"
     "global/scratch"
   ];
@@ -31,10 +37,9 @@ in pkgs.singularity-tools.buildImage {
     "etc/hosts"
     "etc/localtime"
 
-    # system binaries used in my berkeley wrapper script
-    "bin/flock"
-    "bin/srun"
-    "bin/scancel"
-    "bin/squeue"
+    # maybe these are enough to convince slurm to go ahead? no :(
+    # "etc/passwd"
+    # "etc/group"
+    # "etc/shadow"
   ];
 }
