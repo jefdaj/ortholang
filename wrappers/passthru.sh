@@ -6,8 +6,8 @@
 # TODO set logfile from shortcut conig
 
 run() {
- echo "$@"  >> /tmp/wrapper.log
- eval "$@" 2>> /tmp/wrapper.log
+ echo "$@"  >> $TMPDIR/wrapper.log
+ eval "$@" 2>> $TMPDIR/wrapper.log
 }
 
 run "$@"

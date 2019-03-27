@@ -17,15 +17,17 @@
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
 
+# TODO remove now that shortcut sets this?
 export TMPDIR="/clusterfs/rosalind/users/jefdaj/shortcut/shortcut-tmpdir"
 mkdir -p "$TMPDIR"
+
 JOBSFILE="${TMPDIR}/jobs.txt"
 WRAPPERLOG="${TMPDIR}/wrapper.log"
 
 kill_jobs() {
   # In case of errors, make sure not to leave zombie srun jobs.
   # TODO kill only jobs from this process, in case multiple cuts running
-  scancel -u $(whoami) --ctld --full
+  scancel -u jefdaj --ctld --full
   finish_jobs 9999 # set jobs to 0
 }
 
