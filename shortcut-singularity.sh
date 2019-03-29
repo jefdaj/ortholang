@@ -22,7 +22,8 @@ bindcmds="-B ${condo}"
 cmd1="singularity exec $bindcmds $image $shortcutcmd"
 # echo "$cmd1"
 
-cmd2="srun --job-name=shortcut --output=/global/home/users/jefdaj/shortcut/singularity.log --time=00:10:00 --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal --nodes=1 --ntasks-per-node=1 $cmd1"
+# cmd2="srun --job-name=shortcut --output=/global/home/users/jefdaj/shortcut/singularity.log --time=00:01:00 --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal --nodes=2 --ntasks-per-node=1 $cmd1"
+cmd2="srun --job-name=shortcut --output=/global/home/users/jefdaj/shortcut/singularity.log --time=00:01:00 --account=co_rosalind --partition=savio2_htc --mpi=pmi2 --nodes=1 --ntasks-per-node=1 $cmd1"
 echo "$cmd2"
 
 eval "$cmd2"
