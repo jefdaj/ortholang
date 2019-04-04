@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# The other half of the mksrun setup. This one just launches all the scripts
-# from outside the container. This is what you would run via sbatch to schedule
-# a chunk of resources for all the commands at once.
+# Part of a two-part wrapper script for Berkeley's HPC environment that hacks
+# around the inability to use SLURM from within a Singularity image. This
+# script is called with no arguments. It simply launches any .sh file that
+# appears in the shared tmpdir.
+#
+# This is the one you want to run with sbatch to reserve a chunk of resources
+# for all commands. If you don't, the scripts will each wait for resources
+# individually.
 
 # TODO default sbatch args here
 
