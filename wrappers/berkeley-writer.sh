@@ -30,6 +30,7 @@ srundir="${scratch}/srun-commands"
 hashpath="${srundir}/$(echo "$1" | md5sum | awk '{print $1}')"
 scriptpath="${hashpath}.sh"
 lockpath="${hashpath}.lock"
+logpath="${hashpath}.log"
 outpath="${hashpath}.out"
 exitpath="${hashpath}.exit"
 
@@ -42,7 +43,7 @@ singularity_cmd="singularity exec ${image} $1"
 cat << EOF > "$scriptpath"
 #!/bin/bash
 ( flock -n -x 200 || exit 0
-echo "$1" >> ${srundir}/wrapper.log
+echo "$1" >> $logpath
 ($singularity_cmd) &> "$outpath"
 echo "\$?" > "$exitpath"
 ) 200>$lockpath
@@ -54,6 +55,7 @@ chmod +x "$scriptpath"
 # TODO any way to check that the launcher script is running first?
 while sleep 0.1; do [[ -a "$exitpath" ]] && break; done
 cat "$outpath"
+cat "$logpath" >> "${srundir}/wrapper.log"
 exitcode=$(cat "$exitpath")
-[[ $exitcode == 0 ]] && rm -f "$lockpath" "$scriptpath" "$exitpath" "$outpath"
+[[ $exitcode == 0 ]] && rm -f "$lockpath" "$scriptpath" "$exitpath" "$outpath" "$logpath"
 exit $exitcode
