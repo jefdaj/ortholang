@@ -47,12 +47,17 @@ let
     ++ plots.runDepends
     ++ diamond.runDepends;
 
+  # explicitly remove .stack-work from nix source because it's big
+  # TODO remove based on .gitignore file coming in nixpkgs 19.03?
+  notStack = path: type: baseNameOf path != ".stack-work";
+
 # see https://github.com/jml/nix-haskell-example
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
-  shellHook = ''
-      export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-  '';
+  src = builtins.filterSource notStack ./.;
+  # shellHook = ''
+  #    export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+  # '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]
     ++ runDepends

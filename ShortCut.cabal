@@ -144,4 +144,5 @@ executable shortcut
                     random,
                     random-shuffle,
                     dlist,
-                    ansi-terminal
+                    ansi-terminal,
+                    setlocale

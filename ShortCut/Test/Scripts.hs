@@ -2,7 +2,7 @@ module ShortCut.Test.Scripts where
 
 -- import Debug.Trace (trace, traceShow)
 
-import Prelude hiding (writeFile)
+-- import Prelude hiding (writeFile)
 
 import Control.Concurrent.Thread.Delay (delay)
 import Control.Monad              (when)
@@ -68,8 +68,8 @@ getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".cut"] test
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
   where
-    -- this is taken from the Tasty docs
-    fn ref new = ["diff", "-u", ref, new]
+    -- based on the Tasty docs
+    fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
 mkOutTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
@@ -97,6 +97,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       out <- readCreateProcess treeCmd ""
       -- useful for debugging tests or updating the golden files
       -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
+      -- writeBinaryFile ("/tmp" </> takeBaseName t <.> "txt.bin") out
       return $ B8.pack $ toGeneric cfg out
 
 -- TODO use safe writes here

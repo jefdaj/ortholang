@@ -1,5 +1,6 @@
 module Main where
 
+import System.Locale.SetLocale
 import qualified Data.Map as M
 
 import Control.Monad         (when)
@@ -19,12 +20,18 @@ import System.Exit           (exitSuccess)
 import System.IO             (hSetBuffering, BufferMode(..), stdin, stdout)
 import System.Directory      (setCurrentDirectory)
 import Data.IORef            (newIORef)
+import System.Environment    (setEnv)
 
 main:: IO ()
 main = do
-  -- TODO is this helpful?
+  -- TODO does this work everywhere?
+  _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
+  setEnv "LANG" "en_US.UTF-8" -- TODO and is this part superfluous now?
+
   hSetBuffering stdin  LineBuffering
   hSetBuffering stdout LineBuffering
+
+  -- parse config
   usage <- getUsage
   args  <- parseArgsOrExit usage =<< getArgs
   when (hasArg args "help")
@@ -34,6 +41,8 @@ main = do
   when (hasArg args "reference")
     (writeReference >> exitSuccess)
   cfg <- loadConfig modules args
+  setEnv "TMPDIR" $ cfgTmpDir cfg -- for subprocesses like R
+
   ref <- initLocks
   when (cfgDebug cfg) $ putStrLn $ "config: " ++ show cfg
   setCurrentDirectory $ cfgWorkDir cfg
