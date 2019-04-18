@@ -1,0 +1,2 @@
+mycoplasma = load_faa_each (glob_files "data/Mycoplasma*.faa")
+result = sonicparanoid (sample 3 mycoplasma)

@@ -1,3 +1,0 @@
-# TODO fix broken mmseqs dependency so this can run
-mycoplasma = load_faa_each (glob_files "data/Mycoplasma*.faa")
-result = sonicparanoid mycoplasma

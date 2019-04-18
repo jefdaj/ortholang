@@ -52,7 +52,6 @@ badlyBroken :: [FilePath]
 badlyBroken =
   -- TODO fix replace_each to work with generated lists
   [ "orthofinder_orthofinder_sets"
-  , "sonicparanoid_basic"
   -- TODO what's up with these?
   , "psiblast_each_pssm"
   , "psiblast_each_pssm"
