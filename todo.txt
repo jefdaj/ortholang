@@ -3,6 +3,22 @@ fix berkeley hpc stdout/stderr issues!
   "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
   need to send all stdout from individual commands to intermediate files rather than read it directly
 
+idea for repeat_each/lambda expressions:
+  make the lambda/placeholder/whatever expression corrsepond to a dir, and the argument to a file in it!
+  the dir can have the complete hash, same as files do in most of the exprs/* dirs
+  then inside that links to zero or more arguments (this makes sense even for single args I think)
+  arrange like $TMPDIR/lambda/<hash rep expr with placeholder>/<hash argument expr>
+  there only needs to be one of those ^ per input and no outputs right?
+    the overall output can go where it would for normal compilation $TMPDIR/exprs/repeat_each/<hash>
+    each completed input expression output can also be linked to where it would go
+      the only catch is those have to surprise shake, but that's fine
+      think this part through... can you actually compile them? or just do exprHash?
+  think what to name it: lambda? promise? repeat_each2? but don't take long on that
+  overall backwards evaluation:
+    exprs/repeat_each2/<complete expr hash> needs + contains list of single outputs
+    each single output is generated from an input like lambdas/<lambda expr hash>/<arg expr hash>
+    the lambdas/<lambda expr hash> dir is filled how?
+
 fix the unicode encoding issues!
   things to do:
     switch to binary read/write of golden tests as suggested in the docs
