@@ -19,20 +19,15 @@ srundir="${scratch}/srun-commands"
 mkdir -p "$srundir"
 
 # TODO decide time, nodes etc. per command? or use a large default and sbatch a block of time first
-# srun_cmd="--account=co_rosalind --partition=savio2_htc --time=00:01:00 --nodes=1 --ntasks-per-node=1"
-# srun_cmd="--account=co_rosalind --partition=savio2_htc --ntasks=1 --nodes=1"
 srun_name=$(echo "$1" | awk '{print $1}')
-# srun_cmd="--chdir $HOME/shortcut --quiet $srun_cmd --job-name $srun_name"
 srun_cmd="srun --chdir $(pwd)"
-# singularity_cmd="singularity exec ${image}"
 
-while sleep 0.1; do
+while sleep 1; do
   ls "${srundir}"/*.sh 2>/dev/null | while read script; do
     lockpath="${script/.sh/.lock}"
     [[ -a "$lockpath" ]] && continue
-    # cmd="$all_args $script"
     cmd="$srun_cmd $script"
-    echo "$cmd"
-    $cmd & sleep 3
+    # echo "$cmd"
+    $cmd &
   done
 done
