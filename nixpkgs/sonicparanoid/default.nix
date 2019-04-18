@@ -1,3 +1,4 @@
+# with (import ./..);
 { pkgs, python3Packages, fetchurl, mmseqs2 }:
 
 let
@@ -39,7 +40,10 @@ in python3Packages.buildPythonPackage rec {
   doCheck = false;
   # checkInputs = with pypiPython.packages; [];
 
-  patches = ./find-mmseqs-bin.patch;
+  patches = [
+    ./find-mmseqs-bin.patch
+    ./allow-new-mmseqs.patch
+  ];
 
   meta = {
     # TODO write this
