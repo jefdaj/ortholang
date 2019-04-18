@@ -33,6 +33,9 @@ lockpath="${hashpath}.lock"
 outpath="${hashpath}.out"
 exitpath="${hashpath}.exit"
 
+image="${scratch}/shortcut.img"
+singularity_cmd="singularity exec ${image} $1"
+
 # write the srun script, which includes some extra machinery to ensure only one
 # instance runs and to return stdout + stderr to this script when done
 # TODO did the && sync after srun_cmd line help?
@@ -40,7 +43,7 @@ cat << EOF > "$scriptpath"
 #!/bin/bash
 ( flock -n -x 200 || exit 0
 echo "$1" >> ${srundir}/wrapper.log
-($1) &> "$outpath"
+($singularity_cmd) &> "$outpath"
 echo "\$?" > "$exitpath"
 ) 200>$lockpath
 EOF

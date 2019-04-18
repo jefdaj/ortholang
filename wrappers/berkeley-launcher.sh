@@ -13,7 +13,7 @@
 
 condo="/clusterfs/rosalind/users"
 scratch=/global/scratch/jefdaj
-image="${scratch}/shortcut.img"
+# image="${scratch}/shortcut.img"
 srundir="${scratch}/srun-commands"
 
 mkdir -p "$srundir"
@@ -24,14 +24,14 @@ mkdir -p "$srundir"
 srun_name=$(echo "$1" | awk '{print $1}')
 # srun_cmd="--chdir $HOME/shortcut --quiet $srun_cmd --job-name $srun_name"
 srun_cmd="srun --chdir $(pwd)"
-singularity_cmd="singularity exec ${image}"
+# singularity_cmd="singularity exec ${image}"
 
 while sleep 0.1; do
   ls "${srundir}"/*.sh 2>/dev/null | while read script; do
     lockpath="${script/.sh/.lock}"
     [[ -a "$lockpath" ]] && continue
     # cmd="$all_args $script"
-    cmd="$srun_cmd $singularity_cmd $script"
+    cmd="$srun_cmd $script"
     echo "$cmd"
     $cmd & sleep 3
   done
