@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# TODO how to make sure stdout/stderr here go to the outpath instead of launcher terminal?
+
+# TODO document that this writes shell scripts only now, and srun stuff goes in the launcher
+
+# TODO hm, do i need to go back to putting all the srun stuff in the outer wrapper so i can run the script itself via singularity? that would get around any quoting issues
+
 # Part of a two-part wrapper script for Berkeley's HPC environment that hacks
 # around the inability to use SLURM from within a Singularity image. This
 # script is called by shortcut with the regular command as argument 1. For
@@ -21,29 +27,22 @@
 condo="/clusterfs/rosalind/users"
 scratch='/global/scratch/jefdaj'
 srundir="${scratch}/srun-commands"
-image="${scratch}/shortcut.img"
-hashpath="${srundir}/$(echo "$@" | md5sum | awk '{print $1}')"
+hashpath="${srundir}/$(echo "$1" | md5sum | awk '{print $1}')"
 scriptpath="${hashpath}.sh"
 lockpath="${hashpath}.lock"
 outpath="${hashpath}.out"
 exitpath="${hashpath}.exit"
-
-# TODO decide time, nodes etc. per command? or use a large default and sbatch a block of time first
-srun_args="--account=co_rosalind --partition=savio2_htc --time=00:01:00 --nodes=1 --ntasks-per-node=1"
-srun_name=$(echo "$1" | awk '{print $1}')
-srun_args="--chdir $(pwd) --quiet $srun_args --job-name $srun_name"
-srun_cmd="srun $srun_args singularity --silent exec -B ${condo} ${image} $1"
 
 # write the srun script, which includes some extra machinery to ensure only one
 # instance runs and to return stdout + stderr to this script when done
 # TODO did the && sync after srun_cmd line help?
 cat << EOF > "$scriptpath"
 #!/bin/bash
-( flock -x 200 || exit 1
-echo "$srun_cmd" >> ${srundir}/wrapper.log
-$srun_cmd &> "$outpath"
-echo "$?" > "$exitpath"
-) 200>"$lockpath"
+( flock -n -x 200 || exit 0
+echo "$1" >> ${srundir}/wrapper.log
+($1) &> "$outpath"
+echo "\$?" > "$exitpath"
+) 200>$lockpath
 EOF
 chmod +x "$scriptpath"
 
