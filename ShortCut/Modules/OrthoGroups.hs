@@ -16,6 +16,7 @@ import ShortCut.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
 import Data.IORef                  (readIORef)
 
+import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
 import ShortCut.Modules.SonicParanoid (spr)
 
@@ -28,6 +29,8 @@ cutModule = CutModule
       [ orthogroups
       , orthogroupContaining
       , orthogroupsContaining
+      , orthologInAll
+      , orthologInAny
       ]
   }
 
@@ -46,6 +49,7 @@ og = CutTypeGroup
 -- TODO list_groups?
 -- TODO separate module that works with multiple ortholog programs?
 -- TODO version to get the group matching an ID
+-- TODO this works with ofr files too; put them back using a type group!
 orthogroups :: CutFunction
 orthogroups = let name = "orthogroups" in CutFunction
   { fName      = name
@@ -121,24 +125,83 @@ aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContainin
 -- orthogroups_containing --
 ----------------------------
 
+-- TODO think of a better name for this
 orthogroupsContaining :: CutFunction
 orthogroupsContaining = let name = "orthogroups_containing" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ofr, ListOf str] (ListOf (ListOf str))
   , fTypeCheck = defaultTypeCheck [ofr, ListOf str] (ListOf (ListOf str))
-  , fDesc      = Just "Given a list of gene IDs, list the orthogroups that contain them."
+  , fDesc      = Just "Given a list of gene IDs, list the orthogroups that contain any of them."
   , fFixity    = Prefix
-  , fRules     = rSimple aOrthogroupsContaining
+  , fRules     = rSimple $ aOrthogroupsFilter containsOneOf
   }
 
--- see https://stackoverflow.com/a/13271723
-filterContainsOne :: Eq a => [a] -> [[a]] -> [[a]]
-filterContainsOne elems lists = filter (flip any elems . flip elem) lists
+type FilterFn = [String] -> [[String]] -> [[String]]
 
-aOrthogroupsContaining :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aOrthogroupsContaining cfg ref ids [out, ofrPath, idsPath] = do
+-- see https://stackoverflow.com/a/13271723
+containsOneOf :: FilterFn
+containsOneOf elems lists = filter (flip any elems . flip elem) lists
+
+aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   geneIds <- readLits cfg ref $ fromCutPath cfg idsPath
   resDir  <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
-  groups  <- fmap (filterContainsOne geneIds) $ parseOrthoFinder cfg ref ids resDir -- TODO handle sonicparanoid
-  writeOrthogroups cfg ref ids out groups
-aOrthogroupsContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+  groups  <-  parseOrthoFinder cfg ref ids resDir -- TODO handle sonicparanoid
+  let groups' = filterFn geneIds groups
+  writeOrthogroups cfg ref ids out groups'
+aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+
+---------------------
+-- ortholog_in_any --
+---------------------
+
+-- TODO flip args so it reads more naturally?
+orthologInAny :: CutFunction
+orthologInAny = let name = "ortholog_in_any" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [ofr, ListOf faa] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [ofr, ListOf faa] (ListOf (ListOf str))
+  , fDesc      = Just "Filter a list of orthogroups to keep the ones with an ortholog in every given proteome"
+  , fFixity    = Prefix
+  , fRules     = rOrthologInAny
+  }
+
+-- rMakeblastdbEach :: RulesFn
+-- rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
+--   -- rFun1 (map1of1 faType dbType act1) st expr'
+--   (rMap 1 act1) st expr'
+--   where
+--     -- faType = typeOf e
+--     tmpDir = makeblastdbCache cfg 
+--     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
+--     act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
+--     expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
+--     -- expr'' = trace ("expr':" ++ show expr') expr'
+-- rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
+
+rOrthologInAny :: RulesFn
+rOrthologInAny = rSimple undefined
+-- TODO load groups same as above
+-- TODO but instead of a str.list, need to load an faa.list and get str.list.list from it (extract_ids_each?)
+--      easiest way is probably to make this call a hidden fn that takes the str.list.list and compose them
+-- TODO then come up with the right filter fn
+-- TODO and finally save str.list.list same as above
+
+---------------------
+-- ortholog_in_all --
+---------------------
+
+-- TODO flip args so it reads more naturally?
+orthologInAll :: CutFunction
+orthologInAll = let name = "ortholog_in_all" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [ofr, ListOf faa] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [ofr, ListOf faa] (ListOf (ListOf str))
+  , fDesc      = Just "Filter a list of orthogroups to keep the ones with an ortholog in any given proteome"
+  , fFixity    = Prefix
+  , fRules     = rOrthologInAll
+  }
+
+rOrthologInAll :: RulesFn
+rOrthologInAll = undefined
+-- TODO basically aOrthologInAny but with the filter fn tweaked. unify them.
