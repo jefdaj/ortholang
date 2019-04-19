@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module ShortCut.Modules.OrthoGroups
   where
 
