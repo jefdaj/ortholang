@@ -15,6 +15,7 @@ import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
 import Data.IORef                  (readIORef)
+import Text.Regex.Posix            ((=~))
 
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
@@ -54,7 +55,7 @@ orthogroups :: CutFunction
 orthogroups = let name = "orthogroups" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : og -> str.list.list"
-  , fTypeCheck = defaultTypeCheck [ofr] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [spr] (ListOf (ListOf str)) -- TODO or ofr!
   , fDesc      = Just "Parse results from an ortholog finder and list genes in all orthogroups."
   , fFixity    = Prefix
   , fRules     = rSimple aOrthogroups
@@ -74,6 +75,20 @@ parseOrthoFinder cfg ref idref resDir = do
   let groups = map (words . drop 11) (lines txt)
   return groups
 
+parseSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> Action [[String]]
+parseSonicParanoid cfg ref idref resDir = do
+  let orthoPath = resDir </> "multi_species" </> "multispecies_clusters.tsv"
+  ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
+  -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  txt <- readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  let groups = map parseLine $ tail $ lines txt
+  liftIO $ putStrLn $ "groups: " ++ show (head groups)
+      --groups' = map (unhashIDs cfg) groups
+  -- let groups = map (words . drop 11) (lines txt)
+  return groups
+  where
+    parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
+
 writeOrthogroups :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [[String]] -> Action ()
 writeOrthogroups cfg ref _ out groups = do
   -- let groups' = (map . map) (unhashIDs cfg ids) groups
@@ -92,7 +107,7 @@ writeOrthogroups cfg ref _ out groups = do
 aOrthogroups :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aOrthogroups cfg ref idsref [out, ofrPath] = do
   resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
-  groups <- parseOrthoFinder cfg ref idsref resDir
+  groups <- parseSonicParanoid cfg ref idsref resDir -- TODO or parseOrthoFinder
   writeOrthogroups cfg ref idsref out groups
 aOrthogroups _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
