@@ -4,18 +4,23 @@ module ShortCut.Modules.OrthoGroups
 -- TODO homologs module that lists homolog pairs
 -- TODO and make that homologs function work on orthogroups too if possible
 
+-- import Debug.Trace
+
 import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (forM)
-import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, writePaths, readFileStrict')
+import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, writePaths, readFileStrict',
+                                    readPaths)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
 import Data.IORef                  (readIORef)
 import Text.Regex.Posix            ((=~))
+import ShortCut.Core.Compile.Basic (rExpr, debugRules)
+import Data.List                   (intersect)
 
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
@@ -30,8 +35,10 @@ cutModule = CutModule
       [ orthogroups
       , orthogroupContaining
       , orthogroupsContaining
-      , orthologInAll
       , orthologInAny
+      , orthologInAnyStr -- TODO hide?
+      , orthologInAll
+      , orthologInAllStr -- TODO hide?
       ]
   }
 
@@ -76,13 +83,13 @@ parseOrthoFinder cfg ref idref resDir = do
   return groups
 
 parseSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> Action [[String]]
-parseSonicParanoid cfg ref idref resDir = do
+parseSonicParanoid cfg ref _ resDir = do
   let orthoPath = resDir </> "multi_species" </> "multispecies_clusters.tsv"
-  ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
+  -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
   -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
   txt <- readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
-  let groups = map parseLine $ tail $ lines txt
-  liftIO $ putStrLn $ "groups: " ++ show (head groups)
+  let groups = map parseLine $ tail $ lines txt -- TODO be safe about tail
+  -- liftIO $ putStrLn $ "groups: " ++ show groups
       --groups' = map (unhashIDs cfg) groups
   -- let groups = map (words . drop 11) (lines txt)
   return groups
@@ -174,8 +181,8 @@ aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining
 orthologInAny :: CutFunction
 orthologInAny = let name = "ortholog_in_any" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [ofr, ListOf faa] (ListOf (ListOf str))
-  , fTypeCheck = defaultTypeCheck [ofr, ListOf faa] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] (ListOf (ListOf str))
   , fDesc      = Just "Filter a list of orthogroups to keep the ones with an ortholog in every given proteome"
   , fFixity    = Prefix
   , fRules     = rOrthologInAny
@@ -195,28 +202,100 @@ orthologInAny = let name = "ortholog_in_any" in CutFunction
 -- rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
 rOrthologInAny :: RulesFn
-rOrthologInAny = rSimple undefined
--- TODO load groups same as above
--- TODO but instead of a str.list, need to load an faa.list and get str.list.list from it (extract_ids_each?)
---      easiest way is probably to make this call a hidden fn that takes the str.list.list and compose them
--- TODO then come up with the right filter fn
--- TODO and finally save str.list.list same as above
+rOrthologInAny st (CutFun rType salt deps "ortholog_in_any" [groups, faas]) =
+  rExpr st $ CutFun rType salt deps "ortholog_in_any_str" [groups', faas']
+  where
+    groups' = CutFun sll salt (depsOf groups) "orthogroups"      [groups]
+    faas'   = CutFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+rOrthologInAny _ _ = error "bad arguments to rOrthologInAny"
+
+-------------------------
+-- ortholog_in_any_str --
+-------------------------
+
+sll :: CutType
+sll = ListOf (ListOf str)
+
+-- TODO hide this one?
+
+-- TODO flip args so it reads more naturally?
+orthologInAnyStr :: CutFunction
+orthologInAnyStr = let name = "ortholog_in_any_str" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
+  , fTypeCheck = defaultTypeCheck [sll, sll] sll
+  , fDesc      = Just "Version of ortholog_in_any that expects arguments already extracted"
+  , fFixity    = Prefix
+  , fRules     = rOrthologFilterStr groupMemberInAnyList
+  }
+
+type FilterFn2 = [[String]] -> [[String]] -> [[String]]
+
+groupMemberInAnyList :: FilterFn2
+groupMemberInAnyList groups ids = filter (memberInAnyList ids) groups
+  where
+    -- memberInOneList g i = not $ null $ intersect g i
+    overlap g i = not $ null $ intersect g i
+    memberInAnyList is g = any (overlap g) is
+    -- fn g i = let res = overlap g i in trace ("member in one list? " ++ show g ++ " " ++ show i ++ " " ++ show res) res
+
+rOrthologFilterStr :: FilterFn2 -> RulesFn
+rOrthologFilterStr filterFn st@(_, cfg, ref, idref) e@(CutFun _ _ _ _ [groupLists, idLists]) = do
+  (ExprPath groupListsPath) <- rExpr st groupLists
+  (ExprPath idListsPath   ) <- rExpr st idLists
+  let out    = exprPath st e
+      out'   = debugRules cfg "rOrthologFilterStr" e $ fromCutPath cfg out
+  out' %> \_ -> do
+    -- hashedIDs  <- liftIO $ readIORef idref
+    groupPaths <- readPaths cfg ref groupListsPath -- TODO readLits?
+    groups     <- mapM (readLits cfg ref) $ map (fromCutPath cfg) groupPaths
+    idPaths    <- readPaths cfg ref idListsPath
+    ids        <- mapM (readLits cfg ref) $ map (fromCutPath cfg) idPaths
+    let groups' = filterFn groups ids -- TODO add filter here
+    writeOrthogroups cfg ref idref out groups'
+  return (ExprPath out')
+rOrthologFilterStr _ _ _ = error "bad arguments to rOrthologFilterStr"
 
 ---------------------
 -- ortholog_in_all --
 ---------------------
 
+groupMemberInAllList :: FilterFn2
+groupMemberInAllList groups ids = filter (memberInAllList ids) groups
+  where
+    overlap g i = not $ null $ intersect g i
+    memberInAllList is g = all (overlap g) is
+    -- fn g i = let res = overlap g i in trace ("member in one list? " ++ show g ++ " " ++ show i ++ " " ++ show res) res
+
 -- TODO flip args so it reads more naturally?
 orthologInAll :: CutFunction
 orthologInAll = let name = "ortholog_in_all" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [ofr, ListOf faa] (ListOf (ListOf str))
-  , fTypeCheck = defaultTypeCheck [ofr, ListOf faa] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] (ListOf (ListOf str))
   , fDesc      = Just "Filter a list of orthogroups to keep the ones with an ortholog in any given proteome"
   , fFixity    = Prefix
   , fRules     = rOrthologInAll
   }
 
 rOrthologInAll :: RulesFn
-rOrthologInAll = undefined
--- TODO basically aOrthologInAny but with the filter fn tweaked. unify them.
+rOrthologInAll st (CutFun rType salt deps "ortholog_in_all" [groups, faas]) =
+  rExpr st $ CutFun rType salt deps "ortholog_in_all_str" [groups', faas']
+  where
+    groups' = CutFun sll salt (depsOf groups) "orthogroups"      [groups]
+    faas'   = CutFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+rOrthologInAll _ _ = error "bad arguments to rOrthologInAll"
+
+---------------------
+-- ortholog_in_all --
+---------------------
+
+orthologInAllStr :: CutFunction
+orthologInAllStr = let name = "ortholog_in_all_str" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
+  , fTypeCheck = defaultTypeCheck [sll, sll] sll
+  , fDesc      = Just "Version of ortholog_in_all that expects arguments already extracted"
+  , fFixity    = Prefix
+  , fRules     = rOrthologFilterStr groupMemberInAllList
+  }
