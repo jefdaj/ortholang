@@ -26,7 +26,7 @@ in pkgs.singularity-tools.buildImage {
   # WARNING: Non existent bind point (file) in container: '/etc/localtime'
   # TODO should they all be done as files?
   extraBindDirs = [
-    "clusterfs/rosalind/users"
+    "clusterfs/rosalind/users" # TODO remove?
 
     "global/home/users"
     "global/scratch"
