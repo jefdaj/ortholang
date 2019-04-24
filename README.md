@@ -19,21 +19,22 @@ examples, and a list of available functions.
 Quick Start
 -----------
 
-These 3 steps should get you going on any Linux machine:
+This should get you going on any Linux machine, and maybe MacOS:
 
-    # 1. install Nix
+    # 1. Install Nix
     curl https://nixos.org/nix/install | sh
     source ~/.nix-profile/etc/profile.d/nix.sh
 
-    # 2. build ShortCut and run self-tests
+    # 2. Build ShortCut
     git clone https://github.com/jefdaj/shortcut.git
     cd shortcut
     nix-build -j$(nproc)
     export PATH=$PWD/result/bin:$PATH
+
+    # 3. Run self-tests (optional)
     shortcut --test
 
-    # 3. Try it out
-    shortcut --script myfirst.cut
+    # 4. Try it out
     shortcut
 
 The rest of this document gives more details about each of them.
