@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
+-- TODO wow is the list union stuff here a bottleneck? refactor to speed it up
+
 module ShortCut.Modules.OrthoGroups
   where
 
