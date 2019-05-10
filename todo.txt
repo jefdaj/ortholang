@@ -1,3 +1,18 @@
+result handling:
+  should allow lists of any/mixed type in result to make exploring easier
+  should be able to zip up one archive of the result list on the website
+  should be able to reassign other variables without it assuming result should be recalculated immediately
+
+rewrite system calls for better reliability (and mapping):
+  always write a .args/.sh file first
+  write .lock files? or use the .args?
+  always redirect stdout, stderr to their own files as it runs
+  always rerun the command if it fails?
+  should this use a separate mechanism from the berkeley wrapper or are they basically the same?
+  should any real processing *ever* be done in the main haskell binary thread?
+
+should there be a separate RBH module that works with BLAST, DIAMOND, MMSeqs2?
+
 fix berkeley hpc stdout/stderr issues!
   should never be able to confuse filenames with output like this:
   "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
