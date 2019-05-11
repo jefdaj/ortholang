@@ -165,7 +165,8 @@ updateVars :: CutScript -> CutAssign -> CutScript
 updateVars scr asn@(var, expr) =
   if var `elem` depsOf expr then scr else scr'
   where
-    scr' = if var /= CutVar (ReplaceID Nothing) "result" && var `elem` map fst scr
+    res = CutVar (ReplaceID Nothing) "result"
+    scr' = if var /= res && var `elem` map fst scr
              then replaceVar asn scr
              else delFromAL scr var ++ [asn]
 

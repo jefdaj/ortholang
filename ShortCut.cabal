@@ -50,6 +50,7 @@ executable shortcut
                     ShortCut.Core.Eval,
                     ShortCut.Core.Locks,
                     ShortCut.Core.Parse,
+                    ShortCut.Core.Parse.Util,
                     ShortCut.Core.Parse.Basic,
                     ShortCut.Core.Parse.Expr,
                     ShortCut.Core.Parse.Script,

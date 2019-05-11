@@ -2,6 +2,7 @@ module ShortCut.Core.Parse.Expr where
 
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty()
+import ShortCut.Core.Parse.Util
 import ShortCut.Core.Parse.Basic
 
 
@@ -12,12 +13,12 @@ import Control.Applicative    ((<|>))
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.List              (union)
--- import ShortCut.Core.Debug    (debugParser)
--- import ShortCut.Core.Util     (nonEmptyType)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
--- import Data.Either (either)
+
+import Data.Either            (isRight)
+import Text.Parsec            (ParseError)
 
 -- import Debug.Trace (traceM)
 
@@ -179,3 +180,12 @@ pExpr = debugParser "pExpr" $ do
   -- res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- let res' = debugParser cfg "pExpr" res
   return res
+
+-- TODO is this incorrectly counting assignment statements of 'result = ...'?
+--      (maybe because it only parses the varname and returns?)
+isExpr :: CutState -> String -> Bool
+isExpr state line = isRight $ parseWithEof pExpr state line
+
+-- TODO make this return the "result" assignment directly?
+parseExpr :: CutState -> String -> Either ParseError CutExpr
+parseExpr = runParseM pExpr

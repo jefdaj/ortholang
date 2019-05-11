@@ -31,7 +31,6 @@ module ShortCut.Core.Types
   , CutFixity(..)
   -- parse monad
   , ParseM
-  , runParseM
   -- repl monad
   -- , print
   , prompt
@@ -70,8 +69,8 @@ module ShortCut.Core.Types
 -- import Debug.Trace (trace, traceShow)
 
 -- import Prelude hiding (print)
-import qualified Data.Map    as M
-import qualified Text.Parsec as P
+import qualified Data.Map as M
+import Text.Parsec (Parsec)
 
 import ShortCut.Core.Locks (Locks, withReadLock)
 import ShortCut.Core.Util  (readFileStrict, readFileLazy)
@@ -81,8 +80,6 @@ import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
-import Text.Parsec                    (ParseError)
-import Development.Shake.FilePath (makeRelative)
 import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
@@ -391,14 +388,7 @@ type HashedSeqIDs = M.Map String String
 type HashedSeqIDsRef = IORef HashedSeqIDs
 
 type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
-type ParseM a = P.Parsec String CutState a
-
-runParseM :: ParseM a -> CutState -> String -> Either ParseError a
-runParseM p s@(_, cfg, _, _) = P.runParser p s file
-  where
-    file = case cfgScript cfg of
-             Nothing -> "repl"
-             Just f  -> makeRelative (cfgWorkDir cfg) f
+type ParseM a = Parsec String CutState a
 
 ----------------
 -- Repl monad --

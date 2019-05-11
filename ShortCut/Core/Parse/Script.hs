@@ -3,20 +3,15 @@ module ShortCut.Core.Parse.Script where
 import ShortCut.Core.Util (readFileStrict)
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
+import ShortCut.Core.Parse.Util
 import ShortCut.Core.Parse.Basic
 import ShortCut.Core.Parse.Expr
 
 import Control.Applicative    ((<|>), many)
--- import Control.Monad          (void)
--- import ShortCut.Core.Debug    (debugParser)
-import Text.Parsec            (try, getState, putState)
-import Text.Parsec.Char       (spaces, newline)
+import System.FilePath        ((</>), takeDirectory)
+import Text.Parsec            (ParseError, try, getState, putState)
+import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
-import Text.Parsec            (ParseError)
--- import ShortCut.Core.Debug    (debug)
--- import Data.IORef             (IORef)
-import System.FilePath ((</>), takeDirectory)
--- import Data.Map               (empty)
 
 -------------------
 -- preprocessing --
@@ -93,10 +88,31 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
   -- res <- pAssign <|> pResult
   -- let res' = debugParser cfg "pStatement" res
   -- return res
+  --
 
 -------------
 -- scripts --
 -------------
+
+-- TODO move to a separate "files/io" module along with some debug fns?
+parseFileIO :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO CutScript
+parseFileIO cfg ref ids scr = do
+  mscr1 <- parseFile cfg ref ids scr
+  case mscr1 of
+    Left  e -> fail $ show e
+    Right s -> return s
+
+-- TODO need CutState here? or just CutConfig?
+parseStatement :: CutState -> String -> Either ParseError CutAssign
+parseStatement = parseWithEof pStatement
+
+-- The name doesn't do a good job of explaining this, but it's expected to be
+-- parsing an entire script from a string (no previous state).
+-- TODO clarify that
+-- TODO error if it has leftover?
+parseString :: CutConfig -> Locks -> HashedSeqIDsRef -> String
+            -> Either ParseError CutScript
+parseString c r ids = parseWithEof pScript ([], c, r, ids)
 
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
@@ -110,17 +126,6 @@ pScript = debugParser "pScript" $ do
   putState (scr, cfg, ref, ids)
   return scr
 
--- TODO need CutState here? or just CutConfig?
-parseStatement :: CutState -> String -> Either ParseError CutAssign
-parseStatement = runParseM pStatement
-
--- The name doesn't do a good job of explaining this, but it's expected to be
--- parsing an entire script from a string (no previous state).
--- TODO clarify that
-parseString :: CutConfig -> Locks -> HashedSeqIDsRef -> String
-            -> Either ParseError CutScript
-parseString c r ids = runParseM pScript ([], c, r, ids)
-
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
@@ -131,11 +136,3 @@ parseFile cfg ref ids path = do
   return $ (parseString cfg ref ids . stripComments) txt
   where
     path' = debug cfg ("parseFile '" ++ path ++ "'") path
-
--- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO CutScript
-parseFileIO cfg ref ids scr = do
-  mscr1 <- parseFile cfg ref ids scr
-  case mscr1 of
-    Left  e -> fail $ show e
-    Right s -> return s

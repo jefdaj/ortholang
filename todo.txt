@@ -1,7 +1,8 @@
 result handling:
+  x should be able to reassign other variables without it assuming result should be recalculated immediately
+  should be able to use result in further expressions and have it replaced by its value then
   should allow lists of any/mixed type in result to make exploring easier
   should be able to zip up one archive of the result list on the website
-  should be able to reassign other variables without it assuming result should be recalculated immediately
 
 rewrite system calls for better reliability (and mapping):
   always write a .args/.sh file first
