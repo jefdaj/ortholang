@@ -27,10 +27,10 @@ import Control.Monad            (when)
 import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
-import Data.List                (isPrefixOf, isInfixOf, isSuffixOf, filter)
+import Data.List                (isPrefixOf, isInfixOf, isSuffixOf, filter, delete)
 import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
-import Data.Maybe               (catMaybes)
+import Data.Maybe               (catMaybes, fromJust)
 -- import Data.Map                 (empty)
 import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
@@ -157,22 +157,39 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
     when (isExpr st line) (evalScript hdl st')
     return st'
 
--- this is needed to avoid assigning a variable to itself,
+-- this is needed to avoid assigning a variable literally to itself,
 -- which is especially a problem when auto-assigning "result"
--- TODO you should actually be able to do that, but it should replace
---      the `result` var with its current expression first
+-- TODO is this where we can easily require the replacement var's type to match if it has deps?
+-- TODO what happens if you try that in a script? it should fail i guess?
 updateVars :: CutScript -> CutAssign -> CutScript
-updateVars scr asn@(var, expr) =
-  if var `elem` depsOf expr then scr else scr'
+updateVars scr asn@(var, _) =
+  if var /= res && var `elem` map fst scr -- TODO what's the map part for?
+    then replaceVar asn' scr
+    else delFromAL scr var ++ [asn']
   where
     res = CutVar (ReplaceID Nothing) "result"
-    scr' = if var /= res && var `elem` map fst scr
-             then replaceVar asn scr
-             else delFromAL scr var ++ [asn]
+    asn' = removeSelfReferences scr asn
 
 -- replace an existing var in a script
 replaceVar :: CutAssign -> CutScript -> CutScript
 replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
+
+-- makes it ok to assign a var to itself in the repl
+-- by replacing the reference with its value at that point
+-- TODO forbid this in scripts though
+removeSelfReferences :: CutScript -> CutAssign -> CutAssign
+removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, dereference s v e)
+
+-- does the actual work of removing self-references
+dereference :: CutScript -> CutVar -> CutExpr -> CutExpr
+dereference scr var e@(CutRef _ _ _ v2)
+  | var == v2 = fromJust (lookup var scr)
+  | otherwise = e
+dereference _   _   e@(CutLit _ _ _) = e
+dereference _   _   (CutRules _) = error "implement this! or rethink?"
+dereference scr var (CutBop  t n vs s e1 e2) = CutBop  t n (delete var vs) s (dereference scr var e1) (dereference scr var e2)
+dereference scr var (CutFun  t n vs s es   ) = CutFun  t n (delete var vs) s (map (dereference scr var) es)
+dereference scr var (CutList t n vs   es   ) = CutList t n (delete var vs)   (map (dereference scr var) es)
 
 --------------------------
 -- dispatch to commands --
