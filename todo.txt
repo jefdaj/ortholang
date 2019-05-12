@@ -1,4 +1,15 @@
+deduplicate interpreters from different modules? one myPython, myR etc.
+
 rewrite system calls for better reliability (and mapping):
+  attempt to simplify module layout at the same time
+  functions to rewrite with scripts:
+    Blast: aMkBlastFromDb
+    BlastCRB: aCRBBlast
+    BlastDB: aMakeblastdbAll
+    Diamond: aDiamondFromDb
+    Hmmer: aHmmbuild, aHmmSearch
+    Sets
+    SonicParanoid: aSonicParanoid
   need to send all stdout from individual commands to intermediate files rather than read it directly
     should never be able to confuse filenames with output like this:
       "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
