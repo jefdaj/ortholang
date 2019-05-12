@@ -111,7 +111,7 @@ aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
       oPath' = debugA cfg "aSetFold" oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
-              else dedupByContent cfg ref oLst
+              else dedupByContent cfg ref oLst -- TODO remove?
   writeStrings etype cfg ref oPath' oLst''
 aSetFold _ _ _ _ _ _ = fail "bad argument to aSetFold"
 

@@ -4,6 +4,7 @@ let
   blast      = import ./ShortCut/Modules/Blast;
   blastrbh   = import ./ShortCut/Modules/BlastRBH;
   seqio      = import ./ShortCut/Modules/SeqIO;
+  sets       = import ./ShortCut/Modules/Sets;
   plots      = import ./ShortCut/Modules/Plots;
   blasthits  = import ./ShortCut/Modules/BlastHits;
   diamond    = import ./ShortCut/Modules/Diamond;
@@ -21,6 +22,7 @@ let
     blast
     blastrbh
     seqio
+    sets
     plots
     blasthits
     crb-blast
@@ -44,6 +46,7 @@ let
     ++ blastrbh.runDepends
     ++ blasthits.runDepends
     ++ seqio.runDepends
+    ++ sets.runDepends
     ++ plots.runDepends
     ++ diamond.runDepends;
 
