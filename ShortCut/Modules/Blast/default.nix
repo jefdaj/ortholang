@@ -4,13 +4,7 @@
 with import ../../../nixpkgs;
 
 let
-  myPython = pkgs.pythonPackages.python.withPackages (ps: with ps; [
-    docopt
-  ]);
-  myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
-    dplyr
-  ];};
-  runDepends = [ parallel ncbi-blast myPython myR ];
+  runDepends = [ parallel ncbi-blast ];
 
 in stdenv.mkDerivation {
   name = "shortcut-blast";
@@ -21,7 +15,7 @@ in stdenv.mkDerivation {
     #!/usr/bin/env bash
     source ${stdenv}/setup
     mkdir -p $out/bin
-    for script in $src/*.R $src/*.py; do
+    for script in $src/*.sh; do
       dest="$out/bin/$(basename "$script")"
       install -m755 $script $dest
       wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
