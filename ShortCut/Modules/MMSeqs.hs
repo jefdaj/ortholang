@@ -32,7 +32,7 @@ import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.BlastDB    (withSingleton) -- TODO move to core?
 import ShortCut.Modules.SeqIO      (fna, faa)
-import System.Directory            (createDirectoryIfMissing, removeDirectoryRecursive )
+import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 
 cutModule :: CutModule

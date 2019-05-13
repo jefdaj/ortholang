@@ -1,12 +1,12 @@
 module ShortCut.Modules.Muscle
   where
 
-import Development.Shake
+-- import Development.Shake
 import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScript)
 import ShortCut.Core.Compile.Map   (rMapSimpleScript)
-import ShortCut.Core.Paths         (CutPath, fromCutPath)
+-- import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.SeqIO      (faa)
 
 cutModule :: CutModule
