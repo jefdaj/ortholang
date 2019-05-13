@@ -12,7 +12,7 @@ rewrite system calls for better reliability (and mapping):
     BlastCRB: aCRBBlast
     BlastDB: aMakeblastdbAll
     Diamond: aDiamondFromDb
-    Hmmer: aHmmbuild, aHmmSearch
+    Hmmer: aHmmbuild, aHmmSearch, extractHmm*
     x SonicParanoid: aSonicParanoid
     x Muscle: aMuscle
     x MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis

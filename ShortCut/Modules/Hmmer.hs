@@ -5,14 +5,14 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.Muscle (aln)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
-import ShortCut.Core.Actions (debugA, wrappedCmdWrite, wrappedCmdOut, readLit, readLits, writeLits)
+import ShortCut.Core.Actions (debugA, wrappedCmdWrite, readLit, readLits, writeLits)
 import Data.Scientific (formatScientific, FPFormat(..))
 import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
-import ShortCut.Core.Compile.Map  (rMap)
+import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -49,7 +49,7 @@ hmmbuild = let name = "hmmbuild" in CutFunction
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   , fFixity    = Prefix
-  , fRules     = rSimple aHmmbuild
+  , fRules     = rSimpleScript "hmmbuild.sh"
   }
 
 hmmbuildEach :: CutFunction
@@ -58,7 +58,7 @@ hmmbuildEach = let name = "hmmbuild_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   , fFixity    = Prefix
-  , fRules     = rMap 1 aHmmbuild
+  , fRules     = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
 hmmsearch :: CutFunction
@@ -93,14 +93,14 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
 -- TODO convert to rSimpleScript?
-aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aHmmbuild cfg ref _ [out, fa] = do
-  wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
-  where
-    out'  = fromCutPath cfg out
-    out'' = debugA cfg "aHmmbuild" out' [out', fa']
-    fa'   = fromCutPath cfg fa
-aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
+-- aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+-- aHmmbuild cfg ref _ [out, fa] = do
+--   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
+--   where
+--     out'  = fromCutPath cfg out
+--     out'' = debugA cfg "aHmmbuild" out' [out', fa']
+--     fa'   = fromCutPath cfg fa
+-- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
 aHmmsearch :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
@@ -111,9 +111,9 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
       tmpOut = tmpDir </> takeFileName out'
   liftIO $ createDirectoryIfMissing True tmpDir
   wrappedCmdWrite False True cfg ref tmpOut [e', hm', fa'] [] []
-    "hmmsearch" ["-E", eDec, "--tblout", tmpOut, hm', fa']
-  results <- wrappedCmdOut False True cfg ref [tmpOut] [] [] "sed" ["/^#/d", tmpOut]
-  writeLits cfg ref out'' $ lines results
+    "hmmsearch.sh" [out'', eDec, tmpOut, hm', fa']
+  -- results <- wrappedCmdOut False True cfg ref [tmpOut] [] [] "sed" ["/^#/d", tmpOut]
+  -- writeLits cfg ref out'' $ lines results
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aHmmsearch" out' [out', fa']
@@ -141,6 +141,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
   }
 
 -- TODO clean this up! it's pretty ugly
+-- TODO should it be a script?
 aExtractHmm :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aExtractHmm uniq n cfg ref _ [outPath, tsvPath] = do
   lits <- readLits cfg ref tsvPath'
