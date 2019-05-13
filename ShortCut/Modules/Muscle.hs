@@ -44,6 +44,7 @@ muscleEach = let name = "muscle_each" in CutFunction
   }
 
 -- TODO is it parallel?
+-- TODO can this be an rSimpleScript?
 aMuscle :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aMuscle cfg ref _ [out, fa] = do
   wrappedCmdWrite False True cfg ref out'' [fa'] [] []

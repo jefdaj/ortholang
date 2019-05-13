@@ -12,6 +12,9 @@ let
   diamond    = import ./ShortCut/Modules/Diamond;
 
   # TODO will this conflict with the pkg itself?
+  muscle     = import ./ShortCut/Modules/Muscle;
+
+  # TODO will this conflict with the pkg itself?
   sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
 
   myPython = pythonPackages.python.withPackages (ps: with ps; [
@@ -27,6 +30,7 @@ let
     biomartr
     blast
     blastrbh
+    muscle
     crbblast
     seqio
     sets
@@ -38,7 +42,6 @@ let
     pythonPackages.blastdbget
     myPython
     psiblast-exb # TODO does this conflict with ncbi-blast+?
-    muscle
     hmmer
     orthofinder
     diamond
@@ -54,6 +57,7 @@ let
     ++ blastrbh.runDepends
     ++ crbblast.runDepends
     ++ blasthits.runDepends
+    ++ muscle.runDepends
     ++ seqio.runDepends
     ++ sets.runDepends
     ++ plots.runDepends
