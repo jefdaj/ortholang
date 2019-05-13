@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO does this one need special treatment when a run fails?
+
 set -e
 
 OUTPATH="$1"
