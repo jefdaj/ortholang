@@ -10,6 +10,10 @@ let
   hmmer      = import ./ShortCut/Modules/Hmmer;
   blasthits  = import ./ShortCut/Modules/BlastHits;
   diamond    = import ./ShortCut/Modules/Diamond;
+
+  # TODO will this conflict with the pkg itself?
+  sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
+
   myPython = pythonPackages.python.withPackages (ps: with ps; [
     biopython
   ]);
@@ -54,6 +58,7 @@ let
     ++ sets.runDepends
     ++ plots.runDepends
     ++ hmmer.runDepends
+    ++ sonicparanoid.runDepends
     ++ diamond.runDepends;
 
   # explicitly remove .stack-work from nix source because it's big
