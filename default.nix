@@ -3,6 +3,7 @@ let
   biomartr   = import ./ShortCut/Modules/BioMartR;
   blast      = import ./ShortCut/Modules/Blast;
   blastrbh   = import ./ShortCut/Modules/BlastRBH;
+  crbblast   = import ./ShortCut/Modules/CRBBlast;
   seqio      = import ./ShortCut/Modules/SeqIO;
   sets       = import ./ShortCut/Modules/Sets;
   plots      = import ./ShortCut/Modules/Plots;
@@ -21,6 +22,7 @@ let
     biomartr
     blast
     blastrbh
+    crbblast
     seqio
     sets
     plots
@@ -44,6 +46,7 @@ let
     ++ biomartr.runDepends
     ++ blast.runDepends
     ++ blastrbh.runDepends
+    ++ crbblast.runDepends
     ++ blasthits.runDepends
     ++ seqio.runDepends
     ++ sets.runDepends

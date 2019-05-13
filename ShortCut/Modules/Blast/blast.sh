@@ -18,4 +18,4 @@ DBNAME="$(basename "$DBPATH")"
 # TODO should this .out + .err + mv thing be a regular practice everywhere?
 # TODO and if so, maybe it should be done in haskell? only after it works a couple times the tedious way
 $BLASTCMD $BLASTARGS -db "$DBNAME" -evalue "$EDEC" -outfmt 6 -query "$QPATH" > "${OUTPATH}.out" 2> "${OUTPATH}.err"
-mv "${OUTPATH}.out" "$OUTPATH"
+ln -s "$(basename ${OUTPATH}.out)" "$OUTPATH"
