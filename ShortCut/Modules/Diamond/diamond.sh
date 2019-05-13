@@ -2,9 +2,10 @@
 
 set -e
 
-OPATH="$1"
-QPATH="$2"
-ESTR="$3"
-DBPATH="$4"
+OPATH="$1"; shift
+QPATH="$1"; shift
+ESTR="$1"; shift
+DBPATH="$1"; shift
+DCMD="$@"
 
-diamond -q "$QPATH" -o "$OPATH" -e "$ESTR" -d "$DBPATH" > "${OPATH}.out" 2> "${OPATH}.err"
+diamond $DCMD -q "$QPATH" -o "$OPATH" -e "$ESTR" -d "$DBPATH" > "${OPATH}.out" 2> "${OPATH}.err"

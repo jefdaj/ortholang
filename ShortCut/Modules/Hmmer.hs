@@ -141,7 +141,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
   }
 
 -- TODO clean this up! it's pretty ugly
--- TODO should it be a script?
+-- TODO how to integrate the script since it needs the colnum?
 aExtractHmm :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aExtractHmm uniq n cfg ref _ [outPath, tsvPath] = do
   lits <- readLits cfg ref tsvPath'
