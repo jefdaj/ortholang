@@ -7,6 +7,7 @@ let
   seqio      = import ./ShortCut/Modules/SeqIO;
   sets       = import ./ShortCut/Modules/Sets;
   plots      = import ./ShortCut/Modules/Plots;
+  hmmer      = import ./ShortCut/Modules/Hmmer;
   blasthits  = import ./ShortCut/Modules/BlastHits;
   diamond    = import ./ShortCut/Modules/Diamond;
   myPython = pythonPackages.python.withPackages (ps: with ps; [
@@ -26,6 +27,7 @@ let
     seqio
     sets
     plots
+    hmmer
     blasthits
     crb-blast
     ncurses # TODO is this needed?
@@ -51,6 +53,7 @@ let
     ++ seqio.runDepends
     ++ sets.runDepends
     ++ plots.runDepends
+    ++ hmmer.runDepends
     ++ diamond.runDepends;
 
   # explicitly remove .stack-work from nix source because it's big

@@ -92,6 +92,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
+-- TODO convert to rSimpleScript?
 aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aHmmbuild cfg ref _ [out, fa] = do
   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
