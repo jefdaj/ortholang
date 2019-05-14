@@ -102,7 +102,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
   wrappedCmdWrite True True cfg ref oPath [qSrc, tSrc] [] [Cwd tmp'] -- TODO is it parallel?
-    "crb-blast" [ "-q", qSrc, "-t", tSrc, "-o", oPath]
+    "crb-blast.sh" [oPath, tmp', qSrc, tSrc]
   symlink cfg ref o'' oPath'
   where
     o'   = fromCutPath cfg o
