@@ -8,7 +8,7 @@ rewrite system calls for better reliability (and mapping):
   also there shouldn't need to be different versions! all scripts should behave similarly
   functions to rewrite with scripts:
     Sets
-    Blast: aMkBlastFromDb
+    x Blast: aMkBlastFromDb
     x BlastCRB: aCRBBlast
     BlastDB: aMakeblastdbAll
     x Diamond: aDiamondFromDb
