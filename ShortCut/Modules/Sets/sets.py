@@ -41,7 +41,8 @@ def set_all(sets):
 
 def main(outpath, setop, paths):
     setops = {
-        'difference': lambda ss: ss[0] - ss[1],
+        'diff': lambda ss: ss[0] - ss[1],
+        'difference': lambda ss: ss[0] - ss[1], # TODO remove?
         'intersection': lambda ss: ss[0] & ss[1],
         'union': lambda ss: ss[0] | ss[1],
         'any': lambda ss: set_any(ss),
