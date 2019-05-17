@@ -403,12 +403,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   when (length before < 3) $ do
     debugL cfg $ "this is dbPtn: " ++ dbPtn
     debugL cfg $ "this will be dbOut: " ++ dbOut
-    wrappedCmdWrite False True cfg ref out' [dbPtn] [] [Cwd cDir'] "makeblastdb"
-      [ "-in"    , fixedPaths
-      , "-out"   , dbOut
-      , "-title" , takeFileName dbOut
-      , "-dbtype", dbType'
-      ]
+    wrappedCmdWrite False True cfg ref out' [dbPtn] [] [Cwd cDir'] "makeblastdb.sh" [dbOut, fixedPaths, dbType']
     after <- listPrefixFiles dbPtn
     debugL cfg $ "these actual db files were created: " ++ show after
     when (length after < 3) (error "makeblastdb failed (< 3 db files created)")
