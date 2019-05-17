@@ -2,6 +2,7 @@ with import ./nixpkgs;
 let
   biomartr   = import ./ShortCut/Modules/BioMartR;
   blast      = import ./ShortCut/Modules/Blast;
+  blastdb    = import ./ShortCut/Modules/BlastDB;
   blastrbh   = import ./ShortCut/Modules/BlastRBH;
   crbblast   = import ./ShortCut/Modules/CRBBlast;
   seqio      = import ./ShortCut/Modules/SeqIO;
@@ -29,6 +30,7 @@ let
   runDepends = [
     biomartr
     blast
+    blastdb
     blastrbh
     muscle
     crbblast
@@ -53,6 +55,7 @@ let
     diffutils
   ]
     ++ biomartr.runDepends
+    ++ blastdb.runDepends
     ++ blast.runDepends
     ++ blastrbh.runDepends
     ++ crbblast.runDepends
