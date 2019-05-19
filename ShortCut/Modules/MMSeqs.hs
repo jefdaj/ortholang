@@ -100,7 +100,7 @@ rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
       wrappedCmdWrite False True cfg ref out' [dbPath ++ "*"] [] [Cwd createDbDir]
-        "mmseqs-createdb.sh" $ [dbPath] ++ faPaths'
+        "mmseqs-createdb-all.sh" $ [dbPath] ++ faPaths'
     symlink cfg ref out $ toCutPath cfg index
   return (ExprPath out')
 rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e

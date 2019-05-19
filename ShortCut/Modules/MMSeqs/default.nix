@@ -4,7 +4,7 @@
 with import ../../../nixpkgs;
 
 let
-  runDepends = [ mmseqs ];
+  runDepends = [ mmseqs2 ];
 
 in stdenv.mkDerivation {
   name = "shortcut-mmseqs";

@@ -11,6 +11,7 @@ let
   hmmer      = import ./ShortCut/Modules/Hmmer;
   blasthits  = import ./ShortCut/Modules/BlastHits;
   diamond    = import ./ShortCut/Modules/Diamond;
+  mmseqs     = import ./ShortCut/Modules/MMSeqs;
 
   # TODO will this conflict with the pkg itself?
   muscle     = import ./ShortCut/Modules/Muscle;
@@ -47,12 +48,12 @@ let
     hmmer
     orthofinder
     diamond
-    mmseqs2
     # cdhit
     sonicparanoid
     glibcLocales
     tree
     diffutils
+    mmseqs
   ]
     ++ biomartr.runDepends
     ++ blastdb.runDepends
@@ -66,7 +67,8 @@ let
     ++ plots.runDepends
     ++ hmmer.runDepends
     ++ sonicparanoid.runDepends
-    ++ diamond.runDepends;
+    ++ diamond.runDepends
+    ++ mmseqs.runDepends;
 
   # explicitly remove .stack-work from nix source because it's big
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
@@ -76,9 +78,12 @@ let
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
   src = builtins.filterSource notStack ./.;
-  # shellHook = ''
-  #    export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-  # '';
+  shellHook = ''
+     export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+     find "${src}/ShortCut/Modules/* -type d" | while read d; do
+       export PATH=$d:$PATH
+     done
+  '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]
     ++ runDepends

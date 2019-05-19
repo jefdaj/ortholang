@@ -8,5 +8,7 @@ ESTR="$3"
 QDB="$4"
 SDB="$5"
 
-mmseqs search -e "$ESTR" "$QDB" "$SDB" "$ODB" "$TDIR" > "${ODB}.out" 2> "${ODB}.err"
+cmd="mmseqs search -e "$ESTR" "$QDB" "$SDB" "$OUTDB" "$TDIR" > "${OUTDB}.out" 2> "${OUTDB}.err""
+echo "$cmd"
+eval "$cmd"
 rm -rf "$TDIR" # TODO from haskell?
