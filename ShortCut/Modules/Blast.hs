@@ -137,7 +137,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
       -- args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
   -- debugL cfg $ "args'': " ++ show args''
   -- TODO full path to prefix'?
-  wrappedCmdWrite True True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
+  wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
