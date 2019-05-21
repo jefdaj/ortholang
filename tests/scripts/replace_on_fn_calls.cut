@@ -1,7 +1,7 @@
 faa_paths = ["data/Mycoplasma_agalactiae_PG2.gbk",
              "data/Mycoplasma_arthritidis_protein_refseq.faa",
              "data/Mycoplasma_capricolum_protein_refseq.faa",
-             "data/Mycoplasma_genitalium_M2321_10genes.fna"]
+             "data/Mycoplasma_genitalium_M2321_5genes.fna"]
 faa_path = "data/Mycoplasma_agalactiae_PG2_protein_refseq.faa"
 faa = load_faa faa_path
 faa_alternatives = replace_each faa faa_path faa_paths

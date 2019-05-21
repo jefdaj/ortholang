@@ -1,4 +1,4 @@
-genes10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
+genes5 = load_fna "data/Mycoplasma_genitalium_M2321_5genes.fna"
 maga = gbk_to_fna (load_gbk "data/Mycoplasma_genitalium_M2321.gbk")
-hits = extract_queries (tblastx 1.0e-5 genes10 maga)
-result = all (repeat hits genes10 10)
+hits = extract_queries (tblastx 1.0e-5 genes5 maga)
+result = all (repeat hits genes5 10)
