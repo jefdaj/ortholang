@@ -1,34 +1,19 @@
-rewrite system calls for better reliability (and mapping):
-  x attempt to simplify module layout at the same time
-  think about adding a wrappedCmd record with readable fields rather than unreadable positional arguments
-  also there shouldn't need to be different versions! all scripts should behave similarly
-  functions to rewrite with scripts:
-    xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
-    BlastDB: aMakeblastdbAll
-    Sets
-    x Blast: aMkBlastFromDb
-    x BlastCRB: aCRBBlast
-    x Diamond: aDiamondFromDb
-    Hmmer:
-      x aHmmbuild
-      x aHmmSearch
-      aExtractHmm
-    x SonicParanoid: aSonicParanoid
-    x Muscle: aMuscle
-  need to send all stdout from individual commands to intermediate files rather than read it directly
-    should never be able to confuse filenames with output like this:
-      "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
-    should work without assuming anything about what machine the command will be running on, or if it crashes + repeats
-  this is basically separating the "eval" step into "args" and "shell" steps right?
-    always write a .args/.sh file first
-  write .lock files? or use the .args?
-  always redirect stdout, stderr to their own files as it runs
-  always rerun the command if it fails?
-  should this use a separate mechanism from the berkeley wrapper or are they the same?
-  should any real processing *ever* be done in the main haskell binary thread?
+first stage of the rewrite is to use a record for the wrappedCmd* fns
+  should only need one of them since all scripts now?
+  should have readable fields instead of positional args
+
+second stage is to clean it up and separate .args/.sh files
+  should send stdout + stderr to separate files automatically, but not via haskell?
+    i guess this is where the standard wrapper script would step in
+  should handle locking + retry + similar hacks outside haskell too?
+  should have separate .args/sh files amenable to later mapping (third stage)
+  should work in multiple situations: raw, GNU parallel, singularity + SLURM, ideally docker (later)
+
+deduplicate interpreters from different modules? one myPython, myR etc.
+
+flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
 
 fix up blast stuff:
-  simplify Blast.hs by moving parallel hacks to a wrapper script
   generalize BlastHits.hs to HitTables.hs so it works with blastlike programs (CRB-Blast, DIAMOND, ...)
   should there be a separate RBH module too that works with BLAST, DIAMOND, MMSeqs2?
 
@@ -38,7 +23,10 @@ result handling:
   should allow lists of any/mixed type in result to make exploring easier
   should be able to zip up one archive of the result list on the website
 
-should error if replacing something with a different type and stuff depends on it
+improvements to parsing/repl:
+  should error if replacing something with a different type and stuff depends on it
+  label parsers with meaningful error messages where possible
+  add custom errors for commonly confusing situations
 
 idea for repeat_each/lambda expressions:
   make the lambda/placeholder/whatever expression corrsepond to a dir, and the argument to a file in it!
