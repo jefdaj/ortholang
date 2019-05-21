@@ -14,11 +14,11 @@ rewrite system calls for better reliability (and mapping):
     xx BlastCRB: aCRBBlast
     xx Diamond: aDiamondFromDb
     xx SonicParanoid: aSonicParanoid
+    xx Muscle: aMuscle
     Hmmer:
       xx aHmmbuild
       xx aHmmSearch
       aExtractHmm
-    x Muscle: aMuscle
   need to send all stdout from individual commands to intermediate files rather than read it directly
     should never be able to confuse filenames with output like this:
       "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
