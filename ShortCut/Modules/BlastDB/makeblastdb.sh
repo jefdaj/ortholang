@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
+# TODO rename makeblastdb-all.sh?
+
 DBOUT="$1"
-CDIR="$2" # TODO remove?
-FIXEDPATHS="$3" # TODO does the quoting work in all situations?
-DBTYPE="$4"
-DBDIR="$(dirname "$DBOUT")"
+FIXEDPATHS="$2" # TODO does the quoting work in all situations?
+DBTYPE="$3"
+
 TITLE="$(basename "$DBOUT")" # TODO basename as a dependency?
 
-mkdir -p "$DBDIR"
-cd "$CDIR"
 makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE"
