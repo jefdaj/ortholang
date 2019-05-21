@@ -1,0 +1,10 @@
+query = load_faa "data/Mycoplasma_genitalium_single.faa"
+mgen = load_faa "data/Mycoplasma_genitalium_G37_protein_refseq.faa"
+hits = blastp 0.1 query mgen
+hits_ids = extract_targets hits
+hits_faa = extract_seqs mgen (extract_targets hits)
+hits_aln = muscle hits_faa
+hits_hmm = hmmbuild hits_aln
+hits2 = hmmsearch 1.0e-10 hits_hmm mgen
+hits2_ids = extract_hmm_targets hits2
+result = hits2_ids
