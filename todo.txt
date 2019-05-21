@@ -1,4 +1,20 @@
 rewrite system calls for better reliability (and mapping):
+  x attempt to simplify module layout at the same time
+  think about adding a wrappedCmd record with readable fields rather than unreadable positional arguments
+  also there shouldn't need to be different versions! all scripts should behave similarly
+  functions to rewrite with scripts:
+    xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
+    BlastDB: aMakeblastdbAll
+    Sets
+    x Blast: aMkBlastFromDb
+    x BlastCRB: aCRBBlast
+    x Diamond: aDiamondFromDb
+    Hmmer:
+      x aHmmbuild
+      x aHmmSearch
+      aExtractHmm
+    x SonicParanoid: aSonicParanoid
+    x Muscle: aMuscle
   need to send all stdout from individual commands to intermediate files rather than read it directly
     should never be able to confuse filenames with output like this:
       "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
