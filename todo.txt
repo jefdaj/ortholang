@@ -11,7 +11,7 @@ rewrite system calls for better reliability (and mapping):
     xx BlastDB: aMakeblastdbAll
     Sets
     xx Blast: aMkBlastFromDb
-    x BlastCRB: aCRBBlast
+    xx BlastCRB: aCRBBlast
     x Diamond: aDiamondFromDb
     Hmmer:
       x aHmmbuild
