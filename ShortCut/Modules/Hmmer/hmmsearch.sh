@@ -6,7 +6,7 @@
 set -e
 
 OUTPATH="$1"
-EDEC="$2"
+ESTR="$2"
 TMPOUT="$3"
 HMMPATH="$4"
 FAPATH="$5"
