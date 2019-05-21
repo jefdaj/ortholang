@@ -8,10 +8,10 @@ rewrite system calls for better reliability (and mapping):
   also there shouldn't need to be different versions! all scripts should behave similarly
   functions to rewrite with scripts:
     xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
+    BlastDB: aMakeblastdbAll
     Sets
     x Blast: aMkBlastFromDb
     x BlastCRB: aCRBBlast
-    BlastDB: aMakeblastdbAll
     x Diamond: aDiamondFromDb
     Hmmer:
       x aHmmbuild
