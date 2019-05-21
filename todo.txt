@@ -15,7 +15,7 @@ rewrite system calls for better reliability (and mapping):
     xx Diamond: aDiamondFromDb
     Hmmer:
       xx aHmmbuild
-      x aHmmSearch
+      xx aHmmSearch
       aExtractHmm
     x SonicParanoid: aSonicParanoid
     x Muscle: aMuscle
