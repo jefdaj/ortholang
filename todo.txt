@@ -12,7 +12,7 @@ rewrite system calls for better reliability (and mapping):
     Sets
     xx Blast: aMkBlastFromDb
     xx BlastCRB: aCRBBlast
-    x Diamond: aDiamondFromDb
+    xx Diamond: aDiamondFromDb
     Hmmer:
       x aHmmbuild
       x aHmmSearch

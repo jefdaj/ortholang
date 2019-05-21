@@ -120,7 +120,7 @@ rDiamondFromDb = rSimple . aDiamondFromDb
 aDiamondFromDb :: [String] -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
 aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
   eStr <- readLit  cfg ref e'
-  wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [q', o'', eStr, db'] ++ dCmd
+  wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
   where
     o'  = fromCutPath cfg o
     e'  = fromCutPath cfg e
