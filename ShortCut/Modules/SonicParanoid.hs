@@ -14,8 +14,7 @@ import ShortCut.Core.Util          (digest, unlessExists)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "SonicParanoid"
-  , mDesc = "Very fast, accurate, and easy orthology."
+  { mName = "SonicParanoid" , mDesc = "Very fast, accurate, and easy orthology."
   , mTypes = [faa, fna, spr]
   , mFunctions =
       [ sonicparanoid
@@ -50,6 +49,7 @@ sonicparanoid = let name = "sonicparanoid" in CutFunction
 
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
+-- TODO should get all results as an unusable file first, then extract what you want explicitly
 aSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
@@ -77,8 +77,8 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
     -- TODO decide mode based on fn name
     -- TODO decide -d (debug) based on cfg? or leave one way?
-    wrappedCmdWrite True False cfg ref out'' faPaths' [] []
-      "sonicparanoid.sh" [out'', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
+    wrappedCmdWrite True False cfg ref opPath' faPaths' [] []
+      "sonicparanoid.sh" [opPath', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
 
     -- (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
     --   [ "-sh", sharedDir
