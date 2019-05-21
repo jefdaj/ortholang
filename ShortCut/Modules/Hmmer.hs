@@ -107,11 +107,16 @@ aHmmsearch :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aHmmsearch cfg ref _ [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
+
+      -- TODO warn users about this? hmmer fails on smaller values than ~1e-307 on my machine
+      eMin   = formatScientific Fixed Nothing (read "1e-307")
+      eDec'  = if eDec < eMin then eMin else eDec
+
       tmpDir = cfgTmpDir cfg </> "cache" </> "hmmsearch"
       tmpOut = tmpDir </> takeFileName out'
   liftIO $ createDirectoryIfMissing True tmpDir
   wrappedCmdWrite False True cfg ref tmpOut [e', hm', fa'] [] []
-    "hmmsearch.sh" [out'', eDec, tmpOut, hm', fa']
+    "hmmsearch.sh" [out'', eDec', tmpOut, hm', fa']
   -- results <- wrappedCmdOut False True cfg ref [tmpOut] [] [] "sed" ["/^#/d", tmpOut]
   -- writeLits cfg ref out'' $ lines results
   where

@@ -6,7 +6,6 @@ let
   blastrbh   = import ./ShortCut/Modules/BlastRBH;
   crbblast   = import ./ShortCut/Modules/CRBBlast;
   seqio      = import ./ShortCut/Modules/SeqIO;
-  sets       = import ./ShortCut/Modules/Sets;
   plots      = import ./ShortCut/Modules/Plots;
   hmmer      = import ./ShortCut/Modules/Hmmer;
   blasthits  = import ./ShortCut/Modules/BlastHits;
@@ -36,7 +35,6 @@ let
     muscle
     crbblast
     seqio
-    sets
     plots
     hmmer
     blasthits
@@ -63,7 +61,6 @@ let
     ++ blasthits.runDepends
     ++ muscle.runDepends
     ++ seqio.runDepends
-    ++ sets.runDepends
     ++ plots.runDepends
     ++ hmmer.runDepends
     ++ sonicparanoid.runDepends

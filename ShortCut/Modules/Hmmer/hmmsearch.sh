@@ -13,4 +13,4 @@ FAPATH="$5"
 
 hmmsearch -E "$ESTR" --tblout "$TMPOUT" "$HMMPATH" "$FAPATH" > "${TMPOUT}.out" 2> "${TMPOUT}.err"
 sed '/^#/d' "$TMPOUT" > "${OUTPATH}.out" 2> "${OUTPATH}.err"
-ln -s "${OUTPATH}.out" "$OUTPATH"
+ln -s "$(basename ${OUTPATH}.out)" "$OUTPATH"
