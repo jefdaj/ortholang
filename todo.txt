@@ -9,7 +9,6 @@ rewrite system calls for better reliability (and mapping):
   functions to rewrite with scripts:
     xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
     xx BlastDB: aMakeblastdbAll
-    Sets
     xx Blast: aMkBlastFromDb
     xx BlastCRB: aCRBBlast
     xx Diamond: aDiamondFromDb
