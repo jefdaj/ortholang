@@ -10,7 +10,7 @@ rewrite system calls for better reliability (and mapping):
     xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
     xx BlastDB: aMakeblastdbAll
     Sets
-    x Blast: aMkBlastFromDb
+    xx Blast: aMkBlastFromDb
     x BlastCRB: aCRBBlast
     x Diamond: aDiamondFromDb
     Hmmer:
