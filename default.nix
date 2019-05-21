@@ -36,7 +36,6 @@ let
     crbblast
     seqio
     plots
-    hmmer
     blasthits
     crb-blast
     ncurses # TODO is this needed?
