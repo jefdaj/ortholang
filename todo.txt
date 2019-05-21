@@ -7,6 +7,7 @@ rewrite system calls for better reliability (and mapping):
   think about adding a wrappedCmd record with readable fields rather than unreadable positional arguments
   also there shouldn't need to be different versions! all scripts should behave similarly
   functions to rewrite with scripts:
+    xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
     Sets
     x Blast: aMkBlastFromDb
     x BlastCRB: aCRBBlast
@@ -18,7 +19,6 @@ rewrite system calls for better reliability (and mapping):
       aExtractHmm
     x SonicParanoid: aSonicParanoid
     x Muscle: aMuscle
-    x MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
   need to send all stdout from individual commands to intermediate files rather than read it directly
     should never be able to confuse filenames with output like this:
       "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
