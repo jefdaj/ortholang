@@ -12,6 +12,30 @@ second stage is to clean it up and separate .args/.sh files
 deduplicate interpreters from different modules? one myPython, myR etc.
 
 flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
+deduplicate interpreters from different modules? one myPython, myR etc.
+
+rewrite system calls for better reliability (and mapping):
+  x attempt to simplify module layout at the same time
+  think about adding a wrappedCmd record with readable fields rather than unreadable positional arguments
+  functions to rewrite with scripts:
+    Sets
+    Blast: aMkBlastFromDb
+    BlastCRB: aCRBBlast
+    BlastDB: aMakeblastdbAll
+    Diamond: aDiamondFromDb
+    Hmmer: aHmmbuild, aHmmSearch
+    SonicParanoid: aSonicParanoid
+  need to send all stdout from individual commands to intermediate files rather than read it directly
+    should never be able to confuse filenames with output like this:
+      "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
+    should work without assuming anything about what machine the command will be running on, or if it crashes + repeats
+  this is basically separating the "eval" step into "args" and "shell" steps right?
+    always write a .args/.sh file first
+  write .lock files? or use the .args?
+  always redirect stdout, stderr to their own files as it runs
+  always rerun the command if it fails?
+  should this use a separate mechanism from the berkeley wrapper or are they the same?
+  should any real processing *ever* be done in the main haskell binary thread?
 
 fix up blast stuff:
   generalize BlastHits.hs to HitTables.hs so it works with blastlike programs (CRB-Blast, DIAMOND, ...)
