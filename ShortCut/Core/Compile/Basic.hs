@@ -19,7 +19,7 @@ module ShortCut.Core.Compile.Basic
   where
 
 -- TODO does turning of traces radically speed up the interpreter?
-import Debug.Trace       (trace)
+import Debug.Trace (trace)
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -40,7 +40,6 @@ import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
-
 
 debug :: CutConfig -> String -> a -> a
 debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
@@ -79,16 +78,6 @@ rAssign s@(_, cfg, _, _) (var, expr) = do
       res' = debugRules cfg "rAssign" (var, expr) res
   return res'
 
-varNameMatches :: Show a => String -> (CutVar, a) -> Bool
--- varNameMatches name1 pair@((CutVar _ name2), _) = name1 == (trace ("pair: " ++ show pair) name2)
-varNameMatches name1 ((CutVar _ name2), _) = name1 == name2
-
--- TODO how should this behave if there's more than one?
-lookupVar :: Show a => String -> [(CutVar, a)] -> Maybe a
-lookupVar name pairs = case filter (varNameMatches name) pairs of
-  ((_, result):[]) -> Just result
-  _ -> Nothing
-
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
@@ -98,7 +87,7 @@ compileScript s@(as, _, _, _) _ = do
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (rAssign s) as
-  case lookupVar "result" rpaths of
+  case lookupResult rpaths of
     Nothing -> fail "no result variable during compile. that's not right!"
     Just (VarPath r) -> return $ ResPath r
   -- where

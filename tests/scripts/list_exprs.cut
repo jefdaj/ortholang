@@ -1,3 +1,5 @@
+# result should be 1 (all lists are the same)
+
 list1 = load_faa_each ["data/Mycoplasma_agalactiae_small.faa"]
 list2 = [load_faa "data/Mycoplasma_agalactiae_small.faa"]
 list3 = [load_faa "data/Mycoplasma_agalactiae_small.faa"]

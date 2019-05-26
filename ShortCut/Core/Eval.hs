@@ -34,6 +34,8 @@ import ShortCut.Core.Config (debug)
 import Control.Retry
 -- import qualified Data.Map as M
 
+-- import Debug.Trace
+
 import Control.Exception.Safe         (catchAny)
 import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
@@ -167,7 +169,7 @@ evalIntermediateExpr st@(_, cfg, _, _) expr = do
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as, c, ref, ids) = case lookup (CutVar (ReplaceID Nothing) "result") as of
+evalScript hdl s@(as, c, ref, ids) = case lookupResult as of
   Nothing  -> putStrLn "no result variable during eval. that's not right!"
   Just res -> eval hdl c ref ids (typeOf res) (compileScript s $ ReplaceID Nothing)
 

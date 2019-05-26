@@ -12,6 +12,11 @@ import System.FilePath        ((</>), takeDirectory)
 import Text.Parsec            (ParseError, try, getState, putState)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
+import Control.Monad          (when)
+import Data.List              (partition)
+import Data.List.Utils        (hasKeyAL)
+
+-- import Debug.Trace
 
 -------------------
 -- preprocessing --
@@ -52,35 +57,49 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 -- statements --
 ----------------
 
+stripResult :: CutScript -> CutScript
+stripResult scr = filter notRes scr
+  where
+    notRes ((CutVar _ "result"), _) = False
+    notRes _ = True
+
 -- TODO combine pVar and pVarEq somehow to reduce try issues?
 
 -- TODO message in case it doesn't parse?
+-- TODO should reject duplicate variables! except replace result
 pAssign :: ParseM CutAssign
 pAssign = debugParser "pAssign" $ do
   (scr, cfg, ref, ids) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
-  v <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
+  v@(CutVar _ vName) <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
+  when ((hasKeyAL v scr) && (vName /= "result")) $ error $ "duplicate variable '" ++ vName ++ "'"
   e <- debugParseM "first pExpr" >> (lexeme pExpr)
-  putState (scr ++ [(v,e)], cfg, ref, ids)
+  -- let scr' = case vName of
+               -- -- "result" -> trace "stripping old result" $ stripResult scr ++ [(v, e)]
+               -- "result" -> stripResult scr ++ [(v, e)]
+               -- -- _ -> trace "this is not a result assignment" $ scr ++ [(v,e)]
+               -- _ -> scr ++ [(v,e)]
+  let scr' = scr ++ [(v, e)]
+  -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
+  putState (scr', cfg, ref, ids)
   debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
       -- res' = debugParser cfg "pAssign" res
+  -- return $ traceShow scr' res
   return res
 
 -- Handles the special case of a naked top-level expression, which is treated
--- as being assigned to "result". This parses the same in a script or the repl,
--- but doing it more than once in a script will cause an error later.
+-- as being assigned to "result". This parses the same in a script or the repl.
 -- TODO prevent assignments that include the variable being assigned to
 --      (later when working on statement issues)
 -- TODO if the statement is literally `result`, what do we do?
 --      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM CutAssign
 pResult = debugParser "pResult" $ do
-  -- (_, cfg, _) <- getState
   e <- pExpr
-  -- let e' = debugParser cfg "pResult" e
-  return (CutVar (ReplaceID Nothing) "result", e)
+  let res = (CutVar (ReplaceID Nothing) "result", e)
+  return res
 
 pStatement :: ParseM CutAssign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)
@@ -116,6 +135,14 @@ parseString c r ids = parseWithEof pScript ([], c, r, ids)
 
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
+-- Not sure why this should be necessary, but it was easier than fixing the parser to reject multiple results.
+lastResultOnly :: CutScript -> CutScript
+lastResultOnly scr = otherVars ++ [lastRes]
+  where
+    isResult ((CutVar _ v, _)) = v == "result"
+    (resVars, otherVars) = partition isResult scr
+    lastRes = last resVars -- should be safe because we check for no result separately?
+
 -- TODO message in case it doesn't parse?
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM CutScript
@@ -123,8 +150,9 @@ pScript = debugParser "pScript" $ do
   (_, cfg, ref, ids) <- getState
   optional spaces
   scr <- many pStatement
-  putState (scr, cfg, ref, ids)
-  return scr
+  let scr' = lastResultOnly scr
+  putState (scr', cfg, ref, ids)
+  return scr'
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
