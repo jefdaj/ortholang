@@ -1,3 +1,5 @@
+# TODO add a couple more?
 smallbacteria = load_faa_each ["data/Mycoplasma_agalactiae_small.faa",
                                "data/Mycoplasma_genitalium_small.faa"]
-result = orthofinder smallbacteria
+ofres = orthofinder smallbacteria
+result = ofres
