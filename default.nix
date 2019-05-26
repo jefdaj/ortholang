@@ -75,10 +75,11 @@ let
 in haskell.lib.overrideCabal cabalPkg (drv: {
   src = builtins.filterSource notStack ./.;
   shellHook = ''
-     export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-     find "${src}/ShortCut/Modules/* -type d" | while read d; do
-       export PATH=$d:$PATH
-     done
+    ${drv.shellHook or ""}
+    export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+    find "${src}/ShortCut/Modules/* -type d" | while read d; do
+      export PATH=$d:$PATH
+    done
   '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]
