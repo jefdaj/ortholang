@@ -42,7 +42,7 @@ in python3Packages.buildPythonPackage rec {
 
   patches = [
     ./find-mmseqs-bin.patch
-    ./allow-new-mmseqs.patch
+    ./disable-mmseqs-version-check.patch
   ];
 
   meta = {

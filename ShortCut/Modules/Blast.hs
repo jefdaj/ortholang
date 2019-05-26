@@ -18,12 +18,12 @@ import ShortCut.Core.Types
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA, debugL)
+import ShortCut.Core.Actions       (wrappedCmdWrite, readLit, readPath, debugA)
 import ShortCut.Core.Paths         (fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
-import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
-import System.Posix.Escape         (escape)
+-- import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
+-- import System.Posix.Escape         (escape)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -93,46 +93,51 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   prefix <- readPath cfg ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
-      cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
+      -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
       ptn     = prefix' ++ ".*"
-      args    = [ "-db", takeFileName prefix'
-                , "-evalue", eDec
-                , "-outfmt", "6" -- tab-separated values
-                , "-query", "-"
-                ]
+      -- args    = [ "-db", takeFileName prefix'
+      --           , "-evalue", eDec
+      --           , "-outfmt", "6" -- tab-separated values
+      --           , "-query", "-"
+      --           ]
       -- NCBI defaults to megablast for speed at the expense of sensitivity. My
       -- view is users should have to ask for that explicitly, so in ShortCut
       -- "blastn" is actual blastn! Use "megablast" if you want faster results.
       -- See http://www.sixthresearcher.com/when-blast-is-not-blast/
-      (bCmd', args') = case bCmd of
-        "blastn"    -> ("blastn", ["-task","blastn"] ++ args)
-        "megablast" -> ("blastn", args)
+      bCmd' = case bCmd of
+        "blastn" -> "blastn -task blastn"
+        "megablast" -> "blastn"
+        _ -> bCmd
+      -- (bCmd', args') = case bCmd of
+        -- "blastn"    -> ("blastn", ["-task","blastn"] ++ args)
+        -- "megablast" -> ("blastn", args)
         -- TODO is this possible/helpful in newer version of blast?
         -- "blastp"    -> ("blastp", ["-f'm S'", "-s T"] ++ args) -- see doi:10.1093/bioinformatics/btm585
-        _           -> (bCmd, args)
+        -- _           -> (bCmd, args)
       -- Terrible hack, but seems to parallelize BLAST commands without error.
       -- It should also allow each part of the overall BLAST to be run with srun.
       -- TODO proper quoting of args' at least
-      jobl = o'' <.> "log"
-      pCmd = [ "parallel"
-             , "--pipe"
-             , "--round-robin"
-             , "--line-buffer"
-             -- , "-N1"
-             , "--block-size", "100"
-             -- , "-j8" -- TODO match number of cores
-             -- , "--block-size", "1k"
-             , "--joblog", jobl
-             -- , "--resume TODO can this work without making many more tmpfiles?
-             -- , "--resume-failed" -- TODO does this work with --pipe?
-             , "--halt now,fail=1" -- TODO be more lax in production?
-             , "--recstart", "'>'"
-             -- , "-k" -- preserve order in the output (more deterministic)
-             , "--will-cite"
-             ]
-      args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
-  debugL cfg $ "args'': " ++ show args''
-  wrappedCmdWrite True True cfg ref o'' [ptn] [] [Shell, AddEnv "BLASTDB" cDir] "cat" args''
+      -- jobl = o'' <.> "log"
+      -- pCmd = [ "parallel"
+      --        , "--pipe"
+      --        , "--round-robin"
+      --        , "--line-buffer"
+      --        -- , "-N1"
+      --        , "--block-size", "100"
+      --        -- , "-j8" -- TODO match number of cores
+      --        -- , "--block-size", "1k"
+      --        , "--joblog", jobl
+      --        -- , "--resume TODO can this work without making many more tmpfiles?
+      --        -- , "--resume-failed" -- TODO does this work with --pipe?
+      --        , "--halt now,fail=1" -- TODO be more lax in production?
+      --        , "--recstart", "'>'"
+      --        -- , "-k" -- preserve order in the output (more deterministic)
+      --        , "--will-cite"
+      --        ]
+      -- args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
+  -- debugL cfg $ "args'': " ++ show args''
+  -- TODO full path to prefix'?
+  wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q

@@ -27,6 +27,7 @@ module ShortCut.Core.Types
   , HashedSeqIDs
   , HashedSeqIDsRef
   , CutState
+  , lookupResult
   -- , Assoc(..) -- we reuse this from Parsec
   , CutFixity(..)
   -- parse monad
@@ -193,6 +194,9 @@ prefixOf (CutBop _ _ _ n _ _ ) = case n of
 -- TODO have a separate CutAssign for "result"?
 type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
+
+lookupResult :: [(CutVar, b)] -> Maybe b
+lookupResult = lookup (CutVar (ReplaceID Nothing) "result")
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
 -- TODO how to make the record fields not partial functions?

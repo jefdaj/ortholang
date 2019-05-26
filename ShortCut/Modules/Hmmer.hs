@@ -5,14 +5,14 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.Muscle (aln)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
-import ShortCut.Core.Actions (debugA, wrappedCmdWrite, wrappedCmdOut, readLit, readLits, writeLits)
+import ShortCut.Core.Actions (debugA, wrappedCmdWrite, readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
-import Data.List (isPrefixOf, nub, sort)
+-- import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
-import ShortCut.Core.Compile.Map  (rMap)
+import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -49,7 +49,7 @@ hmmbuild = let name = "hmmbuild" in CutFunction
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   , fFixity    = Prefix
-  , fRules     = rSimple aHmmbuild
+  , fRules     = rSimpleScript "hmmbuild.sh"
   }
 
 hmmbuildEach :: CutFunction
@@ -58,7 +58,7 @@ hmmbuildEach = let name = "hmmbuild_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fDesc = Nothing, fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   , fFixity    = Prefix
-  , fRules     = rMap 1 aHmmbuild
+  , fRules     = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
 hmmsearch :: CutFunction
@@ -92,27 +92,31 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
-aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aHmmbuild cfg ref _ [out, fa] = do
-  wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
-  where
-    out'  = fromCutPath cfg out
-    out'' = debugA cfg "aHmmbuild" out' [out', fa']
-    fa'   = fromCutPath cfg fa
-aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
+-- TODO convert to rSimpleScript?
+-- aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+-- aHmmbuild cfg ref _ [out, fa] = do
+--   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
+--   where
+--     out'  = fromCutPath cfg out
+--     out'' = debugA cfg "aHmmbuild" out' [out', fa']
+--     fa'   = fromCutPath cfg fa
+-- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
 aHmmsearch :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aHmmsearch cfg ref _ [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
+
+      -- TODO warn users about this? hmmer fails on smaller values than ~1e-307 on my machine
+      eMin   = formatScientific Fixed Nothing (read "1e-307")
+      eDec'  = if eDec < eMin then eMin else eDec
+
       tmpDir = cfgTmpDir cfg </> "cache" </> "hmmsearch"
       tmpOut = tmpDir </> takeFileName out'
   liftIO $ createDirectoryIfMissing True tmpDir
-  wrappedCmdWrite False True cfg ref tmpOut [e', hm', fa'] [] []
-    "hmmsearch" ["-E", eDec, "--tblout", tmpOut, hm', fa']
-  results <- wrappedCmdOut False True cfg ref [tmpOut] [] [] "sed" ["/^#/d", tmpOut]
-  writeLits cfg ref out'' $ lines results
+  wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [tmpOut] []
+    "hmmsearch.sh" [out'', eDec', tmpOut, hm', fa']
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aHmmsearch" out' [out', fa']
@@ -127,7 +131,7 @@ extractHmmTargets = let name = "extract_hmm_targets" in CutFunction
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fDesc = Nothing, fTypeDesc  = name ++ " : hht -> str.list"
   , fFixity    = Prefix
-  , fRules     = rSimple $ aExtractHmm True 1
+  , fRules     = rSimple $ aExtractHmm 1
   }
 
 extractHmmTargetsEach :: CutFunction
@@ -136,19 +140,21 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fDesc = Nothing, fTypeDesc  = name ++ " : hht.list -> str.list.list"
   , fFixity    = Prefix
-  , fRules     = rMap 1 $ aExtractHmm True 1
+  , fRules     = rMap 1 $ aExtractHmm 1
   }
 
 -- TODO clean this up! it's pretty ugly
-aExtractHmm :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aExtractHmm uniq n cfg ref _ [outPath, tsvPath] = do
-  lits <- readLits cfg ref tsvPath'
-  let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
-      lits''  = if uniq then sort $ nub lits' else lits'
-      lits''' = map (\l -> (words l) !! (n - 1)) lits''
-  writeLits cfg ref outPath'' lits'''
+-- TODO how to integrate the script since it needs the colnum?
+aExtractHmm :: Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aExtractHmm n cfg ref _ [outPath, tsvPath] = do
+  -- lits <- readLits cfg ref tsvPath'
+  -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
+  --     lits''  = if uniq then sort $ nub lits' else lits'
+  --     lits''' = map (\l -> (words l) !! (n - 1)) lits''
+  -- writeLits cfg ref outPath'' lits'''
+  wrappedCmdWrite False True cfg ref outPath'' [outPath'] [] [] "extract-hmm.py" [outPath', tsvPath', show n]
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aExtractHmm" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
-aExtractHmm _ _ _ _ _ _ = fail "bad arguments to aExtractHmm"
+aExtractHmm _ _ _ _ _ = fail "bad arguments to aExtractHmm"

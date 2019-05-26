@@ -118,6 +118,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
       return $ B8.pack $ show scr2
 
 -- test that no absolute paths snuck into the tmpfiles
+-- TODO sanitize stdout + stderr too when running scripts
 mkAbsTest :: CutConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""

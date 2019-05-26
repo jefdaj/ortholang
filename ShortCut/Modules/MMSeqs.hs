@@ -32,7 +32,7 @@ import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.BlastDB    (withSingleton) -- TODO move to core?
 import ShortCut.Modules.SeqIO      (fna, faa)
-import System.Directory            (createDirectoryIfMissing, removeDirectoryRecursive )
+import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 
 cutModule :: CutModule
@@ -100,7 +100,7 @@ rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
       wrappedCmdWrite False True cfg ref out' [dbPath ++ "*"] [] [Cwd createDbDir]
-        "mmseqs" $ ["createdb"] ++ faPaths' ++ [dbPath]
+        "mmseqs-createdb-all.sh" $ [dbPath] ++ faPaths'
     symlink cfg ref out $ toCutPath cfg index
   return (ExprPath out')
 rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
@@ -192,9 +192,9 @@ aMmseqsSearchDb cfg ref ePath qDb sDb outDb = do
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
   let tmpDir = takeDirectory outDb </> "tmp" -- TODO align this with sonicparanoid
   liftIO $ createDirectoryIfMissing True tmpDir
-  wrappedCmdWrite True True cfg ref outDb [ePath, qDb, sDb] [] []
-    "mmseqs" ["search", "-e", eStr, qDb', sDb', outDb, tmpDir]
-  liftIO $ removeDirectoryRecursive tmpDir
+  wrappedCmdWrite True True cfg ref outDb [qDb, sDb] [] []
+    "mmseqs-search.sh" [outDb, tmpDir, eStr, qDb', sDb']
+  -- liftIO $ removeDirectoryRecursive tmpDir
 
 -- TODO remember to remove the .index extension when actually calling mmseqs
 aMmseqConvertAlis :: CutConfig -> Locks -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
@@ -203,12 +203,10 @@ aMmseqConvertAlis cfg ref qDb sDb outDbIndex outTab = do
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
   oDb' <- fmap dropExtension $ resolveMmseqsDb outDbIndex
-  wrappedCmdWrite False True cfg ref outTab [qDb, sDb, oDb' <.> "index"] [] [] "mmseqs"
-    [ "convertalis"
-    , qDb', sDb', oDb', outTab
+  wrappedCmdWrite False True cfg ref outTab [qDb, sDb, oDb' <.> "index"] [] []
+    "mmseqs-convertalis.sh" [outTab, qDb', sDb', oDb']
     -- TODO check this matches my existing blast hit tables, since mmseqs seems to have removed the format option?
     -- , "--format-output", "query target pident alnlen mismatch gapopen qstart qend tstart tend evalue bits"
-    ]
 
 -------------------
 -- mmseqs_search --

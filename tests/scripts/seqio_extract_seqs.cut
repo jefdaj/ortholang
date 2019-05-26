@@ -1,5 +1,5 @@
-fnaSmall = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
-faaSmall = load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa"
+fnaSmall = load_fna "data/Mycoplasma_genitalium_M2321_5genes.fna"
+faaSmall = load_faa "data/Mycoplasma_genitalium_M2321_5genes.faa"
 fnaSmallIDs = extract_ids fnaSmall
 faaSmallIDs = extract_ids faaSmall
 fnaSmallSeqs = extract_seqs fnaSmall fnaSmallIDs

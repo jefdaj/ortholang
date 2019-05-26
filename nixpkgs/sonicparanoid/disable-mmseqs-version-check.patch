@@ -1,0 +1,12 @@
+diff -Naur sonicparanoid-old/sonicparanoid/sonic_paranoid.py sonicparanoid-new/sonicparanoid/sonic_paranoid.py
+--- sonicparanoid-old/sonicparanoid/sonic_paranoid.py	2018-10-19 06:15:45.000000000 +0000
++++ sonicparanoid-new/sonicparanoid/sonic_paranoid.py	2019-05-21 17:44:05.137000000 +0000
+@@ -292,7 +292,7 @@
+     check_quick_multiparanoid_installation('FORCED TO TRUE: Sytem specific GCC version', True)
+     ####
+     # check MMseqs2 installation
+-    check_mmseqs_installation(root)
++    # check_mmseqs_installation(root)
+ 
+     # start measuring the execution time
+     ex_start = time.perf_counter()

@@ -8,14 +8,13 @@ import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import System.FilePath             ((</>), takeBaseName)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmd)
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmdWrite)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Core.Util          (digest, unlessExists)
 
 cutModule :: CutModule
 cutModule = CutModule
-  { mName = "SonicParanoid"
-  , mDesc = "Very fast, accurate, and easy orthology."
+  { mName = "SonicParanoid" , mDesc = "Very fast, accurate, and easy orthology."
   , mTypes = [faa, fna, spr]
   , mFunctions =
       [ sonicparanoid
@@ -50,6 +49,7 @@ sonicparanoid = let name = "sonicparanoid" in CutFunction
 
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
+-- TODO should get all results as an unusable file first, then extract what you want explicitly
 aSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
@@ -75,18 +75,23 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     let faLinks = map (\p -> toCutPath cfg $ inDir </> (takeBaseName $ fromCutPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
-    (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
-      [ "-sh", sharedDir
-      , "-db", dbDir -- TODO share this with the mmseqs2 module
-      , "-i", inDir
-      , "-o", tmpDir
-      , "-m", "fast" -- TODO set this based on fn name
-      , "-noidx" -- TODO optional?
-      , "-d" -- TODO set based on cfgDebug
-      , "-op" -- write ortholog pairs
-      -- , "-ka" -- TODO is this good?
-      ]
-    putNormal $ unlines [o, e] -- TODO remove
+    -- TODO decide mode based on fn name
+    -- TODO decide -d (debug) based on cfg? or leave one way?
+    wrappedCmdWrite True False cfg ref opPath' faPaths' [] []
+      "sonicparanoid.sh" [opPath', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
+
+    -- (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
+    --   [ "-sh", sharedDir
+    --   , "-db", dbDir -- TODO share this with the mmseqs2 module
+    --   , "-i", inDir
+    --   , "-o", tmpDir
+    --   , "-m", "fast" -- TODO set this based on fn name
+    --   , "-noidx" -- TODO optional?
+    --   , "-d" -- TODO set based on cfgDebug
+    --   , "-op" -- write ortholog pairs
+    --   -- , "-ka" -- TODO is this good?
+    --   ]
+    -- putNormal $ unlines [o, e] -- TODO remove
 
   symlink cfg ref out opPath
 

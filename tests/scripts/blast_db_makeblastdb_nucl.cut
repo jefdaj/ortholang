@@ -1,6 +1,6 @@
 single = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
-genes10 = load_fna "data/Mycoplasma_genitalium_M2321_10genes.fna"
-singles = [makeblastdb_nucl single, makeblastdb_nucl genes10]
-each = makeblastdb_nucl_each [single, genes10]
-both = makeblastdb_nucl_all [single, genes10]
+genes5 = load_fna "data/Mycoplasma_genitalium_M2321_5genes.fna"
+singles = [makeblastdb_nucl single, makeblastdb_nucl genes5]
+each = makeblastdb_nucl_each [single, genes5]
+both = makeblastdb_nucl_all [single, genes5]
 result = length_each [singles, each, singles | each, [both]]

@@ -12,19 +12,37 @@ second stage is to clean it up and separate .args/.sh files
 deduplicate interpreters from different modules? one myPython, myR etc.
 
 flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
+
+failing tests:
+  orthofinder_basic
+  orthofinder_orthogroups
+  orthogroups_orthogroup_containing
+  crb_blast_each2
+  blast_hits_filter_evalue
+  sonicparanoid_myco3
+
+include tests:
+  include one (two results! not right)
+  include two (three results!)
+  include nested
+
 deduplicate interpreters from different modules? one myPython, myR etc.
+
+flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
 
 rewrite system calls for better reliability (and mapping):
   x attempt to simplify module layout at the same time
   think about adding a wrappedCmd record with readable fields rather than unreadable positional arguments
-  functions to rewrite with scripts:
-    Sets
-    Blast: aMkBlastFromDb
-    BlastCRB: aCRBBlast
-    BlastDB: aMakeblastdbAll
-    Diamond: aDiamondFromDb
-    Hmmer: aHmmbuild, aHmmSearch
-    SonicParanoid: aSonicParanoid
+  also there shouldn't need to be different versions! all scripts should behave similarly
+  xx functions to rewrite with scripts:
+    xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
+    xx BlastDB: aMakeblastdbAll
+    xx Blast: aMkBlastFromDb
+    xx BlastCRB: aCRBBlast
+    xx Diamond: aDiamondFromDb
+    xx SonicParanoid: aSonicParanoid
+    xx Muscle: aMuscle
+    xx Hmmer: aHmmbuild, aHmmSearch, aExtractHmm
   need to send all stdout from individual commands to intermediate files rather than read it directly
     should never be able to confuse filenames with output like this:
       "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"

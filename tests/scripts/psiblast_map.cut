@@ -3,7 +3,7 @@
 
 # setup
 query   = load_faa "data/Mycoplasma_genitalium_single.faa"
-queries = split_faa (load_faa "data/Mycoplasma_genitalium_M2321_10genes.faa")
+queries = split_faa (load_faa "data/Mycoplasma_genitalium_M2321_5genes.faa")
 mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
 maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
 mgendb  = makeblastdb_prot mgen

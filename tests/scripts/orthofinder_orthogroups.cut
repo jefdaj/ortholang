@@ -1,4 +1,9 @@
-smallbacteria = load_faa_each ["data/Mycoplasma_agalactiae_small.faa",
-                               "data/Mycoplasma_genitalium_small.faa"]
-ofres = orthofinder smallbacteria
-result = orthogroups ofres
+# TODO make sure the whole folder gets removed on fail
+# TODO add a couple more?
+# TODO import orthofinder_basic?
+# smallbacteria = load_faa_each ["data/Mycoplasma_agalactiae_small.faa",
+#                                "data/Mycoplasma_genitalium_small.faa"]
+# ofres = orthogroups (orthofinder smallbacteria)
+include "orthofinder_basic.cut"
+# ofogs = orthogroups ofres
+# result = ofogs
