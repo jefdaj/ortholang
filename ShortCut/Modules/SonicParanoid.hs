@@ -6,11 +6,11 @@ import ShortCut.Core.Types
 
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import System.FilePath             ((</>), takeBaseName)
+import System.FilePath             ((</>), takeBaseName, takeDirectory)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmdWrite)
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmdWrite, readFileStrict)
 import System.Directory            (createDirectoryIfMissing)
-import ShortCut.Core.Util          (digest, unlessExists)
+import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -25,10 +25,13 @@ spr :: CutType
 spr = CutType
   { tExt  = "spr"
   , tDesc = "SonicParanoid results"
-  , tShow = defaultShow
-  -- , tShow = \_ ref path -> do
-  --     txt <- readFileStrict ref path
-  --     return $ unlines $ take 17 $ lines txt
+  -- , tShow = defaultShow
+  , tShow = \cfg ref path -> do
+      path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
+      let dir = takeDirectory $ takeDirectory path'
+          species = dir </> "species.txt"
+      nSpecies <- fmap (length . lines) $ readFileStrict ref species
+      return $ "sonicparanoid result " ++ takeBaseName dir ++ " (" ++ show nSpecies ++ " species)"
   }
 
 -------------------
@@ -64,7 +67,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       opPath      = toCutPath cfg opPath'
       faListPath' = fromCutPath cfg faListPath
       out'        = fromCutPath cfg out
-      out''       = debugA cfg "aSonicParanoid" out' [out', faListPath']
+      opPath''    = debugA cfg "aSonicParanoid" out' [out', opPath', faListPath']
 
   unlessExists opPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
@@ -77,7 +80,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
     -- TODO decide mode based on fn name
     -- TODO decide -d (debug) based on cfg? or leave one way?
-    wrappedCmdWrite True False cfg ref opPath' faPaths' [] []
+    wrappedCmdWrite True False cfg ref opPath'' faPaths' [] []
       "sonicparanoid.sh" [opPath', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
 
     -- (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
