@@ -246,6 +246,7 @@ instance Eq CutType where
   (CutType {tExt = t1}) == (CutType {tExt = t2}) = t1 == t2
   (CutTypeGroup {tgShort = t1}) == (CutTypeGroup {tgShort = t2}) = t1 == t2
   (CutTypeGroup {tgMember = fn}) == t = fn t
+  t == (CutTypeGroup {tgMember = fn}) = fn t
   _ == _ = False -- TODO should this behave differently?
 
 instance Show CutType where
@@ -488,12 +489,15 @@ explainFnBug =
 -- this mostly checks equality, but also has to deal with how an empty list can
 -- be any kind of list
 -- TODO is there any more elegant way? this seems error-prone...
+-- TODO is this the same as the Eq instance?
 typeMatches :: CutType -> CutType -> Bool
 typeMatches Empty _ = True
 typeMatches _ Empty = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
+typeMatches g1@(CutTypeGroup {}) g2@(CutTypeGroup {}) = g1 == g2
 typeMatches a (CutTypeGroup {tgMember = fn}) = fn a
+typeMatches (CutTypeGroup {tgMember = fn}) b = fn b
 typeMatches a b = a == b
 
 typesMatch :: [CutType] -> [CutType] -> Bool

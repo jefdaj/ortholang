@@ -45,8 +45,8 @@ orthofinder = let name = "orthofinder" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
-  , fDesc      = Just "Run OrthoFinder on a list of genomes in FASTA format.\n\
-                      \It produces lots of result files! Use the extract_* functions\n\
+  , fDesc      = Just "Run OrthoFinder on a list of proteomes in FASTA format.\n\
+                      \It produces lots of result files. Use the extract_* functions\n\
                       \or look in the TMPDIR to find the specific info you want."
   , fFixity    = Prefix
   , fRules     = rSimple aOrthofinder

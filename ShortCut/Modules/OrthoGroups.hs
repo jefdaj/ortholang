@@ -34,7 +34,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
-  , mTypes = [og]
+  , mTypes = [og] -- TODO ofr, spr too?
   , mFunctions =
       [ orthogroups
       , orthogroupContaining
@@ -58,6 +58,8 @@ og = CutTypeGroup
 -- orthogroups --
 -----------------
 
+-- for orthofinder, just parse result/Orthogroups/Orthogroups.txt
+-- for sonicparanoid?
 -- TODO list_groups?
 -- TODO separate module that works with multiple ortholog programs?
 -- TODO version to get the group matching an ID
@@ -66,18 +68,21 @@ orthogroups :: CutFunction
 orthogroups = let name = "orthogroups" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : og -> str.list.list"
-  , fTypeCheck = defaultTypeCheck [spr] (ListOf (ListOf str)) -- TODO or ofr!
+  , fTypeCheck = defaultTypeCheck [og] (ListOf (ListOf str)) -- TODO or ofr!
   , fDesc      = Just "Parse results from an ortholog finder and list genes in all orthogroups."
   , fFixity    = Prefix
-  , fRules     = rSimple aOrthogroups
+  , fRules     = rOrthogroups
   }
+
+rOrthogroups :: RulesFn
+rOrthogroups st e@(CutFun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
+rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
 
 findResDir :: CutConfig -> FilePath -> IO FilePath
 findResDir cfg outPath = do
   statsPath <- resolveSymlinks (Just $ cfgTmpDir cfg) outPath
   return $ takeDirectory $ takeDirectory statsPath
 
--- TODO write one of these for sonicparanoid too
 parseOrthoFinder :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> Action [[String]]
 parseOrthoFinder cfg ref idref resDir = do
   let orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
@@ -115,12 +120,15 @@ writeOrthogroups cfg ref _ out groups = do
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
-aOrthogroups :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aOrthogroups cfg ref idsref [out, ofrPath] = do
-  resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
-  groups <- parseSonicParanoid cfg ref idsref resDir -- TODO or parseOrthoFinder
+aOrthogroups :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroups rtn cfg ref idsref [out, ogPath] = do
+  resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ogPath
+  let parser = if      rtn == spr then parseSonicParanoid
+               else if rtn == ofr then parseOrthoFinder
+               else                    error $ "bad type for aOrthogroups: " ++ show rtn
+  groups <- parser cfg ref idsref resDir
   writeOrthogroups cfg ref idsref out groups
-aOrthogroups _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
+aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
 ---------------------------
 -- orthogroup_containing --
@@ -131,8 +139,8 @@ aOrthogroups _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
 orthogroupContaining :: CutFunction
 orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [ofr, str] (ListOf str)
-  , fTypeCheck = defaultTypeCheck [ofr, str] (ListOf str)
+  , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
   , fDesc      = Just "Given one gene ID, list others in the same orthogroup."
   , fFixity    = Prefix
   , fRules     = rSimple aOrthogroupContaining
@@ -152,11 +160,12 @@ aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContainin
 ----------------------------
 
 -- TODO think of a better name for this
+-- TODO should it start from og instead of ofr/spr?
 orthogroupsContaining :: CutFunction
 orthogroupsContaining = let name = "orthogroups_containing" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [ofr, ListOf str] (ListOf (ListOf str))
-  , fTypeCheck = defaultTypeCheck [ofr, ListOf str] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc  name [og, ListOf str] (ListOf (ListOf str))
+  , fTypeCheck = defaultTypeCheck [og, ListOf str] (ListOf (ListOf str))
   , fDesc      = Just "Given a list of gene IDs, list the orthogroups that contain any of them."
   , fFixity    = Prefix
   , fRules     = rSimple $ aOrthogroupsFilter containsOneOf

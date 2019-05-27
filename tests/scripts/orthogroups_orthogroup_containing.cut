@@ -1,3 +1,4 @@
-smallbacteria = load_faa_each (glob_files "data/Mycoplasma_*_small.faa")
-ofres = orthofinder smallbacteria
-result = orthogroup_containing ofres "AKO50238"
+small5 = load_faa_each (sample 5 (glob_files "data/Mycoplasma_*_refseq.faa"))
+ofres = orthofinder small5
+og662 = orthogroup_containing ofres "WP_013729662.1"
+result = og662
