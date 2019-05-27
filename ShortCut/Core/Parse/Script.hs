@@ -16,7 +16,7 @@ import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
 
-import Debug.Trace
+-- import Debug.Trace
 
 -------------------
 -- preprocessing --

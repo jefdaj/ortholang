@@ -5,5 +5,5 @@
 #                                "data/Mycoplasma_genitalium_small.faa"]
 # ofres = orthogroups (orthofinder smallbacteria)
 include "orthofinder_basic.cut"
-# ofogs = orthogroups ofres
-# result = ofogs
+ofogs = orthogroups ofres
+result = ofogs
