@@ -16,11 +16,6 @@ flag to tell shortcut how many machines it's running on, and you get that many p
 failing tests:
   crb_blast_each2
 
-include tests:
-  include one (two results! not right)
-  include two (three results!)
-  include nested
-
 deduplicate interpreters from different modules? one myPython, myR etc.
 
 flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
