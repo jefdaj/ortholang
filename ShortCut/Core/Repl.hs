@@ -271,7 +271,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
   if not dfe
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
-      let cfg' = cfg { cfgScript = Just path' }
+      let cfg' = cfg { cfgScript = Just path', cfgInteractive = False }
       new <- parseFile cfg' ref ids path'
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st

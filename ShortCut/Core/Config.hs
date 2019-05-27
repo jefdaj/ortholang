@@ -5,7 +5,7 @@ module ShortCut.Core.Config where
 import qualified Data.Configurator as C
 
 import Data.Configurator.Types    (Config, Worth(..))
-import Data.Maybe                 (fromJust)
+import Data.Maybe                 (isNothing, fromJust)
 import Data.Text                  (pack)
 import Development.Shake           (newResourceIO)
 -- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
@@ -45,8 +45,10 @@ loadConfig mods args = do
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   ctp <- loadField args cfg "pattern"
   par <- newResourceIO "parallel" 1
+  let int = isNothing csc' || (isPresent args $ longOption "interactive") -- TODO repl getter + setter? seems redundant
   return CutConfig
     { cfgScript  = csc'
+    , cfgInteractive = int
     , cfgTmpDir  = fromJust ctd
     , cfgWorkDir = fromJust cwd
     , cfgDebug   = isPresent args $ longOption "debug"
@@ -92,6 +94,7 @@ setConfigField cfg key val = case lookup key fields of
   Just (_, setter) -> setter cfg val
 
 -- TODO add modules? maybe not much need
+-- TODO add interactive?
 fields :: [(String, (CutConfig -> String,
                      CutConfig -> String -> Either String CutConfig))]
 fields =

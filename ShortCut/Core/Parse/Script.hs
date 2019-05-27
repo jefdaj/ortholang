@@ -16,7 +16,7 @@ import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
 
--- import Debug.Trace
+import Debug.Trace
 
 -------------------
 -- preprocessing --
@@ -73,7 +73,7 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   v@(CutVar _ vName) <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
-  when ((hasKeyAL v scr) && (vName /= "result")) $ error $ "duplicate variable '" ++ vName ++ "'"
+  when ((not $ cfgInteractive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
   e <- debugParseM "first pExpr" >> (lexeme pExpr)
   -- let scr' = case vName of
                -- -- "result" -> trace "stripping old result" $ stripResult scr ++ [(v, e)]
@@ -136,11 +136,12 @@ parseString c r ids = parseWithEof pScript ([], c, r, ids)
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
 -- Not sure why this should be necessary, but it was easier than fixing the parser to reject multiple results.
+-- TODO one result *per repeat ID*, not total!
 lastResultOnly :: CutScript -> CutScript
 lastResultOnly scr = otherVars ++ [lastRes]
   where
-    isResult ((CutVar _ v, _)) = v == "result"
-    (resVars, otherVars) = partition isResult scr
+    (resVars, otherVars) = partition (\(v, _) -> v == CutVar (ReplaceID Nothing) "result") scr
+    -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 
 -- TODO message in case it doesn't parse?

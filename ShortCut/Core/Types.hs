@@ -196,7 +196,9 @@ type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
 lookupResult :: [(CutVar, b)] -> Maybe b
-lookupResult = lookup (CutVar (ReplaceID Nothing) "result")
+lookupResult scr = if null matches then Nothing else Just (snd $ last matches)
+  where
+    matches = filter (\(CutVar _ v, _) -> v == "result") scr
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
 -- TODO how to make the record fields not partial functions?
@@ -336,6 +338,7 @@ num = CutType
 -- TODO rename cfg prefix to just c?
 data CutConfig = CutConfig
   { cfgScript  :: Maybe FilePath
+  , cfgInteractive :: Bool
   , cfgTmpDir  :: FilePath
   , cfgWorkDir :: FilePath
   , cfgDebug   :: Bool
