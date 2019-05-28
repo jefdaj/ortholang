@@ -12,11 +12,12 @@ import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleS
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions       (readPaths, readLit, debugA, wrappedCmdWrite)
+import ShortCut.Core.Actions       (readPaths, readLit, debugA, runCmd, CmdDesc(..))
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Modules.Blast      (bht)
 -- import System.Command              (readProcess)
 import System.Process              (readProcess)
+import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -120,7 +121,19 @@ rDiamondFromDb = rSimple . aDiamondFromDb
 aDiamondFromDb :: [String] -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
 aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
   eStr <- readLit  cfg ref e'
-  wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
+  -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "diamond.sh"
+    , cmdArguments = [o'', q', eStr, db'] ++ dCmd
+    , cmdFixEmpties = True
+    , cmdParallel = True
+    , cmdOptions = []
+    , cmdInPatterns = []
+    , cmdOutPath = o''
+    , cmdExtraOutPaths = []
+    , cmdExitCode = ExitSuccess
+    }
+ 
   where
     o'  = fromCutPath cfg o
     e'  = fromCutPath cfg e
