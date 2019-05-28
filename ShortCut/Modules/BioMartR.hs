@@ -1,5 +1,8 @@
 module ShortCut.Modules.BioMartR where
 
+-- TODO separate functions per database + type? get_refseq_proteome etc
+-- TODO get all the load_* fns to handle .gz files too
+
 -- TODO rename to start with biomartr_?
 -- TODO show progress downloading stuff first
 -- TODO can you just add refseq on the end of the query itself? wtf
@@ -15,15 +18,14 @@ module ShortCut.Modules.BioMartR where
 
 -- TODO what's the overall plan?
 --      1. parse searches regardless of function being used
---      2. feed search table to biomartr script along with fn name
+--      2. feed search table to biomartr cmd along with fn name
 
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Actions (readLits, writeLits, debugA, debugNeed)
+import ShortCut.Core.Actions (readLits, writeLits, debugA, debugNeed, runCmd, CmdDesc(..))
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
-import ShortCut.Core.Actions           (wrappedCmdWrite)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -36,6 +38,7 @@ import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
 -- import ShortCut.Core.Debug   (debugA)
 import System.Directory (createDirectoryIfMissing)
+import System.Exit (ExitCode(..))
 
 ------------------------
 -- module description --
@@ -240,8 +243,19 @@ aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   debugNeed cfg "aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
-  wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
-    "biomartr.R" [out'', bmFn', sTable']
+  -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
+  --   "biomartr.R" [out'', bmFn', sTable']
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "biomartr.R"
+    , cmdArguments = [out'', bmFn', sTable']
+    , cmdExitCode = ExitSuccess
+    , cmdOutPath = out''
+    , cmdFixEmpties = True
+    , cmdParallel = False
+    , cmdInPatterns = [bmFn', sTable']
+    , cmdExtraOutPaths = []
+    , cmdOptions = [Cwd bmTmp'] -- TODO remove?
+    }
   where
     out'    = fromCutPath cfg out
     bmFn'   = fromCutPath cfg bmFn

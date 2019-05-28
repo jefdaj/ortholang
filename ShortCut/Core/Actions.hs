@@ -36,6 +36,9 @@ module ShortCut.Core.Actions
   , debugL
 
   -- run system commands
+  -- TODO remove all these except one, and have it take a record
+  , CmdDesc(..)
+  , runCmd
   , wrappedCmd
   , wrappedCmdError
   , wrappedCmdExit
@@ -105,7 +108,7 @@ debugNeed cfg fnName paths = debug cfg msg $ need paths
 ----------------
 
 -- Action version of readFileStrict. This is used for all reads during a cut;
--- the raw one is just for showing results, reading script files etc.
+-- the raw one is just for showing results, reading cmd files etc.
 readFileStrict' :: CutConfig -> Locks -> FilePath -> Action String
 readFileStrict' cfg ref path = do
   debugNeed cfg "readFileStrict'" [path]
@@ -113,7 +116,7 @@ readFileStrict' cfg ref path = do
 -- {-# INLINE readFileStrict' #-}
 
 {- ShortCut requires empty strings to contain the text <<emptystr>> so we
- - can distinguish them from the empty files that might result from a script
+ - can distinguish them from the empty files that might result from a cmd
  - failing, and from empty lists in case of an error in the typechecker.  This
  - also gives empty lists and strings distinct hashes.
  -}
@@ -167,7 +170,7 @@ readStrings etype cfg ref path = if etype' `elem` [str, num]
           ++ extOf etype ++ ") from " ++ path) etype
 
 {- ShortCut requires empty lists to contain the text <<emptylist>> so we can
- - distinguish them from the empty files that might result from a script
+ - distinguish them from the empty files that might result from a cmd
  - failing, and from empty strings in case of an error in the typechecker.
  - This also gives empty lists and strings distinct hashes.
  -
@@ -293,7 +296,7 @@ wrappedCmdError bin n files = do
 
 {- ShortCut requires explicit empty files with contents like "<<emptylist>>" to
  - distinguish them from runtime errors. This function replaces those with
- - actual empty files before passing them to a script, so logic for that
+ - actual empty files before passing them to a cmd, so logic for that
  - doesn't have to be duplicated over and over.
  -}
 fixEmptyText :: CutConfig -> Locks -> FilePath -> Action FilePath
@@ -313,6 +316,67 @@ fixEmptyText cfg ref path = do
 -- TODO gather shake stuff into a Shake.hs module?
 --      could have config, debug, wrappedCmd, eval...
 -- TODO separate wrappedReadCmd with a shared lock?
+
+-- TODO multiple out patterns too?
+data CmdDesc = CmdDesc
+  { cmdBinary        :: String
+  , cmdArguments     :: [String]
+  , cmdFixEmpties    :: Bool
+  , cmdInPatterns    :: [String]
+  , cmdExtraOutPaths :: [String]
+  , cmdOptions       :: [CmdOption] -- TODO remove?
+  , cmdOutPath       :: FilePath -- TODO Maybe?
+  , cmdParallel      :: Bool
+  , cmdExitCode      :: ExitCode -- expected exit code (others are errors)
+  }
+
+{- One wrappedCmd equivalent function to rule them all.
+ - It's controlled by a CmdDesc record instead of a bunch of unnamed positional arguments,
+ - and will help enforce consistency because all the patterns are enforced in one place.
+ - TODO should it track the .out and .err files, or ignore them?
+ - TODO take CutState instead of individual cfg + locks?
+ - TODO if exit is wrong (usually non-zero), cat out stderr for user
+ - TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
+ -}
+runCmd :: CutConfig -> Locks -> CmdDesc -> Action ()
+runCmd cfg ref@(disk, _) desc = do
+  let stdoutPath = cmdOutPath desc <.> "out"
+      stderrPath = cmdOutPath desc <.> "err"
+  -- liftIO $ delay 1000000
+
+  inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns desc
+  inPaths' <- if cmdFixEmpties desc
+                then mapM (fixEmptyText cfg ref) inPaths
+                else return inPaths
+  -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
+  debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
+  -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
+  let writeLockFn = case (Just $ cmdOutPath desc) of -- TODO it's always Just now right?
+                      Nothing -> id
+                      Just o  -> \fn -> do
+                        debugL cfg $ "wrappedCmd acquiring write lock on '" ++ o ++ "'"
+                        withWriteLock' ref o fn
+      parLockFn = if cmdParallel desc
+                    then \f -> withResource (cfgParLock cfg) 1 $ writeLockFn f
+                    else writeLockFn
+
+  -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
+  parLockFn $ withReadLocks' ref inPaths' $ do
+    -- TODO remove opts?
+    Exit code <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
+      Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
+      Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
+    -- This is disabled because it can make the logs really big
+    -- debugL cfg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
+    debugTrackWrite cfg [stdoutPath, stderrPath] -- TODO does this happen here?
+    return ()
+
+    -- TODO use exitWith here?
+    when (code /= cmdExitCode desc) $ do
+      errTxt <- readFileStrict' cfg ref stderrPath
+      liftIO $ putStrLn errTxt
+
+  return () -- TODO out, err, code here?
 
 wrappedCmd :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
            -> [CmdOption] -> String -> [String]
