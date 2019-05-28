@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# TODO pick binwidths or suppress the default message about it
+
 suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(ggplot2))
 suppressPackageStartupMessages(require(readr))
@@ -24,7 +26,7 @@ read_string <- function(textFile)
   read_file(textFile) %>% trimws
 
 save_plot <- function(plot, plotPath)
-  ggsave(plot, filename=plotPath, device="png")
+  suppressMessages(ggsave(plot, filename=plotPath, device="png"))
 
 main <- function() {
   args <- commandArgs(trailingOnly = TRUE)

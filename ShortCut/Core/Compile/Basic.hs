@@ -32,7 +32,7 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
 import Data.IORef                 (atomicModifyIORef)
 import Data.List                  (intersperse)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Actions      (wrappedCmdWrite, debugA, debugL, debugNeed,
+import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, hashContent, writePaths, symlink)
 import ShortCut.Core.Locks        (withWriteLock')
@@ -40,6 +40,7 @@ import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
+import System.Exit                (ExitCode(..))
 
 debug :: CutConfig -> String -> a -> a
 debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
@@ -455,7 +456,18 @@ aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref
     actFn c r _ t (o:is) = let o'  = fromCutPath c o -- TODO better var names here
                                t'  = fromCutPath c t
                                is' = map (fromCutPath c) is
-                           in wrappedCmdWrite parCmd fixEmpties c r o' is' [] [Cwd t'] script (o':is')
+                           -- in wrappedCmdWrite parCmd fixEmpties c r o' is' [] [Cwd t'] script (o':is')
+                           in runCmd c r $ CmdDesc
+                             { cmdBinary = script
+                             , cmdArguments = o':is'
+                             , cmdFixEmpties = fixEmpties
+                             , cmdParallel = parCmd
+                             , cmdInPatterns = is'
+                             , cmdOutPath = o'
+                             , cmdExtraOutPaths = []
+                             , cmdOptions = [Cwd t'] -- TODO remove?
+                             , cmdExitCode = ExitSuccess
+                             }
     actFn _ _ _ _ _ = fail "bad argument to aSimpleScript actFn"
 aSimpleScript' _ _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 

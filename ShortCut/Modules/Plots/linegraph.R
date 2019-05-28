@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# TODO stop the "saving 7 x 7 image..." message
+
 suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(ggplot2))
 suppressPackageStartupMessages(require(readr))
@@ -30,7 +32,7 @@ read_string <- function(textFile)
   read_file(textFile) %>% trimws
 
 save_plot <- function(plot, plotPath)
-  ggsave(plot, filename=plotPath, device="png")
+  suppressMessages(ggsave(plot, filename=plotPath, device="png"))
 
 main <- function() {
   # args <- c('testplot.png', 'testtitle.txt', 'testnums.txt', 'testxlab.txt')

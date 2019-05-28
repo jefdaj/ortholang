@@ -31,7 +31,7 @@ def is_empty(filetotest):
         return line.startswith('<<empty')
 
 def main(outpath, inlist, emptylink):
-    print 'args:', outpath, emptylink, inlist
+    # print 'args:', outpath, emptylink, inlist
     all_empty = True
     with open(outpath, 'wb') as outfile:
         with open(inlist, 'r') as infiles:
