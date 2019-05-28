@@ -7,12 +7,13 @@ import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.Muscle (aln)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
-import ShortCut.Core.Actions (debugA, wrappedCmdWrite, readLit)
+import ShortCut.Core.Actions (debugA, runCmd, CmdDesc(..), readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
 -- import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
 import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
+import System.Exit (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -115,8 +116,19 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
       tmpDir = cfgTmpDir cfg </> "cache" </> "hmmsearch"
       tmpOut = tmpDir </> takeFileName out'
   liftIO $ createDirectoryIfMissing True tmpDir
-  wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [tmpOut] []
-    "hmmsearch.sh" [out'', eDec', tmpOut, hm', fa']
+  -- wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [tmpOut] []
+  --   "hmmsearch.sh" [out'', eDec', tmpOut, hm', fa']
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "hmmsearch.sh"
+    , cmdArguments = [out'', eDec', tmpOut, hm', fa']
+    , cmdFixEmpties = True
+    , cmdParallel = False
+    , cmdOptions = []
+    , cmdInPatterns = [e', hm', fa']
+    , cmdOutPath = out''
+    , cmdExtraOutPaths = [tmpOut]
+    , cmdExitCode = ExitSuccess
+    }
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aHmmsearch" out' [out', fa']
@@ -152,7 +164,18 @@ aExtractHmm n cfg ref _ [outPath, tsvPath] = do
   --     lits''  = if uniq then sort $ nub lits' else lits'
   --     lits''' = map (\l -> (words l) !! (n - 1)) lits''
   -- writeLits cfg ref outPath'' lits'''
-  wrappedCmdWrite False True cfg ref outPath'' [outPath'] [] [] "extract-hmm.py" [outPath', tsvPath', show n]
+  -- wrappedCmdWrite False True cfg ref outPath'' [outPath'] [] [] "extract-hmm.py" [outPath', tsvPath', show n]
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "extract-hmm.py"
+    , cmdArguments = [outPath', tsvPath', show n]
+    , cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOptions = []
+    , cmdInPatterns = []
+    , cmdOutPath = outPath''
+    , cmdExtraOutPaths = []
+    , cmdExitCode = ExitSuccess
+    }
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aExtractHmm" outPath' [show n, outPath', tsvPath']
