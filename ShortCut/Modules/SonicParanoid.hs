@@ -8,9 +8,10 @@ import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import System.FilePath             ((</>), takeBaseName, takeDirectory)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmdWrite, readFileStrict)
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), readFileStrict)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
+import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -80,8 +81,17 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
     -- TODO decide mode based on fn name
     -- TODO decide -d (debug) based on cfg? or leave one way?
-    wrappedCmdWrite True False cfg ref opPath'' faPaths' [] []
-      "sonicparanoid.sh" [opPath', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
+    runCmd cfg ref $ CmdDesc
+      { cmdBinary = "sonicparanoid.sh"
+      , cmdArguments = [opPath', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
+      , cmdFixEmpties = False -- TODO do that?
+      , cmdParallel = True
+      , cmdOptions = []
+      , cmdInPatterns = faPaths'
+      , cmdOutPath = opPath''
+      , cmdExtraOutPaths = []
+      , cmdExitCode = ExitSuccess
+      }
 
     -- (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
     --   [ "-sh", sharedDir
