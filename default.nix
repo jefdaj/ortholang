@@ -5,6 +5,8 @@ let
   blastdb    = import ./ShortCut/Modules/BlastDB;
   blastrbh   = import ./ShortCut/Modules/BlastRBH;
   crbblast   = import ./ShortCut/Modules/CRBBlast;
+  orthofinder = import ./ShortCut/Modules/OrthoFinder;
+  psiblast   = import ./ShortCut/Modules/PsiBlast;
   seqio      = import ./ShortCut/Modules/SeqIO;
   plots      = import ./ShortCut/Modules/Plots;
   hmmer      = import ./ShortCut/Modules/Hmmer;
@@ -34,6 +36,8 @@ let
     blastrbh
     muscle
     crbblast
+    orthofinder
+    psiblast
     seqio
     plots
     blasthits
@@ -41,9 +45,8 @@ let
     ncurses # TODO is this needed?
     pythonPackages.blastdbget
     myPython
-    psiblast-exb # TODO does this conflict with ncbi-blast+?
+    # psiblast-exb # TODO does this conflict with ncbi-blast+?
     hmmer
-    orthofinder
     diamond
     # cdhit
     sonicparanoid
@@ -57,6 +60,8 @@ let
     ++ blast.runDepends
     ++ blastrbh.runDepends
     ++ crbblast.runDepends
+    ++ orthofinder.runDepends
+    ++ psiblast.runDepends
     ++ blasthits.runDepends
     ++ muscle.runDepends
     ++ seqio.runDepends

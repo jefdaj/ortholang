@@ -9,13 +9,14 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.List                   (isPrefixOf)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, wrappedCmd)
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..))
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Util          (digest, readFileStrict, unlessExists)
 import ShortCut.Modules.SeqIO      (faa)
 import System.Directory            (createDirectoryIfMissing, renameDirectory)
 import System.FilePath             ((</>), takeFileName)
+import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -69,14 +70,18 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
-    (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "orthofinder"
-      [ "-f", tmpDir
-      , "-S", "diamond" -- use DIAMOND instead of BLAST+
-      , "-t", "8" -- TODO figure out with shake or ghc
-      , "-a", "8" -- TODO figure out with shake or ghc
-      ]
-    putNormal $ unlines [o, e] -- TODO remove
-
+    runCmd cfg ref $ CmdDesc
+      { cmdBinary = "orthofinder.sh"
+      , cmdArguments = [out'', tmpDir, "diamond"]
+      , cmdFixEmpties = False
+      , cmdParallel = False -- TODO fix this? it fails because of withResource somehow
+      , cmdOptions = []
+      , cmdInPatterns = faPaths'
+      , cmdOutPath = out''
+      , cmdExtraOutPaths = []
+      , cmdExitCode = ExitSuccess
+      }
+ 
     resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
     liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
 

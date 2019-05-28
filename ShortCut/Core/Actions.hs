@@ -320,7 +320,7 @@ fixEmptyText cfg ref path = do
 -- TODO multiple out patterns too?
 data CmdDesc = CmdDesc
   { cmdBinary        :: String
-  , cmdArguments     :: [String]
+  , cmdArguments     :: [String] -- TODO auto-include outpath before these?
   , cmdFixEmpties    :: Bool
   , cmdInPatterns    :: [String]
   , cmdExtraOutPaths :: [String]
@@ -351,17 +351,17 @@ runCmd cfg ref@(disk, _) desc = do
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
   debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
+  let parLockFn = if cmdParallel desc
+                    then \f -> withResource (cfgParLock cfg) 1 f
+                    else id
   let writeLockFn = case (Just $ cmdOutPath desc) of -- TODO it's always Just now right?
-                      Nothing -> id
+                      Nothing -> parLockFn
                       Just o  -> \fn -> do
                         debugL cfg $ "wrappedCmd acquiring write lock on '" ++ o ++ "'"
-                        withWriteLock' ref o fn
-      parLockFn = if cmdParallel desc
-                    then \f -> withResource (cfgParLock cfg) 1 $ writeLockFn f
-                    else writeLockFn
+                        withWriteLock' ref o $ parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
-  parLockFn $ withReadLocks' ref inPaths' $ do
+  writeLockFn $ withReadLocks' ref inPaths' $ do
     -- TODO remove opts?
     Exit code <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
       Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
@@ -369,12 +369,14 @@ runCmd cfg ref@(disk, _) desc = do
     -- This is disabled because it can make the logs really big
     -- debugL cfg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
     debugTrackWrite cfg [stdoutPath, stderrPath] -- TODO does this happen here?
-    return ()
+    -- return ()
 
     -- TODO use exitWith here?
     when (code /= cmdExitCode desc) $ do
-      errTxt <- readFileStrict' cfg ref stderrPath
-      liftIO $ putStrLn errTxt
+      hasErr <- doesFileExist stderrPath
+      when hasErr $ do
+        errTxt <- liftIO $ readFile stderrPath
+        liftIO $ putStrLn errTxt
 
   return () -- TODO out, err, code here?
 
@@ -493,7 +495,7 @@ hashContent :: CutConfig -> Locks -> CutPath -> Action String
 hashContent cfg ref path = do
   debugNeed cfg "hashContent" [path']
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
-  out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path']
+  out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
   let md5 = take digestLength $ head $ words out
   return md5
   where

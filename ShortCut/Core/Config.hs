@@ -44,7 +44,7 @@ loadConfig mods args = do
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   ctp <- loadField args cfg "pattern"
-  par <- newResourceIO "parallel" 1
+  par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive") -- TODO repl getter + setter? seems redundant
   return CutConfig
     { cfgScript  = csc'

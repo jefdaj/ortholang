@@ -1,3 +1,6 @@
+limit parallel commands to number of nodes, not always just 1
+should that be about how many threads shake gets too?
+
 first stage of the rewrite is to use a record for the wrappedCmd* fns
   should only need one of them since all scripts now?
   should have readable fields instead of positional args
