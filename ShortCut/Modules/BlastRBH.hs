@@ -5,13 +5,14 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (wrappedCmdWrite, debugA)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA)
 -- import ShortCut.Core.Debug         (debugA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
 import ShortCut.Modules.BlastDB    (ndb, pdb)
 import ShortCut.Modules.SeqIO      (faa)
+import System.Exit                 (ExitCode(..))
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
@@ -119,8 +120,17 @@ reciprocalBest = CutFunction
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 aReciprocalBest :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aReciprocalBest cfg ref _ [out, left, right] = do
-  wrappedCmdWrite False True cfg ref out'' [left', right'] [] []
-    "reciprocal_best.R" [out', left', right']
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = out''
+    , cmdInPatterns = [left', right']
+    , cmdExtraOutPaths = []
+    , cmdOptions =[]
+    , cmdBinary = "reciprocal_best.R"
+    , cmdArguments = [out', left', right']
+    , cmdExitCode = ExitSuccess
+    }
   where
     out'   = fromCutPath cfg out
     left'  = fromCutPath cfg left
