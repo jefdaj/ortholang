@@ -9,11 +9,12 @@ import ShortCut.Core.Types
 import Data.List                   (nub, sort)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (wrappedCmdOut, wrappedCmdWrite, writeLits, debugA)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), writeLits, debugA)
 -- import ShortCut.Core.Debug         (debugA )
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.CRBBlast   (crb)
+import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -99,9 +100,17 @@ extractTargetsEach = CutFunction
 
 aCutCol :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aCutCol uniq n cfg ref _ [outPath, tsvPath] = do
-  out <- wrappedCmdOut False True cfg ref [tsvPath'] [] [] "cut" ["-f", show n, tsvPath']
-  let results = if uniq then sort $ nub $ lines out else lines out
-  writeLits cfg ref outPath'' results
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = outPath''
+    , cmdInPatterns = [tsvPath']
+    , cmdExtraOutPaths = []
+    , cmdOptions =[]
+    , cmdBinary = "cut_tsv.sh"
+    , cmdArguments = [outPath', tsvPath', show n]
+    , cmdExitCode = ExitSuccess
+    }
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
@@ -138,8 +147,17 @@ filterEvalueEach = CutFunction
 
 aFilterEvalue :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aFilterEvalue cfg ref _ [out, evalue, hits] = do
-  wrappedCmdWrite False True cfg ref out'' [evalue', hits'] [] []
-    "filter_evalue.R" [out', evalue', hits']
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = out''
+    , cmdInPatterns = [evalue', hits']
+    , cmdExtraOutPaths = []
+    , cmdOptions =[]
+    , cmdBinary = "filter_evalue.R"
+    , cmdArguments = [out', evalue', hits']
+    , cmdExitCode = ExitSuccess
+    }
   where
     out'    = fromCutPath cfg out
     out''   = debugA cfg "aFilterEvalue" out' [out', evalue', hits']
@@ -180,7 +198,17 @@ bestHitsEach = CutFunction
 
 aBestExtract :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aBestExtract cfg ref _ [out, hits] = do
-  wrappedCmdWrite False True cfg ref out'' [hits'] [] [] "best_hits.R" [out', hits']
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = out''
+    , cmdInPatterns = [hits']
+    , cmdExtraOutPaths = []
+    , cmdOptions = []
+    , cmdBinary = "best_hits.R"
+    , cmdArguments = [out', hits']
+    , cmdExitCode = ExitSuccess
+    }
   where
     out'  = fromCutPath cfg out
     out'' = debugA cfg "aBestExtract" out' [out', hits']
