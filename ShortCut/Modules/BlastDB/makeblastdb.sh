@@ -8,4 +8,4 @@ DBTYPE="$3"
 
 TITLE="$(basename "$DBOUT")" # TODO basename as a dependency?
 
-makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE"
+makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE" > "${DBOUT}.out" 2> "${DBOUT}.err"

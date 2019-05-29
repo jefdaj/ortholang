@@ -13,7 +13,7 @@ import ShortCut.Core.Types
 
 import Data.Maybe                  (isJust)
 import Control.Monad               (when, forM)
-import ShortCut.Core.Actions       (wrappedCmdWrite, wrappedCmdExit,
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..),
                                     debugTrackWrite, readLit, readPaths, writeLit, readLits,
                                     writeLits, writePath, debugA, debugL, debugIO, debugNeed,
                                     cachedLinesPath, debugL, writeStrings, readStrings, writePaths,
@@ -35,6 +35,7 @@ import ShortCut.Core.Locks (withReadLock)
 import System.Process
 import Data.String.Utils (split)
 import Data.List (isPrefixOf)
+import System.Exit (ExitCode(..))
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -220,9 +221,17 @@ rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 aBlastdblist :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
 aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
-  _ <- wrappedCmdExit False True cfg ref (Just oPath) [] [Cwd tmpDir, Shell] -- TODO remove stderr?
-    "blastdbget" [tmpDir, ">", listTmp'] [1]
-  return ()
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = oPath
+    , cmdInPatterns = []
+    , cmdExtraOutPaths = []
+    , cmdOptions =[Cwd tmpDir] -- TODO remove?
+    , cmdBinary = "blastdblist.sh"
+    , cmdArguments = [tmpDir, listTmp']
+    , cmdExitCode = ExitFailure 1
+    }
   where
     listTmp' = fromCutPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
@@ -278,8 +287,17 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
   -- TODO was taxdb needed for anything else?
   debugL cfg $ "aBlastdbget dbPrefix'': " ++ dbPrefix''
   debugL cfg $ "aBlastdbget dbPath: " ++ dbPath
-  _ <- wrappedCmdWrite False True cfg ref dbPrefix'' [] [] [Cwd tmp']
-         "blastdbget" ["-d", dbName, "."]
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = dbPrefix''
+    , cmdInPatterns = []
+    , cmdExtraOutPaths = []
+    , cmdOptions =[Cwd tmp'] -- TODO remove?
+    , cmdBinary = "blastdbget.sh"
+    , cmdArguments = [tmp', dbName]
+    , cmdExitCode = ExitSuccess
+    }
   writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
   where
     tmp'       = fromCutPath cfg tmpDir
@@ -403,7 +421,17 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   when (length before < 3) $ do
     debugL cfg $ "this is dbPtn: " ++ dbPtn
     debugL cfg $ "this will be dbOut: " ++ dbOut
-    wrappedCmdWrite False True cfg ref out' [dbPtn] [] [] "makeblastdb.sh" [dbOut, fixedPaths, dbType']
+    runCmd cfg ref $ CmdDesc
+      { cmdParallel = False
+      , cmdFixEmpties = True
+      , cmdOutPath = out'
+      , cmdInPatterns = [dbPtn]
+      , cmdExtraOutPaths = []
+      , cmdOptions =[]
+      , cmdBinary = "makeblastdb.sh"
+      , cmdArguments = [dbOut, fixedPaths, dbType']
+      , cmdExitCode = ExitSuccess
+      }
     after <- listPrefixFiles dbPtn
     debugL cfg $ "these actual db files were created: " ++ show after
     when (length after < 3) (error "makeblastdb failed (< 3 db files created)")
