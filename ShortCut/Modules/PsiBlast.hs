@@ -12,7 +12,7 @@ module ShortCut.Modules.PsiBlast where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPath, 
-                                    wrappedCmdWrite, debugL, debugA, debugNeed,
+                                    runCmd, CmdDesc(..), debugL, debugA, debugNeed,
                                     writeCachedLines, readFileStrict')
 import ShortCut.Core.Compile.Basic (defaultTypeCheck)
 import ShortCut.Core.Paths         (fromCutPath, cacheDir)
@@ -28,6 +28,7 @@ import ShortCut.Modules.SeqIO      (mkConcat)
 import ShortCut.Core.Compile.Compose (compose1)
 import ShortCut.Core.Compile.Map (rMap)
 import System.Directory            (createDirectoryIfMissing)
+import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -166,8 +167,6 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromCutPath cfg $ cacheDir cfg "psiblast"
       dbPre' = fromCutPath cfg dbPre
-      args' = ["-query", qPath', "-evalue", eDec, "-db", dbPre'] ++ args ++ [tPath']
-           ++ ["&&", "touch", tPath'] -- in case no pssm created because no hits
 
         -- , "-num_threads", "8"    -- TODO add this in the wrapper script
         -- , "-out", undefined      -- TODO include this?
@@ -194,12 +193,18 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
       -- TODO need Cwd here too, or maybe instead?
       let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
-      wrappedCmdWrite False True cfg ref tPath'
-        [dbPre' ++ ".*"]        -- inPtns TODO is this right?
-        []                      -- extra outPaths to lock TODO more -out stuff?
-        [Shell, AddEnv "BLASTDB" cDir] -- opts TODO Shell? more specific cache?
-        -- psiblastBin args'
-        "psiblast" args'
+
+      runCmd cfg ref $ CmdDesc
+        { cmdBinary = "psiblast.sh"
+        , cmdInPatterns = [dbPre' ++ ".*"]
+        , cmdExtraOutPaths = []
+        , cmdOptions = []
+        , cmdArguments = [tPath', cDir, qPath', eDec, dbPre'] ++ args
+        , cmdParallel = False -- TODO true, but have to fix first
+        , cmdFixEmpties = True
+        , cmdExitCode = ExitSuccess
+        , cmdOutPath = tPath' -- note that it isn't the final outpath
+        }
     
       -- TODO instead of wrappedCmdWrite, check explicitly for tPath'
       --      and write a "no hits, empty pssm" message if needed
