@@ -9,6 +9,6 @@ QDB="$4"
 SDB="$5"
 
 cmd="mmseqs search -e "$ESTR" "$QDB" "$SDB" "$OUTDB" "$TDIR" > "${OUTDB}.out" 2> "${OUTDB}.err""
-echo "$cmd"
+# echo "$cmd"
 eval "$cmd"
 rm -rf "$TDIR" # TODO from haskell?
