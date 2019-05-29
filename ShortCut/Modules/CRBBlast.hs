@@ -7,7 +7,7 @@ import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import ShortCut.Core.Actions       (wrappedCmdWrite, symlink, debugA, debugNeed)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), symlink, debugA, debugNeed)
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMapTmps)
@@ -15,6 +15,7 @@ import ShortCut.Core.Compile.Map  (rMapTmps)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna, fa)
+import System.Exit (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -101,8 +102,17 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   debugNeed cfg "aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
-  wrappedCmdWrite True True cfg ref oPath [qSrc, tSrc] [] [Cwd tmp'] -- TODO is it parallel?
-    "crb-blast.sh" [oPath, tmp', qSrc, tSrc]
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False -- TODO true?
+    , cmdFixEmpties = True
+    , cmdOutPath = oPath
+    , cmdInPatterns = [qSrc, tSrc]
+    , cmdExtraOutPaths = []
+    , cmdOptions =[Cwd tmp'] -- TODO remove?
+    , cmdBinary = "crb-blast.sh"
+    , cmdArguments = [oPath, tmp', qSrc, tSrc]
+    , cmdExitCode = ExitSuccess
+    }
   symlink cfg ref o'' oPath'
   where
     o'   = fromCutPath cfg o
