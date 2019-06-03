@@ -6,12 +6,13 @@ module ShortCut.Modules.BlastHits where
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.List                   (nub, sort)
+import System.FilePath             ((<.>))
+import ShortCut.Core.Util          (unlessExists)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), writeLits, debugA)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, symlink)
 -- import ShortCut.Core.Debug         (debugA )
-import ShortCut.Core.Paths         (CutPath, fromCutPath)
+import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.CRBBlast   (crb)
 import System.Exit                 (ExitCode(..))
@@ -98,8 +99,9 @@ extractTargetsEach = CutFunction
   where
     name = "extract_targets_each"
 
+-- TODO remove uniq, unless it's used somewhere?
 aCutCol :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aCutCol uniq n cfg ref _ [outPath, tsvPath] = do
+aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -111,6 +113,12 @@ aCutCol uniq n cfg ref _ [outPath, tsvPath] = do
     , cmdArguments = [outPath', tsvPath', show n]
     , cmdExitCode = ExitSuccess
     }
+
+  -- TODO remove this? why does it need to be here at all?
+  -- let outOut = outPath' <.> "out"
+  -- unlessExists outOut $ do
+  --   symlink cfg ref outPath $ toCutPath cfg outOut
+
   where
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
