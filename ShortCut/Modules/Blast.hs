@@ -141,7 +141,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "blast.sh"
-    , cmdArguments = [o'', prefix', bCmd', eDec, q', p']
+    , cmdArguments = [o'', bCmd', eDec, q', prefix']
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO make it parallel again?
     , cmdOptions = []

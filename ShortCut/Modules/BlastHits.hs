@@ -10,7 +10,7 @@ import System.FilePath             ((<.>))
 import ShortCut.Core.Util          (unlessExists)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, symlink, writeCachedVersion)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, symlink, writeCachedVersion, debugTrackWrite)
 -- import ShortCut.Core.Debug         (debugA )
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
@@ -113,6 +113,7 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     , cmdArguments = [tmpPath', tsvPath', show n]
     , cmdExitCode = ExitSuccess
     }
+  debugTrackWrite cfg [tmpPath']
   writeCachedVersion cfg ref outPath'' tmpPath'
 
   -- TODO remove this? why does it need to be here at all?
@@ -146,8 +147,8 @@ filterEvalue = CutFunction
 filterEvalueEach :: CutFunction
 filterEvalueEach = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf hittable)
-  , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf hittable)
+  , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
   , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 2 aFilterEvalue
@@ -185,8 +186,8 @@ aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show arg
 bestHits :: CutFunction
 bestHits =  CutFunction
   { fName      = name 
-  , fTypeCheck = defaultTypeCheck [hittable] hittable
-  , fTypeDesc  = mkTypeDesc name  [hittable] hittable
+  , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
+  , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
   , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
@@ -197,8 +198,8 @@ bestHits =  CutFunction
 bestHitsEach :: CutFunction
 bestHitsEach = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf hittable)
-  , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf hittable)
+  , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
   , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 aBestExtract
