@@ -9,6 +9,7 @@
 
 from Bio import SeqIO
 from sys import argv
+from os.path import basename
 
 # silence warnings
 import warnings
@@ -53,7 +54,10 @@ with open(outfaa, 'w') as out:
         continue
       # assert len(seq_feature.qualifiers['locus_tag']) == 1
       # assert len(seq_feature.qualifiers['product']) == 1
-      # assert len(seq_feature.qualifiers['translation']) == 1
       sid = seqid(seq_feature)
-      seq   = seq_feature.qualifiers['translation'][0]
+      if not 'translation' in seq_feature.qualifiers:
+          print "WARNING! gbk_to_faa ignored '%s' because it has no translation" % sid
+          continue
+      assert len(seq_feature.qualifiers['translation']) == 1
+      seq = seq_feature.qualifiers['translation'][0]
       out.write(">%s\n%s\n" % (sid, seq))
