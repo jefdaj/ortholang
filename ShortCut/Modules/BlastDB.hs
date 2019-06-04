@@ -12,7 +12,7 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Data.Maybe                  (isJust)
-import Control.Monad               (when, forM)
+import Control.Monad               (when, forM, unless)
 import ShortCut.Core.Actions       (runCmd, CmdDesc(..),
                                     debugTrackWrite, readLit, readPaths, writeLit, readLits,
                                     writeLits, writePath, debugA, debugL, debugIO, debugNeed,
@@ -23,7 +23,7 @@ import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
                                     toCutPath, CutPath)
 import ShortCut.Core.Util          (stripWhiteSpace, resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna)
-import System.FilePath             (takeFileName, takeBaseName, (</>), (<.>),
+import System.FilePath             (takeFileName, takeBaseName, takeExtension, (</>), (<.>),
                                     makeRelative, takeDirectory)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
@@ -432,10 +432,18 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
       , cmdArguments = [dbOut, fixedPaths, dbType']
       , cmdExitCode = ExitSuccess
       }
+
+    -- check that all the right files were created
     after <- listPrefixFiles dbPtn
-    debugL cfg $ "these actual db files were created: " ++ show after
-    when (length after < 3) (error "makeblastdb failed (< 3 db files created)")
+    liftIO $ putStrLn "running makeblastdb"
     debugTrackWrite cfg after
+    let expected = if dbType == ndb
+                     then [".nhr", ".nin", ".nsq"]
+                     else [".phr", ".pin", ".psq"]
+        success = all (\e -> e `elem` (map takeExtension after)) expected
+    debugL cfg $ "these actual db files were created: " ++ show after
+    unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
+    
     debugL cfg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
   writePath cfg ref out'' dbOut'

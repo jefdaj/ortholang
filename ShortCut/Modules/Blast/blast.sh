@@ -11,8 +11,8 @@ PPATH="$5" # TODO why not QPATH?
 DBDIR="$(dirname "$PPATH")"
 DBNAME="$(basename "$PPATH")"
 
-export BLASTDB="$(dirname "$DBDIR")" # TODO DBPATH?
 cd "$DBDIR" # TODO remove?
+export BLASTDB="$DBNAME" # TODO DBPATH?
 
 # TODO query on stdin like the current haskell code?
 # TODO should this .out + .err + mv thing be a regular practice everywhere?

@@ -498,12 +498,20 @@ wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = actionRe
 -- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 
 -- TODO fixEmpties should be False here, but don't want to break existing tmpdir just yet
+-- TODO take mod time into account to avoid re-hashing (see if Shake exports that code)
 hashContent :: CutConfig -> Locks -> CutPath -> Action String
-hashContent cfg ref path = do
+hashContent cfg ref@(disk, _) path = do
   debugNeed cfg "hashContent" [path']
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
-  out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
+  -- out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
+       -- $ withReadLock' locks path
+  need [path']
+  Stdout out <- withReadLock' ref path' $ withResource disk 1 $ case cfgWrapper cfg of
+    Nothing -> command [] "md5sum" [path']
+    Just w  -> command [Shell] w ["md5sum", path']
+  -- liftIO $ putStrLn $ "out: " ++ out
   let md5 = take digestLength $ head $ words out
+  -- liftIO $ putStrLn $ "md5: " ++ md5
   return md5
   where
     path' = fromCutPath cfg path
