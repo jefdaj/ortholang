@@ -27,6 +27,7 @@ module ShortCut.Core.Actions
   , writeString
   , writeStrings
   , writeCachedLines
+  , writeCachedVersion
 
   -- debugging
   , debugNeed
@@ -220,6 +221,12 @@ writeCachedLines cfg ref outPath content = do
     $ writeFile' cache (unlines content) -- TODO is this strict?
   unlessExists outPath $
     symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
+
+-- like writeCachedLines but starts from a file written by a script
+writeCachedVersion :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
+writeCachedVersion cfg ref outPath inPath = do
+  content <- fmap lines $ readFileStrict' cfg ref inPath
+  writeCachedLines cfg ref outPath content
 
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?

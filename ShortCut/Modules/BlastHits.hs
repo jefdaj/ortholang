@@ -10,7 +10,7 @@ import System.FilePath             ((<.>))
 import ShortCut.Core.Util          (unlessExists)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, symlink)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, symlink, writeCachedVersion)
 -- import ShortCut.Core.Debug         (debugA )
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
@@ -105,14 +105,15 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
-    , cmdOutPath = outPath''
+    , cmdOutPath = tmpPath'
     , cmdInPatterns = [tsvPath']
     , cmdExtraOutPaths = []
     , cmdOptions =[]
     , cmdBinary = "cut_tsv.sh"
-    , cmdArguments = [outPath', tsvPath', show n]
+    , cmdArguments = [tmpPath', tsvPath', show n]
     , cmdExitCode = ExitSuccess
     }
+  writeCachedVersion cfg ref outPath'' tmpPath'
 
   -- TODO remove this? why does it need to be here at all?
   -- let outOut = outPath' <.> "out"
@@ -123,6 +124,7 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
+    tmpPath'  = outPath'' <.> "tmp" -- the non-deduped version
 aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 
 --------------------------
