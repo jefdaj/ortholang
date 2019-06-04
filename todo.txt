@@ -1,5 +1,7 @@
-limit parallel commands to number of nodes, not always just 1
-should that be about how many threads shake gets too?
+list dedup bug:
+  is it in extract_queries?
+  more generally, i probably need to write a "dedup result" function to run after all scripts
+    ideally also a separate script so it can run on a different node?
 
 first stage of the rewrite is to use a record for the wrappedCmd* fns
   should only need one of them since all scripts now?
@@ -18,6 +20,11 @@ flag to tell shortcut how many machines it's running on, and you get that many p
 
 failing tests:
   crb_blast_each2
+
+include tests:
+  include one (two results! not right)
+  include two (three results!)
+  include nested
 
 deduplicate interpreters from different modules? one myPython, myR etc.
 
