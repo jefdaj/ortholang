@@ -127,6 +127,7 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
     , cmdInPatterns = [e', hm', fa']
     , cmdOutPath = out''
     , cmdExtraOutPaths = [tmpOut]
+    , cmdSanitizePaths = [out'']
     , cmdExitCode = ExitSuccess
     }
   where
@@ -174,6 +175,7 @@ aExtractHmm n cfg ref _ [outPath, tsvPath] = do
     , cmdInPatterns = []
     , cmdOutPath = outPath''
     , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [] -- TODO sanitize outpath?
     , cmdExitCode = ExitSuccess
     }
   where

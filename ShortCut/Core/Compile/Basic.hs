@@ -469,6 +469,7 @@ aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref
                              , cmdInPatterns = is'
                              , cmdOutPath = o'
                              , cmdExtraOutPaths = []
+                             , cmdSanitizePaths = []
                              , cmdOptions = [Cwd t'] -- TODO remove?
                              , cmdExitCode = ExitSuccess
                              }

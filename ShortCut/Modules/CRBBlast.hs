@@ -108,6 +108,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
     , cmdOutPath = oPath
     , cmdInPatterns = [qSrc, tSrc]
     , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
     , cmdOptions =[Cwd tmp'] -- TODO remove?
     , cmdBinary = "crb-blast.sh"
     , cmdArguments = [oPath, tmp', qSrc, tSrc]

@@ -79,6 +79,7 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       , cmdInPatterns = faPaths'
       , cmdOutPath = out''
       , cmdExtraOutPaths = []
+      , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
       }
  

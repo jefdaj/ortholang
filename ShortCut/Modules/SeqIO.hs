@@ -366,6 +366,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     , cmdInPatterns = [faPath']
     , cmdOutPath = tmpList
     , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [tmpList]
     , cmdExitCode = ExitSuccess
     }
   -- loadPaths <- readPaths cfg ref tmpList

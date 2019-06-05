@@ -127,6 +127,7 @@ aReciprocalBest cfg ref _ [out, left, right] = do
     , cmdOutPath = out''
     , cmdInPatterns = [left', right']
     , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
     , cmdOptions =[]
     , cmdBinary = "reciprocal_best.R"
     , cmdArguments = [out', left', right']

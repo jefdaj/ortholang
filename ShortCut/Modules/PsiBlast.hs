@@ -198,6 +198,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
         { cmdBinary = "psiblast.sh"
         , cmdInPatterns = [dbPre' ++ ".*"]
         , cmdExtraOutPaths = []
+        , cmdSanitizePaths = []
         , cmdOptions = []
         , cmdArguments = [tPath', cDir, qPath', eDec, dbPre'] ++ args
         , cmdParallel = False -- TODO true, but have to fix first

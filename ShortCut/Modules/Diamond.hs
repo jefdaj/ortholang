@@ -12,12 +12,13 @@ import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleS
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions       (readPaths, readLit, debugA, runCmd, CmdDesc(..))
+import ShortCut.Core.Actions       (readPaths, readLit, debugA, runCmd, CmdDesc(..), sanitizeFileInPlace)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Modules.Blast      (bht)
 -- import System.Command              (readProcess)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
+import System.FilePath             ((<.>))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -131,8 +132,10 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     , cmdInPatterns = []
     , cmdOutPath = o''
     , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [o'' <.> "out"]
     , cmdExitCode = ExitSuccess
     }
+  sanitizeFileInPlace cfg ref o'
  
   where
     o'  = fromCutPath cfg o

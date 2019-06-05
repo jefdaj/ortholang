@@ -148,6 +148,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     , cmdInPatterns = [ptn]
     , cmdOutPath = o''
     , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
     }
  

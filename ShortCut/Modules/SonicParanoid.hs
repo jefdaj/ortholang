@@ -90,6 +90,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       , cmdInPatterns = faPaths'
       , cmdOutPath = opPath''
       , cmdExtraOutPaths = []
+      , cmdSanitizePaths = []
       , cmdExitCode = ExitSuccess
       }
 

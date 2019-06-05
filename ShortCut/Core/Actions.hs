@@ -28,6 +28,8 @@ module ShortCut.Core.Actions
   , writeStrings
   , writeCachedLines
   , writeCachedVersion
+  , sanitizeFileInPlace
+  , sanitizeFilesInPlace
 
   -- debugging
   , debugNeed
@@ -218,6 +220,7 @@ writeCachedLines cfg ref outPath content = do
   symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
+-- TODO remove in favor of sanitizeFileInPlace?
 writeCachedVersion :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
 writeCachedVersion cfg ref outPath inPath = do
   content <- fmap lines $ readFileStrict' cfg ref inPath
@@ -312,9 +315,10 @@ fixEmptyText cfg ref path = do
 data CmdDesc = CmdDesc
   { cmdBinary        :: String
   , cmdArguments     :: [String] -- TODO auto-include outpath before these?
-  , cmdFixEmpties    :: Bool
+  , cmdFixEmpties    :: Bool -- TODO version for after too?
   , cmdInPatterns    :: [String]
-  , cmdExtraOutPaths :: [String]
+  , cmdExtraOutPaths :: [FilePath]
+  , cmdSanitizePaths :: [FilePath]
   , cmdOptions       :: [CmdOption] -- TODO remove?
   , cmdOutPath       :: FilePath -- TODO Maybe?
   , cmdParallel      :: Bool
@@ -360,7 +364,7 @@ runCmd cfg ref@(disk, _) desc = do
       Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
     -- This is disabled because it can make the logs really big
     -- debugL cfg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    debugTrackWrite cfg [stdoutPath, stderrPath] -- TODO does this happen here?
+    -- debugTrackWrite cfg [stdoutPath, stderrPath] -- TODO does this happen here?
     -- return ()
 
     -- TODO use exitWith here?
@@ -369,6 +373,10 @@ runCmd cfg ref@(disk, _) desc = do
       when hasErr $ do
         errTxt <- liftIO $ readFile stderrPath
         liftIO $ putStrLn errTxt
+
+  let sPaths = stdoutPath:stderrPath:cmdSanitizePaths desc -- TODO main outpath too?
+  -- sanitizeFilesInPlace cfg ref $ cmdSanitizePaths desc
+  sanitizeFilesInPlace cfg ref sPaths
 
   return () -- TODO out, err, code here?
 
@@ -455,8 +463,22 @@ symlink cfg ref src dst = withWriteOnce ref src' $ do
     dst' = fromCutPath cfg dst
     dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
 
--- Apply toGeneric to sanitize the output of a script
--- toGenericFile :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
--- toGenericFile cfg ref inPath outPath = do
---   txt <- readPaths cfg ref inPath
---   return ()
+-- Apply toGeneric to sanitize the output(s) of a script
+-- Should be done before trackWrite to avoid confusing Shake
+sanitizeFileInPlace :: CutConfig -> Locks -> FilePath -> Action ()
+sanitizeFileInPlace cfg ref path = do
+  -- txt <- readFileStrict' cfg ref path
+  exists <- doesFileExist path
+  when exists $ do
+    txt <- liftIO $ readFileStrict ref path -- can't use need here
+    let txt' = toGeneric cfg txt
+    -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
+    writeFile' path txt'
+    debugTrackWrite cfg [path]
+    -- writeFile' path $ toGeneric cfg txt
+    -- writeCachedLines cfg ref path []
+
+-- Apply toGeneric to sanitize the output(s) of a script
+-- Should be done before trackWrite to avoid confusing Shake
+sanitizeFilesInPlace :: CutConfig -> Locks -> [FilePath] -> Action ()
+sanitizeFilesInPlace cfg ref = mapM_ (sanitizeFileInPlace cfg ref)
