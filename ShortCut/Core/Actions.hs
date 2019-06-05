@@ -40,11 +40,6 @@ module ShortCut.Core.Actions
   -- TODO remove all these except one, and have it take a record
   , CmdDesc(..)
   , runCmd
-  , wrappedCmd
-  , wrappedCmdError
-  , wrappedCmdExit
-  , wrappedCmdOut
-  , wrappedCmdWrite
 
   -- misc
   -- , digestFile  -- TODO what's the difference with hashContent?
@@ -70,7 +65,7 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
                                    stringCutPath)
-import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, unlessExists,
+import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict,
                                    ignoreExistsError, digest, globFiles, isEmpty)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteOnce)
@@ -219,8 +214,8 @@ writeCachedLines cfg ref outPath content = do
   withWriteOnce ref cache
     $ debug cfg ("writing '" ++ cache ++ "'")
     $ writeFile' cache (unlines content) -- TODO is this strict?
-  unlessExists outPath $
-    symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
+  -- unlessExists outPath $ -- TODO remove?
+  symlink cfg ref (toCutPath cfg outPath) (toCutPath cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
 writeCachedVersion :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
@@ -289,18 +284,6 @@ debugTrackWrite cfg fs = do
 -- run system commands --
 -------------------------
 
--- TODO is the a type a good way to do this? it never actually gets evaluated
-wrappedCmdError :: String -> Int -> [String] -> Action a
-wrappedCmdError bin n files = do
-  let files' = sort $ nub files
-  liftIO $ rmAll files' -- TODO should these be patterns to match first?
-  -- TODO does this get caught by recoverAll in eval? make sure it does!
-  -- TODO also try adding a manual flush before each external command in case it's an io delay thing
-  error $ unlines $
-    [ "Oh no! " ++ bin ++ " failed with error code " ++ show n ++ "."
-    , "The files it was working on have been deleted:"
-    ] ++ files'
-
 {- ShortCut requires explicit empty files with contents like "<<emptylist>>" to
  - distinguish them from runtime errors. This function replaces those with
  - actual empty files before passing them to a cmd, so logic for that
@@ -354,7 +337,7 @@ runCmd cfg ref@(disk, _) desc = do
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns desc
   inPaths' <- if cmdFixEmpties desc
                 then mapM (fixEmptyText cfg ref) inPaths
-                else return inPaths
+                else debugNeed cfg "runCmd" inPaths >> return inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
   debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
@@ -364,12 +347,13 @@ runCmd cfg ref@(disk, _) desc = do
   let writeLockFn = case (Just $ cmdOutPath desc) of -- TODO it's always Just now right?
                       Nothing -> parLockFn
                       Just o  -> \fn -> do
-                        debugL cfg $ "wrappedCmd acquiring write lock on '" ++ o ++ "'"
+                        debugL cfg $ "runCmd acquiring write lock on '" ++ o ++ "'"
                         withWriteLock' ref o $ parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   writeLockFn $ withReadLocks' ref inPaths' $ do
     -- TODO remove opts?
+    -- TODO always assume disk is 1?
     Exit code <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
       Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
       Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
@@ -386,106 +370,6 @@ runCmd cfg ref@(disk, _) desc = do
         liftIO $ putStrLn errTxt
 
   return () -- TODO out, err, code here?
-
-wrappedCmd :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
-           -> [CmdOption] -> String -> [String]
-           -> Action (String, String, Int)
-wrappedCmd parCmd fixEmpties cfg ref@(disk, _) mOut inPtns opts bin args = actionRetry 5 $ do
-  -- liftIO $ delay 1000000
-  inPaths  <- fmap concat $ liftIO $ mapM globFiles inPtns
-  inPaths' <- if fixEmpties
-                then mapM (fixEmptyText cfg ref) inPaths
-                else return inPaths
-  -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
-  debugL cfg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
-  -- debugL cfg $ "wrappedCmd cfg: " ++ show cfg
-  let writeLockFn = case mOut of
-                      Nothing -> id
-                      Just o  -> \fn -> do
-                        debugL cfg $ "wrappedCmd acquiring write lock on '" ++ o ++ "'"
-                        withWriteLock' ref o fn
-      parLockFn = if parCmd
-                    then \f -> withResource (cfgParLock cfg) 1 $ writeLockFn f
-                    else writeLockFn
-
-  -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
-  parLockFn $ withReadLocks' ref inPaths' $ do
-    (Stdout out, Stderr err, Exit code) <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
-      Nothing -> command opts bin args
-      Just w  -> command (Shell:opts) w [escape $ unwords (bin:args)]
-    let code' = case code of
-                  ExitSuccess   -> 0
-                  ExitFailure n -> n
-    -- This is disabled because it can make the logs really big
-    -- debugL cfg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    return (out, err, code')
-
-{- OK I think this is an issue of immediately returning rather than waiting for
- - another thread to write the same output file? then it hasn't been tracked as
- - written yet or something?
- -}
-
--- Note that this one doesn't have wrappedCmdError,
--- because it's used for when you expect a nonzero exit code.
--- TODO write some other error checking to go along with it!
--- TODO track writes?
--- TODO just return the output + exit code directly and let the caller handle it
--- TODO issue with not re-raising errors here?
-wrappedCmdExit :: Bool -> Bool -> CutConfig -> Locks -> Maybe FilePath -> [String]
-               -> [CmdOption] -> FilePath -> [String] -> [Int] -> Action Int
-wrappedCmdExit parCmd fixEmpties cfg r mOut inPtns opts bin as allowedExitCodes = retryFn $ do
-  (_, _, code) <- wrappedCmd parCmd fixEmpties cfg r mOut inPtns opts bin as
-  case mOut of
-    Nothing -> return ()
-    Just o  -> debugTrackWrite cfg [o] -- >> assertNonEmptyFile cfg r outPath
-  if code `elem` allowedExitCodes
-    then return code
-    else wrappedCmdError bin code $ maybeToList mOut
-  where
-    retryFn = if cfgDebug cfg then id else actionRetry 9
-
-{- wrappedCmd specialized for commands that write one or more files. If the
- - command succeeds it tells Shake which files were written, and if it fails
- - they get deleted. Note that outPaths should *not* include the main outPath,
- - or you'll get a recursive Rules error from Shake.
- - TODO skip the command if the files already exist?
- - TODO shouloutPath:outPaths)d outPaths be outPatterns??
- - TODO if assertNonEmptyFile fails, will other outfiles be deleted?
- - TODO rename wrappedCmdMulti because it has multiple outfiles?
- -}
-wrappedCmdWrite :: Bool -> Bool -> CutConfig -> Locks -> FilePath -> [String] -> [FilePath]
-                -> [CmdOption] -> FilePath -> [String] -> Action ()
-wrappedCmdWrite parCmd fixEmpties cfg ref outPath inPtns outPaths opts bin args = retryFn $ do
-  debugL cfg $ "wrappedCmdWrite outPath: "  ++ outPath
-  debugL cfg $ "wrappedCmdWrite inPtns: "   ++ show inPtns
-  debugL cfg $ "wrappedCmdWrite outPaths: " ++ show outPaths
-  debugL cfg $ "wrappedCmdWrite args: "     ++ show args
-  code <- wrappedCmdExit parCmd fixEmpties cfg ref (Just outPath) inPtns opts bin args [0]
-  -- TODO can this be handled in wrappedCmdExit too?
-  -- liftIO $ delay 10000
-  case code of
-    0 -> do
-      -- debugTrackWrite has to come first here, because the assert will need them!
-      debugTrackWrite cfg outPaths
-      -- liftIO $ delay 10000
-      -- mapM_ (assertNonEmptyFile cfg ref) outPaths
-    n -> wrappedCmdError bin n (outPath:outPaths)
-  where
-    retryFn = if cfgDebug cfg then id else actionRetry 3
-
-{- wrappedCmd specialized for commands that return their output as a string.
- - TODO remove this? it's only used to get columns from blast hit tables
- -}
-wrappedCmdOut :: Bool -> Bool -> CutConfig -> Locks -> [String]
-              -> [String] -> [CmdOption] -> FilePath
-              -> [String] -> Action String
-wrappedCmdOut parCmd fixEmpties cfg ref inPtns outPaths opts bin args = actionRetry 3 $ do
-  (out, err, code) <- wrappedCmd parCmd fixEmpties cfg ref Nothing inPtns opts bin args
-  case code of
-    0 -> return out
-    n -> do
-      debugL cfg $ unlines [out, err]
-      wrappedCmdError bin n outPaths
 
 ----------
 -- misc --
@@ -505,12 +389,11 @@ hashContent cfg ref@(disk, _) path = do
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
   -- out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
        -- $ withReadLock' locks path
-  need [path']
   Stdout out <- withReadLock' ref path' $ withResource disk 1 $ case cfgWrapper cfg of
     Nothing -> command [] "md5sum" [path']
     Just w  -> command [Shell] w ["md5sum", path']
   -- liftIO $ putStrLn $ "out: " ++ out
-  let md5 = take digestLength $ head $ words out
+  let md5 = take digestLength out
   -- liftIO $ putStrLn $ "md5: " ++ md5
   return md5
   where

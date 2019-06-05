@@ -85,6 +85,7 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
     liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
 
+  -- TODO ok to have inside unlessExists?
   symlink cfg ref out $ toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
 
   where

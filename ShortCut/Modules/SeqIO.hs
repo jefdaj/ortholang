@@ -1,4 +1,5 @@
 -- TODO rename something more general like SeqUtils?
+-- TODO when running gbk_to_faa*, also load_faa the result to split out the IDs!
 
 module ShortCut.Modules.SeqIO where
 
@@ -7,15 +8,18 @@ import Development.Shake
 import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
+import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Util          (digest)
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
-                                    wrappedCmdOut, writeCachedLines)
+                                    writeCachedLines, runCmd, CmdDesc(..), readPaths)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
 import System.FilePath             ((</>), (<.>), takeDirectory)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
+import System.Exit                 (ExitCode(..))
+import Control.Monad               (when)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -342,12 +346,29 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
       outDir'   = exprDir' </> "load_" ++ ext
       outPath'  = fromCutPath cfg outPath
       outPath'' = debugA cfg "aSplit" outPath' [outPath', faPath']
-      args      = [outDir', prefix', faPath']
+      tmpList   = outPath' <.> "tmp"
+      args      = [tmpList, outDir', prefix', faPath']
   -- TODO make sure stderr doesn't come through?
   -- TODO any locking needed here?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
-  out <- wrappedCmdOut False True cfg ref [faPath'] [] [] "split_fasta.py" args
-  let loadPaths = map (toCutPath cfg) $ lines out
+  -- TODO rewrite with runCmd -> tmpfile, then correct paths afterward in haskell
+  -- out <- wrappedCmdOut False True cfg ref [faPath'] [] [] "split_fasta.py" args
+  -- TODO why does this work when loaders are called one at a time, but not as part of a big script?
+  -- TODO the IDs are always written properly, so why not the sequences??
+  -- withWriteLock' ref tmpDir' $ do -- why is this required?
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "split_fasta.py"
+    , cmdArguments = args
+    , cmdFixEmpties = False -- TODO will be done in the next step right?
+    , cmdParallel = True -- TODO make it parallel again?
+    , cmdOptions = []
+    , cmdInPatterns = [faPath']
+    , cmdOutPath = tmpList
+    , cmdExtraOutPaths = []
+    , cmdExitCode = ExitSuccess
+    }
+  loadPaths <- readPaths cfg ref tmpList
+  when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   writePaths cfg ref outPath'' loadPaths
 aSplit _ _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths

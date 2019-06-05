@@ -31,7 +31,7 @@ import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Compile.Map2 (singleton)
 import ShortCut.Core.Paths (fromGeneric)
 import ShortCut.Core.Compile.Map (rMap)
-import ShortCut.Core.Locks (withReadLock)
+import ShortCut.Core.Locks (withReadLock, withWriteLock')
 import System.Process
 import Data.String.Utils (split)
 import Data.List (isPrefixOf)
@@ -221,17 +221,18 @@ rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 aBlastdblist :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
 aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
-  runCmd cfg ref $ CmdDesc
-    { cmdParallel = False
-    , cmdFixEmpties = True
-    , cmdOutPath = oPath
-    , cmdInPatterns = []
-    , cmdExtraOutPaths = []
-    , cmdOptions =[Cwd tmpDir] -- TODO remove?
-    , cmdBinary = "blastdblist.sh"
-    , cmdArguments = [tmpDir, listTmp']
-    , cmdExitCode = ExitFailure 1
-    }
+  withWriteLock' ref tmpDir $ do
+    runCmd cfg ref $ CmdDesc
+      { cmdParallel = False
+      , cmdFixEmpties = True
+      , cmdOutPath = oPath
+      , cmdInPatterns = []
+      , cmdExtraOutPaths = []
+      , cmdOptions =[Cwd tmpDir] -- TODO remove?
+      , cmdBinary = "blastdblist.sh"
+      , cmdArguments = [tmpDir, listTmp']
+      , cmdExitCode = ExitFailure 1
+      }
   where
     listTmp' = fromCutPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
@@ -435,11 +436,12 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
 
     -- check that all the right files were created
     after <- listPrefixFiles dbPtn
-    liftIO $ putStrLn "running makeblastdb"
+    -- liftIO $ putStrLn "running makeblastdb"
     debugTrackWrite cfg after
+    -- usually there's an index file too, but not always
     let expected = if dbType == ndb
-                     then [".nhr", ".nin", ".nsq"]
-                     else [".phr", ".pin", ".psq"]
+                     then [".nhr", ".nsq"]
+                     else [".phr", ".psq"]
         success = all (\e -> e `elem` (map takeExtension after)) expected
     debugL cfg $ "these actual db files were created: " ++ show after
     unless success $ error $ "makeblastdb failed to create some database files: " ++ show after

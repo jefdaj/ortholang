@@ -118,6 +118,7 @@ reciprocalBest = CutFunction
     name = "reciprocal_best"
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
+-- TODO why is this the only one that fails, and only when called from repeat??
 aReciprocalBest :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aReciprocalBest cfg ref _ [out, left, right] = do
   runCmd cfg ref $ CmdDesc

@@ -1,4 +1,4 @@
-small = load_fna "data/Mycoplasma_genitalium_M2321_5genes.fna"
+small = load_fna "data/Mycoplasma_genitalium_M2321_single.fna"
 large = load_fna "data/Mycoplasma_genitalium_M2321_5genes.fna"
 fwds = extract_queries (blastn 1.0e-5 small large)
 srevs = extract_queries (blastn_rev 1.0e-5 large small)

@@ -30,11 +30,11 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
 import Data.IORef                 (atomicModifyIORef)
-import Data.List                  (intersperse)
+import Data.List                  (intersperse, isPrefixOf)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, hashContent, writePaths, symlink)
+                                   readLitPaths, writePaths, symlink)
 import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
@@ -69,7 +69,9 @@ rExpr _   (CutRules (CompiledExpr _ _ rules)) = rules
 rulesByName :: CutState -> CutExpr -> String -> Rules ExprPath
 rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
-  Just f  -> (fRules f) s expr
+  Just f  -> if "load_" `isPrefixOf` fName f
+               then (fRules f) s $ setSalt 0 expr
+               else (fRules f) s expr
 
 rAssign :: CutState -> CutAssign -> Rules (CutVar, VarPath)
 rAssign s@(_, cfg, _, _) (var, expr) = do
@@ -300,10 +302,12 @@ rLoad hashSeqIDs s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [p]) = do
     out' = fromCutPath cfg out
 rLoad _ _ _ = fail "bad argument to rLoad"
 
+-- TODO is running this lots of times at once the problem?
+-- TODO see if shake exports code for only hashing when timestamps change
 aLoadHash :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
 aLoadHash hashSeqIDs cfg ref ids src ext = do
-  alwaysRerun
-  -- liftIO $ putStrLn $ "running aLoadHash"
+  -- alwaysRerun
+  -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   debugNeed cfg "aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
