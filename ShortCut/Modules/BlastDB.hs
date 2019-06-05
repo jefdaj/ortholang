@@ -421,7 +421,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
 
   liftIO $ createDirectoryIfMissing True dbDir
   before <- listPrefixFiles dbPtn
-  when (length before < 3) $ do
+  when (length before < 5) $ do
     debugL cfg $ "this is dbPtn: " ++ dbPtn
     debugL cfg $ "this will be dbOut: " ++ dbOut
     runCmd cfg ref $ CmdDesc
@@ -443,8 +443,8 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
     debugTrackWrite cfg after
     -- usually there's an index file too, but not always
     let expected = if dbType == ndb
-                     then [".nhr", ".nsq"]
-                     else [".phr", ".psq"]
+                     then [".nhr", ".nin", ".nsq"]
+                     else [".phr", ".pin", ".psq"]
         success = all (\e -> e `elem` (map takeExtension after)) expected
     debugL cfg $ "these actual db files were created: " ++ show after
     unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
