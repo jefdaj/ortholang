@@ -11,11 +11,11 @@ import ShortCut.Core.Types
 import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Util          (digest)
 import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
-                                    writeCachedLines, runCmd, CmdDesc(..), readPaths)
+                                    writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
-import System.FilePath             ((</>), (<.>), takeDirectory)
+import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
 import System.Exit                 (ExitCode(..))
@@ -346,7 +346,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
       outDir'   = exprDir' </> "load_" ++ ext
       outPath'  = fromCutPath cfg outPath
       outPath'' = debugA cfg "aSplit" outPath' [outPath', faPath']
-      tmpList   = outPath' <.> "tmp"
+      tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath']
   -- TODO make sure stderr doesn't come through?
   -- TODO any locking needed here?
@@ -368,7 +368,8 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     , cmdExtraOutPaths = []
     , cmdExitCode = ExitSuccess
     }
-  loadPaths <- readPaths cfg ref tmpList
-  when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
-  writePaths cfg ref outPath'' loadPaths
+  -- loadPaths <- readPaths cfg ref tmpList
+  -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
+  -- writePaths cfg ref outPath'' loadPaths
+  writeCachedVersion cfg ref outPath'' tmpList
 aSplit _ _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths

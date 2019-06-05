@@ -64,7 +64,7 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 -- import ShortCut.Core.Debug        (debug)
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
-                                   stringCutPath)
+                                   stringCutPath, toGeneric)
 import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict,
                                    ignoreExistsError, digest, globFiles, isEmpty)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
@@ -221,7 +221,8 @@ writeCachedLines cfg ref outPath content = do
 writeCachedVersion :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
 writeCachedVersion cfg ref outPath inPath = do
   content <- fmap lines $ readFileStrict' cfg ref inPath
-  writeCachedLines cfg ref outPath content
+  let content' = map (toGeneric cfg) content
+  writeCachedLines cfg ref outPath content'
 
 -- TODO take a CutPath for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
@@ -453,3 +454,9 @@ symlink cfg ref src dst = withWriteOnce ref src' $ do
     src' = fromCutPath cfg src
     dst' = fromCutPath cfg dst
     dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
+
+-- Apply toGeneric to sanitize the output of a script
+-- toGenericFile :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
+-- toGenericFile cfg ref inPath outPath = do
+--   txt <- readPaths cfg ref inPath
+--   return ()

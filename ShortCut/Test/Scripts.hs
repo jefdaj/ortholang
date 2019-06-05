@@ -123,8 +123,8 @@ mkAbsTest :: CutConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
-    desc = "tmpfiles free of absolute paths"
-    absArgs = [cfgTmpDir cfg, cfgTmpDir cfg </> "exprs", "-R"]
+    desc = "expr files free of absolute paths"
+    absArgs = ["-r", "--exclude='*.*.{out,err}'", cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"] -- TODO why exclude sometimes fails?
     absGrep = do
       _ <- runCut cfg ref ids
       (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
