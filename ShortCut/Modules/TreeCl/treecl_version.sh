@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-treeCl --help
+
+treeCl --help 2>&1 | grep -v DEBUG

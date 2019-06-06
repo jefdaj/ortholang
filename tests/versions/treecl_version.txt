@@ -1,21 +1,16 @@
-DEBUG:matplotlib:CACHEDIR=/root/.cache/matplotlib
-DEBUG:matplotlib.font_manager:Using fontManager instance from /root/.cache/matplotlib/fontList.json
-DEBUG:matplotlib.backends:backend agg version v2.2
-usage: .treeCl-wrapped [-h] [-a] [-b]
-                       [-c {spectral,mds,single,complete,average,ward,kmedoids} [{spectral,mds,single,complete,average,ward,kmedoids} ...]]
-                       [-d {protein,dna}] [-e] [-f {fasta,phylip}]
-                       [-g {ml,nj,lr,l,r}] [-i I] [-l L]
-                       [-m {geo,euc,rf,wrf} [{geo,euc,rf,wrf} ...]] [-o O]
-                       [-p P] [-q Q] [-r R] [-s S] -t T -u U [-v {0,1,2,3}]
-                       [-w] [-z {gz,bz2}] [--trees_in TREES_IN]
-                       [--trees_out TREES_OUT]
-                       [--distances_in DISTANCES_IN [DISTANCES_IN ...]]
-                       [--distances_out DISTANCES_OUT] [--permute]
-                       [--simulate SIMULATE SIMULATE SIMULATE SIMULATE]
-                       [--tsv_only] [--exit] [--no_cluster]
-                       [--true TRUE [TRUE ...]] [--piecewise_distances]
+usage: treeCl [-h] [-a] [-b]
+              [-c {spectral,mds,single,complete,average,ward,kmedoids} [{spectral,mds,single,complete,average,ward,kmedoids} ...]]
+              [-d {protein,dna}] [-e] [-f {fasta,phylip}] [-g {ml,nj,lr,l,r}]
+              [-i I] [-l L] [-m {geo,euc,rf,wrf} [{geo,euc,rf,wrf} ...]]
+              [-o O] [-p P] [-q Q] [-r R] [-s S] -t T -u U [-v {0,1,2,3}] [-w]
+              [-z {gz,bz2}] [--trees_in TREES_IN] [--trees_out TREES_OUT]
+              [--distances_in DISTANCES_IN [DISTANCES_IN ...]]
+              [--distances_out DISTANCES_OUT] [--permute]
+              [--simulate SIMULATE SIMULATE SIMULATE SIMULATE] [--tsv_only]
+              [--exit] [--no_cluster] [--true TRUE [TRUE ...]]
+              [--piecewise_distances]
 
-..treeCl-wrapped-wrapped
+.treeCl-wrapped
 
 optional arguments:
   -h, --help            show this help message and exit

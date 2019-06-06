@@ -55,13 +55,7 @@ in python.mkDerivation {
     sha256 = "0y8lsl6fx4psd6if0kn81qaslnq0rpmr3jmr5xdipmk2rn97k9wn";
   };
   buildInputs = [
-
     makeWrapper
-
-    # TODO be intelligent about whether we can use MPI on a given computer
-    # TODO add an AVX(2) target (didn't I do that already?)
-    raxml
-
   ];
   propagatedBuildInputs = [
 
@@ -89,21 +83,28 @@ in python.mkDerivation {
     scikit-bio
     phylo_utils
 
+    # updated here
+    # TODO be intelligent about whether we can use MPI on a given computer
+    # TODO add an AVX(2) target (didn't I do that already?)
+    raxml
    ];
 
+  # TODO remove?
   preConfigure = ''
     export PATH=${raxml}/bin:$PATH
   '';
 
+  # TODO patch to use MPI before AVX or regular?
   patches = [
     ./uncomment-binary.patch # TODO check with the author that this is OK
   ];
 
+  # TODO remove now that it propagates?
   # TODO remove if preConfigure handles it
   # TODO do the non-python dependencies all need to go here too?
-  postInstall = ''
-    for b in $out/bin/*; do
-      wrapProgram $b --prefix PATH : "${raxml}/bin"
-    done
-  '';
+  # postInstall = ''
+  #   for b in $out/bin/*; do
+  #     wrapProgram $b --prefix PATH : "${raxml}/bin"
+  #   done
+  # '';
 }

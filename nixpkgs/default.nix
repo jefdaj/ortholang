@@ -67,23 +67,20 @@ let
     scikit-bio         = pkgs.python27Packages.callPackage ./scikit-bio { inherit CacheControl; };
     phylo_utils        = pkgs.python27Packages.callPackage ./phylo_utils {};
     blastdbget         = pkgs.python27Packages.callPackage ./blastdbget {};
-    # treeCl             = pkgs.python27Packages.callPackage ./treeCl {
-    #   inherit raxml fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
-    #   # inherit (pkgs.python27Packages) numpy;
-    # };
+    treeCl = pkgs.python27Packages.callPackage ./treeCl {
+      inherit raxml; # TODO why doesn't it find this?
+      inherit fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
+      inherit (pkgs.python27Packages) pyyaml biopython cython dendropy futures ipython;
+      inherit (pkgs.python27Packages) matplotlib nose numpy pandas progressbar scikitlearn scipy;
+    };
   };
-  treeCl = pkgs.callPackage ./treeCl {
-    inherit raxml;
-    inherit (myPython2) pyyaml biopython cython dendropy futures ipython matplotlib nose numpy pandas progressbar scikitlearn scipy;
-    inherit (myPython2) fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
-  };
-
 in pkgs // {
+  python27Packages = myPython2;
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit diamond hmmer mmseqs2;
-  inherit (myPython2) blastdbget;
+  inherit (myPython2) blastdbget treeCl;
   inherit raxml;
-  inherit orthofinder sonicparanoid treeCl;
+  inherit orthofinder sonicparanoid;
 
   # python27Packages = myPython27; # used by treeCl, probably others
   # python36Packages = myPython36; # used by sonicparanoid

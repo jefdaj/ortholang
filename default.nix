@@ -64,7 +64,7 @@ let
     # python27Packages.blastdbget
     tree
   ];
-    # ++ shortcut-sonicparanoid.runDepends
+    # ++ shortcut-sonicparanoid.runDepends; # incompatible with seqio, orthofinder, blastdb?
     # ++ shortcut-biomartr.runDepends
     # ++ shortcut-blast.runDepends
     # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
