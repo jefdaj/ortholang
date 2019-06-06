@@ -133,6 +133,7 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = [o'' <.> "out"]
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [o'', o'' <.> "out"]
     }
   sanitizeFileInPlace cfg ref o'
  

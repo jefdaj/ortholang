@@ -150,6 +150,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [o'']
     }
  
   where

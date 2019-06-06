@@ -1,6 +1,8 @@
 module ShortCut.Modules.SonicParanoid
   where
 
+-- TODO when sonicparanoid fails, delete the whole hash dir to avoid crashing next time
+
 import Development.Shake
 import ShortCut.Core.Types
 
@@ -92,6 +94,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       , cmdExtraOutPaths = []
       , cmdSanitizePaths = []
       , cmdExitCode = ExitSuccess
+      , cmdRmPatterns = [opPath'', tmpDir]
       }
 
     -- (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"

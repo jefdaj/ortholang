@@ -111,6 +111,7 @@ rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
         , cmdBinary = "mmseqs-createdb-all.sh"
         , cmdArguments = [dbPath] ++ faPaths'
         , cmdExitCode = ExitSuccess
+        , cmdRmPatterns = [out', dbPath ++ "*"] -- TODO adjust the code to handle patterns!
         }
     symlink cfg ref out $ toCutPath cfg index
   return (ExprPath out')
@@ -214,6 +215,7 @@ aMmseqsSearchDb cfg ref ePath qDb sDb outDb = do
     , cmdBinary = "mmseqs-search.sh"
     , cmdArguments = [outDb, tmpDir, eStr, qDb', sDb']
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [outDb ++ "*"]
     }
   -- liftIO $ removeDirectoryRecursive tmpDir
 
@@ -237,6 +239,7 @@ aMmseqConvertAlis cfg ref qDb sDb outDbIndex outTab = do
     , cmdBinary = "mmseqs-convertalis.sh"
     , cmdArguments = [outTab, qDb', sDb', oDb']
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [oDb' ++ "*"]
     }
 
 -------------------

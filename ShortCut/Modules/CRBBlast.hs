@@ -113,6 +113,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
     , cmdBinary = "crb-blast.sh"
     , cmdArguments = [oPath, tmp', qSrc, tSrc]
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [o', tmp'] -- TODO the whole thing, right?
     }
   symlink cfg ref o'' oPath'
   where

@@ -232,6 +232,7 @@ aBlastdblist cfg ref _ listTmp = do
       , cmdOptions =[Cwd tmpDir] -- TODO remove?
       , cmdBinary = "blastdblist.sh"
       , cmdArguments = [tmpDir, listTmp']
+      , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
       , cmdExitCode = ExitFailure 1
       }
   where
@@ -300,6 +301,7 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
     , cmdBinary = "blastdbget.sh"
     , cmdArguments = [tmp', dbName]
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
     }
   writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
   where
@@ -435,6 +437,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
       , cmdBinary = "makeblastdb.sh"
       , cmdArguments = [dbOut, fixedPaths, dbType']
       , cmdExitCode = ExitSuccess
+      , cmdRmPatterns = [dbDir]
       }
 
     -- check that all the right files were created

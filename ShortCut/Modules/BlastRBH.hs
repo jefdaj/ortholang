@@ -132,6 +132,7 @@ aReciprocalBest cfg ref _ [out, left, right] = do
     , cmdBinary = "reciprocal_best.R"
     , cmdArguments = [out', left', right']
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [out']
     }
   where
     out'   = fromCutPath cfg out

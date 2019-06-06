@@ -81,6 +81,7 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       , cmdExtraOutPaths = []
       , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
+      , cmdRmPatterns = [out'', tmpDir]
       }
  
     resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"

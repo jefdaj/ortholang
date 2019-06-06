@@ -368,6 +368,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = [tmpList]
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [outPath'', tmpList] -- TODO any more?
     }
   -- loadPaths <- readPaths cfg ref tmpList
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList

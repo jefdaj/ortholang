@@ -254,6 +254,7 @@ aBioMartR cfg ref _ out bmFn bmTmp sTable = do
     , cmdParallel = False
     , cmdInPatterns = [bmFn', sTable']
     , cmdExtraOutPaths = []
+    , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
     , cmdSanitizePaths = []
     , cmdOptions = [Cwd bmTmp'] -- TODO remove?
     }

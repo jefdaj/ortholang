@@ -113,6 +113,7 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     , cmdBinary = "cut_tsv.sh"
     , cmdArguments = [tmpPath', tsvPath', show n]
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [outPath']
     }
   debugTrackWrite cfg [tmpPath']
   writeCachedVersion cfg ref outPath'' tmpPath'
@@ -170,6 +171,7 @@ aFilterEvalue cfg ref _ [out, evalue, hits] = do
     , cmdBinary = "filter_evalue.R"
     , cmdArguments = [out', evalue', hits']
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [out'']
     }
   where
     out'    = fromCutPath cfg out
@@ -222,6 +224,7 @@ aBestExtract cfg ref _ [out, hits] = do
     , cmdBinary = "best_hits.R"
     , cmdArguments = [out', hits']
     , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [out']
     }
   where
     out'  = fromCutPath cfg out

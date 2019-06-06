@@ -74,6 +74,7 @@ import ShortCut.Core.Locks        (withReadLock', withReadLocks',
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory, takeExtension)
+import System.FilePath.Glob       (compile, globDir1)
 -- import System.IO                  (IOMode(..), withFile)
 import System.Posix.Files         (createSymbolicLink)
 import System.Posix.Escape         (escape)
@@ -319,6 +320,7 @@ data CmdDesc = CmdDesc
   , cmdInPatterns    :: [String]
   , cmdExtraOutPaths :: [FilePath]
   , cmdSanitizePaths :: [FilePath]
+  , cmdRmPatterns    :: [String]
   , cmdOptions       :: [CmdOption] -- TODO remove?
   , cmdOutPath       :: FilePath -- TODO Maybe?
   , cmdParallel      :: Bool
@@ -368,17 +370,38 @@ runCmd cfg ref@(disk, _) desc = do
     -- return ()
 
     -- TODO use exitWith here?
-    when (code /= cmdExitCode desc) $ do
-      hasErr <- doesFileExist stderrPath
-      when hasErr $ do
-        errTxt <- liftIO $ readFile stderrPath
-        liftIO $ putStrLn errTxt
+    when (code /= cmdExitCode desc) $
+      handleCmdError cfg ref (cmdBinary desc) code stderrPath (cmdRmPatterns desc)
 
   let sPaths = stdoutPath:stderrPath:cmdSanitizePaths desc -- TODO main outpath too?
   -- sanitizeFilesInPlace cfg ref $ cmdSanitizePaths desc
   sanitizeFilesInPlace cfg ref sPaths
 
   return () -- TODO out, err, code here?
+
+-- TODO does this do directories?
+-- TODO does this work on absolute paths?
+matchPattern :: CutConfig -> String -> Action [FilePath]
+matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
+
+handleCmdError :: CutConfig -> Locks -> String -> ExitCode -> FilePath -> [String] -> Action a
+handleCmdError cfg ref bin n stderrPath rmPatterns = do
+  hasErr <- doesFileExist stderrPath
+  errMsg2 <- if hasErr
+               then do
+                 errTxt <- readFileStrict' cfg ref stderrPath
+                 return $ ["Stderr was:", errTxt]
+               else return []
+  -- let files' = sort $ nub rmPatterns
+  files' <- fmap concat $ mapM (matchPattern cfg) rmPatterns
+  liftIO $ rmAll $ sort $ nub files' -- TODO should these be patterns to match first?
+  -- TODO does this get caught by recoverAll in eval? make sure it does!
+  -- TODO also try adding a manual flush before each external command in case it's an io delay thing
+  let errMsg =
+        [ bin ++ " failed with " ++ show n ++ "."
+        , "The files it was working on have been deleted:"
+        ] ++ files'
+  error $ unlines $ errMsg ++ errMsg2
 
 ----------
 -- misc --

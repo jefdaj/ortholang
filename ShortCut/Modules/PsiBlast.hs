@@ -205,6 +205,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
         , cmdFixEmpties = True
         , cmdExitCode = ExitSuccess
         , cmdOutPath = tPath' -- note that it isn't the final outpath
+        , cmdRmPatterns = [dbPre' ++ "*"]
         }
     
       -- TODO instead of wrappedCmdWrite, check explicitly for tPath'
