@@ -16,6 +16,7 @@ module ShortCut.Core.Sanitize
 -- TODO this is almost fast enough to be usable, but tweak performance some more
 --      (getting rid of debug helps, as does DList)
 -- TODO would having it be a set from the beginning be faster still?
+-- TODO would doing it in a separate script be better so it can run on other nodes?
 
 -- import Debug.Trace
 import qualified Data.DList as D

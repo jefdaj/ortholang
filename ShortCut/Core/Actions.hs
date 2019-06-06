@@ -110,7 +110,7 @@ debugNeed cfg fnName paths = debug cfg msg $ need paths
 readFileStrict' :: CutConfig -> Locks -> FilePath -> Action String
 readFileStrict' cfg ref path = do
   debugNeed cfg "readFileStrict'" [path]
-  liftIO (readFileStrict ref path)
+  withReadLock' ref path $ liftIO (readFileStrict ref path)
 -- {-# INLINE readFileStrict' #-}
 
 {- ShortCut requires empty strings to contain the text <<emptystr>> so we
