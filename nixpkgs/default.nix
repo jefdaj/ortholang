@@ -58,7 +58,7 @@ let
   raxml  = pkgs.callPackage ./raxml { mpi = true; };
 
   # TODO should treeCl go inside the python packages instead of the other way around?
-  treeClPython = pkgs.python27Packages // rec {
+  myPython2 = pkgs.python27Packages // rec {
     fastcluster        = pkgs.python27Packages.callPackage ./fastcluster {};
     fasttree           = pkgs.python27Packages.callPackage ./fasttree {};
     tree_distance      = pkgs.python27Packages.callPackage ./tree_distance {};
@@ -74,13 +74,14 @@ let
   };
   treeCl = pkgs.callPackage ./treeCl {
     inherit raxml;
-    inherit (treeClPython) pyyaml biopython cython dendropy futures ipython matplotlib nose numpy pandas progressbar scikitlearn scipy;
-    inherit (treeClPython) fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
+    inherit (myPython2) pyyaml biopython cython dendropy futures ipython matplotlib nose numpy pandas progressbar scikitlearn scipy;
+    inherit (myPython2) fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
   };
 
 in pkgs // {
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit diamond hmmer mmseqs2;
+  inherit (myPython2) blastdbget;
   inherit raxml;
   inherit orthofinder sonicparanoid treeCl;
 

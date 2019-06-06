@@ -34,19 +34,21 @@ let
 
   # things needed at runtime
   runDepends = [
-    shortcut-sonicparanoid
     shortcut-biomartr
     shortcut-blast
     shortcut-blastdb
     shortcut-blasthits
     shortcut-blastrbh
     shortcut-crbblast
+    shortcut-diamond
+    shortcut-hmmer
     shortcut-mmseqs
     shortcut-muscle
     shortcut-orthofinder
     shortcut-plots
     shortcut-psiblast
     shortcut-seqio
+    shortcut-sonicparanoid
     shortcut-treecl
 
     # cdhit
@@ -90,10 +92,10 @@ in haskell.lib.overrideCabal cabalPkg (drv: {
   shellHook = ''
     ${drv.shellHook or ""}
     export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+    export TASTY_HIDE_SUCCESSES=True
     find "${src}/ShortCut/Modules/* -type d" | while read d; do
       export PATH=$d:$PATH
     done
-    stack repl
   '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]

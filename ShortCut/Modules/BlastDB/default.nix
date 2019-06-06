@@ -3,6 +3,7 @@ with import ../../../nixpkgs;
 let
   runDepends = [
     psiblast-exb # TODO is this still the best version to use?
+    blastdbget
   ];
 
 in stdenv.mkDerivation {
