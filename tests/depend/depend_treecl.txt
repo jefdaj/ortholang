@@ -1,3 +1,6 @@
+DEBUG:matplotlib:CACHEDIR=/root/.cache/matplotlib
+DEBUG:matplotlib.font_manager:Using fontManager instance from /root/.cache/matplotlib/fontList.json
+DEBUG:matplotlib.backends:backend agg version v2.2
 usage: .treeCl-wrapped [-h] [-a] [-b]
                        [-c {spectral,mds,single,complete,average,ward,kmedoids} [{spectral,mds,single,complete,average,ward,kmedoids} ...]]
                        [-d {protein,dna}] [-e] [-f {fasta,phylip}]

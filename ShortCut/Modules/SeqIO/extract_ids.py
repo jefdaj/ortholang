@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # Convert a FASTA file to a list of genes.
 # Usage: extract-seq-ids <tmpdir> <outgenes> <infasta>

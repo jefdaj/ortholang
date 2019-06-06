@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # TODO fix this for newer biopython, and remove my version?
 

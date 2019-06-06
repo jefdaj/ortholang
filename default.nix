@@ -1,5 +1,3 @@
-# TODO get the multiple python versions to play nicely
-
 with import ./nixpkgs;
 let
 

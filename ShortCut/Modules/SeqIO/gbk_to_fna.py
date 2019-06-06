@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # Convert a genbank file to FASTA (amino acid)
 # Usage: gbk_to_fna.py <tmpdir> <outfna> <ingbk>
