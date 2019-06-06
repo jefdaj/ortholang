@@ -13,6 +13,7 @@ import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), readFileStrict)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
+import ShortCut.Core.Locks         (withWriteLock')
 import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
@@ -72,7 +73,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       out'        = fromCutPath cfg out
       opPath''    = debugA cfg "aSonicParanoid" out' [out', opPath', faListPath']
 
-  unlessExists opPath' $ do
+  withWriteLock' ref opPath' $ unlessExists opPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
     faPaths <- readPaths cfg ref faListPath'

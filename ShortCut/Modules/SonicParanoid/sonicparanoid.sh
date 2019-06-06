@@ -13,5 +13,7 @@ INDIR="$5"
 MODE="$6"  # TODO set based on fn name
 DEBUG="$7" # TODO set based on config?
 
+# unset PYTHONPATH
+
 # cd "$CACHEDIR" # TODO is this right?
 sonicparanoid -sh "$SHAREDDIR" -i "$INDIR" -o "$CACHEDIR" -m "$MODE" -noidx $DEBUG -op > "${CACHEDIR}.out" 2> "${CACHEDIR}.err"

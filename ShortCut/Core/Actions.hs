@@ -387,7 +387,7 @@ matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
 handleCmdError :: CutConfig -> Locks -> String -> ExitCode -> FilePath -> [String] -> Action a
 handleCmdError cfg ref bin n stderrPath rmPatterns = do
   hasErr <- doesFileExist stderrPath
-  errMsg2 <- if hasErr
+  errMsg2 <- if hasErr && not (cfgDebug cfg) -- when debugging, leave the files
                then do
                  errTxt <- readFileStrict' cfg ref stderrPath
                  return $ ["Stderr was:", errTxt]
