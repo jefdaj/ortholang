@@ -13,17 +13,20 @@ import Test.Tasty.Golden          (goldenVsString)
 
 depCmds :: [(String, String)]
 depCmds =
-  [ ("psiblast"   , "psiblast -version")   -- should be psiblast-exb 2.5.0
-  , ("ncbi_blast" , "blastn -version")     -- should also come from psiblast-exb
-  , ("crb_blast"  , "crb-blast --version") -- should be older NCBI v2.2.29
-  , ("python"     , "python --version")    -- exact version not important
-  , ("r"          , "R --version")         -- exact version not important
-  , ("biopython"  , "python -c \"import Bio; print Bio.__version__\"")
-  , ("biomartr"   , "Rscript -e \"require(biomartr); packageVersion('biomartr')\"")
-  , ("dplyr"      , "Rscript -e \"require(dplyr); packageVersion('dplyr')\"")
-  , ("diamond"    , "diamond --version")
-  , ("mmseqs"     , "mmseqs --help | grep Version")
-  , ("orthofinder", "orthofinder --help | grep version")
+  [ ("biomartr"     , "Rscript -e \"require(biomartr); packageVersion('biomartr')\"")
+  , ("biopython"    , "python -c \"import Bio; print Bio.__version__\"")
+  , ("crb_blast"    , "crb-blast --version") -- should be older NCBI v2.2.29
+  , ("diamond"      , "diamond --version")
+  , ("dplyr"        , "Rscript -e \"require(dplyr); packageVersion('dplyr')\"")
+  , ("mmseqs"       , "mmseqs --help | grep Version")
+  , ("muscle"       , "muscle -version")
+  , ("ncbi_blast"   , "blastn -version")     -- should also come from psiblast-exb
+  , ("orthofinder"  , "orthofinder --help | grep version")
+  , ("psiblast"     , "psiblast -version")   -- should be psiblast-exb 2.5.0
+  , ("python"       , "python --version")    -- exact version not important
+  , ("r"            , "R --version")         -- exact version not important
+  , ("sonicparanoid", "sonicparanoid -h | head -n3 | tail -n1")
+  , ("treecl"       , "treeCl --help")       -- has no version output
   -- TODO sonicparanoid
   ]
 

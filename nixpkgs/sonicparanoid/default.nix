@@ -1,11 +1,11 @@
 # with (import ./..);
-{ pkgs, python3Packages, fetchurl, mmseqs2 }:
+{ pkgs, python36Packages, fetchurl, mmseqs2 }:
 
 let
   # this is only needed for sh >= 1.12.14; remove once nixpkgs includes it
   pypiPython = import ./requirements.nix { inherit pkgs; };
 
-in python3Packages.buildPythonPackage rec {
+in python36Packages.buildPythonPackage rec {
   pname = "sonicparanoid";
   version = "1.0.14";
 
@@ -16,9 +16,9 @@ in python3Packages.buildPythonPackage rec {
 
   propagatedBuildInputs = [
     mmseqs2
-    python3Packages.biopython
-    python3Packages.numpy
-    python3Packages.pandas
+    python36Packages.biopython
+    python36Packages.numpy
+    python36Packages.pandas
     pypiPython.packages.sh
   ];
 
@@ -32,7 +32,7 @@ in python3Packages.buildPythonPackage rec {
     # mmseqs2
     # numpy
     # pandas
-    python3Packages.cython
+    python36Packages.cython
     pypiPython.packages.sh
   ];
 

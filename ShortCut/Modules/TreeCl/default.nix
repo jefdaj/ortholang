@@ -4,13 +4,10 @@
 with import ../../../nixpkgs;
 
 let
-  # psiblast-exb is like regular blast+ for most purposes
-  # TODO any reason to use the official one instead?
-  # TODO put back parallel?
-  runDepends = [ psiblast-exb ];
+  runDepends = [ treeCl ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-blast";
+  name = "shortcut-treecl";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;

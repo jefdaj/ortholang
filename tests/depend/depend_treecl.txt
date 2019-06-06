@@ -1,0 +1,77 @@
+usage: .treeCl-wrapped [-h] [-a] [-b]
+                       [-c {spectral,mds,single,complete,average,ward,kmedoids} [{spectral,mds,single,complete,average,ward,kmedoids} ...]]
+                       [-d {protein,dna}] [-e] [-f {fasta,phylip}]
+                       [-g {ml,nj,lr,l,r}] [-i I] [-l L]
+                       [-m {geo,euc,rf,wrf} [{geo,euc,rf,wrf} ...]] [-o O]
+                       [-p P] [-q Q] [-r R] [-s S] -t T -u U [-v {0,1,2,3}]
+                       [-w] [-z {gz,bz2}] [--trees_in TREES_IN]
+                       [--trees_out TREES_OUT]
+                       [--distances_in DISTANCES_IN [DISTANCES_IN ...]]
+                       [--distances_out DISTANCES_OUT] [--permute]
+                       [--simulate SIMULATE SIMULATE SIMULATE SIMULATE]
+                       [--tsv_only] [--exit] [--no_cluster]
+                       [--true TRUE [TRUE ...]] [--piecewise_distances]
+
+..treeCl-wrapped-wrapped
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a                    [a]nalyse the bootstraps
+  -b                    Use LSF [b]sub if available
+  -c {spectral,mds,single,complete,average,ward,kmedoids} [{spectral,mds,single,complete,average,ward,kmedoids} ...]
+                        [c]lustering method
+  -d {protein,dna}      [d]atatype
+  -e                    d[e]bug mode - external software wrappers will not
+                        clean up their temp files when this flag is set
+  -f {fasta,phylip}     [f]ile format
+  -g {ml,nj,lr,l,r}     Tree search strate[g]y: ml=full maximum likelihood,
+                        nj=BioNJ, lr=BioNJ topology, optimised lengths and
+                        rates
+  -i I                  [i]nput directory
+  -l L                  number of classes - [l]ower bound
+  -m {geo,euc,rf,wrf} [{geo,euc,rf,wrf} ...]
+                        Distance [m]etric
+  -o O                  [o]utput directory
+  -p P, --scorer_out P  [p]ickle the scorer object to disk for future analysis
+  -q Q, --scorer_in Q   [q]uickload the scorer object from a pickle
+  -r R                  Do permutation to find number of clusters
+                        ([r]andomisation)
+  -s S                  Do parametric bootstraps to find number of clusters
+                        ([s]imulation)
+  -t T                  [t]emporary directory
+  -u U                  number of classes - [u]pper bound
+  -v {0,1,2,3}          [v]erbosity level: 0-3
+  -w                    [w]rite bootstraps to an output subdirectory
+                        [true/false]
+  -z {gz,bz2}           Compression [z]ip format (if input files are
+                        compressed)
+  --trees_in TREES_IN   Directory containing precomputed trees matching the
+                        input alignments. The first part of the filename
+                        (before the ".") needs to match the equivalent part of
+                        the alignment filename for the tree to be recognised.
+  --trees_out TREES_OUT
+                        Directory to write trees to. These can be loadedwith
+                        --trees_in
+  --distances_in DISTANCES_IN [DISTANCES_IN ...]
+                        Distance matrix to use in space-delimited format - see
+                        numpy.savetxt example in
+                        http://wiki.scipy.org/Cookbook/InputOutput. Give files
+                        as key value pairs - geo geodm.txt euc eucdm.txt
+  --distances_out DISTANCES_OUT
+                        Filename to write distance matrix to
+  --permute             Permute the data before analysing, as when doing a
+                        permutation test
+  --simulate SIMULATE SIMULATE SIMULATE SIMULATE
+                        Simulate data from an existing result before
+                        analysing, as when doing a parametric bootstrap.
+                        Requires a previously computed Scorer, loaded via -q.
+                        Usage= --simulate [RESULT.TSV, N] where N is the
+                        number of clusters to start from
+  --tsv_only            Only write the .tsv results file
+  --exit
+  --no_cluster
+  --true TRUE [TRUE ...]
+                        The known true partition
+  --piecewise_distances
+                        For geo dists, compute the rows separately (slower,
+                        but saves memory)

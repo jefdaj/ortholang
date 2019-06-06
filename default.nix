@@ -1,75 +1,85 @@
+# TODO get the multiple python versions to play nicely
+
 with import ./nixpkgs;
 let
-  biomartr   = import ./ShortCut/Modules/BioMartR;
-  blast      = import ./ShortCut/Modules/Blast;
-  blastdb    = import ./ShortCut/Modules/BlastDB;
-  blastrbh   = import ./ShortCut/Modules/BlastRBH;
-  crbblast   = import ./ShortCut/Modules/CRBBlast;
-  orthofinder = import ./ShortCut/Modules/OrthoFinder;
-  psiblast   = import ./ShortCut/Modules/PsiBlast;
-  seqio      = import ./ShortCut/Modules/SeqIO;
-  plots      = import ./ShortCut/Modules/Plots;
-  hmmer      = import ./ShortCut/Modules/Hmmer;
-  blasthits  = import ./ShortCut/Modules/BlastHits;
-  diamond    = import ./ShortCut/Modules/Diamond;
-  mmseqs     = import ./ShortCut/Modules/MMSeqs;
 
-  # TODO will this conflict with the pkg itself?
-  muscle     = import ./ShortCut/Modules/Muscle;
+  shortcut-biomartr      = import ./ShortCut/Modules/BioMartR;
+  shortcut-blast         = import ./ShortCut/Modules/Blast;
+  shortcut-blastdb       = import ./ShortCut/Modules/BlastDB;
+  shortcut-blasthits     = import ./ShortCut/Modules/BlastHits;
+  shortcut-blastrbh      = import ./ShortCut/Modules/BlastRBH;
+  shortcut-crbblast      = import ./ShortCut/Modules/CRBBlast;
+  shortcut-diamond       = import ./ShortCut/Modules/Diamond;
+  shortcut-hmmer         = import ./ShortCut/Modules/Hmmer;
+  shortcut-mmseqs        = import ./ShortCut/Modules/MMSeqs;
+  shortcut-muscle        = import ./ShortCut/Modules/Muscle;
+  shortcut-orthofinder   = import ./ShortCut/Modules/OrthoFinder;
+  shortcut-plots         = import ./ShortCut/Modules/Plots;
+  shortcut-psiblast      = import ./ShortCut/Modules/PsiBlast;
+  shortcut-seqio         = import ./ShortCut/Modules/SeqIO;
+  shortcut-sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
+  shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
 
-  # TODO will this conflict with the pkg itself?
-  sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
+  # myPython = python27Packages.python.withPackages (ps: with ps; [
+    # biopython
+    # treeCl
+  # ]);
 
-  myPython = pythonPackages.python.withPackages (ps: with ps; [
-    biopython
-  ]);
   # it works best if the ghc version here matches the resolver in stack.yaml
   cabalPkg = haskell.packages.ghc844.callPackage ./shortcut.nix {};
+
+  # add haskell dev stuff to nix-shell
   devDepends = [
     haskell.compiler.ghc844
     stack
   ];
+
+  # things needed at runtime
   runDepends = [
-    biomartr
-    blast
-    blastdb
-    blastrbh
-    muscle
-    crbblast
-    orthofinder
-    psiblast
-    seqio
-    plots
-    blasthits
-    crb-blast
-    ncurses # TODO is this needed?
-    pythonPackages.blastdbget
-    myPython
-    # psiblast-exb # TODO does this conflict with ncbi-blast+?
-    hmmer
-    diamond
+    shortcut-sonicparanoid
+    shortcut-biomartr
+    shortcut-blast
+    shortcut-blastdb
+    shortcut-blasthits
+    shortcut-blastrbh
+    shortcut-crbblast
+    shortcut-mmseqs
+    shortcut-muscle
+    shortcut-orthofinder
+    shortcut-plots
+    shortcut-psiblast
+    shortcut-seqio
+    shortcut-treecl
+
     # cdhit
-    sonicparanoid
-    glibcLocales
-    tree
+    # diamond
+    # hmmer
+    # psiblast-exb # TODO does this conflict with ncbi-blast+?
+    # python27Packages
+    # python27Packages.treeCl
+    # raxml
     diffutils
-    mmseqs
+    glibcLocales
+    ncurses # TODO is this needed?
+    # python27Packages.blastdbget
+    tree
   ]
-    ++ biomartr.runDepends
-    ++ blastdb.runDepends
-    ++ blast.runDepends
-    ++ blastrbh.runDepends
-    ++ crbblast.runDepends
-    ++ orthofinder.runDepends
-    ++ psiblast.runDepends
-    ++ blasthits.runDepends
-    ++ muscle.runDepends
-    ++ seqio.runDepends
-    ++ plots.runDepends
-    ++ hmmer.runDepends
-    ++ sonicparanoid.runDepends
-    ++ diamond.runDepends
-    ++ mmseqs.runDepends;
+    ++ shortcut-sonicparanoid.runDepends
+    ++ shortcut-biomartr.runDepends
+    ++ shortcut-blast.runDepends
+    ++ shortcut-blastdb.runDepends
+    ++ shortcut-blasthits.runDepends
+    ++ shortcut-blastrbh.runDepends
+    ++ shortcut-crbblast.runDepends
+    ++ shortcut-diamond.runDepends
+    ++ shortcut-hmmer.runDepends
+    ++ shortcut-mmseqs.runDepends
+    ++ shortcut-muscle.runDepends
+    ++ shortcut-orthofinder.runDepends
+    ++ shortcut-plots.runDepends
+    ++ shortcut-psiblast.runDepends
+    ++ shortcut-seqio.runDepends
+    ++ shortcut-treecl.runDepends;
 
   # explicitly remove .stack-work from nix source because it's big
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
@@ -85,6 +95,7 @@ in haskell.lib.overrideCabal cabalPkg (drv: {
     find "${src}/ShortCut/Modules/* -type d" | while read d; do
       export PATH=$d:$PATH
     done
+    stack repl
   '';
   buildDepends = (drv.buildDepends or [])
     ++ [ makeWrapper ]
