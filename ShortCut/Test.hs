@@ -17,10 +17,10 @@ import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
 -- import Data.IORef            (IORef)
 
-import qualified ShortCut.Test.Deps    as D
-import qualified ShortCut.Test.Parse   as P
-import qualified ShortCut.Test.Repl    as R
-import qualified ShortCut.Test.Scripts as S
+import qualified ShortCut.Test.Versions as V
+import qualified ShortCut.Test.Parse    as P
+import qualified ShortCut.Test.Repl     as R
+import qualified ShortCut.Test.Scripts  as S
 
 -- This is weird because all tests are always created;
 -- filtering is done according to the TASTY_PATTERN environment var.
@@ -29,7 +29,7 @@ import qualified ShortCut.Test.Scripts as S
 mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
 mkTests cfg ref ids = setPtn >> mkTestGroup cfg ref ids "all tests" tests
   where
-    tests  = [D.mkTests, P.mkTests, R.mkTests, S.mkTests]
+    tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
     setPtn = case cfgTestPtn cfg of
                Nothing  -> return ()
                Just ptn -> setEnv "TASTY_PATTERN" ptn

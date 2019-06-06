@@ -610,12 +610,9 @@ showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
-      args = ["-info", "-db", dbBase]
   debugIO cfg $ "showBlastDb dbDir: '" ++ dbDir ++ "'"
-  debugIO cfg $ "showBlastDb args: " ++ show args
   out <- withReadLock ref path' $
-           readCreateProcess (proc "blastdbcmd" args)
-             { cwd = Just dbDir, env = Just [("BLASTDB", dbDir)] } ""
+           readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
   let out1 = lines out
       out2 = concatMap (split "\t") out1
       out3 = filter (not . null) out2

@@ -13,7 +13,7 @@ data-files:         data/*.fa,
                     data/*.gbk,
                     data/*.txt,
                     tests/check/*.sh,
-                    tests/depend/*.txt,
+                    tests/versions/*.txt,
                     tests/repl/*.txt,
                     tests/scripts/*.cut,
                     tests/stdout/*.txt,
@@ -88,7 +88,7 @@ executable shortcut
                     ShortCut.Modules.Summarize,
                     ShortCut.Reference,
                     ShortCut.Test,
-                    ShortCut.Test.Deps
+                    ShortCut.Test.Versions
                     ShortCut.Test.Parse,
                     ShortCut.Test.Parse.Arbitrary,
                     ShortCut.Test.Parse.Examples,

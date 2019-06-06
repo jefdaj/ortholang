@@ -51,9 +51,9 @@ in python36Packages.buildPythonPackage rec {
 
   # A hacky way to stop the python2 PYTHONPATH from interfering with python3.
   # Otherwise we get all kinds of errors related to matplotlib.
-  postInstall = ''
-    for b in $out/bin/*; do
-      wrapProgram $b --unset PYTHONPATH
-    done
-  '';
+  # postInstall = ''
+  #   for b in $out/bin/*; do
+  #     wrapProgram $b --unset PYTHONPATH
+  #   done
+  # '';
 }

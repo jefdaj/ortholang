@@ -15,7 +15,6 @@ import ShortCut.Core.Paths         (CutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions       (readPaths, readLit, debugA, runCmd, CmdDesc(..), sanitizeFileInPlace)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Modules.Blast      (bht)
--- import System.Command              (readProcess)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))
@@ -38,7 +37,7 @@ dmnd = CutType
   , tDesc = "DIAMOND database"
   , tShow = \_ ref path -> do
       path' <- resolveSymlinks Nothing path
-      out <- withReadLock ref path' $ readProcess "diamond" ["dbinfo", "--db", path'] []
+      out <- withReadLock ref path' $ readProcess "diamond_dbinfo.sh" [path'] []
       let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
       return desc
   }

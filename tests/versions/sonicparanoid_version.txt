@@ -1,0 +1,10 @@
+usage: sonicparanoid -i <INPUT_DIRECTORY> -o <OUTPUT_DIRECTORY>[options]
+
+SonicParanoid 1.0
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT_DIRECTORY, --input-directory INPUT_DIRECTORY
+                        Directory containing the proteomes (in FASTA format)
+                        of the species to be compared. NOTE: The file names
+                        MUST NOT contain the '-' nor '.' characters

@@ -47,8 +47,8 @@ let
     shortcut-orthofinder
     shortcut-plots
     shortcut-psiblast
-    shortcut-seqio
     shortcut-sonicparanoid
+    shortcut-seqio
     shortcut-treecl
 
     # cdhit
@@ -63,23 +63,23 @@ let
     ncurses # TODO is this needed?
     # python27Packages.blastdbget
     tree
-  ]
-    ++ shortcut-sonicparanoid.runDepends
-    ++ shortcut-biomartr.runDepends
-    ++ shortcut-blast.runDepends
-    ++ shortcut-blastdb.runDepends
-    ++ shortcut-blasthits.runDepends
-    ++ shortcut-blastrbh.runDepends
-    ++ shortcut-crbblast.runDepends
-    ++ shortcut-diamond.runDepends
-    ++ shortcut-hmmer.runDepends
-    ++ shortcut-mmseqs.runDepends
-    ++ shortcut-muscle.runDepends
-    ++ shortcut-orthofinder.runDepends
-    ++ shortcut-plots.runDepends
-    ++ shortcut-psiblast.runDepends
-    ++ shortcut-seqio.runDepends
-    ++ shortcut-treecl.runDepends;
+  ];
+    # ++ shortcut-sonicparanoid.runDepends
+    # ++ shortcut-biomartr.runDepends
+    # ++ shortcut-blast.runDepends
+    # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
+    # ++ shortcut-blasthits.runDepends
+    # ++ shortcut-blastrbh.runDepends
+    # ++ shortcut-crbblast.runDepends
+    # ++ shortcut-diamond.runDepends
+    # ++ shortcut-hmmer.runDepends
+    # ++ shortcut-mmseqs.runDepends
+    # ++ shortcut-muscle.runDepends
+    # ++ shortcut-orthofinder.runDepends
+    # ++ shortcut-plots.runDepends
+    # ++ shortcut-psiblast.runDepends
+    # ++ shortcut-seqio.runDepends # incompatible with sonicparanoid
+    # ++ shortcut-treecl.runDepends # incompatible with sonicparanoid
 
   # explicitly remove .stack-work from nix source because it's big
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
