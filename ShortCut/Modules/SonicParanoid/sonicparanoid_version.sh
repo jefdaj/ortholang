@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sonicparanoid -h | head
+sonicparanoid -h | grep ^SonicParanoid

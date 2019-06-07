@@ -29,13 +29,13 @@ spr :: CutType
 spr = CutType
   { tExt  = "spr"
   , tDesc = "SonicParanoid results"
-  -- , tShow = defaultShow
-  , tShow = \cfg ref path -> do
-      path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
-      let dir = takeDirectory $ takeDirectory path'
-          species = dir </> "species.txt"
-      nSpecies <- fmap (length . lines) $ readFileStrict ref species
-      return $ "sonicparanoid result " ++ takeBaseName dir ++ " (" ++ show nSpecies ++ " species)"
+  , tShow = defaultShow
+  -- , tShow = \cfg ref path -> do
+  --     path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
+  --     let dir = takeDirectory $ takeDirectory path'
+  --         species = dir </> "species.txt"
+  --     nSpecies <- fmap (length . lines) $ readFileStrict ref species
+  --     return $ "sonicparanoid result " ++ takeBaseName dir ++ " (" ++ show nSpecies ++ " species)"
   }
 
 -------------------
@@ -67,14 +67,14 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       dbDir       = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
       -- outDir      = tmpDir </> "result" -- TODO copy input files here?
       inDir       = tmpDir </> "input_links" -- TODO can you prevent it duplicating this to input?
-      opPath'     = tmpDir </> "ortholog_relations" </> "ortholog_pairs.tsv"
-      opPath      = toCutPath cfg opPath'
+      statsPath'     = tmpDir </> "stats.tsv" -- this gets symlinked to the actual one, whose path varies
+      statsPath      = toCutPath cfg statsPath'
       faListPath' = fromCutPath cfg faListPath
       out'        = fromCutPath cfg out
-      opPath''    = debugA cfg "aSonicParanoid" out' [out', opPath', faListPath']
+      statsPath''    = debugA cfg "aSonicParanoid" out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 
-  withWriteLock' ref opPath' $ unlessExists opPath' $ do
+  withWriteLock' ref tmpDir $ unlessExists statsPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
     faPaths <- readPaths cfg ref faListPath'
@@ -87,16 +87,16 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     -- TODO decide -d (debug) based on cfg? or leave one way?
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "sonicparanoid.sh"
-      , cmdArguments = [opPath', tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
+      , cmdArguments = [tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
       , cmdFixEmpties = False -- TODO do that?
       , cmdParallel = False -- TODO fix shake error associated with this
       , cmdOptions = []
       , cmdInPatterns = faPaths'
-      , cmdOutPath = opPath''
-      , cmdExtraOutPaths = []
+      , cmdOutPath = statsPath''
+      , cmdExtraOutPaths = [] -- TODO what to do about this? there are a lot, sort of
       , cmdSanitizePaths = []
       , cmdExitCode = ExitSuccess
-      , cmdRmPatterns = [opPath'', tmpDir]
+      , cmdRmPatterns = [tmpDir]
       }
 
     -- (o, e, _) <- wrappedCmd True False cfg ref (Just out'') faPaths' [] "sonicparanoid"
@@ -112,6 +112,6 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     --   ]
     -- putNormal $ unlines [o, e] -- TODO remove
 
-  symlink cfg ref out opPath
+  symlink cfg ref out statsPath
 
 aSonicParanoid _ _ _ args = error $ "bad argument to aSonicParanoid: " ++ show args
