@@ -33,9 +33,9 @@ let
   devDepends = [
     haskell.compiler.ghc844
     stack
-  ]
+  ];
     # TODO this shouldn't be needed:
-    ++ shortcut-sonicparanoid.runDepends; # incompatible with seqio, orthofinder, blastdb?
+    # ++ shortcut-sonicparanoid.runDepends; # incompatible with seqio, orthofinder, blastdb?
     # ++ shortcut-biomartr.runDepends
     # ++ shortcut-blast.runDepends
     # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
