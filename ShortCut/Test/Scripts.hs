@@ -37,6 +37,7 @@ tmpfilesVary =
   [ "crb_blast_each2" -- TODO should this be fixable?
   , "ncbi_blast_reciprocal_best"
   , "blast_hits_best_hits"
+  , "sonicparanoid_myco3"
   ]
 
 -- these work, but the stdout varies so they require a check script
