@@ -74,13 +74,16 @@ let
       inherit (pkgs.python27Packages) matplotlib nose numpy pandas progressbar scikitlearn scipy;
     };
   };
+
+  justorthologs = pkgs.callPackage ./justorthologs {};
+
 in pkgs // {
   python27Packages = myPython2;
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit diamond hmmer mmseqs2;
   inherit (myPython2) blastdbget treeCl;
   inherit raxml;
-  inherit orthofinder sonicparanoid;
+  inherit orthofinder sonicparanoid justorthologs;
 
   # python27Packages = myPython27; # used by treeCl, probably others
   # python36Packages = myPython36; # used by sonicparanoid

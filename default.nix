@@ -17,6 +17,7 @@ let
   shortcut-seqio         = import ./ShortCut/Modules/SeqIO;
   shortcut-sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
   shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
+  shortcut-justorthologs = import ./ShortCut/Modules/JustOrthologs;
 
   # myPython = python27Packages.python.withPackages (ps: with ps; [
     # biopython
@@ -33,7 +34,8 @@ let
   devDepends = [
     haskell.compiler.ghc844
     stack
-  ];
+  ]
+    ++ shortcut-justorthologs.runDepends; # incompatible with seqio, orthofinder, blastdb?
     # TODO this shouldn't be needed:
     # ++ shortcut-sonicparanoid.runDepends; # incompatible with seqio, orthofinder, blastdb?
     # ++ shortcut-biomartr.runDepends
@@ -70,6 +72,7 @@ let
     shortcut-seqio
     shortcut-sonicparanoid
     shortcut-treecl
+    shortcut-justorthologs
 
     # cdhit
     diffutils
