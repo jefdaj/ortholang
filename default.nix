@@ -78,14 +78,14 @@ let
     tree
   ];
 
-  # explicitly remove .stack-work from nix source because it's big
+  # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
-  notStack = path: type: baseNameOf path != ".stack-work";
+  noBigDotfiles = path: type: baseNameOf path != ".stack-work" && baseNameOf path != ".git";
 
 # see https://github.com/jml/nix-haskell-example
 # TODO final wrapper with +RTS -N -RTS?
 in haskell.lib.overrideCabal cabalPkg (drv: {
-  src = builtins.filterSource notStack ./.;
+  src = builtins.filterSource noBigDotfiles ./.;
 
   # TODO this isn't being run by overrideCabal at all. get it to work
   shellHook = ''
