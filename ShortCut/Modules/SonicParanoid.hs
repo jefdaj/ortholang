@@ -72,6 +72,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       faListPath' = fromCutPath cfg faListPath
       out'        = fromCutPath cfg out
       opPath''    = debugA cfg "aSonicParanoid" out' [out', opPath', faListPath']
+  liftIO $ createDirectoryIfMissing True sharedDir
 
   withWriteLock' ref opPath' $ unlessExists opPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others

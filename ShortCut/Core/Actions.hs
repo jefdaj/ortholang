@@ -387,7 +387,7 @@ matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
 handleCmdError :: CutConfig -> Locks -> String -> ExitCode -> FilePath -> [String] -> Action a
 handleCmdError cfg ref bin n stderrPath rmPatterns = do
   hasErr <- doesFileExist stderrPath
-  errMsg2 <- if hasErr && not (cfgDebug cfg) -- when debugging, leave the files
+  errMsg2 <- if hasErr
                then do
                  errTxt <- readFileStrict' cfg ref stderrPath
                  return $ ["Stderr was:", errTxt]
@@ -397,10 +397,12 @@ handleCmdError cfg ref bin n stderrPath rmPatterns = do
   liftIO $ rmAll $ sort $ nub files' -- TODO should these be patterns to match first?
   -- TODO does this get caught by recoverAll in eval? make sure it does!
   -- TODO also try adding a manual flush before each external command in case it's an io delay thing
-  let errMsg =
-        [ bin ++ " failed with " ++ show n ++ "."
-        , "The files it was working on have been deleted:"
-        ] ++ files'
+  let errMsg = if cfgDebug cfg
+                 then []
+                 else
+                   [ bin ++ " failed with " ++ show n ++ "."
+                   , "The files it was working on have been deleted:"
+                   ] ++ files'
   error $ unlines $ errMsg ++ errMsg2
 
 ----------
