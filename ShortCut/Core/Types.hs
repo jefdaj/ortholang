@@ -346,7 +346,7 @@ data CutConfig = CutConfig
   , cfgModules :: [CutModule]
   , cfgWrapper :: Maybe FilePath
   , cfgReport  :: Maybe String
-  , cfgTestPtn :: Maybe String
+  , cfgTestPtn :: [String] -- [] means run all tests
   , cfgWidth   :: Maybe Int -- for testing
   , cfgSecure  :: Bool
   , cfgParLock :: Resource

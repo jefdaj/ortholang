@@ -31,8 +31,17 @@ mkTests cfg ref ids = setPtn >> mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
     setPtn = case cfgTestPtn cfg of
-               Nothing  -> return ()
-               Just ptn -> setEnv "TASTY_PATTERN" ptn
+               [] -> return ()
+               ps -> setEnv "TASTY_PATTERN" $ mkTastyPattern ps
+
+{- Tasty uses a subset of AWK to match patterns.
+ - I thought that was confusing, so this generates it from a simple list.
+ - If you find a need for more expressive patterns, email and I'll add them back!
+ -}
+mkTastyPattern :: [String] -> String
+mkTastyPattern ps = foldr1 (\a b -> a ++ " || " ++ b) matchPatterns
+  where
+    matchPatterns = map ("$0 ~ " ++) $ map (\p -> "/" ++ p ++ "/") ps
 
 mkTestConfig :: CutConfig -> FilePath -> CutConfig
 mkTestConfig cfg dir = cfg

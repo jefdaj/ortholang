@@ -2,7 +2,7 @@ A scripting language that makes short work of phylogenomic cuts.
 
 Usage:
   shortcut --help FNORTYPE | --version
-  shortcut --test [--pattern PATTERN]
+  shortcut --test [--pattern PATTERN]...
   shortcut [options]
 
 Options:
@@ -11,6 +11,7 @@ Options:
   --debug            Print debugging messages to stderr
   --test             Run tests. May be combined with a wrapper script.
   --pattern PATTERN  Only run tests matching PATTERN. [default: all]
+                     Can be used more than once to run multiple sets of tests.
   --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
   --script SCRIPT    ShortCut script to run, or load with --interactive

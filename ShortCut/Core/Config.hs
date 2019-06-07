@@ -14,7 +14,7 @@ import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
 import ShortCut.Core.Util         (absolutize)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
-                                   longOption)
+                                   longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
 import Debug.Trace       (trace)
@@ -43,7 +43,7 @@ loadConfig mods args = do
   cwd <- mapM absolutize =<< loadField args cfg "workdir"
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
-  ctp <- loadField args cfg "pattern"
+  let ctp = getAllArgs args (longOption "pattern")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive") -- TODO repl getter + setter? seems redundant
   return CutConfig
