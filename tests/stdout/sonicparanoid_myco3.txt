@@ -1,1 +1,7 @@
-sonicparanoid result 366e1a6522 (3 species)
+info/species	0d8dfa261e	306ef4e6c6	fab3203dba	total
+Proteome sizes	231858	288926	283416	804200
+Input proteins	660	796	743	2199
+Orthologs	395	348	378	1121
+Assigned (%)	59.85	43.72	50.87	50.98
+...
+
