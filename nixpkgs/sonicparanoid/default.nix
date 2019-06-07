@@ -1,5 +1,5 @@
 # with (import ./..);
-{ pkgs, python36Packages, fetchurl, mmseqs2 }:
+{ pkgs, python36Packages, fetchurl, mmseqs2, mcl }:
 
 let
   # this is only needed for sh >= 1.12.14; remove once nixpkgs includes it
@@ -7,11 +7,11 @@ let
 
 in python36Packages.buildPythonPackage rec {
   pname = "sonicparanoid";
-  version = "1.0.14";
+  version = "1.2.2";
 
   src = fetchurl {
-    url = "https://files.pythonhosted.org/packages/a2/29/deabc1920ab6c59fa199b848ab8a0956c1b6612070842d5ce5174320b7bc/${pname}-${version}.tar.gz";
-    sha256 = "0nvnvgjc45y7rdfvlmgwyc5xv3xv3lmxcny1z1ilj1hwdjlh1dbx";
+    url = "https://files.pythonhosted.org/packages/89/a7/8d12cb5ee5f4443db9da8d7a7b34becb8b4e947ae9201978ea1d76c18056/sonicparanoid-1.2.2.tar.gz";
+    sha256 = "1wmnkcmn721xwg9ry43z8ncl5dfwyyi6mh1nxd5rd0vck8ph7mfk";
   };
 
   propagatedBuildInputs = [
@@ -28,7 +28,7 @@ in python36Packages.buildPythonPackage rec {
     # muscle
     # biopython
     # hmmer
-    # mcl
+    mcl
     # mmseqs2
     # numpy
     # pandas
@@ -41,19 +41,21 @@ in python36Packages.buildPythonPackage rec {
   # checkInputs = with pypiPython.packages; [];
 
   patches = [
-    ./find-mmseqs-bin.patch
-    ./disable-mmseqs-version-check.patch
+    ./add-nix-dependency-paths.patch
+    ./disable-version-checks.patch
+    ./ignore-divide-by-zero.patch # TODO is this a bad idea?
   ];
+
+  # Once the patch above has replaced the setup code with Nix vars,
+  # this fills in the full paths. Overall pretty hacky, but seems to work.
+  inherit mcl mmseqs2;
+  postPatch = ''
+    for f in sonicparanoid/*.py*; do
+      substituteAllInPlace "$f"
+    done
+  '';
 
   meta = {
     # TODO write this
   };
-
-  # A hacky way to stop the python2 PYTHONPATH from interfering with python3.
-  # Otherwise we get all kinds of errors related to matplotlib.
-  # postInstall = ''
-  #   for b in $out/bin/*; do
-  #     wrapProgram $b --unset PYTHONPATH
-  #   done
-  # '';
 }

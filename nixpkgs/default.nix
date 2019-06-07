@@ -50,7 +50,7 @@ let
   # TODO push new sh-1.12.14 upstream! haven't managed to include it properly here
   # TODO is this pulling in python3 and messing up treeCl?
   sonicparanoid = pkgs.callPackage ./sonicparanoid {
-    inherit mmseqs2;
+    inherit mmseqs2 mcl;
     inherit (pkgs) python36Packages;
   };
 
