@@ -75,13 +75,25 @@ let
     };
   };
 
+  myPython3 = pkgs.python36Packages // rec {
+    busco = pkgs.python36Packages.callPackage ./busco {
+      inherit (pkgs.lib) makeBinPath;
+      inherit psiblast-exb;
+    };
+  };
+
   justorthologs = pkgs.callPackage ./justorthologs {};
 
 in pkgs // {
-  python27Packages = myPython2;
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit diamond hmmer mmseqs2;
+
+  # TODO will these interfere with each other?
+  python27Packages = myPython2;
+  python36Packages = myPython3;
   inherit (myPython2) blastdbget treeCl;
+  inherit (myPython3) busco;
+
   inherit raxml;
   inherit orthofinder sonicparanoid justorthologs;
 
