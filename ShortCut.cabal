@@ -77,6 +77,7 @@ executable shortcut
                     ShortCut.Modules.Muscle,
                     ShortCut.Modules.OrthoFinder,
                     ShortCut.Modules.OrthoGroups,
+                    ShortCut.Modules.Busco,
                     ShortCut.Modules.Permute,
                     ShortCut.Modules.Plots,
                     ShortCut.Modules.PsiBlast,

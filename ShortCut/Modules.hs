@@ -32,6 +32,7 @@ import qualified ShortCut.Modules.Diamond   as Diamond
 import qualified ShortCut.Modules.MMSeqs    as MMSeqs
 import qualified ShortCut.Modules.SonicParanoid as SonicParanoid
 import qualified ShortCut.Modules.OrthoGroups as OrthoGroups
+import qualified ShortCut.Modules.Busco as Busco
 
 modules :: [CutModule]
 modules =
@@ -63,4 +64,5 @@ modules =
   , MMSeqs.cutModule
   , SonicParanoid.cutModule
   , OrthoGroups.cutModule
+  , Busco.cutModule
   ]
