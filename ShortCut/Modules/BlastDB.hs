@@ -207,7 +207,7 @@ rBlastdblist s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toCutPath   cfg fPath
   listTmp %> \_ -> aBlastdblist   cfg ref ids lTmp'
-  oPath'  %> \_ -> aBlastdbfilter cfg ref ids oPath lTmp' fPath'
+  oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
     oPath   = exprPath s e
@@ -240,19 +240,21 @@ aBlastdblist cfg ref _ listTmp = do
     tmpDir   = takeDirectory $ listTmp'
     oPath    = debugA cfg "aBlastdblist" listTmp' [listTmp']
 
-aBlastdbfilter :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
-aBlastdbfilter cfg ref _ oPath listTmp fPath = do
+-- TODO generalize so it works with busco_list_lineages too?
+-- TODO move to a "Filter" module once that gets started
+aFilterList :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+aFilterList cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
   out       <- readLits cfg ref listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
-  debugL cfg $ "aBlastdbfilter names': " ++ show names'
+  debugL cfg $ "aFilterList names': " ++ show names'
   writeLits cfg ref oPath'' names'
   where
     fPath'   = fromCutPath cfg fPath
     oPath'   = fromCutPath cfg oPath
     listTmp' = fromCutPath cfg listTmp
-    oPath''  = debugA cfg "aBlastdbfilter" oPath' [oPath', listTmp', fPath']
+    oPath''  = debugA cfg "aFilterList" oPath' [oPath', listTmp', fPath']
 
 mkBlastdbget :: String -> CutType -> CutFunction
 mkBlastdbget name dbType = CutFunction
