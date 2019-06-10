@@ -20,7 +20,7 @@ cutModule = CutModule
       -- , buscoProteins
       -- , buscoTranscriptome
       [ buscoListLineages
-      -- , buscoFetchLineage
+      , buscoLoadLineage
       -- TODO each versions
       ]
   }
@@ -128,7 +128,26 @@ aBuscoListLineages cfg ref _ listTmp = do
       , "alveolata_stramenophiles_ensembl"
       ]
 
-buscoFetchLineage :: CutFunction
-buscoFetchLineage  = undefined
+------------------------
+-- busco_load_lineage --
+------------------------
+
+buscoLoadLineage :: CutFunction
+buscoLoadLineage  = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str] lin
+  , fTypeDesc  = mkTypeDesc name  [str] lin
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rBuscoLoadLineage
+  }
+  where
+    name = "busco_load_lineage"
+
+-- TODO rename to just load_lineage
+-- TODO start with a regular load function like the rest and local files
+-- TODO then get it to download first from a url, and do the same for all load_* fns
+--      (this one will need an extra little wrapper to set the url)
+rBuscoLoadLineage = undefined
   where
     url lineage = "http://busco.ezlab.org/v2/datasets/" ++ lineage ++ ".tar.gz"
