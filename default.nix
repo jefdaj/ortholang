@@ -19,6 +19,7 @@ let
   shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
   shortcut-justorthologs = import ./ShortCut/Modules/JustOrthologs;
   shortcut-busco         = import ./ShortCut/Modules/Busco;
+  shortcut-load          = import ./ShortCut/Modules/Load;
 
   # myPython = python27Packages.python.withPackages (ps: with ps; [
     # biopython
@@ -36,6 +37,7 @@ let
     haskell.compiler.ghc844
     stack
   ]
+    ++ shortcut-load.runDepends
     ++ shortcut-busco.runDepends;
     # ++ shortcut-justorthologs.runDepends; # incompatible with seqio, orthofinder, blastdb?
     # TODO this shouldn't be needed:
@@ -76,6 +78,7 @@ let
     shortcut-treecl
     shortcut-justorthologs
     shortcut-busco
+    shortcut-load
 
     # cdhit
     diffutils

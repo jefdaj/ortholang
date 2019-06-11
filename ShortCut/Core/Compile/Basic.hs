@@ -22,6 +22,7 @@ module ShortCut.Core.Compile.Basic
 import Debug.Trace (trace)
 
 import Development.Shake
+import Development.Shake.FilePath (isAbsolute)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty
 import qualified Data.Map as M
@@ -30,7 +31,7 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
 import Data.IORef                 (atomicModifyIORef)
-import Data.List                  (intersperse, isPrefixOf)
+import Data.List                  (intersperse, isPrefixOf, isInfixOf)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
@@ -41,6 +42,7 @@ import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists)
 import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
+import System.Directory           (createDirectoryIfMissing)
 
 debug :: CutConfig -> String -> a -> a
 debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
@@ -336,14 +338,49 @@ aLoadHash hashSeqIDs cfg ref ids src ext = do
   where
     src' = fromCutPath cfg src
 
+-- This is hacky, but should work with multiple protocols like http(s):// and ftp://
+isURL :: String -> Bool
+isURL s = "://" `isInfixOf` take 10 s
+
+-- TODO move to Load module?
+curl :: CutConfig -> Locks -> String -> Action CutPath
+curl cfg ref url = do
+  -- liftIO $ putStrLn $ "url: " ++ url
+  let verbosity = if cfgDebug cfg then "" else "-s"
+      cDir      = fromCutPath cfg $ cacheDir cfg "curl"
+      outPath   = cDir </> digest url
+  liftIO $ createDirectoryIfMissing True cDir
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "download.sh"
+    , cmdArguments = [outPath, url, verbosity]
+    , cmdFixEmpties = False
+    , cmdParallel = False
+    , cmdInPatterns = []
+    , cmdOutPath = outPath
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
+    , cmdOptions = []
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [outPath]
+    }
+  return $ toCutPath cfg outPath
+
 aLoad :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
   debugNeed cfg "aLoad" [strPath']
-  pth <- readLitPaths cfg ref strPath'
-  src' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) $ fromCutPath cfg $ head pth -- TODO safer!
+  pth <- fmap head $ readLits cfg ref strPath' -- TODO safer!
+  -- liftIO $ putStrLn $ "pth: " ++ pth
+  pth' <- if isURL pth
+            then curl cfg ref pth
+            else fmap (toCutPath cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
+  -- liftIO $ putStrLn $ "pth': " ++ show pth'
+  -- src' <- if isURL pth
+            -- then curl cfg ref pth
+            -- else 
+  -- liftIO $ putStrLn $ "src': " ++ src'
   -- debugL cfg $ "aLoad src': '" ++ src' ++ "'"
   -- debugL cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
-  hashPath <- aLoadHash hashSeqIDs cfg ref ids (toCutPath cfg src') (takeExtension outPath')
+  hashPath <- aLoadHash hashSeqIDs cfg ref ids pth' (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   symlink cfg ref outPath'' hashPath
@@ -352,6 +389,10 @@ aLoad hashSeqIDs cfg ref ids strPath outPath = do
     strPath'  = fromCutPath cfg strPath
     outPath'  = fromCutPath cfg outPath
     outPath'' = debugA cfg "aLoad" outPath [strPath', outPath']
+    toAbs line = if isAbsolute line
+                   then line
+                   else cfgWorkDir cfg </> line
+
 
 rLoadList :: Bool -> RulesFn
 rLoadList hashSeqIDs s e@(CutFun (ListOf r) _ _ _ [es])
