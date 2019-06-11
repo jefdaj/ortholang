@@ -7,7 +7,7 @@ import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink, readFileStrict)
 import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, aLoad, curl)
-import ShortCut.Modules.SeqIO (faa)
+import ShortCut.Modules.SeqIO (fna, faa)
 import ShortCut.Modules.BlastDB (aFilterList)
 import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
@@ -26,8 +26,8 @@ cutModule = CutModule
       , buscoListLineages
       , buscoFetchLineage
       , buscoProteins
-      -- [ buscoGenome -- TODO remove until augustus is packaged?
-      -- , buscoTranscriptome
+      -- , buscoGenome -- TODO remove until augustus is packaged?
+      , buscoTranscriptome
       -- TODO each versions
       ]
   }
@@ -45,8 +45,8 @@ bur = CutType
   , tDesc = "BUSCO results"
   , tShow = \_ ref path -> do
       txt <- readFileStrict ref path
-      let tail6 = unlines . reverse . take 6 . reverse . lines
-      return $ init $ "BUSCO results:\n" ++ tail6 txt
+      let tail9 = unlines . reverse . take 9 . reverse . lines
+      return $ init $ "BUSCO result:\n" ++ tail9 txt
   }
 
 loadLineage :: CutFunction
@@ -54,9 +54,6 @@ loadLineage = mkLoad False "load_lineage" bul
 
 buscoCache :: CutConfig -> CutPath
 buscoCache cfg = cacheDir cfg "busco"
-
-buscoGenome        = undefined
-buscoTranscriptome = undefined
 
 -------------------------
 -- busco_list_lineages --
@@ -235,24 +232,25 @@ withBuscoUrl e = error $ "bad argument to withBuscoUrl: " ++ show e
 -- busco_{genome,proteins,transcriptome} --
 -------------------------------------------
 
-buscoProteins :: CutFunction
-buscoProteins  = CutFunction
+mkBusco :: String -> String -> CutType -> CutFunction
+mkBusco name mode inType = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [bul, faa] bur
-  , fTypeDesc  = mkTypeDesc name  [bul, faa] bur
+  , fTypeCheck = defaultTypeCheck [bul, inType] bur
+  , fTypeDesc  = mkTypeDesc name  [bul, inType] bur
   , fDesc      = Nothing
   , fFixity    = Prefix
-  , fRules     = rSimple aBuscoProteins
+  , fRules     = rSimple $ aBusco mode
   }
-  where
-    name = "busco_proteins"
+
+buscoProteins      = mkBusco "busco_proteins"      "prot" faa
+buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
+-- buscoGenome = mkBusco "busco_genome" "geno"
 
 -- TODO need to generate + pass in the unique config file
 -- TODO need to pass only the basename prefix of the outpath?
-aBuscoProteins :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aBuscoProteins cfg ref _ [outPath, bulPath, faaPath] = do
-  let mode = "prot" -- TODO make this an arg
-      out' = fromCutPath cfg outPath
+aBusco :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
+  let out' = fromCutPath cfg outPath
       bul' = takeDirectory $ fromCutPath cfg bulPath
       cDir = fromCutPath cfg $ buscoCache cfg
       -- lDir = cDir </> "lineages"
@@ -279,6 +277,6 @@ aBuscoProteins cfg ref _ [outPath, bulPath, faaPath] = do
   let oBase = "*" ++ takeBaseName out' ++ "*"
       tmpOutPtn = cDir </> oBase </> oBase </> "short_summary*.txt"
   tmpOut <- liftIO $ glob tmpOutPtn
-  liftIO $ putStrLn $ "glob: " ++ show tmpOut
+  -- liftIO $ putStrLn $ "glob: " ++ show tmpOut
   symlink cfg ref outPath $ toCutPath cfg $ head tmpOut
-aBuscoProteins _ _ _ as = error $ "bad argument to aBuscoProteins: " ++ show as
+aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
