@@ -8,7 +8,7 @@ import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..))
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple)
 import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.BlastDB (aFilterList)
-import System.FilePath (takeDirectory, takeBaseName, (<.>), (</>))
+import System.FilePath (takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Util         (resolveSymlinks)
 import System.Exit (ExitCode(..))
@@ -17,7 +17,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
-  , mTypes = [lin, faa]
+  , mTypes = [bul, bur, faa]
   , mFunctions =
       [ loadLineage
       , buscoListLineages
@@ -29,17 +29,26 @@ cutModule = CutModule
       ]
   }
 
-lin :: CutType
-lin = CutType
-  { tExt  = "lin"
+bul :: CutType
+bul = CutType
+  { tExt  = "bul"
   , tDesc = "BUSCO lineage" -- TODO call it something better like database?
   , tShow = \c _ f -> do
       f' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir c) f
       return $ "BUSCO lineage file '" ++ f' ++ "'"
   }
 
+bur :: CutType
+bur = CutType
+  { tExt  = "bur"
+  , tDesc = "BUSCO results"
+  , tShow = \c _ f -> do
+      f' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir c) f
+      return $ "BUSCO results '" ++ f' ++ "'"
+  }
+
 loadLineage :: CutFunction
-loadLineage = mkLoad False "load_lineage" lin
+loadLineage = mkLoad False "load_lineage" bul
 
 buscoCache :: CutConfig -> CutPath
 buscoCache cfg = cacheDir cfg "busco"
@@ -145,8 +154,8 @@ aBuscoListLineages cfg ref _ listTmp = do
 buscoFetchLineage :: CutFunction
 buscoFetchLineage  = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [str] lin
-  , fTypeDesc  = mkTypeDesc name  [str] lin
+  , fTypeCheck = defaultTypeCheck [str] bul
+  , fTypeDesc  = mkTypeDesc name  [str] bul
   , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rBuscoFetchLineage
@@ -175,8 +184,8 @@ withBuscoUrl e = error $ "bad argument to withBuscoUrl: " ++ show e
 buscoProteins :: CutFunction
 buscoProteins  = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [lin, faa] lin -- TODO busco results type
-  , fTypeDesc  = mkTypeDesc name  [lin, faa] lin -- TODO busco results type
+  , fTypeCheck = defaultTypeCheck [bul, faa] bul -- TODO busco results type
+  , fTypeDesc  = mkTypeDesc name  [bul, faa] bul -- TODO busco results type
   , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aBuscoProteins
@@ -187,20 +196,20 @@ buscoProteins  = CutFunction
 -- TODO need to generate + pass in the unique config file
 -- TODO need to pass only the basename prefix of the outpath?
 aBuscoProteins :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
-aBuscoProteins cfg ref ids [outPath, linPath, faaPath] = do
+aBuscoProteins cfg ref _ [outPath, bulPath, faaPath] = do
   let mode = "prot" -- TODO make this an arg
       out' = fromCutPath cfg outPath
-      lin' = fromCutPath cfg linPath
+      bul' = fromCutPath cfg bulPath
       cDir = fromCutPath cfg $ buscoCache cfg
       -- lDir = cDir </> "lineages"
-      -- lDir  = takeDirectory lin'
-      -- lBase = takeBaseName lin'
+      -- lDir  = takeDirectory bul'
+      -- lBase = takeBaseName bul'
       faa' = fromCutPath cfg faaPath
   liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
-  -- need [lin']
+  -- need [bul']
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "busco.sh"
-    , cmdArguments = [out', faa', lin', mode, cDir] -- TODO cfgtemplate, tdir
+    , cmdArguments = [out', faa', bul', mode, cDir] -- TODO cfgtemplate, tdir
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO fix shake error and set to True
     , cmdInPatterns = [faa'] -- TODO lineage file
@@ -211,3 +220,4 @@ aBuscoProteins cfg ref ids [outPath, linPath, faaPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
+aBuscoProteins _ _ _ as = error $ "bad argument to aBuscoProteins: " ++ show as
