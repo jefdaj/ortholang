@@ -4,13 +4,14 @@ module ShortCut.Modules.Busco
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..))
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple)
+import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink)
+import ShortCut.Core.Paths   (exprPath)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, aLoad, curl)
 import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.BlastDB (aFilterList)
 import System.FilePath (takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
-import ShortCut.Core.Util         (resolveSymlinks)
+import ShortCut.Core.Util         (resolveSymlinks, unlessExists)
 import System.Exit (ExitCode(..))
 
 cutModule :: CutModule
@@ -33,9 +34,7 @@ bul :: CutType
 bul = CutType
   { tExt  = "bul"
   , tDesc = "BUSCO lineage" -- TODO call it something better like database?
-  , tShow = \c _ f -> do
-      f' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir c) f
-      return $ "BUSCO lineage file '" ++ f' ++ "'"
+  , tShow = defaultShowN 6
   }
 
 bur :: CutType
@@ -163,10 +162,62 @@ buscoFetchLineage  = CutFunction
   where
     name = "busco_fetch_lineage"
 
+-- TODO move to Util?
+untar :: CutConfig -> Locks -> CutPath -> CutPath -> Action ()
+untar cfg ref from to = runCmd cfg ref $ CmdDesc
+  { cmdBinary = "tar"
+  , cmdArguments = (if cfgDebug cfg then "-v" else ""):["-xf", from', "-C", takeDirectory to']
+  , cmdFixEmpties = False
+  , cmdParallel   = False
+  , cmdInPatterns = [from']
+  , cmdOutPath    = to'
+  , cmdExtraOutPaths = []
+  , cmdSanitizePaths = []
+  , cmdOptions = []
+  , cmdExitCode = ExitSuccess
+  , cmdRmPatterns = [to']
+  }
+  where
+    from' = fromCutPath cfg from
+    to' = fromCutPath cfg to
+
 -- TODO also have to untar it in the lineages dir
 -- TODO and then might as well show dataset.cfg
 rBuscoFetchLineage :: RulesFn
-rBuscoFetchLineage st expr = (fRules loadLineage) st $ withBuscoUrl expr
+-- rBuscoFetchLineage st expr = (fRules loadLineage) st $ withBuscoUrl expr
+-- type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
+rBuscoFetchLineage st@(_, cfg, ref, ids) expr@(CutFun _ _ _ name [nPath]) = do
+  (ExprPath namePath) <- rExpr st nPath
+  let outPath  = exprPath st expr
+      outPath' = fromCutPath cfg outPath
+      bulDir   = (fromCutPath cfg $ buscoCache cfg) </> "lineages"
+  outPath' %> \_ -> do
+    nameStr <- readLit cfg ref namePath
+    let untarPath = bulDir </> nameStr
+        url       = "http://busco.ezlab.org/v2/datasets/" ++ nameStr ++ ".tar.gz"
+        datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
+        datasetPath   = toCutPath cfg datasetPath'
+    -- liftIO $ putStrLn $ "nameStr:   '" ++ nameStr ++ "'"
+    -- liftIO $ putStrLn $ "untarPath: '" ++ untarPath ++ "'"
+    -- liftIO $ putStrLn $ "url:       '" ++ url ++ "'"
+    -- liftIO $ createDirectoryIfMissing True bulDir
+    tarPath <- fmap (fromCutPath cfg) $ curl cfg ref url
+    -- liftIO $ putStrLn $ "tarPath: '" ++ tarPath ++ "'"
+    unlessExists untarPath $ do
+      untar cfg ref (toCutPath cfg tarPath) (toCutPath cfg untarPath)
+    --aLoad False cfg ref ids (toCutPath cfg namePath) (toCutPath cfg untarPath)
+    --
+    symlink cfg ref outPath datasetPath
+  return $ ExprPath outPath'
+rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show e
+
+-- aLoad :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+-- aLoad hashSeqIDs cfg ref ids strPath outPath = do
+
+aBuscoFetchLineage :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action ()
+aBuscoFetchLineage cfg ref _ oPath lName = do
+  return ()
+-- ilterList cfg ref _ oPath listTmp fPath = do
 
 -- TODO rename to just load_lineage?
 -- TODO should the urls say v3 now? homepage still lists v2

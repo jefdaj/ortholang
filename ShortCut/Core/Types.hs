@@ -46,6 +46,7 @@ module ShortCut.Core.Types
   , depsOf
   , rDepsOf
   , defaultShow
+  , defaultShowN -- same but lets you pick how many lines to show
   -- module stuff (in flux)
   , CutFunction(..)
   , mkTypeDesc
@@ -227,9 +228,11 @@ data CutType
   -- deriving (Eq, Show, Read)
 
 defaultShow :: CutConfig -> Locks -> FilePath -> IO String
-defaultShow _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
+defaultShow = defaultShowN 5
+
+defaultShowN :: Int -> CutConfig -> Locks -> FilePath -> IO String
+defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
-    nLines      = 5
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
     fmtLines ls = let nPlusOne = map fmtLine $ take (nLines + 1) ls
                   in if length nPlusOne > nLines
