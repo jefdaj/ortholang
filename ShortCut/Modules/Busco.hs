@@ -5,15 +5,13 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink, readFileStrict)
-import ShortCut.Core.Paths   (exprPath)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, aLoad, curl)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, curl)
 import ShortCut.Modules.SeqIO (fna, faa)
 import ShortCut.Modules.BlastDB (aFilterList)
 import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Util         (resolveSymlinks, unlessExists)
 import System.Exit (ExitCode(..))
-import Data.List (isPrefixOf, isInfixOf)
 import System.FilePath.Glob       (glob)
 
 cutModule :: CutModule
@@ -26,8 +24,8 @@ cutModule = CutModule
       , buscoListLineages
       , buscoFetchLineage
       , buscoProteins
-      -- , buscoGenome -- TODO remove until augustus is packaged?
       , buscoTranscriptome
+      -- TODO buscoGenome (have to package Augustus first?)
       -- TODO each versions
       ]
   }
@@ -186,7 +184,7 @@ untar cfg ref from to = runCmd cfg ref $ CmdDesc
 rBuscoFetchLineage :: RulesFn
 -- rBuscoFetchLineage st expr = (fRules loadLineage) st $ withBuscoUrl expr
 -- type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
-rBuscoFetchLineage st@(_, cfg, ref, ids) expr@(CutFun _ _ _ name [nPath]) = do
+rBuscoFetchLineage st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [nPath]) = do
   (ExprPath namePath) <- rExpr st nPath
   let outPath  = exprPath st expr
       outPath' = fromCutPath cfg outPath
@@ -205,28 +203,9 @@ rBuscoFetchLineage st@(_, cfg, ref, ids) expr@(CutFun _ _ _ name [nPath]) = do
     -- liftIO $ putStrLn $ "tarPath: '" ++ tarPath ++ "'"
     unlessExists untarPath $ do
       untar cfg ref (toCutPath cfg tarPath) (toCutPath cfg untarPath)
-    --aLoad False cfg ref ids (toCutPath cfg namePath) (toCutPath cfg untarPath)
-    --
     symlink cfg ref outPath datasetPath
   return $ ExprPath outPath'
 rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show e
-
--- aLoad :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
--- aLoad hashSeqIDs cfg ref ids strPath outPath = do
-
-aBuscoFetchLineage :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action ()
-aBuscoFetchLineage cfg ref _ oPath lName = do
-  return ()
--- ilterList cfg ref _ oPath listTmp fPath = do
-
--- TODO rename to just load_lineage?
--- TODO should the urls say v3 now? homepage still lists v2
-withBuscoUrl :: CutExpr -> CutExpr
-withBuscoUrl (CutFun rtn salt deps name [CutLit r s lineage])
-  =          (CutFun rtn salt deps name [CutLit r s url])
-  where
-    url = "http://busco.ezlab.org/v2/datasets/" ++ lineage ++ ".tar.gz"
-withBuscoUrl e = error $ "bad argument to withBuscoUrl: " ++ show e
 
 -------------------------------------------
 -- busco_{genome,proteins,transcriptome} --
@@ -242,6 +221,7 @@ mkBusco name mode inType = CutFunction
   , fRules     = rSimple $ aBusco mode
   }
 
+buscoProteins, buscoTranscriptome :: CutFunction
 buscoProteins      = mkBusco "busco_proteins"      "prot" faa
 buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
@@ -253,13 +233,9 @@ aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
   let out' = fromCutPath cfg outPath
       bul' = takeDirectory $ fromCutPath cfg bulPath
       cDir = fromCutPath cfg $ buscoCache cfg
-      -- lDir = cDir </> "lineages"
-      -- lDir  = takeDirectory bul'
-      -- lBase = takeBaseName bul'
       faa' = fromCutPath cfg faaPath
   -- liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
   bul'' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) bul'
-  -- need [bul']
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "busco.sh"
     , cmdArguments = [out', faa', bul'', mode, cDir] -- TODO cfgtemplate, tdir
