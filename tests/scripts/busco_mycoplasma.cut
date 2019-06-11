@@ -1,5 +1,12 @@
-odb9proteobacteria = busco_fetch_lineage "proteobacteria_odb9"
-odb9firmicutes = busco_fetch_lineage "firmicutes_odb9"
+# Do the lineage HMMs used have a large impact on results?
+# Looks like a medium one from just this example...
+
+odb9_firmicutes     = busco_fetch_lineage "firmicutes_odb9"
+odb9_proteobacteria = busco_fetch_lineage "proteobacteria_odb9"
+
 mgen = load_faa "data/Mycoplasma_genitalium_G37_protein_refseq.faa"
-mgen_res = busco_proteins odb9firmicutes mgen
-result = mgen_res
+
+res1 = busco_proteins odb9_firmicutes     mgen
+res2 = busco_proteins odb9_proteobacteria mgen
+
+result = [res1, res2]
