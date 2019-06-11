@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-OUTPREFIX="${1/.lin/}" # TODO full path?
+OUTPREFIX="$1" # TODO full path?
 INPATH="$2"
 LINEAGE="$3" # TODO full path without extension i think
 MODE="$4"
 TDIR="$5"
 
 OBASE="$(basename "$OUTPREFIX")"
-LDIR="$(dirname "$LINEAGE")"
+# LDIR="$(dirname $(dirname "$LINEAGE"))"
+LDIR="$LINEAGE"
 LNAME="$(basename "$LINEAGE")"
 
 # some of these seem to be required,
@@ -20,7 +21,7 @@ out_path     = "$OUTPREFIX"
 lineage_path = "$LDIR"
 cpu          = $(nproc)
 tmp_path     = "$TDIR"
-quiet        = False # TODO set from cfg
+quiet        = False
 gzip         = False
 # TODO set these? or does lineage handle it?
 # domain     = 
@@ -30,8 +31,5 @@ EOF
 CFGTEMPLATE="@busco@/config/config.ini"
 tail -n +45 "$CFGTEMPLATE" >> "$CFGPATH"
 
-# for debugging
-# cat "$CFGPATH"
-
 export BUSCO_CONFIG_FILE="$CFGPATH"
-run_BUSCO.py --cpu $(nproc) -i "$INPATH" -o "$OBASE" -l "$LNAME" -m "$MODE" > "${OUTPREFIX}.out" 2> "${OUTPREFIX}.err"
+run_BUSCO.py --cpu $(nproc) -i "$INPATH" -o "$OBASE" -l "$LINEAGE" -m "$MODE" > "${OUTPREFIX}.out" 2> "${OUTPREFIX}.err"

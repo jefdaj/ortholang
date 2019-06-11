@@ -235,8 +235,8 @@ withBuscoUrl e = error $ "bad argument to withBuscoUrl: " ++ show e
 buscoProteins :: CutFunction
 buscoProteins  = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [bul, faa] bul -- TODO busco results type
-  , fTypeDesc  = mkTypeDesc name  [bul, faa] bul -- TODO busco results type
+  , fTypeCheck = defaultTypeCheck [bul, faa] bur
+  , fTypeDesc  = mkTypeDesc name  [bul, faa] bur
   , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aBuscoProteins
@@ -250,17 +250,18 @@ aBuscoProteins :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action (
 aBuscoProteins cfg ref _ [outPath, bulPath, faaPath] = do
   let mode = "prot" -- TODO make this an arg
       out' = fromCutPath cfg outPath
-      bul' = fromCutPath cfg bulPath
+      bul' = takeDirectory $ fromCutPath cfg bulPath
       cDir = fromCutPath cfg $ buscoCache cfg
       -- lDir = cDir </> "lineages"
       -- lDir  = takeDirectory bul'
       -- lBase = takeBaseName bul'
       faa' = fromCutPath cfg faaPath
   liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
+  bul'' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) bul'
   -- need [bul']
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "busco.sh"
-    , cmdArguments = [out', faa', bul', mode, cDir] -- TODO cfgtemplate, tdir
+    , cmdArguments = [out', faa', bul'', mode, cDir] -- TODO cfgtemplate, tdir
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO fix shake error and set to True
     , cmdInPatterns = [faa'] -- TODO lineage file
