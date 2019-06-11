@@ -5,22 +5,24 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions (debugA, writeLits)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad)
 import ShortCut.Modules.BlastDB (aFilterList)
 import System.FilePath (takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
+import ShortCut.Core.Util         (resolveSymlinks)
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
-  , mTypes = [lin] -- TODO what does the output look like?
+  , mTypes = [lin]
   , mFunctions =
+      [ loadLineage
+      , buscoListLineages
+      , buscoFetchLineage
       -- [ buscoGenome -- TODO remove until augustus is packaged?
       -- , buscoProteins
       -- , buscoTranscriptome
-      [ buscoListLineages
-      , buscoLoadLineage
       -- TODO each versions
       ]
   }
@@ -29,8 +31,13 @@ lin :: CutType
 lin = CutType
   { tExt  = "lin"
   , tDesc = "BUSCO lineage" -- TODO call it something better like database?
-  , tShow = defaultShow -- TODO will this work?
+  , tShow = \c _ f -> do
+      f' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir c) f
+      return $ "BUSCO lineage file '" ++ f' ++ "'"
   }
+
+loadLineage :: CutFunction
+loadLineage = mkLoad False "load_lineage" lin
 
 buscoCache :: CutConfig -> CutPath
 buscoCache cfg = cacheDir cfg "busco"
@@ -129,25 +136,31 @@ aBuscoListLineages cfg ref _ listTmp = do
       ]
 
 ------------------------
--- busco_load_lineage --
+-- busco_fetch_lineage --
 ------------------------
 
-buscoLoadLineage :: CutFunction
-buscoLoadLineage  = CutFunction
+-- TODO consistent naming with similar functions
+
+buscoFetchLineage :: CutFunction
+buscoFetchLineage  = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] lin
   , fTypeDesc  = mkTypeDesc name  [str] lin
   , fDesc      = Nothing
   , fFixity    = Prefix
-  , fRules     = rBuscoLoadLineage
+  , fRules     = rBuscoFetchLineage
   }
   where
-    name = "busco_load_lineage"
+    name = "busco_fetch_lineage"
 
--- TODO rename to just load_lineage
--- TODO start with a regular load function like the rest and local files
--- TODO then get it to download first from a url, and do the same for all load_* fns
---      (this one will need an extra little wrapper to set the url)
-rBuscoLoadLineage = undefined
+rBuscoFetchLineage :: RulesFn
+rBuscoFetchLineage st expr = (fRules loadLineage) st $ withBuscoUrl expr
+
+-- TODO rename to just load_lineage?
+-- TODO should the urls say v3 now? homepage still lists v2
+withBuscoUrl :: CutExpr -> CutExpr
+withBuscoUrl (CutFun rtn salt deps name [CutLit r s lineage])
+  =          (CutFun rtn salt deps name [CutLit r s url])
   where
-    url lineage = "http://busco.ezlab.org/v2/datasets/" ++ lineage ++ ".tar.gz"
+    url = "http://busco.ezlab.org/v2/datasets/" ++ lineage ++ ".tar.gz"
+withBuscoUrl e = error $ "bad argument to withBuscoUrl: " ++ show e
