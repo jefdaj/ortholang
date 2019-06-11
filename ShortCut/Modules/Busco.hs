@@ -4,15 +4,17 @@ module ShortCut.Modules.Busco
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink)
+import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink, readFileStrict)
 import ShortCut.Core.Paths   (exprPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, aLoad, curl)
 import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.BlastDB (aFilterList)
-import System.FilePath (takeDirectory, (<.>), (</>))
+import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Util         (resolveSymlinks, unlessExists)
 import System.Exit (ExitCode(..))
+import Data.List (isPrefixOf, isInfixOf)
+import System.FilePath.Glob       (glob)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -41,9 +43,10 @@ bur :: CutType
 bur = CutType
   { tExt  = "bur"
   , tDesc = "BUSCO results"
-  , tShow = \c _ f -> do
-      f' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir c) f
-      return $ "BUSCO results '" ++ f' ++ "'"
+  , tShow = \_ ref path -> do
+      txt <- readFileStrict ref path
+      let tail6 = unlines . reverse . take 6 . reverse . lines
+      return $ init $ "BUSCO results:\n" ++ tail6 txt
   }
 
 loadLineage :: CutFunction
@@ -256,7 +259,7 @@ aBuscoProteins cfg ref _ [outPath, bulPath, faaPath] = do
       -- lDir  = takeDirectory bul'
       -- lBase = takeBaseName bul'
       faa' = fromCutPath cfg faaPath
-  liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
+  -- liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
   bul'' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) bul'
   -- need [bul']
   runCmd cfg ref $ CmdDesc
@@ -272,4 +275,10 @@ aBuscoProteins cfg ref _ [outPath, bulPath, faaPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
+  -- This is rediculous but I haven't been able to shorten it...
+  let oBase = "*" ++ takeBaseName out' ++ "*"
+      tmpOutPtn = cDir </> oBase </> oBase </> "short_summary*.txt"
+  tmpOut <- liftIO $ glob tmpOutPtn
+  liftIO $ putStrLn $ "glob: " ++ show tmpOut
+  symlink cfg ref outPath $ toCutPath cfg $ head tmpOut
 aBuscoProteins _ _ _ as = error $ "bad argument to aBuscoProteins: " ++ show as

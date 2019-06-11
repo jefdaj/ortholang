@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
 
-OUTPREFIX="$1" # TODO full path?
+# note there's some weirdness with the outpaths.
+# busco will generate its own hashed outdir, so we just pass it the tmpdir.
+# then in haskell the generated run_*.bur dir is symlinked to the final outpath
+
+OUTPREFIX="$1" # busco itself doesn't get to see this
 INPATH="$2"
-LINEAGE="$3" # TODO full path without extension i think
+LINEAGE="$3"
 MODE="$4"
 TDIR="$5"
 
-OBASE="$(basename "$OUTPREFIX")"
-# LDIR="$(dirname $(dirname "$LINEAGE"))"
-LDIR="$LINEAGE"
-LNAME="$(basename "$LINEAGE")"
+OPATH="${TDIR}/$(basename "$OUTPREFIX")"
+OBASE="$(basename "$OPATH")"
 
 # some of these seem to be required,
 # even though they're supposedly overridden by the cli.
 CFGPATH="${OUTPREFIX}.ini"
 cat << EOF > "$CFGPATH"
 [busco]
-in           = "$INPATH"
-out_path     = "$OUTPREFIX"
-lineage_path = "$LDIR"
+in           = $INPATH
+out_path     = $OPATH
+lineage_path = $LINEAGE
 cpu          = $(nproc)
-tmp_path     = "$TDIR"
+tmp_path     = $TDIR/$(basename "$OUTPREFIX")
 quiet        = False
 gzip         = False
 # TODO set these? or does lineage handle it?
