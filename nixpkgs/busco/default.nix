@@ -57,7 +57,8 @@ in buildPythonPackage {
     cp $src/scripts/* $out/bin
 
     # this will be edited further at runtime for each fn call
-    cp config/config.ini.default $out/lib/busco_config_template.ini
+    mkdir -p $out/config
+    cp config/config.ini.default $out/config/config.ini
 
     # if not editing further, would also --set BUSCO_CONFIG_FILE here
     for py in $out/bin/*; do

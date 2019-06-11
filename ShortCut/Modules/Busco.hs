@@ -4,24 +4,26 @@ module ShortCut.Modules.Busco
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions (debugA, writeLits)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad)
+import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..))
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple)
+import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.BlastDB (aFilterList)
-import System.FilePath (takeDirectory, (<.>), (</>))
+import System.FilePath (takeDirectory, takeBaseName, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Util         (resolveSymlinks)
+import System.Exit (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
-  , mTypes = [lin]
+  , mTypes = [lin, faa]
   , mFunctions =
       [ loadLineage
       , buscoListLineages
       , buscoFetchLineage
+      , buscoProteins
       -- [ buscoGenome -- TODO remove until augustus is packaged?
-      -- , buscoProteins
       -- , buscoTranscriptome
       -- TODO each versions
       ]
@@ -43,7 +45,6 @@ buscoCache :: CutConfig -> CutPath
 buscoCache cfg = cacheDir cfg "busco"
 
 buscoGenome        = undefined
-buscoProteins      = undefined
 buscoTranscriptome = undefined
 
 -------------------------
@@ -153,6 +154,8 @@ buscoFetchLineage  = CutFunction
   where
     name = "busco_fetch_lineage"
 
+-- TODO also have to untar it in the lineages dir
+-- TODO and then might as well show dataset.cfg
 rBuscoFetchLineage :: RulesFn
 rBuscoFetchLineage st expr = (fRules loadLineage) st $ withBuscoUrl expr
 
@@ -164,3 +167,47 @@ withBuscoUrl (CutFun rtn salt deps name [CutLit r s lineage])
   where
     url = "http://busco.ezlab.org/v2/datasets/" ++ lineage ++ ".tar.gz"
 withBuscoUrl e = error $ "bad argument to withBuscoUrl: " ++ show e
+
+-------------------------------------------
+-- busco_{genome,proteins,transcriptome} --
+-------------------------------------------
+
+buscoProteins :: CutFunction
+buscoProteins  = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [lin, faa] lin -- TODO busco results type
+  , fTypeDesc  = mkTypeDesc name  [lin, faa] lin -- TODO busco results type
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rSimple aBuscoProteins
+  }
+  where
+    name = "busco_proteins"
+
+-- TODO need to generate + pass in the unique config file
+-- TODO need to pass only the basename prefix of the outpath?
+aBuscoProteins :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aBuscoProteins cfg ref ids [outPath, linPath, faaPath] = do
+  let mode = "prot" -- TODO make this an arg
+      out' = fromCutPath cfg outPath
+      lin' = fromCutPath cfg linPath
+      cDir = fromCutPath cfg $ buscoCache cfg
+      -- lDir = cDir </> "lineages"
+      -- lDir  = takeDirectory lin'
+      -- lBase = takeBaseName lin'
+      faa' = fromCutPath cfg faaPath
+  liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
+  -- need [lin']
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "busco.sh"
+    , cmdArguments = [out', faa', lin', mode, cDir] -- TODO cfgtemplate, tdir
+    , cmdFixEmpties = False
+    , cmdParallel = False -- TODO fix shake error and set to True
+    , cmdInPatterns = [faa'] -- TODO lineage file
+    , cmdOutPath = out'
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
+    , cmdOptions = []
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [out']
+    }

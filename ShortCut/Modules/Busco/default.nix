@@ -12,6 +12,8 @@ in stdenv.mkDerivation {
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;
+  # the substitution is to pick up the path to the busco config template
+  inherit busco;
   builder = writeScript "builder.sh" ''
     #!/usr/bin/env bash
     source ${stdenv}/setup
@@ -21,6 +23,7 @@ in stdenv.mkDerivation {
       [[ "$base" == default.nix ]] && continue
       dest="$out/bin/$base"
       install -m755 $script $dest
+      substituteAllInPlace $dest
       wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
     done
   '';
