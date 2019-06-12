@@ -43,8 +43,8 @@ bur = CutType
   , tDesc = "BUSCO results"
   , tShow = \_ ref path -> do
       txt <- readFileStrict ref path
-      let tail9 = unlines . reverse . take 9 . reverse . lines
-      return $ init $ "BUSCO result:\n" ++ tail9 txt
+      let tail9 = unlines . filter (not . null) . reverse . take 9 . reverse . lines
+      return $ init $ "BUSCO result:" ++ tail9 txt
   }
 
 loadLineage :: CutFunction
