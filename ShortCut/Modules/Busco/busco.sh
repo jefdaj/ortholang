@@ -15,14 +15,14 @@ OBASE="$(basename "$OPATH")"
 
 # some of these seem to be required,
 # even though they're supposedly overridden by the cli.
-CFGPATH="${OUTPREFIX}.ini"
+CFGPATH="${TDIR}/runs/run_${OBASE}.ini"
 cat << EOF > "$CFGPATH"
 [busco]
 in           = $INPATH
-out_path     = $OPATH
+out_path     = ${TDIR}/runs
 lineage_path = $LINEAGE
 cpu          = $(nproc)
-tmp_path     = $TDIR/$(basename "$OUTPREFIX")
+tmp_path     = $TDIR
 quiet        = False
 gzip         = False
 # TODO set these? or does lineage handle it?

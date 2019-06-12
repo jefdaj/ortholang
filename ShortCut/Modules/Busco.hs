@@ -25,7 +25,6 @@ cutModule = CutModule
       , buscoFetchLineage
       , buscoProteins
       , buscoTranscriptome
-      -- TODO buscoGenome (have to package Augustus first?)
       -- TODO each versions
       ]
   }
@@ -33,7 +32,7 @@ cutModule = CutModule
 bul :: CutType
 bul = CutType
   { tExt  = "bul"
-  , tDesc = "BUSCO lineage" -- TODO call it something better like database?
+  , tDesc = "BUSCO lineage HMMs"
   , tShow = defaultShowN 6
   }
 
@@ -185,11 +184,7 @@ untar cfg ref from to = runCmd cfg ref $ CmdDesc
     from' = fromCutPath cfg from
     to' = fromCutPath cfg to
 
--- TODO also have to untar it in the lineages dir
--- TODO and then might as well show dataset.cfg
 rBuscoFetchLineage :: RulesFn
--- rBuscoFetchLineage st expr = (fRules loadLineage) st $ withBuscoUrl expr
--- type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
 rBuscoFetchLineage st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [nPath]) = do
   (ExprPath namePath) <- rExpr st nPath
   let outPath  = exprPath st expr
@@ -201,12 +196,7 @@ rBuscoFetchLineage st@(_, cfg, ref, _) expr@(CutFun _ _ _ _ [nPath]) = do
         url       = "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
         datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
         datasetPath   = toCutPath cfg datasetPath'
-    -- liftIO $ putStrLn $ "nameStr:   '" ++ nameStr ++ "'"
-    -- liftIO $ putStrLn $ "untarPath: '" ++ untarPath ++ "'"
-    -- liftIO $ putStrLn $ "url:       '" ++ url ++ "'"
-    -- liftIO $ createDirectoryIfMissing True bulDir
     tarPath <- fmap (fromCutPath cfg) $ curl cfg ref url
-    -- liftIO $ putStrLn $ "tarPath: '" ++ tarPath ++ "'"
     unlessExists untarPath $ do
       untar cfg ref (toCutPath cfg tarPath) (toCutPath cfg untarPath)
     symlink cfg ref outPath datasetPath
@@ -232,22 +222,21 @@ buscoProteins      = mkBusco "busco_proteins"      "prot" faa
 buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
 
--- TODO need to generate + pass in the unique config file
--- TODO need to pass only the basename prefix of the outpath?
 aBusco :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
 aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
   let out' = fromCutPath cfg outPath
       bul' = takeDirectory $ fromCutPath cfg bulPath
       cDir = fromCutPath cfg $ buscoCache cfg
+      rDir = cDir </> "runs"
       faa' = fromCutPath cfg faaPath
-  -- liftIO $ createDirectoryIfMissing True $ fromCutPath cfg $ buscoCache cfg
   bul'' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) bul'
+  liftIO $ createDirectoryIfMissing True rDir
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "busco.sh"
     , cmdArguments = [out', faa', bul'', mode, cDir] -- TODO cfgtemplate, tdir
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO fix shake error and set to True
-    , cmdInPatterns = [faa'] -- TODO lineage file
+    , cmdInPatterns = [faa']
     , cmdOutPath = out'
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
@@ -256,9 +245,8 @@ aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
     , cmdRmPatterns = [out']
     }
   -- This is rediculous but I haven't been able to shorten it...
-  let oBase = "*" ++ takeBaseName out' ++ "*"
-      tmpOutPtn = cDir </> oBase </> oBase </> "short_summary*.txt"
+  let oBasePtn = "*" ++ takeBaseName out' ++ "*"
+      tmpOutPtn = rDir </> oBasePtn </> "short_summary*.txt"
   tmpOut <- liftIO $ glob tmpOutPtn
-  -- liftIO $ putStrLn $ "glob: " ++ show tmpOut
   symlink cfg ref outPath $ toCutPath cfg $ head tmpOut
 aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
