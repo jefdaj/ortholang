@@ -5,7 +5,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink, readFileStrict)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, curl)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, rSimpleScript, curl)
 import ShortCut.Modules.SeqIO (fna, faa)
 import ShortCut.Modules.BlastDB (aFilterList)
 import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
@@ -25,6 +25,7 @@ cutModule = CutModule
       , buscoFetchLineage
       , buscoProteins
       , buscoTranscriptome
+      , buscoPercentComplete
       -- TODO each versions
       ]
   }
@@ -250,3 +251,19 @@ aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
   tmpOut <- liftIO $ glob tmpOutPtn
   symlink cfg ref outPath $ toCutPath cfg $ head tmpOut
 aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
+
+----------------------------
+-- busco_percent_complete --
+----------------------------
+
+buscoPercentComplete :: CutFunction
+buscoPercentComplete  = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [bur] num
+  , fTypeDesc  = mkTypeDesc name  [bur] num
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rSimpleScript "busco_percent_complete.sh"
+  }
+  where
+    name = "busco_percent_complete"
