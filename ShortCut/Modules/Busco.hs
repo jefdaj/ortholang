@@ -4,8 +4,10 @@ module ShortCut.Modules.Busco
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink, readFileStrict)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, rSimpleScript, curl)
+import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit,
+                              symlink, readFileStrict, sanitizeFileInPlace)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple,
+                                    rSimpleScript, curl)
 import ShortCut.Core.Compile.Map   (rMap, rMapSimpleScript)
 import ShortCut.Modules.SeqIO (fna, faa)
 import ShortCut.Modules.BlastDB (aFilterList)
@@ -19,7 +21,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
-  , mTypes = [bul, bur, faa]
+  , mTypes = [bul, bur, but, faa]
   , mFunctions =
       [ loadLineage
       , buscoListLineages
@@ -27,6 +29,8 @@ cutModule = CutModule
       , buscoProteins       , buscoProteinsEach
       , buscoTranscriptome  , buscoTranscriptomeEach
       , buscoPercentComplete, buscoPercentCompleteEach
+      , buscoScoresTable
+      , buscoFilterProteins
       ]
   }
 
@@ -45,6 +49,13 @@ bur = CutType
       txt <- readFileStrict ref path
       let tail9 = unlines . filter (not . null) . reverse . take 9 . reverse . lines
       return $ init $ "BUSCO result:" ++ tail9 txt
+  }
+
+but :: CutType
+but = CutType
+  { tExt  = "but"
+  , tDesc = "BUSCO scores table"
+  , tShow = defaultShow
   }
 
 loadLineage :: CutFunction
@@ -249,8 +260,9 @@ aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
   -- This is rediculous but I haven't been able to shorten it...
   let oBasePtn = "*" ++ takeBaseName out' ++ "*"
       tmpOutPtn = rDir </> oBasePtn </> "short_summary*.txt"
-  tmpOut <- liftIO $ glob tmpOutPtn
-  symlink cfg ref outPath $ toCutPath cfg $ head tmpOut
+  tmpOut <- liftIO $ fmap head $ glob tmpOutPtn
+  sanitizeFileInPlace cfg ref tmpOut -- will this confuse shake?
+  symlink cfg ref outPath $ toCutPath cfg tmpOut
 aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
 
 ------------------------------------------------
@@ -299,3 +311,42 @@ buscoPercentCompleteEach  = CutFunction
   }
   where
     name = "busco_percent_complete_each"
+
+------------------------
+-- busco_scores_table --
+------------------------
+
+buscoScoresTable :: CutFunction
+buscoScoresTable  = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [ListOf bur] but
+  , fTypeDesc  = mkTypeDesc name  [ListOf bur] but
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rSimpleScript $ name <.> "py"
+  }
+  where
+    name = "busco_scores_table"
+
+-------------------------------
+-- busco_filter_completeness --
+-------------------------------
+
+-- TODO write something that goes from bur.list -> scores table
+-- TODO then this can filter the scores table by completeness, simple
+-- TODO remove busco_percent_complete* afterward since the table will be more useful?
+
+buscoFilterProteins :: CutFunction
+buscoFilterProteins  = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [bul, num, ListOf faa] (ListOf faa)
+  , fTypeDesc  = mkTypeDesc name  [bul, num, ListOf faa] (ListOf faa)
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rBuscoFilterProteins
+  }
+  where
+    name = "busco_filter_completeness"
+
+rBuscoFilterProteins :: RulesFn
+rBuscoFilterProteins = undefined

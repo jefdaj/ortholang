@@ -5,6 +5,7 @@ let
     psiblast-exb # TODO is this still the best version to use?
     hmmer
     busco
+    python36Packages.python # same version as busco for compatibility
   ];
 
 in stdenv.mkDerivation {
