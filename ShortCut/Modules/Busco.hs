@@ -6,6 +6,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, symlink, readFileStrict)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple, rSimpleScript, curl)
+import ShortCut.Core.Compile.Map   (rMap, rMapSimpleScript)
 import ShortCut.Modules.SeqIO (fna, faa)
 import ShortCut.Modules.BlastDB (aFilterList)
 import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
@@ -23,10 +24,9 @@ cutModule = CutModule
       [ loadLineage
       , buscoListLineages
       , buscoFetchLineage
-      , buscoProteins
-      , buscoTranscriptome
-      , buscoPercentComplete
-      -- TODO each versions
+      , buscoProteins       , buscoProteinsEach
+      , buscoTranscriptome  , buscoTranscriptomeEach
+      , buscoPercentComplete, buscoPercentCompleteEach
       ]
   }
 
@@ -153,6 +153,7 @@ aBuscoListLineages cfg ref _ listTmp = do
 ------------------------
 
 -- TODO consistent naming with similar functions
+-- TODO busco_fetch_lineages? (the _each version)
 
 buscoFetchLineage :: CutFunction
 buscoFetchLineage  = CutFunction
@@ -252,9 +253,28 @@ aBusco mode cfg ref _ [outPath, bulPath, faaPath] = do
   symlink cfg ref outPath $ toCutPath cfg $ head tmpOut
 aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
 
-----------------------------
--- busco_percent_complete --
-----------------------------
+------------------------------------------------
+-- busco_{genome,proteins,transcriptome}_each --
+------------------------------------------------
+
+mkBuscoEach :: String -> String -> CutType -> CutFunction
+mkBuscoEach name mode inType = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [bul, (ListOf inType)] (ListOf bur)
+  , fTypeDesc  = mkTypeDesc name  [bul, (ListOf inType)] (ListOf bur)
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rMap 2 $ aBusco mode
+  }
+
+buscoProteinsEach, buscoTranscriptomeEach :: CutFunction
+buscoProteinsEach      = mkBuscoEach "busco_proteins_each"      "prot" faa
+buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
+-- buscoGenomeEach = mkBusco "busco_genome_each" "geno"
+
+-----------------------------
+-- busco_percent_complete* --
+-----------------------------
 
 buscoPercentComplete :: CutFunction
 buscoPercentComplete  = CutFunction
@@ -267,3 +287,15 @@ buscoPercentComplete  = CutFunction
   }
   where
     name = "busco_percent_complete"
+
+buscoPercentCompleteEach :: CutFunction
+buscoPercentCompleteEach  = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [ListOf bur] (ListOf num)
+  , fTypeDesc  = mkTypeDesc name  [ListOf bur] (ListOf num)
+  , fDesc      = Nothing
+  , fFixity    = Prefix
+  , fRules     = rMapSimpleScript 1 "busco_percent_complete.sh"
+  }
+  where
+    name = "busco_percent_complete_each"
