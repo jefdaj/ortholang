@@ -10,7 +10,7 @@
 }:
 mkDerivation {
   pname = "ShortCut";
-  version = "0.8.4.3";
+  version = "0.8.4.4";
   src = ./.;
   isLibrary = false;
   isExecutable = true;
