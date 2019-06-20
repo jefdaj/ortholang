@@ -4,8 +4,8 @@ module ShortCut.Modules.Busco
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, readPaths,
-                              symlink, readFileStrict, sanitizeFileInPlace)
+import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, readPaths, writePaths,
+                              readFileStrict', symlink, readFileStrict, sanitizeFileInPlace)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple,
                                     rSimpleScript, curl)
 import ShortCut.Core.Compile.Map   (rMap, rMapSimpleScript)
@@ -16,6 +16,9 @@ import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Util         (resolveSymlinks, unlessExists)
 import System.Exit (ExitCode(..))
 import System.FilePath.Glob       (glob)
+import Data.Scientific -- (formatScientific, FPFormat(..))
+import Control.Monad (when)
+import Data.List ((\\))
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -383,11 +386,25 @@ buscoFilterCompleteness  = CutFunction
 -- TODO try the same way it works for sets: one canonical full path!
 -- TODO do it the simple way for now, then see if it breaks and if so fix it
 rBuscoFilterCompleteness :: RulesFn
-rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [minscore, table, faas]) = do
-  (ExprPath scorePath) <- rExpr s minscore
-  (ExprPath tablePath) <- rExpr s table
-  (ExprPath faasList ) <- rExpr s faas
+rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [m, t, fs]) = do
+  (ExprPath scorePath) <- rExpr s m
+  (ExprPath tablePath) <- rExpr s t
+  (ExprPath faasList ) <- rExpr s fs
   let out  = exprPath s e
       out' = fromCutPath cfg out
+  out' %> \_ -> do
+    score <- fmap (read :: String -> Scientific) $ readLit  cfg ref scorePath
+    table <- readFileStrict' cfg ref tablePath -- TODO best read fn?
+    faaPaths <- readPaths cfg ref faasList
+    let allScores = map parseWords $ map words $ lines table
+        missing   = faaPaths \\ map fst allScores
+        okPaths   = map fst $ filter (\(_, c) -> c >= score) allScores
+    when (not $ null missing) $
+      error $ "these paths are missing from the table: " ++ show missing
+    writePaths cfg ref out' okPaths
   return $ ExprPath out'
-rBuscoFilterCompleteness _ e = error $ "bad argument to rBuscoFilterCompleteness: " ++ show e
+  where
+    parseWords (p:c:_) = (CutPath p, read c :: Scientific)
+    parseWords ws = error $ "bad argument to parseWords: " ++ show ws
+rBuscoFilterCompleteness _ e = error $
+  "bad argument to rBuscoFilterCompleteness: " ++ show e

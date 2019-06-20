@@ -8,12 +8,11 @@
 
 from sys import argv
 from re  import findall
-from os.path import basename
 
 def read_bur(burpath):
     with open(burpath, 'r') as f:
         txt = f.read()
-    fasta  = basename(findall('for file (.*)\n', txt)[0])
+    fasta  = findall('for file (.*)\n', txt)[0]
     scores = findall(':([0-9\.]{1,5})', txt)
     return (fasta, scores)
 
