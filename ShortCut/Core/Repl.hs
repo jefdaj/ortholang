@@ -287,11 +287,11 @@ cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
 cmdWrite :: CutState -> Handle -> String -> IO CutState
 cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
   [path] -> do
-    saveScript scr path
+    saveScript cfg scr path
     return (scr, cfg { cfgScript = Just path }, locks, ids)
   [var, path] -> case lookup (CutVar (ReplaceID Nothing) var) scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
-    Just e  -> saveScript (depsOnly e scr) path >> return st
+    Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
 
 -- TODO where should this go?
@@ -302,8 +302,8 @@ depsOnly expr scr = deps ++ [res]
     res  = (CutVar (ReplaceID Nothing) "result", expr)
 
 -- TODO where should this go?
-saveScript :: CutScript -> FilePath -> IO ()
-saveScript scr path = absolutize path >>= \p -> writeScript p scr
+saveScript :: CutConfig -> CutScript -> FilePath -> IO ()
+saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!

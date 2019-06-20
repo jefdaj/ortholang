@@ -80,8 +80,10 @@ instance {-# OVERLAPPING #-} Pretty CutScript where
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?
-writeScript :: FilePath -> CutScript -> IO ()
-writeScript path scr = writeBinaryFile path $ unlines $ map prettyShow scr
+writeScript :: CutConfig -> CutScript -> FilePath -> IO ()
+writeScript cfg scr path = do
+  txt <- renderIO cfg $ pPrint scr
+  writeBinaryFile path txt
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty CutExpr where
