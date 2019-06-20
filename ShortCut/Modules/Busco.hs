@@ -4,7 +4,7 @@ module ShortCut.Modules.Busco
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (cacheDir, toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit,
+import ShortCut.Core.Actions (debugA, writeLits, runCmd, CmdDesc(..), readLit, readPaths,
                               symlink, readFileStrict, sanitizeFileInPlace)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple,
                                     rSimpleScript, curl)
@@ -323,10 +323,36 @@ buscoScoresTable  = CutFunction
   , fTypeDesc  = mkTypeDesc name  [ListOf bur] but
   , fDesc      = Nothing
   , fFixity    = Prefix
-  , fRules     = rSimpleScript $ name <.> "py"
+  -- , fRules     = rSimpleScript $ name <.> "py"
+  , fRules     = rBuscoScoresTable
   }
   where
     name = "busco_scores_table"
+
+-- TODO variant of rSimpleScript that reads + passes in a list of input files?
+rBuscoScoresTable :: RulesFn
+rBuscoScoresTable s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [l]) = do
+  (ExprPath lsPath) <- rExpr s l
+  let o  = exprPath s e
+      o' = fromCutPath cfg o
+  o' %> \_ -> do
+    ins <- readPaths cfg ref lsPath
+    let ins' = map (fromCutPath cfg) ins
+    runCmd cfg ref $ CmdDesc
+      { cmdBinary = "busco_scores_table.py"
+      , cmdArguments = o':ins'
+      , cmdFixEmpties = False
+      , cmdParallel   = False
+      , cmdInPatterns = ins'
+      , cmdOutPath    = o'
+      , cmdExtraOutPaths = []
+      , cmdSanitizePaths = [] -- TODO any?
+      , cmdOptions = []
+      , cmdExitCode = ExitSuccess
+      , cmdRmPatterns = [o']
+      }
+  return $ ExprPath o'
+rBuscoScoresTable _ e = error $ "bad argument to rBuscoScoresTable: " ++ show e
 
 -------------------------------
 -- busco_filter_completeness --

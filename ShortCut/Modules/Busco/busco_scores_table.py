@@ -26,14 +26,14 @@ def write_table(outpath, lines):
             for burpath, scores in lines:
                 f.write('\t'.join([burpath] + scores) + '\n')
 
-def main(outpath, burlist):
-    with open(burlist, 'r') as f:
-        burs = f.read().split()
+def main(outpath, burpaths):
     lines = []
-    for bur in burs:
-        line = read_bur(bur)
+    for burpath in burpaths:
+        line = read_bur(burpath)
         lines.append(line)
     write_table(outpath, lines)
 
 if __name__ == '__main__':
-    main(*argv[1:])
+    outpath = argv[1]
+    burpaths = argv[2:]
+    main(outpath, burpaths)

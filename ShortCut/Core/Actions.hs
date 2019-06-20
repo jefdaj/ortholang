@@ -58,7 +58,6 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Config (debug)
 
-import Data.Maybe                 (maybeToList)
 import Control.Monad              (when)
 import Data.List                  (sort, nub)
 import Data.List.Split            (splitOneOf)
