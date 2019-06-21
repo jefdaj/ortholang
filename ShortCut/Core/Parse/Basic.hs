@@ -10,7 +10,7 @@ import Data.Scientific        (Scientific())
 import Debug.Trace            (traceM)
 import Text.Parsec            (getState, (<?>), try, parserTraced)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
-import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof)
+import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe)
 
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
@@ -106,11 +106,15 @@ pNum :: ParseM CutExpr
 pNum = debugParser "pNum" $ do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
+  neg <- try $ optionMaybe $ char '-'
   n  <- digit
   ns <- many (digit <|> oneOf ".e-")
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
-  let lit = show (read (n:ns) :: Scientific)
+  let sign = case neg of
+               Just s -> s
+               _ -> ' '
+      lit = show (read (sign:n:ns) :: Scientific)
   return $ CutLit num (RepeatSalt 0) lit
 
 -- list of chars which can be escaped in ShortCut
