@@ -1,3 +1,23 @@
+week of 6/25:
+  x finish range module
+  design all-vs-all type/module
+  write all-vs-all module + integrate with orthogroup algorithms
+  write orthogroup result handling while running the ortholog finder cuts
+  finish busco plots + maybe generic "histogram before/after" plots
+  add (or just document?) set membership tables
+  get venn diagrams working
+  update tests + bump version
+  run cuts for small group
+  write + record demo for small group (just video, not on demo site yet)
+
+next week:
+  test + merge url loading
+  implement cheat module (rename Script)
+  try leapfrog
+  add range tests
+  load fn docs from separate text files
+  start writing docs for most functions
+
 list dedup bug:
   is it in extract_queries?
   more generally, i probably need to write a "dedup result" function to run after all scripts
