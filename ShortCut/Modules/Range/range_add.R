@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-seq_add <- function(start, stop, step)
+range_add <- function(start, stop, step)
   seq(start, stop, by=step)
 
 save_list <- function(outPath, elems) {
@@ -18,7 +18,7 @@ main <- function() {
   start <- as.numeric(args[[2]])
   stop  <- as.numeric(args[[3]])
   step  <- as.numeric(args[[4]])
-  nums  <- seq_add(start, stop, step)
+  nums  <- range_add(start, stop, step)
   save_list(path, nums)
 }
 

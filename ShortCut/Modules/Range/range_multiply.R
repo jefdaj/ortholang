@@ -1,15 +1,38 @@
 #!/usr/bin/env Rscript
 
-# TODO guard this one against the factor having a negative sign
+# This one is pretty messy. Is there a much simpler way to express it?
 
-seq_multiply <- function(start, stop, factor) {
-  current <- start
-  accumulated <- start
-  while (current * factor <= stop) {
-    current <- current * factor
-	  accumulated <- c(accumulated, current)
+range_multiply <- function(start, stop, factor) {
+  if (start == stop) { 
+		# singleton, so factor doesn't matter
+    return(start)
+  } else {
+		stopifnot(start != 0 & stop != 0 & factor != 0)
+		stopifnot((start < 0) == (stop < 0))
+  	if (abs(start) < abs(stop)) {
+  		# range should be increasing
+  		stopifnot(factor > 1)
+      current <- start
+      accumulated <- start
+      while (abs(factor * current) <= abs(stop)) {
+  			# cat(paste('current: ', current, 'factor:', factor, 'accumulated:', accumulated, '\n'))
+        current <- current * factor
+  	    accumulated <- c(accumulated, current)
+  	  }
+  	  return(accumulated)
+    } else {
+  		# start > stop, range should be decreasing
+  		stopifnot(0 < factor & factor < 1)
+      current <- start
+      accumulated <- start
+      while (abs(factor * current) >= abs(stop)) {
+  			# cat(paste('current: ', current, 'factor:', factor, 'accumulated:', accumulated, '\n'))
+        current <- current * factor
+  	    accumulated <- c(accumulated, current)
+  	  }
+  	  return(accumulated)
+    }
 	}
-	return(accumulated)
 }
 
 save_list <- function(outPath, elems) {
@@ -27,7 +50,7 @@ main <- function() {
   start  <- as.numeric(args[[2]])
   stop   <- as.numeric(args[[3]])
   factor <- as.numeric(args[[4]])
-	nums   <- seq_multiply(start, stop, factor)
+	nums   <- range_multiply(start, stop, factor)
   save_list(path, nums)
 }
 

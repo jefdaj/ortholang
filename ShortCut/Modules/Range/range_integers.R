@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-seq_integers <- function(start, stop)
+range_integers <- function(start, stop)
   seq.int(start, stop)
 
 save_list <- function(outPath, elems) {
@@ -17,7 +17,7 @@ main <- function() {
   path  <- args[[1]]
   start <- as.numeric(args[[2]])
   stop  <- as.numeric(args[[3]])
-	nums  <- seq_integers(start, stop)
+	nums  <- range_integers(start, stop)
   save_list(path, nums)
 }
 

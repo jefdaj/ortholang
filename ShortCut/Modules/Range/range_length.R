@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-seq_length <- function(start, stop, length)
+range_length <- function(start, stop, length)
   seq(start, stop, length.out=length)
 
 save_list <- function(outPath, elems) {
@@ -18,7 +18,7 @@ main <- function() {
   start  <- as.numeric(args[[2]])
   stop   <- as.numeric(args[[3]])
   length <- as.numeric(args[[4]])
-	nums   <- seq_length(start, stop, length)
+	nums   <- range_length(start, stop, length)
   save_list(path, nums)
 }
 

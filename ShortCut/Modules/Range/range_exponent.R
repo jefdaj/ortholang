@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-seq_exponent <- function(base, exp_start, exp_stop, exp_step)
+range_exponent <- function(base, exp_start, exp_stop, exp_step)
   base^seq(exp_start, exp_stop, by=exp_step)
 
 save_list <- function(outPath, elems) {
@@ -19,7 +19,7 @@ main <- function() {
   start <- as.numeric(args[[3]])
   stop  <- as.numeric(args[[4]])
   step  <- as.numeric(args[[5]])
-	nums  <- seq_exponent(base, start, stop, step)
+	nums  <- range_exponent(base, start, stop, step)
   save_list(path, nums)
 }
 
