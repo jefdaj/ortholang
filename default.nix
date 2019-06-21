@@ -20,6 +20,7 @@ let
   shortcut-justorthologs = import ./ShortCut/Modules/JustOrthologs;
   shortcut-busco         = import ./ShortCut/Modules/Busco;
   shortcut-load          = import ./ShortCut/Modules/Load;
+  shortcut-range         = import ./ShortCut/Modules/Range;
 
   # myPython = python27Packages.python.withPackages (ps: with ps; [
     # biopython
@@ -79,6 +80,7 @@ let
     shortcut-justorthologs
     shortcut-busco
     shortcut-load
+    shortcut-range
 
     # cdhit
     diffutils
