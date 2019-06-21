@@ -151,4 +151,5 @@ executable shortcut
                     random-shuffle,
                     dlist,
                     ansi-terminal,
-                    setlocale
+                    setlocale,
+                    raw-strings-qq

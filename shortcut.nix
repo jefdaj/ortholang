@@ -2,11 +2,12 @@
 , configurator, containers, cryptohash, data-default-class
 , directory, dlist, docopt, filelock, filepath, Glob, haskeline
 , hspec, MissingH, mtl, parsec, path, path-io, posix-escape, pretty
-, process, QuickCheck, random, random-shuffle, regex-compat
-, regex-posix, retry, safe-exceptions, scientific, setlocale, shake
-, silently, split, stdenv, strict, tasty, tasty-golden, tasty-hspec
-, tasty-hunit, tasty-quickcheck, temporary, terminal-size, text
-, time, transformers, unbounded-delays, unix, utility-ht
+, process, QuickCheck, random, random-shuffle, raw-strings-qq
+, regex-compat, regex-posix, retry, safe-exceptions, scientific
+, setlocale, shake, silently, split, stdenv, strict, tasty
+, tasty-golden, tasty-hspec, tasty-hunit, tasty-quickcheck
+, temporary, terminal-size, text, time, transformers
+, unbounded-delays, unix, utility-ht
 }:
 mkDerivation {
   pname = "ShortCut";
@@ -20,10 +21,11 @@ mkDerivation {
     containers cryptohash data-default-class directory dlist docopt
     filelock filepath Glob haskeline hspec MissingH mtl parsec path
     path-io posix-escape pretty process QuickCheck random
-    random-shuffle regex-compat regex-posix retry safe-exceptions
-    scientific setlocale shake silently split strict tasty tasty-golden
-    tasty-hspec tasty-hunit tasty-quickcheck temporary terminal-size
-    text time transformers unbounded-delays unix utility-ht
+    random-shuffle raw-strings-qq regex-compat regex-posix retry
+    safe-exceptions scientific setlocale shake silently split strict
+    tasty tasty-golden tasty-hspec tasty-hunit tasty-quickcheck
+    temporary terminal-size text time transformers unbounded-delays
+    unix utility-ht
   ];
   description = "Short, reproducible phylogenomic cuts";
   license = stdenv.lib.licenses.agpl3;
