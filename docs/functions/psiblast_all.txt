@@ -1,0 +1,1 @@
+doc for functions/psiblast_all not written yet

@@ -280,7 +280,8 @@ extOf :: CutType -> String
 extOf Empty                      = "empty" -- for lists with nothing in them yet
 extOf (ListOf                t ) = extOf t ++ ".list"
 extOf (ScoresOf              t ) = extOf t ++ ".scores"
-extOf (CutTypeGroup {tgExt = t}) = "<" ++ t ++ ">" -- TODO should this not be called an extension? it's never written to disk
+extOf (CutTypeGroup {tgExt = t}) = t -- TODO should this not be called an extension? it's never written to disk
+                                     -- TODO put back the < > ?
 extOf (CutType      { tExt = t}) = t
 
 -- TODO is this needed for anything other than repl :help? if not, could use IO to load docs

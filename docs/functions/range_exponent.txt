@@ -1,0 +1,1 @@
+doc for functions/range_exponent not written yet

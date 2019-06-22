@@ -1,0 +1,1 @@
+doc for modules/BLAST+ not written yet

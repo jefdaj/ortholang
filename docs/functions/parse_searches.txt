@@ -1,0 +1,1 @@
+doc for functions/parse_searches not written yet

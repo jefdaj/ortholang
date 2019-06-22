@@ -1,0 +1,1 @@
+doc for functions/ortholog_in_all not written yet

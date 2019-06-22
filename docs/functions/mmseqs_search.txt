@@ -1,0 +1,1 @@
+doc for functions/mmseqs_search not written yet

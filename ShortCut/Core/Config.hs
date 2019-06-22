@@ -69,10 +69,11 @@ loadConfig mods args = do
 getDoc :: FilePath -> IO String
 getDoc docPath = do
   path' <- getDataFileName $ "docs" </> docPath <.> "txt"
+  -- putStrLn $ "path':" ++ path'
   -- this should only happen during development:
-  written <- doesFileExist path'
-  when (not written) $ writeFile path' $ "write " ++ docPath ++ " doc here"
-  doc   <- absolutize =<< readFile path'
+  -- written <- doesFileExist path'
+  -- when (not written) $ writeFile path' $ "write " ++ docPath ++ " doc here"
+  doc <- absolutize path' >>= readFile
   return doc
 
 getUsage :: IO Docopt

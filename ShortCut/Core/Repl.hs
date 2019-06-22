@@ -227,6 +227,7 @@ cmds cfg =
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
 -- TODO if possible, make this open in `less`?
+-- TODO why does this one have a weird path before the :help text?
 cmdHelp :: CutState -> Handle -> String -> IO CutState
 cmdHelp st@(_, cfg, _, _) hdl line = do
   doc <- getDoc docName
@@ -243,8 +244,8 @@ cmdHelp st@(_, cfg, _, _) hdl line = do
                   inputs  = filter (\d -> (extOf t) `isInfixOf` (head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
     docName = case words line of
             [w] -> head $ catMaybes
-                     [ fmap fName $ findFunction cfg w
-                     , fmap tExt  $ findType     cfg w
+                     [ fmap ("functions" </>) $ fmap fName $ findFunction cfg w
+                     , fmap ("types"     </>) $ fmap tExt  $ findType     cfg w
                      , Just "notfound"
                      ]
             _ -> "repl"

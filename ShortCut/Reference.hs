@@ -13,6 +13,12 @@ import Data.List.Split  (splitOn)
 import Data.List.Utils  (join)
 import ShortCut.Modules (modules)
 import Data.Char        (toLower, isAlphaNum)
+import Data.List (nub)
+import System.FilePath ((</>), (<.>))
+import Paths_ShortCut             (getDataFileName)
+import Control.Monad (when)
+import System.Directory (doesFileExist)
+
 
 explainType :: CutType -> String
 explainType Empty = error "explain empty type"
@@ -87,3 +93,24 @@ writeReference :: IO ()
 writeReference = writeFile "reference.md" $ unlines $ 
   header ++
   concatMap moduleReference modules
+
+-- this is just for calling manually during development
+-- TODO move to Reference.hs?
+writeDocPlaceholders :: [CutModule] -> IO ()
+writeDocPlaceholders mods = do
+  docs <- getDataFileName "docs"
+  mapM_ (writePlaceholder docs) names
+  where
+    names  = nub $ mNames ++ fNames ++ tNames
+    mNames = map (\m -> "modules"   </> mName m) mods
+    -- for now, i just create the infix operator docs manually
+    fNames = map (\f -> "functions" </> fName f) $ filter (\f -> fFixity f == Prefix) $ concat $ map mFunctions mods
+    tNames = map (\t -> "types"     </> extOf t) $ concat $ map mTypes mods
+
+writePlaceholder :: FilePath -> FilePath -> IO ()
+writePlaceholder docsDir name = do
+  let path = docsDir </> name <.> "txt"
+  written <- doesFileExist path
+  when (not written) $ do
+    putStrLn path
+    writeFile path $ "doc for " ++ name ++ " not written yet"

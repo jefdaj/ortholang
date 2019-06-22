@@ -1,0 +1,1 @@
+doc for functions/mmseqs_createdb_all not written yet

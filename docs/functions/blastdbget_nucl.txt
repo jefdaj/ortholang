@@ -1,0 +1,1 @@
+doc for functions/blastdbget_nucl not written yet

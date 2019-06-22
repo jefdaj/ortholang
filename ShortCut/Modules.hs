@@ -1,6 +1,6 @@
 module ShortCut.Modules where
 
-import ShortCut.Core.Types (CutModule(..))
+import ShortCut.Core.Types
 
 -- these started as modules but ended up depending heavily on core modifications
 import qualified ShortCut.Core.Compile.Replace as Replace

@@ -13,7 +13,7 @@ import ShortCut.Core.Types   (CutConfig(..))
 import ShortCut.Core.Locks   (initLocks)
 import ShortCut.Modules      (modules)
 import ShortCut.Test         (runTests)
-import ShortCut.Reference    (writeReference)
+import ShortCut.Reference    (writeReference, writeDocPlaceholders)
 import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
 import System.Environment    (getArgs, withArgs)
 import System.Exit           (exitSuccess)
@@ -38,9 +38,9 @@ main = do
     (exitWithUsage usage)
   when (hasArg args "version")
     (putStrLn ("ShortCut " ++ showVersion version) >> exitSuccess)
-  when (hasArg args "reference")
-    (writeReference >> exitSuccess)
   cfg <- loadConfig modules args
+  when (hasArg args "reference")
+    (writeReference >> writeDocPlaceholders (cfgModules cfg) >> exitSuccess) -- TODO combine into one docs dir
   setEnv "TMPDIR" $ cfgTmpDir cfg -- for subprocesses like R
 
   ref <- initLocks
