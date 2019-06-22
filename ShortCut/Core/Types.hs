@@ -13,6 +13,7 @@ module ShortCut.Core.Types
   , CompiledExpr(..)
   , CutConfig(..)
   , findType
+  , findModule
   , findFunction
   , listFunctions
   , listFunctionNames
@@ -360,6 +361,9 @@ data CutConfig = CutConfig
 
 listFunctionNames :: CutConfig -> [String]
 listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
+
+findModule :: CutConfig -> String -> Maybe CutModule
+findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
 
 -- used by the compiler and repl
 -- TODO find bops by char or name too

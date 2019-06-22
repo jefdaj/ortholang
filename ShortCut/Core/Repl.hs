@@ -233,11 +233,15 @@ cmdHelp st@(_, cfg, _, _) hdl line = do
   doc <- case words line of
            [w] -> head $ catMaybes
                     [ fmap fHelp $ findFunction cfg w
+                    , fmap mHelp $ findModule   cfg w
                     , fmap (tHelp cfg) $ findType cfg w
                     , Just $ getDoc "notfound"
                     ]
            _ -> getDoc "repl"
   hPutStrLn hdl doc >> return st
+
+mHelp :: CutModule -> IO String
+mHelp m = getDoc $ "modules" </> mName m
 
 -- TODO move somewhere better
 fHelp :: CutFunction -> IO String
