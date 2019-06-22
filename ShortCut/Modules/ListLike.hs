@@ -28,8 +28,8 @@ cutModule = CutModule
 
 listlike :: CutType
 listlike = CutTypeGroup
-  { tgShort  = "listlike"
-  , tgLong   = "files that can be treated like lists"
+  { tgExt  = "listlike"
+  , tgDesc   = "files that can be treated like lists"
   , tgMember = tListLike
   }
 

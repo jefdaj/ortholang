@@ -53,8 +53,8 @@ gbk = CutType
 
 fa :: CutType
 fa = CutTypeGroup
-  { tgShort = "fa"
-  , tgLong  = "FASTA (nucleic OR amino acid)"
+  { tgExt = "fa"
+  , tgDesc  = "FASTA (nucleic OR amino acid)"
   , tgMember = \t -> t `elem` [fna, faa]
   }
 

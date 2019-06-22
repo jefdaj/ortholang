@@ -32,8 +32,8 @@ cutModule = CutModule
 
 hittable :: CutType
 hittable = CutTypeGroup
-  { tgShort = "hittable"
-  , tgLong  = "files in "
+  { tgExt = "hittable"
+  , tgDesc  = "files in "
   , tgMember = \t -> t `elem` [bht, crb] -- TODO mms too
   }
 

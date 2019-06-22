@@ -4,6 +4,7 @@ module ShortCut.Core.Config where
 
 import qualified Data.Configurator as C
 
+import Control.Monad              (when)
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (isNothing, fromJust)
 import Data.Text                  (pack)
@@ -17,6 +18,8 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
+import System.Directory           (doesFileExist)
+import System.FilePath            ((</>), (<.>))
 import Debug.Trace       (trace)
 
 {- The base debugging function used in other modules too. This is admittedly a
@@ -61,12 +64,19 @@ loadConfig mods args = do
     , cfgParLock = par
     }
 
+-- TODO any way to recover if missing? probably not
+-- TODO use a safe read function with locks here?
+getDoc :: FilePath -> IO String
+getDoc docPath = do
+  path' <- getDataFileName $ "docs" </> docPath <.> "txt"
+  -- this should only happen during development:
+  written <- doesFileExist path'
+  when (not written) $ writeFile path' $ "write " ++ docPath ++ " doc here"
+  doc   <- absolutize =<< readFile path'
+  return doc
+
 getUsage :: IO Docopt
-getUsage = do
-  path <- getDataFileName "usage.txt"
-  -- TODO use a safe read function with locks here?
-  txt  <- absolutize =<< readFile path
-  parseUsageOrExit txt
+getUsage = getDoc "usage" >>= parseUsageOrExit
 
 hasArg :: Arguments -> String -> Bool
 hasArg as a = isPresent as $ longOption a

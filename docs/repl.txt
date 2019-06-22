@@ -1,0 +1,14 @@
+You can type or paste ShortCut code here to run it, same as in a script.
+There are also some extra commands specific to --interactive mode:
+
+:help      to print info about a function or filetype
+:load      to load a script (same as typing the file contents)
+:reload    to reload the current script
+:write     to write the current script to a file
+:needs     to show which variables depend on the given variable
+:neededfor to show which variables a given variable depends on
+:drop      to discard the current script (or a specific variable)
+:quit      to discard the current script and exit the interpreter
+:type      to print the type of an expression
+:show      to print an expression along with its type
+:!         to run the rest of the line as a shell command (disabled in --secure mode)

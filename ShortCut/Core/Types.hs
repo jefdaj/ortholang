@@ -214,8 +214,8 @@ data CutType
    - or fna)".
    -}
   | CutTypeGroup
-    { tgShort   :: String
-    , tgLong  :: String
+    { tgExt   :: String
+    , tgDesc  :: String
     -- , tgShow  :: CutConfig -> Locks -> FilePath -> IO String -- TODO remove?
     , tgMember :: CutType -> Bool
     }
@@ -247,7 +247,7 @@ instance Eq CutType where
   (ListOf a)   == (ListOf b)   = a == b
   (ScoresOf a) == (ScoresOf b) = a == b
   (CutType {tExt = t1}) == (CutType {tExt = t2}) = t1 == t2
-  (CutTypeGroup {tgShort = t1}) == (CutTypeGroup {tgShort = t2}) = t1 == t2
+  (CutTypeGroup {tgExt = t1}) == (CutTypeGroup {tgExt = t2}) = t1 == t2
   (CutTypeGroup {tgMember = fn}) == t = fn t
   t == (CutTypeGroup {tgMember = fn}) = fn t
   _ == _ = False -- TODO should this behave differently?
@@ -280,14 +280,15 @@ extOf :: CutType -> String
 extOf Empty                      = "empty" -- for lists with nothing in them yet
 extOf (ListOf                t ) = extOf t ++ ".list"
 extOf (ScoresOf              t ) = extOf t ++ ".scores"
-extOf (CutTypeGroup {tgShort = t}) = "<" ++ t ++ ">" -- TODO should this not be called an extension? it's never written to disk
+extOf (CutTypeGroup {tgExt = t}) = "<" ++ t ++ ">" -- TODO should this not be called an extension? it's never written to disk
 extOf (CutType      { tExt = t}) = t
 
+-- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
 descOf :: CutType -> String
 descOf Empty         = "empty list" -- for lists with nothing in them yet
 descOf (ListOf   t ) = "list of " ++ descOf t
 descOf (ScoresOf t ) = "scores for " ++ descOf t
-descOf (CutTypeGroup {tgLong = t}) = t
+descOf (CutTypeGroup {tgDesc = t}) = t
 descOf (CutType      { tDesc = t}) = t
 
 varOf :: CutExpr -> [CutVar]

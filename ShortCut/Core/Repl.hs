@@ -38,7 +38,7 @@ import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
 import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
-import ShortCut.Core.Config     (showConfigField, setConfigField)
+import ShortCut.Core.Config     (showConfigField, setConfigField, getDoc)
 -- import System.Command           (runCommand, waitForProcess)
 import System.Process           (runCommand, waitForProcess)
 import System.IO                (Handle, hPutStrLn, stdout)
@@ -226,8 +226,11 @@ cmds cfg =
 
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
+-- TODO if possible, make this open in `less`?
 cmdHelp :: CutState -> Handle -> String -> IO CutState
-cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
+cmdHelp st@(_, cfg, _, _) hdl line = do
+  doc <- getDoc docName
+  hPutStrLn hdl doc >> return st
   where
     fHelp f = fTypeDesc f ++ case fDesc f of
                 Nothing -> ""
@@ -238,30 +241,13 @@ cmdHelp st@(_, cfg, _, _) hdl line = hPutStrLn hdl msg >> return st
                   descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
                   outputs = filter (\d -> (extOf t) `isInfixOf` (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
                   inputs  = filter (\d -> (extOf t) `isInfixOf` (head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
-    msg = case words line of
+    docName = case words line of
             [w] -> head $ catMaybes
-                     [ fmap fHelp $ findFunction cfg w
-                     , fmap tHelp $ findType     cfg w
-                     , Just $ "sorry, no function or filetype is named '" ++ w ++ "'"
+                     [ fmap fName $ findFunction cfg w
+                     , fmap tExt  $ findType     cfg w
+                     , Just "notfound"
                      ]
-            _ -> def
-    -- TODO extract this to a file alonside usage.txt?
-    def = "You can type or paste ShortCut code here to run it, \
-          \same as in a script.\n\
-          \There are also some extra commands:\n\n\
-          \:help     to print info about a function or filetype\n\
-          \:load     to load a script (same as typing the file contents)\n\
-          \:reload   to reload the current script\n\
-          \:write    to write the current script to a file\n\
-          \:needs    to show which variables depend on the given variable\n\
-          \:neededfor to show which variables a given variable depends on\n\
-          \:drop     to discard the current script (or a specific variable)\n\
-          \:quit     to discard the current script and exit the interpreter\n\
-          \:type     to print the type of an expression\n\
-          \:show     to print an expression along with its type"
-          ++ if cfgSecure cfg
-               then ""
-               else "\n:!        to run the rest of the line as a shell command"
+            _ -> "repl"
 
 -- TODO this is totally duplicating code from putAssign; factor out
 cmdLoad :: CutState -> Handle -> String -> IO CutState

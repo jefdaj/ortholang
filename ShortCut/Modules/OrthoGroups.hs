@@ -49,8 +49,8 @@ cutModule = CutModule
 -- TODO should there be single and plural versions?
 og :: CutType
 og = CutTypeGroup
-  { tgShort = "og"
-  , tgLong = "orthogroups (orthofinder or sonicparanoid results)"
+  { tgExt = "og"
+  , tgDesc = "orthogroups (orthofinder or sonicparanoid results)"
   , tgMember = \t -> t `elem` [ofr, spr]
   }
 
