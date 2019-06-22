@@ -101,7 +101,6 @@ replace = CutFunction
   { fName      = "replace"
   , fFixity    = Prefix
   , fTypeCheck = tReplace
-  , fDesc      = Just "See what one (dependent) variable would be if you changed another (independent) variable."
   , fTypeDesc  = dReplace
   , fRules     = rReplace
   }
@@ -194,7 +193,6 @@ replaceEach = CutFunction
   { fName      = "replace_each"
   , fFixity    = Prefix
   , fTypeCheck = tReplaceEach
-  , fDesc      = Nothing
   , fTypeDesc  = dReplaceEach
   , fRules     = rReplaceEach
   }

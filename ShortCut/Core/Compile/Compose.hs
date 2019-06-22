@@ -29,7 +29,7 @@ compose1 name desc fn1 type1 fn2 = CutFunction
   { fName      = name
   , fTypeCheck = tCompose1 fn1 type1 fn2
   , fRules     = rCompose1 fn1 type1 fn2
-  , fDesc = Nothing, fTypeDesc  = desc
+  , fTypeDesc  = desc
   , fFixity    = Prefix
   }
 

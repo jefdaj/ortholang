@@ -272,7 +272,7 @@ mkLoad :: Bool -> String -> CutType -> CutFunction
 mkLoad hashSeqIDs name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [str] rtn
+  , fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix
   , fRules     = rLoad hashSeqIDs
   }
@@ -286,7 +286,7 @@ mkLoadList :: Bool -> String -> CutType -> CutFunction
 mkLoadList hashSeqIDs name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
+  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix
   , fRules     = rLoadList hashSeqIDs
   }

@@ -47,9 +47,6 @@ sonicparanoid = let name = "sonicparanoid" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
-  , fDesc      = Just "Run SonicParanoid on a list of genomes in FASTA format.\n\
-                      \It produces lots of result files! Use the extract_* functions\n\
-                      \or look in the TMPDIR to find the specific info you want."
   , fFixity    = Prefix
   , fRules     = rSimple aSonicParanoid
   }

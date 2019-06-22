@@ -38,7 +38,7 @@ repeatN = CutFunction
   { fName      = "repeat"
   , fFixity    = Prefix
   , fTypeCheck = tRepeatN
-  , fDesc = Nothing, fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
+  , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
   , fRules     = rRepeatN
   }
 

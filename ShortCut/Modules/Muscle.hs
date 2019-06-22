@@ -29,7 +29,7 @@ muscle :: CutFunction
 muscle = let name = "muscle" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [faa] aln
-  , fDesc = Nothing, fTypeDesc  = name ++ " : faa -> aln"
+  , fTypeDesc  = name ++ " : faa -> aln"
   , fFixity    = Prefix
   , fRules     = rSimpleScript "muscle.sh"
   }
@@ -38,7 +38,7 @@ muscleEach :: CutFunction
 muscleEach = let name = "muscle_each" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf aln)
-  , fDesc = Nothing, fTypeDesc  = name ++ " : faa.list -> aln.list"
+  , fTypeDesc  = name ++ " : faa.list -> aln.list"
   , fFixity    = Prefix
   , fRules     = rMapSimpleScript 1 "muscle.sh"
   }

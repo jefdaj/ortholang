@@ -271,7 +271,7 @@ psiblast :: CutFunction
 psiblast = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
   , fFixity    = Prefix
   -- , fRules     = rPsiblast
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
@@ -283,7 +283,7 @@ psiblastEach :: CutFunction
 psiblastEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rPsiblastEach
   }
@@ -313,7 +313,7 @@ psiblastDb :: CutFunction
 psiblastDb = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
+  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   , fFixity    = Prefix
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
   }
@@ -327,7 +327,7 @@ psiblastDbEach :: CutFunction
 psiblastDbEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
@@ -358,7 +358,7 @@ psiblastTrain :: CutFunction
 psiblastTrain = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   , fFixity    = Prefix
   , fRules     = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
@@ -370,7 +370,7 @@ psiblastTrainPssms :: CutFunction
 psiblastTrainPssms = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
   , fFixity    = Prefix
   -- , fRules     = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
   , fRules     = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
@@ -384,7 +384,7 @@ psiblastTrainEach :: CutFunction
 psiblastTrainEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   , fFixity    = Prefix
   , fRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
@@ -395,7 +395,7 @@ psiblastTrainAll :: CutFunction
 psiblastTrainAll = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   , fFixity    = Prefix
   , fRules     = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
   }
@@ -406,7 +406,7 @@ psiblastTrainDb :: CutFunction
 psiblastTrainDb = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
+  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix
   , fRules     = rFun3 aPsiblastTrainDb
   }
@@ -417,7 +417,7 @@ psiblastTrainDbEach :: CutFunction
 psiblastTrainDbEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
+  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix
   , fRules     = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
@@ -428,7 +428,7 @@ psiblastTrainPssmsDb :: CutFunction
 psiblastTrainPssmsDb = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
   , fFixity    = Prefix
   -- , fRules     = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
   , fRules     = rMap 2 aPsiblastTrainDb'
@@ -444,7 +444,7 @@ psiblastPssm :: CutFunction
 psiblastPssm = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   , fFixity    = Prefix
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
@@ -456,7 +456,7 @@ psiblastPssmAll :: CutFunction
 psiblastPssmAll = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
   , fFixity    = Prefix
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
@@ -467,7 +467,7 @@ psiblastPssmEach :: CutFunction
 psiblastPssmEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
@@ -481,7 +481,7 @@ psiblastPssmDb :: CutFunction
 psiblastPssmDb = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix
   , fRules     = rFun3 aPsiblastSearchDb
   }
@@ -492,7 +492,7 @@ psiblastPssmDbEach :: CutFunction
 psiblastPssmDbEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
@@ -509,7 +509,7 @@ psiblastEachPssmDb :: CutFunction
 psiblastEachPssmDb = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   , fFixity    = Prefix
   -- , fRules     = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
   , fRules     = rMap 2 aPsiblastSearchDb'
@@ -533,7 +533,7 @@ psiblastEachPssm :: CutFunction
 psiblastEachPssm = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
   }

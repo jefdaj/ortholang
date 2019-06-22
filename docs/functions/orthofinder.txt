@@ -1,1 +1,3 @@
-doc for functions/orthofinder not written yet
+Run OrthoFinder on a list of proteomes in FASTA format.
+It produces lots of result files. Use the extract_* functions
+or look in the TMPDIR to find the specific info you want.

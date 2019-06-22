@@ -445,7 +445,6 @@ data CutFixity = Prefix | Infix
 data CutFunction = CutFunction
   { fName      :: String
   , fTypeCheck :: [CutType] -> Either String CutType
-  , fDesc      :: Maybe String -- TODO take out the maybe once they're written
   , fTypeDesc  :: String
   , fFixity    :: CutFixity
   , fRules     :: CutState -> CutExpr -> Rules ExprPath

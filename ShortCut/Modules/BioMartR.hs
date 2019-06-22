@@ -87,7 +87,7 @@ parseSearches :: CutFunction
 parseSearches = let name = "parse_searches" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] search
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [ListOf str] search
+  , fTypeDesc  = mkTypeDesc name [ListOf str] search
   , fFixity    = Prefix
   , fRules     = rParseSearches
   }
@@ -100,7 +100,7 @@ getGenomes :: CutFunction
 getGenomes = let name = "get_genomes" in CutFunction
   { fName      = name 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
+  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   , fFixity    = Prefix
   , fRules     = rBioMartR "getGenome"
   }
@@ -113,7 +113,7 @@ getProteomes :: CutFunction
 getProteomes = let name = "get_proteomes" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
+  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   , fFixity    = Prefix
   , fRules     = rBioMartR "getProteome"
   }

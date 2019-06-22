@@ -69,7 +69,6 @@ orthogroups = let name = "orthogroups" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : og -> str.list.list"
   , fTypeCheck = defaultTypeCheck [og] (ListOf (ListOf str)) -- TODO or ofr!
-  , fDesc      = Just "Parse results from an ortholog finder and list genes in all orthogroups."
   , fFixity    = Prefix
   , fRules     = rOrthogroups
   }
@@ -141,7 +140,6 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
-  , fDesc      = Just "Given one gene ID, list others in the same orthogroup."
   , fFixity    = Prefix
   , fRules     = rSimple aOrthogroupContaining
   }
@@ -166,7 +164,6 @@ orthogroupsContaining = let name = "orthogroups_containing" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] (ListOf (ListOf str))
   , fTypeCheck = defaultTypeCheck [og, ListOf str] (ListOf (ListOf str))
-  , fDesc      = Just "Given a list of gene IDs, list the orthogroups that contain any of them."
   , fFixity    = Prefix
   , fRules     = rSimple $ aOrthogroupsFilter containsOneOf
   }
@@ -196,7 +193,6 @@ orthologInAny = let name = "ortholog_in_any" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] (ListOf (ListOf str))
   , fTypeCheck = defaultTypeCheck [spr, ListOf faa] (ListOf (ListOf str))
-  , fDesc      = Just "Filter a list of orthogroups to keep the ones with an ortholog in every given proteome"
   , fFixity    = Prefix
   , fRules     = rOrthologInAny
   }
@@ -237,7 +233,6 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
-  , fDesc      = Just "Version of ortholog_in_any that expects arguments already extracted"
   , fFixity    = Prefix
   , fRules     = rOrthologFilterStr groupMemberInAnyList
   }
@@ -286,7 +281,6 @@ orthologInAll = let name = "ortholog_in_all" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] (ListOf (ListOf str))
   , fTypeCheck = defaultTypeCheck [spr, ListOf faa] (ListOf (ListOf str))
-  , fDesc      = Just "Filter a list of orthogroups to keep the ones with an ortholog in any given proteome"
   , fFixity    = Prefix
   , fRules     = rOrthologInAll
   }
@@ -308,7 +302,6 @@ orthologInAllStr = let name = "ortholog_in_all_str" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
-  , fDesc      = Just "Version of ortholog_in_all that expects arguments already extracted"
   , fFixity    = Prefix
   , fRules     = rOrthologFilterStr groupMemberInAllList
   }

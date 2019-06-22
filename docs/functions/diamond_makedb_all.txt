@@ -1,1 +1,1 @@
-doc for functions/diamond_makedb_all not written yet
+Create one DIAMOND database from mutliple protein FASTA files.

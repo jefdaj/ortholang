@@ -1,1 +1,1 @@
-doc for functions/orthogroups_containing not written yet
+Given a list of gene IDs, list the orthogroups that contain any of them.

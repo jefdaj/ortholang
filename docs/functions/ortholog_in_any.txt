@@ -1,1 +1,1 @@
-doc for functions/ortholog_in_any not written yet
+Filter a list of orthogroups to keep the ones with an ortholog in any given proteome.

@@ -54,7 +54,6 @@ extractQueries = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 1
   }
@@ -67,7 +66,6 @@ extractQueriesEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 $ aCutCol True 1
   }
@@ -80,7 +78,6 @@ extractTargets = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple $ aCutCol True 2
   }
@@ -92,7 +89,6 @@ extractTargetsEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 $ aCutCol True 2
   }
@@ -139,7 +135,6 @@ filterEvalue = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aFilterEvalue
   }
@@ -151,7 +146,6 @@ filterEvalueEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 2 aFilterEvalue
   }
@@ -192,7 +186,6 @@ bestHits =  CutFunction
   { fName      = name 
   , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple aBestExtract
   }
@@ -204,7 +197,6 @@ bestHitsEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 aBestExtract
   }

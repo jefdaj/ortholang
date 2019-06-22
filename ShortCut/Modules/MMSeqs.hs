@@ -72,7 +72,6 @@ mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
-  , fDesc      = Just "Create one MMSeqs2 sequence database from mutiple FASTA files."
   , fFixity    = Prefix
   , fRules     = rMmseqsCreateDbAll
   }
@@ -126,7 +125,6 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
-  , fDesc      = Just "Create an MMSeqs2 sequence database from a FASTA file."
   , fFixity    = Prefix
   , fRules     = rMmseqsCreateDb
   }
@@ -150,7 +148,6 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
-  , fDesc      = Just "Search a target database for sequences matching the query FASTA, similar to BLAST."
   , fFixity    = Prefix
   , fRules     = rMmseqsSearchDb
   }
@@ -251,7 +248,6 @@ mmseqsSearch = let name = "mmseqs_search" in CutFunction
   { fName      = name
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
-  , fDesc      = Just "Find matching sequences in two fasta files, similar to BLAST."
   , fFixity    = Prefix
   , fRules     = rMmseqsSearch
   }

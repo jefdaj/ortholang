@@ -54,7 +54,6 @@ blastCRB = CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
   , fTypeCheck = defaultTypeCheck [fna, fa] crb
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rSimpleTmp name aCRBBlast
   }
@@ -68,7 +67,6 @@ blastCRBEach = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rMapTmps 2 aCRBBlast "crb_blast"
   }

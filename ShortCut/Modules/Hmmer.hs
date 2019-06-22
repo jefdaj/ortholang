@@ -48,7 +48,7 @@ hmmbuild :: CutFunction
 hmmbuild = let name = "hmmbuild" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [aln] hmm
-  , fDesc = Nothing, fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
+  , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   , fFixity    = Prefix
   , fRules     = rSimpleScript "hmmbuild.sh"
   }
@@ -57,7 +57,7 @@ hmmbuildEach :: CutFunction
 hmmbuildEach = let name = "hmmbuild_each" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
-  , fDesc = Nothing, fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
+  , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   , fFixity    = Prefix
   , fRules     = rMapSimpleScript 1 "hmmbuild.sh"
   }
@@ -66,7 +66,7 @@ hmmsearch :: CutFunction
 hmmsearch = let name = "hmmsearch" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
-  , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
+  , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
   , fFixity    = Prefix
   , fRules     = rSimple aHmmsearch
   }
@@ -76,7 +76,7 @@ hmmsearchEach :: CutFunction
 hmmsearchEach = let name = "hmmsearch_each" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
-  , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
+  , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
   , fFixity    = Prefix
   , fRules     = rMap 2 aHmmsearch
   }
@@ -86,7 +86,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 -- hmmsearchEachEach = let name = "hmmsearch_each_each" in CutFunction
 --   { fName      = name
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
---   , fDesc = Nothing, fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
+--   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
 --   , fFixity    = Prefix
 --   , fRules     = rMap 2 aHmmsearch -- TODO this won't work right?
 --   }
@@ -143,7 +143,7 @@ extractHmmTargets :: CutFunction
 extractHmmTargets = let name = "extract_hmm_targets" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
-  , fDesc = Nothing, fTypeDesc  = name ++ " : hht -> str.list"
+  , fTypeDesc  = name ++ " : hht -> str.list"
   , fFixity    = Prefix
   , fRules     = rSimple $ aExtractHmm 1
   }
@@ -152,7 +152,7 @@ extractHmmTargetsEach :: CutFunction
 extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
-  , fDesc = Nothing, fTypeDesc  = name ++ " : hht.list -> str.list.list"
+  , fTypeDesc  = name ++ " : hht.list -> str.list.list"
   , fFixity    = Prefix
   , fRules     = rMap 1 $ aExtractHmm 1
   }

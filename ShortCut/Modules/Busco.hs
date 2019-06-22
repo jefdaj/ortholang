@@ -77,7 +77,6 @@ buscoListLineages = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rBuscoListLineages
   }
@@ -175,7 +174,6 @@ buscoFetchLineage  = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rBuscoFetchLineage
   }
@@ -229,7 +227,6 @@ mkBusco name mode inType = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rSimple $ aBusco mode
   }
@@ -278,7 +275,6 @@ mkBuscoEach name mode inType = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 2 $ aBusco mode
   }
@@ -297,7 +293,6 @@ buscoPercentComplete  = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rSimpleScript "busco_percent_complete.sh"
   }
@@ -309,7 +304,6 @@ buscoPercentCompleteEach  = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rMapSimpleScript 1 "busco_percent_complete.sh"
   }
@@ -325,7 +319,6 @@ buscoScoresTable  = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
-  , fDesc      = Nothing
   , fFixity    = Prefix
   -- , fRules     = rSimpleScript $ name <.> "py"
   , fRules     = rBuscoScoresTable
@@ -373,7 +366,6 @@ buscoFilterCompleteness  = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rBuscoFilterCompleteness
   }

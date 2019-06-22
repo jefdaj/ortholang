@@ -1,1 +1,1 @@
-doc for functions/mmseqs_createdb not written yet
+Create an MMSeqs2 sequence database from a FASTA file.

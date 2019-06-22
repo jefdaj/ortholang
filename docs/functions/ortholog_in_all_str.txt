@@ -1,1 +1,1 @@
-doc for functions/ortholog_in_all_str not written yet
+Version of ortholog_in_all that expects arguments already extracted.

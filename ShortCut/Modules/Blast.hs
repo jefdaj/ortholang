@@ -77,7 +77,7 @@ mkBlastFromDb :: BlastDesc -> CutFunction
 mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
+  , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDb d
   }
@@ -169,7 +169,7 @@ mkBlastFromFa :: BlastDesc -> CutFunction
 mkBlastFromFa d@(bCmd, qType, sType, _) = CutFunction
   { fName      = bCmd
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
+  , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
   }
@@ -194,7 +194,7 @@ mkBlastFromDbEach :: BlastDesc -> CutFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromDbEach d
   }
@@ -212,7 +212,7 @@ mkBlastFromFaEach :: BlastDesc -> CutFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
-  , fDesc = Nothing, fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   , fFixity    = Prefix
   , fRules     = rMkBlastFromFaEach d
   }

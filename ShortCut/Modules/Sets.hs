@@ -55,14 +55,14 @@ mkSetFunctions (foldName, opChar, setFn) = [setBop, setFold]
     setBop = CutFunction
       { fName      = [opChar]
       , fTypeCheck = tSetBop
-      , fDesc = Nothing, fTypeDesc  = mkBopDesc [opChar]
+      , fTypeDesc  = mkBopDesc [opChar]
       , fFixity    = Infix
       , fRules     = rSetBop foldName setFn
       }
     setFold = CutFunction
       { fName      = foldName
       , fTypeCheck = tSetFold
-      , fDesc = Nothing, fTypeDesc  = mkFoldDesc foldName
+      , fTypeDesc  = mkFoldDesc foldName
       , fFixity    = Prefix
       , fRules     = rSetFold (foldr1 setFn)
       }
@@ -136,7 +136,7 @@ some :: CutFunction
 some = CutFunction
   { fName      = "some"
   , fTypeCheck = tSetFold
-  , fDesc = Nothing, fTypeDesc  = "some : X.list.list -> X.list"
+  , fTypeDesc  = "some : X.list.list -> X.list"
   , fFixity    = Prefix
   , fRules     = rSome
   }

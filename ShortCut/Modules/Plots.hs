@@ -19,15 +19,15 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
-  , mTypes = [plot]
+  , mTypes = [png]
   -- , mFunctions = [histogram, linegraph, bargraph, scatterplot, venndiagram]
   , mFunctions = [histogram, linegraph, scatterplot]
   }
 
-plot :: CutType
-plot = CutType
+png :: CutType
+png = CutType
   { tExt  = "png"
-  , tDesc = "png image of a plot"
+  , tDesc = "plot image"
   , tShow = \_ _ f -> return $ "plot image '" ++ f ++ "'"
   }
 
@@ -59,8 +59,8 @@ varNames _ expr = undefined lits -- TODO implement this
 histogram :: CutFunction
 histogram = let name = "histogram" in CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [str, ListOf num] plot
-  , fDesc = Nothing, fTypeDesc  = name ++ " : str num.list -> plot"
+  , fTypeCheck = defaultTypeCheck [str, ListOf num] png
+  , fTypeDesc  = name ++ " : str num.list -> png"
   , fFixity    = Prefix
   , fRules     = rPlotNumList "histogram.R"
   }
@@ -93,7 +93,7 @@ rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
 ---------------------
 
 tPlotScores :: TypeChecker
-tPlotScores [s, ScoresOf n] | s == str && n == num = Right plot
+tPlotScores [s, ScoresOf n] | s == str && n == num = Right png
 tPlotScores _ = Left "expected a title and scores"
 
 -- TODO line graph should label axis by input var name (always there!)
@@ -101,7 +101,7 @@ linegraph :: CutFunction
 linegraph = let name = "linegraph" in CutFunction
   { fName      = name
   , fTypeCheck = tPlotScores
-  , fDesc = Nothing, fTypeDesc  = name ++ " : str num.scores -> plot"
+  , fTypeDesc  = name ++ " : str num.scores -> png"
   , fFixity    = Prefix
   , fRules     = rPlotRepeatScores "linegraph.R"
   }
@@ -111,7 +111,7 @@ scatterplot :: CutFunction
 scatterplot = let name = "scatterplot" in CutFunction
   { fName      = name
   , fTypeCheck = tPlotScores
-  , fDesc = Nothing, fTypeDesc  = name ++ " : str num.scores -> plot"
+  , fTypeDesc  = name ++ " : str num.scores -> png"
   , fFixity    = Prefix
   , fRules     = rPlotRepeatScores "scatterplot.R"
   }

@@ -230,25 +230,53 @@ cmds cfg =
 -- TODO why does this one have a weird path before the :help text?
 cmdHelp :: CutState -> Handle -> String -> IO CutState
 cmdHelp st@(_, cfg, _, _) hdl line = do
-  doc <- getDoc docName
+  doc <- case words line of
+           [w] -> head $ catMaybes
+                    [ fmap fHelp $ findFunction cfg w
+                    , fmap (tHelp cfg) $ findType cfg w
+                    , Just $ getDoc "notfound"
+                    ]
+           _ -> getDoc "repl"
   hPutStrLn hdl doc >> return st
+
+-- TODO move somewhere better
+fHelp :: CutFunction -> IO String
+fHelp f = do
+  doc <- getDoc $ "functions" </> fName f
+  let msg = fTypeDesc f ++ "\n\n" ++ doc
+  return msg
+
+-- TODO move somewhere better
+tHelp :: CutConfig -> CutType -> IO String
+tHelp cfg t = do
+  doc <- getDoc $ "types" </> extOf t
+  let msg = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
+            ++ doc ++ "\n\n"
+            ++ tFnList
+  return msg
   where
-    fHelp f = fTypeDesc f ++ case fDesc f of
-                Nothing -> ""
-                Just s  -> "\n\n" ++ s ++ "\n"
-    tHelp t = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n" ++ tFnList t
-    tFnList t = unlines $ ["You can create them with these functions:"] ++ outputs ++ ["", "And use them with these functions:"] ++ inputs
-                where
-                  descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
-                  outputs = filter (\d -> (extOf t) `isInfixOf` (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
-                  inputs  = filter (\d -> (extOf t) `isInfixOf` (head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)) descs
-    docName = case words line of
-            [w] -> head $ catMaybes
-                     [ fmap ("functions" </>) $ fmap fName $ findFunction cfg w
-                     , fmap ("types"     </>) $ fmap tExt  $ findType     cfg w
-                     , Just "notfound"
-                     ]
-            _ -> "repl"
+    outputs = listFunctionTypesWithOutput cfg t
+    inputs  = listFunctionTypesWithInput  cfg t
+    tFnList = unlines
+                 $ ["You can create them with these functions:"]
+                ++ outputs
+                ++ ["", "And use them with these functions:"]
+                ++ inputs
+
+-- TODO move somewhere better
+listFunctionTypesWithInput :: CutConfig -> CutType -> [String]
+listFunctionTypesWithInput cfg cType = filter matches descs
+  where
+    -- TODO match more carefully because it should have to be an entire word
+    matches d = (extOf cType) `elem` (words $ head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
+
+-- TODO move somewhere better
+listFunctionTypesWithOutput :: CutConfig -> CutType -> [String]
+listFunctionTypesWithOutput cfg cType = filter matches descs
+  where
+    matches d = (extOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
 
 -- TODO this is totally duplicating code from putAssign; factor out
 cmdLoad :: CutState -> Handle -> String -> IO CutState

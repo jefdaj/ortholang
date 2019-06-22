@@ -44,7 +44,6 @@ len = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rLen
   }
@@ -56,7 +55,6 @@ lenEach = CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck [ListOf listlike] (ListOf num)
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules     = rMap 1 aLen -- TODO is 1 wrong?
   }

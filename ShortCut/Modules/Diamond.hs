@@ -51,7 +51,6 @@ diamondmakedb = let name = "diamond_makedb" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck [faa] dmnd
-  , fDesc      = Just "Create a DIAMOND database from a protein FASTA file."
   , fFixity    = Prefix
   , fRules     = rSimpleScriptPar "diamond_makedb.sh"
   }
@@ -65,7 +64,6 @@ diamondmakedbAll = let name = "diamond_makedb_all" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
-  , fDesc      = Just "Create one DIAMOND database from mutliple protein FASTA files."
   , fFixity    = Prefix
   , fRules     = rDiamondmakedbAll
   }
@@ -110,7 +108,6 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name 
   { fName      = name'
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] bht 
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
-  , fDesc      = Just $ "Like " ++ head dCmd ++ ", but uses DIAMOND for speed."
   , fFixity    = Prefix
   , fRules     = rFn dCmd
   }

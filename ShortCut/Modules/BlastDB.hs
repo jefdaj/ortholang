@@ -126,7 +126,6 @@ mkLoadDB name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules  = rLoadDB
   }
@@ -136,7 +135,6 @@ mkLoadDBEach name rtn = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules  = undefined -- TODO write this!
   }
@@ -184,7 +182,6 @@ blastdblist = let name = "blastdblist" in CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rBlastdblist
   }
@@ -261,7 +258,6 @@ mkBlastdbget name dbType = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
-  , fDesc      = Nothing
   , fFixity    = Prefix
   , fRules  = rBlastdbget
   }
@@ -326,7 +322,6 @@ makeblastdbNuclAll = CutFunction
   { fName      = name
   , fTypeCheck = tMakeblastdbAll name ndb
   , fTypeDesc  = name ++ " : fa.list -> ndb"
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdbAll
   }
@@ -338,7 +333,6 @@ makeblastdbProtAll = CutFunction
   { fName      = name
   , fTypeCheck = tMakeblastdbAll name pdb
   , fTypeDesc  = name ++ " : faa.list -> pdb"
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdbAll
   }
@@ -475,7 +469,6 @@ makeblastdbNucl = CutFunction
   { fName      = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
   , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -485,7 +478,6 @@ makeblastdbProt = CutFunction
   { fName      = "makeblastdb_prot"
   , fTypeCheck = tMakeblastdb pdb
   , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdb
   }
@@ -514,7 +506,6 @@ mkMakeblastdbEach dbType = CutFunction
   { fName      = name
   , fTypeCheck = tMakeblastdbEach dbType
   , fTypeDesc  = desc
-  , fDesc = Nothing
   , fFixity    = Prefix
   , fRules     = rMakeblastdbEach
   }
@@ -567,7 +558,6 @@ singletons = CutFunction
   { fName      = name
   , fFixity    = Prefix
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
-  , fDesc = Nothing
   , fTypeCheck = tSingletons
   , fRules     = rSingletons
   }
