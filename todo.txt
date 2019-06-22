@@ -1,5 +1,6 @@
 week of 6/25:
   x finish range module
+  x load fn docs from separate text files
   design all-vs-all type/module
   write all-vs-all module + integrate with orthogroup algorithms
   write orthogroup result handling while running the ortholog finder cuts
@@ -15,7 +16,6 @@ next week:
   implement cheat module (rename Script)
   try leapfrog
   add range tests
-  load fn docs from separate text files
   start writing docs for most functions
 
 list dedup bug:
