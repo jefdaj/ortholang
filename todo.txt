@@ -1,6 +1,7 @@
 week of 6/25:
   x finish range module
   x load fn docs from separate text files
+  result handling: write standalone file, or list mixing types
   design all-vs-all type/module
   write all-vs-all module + integrate with orthogroup algorithms
   write orthogroup result handling while running the ortholog finder cuts
