@@ -10,14 +10,15 @@ week of 6/25:
   get venn diagrams working
   update tests + bump version
   run cuts for small group
-  write + record demo for small group (just video, not on demo site yet)
+  write + record demo for small group (just video, not on demo site yet):
+    talk about how to trade off your time vs the computer's time
 
 next week:
+  start writing docs for most functions
   test + merge url loading
   implement cheat module (rename Script)
   try leapfrog
   add range tests
-  start writing docs for most functions
 
 list dedup bug:
   is it in extract_queries?
