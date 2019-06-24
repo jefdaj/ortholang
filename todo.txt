@@ -1,19 +1,24 @@
 week of 6/25:
   x finish range module
   x load fn docs from separate text files
-  result handling: write standalone file, or list mixing types
-  design all-vs-all type/module
-  write all-vs-all module + integrate with orthogroup algorithms
-  write orthogroup result handling while running the ortholog finder cuts
-  finish busco plots + maybe generic "histogram before/after" plots
-  add (or just document?) set membership tables
-  get venn diagrams working
+  test cut with busco:
+    re-run most conservative
+    if time, extend to a range of quality scores
+    if time, make a tutorial and assign as homework
+  orthogroups:
+    design all-vs-all type/module
+    write all-vs-all module + integrate with orthogroup algorithms
+    write orthogroup result handling while running the ortholog finder cuts
+  make it look nice:
+    finish busco plots + maybe generic "histogram before/after" plots
+    add (or just document?) set membership tables
+    get venn diagrams working
   update tests + bump version
-  run cuts for small group
   write + record demo for small group (just video, not on demo site yet):
     talk about how to trade off your time vs the computer's time
 
 next week:
+  result handling: write standalone file, or list mixing types
   start writing docs for most functions
   test + merge url loading
   implement cheat module (rename Script)
