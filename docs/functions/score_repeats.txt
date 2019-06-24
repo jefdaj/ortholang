@@ -1,1 +1,13 @@
-doc for functions/score_repeats not written yet
+Shorthand for the common use case where you want to score your cut by some
+metric, for example number of hits, then vary one of the input parameters and
+see how the score changes.
+
+Arguments are the same as for repeat_each, except the output variable must be a
+number. It returns a table of scores and the corresponding inputs. You can
+inspect them yourself, or plot them in ShortCut.
+
+Examples:
+
+linegraph
+  "How does the cutoff change the number of hits?"
+  (score_repeats (length hits) initial_cutoff alternate_cutoffs)
