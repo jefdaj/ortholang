@@ -1,6 +1,7 @@
 week of 6/25:
   x finish range module
   x load fn docs from separate text files
+  make bst a member of listlike
   test cut with busco:
     re-run most conservative
     if time, extend to a range of quality scores

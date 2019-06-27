@@ -1,1 +1,19 @@
-doc for functions/busco_filter_completeness not written yet
+Filter a list of transcriptomes or proteomes by their BUSCO completeness score.
+
+Arguments:
+  minimum completeness score
+  busco scores table
+  list of fastas to filter
+
+The separate table facilitates scoring all the species you might want to
+include at the beginning of a project, then quickly filtering them later. Think
+of it like doing one low-stringency BLAST search and then separately filtering
+the hits.
+
+(Separate function coming soon to auto-generate the table from fastas only)
+
+Example:
+
+prots = load_faa_each ...
+table = busco_proteins_each euk prots
+prots95 = busco_filter_completeness 95 table prots

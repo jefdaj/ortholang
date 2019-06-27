@@ -89,6 +89,7 @@ module ShortCut.Core.Paths
   -- symlink stuff
   -- , tmpLink
   -- , symlink
+  , upBy
   )
   where
 
@@ -102,6 +103,7 @@ import ShortCut.Core.Util (digest)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
+import Data.List.Split            (splitOn)
 -- import Data.IORef                 (IORef)
 
 debugPath :: Show a => CutConfig -> String -> CutExpr -> a -> a
@@ -258,3 +260,19 @@ checkPath path = if isAbsolute path || isGeneric path
 
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath
+
+
+-----------
+-- utils --
+-----------
+
+-- TODO move this somewhere else?
+
+-- TODO there must be a standard function for this right?
+-- TODO guard that the top level stays to prevent it being /
+upBy :: Int -> CutPath -> CutPath
+upBy n (CutPath path) = CutPath path'
+  where
+    components = splitOn  "/" path -- TODO allow other delims?
+    components' = reverse $ drop n $ reverse components
+    path' = concat $ intersperse "/" $ components'

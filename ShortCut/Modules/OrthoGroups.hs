@@ -17,7 +17,7 @@ import Control.Monad               (forM)
 import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, writePaths, readFileStrict',
                                     readPaths)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath)
+import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
@@ -77,25 +77,32 @@ rOrthogroups :: RulesFn
 rOrthogroups st e@(CutFun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
 rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
 
+-- TODO any reason to keep this?
 findResDir :: CutConfig -> FilePath -> IO FilePath
 findResDir cfg outPath = do
   statsPath <- resolveSymlinks (Just $ cfgTmpDir cfg) outPath
+  -- liftIO $ putStrLn $ "outPath: " ++ outPath
+  -- liftIO $ putStrLn $ "statsPath: " ++ statsPath
   return $ takeDirectory $ takeDirectory statsPath
 
-parseOrthoFinder :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> Action [[String]]
-parseOrthoFinder cfg ref idref resDir = do
-  let orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
+-- TODO move parse fns to their respective modules for easier maintenance
+
+parseOrthoFinder :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action [[String]]
+parseOrthoFinder cfg ref idref ofrPath = do
+  let resDir = fromCutPath cfg $ upBy 2 ofrPath
+      orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   ids <- liftIO $ readIORef idref
   txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
   let groups = map (words . drop 11) (lines txt)
   return groups
 
-parseSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> Action [[String]]
-parseSonicParanoid cfg ref _ resDir = do
-  let orthoPath = resDir </> "multi_species" </> "multispecies_clusters.tsv"
+parseSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action [[String]]
+parseSonicParanoid cfg ref _ ogPath = do
+  let resDir = takeDirectory $ fromCutPath cfg ogPath
+      grpPath = resDir </> "ortholog_groups.tsv"
   -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
-  -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
-  txt <- readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref grpPath -- TODO openFile error during this?
+  txt <- readFileStrict' cfg ref grpPath -- TODO openFile error during this?
   let groups = map parseLine $ tail $ lines txt -- TODO be safe about tail
   -- liftIO $ putStrLn $ "groups: " ++ show groups
       --groups' = map (unhashIDs cfg) groups
@@ -121,11 +128,12 @@ writeOrthogroups cfg ref _ out groups = do
 -- TODO translate hashes back into actual seqids here?
 aOrthogroups :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aOrthogroups rtn cfg ref idsref [out, ogPath] = do
-  resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ogPath
+  -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
+  -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ogPath
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
                else                    error $ "bad type for aOrthogroups: " ++ show rtn
-  groups <- parser cfg ref idsref resDir
+  groups <- parser cfg ref idsref ogPath
   writeOrthogroups cfg ref idsref out groups
 aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
@@ -147,8 +155,8 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
 aOrthogroupContaining :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   geneId <- readLit cfg ref $ fromCutPath cfg idPath
-  resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
-  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids resDir
+  -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
+  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath
   let group = if null groups' then [] else head groups' -- TODO check for more?
   writeLits cfg ref (fromCutPath cfg out) group
 aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
@@ -177,8 +185,8 @@ containsOneOf elems lists = filter (flip any elems . flip elem) lists
 aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   geneIds <- readLits cfg ref $ fromCutPath cfg idsPath
-  resDir  <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
-  groups  <-  parseOrthoFinder cfg ref ids resDir -- TODO handle sonicparanoid
+  -- resDir  <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
+  groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle sonicparanoid
   let groups' = filterFn geneIds groups
   writeOrthogroups cfg ref ids out groups'
 aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args

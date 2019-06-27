@@ -247,7 +247,7 @@ mHelp m = getDoc $ "modules" </> mName m
 fHelp :: CutFunction -> IO String
 fHelp f = do
   doc <- getDoc $ "functions" </> fName f
-  let msg = fTypeDesc f ++ "\n\n" ++ doc
+  let msg = "\n" ++ fTypeDesc f ++ "\n\n" ++ doc
   return msg
 
 -- TODO move somewhere better

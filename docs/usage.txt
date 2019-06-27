@@ -14,6 +14,7 @@ Options:
                      Can be used more than once to run multiple sets of tests.
   --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
+  --typecheck        Don't run the script yet, just print any type errors.
   --script SCRIPT    ShortCut script to run, or load with --interactive
   --tmpdir TMPDIR    Where to cache results, including many large
                      intermediate files.

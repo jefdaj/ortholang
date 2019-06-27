@@ -10,7 +10,7 @@ import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import System.FilePath             ((</>), takeBaseName, takeDirectory)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), readFileStrict)
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), readFileStrict, debugTrackWrite)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
 import ShortCut.Core.Locks         (withWriteLock')
@@ -64,8 +64,11 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       dbDir       = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
       -- outDir      = tmpDir </> "result" -- TODO copy input files here?
       inDir       = tmpDir </> "input_links" -- TODO can you prevent it duplicating this to input?
+
+      -- TODO does this need some work to get consistently?
       statsPath'     = tmpDir </> "stats.tsv" -- this gets symlinked to the actual one, whose path varies
       statsPath      = toCutPath cfg statsPath'
+
       faListPath' = fromCutPath cfg faListPath
       out'        = fromCutPath cfg out
       statsPath''    = debugA cfg "aSonicParanoid" out' [out', statsPath', faListPath']
@@ -109,6 +112,8 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     --   ]
     -- putNormal $ unlines [o, e] -- TODO remove
 
+  -- TODO does this fix the "does not exist" issue?
+  -- debugTrackWrite cfg [statsPath']
   symlink cfg ref out statsPath
 
 aSonicParanoid _ _ _ args = error $ "bad argument to aSonicParanoid: " ++ show args
