@@ -1,1 +1,2 @@
 Given one gene ID, list others in the same orthogroup.
+Returns an empty list if there aren't any.

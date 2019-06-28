@@ -1,6 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 -- TODO wow is the list union stuff here a bottleneck? refactor to speed it up
+-- TODO shit, it's measuring how many orthogroups an is in rather than how many fastas
+-- TODO think through the overall process here...
+--      do we want to get all orthologs from widespread groups? or just from a reference species?
 
 module ShortCut.Modules.OrthoGroups
   where
@@ -14,8 +17,8 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (forM)
-import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, writePaths, readFileStrict',
-                                    readPaths)
+import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath,
+                                    writePaths, readFileStrict', readPaths)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy)
 import ShortCut.Core.Util          (resolveSymlinks)
@@ -25,6 +28,7 @@ import Data.IORef                  (readIORef)
 import Text.Regex.Posix            ((=~))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import Data.List                   (intersect)
+import Data.Scientific             (Scientific, toRealFloat)
 
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
@@ -34,15 +38,18 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
-  , mTypes = [og] -- TODO ofr, spr too?
+  , mTypes = [og, ofr, spr]
   , mFunctions =
       [ orthogroups
       , orthogroupContaining
       , orthogroupsContaining
       , orthologInAny
-      , orthologInAnyStr -- TODO hide?
       , orthologInAll
-      , orthologInAllStr -- TODO hide?
+      , orthologInMin
+      -- , orthologInMax
+      , orthologInAnyStr     -- TODO hide? rename to show generality?
+      , orthologInAllStr     -- TODO hide? rename to show generality?
+      , orthologInMinStr -- TODO hide? rename to show generality?
       ]
   }
 
@@ -141,8 +148,6 @@ aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show arg
 -- orthogroup_containing --
 ---------------------------
 
--- TODO this should only return a str.list
-
 orthogroupContaining :: CutFunction
 orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   { fName      = name
@@ -170,8 +175,8 @@ aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContainin
 orthogroupsContaining :: CutFunction
 orthogroupsContaining = let name = "orthogroups_containing" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [og, ListOf str] (ListOf (ListOf str))
-  , fTypeCheck = defaultTypeCheck [og, ListOf str] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
+  , fTypeCheck = defaultTypeCheck [og, ListOf str] sll
   , fFixity    = Prefix
   , fRules     = rSimple $ aOrthogroupsFilter containsOneOf
   }
@@ -199,43 +204,26 @@ aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining
 orthologInAny :: CutFunction
 orthologInAny = let name = "ortholog_in_any" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] (ListOf (ListOf str))
-  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologInAny
+  , fRules     = mkOrthologsStrRules "ortholog_in_any"
   }
 
--- rMakeblastdbEach :: RulesFn
--- rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
---   -- rFun1 (map1of1 faType dbType act1) st expr'
---   (rMap 1 act1) st expr'
---   where
---     -- faType = typeOf e
---     tmpDir = makeblastdbCache cfg 
---     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
---     act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
---     expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
---     -- expr'' = trace ("expr':" ++ show expr') expr'
--- rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
-
-rOrthologInAny :: RulesFn
-rOrthologInAny st (CutFun rType salt deps "ortholog_in_any" [groups, faas]) =
-  rExpr st $ CutFun rType salt deps "ortholog_in_any_str" [groups', faas']
+mkOrthologsStrRules :: String -> RulesFn
+mkOrthologsStrRules name st (CutFun rType salt deps _  [groups , faas]) =
+  rExpr st $ CutFun rType salt deps (name ++ "_str")   [groups', faas']
   where
     groups' = CutFun sll salt (depsOf groups) "orthogroups"      [groups]
     faas'   = CutFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
-rOrthologInAny _ _ = error "bad arguments to rOrthologInAny"
+mkOrthologsStrRules _ _ _ = error "bad arguments to mkOrthologsStrRules"
 
--------------------------
--- ortholog_in_any_str --
--------------------------
+-- TODO can this be removed somehow?
+-- TODO flip args so it reads more naturally?
 
 sll :: CutType
 sll = ListOf (ListOf str)
 
--- TODO hide this one?
-
--- TODO flip args so it reads more naturally?
 orthologInAnyStr :: CutFunction
 orthologInAnyStr = let name = "ortholog_in_any_str" in CutFunction
   { fName      = name
@@ -250,10 +238,10 @@ type FilterFn2 = [[String]] -> [[String]] -> [[String]]
 groupMemberInAnyList :: FilterFn2
 groupMemberInAnyList groups ids = filter (memberInAnyList ids) groups
   where
-    -- memberInOneList g i = not $ null $ intersect g i
+    overlap :: [String] -> [String] -> Bool
     overlap g i = not $ null $ intersect g i
+    memberInAnyList :: [[String]] -> [String] -> Bool
     memberInAnyList is g = any (overlap g) is
-    -- fn g i = let res = overlap g i in trace ("member in one list? " ++ show g ++ " " ++ show i ++ " " ++ show res) res
 
 rOrthologFilterStr :: FilterFn2 -> RulesFn
 rOrthologFilterStr filterFn st@(_, cfg, ref, idref) e@(CutFun _ _ _ _ [groupLists, idLists]) = do
@@ -276,34 +264,22 @@ rOrthologFilterStr _ _ _ = error "bad arguments to rOrthologFilterStr"
 -- ortholog_in_all --
 ---------------------
 
+-- TODO flip args so it reads more naturally?
+
 groupMemberInAllList :: FilterFn2
 groupMemberInAllList groups ids = filter (memberInAllList ids) groups
   where
     overlap g i = not $ null $ intersect g i
     memberInAllList is g = all (overlap g) is
-    -- fn g i = let res = overlap g i in trace ("member in one list? " ++ show g ++ " " ++ show i ++ " " ++ show res) res
 
--- TODO flip args so it reads more naturally?
 orthologInAll :: CutFunction
 orthologInAll = let name = "ortholog_in_all" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] (ListOf (ListOf str))
-  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] (ListOf (ListOf str))
+  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologInAll
+  , fRules     = mkOrthologsStrRules "ortholog_in_all"
   }
-
-rOrthologInAll :: RulesFn
-rOrthologInAll st (CutFun rType salt deps "ortholog_in_all" [groups, faas]) =
-  rExpr st $ CutFun rType salt deps "ortholog_in_all_str" [groups', faas']
-  where
-    groups' = CutFun sll salt (depsOf groups) "orthogroups"      [groups]
-    faas'   = CutFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
-rOrthologInAll _ _ = error "bad arguments to rOrthologInAll"
-
----------------------
--- ortholog_in_all --
----------------------
 
 orthologInAllStr :: CutFunction
 orthologInAllStr = let name = "ortholog_in_all_str" in CutFunction
@@ -312,4 +288,82 @@ orthologInAllStr = let name = "ortholog_in_all_str" in CutFunction
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix
   , fRules     = rOrthologFilterStr groupMemberInAllList
+  }
+
+--------------------------
+-- ortholog_in_min --
+--------------------------
+
+pickMin :: (RealFrac a1, Integral a2) => a1 -> a2 -> a2
+pickMin userNum nGroups
+  | userNum == 0 = 0
+  | userNum > -1 && userNum < 1 = pickMin (userNum * fromIntegral nGroups) nGroups
+  | userNum < 0 = pickMin (fromIntegral nGroups + userNum) nGroups
+  | otherwise = ceiling userNum
+
+groupMemberInMin :: Eq a => Scientific -> [[a]] -> [[a]] -> [[a]]
+groupMemberInMin n groups ids = filter (inEnoughLists groups) ids
+  where
+    n' = pickMin (toRealFloat n :: Double) (length groups)
+    overlap gs is = not $ null $ intersect gs is
+    inEnoughLists gss is = fromIntegral (length $ filter (overlap is) gss) >= n'
+
+-- TODO can it be derived from pickMin instead?
+-- pickMax :: (RealFrac a1, Integral a2) => a1 -> a2 -> a2
+-- pickMax userNum nGroups
+--   | userNum == 0 = 0
+--   | userNum > -1 && userNum < 1 = pickMax (userNum * fromIntegral nGroups) nGroups
+--   | userNum < 0 = pickMax (fromIntegral nGroups + userNum) nGroups
+--   | otherwise = floor userNum
+
+-- TODO can it be derived from groupMemberInMin instead?
+-- groupMemberInMax :: Eq a => Scientific -> [[a]] -> [[a]] -> [[a]]
+-- groupMemberInMax n groups ids = filter (notTooManyLists groups) ids
+--   where
+--     n' = pickMax (toRealFloat n :: Double) (length groups)
+--     overlap gs is = not $ null $ intersect gs is
+--     notTooManyLists gss is = fromIntegral (length $ filter (overlap is) gss) <= n'
+
+orthologInMinStr :: CutFunction
+orthologInMinStr = let name = "ortholog_in_min_str" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
+  , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
+  , fFixity    = Prefix
+  , fRules     = rOrthologFilterStrFrac groupMemberInMin
+  }
+
+mkOrthologsStrFracRules :: String -> RulesFn
+mkOrthologsStrFracRules name st (CutFun rType salt deps _ [frac, groups , faas]) =
+  rExpr st $ CutFun rType salt deps (name ++ "_str")  [frac, groups', faas']
+  where
+    groups' = CutFun sll salt (depsOf groups) "orthogroups"      [groups]
+    faas'   = CutFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFilter"
+
+rOrthologFilterStrFrac :: (Scientific -> FilterFn2) -> RulesFn
+rOrthologFilterStrFrac filterFn st@(_, cfg, ref, idref) e@(CutFun _ _ _ _ [frac, groupLists, idLists]) = do
+  (ExprPath fracPath      ) <- rExpr st frac
+  (ExprPath groupListsPath) <- rExpr st groupLists
+  (ExprPath idListsPath   ) <- rExpr st idLists
+  let out    = exprPath st e
+      out'   = debugRules cfg "rOrthologFilterStr" e $ fromCutPath cfg out
+  out' %> \_ -> do
+    f          <- readLit cfg ref fracPath
+    groupPaths <- readPaths cfg ref groupListsPath -- TODO readLits?
+    groups     <- mapM (readLits cfg ref) $ map (fromCutPath cfg) groupPaths
+    idPaths    <- readPaths cfg ref idListsPath
+    ids        <- mapM (readLits cfg ref) $ map (fromCutPath cfg) idPaths
+    let groups' = filterFn (read f :: Scientific) groups ids
+    writeOrthogroups cfg ref idref out groups'
+  return (ExprPath out')
+rOrthologFilterStrFrac _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
+
+orthologInMin :: CutFunction
+orthologInMin = let name = "ortholog_in_min" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc  name [num, spr, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [num, spr, ListOf faa] sll
+  , fFixity    = Prefix
+  , fRules     = mkOrthologsStrFracRules "ortholog_in_min"
   }

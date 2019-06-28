@@ -1,0 +1,4 @@
+mycoplasma = load_faa_each (glob_files "data/Mycoplasma_*_refseq.faa")
+spres = sonicparanoid (sample 3 mycoplasma)
+shared = ortholog_in_at_least 0.5 spres mycoplasma
+result = shared
