@@ -1,5 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 
+-- TODO rewrite only reading the one orthogroups file each time for efficiency
+-- TODO add extract_seqs_all to get the sequences for an orthogroup... and have an _each version of that?
+
 -- TODO is the auto-extracting IDs part weird? maybe make that be manual. or, ask ppl
 -- TODO wow is the list union stuff here a bottleneck? refactor to speed it up
 -- TODO homologs module that lists homolog pairs
@@ -238,6 +241,7 @@ groupMemberInAnyList groups idss = filter memberInAnyList groups
     memberInAnyList :: [String] -> Bool
     memberInAnyList g = any (\ids -> not $ null $ intersect g ids) idss
 
+-- TODO parse orthogroups here for efficiency (prevent thousands of extra lists)
 rOrthologFilterStr :: FilterFn2 -> RulesFn
 rOrthologFilterStr filterFn st@(_, cfg, ref, idref) e@(CutFun _ _ _ _ [groupLists, idLists]) = do
   (ExprPath groupListsPath) <- rExpr st groupLists

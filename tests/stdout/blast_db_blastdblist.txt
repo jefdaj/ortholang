@@ -9,7 +9,6 @@
  "est_mouse_blob",
  "est_others",
  "gss",
- "gss_annot",
  "htgs",
  "human_genomic",
  "landmark",
