@@ -2,15 +2,11 @@
 
 -- TODO is the auto-extracting IDs part weird? maybe make that be manual. or, ask ppl
 -- TODO wow is the list union stuff here a bottleneck? refactor to speed it up
--- TODO shit, it's measuring how many orthogroups an is in rather than how many fastas
--- TODO think through the overall process here...
---      do we want to get all orthologs from widespread groups? or just from a reference species?
+-- TODO homologs module that lists homolog pairs
+-- TODO and make that homologs function work on orthogroups too if possible
 
 module ShortCut.Modules.OrthoGroups
   where
-
--- TODO homologs module that lists homolog pairs
--- TODO and make that homologs function work on orthogroups too if possible
 
 import Development.Shake
 import ShortCut.Core.Types
@@ -50,8 +46,8 @@ cutModule = CutModule
       , orthologInAll
       , orthologInMin
       , orthologInMax
-      , orthologInAnyStr     -- TODO hide? rename to show generality?
-      , orthologInAllStr     -- TODO hide? rename to show generality?
+      , orthologInAnyStr -- TODO hide? rename to show generality?
+      , orthologInAllStr -- TODO hide? rename to show generality?
       , orthologInMinStr -- TODO hide? rename to show generality?
       , orthologInMaxStr -- TODO hide? rename to show generality?
       ]
@@ -237,11 +233,8 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in CutFunction
 type FilterFn2 = [[String]] -> [[String]] -> [[String]]
 
 groupMemberInAnyList :: FilterFn2
--- groupMemberInAnyList groups idss = filter (\g -> length (containsOneOf idss g) < 0) groups
 groupMemberInAnyList groups idss = filter memberInAnyList groups
   where
-    -- overlap :: [String] -> [String] -> Bool
-    -- overlap g i = not $ null $ intersect g i
     memberInAnyList :: [String] -> Bool
     memberInAnyList g = any (\ids -> not $ null $ intersect g ids) idss
 
@@ -271,7 +264,6 @@ rOrthologFilterStr _ _ _ = error "bad arguments to rOrthologFilterStr"
 groupMemberInAllList :: FilterFn2
 groupMemberInAllList groups idss = filter oneInAllLists groups
   where
-    -- overlap g i = not $ null $ intersect g i
     oneInAllLists g = idss == containsOneOf idss g -- TODO reformat with `all`?
 
 orthologInAll :: CutFunction
@@ -302,7 +294,7 @@ pickMin userNum nGroups
   | userNum > -1 && userNum < 1 = ceiling (userNum * fromIntegral nGroups)
   | userNum < 0 - fromIntegral nGroups = 0
   | userNum < 0 = pickMin (fromIntegral nGroups + userNum) nGroups
-  | otherwise = ceiling userNum -- TODO ceiling?
+  | otherwise = ceiling userNum -- TODO floor?
 
 groupMemberInMin :: Scientific -> [[String]] -> [[String]] -> [[String]]
 groupMemberInMin n groups idss = filter inEnoughLists groups
