@@ -37,7 +37,7 @@ import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
-import ShortCut.Core.Util       (absolutize, stripWhiteSpace, justOrDie)
+import ShortCut.Core.Util       (absolutize, stripWhiteSpace, justOrDie, headOrDie)
 import ShortCut.Core.Config     (showConfigField, setConfigField, getDoc)
 -- import System.Command           (runCommand, waitForProcess)
 import System.Process           (runCommand, waitForProcess)
@@ -231,7 +231,7 @@ cmds cfg =
 cmdHelp :: CutState -> Handle -> String -> IO CutState
 cmdHelp st@(_, cfg, _, _) hdl line = do
   doc <- case words line of
-           [w] -> head $ catMaybes
+           [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
                     [ fmap fHelp $ findFunction cfg w
                     , fmap mHelp $ findModule   cfg w
                     , fmap (tHelp cfg) $ findType cfg w
@@ -272,7 +272,7 @@ listFunctionTypesWithInput :: CutConfig -> CutType -> [String]
 listFunctionTypesWithInput cfg cType = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
-    matches d = (extOf cType) `elem` (words $ head $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    matches d = (extOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
 
 -- TODO move somewhere better
@@ -408,8 +408,8 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
     else if (length ws  > 2)
       then hPutStrLn hdl "too many variables" >> return st
       else if (length ws == 1)
-        then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st
-        else case setConfigField cfg (head ws) (last ws) of
+        then hPutStrLn hdl (showConfigField cfg $ headOrDie "cmdConfig failed" ws) >> return st
+        else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
                Right cfg' -> return (scr, cfg', ref, ids)
 
@@ -421,7 +421,7 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
 quotedCompletions :: MonadIO m => CutState -> String -> m [Completion]
 quotedCompletions (_, _, _, idRef) wordSoFar = do
   files  <- listFiles wordSoFar
-  seqIDs <- fmap (map $ head . words) $ fmap M.elems $ liftIO $ readIORef idRef
+  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ liftIO $ readIORef idRef
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
   return $ files ++ seqIDs'
 

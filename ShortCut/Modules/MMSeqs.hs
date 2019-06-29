@@ -27,7 +27,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPaths, runCmd, CmdDesc(..), symlink)
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, exprPath)
-import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
+import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks, headOrDie)
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.BlastDB    (withSingleton) -- TODO move to core?
@@ -57,7 +57,7 @@ mms = CutType
   , tShow = \_ ref path -> do
       path' <- fmap (-<.> "lookup") $ resolveSymlinks Nothing path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
-      let n = head $ words out
+      let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
       -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' cfg ref path'
       let desc = "MMSeqs2 database (" ++ n ++ " sequences)" -- TODO include a hash?
       return desc

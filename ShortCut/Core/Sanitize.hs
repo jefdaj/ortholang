@@ -26,7 +26,7 @@ import qualified Data.Map   as M
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Util    (digest, digestLength)
+import ShortCut.Core.Util    (digest, digestLength, headOrDie)
 import ShortCut.Core.Locks   (withWriteLock')
 import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
@@ -89,7 +89,7 @@ unhashIDs _ ids txt = case split "seqid_" txt of
       replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
                                  shortID  = case M.lookup idAndTab ids of
                                              Nothing -> "ERROR: seqid_" ++ idAndTab ++ " not found"
-                                             Just orig -> head $ words orig
+                                             Just orig -> headOrDie "unhashIDs failed" $ words orig
                              in shortID ++ rest
   _ -> txt
 

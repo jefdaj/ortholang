@@ -76,7 +76,7 @@ import qualified Data.Map as M
 import Text.Parsec (Parsec)
 
 import ShortCut.Core.Locks (Locks, withReadLock)
-import ShortCut.Core.Util  (readFileStrict, readFileLazy)
+import ShortCut.Core.Util  (readFileStrict, readFileLazy, headOrDie)
 
 import Development.Shake              (Rules, Action, Resource)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
@@ -388,7 +388,9 @@ operatorChars :: CutConfig -> [Char]
 operatorChars cfg = if cfgDebug cfg then chars' else chars
   where
     bops    = filter (\f -> fFixity f == Infix) $ listFunctions cfg
-    bChar n = if length n == 1 then head n else error $ "bad bop name: " ++ n
+    bChar n = if length n == 1
+                then (headOrDie "failed to parse bChar in operatorChars") n
+                else error $ "bad bop name: " ++ n
     chars   = map (bChar . fName) bops
     chars'  = trace ("operatorChars: '" ++ chars ++ "'") chars
 
@@ -519,8 +521,8 @@ nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
   where
     nonEmpty = filter isNonEmpty ts
     elemType = if      null ts       then Empty
-               else if null nonEmpty then head ts -- for example (ListOf Empty)
-               else    head nonEmpty
+               else if null nonEmpty then headOrDie "nonEmptyType failed" ts -- for example (ListOf Empty)
+               else    headOrDie "nonEmptyType failed" nonEmpty
     typesOK  = all (typeMatches elemType) ts
     errorMsg = "all elements of a list must have the same type"
 

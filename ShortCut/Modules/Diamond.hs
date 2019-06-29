@@ -10,7 +10,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleScriptPar,
                                     rExpr, debugRules, rSimple)
 import ShortCut.Core.Locks         (withReadLock)
-import ShortCut.Core.Util          (resolveSymlinks)
+import ShortCut.Core.Util          (resolveSymlinks, headOrDie)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, exprPath)
 import ShortCut.Core.Actions       (readPaths, readLit, debugA, runCmd, CmdDesc(..), sanitizeFileInPlace)
 import ShortCut.Modules.SeqIO      (fna, faa)
@@ -149,6 +149,6 @@ rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
   = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules  = rSimple $ aDiamondFromDb dCmd
-    name1  = "diamond_" ++ head dCmd
+    name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
     dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"

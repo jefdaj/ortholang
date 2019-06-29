@@ -39,7 +39,7 @@ import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNee
 import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists)
+                                   digest, removeIfExists, headOrDie)
 import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
@@ -368,7 +368,7 @@ curl cfg ref url = do
 aLoad :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
   debugNeed cfg "aLoad" [strPath']
-  pth <- fmap head $ readLits cfg ref strPath' -- TODO safer!
+  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits cfg ref strPath' -- TODO safer!
   -- liftIO $ putStrLn $ "pth: " ++ pth
   pth' <- if isURL pth
             then curl cfg ref pth

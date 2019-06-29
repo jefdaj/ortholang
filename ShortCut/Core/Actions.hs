@@ -67,7 +67,7 @@ import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
                                    stringCutPath, toGeneric)
 import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict,
-                                   ignoreExistsError, digest, globFiles, isEmpty)
+                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
@@ -131,9 +131,8 @@ readLit cfg locks path = do
 readLits :: CutConfig -> Locks -> FilePath -> Action [String]
 readLits cfg ref path = readList cfg ref path >>= return . checkLits
 
--- TODO something safer than head!
 readPath :: CutConfig -> Locks -> FilePath -> Action CutPath
-readPath cfg ref path = readPaths cfg ref path >>= return . head
+readPath cfg ref path = readPaths cfg ref path >>= return . headOrDie "readPath failed"
 
 -- TODO should this have checkPaths?
 readPaths :: CutConfig -> Locks -> FilePath -> Action [CutPath]
@@ -150,10 +149,9 @@ readLitPaths cfg ref path = do
                    then line
                    else cfgWorkDir cfg </> line
 
--- TODO something safer than head!
 -- TODO how should this relate to readLit and readStr?
 readString :: CutType -> CutConfig -> Locks -> FilePath -> Action String
-readString etype cfg ref path = readStrings etype cfg ref path >>= return . head
+readString etype cfg ref path = readStrings etype cfg ref path >>= return . headOrDie "readString failed"
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
  - the CutType (of each element, not the list!) so it knows how to convert from

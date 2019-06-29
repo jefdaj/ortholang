@@ -26,6 +26,7 @@ module ShortCut.Core.Util
   , popFrom
   , insertAt
   , justOrDie
+  , headOrDie
   )
   where
 
@@ -246,3 +247,8 @@ justOrDie :: String -> Maybe a -> a
 justOrDie msg val = case val of
                  Nothing -> error msg
                  Just v -> v
+
+-- like head, but at least this gives you something to debug
+headOrDie :: String -> [a] -> a
+headOrDie msg [] = error msg
+headOrDie _ lst = head lst

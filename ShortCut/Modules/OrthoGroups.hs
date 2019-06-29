@@ -19,7 +19,7 @@ import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPat
                                     writePaths, readFileStrict', readPaths)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy)
-import ShortCut.Core.Util          (resolveSymlinks)
+import ShortCut.Core.Util          (resolveSymlinks, headOrDie)
 import ShortCut.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
 import Data.IORef                  (readIORef)
@@ -165,7 +165,7 @@ aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   geneId <- readLit cfg ref $ fromCutPath cfg idPath
   -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath
-  let group = if null groups' then [] else head groups' -- TODO check for more?
+  let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits cfg ref (fromCutPath cfg out) group
 aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 

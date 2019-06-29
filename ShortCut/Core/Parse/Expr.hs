@@ -4,6 +4,7 @@ import ShortCut.Core.Types
 import ShortCut.Core.Pretty()
 import ShortCut.Core.Parse.Util
 import ShortCut.Core.Parse.Basic
+import ShortCut.Core.Util (headOrDie)
 
 
 import qualified Text.Parsec.Expr as E
@@ -60,7 +61,9 @@ operatorTable cfg = [map binary bops]
 -- TODO how to fail gracefully (with fail, not error) here??
 pBop :: CutFunction -> ParseM (CutExpr -> CutExpr -> CutExpr)
 pBop bop
-  | fFixity bop == Infix = (debugParser ("pBop " ++ fName bop) (pSym (head $ fName bop))) *> return (pBop' bop)
+  | fFixity bop == Infix = (debugParser ("pBop " ++ fName bop)
+                           (pSym (headOrDie "failed to read fName in pBop" $ fName bop)))
+                           *> return (pBop' bop)
 pBop _ = fail "pBop only works with infix functions"
 
 pBop' :: CutFunction -> (CutExpr -> CutExpr -> CutExpr)

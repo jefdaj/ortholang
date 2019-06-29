@@ -16,6 +16,7 @@ import ShortCut.Core.Actions       (readLit, readPath,
                                     writeCachedLines, readFileStrict')
 import ShortCut.Core.Compile.Basic (defaultTypeCheck)
 import ShortCut.Core.Paths         (fromCutPath, cacheDir)
+import ShortCut.Core.Util          (headOrDie)
 import ShortCut.Modules.BlastDB    (pdb)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.SeqIO      (faa)
@@ -219,7 +220,8 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
        - (If we aren't writing a PSSM, then tPath' is already the final file)
        -}
       when writingPssm $ do
-        querySeqId <- fmap (head . words . head . lines) $ readFileStrict' cfg ref qPath'
+        let head' = headOrDie "aPsiblastDb failed to read querySeqId"
+        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' cfg ref qPath'
         pssmLines <- fmap lines $ readFileStrict' cfg ref tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName dbPre'
