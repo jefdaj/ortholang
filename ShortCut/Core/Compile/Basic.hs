@@ -308,7 +308,7 @@ rLoad _ _ _ = fail "bad argument to rLoad"
 -- TODO see if shake exports code for only hashing when timestamps change
 aLoadHash :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
 aLoadHash hashSeqIDs cfg ref ids src ext = do
-  -- alwaysRerun
+  alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   debugNeed cfg "aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
