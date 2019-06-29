@@ -94,7 +94,7 @@ in pkgs // {
   inherit (myPython2) blastdbget treeCl;
   inherit (myPython3) busco;
 
-  inherit raxml;
+  inherit raxml mcl;
   inherit orthofinder sonicparanoid justorthologs;
 
   # python27Packages = myPython27; # used by treeCl, probably others
