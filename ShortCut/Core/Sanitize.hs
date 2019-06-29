@@ -32,20 +32,25 @@ import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.List.Utils       (split)
 import Data.Maybe (fromJust)
+import System.FilePath (takeBaseName)
 
-type HashedSeqIDList = D.DList (String, String)
+type HashedIDList = D.DList (String, String)
 
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
-hashIDsLine :: String -> (String, HashedSeqIDList)
+hashIDsLine :: String -> (String, HashedIDList)
 hashIDsLine ('>':seqID) = (">seqid_" ++ idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
   where
     idHash = digest seqID
 hashIDsLine txt = (txt, D.empty)
 
+-- add hashing of filenames in addition to fasta contents
+hashIDsPath :: CutConfig -> CutPath -> (String, String)
+hashIDsPath cfg (CutPath path) = (digest path, takeBaseName path)
+
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
-hashIDsFasta :: String -> (String, HashedIDs)
-hashIDsFasta txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ lines txt
+hashIDsTxt :: String -> (String, HashedIDs)
+hashIDsTxt txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ lines txt
   where
     -- hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
     accFn  (oldLines, oldIDs) (newLine, newIDs) = (D.snoc oldLines newLine, D.append oldIDs newIDs)
@@ -58,10 +63,12 @@ hashIDsFile cfg ref inPath outPath = do
       outPath' = fromCutPath cfg outPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
-  let (fasta', ids) = hashIDsFasta txt
+  let (fasta', ids) = hashIDsTxt txt
+      (k, v) = hashIDsPath cfg outPath
+      ids' = M.insert k v ids
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
   debugTrackWrite cfg [outPath']
-  return ids
+  return ids'
 
 writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedIDs -> Action ()
 writeHashedIDs cfg ref path ids = do
