@@ -7,11 +7,11 @@ let
 
 in python36Packages.buildPythonPackage rec {
   pname = "sonicparanoid";
-  version = "1.2.2";
+  version = "1.2.3";
 
   src = fetchurl {
-    url = "https://files.pythonhosted.org/packages/89/a7/8d12cb5ee5f4443db9da8d7a7b34becb8b4e947ae9201978ea1d76c18056/sonicparanoid-1.2.2.tar.gz";
-    sha256 = "1wmnkcmn721xwg9ry43z8ncl5dfwyyi6mh1nxd5rd0vck8ph7mfk";
+    url = "https://files.pythonhosted.org/packages/8d/bf/4337a0707bffc0cbf805f6d9580f0ca16a21213725d240b0292e6ea70523/sonicparanoid-1.2.3.tar.gz";
+    sha256 = "1sgfg3qf3sj8sjlkiqin6cjp8b38rc58js361yb0ikzmy4nh8f06";
   };
 
   propagatedBuildInputs = [

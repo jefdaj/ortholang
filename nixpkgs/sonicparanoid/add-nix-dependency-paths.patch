@@ -1,23 +1,24 @@
-diff -ruN sonicparanoid-old/sonicparanoid/mcl_c.pyx sonicparanoid-new/sonicparanoid/mcl_c.pyx
---- sonicparanoid-old/sonicparanoid/mcl_c.pyx	2019-05-10 02:14:23.000000000 -0700
-+++ sonicparanoid-new/sonicparanoid/mcl_c.pyx	2019-06-06 19:34:08.529160704 -0700
-@@ -90,7 +90,8 @@
+diff -ruN sonicparanoid-1.2.3/sonicparanoid/mcl_c.pyx sonicparanoid-patched/sonicparanoid/mcl_c.pyx
+--- sonicparanoid-1.2.3/sonicparanoid/mcl_c.pyx	2019-06-07 00:06:32.000000000 +0000
++++ sonicparanoid-patched/sonicparanoid/mcl_c.pyx	2019-06-29 00:49:13.742000000 +0000
+@@ -90,7 +90,7 @@
  
    # make sure MCL is installed
    # check if mcl has been installed
 -  mclPath: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mcl_package/bin/mcl')
-+  # mclPath: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mcl_package/bin/mcl')
 +  mclPath = '@mcl@/bin/mcl'
    if os.path.isfile(mclPath):
      if debug:
        print("MCL is installed at {:s}".format(mclPath))
-diff -ruN sonicparanoid-old/sonicparanoid/workers.py sonicparanoid-new/sonicparanoid/workers.py
---- sonicparanoid-old/sonicparanoid/workers.py	2019-05-10 02:14:32.000000000 -0700
-+++ sonicparanoid-new/sonicparanoid/workers.py	2019-06-06 18:35:39.150089448 -0700
-@@ -271,7 +271,7 @@
-     elif ostype == 'Linux':
-         mmseqsPath = os.path.join(pySrcDir, 'bin/linux/mmseqs')
-     '''
+diff -ruN sonicparanoid-1.2.3/sonicparanoid/workers.py sonicparanoid-patched/sonicparanoid/workers.py
+--- sonicparanoid-1.2.3/sonicparanoid/workers.py	2019-06-07 00:35:56.000000000 +0000
++++ sonicparanoid-patched/sonicparanoid/workers.py	2019-06-29 00:50:29.474000000 +0000
+@@ -255,9 +255,7 @@
+ def get_mmseqs_path():
+     """Return the directory in which MMseqs2 binaries are stored."""
+     #import platform
+-    mmseqsPath = None
+-    pySrcDir = os.path.dirname(os.path.abspath(__file__))
 -    mmseqsPath = os.path.join(pySrcDir, 'bin/mmseqs')
 +    mmseqsPath = '@mmseqs2@/bin/mmseqs'
      if not os.path.isfile(mmseqsPath):
