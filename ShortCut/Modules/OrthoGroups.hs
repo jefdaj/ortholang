@@ -97,7 +97,7 @@ findResDir cfg outPath = do
 
 -- TODO move parse fns to their respective modules for easier maintenance
 
-parseOrthoFinder :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action [[String]]
+parseOrthoFinder :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action [[String]]
 parseOrthoFinder cfg ref idref ofrPath = do
   let resDir = fromCutPath cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
@@ -106,7 +106,7 @@ parseOrthoFinder cfg ref idref ofrPath = do
   let groups = map (words . drop 11) (lines txt)
   return groups
 
-parseSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action [[String]]
+parseSonicParanoid :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action [[String]]
 parseSonicParanoid cfg ref _ ogPath = do
   let resDir = takeDirectory $ fromCutPath cfg ogPath
       grpPath = resDir </> "ortholog_groups.tsv"
@@ -121,7 +121,7 @@ parseSonicParanoid cfg ref _ ogPath = do
   where
     parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
 
-writeOrthogroups :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [[String]] -> Action ()
+writeOrthogroups :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> [[String]] -> Action ()
 writeOrthogroups cfg ref _ out groups = do
   -- let groups' = (map . map) (unhashIDs cfg ids) groups
   -- ids   <- liftIO $ readIORef idsref
@@ -136,7 +136,7 @@ writeOrthogroups cfg ref _ out groups = do
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
-aOrthogroups :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroups :: CutType -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroups rtn cfg ref idsref [out, ogPath] = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
   -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ogPath
@@ -160,7 +160,7 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   , fRules     = rSimple aOrthogroupContaining
   }
 
-aOrthogroupContaining :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroupContaining :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   geneId <- readLit cfg ref $ fromCutPath cfg idPath
   -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
@@ -190,7 +190,7 @@ type FilterFn = [[String]] -> [String] -> [[String]]
 containsOneOf :: FilterFn
 containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
-aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   geneIds <- readLits cfg ref $ fromCutPath cfg idsPath
   -- resDir  <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath

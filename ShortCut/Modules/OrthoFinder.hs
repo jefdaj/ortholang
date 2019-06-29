@@ -52,7 +52,7 @@ orthofinder = let name = "orthofinder" in CutFunction
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
 -- TODO what's diamond blast? do i need to add it?
-aOrthofinder :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aOrthofinder :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthofinder cfg ref _ [out, faListPath] = do
 
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath

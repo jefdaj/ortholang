@@ -114,7 +114,7 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 -------------
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO CutScript
+parseFileIO :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> IO CutScript
 parseFileIO cfg ref ids scr = do
   mscr1 <- parseFile cfg ref ids scr
   case mscr1 of
@@ -129,7 +129,7 @@ parseStatement = parseWithEof pStatement
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
 -- TODO error if it has leftover?
-parseString :: CutConfig -> Locks -> HashedSeqIDsRef -> String
+parseString :: CutConfig -> Locks -> HashedIDsRef -> String
             -> Either ParseError CutScript
 parseString c r ids = parseWithEof pScript ([], c, r, ids)
 
@@ -158,7 +158,7 @@ pScript = debugParser "pScript" $ do
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath
+parseFile :: CutConfig -> Locks -> HashedIDsRef -> FilePath
           -> IO (Either ParseError CutScript)
 parseFile cfg ref ids path = do
   txt <- readScriptWithIncludes ref path'

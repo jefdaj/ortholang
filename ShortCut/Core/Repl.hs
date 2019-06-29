@@ -56,13 +56,13 @@ import Development.Shake.FilePath (takeFileName)
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
 
-runRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+runRepl :: CutConfig -> Locks -> HashedIDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+       -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids = do
   clear
   hPutStrLn hdl

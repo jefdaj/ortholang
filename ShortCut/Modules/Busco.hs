@@ -99,7 +99,7 @@ rBuscoListLineages s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [f]) = do
     lTmp'   = toCutPath   cfg listTmp
 rBuscoListLineages _ _ = fail "bad argument to rBuscoListLineages"
 
-aBuscoListLineages :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
+aBuscoListLineages :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action ()
 aBuscoListLineages cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
   writeLits cfg ref oPath allLineages
@@ -236,7 +236,7 @@ buscoProteins      = mkBusco "busco_proteins"      "prot" faa
 buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
 
-aBusco :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aBusco :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aBusco mode cfg ref _ [outPath, blhPath, faaPath] = do
   let out' = fromCutPath cfg outPath
       blh' = takeDirectory $ fromCutPath cfg blhPath

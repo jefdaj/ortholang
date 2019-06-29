@@ -259,7 +259,7 @@ mkConcatEach cType = CutFunction
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
--- aConcat :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+-- aConcat :: CutType -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
 --   fPaths <- readPaths cfg ref fs'
 --   let fPaths' = map (fromCutPath cfg) fPaths
@@ -281,7 +281,7 @@ mkConcatEach cType = CutFunction
 -- aConcat _ _ _ _ = fail "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
-aConcat :: CutType -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aConcat :: CutType -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aConcat cType cfg ref ids [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
@@ -304,7 +304,7 @@ aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 -- writeCachedLines cfg ref outPath content = do
 
 -- TODO would it work to just directly creat a string and tack onto paths here?
--- aSimpleScript' :: Bool -> String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+-- aSimpleScript' :: Bool -> String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 -- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
 
 ------------------------
@@ -335,7 +335,7 @@ splitFastaEach faType = CutFunction
     ext  = extOf faType
     name = "split_" ++ ext ++ "_each"
 
-aSplit :: String -> String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aSplit :: String -> String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aSplit name ext cfg ref _ [outPath, faPath] = do
   let faPath'   = fromCutPath cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"

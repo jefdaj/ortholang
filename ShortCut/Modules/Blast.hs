@@ -88,7 +88,7 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = CutFunction
 rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aMkBlastFromDb :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
   prefix <- readPath cfg ref p'

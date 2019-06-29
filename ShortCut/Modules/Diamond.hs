@@ -115,7 +115,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name 
 rDiamondFromDb :: [String] -> RulesFn
 rDiamondFromDb = rSimple . aDiamondFromDb
 
-aDiamondFromDb :: [String] -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aDiamondFromDb :: [String] -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
   eStr <- readLit  cfg ref e'
   -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd

@@ -150,7 +150,7 @@ rLoadDB st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [s]) = do
     oPath' = fromCutPath cfg oPath
 rLoadDB _ _ = fail "bad argument to rLoadDB"
 
-aLoadDB :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoadDB :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoadDB cfg ref _ oPath sPath = do
   pattern <- readLit cfg ref sPath'
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
@@ -215,7 +215,7 @@ rBlastdblist s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [f]) = do
     lTmp'   = toCutPath   cfg listTmp
 rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 
-aBlastdblist :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
+aBlastdblist :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action ()
 aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
   withWriteLock' ref tmpDir $ do
@@ -239,7 +239,7 @@ aBlastdblist cfg ref _ listTmp = do
 
 -- TODO generalize so it works with busco_list_lineages too?
 -- TODO move to a "Filter" module once that gets started
-aFilterList :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+aFilterList :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aFilterList cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
   out       <- readLits cfg ref listTmp'
@@ -279,7 +279,7 @@ rBlastdbget st@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [name]) = do
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
-aBlastdbget :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+aBlastdbget :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
   debugNeed cfg "aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
@@ -375,7 +375,7 @@ listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . 
 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
-aMakeblastdbAll :: CutType -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ()
+aMakeblastdbAll :: CutType -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ()
 aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
@@ -525,7 +525,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 -- map1of1 :: CutType -> CutType -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
--- rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
+-- rMap :: Int -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()) -> RulesFn
 -- rMap index actFn = rMapMain index Nothing actFn'
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?

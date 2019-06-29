@@ -196,7 +196,7 @@ rParseSearches s@(_, cfg, ref, ids) expr@(CutFun _ _ _ _ [searches]) = do
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
-aParseSearches :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aParseSearches :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aParseSearches cfg ref _ sList out = do
   parses <- (fmap . map) readSearch (readLits cfg ref sList')
   let (errors, searches') = partitionEithers parses
@@ -237,7 +237,7 @@ rBioMartR fn s@(_, cfg, ref, ids) expr@(CutFun rtn salt _ _ [ss]) = do
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: CutConfig -> Locks -> HashedSeqIDsRef
+aBioMartR :: CutConfig -> Locks -> HashedIDsRef
           -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   debugNeed cfg "aBioMartR" [bmFn', sTable']
