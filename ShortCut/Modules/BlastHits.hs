@@ -7,12 +7,10 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import System.FilePath             ((<.>))
-import ShortCut.Core.Util          (unlessExists)
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, symlink, writeCachedVersion, debugTrackWrite)
--- import ShortCut.Core.Debug         (debugA )
-import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, writeCachedVersion, debugTrackWrite)
+import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.CRBBlast   (crb)
 import System.Exit                 (ExitCode(..))

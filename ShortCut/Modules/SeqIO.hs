@@ -8,9 +8,8 @@ import Development.Shake
 import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Util          (digest)
-import ShortCut.Core.Actions       (readPaths, writePaths, debugA, debugNeed,
+import ShortCut.Core.Actions       (readPaths, debugA, debugNeed,
                                     writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
@@ -19,7 +18,6 @@ import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
 import System.Exit                 (ExitCode(..))
-import Control.Monad               (when)
 
 cutModule :: CutModule
 cutModule = CutModule

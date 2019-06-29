@@ -8,11 +8,11 @@ import ShortCut.Core.Types
 
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import System.FilePath             ((</>), takeBaseName, takeDirectory)
+import System.FilePath             ((</>), takeBaseName)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), readFileStrict, debugTrackWrite)
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..))
 import System.Directory            (createDirectoryIfMissing)
-import ShortCut.Core.Util          (digest, unlessExists, resolveSymlinks)
+import ShortCut.Core.Util          (digest, unlessExists)
 import ShortCut.Core.Locks         (withWriteLock')
 import System.Exit                 (ExitCode(..))
 

@@ -5,7 +5,6 @@ module ShortCut.Modules.Range
 
 import Development.Shake
 import ShortCut.Core.Types
-import Text.RawString.QQ
 
 import System.FilePath ((<.>))
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr)
@@ -43,14 +42,14 @@ rRange st@(_, cfg, ref, _) e@(CutFun _ _ _ name args) = do
       out' = fromCutPath cfg out
   argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr st) args
   out' %> \_ -> do
-    args <- mapM (readLit cfg ref) argPaths
+    as <- mapM (readLit cfg ref) argPaths
     runCmd cfg ref $ CmdDesc
       { cmdBinary = name <.> "R"
-      , cmdArguments = out':args
+      , cmdArguments = out':as
       , cmdFixEmpties = False
       , cmdParallel = False
       , cmdOptions = []
-      , cmdInPatterns = args
+      , cmdInPatterns = as
       , cmdOutPath = out'
       , cmdExtraOutPaths = []
       , cmdSanitizePaths = []

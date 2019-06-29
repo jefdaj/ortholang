@@ -4,7 +4,6 @@ module ShortCut.Core.Config where
 
 import qualified Data.Configurator as C
 
-import Control.Monad              (when)
 import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (isNothing, fromJust)
 import Data.Text                  (pack)
@@ -18,7 +17,6 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
-import System.Directory           (doesFileExist)
 import System.FilePath            ((</>), (<.>))
 import Debug.Trace       (trace)
 
