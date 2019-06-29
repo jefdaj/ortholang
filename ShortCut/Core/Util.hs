@@ -25,6 +25,7 @@ module ShortCut.Core.Util
   , isReallyEmpty
   , popFrom
   , insertAt
+  , justOrDie
   )
   where
 
@@ -40,7 +41,6 @@ import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
 import Data.List              (dropWhileEnd, isPrefixOf, isInfixOf, splitAt)
 import Data.List.Utils        (replace)
-import Data.Maybe             (fromJust)
 import System.Directory       (doesPathExist, removePathForcibly,
                                getHomeDirectory, makeAbsolute, removeFile,
                                pathIsSymbolicLink)
@@ -184,7 +184,7 @@ absolutize aPath = do
                         ++ tail aPath
     else do
       pathMaybeWithDots <- absolute_path aPath
-      return $ fromJust $ guess_dotdot pathMaybeWithDots
+      return $ justOrDie "guess_dotdot in absolutize failed!" $ guess_dotdot pathMaybeWithDots
   aPath'' <- makeAbsolute aPath'
   return aPath''
   -- resolveSymlink aPath''
@@ -240,3 +240,9 @@ insertAt i newElement as
   | i >= 0 = let (prefix, suffix) = splitAt i as
              in prefix <> [newElement] <> suffix
 insertAt _ _ _ = error "bad arg to insertAt"
+
+-- like fromJust, but at least this gives you something to debug
+justOrDie :: String -> Maybe a -> a
+justOrDie msg val = case val of
+                 Nothing -> error msg
+                 Just v -> v

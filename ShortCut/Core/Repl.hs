@@ -30,14 +30,14 @@ import Data.Char                (isSpace)
 import Data.List                (isPrefixOf, isSuffixOf, filter, delete)
 import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
-import Data.Maybe               (catMaybes, fromJust)
+import Data.Maybe               (catMaybes)
 -- import Data.Map                 (empty)
 import Prelude           hiding (print)
 import ShortCut.Core.Eval       (evalScript)
 import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
-import ShortCut.Core.Util       (absolutize, stripWhiteSpace)
+import ShortCut.Core.Util       (absolutize, stripWhiteSpace, justOrDie)
 import ShortCut.Core.Config     (showConfigField, setConfigField, getDoc)
 -- import System.Command           (runCommand, waitForProcess)
 import System.Process           (runCommand, waitForProcess)
@@ -183,7 +183,7 @@ removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, der
 -- does the actual work of removing self-references
 dereference :: CutScript -> CutVar -> CutExpr -> CutExpr
 dereference scr var e@(CutRef _ _ _ v2)
-  | var == v2 = fromJust (lookup var scr)
+  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
   | otherwise = e
 dereference _   _   e@(CutLit _ _ _) = e
 dereference _   _   (CutRules _) = error "implement this! or rethink?"

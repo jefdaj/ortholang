@@ -5,14 +5,14 @@ module ShortCut.Core.Config where
 import qualified Data.Configurator as C
 
 import Data.Configurator.Types    (Config, Worth(..))
-import Data.Maybe                 (isNothing, fromJust)
+import Data.Maybe                 (isNothing)
 import Data.Text                  (pack)
 import Development.Shake           (newResourceIO)
 -- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
                                    -- removeFiles, liftIO)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), CutModule(..))
-import ShortCut.Core.Util         (absolutize)
+import ShortCut.Core.Util         (absolutize, justOrDie)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
@@ -34,7 +34,7 @@ loadField args cfg key
 
 loadConfig :: [CutModule] -> Arguments -> IO CutConfig
 loadConfig mods args = do
-  let path = fromJust $ getArg args $ longOption "config"
+  let path = justOrDie "parse --config arg failed!" $ getArg args $ longOption "config"
   cfg <- C.load [Optional path]
   csc <- loadField args cfg "script"
   csc' <- case csc of
@@ -50,8 +50,8 @@ loadConfig mods args = do
   return CutConfig
     { cfgScript  = csc'
     , cfgInteractive = int
-    , cfgTmpDir  = fromJust ctd
-    , cfgWorkDir = fromJust cwd
+    , cfgTmpDir  = justOrDie "parse --tmpdir arg failed!" ctd
+    , cfgWorkDir = justOrDie "parse --workdir arg failed!" cwd
     , cfgDebug   = isPresent args $ longOption "debug"
     , cfgModules = mods
     , cfgWrapper = cls

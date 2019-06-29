@@ -11,11 +11,11 @@ import qualified Data.ByteString.Lazy  as BL
 -- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
 import qualified Data.ByteString.Lazy.Char8 as B8
 import Data.List                  (zip4)
-import Data.Maybe                 (fromJust)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
+import ShortCut.Core.Util         (justOrDie)
 -- import ShortCut.Core.Pretty       (writeScript)
 import ShortCut.Core.Types        (CutConfig(..), HashedSeqIDsRef)
 import ShortCut.Core.Locks        (Locks, withWriteLock)
@@ -107,7 +107,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
     desc = "unchanged by round-trip to file"
     tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
-      scr1 <- parseFileIO cfg ref ids $ fromJust $ cfgScript cfg
+      scr1 <- parseFileIO cfg ref ids $ justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
       -- this is useful for debugging
       -- writeScript cut scr1
       withWriteLock ref tripShow $ writeBinaryFile tripShow $ show scr1

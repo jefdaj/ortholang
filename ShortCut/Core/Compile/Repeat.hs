@@ -14,9 +14,9 @@ module ShortCut.Core.Compile.Repeat where
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Util (justOrDie)
 import ShortCut.Core.Compile.Replace (rReplaceEach)
 
-import Data.Maybe      (fromJust)
 import Data.Scientific (Scientific(), toBoundedInteger)
 
 -- import Debug.Trace
@@ -57,7 +57,7 @@ readSciInt s = case toBoundedInteger (read s :: Scientific) of
 -- TODO is the bug here? might need to convert string -> sci -> int
 extractNum :: CutScript -> CutExpr -> Int
 extractNum _   (CutLit x _ n) | x == num = readSciInt n
-extractNum scr (CutRef _ _ _ v) = extractNum scr $ fromJust $ lookup v scr
+extractNum scr (CutRef _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
 
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
@@ -69,7 +69,7 @@ rRepeatN :: CutState -> CutExpr -> Rules ExprPath
 rRepeatN s@(scr, _, _, _) (CutFun t salt deps name [resExpr, subVar@(CutRef _ _ _ v), repsExpr]) =
   rReplaceEach s (CutFun t salt deps name [resExpr, subVar, subList])
   where
-    subExpr = fromJust $ lookup v scr
+    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = take nReps $ zipWith setSalt [0..] (repeat subExpr) -- TODO is always starting from 0 right?
     -- subs    = zipWith setSalt (unfoldReplaceID salt nReps) (repeat subExpr)
