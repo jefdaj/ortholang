@@ -40,20 +40,20 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- utility functions --
 -----------------------
 
-regularParse :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> Either ParseError a
+regularParse :: ParseM a -> CutConfig -> Locks -> HashedIDsRef -> String -> Either ParseError a
 regularParse p cfg ref ids = parseWithEof p ([], cfg, ref, ids)
 
 takeVar :: String -> CutVar
 takeVar = CutVar (ReplaceID Nothing) . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> CutConfig -> Locks -> HashedSeqIDsRef -> String -> Bool
+parsedItAll :: ParseM a -> CutConfig -> Locks -> HashedIDsRef -> String -> Bool
 parsedItAll p cfg ref ids str' = case parseWithLeftOver p ([], cfg, ref, ids) str' of
   Right (_, "") -> True
   _ -> False
 
 -- parse some cut code, pretty-print it, parse again,
 -- and check that the two parsed ASTs are equal
-roundTrip :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> HashedSeqIDsRef
+roundTrip :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> HashedIDsRef
           -> ParseM a -> String -> Either (String, String) a
 roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
   Left  l1 -> Left (code, show l1)
@@ -65,7 +65,7 @@ roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
 
 -- Test that a list of example strings can be parsed + printed + parsed,
 -- and both parses come out correctly, or return the first error.
-tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> HashedSeqIDsRef -> ParseM a
+tripExamples :: (Eq a, Show a, Pretty a) => CutConfig -> Locks -> HashedIDsRef -> ParseM a
              -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ _ _ [] = Right ()
 tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
@@ -78,16 +78,16 @@ tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
 -- tests --
 -----------
 
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = return $ testGroup "test parser"
                                [exTests cfg ref ids, wsProps cfg ref ids, acProps cfg ref ids]
 
-mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> Locks -> HashedSeqIDsRef
+mkCase :: (Show a, Eq a, Pretty a) => CutConfig -> Locks -> HashedIDsRef
        -> String -> ParseM a -> [(String, a)] -> TestTree
 mkCase cfg ref ids name parser examples = 
   testCase name $ Right () @=? tripExamples cfg ref ids parser examples
 
-exTests :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
+exTests :: CutConfig -> Locks -> HashedIDsRef -> TestTree
 exTests cfg ref ids = testGroup "round-trip handwritten cut code"
   [ mkCase cfg ref ids "function calls"   pFun       exFuns
   , mkCase cfg ref ids "terms"            pTerm      exTerms
@@ -96,7 +96,7 @@ exTests cfg ref ids = testGroup "round-trip handwritten cut code"
   -- , mkCase cfg "binary operators" pBop       exBops
   ]
 
-wsProps :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
+wsProps :: CutConfig -> Locks -> HashedIDsRef -> TestTree
 wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(CutVar _ s)) (ExSpace w) ->
@@ -115,7 +115,7 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   ]
 
 -- TODO use round-trip here too
-acProps :: CutConfig -> Locks -> HashedSeqIDsRef -> TestTree
+acProps :: CutConfig -> Locks -> HashedIDsRef -> TestTree
 acProps cfg ref ids = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
       \(ExVar v@(CutVar _ s)) -> parseWithLeftOver pVar ([], cfg, ref, ids) s == Right (v, "")

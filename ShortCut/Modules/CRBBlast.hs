@@ -80,7 +80,7 @@ blastCRBEach = CutFunction
  -
  - TODO adjust cache paths to be deterministic!
  -}
-aCRBBlast :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ()
+aCRBBlast :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   debugNeed cfg "aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that

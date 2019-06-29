@@ -11,7 +11,7 @@ import Data.List                  (isPrefixOf)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Repl         (mkRepl)
 import ShortCut.Core.Util         (readFileStrict)
-import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM, HashedSeqIDsRef)
+import ShortCut.Core.Types        (CutConfig(..), Locks, ReplM, HashedIDsRef)
 import System.Directory           (createDirectoryIfMissing, removeFile)
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
@@ -21,14 +21,14 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
-mkTestGroup ::  CutConfig -> Locks -> HashedSeqIDsRef -> String
-            -> [CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree] -> IO TestTree
+mkTestGroup ::  CutConfig -> Locks -> HashedIDsRef -> String
+            -> [CutConfig -> Locks -> HashedIDsRef -> IO TestTree] -> IO TestTree
 mkTestGroup cfg ref ids name trees = do
   let trees' = mapM (\t -> t cfg ref ids) trees
   trees'' <- trees'
   return $ testGroup name trees''
 
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = mkTestGroup cfg ref ids "mock REPL interaction"
                 [goldenRepls, goldenReplTrees]
 
@@ -50,7 +50,7 @@ mockPrompt handle stdinStr promptStr = do
 -- TODO why did this get messed up??
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
-mockRepl :: [String] -> FilePath -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+mockRepl :: [String] -> FilePath -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 mockRepl stdinLines path cfg ref ids = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
@@ -64,7 +64,7 @@ mockRepl stdinLines path cfg ref ids = do
   return ()
 
 -- TODO include goldenTree here too (should pass both at once)
-goldenRepl :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
+goldenRepl :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> IO TestTree
 goldenRepl cfg ref ids goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
@@ -91,14 +91,14 @@ findGoldenFiles = do
   let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
   return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles'
 
-goldenRepls :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+goldenRepls :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 goldenRepls cfg ref ids = do
   golds <- findGoldenFiles
   let tests = mapM (goldenRepl cfg ref ids) golds
       group = testGroup "prints expected output"
   fmap group tests
 
-goldenReplTree :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO TestTree
+goldenReplTree :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> IO TestTree
 goldenReplTree cfg ref ids ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
@@ -120,7 +120,7 @@ goldenReplTree cfg ref ids ses = do
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 
-goldenReplTrees :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+goldenReplTrees :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 goldenReplTrees cfg ref ids = do
   txts <- findGoldenFiles
   let tests = mapM (goldenReplTree cfg ref ids) txts

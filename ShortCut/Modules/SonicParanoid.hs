@@ -54,7 +54,7 @@ sonicparanoid = let name = "sonicparanoid" in CutFunction
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
 -- TODO should get all results as an unusable file first, then extract what you want explicitly
-aSonicParanoid :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aSonicParanoid :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
   let cacheDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"

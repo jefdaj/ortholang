@@ -95,7 +95,7 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
-aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]
 aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
@@ -119,7 +119,7 @@ reciprocalBest = CutFunction
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 -- TODO why is this the only one that fails, and only when called from repeat??
-aReciprocalBest :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aReciprocalBest :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aReciprocalBest cfg ref _ [out, left, right] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False

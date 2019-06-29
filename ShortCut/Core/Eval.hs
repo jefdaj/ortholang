@@ -108,7 +108,7 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> CutType -> Rules ResPath -> IO ()
+eval :: Handle -> CutConfig -> Locks -> HashedIDsRef -> CutType -> Rules ResPath -> IO ()
 eval hdl cfg ref ids rtype = if cfgDebug cfg
   then ignoreErrors . eval'
   else retryIgnore  . eval'
@@ -173,7 +173,7 @@ evalScript hdl s@(as, c, ref, ids) = case lookupResult as of
   Nothing  -> putStrLn "no result variable during eval. that's not right!"
   Just res -> eval hdl c ref ids (typeOf res) (compileScript s $ ReplaceID Nothing)
 
-evalFile :: Handle -> CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+evalFile :: Handle -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 evalFile hdl cfg ref ids = case cfgScript cfg of
   Nothing  -> putStrLn "no script during eval. that's not right!"
   Just scr -> do

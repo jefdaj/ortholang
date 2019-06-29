@@ -76,7 +76,7 @@ rLen _ _ = fail "bad arguments to rLen"
 
 -- TODO if given a list with empty lists, should return zeros!
 -- TODO account for the last empty line in mms files! (currently returns length + 1)
-aLen :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aLen :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aLen cfg ref _ [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
   n <- fmap count $ readPaths cfg ref lst'

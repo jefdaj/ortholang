@@ -25,8 +25,8 @@ module ShortCut.Core.Types
   , CutVar(..)
   , CutScript
   , Locks
-  , HashedSeqIDs
-  , HashedSeqIDsRef
+  , HashedIDs
+  , HashedIDsRef
   , CutState
   , lookupResult
   -- , Assoc(..) -- we reuse this from Parsec
@@ -92,9 +92,9 @@ newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
 
 -- Note that each ActionN takes N+1 CutPaths, because the first is the output
 -- TODO take the output last instead?
-type Action1 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
-type Action2 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
-type Action3 = CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
+type Action1 = CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
+type Action2 = CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
+type Action3 = CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 
 -- TODO remove when able in favor of well-typed versions above
 type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
@@ -398,13 +398,13 @@ operatorChars cfg = if cfgDebug cfg then chars' else chars
 
 -- we sanitize the input fasta files to prevent various bugs,
 -- then use this hash -> seqid map to put the original ids back at the end
-type HashedSeqIDs = M.Map String String
+type HashedIDs = M.Map String String
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
-type HashedSeqIDsRef = IORef HashedSeqIDs
+type HashedIDsRef = IORef HashedIDs
 
-type CutState = (CutScript, CutConfig, Locks, HashedSeqIDsRef)
+type CutState = (CutScript, CutConfig, Locks, HashedIDsRef)
 type ParseM a = Parsec String CutState a
 
 ----------------

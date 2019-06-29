@@ -6,7 +6,7 @@ module ShortCut.Test
   where
 
 import Paths_ShortCut        (getDataFileName)
-import ShortCut.Core.Types   (CutConfig(..), Locks, HashedSeqIDsRef)
+import ShortCut.Core.Types   (CutConfig(..), Locks, HashedIDsRef)
 import ShortCut.Test.Repl    (mkTestGroup)
 import System.Directory      (getTemporaryDirectory, createDirectoryIfMissing,
                               setCurrentDirectory)
@@ -26,7 +26,7 @@ import qualified ShortCut.Test.Scripts  as S
 -- filtering is done according to the TASTY_PATTERN environment var.
 -- Gotcha: can't print the test pattern in place of "all tests"
 -- because then they all match, ruining the filter.
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = setPtn >> mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
@@ -54,7 +54,7 @@ mkTestConfig cfg dir = cfg
   -- , cfgReport  = Nothing
   }
 
-runTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO ()
+runTests :: CutConfig -> Locks -> HashedIDsRef -> IO ()
 runTests cfg ref ids = do
   tmpRootDir <- getTemporaryDirectory -- can't share /tmp on the Berkeley cluster!
   createDirectoryIfMissing True tmpRootDir

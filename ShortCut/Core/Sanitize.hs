@@ -44,7 +44,7 @@ hashIDsLine ('>':seqID) = (">seqid_" ++ idHash, D.singleton (idHash, seqID)) -- 
 hashIDsLine txt = (txt, D.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
-hashIDsFasta :: String -> (String, HashedSeqIDs)
+hashIDsFasta :: String -> (String, HashedIDs)
 hashIDsFasta txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ lines txt
   where
     -- hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
@@ -52,7 +52,7 @@ hashIDsFasta txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ l
     joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, M.fromList $ D.toList ids)
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
-hashIDsFile :: CutConfig -> Locks -> CutPath -> CutPath -> Action HashedSeqIDs
+hashIDsFile :: CutConfig -> Locks -> CutPath -> CutPath -> Action HashedIDs
 hashIDsFile cfg ref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
@@ -63,7 +63,7 @@ hashIDsFile cfg ref inPath outPath = do
   debugTrackWrite cfg [outPath']
   return ids
 
-writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedSeqIDs -> Action ()
+writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedIDs -> Action ()
 writeHashedIDs cfg ref path ids = do
   withWriteLock' ref path'
     $ liftIO
@@ -77,12 +77,12 @@ writeHashedIDs cfg ref path ids = do
     toLine (h, i) = h ++ "\t" ++ i
 
 -- see https://stackoverflow.com/q/48571481
--- unhashIDs :: HashedSeqIDs -> String -> String
+-- unhashIDs :: HashedIDs -> String -> String
 -- unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
 
 -- hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
-unhashIDs :: CutConfig -> HashedSeqIDs -> String -> String
+unhashIDs :: CutConfig -> HashedIDs -> String -> String
 unhashIDs _ ids txt = case split "seqid_" txt of
   (before:after) -> before ++ concatMap replaceOne after
     where
@@ -92,7 +92,7 @@ unhashIDs _ ids txt = case split "seqid_" txt of
                              in shortID ++ rest
   _ -> txt
 
-unhashIDsFile :: CutConfig -> Locks -> HashedSeqIDs -> CutPath -> CutPath -> Action ()
+unhashIDsFile :: CutConfig -> Locks -> HashedIDs -> CutPath -> CutPath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
@@ -104,7 +104,7 @@ unhashIDsFile cfg ref ids inPath outPath = do
   debugTrackWrite cfg [outPath']
 
 -- TODO should this be IO or Action?
-readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedSeqIDs
+readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedIDs
 readHashedIDs cfg ref path = do
   let path' = fromCutPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'

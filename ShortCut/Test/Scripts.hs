@@ -17,7 +17,7 @@ import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
 import ShortCut.Core.Paths        (toGeneric)
 -- import ShortCut.Core.Pretty       (writeScript)
-import ShortCut.Core.Types        (CutConfig(..), HashedSeqIDsRef)
+import ShortCut.Core.Types        (CutConfig(..), HashedIDsRef)
 import ShortCut.Core.Locks        (Locks, withWriteLock)
 import ShortCut.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
@@ -72,7 +72,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
-mkOutTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
+mkOutTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
 mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
@@ -83,7 +83,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
       return $ B8.pack out
     desc = "prints expected output"
 
-mkTreeTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
+mkTreeTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
 mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
@@ -101,7 +101,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       return $ B8.pack $ toGeneric cfg out
 
 -- TODO use safe writes here
-mkTripTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> TestTree
+mkTripTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
 mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
   where
     desc = "unchanged by round-trip to file"
@@ -120,7 +120,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
 
 -- test that no absolute paths snuck into the tmpfiles
 -- TODO sanitize stdout + stderr too when running scripts
-mkAbsTest :: CutConfig -> Locks -> HashedSeqIDsRef -> IO [TestTree]
+mkAbsTest :: CutConfig -> Locks -> HashedIDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
@@ -134,7 +134,7 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
 {- This is more or less idempotent because re-running the same cut multiple
  - times is fast. So it's OK to run it once for each test in a group.
  -}
-runCut :: CutConfig -> Locks -> HashedSeqIDsRef -> IO String
+runCut :: CutConfig -> Locks -> HashedIDsRef -> IO String
 runCut cfg ref ids =  do
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
@@ -145,7 +145,7 @@ runCut cfg ref ids =  do
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, FilePath, Maybe FilePath)
-              -> CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+              -> CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkScriptTests (cut, out, tre, mchk) cfg ref ids = do
   absTests   <- mkAbsTest   cfg' ref ids -- just one, but comes as a list
   checkTests <- case mchk of
@@ -167,7 +167,7 @@ mkScriptTests (cut, out, tre, mchk) cfg ref ids = do
  - they should give no output if the tests pass, and print errors otherwise
  - TODO move stdout inside the tmpdir?
  -}
-mkCheckTest :: CutConfig -> Locks -> HashedSeqIDsRef -> FilePath -> IO [TestTree]
+mkCheckTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> IO [TestTree]
 mkCheckTest cfg ref ids scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
   where
     desc = "output + tmpfiles checked by script"
@@ -185,7 +185,7 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = do
   testDir <- getDataFileName "tests"
   names   <- getTestScripts testDir

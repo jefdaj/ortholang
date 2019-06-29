@@ -94,7 +94,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
 -- TODO convert to rSimpleScript?
--- aHmmbuild :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+-- aHmmbuild :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 -- aHmmbuild cfg ref _ [out, fa] = do
 --   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
 --   where
@@ -104,7 +104,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 -- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
-aHmmsearch :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aHmmsearch :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aHmmsearch cfg ref _ [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
@@ -159,7 +159,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
 
 -- TODO clean this up! it's pretty ugly
 -- TODO how to integrate the script since it needs the colnum?
-aExtractHmm :: Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aExtractHmm :: Int -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aExtractHmm n cfg ref _ [outPath, tsvPath] = do
   -- lits <- readLits cfg ref tsvPath'
   -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits

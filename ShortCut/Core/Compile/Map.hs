@@ -52,13 +52,13 @@ import System.Directory           (createDirectoryIfMissing)
 ------------------------------------
 
 -- for action functions that don't need a tmpdir
-rMap :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
+rMap :: Int -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()) -> RulesFn
 rMap index actFn = rMapMain index Nothing actFn'
   where
     actFn' cfg ref ids _ args = actFn cfg ref ids args -- drops unused tmpdir
 
 -- for action functions that need one tmpdir reused between calls
-rMapTmp :: Int -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+rMapTmp :: Int -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
         -> String -> RulesFn
 rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rMapMain index (Just tmpFn) actFn s
   where
@@ -68,7 +68,7 @@ rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rMapMain index (Just tmpFn) act
 -- for action functions that need a unique tmpdir each call
 -- TODO use a hash for the cached path rather than the name, which changes!
 rMapTmps :: Int
-          -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+          -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
           -> String -> RulesFn
 rMapTmps index actFn tmpPrefix s@(_, cfg, _, _) e = rMapMain index (Just tmpFn) actFn s e
   where
@@ -97,7 +97,7 @@ rMapSimpleScript index = rMap index . aSimpleScript
  - but am open to alternatives if anyone thinks of something!
  -}
 rMapMain :: Int -> Maybe ([CutPath] -> IO CutPath)
-         -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+         -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
 rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
@@ -125,7 +125,7 @@ hashFun _ _ = error "hashFun only hashes function calls so far"
 {- This calls aMapArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
  -}
-aMapMain :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
+aMapMain :: CutConfig -> Locks -> HashedIDsRef -> Int
          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
          -> Action ()
 aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
@@ -162,7 +162,7 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' <.> extOf eType
 -- This leaves arguments in .args files for aMapElem to find.
 -- TODO This should be done for each replace operation in replace_each
 -- TODO put mapIndex and mappedArg together, and rename that something with path
-aMapArgs :: CutConfig -> Locks -> HashedSeqIDsRef -> Int
+aMapArgs :: CutConfig -> Locks -> HashedIDsRef -> Int
          -> CutType -> [FilePath] -> FilePath -> CutPath
          -> Action ()
 aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
@@ -190,9 +190,9 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
  - TODO after singleFn works, can we remove tmpFn? (ok if not)
  -}
-aMapElem :: CutConfig -> Locks -> HashedSeqIDsRef -> CutType
+aMapElem :: CutConfig -> Locks -> HashedIDsRef -> CutType
          -> Maybe ([CutPath] -> IO CutPath)
-         -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+         -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
          -> String -> RepeatSalt -> FilePath -> Action ()
 aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"

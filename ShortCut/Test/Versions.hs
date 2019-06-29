@@ -6,7 +6,7 @@ module ShortCut.Test.Versions where
 import Data.ByteString.Lazy.Char8 (pack)
 import Development.Shake.FilePath ((<.>), (</>))
 import Paths_ShortCut             (getDataFileName)
-import ShortCut.Core.Types        (CutConfig(..), Locks, HashedSeqIDsRef)
+import ShortCut.Core.Types        (CutConfig(..), Locks, HashedIDsRef)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
@@ -26,7 +26,7 @@ versionScripts =
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
-mkTests :: CutConfig -> Locks -> HashedSeqIDsRef -> IO TestTree
+mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg _ _ = do
   testDir <- getDataFileName $ "tests"
   return $ testGroup "check dependency versions"

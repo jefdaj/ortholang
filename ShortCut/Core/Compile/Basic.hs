@@ -110,7 +110,7 @@ rLit s@(_, cfg, ref, ids) expr = do
   return (ExprPath path')
 
 -- TODO take the path, not the expression?
-aLit :: CutConfig -> Locks -> HashedSeqIDsRef -> CutExpr -> CutPath -> Action ()
+aLit :: CutConfig -> Locks -> HashedIDsRef -> CutExpr -> CutPath -> Action ()
 aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
   where
     paths :: CutExpr -> FilePath
@@ -140,7 +140,7 @@ rList _ _ = error "bad arguemnt to rList"
 
 -- TODO is this actually needed? seems the same as lits or paths really
 --      (also, is there a need to write empty lists at all?)
--- aListEmpty :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> Action ()
+-- aListEmpty :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action ()
 -- aListEmpty cfg ref ids link = writeLits cfg ref link'' [] -- TODO error here?
 --   where
 --     link'  = fromCutPath cfg link
@@ -159,7 +159,7 @@ rListLits s@(_, cfg, ref, ids) e@(CutList _ _ _ exprs) = do
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
 -- TODO put this in a cache dir by content hash and link there
-aListLits :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> CutPath -> Action ()
+aListLits :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> CutPath -> Action ()
 aListLits cfg ref _ paths outPath = do
   -- need paths'
   lits <- mapM (readLit cfg ref) paths'
@@ -184,7 +184,7 @@ rListPaths s@(_, cfg, ref, ids) e@(CutList rtn salt _ exprs) = do
 rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 -- works on everything but lits: paths or empty lists
-aListPaths :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> CutPath -> Action ()
+aListPaths :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg ref _ paths outPath = do
   debugNeed cfg "aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
@@ -215,7 +215,7 @@ rVar (_, cfg, ref, ids) var expr oPath = do
     vPath  = varPath cfg var expr
     vPath' = debugRules cfg "rVar" var $ fromCutPath cfg vPath
 
-aVar :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aVar :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aVar cfg ref _ vPath oPath = do
   alwaysRerun
   debugNeed cfg "aVar" [oPath']
@@ -306,7 +306,7 @@ rLoad _ _ _ = fail "bad argument to rLoad"
 
 -- TODO is running this lots of times at once the problem?
 -- TODO see if shake exports code for only hashing when timestamps change
-aLoadHash :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> String -> Action CutPath
+aLoadHash :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> String -> Action CutPath
 aLoadHash hashSeqIDs cfg ref ids src ext = do
   -- alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
@@ -365,7 +365,7 @@ curl cfg ref url = do
     }
   return $ toCutPath cfg outPath
 
-aLoad :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoad :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
   debugNeed cfg "aLoad" [strPath']
   pth <- fmap head $ readLits cfg ref strPath' -- TODO safer!
@@ -415,7 +415,7 @@ rLoadListLits s@(_, cfg, ref, ids) expr = do
     outPath  = exprPath s expr
     outPath' = fromCutPath cfg outPath
 
-aLoadListLits :: CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoadListLits :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoadListLits cfg ref _ outPath litsPath = do
   let litsPath' = fromCutPath cfg litsPath
       out       = debugA cfg "aLoadListLits" outPath' [outPath', litsPath']
@@ -436,7 +436,7 @@ rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (CutFun rtn salt _ _ [es]) = do
   return (ExprPath outPath')
 rLoadListLinks _ _ _ = fail "bad arguments to rLoadListLinks"
 
-aLoadListLinks :: Bool -> CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> CutPath -> Action ()
+aLoadListLinks :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
   -- through as a (ListOf str) here; have to read as Strings and convert to
@@ -462,13 +462,13 @@ aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
 -- TODO rename something that goes with the map fns?
-rSimple :: (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()) -> RulesFn
+rSimple :: (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()) -> RulesFn
 rSimple actFn = rSimple' Nothing actFn'
   where
     actFn' cfg ref ids _ args = actFn cfg ref ids args -- drop unused tmpdir
 
 rSimpleTmp :: String
-           -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+           -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
            -> RulesFn
 rSimpleTmp prefix = rSimple' (Just prefix)
 
@@ -484,16 +484,16 @@ rSimpleScriptPar = rSimple . aSimpleScriptPar
 rSimpleScriptNoFix :: String -> RulesFn
 rSimpleScriptNoFix = rSimple . aSimpleScriptNoFix
 
-aSimpleScriptNoFix :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aSimpleScriptNoFix :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aSimpleScriptNoFix = aSimpleScript' False False
 
-aSimpleScript :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aSimpleScript :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aSimpleScript = aSimpleScript' False True
 
-aSimpleScriptPar :: String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aSimpleScriptPar :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aSimpleScriptPar = aSimpleScript' True True
 
-aSimpleScript' :: Bool -> Bool -> String -> (CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ())
+aSimpleScript' :: Bool -> Bool -> String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
   where
     -- TODO is tmpDir used here at all? should it be?
@@ -519,7 +519,7 @@ aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref
 aSimpleScript' _ _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
 
 rSimple' :: Maybe String
-         -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+         -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
          -> RulesFn
 rSimple' mTmpPrefix actFn s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
@@ -536,8 +536,8 @@ rSimple' _ _ _ _ = fail "bad argument to rSimple'"
 -- TODO rSimpleScript that calls rSimple + that
 
 -- TODO need to handle empty lists here?
-aSimple' ::  CutConfig -> Locks -> HashedSeqIDsRef -> CutPath
-         -> (CutConfig -> Locks -> HashedSeqIDsRef -> CutPath -> [CutPath] -> Action ())
+aSimple' ::  CutConfig -> Locks -> HashedIDsRef -> CutPath
+         -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
          -> Maybe CutPath -> [CutPath] -> Action ()
 aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
   debugNeed cfg "aSimple'" argPaths'

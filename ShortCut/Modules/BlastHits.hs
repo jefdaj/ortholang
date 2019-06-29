@@ -96,7 +96,7 @@ extractTargetsEach = CutFunction
     name = "extract_targets_each"
 
 -- TODO remove uniq, unless it's used somewhere?
-aCutCol :: Bool -> Int -> CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aCutCol :: Bool -> Int -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -152,7 +152,7 @@ filterEvalueEach = CutFunction
   where
     name = "filter_evalue_each"
 
-aFilterEvalue :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aFilterEvalue :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aFilterEvalue cfg ref _ [out, evalue, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -203,7 +203,7 @@ bestHitsEach = CutFunction
   where
     name = "best_hits_each"
 
-aBestExtract :: CutConfig -> Locks -> HashedSeqIDsRef -> [CutPath] -> Action ()
+aBestExtract :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aBestExtract cfg ref _ [out, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
