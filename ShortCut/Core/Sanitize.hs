@@ -31,7 +31,6 @@ import ShortCut.Core.Locks   (withWriteLock')
 import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.List.Utils       (split)
-import Data.Maybe (fromJust)
 
 type HashedSeqIDList = D.DList (String, String)
 
@@ -82,13 +81,15 @@ writeHashedIDs cfg ref path ids = do
 
 -- hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
+-- TODO in addition to error handling, be sure to re-read the IDs each run
 unhashIDs :: CutConfig -> HashedSeqIDs -> String -> String
 unhashIDs _ ids txt = case split "seqid_" txt of
   (before:after) -> before ++ concatMap replaceOne after
     where
       replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
-                                 origID  = fromJust $ M.lookup idAndTab ids
-                                 shortID = head $ words origID
+                                 shortID  = case M.lookup idAndTab ids of
+                                             Nothing -> "ERROR: seqid_" ++ idAndTab ++ " not found"
+                                             Just orig -> head $ words orig
                              in shortID ++ rest
   _ -> txt
 
