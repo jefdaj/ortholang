@@ -31,7 +31,7 @@ import ShortCut.Core.Locks   (withWriteLock')
 import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.List.Utils       (split)
-import System.FilePath (takeBaseName)
+import System.FilePath (takeFileName)
 
 type HashedIDList = D.DList (String, String)
 
@@ -42,10 +42,6 @@ hashIDsLine ('>':seqID) = (">seqid_" ++ idHash, D.singleton (idHash, seqID)) -- 
   where
     idHash = digest seqID
 hashIDsLine txt = (txt, D.empty)
-
--- add hashing of filenames in addition to fasta contents
-hashIDsPath :: CutConfig -> CutPath -> (String, String)
-hashIDsPath cfg (CutPath path) = (digest path, takeBaseName path)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
 hashIDsTxt :: String -> (String, HashedIDs)
@@ -63,7 +59,9 @@ hashIDsFile cfg ref inPath outPath = do
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
   let (fasta', ids) = hashIDsTxt txt
-      (k, v) = hashIDsPath cfg outPath
+      (CutPath k) = outPath
+      v = takeFileName inPath'
+      -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
       ids' = M.insert k v ids
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
   debugTrackWrite cfg [outPath']
