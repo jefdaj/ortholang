@@ -1,7 +1,6 @@
 module ShortCut.Core.Sanitize
   ( hashIDsFile
   , writeHashedIDs
-  -- , unhashIDs
   , unhashIDs
   , unhashIDsFile
   , readHashedIDs
@@ -30,7 +29,10 @@ import ShortCut.Core.Util    (digest, digestLength, headOrDie)
 import ShortCut.Core.Locks   (withWriteLock')
 import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
-import Data.List.Utils       (split)
+import Data.Char             (isSpace)
+import Data.Maybe            (catMaybes)
+import Data.List             (isPrefixOf)
+import Data.List.Utils       (subIndex)
 import System.FilePath (takeFileName)
 
 type HashedIDList = D.DList (String, String)
@@ -38,9 +40,9 @@ type HashedIDList = D.DList (String, String)
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
 hashIDsLine :: String -> (String, HashedIDList)
-hashIDsLine ('>':seqID) = (">seqid_" ++ idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
+hashIDsLine ('>':seqID) = ('>':idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
   where
-    idHash = digest seqID
+    idHash = "seqid_" ++ digest seqID -- TODO does storing the extra seqid_ prefix slow it down?
 hashIDsLine txt = (txt, D.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
@@ -84,18 +86,30 @@ writeHashedIDs cfg ref path ids = do
 -- unhashIDs :: HashedIDs -> String -> String
 -- unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
 
--- hackier than the regex, but also faster
+-- sorry in advance! this is what you get when you build it in ghci
+-- its hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
-unhashIDs :: CutConfig -> HashedIDs -> String -> String
-unhashIDs _ ids txt = case split "seqid_" txt of
-  (before:after) -> before ++ concatMap replaceOne after
-    where
-      replaceOne idAndRest = let (idAndTab, rest) = splitAt digestLength idAndRest
-                                 shortID  = case M.lookup idAndTab ids of
-                                             Nothing -> "ERROR: seqid_" ++ idAndTab ++ " not found"
-                                             Just orig -> headOrDie "unhashIDs failed" $ words orig
-                             in shortID ++ rest
-  _ -> txt
+-- TODO does storing a bunch of seqid_ strings in the map slow it down?
+unhashIDs :: HashedIDs -> String -> String
+unhashIDs ids t = case findNext t of
+                   Nothing -> t
+                   Just i  -> let (before, after) = splitAt i t
+                                  after' = replaceNextFold after
+                              in before ++ unhashIDs ids after'
+  where
+    replaceNextFold txt = foldr replacePattern txt patterns
+    replacePattern (ptn, fn) txt = if ptn `isPrefixOf` txt then replaceLen txt fn else txt
+    replaceLen txt lFn = let (sid, rest) = splitAt (lFn txt) txt
+                         in case M.lookup sid ids of
+                              Nothing -> error $ "sid not found: '" ++ sid ++ "'"
+                              Just v  -> headOrDie "failed to look up sid in unhashIDs" (words v) ++ rest
+    findNext txt = case catMaybes $ map (\p -> subIndex p txt) (map fst patterns) of
+                     (x:xs) -> Just $ minimum (x:xs)
+                     _ -> Nothing
+    patterns =
+      [ ("seqid_" , \_   -> length "seqid_" + digestLength)
+      , ("$TMPDIR", \txt -> length $ takeWhile (not . isSpace) txt)
+      ]
 
 unhashIDsFile :: CutConfig -> Locks -> HashedIDs -> CutPath -> CutPath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do
@@ -104,7 +118,7 @@ unhashIDsFile cfg ref ids inPath outPath = do
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
-  let txt' = unhashIDs cfg ids txt
+  let txt' = unhashIDs ids txt
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt' -- TODO be strict?
   debugTrackWrite cfg [outPath']
 

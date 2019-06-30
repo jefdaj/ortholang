@@ -97,12 +97,13 @@ findResDir cfg outPath = do
 
 -- TODO move parse fns to their respective modules for easier maintenance
 
+-- TODO why are we unhashing the ids here?
 parseOrthoFinder :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action [[String]]
 parseOrthoFinder cfg ref idref ofrPath = do
   let resDir = fromCutPath cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   ids <- liftIO $ readIORef idref
-  txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  txt <- fmap (unhashIDs ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
   let groups = map (words . drop 11) (lines txt)
   return groups
 

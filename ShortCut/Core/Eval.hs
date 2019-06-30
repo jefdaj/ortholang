@@ -145,7 +145,7 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
         -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids') ++ " keys)..."
 
         -- TODO fix the bug that causes this to remove newlines after seqids:
-        res' <- fmap (unhashIDs cfg ids') $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
+        res' <- fmap (unhashIDs ids') $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
 
         liftIO $ hPutStrLn hdl res'
         -- liftIO $ putStrLn $ "done rendering with unhashIDs"
