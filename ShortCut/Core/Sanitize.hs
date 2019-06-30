@@ -90,19 +90,21 @@ writeHashedIDs cfg ref path ids = do
 -- its hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
 -- TODO does storing a bunch of seqid_ strings in the map slow it down?
-unhashIDs :: HashedIDs -> String -> String
-unhashIDs ids t = case findNext t of
+unhashIDs :: Bool -> HashedIDs -> String -> String
+unhashIDs longIDs ids t = case findNext t of
                    Nothing -> t
                    Just i  -> let (before, after) = splitAt i t
                                   after' = replaceNextFold after
-                              in before ++ unhashIDs ids after'
+                              in before ++ unhashIDs longIDs ids after'
   where
     replaceNextFold txt = foldr replacePattern txt patterns
     replacePattern (ptn, fn) txt = if ptn `isPrefixOf` txt then replaceLen txt fn else txt
     replaceLen txt lFn = let (sid, rest) = splitAt (lFn txt) txt
                          in case M.lookup sid ids of
                               Nothing -> error $ "sid not found: '" ++ sid ++ "'"
-                              Just v  -> headOrDie "failed to look up sid in unhashIDs" (words v) ++ rest
+                              Just v  -> if longIDs
+                                           then v ++ rest
+                                           else headOrDie "failed to look up sid in unhashIDs" (words v) ++ rest
     findNext txt = case catMaybes $ map (\p -> subIndex p txt) (map fst patterns) of
                      (x:xs) -> Just $ minimum (x:xs)
                      _ -> Nothing
@@ -118,7 +120,7 @@ unhashIDsFile cfg ref ids inPath outPath = do
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
-  let txt' = unhashIDs ids txt
+  let txt' = unhashIDs False ids txt
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt' -- TODO be strict?
   debugTrackWrite cfg [outPath']
 
