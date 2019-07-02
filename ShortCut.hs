@@ -50,6 +50,6 @@ main = do
   when (hasArg args "test")
     (withArgs [] $ runTests (cfg {cfgWidth = Just 100}) ref ids)
   -- TODO typecheck only option here
-  if (hasArg args "script" && (not $ hasArg args "interactive"))
-    then evalFile stdout cfg ref ids
-    else runRepl  cfg ref ids
+  if (cfgInteractive cfg)
+    then runRepl         cfg ref ids
+    else evalFile stdout cfg ref ids

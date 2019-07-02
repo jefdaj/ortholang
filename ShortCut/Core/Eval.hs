@@ -42,12 +42,13 @@ import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath)
--- import ShortCut.Core.Locks            (withReadLock')
-import ShortCut.Core.Sanitize         (unhashIDs)
+import ShortCut.Core.Locks            (withReadLock')
+import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
+import Control.Monad                  (when)
 -- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO use hashes + dates to decide which files to regenerate?
@@ -139,16 +140,36 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
       "eval" ~> do
         alwaysRerun
         actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
-        res  <- prettyResult cfg ref rtype $ toCutPath cfg path
         ids' <- liftIO $ readIORef ids
-        -- liftIO $ putStrLn $ show ids'
-        -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids') ++ " keys)..."
+        {- if --interactive, print the short version of a result
+         - if --output, save the full result (may also be --interactive)
+         - if neither, print the full result
+         - TODO move this logic to the top level?
+         -}
+        when (cfgInteractive cfg) (printShort cfg ref ids' hdl rtype path)
+        case cfgOutFile cfg of
+          Just out -> writeResult cfg ref ids' (toCutPath cfg path) out
+          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids' hdl path)
 
-        -- TODO fix the bug that causes this to remove newlines after seqids:
-        res' <- fmap (unhashIDs False ids') $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
+writeResult :: CutConfig -> Locks -> HashedIDs -> CutPath -> FilePath -> Action ()
+writeResult cfg ref ids path out = unhashIDsFile cfg ref ids path out
 
-        liftIO $ hPutStrLn hdl res'
-        -- liftIO $ putStrLn $ "done rendering with unhashIDs"
+-- TODO what happens when the txt is a binary plot image?
+printLong :: CutConfig -> Locks -> HashedIDs -> Handle -> FilePath -> Action ()
+printLong cfg ref ids hdl path = do
+  txt <- withReadLock' ref path $ readFile' path
+  let txt' = unhashIDs False ids txt
+  liftIO $ hPutStrLn hdl txt'
+
+printShort :: CutConfig -> Locks -> HashedIDs -> Handle -> CutType -> FilePath -> Action ()
+printShort cfg ref ids hdl rtype path = do
+  res  <- prettyResult cfg ref rtype $ toCutPath cfg path
+  -- liftIO $ putStrLn $ show ids
+  -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."
+  -- TODO fix the bug that causes this to remove newlines after seqids:
+  res' <- fmap (unhashIDs False ids) $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
+  liftIO $ hPutStrLn hdl res'
+  -- liftIO $ putStrLn $ "done rendering with unhashIDs"
 
 {- A hacky (attempted) solution to the inability to use results of function
  - calls as inputs to the repeat* and replace* functions: pass the raw

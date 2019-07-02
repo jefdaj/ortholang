@@ -115,17 +115,18 @@ unhashIDs longIDs ids t = case findNext t of
       , ("$TMPDIR", \txt -> length $ takeWhile (not . isSpace) txt)
       ]
 
-unhashIDsFile :: CutConfig -> Locks -> HashedIDs -> CutPath -> CutPath -> Action ()
+-- This sometimes operates internally, but also writes the final result of the cut to a file.
+-- In that case the outpath might not be able to be a cutpath.
+unhashIDsFile :: CutConfig -> Locks -> HashedIDs -> CutPath -> FilePath -> Action ()
 unhashIDsFile cfg ref ids inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
-      outPath' = fromCutPath cfg outPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
   let txt' = unhashIDs False ids txt
   -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
-  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt' -- TODO be strict?
-  debugTrackWrite cfg [outPath']
+  withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
+  debugTrackWrite cfg [outPath]
 
 -- TODO should this be IO or Action?
 readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedIDs

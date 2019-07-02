@@ -44,9 +44,10 @@ loadConfig mods args = do
   cwd <- mapM absolutize =<< loadField args cfg "workdir"
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
+  out <- mapM absolutize =<< loadField args cfg "output"
   let ctp = getAllArgs args (longOption "pattern")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
-  let int = isNothing csc' || (isPresent args $ longOption "interactive") -- TODO repl getter + setter? seems redundant
+  let int = isNothing csc' || (isPresent args $ longOption "interactive")
   return CutConfig
     { cfgScript  = csc'
     , cfgInteractive = int
@@ -60,6 +61,7 @@ loadConfig mods args = do
     , cfgWidth   = Nothing -- not used except in testing
     , cfgSecure  = isPresent args $ longOption "secure"
     , cfgParLock = par
+    , cfgOutFile = out
     }
 
 -- TODO any way to recover if missing? probably not
@@ -114,6 +116,7 @@ fields =
   , ("wrapper", (show . cfgWrapper, setWrapper))
   , ("report" , (show . cfgReport , setReport ))
   , ("width"  , (show . cfgWidth  , setWidth  ))
+  , ("output" , (show . cfgOutFile, setOutFile))
   ]
 
 showConfig :: CutConfig -> String
@@ -158,3 +161,9 @@ setWidth cfg "Nothing" = Right $ cfg { cfgWidth = Nothing }
 setWidth cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
   Just n  -> Right $ cfg { cfgWidth = Just n }
+
+setOutFile :: CutConfig -> String -> Either String CutConfig
+setOutFile cfg "Nothing" = Right $ cfg { cfgOutFile = Nothing }
+setOutFile cfg val = case maybeRead ("\"" ++ val ++ "\"") of
+  Nothing -> Left  $ "invalid: " ++ val
+  Just v  -> Right $ cfg { cfgOutFile = Just v }
