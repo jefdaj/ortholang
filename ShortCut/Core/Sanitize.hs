@@ -95,13 +95,15 @@ unhashIDs longIDs ids t = case findNext t of
                    Nothing -> t
                    Just i  -> let (before, after) = splitAt i t
                                   after' = replaceNextFold after
-                              in before ++ unhashIDs longIDs ids after'
+                              -- the take/drop thing is a hacky way to prevent endless cycles
+                              in before ++ take 1 after' ++ unhashIDs longIDs ids (drop 1 after')
+                              -- in before ++ unhashIDs longIDs ids after'
   where
     replaceNextFold txt = foldr replacePattern txt patterns
     replacePattern (ptn, fn) txt = if ptn `isPrefixOf` txt then replaceLen txt fn else txt
     replaceLen txt lFn = let (sid, rest) = splitAt (lFn txt) txt
                          in case M.lookup sid ids of
-                              Nothing -> error $ "sid not found: '" ++ sid ++ "'"
+                              Nothing -> txt -- happens to other $TMPDIR paths
                               Just v  -> if longIDs
                                            then v ++ rest
                                            else headOrDie "failed to look up sid in unhashIDs" (words v) ++ rest
@@ -121,6 +123,7 @@ unhashIDsFile cfg ref ids inPath outPath = do
   txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
   let txt' = unhashIDs False ids txt
+  -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' txt' -- TODO be strict?
   debugTrackWrite cfg [outPath']
 
