@@ -9,19 +9,20 @@ module ShortCut.Modules.Plots where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Actions (withBinHash)
-import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
-import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript)
--- import System.Directory (createDirectoryIfMissing)
--- import System.FilePath  ((</>), (<.>))
+import ShortCut.Core.Actions (withBinHash, writeCachedLines, readPaths, writeLits)
+import ShortCut.Core.Util (digest)
+import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath, cacheDir)
+import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript,
+                                    defaultTypeCheck)
+import System.Directory (createDirectoryIfMissing)
+import System.FilePath  (takeBaseName, (<.>), (</>))
 
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
   , mTypes = [png]
-  -- , mFunctions = [histogram, linegraph, bargraph, scatterplot, venndiagram]
-  , mFunctions = [histogram, linegraph, scatterplot]
+  , mFunctions = [histogram, linegraph, scatterplot, venndiagram] -- TODO bargraph
   }
 
 png :: CutType
@@ -148,6 +149,56 @@ depRepeatVarName st expr = rLit st $ CutLit str (RepeatSalt 0) $ case expr of
   (CutFun _ _ _ _ [_, (CutRef _ _ _ (CutVar _ v)), _]) -> v
   _ -> ""
 
+----------------------
+-- plot X.list.list --
+----------------------
+
+venndiagram :: CutFunction
+venndiagram = let name = "venndiagram" in CutFunction
+  { fName      = name
+  , fTypeCheck = tPlotListOfLists
+  , fTypeDesc  = name ++ " : X.list.list -> png"
+  , fFixity    = Prefix
+  , fRules     = rPlotListOfLists "venndiagram.R"
+  }
+
+tPlotListOfLists :: TypeChecker
+tPlotListOfLists [(ListOf (ListOf _))] = Right png
+tPlotListOfLists _ = Left "expected a list of lists"
+
+-- TODO is this a reasonable way to do it for now?
+plotLabel :: CutState -> CutExpr -> String
+plotLabel _ (CutRef _ _ _ (CutVar _ v)) = v
+plotLabel st expr = let (CutPath p) = exprPath st expr in takeBaseName p
+
+plotCache :: CutConfig -> CutPath
+plotCache cfg = cacheDir cfg "plots"
+
+rPlotListOfLists :: FilePath -> CutState -> CutExpr -> Rules ExprPath
+rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(CutFun _ _ _ _ [lol]) = do
+  let labels = map (plotLabel st) (extractExprs scr lol)
+  (ExprPath lolPath) <- rExpr st lol
+  let outPath   = exprPath st expr
+      outPath'  = fromCutPath cfg outPath
+      outPath'' = ExprPath outPath'
+      lolPath'  = toCutPath cfg lolPath
+      cDir      = fromCutPath cfg $ plotCache cfg
+      -- labPath'  = cDir </> digest labels <.> "txt"
+      -- labPath   = toCutPath cfg labPath'
+  outPath' %> \_ -> do
+    -- write lists + labels to the cache dir
+    let labPath  = cDir </> digest expr ++ "_names.txt"
+        aLolPath = cDir </> digest expr ++ "_lists.txt"
+    liftIO $ createDirectoryIfMissing True cDir
+    writeCachedLines cfg ref labPath labels
+    paths <- readPaths cfg ref lolPath
+    writeLits cfg ref aLolPath $ map (fromCutPath cfg) paths
+    -- call the main script
+    let args = [labPath, aLolPath]
+    withBinHash cfg ref expr outPath $ \out ->
+      aSimpleScript script cfg ref ids (out:map (toCutPath cfg) args)
+  return outPath''
+rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 
 -------------------
 -- plot X.scores --
@@ -155,10 +206,3 @@ depRepeatVarName st expr = rLit st $ CutLit str (RepeatSalt 0) $ case expr of
 
 bargraph :: CutFunction
 bargraph = undefined
-
-----------------------
--- plot X.list.list --
-----------------------
-
-venndiagram :: CutFunction
-venndiagram = undefined

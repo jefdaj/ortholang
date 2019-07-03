@@ -8,6 +8,9 @@ let
     dplyr
     ggplot2
     readr
+    tidyr
+    UpSetR
+    VennDiagram
   ];};
   runDepends = [ myR ];
 

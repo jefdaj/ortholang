@@ -42,7 +42,7 @@ let
     # ++ shortcut-busco.runDepends;
     # ++ shortcut-justorthologs.runDepends; # incompatible with seqio, orthofinder, blastdb?
     # TODO this shouldn't be needed:
-    ++ shortcut-sonicparanoid.runDepends; # incompatible with seqio, orthofinder, blastdb?
+    ++ shortcut-sonicparanoid.runDepends # incompatible with seqio, orthofinder, blastdb?
     # ++ shortcut-biomartr.runDepends
     # ++ shortcut-blast.runDepends
     # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
@@ -54,7 +54,7 @@ let
     # ++ shortcut-mmseqs.runDepends
     # ++ shortcut-muscle.runDepends
     # ++ shortcut-orthofinder.runDepends
-    # ++ shortcut-plots.runDepends
+    ++ shortcut-plots.runDepends;
     # ++ shortcut-psiblast.runDepends
     # ++ shortcut-seqio.runDepends # incompatible with sonicparanoid
     # ++ shortcut-treecl.runDepends # incompatible with sonicparanoid

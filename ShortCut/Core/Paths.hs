@@ -90,6 +90,7 @@ module ShortCut.Core.Paths
   -- , tmpLink
   -- , symlink
   , upBy
+  , makeTmpdirRelative
   )
   where
 
@@ -276,3 +277,14 @@ upBy n (CutPath path) = CutPath path'
     components = splitOn  "/" path -- TODO allow other delims?
     components' = reverse $ drop n $ reverse components
     path' = concat $ intersperse "/" $ components'
+
+{- For passing scripts paths that don't depend on the $TMPDIR location, but
+ - also don't require any shortcut funny business to read. It relies on the
+ - assumption that the script will be called from inside $TMPDIR. The level
+ - is how many ..s to add to get back up to $TMPDIR from where you call it.
+ - TODO any good way to simplify that?
+ -}
+makeTmpdirRelative :: Int -> CutPath -> FilePath
+makeTmpdirRelative level (CutPath path) = replace "$TMPDIR" dots path
+  where
+    dots = concat $ intersperse "/" $ take level $ repeat ".."
