@@ -1,0 +1,6 @@
+[plot image '$TMPDIR/cache/bin/67034e947e.png',
+ plot image '$TMPDIR/cache/bin/9f4eb32678.png',
+ plot image '$TMPDIR/cache/bin/aabbdf8110.png',
+ plot image '$TMPDIR/cache/bin/bac953ae96.png',
+ plot image '$TMPDIR/cache/bin/90a78cdb3e.png',
+ plot image '$TMPDIR/cache/bin/9ee6a9947c.png']
