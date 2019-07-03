@@ -208,8 +208,8 @@ aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining
 orthologInAny :: CutFunction
 orthologInAny = let name = "ortholog_in_any" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
   , fFixity    = Prefix
   , fRules     = mkOrthologsStrRules name
   }
@@ -274,8 +274,8 @@ groupMemberInAllList groups idss = filter oneInAllLists groups
 orthologInAll :: CutFunction
 orthologInAll = let name = "ortholog_in_all" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [spr, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [spr, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
   , fFixity    = Prefix
   , fRules     = mkOrthologsStrRules "ortholog_in_all"
   }
@@ -339,8 +339,8 @@ rOrthologFilterStrFrac _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 orthologInMin :: CutFunction
 orthologInMin = let name = "ortholog_in_min" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [num, spr, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [num, spr, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
   , fFixity    = Prefix
   , fRules     = mkOrthologsStrFracRules name
   }
@@ -360,8 +360,8 @@ mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
 orthologInMax :: CutFunction
 orthologInMax = let name = "ortholog_in_max" in CutFunction
   { fName      = name
-  , fTypeDesc  = mkTypeDesc  name [num, spr, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [num, spr, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
   , fFixity    = Prefix
   , fRules     = mkOrthologsStrFracRules name
   }
