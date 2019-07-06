@@ -129,6 +129,7 @@ gbkToFnaEach = CutFunction
 -- TODO this needs to do relative paths again, not absolute!
 -- TODO also extract them from genbank files
 
+-- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIds :: CutFunction
 extractIds = CutFunction
   { fName      = name
@@ -140,6 +141,7 @@ extractIds = CutFunction
   where
     name = "extract_ids"
 
+-- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIdsEach :: CutFunction
 extractIdsEach = CutFunction
   { fName      = name
@@ -165,6 +167,7 @@ tExtractIdsEach _ = Left "expected a fasta file"
 
 -- TODO also extract them from genbank files
 
+-- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqs :: CutFunction
 extractSeqs = CutFunction
   { fName      = name
@@ -176,6 +179,7 @@ extractSeqs = CutFunction
   where
     name = "extract_seqs"
 
+-- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: CutFunction
 extractSeqsEach = CutFunction
   { fName      = name

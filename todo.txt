@@ -1,3 +1,7 @@
+bug: need to print parens around negative numbers when writing script
+  is that a special case of mistakenly removing parentheses in math?
+check the profile.html after current greencut run to find out which orthogroup things are slow
+
 week of 6/25:
   x finish range module
   x load fn docs from separate text files
