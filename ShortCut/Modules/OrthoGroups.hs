@@ -19,14 +19,11 @@ import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPat
                                     writePaths, readFileStrict', readPaths, runCmd, CmdDesc(..), debugNeed)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy, cacheDir)
-import ShortCut.Core.Util          (resolveSymlinks, headOrDie, digest)
--- import ShortCut.Core.Sanitize      (unhashIDs)
+import ShortCut.Core.Util          (headOrDie, digest)
 import System.FilePath             ((</>), takeDirectory)
--- import Data.IORef                  (readIORef)
 import Text.Regex.Posix            ((=~))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
-import Data.List                   (intersect)
-import Data.Scientific             -- (Scientific, toRealFloat)
+import Data.Scientific             (toRealFloat)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))
 import System.Directory            (createDirectoryIfMissing)
@@ -38,6 +35,9 @@ import ShortCut.Modules.SonicParanoid (spr)
 -- this is just shorthand
 sll :: CutType
 sll = ListOf (ListOf str)
+
+type PickerFn = Int -> Int
+type PickerFn2 = Double -> Int -> Int
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -91,14 +91,6 @@ orthogroups = let name = "orthogroups" in CutFunction
 rOrthogroups :: RulesFn
 rOrthogroups st e@(CutFun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
 rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
-
--- TODO any reason to keep this?
-findResDir :: CutConfig -> FilePath -> IO FilePath
-findResDir cfg outPath = do
-  statsPath <- resolveSymlinks (Just $ cfgTmpDir cfg) outPath
-  -- liftIO $ putStrLn $ "outPath: " ++ outPath
-  -- liftIO $ putStrLn $ "statsPath: " ++ statsPath
-  return $ takeDirectory $ takeDirectory statsPath
 
 -- TODO move parse fns to their respective modules for easier maintenance
 
@@ -237,45 +229,50 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStr groupMemberInAnyList -- TODO reimplement using min/max
+  , fRules     = rOrthologFilterStr "min" pickAny
   }
 
-type FilterFn2 = [[String]] -> [[String]] -> [[String]]
+pickAny :: Int -> Int
+pickAny _ = 1
 
-groupMemberInAnyList :: FilterFn2
-groupMemberInAnyList groups idss = filter memberInAnyList groups
-  where
-    memberInAnyList :: [String] -> Bool
-    memberInAnyList g = any (\ids -> not $ null $ intersect g ids) idss
-
--- TODO parse orthogroups here for efficiency (prevent thousands of extra lists)
-rOrthologFilterStr :: FilterFn2 -> RulesFn
-rOrthologFilterStr filterFn st@(_, cfg, ref, idref) e@(CutFun _ _ _ _ [groupLists, idLists]) = do
+rOrthologFilterStr :: String -> PickerFn -> RulesFn
+rOrthologFilterStr fnName pickerFn st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [groupLists, idLists]) = do
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists
-  let out    = exprPath st e
-      out'   = debugRules cfg "rOrthologFilterStr" e $ fromCutPath cfg out
+  let out     = exprPath st e
+      out'    = debugRules cfg "rOrthologFilterStr" e $ fromCutPath cfg out
+      ogDir   = fromCutPath cfg $ ogCache cfg
+      ogsPath = ogDir </> digest groupListsPath <.> "txt"
+      idsPath = ogDir </> digest idListsPath    <.> "txt"
+  liftIO $ createDirectoryIfMissing True ogDir
+  ogsPath %> absolutizePaths cfg ref groupListsPath
+  idsPath %> absolutizePaths cfg ref idListsPath
   out' %> \_ -> do
-    -- hashedIDs  <- liftIO $ readIORef idref
-    groupPaths <- readPaths cfg ref groupListsPath -- TODO readLits?
-    groups     <- mapM (readLits cfg ref) $ map (fromCutPath cfg) groupPaths
-    idPaths    <- readPaths cfg ref idListsPath
-    idss       <- mapM (readLits cfg ref) $ map (fromCutPath cfg) idPaths
-    let groups' = filterFn groups idss
-    writeOrthogroups cfg ref idref out groups'
+    -- TODO is there a way to avoid reading this?
+    nIDs  <- fmap length $ readPaths cfg ref idListsPath
+    let fnArg' = show $ pickerFn nIDs
+    debugNeed cfg "orthogroups.py" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
+    runCmd cfg ref $ CmdDesc
+      { cmdParallel = False
+      , cmdFixEmpties = True
+      , cmdOutPath = out'
+      , cmdInPatterns = [ogsPath, idsPath]
+      , cmdExtraOutPaths = []
+      , cmdSanitizePaths = [out'] -- TODO is this right?
+      , cmdOptions =[]
+      , cmdBinary = "orthogroups.py"
+      , cmdArguments = [out', fnName, fnArg', ogsPath, idsPath]
+      , cmdRmPatterns = []
+      , cmdExitCode = ExitSuccess
+      }
   return (ExprPath out')
-rOrthologFilterStr _ _ _ = error "bad arguments to rOrthologFilterStr"
+rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
 
 ---------------------
 -- ortholog_in_all --
 ---------------------
 
 -- TODO flip args so it reads more naturally?
-
-groupMemberInAllList :: FilterFn2
-groupMemberInAllList groups idss = filter oneInAllLists groups
-  where
-    oneInAllLists g = idss == containsOneOf idss g -- TODO reformat with `all`?
 
 orthologInAll :: CutFunction
 orthologInAll = let name = "ortholog_in_all" in CutFunction
@@ -292,8 +289,11 @@ orthologInAllStr = let name = "ortholog_in_all_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStr groupMemberInAllList -- TODO reimplement using min/max
+  , fRules     = rOrthologFilterStr "min" pickAll
   }
+
+pickAll :: Int -> Int
+pickAll nIDs = nIDs
 
 ---------------------
 -- ortholog_in_min --
@@ -307,33 +307,24 @@ pickMin userNum nGroups
   | userNum < 0 = pickMin (fromIntegral nGroups + userNum) nGroups
   | otherwise = ceiling userNum -- TODO floor?
 
-groupMemberInMin :: Scientific -> [[String]] -> [[String]] -> [[String]]
-groupMemberInMin n groups idss = filter inEnoughLists groups
-  where
-    n' = pickMin (toRealFloat n :: Double) (length idss)
-    inEnoughLists g = n' <= length (containsOneOf idss g)
-    --inEnoughLists g = n' <= let res = length (containsOneOf idss g)
-    --                        in trace ("n': " ++ show n' ++ " res: " ++ show res) res
-
 orthologInMinStr :: CutFunction
 orthologInMinStr = let name = "ortholog_in_min_str" in CutFunction
   { fName      = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStrFrac "min"
+  , fRules     = rOrthologFilterStrFrac "min" pickMin
   }
 
 -- read a scientific and print again as a string
-toDecimal :: String -> String
-toDecimal s = formatScientific Fixed Nothing (read s)
+-- toDecimal :: String -> String
+-- toDecimal s = formatScientific Fixed Nothing (read s)
 
 ogCache :: CutConfig -> CutPath
 ogCache cfg = cacheDir cfg "orthogroups"
 
--- TODO take a name rather than a filter fn
-rOrthologFilterStrFrac :: String -> RulesFn
-rOrthologFilterStrFrac fnName st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [frac, groupLists, idLists]) = do
+rOrthologFilterStrFrac :: String -> PickerFn2 -> RulesFn
+rOrthologFilterStrFrac fnName pickerFn st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [frac, groupLists, idLists]) = do
   (ExprPath fracPath      ) <- rExpr st frac
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists
@@ -346,17 +337,10 @@ rOrthologFilterStrFrac fnName st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [frac, group
   ogsPath %> absolutizePaths cfg ref groupListsPath
   idsPath %> absolutizePaths cfg ref idListsPath
   out' %> \_ -> do
-
-    -- f          <- readLit cfg ref fracPath
-    -- groupPaths <- readPaths cfg ref groupListsPath -- TODO readLits?
-    -- groups     <- mapM (readLits cfg ref) $ map (fromCutPath cfg) groupPaths
-    -- idPaths    <- readPaths cfg ref idListsPath
-    -- idss       <- mapM (readLits cfg ref) $ map (fromCutPath cfg) idPaths
-    -- let groups' = filterFn (read f :: Scientific) groups idss
-    -- writeOrthogroups cfg ref idref out groups'
-
-    -- withWriteLock' ref tmpDir $ do
-    fnArg <- fmap toDecimal $ readLit cfg ref fracPath -- TODO pick an int and only pass that
+    -- TODO is there a way to avoid reading this?
+    nIDs  <- fmap length $ readPaths cfg ref idListsPath
+    fnArg <- readLit cfg ref fracPath
+    let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
     debugNeed cfg "orthogroups.py" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
     runCmd cfg ref $ CmdDesc
       { cmdParallel = False
@@ -367,14 +351,12 @@ rOrthologFilterStrFrac fnName st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [frac, group
       , cmdSanitizePaths = [out'] -- TODO is this right?
       , cmdOptions =[]
       , cmdBinary = "orthogroups.py"
-      -- def main(outpath, fnname, fnarg, famspath, idspath):
-      , cmdArguments = [out', fnName, fnArg, ogsPath, idsPath]
+      , cmdArguments = [out', fnName, fnArg', ogsPath, idsPath]
       , cmdRmPatterns = []
       , cmdExitCode = ExitSuccess
       }
- 
   return (ExprPath out')
-rOrthologFilterStrFrac _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
+rOrthologFilterStrFrac _ _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 
 orthologInMin :: CutFunction
 orthologInMin = let name = "ortholog_in_min" in CutFunction
@@ -412,10 +394,9 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStrFrac "max"
+  , fRules     = rOrthologFilterStrFrac "max" pickMax
   }
 
--- TODO can it be derived from pickMax instead?
 pickMax :: (RealFrac a, Integral b) => a -> b -> b
 pickMax userNum nGroups
   | userNum == 0 = 0
@@ -423,12 +404,3 @@ pickMax userNum nGroups
   | userNum > fromIntegral nGroups = nGroups
   | userNum < 0 = pickMax (fromIntegral nGroups + userNum) nGroups
   | otherwise = floor userNum
-
--- TODO can it be derived from groupMemberInMax instead?
-groupMemberInMax :: Scientific -> [[String]] -> [[String]] -> [[String]]
-groupMemberInMax n groups idss = filter notInTooManyLists groups
-  where
-    n' = pickMax (toRealFloat n :: Double) (length idss)
-    notInTooManyLists g = n' >= length (containsOneOf idss g)
-    -- notInTooManyLists g = n' >= let res = length (containsOneOf idss g)
-    --                             in trace ("n': " ++ show n' ++ " res: " ++ show res) res
