@@ -13,6 +13,7 @@ module ShortCut.Modules.OrthoGroups
 
 import Development.Shake
 import ShortCut.Core.Types
+import qualified Data.Map as M
 
 import Control.Monad               (forM)
 import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
@@ -27,6 +28,8 @@ import Data.Scientific             (toRealFloat)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))
 import System.Directory            (createDirectoryIfMissing)
+import Data.IORef                  (readIORef)
+import Data.List                   (isPrefixOf)
 
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
@@ -138,7 +141,6 @@ writeOrthogroups cfg ref _ out groups = do
 aOrthogroups :: CutType -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroups rtn cfg ref idsref [out, ogPath] = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
-  -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ogPath
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
                else                    error $ "bad type for aOrthogroups: " ++ show rtn
@@ -159,10 +161,16 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   , fRules     = rSimple aOrthogroupContaining
   }
 
+lookupID :: HashedIDs -> String -> String
+lookupID ids s = case filter (\(_,v) -> s `isPrefixOf` v) (M.toList ids) of
+  ((k,_):[]) -> k
+  ([])   -> error $ "ERROR: id '" ++ s ++ "' not found"
+  ms     -> error $ "ERROR: multiple ids match '" ++ s ++ "': " ++ show ms
+
 aOrthogroupContaining :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
-  geneId <- readLit cfg ref $ fromCutPath cfg idPath
-  -- resDir <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
+  ids' <- liftIO $ readIORef ids
+  geneId <- fmap (lookupID ids') $ readLit cfg ref $ fromCutPath cfg idPath
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits cfg ref (fromCutPath cfg out) group
@@ -191,8 +199,8 @@ containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
 aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
-  geneIds <- readLits cfg ref $ fromCutPath cfg idsPath
-  -- resDir  <- liftIO $ findResDir cfg $ fromCutPath cfg ofrPath
+  ids' <- liftIO $ readIORef ids
+  geneIds <- fmap (map $ lookupID ids') $ readLits cfg ref $ fromCutPath cfg idsPath
   groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle sonicparanoid
   let groups' = filterFn groups geneIds
   writeOrthogroups cfg ref ids out groups'
