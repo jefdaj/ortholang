@@ -15,18 +15,21 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad               (forM)
-import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath,
-                                    writePaths, readFileStrict', readPaths)
+import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
+                                    writePaths, readFileStrict', readPaths, runCmd, CmdDesc(..), debugNeed)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
-import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy)
-import ShortCut.Core.Util          (resolveSymlinks, headOrDie)
-import ShortCut.Core.Sanitize      (unhashIDs)
+import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy, cacheDir)
+import ShortCut.Core.Util          (resolveSymlinks, headOrDie, digest)
+-- import ShortCut.Core.Sanitize      (unhashIDs)
 import System.FilePath             ((</>), takeDirectory)
-import Data.IORef                  (readIORef)
+-- import Data.IORef                  (readIORef)
 import Text.Regex.Posix            ((=~))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import Data.List                   (intersect)
-import Data.Scientific             (Scientific, toRealFloat)
+import Data.Scientific             -- (Scientific, toRealFloat)
+import System.Exit                 (ExitCode(..))
+import System.FilePath             ((<.>))
+import System.Directory            (createDirectoryIfMissing)
 
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
@@ -45,14 +48,16 @@ cutModule = CutModule
       [ orthogroups
       , orthogroupContaining
       , orthogroupsContaining
+      -- these four are meant to be user-facing
       , orthologInAny
       , orthologInAll
       , orthologInMin
       , orthologInMax
-      , orthologInAnyStr -- TODO hide? rename to show generality?
-      , orthologInAllStr -- TODO hide? rename to show generality?
-      , orthologInMinStr -- TODO hide? rename to show generality?
-      , orthologInMaxStr -- TODO hide? rename to show generality?
+      -- and these four implement them TODO hide?
+      , orthologInAnyStr
+      , orthologInAllStr
+      , orthologInMinStr
+      , orthologInMaxStr
       ]
   }
 
@@ -99,11 +104,12 @@ findResDir cfg outPath = do
 
 -- TODO why are we unhashing the ids here?
 parseOrthoFinder :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action [[String]]
-parseOrthoFinder cfg ref idref ofrPath = do
+parseOrthoFinder cfg ref _ ofrPath = do
   let resDir = fromCutPath cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
-  ids <- liftIO $ readIORef idref
-  txt <- fmap (unhashIDs False ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  -- ids <- liftIO $ readIORef idref
+  -- txt <- fmap (unhashIDs False ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  txt <- readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
   let groups = map (words . drop 11) (lines txt)
   return groups
 
@@ -231,7 +237,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStr groupMemberInAnyList
+  , fRules     = rOrthologFilterStr groupMemberInAnyList -- TODO reimplement using min/max
   }
 
 type FilterFn2 = [[String]] -> [[String]] -> [[String]]
@@ -286,7 +292,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStr groupMemberInAllList
+  , fRules     = rOrthologFilterStr groupMemberInAllList -- TODO reimplement using min/max
   }
 
 ---------------------
@@ -315,24 +321,58 @@ orthologInMinStr = let name = "ortholog_in_min_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStrFrac groupMemberInMin
+  , fRules     = rOrthologFilterStrFrac "min"
   }
 
-rOrthologFilterStrFrac :: (Scientific -> FilterFn2) -> RulesFn
-rOrthologFilterStrFrac filterFn st@(_, cfg, ref, idref) e@(CutFun _ _ _ _ [frac, groupLists, idLists]) = do
+-- read a scientific and print again as a string
+toDecimal :: String -> String
+toDecimal s = formatScientific Fixed Nothing (read s)
+
+ogCache :: CutConfig -> CutPath
+ogCache cfg = cacheDir cfg "orthogroups"
+
+-- TODO take a name rather than a filter fn
+rOrthologFilterStrFrac :: String -> RulesFn
+rOrthologFilterStrFrac fnName st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [frac, groupLists, idLists]) = do
   (ExprPath fracPath      ) <- rExpr st frac
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists
-  let out    = exprPath st e
-      out'   = debugRules cfg "rOrthologFilterStr" e $ fromCutPath cfg out
+  let out     = exprPath st e
+      out'    = debugRules cfg "rOrthologFilterStr" e $ fromCutPath cfg out
+      ogDir   = fromCutPath cfg $ ogCache cfg
+      ogsPath = ogDir </> digest groupListsPath <.> "txt"
+      idsPath = ogDir </> digest idListsPath    <.> "txt"
+  liftIO $ createDirectoryIfMissing True ogDir
+  ogsPath %> absolutizePaths cfg ref groupListsPath
+  idsPath %> absolutizePaths cfg ref idListsPath
   out' %> \_ -> do
-    f          <- readLit cfg ref fracPath
-    groupPaths <- readPaths cfg ref groupListsPath -- TODO readLits?
-    groups     <- mapM (readLits cfg ref) $ map (fromCutPath cfg) groupPaths
-    idPaths    <- readPaths cfg ref idListsPath
-    idss       <- mapM (readLits cfg ref) $ map (fromCutPath cfg) idPaths
-    let groups' = filterFn (read f :: Scientific) groups idss
-    writeOrthogroups cfg ref idref out groups'
+
+    -- f          <- readLit cfg ref fracPath
+    -- groupPaths <- readPaths cfg ref groupListsPath -- TODO readLits?
+    -- groups     <- mapM (readLits cfg ref) $ map (fromCutPath cfg) groupPaths
+    -- idPaths    <- readPaths cfg ref idListsPath
+    -- idss       <- mapM (readLits cfg ref) $ map (fromCutPath cfg) idPaths
+    -- let groups' = filterFn (read f :: Scientific) groups idss
+    -- writeOrthogroups cfg ref idref out groups'
+
+    -- withWriteLock' ref tmpDir $ do
+    fnArg <- fmap toDecimal $ readLit cfg ref fracPath -- TODO pick an int and only pass that
+    debugNeed cfg "orthogroups.py" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
+    runCmd cfg ref $ CmdDesc
+      { cmdParallel = False
+      , cmdFixEmpties = True
+      , cmdOutPath = out'
+      , cmdInPatterns = [ogsPath, idsPath]
+      , cmdExtraOutPaths = []
+      , cmdSanitizePaths = [out'] -- TODO is this right?
+      , cmdOptions =[]
+      , cmdBinary = "orthogroups.py"
+      -- def main(outpath, fnname, fnarg, famspath, idspath):
+      , cmdArguments = [out', fnName, fnArg, ogsPath, idsPath]
+      , cmdRmPatterns = []
+      , cmdExitCode = ExitSuccess
+      }
+ 
   return (ExprPath out')
 rOrthologFilterStrFrac _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 
@@ -372,7 +412,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in CutFunction
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
   , fFixity    = Prefix
-  , fRules     = rOrthologFilterStrFrac groupMemberInMax
+  , fRules     = rOrthologFilterStrFrac "max"
   }
 
 -- TODO can it be derived from pickMax instead?

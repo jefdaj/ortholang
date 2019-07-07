@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 {- ShortCut code is interpreted in phases, but client code shouldn't need to
@@ -41,14 +42,15 @@ import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
-import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath)
+import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath, cacheDir)
 import ShortCut.Core.Locks            (withReadLock')
-import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
+import ShortCut.Core.Sanitize         (readHashedIDs, unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
 import Control.Monad                  (when)
+import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO use hashes + dates to decide which files to regenerate?
@@ -136,7 +138,15 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath
-      want ["eval"]
+      want ["hashids", "eval"]
+      -- not sure why the aLoadHash alwaysRerun doesn't cover this, but it doesn't:
+      "hashids" ~> do
+        alwaysRerun
+        let loadDir = cacheDir cfg "load"
+            loadDir' = fromCutPath cfg loadDir
+        liftIO $ createDirectoryIfMissing True loadDir'
+        idPaths <- getDirectoryFiles loadDir' ["*.ids"]
+        mapM_ (\p -> readHashedIDs cfg ref $ toCutPath cfg $ loadDir' </> p) idPaths
       "eval" ~> do
         alwaysRerun
         actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
@@ -156,7 +166,7 @@ writeResult cfg ref ids path out = unhashIDsFile cfg ref ids path out
 
 -- TODO what happens when the txt is a binary plot image?
 printLong :: CutConfig -> Locks -> HashedIDs -> Handle -> FilePath -> Action ()
-printLong cfg ref ids hdl path = do
+printLong _ ref ids hdl path = do
   txt <- withReadLock' ref path $ readFile' path
   let txt' = unhashIDs False ids txt
   liftIO $ hPutStrLn hdl txt'

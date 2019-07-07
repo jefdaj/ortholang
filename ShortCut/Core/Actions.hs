@@ -13,6 +13,7 @@ module ShortCut.Core.Actions
   , readLits
   , readPath
   , readPaths
+  , absolutizePaths
   , readLitPaths
   , readString
   , readStrings
@@ -66,7 +67,7 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
                                    stringCutPath, toGeneric)
-import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict,
+import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteOnce)
@@ -137,6 +138,17 @@ readPath cfg ref path = readPaths cfg ref path >>= return . headOrDie "readPath 
 -- TODO should this have checkPaths?
 readPaths :: CutConfig -> Locks -> FilePath -> Action [CutPath]
 readPaths cfg ref path = (fmap . map) stringCutPath (readList cfg ref path)
+
+-- makes a copy of a list of paths without shortcut funny business,
+-- suitible for external scripts to read
+-- TODO does this go here or somewhere else?
+absolutizePaths :: CutConfig -> Locks -> FilePath -> FilePath -> Action ()
+absolutizePaths cfg ref inPath outPath = do
+  paths  <- readPaths cfg ref inPath
+  paths' <- mapM (liftIO . absolutize. fromCutPath cfg) paths
+  debugNeed cfg "absolutizePaths" paths' -- because they will be read by the script next
+  -- liftIO $ putStrLn $ "paths': " ++ show paths'
+  withWriteLock' ref outPath $ writeFile' outPath $ unlines paths'
 
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute

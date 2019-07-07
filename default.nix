@@ -21,6 +21,7 @@ let
   shortcut-busco         = import ./ShortCut/Modules/Busco;
   shortcut-load          = import ./ShortCut/Modules/Load;
   shortcut-range         = import ./ShortCut/Modules/Range;
+  shortcut-orthogroups   = import ./ShortCut/Modules/OrthoGroups;
 
   # myPython = python27Packages.python.withPackages (ps: with ps; [
     # biopython
@@ -53,7 +54,8 @@ let
     # ++ shortcut-hmmer.runDepends
     # ++ shortcut-mmseqs.runDepends
     # ++ shortcut-muscle.runDepends
-    ++ shortcut-orthofinder.runDepends;
+    # ++ shortcut-orthofinder.runDepends;
+    ++ shortcut-orthogroups.runDepends;
     # ++ shortcut-plots.runDepends;
     # ++ shortcut-psiblast.runDepends
     # ++ shortcut-seqio.runDepends # incompatible with sonicparanoid
@@ -81,6 +83,7 @@ let
     shortcut-busco
     shortcut-load
     shortcut-range
+    shortcut-orthogroups
 
     # cdhit
     diffutils

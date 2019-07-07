@@ -58,8 +58,8 @@ def main(outpath, fnname, fnarg, famspath, idspath):
     # note fnarg is ignored if fnname is any or all
     debug('famspath: {}'.format(famspath))
     debug('idspath: {}'.format(idspath))
-    fams  = read_families(famspath)
-    ids   = read_idlists(idspath)
+    fams  = read_families(famspath) # TODO handle <<emptylist>>?
+    ids   = read_idlists(idspath)   # TODO handle <<emptylist>>?
     if fnname == 'all':
         fnname = 'min'
         fnarg = len(fams)
@@ -67,7 +67,7 @@ def main(outpath, fnname, fnarg, famspath, idspath):
         fnname = 'min'
         fnarg = 1
     else:
-        fnarg = int(fnarg)
+        fnarg = int(float(fnarg)) # TODO improve this
         debug('fnarg: {}'.format(fnarg))
     debug('fnname: {}'.format(fnname))
     debug('outpath: {}'.format(outpath))
@@ -75,8 +75,11 @@ def main(outpath, fnname, fnarg, famspath, idspath):
     fams2 = [f for f in fams if TESTS[fnname](ids, fnarg, f[1])]
     debug(fams2) # TODO save properly
     with open(outpath, 'w') as f:
-        for (path, _) in fams2:
-            f.write('{}\n'.format(path))
+        if len(fams2) == 0:
+            f.write('<<emptylist>>') # TODO newline?
+        else:
+            for (path, _) in fams2:
+                f.write('{}\n'.format(path))
 
 if __name__ == '__main__':
     main(*argv[1:])

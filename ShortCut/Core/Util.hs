@@ -16,6 +16,7 @@ module ShortCut.Core.Util
   , rmAll
   , resolveSymlinks
   , absolutize
+  -- , absolutizeListOfLitLists
   , expandTildes
   , globFiles
 
@@ -189,6 +190,12 @@ absolutize aPath = do
   aPath'' <- makeAbsolute aPath'
   return aPath''
   -- resolveSymlink aPath''
+
+-- makes a copy of a list of lists of lits, suitible for passing to a script
+-- TODO separate version for a list of lists of paths?
+-- absolutizeListOfLitLists :: CutConfig -> Locks -> CutPath -> FilePath
+-- absolutizeListOfLitLists cfg ref path = do
+--   paths <- readPaths
 
 expandTildes :: String -> IO String
 expandTildes s = do

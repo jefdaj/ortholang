@@ -367,6 +367,7 @@ curl cfg ref url = do
 
 aLoad :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
+  alwaysRerun
   debugNeed cfg "aLoad" [strPath']
   pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits cfg ref strPath' -- TODO safer!
   -- liftIO $ putStrLn $ "pth: " ++ pth
@@ -380,6 +381,7 @@ aLoad hashSeqIDs cfg ref ids strPath outPath = do
   -- liftIO $ putStrLn $ "src': " ++ src'
   -- debugL cfg $ "aLoad src': '" ++ src' ++ "'"
   -- debugL cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
+  -- TODO why doesn't this rerun?
   hashPath <- aLoadHash hashSeqIDs cfg ref ids pth' (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
