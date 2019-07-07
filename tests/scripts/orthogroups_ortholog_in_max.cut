@@ -1,7 +1,7 @@
 mycoplasma = load_faa_each (glob_files "data/Mycoplasma_*_refseq.faa")
 n_to_use = 4
 faas_to_use = sample n_to_use mycoplasma
-spres = sonicparanoid faas_to_use
+spres = orthofinder faas_to_use
 result = length_each
   [ ortholog_in_max 0      spres faas_to_use
   , ortholog_in_max 1      spres faas_to_use
