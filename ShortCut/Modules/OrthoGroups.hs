@@ -56,7 +56,7 @@ cutModule = CutModule
       , orthologInAll
       , orthologInMin
       , orthologInMax
-      -- and these four implement them TODO hide?
+      -- and these four implement them (TODO hide?)
       , orthologInAnyStr
       , orthologInAllStr
       , orthologInMinStr
