@@ -1,9 +1,9 @@
 module ShortCut.Modules.SetsTable
   where
 
--- import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic (defaultTypeCheck)
+import ShortCut.Modules.Plots (rPlotListOfLists)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -35,5 +35,5 @@ setsTable = let name = "sets_table" in CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv
   , fFixity    = Prefix
-  , fRules     = undefined
+  , fRules     = rPlotListOfLists "sets_table.R"
   }

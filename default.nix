@@ -13,6 +13,7 @@ let
   shortcut-muscle        = import ./ShortCut/Modules/Muscle;
   shortcut-orthofinder   = import ./ShortCut/Modules/OrthoFinder;
   shortcut-plots         = import ./ShortCut/Modules/Plots;
+  shortcut-setstable     = import ./ShortCut/Modules/SetsTable;
   shortcut-psiblast      = import ./ShortCut/Modules/PsiBlast;
   shortcut-seqio         = import ./ShortCut/Modules/SeqIO;
   shortcut-sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
@@ -57,6 +58,7 @@ let
     # ++ shortcut-orthofinder.runDepends;
     ++ shortcut-orthogroups.runDepends;
     # ++ shortcut-plots.runDepends;
+    # ++ shortcut-setstable.runDepends;
     # ++ shortcut-psiblast.runDepends
     # ++ shortcut-seqio.runDepends # incompatible with sonicparanoid
     # ++ shortcut-treecl.runDepends # incompatible with sonicparanoid
@@ -75,6 +77,7 @@ let
     shortcut-muscle
     shortcut-orthofinder
     shortcut-plots
+    shortcut-setstable
     shortcut-psiblast
     shortcut-seqio
     shortcut-sonicparanoid
