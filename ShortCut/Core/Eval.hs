@@ -33,7 +33,8 @@ import ShortCut.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
 import Control.Retry
--- import qualified Data.Map as M
+import qualified Data.Map as M
+import Data.List (isPrefixOf)
 
 -- import Debug.Trace
 
@@ -48,7 +49,7 @@ import ShortCut.Core.Sanitize         (readHashedIDs, unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
-import Data.IORef                     (readIORef)
+import Data.IORef                     (readIORef, atomicModifyIORef')
 import Control.Monad                  (when)
 import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
@@ -138,17 +139,11 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath
-      want ["hashids", "eval"]
-      -- not sure why the aLoadHash alwaysRerun doesn't cover this, but it doesn't:
-      "hashids" ~> do
-        alwaysRerun
-        let loadDir = cacheDir cfg "load"
-            loadDir' = fromCutPath cfg loadDir
-        liftIO $ createDirectoryIfMissing True loadDir'
-        idPaths <- getDirectoryFiles loadDir' ["*.ids"]
-        mapM_ (\p -> readHashedIDs cfg ref $ toCutPath cfg $ loadDir' </> p) idPaths
+      want ["eval"]
       "eval" ~> do
         alwaysRerun
+        -- always re-hash IDs first (TODO why is this necessary?)
+        reloadHashedIDs cfg ref ids
         actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
         ids' <- liftIO $ readIORef ids
         {- if --interactive, print the short version of a result
@@ -160,6 +155,20 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids' (toCutPath cfg path) out
           Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids' hdl path)
+
+-- TODO move somewhere else?
+reloadHashedIDs :: CutConfig -> Locks -> HashedIDsRef -> Action ()
+reloadHashedIDs cfg ref ids = do
+  let loadDir = cacheDir cfg "load"
+      loadDir' = fromCutPath cfg loadDir
+  liftIO $ createDirectoryIfMissing True loadDir'
+  idPaths <- getDirectoryFiles loadDir' ["*.ids"]
+  liftIO $ putStrLn $ "idPaths: " ++ show idPaths
+  ids' <- mapM (\p -> readHashedIDs cfg ref $ toCutPath cfg $ loadDir' </> p) idPaths
+  let ids'' = foldr1 M.union ids'
+  liftIO $ putStrLn $ "ids'' with seqid_: "    ++ show (filter (\(k,_) ->      "seqid_" `isPrefixOf` k ) $ take 100 $ M.toList ids'')
+  liftIO $ putStrLn $ "ids'' without seqid_: " ++ show (filter (\(k,_) -> not ("seqid_" `isPrefixOf` k)) $ take 100 $ M.toList ids'')
+  liftIO $ atomicModifyIORef' ids $ \i -> (M.union i ids'', ())
 
 writeResult :: CutConfig -> Locks -> HashedIDs -> CutPath -> FilePath -> Action ()
 writeResult cfg ref ids path out = unhashIDsFile cfg ref ids path out

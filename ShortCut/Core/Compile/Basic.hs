@@ -30,7 +30,7 @@ import qualified Data.Map as M
 import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
                             fromCutPath, varPath, CutPath)
 
-import Data.IORef                 (atomicModifyIORef)
+import Data.IORef                 (atomicModifyIORef')
 import Data.List                  (intersperse, isPrefixOf, isInfixOf)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNeed,
@@ -324,13 +324,13 @@ aLoadHash hashSeqIDs cfg ref ids src ext = do
       newIDs <- if done
         then do 
           -- liftIO $ putStrLn "reading previously hashed ids"
-          readHashedIDs cfg ref idsPath
+          readHashedIDs cfg ref idsPath -- TODO have to atomicModifyIORef' here!
         else do
           -- liftIO $ putStrLn "hashing ids for the first time"
           newIDs <- hashIDsFile cfg ref src hashPath
           writeHashedIDs cfg ref idsPath newIDs
           return newIDs
-      liftIO $ atomicModifyIORef ids $ \is -> (M.union newIDs is, ())
+      liftIO $ atomicModifyIORef' ids $ \is -> (M.union newIDs is, ()) -- TODO is this wrong?
   -- ids' <- liftIO $ readIORef ids
   -- liftIO $ putStrLn $ "total is now " ++ show (length $ M.keys ids') ++ " ids"
   -- liftIO $ putStrLn $ show $ M.keys ids'

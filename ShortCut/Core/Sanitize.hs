@@ -134,6 +134,7 @@ readHashedIDs cfg ref path = do
   let path' = fromCutPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
   txt <- readFileStrict' cfg ref path'
-  let ids = map (\(i, si) -> (i, tail si)) $ map (splitAt digestLength) $ lines txt
+  -- TODO this messes up the $TMPDIR ones right?
+  let ids = map (\(i, si) -> (i, tail si)) $ map (splitAt $ length "seqid_" + digestLength) $ lines txt
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
   return $ M.fromList ids
