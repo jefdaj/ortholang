@@ -31,8 +31,8 @@ import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes)
-import Data.List             (isPrefixOf)
-import Data.List.Utils       (subIndex)
+import Data.List             (isPrefixOf, intersperse)
+import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName)
 
 type HashedIDList = D.DList (String, String)
@@ -134,7 +134,12 @@ readHashedIDs cfg ref path = do
   let path' = fromCutPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
   txt <- readFileStrict' cfg ref path'
-  -- TODO this messes up the $TMPDIR ones right?
-  let ids = map (\(i, si) -> (i, tail si)) $ map (splitAt $ length "seqid_" + digestLength) $ lines txt
+  let splitFn l = let ws = split "\t" l
+                  in if length ws < 2
+                       then error ("failed to split '" ++ l ++ "'")
+                       else (head ws, concat $ intersperse "\t" $ tail ws)
+      ids = map splitFn $ lines txt
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
+  -- liftIO $ putStrLn $ "ids'' with    seqid_: " ++ show ((take 10 $ filter (\(k,_) ->     ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
+  -- liftIO $ putStrLn $ "ids'' without seqid_: " ++ show ((take 10 $ filter (\(k,_) -> not ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
   return $ M.fromList ids

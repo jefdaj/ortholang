@@ -33,8 +33,8 @@ import ShortCut.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
 import Control.Retry
-import qualified Data.Map as M
-import Data.List (isPrefixOf)
+-- import qualified Data.Map as M
+-- import Data.List (isPrefixOf)
 
 -- import Debug.Trace
 
@@ -43,15 +43,15 @@ import Data.Maybe                     (maybeToList)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
-import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath, cacheDir)
+import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Locks            (withReadLock')
-import ShortCut.Core.Sanitize         (readHashedIDs, unhashIDs, unhashIDsFile)
+import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
-import Data.IORef                     (readIORef, atomicModifyIORef')
+import Data.IORef                     (readIORef)
 import Control.Monad                  (when)
-import System.Directory               (createDirectoryIfMissing)
+-- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO use hashes + dates to decide which files to regenerate?
@@ -142,36 +142,22 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        -- always re-hash IDs first (TODO why is this necessary?)
-        reloadHashedIDs cfg ref ids
         actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
-        ids' <- liftIO $ readIORef ids
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
          - if neither, print the full result
          - TODO move this logic to the top level?
          -}
+        ids' <- liftIO $ readIORef ids
         when (cfgInteractive cfg) (printShort cfg ref ids' hdl rtype path)
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids' (toCutPath cfg path) out
           Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids' hdl path)
 
--- TODO move somewhere else?
-reloadHashedIDs :: CutConfig -> Locks -> HashedIDsRef -> Action ()
-reloadHashedIDs cfg ref ids = do
-  let loadDir = cacheDir cfg "load"
-      loadDir' = fromCutPath cfg loadDir
-  liftIO $ createDirectoryIfMissing True loadDir'
-  idPaths <- getDirectoryFiles loadDir' ["*.ids"]
-  liftIO $ putStrLn $ "idPaths: " ++ show idPaths
-  ids' <- mapM (\p -> readHashedIDs cfg ref $ toCutPath cfg $ loadDir' </> p) idPaths
-  let ids'' = foldr1 M.union ids'
-  liftIO $ putStrLn $ "ids'' with seqid_: "    ++ show (filter (\(k,_) ->      "seqid_" `isPrefixOf` k ) $ take 100 $ M.toList ids'')
-  liftIO $ putStrLn $ "ids'' without seqid_: " ++ show (filter (\(k,_) -> not ("seqid_" `isPrefixOf` k)) $ take 100 $ M.toList ids'')
-  liftIO $ atomicModifyIORef' ids $ \i -> (M.union i ids'', ())
-
 writeResult :: CutConfig -> Locks -> HashedIDs -> CutPath -> FilePath -> Action ()
-writeResult cfg ref ids path out = unhashIDsFile cfg ref ids path out
+writeResult cfg ref ids path out = do
+  -- liftIO $ putStrLn $ "writing result to '" ++ out ++ "'"
+  unhashIDsFile cfg ref ids path out
 
 -- TODO what happens when the txt is a binary plot image?
 printLong :: CutConfig -> Locks -> HashedIDs -> Handle -> FilePath -> Action ()
