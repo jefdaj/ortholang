@@ -35,6 +35,7 @@ import qualified ShortCut.Modules.OrthoGroups as OrthoGroups
 import qualified ShortCut.Modules.Busco as Busco
 import qualified ShortCut.Modules.Range as Range
 import qualified ShortCut.Modules.SetsTable as SetsTable
+import qualified ShortCut.Modules.AllVsAll as AllVsAll
 
 modules :: [CutModule]
 modules =
@@ -69,4 +70,5 @@ modules =
   , Busco.cutModule
   , Range.cutModule
   , SetsTable.cutModule
+  , AllVsAll.cutModule
   ]
