@@ -1,6 +1,9 @@
 module ShortCut.Modules.AllVsAll
   where
 
+-- TODO this should be easily doable using the extractExprs trick for lists but not fn calls,
+--      but should you bother since it also might not be needed for the greencut algorithm?
+
 -- import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rExpr)
