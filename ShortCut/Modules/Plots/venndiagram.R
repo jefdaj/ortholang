@@ -17,16 +17,16 @@ read_list <- function(filename)
 
 read_lol <- function(filename) {
   # read a list of lists
-  filenames <- sort(read_list(filename))
+  filenames <- read_list(filename)
   lapply(setNames(filenames, sub('.txt', '', filenames)), read_list)
 }
 
 read_named_lol <- function(namesfile, listsfile) {
-	listnames <- read_list(namesfile)
+  listnames <- read_list(namesfile)
   lists <- read_lol(listsfile)
-	stopifnot(length(listnames) == length(lists))
-	names(lists) <- listnames
-	return(lists)
+  stopifnot(length(listnames) == length(lists))
+  names(lists) <- listnames
+  return(lists)
 }
 
 plot_lists <- function(lists, filename) {
@@ -57,7 +57,7 @@ main <- function() {
   plotPath  <- args[[1]]
   namesPath <- args[[2]] # might contain "<<emptystr>>"?
   listsPath <- args[[3]] # might contain "<<emptystr>>"?
-	read_named_lol(namesPath, listsPath) %>% plot_lists(plotPath)
+  read_named_lol(namesPath, listsPath) %>% plot_lists(plotPath)
 }
 
 main()
