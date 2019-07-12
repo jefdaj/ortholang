@@ -176,8 +176,15 @@ plotCache cfg = cacheDir cfg "plots"
 
 rPlotListOfLists :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(CutFun _ _ _ _ [lol]) = do
-  let (labels, lists) = unzip $ map (\e -> (plotLabel st e, exprPath st e)) (extractExprs scr lol)
-      lists' = map (fromCutPath cfg) lists
+  (ExprPath lPath) <- rExpr st lol -- TODO is this needed?
+  -- (lists, labels) <- fmap unzip $ mapM (\e -> (rExpr st e, return $ plotLabel st e)) (extractExprs scr lol)
+  listsNLabels <- mapM (\e -> do
+                          p <- rExpr st e
+                          return (p, plotLabel st e)) (extractExprs scr lol)
+  let (lists, labels) = unzip listsNLabels
+  -- let (labels, lists) = unzip $ map (\e -> (plotLabel st e, exprPath st e)) (extractExprs scr lol)
+  let lists'  = map (\(ExprPath p) -> p) lists
+      -- ePaths' = map (\(ExprPath p) -> p) ePaths
       outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'
@@ -185,15 +192,19 @@ rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(CutFun _ _ _ _ [lol]) = do
       labPath  = cDir </> digest expr ++ "_names.txt"
       aLolPath = cDir </> digest expr ++ "_lists.txt"
   labPath  %> \_ -> do
+    -- debugNeed cfg "rPlotListOfLists" (lPath:ePaths')
     liftIO $ createDirectoryIfMissing True cDir
     -- liftIO $ putStrLn $ "labels: " ++ show labels
     writeCachedLines cfg ref labPath labels
   aLolPath %> \_ -> do
+    -- debugNeed cfg "rPlotListOfLists" (lPath:ePaths')
     liftIO $ createDirectoryIfMissing True cDir
-    debugNeed cfg "rPlotListOfLists" lists'
     -- liftIO $ putStrLn $ "lists: " ++ show lists
-    writeLits cfg ref aLolPath $ map (fromCutPath cfg) lists
+    debugNeed cfg "rPlotListOfLists" lists'
+    writeLits cfg ref aLolPath lists'
   outPath' %> \_ -> do
+    debugNeed cfg "rPlotListOfLists" (lPath:labPath:aLolPath:[])
+    -- debugNeed cfg "rPlotListOfLists" [labPath, aLolPath]
     withBinHash cfg ref expr outPath $ \out ->
       aSimpleScript script cfg ref ids (out:map (toCutPath cfg) [labPath, aLolPath])
   return outPath''
