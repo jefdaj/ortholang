@@ -67,11 +67,11 @@ myShake cfg rules = do
       , shakeThreads   = 0 -- TODO make customizable? increase?
       , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
       , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
-      -- , shakeChange    = ChangeModtimeAndDigest -- TODO test this
+      , shakeChange    = ChangeModtimeAndDigest -- TODO test this
       -- , shakeCommandOptions = [EchoStdout True]
-      -- , shakeProgress = progressSimple
+      -- , shakeProgress = progressProgram
       -- , shakeLineBuffering = True
-      -- , shakeStaunch = True
+      -- , shakeStaunch = True -- TODO is this a good idea?
       -- , shakeColor = True
       -- TODO shakeShare to implement shared cache on the demo site!
       }
