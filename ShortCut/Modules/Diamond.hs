@@ -1,7 +1,6 @@
 module ShortCut.Modules.Diamond
   where
 
--- TODO any point in a diamond_makedb_each fn?
 -- TODO any point in adding a daa type?
 
 import Development.Shake
@@ -18,7 +17,7 @@ import ShortCut.Modules.Blast      (bht)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))
-import ShortCut.Core.Compile.Map (rMap)
+import ShortCut.Core.Compile.Map (rMap, rMapSimpleScript)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -27,9 +26,10 @@ cutModule = CutModule
   , mTypes = [fna, faa, dmnd]
   , mFunctions =
       [ diamondmakedb
+      , diamondmakedbEach
       , diamondmakedbAll
       ]
-      ++ map mkDiamondBlast variants
+      ++ map mkDiamondBlast variants -- includes the _each ones too
   }
 
 dmnd :: CutType
@@ -54,6 +54,19 @@ diamondmakedb = let name = "diamond_makedb" in CutFunction
   , fTypeCheck = defaultTypeCheck [faa] dmnd
   , fFixity    = Prefix
   , fRules     = rSimpleScriptPar "diamond_makedb.sh"
+  }
+
+-------------------------
+-- diamond_makedb_each --
+-------------------------
+
+diamondmakedbEach :: CutFunction
+diamondmakedbEach = let name = "diamond_makedb_each" in CutFunction
+  { fName      = name
+  , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
+  , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf dmnd)
+  , fFixity    = Prefix
+  , fRules     = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
 ------------------------
@@ -85,36 +98,51 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 -- diamond_blast* --
 --------------------
 
-type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType)
+-- type RulesFn     = CutState -> CutExpr -> Rules ExprPath
+-- type ActionFn    = CutConfig -> CacheDir -> [ExprPath] -> Action ()
+type ActionFn2 = CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
+type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType, CutType)
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?
 variants :: [DiamondBlastDesc]
 variants =
-  [ ("blastp"                  , rDiamondFromFa, ["blastp"                    ], faa, faa )
-  , ("blastp_sensitive"        , rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa )
-  , ("blastp_more_sensitive"   , rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa )
-  , ("blastp_db"               , rDiamondFromDb, ["blastp"                    ], faa, dmnd)
-  , ("blastp_db_sensitive"     , rDiamondFromDb, ["blastp", "--sensitive"     ], faa, dmnd)
-  , ("blastp_db_more_sensitive", rDiamondFromDb, ["blastp", "--more-sensitive"], faa, dmnd)
-  , ("blastx"                  , rDiamondFromFa, ["blastx"                    ], fna, faa )
-  , ("blastx_sensitive"        , rDiamondFromFa, ["blastx", "--sensitive"     ], fna, faa )
-  , ("blastx_more_sensitive"   , rDiamondFromFa, ["blastx", "--more-sensitive"], fna, faa )
-  , ("blastx_db"               , rDiamondFromDb, ["blastx"                    ], fna, dmnd)
-  , ("blastx_db_sensitive"     , rDiamondFromDb, ["blastx", "--sensitive"     ], fna, dmnd)
-  , ("blastx_db_more_sensitive", rDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd)
+  [ ("blastp"                       , rDiamondFromFa          , ["blastp"                    ], faa, faa , bht)
+  , ("blastp_sensitive"             , rDiamondFromFa          , ["blastp", "--sensitive"     ], faa, faa , bht)
+  , ("blastp_more_sensitive"        , rDiamondFromFa          , ["blastp", "--more-sensitive"], faa, faa , bht)
+  , ("blastx"                       , rDiamondFromFa          , ["blastx"                    ], fna, faa , bht)
+  , ("blastx_sensitive"             , rDiamondFromFa          , ["blastx", "--sensitive"     ], fna, faa , bht)
+  , ("blastx_more_sensitive"        , rDiamondFromFa          , ["blastx", "--more-sensitive"], fna, faa , bht)
+
+  , ("blastp_db"                    , rSimple . aDiamondFromDb, ["blastp"                    ], faa, dmnd, bht)
+  , ("blastp_db_sensitive"          , rSimple . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, dmnd, bht)
+  , ("blastp_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, dmnd, bht)
+  , ("blastx_db"                    , rSimple . aDiamondFromDb, ["blastx"                    ], fna, dmnd, bht)
+  , ("blastx_db_sensitive"          , rSimple . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, dmnd, bht)
+  , ("blastx_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd, bht)
+
+  , ("blastp_each"                  , rDiamondFromFaEach      , ["blastp"                    ], faa, ListOf faa , ListOf bht)
+  , ("blastp_sensitive_each"        , rDiamondFromFaEach      , ["blastp", "--sensitive"     ], faa, ListOf faa , ListOf bht)
+  , ("blastp_more_sensitive_each"   , rDiamondFromFaEach      , ["blastp", "--more-sensitive"], faa, ListOf faa , ListOf bht)
+  , ("blastx_each"                  , rDiamondFromFaEach      , ["blastx"                    ], fna, ListOf faa , ListOf bht)
+  , ("blastx_sensitive_each"        , rDiamondFromFaEach      , ["blastx", "--sensitive"     ], fna, ListOf faa , ListOf bht)
+  , ("blastx_more_sensitive_each"   , rDiamondFromFaEach      , ["blastx", "--more-sensitive"], fna, ListOf faa , ListOf bht)
+
+  , ("blastp_db_each"               , rMap 3 . aDiamondFromDb , ["blastp"                    ], faa, ListOf dmnd, ListOf bht)
+  , ("blastp_db_sensitive_each"     , rMap 3 . aDiamondFromDb , ["blastp", "--sensitive"     ], faa, ListOf dmnd, ListOf bht)
+  , ("blastp_db_more_sensitive_each", rMap 3 . aDiamondFromDb , ["blastp", "--more-sensitive"], faa, ListOf dmnd, ListOf bht)
+  , ("blastx_db_each"               , rMap 3 . aDiamondFromDb , ["blastx"                    ], fna, ListOf dmnd, ListOf bht)
+  , ("blastx_db_sensitive_each"     , rMap 3 . aDiamondFromDb , ["blastx", "--sensitive"     ], fna, ListOf dmnd, ListOf bht)
+  , ("blastx_db_more_sensitive_each", rMap 3 . aDiamondFromDb , ["blastx", "--more-sensitive"], fna, ListOf dmnd, ListOf bht)
   ]
 
 mkDiamondBlast :: DiamondBlastDesc -> CutFunction
-mkDiamondBlast (name, rFn, dCmd, qType, sType) = let name' = "diamond_" ++ name in CutFunction
+mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" ++ name in CutFunction
   { fName      = name'
-  , fTypeDesc  = mkTypeDesc name' [num, qType, sType] bht 
-  , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
+  , fTypeCheck = defaultTypeCheck [num, qType, sType] rType
   , fFixity    = Prefix
   , fRules     = rFn dCmd
   }
-
-rDiamondFromDb :: [String] -> RulesFn
-rDiamondFromDb = rSimple . aDiamondFromDb
 
 aDiamondFromDb :: [String] -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
@@ -134,7 +162,6 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     , cmdRmPatterns = [o'', o'' <.> "out"]
     }
   sanitizeFileInPlace cfg ref o'
- 
   where
     o'  = fromCutPath cfg o
     e'  = fromCutPath cfg e
@@ -154,21 +181,12 @@ rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
     dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
 
--------------------------
--- diamond_blast*_each --
--------------------------
-
-mkDiamondEach :: DiamondBlastDesc -> CutFunction
-mkDiamondEach d@(name, fn, args, qType, sType) = CutFunction
-  { fName      = name'
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name' [num, qType, ListOf sType] (ListOf bht)
-  , fFixity    = Prefix
-  , fRules     = rMkDiamondEach fn args
-  }
+-- same, but inserts a "makedb_each" call
+rDiamondFromFaEach :: [String] -> RulesFn
+rDiamondFromFaEach dCmd st (CutFun rtn salt deps _ [e, q, s])
+  = rules st (CutFun rtn salt deps name1 [e, q, dbExpr])
   where
-    name' = name ++ "_each"
-
--- type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType)
-rMkDiamondEach :: ([String] -> RulesFn) -> [String] -> RulesFn
-rMkDiamondEach fn args = rMap 3 $ fn args
+    rules  = rMap 3 $ aDiamondFromDb dCmd
+    name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd ++ "_each"
+    dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb_each" [s]
+rDiamondFromFaEach _ _ _ = fail "bad argument to rDiamondFromFa"
