@@ -18,6 +18,7 @@ import ShortCut.Modules.Blast      (bht)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))
+import ShortCut.Core.Compile.Map (rMap)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -152,3 +153,22 @@ rDiamondFromFa dCmd st (CutFun rtn salt deps _ [e, q, s])
     name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
     dbExpr = CutFun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
+
+-------------------------
+-- diamond_blast*_each --
+-------------------------
+
+mkDiamondEach :: DiamondBlastDesc -> CutFunction
+mkDiamondEach d@(name, fn, args, qType, sType) = CutFunction
+  { fName      = name'
+  , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name' [num, qType, ListOf sType] (ListOf bht)
+  , fFixity    = Prefix
+  , fRules     = rMkDiamondEach fn args
+  }
+  where
+    name' = name ++ "_each"
+
+-- type DiamondBlastDesc = (String, [String] -> RulesFn, [String], CutType, CutType)
+rMkDiamondEach :: ([String] -> RulesFn) -> [String] -> RulesFn
+rMkDiamondEach fn args = rMap 3 $ fn args

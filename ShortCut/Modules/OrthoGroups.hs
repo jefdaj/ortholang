@@ -34,6 +34,7 @@ import Data.List                   (isPrefixOf)
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
 import ShortCut.Modules.SonicParanoid (spr)
+import ShortCut.Modules.GreenCut      (gcr)
 
 -- this is just shorthand
 sll :: CutType
@@ -69,7 +70,7 @@ og :: CutType
 og = CutTypeGroup
   { tgExt = "og"
   , tgDesc = "orthogroups (orthofinder or sonicparanoid results)"
-  , tgMember = \t -> t `elem` [ofr, spr]
+  , tgMember = \t -> t `elem` [ofr, spr, gcr]
   }
 
 -----------------

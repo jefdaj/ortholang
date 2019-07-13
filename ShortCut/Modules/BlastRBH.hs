@@ -148,13 +148,19 @@ aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show
 reciprocalBestEach :: CutFunction
 reciprocalBestEach = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [bht, ListOf bht] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [bht, ListOf bht] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] (ListOf bht)
+  , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rMap 2 aReciprocalBest
+  -- , fRules     = rMap 2 aReciprocalBest -- TODO rewrite!
+  , fRules     = rReciprocalBestEach
   }
   where
     name = "reciprocal_best_each"
+
+rReciprocalBestEach = undefined
+-- TODO extractExprs from both lists, taking on that issue
+-- TODO guard that both are the same length, then zip up
+-- TODO generate reciprocal_best calls for each pair
 
 -----------------
 -- *blast*_rbh --

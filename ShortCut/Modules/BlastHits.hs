@@ -23,9 +23,9 @@ cutModule = CutModule
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach
-    , mkFilterHits "evalue"         , mkFilterHitsEach "evalue"
-    , mkFilterHits "bitscore"       , mkFilterHitsEach "bitscore"
-    , mkFilterHits "percentidentity", mkFilterHitsEach "percentidentity"
+    , mkFilterHits "evalue"  , mkFilterHitsEach "evalue"
+    , mkFilterHits "bitscore", mkFilterHitsEach "bitscore"
+    , mkFilterHits "pident"  , mkFilterHitsEach "pident"
     -- TODO mkFilterHits "rawscore", mkFilterHitsEach "rawscore"
     , bestHits, bestHitsEach
     ]

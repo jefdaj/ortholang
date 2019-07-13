@@ -4,10 +4,12 @@
 with import ../../../nixpkgs;
 
 let
-  myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
-    dplyr
-  ];};
-  runDepends = [ myR ];
+  # TODO any reason to use python 3?
+  myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
+    # biopython
+    ipython # TODO remove
+  ]);
+  runDepends = [ myPython ];
 
 in stdenv.mkDerivation {
   name = "shortcut-greencut";
