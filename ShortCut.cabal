@@ -93,6 +93,7 @@ executable shortcut
                     ShortCut.Modules.Range,
                     ShortCut.Modules.SetsTable,
                     ShortCut.Modules.AllVsAll,
+                    ShortCut.Modules.GreenCut,
                     ShortCut.Reference,
                     ShortCut.Test,
                     ShortCut.Test.Versions

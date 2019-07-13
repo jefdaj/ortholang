@@ -23,6 +23,7 @@ let
   shortcut-load          = import ./ShortCut/Modules/Load;
   shortcut-range         = import ./ShortCut/Modules/Range;
   shortcut-orthogroups   = import ./ShortCut/Modules/OrthoGroups;
+  shortcut-greencut      = import ./ShortCut/Modules/GreenCut;
 
   # myPython = python27Packages.python.withPackages (ps: with ps; [
     # biopython
@@ -57,6 +58,7 @@ let
     # ++ shortcut-muscle.runDepends
     # ++ shortcut-orthofinder.runDepends;
     ++ shortcut-orthogroups.runDepends;
+    # ++ shortcut-greencut.runDepends;
     # ++ shortcut-plots.runDepends;
     # ++ shortcut-setstable.runDepends;
     # ++ shortcut-psiblast.runDepends
@@ -87,6 +89,7 @@ let
     shortcut-load
     shortcut-range
     shortcut-orthogroups
+    shortcut-greencut
 
     # cdhit
     diffutils

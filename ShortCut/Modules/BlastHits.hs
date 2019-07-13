@@ -31,7 +31,7 @@ cutModule = CutModule
 hittable :: CutType
 hittable = CutTypeGroup
   { tgExt = "hittable"
-  , tgDesc  = "files in "
+  , tgDesc  = "BLAST hit table-like"
   , tgMember = \t -> t `elem` [bht, crb] -- TODO mms too
   }
 
@@ -128,6 +128,7 @@ aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 -- filter_evalue(_each) --
 --------------------------
 
+-- TODO also write filter_bitscore
 filterEvalue :: CutFunction
 filterEvalue = CutFunction
   { fName      = name
@@ -179,6 +180,8 @@ aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show arg
 -- TODO move to BlastRBH?
 -- TODO rename to just "best" and "best_each"?
 
+-- TODO should this return whatever hittable type it's given?
+-- TODO split into best_hits_evalue and best_hits_bitscore?
 bestHits :: CutFunction
 bestHits =  CutFunction
   { fName      = name 

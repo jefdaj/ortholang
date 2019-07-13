@@ -36,6 +36,7 @@ import qualified ShortCut.Modules.Busco as Busco
 import qualified ShortCut.Modules.Range as Range
 import qualified ShortCut.Modules.SetsTable as SetsTable
 import qualified ShortCut.Modules.AllVsAll as AllVsAll
+import qualified ShortCut.Modules.GreenCut as GreenCut
 
 modules :: [CutModule]
 modules =
@@ -71,4 +72,5 @@ modules =
   , Range.cutModule
   , SetsTable.cutModule
   , AllVsAll.cutModule
+  , GreenCut.cutModule
   ]

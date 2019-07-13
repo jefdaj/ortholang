@@ -10,7 +10,7 @@ let
   runDepends = [ myR ];
 
 in stdenv.mkDerivation {
-  name = "shortcut-blasthits";
+  name = "shortcut-greencut";
   src = ./.;
   inherit runDepends;
   buildInputs = [ makeWrapper ] ++ runDepends;
