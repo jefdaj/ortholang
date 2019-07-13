@@ -49,7 +49,7 @@ let
     # ++ shortcut-biomartr.runDepends
     # ++ shortcut-blast.runDepends
     # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
-    # ++ shortcut-blasthits.runDepends
+    ++ shortcut-blasthits.runDepends;
     # ++ shortcut-blastrbh.runDepends
     # ++ shortcut-crbblast.runDepends
     # ++ shortcut-diamond.runDepends
@@ -57,7 +57,7 @@ let
     # ++ shortcut-mmseqs.runDepends
     # ++ shortcut-muscle.runDepends
     # ++ shortcut-orthofinder.runDepends;
-    ++ shortcut-orthogroups.runDepends;
+    # ++ shortcut-orthogroups.runDepends;
     # ++ shortcut-greencut.runDepends;
     # ++ shortcut-plots.runDepends;
     # ++ shortcut-setstable.runDepends;

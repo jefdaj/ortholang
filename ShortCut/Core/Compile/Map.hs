@@ -111,8 +111,10 @@ rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name expr
       elemCacheDir   = (fromCutPath cfg $ cacheDir cfg "each") </> hashFun s e
       elemCacheDir'  = toCutPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
-      (ListOf eType) = debug cfg ("type of '" ++ render (pPrint e)
-                                  ++ "' (" ++ show e ++ ") is " ++ show r) r
+      eType = case r of
+                (ListOf t) -> debug cfg ("type of '" ++ render (pPrint e)
+                                  ++ "' (" ++ show e ++ ") is " ++ show t) t
+                _ -> error $ "bad argument to rMapMain: " ++ show e
   elemCachePtn %> aMapElem cfg ref ids eType mTmpFn actFn singleName salt
   mainOutPath  %> aMapMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath

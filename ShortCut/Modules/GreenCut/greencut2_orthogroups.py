@@ -48,8 +48,10 @@ def calc_pdists(gen):
         # TODO in rb_hits, there should only ever be one sid right?
         if not hit.sid in pdists[hit.qid]:
             pdists[hit.qid][hit.sid] = []
+        assert hit.pident >= 0.0, hit.pident <= 100.0 # TODO rounding errors here?
+        # TODO calculated like they say in the methods, will this exclude all paralogs in chlamy?
         pdist = 1 - (hit.pident / 100)
-        assert pdist > 0, pdist < 1
+        # print(hit.__dict__)
         pdists[hit.qid][hit.sid].append(pdist)
     return pdists
 

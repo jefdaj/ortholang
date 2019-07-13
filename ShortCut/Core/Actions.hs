@@ -403,7 +403,10 @@ handleCmdError cfg ref bin n stderrPath rmPatterns = do
                else return []
   -- let files' = sort $ nub rmPatterns
   files' <- fmap concat $ mapM (matchPattern cfg) rmPatterns
-  liftIO $ rmAll $ sort $ nub files' -- TODO should these be patterns to match first?
+  let files'' = sort $ nub files'
+  liftIO $ if cfgDebug cfg
+    then putStrLn $ "these files would be deleted, --debug is enabled: " ++ show files''
+    else rmAll files'' -- TODO should these be patterns to match first?
   -- TODO does this get caught by recoverAll in eval? make sure it does!
   -- TODO also try adding a manual flush before each external command in case it's an io delay thing
   let errMsg = if cfgDebug cfg
