@@ -23,8 +23,11 @@ cutModule = CutModule
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach
-    , filterEvalue  , filterEvalueEach
-    , bestHits      , bestHitsEach
+    , mkFilterHits "evalue"         , mkFilterHitsEach "evalue"
+    , mkFilterHits "bitscore"       , mkFilterHitsEach "bitscore"
+    , mkFilterHits "percentidentity", mkFilterHitsEach "percentidentity"
+    -- TODO mkFilterHits "rawscore", mkFilterHitsEach "rawscore"
+    , bestHits, bestHitsEach
     ]
   }
 
@@ -124,54 +127,59 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     tmpPath'  = outPath'' <.> "tmp" -- the non-deduped version
 aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 
---------------------------
--- filter_evalue(_each) --
---------------------------
+---------------------
+-- filter_*(_each) --
+---------------------
 
--- TODO also write filter_bitscore
 filterEvalue :: CutFunction
-filterEvalue = CutFunction
+filterEvalue = mkFilterHits "evalue"
+
+mkFilterHits :: String -> CutFunction
+mkFilterHits colname = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
   , fFixity    = Prefix
-  , fRules     = rSimple aFilterEvalue
+  , fRules     = rSimple $ aFilterHits colname
   }
   where
-    name = "filter_evalue"
+    name = "filter_" ++ colname
 
 filterEvalueEach :: CutFunction
-filterEvalueEach = CutFunction
+filterEvalueEach = mkFilterHitsEach "evalue"
+
+mkFilterHitsEach :: String -> CutFunction
+mkFilterHitsEach colname = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
   , fFixity    = Prefix
-  , fRules     = rMap 2 aFilterEvalue
+  , fRules     = rMap 2 $ aFilterHits colname
   }
   where
-    name = "filter_evalue_each"
+    name = "filter_" ++ colname ++ "_each"
 
-aFilterEvalue :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
-aFilterEvalue cfg ref _ [out, evalue, hits] = do
+aFilterHits :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
+aFilterHits colname cfg ref _ [out, cutoff, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = out''
-    , cmdInPatterns = [evalue', hits']
+    , cmdInPatterns = [cutoff', hits']
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdOptions =[]
-    , cmdBinary = "filter_evalue.R"
-    , cmdArguments = [out', evalue', hits']
+    , cmdBinary = "filter_hits.R"
+    , cmdArguments = [out', colname, cutoff', hits']
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out'']
     }
   where
     out'    = fromCutPath cfg out
-    out''   = debugA cfg "aFilterEvalue" out' [out', evalue', hits']
-    evalue' = fromCutPath cfg evalue
+    out''   = debugA cfg "aFilterHits" out' [out', cutoff', hits']
+    cutoff' = fromCutPath cfg cutoff
     hits'   = fromCutPath cfg hits
-aFilterEvalue _ _ _ args = error $ "bad argument to aFilterEvalue: " ++ show args
+aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
 
 -------------------------------
 -- get the best hit per gene --

@@ -21,14 +21,14 @@ write_hits <- function(hits, filename) {
               quote=FALSE, row.names=FALSE, col.names=FALSE)
 }
 
-filter_evalue <- function(out, num, bht) {
+filter_hits <- function(out, colname, num, bht) {
   cutoff <- as.numeric(read.table(num)) # TODO fail if this doesn't parse!
-  read_hits(bht) %>% filter(evalue <= cutoff) %>% write_hits(out)
+  read_hits(bht) %>% filter_(colname <= cutoff) %>% write_hits(out) # TODO is that right?
 }
 
 main <- function() {
   args <- commandArgs(trailingOnly = TRUE)
-  filter_evalue(args[[1]], args[[2]], args[[3]])
+  filter_hits(args[[1]], args[[2]], args[[3]], args[[4]])
 }
 
 main()
