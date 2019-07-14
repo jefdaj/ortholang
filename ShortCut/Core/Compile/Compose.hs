@@ -16,7 +16,7 @@ import ShortCut.Core.Paths (exprPath, fromCutPath)
 -- compose1 --
 --------------
 
--- `compose fn1 fn2` is kind of lie `fn2 . fn1` in Haskell
+-- `compose fn1 fn2` is kind of like `fn2 . fn1` in Haskell
 -- TODO can it figure out the types automatically from fn1 and fn2?
 
 compose1 :: String      -- overall function name

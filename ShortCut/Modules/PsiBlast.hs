@@ -33,6 +33,7 @@ import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
 cutModule = CutModule
+  -- TODO move doc to its file
   { mName = "PsiBLAST"
   , mDesc = "Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.\n\
             \\n\

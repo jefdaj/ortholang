@@ -27,7 +27,7 @@ cutModule = CutModule
     map mkBlastFromFaRev     blastDescsRev ++
     map mkBlastFromFaRevEach blastDescsRev ++
 
-    [reciprocalBest, reciprocalBestEach] ++
+    [reciprocalBest, reciprocalBestAll] ++
 
     map mkBlastRbh     blastDescsRev ++
     map mkBlastRbhEach blastDescsRev
@@ -145,22 +145,25 @@ aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show
 -- reciprocal_best_each --
 --------------------------
 
-reciprocalBestEach :: CutFunction
-reciprocalBestEach = CutFunction
+reciprocalBestAll :: CutFunction
+reciprocalBestAll = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
+  , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
   , fFixity    = Prefix
-  -- , fRules     = rMap 2 aReciprocalBest -- TODO rewrite!
-  , fRules     = rReciprocalBestEach
+  , fRules     = rReciprocalBestAll
+  -- , fRules     = rSimpleScript $ name ++ ".R"
   }
   where
-    name = "reciprocal_best_each"
+    name = "reciprocal_best_all"
 
-rReciprocalBestEach = undefined
--- TODO extractExprs from both lists, taking on that issue
--- TODO guard that both are the same length, then zip up
--- TODO generate reciprocal_best calls for each pair
+rReciprocalBestAll :: RulesFn
+rReciprocalBestAll st (CutFun rtn salt deps _ [ls, rs])
+  = rExpr st (CutFun rtn salt deps "reciprocal_best" [c_ls, c_rs])
+  where
+    c_ls = (CutFun rtn salt (depsOf ls) "concat_bht" [ls])
+    c_rs = (CutFun rtn salt (depsOf rs) "concat_bht" [rs])
+rReciprocalBestAll _ e = error $ "bad argument to rRecipocalBestAll: " ++ show e
 
 -----------------
 -- *blast*_rbh --
