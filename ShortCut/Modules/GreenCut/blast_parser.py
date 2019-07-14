@@ -1,5 +1,8 @@
+#!/usr/bin/env python2
+
 # This module is for handling BLAST output lists (in -outfmt 6/ -m8 format).
 # It's documented on https://www.biostars.org/p/253984/
+# TODO how to import it from greencut2_orthogroups.py?
 
 from itertools import groupby
 

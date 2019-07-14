@@ -25,7 +25,9 @@ in stdenv.mkDerivation {
       [[ "$base" == default.nix ]] && continue
       dest="$out/bin/$base"
       install -m755 $script $dest
-      wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+      wrapProgram $dest \
+        --prefix PATH : "${pkgs.lib.makeBinPath runDepends}" \
+        --prefix PYTHONPATH : "$out/bin"
     done
   '';
 }
