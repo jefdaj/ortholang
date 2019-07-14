@@ -30,6 +30,7 @@ import System.FilePath             ((<.>))
 import System.Directory            (createDirectoryIfMissing)
 import Data.IORef                  (readIORef)
 import Data.List                   (isPrefixOf)
+import Data.String.Utils           (split)
 
 import ShortCut.Modules.SeqIO         (faa)
 import ShortCut.Modules.OrthoFinder   (ofr)
@@ -69,7 +70,7 @@ cutModule = CutModule
 og :: CutType
 og = CutTypeGroup
   { tgExt = "og"
-  , tgDesc = "orthogroups (orthofinder or sonicparanoid results)"
+  , tgDesc = "orthogroups (orthofinder, sonicparanoid, or greencut results)"
   , tgMember = \t -> t `elem` [ofr, spr, gcr]
   }
 
@@ -124,6 +125,14 @@ parseSonicParanoid cfg ref _ ogPath = do
   where
     parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
 
+parseGreenCut :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action [[String]]
+parseGreenCut cfg ref _ ogPath = do
+  txt <- readFileStrict' cfg ref $ fromCutPath cfg ogPath
+  let groups = map parseLine $ lines txt
+  return groups
+  where
+    parseLine l = filter (/= ":") $ split "\t" l
+
 writeOrthogroups :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> [[String]] -> Action ()
 writeOrthogroups cfg ref _ out groups = do
   -- let groups' = (map . map) (unhashIDs cfg ids) groups
@@ -144,7 +153,8 @@ aOrthogroups rtn cfg ref idsref [out, ogPath] = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
-               else                    error $ "bad type for aOrthogroups: " ++ show rtn
+               else if rtn == gcr then parseGreenCut
+               else error $ "bad type for aOrthogroups: " ++ show rtn
   groups <- parser cfg ref idsref ogPath
   writeOrthogroups cfg ref idsref out groups
 aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args

@@ -12,20 +12,20 @@ cutModule = CutModule
   , mDesc = "A re-implementation of the original GreenCut(2) ortholog-finding algorithm"
   , mTypes = [gcr]
   , mFunctions =
-      [ greencutTwoOrthogroups
+      [ greencutTwoFamilies
       ]
   }
 
 -- TODO what should the file look like?
 gcr :: CutType
 gcr = CutType
-  { tExt  = "spr"
+  { tExt  = "gcr"
   , tDesc = "GreenCut results"
   , tShow = defaultShow
   }
  
-greencutTwoOrthogroups :: CutFunction
-greencutTwoOrthogroups = CutFunction
+greencutTwoFamilies :: CutFunction
+greencutTwoFamilies = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [bht, bht] gcr
   , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
@@ -33,4 +33,4 @@ greencutTwoOrthogroups = CutFunction
   , fRules     = rSimpleScript $ name ++ ".py"
   }
   where
-    name = "greencut2_orthogroups"
+    name = "greencut2_families"
