@@ -10,6 +10,7 @@ let
     # ]);
   myR = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
     dplyr
+    data_table
   ];};
   # runDepends = [ myR parallelblast ];
   # runDepends = [ parallel ncbi-blast myPython myR ];

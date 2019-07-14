@@ -3,16 +3,19 @@ module ShortCut.Modules.BlastRBH where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck)
+import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, absolutizePaths)
 -- import ShortCut.Core.Debug         (debugA)
-import ShortCut.Core.Paths         (CutPath, fromCutPath)
+import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, cacheDir)
+import ShortCut.Core.Util          (digest)
 import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
 import ShortCut.Modules.BlastDB    (ndb, pdb)
 import ShortCut.Modules.SeqIO      (faa)
 import System.Exit                 (ExitCode(..))
+import System.Directory            (createDirectoryIfMissing)
+import System.FilePath             ((</>), (<.>))
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
@@ -151,19 +154,20 @@ reciprocalBestAll = CutFunction
   , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
   , fFixity    = Prefix
-  , fRules     = rReciprocalBestAll
-  -- , fRules     = rSimpleScript $ name ++ ".R"
+  , fRules     = rSimple aReciprocalBestAll
   }
   where
     name = "reciprocal_best_all"
 
-rReciprocalBestAll :: RulesFn
-rReciprocalBestAll st (CutFun rtn salt deps _ [ls, rs])
-  = rExpr st (CutFun rtn salt deps "reciprocal_best" [c_ls, c_rs])
-  where
-    c_ls = (CutFun rtn salt (depsOf ls) "concat_bht" [ls])
-    c_rs = (CutFun rtn salt (depsOf rs) "concat_bht" [rs])
-rReciprocalBestAll _ e = error $ "bad argument to rRecipocalBestAll: " ++ show e
+aReciprocalBestAll :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
+aReciprocalBestAll cfg ref ids (out:ins) = do
+  let cDir = fromCutPath cfg $ cacheDir cfg "blastrbh"
+      tmpPath p = cDir </> digest p <.> "bht"
+      ins' = map (\p -> (p, tmpPath p)) $ map (fromCutPath cfg) ins
+  liftIO $ createDirectoryIfMissing True cDir
+  mapM_ (\(inPath, outPath) -> absolutizePaths cfg ref inPath outPath) ins'
+  aSimpleScriptNoFix "reciprocal_best_all.R" cfg ref ids (out:map (toCutPath cfg . snd) ins')
+aReciprocalBestAll _ _ _ ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
 
 -----------------
 -- *blast*_rbh --

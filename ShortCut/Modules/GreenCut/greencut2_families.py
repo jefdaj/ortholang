@@ -209,7 +209,8 @@ def parse(handle, eval_thresh=10, bitscore_thresh=0):
 # the rest is my code
 
 def debug(*msg):
-    print(msg)
+    # print(msg)
+    pass
 
 # this is a generator
 def read_hits(filename):
