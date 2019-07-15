@@ -48,7 +48,7 @@ cutModule :: CutModule
 cutModule = CutModule
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
-  , mTypes = [og, ofr, spr]
+  , mTypes = [og, ofr, spr, gcr]
   , mFunctions =
       [ orthogroups
       , orthogroupContaining
@@ -151,6 +151,7 @@ writeOrthogroups cfg ref _ out groups = do
 aOrthogroups :: CutType -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroups rtn cfg ref idsref [out, ogPath] = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
+  -- TODO extract this into a parseOrthogroups function
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
                else if rtn == gcr then parseGreenCut
@@ -182,7 +183,7 @@ aOrthogroupContaining :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Acti
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   ids' <- liftIO $ readIORef ids
   geneId <- fmap (lookupID ids') $ readLit cfg ref $ fromCutPath cfg idPath
-  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath
+  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits cfg ref (fromCutPath cfg out) group
 aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
@@ -192,7 +193,6 @@ aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContainin
 ----------------------------
 
 -- TODO think of a better name for this
--- TODO should it start from og instead of ofr/spr?
 orthogroupsContaining :: CutFunction
 orthogroupsContaining = let name = "orthogroups_containing" in CutFunction
   { fName      = name
@@ -212,7 +212,7 @@ aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedIDsRef -> [CutPath
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   ids' <- liftIO $ readIORef ids
   geneIds <- fmap (map $ lookupID ids') $ readLits cfg ref $ fromCutPath cfg idsPath
-  groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle sonicparanoid
+  groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
   writeOrthogroups cfg ref ids out groups'
 aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args

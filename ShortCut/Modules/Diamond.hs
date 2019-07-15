@@ -228,7 +228,7 @@ rDiamondFromFaEach dCmd st (CutFun rtn salt deps name [e, q, ss])
   = rules st (CutFun rtn salt deps name_db [e, q, dbsExpr])
   where
     rules   = rMap 3 $ aDiamondFromDb dCmd
-    name_db = replace "_each" "_db" name
+    name_db = replace "_each" "_db_each" name
     dbsExpr = CutFun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
 rDiamondFromFaEach _ _ _ = fail "bad argument to rDiamondFromFa"
 

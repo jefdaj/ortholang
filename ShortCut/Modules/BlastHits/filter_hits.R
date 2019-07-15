@@ -24,15 +24,24 @@ write_hits <- function(hits, filename) {
 filter_hits <- function(out, colname, num, bht) {
   cutoff <- as.numeric(read.table(num)) # TODO fail if this doesn't parse!
   df <- read_hits(bht)
-	# print(df)
-	if (colname == 'evalue') {
-		# TODO any other cases where the filter should be <=?
-	  df <- filter(df, evalue <= cutoff)
-	} else {
-	  df <- df[df[[colname]] >= cutoff,]
-	}
-	# print(df)
-	write_hits(df, out) # TODO is that right?
+
+  # catch what seem to be random errors reading the tables!
+  issues <- df[which(is.na(df)), ]
+  if (any(is.na(df))) {
+    cat(paste('errors filtering', bht))
+    print(issues)
+    print(geterrmessage())
+    stop()
+  }
+
+  if (colname == 'evalue') {
+    # TODO any other cases where the filter should be <=?
+    df <- filter(df, evalue <= cutoff)
+  } else {
+    df <- df[df[[colname]] >= cutoff,]
+  }
+  # print(df)
+  write_hits(df, out) # TODO is that right?
 }
 
 main <- function() {
