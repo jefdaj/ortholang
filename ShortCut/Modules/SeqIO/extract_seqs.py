@@ -16,9 +16,9 @@ def matches_prefix(seqid, seqids_to_keep):
     # seqid = seqid.split()[0]
     for i in seqids_to_keep:
         if seqid.startswith(i):
-            print "'%s' matches '%s'" % (seqid, i)
+            # print "'%s' matches '%s'" % (seqid, i)
             return True
-    print "warning: no match for seqid '%s'" % seqid
+    # print "warning: no match for seqid '%s'" % seqid
     return False
 
 with open(inids, 'r') as iis:

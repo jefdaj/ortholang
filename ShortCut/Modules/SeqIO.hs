@@ -8,18 +8,17 @@ import Development.Shake
 import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
-import ShortCut.Core.Util          (digest, resolveSymlinks)
-import ShortCut.Core.Actions       (readPaths, debugA, debugNeed, symlink,
+import ShortCut.Core.Util          (digest)
+import ShortCut.Core.Actions       (readPaths, debugA, debugNeed,
                                     writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath, cacheDir)
 import ShortCut.Core.Sanitize      (lookupIDsFile)
-import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix, aLoadHash)
+import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Map  (rMap, rMapSimpleScript)
-import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName, takeExtension)
+import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Modules.Load       (mkLoaders)
 import System.Exit                 (ExitCode(..))
-import Data.List                   (isPrefixOf)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -181,43 +180,14 @@ extractSeqs = CutFunction
   where
     name = "extract_seqs"
 
--- this is very roundabout, but all the copying seems unavoidable...
 aExtractSeqs :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aExtractSeqs cfg ref ids [outPath, inFa, inList] = do
---   let cDir = fromCutPath cfg $ cacheDir cfg "seqio"
---       out'    = fromCutPath cfg outPath
---       inFa'   = fromCutPath cfg inFa
---       rawRes' = cDir </> digest outPath <.> takeExtension out'
---       rawRes  = toCutPath cfg rawRes'
---   liftIO $ createDirectoryIfMissing True cDir
---   -- this doesn't work because loading replaced the original symlinks setup
---   -- rawFa <- if "$TMPDIR/cache/load/"  `isPrefixOf` ((\(CutPath p) -> p) inFa)
---   --   then do
---   --     origFa <- fmap (toCutPath cfg) $ liftIO $ resolveSymlinks Nothing inFa'
---   --     liftIO $ putStrLn $ "passing original of " ++ show inFa ++ ": " ++ show origFa
---   --     return origFa
---   --   else do
---   let rawFa'  = cDir </> digest inFa <.> takeExtension inFa'
---       rawFa   = toCutPath cfg rawFa'
---   liftIO $ putStrLn $ "unhashing " ++ show inFa ++ " -> " ++ show rawFa
---   unhashIDsFile cfg ref ids inFa rawFa'
---   liftIO $ putStrLn $ "running script on rawFa: " ++ show rawFa ++ " -> rawRes: " ++ show rawRes
---   aSimpleScriptNoFix "extract_seqs.py" cfg ref ids [rawRes, rawFa, inList]
---   -- hashIDsFile cfg ref ids rawRes outPath
---   liftIO $ putStrLn $ "reloading " ++ show rawRes
---   outSrc <- aLoadHash True cfg ref ids rawRes (takeExtension out')
---   liftIO $ putStrLn $ "symlinking " ++ show outSrc ++ " -> " ++ show outPath
---   symlink cfg ref outPath outSrc
-
-  -- TODO what about the other way around?
-  --      i think unhashIDs actually should work on partial matches
   let cDir     = fromCutPath cfg $ cacheDir cfg "seqio"
       tmpList' = cDir </> digest inList <.> "txt"
       tmpList  = toCutPath cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
   lookupIDsFile cfg ref ids inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" cfg ref ids [outPath, inFa, tmpList]
-
 aExtractSeqs _ _ _ ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!

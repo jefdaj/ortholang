@@ -151,7 +151,7 @@ readHashedIDs cfg ref path = do
 
 -- TODO display error to user in a cleaner way than error!
 lookupID :: HashedIDs -> String -> [String]
-lookupID ids s = map snd $ filter (\(_,v) -> s `isPrefixOf` v) (M.toList ids)
+lookupID ids s = map fst $ filter (\(_,v) -> s `isPrefixOf` v) (M.toList ids)
 
 -- TODO move to Actions? causes an import cycle so far
 lookupIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()

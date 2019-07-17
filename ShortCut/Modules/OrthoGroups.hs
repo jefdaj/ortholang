@@ -13,7 +13,7 @@ module ShortCut.Modules.OrthoGroups
 
 import Development.Shake
 import ShortCut.Core.Types
-import qualified Data.Map as M
+-- import qualified Data.Map as M
 
 import Control.Monad               (forM)
 import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
@@ -30,7 +30,7 @@ import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))
 import System.Directory            (createDirectoryIfMissing)
 import Data.IORef                  (readIORef)
-import Data.List                   (isPrefixOf)
+-- import Data.List                   (isPrefixOf)
 import Data.String.Utils           (split)
 
 import ShortCut.Modules.SeqIO         (faa)
