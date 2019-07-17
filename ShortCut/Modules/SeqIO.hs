@@ -9,7 +9,7 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
 import ShortCut.Core.Util          (digest)
-import ShortCut.Core.Actions       (readPaths, debugA, debugNeed,
+import ShortCut.Core.Actions       (readPaths, debugA, debugNeed, readLit,
                                     writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath, cacheDir)
 import ShortCut.Core.Sanitize      (lookupIDsFile)
@@ -37,6 +37,7 @@ cutModule = CutModule
     , splitFasta fna, splitFastaEach fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
+    , gbkToFna2
     ]
     ++ mkLoaders True fna
     ++ mkLoaders True faa
@@ -110,6 +111,60 @@ gbkToFna = CutFunction
   }
   where
     name = "gbk_to_fna"
+
+-----------------------
+-- genbank_to_fasta* --
+-----------------------
+
+-- TODO remove gbkToFna and rename this to replace it?
+
+gbkToFna2 :: CutFunction
+gbkToFna2 = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str, gbk] fna
+  , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
+  , fFixity    = Prefix
+  , fRules     = rSimple $ aGenbankToFasta fna
+  }
+  where
+    name = "gbk_to_fna2"
+
+-- TODO silence the output? or is it helpful?
+aGenbankToFasta :: CutType -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
+aGenbankToFasta rtn cfg ref _ [outPath, ftPath, faPath] = do
+  let faPath'   = fromCutPath cfg faPath
+      ftPath'   = fromCutPath cfg ftPath
+      exprDir'  = cfgTmpDir cfg </> "exprs"
+      tmpDir'   = fromCutPath cfg $ cacheDir cfg "seqio"
+      outDir'   = exprDir' </> "load_" ++ extOf rtn
+      outPath'  = fromCutPath cfg outPath
+      outPath'' = debugA cfg "aGenbankToFasta" outPath' [outPath', faPath']
+      -- tmpPath   = tmpDir' </> takeFileName outPath' <.> "tmp"
+      st        = "whole" -- TODO make variants for this?
+      -- args      = [tmpPath, outDir', prefix', faPath']
+  ft <- readLit cfg ref ftPath'
+  let args      = [ "--in_file", faPath'
+                  , "--out_file", outPath'
+                  , "--feature_type", ft
+                  , "--sequence_type", st
+                  -- , "--qualifiers", "locus,locus_tag,gene,product,location_long"]
+                  , "--annotations", "all"]
+  liftIO $ createDirectoryIfMissing True tmpDir'
+  liftIO $ createDirectoryIfMissing True outDir'
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "genbank_to_fasta.py"
+    , cmdArguments = args
+    , cmdFixEmpties = False
+    , cmdParallel = False
+    , cmdOptions = []
+    , cmdInPatterns = [faPath']
+    , cmdOutPath = outPath'
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [outPath']
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [outPath'']
+    }
+aGenbankToFasta _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
 
 -- TODO need to hash IDs afterward!
 gbkToFnaEach :: CutFunction
