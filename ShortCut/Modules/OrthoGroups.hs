@@ -177,7 +177,11 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
 aOrthogroupContaining :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   ids' <- liftIO $ readIORef ids
-  geneId <- fmap (lookupID ids') $ readLit cfg ref $ fromCutPath cfg idPath
+  partialID <- readLit cfg ref $ fromCutPath cfg idPath
+  let geneId = case lookupID ids' partialID of
+                 (k:[]) -> k
+                 ([])   -> error $ "ERROR: id '" ++ partialID ++ "' not found"
+                 ms     -> error $ "ERROR: multiple ids match '" ++ partialID ++ "': " ++ show ms
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits cfg ref (fromCutPath cfg out) group
@@ -203,10 +207,11 @@ type FilterFn = [[String]] -> [String] -> [[String]]
 containsOneOf :: FilterFn
 containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
+-- TODO should this error when not finding one too, like aOrthogroupContaining?
 aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   ids' <- liftIO $ readIORef ids
-  geneIds <- fmap (map $ lookupID ids') $ readLits cfg ref $ fromCutPath cfg idsPath
+  geneIds <- fmap concat $ fmap (map $ lookupID ids') $ readLits cfg ref $ fromCutPath cfg idsPath
   groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
   writeOrthogroups cfg ref ids out groups'
