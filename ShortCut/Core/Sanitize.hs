@@ -151,7 +151,7 @@ readHashedIDs cfg ref path = do
 
 -- TODO display error to user in a cleaner way than error!
 lookupID :: HashedIDs -> String -> [String]
-lookupID ids s = map fst $ filter (\(_,v) -> s `isPrefixOf` v) (M.toList ids)
+lookupID ids s = map fst $ filter (\(k,v) -> s == k || s `isPrefixOf` v) (M.toList ids)
 
 -- TODO move to Actions? causes an import cycle so far
 lookupIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
@@ -159,7 +159,7 @@ lookupIDsFile cfg ref ids inPath outPath = do
   partialIDs <- readList cfg ref $ fromCutPath cfg inPath
   ids' <- liftIO $ readIORef ids
   let lookupFn v = case lookupID ids' v of
-                     [] -> liftIO (putStrLn ("warning: no ID found for '" ++ v ++ "'")) >> return []
+                     [] -> liftIO (putStrLn ("warning: no ID found for '" ++ v ++ "'. these are the ids: " ++ show ids')) >> return []
                      is -> return is
   idKeys <- fmap concat $ mapM lookupFn partialIDs
   writeCachedLines cfg ref (fromCutPath cfg outPath) idKeys
