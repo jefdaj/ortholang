@@ -1,3 +1,5 @@
+bug: allows multiple vars with the same name!
+
 bug: need to print parens around negative numbers when writing script
   is that a special case of mistakenly removing parentheses in math?
 check the profile.html after current greencut run to find out which orthogroup things are slow
