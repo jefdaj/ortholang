@@ -83,7 +83,6 @@ gbkToFaa = CutFunction
   , fTypeCheck = defaultTypeCheck [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   , fFixity    = Prefix
-  -- , fRules     = rSimpleScript "gbk_to_faa.py"
   , fRules     = rSimple $ aGenbankToFasta faa "aa"
   }
   where
@@ -96,8 +95,7 @@ gbkToFaaEach = CutFunction
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
-  -- , fRules     = rMapSimpleScript 1 "gbk_to_faa.py"
-  , fRules     = rMap 1 $ aGenbankToFasta faa "aa"
+  , fRules     = rMap 2 $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa_each"
@@ -108,7 +106,6 @@ gbkToFna = CutFunction
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   , fFixity    = Prefix
-  -- , fRules     = rSimpleScript "gbk_to_fna.py"
   , fRules     = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
@@ -120,12 +117,12 @@ gbkToFnaEach = CutFunction
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   , fFixity    = Prefix
-  -- , fRules     = rMapSimpleScript 1 "gbk_to_fna.py"
-  , fRules     = rMap 1 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  , fRules     = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna_each"
 
+-- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
 aGenbankToFasta :: CutType -> String
                 -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
@@ -137,13 +134,15 @@ aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
       outDir'   = exprDir' </> "load_" ++ extOf rtn
       outPath'  = fromCutPath cfg outPath
       outPath'' = debugA cfg "aGenbankToFasta" outPath' [outPath', faPath']
+  -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
   ft <- readLit cfg ref ftPath'
-  let ft'       = if ft  == "cds" then "CDS" else ft
-      extraArgs = if ft' == "whole" then ["--annotations", "all"] else []
+  let ft' = if ft  == "cds" then "CDS" else ft
+      (st', extraArgs) = if ft' == "whole" then ("whole", ["--annotations", "all"]) else (st, [])
       args = [ "--in_file", faPath'
              , "--out_file", outPath'
-             , "--sequence_type", st
+             , "--sequence_type", st'
              , "--feature_type", ft'] ++ extraArgs
+  -- liftIO $ putStrLn $ "args: " ++ show args
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
   runCmd cfg ref $ CmdDesc
