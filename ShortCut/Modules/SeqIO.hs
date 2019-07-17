@@ -26,8 +26,8 @@ cutModule = CutModule
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
   , mTypes = [gbk, faa, fna, fa]
   , mFunctions =
-    [ gbkToFaa    , gbkToFaaEach
-    , gbkToFna    , gbkToFnaEach
+    [ gbkToFaa, gbkToFaaEach
+    , gbkToFna, gbkToFnaEach
     , extractSeqs , extractSeqsEach
     , extractIds  , extractIdsEach
     , translate   , translateEach
@@ -37,7 +37,6 @@ cutModule = CutModule
     , splitFasta fna, splitFastaEach fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
-    , gbkToFna2
     ]
     ++ mkLoaders True fna
     ++ mkLoaders True faa
@@ -72,18 +71,20 @@ fna = CutType
   , tShow = defaultShow
   }
 
------------------------
--- gbk_to_f*a(_each) --
------------------------
+--------------
+-- gbk_to_* --
+--------------
 
--- TODO need to hash IDs afterward!
+-- TODO should these automatically fill in the "CDS" string?
+
 gbkToFaa :: CutFunction
 gbkToFaa = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [gbk] faa
-  , fTypeDesc  = mkTypeDesc name  [gbk] faa
+  , fTypeCheck = defaultTypeCheck [str, gbk] faa
+  , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   , fFixity    = Prefix
-  , fRules     = rSimpleScript "gbk_to_faa.py"
+  -- , fRules     = rSimpleScript "gbk_to_faa.py"
+  , fRules     = rSimple $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa"
@@ -92,46 +93,43 @@ gbkToFaa = CutFunction
 gbkToFaaEach :: CutFunction
 gbkToFaaEach = CutFunction
   { fName      = name
-  , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf faa)
-  , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf faa)
+  , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
+  , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
-  , fRules     = rMapSimpleScript 1 "gbk_to_faa.py"
+  -- , fRules     = rMapSimpleScript 1 "gbk_to_faa.py"
+  , fRules     = rMap 1 $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa_each"
 
--- TODO need to hash IDs afterward!
 gbkToFna :: CutFunction
 gbkToFna = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [gbk] fna
-  , fTypeDesc  = mkTypeDesc name  [gbk] fna
-  , fFixity    = Prefix
-  , fRules     = rSimpleScript "gbk_to_fna.py"
-  }
-  where
-    name = "gbk_to_fna"
-
------------------------
--- genbank_to_fasta* --
------------------------
-
--- TODO remove gbkToFna and rename this to replace it?
-
-gbkToFna2 :: CutFunction
-gbkToFna2 = CutFunction
   { fName      = name
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   , fFixity    = Prefix
-  , fRules     = rSimple $ aGenbankToFasta fna
+  -- , fRules     = rSimpleScript "gbk_to_fna.py"
+  , fRules     = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
-    name = "gbk_to_fna2"
+    name = "gbk_to_fna"
+
+gbkToFnaEach :: CutFunction
+gbkToFnaEach = CutFunction
+  { fName      = name
+  , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
+  , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
+  , fFixity    = Prefix
+  -- , fRules     = rMapSimpleScript 1 "gbk_to_fna.py"
+  , fRules     = rMap 1 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  }
+  where
+    name = "gbk_to_fna_each"
 
 -- TODO silence the output? or is it helpful?
-aGenbankToFasta :: CutType -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
-aGenbankToFasta rtn cfg ref _ [outPath, ftPath, faPath] = do
+aGenbankToFasta :: CutType -> String
+                -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
+aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
   let faPath'   = fromCutPath cfg faPath
       ftPath'   = fromCutPath cfg ftPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
@@ -139,16 +137,13 @@ aGenbankToFasta rtn cfg ref _ [outPath, ftPath, faPath] = do
       outDir'   = exprDir' </> "load_" ++ extOf rtn
       outPath'  = fromCutPath cfg outPath
       outPath'' = debugA cfg "aGenbankToFasta" outPath' [outPath', faPath']
-      -- tmpPath   = tmpDir' </> takeFileName outPath' <.> "tmp"
-      st        = "whole" -- TODO make variants for this?
-      -- args      = [tmpPath, outDir', prefix', faPath']
   ft <- readLit cfg ref ftPath'
-  let args      = [ "--in_file", faPath'
-                  , "--out_file", outPath'
-                  , "--feature_type", ft
-                  , "--sequence_type", st
-                  -- , "--qualifiers", "locus,locus_tag,gene,product,location_long"]
-                  , "--annotations", "all"]
+  let ft'       = if ft  == "cds" then "CDS" else ft
+      extraArgs = if ft' == "whole" then ["--annotations", "all"] else []
+      args = [ "--in_file", faPath'
+             , "--out_file", outPath'
+             , "--sequence_type", st
+             , "--feature_type", ft'] ++ extraArgs
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
   runCmd cfg ref $ CmdDesc
@@ -164,19 +159,7 @@ aGenbankToFasta rtn cfg ref _ [outPath, ftPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'']
     }
-aGenbankToFasta _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
-
--- TODO need to hash IDs afterward!
-gbkToFnaEach :: CutFunction
-gbkToFnaEach = CutFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [ListOf gbk] (ListOf fna)
-  , fTypeDesc  = mkTypeDesc name  [ListOf gbk] (ListOf fna)
-  , fFixity    = Prefix
-  , fRules     = rMapSimpleScript 1 "gbk_to_fna.py"
-  }
-  where
-    name = "gbk_to_fna_each"
+aGenbankToFasta _ _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
 
 ------------------------
 -- extract_ids(_each) --

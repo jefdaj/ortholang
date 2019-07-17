@@ -8,16 +8,20 @@
 #To install, move this file to your bin directory, adjust the above path to python, and install
 #Biopython.
 
-
 import sys
 import os.path
 from optparse import OptionParser
+
+# TODO don't suppress these?? maybe just re-throw without filenames?
+import warnings
+from Bio import BiopythonParserWarning
+warnings.simplefilter('ignore', BiopythonParserWarning)
+
 from Bio import SeqIO
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqIO import InsdcIO
-
 
 #### Collect Input ####
 #######################
