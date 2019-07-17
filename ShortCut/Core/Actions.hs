@@ -17,6 +17,7 @@ module ShortCut.Core.Actions
   , readLitPaths
   , readString
   , readStrings
+  , readList
   , readFileStrict
   , readFileStrict'
 

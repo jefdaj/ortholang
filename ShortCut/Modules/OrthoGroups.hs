@@ -21,6 +21,7 @@ import ShortCut.Core.Actions       (readLit, readLits, writeLits, cachedLinesPat
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath, upBy, cacheDir)
 import ShortCut.Core.Util          (headOrDie, digest)
+import ShortCut.Core.Sanitize      (lookupID)
 import System.FilePath             ((</>), takeDirectory)
 import Text.Regex.Posix            ((=~))
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
@@ -172,12 +173,6 @@ orthogroupContaining = let name = "orthogroup_containing" in CutFunction
   , fFixity    = Prefix
   , fRules     = rSimple aOrthogroupContaining
   }
-
-lookupID :: HashedIDs -> String -> String
-lookupID ids s = case filter (\(_,v) -> s `isPrefixOf` v) (M.toList ids) of
-  ((k,_):[]) -> k
-  ([])   -> error $ "ERROR: id '" ++ s ++ "' not found"
-  ms     -> error $ "ERROR: multiple ids match '" ++ s ++ "': " ++ show ms
 
 aOrthogroupContaining :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do

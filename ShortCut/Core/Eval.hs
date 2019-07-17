@@ -148,26 +148,28 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
          - if neither, print the full result
          - TODO move this logic to the top level?
          -}
-        ids' <- liftIO $ readIORef ids
-        when (cfgInteractive cfg) (printShort cfg ref ids' hdl rtype path)
+        -- ids' <- liftIO $ readIORef ids
+        when (cfgInteractive cfg) (printShort cfg ref ids hdl rtype path)
         case cfgOutFile cfg of
-          Just out -> writeResult cfg ref ids' (toCutPath cfg path) out
-          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids' hdl path)
+          Just out -> writeResult cfg ref ids (toCutPath cfg path) out
+          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids hdl path)
 
-writeResult :: CutConfig -> Locks -> HashedIDs -> CutPath -> FilePath -> Action ()
-writeResult cfg ref ids path out = do
+writeResult :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> FilePath -> Action ()
+writeResult cfg ref idsref path out = do
   -- liftIO $ putStrLn $ "writing result to '" ++ out ++ "'"
-  unhashIDsFile cfg ref ids path out
+  unhashIDsFile cfg ref idsref path out
 
 -- TODO what happens when the txt is a binary plot image?
-printLong :: CutConfig -> Locks -> HashedIDs -> Handle -> FilePath -> Action ()
-printLong _ ref ids hdl path = do
+printLong :: CutConfig -> Locks -> HashedIDsRef -> Handle -> FilePath -> Action ()
+printLong _ ref idsref hdl path = do
+  ids <- liftIO $ readIORef idsref
   txt <- withReadLock' ref path $ readFile' path
   let txt' = unhashIDs False ids txt
   liftIO $ hPutStrLn hdl txt'
 
-printShort :: CutConfig -> Locks -> HashedIDs -> Handle -> CutType -> FilePath -> Action ()
-printShort cfg ref ids hdl rtype path = do
+printShort :: CutConfig -> Locks -> HashedIDsRef -> Handle -> CutType -> FilePath -> Action ()
+printShort cfg ref idsref hdl rtype path = do
+  ids <- liftIO $ readIORef idsref
   res  <- prettyResult cfg ref rtype $ toCutPath cfg path
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."

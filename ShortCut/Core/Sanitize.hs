@@ -4,6 +4,8 @@ module ShortCut.Core.Sanitize
   , unhashIDs
   , unhashIDsFile
   , readHashedIDs
+  , lookupID
+  , lookupIDsFile
   )
   where
 
@@ -18,6 +20,7 @@ module ShortCut.Core.Sanitize
 -- TODO would doing it in a separate script be better so it can run on other nodes?
 
 -- import Debug.Trace
+import Prelude hiding (readList)
 import qualified Data.DList as D
 import qualified Data.Map   as M
 -- import qualified Text.Regex as R
@@ -27,13 +30,14 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Util    (digest, digestLength, headOrDie)
 import ShortCut.Core.Locks   (withWriteLock')
-import ShortCut.Core.Actions (debugTrackWrite, readFileStrict')
+import ShortCut.Core.Actions (debugTrackWrite, readFileStrict', readList, writeCachedLines)
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes)
 import Data.List             (isPrefixOf, intersperse)
 import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName)
+import Data.IORef                  (readIORef)
 
 type HashedIDList = D.DList (String, String)
 
@@ -117,12 +121,13 @@ unhashIDs longIDs ids t = case findNext t of
 
 -- This sometimes operates internally, but also writes the final result of the cut to a file.
 -- In that case the outpath might not be able to be a cutpath.
-unhashIDsFile :: CutConfig -> Locks -> HashedIDs -> CutPath -> FilePath -> Action ()
-unhashIDsFile cfg ref ids inPath outPath = do
+unhashIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> FilePath -> Action ()
+unhashIDsFile cfg ref idref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
+  ids <- liftIO $ readIORef idref
   let txt' = unhashIDs False ids txt
   -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
   withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
@@ -143,3 +148,18 @@ readHashedIDs cfg ref path = do
   -- liftIO $ putStrLn $ "ids'' with    seqid_: " ++ show ((take 10 $ filter (\(k,_) ->     ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
   -- liftIO $ putStrLn $ "ids'' without seqid_: " ++ show ((take 10 $ filter (\(k,_) -> not ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
   return $ M.fromList ids
+
+-- TODO display error to user in a cleaner way than error!
+lookupID :: HashedIDs -> String -> String
+lookupID ids s = case filter (\(_,v) -> s `isPrefixOf` v) (M.toList ids) of
+  ((k,_):[]) -> k
+  ([])   -> error $ "ERROR: id '" ++ s ++ "' not found"
+  ms     -> error $ "ERROR: multiple ids match '" ++ s ++ "': " ++ show ms
+
+-- TODO move to Actions? causes an import cycle so far
+lookupIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
+lookupIDsFile cfg ref ids inPath outPath = do
+  partialIDs <- readList cfg ref $ fromCutPath cfg inPath
+  ids' <- liftIO $ readIORef ids
+  let idKeys = map (lookupID ids') partialIDs
+  writeCachedLines cfg ref (fromCutPath cfg outPath) idKeys
