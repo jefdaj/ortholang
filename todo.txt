@@ -1,4 +1,5 @@
 bug: allows multiple vars with the same name!
+feature: print to stdout with --output -, or by default?
 
 bug: need to print parens around negative numbers when writing script
   is that a special case of mistakenly removing parentheses in math?
