@@ -77,7 +77,7 @@ import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory, takeExtension)
 import System.FilePath.Glob       (compile, globDir1)
 -- import System.IO                  (IOMode(..), withFile)
-import System.Posix.Files         (createSymbolicLink)
+import System.Posix.Files         (createSymbolicLink, setFileMode)
 import System.Posix.Escape         (escape)
 -- import System.IO.Temp (emptyTempFile)
 -- import Control.Concurrent.Thread.Delay (delay)
@@ -293,6 +293,8 @@ writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whateve
 debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
+  -- also ensure it only gets written once:
+  liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
   debug cfg ("wrote " ++ show fs) (trackWrite fs)
 
 -------------------------
