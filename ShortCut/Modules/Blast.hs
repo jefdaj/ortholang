@@ -96,7 +96,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
-      ptn     = prefix' ++ ".*"
+      ptn     = prefix' ++ "*"
       -- args    = [ "-db", takeFileName prefix'
       --           , "-evalue", eDec
       --           , "-outfmt", "6" -- tab-separated values

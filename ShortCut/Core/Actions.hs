@@ -71,7 +71,7 @@ import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
 import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
-                                   withWriteLock', withWriteOnce)
+                                   withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory, takeExtension)
@@ -361,11 +361,10 @@ runCmd cfg ref@(disk, _) desc = do
   let parLockFn = if cmdParallel desc
                     then \f -> withResource (cfgParLock cfg) 1 f
                     else id
-  let writeLockFn = case (Just $ cmdOutPath desc) of -- TODO it's always Just now right?
-                      Nothing -> parLockFn
-                      Just o  -> \fn -> do
-                        debugL cfg $ "runCmd acquiring write lock on '" ++ o ++ "'"
-                        withWriteLock' ref o $ parLockFn fn
+      writeLockPaths = (cmdOutPath desc):(cmdExtraOutPaths desc)
+      writeLockFn fn = do
+        debugL cfg $ "runCmd acquiring write locks: " ++ show writeLockPaths
+        withWriteLocks' ref writeLockPaths $ parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   writeLockFn $ withReadLocks' ref inPaths' $ do

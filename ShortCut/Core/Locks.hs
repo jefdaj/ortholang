@@ -6,6 +6,7 @@ module ShortCut.Core.Locks
   , withReadLocks'
   , withWriteLock
   , withWriteLock'
+  , withWriteLocks'
   , withWriteOnce
   )
   where
@@ -115,6 +116,15 @@ withWriteLock ref path ioFn = do
     ioFn
   assertNonEmptyFile ref path
   return res
+
+withWriteLocks' :: Locks -> [FilePath] -> Action a -> Action a
+withWriteLocks' ref paths actFn = do
+  liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
+  locks <- liftIO $ mapM (getLock ref) (nub paths)
+  debugLock' $ "withWriteLocks' acquiring " ++ show paths
+  (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
+    `actionFinally`
+    (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
 withWriteLock' :: Locks -> FilePath -> Action a -> Action a
 withWriteLock' ref path actFn = do
