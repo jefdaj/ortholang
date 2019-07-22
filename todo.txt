@@ -1,3 +1,5 @@
+bug: are multiple instances of blastp being run on the same files at once??
+
 bug: allows multiple vars with the same name!
 feature: print to stdout with --output -, or by default?
 

@@ -24,6 +24,7 @@ import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))
 -- import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
+import System.FilePath             ((<.>))
 -- import System.Posix.Escape         (escape)
 
 cutModule :: CutModule
@@ -147,10 +148,10 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     , cmdOptions = []
     , cmdInPatterns = [ptn]
     , cmdOutPath = o''
-    , cmdExtraOutPaths = []
+    , cmdExtraOutPaths = [o'' <.> "out", o'' <.> "err"]
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o'']
+    , cmdRmPatterns = [o'' ++ "*"] -- .out, .err too
     }
  
   where
