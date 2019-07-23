@@ -17,9 +17,7 @@ export BLASTDB="$DBNAME" # TODO DBPATH?
 # TODO query on stdin like the current haskell code?
 # TODO should this .out + .err + mv thing be a regular practice everywhere?
 # TODO and if so, maybe it should be done in haskell? only after it works a couple times the tedious way
-$BLASTCMD -db "$DBNAME" -evalue "$EDEC" -outfmt 6 -query "$QPATH" > "${OUTPATH}.out" 2> "${OUTPATH}.err"
-if [[ -s "${OUTPATH}.out" ]]; then
-  ln -s "$(basename ${OUTPATH}.out)" "$OUTPATH"
-else
+$BLASTCMD -db "$DBNAME" -evalue "$EDEC" -outfmt 6 -query "$QPATH" > "${OUTPATH}" 2> "${OUTPATH}.err"
+if [[ -z "${OUTPATH}" ]]; then
   echo "<<emptybht>>" > "$OUTPATH"
 fi

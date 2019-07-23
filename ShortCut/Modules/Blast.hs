@@ -18,8 +18,8 @@ import ShortCut.Core.Types
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, debugA)
-import ShortCut.Core.Paths         (fromCutPath, CutPath)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, debugA, symlink)
+import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))
@@ -142,18 +142,18 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "blast.sh"
-    , cmdArguments = [o'', bCmd', eDec, q', prefix']
+    , cmdArguments = [o'' <.> "out", bCmd', eDec, q', prefix']
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO make it parallel again?
     , cmdOptions = []
     , cmdInPatterns = [ptn]
-    , cmdOutPath = o''
-    , cmdExtraOutPaths = [o'' <.> "out", o'' <.> "err"]
+    , cmdOutPath = o'' <.> "out"
+    , cmdExtraOutPaths = [o'' <.> "err"]
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*"] -- .out, .err too
     }
- 
+  symlink cfg ref o (toCutPath cfg $ o'' <.> "out")
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
