@@ -32,13 +32,7 @@ import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
 import System.Directory           (createDirectoryIfMissing, doesFileExist)
 import System.FilePath            (takeDirectory)
-import System.Timeout             (timeout)
 -- import Control.Concurrent.Thread.Delay (delay)
-
-
--- TODO make the timeout configurable?
-waitTime :: Int
-waitTime = 1000000 -- in microseconds (1/10^6 sec)
 
 -- TODO parametarize FilePath and re-export with CutPath in Types.hs?
 type Locks = (Resource, IORef (Map FilePath RWLock))
@@ -75,7 +69,7 @@ withReadLock :: Locks -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
   l <- liftIO $ getLock ref path
   bracket_
-    (debugLock ("withReadLock acquiring '" ++ path ++ "'") >> timeout waitTime (RWLock.acquireRead l))
+    (debugLock ("withReadLock acquiring '" ++ path ++ "'") >> RWLock.acquireRead l)
     (debugLock ("withReadLock releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
     ioFn
 
@@ -83,7 +77,7 @@ withReadLock' :: Locks -> FilePath -> Action a -> Action a
 withReadLock' ref path actFn = do
   l <- liftIO $ getLock ref path
   debugLock' $ "withReadLock' acquiring '" ++ path ++ "'"
-  (liftIO (timeout waitTime ((RWLock.acquireRead l))) >> actFn)
+  (liftIO (RWLock.acquireRead l) >> actFn)
     `actionFinally`
     (debugLock ("withReadLock' releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
 
@@ -91,7 +85,7 @@ withReadLocks' :: Locks -> [FilePath] -> Action a -> Action a
 withReadLocks' ref paths actFn = do
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   debugLock' $ "withReadLocks' acquiring " ++ show paths
-  (liftIO (timeout waitTime (mapM_ RWLock.acquireRead locks)) >> actFn)
+  (liftIO (mapM_ RWLock.acquireRead locks) >> actFn)
     `actionFinally`
     (debugLock ("withReadLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseRead locks)
 
@@ -117,7 +111,7 @@ withWriteLock ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   l <- liftIO $ getLock ref path
   res <- bracket_
-    (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> timeout waitTime (RWLock.acquireWrite l))
+    (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
     (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
     ioFn
   assertNonEmptyFile ref path
@@ -128,7 +122,7 @@ withWriteLocks' ref paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
-  (liftIO (timeout waitTime (mapM_ RWLock.acquireWrite locks)) >> actFn)
+  (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
     `actionFinally`
     (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
@@ -137,7 +131,7 @@ withWriteLock' ref path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path
   debugLock' $ "withWriteLock' acquiring '" ++ path ++ "'"
   l <- liftIO $ getLock ref path
-  (liftIO (timeout waitTime (RWLock.acquireWrite l)) >> actFn)
+  (liftIO (RWLock.acquireWrite l) >> actFn)
     `actionFinally`
     (debugLock ("withWriteLock' releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
 
