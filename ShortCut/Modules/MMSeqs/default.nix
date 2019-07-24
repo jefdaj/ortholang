@@ -18,6 +18,7 @@ in stdenv.mkDerivation {
     for script in $src/*; do
       base="$(basename "$script")"
       [[ "$base" == default.nix ]] && continue
+      [[ "$base" == result ]] && continue
       dest="$out/bin/$base"
       install -m755 $script $dest
       wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
