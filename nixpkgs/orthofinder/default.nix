@@ -44,11 +44,7 @@ in stdenv.mkDerivation rec {
     cp -r OrthoFinder-${version}_source/orthofinder/scripts $out/bin/
     cp -r OrthoFinder-${version}_source/orthofinder/tools $out/bin/
     cp OrthoFinder-${version}_source/orthofinder/config.json $out/bin/
-    linker="$(cat $NIX_CC/nix-support/dynamic-linker)"
     echo "patching $exe"
-    # patchelf --interpreter "$linker"  "$exe"
-    # patchelf --set-rpath   "${psiblast-exb.libPath}" "$exe"
-    # patchelf --shrink-rpath "$exe"
     wrapProgram "$exe" --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 }

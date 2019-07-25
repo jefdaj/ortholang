@@ -8,7 +8,7 @@ module ShortCut.Modules.OrthoFinder
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..))
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), debugTrackWrite)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
@@ -58,12 +58,18 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       statsPath = toCutPath cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
                     </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
+      statsPath' = fromCutPath cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
-  withWriteLock' ref (tmpDir </> "lock") $ do
-    faPaths <- readPaths cfg ref faListPath'
-    let faPaths' = map (fromCutPath cfg) faPaths
-    debugNeed cfg "aOrthofinder" faPaths'
-    let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
+  -- withWriteLock' ref (tmpDir </> "lock") $ do
+  faPaths <- readPaths cfg ref faListPath'
+  let faPaths' = map (fromCutPath cfg) faPaths
+  debugNeed cfg "aOrthofinder" faPaths'
+  let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
+  -- orthofinder is sensitive to which files and dirs have been created before it runs
+  -- so we need to lock the tmpDir to prevent it creating something like Results__1
+  -- and we can't mark statsPath' as an extar outpath
+  -- TODO patch orthofinder not to adjust and then do this the standard way
+  withWriteLock' ref tmpDir $ do -- this is important to prevent multiple threads trying at once
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "orthofinder.sh"
@@ -73,12 +79,16 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       , cmdOptions = []
       , cmdInPatterns = faPaths'
       , cmdOutPath = out'' <.> "out"
-      , cmdExtraOutPaths = [out'' <.> "err", tmpDir]
+      , cmdExtraOutPaths = [out'' <.> "err"] -- TODO statsPath'? seems to break it
       , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
       , cmdRmPatterns = [out'', tmpDir]
       }
-    symlink cfg ref out statsPath
+    -- liftIO $ putStrLn $ "out: " ++ show out
+    -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
+    -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
+  debugTrackWrite cfg [statsPath']
+  symlink cfg ref out statsPath
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
