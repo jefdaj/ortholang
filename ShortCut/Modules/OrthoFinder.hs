@@ -11,6 +11,7 @@ import ShortCut.Core.Types
 import Data.List                   (isPrefixOf)
 import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..))
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
+import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Util          (digest, readFileStrict, unlessExists)
 import ShortCut.Modules.SeqIO      (faa)
@@ -57,9 +58,11 @@ aOrthofinder cfg ref _ [out, faListPath] = do
 
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
       resDir = tmpDir </> "result"
+      statsPath = toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
 
-  unlessExists resDir $ do
-    liftIO $ createDirectoryIfMissing True tmpDir
+  -- unlessExists resDir $ do
+  liftIO $ createDirectoryIfMissing True $ tmpDir </> "OrthoFinder"
+  withWriteLock' ref (tmpDir </> "lock") $ do
 
     faPaths <- readPaths cfg ref faListPath'
     let faPaths' = map (fromCutPath cfg) faPaths
@@ -75,27 +78,29 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       , cmdOptions = []
       , cmdInPatterns = faPaths'
       , cmdOutPath = out'' <.> "out"
-      , cmdExtraOutPaths = [out'' <.> "err"]
+      , cmdExtraOutPaths = [out'' <.> "err", tmpDir]
       , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
       , cmdRmPatterns = [out'', tmpDir]
       }
  
+    -- TODO AHA! probably have to tell shake how to track these. split into the main action and another linking one
+    -- TODO or just patch orthofinder not to do the date thing
+
     -- find the results dir and link it to a name that doesn't include today's date
     resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
     -- liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
     symlink cfg ref (toCutPath cfg resDir) (toCutPath cfg $ tmpDir </> "OrthoFinder" </> resName)
 
     -- let resPath = tmpDir </> "Orthofinder" </> resName
-  let statsPath = toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
-  symlink cfg ref out statsPath
-  -- liftIO $ putStrLn $ "resName: " ++ show resName
-  -- liftIO $ putStrLn $ "resPath: " ++ show resPath
-  -- liftIO $ putStrLn $ "resDir: " ++ show resDir
-  -- liftIO $ putStrLn $ "resPath: " ++ show resPath
-  -- liftIO $ putStrLn $ "srcPath: " ++ show srcPath
-  -- TODO ok to have inside unlessExists?
-  -- return ()
+    symlink cfg ref out statsPath
+    -- liftIO $ putStrLn $ "resName: " ++ show resName
+    -- liftIO $ putStrLn $ "resPath: " ++ show resPath
+    -- liftIO $ putStrLn $ "resDir: " ++ show resDir
+    -- liftIO $ putStrLn $ "resPath: " ++ show resPath
+    -- liftIO $ putStrLn $ "srcPath: " ++ show srcPath
+    -- TODO ok to have inside unlessExists?
+    -- return ()
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
