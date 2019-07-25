@@ -68,7 +68,7 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
                                    stringCutPath, toGeneric)
-import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize,
+import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
@@ -294,8 +294,14 @@ debugTrackWrite :: CutConfig -> [FilePath] -> Action ()
 debugTrackWrite cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
   -- also ensure it only gets written once:
-  liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
+  -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
+  liftIO $ mapM_ (setReadOnly cfg) fs -- TODO is 444 right? test it
   debug cfg ("wrote " ++ show fs) (trackWrite fs)
+
+setReadOnly :: CutConfig -> FilePath -> IO ()
+setReadOnly cfg path = do
+  path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
+  setFileMode path' 444
 
 -------------------------
 -- run system commands --
@@ -363,10 +369,12 @@ runCmd cfg ref@(disk, _) desc = do
   let parLockFn = if cmdParallel desc
                     then \f -> withResource (cfgParLock cfg) 1 f
                     else id
-      writeLockPaths = (cmdOutPath desc):(cmdExtraOutPaths desc)
+      -- writeLockPaths = (cmdOutPath desc):(cmdExtraOutPaths desc)
       writeLockFn fn = do
-        debugL cfg $ "runCmd acquiring write locks: " ++ show writeLockPaths
-        withWriteLocks' ref writeLockPaths $ parLockFn fn
+        debugL cfg $ "runCmd acquiring main write lock: " ++ show (cmdOutPath desc)
+        withWriteOnce ref (cmdOutPath desc) $ do
+          debugL cfg $ "runCmd acquiring extra write locks: " ++ show (cmdExtraOutPaths desc)
+          withWriteLocks' ref (cmdExtraOutPaths desc) $ parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   writeLockFn $ withReadLocks' ref inPaths' $ do

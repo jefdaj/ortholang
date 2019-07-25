@@ -125,10 +125,11 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
     desc = "expr files free of absolute paths"
-    absArgs = ["-r", "--exclude='*.*.{out,err,ini}'", cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"] -- TODO why exclude sometimes fails?
+    grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err", "--exclude=*.ini", "--exclude=*.log",
+                cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
       _ <- runCut cfg ref ids
-      (_, out, err) <- readProcessWithExitCode "grep" absArgs ""
+      (_, out, err) <- readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
 {- This is more or less idempotent because re-running the same cut multiple

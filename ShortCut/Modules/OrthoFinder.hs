@@ -15,7 +15,7 @@ import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Util          (digest, readFileStrict, unlessExists)
 import ShortCut.Modules.SeqIO      (faa)
 import System.Directory            (createDirectoryIfMissing, renameDirectory)
-import System.FilePath             ((</>), takeFileName)
+import System.FilePath             ((</>), (<.>), takeFileName)
 import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
@@ -69,24 +69,33 @@ aOrthofinder cfg ref _ [out, faListPath] = do
 
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "orthofinder.sh"
-      , cmdArguments = [out'', tmpDir, "diamond"]
+      , cmdArguments = [out'' <.> "out", tmpDir, "diamond"]
       , cmdFixEmpties = False
       , cmdParallel = False -- TODO fix this? it fails because of withResource somehow
       , cmdOptions = []
       , cmdInPatterns = faPaths'
-      , cmdOutPath = out''
-      , cmdExtraOutPaths = []
+      , cmdOutPath = out'' <.> "out"
+      , cmdExtraOutPaths = [out'' <.> "err"]
       , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
       , cmdRmPatterns = [out'', tmpDir]
       }
  
+    -- find the results dir and link it to a name that doesn't include today's date
     resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
-    liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
+    -- liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
+    symlink cfg ref (toCutPath cfg resDir) (toCutPath cfg $ tmpDir </> "OrthoFinder" </> resName)
 
+    -- let resPath = tmpDir </> "Orthofinder" </> resName
+  let statsPath = toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
+  symlink cfg ref out statsPath
+  -- liftIO $ putStrLn $ "resName: " ++ show resName
+  -- liftIO $ putStrLn $ "resPath: " ++ show resPath
+  -- liftIO $ putStrLn $ "resDir: " ++ show resDir
+  -- liftIO $ putStrLn $ "resPath: " ++ show resPath
+  -- liftIO $ putStrLn $ "srcPath: " ++ show srcPath
   -- TODO ok to have inside unlessExists?
-  symlink cfg ref out $ toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
-
+  -- return ()
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
