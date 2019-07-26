@@ -44,6 +44,7 @@ import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
 
+-- TODO move somewhere more general?
 debug :: CutConfig -> String -> a -> a
 debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 

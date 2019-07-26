@@ -109,7 +109,7 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
     sList      = CutList (typeOf s) salt (depsOf s) [s]
     subjDbExpr = CutFun dbType salt (depsOf sList) dbFnName [sList]
     editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
-    editedName = bCmd ++ "_db_rev_each" -- TODO is this right? is it deduplicating?
+    editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
                            else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
