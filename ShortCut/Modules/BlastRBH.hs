@@ -1,9 +1,17 @@
 module ShortCut.Modules.BlastRBH where
 
+-- TODO ncbi_blast_blastp_rbh.cut looks like it works, so this must be an issue with the _each versions only?
+--      yeah, blastn_db_rev does it too. and blastn_db_rev_each
+--      but run by itself blastn_rev works properly: only the _each version is written
+-- TODO hold up, blastn is making separate tables from blastn_db when run via blastn_each too
+-- TODO so are both these broken?
+--      blastn_rev_each broken
+--      blastn_each     broken (but this is in Blast.hs)
+
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck, aSimpleScriptNoFix)
+import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck, aSimpleScriptNoFix, debug)
 import ShortCut.Core.Compile.Map  (rMap)
 import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, absolutizePaths)
 -- import ShortCut.Core.Debug         (debugA)
@@ -16,9 +24,17 @@ import ShortCut.Modules.SeqIO      (faa)
 import System.Exit                 (ExitCode(..))
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>))
+import Data.List.Utils             (replace)
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
+
+-- for tracking down non-deduplicating blastp functions
+debugNames :: CutConfig -> String -> CutExpr -> CutExpr -> a -> a
+debugNames cfg fnName (CutFun _ _ _ bname _) (CutFun _ _ _ aname _) rtn = debug cfg msg rtn
+  where
+    msg = fnName ++ " translated " ++ bname ++ " -> " ++ aname
+debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -57,17 +73,19 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFun
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (CutFun rtn salt deps _ [e, q, s])
-  = rules st (CutFun rtn salt deps name [e, s, q])
+rMkBlastFromFaRev d st@(_, cfg, _, _) b@(CutFun rtn salt deps name [e, q, s]) = rules st expr
   where
+    expr = (CutFun rtn salt deps name_norev [e, s, q])
     rules = fRules $ mkBlastFromFa d
-    name  = fName  $ mkBlastFromFa d
+    name_norev = replace "_rev" "" name
+    name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
 rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 ----------------------
 -- *blast*_rev_each --
 ----------------------
 
+-- TODO fix expression paths!
 mkBlastFromFaRevEach :: BlastDesc -> CutFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = CutFunction
   { fName      = name
@@ -91,13 +109,14 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (CutFun rtn salt deps _ [e, s, qs])
     sList      = CutList (typeOf s) salt (depsOf s) [s]
     subjDbExpr = CutFun dbType salt (depsOf sList) dbFnName [sList]
     editedExpr = CutFun rtn salt deps editedName [e, subjDbExpr, qs]
-    editedName = bCmd ++ "_db_rev_each"
+    editedName = bCmd ++ "_db_rev_each" -- TODO is this right? is it deduplicating?
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
                            else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
+-- TODO is this deduplicating properly with the fn name?
 aMkBlastFromDbRev :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]

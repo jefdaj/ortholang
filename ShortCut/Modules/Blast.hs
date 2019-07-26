@@ -209,6 +209,7 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 -- *blast*_each --
 ------------------
 
+-- TODO fix expression paths!
 mkBlastFromFaEach :: BlastDesc -> CutFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
   { fName      = name
@@ -221,6 +222,7 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = CutFunction
     name = bCmd ++ "_each"
 
 -- combination of the two above: insert the makeblastdbcall, then map
+-- TODO fix expression paths! both the _each thing and how lists are appearing in single ones...
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
 rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _   [e, q, ss])
   =                              rules st (CutFun rtn salt deps fn2 [e, q, ss'])
@@ -228,5 +230,5 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (CutFun rtn salt deps _   [e, q, ss])
     rules = rMkBlastFromDbEach d
     ss'   = CutFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
-    fn2   = (fName $ mkBlastFromFa d) ++ "_each"
+    fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"
