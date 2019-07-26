@@ -220,7 +220,7 @@ aVar :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aVar cfg ref _ vPath oPath = do
   alwaysRerun
   debugNeed cfg "aVar" [oPath']
-  withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
+  liftIO $ removeIfExists ref vPath'
   -- TODO should it sometimes symlink and sometimes copy?
   -- TODO before copying, think about how you might have to re-hash again!
   symlink cfg ref vPath'' oPath

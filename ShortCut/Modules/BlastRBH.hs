@@ -73,12 +73,12 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in CutFun
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st@(_, cfg, _, _) b@(CutFun rtn salt deps name [e, q, s]) = rules st expr
+rMkBlastFromFaRev d st (CutFun rtn salt deps name [e, q, s]) = rules st expr
   where
     expr = (CutFun rtn salt deps name_norev [e, s, q])
     rules = fRules $ mkBlastFromFa d
     name_norev = replace "_rev" "" name
-    name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
+    -- name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
 rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 ----------------------

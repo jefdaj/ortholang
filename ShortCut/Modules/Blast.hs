@@ -20,6 +20,8 @@ import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
 import ShortCut.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, debugA, symlink)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
+import ShortCut.Core.Util          (removeIfExists)
+import ShortCut.Core.Locks         (withWriteLock)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))
@@ -140,20 +142,25 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- debugL cfg $ "args'': " ++ show args''
   -- TODO full path to prefix'?
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
+  -- want to be real sure not to accidentally take these as done:
+  let stdoutPath = o'' <.> "out"
+      stderrPath = o'' <.> "err"
+  liftIO $ removeIfExists ref stdoutPath
+  liftIO $ removeIfExists ref stderrPath
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "blast.sh"
-    , cmdArguments = [o'' <.> "out", bCmd', eDec, q', prefix']
+    , cmdArguments = [stdoutPath, bCmd', eDec, q', prefix']
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO make it parallel again?
     , cmdOptions = []
     , cmdInPatterns = [ptn]
-    , cmdOutPath = o'' <.> "out"
-    , cmdExtraOutPaths = [o'' <.> "err"]
+    , cmdOutPath = stdoutPath
+    , cmdExtraOutPaths = [stderrPath]
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o'' ++ "*"] -- .out, .err too
+    , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink cfg ref o (toCutPath cfg $ o'' <.> "out")
+  symlink cfg ref o (toCutPath cfg stdoutPath)
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
