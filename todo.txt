@@ -1,3 +1,9 @@
+orthofinder patches:
+  no date in results dir
+  disable incrementing results dir
+  no compression of blast hits? (it can read normal already i bet)
+  no renaming of seqids since shortcut does that?
+
 bug: are multiple instances of blastp being run on the same files at once??
 
 bug: allows multiple vars with the same name!

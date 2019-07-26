@@ -64,7 +64,7 @@ myShake cfg rules = do
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg
       , shakeVerbosity = if cfgDebug cfg then Chatty else Quiet
-      , shakeThreads   = 0 -- TODO make customizable? increase?
+      , shakeThreads   = 0 -- TODO make customizable? increase? decrease?
       , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
       , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
       , shakeChange    = ChangeModtimeAndDigest -- TODO test this
@@ -153,6 +153,8 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids (toCutPath cfg path) out
           Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids hdl path)
+        Exit _ <- command [] "sync" [] -- TODO is this needed?
+        return ()
 
 writeResult :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> FilePath -> Action ()
 writeResult cfg ref idsref path out = do

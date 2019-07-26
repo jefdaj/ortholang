@@ -86,6 +86,7 @@ let
 
 in pkgs // {
   inherit ncbi-blast crb-blast psiblast-exb;
+  inherit fastme;
   inherit diamond hmmer mmseqs2;
 
   # TODO will these interfere with each other?

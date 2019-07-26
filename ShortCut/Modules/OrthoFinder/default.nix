@@ -4,7 +4,13 @@
 with import ../../../nixpkgs;
 
 let
-  runDepends = [ diamond orthofinder ];
+  runDepends = [
+    psiblast-exb # TODO does it?
+    diamond
+    orthofinder
+    mcl
+    fastme
+  ];
 
 in stdenv.mkDerivation {
   name = "shortcut-orthofinder";

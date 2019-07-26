@@ -8,14 +8,14 @@ module ShortCut.Modules.OrthoFinder
 import Development.Shake
 import ShortCut.Core.Types
 
-import Data.List                   (isPrefixOf)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..))
+import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), debugTrackWrite)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
+import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Util          (digest, readFileStrict, unlessExists)
+import ShortCut.Core.Util          (digest, readFileStrict)
 import ShortCut.Modules.SeqIO      (faa)
-import System.Directory            (createDirectoryIfMissing, renameDirectory)
-import System.FilePath             ((</>), takeFileName)
+import System.Directory            (createDirectoryIfMissing)
+import System.FilePath             ((</>), (<.>), takeFileName)
 import System.Exit                 (ExitCode(..))
 
 cutModule :: CutModule
@@ -34,7 +34,7 @@ ofr = CutType
   , tDesc = "OrthoFinder results"
   , tShow = \_ ref path -> do
       txt <- readFileStrict ref path
-      return $ unlines $ take 17 $ lines txt
+      return $ unlines $ take 17 $ lines txt -- TODO why doesn't this limit lines?
   }
 
 -----------------
@@ -54,39 +54,41 @@ orthofinder = let name = "orthofinder" in CutFunction
 -- TODO what's diamond blast? do i need to add it?
 aOrthofinder :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthofinder cfg ref _ [out, faListPath] = do
-
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
-      resDir = tmpDir </> "result"
-
-  unlessExists resDir $ do
-    liftIO $ createDirectoryIfMissing True tmpDir
-
-    faPaths <- readPaths cfg ref faListPath'
-    let faPaths' = map (fromCutPath cfg) faPaths
-    debugNeed cfg "aOrthofinder" faPaths'
-    let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
+      statsPath = toCutPath cfg $ tmpDir
+                    </> "OrthoFinder" </> "Results_"
+                    </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
+      statsPath' = fromCutPath cfg statsPath
+  liftIO $ createDirectoryIfMissing True tmpDir
+  -- withWriteLock' ref (tmpDir </> "lock") $ do
+  faPaths <- readPaths cfg ref faListPath'
+  let faPaths' = map (fromCutPath cfg) faPaths
+  debugNeed cfg "aOrthofinder" faPaths'
+  let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
+  -- orthofinder is sensitive to which files and dirs have been created before it runs
+  -- so we need to lock the tmpDir to prevent it creating something like Results__1
+  -- and we can't mark statsPath' as an extar outpath
+  -- TODO patch orthofinder not to adjust and then do this the standard way
+  withWriteLock' ref tmpDir $ do -- this is important to prevent multiple threads trying at once
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
-
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "orthofinder.sh"
-      , cmdArguments = [out'', tmpDir, "diamond"]
+      , cmdArguments = [out'' <.> "out", tmpDir, "diamond", "-n", digest faListPath]
       , cmdFixEmpties = False
       , cmdParallel = False -- TODO fix this? it fails because of withResource somehow
       , cmdOptions = []
       , cmdInPatterns = faPaths'
-      , cmdOutPath = out''
-      , cmdExtraOutPaths = []
+      , cmdOutPath = out'' <.> "out"
+      , cmdExtraOutPaths = [out'' <.> "err"] -- TODO statsPath'? seems to break it
       , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
       , cmdRmPatterns = [out'', tmpDir]
       }
- 
-    resName <- fmap last $ fmap (filter $ \p -> "Results_" `isPrefixOf` p) $ getDirectoryContents $ tmpDir </> "OrthoFinder"
-    liftIO $ renameDirectory (tmpDir </> "OrthoFinder" </> resName) resDir
-
-  -- TODO ok to have inside unlessExists?
-  symlink cfg ref out $ toCutPath cfg $ resDir </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
-
+    -- liftIO $ putStrLn $ "out: " ++ show out
+    -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
+    -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
+  debugTrackWrite cfg [statsPath']
+  symlink cfg ref out statsPath
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
