@@ -149,18 +149,18 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   liftIO $ removeIfExists ref stderrPath
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "blast.sh"
-    , cmdArguments = [stdoutPath, bCmd', eDec, q', prefix']
+    , cmdArguments = [o'', bCmd', eDec, q', prefix']
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO make it parallel again?
     , cmdOptions = []
     , cmdInPatterns = [ptn]
-    , cmdOutPath = stdoutPath
-    , cmdExtraOutPaths = [stderrPath]
+    , cmdOutPath = o''
+    , cmdExtraOutPaths = [stdoutPath, stderrPath]
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
+    , cmdRmPatterns = [o'' ++ "*"]
     }
-  symlink cfg ref o (toCutPath cfg stdoutPath)
+  -- symlink cfg ref o (toCutPath cfg stdoutPath)
   where
     o'  = fromCutPath cfg o
     q'  = fromCutPath cfg q
