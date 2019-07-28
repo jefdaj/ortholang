@@ -36,7 +36,7 @@ import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNeed,
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, writePaths, symlink)
-import ShortCut.Core.Locks        (withWriteLock')
+-- import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists, headOrDie)

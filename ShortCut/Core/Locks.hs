@@ -30,9 +30,13 @@ import Data.List                        (nub)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef)
 import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
-import System.Directory           (createDirectoryIfMissing, doesFileExist)
+import System.Directory           (createDirectoryIfMissing, doesFileExist,
+                                   pathIsSymbolicLink)
 import System.FilePath            (takeDirectory)
+import System.Posix.Files         (setFileMode)
 -- import Control.Concurrent.Thread.Delay (delay)
+import Control.Exception.Safe (catch, throwM)
+import System.IO.Error        (isDoesNotExistError)
 
 -- TODO parametarize FilePath and re-export with CutPath in Types.hs?
 type Locks = (Resource, IORef (Map FilePath RWLock))
@@ -140,9 +144,19 @@ withWriteLock' ref path actFn = do
  - 1/2 second) between locking the file and writing it. Otherwise occasional
  - "file is locked" errors. Maybe this is something to do with how I "cheat" by
  - keeping track of some files outside Shake?
+ -
+ - This also re-implements some of debugTrackWrite to avoid an import cycle.
  -}
 withWriteOnce :: Locks -> FilePath -> Action () -> Action ()
 withWriteOnce ref path actFn = withWriteLock' ref path $ do
   -- liftIO $ delay 500000 -- 1/2 second
   exists <- liftIO $ doesFileExist path -- Do not use Shake's version here
   when (not exists) actFn
+  when exists $ liftIO $ catch (do
+    isLink <- liftIO $ pathIsSymbolicLink path
+    when (not isLink)
+      (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
+  when exists $ trackWrite [path]
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwM e
