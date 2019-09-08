@@ -99,9 +99,18 @@ debugA cfg name out args = debug cfg msg out
     msg = name ++ " creating " ++ show out ++ " from " ++ show args
 
 debugNeed :: CutConfig -> String -> [FilePath] -> Action ()
-debugNeed cfg fnName paths = debug cfg msg $ need paths
+debugNeed cfg fnName paths = do
+  let paths' = map fixArgsPath paths
+  let msg = fnName ++ " needs " ++ show paths'
+  debug cfg msg $ need paths'
+  mapM_ afterAction paths
   where
-    msg = fnName ++ " needs " ++ show paths
+    afterAction p = if takeExtension p == ".args"
+                      then debugTrackWrite cfg [p]
+                      else return ()
+    fixArgsPath p = if takeExtension p == ".args"
+                      then takeDirectory p </> ".argsdone"
+                      else p
 
 ----------------
 -- read files --

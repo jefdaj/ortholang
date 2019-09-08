@@ -46,7 +46,7 @@ import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath)
 import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
-import ShortCut.Core.Actions          (readLits, readPaths)
+import ShortCut.Core.Actions          (readLits, readPaths, debugNeed)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
@@ -115,7 +115,8 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 eval :: Handle -> CutConfig -> Locks -> HashedIDsRef -> CutType -> Rules ResPath -> IO ()
 eval hdl cfg ref ids rtype = if cfgDebug cfg
   then ignoreErrors . eval'
-  else retryIgnore  . eval'
+  -- else retryIgnore  . eval'
+  else ignoreErrors  . eval'
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program. The error will still be visible.
@@ -142,7 +143,7 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
+        actionRetry 9 $ debugNeed cfg "eval" [path] -- TODO is this done automatically in the case of result?
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
          - if neither, print the full result

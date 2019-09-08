@@ -7,4 +7,13 @@ singledb = extract_queries (blastp_db 1.0e-5 maga mgendb)
 mappeddb = extract_queries_each (blastp_db_each 1.0e-5
                                                 maga
                                                 [mgendb])
+# TODO did i just break these being the same?
 result = length_each ([single] | mapped | [singledb] | mappeddb)
+
+# these ones are still fine ([350])
+# result = length_each ([single] | [singledb])
+
+# these ones look like they're having issues (error or 160ish)
+# result = length_each (mapped | mappeddb)
+
+# result = length_each [[single] , mapped , [singledb] , mappeddb]

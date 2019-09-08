@@ -6,6 +6,10 @@ module ShortCut.Core.Compile.Map
   )
   where
 
+-- TODO think I figured it out: have to split aMapMain into "leave .args" and "gather outputs"
+--      the "leave .args" half needs to be needed by all the aMapElems
+--      (problem is/was, calls come in needing the aMapElems first, which need the .args, before aMapMain)
+
 {- This is one of the most annoyingly-complicated-yet-useful parts of ShortCut.
  - It lets you generate "mapped" variants of your normal functions. That is, if
  - you wrote something to do a computation on one input file and make one
@@ -39,7 +43,7 @@ import Text.PrettyPrint.HughesPJClass
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Actions      (readPaths, writePaths, symlink,
+import ShortCut.Core.Actions      (readPaths, writePaths, symlink, debugTrackWrite,
                                    readLit, writeLits, debugA, debugL, debugNeed)
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    CutPath, exprPathExplicit, argHashes)
@@ -111,12 +115,14 @@ rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(CutFun r salt _ name expr
       elemCacheDir   = (fromCutPath cfg $ cacheDir cfg "each") </> hashFun s e
       elemCacheDir'  = toCutPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" <.> extOf eType
+      argsDone       = elemCacheDir </> ".argsdone"
       eType = case r of
                 (ListOf t) -> debug cfg ("type of '" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error $ "bad argument to rMapMain: " ++ show e
-  elemCachePtn %> aMapElem cfg ref ids eType mTmpFn actFn singleName salt
-  mainOutPath  %> aMapMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
+  argsDone     %> aMapLeave  cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath' -- aMapLeave triggered by needing argsDone
+  elemCachePtn %> aMapElem   cfg ref ids eType mTmpFn actFn singleName salt argsDone -- TODO is shake automatically needing here?
+  mainOutPath  %> aMapGather cfg ref ids elemCacheDir' eType argLastsPath' argsDone
   return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
@@ -124,31 +130,53 @@ hashFun :: CutState -> CutExpr -> String
 hashFun st e@(CutFun _ s _ n _) = digest $ [n, show s] ++ argHashes st e
 hashFun _ _ = error "hashFun only hashes function calls so far"
 
-{- This calls aMapArgs to leave a .args file for each set of args, then gathers
- - up the corresponding outPaths and returns a list of them.
- -}
-aMapMain :: CutConfig -> Locks -> HashedIDsRef -> Int
-         -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
-         -> Action ()
-aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
+aMapLeave :: CutConfig -> Locks -> HashedIDsRef -> Int
+          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
+          -> Action ()
+aMapLeave cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg argsDone = do
   debugNeed cfg "aMapMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths cfg ref mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
   debugL cfg $ "aMapMain mappedPaths': " ++ show mappedPaths'
-  mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
+  -- no, slightly earlier: liftIO $ putStrLn $ "is this where it happens?"
+  mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir') -- so aMapLeave needs to have been called
         (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
+  writePaths cfg ref argsDone [] -- TODO does which write function used here matter?
+  where
+    regularArgs'   = map (fromCutPath cfg) regularArgs
+    mappedArgList' = fromCutPath cfg mappedArg
+    mapTmpDir'     = fromCutPath cfg mapTmpDir
+
+{- This calls aMapArgs to leave a .args file for each set of args, then gathers
+ - up the corresponding outPaths and returns a list of them.
+ -}
+aMapGather :: CutConfig -> Locks -> HashedIDsRef
+           -> CutPath -> CutType -> CutPath -> FilePath -> FilePath
+           -> Action ()
+aMapGather cfg ref ids mapTmpDir eType mappedArg argsDone outPath = do
+  -- liftIO $ putStrLn $ "is this where it happens?"
+  debugNeed cfg "aMapMain" [argsDone]
+  -- debugNeed cfg "aMapMain" regularArgs'
+  let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
+  -- regularArgs'' <- liftIO $ mapM resolve regularArgs'
+  -- no, earlier: liftIO $ putStrLn $ "is this where it happens?"
+  mappedPaths  <- readPaths cfg ref mappedArgList' -- TODO is this the bug? maybe it's still needing indirectly
+  mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
+  debugL cfg $ "aMapMain mappedPaths': " ++ show mappedPaths'
+  -- mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
+  --       (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
   debugNeed cfg "aMapMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
   let out = debugA cfg "aMapMain" outPath
-              (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
+              (outPath:[mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
     then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
     else writePaths cfg ref out $ map (toCutPath cfg) outPaths'
   where
-    regularArgs'   = map (fromCutPath cfg) regularArgs
+    -- regularArgs'   = map (fromCutPath cfg) regularArgs
     mappedArgList' = fromCutPath cfg mappedArg
     mapTmpDir'     = fromCutPath cfg mapTmpDir
 
@@ -177,7 +205,8 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
   debugL cfg $ "aMapArgs argsPath: " ++ show argsPath
   debugL cfg $ "aMapArgs argPaths: " ++ show argPaths
   debugL cfg $ "aMapArgs argPaths': " ++ show argPaths'
-  writePaths cfg ref argsPath argPaths'
+  writePaths cfg ref argsPath argPaths' -- this is where it gets written, so aMapArgs needs to have been called
+  -- debugTrackWrite cfg [argsPath]
 
 {- This gathers together Rules-time and Action-time arguments and passes
  - everything to actFn. To save on duplicated computation it writes the same
@@ -195,10 +224,12 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
 aMapElem :: CutConfig -> Locks -> HashedIDsRef -> CutType
          -> Maybe ([CutPath] -> IO CutPath)
          -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
-         -> String -> RepeatSalt -> FilePath -> Action ()
-aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
-  let argsPath = out <.> "args"
-  args <- readPaths cfg ref argsPath
+         -> String -> RepeatSalt -> FilePath -> FilePath -> Action ()
+aMapElem cfg ref ids eType tmpFn actFn singleName salt argsDone out = do
+  -- debugNeed cfg "aMapElem" [argsDone]
+  -- no, slightly earlier: liftIO $ putStrLn $ "is this where it happens?"
+  let argsPath = out <.> "args" -- don't need this anymore (argsDone handles it)
+  args <- readPaths cfg ref argsPath -- TODO is this the bug? maybe it's still needing indirectly
   let args' = map (fromCutPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
   debugNeed cfg "aMapElem" args'

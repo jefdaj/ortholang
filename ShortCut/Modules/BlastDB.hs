@@ -31,7 +31,7 @@ import System.Directory           (createDirectoryIfMissing)
 import ShortCut.Core.Compile.Map2 (singleton)
 import ShortCut.Core.Paths (fromGeneric)
 import ShortCut.Core.Compile.Map (rMap)
-import ShortCut.Core.Locks (withReadLock, withWriteLock')
+import ShortCut.Core.Locks (withReadLock)
 import System.Process
 import Data.String.Utils (split)
 import Data.List (isPrefixOf)
@@ -218,20 +218,20 @@ rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 aBlastdblist :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action ()
 aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
-  withWriteLock' ref tmpDir $ do
-    runCmd cfg ref $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = oPath
-      , cmdInPatterns = []
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = []
-      , cmdOptions =[Cwd tmpDir] -- TODO remove?
-      , cmdBinary = "blastdblist.sh"
-      , cmdArguments = [tmpDir, listTmp']
-      , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
-      , cmdExitCode = ExitFailure 1
-      }
+  -- withWriteLock' ref tmpDir $ do
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = oPath
+    , cmdInPatterns = []
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
+    , cmdOptions =[Cwd tmpDir] -- TODO remove?
+    , cmdBinary = "blastdblist.sh"
+    , cmdArguments = [tmpDir, listTmp']
+    , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
+    , cmdExitCode = ExitFailure 1
+    }
   where
     listTmp' = fromCutPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
@@ -419,36 +419,36 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
 
   liftIO $ createDirectoryIfMissing True dbDir
   before <- listPrefixFiles dbPtn
-  when (length before < 5) $ do
-    debugL cfg $ "this is dbPtn: " ++ dbPtn
-    debugL cfg $ "this will be dbOut: " ++ dbOut
-    runCmd cfg ref $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = out'
-      , cmdInPatterns = [dbPtn]
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = []
-      , cmdOptions =[]
-      , cmdBinary = "makeblastdb.sh"
-      , cmdArguments = [dbOut, fixedPaths, dbType']
-      , cmdExitCode = ExitSuccess
-      , cmdRmPatterns = [dbDir]
-      }
-
-    -- check that all the right files were created
-    after <- listPrefixFiles dbPtn
-    -- liftIO $ putStrLn "running makeblastdb"
-    debugTrackWrite cfg after
-    -- usually there's an index file too, but not always
-    let expected = if dbType == ndb
-                     then [".nhr", ".nin", ".nsq"]
-                     else [".phr", ".pin", ".psq"]
-        success = all (\e -> e `elem` (map takeExtension after)) expected
-    debugL cfg $ "these actual db files were created: " ++ show after
-    unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
+  -- when (length before < 5) $ do
+  debugL cfg $ "this is dbPtn: " ++ dbPtn
+  debugL cfg $ "this will be dbOut: " ++ dbOut
+  runCmd cfg ref $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = out'
+    , cmdInPatterns = [dbPtn]
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
+    , cmdOptions =[]
+    , cmdBinary = "makeblastdb.sh"
+    , cmdArguments = [dbOut, fixedPaths, dbType']
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [dbDir]
+    }
     
-    debugL cfg $ "dbOut was also created: " ++ dbOut
+  -- check that all the right files were created
+  after <- listPrefixFiles dbPtn
+  -- liftIO $ putStrLn "running makeblastdb"
+  debugTrackWrite cfg after
+  -- usually there's an index file too, but not always
+  let expected = if dbType == ndb
+                   then [".nhr", ".nin", ".nsq"]
+                   else [".phr", ".pin", ".psq"]
+      success = all (\e -> e `elem` (map (\p -> takeExtension p) after)) expected
+  debugL cfg $ "these actual db files were created: " ++ show after
+  unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
+  
+  debugL cfg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
   writePath cfg ref out'' dbOut'
   where
@@ -538,7 +538,7 @@ rMakeblastdbEach st@(_, cfg, _, _) (CutFun (ListOf dbType) salt deps name [e]) =
     tmpDir = makeblastdbCache cfg 
     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
     act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
-    expr' = CutFun (ListOf dbType) salt deps name [withSingletons e]
+    expr' = CutFun (ListOf dbType) salt deps name [withSingletons e] -- TODO is this what messes it up?
     -- expr'' = trace ("expr':" ++ show expr') expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 

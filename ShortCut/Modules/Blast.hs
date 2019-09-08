@@ -21,7 +21,7 @@ import ShortCut.Core.Compile.Map  (rMap)
 import ShortCut.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, debugA, symlink)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Core.Util          (removeIfExists)
-import ShortCut.Core.Locks         (withWriteLock)
+-- import ShortCut.Core.Locks         (withWriteLock)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))
@@ -143,10 +143,10 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- TODO full path to prefix'?
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   -- want to be real sure not to accidentally take these as done:
-  let stdoutPath = o'' <.> "out"
-      stderrPath = o'' <.> "err"
-  liftIO $ removeIfExists ref stdoutPath
-  liftIO $ removeIfExists ref stderrPath
+  -- let stdoutPath = o'' <.> "out"
+      -- stderrPath = o'' <.> "err"
+  -- liftIO $ removeIfExists ref stdoutPath
+  -- liftIO $ removeIfExists ref stderrPath
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "blast.sh"
     , cmdArguments = [o'', bCmd', eDec, q', prefix']
@@ -155,7 +155,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     , cmdOptions = []
     , cmdInPatterns = [ptn]
     , cmdOutPath = o''
-    , cmdExtraOutPaths = [stdoutPath, stderrPath]
+    , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*"]

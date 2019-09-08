@@ -114,10 +114,11 @@ withWriteLock :: Locks -> FilePath -> IO a -> IO a
 withWriteLock ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   l <- liftIO $ getLock ref path
-  res <- bracket_
-    (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
-    (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
-    ioFn
+  res <- RWLock.withWrite l ioFn
+  -- res <- bracket_
+  --   (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.tryAcquireWrite l)
+  --   (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
+  --   ioFn
   assertNonEmptyFile ref path
   return res
 
@@ -126,10 +127,11 @@ withWriteLocks' ref paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
-  (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
+  (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn) -- TODO can we just try?
     `actionFinally`
     (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
+-- TODO is this where the locking fails with "releaseRead: already released"?
 withWriteLock' :: Locks -> FilePath -> Action a -> Action a
 withWriteLock' ref path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path

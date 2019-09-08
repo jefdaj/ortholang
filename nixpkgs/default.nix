@@ -1,6 +1,7 @@
 # Maintainers willing, everything here is destined to be merged into
 # the main upstream repository at https://github.com/nixos/nixpkgs
 # as soon as I have the time
+# with import <nixpkgs> {};
 
 let
   # fetch my pinned nixpkgs for reproducibility.

@@ -17,7 +17,7 @@ let
   shortcut-psiblast      = import ./ShortCut/Modules/PsiBlast;
   shortcut-seqio         = import ./ShortCut/Modules/SeqIO;
   shortcut-sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
-  shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
+  # shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
   shortcut-justorthologs = import ./ShortCut/Modules/JustOrthologs;
   shortcut-busco         = import ./ShortCut/Modules/Busco;
   shortcut-load          = import ./ShortCut/Modules/Load;
@@ -83,7 +83,7 @@ let
     shortcut-psiblast
     shortcut-seqio
     shortcut-sonicparanoid
-    shortcut-treecl
+    # shortcut-treecl
     shortcut-justorthologs
     shortcut-busco
     shortcut-load

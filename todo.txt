@@ -1,3 +1,8 @@
+mention the colon in the first help line
+
+bug: writing a variable to cut script misses a final newline? maybe only when single variable
+bug: when resuming, if a .bht.out exists but not its final symlink, must delete + re-run the whole thing!
+
 orthofinder patches:
   no date in results dir
   disable incrementing results dir
