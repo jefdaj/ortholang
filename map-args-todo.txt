@@ -1,0 +1,27 @@
+this got a little wierd, but don't throw it all out! it might be almost right
+
+the main new idea is that you could rewrite debugNeed to say,
+"if i need an each/*.args file, need the each/.argsdone instead and then assume"
+
+you already have the part about writing the .argsdone file, that works
+you probably have some extra junk related to trying not to need them at all; throw that out in favor of need-rewriting
+
+hmm, is it actually working in most cases? maybe only singletons have an issue
+or even just blastp itself? that would be weird
+oh, maybe just the *FromFa* ones. that seems reasonable
+  if so, could be the makeblastdb_*_each failing
+    oh that has singletons too
+
+failing tests:
+  ncbi_blast_blastp.cut
+  ncbi_blast_blastp_db.cut
+  ncbi_blast_blastx.cut
+  ncbi_blast_blastx_db.cut
+
+is everything with blastp_each or blastx_each failing?
+
+oh so what do blastp and blastx have in common? they're the only ones that make a protein database
+
+weirdly the tests with reverse ones too don't fail
+
+oh but you also have to turn off retrying to get the obvious errors to manifest...
