@@ -65,7 +65,11 @@ let
   shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] "";
   shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ python36 treeCl ] "";
   # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
-  shortcut-busco         = mkModule ./ShortCut/Modules/Busco         [ myBlast hmmer busco python36 ] "";
+
+  # this config file is only a template; it needs to be completed by busco.sh at runtime
+  shortcut-busco = mkModule ./ShortCut/Modules/Busco [ myBlast hmmer busco python36 which ]
+                     "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
+
   shortcut-load          = mkModule ./ShortCut/Modules/Load          [ curl ] "";
   shortcut-orthogroups   = mkModule ./ShortCut/Modules/OrthoGroups   [ python36 ] "";
   shortcut-greencut      = mkModule ./ShortCut/Modules/GreenCut      [ myPy2 ] myPy2Wrap;

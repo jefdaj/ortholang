@@ -14,6 +14,7 @@ import Test.Tasty.Golden          (goldenVsString)
 versionScripts :: [(String, FilePath)]
 versionScripts =
   [ ("biomartr"     , "biomartr_version.R")
+  , ("busco"        , "busco_version.sh")
   , ("crbblast"     , "crbblast_version.sh")
   , ("diamond"      , "diamond_version.sh")
   , ("mmseqs"       , "mmseqs_version.sh")
