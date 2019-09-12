@@ -23,4 +23,4 @@ before_cache:
   - mkdir -p $HOME/nix.store
   - nix copy --to file://$HOME/nix.store -f default.nix buildInputs
 before_script:
-  - sudo mkdir /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
+  - sudo mkdir -p /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
