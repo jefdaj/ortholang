@@ -19,6 +19,7 @@ versionScripts =
   , ("busco"        , "busco_version.sh")
   , ("crbblast"     , "crbblast_version.sh")
   , ("curl"         , "curl_version.sh")
+  -- , ("tree"         , "tree_version.sh") -- TODO where should this go?
   , ("cut"          , "cut_version.sh")
   , ("diamond"      , "diamond_version.sh")
   , ("hmmer"        , "hmmer_version.sh")
