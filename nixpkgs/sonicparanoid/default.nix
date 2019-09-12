@@ -19,7 +19,7 @@ in python36Packages.buildPythonPackage rec {
     python36Packages.biopython
     python36Packages.numpy
     python36Packages.pandas
-    pypiPython.packages.sh
+    python36Packages.sh
   ];
 
   buildInputs = [
@@ -33,7 +33,7 @@ in python36Packages.buildPythonPackage rec {
     # numpy
     # pandas
     python36Packages.cython
-    pypiPython.packages.sh
+    python36Packages.sh
   ];
 
   # TODO get the tests working! probably just need packages here?

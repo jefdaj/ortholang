@@ -1,4 +1,4 @@
-{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb, diamond }:
+{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb, diamond, python27 }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
 # I'm not sure if this is the proper way to set libPath but it seems to work
@@ -6,10 +6,10 @@
 # TODO include the newer diamond in the repo until nixpkgs updates it
 
 let
-  myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
-    numpy
-    scipy
-  ]);
+  # myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
+  #   numpy
+  #   scipy
+  # ]);
 
 in stdenv.mkDerivation rec {
   name = "orthofinder-${version}";
@@ -24,7 +24,7 @@ in stdenv.mkDerivation rec {
     diamond
     fastme
     mcl
-    myPython
+    python27
   ];
   phases = "unpackPhase patchPhase installPhase";
   patches = [

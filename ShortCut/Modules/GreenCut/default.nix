@@ -1,15 +1,17 @@
 # TODO pass proper arguments
 # TODO shells for working on individual scripts (split by language?)
 
+# this looks like it could be factored out :D
+
 with import ../../../nixpkgs;
 
 let
   # TODO any reason to use python 3?
-  myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
-    # biopython
-    ipython # TODO remove
-  ]);
-  runDepends = [ myPython ];
+  # myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
+  #   # biopython
+  #   ipython # TODO remove
+  # ]);
+  runDepends = [ python27 ];
 
 in stdenv.mkDerivation {
   name = "shortcut-greencut";

@@ -1,5 +1,14 @@
 with import ./nixpkgs;
 let
+  myPython2 = python27.python.buildEnv.override {
+    # see https://github.com/NixOS/nixpkgs/issues/22319
+    ignoreCollisions = true;
+    extraLibs = with python27Packages; [
+      biopython
+      numpy
+      scipy
+    ];
+  };
 
   shortcut-biomartr      = import ./ShortCut/Modules/BioMartR;
   shortcut-blast         = import ./ShortCut/Modules/Blast;
@@ -17,18 +26,13 @@ let
   shortcut-psiblast      = import ./ShortCut/Modules/PsiBlast;
   shortcut-seqio         = import ./ShortCut/Modules/SeqIO;
   shortcut-sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
-  shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
+  # shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
   shortcut-justorthologs = import ./ShortCut/Modules/JustOrthologs;
   shortcut-busco         = import ./ShortCut/Modules/Busco;
   shortcut-load          = import ./ShortCut/Modules/Load;
   shortcut-range         = import ./ShortCut/Modules/Range;
   shortcut-orthogroups   = import ./ShortCut/Modules/OrthoGroups;
   shortcut-greencut      = import ./ShortCut/Modules/GreenCut;
-
-  # myPython = python27Packages.python.withPackages (ps: with ps; [
-    # biopython
-    # treeCl
-  # ]);
 
   # it works best if the ghc version here matches the resolver in stack.yaml
   cabalPkg = haskell.packages.ghc844.callPackage ./shortcut.nix {};
@@ -83,7 +87,7 @@ let
     shortcut-psiblast
     shortcut-seqio
     shortcut-sonicparanoid
-    shortcut-treecl
+    # shortcut-treecl
     shortcut-justorthologs
     shortcut-busco
     shortcut-load

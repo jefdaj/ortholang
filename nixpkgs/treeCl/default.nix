@@ -65,7 +65,7 @@ in python.mkDerivation {
     cython
     dendropy
     futures
-    ipython
+    # ipython
     matplotlib
     nose
     numpy

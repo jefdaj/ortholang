@@ -17,7 +17,8 @@ let
   import "${toString pkgs.path}/pkgs/top-level/python-packages.nix" {
     inherit pkgs;
     inherit (pkgs) stdenv;
-    python = pkgs.python27Full;
+    # python = pkgs.python27Full;
+    python = pkgs.myPython2; # TODO make a Full version?
     # patching pip so it does not try to remove files when running nix-shell
     overrides =
       self: super: {
