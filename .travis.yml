@@ -8,6 +8,7 @@ git:
 branches:
   only:
     - master
+    - - /^release-.*$/
     - develop
     - 2019-09-12_travis-ci
 
@@ -24,3 +25,8 @@ before_cache:
   - nix copy --to file://$HOME/nix.store -f default.nix buildInputs
 before_script:
   - sudo mkdir -p /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
+
+# shouldn't be necessary because nixpkgs/default.nix pins it, but prevents duplicate downloads
+# see https://github.com/travis-ci/docs-travis-ci-com/issues/2236
+env:
+  - NIX_PATH=nixpkgs=channel:nixos-19.03
