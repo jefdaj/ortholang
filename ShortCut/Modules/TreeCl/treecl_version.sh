@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-treeCl -h 2>&1 | grep -v DEBUG | grep -v nix
+treeCl -h 2>&1 | grep -i treecl

@@ -7,14 +7,14 @@
 export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
-export TASTY_HIDE_SUCCESSES=False
+export TASTY_HIDE_SUCCESSES=True
 [[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
 TEST_ARGS="--test $@ +RTS -IO -N -RTS"
 
 # this does an incremental build of the haskell code for faster testing
 echo "testing nix+stack build..."
 cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit"
-nix-shell --command "$cmd" 2>&1 | tee stack-test.log
+nix-shell --quiet --command "$cmd" 2>&1 | tee stack-test.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.

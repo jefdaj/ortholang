@@ -84,6 +84,7 @@ let
   devDepends = [
     haskell.compiler.ghc864
     stack
+    pypi2nix
   ];
     # ++ shortcut-load.runDepends
     # ++ shortcut-busco.runDepends;
