@@ -17,8 +17,7 @@ let
   import "${toString pkgs.path}/pkgs/top-level/python-packages.nix" {
     inherit pkgs;
     inherit (pkgs) stdenv;
-    # python = pkgs.python27Full;
-    python = pkgs.python27; # TODO make a Full version?
+    python = pkgs.python27Full;
     # patching pip so it does not try to remove files when running nix-shell
     overrides =
       self: super: {
@@ -30,8 +29,7 @@ let
       };
   };
 
-  # commonBuildInputs = with pkgs; [ raxml ];
-  commonBuildInputs = with pkgs; [ ];
+  commonBuildInputs = with pkgs; [ raxml ]; # TODO remove?
   commonDoCheck = false;
 
   withPackages = pkgs':
