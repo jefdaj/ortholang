@@ -20,8 +20,9 @@ let
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
   hmmer = pkgs.callPackage ./hmmer { };
+  ncbi-blast = pkgs.callPackage ./ncbi-blast {};
 
-  # ... because it only supports exactly 2.2.29
+  # crb-blast only supports exactly 2.2.29
   # and there are reports of a bug in newer ones (still?)
   # TODO patch crb-blast to use the newest one?
   ncbi-blast-2_2_29 = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
@@ -32,7 +33,6 @@ let
       sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
     };
   });
-
   crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
 
   # cdhit = pkgs.callPackage ./cdhit { };

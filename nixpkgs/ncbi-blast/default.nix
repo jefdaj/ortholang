@@ -1,6 +1,8 @@
 # see http://nixos.org/patchelf.html
 # and firefox-bin (suggested on mailing list)
 
+# TODO update to a much newer version?
+
 {stdenv, fetchurl, zlib, bzip2}:
 
 let
