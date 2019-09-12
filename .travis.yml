@@ -1,5 +1,7 @@
 language: nix
 script: ./test.sh
+git:
+  depth: 3
 
 # attempting to follow https://nvie.com/posts/a-successful-git-branching-model
 branches:

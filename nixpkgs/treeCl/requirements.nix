@@ -29,7 +29,7 @@ let
       };
   };
 
-  commonBuildInputs = with pkgs; [ raxml ]; # TODO remove?
+  commonBuildInputs = with pkgs; [ raxml ];
   commonDoCheck = false;
 
   withPackages = pkgs':
