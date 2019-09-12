@@ -30,7 +30,7 @@ let
     name="ncbi-blast-${version}";
     src = pkgs.fetchurl {
       url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-win64.tar.gz";
-      sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
+      sha256="0p1jhp5cj96xnybrawqi7nx5qxzalfadzbwmahj9kcxh70s04719";
     };
   });
   crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
