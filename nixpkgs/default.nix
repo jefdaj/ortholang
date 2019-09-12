@@ -12,6 +12,10 @@ let
   #   url = "https://github.com/jefdaj/nixpkgs/archive/2019-03-20_nixpkgs-shortcut.tar.gz";
   #   sha256 = "1lj3paw9z0n8v1dk8nxmnd7i0z209746cyz19vsadkswd87x7ipm";
   # }) {};
+  pkgs = import (fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/19.03.tar.gz";
+    sha256 = "0qixmc228vay4jywf14cg72m1g07ffsl75xg5qrdj70hw9xbd6sg";
+  }) {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
