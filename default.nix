@@ -62,7 +62,7 @@ let
   shortcut-orthofinder   = mkModule ./ShortCut/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
   shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";
   shortcut-seqio         = mkModule ./ShortCut/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
-  shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] "";
+  # shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] "";
   # shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ python36 treeCl ] "";
   # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
 
@@ -127,7 +127,7 @@ let
     shortcut-setstable
     shortcut-psiblast
     shortcut-seqio
-    shortcut-sonicparanoid
+    # shortcut-sonicparanoid
     # shortcut-treecl
     # shortcut-justorthologs
     shortcut-busco
