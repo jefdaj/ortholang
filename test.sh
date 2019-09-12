@@ -18,5 +18,7 @@ nix-shell --command "$cmd" 2>&1 | tee stack-test.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
-echo "testing nix build..."
-(nix-build -j$(nproc) && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee nix-test.log
+# echo "testing nix build..."
+# (nix-build -j$(nproc) && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee nix-test.log
+
+echo "finished test run"

@@ -1,0 +1,8 @@
+language: nix
+script: ./test.sh
+
+# attempting to follow https://nvie.com/posts/a-successful-git-branching-model
+branches:
+  only:
+    - master
+    - develop
