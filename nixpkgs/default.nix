@@ -29,7 +29,7 @@ let
     version="2.2.29";
     name="ncbi-blast-${version}";
     src = pkgs.fetchurl {
-      url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
+      url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-win64.tar.gz";
       sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
     };
   });
