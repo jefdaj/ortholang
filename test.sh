@@ -8,6 +8,7 @@ export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 export TASTY_HIDE_SUCCESSES=True
+export NIX_CURL_FLAGS=-sS
 [[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
 TEST_ARGS="--test $@ +RTS -IO -N -RTS"
 
