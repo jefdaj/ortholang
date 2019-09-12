@@ -6,3 +6,4 @@ branches:
   only:
     - master
     - develop
+    - 2019-09-12_travis-ci
