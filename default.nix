@@ -22,6 +22,7 @@ let
     VennDiagram
     biomartr
     data_table
+    futile_logger
   ];};
 
   mkModule = src: runDepends: extraWraps:
@@ -36,7 +37,8 @@ let
         for script in $src/*; do
           base="$(basename "$script")"
           dest="$out/bin/$base"
-          install -m755 $script $dest
+          substituteAll $script $dest
+          chmod +x $dest
           wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}" ${extraWraps}
         done
       '';
