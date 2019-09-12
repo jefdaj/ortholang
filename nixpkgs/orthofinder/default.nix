@@ -6,10 +6,10 @@
 # TODO include the newer diamond in the repo until nixpkgs updates it
 
 let
-  # myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
-  #   numpy
-  #   scipy
-  # ]);
+  myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
+    numpy
+    scipy
+  ]);
 
 in stdenv.mkDerivation rec {
   name = "orthofinder-${version}";
@@ -24,7 +24,7 @@ in stdenv.mkDerivation rec {
     diamond
     fastme
     mcl
-    python27
+    myPython
   ];
   phases = "unpackPhase patchPhase installPhase";
   patches = [

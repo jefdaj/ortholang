@@ -1,38 +1,72 @@
 with import ./nixpkgs;
 let
-  myPython2 = python27.python.buildEnv.override {
+
+  myBlast = psiblast-exb; # for swapping it out if needed
+  myPy2 = python27.buildEnv.override {
+
     # see https://github.com/NixOS/nixpkgs/issues/22319
     ignoreCollisions = true;
+
     extraLibs = with python27Packages; [
       biopython
       numpy
       scipy
     ];
   };
+  myR = rWrapper.override { packages = with rPackages; [
+    dplyr
+    ggplot2
+    readr
+    tidyr
+    UpSetR
+    VennDiagram
+    biomartr
+    data_table
+  ];};
 
-  shortcut-biomartr      = import ./ShortCut/Modules/BioMartR;
-  shortcut-blast         = import ./ShortCut/Modules/Blast;
-  shortcut-blastdb       = import ./ShortCut/Modules/BlastDB;
-  shortcut-blasthits     = import ./ShortCut/Modules/BlastHits;
-  shortcut-blastrbh      = import ./ShortCut/Modules/BlastRBH;
-  shortcut-crbblast      = import ./ShortCut/Modules/CRBBlast;
-  shortcut-diamond       = import ./ShortCut/Modules/Diamond;
-  shortcut-hmmer         = import ./ShortCut/Modules/Hmmer;
-  shortcut-mmseqs        = import ./ShortCut/Modules/MMSeqs;
-  shortcut-muscle        = import ./ShortCut/Modules/Muscle;
-  shortcut-orthofinder   = import ./ShortCut/Modules/OrthoFinder;
-  shortcut-plots         = import ./ShortCut/Modules/Plots;
-  shortcut-setstable     = import ./ShortCut/Modules/SetsTable;
-  shortcut-psiblast      = import ./ShortCut/Modules/PsiBlast;
-  shortcut-seqio         = import ./ShortCut/Modules/SeqIO;
-  shortcut-sonicparanoid = import ./ShortCut/Modules/SonicParanoid;
-  # shortcut-treecl        = import ./ShortCut/Modules/TreeCl;
-  shortcut-justorthologs = import ./ShortCut/Modules/JustOrthologs;
-  shortcut-busco         = import ./ShortCut/Modules/Busco;
-  shortcut-load          = import ./ShortCut/Modules/Load;
-  shortcut-range         = import ./ShortCut/Modules/Range;
-  shortcut-orthogroups   = import ./ShortCut/Modules/OrthoGroups;
-  shortcut-greencut      = import ./ShortCut/Modules/GreenCut;
+  mkModule = src: runDepends: extraWraps:
+    let name = "Shortcut-" + baseNameOf src;
+    in stdenv.mkDerivation {
+      inherit src name runDepends extraWraps;
+      buildInputs = [ makeWrapper ] ++ runDepends;
+      builder = writeScript "builder.sh" ''
+        #!/usr/bin/env bash
+        source ${stdenv}/setup
+        mkdir -p $out/bin
+        for script in $src/*; do
+          base="$(basename "$script")"
+          dest="$out/bin/$base"
+          install -m755 $script $dest
+          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}" ${extraWraps}
+        done
+      '';
+      # TODO shit, that ^ won't work with python3 packages
+    };
+  myPy2Wrap = "--prefix PYTHONPATH : \"$out/bin:${myPy2.python.sitePackages}\"";
+
+  shortcut-biomartr      = mkModule ./ShortCut/Modules/BioMartR      [ myR ] "";
+  shortcut-blasthits     = mkModule ./ShortCut/Modules/BlastHits     [ myR ] "";
+  shortcut-blastrbh      = mkModule ./ShortCut/Modules/BlastRBH      [ myR ] "";
+  shortcut-plots         = mkModule ./ShortCut/Modules/Plots         [ myR ] "";
+  shortcut-setstable     = mkModule ./ShortCut/Modules/SetsTable     [ myR ] "";
+  shortcut-range         = mkModule ./ShortCut/Modules/Range         [ myR ] "";
+  shortcut-blast         = mkModule ./ShortCut/Modules/Blast         [ myBlast ] "";
+  shortcut-blastdb       = mkModule ./ShortCut/Modules/BlastDB       [ myBlast blastdbget ] "";
+  shortcut-crbblast      = mkModule ./ShortCut/Modules/CRBBlast      [ crb-blast ] "";
+  shortcut-diamond       = mkModule ./ShortCut/Modules/Diamond       [ diamond ] "";
+  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ hmmer ] "";
+  shortcut-mmseqs        = mkModule ./ShortCut/Modules/MMSeqs        [ mmseqs2 ] "";
+  shortcut-muscle        = mkModule ./ShortCut/Modules/Muscle        [ muscle ] "";
+  shortcut-orthofinder   = mkModule ./ShortCut/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";
+  shortcut-seqio         = mkModule ./ShortCut/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
+  shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] "";
+  shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ python36 treeCl ] "";
+  # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
+  shortcut-busco         = mkModule ./ShortCut/Modules/Busco         [ myBlast hmmer busco python36 ] "";
+  shortcut-load          = mkModule ./ShortCut/Modules/Load          [ curl ] "";
+  shortcut-orthogroups   = mkModule ./ShortCut/Modules/OrthoGroups   [ python36 ] "";
+  shortcut-greencut      = mkModule ./ShortCut/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   # it works best if the ghc version here matches the resolver in stack.yaml
   cabalPkg = haskell.packages.ghc844.callPackage ./shortcut.nix {};
@@ -44,7 +78,7 @@ let
   devDepends = [
     haskell.compiler.ghc844
     stack
-  ]
+  ];
     # ++ shortcut-load.runDepends
     # ++ shortcut-busco.runDepends;
     # ++ shortcut-justorthologs.runDepends; # incompatible with seqio, orthofinder, blastdb?
@@ -53,7 +87,7 @@ let
     # ++ shortcut-biomartr.runDepends
     # ++ shortcut-blast.runDepends
     # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
-    ++ shortcut-blasthits.runDepends;
+    #++ shortcut-blasthits.runDepends;
     # ++ shortcut-blastrbh.runDepends
     # ++ shortcut-crbblast.runDepends
     # ++ shortcut-diamond.runDepends
@@ -87,8 +121,8 @@ let
     shortcut-psiblast
     shortcut-seqio
     shortcut-sonicparanoid
-    # shortcut-treecl
-    shortcut-justorthologs
+    shortcut-treecl
+    # shortcut-justorthologs
     shortcut-busco
     shortcut-load
     shortcut-range
@@ -106,29 +140,32 @@ let
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
   noBigDotfiles = path: type: baseNameOf path != ".stack-work" && baseNameOf path != ".git";
 
-# see https://github.com/jml/nix-haskell-example
-# TODO final wrapper with +RTS -N -RTS?
-in haskell.lib.overrideCabal cabalPkg (drv: {
-  src = builtins.filterSource noBigDotfiles ./.;
+  # see https://github.com/jml/nix-haskell-example
+  # TODO final wrapper with +RTS -N -RTS?
+  shortcut = haskell.lib.overrideCabal cabalPkg (drv: {
+    src = builtins.filterSource noBigDotfiles ./.;
 
-  # TODO this isn't being run by overrideCabal at all. get it to work
-  shellHook = ''
-    ${drv.shellHook or ""}
-    export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-    export TASTY_HIDE_SUCCESSES=True
-    find "${src}/ShortCut/Modules/* -type d" | while read d; do
-      export PATH=$d:$PATH
-    done
-  '';
+    # TODO this isn't being run by overrideCabal at all. get it to work
+    shellHook = ''
+      ${drv.shellHook or ""}
+      export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+      export TASTY_HIDE_SUCCESSES=True
+      find "${src}/ShortCut/Modules/* -type d" | while read d; do
+        export PATH=$d:$PATH
+      done
+    '';
 
-  buildDepends = (drv.buildDepends or [])
-    ++ [ makeWrapper ]
-    ++ runDepends
-    ++ (if pkgs.lib.inNixShell then devDepends else []);
-  postInstall = ''
-    ${drv.postInstall or ""}
-    wrapProgram "$out/bin/shortcut" \
-      --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
-      --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
-  '';
-})
+    buildDepends = (drv.buildDepends or [])
+      ++ [ makeWrapper ]
+      ++ runDepends
+      ++ (if pkgs.lib.inNixShell then devDepends else []);
+    postInstall = ''
+      ${drv.postInstall or ""}
+      wrapProgram "$out/bin/shortcut" \
+        --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
+        --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+    '';
+  });
+
+# to work on a specific module, substitute it here and enter nix-shell:
+in shortcut

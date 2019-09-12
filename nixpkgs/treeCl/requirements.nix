@@ -18,7 +18,7 @@ let
     inherit pkgs;
     inherit (pkgs) stdenv;
     # python = pkgs.python27Full;
-    python = pkgs.myPython2; # TODO make a Full version?
+    python = pkgs.python27; # TODO make a Full version?
     # patching pip so it does not try to remove files when running nix-shell
     overrides =
       self: super: {
