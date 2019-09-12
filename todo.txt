@@ -1,3 +1,10 @@
+nix vs nix + stack:
+  nix by itself fails orthofinder tests, sonicparanoid tests, plot tests
+    why would that be? what's different between them?
+      try running shortcut-orthofinder orthofinder.sh on its own + from stack separately to see
+      possiblities: threading, dependencies, shellHook/nix-shell itself changes something
+  both do the invalid byte sequence thing though
+
 orthofinder patches:
   no date in results dir
   disable incrementing results dir

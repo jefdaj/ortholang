@@ -152,6 +152,7 @@ let
     src = builtins.filterSource noBigDotfiles ./.;
 
     # TODO this isn't being run by overrideCabal at all. get it to work
+    # TODO is the find command going? that could maybe make the difference
     shellHook = ''
       ${drv.shellHook or ""}
       export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"

@@ -1,6 +1,6 @@
 flags: {}
 nix:
-  enable: true
+  enable: false
   pure: false
 extra-package-dbs: []
 packages:
@@ -16,5 +16,7 @@ extra-deps:
 # TODO are the rtsopts a problem? see if removing fixes any fails
 ghc-options:
         # "$everything": -no-rtsopts
-        # "$targets": -Werror
-        "$everything": -threaded -rtsopts -Wall -Wno-orphans -O2 "-with-rtsopts=-N -IO"
+        # "shake"      : -threaded -rtsopts -Wall "-with-rtsopts=-IO -qg"
+        # "$targets"   : -threaded -rtsopts -Wall "-with-rtsopts=-N -IO"
+        "$everything": -threaded -rtsopts -Wall -O2 "-with-rtsopts=-N -IO"
+        "ShortCut"   : -threaded -rtsopts -Wall -Wno-orphans "-with-rtsopts=-N -IO"
