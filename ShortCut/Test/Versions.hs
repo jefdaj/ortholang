@@ -11,18 +11,27 @@ import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
 
+-- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py? greencut psiblast? seqiostuff sonicparanoid
 versionScripts :: [(String, FilePath)]
 versionScripts =
-  [ ("biomartr"     , "biomartr_version.R")
+  [ ("bash"         , "bash_version.sh")
+  , ("biomartr"     , "biomartr_version.R")
+  , ("blast"        , "blast_version.sh")
   , ("busco"        , "busco_version.sh")
   , ("crbblast"     , "crbblast_version.sh")
+  , ("curl"         , "curl_version.sh")
+  , ("cut"          , "cut_version.sh")
   , ("diamond"      , "diamond_version.sh")
+  , ("makeblastdb"  , "makeblastdb_version.sh")
   , ("mmseqs"       , "mmseqs_version.sh")
   , ("muscle"       , "muscle_version.sh")
-  , ("blast"        , "blast_version.sh")
   , ("orthofinder"  , "orthofinder_version.sh")
   , ("psiblast"     , "psiblast_version.sh")
+  , ("python2"      , "python2_version.sh")
+  , ("python3"      , "python3_version.sh")
+  , ("r"            , "r_version.sh")
   , ("sonicparanoid", "sonicparanoid_version.sh")
+  , ("tar"          , "tar_version.sh")
   , ("treecl"       , "treecl_version.sh")
   ]
 
