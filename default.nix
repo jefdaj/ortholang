@@ -75,14 +75,14 @@ let
   shortcut-greencut      = mkModule ./ShortCut/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   # it works best if the ghc version here matches the resolver in stack.yaml
-  cabalPkg = haskell.packages.ghc844.callPackage ./shortcut.nix {};
+  cabalPkg = haskell.packages.ghc864.callPackage ./shortcut.nix {};
 
   # Things useful for development. The suggested workflow is to uncomment
   # runDepends for only the module(s) you need to develop a given shortcut
   # function, because some of them have incompatible dependencies.
   # Specifically, the python2 and python3 ones interfere with each other.
   devDepends = [
-    haskell.compiler.ghc844
+    haskell.compiler.ghc864
     stack
   ];
     # ++ shortcut-load.runDepends
