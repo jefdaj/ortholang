@@ -8,17 +8,20 @@ export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 export TASTY_HIDE_SUCCESSES=True
-export NIX_CURL_FLAGS=-sS
 [[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
-TEST_ARGS="--test $@ +RTS -IO -N -RTS"
+
+export NIX_CURL_FLAGS=-sS
+
+export NIX_ARGS="-j$(nproc) --quiet"
+export STACK_ARGS="--allow-different-user"
+export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 
 # this does an incremental build of the haskell code for faster testing
-echo "testing nix+stack build..."
-cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit"
-# nix-shell -j$(nproc) --quiet --command "$cmd" 2>&1 | tee stack-test.log
-nix-shell -j$(nproc) --quiet --command "echo 'no-op to enable cache'" 2>&1 | tee stack-test.log
+echo "testing build in nix-shell..."
+cmd="(stack build $STACK_ARGS && stack $STACK_ARGS exec shortcut -- $TEST_ARGS) || exit"
+nix-shell $NIX_ARGS --command "$cmd" 2>&1 | tee test-stack.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
-# echo "testing nix build..."
-# (nix-build -j$(nproc) && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee nix-test.log
+echo "testing nix-only build (no stack)..."
+(nix-build $NIX_ARGS && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee test-nix.log

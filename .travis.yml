@@ -1,5 +1,5 @@
 language: nix
-script: ./test.sh --pattern blast
+script: ./test-travis.sh
 git:
   quiet: true
   depth: 3
