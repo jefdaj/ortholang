@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-storepaths="$(nix-build --dry-run | egrep '^\s*\/nix\/store')"
+storepaths="$(nix-build --dry-run 2>&1 | egrep '^\s*\/nix\/store')"
 echo "these store paths will be attempted: $storepaths"
 
 echo "building as many as possible..."
