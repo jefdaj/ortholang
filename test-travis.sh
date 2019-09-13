@@ -7,4 +7,6 @@ builtstorepaths="$(for p in $storepaths; do [[ -d $p ]] && echo $p; done)"
 echo "these store paths were built:"
 echo $builtstorepaths
 echo "caching them for next time..."
-nix copy --to file://$HOME/nix.store $builtstorepaths
+for p in $builtstorepaths; do
+  nix copy --to file://$HOME/nix.store $p
+done
