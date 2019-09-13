@@ -16,11 +16,6 @@ export NIX_ARGS="-j$(nproc) --quiet"
 export STACK_ARGS="--allow-different-user"
 export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 
-# have to build dependencies either way
-# this will make a series of result-N links, and those are saved by .travis.yml
-echo "building dependencies..."
-nix-build $NIX_ARGS dependencies.nix
-
 # this does an incremental build of the haskell code for faster testing
 echo "testing build in nix-shell..."
 cmd="(stack build $STACK_ARGS && stack $STACK_ARGS exec shortcut -- $TEST_ARGS) || exit"
