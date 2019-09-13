@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-export build_cmd="nix-build -j$(nproc) --quiet dependencies.nix -A travisBuilds --keep-going"
+build_cmd="nix-build -j$(nproc) --quiet dependencies.nix -A travisBuilds --keep-going"
 storepaths="$($build_cmd --dry-run | grep '\/nix\/store')"
-echo "these store paths will be attempted:"
-echo $storepaths
+echo "these store paths will be attempted: $storepaths"
 
-timeout 120 $build_cmd
+echo "building as many as possible..."
+timeout 600 $build_cmd
 
-builtstorepaths="$(for p in $storepaths; do [[ -d $p ]] && echo $p; done | sed 's/\.drv//g')"
-echo "these store paths were built:"
-echo $builtstorepaths
+builtstorepaths="$(for p in $storepaths; do [[ -a $p ]] && echo $p; done)"
+echo "these store paths were built: $builtstorepaths"
 
 echo "caching them for next time..."
 for p in $builtstorepaths; do

@@ -146,5 +146,5 @@ in rec {
 
   # build this to provide a bunch of "checkpoint" result-* links that could be cached
   # .travis.yml uses is to save the nix store between runs and avoid the 50-min timeout
-  travisBuilds = modules ++ builtins.concatLists (builtins.map (m: m.runDepends) modules);
+  travisBuilds = builtins.concatLists (builtins.map (m: m.runDepends) modules) ++ modules;
 }
