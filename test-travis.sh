@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-build_cmd="nix-build -j$(nproc) --quiet dependencies.nix -A travisBuilds --keep-going"
+build_cmd="nix-build -j$(nproc) dependencies.nix -A travisBuilds --keep-going"
 storepaths="$($build_cmd --dry-run | grep '\/nix\/store')"
 echo "these store paths will be attempted: $storepaths"
 
