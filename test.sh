@@ -15,7 +15,8 @@ TEST_ARGS="--test $@ +RTS -IO -N -RTS"
 # this does an incremental build of the haskell code for faster testing
 echo "testing nix+stack build..."
 cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit"
-nix-shell -j$(nproc) --quiet --command "$cmd" 2>&1 | tee stack-test.log
+# nix-shell -j$(nproc) --quiet --command "$cmd" 2>&1 | tee stack-test.log
+nix-shell -j$(nproc) --quiet --command "echo 'no-op to enable cache'" 2>&1 | tee stack-test.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
