@@ -14,7 +14,7 @@ branches:
     - 2019-09-12_travis-ci
 
 # allows plenty of time to save the nix store before the actual timeout:
-script: timeout 120 nix-build dependencies.nix -A travisBuilds; ./test.sh
+script: timeout 600 nix-build dependencies.nix -A travisBuilds && ./test.sh
 
 # follows https://nixos.wiki/wiki/Nix_on_Travis
 # TODO how best to cache the nix-shell stuff?
