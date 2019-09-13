@@ -1,5 +1,4 @@
 language: nix
-script: ./test-travis.sh
 git:
   quiet: true
   depth: 3
@@ -13,6 +12,9 @@ branches:
     - - /^feature-.*$/
     - - /^hotfix-.*$/
     - 2019-09-12_travis-ci
+
+# allows plenty of time to save the nix store before the actual timeout:
+script: timeout 120 ./test.sh
 
 # follows https://nixos.wiki/wiki/Nix_on_Travis
 # TODO how best to cache the nix-shell stuff?
