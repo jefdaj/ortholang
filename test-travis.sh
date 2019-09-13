@@ -3,5 +3,8 @@
 export build_cmd="nix-build -j$(nproc) --quiet dependencies.nix -A travisBuilds"
 storepaths="$($build_cmd --dry-run | grep store | xargs echo)"
 timeout 120 $build_cmd
-builtstorepaths="$(for p in $storepaths; do [[ -d $p ]] && echo $p; done | xargs echo)"
-nix copy --to=$HOME/nix.store $builtstorepaths
+builtstorepaths="$(for p in $storepaths; do [[ -d $p ]] && echo $p; done)"
+echo "these store paths were built:"
+echo $builtstorepaths
+echo "caching them for next time..."
+nix copy --to file://$HOME/nix.store $builtstorepaths
