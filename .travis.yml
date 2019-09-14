@@ -9,9 +9,10 @@ branches:
   only:
     - master
     - develop
-    - - /^release-.*$/
-    - - /^feature-.*$/
-    - - /^hotfix-.*$/ - 2019-09-12_travis-ci
+    - /^release-.*$/
+    - /^feature-.*$/
+    - /^hotfix-.*$/
+    - 2019-09-12_travis-ci
 
 # probably overkill because nixpkgs/default.nix already pins it, but can't hurt
 # see: https://github.com/travis-ci/docs-travis-ci-com/issues/2236
