@@ -11,8 +11,7 @@ branches:
     - develop
     - - /^release-.*$/
     - - /^feature-.*$/
-    - - /^hotfix-.*$/
-    - 2019-09-12_travis-ci
+    - - /^hotfix-.*$/ - 2019-09-12_travis-ci
 
 # probably overkill because nixpkgs/default.nix already pins it, but can't hurt
 # see: https://github.com/travis-ci/docs-travis-ci-com/issues/2236
@@ -37,7 +36,7 @@ before_install:
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
-  - timeout 1800 ./test.sh || echo "tests timed out :("
+  - timeout 1500 ./test.sh || echo "tests timed out :("
 
 before_cache:
 - mkdir -p $HOME/nix.store
