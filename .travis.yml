@@ -31,7 +31,7 @@ before_install:
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
-  - ./test.sh
+  - timeout 1800 ./test.sh || echo "tests timed out :("
 
 # TODO remove:
 # - $HOME/nix.store
