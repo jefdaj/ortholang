@@ -30,7 +30,7 @@ before_install:
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - sudo cachix use jefdaj
+  - cachix use jefdaj
   - ./test.sh
 
 # TODO remove:
