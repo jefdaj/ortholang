@@ -12,7 +12,7 @@ export TASTY_HIDE_SUCCESSES=True
 
 export NIX_CURL_FLAGS=-sS
 
-export NIX_ARGS="-j$(nproc) --quiet"
+export NIX_ARGS="-j$(nproc)"
 export STACK_ARGS="--allow-different-user"
 export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 
