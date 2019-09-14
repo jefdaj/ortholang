@@ -31,6 +31,7 @@ let
       ++ runDepends
       ++ (if pkgs.lib.inNixShell then devDepends else []);
     # TODO set LC_ALL or similar here?
+    # TODO PYTHONPATH?
     postInstall = ''
       ${drv.postInstall or ""}
       wrapProgram "$out/bin/shortcut" \

@@ -23,5 +23,6 @@ nix-shell $NIX_ARGS --command "$cmd" 2>&1 | tee test-nix-stack.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
+# TODO why is nix-shell required?
 echo "testing nix-build only (no stack)..."
-(nix-build $NIX_ARGS && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee test-nix.log
+(nix-build $NIX_ARGS && nix-shell --command "./result/bin/shortcut $TEST_ARGS") 2>&1 | tee test-nix.log
