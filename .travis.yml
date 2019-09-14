@@ -24,21 +24,23 @@ env:
 cache:
   directories:
     - $HOME/.stack
+    - $HOME/nix.store
+
 before_install:
   - sudo mkdir -p /etc/nix
   - echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
+
+before_script:
+  - sudo mkdir -p /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
+  - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+  - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
+  - mkdir -p $HOME/nix.store
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
   - timeout 1800 ./test.sh || echo "tests timed out :("
 
-# TODO remove:
-# - $HOME/nix.store
-# - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
-# - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
-# before_cache:
-# - mkdir -p $HOME/nix.store
-# - for r in result*; do nix copy --to file://$HOME/nix.store $(readlink $r); done
-#before_script:
-#- sudo mkdir -p /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
+before_cache:
+- mkdir -p $HOME/nix.store
+- for r in result*; do nix copy --to file://$HOME/nix.store $(readlink $r); done
