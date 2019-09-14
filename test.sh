@@ -19,14 +19,14 @@ export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 # build nix stuff because it's always needed
 # (and because this way travis can cache some result links)
 nix-build $NIX_ARGS dependencies.nix -A modules # TODO remove
-nix-build $NIX_ARGS
+# nix-build $NIX_ARGS
 
 # this does an incremental build of the haskell code for faster testing
-echo "testing stack build in nix-shell..."
-cmd="(stack build $STACK_ARGS && stack $STACK_ARGS exec shortcut -- $TEST_ARGS) || exit"
-nix-shell $NIX_ARGS --command "$cmd" 2>&1 | tee test-nix-stack.log
+# echo "testing stack build in nix-shell..."
+# cmd="(stack build $STACK_ARGS && stack $STACK_ARGS exec shortcut -- $TEST_ARGS) || exit"
+# nix-shell $NIX_ARGS --command "$cmd" 2>&1 | tee test-nix-stack.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
-echo "testing nix-build only (no stack)..."
-(nix-build $NIX_ARGS && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee test-nix.log
+# echo "testing nix-build only (no stack)..."
+# (nix-build $NIX_ARGS && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee test-nix.log
