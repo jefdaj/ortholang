@@ -1,4 +1,5 @@
 language: nix
+
 git:
   quiet: true
   depth: 3
@@ -29,9 +30,6 @@ cache:
 before_install:
   - sudo mkdir -p /etc/nix
   - echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
-
-before_script:
-  - sudo mkdir -p /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
   - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
   - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
   - mkdir -p $HOME/nix.store
@@ -44,3 +42,6 @@ script:
 before_cache:
 - mkdir -p $HOME/nix.store
 - for r in result*; do nix copy --to file://$HOME/nix.store $(readlink $r); done
+
+# before_script:
+# - sudo mkdir -p /etc/nix && echo 'sandbox = true' | sudo tee /etc/nix/nix.conf
