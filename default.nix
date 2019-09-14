@@ -3,7 +3,8 @@ with import ./dependencies.nix;
 let
 
   # it works best if the ghc version here matches the resolver in stack.yaml
-  cabalPkg = haskell.packages.ghc864.callPackage ./shortcut.nix {};
+  # TODO pass compiler explicitly?
+  cabalPkg = ((import ./stack.nix) { inherit pkgs; }).ShortCut;
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
@@ -29,6 +30,7 @@ let
       ++ [ makeWrapper ]
       ++ runDepends
       ++ (if pkgs.lib.inNixShell then devDepends else []);
+    # TODO set LC_ALL or similar here?
     postInstall = ''
       ${drv.postInstall or ""}
       wrapProgram "$out/bin/shortcut" \
