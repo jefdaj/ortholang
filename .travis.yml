@@ -23,7 +23,9 @@ env:
 #   https://nixos.wiki/wiki/Nix_on_Travis
 #   https://github.com/cachix/cachix/blob/master/.travis.yml
 cache:
+  timeout: 1800
   directories:
+    - .stack-work
     - $HOME/.stack
     - $HOME/nix.store
 
