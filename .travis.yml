@@ -20,7 +20,7 @@ branches:
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
-  - timeout $((45 * 60)) ./test.sh
+  - ./test.sh
 
 notifications:
   email:
