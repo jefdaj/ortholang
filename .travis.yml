@@ -1,5 +1,12 @@
 language: nix
 
+matrix:
+  include:
+    - os: linux
+      dist: bionic
+    - os: osx
+      # osx_image: ?
+
 # see: https://github.com/travis-ci/docs-travis-ci-com/issues/2236
 env:
   - NIX_PATH=nixpkgs=channel:nixos-19.03
