@@ -1,8 +1,12 @@
 language: nix
 
+# see: https://github.com/travis-ci/docs-travis-ci-com/issues/2236
+env:
+  - NIX_PATH=nixpkgs=channel:nixos-19.03
+
 git:
-  quiet: true
-  depth: 3
+  # quiet: true
+  depth: 1
 
 # see: https://nvie.com/posts/a-successful-git-branching-model
 branches:
@@ -12,14 +16,6 @@ branches:
     - /^release-.*$/
     - /^feature-.*$/
     - /^hotfix-.*$/
-
-# see:
-#   https://nixos.wiki/wiki/Nix_on_Travis
-#   https://github.com/cachix/cachix/blob/master/.travis.yml
-cache:
-  directories:
-    - .stack-work
-    - $HOME/.stack
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
