@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO try making the builds --pure, maybe it will clear up the issues
+
 # remember to export TMPDIR=<some shared location> before testing on HPC clusters!
 # script arguments will be passed to shortcut --test
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
@@ -12,7 +14,7 @@ export TASTY_HIDE_SUCCESSES=True
 
 export NIX_CURL_FLAGS=-sS
 
-export NIX_ARGS="-j$(nproc)"
+export NIX_ARGS="--pure -j$(nproc)"
 export STACK_ARGS="--allow-different-user"
 export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 
@@ -24,10 +26,10 @@ export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 # this does an incremental build of the haskell code for faster testing
 # echo "testing stack build in nix-shell..."
 cmd="(stack build $STACK_ARGS && stack $STACK_ARGS exec shortcut -- $TEST_ARGS) || exit"
-nix-shell $NIX_ARGS --command "$cmd" 2>&1 | tee test-nix-stack.log
+nix-shell $NIX_ARGS --command "$cmd" 2>&1 | tee test-nix-stack-shell.log
 
 # this builds everything at once, which is simpler.
 # the downside is it rebuilds the haskell code from scratch.
 # TODO why is nix-shell required?
-# echo "testing nix-build only (no stack)..."
-# (nix-build $NIX_ARGS && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee test-nix.log
+echo "testing stack2nix without nix-shell..."
+(nix-build $NIX_ARGS && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee test-nix-stack.log

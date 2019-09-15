@@ -17,13 +17,14 @@ let
           wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}" ${extraWraps}
         done
       '';
-      # TODO shit, that ^ won't work with python3 packages
     };
 
 in rec {
   myBlast = psiblast-exb; # for swapping it out if needed
 
   myPy2Wrap = "--prefix PYTHONPATH : \"$out/bin:${myPy2.python.sitePackages}\"";
+  myPy3Wrap = "--prefix PYTHONPATH : \"$out/bin:${python36.python.sitePackages}\"";
+
   myPy2 = python27.buildEnv.override {
 
     # see https://github.com/NixOS/nixpkgs/issues/22319
@@ -61,11 +62,14 @@ in rec {
   shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ hmmer ] "";
   shortcut-mmseqs        = mkModule ./ShortCut/Modules/MMSeqs        [ mmseqs2 ] "";
   shortcut-muscle        = mkModule ./ShortCut/Modules/Muscle        [ muscle ] "";
-  shortcut-orthofinder   = mkModule ./ShortCut/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
   shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";
+
+  # TODO should the wrap not be necessary?
   shortcut-seqio         = mkModule ./ShortCut/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
-  # shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] "";
-  # shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ python36 treeCl ] "";
+  shortcut-orthofinder   = mkModule ./ShortCut/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
+
+  shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
   # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
@@ -102,49 +106,4 @@ in rec {
     shortcut-greencut
   ];
 
-  # Things useful for development. The suggested workflow is to uncomment
-  # runDepends for only the module(s) you need to develop a given shortcut
-  # function, because some of them have incompatible dependencies.
-  # Specifically, the python2 and python3 ones interfere with each other.
-  devDepends = [
-    haskell.compiler.ghc864
-    stack
-    pypi2nix
-  ];
-    # ++ shortcut-load.runDepends
-    # ++ shortcut-busco.runDepends;
-    # ++ shortcut-justorthologs.runDepends; # incompatible with seqio, orthofinder, blastdb?
-    # TODO this shouldn't be needed:
-    # ++ shortcut-sonicparanoid.runDepends # incompatible with seqio, orthofinder, blastdb?
-    # ++ shortcut-biomartr.runDepends
-    # ++ shortcut-blast.runDepends
-    # ++ shortcut-blastdb.runDepends  # incompatible with sonicparanoid
-    #++ shortcut-blasthits.runDepends;
-    # ++ shortcut-blastrbh.runDepends
-    # ++ shortcut-crbblast.runDepends
-    # ++ shortcut-diamond.runDepends
-    # ++ shortcut-hmmer.runDepends
-    # ++ shortcut-mmseqs.runDepends
-    # ++ shortcut-muscle.runDepends
-    # ++ shortcut-orthofinder.runDepends;
-    # ++ shortcut-orthogroups.runDepends;
-    # ++ shortcut-greencut.runDepends;
-    # ++ shortcut-plots.runDepends;
-    # ++ shortcut-setstable.runDepends;
-    # ++ shortcut-psiblast.runDepends
-    # ++ shortcut-seqio.runDepends # incompatible with sonicparanoid
-    # ++ shortcut-treecl.runDepends # incompatible with sonicparanoid
-
-  # things needed at runtime
-  runDepends = modules ++ [
-    # cdhit
-    diffutils
-    glibcLocales
-    ncurses # TODO is this needed?
-    tree
-  ];
-
-  # build this to provide a bunch of "checkpoint" result-* links that could be cached
-  # .travis.yml uses is to save the nix store between runs and avoid the 50-min timeout
-  travisBuilds = builtins.concatLists (builtins.map (m: m.runDepends) modules) ++ modules;
 }

@@ -1,18 +1,38 @@
 with import ./nixpkgs;
-with import ./dependencies.nix;
 let
 
-  # it works best if the ghc version here matches the resolver in stack.yaml
-  # TODO pass compiler explicitly?
-  cabalPkg = ((import ./stack.nix) { inherit pkgs; }).ShortCut;
+  # Things needed at runtime. Modules are only the scripts called by shortcut,
+  # not their indirect (propagated) dependencies since those may conflict with
+  # each other.
+  runDepends = (import ./modules.nix).modules ++ [
+    diffutils
+    glibcLocales
+    # ncurses # TODO is this needed?
+    tree
+    gnutar
+    curl
+  ];
+
+  # Things useful for development, which are included if going into nix-shell.
+  # Uncomment or add to it as needed.
+  devDepends = [
+    stack
+    # stack2nix
+    # pypi2nix
+  ];
+
+  myGHC = pkgs.haskell.packages.ghc864;
+  stackPackages = (import ./stack.nix) { inherit pkgs; compiler = myGHC; };
+  haskellPkg = stackPackages.ShortCut; # a stack2nix-generated Cabal package
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
-  noBigDotfiles = path: type: baseNameOf path != ".stack-work" && baseNameOf path != ".git";
+  noBigDotfiles = path: type: baseNameOf path != ".stack-work"
+                           && baseNameOf path != ".git";
 
   # see https://github.com/jml/nix-haskell-example
   # TODO final wrapper with +RTS -N -RTS?
-  shortcut = haskell.lib.overrideCabal cabalPkg (drv: {
+  shortcut = haskell.lib.overrideCabal haskellPkg (drv: {
     src = builtins.filterSource noBigDotfiles ./.;
 
     # TODO this isn't being run by overrideCabal at all. get it to work
@@ -21,24 +41,22 @@ let
       ${drv.shellHook or ""}
       export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
       export TASTY_HIDE_SUCCESSES=True
-      find "${src}/ShortCut/Modules/* -type d" | while read d; do
-        export PATH=$d:$PATH
-      done
     '';
 
     buildDepends = (drv.buildDepends or [])
       ++ [ makeWrapper ]
       ++ runDepends
       ++ (if pkgs.lib.inNixShell then devDepends else []);
+
     # TODO set LC_ALL or similar here?
     # TODO PYTHONPATH?
     postInstall = ''
-      ${drv.postInstall or ""}
       wrapProgram "$out/bin/shortcut" \
         --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
         --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+      ${drv.postInstall or ""}
     '';
   });
 
-# to work on a specific module, substitute it here and enter nix-shell:
+# to work on a specific module, substitute it here and enter nix-shell
 in shortcut
