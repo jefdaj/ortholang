@@ -24,4 +24,4 @@ cache:
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
-  - travis_wait 45 timeout $((45 * 60)) ./test.sh
+  - timeout $((45 * 60)) ./test.sh
