@@ -22,13 +22,12 @@ Loading required package: data_table
 Warning message:
 In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
   there is no package called data_table
-Error in packageVersion("data_table") : 
-  there is no package called data_table
+Error in packageVersion("data_table") : package data_table not found
 Execution halted
-[1] 0.9.0
-[1] 0.8.3
-[1] 3.2.0
+[1] 0.8.0
+[1] 0.7.8
+[1] 3.1.0
 [1] 1.3.1
-[1] 0.8.3
-[1] 1.4.0
+[1] 0.8.2
+[1] 1.3.3
 [1] 1.6.20

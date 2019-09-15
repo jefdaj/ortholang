@@ -36,6 +36,9 @@ let
     shellHook = ''
       ${drv.shellHook or ""}
       export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+      export LC_ALL=en_US.UTF-8
+      export LANG=en_US.UTF-8
+      export LANGUAGE=en_US.UTF-8
       export TASTY_HIDE_SUCCESSES=True
     '';
 
@@ -50,6 +53,9 @@ let
       ${drv.postInstall or ""}
       wrapProgram "$out/bin/shortcut" \
         --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive" \
+        --set LC_ALL en_US.UTF-8 \
+        --set LANG en_US.UTF-8 \
+        --set LANGUAGE en_US.UTF-8 \
         --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
     '';
   });
