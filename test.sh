@@ -18,8 +18,8 @@ export TEST_ARGS="+RTS -IO -N -RTS --test $@"
 
 # build nix stuff because it's always needed
 # (and because this way travis can cache some result links)
-nix-build $NIX_ARGS dependencies.nix -A modules # TODO remove
-# nix-build $NIX_ARGS
+# nix-build $NIX_ARGS dependencies.nix -A modules # TODO remove
+nix-build $NIX_ARGS
 
 # this does an incremental build of the haskell code for faster testing
 # echo "testing stack build in nix-shell..."
