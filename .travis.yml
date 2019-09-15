@@ -3,13 +3,10 @@ language: nix
 matrix:
   include:
     - os: linux
-      dist: bionic
+      # dist: bionic
+      env: NIX_PATH=nixpkgs=channel:nixos-19.03
     - os: osx
-      # osx_image: ?
-
-# see: https://github.com/travis-ci/docs-travis-ci-com/issues/2236
-env:
-  - NIX_PATH=nixpkgs=channel:nixos-19.03
+      env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
 git:
   # quiet: true
