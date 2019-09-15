@@ -40,7 +40,7 @@ install:
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
-  - timeout 1500 ./test.sh || echo "tests timed out :("
+  - timeout 2400 ./test.sh || echo "tests timed out :("
 
 before_cache:
 - mkdir -p $HOME/nix.store
