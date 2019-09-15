@@ -4,14 +4,14 @@
 # script arguments will be passed to shortcut --test
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
 
-set -E
+set -e
 
-export NIX_ARGS="--pure -j$(nproc)"
-export TASTY_QUICKCHECK_TESTS=1000
+export NIX_ARGS="--pure -j$(nproc) --quiet"
+export TASTY_QUICKCHECK_TESTS=100
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 # export TASTY_HIDE_SUCCESSES=True
-[[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
+# [[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
 
 log="shortcut-build_$(date '+%Y-%m-%d_%H:%M').log"
 cmd="nix-build $NIX_ARGS"

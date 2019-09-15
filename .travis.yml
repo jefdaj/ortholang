@@ -13,24 +13,15 @@ branches:
     - /^feature-.*$/
     - /^hotfix-.*$/
 
-# probably overkill because nixpkgs/default.nix already pins it, but can't hurt
-# see: https://github.com/travis-ci/docs-travis-ci-com/issues/2236
-# env:
-#   - NIX_PATH=nixpkgs=channel:nixos-19.03
-
 # see:
 #   https://nixos.wiki/wiki/Nix_on_Travis
 #   https://github.com/cachix/cachix/blob/master/.travis.yml
 cache:
-  timeout: 1800
   directories:
     - .stack-work
     - $HOME/.stack
 
-install:
-  - travis_wait 1800
-
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj
-  - timeout 2700 ./test.sh || echo "tests timed out :("
+  - travis_wait 45 timeout $((45 * 60)) ./test.sh
