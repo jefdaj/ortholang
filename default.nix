@@ -17,13 +17,12 @@ let
   # Uncomment or add to it as needed.
   devDepends = [
     stack
-    # stack2nix
     # pypi2nix
   ];
 
   myGHC = pkgs.haskell.packages.ghc864;
   stackPackages = (import ./stack.nix) { inherit pkgs; compiler = myGHC; };
-  haskellPkg = stackPackages.ShortCut; # a stack2nix-generated Cabal package
+  haskellPkg = myGHC.callPackage ./shortcut.nix {}; # a cabal2nix-generated Cabal package
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
