@@ -2,13 +2,12 @@ language: nix
 
 matrix:
   include:
-    # disabled to test darwin faster
-    # - os: linux
-    #   dist: bionic
-    #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
-    # - os: linux
-    #   dist: trusty
-    #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
+    - os: linux
+      dist: bionic
+      env: NIX_PATH=nixpkgs=channel:nixos-19.03
+    - os: linux
+      dist: trusty
+      env: NIX_PATH=nixpkgs=channel:nixos-19.03
     - os: osx
       env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
@@ -27,13 +26,9 @@ branches:
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - |
-    if [ "$TRAVIS_OS_NAME"  = "osx" ]; then
-      sudo cachix use jefdaj;
-    else
-      cachix use jefdaj;
-    fi
-  - ./test.sh
+  - if [ "$TRAVIS_OS_NAME"  = "osx" ]; then sudo cachix use jefdaj; fi
+  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then cachix use jefdaj; fi
+  - ./test.sh --pattern depend
 
 notifications:
   email:
