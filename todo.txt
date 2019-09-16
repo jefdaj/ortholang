@@ -1,3 +1,6 @@
+things that need to be different on darwin:
+  no nproc
+
 nix vs nix + stack:
   nix by itself fails orthofinder tests, sonicparanoid tests, plot tests
     why would that be? what's different between them?
