@@ -27,8 +27,8 @@ branches:
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then echo \"trusted-users = root $USER\" | sudo tee -a /etc/nix/nix.conf && sudo pkill nix-daemon; fi
-  - cachix use jefdaj
+  - if [ "$TRAVIS_OS_NAME"  = "osx" ]; then sudo cachix use jefdaj; fi
+  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then cachix use jefdaj; fi
   - ./test.sh
 
 notifications:
