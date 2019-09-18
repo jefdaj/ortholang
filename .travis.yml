@@ -13,6 +13,7 @@ branches:
   only:
     - master
     - develop
+    - /^module-.*$/
     - /^release-.*$/
     - /^feature-.*$/
     - /^hotfix-.*$/
