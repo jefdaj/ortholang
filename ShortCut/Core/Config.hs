@@ -48,6 +48,7 @@ loadConfig mods args = do
   let ctp = getAllArgs args (longOption "pattern")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
+  os <- getOS
   return CutConfig
     { cfgScript  = csc'
     , cfgInteractive = int
@@ -62,7 +63,11 @@ loadConfig mods args = do
     , cfgSecure  = isPresent args $ longOption "secure"
     , cfgParLock = par
     , cfgOutFile = out
+    , cfgOS      = os
     }
+
+getOS :: IO String
+getOS = return "mac"
 
 -- TODO any way to recover if missing? probably not
 -- TODO use a safe read function with locks here?

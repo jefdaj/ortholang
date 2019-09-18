@@ -11,6 +11,7 @@ macos:
     cut has different args
     md5sum called md5
     nproc replaced by sysctl something
+    psiblast-exb has no mac version :(
 
 nix vs nix + stack:
   nix by itself fails orthofinder tests, sonicparanoid tests, plot tests

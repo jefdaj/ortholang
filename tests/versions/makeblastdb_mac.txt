@@ -1,0 +1,1 @@
+/nix/store/c1fl1ymnwkixwcqw5b56ggqfhisj4dyy-Shortcut-BlastDB/bin/.makeblastdb_mac.sh-wrapped: line 2: /nix/store/pp8kz8a3wz4i4byvsic2mn3kfxakf43n-psiblast-exb-2.5.0/bin/makeblastdb: cannot execute binary file: Exec format error

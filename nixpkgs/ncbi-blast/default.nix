@@ -7,7 +7,11 @@
 
 let
   ftpSite = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+";
-  arch = "x64-linux";
+  arch = if stdenv.system == "x86_64-darwin"
+    then "universal-macosx"
+    else "x64-linux";
+
+  # TODO fill in more completely:
   # arch = if stdenv.system == "i686-linux"
   #  then "linux-i686"
   #  else "linux-x86_64";

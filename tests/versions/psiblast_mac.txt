@@ -1,0 +1,1 @@
+/nix/store/n1wx8qlmrjpccc74vm18j9bfh4vkcdkq-Shortcut-PsiBlast/bin/.psiblast_mac.sh-wrapped: line 2: /nix/store/pp8kz8a3wz4i4byvsic2mn3kfxakf43n-psiblast-exb-2.5.0/bin/psiblast: cannot execute binary file: Exec format error

@@ -357,6 +357,7 @@ data CutConfig = CutConfig
   , cfgWidth   :: Maybe Int -- for testing
   , cfgSecure  :: Bool
   , cfgParLock :: Resource
+  , cfgOS      :: String
   }
   deriving Show
 
