@@ -1,4 +1,5 @@
 language: nix
+nix: 2.0.4
 
 matrix:
   - include:
