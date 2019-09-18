@@ -5,12 +5,13 @@
 let
   # fetch my pinned nixpkgs for reproducibility.
   # to update the the sha256sum, use nix-prefetch-url --unpack
-  nixpkgs = fetchFromGitHub {
+  inherit (import <nixpkgs> {}) fetchFromGitHub;
+  pkgs = import (fetchFromGitHub {
     owner  = "NixOS";
     repo   = "nixpkgs-channels";
     rev = "e19054ab3cd5b7cc9a01d0efc71c8fe310541065"; # nixos-19.03 as of 2019-09-11
     sha256 = "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2";
-  };
+  }) {};
 
   # use this instead to try to build it with your system's current nixpkgs:
   # pkgs = import <nixpkgs> {};
