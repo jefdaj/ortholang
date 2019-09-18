@@ -5,7 +5,8 @@ matrix:
   include:
     - os: linux
       # dist: bionic
-      env: NIX_PATH=nixpkgs=channel:nixos-19.03
+      # env: NIX_PATH=nixpkgs=channel:nixos-19.03
+      env: NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/e19054ab3cd5b7cc9a01d0efc71c8fe310541065.tar.gz
     # - os: osx
     #   env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
