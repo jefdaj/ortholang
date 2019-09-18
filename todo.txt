@@ -1,5 +1,12 @@
-things that need to be different on darwin:
-  no nproc
+macos:
+  remove nproc
+  is nixpkgs-19.03-darwin the best channel/thing to pin? or stick with the default?
+  error in postInstall, but if you comment it out the build continues
+  errors about system not supported, refusing to evaluate:
+    hmmer
+    muscle
+    ...
+    fix by allowing unsupported system in ~/.config/nixpkgs/config.nix
 
 nix vs nix + stack:
   nix by itself fails orthofinder tests, sonicparanoid tests, plot tests

@@ -3,7 +3,7 @@
 
 # TODO update to a much newer version?
 
-{stdenv, fetchurl, zlib, bzip2}:
+{stdenv, fetchurl, patchelf, zlib, bzip2}:
 
 let
   ftpSite = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+";
@@ -22,6 +22,7 @@ in stdenv.mkDerivation rec {
     url = "${ftpSite}/${version}/${name}+-${arch}.tar.gz";
     sha256 = "027lwjc7vac32q7s9dxvzc9xqhvlk1w4v9kndkqqwbna3cg9aarj";
   };
+  buildInputs = [ patchelf ];
   dontStrip = 1;
   libPath = stdenv.lib.makeLibraryPath [
       stdenv.cc.cc

@@ -41,7 +41,8 @@ let
 
   fastme = pkgs.callPackage ./fastme { };
 
-  # muscle = pkgs.callPackage ./muscle { }; # TODO got this already somewhere!
+  # see https://nixos.org/nix-dev/2014-December/015243.html
+  muscle = pkgs.callPackage ./muscle { };
 
   diamond = pkgs.callPackage ./diamond { };
 
@@ -91,7 +92,7 @@ let
 in pkgs // {
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit fastme;
-  inherit diamond hmmer mmseqs2;
+  inherit diamond hmmer mmseqs2 muscle;
 
   # TODO will these interfere with each other?
   python27Packages = myPython2;
