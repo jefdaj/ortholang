@@ -39,12 +39,13 @@ mkAva name = let name' = name ++ "_ava" in CutFunction
 
 -- TODO any reason to take the name as a separate arg here?
 rMkAva :: RulesFn
-rMkAva st (CutFun rtn salt deps name [e, faas]) = do
-  (ExprPath faasPath) <- rExpr st faas
+rMkAva st (CutFun _ _ _ _ [_, faas]) = do
+  (ExprPath _) <- rExpr st faas
   return undefined
 rMkAva _ e = error $ "bad argument to rMkAva: " ++ show e
 
 -- construct a BLAST-like search expression from compiled paths
+mkSearchExpr :: CutType -> RepeatSalt -> [CutVar] -> String -> CutExpr -> ExprPath -> ExprPath -> CutExpr
 mkSearchExpr rtn salt deps name  evalueExpr  queryFaPath subjFaPath
   =   CutFun rtn salt deps name [evalueExpr, queryExpr,  subjExpr]
   where

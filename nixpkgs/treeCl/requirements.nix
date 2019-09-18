@@ -29,8 +29,7 @@ let
       };
   };
 
-  # commonBuildInputs = with pkgs; [ raxml ];
-  commonBuildInputs = with pkgs; [ ];
+  commonBuildInputs = with pkgs; [ raxml ];
   commonDoCheck = false;
 
   withPackages = pkgs':

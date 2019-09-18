@@ -9,7 +9,7 @@ module ShortCut.Modules.Plots where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Actions (withBinHash, writeCachedLines, writeLits, debugNeed)
+import ShortCut.Core.Actions (withBinHash, writeCachedLines, writeLits)
 import ShortCut.Core.Util (digest)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath, cacheDir)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript,
@@ -176,37 +176,23 @@ plotCache cfg = cacheDir cfg "plots"
 
 rPlotListOfLists :: FilePath -> CutState -> CutExpr -> Rules ExprPath
 rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(CutFun _ _ _ _ [lol]) = do
-  (ExprPath lPath) <- rExpr st lol -- TODO is this needed?
-  -- (lists, labels) <- fmap unzip $ mapM (\e -> (rExpr st e, return $ plotLabel st e)) (extractExprs scr lol)
-  listsNLabels <- mapM (\e -> do
-                          p <- rExpr st e
-                          return (p, plotLabel st e)) (extractExprs scr lol)
-  let (lists, labels) = unzip listsNLabels
-  -- let (labels, lists) = unzip $ map (\e -> (plotLabel st e, exprPath st e)) (extractExprs scr lol)
-  let lists'  = map (\(ExprPath p) -> p) lists
-      -- ePaths' = map (\(ExprPath p) -> p) ePaths
+  let labels = map (plotLabel st) (extractExprs scr lol)
+      lists  = map (exprPath  st) (extractExprs scr lol)
       outPath   = exprPath st expr
       outPath'  = fromCutPath cfg outPath
       outPath'' = ExprPath outPath'
       cDir      = fromCutPath cfg $ plotCache cfg
-      labPath  = cDir </> digest expr ++ "_names.txt"
-      aLolPath = cDir </> digest expr ++ "_lists.txt"
-  labPath  %> \_ -> do
-    -- debugNeed cfg "rPlotListOfLists" (lPath:ePaths')
-    liftIO $ createDirectoryIfMissing True cDir
-    -- liftIO $ putStrLn $ "labels: " ++ show labels
-    writeCachedLines cfg ref labPath labels
-  aLolPath %> \_ -> do
-    -- debugNeed cfg "rPlotListOfLists" (lPath:ePaths')
-    liftIO $ createDirectoryIfMissing True cDir
-    -- liftIO $ putStrLn $ "lists: " ++ show lists
-    debugNeed cfg "rPlotListOfLists" lists'
-    writeLits cfg ref aLolPath lists'
   outPath' %> \_ -> do
-    debugNeed cfg "rPlotListOfLists" (lPath:labPath:aLolPath:[])
-    -- debugNeed cfg "rPlotListOfLists" [labPath, aLolPath]
+    -- write labels + list paths to the cache dir
+    let labPath  = cDir </> digest expr ++ "_names.txt"
+        aLolPath = cDir </> digest expr ++ "_lists.txt"
+    liftIO $ createDirectoryIfMissing True cDir
+    writeCachedLines cfg ref labPath labels
+    writeLits cfg ref aLolPath $ map (fromCutPath cfg) lists
+    let args = [labPath, aLolPath]
+    -- call the main script
     withBinHash cfg ref expr outPath $ \out ->
-      aSimpleScript script cfg ref ids (out:map (toCutPath cfg) [labPath, aLolPath])
+      aSimpleScript script cfg ref ids (out:map (toCutPath cfg) args)
   return outPath''
 rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 

@@ -5,31 +5,35 @@
 let
   # fetch my pinned nixpkgs for reproducibility.
   # use this instead to try to build it with your system's current nixpkgs:
-  # pkgs = import <nixpkgs> {};
+  pkgs = import <nixpkgs> {};
   # to update the the sha256sum, use nix-prefetch-url --unpack
-  # (see https://github.com/NixOS/nix/issues/1381#issuecomment-300755992)
-  pkgs = import (fetchTarball {
-    url = "https://github.com/jefdaj/nixpkgs/archive/2019-03-20_nixpkgs-shortcut.tar.gz";
-    sha256 = "1lj3paw9z0n8v1dk8nxmnd7i0z209746cyz19vsadkswd87x7ipm";
-  }) {};
+  # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
+  # inherit (import <nixpkgs> {}) fetchFromGitHub;
+  # nixpkgs = fetchFromGitHub {
+  #   owner  = "NixOS";
+  #   repo   = "nixpkgs-channels";
+  #   rev = "e19054ab3cd5b7cc9a01d0efc71c8fe310541065"; # nixos-19.03 as of 2019-09-11
+  #   sha256 = "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2";
+  # };
+  # pkgs = import nixpkgs {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
   hmmer = pkgs.callPackage ./hmmer { };
+  ncbi-blast = pkgs.callPackage ./ncbi-blast {};
 
-  # ... because it only supports exactly 2.2.29
+  # crb-blast only supports exactly 2.2.29
   # and there are reports of a bug in newer ones (still?)
   # TODO patch crb-blast to use the newest one?
-  ncbi-blast = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
+  ncbi-blast-2_2_29 = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
     version="2.2.29";
     name="ncbi-blast-${version}";
     src = pkgs.fetchurl {
-      url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-x64-linux.tar.gz";
+      url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
       sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
     };
   });
-
-  crb-blast  = pkgs.callPackage ./crb-blast  { inherit ncbi-blast; };
+  crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
 
   # cdhit = pkgs.callPackage ./cdhit { };
 

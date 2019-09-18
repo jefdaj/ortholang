@@ -1,9 +1,1 @@
-WARNING! gbk_to_faa ignored 'MAG0620 Pseudogene of Hypothetical protein (N terminalpart)' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG1130 Pseudogene' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG1760 Pseudogene of Conserved hypothetical protein(N terminal part)' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG4200 Pseudogene of Conserved Hypothetical protein(C terminal part)' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG4260 Pseudogene of CPG DNA methylase (C terminalpart)' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG4310 Conserved hypothetical protein, DUF285 family' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG4870 Pseudogene of Polysaccharide synthase(C terminal part)' because it has no translation
-WARNING! gbk_to_faa ignored 'MAG6550 gtsA Pseudogene of Glycerol transporter subunit A(C terminal part)' because it has no translation
-[5, 751]
+[5, 759]

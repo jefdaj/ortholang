@@ -30,8 +30,10 @@ gzip         = False
 # species    = 
 EOF
 
-CFGTEMPLATE="@busco@/config/config.ini"
+# the config file is set to its incomplete version earlier in the nix-build,
+# but only the final version here should be used. bit of a hack but it works
+CFGTEMPLATE="$BUSCO_CONFIG_FILE"
 tail -n +45 "$CFGTEMPLATE" >> "$CFGPATH"
-
 export BUSCO_CONFIG_FILE="$CFGPATH"
+
 run_BUSCO.py --cpu $(nproc) -i "$INPATH" -o "$OBASE" -l "$LINEAGE" -m "$MODE" > "${OUTPREFIX}.out" 2> "${OUTPREFIX}.err"

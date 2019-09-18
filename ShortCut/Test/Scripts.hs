@@ -90,7 +90,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     -- TODO refactor them to come from the same fn
     desc = "creates expected tmpfiles"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
-    treeCmd = (shell $ "tree -aI '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt' | " ++ sedCmd)
+    treeCmd = (shell $ "tree -N -aI '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt' | " ++ sedCmd)
                 { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg ref ids

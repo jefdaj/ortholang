@@ -1,4 +1,4 @@
-{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb, diamond }:
+{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb, diamond, python27, utillinux }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
 # I'm not sure if this is the proper way to set libPath but it seems to work
@@ -18,13 +18,14 @@ in stdenv.mkDerivation rec {
     url = "https://github.com/davidemms/OrthoFinder/releases/download/${version}/OrthoFinder-${version}_source.tar.gz";
     sha256 = "12llzc22k52h9f48irb5axhkx9mm6844cj1qbig9wvqi9da541ra";
   };
-  buildInputs = [ makeWrapper ] ++ runDepends;
+  buildInputs = [ pkgs.python27Packages.wrapPython makeWrapper ] ++ runDepends;
   runDepends = [
     #psiblast-exb # TODO remove in favor of diamond/mmseqs2?
     diamond
     fastme
     mcl
     myPython
+    utillinux # for taskset
   ];
   phases = "unpackPhase patchPhase installPhase";
   patches = [
@@ -45,6 +46,7 @@ in stdenv.mkDerivation rec {
     cp -r OrthoFinder-${version}_source/orthofinder/tools $out/bin/
     cp OrthoFinder-${version}_source/orthofinder/config.json $out/bin/
     echo "patching $exe"
+    buildPythonPath "$out"
     wrapProgram "$exe" --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
   '';
 }

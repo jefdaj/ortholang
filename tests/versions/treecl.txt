@@ -1,0 +1,3 @@
+/nix/store/k82wc7d4rbavpa01ydr4msmlv3yzcpsx-python2.7-treecl-0.1.36/lib/python2.7/site-packages/treeCl/__init__.py:18: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+usage: treeCl [-h] [-a] [-b]
+.treeCl-wrapped

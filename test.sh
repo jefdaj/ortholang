@@ -4,19 +4,26 @@
 # script arguments will be passed to shortcut --test
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
 
-export TASTY_QUICKCHECK_TESTS=1000
+set -e
+
+timestamp=$(date '+%Y-%m-%d_%H:%M')
+
+export NIX_PATH=nixpkgs=channel:nixos-19.03
+export nix_args="--pure -j$(nproc)"
+
+log="shortcut-build_${timestamp}.log"
+cmd="nix-build $nix_args"
+echo "$cmd" | tee $log
+$cmd 2>&1 | tee -a $log
+
+export TASTY_QUICKCHECK_TESTS=100
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
-export TASTY_HIDE_SUCCESSES=False
-[[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
-TEST_ARGS="--test $@ +RTS -IO -N -RTS"
+# export TASTY_HIDE_SUCCESSES=True
+# [[ -z "$TMPDIR" ]] && export TMPDIR=/tmp
 
-# this does an incremental build of the haskell code for faster testing
-echo "testing nix+stack build..."
-cmd="(stack build --allow-different-user && ./.stack-work/install/*/*/*/bin/shortcut $TEST_ARGS) || exit"
-nix-shell --command "$cmd" 2>&1 | tee stack-test.log
-
-# this builds everything at once, which is simpler.
-# the downside is it rebuilds the haskell code from scratch.
-echo "testing nix build..."
-(nix-build -j$(nproc) && ./result/bin/shortcut $TEST_ARGS) 2>&1 | tee nix-test.log
+log="shortcut-test_${timestamp}.log"
+test_args="+RTS -IO -N -RTS --test $@"
+cmd="./result/bin/shortcut $test_args"
+echo "$cmd" | tee $log
+$cmd 2>&1 | tee -a $log
