@@ -9,8 +9,8 @@ let
   pkgs = import (fetchFromGitHub {
     owner  = "NixOS";
     repo   = "nixpkgs-channels";
-    rev = "e19054ab3cd5b7cc9a01d0efc71c8fe310541065"; # nixos-19.03 as of 2019-09-11
-    sha256 = "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2";
+    rev = "2dfae8e22fde5032419c3027964c406508332974"; # nixos-19.03 as of 2019-09-15
+    sha256 = "0293j9wib78n5nspywrmd9qkvcqq2vcrclrryxqnaxvj3bs1c0vj";
   }) {};
 
   # use this instead to try to build it with your system's current nixpkgs:
