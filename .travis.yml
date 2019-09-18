@@ -2,12 +2,12 @@ language: nix
 
 matrix:
   include:
-    - os: linux
-      dist: bionic
-      env: NIX_PATH=nixpkgs=channel:nixos-19.03
-    - os: linux
-      dist: trusty
-      env: NIX_PATH=nixpkgs=channel:nixos-19.03
+    # - os: linux
+    #   dist: bionic
+    #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
+    # - os: linux
+    #   dist: trusty
+    #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
     - os: osx
       env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
