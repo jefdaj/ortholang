@@ -7,6 +7,10 @@ macos:
     muscle
     ...
     fix by allowing unsupported system in ~/.config/nixpkgs/config.nix
+  commands missing/different:
+    cut has different args
+    md5sum called md5
+    nproc replaced by sysctl something
 
 nix vs nix + stack:
   nix by itself fails orthofinder tests, sonicparanoid tests, plot tests
