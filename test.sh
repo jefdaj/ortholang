@@ -8,7 +8,6 @@ set -e
 
 timestamp=$(date '+%Y-%m-%d_%H:%M')
 
-export NIX_PATH=nixpkgs=channel:nixos-19.03
 export nix_args="--pure -j$(nproc)"
 
 log="shortcut-build_${timestamp}.log"
