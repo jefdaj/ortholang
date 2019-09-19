@@ -22,19 +22,22 @@ Test Status
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
 
-These are the important ones
+These are the only important ones if you want to try the current release:
 
-[![Status](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master%20branch)
+[![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
-| Mac | Linux |
-|---|---|
-|  |  |
-|  |  |
-|  |  |
+But there are some feature branches you might be interested in:
 
-Modules:
+![cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=cachix)
+![darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin)
+![installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=installscript)
+![nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=nostack2nix)
+![stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=stack2nix)
+![travisbadges](https://img.shields.io/travis/jefdaj/shortcut/feature-travisbadges?label=travisbadges)
+
+And a branch for development of each ShortCut "module":
 
 <!-- TODO core branch too for the haskell part -->
 
@@ -68,15 +71,6 @@ Modules:
 ![setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=setstable)
 ![sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=sonicparanoid)
 ![summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=summarize)
-
-New features in progress:
-
-![cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=cachix)
-![darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin)
-![installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=installscript)
-![nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=nostack2nix)
-![stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=stack2nix)
-![travisbadges](https://img.shields.io/travis/jefdaj/shortcut/feature-travisbadges?label=travisbadges)
 
 Quick Start
 -----------
