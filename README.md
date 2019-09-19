@@ -72,8 +72,7 @@ Modules:
 New features in progress:
 
 ![cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=cachix)
-![darwin 1](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin&build=1)
-![darwin 2](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin&build=2)
+![darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin)
 ![installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=installscript)
 ![nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=nostack2nix)
 ![stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=stack2nix)
