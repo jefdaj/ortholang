@@ -16,11 +16,8 @@ later.
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and a list of available functions.
 
-Status
-------
-
-<!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
-<!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
+Code Status
+-----------
 
 These are the only important ones if you want to try the current release:
 
@@ -28,7 +25,7 @@ These are the only important ones if you want to try the current release:
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
-But you may also be interested in the status of an upcoming feature:
+But you may also be interested in progress on an upcoming feature:
 
 ![cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=cachix)
 ![darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin)
