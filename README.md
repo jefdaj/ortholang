@@ -30,7 +30,7 @@ Status
 
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 
-![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=build&branch=feature-travisbadges)
+![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges)
 
 | Mac | Linux |
 |---|---|
