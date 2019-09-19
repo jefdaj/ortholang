@@ -38,7 +38,7 @@ Status
 |  |  |
 |  |  |
 
-![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=module-allvsall?build=1)
+![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=module-allvsall&build=1)
 ![module-biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=module-biomartr)
 ![module-blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=module-blast)
 ![module-blastdb](https://img.shields.io/travis/jefdaj/shortcut/module-blastdb?label=module-blastdb)
