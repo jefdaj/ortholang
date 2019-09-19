@@ -72,7 +72,7 @@ Or in the somewhat-separate development of a particular ShortCut "module":
 ![sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=sonicparanoid)
 ![summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=summarize)
 
-Green means both the Mac and Linux builds are passing on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches).
+Green means tests are passing for both the Mac and Linux builds on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches).
 
 Quick Start
 -----------
