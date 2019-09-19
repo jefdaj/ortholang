@@ -9,6 +9,7 @@ matrix:
     #   dist: trusty
     #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
     - os: osx
+      osx_image: xcode10.1
       env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
 git:
