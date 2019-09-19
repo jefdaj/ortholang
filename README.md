@@ -16,17 +16,17 @@ later.
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and a list of available functions.
 
-Status
-------
+Test Status
+-----------
 
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
 
-[![Status](https://travis-ci.org/jefdaj/shortcut.svg?branch=master)](https://travis-ci.org/jefdaj/shortcut)  
-[![Status](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master "See test builds")
-![installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=installscript)
+These are the important ones
+
+[![Status](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master%20branch)
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
-![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges)
+<!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
 | Mac | Linux |
 |---|---|
