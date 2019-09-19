@@ -22,6 +22,8 @@ Test Status
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
 
+Green means both the Travis builds are passing for both Mac and Linux.
+
 These are the only important ones if you want to try the current release:
 
 [![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
