@@ -16,8 +16,8 @@ later.
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and a list of available functions.
 
-Test Status
------------
+Status
+------
 
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
