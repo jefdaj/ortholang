@@ -20,7 +20,7 @@ let
     };
 
 in rec {
-  myBlast = psiblast-exb; # for swapping it out if needed
+  myBlast = ncbi-blast; # for swapping it out if needed
 
   # TODO remove these in favor of buildPythonPath!
   myPy2Wrap = "--prefix PYTHONPATH : \"$out/bin:${myPy2.python.sitePackages}\"";

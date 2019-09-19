@@ -20,18 +20,21 @@ let
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
   hmmer = pkgs.callPackage ./hmmer { };
-  ncbi-blast = pkgs.callPackage ./ncbi-blast {};
+  ncbi-blast = pkgs.callPackage ./ncbi-blast {}; # follows latest version (2.9.0 now)
 
   # crb-blast only supports exactly 2.2.29
-  # and there are reports of a bug in newer ones (still?)
-  # TODO patch crb-blast to use the newest one?
+  # and there are reports of a bug in newer ones (TODO still?)
   ncbi-blast-2_2_29 = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
     version="2.2.29";
     name="ncbi-blast-${version}";
-    src = pkgs.fetchurl {
-      url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
-      sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
-    };
+    src = if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
+      then (pkgs.fetchurl {
+        url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-universal-macosx.tar.gz";
+        sha256="00g8pzwx11wvc7zqrxnrd9xad68ckl8agz9lyabmn7h4k07p5yll";
+      }) else (pkgs.fetchurl {
+        url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
+        sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
+      });
   });
   crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
 
@@ -49,7 +52,7 @@ let
   mmseqs2 = pkgs.callPackage ./mmseqs2 { };
 
   orthofinder = pkgs.callPackage ./orthofinder {
-    inherit mcl fastme psiblast-exb diamond;
+    inherit mcl fastme ncbi-blast diamond;
   };
 
   # TODO push new sh-1.12.14 upstream! haven't managed to include it properly here
@@ -83,7 +86,7 @@ let
   myPython3 = pkgs.python36Packages // rec {
     busco = pkgs.python36Packages.callPackage ./busco {
       inherit (pkgs.lib) makeBinPath;
-      inherit psiblast-exb;
+      inherit ncbi-blast;
     };
   };
 

@@ -1,1 +1,2 @@
-/nix/store/4si333vqcdpqgd8xi61rrhklfnwcx2nx-Shortcut-Blast/bin/.blast_mac.sh-wrapped: line 3: /nix/store/pp8kz8a3wz4i4byvsic2mn3kfxakf43n-psiblast-exb-2.5.0/bin/blastn: cannot execute binary file: Exec format error
+blastn: 2.9.0+
+ Package: blast 2.9.0, build Mar 11 2019 16:04:57
