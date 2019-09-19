@@ -1,17 +1,6 @@
 ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
-<!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
-<!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
-
-[![Status](https://travis-ci.org/jefdaj/shortcut.svg?branch=master)](https://travis-ci.org/jefdaj/shortcut)  
-
-[![Status](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat)](https://travis-ci.org/jefdaj/shortcut "See test builds")
-
-![feature-installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=feature-installscript)
-
-![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
-
 
 ShortCut is a scripting language meant to simplify a very common task in
 bioinformatics: making a list of candidate genes likely to be related to a
@@ -27,6 +16,25 @@ later.
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and a list of available functions.
 
+Status
+------
+
+<!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
+<!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
+
+[![Status](https://travis-ci.org/jefdaj/shortcut.svg?branch=master)](https://travis-ci.org/jefdaj/shortcut)  
+
+[![Status](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat)](https://travis-ci.org/jefdaj/shortcut "See test builds")
+
+![feature-installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=feature-installscript)
+
+![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
+
+| Mac | Linux |
+|---|---|
+|  |  |
+|  |  |
+|  |  |
 
 Quick Start
 -----------
