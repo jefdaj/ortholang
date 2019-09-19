@@ -2,6 +2,7 @@ ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
 [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut)
+![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1)
 
 ShortCut is a scripting language meant to simplify a very common task in
 bioinformatics: making a list of candidate genes likely to be related to a
