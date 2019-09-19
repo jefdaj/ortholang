@@ -22,7 +22,6 @@ Test Status
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
 
-Green means both the Mac and Linux builds are passing on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches).
 These are the only important ones if you want to try the current release:
 
 [![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
@@ -72,6 +71,8 @@ Or in the somewhat-separate development of a particular ShortCut "module":
 ![setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=setstable)
 ![sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=sonicparanoid)
 ![summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=summarize)
+
+Green means both the Mac and Linux builds are passing on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches).
 
 Quick Start
 -----------
