@@ -38,7 +38,7 @@ Status
 |  |  |
 |  |  |
 
-![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=module-allvsall&build=1)
+![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=module-allvsall)
 ![module-biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=module-biomartr)
 ![module-blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=module-blast)
 ![module-blastdb](https://img.shields.io/travis/jefdaj/shortcut/module-blastdb?label=module-blastdb)
@@ -70,7 +70,8 @@ Status
 ![module-summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=module-summarize)
 
 ![feature-cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=feature-cachix)
-![feature-darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=feature-darwin)
+![feature-darwin 1](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=feature-darwin&build=1)
+![feature-darwin 2](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=feature-darwin&build=2)
 ![feature-installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=feature-installscript)
 ![feature-nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=feature-nostack2nix)
 ![feature-stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=feature-stack2nix)
