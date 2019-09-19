@@ -4,9 +4,9 @@ ShortCut: short, reproducible phylogenomic cuts
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
 
-[![Build history](https://buildstats.info/appveyor/chart/tygerbytes/resourcefitness)](https://ci.appveyor.com/project/tygerbytes/resourcefitness/history)
-
 [![Status](https://travis-ci.org/jefdaj/shortcut.svg?branch=master)](https://travis-ci.org/jefdaj/shortcut)  
+
+[![Status](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat)](https://travis-ci.org/jefdaj/shortcut "See test builds")
 
 
 ShortCut is a scripting language meant to simplify a very common task in
