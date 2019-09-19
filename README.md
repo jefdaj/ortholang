@@ -22,7 +22,7 @@ Test Status
 <!-- [![Build Status](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master)](https://travis-ci.org/jefdaj/shortcut) -->
 <!-- ![Build status 2](https://travis-matrix-badges.herokuapp.com/repos/jefdaj/shortcut/branches/master/1) -->
 
-Green means both the Travis builds are passing for both Mac and Linux.
+Green means both the Mac and Linux builds are passing on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches).
 
 These are the only important ones if you want to try the current release:
 
@@ -30,7 +30,7 @@ These are the only important ones if you want to try the current release:
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
-But there are some feature branches you might be interested in:
+But you might also be interested in upcoming features:
 
 ![cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=cachix)
 ![darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin)
@@ -39,7 +39,7 @@ But there are some feature branches you might be interested in:
 ![stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=stack2nix)
 ![travisbadges](https://img.shields.io/travis/jefdaj/shortcut/feature-travisbadges?label=travisbadges)
 
-And a branch for development of each ShortCut "module":
+Or in the somewhat-separate development of a particular ShortCut "module":
 
 <!-- TODO core branch too for the haskell part -->
 
