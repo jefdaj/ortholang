@@ -37,7 +37,6 @@ But you may also be interested in progress on an upcoming feature:
 Or in the somewhat-separate development of a particular ShortCut "module":
 
 <!-- TODO core branch too for the haskell part -->
-
 ![allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=allvsall)
 ![biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=biomartr)
 ![blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=blast)
@@ -69,7 +68,7 @@ Or in the somewhat-separate development of a particular ShortCut "module":
 ![sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=sonicparanoid)
 ![summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=summarize)
 
-Green means tests are passing for both the Mac and Linux builds on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches).
+<!-- Green means tests are passing for both the Mac and Linux builds on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches). -->
 
 Quick Start
 -----------
