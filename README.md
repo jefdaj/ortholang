@@ -38,43 +38,85 @@ Status
 |  |  |
 |  |  |
 
+Modules:
+
+<!-- TODO core branch too for the haskell part -->
+
 ![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=module-allvsall)
+
 ![module-biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=module-biomartr)
+
 ![module-blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=module-blast)
+
 ![module-blastdb](https://img.shields.io/travis/jefdaj/shortcut/module-blastdb?label=module-blastdb)
+
 ![module-blasthits](https://img.shields.io/travis/jefdaj/shortcut/module-blasthits?label=module-blasthits)
+
 ![module-blastrbh](https://img.shields.io/travis/jefdaj/shortcut/module-blastrbh?label=module-blastrbh)
+
 ![module-busco](https://img.shields.io/travis/jefdaj/shortcut/module-busco?label=module-busco)
+
 ![module-cheat](https://img.shields.io/travis/jefdaj/shortcut/module-cheat?label=module-cheat)
+
 ![module-crbblast](https://img.shields.io/travis/jefdaj/shortcut/module-crbblast?label=module-crbblast)
+
 ![module-diamond](https://img.shields.io/travis/jefdaj/shortcut/module-diamond?label=module-diamond)
+
 ![module-greencut](https://img.shields.io/travis/jefdaj/shortcut/module-greencut?label=module-greencut)
+
 ![module-hmmer](https://img.shields.io/travis/jefdaj/shortcut/module-hmmer?label=module-hmmer)
+
 ![module-listlike](https://img.shields.io/travis/jefdaj/shortcut/module-listlike?label=module-listlike)
+
 ![module-load](https://img.shields.io/travis/jefdaj/shortcut/module-load?label=module-load)
+
 ![module-math](https://img.shields.io/travis/jefdaj/shortcut/module-math?label=module-math)
+
 ![module-mmseqs](https://img.shields.io/travis/jefdaj/shortcut/module-mmseqs?label=module-mmseqs)
+
 ![module-muscle](https://img.shields.io/travis/jefdaj/shortcut/module-muscle?label=module-muscle)
+
 ![module-orthofinder](https://img.shields.io/travis/jefdaj/shortcut/module-orthofinder?label=module-orthofinder)
+
 ![module-orthogroups](https://img.shields.io/travis/jefdaj/shortcut/module-orthogroups?label=module-orthogroups)
+
 ![module-permute](https://img.shields.io/travis/jefdaj/shortcut/module-permute?label=module-permute)
+
 ![module-plots](https://img.shields.io/travis/jefdaj/shortcut/module-plots?label=module-plots)
+
 ![module-psiblast](https://img.shields.io/travis/jefdaj/shortcut/module-psiblast?label=module-psiblast)
+
 ![module-range](https://img.shields.io/travis/jefdaj/shortcut/module-range?label=module-range)
+
 ![module-sample](https://img.shields.io/travis/jefdaj/shortcut/module-sample?label=module-sample)
+
 ![module-scores](https://img.shields.io/travis/jefdaj/shortcut/module-scores?label=module-scores)
+
 ![module-seqio](https://img.shields.io/travis/jefdaj/shortcut/module-seqio?label=module-seqio)
+
 ![module-sets](https://img.shields.io/travis/jefdaj/shortcut/module-sets?label=module-sets)
+
 ![module-setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=module-setstable)
+
 ![module-sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=module-sonicparanoid)
+
 ![module-summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=module-summarize)
 
+
+New features in progress:
+
 ![feature-cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=feature-cachix)
+
 ![feature-darwin 1](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=feature-darwin&build=1)
+
 ![feature-darwin 2](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=feature-darwin&build=2)
+
 ![feature-installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=feature-installscript)
+
 ![feature-nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=feature-nostack2nix)
+
 ![feature-stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=feature-stack2nix)
+
 ![feature-travisbadges](https://img.shields.io/travis/jefdaj/shortcut/feature-travisbadges?label=feature-travisbadges)
 
 Quick Start
