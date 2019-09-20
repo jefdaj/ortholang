@@ -8,13 +8,18 @@ let
   # pkgs = import <nixpkgs> {};
   # to update the the sha256sum, use nix-prefetch-url --unpack
   # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
-  inherit (import <nixpkgs> {}) fetchFromGitHub;
-  nixpkgs = fetchFromGitHub {
-    owner  = "NixOS";
-    repo   = "nixpkgs-channels";
-    rev = "e19054ab3cd5b7cc9a01d0efc71c8fe310541065"; # nixos-19.03 as of 2019-09-11
-    sha256 = "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2";
-  };
+  nixpkgs = let
+    inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
+    in fetchFromGitHub {
+      owner  = "jefdaj";
+      repo   = "nixpkgs";
+      rev = if stdenv.hostPlatform.system == "x86_64-darwin"
+        then "75996a27e7964ee670359cc98c7b1f3327e5d52c"  # shortcut-mac, derived from nixpkgs-channels/nixos-19.03-darwin
+        else "e19054ab3cd5b7cc9a01d0efc71c8fe310541065"; # shortcut-linux, dervived from nixpkgs-channels/nixos-19.03
+      sha256 = if stdenv.hostPlatform.system == "x86_64-darwin"
+        then "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2"
+        else "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2";
+    };
   pkgs = import nixpkgs {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
