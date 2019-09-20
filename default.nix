@@ -56,8 +56,9 @@ let
         --set LANG en_US.UTF-8 \
         --set LANGUAGE en_US.UTF-8 \
         --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"'' +
-    (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else
-      '' --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive"'');
+    (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else '' \
+      --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive"
+    '');
   });
 
 # to work on a specific module, substitute it here and enter nix-shell

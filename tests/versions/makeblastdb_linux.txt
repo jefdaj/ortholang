@@ -1,2 +1,2 @@
-makeblastdb: 2.5.0+
- Package: blast 2.5.0, build Feb  9 2017 17:20:36
+makeblastdb: 2.9.0+
+ Package: blast 2.9.0, build Mar 11 2019 15:20:05
