@@ -21,7 +21,7 @@ let
       homepage    = https://github.com/cboursnell/crb-blast;
       license     = with licenses; mit;
       maintainers = with maintainers; [ ];
-      platforms   = [ platforms.unix "x86_64-darwin" ];
+      platforms   = [ "x86_64-linux" "x86_64-darwin" ];
     };
   };
 

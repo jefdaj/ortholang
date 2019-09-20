@@ -32,6 +32,6 @@ stdenv.mkDerivation rec {
     maintainers = [ maintainers.unode ];
     # NOTE: Supposed to be compatible with darwin/intel & PPC but currently fails.
     # Anyone with access to these platforms is welcome to give it a try
-    platforms   = [ stdenv.lib.platforms.linux "x86_64-darwin" ];
+    platforms   = [ "x86_64-linux" "x86_64-darwin" ];
   };
 }
