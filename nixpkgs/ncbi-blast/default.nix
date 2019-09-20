@@ -3,11 +3,15 @@
 
 # TODO update to a much newer version?
 
-{stdenv, fetchurl, zlib, bzip2}:
+{stdenv, fetchurl, patchelf, zlib, bzip2}:
 
 let
   ftpSite = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+";
-  arch = "x64-linux";
+  arch = if stdenv.system == "x86_64-darwin"
+    then "x64-macosx"
+    else "x64-linux";
+
+  # TODO fill in more completely:
   # arch = if stdenv.system == "i686-linux"
   #  then "linux-i686"
   #  else "linux-x86_64";
@@ -16,12 +20,15 @@ let
   #  else ...
 
 in stdenv.mkDerivation rec {
-  version = "2.2.31";
+  version = "2.9.0";
   name = "ncbi-blast-${version}";
   src = fetchurl {
     url = "${ftpSite}/${version}/${name}+-${arch}.tar.gz";
-    sha256 = "027lwjc7vac32q7s9dxvzc9xqhvlk1w4v9kndkqqwbna3cg9aarj";
+    sha256 = if arch == "x64-macosx"
+      then "1jc61q9gnpnh1wqz1zqmvlgknf6a4ma26jnkpd13liq2wj5xzdyc"
+      else "172sakjhyibclq8ss2f5ws2ck8mzl15ym8z0slg2jgq4ihwgdyfg";
   };
+  buildInputs = if stdenv.hostPlatform.system == "x86_64-darwin" then [] else [ patchelf ];
   dontStrip = 1;
   libPath = stdenv.lib.makeLibraryPath [
       stdenv.cc.cc
@@ -39,14 +46,17 @@ in stdenv.mkDerivation rec {
     tar xzf $src
   '';
   installPhase = ''
-    linker="$(cat $NIX_CC/nix-support/dynamic-linker)"
     cd $TMP/ncbi-blast-*
+  '' + (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else ''
+    linker="$(cat $NIX_CC/nix-support/dynamic-linker)"
     for exe in bin/*; do
-      [[ "$exe" =~ .*\.pl$ ]] && continue
+      [[ "$exe" =~ .*\.pl$ || "$exe" =~ .*\.sh$ ]] && continue
+      echo "patching $exe..."
       patchelf --interpreter "$linker"  "$exe"
       patchelf --set-rpath   "$libPath" "$exe"
       # patchelf --shrink-rpath "$exe"
     done
+  '') + ''
     mkdir $out; cp -R * $out
   '';
 }

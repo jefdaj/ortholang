@@ -1,3 +1,18 @@
+macos:
+  remove nproc
+  is nixpkgs-19.03-darwin the best channel/thing to pin? or stick with the default?
+  error in postInstall, but if you comment it out the build continues
+  errors about system not supported, refusing to evaluate:
+    hmmer
+    muscle
+    ...
+    fix by allowing unsupported system in ~/.config/nixpkgs/config.nix
+  commands missing/different:
+    cut has different args
+    md5sum called md5
+    nproc replaced by sysctl something
+    psiblast-exb has no mac version :(
+
 nix vs nix + stack:
   nix by itself fails orthofinder tests, sonicparanoid tests, plot tests
     why would that be? what's different between them?

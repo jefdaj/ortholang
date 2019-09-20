@@ -1,4 +1,4 @@
-{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, psiblast-exb, diamond, python27, utillinux }:
+{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, ncbi-blast, diamond, python27, utillinux }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
 # I'm not sure if this is the proper way to set libPath but it seems to work
@@ -20,7 +20,7 @@ in stdenv.mkDerivation rec {
   };
   buildInputs = [ pkgs.python27Packages.wrapPython makeWrapper ] ++ runDepends;
   runDepends = [
-    #psiblast-exb # TODO remove in favor of diamond/mmseqs2?
+    ncbi-blast
     diamond
     fastme
     mcl

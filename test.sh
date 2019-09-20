@@ -5,10 +5,11 @@
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
 
 set -e
+set -o pipefail
 
 timestamp=$(date '+%Y-%m-%d_%H:%M')
 
-export nix_args="--pure -j$(nproc)"
+export nix_args="--pure -j2"
 
 log="shortcut-build_${timestamp}.log"
 cmd="nix-build $nix_args"

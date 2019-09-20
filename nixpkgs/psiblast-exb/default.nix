@@ -1,4 +1,4 @@
-{stdenv, fetchgit, zlib, bzip2}:
+{stdenv, fetchgit, patchelf, zlib, bzip2}:
 
 # This is based on the regular ncbi-blast-2.5.0 nix package.
 # I replaced src and edited unpackPhase + installPhase.
@@ -11,6 +11,7 @@ stdenv.mkDerivation rec {
     rev = "e16ded9280bbe8dfc97f29af697b3dec27616c70";
     sha256 = "0p6s1yp0z001h6fz246h0msjihkxiaqrm39n41hiz3nq41gmwk5k";
   };
+  buildInputs = [ patchelf ];
   dontStrip = 1;
   libPath = stdenv.lib.makeLibraryPath [
       stdenv.cc.cc
