@@ -86,7 +86,7 @@ let
   myPython3 = pkgs.python36Packages // rec {
     busco = pkgs.python36Packages.callPackage ./busco {
       inherit (pkgs.lib) makeBinPath;
-      inherit ncbi-blast;
+      inherit ncbi-blast hmmer;
     };
   };
 
