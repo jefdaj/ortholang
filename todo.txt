@@ -1,25 +1,3 @@
-macos:
-  remove nproc
-  is nixpkgs-19.03-darwin the best channel/thing to pin? or stick with the default?
-  error in postInstall, but if you comment it out the build continues
-  errors about system not supported, refusing to evaluate:
-    hmmer
-    muscle
-    ...
-    fix by allowing unsupported system in ~/.config/nixpkgs/config.nix
-  commands missing/different:
-    cut has different args
-    md5sum called md5
-    nproc replaced by sysctl something
-    psiblast-exb has no mac version :(
-
-nix vs nix + stack:
-  nix by itself fails orthofinder tests, sonicparanoid tests, plot tests
-    why would that be? what's different between them?
-      try running shortcut-orthofinder orthofinder.sh on its own + from stack separately to see
-      possiblities: threading, dependencies, shellHook/nix-shell itself changes something
-  both do the invalid byte sequence thing though
-
 orthofinder patches:
   no date in results dir
   disable incrementing results dir
@@ -29,104 +7,42 @@ orthofinder patches:
 bug: are multiple instances of blastp being run on the same files at once??
 
 bug: allows multiple vars with the same name!
+
 feature: print to stdout with --output -, or by default?
 
 bug: need to print parens around negative numbers when writing script
   is that a special case of mistakenly removing parentheses in math?
+
+make bst a member of listlike
+
+orthogroups:
+  design all-vs-all type/module
+  write all-vs-all module + integrate with orthogroup algorithms
+  write orthogroup result handling while running the ortholog finder cuts
+
 check the profile.html after current greencut run to find out which orthogroup things are slow
 
-week of 6/25:
-  x finish range module
-  x load fn docs from separate text files
-  make bst a member of listlike
-  test cut with busco:
-    re-run most conservative
-    if time, extend to a range of quality scores
-    if time, make a tutorial and assign as homework
-  orthogroups:
-    design all-vs-all type/module
-    write all-vs-all module + integrate with orthogroup algorithms
-    write orthogroup result handling while running the ortholog finder cuts
-  make it look nice:
-    finish busco plots + maybe generic "histogram before/after" plots
-    add (or just document?) set membership tables
-    get venn diagrams working
-  update tests + bump version
-  write + record demo for small group (just video, not on demo site yet):
-    talk about how to trade off your time vs the computer's time
+get proper venn diagrams working and write examples
 
-next week:
-  result handling: write standalone file, or list mixing types
-  start writing docs for most functions
-  test + merge url loading
-  implement cheat module (rename Script)
-  try leapfrog
-  add range tests
+load function should work on urls too
+
+rename cheat to script and get it working
 
 list dedup bug:
   is it in extract_queries?
   more generally, i probably need to write a "dedup result" function to run after all scripts
     ideally also a separate script so it can run on a different node?
 
-first stage of the rewrite is to use a record for the wrappedCmd* fns
-  should only need one of them since all scripts now?
-  should have readable fields instead of positional args
-
-second stage is to clean it up and separate .args/.sh files
+separate .args/.sh files step:
   should send stdout + stderr to separate files automatically, but not via haskell?
     i guess this is where the standard wrapper script would step in
   should handle locking + retry + similar hacks outside haskell too?
   should have separate .args/sh files amenable to later mapping (third stage)
   should work in multiple situations: raw, GNU parallel, singularity + SLURM, ideally docker (later)
 
-deduplicate interpreters from different modules? one myPython, myR etc.
-
 flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
-
-failing tests:
-  crb_blast_each2
-
-include tests:
-  include one (two results! not right)
-  include two (three results!)
-  include nested
-
-deduplicate interpreters from different modules? one myPython, myR etc.
-
-flag to tell shortcut how many machines it's running on, and you get that many parallel commands at once?
-
-rewrite system calls for better reliability (and mapping):
-  x attempt to simplify module layout at the same time
-  think about adding a wrappedCmd record with readable fields rather than unreadable positional arguments
-  also there shouldn't need to be different versions! all scripts should behave similarly
-  xx functions to rewrite with scripts:
-    xx MMSeqs: aMmseqsSearchDb, aMmseqsCreateDbAll, aMmseqConvertAlis
-    xx BlastDB: aMakeblastdbAll
-    xx Blast: aMkBlastFromDb
-    xx BlastCRB: aCRBBlast
-    xx Diamond: aDiamondFromDb
-    xx SonicParanoid: aSonicParanoid
-    xx Muscle: aMuscle
-    xx Hmmer: aHmmbuild, aHmmSearch, aExtractHmm
-  need to send all stdout from individual commands to intermediate files rather than read it directly
-    should never be able to confuse filenames with output like this:
-      "diamond_makedb.sh /global/home/users/jefdaj/.shortcut/exprs/diamond_makedb/c8116966c3_0.dmnd /global/home/users/jefdaj/.shortcut/cache/load/WARNI.faa"
-    should work without assuming anything about what machine the command will be running on, or if it crashes + repeats
-  this is basically separating the "eval" step into "args" and "shell" steps right?
-    always write a .args/.sh file first
-  write .lock files? or use the .args?
-  always redirect stdout, stderr to their own files as it runs
-  always rerun the command if it fails?
-  should this use a separate mechanism from the berkeley wrapper or are they the same?
-  should any real processing *ever* be done in the main haskell binary thread?
-
-fix up blast stuff:
-  generalize BlastHits.hs to HitTables.hs so it works with blastlike programs (CRB-Blast, DIAMOND, ...)
-  should there be a separate RBH module too that works with BLAST, DIAMOND, MMSeqs2?
 
 result handling:
-  x should be able to reassign other variables without it assuming result should be recalculated immediately
-  x should be able to use result in further expressions and have it replaced by its value then
   should allow lists of any/mixed type in result to make exploring easier
   should be able to zip up one archive of the result list on the website
 
@@ -174,21 +90,15 @@ leave_each_out bug:
   leave_each_out [1,2,3] -> does the first 3 elements of the first list! wtf
 
 add mmseqs_rbh stuff!
+
 :write on its own should write to the current script after asking confirmation
 
 type groups:
-  x add the basic data type
-  x handle them in the parser/typechecker functions
   add type groups for:
-    x files with length in lines
-    x fasta files
-    x blast hits-like types
     things that can have orthogroups extracted from them
     things that can have homolog pairs extracted from them (new homologs module)
   rewrite all fTypeCheck and fTypeDesc functions using defaultTypeCheck and mkTypeDesc
   remove the option to use non-default typechecks + descriptions at all
-
-what should and shouldn't go in the rep digests? think about that for a few minutes, then move on
 
 file leaking bug:
   what's happening?
@@ -196,10 +106,6 @@ file leaking bug:
     so randomly there will be some error, then they'll pile up and most remaining tests fail
     this is probably a big source of actual scripts failing too!
   also just learned that enclosed-exceptions is resource heavy and no longer recommended
-  x rewrite everything with safe-exceptions!
-    x find all instances of error, throw, throwIO, bracket, recoverAll, etc.
-    x replace them with proper functions :D
-    x eval failures having to do with the file not existing shouldn't have to be repeated
   prevent file descriptor leaks
     any reason not to make all reads strict?
     wrap all instances of reading or writing a file with cleanup (close handles)
@@ -210,41 +116,54 @@ file leaking bug:
         makeblastdb seems to have particular issues
   try re-implementing the disk resource now and see if it keeps open files in check
 
-bugs identified while updating tests:
-  extracts_seqs broken, possibly because of the seqid_ hashing
-
 rewrite all tests to use mycoplasma for speed and consistency
   start from the ones use by mmseqs
   need their full genomes though
   and in faa + fna format
   also include any other from https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1801-0
   also include Nanoarchaeum equitans
+
 parse errors (including type errors) shouldn't crash the interpreter!
+
 biomartr: get working and improve to handle IDs from papers
-spend some time thinking of a better name
+
 add optional varnames to all cache + expr files? if not too hard it would help manual exploration
+
 list specific functions that are nondeterministic, and maybe have conditions each should satisfy instead?
-add simplest possible "typeclasses" to combine types, then remove fTypeDesc stuff
-bugs to fix:
-  bad bug!
-    eval leave_each_out [1,2,3,4,5]
-    then leave_each_out [1,2,3,4,5, 1e-45]
-    the second result will be wrong:
-    [[2, 3, 4, 5], [1, 3, 4, 5], [1, 2, 4, 5], [1, 2, 3, 5], [1, 2, 3, 4], [1, 2, 3, 4, 5]]
-  when a var fails to parse the error shouldn't be "no such variable <var that failed to parse>"
-  parentheses need to follow the left -> right rule!
+
+remove fTypeDesc now that type groups work
+
+bad bug!
+  eval leave_each_out [1,2,3,4,5]
+  then leave_each_out [1,2,3,4,5, 1e-45]
+  the second result will be wrong:
+  [[2, 3, 4, 5], [1, 3, 4, 5], [1, 2, 4, 5], [1, 2, 3, 5], [1, 2, 3, 4], [1, 2, 3, 4, 5]]
+
+when a var fails to parse the error shouldn't be "no such variable <var that failed to parse>"
+
+parentheses need to follow the left -> right rule!
+
 simplify plots to look more figure like
+
 get sonicparanoid and mmseqs to share tmpfiles
+
 get sonicparanoid and orthofinder sharing common extraction function(s)
+
 draft a greencut-like algorithm using diamond or mmseqs, not necessarily in haskell
+
 write a function to extract_seqs from multiple fastas at once, useful here + elsewhere?
+
 can all "extract" functions be renamed with "list"?
+
 how to open the result cluster files?
+
 swap _ for : in seqid: because orthofinder does that already (or is it messing up and considering those 2 species?)
   maybe better just remove it for now instead
+
 should i edit orthofinder to use shortcut conventions? might be the fastest/clearest way if no options
   how important are the numeric indexes? if those could be made hashes everything would be easy
   and store blast hits as plain txt without the gzip for now
+
 easy functions to write now that you've found the output files:
   orthogroup_seqs : ofr -> faa.list (directly return fasta files)
   orthogroup_ids  : ofr -> str..listlist (extract_ids . orthogroups seqs)
@@ -254,13 +173,12 @@ easy functions to write now that you've found the output files:
   orthogroup_tree_containing : ofr -> str -> ? (can this be done easily? what if none?)
   single_copy_orthogroups : ofr -> str.list.list
   single_copy_orthogroup_sequences : ofr -> faa.list (this would be used to write the above)
+
 should i make a thing to list + extract orthogroups by name? or will that just confuse because they're numeric?
+
 sonicparanoid module
-  x needs IDs sanitized first, probably
-  x scaffolding
-  x go straight to module, where ids will work
-  x approx command: sonicparanoid -i <indir> -o <outdir> -sh <tmpdir> -m fast/default/etc. -noidx -d (if debug)
   outputs pairwise orthologs only; need to read them and make groups
+
 orthogroup functions
   common interface for: orthofinder, sonicparanoid, mmseqs2
   how to make the types work? should the "orthogroups" fn just pull common info from any result?
@@ -272,44 +190,20 @@ orthogroup functions
     which appear in at least N sets or are missing from N sets?
     venn diagram of genes in common between sets
     to get those, will need to extract from each format + do common munging on list of lists
-fix plots too in general and start showing more of them
+
 diamond module
-  read manual
-    handles temporary files itself; output only appears at the end and is thrown away if inturrupted
-    looks to be deterministic! same input -> same output according to the author
-    things that can be set to speed it up/improve results:
-      -e as low as possible
-      -k as low as possible, or use --top instead
-    later, optional taxonomy features?
-    looks to be multithreaded by default
-    any need to set the scoring matrix?
-    can output the same regular blast results. winning!
-      but there's an intermediate DAA (diamond alignment archive) format too. not sure if needed?
-    can gzip the output
-  x test running diamond and getting blast output
-  x write scaffolding code
-  x write useful functions
-    x diamond_makedb
-    x diamond_makedb_all
-    x search variants: fasta + db, regular + sensitive + more sensitive, blastp + blastx
-      x diamond_blastp
-      x diamond_blastp_db
-      x diamond_blastx
-      x diamond_blastx_db
-      x diamond_blastp_sensitive
-      x diamond_blastp_db_sensitive
-      x diamond_blastp_more_sensitive
-      x diamond_blastp_db_more_sensitive
-      x diamond_blastx_sensitive
-      x diamond_blastx_db_sensitive
-      x diamond_blastx_more_sensitive
-      x diamond_blastx_db_more_sensitive
-    x something to load existing databases? maybe not important yet
-  x print data:
-    x diamond dbinfo to print dbs
-    x diamond view to print results
-  x write tests
-    test dependency
+  handles temporary files itself; output only appears at the end and is thrown away if inturrupted
+  looks to be deterministic! same input -> same output according to the author
+  things that can be set to speed it up/improve results:
+    -e as low as possible
+    -k as low as possible, or use --top instead
+  later, optional taxonomy features?
+  looks to be multithreaded by default
+  any need to set the scoring matrix?
+  can output the same regular blast results. winning!
+    but there's an intermediate DAA (diamond alignment archive) format too. not sure if needed?
+  can gzip the output
+
 mmseqs module
   read about it
     should i be working with plass + linclust to get protein sequences from metagenomics datasets?
@@ -335,7 +229,6 @@ mmseqs module
   write useful functions
     variants: regular and _db like blast
     variants: sensitive, default, fast, faster?
-    x test dependency and abort if illegal instruction
     do these first:
       mmseqs_createdb
       mmseqs_search
