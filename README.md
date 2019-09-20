@@ -32,6 +32,7 @@ But you may also be interested in progress on an upcoming feature:
 ![installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=installscript)
 ![nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=nostack2nix)
 ![stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=stack2nix)
+![tmpfiletests](https://img.shields.io/travis/jefdaj/shortcut/feature-tmpfiletests?label=tmpfiletests)
 ![travisbadges](https://img.shields.io/travis/jefdaj/shortcut/feature-travisbadges?label=travisbadges)
 
 Or in the somewhat-separate development of a particular ShortCut "module":
