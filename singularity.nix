@@ -18,6 +18,7 @@ in pkgs.singularity-tools.buildImage {
   # This is for the temporary build image; final output will be smaller
   diskSize = 10240;
 
+  # TODO launch shortcut directly rather than bash?
   runScript = "#!${shortcut.env}\nexec bash \"\$@\"";
 
   # These should be absolute paths with the leading / removed.
@@ -25,15 +26,14 @@ in pkgs.singularity-tools.buildImage {
   # or build the image with none first and look for errors like this when run:
   # WARNING: Non existent bind point (file) in container: '/etc/localtime'
   # TODO should they all be done as files?
-  extraBindDirs = [
-    "clusterfs/rosalind/users" # TODO remove?
-
-    "global/home/users"
-    "global/scratch"
-  ];
   extraBindFiles = [
     # bind points expected by berkeley hpc config
     "etc/hosts"
     "etc/localtime"
+  ];
+  extraBindDirs = [
+    "clusterfs/rosalind/users" # TODO remove?
+    "global/home/users"
+    "global/scratch"
   ];
 }
