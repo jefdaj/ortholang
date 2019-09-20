@@ -4,8 +4,9 @@ let
   # Things needed at runtime. Modules are only the scripts called by shortcut,
   # not their indirect (propagated) dependencies since those may conflict.
   runDepends = (import ./modules.nix).modules ++ [
+    coreutils
     diffutils
-    glibcLocales
+    glibcLocales # TODO even on mac?
     tree
     gnutar
     curl

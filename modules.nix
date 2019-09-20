@@ -1,10 +1,11 @@
 with import ./nixpkgs;
 let
-  mkModule = src: runDepends: extraWraps:
+  mkModule = src: extraRunDeps: extraWraps:
     let name = "Shortcut-" + baseNameOf src;
+        runDeps = [ coreutils ] ++ extraRunDeps;
     in stdenv.mkDerivation {
-      inherit src name runDepends extraWraps;
-      buildInputs = [ makeWrapper ] ++ runDepends;
+      inherit src name extraRunDeps extraWraps;
+      buildInputs = [ makeWrapper ] ++ extraRunDeps;
       builder = writeScript "builder.sh" ''
         #!/usr/bin/env bash
         source ${stdenv}/setup
@@ -14,7 +15,7 @@ let
           dest="$out/bin/$base"
           substituteAll $script $dest
           chmod +x $dest
-          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}" ${extraWraps}
+          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps}
         done
       '';
     };
