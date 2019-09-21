@@ -89,12 +89,13 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
     desc = "creates expected tmpfiles"
+    ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
-    treeCmd = (shell $ "tree -N -aI '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt' | " ++ sedCmd)
-                { cwd = Just $ cfgTmpDir cfg }
+    treeCmd = "tree -a --charset=ascii " ++ ignores ++ " | " ++ sedCmd
+    wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg ref ids
-      out <- readCreateProcess treeCmd ""
+      out <- readCreateProcess wholeCmd ""
       -- useful for debugging tests or updating the golden files
       -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
       -- writeBinaryFile ("/tmp" </> takeBaseName t <.> "txt.bin") out
