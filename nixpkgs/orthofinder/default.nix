@@ -1,4 +1,5 @@
-{ pkgs, stdenv, fetchurl, makeWrapper, mcl, fastme, ncbi-blast, diamond, python27, utillinux }:
+{ stdenv, fetchurl, makeWrapper, makeBinPath, mcl, fastme, ncbi-blast, diamond
+, python27Packages, utillinux }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
 # I'm not sure if this is the proper way to set libPath but it seems to work
@@ -6,7 +7,7 @@
 # TODO include the newer diamond in the repo until nixpkgs updates it
 
 let
-  myPython = pkgs.python27Packages.python.withPackages (ps: with ps; [
+  myPython = python27Packages.python.withPackages (ps: with ps; [
     numpy
     scipy
   ]);
@@ -18,7 +19,7 @@ in stdenv.mkDerivation rec {
     url = "https://github.com/davidemms/OrthoFinder/releases/download/${version}/OrthoFinder-${version}_source.tar.gz";
     sha256 = "12llzc22k52h9f48irb5axhkx9mm6844cj1qbig9wvqi9da541ra";
   };
-  buildInputs = [ pkgs.python27Packages.wrapPython makeWrapper ] ++ runDepends;
+  buildInputs = [ python27Packages.wrapPython makeWrapper ] ++ runDepends;
   runDepends = [
     ncbi-blast
     diamond
@@ -47,6 +48,6 @@ in stdenv.mkDerivation rec {
     cp OrthoFinder-${version}_source/orthofinder/config.json $out/bin/
     echo "patching $exe"
     buildPythonPath "$out"
-    wrapProgram "$exe" --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"
+    wrapProgram "$exe" --prefix PATH : "${makeBinPath runDepends}"
   '';
 }
