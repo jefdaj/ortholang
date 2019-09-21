@@ -1,3 +1,10 @@
+test cleanup:
+  x remove treeCl for now
+  get sonicparanoid loading in the shell again at least, if not passing its tests
+    probably by fixing the python wrappers
+    make a module branch for it
+    check the same code also works with orthofinder
+
 orthofinder patches:
   no date in results dir
   disable incrementing results dir
