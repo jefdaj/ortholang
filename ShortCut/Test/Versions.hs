@@ -37,7 +37,7 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   , ("r_packages"   , "r_packages_OS.R")
   , ("sonicparanoid", "sonicparanoid_OS.sh")
   , ("tar"          , "tar_OS.sh")
-  , ("treecl"       , "treecl_OS.sh")
+  -- , ("treecl"       , "treecl_OS.sh")
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
