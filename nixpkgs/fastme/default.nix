@@ -1,9 +1,10 @@
-{ stdenv, writeScript }:
+{ stdenv, writeScript, patchelf }:
 
 stdenv.mkDerivation {
   name = "fastme";
   # TODO can it be downloaded without the email thing?
   src = ./fastme-2.1.5.tar.gz;
+  buildInputs = [ patchelf ];
   builder = writeScript "builder.sh" ''
     source $stdenv/setup
     cd $TMPDIR

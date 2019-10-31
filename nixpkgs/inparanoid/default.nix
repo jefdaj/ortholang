@@ -19,7 +19,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     diamond
-    psiblast-exb
+    ncbi-blast
     perlPackages.perl
     perlPackages.XMLParser
     openssl    # for the patch script i downloaded

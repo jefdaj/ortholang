@@ -1,10 +1,16 @@
 language: nix
 
 matrix:
-  - include:
+  include:
+    # - os: linux
+    #   dist: bionic
+    #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
     - os: linux
-      dist: bionic
+      dist: xenial
       env: NIX_PATH=nixpkgs=channel:nixos-19.03
+    - os: osx
+      osx_image: xcode10.1
+      env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
 git:
   # quiet: true
@@ -22,8 +28,9 @@ branches:
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - cachix use jefdaj
-  - ./test.sh
+  - if [ "$TRAVIS_OS_NAME"  = "osx" ]; then sudo cachix use jefdaj; fi
+  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then cachix use jefdaj; fi
+  - ./test.sh --pattern depend
 
 notifications:
   email:

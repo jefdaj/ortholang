@@ -4,33 +4,42 @@
 
 let
   # fetch my pinned nixpkgs for reproducibility.
-  # to update the the sha256sum, use nix-prefetch-url --unpack
-  inherit (import <nixpkgs> {}) fetchFromGitHub;
-  pkgs = import (fetchFromGitHub {
-    owner  = "NixOS";
-    repo   = "nixpkgs-channels";
-    rev = "2dfae8e22fde5032419c3027964c406508332974"; # nixos-19.03 as of 2019-09-15
-    sha256 = "0293j9wib78n5nspywrmd9qkvcqq2vcrclrryxqnaxvj3bs1c0vj";
-  }) {};
-
   # use this instead to try to build it with your system's current nixpkgs:
   # pkgs = import <nixpkgs> {};
+  # to update the the sha256sum, use nix-prefetch-url --unpack
+  # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
+  nixpkgs = let
+    inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
+    in fetchFromGitHub {
+      owner  = "jefdaj";
+      repo   = "nixpkgs";
+      rev = if stdenv.hostPlatform.system == "x86_64-darwin"
+        then "75996a27e7964ee670359cc98c7b1f3327e5d52c"  # shortcut-mac, derived from nixpkgs-channels/nixos-19.03-darwin
+        else "e19054ab3cd5b7cc9a01d0efc71c8fe310541065"; # shortcut-linux, dervived from nixpkgs-channels/nixos-19.03
+      sha256 = if stdenv.hostPlatform.system == "x86_64-darwin"
+        then "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2"
+        else "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2";
+    };
+  pkgs = import nixpkgs {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
   hmmer = pkgs.callPackage ./hmmer { };
-  ncbi-blast = pkgs.callPackage ./ncbi-blast {};
+  ncbi-blast = pkgs.callPackage ./ncbi-blast {}; # follows latest version (2.9.0 now)
 
   # crb-blast only supports exactly 2.2.29
-  # and there are reports of a bug in newer ones (still?)
-  # TODO patch crb-blast to use the newest one?
+  # and there are reports of a bug in newer ones (TODO still?)
   ncbi-blast-2_2_29 = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
     version="2.2.29";
     name="ncbi-blast-${version}";
-    src = pkgs.fetchurl {
-      url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
-      sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
-    };
+    src = if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
+      then (pkgs.fetchurl {
+        url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-universal-macosx.tar.gz";
+        sha256="00g8pzwx11wvc7zqrxnrd9xad68ckl8agz9lyabmn7h4k07p5yll";
+      }) else (pkgs.fetchurl {
+        url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
+        sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
+      });
   });
   crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
 
@@ -40,14 +49,15 @@ let
 
   fastme = pkgs.callPackage ./fastme { };
 
-  # muscle = pkgs.callPackage ./muscle { }; # TODO got this already somewhere!
+  # see https://nixos.org/nix-dev/2014-December/015243.html
+  muscle = pkgs.callPackage ./muscle { };
 
   diamond = pkgs.callPackage ./diamond { };
 
   mmseqs2 = pkgs.callPackage ./mmseqs2 { };
 
   orthofinder = pkgs.callPackage ./orthofinder {
-    inherit mcl fastme psiblast-exb diamond;
+    inherit mcl fastme ncbi-blast diamond;
   };
 
   # TODO push new sh-1.12.14 upstream! haven't managed to include it properly here
@@ -81,7 +91,7 @@ let
   myPython3 = pkgs.python36Packages // rec {
     busco = pkgs.python36Packages.callPackage ./busco {
       inherit (pkgs.lib) makeBinPath;
-      inherit psiblast-exb;
+      inherit ncbi-blast hmmer;
     };
   };
 
@@ -90,7 +100,7 @@ let
 in pkgs // {
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit fastme;
-  inherit diamond hmmer mmseqs2;
+  inherit diamond hmmer mmseqs2 muscle;
 
   # TODO will these interfere with each other?
   python27Packages = myPython2;

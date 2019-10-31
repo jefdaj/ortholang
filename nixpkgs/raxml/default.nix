@@ -43,6 +43,6 @@ stdenv.mkDerivation rec {
     license = licenses.gpl3;
     homepage = https://sco.h-its.org/exelixis/web/software/raxml/;
     maintainers = [ maintainers.unode ];
-    platforms = [ "i686-linux" "x86_64-linux" ];
+    platforms = [ "i686-linux" "x86_64-linux" "x86_64-darwin" ];
   };
 }

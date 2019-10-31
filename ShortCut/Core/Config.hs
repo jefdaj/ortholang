@@ -19,6 +19,7 @@ import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
 import System.FilePath            ((</>), (<.>))
 import Debug.Trace       (trace)
+import System.Info                (os)
 
 {- The base debugging function used in other modules too. This is admittedly a
  - weird place to put it, but makes everything much easier as far as avoiding
@@ -48,6 +49,7 @@ loadConfig mods args = do
   let ctp = getAllArgs args (longOption "pattern")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
+  os' <- getOS
   return CutConfig
     { cfgScript  = csc'
     , cfgInteractive = int
@@ -62,7 +64,11 @@ loadConfig mods args = do
     , cfgSecure  = isPresent args $ longOption "secure"
     , cfgParLock = par
     , cfgOutFile = out
+    , cfgOS      = os'
     }
+
+getOS :: IO String
+getOS = return os
 
 -- TODO any way to recover if missing? probably not
 -- TODO use a safe read function with locks here?
