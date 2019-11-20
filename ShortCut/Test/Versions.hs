@@ -21,7 +21,6 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   , ("busco"        , "busco_OS.sh")
   , ("crbblast"     , "crbblast_OS.sh")
   , ("curl"         , "curl_OS.sh")
-  -- , ("tree"         , "tree_OS.sh") -- TODO where should this go?
   , ("cut"          , "cut_OS.sh")
   , ("diamond"      , "diamond_OS.sh")
   , ("hmmer"        , "hmmer_OS.sh")
@@ -30,14 +29,15 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   , ("muscle"       , "muscle_OS.sh")
   , ("orthofinder"  , "orthofinder_OS.sh")
   , ("psiblast"     , "psiblast_OS.sh")
-  , ("python2"      , "python2_OS.sh")
   , ("py2_packages" , "python2_packages_OS.py")
+  , ("python2"      , "python2_OS.sh")
   , ("python3"      , "python3_OS.sh")
   , ("r"            , "r_OS.sh")
   , ("r_packages"   , "r_packages_OS.R")
-  , ("sonicparanoid", "sonicparanoid_OS.sh")
   , ("tar"          , "tar_OS.sh")
-  , ("treecl"       , "treecl_OS.sh")
+  -- , ("sonicparanoid", "sonicparanoid_OS.sh")
+  -- , ("tree"         , "tree_OS.sh") -- TODO where should this go?
+  -- , ("treecl"       , "treecl_OS.sh")
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
