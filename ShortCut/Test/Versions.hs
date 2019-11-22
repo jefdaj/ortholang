@@ -30,10 +30,15 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   , ("muscle"       , "muscle_OS.sh")
   , ("orthofinder"  , "orthofinder_OS.sh")
   , ("psiblast"     , "psiblast_OS.sh")
-  , ("python2"      , "python2_OS.sh")
-  , ("py2_packages" , "python2_packages_OS.py")
-  , ("python3"      , "python3_OS.sh")
   , ("tar"          , "tar_OS.sh")
+
+  , ("python2"      , "python2_OS.sh")
+  , ("py2_numpy"    , "py2_numpy_OS.py")
+  , ("py2_scipy"    , "py2_scipy_OS.py")
+  , ("py2_BioPython", "py2_BioPython_OS.py")
+
+  , ("python3"      , "python3_OS.sh")
+  -- TODO py3 packages?
 
   , ("r"              , "r_OS.sh")
   , ("r_biomartr"     , "r_biomartr_OS.R")
