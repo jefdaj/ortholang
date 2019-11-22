@@ -18,13 +18,14 @@ Loading required package: UpSetR
 Loading required package: VennDiagram
 Loading required package: grid
 Loading required package: futile.logger
-Loading required package: data_table
-Warning message:
-In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
-  there is no package called data_table
-Error in packageVersion("data_table") : 
-  there is no package called data_table
-Execution halted
+Loading required package: data.table
+
+Attaching package: data.table
+
+The following objects are masked from package:dplyr:
+
+    between, first, last
+
 [1] 0.9.0
 [1] 0.8.3
 [1] 3.2.0
@@ -32,3 +33,5 @@ Execution halted
 [1] 0.8.3
 [1] 1.4.0
 [1] 1.6.20
+[1] 1.12.2
+[1] 1.4.3
