@@ -33,11 +33,22 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   , ("python2"      , "python2_OS.sh")
   , ("py2_packages" , "python2_packages_OS.py")
   , ("python3"      , "python3_OS.sh")
-  , ("r"            , "r_OS.sh")
-  , ("r_packages"   , "r_packages_OS.R")
-  , ("sonicparanoid", "sonicparanoid_OS.sh")
   , ("tar"          , "tar_OS.sh")
-  , ("treecl"       , "treecl_OS.sh")
+
+  , ("r"              , "r_OS.sh")
+  , ("r_biomartr"     , "r_biomartr_OS.R")
+  , ("r_dplyr"        , "r_dplyr_OS.R")
+  , ("r_data_table"   , "r_data_table_OS.R")
+  , ("r_futile_logger", "r_futile_logger_OS.R")
+  , ("r_ggplot2"      , "r_ggplot2_OS.R")
+  , ("r_readr"        , "r_readr_OS.R")
+  , ("r_tidyr"        , "r_tidyr_OS.R")
+  , ("r_UpSetR"       , "r_UpSetR_OS.R")
+  , ("r_VennDiagram"  , "r_VennDiagram_OS.R")
+
+  -- , ("sonicparanoid", "sonicparanoid_OS.sh")
+  -- , ("tree"         , "tree_OS.sh") -- TODO where should this go?
+  -- , ("treecl"       , "treecl_OS.sh")
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
