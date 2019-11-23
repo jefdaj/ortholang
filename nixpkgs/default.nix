@@ -57,6 +57,7 @@ let
   mmseqs2 = pkgs.callPackage ./mmseqs2 { };
 
   orthofinder = pkgs.callPackage ./orthofinder {
+    inherit (pkgs.lib) makeBinPath;
     inherit mcl fastme ncbi-blast diamond;
   };
 
