@@ -68,7 +68,7 @@ loadConfig mods args = do
     }
 
 getOS :: IO String
-getOS = return os
+getOS = return $ if os == "darwin" then "mac" else os
 
 -- TODO any way to recover if missing? probably not
 -- TODO use a safe read function with locks here?
