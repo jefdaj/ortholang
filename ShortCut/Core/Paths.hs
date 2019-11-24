@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 -- TODO rename this module to TmpFiles?
 
 {- ShortCut makes heavy use of tmpfiles, and this module controls where they go
@@ -94,24 +96,25 @@ module ShortCut.Core.Paths
   )
   where
 
--- import Development.Shake (Action, trackWrite, need, liftIO)
 import Path (parseAbsFile, fromAbsFile)
 import ShortCut.Core.Types -- (CutConfig)
-import ShortCut.Core.Config (debug)
+-- import ShortCut.Core.Config (debug)
 import ShortCut.Core.Pretty (render, pPrint)
-import ShortCut.Core.Util (digest)
--- import ShortCut.Core.Debug        (debugPath)
+import ShortCut.Core.Util (digest, trace)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
 import Data.List.Split            (splitOn)
 -- import Data.IORef                 (IORef)
 
-debugPath :: Show a => CutConfig -> String -> CutExpr -> a -> a
-debugPath cfg name expr path = debug cfg msg path
+import Text.PrettyPrint.HughesPJClass (Pretty)
+
+-- TODO take Text instead?
+traceP :: (Pretty a, Show b) => String -> a -> b -> b
+traceP name expr path = trace ("core.paths." ++ name) msg path
   where
     ren = render $ pPrint expr
-    msg = name ++ " for '" ++ ren ++ "' is " ++ show path -- TODO include types?
+    msg = ren ++ " -> " ++ show path -- TODO include types?
 
 --------------
 -- cutpaths --
@@ -215,7 +218,7 @@ exprPath (_, cfg, _, _) (CutRules (CompiledExpr _ (ExprPath p) _)) = toCutPath c
 exprPath s@(scr, _, _, _) (CutRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
                                          Just e  -> exprPath s e
-exprPath s@(_, cfg, _, _) expr = debugPath cfg "exprPath" expr res
+exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr

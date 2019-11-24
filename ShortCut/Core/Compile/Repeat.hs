@@ -19,8 +19,6 @@ import ShortCut.Core.Compile.Replace (rReplaceEach)
 
 import Data.Scientific (Scientific(), toBoundedInteger)
 
--- import Debug.Trace
-
 cutModule :: CutModule
 cutModule = CutModule
   { mName = "Repeat"

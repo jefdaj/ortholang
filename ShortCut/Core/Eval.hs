@@ -29,17 +29,15 @@ import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
 import ShortCut.Core.Types
 import ShortCut.Core.Pretty (renderIO)
-import ShortCut.Core.Config (debug)
+-- import ShortCut.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
 import Control.Retry
 -- import qualified Data.Map as M
 -- import Data.List (isPrefixOf)
 
--- import Debug.Trace
-
 import Control.Exception.Safe         (catchAny)
-import Data.Maybe                     (maybeToList)
+import Data.Maybe                     (maybeToList, isJust)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
@@ -47,6 +45,7 @@ import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath
 import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
+import ShortCut.Core.Util             (trace)
 import System.IO                      (Handle, hPutStrLn)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
@@ -63,7 +62,8 @@ myShake cfg rules = do
   where
     myOpts = shakeOptions
       { shakeFiles     = cfgTmpDir cfg
-      , shakeVerbosity = if cfgDebug cfg then Chatty else Quiet
+      -- , shakeVerbosity = if isJust (cfgDebug cfg) then Chatty else Quiet
+      , shakeVerbosity = Quiet
       , shakeThreads   = 0 -- TODO make customizable? increase? decrease?
       , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
       , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
@@ -89,13 +89,13 @@ prettyResult :: CutConfig -> Locks -> CutType -> CutPath -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits cfg ref $ fromCutPath cfg f
+    lits <- readLits ref $ fromCutPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths cfg ref $ fromCutPath cfg f
+    paths <- readPaths ref $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg ref (ScoresOf _)  f = do
@@ -113,7 +113,7 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: Handle -> CutConfig -> Locks -> HashedIDsRef -> CutType -> Rules ResPath -> IO ()
-eval hdl cfg ref ids rtype = if cfgDebug cfg
+eval hdl cfg ref ids rtype = if isJust (cfgDebug cfg)
   then ignoreErrors . eval'
   else retryIgnore  . eval'
   where
@@ -135,7 +135,8 @@ eval hdl cfg ref ids rtype = if cfgDebug cfg
     -- TODO putStrLn rather than debug?
     report fn status = case rsIterNumber status of
       0 -> fn
-      n -> debug cfg ("error! eval failed " ++ show n ++ " times") fn
+      n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
+                  
 
     eval' rpath = myShake cfg $ do
       (ResPath path) <- rpath

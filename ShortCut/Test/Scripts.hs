@@ -1,7 +1,5 @@
 module ShortCut.Test.Scripts where
 
--- import Debug.Trace (trace, traceShow)
-
 -- import Prelude hiding (writeFile)
 
 import Control.Concurrent.Thread.Delay (delay)

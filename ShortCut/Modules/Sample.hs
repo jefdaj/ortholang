@@ -6,7 +6,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic  (rExpr)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions (readLit, readStrings, writeStrings, debugL)
+import ShortCut.Core.Actions (readLit, readStrings, writeStrings, debugA)
 import Data.Scientific
 import System.Random (StdGen)
 import System.Random.Shuffle (shuffle')
@@ -57,7 +57,7 @@ aSample salt t cfg ref _ outPath nPath lstPath = do
       outPath' = fromCutPath cfg outPath
   nStr <- readLit cfg ref nPath'
   lst  <- readStrings t cfg ref lstPath'
-  debugL cfg $ "aSample salt: " ++ show salt
+  debugA ("shortcut.modules.sample.aSample") ("salt: " ++ show salt)
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
       elements' = randomSample salt n lst
   writeStrings t cfg ref outPath' elements'

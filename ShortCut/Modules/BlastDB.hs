@@ -10,13 +10,14 @@ module ShortCut.Modules.BlastDB where
 
 import Development.Shake
 import ShortCut.Core.Types
+import ShortCut.Core.Util (debug)
 
 import Data.Maybe                  (isJust)
 import Control.Monad               (when, forM, unless)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..),
-                                    debugTrackWrite, readLit, readPaths, writeLit, readLits,
-                                    writeLits, writePath, debugA, debugL, debugIO, debugNeed,
-                                    cachedLinesPath, debugL, writeStrings, readStrings, writePaths,
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA,
+                                    trackWrite', readLit, readPaths, writeLit, readLits,
+                                    writeLits, writePath, traceA, need',
+                                    cachedLinesPath, writeStrings, readStrings, writePaths,
                                     readFileStrict)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
 import ShortCut.Core.Paths         (exprPath, cacheDir, fromCutPath,
@@ -36,6 +37,7 @@ import System.Process
 import Data.String.Utils (split)
 import Data.List (isPrefixOf)
 import System.Exit (ExitCode(..))
+import ShortCut.Core.Pretty (Pretty)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -52,6 +54,12 @@ import System.Exit (ExitCode(..))
  - TODO does it work properly when the input fasta file changes and the database
  -      needs to be rebuilt?
  -}
+
+debugA' :: String -> String -> Action ()
+debugA' name = debugA ("modules.blastdb." ++ name)
+
+debugR' :: (Pretty a, Show b) => CutConfig -> String -> a -> b -> b
+debugR' cfg name = debugRules cfg ("modules.blastdb." ++ name)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -158,7 +166,7 @@ aLoadDB cfg ref _ oPath sPath = do
   where
     oPath'  = fromCutPath cfg oPath
     sPath'  = fromCutPath cfg sPath
-    oPath'' = debugA cfg "aLoadDB" oPath' [oPath', sPath']
+    oPath'' = traceA "aLoadDB" oPath' [oPath', sPath']
 
 loadNuclDB :: CutFunction
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -235,23 +243,23 @@ aBlastdblist cfg ref _ listTmp = do
   where
     listTmp' = fromCutPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
-    oPath    = debugA cfg "aBlastdblist" listTmp' [listTmp']
+    oPath    = traceA "aBlastdblist" listTmp' [listTmp']
 
 -- TODO generalize so it works with busco_list_lineages too?
 -- TODO move to a "Filter" module once that gets started
 aFilterList :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aFilterList cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
-  out       <- readLits cfg ref listTmp'
+  out       <- readLits ref listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
-  debugL cfg $ "aFilterList names': " ++ show names'
+  debugA' "aFilterList" $ "names': " ++ show names'
   writeLits cfg ref oPath'' names'
   where
     fPath'   = fromCutPath cfg fPath
     oPath'   = fromCutPath cfg oPath
     listTmp' = fromCutPath cfg listTmp
-    oPath''  = debugA cfg "aFilterList" oPath' [oPath', listTmp', fPath']
+    oPath''  = traceA "aFilterList" oPath' [oPath', listTmp', fPath']
 
 mkBlastdbget :: String -> CutType -> CutFunction
 mkBlastdbget name dbType = CutFunction
@@ -281,13 +289,13 @@ rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
 aBlastdbget :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
-  debugNeed cfg "aBlastdbget" [nPath']
+  need' "shortcut.modules.blastdb.aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
   -- TODO was taxdb needed for anything else?
-  debugL cfg $ "aBlastdbget dbPrefix'': " ++ dbPrefix''
-  debugL cfg $ "aBlastdbget dbPath: " ++ dbPath
+  debugA' "aBlastdbget" $ "dbPrefix'': " ++ dbPrefix''
+  debugA' "aBlastdbget" $ "dbPath: " ++ dbPath
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -306,7 +314,7 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
     tmp'       = fromCutPath cfg tmpDir
     nPath'     = fromCutPath cfg nPath
     dbPrefix'  = fromCutPath cfg dbPrefix
-    dbPrefix'' = debugA cfg "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
+    dbPrefix'' = traceA "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
 
 --------------------------------------------
 -- make one db from a list of FASTA files --
@@ -355,7 +363,7 @@ rMakeblastdbAll :: RulesFn
 rMakeblastdbAll s@(_, cfg, ref, ids) e@(CutFun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out       = exprPath s e
-      out'      = debugRules cfg "rMakeblastdbAll" e $ fromCutPath cfg out
+      out'      = debugR' cfg "rMakeblastdbAll" e $ fromCutPath cfg out
       cDir      = makeblastdbCache cfg
       fasPath'   = toCutPath cfg fasPath
 
@@ -380,7 +388,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
   let dbType' = if dbType == ndb then "nucl" else "prot"
-  debugNeed cfg "aMakeblastdbAll" [fasPath']
+  need' "shortcut.modules.blastdb.aMakeblastdbAll" [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
@@ -390,7 +398,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> fasHash <.> extOf dbType
       dbOut' = toCutPath cfg dbOut
-      out''  = debugA cfg "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
+      out''  = traceA "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
       dbPtn  = cDir' </> fasHash </> "*" -- TODO does this actually help?
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
@@ -401,7 +409,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- solution is just to avoid that for now?
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
-  faPaths <- readPaths cfg ref fasPath'
+  faPaths <- readPaths ref fasPath'
   let noQuoting  = unwords $ map (fromCutPath cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
@@ -409,19 +417,20 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
       --              (map (\p -> "'" ++ fromCutPath cfg p ++ "'") faPaths)
       --              ++ "\""
 
-  debugL cfg $ "aMakeblastdbAll out': "       ++ out'
-  debugL cfg $ "aMakeblastdbAll cDir: "       ++ show cDir
-  debugL cfg $ "aMakeblastdbAll cDir': "      ++ cDir'
-  debugL cfg $ "aMakeblastdbAll dbOut': "     ++ show dbOut'
-  debugL cfg $ "aMakeblastdbAll dbType': "    ++ dbType'
-  debugL cfg $ "aMakeblastdbAll cfg: "        ++ show cfg
-  debugL cfg $ "aMakeblastdbAll fixedPaths: " ++ show fixedPaths
+  let dbg = debugA' "aMakeblastdbAll"
+  dbg $ "out': "       ++ out'
+  dbg $ "cDir: "       ++ show cDir
+  dbg $ "cDir': "      ++ cDir'
+  dbg $ "dbOut': "     ++ show dbOut'
+  dbg $ "dbType': "    ++ dbType'
+  dbg $ "cfg: "        ++ show cfg
+  dbg $ "fixedPaths: " ++ show fixedPaths
 
   liftIO $ createDirectoryIfMissing True dbDir
   before <- listPrefixFiles dbPtn
   when (length before < 5) $ do
-    debugL cfg $ "this is dbPtn: " ++ dbPtn
-    debugL cfg $ "this will be dbOut: " ++ dbOut
+    dbg $ "this is dbPtn: " ++ dbPtn
+    dbg $ "this will be dbOut: " ++ dbOut
     runCmd cfg ref $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
@@ -439,16 +448,16 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
     -- check that all the right files were created
     after <- listPrefixFiles dbPtn
     -- liftIO $ putStrLn "running makeblastdb"
-    debugTrackWrite cfg after
+    trackWrite' cfg after
     -- usually there's an index file too, but not always
     let expected = if dbType == ndb
                      then [".nhr", ".nin", ".nsq"]
                      else [".phr", ".pin", ".psq"]
         success = all (\e -> e `elem` (map takeExtension after)) expected
-    debugL cfg $ "these actual db files were created: " ++ show after
+    dbg $ "these actual db files were created: " ++ show after
     unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
     
-    debugL cfg $ "dbOut was also created: " ++ dbOut
+    dbg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
   writePath cfg ref out'' dbOut'
   where
@@ -583,14 +592,15 @@ aSingletons :: CutType -> Action1
 aSingletons elemType cfg ref _ outPath listPath = do
   let listPath' = fromCutPath cfg listPath
       outPath'  = fromCutPath cfg outPath
-  debugL cfg $ "aSingletons listpath': " ++ listPath'
-  debugL cfg $ "aSingletons outpath': " ++ outPath'
+      dbg = debugA' "aSingletons"
+  dbg $ "listpath': " ++ listPath'
+  dbg $ "outpath': " ++ outPath'
   elems <- readStrings elemType cfg ref listPath'
-  debugL cfg $ "aSingletons elems: " ++ show elems
+  dbg $ "elems: " ++ show elems
   singletonPaths <- forM elems $ \e -> do
     let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
         singletonPath  = toCutPath cfg singletonPath'
-    debugL cfg $ "aSingletons singletonPath': " ++ singletonPath'
+    dbg $ "singletonPath': " ++ singletonPath'
     writeStrings elemType cfg ref singletonPath' [e]
     return singletonPath
   writePaths cfg ref outPath' singletonPaths -- TODO nondeterministic?
@@ -605,7 +615,7 @@ showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
-  debugIO cfg $ "showBlastDb dbDir: '" ++ dbDir ++ "'"
+  debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: '" ++ dbDir ++ "'"
   out <- withReadLock ref path' $
            readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
   let out1 = lines out

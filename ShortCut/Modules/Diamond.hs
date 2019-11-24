@@ -11,7 +11,7 @@ import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleS
 import ShortCut.Core.Locks         (withReadLock)
 import ShortCut.Core.Util          (resolveSymlinks, headOrDie)
 import ShortCut.Core.Paths         (CutPath, fromCutPath, exprPath)
-import ShortCut.Core.Actions       (readPaths, readLit, debugA, runCmd, CmdDesc(..), sanitizeFileInPlace)
+import ShortCut.Core.Actions       (readPaths, readLit, traceA, runCmd, CmdDesc(..), sanitizeFileInPlace)
 import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Modules.Blast      (bht)
 import System.Process              (readProcess)
@@ -92,7 +92,7 @@ rDiamondmakedbAll s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [fas]) = do
   let out  = exprPath s e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
   out' %> \_ -> do
-    faPaths <- readPaths cfg ref fasPath
+    faPaths <- readPaths ref fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
@@ -208,7 +208,7 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     e'  = fromCutPath cfg e
     q'  = fromCutPath cfg q
     db' = fromCutPath cfg db
-    o'' = debugA cfg "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
+    o'' = traceA "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
 aDiamondFromDb _ _ _ _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above

@@ -8,7 +8,7 @@ module ShortCut.Modules.OrthoFinder
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..), debugTrackWrite)
+import ShortCut.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..), trackWrite')
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import ShortCut.Core.Locks         (withWriteLock')
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
@@ -61,9 +61,9 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       statsPath' = fromCutPath cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
   -- withWriteLock' ref (tmpDir </> "lock") $ do
-  faPaths <- readPaths cfg ref faListPath'
+  faPaths <- readPaths ref faListPath'
   let faPaths' = map (fromCutPath cfg) faPaths
-  debugNeed cfg "aOrthofinder" faPaths'
+  need' "shortcut.modules.orthofinder.aOrthofinder" faPaths'
   let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1
@@ -87,11 +87,11 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     -- liftIO $ putStrLn $ "out: " ++ show out
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
-  debugTrackWrite cfg [statsPath']
+  trackWrite' cfg [statsPath']
   symlink cfg ref out statsPath
   where
     out'        = fromCutPath cfg out
     faListPath' = fromCutPath cfg faListPath
-    out''       = debugA cfg "aOrthofinder" out' [out', faListPath']
+    out''       = traceA "aOrthofinder" out' [out', faListPath']
 
 aOrthofinder _ _ _ args = error $ "bad argument to aOrthofinder: " ++ show args

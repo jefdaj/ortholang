@@ -40,12 +40,15 @@ import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>))
 import ShortCut.Core.Actions      (readPaths, writePaths, symlink,
-                                   readLit, writeLits, debugA, debugL, debugNeed)
+                                   readLit, writeLits, traceA, debugA, need')
 import ShortCut.Core.Paths        (cacheDir, toCutPath, fromCutPath, exprPath,
                                    CutPath, exprPathExplicit, argHashes)
 import ShortCut.Core.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)
 import System.Directory           (createDirectoryIfMissing)
+
+debugA' :: String -> String -> Action ()
+debugA' name msg = debugA ("shortcut.core.compile.map." ++ name) msg
 
 ------------------------------------
 -- simplified versions for export --
@@ -131,18 +134,18 @@ aMapMain :: CutConfig -> Locks -> HashedIDsRef -> Int
          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
          -> Action ()
 aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
-  debugNeed cfg "aMapMain" regularArgs'
+  need' "shortcut.core.compile.map.aMapMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
-  mappedPaths  <- readPaths cfg ref mappedArgList'
+  mappedPaths  <- readPaths ref mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
-  debugL cfg $ "aMapMain mappedPaths': " ++ show mappedPaths'
+  debugA' "aMapMain" $ "mappedPaths': " ++ show mappedPaths'
   mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
         (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
-  debugNeed cfg "aMapMain" outPaths
+  need' "shortcut.core.compile.map.aMapMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
-  let out = debugA cfg "aMapMain" outPath
+  let out = traceA "aMapMain" outPath
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
     then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
@@ -173,11 +176,13 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
       argPaths   = insertAt mapIndex mappedArg' regularArgs'
       argPaths'  = map (toCutPath cfg) argPaths
-  debugL cfg $ "aMapArgs mappedArg': " ++ show mappedArg'
-  debugL cfg $ "aMapArgs argsPath: " ++ show argsPath
-  debugL cfg $ "aMapArgs argPaths: " ++ show argPaths
-  debugL cfg $ "aMapArgs argPaths': " ++ show argPaths'
+  debugFn $ "mappedArg': " ++ show mappedArg'
+  debugFn $ "argsPath: " ++ show argsPath
+  debugFn $ "argPaths: " ++ show argPaths
+  debugFn $ "argPaths': " ++ show argPaths'
   writePaths cfg ref argsPath argPaths'
+  where
+    debugFn = debugA' "aMapArgs"
 
 {- This gathers together Rules-time and Action-time arguments and passes
  - everything to actFn. To save on duplicated computation it writes the same
@@ -198,10 +203,10 @@ aMapElem :: CutConfig -> Locks -> HashedIDsRef -> CutType
          -> String -> RepeatSalt -> FilePath -> Action ()
 aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
-  args <- readPaths cfg ref argsPath
+  args <- readPaths ref argsPath
   let args' = map (fromCutPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
-  debugNeed cfg "aMapElem" args'
+  need' "shortcut.core.compile.map.aMapElem" args'
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do
@@ -209,7 +214,7 @@ aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
       let d' = fromCutPath cfg d
       createDirectoryIfMissing True d'
       return d
-  let out' = debugA cfg "aMapElem" (toCutPath cfg out) args''
+  let out' = traceA "aMapElem" (toCutPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toCutPath cfg) args'' -- TODO make it match exprPath
       single  = exprPathExplicit cfg singleName eType salt hashes

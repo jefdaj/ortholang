@@ -7,8 +7,8 @@ module ShortCut.Modules.ListLike where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions  (readPaths, writeLit, debugA)
--- import ShortCut.Core.Debug    (debugA)
+import ShortCut.Core.Actions  (readPaths, writeLit, traceA)
+-- import ShortCut.Core.Debug    (traceA)
 import ShortCut.Core.Paths    (exprPath, fromCutPath,
                                toCutPath, CutPath)
 import ShortCut.Core.Compile.Basic     (rExpr, defaultTypeCheck)
@@ -79,10 +79,10 @@ rLen _ _ = fail "bad arguments to rLen"
 aLen :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aLen cfg ref _ [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
-  n <- fmap count $ readPaths cfg ref lst'
+  n <- fmap count $ readPaths ref lst'
   writeLit cfg ref out'' $ show n
   where
     out'  = fromCutPath cfg out
     lst'  = fromCutPath cfg lst
-    out'' = debugA cfg "aLen" out' [out', lst']
+    out'' = traceA "aLen" out' [out', lst']
 aLen _ _ _ args = error $ "bad arguments to aLen: " ++ show args

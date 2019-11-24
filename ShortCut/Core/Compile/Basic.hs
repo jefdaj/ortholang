@@ -19,7 +19,6 @@ module ShortCut.Core.Compile.Basic
   where
 
 -- TODO does turning of traces radically speed up the interpreter?
-import Debug.Trace (trace)
 
 import Development.Shake
 import Development.Shake.FilePath (isAbsolute)
@@ -33,19 +32,21 @@ import ShortCut.Core.Paths (cacheDir, exprPath, exprPathExplicit, toCutPath,
 import Data.IORef                 (atomicModifyIORef')
 import Data.List                  (intersperse, isPrefixOf, isInfixOf)
 import Development.Shake.FilePath ((</>), (<.>))
-import ShortCut.Core.Actions      (runCmd, CmdDesc(..), debugA, debugL, debugNeed,
+import ShortCut.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, writePaths, symlink)
 import ShortCut.Core.Locks        (withWriteLock')
 import ShortCut.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import ShortCut.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie)
+                                   digest, removeIfExists, headOrDie, trace)
 import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
 
+import Data.Maybe (isJust)
+
 debug :: CutConfig -> String -> a -> a
-debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
+debug cfg msg rtn = if isJust (cfgDebug cfg) then trace "core.compile" msg rtn else rtn
 
 -- TODO restrict to CutExpr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
@@ -118,7 +119,7 @@ aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
     paths _ = fail "bad argument to paths"
     ePath = paths expr
     out'  = fromCutPath cfg out
-    out'' = debugA cfg "aLit" out' [ePath, out']
+    out'' = traceA "aLit" out' [ePath, out']
 
 rList :: CutState -> CutExpr -> Rules ExprPath
 -- TODO is this the bug? refers to a list of other empty lists, no?
@@ -144,7 +145,7 @@ rList _ _ = error "bad arguemnt to rList"
 -- aListEmpty cfg ref ids link = writeLits cfg ref link'' [] -- TODO error here?
 --   where
 --     link'  = fromCutPath cfg link
---     link'' = debugAction cfg "aListEmpty" link' [link']
+--     link'' = traceAction cfg "aListEmpty" link' [link']
 
 -- special case for writing lists of strings or numbers as a single file
 rListLits :: CutState -> CutExpr -> Rules ExprPath
@@ -164,11 +165,11 @@ aListLits cfg ref _ paths outPath = do
   -- need paths'
   lits <- mapM (readLit cfg ref) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
-  debugL cfg $ "aListLits lits': " ++ show lits'
+  debugA "shortcut.core.compile.basic.aListLits" $ "lits': " ++ show lits'
   writeLits cfg ref out'' lits'
   where
     out'   = fromCutPath cfg outPath
-    out''  = debugA cfg "aListLits" out' (out':paths')
+    out''  = traceA "aListLits" out' (out':paths')
     paths' = map (fromCutPath cfg) paths
 
 -- regular case for writing a list of links to some other file type
@@ -186,14 +187,14 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 -- works on everything but lits: paths or empty lists
 aListPaths :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg ref _ paths outPath = do
-  debugNeed cfg "aListPaths" paths'
+  need' "shortcut.core.compile.basic.aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  debugNeed cfg "aListPaths" paths''
+  need' "shortcut.core.compile.basic.aListPaths" paths''
   let paths''' = map (toCutPath cfg) paths'' -- TODO not working?
   writePaths cfg ref out'' paths'''
   where
     out'   = fromCutPath cfg outPath
-    out''  = debugA cfg "aListPaths" out' (out':paths')
+    out''  = traceA "aListPaths" out' (out':paths')
     paths' = map (fromCutPath cfg) paths -- TODO remove this
 
 -- return a link to an existing named variable
@@ -218,7 +219,7 @@ rVar (_, cfg, ref, ids) var expr oPath = do
 aVar :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aVar cfg ref _ vPath oPath = do
   alwaysRerun
-  debugNeed cfg "aVar" [oPath']
+  need' "shortcut.core.compile.basic.aVar" [oPath']
   withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
   -- TODO should it sometimes symlink and sometimes copy?
   -- TODO before copying, think about how you might have to re-hash again!
@@ -228,7 +229,7 @@ aVar cfg ref _ vPath oPath = do
   where
     oPath'  = fromCutPath cfg oPath
     vPath'  = fromCutPath cfg vPath
-    vPath'' = debugA cfg "aVar" vPath [vPath', oPath']
+    vPath'' = traceA "aVar" vPath [vPath', oPath']
 
 -- Handles the actual rule generation for all binary operators.
 -- TODO can it be factored out somehow? seems almost trivial now...
@@ -310,7 +311,7 @@ aLoadHash :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> String -> 
 aLoadHash hashSeqIDs cfg ref ids src ext = do
   alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
-  debugNeed cfg "aLoadHash" [src']
+  need' "shortcut.core.compile.basic.aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
@@ -346,7 +347,7 @@ isURL s = "://" `isInfixOf` take 10 s
 curl :: CutConfig -> Locks -> String -> Action CutPath
 curl cfg ref url = do
   -- liftIO $ putStrLn $ "url: " ++ url
-  let verbosity = if cfgDebug cfg then "" else "-s"
+  let verbosity = if isJust (cfgDebug cfg) then "" else "-s"
       cDir      = fromCutPath cfg $ cacheDir cfg "curl"
       outPath   = cDir </> digest url
   liftIO $ createDirectoryIfMissing True cDir
@@ -368,8 +369,8 @@ curl cfg ref url = do
 aLoad :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
   alwaysRerun
-  debugNeed cfg "aLoad" [strPath']
-  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits cfg ref strPath' -- TODO safer!
+  need' "shortcut.core.compile.basic.aLoad" [strPath']
+  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits ref strPath' -- TODO safer!
   -- liftIO $ putStrLn $ "pth: " ++ pth
   pth' <- if isURL pth
             then curl cfg ref pth
@@ -379,18 +380,18 @@ aLoad hashSeqIDs cfg ref ids strPath outPath = do
             -- then curl cfg ref pth
             -- else 
   -- liftIO $ putStrLn $ "src': " ++ src'
-  -- debugL cfg $ "aLoad src': '" ++ src' ++ "'"
-  -- debugL cfg $ "aLoad outPath': '" ++ outPath' ++ "'"
+  -- debugA $ "aLoad src': '" ++ src' ++ "'"
+  -- debugA $ "aLoad outPath': '" ++ outPath' ++ "'"
   -- TODO why doesn't this rerun?
   hashPath <- aLoadHash hashSeqIDs cfg ref ids pth' (takeExtension outPath')
   -- let hashPath'    = fromCutPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   symlink cfg ref outPath'' hashPath
-  -- debugTrackWrite cfg [outPath'] -- TODO WTF? why does this not get called by symlink?
+  -- trackWrite' cfg [outPath'] -- TODO WTF? why does this not get called by symlink?
   where
     strPath'  = fromCutPath cfg strPath
     outPath'  = fromCutPath cfg outPath
-    outPath'' = debugA cfg "aLoad" outPath [strPath', outPath']
+    outPath'' = traceA "aLoad" outPath [strPath', outPath']
     toAbs line = if isAbsolute line
                    then line
                    else cfgWorkDir cfg </> line
@@ -420,8 +421,8 @@ rLoadListLits s@(_, cfg, ref, ids) expr = do
 aLoadListLits :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoadListLits cfg ref _ outPath litsPath = do
   let litsPath' = fromCutPath cfg litsPath
-      out       = debugA cfg "aLoadListLits" outPath' [outPath', litsPath']
-  lits  <- readLits cfg ref litsPath'
+      out       = traceA "aLoadListLits" outPath' [outPath', litsPath']
+  lits  <- readLits ref litsPath'
   lits' <- liftIO $ mapM absolutize lits
   writeLits cfg ref out lits'
   where
@@ -450,13 +451,13 @@ aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
   hashPaths <- mapM (\p -> aLoadHash hashSeqIDs cfg ref ids p
                          $ takeExtension $ fromCutPath cfg p) paths'''
   let hashPaths' = map (fromCutPath cfg) hashPaths
-  -- debugL cfg $ "about to need: " ++ show paths''
-  debugNeed cfg "aLoadListLinks" hashPaths'
+  -- debugA $ "about to need: " ++ show paths''
+  need' "shortcut.core.compile.basic.aLoadListLinks" hashPaths'
   writePaths cfg ref out hashPaths
   where
     outPath'   = fromCutPath cfg outPath
     pathsPath' = fromCutPath cfg pathsPath
-    out = debugA cfg "aLoadListLinks" outPath' [outPath', pathsPath']
+    out = traceA "aLoadListLinks" outPath' [outPath', pathsPath']
 
 -- based on https://stackoverflow.com/a/18627837
 -- uniqLines :: Ord a => [a] -> [a]
@@ -542,7 +543,7 @@ aSimple' ::  CutConfig -> Locks -> HashedIDsRef -> CutPath
          -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
          -> Maybe CutPath -> [CutPath] -> Action ()
 aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
-  debugNeed cfg "aSimple'" argPaths'
+  need' "shortcut.core.compile.basic.aSimple'" argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
   let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath
       as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths''
@@ -553,7 +554,7 @@ aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
     hashes     = concat $ intersperse "_" $ map digest argPaths'
     argPaths'  = map (fromCutPath cfg) argPaths
     outPath'   = fromCutPath cfg outPath
-    out = debugA cfg "aSimple'" outPath' (outPath':tmpDir':argPaths')
+    out = traceA "aSimple'" outPath' (outPath':tmpDir':argPaths')
     (tmpDir, tmpDir') = case mTmpDir of
                 Nothing  -> (toCutPath cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
                 Just dir -> (toCutPath cfg d, d)

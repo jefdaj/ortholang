@@ -9,7 +9,7 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
 import ShortCut.Core.Util          (digest)
-import ShortCut.Core.Actions       (readPaths, debugA, debugNeed, readLit,
+import ShortCut.Core.Actions       (readPaths, traceA, need', readLit,
                                     writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath, cacheDir)
 import ShortCut.Core.Sanitize      (lookupIDsFile)
@@ -133,7 +133,7 @@ aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
       tmpDir'   = fromCutPath cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ extOf rtn
       outPath'  = fromCutPath cfg outPath
-      outPath'' = debugA cfg "aGenbankToFasta" outPath' [outPath', faPath']
+      outPath'' = traceA "aGenbankToFasta" outPath' [outPath', faPath']
   -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
   ft <- readLit cfg ref ftPath'
   let ft' = if ft  == "cds" then "CDS" else ft
@@ -313,11 +313,11 @@ mkConcatEach cType = CutFunction
  -}
 -- aConcat :: CutType -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
---   fPaths <- readPaths cfg ref fs'
+--   fPaths <- readPaths ref fs'
 --   let fPaths' = map (fromCutPath cfg) fPaths
---   debugNeed cfg "aConcat" fPaths'
+--   need' cfg "aConcat" fPaths'
 --   let out'    = fromCutPath cfg oPath
---       out''   = debugA cfg "aConcat" out' [out', fs']
+--       out''   = traceA "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
 --       emptyStr = "<<empty" ++ extOf cType ++ ">>"
 --       grepCmd = "egrep -v '^" ++ emptyStr ++ "$'"
@@ -344,9 +344,9 @@ aConcat cType cfg ref ids [outPath, inList] = do
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromCutPath cfg outPath
   writeCachedLines cfg ref emptyPath [emptyStr]
-  inPaths <- readPaths cfg ref $ fromCutPath cfg inList
+  inPaths <- readPaths ref $ fromCutPath cfg inList
   let inPaths' = map (fromCutPath cfg) inPaths
-  debugNeed cfg "aConcat" inPaths'
+  need' "shortcut.modules.seqio.aConcat" inPaths'
   writeCachedLines cfg ref inList' inPaths'
   aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
                                       , toCutPath cfg inList'
@@ -395,7 +395,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
       prefix'   = tmpDir' </> digest faPath ++ "_"
       outDir'   = exprDir' </> "load_" ++ ext
       outPath'  = fromCutPath cfg outPath
-      outPath'' = debugA cfg "aSplit" outPath' [outPath', faPath']
+      outPath'' = traceA "aSplit" outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath']
   -- TODO make sure stderr doesn't come through?
@@ -420,7 +420,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'', tmpList] -- TODO any more?
     }
-  -- loadPaths <- readPaths cfg ref tmpList
+  -- loadPaths <- readPaths ref tmpList
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   -- writePaths cfg ref outPath'' loadPaths
   writeCachedVersion cfg ref outPath'' tmpList

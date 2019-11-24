@@ -12,7 +12,7 @@ module ShortCut.Modules.PsiBlast where
 import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Actions       (readLit, readPath, 
-                                    runCmd, CmdDesc(..), debugL, debugA, debugNeed,
+                                    runCmd, CmdDesc(..), debugA, traceA, need',
                                     writeCachedLines, readFileStrict')
 import ShortCut.Core.Compile.Basic (defaultTypeCheck)
 import ShortCut.Core.Paths         (fromCutPath, cacheDir)
@@ -30,6 +30,9 @@ import ShortCut.Core.Compile.Compose (compose1)
 import ShortCut.Core.Compile.Map (rMap)
 import System.Directory            (createDirectoryIfMissing)
 import System.Exit                 (ExitCode(..))
+
+debug :: String -> String -> Action ()
+debug name = debugA ("shortcut.modules.psiblast." ++ name)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -154,17 +157,17 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
       ePath'  = fromCutPath cfg ePath
       qPath'  = fromCutPath cfg qPath -- might be a fasta or pssm
       dbPath' = fromCutPath cfg dbPath
-  debugNeed cfg "aPsiblastDb" [ePath', qPath', dbPath']
+  need' "shortcut.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
 
   eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
 
   -- TODO is there something wrong with the map handlign here? or general makeblastdb?
-  -- dbPrePath <- readPath cfg ref dbPath' -- TODO is this right?
+  -- dbPrePath <- readPath ref dbPath' -- TODO is this right?
   -- let dbPrePath' = fromCutPath cfg dbPrePath
 
   -- this version works for withPdbSubject, but breaks something else?
-  dbPre     <- readPath cfg ref dbPath' -- TODO is this right?
-  debugL cfg $ "aPsiblastDb dbPre: " ++ show dbPre
+  dbPre     <- readPath ref dbPath' -- TODO is this right?
+  debug "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromCutPath cfg $ cacheDir cfg "psiblast"
@@ -178,7 +181,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
   -- TODO is this needed, or will it end up the default?
   -- psiblastBin <- fmap stripWhiteSpace $
   --                  wrappedCmdOut True cfg ref [] [] [] "which" ["psiblast"]
-  -- debugL cfg $ "psiblast binary: " ++ psiblastBin
+  -- debug "aPsiblastDb" $ "binary: " ++ psiblastBin
 
   -- TODO what to do when no hits found? use seqid + nothing as output format
   --      and check for that in the search fn?
@@ -188,13 +191,13 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
   -- before running psiblast, check whether the query is an empty pssm
   -- and if so, just return empty hits immediately
-  lines2 <- fmap (take 2 . lines) $ readFileStrict' cfg ref qPath'
+  lines2 <- fmap (take 2 . lines) $ readFileStrict' ref qPath'
   if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
     then writeCachedLines cfg ref oPath' ["<<emptybht>>"]
     else do
 
       -- TODO need Cwd here too, or maybe instead?
-      let oPath'' = debugA cfg "aPsiblastDb" oPath' [eDec, qPath', dbPath']
+      let oPath'' = traceA "aPsiblastDb" oPath' [eDec, qPath', dbPath']
 
       runCmd cfg ref $ CmdDesc
         { cmdBinary = "psiblast.sh"
@@ -222,8 +225,8 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
        -}
       when writingPssm $ do
         let head' = headOrDie "aPsiblastDb failed to read querySeqId"
-        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' cfg ref qPath'
-        pssmLines <- fmap lines $ readFileStrict' cfg ref tPath'
+        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' ref qPath'
+        pssmLines <- fmap lines $ readFileStrict' ref tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName dbPre'
             trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"

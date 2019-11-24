@@ -3,7 +3,8 @@
 
 module ShortCut.Test.Versions where
 
-import Data.ByteString.Lazy.Char8 (pack)
+import ShortCut.Core.Util (debug, time)
+
 import Development.Shake.FilePath ((<.>), (</>))
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Types        (CutConfig(..), Locks, HashedIDsRef)
@@ -12,10 +13,11 @@ import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
 import Data.List.Utils            (replace)
 import qualified Data.ByteString.Lazy.Char8 as C8
-import System.FilePath.Posix      (takeBaseName, replaceExtension)
+import System.FilePath.Posix      (takeBaseName)
 
 -- OS should be replaced with "mac" or "linux" before using these
--- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py? greencut psiblast? seqiostuff sonicparanoid
+-- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py?
+--      greencut psiblast? seqiostuff sonicparanoid
 versionScripts :: String -> [(String, FilePath)]
 versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   [ ("bash"         , "bash_OS.sh")
@@ -61,6 +63,7 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
 mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg _ _ = do
   testDir <- getDataFileName $ "tests"
+  debug "test.versions" $ "test dir is " ++ testDir
   return $ testGroup "check dependency versions"
          $ map (mkTestVersion cfg testDir) (versionScripts $ cfgOS cfg)
 
@@ -69,8 +72,9 @@ mkTestVersion cfg dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
     gld = dir </> "versions" </> takeBaseName cmd <.> "txt"
+    msg = "tested " ++ name ++ " " ++ cfgOS cfg ++ " version"
     act = do
-      (_, out, err) <- readCreateProcessWithExitCode (shell cmd) ""
+      (_, out, err) <- time "test.versions" msg $ readCreateProcessWithExitCode (shell cmd) ""
       -- helpful for updating tests
       -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") $ toGeneric cfg $ err ++ out
-      return $ pack $ err ++ out
+      return $ C8.pack $ err ++ out

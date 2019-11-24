@@ -1,5 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+-- TODO no welcome if going to load a file + clear the screen anyway
+
 -- TODO could simplify to the same code everywhere except you pass the handle (file vs stdout)?
 
 -- Based on:
@@ -64,13 +66,14 @@ runRepl = mkRepl (repeat prompt) stdout
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
        -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids = do
-  clear
-  hPutStrLn hdl
-    "Welcome to the ShortCut interpreter!\n\
-    \Type :help for a list of the available commands."
   -- load initial script if any
   st <- case cfgScript cfg of
-          Nothing   -> return  ([], cfg, ref, ids)
+          Nothing -> do
+            clear
+            hPutStrLn hdl
+              "Welcome to the ShortCut interpreter!\n\
+              \Type :help for a list of the available commands."
+            return  ([], cfg, ref, ids)
           Just path -> cmdLoad ([], cfg, ref, ids) hdl path
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
@@ -295,7 +298,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         -- TODO put this back? not sure if it makes repl better
-        Right s -> clear >> cmdShow (s, cfg', ref, ids) hdl ""
+        Right s -> cmdShow (s, cfg', ref, ids) hdl ""
         -- Right s -> return (s, cfg', ref, ids)
 
 cmdReload :: CutState -> Handle -> String -> IO CutState
@@ -411,7 +414,9 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
         then hPutStrLn hdl (showConfigField cfg $ headOrDie "cmdConfig failed" ws) >> return st
         else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
-               Right cfg' -> return (scr, cfg', ref, ids)
+               Right iocfg' -> do
+                 cfg' <- iocfg'
+                 return (scr, cfg', ref, ids)
 
 --------------------
 -- tab completion --

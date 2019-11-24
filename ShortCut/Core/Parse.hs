@@ -7,7 +7,7 @@ module ShortCut.Core.Parse
   ( ParseError
   , parseWithEof
   , parseWithLeftOver
-  , parseAndShow
+  , parseAndShow -- TODO remove for production?
   -- functions used elsewhere in core
   , isExpr
   , parseExpr

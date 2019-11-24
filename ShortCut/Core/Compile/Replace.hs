@@ -44,7 +44,7 @@ module ShortCut.Core.Compile.Replace where
 import Development.Shake
 import ShortCut.Core.Types
 
-import ShortCut.Core.Actions       (writeLits, writePaths, readLit, debugA)
+import ShortCut.Core.Actions       (writeLits, writePaths, readLit, traceA)
 import ShortCut.Core.Paths         (exprPath, fromCutPath,
                                     CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, compileScript, debugRules)
@@ -169,7 +169,7 @@ aReplaceEachLits _ cfg ref outPath subPaths resPaths = do
     outPath'  = fromCutPath cfg outPath
     subPaths' = fromCutPath cfg subPaths
     resPaths' = map (fromCutPath cfg) resPaths
-    out = debugA cfg "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
+    out = traceA "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
 
 {- Helper function to write the final list when the results are links to files
  - TODO factor out, and maybe unify with rListLinks
@@ -182,7 +182,7 @@ aReplaceEachLinks cfg ref outPath subPaths resPaths = do
     outPath'  = fromCutPath cfg outPath
     subPaths' = fromCutPath cfg subPaths
     resPaths' = map (fromCutPath cfg) resPaths
-    out = debugA cfg "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
+    out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
 
 ------------------
 -- replace_each --

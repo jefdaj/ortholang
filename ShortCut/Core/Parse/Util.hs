@@ -1,6 +1,8 @@
 module ShortCut.Core.Parse.Util where
 
 import ShortCut.Core.Types
+import ShortCut.Core.Util (trace)
+
 import qualified Text.Parsec as P
 import Text.Parsec                (ParseError)
 import Text.Parsec.Combinator     (manyTill, eof, anyToken)
@@ -11,6 +13,7 @@ import Development.Shake.FilePath (makeRelative)
 -- Some are from the Parsec tutorial here:
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
+-- TODO is this ever needed in production? probably not
 parseAndShow :: (Show a) => ParseM a -> CutState -> String -> String
 parseAndShow p s str' = case runParseM p s str' of
   Left err -> show err
