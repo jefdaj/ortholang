@@ -1,16 +1,27 @@
 language: nix
+nix: 2.0.4
+
+
+cache:
+  directories:
+    - $HOME/.ghc
+    - $HOME/.cabal
+    - $HOME/.stack
+    - .stack-work
 
 matrix:
+  fast_finish: true
   include:
-    # - os: linux
-    #   dist: bionic
-    #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
-    - os: linux
-      dist: xenial
-      env: NIX_PATH=nixpkgs=channel:nixos-19.03
-    - os: osx
-      osx_image: xcode10.1
-      env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
+  # - os: linux
+  #   dist: bionic
+  #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
+  - os: linux
+    dist: xenial
+    # env: NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/e19054ab3cd5b7cc9a01d0efc71c8fe310541065.tar.gz
+    env: NIX_PATH=nixpkgs=channel:nixos-19.03
+  - os: osx
+    osx_image: xcode10.1
+    env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
 git:
   # quiet: true
@@ -19,12 +30,12 @@ git:
 # see: https://nvie.com/posts/a-successful-git-branching-model
 branches:
   only:
-    - master
-    - develop
-    - /^module-.*$/
-    - /^release-.*$/
-    - /^feature-.*$/
-    - /^hotfix-.*$/
+  - master
+  - develop
+  - /^module-.*$/
+  - /^release-.*$/
+  - /^feature-.*$/
+  - /^hotfix-.*$/
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
@@ -34,5 +45,5 @@ script:
 
 notifications:
   email:
-    on_success: change
-    on_failure: change
+  on_success: change
+  on_failure: change
