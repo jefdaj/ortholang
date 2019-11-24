@@ -61,7 +61,7 @@ in rec {
   shortcut-blastdb       = mkModule ./ShortCut/Modules/BlastDB       [ myBlast blastdbget ] "";
   shortcut-crbblast      = mkModule ./ShortCut/Modules/CRBBlast      [ crb-blast ] "";
   shortcut-diamond       = mkModule ./ShortCut/Modules/Diamond       [ diamond ] "";
-  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ hmmer ] "";
+  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
   shortcut-mmseqs        = mkModule ./ShortCut/Modules/MMSeqs        [ mmseqs2 ] "";
   shortcut-muscle        = mkModule ./ShortCut/Modules/Muscle        [ muscle ] "";
   shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";
