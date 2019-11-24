@@ -20,8 +20,8 @@ in haskell.lib.overrideCabal shortcut (drv: {
     export LANGUAGE=en_US.UTF-8
     # export TASTY_HIDE_SUCCESSES=True
   '' ++
-  (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else '' \
+  (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else ''
     export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-  '';
+  '');
 
 })
