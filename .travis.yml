@@ -18,9 +18,9 @@ matrix:
     dist: xenial
     # env: NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/e19054ab3cd5b7cc9a01d0efc71c8fe310541065.tar.gz
     env: NIX_PATH=nixpkgs=channel:nixos-19.03
-  - os: osx
-    osx_image: xcode10.1
-    env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
+  # - os: osx
+  # osx_image: xcode10.1
+  # env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
 
 git:
   # quiet: true
