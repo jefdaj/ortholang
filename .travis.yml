@@ -1,7 +1,6 @@
 language: nix
 nix: 2.0.4
 
-
 cache:
   directories:
     - $HOME/.ghc
