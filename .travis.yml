@@ -1,6 +1,7 @@
 language: nix
 nix: 2.0.4
 
+# see: https://github.com/ChrisPenner/haskell-stack-travis-ci/blob/master/.travis.yml
 cache:
   directories:
     - $HOME/.ghc
@@ -11,9 +12,9 @@ cache:
 matrix:
   fast_finish: true
   include:
-  # - os: linux
-  #   dist: xenial
-  #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
+  - os: linux
+    dist: xenial
+    env: NIX_PATH=nixpkgs=channel:nixos-19.03
   - os: osx
     osx_image: xcode10.1
     env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
@@ -32,13 +33,14 @@ branches:
   - /^feature-.*$/
   - /^hotfix-.*$/
 
+# see: https://github.com/cachix/cachix/issues/228
 before_script:
-- echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf
-- sudo launchctl kickstart -k system/org.nixos.nix-daemon || true
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then; sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - cachix use jefdaj || sudo cachix use jefdaj
+  - cachix use jefdaj
   - ./test.sh || (cat /tmp/shortcut.log; exit 1)
 
 notifications:
