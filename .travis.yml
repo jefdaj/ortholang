@@ -34,10 +34,8 @@ branches:
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - if [ "$TRAVIS_OS_NAME"  = "osx" ]; then sudo cachix use jefdaj; fi
-  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then cachix use jefdaj; fi
-  - ./test.sh
-  - if [ $? != 0 ]]; then cat /tmp/shortcut.log; fi
+  - cachix use jefdaj || sudo cachix use jefdaj
+  - ./test.sh || cat /tmp/shortcut.log
 
 notifications:
   email:
