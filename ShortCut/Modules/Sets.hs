@@ -13,8 +13,8 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Development.Shake.FilePath  ((</>))
 import ShortCut.Core.Compile.Basic (rExpr, typeError, debugRules)
-import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, debugA, hashContent)
--- import ShortCut.Core.Debug         (debugRules, debugA)
+import ShortCut.Core.Actions       (readStrings, readPaths, writeStrings, traceA, hashContent)
+-- import ShortCut.Core.Debug         (debugRules, traceA)
 import ShortCut.Core.Paths         (exprPath, toCutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 
@@ -103,12 +103,12 @@ rSetFold _ _ _ = fail "bad argument to rSetFold"
 aSetFold :: CutConfig -> Locks -> ([Set String] -> Set String)
          -> CutType -> FilePath -> FilePath -> Action ()
 aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
-  setPaths  <- readPaths cfg ref setsPath
+  setPaths  <- readPaths ref setsPath
   setElems  <- mapM (readStrings etype cfg ref) (map (fromCutPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   let sets = map fromList setElems'
       oLst = toList $ fn sets
-      oPath' = debugA cfg "aSetFold" oPath [oPath, setsPath]
+      oPath' = traceA "aSetFold" oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
               else dedupByContent cfg ref oLst -- TODO remove?

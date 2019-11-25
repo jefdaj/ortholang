@@ -27,7 +27,7 @@ import Development.Shake hiding (doesFileExist)
 import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
 import Data.List                        (nub)
-import Data.IORef                       (IORef, newIORef, atomicModifyIORef)
+import Data.IORef                       (IORef, newIORef, atomicModifyIORef')
 import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
 import System.Directory           (createDirectoryIfMissing, doesFileExist)
@@ -41,14 +41,15 @@ type Locks = (Resource, IORef (Map FilePath RWLock))
  - here. For now, just change the code to enable.
  - TODO think of something better
  -}
-debugLock :: String -> IO ()
--- debugLock = putStrLn
-debugLock = const $ return ()
+debugAock :: String -> IO ()
+-- debugAock = putStrLn
+debugAock = const $ return ()
 
-debugLock' :: String -> Action ()
-debugLock' = liftIO . debugLock
+debugAock' :: String -> Action ()
+debugAock' = liftIO . debugAock
 
 initLocks :: IO Locks
+{-# NOINLINE initLocks #-}
 initLocks = do
   -- only approximately related to the number of files open,
   -- but keeps them in check at least
@@ -60,8 +61,8 @@ initLocks = do
 getLock :: Locks -> FilePath -> IO RWLock
 getLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
-  debugLock $ "getLock getting lock for '" ++ path ++ "'"
-  atomicModifyIORef ref $ \c -> case Map.lookup path c of
+  debugAock $ "getLock getting lock for '" ++ path ++ "'"
+  atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path l c, l)
     Just l' -> (c, l')
 
@@ -69,25 +70,25 @@ withReadLock :: Locks -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
   l <- liftIO $ getLock ref path
   bracket_
-    (debugLock ("withReadLock acquiring '" ++ path ++ "'") >> RWLock.acquireRead l)
-    (debugLock ("withReadLock releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
+    (debugAock ("withReadLock acquiring '" ++ path ++ "'") >> RWLock.acquireRead l)
+    (debugAock ("withReadLock releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
     ioFn
 
 withReadLock' :: Locks -> FilePath -> Action a -> Action a
 withReadLock' ref path actFn = do
   l <- liftIO $ getLock ref path
-  debugLock' $ "withReadLock' acquiring '" ++ path ++ "'"
+  debugAock' $ "withReadLock' acquiring '" ++ path ++ "'"
   (liftIO (RWLock.acquireRead l) >> actFn)
     `actionFinally`
-    (debugLock ("withReadLock' releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
+    (debugAock ("withReadLock' releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
 
 withReadLocks' :: Locks -> [FilePath] -> Action a -> Action a
 withReadLocks' ref paths actFn = do
   locks <- liftIO $ mapM (getLock ref) (nub paths)
-  debugLock' $ "withReadLocks' acquiring " ++ show paths
+  debugAock' $ "withReadLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireRead locks) >> actFn)
     `actionFinally`
-    (debugLock ("withReadLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseRead locks)
+    (debugAock ("withReadLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseRead locks)
 
 -- TODO should this be strict too, even though just need one char?
 isActuallyEmpty :: Locks -> FilePath -> IO Bool
@@ -102,7 +103,7 @@ isActuallyEmpty ref path = do
  -}
 assertNonEmptyFile :: Locks -> FilePath -> IO ()
 assertNonEmptyFile ref path = do
-  -- debugL cfg $ "assertNonNull checking '" ++ path ++ "'"
+  -- debugA $ "assertNonNull checking '" ++ path ++ "'"
   empty <- isActuallyEmpty ref path
   when empty $ error $ "script wrote actual empty file: '" ++ path ++ "'"
 
@@ -111,8 +112,8 @@ withWriteLock ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   l <- liftIO $ getLock ref path
   res <- bracket_
-    (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
-    (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
+    (debugAock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
+    (debugAock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
     ioFn
   assertNonEmptyFile ref path
   return res
@@ -121,19 +122,19 @@ withWriteLocks' :: Locks -> [FilePath] -> Action a -> Action a
 withWriteLocks' ref paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
   locks <- liftIO $ mapM (getLock ref) (nub paths)
-  debugLock' $ "withWriteLocks' acquiring " ++ show paths
+  debugAock' $ "withWriteLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
     `actionFinally`
-    (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
+    (debugAock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
 withWriteLock' :: Locks -> FilePath -> Action a -> Action a
 withWriteLock' ref path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path
-  debugLock' $ "withWriteLock' acquiring '" ++ path ++ "'"
+  debugAock' $ "withWriteLock' acquiring '" ++ path ++ "'"
   l <- liftIO $ getLock ref path
   (liftIO (RWLock.acquireWrite l) >> actFn)
     `actionFinally`
-    (debugLock ("withWriteLock' releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
+    (debugAock ("withWriteLock' releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
 
 {- Not sure why, but there's a problem with using Shake's version of
  - doesFileExist here! It will work, but only if I add a short delay (at least

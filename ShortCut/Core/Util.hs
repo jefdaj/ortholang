@@ -1,7 +1,13 @@
 module ShortCut.Core.Util
 
+  -- debugging
+  ( trace
+  , traceShow
+  , debug
+  , time
+
   -- read files
-  ( readFileStrict
+  , readFileStrict
   , readFileLazy
 
   -- hashing
@@ -32,14 +38,16 @@ module ShortCut.Core.Util
   where
 
 import Development.Shake
+
 import qualified System.IO.Strict as Strict
+import qualified Data.ByteString.Char8 as C8
+import qualified Data.Text as T
 
 import Data.Monoid ((<>))
 import Control.Monad          (unless)
 import Control.Exception.Safe (MonadCatch, catch, throwM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
-import Data.ByteString.Char8  (pack)
 import Data.Char              (isSpace)
 import Data.List              (dropWhileEnd, isPrefixOf, isInfixOf, splitAt)
 import Data.List.Utils        (replace)
@@ -58,9 +66,24 @@ import System.FilePath.Glob   (glob)
 -- import Data.Time.Format    (formatTime, defaultTimeLocale)
 import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
 
+import Control.Logging (traceSL, debugS, timedDebugEndS, traceShowSL)
+
 ---------------
 -- debugging --
 ---------------
+
+trace :: String -> String -> a -> a
+trace suffix msg = traceSL (T.pack $ "shortcut." ++ suffix) (T.pack msg)
+
+traceShow :: Show a => String -> a -> a
+traceShow suffix = traceShowSL (T.pack $ "shortcut." ++ suffix)
+
+debug :: String -> String -> IO ()
+debug suffix msg = debugS (T.pack $ "shortcut." ++ suffix) (T.pack msg)
+
+time :: String -> String -> IO a -> IO a
+time suffix msg act = timedDebugEndS (T.pack $ "shortcut." ++ suffix)
+                                     (T.pack msg) act
 
 -- TODO put this in Util
 -- TODO this works, but isn't used yet
@@ -71,8 +94,8 @@ import ShortCut.Core.Locks    (Locks, withReadLock, withReadLock')
 
 -- TODO should this go in Util too?
 -- TODO remove if you can figure out a way to put stamps in regular debug
--- debugIO :: CutConfig -> String -> a -> IO a
--- debugIO cfg msg rtn = do
+-- debugA :: CutConfig -> String -> a -> IO a
+-- debugA msg rtn = do
 --   stamp <- getTimeStamp
 --   return $ debug cfg (stamp ++ " " ++ msg) rtn
 
@@ -118,7 +141,7 @@ digestLength = 10
 digest :: (Show a) => a -> String
 digest val = take digestLength $ show (hash asBytes :: Digest MD5)
   where
-    asBytes = (pack . show) val
+    asBytes = (C8.pack . show) val
 
 -----------
 -- paths --

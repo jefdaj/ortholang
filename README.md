@@ -1,6 +1,7 @@
 ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
+
 ShortCut is a scripting language meant to simplify a very common task in
 bioinformatics: making a list of candidate genes likely to be related to a
 biological process of interest. These are sometimes called phylogenomic cuts.
@@ -15,6 +16,60 @@ later.
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and a list of available functions.
 
+Test Status
+-----------
+
+These are the only important tests if you want to try the current release:
+
+[![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
+![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
+<!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
+
+But you may also be interested in progress on an upcoming feature:
+
+![cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=cachix)
+![darwin](https://img.shields.io/travis/jefdaj/shortcut/feature-darwin?label=darwin)
+![installscript](https://img.shields.io/travis/jefdaj/shortcut/feature-installscript?label=installscript)
+![nostack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-nostack2nix?label=nostack2nix)
+![stack2nix](https://img.shields.io/travis/jefdaj/shortcut/feature-stack2nix?label=stack2nix)
+![tmpfiletests](https://img.shields.io/travis/jefdaj/shortcut/feature-tmpfiletests?label=tmpfiletests)
+![travisbadges](https://img.shields.io/travis/jefdaj/shortcut/feature-travisbadges?label=travisbadges)
+
+Or in the somewhat-separate development of a particular ShortCut "module":
+
+<!-- TODO core branch too for the haskell part -->
+![allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=allvsall)
+![biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=biomartr)
+![blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=blast)
+![blastdb](https://img.shields.io/travis/jefdaj/shortcut/module-blastdb?label=blastdb)
+![blasthits](https://img.shields.io/travis/jefdaj/shortcut/module-blasthits?label=blasthits)
+![blastrbh](https://img.shields.io/travis/jefdaj/shortcut/module-blastrbh?label=blastrbh)
+![busco](https://img.shields.io/travis/jefdaj/shortcut/module-busco?label=busco)
+![cheat](https://img.shields.io/travis/jefdaj/shortcut/module-cheat?label=cheat)
+![crbblast](https://img.shields.io/travis/jefdaj/shortcut/module-crbblast?label=crbblast)
+![diamond](https://img.shields.io/travis/jefdaj/shortcut/module-diamond?label=diamond)
+![greencut](https://img.shields.io/travis/jefdaj/shortcut/module-greencut?label=greencut)
+![hmmer](https://img.shields.io/travis/jefdaj/shortcut/module-hmmer?label=hmmer)
+![listlike](https://img.shields.io/travis/jefdaj/shortcut/module-listlike?label=listlike)
+![load](https://img.shields.io/travis/jefdaj/shortcut/module-load?label=load)
+![math](https://img.shields.io/travis/jefdaj/shortcut/module-math?label=math)
+![mmseqs](https://img.shields.io/travis/jefdaj/shortcut/module-mmseqs?label=mmseqs)
+![muscle](https://img.shields.io/travis/jefdaj/shortcut/module-muscle?label=muscle)
+![orthofinder](https://img.shields.io/travis/jefdaj/shortcut/module-orthofinder?label=orthofinder)
+![orthogroups](https://img.shields.io/travis/jefdaj/shortcut/module-orthogroups?label=orthogroups)
+![permute](https://img.shields.io/travis/jefdaj/shortcut/module-permute?label=permute)
+![plots](https://img.shields.io/travis/jefdaj/shortcut/module-plots?label=plots)
+![psiblast](https://img.shields.io/travis/jefdaj/shortcut/module-psiblast?label=psiblast)
+![range](https://img.shields.io/travis/jefdaj/shortcut/module-range?label=range)
+![sample](https://img.shields.io/travis/jefdaj/shortcut/module-sample?label=sample)
+![scores](https://img.shields.io/travis/jefdaj/shortcut/module-scores?label=scores)
+![seqio](https://img.shields.io/travis/jefdaj/shortcut/module-seqio?label=seqio)
+![sets](https://img.shields.io/travis/jefdaj/shortcut/module-sets?label=sets)
+![setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=setstable)
+![sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=sonicparanoid)
+![summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=summarize)
+
+<!-- Green means tests are passing for both the Mac and Linux builds on [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches). -->
 
 Quick Start
 -----------

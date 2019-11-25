@@ -1,10 +1,11 @@
 with import ./nixpkgs;
 let
-  mkModule = src: runDepends: extraWraps:
+  mkModule = src: extraRunDeps: extraWraps:
     let name = "Shortcut-" + baseNameOf src;
+        runDeps = [ coreutils ] ++ extraRunDeps;
     in stdenv.mkDerivation {
-      inherit src name runDepends extraWraps;
-      buildInputs = [ makeWrapper ] ++ runDepends;
+      inherit src name extraRunDeps extraWraps;
+      buildInputs = [ makeWrapper ] ++ extraRunDeps;
       builder = writeScript "builder.sh" ''
         #!/usr/bin/env bash
         source ${stdenv}/setup
@@ -14,13 +15,13 @@ let
           dest="$out/bin/$base"
           substituteAll $script $dest
           chmod +x $dest
-          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDepends}" ${extraWraps}
+          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps}
         done
       '';
     };
 
 in rec {
-  myBlast = psiblast-exb; # for swapping it out if needed
+  myBlast = ncbi-blast; # for swapping it out if needed
 
   # TODO remove these in favor of buildPythonPath!
   myPy2Wrap = "--prefix PYTHONPATH : \"$out/bin:${myPy2.python.sitePackages}\"";
@@ -60,7 +61,7 @@ in rec {
   shortcut-blastdb       = mkModule ./ShortCut/Modules/BlastDB       [ myBlast blastdbget ] "";
   shortcut-crbblast      = mkModule ./ShortCut/Modules/CRBBlast      [ crb-blast ] "";
   shortcut-diamond       = mkModule ./ShortCut/Modules/Diamond       [ diamond ] "";
-  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ hmmer ] "";
+  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
   shortcut-mmseqs        = mkModule ./ShortCut/Modules/MMSeqs        [ mmseqs2 ] "";
   shortcut-muscle        = mkModule ./ShortCut/Modules/Muscle        [ muscle ] "";
   shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";

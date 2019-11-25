@@ -7,7 +7,7 @@ import ShortCut.Modules.SeqIO (faa)
 import ShortCut.Modules.Muscle (aln)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
 import ShortCut.Core.Paths (CutPath, fromCutPath)
-import ShortCut.Core.Actions (debugA, runCmd, CmdDesc(..), readLit)
+import ShortCut.Core.Actions (traceA, runCmd, CmdDesc(..), readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
 -- import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
@@ -99,7 +99,7 @@ hmmsearchEach = let name = "hmmsearch_each" in CutFunction
 --   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
 --   where
 --     out'  = fromCutPath cfg out
---     out'' = debugA cfg "aHmmbuild" out' [out', fa']
+--     out'' = traceA "aHmmbuild" out' [out', fa']
 --     fa'   = fromCutPath cfg fa
 -- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
@@ -133,7 +133,7 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
     }
   where
     out'  = fromCutPath cfg out
-    out'' = debugA cfg "aHmmsearch" out' [out', fa']
+    out'' = traceA "aHmmsearch" out' [out', fa']
     e'    = fromCutPath cfg e
     hm'   = fromCutPath cfg hm
     fa'   = fromCutPath cfg fa
@@ -161,7 +161,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
 -- TODO how to integrate the script since it needs the colnum?
 aExtractHmm :: Int -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aExtractHmm n cfg ref _ [outPath, tsvPath] = do
-  -- lits <- readLits cfg ref tsvPath'
+  -- lits <- readLits ref tsvPath'
   -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
   --     lits''  = if uniq then sort $ nub lits' else lits'
   --     lits''' = map (\l -> (words l) !! (n - 1)) lits''
@@ -182,6 +182,6 @@ aExtractHmm n cfg ref _ [outPath, tsvPath] = do
     }
   where
     outPath'  = fromCutPath cfg outPath
-    outPath'' = debugA cfg "aExtractHmm" outPath' [show n, outPath', tsvPath']
+    outPath'' = traceA "aExtractHmm" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
 aExtractHmm _ _ _ _ _ = fail "bad arguments to aExtractHmm"

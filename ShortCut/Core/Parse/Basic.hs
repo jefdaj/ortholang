@@ -1,31 +1,51 @@
 module ShortCut.Core.Parse.Basic where
 
+-- TODO hold up, is Logging missing a bunch of NOINLINE statements?
+
 import ShortCut.Core.Types
+import ShortCut.Core.Util (trace)
 -- import ShortCut.Core.Pretty (Pretty, pPrint, render)
 
 import Control.Applicative    ((<|>), many)
-import Control.Monad          (void)
+import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
-import Debug.Trace            (traceM)
-import Text.Parsec            (getState, (<?>), try, parserTraced)
+import Text.Parsec            (getState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
-import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe)
+import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
+import Text.Parsec.Prim (ParsecT, Stream)
 
+-- based on Text.Parsec.Combinator.parserTrace, but:
+--   uses the logging module
+--   shortens long strings to fit on one line
+parserTrace' :: (Show t, Stream s m t) => String -> ParsecT s u m ()
+parserTrace' s = pt <|> return ()
+    where
+        n = 30
+        pt = try $ do
+           x <- try $ many1 anyToken
+           let x' = let sx = show x in if length sx > n then take n sx ++ "\"..." else sx
+           -- TODO why does this output to stderr no matter what??
+           --      the extra messages don't obey the filter either
+           trace "core.parser" (s ++ ": " ++ x') $ try $ eof
+           fail x'
+
+-- based on Text.Parsec.Combinator.parserTraced, but:
+--   uses the logging module
+--   shortens long strings to fit on one line
+parserTraced' :: (Stream s m t, Show t) => String -> ParsecT s u m b -> ParsecT s u m b
+parserTraced' s p = do
+  parserTrace' s
+  -- TODO why does this output to stderr no matter what??
+  --      the extra messages don't obey the filter either
+  p <|> trace "core.parser" (s ++ " backtracked") (fail s)
+  -- p
+
+-- trace for a parser
+-- TODO go back to removing it when not in debug mode for speed, even though order might change?
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
-  (_, cfg, _, _) <- getState
-  if cfgDebug cfg
-    then parserTraced name pFn
-    else pFn
-
--- TODO remove?
-debugParseM :: String -> ParseM ()
-debugParseM msg = do
-  (_, cfg, _, _) <- getState
-  if cfgDebug cfg
-    then traceM msg
-    else return ()
+  parserTraced' name pFn
 
 -- There's a convention in parsers that each one should consume whitespace
 -- after itself (handled by this function), and you only skip leading

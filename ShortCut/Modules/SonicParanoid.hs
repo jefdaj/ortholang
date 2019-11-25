@@ -10,7 +10,7 @@ import ShortCut.Modules.SeqIO      (fna, faa)
 import ShortCut.Core.Compile.Basic (defaultTypeCheck, rSimple)
 import System.FilePath             ((</>), takeBaseName)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath)
-import ShortCut.Core.Actions       (debugA, debugNeed, readPaths, symlink, runCmd, CmdDesc(..))
+import ShortCut.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..))
 import System.Directory            (createDirectoryIfMissing)
 import ShortCut.Core.Util          (digest, unlessExists)
 import ShortCut.Core.Locks         (withWriteLock')
@@ -71,15 +71,15 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
       faListPath' = fromCutPath cfg faListPath
       out'        = fromCutPath cfg out
-      statsPath''    = debugA cfg "aSonicParanoid" out' [out', statsPath', faListPath']
+      statsPath''    = traceA "aSonicParanoid" out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 
   withWriteLock' ref tmpDir $ unlessExists statsPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
-    faPaths <- readPaths cfg ref faListPath'
+    faPaths <- readPaths ref faListPath'
     let faPaths' = map (fromCutPath cfg) faPaths
-    debugNeed cfg "aSonicParanoid" faPaths'
+    need' "shortcut.moodules.sonicparanoid.aSonicParanoid" faPaths'
     let faLinks = map (\p -> toCutPath cfg $ inDir </> (takeBaseName $ fromCutPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
@@ -113,7 +113,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     -- putNormal $ unlines [o, e] -- TODO remove
 
   -- TODO does this fix the "does not exist" issue?
-  -- debugTrackWrite cfg [statsPath']
+  -- trackWrite' cfg [statsPath']
   symlink cfg ref out statsPath
 
 aSonicParanoid _ _ _ args = error $ "bad argument to aSonicParanoid: " ++ show args

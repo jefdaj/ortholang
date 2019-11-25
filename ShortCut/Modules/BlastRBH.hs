@@ -5,8 +5,8 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck, aSimpleScriptNoFix)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, absolutizePaths)
--- import ShortCut.Core.Debug         (debugA)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), traceA, absolutizePaths)
+-- import ShortCut.Core.Debug         (traceA)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, cacheDir)
 import ShortCut.Core.Util          (digest)
 import ShortCut.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
@@ -141,7 +141,7 @@ aReciprocalBest cfg ref _ [out, left, right] = do
     out'   = fromCutPath cfg out
     left'  = fromCutPath cfg left
     right' = fromCutPath cfg right
-    out''  = debugA cfg "aReciprocalBest" out' [out', left', right']
+    out''  = traceA "aReciprocalBest" out' [out', left', right']
 aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
 
 --------------------------

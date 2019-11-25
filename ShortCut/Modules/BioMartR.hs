@@ -23,7 +23,7 @@ module ShortCut.Modules.BioMartR where
 -- import ShortCut.Modules.Blast (gom) -- TODO fix that/deprecate
 import ShortCut.Core.Types
 import Development.Shake
-import ShortCut.Core.Actions (readLits, writeLits, debugA, debugNeed, runCmd, CmdDesc(..))
+import ShortCut.Core.Actions (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
 import ShortCut.Core.Paths  (exprPath, CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Compile.Basic (rExpr, defaultTypeCheck)
 import Control.Monad (void)
@@ -36,7 +36,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
--- import ShortCut.Core.Debug   (debugA)
+-- import ShortCut.Core.Debug   (traceA)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode(..))
 
@@ -198,7 +198,7 @@ rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
 aParseSearches :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aParseSearches cfg ref _ sList out = do
-  parses <- (fmap . map) readSearch (readLits cfg ref sList')
+  parses <- (fmap . map) readSearch (readLits ref sList')
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
@@ -207,7 +207,7 @@ aParseSearches cfg ref _ sList out = do
   where
     sList' = fromCutPath cfg sList
     out'   = fromCutPath cfg out
-    out''  = debugA cfg "aParseSearches" out' [sList', out']
+    out''  = traceA "aParseSearches" out' [sList', out']
 
 ------------------
 -- run biomartr --
@@ -240,7 +240,7 @@ rBioMartR _ _ _ = error "bad rBioMartR call"
 aBioMartR :: CutConfig -> Locks -> HashedIDsRef
           -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
-  debugNeed cfg "aBioMartR" [bmFn', sTable']
+  need' "shortcut.modules.biomartr.aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
   -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
@@ -263,4 +263,4 @@ aBioMartR cfg ref _ out bmFn bmTmp sTable = do
     bmFn'   = fromCutPath cfg bmFn
     bmTmp'  = fromCutPath cfg bmTmp
     sTable' = fromCutPath cfg sTable
-    out'' = debugA cfg "aBioMartR" out' [out', bmFn', bmTmp', sTable']
+    out'' = traceA "aBioMartR" out' [out', bmFn', bmTmp', sTable']

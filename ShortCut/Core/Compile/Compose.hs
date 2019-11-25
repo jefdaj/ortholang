@@ -10,7 +10,6 @@ module ShortCut.Core.Compile.Compose
 import ShortCut.Core.Types
 import ShortCut.Core.Paths (exprPath, fromCutPath)
 -- import ShortCut.Core.Compile.Basic
--- import Debug.Trace
 
 --------------
 -- compose1 --

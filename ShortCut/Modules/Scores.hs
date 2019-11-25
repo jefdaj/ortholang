@@ -13,13 +13,16 @@ import Development.Shake
 import ShortCut.Core.Types
 
 import Control.Monad (when)
-import ShortCut.Core.Actions (readStrings, readLits, writeLits, debugL)
+import ShortCut.Core.Actions (readStrings, readLits, writeLits, debugA)
 import ShortCut.Core.Compile.Basic (rExpr, debugRules)
 import ShortCut.Core.Paths         (CutPath, toCutPath, fromCutPath, exprPath)
 
 -- import ShortCut.Core.Compile.Map  (rMap)
 import ShortCut.Modules.BlastHits (aCutCol)
 import ShortCut.Core.Compile.Basic (rSimple)
+
+debug :: String -> String -> Action ()
+debug name = debugA ("shortcut.modules.scores." ++ name)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -39,16 +42,18 @@ cutModule = CutModule
 
 aScores :: CutConfig -> Locks -> CutPath -> CutPath -> CutType -> CutPath -> Action ()
 aScores cfg ref scoresPath othersPath othersType outPath = do
-  scores <- readLits cfg ref $ fromCutPath cfg scoresPath
+  scores <- readLits ref $ fromCutPath cfg scoresPath
   others <- readStrings othersType cfg ref $ fromCutPath cfg othersPath
   let out' = fromCutPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others
   when (length scores /= length others) $ error $ unlines
      ["mismatched scores and others in aScores:", show scores, show others]
-  debugL cfg $ "aScores scores': " ++ show scores
-  debugL cfg $ "aScores others': " ++ show others
-  debugL cfg $ "aScores rows: "    ++ show rows
+  debug' $ "aScores scores': " ++ show scores
+  debug' $ "aScores others': " ++ show others
+  debug' $ "aScores rows: "    ++ show rows
   writeLits cfg ref out' rows
+  where
+    debug' = debug "aScores"
 
 -----------------------------------------------------
 -- replace_each and score the inputs by the outputs --

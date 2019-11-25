@@ -6,7 +6,7 @@ import Development.Shake
 import ShortCut.Core.Types
 import ShortCut.Core.Compile.Basic        (rExpr, defaultTypeCheck, mkLoad,
                                     mkLoadList, )
-import ShortCut.Core.Actions (readLit, writeLits, debugA)
+import ShortCut.Core.Actions (readLit, writeLits, traceA)
 import ShortCut.Core.Paths (exprPath, CutPath, toCutPath, fromCutPath)
 import Data.List                  (sort)
 import Data.String.Utils          (strip)
@@ -14,7 +14,7 @@ import ShortCut.Core.Compile.Compose (compose1)
 
 import System.FilePath.Glob       (glob)
 import System.Directory (makeRelativeToCurrentDirectory)
--- import ShortCut.Core.Debug        (debugA)
+-- import ShortCut.Core.Debug        (traceA)
 
 cutModule :: CutModule
 cutModule = CutModule
@@ -80,7 +80,7 @@ aGlobFiles cfg ref outPath path = do
   where
     out'  = fromCutPath cfg outPath
     path' = fromCutPath cfg path
-    out'' = debugA cfg "aGlobFiles" out' [out', path']
+    out'' = traceA "aGlobFiles" out' [out', path']
 
 ------------
 -- load_* --

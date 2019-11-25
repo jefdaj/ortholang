@@ -18,7 +18,7 @@ import ShortCut.Core.Types
 import Data.Scientific             (formatScientific, FPFormat(..))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, debugA, symlink)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, traceA, symlink)
 import ShortCut.Core.Paths         (toCutPath, fromCutPath, CutPath)
 import ShortCut.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import ShortCut.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
@@ -92,7 +92,7 @@ rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 aMkBlastFromDb :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
-  prefix <- readPath cfg ref p'
+  prefix <- readPath ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
@@ -137,7 +137,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
       --        , "--will-cite"
       --        ]
       -- args'' = [q', "|"] ++ pCmd ++ [escape $ unwords (bCmd':args'), ">", o'']
-  -- debugL cfg $ "args'': " ++ show args''
+  -- debugModule $ "args'': " ++ show args''
   -- TODO full path to prefix'?
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   runCmd cfg ref $ CmdDesc
@@ -159,7 +159,7 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     q'  = fromCutPath cfg q
     p'  = fromCutPath cfg p
     e'  = fromCutPath cfg e
-    o'' = debugA cfg "aMkBlastFromDb" o' [bCmd, e', o', q', p']
+    o'' = traceA "aMkBlastFromDb" o' [bCmd, e', o', q', p']
 aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------

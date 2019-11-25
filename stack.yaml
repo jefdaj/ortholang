@@ -5,15 +5,20 @@ nix:
 extra-package-dbs: []
 packages:
 - .
+- logging
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
 system-ghc: true
 resolver: lts-13.15
 extra-deps:
   - posix-escape-0.1
+    # - logging-3.0.5
+  - path-io-1.6.0
+  # - docopt-0.7.0.5
   #- shake-0.17.5
 
 # TODO are the rtsopts a problem? see if removing fixes any fails
 ghc-options:
-  "$everything": -threaded -rtsopts -O2
-  "ShortCut"   : -threaded -rtsopts -O2 -Wall -Wno-orphans "-with-rtsopts=-N"
+        # "fast-logger": -O0
+        # "logging": -O0
+        # "ShortCut": -O0

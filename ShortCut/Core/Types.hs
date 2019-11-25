@@ -69,8 +69,6 @@ module ShortCut.Core.Types
   )
   where
 
--- import Debug.Trace (trace, traceShow)
-
 -- import Prelude hiding (print)
 import qualified Data.Map as M
 import Text.Parsec (Parsec)
@@ -85,8 +83,6 @@ import Data.List                      (nub, find)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
-
-import Debug.Trace
 
 newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
 
@@ -348,7 +344,7 @@ data CutConfig = CutConfig
   , cfgInteractive :: Bool
   , cfgTmpDir  :: FilePath
   , cfgWorkDir :: FilePath
-  , cfgDebug   :: Bool
+  , cfgDebug   :: Maybe String
   , cfgModules :: [CutModule]
   , cfgWrapper :: Maybe FilePath
   , cfgOutFile :: Maybe FilePath
@@ -357,6 +353,7 @@ data CutConfig = CutConfig
   , cfgWidth   :: Maybe Int -- for testing
   , cfgSecure  :: Bool
   , cfgParLock :: Resource
+  , cfgOS      :: String
   }
   deriving Show
 
@@ -386,14 +383,14 @@ listFunctions cfg = concat $ map mFunctions $ cfgModules cfg
 
 -- Now with guard against accidentally including parts of prefix fn names!
 operatorChars :: CutConfig -> [Char]
-operatorChars cfg = if cfgDebug cfg then chars' else chars
+operatorChars cfg = chars
   where
     bops    = filter (\f -> fFixity f == Infix) $ listFunctions cfg
     bChar n = if length n == 1
                 then (headOrDie "failed to parse bChar in operatorChars") n
                 else error $ "bad bop name: " ++ n
     chars   = map (bChar . fName) bops
-    chars'  = trace ("operatorChars: '" ++ chars ++ "'") chars
+    -- chars'  = trace ("operatorChars: '" ++ chars ++ "'") chars
 
 -----------------
 -- Parse monad --

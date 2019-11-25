@@ -19,7 +19,6 @@ module ShortCut.Core.Sanitize
 -- TODO would having it be a set from the beginning be faster still?
 -- TODO would doing it in a separate script be better so it can run on other nodes?
 
--- import Debug.Trace
 import Prelude hiding (readList)
 import qualified Data.DList as D
 import qualified Data.Map   as M
@@ -30,7 +29,7 @@ import ShortCut.Core.Types
 
 import ShortCut.Core.Util    (digest, digestLength, headOrDie)
 import ShortCut.Core.Locks   (withWriteLock')
-import ShortCut.Core.Actions (debugTrackWrite, readFileStrict', readList, writeCachedLines)
+import ShortCut.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines)
 import ShortCut.Core.Paths   (fromCutPath)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes)
@@ -63,14 +62,14 @@ hashIDsFile cfg ref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
-  txt <- readFileStrict' cfg ref inPath'
+  txt <- readFileStrict' ref inPath'
   let (fasta', ids) = hashIDsTxt txt
       (CutPath k) = outPath
       v = takeFileName inPath'
       -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
       ids' = M.insert k v ids
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
-  debugTrackWrite cfg [outPath']
+  trackWrite' cfg [outPath']
   return ids'
 
 writeHashedIDs :: CutConfig -> Locks -> CutPath -> HashedIDs -> Action ()
@@ -81,7 +80,7 @@ writeHashedIDs cfg ref path ids = do
     $ unlines
     $ map toLine
     $ M.toList ids
-  debugTrackWrite cfg [path']
+  trackWrite' cfg [path']
   where
     path' = fromCutPath cfg path
     toLine (h, i) = h ++ "\t" ++ i
@@ -125,20 +124,20 @@ unhashIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> FilePath -> Ac
 unhashIDsFile cfg ref idref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
-  txt <- readFileStrict' cfg ref inPath'
+  txt <- readFileStrict' ref inPath'
   -- let txt' = unhashIDs ids txt
   ids <- liftIO $ readIORef idref
   let txt' = unhashIDs False ids txt
   -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
   withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
-  debugTrackWrite cfg [outPath]
+  trackWrite' cfg [outPath]
 
 -- TODO should this be IO or Action?
 readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedIDs
 readHashedIDs cfg ref path = do
   let path' = fromCutPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
-  txt <- readFileStrict' cfg ref path'
+  txt <- readFileStrict' ref path'
   let splitFn l = let ws = split "\t" l
                   in if length ws < 2
                        then error ("failed to split '" ++ l ++ "'")
@@ -156,7 +155,7 @@ lookupID ids s = map fst $ filter (\(k,v) -> s == k || s `isPrefixOf` v) (M.toLi
 -- TODO move to Actions? causes an import cycle so far
 lookupIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 lookupIDsFile cfg ref ids inPath outPath = do
-  partialIDs <- readList cfg ref $ fromCutPath cfg inPath
+  partialIDs <- readList ref $ fromCutPath cfg inPath
   ids' <- liftIO $ readIORef ids
   let lookupFn v = case lookupID ids' v of
                      [] -> liftIO (putStrLn ("warning: no ID found for '" ++ v ++ "'. these are the ids: " ++ show ids')) >> return []

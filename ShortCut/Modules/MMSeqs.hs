@@ -1,8 +1,6 @@
 module ShortCut.Modules.MMSeqs
   where
 
--- import Debug.Trace (trace, traceShow)
-
 -- TODO test failures are because createdb sometimes doesn't create the final .mmseqsdb file, but is otherwise OK?
 
 -- TODO keep intermediate files at least until we can line them up with sonicparanoid if needed
@@ -58,7 +56,7 @@ mms = CutType
       path' <- fmap (-<.> "lookup") $ resolveSymlinks Nothing path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
-      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' cfg ref path'
+      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' ref path'
       let desc = "MMSeqs2 database (" ++ n ++ " sequences)" -- TODO include a hash?
       return desc
   }
@@ -95,7 +93,7 @@ rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fas]) = do
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
-      faPaths <- readPaths cfg ref fasPath
+      faPaths <- readPaths ref fasPath
       let faPaths' = map (fromCutPath cfg) faPaths
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?

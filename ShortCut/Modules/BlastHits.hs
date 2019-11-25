@@ -9,7 +9,7 @@ import ShortCut.Core.Types
 import System.FilePath             ((<.>))
 import ShortCut.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMap)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), debugA, writeCachedVersion, debugTrackWrite)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), traceA, writeCachedVersion, trackWrite')
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Modules.Blast      (bht)
 import ShortCut.Modules.CRBBlast   (crb)
@@ -112,7 +112,7 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath']
     }
-  debugTrackWrite cfg [tmpPath']
+  trackWrite' cfg [tmpPath']
   writeCachedVersion cfg ref outPath'' tmpPath'
 
   -- TODO remove this? why does it need to be here at all?
@@ -122,7 +122,7 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
 
   where
     outPath'  = fromCutPath cfg outPath
-    outPath'' = debugA cfg "aCutCol" outPath' [show n, outPath', tsvPath']
+    outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromCutPath cfg tsvPath
     tmpPath'  = outPath'' <.> "tmp" -- the non-deduped version
 aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
@@ -176,7 +176,7 @@ aFilterHits colname cfg ref _ [out, cutoff, hits] = do
     }
   where
     out'    = fromCutPath cfg out
-    out''   = debugA cfg "aFilterHits" out' [out', cutoff', hits']
+    out''   = traceA "aFilterHits" out' [out', cutoff', hits']
     cutoff' = fromCutPath cfg cutoff
     hits'   = fromCutPath cfg hits
 aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
@@ -229,6 +229,6 @@ aBestExtract cfg ref _ [out, hits] = do
     }
   where
     out'  = fromCutPath cfg out
-    out'' = debugA cfg "aBestExtract" out' [out', hits']
+    out'' = traceA "aBestExtract" out' [out', hits']
     hits' = fromCutPath cfg hits
 aBestExtract _ _ _ args = error $ "bad argument to aBestExtract: " ++ show args

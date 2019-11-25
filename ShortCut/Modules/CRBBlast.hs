@@ -7,11 +7,11 @@ import ShortCut.Core.Types
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import ShortCut.Core.Actions       (runCmd, CmdDesc(..), symlink, debugA, debugNeed)
+import ShortCut.Core.Actions       (runCmd, CmdDesc(..), symlink, traceA, need')
 import ShortCut.Core.Paths         (toCutPath)
 import ShortCut.Core.Compile.Basic (rSimpleTmp, defaultTypeCheck)
 import ShortCut.Core.Compile.Map  (rMapTmps)
--- import ShortCut.Core.Debug         (debugA)
+-- import ShortCut.Core.Debug         (traceA)
 import ShortCut.Core.Paths         (CutPath, fromCutPath)
 import ShortCut.Core.Util          (resolveSymlinks)
 import ShortCut.Modules.SeqIO      (faa, fna, fa)
@@ -37,7 +37,7 @@ cutModule = CutModule
 -- evalue - the blast evalue
 -- bitscore - the blast bitscore
 -- qstart..qend - the coordinates of the alignment in the query from start to end
--- tstart..tend - the coordinates of the alignment in the target from start to end 
+-- tstart..tend - the coordinates of the alignment in the target from start to end
 -- qlen - the length of the query transcript
 -- tlen - the length of the target transcript
 
@@ -82,7 +82,7 @@ blastCRBEach = CutFunction
  -}
 aCRBBlast :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do
-  debugNeed cfg "aCRBBlast" [q', t']
+  need' "shortcut.modules.crbblast.aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
@@ -97,7 +97,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
       tDst' = toCutPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toCutPath cfg oPath
-  debugNeed cfg "aCRBBlast" [qDst, tDst]
+  need' "shortcut.core.modules.crbblast.aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
   runCmd cfg ref $ CmdDesc
@@ -116,7 +116,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   symlink cfg ref o'' oPath'
   where
     o'   = fromCutPath cfg o
-    o''  = debugA cfg "aCRBBlast" o [fromCutPath cfg tmpDir, o', q', t']
+    o''  = traceA "aCRBBlast" o [fromCutPath cfg tmpDir, o', q', t']
     tmp' = fromCutPath cfg tmpDir
     q'   = fromCutPath cfg q
     t'   = fromCutPath cfg t

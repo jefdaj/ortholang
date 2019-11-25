@@ -1,7 +1,7 @@
 { buildPythonPackage
 , fetchgit
 , makeWrapper
-, psiblast-exb
+, ncbi-blast
 , hmmer
 , rPackages
 , rWrapper
@@ -19,7 +19,7 @@ let
 
   # for some reason substituteAll doesn't like names with dashes
   # also now we can change to NCBI BLAST+ or another one
-  myBlast = psiblast-exb;
+  myBlast = ncbi-blast;
 
   runDepends = [
     myR

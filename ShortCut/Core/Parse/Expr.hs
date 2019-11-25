@@ -21,8 +21,6 @@ import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 import Data.Either            (isRight)
 import Text.Parsec            (ParseError)
 
--- import Debug.Trace (traceM)
-
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
 pList :: ParseM CutExpr
@@ -90,9 +88,9 @@ pFunName = do
 pFun :: ParseM CutExpr
 pFun = do
   name <- try pFunName -- TODO try?
-  debugParseM $ "pFun committed to parsing " ++ name
+  -- debugParseM $ "pFun committed to parsing " ++ name
   args <- pArgs
-  debugParseM $ "pFun " ++ name ++ " args: " ++ show args
+  -- debugParseM $ "pFun " ++ name ++ " args: " ++ show args
   pFunArgs name args
 
 -- TODO main parse error is in here, when pTerm fails on an arg??
@@ -128,7 +126,7 @@ pRef = debugParser "pRef" $ do
   v@(CutVar _ var) <- pVar
   -- let v = CutVar var
   (scr, _, _, _) <- getState
-  debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
+  -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v scr of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
     Just e -> return $ CutRef (typeOf e) (RepeatSalt 0) (depsOf e) v

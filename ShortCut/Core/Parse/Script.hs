@@ -1,8 +1,7 @@
 module ShortCut.Core.Parse.Script where
 
-import ShortCut.Core.Util (readFileStrict)
+import ShortCut.Core.Util (readFileStrict, debug)
 import ShortCut.Core.Types
-import ShortCut.Core.Config (debug)
 import ShortCut.Core.Parse.Util
 import ShortCut.Core.Parse.Basic
 import ShortCut.Core.Parse.Expr
@@ -15,8 +14,6 @@ import Text.Parsec.Combinator (optional)
 import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
-
--- import Debug.Trace
 
 -------------------
 -- preprocessing --
@@ -72,9 +69,9 @@ pAssign = debugParser "pAssign" $ do
   (scr, cfg, ref, ids) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
-  v@(CutVar _ vName) <- debugParseM "second pVarEq" >> (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
+  v@(CutVar _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
   when ((not $ cfgInteractive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
-  e <- debugParseM "first pExpr" >> (lexeme pExpr)
+  e <- (lexeme pExpr)
   -- let scr' = case vName of
                -- -- "result" -> trace "stripping old result" $ stripResult scr ++ [(v, e)]
                -- "result" -> stripResult scr ++ [(v, e)]
@@ -83,7 +80,7 @@ pAssign = debugParser "pAssign" $ do
   let scr' = scr ++ [(v, e)]
   -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
   putState (scr', cfg, ref, ids)
-  debugParseM $ "assigned var " ++ show v
+  -- debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
       -- res' = debugParser cfg "pAssign" res
   -- return $ traceShow scr' res
@@ -161,7 +158,6 @@ pScript = debugParser "pScript" $ do
 parseFile :: CutConfig -> Locks -> HashedIDsRef -> FilePath
           -> IO (Either ParseError CutScript)
 parseFile cfg ref ids path = do
-  txt <- readScriptWithIncludes ref path'
+  debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
+  txt <- readScriptWithIncludes ref path
   return $ (parseString cfg ref ids . stripComments) txt
-  where
-    path' = debug cfg ("parseFile '" ++ path ++ "'") path
