@@ -11,9 +11,9 @@ cache:
 matrix:
   fast_finish: true
   include:
-  - os: linux
-    dist: xenial
-    env: NIX_PATH=nixpkgs=channel:nixos-19.03
+  # - os: linux
+  #   dist: xenial
+  #   env: NIX_PATH=nixpkgs=channel:nixos-19.03
   - os: osx
     osx_image: xcode10.1
     env: NIX_PATH=nixpkgs=channel:nixpkgs-19.03-darwin
@@ -31,6 +31,10 @@ branches:
   - /^release-.*$/
   - /^feature-.*$/
   - /^hotfix-.*$/
+
+before_script:
+- echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf
+- sudo launchctl kickstart -k system/org.nixos.nix-daemon || true
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
