@@ -37,6 +37,7 @@ script:
   - if [ "$TRAVIS_OS_NAME"  = "osx" ]; then sudo cachix use jefdaj; fi
   - if [ "$TRAVIS_OS_NAME" != "osx" ]; then cachix use jefdaj; fi
   - ./test.sh
+  - if [ $? != 0 ]]; then cat /tmp/shortcut.log; fi
 
 notifications:
   email:
