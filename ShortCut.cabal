@@ -22,7 +22,7 @@ data-files:         data/*.fa,
                     tests/scripts/*.cut,
                     tests/stdout/*.txt,
                     tests/tmpfiles/*.txt,
-                    wrappers/*.sh
+                    wrapper-scripts/*.sh
 
 -- everything is built into one binary:
 --   run tests with shortcut --test

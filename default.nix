@@ -12,13 +12,6 @@ let
     curl
   ];
 
-  # Things useful for development, which are included if going into nix-shell.
-  # Uncomment or add to it as needed.
-  devDepends = [
-    stack
-    # pypi2nix
-  ];
-
   myGHC = pkgs.haskell.packages.ghc864;
   haskellPkg = myGHC.callPackage ./shortcut.nix {};
 
@@ -32,21 +25,7 @@ let
   shortcut = haskell.lib.overrideCabal haskellPkg (drv: {
     src = builtins.filterSource noBigDotfiles ./.;
 
-    # TODO this isn't being run by overrideCabal at all. get it to work
-    # TODO is the find command going? that could maybe make the difference
-    shellHook = ''
-      ${drv.shellHook or ""}
-      export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-      export LC_ALL=en_US.UTF-8
-      export LANG=en_US.UTF-8
-      export LANGUAGE=en_US.UTF-8
-      export TASTY_HIDE_SUCCESSES=True
-    '';
-
-    buildDepends = (drv.buildDepends or [])
-      ++ [ makeWrapper ]
-      ++ runDepends
-      ++ (if pkgs.lib.inNixShell then devDepends else []);
+    buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
 
     # TODO set LC_ALL or similar here?
     # TODO PYTHONPATH?

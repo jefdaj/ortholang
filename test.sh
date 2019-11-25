@@ -4,7 +4,7 @@
 # script arguments will be passed to shortcut --test
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
 
-test_branch='all'
+test_filter='version'
 
 set -e
 set -o pipefail
@@ -18,9 +18,9 @@ export TASTY_QUICKCHECK_SHOW_REPLAY=True
 timestamp=$(date '+%Y-%m-%d_%H:%M')
 
 nix_args="--pure -j2"
-stack_cmd="stack build && stack exec shortcut -- --test $test_branch"
+stack_cmd="stack build && stack exec shortcut -- --debug '.*' --test $test_filter"
 
-log="shortcut-${test_branch}-${timestamp}.log"
+log="shortcut-${test_filter}-${timestamp}.log"
 
 set -x
 nix-shell $nix_args --command "$stack_cmd" 2>&1 | tee -a $log
