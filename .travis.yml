@@ -36,7 +36,7 @@ branches:
 # see: https://github.com/cachix/cachix/issues/228
 before_script:
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf; fi
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then; sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
