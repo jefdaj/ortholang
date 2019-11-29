@@ -28,8 +28,7 @@ These are the only important tests if you want to try the current release:
 But you may also be interested in progress on an upcoming feature.
 
 Green checked boxes below have been done, grey ones are in progress, and blank ones are pending.
-Test badges mean tests are passing on both Mac and Linux.
-See [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches) for details.
+Test badges mean the [Travis](https://travis-ci.com/jefdaj/shortcut/branches) tests are passing on both Mac and Linux VMs.
 
 These are changes to the core code or build system:
 
