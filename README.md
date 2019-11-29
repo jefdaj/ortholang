@@ -5,9 +5,12 @@ ShortCut is a scripting language meant to simplify a common task in
 bioinformatics: making a list of candidate genes or genomes related to a
 biological process of interest. These are sometimes called phylogenomic cuts.
 
-It aims to be usable for biologists with limited prior coding experience.
-It downloads, installs, and runs the same command line tools you would
-use manually but hides most of the details.
+It has two main design goals:
+
+1. Be useful for biologists with limited prior coding experience
+2. Codify the search in a format that can be published and reused by others
+
+Run [install.sh](install.sh) on Mac or Linux.
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and reference of available functions.
