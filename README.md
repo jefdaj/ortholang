@@ -38,6 +38,7 @@ These are changes to the core code or build system:
 | [feature-progressbar](https://github.com/jefdaj/shortcut/tree/feature-progressbar) | :heavy_check_mark: | ![feature-progressbar](https://badgen.net/travis/jefdaj/shortcut/feature-progressbar?label=) |  |  |
 | [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) | :white_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=) |  |  |
 | [feature-singularity](https://github.com/jefdaj/shortcut/tree/feature-singularity) | :white_check_mark: | ![feature-singularity](https://badgen.net/travis/jefdaj/shortcut/feature-singularity?label=) |  |  |
+| [feature-docker](https://github.com/jefdaj/shortcut/tree/feature-docker) | :white_check_mark: | ![feature-docker](https://badgen.net/travis/jefdaj/shortcut/feature-docker?label=) |  |  |
 
 And these are "modules" related to a specific language feature or bioinformatics program:
 
