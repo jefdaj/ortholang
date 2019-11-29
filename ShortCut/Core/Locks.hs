@@ -41,12 +41,12 @@ type Locks = (Resource, IORef (Map FilePath RWLock))
  - here. For now, just change the code to enable.
  - TODO think of something better
  -}
-debugAock :: String -> IO ()
--- debugAock = putStrLn
-debugAock = const $ return ()
+debugLock :: String -> IO ()
+-- debugLock = putStrLn
+debugLock = const $ return ()
 
-debugAock' :: String -> Action ()
-debugAock' = liftIO . debugAock
+debugLock' :: String -> Action ()
+debugLock' = liftIO . debugLock
 
 initLocks :: IO Locks
 {-# NOINLINE initLocks #-}
@@ -61,7 +61,7 @@ initLocks = do
 getLock :: Locks -> FilePath -> IO RWLock
 getLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
-  debugAock $ "getLock getting lock for '" ++ path ++ "'"
+  debugLock $ "getLock getting lock for '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path l c, l)
     Just l' -> (c, l')
@@ -70,25 +70,25 @@ withReadLock :: Locks -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
   l <- liftIO $ getLock ref path
   bracket_
-    (debugAock ("withReadLock acquiring '" ++ path ++ "'") >> RWLock.acquireRead l)
-    (debugAock ("withReadLock releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
+    (debugLock ("withReadLock acquiring '" ++ path ++ "'") >> RWLock.acquireRead l)
+    (debugLock ("withReadLock releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
     ioFn
 
 withReadLock' :: Locks -> FilePath -> Action a -> Action a
 withReadLock' ref path actFn = do
   l <- liftIO $ getLock ref path
-  debugAock' $ "withReadLock' acquiring '" ++ path ++ "'"
+  debugLock' $ "withReadLock' acquiring '" ++ path ++ "'"
   (liftIO (RWLock.acquireRead l) >> actFn)
     `actionFinally`
-    (debugAock ("withReadLock' releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
+    (debugLock ("withReadLock' releasing '" ++ path ++ "'") >> RWLock.releaseRead l)
 
 withReadLocks' :: Locks -> [FilePath] -> Action a -> Action a
 withReadLocks' ref paths actFn = do
   locks <- liftIO $ mapM (getLock ref) (nub paths)
-  debugAock' $ "withReadLocks' acquiring " ++ show paths
+  debugLock' $ "withReadLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireRead locks) >> actFn)
     `actionFinally`
-    (debugAock ("withReadLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseRead locks)
+    (debugLock ("withReadLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseRead locks)
 
 -- TODO should this be strict too, even though just need one char?
 isActuallyEmpty :: Locks -> FilePath -> IO Bool
@@ -112,8 +112,8 @@ withWriteLock ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   l <- liftIO $ getLock ref path
   res <- bracket_
-    (debugAock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
-    (debugAock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
+    (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
+    (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
     ioFn
   assertNonEmptyFile ref path
   return res
@@ -122,19 +122,19 @@ withWriteLocks' :: Locks -> [FilePath] -> Action a -> Action a
 withWriteLocks' ref paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
   locks <- liftIO $ mapM (getLock ref) (nub paths)
-  debugAock' $ "withWriteLocks' acquiring " ++ show paths
+  debugLock' $ "withWriteLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
     `actionFinally`
-    (debugAock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
+    (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
 withWriteLock' :: Locks -> FilePath -> Action a -> Action a
 withWriteLock' ref path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path
-  debugAock' $ "withWriteLock' acquiring '" ++ path ++ "'"
+  debugLock' $ "withWriteLock' acquiring '" ++ path ++ "'"
   l <- liftIO $ getLock ref path
   (liftIO (RWLock.acquireWrite l) >> actFn)
     `actionFinally`
-    (debugAock ("withWriteLock' releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
+    (debugLock ("withWriteLock' releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
 
 {- Not sure why, but there's a problem with using Shake's version of
  - doesFileExist here! It will work, but only if I add a short delay (at least
