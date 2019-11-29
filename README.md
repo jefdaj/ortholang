@@ -33,46 +33,46 @@ These are changes to the core code or build system:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
-| feature-cachix | :heavy_check_mark: | ![feature-cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=) |  |  |
-| feature-logging | :heavy_check_mark: | ![feature-logging](https://img.shields.io/travis/jefdaj/shortcut/feature-logging?label=) |  |  |
-| feature-progressbar | :heavy_check_mark: | ![feature-progressbar](https://img.shields.io/travis/jefdaj/shortcut/feature-progressbar?label=) |  |  |
-| feature-rerun-tests | :heavy_check_mark: | ![feature-rerun-tests](https://img.shields.io/travis/jefdaj/shortcut/feature-rerun-tests?label=) |  |  |
-| feature-singularity | :heavy_check_mark: | ![feature-singularity](https://img.shields.io/travis/jefdaj/shortcut/feature-singularity?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/feature-cachix | :heavy_check_mark: | ![feature-cachix](https://img.shields.io/travis/jefdaj/shortcut/feature-cachix?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/feature-logging | :heavy_check_mark: | ![feature-logging](https://img.shields.io/travis/jefdaj/shortcut/feature-logging?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/feature-progressbar | :heavy_check_mark: | ![feature-progressbar](https://img.shields.io/travis/jefdaj/shortcut/feature-progressbar?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/feature-rerun-tests | :heavy_check_mark: | ![feature-rerun-tests](https://img.shields.io/travis/jefdaj/shortcut/feature-rerun-tests?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/feature-singularity | :heavy_check_mark: | ![feature-singularity](https://img.shields.io/travis/jefdaj/shortcut/feature-singularity?label=) |  |  |
 
 And these are "modules" related to a specific language feature or bioinformatics program:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
-| module-allvsall | :heavy_check_mark: | ![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=) |  |  |
-| module-biomartr | :heavy_check_mark: | ![module-biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=) |  |  |
-| module-blast | :heavy_check_mark: | ![module-blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=) |  |  |
-| module-blastdb | :heavy_check_mark: | ![module-blastdb](https://img.shields.io/travis/jefdaj/shortcut/module-blastdb?label=) |  |  |
-| module-blasthits | :heavy_check_mark: | ![module-blasthits](https://img.shields.io/travis/jefdaj/shortcut/module-blasthits?label=) |  |  |
-| module-blastrbh | :heavy_check_mark: | ![module-blastrbh](https://img.shields.io/travis/jefdaj/shortcut/module-blastrbh?label=) |  |  |
-| module-busco | :heavy_check_mark: | ![module-busco](https://img.shields.io/travis/jefdaj/shortcut/module-busco?label=) |  |  |
-| module-cheat | | ![module-cheat](https://img.shields.io/travis/jefdaj/shortcut/module-cheat?label=) |  |  |
-| module-crbblast | :heavy_check_mark: | ![module-crbblast](https://img.shields.io/travis/jefdaj/shortcut/module-crbblast?label=) |  |  |
-| module-diamond | :heavy_check_mark: | ![module-diamond](https://img.shields.io/travis/jefdaj/shortcut/module-diamond?label=) |  |  |
-| module-greencut | :white_check_mark: | ![module-greencut](https://img.shields.io/travis/jefdaj/shortcut/module-greencut?label=) |  |  |
-| module-hmmer | :heavy_check_mark: | ![module-hmmer](https://img.shields.io/travis/jefdaj/shortcut/module-hmmer?label=) |  |  |
-| module-listlike | :white_check_mark: | ![module-listlike](https://img.shields.io/travis/jefdaj/shortcut/module-listlike?label=) |  |  |
-| module-load | :heavy_check_mark: | ![module-load](https://img.shields.io/travis/jefdaj/shortcut/module-load?label=) |  |  |
-| module-math | :heavy_check_mark: | ![module-math](https://img.shields.io/travis/jefdaj/shortcut/module-math?label=) |  |  |
-| module-mmseqs | :heavy_check_mark: | ![module-mmseqs](https://img.shields.io/travis/jefdaj/shortcut/module-mmseqs?label=) |  |  |
-| module-muscle | :heavy_check_mark: | ![module-muscle](https://img.shields.io/travis/jefdaj/shortcut/module-muscle?label=) |  |  |
-| module-orthofinder | :white_check_mark: | ![module-orthofinder](https://img.shields.io/travis/jefdaj/shortcut/module-orthofinder?label=) |  |  |
-| module-orthogroups | :white_check_mark: | ![module-orthogroups](https://img.shields.io/travis/jefdaj/shortcut/module-orthogroups?label=) |  |  |
-| module-permute | :white_check_mark: | ![module-permute](https://img.shields.io/travis/jefdaj/shortcut/module-permute?label=) |  |  |
-| module-plots | :white_check_mark: | ![module-plots](https://img.shields.io/travis/jefdaj/shortcut/module-plots?label=) |  |  |
-| module-psiblast | :white_check_mark: | ![module-psiblast](https://img.shields.io/travis/jefdaj/shortcut/module-psiblast?label=) |  |  |
-| module-range | :heavy_check_mark: | ![module-range](https://img.shields.io/travis/jefdaj/shortcut/module-range?label=) |  |  |
-| module-sample | :heavy_check_mark: | ![module-sample](https://img.shields.io/travis/jefdaj/shortcut/module-sample?label=) |  |  |
-| module-scores | :heavy_check_mark: | ![module-scores](https://img.shields.io/travis/jefdaj/shortcut/module-scores?label=) |  |  |
-| module-seqio | :heavy_check_mark: | ![module-seqio](https://img.shields.io/travis/jefdaj/shortcut/module-seqio?label=) |  |  |
-| module-sets | :heavy_check_mark: | ![module-sets](https://img.shields.io/travis/jefdaj/shortcut/module-sets?label=) |  |  |
-| module-setstable | :heavy_check_mark: | ![module-setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=) |  |  |
-| module-sonicparanoid | :heavy_check_mark: | ![module-sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=) |  |  |
-| module-summarize | :heavy_check_mark: | ![module-summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-allvsall | :heavy_check_mark: | ![module-allvsall](https://img.shields.io/travis/jefdaj/shortcut/module-allvsall?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-biomartr | :heavy_check_mark: | ![module-biomartr](https://img.shields.io/travis/jefdaj/shortcut/module-biomartr?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-blast | :heavy_check_mark: | ![module-blast](https://img.shields.io/travis/jefdaj/shortcut/module-blast?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-blastdb | :heavy_check_mark: | ![module-blastdb](https://img.shields.io/travis/jefdaj/shortcut/module-blastdb?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-blasthits | :heavy_check_mark: | ![module-blasthits](https://img.shields.io/travis/jefdaj/shortcut/module-blasthits?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-blastrbh | :heavy_check_mark: | ![module-blastrbh](https://img.shields.io/travis/jefdaj/shortcut/module-blastrbh?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-busco | :heavy_check_mark: | ![module-busco](https://img.shields.io/travis/jefdaj/shortcut/module-busco?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-cheat | | ![module-cheat](https://img.shields.io/travis/jefdaj/shortcut/module-cheat?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-crbblast | :heavy_check_mark: | ![module-crbblast](https://img.shields.io/travis/jefdaj/shortcut/module-crbblast?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-diamond | :heavy_check_mark: | ![module-diamond](https://img.shields.io/travis/jefdaj/shortcut/module-diamond?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-greencut | :white_check_mark: | ![module-greencut](https://img.shields.io/travis/jefdaj/shortcut/module-greencut?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-hmmer | :heavy_check_mark: | ![module-hmmer](https://img.shields.io/travis/jefdaj/shortcut/module-hmmer?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-listlike | :white_check_mark: | ![module-listlike](https://img.shields.io/travis/jefdaj/shortcut/module-listlike?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-load | :heavy_check_mark: | ![module-load](https://img.shields.io/travis/jefdaj/shortcut/module-load?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-math | :heavy_check_mark: | ![module-math](https://img.shields.io/travis/jefdaj/shortcut/module-math?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-mmseqs | :heavy_check_mark: | ![module-mmseqs](https://img.shields.io/travis/jefdaj/shortcut/module-mmseqs?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-muscle | :heavy_check_mark: | ![module-muscle](https://img.shields.io/travis/jefdaj/shortcut/module-muscle?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-orthofinder | :white_check_mark: | ![module-orthofinder](https://img.shields.io/travis/jefdaj/shortcut/module-orthofinder?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-orthogroups | :white_check_mark: | ![module-orthogroups](https://img.shields.io/travis/jefdaj/shortcut/module-orthogroups?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-permute | :white_check_mark: | ![module-permute](https://img.shields.io/travis/jefdaj/shortcut/module-permute?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-plots | :white_check_mark: | ![module-plots](https://img.shields.io/travis/jefdaj/shortcut/module-plots?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-psiblast | :white_check_mark: | ![module-psiblast](https://img.shields.io/travis/jefdaj/shortcut/module-psiblast?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-range | :heavy_check_mark: | ![module-range](https://img.shields.io/travis/jefdaj/shortcut/module-range?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-sample | :heavy_check_mark: | ![module-sample](https://img.shields.io/travis/jefdaj/shortcut/module-sample?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-scores | :heavy_check_mark: | ![module-scores](https://img.shields.io/travis/jefdaj/shortcut/module-scores?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-seqio | :heavy_check_mark: | ![module-seqio](https://img.shields.io/travis/jefdaj/shortcut/module-seqio?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-sets | :heavy_check_mark: | ![module-sets](https://img.shields.io/travis/jefdaj/shortcut/module-sets?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-setstable | :heavy_check_mark: | ![module-setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-sonicparanoid | :heavy_check_mark: | ![module-sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=) |  |  |
+| https://github.com/jefdaj/shortcut/tree/module-summarize | :heavy_check_mark: | ![module-summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=) |  |  |
 
 Quick Start
 -----------
