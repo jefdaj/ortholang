@@ -21,8 +21,8 @@ Development Status
 
 These are the only important tests if you want to try the current release:
 
-[![Master branch](http://badgen.net/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
-![Demo Site](https://badgen.net/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
+[![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
+![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
 But you may also be interested in progress on an upcoming feature.
