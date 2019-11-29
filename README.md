@@ -10,7 +10,7 @@ It has two main design goals:
 1. Be useful for biologists with limited prior coding experience
 2. Codify the search in a format that can be published and reused by others
 
-Run [install.sh](install.sh) on Mac or Linux.
+Run [install.sh](install.sh) to install it on Mac or Linux.
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and reference of available functions.
@@ -74,32 +74,8 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-sonicparanoid](https://github.com/jefdaj/shortcut/tree/module-sonicparanoid) | :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/shortcut/module-sonicparanoid?label=) |  |  |
 | [module-summarize](https://github.com/jefdaj/shortcut/tree/module-summarize) | :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/shortcut/module-summarize?label=) |  |  |
 
-Quick Start
------------
-
-This should get you going on any Linux machine, and maybe MacOS:
-
-    # 1. Install Nix
-    curl https://nixos.org/nix/install | sh
-    source ~/.nix-profile/etc/profile.d/nix.sh
-
-    # 2. Build ShortCut
-    git clone https://github.com/jefdaj/shortcut.git
-    cd shortcut
-    nix-build -j$(nproc)
-    export PATH=$PWD/result/bin:$PATH
-
-    # 3. Run self-tests (optional)
-    shortcut --test
-
-    # 4. Try it out
-    shortcut
-
-The rest of this document gives more details about each of them.
-
-
-Install Nix
------------
+Build Shortcut and run self-tests
+---------------------------------
 
 ShortCut is best built using [Nix][2], which ensures that all dependencies are
 exactly satisfied. Not much human work is required, but it will download and/or
@@ -110,19 +86,6 @@ instructions, or just run this:
 
     curl https://nixos.org/nix/install | sh
     source ~/.nix-profile/etc/profile.d/nix.sh
-
-Installing ShortCut without this is theoretically possible, but much harder and less reliable.
-Email Jeff if you want/need to try it so he can update the README with instructions!
-
-To remove all Nix and ShortCut files later, edit the Nix line out of your `~/.bashrc` and run:
-
-    rm -rf /nix
-    rm -rf ~/.nix*
-    rm -rf ~/.shortcut
-
-
-Build Shortcut and run self-tests
----------------------------------
 
 <a href="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap" target="_blank">
   <img src="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap.png" width="300"/>
