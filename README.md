@@ -1,45 +1,43 @@
 ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
-
-ShortCut is a scripting language meant to simplify a very common task in
-bioinformatics: making a list of candidate genes likely to be related to a
+ShortCut is a scripting language meant to simplify a common task in
+bioinformatics: making a list of candidate genes or genomes related to a
 biological process of interest. These are sometimes called phylogenomic cuts.
 
-ShortCut downloads, installs, and runs the same command line tools you would
-use manually but hides most of the details. That lets you quickly perform
-searches too complex for a website without getting so far into the weeds that
-you lose days programming. It should also be suitable for users with minimal to
-no prior coding experience, and will be reproducable by other researchers
-later.
+It has two main design goals:
+
+1. Be useful for biologists with limited prior coding experience
+2. Codify the search in a format that can be published and reused by others
+
+Run [install.sh](install.sh) to install it on Mac or Linux.
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
-examples, and a list of available functions.
+examples, and reference of available functions.
 
 Development Status
 ------------------
 
 These are the only important tests if you want to try the current release:
 
-[![Master branch](http://badgen.net/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
-![Demo Site](https://badgen.net/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
+[![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
+![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
 But you may also be interested in progress on an upcoming feature.
 
 Green checked boxes below have been done, grey ones are in progress, and blank ones are pending.
-Test badges mean tests are passing on both Mac and Linux.
-See [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches) for details.
+Test badges mean the [Travis](https://travis-ci.com/jefdaj/shortcut/branches) tests are passing on both Mac and Linux VMs.
 
 These are changes to the core code or build system:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
 | [feature-cachix](https://github.com/jefdaj/shortcut/tree/feature-cachix) | :heavy_check_mark: | ![feature-cachix](https://badgen.net/travis/jefdaj/shortcut/feature-cachix?label=) |  |  |
-| [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) | :heavy_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=) |  |  |
+| [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) | :white_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=) |  |  |
 | [feature-progressbar](https://github.com/jefdaj/shortcut/tree/feature-progressbar) | :heavy_check_mark: | ![feature-progressbar](https://badgen.net/travis/jefdaj/shortcut/feature-progressbar?label=) |  |  |
-| [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) | :heavy_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=) |  |  |
-| [feature-singularity](https://github.com/jefdaj/shortcut/tree/feature-singularity) | :heavy_check_mark: | ![feature-singularity](https://badgen.net/travis/jefdaj/shortcut/feature-singularity?label=) |  |  |
+| [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) | :white_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=) |  |  |
+| [feature-singularity](https://github.com/jefdaj/shortcut/tree/feature-singularity) | :white_check_mark: | ![feature-singularity](https://badgen.net/travis/jefdaj/shortcut/feature-singularity?label=) |  |  |
 
 And these are "modules" related to a specific language feature or bioinformatics program:
 
@@ -76,32 +74,8 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-sonicparanoid](https://github.com/jefdaj/shortcut/tree/module-sonicparanoid) | :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/shortcut/module-sonicparanoid?label=) |  |  |
 | [module-summarize](https://github.com/jefdaj/shortcut/tree/module-summarize) | :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/shortcut/module-summarize?label=) |  |  |
 
-Quick Start
------------
-
-This should get you going on any Linux machine, and maybe MacOS:
-
-    # 1. Install Nix
-    curl https://nixos.org/nix/install | sh
-    source ~/.nix-profile/etc/profile.d/nix.sh
-
-    # 2. Build ShortCut
-    git clone https://github.com/jefdaj/shortcut.git
-    cd shortcut
-    nix-build -j$(nproc)
-    export PATH=$PWD/result/bin:$PATH
-
-    # 3. Run self-tests (optional)
-    shortcut --test
-
-    # 4. Try it out
-    shortcut
-
-The rest of this document gives more details about each of them.
-
-
-Install Nix
------------
+Build Shortcut and run self-tests
+---------------------------------
 
 ShortCut is best built using [Nix][2], which ensures that all dependencies are
 exactly satisfied. Not much human work is required, but it will download and/or
@@ -112,19 +86,6 @@ instructions, or just run this:
 
     curl https://nixos.org/nix/install | sh
     source ~/.nix-profile/etc/profile.d/nix.sh
-
-Installing ShortCut without this is theoretically possible, but much harder and less reliable.
-Email Jeff if you want/need to try it so he can update the README with instructions!
-
-To remove all Nix and ShortCut files later, edit the Nix line out of your `~/.bashrc` and run:
-
-    rm -rf /nix
-    rm -rf ~/.nix*
-    rm -rf ~/.shortcut
-
-
-Build Shortcut and run self-tests
----------------------------------
 
 <a href="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap" target="_blank">
   <img src="https://asciinema.org/a/MW5oHH9jMI0gFHXUnimwt3Sap.png" width="300"/>
