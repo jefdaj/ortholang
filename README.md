@@ -1,20 +1,16 @@
 ShortCut: short, reproducible phylogenomic cuts
 ===============================================
 
-
-ShortCut is a scripting language meant to simplify a very common task in
-bioinformatics: making a list of candidate genes likely to be related to a
+ShortCut is a scripting language meant to simplify a common task in
+bioinformatics: making a list of candidate genes or genomes related to a
 biological process of interest. These are sometimes called phylogenomic cuts.
 
-ShortCut downloads, installs, and runs the same command line tools you would
-use manually but hides most of the details. That lets you quickly perform
-searches too complex for a website without getting so far into the weeds that
-you lose days programming. It should also be suitable for users with minimal to
-no prior coding experience, and will be reproducable by other researchers
-later.
+It aims to be usable for biologists with limited prior coding experience.
+It downloads, installs, and runs the same command line tools you would
+use manually but hides most of the details.
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
-examples, and a list of available functions.
+examples, and reference of available functions.
 
 Development Status
 ------------------
