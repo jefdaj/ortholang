@@ -25,7 +25,11 @@ These are the only important tests if you want to try the current release:
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
-But you may also be interested in progress on an upcoming feature:
+But you may also be interested in progress on an upcoming feature.
+Green checked boxes have been done, grey ones are in progress, and blank ones are pending.
+Test badges mean tests are passing on both Mac and Linux VMs. See [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches) for details.
+
+These are changes to the interpreter:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
@@ -35,7 +39,7 @@ But you may also be interested in progress on an upcoming feature:
 | feature-rerun-tests | :heavy_check_mark: | ![feature-rerun-tests](https://img.shields.io/travis/jefdaj/shortcut/feature-rerun-tests?label=) |  |  |
 | feature-singularity | :heavy_check_mark: | ![feature-singularity](https://img.shields.io/travis/jefdaj/shortcut/feature-singularity?label=) |  |  |
 
-Or in the somewhat-separate development of a particular ShortCut module:
+And these are "modules" related to a specific language feature or bioinformatics program:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
@@ -69,8 +73,6 @@ Or in the somewhat-separate development of a particular ShortCut module:
 | module-setstable | :heavy_check_mark: | ![module-setstable](https://img.shields.io/travis/jefdaj/shortcut/module-setstable?label=) |  |  |
 | module-sonicparanoid | :heavy_check_mark: | ![module-sonicparanoid](https://img.shields.io/travis/jefdaj/shortcut/module-sonicparanoid?label=) |  |  |
 | module-summarize | :heavy_check_mark: | ![module-summarize](https://img.shields.io/travis/jefdaj/shortcut/module-summarize?label=) |  |  |
-
-
 
 Quick Start
 -----------
