@@ -29,7 +29,7 @@ But you may also be interested in progress on an upcoming feature.
 Green checked boxes have been done, grey ones are in progress, and blank ones are pending.
 Test badges mean tests are passing on both Mac and Linux VMs. See [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches) for details.
 
-These are changes to the interpreter:
+These are changes to the core code or build system:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
