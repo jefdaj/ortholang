@@ -50,7 +50,7 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-blasthits](https://github.com/jefdaj/shortcut/tree/module-blasthits) | :heavy_check_mark: | ![module-blasthits](https://img.shields.io/travis/jefdaj/shortcut/module-blasthits?label=) |  |  |
 | [module-blastrbh](https://github.com/jefdaj/shortcut/tree/module-blastrbh) | :heavy_check_mark: | ![module-blastrbh](https://img.shields.io/travis/jefdaj/shortcut/module-blastrbh?label=) |  |  |
 | [module-busco](https://github.com/jefdaj/shortcut/tree/module-busco) | :heavy_check_mark: | ![module-busco](https://img.shields.io/travis/jefdaj/shortcut/module-busco?label=) |  |  |
-| [module-cheat](https://github.com/jefdaj/shortcut/tree/module-cheat | | ![module-cheat](https://img.shields.io/travis/jefdaj/shortcut/module-cheat?label=) |  |  |
+| [module-cheat](https://github.com/jefdaj/shortcut/tree/module-cheat) | | ![module-cheat](https://img.shields.io/travis/jefdaj/shortcut/module-cheat?label=) |  |  |
 | [module-crbblast](https://github.com/jefdaj/shortcut/tree/module-crbblast) | :heavy_check_mark: | ![module-crbblast](https://img.shields.io/travis/jefdaj/shortcut/module-crbblast?label=) |  |  |
 | [module-diamond](https://github.com/jefdaj/shortcut/tree/module-diamond) | :heavy_check_mark: | ![module-diamond](https://img.shields.io/travis/jefdaj/shortcut/module-diamond?label=) |  |  |
 | [module-greencut](https://github.com/jefdaj/shortcut/tree/module-greencut) | :white_check_mark: | ![module-greencut](https://img.shields.io/travis/jefdaj/shortcut/module-greencut?label=) |  |  |
