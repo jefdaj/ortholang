@@ -26,8 +26,10 @@ These are the only important tests if you want to try the current release:
 <!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
 But you may also be interested in progress on an upcoming feature.
-Green checked boxes have been done, grey ones are in progress, and blank ones are pending.
-Test badges mean tests are passing on both Mac and Linux VMs. See [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches) for details.
+
+Green checked boxes below have been done, grey ones are in progress, and blank ones are pending.
+Test badges mean tests are passing on both Mac and Linux.
+See [Travis CI](https://travis-ci.com/jefdaj/shortcut/branches) for details.
 
 These are changes to the core code or build system:
 
