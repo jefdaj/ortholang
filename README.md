@@ -10,7 +10,14 @@ It has two main design goals:
 1. Be useful for biologists with limited prior coding experience
 2. Codify the search in a format that can be published and reused by others
 
-Run [install.sh](install.sh) to install it on Mac or Linux.
+Quick Start
+===========
+
+Run [install.sh](install.sh) to install everything on Mac or Linux:
+
+``` .bash
+curl https://raw.githubusercontent.com/jefdaj/shortcut/master/install.sh | sh
+```
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and reference of available functions.
@@ -22,20 +29,20 @@ These are the only important tests if you want to try the current release:
 
 [![Master branch](http://img.shields.io/travis/jefdaj/shortcut/master.svg?style=flat&label=master)](https://travis-ci.org/jefdaj/shortcut?label=master)
 ![Demo Site](https://img.shields.io/website?label=demo%20site&url=http%3A%2F%2Fshortcut.pmb.berkeley.edu)
-<!-- ![Env label](http://badges.herokuapp.com/travis/jefdaj/shortcut?env=BADGE=osx&label=osx&branch=feature-travisbadges) -->
 
-But you may also be interested in progress on an upcoming feature.
+The grids below track progress on upcoming features.
+Green checked boxes have been done, grey ones are in progress, and blank ones are pending.
+Test badges monitor [Travis](https://travis-ci.com/jefdaj/shortcut/branches) tests in Mac + Linux VMs.
 
-Green checked boxes below have been done, grey ones are in progress, and blank ones are pending.
-Test badges mean the [Travis](https://travis-ci.com/jefdaj/shortcut/branches) tests are passing on both Mac and Linux VMs.
-
-These are changes to the core code or build system:
+These branches are for updates to the core code or build system:
 
 | branch           |  code | tests                                                                                     | docs |  demo |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
 | [feature-cachix](https://github.com/jefdaj/shortcut/tree/feature-cachix) | :heavy_check_mark: | ![feature-cachix](https://badgen.net/travis/jefdaj/shortcut/feature-cachix?label=)  |  |
 | [feature-docker](https://github.com/jefdaj/shortcut/tree/feature-docker) | :heavy_check_mark: | ![feature-docker](https://badgen.net/travis/jefdaj/shortcut/feature-docker?label=)  |  |
+| [feature-docs](https://github.com/jefdaj/shortcut/tree/feature-docs) | :heavy_check_mark: | ![feature-docs](https://badgen.net/travis/jefdaj/shortcut/feature-docs?label=)  |  |
 | [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) | :white_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=)  |  |
+| [feature-nixpkgs](https://github.com/jefdaj/shortcut/tree/feature-nixpkgs) | :heavy_check_mark: | ![feature-nixpkgs](https://badgen.net/travis/jefdaj/shortcut/feature-nixpkgs?label=)  |  |
 | [feature-progressbar](https://github.com/jefdaj/shortcut/tree/feature-progressbar) | :heavy_check_mark: | ![feature-progressbar](https://badgen.net/travis/jefdaj/shortcut/feature-progressbar?label=)  |  |
 | [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) | :white_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=)  |  |
 | [feature-singularity](https://github.com/jefdaj/shortcut/tree/feature-singularity) | :white_check_mark: | ![feature-singularity](https://badgen.net/travis/jefdaj/shortcut/feature-singularity?label=)  |  |
@@ -74,7 +81,6 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-setstable](https://github.com/jefdaj/shortcut/tree/module-setstable) | :heavy_check_mark: | ![module-setstable](https://badgen.net/travis/jefdaj/shortcut/module-setstable?label=)  |  | |
 | [module-sonicparanoid](https://github.com/jefdaj/shortcut/tree/module-sonicparanoid) | :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/shortcut/module-sonicparanoid?label=) :white_check_mark:  |  | |
 | [module-summarize](https://github.com/jefdaj/shortcut/tree/module-summarize) | :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/shortcut/module-summarize?label=)  |  | |
- |
 
 Build Shortcut and run self-tests
 ---------------------------------
