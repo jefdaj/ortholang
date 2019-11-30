@@ -29,7 +29,5 @@ Options:
                      or not yet.
   --secure           Make things a little more secure for webserver use.
                      So far, it just disables shell access through the :! command.
-  --reference        Generate a markdown file summarizing all the available
-                     modules and functions. Mainly for the website.
   --output OUTPUT    Instead of printing results, save them to this file.
                      

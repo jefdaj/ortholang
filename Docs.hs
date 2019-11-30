@@ -1,4 +1,4 @@
-module ShortCut.Reference where
+module Main where
 
 {- This isn't meant for end users. It's just an easy way to keep
  - the module reference on the website in sync with the actual code.
@@ -114,3 +114,9 @@ writePlaceholder docsDir name = do
   when (not written) $ do
     putStrLn path
     writeFile path $ "doc for " ++ name ++ " not written yet"
+
+-- TODO take one argument like: shortcut-docs ~/shortcut-demo/templates/reference.md
+main :: IO ()
+main = do
+  writeDocPlaceholders modules
+  writeReference

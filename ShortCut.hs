@@ -14,7 +14,6 @@ import ShortCut.Core.Types   (CutConfig(..))
 import ShortCut.Core.Locks   (initLocks)
 import ShortCut.Modules      (modules)
 import ShortCut.Test         (runTests)
-import ShortCut.Reference    (writeReference, writeDocPlaceholders)
 import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
 import System.Environment    (getArgs)
 import System.Exit           (exitSuccess)
@@ -63,10 +62,10 @@ main = withFileLogging "/tmp/shortcut.log" $ do
   -- TODO hide this from users?
   -- when (hasArg args "reference") $ do
     -- debug "handling --reference"
-  dispatch args "reference" $ do
-    writeReference
-    writeDocPlaceholders (cfgModules cfg)
-    exitSuccess -- TODO combine into one docs dir
+  -- dispatch args "reference" $ do
+  --   writeReference
+  --   writeDocPlaceholders (cfgModules cfg)
+  --   exitSuccess -- TODO combine into one docs dir
 
   dispatch args "test" $ do
     -- args is used here to set up the Tasty environment vars
