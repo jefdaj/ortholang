@@ -74,6 +74,7 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-sonicparanoid](https://github.com/jefdaj/shortcut/tree/module-sonicparanoid) | :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/shortcut/module-sonicparanoid?label=) :white_check_mark:  |  | |
 | [module-summarize](https://github.com/jefdaj/shortcut/tree/module-summarize) | :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/shortcut/module-summarize?label=)  |  | |
  |
+
 Build Shortcut and run self-tests
 ---------------------------------
 
