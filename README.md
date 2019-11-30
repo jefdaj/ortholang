@@ -44,7 +44,7 @@ And these are "modules" related to a specific language feature or bioinformatics
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
-| [module-allvsall](https://github.com/jefdaj/shortcut/tree/module-allvsall) | :heavy_check_mark: | ![module-allvsall](https://badgen.net/travis/jefdaj/shortcut/module-allvsall?label=) |  |  |
+| [module-allvsall](https://github.com/jefdaj/shortcut/tree/module-allvsall) | :white_check_mark: | ![module-allvsall](https://badgen.net/travis/jefdaj/shortcut/module-allvsall?label=) |  |  |
 | [module-biomartr](https://github.com/jefdaj/shortcut/tree/module-biomartr) | :heavy_check_mark: | ![module-biomartr](https://badgen.net/travis/jefdaj/shortcut/module-biomartr?label=) |  |  |
 | [module-blast](https://github.com/jefdaj/shortcut/tree/module-blast) | :heavy_check_mark: | ![module-blast](https://badgen.net/travis/jefdaj/shortcut/module-blast?label=) |  |  |
 | [module-blastdb](https://github.com/jefdaj/shortcut/tree/module-blastdb) | :heavy_check_mark: | ![module-blastdb](https://badgen.net/travis/jefdaj/shortcut/module-blastdb?label=) |  |  |
