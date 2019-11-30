@@ -31,7 +31,7 @@ Test badges mean the [Travis](https://travis-ci.com/jefdaj/shortcut/branches) te
 
 These are changes to the core code or build system:
 
-| branch           |  code | tests                                                                                     | demo |  docs |
+| branch           |  code | tests                                                                                     | docs |  demo |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
 | [feature-cachix](https://github.com/jefdaj/shortcut/tree/feature-cachix) | :heavy_check_mark: | ![feature-cachix](https://badgen.net/travis/jefdaj/shortcut/feature-cachix?label=)  |  |
 | [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) | :white_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=)  |  |
@@ -41,7 +41,7 @@ These are changes to the core code or build system:
 
 And these are "modules" related to a specific language feature or bioinformatics program:
 
-| branch           |  code | tests                                                                                     | demo |  docs |
+| branch           |  code | tests                                                                                     | docs |  demo |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
 | [module-allvsall](https://github.com/jefdaj/shortcut/tree/module-allvsall) | :heavy_check_mark: | ![module-allvsall](https://badgen.net/travis/jefdaj/shortcut/module-allvsall?label=)  |  |
 | [module-biomartr](https://github.com/jefdaj/shortcut/tree/module-biomartr) | :heavy_check_mark: | ![module-biomartr](https://badgen.net/travis/jefdaj/shortcut/module-biomartr?label=) :white_check_mark: |  | |
