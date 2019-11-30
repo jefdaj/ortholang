@@ -34,6 +34,7 @@ These are changes to the core code or build system:
 | branch           |  code | tests                                                                                     | docs |  demo |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
 | [feature-cachix](https://github.com/jefdaj/shortcut/tree/feature-cachix) | :heavy_check_mark: | ![feature-cachix](https://badgen.net/travis/jefdaj/shortcut/feature-cachix?label=)  |  |
+| [feature-docker](https://github.com/jefdaj/shortcut/tree/feature-docker) | :heavy_check_mark: | ![feature-docker](https://badgen.net/travis/jefdaj/shortcut/feature-docker?label=)  |  |
 | [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) | :white_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=)  |  |
 | [feature-progressbar](https://github.com/jefdaj/shortcut/tree/feature-progressbar) | :heavy_check_mark: | ![feature-progressbar](https://badgen.net/travis/jefdaj/shortcut/feature-progressbar?label=)  |  |
 | [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) | :white_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=)  |  |
