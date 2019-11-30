@@ -13,7 +13,12 @@ let
   ];
 
   myGHC = pkgs.haskell.packages.ghc864;
-  haskellPkg = myGHC.callPackage ./shortcut.nix {};
+  logging = myGHC.callPackage (import ./logging) {};
+  progress-meter = haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
+    broken = false;
+    jailbreak = true;
+  });
+  haskellPkg = myGHC.callPackage ./shortcut.nix { inherit logging progress-meter; };
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?

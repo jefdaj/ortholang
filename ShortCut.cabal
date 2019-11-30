@@ -168,4 +168,3 @@ executable shortcut
                     raw-strings-qq,
                     logging,
                     progress-meter
-                    -- TODO get working in nix: progress-meter
