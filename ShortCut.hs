@@ -32,7 +32,7 @@ import Control.Logging -- (withFileLogging)
 
 -- TODO any good way to configure logging from the beginning, before docopt?
 main:: IO ()
-main = withFileLogging "/tmp/shortcut.log" $ do
+main = withFileLogging "shortcut.log" $ do
   setLogTimeFormat "[%Y-%m-%d %H:%M:%S %q]"
   debugS' "shortcut.main" "starting"
 
