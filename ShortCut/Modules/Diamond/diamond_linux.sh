@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-diamond --version
+diamond version

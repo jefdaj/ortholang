@@ -12,7 +12,7 @@ let
     curl
   ];
 
-  myGHC = pkgs.haskell.packages.ghc864;
+  myGHC = pkgs.haskell.packages.ghc865;
   logging = myGHC.callPackage (import ./logging) {};
   progress-meter = haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
     broken = false;
