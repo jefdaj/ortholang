@@ -1,6 +1,2 @@
 DIAMOND database $TMPDIR/vars/result
-Database format version = 2
-Diamond build = 123
-Sequences = 578
-Letters = 206506
 
