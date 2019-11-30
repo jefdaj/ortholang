@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RecordWildCards #-}
 
 {- ShortCut code is interpreted in phases, but client code shouldn't need to
  - care about that, so this module wraps them in a simplified interface. It
@@ -20,7 +21,6 @@ module ShortCut.Core.Eval
   ( eval
   , evalFile
   , evalScript
-  , evalIntermediateExpr
   )
   where
 
@@ -37,45 +37,134 @@ import Control.Retry
 -- import Data.List (isPrefixOf)
 
 import Control.Exception.Safe         (catchAny)
-import Data.Maybe                     (maybeToList, isJust)
-import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
+import Data.Maybe                     (maybeToList, isJust, fromMaybe)
+import ShortCut.Core.Compile.Basic    (compileScript)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
-import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath, exprPath)
+import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
 import ShortCut.Core.Util             (trace)
-import System.IO                      (Handle, hPutStrLn)
-import System.FilePath                ((</>))
+import System.IO                      (Handle)
+import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
 import Control.Monad                  (when)
+import GHC.Conc (numCapabilities)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 
+import Control.Concurrent
+-- import Data.Foldable
+import qualified System.Progress as P
+-- import Data.IORef
+-- import Data.Monoid
+-- import Control.Monad
+
+import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
+import System.Time.Utils (renderSecs)
+
+-- TODO what's an optimal number?
+numInterpreterThreads :: Int
+numInterpreterThreads = max 1 $ numCapabilities - 1
+
+-- TODO how to update one last time at the end?
+-- sample is in milliseconds (1000 = a second)
+updateLoop :: Int -> IO a -> IO b
+updateLoop delay updateFn = do
+  threadDelay delay
+  _ <- updateFn
+  updateLoop delay updateFn
+
+updateProgress :: P.Meter' EvalProgress -> IO Progress -> IO ()
+updateProgress pm iosp = do
+  -- putStrLn "updating progress"
+  Progress{..} <- iosp -- this is weird, but the types check!
+  let d = countBuilt + countSkipped + 1
+      t = countBuilt + countSkipped + countTodo
+  update <- getCurrentTime
+  P.modifyMeter pm (\ep -> ep {epDone = d, epTotal = t, epUpdate = update})
+  -- unless (d >= t) $ do
+    -- threadDelay $ 1000 * 100
+    -- updateProgress pm iosp
+  -- return ()
+
+completeProgress :: P.Meter' EvalProgress -> Action ()
+completeProgress pm = do
+  liftIO $ P.modifyMeter pm (\ep2 -> ep2 {epDone = epTotal ep2})
+  Exit _ <- command [] "sync" [] -- why is this needed?
+  return ()
+
+data EvalProgress = EvalProgress
+  { epTitle   :: String
+
+  -- together these two let you get duration,
+  -- and epUpdate alone seeds the progress bar animation (if any)
+  , epUpdate  :: UTCTime
+  , epStart   :: UTCTime
+
+  , epDone    :: Int
+  , epTotal   :: Int
+  , epThreads :: Int
+  , epWidth   :: Int
+  , epArrowHead :: Char
+  , epArrowShaft :: Char
+  }
+
+-- TODO hey should the state just be a Progress{..} itself? seems simpler + more flexible
+renderProgress :: EvalProgress -> String
+-- TODO put back renderProgress EvalProgress{..} | epUpdates <  3 = ""
+renderProgress EvalProgress{..} = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
+  where
+    -- details  = if epDone >= epTotal then [] else [fraction]
+    time = renderTime epStart epUpdate
+    fraction = "[" ++ working ++ "/" ++ show epTotal ++ "]" -- TODO skip fraction when done
+    firstTask = min epTotal $ epDone + 1
+    lastTask  = min epTotal $ epDone + epThreads
+    threads  = if firstTask == lastTask then 1 else lastTask - firstTask + 1
+    working  = show firstTask ++ if threads < 2 then "" else "-" ++ show lastTask
+    arrowWidth = epWidth - length epTitle - length time - length fraction
+    arrowFrac  = ((fromIntegral epDone) :: Double) / (fromIntegral epTotal)
+    arrow = if epStart == epUpdate then replicate arrowWidth ' '
+            else renderBar arrowWidth threads arrowFrac epArrowShaft epArrowHead
+
+renderTime :: UTCTime -> UTCTime -> String
+renderTime start update = renderSecs $ round $ diffUTCTime update start
+
+renderBar :: Int -> Int -> Double -> Char -> Char -> String
+renderBar total _ fraction _ _ | fraction == 0 = replicate total ' '
+renderBar total nThreads fraction shaftChar headChar = shaft ++ heads ++ blank
+  where
+    -- hl a = map (\(i, c) -> if (updates + i) `mod` 15 == 0 then '-' else c) $ zip [1..] a
+    len     = ceiling $ fraction * fromIntegral total
+    shaft   = replicate len shaftChar
+    heads   = replicate nThreads headChar
+    blank   = replicate (total - len - nThreads - 1) ' '
+
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
-myShake :: CutConfig -> Rules () -> IO ()
-myShake cfg rules = do
-  (shake myOpts . alternatives) rules
-  -- removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
-  where
-    myOpts = shakeOptions
-      { shakeFiles     = cfgTmpDir cfg
-      -- , shakeVerbosity = if isJust (cfgDebug cfg) then Chatty else Quiet
-      , shakeVerbosity = Quiet
-      , shakeThreads   = 0 -- TODO make customizable? increase? decrease?
-      , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
-      , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
-      , shakeChange    = ChangeModtimeAndDigest -- TODO test this
-      -- , shakeCommandOptions = [EchoStdout True]
-      -- , shakeProgress = progressProgram
-      -- , shakeLineBuffering = True
-      -- , shakeStaunch = True -- TODO is this a good idea?
-      -- , shakeColor = True
-      -- TODO shakeShare to implement shared cache on the demo site!
-      }
+myShake :: CutConfig -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
+myShake cfg pm delay rules = do
+  -- ref <- newIORef (return mempty :: IO Progress)
+  let shakeOpts = shakeOptions
+        { shakeFiles     = cfgTmpDir cfg
+        -- , shakeVerbosity = if isJust (cfgDebug cfg) then Chatty else Quiet
+        , shakeVerbosity = Quiet
+        , shakeThreads   = numInterpreterThreads
+        , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
+        , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
+        , shakeChange    = ChangeModtimeAndDigest -- TODO test this
+        -- , shakeCommandOptions = [EchoStdout True]
+        , shakeProgress = updateLoop delay . updateProgress pm
+        -- , shakeLineBuffering = True
+        -- , shakeStaunch = True -- TODO is this a good idea?
+        -- , shakeColor = True
+        -- TODO shakeShare to implement shared cache on the demo site!
+        }
 
+  (shake shakeOpts . alternatives) rules
+  -- removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
+  --
 {- This seems to be separately required to show the final result of eval.
  - It can't be moved to Pretty.hs either because that causes an import cycle.
  -
@@ -113,9 +202,29 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: Handle -> CutConfig -> Locks -> HashedIDsRef -> CutType -> Rules ResPath -> IO ()
-eval hdl cfg ref ids rtype = if isJust (cfgDebug cfg)
-  then ignoreErrors . eval'
-  else retryIgnore  . eval'
+eval hdl cfg ref ids rtype p = do
+  start <- getCurrentTime
+  let ep = EvalProgress
+             { epTitle = takeFileName $ fromMaybe "shortcut" $ cfgScript cfg
+             , epStart  = start
+             , epUpdate = start
+             , epDone    = 0
+             , epTotal   = 0
+             , epThreads = numInterpreterThreads
+             , epWidth = fromMaybe 100 $ cfgWidth cfg
+             , epArrowShaft = '—'
+             , epArrowHead = '▶'
+             }
+      delay = 1000000 -- in microseconds
+      pOpts = P.Progress
+                { progressDelay = delay
+                , progressHandle = hdl
+                , progressInitial = ep
+                , progressRender = renderProgress
+                }
+  if isJust (cfgDebug cfg)
+    then ignoreErrors $ eval' delay pOpts p
+    else retryIgnore  $ eval' delay pOpts p
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program. The error will still be visible.
@@ -136,9 +245,8 @@ eval hdl cfg ref ids rtype = if isJust (cfgDebug cfg)
     report fn status = case rsIterNumber status of
       0 -> fn
       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
-                  
 
-    eval' rpath = myShake cfg $ do
+    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
       (ResPath path) <- rpath
       want ["eval"]
       "eval" ~> do
@@ -150,11 +258,11 @@ eval hdl cfg ref ids rtype = if isJust (cfgDebug cfg)
          - TODO move this logic to the top level?
          -}
         -- ids' <- liftIO $ readIORef ids
-        when (cfgInteractive cfg) (printShort cfg ref ids hdl rtype path)
+        when (cfgInteractive cfg) (printShort cfg ref ids pm rtype path)
+        completeProgress pm
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids (toCutPath cfg path) out
-          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids hdl path)
-        Exit _ <- command [] "sync" [] -- TODO is this needed?
+          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids pm path)
         return ()
 
 writeResult :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> FilePath -> Action ()
@@ -163,40 +271,23 @@ writeResult cfg ref idsref path out = do
   unhashIDsFile cfg ref idsref path out
 
 -- TODO what happens when the txt is a binary plot image?
-printLong :: CutConfig -> Locks -> HashedIDsRef -> Handle -> FilePath -> Action ()
-printLong _ ref idsref hdl path = do
+printLong :: CutConfig -> Locks -> HashedIDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
+printLong _ ref idsref pm path = do
   ids <- liftIO $ readIORef idsref
   txt <- withReadLock' ref path $ readFile' path
   let txt' = unhashIDs False ids txt
-  liftIO $ hPutStrLn hdl txt'
+  liftIO $ P.putMsgLn pm ("\n" ++ txt')
 
-printShort :: CutConfig -> Locks -> HashedIDsRef -> Handle -> CutType -> FilePath -> Action ()
-printShort cfg ref idsref hdl rtype path = do
+printShort :: CutConfig -> Locks -> HashedIDsRef -> P.Meter' EvalProgress -> CutType -> FilePath -> Action ()
+printShort cfg ref idsref pm rtype path = do
   ids <- liftIO $ readIORef idsref
   res  <- prettyResult cfg ref rtype $ toCutPath cfg path
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."
   -- TODO fix the bug that causes this to remove newlines after seqids:
   res' <- fmap (unhashIDs False ids) $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
-  liftIO $ hPutStrLn hdl res'
+  liftIO $ P.putMsgLn pm res'
   -- liftIO $ putStrLn $ "done rendering with unhashIDs"
-
-{- A hacky (attempted) solution to the inability to use results of function
- - calls as inputs to the repeat* and replace* functions: pass the raw
- - expression into the Action monad and separately evaluate it inside. Will it
- - work? Sounds plausible... No rules or anything needed here I think.
- - TODO do i need to pass the handle in from above?
- - TODO factor out the common code with eval above?
- -}
-evalIntermediateExpr :: CutState -> CutExpr -> IO CutPath
-evalIntermediateExpr st@(_, cfg, _, _) expr = do
-  myShake cfg $ do
-    (ExprPath path) <- rExpr st expr
-    want ["evalIntermediateExpr"]
-    "evalIntermediateExpr" ~> do
-      alwaysRerun
-      actionRetry 9 $ need [path]
-  return $ exprPath st expr
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
