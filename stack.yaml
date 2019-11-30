@@ -1,5 +1,6 @@
 flags: {}
 allow-newer: true
+# we use stack inside of nix instead of the other way around
 nix:
   enable: false
   pure: false
@@ -10,7 +11,7 @@ packages:
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
 system-ghc: true
-resolver: lts-13.15
+resolver: lts-14.4
 extra-deps:
   - posix-escape-0.1
   - path-io-1.6.0

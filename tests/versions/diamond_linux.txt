@@ -1,1 +1,5 @@
-diamond version 0.9.22
+diamond v0.9.29.130 | by Benjamin Buchfink <buchfink@gmail.com>
+Licensed under the GNU GPL <https://www.gnu.org/licenses/gpl.txt>
+Check http://github.com/bbuchfink/diamond for updates.
+
+diamond version 0.9.29
