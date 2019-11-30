@@ -33,46 +33,46 @@ These are changes to the core code or build system:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
-| [feature-cachix](https://github.com/jefdaj/shortcut/tree/feature-cachix) :heavy_check_mark: | ![feature-cachix](https://badgen.net/travis/jefdaj/shortcut/feature-cachix?label=)  |  |
-| [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) :white_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=)  |  |
-| [feature-progressbar](https://github.com/jefdaj/shortcut/tree/feature-progressbar) :heavy_check_mark: | ![feature-progressbar](https://badgen.net/travis/jefdaj/shortcut/feature-progressbar?label=)  |  |
-| [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) :white_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=)  |  |
-| [feature-singularity](https://github.com/jefdaj/shortcut/tree/feature-singularity) :white_check_mark: | ![feature-singularity](https://badgen.net/travis/jefdaj/shortcut/feature-singularity?label=)  |  |
+| [feature-cachix](https://github.com/jefdaj/shortcut/tree/feature-cachix) | :heavy_check_mark: | ![feature-cachix](https://badgen.net/travis/jefdaj/shortcut/feature-cachix?label=)  |  |
+| [feature-logging](https://github.com/jefdaj/shortcut/tree/feature-logging) | :white_check_mark: | ![feature-logging](https://badgen.net/travis/jefdaj/shortcut/feature-logging?label=)  |  |
+| [feature-progressbar](https://github.com/jefdaj/shortcut/tree/feature-progressbar) | :heavy_check_mark: | ![feature-progressbar](https://badgen.net/travis/jefdaj/shortcut/feature-progressbar?label=)  |  |
+| [feature-rerun-tests](https://github.com/jefdaj/shortcut/tree/feature-rerun-tests) | :white_check_mark: | ![feature-rerun-tests](https://badgen.net/travis/jefdaj/shortcut/feature-rerun-tests?label=)  |  |
+| [feature-singularity](https://github.com/jefdaj/shortcut/tree/feature-singularity) | :white_check_mark: | ![feature-singularity](https://badgen.net/travis/jefdaj/shortcut/feature-singularity?label=)  |  |
 
 And these are "modules" related to a specific language feature or bioinformatics program:
 
 | branch           |  code | tests                                                                                     | demo |  docs |
 |------------------|-------|-------------------------------------------------------------------------------------------|------|-------|
-| [module-allvsall](https://github.com/jefdaj/shortcut/tree/module-allvsall) :heavy_check_mark: | ![module-allvsall](https://badgen.net/travis/jefdaj/shortcut/module-allvsall?label=)  |  |
-| [module-biomartr](https://github.com/jefdaj/shortcut/tree/module-biomartr) :heavy_check_mark: | ![module-biomartr](https://badgen.net/travis/jefdaj/shortcut/module-biomartr?label=) :white_check_mark: |  | |
-| [module-blast](https://github.com/jefdaj/shortcut/tree/module-blast) :heavy_check_mark: | ![module-blast](https://badgen.net/travis/jefdaj/shortcut/module-blast?label=) :heavy_check_mark:  |  | |
-| [module-blastdb](https://github.com/jefdaj/shortcut/tree/module-blastdb) :heavy_check_mark: | ![module-blastdb](https://badgen.net/travis/jefdaj/shortcut/module-blastdb?label=) :heavy_check_mark:  |  | |
-| [module-blasthits](https://github.com/jefdaj/shortcut/tree/module-blasthits) :heavy_check_mark: | ![module-blasthits](https://badgen.net/travis/jefdaj/shortcut/module-blasthits?label=) :heavy_check_mark:  |  | |
-| [module-blastrbh](https://github.com/jefdaj/shortcut/tree/module-blastrbh) :heavy_check_mark: | ![module-blastrbh](https://badgen.net/travis/jefdaj/shortcut/module-blastrbh?label=) :white_check_mark:  |  | |
-| [module-busco](https://github.com/jefdaj/shortcut/tree/module-busco) :heavy_check_mark: | ![module-busco](https://badgen.net/travis/jefdaj/shortcut/module-busco?label=) :heavy_check_mark: |  | |
-| [module-cheat](https://github.com/jefdaj/shortcut/tree/module-cheat) | ![module-cheat](https://badgen.net/travis/jefdaj/shortcut/module-cheat?label=)  |  | |
-| [module-crbblast](https://github.com/jefdaj/shortcut/tree/module-crbblast) :heavy_check_mark: | ![module-crbblast](https://badgen.net/travis/jefdaj/shortcut/module-crbblast?label=) :heavy_check_mark:  |  | |
-| [module-diamond](https://github.com/jefdaj/shortcut/tree/module-diamond) :heavy_check_mark: | ![module-diamond](https://badgen.net/travis/jefdaj/shortcut/module-diamond?label=) :heavy_check_mark: |  | |
-| [module-greencut](https://github.com/jefdaj/shortcut/tree/module-greencut) :white_check_mark: | ![module-greencut](https://badgen.net/travis/jefdaj/shortcut/module-greencut?label=)  |  | |
-| [module-hmmer](https://github.com/jefdaj/shortcut/tree/module-hmmer) :heavy_check_mark: | ![module-hmmer](https://badgen.net/travis/jefdaj/shortcut/module-hmmer?label=) :heavy_check_mark: |  | |
-| [module-listlike](https://github.com/jefdaj/shortcut/tree/module-listlike) :white_check_mark: | ![module-listlike](https://badgen.net/travis/jefdaj/shortcut/module-listlike?label=)  |  | |
-| [module-load](https://github.com/jefdaj/shortcut/tree/module-load) :heavy_check_mark: | ![module-load](https://badgen.net/travis/jefdaj/shortcut/module-load?label=) :heavy_check_mark: |  | |
-| [module-math](https://github.com/jefdaj/shortcut/tree/module-math) :heavy_check_mark: | ![module-math](https://badgen.net/travis/jefdaj/shortcut/module-math?label=) :heavy_check_mark: |  | |
-| [module-mmseqs](https://github.com/jefdaj/shortcut/tree/module-mmseqs) :heavy_check_mark: | ![module-mmseqs](https://badgen.net/travis/jefdaj/shortcut/module-mmseqs?label=) :heavy_check_mark: |  | |
-| [module-muscle](https://github.com/jefdaj/shortcut/tree/module-muscle) :heavy_check_mark: | ![module-muscle](https://badgen.net/travis/jefdaj/shortcut/module-muscle?label=) :heavy_check_mark: |  | |
-| [module-orthofinder](https://github.com/jefdaj/shortcut/tree/module-orthofinder) :white_check_mark: | ![module-orthofinder](https://badgen.net/travis/jefdaj/shortcut/module-orthofinder?label=) :heavy_check_mark: |  | |
-| [module-orthogroups](https://github.com/jefdaj/shortcut/tree/module-orthogroups) :white_check_mark: | ![module-orthogroups](https://badgen.net/travis/jefdaj/shortcut/module-orthogroups?label=) :white_check_mark: |  | |
-| [module-permute](https://github.com/jefdaj/shortcut/tree/module-permute) :white_check_mark: | ![module-permute](https://badgen.net/travis/jefdaj/shortcut/module-permute?label=)  |  | |
-| [module-plots](https://github.com/jefdaj/shortcut/tree/module-plots) :white_check_mark: | ![module-plots](https://badgen.net/travis/jefdaj/shortcut/module-plots?label=) :white_check_mark: |  | |
-| [module-psiblast](https://github.com/jefdaj/shortcut/tree/module-psiblast) :white_check_mark: | ![module-psiblast](https://badgen.net/travis/jefdaj/shortcut/module-psiblast?label=) :heavy_check_mark: |  | |
-| [module-range](https://github.com/jefdaj/shortcut/tree/module-range) :heavy_check_mark: | ![module-range](https://badgen.net/travis/jefdaj/shortcut/module-range?label=)  |  | |
-| [module-sample](https://github.com/jefdaj/shortcut/tree/module-sample) :heavy_check_mark: | ![module-sample](https://badgen.net/travis/jefdaj/shortcut/module-sample?label=) :white_check_mark: |  | |
-| [module-scores](https://github.com/jefdaj/shortcut/tree/module-scores) :heavy_check_mark: | ![module-scores](https://badgen.net/travis/jefdaj/shortcut/module-scores?label=) :white_check_mark: |  | |
-| [module-seqio](https://github.com/jefdaj/shortcut/tree/module-seqio) :heavy_check_mark: | ![module-seqio](https://badgen.net/travis/jefdaj/shortcut/module-seqio?label=) :heavy_check_mark: |  | |
-| [module-sets](https://github.com/jefdaj/shortcut/tree/module-sets) :heavy_check_mark: | ![module-sets](https://badgen.net/travis/jefdaj/shortcut/module-sets?label=)  |  | |
-| [module-setstable](https://github.com/jefdaj/shortcut/tree/module-setstable) :heavy_check_mark: | ![module-setstable](https://badgen.net/travis/jefdaj/shortcut/module-setstable?label=)  |  | |
-| [module-sonicparanoid](https://github.com/jefdaj/shortcut/tree/module-sonicparanoid) :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/shortcut/module-sonicparanoid?label=) :white_check_mark:  |  | |
-| [module-summarize](https://github.com/jefdaj/shortcut/tree/module-summarize) :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/shortcut/module-summarize?label=)  |  | |
+| [module-allvsall](https://github.com/jefdaj/shortcut/tree/module-allvsall) | :heavy_check_mark: | ![module-allvsall](https://badgen.net/travis/jefdaj/shortcut/module-allvsall?label=)  |  |
+| [module-biomartr](https://github.com/jefdaj/shortcut/tree/module-biomartr) | :heavy_check_mark: | ![module-biomartr](https://badgen.net/travis/jefdaj/shortcut/module-biomartr?label=) :white_check_mark: |  | |
+| [module-blast](https://github.com/jefdaj/shortcut/tree/module-blast) | :heavy_check_mark: | ![module-blast](https://badgen.net/travis/jefdaj/shortcut/module-blast?label=) :heavy_check_mark:  |  | |
+| [module-blastdb](https://github.com/jefdaj/shortcut/tree/module-blastdb) | :heavy_check_mark: | ![module-blastdb](https://badgen.net/travis/jefdaj/shortcut/module-blastdb?label=) :heavy_check_mark:  |  | |
+| [module-blasthits](https://github.com/jefdaj/shortcut/tree/module-blasthits) | :heavy_check_mark: | ![module-blasthits](https://badgen.net/travis/jefdaj/shortcut/module-blasthits?label=) :heavy_check_mark:  |  | |
+| [module-blastrbh](https://github.com/jefdaj/shortcut/tree/module-blastrbh) | :heavy_check_mark: | ![module-blastrbh](https://badgen.net/travis/jefdaj/shortcut/module-blastrbh?label=) :white_check_mark:  |  | |
+| [module-busco](https://github.com/jefdaj/shortcut/tree/module-busco) | :heavy_check_mark: | ![module-busco](https://badgen.net/travis/jefdaj/shortcut/module-busco?label=) :heavy_check_mark: |  | |
+| [module-cheat](https://github.com/jefdaj/shortcut/tree/module-cheat) | | ![module-cheat](https://badgen.net/travis/jefdaj/shortcut/module-cheat?label=)  |  | |
+| [module-crbblast](https://github.com/jefdaj/shortcut/tree/module-crbblast) | :heavy_check_mark: | ![module-crbblast](https://badgen.net/travis/jefdaj/shortcut/module-crbblast?label=) :heavy_check_mark:  |  | |
+| [module-diamond](https://github.com/jefdaj/shortcut/tree/module-diamond) | :heavy_check_mark: | ![module-diamond](https://badgen.net/travis/jefdaj/shortcut/module-diamond?label=) :heavy_check_mark: |  | |
+| [module-greencut](https://github.com/jefdaj/shortcut/tree/module-greencut) | :white_check_mark: | ![module-greencut](https://badgen.net/travis/jefdaj/shortcut/module-greencut?label=)  |  | |
+| [module-hmmer](https://github.com/jefdaj/shortcut/tree/module-hmmer) | :heavy_check_mark: | ![module-hmmer](https://badgen.net/travis/jefdaj/shortcut/module-hmmer?label=) :heavy_check_mark: |  | |
+| [module-listlike](https://github.com/jefdaj/shortcut/tree/module-listlike) | :white_check_mark: | ![module-listlike](https://badgen.net/travis/jefdaj/shortcut/module-listlike?label=)  |  | |
+| [module-load](https://github.com/jefdaj/shortcut/tree/module-load) | :heavy_check_mark: | ![module-load](https://badgen.net/travis/jefdaj/shortcut/module-load?label=) :heavy_check_mark: |  | |
+| [module-math](https://github.com/jefdaj/shortcut/tree/module-math) | :heavy_check_mark: | ![module-math](https://badgen.net/travis/jefdaj/shortcut/module-math?label=) :heavy_check_mark: |  | |
+| [module-mmseqs](https://github.com/jefdaj/shortcut/tree/module-mmseqs) | :heavy_check_mark: | ![module-mmseqs](https://badgen.net/travis/jefdaj/shortcut/module-mmseqs?label=) :heavy_check_mark: |  | |
+| [module-muscle](https://github.com/jefdaj/shortcut/tree/module-muscle) | :heavy_check_mark: | ![module-muscle](https://badgen.net/travis/jefdaj/shortcut/module-muscle?label=) :heavy_check_mark: |  | |
+| [module-orthofinder](https://github.com/jefdaj/shortcut/tree/module-orthofinder) | :white_check_mark: | ![module-orthofinder](https://badgen.net/travis/jefdaj/shortcut/module-orthofinder?label=) :heavy_check_mark: |  | |
+| [module-orthogroups](https://github.com/jefdaj/shortcut/tree/module-orthogroups) | :white_check_mark: | ![module-orthogroups](https://badgen.net/travis/jefdaj/shortcut/module-orthogroups?label=) :white_check_mark: |  | |
+| [module-permute](https://github.com/jefdaj/shortcut/tree/module-permute) | :white_check_mark: | ![module-permute](https://badgen.net/travis/jefdaj/shortcut/module-permute?label=)  |  | |
+| [module-plots](https://github.com/jefdaj/shortcut/tree/module-plots) | :white_check_mark: | ![module-plots](https://badgen.net/travis/jefdaj/shortcut/module-plots?label=) :white_check_mark: |  | |
+| [module-psiblast](https://github.com/jefdaj/shortcut/tree/module-psiblast) | :white_check_mark: | ![module-psiblast](https://badgen.net/travis/jefdaj/shortcut/module-psiblast?label=) :heavy_check_mark: |  | |
+| [module-range](https://github.com/jefdaj/shortcut/tree/module-range) | :heavy_check_mark: | ![module-range](https://badgen.net/travis/jefdaj/shortcut/module-range?label=)  |  | |
+| [module-sample](https://github.com/jefdaj/shortcut/tree/module-sample) | :heavy_check_mark: | ![module-sample](https://badgen.net/travis/jefdaj/shortcut/module-sample?label=) :white_check_mark: |  | |
+| [module-scores](https://github.com/jefdaj/shortcut/tree/module-scores) | :heavy_check_mark: | ![module-scores](https://badgen.net/travis/jefdaj/shortcut/module-scores?label=) :white_check_mark: |  | |
+| [module-seqio](https://github.com/jefdaj/shortcut/tree/module-seqio) | :heavy_check_mark: | ![module-seqio](https://badgen.net/travis/jefdaj/shortcut/module-seqio?label=) :heavy_check_mark: |  | |
+| [module-sets](https://github.com/jefdaj/shortcut/tree/module-sets) | :heavy_check_mark: | ![module-sets](https://badgen.net/travis/jefdaj/shortcut/module-sets?label=)  |  | |
+| [module-setstable](https://github.com/jefdaj/shortcut/tree/module-setstable) | :heavy_check_mark: | ![module-setstable](https://badgen.net/travis/jefdaj/shortcut/module-setstable?label=)  |  | |
+| [module-sonicparanoid](https://github.com/jefdaj/shortcut/tree/module-sonicparanoid) | :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/shortcut/module-sonicparanoid?label=) :white_check_mark:  |  | |
+| [module-summarize](https://github.com/jefdaj/shortcut/tree/module-summarize) | :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/shortcut/module-summarize?label=)  |  | |
  |
 Build Shortcut and run self-tests
 ---------------------------------
