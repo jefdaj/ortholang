@@ -84,7 +84,7 @@ let
     treeCl = pkgs.python27Packages.callPackage ./treeCl {
       inherit raxml; # TODO why doesn't it find this?
       inherit fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
-      inherit (pkgs.python27Packages) pyyaml biopython cython dendropy futures ipython;
+      inherit (pkgs.python27Packages) pyyaml biopython cython dendropy futures;
       inherit (pkgs.python27Packages) matplotlib nose numpy pandas progressbar scikitlearn scipy;
     };
   };
