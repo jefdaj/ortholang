@@ -288,6 +288,7 @@ listFunctionTypesWithOutput cfg cType = filter matches descs
 -- TODO this is totally duplicating code from putAssign; factor out
 cmdLoad :: CutState -> Handle -> String -> IO CutState
 cmdLoad st@(_, cfg, ref, ids) hdl path = do
+  clear
   path' <- absolutize path
   dfe   <- doesFileExist path'
   if not dfe
