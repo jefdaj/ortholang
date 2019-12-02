@@ -220,7 +220,7 @@ eval hdl cfg ref ids rtype p = do
                 { progressDelay = delay
                 , progressHandle = hdl
                 , progressInitial = ep
-                , progressRender = renderProgress
+                , progressRender = if cfgNoProg cfg then (const "") else renderProgress
                 }
   if isJust (cfgDebug cfg)
     then ignoreErrors $ eval' delay pOpts p

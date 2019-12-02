@@ -29,5 +29,6 @@ Options:
                      or not yet.
   --secure           Make things a little more secure for webserver use.
                      So far, it just disables shell access through the :! command.
+  --noprogress       Do not display the progress bar.
   --output OUTPUT    Instead of printing results, save them to this file.
                      
