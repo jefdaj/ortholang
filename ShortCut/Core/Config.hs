@@ -83,6 +83,7 @@ loadConfig mods args = do
               , cfgTestPtn = ctp
               , cfgWidth   = Nothing -- not used except in testing
               , cfgSecure  = isPresent args $ longOption "secure"
+              , cfgNoProg  = isPresent args $ longOption "noprogress"
               , cfgParLock = par
               , cfgOutFile = out
               , cfgOS      = os'

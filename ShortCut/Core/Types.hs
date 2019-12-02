@@ -352,6 +352,7 @@ data CutConfig = CutConfig
   , cfgTestPtn :: [String] -- [] means run all tests
   , cfgWidth   :: Maybe Int -- for testing
   , cfgSecure  :: Bool
+  , cfgNoProg  :: Bool
   , cfgParLock :: Resource
   , cfgOS      :: String
   }
