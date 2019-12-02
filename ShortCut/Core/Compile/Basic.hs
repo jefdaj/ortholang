@@ -444,6 +444,7 @@ aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
   -- through as a (ListOf str) here; have to read as Strings and convert to
   -- CutPaths
+  -- alwaysRerun -- TODO does this help?
   paths <- readLitPaths cfg ref pathsPath'
   let paths' = map (fromCutPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'

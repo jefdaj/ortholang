@@ -466,6 +466,7 @@ handleCmdError cfg ref bin n stderrPath rmPatterns = do
 -- TODO take mod time into account to avoid re-hashing (see if Shake exports that code)
 hashContent :: CutConfig -> Locks -> CutPath -> Action String
 hashContent cfg ref@(disk, _) path = do
+  -- alwaysRerun -- TODO does this help?
   need' "hashContent" [path']
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
   -- out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
