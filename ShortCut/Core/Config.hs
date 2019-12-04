@@ -67,7 +67,7 @@ loadConfig mods args = do
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   out <- mapM absolutize =<< loadField args cfg "output"
-  shr <- mapM absolutize =<< loadField args cfg "share"
+  shr <- mapM absolutize =<< loadField args cfg "sharedir"
   let ctp = getAllArgs args (longOption "test")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
