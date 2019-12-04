@@ -107,12 +107,7 @@ rLit :: CutState -> CutExpr -> Rules ExprPath
 rLit s@(_, cfg, ref, ids) expr = do
   let path  = exprPath s expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromCutPath cfg path
-
-  -- this compiles, but the cache still fails.
-  -- maybe it should only be done on actions that read from disk instead of write?
-  cached <- newCache $ \p -> aLit cfg ref ids expr (toCutPath cfg p)
-  path' %> cached
-
+  path' %> \_ -> aLit cfg ref ids expr path
   return (ExprPath path')
 
 -- TODO take the path, not the expression?
@@ -330,6 +325,7 @@ aLoadHash hashSeqIDs cfg ref ids src ext = do
       newIDs <- if done
         then do 
           -- liftIO $ putStrLn "reading previously hashed ids"
+          -- TODO is this a good place to use Shake's newCache?
           readHashedIDs cfg ref idsPath -- TODO have to atomicModifyIORef' here!
         else do
           -- liftIO $ putStrLn "hashing ids for the first time"
