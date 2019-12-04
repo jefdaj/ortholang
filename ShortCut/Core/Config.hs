@@ -67,7 +67,7 @@ loadConfig mods args = do
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   out <- mapM absolutize =<< loadField args cfg "output"
-  -- shr <- mapM absolutize =<< loadField args cfg "sharedir"
+  shr <- mapM absolutize =<< loadField args cfg "sharedir"
   let ctp = getAllArgs args (longOption "test")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
@@ -87,7 +87,7 @@ loadConfig mods args = do
               , cfgNoProg  = isPresent args $ longOption "noprogress"
               , cfgParLock = par
               , cfgOutFile = out
-              -- , cfgShare   = shr
+              , cfgShare   = shr
               , cfgOS      = os'
               }
   debug' $ show res
@@ -169,7 +169,7 @@ setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of
 updateDebug :: Maybe String -> IO ()
 updateDebug regex = case regex of
   Nothing -> do
-    debug' "turning of debugging"
+    debug' "turning off debugging"
     setLogLevel LevelWarn
   Just r -> do
     setLogLevel LevelDebug

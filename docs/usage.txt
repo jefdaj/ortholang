@@ -30,5 +30,6 @@ Options:
   --secure           Make things a little more secure for webserver use.
                      So far, it just disables shell access through the :! command.
   --noprogress       Do not display the progress bar.
+  --sharedir SHARE   A shared cache for multiple shortcut instances.
   --output OUTPUT    Instead of printing results, save them to this file.
                      
