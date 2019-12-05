@@ -34,18 +34,6 @@ mkTests cfg ref ids = mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
 
-{- Tasty uses a subset of AWK to match patterns.
- - I thought that was confusing, so this generates it from a simple list.
- - If you find a need for more expressive patterns, email and I'll add them back!
- - TODO is this broken for multiple patterns? fix or remove
- -}
-mkTastyPattern :: [String] -> String
-mkTastyPattern ps = trace "test.mkTastyPatttern" msg awkPtn
-  where
-    matchPatterns = map ("$0 ~ " ++) $ map (\p -> "/" ++ p ++ "/") ps
-    awkPtn = foldr1 (\a b -> a ++ " || " ++ b) matchPatterns
-    msg = show ps ++ " -> '" ++ awkPtn ++ "'"
-
 mkTestConfig :: CutConfig -> FilePath -> CutConfig
 mkTestConfig cfg dir = cfg
   { cfgScript  = Nothing
@@ -71,7 +59,7 @@ runTests args cfg ref ids = withArgs [] $ do
     setEnv "TASTY_NUM_THREADS" "1" -- TODO can more be done without repl issues?
     case getAllArgs args (longOption "test") of
       [] -> return ()
-      ps -> setEnv "TASTY_PATTERN" $ mkTastyPattern ps
+      ps -> setEnv "TASTY_PATTERN" $ unwords ps
     let dataSrc = wd </> "data"
         dataDst = tmpSubDir </> "data"
     -- TODO why not use the symlink function here?
