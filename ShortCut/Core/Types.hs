@@ -62,6 +62,7 @@ module ShortCut.Core.Types
   , ResPath(..)
   -- misc experimental stuff
   , extractExprs
+  , extractLoads
   , typeMatches
   , typesMatch
   , nonEmptyType
@@ -74,14 +75,15 @@ import qualified Data.Map as M
 import Text.Parsec (Parsec)
 
 import ShortCut.Core.Locks (Locks, withReadLock)
-import ShortCut.Core.Util  (readFileStrict, readFileLazy, headOrDie)
+import ShortCut.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
-import Data.List                      (nub, find)
+import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
+import Data.Maybe (fromJust)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 newtype CutPath = CutPath FilePath deriving (Eq, Ord, Show)
@@ -485,6 +487,20 @@ extractExprs scr (CutRef  _ _ _ v ) = case lookup v scr of
 extractExprs _   (CutFun _ _ _ _ _) = error explainFnBug
 extractExprs scr (CutBop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show e
+
+-- TODO any good way to avoid fromJust here?
+exprDepsOf :: CutScript -> CutExpr -> [CutExpr]
+exprDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
+
+-- needed to know what to still evaluate despite caching, so we can load seqid hashes
+-- TODO rename to reflect that it's mostly about getting the functions which can't be cached
+extractLoads :: CutScript -> CutExpr -> [CutExpr]
+-- extractLoads s e = filter isLoad $ extractExprs s e
+extractLoads s e@(CutFun _ _ _ _ _) = filter isLoad' $ exprDepsOf s e
+  where
+    isLoad' expr = let res = isLoad expr in trace "shortcut.core.types.extractLoads" ("isLoad '" ++ show expr ++ "'? " ++ show res) res
+    isLoad (CutFun _ _ _ name _) = "load" `isPrefixOf` name || "glob" `isPrefixOf` name
+    isLoad _ = False
 
 -- TODO will this get printed, or will there just be a parse error?
 explainFnBug :: String
