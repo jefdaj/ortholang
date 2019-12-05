@@ -119,9 +119,11 @@ needDebug fnName paths = do
 -- TODO how to force it to load the seqids when their downstream files aren't needed?
 --      probably list all the load* dependencies of the expr and want/need them first
 needShared :: CutConfig -> Locks -> String -> CutPath -> Action ()
-needShared cfg ref name path@(CutPath p) =
+needShared cfg ref name path@(CutPath p) = do
   let path' = fromCutPath cfg path
-  in if ("/load" `isInfixOf` p)
+  done <- doesFileExist path'
+  if done -- if done already, needing is cheap + more elegant than cache lookup
+     || ("/load" `isInfixOf` p)
      || ("exprs/str" `isInfixOf` p)
      || ("exprs/num" `isInfixOf` p)
      || ("/reps/" `isInfixOf` p)
