@@ -496,7 +496,7 @@ exprDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
 -- TODO rename to reflect that it's mostly about getting the functions which can't be cached
 extractLoads :: CutScript -> CutExpr -> [CutExpr]
 -- extractLoads s e = filter isLoad $ extractExprs s e
-extractLoads s e@(CutFun _ _ _ _ _) = filter isLoad' $ exprDepsOf s e
+extractLoads s e = filter isLoad' $ exprDepsOf s e
   where
     isLoad' expr = let res = isLoad expr in trace "shortcut.core.types.extractLoads" ("isLoad '" ++ show expr ++ "'? " ++ show res) res
     isLoad (CutFun _ _ _ name _) = "load" `isPrefixOf` name || "glob" `isPrefixOf` name
