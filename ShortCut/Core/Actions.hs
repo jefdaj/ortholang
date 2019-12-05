@@ -124,6 +124,7 @@ needShared cfg ref name path@(CutPath p) = do
   done <- doesFileExist path'
   if done -- if done already, needing is cheap + more elegant than cache lookup
      || ("/load" `isInfixOf` p)
+     || ("/glob" `isInfixOf` p)
      || ("exprs/str" `isInfixOf` p)
      || ("exprs/num" `isInfixOf` p)
      || ("/reps/" `isInfixOf` p)
