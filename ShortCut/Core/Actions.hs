@@ -61,7 +61,7 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
 import Control.Monad              (when)
-import Data.List                  (sort, nub, isPrefixOf)
+import Data.List                  (sort, nub, isPrefixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 -- import ShortCut.Core.Debug        (debug)
@@ -124,9 +124,19 @@ needShared cfg ref name path@(CutPath p) =
         Just sp -> do
           isLink <- liftIO $ pathIsSymbolicLink sp
           when isLink $ needLink cfg ref name sp
+          when (isPathList sp) $ do
+            paths <- readPaths cfg ref sp
+            liftIO $ putStrLn $ "paths: " ++ show paths
+            need' cfg ref name $ map (fromCutPath cfg) paths -- TODO rename?
           liftIO $ createDirectoryIfMissing True $ takeDirectory path'
           withWriteOnce ref path' $ liftIO $ copyFile sp path'
           trackWrite' cfg [path']
+
+isPathList :: FilePath -> Bool
+isPathList path
+  =  (".list" `isSuffixOf` path)
+  && not (".str.list" `isSuffixOf` path)
+  && not (".num.list" `isSuffixOf` path)
 
 needLink :: CutConfig -> Locks -> String -> FilePath -> Action ()
 needLink cfg ref name link = do
