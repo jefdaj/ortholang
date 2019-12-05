@@ -72,7 +72,7 @@ import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, 
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie, debug, trace, traceShow)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
-import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile)
+import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory, takeExtension)
 import System.FilePath.Glob       (compile, globDir1)
@@ -82,8 +82,10 @@ import System.Posix.Escape         (escape)
 -- import System.IO.Temp (emptyTempFile)
 -- import Control.Concurrent.Thread.Delay (delay)
 import Data.Maybe (isJust)
-import Network.HTTP (simpleHTTP, getRequest, Response(..))
+-- import Network.HTTP (simpleHTTP, getRequest, Response(..))
 import System.IO.Temp (writeTempFile)
+import qualified Data.ByteString as BS
+import Network.Download (openURIString)
 
 ---------------
 -- debugging --
@@ -138,7 +140,10 @@ needShared cfg ref name path@(CutPath p) =
             liftIO $ putStrLn $ "paths: " ++ show paths
             need' cfg ref name $ map (fromCutPath cfg) paths -- TODO rename?
           liftIO $ createDirectoryIfMissing True $ takeDirectory path'
-          withWriteOnce ref path' $ liftIO $ copyFile sp path'
+          -- TODO figure out better criteria for this
+          if "download" `isInfixOf` sp
+            then liftIO $ renameFile sp path'
+            else withWriteOnce ref path' $ liftIO $ copyFile sp path'
           trackWrite' cfg [path']
 
 isPathList :: FilePath -> Bool
@@ -167,22 +172,31 @@ lookupShared cfg path = case sharedPath cfg path of
 
 -- TODO what about timeouts and stuff?
 -- TODO would downloading as binary be better?
+-- TODO how to remove the files after downloading?
 download :: CutConfig -> String -> IO (Maybe FilePath)
 -- download _ url = return Nothing
 download cfg url = do
-  liftIO $ putStrLn $ "url: " ++ url
-  response <- simpleHTTP $ getRequest url
-  case fmap rspCode response of
-    Left _ -> do
-      -- liftIO $ putStrLn $ show err
-      return Nothing
-    Right (2,0,0) -> case fmap rspBody response of
-      Left _ -> return Nothing
-      Right txt -> do
-        path <- writeTempFile (cfgTmpDir cfg) "download.txt" txt
-        -- liftIO $ putStrLn $ "downloaded: " ++ path
-        return $ Just path
-    Right _ -> return Nothing
+  -- liftIO $ putStrLn $ "url: " ++ url
+
+  -- works, but seems to have problems with timeouts or something
+  -- response <- simpleHTTP $ getRequest url
+  -- case fmap rspCode response of
+  --   Left _ -> do
+  --     -- liftIO $ putStrLn $ show err
+  --     return Nothing
+  --   Right (2,0,0) -> case fmap rspBody response of
+  --     Left _ -> return Nothing
+  --     Right txt -> do
+  --       path <- writeTempFile (cfgTmpDir cfg) "download.txt" txt
+  --       -- liftIO $ putStrLn $ "downloaded: " ++ path
+  --       return $ Just path
+  --   Right _ -> return Nothing
+
+  -- use download instead of HTTP
+  es <- openURIString url
+  case es of
+    Left _ -> return Nothing
+    Right s -> fmap Just $ writeTempFile (cfgTmpDir cfg) "download.txt" s
 
 ----------------
 -- read files --
