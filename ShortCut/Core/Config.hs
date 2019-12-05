@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- TODO show cfgShare
+
 module ShortCut.Core.Config where
 
 -- TODO absolutize in the setters too? or unify them with initial loaders?

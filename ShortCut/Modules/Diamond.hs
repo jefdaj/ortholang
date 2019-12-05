@@ -2,6 +2,7 @@ module ShortCut.Modules.Diamond
   where
 
 -- TODO any point in adding a daa type?
+-- TODO can't just cat the .dmnd files!
 
 import Development.Shake
 import ShortCut.Core.Types
