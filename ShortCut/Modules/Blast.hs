@@ -92,7 +92,7 @@ rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 aMkBlastFromDb :: String -> (CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ())
 aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
-  prefix <- readPath ref p'
+  prefix <- readPath cfg ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromCutPath cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?

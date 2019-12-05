@@ -187,9 +187,9 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 -- works on everything but lits: paths or empty lists
 aListPaths :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> CutPath -> Action ()
 aListPaths cfg ref _ paths outPath = do
-  need' "shortcut.core.compile.basic.aListPaths" paths'
+  need' cfg ref "shortcut.core.compile.basic.aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  need' "shortcut.core.compile.basic.aListPaths" paths''
+  need' cfg ref "shortcut.core.compile.basic.aListPaths" paths''
   let paths''' = map (toCutPath cfg) paths'' -- TODO not working?
   writePaths cfg ref out'' paths'''
   where
@@ -219,7 +219,7 @@ rVar (_, cfg, ref, ids) var expr oPath = do
 aVar :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aVar cfg ref _ vPath oPath = do
   alwaysRerun
-  need' "shortcut.core.compile.basic.aVar" [oPath']
+  need' cfg ref "shortcut.core.compile.basic.aVar" [oPath']
   withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
   -- TODO should it sometimes symlink and sometimes copy?
   -- TODO before copying, think about how you might have to re-hash again!
@@ -311,7 +311,7 @@ aLoadHash :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> String -> 
 aLoadHash hashSeqIDs cfg ref ids src ext = do
   alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
-  need' "shortcut.core.compile.basic.aLoadHash" [src']
+  need' cfg ref "shortcut.core.compile.basic.aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromCutPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 <.> ext
@@ -370,8 +370,8 @@ curl cfg ref url = do
 aLoad :: Bool -> CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
   alwaysRerun
-  need' "shortcut.core.compile.basic.aLoad" [strPath']
-  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits ref strPath' -- TODO safer!
+  need' cfg ref "shortcut.core.compile.basic.aLoad" [strPath']
+  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits cfg ref strPath' -- TODO safer!
   -- liftIO $ putStrLn $ "pth: " ++ pth
   pth' <- if isURL pth
             then curl cfg ref pth
@@ -423,7 +423,7 @@ aLoadListLits :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Act
 aLoadListLits cfg ref _ outPath litsPath = do
   let litsPath' = fromCutPath cfg litsPath
       out       = traceA "aLoadListLits" outPath' [outPath', litsPath']
-  lits  <- readLits ref litsPath'
+  lits  <- readLits cfg ref litsPath'
   lits' <- liftIO $ mapM absolutize lits
   writeLits cfg ref out lits'
   where
@@ -454,7 +454,7 @@ aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
                          $ takeExtension $ fromCutPath cfg p) paths'''
   let hashPaths' = map (fromCutPath cfg) hashPaths
   -- debugA $ "about to need: " ++ show paths''
-  need' "shortcut.core.compile.basic.aLoadListLinks" hashPaths'
+  need' cfg ref "shortcut.core.compile.basic.aLoadListLinks" hashPaths'
   writePaths cfg ref out hashPaths
   where
     outPath'   = fromCutPath cfg outPath
@@ -545,7 +545,7 @@ aSimple' ::  CutConfig -> Locks -> HashedIDsRef -> CutPath
          -> (CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ())
          -> Maybe CutPath -> [CutPath] -> Action ()
 aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
-  need' "shortcut.core.compile.basic.aSimple'" argPaths'
+  need' cfg ref "shortcut.core.compile.basic.aSimple'" argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toCutPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
   let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath
       as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths''

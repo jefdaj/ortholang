@@ -313,9 +313,9 @@ mkConcatEach cType = CutFunction
  -}
 -- aConcat :: CutType -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
---   fPaths <- readPaths ref fs'
+--   fPaths <- readPaths cfg ref fs'
 --   let fPaths' = map (fromCutPath cfg) fPaths
---   need' cfg "aConcat" fPaths'
+--   need' cfg ref "aConcat" fPaths'
 --   let out'    = fromCutPath cfg oPath
 --       out''   = traceA "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
@@ -344,9 +344,9 @@ aConcat cType cfg ref ids [outPath, inList] = do
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromCutPath cfg outPath
   writeCachedLines cfg ref emptyPath [emptyStr]
-  inPaths <- readPaths ref $ fromCutPath cfg inList
+  inPaths <- readPaths cfg ref $ fromCutPath cfg inList
   let inPaths' = map (fromCutPath cfg) inPaths
-  need' "shortcut.modules.seqio.aConcat" inPaths'
+  need' cfg ref "shortcut.modules.seqio.aConcat" inPaths'
   writeCachedLines cfg ref inList' inPaths'
   aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
                                       , toCutPath cfg inList'
@@ -420,7 +420,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'', tmpList] -- TODO any more?
     }
-  -- loadPaths <- readPaths ref tmpList
+  -- loadPaths <- readPaths cfg ref tmpList
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   -- writePaths cfg ref outPath'' loadPaths
   writeCachedVersion cfg ref outPath'' tmpList

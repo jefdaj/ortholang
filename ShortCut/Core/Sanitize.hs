@@ -62,7 +62,7 @@ hashIDsFile cfg ref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
       outPath' = fromCutPath cfg outPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
-  txt <- readFileStrict' ref inPath'
+  txt <- readFileStrict' cfg ref inPath'
   let (fasta', ids) = hashIDsTxt txt
       (CutPath k) = outPath
       v = takeFileName inPath'
@@ -124,7 +124,7 @@ unhashIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> FilePath -> Ac
 unhashIDsFile cfg ref idref inPath outPath = do
   let inPath'  = fromCutPath cfg inPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromCutPath cfg inPath
-  txt <- readFileStrict' ref inPath'
+  txt <- readFileStrict' cfg ref inPath'
   -- let txt' = unhashIDs ids txt
   ids <- liftIO $ readIORef idref
   let txt' = unhashIDs False ids txt
@@ -137,7 +137,7 @@ readHashedIDs :: CutConfig -> Locks -> CutPath -> Action HashedIDs
 readHashedIDs cfg ref path = do
   let path' = fromCutPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
-  txt <- readFileStrict' ref path'
+  txt <- readFileStrict' cfg ref path'
   let splitFn l = let ws = split "\t" l
                   in if length ws < 2
                        then error ("failed to split '" ++ l ++ "'")
@@ -155,7 +155,7 @@ lookupID ids s = map fst $ filter (\(k,v) -> s == k || s `isPrefixOf` v) (M.toLi
 -- TODO move to Actions? causes an import cycle so far
 lookupIDsFile :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 lookupIDsFile cfg ref ids inPath outPath = do
-  partialIDs <- readList ref $ fromCutPath cfg inPath
+  partialIDs <- readList cfg ref $ fromCutPath cfg inPath
   ids' <- liftIO $ readIORef ids
   let lookupFn v = case lookupID ids' v of
                      [] -> liftIO (putStrLn ("warning: no ID found for '" ++ v ++ "'. these are the ids: " ++ show ids')) >> return []

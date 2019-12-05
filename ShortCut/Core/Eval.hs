@@ -180,13 +180,13 @@ prettyResult :: CutConfig -> Locks -> CutType -> CutPath -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits ref $ fromCutPath cfg f
+    lits <- readLits cfg ref $ fromCutPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths ref $ fromCutPath cfg f
+    paths <- readPaths cfg ref $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg ref (ScoresOf _)  f = do

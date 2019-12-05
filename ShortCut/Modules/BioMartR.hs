@@ -198,7 +198,7 @@ rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
 aParseSearches :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> Action ()
 aParseSearches cfg ref _ sList out = do
-  parses <- (fmap . map) readSearch (readLits ref sList')
+  parses <- (fmap . map) readSearch (readLits cfg ref sList')
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
@@ -240,7 +240,7 @@ rBioMartR _ _ _ = error "bad rBioMartR call"
 aBioMartR :: CutConfig -> Locks -> HashedIDsRef
           -> CutPath -> CutPath -> CutPath -> CutPath -> Action ()
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
-  need' "shortcut.modules.biomartr.aBioMartR" [bmFn', sTable']
+  need' cfg ref "shortcut.modules.biomartr.aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
   -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']

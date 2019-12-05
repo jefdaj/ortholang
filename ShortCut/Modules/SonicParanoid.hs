@@ -77,9 +77,9 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
   withWriteLock' ref tmpDir $ unlessExists statsPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
-    faPaths <- readPaths ref faListPath'
+    faPaths <- readPaths cfg ref faListPath'
     let faPaths' = map (fromCutPath cfg) faPaths
-    need' "shortcut.moodules.sonicparanoid.aSonicParanoid" faPaths'
+    need' cfg ref "shortcut.moodules.sonicparanoid.aSonicParanoid" faPaths'
     let faLinks = map (\p -> toCutPath cfg $ inDir </> (takeBaseName $ fromCutPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 

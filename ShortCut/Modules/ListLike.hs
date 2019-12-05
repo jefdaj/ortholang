@@ -79,7 +79,7 @@ rLen _ _ = fail "bad arguments to rLen"
 aLen :: CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aLen cfg ref _ [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
-  n <- fmap count $ readPaths ref lst'
+  n <- fmap count $ readPaths cfg ref lst'
   writeLit cfg ref out'' $ show n
   where
     out'  = fromCutPath cfg out

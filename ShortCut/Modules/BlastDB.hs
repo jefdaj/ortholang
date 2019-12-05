@@ -250,7 +250,7 @@ aBlastdblist cfg ref _ listTmp = do
 aFilterList :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aFilterList cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
-  out       <- readLits ref listTmp'
+  out       <- readLits cfg ref listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
   debugA' "aFilterList" $ "names': " ++ show names'
@@ -289,7 +289,7 @@ rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
 aBlastdbget :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> CutPath -> CutPath -> Action ()
 aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
-  need' "shortcut.modules.blastdb.aBlastdbget" [nPath']
+  need' cfg ref "shortcut.modules.blastdb.aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
@@ -388,7 +388,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
   let dbType' = if dbType == ndb then "nucl" else "prot"
-  need' "shortcut.modules.blastdb.aMakeblastdbAll" [fasPath']
+  need' cfg ref "shortcut.modules.blastdb.aMakeblastdbAll" [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
@@ -409,7 +409,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- solution is just to avoid that for now?
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
-  faPaths <- readPaths ref fasPath'
+  faPaths <- readPaths cfg ref fasPath'
   let noQuoting  = unwords $ map (fromCutPath cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting

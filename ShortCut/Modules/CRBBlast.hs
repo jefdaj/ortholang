@@ -82,7 +82,7 @@ blastCRBEach = CutFunction
  -}
 aCRBBlast :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> [CutPath] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do
-  need' "shortcut.modules.crbblast.aCRBBlast" [q', t']
+  need' cfg ref "shortcut.modules.crbblast.aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
@@ -97,7 +97,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
       tDst' = toCutPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toCutPath cfg oPath
-  need' "shortcut.core.modules.crbblast.aCRBBlast" [qDst, tDst]
+  need' cfg ref "shortcut.core.modules.crbblast.aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
   runCmd cfg ref $ CmdDesc

@@ -51,9 +51,9 @@ rSummary _ _ _ = fail "bad argument to rSummary"
 aSummary :: CutConfig -> Locks -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()
 aSummary cfg ref summaryFn iPath out = do
-  need' "shortcut.modules.summary.aSummary" [iPath]
-  iLists <- readLits ref iPath
-  iElems <- mapM (readLits ref . (\p -> cfgTmpDir cfg </> p)) iLists
+  need' cfg ref "shortcut.modules.summary.aSummary" [iPath]
+  iLists <- readLits cfg ref iPath
+  iElems <- mapM (readLits cfg ref . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
       out' = traceA "aSummary" out [out, iPath]
   writeLits cfg ref out' oElems

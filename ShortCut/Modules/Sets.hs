@@ -103,7 +103,7 @@ rSetFold _ _ _ = fail "bad argument to rSetFold"
 aSetFold :: CutConfig -> Locks -> ([Set String] -> Set String)
          -> CutType -> FilePath -> FilePath -> Action ()
 aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
-  setPaths  <- readPaths ref setsPath
+  setPaths  <- readPaths cfg ref setsPath
   setElems  <- mapM (readStrings etype cfg ref) (map (fromCutPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   let sets = map fromList setElems'

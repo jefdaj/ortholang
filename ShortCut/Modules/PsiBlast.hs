@@ -157,16 +157,16 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
       ePath'  = fromCutPath cfg ePath
       qPath'  = fromCutPath cfg qPath -- might be a fasta or pssm
       dbPath' = fromCutPath cfg dbPath
-  need' "shortcut.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
+  need' cfg ref "shortcut.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
 
   eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
 
   -- TODO is there something wrong with the map handlign here? or general makeblastdb?
-  -- dbPrePath <- readPath ref dbPath' -- TODO is this right?
+  -- dbPrePath <- readPath cfg ref dbPath' -- TODO is this right?
   -- let dbPrePath' = fromCutPath cfg dbPrePath
 
   -- this version works for withPdbSubject, but breaks something else?
-  dbPre     <- readPath ref dbPath' -- TODO is this right?
+  dbPre     <- readPath cfg ref dbPath' -- TODO is this right?
   debug "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
@@ -191,7 +191,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
   -- before running psiblast, check whether the query is an empty pssm
   -- and if so, just return empty hits immediately
-  lines2 <- fmap (take 2 . lines) $ readFileStrict' ref qPath'
+  lines2 <- fmap (take 2 . lines) $ readFileStrict' cfg ref qPath'
   if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
     then writeCachedLines cfg ref oPath' ["<<emptybht>>"]
     else do
@@ -225,8 +225,8 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
        -}
       when writingPssm $ do
         let head' = headOrDie "aPsiblastDb failed to read querySeqId"
-        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' ref qPath'
-        pssmLines <- fmap lines $ readFileStrict' ref tPath'
+        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' cfg ref qPath'
+        pssmLines <- fmap lines $ readFileStrict' cfg ref tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName dbPre'
             trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"
