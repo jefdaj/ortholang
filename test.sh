@@ -18,7 +18,7 @@ export TASTY_QUICKCHECK_SHOW_REPLAY=True
 timestamp=$(date '+%Y-%m-%d_%H:%M')
 
 nix_args="--pure -j2"
-stack_cmd="stack build && stack exec shortcut -- --debug '.*' --test $test_filter"
+stack_cmd="stack build && stack exec shortcut -- --test $test_filter"
 
 log="shortcut-${test_filter}-${timestamp}.log"
 
@@ -26,8 +26,8 @@ set -x
 nix-shell $nix_args --command "$stack_cmd" 2>&1 | tee -a $log
 
 # test with the demo server cache too
-# (just blast functions for now to keep from getting too big)
-stack_cmd_2="stack exec shortcut -- --debug '.*' --shared 'http://shortcut.pmb.berkeley.edu/shared' --test '$0 !~ /tmpfiles/ && $0 ~ /blast/'"
+# (just blastp functions for now to keep from getting too big)
+stack_cmd_2="stack exec shortcut -- --shared 'http://shortcut.pmb.berkeley.edu/shared' --test '\$0 !~ /tmpfiles/ && \$0 ~ /blastp/'"
 nix-shell $nix_args --command "$stack_cmd_2" 2>&1 | tee -a $log
 
 # log="shortcut-test_${timestamp}.log"
