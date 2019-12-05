@@ -134,16 +134,16 @@ aMapMain :: CutConfig -> Locks -> HashedIDsRef -> Int
          -> [CutPath] -> CutPath -> CutType -> CutPath -> FilePath
          -> Action ()
 aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
-  need' "shortcut.core.compile.map.aMapMain" regularArgs'
+  need' cfg ref "shortcut.core.compile.map.aMapMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
-  mappedPaths  <- readPaths ref mappedArgList'
+  mappedPaths  <- readPaths cfg ref mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromCutPath cfg) mappedPaths
   debugA' "aMapMain" $ "mappedPaths': " ++ show mappedPaths'
   mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
         (map (toCutPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
-  need' "shortcut.core.compile.map.aMapMain" outPaths
+  need' cfg ref "shortcut.core.compile.map.aMapMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
   let out = traceA "aMapMain" outPath
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
@@ -203,10 +203,10 @@ aMapElem :: CutConfig -> Locks -> HashedIDsRef -> CutType
          -> String -> RepeatSalt -> FilePath -> Action ()
 aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = out <.> "args"
-  args <- readPaths ref argsPath
+  args <- readPaths cfg ref argsPath
   let args' = map (fromCutPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
-  need' "shortcut.core.compile.map.aMapElem" args'
+  need' cfg ref "shortcut.core.compile.map.aMapElem" args'
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do

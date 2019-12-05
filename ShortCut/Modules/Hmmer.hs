@@ -161,7 +161,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in CutFunction
 -- TODO how to integrate the script since it needs the colnum?
 aExtractHmm :: Int -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aExtractHmm n cfg ref _ [outPath, tsvPath] = do
-  -- lits <- readLits ref tsvPath'
+  -- lits <- readLits cfg ref tsvPath'
   -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
   --     lits''  = if uniq then sort $ nub lits' else lits'
   --     lits''' = map (\l -> (words l) !! (n - 1)) lits''

@@ -54,7 +54,7 @@ rMath _ _ _ = fail "bad argument to rMath"
 aMath :: CutConfig -> Locks -> (Scientific -> Scientific -> Scientific)
       -> FilePath -> FilePath -> FilePath -> Action ()
 aMath cfg ref fn p1 p2 out = do
-    need' "shortcut.modules.math.aMath" [p1, p2]
+    need' cfg ref "shortcut.modules.math.aMath" [p1, p2]
     num1 <- fmap strip $ readLit cfg ref p1
     num2 <- fmap strip $ readLit cfg ref p2
     -- putQuiet $ unwords [fnName, p1, p2, p3]

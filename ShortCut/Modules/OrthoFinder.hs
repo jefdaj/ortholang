@@ -61,9 +61,9 @@ aOrthofinder cfg ref _ [out, faListPath] = do
       statsPath' = fromCutPath cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
   -- withWriteLock' ref (tmpDir </> "lock") $ do
-  faPaths <- readPaths ref faListPath'
+  faPaths <- readPaths cfg ref faListPath'
   let faPaths' = map (fromCutPath cfg) faPaths
-  need' "shortcut.modules.orthofinder.aOrthofinder" faPaths'
+  need' cfg ref "shortcut.modules.orthofinder.aOrthofinder" faPaths'
   let faLinks = map (\p -> toCutPath cfg $ tmpDir </> (takeFileName $ fromCutPath cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1

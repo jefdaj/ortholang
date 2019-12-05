@@ -106,8 +106,8 @@ parseOrthoFinder cfg ref _ ofrPath = do
   let resDir = fromCutPath cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   -- ids <- liftIO $ readIORef idref
-  -- txt <- fmap (unhashIDs False ids) $ readFileStrict' ref orthoPath -- TODO openFile error during this?
-  txt <- readFileStrict' ref orthoPath -- TODO openFile error during this?
+  -- txt <- fmap (unhashIDs False ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
+  txt <- readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
   let groups = map (words . drop 11) (lines txt)
   return groups
 
@@ -116,8 +116,8 @@ parseSonicParanoid cfg ref _ ogPath = do
   let resDir = takeDirectory $ fromCutPath cfg ogPath
       grpPath = resDir </> "ortholog_groups.tsv"
   -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
-  -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' ref grpPath -- TODO openFile error during this?
-  txt <- readFileStrict' ref grpPath -- TODO openFile error during this?
+  -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref grpPath -- TODO openFile error during this?
+  txt <- readFileStrict' cfg ref grpPath -- TODO openFile error during this?
   let groups = map parseLine $ tail $ lines txt -- TODO be safe about tail
   -- liftIO $ putStrLn $ "groups: " ++ show groups
       --groups' = map (unhashIDs cfg) groups
@@ -128,7 +128,7 @@ parseSonicParanoid cfg ref _ ogPath = do
 
 parseGreenCut :: CutConfig -> Locks -> HashedIDsRef -> CutPath -> Action [[String]]
 parseGreenCut cfg ref _ ogPath = do
-  txt <- readFileStrict' ref $ fromCutPath cfg ogPath
+  txt <- readFileStrict' cfg ref $ fromCutPath cfg ogPath
   let groups = map parseLine $ lines txt
   return groups
   where
@@ -211,7 +211,7 @@ containsOneOf lists elems = filter (flip any elems . flip elem) lists
 aOrthogroupsFilter :: FilterFn -> CutConfig -> Locks -> HashedIDsRef -> [CutPath] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   ids' <- liftIO $ readIORef ids
-  geneIds <- fmap concat $ fmap (map $ lookupID ids') $ readLits ref $ fromCutPath cfg idsPath
+  geneIds <- fmap concat $ fmap (map $ lookupID ids') $ readLits cfg ref $ fromCutPath cfg idsPath
   groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
   writeOrthogroups cfg ref ids out groups'
@@ -268,9 +268,9 @@ rOrthologFilterStr fnName pickerFn st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [groupL
   idsPath %> absolutizePaths cfg ref idListsPath
   out' %> \_ -> do
     -- TODO is there a way to avoid reading this?
-    nIDs  <- fmap length $ readPaths ref idListsPath
+    nIDs  <- fmap length $ readPaths cfg ref idListsPath
     let fnArg' = show $ pickerFn nIDs
-    need' "shortcut.modules.orthogroups.rOrthologFilterStr" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
+    need' cfg ref "shortcut.modules.orthogroups.rOrthologFilterStr" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
     runCmd cfg ref $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
@@ -357,10 +357,10 @@ rOrthologFilterStrFrac fnName pickerFn st@(_, cfg, ref, _) e@(CutFun _ _ _ _ [fr
   idsPath %> absolutizePaths cfg ref idListsPath
   out' %> \_ -> do
     -- TODO is there a way to avoid reading this?
-    nIDs  <- fmap length $ readPaths ref idListsPath
+    nIDs  <- fmap length $ readPaths cfg ref idListsPath
     fnArg <- readLit cfg ref fracPath
     let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
-    need' "shortcut.modules.orthogroups.rOrthologFilterStrFrac" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
+    need' cfg ref "shortcut.modules.orthogroups.rOrthologFilterStrFrac" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
     runCmd cfg ref $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True

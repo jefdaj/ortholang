@@ -52,7 +52,7 @@ aPermute :: CutState
          -> FilePath -> CutType -> RepeatSalt
          -> FilePath -> Action ()
 aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
-  need' "shortcut.modules.permute.aPermute" [iPath]
+  need' cfg ref "shortcut.modules.permute.aPermute" [iPath]
   elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)

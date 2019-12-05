@@ -38,7 +38,7 @@ import Control.Retry
 
 import Control.Exception.Safe         (catchAny)
 import Data.Maybe                     (maybeToList, isJust, fromMaybe)
-import ShortCut.Core.Compile.Basic    (compileScript)
+import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
 import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
@@ -156,6 +156,8 @@ myShake cfg pm delay rules = do
         , shakeChange    = ChangeModtimeAndDigest -- TODO test this
         -- , shakeCommandOptions = [EchoStdout True]
         , shakeProgress = updateLoop delay . updateProgress pm
+        -- , shakeShare = cfgShare cfg -- TODO why doesn't this work?
+        -- , shakeCloud = ["localhost"] -- TODO why doesn't this work?
         -- , shakeLineBuffering = True
         -- , shakeStaunch = True -- TODO is this a good idea?
         -- , shakeColor = True
@@ -178,13 +180,13 @@ prettyResult :: CutConfig -> Locks -> CutType -> CutPath -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits ref $ fromCutPath cfg f
+    lits <- readLits cfg ref $ fromCutPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths ref $ fromCutPath cfg f
+    paths <- readPaths cfg ref $ fromCutPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg ref (ScoresOf _)  f = do
@@ -201,8 +203,8 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> CutConfig -> Locks -> HashedIDsRef -> CutType -> Rules ResPath -> IO ()
-eval hdl cfg ref ids rtype p = do
+eval :: Handle -> CutConfig -> Locks -> HashedIDsRef -> CutType -> Rules [ExprPath] -> Rules ResPath -> IO ()
+eval hdl cfg ref ids rtype ls p = do
   start <- getCurrentTime
   let ep = EvalProgress
              { epTitle = takeFileName $ fromMaybe "shortcut" $ cfgScript cfg
@@ -223,8 +225,8 @@ eval hdl cfg ref ids rtype p = do
                 , progressRender = if cfgNoProg cfg then (const "") else renderProgress
                 }
   if isJust (cfgDebug cfg)
-    then ignoreErrors $ eval' delay pOpts p
-    else retryIgnore  $ eval' delay pOpts p
+    then ignoreErrors $ eval' delay pOpts ls p
+    else retryIgnore  $ eval' delay pOpts ls p
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program. The error will still be visible.
@@ -246,12 +248,13 @@ eval hdl cfg ref ids rtype p = do
       0 -> fn
       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
-    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
+    eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
+      lpaths' <- (fmap . map) (\(ExprPath p) -> p) lpaths
       (ResPath path) <- rpath
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        actionRetry 9 $ need [path] -- TODO is this done automatically in the case of result?
+        actionRetry 9 $ need $ lpaths' ++ [path] -- TODO is this done automatically in the case of result?
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
          - if neither, print the full result
@@ -293,7 +296,10 @@ printShort cfg ref idsref pm rtype path = do
 evalScript :: Handle -> CutState -> IO ()
 evalScript hdl s@(as, c, ref, ids) = case lookupResult as of
   Nothing  -> putStrLn "no result variable during eval. that's not right!"
-  Just res -> eval hdl c ref ids (typeOf res) (compileScript s $ ReplaceID Nothing)
+  Just res -> do
+    let loadExprs = extractLoads as res
+    let loads = mapM (rExpr s) $ trace "shortcut.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
+    eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
 
 evalFile :: Handle -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 evalFile hdl cfg ref ids = case cfgScript cfg of

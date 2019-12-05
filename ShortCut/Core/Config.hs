@@ -26,6 +26,7 @@ import System.Info                (os)
 
 import Control.Logging (LogLevel(..), setLogLevel, setDebugSourceRegex)
 import Control.Monad         (when)
+import Data.List (isPrefixOf)
 
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main ShortCut config below.
@@ -69,6 +70,7 @@ loadConfig mods args = do
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   out <- mapM absolutize =<< loadField args cfg "output"
+  shr <- mapM (\p -> if "http" `isPrefixOf` p then return p else absolutize p) =<< loadField args cfg "shared"
   let ctp = getAllArgs args (longOption "test")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
@@ -88,6 +90,7 @@ loadConfig mods args = do
               , cfgNoProg  = isPresent args $ longOption "noprogress"
               , cfgParLock = par
               , cfgOutFile = out
+              , cfgShare   = shr
               , cfgOS      = os'
               }
   debug' $ show res
@@ -150,6 +153,7 @@ fields =
   , ("report" , (show . cfgReport , setReport ))
   , ("width"  , (show . cfgWidth  , setWidth  ))
   , ("output" , (show . cfgOutFile, setOutFile))
+  -- TODO add share?
   ]
 
 showConfig :: CutConfig -> String
@@ -168,7 +172,7 @@ setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of
 updateDebug :: Maybe String -> IO ()
 updateDebug regex = case regex of
   Nothing -> do
-    debug' "turning of debugging"
+    debug' "turning off debugging"
     setLogLevel LevelWarn
   Just r -> do
     setLogLevel LevelDebug

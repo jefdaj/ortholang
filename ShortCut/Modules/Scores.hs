@@ -42,7 +42,7 @@ cutModule = CutModule
 
 aScores :: CutConfig -> Locks -> CutPath -> CutPath -> CutType -> CutPath -> Action ()
 aScores cfg ref scoresPath othersPath othersType outPath = do
-  scores <- readLits ref $ fromCutPath cfg scoresPath
+  scores <- readLits cfg ref $ fromCutPath cfg scoresPath
   others <- readStrings othersType cfg ref $ fromCutPath cfg othersPath
   let out' = fromCutPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others

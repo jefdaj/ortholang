@@ -92,6 +92,7 @@ library
                     ShortCut.Test.Parse.Examples,
                     ShortCut.Test.Repl,
                     ShortCut.Test.Scripts
+  pkgconfig-depends: zlib
   build-depends:    Glob,
                     -- TODO is this ok to bring back? MissingH,
                     MissingH,
@@ -151,7 +152,9 @@ library
                     setlocale,
                     raw-strings-qq,
                     logging,
-                    progress-meter
+                    progress-meter,
+                    download
+                    -- HTTP
 
 -- everything is built into one binary:
 --   run tests with shortcut --test
@@ -236,6 +239,7 @@ executable shortcut
                     ShortCut.Test.Parse.Examples,
                     ShortCut.Test.Repl,
                     ShortCut.Test.Scripts
+  pkgconfig-depends: zlib
   build-depends:    Glob,
                     -- TODO is this ok to bring back? MissingH,
                     MissingH,
@@ -295,4 +299,6 @@ executable shortcut
                     setlocale,
                     raw-strings-qq,
                     logging,
-                    progress-meter
+                    progress-meter,
+                    download
+                    -- HTTP

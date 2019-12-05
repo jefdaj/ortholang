@@ -55,6 +55,7 @@ module ShortCut.Core.Paths
   ( CutPath()
   , toCutPath
   , fromCutPath
+  , sharedPath
   , cutPathString
   , stringCutPath
   , toGeneric
@@ -151,6 +152,9 @@ toCutPath cfg = CutPath . checkPath . toGeneric cfg . normalize
 
 fromCutPath :: CutConfig -> CutPath -> FilePath
 fromCutPath cfg (CutPath path) = fromGeneric cfg path
+
+sharedPath :: CutConfig -> CutPath -> Maybe FilePath
+sharedPath cfg (CutPath path) = fmap (\sd -> replace "$TMPDIR" sd path) (cfgShare cfg)
 
 -- weird, but needed for writing cutpaths to files in Actions.hs
 cutPathString :: CutPath -> String

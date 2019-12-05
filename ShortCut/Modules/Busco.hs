@@ -334,7 +334,7 @@ rBuscoScoresTable s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [l]) = do
   let o  = exprPath s e
       o' = fromCutPath cfg o
   o' %> \_ -> do
-    ins <- readPaths ref lsPath
+    ins <- readPaths cfg ref lsPath
     let ins' = map (fromCutPath cfg) ins
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "busco_scores_table.py"
@@ -387,8 +387,8 @@ rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(CutFun _ _ _ _ [m, t, fs]) = do
       out' = fromCutPath cfg out
   out' %> \_ -> do
     score <- fmap (read :: String -> Scientific) $ readLit  cfg ref scorePath
-    table <- readFileStrict' ref tablePath -- TODO best read fn?
-    faaPaths <- readPaths ref faasList
+    table <- readFileStrict' cfg ref tablePath -- TODO best read fn?
+    faaPaths <- readPaths cfg ref faasList
     let allScores = map parseWords $ map words $ lines table
         missing   = faaPaths \\ map fst allScores
         okPaths   = map fst $ filter (\(_, c) -> c >= score) allScores

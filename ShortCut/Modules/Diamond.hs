@@ -93,7 +93,7 @@ rDiamondmakedbAll s@(_, cfg, ref, ids) e@(CutFun _ _ _ _ [fas]) = do
   let out  = exprPath s e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromCutPath cfg out
   out' %> \_ -> do
-    faPaths <- readPaths ref fasPath
+    faPaths <- readPaths cfg ref fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
