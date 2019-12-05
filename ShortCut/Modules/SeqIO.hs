@@ -1,5 +1,6 @@
 -- TODO rename something more general like SeqUtils?
 -- TODO when running gbk_to_faa*, also load_faa the result to split out the IDs!
+-- TODO gbk_to_fna (and probably others) need to substitute seqid_* hashes
 
 module ShortCut.Modules.SeqIO where
 
