@@ -82,6 +82,8 @@ import System.Posix.Escape         (escape)
 -- import System.IO.Temp (emptyTempFile)
 -- import Control.Concurrent.Thread.Delay (delay)
 import Data.Maybe (isJust)
+import Network.HTTP (simpleHTTP, getRequest, Response(..))
+import System.IO.Temp (writeTempFile)
 
 ---------------
 -- debugging --
@@ -112,6 +114,7 @@ needDebug fnName paths = do
   debugA (fnName ++ ".need") (show paths)
   need paths
 
+-- TODO how to force it to load the seqids when their downstream files aren't needed?
 needShared :: CutConfig -> Locks -> String -> CutPath -> Action ()
 needShared cfg ref name path@(CutPath p) =
   let path' = fromCutPath cfg path
@@ -148,10 +151,29 @@ lookupShared :: CutConfig -> CutPath -> Action (Maybe FilePath)
 lookupShared cfg path = case sharedPath cfg path of
   Nothing -> return Nothing
   Just sp -> do
-    exists <- doesFileExist sp
-    return $ if exists
-      then Just sp
-      else Nothing
+    if "http" `isPrefixOf` sp -- TODO come up with something more robust to detect urls!
+      then liftIO $ download cfg sp
+      else do
+        exists <- doesFileExist sp
+        return $ if exists
+          then Just sp
+          else Nothing
+
+-- TODO what about timeouts and stuff?
+download :: CutConfig -> String -> IO (Maybe FilePath)
+download cfg url = do
+  response <- simpleHTTP $ getRequest url
+  case fmap rspCode response of
+    Left _ -> do
+      -- liftIO $ putStrLn $ show err
+      return Nothing
+    Right (2,0,0) -> case fmap rspBody response of
+      Left _ -> return Nothing
+      Right txt -> do
+        path <- writeTempFile (cfgTmpDir cfg) "download.txt" txt
+        -- liftIO $ putStrLn $ "downloaded: " ++ path
+        return $ Just path
+    Right _ -> return Nothing
 
 ----------------
 -- read files --

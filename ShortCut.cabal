@@ -149,7 +149,8 @@ library
                     setlocale,
                     raw-strings-qq,
                     logging,
-                    progress-meter
+                    progress-meter,
+                    HTTP
 
 -- everything is built into one binary:
 --   run tests with shortcut --test
@@ -293,4 +294,5 @@ executable shortcut
                     setlocale,
                     raw-strings-qq,
                     logging,
-                    progress-meter
+                    progress-meter,
+                    HTTP
