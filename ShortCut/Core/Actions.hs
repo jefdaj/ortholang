@@ -61,7 +61,7 @@ import ShortCut.Core.Types
 -- import ShortCut.Core.Config (debug)
 
 import Control.Monad              (when)
-import Data.List                  (sort, nub, isPrefixOf, isSuffixOf)
+import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 -- import ShortCut.Core.Debug        (debug)
@@ -115,10 +115,16 @@ needDebug fnName paths = do
   need paths
 
 -- TODO how to force it to load the seqids when their downstream files aren't needed?
+--      probably list all the load* dependencies of the expr and want/need them first
 needShared :: CutConfig -> Locks -> String -> CutPath -> Action ()
 needShared cfg ref name path@(CutPath p) =
   let path' = fromCutPath cfg path
-  in if ("$TMPDIR/cache/load/" `isPrefixOf` p) || (not $ "$TMPDIR" `isPrefixOf` p)
+  in if ("/load" `isInfixOf` p)
+     || ("exprs/str" `isInfixOf` p)
+     || ("exprs/num" `isInfixOf` p)
+     || ("/reps/" `isInfixOf` p)
+     || ("/vars/" `isInfixOf` p)
+     || (not $ "$TMPDIR" `isPrefixOf` p)
     then needDebug name [path']
     else do
       shared <- lookupShared cfg path
@@ -160,8 +166,11 @@ lookupShared cfg path = case sharedPath cfg path of
           else Nothing
 
 -- TODO what about timeouts and stuff?
+-- TODO would downloading as binary be better?
 download :: CutConfig -> String -> IO (Maybe FilePath)
+-- download _ url = return Nothing
 download cfg url = do
+  liftIO $ putStrLn $ "url: " ++ url
   response <- simpleHTTP $ getRequest url
   case fmap rspCode response of
     Left _ -> do
