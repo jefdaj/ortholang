@@ -4,6 +4,7 @@ let
   shortcut = import ./default.nix;
   devDepends = [
     stack
+    zip
     # pypi2nix
   ];
 
@@ -15,7 +16,6 @@ in haskell.lib.overrideCabal shortcut (drv: {
   # TODO is the find command going? that could maybe make the difference
   shellHook = ''
     ${drv.shellHook or ""}
-    export LC_ALL=en_US.UTF-8
     export LANG=en_US.UTF-8
     export LANGUAGE=en_US.UTF-8
     # export TASTY_HIDE_SUCCESSES=True

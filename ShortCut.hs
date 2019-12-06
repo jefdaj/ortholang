@@ -37,8 +37,8 @@ main = withFileLogging "shortcut.log" $ do
   debugS' "shortcut.main" "starting"
 
   -- TODO does this work everywhere?
-  _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
-  setEnv "LANG" "en_US.UTF-8" -- TODO and is this part superfluous now?
+  -- _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
+  -- setEnv "LANG" "en_US.UTF-8" -- TODO and is this part superfluous now?
   -- hSetBuffering stdin  LineBuffering
   -- hSetBuffering stdout LineBuffering
 

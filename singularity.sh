@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # TODO why is setting it here different from inside singularity?
-export LC_ALL="en_US.UTF-8"
+export LC_ALL="en_US.utf8"
 
 condo=/clusterfs/rosalind/users
 scratch=/global/scratch
