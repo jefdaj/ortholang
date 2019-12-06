@@ -1,0 +1,28 @@
+.
+|-- cache
+|-- exprs
+|   |-- divide
+|   |   `-- e05aae5b00_538f7a4f17_0.num -> ../../cache/lines/...
+|   |-- list
+|   |   `-- c43d93c8ef_0.num.list -> ../../cache/lines/...
+|   `-- num
+|       |-- 89fb8b4aed_0.num -> ../../cache/lines/...
+|       |-- a629005e3c_0.num -> ../../cache/lines/...
+|       `-- eaad7f2e40_0.num -> ../../cache/lines/...
+|-- reps
+|   |-- 2819d77d2f
+|   |   |-- dep2.num -> ../../reps/5f841ac384/result
+|   |   `-- result -> ../../reps/2819d77d2f/dep2.num
+|   |-- 5f841ac384
+|   |   |-- dep.num -> ../../exprs/num/89fb8b4aed_0.num
+|   |   `-- result -> ../../reps/5f841ac384/dep.num
+|   `-- c11f8ab00b
+|       |-- dep2.num -> ../../exprs/num/eaad7f2e40_0.num
+|       |-- result -> ../../reps/c11f8ab00b/var_that_depends_on_replace_result.num
+|       `-- var_that_depends_on_replace_result.num -> ../../exprs/divide/e05aae5b00_538f7a4f17_0.num
+`-- vars
+    |-- result -> ../exprs/list/c43d93c8ef_0.num.list
+    |-- var_that_ignores_first_replace_result.num -> ../reps/c11f8ab00b/result
+    `-- var_that_replaces_in_first_replace_call.num -> ../reps/2819d77d2f/result
+
+10 directories, 15 files

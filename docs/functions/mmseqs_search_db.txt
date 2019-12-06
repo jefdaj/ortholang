@@ -1,0 +1,1 @@
+Search a target database for sequences matching the query FASTA, similar to BLAST.

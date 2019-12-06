@@ -1,0 +1,460 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+-- TODO no welcome if going to load a file + clear the screen anyway
+
+-- TODO could simplify to the same code everywhere except you pass the handle (file vs stdout)?
+
+-- Based on:
+-- http://dev.stephendiehl.com/hask/ (the Haskeline section)
+-- https://github.com/goldfirere/glambda
+
+-- TODO prompt to remove any bindings dependent on one the user is changing
+--      hey! just store a list of vars referenced as you go too. much easier!
+--      will still have to do that recursively.. don't try until after lab meeting
+
+-- TODO you should be able to write comments in the REPL
+-- TODO why doesn't prettyShow work anymore? what changed??
+-- TODO should be able to :reload the current script, if any
+
+module ShortCut.Core.Repl
+  -- ( mkRepl
+  -- , runRepl
+  -- )
+  where
+
+import qualified Data.Map as M
+import System.Console.Haskeline hiding (catch)
+
+import Control.Monad            (when)
+import Control.Monad.IO.Class   (liftIO, MonadIO)
+import Control.Monad.State.Lazy (get, put)
+import Data.Char                (isSpace)
+import Data.List                (isPrefixOf, isSuffixOf, filter, delete)
+import Data.List.Split          (splitOn)
+import Data.List.Utils          (delFromAL)
+import Data.Maybe               (catMaybes)
+-- import Data.Map                 (empty)
+import Prelude           hiding (print)
+import ShortCut.Core.Eval       (evalScript)
+import ShortCut.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
+import ShortCut.Core.Types
+import ShortCut.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
+import ShortCut.Core.Util       (absolutize, stripWhiteSpace, justOrDie, headOrDie)
+import ShortCut.Core.Config     (showConfigField, setConfigField, getDoc)
+-- import System.Command           (runCommand, waitForProcess)
+import System.Process           (runCommand, waitForProcess)
+import System.IO                (Handle, hPutStrLn, stdout)
+import System.Directory         (doesFileExist)
+import System.FilePath.Posix    ((</>))
+import Control.Exception.Safe   (Typeable, throw, try)
+import System.Console.ANSI      (clearScreen, cursorUp)
+import Data.IORef               (readIORef)
+import Development.Shake.FilePath (takeFileName)
+
+--------------------
+-- main interface --
+--------------------
+
+clear :: IO ()
+clear = clearScreen >> cursorUp 1000
+
+runRepl :: CutConfig -> Locks -> HashedIDsRef -> IO ()
+runRepl = mkRepl (repeat prompt) stdout
+
+-- Like runRepl, but allows overriding the prompt function for golden testing.
+-- Used by mockRepl in ShortCut/Core/Repl/Tests.hs
+mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
+       -> CutConfig -> Locks -> HashedIDsRef -> IO ()
+mkRepl promptFns hdl cfg ref ids = do
+  -- load initial script if any
+  st <- case cfgScript cfg of
+          Nothing -> do
+            clear
+            hPutStrLn hdl
+              "Welcome to the ShortCut interpreter!\n\
+              \Type :help for a list of the available commands."
+            return  ([], cfg, ref, ids)
+          Just path -> cmdLoad ([], cfg, ref, ids) hdl path
+  -- run repl with initial state
+  _ <- runReplM (replSettings st) (loop promptFns hdl) st
+  return ()
+
+-- promptArrow = " --‣ "
+-- promptArrow = " ❱❱❱ "
+-- promptArrow = " --❱ "
+-- promptArrow = " ⋺  "
+-- promptArrow = " >> "
+-- promptArrow = "-> "
+promptArrow :: String
+promptArrow = " —▶ "
+
+shortCutPrompt :: CutConfig -> String
+shortCutPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command didn't print anything
+  where
+    name = case cfgScript cfg of
+      Nothing -> "shortcut"
+      Just s  -> takeFileName s
+
+-- There are four types of input we might get, in the order checked for:
+-- TODO update this to reflect 3/4 merged
+--   1. a blank line, in which case we just loop again
+--   2. a REPL command, which starts with `:`
+--   3. an assignment statement (even an invalid one)
+--   4. a one-off expression to be evaluated
+--      (this includes if it's the name of an existing var)
+--
+-- TODO if you type an existing variable name, should it evaluate the script
+--      *only up to the point of that variable*? or will that not be needed
+--      in practice once the kinks are worked out?
+--
+-- TODO improve error messages by only parsing up until the varname asked for!
+-- TODO should the new statement go where the old one was, or at the end??
+--
+-- The weird list of prompt functions allows mocking stdin for golded testing.
+-- (No need to mock print because stdout can be captured directly)
+--
+-- TODO replace list of prompts with pipe-style read/write from here?
+--      http://stackoverflow.com/a/14027387
+loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
+-- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
+loop [] _ = return ()
+loop (promptFn:promptFns) hdl = do
+  st@(_, cfg, _, _)  <- get
+  Just line <- promptFn $ shortCutPrompt cfg -- TODO can this fail?
+  st' <- liftIO $ try $ step st hdl line
+  case st' of
+    Right s -> put s >> loop promptFns hdl
+    Left (SomeException e) -> do
+      liftIO $ hPutStrLn hdl $ show e
+      return () -- TODO *only* return if it's QuitRepl; ignore otherwise
+
+-- handler :: Handle -> SomeException -> IO (Maybe a)
+-- handler hdl e = hPutStrLn hdl ("error! " ++ show e) >> return Nothing
+
+-- TODO move to Types.hs
+-- TODO use this pattern for other errors? or remove?
+
+data QuitRepl = QuitRepl
+  deriving Typeable
+
+instance Exception QuitRepl
+
+instance Show QuitRepl where
+  show QuitRepl = "Bye for now!"
+
+-- Attempts to process a line of input, but prints an error and falls back to
+-- the current state if anything goes wrong. This should eventually be the only
+-- place exceptions are caught.
+step :: CutState -> Handle -> String -> IO CutState
+step st hdl line = case stripWhiteSpace line of
+  ""        -> return st
+  ('#':_  ) -> return st
+  (':':cmd) -> runCmd st hdl cmd
+  statement -> runStatement st hdl statement
+
+runStatement :: CutState -> Handle -> String -> IO CutState
+runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
+  Left  e -> hPutStrLn hdl (show e) >> return st
+  Right r -> do
+    let st' = (updateVars scr r, cfg, ref, ids)
+    when (isExpr st line) (evalScript hdl st')
+    return st'
+
+-- this is needed to avoid assigning a variable literally to itself,
+-- which is especially a problem when auto-assigning "result"
+-- TODO is this where we can easily require the replacement var's type to match if it has deps?
+-- TODO what happens if you try that in a script? it should fail i guess?
+updateVars :: CutScript -> CutAssign -> CutScript
+updateVars scr asn@(var, _) =
+  if var /= res && var `elem` map fst scr -- TODO what's the map part for?
+    then replaceVar asn' scr
+    else delFromAL scr var ++ [asn']
+  where
+    res = CutVar (ReplaceID Nothing) "result"
+    asn' = removeSelfReferences scr asn
+
+-- replace an existing var in a script
+replaceVar :: CutAssign -> CutScript -> CutScript
+replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
+
+-- makes it ok to assign a var to itself in the repl
+-- by replacing the reference with its value at that point
+-- TODO forbid this in scripts though
+removeSelfReferences :: CutScript -> CutAssign -> CutAssign
+removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, dereference s v e)
+
+-- does the actual work of removing self-references
+dereference :: CutScript -> CutVar -> CutExpr -> CutExpr
+dereference scr var e@(CutRef _ _ _ v2)
+  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
+  | otherwise = e
+dereference _   _   e@(CutLit _ _ _) = e
+dereference _   _   (CutRules _) = error "implement this! or rethink?"
+dereference scr var (CutBop  t n vs s e1 e2) = CutBop  t n (delete var vs) s (dereference scr var e1) (dereference scr var e2)
+dereference scr var (CutFun  t n vs s es   ) = CutFun  t n (delete var vs) s (map (dereference scr var) es)
+dereference scr var (CutList t n vs   es   ) = CutList t n (delete var vs)   (map (dereference scr var) es)
+
+--------------------------
+-- dispatch to commands --
+--------------------------
+
+runCmd :: CutState -> Handle -> String -> IO CutState
+runCmd st@(_, cfg, _, _) hdl line = case matches of
+  [(_, fn)] -> fn st hdl $ stripWhiteSpace args
+  []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
+  _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
+  where
+    (cmd, args) = break isSpace line
+    matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
+
+cmds :: CutConfig -> [(String, CutState -> Handle -> String -> IO CutState)]
+cmds cfg =
+  [ ("help"     , cmdHelp    )
+  , ("load"     , cmdLoad    )
+  , ("write"    , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
+  , ("needs"    , cmdNeeds   )
+  , ("neededfor", cmdNeededBy)
+  , ("drop"     , cmdDrop    )
+  , ("type"     , cmdType    )
+  , ("show"     , cmdShow    )
+  , ("reload"   , cmdReload  )
+  , ("quit"     , cmdQuit    )
+  , ("config"   , cmdConfig  )
+  ]
+  ++ if cfgSecure cfg then [] else [("!", cmdBang)]
+
+---------------------------
+-- run specific commands --
+---------------------------
+
+-- TODO load this from a file?
+-- TODO update to include :config getting + setting
+-- TODO if possible, make this open in `less`?
+-- TODO why does this one have a weird path before the :help text?
+cmdHelp :: CutState -> Handle -> String -> IO CutState
+cmdHelp st@(_, cfg, _, _) hdl line = do
+  doc <- case words line of
+           [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
+                    [ fmap fHelp $ findFunction cfg w
+                    , fmap mHelp $ findModule   cfg w
+                    , fmap (tHelp cfg) $ findType cfg w
+                    , Just $ getDoc "notfound"
+                    ]
+           _ -> getDoc "repl"
+  hPutStrLn hdl doc >> return st
+
+mHelp :: CutModule -> IO String
+mHelp m = getDoc $ "modules" </> mName m
+
+-- TODO move somewhere better
+fHelp :: CutFunction -> IO String
+fHelp f = do
+  doc <- getDoc $ "functions" </> fName f
+  let msg = "\n" ++ fTypeDesc f ++ "\n\n" ++ doc
+  return msg
+
+-- TODO move somewhere better
+tHelp :: CutConfig -> CutType -> IO String
+tHelp cfg t = do
+  doc <- getDoc $ "types" </> extOf t
+  let msg = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
+            ++ doc ++ "\n\n"
+            ++ tFnList
+  return msg
+  where
+    outputs = listFunctionTypesWithOutput cfg t
+    inputs  = listFunctionTypesWithInput  cfg t
+    tFnList = unlines
+                 $ ["You can create them with these functions:"]
+                ++ outputs
+                ++ ["", "And use them with these functions:"]
+                ++ inputs
+
+-- TODO move somewhere better
+listFunctionTypesWithInput :: CutConfig -> CutType -> [String]
+listFunctionTypesWithInput cfg cType = filter matches descs
+  where
+    -- TODO match more carefully because it should have to be an entire word
+    matches d = (extOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
+
+-- TODO move somewhere better
+listFunctionTypesWithOutput :: CutConfig -> CutType -> [String]
+listFunctionTypesWithOutput cfg cType = filter matches descs
+  where
+    matches d = (extOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
+
+-- TODO this is totally duplicating code from putAssign; factor out
+cmdLoad :: CutState -> Handle -> String -> IO CutState
+cmdLoad st@(_, cfg, ref, ids) hdl path = do
+  clear
+  path' <- absolutize path
+  dfe   <- doesFileExist path'
+  if not dfe
+    then hPutStrLn hdl ("no such file: " ++ path') >> return st
+    else do
+      let cfg' = cfg { cfgScript = Just path' } -- TODO why the False??
+      new <- parseFile cfg' ref ids path'
+      case new of
+        Left  e -> hPutStrLn hdl (show e) >> return st
+        -- TODO put this back? not sure if it makes repl better
+        Right s -> cmdShow (s, cfg', ref, ids) hdl ""
+        -- Right s -> return (s, cfg', ref, ids)
+
+cmdReload :: CutState -> Handle -> String -> IO CutState
+cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
+  Nothing -> cmdDrop st hdl ""
+  Just s  -> cmdLoad st hdl s
+
+cmdWrite :: CutState -> Handle -> String -> IO CutState
+cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
+  [path] -> do
+    saveScript cfg scr path
+    return (scr, cfg { cfgScript = Just path }, locks, ids)
+  [var, path] -> case lookup (CutVar (ReplaceID Nothing) var) scr of
+    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Just e  -> saveScript cfg (depsOnly e scr) path >> return st
+  _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
+
+-- TODO where should this go?
+depsOnly :: CutExpr -> CutScript -> CutScript
+depsOnly expr scr = deps ++ [res]
+  where
+    deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
+    res  = (CutVar (ReplaceID Nothing) "result", expr)
+
+-- TODO where should this go?
+saveScript :: CutConfig -> CutScript -> FilePath -> IO ()
+saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
+
+-- TODO factor out the variable lookup stuff
+-- TODO except, this should work with expressions too!
+cmdNeededBy :: CutState -> Handle -> String -> IO CutState
+cmdNeededBy st@(scr, cfg, _, _) hdl var = do
+  case lookup (CutVar (ReplaceID Nothing) var) scr of
+    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (CutVar Nothing var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar (ReplaceID Nothing) var):depsOf e) scr
+  return st
+
+-- TODO move to Pretty.hs
+-- prettyAssigns :: Handle -> (CutAssign -> Bool) -> CutScript -> IO ()
+-- prettyAssigns hdl fn scr = do
+  -- txt <- renderIO $ pPrint $ filter fn scr
+  -- hPutStrLn hdl txt
+
+cmdNeeds :: CutState -> Handle -> String -> IO CutState
+cmdNeeds st@(scr, cfg, _, _) hdl var = do
+  let var' = CutVar (ReplaceID Nothing) var
+  case lookup var' scr of
+    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (CutVar (ReplaceID Nothing) var):rDepsOf scr var') scr
+  return st
+
+-- TODO factor out the variable lookup stuff
+cmdDrop :: CutState -> Handle -> String -> IO CutState
+cmdDrop (_, cfg, ref, ids) _ [] = clear >> return ([], cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
+cmdDrop st@(scr, cfg, ref, ids) hdl var = do
+  let v = CutVar (ReplaceID Nothing) var
+  case lookup v scr of
+    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Just _  -> return (delFromAL scr v, cfg, ref, ids)
+
+cmdType :: CutState -> Handle -> String -> IO CutState
+cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
+  where
+    typeInfo = case stripWhiteSpace s of
+      "" -> allTypes
+      s' -> oneType s'
+    oneType e = case findFunction cfg e of
+      Just f  -> fTypeDesc f
+      Nothing -> showExprType st e -- TODO also show the expr itself?
+    allTypes = init $ unlines $ map showAssignType scr
+
+showExprType :: CutState -> String -> String
+showExprType st e = case parseExpr st e of
+  Right expr -> show $ typeOf expr
+  Left  err  -> show err
+
+showAssignType :: CutAssign -> String
+showAssignType (CutVar _ v, e) = unwords [typedVar, "=", prettyExpr]
+  where
+    -- parentheses also work:
+    -- typedVar = v ++ " (" ++ show (typeOf e) ++ ")"
+    typedVar = v ++ "." ++ show (typeOf e)
+    prettyExpr = render $ pPrint e
+
+-- TODO factor out the variable lookup stuff
+cmdShow :: CutState -> Handle -> String -> IO CutState
+cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
+cmdShow st@(scr, cfg, _, _) hdl var = do
+  case lookup (CutVar (ReplaceID Nothing) var) scr of
+    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Just e  -> pPrintHdl cfg hdl e
+  return st
+
+-- TODO does this one need to be a special case now?
+cmdQuit :: CutState -> Handle -> String -> IO CutState
+cmdQuit _ _ _ = throw QuitRepl
+-- cmdQuit _ _ _ = ioError $ userError "Bye for now!"
+
+cmdBang :: CutState -> Handle -> String -> IO CutState
+cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
+
+-- TODO if no args, dump whole config by pretty-printing
+-- TODO wow much staircase get rid of it
+cmdConfig :: CutState -> Handle -> String -> IO CutState
+cmdConfig st@(scr, cfg, ref, ids) hdl s = do
+  let ws = words s
+  if (length ws == 0)
+    then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
+    else if (length ws  > 2)
+      then hPutStrLn hdl "too many variables" >> return st
+      else if (length ws == 1)
+        then hPutStrLn hdl (showConfigField cfg $ headOrDie "cmdConfig failed" ws) >> return st
+        else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
+               Left err -> hPutStrLn hdl err >> return st
+               Right iocfg' -> do
+                 cfg' <- iocfg'
+                 return (scr, cfg', ref, ids)
+
+--------------------
+-- tab completion --
+--------------------
+
+-- complete things in quotes: filenames, seqids
+quotedCompletions :: MonadIO m => CutState -> String -> m [Completion]
+quotedCompletions (_, _, _, idRef) wordSoFar = do
+  files  <- listFiles wordSoFar
+  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ liftIO $ readIORef idRef
+  let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
+  return $ files ++ seqIDs'
+
+-- complete everything else: fn names, var names, :commands, types
+-- these can be filenames too, but only if the line starts with a :command
+nakedCompletions :: MonadIO m => CutState -> String -> String -> m [Completion]
+nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
+  files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
+  return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
+  where
+    wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
+    fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
+    varNames = map ((\(CutVar _ v) -> v) . fst) scr
+    cmdNames = map ((':':) . fst) (cmds cfg)
+    typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
+
+-- this is mostly lifted from Haskeline's completeFile
+myComplete :: MonadIO m => CutState -> CompletionFunc m
+myComplete s = completeQuotedWord   (Just '\\') "\"'" (quotedCompletions s)
+             $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
+                                    (nakedCompletions s)
+
+-- This is separate from the CutConfig because it shouldn't need changing.
+-- TODO do we actually need the script here? only if we're recreating it every loop i guess
+replSettings :: CutState -> Settings IO
+replSettings s@(_, cfg, _, _) = Settings
+  { complete       = myComplete s
+  , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
+  , autoAddHistory = True
+  }

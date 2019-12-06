@@ -1,0 +1,4 @@
+organism	database	identifier
+Synechococcus elongatus PCC maga	refseq	NA
+Synechocystis sp. PCC mgen	refseq	NA
+

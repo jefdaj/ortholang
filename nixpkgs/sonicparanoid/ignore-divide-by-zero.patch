@@ -1,0 +1,12 @@
+diff -ruN sonicparanoid-old/sonicparanoid/orthogroups.py sonicparanoid-new/sonicparanoid/orthogroups.py
+--- sonicparanoid-old/sonicparanoid/orthogroups.py	2019-05-10 02:14:23.000000000 -0700
++++ sonicparanoid-new/sonicparanoid/orthogroups.py	2019-06-06 20:16:22.430327338 -0700
+@@ -540,6 +540,8 @@
+     # compute the array with the seed ratios
+     # the calculation is computed only if the number of inparalogs is > 0
+     #seedRatioArr = np.where(geneCntArr > 0, (geneCntArr - inparaCntArr)/geneCntArr, geneCntArr)
++    # TODO is this a bad idea? see https://github.com/belltailjp/selective_search_py/issues/20
++    np.seterr(divide='ignore', invalid='ignore')
+     seedRatioArr = (geneCntArr - inparaCntArr)/geneCntArr
+     if debug:
+         print('Final genes counts:\t{:s}'.format(str(geneCntArr)))

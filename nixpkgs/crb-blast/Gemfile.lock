@@ -1,0 +1,28 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    bindeps (1.2.1)
+      fixwhich (~> 1.0, >= 1.0.2)
+    bio (1.5.1)
+    crb-blast (0.6.9)
+      bindeps (~> 1.0, >= 1.0.3)
+      bio (~> 1.4, >= 1.4.3)
+      fixwhich (~> 1.0, >= 1.0.2)
+      threach (~> 0.2, >= 0.2.0)
+      trollop (~> 2.0)
+    facade (1.0.7)
+    fixwhich (1.0.2)
+      pathname2 (~> 1.4, >= 1.4.4)
+    pathname2 (1.8.0)
+      facade
+    threach (0.2.0)
+    trollop (2.1.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  crb-blast
+
+BUNDLED WITH
+   1.14.6

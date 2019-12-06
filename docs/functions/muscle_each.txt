@@ -1,0 +1,1 @@
+doc for functions/muscle_each not written yet

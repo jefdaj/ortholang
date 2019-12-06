@@ -1,0 +1,65 @@
+.
+|-- cache
+|   |-- each
+|   |   |-- 1489aef6fb
+|   |   |   |-- 18f4582b43.str.list -> ../../../exprs/extract_queries/18f4582b43_0.str.list
+|   |   |   `-- 18f4582b43.str.list.args -> ../../../cache/lines/...
+|   |   `-- f0c3051944
+|   |       |-- b62abf3ff8.bht -> ../../../exprs/blastp_db/ce1c174684_4c3a8ed07a_b62abf3ff8_0.bht
+|   |       `-- b62abf3ff8.bht.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 36189032ad.faa
+|   |   |-- 36189032ad.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
+|   `-- makeblastdb
+|       `-- d77632b774
+|           |-- d77632b774.pdb.err
+|           |-- d77632b774.pdb.out
+|           |-- d77632b774.pdb.phr
+|           |-- d77632b774.pdb.pin
+|           `-- d77632b774.pdb.psq
+|-- exprs
+|   |-- all
+|   |   `-- 6b8b590c7f_0.str.list -> ../../cache/lines/...
+|   |-- any
+|   |   `-- 6e2b4eb209_0.str.list.list -> ../../cache/lines/...
+|   |-- blastp_db
+|   |   |-- 46e62edec1_183f436b85_87a8b36472_0.bht -> ../../exprs/blastp_db/46e62edec1_183f436b85_87a8b36472_0.bht.out
+|   |   |-- 46e62edec1_183f436b85_87a8b36472_0.bht.out
+|   |   |-- 46e62edec1_183f436b85_87a8b36472_0.bht.out.err
+|   |   |-- ce1c174684_4c3a8ed07a_b62abf3ff8_0.bht -> ../../exprs/blastp_db/ce1c174684_4c3a8ed07a_b62abf3ff8_0.bht.out
+|   |   |-- ce1c174684_4c3a8ed07a_b62abf3ff8_0.bht.out
+|   |   `-- ce1c174684_4c3a8ed07a_b62abf3ff8_0.bht.out.err
+|   |-- blastp_db_each
+|   |   `-- 46e62edec1_183f436b85_94eb4d3dba_0.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 18f4582b43_0.str.list -> ../../cache/lines/...
+|   |   |-- 18f4582b43_0.str.list.tmp.err
+|   |   |-- 4c82f22fce_0.str.list -> ../../cache/lines/...
+|   |   `-- 4c82f22fce_0.str.list.tmp.err
+|   |-- extract_queries_each
+|   |   `-- 4c03c86631_0.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 3bbbf950a3_0.str.list.list -> ../../cache/lines/...
+|   |   |-- 5800d7ea29_0.pdb.list -> ../../cache/lines/...
+|   |   |-- 823206eec3_0.faa.list -> ../../cache/lines/...
+|   |   `-- df91bd4d94_0.str.list.list.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 1da1b2a943_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |-- makeblastdb_prot
+|   |   `-- 96d02905bd_0.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835_0.num -> ../../cache/lines/...
+|   `-- str
+|       |-- c156278223_0.str -> ../../cache/lines/...
+|       `-- c5570b421f_0.str -> ../../cache/lines/...
+`-- vars
+    |-- maga5.faa -> ../exprs/load_faa/1da1b2a943_0.faa
+    |-- maga.pdb -> ../exprs/makeblastdb_prot/96d02905bd_0.pdb
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/4c03c86631_0.str.list.list
+    |-- result -> ../exprs/all/6b8b590c7f_0.str.list
+    `-- single.str.list -> ../exprs/extract_queries/4c82f22fce_0.str.list
+
+20 directories, 42 files

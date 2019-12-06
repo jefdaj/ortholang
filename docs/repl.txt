@@ -1,0 +1,15 @@
+You can type or paste ShortCut code here to run it, same as in a script.
+Unlike in a script though, you can also evaluate and redefine variables.
+There are also some extra commands specific to --interactive mode:
+
+:help      to print info about a function or filetype
+:load      to clear the current session and load a script
+:reload    to reload the current script
+:write     to save the whole script (or dependencies of a specific variable)
+:needs     to show which variables depend on the given variable
+:neededfor to show which variables a given variable depends on
+:drop      to discard the current script (or a specific variable)
+:quit      to discard the current script and exit the interpreter
+:type      to print the type of an expression
+:show      to print an expression along with its type
+:!         to run the rest of the line as a shell command (disabled in --secure mode)

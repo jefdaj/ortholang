@@ -1,0 +1,1 @@
+doc for functions/megablast not written yet

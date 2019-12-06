@@ -1,0 +1,19 @@
+.
+|-- cache
+|   `-- busco
+|       `-- dblist.txt -> ../../cache/lines/...
+|-- exprs
+|   |-- busco_list_lineages
+|   |   |-- ba4949f3b8_0.str.list -> ../../cache/lines/...
+|   |   `-- da7eca0b3e_0.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 54957fa930_0.str.list.list -> ../../cache/lines/...
+|   `-- str
+|       |-- 9d4568c009_0.str -> ../../cache/lines/...
+|       `-- bdca26ac34_0.str -> ../../cache/lines/...
+`-- vars
+    |-- ball.str.list -> ../exprs/busco_list_lineages/ba4949f3b8_0.str.list
+    |-- blins.str.list -> ../exprs/busco_list_lineages/da7eca0b3e_0.str.list
+    `-- result -> ../exprs/list/54957fa930_0.str.list.list
+
+7 directories, 9 files

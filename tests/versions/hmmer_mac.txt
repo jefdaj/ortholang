@@ -1,0 +1,1 @@
+# HMMER 3.2.1 (June 2018); http://hmmer.org/

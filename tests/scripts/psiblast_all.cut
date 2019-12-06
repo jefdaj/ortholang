@@ -1,0 +1,5 @@
+query = load_faa "data/Mycoplasma_genitalium_single.faa"
+mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
+maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+hitlists = psiblast_all 0.1 query [mgen, maga]
+result = hitlists

@@ -1,0 +1,33 @@
+--- blastdbget/blastdbget.py	2017-10-08 23:04:30.578000000 -0700
++++ blastdbget-no-validate-dbs/blastdbget.py	2017-10-08 23:05:49.479000000 -0700
+@@ -301,7 +301,7 @@
+         show_available(remote_files)
+ 
+     if not "taxdb" in database:
+-        database + ("taxdb",)
++        database += ["taxdb"]
+ 
+     if output is None:
+         output = safe_makedir(os.path.abspath('.'))
+@@ -325,13 +325,14 @@
+     q.join()
+ 
+     # validate the database
+-    status = validate_dbs(output, database)
+-    for db, success in status.iteritems():
+-        if success:
+-            log.info("%s created successfully" % db)
+-            # maybe delete the tgz and md5 files
+-        else:
+-            log.warn("%s failed validation" % db)
++    # (removed because blastdbcheck seems to be broken)
++    # status = validate_dbs(output, database)
++    # for db, success in status.iteritems():
++    #     if success:
++    #         log.info("%s created successfully" % db)
++    #         # maybe delete the tgz and md5 files
++    #     else:
++    #         log.warn("%s failed validation" % db)
+     log.info("Process complete.")
+ 
+ 

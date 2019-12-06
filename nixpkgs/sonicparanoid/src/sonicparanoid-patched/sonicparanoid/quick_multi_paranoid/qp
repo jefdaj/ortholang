@@ -1,0 +1,90 @@
+#!/bin/sh
+echo "====================================================="
+echo "                   QuickParanoid "
+echo "====================================================="
+
+read -p "Dataset directory [default = \".\" (current directory)]: " FILE_DIRECTORY
+if [ -z ${FILE_DIRECTORY} ]; then
+  FILE_DIRECTORY="."
+  fi
+
+read -p "Data file prefix [default = \"sqltable.\"]: " FILE_PREFIX
+if [ -z ${FILE_PREFIX} ]; then
+  FILE_PREFIX="sqltable."
+  fi
+
+read -p "Data file separator [default = \"-\"]: " FILE_SEPARATOR
+if [ -z ${FILE_SEPARATOR} ]; then
+  FILE_SEPARATOR="-"
+  fi
+
+read -p "Configuration file [default = \"${FILE_DIRECTORY}/config\"]: " CONFIG_FILE
+if [ -z ${CONFIG_FILE} ]; then
+  CONFIG_FILE=${FILE_DIRECTORY}/config
+  fi
+
+read -p "Executable file prefix [default = \"test\"]: " EXEC_FILE_PREFIX
+if [ -z ${EXEC_FILE_PREFIX} ]; then
+  EXEC_FILE_PREFIX="test"
+  fi
+
+export FILE_DIRECTORY=${FILE_DIRECTORY}/        # append a trailing "/" 
+
+#===========================================
+#        generate qp.h header file
+#===========================================
+
+echo "Generating a header file....."
+
+#delete qp.h if it exists
+rm -f qp.h
+touch qp.h 
+echo "#ifndef __QP__" >> qp.h 
+echo "" >> qp.h 
+echo "//user-specified parameters" >> qp.h 
+echo "#define FILE_DIRECTORY \"$FILE_DIRECTORY\"      // directory where data files reside" >> qp.h 
+echo "#define FILE_PREFIX \"$FILE_PREFIX\"      // prefix in each data file" >> qp.h 
+echo "#define FILE_SEPARATOR \"$FILE_SEPARATOR\"      // separator between species names" >> qp.h 
+echo "#define FILE_CONFIG \"$CONFIG_FILE\"      // configuration file" >> qp.h 
+echo "" >> qp.h 
+echo "// used internally by programs -- do not edit them" >> qp.h 
+echo "#define INTERMEDIATE_DATAFILE_SUFFIX \"_c\"" >> qp.h 
+echo "#define INTERMEDIATE_HEADER_FILE \"__ortholog.h\"" >> qp.h 
+echo "" >> qp.h 
+echo "#endif  // __QP__" >> qp.h 
+
+#============================================
+#        generate Makefile.in
+#===========================================
+
+export EXEC_FILE=${EXEC_FILE_PREFIX}
+export EXEC_FILEs=${EXEC_FILE_PREFIX}s 
+
+echo "Updating Makefile....."
+
+#delete Makefile.in if it exists
+rm -f Makefile.in
+touch Makefile.in
+echo "#configuration file" >> Makefile.in
+echo "CONFIG_FILE=$CONFIG_FILE" >> Makefile.in
+echo "" >> Makefile.in
+echo "#execution files" >> Makefile.in
+echo "EXEC_FILE=$EXEC_FILE" >> Makefile.in
+echo "EXEC_FILEs=$EXEC_FILEs" >> Makefile.in
+
+#============================================
+#       run make !!!!
+#===========================================
+
+echo "Generating executable files......"
+#make clean
+make all
+
+#===========================================
+#       postscript message
+#===========================================
+echo "Done." 
+echo "Run ${EXEC_FILE} to perform ortholog clustering." 
+echo "Run ${EXEC_FILEs} to see the dataset size and the number of entries." 
+
+

@@ -1,0 +1,3 @@
+[submodule "logging"]
+	path = logging
+	url = http://github.com/jefdaj/logging

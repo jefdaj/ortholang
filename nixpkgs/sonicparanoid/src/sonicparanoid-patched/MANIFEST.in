@@ -1,0 +1,25 @@
+# Include licence
+include LICENSE.md
+
+# Include manual files
+#include sonicparanoid_user_manual.pdf
+#include sonicparanoid_user_manual.tex
+
+# Include input test files
+include sonicparanoid/example/test_input/*
+include sonicparanoid/example/test_output/*
+include sonicparanoid/bin/README.txt
+
+# Include mmseqs2 source code
+include sonicparanoid/mmseqs2_src/mmseqs.tar.gz
+include sonicparanoid/mmseqs2_src/README.txt
+
+# Include C source code for multi-species orthology
+include sonicparanoid/quick_multi_paranoid/*
+
+# Include all python source files
+#include sonicparanoid/*.so
+include sonicparanoid/*.py
+exclude sonicparanoid/*.c
+include sonicparanoid/*.pyx
+include sonicparanoid/config.json

@@ -1,0 +1,2 @@
+[plot image '$TMPDIR/cache/bin/56fa9aeef3.png',
+ plot image '$TMPDIR/cache/bin/153eb140fe.png']

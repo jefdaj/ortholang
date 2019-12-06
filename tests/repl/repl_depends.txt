@@ -1,0 +1,35 @@
+Welcome to the ShortCut interpreter!
+Type :help for a list of the available commands.
+
+shortcut —▶ v1 = "one"
+
+shortcut —▶ v2 = "two"
+
+shortcut —▶ v3 = [v1, v2]
+
+shortcut —▶ :show
+v1 = "one"
+v2 = "two"
+v3 = [v1, v2]
+
+shortcut —▶ :neededfor v1
+v1 = "one"
+
+shortcut —▶ :neededfor v2
+v2 = "two"
+
+shortcut —▶ :neededfor v3
+v1 = "one"
+v2 = "two"
+v3 = [v1, v2]
+
+shortcut —▶ v4 = v3
+
+shortcut —▶ :neededfor v4
+v1 = "one"
+v2 = "two"
+v3 = [v1, v2]
+v4 = v3
+
+shortcut —▶ :q
+Bye for now!

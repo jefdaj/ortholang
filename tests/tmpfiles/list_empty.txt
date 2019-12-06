@@ -1,0 +1,9 @@
+.
+|-- cache
+|-- exprs
+|   `-- list
+|       `-- d751713988_0.empty.list -> ../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/list/d751713988_0.empty.list
+
+4 directories, 2 files

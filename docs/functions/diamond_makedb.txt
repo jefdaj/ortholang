@@ -1,0 +1,1 @@
+Create a DIAMOND database from a protein FASTA file.

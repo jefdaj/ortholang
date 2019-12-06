@@ -1,0 +1,32 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 6046a54e92.fna
+|   |   |-- 6046a54e92.fna.ids
+|   |   |-- 8723e7ac8c.fna
+|   |   `-- 8723e7ac8c.fna.ids
+|   `-- makeblastdb
+|       `-- ea1568d48b
+|           |-- ea1568d48b.ndb.err
+|           |-- ea1568d48b.ndb.nhr
+|           |-- ea1568d48b.ndb.nin
+|           |-- ea1568d48b.ndb.nsq
+|           `-- ea1568d48b.ndb.out
+|-- exprs
+|   |-- list
+|   |   `-- dbe42d6056_0.fna.list -> ../../cache/lines/...
+|   |-- load_fna
+|   |   |-- 1bf6815c3c_0.fna -> ../../cache/load/8723e7ac8c.fna
+|   |   `-- 832f789663_0.fna -> ../../cache/load/6046a54e92.fna
+|   |-- makeblastdb_nucl_all
+|   |   `-- 793c81c77a_0.ndb -> ../../cache/lines/...
+|   `-- str
+|       |-- 29d22d084f_0.str -> ../../cache/lines/...
+|       `-- 936e46a549_0.str -> ../../cache/lines/...
+`-- vars
+    |-- db.ndb -> ../exprs/makeblastdb_nucl_all/793c81c77a_0.ndb
+    |-- genes5.fna -> ../exprs/load_fna/832f789663_0.fna
+    |-- result -> ../vars/db.ndb
+    `-- single.fna -> ../exprs/load_fna/1bf6815c3c_0.fna
+
+10 directories, 19 files

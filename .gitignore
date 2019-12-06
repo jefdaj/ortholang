@@ -1,0 +1,13 @@
+*.sw*
+.stack-work
+.stack-root
+result
+tmp
+*.log
+.nfs*
+*.egg-info
+*.*~
+nixpkgs/inparanoid/*.zip
+nixpkgs/inparanoid/*.tar.gz
+Paths_*
+*.lock

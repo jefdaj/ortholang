@@ -1,0 +1,1 @@
+Create an MMSeqs2 sequence database from a FASTA file.

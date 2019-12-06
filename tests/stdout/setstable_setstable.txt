@@ -1,0 +1,49 @@
+[	l1
+1	x
+2	x
+3	x
+4	x
+...
+,
+ 	l1	l2
+1	x	
+2	x	
+3	x	x
+4	x	x
+...
+,
+ 	l1	l2	l3
+1	x		
+2	x		
+3	x	x	x
+4	x	x	x
+...
+,
+ 	l1	l2	l3	l4
+1	x			
+2	x			
+3	x	x	x	
+4	x	x	x	
+...
+,
+ 	l1	l2	l3	l4	l5
+0					x
+1	x				x
+2	x				x
+3	x	x	x		x
+...
+,
+ 	l2	l5	l1	l3	l4
+0		x			
+1		x	x		
+2		x	x		
+3	x	x	x	x	
+...
+,
+ 	l1	l2	l3	l4	l5	l6
+0					x	x
+1	x				x	x
+2	x				x	x
+3	x	x	x		x	x
+...
+]

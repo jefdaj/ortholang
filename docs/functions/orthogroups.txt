@@ -1,0 +1,1 @@
+Parse results from an ortholog finder and list genes in all orthogroups.

@@ -1,0 +1,1 @@
+doc for functions/diamond_blastx not written yet

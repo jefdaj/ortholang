@@ -1,0 +1,1 @@
+doc for functions/best_hits not written yet

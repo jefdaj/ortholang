@@ -1,0 +1,2 @@
+DIAMOND database $TMPDIR/vars/result
+
