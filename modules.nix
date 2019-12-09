@@ -2,12 +2,11 @@ with import ./nixpkgs;
 let
   mkModule = src: extraRunDeps: extraWraps:
     let name = "Shortcut-" + baseNameOf src;
-        runDeps = [ coreutils ] ++ extraRunDeps;
+        runDeps = [ bash coreutils ] ++ extraRunDeps;
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
       buildInputs = [ makeWrapper ] ++ extraRunDeps;
       builder = writeScript "builder.sh" ''
-        #!/usr/bin/env bash
         source ${stdenv}/setup
         mkdir -p $out/bin
         for script in $src/*; do

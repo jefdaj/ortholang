@@ -32,12 +32,10 @@ let
 
     buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
 
-    # TODO set LC_ALL or similar here?
     # TODO PYTHONPATH?
     postInstall = ''
       ${drv.postInstall or ""}
       wrapProgram "$out/bin/shortcut" \
-        --set LC_ALL en_US.UTF-8 \
         --set LANG en_US.UTF-8 \
         --set LANGUAGE en_US.UTF-8 \
         --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"'' +
