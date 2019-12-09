@@ -16,7 +16,8 @@ Quick Start
 Run [install.sh](install.sh) to install everything on Mac or Linux:
 
 ``` .bash
-curl https://raw.githubusercontent.com/jefdaj/shortcut/master/install.sh | sh
+curl https://raw.githubusercontent.com/jefdaj/shortcut/master/install.sh | bash
+source $HOME/.nix-profile/etc/profile.d/nix.sh
 ```
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
