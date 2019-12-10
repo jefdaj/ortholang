@@ -7,6 +7,10 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
+## [0.9.2] - 2019-12-10
+### Changed
+- Friendlier install script
+
 ## [0.9.1] - 2019-12-06
 ### Fixed
 - install.sh should work now
