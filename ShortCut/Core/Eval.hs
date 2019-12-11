@@ -113,8 +113,9 @@ data EvalProgress = EvalProgress
 
 -- TODO hey should the state just be a Progress{..} itself? seems simpler + more flexible
 renderProgress :: EvalProgress -> String
--- TODO put back renderProgress EvalProgress{..} | epUpdates <  3 = ""
-renderProgress EvalProgress{..} = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
+renderProgress EvalProgress{..}
+  | (round $ diffUTCTime epUpdate epStart) < 5 || epDone == 0 = ""
+  | otherwise = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
   where
     -- details  = if epDone >= epTotal then [] else [fraction]
     time = renderTime epStart epUpdate
@@ -213,7 +214,7 @@ eval hdl cfg ref ids rtype ls p = do
              , epDone    = 0
              , epTotal   = 0
              , epThreads = numInterpreterThreads
-             , epWidth = fromMaybe 100 $ cfgWidth cfg
+             , epWidth = fromMaybe 80 $ cfgWidth cfg
              , epArrowShaft = '—'
              , epArrowHead = '▶'
              }
