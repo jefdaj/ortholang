@@ -2,7 +2,7 @@ name:               ShortCut
 synopsis:           Short, reproducible phylogenomic cuts
 author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
-version:            0.9.1
+version:            0.9.2
 license:            AGPL-3
 license-file:       LICENSE
 build-type:         Simple
