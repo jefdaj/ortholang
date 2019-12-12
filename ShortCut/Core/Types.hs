@@ -28,6 +28,7 @@ module ShortCut.Core.Types
   , HashedIDs
   , HashedIDsRef
   , CutState
+  , ensureResult
   , lookupResult
   -- , Assoc(..) -- we reuse this from Parsec
   , CutFixity(..)
@@ -195,8 +196,17 @@ prefixOf (CutBop _ _ _ n _ _ ) = case n of
 type CutAssign = (CutVar, CutExpr)
 type CutScript = [CutAssign]
 
+ensureResult :: CutScript -> CutScript
+ensureResult scr = if null scr then noRes else scr'
+  where
+    noRes = [(resVar, CutLit str (RepeatSalt 0) "no result")]
+    resVar = CutVar (ReplaceID Nothing) "result"
+    scr' = scr ++ [(resVar, snd $ last scr)]
+
 lookupResult :: [(CutVar, b)] -> Maybe b
-lookupResult scr = if null matches then Nothing else Just (snd $ last matches)
+lookupResult scr = if null matches
+  then (if null scr then Nothing else Just (snd $ last scr))
+  else Just (snd $ last matches)
   where
     matches = filter (\(CutVar _ v, _) -> v == "result") scr
 
