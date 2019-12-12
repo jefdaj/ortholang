@@ -43,7 +43,7 @@ import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
 
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromJust)
 
 debug :: CutConfig -> String -> a -> a
 debug cfg msg rtn = if isJust (cfgDebug cfg) then trace "core.compile" msg rtn else rtn
@@ -93,9 +93,10 @@ compileScript s@(as, _, _, _) _ = do
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (rAssign s) as
-  case lookupResult rpaths of
-    Nothing -> fail "no result variable during compile. that's not right!"
-    Just (VarPath r) -> return $ ResPath r
+  res <- case lookupResult rpaths of
+    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr s $ fromJust $ lookupResult $ ensureResult as
+    Just r  -> fmap (\(VarPath  p) -> p) $ return r
+  return $ ResPath res
   -- where
     -- p here is "result" + the permutation name/hash if there is one right?
     -- res = case permHash of

@@ -37,7 +37,7 @@ import Control.Retry
 -- import Data.List (isPrefixOf)
 
 import Control.Exception.Safe         (catchAny)
-import Data.Maybe                     (maybeToList, isJust, fromMaybe)
+import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
@@ -295,12 +295,13 @@ printShort cfg ref idsref pm rtype path = do
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as, c, ref, ids) = case lookupResult as of
-  Nothing  -> putStrLn "no result variable during eval. that's not right!"
-  Just res -> do
-    let loadExprs = extractLoads as res
-    let loads = mapM (rExpr s) $ trace "shortcut.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-    eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
+evalScript hdl s@(as, c, ref, ids) =
+  let res = case lookupResult as of
+              Nothing -> fromJust $ lookupResult $ ensureResult as
+              Just r  -> r
+      loadExprs = extractLoads as res
+      loads = mapM (rExpr s) $ trace "shortcut.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
+  in eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
 
 evalFile :: Handle -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 evalFile hdl cfg ref ids = case cfgScript cfg of
