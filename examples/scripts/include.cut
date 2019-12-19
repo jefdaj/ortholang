@@ -1,0 +1,4 @@
+# same as writing the code from the previous script here:
+include "plot_linegraph.cut"
+# TODO make sure result gets removed!
+# result = plots

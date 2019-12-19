@@ -7,11 +7,16 @@ license:            AGPL-3
 license-file:       LICENSE
 build-type:         Simple
 cabal-version:      >=1.10
-data-files:         data/*.fa,
-                    data/*.faa,
-                    data/*.fna,
-                    data/*.gbk,
-                    data/*.txt,
+data-files:         examples/lists/*.txt,
+                    examples/scripts/*.cut,
+                    examples/cyanobacteria/*.faa,
+                    examples/cyanobacteria/*.fna,
+                    examples/cyanobacteria/*.gbff,
+                    examples/cyanobacteria/*.gbk,
+                    examples/mycoplasma/*.fa,
+                    examples/mycoplasma/*.faa,
+                    examples/mycoplasma/*.fna,
+                    examples/mycoplasma/*.gbk,
                     docs/*.txt,
                     docs/modules/*.txt,
                     docs/types/*.txt,
