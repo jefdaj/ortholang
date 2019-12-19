@@ -1,0 +1,2 @@
+examples/cyanobacteria/Synechocystis-PCC-6803-uid159873.gbk
+examples/cyanobacteria/SynPCC7942_chr.gbk

@@ -1,0 +1,7 @@
+examples/mycoplasma/Mycoplasma_agalactiae_PG2.gbk
+examples/mycoplasma/Mycoplasma_arthritidis_158L3-1.gbk
+examples/mycoplasma/Mycoplasma_bovis_HB0801-P115.gbk
+examples/mycoplasma/Mycoplasma_canadense_HAZ360_1.gbk
+examples/mycoplasma/Mycoplasma_genitalium_M2321.gbk
+examples/cyanobacteria/SynPCC7942_chr.gbk
+examples/cyanobacteria/SynPCC7942_pANL.gbk

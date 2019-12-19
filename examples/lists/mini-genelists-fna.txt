@@ -1,2 +1,0 @@
-data/6803genes10.fna
-data/7942genes10.fna
