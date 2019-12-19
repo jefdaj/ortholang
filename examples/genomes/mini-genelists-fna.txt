@@ -1,2 +1,0 @@
-examples/cyanobacteria/6803genes10.fna
-examples/cyanobacteria/7942genes10.fna

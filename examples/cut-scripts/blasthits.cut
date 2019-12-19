@@ -7,8 +7,8 @@
 # program that produces similar hit tables.
 
 # First you have to do a search, of course.
-maga = load_faa "examples/Mycoplasma/Mycoplasma_agalactiae_small.faa"
-mbov = load_faa "examples/Mycoplasma/Mycoplasma_bovis_small.fa"
+maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
+mbov = load_faa "examples/sequences/Mycoplasma_bovis_small.fa"
 maga_mbov = blastp 1e-10 maga mbov
 
 # You can make the hits more stringent afterward without re-running it
