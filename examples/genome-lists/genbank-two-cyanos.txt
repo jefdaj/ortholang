@@ -1,0 +1,2 @@
+examples/sequences/PCC_6803_genome.gbff
+examples/sequences/PCC_7942_chr.gbk

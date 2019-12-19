@@ -1,4 +1,0 @@
-examples/mycoplasma/Mycoplasma_agalactiae_small.faa
-examples/mycoplasma/Mycoplasma_bovis_small.fa
-examples/mycoplasma/Mycoplasma_genitalium_small.faa
-examples/mycoplasma/Mycoplasma_hyopneumoniae_small.faa

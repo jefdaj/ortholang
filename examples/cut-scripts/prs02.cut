@@ -1,6 +1,6 @@
-pcc6803 = load_faa "examples/6803genes.faa"
-pcc7942 = concat_faa [gbk_to_faa (load_gbk "examples/SynPCC7942_chr.gbk"),
-                      gbk_to_faa (load_gbk "examples/SynPCC7942_pANL.gbk")]
+pcc6803 = load_faa "examples/sequences/PCC_6803_genes.faa"
+pcc7942 = concat_faa [gbk_to_faa "cds" (load_gbk "examples/sequences/PCC_7942_chr.gbk"),
+                      gbk_to_faa "cds" (load_gbk "examples/sequences/PCC_7942_pANL.gbk")]
 
 # BLAST Synechococcus genes against Synechocystis with a standard cutoff
 cutoff = 1e-10
