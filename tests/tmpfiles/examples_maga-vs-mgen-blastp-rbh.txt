@@ -1,0 +1,53 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 10ffe0cf0f.faa
+|   |   |-- 10ffe0cf0f.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
+|   `-- makeblastdb
+|       |-- b7cb78026e
+|       |   |-- b7cb78026e.pdb.err
+|       |   |-- b7cb78026e.pdb.out
+|       |   |-- b7cb78026e.pdb.phr
+|       |   |-- b7cb78026e.pdb.pin
+|       |   `-- b7cb78026e.pdb.psq
+|       `-- d77632b774
+|           |-- d77632b774.pdb.err
+|           |-- d77632b774.pdb.out
+|           |-- d77632b774.pdb.phr
+|           |-- d77632b774.pdb.pin
+|           `-- d77632b774.pdb.psq
+|-- exprs
+|   |-- blastp_db
+|   |   |-- 46e62edec1_7293551cfa_e671221d3b_0.bht -> ../../exprs/blastp_db/46e62edec1_7293551cfa_e671221d3b_0.bht.out
+|   |   |-- 46e62edec1_7293551cfa_e671221d3b_0.bht.out
+|   |   |-- 46e62edec1_7293551cfa_e671221d3b_0.bht.out.err
+|   |   |-- 46e62edec1_fd0a204210_3b3f845657_0.bht -> ../../exprs/blastp_db/46e62edec1_fd0a204210_3b3f845657_0.bht.out
+|   |   |-- 46e62edec1_fd0a204210_3b3f845657_0.bht.out
+|   |   `-- 46e62edec1_fd0a204210_3b3f845657_0.bht.out.err
+|   |-- list
+|   |   |-- 2ba1eb8e63_0.faa.list -> ../../cache/lines/...
+|   |   `-- 66644cae34_0.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 0e49ee7cdf_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
+|   |-- makeblastdb_prot
+|   |   |-- 54c0925240_0.pdb -> ../../cache/lines/...
+|   |   `-- 5d8d18dd37_0.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835_0.num -> ../../cache/lines/...
+|   |-- reciprocal_best
+|   |   `-- 1c8e5dbe1a_eeca7bd4aa_0.bht
+|   `-- str
+|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
+`-- vars
+    |-- fwdHits.bht -> ../exprs/blastp_db/46e62edec1_7293551cfa_e671221d3b_0.bht
+    |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/0e49ee7cdf_0.faa
+    |-- recHits.bht -> ../exprs/reciprocal_best/1c8e5dbe1a_eeca7bd4aa_0.bht
+    |-- result -> ../vars/recHits.bht
+    `-- revHits.bht -> ../exprs/blastp_db/46e62edec1_fd0a204210_3b3f845657_0.bht
+
+14 directories, 36 files

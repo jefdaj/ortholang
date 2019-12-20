@@ -6,5 +6,5 @@
 
 include "maga-vs-mgen-blastp-rbh-3x.cut"
 
-solidHitIDs100 = all (repeat solidHitIDs n_repeats 100)
+solidHitIDs100 = repeat solidHitIDs n_repeats 100
 result = solidHitIDs100
