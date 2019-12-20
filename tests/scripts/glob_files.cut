@@ -1,1 +1,1 @@
-result = glob_files "data/*.faa"
+result = glob_files "examples/sequences/*.faa"

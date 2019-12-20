@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- a304ea7b35
+|   |   `-- 96417b560d
 |   |       |-- f606c5bd36.pdb -> ../../../exprs/makeblastdb_prot/f606c5bd36_0.pdb
 |   |       |-- f606c5bd36.pdb.args -> ../../../cache/lines/...
 |   |       |-- ffbede4f01.pdb -> ../../../exprs/makeblastdb_prot/ffbede4f01_0.pdb
@@ -28,22 +28,22 @@
 |   |-- list
 |   |   `-- 0e7696392c_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 1da1b2a943_0.faa -> ../../cache/load/cb3e90dc00.faa
-|   |   `-- dcc6976d0e_0.faa -> ../../cache/load/28e059b2a9.faa
+|   |   |-- 37261f1f62_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   `-- e47e096fcc_0.faa -> ../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_prot
 |   |   |-- f606c5bd36_0.pdb -> ../../cache/lines/...
 |   |   `-- ffbede4f01_0.pdb -> ../../cache/lines/...
 |   |-- makeblastdb_prot_each
-|   |   `-- 44401963e7_0.pdb.list -> ../../cache/lines/...
+|   |   `-- c68e3e181e_0.pdb.list -> ../../cache/lines/...
 |   |-- singletons
-|   |   `-- e1978d6272_0.faa.list.list -> ../../cache/lines/...
+|   |   `-- 8201bf0297_0.faa.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- b9e2f5fbe2_0.str -> ../../cache/lines/...
-|       `-- c5570b421f_0.str -> ../../cache/lines/...
+|       |-- 1e020faf26_0.str -> ../../cache/lines/...
+|       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
-    |-- dbs.pdb.list -> ../exprs/makeblastdb_prot_each/44401963e7_0.pdb.list
-    |-- genes5.faa -> ../exprs/load_faa/1da1b2a943_0.faa
+    |-- dbs.pdb.list -> ../exprs/makeblastdb_prot_each/c68e3e181e_0.pdb.list
+    |-- genes5.faa -> ../exprs/load_faa/37261f1f62_0.faa
     |-- result -> ../vars/dbs.pdb.list
-    `-- single.faa -> ../exprs/load_faa/dcc6976d0e_0.faa
+    `-- single.faa -> ../exprs/load_faa/e47e096fcc_0.faa
 
 15 directories, 31 files

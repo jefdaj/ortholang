@@ -16,17 +16,17 @@
 |   |-- list
 |   |   `-- 0e7696392c_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 1da1b2a943_0.faa -> ../../cache/load/cb3e90dc00.faa
-|   |   `-- dcc6976d0e_0.faa -> ../../cache/load/28e059b2a9.faa
+|   |   |-- 37261f1f62_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   `-- e47e096fcc_0.faa -> ../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_prot_all
-|   |   `-- e1978d6272_0.pdb -> ../../cache/lines/...
+|   |   `-- 8201bf0297_0.pdb -> ../../cache/lines/...
 |   `-- str
-|       |-- b9e2f5fbe2_0.str -> ../../cache/lines/...
-|       `-- c5570b421f_0.str -> ../../cache/lines/...
+|       |-- 1e020faf26_0.str -> ../../cache/lines/...
+|       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
-    |-- db.pdb -> ../exprs/makeblastdb_prot_all/e1978d6272_0.pdb
-    |-- genes5.faa -> ../exprs/load_faa/1da1b2a943_0.faa
+    |-- db.pdb -> ../exprs/makeblastdb_prot_all/8201bf0297_0.pdb
+    |-- genes5.faa -> ../exprs/load_faa/37261f1f62_0.faa
     |-- result -> ../vars/db.pdb
-    `-- single.faa -> ../exprs/load_faa/dcc6976d0e_0.faa
+    `-- single.faa -> ../exprs/load_faa/e47e096fcc_0.faa
 
 10 directories, 19 files

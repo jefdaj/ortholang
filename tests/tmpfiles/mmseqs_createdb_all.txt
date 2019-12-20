@@ -8,24 +8,24 @@
 |           |-- 74ca5e78d9.mmseqs2db
 |           |-- 74ca5e78d9.mmseqs2db.dbtype
 |           |-- 74ca5e78d9.mmseqs2db.err
-|           |-- 74ca5e78d9.mmseqs2db_h
-|           |-- 74ca5e78d9.mmseqs2db_h.dbtype
-|           |-- 74ca5e78d9.mmseqs2db_h.index
 |           |-- 74ca5e78d9.mmseqs2db.index
 |           |-- 74ca5e78d9.mmseqs2db.lookup
-|           `-- 74ca5e78d9.mmseqs2db.out
+|           |-- 74ca5e78d9.mmseqs2db.out
+|           |-- 74ca5e78d9.mmseqs2db_h
+|           |-- 74ca5e78d9.mmseqs2db_h.dbtype
+|           `-- 74ca5e78d9.mmseqs2db_h.index
 |-- exprs
 |   |-- list
 |   |   `-- 66644cae34_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- mmseqs_createdb_all
-|   |   `-- 96d02905bd_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db.index
+|   |   `-- 54c0925240_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db.index
 |   `-- str
-|       `-- c156278223_0.str -> ../../cache/lines/...
+|       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/96d02905bd_0.mms
-    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
+    |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
+    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/54c0925240_0.mms
     `-- result -> ../vars/maga_db.mms
 
 10 directories, 18 files

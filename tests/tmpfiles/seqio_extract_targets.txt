@@ -1,58 +1,58 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 5b10cb7679
-|   |       |-- a662dfc2af.str.list -> ../../../exprs/extract_targets/a662dfc2af_0.str.list
-|   |       `-- a662dfc2af.str.list.args -> ../../../cache/lines/...
+|   |   `-- e82fdfbc43
+|   |       |-- 8b94fd3e7b.str.list -> ../../../exprs/extract_targets/8b94fd3e7b_0.str.list
+|   |       `-- 8b94fd3e7b.str.list.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |   |-- cb3e90dc00.faa
 |   |   `-- cb3e90dc00.faa.ids
 |   |-- makeblastdb
-|   |   `-- 05e56ef3a1
-|   |       |-- 05e56ef3a1.pdb.err
-|   |       |-- 05e56ef3a1.pdb.out
-|   |       |-- 05e56ef3a1.pdb.phr
-|   |       |-- 05e56ef3a1.pdb.pin
-|   |       `-- 05e56ef3a1.pdb.psq
+|   |   `-- 128216f384
+|   |       |-- 128216f384.pdb.err
+|   |       |-- 128216f384.pdb.out
+|   |       |-- 128216f384.pdb.phr
+|   |       |-- 128216f384.pdb.pin
+|   |       `-- 128216f384.pdb.psq
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 9fa8b2cd88_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 79e606f478_0.str.list.list -> ../../cache/lines/...
 |   |-- blastp_db
-|   |   |-- 46e62edec1_183f436b85_36b6a3c0b6_0.bht -> ../../exprs/blastp_db/46e62edec1_183f436b85_36b6a3c0b6_0.bht.out
-|   |   |-- 46e62edec1_183f436b85_36b6a3c0b6_0.bht.out
-|   |   `-- 46e62edec1_183f436b85_36b6a3c0b6_0.bht.out.err
+|   |   |-- 46e62edec1_cdd012aa55_92f7c820bc_0.bht -> ../../exprs/blastp_db/46e62edec1_cdd012aa55_92f7c820bc_0.bht.out
+|   |   |-- 46e62edec1_cdd012aa55_92f7c820bc_0.bht.out
+|   |   `-- 46e62edec1_cdd012aa55_92f7c820bc_0.bht.out.err
 |   |-- extract_targets
-|   |   |-- a662dfc2af_0.str.list -> ../../cache/lines/...
-|   |   |-- a662dfc2af_0.str.list.tmp.err
-|   |   |-- ef380118eb_0.str.list -> ../../cache/lines/...
-|   |   `-- ef380118eb_0.str.list.tmp.err
+|   |   |-- 3226d667c7_0.str.list -> ../../cache/lines/...
+|   |   |-- 3226d667c7_0.str.list.tmp.err
+|   |   |-- 8b94fd3e7b_0.str.list -> ../../cache/lines/...
+|   |   `-- 8b94fd3e7b_0.str.list.tmp.err
 |   |-- extract_targets_each
-|   |   `-- 25624c1634_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 9b93c28b82_0.str.list.list -> ../../cache/lines/...
 |   |-- gbk_to_faa
-|   |   `-- 262cf7e4e4_cdab12f059_0.faa
+|   |   `-- 262cf7e4e4_b8e1167f5f_0.faa
 |   |-- list
-|   |   |-- 1cba0f89eb_0.faa.list -> ../../cache/lines/...
 |   |   |-- 26890dda4f_0.bht.list -> ../../cache/lines/...
 |   |   |-- 3bbbf950a3_0.str.list.list -> ../../cache/lines/...
+|   |   |-- dc08b79aaf_0.faa.list -> ../../cache/lines/...
 |   |   `-- df91bd4d94_0.str.list.list.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   `-- 1da1b2a943_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   `-- 37261f1f62_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |-- load_gbk
-|   |   `-- 15e3d91521_0.gbk -> ../../cache/load/28ce925871.gbk
+|   |   `-- 7c96d918c8_0.gbk -> ../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_prot
-|   |   `-- 0beffaee84_0.pdb -> ../../cache/lines/...
+|   |   `-- 80c9b6396e_0.pdb -> ../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835_0.num -> ../../cache/lines/...
 |   `-- str
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
-|       |-- b4da62b027_0.str -> ../../cache/lines/...
-|       `-- c5570b421f_0.str -> ../../cache/lines/...
+|       |-- ead30046d0_0.str -> ../../cache/lines/...
+|       `-- ee108e12fa_0.str -> ../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/46e62edec1_183f436b85_36b6a3c0b6_0.bht
-    |-- mapped.str.list.list -> ../exprs/extract_targets_each/25624c1634_0.str.list.list
-    |-- result -> ../exprs/any/9fa8b2cd88_0.str.list.list
-    `-- single.str.list -> ../exprs/extract_targets/ef380118eb_0.str.list
+    |-- hits.bht -> ../exprs/blastp_db/46e62edec1_cdd012aa55_92f7c820bc_0.bht
+    |-- mapped.str.list.list -> ../exprs/extract_targets_each/9b93c28b82_0.str.list.list
+    |-- result -> ../exprs/any/79e606f478_0.str.list.list
+    `-- single.str.list -> ../exprs/extract_targets/3226d667c7_0.str.list
 
 20 directories, 35 files

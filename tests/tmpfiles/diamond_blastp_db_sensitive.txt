@@ -7,25 +7,25 @@
 |       `-- 36189032ad.faa.ids
 |-- exprs
 |   |-- diamond_blastp_db_sensitive
-|   |   |-- bca777a01a_33392d8410_e6e16f079e_0.bht
-|   |   |-- bca777a01a_33392d8410_e6e16f079e_0.bht.err
-|   |   `-- bca777a01a_33392d8410_e6e16f079e_0.bht.out
+|   |   |-- bca777a01a_7293551cfa_6a44b64e07_0.bht
+|   |   |-- bca777a01a_7293551cfa_6a44b64e07_0.bht.err
+|   |   `-- bca777a01a_7293551cfa_6a44b64e07_0.bht.out
 |   |-- diamond_makedb
-|   |   |-- c8116966c3_0.dmnd
-|   |   |-- c8116966c3_0.dmnd.err
-|   |   `-- c8116966c3_0.dmnd.out
+|   |   |-- fd0a204210_0.dmnd
+|   |   |-- fd0a204210_0.dmnd.err
+|   |   `-- fd0a204210_0.dmnd.out
 |   |-- load_faa
-|   |   |-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
-|   |   `-- a3d0ec3042_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   |-- 0e49ee7cdf_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- num
 |   |   `-- 6de785566e_0.num -> ../../cache/lines/...
 |   `-- str
-|       |-- c156278223_0.str -> ../../cache/lines/...
-|       `-- d03a6ca5fb_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/c8116966c3_0.dmnd
-    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/a3d0ec3042_0.faa
-    `-- result -> ../exprs/diamond_blastp_db_sensitive/bca777a01a_33392d8410_e6e16f079e_0.bht
+    |-- db.dmnd -> ../exprs/diamond_makedb/fd0a204210_0.dmnd
+    |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/0e49ee7cdf_0.faa
+    `-- result -> ../exprs/diamond_blastp_db_sensitive/bca777a01a_7293551cfa_6a44b64e07_0.bht
 
 9 directories, 19 files

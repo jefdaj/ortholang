@@ -1,17 +1,17 @@
 .
 |-- cache
 |   |-- crb_blast
-|   |   `-- 06dc90fa49_771f1eb78e
+|   |   `-- f1ce3e0110_c5017e0cbb
 |   |       |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
-|   |       |-- 36189032ad_into_6046a54e92.2.blast
 |   |       |-- 36189032ad.phr
 |   |       |-- 36189032ad.pin
 |   |       |-- 36189032ad.psq
+|   |       |-- 36189032ad_into_6046a54e92.2.blast
 |   |       |-- 6046a54e92.fna -> ../../../cache/load/6046a54e92.fna
-|   |       |-- 6046a54e92_into_36189032ad.1.blast
 |   |       |-- 6046a54e92.nhr
 |   |       |-- 6046a54e92.nin
 |   |       |-- 6046a54e92.nsq
+|   |       |-- 6046a54e92_into_36189032ad.1.blast
 |   |       |-- evalues_data
 |   |       |-- fitting_data
 |   |       |-- results.crb
@@ -24,21 +24,21 @@
 |       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- crb_blast
-|   |   `-- 47ebd2a24b_33392d8410_0.crb -> ../../cache/crb_blast/06dc90fa49_771f1eb78e/results.crb
+|   |   `-- a3fc746119_7293551cfa_0.crb -> ../../cache/crb_blast/f1ce3e0110_c5017e0cbb/results.crb
 |   |-- extract_targets
-|   |   |-- b8da111eb4_0.str.list -> ../../cache/lines/...
-|   |   `-- b8da111eb4_0.str.list.tmp.err
+|   |   |-- 7905b5f9fc_0.str.list -> ../../cache/lines/...
+|   |   `-- 7905b5f9fc_0.str.list.tmp.err
 |   |-- load_faa
-|   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- load_fna
-|   |   `-- 832f789663_0.fna -> ../../cache/load/6046a54e92.fna
+|   |   `-- c64e4d283b_0.fna -> ../../cache/load/6046a54e92.fna
 |   `-- str
-|       |-- 936e46a549_0.str -> ../../cache/lines/...
-|       `-- c156278223_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
-    |-- hits.crb -> ../exprs/crb_blast/47ebd2a24b_33392d8410_0.crb
-    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
-    |-- minimgen.fna -> ../exprs/load_fna/832f789663_0.fna
-    `-- result -> ../exprs/extract_targets/b8da111eb4_0.str.list
+    |-- hits.crb -> ../exprs/crb_blast/a3fc746119_7293551cfa_0.crb
+    |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
+    |-- minimgen.fna -> ../exprs/load_fna/c64e4d283b_0.fna
+    `-- result -> ../exprs/extract_targets/7905b5f9fc_0.str.list
 
 11 directories, 30 files

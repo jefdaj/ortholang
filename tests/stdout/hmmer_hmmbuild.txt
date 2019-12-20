@@ -1,5 +1,5 @@
 HMMER3/f [3.2.1 | June 2018]
-NAME  ec31296ed3_0
+NAME  c7f8a90354_0
 LENG  380
 ALPH  amino
 RF    no

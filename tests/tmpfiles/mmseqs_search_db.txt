@@ -10,60 +10,53 @@
 |       |   |-- 74ca5e78d9.mmseqs2db
 |       |   |-- 74ca5e78d9.mmseqs2db.dbtype
 |       |   |-- 74ca5e78d9.mmseqs2db.err
-|       |   |-- 74ca5e78d9.mmseqs2db_h
-|       |   |-- 74ca5e78d9.mmseqs2db_h.dbtype
-|       |   |-- 74ca5e78d9.mmseqs2db_h.index
 |       |   |-- 74ca5e78d9.mmseqs2db.index
 |       |   |-- 74ca5e78d9.mmseqs2db.lookup
 |       |   |-- 74ca5e78d9.mmseqs2db.out
+|       |   |-- 74ca5e78d9.mmseqs2db_h
+|       |   |-- 74ca5e78d9.mmseqs2db_h.dbtype
+|       |   |-- 74ca5e78d9.mmseqs2db_h.index
 |       |   |-- b3bed9ea62.mmseqs2db
 |       |   |-- b3bed9ea62.mmseqs2db.dbtype
 |       |   |-- b3bed9ea62.mmseqs2db.err
-|       |   |-- b3bed9ea62.mmseqs2db_h
-|       |   |-- b3bed9ea62.mmseqs2db_h.dbtype
-|       |   |-- b3bed9ea62.mmseqs2db_h.index
 |       |   |-- b3bed9ea62.mmseqs2db.index
 |       |   |-- b3bed9ea62.mmseqs2db.lookup
-|       |   `-- b3bed9ea62.mmseqs2db.out
+|       |   |-- b3bed9ea62.mmseqs2db.out
+|       |   |-- b3bed9ea62.mmseqs2db_h
+|       |   |-- b3bed9ea62.mmseqs2db_h.dbtype
+|       |   `-- b3bed9ea62.mmseqs2db_h.index
 |       `-- search
-|           |-- 49944eccdc.mmseqs2db.0
-|           |-- 49944eccdc.mmseqs2db.1
-|           |-- 49944eccdc.mmseqs2db.2
-|           |-- 49944eccdc.mmseqs2db.3
-|           |-- 49944eccdc.mmseqs2db.4
-|           |-- 49944eccdc.mmseqs2db.5
-|           |-- 49944eccdc.mmseqs2db.6
-|           |-- 49944eccdc.mmseqs2db.7
-|           |-- 49944eccdc.mmseqs2db.dbtype
-|           |-- 49944eccdc.mmseqs2db.err
-|           |-- 49944eccdc.mmseqs2db.index
-|           `-- 49944eccdc.mmseqs2db.out
+|           |-- a41a5ed7ca.mmseqs2db
+|           |-- a41a5ed7ca.mmseqs2db.dbtype
+|           |-- a41a5ed7ca.mmseqs2db.err
+|           |-- a41a5ed7ca.mmseqs2db.index
+|           `-- a41a5ed7ca.mmseqs2db.out
 |-- exprs
 |   |-- length
-|   |   `-- 49944eccdc_0.num -> ../../cache/lines/...
+|   |   `-- a41a5ed7ca_0.num -> ../../cache/lines/...
 |   |-- list
 |   |   |-- 2ba1eb8e63_0.faa.list -> ../../cache/lines/...
 |   |   `-- 66644cae34_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 38ee10291a_0.faa -> ../../cache/load/11bbf54fc6.faa
-|   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |   |-- 1205880c10_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- mmseqs_createdb
-|   |   |-- 3002f20385_0.mms -> ../../cache/mmseqs/createdb/b3bed9ea62.mmseqs2db.index
-|   |   `-- 96d02905bd_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db.index
+|   |   |-- 54c0925240_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db.index
+|   |   `-- e89296de33_0.mms -> ../../cache/mmseqs/createdb/b3bed9ea62.mmseqs2db.index
 |   |-- mmseqs_search_db
-|   |   |-- 154e324425_33392d8410_69f5556f7a_0.bht
-|   |   |-- 154e324425_33392d8410_69f5556f7a_0.bht.err
-|   |   `-- 154e324425_33392d8410_69f5556f7a_0.bht.out
+|   |   |-- 154e324425_7293551cfa_a39cf3833a_0.bht
+|   |   |-- 154e324425_7293551cfa_a39cf3833a_0.bht.err
+|   |   `-- 154e324425_7293551cfa_a39cf3833a_0.bht.out
 |   |-- num
 |   |   `-- ac9644e51f_0.num -> ../../cache/lines/...
 |   `-- str
-|       |-- 967a681a55_0.str -> ../../cache/lines/...
-|       `-- c156278223_0.str -> ../../cache/lines/...
+|       |-- 40edb92618_0.str -> ../../cache/lines/...
+|       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/mmseqs_search_db/154e324425_33392d8410_69f5556f7a_0.bht
-    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
-    |-- mgendb.mms -> ../exprs/mmseqs_createdb/3002f20385_0.mms
-    |-- mgen.faa -> ../exprs/load_faa/38ee10291a_0.faa
-    `-- result -> ../exprs/length/49944eccdc_0.num
+    |-- hits.bht -> ../exprs/mmseqs_search_db/154e324425_7293551cfa_a39cf3833a_0.bht
+    |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/1205880c10_0.faa
+    |-- mgendb.mms -> ../exprs/mmseqs_createdb/e89296de33_0.mms
+    `-- result -> ../exprs/length/a41a5ed7ca_0.num
 
-14 directories, 52 files
+14 directories, 45 files

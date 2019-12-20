@@ -1,20 +1,20 @@
 .
 |-- cache
 |   |-- load
-|   |   `-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|   |   `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   `-- seqio
 |-- exprs
 |   |-- gbk_to_fna
-|   |   `-- 262cf7e4e4_cdab12f059_0.fna
+|   |   `-- 262cf7e4e4_b8e1167f5f_0.fna
 |   |-- load_fna
 |   |-- load_gbk
-|   |   `-- 15e3d91521_0.gbk -> ../../cache/load/28ce925871.gbk
+|   |   `-- 7c96d918c8_0.gbk -> ../../cache/load/28ce925871.gbk
 |   `-- str
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
-|       `-- b4da62b027_0.str -> ../../cache/lines/...
+|       `-- ee108e12fa_0.str -> ../../cache/lines/...
 `-- vars
-    |-- fna.fna -> ../exprs/gbk_to_fna/262cf7e4e4_cdab12f059_0.fna
-    |-- gbk.gbk -> ../exprs/load_gbk/15e3d91521_0.gbk
+    |-- fna.fna -> ../exprs/gbk_to_fna/262cf7e4e4_b8e1167f5f_0.fna
+    |-- gbk.gbk -> ../exprs/load_gbk/7c96d918c8_0.gbk
     `-- result -> ../vars/fna.fna
 
 9 directories, 8 files

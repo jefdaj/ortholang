@@ -9,17 +9,17 @@
 |       `-- 39b21a8bf4.faa.ids
 |-- exprs
 |   |-- diamond_makedb_all
-|   |   |-- 722bcc0dfa_0.dmnd
-|   |   |-- 722bcc0dfa_0.dmnd.err
-|   |   `-- 722bcc0dfa_0.dmnd.out
+|   |   |-- 4ef121b815_0.dmnd
+|   |   |-- 4ef121b815_0.dmnd.err
+|   |   `-- 4ef121b815_0.dmnd.out
 |   |-- glob_files
-|   |   `-- 55884326c8_0.str.list -> ../../cache/lines/...
+|   |   `-- cadd1a7b08_0.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   `-- bf5eacc9c3_0.faa.list -> ../../cache/lines/...
+|   |   `-- b2d770718c_0.faa.list -> ../../cache/lines/...
 |   `-- str
-|       `-- b4fd58abbf_0.str -> ../../cache/lines/...
+|       `-- f9b7f821c1_0.str -> ../../cache/lines/...
 `-- vars
-    |-- mycoplasma.faa.list -> ../exprs/list/bf5eacc9c3_0.faa.list
-    `-- result -> ../exprs/diamond_makedb_all/722bcc0dfa_0.dmnd
+    |-- mycoplasma.faa.list -> ../exprs/list/b2d770718c_0.faa.list
+    `-- result -> ../exprs/diamond_makedb_all/4ef121b815_0.dmnd
 
 8 directories, 14 files

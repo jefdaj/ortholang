@@ -1,1 +1,2 @@
-["data/Mycoplasma_genitalium_small.faa", "data/Mycoplasma_hyopneumoniae_small.faa"]
+["examples/sequences/Mycoplasma_genitalium_small.faa",
+ "examples/sequences/Mycoplasma_hyopneumoniae_small.faa"]

@@ -5,13 +5,13 @@
 
 # the (maga) query gene has an exact match in its own genome,
 # so there should be a hit at any e-value
-query   = load_faa "data/Mycoplasma_genitalium_single.faa"
-maga = load_faa "data/Mycoplasma_agalactiae_small.faa"
+query   = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
+maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
 magadb  = makeblastdb_prot maga
 
 # there's no perfect hit in another cyano though,
 # so below a certain cutoff an empty pssm will be created if trained on mgen
-mgen = load_faa "data/Mycoplasma_genitalium_protein_refseq.faa"
+mgen = load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"
 mgendb  = makeblastdb_prot mgen
 
 # check that psiblast itself works by training a pssm on each
