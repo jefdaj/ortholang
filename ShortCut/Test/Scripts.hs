@@ -8,7 +8,7 @@ import Control.Monad              (when)
 import qualified Data.ByteString.Lazy  as BL
 -- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
 import qualified Data.ByteString.Lazy.Char8 as B8
-import Data.List                  (zip4)
+import Data.List                  (zip5)
 import Paths_ShortCut             (getDataFileName)
 import ShortCut.Core.Eval         (evalFile)
 import ShortCut.Core.Parse        (parseFileIO)
@@ -144,9 +144,9 @@ runCut cfg ref ids =  do
   writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out -- for the shell script tests
   return $ toGeneric cfg out
 
-mkScriptTests :: (FilePath, FilePath, FilePath, Maybe FilePath)
+mkScriptTests :: (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
               -> CutConfig -> Locks -> HashedIDsRef -> IO TestTree
-mkScriptTests (cut, out, tre, mchk) cfg ref ids = do
+mkScriptTests (name, cut, out, tre, mchk) cfg ref ids = do
   absTests   <- mkAbsTest   cfg' ref ids -- just one, but comes as a list
   checkTests <- case mchk of
                   Nothing -> return []
@@ -159,7 +159,6 @@ mkScriptTests (cut, out, tre, mchk) cfg ref ids = do
                     else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
   return $ testGroup name tests
   where
-    name = takeBaseName cut
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
 
 {- "check scripts" for handling the tricky cases:
@@ -188,11 +187,15 @@ findTestFile base dir ext name = do
 mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = do
   testDir <- getDataFileName "tests"
+  exDir   <- getDataFileName "examples"
   names   <- getTestScripts testDir
-  mchecks <- mapM (findTestFile testDir "check" "sh") names
-  let cuts   = map (testFilePath testDir "scripts"  "cut") names
-      outs   = map (testFilePath testDir "stdout"   "txt") names
-      trees  = map (testFilePath testDir "tmpfiles" "txt") names
-      quads  = zip4 cuts outs trees mchecks
-      groups = map mkScriptTests quads
+  exNames <- getTestScripts exDir
+  let exNames' = map ("examples_" ++) exNames
+  mchecks <- mapM (findTestFile testDir "check" "sh") (names ++ exNames')
+  let cuts   = map (testFilePath testDir "scripts"  "cut") names ++
+               map (testFilePath exDir "cut-scripts" "cut") exNames
+      outs   = map (testFilePath testDir "stdout"   "txt") (names ++ exNames')
+      trees  = map (testFilePath testDir "tmpfiles" "txt") (names ++ exNames')
+      hepts  = zip5 (names ++ exNames') cuts outs trees mchecks
+      groups = map mkScriptTests hepts
   mkTestGroup cfg ref ids "interpret test scripts" groups
