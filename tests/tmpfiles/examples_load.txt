@@ -1,0 +1,12 @@
+.
+|-- cache
+|-- exprs
+|   |-- glob_files
+|   |   `-- 95d088dfb1_0.str.list -> ../../cache/lines/...
+|   `-- str
+|       `-- a2afbbbddc_0.str -> ../../cache/lines/...
+`-- vars
+    |-- pcc7942.str.list -> ../exprs/glob_files/95d088dfb1_0.str.list
+    `-- result -> ../vars/pcc7942.str.list
+
+5 directories, 4 files

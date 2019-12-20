@@ -5,27 +5,27 @@
 |   |   `-- 36189032ad.faa.ids
 |   `-- mmseqs
 |       `-- createdb
-|           |-- 74ca5e78d9.mmseqs2db
-|           |-- 74ca5e78d9.mmseqs2db.dbtype
-|           |-- 74ca5e78d9.mmseqs2db.err
-|           |-- 74ca5e78d9.mmseqs2db_h
-|           |-- 74ca5e78d9.mmseqs2db_h.dbtype
-|           |-- 74ca5e78d9.mmseqs2db_h.index
-|           |-- 74ca5e78d9.mmseqs2db.index
-|           |-- 74ca5e78d9.mmseqs2db.lookup
-|           `-- 74ca5e78d9.mmseqs2db.out
+|           |-- 5916b67034.mmseqs2db
+|           |-- 5916b67034.mmseqs2db.dbtype
+|           |-- 5916b67034.mmseqs2db.err
+|           |-- 5916b67034.mmseqs2db_h
+|           |-- 5916b67034.mmseqs2db_h.dbtype
+|           |-- 5916b67034.mmseqs2db_h.index
+|           |-- 5916b67034.mmseqs2db.index
+|           |-- 5916b67034.mmseqs2db.lookup
+|           `-- 5916b67034.mmseqs2db.out
 |-- exprs
 |   |-- list
-|   |   `-- 66644cae34_0.faa.list -> ../../cache/lines/...
+|   |   `-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- mmseqs_createdb
-|   |   `-- 96d02905bd_0.mms -> ../../cache/mmseqs/createdb/74ca5e78d9.mmseqs2db.index
+|   |   `-- 1523a4da89_0.mms -> ../../cache/mmseqs/createdb/5916b67034.mmseqs2db.index
 |   `-- str
-|       `-- c156278223_0.str -> ../../cache/lines/...
+|       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga_db.mms -> ../exprs/mmseqs_createdb/96d02905bd_0.mms
-    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
+    |-- maga_db.mms -> ../exprs/mmseqs_createdb/1523a4da89_0.mms
+    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
     `-- result -> ../vars/maga_db.mms
 
 10 directories, 18 files

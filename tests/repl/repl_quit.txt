@@ -1,5 +1,5 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ :q
+ortholang —▶ :q
 Bye for now!

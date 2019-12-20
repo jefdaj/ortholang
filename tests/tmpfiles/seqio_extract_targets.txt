@@ -1,58 +1,58 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 5b10cb7679
-|   |       |-- a662dfc2af.str.list -> ../../../exprs/extract_targets/a662dfc2af_0.str.list
-|   |       `-- a662dfc2af.str.list.args -> ../../../cache/lines/...
+|   |   `-- 62d9ff753a
+|   |       |-- 54bc3f8cf4.str.list -> ../../../exprs/extract_targets/54bc3f8cf4_0.str.list
+|   |       `-- 54bc3f8cf4.str.list.args -> ../../../cache/lines/...
 |   |-- load
-|   |   |-- 28ce925871.gbk -> $WORKDIR/data/Mycoplasma_genitalium_M2321.gbk
+|   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |   |-- cb3e90dc00.faa
 |   |   `-- cb3e90dc00.faa.ids
 |   |-- makeblastdb
-|   |   `-- 05e56ef3a1
-|   |       |-- 05e56ef3a1.pdb.err
-|   |       |-- 05e56ef3a1.pdb.out
-|   |       |-- 05e56ef3a1.pdb.phr
-|   |       |-- 05e56ef3a1.pdb.pin
-|   |       `-- 05e56ef3a1.pdb.psq
+|   |   `-- 0b4fe876cf
+|   |       |-- 0b4fe876cf.pdb.err
+|   |       |-- 0b4fe876cf.pdb.out
+|   |       |-- 0b4fe876cf.pdb.phr
+|   |       |-- 0b4fe876cf.pdb.pin
+|   |       `-- 0b4fe876cf.pdb.psq
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 9fa8b2cd88_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 4db88f5721_0.str.list.list -> ../../cache/lines/...
 |   |-- blastp_db
-|   |   |-- 46e62edec1_183f436b85_36b6a3c0b6_0.bht -> ../../exprs/blastp_db/46e62edec1_183f436b85_36b6a3c0b6_0.bht.out
-|   |   |-- 46e62edec1_183f436b85_36b6a3c0b6_0.bht.out
-|   |   `-- 46e62edec1_183f436b85_36b6a3c0b6_0.bht.out.err
+|   |   |-- b79e5160cb_e0be9800d0_af755a47ae_0.bht -> ../../exprs/blastp_db/b79e5160cb_e0be9800d0_af755a47ae_0.bht.out
+|   |   |-- b79e5160cb_e0be9800d0_af755a47ae_0.bht.out
+|   |   `-- b79e5160cb_e0be9800d0_af755a47ae_0.bht.out.err
 |   |-- extract_targets
-|   |   |-- a662dfc2af_0.str.list -> ../../cache/lines/...
-|   |   |-- a662dfc2af_0.str.list.tmp.err
-|   |   |-- ef380118eb_0.str.list -> ../../cache/lines/...
-|   |   `-- ef380118eb_0.str.list.tmp.err
+|   |   |-- 54bc3f8cf4_0.str.list -> ../../cache/lines/...
+|   |   |-- 54bc3f8cf4_0.str.list.tmp.err
+|   |   |-- 97c145267e_0.str.list -> ../../cache/lines/...
+|   |   `-- 97c145267e_0.str.list.tmp.err
 |   |-- extract_targets_each
-|   |   `-- 25624c1634_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 5790e28be2_0.str.list.list -> ../../cache/lines/...
 |   |-- gbk_to_faa
-|   |   `-- 262cf7e4e4_cdab12f059_0.faa
+|   |   `-- acb4ee1de2_8ec3a4f820_0.faa
 |   |-- list
-|   |   |-- 1cba0f89eb_0.faa.list -> ../../cache/lines/...
-|   |   |-- 26890dda4f_0.bht.list -> ../../cache/lines/...
-|   |   |-- 3bbbf950a3_0.str.list.list -> ../../cache/lines/...
-|   |   `-- df91bd4d94_0.str.list.list.list -> ../../cache/lines/...
+|   |   |-- 32b04e3e15_0.bht.list -> ../../cache/lines/...
+|   |   |-- 335487c411_0.faa.list -> ../../cache/lines/...
+|   |   |-- 6514e5f791_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 7c54f3bb14_0.str.list.list.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   `-- 1da1b2a943_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |-- load_gbk
-|   |   `-- 15e3d91521_0.gbk -> ../../cache/load/28ce925871.gbk
+|   |   `-- cbd97ba8fe_0.gbk -> ../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_prot
-|   |   `-- 0beffaee84_0.pdb -> ../../cache/lines/...
+|   |   `-- fff4d7542e_0.pdb -> ../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835_0.num -> ../../cache/lines/...
 |   `-- str
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
-|       |-- b4da62b027_0.str -> ../../cache/lines/...
-|       `-- c5570b421f_0.str -> ../../cache/lines/...
+|       |-- ead30046d0_0.str -> ../../cache/lines/...
+|       `-- ee108e12fa_0.str -> ../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/46e62edec1_183f436b85_36b6a3c0b6_0.bht
-    |-- mapped.str.list.list -> ../exprs/extract_targets_each/25624c1634_0.str.list.list
-    |-- result -> ../exprs/any/9fa8b2cd88_0.str.list.list
-    `-- single.str.list -> ../exprs/extract_targets/ef380118eb_0.str.list
+    |-- hits.bht -> ../exprs/blastp_db/b79e5160cb_e0be9800d0_af755a47ae_0.bht
+    |-- mapped.str.list.list -> ../exprs/extract_targets_each/5790e28be2_0.str.list.list
+    |-- result -> ../exprs/any/4db88f5721_0.str.list.list
+    `-- single.str.list -> ../exprs/extract_targets/97c145267e_0.str.list
 
 20 directories, 35 files

@@ -1,0 +1,19 @@
+.
+|-- cache
+|   `-- load
+|       |-- 737dfdb34e.fna
+|       |-- 737dfdb34e.fna.ids
+|       |-- ff08c7f09e.fna
+|       `-- ff08c7f09e.fna.ids
+|-- exprs
+|   |-- glob_files
+|   |   `-- ae3a450466_0.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 124b7ab097_0.fna.list -> ../../cache/lines/...
+|   `-- str
+|       `-- cbc44e51d7_0.str -> ../../cache/lines/...
+`-- vars
+    |-- both.fna.list -> ../exprs/list/124b7ab097_0.fna.list
+    `-- result -> ../vars/both.fna.list
+
+7 directories, 9 files

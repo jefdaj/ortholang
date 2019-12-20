@@ -60,11 +60,11 @@ runTests args cfg ref ids = withArgs [] $ do
     case getAllArgs args (longOption "test") of
       [] -> return ()
       ps -> setEnv "TASTY_PATTERN" $ unwords ps
-    let dataSrc = wd </> "data"
-        dataDst = tmpSubDir </> "data"
+    let exSrc = wd </> "examples"
+        exDst = tmpSubDir </> "examples"
     -- TODO why not use the symlink function here?
     (_,_,_) <- readCreateProcessWithExitCode
-      (shell $ unwords ["ln -s", dataSrc, dataDst]) ""
-    dbg $ "created data dir " ++ dataDst
+      (shell $ unwords ["ln -s", exSrc, exDst]) ""
+    dbg $ "created examples dir " ++ exDst
     tests <- mkTests (mkTestConfig cfg tmpSubDir) ref ids
     defaultMain tests
