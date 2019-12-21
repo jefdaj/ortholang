@@ -26,6 +26,7 @@ read_string <- function(textFile)
   read_file(textFile) %>% trimws
 
 save_plot <- function(plot, plotPath)
+  # TODO would png(); plot; dev.close() work around the X11 error here?
   suppressMessages(ggsave(plot, filename=plotPath, device="png"))
 
 main <- function() {
