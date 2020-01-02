@@ -227,7 +227,7 @@ eval hdl cfg ref ids rtype ls p = do
                 }
   if isJust (cfgDebug cfg)
     then ignoreErrors $ eval' delay pOpts ls p
-    else ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
+    else retryIgnore  $ eval' delay pOpts ls p
   where
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program. The error will still be visible.
