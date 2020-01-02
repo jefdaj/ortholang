@@ -18,9 +18,9 @@ build_docker_image() {
 }
 
 run_docker_image() {
-  CONTAINER=$(docker ps --latest | grep shortcut | awk '{print $2}')
+  latest=$(docker images | grep shortcut | head -n1 | awk '{print $2}')
   docker run $@ \
-	  $CONTAINER shortcut $SHORTCUT_ARGS
+	  shortcut:$latest shortcut $SHORTCUT_ARGS
 }
 
 run_tests() {
