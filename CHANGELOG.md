@@ -7,6 +7,15 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
+## [0.9.3] - 2020-01-02
+### Added
+- Docker image (nix expression, build script, docker hub repo)
+
+### Fixed
+- Specified basic linux dependencies in nix files
+- Patch shebangs in all orthofinder scripts
+- Stack repl finds nix-provided zlib now
+
 ## [0.9.2] - 2019-12-10
 ### Changed
 - Friendlier install script
