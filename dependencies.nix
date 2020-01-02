@@ -1,20 +1,5 @@
 with import ./nixpkgs;
 let
-  # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
-  tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
-    builder = "${bash}/bin/bash";
-    buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
-    postInstall = (oldAttrs.postInstall or "") + ''
-      wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
-    '';
-  });
-
-  # fixes "Fontconfig error: Cannot load default config file"
-  # from nixpkgs/pkgs/development/libraries/pipewire/default.nix
-  fontsConf = makeFontsConf {
-    fontDirectories = [ ];
-  };
-
   myEnv = [
     # TODO which of these are needed?
     stdenv
@@ -24,24 +9,20 @@ let
     diffutils
     glibcLocales # TODO even on mac?
     tree
-    tarWithGzip
+    gnutar
     gnugrep
     gnused
     gawk
     curl
-    cacert # for curl https
-    fontconfig.lib # for R plotting scripts
   ];
 
-  # TODO why is patching shebangs on the wrapped scripts necessary??
   mkModule = src: extraRunDeps: extraWraps:
-    let name = "OrthoLang-" + baseNameOf src;
+    let name = "Shortcut-" + baseNameOf src;
         runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
-      NIX_LDFLAGS = "-lfontconfig"; # for R plotting scripts
-      buildInputs = [ makeWrapper ] ++ runDeps;
-      installPhase = ''
+      buildInputs = [ makeWrapper ] ++ extraRunDeps;
+      builder = writeScript "builder.sh" ''
         source ${stdenv}/setup
         mkdir -p $out/bin
         for script in $src/*; do
@@ -49,23 +30,7 @@ let
           dest="$out/bin/$base"
           substituteAll $script $dest
           chmod +x $dest
-          wrapProgram $dest \
-            --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps} \
-            --set NIX_SSL_CERT_FILE "${cacert}/etc/ssl/certs/ca-bundle.crt" \
-            --set FONTCONFIG_FILE "${fontsConf}"
-        done
-      '';
-
-      # problem:  https://github.com/NixOS/nixpkgs/issues/11133
-      # solution: https://github.com/NixOS/nixpkgs/pull/74942
-      fixupPhase = if stdenv.isDarwin then ''
-        for script in $out/bin/.*-wrapped; do
-          patchShebangs "$script"
-          substituteInPlace $script --replace "#!/nix" "#!/usr/bin/env /nix"
-        done
-      '' else ''
-        for script in $out/bin/.*-wrapped; do
-          patchShebangs "$script"
+          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps}
         done
         for script in $out/bin/.*-wrapped; do
           patchShebangs $script
@@ -104,62 +69,61 @@ in rec {
     futile_logger
   ];};
 
-  ortholang-biomartr      = mkModule ./OrthoLang/Modules/BioMartR      [ myR ] "";
-  ortholang-blasthits     = mkModule ./OrthoLang/Modules/BlastHits     [ myR ] "";
-  ortholang-blastrbh      = mkModule ./OrthoLang/Modules/BlastRBH      [ myR ] "";
-  ortholang-plots         = mkModule ./OrthoLang/Modules/Plots         [ myR ] "";
-  ortholang-setstable     = mkModule ./OrthoLang/Modules/SetsTable     [ myR ] "";
-  ortholang-range         = mkModule ./OrthoLang/Modules/Range         [ myR ] "";
-  ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast ] "";
-  ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast blastdbget ] "";
-  ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
-  ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
-  ortholang-hmmer         = mkModule ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
-  ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
-  ortholang-muscle        = mkModule ./OrthoLang/Modules/Muscle        [ muscle ] "";
-  ortholang-psiblast      = mkModule ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
+  shortcut-biomartr      = mkModule ./ShortCut/Modules/BioMartR      [ myR ] "";
+  shortcut-blasthits     = mkModule ./ShortCut/Modules/BlastHits     [ myR ] "";
+  shortcut-blastrbh      = mkModule ./ShortCut/Modules/BlastRBH      [ myR ] "";
+  shortcut-plots         = mkModule ./ShortCut/Modules/Plots         [ myR ] "";
+  shortcut-setstable     = mkModule ./ShortCut/Modules/SetsTable     [ myR ] "";
+  shortcut-range         = mkModule ./ShortCut/Modules/Range         [ myR ] "";
+  shortcut-blast         = mkModule ./ShortCut/Modules/Blast         [ myBlast ] "";
+  shortcut-blastdb       = mkModule ./ShortCut/Modules/BlastDB       [ myBlast blastdbget ] "";
+  shortcut-crbblast      = mkModule ./ShortCut/Modules/CRBBlast      [ crb-blast ] "";
+  shortcut-diamond       = mkModule ./ShortCut/Modules/Diamond       [ diamond ] "";
+  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
+  shortcut-mmseqs        = mkModule ./ShortCut/Modules/MMSeqs        [ mmseqs2 ] "";
+  shortcut-muscle        = mkModule ./ShortCut/Modules/Muscle        [ muscle ] "";
+  shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";
 
   # TODO should the wrap not be necessary?
-  ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
-  ortholang-orthofinder   = mkModule ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
-  ortholang-sonicparanoid = mkModule ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
+  shortcut-seqio         = mkModule ./ShortCut/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
+  shortcut-orthofinder   = mkModule ./ShortCut/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
-  ortholang-treecl        = mkModule ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
-  # ortholang-justorthologs = mkModule ./OrthoLang/Modules/JustOrthologs [ justorthologs ] "";
+  shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
+  # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
-  ortholang-busco = mkModule ./OrthoLang/Modules/Busco
-                     [ myBlast hmmer busco python36 which tarWithGzip ]
+  shortcut-busco = mkModule ./ShortCut/Modules/Busco [ myBlast hmmer busco python36 which ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
-  ortholang-load          = mkModule ./OrthoLang/Modules/Load          [ curl ] "";
-  ortholang-orthogroups   = mkModule ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
-  ortholang-greencut      = mkModule ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
+  shortcut-load          = mkModule ./ShortCut/Modules/Load          [ curl ] "";
+  shortcut-orthogroups   = mkModule ./ShortCut/Modules/OrthoGroups   [ python36 ] "";
+  shortcut-greencut      = mkModule ./ShortCut/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   modules = [
-    ortholang-biomartr
-    ortholang-blast
-    ortholang-blastdb
-    ortholang-blasthits
-    ortholang-blastrbh
-    ortholang-crbblast
-    ortholang-diamond
-    ortholang-hmmer
-    ortholang-mmseqs
-    ortholang-muscle
-    ortholang-orthofinder
-    ortholang-plots
-    ortholang-setstable
-    ortholang-psiblast
-    ortholang-seqio
-    # ortholang-sonicparanoid
-    # ortholang-treecl
-    # ortholang-justorthologs
-    ortholang-busco
-    ortholang-load
-    ortholang-range
-    ortholang-orthogroups
-    ortholang-greencut
+    shortcut-biomartr
+    shortcut-blast
+    shortcut-blastdb
+    shortcut-blasthits
+    shortcut-blastrbh
+    shortcut-crbblast
+    shortcut-diamond
+    shortcut-hmmer
+    shortcut-mmseqs
+    shortcut-muscle
+    shortcut-orthofinder
+    shortcut-plots
+    shortcut-setstable
+    shortcut-psiblast
+    shortcut-seqio
+    # shortcut-sonicparanoid
+    # shortcut-treecl
+    # shortcut-justorthologs
+    shortcut-busco
+    shortcut-load
+    shortcut-range
+    shortcut-orthogroups
+    shortcut-greencut
   ];
 
   runDepends = modules ++ myEnv;

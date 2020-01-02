@@ -22,17 +22,17 @@ in pkgs.dockerTools.buildImage {
 
   runAsRoot = ''
     #!${pkgs.runtimeShell}
-    mkdir -p /.ortholang
+    mkdir -p /tmpdir
     mkdir -p /workdir
   '';
 
   config = {
     # TODO workdir is redundant here?
-    Cmd = [ "/bin/ortholang" "--tmpdir" "/.ortholang" "--workdir" "/workdir" ];
+    Cmd = [ "/bin/shortcut" "--tmpdir" "/tmpdir" "--workdir" "/workdir" ];
     WorkingDir = "/workdir";
     Volumes = {
-      "/.ortholang" = {};
-      "/workdir"   = {};
+      "/tmpdir"  = {};
+      "/workdir" = {};
     };
   };
 }
