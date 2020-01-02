@@ -23,7 +23,7 @@ stack_cmd="stack build && stack exec shortcut -- --test $test_filter"
 log="shortcut-${test_filter}-${timestamp}.log"
 
 set -x
-$stack_cmd 2>&1 | tee -a $log
+nix-shell $nix_args --command "$stack_cmd" 2>&1 | tee -a $log
 
 # test with the demo server cache too
 # (just blastp functions for now to keep from getting too big)
