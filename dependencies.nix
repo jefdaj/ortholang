@@ -14,6 +14,7 @@ let
     gnused
     gawk
     curl
+    fontconfig.lib # for R plotting scripts
   ];
 
   # TODO why is patching shebangs on the wrapped scripts necessary??
@@ -22,6 +23,7 @@ let
         runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
+      NIX_LDFLAGS = "-lfontconfig"; # for R plotting scripts
       buildInputs = [ makeWrapper ] ++ runDeps;
       builder = writeScript "builder.sh" ''
         source ${stdenv}/setup
