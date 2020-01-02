@@ -13,7 +13,7 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ### Fixed
 - Specified linux dependencies in nix files
-- Patch shebangs in Orthofinder scripts
+- Patch shebangs in all orthofinder scripts
 - Stack repl finds nix-provided zlib now
 - Venn Diagram list dependencies
 - Provide Fontconfig path to R scripts
