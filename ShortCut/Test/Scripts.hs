@@ -76,8 +76,8 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runCut cfg ref ids
-      -- useful for debugging tests or updating the golden files
-      -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") out
+      -- uncomment to update the stdout golden files:
+      -- writeFile ("/home/jefdaj/shortcut/tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
 
@@ -93,11 +93,10 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg ref ids
-      out <- readCreateProcess wholeCmd ""
-      -- useful for debugging tests or updating the golden files
-      -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
-      -- writeBinaryFile ("/tmp" </> takeBaseName t <.> "txt.bin") out
-      return $ B8.pack $ toGeneric cfg out
+      out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
+      -- uncomment to update the tmpfiles golden files:
+      -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName t <.> "txt") out
+      return $ B8.pack out
 
 -- TODO use safe writes here
 mkTripTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
