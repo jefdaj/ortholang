@@ -67,6 +67,9 @@ let
         for script in $out/bin/.*-wrapped; do
           patchShebangs "$script"
         done
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs $script
+        done
       '';
     };
 

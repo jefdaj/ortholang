@@ -18,9 +18,9 @@ build_docker_image() {
 }
 
 run_docker_image() {
-  latest=$(docker images | grep shortcut | head -n1 | awk '{print $2}')
+  CONTAINER=$(docker ps --latest | grep shortcut | awk '{print $2}')
   docker run $@ \
-	  shortcut:$latest shortcut $SHORTCUT_ARGS
+	  $CONTAINER shortcut $SHORTCUT_ARGS
 }
 
 run_tests() {
@@ -29,10 +29,12 @@ run_tests() {
 }
 
 run_repl() {
+  export SHORTCUT_TMPDIR="$TMPDIR"
+  export SHORTCUT_WORKDIR="$PWD"
   export SHORTCUT_ARGS='--interactive'
 	run_docker_image -i -t \
-    --mount type=bind,source="$TMPDIR",target="/tmpdir" \
-    --mount type=bind,source="$PWD",target="/workdir"
+    --mount type=bind,source="$SHORTCUT_TMPDIR",target="/tmpdir" \
+    --mount type=bind,source="$SHORTCUT_WORKDIR",target="/workdir"
 }
 
 build_docker_image 2>&1 | tee docker-build.log
