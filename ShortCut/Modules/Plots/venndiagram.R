@@ -53,7 +53,6 @@ plot_lists <- function(lists, filename) {
 main <- function() {
   # args <- c('testplot.png', 'testnames.txt', 'testlists.txt')
   args <- commandArgs(trailingOnly = TRUE)
-  # print(args)
   plotPath  <- args[[1]]
   namesPath <- args[[2]] # might contain "<<emptystr>>"?
   listsPath <- args[[3]] # might contain "<<emptystr>>"?

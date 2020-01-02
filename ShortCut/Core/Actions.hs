@@ -480,7 +480,7 @@ runCmd cfg ref@(disk, _) desc = do
   inPaths' <- if cmdFixEmpties desc
                 then mapM (fixEmptyText cfg ref) inPaths
                 else need' cfg ref "core.actions.runCmd" inPaths >> return inPaths
-  -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
+  -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
   dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   let parLockFn = if cmdParallel desc
