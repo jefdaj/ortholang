@@ -2,9 +2,8 @@ flags: {}
 allow-newer: true
 # we use stack inside of nix instead of the other way around
 nix:
-  enable: true
+  enable: false
   pure: false
-  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
 extra-package-dbs: []
 packages:
 - .
