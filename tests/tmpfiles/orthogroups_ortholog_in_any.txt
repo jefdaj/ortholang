@@ -1772,8 +1772,8 @@
 |   |                       |-- OG0000058_tree_id.txt
 |   |                       `-- OG0000059_tree_id.txt
 |   `-- orthogroups
-|       |-- 53bacf9efd.txt
-|       `-- f9e3c41f2f.txt
+|       |-- cad1e5e8a5.txt
+|       `-- f4ad8b9bc5.txt
 |-- exprs
 |   |-- extract_ids
 |   |   |-- 06b3e4476b_0.str.list

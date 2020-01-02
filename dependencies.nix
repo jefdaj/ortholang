@@ -1,8 +1,24 @@
 with import ./nixpkgs;
 let
+  myEnv = [
+    # TODO which of these are needed?
+    stdenv
+    bash
+    bashInteractive
+    coreutils
+    diffutils
+    glibcLocales # TODO even on mac?
+    tree
+    gnutar
+    gnugrep
+    gnused
+    gawk
+    curl
+  ];
+
   mkModule = src: extraRunDeps: extraWraps:
     let name = "Shortcut-" + baseNameOf src;
-        runDeps = [ bash coreutils ] ++ extraRunDeps;
+        runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
       buildInputs = [ makeWrapper ] ++ extraRunDeps;
@@ -15,6 +31,9 @@ let
           substituteAll $script $dest
           chmod +x $dest
           wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps}
+        done
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs $script
         done
       '';
     };
@@ -107,4 +126,6 @@ in rec {
     shortcut-greencut
   ];
 
+  runDepends = modules ++ myEnv;
+  # TODO separate list of useful, non-conflicting programs to put on PATH?
 }

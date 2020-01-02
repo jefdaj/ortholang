@@ -3945,8 +3945,8 @@
 |   |                       |-- OG0000374_tree_id.txt
 |   |                       `-- OG0000375_tree_id.txt
 |   `-- orthogroups
-|       |-- 11ab3e6a8c.txt
-|       `-- e73dceff38.txt
+|       |-- a1bd121696.txt
+|       `-- cc00904181.txt
 |-- exprs
 |   |-- extract_ids
 |   |   |-- 06b3e4476b_0.str.list
