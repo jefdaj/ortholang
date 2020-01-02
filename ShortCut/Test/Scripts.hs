@@ -36,6 +36,12 @@ tmpfilesVary =
   , "ncbi_blast_reciprocal_best"
   , "blast_hits_best_hits"
   , "sonicparanoid_myco3"
+  , "orthogroups_ortholog_in_all"
+  , "orthogroups_ortholog_in_any"
+  , "orthogroups_ortholog_in_max"
+  , "orthogroups_ortholog_in_max_2"
+  , "orthogroups_ortholog_in_min"
+  , "orthogroups_str_tests" -- TODO this really shouldn't vary
   ]
 
 -- these work, but the stdout varies so they require a check script
