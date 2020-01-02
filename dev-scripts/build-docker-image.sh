@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage ./dev-scripts/build-docker-image.sh
-# It runs the tests first, then launches the REPL for manual debugging.
+# Uncomment the last run_repl line for manual debugging.
 # Command line arguments are passed to nix-build.
 
 set -e
@@ -18,9 +18,9 @@ build_docker_image() {
 }
 
 run_docker_image() {
-  CONTAINER=$(docker ps --latest | grep shortcut | awk '{print $2}')
+  latest=$(docker images | grep shortcut | head -n1 | awk '{print $2}')
   docker run $@ \
-	  $CONTAINER shortcut $SHORTCUT_ARGS
+	  shortcut:$latest shortcut $SHORTCUT_ARGS
 }
 
 run_tests() {
@@ -39,4 +39,4 @@ run_repl() {
 
 build_docker_image 2>&1 | tee docker-build.log
 run_tests 2>&1 | tee docker-test.log
-run_repl
+# run_repl
