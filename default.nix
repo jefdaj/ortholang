@@ -24,7 +24,9 @@ let
   shortcut = haskell.lib.overrideCabal haskellPkg (drv: {
     src = builtins.filterSource noBigDotfiles ./.;
 
-    buildDepends = (drv.buildDepends or []) ++ [ makeWrapper ] ++ runDepends;
+    buildDepends = (drv.buildDepends or [])  ++ runDepends ++ [
+      makeWrapper zlib.dev zlib.out pkgconfig
+    ];
 
     # TODO PYTHONPATH?
     postInstall = ''
