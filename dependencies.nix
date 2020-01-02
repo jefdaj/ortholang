@@ -16,12 +16,13 @@ let
     curl
   ];
 
+  # TODO why is patching shebangs on the wrapped scripts necessary??
   mkModule = src: extraRunDeps: extraWraps:
     let name = "Shortcut-" + baseNameOf src;
         runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
-      buildInputs = [ makeWrapper ] ++ extraRunDeps;
+      buildInputs = [ makeWrapper ] ++ runDeps;
       builder = writeScript "builder.sh" ''
         source ${stdenv}/setup
         mkdir -p $out/bin
