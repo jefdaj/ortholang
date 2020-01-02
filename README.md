@@ -109,14 +109,20 @@ Add this line to your `~/.bashrc`.
     export PATH=$PWD/result/bin:$PATH
 
 
-Build Docker image
-------------------
+Docker
+------
 
-`nix-build docker.nix` should do it.
+Get the latest official image from [Docker hub](https://hub.docker.com/r/jefdaj/shortcut) like so:
+
+```
+docker pull jefdaj/shortcut
+```
+
+To build a new image, edit and run [dev-scripts/build-docker-image.sh](https://github.com/jefdaj/shortcut/tree/master/dev-scripts/build-docker-image.sh).
 
 
-Build Singularity image
------------------------
+Singularity
+-----------
 
 `nix-build singularity.nix` should get you most of the way there, but you
 should edit that file first to include any bind dirs and mount points used by
