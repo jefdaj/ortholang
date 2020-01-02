@@ -46,8 +46,15 @@ in stdenv.mkDerivation rec {
     cp -r OrthoFinder-${version}_source/orthofinder/scripts $out/bin/
     cp -r OrthoFinder-${version}_source/orthofinder/tools $out/bin/
     cp OrthoFinder-${version}_source/orthofinder/config.json $out/bin/
+    for script in $out/bin/*/*.py; do
+      [[ $(basename $script) == '__init__.py' ]] && continue
+      echo "patching $script"
+      chmod +x "$script"
+      patchShebangs "$script"
+    done
     echo "patching $exe"
     buildPythonPath "$out"
+    patchShebangs "$exe"
     wrapProgram "$exe" --prefix PATH : "${makeBinPath runDepends}"
   '';
 }

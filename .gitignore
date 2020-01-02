@@ -10,5 +10,5 @@ Paths_*
 nixpkgs/inparanoid/*.tar.gz
 nixpkgs/inparanoid/*.zip
 release-*
-result
+result*
 tmp

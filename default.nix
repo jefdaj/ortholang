@@ -3,14 +3,8 @@ let
 
   # Things needed at runtime. Modules are only the scripts called by shortcut,
   # not their indirect (propagated) dependencies since those may conflict.
-  runDepends = (import ./modules.nix).modules ++ [
-    coreutils
-    diffutils
-    glibcLocales # TODO even on mac?
-    tree
-    gnutar
-    curl
-  ];
+  # TODO add the ones that don't conflict for easier development?
+  inherit (import ./dependencies.nix) runDepends;
 
   myGHC = pkgs.haskell.packages.ghc865;
   logging = myGHC.callPackage (import ./logging) {};

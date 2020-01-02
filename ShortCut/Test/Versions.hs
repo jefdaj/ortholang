@@ -21,19 +21,23 @@ import System.FilePath.Posix      (takeBaseName)
 versionScripts :: String -> [(String, FilePath)]
 versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   [ ("bash"         , "bash_OS.sh")
+  , ("curl"         , "curl_OS.sh")
+  , ("cut"          , "cut_OS.sh")
+  , ("tar"          , "tar_OS.sh")
+  , ("sed"          , "sed_OS.sh")
+  , ("tree"         , "tree_OS.sh") -- TODO where should this go?
+  , ("awk"          , "awk_OS.sh") -- TODO where should this go?
+
   , ("blast"        , "blast_OS.sh")
   , ("busco"        , "busco_OS.sh")
   , ("crbblast"     , "crbblast_OS.sh")
-  , ("curl"         , "curl_OS.sh")
-  , ("cut"          , "cut_OS.sh")
   , ("diamond"      , "diamond_OS.sh")
   , ("hmmer"        , "hmmer_OS.sh")
   , ("makeblastdb"  , "makeblastdb_OS.sh")
   , ("mmseqs"       , "mmseqs_OS.sh")
   , ("muscle"       , "muscle_OS.sh")
   , ("orthofinder"  , "orthofinder_OS.sh")
-  , ("psiblast"     , "psiblast_OS.sh")
-  , ("tar"          , "tar_OS.sh")
+  , ("psiblast"     , "psiblast_OS.sh") -- TODO remove?
 
   , ("python2"  , "python2_OS.sh")
   , ("numpy"    , "py2_numpy_OS.py")
@@ -55,7 +59,6 @@ versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
   , ("VennDiagram"  , "r_VennDiagram_OS.R")
 
   -- , ("sonicparanoid", "sonicparanoid_OS.sh")
-  -- , ("tree"         , "tree_OS.sh") -- TODO where should this go?
   -- , ("treecl"       , "treecl_OS.sh")
   ]
 

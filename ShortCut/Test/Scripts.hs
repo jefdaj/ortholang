@@ -76,7 +76,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runCut cfg ref ids
-      -- uncomment to update the stdout golden files:
+      -- uncomment to update the golden stdout files:
       -- writeFile ("/home/jefdaj/shortcut/tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
@@ -87,6 +87,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
     desc = "creates expected tmpfiles"
+    -- TODO add nondeterministic expression + cache dirs here by parsing modules:
     ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = "tree -a --charset=ascii " ++ ignores ++ " | " ++ sedCmd
@@ -94,7 +95,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     treeAct = do
       _ <- runCut cfg ref ids
       out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
-      -- uncomment to update the tmpfiles golden files:
+      -- uncomment to update golden tmpfile trees:
       -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
 
