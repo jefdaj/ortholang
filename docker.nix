@@ -22,17 +22,17 @@ in pkgs.dockerTools.buildImage {
 
   runAsRoot = ''
     #!${pkgs.runtimeShell}
-    mkdir -p /tmpdir
+    mkdir -p /.shortcut
     mkdir -p /workdir
   '';
 
   config = {
     # TODO workdir is redundant here?
-    Cmd = [ "/bin/shortcut" "--tmpdir" "/tmpdir" "--workdir" "/workdir" ];
+    Cmd = [ "/bin/shortcut" "--tmpdir" "/.shortcut" "--workdir" "/workdir" ];
     WorkingDir = "/workdir";
     Volumes = {
-      "/tmpdir"  = {};
-      "/workdir" = {};
+      "/.shortcut" = {};
+      "/workdir"   = {};
     };
   };
 }
