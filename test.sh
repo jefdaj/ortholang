@@ -27,7 +27,7 @@ nix-shell $nix_args --command "$stack_cmd; exit" 2>&1 | tee -a $log
 
 # test with the demo server cache too
 # (just blastp functions for now to keep from getting too big)
-stack_cmd_2="stack exec shortcut -- --shared 'http://shortcut.pmb.berkeley.edu/shared' --test '\$0 !~ /tmpfiles/ && \$0 ~ /blastp/'"
+stack_cmd_2="stack exec shortcut -- --shared http://shortcut.pmb.berkeley.edu/shared --test version'"
 nix-shell $nix_args --command "$stack_cmd_2; exit" 2>&1 | tee -a $log
 
 # log="shortcut-test_${timestamp}.log"
