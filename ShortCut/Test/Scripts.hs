@@ -43,6 +43,8 @@ tmpfilesVary =
   , "orthogroups_ortholog_in_min"
   , "orthogroups_str_tests" -- TODO this really shouldn't vary
   , "plot_venndiagram"
+  , "plot_linegraph"
+  , "plot_scatterplot"
   ]
 
 -- these work, but the stdout varies so they require a check script
