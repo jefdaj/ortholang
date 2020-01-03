@@ -1,5 +1,20 @@
 with import ./nixpkgs;
 let
+  # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
+  tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
+    builder = "${bash}/bin/bash";
+    buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
+    postInstall = (oldAttrs.postInstall or "") + ''
+      wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
+    '';
+  });
+
+  # fixes "Fontconfig error: Cannot load default config file"
+  # from nixpkgs/pkgs/development/libraries/pipewire/default.nix
+  fontsConf = makeFontsConf {
+    fontDirectories = [ ];
+  };
+
   myEnv = [
     # TODO which of these are needed?
     stdenv
@@ -9,11 +24,12 @@ let
     diffutils
     glibcLocales # TODO even on mac?
     tree
-    gnutar
+    tarWithGzip
     gnugrep
     gnused
     gawk
     curl
+    cacert # for curl https
     fontconfig.lib # for R plotting scripts
   ];
 
@@ -33,7 +49,10 @@ let
           dest="$out/bin/$base"
           substituteAll $script $dest
           chmod +x $dest
-          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps}
+          wrapProgram $dest \
+            --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps} \
+            --set NIX_SSL_CERT_FILE "${cacert}/etc/ssl/certs/ca-bundle.crt" \
+            --set FONTCONFIG_FILE "${fontsConf}"
         done
         for script in $out/bin/.*-wrapped; do
           patchShebangs $script
@@ -96,7 +115,8 @@ in rec {
   # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
-  shortcut-busco = mkModule ./ShortCut/Modules/Busco [ myBlast hmmer busco python36 which ]
+  shortcut-busco = mkModule ./ShortCut/Modules/Busco
+                     [ myBlast hmmer busco python36 which tarWithGzip ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
   shortcut-load          = mkModule ./ShortCut/Modules/Load          [ curl ] "";
