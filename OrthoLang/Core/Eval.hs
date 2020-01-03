@@ -227,7 +227,7 @@ eval hdl cfg ref ids rtype ls p = do
                 }
   if isJust (cfgDebug cfg)
     then ignoreErrors $ eval' delay pOpts ls p
-    else retryIgnore  $ eval' delay pOpts ls p
+    else ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
     -- ignoreErrors fn = catchAny fn (\_ -> return ())
     ignoreErrors fn = catchAny fn (\e -> putStrLn ("ignored error: " ++ show e))
