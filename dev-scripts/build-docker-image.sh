@@ -29,12 +29,10 @@ run_tests() {
 }
 
 run_repl() {
-  export SHORTCUT_TMPDIR="$TMPDIR"
-  export SHORTCUT_WORKDIR="$PWD"
   export SHORTCUT_ARGS='--interactive'
 	run_docker_image -i -t \
-    --mount type=bind,source="$SHORTCUT_TMPDIR",target="/tmpdir" \
-    --mount type=bind,source="$SHORTCUT_WORKDIR",target="/workdir"
+    --mount type=bind,source="$TMPDIR",target="/tmpdir" \
+    --mount type=bind,source="$PWD",target="/workdir"
 }
 
 build_docker_image 2>&1 | tee docker-build.log
