@@ -90,7 +90,7 @@ orthogroups = let name = "orthogroups" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [og] sll
   , fTypeCheck = defaultTypeCheck [og] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rOrthogroups
   }
 
@@ -170,7 +170,7 @@ orthogroupContaining = let name = "orthogroup_containing" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aOrthogroupContaining
   }
 
@@ -197,7 +197,7 @@ orthogroupsContaining = let name = "orthogroups_containing" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf str] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aOrthogroupsFilter containsOneOf
   }
 
@@ -227,7 +227,7 @@ orthologInAny = let name = "ortholog_in_any" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = mkOrthologsStrRules name
   }
 
@@ -247,7 +247,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rOrthologFilterStr "min" pickAny
   }
 
@@ -298,7 +298,7 @@ orthologInAll = let name = "ortholog_in_all" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = mkOrthologsStrRules "ortholog_in_all"
   }
 
@@ -307,7 +307,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rOrthologFilterStr "min" pickAll
   }
 
@@ -331,7 +331,7 @@ orthologInMinStr = let name = "ortholog_in_min_str" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rOrthologFilterStrFrac "min" pickMin
   }
 
@@ -382,7 +382,7 @@ orthologInMin = let name = "ortholog_in_min" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = mkOrthologsStrFracRules name
   }
 
@@ -403,7 +403,7 @@ orthologInMax = let name = "ortholog_in_max" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = mkOrthologsStrFracRules name
   }
 
@@ -412,7 +412,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rOrthologFilterStrFrac "max" pickMax
   }
 

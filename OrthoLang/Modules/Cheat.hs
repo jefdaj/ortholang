@@ -51,7 +51,7 @@ cheat = OrthoLangFunction
   { fNames     = ["cheat"]
   , fTypeCheck = cheatTypeCheck
   , fTypeDesc  = "cheat : ??? (implement this)"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules  = rCheat
   }
 

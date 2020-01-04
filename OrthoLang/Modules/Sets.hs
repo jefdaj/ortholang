@@ -57,14 +57,14 @@ mkSetFunctions (foldName, opChar, opName, setFn) = [setBop, setFold]
       { fNames     = [[opChar], opName]
       , fTypeCheck = tSetBop
       , fTypeDesc  = mkBopDesc [opChar]
-      , fFixity    = Infix
+      , fFixity    = Infix, fTags = []
       , fRules     = rSetBop foldName setFn
       }
     setFold = OrthoLangFunction
       { fNames     = [foldName]
       , fTypeCheck = tSetFold
       , fTypeDesc  = mkFoldDesc foldName
-      , fFixity    = Prefix
+      , fFixity    = Prefix, fTags = []
       , fRules     = rSetFold (foldr1 setFn)
       }
 
@@ -138,7 +138,7 @@ some = OrthoLangFunction
   { fNames     = ["some"]
   , fTypeCheck = tSetFold
   , fTypeDesc  = "some : X.list.list -> X.list"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSome
   }
 

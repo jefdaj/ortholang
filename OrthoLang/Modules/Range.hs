@@ -31,7 +31,7 @@ mkRangeFn name nArgs =  OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck (take nArgs $ repeat num) (ListOf num)
   , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rRange
   }
 

@@ -44,7 +44,7 @@ len = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rLen
   }
   where
@@ -55,7 +55,7 @@ lenEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck [ListOf listlike] (ListOf num)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 1 aLen -- TODO is 1 wrong?
   }
   where

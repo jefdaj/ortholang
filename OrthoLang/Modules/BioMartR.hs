@@ -88,7 +88,7 @@ parseSearches = let name = "parse_searches" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf str] search
   , fTypeDesc  = mkTypeDesc name [ListOf str] search
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rParseSearches
   }
 
@@ -101,7 +101,7 @@ getGenomes = let name = "get_genomes" in OrthoLangFunction
   { fNames     = [name] 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rBioMartR "getGenome"
   }
 
@@ -114,7 +114,7 @@ getProteomes = let name = "get_proteomes" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rBioMartR "getProteome"
   }
 

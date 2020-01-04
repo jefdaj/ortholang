@@ -46,7 +46,7 @@ orthofinder = let name = "orthofinder" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aOrthofinder
   }
 

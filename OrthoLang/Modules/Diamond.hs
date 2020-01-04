@@ -54,7 +54,7 @@ diamondmakedb = let name = "diamond_makedb" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck [faa] dmnd
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimpleScriptPar "diamond_makedb.sh"
   }
 
@@ -69,7 +69,7 @@ diamondmakedbEach = let name = "diamond_makedb_each" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf dmnd)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
@@ -82,7 +82,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rDiamondmakedbAll
   }
 
@@ -182,7 +182,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   { fNames     = [name']
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
   , fTypeCheck = defaultTypeCheck [num, qType, sType] rType
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rFn dCmd
   }
 

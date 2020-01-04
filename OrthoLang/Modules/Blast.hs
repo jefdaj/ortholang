@@ -79,7 +79,7 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastFromDb d
   }
   where
@@ -171,7 +171,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = OrthoLangFunction
   { fNames     = [bCmd]
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
   }
 
@@ -196,7 +196,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastFromDbEach d
   }
   where
@@ -214,7 +214,7 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastFromFaEach d
   }
   where

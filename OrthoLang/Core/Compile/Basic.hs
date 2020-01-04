@@ -275,7 +275,7 @@ mkLoad hashSeqIDs name rtn = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rLoad hashSeqIDs
   }
 
@@ -289,7 +289,7 @@ mkLoadList hashSeqIDs name rtn = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rLoadList hashSeqIDs
   }
 

@@ -34,6 +34,6 @@ setsTable = let name = "sets_table" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rPlotListOfLists "sets_table.R"
   }

@@ -83,7 +83,7 @@ gbkToFaa = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aGenbankToFasta faa "aa"
   }
   where
@@ -95,7 +95,7 @@ gbkToFaaEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 2 $ aGenbankToFasta faa "aa"
   }
   where
@@ -106,7 +106,7 @@ gbkToFna = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
@@ -117,7 +117,7 @@ gbkToFnaEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
@@ -172,7 +172,7 @@ aGenbankToFasta _ _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++
 extractIds :: OrthoLangFunction
 extractIds = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractIds
   , fTypeDesc  = name ++ " : fa -> str.list"
   , fRules     = rSimpleScript "extract_ids.py"
@@ -184,7 +184,7 @@ extractIds = OrthoLangFunction
 extractIdsEach :: OrthoLangFunction
 extractIdsEach = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractIdsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fRules     = rMapSimpleScript 1 "extract_ids.py"
@@ -210,7 +210,7 @@ tExtractIdsEach _ = Left "expected a fasta file"
 extractSeqs :: OrthoLangFunction
 extractSeqs = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractSeqs
   , fTypeDesc  = name ++ " : fa str.list -> fa"
   , fRules     = rSimple aExtractSeqs 
@@ -232,7 +232,7 @@ aExtractSeqs _ _ _ ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 extractSeqsEach :: OrthoLangFunction
 extractSeqsEach = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fRules     = rMap 1 aExtractSeqs
@@ -257,7 +257,7 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 translate :: OrthoLangFunction
 translate = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [fna] faa
   , fTypeDesc  = mkTypeDesc name  [fna] faa
   , fRules     = rSimpleScript "translate.py"
@@ -268,7 +268,7 @@ translate = OrthoLangFunction
 translateEach :: OrthoLangFunction
 translateEach = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
   , fRules     = rMapSimpleScript 1 "translate.py"
@@ -285,7 +285,7 @@ translateEach = OrthoLangFunction
 mkConcat :: OrthoLangType -> OrthoLangFunction
 mkConcat cType = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
   , fRules     = rSimple $ aConcat cType
@@ -297,7 +297,7 @@ mkConcat cType = OrthoLangFunction
 mkConcatEach :: OrthoLangType -> OrthoLangFunction
 mkConcatEach cType = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
   , fRules     = rMap 1 $ aConcat cType
@@ -367,7 +367,7 @@ aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 splitFasta :: OrthoLangType -> OrthoLangFunction
 splitFasta faType = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
   , fRules     = rSimple $ aSplit name ext
@@ -379,7 +379,7 @@ splitFasta faType = OrthoLangFunction
 splitFastaEach :: OrthoLangType -> OrthoLangFunction
 splitFastaEach faType = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
   , fRules     = rMap 1 $ aSplit name ext -- TODO is 1 wrong?

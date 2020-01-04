@@ -99,7 +99,7 @@ setReplaceIDs newID = mangleScript (setReplaceID newID)
 replace :: OrthoLangFunction
 replace = OrthoLangFunction
   { fNames     = ["replace"]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tReplace
   , fTypeDesc  = dReplace
   , fRules     = rReplace
@@ -191,7 +191,7 @@ aReplaceEachLinks cfg ref outPath subPaths resPaths = do
 replaceEach :: OrthoLangFunction
 replaceEach = OrthoLangFunction
   { fNames     = ["replace_each"]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tReplaceEach
   , fTypeDesc  = dReplaceEach
   , fRules     = rReplaceEach

@@ -62,7 +62,7 @@ histogram = let name = "histogram" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rPlotNumList "histogram.R"
   }
 
@@ -103,7 +103,7 @@ linegraph = let name = "linegraph" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rPlotRepeatScores "linegraph.R"
   }
 
@@ -113,7 +113,7 @@ scatterplot = let name = "scatterplot" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rPlotRepeatScores "scatterplot.R"
   }
 
@@ -158,7 +158,7 @@ venndiagram = let name = "venndiagram" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = tPlotListOfLists
   , fTypeDesc  = name ++ " : X.list.list -> png"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rPlotListOfLists "venndiagram.R"
   }
 

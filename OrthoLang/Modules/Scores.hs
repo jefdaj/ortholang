@@ -64,7 +64,7 @@ aScores cfg ref scoresPath othersPath othersType outPath = do
 scoreRepeats :: OrthoLangFunction
 scoreRepeats = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tScoreRepeats
   , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
   , fRules     = rScoreRepeats
@@ -101,7 +101,7 @@ extractScores = let name = "extract_scores" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : X.scores -> num.list"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aOrthoLangCol False 1
   }
 
@@ -111,7 +111,7 @@ extractScored = let name = "extract_scored" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : X.scores -> X.list"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aOrthoLangCol False 2
   }
 

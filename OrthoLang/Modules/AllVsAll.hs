@@ -33,7 +33,7 @@ mkAva name = let name' = name ++ "_ava" in OrthoLangFunction
   { fNames     = [name']
   , fTypeDesc  = mkTypeDesc  name' [num, ListOf faa] ava
   , fTypeCheck = defaultTypeCheck  [num, ListOf faa] ava
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkAva
   }
 

@@ -278,7 +278,7 @@ psiblast = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   -- , fRules     = rPsiblast
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
   }
@@ -290,7 +290,7 @@ psiblastEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rPsiblastEach
   }
   where
@@ -320,7 +320,7 @@ psiblastDb = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
   }
   where
@@ -334,7 +334,7 @@ psiblastDbEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
   -- , fRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
@@ -365,7 +365,7 @@ psiblastTrain = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
   where
@@ -377,7 +377,7 @@ psiblastTrainPssms = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   -- , fRules     = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
   , fRules     = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
   }
@@ -391,7 +391,7 @@ psiblastTrainEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
   where
@@ -402,7 +402,7 @@ psiblastTrainAll = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
   }
   where
@@ -413,7 +413,7 @@ psiblastTrainDb = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rFun3 aPsiblastTrainDb
   }
   where
@@ -424,7 +424,7 @@ psiblastTrainDbEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
   where
@@ -435,7 +435,7 @@ psiblastTrainPssmsDb = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   -- , fRules     = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
   , fRules     = rMap 2 aPsiblastTrainDb'
   }
@@ -451,7 +451,7 @@ psiblastPssm = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
@@ -463,7 +463,7 @@ psiblastPssmAll = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
@@ -474,7 +474,7 @@ psiblastPssmEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
   where
@@ -488,7 +488,7 @@ psiblastPssmDb = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rFun3 aPsiblastSearchDb
   }
   where
@@ -499,7 +499,7 @@ psiblastPssmDbEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
   where
@@ -516,7 +516,7 @@ psiblastEachPssmDb = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   -- , fRules     = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
   , fRules     = rMap 2 aPsiblastSearchDb'
   }
@@ -540,7 +540,7 @@ psiblastEachPssm = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
   }
   where

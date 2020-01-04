@@ -23,7 +23,7 @@ orthoLangModule = OrthoLangModule
 -- commonElements :: OrthoLangFunction
 -- commonElements = OrthoLangFunction
 --   { fNames     = "common_elements" -- TODO rename to `all`?
---   , fFixity    = Prefix
+--   , fFixity    = Prefix, fTags = []
 --   , fTypeCheck = summaryTypeCheck
 --   , fDesc = Nothing, fTypeDesc  = undefined
 --   , fRules  = rSummary (foldr1 intersect)
