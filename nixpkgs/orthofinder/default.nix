@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, makeWrapper, makeBinPath, mcl, fastme, ncbi-blast, diamond
+{ lib, stdenv, fetchurl, makeWrapper, makeBinPath, mcl, fastme, ncbi-blast, diamond
 , python27Packages, utillinux }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
@@ -56,5 +56,13 @@ in stdenv.mkDerivation rec {
     buildPythonPath "$out"
     patchShebangs "$exe"
     wrapProgram "$exe" --prefix PATH : "${makeBinPath runDepends}"
+  '' +
+  
+  # problem:  https://github.com/NixOS/nixpkgs/issues/11133
+  # solution: https://github.com/NixOS/nixpkgs/pull/74942
+  lib.optionalString stdenv.isDarwin ''
+    for script in $out/bin/.*-wrapped $out/bin/*/*.py; do
+      substituteInPlace $script --replace "#!/" "#!/usr/bin/env /"
+    done
   '';
 }
