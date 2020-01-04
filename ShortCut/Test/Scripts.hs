@@ -67,6 +67,7 @@ badlyBroken =
   , "psiblast_empty_pssms"
   , "psiblast_map"
   , "psiblast_pssm_all"
+  , "sonicparanoid_test1"
   ]
 
 getTestScripts :: FilePath -> IO [FilePath]
