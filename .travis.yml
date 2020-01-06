@@ -39,9 +39,8 @@ before_script:
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
 
 script:
-  - nix-env -iA cachix -f https://cachix.org/api/v1/install || echo "cachix install error"
-  - cachix use jefdaj || echo "cachix install error"
-  - nix-env -i stack || echo "stack install error"
+  - nix-env -iA cachix -f https://cachix.org/api/v1/install
+  - cachix use jefdaj
   - ./test.sh || (cat shortcut*.log; exit 1)
 
 notifications:
