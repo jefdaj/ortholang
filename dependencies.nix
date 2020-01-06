@@ -54,18 +54,18 @@ let
             --set NIX_SSL_CERT_FILE "${cacert}/etc/ssl/certs/ca-bundle.crt" \
             --set FONTCONFIG_FILE "${fontsConf}"
         done
-        # for script in $out/bin/.*-wrapped; do
-        #   patchShebangs $script
-        # done
+      '' + if stdenv.isDarwin then ''
+        # problem:  https://github.com/NixOS/nixpkgs/issues/11133
+        # solution: https://github.com/NixOS/nixpkgs/pull/74942
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs $script
+          substituteInPlace $script --replace "#!/" "#!/usr/bin/env /"
+        done
+      '' else ''
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs $script
+        done
       '';
-
-      # problem:  https://github.com/NixOS/nixpkgs/issues/11133
-      # solution: https://github.com/NixOS/nixpkgs/pull/74942
-      # postFixup = lib.optionalString stdenv.isDarwin ''
-      #   for script in $out/bin/*; do
-      #     substituteInPlace $script --replace "#!/" "#!/usr/bin/env /"
-      #   done
-      # '';
     };
 
 in rec {
