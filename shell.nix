@@ -4,7 +4,7 @@ let
   shortcut = import ./default.nix;
   devDepends = [
     stack
-    zip
+    # zip
     # pypi2nix
   ];
 
