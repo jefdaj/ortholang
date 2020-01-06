@@ -32,11 +32,9 @@ import ShortCut.Core.Pretty (renderIO)
 -- import ShortCut.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
-import Control.Retry
 -- import qualified Data.Map as M
 -- import Data.List (isPrefixOf)
 
-import Control.Exception.Safe         (catchAny)
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
@@ -45,7 +43,7 @@ import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
-import ShortCut.Core.Util             (trace)
+import ShortCut.Core.Util             (trace, ignoreErrors)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
@@ -53,6 +51,7 @@ import Control.Monad                  (when)
 import GHC.Conc (numCapabilities)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
+import Control.Retry          (rsIterNumber)
 
 import Control.Concurrent
 -- import Data.Foldable
@@ -229,22 +228,9 @@ eval hdl cfg ref ids rtype ls p = do
     then ignoreErrors $ eval' delay pOpts ls p
     else ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
-    -- This isn't as bad as it sounds. It just prints an error message instead
-    -- of crashing the rest of the program. The error will still be visible.
-    ignoreErrors fn = catchAny fn (\e -> putStrLn ("error! " ++ show e))
-
-    -- This one is as bad as it sounds, so remove it when able! It's the only
-    -- way I've managed to solve the occasional "openFile" lock conflicts.
-    -- TODO at least log when a retry happens for debugging
-    -- TODO ask Niel if individual actions can be retried instead
-    -- TODO could always fork Shake to put it in if needed too
-    limitedBackoff = exponentialBackoff 50 <> limitRetries 5
-    retryIgnore fn = ignoreErrors
-                   $ recoverAll limitedBackoff
-                   $ report fn
-
     -- Reports how many failures so far and runs the main fn normally
     -- TODO putStrLn rather than debug?
+    -- TODO remove if not using retryIgnore?
     report fn status = case rsIterNumber status of
       0 -> fn
       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
