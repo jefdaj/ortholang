@@ -27,7 +27,7 @@ module ShortCut.Core.Util
   , globFiles
 
   -- error handling
-  , ignoreErrors
+  -- , ignoreErrors
   , retryIgnore
 
   -- misc

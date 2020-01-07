@@ -69,7 +69,7 @@ import ShortCut.Core.Paths        (CutPath, toCutPath, fromCutPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
                                    stringCutPath, toGeneric, sharedPath)
 import ShortCut.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
-                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie, debug, trace, traceShow, ignoreErrors)
+                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie, debug, trace, traceShow)
 import ShortCut.Core.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
@@ -86,7 +86,8 @@ import Data.Maybe (isJust)
 import System.IO.Temp (writeTempFile)
 import qualified Data.ByteString as BS
 import Network.Download (openURIString)
-import Control.Exception (try)
+-- import Control.Exception (try)
+import Control.Exception.Safe (catchAny)
 
 ---------------
 -- debugging --
@@ -412,7 +413,7 @@ trackWrite' cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
   -- also ensure it only gets written once:
   -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
-  liftIO $ mapM_ (ignoreErrors . setReadOnly cfg) fs -- TODO is 444 right? test it
+  liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
   trackWrite $ traceShow "core.actions.trackWrite'" fs
 
 setReadOnly :: CutConfig -> FilePath -> IO ()

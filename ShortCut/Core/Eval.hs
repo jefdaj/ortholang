@@ -43,7 +43,7 @@ import ShortCut.Core.Paths            (CutPath, toCutPath, fromCutPath)
 import ShortCut.Core.Locks            (withReadLock')
 import ShortCut.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import ShortCut.Core.Actions          (readLits, readPaths)
-import ShortCut.Core.Util             (trace, ignoreErrors)
+import ShortCut.Core.Util             (trace)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
@@ -52,6 +52,7 @@ import GHC.Conc (numCapabilities)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 import Control.Retry          (rsIterNumber)
+import Control.Exception.Safe (catchAny)
 
 import Control.Concurrent
 -- import Data.Foldable
@@ -228,6 +229,8 @@ eval hdl cfg ref ids rtype ls p = do
     then ignoreErrors $ eval' delay pOpts ls p
     else ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
+    -- ignoreErrors fn = catchAny fn (\_ -> return ())
+    ignoreErrors fn = catchAny fn (\e -> putStrLn ("ignored error: " ++ show e))
     -- Reports how many failures so far and runs the main fn normally
     -- TODO putStrLn rather than debug?
     -- TODO remove if not using retryIgnore?
