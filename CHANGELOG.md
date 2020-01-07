@@ -17,6 +17,8 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Stack repl finds nix-provided zlib now
 - Venn Diagram list dependencies
 - Provide Fontconfig path to R scripts
+- Use shell.nix in test.sh
+- Marked a few tests as broken or nondeterministic
 
 ## [0.9.2] - 2019-12-10
 ### Changed
