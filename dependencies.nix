@@ -1,12 +1,47 @@
 with import ./nixpkgs;
 let
+  # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
+  tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
+    builder = "${bash}/bin/bash";
+    buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
+    postInstall = (oldAttrs.postInstall or "") + ''
+      wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
+    '';
+  });
+
+  # fixes "Fontconfig error: Cannot load default config file"
+  # from nixpkgs/pkgs/development/libraries/pipewire/default.nix
+  fontsConf = makeFontsConf {
+    fontDirectories = [ ];
+  };
+
+  myEnv = [
+    # TODO which of these are needed?
+    stdenv
+    bash
+    bashInteractive
+    coreutils
+    diffutils
+    glibcLocales # TODO even on mac?
+    tree
+    tarWithGzip
+    gnugrep
+    gnused
+    gawk
+    curl
+    cacert # for curl https
+    fontconfig.lib # for R plotting scripts
+  ];
+
+  # TODO why is patching shebangs on the wrapped scripts necessary??
   mkModule = src: extraRunDeps: extraWraps:
     let name = "Shortcut-" + baseNameOf src;
-        runDeps = [ bash coreutils ] ++ extraRunDeps;
+        runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
-      buildInputs = [ makeWrapper ] ++ extraRunDeps;
-      builder = writeScript "builder.sh" ''
+      NIX_LDFLAGS = "-lfontconfig"; # for R plotting scripts
+      buildInputs = [ makeWrapper ] ++ runDeps;
+      installPhase = ''
         source ${stdenv}/setup
         mkdir -p $out/bin
         for script in $src/*; do
@@ -14,7 +49,23 @@ let
           dest="$out/bin/$base"
           substituteAll $script $dest
           chmod +x $dest
-          wrapProgram $dest --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps}
+          wrapProgram $dest \
+            --prefix PATH : "${pkgs.lib.makeBinPath runDeps}" ${extraWraps} \
+            --set NIX_SSL_CERT_FILE "${cacert}/etc/ssl/certs/ca-bundle.crt" \
+            --set FONTCONFIG_FILE "${fontsConf}"
+        done
+      '';
+
+      # problem:  https://github.com/NixOS/nixpkgs/issues/11133
+      # solution: https://github.com/NixOS/nixpkgs/pull/74942
+      fixupPhase = if stdenv.isDarwin then ''
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs "$script"
+          substituteInPlace $script --replace "#!/nix" "#!/usr/bin/env /nix"
+        done
+      '' else ''
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs "$script"
         done
       '';
     };
@@ -74,7 +125,8 @@ in rec {
   # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
-  shortcut-busco = mkModule ./ShortCut/Modules/Busco [ myBlast hmmer busco python36 which ]
+  shortcut-busco = mkModule ./ShortCut/Modules/Busco
+                     [ myBlast hmmer busco python36 which tarWithGzip ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
   shortcut-load          = mkModule ./ShortCut/Modules/Load          [ curl ] "";
@@ -107,4 +159,6 @@ in rec {
     shortcut-greencut
   ];
 
+  runDepends = modules ++ myEnv;
+  # TODO separate list of useful, non-conflicting programs to put on PATH?
 }

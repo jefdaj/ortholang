@@ -9,7 +9,7 @@ module ShortCut.Modules.Plots where
 
 import Development.Shake
 import ShortCut.Core.Types
-import ShortCut.Core.Actions (withBinHash, writeCachedLines, writeLits)
+import ShortCut.Core.Actions (withBinHash, writeCachedLines, writeLits, need')
 import ShortCut.Core.Util (digest)
 import ShortCut.Core.Paths (exprPath, toCutPath, fromCutPath, cacheDir)
 import ShortCut.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript,
@@ -183,6 +183,7 @@ rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(CutFun _ _ _ _ [lol]) = do
       outPath'' = ExprPath outPath'
       cDir      = fromCutPath cfg $ plotCache cfg
   outPath' %> \_ -> do
+    need' cfg ref "rPlotListOfLists" $ map (fromCutPath cfg) lists
     -- write labels + list paths to the cache dir
     let labPath  = cDir </> digest expr ++ "_names.txt"
         aLolPath = cDir </> digest expr ++ "_lists.txt"

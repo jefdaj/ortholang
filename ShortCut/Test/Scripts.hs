@@ -33,9 +33,20 @@ import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 tmpfilesVary :: [FilePath]
 tmpfilesVary =
   [ "crb_blast_each2" -- TODO should this be fixable?
+  , "crb_blast_two_cyanos"
   , "ncbi_blast_reciprocal_best"
   , "blast_hits_best_hits"
   , "sonicparanoid_myco3"
+  , "orthogroups_ortholog_in_all"
+  , "orthogroups_ortholog_in_any"
+  , "orthogroups_ortholog_in_max"
+  , "orthogroups_ortholog_in_max_2"
+  , "orthogroups_ortholog_in_min"
+  , "orthogroups_str_tests" -- TODO this really shouldn't vary
+  , "plot_venndiagram"
+  , "plot_linegraph"
+  , "plot_scatterplot"
+  , "plot_histogram"
   ]
 
 -- these work, but the stdout varies so they require a check script
@@ -58,6 +69,8 @@ badlyBroken =
   , "psiblast_empty_pssms"
   , "psiblast_map"
   , "psiblast_pssm_all"
+  , "sonicparanoid_test1"
+  , "sonicparanoid_myco3" -- TODO finish writing module first
   ]
 
 getTestScripts :: FilePath -> IO [FilePath]
@@ -76,8 +89,8 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runCut cfg ref ids
-      -- useful for debugging tests or updating the golden files
-      -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") out
+      -- uncomment to update the golden stdout files:
+      -- writeFile ("/home/jefdaj/shortcut/tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
 
@@ -87,17 +100,17 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
     desc = "creates expected tmpfiles"
+    -- TODO add nondeterministic expression + cache dirs here by parsing modules:
     ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = "tree -a --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runCut cfg ref ids
-      out <- readCreateProcess wholeCmd ""
-      -- useful for debugging tests or updating the golden files
-      -- writeFile ("/tmp" </> takeBaseName t <.> "txt") out
-      -- writeBinaryFile ("/tmp" </> takeBaseName t <.> "txt.bin") out
-      return $ B8.pack $ toGeneric cfg out
+      out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
+      -- uncomment to update golden tmpfile trees:
+      -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName t <.> "txt") out
+      return $ B8.pack out
 
 -- TODO use safe writes here
 mkTripTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree

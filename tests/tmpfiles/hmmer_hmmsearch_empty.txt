@@ -35,7 +35,7 @@
 |   |   |-- ca94e47e1e_0.hmm.err
 |   |   `-- ca94e47e1e_0.hmm.out
 |   |-- hmmsearch
-|   |   |-- bad1ffe1f3_c5499e129e_879d2cf758_0.hht -> bad1ffe1f3_c5499e129e_879d2cf758_0.hht.out
+|   |   |-- bad1ffe1f3_c5499e129e_879d2cf758_0.hht
 |   |   |-- bad1ffe1f3_c5499e129e_879d2cf758_0.hht.err
 |   |   `-- bad1ffe1f3_c5499e129e_879d2cf758_0.hht.out
 |   |-- list

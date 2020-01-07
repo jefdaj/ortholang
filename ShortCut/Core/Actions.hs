@@ -86,6 +86,8 @@ import Data.Maybe (isJust)
 import System.IO.Temp (writeTempFile)
 import qualified Data.ByteString as BS
 import Network.Download (openURIString)
+-- import Control.Exception (try)
+import Control.Exception.Safe (catchAny)
 
 ---------------
 -- debugging --
@@ -411,7 +413,7 @@ trackWrite' cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
   -- also ensure it only gets written once:
   -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
-  liftIO $ mapM_ (setReadOnly cfg) fs -- TODO is 444 right? test it
+  liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
   trackWrite $ traceShow "core.actions.trackWrite'" fs
 
 setReadOnly :: CutConfig -> FilePath -> IO ()
@@ -480,7 +482,7 @@ runCmd cfg ref@(disk, _) desc = do
   inPaths' <- if cmdFixEmpties desc
                 then mapM (fixEmptyText cfg ref) inPaths
                 else need' cfg ref "core.actions.runCmd" inPaths >> return inPaths
-  -- liftIO $ createDirectoryIfMissing True $ takeDirectory outPath
+  -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
   dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   let parLockFn = if cmdParallel desc

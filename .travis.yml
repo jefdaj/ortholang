@@ -40,8 +40,8 @@ before_script:
 
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - cachix use jefdaj
-  - ./test.sh || (cat shortcut*.log; exit 1)
+  - cachix use jefdaj || echo "cachix install failed"
+  - ./test.sh || (cat shortcut*.log; echo "tests failed"; exit 1)
 
 notifications:
   email:

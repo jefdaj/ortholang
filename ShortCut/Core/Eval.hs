@@ -32,12 +32,10 @@ import ShortCut.Core.Pretty (renderIO)
 -- import ShortCut.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
-import Control.Retry
 -- import qualified Data.Map as M
 -- import Data.List (isPrefixOf)
 
-import Control.Exception.Safe         (catchAny)
-import Data.Maybe                     (maybeToList, isJust, fromMaybe)
+import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
 import ShortCut.Core.Compile.Basic    (compileScript, rExpr)
 import ShortCut.Core.Parse            (parseFileIO)
 import ShortCut.Core.Pretty           (prettyNum)
@@ -53,6 +51,8 @@ import Control.Monad                  (when)
 import GHC.Conc (numCapabilities)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
+import Control.Retry          (rsIterNumber)
+import Control.Exception.Safe (catchAny)
 
 import Control.Concurrent
 -- import Data.Foldable
@@ -113,8 +113,9 @@ data EvalProgress = EvalProgress
 
 -- TODO hey should the state just be a Progress{..} itself? seems simpler + more flexible
 renderProgress :: EvalProgress -> String
--- TODO put back renderProgress EvalProgress{..} | epUpdates <  3 = ""
-renderProgress EvalProgress{..} = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
+renderProgress EvalProgress{..}
+  | (round $ diffUTCTime epUpdate epStart) < 5 || epDone == 0 = ""
+  | otherwise = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
   where
     -- details  = if epDone >= epTotal then [] else [fraction]
     time = renderTime epStart epUpdate
@@ -213,7 +214,7 @@ eval hdl cfg ref ids rtype ls p = do
              , epDone    = 0
              , epTotal   = 0
              , epThreads = numInterpreterThreads
-             , epWidth = fromMaybe 100 $ cfgWidth cfg
+             , epWidth = fromMaybe 80 $ cfgWidth cfg
              , epArrowShaft = '—'
              , epArrowHead = '▶'
              }
@@ -226,24 +227,13 @@ eval hdl cfg ref ids rtype ls p = do
                 }
   if isJust (cfgDebug cfg)
     then ignoreErrors $ eval' delay pOpts ls p
-    else retryIgnore  $ eval' delay pOpts ls p
+    else ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
-    -- This isn't as bad as it sounds. It just prints an error message instead
-    -- of crashing the rest of the program. The error will still be visible.
-    ignoreErrors fn = catchAny fn (\e -> putStrLn ("error! " ++ show e))
-
-    -- This one is as bad as it sounds, so remove it when able! It's the only
-    -- way I've managed to solve the occasional "openFile" lock conflicts.
-    -- TODO at least log when a retry happens for debugging
-    -- TODO ask Niel if individual actions can be retried instead
-    -- TODO could always fork Shake to put it in if needed too
-    limitedBackoff = exponentialBackoff 50 <> limitRetries 5
-    retryIgnore fn = ignoreErrors
-                   $ recoverAll limitedBackoff
-                   $ report fn
-
+    -- ignoreErrors fn = catchAny fn (\_ -> return ())
+    ignoreErrors fn = catchAny fn (\e -> putStrLn ("ignored error: " ++ show e))
     -- Reports how many failures so far and runs the main fn normally
     -- TODO putStrLn rather than debug?
+    -- TODO remove if not using retryIgnore?
     report fn status = case rsIterNumber status of
       0 -> fn
       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
@@ -294,12 +284,13 @@ printShort cfg ref idsref pm rtype path = do
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> CutState -> IO ()
-evalScript hdl s@(as, c, ref, ids) = case lookupResult as of
-  Nothing  -> putStrLn "no result variable during eval. that's not right!"
-  Just res -> do
-    let loadExprs = extractLoads as res
-    let loads = mapM (rExpr s) $ trace "shortcut.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-    eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
+evalScript hdl s@(as, c, ref, ids) =
+  let res = case lookupResult as of
+              Nothing -> fromJust $ lookupResult $ ensureResult as
+              Just r  -> r
+      loadExprs = extractLoads as res
+      loads = mapM (rExpr s) $ trace "shortcut.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
+  in eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
 
 evalFile :: Handle -> CutConfig -> Locks -> HashedIDsRef -> IO ()
 evalFile hdl cfg ref ids = case cfgScript cfg of

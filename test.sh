@@ -23,12 +23,12 @@ stack_cmd="stack build && stack exec shortcut -- --test $test_filter"
 log="shortcut-${test_filter}-${timestamp}.log"
 
 set -x
-nix-shell $nix_args --command "$stack_cmd" 2>&1 | tee -a $log
+nix-shell shell.nix $nix_args --command "$stack_cmd; exit" 2>&1 | tee -a $log
 
 # test with the demo server cache too
 # (just blastp functions for now to keep from getting too big)
-stack_cmd_2="stack exec shortcut -- --shared 'http://shortcut.pmb.berkeley.edu/shared' --test '\$0 !~ /tmpfiles/ && \$0 ~ /blastp/'"
-nix-shell $nix_args --command "$stack_cmd_2" 2>&1 | tee -a $log
+stack_cmd_2="stack exec shortcut -- --shared http://shortcut.pmb.berkeley.edu/shared --test $test_filter"
+nix-shell shell.nix $nix_args --command "$stack_cmd_2; exit" 2>&1 | tee -a $log
 
 # log="shortcut-test_${timestamp}.log"
 # test_args="+RTS -IO -N -RTS --test biomartr"

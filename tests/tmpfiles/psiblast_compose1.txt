@@ -32,11 +32,6 @@
 |   |   |   `-- c1b08194e1.pdb.psq
 |   |   `-- d77632b774
 |   |       |-- d77632b774.pdb.err
-|   |       |-- d77632b774.pdb.list.err
-|   |       |-- d77632b774.pdb.list.out
-|   |       |-- d77632b774.pdb.list.phr
-|   |       |-- d77632b774.pdb.list.pin
-|   |       |-- d77632b774.pdb.list.psq
 |   |       |-- d77632b774.pdb.out
 |   |       |-- d77632b774.pdb.phr
 |   |       |-- d77632b774.pdb.pin
@@ -105,4 +100,4 @@
     |-- table1.bht -> ../exprs/concat_bht/94fb0d0472_0.bht
     `-- table2.bht -> ../exprs/concat_bht/6e2e9b3dd7_0.bht
 
-25 directories, 80 files
+25 directories, 75 files

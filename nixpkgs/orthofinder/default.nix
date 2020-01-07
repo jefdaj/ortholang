@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, makeWrapper, makeBinPath, mcl, fastme, ncbi-blast, diamond
+{ lib, stdenv, fetchurl, makeWrapper, makeBinPath, mcl, fastme, ncbi-blast, diamond
 , python27Packages, utillinux }:
 
 # This is based on my psiblast-exb package, which in turn is based on the ncbi-blast one
@@ -28,7 +28,7 @@ in stdenv.mkDerivation rec {
     myPython
     utillinux # for taskset
   ];
-  phases = "unpackPhase patchPhase installPhase";
+  phases = "unpackPhase patchPhase installPhase fixupPhase";
   patches = [
     ./remove-results-dates.patch
   ];
@@ -46,8 +46,30 @@ in stdenv.mkDerivation rec {
     cp -r OrthoFinder-${version}_source/orthofinder/scripts $out/bin/
     cp -r OrthoFinder-${version}_source/orthofinder/tools $out/bin/
     cp OrthoFinder-${version}_source/orthofinder/config.json $out/bin/
-    echo "patching $exe"
-    buildPythonPath "$out"
-    wrapProgram "$exe" --prefix PATH : "${makeBinPath runDepends}"
   '';
+
+
+  # problem:  https://github.com/NixOS/nixpkgs/issues/11133
+  # solution: https://github.com/NixOS/nixpkgs/pull/74942
+  fixupPhase = if stdenv.isDarwin then ''
+    for script in $out/bin/*/*.py; do
+      [[ $(basename $script) == '__init__.py' ]] && continue
+      chmod +x "$script"
+      patchShebangs "$script"
+      substituteInPlace $script --replace "#!/nix" "#!/usr/bin/env /nix"
+    done
+    patchShebangs "$exe"
+    substituteInPlace "$exe" --replace "#!/nix" "#!/usr/bin/env /nix"
+    wrapProgram "$exe" --prefix PATH : "${makeBinPath runDepends}"
+    buildPythonPath "$out"
+  '' else ''
+    for script in $out/bin/*/*.py; do
+      [[ $(basename $script) == '__init__.py' ]] && continue
+      chmod +x "$script"
+      patchShebangs "$script"
+    done
+    patchShebangs "$exe"
+    wrapProgram "$exe" --prefix PATH : "${makeBinPath runDepends}"
+    buildPythonPath "$out"
+   '';
 }
