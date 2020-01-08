@@ -1,5 +1,0 @@
-n     = 4
-l     = [4]
-lol   = [l, [2.5]]
-lolol = [lol]
-result = lolol

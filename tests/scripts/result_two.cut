@@ -1,6 +1,0 @@
-# Repeating the same varname twice should usually be an error,
-# but "result" is a special case. Assigning it again will overwrite the first one.
-
-result = "first result, which should not be shown"
-result = "second result, which should overwrite it"
-# "third result, which should overwrite both"
