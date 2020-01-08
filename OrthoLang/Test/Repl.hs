@@ -12,7 +12,7 @@ import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Repl         (mkRepl)
 import OrthoLang.Core.Util         (readFileStrict)
 import OrthoLang.Core.Types        (OrthoLangConfig(..), Locks, ReplM, HashedIDsRef)
-import System.Directory           (createDirectoryIfMissing, removeFile)
+import System.Directory           (createDirectoryIfMissing, removeFile) -- copyFile
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
@@ -74,7 +74,7 @@ goldenRepl cfg ref ids goldenFile = do
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut cfg' ref ids
                -- uncomment to update repl golden files:
-               -- >> copyFile tstOut goldenFile
+               -- >> copyFile tstOut ("/home/jefdaj/shortcut/tests/repl" </> takeBaseName goldenFile <.> "txt")
   return $ goldenVsFile desc goldenFile tstOut action
 
 knownFailing :: [FilePath]
@@ -115,8 +115,8 @@ goldenReplTree cfg ref ids ses = do
                  _ <- mockRepl stdin tmpOut cfg' ref ids
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
-                 -- helpful for updating tests
-                 -- writeFile ("/tmp" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
+                 -- uncomment to update golden repl trees
+                 -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 
