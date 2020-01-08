@@ -1,4 +1,4 @@
-module OrthoLang.Modules.GreenOrthoLang
+module OrthoLang.Modules.GreenCut
   where
 
 -- import Development.Shake
@@ -8,8 +8,8 @@ import OrthoLang.Modules.Blast (bht)
 
 orthoLangModule :: OrthoLangModule
 orthoLangModule = OrthoLangModule
-  { mName = "GreenOrthoLang"
-  , mDesc = "A re-implementation of the original GreenOrthoLang(2) ortholog-finding algorithm"
+  { mName = "GreenCut"
+  , mDesc = "A re-implementation of the original GreenCut(2) ortholog-finding algorithm"
   , mTypes = [gcr]
   , mFunctions =
       [ greencutTwoFamilies
@@ -20,7 +20,7 @@ orthoLangModule = OrthoLangModule
 gcr :: OrthoLangType
 gcr = OrthoLangType
   { tExt  = "gcr"
-  , tDesc = "GreenOrthoLang results"
+  , tDesc = "GreenCut results"
   , tShow = defaultShow
   }
  
