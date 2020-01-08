@@ -936,8 +936,240 @@
 |   |   |               |   `-- POG0908Z93T.prfl
 |   |   |               `-- scores_cutoff
 |   |   `-- runs
+<<<<<<< HEAD
 |   |       |-- run_87f9deefcd_e1d7aa4e98_0.bsr
 |   |       |   |-- full_table_87f9deefcd_e1d7aa4e98_0.bsr.tsv
+=======
+|   |       |-- run_608982fe7d_4965dfe745_0.bsr
+|   |       |   |-- full_table_608982fe7d_4965dfe745_0.bsr.tsv
+|   |       |   |-- hmmer_output
+|   |       |   |   |-- POG0908042N.out.1
+|   |       |   |   |-- POG0908053X.out.1
+|   |       |   |   |-- POG090805N3.out.1
+|   |       |   |   |-- POG090805NB.out.1
+|   |       |   |   |-- POG090805ND.out.1
+|   |       |   |   |-- POG090805NH.out.1
+|   |       |   |   |-- POG090806SW.out.1
+|   |       |   |   |-- POG09080BQC.out.1
+|   |       |   |   |-- POG09080CPF.out.1
+|   |       |   |   |-- POG09080CPG.out.1
+|   |       |   |   |-- POG09080IID.out.1
+|   |       |   |   |-- POG09080M8F.out.1
+|   |       |   |   |-- POG09080RC5.out.1
+|   |       |   |   |-- POG090811T9.out.1
+|   |       |   |   |-- POG09081230U.out.1
+|   |       |   |   |-- POG090812R9T.out.1
+|   |       |   |   |-- POG090813FD7.out.1
+|   |       |   |   |-- POG090813QQ.out.1
+|   |       |   |   |-- POG090814DZB.out.1
+|   |       |   |   |-- POG090816X6C.out.1
+|   |       |   |   |-- POG0908170N.out.1
+|   |       |   |   |-- POG090817ULZ.out.1
+|   |       |   |   |-- POG090818RP8.out.1
+|   |       |   |   |-- POG090819L5Q.out.1
+|   |       |   |   |-- POG09081A1EN.out.1
+|   |       |   |   |-- POG09081AJNN.out.1
+|   |       |   |   |-- POG09081AR68.out.1
+|   |       |   |   |-- POG09081AR69.out.1
+|   |       |   |   |-- POG09081BN8P.out.1
+|   |       |   |   |-- POG09081E2X9.out.1
+|   |       |   |   |-- POG09081EEFL.out.1
+|   |       |   |   |-- POG09081GXO.out.1
+|   |       |   |   |-- POG09081HP3.out.1
+|   |       |   |   |-- POG09081JJM.out.1
+|   |       |   |   |-- POG09081OQE.out.1
+|   |       |   |   |-- POG09081PDH.out.1
+|   |       |   |   |-- POG09081PDO.out.1
+|   |       |   |   |-- POG09081RY1.out.1
+|   |       |   |   |-- POG09081RY2.out.1
+|   |       |   |   |-- POG09081RY6.out.1
+|   |       |   |   |-- POG090829M4.out.1
+|   |       |   |   |-- POG09082GXA.out.1
+|   |       |   |   |-- POG09082JOM.out.1
+|   |       |   |   |-- POG09082NLD.out.1
+|   |       |   |   |-- POG09082NLE.out.1
+|   |       |   |   |-- POG09082NLF.out.1
+|   |       |   |   |-- POG09082O4J.out.1
+|   |       |   |   |-- POG09082O4M.out.1
+|   |       |   |   |-- POG09082O4Q.out.1
+|   |       |   |   |-- POG09082YBY.out.1
+|   |       |   |   |-- POG09083CNA.out.1
+|   |       |   |   |-- POG09083CNE.out.1
+|   |       |   |   |-- POG09083CO7.out.1
+|   |       |   |   |-- POG09083QWE.out.1
+|   |       |   |   |-- POG090846WD.out.1
+|   |       |   |   |-- POG090848LV.out.1
+|   |       |   |   |-- POG09084BAZ.out.1
+|   |       |   |   |-- POG09084G31.out.1
+|   |       |   |   |-- POG09084GNT.out.1
+|   |       |   |   |-- POG09084T66.out.1
+|   |       |   |   |-- POG09084T67.out.1
+|   |       |   |   |-- POG09085844.out.1
+|   |       |   |   |-- POG09085A45.out.1
+|   |       |   |   |-- POG09085A48.out.1
+|   |       |   |   |-- POG09085G8D.out.1
+|   |       |   |   |-- POG09085G8I.out.1
+|   |       |   |   |-- POG09085G8L.out.1
+|   |       |   |   |-- POG09085G8Q.out.1
+|   |       |   |   |-- POG09085G8X.out.1
+|   |       |   |   |-- POG09085G9C.out.1
+|   |       |   |   |-- POG09085JJ2.out.1
+|   |       |   |   |-- POG09085K1Z.out.1
+|   |       |   |   |-- POG09085NJQ.out.1
+|   |       |   |   |-- POG09086HZU.out.1
+|   |       |   |   |-- POG09086HZV.out.1
+|   |       |   |   |-- POG09086LGG.out.1
+|   |       |   |   |-- POG09086PE6.out.1
+|   |       |   |   |-- POG090871D0.out.1
+|   |       |   |   |-- POG09087705.out.1
+|   |       |   |   |-- POG09087DMQ.out.1
+|   |       |   |   |-- POG09087DMS.out.1
+|   |       |   |   |-- POG09087DMU.out.1
+|   |       |   |   |-- POG09087DMW.out.1
+|   |       |   |   |-- POG09087HE9.out.1
+|   |       |   |   |-- POG09087QCZ.out.1
+|   |       |   |   |-- POG09087QD2.out.1
+|   |       |   |   |-- POG09087QD4.out.1
+|   |       |   |   |-- POG09087QD9.out.1
+|   |       |   |   |-- POG09087X8E.out.1
+|   |       |   |   |-- POG09087Z77.out.1
+|   |       |   |   |-- POG090887OE.out.1
+|   |       |   |   |-- POG090888RC.out.1
+|   |       |   |   |-- POG09088D2Z.out.1
+|   |       |   |   |-- POG09088D33.out.1
+|   |       |   |   |-- POG09088D38.out.1
+|   |       |   |   |-- POG09088KL7.out.1
+|   |       |   |   |-- POG09088ORL.out.1
+|   |       |   |   |-- POG09088WUK.out.1
+|   |       |   |   |-- POG09088YYG.out.1
+|   |       |   |   |-- POG090890X8.out.1
+|   |       |   |   |-- POG090896NN.out.1
+|   |       |   |   |-- POG09089ABT.out.1
+|   |       |   |   |-- POG09089ABU.out.1
+|   |       |   |   |-- POG09089BU7.out.1
+|   |       |   |   |-- POG09089PT1.out.1
+|   |       |   |   |-- POG09089QUL.out.1
+|   |       |   |   |-- POG09089TPL.out.1
+|   |       |   |   |-- POG09089ZGC.out.1
+|   |       |   |   |-- POG09089ZGI.out.1
+|   |       |   |   |-- POG0908A0PI.out.1
+|   |       |   |   |-- POG0908A2RA.out.1
+|   |       |   |   |-- POG0908A74U.out.1
+|   |       |   |   |-- POG0908ABVX.out.1
+|   |       |   |   |-- POG0908AELH.out.1
+|   |       |   |   |-- POG0908AELI.out.1
+|   |       |   |   |-- POG0908AMDC.out.1
+|   |       |   |   |-- POG0908ARFH.out.1
+|   |       |   |   |-- POG0908ASG9.out.1
+|   |       |   |   |-- POG0908ATXP.out.1
+|   |       |   |   |-- POG0908ATXW.out.1
+|   |       |   |   |-- POG0908AV6T.out.1
+|   |       |   |   |-- POG0908AVQC.out.1
+|   |       |   |   |-- POG0908B2J7.out.1
+|   |       |   |   |-- POG0908B2JE.out.1
+|   |       |   |   |-- POG0908BA6D.out.1
+|   |       |   |   |-- POG0908BNOA.out.1
+|   |       |   |   |-- POG0908BO88.out.1
+|   |       |   |   |-- POG0908BT5K.out.1
+|   |       |   |   |-- POG0908DF3P.out.1
+|   |       |   |   |-- POG0908DFQ0.out.1
+|   |       |   |   |-- POG0908DOQ3.out.1
+|   |       |   |   |-- POG0908DQQA.out.1
+|   |       |   |   |-- POG0908DWIX.out.1
+|   |       |   |   |-- POG0908ETO9.out.1
+|   |       |   |   |-- POG0908EU4V.out.1
+|   |       |   |   |-- POG0908EU4W.out.1
+|   |       |   |   |-- POG0908F195.out.1
+|   |       |   |   |-- POG0908F4A4.out.1
+|   |       |   |   |-- POG0908FBHU.out.1
+|   |       |   |   |-- POG0908FCPZ.out.1
+|   |       |   |   |-- POG0908FKZO.out.1
+|   |       |   |   |-- POG0908FKZQ.out.1
+|   |       |   |   |-- POG0908FWW2.out.1
+|   |       |   |   |-- POG0908GKBQ.out.1
+|   |       |   |   |-- POG0908GM31.out.1
+|   |       |   |   |-- POG0908GMN2.out.1
+|   |       |   |   |-- POG0908GUA5.out.1
+|   |       |   |   |-- POG0908GVBC.out.1
+|   |       |   |   |-- POG0908GYBJ.out.1
+|   |       |   |   |-- POG0908ICER.out.1
+|   |       |   |   |-- POG0908IEOZ.out.1
+|   |       |   |   |-- POG0908ITQA.out.1
+|   |       |   |   |-- POG0908JAEM.out.1
+|   |       |   |   |-- POG0908JS0X.out.1
+|   |       |   |   |-- POG0908K3OG.out.1
+|   |       |   |   |-- POG0908K6S0.out.1
+|   |       |   |   |-- POG0908K6S5.out.1
+|   |       |   |   |-- POG0908K77U.out.1
+|   |       |   |   |-- POG0908KOA0.out.1
+|   |       |   |   |-- POG0908KRQM.out.1
+|   |       |   |   |-- POG0908KRQN.out.1
+|   |       |   |   |-- POG0908M9D5.out.1
+|   |       |   |   |-- POG0908MWHI.out.1
+|   |       |   |   |-- POG0908N61V.out.1
+|   |       |   |   |-- POG0908N61W.out.1
+|   |       |   |   |-- POG0908N71Q.out.1
+|   |       |   |   |-- POG0908N83V.out.1
+|   |       |   |   |-- POG0908N9E9.out.1
+|   |       |   |   |-- POG0908NTMC.out.1
+|   |       |   |   |-- POG0908NUXC.out.1
+|   |       |   |   |-- POG0908OHAK.out.1
+|   |       |   |   |-- POG0908OKU5.out.1
+|   |       |   |   |-- POG0908OUT7.out.1
+|   |       |   |   |-- POG0908OUT9.out.1
+|   |       |   |   |-- POG0908P08V.out.1
+|   |       |   |   |-- POG0908P08Z.out.1
+|   |       |   |   |-- POG0908P810.out.1
+|   |       |   |   |-- POG0908P8TC.out.1
+|   |       |   |   |-- POG0908PBNY.out.1
+|   |       |   |   |-- POG0908PD54.out.1
+|   |       |   |   |-- POG0908PD56.out.1
+|   |       |   |   |-- POG0908PEE8.out.1
+|   |       |   |   |-- POG0908PEEB.out.1
+|   |       |   |   |-- POG0908PETZ.out.1
+|   |       |   |   |-- POG0908PJP9.out.1
+|   |       |   |   |-- POG0908PTCQ.out.1
+|   |       |   |   |-- POG0908PTCS.out.1
+|   |       |   |   |-- POG0908QDH8.out.1
+|   |       |   |   |-- POG0908QF0S.out.1
+|   |       |   |   |-- POG0908QGHB.out.1
+|   |       |   |   |-- POG0908QRKZ.out.1
+|   |       |   |   |-- POG0908QRL2.out.1
+|   |       |   |   |-- POG0908R2M2.out.1
+|   |       |   |   |-- POG0908R4LK.out.1
+|   |       |   |   |-- POG0908R4LQ.out.1
+|   |       |   |   |-- POG0908R93X.out.1
+|   |       |   |   |-- POG0908R9UT.out.1
+|   |       |   |   |-- POG0908RHLZ.out.1
+|   |       |   |   |-- POG0908RNZK.out.1
+|   |       |   |   |-- POG0908RQH6.out.1
+|   |       |   |   |-- POG0908RRK7.out.1
+|   |       |   |   |-- POG0908RZYD.out.1
+|   |       |   |   |-- POG0908S8GE.out.1
+|   |       |   |   |-- POG0908SD3W.out.1
+|   |       |   |   |-- POG0908SLUR.out.1
+|   |       |   |   |-- POG0908SVN9.out.1
+|   |       |   |   |-- POG0908SW1E.out.1
+|   |       |   |   |-- POG0908TBSS.out.1
+|   |       |   |   |-- POG0908TJN3.out.1
+|   |       |   |   |-- POG0908TK3U.out.1
+|   |       |   |   |-- POG0908U8SK.out.1
+|   |       |   |   |-- POG0908UEXX.out.1
+|   |       |   |   |-- POG0908UGSH.out.1
+|   |       |   |   |-- POG0908UVTT.out.1
+|   |       |   |   |-- POG0908V3GA.out.1
+|   |       |   |   |-- POG0908V908.out.1
+|   |       |   |   |-- POG0908VM9T.out.1
+|   |       |   |   |-- POG0908WCPR.out.1
+|   |       |   |   |-- POG0908Y9GD.out.1
+|   |       |   |   |-- POG0908YDZB.out.1
+|   |       |   |   `-- POG0908Z93T.out.1
+|   |       |   |-- missing_busco_list_608982fe7d_4965dfe745_0.bsr.tsv
+|   |       |   `-- short_summary_608982fe7d_4965dfe745_0.bsr.txt
+|   |       |-- run_608982fe7d_4965dfe745_0.bsr.ini
+|   |       |-- run_ce7af60eaa_4965dfe745_0.bsr
+|   |       |   |-- full_table_ce7af60eaa_4965dfe745_0.bsr.tsv
+>>>>>>> update tests
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG090A000X.out.1
 |   |       |   |   |-- POG090A000Y.out.1
@@ -1171,6 +1403,7 @@
 |   |       |   |   |-- POG090A031D.out.1
 |   |       |   |   |-- POG090A0386.out.1
 |   |       |   |   `-- POG090A039N.out.1
+<<<<<<< HEAD
 |   |       |   |-- missing_busco_list_87f9deefcd_e1d7aa4e98_0.bsr.tsv
 |   |       |   `-- short_summary_87f9deefcd_e1d7aa4e98_0.bsr.txt
 |   |       |-- run_87f9deefcd_e1d7aa4e98_0.bsr.ini
@@ -1401,6 +1634,11 @@
 |   |       |   |-- missing_busco_list_de8617e1bb_e1d7aa4e98_0.bsr.tsv
 |   |       |   `-- short_summary_de8617e1bb_e1d7aa4e98_0.bsr.txt
 |   |       `-- run_de8617e1bb_e1d7aa4e98_0.bsr.ini
+=======
+|   |       |   |-- missing_busco_list_ce7af60eaa_4965dfe745_0.bsr.tsv
+|   |       |   `-- short_summary_ce7af60eaa_4965dfe745_0.bsr.txt
+|   |       `-- run_ce7af60eaa_4965dfe745_0.bsr.ini
+>>>>>>> update tests
 |   |-- curl
 |   |   |-- 9c46bc8ed4
 |   |   `-- bd265ecf24
@@ -1409,9 +1647,10 @@
 |       `-- 11bbf54fc6.faa.ids
 |-- exprs
 |   |-- busco_fetch_lineage
-|   |   |-- 5ea47da7d6_0.blh -> ../../cache/busco/lineages/v2/datasets/firmicutes_odb9/dataset.cfg
-|   |   `-- 69c037e8f4_0.blh -> ../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
+|   |   |-- 71e53ccedc_0.blh -> ../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
+|   |   `-- 8739e5c86b_0.blh -> ../../cache/busco/lineages/v2/datasets/firmicutes_odb9/dataset.cfg
 |   |-- busco_percent_complete
+<<<<<<< HEAD
 |   |   |-- 199c2bde66_0.num
 |   |   |-- 199c2bde66_0.num.err
 |   |   |-- cadb00a6f1_0.num
@@ -1427,16 +1666,42 @@
 |   |   `-- 1ff128c8f3_0.num.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   `-- 229f13222e_0.faa -> ../../cache/load/11bbf54fc6.faa
+=======
+|   |   |-- 02ce349d7d_0.num
+|   |   |-- 02ce349d7d_0.num.err
+|   |   |-- 58d2eebf19_0.num
+|   |   `-- 58d2eebf19_0.num.err
+|   |-- busco_proteins
+|   |   |-- 608982fe7d_4965dfe745_0.bsr -> ../../cache/busco/runs/run_608982fe7d_4965dfe745_0.bsr/short_summary_608982fe7d_4965dfe745_0.bsr.txt
+|   |   |-- 608982fe7d_4965dfe745_0.bsr.err
+|   |   |-- 608982fe7d_4965dfe745_0.bsr.out
+|   |   |-- ce7af60eaa_4965dfe745_0.bsr -> ../../cache/busco/runs/run_ce7af60eaa_4965dfe745_0.bsr/short_summary_ce7af60eaa_4965dfe745_0.bsr.txt
+|   |   |-- ce7af60eaa_4965dfe745_0.bsr.err
+|   |   `-- ce7af60eaa_4965dfe745_0.bsr.out
+|   |-- list
+|   |   `-- 895b8efeac_0.num.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   `-- 18f03ea97d_0.faa -> ../../cache/load/11bbf54fc6.faa
+>>>>>>> update tests
 |   `-- str
 |       |-- 385ae70d8e_0.str -> ../../cache/lines/...
 |       |-- 405d2aacea_0.str -> ../../cache/lines/...
 |       `-- f6e8c8ce02_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- mgen.faa -> ../exprs/load_faa/229f13222e_0.faa
     |-- odb9_firmicutes.blh -> ../exprs/busco_fetch_lineage/5ea47da7d6_0.blh
     |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/69c037e8f4_0.blh
     |-- res1.bsr -> ../exprs/busco_proteins/87f9deefcd_e1d7aa4e98_0.bsr
     |-- res2.bsr -> ../exprs/busco_proteins/de8617e1bb_e1d7aa4e98_0.bsr
     `-- result -> ../exprs/list/1ff128c8f3_0.num.list
+=======
+    |-- mgen.faa -> ../exprs/load_faa/18f03ea97d_0.faa
+    |-- odb9_firmicutes.blh -> ../exprs/busco_fetch_lineage/8739e5c86b_0.blh
+    |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/71e53ccedc_0.blh
+    |-- res1.bsr -> ../exprs/busco_proteins/ce7af60eaa_4965dfe745_0.bsr
+    |-- res2.bsr -> ../exprs/busco_proteins/608982fe7d_4965dfe745_0.bsr
+    `-- result -> ../exprs/list/895b8efeac_0.num.list
+>>>>>>> update tests
 
 28 directories, 1411 files

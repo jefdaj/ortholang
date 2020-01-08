@@ -459,8 +459,8 @@
 |   |   |               |   `-- POG0908Z93T.prfl
 |   |   |               `-- scores_cutoff
 |   |   `-- runs
-|   |       |-- run_f44a70cf2d_06b3e4476b_0.bsr
-|   |       |   |-- full_table_f44a70cf2d_06b3e4476b_0.bsr.tsv
+|   |       |-- run_5a6cf44862_597248ff77_0.bsr
+|   |       |   |-- full_table_5a6cf44862_597248ff77_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG0908042N.out.1
 |   |       |   |   |-- POG0908053X.out.1
@@ -683,11 +683,11 @@
 |   |       |   |   |-- POG0908Y9GD.out.1
 |   |       |   |   |-- POG0908YDZB.out.1
 |   |       |   |   `-- POG0908Z93T.out.1
-|   |       |   |-- missing_busco_list_f44a70cf2d_06b3e4476b_0.bsr.tsv
-|   |       |   `-- short_summary_f44a70cf2d_06b3e4476b_0.bsr.txt
-|   |       |-- run_f44a70cf2d_06b3e4476b_0.bsr.ini
-|   |       |-- run_f44a70cf2d_e66755a6ce_0.bsr
-|   |       |   |-- full_table_f44a70cf2d_e66755a6ce_0.bsr.tsv
+|   |       |   |-- missing_busco_list_5a6cf44862_597248ff77_0.bsr.tsv
+|   |       |   `-- short_summary_5a6cf44862_597248ff77_0.bsr.txt
+|   |       |-- run_5a6cf44862_597248ff77_0.bsr.ini
+|   |       |-- run_5a6cf44862_dccba5f86e_0.bsr
+|   |       |   |-- full_table_5a6cf44862_dccba5f86e_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG0908042N.out.1
 |   |       |   |   |-- POG0908053X.out.1
@@ -910,17 +910,25 @@
 |   |       |   |   |-- POG0908Y9GD.out.1
 |   |       |   |   |-- POG0908YDZB.out.1
 |   |       |   |   `-- POG0908Z93T.out.1
-|   |       |   |-- missing_busco_list_f44a70cf2d_e66755a6ce_0.bsr.tsv
-|   |       |   `-- short_summary_f44a70cf2d_e66755a6ce_0.bsr.txt
-|   |       `-- run_f44a70cf2d_e66755a6ce_0.bsr.ini
+|   |       |   |-- missing_busco_list_5a6cf44862_dccba5f86e_0.bsr.tsv
+|   |       |   `-- short_summary_5a6cf44862_dccba5f86e_0.bsr.txt
+|   |       `-- run_5a6cf44862_dccba5f86e_0.bsr.ini
 |   |-- curl
 |   |   `-- 9c46bc8ed4
 |   |-- each
+<<<<<<< HEAD
 |   |   `-- e08c76cd3f
 |   |       |-- 06b3e4476b.bsr -> ../../../exprs/busco_proteins/f44a70cf2d_06b3e4476b_0.bsr
 |   |       |-- 06b3e4476b.bsr.args -> ../../../cache/lines/...
 |   |       |-- e66755a6ce.bsr -> ../../../exprs/busco_proteins/f44a70cf2d_e66755a6ce_0.bsr
 |   |       `-- e66755a6ce.bsr.args -> ../../../cache/lines/...
+=======
+|   |   `-- 36760959c6
+|   |       |-- 597248ff77.bsr -> ../../../exprs/busco_proteins/5a6cf44862_597248ff77_0.bsr
+|   |       |-- 597248ff77.bsr.args -> ../../../cache/lines/...
+|   |       |-- dccba5f86e.bsr -> ../../../exprs/busco_proteins/5a6cf44862_dccba5f86e_0.bsr
+|   |       `-- dccba5f86e.bsr.args -> ../../../cache/lines/...
+>>>>>>> update tests
 |   `-- load
 |       |-- 0d8dfa261e.faa
 |       |-- 0d8dfa261e.faa.ids
@@ -928,26 +936,41 @@
 |       `-- 11bbf54fc6.faa.ids
 |-- exprs
 |   |-- busco_fetch_lineage
-|   |   `-- 69c037e8f4_0.blh -> ../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
+|   |   `-- 71e53ccedc_0.blh -> ../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
 |   |-- busco_filter_completeness
+<<<<<<< HEAD
 |   |   `-- ddb2bd2cbf_3c439e4d8d_5d537f74e1_0.faa.list -> ../../cache/lines/...
+=======
+|   |   `-- 43de112e90_ff6980ea54_73b82163a0_0.faa.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   |-- busco_proteins
-|   |   |-- f44a70cf2d_06b3e4476b_0.bsr -> ../../cache/busco/runs/run_f44a70cf2d_06b3e4476b_0.bsr/short_summary_f44a70cf2d_06b3e4476b_0.bsr.txt
-|   |   |-- f44a70cf2d_06b3e4476b_0.bsr.err
-|   |   |-- f44a70cf2d_06b3e4476b_0.bsr.out
-|   |   |-- f44a70cf2d_e66755a6ce_0.bsr -> ../../cache/busco/runs/run_f44a70cf2d_e66755a6ce_0.bsr/short_summary_f44a70cf2d_e66755a6ce_0.bsr.txt
-|   |   |-- f44a70cf2d_e66755a6ce_0.bsr.err
-|   |   `-- f44a70cf2d_e66755a6ce_0.bsr.out
+|   |   |-- 5a6cf44862_597248ff77_0.bsr -> ../../cache/busco/runs/run_5a6cf44862_597248ff77_0.bsr/short_summary_5a6cf44862_597248ff77_0.bsr.txt
+|   |   |-- 5a6cf44862_597248ff77_0.bsr.err
+|   |   |-- 5a6cf44862_597248ff77_0.bsr.out
+|   |   |-- 5a6cf44862_dccba5f86e_0.bsr -> ../../cache/busco/runs/run_5a6cf44862_dccba5f86e_0.bsr/short_summary_5a6cf44862_dccba5f86e_0.bsr.txt
+|   |   |-- 5a6cf44862_dccba5f86e_0.bsr.err
+|   |   `-- 5a6cf44862_dccba5f86e_0.bsr.out
 |   |-- busco_proteins_each
+<<<<<<< HEAD
 |   |   `-- de8617e1bb_2d401fa755_0.bsr.list -> ../../cache/lines/...
 |   |-- busco_scores_table
 |   |   `-- f8dab64e04_0.bst
+=======
+|   |   `-- 608982fe7d_b58c690ac7_0.bsr.list -> ../../cache/lines/...
+|   |-- busco_scores_table
+|   |   `-- b06b959890_0.bst
+>>>>>>> update tests
 |   |-- list
-|   |   |-- 12615b38c7_0.faa.list -> ../../cache/lines/...
-|   |   `-- 5c35b1f40d_0.faa.list -> ../../cache/lines/...
+|   |   |-- d5a98d9fd0_0.faa.list -> ../../cache/lines/...
+|   |   `-- def8d20b32_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
+<<<<<<< HEAD
 |   |   |-- 229f13222e_0.faa -> ../../cache/load/11bbf54fc6.faa
 |   |   `-- 246e11f77b_0.faa -> ../../cache/load/0d8dfa261e.faa
+=======
+|   |   |-- 18f03ea97d_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |   `-- 4edc591e37_0.faa -> ../../cache/load/0d8dfa261e.faa
+>>>>>>> update tests
 |   |-- num
 |   |   `-- 4e68c168ca_0.num -> ../../cache/lines/...
 |   `-- str
@@ -955,6 +978,7 @@
 |       |-- c58447896b_0.str -> ../../cache/lines/...
 |       `-- f6e8c8ce02_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- faas.faa.list -> ../exprs/list/12615b38c7_0.faa.list
     |-- maga.faa -> ../exprs/load_faa/246e11f77b_0.faa
     |-- mgen.faa -> ../exprs/load_faa/229f13222e_0.faa
@@ -963,5 +987,15 @@
     |-- result -> ../vars/over40.faa.list
     |-- scores.bsr.list -> ../exprs/busco_proteins_each/de8617e1bb_2d401fa755_0.bsr.list
     `-- table.bst -> ../exprs/busco_scores_table/f8dab64e04_0.bst
+=======
+    |-- faas.faa.list -> ../exprs/list/d5a98d9fd0_0.faa.list
+    |-- maga.faa -> ../exprs/load_faa/4edc591e37_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/18f03ea97d_0.faa
+    |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/71e53ccedc_0.blh
+    |-- over40.faa.list -> ../exprs/busco_filter_completeness/43de112e90_ff6980ea54_73b82163a0_0.faa.list
+    |-- result -> ../vars/over40.faa.list
+    |-- scores.bsr.list -> ../exprs/busco_proteins_each/608982fe7d_b58c690ac7_0.bsr.list
+    `-- table.bst -> ../exprs/busco_scores_table/b06b959890_0.bst
+>>>>>>> update tests
 
 29 directories, 935 files

@@ -6,6 +6,7 @@
 |   |   |-- cb3e90dc00.faa
 |   |   `-- cb3e90dc00.faa.ids
 |   `-- seqio
+<<<<<<< HEAD
 |       |-- 0f6da10db2.txt -> ../../cache/lines/...
 |       `-- 3900d389c9.txt -> ../../cache/lines/...
 |-- exprs
@@ -22,18 +23,43 @@
 |   |-- extract_seqs
 |   |   |-- a3fc746119_3900d389c9_0.fna
 |   |   `-- cdd012aa55_0f6da10db2_0.faa
+=======
+|       |-- 15952ae1e5.txt -> ../../cache/lines/...
+|       `-- 38d46f578e.txt -> ../../cache/lines/...
+|-- exprs
+|   |-- any
+|   |   `-- cac982b039_0.str.list -> ../../cache/lines/...
+|   |-- diff
+|   |   |-- 9349664551_0.str.list -> ../../cache/lines/...
+|   |   `-- dd0d07526a_0.str.list -> ../../cache/lines/...
+|   |-- extract_ids
+|   |   |-- 03f621da34_0.str.list
+|   |   |-- 1fc4c5ac4e_0.str.list
+|   |   |-- 3e5ee24fdb_0.str.list
+|   |   `-- bcdc8b00a7_0.str.list
+|   |-- extract_seqs
+|   |   |-- 1fc4c5ac4e_38d46f578e_0.fna
+|   |   `-- bcdc8b00a7_15952ae1e5_0.faa
+>>>>>>> update tests
 |   |-- list
-|   |   |-- 0bcd74b0c9_0.str.list.list -> ../../cache/lines/...
-|   |   |-- 21d8d30ef5_0.str.list.list -> ../../cache/lines/...
-|   |   `-- 5ba0a3b9d9_0.str.list.list -> ../../cache/lines/...
+|   |   |-- 702857335d_0.str.list.list -> ../../cache/lines/...
+|   |   |-- ab5f3e798f_0.str.list.list -> ../../cache/lines/...
+|   |   `-- e5ff47baa6_0.str.list.list -> ../../cache/lines/...
 |   |-- load_faa
+<<<<<<< HEAD
 |   |   `-- 37261f1f62_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |-- load_fna
 |   |   `-- c64e4d283b_0.fna -> ../../cache/load/6046a54e92.fna
+=======
+|   |   `-- dd27a28c2a_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- load_fna
+|   |   `-- 6d5bdf115f_0.fna -> ../../cache/load/6046a54e92.fna
+>>>>>>> update tests
 |   `-- str
 |       |-- ac19b3d2a1_0.str -> ../../cache/lines/...
 |       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- faaDiff.str.list -> ../exprs/diff/0c27d576d6_0.str.list
     |-- faaSmall.faa -> ../exprs/load_faa/37261f1f62_0.faa
     |-- faaSmallAll.str.list -> ../exprs/extract_ids/ba73575a56_0.str.list
@@ -45,5 +71,18 @@
     |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/a3fc746119_0.str.list
     |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/a3fc746119_3900d389c9_0.fna
     `-- result -> ../exprs/any/d80a18c00d_0.str.list
+=======
+    |-- faaDiff.str.list -> ../exprs/diff/9349664551_0.str.list
+    |-- faaSmallAll.str.list -> ../exprs/extract_ids/03f621da34_0.str.list
+    |-- faaSmall.faa -> ../exprs/load_faa/dd27a28c2a_0.faa
+    |-- faaSmallIDs.str.list -> ../exprs/extract_ids/bcdc8b00a7_0.str.list
+    |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/bcdc8b00a7_15952ae1e5_0.faa
+    |-- fnaDiff.str.list -> ../exprs/diff/dd0d07526a_0.str.list
+    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/3e5ee24fdb_0.str.list
+    |-- fnaSmall.fna -> ../exprs/load_fna/6d5bdf115f_0.fna
+    |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/1fc4c5ac4e_0.str.list
+    |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/1fc4c5ac4e_38d46f578e_0.fna
+    `-- result -> ../exprs/any/cac982b039_0.str.list
+>>>>>>> update tests
 
 13 directories, 33 files

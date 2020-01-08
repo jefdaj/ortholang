@@ -1,11 +1,19 @@
 .
 |-- cache
 |   |-- each
+<<<<<<< HEAD
 |   |   `-- 2e81e747b2
 |   |       |-- c236ed843c.ndb -> ../../../exprs/makeblastdb_nucl/c236ed843c_0.ndb
 |   |       |-- c236ed843c.ndb.args -> ../../../cache/lines/...
 |   |       |-- fbc3f2dfc1.ndb -> ../../../exprs/makeblastdb_nucl/fbc3f2dfc1_0.ndb
 |   |       `-- fbc3f2dfc1.ndb.args -> ../../../cache/lines/...
+=======
+|   |   `-- e8b2094735
+|   |       |-- 033b2784e5.ndb -> ../../../exprs/makeblastdb_nucl/033b2784e5_0.ndb
+|   |       |-- 033b2784e5.ndb.args -> ../../../cache/lines/...
+|   |       |-- cd7457665a.ndb -> ../../../exprs/makeblastdb_nucl/cd7457665a_0.ndb
+|   |       `-- cd7457665a.ndb.args -> ../../../cache/lines/...
+>>>>>>> update tests
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   |-- 6046a54e92.fna.ids
@@ -26,24 +34,42 @@
 |           `-- 933216e8a2.ndb.out
 |-- exprs
 |   |-- list
-|   |   `-- dbe42d6056_0.fna.list -> ../../cache/lines/...
+|   |   `-- fb2c20f954_0.fna.list -> ../../cache/lines/...
 |   |-- load_fna
+<<<<<<< HEAD
 |   |   |-- 2fbf169736_0.fna -> ../../cache/load/8723e7ac8c.fna
 |   |   `-- c64e4d283b_0.fna -> ../../cache/load/6046a54e92.fna
+=======
+|   |   |-- 6d5bdf115f_0.fna -> ../../cache/load/6046a54e92.fna
+|   |   `-- 8eef8cbc6c_0.fna -> ../../cache/load/8723e7ac8c.fna
+>>>>>>> update tests
 |   |-- makeblastdb_nucl
-|   |   |-- c236ed843c_0.ndb -> ../../cache/lines/...
-|   |   `-- fbc3f2dfc1_0.ndb -> ../../cache/lines/...
+|   |   |-- 033b2784e5_0.ndb -> ../../cache/lines/...
+|   |   `-- cd7457665a_0.ndb -> ../../cache/lines/...
 |   |-- makeblastdb_nucl_each
+<<<<<<< HEAD
 |   |   `-- 0227eddd4d_0.ndb.list -> ../../cache/lines/...
 |   |-- singletons
 |   |   `-- 261f4a9aae_0.fna.list.list -> ../../cache/lines/...
+=======
+|   |   `-- d99f227ac7_0.ndb.list -> ../../cache/lines/...
+|   |-- singletons
+|   |   `-- af8e3176e8_0.fna.list.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       |-- 0ecd3e7ed5_0.str -> ../../cache/lines/...
 |       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- dbs.ndb.list -> ../exprs/makeblastdb_nucl_each/0227eddd4d_0.ndb.list
     |-- genes5.fna -> ../exprs/load_fna/c64e4d283b_0.fna
     |-- result -> ../vars/dbs.ndb.list
     `-- single.fna -> ../exprs/load_fna/2fbf169736_0.fna
+=======
+    |-- dbs.ndb.list -> ../exprs/makeblastdb_nucl_each/d99f227ac7_0.ndb.list
+    |-- genes5.fna -> ../exprs/load_fna/6d5bdf115f_0.fna
+    |-- result -> ../vars/dbs.ndb.list
+    `-- single.fna -> ../exprs/load_fna/8eef8cbc6c_0.fna
+>>>>>>> update tests
 
 15 directories, 31 files

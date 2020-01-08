@@ -7,6 +7,7 @@
 |       `-- 36189032ad.faa.ids
 |-- exprs
 |   |-- diamond_blastp
+<<<<<<< HEAD
 |   |   |-- bca777a01a_7293551cfa_6a44b64e07_0.bht
 |   |   |-- bca777a01a_7293551cfa_6a44b64e07_0.bht.err
 |   |   `-- bca777a01a_7293551cfa_6a44b64e07_0.bht.out
@@ -17,14 +18,32 @@
 |   |-- load_faa
 |   |   |-- 0e49ee7cdf_0.faa -> ../../cache/load/10ffe0cf0f.faa
 |   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
+=======
+|   |   |-- c5e9182d78_54ff0da579_9232f7fa56_0.bht
+|   |   |-- c5e9182d78_54ff0da579_9232f7fa56_0.bht.err
+|   |   `-- c5e9182d78_54ff0da579_9232f7fa56_0.bht.out
+|   |-- diamond_makedb
+|   |   |-- 425ee46f11_0.dmnd
+|   |   |-- 425ee46f11_0.dmnd.err
+|   |   `-- 425ee46f11_0.dmnd.out
+|   |-- load_faa
+|   |   |-- 6af4625356_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- ade41eafca_0.faa -> ../../cache/load/10ffe0cf0f.faa
+>>>>>>> update tests
 |   |-- num
 |   |   `-- 6de785566e_0.num -> ../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
 |       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
     |-- mgen.faa -> ../exprs/load_faa/0e49ee7cdf_0.faa
     `-- result -> ../exprs/diamond_blastp/bca777a01a_7293551cfa_6a44b64e07_0.bht
+=======
+    |-- maga.faa -> ../exprs/load_faa/6af4625356_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/ade41eafca_0.faa
+    `-- result -> ../exprs/diamond_blastp/c5e9182d78_54ff0da579_9232f7fa56_0.bht
+>>>>>>> update tests
 
 9 directories, 18 files

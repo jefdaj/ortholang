@@ -23,9 +23,10 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   |-- 12615b38c7_0.faa.list -> ../../cache/lines/...
-|   |   `-- 66644cae34_0.faa.list -> ../../cache/lines/...
+|   |   |-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
+|   |   `-- d5a98d9fd0_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
+<<<<<<< HEAD
 |   |   |-- 1205880c10_0.faa -> ../../cache/load/11bbf54fc6.faa
 |   |   |-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
 |   |   `-- e47e096fcc_0.faa -> ../../cache/load/28e059b2a9.faa
@@ -42,11 +43,30 @@
 |   |   |-- 23b48ffb3d_085675fe4b_b141710a2c_0.pssm -> ../../cache/lines/...
 |   |   |-- 23b48ffb3d_085675fe4b_b141710a2c_0.pssm.tmp.err
 |   |   `-- 23b48ffb3d_085675fe4b_b141710a2c_0.pssm.tmp.out
+=======
+|   |   |-- 4a8c45699f_0.faa -> ../../cache/load/28e059b2a9.faa
+|   |   |-- 6af4625356_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 70c0ec78dc_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |-- makeblastdb_prot_all
+|   |   |-- 95737aa356_0.pdb.list -> ../../cache/lines/...
+|   |   `-- ef496270cd_0.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- c23938f494_0.num -> ../../cache/lines/...
+|   |-- psiblast_pssm
+|   |   |-- 1154de2857_3d594a35cc_7809baec4d_0.bht
+|   |   |-- 1154de2857_3d594a35cc_7809baec4d_0.bht.err
+|   |   `-- 1154de2857_3d594a35cc_7809baec4d_0.bht.out
+|   |-- psiblast_train_db
+|   |   |-- 1154de2857_58e67d5061_348fd6dc2c_0.pssm -> ../../cache/lines/...
+|   |   |-- 1154de2857_58e67d5061_348fd6dc2c_0.pssm.tmp.err
+|   |   `-- 1154de2857_58e67d5061_348fd6dc2c_0.pssm.tmp.out
+>>>>>>> update tests
 |   `-- str
 |       |-- 1e020faf26_0.str -> ../../cache/lines/...
 |       |-- 40edb92618_0.str -> ../../cache/lines/...
 |       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/b1a76e4528_0.pdb
     |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
     |-- mgen.faa -> ../exprs/load_faa/1205880c10_0.faa
@@ -54,5 +74,14 @@
     |-- query.faa -> ../exprs/load_faa/e47e096fcc_0.faa
     |-- result -> ../vars/single.bht
     `-- single.bht -> ../exprs/psiblast_pssm/23b48ffb3d_5ed92f9b94_6564ed4faf_0.bht
+=======
+    |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/ef496270cd_0.pdb
+    |-- maga.faa -> ../exprs/load_faa/6af4625356_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/70c0ec78dc_0.faa
+    |-- pssm.pssm -> ../exprs/psiblast_train_db/1154de2857_58e67d5061_348fd6dc2c_0.pssm
+    |-- query.faa -> ../exprs/load_faa/4a8c45699f_0.faa
+    |-- result -> ../vars/single.bht
+    `-- single.bht -> ../exprs/psiblast_pssm/1154de2857_3d594a35cc_7809baec4d_0.bht
+>>>>>>> update tests
 
 15 directories, 40 files

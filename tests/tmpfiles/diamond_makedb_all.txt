@@ -9,6 +9,7 @@
 |       `-- 39b21a8bf4.faa.ids
 |-- exprs
 |   |-- diamond_makedb_all
+<<<<<<< HEAD
 |   |   |-- 4ef121b815_0.dmnd
 |   |   |-- 4ef121b815_0.dmnd.err
 |   |   `-- 4ef121b815_0.dmnd.out
@@ -16,10 +17,24 @@
 |   |   `-- cadd1a7b08_0.str.list -> ../../cache/lines/...
 |   |-- list
 |   |   `-- b2d770718c_0.faa.list -> ../../cache/lines/...
+=======
+|   |   |-- dd459e4a5e_0.dmnd
+|   |   |-- dd459e4a5e_0.dmnd.err
+|   |   `-- dd459e4a5e_0.dmnd.out
+|   |-- glob_files
+|   |   `-- 2807f077c4_0.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   `-- 3b3fe7d5b4_0.faa.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       `-- f9b7f821c1_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- mycoplasma.faa.list -> ../exprs/list/b2d770718c_0.faa.list
     `-- result -> ../exprs/diamond_makedb_all/4ef121b815_0.dmnd
+=======
+    |-- mycoplasma.faa.list -> ../exprs/list/3b3fe7d5b4_0.faa.list
+    `-- result -> ../exprs/diamond_makedb_all/dd459e4a5e_0.dmnd
+>>>>>>> update tests
 
 8 directories, 14 files

@@ -1,6 +1,7 @@
 .
 |-- cache
 |   |-- each
+<<<<<<< HEAD
 |   |   |-- 3e6ac12c71
 |   |   |   |-- 80bf5b507e.str.list -> ../../../exprs/extract_queries/80bf5b507e_0.str.list
 |   |   |   |-- 80bf5b507e.str.list.args -> ../../../cache/lines/...
@@ -9,6 +10,16 @@
 |   |   `-- 6825cc3768
 |   |       |-- d2c7ab309c.str.list -> ../../../exprs/extract_targets/d2c7ab309c_0.str.list
 |   |       `-- d2c7ab309c.str.list.args -> ../../../cache/lines/...
+=======
+|   |   |-- 0834fab984
+|   |   |   |-- 15ff5db109.str.list -> ../../../exprs/extract_queries/15ff5db109_0.str.list
+|   |   |   |-- 15ff5db109.str.list.args -> ../../../cache/lines/...
+|   |   |   |-- 6c9339dcf6.str.list -> ../../../exprs/extract_queries/6c9339dcf6_0.str.list
+|   |   |   `-- 6c9339dcf6.str.list.args -> ../../../cache/lines/...
+|   |   `-- a8fd20ad27
+|   |       |-- 6c9339dcf6.str.list -> ../../../exprs/extract_targets/6c9339dcf6_0.str.list
+|   |       `-- 6c9339dcf6.str.list.args -> ../../../cache/lines/...
+>>>>>>> update tests
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   `-- 6046a54e92.fna.ids
@@ -21,6 +32,7 @@
 |           `-- 933216e8a2.ndb.out
 |-- exprs
 |   |-- all
+<<<<<<< HEAD
 |   |   `-- e6ca4943fa_0.str.list -> ../../cache/lines/...
 |   |-- any
 |   |   |-- d21c87b7dd_0.str.list.list -> ../../cache/lines/...
@@ -58,9 +70,49 @@
 |   |-- reciprocal_best
 |   |   |-- 1d4e035f5f_1d4e035f5f_0.bht
 |   |   `-- 1d4e035f5f_6b1d08b086_0.bht
+=======
+|   |   `-- 2918033776_0.str.list -> ../../cache/lines/...
+|   |-- any
+|   |   |-- 2918033776_0.str.list -> ../../cache/lines/...
+|   |   `-- 6523da279b_0.str.list.list -> ../../cache/lines/...
+|   |-- blastn_db
+|   |   |-- b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht -> ../../exprs/blastn_db/b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht.out
+|   |   |-- b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht.out
+|   |   `-- b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht.out.err
+|   |-- diff
+|   |   `-- 05a092d4b6_0.str.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 15ff5db109_0.str.list -> ../../cache/lines/...
+|   |   |-- 15ff5db109_0.str.list.tmp.err
+|   |   |-- 6c9339dcf6_0.str.list -> ../../cache/lines/...
+|   |   `-- 6c9339dcf6_0.str.list.tmp.err
+|   |-- extract_queries_each
+|   |   `-- ec5956ff8b_0.str.list.list -> ../../cache/lines/...
+|   |-- extract_targets
+|   |   |-- 6c9339dcf6_0.str.list -> ../../cache/lines/...
+|   |   `-- 6c9339dcf6_0.str.list.tmp.err
+|   |-- extract_targets_each
+|   |   `-- 8ba7e4549c_0.str.list.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 6c6a9691dc_0.str.list.list.list -> ../../cache/lines/...
+|   |   |-- 74bdb5895f_0.fna.list -> ../../cache/lines/...
+|   |   |-- 840db12a12_0.bht.list -> ../../cache/lines/...
+|   |   |-- c4e09c8d55_0.str.list.list -> ../../cache/lines/...
+|   |   `-- edbdd2d772_0.bht.list -> ../../cache/lines/...
+|   |-- load_fna
+|   |   `-- 6d5bdf115f_0.fna -> ../../cache/load/6046a54e92.fna
+|   |-- makeblastdb_nucl
+|   |   `-- 23275696ff_0.ndb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835_0.num -> ../../cache/lines/...
+|   |-- reciprocal_best
+|   |   |-- dc496cc314_aec534a34b_0.bht
+|   |   `-- dc496cc314_dc496cc314_0.bht
+>>>>>>> update tests
 |   `-- str
 |       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- fwd.bht -> ../exprs/blastn_db/46e62edec1_a3fc746119_7a72cf915f_0.bht
     |-- lists.str.list.list -> ../exprs/any/d21c87b7dd_0.str.list.list
     |-- maga.fna -> ../exprs/load_fna/c64e4d283b_0.fna
@@ -73,5 +125,19 @@
     |-- result -> ../exprs/diff/f749aeedcc_0.str.list
     |-- rev1.bht -> ../exprs/blastn_db/46e62edec1_a3fc746119_7a72cf915f_0.bht
     `-- rev2.bht -> ../exprs/blastn_db/46e62edec1_a3fc746119_7a72cf915f_0.bht
+=======
+    |-- fwd.bht -> ../exprs/blastn_db/b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht
+    |-- lists.str.list.list -> ../exprs/any/6523da279b_0.str.list.list
+    |-- maga.fna -> ../exprs/load_fna/6d5bdf115f_0.fna
+    |-- mgen.fna -> ../exprs/load_fna/6d5bdf115f_0.fna
+    |-- n.num -> ../exprs/num/a53b190835_0.num
+    |-- rbh1.bht -> ../exprs/reciprocal_best/dc496cc314_dc496cc314_0.bht
+    |-- rbh2.bht -> ../exprs/reciprocal_best/dc496cc314_aec534a34b_0.bht
+    |-- rbh3.bht -> ../exprs/reciprocal_best/dc496cc314_aec534a34b_0.bht
+    |-- rbh4.bht -> ../exprs/reciprocal_best/dc496cc314_aec534a34b_0.bht
+    |-- result -> ../exprs/diff/05a092d4b6_0.str.list
+    |-- rev1.bht -> ../exprs/blastn_db/b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht
+    `-- rev2.bht -> ../exprs/blastn_db/b79e5160cb_1fc4c5ac4e_0d82b951e4_0.bht
+>>>>>>> update tests
 
 23 directories, 51 files

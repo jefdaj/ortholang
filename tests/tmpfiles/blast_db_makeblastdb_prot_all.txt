@@ -14,19 +14,33 @@
 |           `-- 8948446e38.pdb.psq
 |-- exprs
 |   |-- list
-|   |   `-- 0e7696392c_0.faa.list -> ../../cache/lines/...
+|   |   `-- cb392f00cd_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
+<<<<<<< HEAD
 |   |   |-- 37261f1f62_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |   `-- e47e096fcc_0.faa -> ../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_prot_all
 |   |   `-- 8201bf0297_0.pdb -> ../../cache/lines/...
+=======
+|   |   |-- 4a8c45699f_0.faa -> ../../cache/load/28e059b2a9.faa
+|   |   `-- dd27a28c2a_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |-- makeblastdb_prot_all
+|   |   `-- 494beaeab4_0.pdb -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       |-- 1e020faf26_0.str -> ../../cache/lines/...
 |       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- db.pdb -> ../exprs/makeblastdb_prot_all/8201bf0297_0.pdb
     |-- genes5.faa -> ../exprs/load_faa/37261f1f62_0.faa
     |-- result -> ../vars/db.pdb
     `-- single.faa -> ../exprs/load_faa/e47e096fcc_0.faa
+=======
+    |-- db.pdb -> ../exprs/makeblastdb_prot_all/494beaeab4_0.pdb
+    |-- genes5.faa -> ../exprs/load_faa/dd27a28c2a_0.faa
+    |-- result -> ../vars/db.pdb
+    `-- single.faa -> ../exprs/load_faa/4a8c45699f_0.faa
+>>>>>>> update tests
 
 10 directories, 19 files

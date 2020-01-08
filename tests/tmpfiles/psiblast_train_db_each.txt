@@ -21,6 +21,7 @@
 |   |       |-- d77632b774.pdb.pin
 |   |       `-- d77632b774.pdb.psq
 |   |-- map
+<<<<<<< HEAD
 |   |   |-- 2cbdf61626.pssm -> ../../cache/lines/...
 |   |   |-- 2cbdf61626.pssm.tmp.err
 |   |   |-- 2cbdf61626.pssm.tmp.out
@@ -44,15 +45,47 @@
 |   |   `-- c23938f494_0.num -> ../../cache/lines/...
 |   |-- psiblast_train_db_each
 |   |   `-- 23b48ffb3d_085675fe4b_1e5b5a355e_0.pssm.list -> ../../cache/lines/...
+=======
+|   |   |-- 88cf6fcad1.pssm -> ../../cache/lines/...
+|   |   |-- 88cf6fcad1.pssm.tmp.err
+|   |   |-- 88cf6fcad1.pssm.tmp.out
+|   |   |-- 9afcd11d71.pssm -> ../../cache/lines/...
+|   |   |-- 9afcd11d71.pssm.tmp.err
+|   |   `-- 9afcd11d71.pssm.tmp.out
+|   `-- psiblast
+|-- exprs
+|   |-- list
+|   |   |-- 1349540bd5_0.faa.list -> ../../cache/lines/...
+|   |   |-- 70f419cfc0_0.faa.list -> ../../cache/lines/...
+|   |   `-- caddf507ae_0.pdb.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 4a8c45699f_0.faa -> ../../cache/load/28e059b2a9.faa
+|   |   |-- 6af4625356_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 70c0ec78dc_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |-- makeblastdb_prot
+|   |   |-- 5a49a0d8ca_0.pdb -> ../../cache/lines/...
+|   |   `-- 95737aa356_0.pdb -> ../../cache/lines/...
+|   |-- num
+|   |   `-- c23938f494_0.num -> ../../cache/lines/...
+|   |-- psiblast_train_db_each
+|   |   `-- 1154de2857_58e67d5061_8ace0d0535_0.pssm.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       |-- 1e020faf26_0.str -> ../../cache/lines/...
 |       |-- 40edb92618_0.str -> ../../cache/lines/...
 |       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- magadb.pdb -> ../exprs/makeblastdb_prot/54c0925240_0.pdb
     |-- mgendb.pdb -> ../exprs/makeblastdb_prot/e89296de33_0.pdb
     |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/23b48ffb3d_085675fe4b_1e5b5a355e_0.pssm.list
     |-- query.faa -> ../exprs/load_faa/e47e096fcc_0.faa
+=======
+    |-- magadb.pdb -> ../exprs/makeblastdb_prot/95737aa356_0.pdb
+    |-- mgendb.pdb -> ../exprs/makeblastdb_prot/5a49a0d8ca_0.pdb
+    |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/1154de2857_58e67d5061_8ace0d0535_0.pssm.list
+    |-- query.faa -> ../exprs/load_faa/4a8c45699f_0.faa
+>>>>>>> update tests
     `-- result -> ../vars/pssm.pssm.list
 
 15 directories, 40 files

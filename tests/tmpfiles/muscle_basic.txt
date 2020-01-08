@@ -13,9 +13,10 @@
 |   |       |-- d77632b774.pdb.pin
 |   |       `-- d77632b774.pdb.psq
 |   `-- seqio
-|       `-- 83143c0e8d.txt -> ../../cache/lines/...
+|       `-- ad490b76b8.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- blastp_db
+<<<<<<< HEAD
 |   |   |-- 2c8d2dc6de_085675fe4b_3b3f845657_0.bht -> ../../exprs/blastp_db/2c8d2dc6de_085675fe4b_3b3f845657_0.bht.out
 |   |   |-- 2c8d2dc6de_085675fe4b_3b3f845657_0.bht.out
 |   |   `-- 2c8d2dc6de_085675fe4b_3b3f845657_0.bht.out.err
@@ -24,9 +25,20 @@
 |   |-- extract_targets
 |   |   |-- fd29f8c7c5_0.str.list -> ../../cache/lines/...
 |   |   `-- fd29f8c7c5_0.str.list.tmp.err
+=======
+|   |   |-- 79c21d433f_58e67d5061_cc042296fb_0.bht -> ../../exprs/blastp_db/79c21d433f_58e67d5061_cc042296fb_0.bht.out
+|   |   |-- 79c21d433f_58e67d5061_cc042296fb_0.bht.out
+|   |   `-- 79c21d433f_58e67d5061_cc042296fb_0.bht.out.err
+|   |-- extract_seqs
+|   |   `-- 54ff0da579_aca41108e0_0.faa
+|   |-- extract_targets
+|   |   |-- 95829b3f2a_0.str.list -> ../../cache/lines/...
+|   |   `-- 95829b3f2a_0.str.list.tmp.err
+>>>>>>> update tests
 |   |-- list
-|   |   `-- 66644cae34_0.faa.list -> ../../cache/lines/...
+|   |   `-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
+<<<<<<< HEAD
 |   |   |-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
 |   |   `-- e47e096fcc_0.faa -> ../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_prot
@@ -35,17 +47,35 @@
 |   |   |-- e746caef0b_0.aln
 |   |   |-- e746caef0b_0.aln.err
 |   |   `-- e746caef0b_0.aln.out
+=======
+|   |   |-- 4a8c45699f_0.faa -> ../../cache/load/28e059b2a9.faa
+|   |   `-- 6af4625356_0.faa -> ../../cache/load/36189032ad.faa
+|   |-- makeblastdb_prot
+|   |   `-- 95737aa356_0.pdb -> ../../cache/lines/...
+|   |-- muscle
+|   |   |-- b957e8e242_0.aln
+|   |   |-- b957e8e242_0.aln.err
+|   |   `-- b957e8e242_0.aln.out
+>>>>>>> update tests
 |   |-- num
 |   |   `-- efc8362dcc_0.num -> ../../cache/lines/...
 |   `-- str
 |       |-- 1e020faf26_0.str -> ../../cache/lines/...
 |       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- hits.bht -> ../exprs/blastp_db/2c8d2dc6de_085675fe4b_3b3f845657_0.bht
     |-- hits_aln.aln -> ../exprs/muscle/e746caef0b_0.aln
     |-- hits_faa.faa -> ../exprs/extract_seqs/7293551cfa_84a3369bce_0.faa
     |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
     |-- mgen.faa -> ../exprs/load_faa/e47e096fcc_0.faa
+=======
+    |-- hits_aln.aln -> ../exprs/muscle/b957e8e242_0.aln
+    |-- hits.bht -> ../exprs/blastp_db/79c21d433f_58e67d5061_cc042296fb_0.bht
+    |-- hits_faa.faa -> ../exprs/extract_seqs/54ff0da579_aca41108e0_0.faa
+    |-- maga.faa -> ../exprs/load_faa/6af4625356_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/4a8c45699f_0.faa
+>>>>>>> update tests
     `-- result -> ../vars/hits_aln.aln
 
 16 directories, 32 files

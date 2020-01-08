@@ -5,18 +5,33 @@
 |       `-- 9c67ed8020.list -> $WORKDIR/examples/genome-lists/proteomes-small.txt
 |-- exprs
 |   |-- any
+<<<<<<< HEAD
 |   |   `-- b61399344a_0.str.list -> ../../cache/lines/...
+=======
+|   |   `-- b98e1aed32_0.str.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   |-- list
-|   |   `-- db728c3c80_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 3288eebb1b_0.str.list.list -> ../../cache/lines/...
 |   |-- load_list
+<<<<<<< HEAD
 |   |   |-- 46bb8dea00_0.str.list -> ../../cache/load/1dd6f75231.list
 |   |   `-- 99586a104e_0.str.list -> ../../cache/load/9c67ed8020.list
+=======
+|   |   |-- 1daca2b8ae_0.str.list -> ../../cache/load/3f8ba64ec1.list
+|   |   `-- 9345d1c83f_0.str.list -> ../../cache/load/6796447fab.list
+>>>>>>> update tests
 |   `-- str
 |       |-- 52221f8e2b_0.str -> ../../cache/lines/...
 |       `-- 92ffe42ab6_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- refseq.str.list -> ../exprs/load_list/46bb8dea00_0.str.list
     |-- result -> ../exprs/any/b61399344a_0.str.list
     `-- small.str.list -> ../exprs/load_list/99586a104e_0.str.list
+=======
+    |-- refseq.str.list -> ../exprs/load_list/9345d1c83f_0.str.list
+    |-- result -> ../exprs/any/b98e1aed32_0.str.list
+    `-- small.str.list -> ../exprs/load_list/1daca2b8ae_0.str.list
+>>>>>>> update tests
 
 8 directories, 11 files

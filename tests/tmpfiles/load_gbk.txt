@@ -4,6 +4,7 @@
 |       `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |-- exprs
 |   |-- any
+<<<<<<< HEAD
 |   |   `-- 5f22bb5adf_0.gbk.list -> ../../cache/lines/...
 |   |-- list
 |   |   |-- 0f88494317_0.gbk.list -> ../../cache/lines/...
@@ -12,11 +13,27 @@
 |   |   `-- e89ae938b2_0.gbk.list -> ../../cache/lines/...
 |   |-- load_gbk
 |   |   `-- 7c96d918c8_0.gbk -> ../../cache/load/28ce925871.gbk
+=======
+|   |   `-- 7ccc7c8e64_0.gbk.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 0095fbda16_0.gbk.list -> ../../cache/lines/...
+|   |   |-- 3861448a43_0.gbk.list -> ../../cache/lines/...
+|   |   |-- e63d045b93_0.str.list -> ../../cache/lines/...
+|   |   `-- f554b96663_0.gbk.list.list -> ../../cache/lines/...
+|   |-- load_gbk
+|   |   `-- f03a2c0db2_0.gbk -> ../../cache/load/28ce925871.gbk
+>>>>>>> update tests
 |   `-- str
 |       `-- ee108e12fa_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- mapped.gbk.list -> ../exprs/list/e89ae938b2_0.gbk.list
     |-- result -> ../exprs/any/5f22bb5adf_0.gbk.list
     `-- single.gbk -> ../exprs/load_gbk/7c96d918c8_0.gbk
+=======
+    |-- mapped.gbk.list -> ../exprs/list/3861448a43_0.gbk.list
+    |-- result -> ../exprs/any/7ccc7c8e64_0.gbk.list
+    `-- single.gbk -> ../exprs/load_gbk/f03a2c0db2_0.gbk
+>>>>>>> update tests
 
 8 directories, 11 files

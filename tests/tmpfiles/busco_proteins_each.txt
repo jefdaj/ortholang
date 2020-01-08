@@ -482,8 +482,8 @@
 |   |   |               |   `-- POG090A039N.prfl
 |   |   |               `-- scores_cutoff
 |   |   `-- runs
-|   |       |-- run_28658fa152_06b3e4476b_0.bsr
-|   |       |   |-- full_table_28658fa152_06b3e4476b_0.bsr.tsv
+|   |       |-- run_895dd19de5_597248ff77_0.bsr
+|   |       |   |-- full_table_895dd19de5_597248ff77_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG090A000X.out.1
 |   |       |   |   |-- POG090A000Y.out.1
@@ -717,11 +717,11 @@
 |   |       |   |   |-- POG090A031D.out.1
 |   |       |   |   |-- POG090A0386.out.1
 |   |       |   |   `-- POG090A039N.out.1
-|   |       |   |-- missing_busco_list_28658fa152_06b3e4476b_0.bsr.tsv
-|   |       |   `-- short_summary_28658fa152_06b3e4476b_0.bsr.txt
-|   |       |-- run_28658fa152_06b3e4476b_0.bsr.ini
-|   |       |-- run_28658fa152_e66755a6ce_0.bsr
-|   |       |   |-- full_table_28658fa152_e66755a6ce_0.bsr.tsv
+|   |       |   |-- missing_busco_list_895dd19de5_597248ff77_0.bsr.tsv
+|   |       |   `-- short_summary_895dd19de5_597248ff77_0.bsr.txt
+|   |       |-- run_895dd19de5_597248ff77_0.bsr.ini
+|   |       |-- run_895dd19de5_dccba5f86e_0.bsr
+|   |       |   |-- full_table_895dd19de5_dccba5f86e_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG090A000X.out.1
 |   |       |   |   |-- POG090A000Y.out.1
@@ -955,17 +955,25 @@
 |   |       |   |   |-- POG090A031D.out.1
 |   |       |   |   |-- POG090A0386.out.1
 |   |       |   |   `-- POG090A039N.out.1
-|   |       |   |-- missing_busco_list_28658fa152_e66755a6ce_0.bsr.tsv
-|   |       |   `-- short_summary_28658fa152_e66755a6ce_0.bsr.txt
-|   |       `-- run_28658fa152_e66755a6ce_0.bsr.ini
+|   |       |   |-- missing_busco_list_895dd19de5_dccba5f86e_0.bsr.tsv
+|   |       |   `-- short_summary_895dd19de5_dccba5f86e_0.bsr.txt
+|   |       `-- run_895dd19de5_dccba5f86e_0.bsr.ini
 |   |-- curl
 |   |   `-- bd265ecf24
 |   |-- each
+<<<<<<< HEAD
 |   |   `-- e73b5bd879
 |   |       |-- 06b3e4476b.bsr -> ../../../exprs/busco_proteins/28658fa152_06b3e4476b_0.bsr
 |   |       |-- 06b3e4476b.bsr.args -> ../../../cache/lines/...
 |   |       |-- e66755a6ce.bsr -> ../../../exprs/busco_proteins/28658fa152_e66755a6ce_0.bsr
 |   |       `-- e66755a6ce.bsr.args -> ../../../cache/lines/...
+=======
+|   |   `-- 0888e59c61
+|   |       |-- 597248ff77.bsr -> ../../../exprs/busco_proteins/895dd19de5_597248ff77_0.bsr
+|   |       |-- 597248ff77.bsr.args -> ../../../cache/lines/...
+|   |       |-- dccba5f86e.bsr -> ../../../exprs/busco_proteins/895dd19de5_dccba5f86e_0.bsr
+|   |       `-- dccba5f86e.bsr.args -> ../../../cache/lines/...
+>>>>>>> update tests
 |   `-- load
 |       |-- 0d8dfa261e.faa
 |       |-- 0d8dfa261e.faa.ids
@@ -973,29 +981,45 @@
 |       `-- 11bbf54fc6.faa.ids
 |-- exprs
 |   |-- busco_fetch_lineage
-|   |   `-- 5ea47da7d6_0.blh -> ../../cache/busco/lineages/v2/datasets/firmicutes_odb9/dataset.cfg
+|   |   `-- 8739e5c86b_0.blh -> ../../cache/busco/lineages/v2/datasets/firmicutes_odb9/dataset.cfg
 |   |-- busco_proteins
-|   |   |-- 28658fa152_06b3e4476b_0.bsr -> ../../cache/busco/runs/run_28658fa152_06b3e4476b_0.bsr/short_summary_28658fa152_06b3e4476b_0.bsr.txt
-|   |   |-- 28658fa152_06b3e4476b_0.bsr.err
-|   |   |-- 28658fa152_06b3e4476b_0.bsr.out
-|   |   |-- 28658fa152_e66755a6ce_0.bsr -> ../../cache/busco/runs/run_28658fa152_e66755a6ce_0.bsr/short_summary_28658fa152_e66755a6ce_0.bsr.txt
-|   |   |-- 28658fa152_e66755a6ce_0.bsr.err
-|   |   `-- 28658fa152_e66755a6ce_0.bsr.out
+|   |   |-- 895dd19de5_597248ff77_0.bsr -> ../../cache/busco/runs/run_895dd19de5_597248ff77_0.bsr/short_summary_895dd19de5_597248ff77_0.bsr.txt
+|   |   |-- 895dd19de5_597248ff77_0.bsr.err
+|   |   |-- 895dd19de5_597248ff77_0.bsr.out
+|   |   |-- 895dd19de5_dccba5f86e_0.bsr -> ../../cache/busco/runs/run_895dd19de5_dccba5f86e_0.bsr/short_summary_895dd19de5_dccba5f86e_0.bsr.txt
+|   |   |-- 895dd19de5_dccba5f86e_0.bsr.err
+|   |   `-- 895dd19de5_dccba5f86e_0.bsr.out
 |   |-- busco_proteins_each
+<<<<<<< HEAD
 |   |   `-- 87f9deefcd_2d401fa755_0.bsr.list -> ../../cache/lines/...
+=======
+|   |   `-- ce7af60eaa_b58c690ac7_0.bsr.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   |-- list
-|   |   `-- 5c35b1f40d_0.faa.list -> ../../cache/lines/...
+|   |   `-- def8d20b32_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
+<<<<<<< HEAD
 |   |   |-- 229f13222e_0.faa -> ../../cache/load/11bbf54fc6.faa
 |   |   `-- 246e11f77b_0.faa -> ../../cache/load/0d8dfa261e.faa
+=======
+|   |   |-- 18f03ea97d_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |   `-- 4edc591e37_0.faa -> ../../cache/load/0d8dfa261e.faa
+>>>>>>> update tests
 |   `-- str
 |       |-- 405d2aacea_0.str -> ../../cache/lines/...
 |       |-- c58447896b_0.str -> ../../cache/lines/...
 |       `-- f6e8c8ce02_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- maga.faa -> ../exprs/load_faa/246e11f77b_0.faa
     |-- mgen.faa -> ../exprs/load_faa/229f13222e_0.faa
     |-- odb9_firmicutes.blh -> ../exprs/busco_fetch_lineage/5ea47da7d6_0.blh
     `-- result -> ../exprs/busco_proteins_each/87f9deefcd_2d401fa755_0.bsr.list
+=======
+    |-- maga.faa -> ../exprs/load_faa/4edc591e37_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/18f03ea97d_0.faa
+    |-- odb9_firmicutes.blh -> ../exprs/busco_fetch_lineage/8739e5c86b_0.blh
+    `-- result -> ../exprs/busco_proteins_each/ce7af60eaa_b58c690ac7_0.bsr.list
+>>>>>>> update tests
 
 26 directories, 972 files

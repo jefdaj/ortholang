@@ -2,10 +2,18 @@
 |-- cache
 |-- exprs
 |   |-- glob_files
+<<<<<<< HEAD
 |   |   `-- bf23146466_0.str.list -> ../../cache/lines/...
+=======
+|   |   `-- 594643cde4_0.str.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       `-- f78ef4ca97_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     `-- result -> ../exprs/glob_files/bf23146466_0.str.list
+=======
+    `-- result -> ../exprs/glob_files/594643cde4_0.str.list
+>>>>>>> update tests
 
 5 directories, 3 files

@@ -1,7 +1,11 @@
 .
 |-- cache
 |   |-- concat
+<<<<<<< HEAD
 |   |   |-- 4e3b0930d4.txt -> ../../cache/lines/...
+=======
+|   |   |-- c33c7a352b.txt -> ../../cache/lines/...
+>>>>>>> update tests
 |   |   `-- emptyfna.txt -> ../../cache/lines/...
 |   |-- load
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -9,6 +13,7 @@
 |   `-- seqio
 |-- exprs
 |   |-- concat_fna
+<<<<<<< HEAD
 |   |   `-- 3642f3d2c7_0.fna
 |   |-- gbk_to_fna
 |   |   |-- 262cf7e4e4_b34481f398_0.fna
@@ -19,11 +24,27 @@
 |   |-- load_gbk
 |   |   |-- 7c96d918c8_0.gbk -> ../../cache/load/28ce925871.gbk
 |   |   `-- fa6fcd5915_0.gbk -> ../../cache/load/97d2ef290c.gbk
+=======
+|   |   `-- a82757e326_0.fna
+|   |-- gbk_to_fna
+|   |   |-- acb4ee1de2_568b977ff2_0.fna
+|   |   `-- acb4ee1de2_bc4e9110c6_0.fna
+|   |-- list
+|   |   `-- 98344b2a90_0.fna.list -> ../../cache/lines/...
+|   |-- load_fna
+|   |-- load_gbk
+|   |   |-- 8344a68a03_0.gbk -> ../../cache/load/97d2ef290c.gbk
+|   |   `-- f03a2c0db2_0.gbk -> ../../cache/load/28ce925871.gbk
+>>>>>>> update tests
 |   `-- str
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
 |       |-- ee108e12fa_0.str -> ../../cache/lines/...
 |       `-- fc0141ab13_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     `-- result -> ../exprs/concat_fna/3642f3d2c7_0.fna
+=======
+    `-- result -> ../exprs/concat_fna/a82757e326_0.fna
+>>>>>>> update tests
 
 12 directories, 14 files

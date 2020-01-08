@@ -14,19 +14,33 @@
 |           `-- ea1568d48b.ndb.out
 |-- exprs
 |   |-- list
-|   |   `-- dbe42d6056_0.fna.list -> ../../cache/lines/...
+|   |   `-- fb2c20f954_0.fna.list -> ../../cache/lines/...
 |   |-- load_fna
+<<<<<<< HEAD
 |   |   |-- 2fbf169736_0.fna -> ../../cache/load/8723e7ac8c.fna
 |   |   `-- c64e4d283b_0.fna -> ../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_nucl_all
 |   |   `-- 261f4a9aae_0.ndb -> ../../cache/lines/...
+=======
+|   |   |-- 6d5bdf115f_0.fna -> ../../cache/load/6046a54e92.fna
+|   |   `-- 8eef8cbc6c_0.fna -> ../../cache/load/8723e7ac8c.fna
+|   |-- makeblastdb_nucl_all
+|   |   `-- af8e3176e8_0.ndb -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       |-- 0ecd3e7ed5_0.str -> ../../cache/lines/...
 |       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- db.ndb -> ../exprs/makeblastdb_nucl_all/261f4a9aae_0.ndb
     |-- genes5.fna -> ../exprs/load_fna/c64e4d283b_0.fna
     |-- result -> ../vars/db.ndb
     `-- single.fna -> ../exprs/load_fna/2fbf169736_0.fna
+=======
+    |-- db.ndb -> ../exprs/makeblastdb_nucl_all/af8e3176e8_0.ndb
+    |-- genes5.fna -> ../exprs/load_fna/6d5bdf115f_0.fna
+    |-- result -> ../vars/db.ndb
+    `-- single.fna -> ../exprs/load_fna/8eef8cbc6c_0.fna
+>>>>>>> update tests
 
 10 directories, 19 files

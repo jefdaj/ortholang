@@ -1,6 +1,7 @@
 .
 |-- cache
 |   |-- each
+<<<<<<< HEAD
 |   |   |-- 33d00e7efc
 |   |   |   |-- e9da0fa7fc.ndb -> ../../../exprs/makeblastdb_nucl/e9da0fa7fc_0.ndb
 |   |   |   `-- e9da0fa7fc.ndb.args -> ../../../cache/lines/...
@@ -10,10 +11,22 @@
 |   |   `-- d0705037b3
 |   |       |-- ef7a0f8286.bht -> ../../../exprs/blastn/ce1c174684_8d5f2ea1b8_ef7a0f8286_0.bht
 |   |       `-- ef7a0f8286.bht.args -> ../../../cache/lines/...
+=======
+|   |   |-- 20c9c83807
+|   |   |   |-- 9fb9be0080.bht -> ../../../exprs/blastn/62056882ce_54135eadc8_9fb9be0080_0.bht
+|   |   |   `-- 9fb9be0080.bht.args -> ../../../cache/lines/...
+|   |   |-- 8bf28964c4
+|   |   |   |-- df5c450820.str.list -> ../../../exprs/extract_queries/df5c450820_0.str.list
+|   |   |   `-- df5c450820.str.list.args -> ../../../cache/lines/...
+|   |   `-- d91242f060
+|   |       |-- daee6b65d5.ndb -> ../../../exprs/makeblastdb_nucl/daee6b65d5_0.ndb
+|   |       `-- daee6b65d5.ndb.args -> ../../../cache/lines/...
+>>>>>>> update tests
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |-- makeblastdb
+<<<<<<< HEAD
 |   |   `-- 6a0a80044e
 |   |       |-- 6a0a80044e.ndb.err
 |   |       |-- 6a0a80044e.ndb.nhr
@@ -44,12 +57,45 @@
 |   |-- gbk_to_fna
 |   |   |-- 262cf7e4e4_34555a2b1c_0.fna
 |   |   `-- 262cf7e4e4_b8e1167f5f_0.fna
+=======
+|   |   `-- 141ee45b0e
+|   |       |-- 141ee45b0e.ndb.err
+|   |       |-- 141ee45b0e.ndb.nhr
+|   |       |-- 141ee45b0e.ndb.nin
+|   |       |-- 141ee45b0e.ndb.nsq
+|   |       `-- 141ee45b0e.ndb.out
+|   `-- seqio
+|-- exprs
+|   |-- any
+|   |   `-- 29aed3ce98_0.str.list.list -> ../../cache/lines/...
+|   |-- blastn
+|   |   |-- 62056882ce_54135eadc8_9fb9be0080_0.bht -> ../../exprs/blastn/62056882ce_54135eadc8_9fb9be0080_0.bht.out
+|   |   |-- 62056882ce_54135eadc8_9fb9be0080_0.bht.out
+|   |   `-- 62056882ce_54135eadc8_9fb9be0080_0.bht.out.err
+|   |-- blastn_db
+|   |   |-- b79e5160cb_54135eadc8_9c8a3698dd_0.bht -> ../../exprs/blastn_db/b79e5160cb_54135eadc8_9c8a3698dd_0.bht.out
+|   |   |-- b79e5160cb_54135eadc8_9c8a3698dd_0.bht.out
+|   |   `-- b79e5160cb_54135eadc8_9c8a3698dd_0.bht.out.err
+|   |-- blastn_each
+|   |   `-- b79e5160cb_54135eadc8_b77e848b2c_0.bht.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 7ceac8ee50_0.str.list -> ../../cache/lines/...
+|   |   |-- 7ceac8ee50_0.str.list.tmp.err
+|   |   |-- df5c450820_0.str.list -> ../../cache/lines/...
+|   |   `-- df5c450820_0.str.list.tmp.err
+|   |-- extract_queries_each
+|   |   `-- 6ed8516160_0.str.list.list -> ../../cache/lines/...
+|   |-- gbk_to_fna
+|   |   |-- acb4ee1de2_3a204144dc_0.fna
+|   |   `-- acb4ee1de2_bc4e9110c6_0.fna
+>>>>>>> update tests
 |   |-- list
-|   |   |-- 3bbbf950a3_0.str.list.list -> ../../cache/lines/...
-|   |   |-- 65127d0127_0.fna.list -> ../../cache/lines/...
-|   |   `-- df91bd4d94_0.str.list.list.list -> ../../cache/lines/...
+|   |   |-- 4e18530e48_0.fna.list -> ../../cache/lines/...
+|   |   |-- 6514e5f791_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 7c54f3bb14_0.str.list.list.list -> ../../cache/lines/...
 |   |-- load_fna
 |   |-- load_gbk
+<<<<<<< HEAD
 |   |   |-- 7c96d918c8_0.gbk -> ../../cache/load/28ce925871.gbk
 |   |   `-- 93db3bf975_0.gbk -> ../../cache/load/1e7afd22cf.gbk
 |   |-- makeblastdb_nucl
@@ -61,15 +107,36 @@
 |   |   `-- a53b190835_0.num -> ../../cache/lines/...
 |   |-- singletons
 |   |   `-- 7a171511eb_0.fna.list.list -> ../../cache/lines/...
+=======
+|   |   |-- 316d221949_0.gbk -> ../../cache/load/1e7afd22cf.gbk
+|   |   `-- f03a2c0db2_0.gbk -> ../../cache/load/28ce925871.gbk
+|   |-- makeblastdb_nucl
+|   |   |-- 0e64610064_0.ndb -> ../../cache/lines/...
+|   |   `-- daee6b65d5_0.ndb -> ../../cache/lines/...
+|   |-- makeblastdb_nucl_each
+|   |   `-- 7f106976a3_0.ndb.list -> ../../cache/lines/...
+|   |-- num
+|   |   `-- a53b190835_0.num -> ../../cache/lines/...
+|   |-- singletons
+|   |   `-- 0e64610064_0.fna.list.list -> ../../cache/lines/...
+>>>>>>> update tests
 |   `-- str
 |       |-- 638026de12_0.str -> ../../cache/lines/...
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
 |       `-- ee108e12fa_0.str -> ../../cache/lines/...
 `-- vars
+<<<<<<< HEAD
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/d9f710a60d_0.str.list.list
     |-- mbov.fna -> ../exprs/gbk_to_fna/262cf7e4e4_34555a2b1c_0.fna
     |-- mgen.fna -> ../exprs/gbk_to_fna/262cf7e4e4_b8e1167f5f_0.fna
     |-- result -> ../exprs/any/71c149fe08_0.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/6d20af7178_0.str.list
+=======
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/6ed8516160_0.str.list.list
+    |-- mbov.fna -> ../exprs/gbk_to_fna/acb4ee1de2_3a204144dc_0.fna
+    |-- mgen.fna -> ../exprs/gbk_to_fna/acb4ee1de2_bc4e9110c6_0.fna
+    |-- result -> ../exprs/any/29aed3ce98_0.str.list.list
+    `-- single.str.list -> ../exprs/extract_queries/7ceac8ee50_0.str.list
+>>>>>>> update tests
 
 26 directories, 46 files
