@@ -1,13 +1,13 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ "stuff"
+ortholang —▶ "stuff"
 "stuff"
 
-shortcut —▶ ["more", "stuff"]
+ortholang —▶ ["more", "stuff"]
 ["more", "stuff"]
 
-shortcut —▶ ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
+ortholang —▶ ["what", "about", "a", "large", "number", "of", "short", "strings?", "will", "they", "be", "distributed", "over", "several", "lines?"]
 ["what",
  "about",
  "a",
@@ -24,12 +24,12 @@ shortcut —▶ ["what", "about", "a", "large", "number", "of", "short", "string
  "several",
  "lines?"]
 
-shortcut —▶ ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
+ortholang —▶ ["one", "two", "three", "and now some longer ones", "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
 ["one",
  "two",
  "three",
  "and now some longer ones",
  "like, reallllllllllllllllllllllllllllllllllllllllly looooooooooooooooooooooooooooooooooong ones"]
 
-shortcut —▶ :q
+ortholang —▶ :q
 Bye for now!

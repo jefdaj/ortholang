@@ -91,62 +91,62 @@ in rec {
     futile_logger
   ];};
 
-  shortcut-biomartr      = mkModule ./ShortCut/Modules/BioMartR      [ myR ] "";
-  shortcut-blasthits     = mkModule ./ShortCut/Modules/BlastHits     [ myR ] "";
-  shortcut-blastrbh      = mkModule ./ShortCut/Modules/BlastRBH      [ myR ] "";
-  shortcut-plots         = mkModule ./ShortCut/Modules/Plots         [ myR ] "";
-  shortcut-setstable     = mkModule ./ShortCut/Modules/SetsTable     [ myR ] "";
-  shortcut-range         = mkModule ./ShortCut/Modules/Range         [ myR ] "";
-  shortcut-blast         = mkModule ./ShortCut/Modules/Blast         [ myBlast ] "";
-  shortcut-blastdb       = mkModule ./ShortCut/Modules/BlastDB       [ myBlast blastdbget ] "";
-  shortcut-crbblast      = mkModule ./ShortCut/Modules/CRBBlast      [ crb-blast ] "";
-  shortcut-diamond       = mkModule ./ShortCut/Modules/Diamond       [ diamond ] "";
-  shortcut-hmmer         = mkModule ./ShortCut/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
-  shortcut-mmseqs        = mkModule ./ShortCut/Modules/MMSeqs        [ mmseqs2 ] "";
-  shortcut-muscle        = mkModule ./ShortCut/Modules/Muscle        [ muscle ] "";
-  shortcut-psiblast      = mkModule ./ShortCut/Modules/PsiBlast      [ myBlast ] "";
+  ortholang-biomartr      = mkModule ./OrthoLang/Modules/BioMartR      [ myR ] "";
+  ortholang-blasthits     = mkModule ./OrthoLang/Modules/BlastHits     [ myR ] "";
+  ortholang-blastrbh      = mkModule ./OrthoLang/Modules/BlastRBH      [ myR ] "";
+  ortholang-plots         = mkModule ./OrthoLang/Modules/Plots         [ myR ] "";
+  ortholang-setstable     = mkModule ./OrthoLang/Modules/SetsTable     [ myR ] "";
+  ortholang-range         = mkModule ./OrthoLang/Modules/Range         [ myR ] "";
+  ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast ] "";
+  ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast blastdbget ] "";
+  ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
+  ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
+  ortholang-hmmer         = mkModule ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
+  ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
+  ortholang-muscle        = mkModule ./OrthoLang/Modules/Muscle        [ muscle ] "";
+  ortholang-psiblast      = mkModule ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
 
   # TODO should the wrap not be necessary?
-  shortcut-seqio         = mkModule ./ShortCut/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
-  shortcut-orthofinder   = mkModule ./ShortCut/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
-  shortcut-sonicparanoid = mkModule ./ShortCut/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
+  ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
+  ortholang-orthofinder   = mkModule ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  ortholang-sonicparanoid = mkModule ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
-  shortcut-treecl        = mkModule ./ShortCut/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
-  # shortcut-justorthologs = mkModule ./ShortCut/Modules/JustOrthologs [ justorthologs ] "";
+  ortholang-treecl        = mkModule ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
+  # ortholang-justorthologs = mkModule ./OrthoLang/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
-  shortcut-busco = mkModule ./ShortCut/Modules/Busco
+  ortholang-busco = mkModule ./OrthoLang/Modules/Busco
                      [ myBlast hmmer busco python36 which tarWithGzip ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
-  shortcut-load          = mkModule ./ShortCut/Modules/Load          [ curl ] "";
-  shortcut-orthogroups   = mkModule ./ShortCut/Modules/OrthoGroups   [ python36 ] "";
-  shortcut-greencut      = mkModule ./ShortCut/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
+  ortholang-load          = mkModule ./OrthoLang/Modules/Load          [ curl ] "";
+  ortholang-orthogroups   = mkModule ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
+  ortholang-greencut      = mkModule ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   modules = [
-    shortcut-biomartr
-    shortcut-blast
-    shortcut-blastdb
-    shortcut-blasthits
-    shortcut-blastrbh
-    shortcut-crbblast
-    shortcut-diamond
-    shortcut-hmmer
-    shortcut-mmseqs
-    shortcut-muscle
-    shortcut-orthofinder
-    shortcut-plots
-    shortcut-setstable
-    shortcut-psiblast
-    shortcut-seqio
-    # shortcut-sonicparanoid
-    # shortcut-treecl
-    # shortcut-justorthologs
-    shortcut-busco
-    shortcut-load
-    shortcut-range
-    shortcut-orthogroups
-    shortcut-greencut
+    ortholang-biomartr
+    ortholang-blast
+    ortholang-blastdb
+    ortholang-blasthits
+    ortholang-blastrbh
+    ortholang-crbblast
+    ortholang-diamond
+    ortholang-hmmer
+    ortholang-mmseqs
+    ortholang-muscle
+    ortholang-orthofinder
+    ortholang-plots
+    ortholang-setstable
+    ortholang-psiblast
+    ortholang-seqio
+    # ortholang-sonicparanoid
+    # ortholang-treecl
+    # ortholang-justorthologs
+    ortholang-busco
+    ortholang-load
+    ortholang-range
+    ortholang-orthogroups
+    ortholang-greencut
   ];
 
   runDepends = modules ++ myEnv;

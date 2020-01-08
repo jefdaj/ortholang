@@ -1,7 +1,7 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ glob_files "data/*.faa"
+ortholang —▶ glob_files "data/*.faa"
 ["data/Mycoplasma_agalactiae_PG2_protein_refseq.faa",
  "data/Mycoplasma_agalactiae_protein_refseq.faa",
  "data/Mycoplasma_agalactiae_small.faa",
@@ -22,11 +22,11 @@ shortcut —▶ glob_files "data/*.faa"
  "data/Mycoplasma_pulmonis_protein_refseq.faa",
  "data/Mycoplasma_synoviae_protein_refseq.faa"]
 
-shortcut —▶ glob_files "data/*7942*"
+ortholang —▶ glob_files "data/*7942*"
 ["data/SynPCC7942_chr.gbk", "data/SynPCC7942_pANL.gbk"]
 
-shortcut —▶ glob_files "data/*.txt"
+ortholang —▶ glob_files "data/*.txt"
 ["data/genomes-genbank.txt", "data/proteomes-mmseqs.txt", "data/proteomes-refseq.txt"]
 
-shortcut —▶ :q
+ortholang —▶ :q
 Bye for now!

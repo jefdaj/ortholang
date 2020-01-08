@@ -1,4 +1,4 @@
-You can type or paste ShortCut code here to run it, same as in a script.
+You can type or paste OrthoLang code here to run it, same as in a script.
 Unlike in a script though, you can also evaluate and redefine variables.
 There are also some extra commands specific to --interactive mode:
 

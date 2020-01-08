@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-# Just a fancy cat with special handling for shortcut's <<emptywhatever>> files
+# Just a fancy cat with special handling for ortholang's <<emptywhatever>> files
 # TODO disable fixEmptyFile for this one probably
 # TODO and need to add fixList
 # Usage: cat.py <outfile> <emptylink> <inlist>
@@ -17,7 +17,7 @@ def cat(infile, wfd):
         copyfileobj(fd, wfd, 1024*1024*10)
 
 # def is_empty(emptylink, filetotest):
-#     # because shortcut deduplicates all the <<empty...>> files,
+#     # because ortholang deduplicates all the <<empty...>> files,
 #     # theoretically we can just test if each thing to concat is the same
 #     # as the example without opening it. any reason that would be unsafe?
 #     return islink(filetotest) and realpath(filetotest) == realpath(emptylink)

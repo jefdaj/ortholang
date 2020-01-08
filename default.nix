@@ -1,7 +1,7 @@
 with import ./nixpkgs;
 let
 
-  # Things needed at runtime. Modules are only the scripts called by shortcut,
+  # Things needed at runtime. Modules are only the scripts called by ortholang,
   # not their indirect (propagated) dependencies since those may conflict.
   # TODO add the ones that don't conflict for easier development?
   inherit (import ./dependencies.nix) runDepends;
@@ -12,7 +12,7 @@ let
     broken = false;
     jailbreak = true;
   });
-  haskellPkg = myGHC.callPackage ./shortcut.nix { inherit logging progress-meter; };
+  haskellPkg = myGHC.callPackage ./ortholang.nix { inherit logging progress-meter; };
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
@@ -21,7 +21,7 @@ let
 
   # see https://github.com/jml/nix-haskell-example
   # TODO final wrapper with +RTS -N -RTS?
-  shortcut = haskell.lib.overrideCabal haskellPkg (drv: {
+  ortholang = haskell.lib.overrideCabal haskellPkg (drv: {
     src = builtins.filterSource noBigDotfiles ./.;
 
     buildDepends = (drv.buildDepends or [])  ++ runDepends ++ [
@@ -31,7 +31,7 @@ let
     # TODO PYTHONPATH?
     postInstall = ''
       ${drv.postInstall or ""}
-      wrapProgram "$out/bin/shortcut" \
+      wrapProgram "$out/bin/ortholang" \
         --set LANG en_US.UTF-8 \
         --set LANGUAGE en_US.UTF-8 \
         --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"'' +
@@ -41,4 +41,4 @@ let
   });
 
 # to work on a specific module, substitute it here and enter nix-shell
-in shortcut
+in ortholang

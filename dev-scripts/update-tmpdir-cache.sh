@@ -3,7 +3,7 @@
 # Caches tmpfiles for the (working) test scripts.
 # TODO separate scripts to download all databases
 
-echo "building shortcut with stack..."
+echo "building ortholang with stack..."
 stack build
 rm -rf tmpdir-cache
 
@@ -12,7 +12,7 @@ for n in {1..3}; do
   echo -n "filling cache (round $n)"
 	# randomize order in case it matters
   ls tests/scripts/*.ol | shuf | while read f; do
-    stack exec shortcut -- --tmpdir tmpdir-cache --script $f &>/dev/null && echo -n "." || echo "\nERROR: $f"
+    stack exec ortholang -- --tmpdir tmpdir-cache --script $f &>/dev/null && echo -n "." || echo "\nERROR: $f"
   done
 	echo
 done

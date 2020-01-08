@@ -1,6 +1,6 @@
 #/usr/bin/env bash
 
-export LOG=shortcut.log
+export LOG=ortholang.log
 
 case "$(uname)" in
   Linux ) export CHANNEL=nixos-19.09 ;;
@@ -14,7 +14,7 @@ onfailure() {
 }
 
 onsuccess() {
-  echo "Success! Try opening a new terminal and running: shortcut"
+  echo "Success! Try opening a new terminal and running: ortholang"
   echo "If you get 'command not found', add this line to your .profile or .bashrc and try again:"
   echo "source $HOME/.nix-profile/etc/profile.d/nix.sh"
 }
@@ -35,7 +35,7 @@ onsuccess() {
   nix-channel --options substituters "" --update >> $LOG 2>&1
   echo " OK"
 
-  # TODO name the cache shortcut?
+  # TODO name the cache ortholang?
   echo -n "Adding the jefdaj Cachix cache..."
   which cachix &> /dev/null
   if [[ $? != 0 ]]; then
@@ -44,13 +44,13 @@ onsuccess() {
   ([[ "$(uname)" == Darwin ]] && sudo cachix use jefdaj || cachix use jefdaj) >> $LOG 2>&1
   echo " OK"
 
-  echo -n "Installing ShortCut from GitHub..."
-  archive='https://github.com/jefdaj/shortcut/files/3934119/shortcut-v0.9.1.tar.gz'
+  echo -n "Installing OrthoLang from GitHub..."
+  archive='https://github.com/jefdaj/ortholang/files/3934119/ortholang-v0.9.1.tar.gz'
   nix-env -i -f $archive >> $LOG 2>&1
   echo " OK"
 
   echo "Testing that everything works..."
-  shortcut --test version
-  shortcut --version
+  ortholang --test version
+  ortholang --version
   echo
 ) && onsuccess || onfailure

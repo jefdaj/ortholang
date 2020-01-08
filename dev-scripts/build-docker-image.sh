@@ -18,9 +18,9 @@ build_docker_image() {
 }
 
 run_docker_image() {
-  latest=$(docker images | grep shortcut | head -n1 | awk '{print $2}')
+  latest=$(docker images | grep ortholang | head -n1 | awk '{print $2}')
   docker run $@ \
-	  shortcut:$latest shortcut $SHORTCUT_ARGS
+	  ortholang:$latest ortholang $SHORTCUT_ARGS
 }
 
 run_tests() {

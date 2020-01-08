@@ -33,6 +33,6 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Move development to `develop` branch; `master` will be for releases
 - Start using semantic versioning
 
-[unreleased]: https://github.com/jefdaj/shortcut/compare/v0.9.1...HEAD
-[0.9.1]: https://github.com/jefdaj/shortcut/releases/tag/v0.9.1
-[0.9.0]: https://github.com/jefdaj/shortcut/releases/tag/v0.9.0
+[unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.1
+[0.9.0]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.0
