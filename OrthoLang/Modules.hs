@@ -36,7 +36,7 @@ import qualified OrthoLang.Modules.Busco as Busco
 import qualified OrthoLang.Modules.Range as Range
 import qualified OrthoLang.Modules.SetsTable as SetsTable
 import qualified OrthoLang.Modules.AllVsAll as AllVsAll
-import qualified OrthoLang.Modules.GreenOrthoLang as GreenOrthoLang
+import qualified OrthoLang.Modules.GreenCut as GreenCut
 
 modules :: [OrthoLangModule]
 modules =
@@ -72,5 +72,5 @@ modules =
   , Range.orthoLangModule
   , SetsTable.orthoLangModule
   , AllVsAll.orthoLangModule
-  , GreenOrthoLang.orthoLangModule
+  , GreenCut.orthoLangModule
   ]

@@ -36,7 +36,7 @@ import Data.String.Utils           (split)
 import OrthoLang.Modules.SeqIO         (faa)
 import OrthoLang.Modules.OrthoFinder   (ofr)
 import OrthoLang.Modules.SonicParanoid (spr)
-import OrthoLang.Modules.GreenOrthoLang      (gcr)
+import OrthoLang.Modules.GreenCut      (gcr)
 
 -- this is just shorthand
 sll :: OrthoLangType
@@ -126,8 +126,8 @@ parseSonicParanoid cfg ref _ ogPath = do
   where
     parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
 
-parseGreenOrthoLang :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action [[String]]
-parseGreenOrthoLang cfg ref _ ogPath = do
+parseGreenCut :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action [[String]]
+parseGreenCut cfg ref _ ogPath = do
   txt <- readFileStrict' cfg ref $ fromOrthoLangPath cfg ogPath
   let groups = map parseLine $ lines txt
   return groups
@@ -155,7 +155,7 @@ aOrthogroups rtn cfg ref idsref [out, ogPath] = do
   -- TODO extract this into a parseOrthogroups function
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
-               else if rtn == gcr then parseGreenOrthoLang
+               else if rtn == gcr then parseGreenCut
                else error $ "bad type for aOrthogroups: " ++ show rtn
   groups <- parser cfg ref idsref ogPath
   writeOrthogroups cfg ref idsref out groups
