@@ -1,8 +1,8 @@
 A scripting language that makes short work of phylogenomic cuts.
 
 Usage:
-  shortcut --help FNORTYPE | --version
-  shortcut [options]
+  ortholang --help FNORTYPE | --version
+  ortholang [options]
 
 Options:
   --help FNORTYPE    Print possibly-helpful info about a function or filetype.
@@ -13,12 +13,12 @@ Options:
   --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
   --typecheck        Don't run the script yet, just print any type errors.
-  --script SCRIPT    ShortCut script to run, or load with --interactive
+  --script SCRIPT    OrthoLang script to run, or load with --interactive
   --tmpdir TMPDIR    Where to cache results, including many large
                      intermediate files.
-                     [default: ~/.shortcut]
+                     [default: ~/.ortholang]
   --config CONFIG    Load any/all of these options from a config file.
-                     [default: ~/.shortcut/config]
+                     [default: ~/.ortholang/config]
   --workdir WORKDIR  Working directory and start point for relative paths.
                      [default: .]
   --wrapper WRAPPER  Script to wrap arbitrary system commands. Use this to

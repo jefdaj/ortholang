@@ -1,5 +1,5 @@
 # When training a pssm fails because the e-value is too low/db too distantly
-# related, ShortCut creates an "empty" pssm to track that fact rather than
+# related, OrthoLang creates an "empty" pssm to track that fact rather than
 # failing. This tests that it works properly by trying searches that would fail
 # otherwise.
 

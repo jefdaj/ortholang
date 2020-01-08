@@ -20,4 +20,4 @@ extra-deps:
 # TODO are the rtsopts a problem? see if removing fixes any fails
 ghc-options:
         # "all": -O2
-        # "ShortCut": -O0
+        # "OrthoLang": -O0

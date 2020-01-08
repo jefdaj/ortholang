@@ -10,7 +10,7 @@
 , transformers, unbounded-delays, unix, utility-ht, zlib
 }:
 mkDerivation {
-  pname = "ShortCut";
+  pname = "OrthoLang";
   version = "0.9.3";
   src = ./.;
   isLibrary = true;

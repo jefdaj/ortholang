@@ -13,7 +13,7 @@
 
 condo="/clusterfs/rosalind/users"
 scratch=/global/scratch/jefdaj
-# image="${scratch}/shortcut.img"
+# image="${scratch}/ortholang.img"
 srundir="${scratch}/srun-commands"
 
 mkdir -p "$srundir"

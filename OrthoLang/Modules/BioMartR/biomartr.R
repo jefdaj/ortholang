@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# TODO: cache results in shortcut to prevent wasting time on FTP stuff
+# TODO: cache results in ortholang to prevent wasting time on FTP stuff
 # TODO: hardcode args for development
 
 # TODO: put downloads in tmpDirs specific to the functions (genome, proteome, ...)

@@ -3,12 +3,12 @@ with import ./nixpkgs;
 # TODO can the docker image also be made into a Snap package?
 
 let
-  shortcut = import ./default.nix;
+  ortholang = import ./default.nix;
   inherit (import ./dependencies.nix) modules runDepends;
 
 in pkgs.dockerTools.buildImage {
-  name = "shortcut";
-  tag = "${shortcut.version}";
+  name = "ortholang";
+  tag = "${ortholang.version}";
   created = "now";
 
   # For the temporary build image. Currently ~7.5GB are required.
@@ -18,20 +18,20 @@ in pkgs.dockerTools.buildImage {
   contents = lib.lists.unique
     (builtins.concatLists (map (m: m.extraRunDeps) modules)
     ++ runDepends
-    ++ [ shortcut ]);
+    ++ [ ortholang ]);
 
   runAsRoot = ''
     #!${pkgs.runtimeShell}
-    mkdir -p /.shortcut
+    mkdir -p /.ortholang
     mkdir -p /workdir
   '';
 
   config = {
     # TODO workdir is redundant here?
-    Cmd = [ "/bin/shortcut" "--tmpdir" "/.shortcut" "--workdir" "/workdir" ];
+    Cmd = [ "/bin/ortholang" "--tmpdir" "/.ortholang" "--workdir" "/workdir" ];
     WorkingDir = "/workdir";
     Volumes = {
-      "/.shortcut" = {};
+      "/.ortholang" = {};
       "/workdir"   = {};
     };
   };

@@ -1,7 +1,7 @@
 { pythonPackages, fetchgit }:
 with pythonPackages;
 
-# TODO patch to use the shortcut tmpdir for downloads rather than /tmp?
+# TODO patch to use the ortholang tmpdir for downloads rather than /tmp?
 
 buildPythonPackage {
   name = "blastdbget";

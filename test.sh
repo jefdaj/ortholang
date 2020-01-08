@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # remember to export TMPDIR=<some shared location> before testing on HPC clusters!
-# script arguments will be passed to shortcut --test
+# script arguments will be passed to ortholang --test
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
 
 test_filter='version'
@@ -18,9 +18,9 @@ export TASTY_QUICKCHECK_SHOW_REPLAY=True
 timestamp=$(date '+%Y-%m-%d_%H:%M')
 
 nix_args="--pure -j2"
-stack_cmd="stack build && stack exec shortcut -- --test $test_filter"
+stack_cmd="stack build && stack exec ortholang -- --test $test_filter"
 
-log="shortcut-${test_filter}-${timestamp}.log"
+log="ortholang-${test_filter}-${timestamp}.log"
 
 set -x
 nix-shell shell.nix $nix_args --command "$stack_cmd; exit" 2>&1 | tee -a $log
@@ -30,8 +30,8 @@ nix-shell shell.nix $nix_args --command "$stack_cmd; exit" 2>&1 | tee -a $log
 stack_cmd_2="stack exec shortcut -- --shared http://shortcut.pmb.berkeley.edu/shared --test $test_filter"
 nix-shell shell.nix $nix_args --command "$stack_cmd_2; exit" 2>&1 | tee -a $log
 
-# log="shortcut-test_${timestamp}.log"
+# log="ortholang-test_${timestamp}.log"
 # test_args="+RTS -IO -N -RTS --test biomartr"
-# cmd="./result/bin/shortcut $test_args"
+# cmd="./result/bin/ortholang $test_args"
 # echo "$cmd" | tee $log
 # $cmd 2>&1 | tee -a $log
