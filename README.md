@@ -158,8 +158,8 @@ Try it out
 These commands will run an existing script, load an existing script in the
 interpreter, and start a new script in the interpreter respectively:
 
-* `shortcut --script your-existing.cut`
-* `shortcut --script your-existing.cut --interactive`
+* `shortcut --script your-existing-script.ol`
+* `shortcut --script your-existing-script.ol --interactive`
 * `shortcut`
 
 See [usage.txt][3] for other command line options, and type `:help` in the
