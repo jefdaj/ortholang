@@ -11,7 +11,7 @@ rm -rf tmpdir-cache
 for n in {1..3}; do
   echo -n "filling cache (round $n)"
 	# randomize order in case it matters
-  ls tests/scripts/*.cut | shuf | while read f; do
+  ls tests/scripts/*.ol | shuf | while read f; do
     stack exec shortcut -- --tmpdir tmpdir-cache --script $f &>/dev/null && echo -n "." || echo "\nERROR: $f"
   done
 	echo

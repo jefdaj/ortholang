@@ -71,7 +71,7 @@ badlyBroken =
   ]
 
 getTestScripts :: FilePath -> IO [FilePath]
-getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".cut"] testDir
+getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".ol"] testDir
 
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
