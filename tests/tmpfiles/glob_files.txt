@@ -2,18 +2,10 @@
 |-- cache
 |-- exprs
 |   |-- glob_files
-<<<<<<< HEAD
-|   |   `-- bf23146466_0.str.list -> ../../cache/lines/...
-=======
-|   |   `-- 594643cde4_0.str.list -> ../../cache/lines/...
->>>>>>> update tests
+|   |   `-- 93fca3cf6b_0.str.list -> ../../cache/lines/...
 |   `-- str
 |       `-- f78ef4ca97_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    `-- result -> ../exprs/glob_files/bf23146466_0.str.list
-=======
-    `-- result -> ../exprs/glob_files/594643cde4_0.str.list
->>>>>>> update tests
+    `-- result -> ../exprs/glob_files/93fca3cf6b_0.str.list
 
 5 directories, 3 files

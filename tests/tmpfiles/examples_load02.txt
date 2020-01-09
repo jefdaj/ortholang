@@ -1,36 +1,36 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 478bf72fe6.txt -> ../../cache/lines/...
+|   |   |-- c8508695ef.txt -> ../../cache/lines/...
 |   |   `-- emptyfaa.txt -> ../../cache/lines/...
 |   |-- each
-|   |   `-- bafa813873
-|   |       |-- 5ba32d666a.faa -> ../../../exprs/gbk_to_faa/36cab58d20_5ba32d666a_0.faa
-|   |       |-- 5ba32d666a.faa.args -> ../../../cache/lines/...
-|   |       |-- 7165aa427a.faa -> ../../../exprs/gbk_to_faa/36cab58d20_7165aa427a_0.faa
-|   |       `-- 7165aa427a.faa.args -> ../../../cache/lines/...
+|   |   `-- 33d6dd2407
+|   |       |-- 5edc709220.faa -> ../../../exprs/gbk_to_faa/37fd11c13a_5edc709220_0.faa
+|   |       |-- 5edc709220.faa.args -> ../../../cache/lines/...
+|   |       |-- a442bad0d5.faa -> ../../../exprs/gbk_to_faa/37fd11c13a_a442bad0d5_0.faa
+|   |       `-- a442bad0d5.faa.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- d8da51f7cd.gbk -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
 |   |   `-- ec9540d17e.gbk -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
 |   `-- seqio
 |-- exprs
 |   |-- concat_faa
-|   |   `-- aaf6ab7c4a_0.faa
+|   |   `-- d2b5ed57ad_0.faa
 |   |-- gbk_to_faa
-|   |   |-- 36cab58d20_5ba32d666a_0.faa
-|   |   `-- 36cab58d20_7165aa427a_0.faa
+|   |   |-- 37fd11c13a_5edc709220_0.faa
+|   |   `-- 37fd11c13a_a442bad0d5_0.faa
 |   |-- gbk_to_faa_each
-|   |   `-- 262cf7e4e4_c35fb4a708_0.faa.list -> ../../cache/lines/...
+|   |   `-- acb4ee1de2_e996e7b24a_0.faa.list -> ../../cache/lines/...
 |   |-- glob_files
-|   |   `-- 7148d68bb2_0.str.list -> ../../cache/lines/...
+|   |   `-- 95d088dfb1_0.str.list -> ../../cache/lines/...
 |   |-- list
-|   |   `-- a680636493_0.gbk.list -> ../../cache/lines/...
+|   |   `-- e8227beec1_0.gbk.list -> ../../cache/lines/...
 |   |-- load_faa
 |   `-- str
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
 |       `-- a2afbbbddc_0.str -> ../../cache/lines/...
 `-- vars
-    |-- pcc7942v2.faa -> ../exprs/concat_faa/aaf6ab7c4a_0.faa
+    |-- pcc7942v2.faa -> ../exprs/concat_faa/d2b5ed57ad_0.faa
     `-- result -> ../vars/pcc7942v2.faa
 
 15 directories, 18 files

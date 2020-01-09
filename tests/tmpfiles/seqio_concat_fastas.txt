@@ -1,79 +1,43 @@
 .
 |-- cache
 |   |-- concat
-<<<<<<< HEAD
-|   |   |-- 4e3b0930d4.txt -> ../../cache/lines/...
+|   |   |-- 340891ae85.txt -> ../../cache/lines/...
 |   |   `-- emptyfna.txt -> ../../cache/lines/...
 |   |-- each
-|   |   `-- b95e38edca
-|   |       |-- 4e3b0930d4.fna -> ../../../exprs/concat_fna/4e3b0930d4_0.fna
-|   |       `-- 4e3b0930d4.fna.args -> ../../../cache/lines/...
-=======
-|   |   |-- c33c7a352b.txt -> ../../cache/lines/...
-|   |   `-- emptyfna.txt -> ../../cache/lines/...
-|   |-- each
-|   |   `-- 8084e036ac
-|   |       |-- c33c7a352b.fna -> ../../../exprs/concat_fna/c33c7a352b_0.fna
-|   |       `-- c33c7a352b.fna.args -> ../../../cache/lines/...
->>>>>>> update tests
+|   |   `-- 021675e308
+|   |       |-- 340891ae85.fna -> ../../../exprs/concat_fna/340891ae85_0.fna
+|   |       `-- 340891ae85.fna.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |   `-- 97d2ef290c.gbk -> $WORKDIR/examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk
 |   `-- seqio
 |-- exprs
 |   |-- any
-<<<<<<< HEAD
-|   |   `-- 29e0e5165e_0.fna.list -> ../../cache/lines/...
+|   |   `-- 914ec35516_0.fna.list -> ../../cache/lines/...
 |   |-- concat_fna
-|   |   |-- 3642f3d2c7_0.fna
-|   |   `-- 4e3b0930d4_0.fna
+|   |   |-- 340891ae85_0.fna
+|   |   `-- 8d15a839cf_0.fna
 |   |-- concat_fna_each
-|   |   `-- 3e7160fbab_0.fna.list -> ../../cache/lines/...
+|   |   `-- e654cc1eca_0.fna.list -> ../../cache/lines/...
 |   |-- gbk_to_fna
-|   |   |-- 262cf7e4e4_b34481f398_0.fna
-|   |   `-- 262cf7e4e4_b8e1167f5f_0.fna
-|   |-- list
-|   |   |-- 0a25f167ac_0.fna.list.list -> ../../cache/lines/...
-|   |   |-- 49b3b2afd6_0.fna.list.list -> ../../cache/lines/...
-|   |   |-- 9477303fb9_0.fna.list -> ../../cache/lines/...
-|   |   `-- de88435002_0.fna.list -> ../../cache/lines/...
-|   |-- load_fna
-|   |-- load_gbk
-|   |   |-- 7c96d918c8_0.gbk -> ../../cache/load/28ce925871.gbk
-|   |   `-- fa6fcd5915_0.gbk -> ../../cache/load/97d2ef290c.gbk
-=======
-|   |   `-- 9073504d83_0.fna.list -> ../../cache/lines/...
-|   |-- concat_fna
-|   |   |-- a82757e326_0.fna
-|   |   `-- c33c7a352b_0.fna
-|   |-- concat_fna_each
-|   |   `-- 53be9d7d08_0.fna.list -> ../../cache/lines/...
-|   |-- gbk_to_fna
-|   |   |-- acb4ee1de2_568b977ff2_0.fna
-|   |   `-- acb4ee1de2_bc4e9110c6_0.fna
+|   |   |-- acb4ee1de2_86efc03ac8_0.fna
+|   |   `-- acb4ee1de2_8ec3a4f820_0.fna
 |   |-- list
 |   |   |-- 036cba2ad7_0.fna.list -> ../../cache/lines/...
+|   |   |-- 12bd22133e_0.fna.list -> ../../cache/lines/...
 |   |   |-- 5864c7f72a_0.fna.list.list -> ../../cache/lines/...
-|   |   |-- 98344b2a90_0.fna.list -> ../../cache/lines/...
-|   |   `-- 9918914da7_0.fna.list.list -> ../../cache/lines/...
+|   |   `-- f38e375f98_0.fna.list.list -> ../../cache/lines/...
 |   |-- load_fna
 |   |-- load_gbk
-|   |   |-- 8344a68a03_0.gbk -> ../../cache/load/97d2ef290c.gbk
-|   |   `-- f03a2c0db2_0.gbk -> ../../cache/load/28ce925871.gbk
->>>>>>> update tests
+|   |   |-- a4be889eec_0.gbk -> ../../cache/load/97d2ef290c.gbk
+|   |   `-- cbd97ba8fe_0.gbk -> ../../cache/load/28ce925871.gbk
 |   `-- str
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
 |       |-- ee108e12fa_0.str -> ../../cache/lines/...
 |       `-- fc0141ab13_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    |-- mapped.fna.list -> ../exprs/concat_fna_each/3e7160fbab_0.fna.list
-    |-- result -> ../exprs/any/29e0e5165e_0.fna.list
-    `-- single.fna -> ../exprs/concat_fna/3642f3d2c7_0.fna
-=======
-    |-- mapped.fna.list -> ../exprs/concat_fna_each/53be9d7d08_0.fna.list
-    |-- result -> ../exprs/any/9073504d83_0.fna.list
-    `-- single.fna -> ../exprs/concat_fna/a82757e326_0.fna
->>>>>>> update tests
+    |-- mapped.fna.list -> ../exprs/concat_fna_each/e654cc1eca_0.fna.list
+    |-- result -> ../exprs/any/914ec35516_0.fna.list
+    `-- single.fna -> ../exprs/concat_fna/8d15a839cf_0.fna
 
 16 directories, 24 files

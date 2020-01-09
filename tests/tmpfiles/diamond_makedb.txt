@@ -5,28 +5,15 @@
 |       `-- 10ffe0cf0f.faa.ids
 |-- exprs
 |   |-- diamond_makedb
-<<<<<<< HEAD
-|   |   |-- fd0a204210_0.dmnd
-|   |   |-- fd0a204210_0.dmnd.err
-|   |   `-- fd0a204210_0.dmnd.out
+|   |   |-- ff056810c7_0.dmnd
+|   |   |-- ff056810c7_0.dmnd.err
+|   |   `-- ff056810c7_0.dmnd.out
 |   |-- load_faa
-|   |   `-- 0e49ee7cdf_0.faa -> ../../cache/load/10ffe0cf0f.faa
-=======
-|   |   |-- 425ee46f11_0.dmnd
-|   |   |-- 425ee46f11_0.dmnd.err
-|   |   `-- 425ee46f11_0.dmnd.out
-|   |-- load_faa
-|   |   `-- ade41eafca_0.faa -> ../../cache/load/10ffe0cf0f.faa
->>>>>>> update tests
+|   |   `-- 281359b1ca_0.faa -> ../../cache/load/10ffe0cf0f.faa
 |   `-- str
 |       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    |-- mgen.faa -> ../exprs/load_faa/0e49ee7cdf_0.faa
-    `-- result -> ../exprs/diamond_makedb/fd0a204210_0.dmnd
-=======
-    |-- mgen.faa -> ../exprs/load_faa/ade41eafca_0.faa
-    `-- result -> ../exprs/diamond_makedb/425ee46f11_0.dmnd
->>>>>>> update tests
+    |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
+    `-- result -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
 
 7 directories, 9 files

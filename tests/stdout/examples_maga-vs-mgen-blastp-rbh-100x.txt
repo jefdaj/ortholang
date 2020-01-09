@@ -1,0 +1,1 @@
+plot image '$TMPDIR/vars/result'

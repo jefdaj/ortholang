@@ -1,60 +1,32 @@
 .
 |-- cache
 |   |-- each
-<<<<<<< HEAD
-|   |   `-- aee6a540c6
-|   |       |-- ee6834ffce.faa -> ../../../exprs/translate/ee6834ffce_0.faa
-|   |       `-- ee6834ffce.faa.args -> ../../../cache/lines/...
-=======
-|   |   `-- 8e9fbedd47
+|   |   `-- d7f8d43af1
 |   |       |-- d1dfed7680.faa -> ../../../exprs/translate/d1dfed7680_0.faa
 |   |       `-- d1dfed7680.faa.args -> ../../../cache/lines/...
->>>>>>> update tests
 |   `-- load
 |       |-- 6046a54e92.fna
 |       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- any
-<<<<<<< HEAD
-|   |   `-- ee7e03c56b_0.faa.list -> ../../cache/lines/...
-|   |-- list
-|   |   |-- 14f1f13937_0.faa.list.list -> ../../cache/lines/...
-|   |   |-- 49ae883ffc_0.faa.list -> ../../cache/lines/...
-|   |   |-- 6949f171a4_0.fna.list -> ../../cache/lines/...
-|   |   `-- b2478fee8e_0.str.list -> ../../cache/lines/...
-|   |-- load_fna
-|   |   `-- c64e4d283b_0.fna -> ../../cache/load/6046a54e92.fna
-=======
-|   |   `-- d014ac4aa9_0.faa.list -> ../../cache/lines/...
+|   |   `-- 9517b8b589_0.faa.list -> ../../cache/lines/...
 |   |-- list
 |   |   |-- 315ba37670_0.faa.list.list -> ../../cache/lines/...
 |   |   |-- 47deec11ba_0.faa.list -> ../../cache/lines/...
-|   |   |-- 8d04a76c37_0.str.list -> ../../cache/lines/...
-|   |   `-- ce462b96f5_0.fna.list -> ../../cache/lines/...
+|   |   |-- 6fb2af47e3_0.fna.list -> ../../cache/lines/...
+|   |   `-- 88a579f71a_0.str.list -> ../../cache/lines/...
 |   |-- load_fna
-|   |   `-- 6d5bdf115f_0.fna -> ../../cache/load/6046a54e92.fna
->>>>>>> update tests
+|   |   `-- 2fe5a30d0c_0.fna -> ../../cache/load/6046a54e92.fna
 |   |-- str
 |   |   `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 |   |-- translate
-<<<<<<< HEAD
-|   |   |-- a3fc746119_0.faa
-|   |   `-- ee6834ffce_0.faa
-|   `-- translate_each
-|       `-- 998ae9106b_0.faa.list -> ../../cache/lines/...
-`-- vars
-    |-- mapped.faa.list -> ../exprs/translate_each/998ae9106b_0.faa.list
-    |-- result -> ../exprs/any/ee7e03c56b_0.faa.list
-    `-- single.faa -> ../exprs/translate/a3fc746119_0.faa
-=======
-|   |   |-- 1fc4c5ac4e_0.faa
+|   |   |-- b23b6505d6_0.faa
 |   |   `-- d1dfed7680_0.faa
 |   `-- translate_each
-|       `-- b3288d49aa_0.faa.list -> ../../cache/lines/...
+|       `-- 47b8326168_0.faa.list -> ../../cache/lines/...
 `-- vars
-    |-- mapped.faa.list -> ../exprs/translate_each/b3288d49aa_0.faa.list
-    |-- result -> ../exprs/any/d014ac4aa9_0.faa.list
-    `-- single.faa -> ../exprs/translate/1fc4c5ac4e_0.faa
->>>>>>> update tests
+    |-- mapped.faa.list -> ../exprs/translate_each/47b8326168_0.faa.list
+    |-- result -> ../exprs/any/9517b8b589_0.faa.list
+    `-- single.faa -> ../exprs/translate/b23b6505d6_0.faa
 
 12 directories, 17 files

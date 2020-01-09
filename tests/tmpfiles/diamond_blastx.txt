@@ -7,37 +7,20 @@
 |   `-- seqio
 |-- exprs
 |   |-- diamond_blastx
-<<<<<<< HEAD
-|   |   |-- bca777a01a_ef7697b8cc_6a44b64e07_0.bht
-|   |   |-- bca777a01a_ef7697b8cc_6a44b64e07_0.bht.err
-|   |   `-- bca777a01a_ef7697b8cc_6a44b64e07_0.bht.out
+|   |   |-- c5e9182d78_bdfca3a2e2_d03aa36864_0.bht
+|   |   |-- c5e9182d78_bdfca3a2e2_d03aa36864_0.bht.err
+|   |   `-- c5e9182d78_bdfca3a2e2_d03aa36864_0.bht.out
 |   |-- diamond_makedb
-|   |   |-- fd0a204210_0.dmnd
-|   |   |-- fd0a204210_0.dmnd.err
-|   |   `-- fd0a204210_0.dmnd.out
+|   |   |-- ff056810c7_0.dmnd
+|   |   |-- ff056810c7_0.dmnd.err
+|   |   `-- ff056810c7_0.dmnd.out
 |   |-- gbk_to_fna
-|   |   `-- 262cf7e4e4_6e38ddec88_0.fna
+|   |   `-- acb4ee1de2_9de9824b38_0.fna
 |   |-- load_faa
-|   |   `-- 0e49ee7cdf_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- 281359b1ca_0.faa -> ../../cache/load/10ffe0cf0f.faa
 |   |-- load_fna
 |   |-- load_gbk
-|   |   `-- 3bab018e1a_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
-=======
-|   |   |-- c5e9182d78_179557b1ac_9232f7fa56_0.bht
-|   |   |-- c5e9182d78_179557b1ac_9232f7fa56_0.bht.err
-|   |   `-- c5e9182d78_179557b1ac_9232f7fa56_0.bht.out
-|   |-- diamond_makedb
-|   |   |-- 425ee46f11_0.dmnd
-|   |   |-- 425ee46f11_0.dmnd.err
-|   |   `-- 425ee46f11_0.dmnd.out
-|   |-- gbk_to_fna
-|   |   `-- acb4ee1de2_455e53b4b0_0.fna
-|   |-- load_faa
-|   |   `-- ade41eafca_0.faa -> ../../cache/load/10ffe0cf0f.faa
-|   |-- load_fna
-|   |-- load_gbk
-|   |   `-- ff560537cf_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
->>>>>>> update tests
+|   |   `-- 99dc942b60_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
 |   |-- num
 |   |   `-- 6de785566e_0.num -> ../../cache/lines/...
 |   `-- str
@@ -45,14 +28,8 @@
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
 |       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    |-- maga.fna -> ../exprs/gbk_to_fna/262cf7e4e4_6e38ddec88_0.fna
-    |-- mgen.faa -> ../exprs/load_faa/0e49ee7cdf_0.faa
-    `-- result -> ../exprs/diamond_blastx/bca777a01a_ef7697b8cc_6a44b64e07_0.bht
-=======
-    |-- maga.fna -> ../exprs/gbk_to_fna/acb4ee1de2_455e53b4b0_0.fna
-    |-- mgen.faa -> ../exprs/load_faa/ade41eafca_0.faa
-    `-- result -> ../exprs/diamond_blastx/c5e9182d78_179557b1ac_9232f7fa56_0.bht
->>>>>>> update tests
+    |-- maga.fna -> ../exprs/gbk_to_fna/acb4ee1de2_9de9824b38_0.fna
+    |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
+    `-- result -> ../exprs/diamond_blastx/c5e9182d78_bdfca3a2e2_d03aa36864_0.bht
 
 13 directories, 19 files

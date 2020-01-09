@@ -7,45 +7,25 @@
 |       `-- 36189032ad.faa.ids
 |-- exprs
 |   |-- diamond_blastp_db_sensitive
-<<<<<<< HEAD
-|   |   |-- bca777a01a_7293551cfa_6a44b64e07_0.bht
-|   |   |-- bca777a01a_7293551cfa_6a44b64e07_0.bht.err
-|   |   `-- bca777a01a_7293551cfa_6a44b64e07_0.bht.out
+|   |   |-- c5e9182d78_b947a1128f_d03aa36864_0.bht
+|   |   |-- c5e9182d78_b947a1128f_d03aa36864_0.bht.err
+|   |   `-- c5e9182d78_b947a1128f_d03aa36864_0.bht.out
 |   |-- diamond_makedb
-|   |   |-- fd0a204210_0.dmnd
-|   |   |-- fd0a204210_0.dmnd.err
-|   |   `-- fd0a204210_0.dmnd.out
+|   |   |-- ff056810c7_0.dmnd
+|   |   |-- ff056810c7_0.dmnd.err
+|   |   `-- ff056810c7_0.dmnd.out
 |   |-- load_faa
-|   |   |-- 0e49ee7cdf_0.faa -> ../../cache/load/10ffe0cf0f.faa
-|   |   `-- 49f1c56387_0.faa -> ../../cache/load/36189032ad.faa
-=======
-|   |   |-- c5e9182d78_54ff0da579_9232f7fa56_0.bht
-|   |   |-- c5e9182d78_54ff0da579_9232f7fa56_0.bht.err
-|   |   `-- c5e9182d78_54ff0da579_9232f7fa56_0.bht.out
-|   |-- diamond_makedb
-|   |   |-- 425ee46f11_0.dmnd
-|   |   |-- 425ee46f11_0.dmnd.err
-|   |   `-- 425ee46f11_0.dmnd.out
-|   |-- load_faa
-|   |   |-- 6af4625356_0.faa -> ../../cache/load/36189032ad.faa
-|   |   `-- ade41eafca_0.faa -> ../../cache/load/10ffe0cf0f.faa
->>>>>>> update tests
+|   |   |-- 281359b1ca_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- num
 |   |   `-- 6de785566e_0.num -> ../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
 |       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    |-- db.dmnd -> ../exprs/diamond_makedb/fd0a204210_0.dmnd
-    |-- maga.faa -> ../exprs/load_faa/49f1c56387_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/0e49ee7cdf_0.faa
-    `-- result -> ../exprs/diamond_blastp_db_sensitive/bca777a01a_7293551cfa_6a44b64e07_0.bht
-=======
-    |-- db.dmnd -> ../exprs/diamond_makedb/425ee46f11_0.dmnd
-    |-- maga.faa -> ../exprs/load_faa/6af4625356_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/ade41eafca_0.faa
-    `-- result -> ../exprs/diamond_blastp_db_sensitive/c5e9182d78_54ff0da579_9232f7fa56_0.bht
->>>>>>> update tests
+    |-- db.dmnd -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
+    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
+    `-- result -> ../exprs/diamond_blastp_db_sensitive/c5e9182d78_b947a1128f_d03aa36864_0.bht
 
 9 directories, 19 files

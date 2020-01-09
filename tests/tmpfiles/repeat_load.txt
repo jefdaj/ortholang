@@ -14,243 +14,123 @@
 |           `-- c1b08194e1.pdb.psq
 |-- exprs
 |   |-- blastp_db
-<<<<<<< HEAD
-|   |   |-- 46e62edec1_9f8c49632d_0eb4f46de3_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_0eb4f46de3_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_0eb4f46de3_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_0eb4f46de3_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_128b3fc62a_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_128b3fc62a_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_128b3fc62a_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_128b3fc62a_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_3441a9e53b_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_3441a9e53b_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_3441a9e53b_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_3441a9e53b_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_456de167d1_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_456de167d1_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_456de167d1_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_456de167d1_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_45c01d8360_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_45c01d8360_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_45c01d8360_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_45c01d8360_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_6508266c99_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_6508266c99_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_6508266c99_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_6508266c99_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_7f26c85a3b_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_7f26c85a3b_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_7f26c85a3b_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_7f26c85a3b_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_95c7b6b3bd_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_95c7b6b3bd_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_95c7b6b3bd_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_95c7b6b3bd_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_b110873fa9_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_b110873fa9_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_b110873fa9_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_b110873fa9_0.bht.out.err
-|   |   |-- 46e62edec1_9f8c49632d_bfec4064a2_0.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_bfec4064a2_0.bht.out
-|   |   |-- 46e62edec1_9f8c49632d_bfec4064a2_0.bht.out
-|   |   `-- 46e62edec1_9f8c49632d_bfec4064a2_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_052692a36f_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_052692a36f_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_052692a36f_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_052692a36f_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_121de903a0_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_121de903a0_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_121de903a0_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_121de903a0_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_244d5329d5_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_244d5329d5_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_244d5329d5_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_244d5329d5_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_6ba69f7025_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_6ba69f7025_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_6ba69f7025_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_6ba69f7025_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_87da02e89a_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_87da02e89a_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_87da02e89a_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_87da02e89a_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_8ce42d084b_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_8ce42d084b_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_8ce42d084b_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_8ce42d084b_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_964c082ed5_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_964c082ed5_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_964c082ed5_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_964c082ed5_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_9afa74f885_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_9afa74f885_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_9afa74f885_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_9afa74f885_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_acace57167_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_acace57167_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_acace57167_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_acace57167_0.bht.out.err
+|   |   |-- b79e5160cb_d1561f14c2_d50ba1b64d_0.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_d50ba1b64d_0.bht.out
+|   |   |-- b79e5160cb_d1561f14c2_d50ba1b64d_0.bht.out
+|   |   `-- b79e5160cb_d1561f14c2_d50ba1b64d_0.bht.out.err
 |   |-- length
-|   |   `-- e4036936b0_0.num -> ../../cache/lines/...
+|   |   `-- ddd08d5f09_0.num -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 004fdb308f_0.faa.list -> ../../cache/lines/...
-|   |   |-- 0c29160a21_0.faa.list -> ../../cache/lines/...
-|   |   |-- 0e69842928_0.faa.list -> ../../cache/lines/...
-|   |   |-- 2ba1eb8e63_0.faa.list -> ../../cache/lines/...
-|   |   |-- 393b31e274_0.faa.list -> ../../cache/lines/...
-|   |   |-- 62b665de03_0.faa.list -> ../../cache/lines/...
-|   |   |-- 67630b0dcc_0.faa.list -> ../../cache/lines/...
-|   |   |-- 7ed29250d6_0.faa.list -> ../../cache/lines/...
-|   |   |-- 9e0a469e59_0.faa.list -> ../../cache/lines/...
-|   |   |-- ad60d41235_0.faa.list -> ../../cache/lines/...
-|   |   `-- e421a34153_0.faa.list -> ../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 1205880c10_0.faa -> ../../cache/load/11bbf54fc6.faa
-|   |   `-- 246e11f77b_0.faa -> ../../cache/load/0d8dfa261e.faa
-|   |-- makeblastdb_prot
-|   |   |-- 28d6c17b83_0.pdb -> ../../cache/lines/...
-|   |   |-- 5769e6f05f_0.pdb -> ../../cache/lines/...
-|   |   |-- 61f608ee9b_0.pdb -> ../../cache/lines/...
-|   |   |-- 7a10cbec1f_0.pdb -> ../../cache/lines/...
-|   |   |-- acfdd5f192_0.pdb -> ../../cache/lines/...
-|   |   |-- b86a4fcad5_0.pdb -> ../../cache/lines/...
-|   |   |-- be557deebc_0.pdb -> ../../cache/lines/...
-|   |   |-- d33d5220ae_0.pdb -> ../../cache/lines/...
-|   |   |-- e89296de33_0.pdb -> ../../cache/lines/...
-|   |   `-- f5105c8b2f_0.pdb -> ../../cache/lines/...
-|   |-- num
-|   |   `-- a53b190835_0.num -> ../../cache/lines/...
-|   |-- repeat
-|   |   `-- fefb38ec4f_a7b87d8aae_aec8c8e2a4_0.bht.list -> ../../cache/lines/...
-=======
-|   |   |-- b79e5160cb_65d2d81896_5104d82cf6_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_5104d82cf6_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_5104d82cf6_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_5104d82cf6_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_60231e19a0_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_60231e19a0_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_60231e19a0_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_60231e19a0_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_675aec15e0_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_675aec15e0_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_675aec15e0_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_675aec15e0_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_7588087dd6_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_7588087dd6_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_7588087dd6_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_7588087dd6_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_778e7a5052_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_778e7a5052_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_778e7a5052_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_778e7a5052_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_8e0ac277fb_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_8e0ac277fb_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_8e0ac277fb_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_8e0ac277fb_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_918a099df0_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_918a099df0_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_918a099df0_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_918a099df0_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_c5339425b1_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_c5339425b1_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_c5339425b1_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_c5339425b1_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_e1a9fa57f4_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_e1a9fa57f4_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_e1a9fa57f4_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_e1a9fa57f4_0.bht.out.err
-|   |   |-- b79e5160cb_65d2d81896_e1c6eac2a7_0.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_e1c6eac2a7_0.bht.out
-|   |   |-- b79e5160cb_65d2d81896_e1c6eac2a7_0.bht.out
-|   |   `-- b79e5160cb_65d2d81896_e1c6eac2a7_0.bht.out.err
-|   |-- length
-|   |   `-- 16218ea79e_0.num -> ../../cache/lines/...
-|   |-- list
-|   |   |-- 1d5dc8fab9_0.faa.list -> ../../cache/lines/...
-|   |   |-- 1e7c733397_0.faa.list -> ../../cache/lines/...
+|   |   |-- 275805c108_0.faa.list -> ../../cache/lines/...
+|   |   |-- 2af5d173fe_0.faa.list -> ../../cache/lines/...
 |   |   |-- 3d6147ea9d_0.faa.list -> ../../cache/lines/...
-|   |   |-- 43d2f4f015_0.faa.list -> ../../cache/lines/...
-|   |   |-- 44f0b899ef_0.faa.list -> ../../cache/lines/...
-|   |   |-- 65140360e6_0.faa.list -> ../../cache/lines/...
-|   |   |-- 98a877f157_0.faa.list -> ../../cache/lines/...
-|   |   |-- bca650f7bd_0.faa.list -> ../../cache/lines/...
-|   |   |-- cf3152dfe5_0.faa.list -> ../../cache/lines/...
-|   |   |-- f59e2d2e84_0.faa.list -> ../../cache/lines/...
-|   |   `-- ff4337b356_0.faa.list -> ../../cache/lines/...
+|   |   |-- 440e24723d_0.faa.list -> ../../cache/lines/...
+|   |   |-- 67796c3b31_0.faa.list -> ../../cache/lines/...
+|   |   |-- 8a5a8a42c4_0.faa.list -> ../../cache/lines/...
+|   |   |-- 9bff7d3efa_0.faa.list -> ../../cache/lines/...
+|   |   |-- add32f63a3_0.faa.list -> ../../cache/lines/...
+|   |   |-- b4ad0557fe_0.faa.list -> ../../cache/lines/...
+|   |   |-- c838eed8ba_0.faa.list -> ../../cache/lines/...
+|   |   `-- f25c951ec5_0.faa.list -> ../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 4edc591e37_0.faa -> ../../cache/load/0d8dfa261e.faa
-|   |   `-- 70c0ec78dc_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |   |-- 48877bb94a_0.faa -> ../../cache/load/0d8dfa261e.faa
+|   |   `-- 5815f1ab62_0.faa -> ../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_prot
-|   |   |-- 0cd1b5e92e_0.pdb -> ../../cache/lines/...
-|   |   |-- 15548ff08f_0.pdb -> ../../cache/lines/...
-|   |   |-- 3c91ad9707_0.pdb -> ../../cache/lines/...
-|   |   |-- 410e6f3502_0.pdb -> ../../cache/lines/...
-|   |   |-- 5a49a0d8ca_0.pdb -> ../../cache/lines/...
-|   |   |-- 5c2451ada6_0.pdb -> ../../cache/lines/...
-|   |   |-- 8d3662a359_0.pdb -> ../../cache/lines/...
-|   |   |-- 9c129d9b17_0.pdb -> ../../cache/lines/...
-|   |   |-- c0d48469bc_0.pdb -> ../../cache/lines/...
-|   |   `-- cbb2837d6e_0.pdb -> ../../cache/lines/...
+|   |   |-- 0919af5f58_0.pdb -> ../../cache/lines/...
+|   |   |-- 0f5f38373a_0.pdb -> ../../cache/lines/...
+|   |   |-- 2f4c1da3cb_0.pdb -> ../../cache/lines/...
+|   |   |-- 8d186183f7_0.pdb -> ../../cache/lines/...
+|   |   |-- c93d63638c_0.pdb -> ../../cache/lines/...
+|   |   |-- d67c645a0a_0.pdb -> ../../cache/lines/...
+|   |   |-- e4ddca6935_0.pdb -> ../../cache/lines/...
+|   |   |-- e6ab4ac8c3_0.pdb -> ../../cache/lines/...
+|   |   |-- e6ddb4324c_0.pdb -> ../../cache/lines/...
+|   |   `-- ef850497bc_0.pdb -> ../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835_0.num -> ../../cache/lines/...
 |   |-- repeat
-|   |   `-- 1e2757d0a9_686fd6e63d_9a0f001c9e_0.bht.list -> ../../cache/lines/...
->>>>>>> update tests
+|   |   `-- 6b98cd2621_dd98495d6e_3cf2fa000e_0.bht.list -> ../../cache/lines/...
 |   `-- str
 |       |-- 40edb92618_0.str -> ../../cache/lines/...
 |       `-- c58447896b_0.str -> ../../cache/lines/...
 |-- reps
-<<<<<<< HEAD
-|   |-- 15cb024e7a
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_456de167d1_0.bht
-|   |   `-- result -> ../../reps/15cb024e7a/fwdHits.bht
-|   |-- 38a540588b
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_6508266c99_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/38a540588b/fwdHits.bht
-|   |-- 3e1bcdde27
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_bfec4064a2_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/3e1bcdde27/fwdHits.bht
-|   |-- 5ab2753338
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_95c7b6b3bd_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/5ab2753338/fwdHits.bht
-|   |-- 633f78e879
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_3441a9e53b_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/633f78e879/fwdHits.bht
-|   |-- 79368cc692
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_7f26c85a3b_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/79368cc692/fwdHits.bht
-|   |-- b117ce281e
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_b110873fa9_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/b117ce281e/fwdHits.bht
-|   |-- d583d354b2
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_128b3fc62a_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/d583d354b2/fwdHits.bht
-|   |-- f5f61fa4bb
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_45c01d8360_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|   |   `-- result -> ../../reps/f5f61fa4bb/fwdHits.bht
-|   `-- f79bdde945
-|       |-- fwdHits.bht -> ../../exprs/blastp_db/46e62edec1_9f8c49632d_0eb4f46de3_0.bht
-|       |-- maga.faa -> ../../exprs/load_faa/246e11f77b_0.faa
-|       |-- mgen.faa -> ../../exprs/load_faa/1205880c10_0.faa
-|       `-- result -> ../../reps/f79bdde945/fwdHits.bht
+|   |-- 00f6aa06e2
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_052692a36f_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/00f6aa06e2/fwdHits.bht
+|   |-- 13ba15a45b
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_244d5329d5_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/13ba15a45b/fwdHits.bht
+|   |-- 3930ccf535
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_964c082ed5_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/3930ccf535/fwdHits.bht
+|   |-- 3a9b585ce4
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_8ce42d084b_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/3a9b585ce4/fwdHits.bht
+|   |-- 566c45adeb
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_6ba69f7025_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/566c45adeb/fwdHits.bht
+|   |-- 628d65c91a
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_87da02e89a_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/628d65c91a/fwdHits.bht
+|   |-- 740deac58d
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_9afa74f885_0.bht
+|   |   `-- result -> ../../reps/740deac58d/fwdHits.bht
+|   |-- 8ac2b072b7
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_121de903a0_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/8ac2b072b7/fwdHits.bht
+|   |-- 9bea066e15
+|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_d50ba1b64d_0.bht
+|   |   |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|   |   |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|   |   `-- result -> ../../reps/9bea066e15/fwdHits.bht
+|   `-- b4d1d6a46d
+|       |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_d1561f14c2_acace57167_0.bht
+|       |-- maga.faa -> ../../exprs/load_faa/48877bb94a_0.faa
+|       |-- mgen.faa -> ../../exprs/load_faa/5815f1ab62_0.faa
+|       `-- result -> ../../reps/b4d1d6a46d/fwdHits.bht
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/246e11f77b_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/1205880c10_0.faa
-    `-- result -> ../exprs/length/e4036936b0_0.num
-=======
-|   |-- 12a4a0ba68
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_60231e19a0_0.bht
-|   |   `-- result -> ../../reps/12a4a0ba68/fwdHits.bht
-|   |-- 305c3840c4
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_e1a9fa57f4_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/305c3840c4/fwdHits.bht
-|   |-- 4be1129d00
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_7588087dd6_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/4be1129d00/fwdHits.bht
-|   |-- 7d7b78dbe0
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_c5339425b1_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/7d7b78dbe0/fwdHits.bht
-|   |-- 7f83f7adb2
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_e1c6eac2a7_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/7f83f7adb2/fwdHits.bht
-|   |-- 87138a9ce8
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_918a099df0_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/87138a9ce8/fwdHits.bht
-|   |-- aa453bdc2c
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_675aec15e0_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/aa453bdc2c/fwdHits.bht
-|   |-- b5e1d8d348
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_778e7a5052_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/b5e1d8d348/fwdHits.bht
-|   |-- f185bdb7b8
-|   |   |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_5104d82cf6_0.bht
-|   |   |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|   |   |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|   |   `-- result -> ../../reps/f185bdb7b8/fwdHits.bht
-|   `-- ffe2a606cd
-|       |-- fwdHits.bht -> ../../exprs/blastp_db/b79e5160cb_65d2d81896_8e0ac277fb_0.bht
-|       |-- maga.faa -> ../../exprs/load_faa/4edc591e37_0.faa
-|       |-- mgen.faa -> ../../exprs/load_faa/70c0ec78dc_0.faa
-|       `-- result -> ../../reps/ffe2a606cd/fwdHits.bht
-`-- vars
-    |-- maga.faa -> ../exprs/load_faa/4edc591e37_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/70c0ec78dc_0.faa
-    `-- result -> ../exprs/length/16218ea79e_0.num
->>>>>>> update tests
+    |-- maga.faa -> ../exprs/load_faa/48877bb94a_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/5815f1ab62_0.faa
+    `-- result -> ../exprs/length/ddd08d5f09_0.num
 
 25 directories, 108 files

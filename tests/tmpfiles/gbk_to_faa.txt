@@ -5,26 +5,15 @@
 |   `-- seqio
 |-- exprs
 |   |-- gbk_to_faa
-<<<<<<< HEAD
-|   |   `-- 262cf7e4e4_6e38ddec88_0.faa
+|   |   `-- acb4ee1de2_9de9824b38_0.faa
 |   |-- load_faa
 |   |-- load_gbk
-|   |   `-- 3bab018e1a_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
-=======
-|   |   `-- acb4ee1de2_455e53b4b0_0.faa
-|   |-- load_faa
-|   |-- load_gbk
-|   |   `-- ff560537cf_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
->>>>>>> update tests
+|   |   `-- 99dc942b60_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
 |   `-- str
 |       |-- 3e6793b201_0.str -> ../../cache/lines/...
 |       `-- 90811d06ee_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    |-- maga.faa -> ../exprs/gbk_to_faa/262cf7e4e4_6e38ddec88_0.faa
-=======
-    |-- maga.faa -> ../exprs/gbk_to_faa/acb4ee1de2_455e53b4b0_0.faa
->>>>>>> update tests
+    |-- maga.faa -> ../exprs/gbk_to_faa/acb4ee1de2_9de9824b38_0.faa
     `-- result -> ../vars/maga.faa
 
 9 directories, 7 files

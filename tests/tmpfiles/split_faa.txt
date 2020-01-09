@@ -1,19 +1,11 @@
 .
 |-- cache
 |   |-- each
-<<<<<<< HEAD
-|   |   `-- 449a3f0fcd
-|   |       |-- 40c1b8858f.num -> ../../../exprs/length/40c1b8858f_0.num
-|   |       |-- 40c1b8858f.num.args -> ../../../cache/lines/...
-|   |       |-- a506be6b4b.num -> ../../../exprs/length/a506be6b4b_0.num
-|   |       `-- a506be6b4b.num.args -> ../../../cache/lines/...
-=======
-|   |   `-- ef72711814
+|   |   `-- dcd259e32f
 |   |       |-- a0ba27388c.num -> ../../../exprs/length/a0ba27388c_0.num
 |   |       |-- a0ba27388c.num.args -> ../../../cache/lines/...
 |   |       |-- d7253aa6a0.num -> ../../../exprs/length/d7253aa6a0_0.num
 |   |       `-- d7253aa6a0.num.args -> ../../../cache/lines/...
->>>>>>> update tests
 |   |-- load
 |   |   |-- bb17ca9dfe.gbk -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
 |   |   |-- cb3e90dc00.faa
@@ -22,20 +14,12 @@
 |   `-- split_faa
 |-- exprs
 |   |-- gbk_to_faa
-<<<<<<< HEAD
-|   |   `-- 262cf7e4e4_6e38ddec88_0.faa
-=======
-|   |   `-- acb4ee1de2_455e53b4b0_0.faa
->>>>>>> update tests
+|   |   `-- acb4ee1de2_9de9824b38_0.faa
 |   |-- length
 |   |   |-- a0ba27388c_0.num -> ../../cache/lines/...
 |   |   `-- d7253aa6a0_0.num -> ../../cache/lines/...
 |   |-- length_each
-<<<<<<< HEAD
-|   |   `-- 2ecee5eff4_0.num.list -> ../../cache/lines/...
-=======
-|   |   `-- 4982dfdcf7_0.num.list -> ../../cache/lines/...
->>>>>>> update tests
+|   |   `-- 8b78b5adb5_0.num.list -> ../../cache/lines/...
 |   |-- list
 |   |   `-- 1135f45194_0.faa.list.list -> ../../cache/lines/...
 |   |-- load_faa
@@ -902,7 +886,6 @@
 |   |   |           `-- c6
 |   |   |               `-- 32
 |   |   |                   `-- f.faa
-|   |   |-- 37261f1f62_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |   |-- 39
 |   |   |   |-- 73
 |   |   |   |   `-- d3
@@ -3057,6 +3040,7 @@
 |   |   |           `-- ab
 |   |   |               `-- 84
 |   |   |                   `-- f.faa
+|   |   |-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |   |-- bb
 |   |   |   |-- 88
 |   |   |   |   `-- 32
@@ -3621,7 +3605,6 @@
 |   |   |           `-- 81
 |   |   |               `-- 81
 |   |   |                   `-- 4.faa
-|   |   |-- dd27a28c2a_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |   |-- de
 |   |   |   |-- 5e
 |   |   |   |   `-- 54
@@ -4105,31 +4088,18 @@
 |   |                   `-- 68
 |   |                       `-- 3.faa
 |   |-- load_gbk
-<<<<<<< HEAD
-|   |   `-- 3bab018e1a_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
+|   |   `-- 99dc942b60_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
 |   |-- split_faa
-|   |   |-- 1120920c02_0.faa.list -> ../../cache/lines/...
-|   |   `-- cdd012aa55_0.faa.list -> ../../cache/lines/...
-=======
-|   |   `-- ff560537cf_0.gbk -> ../../cache/load/bb17ca9dfe.gbk
-|   |-- split_faa
-|   |   |-- 6ef7abd652_0.faa.list -> ../../cache/lines/...
-|   |   `-- bcdc8b00a7_0.faa.list -> ../../cache/lines/...
->>>>>>> update tests
+|   |   |-- 593c7bc0a9_0.faa.list -> ../../cache/lines/...
+|   |   `-- e0be9800d0_0.faa.list -> ../../cache/lines/...
 |   `-- str
 |       |-- 3e6793b201_0.str -> ../../cache/lines/...
 |       |-- 90811d06ee_0.str -> ../../cache/lines/...
 |       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
-<<<<<<< HEAD
-    |-- faas1.faa.list -> ../exprs/split_faa/cdd012aa55_0.faa.list
-    |-- faas2.faa.list -> ../exprs/split_faa/1120920c02_0.faa.list
-    |-- lengths.num.list -> ../exprs/length_each/2ecee5eff4_0.num.list
-=======
-    |-- faas1.faa.list -> ../exprs/split_faa/bcdc8b00a7_0.faa.list
-    |-- faas2.faa.list -> ../exprs/split_faa/6ef7abd652_0.faa.list
-    |-- lengths.num.list -> ../exprs/length_each/4982dfdcf7_0.num.list
->>>>>>> update tests
+    |-- faas1.faa.list -> ../exprs/split_faa/e0be9800d0_0.faa.list
+    |-- faas2.faa.list -> ../exprs/split_faa/593c7bc0a9_0.faa.list
+    |-- lengths.num.list -> ../exprs/length_each/8b78b5adb5_0.num.list
     `-- result -> ../vars/lengths.num.list
 
 3315 directories, 787 files
