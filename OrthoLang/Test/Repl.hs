@@ -12,7 +12,7 @@ import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Repl         (mkRepl)
 import OrthoLang.Core.Util         (readFileStrict)
 import OrthoLang.Core.Types        (OrthoLangConfig(..), Locks, ReplM, HashedIDsRef)
-import System.Directory           (createDirectoryIfMissing, removeFile) -- copyFile
+import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
