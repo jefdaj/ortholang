@@ -202,8 +202,8 @@ mkTests cfg ref ids = do
   exNames <- getTestScripts exDir
   let exNames' = map ("examples_" ++) exNames
   mchecks <- mapM (findTestFile testDir "check" "sh") (names ++ exNames')
-  let cuts   = map (testFilePath testDir "scripts"  "cut") names ++
-               map (testFilePath exDir "cut-scripts" "cut") exNames
+  let cuts   = map (testFilePath testDir "scripts"  "ol") names ++
+               map (testFilePath exDir   "scripts"  "ol") exNames
       outs   = map (testFilePath testDir "stdout"   "txt") (names ++ exNames')
       trees  = map (testFilePath testDir "tmpfiles" "txt") (names ++ exNames')
       hepts  = zip5 (names ++ exNames') cuts outs trees mchecks
