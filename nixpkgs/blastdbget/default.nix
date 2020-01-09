@@ -2,6 +2,7 @@
 with pythonPackages;
 
 # TODO patch to use the ortholang tmpdir for downloads rather than /tmp?
+# TODO update patch to comment out validate_dbs, import sh lines too
 
 buildPythonPackage {
   name = "blastdbget";
