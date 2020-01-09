@@ -7,7 +7,7 @@ license:            AGPL-3
 license-file:       LICENSE
 build-type:         Simple
 cabal-version:      >=1.10
-data-files:         examples/cut-scripts/*.cut,
+data-files:         examples/scripts/*.ol,
                     examples/gene-lists/*.txt,
                     examples/genome-lists/*.txt,
                     examples/sequences/*.fa,

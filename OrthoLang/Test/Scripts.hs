@@ -1,4 +1,4 @@
-module ShortCut.Test.Scripts where
+module OrthoLang.Test.Scripts where
 
 -- import Prelude hiding (writeFile)
 
@@ -9,15 +9,15 @@ import qualified Data.ByteString.Lazy  as BL
 -- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
 import qualified Data.ByteString.Lazy.Char8 as B8
 import Data.List                  (zip5)
-import Paths_ShortCut             (getDataFileName)
-import ShortCut.Core.Eval         (evalFile)
-import ShortCut.Core.Parse        (parseFileIO)
-import ShortCut.Core.Paths        (toGeneric)
-import ShortCut.Core.Util         (justOrDie)
--- import ShortCut.Core.Pretty       (writeScript)
-import ShortCut.Core.Types        (CutConfig(..), HashedIDsRef)
-import ShortCut.Core.Locks        (Locks, withWriteLock)
-import ShortCut.Test.Repl         (mkTestGroup)
+import Paths_OrthoLang             (getDataFileName)
+import OrthoLang.Core.Eval         (evalFile)
+import OrthoLang.Core.Parse        (parseFileIO)
+import OrthoLang.Core.Paths        (toGeneric)
+import OrthoLang.Core.Util         (justOrDie)
+-- import OrthoLang.Core.Pretty       (writeScript)
+import OrthoLang.Core.Types        (OrthoLangConfig(..), HashedIDsRef)
+import OrthoLang.Core.Locks        (Locks, withWriteLock)
+import OrthoLang.Test.Repl         (mkTestGroup)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (takeBaseName, (</>), (<.>))
 import System.IO                  (stdout, stderr)
@@ -80,18 +80,18 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
-mkOutTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
+mkOutTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
 mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
-      out <- runCut cfg ref ids
+      out <- runOrthoLang cfg ref ids
       -- uncomment to update the golden stdout files:
       -- writeFile ("/home/jefdaj/shortcut/tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
 
-mkTreeTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
+mkTreeTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
 mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
@@ -103,14 +103,14 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     treeCmd = "tree -a --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
-      _ <- runCut cfg ref ids
+      _ <- runOrthoLang cfg ref ids
       out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
 
 -- TODO use safe writes here
-mkTripTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
+mkTripTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
 mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
   where
     desc = "unchanged by round-trip to file"
@@ -129,7 +129,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
 
 -- test that no absolute paths snuck into the tmpfiles
 -- TODO sanitize stdout + stderr too when running scripts
-mkAbsTest :: CutConfig -> Locks -> HashedIDsRef -> IO [TestTree]
+mkAbsTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
@@ -137,15 +137,15 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
     grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err", "--exclude=*.ini", "--exclude=*.log",
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
-      _ <- runCut cfg ref ids
+      _ <- runOrthoLang cfg ref ids
       (_, out, err) <- readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
 {- This is more or less idempotent because re-running the same cut multiple
  - times is fast. So it's OK to run it once for each test in a group.
  -}
-runCut :: CutConfig -> Locks -> HashedIDsRef -> IO String
-runCut cfg ref ids =  do
+runOrthoLang :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO String
+runOrthoLang cfg ref ids =  do
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile stdout cfg ref ids
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
@@ -155,7 +155,7 @@ runCut cfg ref ids =  do
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
-              -> CutConfig -> Locks -> HashedIDsRef -> IO TestTree
+              -> OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkScriptTests (name, cut, out, tre, mchk) cfg ref ids = do
   absTests   <- mkAbsTest   cfg' ref ids -- just one, but comes as a list
   checkTests <- case mchk of
@@ -176,12 +176,12 @@ mkScriptTests (name, cut, out, tre, mchk) cfg ref ids = do
  - they should give no output if the tests pass, and print errors otherwise
  - TODO move stdout inside the tmpdir?
  -}
-mkCheckTest :: CutConfig -> Locks -> HashedIDsRef -> FilePath -> IO [TestTree]
+mkCheckTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> IO [TestTree]
 mkCheckTest cfg ref ids scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
   where
     desc = "output + tmpfiles checked by script"
     runCheck = do
-      _ <- runCut cfg ref ids
+      _ <- runOrthoLang cfg ref ids
       (_, out, err) <- readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
@@ -194,7 +194,7 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
-mkTests :: CutConfig -> Locks -> HashedIDsRef -> IO TestTree
+mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
