@@ -13,3 +13,5 @@ genes_with_hits = extract_queries blast_hits
 
 # get a list of sequences in the database that matched those genes
 nr_seq_matches = extract_targets blast_hits
+
+result = "nothing so far"
