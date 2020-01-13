@@ -74,8 +74,8 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-sonicparanoid](https://github.com/jefdaj/ortholang/tree/module-sonicparanoid) | :heavy_check_mark: | ![module-sonicparanoid](https://badgen.net/travis/jefdaj/ortholang/module-sonicparanoid?label=) | :white_check_mark:  |  |
 | [module-summarize](https://github.com/jefdaj/ortholang/tree/module-summarize) | :heavy_check_mark: | ![module-summarize](https://badgen.net/travis/jefdaj/ortholang/module-summarize?label=) |  |  |
 
-Build Shortcut and run self-tests
----------------------------------
+Build Ortholang and run self-tests
+----------------------------------
 
 OrthoLang is best built using [Nix][2], which ensures that all dependencies are
 exactly satisfied. Not much human work is required, but it will download and/or

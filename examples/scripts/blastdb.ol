@@ -24,7 +24,7 @@ swissprot = blastdbget_prot "swissprot"
 # makeblastdb_prot_each instead.
 mycodb = makeblastdb_prot_all (load_faa_glob "examples/sequences/Mycoplasma_*_refseq.faa")
 
-# The convention in ShortCut is that BLAST functions expect to be passed FASTA
+# The convention in OrthoLang is that BLAST functions expect to be passed FASTA
 # files and make any needed databases themselves. But for each function that
 # does that there's another with a _db suffix that takes the raw database.
 # For example, the tblastn and tblastn_db calls here will come out the same:

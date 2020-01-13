@@ -35,7 +35,7 @@ let
 
   # TODO why is patching shebangs on the wrapped scripts necessary??
   mkModule = src: extraRunDeps: extraWraps:
-    let name = "Shortcut-" + baseNameOf src;
+    let name = "OrthoLang-" + baseNameOf src;
         runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;

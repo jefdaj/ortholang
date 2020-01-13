@@ -74,7 +74,7 @@ goldenRepl cfg ref ids goldenFile = do
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut cfg' ref ids
                -- uncomment to update repl golden files:
-               -- >> copyFile tstOut ("/home/jefdaj/shortcut/tests/repl" </> takeBaseName goldenFile <.> "txt")
+               -- >> copyFile tstOut ("/home/jefdaj/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
   return $ goldenVsFile desc goldenFile tstOut action
 
 knownFailing :: [FilePath]
@@ -116,7 +116,7 @@ goldenReplTree cfg ref ids ses = do
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  -- uncomment to update golden repl trees
-                 -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
+                 -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 
