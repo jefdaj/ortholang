@@ -1,39 +1,39 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ v1 = "original first var"
+ortholang —▶ v1 = "original first var"
 
-shortcut —▶ v2 = "second var"
+ortholang —▶ v2 = "second var"
 
-shortcut —▶ :show
+ortholang —▶ :show
 v1 = "original first var"
 v2 = "second var"
 
-shortcut —▶ v1 = "replacement first var"
+ortholang —▶ v1 = "replacement first var"
 
-shortcut —▶ :show
+ortholang —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
 
-shortcut —▶ v2
+ortholang —▶ v2
 "second var"
 
-shortcut —▶ v3 = "third var, inserted after result"
+ortholang —▶ v3 = "third var, inserted after result"
 
-shortcut —▶ :show
+ortholang —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
 result = v2
 v3 = "third var, inserted after result"
 
-shortcut —▶ v3
+ortholang —▶ v3
 "third var, inserted after result"
 
-shortcut —▶ :show
+ortholang —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
 v3 = "third var, inserted after result"
 result = v3
 
-shortcut —▶ :quit
+ortholang —▶ :quit
 Bye for now!

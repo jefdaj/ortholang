@@ -1,0 +1,2 @@
+examples/sequences/PCC_6803_genes_10.faa
+examples/sequences/PCC_7942_genes_10.faa

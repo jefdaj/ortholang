@@ -1,3 +1,0 @@
-mgen = load_faa "data/Mycoplasma_genitalium_small.faa"
-maga = gbk_to_fna "cds" (load_gbk "data/Mycoplasma_agalactiae_PG2.gbk")
-result = diamond_blastx_more_sensitive 1.0e-50 maga mgen

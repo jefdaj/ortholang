@@ -1,3 +1,0 @@
-gbk = load_gbk "data/Mycoplasma_genitalium_M2321.gbk"
-faa = gbk_to_faa "cds" gbk
-result = faa

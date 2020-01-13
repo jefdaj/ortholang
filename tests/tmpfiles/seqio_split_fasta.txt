@@ -1,12 +1,12 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 5a68885b25
-|   |   |   |-- 4c3a8ed07a.faa.list -> ../../../exprs/split_faa/4c3a8ed07a_0.faa.list
-|   |   |   `-- 4c3a8ed07a.faa.list.args -> ../../../cache/lines/...
-|   |   `-- eebe5c8e39
-|   |       |-- 40c1b8858f.num -> ../../../exprs/length/40c1b8858f_0.num
-|   |       `-- 40c1b8858f.num.args -> ../../../cache/lines/...
+|   |   |-- 028d922335
+|   |   |   |-- d7253aa6a0.num -> ../../../exprs/length/d7253aa6a0_0.num
+|   |   |   `-- d7253aa6a0.num.args -> ../../../cache/lines/...
+|   |   `-- 0fdfba2fd6
+|   |       |-- 06fd51cdc4.faa.list -> ../../../exprs/split_faa/06fd51cdc4_0.faa.list
+|   |       `-- 06fd51cdc4.faa.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- cb3e90dc00.faa
 |   |   `-- cb3e90dc00.faa.ids
@@ -14,15 +14,15 @@
 |   `-- split_faa_each
 |-- exprs
 |   |-- any
-|   |   `-- 4b39c8d603_0.faa.list.list -> ../../cache/lines/...
+|   |   `-- b5adcac173_0.faa.list.list -> ../../cache/lines/...
 |   |-- length
-|   |   `-- 40c1b8858f_0.num -> ../../cache/lines/...
+|   |   `-- d7253aa6a0_0.num -> ../../cache/lines/...
 |   |-- length_each
-|   |   `-- 4cec83f40c_0.num.list -> ../../cache/lines/...
+|   |   `-- 70c38d31a7_0.num.list -> ../../cache/lines/...
 |   |-- list
-|   |   |-- 60229cb1c9_0.faa.list.list.list -> ../../cache/lines/...
-|   |   |-- 7289342c27_0.faa.list.list -> ../../cache/lines/...
-|   |   `-- 903b902e8a_0.faa.list -> ../../cache/lines/...
+|   |   |-- 1ed650df10_0.faa.list -> ../../cache/lines/...
+|   |   |-- 43ee22bfd7_0.faa.list.list.list -> ../../cache/lines/...
+|   |   `-- ead79b9394_0.faa.list.list -> ../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 00
 |   |   |   `-- 28
@@ -30,7 +30,6 @@
 |   |   |           `-- 57
 |   |   |               `-- 08
 |   |   |                   `-- b.faa
-|   |   |-- 1da1b2a943_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |   |-- 4f
 |   |   |   `-- ae
 |   |   |       `-- 11
@@ -49,23 +48,24 @@
 |   |   |           `-- 19
 |   |   |               `-- 6b
 |   |   |                   `-- 4.faa
-|   |   `-- a7
-|   |       `-- ba
-|   |           `-- 8c
-|   |               `-- 36
-|   |                   `-- 7d
-|   |                       `-- 3.faa
+|   |   |-- a7
+|   |   |   `-- ba
+|   |   |       `-- 8c
+|   |   |           `-- 36
+|   |   |               `-- 7d
+|   |   |                   `-- 3.faa
+|   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |-- split_faa
-|   |   |-- 183f436b85_0.faa.list -> ../../cache/lines/...
-|   |   `-- 4c3a8ed07a_0.faa.list -> ../../cache/lines/...
+|   |   |-- 06fd51cdc4_0.faa.list -> ../../cache/lines/...
+|   |   `-- e0be9800d0_0.faa.list -> ../../cache/lines/...
 |   |-- split_faa_each
-|   |   `-- ba6193e8d1_0.faa.list.list -> ../../cache/lines/...
+|   |   `-- 5caf93c9c9_0.faa.list.list -> ../../cache/lines/...
 |   `-- str
-|       `-- c5570b421f_0.str -> ../../cache/lines/...
+|       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
-    |-- genes.faa.list -> ../exprs/split_faa/183f436b85_0.faa.list
-    |-- mapped.faa.list.list -> ../exprs/split_faa_each/ba6193e8d1_0.faa.list.list
-    |-- multifa.faa -> ../exprs/load_faa/1da1b2a943_0.faa
-    `-- result -> ../exprs/length_each/4cec83f40c_0.num.list
+    |-- genes.faa.list -> ../exprs/split_faa/e0be9800d0_0.faa.list
+    |-- mapped.faa.list.list -> ../exprs/split_faa_each/5caf93c9c9_0.faa.list.list
+    |-- multifa.faa -> ../exprs/load_faa/ba41f009f5_0.faa
+    `-- result -> ../exprs/length_each/70c38d31a7_0.num.list
 
 42 directories, 26 files

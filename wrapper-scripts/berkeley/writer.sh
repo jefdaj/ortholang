@@ -8,7 +8,7 @@
 
 # Part of a two-part wrapper script for Berkeley's HPC environment that hacks
 # around the inability to use SLURM from within a Singularity image. This
-# script is called by shortcut with the regular command as argument 1. For
+# script is called by ortholang with the regular command as argument 1. For
 # example:
 #
 # ./wrappers/berkeley-writer.sh 'md5sum /path/to/file.faa'
@@ -34,7 +34,7 @@ logpath="${hashpath}.log"
 outpath="${hashpath}.out"
 exitpath="${hashpath}.exit"
 
-image="${scratch}/shortcut.img"
+image="${scratch}/ortholang.img"
 singularity_cmd="singularity exec ${image} $1"
 
 # write the srun script, which includes some extra machinery to ensure only one

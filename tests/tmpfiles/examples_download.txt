@@ -1,0 +1,15 @@
+.
+|-- cache
+|   `-- blastdbget
+|       |-- dblist.txt
+|       `-- dblist.txt.err
+|-- exprs
+|   |-- blastdblist
+|   |   `-- 32f8f062fe_0.str.list -> ../../cache/lines/...
+|   `-- str
+|       `-- 072c64781f_0.str -> ../../cache/lines/...
+`-- vars
+    |-- ncbi_human_db_list.str.list -> ../exprs/blastdblist/32f8f062fe_0.str.list
+    `-- result -> ../vars/ncbi_human_db_list.str.list
+
+6 directories, 6 files

@@ -1,0 +1,137 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 0d8dfa261e.faa
+|   |   |-- 0d8dfa261e.faa.ids
+|   |   |-- 11bbf54fc6.faa
+|   |   |-- 11bbf54fc6.faa.ids
+|   |   |-- 165315693c.faa
+|   |   |-- 165315693c.faa.ids
+|   |   |-- 306ef4e6c6.faa
+|   |   |-- 306ef4e6c6.faa.ids
+|   |   |-- 35c3295f2e.faa
+|   |   |-- 35c3295f2e.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   |-- 36189032ad.faa.ids
+|   |   |-- 43bf492ff0.faa
+|   |   |-- 43bf492ff0.faa.ids
+|   |   |-- 4b624c0c8d.faa
+|   |   |-- 4b624c0c8d.faa.ids
+|   |   |-- 781ac8532f.faa
+|   |   |-- 781ac8532f.faa.ids
+|   |   |-- 806cb805fc.faa
+|   |   |-- 806cb805fc.faa.ids
+|   |   |-- 8ad58ec4ef.faa
+|   |   |-- 8ad58ec4ef.faa.ids
+|   |   |-- d371a5b0f3.faa
+|   |   |-- d371a5b0f3.faa.ids
+|   |   |-- f47bc9964f.faa
+|   |   |-- f47bc9964f.faa.ids
+|   |   |-- fab3203dba.faa
+|   |   |-- fab3203dba.faa.ids
+|   |   |-- fd55270dfc.faa
+|   |   `-- fd55270dfc.faa.ids
+|   `-- mmseqs
+|       |-- createdb
+|       |   |-- 186dae3615.mmseqs2db
+|       |   |-- 186dae3615.mmseqs2db.dbtype
+|       |   |-- 186dae3615.mmseqs2db.err
+|       |   |-- 186dae3615.mmseqs2db_h
+|       |   |-- 186dae3615.mmseqs2db_h.dbtype
+|       |   |-- 186dae3615.mmseqs2db_h.index
+|       |   |-- 186dae3615.mmseqs2db.index
+|       |   |-- 186dae3615.mmseqs2db.lookup
+|       |   |-- 186dae3615.mmseqs2db.out
+|       |   |-- 5916b67034.mmseqs2db
+|       |   |-- 5916b67034.mmseqs2db.dbtype
+|       |   |-- 5916b67034.mmseqs2db.err
+|       |   |-- 5916b67034.mmseqs2db_h
+|       |   |-- 5916b67034.mmseqs2db_h.dbtype
+|       |   |-- 5916b67034.mmseqs2db_h.index
+|       |   |-- 5916b67034.mmseqs2db.index
+|       |   |-- 5916b67034.mmseqs2db.lookup
+|       |   |-- 5916b67034.mmseqs2db.out
+|       |   |-- 693b7e2135.mmseqs2db
+|       |   |-- 693b7e2135.mmseqs2db.dbtype
+|       |   |-- 693b7e2135.mmseqs2db.err
+|       |   |-- 693b7e2135.mmseqs2db_h
+|       |   |-- 693b7e2135.mmseqs2db_h.dbtype
+|       |   |-- 693b7e2135.mmseqs2db_h.index
+|       |   |-- 693b7e2135.mmseqs2db.index
+|       |   |-- 693b7e2135.mmseqs2db.lookup
+|       |   `-- 693b7e2135.mmseqs2db.out
+|       `-- search
+|           |-- 16c75a92e5.mmseqs2db.0
+|           |-- 16c75a92e5.mmseqs2db.1
+|           |-- 16c75a92e5.mmseqs2db.2
+|           |-- 16c75a92e5.mmseqs2db.3
+|           |-- 16c75a92e5.mmseqs2db.4
+|           |-- 16c75a92e5.mmseqs2db.5
+|           |-- 16c75a92e5.mmseqs2db.6
+|           |-- 16c75a92e5.mmseqs2db.7
+|           |-- 16c75a92e5.mmseqs2db.dbtype
+|           |-- 16c75a92e5.mmseqs2db.err
+|           |-- 16c75a92e5.mmseqs2db.index
+|           |-- 16c75a92e5.mmseqs2db.out
+|           |-- d65d0659b7.mmseqs2db.0
+|           |-- d65d0659b7.mmseqs2db.1
+|           |-- d65d0659b7.mmseqs2db.2
+|           |-- d65d0659b7.mmseqs2db.3
+|           |-- d65d0659b7.mmseqs2db.4
+|           |-- d65d0659b7.mmseqs2db.5
+|           |-- d65d0659b7.mmseqs2db.6
+|           |-- d65d0659b7.mmseqs2db.7
+|           |-- d65d0659b7.mmseqs2db.dbtype
+|           |-- d65d0659b7.mmseqs2db.err
+|           |-- d65d0659b7.mmseqs2db.index
+|           `-- d65d0659b7.mmseqs2db.out
+|-- exprs
+|   |-- diff
+|   |   |-- 29d8afc4a7_0.faa.list -> ../../cache/lines/...
+|   |   `-- 5fc28dbc9c_0.str.list -> ../../cache/lines/...
+|   |-- extract_queries
+|   |   |-- 16c75a92e5_0.str.list -> ../../cache/lines/...
+|   |   |-- 16c75a92e5_0.str.list.tmp.err
+|   |   |-- 42ea003f94_0.str.list -> ../../cache/lines/...
+|   |   `-- 42ea003f94_0.str.list.tmp.err
+|   |-- glob_files
+|   |   `-- c66c960bb5_0.str.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 23a13d78d4_0.faa.list.list -> ../../cache/lines/...
+|   |   |-- 2609fbceb1_0.faa.list -> ../../cache/lines/...
+|   |   |-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
+|   |   |-- a0713b12dc_0.str.list.list -> ../../cache/lines/...
+|   |   `-- e84d0351e0_0.faa.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 63991ace99_0.faa -> ../../cache/load/43bf492ff0.faa
+|   |-- mmseqs_createdb
+|   |   |-- 1523a4da89_0.mms -> ../../cache/mmseqs/createdb/5916b67034.mmseqs2db.index
+|   |   `-- 24d4dec821_0.mms -> ../../cache/mmseqs/createdb/693b7e2135.mmseqs2db.index
+|   |-- mmseqs_createdb_all
+|   |   `-- 6f6d180135_0.mms -> ../../cache/mmseqs/createdb/186dae3615.mmseqs2db.index
+|   |-- mmseqs_search
+|   |   |-- 4f840982e4_b947a1128f_8276957c8b_0.bht
+|   |   |-- 4f840982e4_b947a1128f_8276957c8b_0.bht.err
+|   |   `-- 4f840982e4_b947a1128f_8276957c8b_0.bht.out
+|   |-- mmseqs_search_db
+|   |   |-- 4f840982e4_b947a1128f_e6a5024844_0.bht
+|   |   |-- 4f840982e4_b947a1128f_e6a5024844_0.bht.err
+|   |   `-- 4f840982e4_b947a1128f_e6a5024844_0.bht.out
+|   |-- num
+|   |   `-- 1759491fab_0.num -> ../../cache/lines/...
+|   `-- str
+|       |-- 7e4b736a9e_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- ec25710c91_0.str -> ../../cache/lines/...
+`-- vars
+    |-- genes1.str.list -> ../exprs/extract_queries/42ea003f94_0.str.list
+    |-- genes2.str.list -> ../exprs/extract_queries/16c75a92e5_0.str.list
+    |-- hits1.bht -> ../exprs/mmseqs_search/4f840982e4_b947a1128f_8276957c8b_0.bht
+    |-- hits2.bht -> ../exprs/mmseqs_search_db/4f840982e4_b947a1128f_e6a5024844_0.bht
+    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
+    |-- mbov.faa -> ../exprs/load_faa/63991ace99_0.faa
+    |-- others.faa.list -> ../exprs/diff/29d8afc4a7_0.faa.list
+    `-- result -> ../exprs/diff/5fc28dbc9c_0.str.list
+
+18 directories, 116 files

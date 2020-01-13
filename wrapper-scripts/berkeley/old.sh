@@ -7,18 +7,18 @@
 # though if you adjust the SRUN command to match your system requirements.
 
 # Note that you also need to set TMPDIR to something shared across machines
-# before invoking shortcut. For example I use:
-# export TMPDIR=/global/scratch/jefdaj/shortcut-test
+# before invoking ortholang. For example I use:
+# export TMPDIR=/global/scratch/jefdaj/ortholang-test
 # Otherwise you'll get lots of possibly-confusing srun errors!
 
-# TODO set logfile from shortcut config
+# TODO set logfile from ortholang config
 
 # Common options for all srun commands
 SRUN="srun --account=co_rosalind --partition=savio2_htc --qos=rosalind_htc2_normal"
 SRUN="$SRUN --chdir $(pwd) --quiet"
 
-# TODO remove now that shortcut sets this?
-export TMPDIR="/clusterfs/rosalind/users/jefdaj/shortcut/shortcut-tmpdir"
+# TODO remove now that ortholang sets this?
+export TMPDIR="/clusterfs/rosalind/users/jefdaj/ortholang/ortholang-tmpdir"
 mkdir -p "$TMPDIR"
 
 JOBSFILE="${TMPDIR}/jobs.txt"
@@ -99,7 +99,7 @@ srun_split() {
 
 srun_parallel() {
   # monkey-patches a parallel call to run its individual commands via slurm
-  # note that it's brittle and only works on shortcut-generated blast commands
+  # note that it's brittle and only works on ortholang-generated blast commands
   #sleep $(shuf -i 0-300 -n1) # prevent all trying to limit_total_jobs at once
   cmd="$@"
   before="$(echo "$cmd" | cut -d' ' -f-12)" # ... --pipe

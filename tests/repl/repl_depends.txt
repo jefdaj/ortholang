@@ -1,35 +1,35 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ v1 = "one"
+ortholang —▶ v1 = "one"
 
-shortcut —▶ v2 = "two"
+ortholang —▶ v2 = "two"
 
-shortcut —▶ v3 = [v1, v2]
+ortholang —▶ v3 = [v1, v2]
 
-shortcut —▶ :show
+ortholang —▶ :show
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-shortcut —▶ :neededfor v1
+ortholang —▶ :neededfor v1
 v1 = "one"
 
-shortcut —▶ :neededfor v2
+ortholang —▶ :neededfor v2
 v2 = "two"
 
-shortcut —▶ :neededfor v3
+ortholang —▶ :neededfor v3
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-shortcut —▶ v4 = v3
+ortholang —▶ v4 = v3
 
-shortcut —▶ :neededfor v4
+ortholang —▶ :neededfor v4
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 v4 = v3
 
-shortcut —▶ :q
+ortholang —▶ :q
 Bye for now!

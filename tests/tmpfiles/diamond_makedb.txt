@@ -5,15 +5,15 @@
 |       `-- 10ffe0cf0f.faa.ids
 |-- exprs
 |   |-- diamond_makedb
-|   |   |-- c8116966c3_0.dmnd
-|   |   |-- c8116966c3_0.dmnd.err
-|   |   `-- c8116966c3_0.dmnd.out
+|   |   |-- ff056810c7_0.dmnd
+|   |   |-- ff056810c7_0.dmnd.err
+|   |   `-- ff056810c7_0.dmnd.out
 |   |-- load_faa
-|   |   `-- a3d0ec3042_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- 281359b1ca_0.faa -> ../../cache/load/10ffe0cf0f.faa
 |   `-- str
-|       `-- d03a6ca5fb_0.str -> ../../cache/lines/...
+|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
-    |-- mgen.faa -> ../exprs/load_faa/a3d0ec3042_0.faa
-    `-- result -> ../exprs/diamond_makedb/c8116966c3_0.dmnd
+    |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
+    `-- result -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
 
 7 directories, 9 files

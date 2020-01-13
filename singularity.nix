@@ -1,15 +1,15 @@
 with import ./nixpkgs;
 
-let shortcut = import ./default.nix;
+let ortholang = import ./default.nix;
 
 in pkgs.singularity-tools.buildImage {
-  name = "shortcut-${shortcut.version}";
+  name = "ortholang-${ortholang.version}";
   contents = [
     # TODO which of these are actually needed on berkeley hpc?
     coreutils
     binutils
     utillinux
-    shortcut
+    ortholang
     openssh
     openmpi
     slurm
@@ -18,8 +18,8 @@ in pkgs.singularity-tools.buildImage {
   # This is for the temporary build image; final output will be smaller
   diskSize = 10240;
 
-  # TODO launch shortcut directly rather than bash?
-  runScript = "#!${shortcut.env}\nexec bash \"\$@\"";
+  # TODO launch ortholang directly rather than bash?
+  runScript = "#!${ortholang.env}\nexec bash \"\$@\"";
 
   # These should be absolute paths with the leading / removed.
   # Consult your HPC admin/support for help determining what to bind,

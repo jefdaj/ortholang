@@ -1,0 +1,45 @@
+.
+|-- cache
+|   |-- concat
+|   |   |-- c8508695ef.txt -> ../../cache/lines/...
+|   |   `-- emptyfaa.txt -> ../../cache/lines/...
+|   |-- each
+|   |   `-- 45a3061e78
+|   |       |-- 5edc709220.faa -> ../../../exprs/gbk_to_faa/37fd11c13a_5edc709220_0.faa
+|   |       |-- 5edc709220.faa.args -> ../../../cache/lines/...
+|   |       |-- a442bad0d5.faa -> ../../../exprs/gbk_to_faa/37fd11c13a_a442bad0d5_0.faa
+|   |       `-- a442bad0d5.faa.args -> ../../../cache/lines/...
+|   |-- load
+|   |   |-- 5e5e074c73.list -> $WORKDIR/examples/gene-lists/pcc7942-random-100.txt
+|   |   |-- d8da51f7cd.gbk -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
+|   |   `-- ec9540d17e.gbk -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
+|   `-- seqio
+|       `-- a846b88228.txt -> ../../cache/lines/...
+|-- exprs
+|   |-- concat_faa
+|   |   `-- 028e7186b2_0.faa
+|   |-- extract_seqs
+|   |   `-- 8dca01b696_cef416d573_0.faa
+|   |-- gbk_to_faa
+|   |   |-- 37fd11c13a_5edc709220_0.faa
+|   |   `-- 37fd11c13a_a442bad0d5_0.faa
+|   |-- gbk_to_faa_each
+|   |   `-- acb4ee1de2_2e7f888133_0.faa.list -> ../../cache/lines/...
+|   |-- list
+|   |   |-- 2ae3c51a67_0.gbk.list -> ../../cache/lines/...
+|   |   `-- 86fe448335_0.str.list -> ../../cache/lines/...
+|   |-- load_faa
+|   |-- load_list
+|   |   `-- 8d68f59148_0.str.list -> ../../cache/load/5e5e074c73.list
+|   `-- str
+|       |-- 352a01db6d_0.str -> ../../cache/lines/...
+|       |-- 3a80eda966_0.str -> ../../cache/lines/...
+|       |-- 90811d06ee_0.str -> ../../cache/lines/...
+|       `-- b6bd6d67ae_0.str -> ../../cache/lines/...
+`-- vars
+    |-- genes_of_interest.str.list -> ../exprs/load_list/8d68f59148_0.str.list
+    |-- pcc7942genes.faa -> ../exprs/concat_faa/028e7186b2_0.faa
+    |-- result -> ../vars/sequences_of_interest.faa
+    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/8dca01b696_cef416d573_0.faa
+
+16 directories, 26 files

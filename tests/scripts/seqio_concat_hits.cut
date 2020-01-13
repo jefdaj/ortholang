@@ -1,5 +1,0 @@
-query = load_faa "data/Mycoplasma_genitalium_single.faa"
-mgen = makeblastdb_prot (load_faa "data/Mycoplasma_agalactiae_small.faa")
-maga = makeblastdb_prot (load_faa "data/Mycoplasma_genitalium_small.faa")
-hitlists = psiblast_db_each 1.0e-2 query [mgen, maga]
-result = concat_bht hitlists

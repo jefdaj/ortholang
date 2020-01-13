@@ -1,14 +1,14 @@
 with import ./nixpkgs;
 
 let
-  shortcut = import ./default.nix;
+  ortholang = import ./default.nix;
   devDepends = [
     stack
     zip
     # pypi2nix
   ];
 
-in haskell.lib.overrideCabal shortcut (drv: {
+in haskell.lib.overrideCabal ortholang (drv: {
 
   buildDepends = drv.buildDepends ++ devDepends;
 

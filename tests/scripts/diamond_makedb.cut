@@ -1,2 +1,0 @@
-mgen = load_faa "data/Mycoplasma_genitalium_small.faa"
-result = diamond_makedb mgen

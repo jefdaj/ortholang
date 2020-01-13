@@ -15,7 +15,7 @@
 , scikitlearn
 , scipy
 
-# packaged with shortcut
+# packaged with ortholang
 , fastcluster
 , fasttree
 , tree_distance
@@ -24,14 +24,14 @@
 , scikit-bio
 , phylo_utils
 
-# edited version packaged with shortcut
+# edited version packaged with ortholang
 , raxml
 
 }:
 
 let
   # TODO remove this and put all dependencies
-  # pkgs = import /home/jefdaj/shortcut/nixpkgs;
+  # pkgs = import /home/jefdaj/ortholang/nixpkgs;
 
   # TODO can this work without the pypi2nix requirements.nix stuff?
   #      it doesn't really use it much
