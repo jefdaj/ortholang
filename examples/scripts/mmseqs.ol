@@ -1,5 +1,3 @@
-# TODO explain why the two methods come up witi different hits
-
 # list M. agalactiae genes with good hits in M. bovis
 maga   = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
 mbov   = load_faa "examples/sequences/Mycoplasma_bovis_small.fa"
