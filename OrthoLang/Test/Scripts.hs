@@ -87,7 +87,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     scriptAct = do
       out <- runOrthoLang cfg ref ids
       -- uncomment to update the golden stdout files:
-      -- writeFile ("/home/jefdaj/shortcut/tests/stdout" </> takeBaseName gld <.> "txt") out
+      -- writeFile ("/home/jefdaj/ortholang/tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
 
@@ -106,7 +106,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       _ <- runOrthoLang cfg ref ids
       out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
-      -- writeFile ("/home/jefdaj/shortcut/tests/tmpfiles" </> takeBaseName t <.> "txt") out
+      -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
 
 -- TODO use safe writes here

@@ -20,16 +20,16 @@ build_docker_image() {
 run_docker_image() {
   latest=$(docker images | grep ortholang | head -n1 | awk '{print $2}')
   docker run $@ \
-	  ortholang:$latest ortholang $SHORTCUT_ARGS
+	  ortholang:$latest ortholang $ORTHOLANG_ARGS
 }
 
 run_tests() {
-  export SHORTCUT_ARGS='--test all'
+  export ORTHOLANG_ARGS='--test all'
   run_docker_image -t
 }
 
 run_repl() {
-  export SHORTCUT_ARGS='--interactive'
+  export ORTHOLANG_ARGS='--interactive'
 	run_docker_image -i -t \
     --mount type=bind,source="$TMPDIR",target="/tmpdir" \
     --mount type=bind,source="$PWD",target="/workdir"

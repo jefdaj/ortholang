@@ -1,4 +1,4 @@
-# ShortCut mainly deals with files you load yourself, but there are also a few
+# OrthoLang mainly deals with files you load yourself, but there are also a few
 # functions for downloading things from public databases.
 
 # You can list BLAST databases available from NCBI like this:

@@ -1,9 +1,9 @@
-# BLAST can produce results in several formats, but ShortCut sticks with
+# BLAST can produce results in several formats, but OrthoLang sticks with
 # tabular data (-outfmt 6) because it's compatible with many other search
 # programs: PSI-BLAST, CRB-BLAST, Diamond, MMSeqs2, ... You can open the hit
 # tables yourself to look at various statistics. Often you just want to get a
 # list of genes matching some criteria though. Here's how you can do it inside
-# ShortCut. These examples all use BLAST, but should work the same with any
+# OrthoLang. These examples all use BLAST, but should work the same with any
 # program that produces similar hit tables.
 
 # First you have to do a search, of course.
