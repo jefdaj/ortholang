@@ -7,6 +7,10 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
+## [0.9.4] - 2020-01-15
+### Changed
+- Rename ShortCut to OrthoLang
+
 ## [0.9.3] - 2020-01-02
 ### Added
 - Docker image (nix expression, build script, docker hub repo)
@@ -33,6 +37,9 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Move development to `develop` branch; `master` will be for releases
 - Start using semantic versioning
 
-[unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.1...HEAD
+[unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.4...HEAD
+[0.9.4]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.4
+[0.9.3]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.3
+[0.9.2]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.2
 [0.9.1]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.1
 [0.9.0]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.0
