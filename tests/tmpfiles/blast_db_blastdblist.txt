@@ -2,7 +2,8 @@
 |-- cache
 |   `-- blastdbget
 |       |-- dblist.txt
-|       `-- dblist.txt.err
+|       |-- dblist.txt.err
+|       `-- dblist.txt.out
 |-- exprs
 |   |-- any
 |   |   |-- 41c2be5e35_0.str.list -> ../../cache/lines/...
@@ -29,4 +30,4 @@
     |-- proks.str.list -> ../exprs/blastdblist/ab04b3b427_0.str.list
     `-- result -> ../exprs/any/61067f4235_0.str.list
 
-8 directories, 21 files
+8 directories, 22 files

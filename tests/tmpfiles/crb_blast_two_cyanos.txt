@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- crb_blast
-|   |   `-- 9ff08e5d87_aa64689066
+|   |   `-- d4edc4b6ee_823a99bb06
 |   |       |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |   |       |-- 36189032ad_into_6046a54e92.2.blast
 |   |       |-- 36189032ad.phr
@@ -24,7 +24,7 @@
 |       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- crb_blast
-|   |   `-- b23b6505d6_b947a1128f_0.crb -> ../../cache/crb_blast/9ff08e5d87_aa64689066/results.crb
+|   |   `-- b23b6505d6_b947a1128f_0.crb -> ../../cache/crb_blast/d4edc4b6ee_823a99bb06/results.crb
 |   |-- extract_targets
 |   |   |-- 7e2935a015_0.str.list -> ../../cache/lines/...
 |   |   `-- 7e2935a015_0.str.list.tmp.err
