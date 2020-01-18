@@ -228,7 +228,6 @@ readLit cfg locks path = do
     then return ""
     else fmap (checkLit . init) -- TODO safe? already checked if empty
        $ readFileStrict' cfg locks path
-       -- $ traceShowSL (pack "core.actions.readLit") path
 
 readLits :: OrthoLangConfig -> Locks -> FilePath -> Action [String]
 readLits cfg ref path = readList cfg ref path >>= return . checkLits
@@ -563,7 +562,6 @@ hashContent cfg ref@(disk, _) path = do
   need' cfg ref "hashContent" [path']
   -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
   -- out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
-       -- $ withReadLock' locks path
   Stdout out <- withReadLock' ref path' $ withResource disk 1 $ case cfgWrapper cfg of
     Nothing -> command [] "md5sum" [path']
     Just w  -> command [Shell] w ["md5sum", path']
