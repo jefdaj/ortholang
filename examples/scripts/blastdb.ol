@@ -34,4 +34,5 @@ hits1 = tblastn    1e-50 pcc7942  pcc6803
 hits2 = tblastn_db 1e-50 pcc7942 (makeblastdb_nucl pcc6803)
 
 # TODO what should be evaluated?
-result = [human, swissprot, mycodb, makeblastdb_prot pcc6803]
+# result = [human, swissprot, mycodb, makeblastdb_prot pcc6803]
+result = [human, swissprot, mycodb]
