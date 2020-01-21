@@ -27,7 +27,7 @@ aln = OrthoLangType
 
 muscle :: OrthoLangFunction
 muscle = let name = "muscle" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [faa] aln
   , fTypeDesc  = name ++ " : faa -> aln"
   , fFixity    = Prefix
@@ -36,7 +36,7 @@ muscle = let name = "muscle" in OrthoLangFunction
 
 muscleEach :: OrthoLangFunction
 muscleEach = let name = "muscle_each" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf aln)
   , fTypeDesc  = name ++ " : faa.list -> aln.list"
   , fFixity    = Prefix

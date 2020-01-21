@@ -17,10 +17,10 @@ orthoLangModule = OrthoLangModule
   , mDesc = "Basic math"
   , mTypes = [] -- TODO include num?
   , mFunctions =
-    [ mkMathFn "+" (+)
-    , mkMathFn "-" (-)
-    , mkMathFn "*" (*)
-    , mkMathFn "/" (divDouble)
+    [ mkMathFn '+' "plus"   (+)
+    , mkMathFn '-' "minus"  (-)
+    , mkMathFn '*' "times"  (*)
+    , mkMathFn '/' "divide" (divDouble)
     ]
   }
 
@@ -31,11 +31,11 @@ divDouble n1 n2 = read $ show (answer :: Double)
   where
     answer = toRealFloat n1 / toRealFloat n2
 
-mkMathFn :: String -> (Scientific -> Scientific -> Scientific) -> OrthoLangFunction
-mkMathFn name fn = OrthoLangFunction
-  { fName      = name
-  , fTypeCheck = defaultTypeCheck [num, num] num
-  , fTypeDesc  = mkTypeDesc name  [num, num] num
+mkMathFn :: Char -> String -> (Scientific -> Scientific -> Scientific) -> OrthoLangFunction
+mkMathFn opChar opName fn = OrthoLangFunction
+  { fNames     = [[opChar], opName]
+  , fTypeCheck = defaultTypeCheck    [num, num] num
+  , fTypeDesc  = mkTypeDesc [opChar] [num, num] num
   , fFixity    = Infix
   , fRules     = rMath fn
   }

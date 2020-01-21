@@ -76,7 +76,7 @@ blastDescs =
 
 mkBlastFromDb :: BlastDesc -> OrthoLangFunction
 mkBlastFromDb d@(bCmd, qType, _, dbType) = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   , fFixity    = Prefix
@@ -168,7 +168,7 @@ aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 mkBlastFromFa :: BlastDesc -> OrthoLangFunction
 mkBlastFromFa d@(bCmd, qType, sType, _) = OrthoLangFunction
-  { fName      = bCmd
+  { fNames     = [bCmd]
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   , fFixity    = Prefix
@@ -182,7 +182,7 @@ rMkBlastFromFa d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _ [e, q, s])
   = rules st (OrthoLangFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fRules $ mkBlastFromDb d
-    name1 = fName  $ mkBlastFromDb d
+    name1 = head $ fNames $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
     dbExpr = OrthoLangFun dbType salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
@@ -193,7 +193,7 @@ rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 mkBlastFromDbEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   , fFixity    = Prefix
@@ -211,7 +211,7 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 
 mkBlastFromFaEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   , fFixity    = Prefix
@@ -228,5 +228,5 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _   [e, q,
     rules = rMkBlastFromDbEach d
     ss'   = OrthoLangFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
-    fn2   = (fName $ mkBlastFromFa d) ++ "_each"
+    fn2   = (head $ fNames $ mkBlastFromFa d) ++ "_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

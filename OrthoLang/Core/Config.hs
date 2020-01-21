@@ -22,6 +22,7 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import Text.Read.HT               (maybeRead)
 import System.FilePath            ((</>), (<.>))
+import System.Directory           (doesFileExist)
 import System.Info                (os)
 
 import Control.Logging (LogLevel(..), setLogLevel, setDebugSourceRegex)
@@ -102,18 +103,20 @@ getOS = return $ if os == "darwin" then "mac" else os
 
 -- TODO any way to recover if missing? probably not
 -- TODO use a safe read function with locks here?
-getDoc :: FilePath -> IO String
-getDoc docPath = do
-  path' <- getDataFileName $ "docs" </> docPath <.> "txt"
+getDoc :: [FilePath] -> IO String
+getDoc docPaths = do
+  paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) docPaths
+  tests <- mapM doesFileExist paths'
+  let path' = head [p | (p, t) <- zip paths' tests, t]
   -- putStrLn $ "path':" ++ path'
   -- this should only happen during development:
   -- written <- doesFileExist path'
   -- when (not written) $ writeFile path' $ "write " ++ docPath ++ " doc here"
-  doc <- absolutize path' >>= readFile
+  doc <- readFile path'
   return doc
 
 getUsage :: IO Docopt
-getUsage = getDoc "usage" >>= parseUsageOrExit
+getUsage = getDoc ["usage"] >>= parseUsageOrExit
 
 -- hasArg :: Arguments -> String -> Bool
 -- hasArg as a = isPresent as $ longOption a

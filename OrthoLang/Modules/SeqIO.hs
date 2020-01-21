@@ -80,7 +80,7 @@ fna = OrthoLangType
 
 gbkToFaa :: OrthoLangFunction
 gbkToFaa = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   , fFixity    = Prefix
@@ -92,7 +92,7 @@ gbkToFaa = OrthoLangFunction
 -- TODO need to hash IDs afterward!
 gbkToFaaEach :: OrthoLangFunction
 gbkToFaaEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   , fFixity    = Prefix
@@ -103,7 +103,7 @@ gbkToFaaEach = OrthoLangFunction
 
 gbkToFna :: OrthoLangFunction
 gbkToFna = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   , fFixity    = Prefix
@@ -114,7 +114,7 @@ gbkToFna = OrthoLangFunction
 
 gbkToFnaEach :: OrthoLangFunction
 gbkToFnaEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   , fFixity    = Prefix
@@ -171,7 +171,7 @@ aGenbankToFasta _ _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIds :: OrthoLangFunction
 extractIds = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = tExtractIds
   , fTypeDesc  = name ++ " : fa -> str.list"
@@ -183,7 +183,7 @@ extractIds = OrthoLangFunction
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIdsEach :: OrthoLangFunction
 extractIdsEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = tExtractIdsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
@@ -209,7 +209,7 @@ tExtractIdsEach _ = Left "expected a fasta file"
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqs :: OrthoLangFunction
 extractSeqs = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqs
   , fTypeDesc  = name ++ " : fa str.list -> fa"
@@ -231,7 +231,7 @@ aExtractSeqs _ _ _ ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: OrthoLangFunction
 extractSeqsEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
@@ -256,7 +256,7 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 -- TODO name something else like fna_to_faa?
 translate :: OrthoLangFunction
 translate = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [fna] faa
   , fTypeDesc  = mkTypeDesc name  [fna] faa
@@ -267,7 +267,7 @@ translate = OrthoLangFunction
 
 translateEach :: OrthoLangFunction
 translateEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
@@ -284,7 +284,7 @@ translateEach = OrthoLangFunction
 
 mkConcat :: OrthoLangType -> OrthoLangFunction
 mkConcat cType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
@@ -296,7 +296,7 @@ mkConcat cType = OrthoLangFunction
 
 mkConcatEach :: OrthoLangType -> OrthoLangFunction
 mkConcatEach cType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
@@ -366,7 +366,7 @@ aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 
 splitFasta :: OrthoLangType -> OrthoLangFunction
 splitFasta faType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
@@ -378,7 +378,7 @@ splitFasta faType = OrthoLangFunction
 
 splitFastaEach :: OrthoLangType -> OrthoLangFunction
 splitFastaEach faType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)

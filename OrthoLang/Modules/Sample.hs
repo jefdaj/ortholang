@@ -24,7 +24,7 @@ orthoLangModule = OrthoLangModule
 
 sample :: OrthoLangFunction
 sample = OrthoLangFunction
-  { fName      = name 
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeCheck = tSample
   , fRules     = rSample

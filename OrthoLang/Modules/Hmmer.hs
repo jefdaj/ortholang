@@ -46,7 +46,7 @@ hht = OrthoLangType
 
 hmmbuild :: OrthoLangFunction
 hmmbuild = let name = "hmmbuild" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   , fFixity    = Prefix
@@ -55,7 +55,7 @@ hmmbuild = let name = "hmmbuild" in OrthoLangFunction
 
 hmmbuildEach :: OrthoLangFunction
 hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   , fFixity    = Prefix
@@ -64,7 +64,7 @@ hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
 
 hmmsearch :: OrthoLangFunction
 hmmsearch = let name = "hmmsearch" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
   , fFixity    = Prefix
@@ -74,7 +74,7 @@ hmmsearch = let name = "hmmsearch" in OrthoLangFunction
 -- TODO is this the right name for mapping over arg 2?
 hmmsearchEach :: OrthoLangFunction
 hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
   , fFixity    = Prefix
@@ -84,7 +84,7 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
 -- TODO better name, or is this actually the most descriptive way?
 -- hmmsearchEachEach :: OrthoLangFunction
 -- hmmsearchEachEach = let name = "hmmsearch_each_each" in OrthoLangFunction
---   { fName      = name
+--   { fNames     = [name]
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
 --   , fFixity    = Prefix
@@ -141,7 +141,7 @@ aHmmsearch _ _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
 
 extractHmmTargets :: OrthoLangFunction
 extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
   , fFixity    = Prefix
@@ -150,7 +150,7 @@ extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
 
 extractHmmTargetsEach :: OrthoLangFunction
 extractHmmTargetsEach = let name = "extract_hmm_targets_each" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
   , fFixity    = Prefix

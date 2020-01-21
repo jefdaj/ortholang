@@ -40,7 +40,7 @@ loadList = mkLoad False "load_list" (ListOf str)
 
 globFiles :: OrthoLangFunction
 globFiles = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix

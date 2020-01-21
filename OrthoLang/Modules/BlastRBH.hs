@@ -48,7 +48,7 @@ blastDescsRev = filter isReversible blastDescs
 
 mkBlastFromFaRev :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
   , fFixity    = Prefix
@@ -61,7 +61,7 @@ rMkBlastFromFaRev d st (OrthoLangFun rtn salt deps _ [e, q, s])
   = rules st (OrthoLangFun rtn salt deps name [e, s, q])
   where
     rules = fRules $ mkBlastFromFa d
-    name  = fName  $ mkBlastFromFa d
+    name  = head $ fNames $ mkBlastFromFa d
 rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 ----------------------
@@ -70,7 +70,7 @@ rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 mkBlastFromFaRevEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
   , fFixity    = Prefix
@@ -111,7 +111,7 @@ aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
 
 reciprocalBest :: OrthoLangFunction
 reciprocalBest = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
   , fFixity    = Prefix
@@ -150,7 +150,7 @@ aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show
 
 reciprocalBestAll :: OrthoLangFunction
 reciprocalBestAll = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
   , fFixity    = Prefix
@@ -175,7 +175,7 @@ aReciprocalBestAll _ _ _ ps = error $ "bad argument to aReciprocalBestAll: " ++ 
 
 mkBlastRbh :: BlastDesc -> OrthoLangFunction
 mkBlastRbh d@(bCmd, qType, sType, _) = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
   , fFixity    = Prefix
@@ -199,7 +199,7 @@ rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 
 mkBlastRbhEach :: BlastDesc -> OrthoLangFunction
 mkBlastRbhEach d@(bCmd, qType, sType, _) = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix

@@ -85,7 +85,7 @@ faagz = OrthoLangType
 -- TODO does this work at all?
 parseSearches :: OrthoLangFunction
 parseSearches = let name = "parse_searches" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf str] search
   , fTypeDesc  = mkTypeDesc name [ListOf str] search
   , fFixity    = Prefix
@@ -98,7 +98,7 @@ parseSearches = let name = "parse_searches" in OrthoLangFunction
 
 getGenomes :: OrthoLangFunction
 getGenomes = let name = "get_genomes" in OrthoLangFunction
-  { fName      = name 
+  { fNames     = [name] 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   , fFixity    = Prefix
@@ -111,7 +111,7 @@ getGenomes = let name = "get_genomes" in OrthoLangFunction
 
 getProteomes :: OrthoLangFunction
 getProteomes = let name = "get_proteomes" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   , fFixity    = Prefix

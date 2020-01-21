@@ -43,7 +43,7 @@ ofr = OrthoLangType
 
 orthofinder :: OrthoLangFunction
 orthofinder = let name = "orthofinder" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
   , fFixity    = Prefix

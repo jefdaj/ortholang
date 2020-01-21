@@ -30,7 +30,7 @@ ava = OrthoLangType
 -- TODO remove the other hit table types? check if they're needed at all
 mkAva :: String -> OrthoLangFunction
 mkAva name = let name' = name ++ "_ava" in OrthoLangFunction
-  { fName      = name'
+  { fNames     = [name']
   , fTypeDesc  = mkTypeDesc  name' [num, ListOf faa] ava
   , fTypeCheck = defaultTypeCheck  [num, ListOf faa] ava
   , fFixity    = Prefix

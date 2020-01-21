@@ -41,7 +41,7 @@ tListLike x = x `elem` [bht, crb, mms]
 -- can't name it length because that's a standard Haskell function
 len :: OrthoLangFunction
 len = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
   , fFixity    = Prefix
@@ -52,7 +52,7 @@ len = OrthoLangFunction
 
 lenEach :: OrthoLangFunction
 lenEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck [ListOf listlike] (ListOf num)
   , fFixity    = Prefix

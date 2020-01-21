@@ -26,7 +26,7 @@ gcr = OrthoLangType
  
 greencutTwoFamilies :: OrthoLangFunction
 greencutTwoFamilies = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [bht, bht] gcr
   , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
   , fFixity    = Prefix

@@ -275,7 +275,7 @@ withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 psiblast :: OrthoLangFunction
 psiblast = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
   , fFixity    = Prefix
@@ -287,7 +287,7 @@ psiblast = OrthoLangFunction
 
 psiblastEach :: OrthoLangFunction
 psiblastEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
@@ -317,7 +317,7 @@ psiblastAll = compose1 name
 
 psiblastDb :: OrthoLangFunction
 psiblastDb = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   , fFixity    = Prefix
@@ -331,7 +331,7 @@ psiblastDb = OrthoLangFunction
 -- wait can psiblast just take a faa and pdb directly?
 psiblastDbEach :: OrthoLangFunction
 psiblastDbEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
@@ -362,7 +362,7 @@ trainingArgs =
 
 psiblastTrain :: OrthoLangFunction
 psiblastTrain = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   , fFixity    = Prefix
@@ -374,7 +374,7 @@ psiblastTrain = OrthoLangFunction
 -- TODO better name!
 psiblastTrainPssms :: OrthoLangFunction
 psiblastTrainPssms = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
   , fFixity    = Prefix
@@ -388,7 +388,7 @@ psiblastTrainPssms = OrthoLangFunction
 --      (makes a list of length 1 from multiple faa subjects)
 psiblastTrainEach :: OrthoLangFunction
 psiblastTrainEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   , fFixity    = Prefix
@@ -399,7 +399,7 @@ psiblastTrainEach = OrthoLangFunction
 
 psiblastTrainAll :: OrthoLangFunction
 psiblastTrainAll = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   , fFixity    = Prefix
@@ -410,7 +410,7 @@ psiblastTrainAll = OrthoLangFunction
 
 psiblastTrainDb :: OrthoLangFunction
 psiblastTrainDb = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix
@@ -421,7 +421,7 @@ psiblastTrainDb = OrthoLangFunction
 
 psiblastTrainDbEach :: OrthoLangFunction
 psiblastTrainDbEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix
@@ -432,7 +432,7 @@ psiblastTrainDbEach = OrthoLangFunction
 
 psiblastTrainPssmsDb :: OrthoLangFunction
 psiblastTrainPssmsDb = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
   , fFixity    = Prefix
@@ -448,7 +448,7 @@ psiblastTrainPssmsDb = OrthoLangFunction
 
 psiblastPssm :: OrthoLangFunction
 psiblastPssm = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   , fFixity    = Prefix
@@ -460,7 +460,7 @@ psiblastPssm = OrthoLangFunction
 -- TODO why does this one fail? it's not even using rMap
 psiblastPssmAll :: OrthoLangFunction
 psiblastPssmAll = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
   , fFixity    = Prefix
@@ -471,7 +471,7 @@ psiblastPssmAll = OrthoLangFunction
 
 psiblastPssmEach :: OrthoLangFunction
 psiblastPssmEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   , fFixity    = Prefix
@@ -485,7 +485,7 @@ searchArgs = ["-outfmt", "6", "-out"]
 
 psiblastPssmDb :: OrthoLangFunction
 psiblastPssmDb = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix
@@ -496,7 +496,7 @@ psiblastPssmDb = OrthoLangFunction
 
 psiblastPssmDbEach :: OrthoLangFunction
 psiblastPssmDbEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix
@@ -513,7 +513,7 @@ psiblastPssmDbEach = OrthoLangFunction
 -- TODO would a user ever want to use this one directly?
 psiblastEachPssmDb :: OrthoLangFunction
 psiblastEachPssmDb = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   , fFixity    = Prefix
@@ -537,7 +537,7 @@ psiblastPssmsDb = compose1 name
 --      specific incompatibility with withPdbSubject?
 psiblastEachPssm :: OrthoLangFunction
 psiblastEachPssm = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
   , fFixity    = Prefix

@@ -67,7 +67,7 @@ mms = OrthoLangType
 
 mmseqsCreateDbAll :: OrthoLangFunction
 mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
   , fFixity    = Prefix
@@ -120,7 +120,7 @@ rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
 mmseqsCreateDb :: OrthoLangFunction
 mmseqsCreateDb = let name = "mmseqs_createdb" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
   , fFixity    = Prefix
@@ -143,7 +143,7 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 
 mmseqsSearchDb :: OrthoLangFunction
 mmseqsSearchDb = let name = "mmseqs_search_db" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
   , fFixity    = Prefix
@@ -243,7 +243,7 @@ aMmseqConvertAlis cfg ref qDb sDb outDbIndex outTab = do
 
 mmseqsSearch :: OrthoLangFunction
 mmseqsSearch = let name = "mmseqs_search" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
   , fFixity    = Prefix
