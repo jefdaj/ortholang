@@ -131,7 +131,7 @@ pdb = OrthoLangType
 
 mkLoadDB :: String -> OrthoLangType -> OrthoLangFunction
 mkLoadDB name rtn = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix
@@ -140,7 +140,7 @@ mkLoadDB name rtn = OrthoLangFunction
 
 mkLoadDBEach :: String -> OrthoLangType -> OrthoLangFunction
 mkLoadDBEach name rtn = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   , fFixity    = Prefix
@@ -187,7 +187,7 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 -- takes a filter string (leave empty for all results)
 blastdblist :: OrthoLangFunction
 blastdblist = let name = "blastdblist" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix
@@ -263,7 +263,7 @@ aFilterList cfg ref _ oPath listTmp fPath = do
 
 mkBlastdbget :: String -> OrthoLangType -> OrthoLangFunction
 mkBlastdbget name dbType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
   , fFixity    = Prefix
@@ -327,7 +327,7 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
 --      in addition to actual inputs?
 makeblastdbNuclAll :: OrthoLangFunction
 makeblastdbNuclAll = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = tMakeblastdbAll name ndb
   , fTypeDesc  = name ++ " : fa.list -> ndb"
   , fFixity    = Prefix
@@ -338,7 +338,7 @@ makeblastdbNuclAll = OrthoLangFunction
 
 makeblastdbProtAll :: OrthoLangFunction
 makeblastdbProtAll = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = tMakeblastdbAll name pdb
   , fTypeDesc  = name ++ " : faa.list -> pdb"
   , fFixity    = Prefix
@@ -475,7 +475,7 @@ aMakeblastdbAll _ _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++
 
 makeblastdbNucl :: OrthoLangFunction
 makeblastdbNucl = OrthoLangFunction
-  { fName      = "makeblastdb_nucl"
+  { fNames     = ["makeblastdb_nucl"]
   , fTypeCheck = tMakeblastdb ndb
   , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
   , fFixity    = Prefix
@@ -484,7 +484,7 @@ makeblastdbNucl = OrthoLangFunction
 
 makeblastdbProt :: OrthoLangFunction
 makeblastdbProt = OrthoLangFunction
-  { fName      = "makeblastdb_prot"
+  { fNames     = ["makeblastdb_prot"]
   , fTypeCheck = tMakeblastdb pdb
   , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
   , fFixity    = Prefix
@@ -512,7 +512,7 @@ withSingleton e = error $ "bad argument to withSingleton: " ++ show e
 
 mkMakeblastdbEach :: OrthoLangType -> OrthoLangFunction
 mkMakeblastdbEach dbType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = tMakeblastdbEach dbType
   , fTypeDesc  = desc
   , fFixity    = Prefix
@@ -564,7 +564,7 @@ withSingletons e = OrthoLangFun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singl
 -- TODO hide from users?
 singletons :: OrthoLangFunction
 singletons = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fFixity    = Prefix
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
   , fTypeCheck = tSingletons

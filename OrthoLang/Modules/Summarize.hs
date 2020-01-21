@@ -22,7 +22,7 @@ orthoLangModule = OrthoLangModule
 -- TODO remove once a couple others are finished
 -- commonElements :: OrthoLangFunction
 -- commonElements = OrthoLangFunction
---   { fName      = "common_elements" -- TODO rename to `all`?
+--   { fNames     = "common_elements" -- TODO rename to `all`?
 --   , fFixity    = Prefix
 --   , fTypeCheck = summaryTypeCheck
 --   , fDesc = Nothing, fTypeDesc  = undefined

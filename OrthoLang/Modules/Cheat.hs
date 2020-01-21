@@ -48,7 +48,7 @@ orthoLangModule = OrthoLangModule
 
 cheat :: OrthoLangFunction
 cheat = OrthoLangFunction
-  { fName      = "cheat"
+  { fNames     = ["cheat"]
   , fTypeCheck = cheatTypeCheck
   , fTypeDesc  = "cheat : ??? (implement this)"
   , fFixity    = Prefix

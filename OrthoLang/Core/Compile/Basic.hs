@@ -72,7 +72,7 @@ rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 rulesByName :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath
 rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
-  Just f  -> if "load_" `isPrefixOf` fName f
+  Just f  -> if any ("load_" `isPrefixOf`) (fNames f)
                then (fRules f) s $ setSalt 0 expr
                else (fRules f) s expr
 
@@ -272,7 +272,7 @@ defaultTypeCheck expected returned actual =
  -}
 mkLoad :: Bool -> String -> OrthoLangType -> OrthoLangFunction
 mkLoad hashSeqIDs name rtn = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix
@@ -286,7 +286,7 @@ mkLoad hashSeqIDs name rtn = OrthoLangFunction
  -}
 mkLoadList :: Bool -> String -> OrthoLangType -> OrthoLangFunction
 mkLoadList hashSeqIDs name rtn = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix

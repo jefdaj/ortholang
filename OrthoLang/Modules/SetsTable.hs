@@ -31,7 +31,7 @@ tsv = OrthoLangType
 
 setsTable :: OrthoLangFunction
 setsTable = let name = "sets_table" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv
   , fFixity    = Prefix

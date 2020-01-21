@@ -51,7 +51,7 @@ crb = OrthoLangType
 
 blastCRB :: OrthoLangFunction
 blastCRB = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
   , fTypeCheck = defaultTypeCheck [fna, fa] crb
   , fFixity    = Prefix
@@ -64,7 +64,7 @@ blastCRB = OrthoLangFunction
 -- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
 blastCRBEach :: OrthoLangFunction
 blastCRBEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
   , fFixity    = Prefix

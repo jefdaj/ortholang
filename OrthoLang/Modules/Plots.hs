@@ -59,7 +59,7 @@ varNames _ expr = undefined lits -- TODO implement this
 
 histogram :: OrthoLangFunction
 histogram = let name = "histogram" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
   , fFixity    = Prefix
@@ -100,7 +100,7 @@ tPlotScores _ = Left "expected a title and scores"
 -- TODO line graph should label axis by input var name (always there!)
 linegraph :: OrthoLangFunction
 linegraph = let name = "linegraph" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
   , fFixity    = Prefix
@@ -110,7 +110,7 @@ linegraph = let name = "linegraph" in OrthoLangFunction
 -- TODO scatterplot should label axis by input var name (always there!)
 scatterplot :: OrthoLangFunction
 scatterplot = let name = "scatterplot" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
   , fFixity    = Prefix
@@ -155,7 +155,7 @@ depRepeatVarName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr
 
 venndiagram :: OrthoLangFunction
 venndiagram = let name = "venndiagram" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = tPlotListOfLists
   , fTypeDesc  = name ++ " : X.list.list -> png"
   , fFixity    = Prefix

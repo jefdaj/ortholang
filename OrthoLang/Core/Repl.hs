@@ -238,25 +238,25 @@ cmdHelp st@(_, cfg, _, _) hdl line = do
                     [ fmap fHelp $ findFunction cfg w
                     , fmap mHelp $ findModule   cfg w
                     , fmap (tHelp cfg) $ findType cfg w
-                    , Just $ getDoc "notfound"
+                    , Just $ getDoc ["notfound"]
                     ]
-           _ -> getDoc "repl"
+           _ -> getDoc ["repl"]
   hPutStrLn hdl doc >> return st
 
 mHelp :: OrthoLangModule -> IO String
-mHelp m = getDoc $ "modules" </> mName m
+mHelp m = getDoc ["modules" </> mName m]
 
 -- TODO move somewhere better
 fHelp :: OrthoLangFunction -> IO String
 fHelp f = do
-  doc <- getDoc $ "functions" </> fName f
+  doc <- getDoc $ map ("functions" </>) (fNames f)
   let msg = "\n" ++ fTypeDesc f ++ "\n\n" ++ doc
   return msg
 
 -- TODO move somewhere better
 tHelp :: OrthoLangConfig -> OrthoLangType -> IO String
 tHelp cfg t = do
-  doc <- getDoc $ "types" </> extOf t
+  doc <- getDoc ["types" </> extOf t]
   let msg = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
             ++ doc ++ "\n\n"
             ++ tFnList
@@ -439,7 +439,7 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
   where
     wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
-    fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
+    fnNames  = concatMap (map (head . fNames) . mFunctions) (cfgModules cfg)
     varNames = map ((\(OrthoLangVar _ v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg

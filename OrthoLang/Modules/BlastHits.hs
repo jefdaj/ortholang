@@ -52,7 +52,7 @@ hittable = OrthoLangTypeGroup
 
 extractQueries :: OrthoLangFunction
 extractQueries = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   , fFixity    = Prefix
@@ -64,7 +64,7 @@ extractQueries = OrthoLangFunction
 -- TODO this should have a typeclass
 extractQueriesEach :: OrthoLangFunction
 extractQueriesEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   , fFixity    = Prefix
@@ -76,7 +76,7 @@ extractQueriesEach = OrthoLangFunction
 -- TODO this should have a typeclass
 extractTargets :: OrthoLangFunction
 extractTargets = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   , fFixity    = Prefix
@@ -87,7 +87,7 @@ extractTargets = OrthoLangFunction
 
 extractTargetsEach :: OrthoLangFunction
 extractTargetsEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   , fFixity    = Prefix
@@ -136,7 +136,7 @@ filterEvalue = mkFilterHits "evalue"
 
 mkFilterHits :: String -> OrthoLangFunction
 mkFilterHits colname = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
   , fFixity    = Prefix
@@ -150,7 +150,7 @@ filterEvalueEach = mkFilterHitsEach "evalue"
 
 mkFilterHitsEach :: String -> OrthoLangFunction
 mkFilterHitsEach colname = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
   , fFixity    = Prefix
@@ -192,7 +192,7 @@ aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
 -- TODO split into best_hits_evalue and best_hits_bitscore?
 bestHits :: OrthoLangFunction
 bestHits =  OrthoLangFunction
-  { fName      = name 
+  { fNames     = [name] 
   , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
   , fFixity    = Prefix
@@ -203,7 +203,7 @@ bestHits =  OrthoLangFunction
 
 bestHitsEach :: OrthoLangFunction
 bestHitsEach = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
   , fFixity    = Prefix

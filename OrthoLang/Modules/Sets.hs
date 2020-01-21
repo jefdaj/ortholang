@@ -29,6 +29,7 @@ orthoLangModule = OrthoLangModule
 type SetOpDesc =
   ( String -- name of the prefix function
   , Char   -- name of the infix/binary function
+  , String -- long name for the binary operator (should be a valid filename)
   , Set String -> Set String -> Set String -- haskell set op
   )
 
@@ -42,25 +43,25 @@ type SetOpDesc =
  -}
 setOpDescs :: [SetOpDesc]
 setOpDescs =
-  [ ("any" , '|', union)
-  , ("all" , '&', intersection)
-  , ("diff", '~', difference)
+  [ ("any" , '|', "union"       , union)
+  , ("all" , '&', "intersection", intersection)
+  , ("diff", '~', "difference"  , difference)
   ]
 
 mkSetFunctions :: SetOpDesc -> [OrthoLangFunction]
-mkSetFunctions (foldName, opChar, setFn) = [setBop, setFold]
+mkSetFunctions (foldName, opChar, opName, setFn) = [setBop, setFold]
   where
     mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
     mkFoldDesc name = name ++ " : X.list.list -> X.list"
     setBop = OrthoLangFunction
-      { fName      = [opChar]
+      { fNames     = [[opChar], opName]
       , fTypeCheck = tSetBop
       , fTypeDesc  = mkBopDesc [opChar]
       , fFixity    = Infix
       , fRules     = rSetBop foldName setFn
       }
     setFold = OrthoLangFunction
-      { fName      = foldName
+      { fNames     = [foldName]
       , fTypeCheck = tSetFold
       , fTypeDesc  = mkFoldDesc foldName
       , fFixity    = Prefix
@@ -134,7 +135,7 @@ dedupByContent cfg ref paths = do
 
 some :: OrthoLangFunction
 some = OrthoLangFunction
-  { fName      = "some"
+  { fNames     = ["some"]
   , fTypeCheck = tSetFold
   , fTypeDesc  = "some : X.list.list -> X.list"
   , fFixity    = Prefix

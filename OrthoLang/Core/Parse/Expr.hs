@@ -59,15 +59,15 @@ operatorTable cfg = [map binary bops]
 -- TODO how to fail gracefully (with fail, not error) here??
 pBop :: OrthoLangFunction -> ParseM (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
 pBop bop
-  | fFixity bop == Infix = (debugParser ("pBop " ++ fName bop)
-                           (pSym (headOrDie "failed to read fName in pBop" $ fName bop)))
+  | fFixity bop == Infix = (debugParser ("pBop " ++ head (fNames bop))
+                           (pSym (headOrDie "failed to read fNames in pBop" $ (head $ fNames bop))))
                            *> return (pBop' bop)
 pBop _ = fail "pBop only works with infix functions"
 
 pBop' :: OrthoLangFunction -> (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
 pBop' bop e1 e2 = case (fTypeCheck bop) [typeOf e1, typeOf e2] of
   Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-  Right rtn -> OrthoLangBop rtn (RepeatSalt 0) (union (depsOf e1) (depsOf e2)) (fName bop) e1 e2
+  Right rtn -> OrthoLangBop rtn (RepeatSalt 0) (union (depsOf e1) (depsOf e2)) (head $ fNames bop) e1 e2
 
 ---------------
 -- functions --
@@ -107,7 +107,7 @@ pFunArgs name args = debugParser "pFun" $ do
   -- args <- pArgs
   -- args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
-      fns' = filter (\f -> fName f == name) fns
+      fns' = filter (\f -> head (fNames f) == name) fns
   case fns' of
     []      -> fail $ "no function found with name '" ++ name ++ "'"
     (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
@@ -144,7 +144,7 @@ typecheckArgs :: OrthoLangFunction -> [OrthoLangExpr] -> ParseM OrthoLangExpr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
   Left  msg -> fail msg
   Right rtn -> let deps = foldr1 union $ map depsOf args
-               in return $ OrthoLangFun rtn (RepeatSalt 0) deps (fName fn) args
+               in return $ OrthoLangFun rtn (RepeatSalt 0) deps (head $ fNames fn) args
 
 -----------------
 -- expressions --

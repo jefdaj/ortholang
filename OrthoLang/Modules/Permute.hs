@@ -77,7 +77,7 @@ aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
 
 leaveEachOut :: OrthoLangFunction
 leaveEachOut = let name = "leave_each_out" in OrthoLangFunction
-  { fName      = name 
+  { fNames     = [name] 
   , fFixity    = Prefix
   , fTypeCheck = combosTypeCheck
   , fTypeDesc  = name ++ " : X.list -> X.list.list"

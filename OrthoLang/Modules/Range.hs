@@ -28,7 +28,7 @@ orthoLangModule = OrthoLangModule
 
 mkRangeFn :: String -> Int -> OrthoLangFunction
 mkRangeFn name nArgs =  OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck (take nArgs $ repeat num) (ListOf num)
   , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
   , fFixity    = Prefix

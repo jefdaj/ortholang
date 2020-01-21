@@ -44,7 +44,7 @@ spr = OrthoLangType
 
 sonicparanoid :: OrthoLangFunction
 sonicparanoid = let name = "sonicparanoid" in OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
   , fFixity    = Prefix

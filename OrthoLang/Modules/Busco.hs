@@ -78,7 +78,7 @@ buscoCache cfg = cacheDir cfg "busco"
 
 buscoListLineages :: OrthoLangFunction
 buscoListLineages = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix
@@ -179,7 +179,7 @@ aBuscoListLineages cfg ref _ listTmp = do
 
 buscoFetchLineage :: OrthoLangFunction
 buscoFetchLineage  = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
   , fFixity    = Prefix
@@ -232,7 +232,7 @@ rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show 
 
 mkBusco :: String -> String -> OrthoLangType -> OrthoLangFunction
 mkBusco name mode inType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
   , fFixity    = Prefix
@@ -280,7 +280,7 @@ aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
 
 mkBuscoEach :: String -> String -> OrthoLangType -> OrthoLangFunction
 mkBuscoEach name mode inType = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
   , fFixity    = Prefix
@@ -298,7 +298,7 @@ buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
 
 buscoPercentComplete :: OrthoLangFunction
 buscoPercentComplete  = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
   , fFixity    = Prefix
@@ -309,7 +309,7 @@ buscoPercentComplete  = OrthoLangFunction
 
 buscoPercentCompleteEach :: OrthoLangFunction
 buscoPercentCompleteEach  = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
   , fFixity    = Prefix
@@ -324,7 +324,7 @@ buscoPercentCompleteEach  = OrthoLangFunction
 
 buscoScoresTable :: OrthoLangFunction
 buscoScoresTable  = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
   , fFixity    = Prefix
@@ -371,7 +371,7 @@ rBuscoScoresTable _ e = error $ "bad argument to rBuscoScoresTable: " ++ show e
 
 buscoFilterCompleteness :: OrthoLangFunction
 buscoFilterCompleteness  = OrthoLangFunction
-  { fName      = name
+  { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fFixity    = Prefix

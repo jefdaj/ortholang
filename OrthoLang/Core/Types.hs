@@ -371,8 +371,10 @@ data OrthoLangConfig = OrthoLangConfig
   }
   deriving Show
 
+-- note: only lists the first name of each function,
+--       which for binary operators will be the single-char one
 listFunctionNames :: OrthoLangConfig -> [String]
-listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
+listFunctionNames cfg = map (head . fNames) $ concat $ map mFunctions $ cfgModules cfg
 
 findModule :: OrthoLangConfig -> String -> Maybe OrthoLangModule
 findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
@@ -381,7 +383,7 @@ findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
 findFunction :: OrthoLangConfig -> String -> Maybe OrthoLangFunction
-findFunction cfg name = find (\f -> fName f == name) fs
+findFunction cfg name = find (\f -> any (== name) (fNames f)) fs
   where
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
@@ -403,7 +405,7 @@ operatorChars cfg = chars
     bChar n = if length n == 1
                 then (headOrDie "failed to parse bChar in operatorChars") n
                 else error $ "bad bop name: " ++ n
-    chars   = map (bChar . fName) bops
+    chars   = map (bChar . head . fNames) bops
     -- chars'  = trace ("operatorChars: '" ++ chars ++ "'") chars
 
 -----------------
@@ -461,7 +463,7 @@ data OrthoLangFixity = Prefix | Infix
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data OrthoLangFunction = OrthoLangFunction
-  { fName      :: String
+  { fNames     :: [String]
   , fTypeCheck :: [OrthoLangType] -> Either String OrthoLangType
   , fTypeDesc  :: String
   , fFixity    :: OrthoLangFixity
