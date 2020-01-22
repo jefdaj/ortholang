@@ -7,9 +7,15 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
-## [0.9.4] - 2020-01-15
+## [0.9.4] - 2020-01-22
 ### Changed
 - Rename ShortCut to OrthoLang
+- Refactor cabal and nix files so ortholang-demo can auto-update docs
+- OrthoLangFunctions can have multiple fNames now (only binary operators use them)
+
+### Added:
+- Some BLAST docs
+- Some example scripts
 
 ## [0.9.3] - 2020-01-02
 ### Added
