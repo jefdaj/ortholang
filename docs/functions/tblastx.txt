@@ -1,1 +1,28 @@
-doc for functions/tblastx not written yet
+BLAST one file of nucleic acid (DNA) sequences against another,
+comparing all possible protein translations.
+
+WARNING: this is slow. It's equivalent to 6 * 6 = 36 blastp searches.
+
+Inputs:
+  an e-value cutoff
+  a query   FASTA nucleic acid file
+  a subject FASTA nucleic acid file
+
+Algorithm:
+  make a nucleotide database from the subject sequences
+  BLAST translations of the query sequences against translations of the database
+
+Output:
+  a table of all hits below the cutoff
+
+See also:
+  tblastx_db
+  tblastx_db_each
+  tblastx_db_all (coming soon)
+  tblastx_each
+  tblastx_all (coming soon)
+  tblastx_rbh
+  tblastx_rbh_each
+  tblastx_rbh_all (coming soon)
+  tblastx_rev
+  tblastx_rev_each
