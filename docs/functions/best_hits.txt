@@ -1,1 +1,8 @@
-doc for functions/best_hits not written yet
+Given a hit table, returns a smaller hit table with only the best hit per query gene ID.
+
+See also:
+  best_hits_each
+  best_hits_all (coming soon)
+  reciprocal_best
+  reciprocal_best_each (coming soon)
+  reciprocal_best_all
