@@ -1,4 +1,11 @@
-doc for functions/blastn_rbh_each not written yet
+Like blastn_rbh, but the last argument is a list of files.
+Useful when you want to find orthologs for one species in a list of others.
+For example:
+
+  hit_tables = blastn_rbh_each 1e-20 my_species [species1, species2, species3]
+  shared_genes = all (extract_queries_each hit_tables)
+
+Note that you might want to use a protein sequence search instead for this.
 
 See also:
   blastn
