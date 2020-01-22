@@ -1,1 +1,2 @@
-doc for functions/all not written yet
+Given a list of lists, returns the elements all of them have in common.
+Like | (set intersection) but with a flexible number of arguments.

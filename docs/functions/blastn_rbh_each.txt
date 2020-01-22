@@ -1,1 +1,13 @@
 doc for functions/blastn_rbh_each not written yet
+
+See also:
+  blastn
+  blastn_db
+  blastn_db_each
+  blastn_db_all (coming soon)
+  blastn_each
+  blastn_all (coming soon)
+  blastn_rbh
+  blastn_rbh_all (coming soon)
+  blastn_rev
+  blastn_rev_each
