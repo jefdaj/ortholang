@@ -4,8 +4,8 @@ Main OrthoLang release checklist:
 - [ ] bump version in OrthoLang.cabal + ortholang.nix
 - [ ] update nixpkgs if needed
 - [ ] tag, push, and pin new nixpkgs if needed
-- [ ] build + run/update tests on linux
-- [ ] build + run/update tests on mac
+- [ ] build + run/update tests on linux (use stack, then nix)
+- [ ] build + run/update tests on mac (use stack, then nix)
 - [ ] cachix push build + shell packages on linux
 - [ ] cachix push build + shell packages on mac
 - [ ] push release branch to Travis and check that version tests pass
@@ -24,5 +24,5 @@ Main OrthoLang release checklist:
 Finally, update the demo site:
 - [ ] update ortholang submodule commit to point to master
 - [ ] bump expected version in ortholang-demo.py
-- [ ] build and run the docs executable to update functions*.md
+- [ ] build and run the docs executable to update functions\*.md
 - [ ] restart the demo and check that it works
