@@ -1,1 +1,24 @@
-doc for functions/blastx_db not written yet
+Like blastx, but BLASTs against an existing database.
+
+Inputs:
+  an e-value cutoff
+  a query FASTA amino acid file
+  a subject BLAST protein database
+
+Algorithm:
+  BLAST the query sequences against the database
+
+Output:
+  a table of all hits below the cutoff
+
+See also:
+  blastx
+  blastx_db_each
+  blastx_db_all (coming soon)
+  blastx_each
+  blastx_all (coming soon)
+  blastx_rbh
+  blastx_rbh_each
+  blastx_rbh_all (coming soon)
+  blastx_rev
+  blastx_rev_each
