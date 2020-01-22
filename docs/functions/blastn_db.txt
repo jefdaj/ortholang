@@ -1,13 +1,15 @@
 Like blastn, but BLASTs against an existing database.
 
-Given:
+Inputs:
   an e-value cutoff
   a query FASTA nucleic acid file
   a subject BLAST nucleotide database
 
-It:
-  BLASTS the query sequences against the database
-  returns a table of all hits below the cutoff
+Algorithm:
+  BLAST the query sequences against the database
+
+Output:
+  a table of all hits below the cutoff
 
 See also:
   blastn

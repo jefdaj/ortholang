@@ -1,26 +1,29 @@
 BLAST two FASTA nucleic acid files against each other and keep only the
 reciprocal best hits.
 
-Order matters if you want to inspect the resulting table, but if you only care
-about pairs of matching genes genes then fwd and rev are interchangable.
-
-Given:
+Inputs:
   an e-value cutoff
   two nucleic acid file FASTA files
 
-It:
-  makes a nucleotide database from each FASTA file
-  BLASTs each FASTA file against the other database
-  filters the forward hits table for reciprocal best hits in the reverse one
+Algorithm:
+  make a nucleotide database from each FASTA file
+  BLAST each FASTA file against the other database
+  filter the forward hits table for reciprocal best hits in the reverse one
 
-Like taking the reciprocal_best of two blastn functions.
-For example, both these rb_hits will be the same:
+Output:
+  a table of the best forward hit per pair of reciprocal best hits
+
+It's like taking the reciprocal_best of two blastn functions.
+For example, these rb_hits are the same:
 
   fwd_hits = blastn 1e-20 species1 species2
   rev_hits = blastn 1e-20 species2 species1
   rb_hits1 = reciprocal_best fwd_hits rev_hits
 
   rb_hits2 = blastn_rbh 1e-20 species1 species2
+
+Order matters if you want to inspect the resulting table, but if you only care
+about pairs of matching genes genes then fwd and rev are interchangable.
 
 See also:
   blastn
