@@ -6,7 +6,6 @@ Main OrthoLang release checklist:
 - [ ] tag, push, and pin new nixpkgs if needed
 - [ ] build + run/update tests on linux
 - [ ] build + run/update tests on mac
-- [ ] build + run/update tests on docker (probably via linux)
 - [ ] cachix push build + shell packages on linux
 - [ ] cachix push build + shell packages on mac
 - [ ] push release branch to Travis and check that version tests pass
