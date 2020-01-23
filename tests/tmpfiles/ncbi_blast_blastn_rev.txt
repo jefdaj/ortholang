@@ -82,15 +82,15 @@
 |   `-- str
 |       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
     |-- maga5.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
-    |-- mapped.str.list.list -> ../exprs/any/83d42bc39d_0.str.list.list
+    |-- maga.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
     |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/17b6e17d05_0.str.list.list
     |-- mappedRev.str.list.list -> ../exprs/extract_queries_each/84a4293dda_0.str.list.list
+    |-- mapped.str.list.list -> ../exprs/any/83d42bc39d_0.str.list.list
     |-- n.num -> ../exprs/num/a53b190835_0.num
     |-- result -> ../exprs/any/edf20fa34c_0.str.list.list
-    |-- single.str.list -> ../exprs/any/27b433ed61_0.str.list
     |-- singleFwd.str.list -> ../exprs/extract_queries/549be5fd7f_0.str.list
-    `-- singleRev.str.list -> ../exprs/extract_queries/06e87f7bdb_0.str.list
+    |-- singleRev.str.list -> ../exprs/extract_queries/06e87f7bdb_0.str.list
+    `-- single.str.list -> ../exprs/any/27b433ed61_0.str.list
 
 28 directories, 65 files

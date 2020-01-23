@@ -18074,8 +18074,8 @@
 |       |-- b6bd6d67ae_0.str -> ../../cache/lines/...
 |       `-- db8a3bed2e_0.str -> ../../cache/lines/...
 `-- vars
-    |-- g1.faa -> ../exprs/load_faa/4b2aa63968_0.faa
     |-- g1_10_genes.faa.list -> ../exprs/sample/884a4afa00_64f777d97e_0.faa.list
+    |-- g1.faa -> ../exprs/load_faa/4b2aa63968_0.faa
     |-- g2.faa -> ../exprs/concat_faa/018718508c_0.faa
     |-- pssms.pssm.list -> ../exprs/psiblast_train_pssms/406109b298_2517b973de_6305d521d4_0.pssm.list
     `-- result -> ../vars/pssms.pssm.list

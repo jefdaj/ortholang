@@ -92,12 +92,12 @@
 |       `-- dec8f9d2e2_0.str -> ../../cache/lines/...
 `-- vars
     |-- maga.faa -> ../exprs/load_faa/0fe71bcee7_0.faa
-    |-- mapped.str.list.list -> ../exprs/extract_queries_each/8044905ce5_0.str.list.list
     |-- mappeddb.str.list.list -> ../exprs/extract_queries_each/9dadec093a_0.str.list.list
-    |-- mgen.faa -> ../exprs/load_faa/5815f1ab62_0.faa
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/8044905ce5_0.str.list.list
     |-- mgendb.pdb -> ../exprs/makeblastdb_prot/c93d63638c_0.pdb
+    |-- mgen.faa -> ../exprs/load_faa/5815f1ab62_0.faa
     |-- result -> ../exprs/length_each/969b004daa_0.num.list
-    |-- single.str.list -> ../exprs/extract_queries/ccdd8cee06_0.str.list
-    `-- singledb.str.list -> ../exprs/extract_queries/948e763b37_0.str.list
+    |-- singledb.str.list -> ../exprs/extract_queries/948e763b37_0.str.list
+    `-- single.str.list -> ../exprs/extract_queries/ccdd8cee06_0.str.list
 
 29 directories, 71 files

@@ -3,15 +3,15 @@
 |   |-- crb_blast
 |   |   |-- d1dfed7680_0fcd0695d1
 |   |   |   |-- 10ffe0cf0f.faa -> ../../../cache/load/10ffe0cf0f.faa
+|   |   |   |-- 10ffe0cf0f_into_6046a54e92.2.blast
 |   |   |   |-- 10ffe0cf0f.phr
 |   |   |   |-- 10ffe0cf0f.pin
 |   |   |   |-- 10ffe0cf0f.psq
-|   |   |   |-- 10ffe0cf0f_into_6046a54e92.2.blast
 |   |   |   |-- 6046a54e92.fna -> ../../../cache/load/6046a54e92.fna
+|   |   |   |-- 6046a54e92_into_10ffe0cf0f.1.blast
 |   |   |   |-- 6046a54e92.nhr
 |   |   |   |-- 6046a54e92.nin
 |   |   |   |-- 6046a54e92.nsq
-|   |   |   |-- 6046a54e92_into_10ffe0cf0f.1.blast
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
 |   |   |   |-- results.crb
@@ -19,15 +19,15 @@
 |   |   |   `-- results.crb.out
 |   |   |-- d1dfed7680_7b73f26d96
 |   |   |   |-- 39b21a8bf4.faa -> ../../../cache/load/39b21a8bf4.faa
+|   |   |   |-- 39b21a8bf4_into_6046a54e92.2.blast
 |   |   |   |-- 39b21a8bf4.phr
 |   |   |   |-- 39b21a8bf4.pin
 |   |   |   |-- 39b21a8bf4.psq
-|   |   |   |-- 39b21a8bf4_into_6046a54e92.2.blast
 |   |   |   |-- 6046a54e92.fna -> ../../../cache/load/6046a54e92.fna
+|   |   |   |-- 6046a54e92_into_39b21a8bf4.1.blast
 |   |   |   |-- 6046a54e92.nhr
 |   |   |   |-- 6046a54e92.nin
 |   |   |   |-- 6046a54e92.nsq
-|   |   |   |-- 6046a54e92_into_39b21a8bf4.1.blast
 |   |   |   |-- evalues_data
 |   |   |   |-- fitting_data
 |   |   |   |-- results.crb
@@ -35,15 +35,15 @@
 |   |   |   `-- results.crb.out
 |   |   `-- d1dfed7680_8e4b08391e
 |   |       |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
+|   |       |-- 36189032ad_into_6046a54e92.2.blast
 |   |       |-- 36189032ad.phr
 |   |       |-- 36189032ad.pin
 |   |       |-- 36189032ad.psq
-|   |       |-- 36189032ad_into_6046a54e92.2.blast
 |   |       |-- 6046a54e92.fna -> ../../../cache/load/6046a54e92.fna
+|   |       |-- 6046a54e92_into_36189032ad.1.blast
 |   |       |-- 6046a54e92.nhr
 |   |       |-- 6046a54e92.nin
 |   |       |-- 6046a54e92.nsq
-|   |       |-- 6046a54e92_into_36189032ad.1.blast
 |   |       |-- evalues_data
 |   |       |-- fitting_data
 |   |       |-- results.crb

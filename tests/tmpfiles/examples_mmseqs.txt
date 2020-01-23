@@ -36,37 +36,51 @@
 |       |   |-- 186dae3615.mmseqs2db
 |       |   |-- 186dae3615.mmseqs2db.dbtype
 |       |   |-- 186dae3615.mmseqs2db.err
-|       |   |-- 186dae3615.mmseqs2db.index
-|       |   |-- 186dae3615.mmseqs2db.lookup
-|       |   |-- 186dae3615.mmseqs2db.out
 |       |   |-- 186dae3615.mmseqs2db_h
 |       |   |-- 186dae3615.mmseqs2db_h.dbtype
 |       |   |-- 186dae3615.mmseqs2db_h.index
+|       |   |-- 186dae3615.mmseqs2db.index
+|       |   |-- 186dae3615.mmseqs2db.lookup
+|       |   |-- 186dae3615.mmseqs2db.out
 |       |   |-- 5916b67034.mmseqs2db
 |       |   |-- 5916b67034.mmseqs2db.dbtype
 |       |   |-- 5916b67034.mmseqs2db.err
-|       |   |-- 5916b67034.mmseqs2db.index
-|       |   |-- 5916b67034.mmseqs2db.lookup
-|       |   |-- 5916b67034.mmseqs2db.out
 |       |   |-- 5916b67034.mmseqs2db_h
 |       |   |-- 5916b67034.mmseqs2db_h.dbtype
 |       |   |-- 5916b67034.mmseqs2db_h.index
+|       |   |-- 5916b67034.mmseqs2db.index
+|       |   |-- 5916b67034.mmseqs2db.lookup
+|       |   |-- 5916b67034.mmseqs2db.out
 |       |   |-- 693b7e2135.mmseqs2db
 |       |   |-- 693b7e2135.mmseqs2db.dbtype
 |       |   |-- 693b7e2135.mmseqs2db.err
-|       |   |-- 693b7e2135.mmseqs2db.index
-|       |   |-- 693b7e2135.mmseqs2db.lookup
-|       |   |-- 693b7e2135.mmseqs2db.out
 |       |   |-- 693b7e2135.mmseqs2db_h
 |       |   |-- 693b7e2135.mmseqs2db_h.dbtype
-|       |   `-- 693b7e2135.mmseqs2db_h.index
+|       |   |-- 693b7e2135.mmseqs2db_h.index
+|       |   |-- 693b7e2135.mmseqs2db.index
+|       |   |-- 693b7e2135.mmseqs2db.lookup
+|       |   `-- 693b7e2135.mmseqs2db.out
 |       `-- search
-|           |-- 16c75a92e5.mmseqs2db
+|           |-- 16c75a92e5.mmseqs2db.0
+|           |-- 16c75a92e5.mmseqs2db.1
+|           |-- 16c75a92e5.mmseqs2db.2
+|           |-- 16c75a92e5.mmseqs2db.3
+|           |-- 16c75a92e5.mmseqs2db.4
+|           |-- 16c75a92e5.mmseqs2db.5
+|           |-- 16c75a92e5.mmseqs2db.6
+|           |-- 16c75a92e5.mmseqs2db.7
 |           |-- 16c75a92e5.mmseqs2db.dbtype
 |           |-- 16c75a92e5.mmseqs2db.err
 |           |-- 16c75a92e5.mmseqs2db.index
 |           |-- 16c75a92e5.mmseqs2db.out
-|           |-- d65d0659b7.mmseqs2db
+|           |-- d65d0659b7.mmseqs2db.0
+|           |-- d65d0659b7.mmseqs2db.1
+|           |-- d65d0659b7.mmseqs2db.2
+|           |-- d65d0659b7.mmseqs2db.3
+|           |-- d65d0659b7.mmseqs2db.4
+|           |-- d65d0659b7.mmseqs2db.5
+|           |-- d65d0659b7.mmseqs2db.6
+|           |-- d65d0659b7.mmseqs2db.7
 |           |-- d65d0659b7.mmseqs2db.dbtype
 |           |-- d65d0659b7.mmseqs2db.err
 |           |-- d65d0659b7.mmseqs2db.index
@@ -120,4 +134,4 @@
     |-- others.faa.list -> ../exprs/diff/29d8afc4a7_0.faa.list
     `-- result -> ../exprs/diff/5fc28dbc9c_0.str.list
 
-18 directories, 102 files
+18 directories, 116 files
