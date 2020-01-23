@@ -24,8 +24,8 @@
 |       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
     |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
-    |-- mgendb.dmnd -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
     |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
+    |-- mgendb.dmnd -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
     `-- result -> ../exprs/diamond_blastp_db/c5e9182d78_b947a1128f_d03aa36864_0.bht
 
 9 directories, 19 files

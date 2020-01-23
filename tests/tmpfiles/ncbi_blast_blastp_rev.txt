@@ -51,8 +51,8 @@
 |       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
 |       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
     |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
+    |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
     |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/20567e036b_0.str.list.list
     |-- n.num -> ../exprs/num/a53b190835_0.num
     `-- result -> ../vars/mappedFwd.str.list.list

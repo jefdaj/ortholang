@@ -56,8 +56,8 @@
 |       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
 |       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
     |-- maga.pdb -> ../exprs/makeblastdb_prot/1523a4da89_0.pdb
+    |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/9ab84023ed_0.str.list.list
     |-- result -> ../exprs/all/7cb15624e1_0.str.list
     `-- single.str.list -> ../exprs/extract_queries/d51477d9c6_0.str.list

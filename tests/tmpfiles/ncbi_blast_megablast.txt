@@ -58,8 +58,8 @@
 |   `-- str
 |       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga5.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
     |-- maga.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
+    |-- maga5.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/9e1b9a157d_0.str.list.list
     |-- result -> ../exprs/any/0e39079978_0.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/985d80b7b1_0.str.list

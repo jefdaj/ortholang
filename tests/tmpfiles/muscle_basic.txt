@@ -41,8 +41,8 @@
 |       |-- 1e020faf26_0.str -> ../../cache/lines/...
 |       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
 `-- vars
-    |-- hits_aln.aln -> ../exprs/muscle/daad3a8a2b_0.aln
     |-- hits.bht -> ../exprs/blastp_db/79c21d433f_4644d53dcd_d28fbead27_0.bht
+    |-- hits_aln.aln -> ../exprs/muscle/daad3a8a2b_0.aln
     |-- hits_faa.faa -> ../exprs/extract_seqs/b947a1128f_2cc5d34293_0.faa
     |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
     |-- mgen.faa -> ../exprs/load_faa/b1dad56770_0.faa

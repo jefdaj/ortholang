@@ -62,8 +62,8 @@
 |       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
 |       `-- ec25710c91_0.str -> ../../cache/lines/...
 `-- vars
-    |-- maga_best_mbov.bht -> ../exprs/best_hits/44ead2459b_0.bht
     |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
+    |-- maga_best_mbov.bht -> ../exprs/best_hits/44ead2459b_0.bht
     |-- maga_ids.str.list -> ../exprs/extract_queries/de2d7239cb_0.str.list
     |-- maga_mbov.bht -> ../exprs/blastp_db/406109b298_b947a1128f_21032fd353_0.bht
     |-- maga_mbov_rbh.bht -> ../exprs/reciprocal_best/44ead2459b_c443effffe_0.bht

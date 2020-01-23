@@ -65,8 +65,8 @@
 |   `-- tblastn_each
 |       `-- b79e5160cb_e0be9800d0_bd0075bcce_0.bht.list -> ../../cache/lines/...
 `-- vars
-    |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
     |-- maga.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
+    |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/beed021a09_0.str.list.list
     |-- result -> ../exprs/all/ceb66f4a02_0.str.list
     `-- single.str.list -> ../exprs/extract_queries/980de2a882_0.str.list

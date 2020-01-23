@@ -56,10 +56,10 @@
 |       |-- 1e020faf26_0.str -> ../../cache/lines/...
 |       `-- f6e8c8ce02_0.str -> ../../cache/lines/...
 `-- vars
+    |-- hits.bht -> ../exprs/blastp_db/79c21d433f_4644d53dcd_a2c6594281_0.bht
     |-- hits2.hht -> ../exprs/hmmsearch/406109b298_57f2258c33_8f45069ec8_0.hht
     |-- hits2_ids.str.list -> ../exprs/extract_hmm_targets/5c2b54a186_0.str.list
     |-- hits_aln.aln -> ../exprs/muscle/fd73a1c385_0.aln
-    |-- hits.bht -> ../exprs/blastp_db/79c21d433f_4644d53dcd_a2c6594281_0.bht
     |-- hits_faa.faa -> ../exprs/extract_seqs/8f45069ec8_c3ab257b06_0.faa
     |-- hits_hmm.hmm -> ../exprs/hmmbuild/1ab71ea433_0.hmm
     |-- mgen.faa -> ../exprs/load_faa/78020dc253_0.faa

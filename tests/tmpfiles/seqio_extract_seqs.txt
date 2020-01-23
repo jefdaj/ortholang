@@ -35,13 +35,13 @@
 |       `-- ead30046d0_0.str -> ../../cache/lines/...
 `-- vars
     |-- faaDiff.str.list -> ../exprs/diff/f493b3b502_0.str.list
-    |-- faaSmallAll.str.list -> ../exprs/extract_ids/c6cdbe5a9a_0.str.list
     |-- faaSmall.faa -> ../exprs/load_faa/ba41f009f5_0.faa
+    |-- faaSmallAll.str.list -> ../exprs/extract_ids/c6cdbe5a9a_0.str.list
     |-- faaSmallIDs.str.list -> ../exprs/extract_ids/e0be9800d0_0.str.list
     |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/e0be9800d0_c2598afc2c_0.faa
     |-- fnaDiff.str.list -> ../exprs/diff/50f02a3c59_0.str.list
-    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/b7440bdf29_0.str.list
     |-- fnaSmall.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
+    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/b7440bdf29_0.str.list
     |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/b23b6505d6_0.str.list
     |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/b23b6505d6_873ea35553_0.fna
     `-- result -> ../exprs/any/28a66f88f3_0.str.list

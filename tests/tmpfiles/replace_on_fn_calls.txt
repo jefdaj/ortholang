@@ -47,8 +47,8 @@
 |       `-- result -> ../../reps/83de0ea40a/faa.faa
 `-- vars
     |-- faa_alternatives.faa.list -> ../exprs/replace_each/d1561f14c2_48877bb94a_6fc58a709a_0.faa.list
-    |-- faa_paths.str.list -> ../exprs/list/277b89b004_0.str.list
     |-- faa_path.str -> ../exprs/str/c58447896b_0.str
+    |-- faa_paths.str.list -> ../exprs/list/277b89b004_0.str.list
     `-- result -> ../vars/faa_alternatives.faa.list
 
 13 directories, 38 files
