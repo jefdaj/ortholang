@@ -2,15 +2,3 @@ Like blastn, but BLASTs against a list of subject sequence files.
 
 For example:
   blastn_each 1e-20 my_species [species1, species2, species3]
-
-See also:
-  blastn
-  blastn_all (coming soon)
-  blastn_db
-  blastn_db_each
-  blastn_db_all (coming soon)
-  blastn_rbh
-  blastn_rbh_each
-  blastn_rbh_all (coming soon)
-  blastn_rev
-  blastn_rev_each

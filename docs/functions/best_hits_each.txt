@@ -1,8 +1,1 @@
 Given a list of hit tables, returns a list of smaller hit tables, each with only the best hit per query gene ID.
-
-See also:
-  best_hits
-  best_hits_all (coming soon)
-  reciprocal_best
-  reciprocal_best_each (coming soon)
-  reciprocal_best_all

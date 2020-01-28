@@ -11,15 +11,3 @@ Algorithm:
 
 Output:
   a table of all hits below the cutoff
-
-See also:
-  blastp_db
-  blastp_db_each
-  blastp_db_all (coming soon)
-  blastp_each
-  blastp_all (coming soon)
-  blastp_rbh
-  blastp_rbh_each
-  blastp_rbh_all (coming soon)
-  blastp_rev
-  blastp_rev_each

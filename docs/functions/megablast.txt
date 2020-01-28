@@ -4,15 +4,3 @@ This is probably what you think of as blastn if you've been using the NCBI
 site. See this blog post for details:
 
 http://www.sixthresearcher.com/when-blast-is-not-blast/
-
-See also:
-  megablast_db
-  megablast_db_each
-  megablast_db_all (coming soon)
-  megablast_each
-  megablast_all (coming soon)
-  megablast_rbh
-  megablast_rbh_each
-  megablast_rbh_all (coming soon)
-  megablast_rev
-  megablast_rev_each

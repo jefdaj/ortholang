@@ -13,15 +13,3 @@ For example, these two are the same:
   fwd2 = blastn     1e-20 species1 species2
   rev2 = blastn_rev 1e-20 species1 species2
   rbh2 = reciprocal_best fwd1 rev2
-
-See also:
-  blastn
-  blastn_db
-  blastn_db_each
-  blastn_db_all (coming soon)
-  blastn_each
-  blastn_all (coming soon)
-  blastn_rbh
-  blastn_rbh_each
-  blastn_rbh_all (coming soon)
-  blastn_rev_each
