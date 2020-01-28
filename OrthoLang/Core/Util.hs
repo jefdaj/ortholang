@@ -26,6 +26,10 @@ module OrthoLang.Core.Util
   , expandTildes
   , globFiles
 
+  -- error handling
+  -- , ignoreErrors
+  , retryIgnore
+
   -- misc
   , stripWhiteSpace
   , isEmpty
@@ -45,7 +49,8 @@ import qualified Data.Text as T
 
 import Data.Monoid ((<>))
 import Control.Monad          (unless)
-import Control.Exception.Safe (MonadCatch, catch, throwM)
+import Control.Exception.Safe (MonadCatch, catch, throwM, catchAny)
+import Control.Retry          (recoverAll, exponentialBackoff, limitRetries)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Crypto.Hash            (hash, Digest, MD5)
 import Data.Char              (isSpace)
@@ -227,6 +232,23 @@ expandTildes s = do
 
 globFiles :: String -> IO [FilePath]
 globFiles ptn = expandTildes ptn >>= glob >>= mapM absolutize
+
+--------------------
+-- error handling --
+--------------------
+
+ignoreErrors fn = catchAny fn (\e -> putStrLn ("error! " ++ show e))
+
+-- This one is as bad as it sounds, so remove it when able! It's the only
+-- way I've managed to solve the occasional "openFile" lock conflicts.
+-- TODO at least log when a retry happens for debugging
+-- TODO ask Niel if individual actions can be retried instead
+-- TODO could always fork Shake to put it in if needed too
+retryIgnore fn = ignoreErrors $ recoverAll limitedBackoff fn
+  where
+    -- This isn't as bad as it sounds. It just prints an error message instead
+    -- of crashing the rest of the program. The error will still be visible.
+    limitedBackoff = exponentialBackoff 50 <> limitRetries 5
 
 ----------
 -- misc --

@@ -33,6 +33,7 @@ import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 tmpfilesVary :: [FilePath]
 tmpfilesVary =
   [ "crb_blast_each2" -- TODO should this be fixable?
+  , "crb_blast_two_cyanos"
   , "ncbi_blast_reciprocal_best"
   , "blast_hits_best_hits"
   , "sonicparanoid_myco3"
@@ -45,6 +46,7 @@ tmpfilesVary =
   , "plot_venndiagram"
   , "plot_linegraph"
   , "plot_scatterplot"
+  , "plot_histogram"
   ]
 
 -- these work, but the stdout varies so they require a check script
@@ -68,6 +70,7 @@ badlyBroken =
   , "psiblast_map"
   , "psiblast_pssm_all"
   , "sonicparanoid_test1"
+  , "sonicparanoid_myco3" -- TODO finish writing module first
   ]
 
 getTestScripts :: FilePath -> IO [FilePath]

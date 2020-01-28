@@ -4,7 +4,7 @@ let
   ortholang = import ./default.nix;
   devDepends = [
     stack
-    zip
+    # zip
     # pypi2nix
   ];
 
