@@ -9,15 +9,3 @@ For example if my_species is faa and species1, 2, and 3 are fna:
   fwds = tblastn_each    1e-20 my_species [species1, species2, species3]
   revs = blastx_rev_each 1e-20 my_species [species1, species2, species3]
   rbhs = reciprocal_best_each fwds revs
-
-See also:
-  blastn
-  blastn_db
-  blastn_db_each
-  blastn_db_all (coming soon)
-  blastn_each
-  blastn_all (coming soon)
-  blastn_rbh
-  blastn_rbh_each
-  blastn_rbh_all (coming soon)
-  blastn_rev
