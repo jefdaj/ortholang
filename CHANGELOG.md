@@ -12,7 +12,7 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Rename ShortCut to OrthoLang
 - Refactor cabal and nix files so ortholang-demo can auto-update the website docs
 - Functions can have multiple names (only used by binary operators so far)
-- Update pinned nixpkgs to cleanmaster-19.09
+- Update pinned nixpkgs to 2020-02-01_ortholang
 
 ### Added:
 - The first few BLAST docs
