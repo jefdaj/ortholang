@@ -1,1 +1,2 @@
-doc for functions/any not written yet
+Given a list of lists, returns the unique elements from all of them.
+Like & (set union) but with a flexible number of arguments.

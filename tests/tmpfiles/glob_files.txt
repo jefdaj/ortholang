@@ -2,10 +2,10 @@
 |-- cache
 |-- exprs
 |   |-- glob_files
-|   |   `-- 3cf1235f72_0.str.list -> ../../cache/lines/...
+|   |   `-- 93fca3cf6b_0.str.list -> ../../cache/lines/...
 |   `-- str
-|       `-- 4749080868_0.str -> ../../cache/lines/...
+|       `-- f78ef4ca97_0.str -> ../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/glob_files/3cf1235f72_0.str.list
+    `-- result -> ../exprs/glob_files/93fca3cf6b_0.str.list
 
 5 directories, 3 files

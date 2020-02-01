@@ -1,0 +1,2 @@
+examples/sequences/PCC_7942_chr.gbk
+examples/sequences/PCC_7942_pANL.gbk

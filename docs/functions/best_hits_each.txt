@@ -1,1 +1,1 @@
-doc for functions/best_hits_each not written yet
+Given a list of hit tables, returns a list of smaller hit tables, each with only the best hit per query gene ID.

@@ -1,1 +1,4 @@
-doc for functions/blastn_each not written yet
+Like blastn, but BLASTs against a list of subject sequence files.
+
+For example:
+  blastn_each 1e-20 my_species [species1, species2, species3]

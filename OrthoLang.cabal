@@ -1,0 +1,184 @@
+cabal-version:      2.2
+name:               OrthoLang
+synopsis:           Short, reproducible phylogenomic cuts
+author:             Jeffrey David Johnson
+maintainer:         jefdaj@berkeley.edu
+version:            0.9.4
+-- license:            AGPL-3
+license-file:       LICENSE
+build-type:         Simple
+data-files:         examples/scripts/*.ol,
+                    examples/gene-lists/*.txt,
+                    examples/genome-lists/*.txt,
+                    examples/sequences/*.fa,
+                    examples/sequences/*.faa,
+                    examples/sequences/*.fna,
+                    examples/sequences/*.gbff,
+                    examples/sequences/*.gbk,
+                    docs/*.txt,
+                    docs/modules/*.txt,
+                    docs/types/*.txt,
+                    docs/functions/*.txt,
+                    tests/check/*.sh,
+                    tests/versions/*.txt,
+                    tests/repl/*.txt,
+                    tests/scripts/*.ol,
+                    tests/stdout/*.txt,
+                    tests/tmpfiles/*.txt,
+                    wrapper-scripts/*.sh
+
+source-repository head
+  type: git
+  location: https://github.com/jefdaj/ortholang.git
+
+common shared-properties
+  hs-source-dirs:   .
+  default-language: Haskell2010
+  ghc-options: 
+        -threaded
+        -rtsopts
+        -- TODO why does -N slow it down so much sometimes? remove?
+        -- TODO is there an optimal number/fraction of cores?
+        -- TODO does playing with flags for shake + other packages help?
+        -- TODO does -O2 help?
+        "-with-rtsopts=-N -IO"
+        -Wno-orphans
+        -- -pedantic
+        -- -O0
+        -- -O2
+        -- TODO what about the old shake -qg?
+  pkgconfig-depends: zlib
+  build-depends:    Glob,
+                    -- TODO is this ok to bring back? MissingH,
+                    MissingH,
+                    QuickCheck,
+                    base,
+                    bytestring,
+                    configurator,
+                    containers,
+                    cryptohash,
+                    directory,
+                    data-default-class,
+                    docopt,
+                    -- exceptions,
+                    -- enclosed-exceptions,
+                    safe-exceptions,
+                    -- TODO remove in favor of path
+                    filelock,
+                    filepath,
+                    haskeline,
+                    mtl,
+                    parsec,
+                    path,
+                    path-io,
+                    pretty,
+                    process,
+                    -- regex,
+                    regex-compat,
+                    regex-posix,
+                    -- regex-pcre,
+                    silently,
+                    scientific,
+                    shake >= 0.17.5,
+                    split,
+                    strict,
+                    -- tagged-exception-core,
+                    hspec,
+                    tasty,
+                    tasty-hunit,
+                    tasty-hspec,
+                    tasty-golden,
+                    tasty-quickcheck,
+                    temporary,
+                    text,
+                    transformers,
+                    unbounded-delays,
+                    unix,
+                    utility-ht,
+                    time,
+                    concurrent-extra,
+                    retry,
+                    terminal-size,
+                    posix-escape,
+                    random,
+                    random-shuffle,
+                    dlist,
+                    ansi-terminal,
+                    setlocale,
+                    raw-strings-qq,
+                    logging,
+                    progress-meter,
+                    download
+
+library
+  import:           shared-properties
+  exposed-modules:  Paths_OrthoLang,
+                    OrthoLang.Core,
+                    OrthoLang.Core.Actions,
+                    OrthoLang.Core.Compile,
+                    OrthoLang.Core.Compile.Basic,
+                    OrthoLang.Core.Compile.Compose,
+                    OrthoLang.Core.Compile.Map,
+                    OrthoLang.Core.Compile.Map2,
+                    OrthoLang.Core.Compile.Repeat,
+                    OrthoLang.Core.Compile.Replace,
+                    OrthoLang.Core.Config,
+                    OrthoLang.Core.Eval,
+                    OrthoLang.Core.Locks,
+                    OrthoLang.Core.Parse,
+                    OrthoLang.Core.Parse.Util,
+                    OrthoLang.Core.Parse.Basic,
+                    OrthoLang.Core.Parse.Expr,
+                    OrthoLang.Core.Parse.Script,
+                    OrthoLang.Core.Paths,
+                    OrthoLang.Core.Pretty,
+                    OrthoLang.Core.Repl,
+                    OrthoLang.Core.Sanitize,
+                    OrthoLang.Core.Types,
+                    OrthoLang.Core.Util,
+                    OrthoLang.Modules,
+                    OrthoLang.Modules.BioMartR,
+                    OrthoLang.Modules.Blast,
+                    OrthoLang.Modules.BlastDB,
+                    OrthoLang.Modules.BlastHits,
+                    OrthoLang.Modules.BlastRBH,
+                    OrthoLang.Modules.CRBBlast,
+                    OrthoLang.Modules.Cheat,
+                    OrthoLang.Modules.Diamond,
+                    OrthoLang.Modules.Hmmer,
+                    OrthoLang.Modules.ListLike,
+                    OrthoLang.Modules.Load,
+                    OrthoLang.Modules.MMSeqs,
+                    OrthoLang.Modules.Math,
+                    OrthoLang.Modules.Muscle,
+                    OrthoLang.Modules.OrthoFinder,
+                    OrthoLang.Modules.OrthoGroups,
+                    OrthoLang.Modules.Busco,
+                    OrthoLang.Modules.Permute,
+                    OrthoLang.Modules.Plots,
+                    OrthoLang.Modules.PsiBlast,
+                    OrthoLang.Modules.Sample,
+                    OrthoLang.Modules.Scores,
+                    OrthoLang.Modules.SeqIO,
+                    OrthoLang.Modules.Sets,
+                    OrthoLang.Modules.SonicParanoid,
+                    OrthoLang.Modules.Summarize,
+                    OrthoLang.Modules.Range,
+                    OrthoLang.Modules.SetsTable,
+                    OrthoLang.Modules.AllVsAll,
+                    OrthoLang.Modules.GreenCut,
+                    OrthoLang.Test,
+                    OrthoLang.Test.Versions
+                    OrthoLang.Test.Parse,
+                    OrthoLang.Test.Parse.Arbitrary,
+                    OrthoLang.Test.Parse.Examples,
+                    OrthoLang.Test.Repl,
+                    OrthoLang.Test.Scripts
+
+-- everything is built into one binary:
+--   run tests with ortholang --test
+--   write website reference docs with ortholang --reference
+-- TODO is -IO -qg needed for ortholang, or just shake?
+executable ortholang
+  import:           shared-properties
+  main-is:          OrthoLang.hs

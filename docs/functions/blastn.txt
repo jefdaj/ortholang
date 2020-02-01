@@ -1,1 +1,20 @@
-doc for functions/blastn not written yet
+BLAST one file of nucleic acid (DNA) sequences against another.
+
+WARNING: when you set the NCBI site to use blastn, it actually does something
+closer to the ortholang megablast function. You should use megablast for fast
+high-similarity matches or blastn if you want to find shorter, less similar
+matches. See this blog post for details:
+
+http://www.sixthresearcher.com/when-blast-is-not-blast/
+
+Inputs:
+  an e-value cutoff
+  a query   FASTA nucleic acid file
+  a subject FASTA nucleic acid file
+
+Algorithm:
+  make a nucleotide database from the subject sequences
+  BLAST the query sequences against the database
+
+Output:
+  a table of all hits below the cutoff

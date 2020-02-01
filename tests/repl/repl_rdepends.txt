@@ -1,36 +1,36 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ v1 = "one"
+ortholang —▶ v1 = "one"
 
-shortcut —▶ v2 = "two"
+ortholang —▶ v2 = "two"
 
-shortcut —▶ v3 = [v1, v2]
+ortholang —▶ v3 = [v1, v2]
 
-shortcut —▶ :show
+ortholang —▶ :show
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-shortcut —▶ :needs v1
+ortholang —▶ :needs v1
 v1 = "one"
 v3 = [v1, v2]
 
-shortcut —▶ :rdep v2
+ortholang —▶ :rdep v2
 unknown command: rdep
 
-shortcut —▶ :rdep v3
+ortholang —▶ :rdep v3
 unknown command: rdep
 
-shortcut —▶ v4 = v3
+ortholang —▶ v4 = v3
 
-shortcut —▶ :rdep v3
+ortholang —▶ :rdep v3
 unknown command: rdep
 
-shortcut —▶ v5 = v4
+ortholang —▶ v5 = v4
 
-shortcut —▶ :rdep v3
+ortholang —▶ :rdep v3
 unknown command: rdep
 
-shortcut —▶ :quit
+ortholang —▶ :quit
 Bye for now!

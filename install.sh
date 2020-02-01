@@ -1,11 +1,11 @@
 #/usr/bin/env bash
 
-export LOG=shortcut.log
+export LOG=ortholang.log
 
 case "$(uname)" in
   Linux ) export CHANNEL=nixos-19.09 ;;
   Darwin) export CHANNEL=nixpkgs-19.09-darwin ;;
-  *) echo "Sorry, unsupported OS: $(uname). Try manual download + nix-build?"; exit 1 ;;
+  *) echo "Sorry, unsupported OS: $(uname). Try git clone + nix-build, or ask Jeff!"; exit 1 ;;
 esac
 
 onfailure() {
@@ -14,13 +14,14 @@ onfailure() {
 }
 
 onsuccess() {
-  echo "Success! Try opening a new terminal and running: shortcut"
+  echo "Success! Try opening a new terminal and running: ortholang"
   echo "If you get 'command not found', add this line to your .profile or .bashrc and try again:"
   echo "source $HOME/.nix-profile/etc/profile.d/nix.sh"
 }
 
 (
   set -e
+  set -o pipefail
 
   echo -n "Installing the Nix package manager..."
   which nix-env &> /dev/null
@@ -35,7 +36,6 @@ onsuccess() {
   nix-channel --options substituters "" --update >> $LOG 2>&1
   echo " OK"
 
-  # TODO name the cache shortcut?
   echo -n "Adding the jefdaj Cachix cache..."
   which cachix &> /dev/null
   if [[ $? != 0 ]]; then
@@ -44,13 +44,12 @@ onsuccess() {
   ([[ "$(uname)" == Darwin ]] && sudo cachix use jefdaj || cachix use jefdaj) >> $LOG 2>&1
   echo " OK"
 
-  echo -n "Installing ShortCut from GitHub..."
-  archive='https://github.com/jefdaj/shortcut/files/3934119/shortcut-v0.9.1.tar.gz'
-  nix-env -i -f $archive >> $LOG 2>&1
-  echo " OK"
+  echo "Installing OrthoLang..."
+  archive='https://ortholang.pmb.berkeley.edu/static/ortholang-v0.9.4.tar.gz'
+  nix-env -i -f $archive 2>&1 | tee -a $LOG
 
   echo "Testing that everything works..."
-  shortcut --test version
-  shortcut --version
+  ortholang --test version
+  ortholang --version
   echo
 ) && onsuccess || onfailure

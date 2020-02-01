@@ -1,1 +1,15 @@
-doc for functions/blastn_rev not written yet
+Like blastn, but with the FASTA files flipped.
+
+Useful for the specific case where you want reciprocal best hits from separate
+forward and reverse searches, and want to reduce the chances of messing up the
+input order.
+
+For example, these two are the same:
+
+  fwd1 = blastn 1e-20 species1 species2
+  rev1 = blastn 1e-20 species2 species1
+  rbh1 = reciprocal_best fwd1 rev1
+
+  fwd2 = blastn     1e-20 species1 species2
+  rev2 = blastn_rev 1e-20 species1 species2
+  rbh2 = reciprocal_best fwd1 rev2

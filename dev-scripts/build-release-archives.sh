@@ -12,15 +12,15 @@ rm -rf release-${tag}
 mkdir release-${tag}
 pushd release-${tag}
 
-git clone http://github.com/jefdaj/shortcut
-pushd shortcut
+git clone http://github.com/jefdaj/ortholang
+pushd ortholang
 git checkout ${tag}
 git submodule update --init --recursive
 rm -rf .git*
 popd
 
-tar cvzf shortcut-${tag}.tar.gz shortcut
-zip -r   shortcut-${tag}.zip    shortcut
+tar cvzf ortholang-${tag}.tar.gz ortholang
+zip -r   ortholang-${tag}.zip    ortholang
 
 echo "release files:"
-du -h shortcut-*
+du -h ortholang-*

@@ -6,7 +6,7 @@
 |   |   |-- 36189032ad.faa
 |   |   `-- 36189032ad.faa.ids
 |   `-- orthofinder
-|       `-- 1553eeea0a
+|       `-- bde1b97dfd
 |           |-- 10ffe0cf0f.faa -> ../../../cache/load/10ffe0cf0f.faa
 |           |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |           `-- OrthoFinder
@@ -15,11 +15,11 @@
 |                   |   |-- Duplications_per_Orthogroup.tsv
 |                   |   |-- Duplications_per_Species_Tree_Node.tsv
 |                   |   |-- Orthogroups_SpeciesOverlaps.tsv
+|                   |   |-- OrthologuesStats_Totals.tsv
 |                   |   |-- OrthologuesStats_many-to-many.tsv
 |                   |   |-- OrthologuesStats_many-to-one.tsv
 |                   |   |-- OrthologuesStats_one-to-many.tsv
 |                   |   |-- OrthologuesStats_one-to-one.tsv
-|                   |   |-- OrthologuesStats_Totals.tsv
 |                   |   |-- Statistics_Overall.tsv
 |                   |   `-- Statistics_PerSpecies.tsv
 |                   |-- Gene_Duplication_Events
@@ -29,12 +29,6 @@
 |                   |   |-- OG0000000_tree.txt
 |                   |   `-- OG0000001_tree.txt
 |                   |-- Log.txt
-|                   |-- Orthogroups
-|                   |   |-- Orthogroups.GeneCount.tsv
-|                   |   |-- Orthogroups_SingleCopyOrthologues.txt
-|                   |   |-- Orthogroups.tsv
-|                   |   |-- Orthogroups.txt
-|                   |   `-- Orthogroups_UnassignedGenes.tsv
 |                   |-- Orthogroup_Sequences
 |                   |   |-- OG0000000.fa
 |                   |   |-- OG0000001.fa
@@ -364,6 +358,12 @@
 |                   |   |-- OG0000325.fa
 |                   |   |-- OG0000326.fa
 |                   |   `-- OG0000327.fa
+|                   |-- Orthogroups
+|                   |   |-- Orthogroups.GeneCount.tsv
+|                   |   |-- Orthogroups.tsv
+|                   |   |-- Orthogroups.txt
+|                   |   |-- Orthogroups_SingleCopyOrthologues.txt
+|                   |   `-- Orthogroups_UnassignedGenes.tsv
 |                   |-- Orthologues
 |                   |   |-- Orthologues_10ffe0cf0f
 |                   |   |   `-- 10ffe0cf0f__v__36189032ad.tsv
@@ -408,44 +408,44 @@
 |                   |   |-- OG0000036.fa
 |                   |   `-- OG0000037.fa
 |                   |-- Species_Tree
-|                   |   |-- SpeciesTree_rooted_node_labels.txt
-|                   |   `-- SpeciesTree_rooted.txt
+|                   |   |-- SpeciesTree_rooted.txt
+|                   |   `-- SpeciesTree_rooted_node_labels.txt
 |                   `-- WorkingDirectory
 |                       |-- Blast0_0.txt
 |                       |-- Blast0_1.txt
 |                       |-- Blast1_0.txt
 |                       |-- Blast1_1.txt
-|                       |-- clusters_OrthoFinder_I1.5.txt
-|                       |-- clusters_OrthoFinder_I1.5.txt_id_pairs.txt
 |                       |-- OrthoFinder_graph.txt
-|                       |-- pickle
 |                       |-- SequenceIDs.txt
 |                       |-- Species0.fa
 |                       |-- Species1.fa
 |                       |-- SpeciesIDs.txt
 |                       |-- SpeciesTree_rooted_ids.txt
-|                       |-- SpeciesTree_unrooted_ids.txt
 |                       |-- SpeciesTree_unrooted.txt
-|                       `-- Trees_ids
-|                           |-- OG0000000_tree_id.txt
-|                           `-- OG0000001_tree_id.txt
+|                       |-- SpeciesTree_unrooted_ids.txt
+|                       |-- Trees_ids
+|                       |   |-- OG0000000_tree_id.txt
+|                       |   `-- OG0000001_tree_id.txt
+|                       |-- clusters_OrthoFinder_I1.5.txt
+|                       |-- clusters_OrthoFinder_I1.5.txt_id_pairs.txt
+|                       `-- pickle
 |-- exprs
 |   |-- list
-|   |   |-- b826618e90_0.str.list -> ../../cache/lines/...
-|   |   `-- bcd41e8ba1_0.faa.list -> ../../cache/lines/...
+|   |   |-- 103fd7f341_0.faa.list -> ../../cache/lines/...
+|   |   `-- 2ff622f766_0.str.list -> ../../cache/lines/...
 |   |-- orthofinder
-|   |   |-- ad0c8e43aa_0.ofr -> ../../cache/orthofinder/1553eeea0a/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
-|   |   |-- ad0c8e43aa_0.ofr.err
-|   |   `-- ad0c8e43aa_0.ofr.out
+|   |   |-- 9410d5dd3d_0.ofr -> ../../cache/orthofinder/bde1b97dfd/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
+|   |   |-- 9410d5dd3d_0.ofr.err
+|   |   `-- 9410d5dd3d_0.ofr.out
 |   |-- orthogroups
-|   |   `-- 2d34901ea3_0.str.list.list -> ../../cache/lines/...
+|   |   `-- 407eb96c17_0.str.list.list -> ../../cache/lines/...
 |   `-- str
-|       |-- c156278223_0.str -> ../../cache/lines/...
-|       `-- d03a6ca5fb_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
 `-- vars
-    |-- ofogs.str.list.list -> ../exprs/orthogroups/2d34901ea3_0.str.list.list
-    |-- ofres.ofr -> ../exprs/orthofinder/ad0c8e43aa_0.ofr
+    |-- ofogs.str.list.list -> ../exprs/orthogroups/407eb96c17_0.str.list.list
+    |-- ofres.ofr -> ../exprs/orthofinder/9410d5dd3d_0.ofr
     |-- result -> ../vars/ofogs.str.list.list
-    `-- smallbacteria.faa.list -> ../exprs/list/bcd41e8ba1_0.faa.list
+    `-- smallbacteria.faa.list -> ../exprs/list/103fd7f341_0.faa.list
 
 26 directories, 422 files

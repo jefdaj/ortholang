@@ -1,11 +1,11 @@
-Welcome to the ShortCut interpreter!
+Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
-shortcut —▶ [["one"]]
+ortholang —▶ [["one"]]
 [["one"]]
 
-shortcut —▶ :t [["one"]]
+ortholang —▶ :t [["one"]]
 str.list.list
 
-shortcut —▶ :quit
+ortholang —▶ :quit
 Bye for now!

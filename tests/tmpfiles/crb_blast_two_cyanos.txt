@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- crb_blast
-|   |   `-- 76fcc9338e_82a1c0f620
+|   |   `-- d4edc4b6ee_823a99bb06
 |   |       |-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |   |       |-- 36189032ad_into_6046a54e92.2.blast
 |   |       |-- 36189032ad.phr
@@ -24,21 +24,21 @@
 |       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- crb_blast
-|   |   `-- 47ebd2a24b_33392d8410_0.crb -> ../../cache/crb_blast/76fcc9338e_82a1c0f620/results.crb
+|   |   `-- b23b6505d6_b947a1128f_0.crb -> ../../cache/crb_blast/d4edc4b6ee_823a99bb06/results.crb
 |   |-- extract_targets
-|   |   |-- b8da111eb4_0.str.list -> ../../cache/lines/...
-|   |   `-- b8da111eb4_0.str.list.tmp.err
+|   |   |-- 7e2935a015_0.str.list -> ../../cache/lines/...
+|   |   `-- 7e2935a015_0.str.list.tmp.err
 |   |-- load_faa
-|   |   `-- 55ac586087_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
 |   |-- load_fna
-|   |   `-- 832f789663_0.fna -> ../../cache/load/6046a54e92.fna
+|   |   `-- 2fe5a30d0c_0.fna -> ../../cache/load/6046a54e92.fna
 |   `-- str
-|       |-- 936e46a549_0.str -> ../../cache/lines/...
-|       `-- c156278223_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
 `-- vars
-    |-- hits.crb -> ../exprs/crb_blast/47ebd2a24b_33392d8410_0.crb
-    |-- maga.faa -> ../exprs/load_faa/55ac586087_0.faa
-    |-- minimgen.fna -> ../exprs/load_fna/832f789663_0.fna
-    `-- result -> ../exprs/extract_targets/b8da111eb4_0.str.list
+    |-- hits.crb -> ../exprs/crb_blast/b23b6505d6_b947a1128f_0.crb
+    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
+    |-- minimgen.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
+    `-- result -> ../exprs/extract_targets/7e2935a015_0.str.list
 
 11 directories, 30 files

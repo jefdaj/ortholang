@@ -1,0 +1,7 @@
+BLAST Database error: No alias or index file found for nucleotide database [human_est] in search path [$TMPDIR/cache/blastdbget::]
+ignored error: Error when running Shake build system:
+  at want, called at ./OrthoLang/Core/Eval.hs:244:7 in main:OrthoLang.Core.Eval
+* Depends on: eval
+* Raised the exception:
+readCreateProcess: blastdbcmd.sh "$TMPDIR/cache/blastdbget" "human_est" (exit 2): failed
+

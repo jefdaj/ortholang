@@ -5,22 +5,19 @@
 let
   # fetch my pinned nixpkgs for reproducibility.
   # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
-  # use this instead to try to build it with your system's current nixpkgs:
-  # pkgs = import <nixpkgs> {};
   # to update the the sha256sum:
-  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/2019-11-30_nixpkgs-shortcut.tar.gz
+  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/<rev>.tar.gz
   pkgs = let
     inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
   in import (fetchFromGitHub {
     owner  = "jefdaj";
     repo   = "nixpkgs";
-    rev = if stdenv.hostPlatform.system == "x86_64-darwin"
-      then "75996a27e7964ee670359cc98c7b1f3327e5d52c"  # shortcut-mac, derived from nixpkgs-channels/nixos-19.03-darwin
-      else "89520e692736b1e7fc3926bbd52c4e1faaa16eb9"; # shortcut-linux, dervived from nixpkgs-channels/nixos-19.09
-    sha256 = if stdenv.hostPlatform.system == "x86_64-darwin"
-      then "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2"
-      else "1vv5ydpckhsck5bm45hvlvbvn2nlxv2mpnqb82943p7vkwk87shy";
+    rev    = "2020-02-01_ortholang";
+    sha256 = "1sxicczxc3hdjyrbhmg3dvmkq2q6dzqyrv272ksxvgr8vfamdd2h";
   }) {};
+
+  # use this instead to try to build it with your system's current nixpkgs:
+  # pkgs = import <nixpkgs> {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
@@ -34,10 +31,10 @@ let
     name="ncbi-blast-${version}";
     src = if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
       then (pkgs.fetchurl {
-        url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-universal-macosx.tar.gz";
+        url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-universal-macosx.tar.gz";
         sha256="00g8pzwx11wvc7zqrxnrd9xad68ckl8agz9lyabmn7h4k07p5yll";
       }) else (pkgs.fetchurl {
-        url = "http://mirrors.vbi.vt.edu/mirrors/ftp.ncbi.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
+        url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
         sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
       });
   });

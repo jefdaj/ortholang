@@ -1,3 +1,0 @@
-small = load_list "data/proteomes-small.txt"
-refseq = load_list "data/proteomes-refseq.txt"
-result = small | refseq

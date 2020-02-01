@@ -1,0 +1,19 @@
+.
+|-- cache
+|-- exprs
+|   |-- multiply
+|   |   |-- b16bfe9398_435245ee69_0.num -> ../../cache/lines/...
+|   |   `-- e663bd5e3a_87ff177bc7_0.num -> ../../cache/lines/...
+|   |-- num
+|   |   |-- 9d7db6f932_0.num -> ../../cache/lines/...
+|   |   |-- ca076eb63f_0.num -> ../../cache/lines/...
+|   |   `-- eaad7f2e40_0.num -> ../../cache/lines/...
+|   `-- subtract
+|       `-- cfbac38c9b_435245ee69_0.num -> ../../cache/lines/...
+`-- vars
+    |-- result -> ../vars/var4.num
+    |-- var1.num -> ../exprs/num/ca076eb63f_0.num
+    |-- var3.num -> ../exprs/multiply/b16bfe9398_435245ee69_0.num
+    `-- var4.num -> ../exprs/subtract/cfbac38c9b_435245ee69_0.num
+
+6 directories, 10 files

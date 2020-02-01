@@ -1,3 +1,0 @@
-single = translate (load_fna "data/Mycoplasma_genitalium_M2321_5genes.fna")
-mapped = translate_each (load_fna_each ["data/Mycoplasma_genitalium_M2321_5genes.fna"])
-result = [single] | mapped

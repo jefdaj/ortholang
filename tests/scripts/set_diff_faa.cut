@@ -1,8 +1,0 @@
-set1 = ["data/Mycoplasma_agalactiae_small.faa",
-        "data/Mycoplasma_genitalium_small.faa"]
-set2 = ["data/Mycoplasma_agalactiae_small.faa",
-        "data/Mycoplasma_genitalium_small.faa",
-        "data/Mycoplasma_hyopneumoniae_small.faa"]
-res1 = diff [set1, set2]
-res2 = set1 ~ set2
-result = [res1, res2]

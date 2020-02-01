@@ -4,5 +4,6 @@
 # see https://github.com/cachix/cachix/issues/52
 # And of course, it will only work if you have my API key.
 
-nix-store -qR --include-outputs $(nix-instantiate shell.nix  ) | cachix push jefdaj
-nix-store -qR --include-outputs $(nix-instantiate default.nix) | cachix push jefdaj
+for f in shell.nix default.nix; do
+  nix-store -qR --include-outputs $(nix-instantiate $f) | cachix push jefdaj
+done

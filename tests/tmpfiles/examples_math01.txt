@@ -1,0 +1,13 @@
+.
+|-- cache
+|-- exprs
+|   |-- multiply
+|   |   `-- d36214249a_c5e9182d78_0.num -> ../../cache/lines/...
+|   `-- num
+|       |-- 6de785566e_0.num -> ../../cache/lines/...
+|       `-- 8999227e35_0.num -> ../../cache/lines/...
+`-- vars
+    |-- result -> ../exprs/multiply/d36214249a_c5e9182d78_0.num
+    `-- z.num -> ../exprs/num/6de785566e_0.num
+
+5 directories, 5 files

@@ -1,1 +1,13 @@
-doc for functions/tblastn not written yet
+BLAST amino acid (protein) sequences against nucleic acid (DNA) sequences.
+
+Inputs:
+  an e-value cutoff
+  a query   FASTA amino acid file
+  a subject FASTA nucleic acid file
+
+Algorithm:
+  make a nucleotide database from the subject sequences
+  BLAST the query proteins against translations (all 6 reading frames) of the database sequences
+
+Output:
+  a table of all hits below the cutoff

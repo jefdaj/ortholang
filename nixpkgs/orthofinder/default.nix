@@ -48,7 +48,6 @@ in stdenv.mkDerivation rec {
     cp OrthoFinder-${version}_source/orthofinder/config.json $out/bin/
   '';
 
-
   # problem:  https://github.com/NixOS/nixpkgs/issues/11133
   # solution: https://github.com/NixOS/nixpkgs/pull/74942
   fixupPhase = if stdenv.isDarwin then ''
