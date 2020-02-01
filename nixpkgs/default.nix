@@ -6,7 +6,7 @@ let
   # fetch my pinned nixpkgs for reproducibility.
   # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
   # to update the the sha256sum:
-  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/2019-11-30_nixpkgs-ortholang.tar.gz
+  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/<rev>.tar.gz
   pkgs = let
     inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
   in import (fetchFromGitHub {
