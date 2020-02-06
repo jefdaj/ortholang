@@ -103,7 +103,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     -- TODO add nondeterministic expression + cache dirs here by parsing modules:
     ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
-    treeCmd = "tree -a --charset=ascii " ++ ignores ++ " | " ++ sedCmd
+    treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runOrthoLang cfg ref ids

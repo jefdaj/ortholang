@@ -36,7 +36,6 @@
 |   |   |           `-- 57
 |   |   |               `-- 08
 |   |   |                   `-- b.faa
-|   |   |-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
 |   |   |-- 4f
 |   |   |   `-- ae
 |   |   |       `-- 11
@@ -61,6 +60,7 @@
 |   |   |           `-- 36
 |   |   |               `-- 7d
 |   |   |                   `-- 3.faa
+|   |   |-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
 |   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
 |   |-- makeblastdb_prot_all
 |   |   `-- 1523a4da89_0.pdb.list -> ../../cache/lines/...
