@@ -5,22 +5,19 @@
 let
   # fetch my pinned nixpkgs for reproducibility.
   # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
-  # use this instead to try to build it with your system's current nixpkgs:
-  pkgs = import <nixpkgs> {};
   # to update the the sha256sum:
-  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/2019-11-30_nixpkgs-ortholang.tar.gz
-  # pkgs = let
-  #   inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
-  # in import (fetchFromGitHub {
-  #   owner  = "jefdaj";
-  #   repo   = "nixpkgs";
-  #   rev = if stdenv.hostPlatform.system == "x86_64-darwin"
-  #     then "75996a27e7964ee670359cc98c7b1f3327e5d52c"  # ortholang-mac, derived from nixpkgs-channels/nixos-19.03-darwin
-  #     else "89520e692736b1e7fc3926bbd52c4e1faaa16eb9"; # ortholang-linux, dervived from nixpkgs-channels/nixos-19.09
-  #   sha256 = if stdenv.hostPlatform.system == "x86_64-darwin"
-  #     then "0b92yhkj3pq58svyrx7jp0njhaykwr29079izqn6qs638v8zvhl2"
-  #     else "1vv5ydpckhsck5bm45hvlvbvn2nlxv2mpnqb82943p7vkwk87shy";
-  # }) {};
+  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/<rev>.tar.gz
+  pkgs = let
+    inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
+  in import (fetchFromGitHub {
+    owner  = "jefdaj";
+    repo   = "nixpkgs";
+    rev    = "2020-02-01_ortholang";
+    sha256 = "1sxicczxc3hdjyrbhmg3dvmkq2q6dzqyrv272ksxvgr8vfamdd2h";
+  }) {};
+
+  # use this instead to try to build it with your system's current nixpkgs:
+  # pkgs = import <nixpkgs> {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 

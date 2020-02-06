@@ -6,15 +6,3 @@ For example:
 
 Note that you should probably use a protein sequence search instead for
 something like this.
-
-See also:
-  blastn
-  blastn_each
-  blastn_all (coming soon)
-  blastn_db
-  blastn_db_all (coming soon)
-  blastn_rbh
-  blastn_rbh_each
-  blastn_rbh_all (coming soon)
-  blastn_rev
-  blastn_rev_each
