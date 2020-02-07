@@ -41,7 +41,7 @@ let
       inherit src name extraRunDeps extraWraps;
       NIX_LDFLAGS = "-lfontconfig"; # for R plotting scripts
       buildInputs = [ makeWrapper ] ++ runDeps;
-      builder = writeScript "builder.sh" ''
+      installPhase = ''
         source ${stdenv}/setup
         mkdir -p $out/bin
         for script in $src/*; do
@@ -54,6 +54,16 @@ let
             --set NIX_SSL_CERT_FILE "${cacert}/etc/ssl/certs/ca-bundle.crt" \
             --set FONTCONFIG_FILE "${fontsConf}"
         done
+      '';
+
+      # problem:  https://github.com/NixOS/nixpkgs/issues/11133
+      # solution: https://github.com/NixOS/nixpkgs/pull/74942
+      fixupPhase = if stdenv.isDarwin then ''
+        for script in $out/bin/.*-wrapped; do
+          patchShebangs "$script"
+          substituteInPlace $script --replace "#!/nix" "#!/usr/bin/env /nix"
+        done
+      '' else ''
         for script in $out/bin/.*-wrapped; do
           patchShebangs $script
         done

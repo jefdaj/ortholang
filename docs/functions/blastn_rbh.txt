@@ -24,15 +24,3 @@ For example, these rb_hits are the same:
 
 Order matters if you want to inspect the resulting table, but if you only care
 about pairs of matching genes genes then fwd and rev are interchangable.
-
-See also:
-  blastn
-  blastn_db
-  blastn_db_each
-  blastn_db_all (coming soon)
-  blastn_each
-  blastn_all (coming soon)
-  blastn_rbh_each
-  blastn_rbh_all (coming soon)
-  blastn_rev
-  blastn_rev_each

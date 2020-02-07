@@ -5,7 +5,7 @@ export LOG=ortholang.log
 case "$(uname)" in
   Linux ) export CHANNEL=nixos-19.09 ;;
   Darwin) export CHANNEL=nixpkgs-19.09-darwin ;;
-  *) echo "Sorry, unsupported OS: $(uname). Try manual download + nix-build?"; exit 1 ;;
+  *) echo "Sorry, unsupported OS: $(uname). Try git clone + nix-build, or ask Jeff!"; exit 1 ;;
 esac
 
 onfailure() {
@@ -21,6 +21,7 @@ onsuccess() {
 
 (
   set -e
+  set -o pipefail
 
   echo -n "Installing the Nix package manager..."
   which nix-env &> /dev/null
@@ -35,7 +36,6 @@ onsuccess() {
   nix-channel --options substituters "" --update >> $LOG 2>&1
   echo " OK"
 
-  # TODO name the cache ortholang?
   echo -n "Adding the jefdaj Cachix cache..."
   which cachix &> /dev/null
   if [[ $? != 0 ]]; then
@@ -44,10 +44,9 @@ onsuccess() {
   ([[ "$(uname)" == Darwin ]] && sudo cachix use jefdaj || cachix use jefdaj) >> $LOG 2>&1
   echo " OK"
 
-  echo -n "Installing OrthoLang from GitHub..."
-  archive='https://github.com/jefdaj/ortholang/files/3934119/ortholang-v0.9.1.tar.gz'
-  nix-env -i -f $archive >> $LOG 2>&1
-  echo " OK"
+  echo "Installing OrthoLang..."
+  archive='https://ortholang.pmb.berkeley.edu/static/ortholang-v0.9.4.tar.gz'
+  nix-env -i -f $archive 2>&1 | tee -a $LOG
 
   echo "Testing that everything works..."
   ortholang --test version

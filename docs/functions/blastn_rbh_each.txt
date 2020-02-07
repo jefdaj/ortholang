@@ -6,15 +6,3 @@ For example:
   shared_genes = all (extract_queries_each hit_tables)
 
 Note that you might want to use a protein sequence search instead for this.
-
-See also:
-  blastn
-  blastn_db
-  blastn_db_each
-  blastn_db_all (coming soon)
-  blastn_each
-  blastn_all (coming soon)
-  blastn_rbh
-  blastn_rbh_all (coming soon)
-  blastn_rev
-  blastn_rev_each

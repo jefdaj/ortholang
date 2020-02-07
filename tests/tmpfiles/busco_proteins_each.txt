@@ -5,10 +5,6 @@
 |   |   |   `-- v2
 |   |   |       `-- datasets
 |   |   |           `-- firmicutes_odb9
-|   |   |               |-- ancestral
-|   |   |               |-- ancestral_variants
-|   |   |               |-- dataset.cfg
-|   |   |               |-- firmicutes_db9 -> ../../firmicutes_db9
 |   |   |               |-- hmms
 |   |   |               |   |-- POG090A000X.hmm
 |   |   |               |   |-- POG090A000Y.hmm
@@ -246,7 +242,6 @@
 |   |   |               |   |-- firmicutes_1239_OrthoDB9_orthogroup_info.txt.gz
 |   |   |               |   |-- ogs.id.info
 |   |   |               |   `-- species.info
-|   |   |               |-- lengths_cutoff
 |   |   |               |-- prfl
 |   |   |               |   |-- POG090A000X.prfl
 |   |   |               |   |-- POG090A000Y.prfl
@@ -480,10 +475,14 @@
 |   |   |               |   |-- POG090A031D.prfl
 |   |   |               |   |-- POG090A0386.prfl
 |   |   |               |   `-- POG090A039N.prfl
+|   |   |               |-- ancestral
+|   |   |               |-- ancestral_variants
+|   |   |               |-- dataset.cfg
+|   |   |               |-- firmicutes_db9 -> ../../firmicutes_db9
+|   |   |               |-- lengths_cutoff
 |   |   |               `-- scores_cutoff
 |   |   `-- runs
 |   |       |-- run_895dd19de5_597248ff77_0.bsr
-|   |       |   |-- full_table_895dd19de5_597248ff77_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG090A000X.out.1
 |   |       |   |   |-- POG090A000Y.out.1
@@ -717,11 +716,10 @@
 |   |       |   |   |-- POG090A031D.out.1
 |   |       |   |   |-- POG090A0386.out.1
 |   |       |   |   `-- POG090A039N.out.1
+|   |       |   |-- full_table_895dd19de5_597248ff77_0.bsr.tsv
 |   |       |   |-- missing_busco_list_895dd19de5_597248ff77_0.bsr.tsv
 |   |       |   `-- short_summary_895dd19de5_597248ff77_0.bsr.txt
-|   |       |-- run_895dd19de5_597248ff77_0.bsr.ini
 |   |       |-- run_895dd19de5_dccba5f86e_0.bsr
-|   |       |   |-- full_table_895dd19de5_dccba5f86e_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG090A000X.out.1
 |   |       |   |   |-- POG090A000Y.out.1
@@ -955,8 +953,10 @@
 |   |       |   |   |-- POG090A031D.out.1
 |   |       |   |   |-- POG090A0386.out.1
 |   |       |   |   `-- POG090A039N.out.1
+|   |       |   |-- full_table_895dd19de5_dccba5f86e_0.bsr.tsv
 |   |       |   |-- missing_busco_list_895dd19de5_dccba5f86e_0.bsr.tsv
 |   |       |   `-- short_summary_895dd19de5_dccba5f86e_0.bsr.txt
+|   |       |-- run_895dd19de5_597248ff77_0.bsr.ini
 |   |       `-- run_895dd19de5_dccba5f86e_0.bsr.ini
 |   |-- curl
 |   |   `-- bd265ecf24

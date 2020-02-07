@@ -5,10 +5,6 @@
 |   |   |   `-- v2
 |   |   |       `-- datasets
 |   |   |           |-- firmicutes_odb9
-|   |   |           |   |-- ancestral
-|   |   |           |   |-- ancestral_variants
-|   |   |           |   |-- dataset.cfg
-|   |   |           |   |-- firmicutes_db9 -> ../../firmicutes_db9
 |   |   |           |   |-- hmms
 |   |   |           |   |   |-- POG090A000X.hmm
 |   |   |           |   |   |-- POG090A000Y.hmm
@@ -246,7 +242,6 @@
 |   |   |           |   |   |-- firmicutes_1239_OrthoDB9_orthogroup_info.txt.gz
 |   |   |           |   |   |-- ogs.id.info
 |   |   |           |   |   `-- species.info
-|   |   |           |   |-- lengths_cutoff
 |   |   |           |   |-- prfl
 |   |   |           |   |   |-- POG090A000X.prfl
 |   |   |           |   |   |-- POG090A000Y.prfl
@@ -480,11 +475,13 @@
 |   |   |           |   |   |-- POG090A031D.prfl
 |   |   |           |   |   |-- POG090A0386.prfl
 |   |   |           |   |   `-- POG090A039N.prfl
+|   |   |           |   |-- ancestral
+|   |   |           |   |-- ancestral_variants
+|   |   |           |   |-- dataset.cfg
+|   |   |           |   |-- firmicutes_db9 -> ../../firmicutes_db9
+|   |   |           |   |-- lengths_cutoff
 |   |   |           |   `-- scores_cutoff
 |   |   |           `-- proteobacteria_odb9
-|   |   |               |-- ancestral
-|   |   |               |-- ancestral_variants
-|   |   |               |-- dataset.cfg
 |   |   |               |-- hmms
 |   |   |               |   |-- POG0908042N.hmm
 |   |   |               |   |-- POG0908053X.hmm
@@ -711,7 +708,6 @@
 |   |   |               |   |-- ogs.id.info
 |   |   |               |   |-- proteobacteria_1224_OrthoDB9_orthogroup_info.txt.gz
 |   |   |               |   `-- species.info
-|   |   |               |-- lengths_cutoff
 |   |   |               |-- prfl
 |   |   |               |   |-- POG0908042N.prfl
 |   |   |               |   |-- POG0908053X.prfl
@@ -934,10 +930,13 @@
 |   |   |               |   |-- POG0908Y9GD.prfl
 |   |   |               |   |-- POG0908YDZB.prfl
 |   |   |               |   `-- POG0908Z93T.prfl
+|   |   |               |-- ancestral
+|   |   |               |-- ancestral_variants
+|   |   |               |-- dataset.cfg
+|   |   |               |-- lengths_cutoff
 |   |   |               `-- scores_cutoff
 |   |   `-- runs
 |   |       |-- run_608982fe7d_8f45069ec8_0.bsr
-|   |       |   |-- full_table_608982fe7d_8f45069ec8_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG0908042N.out.1
 |   |       |   |   |-- POG0908053X.out.1
@@ -1160,11 +1159,10 @@
 |   |       |   |   |-- POG0908Y9GD.out.1
 |   |       |   |   |-- POG0908YDZB.out.1
 |   |       |   |   `-- POG0908Z93T.out.1
+|   |       |   |-- full_table_608982fe7d_8f45069ec8_0.bsr.tsv
 |   |       |   |-- missing_busco_list_608982fe7d_8f45069ec8_0.bsr.tsv
 |   |       |   `-- short_summary_608982fe7d_8f45069ec8_0.bsr.txt
-|   |       |-- run_608982fe7d_8f45069ec8_0.bsr.ini
 |   |       |-- run_ce7af60eaa_8f45069ec8_0.bsr
-|   |       |   |-- full_table_ce7af60eaa_8f45069ec8_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG090A000X.out.1
 |   |       |   |   |-- POG090A000Y.out.1
@@ -1398,8 +1396,10 @@
 |   |       |   |   |-- POG090A031D.out.1
 |   |       |   |   |-- POG090A0386.out.1
 |   |       |   |   `-- POG090A039N.out.1
+|   |       |   |-- full_table_ce7af60eaa_8f45069ec8_0.bsr.tsv
 |   |       |   |-- missing_busco_list_ce7af60eaa_8f45069ec8_0.bsr.tsv
 |   |       |   `-- short_summary_ce7af60eaa_8f45069ec8_0.bsr.txt
+|   |       |-- run_608982fe7d_8f45069ec8_0.bsr.ini
 |   |       `-- run_ce7af60eaa_8f45069ec8_0.bsr.ini
 |   |-- curl
 |   |   |-- 9c46bc8ed4

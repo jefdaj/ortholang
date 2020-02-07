@@ -5,9 +5,6 @@
 |   |   |   `-- v2
 |   |   |       `-- datasets
 |   |   |           `-- proteobacteria_odb9
-|   |   |               |-- ancestral
-|   |   |               |-- ancestral_variants
-|   |   |               |-- dataset.cfg
 |   |   |               |-- hmms
 |   |   |               |   |-- POG0908042N.hmm
 |   |   |               |   |-- POG0908053X.hmm
@@ -234,7 +231,6 @@
 |   |   |               |   |-- ogs.id.info
 |   |   |               |   |-- proteobacteria_1224_OrthoDB9_orthogroup_info.txt.gz
 |   |   |               |   `-- species.info
-|   |   |               |-- lengths_cutoff
 |   |   |               |-- prfl
 |   |   |               |   |-- POG0908042N.prfl
 |   |   |               |   |-- POG0908053X.prfl
@@ -457,10 +453,13 @@
 |   |   |               |   |-- POG0908Y9GD.prfl
 |   |   |               |   |-- POG0908YDZB.prfl
 |   |   |               |   `-- POG0908Z93T.prfl
+|   |   |               |-- ancestral
+|   |   |               |-- ancestral_variants
+|   |   |               |-- dataset.cfg
+|   |   |               |-- lengths_cutoff
 |   |   |               `-- scores_cutoff
 |   |   `-- runs
 |   |       |-- run_5a6cf44862_597248ff77_0.bsr
-|   |       |   |-- full_table_5a6cf44862_597248ff77_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG0908042N.out.1
 |   |       |   |   |-- POG0908053X.out.1
@@ -683,11 +682,10 @@
 |   |       |   |   |-- POG0908Y9GD.out.1
 |   |       |   |   |-- POG0908YDZB.out.1
 |   |       |   |   `-- POG0908Z93T.out.1
+|   |       |   |-- full_table_5a6cf44862_597248ff77_0.bsr.tsv
 |   |       |   |-- missing_busco_list_5a6cf44862_597248ff77_0.bsr.tsv
 |   |       |   `-- short_summary_5a6cf44862_597248ff77_0.bsr.txt
-|   |       |-- run_5a6cf44862_597248ff77_0.bsr.ini
 |   |       |-- run_5a6cf44862_dccba5f86e_0.bsr
-|   |       |   |-- full_table_5a6cf44862_dccba5f86e_0.bsr.tsv
 |   |       |   |-- hmmer_output
 |   |       |   |   |-- POG0908042N.out.1
 |   |       |   |   |-- POG0908053X.out.1
@@ -910,8 +908,10 @@
 |   |       |   |   |-- POG0908Y9GD.out.1
 |   |       |   |   |-- POG0908YDZB.out.1
 |   |       |   |   `-- POG0908Z93T.out.1
+|   |       |   |-- full_table_5a6cf44862_dccba5f86e_0.bsr.tsv
 |   |       |   |-- missing_busco_list_5a6cf44862_dccba5f86e_0.bsr.tsv
 |   |       |   `-- short_summary_5a6cf44862_dccba5f86e_0.bsr.txt
+|   |       |-- run_5a6cf44862_597248ff77_0.bsr.ini
 |   |       `-- run_5a6cf44862_dccba5f86e_0.bsr.ini
 |   |-- curl
 |   |   `-- 9c46bc8ed4
