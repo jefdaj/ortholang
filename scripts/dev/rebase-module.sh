@@ -20,6 +20,6 @@ git rebase master || git status
 # git add test.sh
 # git rebase --continue || git rebase --skip
 
-./test.sh
+# ./test.sh
 
 # If that goes well, git push --force manually
