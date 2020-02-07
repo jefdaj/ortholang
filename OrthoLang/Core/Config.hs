@@ -71,6 +71,7 @@ loadConfig mods args = do
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   out <- mapM absolutize =<< loadField args cfg "output"
+  crr <- mapM absolutize =<< loadField args cfg "rerun"
   shr <- mapM (\p -> if "http" `isPrefixOf` p then return p else absolutize p) =<< loadField args cfg "shared"
   let ctp = getAllArgs args (longOption "test")
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
@@ -86,6 +87,7 @@ loadConfig mods args = do
               , cfgWrapper = cls
               , cfgReport  = rep
               , cfgTestPtn = ctp
+              , cfgFailLog :: Maybe String -- TODO is this how it'll come through?
               , cfgWidth   = Nothing -- not used except in testing
               , cfgSecure  = isPresent args $ longOption "secure"
               , cfgNoProg  = isPresent args $ longOption "noprogress"

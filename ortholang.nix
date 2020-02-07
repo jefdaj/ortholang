@@ -6,7 +6,7 @@
 , random-shuffle, raw-strings-qq, regex-compat, regex-posix, retry
 , safe-exceptions, scientific, setlocale, shake, silently, split
 , stdenv, strict, tasty, tasty-golden, tasty-hspec, tasty-hunit
-, tasty-quickcheck, temporary, terminal-size, text, time
+, tasty-quickcheck, tasty-rerun, temporary, terminal-size, text, time
 , transformers, unbounded-delays, unix, utility-ht, zlib
 }:
 mkDerivation {
@@ -24,7 +24,7 @@ mkDerivation {
     QuickCheck random random-shuffle raw-strings-qq regex-compat
     regex-posix retry safe-exceptions scientific setlocale shake
     silently split strict tasty tasty-golden tasty-hspec tasty-hunit
-    tasty-quickcheck temporary terminal-size text time transformers
+    tasty-quickcheck tasty-rerun temporary terminal-size text time transformers
     unbounded-delays unix utility-ht
   ];
   executablePkgconfigDepends = [ zlib ];

@@ -14,7 +14,9 @@ import System.Environment    (setEnv, withArgs)
 import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
-import Test.Tasty            (TestTree, defaultMain)
+import Test.Tasty            (TestTree, defaultMainWithIngredients)
+import Test.Tasty.Ingredients.ConsoleReporter (consoleTestReporter)
+import Test.Tasty.Ingredients.Rerun (rerunningTests)
 -- import Data.IORef            (IORef)
 
 import System.Console.Docopt (Arguments, longOption, getAllArgs)
@@ -30,9 +32,16 @@ import qualified OrthoLang.Test.Scripts  as S
 -- Gotcha: can't print the test pattern in place of "all tests"
 -- because then they all match, ruining the filter.
 mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
-mkTests cfg ref ids = mkTestGroup cfg ref ids "all tests" tests
+mkTests cfg ref ids = setPtn >> setLog >> mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
+    setLog = case cfgFailLog cfg of
+               Nothing -> return ()
+               Just p  -> do
+                 -- TODO why don't these work? (maybe it's insensitive to cli options?)
+                 setEnv "TASTY_RERUN_UPDATE" "True"
+                 setEnv "TASTY_RERUN_LOG_FILE" p
+                 setEnv "TASTY_RERUN_FILTER" "failures,new"
 
 mkTestConfig :: OrthoLangConfig -> FilePath -> OrthoLangConfig
 mkTestConfig cfg dir = cfg
@@ -67,4 +76,4 @@ runTests args cfg ref ids = withArgs [] $ do
       (shell $ unwords ["ln -s", exSrc, exDst]) ""
     dbg $ "created examples dir " ++ exDst
     tests <- mkTests (mkTestConfig cfg tmpSubDir) ref ids
-    defaultMain tests
+    defaultMainWithIngredients [rerunningTests [consoleTestReporter]] tests

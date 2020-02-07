@@ -22,6 +22,7 @@ extra-deps:
   - posix-escape-0.1
   - path-io-1.6.0
   - progress-meter-1.0.0.1
+  - tasty-rerun-1.1.14
 
 # TODO are the rtsopts a problem? see if removing fixes any fails
 ghc-options:

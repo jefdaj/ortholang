@@ -2,6 +2,7 @@ A scripting language that makes short work of phylogenomic cuts.
 
 Usage:
   ortholang --help FNORTYPE | --version
+  ortholang --test [--pattern PATTERN] [--failed RERUN]...
   ortholang [options]
 
 Options:
@@ -10,6 +11,8 @@ Options:
   --debug REGEX      Log debugging messages matching REGEX.
   --test PATTERN     Run tests matching PATTERN.
                      Can be used more than once to run multiple sets of tests.
+  --rerun RERUN      Only run tests in the rerun log from last time
+                     [default: shortcut-rerun.log]
   --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
   --typecheck        Don't run the script yet, just print any type errors.
