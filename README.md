@@ -10,7 +10,7 @@ It has two main design goals:
 1. Be useful for biologists with limited prior coding experience
 2. Codify the search in a format that can be published and reused by others
 
-Run [install.sh](install.sh) to install it on Mac or Linux.
+Run [scripts/install.sh](scripts/install.sh) to install it on Mac or Linux.
 
 See [the demo site][1] for a more detailed overview, tutorial, interactive
 examples, and reference of available functions.

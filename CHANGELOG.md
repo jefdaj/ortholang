@@ -7,6 +7,9 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
+## Changed
+- Gather scripts into one directory
+
 ## [0.9.4] - 2020-01-22
 ### Changed
 - Rename ShortCut to OrthoLang

@@ -25,7 +25,7 @@ data-files:         examples/scripts/*.ol,
                     tests/scripts/*.ol,
                     tests/stdout/*.txt,
                     tests/tmpfiles/*.txt,
-                    wrapper-scripts/*.sh
+                    scripts/wrappers/*.sh
 
 source-repository head
   type: git
