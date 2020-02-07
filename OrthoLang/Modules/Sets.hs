@@ -7,16 +7,20 @@ module OrthoLang.Modules.Sets where
 import Development.Shake
 import OrthoLang.Core.Types
 
+import qualified Data.Set as Set
+
 import Data.Function               (on)
 import Data.List                   (nubBy)
 import Data.Set                    (Set, union, difference, intersection, fromList,
                                     toList)
+import Data.IORef                  (readIORef)
 import Development.Shake.FilePath  ((</>))
 import OrthoLang.Core.Compile.Basic (rExpr, typeError, debugRules)
 import OrthoLang.Core.Actions       (readStrings, readPaths, writeStrings, traceA, hashContent)
 -- import OrthoLang.Core.Debug         (debugRules, traceA)
 import OrthoLang.Core.Paths         (exprPath, toOrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Core.Util          (resolveSymlinks)
+import OrthoLang.Core.Sanitize      (unhashIDs)
 
 orthoLangModule :: OrthoLangModule
 orthoLangModule = OrthoLangModule
@@ -91,30 +95,32 @@ rSetBop name fn s (OrthoLangBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s 
 rSetBop _ _ _ _ = fail "bad argument to rSetBop"
 
 rSetFold :: ([Set String] -> Set String) -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
-rSetFold fn s@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [lol]) = do
+rSetFold fn s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
   let oPath      = fromOrthoLangPath cfg $ exprPath s e
       oPath'     = cfgTmpDir cfg </> oPath
       oPath''    = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
-  oPath %> \_ -> aSetFold cfg ref fn t oPath' setsPath
+  oPath %> \_ -> aSetFold cfg ref ids fn t oPath' setsPath
   return (ExprPath oPath'')
 rSetFold _ _ _ = fail "bad argument to rSetFold"
 
-aSetFold :: OrthoLangConfig -> Locks -> ([Set String] -> Set String)
+aSetFold :: OrthoLangConfig -> Locks -> HashedIDsRef -> ([Set String] -> Set String)
          -> OrthoLangType -> FilePath -> FilePath -> Action ()
-aSetFold cfg ref fn (ListOf etype) oPath setsPath = do
+aSetFold cfg ref idsRef fn (ListOf etype) oPath setsPath = do
   setPaths  <- readPaths cfg ref setsPath
   setElems  <- mapM (readStrings etype cfg ref) (map (fromOrthoLangPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
+  ids <- liftIO $ readIORef idsRef
   let sets = map fromList setElems'
-      oLst = toList $ fn sets
+      sets' = (map . Set.map) (unhashIDs False ids) sets -- TODO will this work?
+      oLst = toList $ fn sets'
       oPath' = traceA "aSetFold" oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
               else dedupByContent cfg ref oLst -- TODO remove?
   writeStrings etype cfg ref oPath' oLst''
-aSetFold _ _ _ _ _ _ = fail "bad argument to aSetFold"
+aSetFold _ _ _ _ _ _ _ = fail "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
