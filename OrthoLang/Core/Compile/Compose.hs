@@ -29,7 +29,7 @@ compose1 name desc fn1 type1 fn2 = OrthoLangFunction
   , fTypeCheck = tCompose1 fn1 type1 fn2
   , fRules     = rCompose1 fn1 type1 fn2
   , fTypeDesc  = desc
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   }
 
 tCompose1 :: OrthoLangFunction -> OrthoLangType -> OrthoLangFunction -> TypeChecker
