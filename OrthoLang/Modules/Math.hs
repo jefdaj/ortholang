@@ -36,7 +36,7 @@ mkMathFn opChar opName fn = OrthoLangFunction
   { fNames     = [[opChar], opName]
   , fTypeCheck = defaultTypeCheck    [num, num] num
   , fTypeDesc  = mkTypeDesc [opChar] [num, num] num
-  , fFixity    = Infix
+  , fFixity    = Infix, fTags = []
   , fRules     = rMath fn
   }
 

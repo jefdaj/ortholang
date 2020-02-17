@@ -70,7 +70,7 @@ mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMmseqsCreateDbAll
   }
 
@@ -123,7 +123,7 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMmseqsCreateDb
   }
 
@@ -146,7 +146,7 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMmseqsSearchDb
   }
 
@@ -246,7 +246,7 @@ mmseqsSearch = let name = "mmseqs_search" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMmseqsSearch
   }
 

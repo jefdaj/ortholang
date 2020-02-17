@@ -43,7 +43,7 @@ globFiles = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules  = rGlobFiles
   }
   where

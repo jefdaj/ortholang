@@ -55,7 +55,7 @@ extractQueries = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aOrthoLangCol True 1
   }
   where
@@ -67,7 +67,7 @@ extractQueriesEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 1 $ aOrthoLangCol True 1
   }
   where
@@ -79,7 +79,7 @@ extractTargets = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aOrthoLangCol True 2
   }
   where
@@ -90,7 +90,7 @@ extractTargetsEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 1 $ aOrthoLangCol True 2
   }
   where
@@ -139,7 +139,7 @@ mkFilterHits colname = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aFilterHits colname
   }
   where
@@ -153,7 +153,7 @@ mkFilterHitsEach colname = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 2 $ aFilterHits colname
   }
   where
@@ -195,7 +195,7 @@ bestHits =  OrthoLangFunction
   { fNames     = [name] 
   , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aBestExtract
   }
   where
@@ -206,7 +206,7 @@ bestHitsEach = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 1 aBestExtract
   }
   where

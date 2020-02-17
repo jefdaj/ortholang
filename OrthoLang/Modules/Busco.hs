@@ -81,7 +81,7 @@ buscoListLineages = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rBuscoListLineages
   }
   where
@@ -182,7 +182,7 @@ buscoFetchLineage  = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rBuscoFetchLineage
   }
   where
@@ -235,7 +235,7 @@ mkBusco name mode inType = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aBusco mode
   }
 
@@ -283,7 +283,7 @@ mkBuscoEach name mode inType = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 2 $ aBusco mode
   }
 
@@ -301,7 +301,7 @@ buscoPercentComplete  = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimpleScript "busco_percent_complete.sh"
   }
   where
@@ -312,7 +312,7 @@ buscoPercentCompleteEach  = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMapSimpleScript 1 "busco_percent_complete.sh"
   }
   where
@@ -327,7 +327,7 @@ buscoScoresTable  = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   -- , fRules     = rSimpleScript $ name <.> "py"
   , fRules     = rBuscoScoresTable
   }
@@ -374,7 +374,7 @@ buscoFilterCompleteness  = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rBuscoFilterCompleteness
   }
   where

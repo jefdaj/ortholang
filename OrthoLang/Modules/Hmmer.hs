@@ -49,7 +49,7 @@ hmmbuild = let name = "hmmbuild" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimpleScript "hmmbuild.sh"
   }
 
@@ -58,7 +58,7 @@ hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
@@ -67,7 +67,7 @@ hmmsearch = let name = "hmmsearch" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aHmmsearch
   }
 
@@ -77,7 +77,7 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 2 aHmmsearch
   }
 
@@ -87,7 +87,7 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
 --   { fNames     = [name]
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
---   , fFixity    = Prefix
+--   , fFixity    = Prefix, fTags = []
 --   , fRules     = rMap 2 aHmmsearch -- TODO this won't work right?
 --   }
 
@@ -144,7 +144,7 @@ extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple $ aExtractHmm 1
   }
 
@@ -153,7 +153,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in OrthoLangFuncti
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMap 1 $ aExtractHmm 1
   }
 

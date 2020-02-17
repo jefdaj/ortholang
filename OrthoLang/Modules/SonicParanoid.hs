@@ -47,7 +47,7 @@ sonicparanoid = let name = "sonicparanoid" in OrthoLangFunction
   { fNames     = [name]
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aSonicParanoid
   }
 

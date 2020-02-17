@@ -25,7 +25,7 @@ orthoLangModule = OrthoLangModule
 sample :: OrthoLangFunction
 sample = OrthoLangFunction
   { fNames     = [name]
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fTypeCheck = tSample
   , fRules     = rSample
   , fTypeDesc  = name ++ " : num X.list -> X.list"

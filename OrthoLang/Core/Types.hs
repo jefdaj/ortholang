@@ -51,6 +51,7 @@ module OrthoLang.Core.Types
   , defaultShowN -- same but lets you pick how many lines to show
   -- module stuff (in flux)
   , OrthoLangFunction(..)
+  , FnTag(..)
   , mkTypeDesc
   , OrthoLangModule(..)
   , saltOf
@@ -460,6 +461,15 @@ prompt = lift . lift . getInputLine
 data OrthoLangFixity = Prefix | Infix
   deriving (Eq, Show, Read)
 
+data FnTag
+  = Stochastic -- do repeat, do cache/share
+  | ReadsDirs  -- do not repeat, do not cache/share
+  | ReadsFile  -- do not repeat, do cache/share
+  | ReadsURL   -- do not repeat, do not cache/share?
+  | Broken     -- remove from functions list when loading
+  | Hidden     -- remove from user-facing lists
+  deriving (Eq, Read, Show)
+
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data OrthoLangFunction = OrthoLangFunction
@@ -467,6 +477,7 @@ data OrthoLangFunction = OrthoLangFunction
   , fTypeCheck :: [OrthoLangType] -> Either String OrthoLangType
   , fTypeDesc  :: String
   , fFixity    :: OrthoLangFixity
+  , fTags      :: [FnTag]
   , fRules     :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }

@@ -51,7 +51,7 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoL
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastFromFaRev d
   }
 
@@ -73,7 +73,7 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastFromFaRevEach d
   }
   where
@@ -114,7 +114,7 @@ reciprocalBest = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aReciprocalBest
   }
   where
@@ -153,7 +153,7 @@ reciprocalBestAll = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimple aReciprocalBestAll
   }
   where
@@ -178,7 +178,7 @@ mkBlastRbh d@(bCmd, qType, sType, _) = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastRbh d
   }
   where
@@ -202,7 +202,7 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMkBlastRbhEach d
   }
   where

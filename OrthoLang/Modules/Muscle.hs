@@ -30,7 +30,7 @@ muscle = let name = "muscle" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [faa] aln
   , fTypeDesc  = name ++ " : faa -> aln"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rSimpleScript "muscle.sh"
   }
 
@@ -39,6 +39,6 @@ muscleEach = let name = "muscle_each" in OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf aln)
   , fTypeDesc  = name ++ " : faa.list -> aln.list"
-  , fFixity    = Prefix
+  , fFixity    = Prefix, fTags = []
   , fRules     = rMapSimpleScript 1 "muscle.sh"
   }
