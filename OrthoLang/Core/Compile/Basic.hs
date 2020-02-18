@@ -35,7 +35,7 @@ import Development.Shake.FilePath ((</>), (<.>))
 import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, writePaths, symlink)
-import OrthoLang.Core.Locks        (withWriteLock')
+-- import OrthoLang.Core.Locks        (withWriteLock')
 import OrthoLang.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
 import OrthoLang.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists, headOrDie, trace)
