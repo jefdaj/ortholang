@@ -69,7 +69,7 @@ import System.Posix.Files     (readSymbolicLink)
 import System.FilePath.Glob   (glob)
 -- import Data.Time.LocalTime (getZonedTime)
 -- import Data.Time.Format    (formatTime, defaultTimeLocale)
-import OrthoLang.Core.Locks    (Locks, withReadLock, withReadLock')
+import OrthoLang.Core.Locks    (Locks, withReadLock, withReadLock', withWriteLock)
 
 import Control.Logging (traceSL, debugS, timedDebugEndS, traceShowSL)
 
@@ -169,8 +169,8 @@ unlessMatch paths act = do
 
 -- TODO call this module something besides Debug now that it also handles errors?
 -- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
-removeIfExists :: (MonadIO m, MonadCatch m) => FilePath -> m ()
-removeIfExists fileName = (liftIO (removeFile fileName)) `catch` handleExists
+removeIfExists :: (MonadIO m, MonadCatch m) => Locks -> FilePath -> m ()
+removeIfExists ref fileName = (liftIO (withWriteLock ref fileName $ removeFile fileName)) `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
           | otherwise = throwM e

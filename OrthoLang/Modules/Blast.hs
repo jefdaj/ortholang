@@ -20,6 +20,8 @@ import OrthoLang.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import OrthoLang.Core.Compile.Map  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, traceA, symlink)
 import OrthoLang.Core.Paths         (toOrthoLangPath, fromOrthoLangPath, OrthoLangPath)
+import OrthoLang.Core.Util          (removeIfExists)
+import OrthoLang.Core.Locks         (withWriteLock)
 import OrthoLang.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import OrthoLang.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))
@@ -140,20 +142,25 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- debugModule $ "args'': " ++ show args''
   -- TODO full path to prefix'?
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
+  -- want to be real sure not to accidentally mistake these for done:
+  let stdoutPath = o'' <.> "out"
+      stderrPath = o'' <.> "err"
+  liftIO $ removeIfExists ref stdoutPath
+  liftIO $ removeIfExists ref stderrPath
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "blast.sh"
-    , cmdArguments = [o'' <.> "out", bCmd', eDec, q', prefix']
+    , cmdArguments = [stdoutPath, bCmd', eDec, q', prefix']
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO make it parallel again?
     , cmdOptions = []
     , cmdInPatterns = [ptn]
-    , cmdOutPath = o'' <.> "out"
-    , cmdExtraOutPaths = [o'' <.> "err"]
+    , cmdOutPath = stdoutPath
+    , cmdExtraOutPaths = [stderrPath]
     , cmdSanitizePaths = []
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o'' ++ "*"] -- .out, .err too
+    , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink cfg ref o (toOrthoLangPath cfg $ o'' <.> "out")
+  symlink cfg ref o (toOrthoLangPath cfg stdoutPath)
   where
     o'  = fromOrthoLangPath cfg o
     q'  = fromOrthoLangPath cfg q

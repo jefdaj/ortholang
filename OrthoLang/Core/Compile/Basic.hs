@@ -221,7 +221,7 @@ aVar :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPa
 aVar cfg ref _ vPath oPath = do
   alwaysRerun
   need' cfg ref "ortholang.core.compile.basic.aVar" [oPath']
-  withWriteLock' ref vPath' $ liftIO $ removeIfExists vPath'
+  liftIO $ removeIfExists ref vPath'
   -- TODO should it sometimes symlink and sometimes copy?
   -- TODO before copying, think about how you might have to re-hash again!
   symlink cfg ref vPath'' oPath
