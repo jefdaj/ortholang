@@ -41,7 +41,7 @@ common shared-properties
         -- TODO is there an optimal number/fraction of cores?
         -- TODO does playing with flags for shake + other packages help?
         -- TODO does -O2 help?
-        "-with-rtsopts=-N -IO"
+        "-with-rtsopts=-N -IO -qg"
         -Wno-orphans
         -- -pedantic
         -- -O0

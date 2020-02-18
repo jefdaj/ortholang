@@ -3,7 +3,7 @@ module OrthoLang.Modules.BlastRBH where
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck, aSimpleScriptNoFix)
+import OrthoLang.Core.Compile.Basic (rExpr, rSimple, defaultTypeCheck, aSimpleScriptNoFix, debug)
 import OrthoLang.Core.Compile.Map  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, absolutizePaths)
 -- import OrthoLang.Core.Debug         (traceA)
@@ -16,9 +16,17 @@ import OrthoLang.Modules.SeqIO      (faa)
 import System.Exit                 (ExitCode(..))
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>))
+import Data.List.Utils             (replace)
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
+
+-- for tracking down non-deduplicating blastp functions
+debugNames :: OrthoLangConfig -> String -> OrthoLangExpr -> OrthoLangExpr -> a -> a
+debugNames cfg fnName (OrthoLangFun _ _ _ bname _) (OrthoLangFun _ _ _ aname _) rtn = debug cfg msg rtn
+  where
+    msg = fnName ++ " translated " ++ bname ++ " -> " ++ aname
+debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
 
 orthoLangModule :: OrthoLangModule
 orthoLangModule = OrthoLangModule
@@ -57,17 +65,19 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoL
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (OrthoLangFun rtn salt deps _ [e, q, s])
-  = rules st (OrthoLangFun rtn salt deps name [e, s, q])
+rMkBlastFromFaRev d st (OrthoLangFun rtn salt deps name [e, q, s]) = rules st expr
   where
+    expr  = OrthoLangFun rtn salt deps name_norev [e, s, q]
     rules = fRules $ mkBlastFromFa d
-    name  = head $ fNames $ mkBlastFromFa d
+    name_norev  = replace "_rev" "" name
+    -- name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
 rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 ----------------------
 -- *blast*_rev_each --
 ----------------------
 
+-- TODO fix expression paths!
 mkBlastFromFaRevEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
   { fNames     = [name]
@@ -91,13 +101,14 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) st (OrthoLangFun rtn salt deps _ [e, s
     sList      = OrthoLangList (typeOf s) salt (depsOf s) [s]
     subjDbExpr = OrthoLangFun dbType salt (depsOf sList) dbFnName [sList]
     editedExpr = OrthoLangFun rtn salt deps editedName [e, subjDbExpr, qs]
-    editedName = bCmd ++ "_db_rev_each"
+    editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
                            else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
+-- TODO is it deduplicating properly with the fn name?
 aMkBlastFromDbRev :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]

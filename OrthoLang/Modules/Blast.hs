@@ -228,5 +228,5 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _   [e, q,
     rules = rMkBlastFromDbEach d
     ss'   = OrthoLangFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
-    fn2   = (head $ fNames $ mkBlastFromFa d) ++ "_each"
+    fn2   = (head $ fNames $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"
