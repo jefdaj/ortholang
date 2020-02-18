@@ -2,7 +2,11 @@
 
 set -e
 
-outpath="$1"; shift
+outdir="$(dirname "$1")"; shift
 faapaths="$@"
 
-cat $faapaths | diamond makedb --db "$outpath" > "${outpath}.out" 2> "${outpath}.err"
+mkdir -p "$outdir"
+cd "$outdir"
+cat $faapaths | diamond makedb --db result > out 2> err
+sync
+mv result.dmnd result

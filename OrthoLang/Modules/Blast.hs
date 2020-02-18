@@ -25,8 +25,7 @@ import OrthoLang.Core.Locks         (withWriteLock)
 import OrthoLang.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import OrthoLang.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))
--- import System.FilePath             (takeDirectory, takeFileName, (</>), (<.>))
-import System.FilePath             ((<.>))
+import System.FilePath             (replaceBaseName, (<.>))
 -- import System.Posix.Escape         (escape)
 
 orthoLangModule :: OrthoLangModule
@@ -143,8 +142,8 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- TODO full path to prefix'?
   -- wrappedCmdWrite False True cfg ref o'' [ptn] [] [] "blast.sh" [o'', prefix', bCmd', eDec, q', p']
   -- want to be real sure not to accidentally mistake these for done:
-  let stdoutPath = o'' <.> "out"
-      stderrPath = o'' <.> "err"
+  let stdoutPath = replaceBaseName o'' "out"
+      stderrPath = replaceBaseName o'' "err"
   liftIO $ removeIfExists ref stdoutPath
   liftIO $ removeIfExists ref stderrPath
   runCmd cfg ref $ CmdDesc

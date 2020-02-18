@@ -255,7 +255,7 @@ eval hdl cfg ref ids rtype ls p = do
         completeProgress pm
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids (toOrthoLangPath cfg path) out
-          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids pm path)
+          Nothing  -> return () -- when (not $ cfgInteractive cfg) (printLong cfg ref ids pm path)
         return ()
 
 writeResult :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> FilePath -> Action ()
@@ -264,6 +264,7 @@ writeResult cfg ref idsref path out = do
   unhashIDsFile cfg ref idsref path out
 
 -- TODO what happens when the txt is a binary plot image?
+-- TODO is this where the diamond makedb error comes in?
 printLong :: OrthoLangConfig -> Locks -> HashedIDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
 printLong _ ref idsref pm path = do
   ids <- liftIO $ readIORef idsref

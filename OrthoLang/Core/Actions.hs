@@ -63,7 +63,7 @@ import OrthoLang.Core.Types
 import Control.Monad              (when)
 import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
-import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
+import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative, replaceBaseName)
 -- import OrthoLang.Core.Debug        (debug)
 import OrthoLang.Core.Paths        (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, checkLit,
                                    checkLits, cacheDir, cutPathString,
@@ -418,6 +418,7 @@ trackWrite' cfg fs = do
 setReadOnly :: OrthoLangConfig -> FilePath -> IO ()
 setReadOnly cfg path = do
   path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
+  -- TODO skip if path' outside tmpdir
   setFileMode path' 444
 
 -------------------------
@@ -472,8 +473,8 @@ data CmdDesc = CmdDesc
  -}
 runCmd :: OrthoLangConfig -> Locks -> CmdDesc -> Action ()
 runCmd cfg ref@(disk, _) desc = do
-  let stdoutPath = cmdOutPath desc <.> "out"
-      stderrPath = cmdOutPath desc <.> "err"
+  let stdoutPath = replaceBaseName (cmdOutPath desc) "out"
+      stderrPath = replaceBaseName (cmdOutPath desc) "err"
       dbg = debugA' "runCmd"
   -- liftIO $ delay 1000000
 
@@ -592,11 +593,11 @@ withBinHash cfg ref expr outPath actFn = do
   let binDir'  = fromOrthoLangPath cfg $ cacheDir cfg "bin"
       outPath' = fromOrthoLangPath cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
-  let binTmp' = binDir' </> digest expr <.> takeExtension outPath'
+  let binTmp' = binDir' </> digest expr -- <.> takeExtension outPath'
       binTmp  = toOrthoLangPath cfg binTmp'
   _ <- actFn binTmp
   md5 <- hashContent cfg ref binTmp
-  let binOut' = binDir' </> md5 <.> takeExtension outPath'
+  let binOut' = binDir' </> md5 -- <.> takeExtension outPath'
       binOut  = toOrthoLangPath cfg binOut'
   -- debugS $ "withBinHash binOut: "  ++ show binOut
   -- debugS $ "withBinHash binOut': " ++ show binOut'

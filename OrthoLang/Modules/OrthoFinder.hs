@@ -15,7 +15,7 @@ import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLa
 import OrthoLang.Core.Util          (digest, readFileStrict)
 import OrthoLang.Modules.SeqIO      (faa)
 import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             ((</>), (<.>), takeFileName)
+import System.FilePath             ((</>), (<.>), takeFileName, takeBaseName, replaceBaseName)
 import System.Exit                 (ExitCode(..))
 
 orthoLangModule :: OrthoLangModule
@@ -67,19 +67,19 @@ aOrthofinder cfg ref _ [out, faListPath] = do
   let faLinks = map (\p -> toOrthoLangPath cfg $ tmpDir </> (takeFileName $ fromOrthoLangPath cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1
-  -- and we can't mark statsPath' as an extar outpath
+  -- and we can't mark statsPath' as an extra outpath
   -- TODO patch orthofinder not to adjust and then do this the standard way
   withWriteLock' ref tmpDir $ do -- this is important to prevent multiple threads trying at once
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "orthofinder.sh"
-      , cmdArguments = [out'' <.> "out", tmpDir, "diamond", "-n", digest faListPath]
+      , cmdArguments = [replaceBaseName out'' "out", tmpDir, "diamond", "-n", digest faListPath]
       , cmdFixEmpties = False
       , cmdParallel = False -- TODO fix this? it fails because of withResource somehow
       , cmdOptions = []
       , cmdInPatterns = faPaths'
-      , cmdOutPath = out'' <.> "out"
-      , cmdExtraOutPaths = [out'' <.> "err"] -- TODO statsPath'? seems to break it
+      , cmdOutPath = replaceBaseName out'' "out"
+      , cmdExtraOutPaths = [replaceBaseName out'' "err"] -- TODO statsPath'? seems to break it
       , cmdSanitizePaths = [] -- TODO use this?
       , cmdExitCode = ExitSuccess
       , cmdRmPatterns = [out'', tmpDir]

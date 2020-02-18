@@ -17,7 +17,7 @@ import OrthoLang.Modules.SeqIO      (fna, faa)
 import OrthoLang.Modules.Blast      (bht)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
-import System.FilePath             ((<.>))
+import System.FilePath             (replaceBaseName)
 import OrthoLang.Core.Compile.Map   (rMap, rMapSimpleScript)
 import Data.List.Utils             (replace)
 
@@ -199,9 +199,9 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     , cmdInPatterns = []
     , cmdOutPath = o''
     , cmdExtraOutPaths = []
-    , cmdSanitizePaths = [o'' <.> "out"]
+    , cmdSanitizePaths = [replaceBaseName o'' "out"]
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o'', o'' <.> "out"]
+    , cmdRmPatterns = [o'', replaceBaseName o'' "out"]
     }
   sanitizeFileInPlace cfg ref o'
   where

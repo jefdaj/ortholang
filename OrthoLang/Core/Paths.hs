@@ -230,12 +230,13 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
     hashes = argHashes s expr
     res    = exprPathExplicit cfg prefix rtype salt hashes
 
+-- TODO remove repeat salt if fn is deterministic
 exprPathExplicit :: OrthoLangConfig -> String -> OrthoLangType -> RepeatSalt -> [String] -> OrthoLangPath
 exprPathExplicit cfg prefix rtype (RepeatSalt s) hashes = toOrthoLangPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
-    base = (concat $ intersperse "_" $ hashes ++ [show s])
-    path = dir </> base <.> extOf rtype
+    base = (concat $ intersperse "/" $ hashes ++ [show s])
+    path = dir </> base </> "result" -- <.> extOf rtype
 
 -- TODO remove VarPath, ExprPath types once OrthoLangPath works everywhere
 varPath :: OrthoLangConfig -> OrthoLangVar -> OrthoLangExpr -> OrthoLangPath

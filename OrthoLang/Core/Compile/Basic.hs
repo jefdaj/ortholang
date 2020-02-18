@@ -554,7 +554,7 @@ aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
   trackWrite [out] -- TODO remove?
   where
     -- TODO probably not "simple tmp" anymore... remove? rename?
-    hashes     = concat $ intersperse "_" $ map digest argPaths'
+    hashes     = concat $ intersperse "/" $ map digest argPaths'
     argPaths'  = map (fromOrthoLangPath cfg) argPaths
     outPath'   = fromOrthoLangPath cfg outPath
     out = traceA "aSimple'" outPath' (outPath':tmpDir':argPaths')

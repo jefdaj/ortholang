@@ -30,7 +30,7 @@ import OrthoLang.Core.Paths
 import OrthoLang.Core.Util (digest)
 import Control.Monad (forM, forM_)
 import OrthoLang.Core.Actions (readStrings, writeStrings, debugA)
-import System.FilePath ((</>), (<.>))
+import System.FilePath ((</>))
 import OrthoLang.Core.Compile.Basic (rExpr, debugRules)
 
 debugA' :: String -> String -> Action ()
@@ -55,7 +55,7 @@ map1of1 inType outType act1 cfg locks ids out a1 = do
   let tmpDir = mapCache cfg
   debugFn $ "tmpDir: " ++ show tmpDir
   outPaths <- forM inPaths $ \i -> do
-    let o = tmpDir </> digest [out, toOrthoLangPath cfg i] <.> extOf outType
+    let o = tmpDir </> digest [out, toOrthoLangPath cfg i] </> "result" -- <.> extOf outType
     debugFn $ "o: " ++ show o
     act1 cfg locks ids (toOrthoLangPath cfg o) (toOrthoLangPath cfg i)
     return o
@@ -92,7 +92,7 @@ map2of3 inType outType act3 cfg locks ids out a1 a2 a3 = do
   inPaths <- readStrings inType cfg locks $ fromOrthoLangPath cfg a2
   let tmpDir   = mapCache cfg
       outPaths = (flip map) inPaths $ \i ->
-                   tmpDir </> digest [out, toOrthoLangPath cfg i] <.> extOf outType
+                   tmpDir </> digest [out, toOrthoLangPath cfg i] </> "result" -- <.> extOf outType
       ioPairs  = zip inPaths outPaths
   -- TODO can this be done with forP in parallel? have to only do one overall read lock on input
   -- might need to pass a list of already-locked files to skip locking inside?
@@ -123,7 +123,7 @@ map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
 
   debugFn $ "map3Base inPaths read from a3: " ++ show inPaths
   let tmpDir   = cfgTmpDir cfg </> "cache" </> "map" -- TODO figure this out better
-      outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toOrthoLangPath cfg i] <.> extOf outType
+      outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toOrthoLangPath cfg i] </> "result" -- <.> extOf outType
       ioPairs  = zip inPaths outPaths
   -- debugFn $ "map3Base outPaths: " ++ show outPaths
   -- debugFn $ "map3Base out: " ++ show out

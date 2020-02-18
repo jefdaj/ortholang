@@ -6,7 +6,7 @@ module OrthoLang.Modules.BlastHits where
 import Development.Shake
 import OrthoLang.Core.Types
 
-import System.FilePath             ((<.>))
+import System.FilePath             (replaceBaseName)
 import OrthoLang.Core.Compile.Basic (rSimple, defaultTypeCheck)
 import OrthoLang.Core.Compile.Map  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, writeCachedVersion, trackWrite')
@@ -124,7 +124,7 @@ aOrthoLangCol _ n cfg ref _ [outPath, tsvPath] = do
     outPath'  = fromOrthoLangPath cfg outPath
     outPath'' = traceA "aOrthoLangCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromOrthoLangPath cfg tsvPath
-    tmpPath'  = outPath'' <.> "tmp" -- the non-deduped version
+    tmpPath'  = replaceBaseName outPath'' "tmp" -- the non-deduped version
 aOrthoLangCol _ _ _ _ _ _ = fail "bad arguments to aOrthoLangCol"
 
 ---------------------

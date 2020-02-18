@@ -2,7 +2,11 @@
 
 set -e
 
-outpath="$1"
+outdir="$(dirname "$1")"
 faapath="$2"
 
-diamond makedb --in "$faapath" --db "$outpath" > "${outpath}.out" 2> "${outpath}.err"
+# diamond requires a .dmnd extension on result here
+mkdir -p "$outdir"
+cd "$outdir"
+diamond makedb --in "$faapath" --db result > out 2> err
+mv result.dmnd result
