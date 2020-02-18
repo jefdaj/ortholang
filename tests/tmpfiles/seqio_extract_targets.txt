@@ -25,9 +25,9 @@
 |   |   `-- b79e5160cb_e0be9800d0_af755a47ae_0.bht.out.err
 |   |-- extract_targets
 |   |   |-- 54bc3f8cf4_0.str.list -> ../../cache/lines/...
-|   |   |-- 54bc3f8cf4_0.str.list.tmp.err
+|   |   |-- 54bc3f8cf4_0.str.list.err
 |   |   |-- 97c145267e_0.str.list -> ../../cache/lines/...
-|   |   `-- 97c145267e_0.str.list.tmp.err
+|   |   `-- 97c145267e_0.str.list.err
 |   |-- extract_targets_each
 |   |   `-- 5790e28be2_0.str.list.list -> ../../cache/lines/...
 |   |-- gbk_to_faa

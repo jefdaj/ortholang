@@ -2,13 +2,13 @@
 |-- cache
 |   |-- each
 |   |   |-- 68dc983805
-|   |   |   |-- 9feaf0bccf.str.list -> ../../../exprs/extract_queries/9feaf0bccf_0.str.list
-|   |   |   `-- 9feaf0bccf.str.list.args -> ../../../cache/lines/...
+|   |   |   |-- 265a9ea649.str.list -> ../../../exprs/extract_queries/265a9ea649_0.str.list
+|   |   |   `-- 265a9ea649.str.list.args -> ../../../cache/lines/...
 |   |   |-- d2862ee466
 |   |   |   |-- e9b423a41c.pdb -> ../../../exprs/makeblastdb_prot/e9b423a41c_0.pdb
 |   |   |   `-- e9b423a41c.pdb.args -> ../../../cache/lines/...
-|   |   `-- f7db4874f6
-|   |       |-- 9138a796a5.bht -> ../../../exprs/blastp/62056882ce_06fd51cdc4_9138a796a5_0.bht
+|   |   `-- d654cec2b5
+|   |       |-- 9138a796a5.bht -> ../../../exprs/blastp_db/62056882ce_06fd51cdc4_9138a796a5_0.bht
 |   |       `-- 9138a796a5.bht.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 36189032ad.faa
@@ -23,15 +23,15 @@
 |           |-- d77632b774.pdb.pin
 |           `-- d77632b774.pdb.psq
 |-- exprs
-|   |-- blastp
-|   |   |-- 62056882ce_06fd51cdc4_9138a796a5_0.bht -> ../../exprs/blastp/62056882ce_06fd51cdc4_9138a796a5_0.bht.out
+|   |-- blastp_db
+|   |   |-- 62056882ce_06fd51cdc4_9138a796a5_0.bht -> ../../exprs/blastp_db/62056882ce_06fd51cdc4_9138a796a5_0.bht.out
 |   |   |-- 62056882ce_06fd51cdc4_9138a796a5_0.bht.out
 |   |   `-- 62056882ce_06fd51cdc4_9138a796a5_0.bht.out.err
-|   |-- blastp_each
+|   |-- blastp_db_each
 |   |   `-- b79e5160cb_e0be9800d0_186a278e82_0.bht.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 9feaf0bccf_0.str.list -> ../../cache/lines/...
-|   |   `-- 9feaf0bccf_0.str.list.tmp.err
+|   |   |-- 265a9ea649_0.str.list -> ../../cache/lines/...
+|   |   `-- 265a9ea649_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- 20567e036b_0.str.list.list -> ../../cache/lines/...
 |   |-- list

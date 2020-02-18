@@ -37,15 +37,15 @@
 |   |   `-- 018718508c_0.faa
 |   |-- extract_queries
 |   |   |-- 317e812f71_0.str.list -> ../../cache/lines/...
-|   |   |-- 317e812f71_0.str.list.tmp.err
+|   |   |-- 317e812f71_0.str.list.err
 |   |   |-- 694d27d5a8_0.str.list -> ../../cache/lines/...
-|   |   |-- 694d27d5a8_0.str.list.tmp.err
+|   |   |-- 694d27d5a8_0.str.list.err
 |   |   |-- 9a8bc849b9_0.str.list -> ../../cache/lines/...
-|   |   |-- 9a8bc849b9_0.str.list.tmp.err
+|   |   |-- 9a8bc849b9_0.str.list.err
 |   |   |-- e17b44706c_0.str.list -> ../../cache/lines/...
-|   |   |-- e17b44706c_0.str.list.tmp.err
+|   |   |-- e17b44706c_0.str.list.err
 |   |   |-- e37f4bda12_0.str.list -> ../../cache/lines/...
-|   |   `-- e37f4bda12_0.str.list.tmp.err
+|   |   `-- e37f4bda12_0.str.list.err
 |   |-- gbk_to_faa
 |   |   |-- acb4ee1de2_ef3f277e70_0.faa
 |   |   `-- acb4ee1de2_efa3d19c29_0.faa

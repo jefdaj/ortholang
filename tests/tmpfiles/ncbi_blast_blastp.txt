@@ -5,10 +5,10 @@
 |   |   |   |-- 05dc7bfa3e.pdb -> ../../../exprs/makeblastdb_prot/05dc7bfa3e_0.pdb
 |   |   |   `-- 05dc7bfa3e.pdb.args -> ../../../cache/lines/...
 |   |   |-- 7ac5c1582a
-|   |   |   |-- b210b0ef0b.str.list -> ../../../exprs/extract_queries/b210b0ef0b_0.str.list
-|   |   |   `-- b210b0ef0b.str.list.args -> ../../../cache/lines/...
-|   |   |-- a69c48a076
-|   |   |   |-- 89825d24d3.bht -> ../../../exprs/blastp/62056882ce_597248ff77_89825d24d3_0.bht
+|   |   |   |-- 91c1b19d98.str.list -> ../../../exprs/extract_queries/91c1b19d98_0.str.list
+|   |   |   `-- 91c1b19d98.str.list.args -> ../../../cache/lines/...
+|   |   |-- f842057df4
+|   |   |   |-- 89825d24d3.bht -> ../../../exprs/blastp_db/62056882ce_597248ff77_89825d24d3_0.bht
 |   |   |   `-- 89825d24d3.bht.args -> ../../../cache/lines/...
 |   |   `-- fec6435881
 |   |       |-- 446c22fa44.num -> ../../../exprs/length/446c22fa44_0.num
@@ -28,21 +28,20 @@
 |-- exprs
 |   |-- any
 |   |   `-- 545887ad6a_0.str.list.list -> ../../cache/lines/...
-|   |-- blastp
-|   |   |-- 62056882ce_597248ff77_89825d24d3_0.bht -> ../../exprs/blastp/62056882ce_597248ff77_89825d24d3_0.bht.out
-|   |   |-- 62056882ce_597248ff77_89825d24d3_0.bht.out
-|   |   `-- 62056882ce_597248ff77_89825d24d3_0.bht.out.err
 |   |-- blastp_db
+|   |   |-- 62056882ce_597248ff77_89825d24d3_0.bht -> ../../exprs/blastp_db/62056882ce_597248ff77_89825d24d3_0.bht.out
+|   |   |-- 62056882ce_597248ff77_89825d24d3_0.bht.out
+|   |   |-- 62056882ce_597248ff77_89825d24d3_0.bht.out.err
 |   |   |-- b79e5160cb_fb22695528_9afa74f885_0.bht -> ../../exprs/blastp_db/b79e5160cb_fb22695528_9afa74f885_0.bht.out
 |   |   |-- b79e5160cb_fb22695528_9afa74f885_0.bht.out
 |   |   `-- b79e5160cb_fb22695528_9afa74f885_0.bht.out.err
-|   |-- blastp_each
+|   |-- blastp_db_each
 |   |   `-- b79e5160cb_fb22695528_fd056b6e21_0.bht.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- b210b0ef0b_0.str.list -> ../../cache/lines/...
-|   |   |-- b210b0ef0b_0.str.list.tmp.err
+|   |   |-- 91c1b19d98_0.str.list -> ../../cache/lines/...
+|   |   |-- 91c1b19d98_0.str.list.err
 |   |   |-- ccdd8cee06_0.str.list -> ../../cache/lines/...
-|   |   `-- ccdd8cee06_0.str.list.tmp.err
+|   |   `-- ccdd8cee06_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- 8044905ce5_0.str.list.list -> ../../cache/lines/...
 |   |-- length
@@ -75,4 +74,4 @@
     |-- result -> ../exprs/length_each/94cef6ab25_0.num.list
     `-- single.str.list -> ../exprs/extract_queries/ccdd8cee06_0.str.list
 
-26 directories, 49 files
+25 directories, 49 files

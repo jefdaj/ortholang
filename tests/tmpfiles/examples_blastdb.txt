@@ -19,7 +19,9 @@
 |   |   |-- swissprot.tar.gz
 |   |   |-- swissprot.tar.gz.md5
 |   |   |-- taxdb.btd
-|   |   `-- taxdb.bti
+|   |   |-- taxdb.bti
+|   |   |-- taxdb.tar.gz
+|   |   `-- taxdb.tar.gz.md5
 |   |-- load
 |   |   |-- 0d8dfa261e.faa
 |   |   |-- 0d8dfa261e.faa.ids
@@ -75,4 +77,4 @@
     |-- result -> ../exprs/list/b4e4ca8f6a_0.pdb.list
     `-- swissprot.pdb -> ../exprs/blastdbget_prot/ecc82e8b34_0.pdb
 
-12 directories, 63 files
+12 directories, 65 files

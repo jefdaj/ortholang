@@ -1,15 +1,15 @@
 .
 |-- cache
 |   |-- each
+|   |   |-- 0d01e96d6e
+|   |   |   |-- 5303c41d07.bht -> ../../../exprs/blastx_db/62056882ce_ae17c58343_5303c41d07_0.bht
+|   |   |   `-- 5303c41d07.bht.args -> ../../../cache/lines/...
 |   |   |-- cddf581b51
-|   |   |   |-- 218f9869c4.str.list -> ../../../exprs/extract_queries/218f9869c4_0.str.list
-|   |   |   `-- 218f9869c4.str.list.args -> ../../../cache/lines/...
-|   |   |-- ea86f473c1
-|   |   |   |-- 02b5e6a670.pdb -> ../../../exprs/makeblastdb_prot/02b5e6a670_0.pdb
-|   |   |   `-- 02b5e6a670.pdb.args -> ../../../cache/lines/...
-|   |   `-- f356f02a08
-|   |       |-- 5303c41d07.bht -> ../../../exprs/blastx/62056882ce_ae17c58343_5303c41d07_0.bht
-|   |       `-- 5303c41d07.bht.args -> ../../../cache/lines/...
+|   |   |   |-- 47c27a15a6.str.list -> ../../../exprs/extract_queries/47c27a15a6_0.str.list
+|   |   |   `-- 47c27a15a6.str.list.args -> ../../../cache/lines/...
+|   |   `-- ea86f473c1
+|   |       |-- 02b5e6a670.pdb -> ../../../exprs/makeblastdb_prot/02b5e6a670_0.pdb
+|   |       `-- 02b5e6a670.pdb.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -24,21 +24,20 @@
 |-- exprs
 |   |-- any
 |   |   `-- eaffe60918_0.str.list.list -> ../../cache/lines/...
-|   |-- blastx
-|   |   |-- 62056882ce_ae17c58343_5303c41d07_0.bht -> ../../exprs/blastx/62056882ce_ae17c58343_5303c41d07_0.bht.out
-|   |   |-- 62056882ce_ae17c58343_5303c41d07_0.bht.out
-|   |   `-- 62056882ce_ae17c58343_5303c41d07_0.bht.out.err
 |   |-- blastx_db
+|   |   |-- 62056882ce_ae17c58343_5303c41d07_0.bht -> ../../exprs/blastx_db/62056882ce_ae17c58343_5303c41d07_0.bht.out
+|   |   |-- 62056882ce_ae17c58343_5303c41d07_0.bht.out
+|   |   |-- 62056882ce_ae17c58343_5303c41d07_0.bht.out.err
 |   |   |-- b79e5160cb_ae17c58343_af755a47ae_0.bht -> ../../exprs/blastx_db/b79e5160cb_ae17c58343_af755a47ae_0.bht.out
 |   |   |-- b79e5160cb_ae17c58343_af755a47ae_0.bht.out
 |   |   `-- b79e5160cb_ae17c58343_af755a47ae_0.bht.out.err
-|   |-- blastx_each
+|   |-- blastx_db_each
 |   |   `-- b79e5160cb_ae17c58343_9eb4ce3a73_0.bht.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 218f9869c4_0.str.list -> ../../cache/lines/...
-|   |   |-- 218f9869c4_0.str.list.tmp.err
+|   |   |-- 47c27a15a6_0.str.list -> ../../cache/lines/...
+|   |   |-- 47c27a15a6_0.str.list.err
 |   |   |-- a88d15f6a9_0.str.list -> ../../cache/lines/...
-|   |   `-- a88d15f6a9_0.str.list.tmp.err
+|   |   `-- a88d15f6a9_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- 0adceabb1e_0.str.list.list -> ../../cache/lines/...
 |   |-- gbk_to_faa
@@ -74,4 +73,4 @@
     |-- result -> ../exprs/any/eaffe60918_0.str.list.list
     `-- single.str.list -> ../exprs/extract_queries/a88d15f6a9_0.str.list
 
-28 directories, 46 files
+27 directories, 46 files

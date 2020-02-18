@@ -1,12 +1,12 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- a07ed11fa7
-|   |   |   |-- 878c389838.str.list -> ../../../exprs/extract_queries/878c389838_0.str.list
-|   |   |   `-- 878c389838.str.list.args -> ../../../cache/lines/...
-|   |   `-- e42f3aeccc
-|   |       |-- 5aadabc02f.bht -> ../../../exprs/blastn_db_rev/62056882ce_defaeb6e12_5aadabc02f_0.bht
-|   |       `-- 5aadabc02f.bht.args -> ../../../cache/lines/...
+|   |   |-- 99ef3cbabc
+|   |   |   |-- 5aadabc02f.bht -> ../../../exprs/blastn_db/62056882ce_defaeb6e12_5aadabc02f_0.bht
+|   |   |   `-- 5aadabc02f.bht.args -> ../../../cache/lines/...
+|   |   `-- a07ed11fa7
+|   |       |-- 04cd1cdb17.str.list -> ../../../exprs/extract_queries/04cd1cdb17_0.str.list
+|   |       `-- 04cd1cdb17.str.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   |-- 6046a54e92.fna.ids
@@ -26,24 +26,23 @@
 |   |   |-- 3325b3edee_0.str.list -> ../../cache/lines/...
 |   |   `-- bb35f61739_0.str.list -> ../../cache/lines/...
 |   |-- blastn_db
+|   |   |-- 62056882ce_defaeb6e12_5aadabc02f_0.bht -> ../../exprs/blastn_db/62056882ce_defaeb6e12_5aadabc02f_0.bht.out
+|   |   |-- 62056882ce_defaeb6e12_5aadabc02f_0.bht.out
+|   |   |-- 62056882ce_defaeb6e12_5aadabc02f_0.bht.out.err
 |   |   |-- b79e5160cb_c291614658_210fcc817d_0.bht -> ../../exprs/blastn_db/b79e5160cb_c291614658_210fcc817d_0.bht.out
 |   |   |-- b79e5160cb_c291614658_210fcc817d_0.bht.out
 |   |   `-- b79e5160cb_c291614658_210fcc817d_0.bht.out.err
-|   |-- blastn_db_rev
-|   |   |-- 62056882ce_defaeb6e12_5aadabc02f_0.bht -> ../../exprs/blastn_db_rev/62056882ce_defaeb6e12_5aadabc02f_0.bht.out
-|   |   |-- 62056882ce_defaeb6e12_5aadabc02f_0.bht.out
-|   |   `-- 62056882ce_defaeb6e12_5aadabc02f_0.bht.out.err
-|   |-- blastn_db_rev_each
+|   |-- blastn_db_each
 |   |   `-- b79e5160cb_0cb4899129_bf33cf4628_0.bht.list -> ../../cache/lines/...
 |   |-- diff
 |   |   `-- e1b3e13706_0.str.list -> ../../cache/lines/...
 |   |-- extract_queries
+|   |   |-- 04cd1cdb17_0.str.list -> ../../cache/lines/...
+|   |   |-- 04cd1cdb17_0.str.list.err
 |   |   |-- 07587d5db5_0.str.list -> ../../cache/lines/...
-|   |   |-- 07587d5db5_0.str.list.tmp.err
-|   |   |-- 878c389838_0.str.list -> ../../cache/lines/...
-|   |   |-- 878c389838_0.str.list.tmp.err
+|   |   |-- 07587d5db5_0.str.list.err
 |   |   |-- e8a89f83e3_0.str.list -> ../../cache/lines/...
-|   |   `-- e8a89f83e3_0.str.list.tmp.err
+|   |   `-- e8a89f83e3_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- 90cf84572a_0.str.list.list -> ../../cache/lines/...
 |   |-- list
@@ -71,4 +70,4 @@
     |-- small.fna -> ../exprs/load_fna/f0b6c9fa50_0.fna
     `-- srevs.str.list -> ../exprs/extract_queries/e8a89f83e3_0.str.list
 
-23 directories, 48 files
+22 directories, 48 files

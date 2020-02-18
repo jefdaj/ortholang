@@ -67,8 +67,6 @@
 |           |-- 16c75a92e5.mmseqs2db.3
 |           |-- 16c75a92e5.mmseqs2db.4
 |           |-- 16c75a92e5.mmseqs2db.5
-|           |-- 16c75a92e5.mmseqs2db.6
-|           |-- 16c75a92e5.mmseqs2db.7
 |           |-- 16c75a92e5.mmseqs2db.dbtype
 |           |-- 16c75a92e5.mmseqs2db.err
 |           |-- 16c75a92e5.mmseqs2db.index
@@ -79,8 +77,6 @@
 |           |-- d65d0659b7.mmseqs2db.3
 |           |-- d65d0659b7.mmseqs2db.4
 |           |-- d65d0659b7.mmseqs2db.5
-|           |-- d65d0659b7.mmseqs2db.6
-|           |-- d65d0659b7.mmseqs2db.7
 |           |-- d65d0659b7.mmseqs2db.dbtype
 |           |-- d65d0659b7.mmseqs2db.err
 |           |-- d65d0659b7.mmseqs2db.index
@@ -91,9 +87,9 @@
 |   |   `-- 5fc28dbc9c_0.str.list -> ../../cache/lines/...
 |   |-- extract_queries
 |   |   |-- 16c75a92e5_0.str.list -> ../../cache/lines/...
-|   |   |-- 16c75a92e5_0.str.list.tmp.err
+|   |   |-- 16c75a92e5_0.str.list.err
 |   |   |-- 42ea003f94_0.str.list -> ../../cache/lines/...
-|   |   `-- 42ea003f94_0.str.list.tmp.err
+|   |   `-- 42ea003f94_0.str.list.err
 |   |-- glob_files
 |   |   `-- c66c960bb5_0.str.list -> ../../cache/lines/...
 |   |-- list
@@ -134,4 +130,4 @@
     |-- others.faa.list -> ../exprs/diff/29d8afc4a7_0.faa.list
     `-- result -> ../exprs/diff/5fc28dbc9c_0.str.list
 
-18 directories, 116 files
+18 directories, 112 files

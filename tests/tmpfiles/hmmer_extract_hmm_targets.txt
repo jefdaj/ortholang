@@ -29,7 +29,7 @@
 |   |   `-- 8f45069ec8_c3ab257b06_0.faa
 |   |-- extract_targets
 |   |   |-- 2bcadff371_0.str.list -> ../../cache/lines/...
-|   |   `-- 2bcadff371_0.str.list.tmp.err
+|   |   `-- 2bcadff371_0.str.list.err
 |   |-- hmmbuild
 |   |   |-- 1ab71ea433_0.hmm
 |   |   |-- 1ab71ea433_0.hmm.err

@@ -2,10 +2,10 @@
 |-- cache
 |   |-- each
 |   |   |-- 35f8817c07
-|   |   |   |-- 79d5e8d67e.str.list -> ../../../exprs/extract_queries/79d5e8d67e_0.str.list
-|   |   |   `-- 79d5e8d67e.str.list.args -> ../../../cache/lines/...
-|   |   `-- 8deb157f26
-|   |       |-- 5aadabc02f.bht -> ../../../exprs/blastn_db_rev/77b7f9d65e_defaeb6e12_5aadabc02f_0.bht
+|   |   |   |-- 7b6ab841aa.str.list -> ../../../exprs/extract_queries/7b6ab841aa_0.str.list
+|   |   |   `-- 7b6ab841aa.str.list.args -> ../../../cache/lines/...
+|   |   `-- 6e6cd93c28
+|   |       |-- 5aadabc02f.bht -> ../../../exprs/blastn_db/77b7f9d65e_defaeb6e12_5aadabc02f_0.bht
 |   |       `-- 5aadabc02f.bht.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 6046a54e92.fna
@@ -23,20 +23,19 @@
 |   |-- blastn_db
 |   |   |-- 406109b298_c291614658_210fcc817d_0.bht -> ../../exprs/blastn_db/406109b298_c291614658_210fcc817d_0.bht.out
 |   |   |-- 406109b298_c291614658_210fcc817d_0.bht.out
-|   |   `-- 406109b298_c291614658_210fcc817d_0.bht.out.err
-|   |-- blastn_db_rev
-|   |   |-- 77b7f9d65e_defaeb6e12_5aadabc02f_0.bht -> ../../exprs/blastn_db_rev/77b7f9d65e_defaeb6e12_5aadabc02f_0.bht.out
+|   |   |-- 406109b298_c291614658_210fcc817d_0.bht.out.err
+|   |   |-- 77b7f9d65e_defaeb6e12_5aadabc02f_0.bht -> ../../exprs/blastn_db/77b7f9d65e_defaeb6e12_5aadabc02f_0.bht.out
 |   |   |-- 77b7f9d65e_defaeb6e12_5aadabc02f_0.bht.out
 |   |   `-- 77b7f9d65e_defaeb6e12_5aadabc02f_0.bht.out.err
-|   |-- blastn_db_rev_each
+|   |-- blastn_db_each
 |   |   `-- 406109b298_0cb4899129_bf33cf4628_0.bht.list -> ../../cache/lines/...
 |   |-- diff
 |   |   `-- 0eb564369c_0.str.list.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 79d5e8d67e_0.str.list -> ../../cache/lines/...
-|   |   |-- 79d5e8d67e_0.str.list.tmp.err
+|   |   |-- 7b6ab841aa_0.str.list -> ../../cache/lines/...
+|   |   |-- 7b6ab841aa_0.str.list.err
 |   |   |-- 921da554b9_0.str.list -> ../../cache/lines/...
-|   |   `-- 921da554b9_0.str.list.tmp.err
+|   |   `-- 921da554b9_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- 4467f3e091_0.str.list.list -> ../../cache/lines/...
 |   |-- list
@@ -63,4 +62,4 @@
     |-- small.fna -> ../exprs/load_fna/f0b6c9fa50_0.fna
     `-- srevs.str.list -> ../exprs/extract_queries/921da554b9_0.str.list
 
-21 directories, 42 files
+20 directories, 42 files

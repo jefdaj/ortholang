@@ -1,15 +1,15 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 4a2cf5a009
-|   |   |   |-- defaeb6e12.bht -> ../../../exprs/tblastn/62056882ce_06fd51cdc4_defaeb6e12_0.bht
+|   |   |-- a081032abf
+|   |   |   |-- defaeb6e12.bht -> ../../../exprs/tblastn_db/62056882ce_06fd51cdc4_defaeb6e12_0.bht
 |   |   |   `-- defaeb6e12.bht.args -> ../../../cache/lines/...
 |   |   |-- af4ee6fab7
 |   |   |   |-- cd7457665a.ndb -> ../../../exprs/makeblastdb_nucl/cd7457665a_0.ndb
 |   |   |   `-- cd7457665a.ndb.args -> ../../../cache/lines/...
 |   |   `-- b4a1891ae7
-|   |       |-- 4cdc0671ba.str.list -> ../../../exprs/extract_queries/4cdc0671ba_0.str.list
-|   |       `-- 4cdc0671ba.str.list.args -> ../../../cache/lines/...
+|   |       |-- 2fd98bd11f.str.list -> ../../../exprs/extract_queries/2fd98bd11f_0.str.list
+|   |       `-- 2fd98bd11f.str.list.args -> ../../../cache/lines/...
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   |-- 6046a54e92.fna.ids
@@ -28,10 +28,10 @@
 |   |-- any
 |   |   `-- 136f21792b_0.str.list.list -> ../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 4cdc0671ba_0.str.list -> ../../cache/lines/...
-|   |   |-- 4cdc0671ba_0.str.list.tmp.err
+|   |   |-- 2fd98bd11f_0.str.list -> ../../cache/lines/...
+|   |   |-- 2fd98bd11f_0.str.list.err
 |   |   |-- 980de2a882_0.str.list -> ../../cache/lines/...
-|   |   `-- 980de2a882_0.str.list.tmp.err
+|   |   `-- 980de2a882_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- beed021a09_0.str.list.list -> ../../cache/lines/...
 |   |-- list
@@ -54,15 +54,14 @@
 |   |-- str
 |   |   |-- ac19b3d2a1_0.str -> ../../cache/lines/...
 |   |   `-- ead30046d0_0.str -> ../../cache/lines/...
-|   |-- tblastn
-|   |   |-- 62056882ce_06fd51cdc4_defaeb6e12_0.bht -> ../../exprs/tblastn/62056882ce_06fd51cdc4_defaeb6e12_0.bht.out
-|   |   |-- 62056882ce_06fd51cdc4_defaeb6e12_0.bht.out
-|   |   `-- 62056882ce_06fd51cdc4_defaeb6e12_0.bht.out.err
 |   |-- tblastn_db
+|   |   |-- 62056882ce_06fd51cdc4_defaeb6e12_0.bht -> ../../exprs/tblastn_db/62056882ce_06fd51cdc4_defaeb6e12_0.bht.out
+|   |   |-- 62056882ce_06fd51cdc4_defaeb6e12_0.bht.out
+|   |   |-- 62056882ce_06fd51cdc4_defaeb6e12_0.bht.out.err
 |   |   |-- b79e5160cb_e0be9800d0_210fcc817d_0.bht -> ../../exprs/tblastn_db/b79e5160cb_e0be9800d0_210fcc817d_0.bht.out
 |   |   |-- b79e5160cb_e0be9800d0_210fcc817d_0.bht.out
 |   |   `-- b79e5160cb_e0be9800d0_210fcc817d_0.bht.out.err
-|   `-- tblastn_each
+|   `-- tblastn_db_each
 |       `-- b79e5160cb_e0be9800d0_bd0075bcce_0.bht.list -> ../../cache/lines/...
 `-- vars
     |-- maga5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
@@ -71,4 +70,4 @@
     |-- result -> ../exprs/all/ceb66f4a02_0.str.list
     `-- single.str.list -> ../exprs/extract_queries/980de2a882_0.str.list
 
-25 directories, 46 files
+24 directories, 46 files

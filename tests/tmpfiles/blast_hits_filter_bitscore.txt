@@ -28,9 +28,9 @@
 |   |   `-- b79e5160cb_ff056810c7_a2c6594281_0.bht.out.err
 |   |-- extract_queries
 |   |   |-- 919f88e624_0.str.list -> ../../cache/lines/...
-|   |   |-- 919f88e624_0.str.list.tmp.err
+|   |   |-- 919f88e624_0.str.list.err
 |   |   |-- add54126d4_0.str.list -> ../../cache/lines/...
-|   |   `-- add54126d4_0.str.list.tmp.err
+|   |   `-- add54126d4_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- b041354ac4_0.str.list.list -> ../../cache/lines/...
 |   |-- filter_bitscore

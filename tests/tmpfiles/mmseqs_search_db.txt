@@ -32,8 +32,6 @@
 |           |-- 1d45b711c6.mmseqs2db.3
 |           |-- 1d45b711c6.mmseqs2db.4
 |           |-- 1d45b711c6.mmseqs2db.5
-|           |-- 1d45b711c6.mmseqs2db.6
-|           |-- 1d45b711c6.mmseqs2db.7
 |           |-- 1d45b711c6.mmseqs2db.dbtype
 |           |-- 1d45b711c6.mmseqs2db.err
 |           |-- 1d45b711c6.mmseqs2db.index
@@ -66,4 +64,4 @@
     |-- mgen.faa -> ../exprs/load_faa/5815f1ab62_0.faa
     `-- result -> ../exprs/length/1d45b711c6_0.num
 
-14 directories, 52 files
+14 directories, 50 files

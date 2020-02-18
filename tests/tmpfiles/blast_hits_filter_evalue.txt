@@ -28,9 +28,9 @@
 |   |   `-- b79e5160cb_ff056810c7_a2c6594281_0.bht.out.err
 |   |-- extract_queries
 |   |   |-- b0e557841d_0.str.list -> ../../cache/lines/...
-|   |   |-- b0e557841d_0.str.list.tmp.err
+|   |   |-- b0e557841d_0.str.list.err
 |   |   |-- f12113b23f_0.str.list -> ../../cache/lines/...
-|   |   `-- f12113b23f_0.str.list.tmp.err
+|   |   `-- f12113b23f_0.str.list.err
 |   |-- extract_queries_each
 |   |   `-- e6b512e38d_0.str.list.list -> ../../cache/lines/...
 |   |-- filter_evalue
