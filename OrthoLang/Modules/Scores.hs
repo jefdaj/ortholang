@@ -18,7 +18,7 @@ import OrthoLang.Core.Compile.Basic (rExpr, debugRules)
 import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, exprPath)
 
 -- import OrthoLang.Core.Compile.Map  (rMap)
-import OrthoLang.Modules.BlastHits (aOrthoLangCol)
+import OrthoLang.Modules.BlastHits (aCutCol)
 import OrthoLang.Core.Compile.Basic (rSimple)
 
 debug :: String -> String -> Action ()
@@ -102,7 +102,7 @@ extractScores = let name = "extract_scores" in OrthoLangFunction
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : X.scores -> num.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aOrthoLangCol False 1
+  , fRules     = rSimple $ aCutCol False 1
   }
 
 -- TODO deduplicate with extractTargets?
@@ -112,7 +112,7 @@ extractScored = let name = "extract_scored" in OrthoLangFunction
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : X.scores -> X.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aOrthoLangCol False 2
+  , fRules     = rSimple $ aCutCol False 2
   }
 
 tExtractScores :: TypeChecker

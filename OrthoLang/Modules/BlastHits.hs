@@ -56,7 +56,7 @@ extractQueries = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aOrthoLangCol True 1
+  , fRules     = rSimple $ aCutCol True 1
   }
   where
     name = "extract_queries"
@@ -68,7 +68,7 @@ extractQueriesEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 $ aOrthoLangCol True 1
+  , fRules     = rMap 1 $ aCutCol True 1
   }
   where
     name = "extract_queries_each"
@@ -80,7 +80,7 @@ extractTargets = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aOrthoLangCol True 2
+  , fRules     = rSimple $ aCutCol True 2
   }
   where
     name = "extract_targets"
@@ -91,14 +91,14 @@ extractTargetsEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 $ aOrthoLangCol True 2
+  , fRules     = rMap 1 $ aCutCol True 2
   }
   where
     name = "extract_targets_each"
 
 -- TODO remove uniq, unless it's used somewhere?
-aOrthoLangCol :: Bool -> Int -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
-aOrthoLangCol _ n cfg ref _ [outPath, tsvPath] = do
+aCutCol :: Bool -> Int -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -122,10 +122,10 @@ aOrthoLangCol _ n cfg ref _ [outPath, tsvPath] = do
 
   where
     outPath'  = fromOrthoLangPath cfg outPath
-    outPath'' = traceA "aOrthoLangCol" outPath' [show n, outPath', tsvPath']
+    outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
     tsvPath'  = fromOrthoLangPath cfg tsvPath
     tmpPath'  = replaceBaseName outPath'' "tmp" -- the non-deduped version
-aOrthoLangCol _ _ _ _ _ _ = fail "bad arguments to aOrthoLangCol"
+aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 
 ---------------------
 -- filter_*(_each) --
