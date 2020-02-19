@@ -5,8 +5,9 @@ set -x
 set -o pipefail
 
 # only run tests matching this filter string:
-BRANCH="$(git rev-parse --abbrev-ref HEAD | cut -d'-' -f2-)"
-[[ -z "$1" ]] && TEST_FILTER="$BRANCH" || TEST_FILTER="$1"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+[[ "$BRANCH" =~ module ]] && DEFAULT_FILTER="$(echo "$BRANCH" | cut -d'-' -f2)" || DEFAULT_FILTER='all'
+[[ -z "$1" ]] && TEST_FILTER="$DEFAULT_FILTER" || TEST_FILTER="$1"
 
 if [[ -z "$TMPDIR" ]]; then
   export TMPDIR=$PWD/.stack-work/tmp
