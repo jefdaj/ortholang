@@ -38,7 +38,7 @@ import Text.PrettyPrint.HughesPJClass
 
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
-import Development.Shake.FilePath ((</>), replaceBaseName)
+import Development.Shake.FilePath ((</>), (<.>), replaceBaseName)
 import OrthoLang.Core.Actions      (readPaths, writePaths, symlink,
                                    readLit, writeLits, traceA, debugA, need')
 import OrthoLang.Core.Paths        (cacheDir, toOrthoLangPath, fromOrthoLangPath, exprPath,
@@ -223,7 +223,10 @@ aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
       single' = fromOrthoLangPath cfg single
       args''' = single:map (toOrthoLangPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?
-  -- TODO any reason not to use withWriteOnce?
-  -- unlessExists single' $ actFn cfg ref ids dir args''' -- TODO is this the bug???
-  withWriteOnce ref single' $ actFn cfg ref ids dir args''' -- TODO is this the bug???
+  unlessExists single' $ actFn cfg ref ids dir args'''
+  -- TODO is there a way to use withWriteOnce without an indefinite block??
+  -- withWriteOnce ref single' $ actFn cfg ref ids dir args''' -- TODO is this the bug???
+  -- withWriteOnce ref (single' <.> "test") $ do
+  --   actFn cfg ref ids dir args''' -- TODO is this the bug???
+  --   writeFile' (single' <.> "test") ""
   symlink cfg ref out' single
