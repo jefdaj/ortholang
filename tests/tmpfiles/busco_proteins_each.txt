@@ -723,11 +723,13 @@
 |   |-- curl
 |   |   `-- bd265ecf24
 |   |-- each
-|   |   `-- 53c092c750
-|   |       |-- 06b3e4476b.bsr -> ../../../exprs/busco_proteins/28658fa152_06b3e4476b_0.bsr
-|   |       |-- 06b3e4476b.bsr.args -> ../../../cache/lines/...
-|   |       |-- e66755a6ce.bsr -> ../../../exprs/busco_proteins/28658fa152_e66755a6ce_0.bsr
-|   |       `-- e66755a6ce.bsr.args -> ../../../cache/lines/...
+|   |   `-- 9a0ed99cb2
+|   |       |-- 789b09c9e1
+|   |       |   |-- args -> ../../../../cache/lines/...
+|   |       |   `-- result -> ../../../../exprs/busco_proteins/895dd19de5/789b09c9e1/0/result
+|   |       `-- f3acb45197
+|   |           |-- args -> ../../../../cache/lines/...
+|   |           `-- result -> ../../../../exprs/busco_proteins/895dd19de5/f3acb45197/0/result
 |   `-- load
 |       |-- 0d8dfa261e
 |       |-- 0d8dfa261e.ids
@@ -735,16 +737,26 @@
 |       `-- 11bbf54fc6.ids
 |-- exprs
 |   |-- busco_fetch_lineage
-|   |   `-- 5ea47da7d6_0.blh -> ../../cache/busco/lineages/v2/datasets/firmicutes_odb9/dataset.cfg
+|   |   `-- 4be36e5232
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/busco/lineages/v2/datasets/firmicutes_odb9/dataset.cfg
 |   |-- busco_proteins
-|   |   |-- 28658fa152_06b3e4476b_0.bsr -> ../../cache/busco/runs/run_28658fa152_06b3e4476b_0.bsr/short_summary_28658fa152_06b3e4476b_0.bsr.txt
-|   |   |-- 28658fa152_06b3e4476b_0.bsr.err
-|   |   |-- 28658fa152_06b3e4476b_0.bsr.out
-|   |   |-- 28658fa152_e66755a6ce_0.bsr -> ../../cache/busco/runs/run_28658fa152_e66755a6ce_0.bsr/short_summary_28658fa152_e66755a6ce_0.bsr.txt
-|   |   |-- 28658fa152_e66755a6ce_0.bsr.err
-|   |   `-- 28658fa152_e66755a6ce_0.bsr.out
+|   |   `-- 895dd19de5
+|   |       |-- 789b09c9e1
+|   |       |   `-- 0
+|   |       |       |-- result -> ../../../../../cache/busco/runs/run_result/short_summary_result.txt
+|   |       |       |-- result.err
+|   |       |       `-- result.out
+|   |       `-- f3acb45197
+|   |           `-- 0
+|   |               |-- result -> ../../../../../cache/busco/runs/run_result/short_summary_result.txt
+|   |               |-- result.err
+|   |               `-- result.out
 |   |-- busco_proteins_each
-|   |   `-- 87f9deefcd_1ff5770437_0.bsr.list -> ../../cache/lines/...
+|   |   `-- 4051c0d589
+|   |       `-- 8dc5314a7b
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- list
 |   |   `-- def8d20b32
 |   |       `-- 0
@@ -757,13 +769,19 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/11bbf54fc6
 |   `-- str
-|       |-- 405d2aacea_0.str -> ../../cache/lines/...
-|       |-- 4aa6e4da56_0.str -> ../../cache/lines/...
-|       `-- 5077e66eaa_0.str -> ../../cache/lines/...
+|       |-- 405d2aacea
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- c58447896b
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- f6e8c8ce02
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/a6b3a06882_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/b712129ae8_0.faa
-    |-- odb9_firmicutes.blh -> ../exprs/busco_fetch_lineage/5ea47da7d6_0.blh
-    `-- result -> ../exprs/busco_proteins_each/87f9deefcd_1ff5770437_0.bsr.list
+    |-- maga.faa -> ../exprs/load_faa/2774b3aa5c/0/result
+    |-- mgen.faa -> ../exprs/load_faa/d7b94f4516/0/result
+    |-- odb9_firmicutes.blh -> ../exprs/busco_fetch_lineage/4be36e5232/0/result
+    `-- result -> ../exprs/busco_proteins_each/4051c0d589/8dc5314a7b/0/result
 
 48 directories, 736 files
