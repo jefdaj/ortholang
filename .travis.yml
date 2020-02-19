@@ -2,12 +2,12 @@ language: nix
 nix: 2.0.4
 
 # see: https://github.com/ChrisPenner/haskell-stack-travis-ci/blob/master/.travis.yml
-cache:
-  directories:
-    - $HOME/.ghc
-    - $HOME/.cabal
-    - $HOME/.stack
-    - .stack-work
+# cache:
+#   directories:
+#     - $HOME/.ghc
+#     - $HOME/.cabal
+#     - $HOME/.stack
+#     - .stack-work
 
 matrix:
   fast_finish: true
