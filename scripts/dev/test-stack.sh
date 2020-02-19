@@ -6,7 +6,7 @@ set -o pipefail
 
 # only run tests matching this filter string:
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-[[ "$BRANCH" =~ module ]] && DEFAULT_FILTER="$(echo "$BRANCH" | cut -d'-' -f2)" || DEFAULT_FILTER='all'
+[[ "$BRANCH" =~ module ]] && DEFAULT_FILTER="$(echo "$BRANCH" | cut -d'-' -f2)" || DEFAULT_FILTER='version'
 [[ -z "$1" ]] && TEST_FILTER="$DEFAULT_FILTER" || TEST_FILTER="$1"
 
 if [[ -z "$TMPDIR" ]]; then
