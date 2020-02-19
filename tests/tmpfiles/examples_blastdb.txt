@@ -1,98 +1,11 @@
 .
 |-- cache
-|   |-- blastdbget
-|   |   |-- human_est.err
-|   |   |-- human_est.out
-|   |   |-- swissprot.err
-|   |   |-- swissprot.out
-|   |   |-- swissprot.pdb
-|   |   |-- swissprot.phr
-|   |   |-- swissprot.pin
-|   |   |-- swissprot.pog
-|   |   |-- swissprot.pos
-|   |   |-- swissprot.pot
-|   |   |-- swissprot.ppd
-|   |   |-- swissprot.ppi
-|   |   |-- swissprot.psq
-|   |   |-- swissprot.ptf
-|   |   |-- swissprot.pto
-|   |   |-- swissprot.tar.gz
-|   |   |-- swissprot.tar.gz.md5
-|   |   |-- taxdb.btd
-|   |   |-- taxdb.bti
-|   |   |-- taxdb.tar.gz
-|   |   `-- taxdb.tar.gz.md5
-|   |-- load
-|   |   |-- 0d8dfa261e.faa
-|   |   |-- 0d8dfa261e.faa.ids
-|   |   |-- 11bbf54fc6.faa
-|   |   |-- 11bbf54fc6.faa.ids
-|   |   |-- 165315693c.faa
-|   |   |-- 165315693c.faa.ids
-|   |   |-- 306ef4e6c6.faa
-|   |   |-- 306ef4e6c6.faa.ids
-|   |   |-- 35c3295f2e.faa
-|   |   |-- 35c3295f2e.faa.ids
-|   |   |-- 4b624c0c8d.faa
-|   |   |-- 4b624c0c8d.faa.ids
-|   |   |-- 781ac8532f.faa
-|   |   |-- 781ac8532f.faa.ids
-|   |   |-- 806cb805fc.faa
-|   |   |-- 806cb805fc.faa.ids
-|   |   |-- 8ad58ec4ef.faa
-|   |   |-- 8ad58ec4ef.faa.ids
-|   |   |-- d371a5b0f3.faa
-|   |   |-- d371a5b0f3.faa.ids
-|   |   |-- f47bc9964f.faa
-|   |   |-- f47bc9964f.faa.ids
-|   |   |-- fab3203dba.faa
-|   |   |-- fab3203dba.faa.ids
-|   |   |-- fd55270dfc.faa
-|   |   `-- fd55270dfc.faa.ids
-|   `-- makeblastdb
-|       `-- a4c0caf181
-|           |-- a4c0caf181.pdb.err
-|           |-- a4c0caf181.pdb.out
-|           |-- a4c0caf181.pdb.phr
-|           |-- a4c0caf181.pdb.pin
-|           `-- a4c0caf181.pdb.psq
 |-- exprs
-|   |-- blastdbget_prot
-|   |   |-- 196564dd52
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 54d0de846b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- glob_files
-|   |   `-- 260407740b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- list
-|   |   |-- af64fdf8ae
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- b4e4ca8f6a
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- makeblastdb_prot_all
-|   |   `-- 0d2f859412
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       |-- 2ec6e38f2e
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
-|       |-- 6c95ffed6d
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
-|       `-- 7e4b736a9e
+|       `-- 14bf5d9d12
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- human.pdb -> ../exprs/blastdbget_prot/196564dd52/0/result
-    |-- mycodb.pdb -> ../exprs/makeblastdb_prot_all/0d2f859412/0/result
-    |-- result -> ../exprs/list/b4e4ca8f6a/0/result
-    `-- swissprot.pdb -> ../exprs/blastdbget_prot/54d0de846b/0/result
+    `-- result -> ../exprs/str/14bf5d9d12/0/result
 
-30 directories, 65 files
+6 directories, 2 files

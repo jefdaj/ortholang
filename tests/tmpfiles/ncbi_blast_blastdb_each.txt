@@ -139,9 +139,6 @@
 |   |       `-- f32c7eb7cf
 |   |           `-- 635b625879
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
-|   |                   `-- result -> out
 |   |-- blastp_db_each
 |   |   `-- 66dc2a3b29
 |   |       `-- f32c7eb7cf
@@ -310,4 +307,4 @@
     |-- sfna1.fna -> ../exprs/load_fna/f4e1d9e6a0/0/result
     `-- sfna2.fna -> ../exprs/load_fna/f4e1d9e6a0/0/result
 
-181 directories, 129 files
+181 directories, 126 files
