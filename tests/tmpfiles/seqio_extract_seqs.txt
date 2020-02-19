@@ -1,49 +1,83 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 6046a54e92.fna
-|   |   |-- 6046a54e92.fna.ids
-|   |   |-- cb3e90dc00.faa
-|   |   `-- cb3e90dc00.faa.ids
+|   |   |-- 6046a54e92
+|   |   |-- 6046a54e92.ids
+|   |   |-- cb3e90dc00
+|   |   `-- cb3e90dc00.ids
 |   `-- seqio
-|       |-- 873ea35553.txt -> ../../cache/lines/...
-|       `-- c2598afc2c.txt -> ../../cache/lines/...
+|       |-- b25201ff9d.txt -> ../../cache/lines/...
+|       `-- bb9c7c8d83.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- any
-|   |   `-- 28a66f88f3_0.str.list -> ../../cache/lines/...
+|   |   `-- 9aba5d2be0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- diff
-|   |   |-- 50f02a3c59_0.str.list -> ../../cache/lines/...
-|   |   `-- f493b3b502_0.str.list -> ../../cache/lines/...
+|   |   |-- ac8613d398
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- b8350f10a5
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- extract_ids
-|   |   |-- b23b6505d6_0.str.list
-|   |   |-- b7440bdf29_0.str.list
-|   |   |-- c6cdbe5a9a_0.str.list
-|   |   `-- e0be9800d0_0.str.list
+|   |   |-- 27d007fff5
+|   |   |   `-- 0
+|   |   |       `-- result
+|   |   |-- a2657d1b99
+|   |   |   `-- 0
+|   |   |       `-- result
+|   |   |-- c25438b61b
+|   |   |   `-- 0
+|   |   |       `-- result
+|   |   `-- f32c7eb7cf
+|   |       `-- 0
+|   |           `-- result
 |   |-- extract_seqs
-|   |   |-- b23b6505d6_873ea35553_0.fna
-|   |   `-- e0be9800d0_c2598afc2c_0.faa
+|   |   |-- 27d007fff5
+|   |   |   `-- bb9c7c8d83
+|   |   |       `-- 0
+|   |   |           `-- result
+|   |   `-- f32c7eb7cf
+|   |       `-- b25201ff9d
+|   |           `-- 0
+|   |               `-- result
 |   |-- list
-|   |   |-- 702857335d_0.str.list.list -> ../../cache/lines/...
-|   |   |-- ab5f3e798f_0.str.list.list -> ../../cache/lines/...
-|   |   `-- e5ff47baa6_0.str.list.list -> ../../cache/lines/...
+|   |   |-- 702857335d
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- ab5f3e798f
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- e5ff47baa6
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   `-- d10d10f063
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/cb3e90dc00
 |   |-- load_fna
-|   |   `-- 2fe5a30d0c_0.fna -> ../../cache/load/6046a54e92.fna
+|   |   `-- f4e1d9e6a0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/6046a54e92
 |   `-- str
-|       |-- ac19b3d2a1_0.str -> ../../cache/lines/...
-|       `-- ead30046d0_0.str -> ../../cache/lines/...
+|       |-- ac19b3d2a1
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- ead30046d0
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- faaDiff.str.list -> ../exprs/diff/f493b3b502_0.str.list
-    |-- faaSmallAll.str.list -> ../exprs/extract_ids/c6cdbe5a9a_0.str.list
-    |-- faaSmall.faa -> ../exprs/load_faa/ba41f009f5_0.faa
-    |-- faaSmallIDs.str.list -> ../exprs/extract_ids/e0be9800d0_0.str.list
-    |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/e0be9800d0_c2598afc2c_0.faa
-    |-- fnaDiff.str.list -> ../exprs/diff/50f02a3c59_0.str.list
-    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/b7440bdf29_0.str.list
-    |-- fnaSmall.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
-    |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/b23b6505d6_0.str.list
-    |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/b23b6505d6_873ea35553_0.fna
-    `-- result -> ../exprs/any/28a66f88f3_0.str.list
+    |-- faaDiff.str.list -> ../exprs/diff/b8350f10a5/0/result
+    |-- faaSmallAll.str.list -> ../exprs/extract_ids/a2657d1b99/0/result
+    |-- faaSmall.faa -> ../exprs/load_faa/d10d10f063/0/result
+    |-- faaSmallIDs.str.list -> ../exprs/extract_ids/f32c7eb7cf/0/result
+    |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/f32c7eb7cf/b25201ff9d/0/result
+    |-- fnaDiff.str.list -> ../exprs/diff/ac8613d398/0/result
+    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/c25438b61b/0/result
+    |-- fnaSmall.fna -> ../exprs/load_fna/f4e1d9e6a0/0/result
+    |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/27d007fff5/0/result
+    |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/27d007fff5/bb9c7c8d83/0/result
+    `-- result -> ../exprs/any/9aba5d2be0/0/result
 
-13 directories, 33 files
+47 directories, 33 files

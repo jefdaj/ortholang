@@ -4091,26 +4091,43 @@
 |           `-- fab3203dba.faa -> ../../../cache/load/fab3203dba.faa
 |-- exprs
 |   |-- glob_files
-|   |   `-- c66c960bb5_0.str.list -> ../../cache/lines/...
+|   |   `-- 260407740b
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   `-- 1424c5253d_0.faa.list -> ../../cache/lines/...
+|   |   `-- 12880e4df9
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
-|   |   `-- eaad7f2e40_0.num -> ../../cache/lines/...
+|   |   `-- eaad7f2e40
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- orthofinder
-|   |   |-- a55d5a622f_0.ofr -> ../../cache/orthofinder/978fa77f19/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
-|   |   |-- a55d5a622f_0.ofr.err
-|   |   `-- a55d5a622f_0.ofr.out
+|   |   `-- 66d86f89ee
+|   |       `-- 0
+|   |           |-- out
+|   |           `-- result -> ../../../../cache/orthofinder/978fa77f19/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
 |   |-- orthogroup_containing
-|   |   `-- e92893b5fa_593df8e9f4_0.str.list -> ../../cache/lines/...
+|   |   `-- edbc50cc95
+|   |       `-- 3bf601d181
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- sample
-|   |   `-- 87ff177bc7_e84d0351e0_0.str.list -> ../../cache/lines/...
+|   |   `-- 9b715cff19
+|   |       `-- af64fdf8ae
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   `-- str
-|       |-- 6dd61a5289_0.str -> ../../cache/lines/...
-|       `-- 7e4b736a9e_0.str -> ../../cache/lines/...
+|       |-- 6dd61a5289
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- 7e4b736a9e
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- ofres.ofr -> ../exprs/orthofinder/a55d5a622f_0.ofr
-    |-- og662.str.list -> ../exprs/orthogroup_containing/e92893b5fa_593df8e9f4_0.str.list
+    |-- ofres.ofr -> ../exprs/orthofinder/66d86f89ee/0/result
+    |-- og662.str.list -> ../exprs/orthogroup_containing/edbc50cc95/3bf601d181/0/result
     |-- result -> ../vars/og662.str.list
-    `-- small5.faa.list -> ../exprs/list/1424c5253d_0.faa.list
+    `-- small5.faa.list -> ../exprs/list/12880e4df9/0/result
 
-35 directories, 4078 files
+53 directories, 4077 files

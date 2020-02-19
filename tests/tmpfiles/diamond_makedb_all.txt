@@ -9,17 +9,25 @@
 |       `-- 39b21a8bf4.faa.ids
 |-- exprs
 |   |-- diamond_makedb_all
-|   |   |-- 38e40ed961_0.dmnd
-|   |   |-- 38e40ed961_0.dmnd.err
-|   |   `-- 38e40ed961_0.dmnd.out
+|   |   `-- 9ac6429f95
+|   |       `-- 0
+|   |           |-- err
+|   |           |-- out
+|   |           `-- result
 |   |-- glob_files
-|   |   `-- 497a59643d_0.str.list -> ../../cache/lines/...
+|   |   `-- f4c384388f
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   `-- 70c5630e7c_0.faa.list -> ../../cache/lines/...
+|   |   `-- 2144e692ad
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       `-- f9b7f821c1_0.str -> ../../cache/lines/...
+|       `-- f9b7f821c1
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- mycoplasma.faa.list -> ../exprs/list/70c5630e7c_0.faa.list
-    `-- result -> ../exprs/diamond_makedb_all/38e40ed961_0.dmnd
+    |-- mycoplasma.faa.list -> ../exprs/list/2144e692ad/0/result
+    `-- result -> ../exprs/diamond_makedb_all/9ac6429f95/0/result
 
-8 directories, 14 files
+16 directories, 14 files

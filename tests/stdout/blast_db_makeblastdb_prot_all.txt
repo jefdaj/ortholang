@@ -1,7 +1,7 @@
-Database: 8948446e38.pdb
+Database: 583d3fe84e.pdb
 6 sequences; 2,973 total residues
 Longest sequence: 836 residues
 BLASTDB Version: 4
 Volumes:
-$TMPDIR/cache/makeblastdb/8948446e38/8948446e38.pdb
+$TMPDIR/cache/makeblastdb/583d3fe84e/583d3fe84e.pdb
 

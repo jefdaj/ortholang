@@ -2,10 +2,14 @@
 |-- cache
 |-- exprs
 |   |-- list
-|   |   `-- 588716e14b_0.num.list -> ../../cache/lines/...
+|   |   `-- 8d6d4b607e
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- num
-|       `-- ee383407c9_0.num -> ../../cache/lines/...
+|       `-- ee383407c9
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/list/588716e14b_0.num.list
+    `-- result -> ../exprs/list/8d6d4b607e/0/result
 
-5 directories, 3 files
+9 directories, 3 files

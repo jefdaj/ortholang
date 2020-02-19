@@ -2,15 +2,23 @@
 |-- cache
 |-- exprs
 |   |-- any
-|   |   `-- 6606131229_0.empty.list -> ../../cache/lines/...
+|   |   `-- 96b96cc1e8
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- length
-|   |   `-- dc8950886a_0.num -> ../../cache/lines/...
+|   |   `-- ba564a247a
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- list
-|       |-- 2d470f7b0c_0.empty.list.list -> ../../cache/lines/...
-|       `-- d751713988_0.empty.list -> ../../cache/lines/...
+|       |-- 3bf77091d9
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- d751713988
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
     |-- result -> ../vars/sets.num
-    |-- sets.num -> ../exprs/length/dc8950886a_0.num
-    `-- two.empty.list.list -> ../exprs/list/2d470f7b0c_0.empty.list.list
+    |-- sets.num -> ../exprs/length/ba564a247a/0/result
+    `-- two.empty.list.list -> ../exprs/list/3bf77091d9/0/result
 
-6 directories, 7 files
+14 directories, 7 files

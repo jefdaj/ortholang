@@ -1,32 +1,44 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 28e059b2a9.faa
-|   |   |-- 28e059b2a9.faa.ids
-|   |   |-- cb3e90dc00.faa
-|   |   `-- cb3e90dc00.faa.ids
+|   |   |-- 28e059b2a9
+|   |   |-- 28e059b2a9.ids
+|   |   |-- cb3e90dc00
+|   |   `-- cb3e90dc00.ids
 |   `-- makeblastdb
-|       `-- 8948446e38
-|           |-- 8948446e38.pdb.err
-|           |-- 8948446e38.pdb.out
-|           |-- 8948446e38.pdb.phr
-|           |-- 8948446e38.pdb.pin
-|           `-- 8948446e38.pdb.psq
+|       `-- 583d3fe84e
+|           |-- 583d3fe84e.pdb.err
+|           |-- 583d3fe84e.pdb.out
+|           |-- 583d3fe84e.pdb.phr
+|           |-- 583d3fe84e.pdb.pin
+|           `-- 583d3fe84e.pdb.psq
 |-- exprs
 |   |-- list
-|   |   `-- cb392f00cd_0.faa.list -> ../../cache/lines/...
+|   |   `-- cb392f00cd
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- b1dad56770_0.faa -> ../../cache/load/28e059b2a9.faa
-|   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   |-- 385ba48b5c
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/28e059b2a9
+|   |   `-- d10d10f063
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/cb3e90dc00
 |   |-- makeblastdb_prot_all
-|   |   `-- bdb82b5437_0.pdb -> ../../cache/lines/...
+|   |   `-- 13493f18d7
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       |-- 1e020faf26_0.str -> ../../cache/lines/...
-|       `-- ead30046d0_0.str -> ../../cache/lines/...
+|       |-- 1e020faf26
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- ead30046d0
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- db.pdb -> ../exprs/makeblastdb_prot_all/bdb82b5437_0.pdb
-    |-- genes5.faa -> ../exprs/load_faa/ba41f009f5_0.faa
+    |-- db.pdb -> ../exprs/makeblastdb_prot_all/13493f18d7/0/result
+    |-- genes5.faa -> ../exprs/load_faa/d10d10f063/0/result
     |-- result -> ../vars/db.pdb
-    `-- single.faa -> ../exprs/load_faa/b1dad56770_0.faa
+    `-- single.faa -> ../exprs/load_faa/385ba48b5c/0/result
 
-10 directories, 19 files
+22 directories, 19 files

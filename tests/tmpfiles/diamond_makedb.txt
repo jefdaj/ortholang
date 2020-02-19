@@ -1,19 +1,25 @@
 .
 |-- cache
 |   `-- load
-|       |-- 10ffe0cf0f.faa
-|       `-- 10ffe0cf0f.faa.ids
+|       |-- 10ffe0cf0f
+|       `-- 10ffe0cf0f.ids
 |-- exprs
 |   |-- diamond_makedb
-|   |   |-- ff056810c7_0.dmnd
-|   |   |-- ff056810c7_0.dmnd.err
-|   |   `-- ff056810c7_0.dmnd.out
+|   |   `-- 954b3ac6f3
+|   |       `-- 0
+|   |           |-- err
+|   |           |-- out
+|   |           `-- result
 |   |-- load_faa
-|   |   `-- 281359b1ca_0.faa -> ../../cache/load/10ffe0cf0f.faa
+|   |   `-- ad6ae7249f
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/10ffe0cf0f
 |   `-- str
-|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
+|       `-- cdba97c8d8
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
-    `-- result -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
+    |-- mgen.faa -> ../exprs/load_faa/ad6ae7249f/0/result
+    `-- result -> ../exprs/diamond_makedb/954b3ac6f3/0/result
 
-7 directories, 9 files
+13 directories, 9 files

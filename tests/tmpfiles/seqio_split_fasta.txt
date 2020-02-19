@@ -1,71 +1,97 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 028d922335
-|   |   |   |-- d7253aa6a0.num -> ../../../exprs/length/d7253aa6a0_0.num
-|   |   |   `-- d7253aa6a0.num.args -> ../../../cache/lines/...
-|   |   `-- 0fdfba2fd6
-|   |       |-- 06fd51cdc4.faa.list -> ../../../exprs/split_faa/06fd51cdc4_0.faa.list
-|   |       `-- 06fd51cdc4.faa.list.args -> ../../../cache/lines/...
+|   |   |-- 56a614a972
+|   |   |   `-- 1b7c1db9d4
+|   |   |       |-- args -> ../../../../cache/lines/...
+|   |   |       `-- result -> ../../../../exprs/split_faa/1b7c1db9d4/0/result
+|   |   `-- e886998f8e
+|   |       `-- bccf704def
+|   |           |-- args -> ../../../../cache/lines/...
+|   |           `-- result -> ../../../../exprs/length/bccf704def/0/result
 |   |-- load
-|   |   |-- cb3e90dc00.faa
-|   |   `-- cb3e90dc00.faa.ids
+|   |   |-- cb3e90dc00
+|   |   `-- cb3e90dc00.ids
 |   |-- split_faa
+|   |   `-- 1b7c1db9d4
 |   `-- split_faa_each
+|       `-- 1b7c1db9d4
 |-- exprs
 |   |-- any
-|   |   `-- b5adcac173_0.faa.list.list -> ../../cache/lines/...
+|   |   `-- 530e5326ec
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- length
-|   |   `-- d7253aa6a0_0.num -> ../../cache/lines/...
+|   |   `-- bccf704def
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- length_each
-|   |   `-- 70c38d31a7_0.num.list -> ../../cache/lines/...
+|   |   `-- afdf3d58dc
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 1ed650df10_0.faa.list -> ../../cache/lines/...
-|   |   |-- 43ee22bfd7_0.faa.list.list.list -> ../../cache/lines/...
-|   |   `-- ead79b9394_0.faa.list.list -> ../../cache/lines/...
+|   |   |-- 1ed650df10
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- ead79b9394
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- fc9d4db9e3
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 00
 |   |   |   `-- 28
 |   |   |       `-- 42
 |   |   |           `-- 57
 |   |   |               `-- 08
-|   |   |                   `-- b.faa
+|   |   |                   `-- b
 |   |   |-- 4f
 |   |   |   `-- ae
 |   |   |       `-- 11
 |   |   |           `-- 2e
 |   |   |               `-- cb
-|   |   |                   `-- 3.faa
+|   |   |                   `-- 3
 |   |   |-- 5e
 |   |   |   `-- 7e
 |   |   |       `-- 2f
 |   |   |           `-- 77
 |   |   |               `-- 41
-|   |   |                   `-- 5.faa
+|   |   |                   `-- 5
 |   |   |-- 5f
 |   |   |   `-- 19
 |   |   |       `-- 74
 |   |   |           `-- 19
 |   |   |               `-- 6b
-|   |   |                   `-- 4.faa
+|   |   |                   `-- 4
 |   |   |-- a7
 |   |   |   `-- ba
 |   |   |       `-- 8c
 |   |   |           `-- 36
 |   |   |               `-- 7d
-|   |   |                   `-- 3.faa
-|   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   |                   `-- 3
+|   |   `-- d10d10f063
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/cb3e90dc00
 |   |-- split_faa
-|   |   |-- 06fd51cdc4_0.faa.list -> ../../cache/lines/...
-|   |   `-- e0be9800d0_0.faa.list -> ../../cache/lines/...
+|   |   |-- 1b7c1db9d4
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- f32c7eb7cf
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- split_faa_each
-|   |   `-- 5caf93c9c9_0.faa.list.list -> ../../cache/lines/...
+|   |   `-- 6e886f18d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       `-- ead30046d0_0.str -> ../../cache/lines/...
+|       `-- ead30046d0
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- genes.faa.list -> ../exprs/split_faa/e0be9800d0_0.faa.list
-    |-- mapped.faa.list.list -> ../exprs/split_faa_each/5caf93c9c9_0.faa.list.list
-    |-- multifa.faa -> ../exprs/load_faa/ba41f009f5_0.faa
-    `-- result -> ../exprs/length_each/70c38d31a7_0.num.list
+    |-- genes.faa.list -> ../exprs/split_faa/f32c7eb7cf/0/result
+    |-- mapped.faa.list.list -> ../exprs/split_faa_each/6e886f18d4/0/result
+    |-- multifa.faa -> ../exprs/load_faa/d10d10f063/0/result
+    `-- result -> ../exprs/length_each/afdf3d58dc/0/result
 
-42 directories, 26 files
+68 directories, 26 files

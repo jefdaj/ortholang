@@ -1,32 +1,44 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 6046a54e92.fna
-|   |   |-- 6046a54e92.fna.ids
-|   |   |-- 8723e7ac8c.fna
-|   |   `-- 8723e7ac8c.fna.ids
+|   |   |-- 6046a54e92
+|   |   |-- 6046a54e92.ids
+|   |   |-- 8723e7ac8c
+|   |   `-- 8723e7ac8c.ids
 |   `-- makeblastdb
-|       `-- ea1568d48b
-|           |-- ea1568d48b.ndb.err
-|           |-- ea1568d48b.ndb.nhr
-|           |-- ea1568d48b.ndb.nin
-|           |-- ea1568d48b.ndb.nsq
-|           `-- ea1568d48b.ndb.out
+|       `-- 00f33c329c
+|           |-- 00f33c329c.ndb.err
+|           |-- 00f33c329c.ndb.nhr
+|           |-- 00f33c329c.ndb.nin
+|           |-- 00f33c329c.ndb.nsq
+|           `-- 00f33c329c.ndb.out
 |-- exprs
 |   |-- list
-|   |   `-- fb2c20f954_0.fna.list -> ../../cache/lines/...
+|   |   `-- fb2c20f954
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_fna
-|   |   |-- 2fe5a30d0c_0.fna -> ../../cache/load/6046a54e92.fna
-|   |   `-- f0b6c9fa50_0.fna -> ../../cache/load/8723e7ac8c.fna
+|   |   |-- b06189156a
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/8723e7ac8c
+|   |   `-- f4e1d9e6a0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/6046a54e92
 |   |-- makeblastdb_nucl_all
-|   |   `-- aae831136f_0.ndb -> ../../cache/lines/...
+|   |   `-- 8f1bade8bb
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       |-- 0ecd3e7ed5_0.str -> ../../cache/lines/...
-|       `-- ac19b3d2a1_0.str -> ../../cache/lines/...
+|       |-- 0ecd3e7ed5
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- ac19b3d2a1
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- db.ndb -> ../exprs/makeblastdb_nucl_all/aae831136f_0.ndb
-    |-- genes5.fna -> ../exprs/load_fna/2fe5a30d0c_0.fna
+    |-- db.ndb -> ../exprs/makeblastdb_nucl_all/8f1bade8bb/0/result
+    |-- genes5.fna -> ../exprs/load_fna/f4e1d9e6a0/0/result
     |-- result -> ../vars/db.ndb
-    `-- single.fna -> ../exprs/load_fna/f0b6c9fa50_0.fna
+    `-- single.fna -> ../exprs/load_fna/b06189156a/0/result
 
-10 directories, 19 files
+22 directories, 19 files

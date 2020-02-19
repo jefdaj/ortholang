@@ -2,25 +2,51 @@
 |-- cache
 |-- exprs
 |   |-- add
-|   |   |-- 69f738303f_589afd8ba4_0.num -> ../../cache/lines/...
-|   |   |-- 75463832ad_75463832ad_0.num -> ../../cache/lines/...
-|   |   `-- cda9e581b3_8e2966e074_0.num -> ../../cache/lines/...
+|   |   |-- 7a756370ef
+|   |   |   `-- f88b2b1b09
+|   |   |       `-- 0
+|   |   |           `-- result -> ../../../../../cache/lines/...
+|   |   |-- a5e419fd08
+|   |   |   `-- bc47f42e5c
+|   |   |       `-- 0
+|   |   |           `-- result -> ../../../../../cache/lines/...
+|   |   `-- f89070018f
+|   |       `-- f89070018f
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- divide
-|   |   `-- 038f37a7f1_a08220cdbf_0.num -> ../../cache/lines/...
+|   |   `-- 89c1e8db00
+|   |       `-- 6c7145e74b
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- multiply
-|   |   `-- 56e747f3b8_09bad29f25_0.num -> ../../cache/lines/...
+|   |   `-- 72d3d9e268
+|   |       `-- 582c3b5c81
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- num
-|   |   |-- b2fc577686_0.num -> ../../cache/lines/...
-|   |   |-- ea11b49459_0.num -> ../../cache/lines/...
-|   |   |-- ee383407c9_0.num -> ../../cache/lines/...
-|   |   `-- f5b6e413fa_0.num -> ../../cache/lines/...
+|   |   |-- b2fc577686
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- ea11b49459
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- ee383407c9
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- f5b6e413fa
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- subtract
-|       `-- 75463832ad_589afd8ba4_0.num -> ../../cache/lines/...
+|       `-- f89070018f
+|           `-- bc47f42e5c
+|               `-- 0
+|                   `-- result -> ../../../../../cache/lines/...
 `-- vars
-    |-- n1.num -> ../exprs/add/75463832ad_75463832ad_0.num
-    |-- n2.num -> ../exprs/subtract/75463832ad_589afd8ba4_0.num
-    |-- n3.num -> ../exprs/multiply/56e747f3b8_09bad29f25_0.num
-    |-- n5.num -> ../exprs/add/cda9e581b3_8e2966e074_0.num
+    |-- n1.num -> ../exprs/add/f89070018f/f89070018f/0/result
+    |-- n2.num -> ../exprs/subtract/f89070018f/bc47f42e5c/0/result
+    |-- n3.num -> ../exprs/multiply/72d3d9e268/582c3b5c81/0/result
+    |-- n5.num -> ../exprs/add/7a756370ef/f88b2b1b09/0/result
     `-- result -> ../vars/n5.num
 
-8 directories, 15 files
+34 directories, 15 files

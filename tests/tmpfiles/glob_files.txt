@@ -2,10 +2,14 @@
 |-- cache
 |-- exprs
 |   |-- glob_files
-|   |   `-- 93fca3cf6b_0.str.list -> ../../cache/lines/...
+|   |   `-- bdff921d7b
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       `-- f78ef4ca97_0.str -> ../../cache/lines/...
+|       `-- f78ef4ca97
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/glob_files/93fca3cf6b_0.str.list
+    `-- result -> ../exprs/glob_files/bdff921d7b/0/result
 
-5 directories, 3 files
+9 directories, 3 files

@@ -2,8 +2,10 @@
 |-- cache
 |-- exprs
 |   `-- str
-|       `-- c0fb1f65e9_0.str -> ../../cache/lines/...
+|       `-- c0fb1f65e9
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/str/c0fb1f65e9_0.str
+    `-- result -> ../exprs/str/c0fb1f65e9/0/result
 
-4 directories, 2 files
+6 directories, 2 files

@@ -1,29 +1,48 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 340891ae85.txt -> ../../cache/lines/...
+|   |   |-- 0a6046850c.txt -> ../../cache/lines/...
 |   |   `-- emptyfna.txt -> ../../cache/lines/...
 |   |-- load
-|   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
-|   |   `-- 97d2ef290c.gbk -> $WORKDIR/examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk
+|   |   |-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|   |   `-- 97d2ef290c -> $WORKDIR/examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk
 |   `-- seqio
 |-- exprs
 |   |-- concat_fna
-|   |   `-- 8d15a839cf_0.fna
+|   |   `-- 8c6839b6f9
+|   |       `-- 0
+|   |           `-- result
 |   |-- gbk_to_fna
-|   |   |-- acb4ee1de2_86efc03ac8_0.fna
-|   |   `-- acb4ee1de2_8ec3a4f820_0.fna
+|   |   `-- c73dd7aee4
+|   |       |-- ed75f67df6
+|   |       |   `-- 0
+|   |       |       `-- result
+|   |       `-- f8f886c3cd
+|   |           `-- 0
+|   |               `-- result
 |   |-- list
-|   |   `-- 12bd22133e_0.fna.list -> ../../cache/lines/...
+|   |   `-- cf3f223a17
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_fna
 |   |-- load_gbk
-|   |   |-- a4be889eec_0.gbk -> ../../cache/load/97d2ef290c.gbk
-|   |   `-- cbd97ba8fe_0.gbk -> ../../cache/load/28ce925871.gbk
+|   |   |-- 3c9c0a70a2
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/97d2ef290c
+|   |   `-- a6b552f7e9
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/28ce925871
 |   `-- str
-|       |-- 90811d06ee_0.str -> ../../cache/lines/...
-|       |-- ee108e12fa_0.str -> ../../cache/lines/...
-|       `-- fc0141ab13_0.str -> ../../cache/lines/...
+|       |-- 90811d06ee
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- ee108e12fa
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- fc0141ab13
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/concat_fna/8d15a839cf_0.fna
+    `-- result -> ../exprs/concat_fna/8c6839b6f9/0/result
 
-12 directories, 14 files
+31 directories, 14 files

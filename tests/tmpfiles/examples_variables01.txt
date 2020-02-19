@@ -2,8 +2,10 @@
 |-- cache
 |-- exprs
 |   `-- str
-|       `-- ea18add258_0.str -> ../../cache/lines/...
+|       `-- ea18add258
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/str/ea18add258_0.str
+    `-- result -> ../exprs/str/ea18add258/0/result
 
-4 directories, 2 files
+6 directories, 2 files

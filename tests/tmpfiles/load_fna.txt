@@ -1,23 +1,39 @@
 .
 |-- cache
 |   `-- load
+|       |-- 8723e7ac8c
 |       |-- 8723e7ac8c.fna
-|       `-- 8723e7ac8c.fna.ids
+|       |-- 8723e7ac8c.fna.ids
+|       `-- 8723e7ac8c.ids
 |-- exprs
 |   |-- any
-|   |   `-- 5eb852e728_0.fna.list -> ../../cache/lines/...
+|   |   `-- caeea4d44e
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 036cba2ad7_0.fna.list -> ../../cache/lines/...
-|   |   |-- 3066475cbf_0.fna.list -> ../../cache/lines/...
-|   |   |-- 5864c7f72a_0.fna.list.list -> ../../cache/lines/...
-|   |   `-- b96b08a02b_0.str.list -> ../../cache/lines/...
+|   |   |-- 036cba2ad7
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- b94577ec53
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- bbbcf97a58
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- d3af1b2fac
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_fna
-|   |   `-- f0b6c9fa50_0.fna -> ../../cache/load/8723e7ac8c.fna
+|   |   `-- b06189156a
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/8723e7ac8c
 |   `-- str
-|       `-- 0ecd3e7ed5_0.str -> ../../cache/lines/...
+|       `-- 0ecd3e7ed5
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- mapped.fna.list -> ../exprs/list/3066475cbf_0.fna.list
-    |-- result -> ../exprs/any/5eb852e728_0.fna.list
-    `-- single.fna -> ../exprs/load_fna/f0b6c9fa50_0.fna
+    |-- mapped.fna.list -> ../exprs/list/b94577ec53/0/result
+    |-- result -> ../exprs/any/caeea4d44e/0/result
+    `-- single.fna -> ../exprs/load_fna/b06189156a/0/result
 
-8 directories, 12 files
+22 directories, 14 files

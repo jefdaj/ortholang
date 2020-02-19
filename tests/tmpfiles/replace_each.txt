@@ -2,43 +2,70 @@
 |-- cache
 |-- exprs
 |   |-- multiply
-|   |   |-- 0b784211f8_589afd8ba4_0.num -> ../../cache/lines/...
-|   |   |-- 0b784211f8_75463832ad_0.num -> ../../cache/lines/...
-|   |   |-- 0b784211f8_87ff177bc7_0.num -> ../../cache/lines/...
-|   |   |-- 0b784211f8_b21de87580_0.num -> ../../cache/lines/...
-|   |   `-- 0b784211f8_c5eddbef58_0.num -> ../../cache/lines/...
+|   |   `-- 086435d94d
+|   |       |-- 8b184bb3d7
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |-- 9b715cff19
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |-- bc47f42e5c
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |-- c32d32c633
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       `-- f89070018f
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- num
-|   |   |-- 254e420f28_0.num -> ../../cache/lines/...
-|   |   |-- 89fb8b4aed_0.num -> ../../cache/lines/...
-|   |   |-- a629005e3c_0.num -> ../../cache/lines/...
-|   |   |-- ea11b49459_0.num -> ../../cache/lines/...
-|   |   |-- eaad7f2e40_0.num -> ../../cache/lines/...
-|   |   `-- ee383407c9_0.num -> ../../cache/lines/...
+|   |   |-- 254e420f28
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 89fb8b4aed
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- a629005e3c
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- ea11b49459
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- eaad7f2e40
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- ee383407c9
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- replace_each
-|       `-- 82618f0dc9_75463832ad_f7f5f69db0_0.num.list -> ../../cache/lines/...
+|       `-- 6267fc7de2
+|           `-- f89070018f
+|               `-- 8c9705d149
+|                   `-- 0
+|                       `-- result -> ../../../../../../cache/lines/...
 |-- reps
 |   |-- 47a56055bb
-|   |   |-- dep.num -> ../../exprs/multiply/0b784211f8_b21de87580_0.num
-|   |   |-- ind.num -> ../../exprs/num/a629005e3c_0.num
+|   |   |-- dep.num -> ../../exprs/multiply/086435d94d/c32d32c633/0/result
+|   |   |-- ind.num -> ../../exprs/num/a629005e3c/0/result
 |   |   `-- result -> ../../reps/47a56055bb/dep.num
 |   |-- 74292fb41b
-|   |   |-- dep.num -> ../../exprs/multiply/0b784211f8_c5eddbef58_0.num
-|   |   |-- ind.num -> ../../exprs/num/89fb8b4aed_0.num
+|   |   |-- dep.num -> ../../exprs/multiply/086435d94d/8b184bb3d7/0/result
+|   |   |-- ind.num -> ../../exprs/num/89fb8b4aed/0/result
 |   |   `-- result -> ../../reps/74292fb41b/dep.num
 |   |-- 82076bd01a
-|   |   |-- dep.num -> ../../exprs/multiply/0b784211f8_589afd8ba4_0.num
-|   |   |-- ind.num -> ../../exprs/num/ea11b49459_0.num
+|   |   |-- dep.num -> ../../exprs/multiply/086435d94d/bc47f42e5c/0/result
+|   |   |-- ind.num -> ../../exprs/num/ea11b49459/0/result
 |   |   `-- result -> ../../reps/82076bd01a/dep.num
 |   |-- c4547a53d8
-|   |   |-- dep.num -> ../../exprs/multiply/0b784211f8_75463832ad_0.num
+|   |   |-- dep.num -> ../../exprs/multiply/086435d94d/f89070018f/0/result
 |   |   `-- result -> ../../reps/c4547a53d8/dep.num
 |   `-- cc45977bc6
-|       |-- dep.num -> ../../exprs/multiply/0b784211f8_87ff177bc7_0.num
-|       |-- ind.num -> ../../exprs/num/eaad7f2e40_0.num
+|       |-- dep.num -> ../../exprs/multiply/086435d94d/9b715cff19/0/result
+|       |-- ind.num -> ../../exprs/num/eaad7f2e40/0/result
 |       `-- result -> ../../reps/cc45977bc6/dep.num
 `-- vars
-    |-- ind.num -> ../exprs/num/ee383407c9_0.num
-    |-- rep.num.list -> ../exprs/replace_each/82618f0dc9_75463832ad_f7f5f69db0_0.num.list
+    |-- ind.num -> ../exprs/num/ee383407c9/0/result
+    |-- rep.num.list -> ../exprs/replace_each/6267fc7de2/f89070018f/8c9705d149/0/result
     `-- result -> ../vars/rep.num.list
 
-12 directories, 29 files
+39 directories, 29 files

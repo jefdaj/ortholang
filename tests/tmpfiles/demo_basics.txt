@@ -1,15 +1,19 @@
 .
 |-- cache
 |   `-- load
-|       |-- 11bbf54fc6.faa
-|       `-- 11bbf54fc6.faa.ids
+|       |-- 11bbf54fc6
+|       `-- 11bbf54fc6.ids
 |-- exprs
 |   |-- load_faa
-|   |   `-- 5815f1ab62_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |   `-- c277aef0d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/11bbf54fc6
 |   `-- str
-|       `-- 40edb92618_0.str -> ../../cache/lines/...
+|       `-- 40edb92618
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- mgen.faa -> ../exprs/load_faa/5815f1ab62_0.faa
+    |-- mgen.faa -> ../exprs/load_faa/c277aef0d4/0/result
     `-- result -> ../vars/mgen.faa
 
-6 directories, 6 files
+10 directories, 6 files

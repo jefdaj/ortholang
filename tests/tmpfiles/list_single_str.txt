@@ -2,10 +2,14 @@
 |-- cache
 |-- exprs
 |   |-- list
-|   |   `-- f87f0a510a_0.str.list -> ../../cache/lines/...
+|   |   `-- 358f6d1ee7
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       `-- a2a665650c_0.str -> ../../cache/lines/...
+|       `-- a2a665650c
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/list/f87f0a510a_0.str.list
+    `-- result -> ../exprs/list/358f6d1ee7/0/result
 
-5 directories, 3 files
+9 directories, 3 files

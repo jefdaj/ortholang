@@ -1,97 +1,139 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 15bf37972d
-|   |       |-- 05653a0e38.pssm -> ../../../exprs/psiblast_train_pssms/61bcf93341_05653a0e38_80bba2bcc5_0.pssm
-|   |       |-- 05653a0e38.pssm.args -> ../../../cache/lines/...
-|   |       |-- 17687f7df6.pssm -> ../../../exprs/psiblast_train_pssms/61bcf93341_17687f7df6_80bba2bcc5_0.pssm
-|   |       |-- 17687f7df6.pssm.args -> ../../../cache/lines/...
-|   |       |-- 66bf6d9c3d.pssm -> ../../../exprs/psiblast_train_pssms/61bcf93341_66bf6d9c3d_80bba2bcc5_0.pssm
-|   |       |-- 66bf6d9c3d.pssm.args -> ../../../cache/lines/...
-|   |       |-- 8ad3fe1b69.pssm -> ../../../exprs/psiblast_train_pssms/61bcf93341_8ad3fe1b69_80bba2bcc5_0.pssm
-|   |       |-- 8ad3fe1b69.pssm.args -> ../../../cache/lines/...
-|   |       |-- c0be5eeedb.pssm -> ../../../exprs/psiblast_train_pssms/61bcf93341_c0be5eeedb_80bba2bcc5_0.pssm
-|   |       `-- c0be5eeedb.pssm.args -> ../../../cache/lines/...
+|   |   `-- 6312aba38c
+|   |       |-- 471f090a1b
+|   |       |   |-- args -> ../../../../cache/lines/...
+|   |       |   `-- result -> ../../../../exprs/psiblast_train_pssms/61bcf93341/471f090a1b/20a2a65bc0/0/result
+|   |       |-- 9091795452
+|   |       |   |-- args -> ../../../../cache/lines/...
+|   |       |   `-- result -> ../../../../exprs/psiblast_train_pssms/61bcf93341/9091795452/20a2a65bc0/0/result
+|   |       |-- ab0848d231
+|   |       |   |-- args -> ../../../../cache/lines/...
+|   |       |   `-- result -> ../../../../exprs/psiblast_train_pssms/61bcf93341/ab0848d231/20a2a65bc0/0/result
+|   |       |-- b4a20acd76
+|   |       |   |-- args -> ../../../../cache/lines/...
+|   |       |   `-- result -> ../../../../exprs/psiblast_train_pssms/61bcf93341/b4a20acd76/20a2a65bc0/0/result
+|   |       `-- d2c60dae85
+|   |           |-- args -> ../../../../cache/lines/...
+|   |           `-- result -> ../../../../exprs/psiblast_train_pssms/61bcf93341/d2c60dae85/20a2a65bc0/0/result
 |   |-- load
-|   |   |-- 36189032ad.faa
-|   |   |-- 36189032ad.faa.ids
-|   |   |-- cb3e90dc00.faa
-|   |   `-- cb3e90dc00.faa.ids
+|   |   |-- 36189032ad
+|   |   |-- 36189032ad.ids
+|   |   |-- cb3e90dc00
+|   |   `-- cb3e90dc00.ids
 |   |-- makeblastdb
-|   |   `-- d77632b774
-|   |       |-- d77632b774.pdb.list.err
-|   |       |-- d77632b774.pdb.list.out
-|   |       |-- d77632b774.pdb.list.phr
-|   |       |-- d77632b774.pdb.list.pin
-|   |       `-- d77632b774.pdb.list.psq
+|   |   `-- c27509026d
+|   |       |-- c27509026d.pdb.list.err
+|   |       |-- c27509026d.pdb.list.out
+|   |       |-- c27509026d.pdb.list.phr
+|   |       |-- c27509026d.pdb.list.pin
+|   |       `-- c27509026d.pdb.list.psq
 |   |-- psiblast
 |   `-- split_faa
+|       `-- 1b7c1db9d4
 |-- exprs
 |   |-- list
-|   |   `-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
+|   |   `-- 9fe31e7ad0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 00
 |   |   |   `-- 28
 |   |   |       `-- 42
 |   |   |           `-- 57
 |   |   |               `-- 08
-|   |   |                   `-- b.faa
+|   |   |                   `-- b
 |   |   |-- 4f
 |   |   |   `-- ae
 |   |   |       `-- 11
 |   |   |           `-- 2e
 |   |   |               `-- cb
-|   |   |                   `-- 3.faa
+|   |   |                   `-- 3
 |   |   |-- 5e
 |   |   |   `-- 7e
 |   |   |       `-- 2f
 |   |   |           `-- 77
 |   |   |               `-- 41
-|   |   |                   `-- 5.faa
+|   |   |                   `-- 5
 |   |   |-- 5f
 |   |   |   `-- 19
 |   |   |       `-- 74
 |   |   |           `-- 19
 |   |   |               `-- 6b
-|   |   |                   `-- 4.faa
+|   |   |                   `-- 4
+|   |   |-- 72a50a6cda
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/36189032ad
 |   |   |-- a7
 |   |   |   `-- ba
 |   |   |       `-- 8c
 |   |   |           `-- 36
 |   |   |               `-- 7d
-|   |   |                   `-- 3.faa
-|   |   |-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
-|   |   `-- ba41f009f5_0.faa -> ../../cache/load/cb3e90dc00.faa
+|   |   |                   `-- 3
+|   |   `-- d10d10f063
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/cb3e90dc00
 |   |-- makeblastdb_prot_all
-|   |   `-- 1523a4da89_0.pdb.list -> ../../cache/lines/...
+|   |   `-- 57970a58d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
-|   |   `-- efc8362dcc_0.num -> ../../cache/lines/...
+|   |   `-- efc8362dcc
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- psiblast_train_pssms
-|   |   |-- 61bcf93341_05653a0e38_80bba2bcc5_0.pssm -> ../../cache/lines/...
-|   |   |-- 61bcf93341_05653a0e38_80bba2bcc5_0.pssm.tmp.err
-|   |   |-- 61bcf93341_05653a0e38_80bba2bcc5_0.pssm.tmp.out
-|   |   |-- 61bcf93341_17687f7df6_80bba2bcc5_0.pssm -> ../../cache/lines/...
-|   |   |-- 61bcf93341_17687f7df6_80bba2bcc5_0.pssm.tmp.err
-|   |   |-- 61bcf93341_17687f7df6_80bba2bcc5_0.pssm.tmp.out
-|   |   |-- 61bcf93341_66bf6d9c3d_80bba2bcc5_0.pssm -> ../../cache/lines/...
-|   |   |-- 61bcf93341_66bf6d9c3d_80bba2bcc5_0.pssm.tmp.err
-|   |   |-- 61bcf93341_66bf6d9c3d_80bba2bcc5_0.pssm.tmp.out
-|   |   |-- 61bcf93341_8ad3fe1b69_80bba2bcc5_0.pssm -> ../../cache/lines/...
-|   |   |-- 61bcf93341_8ad3fe1b69_80bba2bcc5_0.pssm.tmp.err
-|   |   |-- 61bcf93341_8ad3fe1b69_80bba2bcc5_0.pssm.tmp.out
-|   |   |-- 61bcf93341_c0be5eeedb_80bba2bcc5_0.pssm -> ../../cache/lines/...
-|   |   |-- 61bcf93341_c0be5eeedb_80bba2bcc5_0.pssm.tmp.err
-|   |   |-- 61bcf93341_c0be5eeedb_80bba2bcc5_0.pssm.tmp.out
-|   |   `-- 79c21d433f_fd0c998307_6ca833eb5e_0.pssm.list -> ../../cache/lines/...
+|   |   |-- 61bcf93341
+|   |   |   |-- 471f090a1b
+|   |   |   |   `-- 20a2a65bc0
+|   |   |   |       `-- 0
+|   |   |   |           |-- result -> ../../../../../../cache/lines/...
+|   |   |   |           |-- result.tmp.err
+|   |   |   |           `-- result.tmp.out
+|   |   |   |-- 9091795452
+|   |   |   |   `-- 20a2a65bc0
+|   |   |   |       `-- 0
+|   |   |   |           |-- result -> ../../../../../../cache/lines/...
+|   |   |   |           |-- result.tmp.err
+|   |   |   |           `-- result.tmp.out
+|   |   |   |-- ab0848d231
+|   |   |   |   `-- 20a2a65bc0
+|   |   |   |       `-- 0
+|   |   |   |           |-- result -> ../../../../../../cache/lines/...
+|   |   |   |           |-- result.tmp.err
+|   |   |   |           `-- result.tmp.out
+|   |   |   |-- b4a20acd76
+|   |   |   |   `-- 20a2a65bc0
+|   |   |   |       `-- 0
+|   |   |   |           |-- result -> ../../../../../../cache/lines/...
+|   |   |   |           |-- result.tmp.err
+|   |   |   |           `-- result.tmp.out
+|   |   |   `-- d2c60dae85
+|   |   |       `-- 20a2a65bc0
+|   |   |           `-- 0
+|   |   |               |-- result -> ../../../../../../cache/lines/...
+|   |   |               |-- result.tmp.err
+|   |   |               `-- result.tmp.out
+|   |   `-- aac0841202
+|   |       `-- f268e2d99d
+|   |           `-- 3a9cc6431e
+|   |               `-- 0
+|   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- split_faa
-|   |   `-- e0be9800d0_0.faa.list -> ../../cache/lines/...
+|   |   `-- f32c7eb7cf
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
-|       `-- ead30046d0_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- ead30046d0
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
-    |-- pssms.pssm.list -> ../exprs/psiblast_train_pssms/79c21d433f_fd0c998307_6ca833eb5e_0.pssm.list
-    |-- queries.faa.list -> ../exprs/split_faa/e0be9800d0_0.faa.list
+    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
+    |-- pssms.pssm.list -> ../exprs/psiblast_train_pssms/aac0841202/f268e2d99d/3a9cc6431e/0/result
+    |-- queries.faa.list -> ../exprs/split_faa/f32c7eb7cf/0/result
     `-- result -> ../vars/pssms.pssm.list
 
-42 directories, 52 files
+84 directories, 52 files

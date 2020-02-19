@@ -431,18 +431,27 @@
 |           `-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |-- exprs
 |   |-- list
-|   |   |-- 103fd7f341_0.faa.list -> ../../cache/lines/...
-|   |   `-- 2ff622f766_0.str.list -> ../../cache/lines/...
+|   |   |-- 9af6dc7081
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- f22daab0ad
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- orthofinder
-|   |   |-- 9410d5dd3d_0.ofr -> ../../cache/orthofinder/bde1b97dfd/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
-|   |   |-- 9410d5dd3d_0.ofr.err
-|   |   `-- 9410d5dd3d_0.ofr.out
+|   |   `-- 07480d9ac9
+|   |       `-- 0
+|   |           |-- out
+|   |           `-- result -> ../../../../cache/orthofinder/bde1b97dfd/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
 |   `-- str
-|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
-|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- cdba97c8d8
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- ofres.ofr -> ../exprs/orthofinder/9410d5dd3d_0.ofr
+    |-- ofres.ofr -> ../exprs/orthofinder/07480d9ac9/0/result
     |-- result -> ../vars/ofres.ofr
-    `-- smallbacteria.faa.list -> ../exprs/list/103fd7f341_0.faa.list
+    `-- smallbacteria.faa.list -> ../exprs/list/f22daab0ad/0/result
 
-25 directories, 420 files
+35 directories, 419 files

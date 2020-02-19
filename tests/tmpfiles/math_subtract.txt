@@ -2,11 +2,18 @@
 |-- cache
 |-- exprs
 |   |-- num
-|   |   |-- ea11b49459_0.num -> ../../cache/lines/...
-|   |   `-- ee383407c9_0.num -> ../../cache/lines/...
+|   |   |-- ea11b49459
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- ee383407c9
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- subtract
-|       `-- 75463832ad_589afd8ba4_0.num -> ../../cache/lines/...
+|       `-- f89070018f
+|           `-- bc47f42e5c
+|               `-- 0
+|                   `-- result -> ../../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/subtract/75463832ad_589afd8ba4_0.num
+    `-- result -> ../exprs/subtract/f89070018f/bc47f42e5c/0/result
 
-5 directories, 4 files
+12 directories, 4 files

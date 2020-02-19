@@ -1,54 +1,80 @@
 .
 |-- cache
 |   `-- load
-|       |-- 0d8dfa261e.faa
-|       |-- 0d8dfa261e.faa.ids
-|       |-- 306ef4e6c6.faa
-|       |-- 306ef4e6c6.faa.ids
-|       |-- 6046a54e92.faa
-|       |-- 6046a54e92.faa.ids
-|       |-- 781ac8532f.faa
-|       |-- 781ac8532f.faa.ids
-|       |-- bb17ca9dfe.faa
-|       `-- bb17ca9dfe.faa.ids
+|       |-- 0d8dfa261e
+|       |-- 0d8dfa261e.ids
+|       |-- 306ef4e6c6
+|       |-- 306ef4e6c6.ids
+|       |-- 6046a54e92
+|       |-- 6046a54e92.ids
+|       |-- 781ac8532f
+|       |-- 781ac8532f.ids
+|       |-- bb17ca9dfe
+|       `-- bb17ca9dfe.ids
 |-- exprs
 |   |-- list
-|   |   `-- 277b89b004_0.str.list -> ../../cache/lines/...
+|   |   `-- 9d4096f89b
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 2fe5a30d0c_0.faa -> ../../cache/load/6046a54e92.faa
-|   |   |-- 48877bb94a_0.faa -> ../../cache/load/0d8dfa261e.faa
-|   |   |-- 85c4f69b58_0.faa -> ../../cache/load/781ac8532f.faa
-|   |   |-- 99dc942b60_0.faa -> ../../cache/load/bb17ca9dfe.faa
-|   |   `-- f697997c6b_0.faa -> ../../cache/load/306ef4e6c6.faa
+|   |   |-- 2774b3aa5c
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/0d8dfa261e
+|   |   |-- 334c8c38b1
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/bb17ca9dfe
+|   |   |-- 435238acd3
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/306ef4e6c6
+|   |   |-- 8ff98d9685
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/781ac8532f
+|   |   `-- f4e1d9e6a0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/6046a54e92
 |   |-- replace_each
-|   |   `-- d1561f14c2_48877bb94a_6fc58a709a_0.faa.list -> ../../cache/lines/...
+|   |   `-- 56b743f0e5
+|   |       `-- 2774b3aa5c
+|   |           `-- a609c422a1
+|   |               `-- 0
+|   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
-|       |-- 3e6793b201_0.str -> ../../cache/lines/...
-|       |-- ac19b3d2a1_0.str -> ../../cache/lines/...
-|       |-- c58447896b_0.str -> ../../cache/lines/...
-|       |-- c608ebc35b_0.str -> ../../cache/lines/...
-|       `-- fea29192ee_0.str -> ../../cache/lines/...
+|       |-- 3e6793b201
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- ac19b3d2a1
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- c58447896b
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- c608ebc35b
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- fea29192ee
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 |-- reps
 |   |-- 47a201c209
-|   |   |-- faa.faa -> ../../exprs/load_faa/99dc942b60_0.faa
-|   |   |-- faa_path.str -> ../../exprs/str/3e6793b201_0.str
+|   |   |-- faa.faa -> ../../exprs/load_faa/334c8c38b1/0/result
+|   |   |-- faa_path.str -> ../../exprs/str/3e6793b201/0/result
 |   |   `-- result -> ../../reps/47a201c209/faa.faa
 |   |-- 4e0dcd037b
-|   |   |-- faa.faa -> ../../exprs/load_faa/2fe5a30d0c_0.faa
-|   |   |-- faa_path.str -> ../../exprs/str/ac19b3d2a1_0.str
+|   |   |-- faa.faa -> ../../exprs/load_faa/f4e1d9e6a0/0/result
+|   |   |-- faa_path.str -> ../../exprs/str/ac19b3d2a1/0/result
 |   |   `-- result -> ../../reps/4e0dcd037b/faa.faa
 |   |-- 6164cedf20
-|   |   |-- faa.faa -> ../../exprs/load_faa/85c4f69b58_0.faa
-|   |   |-- faa_path.str -> ../../exprs/str/fea29192ee_0.str
+|   |   |-- faa.faa -> ../../exprs/load_faa/8ff98d9685/0/result
+|   |   |-- faa_path.str -> ../../exprs/str/fea29192ee/0/result
 |   |   `-- result -> ../../reps/6164cedf20/faa.faa
 |   `-- 83de0ea40a
-|       |-- faa.faa -> ../../exprs/load_faa/f697997c6b_0.faa
-|       |-- faa_path.str -> ../../exprs/str/c608ebc35b_0.str
+|       |-- faa.faa -> ../../exprs/load_faa/435238acd3/0/result
+|       |-- faa_path.str -> ../../exprs/str/c608ebc35b/0/result
 |       `-- result -> ../../reps/83de0ea40a/faa.faa
 `-- vars
-    |-- faa_alternatives.faa.list -> ../exprs/replace_each/d1561f14c2_48877bb94a_6fc58a709a_0.faa.list
-    |-- faa_paths.str.list -> ../exprs/list/277b89b004_0.str.list
-    |-- faa_path.str -> ../exprs/str/c58447896b_0.str
+    |-- faa_alternatives.faa.list -> ../exprs/replace_each/56b743f0e5/2774b3aa5c/a609c422a1/0/result
+    |-- faa_paths.str.list -> ../exprs/list/9d4096f89b/0/result
+    |-- faa_path.str -> ../exprs/str/c58447896b/0/result
     `-- result -> ../vars/faa_alternatives.faa.list
 
-13 directories, 38 files
+39 directories, 38 files

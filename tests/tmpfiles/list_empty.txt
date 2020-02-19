@@ -2,8 +2,10 @@
 |-- cache
 |-- exprs
 |   `-- list
-|       `-- d751713988_0.empty.list -> ../../cache/lines/...
+|       `-- d751713988
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/list/d751713988_0.empty.list
+    `-- result -> ../exprs/list/d751713988/0/result
 
-4 directories, 2 files
+6 directories, 2 files

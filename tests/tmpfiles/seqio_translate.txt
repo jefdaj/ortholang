@@ -1,32 +1,55 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- d7f8d43af1
-|   |       |-- d1dfed7680.faa -> ../../../exprs/translate/d1dfed7680_0.faa
-|   |       `-- d1dfed7680.faa.args -> ../../../cache/lines/...
+|   |   `-- f06d93e013
+|   |       `-- d1dfed7680
+|   |           |-- args -> ../../../../cache/lines/...
+|   |           `-- result -> ../../../../exprs/translate/d1dfed7680/0/result
 |   `-- load
+|       |-- 6046a54e92
 |       |-- 6046a54e92.fna
-|       `-- 6046a54e92.fna.ids
+|       |-- 6046a54e92.fna.ids
+|       `-- 6046a54e92.ids
 |-- exprs
 |   |-- any
-|   |   `-- 9517b8b589_0.faa.list -> ../../cache/lines/...
+|   |   `-- 2501200f6d
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 315ba37670_0.faa.list.list -> ../../cache/lines/...
-|   |   |-- 47deec11ba_0.faa.list -> ../../cache/lines/...
-|   |   |-- 6fb2af47e3_0.fna.list -> ../../cache/lines/...
-|   |   `-- 88a579f71a_0.str.list -> ../../cache/lines/...
+|   |   |-- 47deec11ba
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 49af321016
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 948e59e22f
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- ef4413f3a3
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_fna
-|   |   `-- 2fe5a30d0c_0.fna -> ../../cache/load/6046a54e92.fna
+|   |   `-- f4e1d9e6a0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/6046a54e92
 |   |-- str
-|   |   `-- ac19b3d2a1_0.str -> ../../cache/lines/...
+|   |   `-- ac19b3d2a1
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- translate
-|   |   |-- b23b6505d6_0.faa
-|   |   `-- d1dfed7680_0.faa
+|   |   |-- 27d007fff5
+|   |   |   `-- 0
+|   |   |       `-- result
+|   |   `-- d1dfed7680
+|   |       `-- 0
+|   |           `-- result
 |   `-- translate_each
-|       `-- 47b8326168_0.faa.list -> ../../cache/lines/...
+|       `-- bea34db408
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- mapped.faa.list -> ../exprs/translate_each/47b8326168_0.faa.list
-    |-- result -> ../exprs/any/9517b8b589_0.faa.list
-    `-- single.faa -> ../exprs/translate/b23b6505d6_0.faa
+    |-- mapped.faa.list -> ../exprs/translate_each/bea34db408/0/result
+    |-- result -> ../exprs/any/2501200f6d/0/result
+    `-- single.faa -> ../exprs/translate/27d007fff5/0/result
 
-12 directories, 17 files
+33 directories, 19 files

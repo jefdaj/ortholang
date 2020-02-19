@@ -1,63 +1,110 @@
 .
 |-- cache
 |   `-- bin
-|       |-- 06044751b4.png -> ../../cache/bin/318ec751fc.png
-|       |-- 318ec751fc.png
-|       |-- 7eb05e1566.png -> ../../cache/bin/9077a5cbe5.png
-|       `-- 9077a5cbe5.png
+|       |-- 06044751b4 -> ../../cache/bin/318ec751fc
+|       |-- 318ec751fc
+|       |-- 7eb05e1566 -> ../../cache/bin/9077a5cbe5
+|       `-- 9077a5cbe5
 |-- exprs
 |   |-- list
-|   |   |-- 215f379941_0.num.list -> ../../cache/lines/...
-|   |   `-- 4b7c657542_0.png.list -> ../../cache/lines/...
+|   |   |-- 3a36f11c25
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- 87e61782a4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- multiply
-|   |   |-- 0b784211f8_589afd8ba4_0.num -> ../../cache/lines/...
-|   |   |-- 0b784211f8_75463832ad_0.num -> ../../cache/lines/...
-|   |   |-- 0b784211f8_87ff177bc7_0.num -> ../../cache/lines/...
-|   |   |-- 0b784211f8_b21de87580_0.num -> ../../cache/lines/...
-|   |   `-- 0b784211f8_c5eddbef58_0.num -> ../../cache/lines/...
+|   |   `-- 086435d94d
+|   |       |-- 8b184bb3d7
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |-- 9b715cff19
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |-- bc47f42e5c
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |-- c32d32c633
+|   |       |   `-- 0
+|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       `-- f89070018f
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- num
-|   |   |-- 254e420f28_0.num -> ../../cache/lines/...
-|   |   |-- 89fb8b4aed_0.num -> ../../cache/lines/...
-|   |   |-- a629005e3c_0.num -> ../../cache/lines/...
-|   |   |-- ea11b49459_0.num -> ../../cache/lines/...
-|   |   |-- eaad7f2e40_0.num -> ../../cache/lines/...
-|   |   `-- ee383407c9_0.num -> ../../cache/lines/...
+|   |   |-- 254e420f28
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 89fb8b4aed
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- a629005e3c
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- ea11b49459
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- eaad7f2e40
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- ee383407c9
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- replace_each
-|   |   `-- 82618f0dc9_75463832ad_74bea98779_0.num.list -> ../../cache/lines/...
+|   |   `-- 6267fc7de2
+|   |       `-- f89070018f
+|   |           `-- 0c2776b652
+|   |               `-- 0
+|   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- scatterplot
-|   |   |-- 026f39b8d0_7427a1c2bc_0.png -> ../../cache/bin/7eb05e1566.png
-|   |   `-- 7619799eeb_7427a1c2bc_0.png -> ../../cache/bin/06044751b4.png
+|   |   |-- 608f2f90d8
+|   |   |   `-- 89b1fc602f
+|   |   |       `-- 0
+|   |   |           `-- result -> ../../../../../cache/bin/06044751b4
+|   |   `-- a3177e3890
+|   |       `-- 89b1fc602f
+|   |           `-- 0
+|   |               `-- result -> ../../../../../cache/bin/7eb05e1566
 |   |-- score_repeats
-|   |   `-- 82618f0dc9_75463832ad_74bea98779_0.num.scores -> ../../cache/lines/...
+|   |   `-- 6267fc7de2
+|   |       `-- f89070018f
+|   |           `-- 0c2776b652
+|   |               `-- 0
+|   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
-|       |-- 18849995c1_0.str -> ../../cache/lines/...
-|       |-- 9d4568c009_0.str -> ../../cache/lines/...
-|       `-- b7f47efb8d_0.str -> ../../cache/lines/...
+|       |-- 18849995c1
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- 9d4568c009
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- b7f47efb8d
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 |-- reps
 |   |-- 510df6c70f
 |   |   |-- result -> ../../reps/510df6c70f/yvar.num
-|   |   |-- xvar.num -> ../../exprs/num/a629005e3c_0.num
-|   |   `-- yvar.num -> ../../exprs/multiply/0b784211f8_b21de87580_0.num
+|   |   |-- xvar.num -> ../../exprs/num/a629005e3c/0/result
+|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/c32d32c633/0/result
 |   |-- 59198423aa
 |   |   |-- result -> ../../reps/59198423aa/yvar.num
-|   |   |-- xvar.num -> ../../exprs/num/eaad7f2e40_0.num
-|   |   `-- yvar.num -> ../../exprs/multiply/0b784211f8_87ff177bc7_0.num
+|   |   |-- xvar.num -> ../../exprs/num/eaad7f2e40/0/result
+|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/9b715cff19/0/result
 |   |-- b232aef57f
 |   |   |-- result -> ../../reps/b232aef57f/yvar.num
-|   |   |-- xvar.num -> ../../exprs/num/89fb8b4aed_0.num
-|   |   `-- yvar.num -> ../../exprs/multiply/0b784211f8_c5eddbef58_0.num
+|   |   |-- xvar.num -> ../../exprs/num/89fb8b4aed/0/result
+|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/8b184bb3d7/0/result
 |   |-- deded05d4c
 |   |   |-- result -> ../../reps/deded05d4c/yvar.num
-|   |   |-- xvar.num -> ../../exprs/num/ea11b49459_0.num
-|   |   `-- yvar.num -> ../../exprs/multiply/0b784211f8_589afd8ba4_0.num
+|   |   |-- xvar.num -> ../../exprs/num/ea11b49459/0/result
+|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/bc47f42e5c/0/result
 |   `-- dfb42bca15
 |       |-- result -> ../../reps/dfb42bca15/yvar.num
-|       `-- yvar.num -> ../../exprs/multiply/0b784211f8_75463832ad_0.num
+|       `-- yvar.num -> ../../exprs/multiply/086435d94d/f89070018f/0/result
 `-- vars
-    |-- named.num.scores -> ../exprs/score_repeats/82618f0dc9_75463832ad_74bea98779_0.num.scores
-    |-- plots.png.list -> ../exprs/list/4b7c657542_0.png.list
+    |-- named.num.scores -> ../exprs/score_repeats/6267fc7de2/f89070018f/0c2776b652/0/result
+    |-- plots.png.list -> ../exprs/list/87e61782a4/0/result
     |-- result -> ../vars/plots.png.list
-    |-- unnamed.num.scores -> ../exprs/score_repeats/82618f0dc9_75463832ad_74bea98779_0.num.scores
-    `-- xvar.num -> ../exprs/num/ee383407c9_0.num
+    |-- unnamed.num.scores -> ../exprs/score_repeats/6267fc7de2/f89070018f/0c2776b652/0/result
+    `-- xvar.num -> ../exprs/num/ee383407c9/0/result
 
-17 directories, 43 files
+64 directories, 43 files

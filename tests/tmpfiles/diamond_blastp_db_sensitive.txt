@@ -1,31 +1,47 @@
 .
 |-- cache
 |   `-- load
-|       |-- 10ffe0cf0f.faa
-|       |-- 10ffe0cf0f.faa.ids
-|       |-- 36189032ad.faa
-|       `-- 36189032ad.faa.ids
+|       |-- 10ffe0cf0f
+|       |-- 10ffe0cf0f.ids
+|       |-- 36189032ad
+|       `-- 36189032ad.ids
 |-- exprs
 |   |-- diamond_blastp_db_sensitive
-|   |   |-- c5e9182d78_b947a1128f_d03aa36864_0.bht
-|   |   |-- c5e9182d78_b947a1128f_d03aa36864_0.bht.err
-|   |   `-- c5e9182d78_b947a1128f_d03aa36864_0.bht.out
+|   |   `-- 8f00850928
+|   |       `-- ed39c166ed
+|   |           `-- 56b6441383
+|   |               `-- 0
+|   |                   |-- err
+|   |                   |-- out
+|   |                   `-- result
 |   |-- diamond_makedb
-|   |   |-- ff056810c7_0.dmnd
-|   |   |-- ff056810c7_0.dmnd.err
-|   |   `-- ff056810c7_0.dmnd.out
+|   |   `-- 954b3ac6f3
+|   |       `-- 0
+|   |           |-- err
+|   |           |-- out
+|   |           `-- result
 |   |-- load_faa
-|   |   |-- 281359b1ca_0.faa -> ../../cache/load/10ffe0cf0f.faa
-|   |   `-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
+|   |   |-- 72a50a6cda
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/36189032ad
+|   |   `-- ad6ae7249f
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/10ffe0cf0f
 |   |-- num
-|   |   `-- 6de785566e_0.num -> ../../cache/lines/...
+|   |   `-- 6de785566e
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       |-- 824ccbd8b2_0.str -> ../../cache/lines/...
-|       `-- cdba97c8d8_0.str -> ../../cache/lines/...
+|       |-- 824ccbd8b2
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- cdba97c8d8
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/ff056810c7_0.dmnd
-    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
-    |-- mgen.faa -> ../exprs/load_faa/281359b1ca_0.faa
-    `-- result -> ../exprs/diamond_blastp_db_sensitive/c5e9182d78_b947a1128f_d03aa36864_0.bht
+    |-- db.dmnd -> ../exprs/diamond_makedb/954b3ac6f3/0/result
+    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
+    |-- mgen.faa -> ../exprs/load_faa/ad6ae7249f/0/result
+    `-- result -> ../exprs/diamond_blastp_db_sensitive/8f00850928/ed39c166ed/56b6441383/0/result
 
-9 directories, 19 files
+25 directories, 19 files

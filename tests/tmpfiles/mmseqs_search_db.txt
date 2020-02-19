@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 11bbf54fc6.faa
-|   |   |-- 11bbf54fc6.faa.ids
-|   |   |-- 36189032ad.faa
-|   |   `-- 36189032ad.faa.ids
+|   |   |-- 11bbf54fc6
+|   |   |-- 11bbf54fc6.ids
+|   |   |-- 36189032ad
+|   |   `-- 36189032ad.ids
 |   `-- mmseqs
 |       |-- createdb
 |       |   |-- 16ea10f188.mmseqs2db
@@ -26,42 +26,66 @@
 |       |   |-- 5916b67034.mmseqs2db.lookup
 |       |   `-- 5916b67034.mmseqs2db.out
 |       `-- search
-|           |-- 1d45b711c6.mmseqs2db.0
-|           |-- 1d45b711c6.mmseqs2db.1
-|           |-- 1d45b711c6.mmseqs2db.2
-|           |-- 1d45b711c6.mmseqs2db.3
-|           |-- 1d45b711c6.mmseqs2db.4
-|           |-- 1d45b711c6.mmseqs2db.5
-|           |-- 1d45b711c6.mmseqs2db.dbtype
-|           |-- 1d45b711c6.mmseqs2db.err
-|           |-- 1d45b711c6.mmseqs2db.index
-|           `-- 1d45b711c6.mmseqs2db.out
+|           |-- fbb42ae495.mmseqs2db.0
+|           |-- fbb42ae495.mmseqs2db.1
+|           |-- fbb42ae495.mmseqs2db.2
+|           |-- fbb42ae495.mmseqs2db.3
+|           |-- fbb42ae495.mmseqs2db.4
+|           |-- fbb42ae495.mmseqs2db.5
+|           |-- fbb42ae495.mmseqs2db.dbtype
+|           |-- fbb42ae495.mmseqs2db.err
+|           |-- fbb42ae495.mmseqs2db.index
+|           `-- fbb42ae495.mmseqs2db.out
 |-- exprs
 |   |-- length
-|   |   `-- 1d45b711c6_0.num -> ../../cache/lines/...
+|   |   `-- fbb42ae495
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 3d6147ea9d_0.faa.list -> ../../cache/lines/...
-|   |   `-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
+|   |   |-- 3d6147ea9d
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- 9fe31e7ad0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
-|   |   `-- 5815f1ab62_0.faa -> ../../cache/load/11bbf54fc6.faa
+|   |   |-- 72a50a6cda
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/36189032ad
+|   |   `-- c277aef0d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/11bbf54fc6
 |   |-- mmseqs_createdb
-|   |   |-- 1523a4da89_0.mms -> ../../cache/mmseqs/createdb/5916b67034.mmseqs2db.index
-|   |   `-- c93d63638c_0.mms -> ../../cache/mmseqs/createdb/16ea10f188.mmseqs2db.index
+|   |   |-- 360beca860
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/mmseqs/createdb/16ea10f188.mmseqs2db.index
+|   |   `-- 57970a58d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/mmseqs/createdb/5916b67034.mmseqs2db.index
 |   |-- mmseqs_search_db
-|   |   |-- eddcf341b8_b947a1128f_f1535dd92d_0.bht
-|   |   |-- eddcf341b8_b947a1128f_f1535dd92d_0.bht.err
-|   |   `-- eddcf341b8_b947a1128f_f1535dd92d_0.bht.out
+|   |   `-- 1e2e861a97
+|   |       `-- ed39c166ed
+|   |           `-- 6d09f14c8f
+|   |               `-- 0
+|   |                   |-- result
+|   |                   |-- result.err
+|   |                   `-- result.out
 |   |-- num
-|   |   `-- ac9644e51f_0.num -> ../../cache/lines/...
+|   |   `-- ac9644e51f
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
-|       |-- 40edb92618_0.str -> ../../cache/lines/...
-|       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       |-- 40edb92618
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- 824ccbd8b2
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/mmseqs_search_db/eddcf341b8_b947a1128f_f1535dd92d_0.bht
-    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
-    |-- mgendb.mms -> ../exprs/mmseqs_createdb/c93d63638c_0.mms
-    |-- mgen.faa -> ../exprs/load_faa/5815f1ab62_0.faa
-    `-- result -> ../exprs/length/1d45b711c6_0.num
+    |-- hits.bht -> ../exprs/mmseqs_search_db/1e2e861a97/ed39c166ed/6d09f14c8f/0/result
+    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
+    |-- mgendb.mms -> ../exprs/mmseqs_createdb/360beca860/0/result
+    |-- mgen.faa -> ../exprs/load_faa/c277aef0d4/0/result
+    `-- result -> ../exprs/length/fbb42ae495/0/result
 
-14 directories, 50 files
+38 directories, 50 files

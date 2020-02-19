@@ -1,8 +1,8 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 36189032ad.faa
-|   |   `-- 36189032ad.faa.ids
+|   |   |-- 36189032ad
+|   |   `-- 36189032ad.ids
 |   `-- mmseqs
 |       `-- createdb
 |           |-- 5916b67034.mmseqs2db
@@ -16,16 +16,24 @@
 |           `-- 5916b67034.mmseqs2db.out
 |-- exprs
 |   |-- list
-|   |   `-- 9fe31e7ad0_0.faa.list -> ../../cache/lines/...
+|   |   `-- 9fe31e7ad0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   `-- 38c89a124f_0.faa -> ../../cache/load/36189032ad.faa
+|   |   `-- 72a50a6cda
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/36189032ad
 |   |-- mmseqs_createdb_all
-|   |   `-- 1523a4da89_0.mms -> ../../cache/mmseqs/createdb/5916b67034.mmseqs2db.index
+|   |   `-- 57970a58d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/mmseqs/createdb/5916b67034.mmseqs2db.index
 |   `-- str
-|       `-- 824ccbd8b2_0.str -> ../../cache/lines/...
+|       `-- 824ccbd8b2
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/1523a4da89_0.mms
-    |-- maga.faa -> ../exprs/load_faa/38c89a124f_0.faa
+    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/57970a58d4/0/result
+    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
     `-- result -> ../vars/maga_db.mms
 
-10 directories, 18 files
+18 directories, 18 files

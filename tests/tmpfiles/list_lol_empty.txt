@@ -2,9 +2,13 @@
 |-- cache
 |-- exprs
 |   `-- list
-|       |-- d751713988_0.empty.list -> ../../cache/lines/...
-|       `-- fc51b3510a_0.empty.list.list -> ../../cache/lines/...
+|       |-- a4af8b0058
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- d751713988
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/list/fc51b3510a_0.empty.list.list
+    `-- result -> ../exprs/list/a4af8b0058/0/result
 
-4 directories, 3 files
+8 directories, 3 files
