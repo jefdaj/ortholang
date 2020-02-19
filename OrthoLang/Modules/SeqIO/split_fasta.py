@@ -40,6 +40,11 @@ def split_fasta(outlist, outdir, infasta, prefix, suffix):
     #   https://www.biostars.org/p/105388/#105399
     #   https://stackoverflow.com/a/3431838
 
+    try:
+        makedirs(prefix)
+    except OSError:
+        pass
+
     index = 0 # tmpfile prefix (remove if only one at a time?)
     opened = False # refers to current tmpfile
     md5sum = md5() # will be updated line by line
