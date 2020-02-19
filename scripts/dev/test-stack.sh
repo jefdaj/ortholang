@@ -23,6 +23,8 @@ nix-run() {
   nix-shell shell.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
 }
 
+nix-run "stack build"
+
 ### run tests ###
 
 # other possible tasty settings: https://hackage.haskell.org/package/tasty
