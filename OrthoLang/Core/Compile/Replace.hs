@@ -270,12 +270,12 @@ rReplaceEach _ expr = fail $ "bad argument to rReplaceEach: " ++ show expr
  - TODO once this works, rewrite replace using it + singleton
  -}
 
-replaceEach2 :: CutFunction
-replaceEach2 = CutFunction
-  { fName      = "replace_each2"
+replaceEach2 :: OrthoLangFunction
+replaceEach2 = OrthoLangFunction
+  { fNames     = ["replace_each2"]
   , fFixity    = Prefix
+  , fTags      = []
   , fTypeCheck = tReplaceEach
-  , fDesc      = Nothing
   , fTypeDesc  = dReplaceEach2
   , fRules     = rReplaceEach
   }
