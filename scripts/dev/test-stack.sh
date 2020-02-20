@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
 set -x
 set -o pipefail
 
@@ -22,7 +21,10 @@ LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
 
 nix-run() {
   rm -f ortholang.log
-  nix-shell shell.nix $NIX_ARGS --run "$@ || cat ortholang.log" 2>&1 | tee -a "$LOGFILE"
+  nix-shell shell.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
+  code="$?"
+  [[ $code == 0 ]] || cat ortholang.log | tee -a "$LOGFILE"
+  return $code
 }
 
 nix-run "stack build"
@@ -39,6 +41,12 @@ TEST_ARGS="--debug '.*' --test '$TEST_FILTER'"
 
 # test using shared cache first because it's faster
 nix-run "$STACK_CMD --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS"
+code1="$?"
 
 # then locally to verify everything really works
 nix-run "$STACK_CMD $TEST_ARGS"
+code2="$?"
+
+# exit nonzero if either run failed
+[[ $code1 == 0 ]] || exit $code1
+exit $code2
