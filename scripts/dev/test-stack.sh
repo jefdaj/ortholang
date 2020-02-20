@@ -21,7 +21,8 @@ TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
 LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
 
 nix-run() {
-  nix-shell shell.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
+  rm -f ortholang.log
+  nix-shell shell.nix $NIX_ARGS --run "$@ || cat ortholang.log" 2>&1 | tee -a "$LOGFILE"
 }
 
 nix-run "stack build"
@@ -34,7 +35,7 @@ export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 
 STACK_CMD="stack exec ortholang --"
-TEST_ARGS="--test '$TEST_FILTER'"
+TEST_ARGS="--debug '.*' --test '$TEST_FILTER'"
 
 # test using shared cache first because it's faster
 nix-run "$STACK_CMD --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS"

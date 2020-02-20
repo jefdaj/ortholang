@@ -43,9 +43,6 @@ script:
   - cachix use jefdaj || echo "cachix install failed"
   - ./scripts/dev/test-nix.sh
 
-after_failure:
-  - cat *.log
-
 notifications:
   email:
   on_success: false

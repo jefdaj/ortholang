@@ -22,7 +22,12 @@ LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
 
 nix-build $NIX_ARGS 2>&1 | tee -a $LOGFILE
 
-export PATH=$PWD/result/bin:$PATH
+
+bin-run() {
+  rm -f ortholang.log
+  ./result/bin/ortholang $@ 2>&1 | tee -a $LOGFILE
+  [[ $? == 0 ]] || cat ortholang.log
+}
 
 ### run tests ###
 
@@ -31,10 +36,10 @@ export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 
+TEST_ARGS="--debug '.*' --test $TEST_FILTER"
+
 # test using shared cache first because it's faster
-ortholang \
-  --shared http://shortcut.pmb.berkeley.edu/shared \
-  --test "$TEST_FILTER" 2>&1 | tee -a $LOGFILE
+bin-run --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS
 
 # then locally to verify everything really works
-ortholang --test "$TEST_FILTER" 2>&1 | tee -a $LOGFILE
+bin-run $TEST_ARGS
