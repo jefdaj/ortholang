@@ -1,9 +1,13 @@
 flags: {}
 allow-newer: true
-# we use stack inside of nix instead of the other way around
+
+# this seems to fix the zlib bug in stack repl for now, but it's fiddly
+# see: https://github.com/commercialhaskell/stack/issues/2130#issuecomment-247032332
+# usage: nix-shell --command 'stack repl' (or similar)
 nix:
-  enable: false
-  pure: false
+  enable: true
+  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
+
 extra-package-dbs: []
 packages:
 - .
