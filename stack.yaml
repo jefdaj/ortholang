@@ -3,10 +3,12 @@ allow-newer: true
 
 # this seems to fix the zlib bug in stack repl for now, but it's fiddly
 # see: https://github.com/commercialhaskell/stack/issues/2130#issuecomment-247032332
-# usage: nix-shell --command 'stack repl' (or similar)
+# uncomment the packages: line to get stack repl to work:
+# nix-shell --command 'stack repl' (or similar)
+# ...but take it away to get regular builds to work
 nix:
   enable: true
-  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
+  # packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
 
 extra-package-dbs: []
 packages:
