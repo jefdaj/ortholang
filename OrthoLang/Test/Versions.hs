@@ -11,55 +11,53 @@ import OrthoLang.Core.Types        (OrthoLangConfig(..), Locks, HashedIDsRef)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
-import Data.List.Utils            (replace)
 import qualified Data.ByteString.Lazy.Char8 as C8
 import System.FilePath.Posix      (takeBaseName)
 
--- OS should be replaced with "mac" or "linux" before using these
 -- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py?
 --      greencut psiblast? seqiostuff sonicparanoid
 versionScripts :: String -> [(String, FilePath)]
-versionScripts os = map (\(a,b) -> (a, replace "OS" os b))
-  [ ("bash"         , "bash_OS.sh")
-  , ("curl"         , "curl_OS.sh")
-  , ("cut"          , "cut_OS.sh")
-  , ("tar"          , "tar_OS.sh")
-  , ("sed"          , "sed_OS.sh")
-  , ("tree"         , "tree_OS.sh") -- TODO where should this go?
-  , ("awk"          , "awk_OS.sh") -- TODO where should this go?
+versionScripts os = map (\(a,b) -> (a, os ++ ":" ++ b))
+  [ ("bash"         , "bash.sh")
+  , ("curl"         , "curl.sh")
+  , ("cut"          , "cut.sh")
+  , ("tar"          , "tar.sh")
+  , ("sed"          , "sed.sh")
+  , ("tree"         , "tree.sh") -- TODO where should this go?
+  , ("awk"          , "awk.sh") -- TODO where should this go?
 
-  , ("blast"        , "blast_OS.sh")
-  , ("busco"        , "busco_OS.sh")
-  , ("crbblast"     , "crbblast_OS.sh")
-  , ("diamond"      , "diamond_OS.sh")
-  , ("hmmer"        , "hmmer_OS.sh")
-  , ("makeblastdb"  , "makeblastdb_OS.sh")
-  , ("mmseqs"       , "mmseqs_OS.sh")
-  , ("muscle"       , "muscle_OS.sh")
-  , ("orthofinder"  , "orthofinder_OS.sh")
-  , ("psiblast"     , "psiblast_OS.sh") -- TODO remove?
+  , ("blast"        , "blast.sh")
+  , ("busco"        , "busco.sh")
+  , ("crbblast"     , "crbblast.sh")
+  , ("diamond"      , "diamond.sh")
+  , ("hmmer"        , "hmmer.sh")
+  , ("makeblastdb"  , "makeblastdb.sh")
+  , ("mmseqs"       , "mmseqs.sh")
+  , ("muscle"       , "muscle.sh")
+  , ("orthofinder"  , "orthofinder.sh")
+  , ("psiblast"     , "psiblast.sh") -- TODO remove?
 
-  , ("python2"  , "python2_OS.sh")
-  , ("numpy"    , "py2_numpy_OS.py")
-  , ("scipy"    , "py2_scipy_OS.py")
-  , ("BioPython", "py2_BioPython_OS.py")
+  , ("python2"  , "python2.sh")
+  , ("numpy"    , "py2_numpy.py")
+  , ("scipy"    , "py2_scipy.py")
+  , ("BioPython", "py2_BioPython.py")
 
-  , ("python3"  , "python3_OS.sh")
+  , ("python3"  , "python3.sh")
   -- TODO py3 packages?
 
-  , ("r"            , "r_OS.sh")
-  , ("biomartr"     , "r_biomartr_OS.R")
-  , ("dplyr"        , "r_dplyr_OS.R")
-  , ("data.table"   , "r_data_table_OS.R")
-  , ("futile.logger", "r_futile_logger_OS.R")
-  , ("ggplot2"      , "r_ggplot2_OS.R")
-  , ("readr"        , "r_readr_OS.R")
-  , ("tidyr"        , "r_tidyr_OS.R")
-  , ("UpSetR"       , "r_UpSetR_OS.R")
-  , ("VennDiagram"  , "r_VennDiagram_OS.R")
+  , ("r"            , "r.sh")
+  , ("biomartr"     , "r_biomartr.R")
+  , ("dplyr"        , "r_dplyr.R")
+  , ("data.table"   , "r_data_table.R")
+  , ("futile.logger", "r_futile_logger.R")
+  , ("ggplot2"      , "r_ggplot2.R")
+  , ("readr"        , "r_readr.R")
+  , ("tidyr"        , "r_tidyr.R")
+  , ("UpSetR"       , "r_UpSetR.R")
+  , ("VennDiagram"  , "r_VennDiagram.R")
 
-  -- , ("sonicparanoid", "sonicparanoid_OS.sh")
-  -- , ("treecl"       , "treecl_OS.sh")
+  -- , ("sonicparanoid", "sonicparanoid.sh")
+  -- , ("treecl"       , "treecl.sh")
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config

@@ -8,16 +8,19 @@ import Control.Monad              (when)
 import qualified Data.ByteString.Lazy  as BL
 -- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
 import qualified Data.ByteString.Lazy.Char8 as B8
-import Data.List                  (zip5)
+import Data.Char                  (toLower)
+import Data.List                  (zip5, isPrefixOf)
+import Data.List.Split            (splitOn)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Eval         (evalFile)
 import OrthoLang.Core.Parse        (parseFileIO)
 import OrthoLang.Core.Paths        (toGeneric)
 import OrthoLang.Core.Util         (justOrDie)
 -- import OrthoLang.Core.Pretty       (writeScript)
-import OrthoLang.Core.Types        (OrthoLangConfig(..), HashedIDsRef)
+import OrthoLang.Core.Types        (OrthoLangConfig(..), OrthoLangModule(..), HashedIDsRef)
 import OrthoLang.Core.Locks        (Locks, withWriteLock)
 import OrthoLang.Test.Repl         (mkTestGroup)
+import OrthoLang.Modules          (modules)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (takeBaseName, (</>), (<.>))
 import System.IO                  (stdout, stderr)
@@ -32,49 +35,52 @@ import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 -- these work, but the tmpfiles vary so they require a check script
 tmpfilesVary :: [FilePath]
 tmpfilesVary =
-  [ "crb_blast_each2" -- TODO should this be fixable?
-  , "crb_blast_two_cyanos"
-  , "ncbi_blast_reciprocal_best"
-  , "blast_hits_best_hits"
+  [ "crbblast:crb_blast_each2" -- TODO should this be fixable?
+  , "crbblast:crb_blast_two_cyanos"
+  , "blasthits:reciprocal_best"
+  , "blasthits:best_hits"
   , "sonicparanoid_myco3"
-  , "orthogroups_ortholog_in_all"
-  , "orthogroups_ortholog_in_any"
-  , "orthogroups_ortholog_in_max"
-  , "orthogroups_ortholog_in_max_2"
-  , "orthogroups_ortholog_in_min"
-  , "orthogroups_str_tests" -- TODO this really shouldn't vary
-  , "plot_venndiagram"
-  , "plot_linegraph"
-  , "plot_scatterplot"
-  , "plot_histogram"
+  , "orthogroups:ortholog_in_all"
+  , "orthogroups:ortholog_in_any"
+  , "orthogroups:ortholog_in_max"
+  , "orthogroups:ortholog_in_max_2"
+  , "orthogroups:ortholog_in_min"
+  , "orthogroups:str_tests" -- TODO this really shouldn't vary
+  , "plots:venndiagram"
+  , "plots:linegraph"
+  , "plots:scatterplot"
+  , "plots:histogram"
   ]
 
 -- these work, but the stdout varies so they require a check script
 stdoutVaries :: [FilePath]
 stdoutVaries =
-  [ "crb_blast_each2"
-  , "ncbi_blast_reciprocal_best" -- TODO should this be fixable?
-  , "blast_hits_best_hits"
+  [ "crbblast:crb_blast_each2"
+  , "blasthits:reciprocal_best" -- TODO should this be fixable?
+  , "blasthits:best_hits"
   ]
 
 -- these generally need work and should be skipped for now :(
 badlyBroken :: [FilePath]
 badlyBroken =
   -- TODO fix replace_each to work with generated lists
-  [ "orthofinder_orthofinder_sets"
+  [ "orthofinder:orthofinder_sets" -- TODO is this gone?
   -- TODO what's up with these?
-  , "psiblast_each_pssm"
-  , "psiblast_each_pssm"
-  , "psiblast_empty_pssms"
-  , "psiblast_empty_pssms"
-  , "psiblast_map"
-  , "psiblast_pssm_all"
-  , "sonicparanoid_test1"
-  , "sonicparanoid_myco3" -- TODO finish writing module first
+  , "psiblast:psiblast_each_pssm"
+  , "psiblast:psiblast_empty_pssms"
+  , "psiblast:psiblast_map"
+  , "psiblast:psiblast_pssm_all"
+  , "sonicparanoid:test1"
+  , "sonicparanoid:myco3" -- TODO finish writing module first
   ]
 
-getTestScripts :: FilePath -> IO [FilePath]
-getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".ol"] testDir
+getTestScripts :: FilePath -> Maybe String -> IO [FilePath]
+getTestScripts testDir mPrefix = do
+  paths <- findByExtension [".ol"] testDir
+  let names = map takeBaseName paths
+  return $ case mPrefix of
+    Nothing -> names
+    Just p  -> filter ((p ++ ":") `isPrefixOf`) names
 
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
@@ -197,18 +203,40 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
+mkTestsPrefix :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> String -> Maybe String -> IO TestTree
+mkTestsPrefix cfg ref ids testDir groupName mPrefix = do
+  names   <- getTestScripts testDir mPrefix
+  mchecks <- mapM (findTestFile testDir "check" "sh") names
+  let cuts   = map (testFilePath testDir "scripts"  "ol" ) names
+      outs   = map (testFilePath testDir "stdout"   "txt") names
+      trees  = map (testFilePath testDir "tmpfiles" "txt") names
+      hepts  = zip5 (map removePrefix names) cuts outs trees mchecks
+      groups = map mkScriptTests hepts
+  mkTestGroup cfg ref ids groupName groups
+
+mkExampleTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> FilePath -> IO TestTree
+mkExampleTests cfg ref ids exDir testDir = do
+  names <- getTestScripts exDir Nothing
+  let names' = map ("examples:" ++) names
+  mchecks <- mapM (findTestFile testDir "check" "sh") names'
+  let cuts   = map (testFilePath exDir   "scripts"  "ol" ) names
+      outs   = map (testFilePath testDir "stdout"   "txt") names'
+      trees  = map (testFilePath testDir "tmpfiles" "txt") names'
+      hepts  = zip5 (map removePrefix names) cuts outs trees mchecks
+      groups = map mkScriptTests hepts
+  mkTestGroup cfg ref ids "examples for demo site" groups
+
+removePrefix :: String -> String
+removePrefix = last . splitOn ":"
+
+-- from: https://stackoverflow.com/q/47876071
+simplify :: String -> String
+simplify = filter (`elem` ['a'..'z']) . map toLower
+
 mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
-  names   <- getTestScripts testDir
-  exNames <- getTestScripts exDir
-  let exNames' = map ("examples_" ++) exNames
-  mchecks <- mapM (findTestFile testDir "check" "sh") (names ++ exNames')
-  let cuts   = map (testFilePath testDir "scripts"  "ol") names ++
-               map (testFilePath exDir   "scripts"  "ol") exNames
-      outs   = map (testFilePath testDir "stdout"   "txt") (names ++ exNames')
-      trees  = map (testFilePath testDir "tmpfiles" "txt") (names ++ exNames')
-      hepts  = zip5 (names ++ exNames') cuts outs trees mchecks
-      groups = map mkScriptTests hepts
-  mkTestGroup cfg ref ids "interpret test scripts" groups
+  groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids testDir mn $ Just mn) $ map (simplify . mName) modules
+  exGroup <- mkExampleTests cfg ref ids exDir testDir
+  return $ testGroup "run test scripts" $ groups ++ [exGroup]
