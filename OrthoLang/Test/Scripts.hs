@@ -8,16 +8,19 @@ import Control.Monad              (when)
 import qualified Data.ByteString.Lazy  as BL
 -- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
 import qualified Data.ByteString.Lazy.Char8 as B8
-import Data.List                  (zip5)
+import Data.Char                  (toLower)
+import Data.List                  (zip5, isPrefixOf)
+import Data.List.Split            (splitOn)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Eval         (evalFile)
 import OrthoLang.Core.Parse        (parseFileIO)
 import OrthoLang.Core.Paths        (toGeneric)
 import OrthoLang.Core.Util         (justOrDie)
 -- import OrthoLang.Core.Pretty       (writeScript)
-import OrthoLang.Core.Types        (OrthoLangConfig(..), HashedIDsRef)
+import OrthoLang.Core.Types        (OrthoLangConfig(..), OrthoLangModule(..), HashedIDsRef)
 import OrthoLang.Core.Locks        (Locks, withWriteLock)
 import OrthoLang.Test.Repl         (mkTestGroup)
+import OrthoLang.Modules          (modules)
 import System.Directory           (doesFileExist)
 import System.FilePath.Posix      (takeBaseName, (</>), (<.>))
 import System.IO                  (stdout, stderr)
@@ -32,49 +35,51 @@ import Test.Tasty.Hspec           (testSpecs, shouldReturn)
 -- these work, but the tmpfiles vary so they require a check script
 tmpfilesVary :: [FilePath]
 tmpfilesVary =
-  [ "crb_blast_each2" -- TODO should this be fixable?
-  , "crb_blast_two_cyanos"
-  , "ncbi_blast_reciprocal_best"
-  , "blast_hits_best_hits"
+  [ "crbblast:crb_blast_each2" -- TODO should this be fixable?
+  , "crbblast:crb_blast_two_cyanos"
+  , "blasthits:reciprocal_best"
+  , "blasthits:best_hits"
   , "sonicparanoid_myco3"
-  , "orthogroups_ortholog_in_all"
-  , "orthogroups_ortholog_in_any"
-  , "orthogroups_ortholog_in_max"
-  , "orthogroups_ortholog_in_max_2"
-  , "orthogroups_ortholog_in_min"
-  , "orthogroups_str_tests" -- TODO this really shouldn't vary
-  , "plot_venndiagram"
-  , "plot_linegraph"
-  , "plot_scatterplot"
-  , "plot_histogram"
+  , "orthogroups:ortholog_in_all"
+  , "orthogroups:ortholog_in_any"
+  , "orthogroups:ortholog_in_max"
+  , "orthogroups:ortholog_in_max_2"
+  , "orthogroups:ortholog_in_min"
+  , "orthogroups:str_tests" -- TODO this really shouldn't vary
+  , "plots:venndiagram"
+  , "plots:linegraph"
+  , "plots:scatterplot"
+  , "plots:histogram"
   ]
 
 -- these work, but the stdout varies so they require a check script
 stdoutVaries :: [FilePath]
 stdoutVaries =
-  [ "crb_blast_each2"
-  , "ncbi_blast_reciprocal_best" -- TODO should this be fixable?
-  , "blast_hits_best_hits"
+  [ "crbblast:crb_blast_each2"
+  , "blasthits:reciprocal_best" -- TODO should this be fixable?
+  , "blasthits:best_hits"
   ]
 
 -- these generally need work and should be skipped for now :(
 badlyBroken :: [FilePath]
 badlyBroken =
   -- TODO fix replace_each to work with generated lists
-  [ "orthofinder_orthofinder_sets"
+  [ "orthofinder:orthofinder_sets" -- TODO is this gone?
   -- TODO what's up with these?
-  , "psiblast_each_pssm"
-  , "psiblast_each_pssm"
-  , "psiblast_empty_pssms"
-  , "psiblast_empty_pssms"
-  , "psiblast_map"
-  , "psiblast_pssm_all"
-  , "sonicparanoid_test1"
-  , "sonicparanoid_myco3" -- TODO finish writing module first
+  , "psiblast:psiblast_each_pssm"
+  , "psiblast:psiblast_empty_pssms"
+  , "psiblast:psiblast_map"
+  , "psiblast:psiblast_pssm_all"
+  , "sonicparanoid:test1"
+  , "sonicparanoid:myco3" -- TODO finish writing module first
   ]
 
-getTestScripts :: FilePath -> IO [FilePath]
-getTestScripts testDir = fmap (map takeBaseName) $ findByExtension [".ol"] testDir
+getTestScripts :: FilePath -> String -> IO [FilePath]
+getTestScripts testDir modname = do
+  paths <- findByExtension [".ol"] testDir
+  let names = map takeBaseName paths
+      matches = filter ((modname ++ ":") `isPrefixOf`) names
+  return matches
 
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
@@ -197,18 +202,33 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
-mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
-mkTests cfg ref ids = do
+-- TODO there should be one of these per module right?
+-- TODO remove examples and make them a separte "module" for the purposes of testing?
+--      this is actually more natural: add it in mkTests
+mkModuleTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> String -> IO TestTree
+mkModuleTests cfg ref ids modname = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
-  names   <- getTestScripts testDir
-  exNames <- getTestScripts exDir
-  let exNames' = map ("examples_" ++) exNames
+  names   <- getTestScripts testDir modname
+  exNames <- getTestScripts   exDir modname
+  let exNames' = map ("examples:" ++) exNames
   mchecks <- mapM (findTestFile testDir "check" "sh") (names ++ exNames')
   let cuts   = map (testFilePath testDir "scripts"  "ol") names ++
                map (testFilePath exDir   "scripts"  "ol") exNames
       outs   = map (testFilePath testDir "stdout"   "txt") (names ++ exNames')
       trees  = map (testFilePath testDir "tmpfiles" "txt") (names ++ exNames')
-      hepts  = zip5 (names ++ exNames') cuts outs trees mchecks
+      hepts  = zip5 (map removeModname $ names ++ exNames') cuts outs trees mchecks
       groups = map mkScriptTests hepts
-  mkTestGroup cfg ref ids "interpret test scripts" groups
+  mkTestGroup cfg ref ids (modname ++ " module") groups
+
+removeModname = last . splitOn ":"
+
+-- from: https://stackoverflow.com/q/47876071
+simplify :: String -> String
+simplify = filter (`elem` ['a'..'z']) . map toLower
+
+-- TODO move the examples here
+mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+mkTests cfg ref ids = do
+  groups <- mapM (mkModuleTests cfg ref ids) $ map (simplify . mName) modules
+  return $ testGroup "run test scripts" groups
