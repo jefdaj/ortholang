@@ -74,12 +74,13 @@ badlyBroken =
   , "sonicparanoid:myco3" -- TODO finish writing module first
   ]
 
-getTestScripts :: FilePath -> String -> IO [FilePath]
-getTestScripts testDir modname = do
+getTestScripts :: FilePath -> Maybe String -> IO [FilePath]
+getTestScripts testDir mPrefix = do
   paths <- findByExtension [".ol"] testDir
   let names = map takeBaseName paths
-      matches = filter ((modname ++ ":") `isPrefixOf`) names
-  return matches
+  return $ case mPrefix of
+    Nothing -> names
+    Just p  -> filter ((p ++ ":") `isPrefixOf`) names
 
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
 goldenDiff name file action = goldenVsStringDiff name fn file action
@@ -202,33 +203,40 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
--- TODO there should be one of these per module right?
--- TODO remove examples and make them a separte "module" for the purposes of testing?
---      this is actually more natural: add it in mkTests
-mkModuleTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> String -> IO TestTree
-mkModuleTests cfg ref ids modname = do
-  testDir <- getDataFileName "tests"
-  exDir   <- getDataFileName "examples"
-  names   <- getTestScripts testDir modname
-  exNames <- getTestScripts   exDir modname
-  let exNames' = map ("examples:" ++) exNames
-  mchecks <- mapM (findTestFile testDir "check" "sh") (names ++ exNames')
-  let cuts   = map (testFilePath testDir "scripts"  "ol") names ++
-               map (testFilePath exDir   "scripts"  "ol") exNames
-      outs   = map (testFilePath testDir "stdout"   "txt") (names ++ exNames')
-      trees  = map (testFilePath testDir "tmpfiles" "txt") (names ++ exNames')
-      hepts  = zip5 (map removeModname $ names ++ exNames') cuts outs trees mchecks
+mkTestsPrefix :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> String -> Maybe String -> IO TestTree
+mkTestsPrefix cfg ref ids testDir groupName mPrefix = do
+  names   <- getTestScripts testDir mPrefix
+  mchecks <- mapM (findTestFile testDir "check" "sh") names
+  let cuts   = map (testFilePath testDir "scripts"  "ol" ) names
+      outs   = map (testFilePath testDir "stdout"   "txt") names
+      trees  = map (testFilePath testDir "tmpfiles" "txt") names
+      hepts  = zip5 (map removePrefix names) cuts outs trees mchecks
       groups = map mkScriptTests hepts
-  mkTestGroup cfg ref ids (modname ++ " module") groups
+  mkTestGroup cfg ref ids groupName groups
 
-removeModname = last . splitOn ":"
+mkExampleTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> FilePath -> IO TestTree
+mkExampleTests cfg ref ids exDir testDir = do
+  names <- getTestScripts exDir Nothing
+  let names' = map ("examples:" ++) names
+  mchecks <- mapM (findTestFile testDir "check" "sh") names'
+  let cuts   = map (testFilePath exDir   "scripts"  "ol" ) names
+      outs   = map (testFilePath testDir "stdout"   "txt") names'
+      trees  = map (testFilePath testDir "tmpfiles" "txt") names'
+      hepts  = zip5 (map removePrefix names) cuts outs trees mchecks
+      groups = map mkScriptTests hepts
+  mkTestGroup cfg ref ids "examples for demo site" groups
+
+removePrefix :: String -> String
+removePrefix = last . splitOn ":"
 
 -- from: https://stackoverflow.com/q/47876071
 simplify :: String -> String
 simplify = filter (`elem` ['a'..'z']) . map toLower
 
--- TODO move the examples here
 mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
 mkTests cfg ref ids = do
-  groups <- mapM (mkModuleTests cfg ref ids) $ map (simplify . mName) modules
-  return $ testGroup "run test scripts" groups
+  testDir <- getDataFileName "tests"
+  exDir   <- getDataFileName "examples"
+  groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids testDir mn $ Just mn) $ map (simplify . mName) modules
+  exGroup <- mkExampleTests cfg ref ids exDir testDir
+  return $ testGroup "run test scripts" $ groups ++ [exGroup]
