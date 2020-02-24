@@ -1,21 +1,18 @@
 .
 |-- cache
+|   |-- each
+|   |   `-- 38a85cd20b
+|   |       |-- 0fcd0695d1
+|   |       |   |-- args -> ../../../../cache/lines/...
+|   |       |   `-- result -> ../../../../exprs/extract_ids/0fcd0695d1/0/result
+|   |       `-- 8e4b08391e
+|   |           |-- args -> ../../../../cache/lines/...
+|   |           `-- result -> ../../../../exprs/extract_ids/8e4b08391e/0/result
 |   |-- load
 |   |   |-- 10ffe0cf0f.faa
 |   |   |-- 10ffe0cf0f.faa.ids
-|   |   |-- 28e059b2a9
-|   |   |-- 28e059b2a9.ids
-|   |   |-- 36189032ad
 |   |   |-- 36189032ad.faa
-|   |   |-- 36189032ad.faa.ids
-|   |   `-- 36189032ad.ids
-|   |-- makeblastdb
-|   |   `-- c27509026d
-|   |       |-- c27509026d.pdb.err
-|   |       |-- c27509026d.pdb.out
-|   |       |-- c27509026d.pdb.phr
-|   |       |-- c27509026d.pdb.pin
-|   |       `-- c27509026d.pdb.psq
+|   |   `-- 36189032ad.faa.ids
 |   |-- orthofinder
 |   |   `-- bde1b97dfd
 |   |       |-- OrthoFinder
@@ -440,56 +437,34 @@
 |   |       |       `-- Log.txt
 |   |       |-- 10ffe0cf0f.faa -> ../../../cache/load/10ffe0cf0f.faa
 |   |       `-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
-|   `-- seqio
-|       `-- ad490b76b8.txt -> ../../cache/lines/...
+|   `-- orthogroups
+|       |-- 2856107980.txt
+|       `-- d02cda14cf.txt
 |-- exprs
-|   |-- blastp_db
-|   |   `-- aac0841202
-|   |       `-- c8f3331792
-|   |           `-- 635b625879
-|   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
-|   |                   `-- result -> out
-|   |-- extract_seqs
-|   |   `-- ed39c166ed
-|   |       `-- f38f780de6
-|   |           `-- 0
-|   |               `-- result
-|   |-- extract_targets
-|   |   `-- 9f34ea1b7d
+|   |-- extract_ids
+|   |   |-- 0fcd0695d1
+|   |   |   `-- 0
+|   |   |       `-- result
+|   |   `-- 8e4b08391e
 |   |       `-- 0
-|   |           |-- result -> ../../../../cache/lines/...
-|   |           `-- tmp
+|   |           `-- result
+|   |-- extract_ids_each
+|   |   `-- 07480d9ac9
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- length
+|   |   `-- 257cf24142
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
 |   |   |-- 9af6dc7081
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 9fe31e7ad0
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- f22daab0ad
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 385ba48b5c
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- 72a50a6cda
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
-|   |-- makeblastdb_prot
-|   |   `-- 57970a58d4
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- muscle
-|   |   `-- 92cea2bfa4
-|   |       `-- 0
-|   |           |-- result
-|   |           |-- result.err
-|   |           `-- result.out
 |   |-- num
-|   |   `-- efc8362dcc
+|   |   `-- ea11b49459
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- orthofinder
@@ -497,10 +472,17 @@
 |   |       `-- 0
 |   |           |-- out
 |   |           `-- result -> ../../../../cache/orthofinder/bde1b97dfd/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
+|   |-- orthogroups
+|   |   `-- bacb2fe175
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- ortholog_in_max_str
+|   |   `-- bc47f42e5c
+|   |       `-- 8c409ce2a3
+|   |           `-- d60649cffc
+|   |               `-- 0
+|   |                   `-- result
 |   `-- str
-|       |-- 1e020faf26
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
 |       |-- 824ccbd8b2
 |       |   `-- 0
 |       |       `-- result -> ../../../../cache/lines/...
@@ -508,13 +490,8 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits_aln.aln -> ../exprs/muscle/92cea2bfa4/0/result
-    |-- hits.bht -> ../exprs/blastp_db/aac0841202/c8f3331792/635b625879/0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/ed39c166ed/f38f780de6/0/result
-    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
-    |-- mgen.faa -> ../exprs/load_faa/385ba48b5c/0/result
     |-- ofres.ofr -> ../exprs/orthofinder/07480d9ac9/0/result
-    |-- result -> ../vars/ofres.ofr
+    |-- result -> ../exprs/length/257cf24142/0/result
     `-- smallbacteria.faa.list -> ../exprs/list/f22daab0ad/0/result
 
-68 directories, 449 files
+62 directories, 432 files

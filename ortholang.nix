@@ -30,4 +30,12 @@ mkDerivation {
   executablePkgconfigDepends = [ zlib ];
   description = "Short, reproducible phylogenomic cuts";
   license = stdenv.lib.licenses.agpl3;
+  # profiling:
+  enableExecutableProfiling = true;
+  configureFlags = [
+    "--ghc-options=-fprof-auto-calls"
+    "--ghc-options=-fprof-auto-exported"
+    "--ghc-options=-fprof-auto-top"
+    "--ghc-options=-fprof-cafs"
+  ];
 }

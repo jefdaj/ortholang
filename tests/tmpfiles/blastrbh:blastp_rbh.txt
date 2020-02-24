@@ -47,9 +47,6 @@
 |   |       |-- ed39c166ed
 |   |       |   `-- 6a2118269a
 |   |       |       `-- 0
-|   |       |           |-- err
-|   |       |           |-- out
-|   |       |           `-- result -> out
 |   |       `-- fafed1f7b9
 |   |           `-- 635b625879
 |   |               `-- 0
@@ -152,4 +149,4 @@
     |-- rev1.bht -> ../exprs/blastp_db/66dc2a3b29/ed39c166ed/6a2118269a/0/result
     `-- rev2.bht -> ../exprs/blastp_db/66dc2a3b29/ed39c166ed/6a2118269a/0/result
 
-86 directories, 66 files
+86 directories, 63 files

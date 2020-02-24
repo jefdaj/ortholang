@@ -1,0 +1,76 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 11bbf54fc6
+|   |   |-- 11bbf54fc6.ids
+|   |   |-- 28e059b2a9
+|   |   |-- 28e059b2a9.ids
+|   |   |-- 36189032ad
+|   |   `-- 36189032ad.ids
+|   |-- makeblastdb
+|   |   `-- 0561c48376
+|   |       |-- 0561c48376.pdb.err
+|   |       |-- 0561c48376.pdb.out
+|   |       |-- 0561c48376.pdb.phr
+|   |       |-- 0561c48376.pdb.pin
+|   |       `-- 0561c48376.pdb.psq
+|   `-- psiblast
+|-- exprs
+|   |-- list
+|   |   `-- d5a98d9fd0
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- load_faa
+|   |   |-- 385ba48b5c
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/28e059b2a9
+|   |   |-- 72a50a6cda
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/36189032ad
+|   |   `-- c277aef0d4
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/load/11bbf54fc6
+|   |-- makeblastdb_prot_all
+|   |   `-- 460a3298f5
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- num
+|   |   `-- c23938f494
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- psiblast_pssm_all
+|   |   `-- 9f0f80d584
+|   |       `-- e75bfb7be8
+|   |           `-- 05da9f9faa
+|   |               `-- 0
+|   |                   |-- result
+|   |                   |-- result.err
+|   |                   `-- result.out
+|   |-- psiblast_train_db
+|   |   `-- 9f0f80d584
+|   |       `-- c8f3331792
+|   |           `-- 05da9f9faa
+|   |               `-- 0
+|   |                   |-- result -> ../../../../../../cache/lines/...
+|   |                   |-- result.tmp.err
+|   |                   `-- result.tmp.out
+|   `-- str
+|       |-- 1e020faf26
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- 40edb92618
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- 824ccbd8b2
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
+`-- vars
+    |-- cyanodb.pdb -> ../exprs/makeblastdb_prot_all/460a3298f5/0/result
+    |-- hitlist.bht -> ../exprs/psiblast_pssm_all/9f0f80d584/e75bfb7be8/05da9f9faa/0/result
+    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
+    |-- mgen.faa -> ../exprs/load_faa/c277aef0d4/0/result
+    |-- pssm.pssm -> ../exprs/psiblast_train_db/9f0f80d584/c8f3331792/05da9f9faa/0/result
+    |-- query.faa -> ../exprs/load_faa/385ba48b5c/0/result
+    `-- result -> ../vars/hitlist.bht
+
+40 directories, 33 files

@@ -52,7 +52,7 @@
 |   |       `-- 3101b8aa23
 |   |           `-- 5d361c350b
 |   |               `-- 0
-|   |                   |-- result -> result.out
+|   |                   |-- result
 |   |                   |-- result.err
 |   |                   `-- result.out
 |   |-- list
