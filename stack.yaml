@@ -8,7 +8,8 @@ allow-newer: true
 # ...but take it away to get regular builds to work
 nix:
   enable: true
-  # packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
+  pure: false
+  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
 
 extra-package-dbs: []
 packages:
