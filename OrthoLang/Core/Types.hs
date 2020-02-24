@@ -73,7 +73,7 @@ module OrthoLang.Core.Types
   where
 
 -- import Prelude hiding (print)
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import Text.Parsec (Parsec)
 
 import OrthoLang.Core.Locks (Locks, withReadLock)

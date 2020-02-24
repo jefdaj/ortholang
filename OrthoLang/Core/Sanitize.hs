@@ -9,6 +9,8 @@ module OrthoLang.Core.Sanitize
   )
   where
 
+-- TODO space leak probably in here, right? pinpoint it!
+
 {- This tries to prevent various programs from choking on badly formatted FASTA
  - sequence IDs. It replaces them with hashes before running anything, keeps a
  - hash -> ID map, and puts them back in the final output.
@@ -21,7 +23,7 @@ module OrthoLang.Core.Sanitize
 
 import Prelude hiding (readList)
 import qualified Data.DList as D
-import qualified Data.Map   as M
+import qualified Data.Map.Strict   as M
 -- import qualified Text.Regex as R
 
 import Development.Shake
@@ -38,23 +40,23 @@ import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName)
 import Data.IORef                  (readIORef)
 
-type HashedIDList = D.DList (String, String)
+-- type HashedIDList = D.DList (String, String)
 
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
-hashIDsLine :: String -> (String, HashedIDList)
-hashIDsLine ('>':seqID) = ('>':idHash, D.singleton (idHash, seqID)) -- TODO issue dropping newlines here?
+hashIDsLine :: String -> (String, HashedIDs)
+hashIDsLine ('>':seqID) = ('>':idHash, M.singleton idHash seqID) -- TODO issue dropping newlines here?
   where
     idHash = "seqid_" ++ digest seqID -- TODO does storing the extra seqid_ prefix slow it down?
-hashIDsLine txt = (txt, D.empty)
+hashIDsLine txt = (txt, M.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
 hashIDsTxt :: String -> (String, HashedIDs)
-hashIDsTxt txt = joinFn $ foldl accFn (D.empty, D.empty) $ map hashIDsLine $ lines txt
+hashIDsTxt txt = joinFn $ foldl accFn (D.empty, M.empty) $ map hashIDsLine $ lines txt
   where
     -- hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
-    accFn  (oldLines, oldIDs) (newLine, newIDs) = (D.snoc oldLines newLine, D.append oldIDs newIDs)
-    joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, M.fromList $ D.toList ids)
+    accFn  (oldLines, oldIDs) (newLine, newIDs) = (D.snoc oldLines newLine, M.union oldIDs newIDs)
+    joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, ids)
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
 hashIDsFile :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action HashedIDs
