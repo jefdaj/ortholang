@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module OrthoLang.Core.Sanitize
   ( hashIDsFile
   , writeHashedIDs
@@ -22,7 +24,7 @@ module OrthoLang.Core.Sanitize
 -- TODO would doing it in a separate script be better so it can run on other nodes?
 
 import Prelude hiding (readList)
-import qualified Data.DList as D
+-- import qualified Data.DList as D
 import qualified Data.Map.Strict   as M
 -- import qualified Text.Regex as R
 
@@ -52,11 +54,13 @@ hashIDsLine txt = (txt, M.empty)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
 hashIDsTxt :: String -> (String, HashedIDs)
-hashIDsTxt txt = joinFn $ foldl accFn (D.empty, M.empty) $ map hashIDsLine $ lines txt
+hashIDsTxt txt = foldl accFn ("", M.empty) $ map hashIDsLine $ lines txt
   where
     -- hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
-    accFn  (oldLines, oldIDs) (newLine, newIDs) = (D.snoc oldLines newLine, M.union oldIDs newIDs)
-    joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, ids)
+    accFn  (oldLines, oldIDs) (newLine, newIDs) = let !ls = oldLines ++ newLine ++ "\n"
+                                                      !ids = M.union oldIDs newIDs
+                                                  in (ls, ids)
+    -- joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, ids)
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
 hashIDsFile :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action HashedIDs
@@ -65,7 +69,7 @@ hashIDsFile cfg ref inPath outPath = do
       outPath' = fromOrthoLangPath cfg outPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
-  let (fasta', ids) = hashIDsTxt txt
+  let (!fasta', !ids) = hashIDsTxt txt
       (OrthoLangPath k) = outPath
       v = takeFileName inPath'
       -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
