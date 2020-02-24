@@ -24,7 +24,6 @@ extra-deps:
   - path-io-1.6.0
   - progress-meter-1.0.0.1
 
-# TODO are the rtsopts a problem? see if removing fixes any fails
 ghc-options:
-        # "all": -O2
-        # "OrthoLang": -O0
+  # "$everything": -rtsopts -prof -fprof-auto
+  # "OrthoLang"  : -rtsopts -prof -fprof-auto

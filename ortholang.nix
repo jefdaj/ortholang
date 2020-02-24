@@ -32,10 +32,13 @@ mkDerivation {
   license = stdenv.lib.licenses.agpl3;
   # profiling:
   enableExecutableProfiling = true;
+  enableLibraryProfiling = true;
   configureFlags = [
-    "--ghc-options=-fprof-auto-calls"
-    "--ghc-options=-fprof-auto-exported"
-    "--ghc-options=-fprof-auto-top"
-    "--ghc-options=-fprof-cafs"
+    # "--ghc-options=-fprof-auto-calls"
+    # "--ghc-options=-fprof-auto-exported"
+    # "--ghc-options=-fprof-cafs"
+    "--ghc-options=-rtsopts"
+    "--ghc-options=-fprof"
+    "--ghc-options=-fprof-auto"
   ];
 }
