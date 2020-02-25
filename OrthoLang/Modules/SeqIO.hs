@@ -41,7 +41,7 @@ orthoLangModule = OrthoLangModule
     ]
     ++ mkLoaders True fna
     ++ mkLoaders True faa
-    ++ mkLoaders False gbk
+    ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
   }
 
 gbk :: OrthoLangType

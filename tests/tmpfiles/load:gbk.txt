@@ -1,8 +1,7 @@
 .
 |-- cache
 |   `-- load
-|       |-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
-|       `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|       `-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |-- exprs
 |   |-- any
 |   |   `-- 62bc1d3f0e
@@ -34,4 +33,4 @@
     |-- result -> ../exprs/any/62bc1d3f0e/0/result
     `-- single.gbk -> ../exprs/load_gbk/a6b552f7e9/0/result
 
-22 directories, 12 files
+22 directories, 11 files

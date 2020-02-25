@@ -2,6 +2,7 @@
 
 module OrthoLang.Core.Sanitize
   ( hashIDsFile
+  , hashIDsFile2
   , writeHashedIDs
   , unhashIDs
   , unhashIDsFile
@@ -33,14 +34,16 @@ import OrthoLang.Core.Types
 
 import OrthoLang.Core.Util    (digest, digestLength, headOrDie)
 import OrthoLang.Core.Locks   (withWriteLock')
-import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines)
-import OrthoLang.Core.Paths   (fromOrthoLangPath)
+import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
+import OrthoLang.Core.Paths   (toOrthoLangPath, fromOrthoLangPath)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes)
 import Data.List             (isPrefixOf, intersperse)
 import Data.List.Utils       (split, subIndex)
-import System.FilePath (takeFileName)
+import System.FilePath (takeFileName, takeDirectory, (<.>))
+import System.Directory           (createDirectoryIfMissing)
 import Data.IORef                  (readIORef)
+import System.Exit                (ExitCode(..))
 
 -- type HashedIDList = D.DList (String, String)
 
@@ -77,6 +80,30 @@ hashIDsFile cfg ref inPath outPath = do
   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
   trackWrite' cfg [outPath']
   return ids'
+
+-- rewrite of hashIDsFile as a python script; will it fix the space leak?
+hashIDsFile2 :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action ()
+hashIDsFile2 cfg ref inFa outFa = do
+  let inFa'   = fromOrthoLangPath cfg inFa
+      outFa'  = fromOrthoLangPath cfg outFa
+      outIDs' = outFa' <.> "ids"
+      outIDs  = toOrthoLangPath cfg outIDs'
+      (OrthoLangPath inFaGeneric) = inFa
+  liftIO $ createDirectoryIfMissing True $ takeDirectory inFa'
+  liftIO $ createDirectoryIfMissing True $ takeDirectory outFa'
+  runCmd cfg ref $ CmdDesc
+    { cmdBinary = "hash_seqids.py"
+    , cmdArguments = [outFa', inFa', inFaGeneric]
+    , cmdFixEmpties = False
+    , cmdParallel = False
+    , cmdOptions = []
+    , cmdInPatterns = [inFa']
+    , cmdOutPath = outFa'
+    , cmdExtraOutPaths = [outIDs']
+    , cmdSanitizePaths = []
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [outFa', outIDs']
+    }
 
 writeHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> HashedIDs -> Action ()
 writeHashedIDs cfg ref path ids = do
@@ -122,6 +149,7 @@ unhashIDs longIDs ids t = case findNext t of
     patterns =
       [ ("seqid_" , \_   -> length "seqid_" + digestLength)
       , ("$TMPDIR", \txt -> length $ takeWhile (not . isSpace) txt)
+      , ("$WORKDIR", \txt -> length $ takeWhile (not . isSpace) txt) -- TODO remove this one?
       ]
 
 -- This sometimes operates internally, but also writes the final result of the cut to a file.
@@ -131,10 +159,12 @@ unhashIDsFile cfg ref idref inPath outPath = do
   let inPath'  = fromOrthoLangPath cfg inPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
+  liftIO $ putStrLn $ "txt: '" ++ txt ++ "'"
   -- let txt' = unhashIDs ids txt
   ids <- liftIO $ readIORef idref
+  liftIO $ putStrLn $ "ids: " ++ show ids
   let txt' = unhashIDs False ids txt
-  -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
+  liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
   withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' cfg [outPath]
 

@@ -2,8 +2,6 @@
 |-- cache
 |   `-- load
 |       |-- 8723e7ac8c
-|       |-- 8723e7ac8c.fna
-|       |-- 8723e7ac8c.fna.ids
 |       `-- 8723e7ac8c.ids
 |-- exprs
 |   |-- any
@@ -36,4 +34,4 @@
     |-- result -> ../exprs/any/caeea4d44e/0/result
     `-- single.fna -> ../exprs/load_fna/b06189156a/0/result
 
-22 directories, 14 files
+22 directories, 12 files

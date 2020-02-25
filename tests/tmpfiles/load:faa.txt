@@ -2,8 +2,6 @@
 |-- cache
 |   `-- load
 |       |-- 28e059b2a9
-|       |-- 28e059b2a9.faa
-|       |-- 28e059b2a9.faa.ids
 |       `-- 28e059b2a9.ids
 |-- exprs
 |   |-- any
@@ -36,4 +34,4 @@
     |-- result -> ../exprs/any/c7bbd2c24f/0/result
     `-- single.faa -> ../exprs/load_faa/385ba48b5c/0/result
 
-22 directories, 14 files
+22 directories, 12 files

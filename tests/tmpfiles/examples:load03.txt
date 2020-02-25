@@ -1,20 +1,20 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 7a7589d679.txt -> ../../cache/lines/...
-|   |   `-- emptyfaa.txt -> ../../cache/lines/...
+|   |   |-- emptyfaa.txt -> ../../cache/lines/...
+|   |   `-- f8222fbd6b.txt -> ../../cache/lines/...
 |   |-- each
 |   |   `-- fec3c06864
-|   |       |-- 5edc709220
+|   |       |-- 0197b8cb55
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/5edc709220/0/result
-|   |       `-- a442bad0d5
+|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/0197b8cb55/0/result
+|   |       `-- 4b181c7a74
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/a442bad0d5/0/result
+|   |           `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/4b181c7a74/0/result
 |   |-- load
 |   |   |-- 5e5e074c73 -> $WORKDIR/examples/gene-lists/pcc7942-random-100.txt
-|   |   |-- d8da51f7cd.gbk -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
-|   |   `-- ec9540d17e.gbk -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
+|   |   |-- d8da51f7cd -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
+|   |   `-- ec9540d17e -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
 |   `-- seqio
 |       `-- 4abc1a828c.txt -> ../../cache/lines/...
 |-- exprs
@@ -29,10 +29,10 @@
 |   |               `-- result
 |   |-- gbk_to_faa
 |   |   `-- 37fd11c13a
-|   |       |-- 5edc709220
+|   |       |-- 0197b8cb55
 |   |       |   `-- 0
 |   |       |       `-- result
-|   |       `-- a442bad0d5
+|   |       `-- 4b181c7a74
 |   |           `-- 0
 |   |               `-- result
 |   |-- gbk_to_faa_each

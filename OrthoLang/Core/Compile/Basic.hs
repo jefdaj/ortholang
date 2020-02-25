@@ -36,9 +36,9 @@ import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, writePaths, symlink)
 -- import OrthoLang.Core.Locks        (withWriteLock')
-import OrthoLang.Core.Sanitize     (hashIDsFile, writeHashedIDs, readHashedIDs)
+import OrthoLang.Core.Sanitize     (hashIDsFile2, readHashedIDs)
 import OrthoLang.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie, trace)
+                                   digest, removeIfExists, headOrDie, trace, unlessExists)
 import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
@@ -308,35 +308,27 @@ rLoad _ _ _ = fail "bad argument to rLoad"
 
 -- TODO is running this lots of times at once the problem?
 -- TODO see if shake exports code for only hashing when timestamps change
+-- TODO remove ext? not sure it does anything
 aLoadHash :: Bool -> OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> String -> Action OrthoLangPath
-aLoadHash hashSeqIDs cfg ref ids src ext = do
+aLoadHash hashSeqIDs cfg ref ids src _ = do
   alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   need' cfg ref "ortholang.core.compile.basic.aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromOrthoLangPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
-      hashPath' = tmpDir' </> md5 <.> ext
+      hashPath' = tmpDir' </> md5 -- <.> ext
       hashPath  = toOrthoLangPath cfg hashPath'
   if not hashSeqIDs
     then symlink cfg ref hashPath src
     else do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toOrthoLangPath cfg idsPath'
-      done <- doesFileExist idsPath'
-      newIDs <- if done
-        then do 
-          -- liftIO $ putStrLn "reading previously hashed ids"
-          -- TODO is this a good place to use Shake's newCache?
-          readHashedIDs cfg ref idsPath -- TODO have to atomicModifyIORef' here!
-        else do
-          -- liftIO $ putStrLn "hashing ids for the first time"
-          newIDs <- hashIDsFile cfg ref src hashPath
-          writeHashedIDs cfg ref idsPath newIDs
-          return newIDs
-      liftIO $ atomicModifyIORef' ids $ \is -> (M.union newIDs is, ()) -- TODO is this wrong?
+      unlessExists idsPath' $ hashIDsFile2 cfg ref src hashPath
+      newIDs <- readHashedIDs cfg ref idsPath -- TODO put atomicModifyIORef' inside this?
+      -- liftIO $ putStrLn $ "newIDs: " ++ show newIDs
+      liftIO $ atomicModifyIORef' ids $ \is -> (M.union is newIDs, ()) -- TODO is this wrong?
   -- ids' <- liftIO $ readIORef ids
-  -- liftIO $ putStrLn $ "total is now " ++ show (length $ M.keys ids') ++ " ids"
-  -- liftIO $ putStrLn $ show $ M.keys ids'
+  -- liftIO $ putStrLn $ "ids': " ++ show ids'
   return hashPath
   where
     src' = fromOrthoLangPath cfg src
