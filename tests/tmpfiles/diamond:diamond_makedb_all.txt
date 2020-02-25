@@ -1,12 +1,12 @@
 .
 |-- cache
 |   `-- load
-|       |-- 10ffe0cf0f.faa
-|       |-- 10ffe0cf0f.faa.ids
-|       |-- 36189032ad.faa
-|       |-- 36189032ad.faa.ids
-|       |-- 39b21a8bf4.faa
-|       `-- 39b21a8bf4.faa.ids
+|       |-- 10ffe0cf0f
+|       |-- 10ffe0cf0f.ids
+|       |-- 36189032ad
+|       |-- 36189032ad.ids
+|       |-- 39b21a8bf4
+|       `-- 39b21a8bf4.ids
 |-- exprs
 |   |-- diamond_makedb_all
 |   |   `-- 9ac6429f95

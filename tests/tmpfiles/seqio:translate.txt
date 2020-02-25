@@ -2,13 +2,11 @@
 |-- cache
 |   |-- each
 |   |   `-- f06d93e013
-|   |       `-- d1dfed7680
+|   |       `-- 4528a36f2f
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/translate/d1dfed7680/0/result
+|   |           `-- result -> ../../../../exprs/translate/4528a36f2f/0/result
 |   `-- load
 |       |-- 6046a54e92
-|       |-- 6046a54e92.fna
-|       |-- 6046a54e92.fna.ids
 |       `-- 6046a54e92.ids
 |-- exprs
 |   |-- any
@@ -40,7 +38,7 @@
 |   |   |-- 27d007fff5
 |   |   |   `-- 0
 |   |   |       `-- result
-|   |   `-- d1dfed7680
+|   |   `-- 4528a36f2f
 |   |       `-- 0
 |   |           `-- result
 |   `-- translate_each
@@ -52,4 +50,4 @@
     |-- result -> ../exprs/any/2501200f6d/0/result
     `-- single.faa -> ../exprs/translate/27d007fff5/0/result
 
-33 directories, 19 files
+33 directories, 17 files

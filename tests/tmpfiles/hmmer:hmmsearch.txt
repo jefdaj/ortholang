@@ -17,7 +17,7 @@
 |   |       |-- de368a5ecd.pdb.pin
 |   |       `-- de368a5ecd.pdb.psq
 |   `-- seqio
-|       `-- ed21a5f424.txt -> ../../cache/lines/...
+|       `-- 32ad11cd52.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- blastp_db
 |   |   `-- aac0841202

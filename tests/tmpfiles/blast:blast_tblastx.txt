@@ -107,6 +107,9 @@
 |           |-- 27d007fff5
 |           |   `-- f7a7171333
 |           |       `-- 0
+|           |           |-- err
+|           |           |-- out
+|           |           `-- result -> out
 |           |-- 2f2b98e000
 |           |   `-- f7a7171333
 |           |       `-- 0
@@ -129,7 +132,8 @@
 |           |   `-- f7a7171333
 |           |       `-- 0
 |           |           |-- err
-|           |           `-- out
+|           |           |-- out
+|           |           `-- result -> out
 |           |-- 4c5c96b589
 |           |   `-- f7a7171333
 |           |       `-- 0
@@ -140,7 +144,8 @@
 |           |   `-- f7a7171333
 |           |       `-- 0
 |           |           |-- err
-|           |           `-- out
+|           |           |-- out
+|           |           `-- result -> out
 |           |-- b02bbcf92f
 |           |   `-- f7a7171333
 |           |       `-- 0
@@ -204,4 +209,4 @@
     |-- maga.fna -> ../exprs/gbk_to_fna/c73dd7aee4/ed75f67df6/0/result
     `-- result -> ../exprs/all/9a6e078612/0/result
 
-107 directories, 97 files
+107 directories, 102 files
