@@ -13,7 +13,7 @@ mkDerivation {
   pname = "OrthoLang";
   version = "0.9.4";
   src = ./.;
-  isLibrary = true;
+  isLibrary = true; # TODO remove since only ortholang-demo uses the library?
   isExecutable = true;
   enableSeparateDataOutput = true;
   executableHaskellDepends = [
@@ -30,15 +30,14 @@ mkDerivation {
   executablePkgconfigDepends = [ zlib ];
   description = "Short, reproducible phylogenomic cuts";
   license = stdenv.lib.licenses.agpl3;
-  # profiling:
-  enableExecutableProfiling = true;
-  enableLibraryProfiling = true;
-  configureFlags = [
-    # "--ghc-options=-fprof-auto-calls"
-    # "--ghc-options=-fprof-auto-exported"
-    # "--ghc-options=-fprof-cafs"
-    "--ghc-options=-rtsopts"
-    "--ghc-options=-fprof"
-    "--ghc-options=-fprof-auto"
-  ];
+
+  # uncomment for profiling (for example with +RTS -p -RTS):
+  # TODO is it still broken?
+  # enableExecutableProfiling = true;
+  # enableLibraryProfiling = true;
+  # configureFlags = [
+  #   "--ghc-options=-rtsopts"
+  #   "--ghc-options=-prof"
+  #   "--ghc-options=-fprof-auto"
+  # ];
 }
