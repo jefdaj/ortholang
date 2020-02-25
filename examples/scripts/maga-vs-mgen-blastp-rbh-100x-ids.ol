@@ -2,7 +2,6 @@
 # don't need any of the plotting code for that, so we can go back to the second
 # script...
 
-# TODO wasn't repeat going to be renamed to replace?
 include "maga-vs-mgen-blastp-rbh-3x.ol"
 solidHitIDs100 = all (repeat solidHitIDs n_repeats 100)
 result = solidHitIDs100
