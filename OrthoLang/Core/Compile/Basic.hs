@@ -31,7 +31,7 @@ import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toOrthoLangPa
 
 import Data.IORef                 (atomicModifyIORef')
 import Data.List                  (intersperse, isPrefixOf, isInfixOf)
-import Development.Shake.FilePath ((</>), (<.>))
+import Development.Shake.FilePath ((</>), (<.>), takeFileName)
 import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, writePaths, symlink)
@@ -316,6 +316,7 @@ aLoadHash hashSeqIDs cfg ref ids src _ = do
   need' cfg ref "ortholang.core.compile.basic.aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromOrthoLangPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
+      src'      = fromOrthoLangPath cfg src
       hashPath' = tmpDir' </> md5 -- <.> ext
       hashPath  = toOrthoLangPath cfg hashPath'
   if not hashSeqIDs
@@ -324,7 +325,9 @@ aLoadHash hashSeqIDs cfg ref ids src _ = do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toOrthoLangPath cfg idsPath'
       unlessExists idsPath' $ hashIDsFile2 cfg ref src hashPath
-      newIDs <- readHashedIDs cfg ref idsPath -- TODO put atomicModifyIORef' inside this?
+      let (OrthoLangPath k) = hashPath
+          v = takeFileName src'
+      newIDs <- fmap (M.insert k v) $ readHashedIDs cfg ref idsPath -- TODO put atomicModifyIORef' inside this?
       -- liftIO $ putStrLn $ "newIDs: " ++ show newIDs
       liftIO $ atomicModifyIORef' ids $ \is -> (M.union is newIDs, ()) -- TODO is this wrong?
   -- ids' <- liftIO $ readIORef ids

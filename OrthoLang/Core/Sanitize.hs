@@ -88,12 +88,14 @@ hashIDsFile2 cfg ref inFa outFa = do
       outFa'  = fromOrthoLangPath cfg outFa
       outIDs' = outFa' <.> "ids"
       outIDs  = toOrthoLangPath cfg outIDs'
-      (OrthoLangPath inFaGeneric) = inFa
+      -- (OrthoLangPath k) = inFa
+      -- v = takeFileName inPath'
+      -- ids' = M.insert k v ids
   liftIO $ createDirectoryIfMissing True $ takeDirectory inFa'
   liftIO $ createDirectoryIfMissing True $ takeDirectory outFa'
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "hash_seqids.py"
-    , cmdArguments = [outFa', inFa', inFaGeneric]
+    , cmdArguments = [outFa', inFa']
     , cmdFixEmpties = False
     , cmdParallel = False
     , cmdOptions = []

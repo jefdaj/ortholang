@@ -16,13 +16,11 @@ def hash_id(seqid):
 outfa = argv[1]
 outids = outfa + '.ids'
 infa = argv[2]
-infageneric = argv[3]
 
 # print argv
 # print 'outfa', outfa
 # print 'outids', outids
 # print 'infa', infa
-# print 'infageneric', infageneric
 
 # all hash -> seqid pairs so far
 SEQIDS = {}
@@ -39,7 +37,5 @@ with open(outfa, 'wb') as out:
 
 # TODO does SEQIDS need any sorting?
 with open(outids, 'wb') as out:
-    # TODO also write the fasta name itself at the top (how to do $TMPDIR?)
-    out.write('%s\t%s\n' % (infageneric, infa)) # TODO is outfa right here? probably have to pass user string
     for hashed in SEQIDS:
         out.write('%s\t%s\n' % (hashed, SEQIDS[hashed]))
