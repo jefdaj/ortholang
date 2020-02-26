@@ -32,12 +32,6 @@ mkDerivation {
   license = stdenv.lib.licenses.agpl3;
 
   # uncomment for profiling (for example with +RTS -p -RTS):
-  # TODO is it still broken?
-  # enableExecutableProfiling = true;
-  # enableLibraryProfiling = true;
-  # configureFlags = [
-  #   "--ghc-options=-rtsopts"
-  #   "--ghc-options=-prof"
-  #   "--ghc-options=-fprof-auto"
-  # ];
+  enableExecutableProfiling = false;
+  enableLibraryProfiling = false;
 }

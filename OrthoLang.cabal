@@ -35,18 +35,14 @@ common shared-properties
   hs-source-dirs:   .
   default-language: Haskell2010
   ghc-options: 
+        -Wno-orphans
+        -- -O2 is for building fast final code; switch to -O0 to speed compilation during development!
+        -O2
+        -- for threading and garbage collection rationale, see:
+        -- http://hackage.haskell.org/package/shake-0.14/docs/Development-Shake.html
         -threaded
         -rtsopts
-        -- TODO why does -N slow it down so much sometimes? remove?
-        -- TODO is there an optimal number/fraction of cores?
-        -- TODO does playing with flags for shake + other packages help?
-        -- TODO does -O2 help?
-        -- "-with-rtsopts=-N -IO -qg"
-        -Wno-orphans
-        -- -pedantic
-        -- -O0
-        -- -O2
-        -- TODO what about the old shake -qg?
+        "-with-rtsopts=-N -I0 -qg"
   pkgconfig-depends: zlib
   build-depends:    Glob,
                     -- TODO is this ok to bring back? MissingH,

@@ -369,6 +369,7 @@ data OrthoLangConfig = OrthoLangConfig
   , cfgNoProg  :: Bool
   , cfgParLock :: Resource
   , cfgOS      :: String
+  , cfgThreads :: Int
   }
   deriving Show
 
