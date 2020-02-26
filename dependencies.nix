@@ -107,7 +107,7 @@ in rec {
   ortholang-plots         = mkModule ./OrthoLang/Modules/Plots         [ myR ] "";
   ortholang-setstable     = mkModule ./OrthoLang/Modules/SetsTable     [ myR ] "";
   ortholang-range         = mkModule ./OrthoLang/Modules/Range         [ myR ] "";
-  ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast ] "";
+  ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
   ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast blastdbget ] "";
   ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
   ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
