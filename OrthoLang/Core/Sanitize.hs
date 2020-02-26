@@ -161,12 +161,12 @@ unhashIDsFile cfg ref idref inPath outPath = do
   let inPath'  = fromOrthoLangPath cfg inPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
-  liftIO $ putStrLn $ "txt: '" ++ txt ++ "'"
+  -- liftIO $ putStrLn $ "txt: '" ++ txt ++ "'"
   -- let txt' = unhashIDs ids txt
   ids <- liftIO $ readIORef idref
-  liftIO $ putStrLn $ "ids: " ++ show ids
+  -- liftIO $ putStrLn $ "ids: " ++ show ids
   let txt' = unhashIDs False ids txt
-  liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
+  -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
   withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' cfg [outPath]
 
