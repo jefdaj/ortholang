@@ -104,6 +104,7 @@ common shared-properties
                     raw-strings-qq,
                     logging,
                     progress-meter,
+                    store,
                     download
 
 library

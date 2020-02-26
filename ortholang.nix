@@ -7,7 +7,7 @@
 , safe-exceptions, scientific, setlocale, shake, silently, split
 , stdenv, strict, tasty, tasty-golden, tasty-hspec, tasty-hunit
 , tasty-quickcheck, temporary, terminal-size, text, time
-, transformers, unbounded-delays, unix, utility-ht, zlib
+, transformers, unbounded-delays, unix, utility-ht, zlib, store
 }:
 mkDerivation {
   pname = "OrthoLang";
@@ -25,7 +25,7 @@ mkDerivation {
     regex-posix retry safe-exceptions scientific setlocale shake
     silently split strict tasty tasty-golden tasty-hspec tasty-hunit
     tasty-quickcheck temporary terminal-size text time transformers
-    unbounded-delays unix utility-ht
+    unbounded-delays unix utility-ht store
   ];
   executablePkgconfigDepends = [ zlib ];
   description = "Short, reproducible phylogenomic cuts";
