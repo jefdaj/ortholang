@@ -48,7 +48,6 @@ import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
 import Control.Monad                  (when)
-import GHC.Conc (numCapabilities)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 import Control.Retry          (rsIterNumber)
@@ -63,10 +62,6 @@ import qualified System.Progress as P
 
 import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 import System.Time.Utils (renderSecs)
-
--- TODO what's an optimal number?
-numInterpreterThreads :: Int
-numInterpreterThreads = max 1 $ numCapabilities - 1
 
 -- TODO how to update one last time at the end?
 -- sample is in milliseconds (1000 = a second)
@@ -151,10 +146,11 @@ myShake cfg pm delay rules = do
         { shakeFiles     = cfgTmpDir cfg
         -- , shakeVerbosity = if isJust (cfgDebug cfg) then Chatty else Quiet
         , shakeVerbosity = Quiet
-        , shakeThreads   = numInterpreterThreads
+        , shakeThreads   = max 1 (cfgThreads cfg - 1)
         , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
         , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
-        , shakeChange    = ChangeModtimeAndDigest -- TODO test this
+        -- , shakeChange    = ChangeModtimeAndDigest -- TODO test this
+        , shakeChange    = ChangeModtime -- TODO test this
         -- , shakeCommandOptions = [EchoStdout True]
         , shakeProgress = updateLoop delay . updateProgress pm
         -- , shakeShare = cfgShare cfg -- TODO why doesn't this work?
@@ -213,7 +209,7 @@ eval hdl cfg ref ids rtype ls p = do
              , epUpdate = start
              , epDone    = 0
              , epTotal   = 0
-             , epThreads = numInterpreterThreads
+             , epThreads = cfgThreads cfg
              , epWidth = fromMaybe 80 $ cfgWidth cfg
              , epArrowShaft = '—'
              , epArrowHead = '▶'

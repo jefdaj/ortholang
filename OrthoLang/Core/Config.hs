@@ -28,6 +28,7 @@ import System.Info                (os)
 import Control.Logging (LogLevel(..), setLogLevel, setDebugSourceRegex)
 import Control.Monad         (when)
 import Data.List (isPrefixOf)
+import GHC.Conc (getNumProcessors)
 
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main OrthoLang config below.
@@ -76,6 +77,7 @@ loadConfig mods args = do
   par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
   os' <- getOS
+  cp <- getNumProcessors
   let res = OrthoLangConfig
               { cfgScript  = csc'
               , cfgInteractive = int
@@ -93,6 +95,7 @@ loadConfig mods args = do
               , cfgOutFile = out
               , cfgShare   = shr
               , cfgOS      = os'
+              , cfgThreads = cp
               }
   debug' $ show res
   updateDebug dbg
@@ -156,6 +159,7 @@ fields =
   , ("report" , (show . cfgReport , setReport ))
   , ("width"  , (show . cfgWidth  , setWidth  ))
   , ("output" , (show . cfgOutFile, setOutFile))
+  , ("threads", (show . cfgThreads, setThreads))
   -- TODO add share?
   ]
 
@@ -208,6 +212,11 @@ setReport :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
 setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   v       -> Right $ return $ cfg { cfgReport = v }
+
+setThreads :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setThreads cfg val = case maybeRead val of
+  Nothing -> Left  $ "invalid: " ++ val
+  Just v  -> Right $ return $ cfg { cfgThreads = v }
 
 setWidth :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
 setWidth cfg "Nothing" = Right $ return $ cfg { cfgWidth = Nothing }
