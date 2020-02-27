@@ -17,7 +17,7 @@ import Test.Tasty.HUnit      ((@=?), testCase)
 import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
--- import Data.Map              (empty)
+-- import Data.Map.Strict              (empty)
 -- import Data.IORef            (IORef)
 
 -- import Test.Tasty            (TestTree, testGroup)

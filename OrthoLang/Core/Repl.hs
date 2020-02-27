@@ -22,7 +22,7 @@ module OrthoLang.Core.Repl
   -- )
   where
 
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import System.Console.Haskeline hiding (catch)
 
 import Control.Monad            (when)
@@ -33,7 +33,7 @@ import Data.List                (isPrefixOf, isSuffixOf, filter, delete)
 import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
 import Data.Maybe               (catMaybes)
--- import Data.Map                 (empty)
+-- import Data.Map.Strict                 (empty)
 import Prelude           hiding (print)
 import OrthoLang.Core.Eval       (evalScript)
 import OrthoLang.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)

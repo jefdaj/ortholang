@@ -13,7 +13,7 @@ module OrthoLang.Modules.OrthoGroups
 
 import Development.Shake
 import OrthoLang.Core.Types
--- import qualified Data.Map as M
+-- import qualified Data.Map.Strict as M
 
 import Control.Monad               (forM)
 import OrthoLang.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,

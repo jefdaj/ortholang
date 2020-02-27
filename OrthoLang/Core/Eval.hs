@@ -32,7 +32,7 @@ import OrthoLang.Core.Pretty (renderIO)
 -- import OrthoLang.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
--- import qualified Data.Map as M
+-- import qualified Data.Map.Strict as M
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)

@@ -24,7 +24,7 @@ import Development.Shake
 import Development.Shake.FilePath (isAbsolute)
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 
 import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toOrthoLangPath,
                             fromOrthoLangPath, varPath, OrthoLangPath)

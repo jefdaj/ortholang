@@ -3,7 +3,7 @@
 module Main where
 
 import System.Locale.SetLocale
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 
 import Data.Version          (showVersion)
 import Paths_OrthoLang        (version)
