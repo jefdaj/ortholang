@@ -170,16 +170,21 @@ unhashIDsFile cfg ref idref inPath outPath = do
   withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' cfg [outPath]
 
+-- from: https://stackoverflow.com/a/40297465
+splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
+splitAtFirst x = fmap (drop 1) . break (x ==)
+
 -- TODO should this be IO or Action?
 readHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> Action HashedIDs
 readHashedIDs cfg ref path = do
   let path' = fromOrthoLangPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
   txt <- readFileStrict' cfg ref path'
-  let splitFn l = let ws = split "\t" l
-                  in if length ws < 2
-                       then error ("failed to split '" ++ l ++ "'")
-                       else (head ws, concat $ intersperse "\t" $ tail ws)
+  -- let splitFn l = let ws = split "\t" l
+  --                 in if length ws < 2
+  --                      then error ("failed to split '" ++ l ++ "'")
+  --                      else (head ws, concat $ intersperse "\t" $ tail ws)
+  let splitFn = splitAtFirst '\t'
       ids = map splitFn $ lines txt
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
   -- liftIO $ putStrLn $ "ids'' with    seqid_: " ++ show ((take 10 $ filter (\(k,_) ->     ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
