@@ -510,7 +510,8 @@ runCmd cfg ref@(disk, _) desc = do
 
     -- TODO use exitWith here?
     when (code /= cmdExitCode desc) $
-      handleCmdError cfg ref (cmdBinary desc) code stderrPath (cmdRmPatterns desc)
+      let rmPatterns = (replaceBaseName (cmdOutPath desc) "*"):(cmdRmPatterns desc)
+      in handleCmdError cfg ref (cmdBinary desc) code stderrPath rmPatterns
 
   let sPaths = stdoutPath:stderrPath:cmdSanitizePaths desc -- TODO main outpath too?
   -- sanitizeFilesInPlace cfg ref $ cmdSanitizePaths desc
