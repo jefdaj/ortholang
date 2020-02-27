@@ -3,7 +3,7 @@
 module OrthoLang.Core.Sanitize
   -- ( hashIDsFile
   ( hashIDsFile2
-  , writeHashedIDs
+  -- , writeHashedIDs
   , unhashIDs
   , unhashIDsFile
   , readHashedIDs
@@ -32,12 +32,12 @@ import qualified Data.Map.Strict   as M
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Util    (digest, digestLength, headOrDie)
+import OrthoLang.Core.Util    (digest, digestLength, headOrDie, trace)
 import OrthoLang.Core.Locks   (withWriteLock')
 import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
 import OrthoLang.Core.Paths   (toOrthoLangPath, fromOrthoLangPath)
 import Data.Char             (isSpace)
-import Data.Maybe            (catMaybes)
+import Data.Maybe            (catMaybes, mapMaybe)
 import Data.List             (isPrefixOf, intersperse)
 import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName, takeDirectory, (<.>))
@@ -49,21 +49,19 @@ import System.Exit                (ExitCode(..))
 
 -- if the line is a fasta sequence id we hash it, otherwise leave alone
 -- TODO use the map itself as an accumulator instead
-hashIDsLine :: String -> (String, HashedIDs)
-hashIDsLine ('>':seqID) = ('>':idHash, M.singleton idHash seqID) -- TODO issue dropping newlines here?
+hashIDsLine :: String -> (String, Maybe (String, String))
+hashIDsLine ('>':seqID) = ('>':idHash, Just (idHash, seqID)) -- TODO issue dropping newlines here?
   where
     idHash = "seqid_" ++ digest seqID -- TODO does storing the extra seqid_ prefix slow it down?
-hashIDsLine txt = (txt, M.empty)
+hashIDsLine txt = (txt, Nothing)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs
-hashIDsTxt :: String -> (String, HashedIDs)
-hashIDsTxt txt = foldl accFn ("", M.empty) $ map hashIDsLine $ lines txt
+hashIDsTxt :: String -> (String, M.Map String String)
+hashIDsTxt txt = (unlines lines', M.fromList seqids)
   where
-    -- hashIDsLine' s = let s' = hashIDsLine s in trace ("'" ++ s ++ "' -> " ++ show s') s'
-    accFn  (oldLines, oldIDs) (newLine, newIDs) = let !ls = oldLines ++ newLine ++ "\n"
-                                                      !ids = M.union oldIDs newIDs
-                                                  in (ls, ids)
-    -- joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, ids)
+    hashed = map hashIDsLine $ lines txt
+    lines' = map fst hashed
+    seqids = catMaybes $ map snd $ hashed
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
 -- hashIDsFile :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action HashedIDs
@@ -107,18 +105,18 @@ hashIDsFile2 cfg ref inFa outFa = do
     , cmdRmPatterns = [outFa', outIDs']
     }
 
-writeHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> HashedIDs -> Action ()
-writeHashedIDs cfg ref path ids = do
-  withWriteLock' ref path'
-    $ liftIO
-    $ writeFile path' -- TODO be strict?
-    $ unlines
-    $ map toLine
-    $ M.toList ids
-  trackWrite' cfg [path']
-  where
-    path' = fromOrthoLangPath cfg path
-    toLine (h, i) = h ++ "\t" ++ i
+-- writeHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> HashedIDs -> Action ()
+-- writeHashedIDs cfg ref path ids = do
+--   withWriteLock' ref path'
+--     $ liftIO
+--     $ writeFile path' -- TODO be strict?
+--     $ unlines
+--     $ map toLine
+--     $ M.toList ids
+--   trackWrite' cfg [path']
+--   where
+--     path' = fromOrthoLangPath cfg path
+--     toLine (h, i) = h ++ "\t" ++ i
 
 -- see https://stackoverflow.com/q/48571481
 -- unhashIDs :: HashedIDs -> String -> String
@@ -140,7 +138,7 @@ unhashIDs longIDs ids t = case findNext t of
     replaceNextFold txt = foldr replacePattern txt patterns
     replacePattern (ptn, fn) txt = if ptn `isPrefixOf` txt then replaceLen txt fn else txt
     replaceLen txt lFn = let (sid, rest) = splitAt (lFn txt) txt
-                         in case M.lookup sid ids of
+                         in case lookupID ids sid of
                               Nothing -> txt -- happens to other $TMPDIR paths
                               Just v  -> if longIDs
                                            then v ++ rest
@@ -175,7 +173,7 @@ splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
 -- TODO should this be IO or Action?
-readHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> Action HashedIDs
+readHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> Action (M.Map String String)
 readHashedIDs cfg ref path = do
   let path' = fromOrthoLangPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
@@ -192,8 +190,19 @@ readHashedIDs cfg ref path = do
   return $ M.fromList ids
 
 -- TODO display error to user in a cleaner way than error!
-lookupID :: HashedIDs -> String -> [String]
-lookupID ids s = map fst $ filter (\(k,v) -> s == k || s `isPrefixOf` v) (M.toList ids)
+-- TODO is this really needed? seems suuuper slow. replace with error or just by warning them?
+-- lookupID :: HashedIDs -> String -> [String]
+-- lookupID ids s = map fst $ filter (\(k,v) -> s == k || s `isPrefixOf` v) (M.toList ids)
+
+-- this works whether the ID is for a file or seqid. files are checked first
+lookupID :: HashedIDs -> String -> Maybe String
+lookupID (HashedIDs {hFiles = f, hSeqIDs = s}) i =
+  if M.member i f then M.lookup i f
+  else case catMaybes (map (M.lookup i) (M.elems s)) of
+    []  -> Nothing
+    [x] -> Just x
+    -- xs  -> error $ "duplicate seqid: " ++ show xs
+    xs  -> trace "core.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)
 
 -- TODO move to Actions? causes an import cycle so far
 lookupIDsFile :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
@@ -201,8 +210,9 @@ lookupIDsFile cfg ref ids inPath outPath = do
   partialIDs <- readList cfg ref $ fromOrthoLangPath cfg inPath
   ids' <- liftIO $ readIORef ids
   let lookupFn v = case lookupID ids' v of
-                     [] -> liftIO (putStrLn ("warning: no ID found for '" ++ v ++ "'. these are the ids: " ++ show ids')) >> return []
-                     is -> return is
-  idKeys <- fmap concat $ mapM lookupFn partialIDs
+                     Just i  -> return i
+                     Nothing -> do
+                       liftIO $ putStrLn ("warning: no ID found for '" ++ v ++ "'")
+                       return v
+  idKeys <- mapM lookupFn partialIDs
   writeCachedLines cfg ref (fromOrthoLangPath cfg outPath) idKeys
-  where

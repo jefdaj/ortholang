@@ -427,7 +427,7 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
 quotedCompletions :: MonadIO m => OrthoLangState -> String -> m [Completion]
 quotedCompletions (_, _, _, idRef) wordSoFar = do
   files  <- listFiles wordSoFar
-  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ liftIO $ readIORef idRef
+  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ fmap (M.unions . M.elems . hSeqIDs) $ liftIO $ readIORef idRef
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
   return $ files ++ seqIDs'
 

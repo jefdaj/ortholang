@@ -15,7 +15,8 @@ import Development.Shake
 import OrthoLang.Core.Types
 -- import qualified Data.Map.Strict as M
 
-import Control.Monad               (forM)
+import Control.Monad               (forM, when)
+import Data.Maybe                  (isJust, catMaybes)
 import OrthoLang.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
                                     writePaths, readFileStrict', readPaths, runCmd, CmdDesc(..), need')
 import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rSimple)
@@ -178,10 +179,10 @@ aOrthogroupContaining :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangP
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   ids' <- liftIO $ readIORef ids
   partialID <- readLit cfg ref $ fromOrthoLangPath cfg idPath
+  -- TODO should there be a separate case for multiple matches?
   let geneId = case lookupID ids' partialID of
-                 (k:[]) -> k
-                 ([])   -> error $ "ERROR: id '" ++ partialID ++ "' not found"
-                 ms     -> error $ "ERROR: multiple ids match '" ++ partialID ++ "': " ++ show ms
+                 Just k -> k
+                 Nothing -> error $ "ERROR: id '" ++ partialID ++ "' not found"
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits cfg ref (fromOrthoLangPath cfg out) group
@@ -211,8 +212,10 @@ containsOneOf lists elems = filter (flip any elems . flip elem) lists
 aOrthogroupsFilter :: FilterFn -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   ids' <- liftIO $ readIORef ids
-  geneIds <- fmap concat $ fmap (map $ lookupID ids') $ readLits cfg ref $ fromOrthoLangPath cfg idsPath
-  groups  <-  parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
+  lookups <- fmap (map $ lookupID ids') $ readLits cfg ref $ fromOrthoLangPath cfg idsPath
+  when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
+  let geneIds = catMaybes lookups
+  groups <- parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
   writeOrthogroups cfg ref ids out groups'
 aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args

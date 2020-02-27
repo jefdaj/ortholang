@@ -25,7 +25,7 @@ module OrthoLang.Core.Types
   , OrthoLangVar(..)
   , OrthoLangScript
   , Locks
-  , HashedIDs
+  , HashedIDs(..)
   , HashedIDsRef
   , OrthoLangState
   , ensureResult
