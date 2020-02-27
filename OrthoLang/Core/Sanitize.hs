@@ -1,8 +1,8 @@
 {-# LANGUAGE BangPatterns #-}
 
 module OrthoLang.Core.Sanitize
-  ( hashIDsFile
-  , hashIDsFile2
+  -- ( hashIDsFile
+  ( hashIDsFile2
   , writeHashedIDs
   , unhashIDs
   , unhashIDsFile
@@ -66,20 +66,20 @@ hashIDsTxt txt = foldl accFn ("", M.empty) $ map hashIDsLine $ lines txt
     -- joinFn (hashedLines, ids) = (unlines $ D.toList hashedLines, ids)
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
-hashIDsFile :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action HashedIDs
-hashIDsFile cfg ref inPath outPath = do
-  let inPath'  = fromOrthoLangPath cfg inPath
-      outPath' = fromOrthoLangPath cfg outPath
-  -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
-  txt <- readFileStrict' cfg ref inPath'
-  let (!fasta', !ids) = hashIDsTxt txt
-      (OrthoLangPath k) = outPath
-      v = takeFileName inPath'
-      -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
-      ids' = M.insert k v ids
-  withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
-  trackWrite' cfg [outPath']
-  return ids'
+-- hashIDsFile :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action HashedIDs
+-- hashIDsFile cfg ref inPath outPath = do
+--   let inPath'  = fromOrthoLangPath cfg inPath
+--       outPath' = fromOrthoLangPath cfg outPath
+--   -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
+--   txt <- readFileStrict' cfg ref inPath'
+--   let (!fasta', !ids) = hashIDsTxt txt
+--       (OrthoLangPath k) = outPath
+--       v = takeFileName inPath'
+--       -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
+--       ids' = M.insert k v ids
+--   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
+--   trackWrite' cfg [outPath']
+--   return ids'
 
 -- rewrite of hashIDsFile as a python script; will it fix the space leak?
 hashIDsFile2 :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action ()
