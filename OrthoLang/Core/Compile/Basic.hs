@@ -324,14 +324,13 @@ aLoadHash hashSeqIDs cfg ref ids src _ = do
     else do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toOrthoLangPath cfg idsPath'
+
       unlessExists idsPath' $ hashIDsFile2 cfg ref src hashPath
       let (OrthoLangPath k) = hashPath
           v = takeFileName src'
       newIDs <- fmap (M.insert k v) $ readHashedIDs cfg ref idsPath -- TODO put atomicModifyIORef' inside this?
-      -- liftIO $ putStrLn $ "newIDs: " ++ show newIDs
       liftIO $ atomicModifyIORef' ids $ \is -> (M.union is newIDs, ()) -- TODO is this wrong?
-  -- ids' <- liftIO $ readIORef ids
-  -- liftIO $ putStrLn $ "ids': " ++ show ids'
+
   return hashPath
   where
     src' = fromOrthoLangPath cfg src

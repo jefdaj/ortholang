@@ -416,7 +416,12 @@ operatorChars cfg = chars
 
 -- we sanitize the input fasta files to prevent various bugs,
 -- then use this hash -> seqid map to put the original ids back at the end
-type HashedIDs = M.Map String String
+-- hFiles is for making paths generic
+-- hSeqIDs is the main one, and stores hash -> seqid maps indexed by their (generic) hFiles path
+data HashedIDs = HashedIDs
+  { hFiles  :: M.Map String String
+  , hSeqIDs :: M.Map String (M.Map String String)
+  }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
