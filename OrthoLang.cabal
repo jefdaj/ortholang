@@ -42,7 +42,7 @@ common shared-properties
         -- http://hackage.haskell.org/package/shake-0.14/docs/Development-Shake.html
         -threaded
         -rtsopts
-        "-with-rtsopts=-N -I0 -qg"
+        "-with-rtsopts=-N8 -I0 -qg"
   pkgconfig-depends: zlib
   build-depends:    Glob,
                     -- TODO is this ok to bring back? MissingH,

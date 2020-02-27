@@ -74,7 +74,7 @@ loadConfig mods args = do
   out <- mapM absolutize =<< loadField args cfg "output"
   shr <- mapM (\p -> if "http" `isPrefixOf` p then return p else absolutize p) =<< loadField args cfg "shared"
   let ctp = getAllArgs args (longOption "test")
-  par <- newResourceIO "parallel" 1 -- TODO set to number of nodes
+  par <- newResourceIO "parallel" 8 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
   os' <- getOS
   cp <- getNumProcessors
