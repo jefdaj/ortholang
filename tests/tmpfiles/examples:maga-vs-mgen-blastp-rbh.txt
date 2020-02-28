@@ -24,9 +24,6 @@
 |   |       |-- 954b3ac6f3
 |   |       |   `-- 635b625879
 |   |       |       `-- 0
-|   |       |           |-- err
-|   |       |           |-- out
-|   |       |           `-- result -> out
 |   |       `-- ed39c166ed
 |   |           `-- 332367b160
 |   |               `-- 0
@@ -78,4 +75,4 @@
     |-- result -> ../vars/recHits.bht
     `-- revHits.bht -> ../exprs/blastp_db/66dc2a3b29/954b3ac6f3/635b625879/0/result
 
-42 directories, 36 files
+42 directories, 33 files

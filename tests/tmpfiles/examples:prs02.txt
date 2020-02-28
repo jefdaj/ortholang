@@ -29,9 +29,6 @@
 |   |   |   `-- 158ecbe0af
 |   |   |       `-- abe47cf05e
 |   |   |           `-- 0
-|   |   |               |-- err
-|   |   |               |-- out
-|   |   |               `-- result -> out
 |   |   |-- 66dc2a3b29
 |   |   |   `-- 158ecbe0af
 |   |   |       `-- abe47cf05e
@@ -190,4 +187,4 @@
     |-- pcc7942.faa -> ../exprs/concat_faa/f9157dd6ea/0/result
     `-- result -> ../vars/lengths.num.list
 
-107 directories, 83 files
+107 directories, 80 files

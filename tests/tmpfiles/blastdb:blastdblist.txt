@@ -2,8 +2,7 @@
 |-- cache
 |   `-- blastdbget
 |       |-- dblist.txt
-|       |-- dblist.txt.err
-|       `-- dblist.txt.out -> $TMPDIR/cache/blastdbget/dblist.txt
+|       `-- dblist.txt.err
 |-- exprs
 |   |-- any
 |   |   |-- 9201a245d3
@@ -58,4 +57,4 @@
     |-- proks.str.list -> ../exprs/blastdblist/4a07e286e4/0/result
     `-- result -> ../exprs/any/e8690b7efe/0/result
 
-36 directories, 22 files
+36 directories, 21 files

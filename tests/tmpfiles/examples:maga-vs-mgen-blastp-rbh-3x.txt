@@ -45,9 +45,6 @@
 |   |       |-- 4a12ab14e5
 |   |       |   `-- 635b625879
 |   |       |       `-- 0
-|   |       |           |-- err
-|   |       |           |-- out
-|   |       |           `-- result -> out
 |   |       |-- 954b3ac6f3
 |   |       |   `-- 635b625879
 |   |       |       `-- 0
@@ -58,13 +55,11 @@
 |   |           |-- 03e219c202
 |   |           |   `-- 0
 |   |           |       |-- err
-|   |           |       |-- out
-|   |           |       `-- result -> out
+|   |           |       `-- out
 |   |           |-- 332367b160
 |   |           |   `-- 0
 |   |           |       |-- err
-|   |           |       |-- out
-|   |           |       `-- result -> out
+|   |           |       `-- out
 |   |           `-- 91c60b1794
 |   |               `-- 0
 |   |                   |-- err
@@ -180,4 +175,4 @@
     |-- solidHitIDs.str.list -> ../exprs/all/730524c915/0/result
     `-- solidHits.bht.list -> ../exprs/repeat/6e9cf81c66/954b3ac6f3/79988522e8/0/result
 
-95 directories, 85 files
+95 directories, 80 files

@@ -107,63 +107,45 @@
 |           |-- 27d007fff5
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
 |           |           `-- result -> out
 |           |-- 2f2b98e000
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
 |           |           `-- result -> out
 |           |-- 31d8b156f6
 |           |   `-- f7a7171333
 |           |       `-- 0
 |           |           |-- err
-|           |           |-- out
-|           |           `-- result -> out
+|           |           `-- out
 |           |-- 3dc6bb8407
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
 |           |           `-- result -> out
 |           |-- 4a53c25a37
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
-|           |           `-- result -> out
 |           |-- 4c5c96b589
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
 |           |           `-- result -> out
 |           |-- 8b954053f9
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
 |           |           `-- result -> out
 |           |-- b02bbcf92f
 |           |   `-- f7a7171333
 |           |       `-- 0
-|           |           |-- err
-|           |           |-- out
 |           |           `-- result -> out
 |           |-- b2cf4f1741
 |           |   `-- f7a7171333
 |           |       `-- 0
 |           |           |-- err
-|           |           |-- out
-|           |           `-- result -> out
+|           |           `-- out
 |           `-- d401d64d83
 |               `-- f7a7171333
 |                   `-- 0
 |                       |-- err
-|                       |-- out
-|                       `-- result -> out
+|                       `-- out
 |-- reps
 |   |-- 17d9e94d5c
 |   |   |-- genes5.fna -> ../../exprs/load_fna/f4e1d9e6a0/0/result
@@ -209,4 +191,4 @@
     |-- maga.fna -> ../exprs/gbk_to_fna/c73dd7aee4/ed75f67df6/0/result
     `-- result -> ../exprs/all/9a6e078612/0/result
 
-107 directories, 102 files
+107 directories, 84 files

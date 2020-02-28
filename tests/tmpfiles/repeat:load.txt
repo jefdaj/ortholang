@@ -18,54 +18,32 @@
 |   |       `-- 56b743f0e5
 |   |           |-- 0ddd2369f9
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
-|   |           |       `-- result -> out
 |   |           |-- 5b040b6aa0
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
 |   |           |       `-- result -> out
 |   |           |-- 6a2118269a
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
 |   |           |       `-- result -> out
 |   |           |-- 6a4b671a56
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
 |   |           |       `-- result -> out
 |   |           |-- 7cbf5031bd
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
 |   |           |       `-- result -> out
 |   |           |-- 91d8dfa0e2
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
-|   |           |       `-- result -> out
 |   |           |-- a22d087645
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
 |   |           |       `-- result -> out
 |   |           |-- cc27722228
 |   |           |   `-- 0
-|   |           |       |-- err
-|   |           |       |-- out
 |   |           |       `-- result -> out
 |   |           |-- ec91c5acc8
 |   |           |   `-- 0
 |   |           |       |-- err
-|   |           |       |-- out
-|   |           |       `-- result -> out
+|   |           |       `-- out
 |   |           `-- f2ce21e0e9
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
-|   |                   `-- result -> out
 |   |-- length
 |   |   `-- e1ddab5537
 |   |       `-- 0
@@ -213,4 +191,4 @@
     |-- mgen.faa -> ../exprs/load_faa/c277aef0d4/0/result
     `-- result -> ../exprs/length/e1ddab5537/0/result
 
-105 directories, 108 files
+105 directories, 86 files
