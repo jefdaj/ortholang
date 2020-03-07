@@ -47,7 +47,7 @@ import Text.Regex.Posix           ((=~))
 type Locks = (Resource, IORef (Map FilePath (RWLock, FileProgress)))
 
 -- TODO should there also be Failed?
-data FileProgress = Success Int | Attempt Int
+data FileProgress = ReadOnly | Success Int | Attempt Int
   deriving (Read, Show, Eq)
 
 {- A horrible hack to avoid import the import cycle caused by using a Config
@@ -71,16 +71,27 @@ initLocks = do
   locks <- newIORef Map.empty
   return (disk, locks)
 
-getLock :: LocksRef -> FilePath -> IO RWLock
-getLock (_, ref) path = do
+getReadLock :: Locks -> FilePath -> IO RWLock
+getReadLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
-  debugLock $ "getLock getting lock for \"" ++ path ++ "\""
+  debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
+  atomicModifyIORef' ref $ \c -> case Map.lookup path c of
+    Nothing -> (Map.insert path (l, ReadOnly) c, l) -- TODO error here too sometimes?
+    Just (_ , Attempt _) -> error $ "Attempt to read file not written successfully yet: '" ++ path ++ "'"
+    Just (l', ReadOnly ) -> (c, l')
+    Just (l', Success _) -> (c, l')
+
+getWriteLock :: Locks -> FilePath -> IO RWLock
+getWriteLock (_, ref) path = do
+  l <- RWLock.new -- TODO how to avoid creating extra locks here?
+  debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path (l, Attempt 1) c, l)
     Just (l', Success n) -> if whitelisted path
                               then (Map.insert path (l, Success (n+1)) c, l')
-                              else error $ "Attempt to getLock when already done: '" ++ path ++ "'"
+                              else error $ "Attempt to re-write successful file: '" ++ path ++ "'"
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
+    Just (l', ReadOnly ) -> error $ "Attempt to write read-only file: '" ++ path ++ "'"
 
 markDone :: Locks -> FilePath -> IO ()
 markDone (_, ref) path = do
@@ -115,25 +126,23 @@ withMarkDone' ref paths act = do
 
 withReadLock :: Locks -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
-  l <- liftIO $ getLock ref path
+  l <- liftIO $ getReadLock ref path
   bracket_
     (debugLock ("withReadLock acquiring \"" ++ path ++ "\"") >> RWLock.acquireRead l)
     (debugLock ("withReadLock releasing \"" ++ path ++ "\"") >> RWLock.releaseRead l)
     ioFn
 
-withReadLock' :: FilePath -> Action a -> Action a
-withReadLock' path actFn = do
-  ref <- fmap fromJust getShakeExtra
-  l <- liftIO $ getLock ref path
-  debugLock' $ "withReadLock' acquiring \"" ++ path ++ "\""
+withReadLock' :: Locks -> FilePath -> Action a -> Action a
+withReadLock' ref path actFn = do
+  l <- liftIO $ getReadLock ref path
+  debugLock' $ "withReadLock' acquiring '" ++ path ++ "'"
   (liftIO (RWLock.acquireRead l) >> actFn)
     `actionFinally`
     (debugLock ("withReadLock' releasing \"" ++ path ++ "\"") >> RWLock.releaseRead l)
 
-withReadLocks' :: [FilePath] -> Action a -> Action a
-withReadLocks' paths actFn = do
-  ref <- fmap fromJust getShakeExtra
-  locks <- liftIO $ mapM (getLock ref) (nub paths)
+withReadLocks' :: Locks -> [FilePath] -> Action a -> Action a
+withReadLocks' ref paths actFn = do
+  locks <- liftIO $ mapM (getReadLock ref) (nub paths)
   debugLock' $ "withReadLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireRead locks) >> actFn)
     `actionFinally`
@@ -169,7 +178,7 @@ but sometimes a lock is just a lock. Then you want this function instead.
 withWriteLockEmpty :: LocksRef -> FilePath -> IO a -> IO a
 withWriteLockEmpty ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
-  l <- liftIO $ getLock ref path
+  l <- liftIO $ getWriteLock ref path
   res <- bracket_
     (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
     (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
@@ -180,8 +189,7 @@ withWriteLockEmpty ref path ioFn = do
 withWriteLocks' :: [FilePath] -> Action a -> Action a
 withWriteLocks' paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
-  ref <- fmap fromJust getShakeExtra
-  locks <- liftIO $ mapM (getLock ref) (nub paths)
+  locks <- liftIO $ mapM (getWriteLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireWrite locks) >> withMarkDone' ref (nub paths) actFn)
     `actionFinally`
@@ -190,9 +198,8 @@ withWriteLocks' paths actFn = do
 withWriteLock' :: FilePath -> Action a -> Action a
 withWriteLock' path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path
-  debugLock' $ "withWriteLock' acquiring \"" ++ path ++ "\""
-  ref <- fmap fromJust getShakeExtra
-  l <- liftIO $ getLock ref path
+  debugLock' $ "withWriteLock' acquiring '" ++ path ++ "'"
+  l <- liftIO $ getWriteLock ref path
   (liftIO (RWLock.acquireWrite l) >> withMarkDone' ref [path] actFn)
     `actionFinally`
     (debugLock ("withWriteLock' releasing \"" ++ path ++ "\"") >> RWLock.releaseWrite l)
