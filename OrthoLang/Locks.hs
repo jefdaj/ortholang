@@ -38,6 +38,8 @@ import System.FilePath            (takeDirectory)
 import System.Posix.Files         (setFileMode)
 import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
+-- import System.FilePath.Glob       (compile, match)
+import Text.Regex.Posix           ((=~))
 
 -- import Control.Concurrent.Thread.Delay (delay)
 
@@ -75,7 +77,9 @@ getLock (_, ref) path = do
   debugLock $ "getLock getting lock for \"" ++ path ++ "\""
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path (l, Attempt 1) c, l)
-    Just (l', Success _) -> error $ "Attempt to getLock when already done: '" ++ path ++ "'"
+    Just (l', Success n) -> if whitelisted path
+                              then (Map.insert path (l, Success (n+1)) c, l')
+                              else error $ "Attempt to getLock when already done: '" ++ path ++ "'"
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
 
 markDone :: Locks -> FilePath -> IO ()
@@ -83,8 +87,18 @@ markDone (_, ref) path = do
   debugLock $ "markDone '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> error $ "markDone called on nonexistent lock path '" ++ path ++ "'"
-    Just (l, Success _) -> error $ "markDone called on already-finished lock path '" ++ path ++ "'"
+    Just (l, Success n) -> if whitelisted path
+                             then (Map.insert path (l, Success (n+1)) c, ())
+                             else error $ "markDone called on already-finished lock path '" ++ path ++ "'"
     Just (l, Attempt n) -> (Map.insert path (l, Success (n+1)) c, ())
+
+-- describes some paths we don't want to see duplicate write errors for
+whitelisted :: FilePath -> Bool
+whitelisted path = any (\p -> path =~ p) regexes
+  where
+    regexes =
+      [ "\\.show$"
+      ]
 
 withMarkDone :: Locks -> [FilePath] -> IO a -> IO a
 withMarkDone ref paths act = do
