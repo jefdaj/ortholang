@@ -217,7 +217,7 @@ eval hdl cfg ref ids dr rtype ls p = do
              , epArrowShaft = '—'
              , epArrowHead = '▶'
              }
-      delay = 1000000 -- in microseconds
+      delay = 100000 -- in microseconds
       pOpts = P.Progress
                 { progressDelay = delay
                 , progressHandle = hdl
