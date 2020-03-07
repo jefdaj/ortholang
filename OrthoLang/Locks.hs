@@ -41,10 +41,12 @@ import System.IO.Error            (isDoesNotExistError)
 
 -- import Control.Concurrent.Thread.Delay (delay)
 
--- TODO parametarize FilePath and re-export with Path in Types.hs?
--- TODO can this go into ActionState/GlobalEnv in any saner way?
-type Locks    = Map FilePath RWLock
-type LocksRef = (Resource, IORef Locks)
+-- TODO parametarize FilePath and re-export with OrthoLangPath in Types.hs?
+type Locks = (Resource, IORef (Map FilePath (RWLock, FileProgress)))
+
+-- TODO should there also be Failed?
+data FileProgress = Success | Attempt Int
+  deriving (Read, Show, Eq)
 
 {- A horrible hack to avoid import the import cycle caused by using a Config
  - here. For now, just change the code to enable.
@@ -72,8 +74,9 @@ getLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   debugLock $ "getLock getting lock for \"" ++ path ++ "\""
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
-    Nothing -> (Map.insert path l c, l)
-    Just l' -> (c, l')
+    Nothing -> (Map.insert path (l, Attempt 1) c, l)
+    Just (l', Success) -> error $ "Attempt to getLock when already done: '" ++ path ++ "'"
+    Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
 
 withReadLock :: LocksRef -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
