@@ -45,7 +45,7 @@ import System.IO.Error            (isDoesNotExistError)
 type Locks = (Resource, IORef (Map FilePath (RWLock, FileProgress)))
 
 -- TODO should there also be Failed?
-data FileProgress = Success | Attempt Int
+data FileProgress = Success Int | Attempt Int
   deriving (Read, Show, Eq)
 
 {- A horrible hack to avoid import the import cycle caused by using a Config
@@ -75,10 +75,31 @@ getLock (_, ref) path = do
   debugLock $ "getLock getting lock for \"" ++ path ++ "\""
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path (l, Attempt 1) c, l)
-    Just (l', Success) -> error $ "Attempt to getLock when already done: '" ++ path ++ "'"
+    Just (l', Success _) -> error $ "Attempt to getLock when already done: '" ++ path ++ "'"
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
 
-withReadLock :: LocksRef -> FilePath -> IO a -> IO a
+markDone :: Locks -> FilePath -> IO ()
+markDone (_, ref) path = do
+  debugLock $ "markDone '" ++ path ++ "'"
+  atomicModifyIORef' ref $ \c -> case Map.lookup path c of
+    Nothing -> error $ "markDone called on nonexistent lock path '" ++ path ++ "'"
+    Just (l, Success _) -> error $ "markDone called on already-finished lock path '" ++ path ++ "'"
+    Just (l, Attempt n) -> (Map.insert path (l, Success (n+1)) c, ())
+
+withMarkDone :: Locks -> [FilePath] -> IO a -> IO a
+withMarkDone ref paths act = do
+  res <- act
+  mapM_ (markDone ref) paths
+  return res
+
+-- TODO use MonadIO or something to unify these?
+withMarkDone' :: Locks -> [FilePath] -> Action a -> Action a
+withMarkDone' ref paths act = do
+  res <- act
+  liftIO $ mapM_ (markDone ref) paths
+  return res
+
+withReadLock :: Locks -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
   l <- liftIO $ getLock ref path
   bracket_
@@ -136,9 +157,10 @@ withWriteLockEmpty ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   l <- liftIO $ getLock ref path
   res <- bracket_
-    (debugLock ("withWriteLock acquiring \"" ++ path ++ "\"") >> RWLock.acquireWrite l)
-    (debugLock ("withWriteLock releasing \"" ++ path ++ "\"") >> RWLock.releaseWrite l)
-    ioFn
+    (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
+    (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
+    (withMarkDone ref [path] ioFn)
+  assertNonEmptyFile ref path
   return res
 
 withWriteLocks' :: [FilePath] -> Action a -> Action a
@@ -147,7 +169,7 @@ withWriteLocks' paths actFn = do
   ref <- fmap fromJust getShakeExtra
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
-  (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
+  (liftIO (mapM_ RWLock.acquireWrite locks) >> withMarkDone' ref (nub paths) actFn)
     `actionFinally`
     (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
@@ -157,7 +179,7 @@ withWriteLock' path actFn = do
   debugLock' $ "withWriteLock' acquiring \"" ++ path ++ "\""
   ref <- fmap fromJust getShakeExtra
   l <- liftIO $ getLock ref path
-  (liftIO (RWLock.acquireWrite l) >> actFn)
+  (liftIO (RWLock.acquireWrite l) >> withMarkDone' ref [path] actFn)
     `actionFinally`
     (debugLock ("withWriteLock' releasing \"" ++ path ++ "\"") >> RWLock.releaseWrite l)
 
