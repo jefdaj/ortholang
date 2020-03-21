@@ -1,5 +1,8 @@
-module OrthoLang.Locks
-  ( LocksRef
+-- TODO remove any unneccessary locks that aren't withWriteOnce* from the other modules!
+-- TODO wait do that, but also in a separate branch rewrite the locking simpler with whole expr dirs at once!
+
+module OrthoLang.Core.Locks
+  ( Locks
   , initLocks
   , withReadLock
   , withReadLock'
@@ -87,9 +90,11 @@ getWriteLock (_, ref) path = do
   debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path (l, Attempt 1) c, l)
-    Just (l', Success n) -> if whitelisted path
-                              then (Map.insert path (l, Success (n+1)) c, l')
-                              else error $ "Attempt to re-write successful file: '" ++ path ++ "'"
+    -- TODO hey should this be l' in the insert???
+    -- Just (l', Success n) -> if whitelisted path
+    --                           then (Map.insert path (l, Success (n+1)) c, l')
+    --                           else error $ "Attempt to re-write successful file: '" ++ path ++ "'" -- TODO remove error?
+    Just (l', Success n) -> (Map.insert path (l', Attempt (n+1)) c, l')
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
     Just (l', ReadOnly ) -> error $ "Attempt to write read-only file: '" ++ path ++ "'"
 
@@ -212,7 +217,9 @@ withWriteLock' path actFn = do
  -
  - This also re-implements some of debugTrackWrite to avoid an import cycle.
  -
- - TODO can this be removed once newrules work?
+ - TODO rewrite to return immediately after locking if the FileProgress is Success
+ -      ... which means getting the lock itself shouldn't throw an error right?
+ -      or should this be removed entirely for runCmd and assume Shake knows what it's doing instead?
  -}
 withWriteOnce :: FilePath -> Action () -> Action ()
 withWriteOnce path actFn = withWriteLock' path $ do
