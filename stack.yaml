@@ -17,8 +17,10 @@ packages:
 - logging
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
+# lts-15.3 = ghc882
+# lts-14.27 = ghc865
 system-ghc: true
-resolver: lts-14.4
+resolver: lts-14.27
 extra-deps:
   - posix-escape-0.1
   - path-io-1.6.0
