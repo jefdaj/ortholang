@@ -63,7 +63,7 @@ extractNum _ _ = error "bad argument to extractNum"
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the salts should work?
-rRepeatN :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rRepeatN :: RulesFn
 rRepeatN s@(scr, _, _, _) (OrthoLangFun t salt deps name [resExpr, subVar@(OrthoLangRef _ _ _ v), repsExpr]) =
   rReplaceEach s (OrthoLangFun t salt deps name [resExpr, subVar, subList])
   where

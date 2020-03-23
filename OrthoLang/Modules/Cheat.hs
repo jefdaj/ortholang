@@ -67,5 +67,5 @@ cheatTypeCheck (script : rtype : _)
 cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
                           \be strings specifying the script path and return type"
 
-rCheat :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rCheat :: RulesFn
 rCheat = undefined

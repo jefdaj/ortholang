@@ -102,7 +102,7 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 -- diamond_blast* --
 --------------------
 
--- type RulesFn     = OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+-- type RulesFn     = RulesFn
 -- type ActionFn    = OrthoLangConfig -> CacheDir -> [ExprPath] -> Action ()
 type ActionFn2 = OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
 type DiamondBlastDesc = (String, [String] -> RulesFn, [String], OrthoLangType, OrthoLangType, OrthoLangType)

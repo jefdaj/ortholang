@@ -58,7 +58,7 @@ globFiles = OrthoLangFunction
 --    (should use str rather than elemRtnType tho)
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
-rGlobFiles :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rGlobFiles :: RulesFn
 rGlobFiles s@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
   let outPath = exprPath s e

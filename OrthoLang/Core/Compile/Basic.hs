@@ -60,7 +60,7 @@ debugRules cfg name input out = debug cfg msg out
 -- compile the OrthoLang AST --
 ------------------------------
 
-rExpr :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rExpr :: RulesFn
 rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e
 rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
 rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e
@@ -104,7 +104,7 @@ compileScript s@(as, _, _, _) _ = do
       -- Just h  -> "result." ++ h
 
 -- write a literal value from OrthoLang source code to file
-rLit :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rLit :: RulesFn
 rLit s@(_, cfg, ref, ids) expr = do
   let path  = exprPath s expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromOrthoLangPath cfg path
@@ -122,7 +122,7 @@ aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
     out'  = fromOrthoLangPath cfg out
     out'' = traceA "aLit" out' [ePath, out']
 
-rList :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rList :: RulesFn
 -- TODO is this the bug? refers to a list of other empty lists, no?
 -- rList s e@(OrthoLangList Empty _ _ _) = rListLits s e -- TODO remove? rListPaths?
 rList s e@(OrthoLangList rtn _ _ _)
@@ -132,7 +132,7 @@ rList _ _ = error "bad arguemnt to rList"
 
 -- special case for empty lists
 -- TODO is a special type for this really needed?
--- rListEmpty :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+-- rListEmpty :: RulesFn
 -- rListEmpty s@(_,cfg,ref) e@(OrthoLangList Empty _ _ _) = do
 --   let link  = exprPath s e
 --       link' = debugRules cfg "rListEmpty" e $ fromOrthoLangPath cfg link
@@ -149,7 +149,7 @@ rList _ _ = error "bad arguemnt to rList"
 --     link'' = traceAction cfg "aListEmpty" link' [link']
 
 -- special case for writing lists of strings or numbers as a single file
-rListLits :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rListLits :: RulesFn
 rListLits s@(_, cfg, ref, ids) e@(OrthoLangList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> toOrthoLangPath cfg p) litPaths
@@ -174,7 +174,7 @@ aListLits cfg ref _ paths outPath = do
     paths' = map (fromOrthoLangPath cfg) paths
 
 -- regular case for writing a list of links to some other file type
-rListPaths :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rListPaths :: RulesFn
 rListPaths s@(_, cfg, ref, ids) e@(OrthoLangList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toOrthoLangPath cfg p) paths
@@ -200,7 +200,7 @@ aListPaths cfg ref _ paths outPath = do
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
-rRef :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rRef :: RulesFn
 rRef (_, cfg, _, _) e@(OrthoLangRef _ _ _ var) = return $ ePath $ varPath cfg var e
   where
     ePath p = ExprPath $ debugRules cfg "rRef" e $ fromOrthoLangPath cfg p
@@ -296,7 +296,7 @@ mkLoadList hashSeqIDs name rtn = OrthoLangFunction
 -- The paths here are a little confusing: expr is a str of the path we want to
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
-rLoad :: Bool -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rLoad :: Bool -> RulesFn
 rLoad hashSeqIDs s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr s p
   out' %> \_ -> aLoad hashSeqIDs cfg ref ids (toOrthoLangPath cfg strPath) out

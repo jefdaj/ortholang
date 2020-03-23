@@ -37,7 +37,7 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- using the given summaryFn
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
-rSummary :: ([[FilePath]] -> [FilePath]) -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rSummary :: ([[FilePath]] -> [FilePath]) -> RulesFn
 rSummary summaryFn s@(_, cfg, ref, _) expr@(OrthoLangFun _ _ _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   -- let (ListOf (ListOf eType)) = typeOf iList

@@ -87,14 +87,14 @@ tSetFold _ = Left "expecting a list of lists"
 -- apply a set operation to two lists (converted to sets first)
 -- TODO if order turns out to be important in cuts, call them lists
 rSetBop :: String -> (Set String -> Set String -> Set String)
-     -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+     -> RulesFn
 rSetBop name fn s (OrthoLangBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
   where
     fun = OrthoLangFun  rtn salt deps name [lst]
     lst = OrthoLangList rtn salt deps [s1, s2]
 rSetBop _ _ _ _ = fail "bad argument to rSetBop"
 
-rSetFold :: ([Set String] -> Set String) -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rSetFold :: ([Set String] -> Set String) -> RulesFn
 rSetFold fn s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
   let oPath      = fromOrthoLangPath cfg $ exprPath s e
@@ -148,7 +148,7 @@ some = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rSome
   }
 
-rSome :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rSome :: RulesFn
 rSome s (OrthoLangFun rtn salt deps _ lol) = rExpr s diffExpr
   where
     anyExpr  = OrthoLangFun rtn salt deps "any" lol

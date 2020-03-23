@@ -40,13 +40,13 @@ png = OrthoLangType
  - "num_genomes", this will write that name to a string for use in the plot.
  - Otherwise it will return an empty string, which the script should ignore.
  -}
-varName :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+varName :: RulesFn
 varName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
   (OrthoLangRef _ _ _ (OrthoLangVar _ name)) -> name
   _ -> ""
 
 -- Like varName, but for a list of names
-varNames :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+varNames :: RulesFn
 varNames _ expr = undefined lits -- TODO implement this
   where
     lits = OrthoLangLit str (RepeatSalt 0) $ case expr of
@@ -74,7 +74,7 @@ histogram = let name = "histogram" in OrthoLangFunction
 --   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
 --   return paths'
 
-rPlotNumList :: FilePath -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rPlotNumList :: FilePath -> RulesFn
 rPlotNumList script st@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
@@ -119,8 +119,8 @@ scatterplot = let name = "scatterplot" in OrthoLangFunction
 
 -- TODO take an argument for extracting the axis name
 -- TODO also get y axis from dependent variable?
-rPlotNumScores :: (OrthoLangState -> OrthoLangExpr -> Rules ExprPath)
-               -> FilePath -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rPlotNumScores :: (RulesFn)
+               -> FilePath -> RulesFn
 rPlotNumScores xFn script st@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
@@ -136,15 +136,15 @@ rPlotNumScores xFn script st@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [titl
   return outPath''
 rPlotNumScores _ _ _ _ = fail "bad argument to rPlotNumScores"
 
-rPlotRepeatScores :: FilePath -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rPlotRepeatScores :: FilePath -> RulesFn
 rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
-indRepeatVarName :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+indRepeatVarName :: RulesFn
 indRepeatVarName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
   (OrthoLangFun _ _ _ _ [_, (OrthoLangRef _ _ _ (OrthoLangVar _ v)), _]) -> v
   _ -> ""
 
-depRepeatVarName :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+depRepeatVarName :: RulesFn
 depRepeatVarName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
   (OrthoLangFun _ _ _ _ [_, (OrthoLangRef _ _ _ (OrthoLangVar _ v)), _]) -> v
   _ -> ""
@@ -174,7 +174,7 @@ plotLabel st expr = let (OrthoLangPath p) = exprPath st expr in takeBaseName p
 plotCache :: OrthoLangConfig -> OrthoLangPath
 plotCache cfg = cacheDir cfg "plots"
 
-rPlotListOfLists :: FilePath -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rPlotListOfLists :: FilePath -> RulesFn
 rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [lol]) = do
   let labels = map (plotLabel st) (extractExprs scr lol)
       lists  = map (exprPath  st) (extractExprs scr lol)

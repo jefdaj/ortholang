@@ -61,7 +61,7 @@ lenEach = OrthoLangFunction
   where
     name = "length_each"
 
-rLen :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rLen :: RulesFn
 rLen s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr s l
   -- TODO once all modules are converted, add back phantom types!

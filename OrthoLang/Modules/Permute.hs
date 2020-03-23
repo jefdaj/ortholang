@@ -36,7 +36,7 @@ orthoLangModule = OrthoLangModule
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
-         -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+         -> RulesFn
 rPermute comboFn s@(_, cfg, _, _) expr@(OrthoLangFun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oList      = fromOrthoLangPath cfg $ exprPath s expr

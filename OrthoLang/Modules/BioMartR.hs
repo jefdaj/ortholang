@@ -186,7 +186,7 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
-rParseSearches :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rParseSearches :: RulesFn
 rParseSearches s@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   let searchTable  = exprPath s expr
@@ -221,7 +221,7 @@ aParseSearches cfg ref _ sList out = do
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO rewrite in expression editing style, inserting parse_searches
-rBioMartR :: String -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rBioMartR :: String -> RulesFn
 rBioMartR fn s@(_, cfg, ref, ids) expr@(OrthoLangFun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (OrthoLangLit str (RepeatSalt 0) fn)
   -- (ExprPath sTable) <- rParseSearches s ss

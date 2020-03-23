@@ -113,7 +113,7 @@ tReplace _ = Left "invalid args to replace" -- TODO better errors here
 dReplace :: String
 dReplace = "replace : <outputvar> <vartoreplace> <exprtoreplacewith> -> <newoutput>"
 
-rReplace :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rReplace :: RulesFn
 rReplace st (OrthoLangFun _ _ _ _ (resExpr:(OrthoLangRef _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
 rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
 

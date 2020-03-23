@@ -43,7 +43,7 @@ mkMathFn opChar opName fn = OrthoLangFunction
 -- apply a math operation to two numbers
 -- TODO can a lot of this be moved back into compile while leaving something?
 rMath :: (Scientific -> Scientific -> Scientific) -- in this module
-      -> OrthoLangState -> OrthoLangExpr -> Rules ExprPath    -- in Compile module
+      -> RulesFn    -- in Compile module
 rMath fn s@(_, cfg, ref, _) e@(OrthoLangBop _ _ _ _ n1 n2) = do
   -- liftIO $ putStrLn "entering rMath"
   (ExprPath p1, ExprPath p2, ExprPath p3) <- rBop s e (n1, n2)

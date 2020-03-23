@@ -76,7 +76,7 @@ tScoreRepeats :: [OrthoLangType] -> Either String OrthoLangType
 tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
-rScoreRepeats :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+rScoreRepeats :: RulesFn
 rScoreRepeats s@(_, cfg, ref, _) expr@(OrthoLangFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr s subList
   scores <- rExpr s repEachExpr
