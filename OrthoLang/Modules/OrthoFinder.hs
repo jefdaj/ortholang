@@ -47,7 +47,7 @@ orthofinder = let name = "orthofinder" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aOrthofinder
+  , fNewRules = Nothing, fOldRules = rSimple aOrthofinder
   }
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results

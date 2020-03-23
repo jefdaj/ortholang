@@ -81,7 +81,7 @@ leaveEachOut = let name = "leave_each_out" in OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = combosTypeCheck
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
-  , fRules     = rPermute dropEach
+  , fNewRules = Nothing, fOldRules = rPermute dropEach
   }
 
 combosTypeCheck :: [OrthoLangType] -> Either String OrthoLangType

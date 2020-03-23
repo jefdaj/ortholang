@@ -27,7 +27,7 @@ sample = OrthoLangFunction
   { fNames     = [name]
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tSample
-  , fRules     = rSample
+  , fNewRules = Nothing, fOldRules = rSample
   , fTypeDesc  = name ++ " : num X.list -> X.list"
   }
   where

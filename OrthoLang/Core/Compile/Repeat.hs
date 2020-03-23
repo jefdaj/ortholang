@@ -37,7 +37,7 @@ repeatN = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tRepeatN
   , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
-  , fRules     = rRepeatN
+  , fNewRules = Nothing, fOldRules = rRepeatN
   }
 
 -- takes a result type, a starting type, and an int,

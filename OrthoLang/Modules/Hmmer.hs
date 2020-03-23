@@ -50,7 +50,7 @@ hmmbuild = let name = "hmmbuild" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimpleScript "hmmbuild.sh"
+  , fNewRules = Nothing, fOldRules = rSimpleScript "hmmbuild.sh"
   }
 
 hmmbuildEach :: OrthoLangFunction
@@ -59,7 +59,7 @@ hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMapSimpleScript 1 "hmmbuild.sh"
+  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
 hmmsearch :: OrthoLangFunction
@@ -68,7 +68,7 @@ hmmsearch = let name = "hmmsearch" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aHmmsearch
+  , fNewRules = Nothing, fOldRules = rSimple aHmmsearch
   }
 
 -- TODO is this the right name for mapping over arg 2?
@@ -78,7 +78,7 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 2 aHmmsearch
+  , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch
   }
 
 -- TODO better name, or is this actually the most descriptive way?
@@ -88,7 +88,7 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
 --   , fFixity    = Prefix, fTags = []
---   , fRules     = rMap 2 aHmmsearch -- TODO this won't work right?
+--   , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch -- TODO this won't work right?
 --   }
 
 -- TODO is it parallel?
@@ -145,7 +145,7 @@ extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aExtractHmm 1
+  , fNewRules = Nothing, fOldRules = rSimple $ aExtractHmm 1
   }
 
 extractHmmTargetsEach :: OrthoLangFunction
@@ -154,7 +154,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in OrthoLangFuncti
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 $ aExtractHmm 1
+  , fNewRules = Nothing, fOldRules = rMap 1 $ aExtractHmm 1
   }
 
 -- TODO clean this up! it's pretty ugly

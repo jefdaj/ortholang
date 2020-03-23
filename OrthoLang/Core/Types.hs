@@ -484,7 +484,8 @@ data OrthoLangFunction = OrthoLangFunction
   , fTypeDesc  :: String
   , fFixity    :: OrthoLangFixity
   , fTags      :: [FnTag]
-  , fRules     :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+  , fOldRules  :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+  , fNewRules  :: Maybe (Rules ())
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)

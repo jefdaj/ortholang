@@ -82,7 +82,7 @@ buscoListLineages = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rBuscoListLineages
+  , fNewRules = Nothing, fOldRules = rBuscoListLineages
   }
   where
     name = "busco_list_lineages"
@@ -183,7 +183,7 @@ buscoFetchLineage  = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
   , fFixity    = Prefix, fTags = []
-  , fRules     = rBuscoFetchLineage
+  , fNewRules = Nothing, fOldRules = rBuscoFetchLineage
   }
   where
     name = "busco_fetch_lineage"
@@ -236,7 +236,7 @@ mkBusco name mode inType = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aBusco mode
+  , fNewRules = Nothing, fOldRules = rSimple $ aBusco mode
   }
 
 buscoProteins, buscoTranscriptome :: OrthoLangFunction
@@ -284,7 +284,7 @@ mkBuscoEach name mode inType = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 2 $ aBusco mode
+  , fNewRules = Nothing, fOldRules = rMap 2 $ aBusco mode
   }
 
 buscoProteinsEach, buscoTranscriptomeEach :: OrthoLangFunction
@@ -302,7 +302,7 @@ buscoPercentComplete  = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimpleScript "busco_percent_complete.sh"
+  , fNewRules = Nothing, fOldRules = rSimpleScript "busco_percent_complete.sh"
   }
   where
     name = "busco_percent_complete"
@@ -313,7 +313,7 @@ buscoPercentCompleteEach  = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMapSimpleScript 1 "busco_percent_complete.sh"
+  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
   }
   where
     name = "busco_percent_complete_each"
@@ -328,8 +328,8 @@ buscoScoresTable  = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
   , fFixity    = Prefix, fTags = []
-  -- , fRules     = rSimpleScript $ name <.> "py"
-  , fRules     = rBuscoScoresTable
+  -- , fNewRules = Nothing, fOldRules = rSimpleScript $ name <.> "py"
+  , fNewRules = Nothing, fOldRules = rBuscoScoresTable
   }
   where
     name = "busco_scores_table"
@@ -375,7 +375,7 @@ buscoFilterCompleteness  = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fFixity    = Prefix, fTags = []
-  , fRules     = rBuscoFilterCompleteness
+  , fNewRules = Nothing, fOldRules = rBuscoFilterCompleteness
   }
   where
     name = "busco_filter_completeness"

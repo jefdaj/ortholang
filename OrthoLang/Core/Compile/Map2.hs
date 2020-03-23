@@ -21,7 +21,7 @@ module OrthoLang.Core.Compile.Map2
 
 {- Haskell functions for making mapped versions of OrthoLang functions.
  - Some are applied to Actions and some to Rules, but either way the result is
- - a higher-order RulesFn for use in the fRules field of a OrthoLangFunction.
+ - a higher-order RulesFn for use in the fOldRules field of a OrthoLangFunction.
  -}
 
 import Development.Shake

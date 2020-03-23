@@ -73,8 +73,8 @@ rulesByName :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath
 rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> if any ("load_" `isPrefixOf`) (fNames f)
-               then (fRules f) s $ setSalt 0 expr
-               else (fRules f) s expr
+               then (fOldRules f) s $ setSalt 0 expr
+               else (fOldRules f) s expr
 
 rAssign :: OrthoLangState -> OrthoLangAssign -> Rules (OrthoLangVar, VarPath)
 rAssign s@(_, cfg, _, _) (var, expr) = do
@@ -276,7 +276,7 @@ mkLoad hashSeqIDs name rtn = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix, fTags = []
-  , fRules     = rLoad hashSeqIDs
+  , fNewRules = Nothing, fOldRules = rLoad hashSeqIDs
   }
 
 {- Like cLoad, except it operates on a list of strings. Note that you can also
@@ -290,7 +290,7 @@ mkLoadList hashSeqIDs name rtn = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rLoadList hashSeqIDs
+  , fNewRules = Nothing, fOldRules = rLoadList hashSeqIDs
   }
 
 -- The paths here are a little confusing: expr is a str of the path we want to

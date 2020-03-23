@@ -27,7 +27,7 @@ compose1 :: String      -- overall function name
 compose1 name desc fn1 type1 fn2 = OrthoLangFunction
   { fNames     = [name]
   , fTypeCheck = tCompose1 fn1 type1 fn2
-  , fRules     = rCompose1 fn1 type1 fn2
+  , fNewRules = Nothing, fOldRules = rCompose1 fn1 type1 fn2
   , fTypeDesc  = desc
   , fFixity    = Prefix, fTags = []
   }
@@ -42,10 +42,10 @@ tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
                              ++ ", not " ++ extOf expected
 
 rCompose1 :: OrthoLangFunction -> OrthoLangType -> OrthoLangFunction -> RulesFn
-rCompose1 fn1 rtn1 fn2 st@(_, cfg, _, _) (OrthoLangFun rtn2 salt deps _ args) = (fRules fn2) st expr2
+rCompose1 fn1 rtn1 fn2 st@(_, cfg, _, _) (OrthoLangFun rtn2 salt deps _ args) = (fOldRules fn2) st expr2
   where
     expr1'  = OrthoLangFun rtn1 salt deps (head $ fNames fn1) args
     path1'  = ExprPath $ fromOrthoLangPath cfg $ exprPath st expr1'
-    expr1'' = OrthoLangRules $ CompiledExpr rtn1 path1' $ (fRules fn1) st expr1'
+    expr1'' = OrthoLangRules $ CompiledExpr rtn1 path1' $ (fOldRules fn1) st expr1'
     expr2   = OrthoLangFun rtn2 salt deps (head $ fNames fn2) [expr1'']
 rCompose1 _ _ _ _ _ = fail "bad argument to rCompose1"

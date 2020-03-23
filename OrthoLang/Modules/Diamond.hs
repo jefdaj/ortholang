@@ -55,7 +55,7 @@ diamondmakedb = let name = "diamond_makedb" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck [faa] dmnd
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimpleScriptPar "diamond_makedb.sh"
+  , fNewRules = Nothing, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
   }
 
 -------------------------
@@ -70,7 +70,7 @@ diamondmakedbEach = let name = "diamond_makedb_each" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf dmnd)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMapSimpleScript 1 "diamond_makedb.sh"
+  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
 ------------------------
@@ -83,7 +83,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
   , fFixity    = Prefix, fTags = []
-  , fRules     = rDiamondmakedbAll
+  , fNewRules = Nothing, fOldRules = rDiamondmakedbAll
   }
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
@@ -183,7 +183,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
   , fTypeCheck = defaultTypeCheck [num, qType, sType] rType
   , fFixity    = Prefix, fTags = []
-  , fRules     = rFn dCmd
+  , fNewRules = Nothing, fOldRules = rFn dCmd
   }
 
 aDiamondFromDb :: [String] -> ActionFn2

@@ -55,7 +55,7 @@ blastCRB = OrthoLangFunction
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
   , fTypeCheck = defaultTypeCheck [fna, fa] crb
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimpleTmp name aCRBBlast
+  , fNewRules = Nothing, fOldRules = rSimpleTmp name aCRBBlast
   }
   where
     name = "crb_blast"
@@ -68,7 +68,7 @@ blastCRBEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMapTmps 2 aCRBBlast "crb_blast"
+  , fNewRules = Nothing, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }
   where
     name = "crb_blast_each"

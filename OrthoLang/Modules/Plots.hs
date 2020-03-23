@@ -63,7 +63,7 @@ histogram = let name = "histogram" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rPlotNumList "histogram.R"
+  , fNewRules = Nothing, fOldRules = rPlotNumList "histogram.R"
   }
 
 -- for reference:
@@ -104,7 +104,7 @@ linegraph = let name = "linegraph" in OrthoLangFunction
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rPlotRepeatScores "linegraph.R"
+  , fNewRules = Nothing, fOldRules = rPlotRepeatScores "linegraph.R"
   }
 
 -- TODO scatterplot should label axis by input var name (always there!)
@@ -114,7 +114,7 @@ scatterplot = let name = "scatterplot" in OrthoLangFunction
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rPlotRepeatScores "scatterplot.R"
+  , fNewRules = Nothing, fOldRules = rPlotRepeatScores "scatterplot.R"
   }
 
 -- TODO take an argument for extracting the axis name
@@ -159,7 +159,7 @@ venndiagram = let name = "venndiagram" in OrthoLangFunction
   , fTypeCheck = tPlotListOfLists
   , fTypeDesc  = name ++ " : X.list.list -> png"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rPlotListOfLists "venndiagram.R"
+  , fNewRules = Nothing, fOldRules = rPlotListOfLists "venndiagram.R"
   }
 
 tPlotListOfLists :: TypeChecker

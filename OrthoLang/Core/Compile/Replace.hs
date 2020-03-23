@@ -102,7 +102,7 @@ replace = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tReplace
   , fTypeDesc  = dReplace
-  , fRules     = rReplace
+  , fNewRules = Nothing, fOldRules = rReplace
   }
 
 tReplace :: [OrthoLangType] -> Either String OrthoLangType
@@ -194,7 +194,7 @@ replaceEach = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tReplaceEach
   , fTypeDesc  = dReplaceEach
-  , fRules     = rReplaceEach
+  , fNewRules = Nothing, fOldRules = rReplaceEach
   }
 
 tReplaceEach :: [OrthoLangType] -> Either String OrthoLangType

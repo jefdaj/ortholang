@@ -62,14 +62,14 @@ mkSetFunctions (foldName, opChar, opName, setFn) = [setBop, setFold]
       , fTypeCheck = tSetBop
       , fTypeDesc  = mkBopDesc [opChar]
       , fFixity    = Infix, fTags = []
-      , fRules     = rSetBop foldName setFn
+      , fNewRules = Nothing, fOldRules = rSetBop foldName setFn
       }
     setFold = OrthoLangFunction
       { fNames     = [foldName]
       , fTypeCheck = tSetFold
       , fTypeDesc  = mkFoldDesc foldName
       , fFixity    = Prefix, fTags = []
-      , fRules     = rSetFold (foldr1 setFn)
+      , fNewRules = Nothing, fOldRules = rSetFold (foldr1 setFn)
       }
 
 -- if the user gives two lists but of different types, complain that they must
@@ -145,7 +145,7 @@ some = OrthoLangFunction
   , fTypeCheck = tSetFold
   , fTypeDesc  = "some : X.list.list -> X.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSome
+  , fNewRules = Nothing, fOldRules = rSome
   }
 
 rSome :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath

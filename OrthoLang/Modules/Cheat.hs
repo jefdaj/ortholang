@@ -52,7 +52,7 @@ cheat = OrthoLangFunction
   , fTypeCheck = cheatTypeCheck
   , fTypeDesc  = "cheat : ??? (implement this)"
   , fFixity    = Prefix, fTags = []
-  , fRules  = rCheat
+  , fNewRules = Nothing, fOldRules = rCheat
   }
 
 -- TODO detect return type based on string contents,

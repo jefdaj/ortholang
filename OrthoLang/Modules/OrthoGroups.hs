@@ -92,7 +92,7 @@ orthogroups = let name = "orthogroups" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [og] sll
   , fTypeCheck = defaultTypeCheck [og] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = rOrthogroups
+  , fNewRules = Nothing, fOldRules = rOrthogroups
   }
 
 rOrthogroups :: RulesFn
@@ -172,7 +172,7 @@ orthogroupContaining = let name = "orthogroup_containing" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aOrthogroupContaining
+  , fNewRules = Nothing, fOldRules = rSimple aOrthogroupContaining
   }
 
 aOrthogroupContaining :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
@@ -199,7 +199,7 @@ orthogroupsContaining = let name = "orthogroups_containing" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf str] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aOrthogroupsFilter containsOneOf
+  , fNewRules = Nothing, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
   }
 
 type FilterFn = [[String]] -> [String] -> [[String]]
@@ -231,7 +231,7 @@ orthologInAny = let name = "ortholog_in_any" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = mkOrthologsStrRules name
+  , fNewRules = Nothing, fOldRules = mkOrthologsStrRules name
   }
 
 mkOrthologsStrRules :: String -> RulesFn
@@ -251,7 +251,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = rOrthologFilterStr "min" pickAny
+  , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAny
   }
 
 pickAny :: Int -> Int
@@ -302,7 +302,7 @@ orthologInAll = let name = "ortholog_in_all" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = mkOrthologsStrRules "ortholog_in_all"
+  , fNewRules = Nothing, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
 
 orthologInAllStr :: OrthoLangFunction
@@ -311,7 +311,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = rOrthologFilterStr "min" pickAll
+  , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAll
   }
 
 pickAll :: Int -> Int
@@ -335,7 +335,7 @@ orthologInMinStr = let name = "ortholog_in_min_str" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = rOrthologFilterStrFrac "min" pickMin
+  , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "min" pickMin
   }
 
 -- read a scientific and print again as a string
@@ -386,7 +386,7 @@ orthologInMin = let name = "ortholog_in_min" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = mkOrthologsStrFracRules name
+  , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
 
 mkOrthologsStrFracRules :: String -> RulesFn
@@ -407,7 +407,7 @@ orthologInMax = let name = "ortholog_in_max" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = mkOrthologsStrFracRules name
+  , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
 
 orthologInMaxStr :: OrthoLangFunction
@@ -416,7 +416,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
   , fFixity    = Prefix, fTags = []
-  , fRules     = rOrthologFilterStrFrac "max" pickMax
+  , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "max" pickMax
   }
 
 pickMax :: (RealFrac a, Integral b) => a -> b -> b

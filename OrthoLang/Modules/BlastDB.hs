@@ -135,7 +135,7 @@ mkLoadDB name rtn = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   , fFixity    = Prefix, fTags = []
-  , fRules  = rLoadDB
+  , fNewRules = Nothing, fOldRules = rLoadDB
   }
 
 mkLoadDBEach :: String -> OrthoLangType -> OrthoLangFunction
@@ -144,7 +144,7 @@ mkLoadDBEach name rtn = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   , fFixity    = Prefix, fTags = []
-  , fRules  = undefined -- TODO write this!
+  , fNewRules = Nothing, fOldRules = undefined -- TODO write this!
   }
 
 rLoadDB :: RulesFn
@@ -191,7 +191,7 @@ blastdblist = let name = "blastdblist" in OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rBlastdblist
+  , fNewRules = Nothing, fOldRules = rBlastdblist
   }
 
 filterNames :: String -> [String] -> [String]
@@ -267,7 +267,7 @@ mkBlastdbget name dbType = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
   , fFixity    = Prefix, fTags = []
-  , fRules  = rBlastdbget
+  , fNewRules = Nothing, fOldRules = rBlastdbget
   }
 
 blastdbgetNucl :: OrthoLangFunction
@@ -331,7 +331,7 @@ makeblastdbNuclAll = OrthoLangFunction
   , fTypeCheck = tMakeblastdbAll name ndb
   , fTypeDesc  = name ++ " : fa.list -> ndb"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMakeblastdbAll
+  , fNewRules = Nothing, fOldRules = rMakeblastdbAll
   }
   where
     name = "makeblastdb_nucl_all"
@@ -342,7 +342,7 @@ makeblastdbProtAll = OrthoLangFunction
   , fTypeCheck = tMakeblastdbAll name pdb
   , fTypeDesc  = name ++ " : faa.list -> pdb"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMakeblastdbAll
+  , fNewRules = Nothing, fOldRules = rMakeblastdbAll
   }
   where
     name = "makeblastdb_prot_all"
@@ -481,7 +481,7 @@ makeblastdbNucl = OrthoLangFunction
   , fTypeCheck = tMakeblastdb ndb
   , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMakeblastdb
+  , fNewRules = Nothing, fOldRules = rMakeblastdb
   }
 
 makeblastdbProt :: OrthoLangFunction
@@ -490,7 +490,7 @@ makeblastdbProt = OrthoLangFunction
   , fTypeCheck = tMakeblastdb pdb
   , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMakeblastdb
+  , fNewRules = Nothing, fOldRules = rMakeblastdb
   }
 
 tMakeblastdb :: OrthoLangType -> TypeChecker
@@ -518,7 +518,7 @@ mkMakeblastdbEach dbType = OrthoLangFunction
   , fTypeCheck = tMakeblastdbEach dbType
   , fTypeDesc  = desc
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMakeblastdbEach
+  , fNewRules = Nothing, fOldRules = rMakeblastdbEach
   }
   where
     desc = name ++ " : " ++ ext ++ ".list -> " ++ extOf dbType ++ ".list"
@@ -570,7 +570,7 @@ singletons = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
   , fTypeCheck = tSingletons
-  , fRules     = rSingletons
+  , fNewRules = Nothing, fOldRules = rSingletons
   }
   where
     name = "singletons"

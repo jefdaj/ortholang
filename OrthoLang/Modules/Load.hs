@@ -44,7 +44,7 @@ globFiles = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules  = rGlobFiles
+  , fNewRules = Nothing, fOldRules = rGlobFiles
   }
   where
     name = "glob_files"

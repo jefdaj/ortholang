@@ -26,7 +26,7 @@ orthoLangModule = OrthoLangModule
 --   , fFixity    = Prefix, fTags = []
 --   , fTypeCheck = summaryTypeCheck
 --   , fDesc = Nothing, fTypeDesc  = undefined
---   , fRules  = rSummary (foldr1 intersect)
+--   , fNewRules = Nothing, fOldRules = rSummary (foldr1 intersect)
 --   }
 
 summaryTypeCheck :: [OrthoLangType] -> Either String OrthoLangType

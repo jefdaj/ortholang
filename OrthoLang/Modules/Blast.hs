@@ -81,7 +81,7 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastFromDb d
+  , fNewRules = Nothing, fOldRules = rMkBlastFromDb d
   }
   where
     name = bCmd ++ "_db"
@@ -178,7 +178,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
+  , fNewRules = Nothing, fOldRules = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
   }
 
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
@@ -187,7 +187,7 @@ rMkBlastFromFa :: BlastDesc -> RulesFn
 rMkBlastFromFa d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _ [e, q, s])
   = rules st (OrthoLangFun rtn salt deps name1 [e, q, dbExpr])
   where
-    rules = fRules $ mkBlastFromDb d
+    rules = fOldRules $ mkBlastFromDb d
     name1 = head $ fNames $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
     dbExpr = OrthoLangFun dbType salt (depsOf s) name2 [s] 
@@ -203,7 +203,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastFromDbEach d
+  , fNewRules = Nothing, fOldRules = rMkBlastFromDbEach d
   }
   where
     name = bCmd ++ "_db_each"
@@ -221,7 +221,7 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastFromFaEach d
+  , fNewRules = Nothing, fOldRules = rMkBlastFromFaEach d
   }
   where
     name = bCmd ++ "_each"

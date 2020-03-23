@@ -48,7 +48,7 @@ sonicparanoid = let name = "sonicparanoid" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aSonicParanoid
+  , fNewRules = Nothing, fOldRules = rSimple aSonicParanoid
   }
 
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo

@@ -34,7 +34,7 @@ mkAva name = let name' = name ++ "_ava" in OrthoLangFunction
   , fTypeDesc  = mkTypeDesc  name' [num, ListOf faa] ava
   , fTypeCheck = defaultTypeCheck  [num, ListOf faa] ava
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkAva
+  , fNewRules = Nothing, fOldRules = rMkAva
   }
 
 -- TODO any reason to take the name as a separate arg here?

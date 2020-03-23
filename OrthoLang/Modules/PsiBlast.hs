@@ -279,8 +279,8 @@ psiblast = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
   , fFixity    = Prefix, fTags = []
-  -- , fRules     = rPsiblast
-  , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
+  -- , fNewRules = Nothing, fOldRules = rPsiblast
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
   }
   where
     name = "psiblast"
@@ -291,7 +291,7 @@ psiblastEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rPsiblastEach
+  , fNewRules = Nothing, fOldRules = rPsiblastEach
   }
   where
     name = "psiblast_each"
@@ -321,7 +321,7 @@ psiblastDb = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
   }
   where
     name = "psiblast_db"
@@ -337,8 +337,8 @@ psiblastDbEach = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
-  -- , fRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
-  , fRules     = rMap 3 aPsiblastSearchDb'
+  -- , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
+  , fNewRules = Nothing, fOldRules = rMap 3 aPsiblastSearchDb'
   }
   where
     name = "psiblast_db_each"
@@ -366,7 +366,7 @@ psiblastTrain = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
   where
     name = "psiblast_train"
@@ -378,8 +378,8 @@ psiblastTrainPssms = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
   , fFixity    = Prefix, fTags = []
-  -- , fRules     = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
-  , fRules     = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
+  -- , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
+  , fNewRules = Nothing, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
   }
   where
     name = "psiblast_train_pssms"
@@ -392,7 +392,7 @@ psiblastTrainEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   , fFixity    = Prefix, fTags = []
-  , fRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_train_each"
@@ -403,7 +403,7 @@ psiblastTrainAll = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
   }
   where
     name = "psiblast_train_all"
@@ -414,7 +414,7 @@ psiblastTrainDb = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   , fFixity    = Prefix, fTags = []
-  , fRules     = rFun3 aPsiblastTrainDb
+  , fNewRules = Nothing, fOldRules = rFun3 aPsiblastTrainDb
   }
   where
     name = "psiblast_train_db"
@@ -425,7 +425,7 @@ psiblastTrainDbEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
+  , fNewRules = Nothing, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
   where
     name = "psiblast_train_db_each"
@@ -436,8 +436,8 @@ psiblastTrainPssmsDb = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
   , fFixity    = Prefix, fTags = []
-  -- , fRules     = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
-  , fRules     = rMap 2 aPsiblastTrainDb'
+  -- , fNewRules = Nothing, fOldRules = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
+  , fNewRules = Nothing, fOldRules = rMap 2 aPsiblastTrainDb'
   }
   where
     name = "psiblast_train_pssms_db"
@@ -452,7 +452,7 @@ psiblastPssm = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
     name = "psiblast_pssm"
@@ -464,7 +464,7 @@ psiblastPssmAll = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
     name = "psiblast_pssm_all"
@@ -475,7 +475,7 @@ psiblastPssmEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
+  , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_pssm_each"
@@ -489,7 +489,7 @@ psiblastPssmDb = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rFun3 aPsiblastSearchDb
+  , fNewRules = Nothing, fOldRules = rFun3 aPsiblastSearchDb
   }
   where
     name = "psiblast_pssm_db"
@@ -500,7 +500,7 @@ psiblastPssmDbEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
+  , fNewRules = Nothing, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
   where
     name = "psiblast_pssm_db_each"
@@ -517,8 +517,8 @@ psiblastEachPssmDb = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  -- , fRules     = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
-  , fRules     = rMap 2 aPsiblastSearchDb'
+  -- , fNewRules = Nothing, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
+  , fNewRules = Nothing, fOldRules = rMap 2 aPsiblastSearchDb'
   }
   where
     name = "psiblast_each_pssm_db"
@@ -541,7 +541,7 @@ psiblastEachPssm = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
+  , fNewRules = Nothing, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
   }
   where
     name = "psiblast_each_pssm"

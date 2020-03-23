@@ -45,7 +45,7 @@ len = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
   , fFixity    = Prefix, fTags = []
-  , fRules     = rLen
+  , fNewRules = Nothing, fOldRules = rLen
   }
   where
     name = "length"
@@ -56,7 +56,7 @@ lenEach = OrthoLangFunction
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck [ListOf listlike] (ListOf num)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 aLen -- TODO is 1 wrong?
+  , fNewRules = Nothing, fOldRules = rMap 1 aLen -- TODO is 1 wrong?
   }
   where
     name = "length_each"

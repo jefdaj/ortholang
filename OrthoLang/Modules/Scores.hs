@@ -67,7 +67,7 @@ scoreRepeats = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tScoreRepeats
   , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
-  , fRules     = rScoreRepeats
+  , fNewRules = Nothing, fOldRules = rScoreRepeats
   }
   where
     name = "score_repeats"
@@ -102,7 +102,7 @@ extractScores = let name = "extract_scores" in OrthoLangFunction
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : X.scores -> num.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aCutCol False 1
+  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol False 1
   }
 
 -- TODO deduplicate with extractTargets?
@@ -112,7 +112,7 @@ extractScored = let name = "extract_scored" in OrthoLangFunction
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : X.scores -> X.list"
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aCutCol False 2
+  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol False 2
   }
 
 tExtractScores :: TypeChecker

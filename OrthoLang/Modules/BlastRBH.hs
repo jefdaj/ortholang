@@ -60,7 +60,7 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoL
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastFromFaRev d
+  , fNewRules = Nothing, fOldRules = rMkBlastFromFaRev d
   }
 
 -- flips the query and subject arguments and reuses the regular compiler above
@@ -68,7 +68,7 @@ rMkBlastFromFaRev :: BlastDesc -> RulesFn
 rMkBlastFromFaRev d st (OrthoLangFun rtn salt deps name [e, q, s]) = rules st expr
   where
     expr  = OrthoLangFun rtn salt deps name_norev [e, s, q]
-    rules = fRules $ mkBlastFromFa d
+    rules = fOldRules $ mkBlastFromFa d
     name_norev  = replace "_rev" "" name
     -- name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
 rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
@@ -84,7 +84,7 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastFromFaRevEach d
+  , fNewRules = Nothing, fOldRules = rMkBlastFromFaRevEach d
   }
   where
     name = bCmd ++ "_rev_each"
@@ -126,7 +126,7 @@ reciprocalBest = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aReciprocalBest
+  , fNewRules = Nothing, fOldRules = rSimple aReciprocalBest
   }
   where
     name = "reciprocal_best"
@@ -165,7 +165,7 @@ reciprocalBestAll = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aReciprocalBestAll
+  , fNewRules = Nothing, fOldRules = rSimple aReciprocalBestAll
   }
   where
     name = "reciprocal_best_all"
@@ -190,7 +190,7 @@ mkBlastRbh d@(bCmd, qType, sType, _) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastRbh d
+  , fNewRules = Nothing, fOldRules = rMkBlastRbh d
   }
   where
     name = bCmd ++ "_rbh"
@@ -214,7 +214,7 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMkBlastRbhEach d
+  , fNewRules = Nothing, fOldRules = rMkBlastRbhEach d
   }
   where
     name = bCmd ++ "_rbh_each"

@@ -56,7 +56,7 @@ extractQueries = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aCutCol True 1
+  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol True 1
   }
   where
     name = "extract_queries"
@@ -68,7 +68,7 @@ extractQueriesEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 $ aCutCol True 1
+  , fNewRules = Nothing, fOldRules = rMap 1 $ aCutCol True 1
   }
   where
     name = "extract_queries_each"
@@ -80,7 +80,7 @@ extractTargets = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aCutCol True 2
+  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol True 2
   }
   where
     name = "extract_targets"
@@ -91,7 +91,7 @@ extractTargetsEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 $ aCutCol True 2
+  , fNewRules = Nothing, fOldRules = rMap 1 $ aCutCol True 2
   }
   where
     name = "extract_targets_each"
@@ -140,7 +140,7 @@ mkFilterHits colname = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aFilterHits colname
+  , fNewRules = Nothing, fOldRules = rSimple $ aFilterHits colname
   }
   where
     name = "filter_" ++ colname
@@ -154,7 +154,7 @@ mkFilterHitsEach colname = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 2 $ aFilterHits colname
+  , fNewRules = Nothing, fOldRules = rMap 2 $ aFilterHits colname
   }
   where
     name = "filter_" ++ colname ++ "_each"
@@ -196,7 +196,7 @@ bestHits =  OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple aBestExtract
+  , fNewRules = Nothing, fOldRules = rSimple aBestExtract
   }
   where
     name = "best_hits"
@@ -207,7 +207,7 @@ bestHitsEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 1 aBestExtract
+  , fNewRules = Nothing, fOldRules = rMap 1 aBestExtract
   }
   where
     name = "best_hits_each"

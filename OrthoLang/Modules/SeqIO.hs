@@ -84,7 +84,7 @@ gbkToFaa = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aGenbankToFasta faa "aa"
+  , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa"
@@ -96,7 +96,7 @@ gbkToFaaEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 2 $ aGenbankToFasta faa "aa"
+  , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa_each"
@@ -107,7 +107,7 @@ gbkToFna = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna"
@@ -118,7 +118,7 @@ gbkToFnaEach = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna_each"
@@ -175,7 +175,7 @@ extractIds = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractIds
   , fTypeDesc  = name ++ " : fa -> str.list"
-  , fRules     = rSimpleScript "extract_ids.py"
+  , fNewRules = Nothing, fOldRules = rSimpleScript "extract_ids.py"
   }
   where
     name = "extract_ids"
@@ -187,7 +187,7 @@ extractIdsEach = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractIdsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fRules     = rMapSimpleScript 1 "extract_ids.py"
+  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "extract_ids.py"
   }
   where
     name = "extract_ids_each"
@@ -213,7 +213,7 @@ extractSeqs = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractSeqs
   , fTypeDesc  = name ++ " : fa str.list -> fa"
-  , fRules     = rSimple aExtractSeqs 
+  , fNewRules = Nothing, fOldRules = rSimple aExtractSeqs 
   }
   where
     name = "extract_seqs"
@@ -235,7 +235,7 @@ extractSeqsEach = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fRules     = rMap 1 aExtractSeqs
+  , fNewRules = Nothing, fOldRules = rMap 1 aExtractSeqs
   }
   where
     name = "extract_seqs_each"
@@ -260,7 +260,7 @@ translate = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [fna] faa
   , fTypeDesc  = mkTypeDesc name  [fna] faa
-  , fRules     = rSimpleScript "translate.py"
+  , fNewRules = Nothing, fOldRules = rSimpleScript "translate.py"
   }
   where
     name = "translate"
@@ -271,7 +271,7 @@ translateEach = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
-  , fRules     = rMapSimpleScript 1 "translate.py"
+  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "translate.py"
   }
   where
     name = "translate_each"
@@ -288,7 +288,7 @@ mkConcat cType = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
-  , fRules     = rSimple $ aConcat cType
+  , fNewRules = Nothing, fOldRules = rSimple $ aConcat cType
   }
   where
     ext  = extOf cType
@@ -300,7 +300,7 @@ mkConcatEach cType = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
-  , fRules     = rMap 1 $ aConcat cType
+  , fNewRules = Nothing, fOldRules = rMap 1 $ aConcat cType
   }
   where
     ext  = extOf cType
@@ -370,7 +370,7 @@ splitFasta faType = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
-  , fRules     = rSimple $ aSplit name ext
+  , fNewRules = Nothing, fOldRules = rSimple $ aSplit name ext
   }
   where
     ext  = extOf faType
@@ -382,7 +382,7 @@ splitFastaEach faType = OrthoLangFunction
   , fFixity    = Prefix, fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
-  , fRules     = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
+  , fNewRules = Nothing, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where
     ext  = extOf faType

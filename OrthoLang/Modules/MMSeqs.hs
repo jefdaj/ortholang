@@ -71,7 +71,7 @@ mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in OrthoLangFunction
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMmseqsCreateDbAll
+  , fNewRules = Nothing, fOldRules = rMmseqsCreateDbAll
   }
 
 tMmseqsCreateDbAll :: String -> TypeChecker
@@ -124,7 +124,7 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in OrthoLangFunction
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMmseqsCreateDb
+  , fNewRules = Nothing, fOldRules = rMmseqsCreateDb
   }
 
 tMmseqsCreateDb :: String -> TypeChecker
@@ -147,7 +147,7 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in OrthoLangFunction
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMmseqsSearchDb
+  , fNewRules = Nothing, fOldRules = rMmseqsSearchDb
   }
 
 tMmseqsSearchDb :: String -> TypeChecker
@@ -247,7 +247,7 @@ mmseqsSearch = let name = "mmseqs_search" in OrthoLangFunction
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
   , fFixity    = Prefix, fTags = []
-  , fRules     = rMmseqsSearch
+  , fNewRules = Nothing, fOldRules = rMmseqsSearch
   }
 
 tMmseqsSearch :: String -> TypeChecker
@@ -259,6 +259,6 @@ rMmseqsSearch :: RulesFn
 rMmseqsSearch st (OrthoLangFun rtn salt deps name [e, q, s])
   = rules st (OrthoLangFun rtn salt deps name [e, q, sDb])
   where
-    rules = fRules mmseqsSearchDb
+    rules = fOldRules mmseqsSearchDb
     sDb = OrthoLangFun mms salt (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
 rMmseqsSearch _ _ = fail "bad argument to rMmseqsSearch"

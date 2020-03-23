@@ -37,7 +37,7 @@ mkMathFn opChar opName fn = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck    [num, num] num
   , fTypeDesc  = mkTypeDesc [opChar] [num, num] num
   , fFixity    = Infix, fTags = []
-  , fRules     = rMath fn
+  , fNewRules = Nothing, fOldRules = rMath fn
   }
 
 -- apply a math operation to two numbers

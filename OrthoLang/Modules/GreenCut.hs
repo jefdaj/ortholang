@@ -30,7 +30,7 @@ greencutTwoFamilies = OrthoLangFunction
   , fTypeCheck = defaultTypeCheck [bht, bht] gcr
   , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
   , fFixity    = Prefix, fTags = []
-  , fRules     = rSimpleScript $ name ++ ".py"
+  , fNewRules = Nothing, fOldRules = rSimpleScript $ name ++ ".py"
   }
   where
     name = "greencut2_families"
