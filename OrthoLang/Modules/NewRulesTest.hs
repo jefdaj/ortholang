@@ -21,6 +21,64 @@ orthoLangModule = OrthoLangModule
       ]
   }
 
+------------------------------
+-- new rules infrastructure --
+------------------------------
+
+-- TODO ExprPaths for deps?
+-- TODO or OrthoLangPaths throughout?
+-- TODO can you encode NewAction1, 2, 3... easily?
+
+type NewAction1 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath                         -> Action ()
+type NewAction2 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath -> FilePath             -> Action ()
+type NewAction3 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+
+type NewRulesFn = OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+
+rNewRules1 :: String -> TypeChecker -> NewAction1 -> NewRulesFn
+rNewRules1 = rNewRules 1 $ \fn deps -> fn (deps !! 0)
+
+rNewRules2 :: String -> TypeChecker -> NewAction2 -> NewRulesFn
+rNewRules2 = rNewRules 2 $ \fn deps -> fn (deps !! 0) (deps !! 1)
+
+rNewRules3 :: String -> TypeChecker -> NewAction3 -> NewRulesFn
+rNewRules3 = rNewRules 3 $ \fn deps -> fn (deps !! 0) (deps !! 1) (deps !! 2)
+
+rNewRules
+  :: Int -> (t -> [FilePath] -> Action ()) -> String
+  -> TypeChecker
+  -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
+  -> NewRulesFn
+rNewRules nArgs applyDeps name tFn aFn cfg lRef iRef = do
+  let exprDir = cfgTmpDir cfg </> "exprs"
+      pattern = exprDir </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
+  pattern %> \p -> aNewRules applyDeps tFn aFn cfg lRef iRef (ExprPath p)
+  return ()
+
+aNewRules
+  :: (t -> [FilePath] -> Action ())
+  -> TypeChecker
+  -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
+  ->  OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath
+  -> Action ()
+aNewRules applyDeps tFn aFn cfg lRef iRef o@(ExprPath out) = do
+  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
+  case tFn dTypes of
+    Left err -> error err
+    Right rType -> do
+      when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
+      let deps' = map (fromOrthoLangPath cfg) deps
+      need' cfg lRef "ortholang.modules.newrulestest.anewrules" deps'
+      -- TODO look up out too and assert that its type matches typechecker result
+      -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
+      -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
+      -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
+      applyDeps (aFn cfg lRef iRef o) deps'
+
+-----------
+-- test1 --
+-----------
+
 test1 :: OrthoLangFunction
 test1 = let name = "newrulestest1" in OrthoLangFunction
   { fNames     = [name]
@@ -28,42 +86,14 @@ test1 = let name = "newrulestest1" in OrthoLangFunction
   , fTypeCheck = tTest1
   , fFixity    = Prefix, fTags = []
   , fOldRules = undefined
-  , fNewRules = Just $ rNewRules name 2 tTest1 aTest1
+  , fNewRules = Just $ rNewRules2 name tTest1 aTest1
   }
 
 tTest1 :: TypeChecker
 tTest1 = defaultTypeCheck [str, str] str
 
--- TODO ExprPaths for deps?
--- TODO or OrthoLangPaths throughout?
--- TODO can you encode NewAction1, 2, 3... easily?
-type NewAction  = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> [FilePath] -> Action ()
-type NewRulesFn = OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
-
-rNewRules :: String -> Int -> TypeChecker -> NewAction -> NewRulesFn
-rNewRules name nArgs tFn aFn cfg lRef iRef = do
-  let exprDir = cfgTmpDir cfg </> "exprs"
-      pattern = exprDir </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
-  pattern %> \p -> aNewRules tFn aFn cfg lRef iRef (ExprPath p)
-  return ()
-
-aNewRules :: TypeChecker -> NewAction -> OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> Action ()
-aNewRules tFn aFn cfg lRef iRef o@(ExprPath out) = do
-  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
-  case tFn dTypes of
-    Left err -> error err
-    Right rType -> do
-      when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
-      let deps' = map (fromOrthoLangPath cfg) deps
-      need' cfg lRef "ortholang.modules.newrulestest.test1" deps'
-      -- TODO look up out too and assert that its type matches typechecker result
-      -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
-      -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
-      -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
-      aFn cfg lRef iRef o deps'
-
-aTest1 :: NewAction
-aTest1 cfg lRef iRef (ExprPath out) deps' = do
-  s1 <- readLit cfg lRef $ deps' !! 0
-  s2 <- readLit cfg lRef $ deps' !! 1
+aTest1 :: NewAction2
+aTest1 cfg lRef _ (ExprPath out) d1 d2 = do
+  s1 <- readLit cfg lRef d1
+  s2 <- readLit cfg lRef d2
   writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
