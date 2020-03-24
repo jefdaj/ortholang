@@ -152,6 +152,7 @@ step st hdl line = case stripWhiteSpace line of
   (':':cmd) -> runCmd st hdl cmd
   statement -> runStatement st hdl statement
 
+-- TODO insert ids
 runStatement :: OrthoLangState -> Handle -> String -> IO OrthoLangState
 runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
   Left  e -> hPutStrLn hdl (show e) >> return st
@@ -295,7 +296,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
       let cfg' = cfg { cfgScript = Just path' } -- TODO why the False??
-      new <- parseFile cfg' ref ids path'
+      new <- parseFile cfg' ref ids path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         -- TODO put this back? not sure if it makes repl better
@@ -372,6 +373,7 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
       Nothing -> showExprType st e -- TODO also show the expr itself?
     allTypes = init $ unlines $ map showAssignType scr
 
+-- TODO insert id?
 showExprType :: OrthoLangState -> String -> String
 showExprType st e = case parseExpr st e of
   Right expr -> show $ typeOf expr

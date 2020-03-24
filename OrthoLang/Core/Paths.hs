@@ -239,10 +239,9 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
 exprDigest :: OrthoLangState -> OrthoLangExpr -> ExprDigest
 exprDigest st expr = ExprDigest $ digest $ exprPath st expr
 
-insertNewRulesDigest :: OrthoLangConfig -> HashedIDsRef -> OrthoLangExpr -> Action ()
-insertNewRulesDigest cfg idr expr =
-  liftIO $ atomicModifyIORef' idr $
-    \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
+insertNewRulesDigest :: OrthoLangConfig -> HashedIDsRef -> OrthoLangExpr -> IO ()
+insertNewRulesDigest cfg idr expr = atomicModifyIORef' idr $
+  \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
   where
     eType   = typeOf expr
     fakeState = (undefined, cfg, undefined, idr) -- TODO fix this!

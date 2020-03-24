@@ -5,6 +5,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
+import OrthoLang.Core.Paths (insertNewRulesDigest)
 
 import Control.Applicative    ((<|>), many)
 import System.FilePath        ((</>), takeDirectory)
@@ -130,6 +131,9 @@ parseString :: OrthoLangConfig -> Locks -> HashedIDsRef -> String
             -> Either ParseError OrthoLangScript
 parseString c r ids = parseWithEof pScript ([], c, r, ids)
 
+insertNewRulesDigests :: OrthoLangConfig -> HashedIDsRef -> OrthoLangScript -> IO ()
+insertNewRulesDigests cfg idr scr = mapM_ (insertNewRulesDigest cfg idr) $ map snd scr
+
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
 -- Not sure why this should be necessary, but it was easier than fixing the parser to reject multiple results.
@@ -160,4 +164,8 @@ parseFile :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath
 parseFile cfg ref ids path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path
-  return $ (parseString cfg ref ids . stripComments) txt
+  let scr = (parseString cfg ref ids . stripComments) txt
+  case scr of
+    Left _ -> return ()
+    Right s -> insertNewRulesDigests cfg ids s
+  return scr
