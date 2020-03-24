@@ -27,6 +27,7 @@ module OrthoLang.Core.Types
   , Locks
   , HashedIDs(..)
   , HashedIDsRef
+  , decodeExprDeps
   , OrthoLangState
   , ensureResult
   , lookupResult
@@ -80,12 +81,14 @@ import OrthoLang.Core.Locks (Locks, withReadLock)
 import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
+import Development.Shake.FilePath (makeRelative, splitPath, (</>))
+-- import Control.Monad (guard)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
-import Data.IORef                     (IORef)
-import Data.Maybe (fromJust)
+import Data.IORef                     (IORef, readIORef)
+import Data.Maybe (fromJust, catMaybes)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 newtype OrthoLangPath = OrthoLangPath FilePath deriving (Eq, Ord, Show)
@@ -423,8 +426,32 @@ operatorChars cfg = chars
 data HashedIDs = HashedIDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: M.Map String (OrthoLangType, OrthoLangPath)
+  , hExprs  :: M.Map String (OrthoLangType, ExprPath)
   }
+
+-- TODO what monad should this be in?
+-- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
+-- TODO take an ExprPath
+-- TODO remove any unneccesary path components before lookup, and count the necessary ones
+-- TODO is init a safe enough way to remove 'result' from the ends of the paths?
+decodeExprDeps :: OrthoLangConfig -> HashedIDsRef -> FilePath -> IO ([OrthoLangType], [ExprPath])
+decodeExprDeps cfg idsRef p = do
+  HashedIDs {hExprs = ids} <- readIORef idsRef
+  let keys = init $ splitPath $ makeRelative (cfgTmpDir cfg </> "exprs") p
+      vals = catMaybes $ map (\k -> M.lookup k ids) keys
+      vals' = trace "ortholang.core.types.decodeExprDeps" (p ++ " -> " ++ show vals) vals
+      types = map fst vals'
+      paths = map snd vals'
+  -- TODO user-visible error here if one or more lookups fails
+  -- guard (length vals /= length keys) $ do
+  --   error $ "failed to decode path: '" ++ p ++ "'"
+  return (types, paths)
+
+-- TODO what monad should this be in?
+-- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
+-- lookupExprs :: HashedIDsRef -> [String] -> IO [(OrthoLangType, ExprPath)]
+-- lookupExprs idsRef digests = do
+  -- undefined
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
