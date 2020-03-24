@@ -66,8 +66,9 @@ module OrthoLang.Core.Paths
   , argHashes
   -- , hashContent
   , exprPath
-  , exprDigest
+  , exprPathDigest
   , insertNewRulesDigest
+  , decodeNewRulesDeps
   , exprPathExplicit
   , varPath
   , checkLit
@@ -105,14 +106,16 @@ import OrthoLang.Core.Types -- (OrthoLangConfig)
 import OrthoLang.Core.Pretty (render, pPrint)
 import OrthoLang.Core.Util (digest, trace)
 import Data.String.Utils          (replace)
-import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
+import Development.Shake.FilePath ((</>), (<.>), isAbsolute, makeRelative, splitPath)
 import Data.List                  (intersperse, isPrefixOf)
 import Data.List.Split            (splitOn)
--- import Data.IORef                 (IORef)
 
 import qualified Data.Map.Strict as M
 import Development.Shake
-import Data.IORef                 (atomicModifyIORef')
+import Data.IORef                 (readIORef, atomicModifyIORef')
+import Control.Monad (when)
+import Data.Maybe (fromJust, catMaybes)
+import Data.IORef (atomicModifyIORef')
 
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
@@ -236,16 +239,42 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
     hashes = argHashes s expr
     res    = exprPathExplicit cfg prefix rtype salt hashes
 
-exprDigest :: OrthoLangState -> OrthoLangExpr -> ExprDigest
-exprDigest st expr = ExprDigest $ digest $ exprPath st expr
+exprPathDigest :: OrthoLangPath -> ExprDigest
+exprPathDigest = ExprDigest . digest
 
 insertNewRulesDigest :: OrthoLangState -> OrthoLangExpr -> IO ()
 insertNewRulesDigest st@(_, cfg, _, idr) expr = atomicModifyIORef' idr $
   \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
   where
     eType   = typeOf expr
-    ePath   = exprPath   st expr
-    eDigest = exprDigest st expr
+    ePath   = exprPath st expr
+    eDigest = exprPathDigest ePath
+
+-- TODO what monad should this be in?
+-- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
+-- TODO take an ExprPath
+-- TODO remove any unneccesary path components before lookup, and count the necessary ones
+-- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
+-- TODO better split function
+decodeNewRulesDeps :: OrthoLangConfig -> HashedIDsRef -> ExprPath
+                   -> IO (OrthoLangType, [OrthoLangType], [OrthoLangPath])
+decodeNewRulesDeps cfg idsRef o@(ExprPath out) = do
+  HashedIDs {hExprs = ids} <- readIORef idsRef
+  let dKeys  = map ExprDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
+      dVals  = catMaybes $ map (\k -> M.lookup k ids) dKeys
+      dVals' = trace "ortholang.core.types.decodeNewRulesDeps" (out ++ " -> " ++ show dVals) dVals
+      dTypes = map fst dVals'
+      dPaths = map snd dVals'
+      oKey   = exprPathDigest $ toOrthoLangPath cfg out
+      Just (oType, _) = M.lookup oKey ids
+  -- TODO user-visible error here if one or more lookups fails
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps dKeys: " ++ show dKeys
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps dTypes: " ++ show dTypes
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps dVals': " ++ show dVals'
+  when (length dVals /= length dKeys) $ error $ "failed to decode path: '" ++ out ++ "'"
+  return (oType, dTypes, dPaths)
 
 -- TODO remove repeat salt if fn is deterministic
 exprPathExplicit :: OrthoLangConfig -> String -> OrthoLangType -> RepeatSalt -> [String] -> OrthoLangPath

@@ -71,7 +71,6 @@ module OrthoLang.Core.Types
   , nonEmptyType
   , isNonEmpty
   -- new rules infrastructure
-  , decodeNewRulesDeps
   , newRules
   )
   where
@@ -84,14 +83,12 @@ import OrthoLang.Core.Locks (Locks, withReadLock)
 import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
-import Development.Shake.FilePath (splitPath, (</>), makeRelative)
-import Control.Monad (when)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
-import Data.IORef                     (IORef, readIORef)
+import Data.IORef                     (IORef)
 import Data.Maybe (fromJust, catMaybes)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
@@ -587,29 +584,6 @@ isNonEmpty :: OrthoLangType -> Bool
 isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True
-
--- TODO what monad should this be in?
--- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
--- TODO take an ExprPath
--- TODO remove any unneccesary path components before lookup, and count the necessary ones
--- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
--- TODO better split function
-decodeNewRulesDeps :: OrthoLangConfig -> HashedIDsRef -> ExprPath -> IO ([OrthoLangType], [OrthoLangPath])
-decodeNewRulesDeps cfg idsRef (ExprPath p) = do
-  HashedIDs {hExprs = ids} <- readIORef idsRef
-  let keys = map ExprDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) p
-      vals = catMaybes $ map (\k -> M.lookup k ids) keys
-      vals' = trace "ortholang.core.types.decodeNewRulesDeps" (p ++ " -> " ++ show vals) vals
-      types = map fst vals'
-      paths = map snd vals'
-  -- TODO user-visible error here if one or more lookups fails
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps keys: " ++ show keys
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps types: " ++ show types
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps vals': " ++ show vals'
-  when (length vals /= length keys) $ error $ "failed to decode path: '" ++ p ++ "'"
-  return (types, paths)
 
 newRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
 newRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules

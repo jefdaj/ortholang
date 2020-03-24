@@ -2,7 +2,7 @@ module OrthoLang.Modules.NewRulesTest where
 
 import Development.Shake
 import OrthoLang.Core.Types
-import OrthoLang.Core.Paths (fromOrthoLangPath)
+import OrthoLang.Core.Paths (fromOrthoLangPath, decodeNewRulesDeps)
 import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
 import OrthoLang.Core.Actions (writeCachedLines, need', readLit)
 import System.FilePath ((</>))
@@ -44,12 +44,14 @@ rNewRules tFn cfg lRef iRef = do
 aTest1 :: TypeChecker
        -> OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> Action ()
 aTest1 tFn cfg lRef iRef o@(ExprPath out) = do
-  (types, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
+  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
   let deps' = map (fromOrthoLangPath cfg) deps
   need' cfg lRef "ortholang.modules.newrulestest.test1" deps'
   s1 <- readLit cfg lRef $ deps' !! 0
   s2 <- readLit cfg lRef $ deps' !! 1
-  -- liftIO $ putStrLn $ "aTest1 types: " ++ show types
-  liftIO $ putStrLn $ "aTest1 typechecker says: " ++ show (tFn types)
+  -- TODO assert that types match typechecker
+  -- TODO look up out too and assert that its type matches typechecker result
+  -- liftIO $ putStrLn $ "aTest1 dTypes: " ++ show dTypes
+  liftIO $ putStrLn $ "aTest1 typechecker says: " ++ show (tFn dTypes)
   -- liftIO $ putStrLn $ "aTest1 deps: " ++ show deps
   writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
