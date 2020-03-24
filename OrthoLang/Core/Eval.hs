@@ -234,7 +234,7 @@ eval hdl cfg ref ids rtype ls p = do
       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
-      newRules $ cfgModules cfg
+      newRules cfg ids
       lpaths' <- (fmap . map) (\(ExprPath p) -> p) lpaths
       (ResPath path) <- rpath
       want ["eval"]
