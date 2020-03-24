@@ -164,6 +164,7 @@ library
                     OrthoLang.Modules.SetsTable,
                     OrthoLang.Modules.AllVsAll,
                     OrthoLang.Modules.GreenCut,
+                    OrthoLang.Modules.NewRulesTest,
                     OrthoLang.Test,
                     OrthoLang.Test.Versions
                     OrthoLang.Test.Parse,
