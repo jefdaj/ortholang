@@ -496,7 +496,7 @@ data OrthoLangFunction = OrthoLangFunction
   , fFixity    :: OrthoLangFixity
   , fTags      :: [FnTag]
   , fOldRules  :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
-  , fNewRules  :: Maybe (OrthoLangConfig -> HashedIDsRef -> Rules ())
+  , fNewRules  :: Maybe (OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   }
   -- deriving (Eq, Read)
@@ -597,22 +597,22 @@ isNonEmpty _          = True
 decodeNewRulesDeps :: OrthoLangConfig -> HashedIDsRef -> ExprPath -> IO ([OrthoLangType], [OrthoLangPath])
 decodeNewRulesDeps cfg idsRef (ExprPath p) = do
   HashedIDs {hExprs = ids} <- readIORef idsRef
-  let keys = map ExprDigest $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) p
+  let keys = map ExprDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) p
       vals = catMaybes $ map (\k -> M.lookup k ids) keys
       vals' = trace "ortholang.core.types.decodeNewRulesDeps" (p ++ " -> " ++ show vals) vals
       types = map fst vals'
       paths = map snd vals'
   -- TODO user-visible error here if one or more lookups fails
-  liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
-  liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p
-  liftIO $ putStrLn $ "decodeNewRulesDeps keys: " ++ show keys
-  liftIO $ putStrLn $ "decodeNewRulesDeps types: " ++ show types
-  liftIO $ putStrLn $ "decodeNewRulesDeps vals': " ++ show vals'
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps keys: " ++ show keys
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps types: " ++ show types
+  -- liftIO $ putStrLn $ "decodeNewRulesDeps vals': " ++ show vals'
   when (length vals /= length keys) $ error $ "failed to decode path: '" ++ p ++ "'"
   return (types, paths)
 
-newRules :: OrthoLangConfig -> HashedIDsRef -> Rules ()
-newRules cfg idsRef = mconcat $ map (\r -> r cfg idsRef) rules
+newRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+newRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
   where
    fns   = concatMap mFunctions $ cfgModules cfg
    rules = catMaybes $ map fNewRules fns
