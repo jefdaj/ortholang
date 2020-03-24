@@ -337,8 +337,8 @@ aLoadHash hashSeqIDs cfg ref ids src _ = do
           v = takeFileName src'
       newIDs <- readHashedIDs cfg ref idsPath
       liftIO $ atomicModifyIORef' ids $
-        \h@(HashedIDs {hFiles = f, hSeqIDs = s}) -> (HashedIDs { hFiles  = M.insert k v f
-                                                               , hSeqIDs = M.insert k newIDs s}, ())
+        \h@(HashedIDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
+                                                       , hSeqIDs = M.insert k newIDs s}, ())
 
   return hashPath
   where
