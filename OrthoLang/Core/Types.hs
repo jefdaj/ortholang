@@ -62,6 +62,7 @@ module OrthoLang.Core.Types
   , ExprPath(..)
   , VarPath(..)
   , ResPath(..)
+  , ExprDigest(..)
   -- misc experimental stuff
   , extractExprs
   , extractLoads
@@ -83,8 +84,9 @@ import OrthoLang.Core.Locks (Locks, withReadLock)
 import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
-import Development.Shake.FilePath (makeRelative, splitPath, (</>))
+import Development.Shake.FilePath (splitPath, (</>), makeRelative)
 import Control.Monad (when)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
@@ -111,6 +113,7 @@ newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.ortholang/c
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
 newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/<varname>.<type>
 newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/result[.<hash>.<type>]
+newtype ExprDigest = ExprDigest String deriving (Read, Show, Eq, Ord)
 
 -- Filename extension, which in OrthoLang is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -428,7 +431,7 @@ operatorChars cfg = chars
 data HashedIDs = HashedIDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: M.Map String (OrthoLangType, ExprPath)
+  , hExprs  :: M.Map ExprDigest (OrthoLangType, OrthoLangPath)
   }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
@@ -590,15 +593,21 @@ isNonEmpty _          = True
 -- TODO take an ExprPath
 -- TODO remove any unneccesary path components before lookup, and count the necessary ones
 -- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
-decodeNewRulesDeps :: OrthoLangConfig -> HashedIDsRef -> FilePath -> IO ([OrthoLangType], [ExprPath])
-decodeNewRulesDeps cfg idsRef p = do
+-- TODO better split function
+decodeNewRulesDeps :: OrthoLangConfig -> HashedIDsRef -> ExprPath -> IO ([OrthoLangType], [OrthoLangPath])
+decodeNewRulesDeps cfg idsRef (ExprPath p) = do
   HashedIDs {hExprs = ids} <- readIORef idsRef
-  let keys = reverse $ drop 2 $ reverse $ splitPath $ makeRelative (cfgTmpDir cfg </> "exprs") p
+  let keys = map ExprDigest $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) p
       vals = catMaybes $ map (\k -> M.lookup k ids) keys
       vals' = trace "ortholang.core.types.decodeNewRulesDeps" (p ++ " -> " ++ show vals) vals
       types = map fst vals'
       paths = map snd vals'
   -- TODO user-visible error here if one or more lookups fails
+  liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
+  liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p
+  liftIO $ putStrLn $ "decodeNewRulesDeps keys: " ++ show keys
+  liftIO $ putStrLn $ "decodeNewRulesDeps types: " ++ show types
+  liftIO $ putStrLn $ "decodeNewRulesDeps vals': " ++ show vals'
   when (length vals /= length keys) $ error $ "failed to decode path: '" ++ p ++ "'"
   return (types, paths)
 

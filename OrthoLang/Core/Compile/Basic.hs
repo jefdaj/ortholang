@@ -27,7 +27,7 @@ import OrthoLang.Core.Pretty
 import qualified Data.Map.Strict as M
 
 import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toOrthoLangPath,
-                            fromOrthoLangPath, varPath, OrthoLangPath)
+                            fromOrthoLangPath, varPath, OrthoLangPath, insertNewRulesDigest)
 
 import Data.IORef                 (atomicModifyIORef')
 import Data.List                  (intersperse, isPrefixOf, isInfixOf)
@@ -119,7 +119,9 @@ rLit s@(_, cfg, ref, ids) expr = do
 
 -- TODO take the path, not the expression?
 aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangExpr -> OrthoLangPath -> Action ()
-aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
+aLit cfg ref idr expr out = do
+  insertNewRulesDigest cfg idr expr
+  writeLit cfg ref out'' ePath -- TODO too much dedup?
   where
     paths :: OrthoLangExpr -> FilePath
     paths (OrthoLangLit _ _ p) = p

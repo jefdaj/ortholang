@@ -66,6 +66,8 @@ module OrthoLang.Core.Paths
   , argHashes
   -- , hashContent
   , exprPath
+  , exprDigest
+  , insertNewRulesDigest
   , exprPathExplicit
   , varPath
   , checkLit
@@ -107,6 +109,10 @@ import Development.Shake.FilePath ((</>), (<.>), isAbsolute)
 import Data.List                  (intersperse, isPrefixOf)
 import Data.List.Split            (splitOn)
 -- import Data.IORef                 (IORef)
+
+import qualified Data.Map.Strict as M
+import Development.Shake
+import Data.IORef                 (atomicModifyIORef')
 
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
@@ -229,6 +235,19 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
     salt   = saltOf expr
     hashes = argHashes s expr
     res    = exprPathExplicit cfg prefix rtype salt hashes
+
+exprDigest :: OrthoLangState -> OrthoLangExpr -> ExprDigest
+exprDigest st expr = ExprDigest $ digest $ exprPath st expr
+
+insertNewRulesDigest :: OrthoLangConfig -> HashedIDsRef -> OrthoLangExpr -> Action ()
+insertNewRulesDigest cfg idr expr =
+  liftIO $ atomicModifyIORef' idr $
+    \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
+  where
+    eType   = typeOf expr
+    fakeState = (undefined, cfg, undefined, idr) -- TODO fix this!
+    ePath   = exprPath   fakeState expr
+    eDigest = exprDigest fakeState expr
 
 -- TODO remove repeat salt if fn is deterministic
 exprPathExplicit :: OrthoLangConfig -> String -> OrthoLangType -> RepeatSalt -> [String] -> OrthoLangPath
