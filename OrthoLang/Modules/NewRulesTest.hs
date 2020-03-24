@@ -28,24 +28,27 @@ test1 = let name = "newrulestest1" in OrthoLangFunction
   , fTypeCheck = tTest1
   , fFixity    = Prefix, fTags = []
   , fOldRules = undefined
-  , fNewRules = Just $ rNewRules tTest1 aTest1
+  , fNewRules = Just $ rNewRules name 2 tTest1 aTest1
   }
 
 tTest1 :: TypeChecker
 tTest1 = defaultTypeCheck [str, str] str
 
-type NewAction = TypeChecker -> OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> Action ()
+-- TODO ExprPaths for deps?
+-- TODO or OrthoLangPaths throughout?
+-- TODO can you encode NewAction1, 2, 3... easily?
+type NewAction  = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> [FilePath] -> Action ()
 type NewRulesFn = OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
 
-rNewRules :: TypeChecker -> NewAction -> NewRulesFn
-rNewRules tFn aFn cfg lRef iRef = do
+rNewRules :: String -> Int -> TypeChecker -> NewAction -> NewRulesFn
+rNewRules name nArgs tFn aFn cfg lRef iRef = do
   let exprDir = cfgTmpDir cfg </> "exprs"
-      pattern = exprDir </> "newrulestest1" </> "*" </> "*" </> "*" </> "result"
-  pattern %> \p -> aFn tFn cfg lRef iRef (ExprPath p)
+      pattern = exprDir </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
+  pattern %> \p -> aNewRules tFn aFn cfg lRef iRef (ExprPath p)
   return ()
 
-aTest1 :: NewAction
-aTest1 tFn cfg lRef iRef o@(ExprPath out) = do
+aNewRules :: TypeChecker -> NewAction -> OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> Action ()
+aNewRules tFn aFn cfg lRef iRef o@(ExprPath out) = do
   (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
   case tFn dTypes of
     Left err -> error err
@@ -53,10 +56,14 @@ aTest1 tFn cfg lRef iRef o@(ExprPath out) = do
       when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
       let deps' = map (fromOrthoLangPath cfg) deps
       need' cfg lRef "ortholang.modules.newrulestest.test1" deps'
-      s1 <- readLit cfg lRef $ deps' !! 0
-      s2 <- readLit cfg lRef $ deps' !! 1
       -- TODO look up out too and assert that its type matches typechecker result
-      -- liftIO $ putStrLn $ "aTest1 dTypes: " ++ show dTypes
-      liftIO $ putStrLn $ "aTest1 typechecker says: " ++ show (tFn dTypes)
-      -- liftIO $ putStrLn $ "aTest1 deps: " ++ show deps
-      writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
+      -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
+      -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
+      -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
+      aFn cfg lRef iRef o deps'
+
+aTest1 :: NewAction
+aTest1 cfg lRef iRef (ExprPath out) deps' = do
+  s1 <- readLit cfg lRef $ deps' !! 0
+  s2 <- readLit cfg lRef $ deps' !! 1
+  writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
