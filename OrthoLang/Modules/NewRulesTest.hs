@@ -76,31 +76,36 @@ aNewRules applyDeps tFn aFn cfg lRef iRef o@(ExprPath out) = do
       -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
       applyDeps (aFn cfg lRef iRef o) deps'
 
+mkNewFn1 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction1 -> OrthoLangFunction
+mkNewFn1 = mkNewFn rNewRules1
+
+mkNewFn2 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction2 -> OrthoLangFunction
+mkNewFn2 = mkNewFn rNewRules2
+
+mkNewFn3 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction3 -> OrthoLangFunction
+mkNewFn3 = mkNewFn rNewRules3
+
+mkNewFn
+  :: (String -> TypeChecker -> t -> OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())
+  -> String -> OrthoLangType -> [OrthoLangType] -> t -> OrthoLangFunction
+mkNewFn rFn name oType dTypes aFn =
+  let tFn = defaultTypeCheck dTypes oType
+  in OrthoLangFunction
+       { fNames     = [name]
+       , fTypeDesc  = mkTypeDesc name dTypes oType
+       , fTypeCheck = tFn
+       , fFixity    = Prefix, fTags = []
+       , fOldRules  = undefined
+       , fNewRules  = Just $ rFn name tFn aFn
+       }
+
 -----------
 -- test1 --
 -----------
 
 -- TODO factor the common elements out of this to get it as simple as possible
 test1 :: OrthoLangFunction
-test1 = mkNewFn2 "newrulestest1" str [str, str] tTest1 aTest1
-
-mkNewFn2 :: String -> OrthoLangType -> [OrthoLangType] -> TypeChecker -> NewAction2 -> OrthoLangFunction
-mkNewFn2 = mkNewFn rNewRules2
-
-mkNewFn :: (String -> t1 -> t2 -> OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())
-         -> String -> OrthoLangType -> [OrthoLangType] -> t1 -> t2
-         -> OrthoLangFunction
-mkNewFn rFn name oType dTypes tFn aFn = OrthoLangFunction
-  { fNames     = [name]
-  , fTypeDesc  = mkTypeDesc name dTypes oType
-  , fTypeCheck = tTest1
-  , fFixity    = Prefix, fTags = []
-  , fOldRules  = undefined
-  , fNewRules  = Just $ rFn name tFn aFn
-  }
-
-tTest1 :: TypeChecker
-tTest1 = defaultTypeCheck [str, str] str
+test1 = mkNewFn2 "newrulestest1" str [str, str] aTest1
 
 aTest1 :: NewAction2
 aTest1 cfg lRef _ (ExprPath out) d1 d2 = do
