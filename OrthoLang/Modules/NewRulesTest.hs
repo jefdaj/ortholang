@@ -27,27 +27,29 @@ test1 = let name = "newrulestest1" in OrthoLangFunction
   , fTypeCheck = tTest1
   , fFixity    = Prefix, fTags = []
   , fOldRules = undefined
-  , fNewRules = Just rTest1
+  , fNewRules = Just $ rNewRules tTest1
   }
 
 tTest1 :: TypeChecker
 tTest1 = defaultTypeCheck [str, str] str
 
-rTest1 :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
-rTest1 cfg lRef iRef = do
+rNewRules :: TypeChecker
+          -> OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+rNewRules tFn cfg lRef iRef = do
   let exprDir = cfgTmpDir cfg </> "exprs"
       pattern = exprDir </> "newrulestest1" </> "*" </> "*" </> "*" </> "result"
-  pattern %> \p -> aTest1 cfg lRef iRef (ExprPath p)
+  pattern %> \p -> aTest1 tFn cfg lRef iRef (ExprPath p)
   return ()
 
-aTest1 :: OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> Action ()
-aTest1 cfg lRef iRef o@(ExprPath out) = do
+aTest1 :: TypeChecker
+       -> OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> Action ()
+aTest1 tFn cfg lRef iRef o@(ExprPath out) = do
   (types, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
   let deps' = map (fromOrthoLangPath cfg) deps
   need' cfg lRef "ortholang.modules.newrulestest.test1" deps'
   s1 <- readLit cfg lRef $ deps' !! 0
   s2 <- readLit cfg lRef $ deps' !! 1
   -- liftIO $ putStrLn $ "aTest1 types: " ++ show types
-  -- liftIO $ putStrLn $ "aTest1 typechecker says: " ++ show (tTest1 types)
+  liftIO $ putStrLn $ "aTest1 typechecker says: " ++ show (tFn types)
   -- liftIO $ putStrLn $ "aTest1 deps: " ++ show deps
   writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
