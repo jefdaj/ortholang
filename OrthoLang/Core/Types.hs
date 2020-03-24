@@ -27,7 +27,6 @@ module OrthoLang.Core.Types
   , Locks
   , HashedIDs(..)
   , HashedIDsRef
-  , decodeExprDeps
   , OrthoLangState
   , ensureResult
   , lookupResult
@@ -70,6 +69,9 @@ module OrthoLang.Core.Types
   , typesMatch
   , nonEmptyType
   , isNonEmpty
+  -- new rules infrastructure
+  , decodeNewExprDeps
+  , newRules
   )
   where
 
@@ -429,30 +431,6 @@ data HashedIDs = HashedIDs
   , hExprs  :: M.Map String (OrthoLangType, ExprPath)
   }
 
--- TODO what monad should this be in?
--- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
--- TODO take an ExprPath
--- TODO remove any unneccesary path components before lookup, and count the necessary ones
--- TODO is init a safe enough way to remove 'result' from the ends of the paths?
-decodeExprDeps :: OrthoLangConfig -> HashedIDsRef -> FilePath -> IO ([OrthoLangType], [ExprPath])
-decodeExprDeps cfg idsRef p = do
-  HashedIDs {hExprs = ids} <- readIORef idsRef
-  let keys = init $ splitPath $ makeRelative (cfgTmpDir cfg </> "exprs") p
-      vals = catMaybes $ map (\k -> M.lookup k ids) keys
-      vals' = trace "ortholang.core.types.decodeExprDeps" (p ++ " -> " ++ show vals) vals
-      types = map fst vals'
-      paths = map snd vals'
-  -- TODO user-visible error here if one or more lookups fails
-  -- guard (length vals /= length keys) $ do
-  --   error $ "failed to decode path: '" ++ p ++ "'"
-  return (types, paths)
-
--- TODO what monad should this be in?
--- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
--- lookupExprs :: HashedIDsRef -> [String] -> IO [(OrthoLangType, ExprPath)]
--- lookupExprs idsRef digests = do
-  -- undefined
-
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
 type HashedIDsRef = IORef HashedIDs
@@ -606,3 +584,27 @@ isNonEmpty :: OrthoLangType -> Bool
 isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True
+
+-- TODO what monad should this be in?
+-- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
+-- TODO take an ExprPath
+-- TODO remove any unneccesary path components before lookup, and count the necessary ones
+-- TODO is init a safe enough way to remove 'result' from the ends of the paths?
+decodeNewExprDeps :: OrthoLangConfig -> HashedIDsRef -> FilePath -> IO ([OrthoLangType], [ExprPath])
+decodeNewExprDeps cfg idsRef p = do
+  HashedIDs {hExprs = ids} <- readIORef idsRef
+  let keys = init $ splitPath $ makeRelative (cfgTmpDir cfg </> "exprs") p
+      vals = catMaybes $ map (\k -> M.lookup k ids) keys
+      vals' = trace "ortholang.core.types.decodeNewExprDeps" (p ++ " -> " ++ show vals) vals
+      types = map fst vals'
+      paths = map snd vals'
+  -- TODO user-visible error here if one or more lookups fails
+  -- guard (length vals /= length keys) $ do
+  --   error $ "failed to decode path: '" ++ p ++ "'"
+  return (types, paths)
+
+newRules :: [OrthoLangModule] -> Rules ()
+newRules ms = mconcat rules
+  where
+   fns   = concatMap mFunctions ms
+   rules = catMaybes $ map fNewRules fns
