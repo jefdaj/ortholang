@@ -74,8 +74,8 @@ main = withFileLogging "ortholang.log" $ do
 
   -- TODO typecheck only option here
   if (cfgInteractive cfg)
-    then runRepl         cfg ref ids
-    else evalFile stdout cfg ref ids
+    then runRepl cfg ref ids -- TODO take an entire state here too?
+    else evalFile ([], cfg, ref, ids) stdout
 
   -- TODO is it a problem that --test never reaches this?
   -- debug "finished main"
