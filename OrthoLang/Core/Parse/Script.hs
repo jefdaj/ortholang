@@ -5,7 +5,6 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
-import OrthoLang.Core.Paths (insertNewRulesDigest)
 
 import Control.Applicative    ((<|>), many)
 import System.FilePath        ((</>), takeDirectory)
@@ -112,9 +111,9 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 -------------
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> IO OrthoLangScript
-parseFileIO cfg ref ids scr = do
-  mscr1 <- parseFile cfg ref ids scr
+parseFileIO :: OrthoLangState -> FilePath -> IO OrthoLangScript
+parseFileIO st scr = do
+  mscr1 <- parseFile st scr
   case mscr1 of
     Left  e -> fail $ show e
     Right s -> return s
@@ -130,9 +129,6 @@ parseStatement = parseWithEof pStatement
 parseString :: OrthoLangConfig -> Locks -> HashedIDsRef -> String
             -> Either ParseError OrthoLangScript
 parseString c r ids = parseWithEof pScript ([], c, r, ids)
-
-insertNewRulesDigests :: OrthoLangConfig -> HashedIDsRef -> OrthoLangScript -> IO ()
-insertNewRulesDigests cfg idr scr = mapM_ (insertNewRulesDigest cfg idr) $ map snd scr
 
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
@@ -159,13 +155,8 @@ pScript = debugParser "pScript" $ do
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath
-          -> IO (Either ParseError OrthoLangScript)
-parseFile cfg ref ids path = do
+parseFile :: OrthoLangState -> FilePath -> IO (Either ParseError OrthoLangScript)
+parseFile st@(_, cfg, ref, ids) path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path
-  let scr = (parseString cfg ref ids . stripComments) txt
-  case scr of
-    Left _ -> return ()
-    Right s -> insertNewRulesDigests cfg ids s
-  return scr
+  return $ (parseString cfg ref ids . stripComments) txt

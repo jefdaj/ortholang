@@ -289,9 +289,9 @@ evalScript hdl s@(as, c, ref, ids) =
       loads = mapM (rExpr s) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
   in eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
 
-evalFile :: Handle -> OrthoLangConfig -> Locks -> HashedIDsRef -> IO ()
-evalFile hdl cfg ref ids = case cfgScript cfg of
+evalFile :: OrthoLangState -> Handle -> IO ()
+evalFile st@(_, cfg, ref, ids) hdl = case cfgScript cfg of
   Nothing  -> putStrLn "no script during eval. that's not right!"
   Just scr -> do
-    s <- parseFileIO cfg ref ids scr -- TODO just take a OrthoLangState?
+    s <- parseFileIO st scr -- TODO just take a OrthoLangState?
     evalScript hdl (s, cfg, ref, ids)

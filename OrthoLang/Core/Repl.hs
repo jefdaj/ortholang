@@ -287,8 +287,9 @@ listFunctionTypesWithOutput cfg cType = filter matches descs
     descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
 
 -- TODO this is totally duplicating code from putAssign; factor out
+-- TODO should it be an error for the new script not to play well with an existing one?
 cmdLoad :: OrthoLangState -> Handle -> String -> IO OrthoLangState
-cmdLoad st@(_, cfg, ref, ids) hdl path = do
+cmdLoad st@(scr, cfg, ref, ids) hdl path = do
   clear
   path' <- absolutize path
   dfe   <- doesFileExist path'
@@ -296,7 +297,7 @@ cmdLoad st@(_, cfg, ref, ids) hdl path = do
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
       let cfg' = cfg { cfgScript = Just path' } -- TODO why the False??
-      new <- parseFile cfg' ref ids path' -- TODO insert ids
+      new <- parseFile (scr, cfg', ref, ids) path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         -- TODO put this back? not sure if it makes repl better
