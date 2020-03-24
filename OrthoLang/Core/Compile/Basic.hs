@@ -60,6 +60,9 @@ debugRules cfg name input out = debug cfg msg out
 -- compile the OrthoLang AST --
 ------------------------------
 
+-- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
+-- TODO wait! it's the rules that might not need to be returned, not the path, right?
+--            that actually makes it easy to use the same function types but not do any actual rules :D
 rExpr :: RulesFn
 rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e
 rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
@@ -68,13 +71,16 @@ rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n
 rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 
--- TODO remove once no longer needed (parser should find fns)
+-- This is in the process of being replaced with fNewRules,
+-- so we ignore any function that already has that field written.
 rulesByName :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath
 rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
-  Just f  -> if any ("load_" `isPrefixOf`) (fNames f)
-               then (fOldRules f) s $ setSalt 0 expr
-               else (fOldRules f) s expr
+  Just f  -> case fNewRules f of
+               Nothing -> if any ("load_" `isPrefixOf`) (fNames f)
+                            then (fOldRules f) s $ setSalt 0 expr
+                            else (fOldRules f) s expr
+               Just nr -> return $ ExprPath $ fromOrthoLangPath cfg $ exprPath s expr
 
 rAssign :: OrthoLangState -> OrthoLangAssign -> Rules (OrthoLangVar, VarPath)
 rAssign s@(_, cfg, _, _) (var, expr) = do
