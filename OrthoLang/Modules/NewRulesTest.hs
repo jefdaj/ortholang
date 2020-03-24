@@ -44,6 +44,7 @@ rNewRules2 = rNewRules 2 $ \fn deps -> fn (deps !! 0) (deps !! 1)
 rNewRules3 :: String -> TypeChecker -> NewAction3 -> NewRulesFn
 rNewRules3 = rNewRules 3 $ \fn deps -> fn (deps !! 0) (deps !! 1) (deps !! 2)
 
+-- TODO can you add more rules simply by doing >> moreRulesFn after this?
 rNewRules
   :: Int -> (t -> [FilePath] -> Action ()) -> String
   -> TypeChecker
@@ -79,14 +80,23 @@ aNewRules applyDeps tFn aFn cfg lRef iRef o@(ExprPath out) = do
 -- test1 --
 -----------
 
+-- TODO factor the common elements out of this to get it as simple as possible
 test1 :: OrthoLangFunction
-test1 = let name = "newrulestest1" in OrthoLangFunction
+test1 = mkNewFn2 "newrulestest1" str [str, str] tTest1 aTest1
+
+mkNewFn2 :: String -> OrthoLangType -> [OrthoLangType] -> TypeChecker -> NewAction2 -> OrthoLangFunction
+mkNewFn2 = mkNewFn rNewRules2
+
+mkNewFn :: (String -> t1 -> t2 -> OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())
+         -> String -> OrthoLangType -> [OrthoLangType] -> t1 -> t2
+         -> OrthoLangFunction
+mkNewFn rFn name oType dTypes tFn aFn = OrthoLangFunction
   { fNames     = [name]
-  , fTypeDesc  = mkTypeDesc  name [str, str] str
+  , fTypeDesc  = mkTypeDesc name dTypes oType
   , fTypeCheck = tTest1
   , fFixity    = Prefix, fTags = []
-  , fOldRules = undefined
-  , fNewRules = Just $ rNewRules2 name tTest1 aTest1
+  , fOldRules  = undefined
+  , fNewRules  = Just $ rFn name tFn aFn
   }
 
 tTest1 :: TypeChecker
