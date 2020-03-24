@@ -418,9 +418,12 @@ operatorChars cfg = chars
 -- then use this hash -> seqid map to put the original ids back at the end
 -- hFiles is for making paths generic
 -- hSeqIDs is the main one, and stores hash -> seqid maps indexed by their (generic) hFiles path
+-- hExprs is for decoding exprs/<hash>/<hash>/... paths
+-- TODO use bytestring-tries rather than maps with string keys?
 data HashedIDs = HashedIDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
+  , hExprs  :: M.Map String (OrthoLangType, OrthoLangPath)
   }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff

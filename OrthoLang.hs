@@ -55,7 +55,7 @@ main = withFileLogging "ortholang.log" $ do
   setEnv "TMPDIR" $ cfgTmpDir cfg -- for subprocesses like R
   ref <- initLocks
   setCurrentDirectory $ cfgWorkDir cfg
-  ids <- newIORef $ HashedIDs M.empty M.empty
+  ids <- newIORef $ HashedIDs M.empty M.empty M.empty
 
   -- TODO should these be mutually exclusive?
 
