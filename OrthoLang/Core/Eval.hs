@@ -36,7 +36,7 @@ import OrthoLang.Core.Pretty (renderIO)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Core.Compile.Basic    (compileScript, rExpr)
+import OrthoLang.Core.Compile.Basic    (compileScript, rExpr, newCoreRules)
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
@@ -234,7 +234,8 @@ eval hdl cfg ref ids rtype ls p = do
       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
-      newRules cfg ref ids
+      newCoreRules
+      newFunctionRules cfg ref ids
       lpaths' <- (fmap . map) (\(ExprPath p) -> p) lpaths
       (ResPath path) <- rpath
       want ["eval"]

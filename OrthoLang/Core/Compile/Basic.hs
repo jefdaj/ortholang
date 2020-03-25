@@ -71,6 +71,22 @@ rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n
 rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 
+newCoreRules :: Rules ()
+newCoreRules = do
+  -- TODO rLit
+  -- TODO rList{,Lists,Paths}
+  -- TODO rAssign?
+  -- TODO rRef?
+  -- TODO rBop
+  -- TODO rLoad{,List,ListLits,ListLinks}
+  -- TODO rSimple{,Tmp,Script,ScriptPar,ScriptNoFix,'}
+  -- TODO rReplace{,',Each}
+  -- TODO rMap{,Tmp,Tmps,SimpleScript}
+  -- TODO rCompose1
+  -- TODO rFun{1,3}
+  -- TODO rRepeatN
+  undefined
+
 -- This is in the process of being replaced with fNewRules,
 -- so we ignore any function that already has that field written.
 rulesByName :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath

@@ -71,7 +71,7 @@ module OrthoLang.Core.Types
   , nonEmptyType
   , isNonEmpty
   -- new rules infrastructure
-  , newRules
+  , newFunctionRules
   )
   where
 
@@ -585,8 +585,8 @@ isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True
 
-newRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
-newRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
+newFunctionRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+newFunctionRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
   where
    fns   = concatMap mFunctions $ cfgModules cfg
    rules = catMaybes $ map fNewRules fns
