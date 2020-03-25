@@ -7,8 +7,6 @@ import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
 import OrthoLang.Core.Actions (writeCachedLines, need', readLit)
 import System.FilePath ((</>))
 import Control.Monad (when)
-
--- TODO fix digests:
 import OrthoLang.Modules.SeqIO (faa)
 
 orthoLangModule :: OrthoLangModule
@@ -124,4 +122,4 @@ test2 :: OrthoLangFunction
 test2 = mkNewFn3 "newrulestest2" faa [str, faa, faa] aTest2
 
 aTest2 :: NewAction3
-aTest2 cfg lRef iRef (ExprPath out) a1 a2 a3 = undefined
+aTest2 cfg lRef _ (ExprPath out) a1 a2 a3 = writeCachedLines cfg lRef out ["inputs:", a1, a2, a3]
