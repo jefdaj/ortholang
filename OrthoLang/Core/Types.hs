@@ -7,6 +7,11 @@ module OrthoLang.Core.Types
   , ActionFn
   , RulesFn
   , TypeChecker
+  -- new rules types
+  , NewAction1
+  , NewAction2
+  , NewAction3
+  , NewRulesFn
   -- data structures
   , OrthoLangAssign
   , OrthoLangExpr(..)
@@ -105,6 +110,12 @@ type ActionFn    = OrthoLangConfig -> CacheDir -> [ExprPath] -> Action ()
 
 type RulesFn     = OrthoLangState -> OrthoLangExpr -> Rules ExprPath
 type TypeChecker = [OrthoLangType] -> Either String OrthoLangType
+
+type NewAction1 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath                         -> Action ()
+type NewAction2 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath -> FilePath             -> Action ()
+type NewAction3 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+
+type NewRulesFn = OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
 
 newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.ortholang/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
