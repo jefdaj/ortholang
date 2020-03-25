@@ -172,18 +172,23 @@ deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
 --            that actually makes it easy to use the same function types but not do any actual rules :D
+--
+-- TODO which of these can we really deprecate? maybe just rulesByName?
 rExpr :: RulesFn
-rExpr s e@(OrthoLangLit _ _ _      ) = deprecatedRules s e -- TODO what will happen when we call this?
+rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e -- TODO what will happen when we call this?
 rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
 rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e
-rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
+rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n
 rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n
 rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 
 newCoreRules :: NewRulesFn
 newCoreRules cfg lRef iRef = do
-  newPattern cfg "str" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] str) aLit cfg lRef iRef (ExprPath p)
-  newPattern cfg "num" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] num) aLit cfg lRef iRef (ExprPath p)
+  return ()
+  -- this is a nice idea in general, but won't work with the special lit compilers
+  -- (because they need direct access to the expressions to get their lit values)
+  -- newPattern cfg "str" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] str) aLit cfg lRef iRef (ExprPath p)
+  -- newPattern cfg "num" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] num) aLit cfg lRef iRef (ExprPath p)
   -- TODO rList{,Lists,Paths}
   -- TODO rAssign?
   -- TODO rRef?
@@ -235,27 +240,27 @@ compileScript s@(as, _, _, _) _ = do
       -- Just h  -> "result." ++ h
 
 -- write a literal value from OrthoLang source code to file
--- rLit :: RulesFn
--- rLit s@(_, cfg, ref, ids) expr = do
---   let path  = exprPath s expr -- absolute paths allowed!
---       path' = debugRules cfg "rLit" expr $ fromOrthoLangPath cfg path
---   path' %> \_ -> aLit cfg ref ids expr path
---   return (ExprPath path')
+rLit :: RulesFn
+rLit s@(_, cfg, ref, ids) expr = do
+  let path  = exprPath s expr -- absolute paths allowed!
+      path' = debugRules cfg "rLit" expr $ fromOrthoLangPath cfg path
+  path' %> \_ -> aLit cfg ref ids expr path
+  return (ExprPath path')
 
 -- TODO take the path, not the expression?
 -- TODO these actions all need to decode their dependencies from the outpath rather than the expression
---aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangExpr -> OrthoLangPath -> Action ()
---aLit cfg ref idr expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
---  where
---    paths :: OrthoLangExpr -> FilePath
---    paths (OrthoLangLit _ _ p) = p
---    paths _ = fail "bad argument to paths"
---    ePath = paths expr
---    out'  = fromOrthoLangPath cfg out
---    out'' = traceA "aLit" out' [ePath, out']
+aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangExpr -> OrthoLangPath -> Action ()
+aLit cfg ref idr expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
+  where
+    paths :: OrthoLangExpr -> FilePath
+    paths (OrthoLangLit _ _ p) = p
+    paths _ = fail "bad argument to paths"
+    ePath = paths expr
+    out'  = fromOrthoLangPath cfg out
+    out'' = traceA "aLit" out' [ePath, out']
 
-aLit :: NewAction1
-aLit = undefined
+-- aLit :: NewAction1
+-- aLit = undefined
 -- aLit cfg lRef iRef (ExprPath out') a1 = do
   -- writeLit cfg lRef out ePath -- TODO too much dedup?
   -- where
