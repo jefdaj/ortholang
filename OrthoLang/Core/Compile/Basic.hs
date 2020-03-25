@@ -71,13 +71,32 @@ debugRules cfg name input out = debug cfg msg out
 -- TODO can you encode NewAction1, 2, 3... easily?
 
 rNewRules1 :: String -> TypeChecker -> NewAction1 -> NewRulesFn
-rNewRules1 = rNewRules 1 $ \fn deps -> fn (deps !! 0)
+rNewRules1 = rNewRules 1 applyList1
+
+applyList1
+  :: (FilePath -> Action ())
+  -> [FilePath] -> Action ()
+applyList1 fn deps = fn (deps !! 0)
 
 rNewRules2 :: String -> TypeChecker -> NewAction2 -> NewRulesFn
-rNewRules2 = rNewRules 2 $ \fn deps -> fn (deps !! 0) (deps !! 1)
+rNewRules2 = rNewRules 2 applyList2
+
+applyList2
+  :: (FilePath -> FilePath -> Action ())
+  -> [FilePath] -> Action ()
+applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
 rNewRules3 :: String -> TypeChecker -> NewAction3 -> NewRulesFn
-rNewRules3 = rNewRules 3 $ \fn deps -> fn (deps !! 0) (deps !! 1) (deps !! 2)
+rNewRules3 = rNewRules 3 applyList3
+
+applyList3
+  :: (FilePath -> FilePath -> FilePath -> Action ())
+  -> [FilePath] -> Action ()
+applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
+
+newPattern :: OrthoLangConfig -> String -> Int -> FilePattern
+newPattern cfg name nArgs =
+  cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
 
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 rNewRules
@@ -85,19 +104,20 @@ rNewRules
   -> TypeChecker
   -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
   -> NewRulesFn
-rNewRules nArgs applyDeps name tFn aFn cfg lRef iRef = do
+rNewRules nArgs applyFn name tFn aFn cfg lRef iRef = do
   let exprDir = cfgTmpDir cfg </> "exprs"
-      pattern = exprDir </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
-  pattern %> \p -> aNewRules applyDeps tFn aFn cfg lRef iRef (ExprPath p)
+      pattern = newPattern cfg name nArgs
+      -- pattern = exprDir </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
+  pattern %> \p -> aNewRules applyFn tFn aFn cfg lRef iRef (ExprPath p)
   return ()
 
 aNewRules
-  :: (t -> [FilePath] -> Action ())
+  :: (t -> [FilePath] -> Action ()) -- one of the apply{1,2,3} fns
   -> TypeChecker
   -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
   ->  OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath
   -> Action ()
-aNewRules applyDeps tFn aFn cfg lRef iRef out = do
+aNewRules applyFn tFn aFn cfg lRef iRef out = do
   (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef out
   case tFn dTypes of
     Left err -> error err
@@ -109,8 +129,9 @@ aNewRules applyDeps tFn aFn cfg lRef iRef out = do
       -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
       -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
       -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
-      applyDeps (aFn cfg lRef iRef out) deps'
+      applyFn (aFn cfg lRef iRef out) deps'
 
+-- TODO do the applyFn thing at the action level rather than rules?
 mkNewFn1 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction1 -> OrthoLangFunction
 mkNewFn1 = mkNewFn rNewRules1
 
@@ -159,11 +180,10 @@ rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
 rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n
 rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 
-newCoreRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+newCoreRules :: NewRulesFn
 newCoreRules cfg lRef iRef = do
-  let exprs = cfgTmpDir cfg </> "exprs"
-  -- TODO rLit (str,num)
-  -- exprs </> "str/*/*/result" %> aLit cfg lRef iRef
+  newPattern cfg "str" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] str) aLit cfg lRef iRef (ExprPath p)
+  newPattern cfg "num" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] num) aLit cfg lRef iRef (ExprPath p)
   -- TODO rList{,Lists,Paths}
   -- TODO rAssign?
   -- TODO rRef?
@@ -175,7 +195,6 @@ newCoreRules cfg lRef iRef = do
   -- TODO rCompose1
   -- TODO rFun{1,3}
   -- TODO rRepeatN
-  undefined
 
 -- This is in the process of being replaced with fNewRules,
 -- so we ignore any function that already has that field written.
@@ -237,6 +256,10 @@ compileScript s@(as, _, _, _) _ = do
 
 aLit :: NewAction1
 aLit = undefined
+-- aLit cfg lRef iRef (ExprPath out') a1 = do
+  -- writeLit cfg lRef out ePath -- TODO too much dedup?
+  -- where
+    -- out = toOrthoLangPath cfg out'
 
 rList :: RulesFn
 -- TODO is this the bug? refers to a list of other empty lists, no?
