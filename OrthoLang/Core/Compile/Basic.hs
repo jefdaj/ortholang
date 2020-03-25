@@ -10,12 +10,17 @@
 -- TODO why doesn't turning down the verbosity actually work?
 
 module OrthoLang.Core.Compile.Basic
---   ( compileScript
---   , rBop
---   , rExpr
---   , rList
---   , addPrefixes
---   )
+  ( compileScript
+  , curl
+  , debug
+  , debugRules
+  , defaultTypeCheck
+  , mkLoad
+  , mkLoadList
+  , rBop
+  , rExpr
+  , typeError
+  )
   where
 
 -- TODO does turning of traces radically speed up the interpreter?
@@ -30,12 +35,11 @@ import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toOrthoLangPa
                             fromOrthoLangPath, varPath, OrthoLangPath)
 
 import Data.IORef                 (atomicModifyIORef')
-import Data.List                  (intersperse, isPrefixOf, isInfixOf)
+import Data.List                  (isPrefixOf, isInfixOf)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName)
 import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
                                    readLitPaths, writePaths, symlink)
--- import OrthoLang.Core.Locks        (withWriteLock')
 import OrthoLang.Core.Sanitize     (hashIDsFile2, readHashedIDs)
 import OrthoLang.Core.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists, headOrDie, trace, unlessExists)
@@ -44,11 +48,6 @@ import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
 
 import Data.Maybe (isJust, fromJust)
-
-import OrthoLang.Core.Paths (fromOrthoLangPath, decodeNewRulesDeps)
-import OrthoLang.Core.Actions (writeCachedLines, need', readLit)
-import System.FilePath ((</>))
-import Control.Monad (when)
 
 debug :: OrthoLangConfig -> String -> a -> a
 debug cfg msg rtn = if isJust (cfgDebug cfg) then trace "core.compile" msg rtn else rtn
@@ -69,11 +68,11 @@ debugRules cfg name input out = debug cfg msg out
 
 -- This should return the same outPath as the old RulesFns, without doing anything else.
 -- TODO remove it once the new rules are all written
-deprecatedRules :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
-deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
-  where
-    out  = exprPath s e
-    out' = fromOrthoLangPath cfg $ exprPath s e
+-- deprecatedRules :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+-- deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
+--   where
+--     out  = exprPath s e
+--     out' = fromOrthoLangPath cfg $ exprPath s e
 
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
@@ -96,7 +95,7 @@ rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
                Nothing -> if any ("load_" `isPrefixOf`) (fNames f)
                             then (fOldRules f) s $ setSalt 0 expr
                             else (fOldRules f) s expr
-               Just nr -> return $ ExprPath $ fromOrthoLangPath cfg $ exprPath s expr
+               Just _ -> return $ ExprPath $ fromOrthoLangPath cfg $ exprPath s expr
 
 rAssign :: OrthoLangState -> OrthoLangAssign -> Rules (OrthoLangVar, VarPath)
 rAssign s@(_, cfg, _, _) (var, expr) = do
@@ -136,7 +135,7 @@ rLit s@(_, cfg, ref, ids) expr = do
 -- TODO take the path, not the expression?
 -- TODO these actions all need to decode their dependencies from the outpath rather than the expression
 aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangExpr -> OrthoLangPath -> Action ()
-aLit cfg ref idr expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
+aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
   where
     paths :: OrthoLangExpr -> FilePath
     paths (OrthoLangLit _ _ p) = p
@@ -346,7 +345,6 @@ aLoadHash hashSeqIDs cfg ref ids src _ = do
   need' cfg ref "ortholang.core.compile.basic.aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromOrthoLangPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
-      src'      = fromOrthoLangPath cfg src
       hashPath' = tmpDir' </> md5 -- <.> ext
       hashPath  = toOrthoLangPath cfg hashPath'
   if not hashSeqIDs

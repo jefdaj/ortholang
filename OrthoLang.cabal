@@ -160,6 +160,7 @@ library
                     OrthoLang.Test.Repl,
                     OrthoLang.Test.Scripts
   other-modules:    OrthoLang.Core.Compile.Basic
+                    OrthoLang.Core.Compile.NewRules,
                     OrthoLang.Core.Compile.Simple,
                     OrthoLang.Core.Compile.Compose,
                     OrthoLang.Core.Compile.Map,
