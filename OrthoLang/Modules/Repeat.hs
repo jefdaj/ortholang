@@ -1,4 +1,4 @@
-module OrthoLang.Core.Compile.Repeat where
+module OrthoLang.Modules.Repeat where
 
 {- They're named similarly, but repeat and replace mean different things. The
  - Replace module copies the script and replaces a variable in each version of
@@ -15,7 +15,7 @@ module OrthoLang.Core.Compile.Repeat where
 import Development.Shake
 import OrthoLang.Core.Types
 import OrthoLang.Core.Util (justOrDie)
-import OrthoLang.Core.Compile.Replace (rReplaceEach)
+import OrthoLang.Modules.Replace (rReplaceEach)
 
 import Data.Scientific (Scientific(), toBoundedInteger)
 

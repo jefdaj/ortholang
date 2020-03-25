@@ -1,4 +1,4 @@
-module OrthoLang.Core.Compile.Replace where
+module OrthoLang.Modules.Replace where
 
 {- This is some pretty awkward code, but I also think it's one of the coolest
  - features of OrthoLang! It conveniently answers the common question "What
@@ -47,7 +47,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Actions       (writeLits, writePaths, readLit, traceA)
 import OrthoLang.Core.Paths         (exprPath, fromOrthoLangPath,
                                     OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
-import OrthoLang.Core.Compile.Basic (rExpr, compileScript, debugRules)
+import OrthoLang.Core.Compile (rExpr, compileScript, debugRules)
 import OrthoLang.Core.Util          (digest, stripWhiteSpace)
 
 orthoLangModule :: OrthoLangModule

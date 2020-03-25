@@ -3,8 +3,8 @@ module OrthoLang.Modules where
 import OrthoLang.Core.Types
 
 -- these started as modules but ended up depending heavily on core modifications
-import qualified OrthoLang.Core.Compile.Replace as Replace
-import qualified OrthoLang.Core.Compile.Repeat  as Repeat
+import qualified OrthoLang.Modules.Replace as Replace
+import qualified OrthoLang.Modules.Repeat  as Repeat
 
 -- whereas these are actually modular
 import qualified OrthoLang.Modules.BioMartR  as BioMartR
