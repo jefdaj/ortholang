@@ -139,5 +139,3 @@ mkNewFn rFn name oType dTypes aFn =
        , fOldRules  = undefined
        , fNewRules  = Just $ rFn name tFn aFn
        }
-
-

@@ -1,4 +1,3 @@
-
 -- module "compiles" it by translating it into a set of Shake build rules. To
 -- actually run the rules, use `eval` in the Interpret module.
 
@@ -49,6 +48,7 @@ import System.Directory           (createDirectoryIfMissing)
 
 import Data.Maybe (isJust, fromJust)
 
+
 debug :: OrthoLangConfig -> String -> a -> a
 debug cfg msg rtn = if isJust (cfgDebug cfg) then trace "core.compile" msg rtn else rtn
 
@@ -59,7 +59,6 @@ debugRules cfg name input out = debug cfg msg out
   where
     ren = render $ pPrint input
     msg = name ++ " compiled '" ++ ren ++ "' to " ++ show out
-
 
 
 ------------------------------
@@ -144,13 +143,6 @@ aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
     out'  = fromOrthoLangPath cfg out
     out'' = traceA "aLit" out' [ePath, out']
 
--- aLit :: NewAction1
--- aLit = undefined
--- aLit cfg lRef iRef (ExprPath out') a1 = do
-  -- writeLit cfg lRef out ePath -- TODO too much dedup?
-  -- where
-    -- out = toOrthoLangPath cfg out'
-
 rList :: RulesFn
 -- TODO is this the bug? refers to a list of other empty lists, no?
 -- rList s e@(OrthoLangList Empty _ _ _) = rListLits s e -- TODO remove? rListPaths?
@@ -158,24 +150,6 @@ rList s e@(OrthoLangList rtn _ _ _)
   | rtn `elem` [Empty, str, num] = rListLits  s e -- TODO does Empty fit here?
   | otherwise                    = rListPaths s e
 rList _ _ = error "bad arguemnt to rList"
-
--- special case for empty lists
--- TODO is a special type for this really needed?
--- rListEmpty :: RulesFn
--- rListEmpty s@(_,cfg,ref) e@(OrthoLangList Empty _ _ _) = do
---   let link  = exprPath s e
---       link' = debugRules cfg "rListEmpty" e $ fromOrthoLangPath cfg link
---   link' %> \_ -> aListEmpty cfg ref ids link
---   return (ExprPath link')
--- rListEmpty _ e = error $ "bad arguemnt to rListEmpty: " ++ show e
-
--- TODO is this actually needed? seems the same as lits or paths really
---      (also, is there a need to write empty lists at all?)
--- aListEmpty :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action ()
--- aListEmpty cfg ref ids link = writeLits cfg ref link'' [] -- TODO error here?
---   where
---     link'  = fromOrthoLangPath cfg link
---     link'' = traceAction cfg "aListEmpty" link' [link']
 
 -- special case for writing lists of strings or numbers as a single file
 rListLits :: RulesFn
@@ -273,6 +247,7 @@ rBop s@(_, cfg, _, _) e@(OrthoLangBop _ _ _ _ _ _) (n1, n2) = do
   return (ExprPath p1, ExprPath p2, ExprPath path')
 rBop _ _ _ = fail "bad argument to rBop"
 
+
 ------------------------------
 -- [t]ypechecking functions --
 ------------------------------
@@ -289,6 +264,7 @@ defaultTypeCheck expected returned actual =
   if actual `typesMatch` expected
     then Right returned
     else Left $ typeError expected actual
+
 
 --------------------------
 -- links to input files --
@@ -422,7 +398,6 @@ aLoad hashSeqIDs cfg ref ids strPath outPath = do
     toAbs line = if isAbsolute line
                    then line
                    else cfgWorkDir cfg </> line
-
 
 rLoadList :: Bool -> RulesFn
 rLoadList hashSeqIDs s e@(OrthoLangFun (ListOf r) _ _ _ [es])
