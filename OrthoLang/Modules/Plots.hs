@@ -12,7 +12,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Actions (withBinHash, writeCachedLines, writeLits, need')
 import OrthoLang.Core.Util (digest)
 import OrthoLang.Core.Paths (exprPath, toOrthoLangPath, fromOrthoLangPath, cacheDir)
-import OrthoLang.Core.Compile.Basic (rExpr, rLit, defaultTypeCheck, aSimpleScript,
+import OrthoLang.Core.Compile.Basic (rExpr, defaultTypeCheck, aSimpleScript,
                                     defaultTypeCheck)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))
@@ -41,7 +41,7 @@ png = OrthoLangType
  - Otherwise it will return an empty string, which the script should ignore.
  -}
 varName :: RulesFn
-varName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
+varName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
   (OrthoLangRef _ _ _ (OrthoLangVar _ name)) -> name
   _ -> ""
 
@@ -140,12 +140,12 @@ rPlotRepeatScores :: FilePath -> RulesFn
 rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: RulesFn
-indRepeatVarName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
+indRepeatVarName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
   (OrthoLangFun _ _ _ _ [_, (OrthoLangRef _ _ _ (OrthoLangVar _ v)), _]) -> v
   _ -> ""
 
 depRepeatVarName :: RulesFn
-depRepeatVarName st expr = rLit st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
+depRepeatVarName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
   (OrthoLangFun _ _ _ _ [_, (OrthoLangRef _ _ _ (OrthoLangVar _ v)), _]) -> v
   _ -> ""
 

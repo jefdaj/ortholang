@@ -140,11 +140,19 @@ mkNewFn rFn name oType dTypes aFn =
 -- compile the OrthoLang AST --
 ------------------------------
 
+-- This should return the same outPath as the old RulesFns, without doing anything else.
+-- TODO remove it once the new rules are all written
+deprecatedRules :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
+  where
+    out  = exprPath s e
+    out' = fromOrthoLangPath cfg $ exprPath s e
+
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
 --            that actually makes it easy to use the same function types but not do any actual rules :D
 rExpr :: RulesFn
-rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e
+rExpr s e@(OrthoLangLit _ _ _      ) = deprecatedRules s e -- TODO what will happen when we call this?
 rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
 rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e
 rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO turn into Fun?
@@ -208,26 +216,27 @@ compileScript s@(as, _, _, _) _ = do
       -- Just h  -> "result." ++ h
 
 -- write a literal value from OrthoLang source code to file
-rLit :: RulesFn
-rLit s@(_, cfg, ref, ids) expr = do
-  let path  = exprPath s expr -- absolute paths allowed!
-      path' = debugRules cfg "rLit" expr $ fromOrthoLangPath cfg path
-  path' %> \_ -> aLit cfg ref ids expr path
-  return (ExprPath path')
+-- rLit :: RulesFn
+-- rLit s@(_, cfg, ref, ids) expr = do
+--   let path  = exprPath s expr -- absolute paths allowed!
+--       path' = debugRules cfg "rLit" expr $ fromOrthoLangPath cfg path
+--   path' %> \_ -> aLit cfg ref ids expr path
+--   return (ExprPath path')
 
 -- TODO take the path, not the expression?
 -- TODO these actions all need to decode their dependencies from the outpath rather than the expression
-aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangExpr -> OrthoLangPath -> Action ()
-aLit cfg ref idr expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
-  where
-    paths :: OrthoLangExpr -> FilePath
-    paths (OrthoLangLit _ _ p) = p
-    paths _ = fail "bad argument to paths"
-    ePath = paths expr
-    out'  = fromOrthoLangPath cfg out
-    out'' = traceA "aLit" out' [ePath, out']
+--aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangExpr -> OrthoLangPath -> Action ()
+--aLit cfg ref idr expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
+--  where
+--    paths :: OrthoLangExpr -> FilePath
+--    paths (OrthoLangLit _ _ p) = p
+--    paths _ = fail "bad argument to paths"
+--    ePath = paths expr
+--    out'  = fromOrthoLangPath cfg out
+--    out'' = traceA "aLit" out' [ePath, out']
 
--- aLit :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> 
+aLit :: NewAction1
+aLit = undefined
 
 rList :: RulesFn
 -- TODO is this the bug? refers to a list of other empty lists, no?
