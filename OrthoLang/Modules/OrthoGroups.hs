@@ -89,10 +89,10 @@ og = OrthoLangTypeGroup
 -- TODO this works with ofr files too; put them back using a type group!
 orthogroups :: OrthoLangFunction
 orthogroups = let name = "orthogroups" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og] sll
   , fTypeCheck = defaultTypeCheck [og] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthogroups
   }
 
@@ -169,10 +169,10 @@ aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show arg
 
 orthogroupContaining :: OrthoLangFunction
 orthogroupContaining = let name = "orthogroup_containing" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aOrthogroupContaining
   }
 
@@ -196,10 +196,10 @@ aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContainin
 -- TODO think of a better name for this
 orthogroupsContaining :: OrthoLangFunction
 orthogroupsContaining = let name = "orthogroups_containing" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf str] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
   }
 
@@ -228,10 +228,10 @@ aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining
 -- TODO flip args so it reads more naturally?
 orthologInAny :: OrthoLangFunction
 orthologInAny = let name = "ortholog_in_any" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrRules name
   }
 
@@ -248,10 +248,10 @@ mkOrthologsStrRules _ _ _ = error "bad arguments to mkOrthologsStrRules"
 
 orthologInAnyStr :: OrthoLangFunction
 orthologInAnyStr = let name = "ortholog_in_any_str" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAny
   }
 
@@ -299,19 +299,19 @@ rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
 
 orthologInAll :: OrthoLangFunction
 orthologInAll = let name = "ortholog_in_all" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
 
 orthologInAllStr :: OrthoLangFunction
 orthologInAllStr = let name = "ortholog_in_all_str" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAll
   }
 
@@ -332,10 +332,10 @@ pickMin userNum nGroups
 
 orthologInMinStr :: OrthoLangFunction
 orthologInMinStr = let name = "ortholog_in_min_str" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "min" pickMin
   }
 
@@ -383,10 +383,10 @@ rOrthologFilterStrFrac _ _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 
 orthologInMin :: OrthoLangFunction
 orthologInMin = let name = "ortholog_in_min" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
 
@@ -404,19 +404,19 @@ mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
 
 orthologInMax :: OrthoLangFunction
 orthologInMax = let name = "ortholog_in_max" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
 
 orthologInMaxStr :: OrthoLangFunction
 orthologInMaxStr = let name = "ortholog_in_max_str" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "max" pickMax
   }
 

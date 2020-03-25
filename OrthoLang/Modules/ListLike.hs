@@ -41,10 +41,10 @@ tListLike x = x `elem` [bht, crb, mms]
 -- can't name it length because that's a standard Haskell function
 len :: OrthoLangFunction
 len = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rLen
   }
   where
@@ -52,10 +52,10 @@ len = OrthoLangFunction
 
 lenEach :: OrthoLangFunction
 lenEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck [ListOf listlike] (ListOf num)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 aLen -- TODO is 1 wrong?
   }
   where

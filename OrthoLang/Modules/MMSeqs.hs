@@ -67,10 +67,10 @@ mms = OrthoLangType
 
 mmseqsCreateDbAll :: OrthoLangFunction
 mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMmseqsCreateDbAll
   }
 
@@ -120,10 +120,10 @@ rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
 mmseqsCreateDb :: OrthoLangFunction
 mmseqsCreateDb = let name = "mmseqs_createdb" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMmseqsCreateDb
   }
 
@@ -143,10 +143,10 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 
 mmseqsSearchDb :: OrthoLangFunction
 mmseqsSearchDb = let name = "mmseqs_search_db" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMmseqsSearchDb
   }
 
@@ -243,10 +243,10 @@ aMmseqConvertAlis cfg ref qDb sDb outDbIndex outTab = do
 
 mmseqsSearch :: OrthoLangFunction
 mmseqsSearch = let name = "mmseqs_search" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMmseqsSearch
   }
 

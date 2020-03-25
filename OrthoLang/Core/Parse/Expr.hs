@@ -16,6 +16,7 @@ import Control.Applicative    ((<|>))
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.List              (union)
+import Data.Maybe (isJust, fromJust)
 import Text.Parsec            (try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
@@ -46,7 +47,7 @@ operatorTable :: OrthoLangConfig -> [[E.Operator String OrthoLangState Identity 
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
-    bops = filter (\f -> fFixity f == Infix) (concat $ map mFunctions mods)
+    bops = filter (isJust . fOpChar) (concat $ map mFunctions mods)
     mods = cfgModules cfg
 
 -- Tricky bit: needs to take two already-parsed expressions
@@ -61,15 +62,21 @@ operatorTable cfg = [map binary bops]
 -- TODO how to fail gracefully (with fail, not error) here??
 pBop :: OrthoLangFunction -> ParseM (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
 pBop bop
-  | fFixity bop == Infix = (debugParser ("pBop " ++ head (fNames bop))
-                           (pSym (headOrDie "failed to read fNames in pBop" $ (head $ fNames bop))))
+  | isJust (fOpChar bop) = (debugParser ("pBop " ++ fName bop)
+                           (pSym (headOrDie "failed to read fName in pBop" $ [fromJust $ fOpChar bop])))
                            *> return (pBop' bop)
 pBop _ = fail "pBop only works with infix functions"
 
 pBop' :: OrthoLangFunction -> (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
-pBop' bop e1 e2 = case (fTypeCheck bop) [typeOf e1, typeOf e2] of
+pBop' bop e1 e2 = case bopTypeCheck of
   Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-  Right rtn -> OrthoLangBop rtn (RepeatSalt 0) (union (depsOf e1) (depsOf e2)) (head $ fNames bop) e1 e2
+  Right rtn -> OrthoLangBop rtn (RepeatSalt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+  where
+    bopTypeCheck = case (fTypeCheck bop) [ListOf $ typeOf e1] of
+      Left  e -> Left e
+      Right r -> if typeOf e1 /= typeOf e2
+                   then Left $ "mismatched bop types: " ++ show (typeOf e1) ++ " and " ++ show (typeOf e2)
+                   else Right r
 
 ---------------
 -- functions --
@@ -109,7 +116,7 @@ pFunArgs name args = debugParser "pFun" $ do
   -- args <- pArgs
   -- args <- manyTill pTerm pEnd
   let fns  = concat $ map mFunctions $ cfgModules cfg
-      fns' = filter (\f -> head (fNames f) == name) fns
+      fns' = filter (\f -> fName f == name) fns
   case fns' of
     []      -> fail $ "no function found with name '" ++ name ++ "'"
     (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
@@ -146,7 +153,7 @@ typecheckArgs :: OrthoLangFunction -> [OrthoLangExpr] -> ParseM OrthoLangExpr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
   Left  msg -> fail msg
   Right rtn -> let deps = foldr1 union $ map depsOf args
-               in return $ OrthoLangFun rtn (RepeatSalt 0) deps (head $ fNames fn) args
+               in return $ OrthoLangFun rtn (RepeatSalt 0) deps (fName fn) args
 
 -----------------
 -- expressions --

@@ -33,8 +33,8 @@ orthoLangModule = OrthoLangModule
 
 repeatN :: OrthoLangFunction
 repeatN = OrthoLangFunction
-  { fNames     = ["repeat"]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = "repeat"
+  ,fTags = []
   , fTypeCheck = tRepeatN
   , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
   , fNewRules = Nothing, fOldRules = rRepeatN

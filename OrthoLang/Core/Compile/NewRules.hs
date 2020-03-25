@@ -31,9 +31,6 @@ newCoreRules cfg lRef iRef = do
   -- newPattern cfg "str" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] str) aLit cfg lRef iRef (ExprPath p)
   -- newPattern cfg "num" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] num) aLit cfg lRef iRef (ExprPath p)
 
-  -- TODO rList{,Lists,Paths}
-  -- TODO rAssign?
-  -- TODO rRef?
   -- TODO rBop
   -- TODO rLoad{,List,ListLits,ListLinks}
   -- TODO rSimple{,Tmp,Script,ScriptPar,ScriptNoFix,'}
@@ -78,6 +75,7 @@ applyList3
   -> [FilePath] -> Action ()
 applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
 
+-- TODO any need to look up prefixOf to get the canonical name?
 newPattern :: OrthoLangConfig -> String -> Int -> FilePattern
 newPattern cfg name nArgs =
   cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
@@ -116,26 +114,27 @@ aNewRules applyFn tFn aFn cfg lRef iRef out = do
       applyFn (aFn cfg lRef iRef out) deps'
 
 -- TODO do the applyFn thing at the action level rather than rules?
-mkNewFn1 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction1 -> OrthoLangFunction
+mkNewFn1 :: String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> NewAction1 -> OrthoLangFunction
 mkNewFn1 = mkNewFn rNewRules1
 
-mkNewFn2 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction2 -> OrthoLangFunction
+mkNewFn2 :: String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> NewAction2 -> OrthoLangFunction
 mkNewFn2 = mkNewFn rNewRules2
 
-mkNewFn3 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction3 -> OrthoLangFunction
+mkNewFn3 :: String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> NewAction3 -> OrthoLangFunction
 mkNewFn3 = mkNewFn rNewRules3
 
 mkNewFn
   :: (String -> TypeChecker -> t -> NewRulesFn)
-  -> String -> OrthoLangType -> [OrthoLangType] -> t
+  -> String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> t
   -> OrthoLangFunction
-mkNewFn rFn name oType dTypes aFn =
+mkNewFn rFn name mChar oType dTypes aFn =
   let tFn = defaultTypeCheck dTypes oType
   in OrthoLangFunction
-       { fNames     = [name]
+       { fOpChar    = mChar
+       , fName      = name
        , fTypeDesc  = mkTypeDesc name dTypes oType
        , fTypeCheck = tFn
-       , fFixity    = Prefix, fTags = []
+       , fTags      = []
        , fOldRules  = undefined
        , fNewRules  = Just $ rFn name tFn aFn
        }

@@ -159,7 +159,7 @@ gFunName = elements fnNames
 -- this is duplicated from Types.hs without the OrthoLangConfig argument
 -- TODO should this version replace it?
 fnNames :: [String]
-fnNames = map (head . fNames) $ concat $ map mFunctions modules
+fnNames = map fName $ concat $ map mFunctions modules
 
 -- TODO why the one argument? can't do typechecking here anyway
 gFun :: Gen String

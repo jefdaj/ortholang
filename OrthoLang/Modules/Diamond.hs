@@ -51,10 +51,10 @@ dmnd = OrthoLangType
 
 diamondmakedb :: OrthoLangFunction
 diamondmakedb = let name = "diamond_makedb" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck [faa] dmnd
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
   }
 
@@ -66,10 +66,10 @@ diamondmakedb = let name = "diamond_makedb" in OrthoLangFunction
 
 diamondmakedbEach :: OrthoLangFunction
 diamondmakedbEach = let name = "diamond_makedb_each" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf dmnd)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
@@ -79,10 +79,10 @@ diamondmakedbEach = let name = "diamond_makedb_each" in OrthoLangFunction
 
 diamondmakedbAll :: OrthoLangFunction
 diamondmakedbAll = let name = "diamond_makedb_all" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rDiamondmakedbAll
   }
 
@@ -179,10 +179,10 @@ rFlip23 _ _ e = error $ "bad argument to rFlip23: " ++ show e
 
 mkDiamondBlast :: DiamondBlastDesc -> OrthoLangFunction
 mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" ++ name in OrthoLangFunction
-  { fNames     = [name']
+  { fOpChar = Nothing, fName = name'
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
   , fTypeCheck = defaultTypeCheck [num, qType, sType] rType
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rFn dCmd
   }
 

@@ -27,10 +27,10 @@ gcr = OrthoLangType
  
 greencutTwoFamilies :: OrthoLangFunction
 greencutTwoFamilies = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [bht, bht] gcr
   , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleScript $ name ++ ".py"
   }
   where

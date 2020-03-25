@@ -57,10 +57,10 @@ blastDescsRev = filter isReversible blastDescs
 
 mkBlastFromFaRev :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromFaRev d
   }
 
@@ -81,10 +81,10 @@ rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 -- TODO fix expression paths!
 mkBlastFromFaRevEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromFaRevEach d
   }
   where
@@ -123,10 +123,10 @@ aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
 
 reciprocalBest :: OrthoLangFunction
 reciprocalBest = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aReciprocalBest
   }
   where
@@ -162,10 +162,10 @@ aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show
 
 reciprocalBestAll :: OrthoLangFunction
 reciprocalBestAll = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aReciprocalBestAll
   }
   where
@@ -187,10 +187,10 @@ aReciprocalBestAll _ _ _ ps = error $ "bad argument to aReciprocalBestAll: " ++ 
 
 mkBlastRbh :: BlastDesc -> OrthoLangFunction
 mkBlastRbh d@(bCmd, qType, sType, _) = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastRbh d
   }
   where
@@ -211,10 +211,10 @@ rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 
 mkBlastRbhEach :: BlastDesc -> OrthoLangFunction
 mkBlastRbhEach d@(bCmd, qType, sType, _) = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastRbhEach d
   }
   where

@@ -63,8 +63,8 @@ aScores cfg ref scoresPath othersPath othersType outPath = do
 
 scoreRepeats :: OrthoLangFunction
 scoreRepeats = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = tScoreRepeats
   , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
   , fNewRules = Nothing, fOldRules = rScoreRepeats
@@ -98,20 +98,20 @@ rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 -- TODO deduplicate with extractQueries?
 extractScores :: OrthoLangFunction
 extractScores = let name = "extract_scores" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : X.scores -> num.list"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aCutCol False 1
   }
 
 -- TODO deduplicate with extractTargets?
 extractScored :: OrthoLangFunction
 extractScored = let name = "extract_scored" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : X.scores -> X.list"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aCutCol False 2
   }
 

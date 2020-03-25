@@ -36,7 +36,7 @@ module OrthoLang.Core.Types
   , ensureResult
   , lookupResult
   -- , Assoc(..) -- we reuse this from Parsec
-  , OrthoLangFixity(..)
+  -- , OrthoLangFixity(..)
   -- parse monad
   , ParseM
   -- repl monad
@@ -93,7 +93,7 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, catMaybes)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 newtype OrthoLangPath = OrthoLangPath FilePath deriving (Eq, Ord, Show)
@@ -202,10 +202,10 @@ prefixOf (OrthoLangBop _ _ _ n _ _ ) = case n of
                                    "-" -> "subtract"
                                    "*" -> "multiply"
                                    "/" -> "divide"
-                                   "~" -> "difference"
-                                   "&" -> "intersection"
-                                   "|" -> "union"
-                                   _   -> error "unknown OrthoLangBop"
+                                   "|" -> "any"
+                                   "&" -> "all"
+                                   "~" -> "diff"
+                                   x   -> error $ "unknown OrthoLangBop: '" ++ x ++ "'"
 
 
 -- TODO have a separate OrthoLangAssign for "result"?
@@ -391,7 +391,7 @@ data OrthoLangConfig = OrthoLangConfig
 -- note: only lists the first name of each function,
 --       which for binary operators will be the single-char one
 listFunctionNames :: OrthoLangConfig -> [String]
-listFunctionNames cfg = map (head . fNames) $ concat $ map mFunctions $ cfgModules cfg
+listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
 findModule :: OrthoLangConfig -> String -> Maybe OrthoLangModule
 findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
@@ -400,7 +400,7 @@ findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
 findFunction :: OrthoLangConfig -> String -> Maybe OrthoLangFunction
-findFunction cfg name = find (\f -> any (== name) (fNames f)) fs
+findFunction cfg name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar f) == Just name) fs
   where
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
@@ -412,18 +412,11 @@ findType cfg ext = find (\t -> extOf t == ext) ts
     ts = concatMap mTypes ms
 
 listFunctions :: OrthoLangConfig -> [OrthoLangFunction]
-listFunctions cfg = concat $ map mFunctions $ cfgModules cfg
+listFunctions cfg = concatMap mFunctions $ cfgModules cfg
 
 -- Now with guard against accidentally including parts of prefix fn names!
 operatorChars :: OrthoLangConfig -> [Char]
-operatorChars cfg = chars
-  where
-    bops    = filter (\f -> fFixity f == Infix) $ listFunctions cfg
-    bChar n = if length n == 1
-                then (headOrDie "failed to parse bChar in operatorChars") n
-                else error $ "bad bop name: " ++ n
-    chars   = map (bChar . head . fNames) bops
-    -- chars'  = trace ("operatorChars: '" ++ chars ++ "'") chars
+operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 
 -----------------
 -- Parse monad --
@@ -482,8 +475,8 @@ prompt = lift . lift . getInputLine
 --   deriving (Eq, Show, Read)
 
 -- TODO should there be any more fundamental difference between fns and bops?
-data OrthoLangFixity = Prefix | Infix
-  deriving (Eq, Show, Read)
+-- data OrthoLangFixity = Prefix | Infix
+--   deriving (Eq, Show, Read)
 
 data FnTag
   = Stochastic -- do repeat, do cache/share
@@ -497,10 +490,10 @@ data FnTag
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data OrthoLangFunction = OrthoLangFunction
-  { fNames     :: [String]
+  { fName      :: String
+  , fOpChar    :: Maybe Char -- char for the infix operator, if any
   , fTypeCheck :: [OrthoLangType] -> Either String OrthoLangType
   , fTypeDesc  :: String
-  , fFixity    :: OrthoLangFixity
   , fTags      :: [FnTag]
   , fOldRules  :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
   , fNewRules  :: Maybe (OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())

@@ -78,10 +78,10 @@ blastDescs =
 
 mkBlastFromDb :: BlastDesc -> OrthoLangFunction
 mkBlastFromDb d@(bCmd, qType, _, dbType) = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromDb d
   }
   where
@@ -175,10 +175,10 @@ aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 mkBlastFromFa :: BlastDesc -> OrthoLangFunction
 mkBlastFromFa d@(bCmd, qType, sType, _) = OrthoLangFunction
-  { fNames     = [bCmd]
+  { fOpChar = Nothing, fName = bCmd
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
   }
 
@@ -189,7 +189,7 @@ rMkBlastFromFa d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _ [e, q, s])
   = rules st (OrthoLangFun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fOldRules $ mkBlastFromDb d
-    name1 = head $ fNames $ mkBlastFromDb d
+    name1 = fName $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
     dbExpr = OrthoLangFun dbType salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
@@ -200,10 +200,10 @@ rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 mkBlastFromDbEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromDbEach d
   }
   where
@@ -218,10 +218,10 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 
 mkBlastFromFaEach :: BlastDesc -> OrthoLangFunction
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromFaEach d
   }
   where
@@ -235,5 +235,5 @@ rMkBlastFromFaEach d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _   [e, q,
     rules = rMkBlastFromDbEach d
     ss'   = OrthoLangFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
-    fn2   = (head $ fNames $ mkBlastFromFa d) ++ "_db_each"
+    fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

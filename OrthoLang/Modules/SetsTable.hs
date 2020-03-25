@@ -31,9 +31,9 @@ tsv = OrthoLangType
 
 setsTable :: OrthoLangFunction
 setsTable = let name = "sets_table" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotListOfLists "sets_table.R"
   }

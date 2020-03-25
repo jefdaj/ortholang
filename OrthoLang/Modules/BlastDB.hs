@@ -130,19 +130,19 @@ pdb = OrthoLangType
 
 mkLoadDB :: String -> OrthoLangType -> OrthoLangFunction
 mkLoadDB name rtn = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rLoadDB
   }
 
 mkLoadDBEach :: String -> OrthoLangType -> OrthoLangFunction
 mkLoadDBEach name rtn = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = undefined -- TODO write this!
   }
 
@@ -186,10 +186,10 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 -- takes a filter string (leave empty for all results)
 blastdblist :: OrthoLangFunction
 blastdblist = let name = "blastdblist" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rBlastdblist
   }
 
@@ -262,10 +262,10 @@ aFilterList cfg ref _ oPath listTmp fPath = do
 
 mkBlastdbget :: String -> OrthoLangType -> OrthoLangFunction
 mkBlastdbget name dbType = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rBlastdbget
   }
 
@@ -326,10 +326,10 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
 --      in addition to actual inputs?
 makeblastdbNuclAll :: OrthoLangFunction
 makeblastdbNuclAll = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tMakeblastdbAll name ndb
   , fTypeDesc  = name ++ " : fa.list -> ndb"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMakeblastdbAll
   }
   where
@@ -337,10 +337,10 @@ makeblastdbNuclAll = OrthoLangFunction
 
 makeblastdbProtAll :: OrthoLangFunction
 makeblastdbProtAll = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tMakeblastdbAll name pdb
   , fTypeDesc  = name ++ " : faa.list -> pdb"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMakeblastdbAll
   }
   where
@@ -476,19 +476,19 @@ aMakeblastdbAll _ _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++
 
 makeblastdbNucl :: OrthoLangFunction
 makeblastdbNucl = OrthoLangFunction
-  { fNames     = ["makeblastdb_nucl"]
+  { fOpChar = Nothing, fName = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
   , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMakeblastdb
   }
 
 makeblastdbProt :: OrthoLangFunction
 makeblastdbProt = OrthoLangFunction
-  { fNames     = ["makeblastdb_prot"]
+  { fOpChar = Nothing, fName = "makeblastdb_prot"
   , fTypeCheck = tMakeblastdb pdb
   , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMakeblastdb
   }
 
@@ -513,10 +513,10 @@ withSingleton e = error $ "bad argument to withSingleton: " ++ show e
 
 mkMakeblastdbEach :: OrthoLangType -> OrthoLangFunction
 mkMakeblastdbEach dbType = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tMakeblastdbEach dbType
   , fTypeDesc  = desc
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMakeblastdbEach
   }
   where
@@ -565,8 +565,8 @@ withSingletons e = OrthoLangFun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singl
 -- TODO hide from users?
 singletons :: OrthoLangFunction
 singletons = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
   , fTypeCheck = tSingletons
   , fNewRules = Nothing, fOldRules = rSingletons

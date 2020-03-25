@@ -59,10 +59,10 @@ varNames _ expr = undefined lits -- TODO implement this
 
 histogram :: OrthoLangFunction
 histogram = let name = "histogram" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotNumList "histogram.R"
   }
 
@@ -100,20 +100,20 @@ tPlotScores _ = Left "expected a title and scores"
 -- TODO line graph should label axis by input var name (always there!)
 linegraph :: OrthoLangFunction
 linegraph = let name = "linegraph" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotRepeatScores "linegraph.R"
   }
 
 -- TODO scatterplot should label axis by input var name (always there!)
 scatterplot :: OrthoLangFunction
 scatterplot = let name = "scatterplot" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotRepeatScores "scatterplot.R"
   }
 
@@ -155,10 +155,10 @@ depRepeatVarName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case exp
 
 venndiagram :: OrthoLangFunction
 venndiagram = let name = "venndiagram" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = tPlotListOfLists
   , fTypeDesc  = name ++ " : X.list.list -> png"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotListOfLists "venndiagram.R"
   }
 

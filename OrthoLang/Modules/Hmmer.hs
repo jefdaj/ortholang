@@ -47,48 +47,48 @@ hht = OrthoLangType
 
 hmmbuild :: OrthoLangFunction
 hmmbuild = let name = "hmmbuild" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleScript "hmmbuild.sh"
   }
 
 hmmbuildEach :: OrthoLangFunction
 hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
 hmmsearch :: OrthoLangFunction
 hmmsearch = let name = "hmmsearch" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aHmmsearch
   }
 
 -- TODO is this the right name for mapping over arg 2?
 hmmsearchEach :: OrthoLangFunction
 hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch
   }
 
 -- TODO better name, or is this actually the most descriptive way?
 -- hmmsearchEachEach :: OrthoLangFunction
 -- hmmsearchEachEach = let name = "hmmsearch_each_each" in OrthoLangFunction
---   { fNames     = [name]
+--   { fOpChar = Nothing, fName = name
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
---   , fFixity    = Prefix, fTags = []
+--   ,fTags = []
 --   , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch -- TODO this won't work right?
 --   }
 
@@ -142,19 +142,19 @@ aHmmsearch _ _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
 
 extractHmmTargets :: OrthoLangFunction
 extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aExtractHmm 1
   }
 
 extractHmmTargetsEach :: OrthoLangFunction
 extractHmmTargetsEach = let name = "extract_hmm_targets_each" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 $ aExtractHmm 1
   }
 

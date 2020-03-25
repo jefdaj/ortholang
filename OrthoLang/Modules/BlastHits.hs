@@ -53,10 +53,10 @@ hittable = OrthoLangTypeGroup
 
 extractQueries :: OrthoLangFunction
 extractQueries = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aCutCol True 1
   }
   where
@@ -65,10 +65,10 @@ extractQueries = OrthoLangFunction
 -- TODO this should have a typeclass
 extractQueriesEach :: OrthoLangFunction
 extractQueriesEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 $ aCutCol True 1
   }
   where
@@ -77,10 +77,10 @@ extractQueriesEach = OrthoLangFunction
 -- TODO this should have a typeclass
 extractTargets :: OrthoLangFunction
 extractTargets = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aCutCol True 2
   }
   where
@@ -88,10 +88,10 @@ extractTargets = OrthoLangFunction
 
 extractTargetsEach :: OrthoLangFunction
 extractTargetsEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 $ aCutCol True 2
   }
   where
@@ -137,10 +137,10 @@ filterEvalue = mkFilterHits "evalue"
 
 mkFilterHits :: String -> OrthoLangFunction
 mkFilterHits colname = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aFilterHits colname
   }
   where
@@ -151,10 +151,10 @@ filterEvalueEach = mkFilterHitsEach "evalue"
 
 mkFilterHitsEach :: String -> OrthoLangFunction
 mkFilterHitsEach colname = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 $ aFilterHits colname
   }
   where
@@ -193,10 +193,10 @@ aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
 -- TODO split into best_hits_evalue and best_hits_bitscore?
 bestHits :: OrthoLangFunction
 bestHits =  OrthoLangFunction
-  { fNames     = [name] 
+  { fOpChar = Nothing, fName = name 
   , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aBestExtract
   }
   where
@@ -204,10 +204,10 @@ bestHits =  OrthoLangFunction
 
 bestHitsEach :: OrthoLangFunction
 bestHitsEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 aBestExtract
   }
   where

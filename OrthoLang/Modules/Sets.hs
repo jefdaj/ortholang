@@ -27,13 +27,12 @@ orthoLangModule = OrthoLangModule
   { mName = "Sets"
   , mDesc = "Set operations for use with lists"
   , mTypes = []
-  , mFunctions = some : (concat $ map mkSetFunctions setOpDescs)
+  , mFunctions = some : map mkSetFunction setOpDescs
   }
 
 type SetOpDesc =
   ( String -- name of the prefix function
   , Char   -- name of the infix/binary function
-  , String -- long name for the binary operator (should be a valid filename)
   , Set String -> Set String -> Set String -- haskell set op
   )
 
@@ -47,52 +46,28 @@ type SetOpDesc =
  -}
 setOpDescs :: [SetOpDesc]
 setOpDescs =
-  [ ("any" , '|', "union"       , union)
-  , ("all" , '&', "intersection", intersection)
-  , ("diff", '~', "difference"  , difference)
+  [ ("any" , '|', union)
+  , ("all" , '&', intersection)
+  , ("diff", '~', difference)
   ]
 
-mkSetFunctions :: SetOpDesc -> [OrthoLangFunction]
-mkSetFunctions (foldName, opChar, opName, setFn) = [setBop, setFold]
+mkSetFunction :: SetOpDesc -> OrthoLangFunction
+mkSetFunction (foldName, opChar, setFn) = setFold
   where
     mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
     mkFoldDesc name = name ++ " : X.list.list -> X.list"
-    setBop = OrthoLangFunction
-      { fNames     = [[opChar], opName]
-      , fTypeCheck = tSetBop
-      , fTypeDesc  = mkBopDesc [opChar]
-      , fFixity    = Infix, fTags = []
-      , fNewRules = Nothing, fOldRules = rSetBop foldName setFn
-      }
     setFold = OrthoLangFunction
-      { fNames     = [foldName]
+      { fName = foldName
+      , fOpChar    = Just opChar
       , fTypeCheck = tSetFold
       , fTypeDesc  = mkFoldDesc foldName
-      , fFixity    = Prefix, fTags = []
+      , fTags = []
       , fNewRules = Nothing, fOldRules = rSetFold (foldr1 setFn)
       }
-
--- if the user gives two lists but of different types, complain that they must
--- be the same. if there aren't two lists at all, complain about that first
-tSetBop :: [OrthoLangType] -> Either String OrthoLangType
-tSetBop actual@[ListOf a, ListOf b]
-  | typeMatches a b = fmap ListOf $ nonEmptyType [a, b]
-  | otherwise = Left $ typeError [ListOf a, ListOf a] actual
-tSetBop _ = Left "Type error: expected two lists of the same type"
 
 tSetFold :: [OrthoLangType] -> Either String OrthoLangType
 tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
-
--- apply a set operation to two lists (converted to sets first)
--- TODO if order turns out to be important in cuts, call them lists
-rSetBop :: String -> (Set String -> Set String -> Set String)
-     -> RulesFn
-rSetBop name fn s (OrthoLangBop rtn salt deps _ s1 s2) = rSetFold (foldr1 fn) s fun
-  where
-    fun = OrthoLangFun  rtn salt deps name [lst]
-    lst = OrthoLangList rtn salt deps [s1, s2]
-rSetBop _ _ _ _ = fail "bad argument to rSetBop"
 
 rSetFold :: ([Set String] -> Set String) -> RulesFn
 rSetFold fn s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [lol]) = do
@@ -141,10 +116,10 @@ dedupByContent cfg ref paths = do
 
 some :: OrthoLangFunction
 some = OrthoLangFunction
-  { fNames     = ["some"]
+  { fOpChar = Nothing, fName = "some"
   , fTypeCheck = tSetFold
   , fTypeDesc  = "some : X.list.list -> X.list"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSome
   }
 

@@ -28,18 +28,18 @@ aln = OrthoLangType
 
 muscle :: OrthoLangFunction
 muscle = let name = "muscle" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [faa] aln
   , fTypeDesc  = name ++ " : faa -> aln"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleScript "muscle.sh"
   }
 
 muscleEach :: OrthoLangFunction
 muscleEach = let name = "muscle_each" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf aln)
   , fTypeDesc  = name ++ " : faa.list -> aln.list"
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "muscle.sh"
   }

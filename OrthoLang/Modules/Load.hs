@@ -39,10 +39,10 @@ loadList = mkLoad False "load_list" (ListOf str)
 
 globFiles :: OrthoLangFunction
 globFiles = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rGlobFiles
   }
   where

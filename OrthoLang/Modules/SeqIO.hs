@@ -81,10 +81,10 @@ fna = OrthoLangType
 
 gbkToFaa :: OrthoLangFunction
 gbkToFaa = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta faa "aa"
   }
   where
@@ -93,10 +93,10 @@ gbkToFaa = OrthoLangFunction
 -- TODO need to hash IDs afterward!
 gbkToFaaEach :: OrthoLangFunction
 gbkToFaaEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
   }
   where
@@ -104,10 +104,10 @@ gbkToFaaEach = OrthoLangFunction
 
 gbkToFna :: OrthoLangFunction
 gbkToFna = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
@@ -115,10 +115,10 @@ gbkToFna = OrthoLangFunction
 
 gbkToFnaEach :: OrthoLangFunction
 gbkToFnaEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
@@ -172,8 +172,8 @@ aGenbankToFasta _ _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIds :: OrthoLangFunction
 extractIds = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = tExtractIds
   , fTypeDesc  = name ++ " : fa -> str.list"
   , fNewRules = Nothing, fOldRules = rSimpleScript "extract_ids.py"
@@ -184,8 +184,8 @@ extractIds = OrthoLangFunction
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIdsEach :: OrthoLangFunction
 extractIdsEach = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = tExtractIdsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "extract_ids.py"
@@ -210,8 +210,8 @@ tExtractIdsEach _ = Left "expected a fasta file"
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqs :: OrthoLangFunction
 extractSeqs = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = tExtractSeqs
   , fTypeDesc  = name ++ " : fa str.list -> fa"
   , fNewRules = Nothing, fOldRules = rSimple aExtractSeqs 
@@ -232,8 +232,8 @@ aExtractSeqs _ _ _ ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: OrthoLangFunction
 extractSeqsEach = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fNewRules = Nothing, fOldRules = rMap 1 aExtractSeqs
@@ -257,8 +257,8 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 -- TODO name something else like fna_to_faa?
 translate :: OrthoLangFunction
 translate = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = defaultTypeCheck [fna] faa
   , fTypeDesc  = mkTypeDesc name  [fna] faa
   , fNewRules = Nothing, fOldRules = rSimpleScript "translate.py"
@@ -268,8 +268,8 @@ translate = OrthoLangFunction
 
 translateEach :: OrthoLangFunction
 translateEach = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "translate.py"
@@ -285,8 +285,8 @@ translateEach = OrthoLangFunction
 
 mkConcat :: OrthoLangType -> OrthoLangFunction
 mkConcat cType = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
   , fNewRules = Nothing, fOldRules = rSimple $ aConcat cType
@@ -297,8 +297,8 @@ mkConcat cType = OrthoLangFunction
 
 mkConcatEach :: OrthoLangType -> OrthoLangFunction
 mkConcatEach cType = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
   , fNewRules = Nothing, fOldRules = rMap 1 $ aConcat cType
@@ -367,8 +367,8 @@ aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 
 splitFasta :: OrthoLangType -> OrthoLangFunction
 splitFasta faType = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
   , fNewRules = Nothing, fOldRules = rSimple $ aSplit name ext
@@ -379,8 +379,8 @@ splitFasta faType = OrthoLangFunction
 
 splitFastaEach :: OrthoLangType -> OrthoLangFunction
 splitFastaEach faType = OrthoLangFunction
-  { fNames     = [name]
-  , fFixity    = Prefix, fTags = []
+  { fOpChar = Nothing, fName = name
+  ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
   , fNewRules = Nothing, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?

@@ -17,7 +17,7 @@ orthoLangModule = OrthoLangModule
   }
 
 test1 :: OrthoLangFunction
-test1 = mkNewFn2 "newrulestest1" str [str, str] aTest1
+test1 = mkNewFn2 "newrulestest1" Nothing str [str, str] aTest1
 
 -- TODO make these all OrthoLangPaths?
 aTest1 :: NewAction2
@@ -27,7 +27,7 @@ aTest1 cfg lRef _ (ExprPath out) d1 d2 = do
   writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
 
 test2 :: OrthoLangFunction
-test2 = mkNewFn3 "newrulestest2" faa [str, faa, faa] aTest2
+test2 = mkNewFn3 "newrulestest2" Nothing faa [str, faa, faa] aTest2
 
 aTest2 :: NewAction3
 aTest2 cfg lRef _ (ExprPath out) a1 a2 a3 = writeCachedLines cfg lRef out ["inputs:", a1, a2, a3]

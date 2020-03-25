@@ -52,10 +52,10 @@ crb = OrthoLangType
 
 blastCRB :: OrthoLangFunction
 blastCRB = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
   , fTypeCheck = defaultTypeCheck [fna, fa] crb
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleTmp name aCRBBlast
   }
   where
@@ -65,10 +65,10 @@ blastCRB = OrthoLangFunction
 -- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
 blastCRBEach :: OrthoLangFunction
 blastCRBEach = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }
   where

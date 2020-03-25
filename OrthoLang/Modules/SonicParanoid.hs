@@ -45,10 +45,10 @@ spr = OrthoLangType
 
 sonicparanoid :: OrthoLangFunction
 sonicparanoid = let name = "sonicparanoid" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aSonicParanoid
   }
 

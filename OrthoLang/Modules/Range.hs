@@ -28,10 +28,10 @@ orthoLangModule = OrthoLangModule
 
 mkRangeFn :: String -> Int -> OrthoLangFunction
 mkRangeFn name nArgs =  OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck (take nArgs $ repeat num) (ListOf num)
   , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rRange
   }
 

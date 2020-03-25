@@ -127,7 +127,7 @@ instance Pretty OrthoLangConfig where
 
 -- TODO change this to something useful
 instance Pretty OrthoLangFunction where
-  pPrint fn = text $ "OrthoLangFunction '" ++ head (fNames fn) ++ "'"
+  pPrint fn = text $ "OrthoLangFunction '" ++ fName fn ++ "'"
 
 instance Show OrthoLangFunction where
   show = prettyShow

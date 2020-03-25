@@ -250,7 +250,7 @@ mHelp m = getDoc ["modules" </> mName m]
 -- TODO move somewhere better
 fHelp :: OrthoLangFunction -> IO String
 fHelp f = do
-  doc <- getDoc $ map ("functions" </>) (fNames f)
+  doc <- getDoc ["functions" </> fName f]
   let msg = "\n" ++ fTypeDesc f ++ "\n\n" ++ doc
   return msg
 
@@ -442,7 +442,7 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
   where
     wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
-    fnNames  = concatMap (map (head . fNames) . mFunctions) (cfgModules cfg)
+    fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
     varNames = map ((\(OrthoLangVar _ v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg

@@ -44,10 +44,10 @@ ofr = OrthoLangType
 
 orthofinder :: OrthoLangFunction
 orthofinder = let name = "orthofinder" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aOrthofinder
   }
 

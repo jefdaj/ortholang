@@ -16,7 +16,7 @@ module OrthoLang.Core.Compile.Basic
   , defaultTypeCheck
   , mkLoad
   , mkLoadList
-  , rBop
+  -- , rBop
   , rExpr
   , typeError
   )
@@ -80,10 +80,12 @@ rExpr :: RulesFn
 rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e
 rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
 rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e -- TODO deprecate this?
-rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO deprecate this
 rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n -- TODO deprecate this
 rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
-
+rExpr s e@(OrthoLangBop t r ds _ e1 e2) = rExpr s fn
+  where
+    es = OrthoLangList (ListOf t) r ds [e1, e2] -- TODO is ListOf right?
+    fn = OrthoLangFun t r ds (prefixOf e) [es]
 
 -- This is in the process of being replaced with fNewRules,
 -- so we ignore any function that already has that field written.
@@ -91,7 +93,7 @@ rulesByName :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath
 rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> case fNewRules f of
-               Nothing -> if any ("load_" `isPrefixOf`) (fNames f)
+               Nothing -> if "load_" `isPrefixOf` fName f
                             then (fOldRules f) s $ setSalt 0 expr
                             else (fOldRules f) s expr
                Just _ -> return $ ExprPath $ fromOrthoLangPath cfg $ exprPath s expr
@@ -235,18 +237,6 @@ aVar cfg ref _ vPath oPath = do
     vPath'  = fromOrthoLangPath cfg vPath
     vPath'' = traceA "aVar" vPath [vPath', oPath']
 
--- Handles the actual rule generation for all binary operators.
--- TODO can it be factored out somehow? seems almost trivial now...
-rBop :: OrthoLangState -> OrthoLangExpr -> (OrthoLangExpr, OrthoLangExpr)
-      -> Rules (ExprPath, ExprPath, ExprPath)
-rBop s@(_, cfg, _, _) e@(OrthoLangBop _ _ _ _ _ _) (n1, n2) = do
-  (ExprPath p1) <- rExpr s n1
-  (ExprPath p2) <- rExpr s n2
-  let path  = fromOrthoLangPath cfg $ exprPath s e
-      path' = debugRules cfg "rBop" e path
-  return (ExprPath p1, ExprPath p2, ExprPath path')
-rBop _ _ _ = fail "bad argument to rBop"
-
 
 ------------------------------
 -- [t]ypechecking functions --
@@ -277,10 +267,10 @@ defaultTypeCheck expected returned actual =
  -}
 mkLoad :: Bool -> String -> OrthoLangType -> OrthoLangFunction
 mkLoad hashSeqIDs name rtn = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rLoad hashSeqIDs
   }
 
@@ -291,10 +281,10 @@ mkLoad hashSeqIDs name rtn = OrthoLangFunction
  -}
 mkLoadList :: Bool -> String -> OrthoLangType -> OrthoLangFunction
 mkLoadList hashSeqIDs name rtn = OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rLoadList hashSeqIDs
   }
 

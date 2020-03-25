@@ -85,10 +85,10 @@ faagz = OrthoLangType
 -- TODO does this work at all?
 parseSearches :: OrthoLangFunction
 parseSearches = let name = "parse_searches" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf str] search
   , fTypeDesc  = mkTypeDesc name [ListOf str] search
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rParseSearches
   }
 
@@ -98,10 +98,10 @@ parseSearches = let name = "parse_searches" in OrthoLangFunction
 
 getGenomes :: OrthoLangFunction
 getGenomes = let name = "get_genomes" in OrthoLangFunction
-  { fNames     = [name] 
+  { fOpChar = Nothing, fName = name 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rBioMartR "getGenome"
   }
 
@@ -111,10 +111,10 @@ getGenomes = let name = "get_genomes" in OrthoLangFunction
 
 getProteomes :: OrthoLangFunction
 getProteomes = let name = "get_proteomes" in OrthoLangFunction
-  { fNames     = [name]
+  { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
-  , fFixity    = Prefix, fTags = []
+  ,fTags = []
   , fNewRules = Nothing, fOldRules = rBioMartR "getProteome"
   }
 
