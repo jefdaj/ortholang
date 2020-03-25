@@ -6,9 +6,6 @@ import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Util (headOrDie)
 
-import OrthoLang.Core.Paths (insertNewRulesDigest)
-import System.IO.Unsafe (unsafePerformIO)
-
 import qualified Text.Parsec.Expr as E
 -- import Text.PrettyPrint.HughesPJClass (render, pPrint)
 
@@ -187,9 +184,9 @@ pExpr = debugParser "pExpr" $ do
   st@(_, cfg, _, _) <- getState
   -- debugParseM "expr"
   res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
-  return $ unsafePerformIO (insertNewRulesDigest st res >> return res)
-  -- res <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
+  -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
   -- let res' = debugParser cfg "pExpr" res
+  return res
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)

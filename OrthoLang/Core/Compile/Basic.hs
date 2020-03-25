@@ -48,6 +48,9 @@ import System.Directory           (createDirectoryIfMissing)
 
 import Data.Maybe (isJust, fromJust)
 
+import OrthoLang.Core.Paths (insertNewRulesDigest)
+import System.IO.Unsafe (unsafePerformIO)
+
 
 debug :: OrthoLangConfig -> String -> a -> a
 debug cfg msg rtn = if isJust (cfgDebug cfg) then trace "core.compile" msg rtn else rtn
@@ -76,15 +79,24 @@ debugRules cfg name input out = debug cfg msg out
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
 --            that actually makes it easy to use the same function types but not do any actual rules :D
+
+-- TODO insert digests as they're compiled here, not as they're parsed
+--      (because some are generated automatically, not parsed at all!)
+-- TODO and put them into the state explicitly without this IORef hack
 rExpr :: RulesFn
-rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e
-rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
-rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e -- TODO deprecate this?
-rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n -- TODO deprecate this
-rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
-rExpr s e@(OrthoLangBop t r ds _ e1 e2) = rExpr s fn
+rExpr s@(_, cfg, _, _) e = unsafePerformIO $ do
+  insertNewRulesDigest s e
+  return $ rExpr' s e
+
+rExpr' :: RulesFn
+rExpr' s e@(OrthoLangLit _ _ _      ) = rLit s e
+rExpr' s e@(OrthoLangRef _ _ _ _    ) = rRef s e
+rExpr' s e@(OrthoLangList _ _ _ _   ) = rList s e -- TODO deprecate this?
+rExpr' s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n -- TODO deprecate this
+rExpr' _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
+rExpr' s e@(OrthoLangBop t r ds _ e1 e2) = rExpr s fn
   where
-    es = OrthoLangList (ListOf t) r ds [e1, e2] -- TODO is ListOf right?
+    es = OrthoLangList t r ds [e1, e2] -- TODO is ListOf right?
     fn = OrthoLangFun t r ds (prefixOf e) [es]
 
 -- This is in the process of being replaced with fNewRules,
@@ -179,12 +191,14 @@ aListLits cfg ref _ paths outPath = do
     paths' = map (fromOrthoLangPath cfg) paths
 
 -- regular case for writing a list of links to some other file type
+-- TODO hash mismatch error here?
 rListPaths :: RulesFn
 rListPaths s@(_, cfg, ref, ids) e@(OrthoLangList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toOrthoLangPath cfg p) paths
-      hash     = digest $ concat $ map digest paths'
-      outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
+      -- hash     = digest $ concat $ map digest paths'
+      -- outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
+      outPath  = exprPath s e
       outPath' = debugRules cfg "rListPaths" e $ fromOrthoLangPath cfg outPath
   outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
@@ -421,11 +435,13 @@ aLoadListLits cfg ref _ outPath litsPath = do
     outPath' = fromOrthoLangPath cfg outPath
 
 -- regular case for lists of any other file type
+-- TODO hash mismatch here?
 rLoadListLinks :: Bool -> RulesFn
-rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) (OrthoLangFun rtn salt _ _ [es]) = do
+rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) e@(OrthoLangFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
-  let hash     = digest $ toOrthoLangPath cfg pathsPath
-      outPath  = exprPathExplicit cfg "list" rtn salt [hash]
+  -- let hash     = digest $ toOrthoLangPath cfg pathsPath
+  --     outPath  = exprPathExplicit cfg "list" rtn salt [hash]
+  let outPath  = exprPath s e
       outPath' = fromOrthoLangPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toOrthoLangPath cfg pathsPath) outPath
   return (ExprPath outPath')

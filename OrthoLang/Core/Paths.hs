@@ -100,6 +100,8 @@ module OrthoLang.Core.Paths
   )
   where
 
+import qualified Debug.Trace as DT
+
 import Path (parseAbsFile, fromAbsFile)
 import OrthoLang.Core.Types -- (OrthoLangConfig)
 -- import OrthoLang.Core.Config (debug)
@@ -243,7 +245,10 @@ exprPathDigest :: OrthoLangPath -> ExprDigest
 exprPathDigest = ExprDigest . digest
 
 insertNewRulesDigest :: OrthoLangState -> OrthoLangExpr -> IO ()
-insertNewRulesDigest st@(_, cfg, _, idr) expr = atomicModifyIORef' idr $
+insertNewRulesDigest s e = let r = insertNewRulesDigest' s e
+                           in DT.trace (show (exprPathDigest (exprPath s e)) ++ " -> " ++ show e) r
+
+insertNewRulesDigest' st@(_, cfg, _, idr) expr = atomicModifyIORef' idr $
   \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
   where
     eType   = typeOf expr
