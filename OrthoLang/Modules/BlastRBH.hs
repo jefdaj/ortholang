@@ -3,9 +3,9 @@ module OrthoLang.Modules.BlastRBH where
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Compile.Basic (rExpr, defaultTypeCheck, debug)
-import OrthoLang.Core.Compile.Simple (rSimple, aSimpleScriptNoFix)
-import OrthoLang.Core.Compile.Map  (rMap)
+import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, debug)
+import OrthoLang.Core.Compile (rSimple, aSimpleScriptNoFix)
+import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, absolutizePaths)
 -- import OrthoLang.Core.Debug         (traceA)
 import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, cacheDir)

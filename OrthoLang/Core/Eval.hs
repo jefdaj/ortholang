@@ -36,7 +36,7 @@ import OrthoLang.Core.Pretty (renderIO)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Core.Compile.Basic    (compileScript, rExpr, newCoreRules)
+import OrthoLang.Core.Compile         (compileScript, rExpr, newCoreRules)
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)

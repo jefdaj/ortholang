@@ -5,15 +5,15 @@ import Development.Shake
 import OrthoLang.Core.Types
 import OrthoLang.Modules.SeqIO (faa)
 import OrthoLang.Modules.Muscle (aln)
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
-import OrthoLang.Core.Compile.Simple (rSimple, rSimpleScript)
+import OrthoLang.Core.Compile (defaultTypeCheck)
+import OrthoLang.Core.Compile (rSimple, rSimpleScript)
 import OrthoLang.Core.Paths (OrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Core.Actions (traceA, runCmd, CmdDesc(..), readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
 -- import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
-import OrthoLang.Core.Compile.Map  (rMap, rMapSimpleScript)
+import OrthoLang.Core.Compile  (rMap, rMapSimpleScript)
 import System.Exit (ExitCode(..))
 
 orthoLangModule :: OrthoLangModule

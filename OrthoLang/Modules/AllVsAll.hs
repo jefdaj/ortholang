@@ -6,7 +6,7 @@ module OrthoLang.Modules.AllVsAll
 
 -- import Development.Shake
 import OrthoLang.Core.Types
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rExpr)
+import OrthoLang.Core.Compile (defaultTypeCheck, rExpr)
 import OrthoLang.Modules.SeqIO         (faa)
 
 orthoLangModule :: OrthoLangModule

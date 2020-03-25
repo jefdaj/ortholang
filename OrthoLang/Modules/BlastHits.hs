@@ -7,9 +7,9 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import System.FilePath             (replaceBaseName)
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
-import OrthoLang.Core.Compile.Simple (rSimple)
-import OrthoLang.Core.Compile.Map  (rMap)
+import OrthoLang.Core.Compile (defaultTypeCheck)
+import OrthoLang.Core.Compile (rSimple)
+import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, writeCachedVersion, trackWrite')
 import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Modules.Blast      (bht)

@@ -14,7 +14,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Actions       (readLit, readPath, 
                                     runCmd, CmdDesc(..), debugA, traceA, need',
                                     writeCachedLines, readFileStrict')
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
+import OrthoLang.Core.Compile (defaultTypeCheck, rFun3, map3of3, singleton)
 import OrthoLang.Core.Paths         (fromOrthoLangPath, cacheDir)
 import OrthoLang.Core.Util          (headOrDie)
 import OrthoLang.Modules.BlastDB    (pdb)
@@ -24,10 +24,9 @@ import Data.Scientific             (formatScientific, FPFormat(..))
 import System.FilePath             ((<.>), takeFileName)
 -- import System.Directory            (removeFile)
 import Control.Monad               (when)
-import OrthoLang.Core.Compile.Map2  (rFun3, map3of3, singleton)
 import OrthoLang.Modules.SeqIO      (mkConcat)
-import OrthoLang.Core.Compile.Compose (compose1)
-import OrthoLang.Core.Compile.Map (rMap)
+import OrthoLang.Core.Compile (compose1)
+import OrthoLang.Core.Compile (rMap)
 import System.Directory            (createDirectoryIfMissing)
 import System.Exit                 (ExitCode(..))
 

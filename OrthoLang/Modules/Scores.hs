@@ -14,12 +14,12 @@ import OrthoLang.Core.Types
 
 import Control.Monad (when)
 import OrthoLang.Core.Actions (readStrings, readLits, writeLits, debugA)
-import OrthoLang.Core.Compile.Basic (rExpr, debugRules)
+import OrthoLang.Core.Compile (rExpr, debugRules)
 import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, exprPath)
 
--- import OrthoLang.Core.Compile.Map  (rMap)
+-- import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Modules.BlastHits (aCutCol)
-import OrthoLang.Core.Compile.Simple (rSimple)
+import OrthoLang.Core.Compile (rSimple)
 
 debug :: String -> String -> Action ()
 debug name = debugA ("ortholang.modules.scores." ++ name)

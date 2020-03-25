@@ -25,7 +25,7 @@ import OrthoLang.Core.Types
 import Development.Shake
 import OrthoLang.Core.Actions (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
 import OrthoLang.Core.Paths  (exprPath, OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
-import OrthoLang.Core.Compile.Basic (rExpr, defaultTypeCheck)
+import OrthoLang.Core.Compile (rExpr, defaultTypeCheck)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)

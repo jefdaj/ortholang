@@ -1,7 +1,7 @@
 module OrthoLang.Modules.NewRulesTest where
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Compile.Basic (mkNewFn2, mkNewFn3)
+import OrthoLang.Core.Compile (mkNewFn2, mkNewFn3)
 import OrthoLang.Core.Actions (writeCachedLines, readLit)
 import OrthoLang.Modules.SeqIO (faa)
 

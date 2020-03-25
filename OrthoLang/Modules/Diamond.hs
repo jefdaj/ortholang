@@ -7,8 +7,8 @@ module OrthoLang.Modules.Diamond
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rExpr, debugRules)
-import OrthoLang.Core.Compile.Simple (rSimpleScriptPar, aSimpleScriptPar, rSimple)
+import OrthoLang.Core.Compile (defaultTypeCheck, rExpr, debugRules)
+import OrthoLang.Core.Compile (rSimpleScriptPar, aSimpleScriptPar, rSimple)
 import OrthoLang.Core.Locks         (withReadLock)
 import OrthoLang.Core.Util          (resolveSymlinks, headOrDie)
 import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath, exprPath)
@@ -18,7 +18,7 @@ import OrthoLang.Modules.Blast      (bht)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             (replaceBaseName)
-import OrthoLang.Core.Compile.Map   (rMap, rMapSimpleScript)
+import OrthoLang.Core.Compile   (rMap, rMapSimpleScript)
 import Data.List.Utils             (replace)
 
 orthoLangModule :: OrthoLangModule

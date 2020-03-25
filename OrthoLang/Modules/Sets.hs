@@ -15,7 +15,7 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Data.IORef                  (readIORef)
 import Development.Shake.FilePath  ((</>))
-import OrthoLang.Core.Compile.Basic (rExpr, typeError, debugRules)
+import OrthoLang.Core.Compile (rExpr, typeError, debugRules)
 import OrthoLang.Core.Actions       (readStrings, readPaths, writeStrings, traceA, hashContent)
 -- import OrthoLang.Core.Debug         (debugRules, traceA)
 import OrthoLang.Core.Paths         (exprPath, toOrthoLangPath, fromOrthoLangPath)

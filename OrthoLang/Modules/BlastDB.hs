@@ -19,7 +19,7 @@ import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), debugA,
                                     writeLits, writePath, traceA, need',
                                     cachedLinesPath, writeStrings, readStrings, writePaths,
                                     readFileStrict)
-import OrthoLang.Core.Compile.Basic (rExpr, defaultTypeCheck, debugRules)
+import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, debugRules, singleton)
 import OrthoLang.Core.Paths         (exprPath, cacheDir, fromOrthoLangPath,
                                     toOrthoLangPath, OrthoLangPath)
 import OrthoLang.Core.Util          (stripWhiteSpace, resolveSymlinks)
@@ -29,9 +29,8 @@ import System.FilePath             (takeFileName, takeBaseName, takeExtension, (
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 import System.Directory           (createDirectoryIfMissing)
-import OrthoLang.Core.Compile.Map2 (singleton)
 import OrthoLang.Core.Paths (fromGeneric)
-import OrthoLang.Core.Compile.Map (rMap)
+import OrthoLang.Core.Compile (rMap)
 import OrthoLang.Core.Locks (withReadLock, withWriteLock')
 import System.Process
 import Data.String.Utils (split)

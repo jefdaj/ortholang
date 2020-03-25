@@ -7,7 +7,7 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import System.FilePath ((<.>))
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rExpr)
+import OrthoLang.Core.Compile (defaultTypeCheck, rExpr)
 import OrthoLang.Core.Actions (readLit, CmdDesc(..), runCmd)
 import OrthoLang.Core.Paths (exprPath, fromOrthoLangPath)
 import System.Exit (ExitCode(..))

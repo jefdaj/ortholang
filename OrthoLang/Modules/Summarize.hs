@@ -4,7 +4,7 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import OrthoLang.Core.Paths (exprPath, fromOrthoLangPath)
-import OrthoLang.Core.Compile.Basic      (rExpr)
+import OrthoLang.Core.Compile      (rExpr)
 import OrthoLang.Core.Actions (readLits, writeLits, traceA, need')
 -- import OrthoLang.Core.Debug (traceA)
 import Development.Shake.FilePath ((</>))

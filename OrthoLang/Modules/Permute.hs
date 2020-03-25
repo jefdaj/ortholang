@@ -8,7 +8,7 @@ import OrthoLang.Core.Util (trace)
 -- import OrthoLang.Core.Config (debug)
 
 import Development.Shake.FilePath   (makeRelative)
-import OrthoLang.Core.Compile.Basic  (rExpr)
+import OrthoLang.Core.Compile  (rExpr)
 import OrthoLang.Core.Actions (readStrings, writeStrings, traceA, need')
 import OrthoLang.Core.Paths (exprPath, exprPathExplicit, fromOrthoLangPath)
 -- import OrthoLang.Core.Debug          (traceA, debug)

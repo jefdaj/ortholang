@@ -7,8 +7,8 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import OrthoLang.Modules.SeqIO      (fna, faa)
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
-import OrthoLang.Core.Compile.Simple (rSimple)
+import OrthoLang.Core.Compile (defaultTypeCheck)
+import OrthoLang.Core.Compile (rSimple)
 import System.FilePath             ((</>), takeBaseName)
 import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..))

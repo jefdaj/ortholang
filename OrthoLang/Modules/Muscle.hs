@@ -4,9 +4,9 @@ module OrthoLang.Modules.Muscle
 -- import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
-import OrthoLang.Core.Compile.Simple (rSimpleScript)
-import OrthoLang.Core.Compile.Map   (rMapSimpleScript)
+import OrthoLang.Core.Compile (defaultTypeCheck)
+import OrthoLang.Core.Compile (rSimpleScript)
+import OrthoLang.Core.Compile   (rMapSimpleScript)
 -- import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Modules.SeqIO      (faa)
 

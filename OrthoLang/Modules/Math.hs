@@ -7,7 +7,7 @@ import Development.Shake
 
 import Data.Scientific             (Scientific, toRealFloat)
 import Data.String.Utils           (strip)
-import OrthoLang.Core.Compile.Basic (rBop, defaultTypeCheck)
+import OrthoLang.Core.Compile (rBop, defaultTypeCheck)
 -- import OrthoLang.Core.Debug         (traceA)
 import OrthoLang.Core.Actions       (readLit, writeLit, traceA, need')
 

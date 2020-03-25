@@ -3,8 +3,8 @@ module OrthoLang.Modules.GreenCut
 
 -- import Development.Shake
 import OrthoLang.Core.Types
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
-import OrthoLang.Core.Compile.Simple (rSimpleScript)
+import OrthoLang.Core.Compile (defaultTypeCheck)
+import OrthoLang.Core.Compile (rSimpleScript)
 import OrthoLang.Modules.Blast (bht)
 
 orthoLangModule :: OrthoLangModule

@@ -4,7 +4,7 @@ module OrthoLang.Modules.Sample where
 
 import Development.Shake
 import OrthoLang.Core.Types
-import OrthoLang.Core.Compile.Basic  (rExpr)
+import OrthoLang.Core.Compile  (rExpr)
 import OrthoLang.Core.Paths (exprPath, toOrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Core.Actions (readLit, readStrings, writeStrings, debugA)
 import Data.Scientific

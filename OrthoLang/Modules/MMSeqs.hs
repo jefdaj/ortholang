@@ -23,7 +23,7 @@ import OrthoLang.Core.Types
 
 -- import Data.List                   (isSuffixOf)
 import OrthoLang.Core.Actions       (readLit, readPaths, runCmd, CmdDesc(..), symlink)
-import OrthoLang.Core.Compile.Basic (rExpr, debugRules)
+import OrthoLang.Core.Compile (rExpr, debugRules)
 import OrthoLang.Core.Paths         (toOrthoLangPath, fromOrthoLangPath, exprPath)
 import OrthoLang.Core.Util          (digest, unlessExists, resolveSymlinks, headOrDie)
 import OrthoLang.Core.Locks         (withReadLock)
