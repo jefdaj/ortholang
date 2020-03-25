@@ -7,8 +7,8 @@ module OrthoLang.Modules.Diamond
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rSimpleScriptPar, aSimpleScriptPar,
-                                    rExpr, debugRules, rSimple)
+import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rExpr, debugRules)
+import OrthoLang.Core.Compile.Simple (rSimpleScriptPar, aSimpleScriptPar, rSimple)
 import OrthoLang.Core.Locks         (withReadLock)
 import OrthoLang.Core.Util          (resolveSymlinks, headOrDie)
 import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath, exprPath)

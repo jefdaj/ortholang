@@ -33,6 +33,7 @@ module OrthoLang.Core.Compile.Map
 
 import Development.Shake
 import OrthoLang.Core.Compile.Basic
+import OrthoLang.Core.Compile.Simple
 import OrthoLang.Core.Types
 import Text.PrettyPrint.HughesPJClass
 

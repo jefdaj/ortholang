@@ -16,7 +16,8 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import Data.Scientific             (formatScientific, FPFormat(..))
-import OrthoLang.Core.Compile.Basic (rSimple, defaultTypeCheck)
+import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
+import OrthoLang.Core.Compile.Simple (rSimple)
 import OrthoLang.Core.Compile.Map  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, traceA, symlink)
 import OrthoLang.Core.Paths         (toOrthoLangPath, fromOrthoLangPath, OrthoLangPath)

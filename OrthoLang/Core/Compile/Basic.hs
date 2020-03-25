@@ -172,23 +172,22 @@ deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
 --            that actually makes it easy to use the same function types but not do any actual rules :D
---
--- TODO which of these can we really deprecate? maybe just rulesByName?
 rExpr :: RulesFn
-rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e -- TODO what will happen when we call this?
+rExpr s e@(OrthoLangLit _ _ _      ) = rLit s e
 rExpr s e@(OrthoLangRef _ _ _ _    ) = rRef s e
-rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e
-rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n
-rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n
+rExpr s e@(OrthoLangList _ _ _ _   ) = rList s e -- TODO deprecate this?
+rExpr s e@(OrthoLangBop _ _ _ n _ _) = rulesByName s e n -- TODO deprecate this
+rExpr s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n -- TODO deprecate this
 rExpr _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 
 newCoreRules :: NewRulesFn
 newCoreRules cfg lRef iRef = do
-  return ()
+
   -- this is a nice idea in general, but won't work with the special lit compilers
   -- (because they need direct access to the expressions to get their lit values)
   -- newPattern cfg "str" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] str) aLit cfg lRef iRef (ExprPath p)
   -- newPattern cfg "num" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] num) aLit cfg lRef iRef (ExprPath p)
+
   -- TODO rList{,Lists,Paths}
   -- TODO rAssign?
   -- TODO rRef?
@@ -200,6 +199,8 @@ newCoreRules cfg lRef iRef = do
   -- TODO rCompose1
   -- TODO rFun{1,3}
   -- TODO rRepeatN
+
+  return ()
 
 -- This is in the process of being replaced with fNewRules,
 -- so we ignore any function that already has that field written.
@@ -602,105 +603,3 @@ aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
     outPath'   = fromOrthoLangPath cfg outPath
     pathsPath' = fromOrthoLangPath cfg pathsPath
     out = traceA "aLoadListLinks" outPath' [outPath', pathsPath']
-
--- based on https://stackoverflow.com/a/18627837
--- uniqLines :: Ord a => [a] -> [a]
--- uniqLines = unlines . toList . fromList . lines
-
--- takes an action fn with any number of args and calls it with a tmpdir.
--- TODO rename something that goes with the map fns?
-rSimple :: (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()) -> RulesFn
-rSimple actFn = rSimple' Nothing actFn'
-  where
-    actFn' cfg ref ids _ args = actFn cfg ref ids args -- drop unused tmpdir
-
-rSimpleTmp :: String
-           -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
-           -> RulesFn
-rSimpleTmp prefix = rSimple' (Just prefix)
-
-{- For scripts that just need some args passed to them. The first will be the
- - outPath, and the rest actual args. The string is the script name.
- -}
-rSimpleScript :: String -> RulesFn
-rSimpleScript = rSimple . aSimpleScript
-
-rSimpleScriptPar :: String -> RulesFn
-rSimpleScriptPar = rSimple . aSimpleScriptPar
-
-rSimpleScriptNoFix :: String -> RulesFn
-rSimpleScriptNoFix = rSimple . aSimpleScriptNoFix
-
-aSimpleScriptNoFix :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
-aSimpleScriptNoFix = aSimpleScript' False False
-
-aSimpleScript :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
-aSimpleScript = aSimpleScript' False True
-
-aSimpleScriptPar :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
-aSimpleScriptPar = aSimpleScript' True True
-
-aSimpleScript' :: Bool -> Bool -> String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
-aSimpleScript' parCmd fixEmpties script cfg ref ids (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
-  where
-    -- TODO is tmpDir used here at all? should it be?
-    -- TODO match []?
-    actFn c r _ t (o:is) = let o'  = fromOrthoLangPath c o -- TODO better var names here
-                               t'  = fromOrthoLangPath c t
-                               is' = map (fromOrthoLangPath c) is
-                           -- in wrappedCmdWrite parCmd fixEmpties c r o' is' [] [Cwd t'] script (o':is')
-                           in runCmd c r $ CmdDesc
-                             { cmdBinary = script
-                             , cmdArguments = o':is'
-                             , cmdFixEmpties = fixEmpties
-                             , cmdParallel = parCmd
-                             , cmdInPatterns = is'
-                             , cmdOutPath = o'
-                             , cmdExtraOutPaths = []
-                             , cmdSanitizePaths = []
-                             , cmdOptions = [Cwd t'] -- TODO remove?
-                             , cmdExitCode = ExitSuccess
-                             , cmdRmPatterns = [o'] -- TODO is this a sane default?
-                             }
-    actFn _ _ _ _ _ = fail "bad argument to aSimpleScript actFn"
-aSimpleScript' _ _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
-
-rSimple' :: Maybe String
-         -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
-         -> RulesFn
-rSimple' mTmpPrefix actFn s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ exprs) = do
-  argPaths <- mapM (rExpr s) exprs
-  let argPaths' = map (\(ExprPath p) -> toOrthoLangPath cfg p) argPaths
-  outPath' %> \_ -> aSimple' cfg ref ids outPath actFn mTmpDir argPaths'
-  return (ExprPath outPath')
-  where
-    mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
-    outPath  = exprPath s e
-    outPath' = fromOrthoLangPath cfg outPath
-rSimple' _ _ _ _ = fail "bad argument to rSimple'"
-
--- TODO aSimpleScript that calls aSimple' with a wrappedCmd as the actFn
--- TODO rSimpleScript that calls rSimple + that
-
--- TODO need to handle empty lists here?
-aSimple' ::  OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath
-         -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
-         -> Maybe OrthoLangPath -> [OrthoLangPath] -> Action ()
-aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
-  need' cfg ref "ortholang.core.compile.basic.aSimple'" argPaths'
-  argPaths'' <- liftIO $ mapM (fmap (toOrthoLangPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
-  let o' = debug cfg ("aSimple' outPath': " ++ outPath' ++ "'") outPath
-      as = debug cfg ("aSimple' argsPaths'': " ++ show argPaths'') argPaths''
-  actFn cfg ref ids tmpDir (o':as)
-  trackWrite [out] -- TODO remove?
-  where
-    -- TODO probably not "simple tmp" anymore... remove? rename?
-    hashes     = concat $ intersperse "/" $ map digest argPaths'
-    argPaths'  = map (fromOrthoLangPath cfg) argPaths
-    outPath'   = fromOrthoLangPath cfg outPath
-    out = traceA "aSimple'" outPath' (outPath':tmpDir':argPaths')
-    (tmpDir, tmpDir') = case mTmpDir of
-                Nothing  -> (toOrthoLangPath cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
-                Just dir -> (toOrthoLangPath cfg d, d)
-                  where
-                    d = fromOrthoLangPath cfg dir </> hashes

@@ -19,7 +19,7 @@ import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLa
 
 -- import OrthoLang.Core.Compile.Map  (rMap)
 import OrthoLang.Modules.BlastHits (aCutCol)
-import OrthoLang.Core.Compile.Basic (rSimple)
+import OrthoLang.Core.Compile.Simple (rSimple)
 
 debug :: String -> String -> Action ()
 debug name = debugA ("ortholang.modules.scores." ++ name)

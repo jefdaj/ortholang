@@ -114,6 +114,7 @@ library
                     OrthoLang.Core.Actions,
                     OrthoLang.Core.Compile,
                     OrthoLang.Core.Compile.Basic,
+                    OrthoLang.Core.Compile.Simple,
                     OrthoLang.Core.Compile.Compose,
                     OrthoLang.Core.Compile.Map,
                     OrthoLang.Core.Compile.Map2,

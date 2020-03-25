@@ -9,7 +9,8 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import OrthoLang.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..), trackWrite')
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rSimple)
+import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
+import OrthoLang.Core.Compile.Simple (rSimple)
 import OrthoLang.Core.Locks         (withWriteLock')
 import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Core.Util          (digest, readFileStrict)

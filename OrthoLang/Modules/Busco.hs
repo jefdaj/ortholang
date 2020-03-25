@@ -9,8 +9,8 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Paths (cacheDir, toOrthoLangPath, fromOrthoLangPath, exprPath)
 import OrthoLang.Core.Actions (traceA, writeLits, runCmd, CmdDesc(..), readLit, readPaths, writePaths,
                               readFileStrict', symlink, readFileStrict, sanitizeFileInPlace)
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, rSimple,
-                                    rSimpleScript, curl)
+import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rExpr, mkLoad, curl)
+import OrthoLang.Core.Compile.Simple (rSimple, rSimpleScript)
 import OrthoLang.Core.Compile.Map   (rMap, rMapSimpleScript)
 import OrthoLang.Modules.SeqIO (fna, faa, mkConcat)
 import OrthoLang.Modules.BlastDB (aFilterList)

@@ -12,8 +12,8 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Actions (withBinHash, writeCachedLines, writeLits, need')
 import OrthoLang.Core.Util (digest)
 import OrthoLang.Core.Paths (exprPath, toOrthoLangPath, fromOrthoLangPath, cacheDir)
-import OrthoLang.Core.Compile.Basic (rExpr, defaultTypeCheck, aSimpleScript,
-                                    defaultTypeCheck)
+import OrthoLang.Core.Compile.Basic (rExpr, defaultTypeCheck, defaultTypeCheck)
+import OrthoLang.Core.Compile.Simple (aSimpleScript)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))
 

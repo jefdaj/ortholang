@@ -5,7 +5,8 @@ import Development.Shake
 import OrthoLang.Core.Types
 import OrthoLang.Modules.SeqIO (faa)
 import OrthoLang.Modules.Muscle (aln)
-import OrthoLang.Core.Compile.Basic (defaultTypeCheck, rSimple, rSimpleScript)
+import OrthoLang.Core.Compile.Basic (defaultTypeCheck)
+import OrthoLang.Core.Compile.Simple (rSimple, rSimpleScript)
 import OrthoLang.Core.Paths (OrthoLangPath, fromOrthoLangPath)
 import OrthoLang.Core.Actions (traceA, runCmd, CmdDesc(..), readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
