@@ -35,3 +35,4 @@ import OrthoLang.Core.Compile.Map
 import OrthoLang.Core.Compile.Map2
 -- import OrthoLang.Core.Compile.Repeat
 import OrthoLang.Core.Compile.Compose
+import OrthoLang.Core.Compile.NewRules
