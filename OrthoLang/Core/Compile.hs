@@ -14,6 +14,7 @@ module OrthoLang.Core.Compile
   , mkNewFn2
   , mkNewFn3
   , newCoreRules
+  , newFunctionRules
   , rBop
   , rExpr
   , rFun3

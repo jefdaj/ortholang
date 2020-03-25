@@ -1,5 +1,6 @@
 module OrthoLang.Core.Compile.NewRules
   ( newCoreRules
+  , newFunctionRules
   , mkNewFn1
   , mkNewFn2
   , mkNewFn3
@@ -13,7 +14,14 @@ import OrthoLang.Core.Actions (need')
 import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Paths (fromOrthoLangPath, decodeNewRulesDeps)
 import OrthoLang.Core.Types
+import Data.Maybe (catMaybes)
 
+
+newFunctionRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+newFunctionRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
+  where
+   fns   = concatMap mFunctions $ cfgModules cfg
+   rules = catMaybes $ map fNewRules fns
 
 newCoreRules :: NewRulesFn
 newCoreRules cfg lRef iRef = do

@@ -76,7 +76,6 @@ module OrthoLang.Core.Types
   , nonEmptyType
   , isNonEmpty
   -- new rules infrastructure
-  , newFunctionRules
   )
   where
 
@@ -94,7 +93,7 @@ import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
-import Data.Maybe (fromJust, catMaybes)
+import Data.Maybe (fromJust)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 newtype OrthoLangPath = OrthoLangPath FilePath deriving (Eq, Ord, Show)
@@ -595,9 +594,3 @@ isNonEmpty :: OrthoLangType -> Bool
 isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True
-
-newFunctionRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
-newFunctionRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
-  where
-   fns   = concatMap mFunctions $ cfgModules cfg
-   rules = catMaybes $ map fNewRules fns
