@@ -86,8 +86,9 @@ mkNewFn3 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction3 -> OrthoLan
 mkNewFn3 = mkNewFn rNewRules3
 
 mkNewFn
-  :: (String -> TypeChecker -> t -> OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())
-  -> String -> OrthoLangType -> [OrthoLangType] -> t -> OrthoLangFunction
+  :: (String -> TypeChecker -> t -> NewRulesFn)
+  -> String -> OrthoLangType -> [OrthoLangType] -> t
+  -> OrthoLangFunction
 mkNewFn rFn name oType dTypes aFn =
   let tFn = defaultTypeCheck dTypes oType
   in OrthoLangFunction
@@ -107,6 +108,7 @@ mkNewFn rFn name oType dTypes aFn =
 test1 :: OrthoLangFunction
 test1 = mkNewFn2 "newrulestest1" str [str, str] aTest1
 
+-- TODO make these all OrthoLangPaths
 aTest1 :: NewAction2
 aTest1 cfg lRef _ (ExprPath out) d1 d2 = do
   s1 <- readLit cfg lRef d1
