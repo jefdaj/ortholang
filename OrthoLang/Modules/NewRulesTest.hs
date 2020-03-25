@@ -18,6 +18,7 @@ orthoLangModule = OrthoLangModule
   , mTypes = [str]
   , mFunctions =
       [ test1
+      , test2
       ]
   }
 
@@ -62,8 +63,8 @@ aNewRules
   -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
   ->  OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath
   -> Action ()
-aNewRules applyDeps tFn aFn cfg lRef iRef o@(ExprPath out) = do
-  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef o
+aNewRules applyDeps tFn aFn cfg lRef iRef out = do
+  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef out
   case tFn dTypes of
     Left err -> error err
     Right rType -> do
@@ -74,7 +75,7 @@ aNewRules applyDeps tFn aFn cfg lRef iRef o@(ExprPath out) = do
       -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
       -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
       -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
-      applyDeps (aFn cfg lRef iRef o) deps'
+      applyDeps (aFn cfg lRef iRef out) deps'
 
 mkNewFn1 :: String -> OrthoLangType -> [OrthoLangType] -> NewAction1 -> OrthoLangFunction
 mkNewFn1 = mkNewFn rNewRules1
@@ -114,3 +115,13 @@ aTest1 cfg lRef _ (ExprPath out) d1 d2 = do
   s1 <- readLit cfg lRef d1
   s2 <- readLit cfg lRef d2
   writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
+
+-----------
+-- test2 --
+-----------
+
+test2 :: OrthoLangFunction
+test2 = mkNewFn3 "newrulestest2" faa [str, faa, faa] aTest2
+
+aTest2 :: NewAction3
+aTest2 cfg lRef iRef (ExprPath out) a1 a2 a3 = undefined
