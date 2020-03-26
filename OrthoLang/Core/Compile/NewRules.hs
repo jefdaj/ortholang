@@ -96,6 +96,7 @@ newPattern cfg name nArgs =
   cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
 
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
+-- TODO one less * if not using repeat salt
 rNewRules
   :: Int -> (t -> [FilePath] -> Action ()) -> String
   -> TypeChecker

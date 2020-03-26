@@ -47,8 +47,8 @@ module OrthoLang.Core.Compile.Basic
   -- , aLoadHash
   -- , aLoadListLinks
   -- , aLoadListLits
-  -- , aSourceListLits
-  -- , aSourceListPaths
+  -- , aListLits
+  -- , aListPaths
   -- , aVar
   -- , isURL
   -- , withInsertNewRulesDigests
@@ -67,7 +67,7 @@ import qualified Data.Map.Strict as M
 import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toOrthoLangPath,
                             fromOrthoLangPath, varPath, OrthoLangPath)
 
-import Data.IORef                 (atomicModifyIORef')
+import Data.IORef                 (atomicModifyIORef', readIORef)
 import Data.List                  (isPrefixOf, isInfixOf)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName)
 import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
@@ -119,8 +119,10 @@ debugRules cfg name input out = debug cfg name msg out
 -- TODO and put them into the state explicitly without this IORef hack
 
 withInsertNewRulesDigests:: OrthoLangState -> [OrthoLangExpr] -> a -> a
-withInsertNewRulesDigests s es a = unsafePerformIO $ do
+withInsertNewRulesDigests s@(_,_,_,r) es a = unsafePerformIO $ do
   mapM_ (insertNewRulesDigest s) es
+  (HashedIDs {hExprs = ids}) <- readIORef r
+  print ids
   return a
 
 {-|
@@ -247,7 +249,7 @@ rListLits :: RulesFn
 rListLits s@(_, cfg, ref, ids) e@(OrthoLangList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> toOrthoLangPath cfg p) litPaths
-  outPath' %> \_ -> aSourceListLits cfg ref ids litPaths' outPath
+  outPath' %> \_ -> aListLits cfg ref ids litPaths' outPath
   return (ExprPath outPath')
   where
     outPath  = exprPath s e
@@ -255,16 +257,16 @@ rListLits s@(_, cfg, ref, ids) e@(OrthoLangList _ _ _ exprs) = do
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
 -- TODO put this in a cache dir by content hash and link there
-aSourceListLits :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
-aSourceListLits cfg ref _ paths outPath = do
+aListLits :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
+aListLits cfg ref _ paths outPath = do
   need paths'
   lits <- mapM (readLit cfg ref) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
-  debugA "core.compile.basic.aSourceListLits" $ "lits': " ++ show lits'
+  debugA "core.compile.basic.aListLits" $ "lits': " ++ show lits'
   writeLits cfg ref out'' lits'
   where
     out'   = fromOrthoLangPath cfg outPath
-    out''  = traceA "aSourceListLits" out' (out':paths')
+    out''  = traceA "aListLits" out' (out':paths')
     paths' = map (fromOrthoLangPath cfg) paths
 
 {-|
@@ -295,20 +297,20 @@ rListPaths s@(_, cfg, ref, ids) e@(OrthoLangList rtn salt _ exprs) = do
       -- outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath  = exprPath s e
       outPath' = debugRules cfg "rListPaths" e $ fromOrthoLangPath cfg outPath
-  outPath' %> \_ -> aSourceListPaths cfg ref ids paths' outPath
+  outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
 rListPaths _ _ = error "bad arguemnts to rListPaths"
 
-aSourceListPaths :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
-aSourceListPaths cfg ref _ paths outPath = do
-  need' cfg ref "core.compile.basic.aSourceListPaths" paths'
+aListPaths :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
+aListPaths cfg ref _ paths outPath = do
+  need' cfg ref "core.compile.basic.aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  need' cfg ref "core.compile.basic.aSourceListPaths" paths''
+  need' cfg ref "core.compile.basic.aListPaths" paths''
   let paths''' = map (toOrthoLangPath cfg) paths'' -- TODO not working?
   writePaths cfg ref out'' paths'''
   where
     out'   = fromOrthoLangPath cfg outPath
-    out''  = traceA "aSourceListPaths" out' (out':paths')
+    out''  = traceA "aListPaths" out' (out':paths')
     paths' = map (fromOrthoLangPath cfg) paths -- TODO remove this
 
 -- return a link to an existing named variable

@@ -1,7 +1,14 @@
 module OrthoLang.Modules.Math where
 
--- simpler problem? maybe not everything is even getting compiled through rExpr
---   [ ] try forcing it
+-- simpler problem? maybe not everything is even getting compiled through rExpr. no it is
+-- looks like lits (at least nums) arent being added to the hExprs map
+--   need to have the list-needing function (multiply) need the list (works)
+--   then the list has to need its elements (not working), which have to have been compiled (not working)
+
+-- simple idea: what if the compilation has to be evaluated strictly to fill HashedIDs?
+--   would make sense, but difficult to test without NFData instances
+--   if that's it, maybe you should rethink the design and keep the digests in the state directly!
+-- also create a NewRulesTest case for this
 
 -- TODO aha! the bug is that the list of [n1, n2] is never needed by the bop somehow
 --      it also happens when calling multiply [2, 3.5] directly

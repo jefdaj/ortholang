@@ -432,13 +432,14 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 data HashedIDs = HashedIDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: M.Map ExprDigest (OrthoLangType, OrthoLangPath)
+  , hExprs  :: M.Map ExprDigest (OrthoLangType, OrthoLangPath) -- TODO move this to OrthoLangState below
   }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
 type HashedIDsRef = IORef HashedIDs
 
+-- TODO split off a new branch that adds hExprs to this state
 type OrthoLangState = (OrthoLangScript, OrthoLangConfig, Locks, HashedIDsRef)
 type ParseM a = Parsec String OrthoLangState a
 
