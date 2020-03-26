@@ -1,18 +1,19 @@
 module OrthoLang.Core.Types
-  -- type aliases and newtypes
-  ( OrthoLangPath(..)
+  (
+  -- * Types and Newtypes
+    OrthoLangPath(..)
   , Action1
   , Action2
   , Action3
   , ActionFn
   , RulesFn
   , TypeChecker
-  -- new rules types
+  -- * Action functions for NewRules
   , NewAction1
   , NewAction2
   , NewAction3
   , NewRulesFn
-  -- data structures
+  -- * Basic data structures
   , OrthoLangAssign
   , OrthoLangExpr(..)
   , CompiledExpr(..)
@@ -62,13 +63,13 @@ module OrthoLang.Core.Types
   , saltOf
   , setSalt
   , prefixOf
-  -- wrappers to prevent confusing the various paths
+  -- * Wrappers to prevent confusing the various paths
   , CacheDir(..)
   , ExprPath(..)
   , VarPath(..)
   , ResPath(..)
   , ExprDigest(..)
-  -- misc experimental stuff
+  -- * Misc experimental stuff
   , extractExprs
   , extractLoads
   , typeMatches
@@ -490,15 +491,15 @@ data FnTag
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data OrthoLangFunction = OrthoLangFunction
-  { fName      :: String
-  , fOpChar    :: Maybe Char -- char for the infix operator, if any
-  , fTypeCheck :: [OrthoLangType] -> Either String OrthoLangType
-  , fTypeDesc  :: String
-  , fTags      :: [FnTag]
-  , fOldRules  :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
-  , fNewRules  :: Maybe (OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ())
-  -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
+  { fName      :: String           -- ^ main (prefix) function name
+  , fOpChar    :: Maybe Char       -- ^ infix operator symbol, if any
+  , fTypeCheck :: TypeChecker      -- ^ checks input types, returning an error message or return type
+  , fTypeDesc  :: String           -- ^ human-readable description
+  , fTags      :: [FnTag]          -- ^ function tags (TODO implement these)
+  , fOldRules  :: RulesFn          -- ^ old-style rules (TODO deprecate, then remove)
+  , fNewRules  :: Maybe NewRulesFn -- ^ new-style rules (TODO write them all, then remove the Maybe)
   }
+  -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   -- deriving (Eq, Read)
 
 mkTypeDesc :: String -> [OrthoLangType] -> OrthoLangType -> String
@@ -506,8 +507,8 @@ mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
 
 -- TODO does eq make sense here?
 data OrthoLangModule = OrthoLangModule
-  { mName :: String
-  , mDesc :: String
+  { mName      :: String
+  , mDesc      :: String
   , mTypes     :: [OrthoLangType]
   , mFunctions :: [OrthoLangFunction]
   }

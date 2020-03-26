@@ -1,12 +1,17 @@
--- module "compiles" it by translating it into a set of Shake build rules. To
--- actually run the rules, use `eval` in the Interpret module.
+{-|
+This module "compiles" an expression it by translating it into a set of Shake
+build rules. To actually run the rules, use `eval` in the Interpret module.
 
--- TODO add more descriptive runtime error for canonicalizePath failing b/c no file
--- TODO see if you can avoid making more than one absolute symlink per input file
--- TODO make systematically sure there's only one rule for each file
--- TODO pass tmpDir as a config option somehow, and verbosity
+TODO add more descriptive runtime error for canonicalizePath failing b/c no file
 
--- TODO why doesn't turning down the verbosity actually work?
+TODO see if you can avoid making more than one absolute symlink per input file
+
+TODO make systematically sure there's only one rule for each file
+
+TODO pass tmpDir as a config option somehow, and verbosity
+
+TODO why doesn't turning down the verbosity actually work?
+-}
 
 module OrthoLang.Core.Compile.Basic
   ( compileScript
@@ -19,6 +24,9 @@ module OrthoLang.Core.Compile.Basic
   -- , rBop
   , rExpr
   , typeError
+
+  -- * Things to deprecate and then remove
+  , rulesByName
   )
   where
 
@@ -413,7 +421,7 @@ aLoad hashSeqIDs cfg ref ids strPath outPath = do
 rLoadList :: Bool -> RulesFn
 rLoadList hashSeqIDs s e@(OrthoLangFun (ListOf r) _ _ _ [es])
   | r `elem` [str, num] = rLoadListLits s es
-  | otherwise = rLoadListLinks hashSeqIDs s e
+  | otherwise = rLoadListPaths hashSeqIDs s e
 rLoadList _ _ _ = fail "bad arguments to rLoadList"
 
 -- special case for lists of str and num
@@ -443,8 +451,8 @@ aLoadListLits cfg ref _ outPath litsPath = do
 
 -- regular case for lists of any other file type
 -- TODO hash mismatch here?
-rLoadListLinks :: Bool -> RulesFn
-rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) e@(OrthoLangFun rtn salt _ _ [es]) = do
+rLoadListPaths :: Bool -> RulesFn
+rLoadListPaths hashSeqIDs s@(_, cfg, ref, ids) e@(OrthoLangFun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   -- let hash     = digest $ toOrthoLangPath cfg pathsPath
   --     outPath  = exprPathExplicit cfg "list" rtn salt [hash]
@@ -452,7 +460,7 @@ rLoadListLinks hashSeqIDs s@(_, cfg, ref, ids) e@(OrthoLangFun rtn salt _ _ [es]
       outPath' = fromOrthoLangPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toOrthoLangPath cfg pathsPath) outPath
   return (ExprPath outPath')
-rLoadListLinks _ _ _ = fail "bad arguments to rLoadListLinks"
+rLoadListPaths _ _ _ = fail "bad arguments to rLoadListPaths"
 
 aLoadListLinks :: Bool -> OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
 aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do

@@ -101,8 +101,9 @@ set deduplication to work.
 -}
 
 module OrthoLang.Core.Paths
-  -- cutpaths
-  ( OrthoLangPath()
+  (
+  -- * cutpaths
+    OrthoLangPath()
   , toOrthoLangPath
   , fromOrthoLangPath
   , sharedPath
@@ -110,7 +111,7 @@ module OrthoLang.Core.Paths
   , stringOrthoLangPath
   , toGeneric
   , fromGeneric
-  -- cache dirs
+  -- * cache dirs
   , cacheDir
   -- tmpfiles
   , argHashes

@@ -1,11 +1,13 @@
+{-|
+Attempt to compose OrthoLang functions. Work in progress, but promising!
+
+TODO Can this be an applicative?
+-}
+
 module OrthoLang.Core.Compile.Compose
   ( compose1
   )
   where
-
-{- Attempt to compose OrthoLang functions. Work in progress, but promising!
- - TODO Can this be an applicative?
- -}
 
 import OrthoLang.Core.Types
 import OrthoLang.Core.Paths (exprPath, fromOrthoLangPath)

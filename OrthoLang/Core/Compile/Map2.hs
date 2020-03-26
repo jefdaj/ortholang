@@ -1,3 +1,9 @@
+{-|
+Haskell functions for making mapped versions of OrthoLang functions.
+Some are applied to Actions and some to Rules, but either way the result is
+a higher-order RulesFn for use in the fOldRules field of a OrthoLangFunction.
+-}
+
 module OrthoLang.Core.Compile.Map2
 
 -- TODO should output files in an identifyable folder by final fn name,
@@ -18,11 +24,6 @@ module OrthoLang.Core.Compile.Map2
   , singleton
   )
   where
-
-{- Haskell functions for making mapped versions of OrthoLang functions.
- - Some are applied to Actions and some to Rules, but either way the result is
- - a higher-order RulesFn for use in the fOldRules field of a OrthoLangFunction.
- -}
 
 import Development.Shake
 import OrthoLang.Core.Types

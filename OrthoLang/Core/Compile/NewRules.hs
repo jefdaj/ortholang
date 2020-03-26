@@ -1,3 +1,18 @@
+{-|
+A work in progress. If this goes well, it will replace
+'OrthoLang.Core.Compile.Basic.rulesByName' for all function calls.
+
+The big change is that it decodes dependencies from expression paths rather
+than explicitly making a Shake pattern for each file. That lets Shake discover
+them as it's supposed to, and should prevent the lingering file lock issues
+that stem from mapped function variants \"surprising\" Shake with what they
+build.
+
+It should also reduce boilerplace in the modules: in most cases only one
+'NewActionN' function will be needed (where N = 1, 2, 3, ...) per
+'OrthoLangFunction' definition.
+-}
+
 module OrthoLang.Core.Compile.NewRules
   ( newCoreRules
   , newFunctionRules
