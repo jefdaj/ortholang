@@ -118,7 +118,7 @@ aNewRules applyFn tFn aFn cfg lRef iRef out = do
     Right rType -> do
       when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
       let deps' = map (fromOrthoLangPath cfg) deps
-      need' cfg lRef "ortholang.modules.newrulestest.anewrules" deps'
+      need' cfg lRef "ortholang.modules.newrulestest.aNewRules" deps'
       -- TODO look up out too and assert that its type matches typechecker result
       -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
       -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)

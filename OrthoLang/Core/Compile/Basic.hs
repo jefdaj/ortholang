@@ -260,7 +260,7 @@ aSourceListLits cfg ref _ paths outPath = do
   need paths'
   lits <- mapM (readLit cfg ref) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
-  debugA "ortholang.core.compile.basic.aSourceListLits" $ "lits': " ++ show lits'
+  debugA "core.compile.basic.aSourceListLits" $ "lits': " ++ show lits'
   writeLits cfg ref out'' lits'
   where
     out'   = fromOrthoLangPath cfg outPath
@@ -301,9 +301,9 @@ rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 aSourceListPaths :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
 aSourceListPaths cfg ref _ paths outPath = do
-  need' cfg ref "ortholang.core.compile.basic.aSourceListPaths" paths'
+  need' cfg ref "core.compile.basic.aSourceListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  need' cfg ref "ortholang.core.compile.basic.aSourceListPaths" paths''
+  need' cfg ref "core.compile.basic.aSourceListPaths" paths''
   let paths''' = map (toOrthoLangPath cfg) paths'' -- TODO not working?
   writePaths cfg ref out'' paths'''
   where
@@ -333,7 +333,7 @@ rVar (_, cfg, ref, ids) var expr oPath = do
 aVar :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
 aVar cfg ref _ vPath oPath = do
   alwaysRerun
-  need' cfg ref "ortholang.core.compile.basic.aVar" [oPath']
+  need' cfg ref "core.compile.basic.aVar" [oPath']
   liftIO $ removeIfExists ref vPath'
   -- TODO should it sometimes symlink and sometimes copy?
   -- TODO before copying, think about how you might have to re-hash again!
@@ -416,7 +416,7 @@ aLoadHash :: Bool -> OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -
 aLoadHash hashSeqIDs cfg ref ids src _ = do
   alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
-  need' cfg ref "ortholang.core.compile.basic.aLoadHash" [src']
+  need' cfg ref "core.compile.basic.aLoadHash" [src']
   md5 <- hashContent cfg ref src -- TODO permission error here?
   let tmpDir'   = fromOrthoLangPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 -- <.> ext
@@ -470,7 +470,7 @@ curl cfg ref url = do
 aLoad :: Bool -> OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
 aLoad hashSeqIDs cfg ref ids strPath outPath = do
   alwaysRerun
-  need' cfg ref "ortholang.core.compile.basic.aLoad" [strPath']
+  need' cfg ref "core.compile.basic.aLoad" [strPath']
   pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits cfg ref strPath' -- TODO safer!
   -- liftIO $ putStrLn $ "pth: " ++ pth
   pth' <- if isURL pth
@@ -554,7 +554,7 @@ aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
                          $ takeExtension $ fromOrthoLangPath cfg p) paths'''
   let hashPaths' = map (fromOrthoLangPath cfg) hashPaths
   -- debugA $ "about to need: " ++ show paths''
-  need' cfg ref "ortholang.core.compile.basic.aLoadListLinks" hashPaths'
+  need' cfg ref "core.compile.basic.aLoadListLinks" hashPaths'
   writePaths cfg ref out hashPaths
   where
     outPath'   = fromOrthoLangPath cfg outPath

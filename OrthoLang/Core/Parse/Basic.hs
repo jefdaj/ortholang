@@ -27,7 +27,7 @@ parserTrace' s = pt <|> return ()
            let x' = let sx = show x in if length sx > n then take n sx ++ "\"..." else sx
            -- TODO why does this output to stderr no matter what??
            --      the extra messages don't obey the filter either
-           trace "core.parser" (s ++ ": " ++ x') $ try $ eof
+           trace ("core.parser." ++ s) (x') $ try $ eof
            fail x'
 
 -- based on Text.Parsec.Combinator.parserTraced, but:
@@ -38,7 +38,7 @@ parserTraced' s p = do
   parserTrace' s
   -- TODO why does this output to stderr no matter what??
   --      the extra messages don't obey the filter either
-  p <|> trace "core.parser" (s ++ " backtracked") (fail s)
+  p <|> trace ("core.parser." ++ s) "backtracked" (fail s)
   -- p
 
 -- trace for a parser

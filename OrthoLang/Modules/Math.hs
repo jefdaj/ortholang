@@ -1,5 +1,8 @@
 module OrthoLang.Modules.Math where
 
+-- simpler problem? maybe not everything is even getting compiled through rExpr
+--   [ ] try forcing it
+
 -- TODO aha! the bug is that the list of [n1, n2] is never needed by the bop somehow
 --      it also happens when calling multiply [2, 3.5] directly
 --      which means:
