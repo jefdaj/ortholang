@@ -156,7 +156,7 @@ calcReplaceID (scr, _, _, _) resExpr subVar subExpr = ReplaceID $ Just $ digest
   ]
 
 {- Helper function to write the final list when the results are literals
- - TODO factor out, and maybe unify with rListLits
+ - TODO factor out, and maybe unify with rSourceListLits
  - TODO subPaths is only one path? if so, rename it
  -}
 aReplaceEachLits :: OrthoLangType -> OrthoLangConfig -> Locks
@@ -172,7 +172,7 @@ aReplaceEachLits _ cfg ref outPath subPaths resPaths = do
     out = traceA "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
 
 {- Helper function to write the final list when the results are links to files
- - TODO factor out, and maybe unify with rListLinks
+ - TODO factor out, and maybe unify with rSourceListLinks
  -}
 aReplaceEachLinks :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> [OrthoLangPath] -> Action ()
 aReplaceEachLinks cfg ref outPath subPaths resPaths = do

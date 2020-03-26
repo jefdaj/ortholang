@@ -11,7 +11,7 @@ module OrthoLang.Modules.Math where
 --      hmm, it could be the applyDeps thing not needing the overall list first?
 --      aha! no it's the opposite:
 --        aNewRules does need' it, but there's no matching pattern
---        why would that be though? it should match rListLits
+--        why would that be though? it should match rSourceListLits
 --      clue: the explicit list hashing uses (ListOf rtn) as type for some reason
 --      clue: return type for multiply looks like it's wrongly num.list?
 --        nevermind that's the one dep, which is right other than having the wrong hash
