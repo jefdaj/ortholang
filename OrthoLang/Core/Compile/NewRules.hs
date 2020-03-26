@@ -87,10 +87,7 @@ rNewRules
   -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
   -> NewRulesFn
 rNewRules nArgs applyFn name tFn aFn cfg lRef iRef = do
-  let exprDir = cfgTmpDir cfg </> "exprs"
-      pattern = newPattern cfg name nArgs
-      -- pattern = exprDir </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
-  pattern %> \p -> aNewRules applyFn tFn aFn cfg lRef iRef (ExprPath p)
+  newPattern cfg name nArgs %> \p -> aNewRules applyFn tFn aFn cfg lRef iRef (ExprPath p)
   return ()
 
 aNewRules

@@ -83,10 +83,14 @@ debugRules cfg name input out = debug cfg msg out
 -- TODO insert digests as they're compiled here, not as they're parsed
 --      (because some are generated automatically, not parsed at all!)
 -- TODO and put them into the state explicitly without this IORef hack
+
+withInsertNewRulesDigests:: OrthoLangState -> [OrthoLangExpr] -> a -> a
+withInsertNewRulesDigests s es a = unsafePerformIO $ do
+  mapM_ (insertNewRulesDigest s) es
+  return a
+
 rExpr :: RulesFn
-rExpr s@(_, cfg, _, _) e = unsafePerformIO $ do
-  insertNewRulesDigest s e
-  return $ rExpr' s e
+rExpr s@(_, cfg, _, _) e = withInsertNewRulesDigests s [e] $ rExpr' s e
 
 rExpr' :: RulesFn
 rExpr' s e@(OrthoLangLit _ _ _      ) = rLit s e
@@ -94,15 +98,18 @@ rExpr' s e@(OrthoLangRef _ _ _ _    ) = rRef s e
 rExpr' s e@(OrthoLangList _ _ _ _   ) = rList s e -- TODO deprecate this?
 rExpr' s e@(OrthoLangFun _ _ _ n _  ) = rulesByName s e n -- TODO deprecate this
 rExpr' _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
-rExpr' s e@(OrthoLangBop t r ds _ e1 e2) = rExpr s fn
+rExpr' s e@(OrthoLangBop t r ds _ e1 e2) = withInsertNewRulesDigests s [e1,e2,es] $ rExpr s fn
   where
-    es = OrthoLangList t r ds [e1, e2] -- TODO is ListOf right?
+    es = OrthoLangList t r ds [e1, e2]
     fn = OrthoLangFun t r ds (prefixOf e) [es]
 
 -- This is in the process of being replaced with fNewRules,
 -- so we ignore any function that already has that field written.
 rulesByName :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath
-rulesByName s@(_, cfg, _, _) expr name = case findFunction cfg name of
+rulesByName s e@(OrthoLangFun _ _ _ _ es) n = withInsertNewRulesDigests s es $ rulesByName' s e n
+rulesByName _ _ n = error $ "bad argument to rulesByName: " ++ n
+
+rulesByName' s@(_, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> case fNewRules f of
                Nothing -> if "load_" `isPrefixOf` fName f
@@ -160,9 +167,9 @@ aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
 rList :: RulesFn
 -- TODO is this the bug? refers to a list of other empty lists, no?
 -- rList s e@(OrthoLangList Empty _ _ _) = rListLits s e -- TODO remove? rListPaths?
-rList s e@(OrthoLangList rtn _ _ _)
-  | rtn `elem` [Empty, str, num] = rListLits  s e -- TODO does Empty fit here?
-  | otherwise                    = rListPaths s e
+rList s e@(OrthoLangList rtn _ _ es)
+  | rtn `elem` [Empty, str, num] = withInsertNewRulesDigests s (e:es) $ rListLits  s e -- TODO does Empty fit here?
+  | otherwise                    = withInsertNewRulesDigests s (e:es) $ rListPaths s e
 rList _ _ = error "bad arguemnt to rList"
 
 -- special case for writing lists of strings or numbers as a single file
@@ -180,7 +187,7 @@ rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
 aListLits cfg ref _ paths outPath = do
-  -- need paths'
+  need paths'
   lits <- mapM (readLit cfg ref) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
   debugA "ortholang.core.compile.basic.aListLits" $ "lits': " ++ show lits'
