@@ -19,9 +19,9 @@ module OrthoLang.Core.Compile.Basic
   -- * Expression compilers
     rExpr
   , rLit
-  , rSrcList
-  , rSrcListLits
-  , rSrcListPaths
+  , rList
+  , rListLits
+  , rListPaths
   , rNamedFunction
 
   -- * Script compilers
@@ -135,7 +135,7 @@ rExpr s@(_, cfg, _, _) e = withInsertNewRulesDigests s [e] $ rExpr' s e
 rExpr' :: RulesFn
 rExpr' s e@(OrthoLangLit _ _ _      ) = rLit s e
 rExpr' s e@(OrthoLangRef _ _ _ _    ) = rRef s e
-rExpr' s e@(OrthoLangList _ _ _ _   ) = rSrcList s e -- TODO deprecate this?
+rExpr' s e@(OrthoLangList _ _ _ _   ) = rList s e
 rExpr' s e@(OrthoLangFun _ _ _ n _  ) = rNamedFunction s e n -- TODO deprecate this
 rExpr' _   (OrthoLangRules (CompiledExpr _ _ rules)) = rules
 rExpr' s e@(OrthoLangBop t r ds _ e1 e2) = withInsertNewRulesDigests s [e1,e2,es] $ rExpr s fn
@@ -184,7 +184,7 @@ compileScript s@(as, _, _, _) _ = do
       -- Nothing -> "result"
       -- Just h  -> "result." ++ h
 
--- | Write a literal value from OrthoLang source code to file
+-- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn
 rLit s@(_, cfg, ref, ids) expr = do
   let path  = exprPath s expr -- absolute paths allowed!
@@ -211,11 +211,11 @@ whose type is a @'ListOf' \<something\>@ instead.
 
 TODO remove the insert digests hack
 -}
-rSrcList :: RulesFn
-rSrcList s e@(OrthoLangList rtn _ _ es)
-  | rtn `elem` [Empty, str, num] = withInsertNewRulesDigests s (e:es) $ rSrcListLits  s e
-  | otherwise                    = withInsertNewRulesDigests s (e:es) $ rSrcListPaths s e
-rSrcList _ _ = error "bad arguemnt to rSrcList"
+rList :: RulesFn
+rList s e@(OrthoLangList rtn _ _ es)
+  | rtn `elem` [Empty, str, num] = withInsertNewRulesDigests s (e:es) $ rListLits  s e
+  | otherwise                    = withInsertNewRulesDigests s (e:es) $ rListPaths s e
+rList _ _ = error "bad arguemnt to rList"
 
 {-|
 Special case for writing lists of literals ('str's or 'num's) in the source code.
@@ -239,20 +239,20 @@ order to match the format of function-generated lists of literals. It turns out
 to be much more efficient for those to write one big multiline file than
 thousands of small literals + one list of links pointing to them.
 
-TODO can it be mostly unified with rSrcListPaths digest-wise?
+TODO can it be mostly unified with rListPaths digest-wise?
 
 TODO what happens when you make a list of literals in two steps using links?
 -}
-rSrcListLits :: RulesFn
-rSrcListLits s@(_, cfg, ref, ids) e@(OrthoLangList _ _ _ exprs) = do
+rListLits :: RulesFn
+rListLits s@(_, cfg, ref, ids) e@(OrthoLangList _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> toOrthoLangPath cfg p) litPaths
   outPath' %> \_ -> aSourceListLits cfg ref ids litPaths' outPath
   return (ExprPath outPath')
   where
     outPath  = exprPath s e
-    outPath' = debugRules cfg "rSrcListLits" e $ fromOrthoLangPath cfg outPath
-rSrcListLits _ e = error $ "bad argument to rSrcListLits: " ++ show e
+    outPath' = debugRules cfg "rListLits" e $ fromOrthoLangPath cfg outPath
+rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
 -- TODO put this in a cache dir by content hash and link there
 aSourceListLits :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
@@ -287,17 +287,17 @@ known until after the function runs.
 
 TODO hash mismatch error here?
 -}
-rSrcListPaths :: RulesFn
-rSrcListPaths s@(_, cfg, ref, ids) e@(OrthoLangList rtn salt _ exprs) = do
+rListPaths :: RulesFn
+rListPaths s@(_, cfg, ref, ids) e@(OrthoLangList rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toOrthoLangPath cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath  = exprPath s e
-      outPath' = debugRules cfg "rSrcListPaths" e $ fromOrthoLangPath cfg outPath
+      outPath' = debugRules cfg "rListPaths" e $ fromOrthoLangPath cfg outPath
   outPath' %> \_ -> aSourceListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
-rSrcListPaths _ _ = error "bad arguemnts to rSrcListPaths"
+rListPaths _ _ = error "bad arguemnts to rListPaths"
 
 aSourceListPaths :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> OrthoLangPath -> Action ()
 aSourceListPaths cfg ref _ paths outPath = do
