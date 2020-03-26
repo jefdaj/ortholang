@@ -86,16 +86,16 @@ import OrthoLang.Core.Paths (insertNewRulesDigest)
 import System.IO.Unsafe (unsafePerformIO)
 
 
-debug :: OrthoLangConfig -> String -> a -> a
-debug cfg msg rtn = if isJust (cfgDebug cfg) then trace "core.compile" msg rtn else rtn
+debug :: OrthoLangConfig -> String -> String -> a -> a
+debug cfg name msg rtn = if isJust (cfgDebug cfg) then trace ("core.compile." ++ name) msg rtn else rtn
 
 -- TODO restrict to OrthoLangExpr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
 debugRules :: (Pretty a, Show b) => OrthoLangConfig -> String -> a -> b -> b
-debugRules cfg name input out = debug cfg msg out
+debugRules cfg name input out = debug cfg name msg out
   where
     ren = render $ pPrint input
-    msg = name ++ " compiled '" ++ ren ++ "' to " ++ show out
+    msg = "'" ++ ren ++ "' -> " ++ show out
 
 
 ------------------------------

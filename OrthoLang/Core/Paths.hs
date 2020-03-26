@@ -192,15 +192,15 @@ traceP :: (Pretty a, Show b) => String -> a -> b -> b
 traceP name expr path = trace ("core.paths." ++ name) msg path
   where
     ren = render $ pPrint expr
-    msg = ren ++ " -> " ++ show path -- TODO include types?
+    msg = "'" ++ ren ++ "' -> " ++ show path -- TODO include types?
 
 traceD name st expr = trace ("core.paths." ++ name) msg
   where
-    -- ren  = render $ pPrint expr
-    ren  = show expr
+    ren  = render $ pPrint expr
+    -- ren  = show expr
     path = exprPath st expr
     dig  = exprPathDigest path
-    msg  = "insert digest for " ++ ren ++ ": (" ++ show dig ++ ", " ++ show path ++ ")"
+    msg  = "'" ++ ren ++ "' -> (" ++ show dig ++ ", " ++ show path ++ ")"
 
 --------------
 -- cutpaths --

@@ -54,6 +54,8 @@ import OrthoLang.Core.Util         (digest, resolveSymlinks, unlessExists,
 import OrthoLang.Core.Locks       (withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 
+-- TODO swap out plain debug fn for a proper one with module name
+
 debugA' :: String -> String -> Action ()
 debugA' name msg = debugA ("ortholang.core.compile.map." ++ name) msg
 
@@ -122,7 +124,7 @@ rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(OrthoLangFun r salt _ nam
       elemCacheDir'  = toOrthoLangPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> extOf eType
       eType = case r of
-                (ListOf t) -> debug cfg ("type of '" ++ render (pPrint e)
+                (ListOf t) -> debug cfg "rMapMain" ("type of '" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error $ "bad argument to rMapMain: " ++ show e
   elemCachePtn %> aMapElem cfg ref ids eType mTmpFn actFn singleName salt
@@ -169,7 +171,7 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> extOf eTyp
   where
     path' = toOrthoLangPath cfg path
     hash  = digest path'
-    hash' = debug cfg ("hash of " ++ show path' ++ " is " ++ hash) hash
+    hash' = debug cfg "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
 
 -- This leaves arguments in .args files for aMapElem to find.
 -- TODO This should be done for each replace operation in replace_each

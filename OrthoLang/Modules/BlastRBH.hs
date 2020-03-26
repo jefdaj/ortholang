@@ -24,9 +24,9 @@ import Data.List.Utils             (replace)
 
 -- for tracking down non-deduplicating blastp functions
 debugNames :: OrthoLangConfig -> String -> OrthoLangExpr -> OrthoLangExpr -> a -> a
-debugNames cfg fnName (OrthoLangFun _ _ _ bname _) (OrthoLangFun _ _ _ aname _) rtn = debug cfg msg rtn
+debugNames cfg fnName (OrthoLangFun _ _ _ bname _) (OrthoLangFun _ _ _ aname _) rtn = debug cfg fnName msg rtn
   where
-    msg = fnName ++ " translated " ++ bname ++ " -> " ++ aname
+    msg = "'" ++ bname ++ "' -> '" ++ aname ++ "'"
 debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
 
 orthoLangModule :: OrthoLangModule
