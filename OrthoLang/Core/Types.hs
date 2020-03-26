@@ -211,7 +211,13 @@ prefixOf (OrthoLangBop _ _ _ n _ _ ) = case n of
 
 -- TODO have a separate OrthoLangAssign for "result"?
 type OrthoLangAssign = (OrthoLangVar, OrthoLangExpr)
-type OrthoLangScript = [OrthoLangAssign]
+
+data OrthoLangScript = OrthoLangScript
+  { sAssigns :: [OrthoLangAssign]
+  -- ^ Structured representation of the code suitable for printing, transforming, etc.
+  , sDepends :: M.Map ExprDigest (OrthoLangType, OrthoLangPath)
+  -- ^ Map suitable for auto-discovery of dependencies from expression path digests
+  }
 
 ensureResult :: OrthoLangScript -> OrthoLangScript
 ensureResult scr = if null scr then noRes else scr'
@@ -432,7 +438,6 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 data HashedIDs = HashedIDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: M.Map ExprDigest (OrthoLangType, OrthoLangPath) -- TODO move this to OrthoLangState below
   }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
