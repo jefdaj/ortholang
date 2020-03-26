@@ -1,10 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-{- Some Shake Actions wrapped with OrthoLang-specific additions,
- - and some other stuff. Eventually, it would be nice if all IO happened here.
- -
- - TODO rename to be shorter (no "safe", "wrapped", etc)
- -}
+{-|
+Some Shake Actions wrapped with OrthoLang-specific additions,
+and some other stuff. Eventually, it would be nice if all IO happened here.
+
+TODO rename to be shorter (no "safe", "wrapped", etc)
+-}
 
 module OrthoLang.Core.Actions
 
@@ -319,18 +320,21 @@ last50 thing = if length shown > 50 then "..." ++ (reverse $ take 50 $ reverse s
   where
     shown = show thing
 
-{- This ensures that when two lists have the same content, their expression
- - paths will be links to the same cached path. That causes them to get
- - properly deduplicated when used in a set operation. It also makes the .tree
- - test files much stricter, since they'll change if any list element changes.
- - The Maybe is in case you only need to write lists as part of a larger list
- - and don't want individual outpaths.
- -
- - TODO switch to md5sum/hashContent?
- - TODO does it need to handle a race condition when writing to the cache?
- - TODO any reason to keep original extensions instead of all using .txt?
- -      oh, if we're testing extensions anywhere. lets not do that though
- -}
+{-|
+This ensures that when two lists have the same content, their expression
+paths will be links to the same cached path. That causes them to get
+properly deduplicated when used in a set operation. It also makes the @.tree@
+test files much stricter, since they'll change if any list element changes.
+The Maybe is in case you only need to write lists as part of a larger list
+and don't want individual outpaths.
+
+TODO switch to md5sum/hashContent?
+
+TODO does it need to handle a race condition when writing to the cache?
+
+TODO any reason to keep original extensions instead of all using .txt?
+     oh, if we're testing extensions anywhere. lets not do that though
+-}
 writeCachedLines :: OrthoLangConfig -> Locks -> FilePath -> [String] -> Action ()
 writeCachedLines cfg ref outPath content = do
   let cache = cachedLinesPath cfg content
@@ -381,10 +385,11 @@ writeLit cfg ref path lit = do
   where
     lits = [if null lit then "<<emptystr>>" else lit]
 
-{- Write a "list of whatever". Mostly for generic set operations. You include
- - the OrthoLangType (of each element, not the list!) so it knows how to convert
- - to/from String, and then within the function you treat them as Strings.
- -}
+{-|
+Write a "list of whatever". Mostly for generic set operations. You include
+the OrthoLangType (of each element, not the list!) so it knows how to convert
+to/from String, and then within the function you treat them as Strings.
+-}
 writeStrings :: OrthoLangType -> OrthoLangConfig -> Locks
              -> FilePath -> [String] -> Action ()
 writeStrings etype cfg ref out whatevers = do
@@ -398,15 +403,17 @@ writeString :: OrthoLangType -> OrthoLangConfig -> Locks
             -> FilePath -> String -> Action ()
 writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whatever]
 
-{- Turns out there's a race condition during `repeat` calls, because the same
- - literals are being compiled in each thread at roughly the same time. The way
- - I solved it was 1) check if the file as written already, and 2) if there's a
- - conflict in the middle of the operation anyway, ignore the error. Whichever
- - thread got there first will be writing the same exact text anyway.
- -}
+{-|
+Turns out there's a race condition during `repeat` calls, because the same
+literals are being compiled in each thread at roughly the same time. The way
+I solved it was 1) check if the file as written already, and 2) if there's a
+conflict in the middle of the operation anyway, ignore the error. Whichever
+thread got there first will be writing the same exact text anyway.
 
--- TODO rename like myReadFile, myReadLines?
--- TODO move to Util?
+TODO rename like myReadFile, myReadLines?
+
+TODO move to Util?
+-}
 trackWrite' :: OrthoLangConfig -> [FilePath] -> Action ()
 trackWrite' cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
@@ -425,11 +432,12 @@ setReadOnly cfg path = do
 -- run system commands --
 -------------------------
 
-{- OrthoLang requires explicit empty files with contents like "<<emptylist>>" to
- - distinguish them from runtime errors. This function replaces those with
- - actual empty files before passing them to a cmd, so logic for that
- - doesn't have to be duplicated over and over.
- -}
+{-|
+OrthoLang requires explicit empty files with contents like "<<emptylist>>" to
+distinguish them from runtime errors. This function replaces those with
+actual empty files before passing them to a cmd, so logic for that
+doesn't have to be duplicated over and over.
+-}
 fixEmptyText :: OrthoLangConfig -> Locks -> FilePath -> Action FilePath
 fixEmptyText cfg ref path = do
   need' cfg ref "core.actions.fixEmptyText" [path] -- Note isEmpty does this too
@@ -442,13 +450,12 @@ fixEmptyText cfg ref path = do
 -- TODO print a message for the user
 -- TODO raise/re-raise an exception
 
--- Shake's command_ adapted to work with wrapperScript and wrapperLimit if used.
--- ptns is a list of patterns for files to delete in case the cmd fails.
--- TODO gather shake stuff into a Shake.hs module?
---      could have config, debug, wrappedCmd, eval...
--- TODO separate wrappedReadCmd with a shared lock?
-
--- TODO multiple out patterns too?
+-- | Shake's command_ adapted to work with wrapperScript and wrapperLimit if used.
+--   ptns is a list of patterns for files to delete in case the cmd fails.
+--   TODO gather shake stuff into a Shake.hs module?
+--        could have config, debug, wrappedCmd, eval...
+--   TODO separate wrappedReadCmd with a shared lock?
+--   TODO multiple out patterns too?
 data CmdDesc = CmdDesc
   { cmdBinary        :: String
   , cmdArguments     :: [String] -- TODO auto-include outpath before these?
@@ -463,14 +470,19 @@ data CmdDesc = CmdDesc
   , cmdExitCode      :: ExitCode -- expected exit code (others are errors)
   }
 
-{- One wrappedCmd equivalent function to rule them all.
- - It's controlled by a CmdDesc record instead of a bunch of unnamed positional arguments,
- - and will help enforce consistency because all the patterns are enforced in one place.
- - TODO should it track the .out and .err files, or ignore them?
- - TODO take OrthoLangState instead of individual cfg + locks?
- - TODO if exit is wrong (usually non-zero), cat out stderr for user
- - TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
- -}
+{-|
+One wrappedCmd equivalent function to rule them all.
+It's controlled by a CmdDesc record instead of a bunch of unnamed positional arguments,
+and will help enforce consistency because all the patterns are enforced in one place.
+
+TODO should it track the .out and .err files, or ignore them?
+
+TODO take OrthoLangState instead of individual cfg + locks?
+
+TODO if exit is wrong (usually non-zero), cat out stderr for user
+
+TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
+-}
 runCmd :: OrthoLangConfig -> Locks -> CmdDesc -> Action ()
 runCmd cfg ref@(disk, _) desc = do
   let stdoutPath = replaceBaseName (cmdOutPath desc) "out"
@@ -552,9 +564,9 @@ handleCmdError cfg ref bin n stderrPath rmPatterns = do
 -- misc --
 ----------
 
--- This is the only function that should access readFileStrict' directly;
--- all others go through readStr and readList. TODO no longer true?
--- TODO use a OrthoLangPath here?
+-- | This is the only function that should access readFileStrict' directly;
+--   all others go through readStr and readList. TODO no longer true?
+--   TODO use a OrthoLangPath here?
 -- digestFile :: OrthoLangConfig -> Locks -> FilePath -> Action String
 -- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 
@@ -576,18 +588,24 @@ hashContent cfg ref@(disk, _) path = do
   where
     path' = fromOrthoLangPath cfg path
 
-{- Hashing doesn't save any space here, but it puts the hashes in
- - src/tests/plots/*.tree so we can test that the plots don't change.
- -
- - What it does:
- -   1. make a random temporary path
- -   2. pass that to actFn to make the actual output
- -   3. hash the output to determine cache path
- -   4. symlink hash path -> tmp path, actual outPath -> hash path
- -
- - TODO remove if ggplot turns out to be nondeterministic
- - TODO use hash of expr + original ext instead so it looks nicer?
- -}
+{-|
+Hashing doesn't save any space here, but it puts the hashes in
+@src\/tests\/plots\/*.tree@ so we can test that the plots don't change.
+
+What it does:
+
+1. make a random temporary path
+
+2. pass that to actFn to make the actual output
+
+3. hash the output to determine cache path
+
+4. symlink hash path -> tmp path, actual outPath -> hash path
+
+TODO remove if ggplot turns out to be nondeterministic
+
+TODO use hash of expr + original ext instead so it looks nicer?
+-}
 withBinHash :: OrthoLangConfig -> Locks -> OrthoLangExpr -> OrthoLangPath
             -> (OrthoLangPath -> Action ()) -> Action ()
 withBinHash cfg ref expr outPath actFn = do
@@ -606,10 +624,12 @@ withBinHash cfg ref expr outPath actFn = do
   symlink cfg ref binOut  binTmp
   symlink cfg ref outPath binOut
 
-{- Takes source and destination paths in the tmpdir and makes a path between
- - them with the right number of dots.
- - TODO check that the OrthoLangPath is in TMPDIR, not WORKDIR!
- -}
+{-|
+Takes source and destination paths in the tmpdir and makes a path between
+them with the right number of dots.
+
+TODO check that the OrthoLangPath is in TMPDIR, not WORKDIR!
+-}
 tmpLink :: OrthoLangConfig -> FilePath -> FilePath -> FilePath
 tmpLink cfg src dst = dots </> tmpRel dst
   where
@@ -617,10 +637,11 @@ tmpLink cfg src dst = dots </> tmpRel dst
     dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
     nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
 
-{- Note that src here means what's sometimes called the destination. The first
- - arg should be the symlink path and the second the file it points to. (it
- - was going to be kind of confusing either way)
- -}
+{-|
+Note that src here means what's sometimes called the destination. The first arg
+should be the symlink path and the second the file it points to. (it was going
+to be kind of confusing either way)
+-}
 symlink :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action ()
 symlink cfg ref src dst = withWriteOnce ref src' $ do
   liftIO $ createDirectoryIfMissing True $ takeDirectory src'
@@ -646,7 +667,9 @@ sanitizeFileInPlace cfg ref path = do
     -- writeFile' path $ toGeneric cfg txt
     -- writeCachedLines cfg ref path []
 
--- Apply toGeneric to sanitize the output(s) of a script
--- Should be done before trackWrite to avoid confusing Shake
+{-|
+Apply toGeneric to sanitize the output(s) of a script.
+Should be done before trackWrite to avoid confusing Shake
+-}
 sanitizeFilesInPlace :: OrthoLangConfig -> Locks -> [FilePath] -> Action ()
 sanitizeFilesInPlace cfg ref = mapM_ (sanitizeFileInPlace cfg ref)
