@@ -5,11 +5,21 @@ module OrthoLang.Modules.Math where
 --      which means:
 --        - it's nothing to do with bop parsing
 --        - the bug must be in Compile/NewRules.hs?
+--      [2, 3.5] has path: TMPDIR/exprs/list/bd6c542918/0/result digest: 1eb7dcd853
+--      multiply [2, 3.5] wants digest: 1eb7dcd853
+--      so is multiply just not needing it, or what?
+--      hmm, it could be the applyDeps thing not needing the overall list first?
+--      aha! no it's the opposite:
+--        aNewRules does need' it, but there's no matching pattern
+--        why would that be though? it should match rListLits
+--      clue: the explicit list hashing uses (ListOf rtn) as type for some reason
+--      clue: return type for multiply looks like it's wrongly num.list?
+--        nevermind that's the one dep, which is right other than having the wrong hash
 
 import OrthoLang.Core.Types
 
 import Data.Scientific        (Scientific, toRealFloat)
-import OrthoLang.Core.Actions (readLits, writeLit)
+import OrthoLang.Core.Actions (readLits, writeLit, need')
 import OrthoLang.Core.Compile (mkNewFn1)
 import OrthoLang.Core.Paths   (toOrthoLangPath, fromOrthoLangPath)
 import Control.Monad.IO.Class (liftIO)
@@ -45,6 +55,7 @@ aMath fn cfg lRef _ (ExprPath out) a1 = do
   -- liftIO $ putStrLn $ "aMath paths: " ++ show paths
   -- inputs <- mapM (readLit cfg lRef) $ map (fromOrthoLangPath cfg) paths
   -- liftIO $ putStrLn $ "aMath inputs: " ++ show inputs
+  -- need' cfg lRef "test" [a1]
   inputs <- readLits cfg lRef a1
   let result = foldl1 fn $ map (\n -> read n :: Scientific) inputs
   -- liftIO $ putStrLn $ "aMath result: " ++ show result

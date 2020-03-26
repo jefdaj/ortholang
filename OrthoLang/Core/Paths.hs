@@ -2,53 +2,103 @@
 
 -- TODO rename this module to TmpFiles?
 
-{- OrthoLang makes heavy use of tmpfiles, and this module controls where they go
- - inside the main tmpdir. After a rewrite, the overall layout should be:
- -
- - TMPDIR
- - |-- cache: a tmpdir per module for index files or whatever
- - |   |-- biomartr
- - |   |-- blast
- - |   |-- crb-blast
- - |   |-- seqio
- - |   `-- ...
- - |-- exprs: the hashed result of every expression, organized by fn
- - |   |-- all
- - |   |-- any
- - |   |-- concat_fastas
- - |   |-- crb_blast
- - |   |-- crb_blast_each
- - |   |-- extract_ids
- - |   |-- extract_seqs
- - |   |-- gbk_to_faa
- - |   |-- gbk_to_fna
- - |   |-- leave_each_out
- - |   |-- repeat
- - |   |-- replace_each
- - |   |-- translate
- - |   `-- ...
- - `-- vars: symlinks from user variable names to hashed expressions
- -    |-- green_hits.str.list
- -    |-- greens.faa.list
- -    |-- plantcut.str.list
- -    |-- result
- -    `-- ...
- -
- - Files in the cache are organized however seems best on a per-module basis
- - with help from `cacheDir`, `cacheDirUniq`, and `cacheFile`.
- -
- - Expression paths are determined by `exprPath` or `exprPathExplicit`. They
- - get the base name by `show`ing the expression and `digest`ing the resulting
- - `String`, the extension based on the `OrthoLangType`, and the folder based on
- - constructor + function name if a function. Some made up examples:
- -
- -   ~/.ortholang/exprs/cut_list/f987e9b98a.str.list
- -   ~/.ortholang/exprs/cut_lit/a09f8e8b9c.str
- -   ~/.ortholang/exprs/crb_blast/38978s9a79.crb
- -   ~/.ortholang/exprs/gbk_to_fna/289379af7a.fna
- -
- - Var links are determined by `varPath` using the user-given name and `OrthoLangType`.
- -}
+{-|
+OrthoLang makes heavy use of tmpfiles, and this module controls where they go
+inside the main tmpdir. The overall layout is:
+
+@
+TMPDIR
+|-- cache: per-module indexes, temporary files, etc.
+|   |-- biomartr
+|   |-- blast
+|   |-- crb-blast
+|   |-- seqio
+|   `-- ...
+|-- exprs: hashed result of every expression, organized by fn + arg hashes + salt
+|   |-- all
+|   |-- any
+|   |-- concat_fastas
+|   |-- crb_blast
+|   |-- crb_blast_each
+|   `-- ...
+|-- vars: symlinks from user variable names to hashed expressions
+|   |-- green_hits.str.list
+|   |-- greens.faa.list
+|   |-- plantcut.str.list
+|   |-- result
+|   `-- ...
+`-- reps: per-repeat vars separated by random hash prefixes
+    |-- 00f6aa06e2
+    |   |-- green_hits.str.list
+    |   |-- greens.faa.list
+    |   |-- plantcut.str.list
+    |   |-- result
+    |   `-- ...
+    |-- 13ba15a45b
+    `-- ...
+@
+
+Files in the cache are organized however seems best on a per-module basis
+with help from 'cacheDir', 'cacheDirUniq', and 'cacheFile'.
+
+Var links are determined by 'varPath' using the user-given name and 'OrthoLangType'.
+
+Expression paths merit some more explanation. They are determined by
+'exprPath' or 'exprPathExplicit'. They get the base name by 'show'ing the
+expression and 'digest'ing the resulting 'String', and the folder based on
+constructor + function name if a function. Some made up examples:
+
+@
+TMPDIR\/exprs\/cut_list\/f987e9b98a.str.list
+TMPDIR\/exprs\/cut_lit\/a09f8e8b9c.str
+TMPDIR\/exprs\/crb_blast\/38978s9a79.crb
+TMPDIR\/exprs\/gbk_to_fna\/289379af7a.fna
+@
+
+For most functions, the full path is determined by fn name + argument digests
++ repeat salt, like this:
+
+@
+TMPDIR\/exprs\/fn_name\/\<digest1\>\/\<digest2\>\/\<digest3\>\/\<salt\>\/result
+@
+
+The repeat salt is a number (0, 1, ...) that causes OrthoLang to re-generate
+the result multiple times by changing the path when a user calls one of the
+repeat functions. Note: deterministic functions will soon have their repeat
+salts removed.
+
+The last directory with 'result' is a per-call tmpdir for executing scripts
+and cleaning up anything they generate if they fail before trying again.
+There may also be 'stdout' and 'stderr' logs, and lockfiles.
+
+Digests are truncated md5sums of the corresponding expression path. Their
+implementation doesn't really matter much. The important thing is that
+whenever an expression is compiled to a path (TODO link to that), we also
+store its digest (in the 'HashedIDs' IORef for now) to look up later. Then we
+can decode the dependencies of any function call (note: not every
+expression!) from its path and tell Shake to 'need' them.
+
+That works for fn calls, but not for literals or lists since they have no
+depdendencies and an indeterminate number of dependencies respectively. So
+their paths are chosen by content. There's also no need for salts or
+per-call tmpdirs:
+
+@
+TMPDIR\/exprs\/\<num or str\>\/\<digest of content\>
+TMPDIR\/exprs\/list\/\<digest of element digests\>
+@
+
+There are also a few special cases where we have to break up the fn call
+tmpdirs further for performance reasons, because having more than ~1000
+files per dir is really slow on Linux. So for example 'split_faa' has a
+whole tree of dirs for all the tiny FASTA files it produces.
+
+The @TMPDIR\/cache\/lines@ dir is also special. Any text file written anywhere
+by 'writeCachedLines' actually goes there, and is symlinked to its
+destination. That sounds complicated, but is necessary to make sure the same
+file contents always have the same canonical path, which is necessary for
+set deduplication to work.
+-}
 
 module OrthoLang.Core.Paths
   -- cutpaths
@@ -128,11 +178,19 @@ traceP name expr path = trace ("core.paths." ++ name) msg path
     ren = render $ pPrint expr
     msg = ren ++ " -> " ++ show path -- TODO include types?
 
+traceD name st expr = trace ("core.paths." ++ name) msg
+  where
+    -- ren  = render $ pPrint expr
+    ren  = show expr
+    path = exprPath st expr
+    dig  = exprPathDigest path
+    msg  = "insert digest for " ++ ren ++ ": (" ++ show dig ++ ", " ++ show path ++ ")"
+
 --------------
 -- cutpaths --
 --------------
 
--- Replace current absolute paths with generic placeholders that won't change
+-- | Replace current absolute paths with generic placeholders that won't change
 -- when the tmpDir is moved later or whatever.
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
 toGeneric :: OrthoLangConfig -> String -> String
@@ -140,7 +198,7 @@ toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
                   $ replace (cfgTmpDir  cfg) "$TMPDIR"
                   $ txt
 
--- Replace generic path placeholders with current paths
+-- | Replace generic path placeholders with current paths
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
 fromGeneric :: OrthoLangConfig -> String -> String
 fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
@@ -167,7 +225,7 @@ fromOrthoLangPath cfg (OrthoLangPath path) = fromGeneric cfg path
 sharedPath :: OrthoLangConfig -> OrthoLangPath -> Maybe FilePath
 sharedPath cfg (OrthoLangPath path) = fmap (\sd -> replace "$TMPDIR" sd path) (cfgShare cfg)
 
--- weird, but needed for writing cutpaths to files in Actions.hs
+-- | weird, but needed for writing cutpaths to files in Actions.hs
 cutPathString :: OrthoLangPath -> String
 cutPathString (OrthoLangPath path) = path
 
@@ -190,7 +248,7 @@ cacheDir cfg modName = toOrthoLangPath cfg path
 -- tmpfiles --
 --------------
 
--- This is just a convenience used in exprPath
+-- | This is just a convenience used in exprPath
 -- TODO rename hSomething?
 argHashes :: OrthoLangState -> OrthoLangExpr -> [String]
 argHashes s@(scr,_, _, _) (OrthoLangRef _ _ _ v) = case lookup v scr of
@@ -213,10 +271,11 @@ argHashes _ (OrthoLangRules (CompiledExpr _ p _)) = [digest p] -- TODO is this O
 -- resolveVars :: OrthoLangConfig -> [OrthoLangPath] -> IO [OrthoLangPath]
 -- resolveVars cfg = mapM (resolveVar cfg)
 
-{- An attempt to speed up file access by making a tree of smaller dirs instead
- - of one giant one with a million+ files in it. Since it would complicate the
- - .tree files to split everything up, for now I just have a list of dirs that
- - are likely to benefit from it.
+{- | An attempt to speed up file access by making a tree of smaller dirs instead
+ -   of one giant one with a million+ files in it. Since it would complicate the
+ -   .tree files to split everything up, for now I just have a list of dirs that
+ -   are likely to benefit from it.
+ -
  - TODO write this in haskell instead of python! (currently in split_faa)
  -}
 -- expandHashDirs :: FilePath -> FilePath
@@ -245,11 +304,10 @@ exprPathDigest :: OrthoLangPath -> ExprDigest
 exprPathDigest = ExprDigest . digest
 
 insertNewRulesDigest :: OrthoLangState -> OrthoLangExpr -> IO ()
-insertNewRulesDigest s e = let r = insertNewRulesDigest' s e
-                           in DT.trace (show (exprPathDigest (exprPath s e)) ++ " -> " ++ show e) r
-
-insertNewRulesDigest' st@(_, cfg, _, idr) expr = atomicModifyIORef' idr $
-  \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
+insertNewRulesDigest st@(_, cfg, _, idr) expr
+  = traceD "insertNewRulesDigest" st expr
+  $ atomicModifyIORef' idr
+  $ \h@(HashedIDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
   where
     eType   = typeOf expr
     ePath   = exprPath st expr
@@ -302,7 +360,7 @@ varPath cfg (OrthoLangVar (ReplaceID rep) var) expr = toOrthoLangPath cfg $ cfgT
 -- io checks --
 ---------------
 
--- These are just to alert me of programming mistakes,
+-- | These are just to alert me of programming mistakes,
 -- and can be removed once the rest of the IO stuff is solid.
 checkLit :: String -> String
 checkLit lit = if isGeneric lit
@@ -337,10 +395,11 @@ upBy n (OrthoLangPath path) = OrthoLangPath path'
     components' = reverse $ drop n $ reverse components
     path' = concat $ intersperse "/" $ components'
 
-{- For passing scripts paths that don't depend on the $TMPDIR location, but
- - also don't require any ortholang funny business to read. It relies on the
- - assumption that the script will be called from inside $TMPDIR. The level
- - is how many ..s to add to get back up to $TMPDIR from where you call it.
+{- | For passing scripts paths that don't depend on the $TMPDIR location, but
+ -   also don't require any ortholang funny business to read. It relies on the
+ -   assumption that the script will be called from inside $TMPDIR. The level
+ -   is how many ..s to add to get back up to $TMPDIR from where you call it.
+ -
  - TODO any good way to simplify that?
  -}
 makeTmpdirRelative :: Int -> OrthoLangPath -> FilePath
