@@ -1,6 +1,6 @@
 {-|
 A work in progress. If this goes well, it will replace
-'OrthoLang.Core.Compile.Basic.rulesByName' for all function calls.
+'OrthoLang.Core.Compile.Basic.rNamedFunction' for all function calls.
 
 The big change is that it decodes dependencies from expression paths rather
 than explicitly making a Shake pattern for each file. That lets Shake discover
