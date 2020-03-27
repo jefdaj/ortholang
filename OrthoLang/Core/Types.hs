@@ -212,6 +212,7 @@ prefixOf (OrthoLangBop _ _ _ n _ _ ) = case n of
 -- TODO have a separate OrthoLangAssign for "result"?
 type OrthoLangAssign = (OrthoLangVar, OrthoLangExpr)
 
+-- TODO should this be RulesState? aka all the stuff needed when parsing/compiling in Rules
 data OrthoLangScript = OrthoLangScript
   { sAssigns :: [OrthoLangAssign]
   -- ^ Structured representation of the code suitable for printing, transforming, etc.
@@ -435,6 +436,7 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 -- hSeqIDs is the main one, and stores hash -> seqid maps indexed by their (generic) hFiles path
 -- hExprs is for decoding exprs/<hash>/<hash>/... paths
 -- TODO use bytestring-tries rather than maps with string keys?
+-- TODO should this be ActionIDs in general? aka all the stuff that might be needed in Action
 data HashedIDs = HashedIDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
@@ -444,7 +446,7 @@ data HashedIDs = HashedIDs
 -- TODO go back and do it right
 type HashedIDsRef = IORef HashedIDs
 
--- TODO split off a new branch that adds hExprs to this state
+-- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
 type OrthoLangState = (OrthoLangScript, OrthoLangConfig, Locks, HashedIDsRef)
 type ParseM a = Parsec String OrthoLangState a
 
