@@ -32,6 +32,7 @@ module OrthoLang.Core.Types
   , Script
   , LocksRef
   , IDs(..)
+  , DigestMap(..)
   , IDsRef
   , GlobalEnv
   , ensureResult
@@ -68,7 +69,7 @@ module OrthoLang.Core.Types
   , ExprPath(..)
   , VarPath(..)
   , ResPath(..)
-  , ExprDigest(..)
+  , PathDigest(..)
   -- * Misc experimental stuff
   , extractExprs
   , extractLoads
@@ -121,7 +122,7 @@ newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.ortholang/c
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
 newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/<varname>.<type>
 newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/result[.<hash>.<type>]
-newtype ExprDigest = ExprDigest String deriving (Read, Show, Eq, Ord)
+newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 
 -- Filename extension, which in OrthoLang is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -433,12 +434,15 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 data IDs = IDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: M.Map ExprDigest (Type, Path) -- TODO move this to OrthoLangState below
+  , hExprs  :: DigestMap
   }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
 type IDsRef = IORef IDs
+
+type DigestMap = M.Map PathDigest (Type, Path)
+type DigestsRef = IORef DigestMap
 
 -- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
 type GlobalEnv = (Script, Config, LocksRef, IDsRef)

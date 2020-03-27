@@ -316,8 +316,8 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
     hashes = argHashes s expr
     res    = exprPathExplicit cfg prefix rtype salt hashes
 
-exprPathDigest :: Path -> ExprDigest
-exprPathDigest = ExprDigest . digest
+exprPathDigest :: Path -> PathDigest
+exprPathDigest = PathDigest . digest
 
 insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
 insertNewRulesDigest st@(_, cfg, _, idr) expr
@@ -339,7 +339,7 @@ decodeNewRulesDeps :: Config -> IDsRef -> ExprPath
                    -> IO (Type, [Type], [Path])
 decodeNewRulesDeps cfg idsRef o@(ExprPath out) = do
   IDs {hExprs = ids} <- readIORef idsRef
-  let dKeys  = map ExprDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
+  let dKeys  = map PathDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
       dVals  = catMaybes $ map (\k -> M.lookup k ids) dKeys
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("'" ++ out ++ "' -> " ++ show dVals) dVals
       dTypes = map fst dVals'
