@@ -10,7 +10,7 @@ import Paths_OrthoLang        (version)
 import OrthoLang.Core         (runRepl, evalFile)
 import OrthoLang.Core.Config  (getUsage, loadConfig, dispatch)
 -- import OrthoLang.Core.Debug   (debug)
-import OrthoLang.Core.Types   (Config(..), IDs(..))
+import OrthoLang.Core.Types   (Config(..), IDs(..), emptyScript)
 import OrthoLang.Core.Locks   (initLocks)
 import OrthoLang.Modules      (modules)
 import OrthoLang.Test         (runTests)
@@ -75,7 +75,7 @@ main = withFileLogging "ortholang.log" $ do
   -- TODO typecheck only option here
   if (cfgInteractive cfg)
     then runRepl cfg ref ids -- TODO take an entire state here too?
-    else evalFile ([], cfg, ref, ids) stdout
+    else evalFile (emptyScript, cfg, ref, ids) stdout
 
   -- TODO is it a problem that --test never reaches this?
   -- debug "finished main"

@@ -267,7 +267,7 @@ cacheDir cfg modName = toPath cfg path
 -- | This is just a convenience used in exprPath
 -- TODO rename hSomething?
 argHashes :: GlobalEnv -> Expr -> [String]
-argHashes s@(scr,_, _, _) (Ref _ _ _ v) = case lookup v scr of
+argHashes s@(scr,_, _, _) (Ref _ _ _ v) = case lookup v (sAssigns scr) of
                                          Nothing -> error $ "no such var " ++ show v
                                          Just e  -> argHashes s e
 argHashes _ (Lit  _ _     v    ) = [digest v]
@@ -305,8 +305,8 @@ argHashes _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's abo
 -- TODO rename to tmpPath?
 exprPath :: GlobalEnv -> Expr -> Path
 exprPath (_, cfg, _, _) (Com (CompiledExpr _ (ExprPath p) _)) = toPath cfg p
-exprPath s@(scr, _, _, _) (Ref _ _ _ v) = case lookup v scr of
-                                         Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
+exprPath s@(scr, _, _, _) (Ref _ _ _ v) = case lookup v (sAssigns scr) of
+                                         Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show (sAssigns scr)
                                          Just e  -> exprPath s e
 exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
   where

@@ -55,7 +55,7 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 ----------------
 
 stripResult :: Script -> Script
-stripResult scr = filter notRes scr
+stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
   where
     notRes ((Var _ "result"), _) = False
     notRes _ = True
@@ -70,16 +70,16 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   v@(Var _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
-  when ((not $ cfgInteractive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
+  when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
   e <- (lexeme pExpr)
   -- let scr' = case vName of
                -- -- "result" -> trace "stripping old result" $ stripResult scr ++ [(v, e)]
                -- "result" -> stripResult scr ++ [(v, e)]
                -- -- _ -> trace "this is not a result assignment" $ scr ++ [(v,e)]
                -- _ -> scr ++ [(v,e)]
-  let scr' = scr ++ [(v, e)]
+  let as' = (sAssigns scr) ++ [(v, e)]
   -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
-  putState (scr', cfg, ref, ids)
+  putState (scr {sAssigns=as'}, cfg, ref, ids)
   -- debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
       -- res' = debugParser cfg "pAssign" res
@@ -128,16 +128,16 @@ parseStatement = parseWithEof pStatement
 -- TODO error if it has leftover?
 parseString :: Config -> LocksRef -> IDsRef -> String
             -> Either ParseError Script
-parseString c r ids = parseWithEof pScript ([], c, r, ids)
+parseString c r ids = parseWithEof pScript (emptyScript, c, r, ids)
 
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
 -- Not sure why this should be necessary, but it was easier than fixing the parser to reject multiple results.
 -- TODO one result *per repeat ID*, not total!
 lastResultOnly :: Script -> Script
-lastResultOnly scr = otherVars ++ [lastRes]
+lastResultOnly scr@(Script {sAssigns = as}) = scr {sAssigns = otherVars ++ [lastRes]}
   where
-    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") scr
+    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") as
     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 
@@ -147,8 +147,9 @@ pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   (_, cfg, ref, ids) <- getState
   optional spaces
-  scr <- many pStatement
-  let scr' = lastResultOnly scr
+  as <- many pStatement
+  let scr  = emptyScript {sAssigns = as}
+      scr' = lastResultOnly scr
   putState (scr', cfg, ref, ids)
   return scr'
 

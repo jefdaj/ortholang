@@ -84,7 +84,7 @@ mangleAssign :: (Var -> Var) -> Assign -> Assign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
 
 mangleScript :: (Var -> Var) -> Script -> Script
-mangleScript fn = map (mangleAssign fn)
+mangleScript fn scr = scr {sAssigns = map (mangleAssign fn) (sAssigns scr)}
 
 setRepID :: RepID -> Var -> Var
 setRepID newID (Var _ name) = Var newID name
@@ -134,9 +134,9 @@ rReplace' :: GlobalEnv
 rReplace' st@(script, cfg, ref, ids) resExpr subVar@(Var _ _) subExpr = do
   let res   = (Var (RepID Nothing) "result", resExpr)
       sub   = (subVar, subExpr)
-      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
+      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) (sAssigns script)
       newID = calcRepID st resExpr subVar subExpr
-      scr'  = (setRepIDs newID ([sub] ++ deps ++ [res]))
+      scr'  = (setRepIDs newID (script {sAssigns = [sub] ++ deps ++ [res]}))
   (ResPath resPath) <- compileScript (scr', cfg, ref, ids) newID -- TODO remove the ID here, or is it useful?
   return (ExprPath resPath)
 

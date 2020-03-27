@@ -17,7 +17,7 @@ import OrthoLang.Core.Parse        (parseFileIO)
 import OrthoLang.Core.Paths        (toGeneric)
 import OrthoLang.Core.Util         (justOrDie)
 -- import OrthoLang.Core.Pretty       (writeScript)
-import OrthoLang.Core.Types        (Config(..), Module(..), IDsRef)
+import OrthoLang.Core.Types        (Config(..), Module(..), IDsRef, emptyScript)
 import OrthoLang.Core.Locks        (LocksRef, withWriteLock)
 import OrthoLang.Test.Repl         (mkTestGroup)
 import OrthoLang.Modules          (modules)
@@ -125,7 +125,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
     desc = "unchanged by round-trip to file"
     tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
-      scr1 <- parseFileIO ([], cfg, ref, ids) $ justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
+      scr1 <- parseFileIO (emptyScript, cfg, ref, ids) $ justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
       -- this is useful for debugging
       -- writeScript cut scr1
       withWriteLock ref tripShow $ writeBinaryFile tripShow $ show scr1
@@ -133,7 +133,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
-      scr2 <- parseFileIO ([], cfg, ref, ids) cut
+      scr2 <- parseFileIO (emptyScript, cfg, ref, ids) cut
       return $ B8.pack $ show scr2
 
 -- test that no absolute paths snuck into the tmpfiles
@@ -156,7 +156,7 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
 runScript :: Config -> LocksRef -> IDsRef -> IO String
 runScript cfg ref ids =  do
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
-  (out, ()) <- hCapture [stdout, stderr] $ evalFile ([], cfg, ref, ids) stdout
+  (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids) stdout
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)

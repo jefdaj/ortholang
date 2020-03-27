@@ -55,7 +55,7 @@ readSciInt s = case toBoundedInteger (read s :: Scientific) of
 -- TODO is the bug here? might need to convert string -> sci -> int
 extractNum :: Script -> Expr -> Int
 extractNum _   (Lit x _ n) | x == num = readSciInt n
-extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookup v scr
+extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookup v $ sAssigns scr
 extractNum _ _ = error "bad argument to extractNum"
 
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
@@ -67,7 +67,7 @@ rRepeatN :: RulesFn
 rRepeatN s@(scr, _, _, _) (Fun t salt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
   rReplaceEach s (Fun t salt deps name [resExpr, subVar, subList])
   where
-    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v scr
+    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v $ sAssigns scr
     nReps   = extractNum scr repsExpr
     subs    = take nReps $ zipWith setSalt [0..] (repeat subExpr) -- TODO is always starting from 0 right?
     -- subs    = zipWith setSalt (unfoldRepID salt nReps) (repeat subExpr)

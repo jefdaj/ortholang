@@ -171,13 +171,13 @@ rAssign s@(_, cfg, _, _) (var, expr) = do
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
 compileScript :: GlobalEnv -> RepID -> Rules ResPath
-compileScript s@(as, _, _, _) _ = do
+compileScript s@(scr, _, _, _) _ = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
-  rpaths <- mapM (rAssign s) as
+  rpaths <- mapM (rAssign s) (sAssigns scr)
   res <- case lookupResult rpaths of
-    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr s $ fromJust $ lookupResult $ ensureResult as
+    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr s $ fromJust $ lookupResult $ sAssigns $ ensureResult scr
     Just r  -> fmap (\(VarPath  p) -> p) $ return r
   return $ ResPath res
   -- where

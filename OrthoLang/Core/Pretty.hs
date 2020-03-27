@@ -73,10 +73,10 @@ instance {-# OVERLAPPING #-} Pretty Assign where
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
+-- TODO is totally ignoring the sDigests part OK here?
 instance {-# OVERLAPPING #-} Pretty Script where
-  pPrint [] = empty
-  -- pPrint as = text $ unlines $ map prettyShow as
-  pPrint as = vcat $ map pPrint as
+  pPrint (Script {sAssigns = []}) = empty
+  pPrint (Script {sAssigns = as}) = vcat $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?

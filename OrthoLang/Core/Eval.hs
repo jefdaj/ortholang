@@ -282,11 +282,11 @@ printShort cfg ref idsref pm rtype path = do
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> GlobalEnv -> IO ()
-evalScript hdl s@(as, c, ref, ids) =
-  let res = case lookupResult as of
-              Nothing -> fromJust $ lookupResult $ ensureResult as
+evalScript hdl s@(scr, c, ref, ids) =
+  let res = case lookupResult (sAssigns scr) of
+              Nothing -> fromJust $ lookupResult $ sAssigns $ ensureResult scr
               Just r  -> r
-      loadExprs = extractLoads as res
+      loadExprs = extractLoads scr res
       loads = mapM (rExpr s) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
   in eval hdl c ref ids (typeOf res) loads (compileScript s $ RepID Nothing)
 

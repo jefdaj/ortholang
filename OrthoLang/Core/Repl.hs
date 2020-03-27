@@ -73,8 +73,8 @@ mkRepl promptFns hdl cfg ref ids = do
             hPutStrLn hdl
               "Welcome to the OrthoLang interpreter!\n\
               \Type :help for a list of the available commands."
-            return  ([], cfg, ref, ids)
-          Just path -> cmdLoad ([], cfg, ref, ids) hdl path
+            return  (emptyScript, cfg, ref, ids)
+          Just path -> cmdLoad (emptyScript, cfg, ref, ids) hdl path
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
@@ -166,16 +166,16 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
 updateVars :: Script -> Assign -> Script
-updateVars scr asn@(var, _) =
-  if var /= res && var `elem` map fst scr -- TODO what's the map part for?
-    then replaceVar asn' scr
-    else delFromAL scr var ++ [asn']
+updateVars scr asn@(var, _) = scr {sAssigns = as'}
   where
     res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn
+    as' = if var /= res && var `elem` map fst (sAssigns scr)
+            then replaceVar asn' $ sAssigns scr
+            else delFromAL (sAssigns scr) var ++ [asn']
 
 -- replace an existing var in a script
-replaceVar :: Assign -> Script -> Script
+replaceVar :: Assign -> [Assign] -> [Assign]
 replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
 
 -- makes it ok to assign a var to itself in the repl
@@ -187,7 +187,7 @@ removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, der
 -- does the actual work of removing self-references
 dereference :: Script -> Var -> Expr -> Expr
 dereference scr var e@(Ref _ _ _ v2)
-  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
+  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var $ sAssigns scr
   | otherwise = e
 dereference _   _   e@(Lit _ _ _) = e
 dereference _   _   (Com _) = error "implement this! or rethink?"
@@ -314,16 +314,16 @@ cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
     return (scr, cfg { cfgScript = Just path }, locks, ids)
-  [var, path] -> case lookup (Var (RepID Nothing) var) scr of
+  [var, path] -> case lookup (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
 
 -- TODO where should this go?
 depsOnly :: Expr -> Script -> Script
-depsOnly expr scr = deps ++ [res]
+depsOnly expr scr = scr {sAssigns = deps ++ [res]}
   where
-    deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
+    deps = filter (\(v,_) -> (elem v $ depsOf expr)) $ sAssigns scr
     res  = (Var (RepID Nothing) "result", expr)
 
 -- TODO where should this go?
@@ -334,10 +334,10 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 -- TODO except, this should work with expressions too!
 cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeededBy st@(scr, cfg, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) scr of
+  case lookup (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (Var Nothing var):depsOf e) scr
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
   return st
 
 -- TODO move to Pretty.hs
@@ -349,19 +349,19 @@ cmdNeededBy st@(scr, cfg, _, _) hdl var = do
 cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeeds st@(scr, cfg, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
-  case lookup var' scr of
+  case lookup var' (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') scr
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') (sAssigns scr)
   return st
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdDrop (_, cfg, ref, ids) _ [] = clear >> return ([], cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
+cmdDrop (_, cfg, ref, ids) _ [] = clear >> return (emptyScript, cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
 cmdDrop st@(scr, cfg, ref, ids) hdl var = do
   let v = Var (RepID Nothing) var
-  case lookup v scr of
+  case lookup v (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
-    Just _  -> return (delFromAL scr v, cfg, ref, ids)
+    Just _  -> return (scr {sAssigns = delFromAL (sAssigns scr) v}, cfg, ref, ids)
 
 cmdType :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
@@ -372,7 +372,7 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
     oneType e = case findFunction cfg e of
       Just f  -> fTypeDesc f
       Nothing -> showExprType st e -- TODO also show the expr itself?
-    allTypes = init $ unlines $ map showAssignType scr
+    allTypes = init $ unlines $ map showAssignType $ sAssigns scr
 
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String
@@ -389,10 +389,11 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
     prettyExpr = render $ pPrint e
 
 -- TODO factor out the variable lookup stuff
+-- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
+cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns s) >> return st
 cmdShow st@(scr, cfg, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) scr of
+  case lookup (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
   return st
@@ -443,7 +444,7 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
   where
     wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
-    varNames = map ((\(Var _ v) -> v) . fst) scr
+    varNames = map ((\(Var _ v) -> v) . fst) (sAssigns scr)
     cmdNames = map ((':':) . fst) (cmds cfg)
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 

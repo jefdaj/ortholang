@@ -29,7 +29,8 @@ module OrthoLang.Core.Types
   , RepID(..)
   , Salt(..)
   , Var(..)
-  , Script
+  , Script(..)
+  , emptyScript
   , LocksRef
   , IDs(..)
   , DigestMap(..)
@@ -212,14 +213,24 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
 
 -- TODO have a separate Assign for "result"?
 type Assign = (Var, Expr)
-type Script = [Assign]
+data Script = Script
+  { sAssigns :: [Assign]  -- ^ Structured representation of the code suitable for printing, transforming, etc.
+  , sDigests :: DigestMap -- ^ Map suitable for auto-discovery of dependencies from expression paths
+  }
+
+-- TODO is totally ignoring sDigests OK here?
+instance Show Script where
+  show scr = show (sAssigns scr)
+
+emptyScript :: Script
+emptyScript = Script {sAssigns = [], sDigests = M.empty}
 
 ensureResult :: Script -> Script
-ensureResult scr = if null scr then noRes else scr'
+ensureResult scr@(Script {sAssigns = as}) = if null as then noRes else scr'
   where
-    noRes = [(resVar, Lit str (Salt 0) "no result")]
     resVar = Var (RepID Nothing) "result"
-    scr' = scr ++ [(resVar, snd $ last scr)]
+    noRes  = scr {sAssigns = as ++ [(resVar, Lit str (Salt 0) "no result")]}
+    scr'   = scr {sAssigns = as ++ [(resVar, snd $ last as)               ]}
 
 lookupResult :: [(Var, b)] -> Maybe b
 lookupResult scr = if null matches
@@ -334,7 +345,7 @@ depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? 
 rDepsOf :: Script -> Var -> [Var]
 rDepsOf scr var = map fst rDeps
   where
-    rDeps = filter (\(_,e) -> isRDep e) scr
+    rDeps = filter (\(_,e) -> isRDep e) (sAssigns scr)
     isRDep expr = elem var $ depsOf expr
 
 -- TODO move to modules as soon as parsing works again
@@ -442,7 +453,6 @@ data IDs = IDs
 type IDsRef = IORef IDs
 
 type DigestMap = M.Map PathDigest (Type, Path)
-type DigestsRef = IORef DigestMap
 
 -- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
 type GlobalEnv = (Script, Config, LocksRef, IDsRef)
@@ -529,7 +539,7 @@ instance Show Module where
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs  _  (Lst _ _ _ es) = es
-extractExprs scr (Ref  _ _ _ v ) = case lookup v scr of
+extractExprs scr (Ref  _ _ _ v ) = case lookup v (sAssigns scr) of
                                         Nothing -> error $ "no such var " ++ show v
                                         Just e  -> extractExprs scr e
 extractExprs _   (Fun _ _ _ _ _) = error explainFnBug
@@ -538,7 +548,7 @@ extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show 
 
 -- TODO any good way to avoid fromJust here?
 exprDepsOf :: Script -> Expr -> [Expr]
-exprDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
+exprDepsOf scr expr = map (\e -> fromJust $ lookup e $ sAssigns scr) (depsOf expr)
 
 -- needed to know what to still evaluate despite caching, so we can load seqid hashes
 -- TODO rename to reflect that it's mostly about getting the functions which can't be cached

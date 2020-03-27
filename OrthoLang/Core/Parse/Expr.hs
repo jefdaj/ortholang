@@ -133,7 +133,7 @@ pRef = debugParser "pRef" $ do
   -- let v = Var var
   (scr, _, _, _) <- getState
   -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
-  case lookup v scr of
+  case lookup v (sAssigns scr) of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
     Just e -> return $ Ref (typeOf e) (Salt 0) (depsOf e) v
 
