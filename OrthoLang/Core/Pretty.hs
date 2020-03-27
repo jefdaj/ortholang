@@ -138,3 +138,6 @@ instance Pretty Module where
 
 -- instance Show Module where
   -- show = prettyShow
+
+instance Pretty DigestMap where
+  pPrint m = text $ show m

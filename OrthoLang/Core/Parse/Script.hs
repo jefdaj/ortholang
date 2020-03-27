@@ -66,7 +66,7 @@ stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
 
 -- TODO message in case it doesn't parse?
 -- TODO should reject duplicate variables! except replace result
-pAssign :: ParseM Assign
+pAssign :: ParseM (Assign, DigestMap)
 pAssign = debugParser "pAssign" $ do
   st@(scr, cfg, ref, ids) <- getState
   -- optional newline
@@ -84,12 +84,13 @@ pAssign = debugParser "pAssign" $ do
       dKey = exprPathDigest p
       ds'  = M.insert dKey dVal (sDigests scr)
   -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
-  putState (scr {sAssigns=as', sDigests=ds'}, cfg, ref, ids) -- TODO add digests here?
+  putState (scr {sAssigns=as', sDigests=ds'}, cfg, ref, ids) -- TODO remove this?
   -- debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
+      dmap = M.fromList [(dKey, dVal)] -- TODO or remove this?
       -- res' = debugParser cfg "pAssign" res
   -- return $ traceShow scr' res
-  return res
+  return (res, dmap)
 
 -- Handles the special case of a naked top-level expression, which is treated
 -- as being assigned to "result". This parses the same in a script or the repl.
@@ -97,13 +98,13 @@ pAssign = debugParser "pAssign" $ do
 --      (later when working on statement issues)
 -- TODO if the statement is literally `result`, what do we do?
 --      maybe we need a separate type of assignment statement for this?
-pResult :: ParseM Assign
+pResult :: ParseM (Assign, DigestMap)
 pResult = debugParser "pResult" $ do
   e <- pExpr
   let res = (Var (RepID Nothing) "result", e)
-  return res
+  return (res, M.empty)
 
-pStatement :: ParseM Assign
+pStatement :: ParseM (Assign, DigestMap)
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)
   -- (_, cfg) <- getState
   -- res <- pAssign <|> pResult
@@ -124,7 +125,7 @@ parseFileIO st scr = do
     Right s -> return s
 
 -- TODO need GlobalEnv here? or just Config?
-parseStatement :: GlobalEnv -> String -> Either ParseError Assign
+parseStatement :: GlobalEnv -> String -> Either ParseError (Assign, DigestMap)
 parseStatement = parseWithEof pStatement
 
 -- The name doesn't do a good job of explaining this, but it's expected to be
@@ -152,8 +153,10 @@ pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   (_, cfg, ref, ids) <- getState
   optional spaces
-  as <- many pStatement
-  let scr  = emptyScript {sAssigns = as}
+  ads <- many pStatement
+  let (as, ds) = unzip ads 
+      ds'  = M.unions ds
+      scr  = emptyScript {sAssigns = as, sDigests = ds'}
       scr' = lastResultOnly scr
   putState (scr', cfg, ref, ids)
   return scr'

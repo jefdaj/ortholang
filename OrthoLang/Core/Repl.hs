@@ -165,8 +165,8 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
 -- which is especially a problem when auto-assigning "result"
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
-updateVars :: Script -> Assign -> Script
-updateVars scr asn@(var, _) = scr {sAssigns = as'}
+updateVars :: Script -> (Assign, DigestMap) -> Script
+updateVars scr (asn@(var, _), ds) = scr {sAssigns = as', sDigests = M.union (sDigests scr) ds}
   where
     res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn

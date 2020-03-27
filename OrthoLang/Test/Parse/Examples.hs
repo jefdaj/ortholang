@@ -115,5 +115,5 @@ exExprs = exTerms ++ map addParens exTerms ++
 -- TODO list of pairs of expressions that should parse the same;
 --      then you don't have to actually write out the AST
 
-exStatements :: [(String, Assign)]
+exStatements :: [(String, (Assign, DigestMap))]
 exStatements = []
