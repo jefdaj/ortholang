@@ -8,18 +8,18 @@ import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), symlink, traceA, need')
-import OrthoLang.Core.Paths         (toOrthoLangPath)
+import OrthoLang.Core.Paths         (toPath)
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimpleTmp)
 import OrthoLang.Core.Compile  (rMapTmps)
 -- import OrthoLang.Core.Debug         (traceA)
-import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths         (Path, fromPath)
 import OrthoLang.Core.Util          (resolveSymlinks)
 import OrthoLang.Modules.SeqIO      (faa, fna, fa)
 import System.Exit (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
   , mTypes = [fna, faa, fa, crb]
@@ -43,15 +43,15 @@ orthoLangModule = OrthoLangModule
 -- tlen - the length of the target transcript
 
 -- TODO remove if these are exactly blast hit tables
-crb :: OrthoLangType
-crb = OrthoLangType
+crb :: Type
+crb = Type
   { tExt  = "crb"
   , tDesc = "tab-separated table of conditional reciprocal blast best hits"
   , tShow  = defaultShow
   }
 
-blastCRB :: OrthoLangFunction
-blastCRB = OrthoLangFunction
+blastCRB :: Function
+blastCRB = Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
   , fTypeCheck = defaultTypeCheck [fna, fa] crb
@@ -63,8 +63,8 @@ blastCRB = OrthoLangFunction
 
 -- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
 -- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
-blastCRBEach :: OrthoLangFunction
-blastCRBEach = OrthoLangFunction
+blastCRBEach :: Function
+blastCRBEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
@@ -81,7 +81,7 @@ blastCRBEach = OrthoLangFunction
  -
  - TODO adjust cache paths to be deterministic!
  -}
-aCRBBlast :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ()
+aCRBBlast :: Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   need' cfg ref "ortholang.modules.crbblast.aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
@@ -92,12 +92,12 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
   tDst <- liftIO $ resolveSymlinks Nothing t' -- link directly to the file
   let qSrc  = tmp' </> qName
       tSrc  = tmp' </> tName
-      qSrc' = toOrthoLangPath cfg qSrc
-      qDst' = toOrthoLangPath cfg qDst
-      tSrc' = toOrthoLangPath cfg tSrc
-      tDst' = toOrthoLangPath cfg tDst
+      qSrc' = toPath cfg qSrc
+      qDst' = toPath cfg qDst
+      tSrc' = toPath cfg tSrc
+      tDst' = toPath cfg tDst
       oPath = tmp' </> "results.crb"
-      oPath' = toOrthoLangPath cfg oPath
+      oPath' = toPath cfg oPath
   need' cfg ref "ortholang.core.modules.crbblast.aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
@@ -116,9 +116,9 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
     }
   symlink cfg ref o'' oPath'
   where
-    o'   = fromOrthoLangPath cfg o
-    o''  = traceA "aCRBBlast" o [fromOrthoLangPath cfg tmpDir, o', q', t']
-    tmp' = fromOrthoLangPath cfg tmpDir
-    q'   = fromOrthoLangPath cfg q
-    t'   = fromOrthoLangPath cfg t
+    o'   = fromPath cfg o
+    o''  = traceA "aCRBBlast" o [fromPath cfg tmpDir, o', q', t']
+    tmp' = fromPath cfg tmpDir
+    q'   = fromPath cfg q
+    t'   = fromPath cfg t
 aCRBBlast _ _ _ _ args = error $ "bad argument to aCRBBlast: " ++ show args

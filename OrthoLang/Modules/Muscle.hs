@@ -7,27 +7,27 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimpleScript)
 import OrthoLang.Core.Compile   (rMapSimpleScript)
--- import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath)
+-- import OrthoLang.Core.Paths         (Path, fromPath)
 import OrthoLang.Modules.SeqIO      (faa)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "MUSCLE"
   , mDesc = "Align sequences with MUSCLE"
   , mTypes = [faa, aln]
   , mFunctions = [muscle, muscleEach]
   }
 
-aln :: OrthoLangType
-aln = OrthoLangType
+aln :: Type
+aln = Type
   { tExt  = "aln"
   , tDesc = "multiple sequence alignment"
   -- , tShow = \_ _ f -> return $ "multiple sequence alignment '" ++ f ++ "'" -- TODO actually show?
   , tShow = defaultShow
   }
 
-muscle :: OrthoLangFunction
-muscle = let name = "muscle" in OrthoLangFunction
+muscle :: Function
+muscle = let name = "muscle" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [faa] aln
   , fTypeDesc  = name ++ " : faa -> aln"
@@ -35,8 +35,8 @@ muscle = let name = "muscle" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rSimpleScript "muscle.sh"
   }
 
-muscleEach :: OrthoLangFunction
-muscleEach = let name = "muscle_each" in OrthoLangFunction
+muscleEach :: Function
+muscleEach = let name = "muscle_each" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf aln)
   , fTypeDesc  = name ++ " : faa.list -> aln.list"

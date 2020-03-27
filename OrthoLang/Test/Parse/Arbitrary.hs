@@ -55,10 +55,10 @@ gVar = (:) <$> first <*> listOf rest
     first = elements vFirstChars
     rest  = elements vNonFirstChars
 
-newtype ExVar = ExVar OrthoLangVar deriving (Eq, Show)
+newtype ExVar = ExVar Var deriving (Eq, Show)
 
 instance Arbitrary ExVar where
-  arbitrary = (ExVar . OrthoLangVar (ReplaceID Nothing)) <$> gVar
+  arbitrary = (ExVar . Var (RepID Nothing)) <$> gVar
 
 -- references --
 
@@ -151,12 +151,12 @@ instance Arbitrary ExNum where
 
 -- commands --
 
--- TODO need to use forAll with another function with OrthoLangConfig arg rather than
+-- TODO need to use forAll with another function with Config arg rather than
 -- an Arbitrary instance here? for now, just faking it...
 gFunName :: Gen String
 gFunName = elements fnNames
 
--- this is duplicated from Types.hs without the OrthoLangConfig argument
+-- this is duplicated from Types.hs without the Config argument
 -- TODO should this version replace it?
 fnNames :: [String]
 fnNames = map fName $ concat $ map mFunctions modules

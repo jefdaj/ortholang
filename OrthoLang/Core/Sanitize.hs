@@ -3,10 +3,10 @@
 module OrthoLang.Core.Sanitize
   -- ( hashIDsFile
   ( hashIDsFile2
-  -- , writeHashedIDs
+  -- , writeIDs
   , unhashIDs
   , unhashIDsFile
-  , readHashedIDs
+  , readIDs
   , lookupID
   , lookupIDsFile
   )
@@ -35,7 +35,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Util    (digest, digestLength, headOrDie, trace)
 import OrthoLang.Core.Locks   (withWriteLock')
 import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
-import OrthoLang.Core.Paths   (toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths   (toPath, fromPath)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes, mapMaybe)
 import Data.List             (isPrefixOf, intersperse)
@@ -64,14 +64,14 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
     seqids = catMaybes $ map snd $ hashed
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
--- hashIDsFile :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action HashedIDs
+-- hashIDsFile :: Config -> LocksRef -> Path -> Path -> Action IDs
 -- hashIDsFile cfg ref inPath outPath = do
---   let inPath'  = fromOrthoLangPath cfg inPath
---       outPath' = fromOrthoLangPath cfg outPath
---   -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
+--   let inPath'  = fromPath cfg inPath
+--       outPath' = fromPath cfg outPath
+--   -- txt <- withReadLock' ref inPath' $ readFile' $ fromPath cfg inPath
 --   txt <- readFileStrict' cfg ref inPath'
 --   let (!fasta', !ids) = hashIDsTxt txt
---       (OrthoLangPath k) = outPath
+--       (Path k) = outPath
 --       v = takeFileName inPath'
 --       -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
 --       ids' = M.insert k v ids
@@ -80,13 +80,13 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 --   return ids'
 
 -- rewrite of hashIDsFile as a python script; will it fix the space leak?
-hashIDsFile2 :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action ()
+hashIDsFile2 :: Config -> LocksRef -> Path -> Path -> Action ()
 hashIDsFile2 cfg ref inFa outFa = do
-  let inFa'   = fromOrthoLangPath cfg inFa
-      outFa'  = fromOrthoLangPath cfg outFa
+  let inFa'   = fromPath cfg inFa
+      outFa'  = fromPath cfg outFa
       outIDs' = outFa' <.> "ids"
-      outIDs  = toOrthoLangPath cfg outIDs'
-      -- (OrthoLangPath k) = inFa
+      outIDs  = toPath cfg outIDs'
+      -- (Path k) = inFa
       -- v = takeFileName inPath'
       -- ids' = M.insert k v ids
   liftIO $ createDirectoryIfMissing True $ takeDirectory inFa'
@@ -105,8 +105,8 @@ hashIDsFile2 cfg ref inFa outFa = do
     , cmdRmPatterns = [outFa', outIDs']
     }
 
--- writeHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> HashedIDs -> Action ()
--- writeHashedIDs cfg ref path ids = do
+-- writeIDs :: Config -> LocksRef -> Path -> IDs -> Action ()
+-- writeIDs cfg ref path ids = do
 --   withWriteLock' ref path'
 --     $ liftIO
 --     $ writeFile path' -- TODO be strict?
@@ -115,18 +115,18 @@ hashIDsFile2 cfg ref inFa outFa = do
 --     $ M.toList ids
 --   trackWrite' cfg [path']
 --   where
---     path' = fromOrthoLangPath cfg path
+--     path' = fromPath cfg path
 --     toLine (h, i) = h ++ "\t" ++ i
 
 -- see https://stackoverflow.com/q/48571481
--- unhashIDs :: HashedIDs -> String -> String
+-- unhashIDs :: IDs -> String -> String
 -- unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
 
 -- sorry in advance! this is what you get when you build it in ghci
 -- its hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
 -- TODO does storing a bunch of seqid_ strings in the map slow it down?
-unhashIDs :: Bool -> HashedIDs -> String -> String
+unhashIDs :: Bool -> IDs -> String -> String
 unhashIDs longIDs ids t = case findNext t of
                    Nothing -> t
                    Just i  -> let (before, after) = splitAt i t
@@ -154,10 +154,10 @@ unhashIDs longIDs ids t = case findNext t of
 
 -- This sometimes operates internally, but also writes the final result of the cut to a file.
 -- In that case the outpath might not be able to be a cutpath.
-unhashIDsFile :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> FilePath -> Action ()
+unhashIDsFile :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
 unhashIDsFile cfg ref idref inPath outPath = do
-  let inPath'  = fromOrthoLangPath cfg inPath
-  -- txt <- withReadLock' ref inPath' $ readFile' $ fromOrthoLangPath cfg inPath
+  let inPath'  = fromPath cfg inPath
+  -- txt <- withReadLock' ref inPath' $ readFile' $ fromPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
   -- liftIO $ putStrLn $ "txt: '" ++ txt ++ "'"
   -- let txt' = unhashIDs ids txt
@@ -173,9 +173,9 @@ splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
 -- TODO should this be IO or Action?
-readHashedIDs :: OrthoLangConfig -> Locks -> OrthoLangPath -> Action (M.Map String String)
-readHashedIDs cfg ref path = do
-  let path' = fromOrthoLangPath cfg path
+readIDs :: Config -> LocksRef -> Path -> Action (M.Map String String)
+readIDs cfg ref path = do
+  let path' = fromPath cfg path
   -- txt <- withReadLock' ref path' $ readFile' path'
   txt <- readFileStrict' cfg ref path'
   -- let splitFn l = let ws = split "\t" l
@@ -191,12 +191,12 @@ readHashedIDs cfg ref path = do
 
 -- TODO display error to user in a cleaner way than error!
 -- TODO is this really needed? seems suuuper slow. replace with error or just by warning them?
--- lookupID :: HashedIDs -> String -> [String]
+-- lookupID :: IDs -> String -> [String]
 -- lookupID ids s = map fst $ filter (\(k,v) -> s == k || s `isPrefixOf` v) (M.toList ids)
 
 -- this works whether the ID is for a file or seqid. files are checked first
-lookupID :: HashedIDs -> String -> Maybe String
-lookupID (HashedIDs {hFiles = f, hSeqIDs = s}) i =
+lookupID :: IDs -> String -> Maybe String
+lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
   if M.member i f then M.lookup i f
   else case catMaybes (map (M.lookup i) (M.elems s)) of
     []  -> Nothing
@@ -205,9 +205,9 @@ lookupID (HashedIDs {hFiles = f, hSeqIDs = s}) i =
     xs  -> trace "core.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)
 
 -- TODO move to Actions? causes an import cycle so far
-lookupIDsFile :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
+lookupIDsFile :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
 lookupIDsFile cfg ref ids inPath outPath = do
-  partialIDs <- readList cfg ref $ fromOrthoLangPath cfg inPath
+  partialIDs <- readList cfg ref $ fromPath cfg inPath
   ids' <- liftIO $ readIORef ids
   let lookupFn v = case lookupID ids' v of
                      Just i  -> return i
@@ -215,4 +215,4 @@ lookupIDsFile cfg ref ids inPath outPath = do
                        liftIO $ putStrLn ("warning: no ID found for '" ++ v ++ "'")
                        return v
   idKeys <- mapM lookupFn partialIDs
-  writeCachedLines cfg ref (fromOrthoLangPath cfg outPath) idKeys
+  writeCachedLines cfg ref (fromPath cfg outPath) idKeys

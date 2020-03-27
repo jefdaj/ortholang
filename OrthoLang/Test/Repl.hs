@@ -11,7 +11,7 @@ import Data.List                  (isPrefixOf)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Repl         (mkRepl)
 import OrthoLang.Core.Util         (readFileStrict)
-import OrthoLang.Core.Types        (OrthoLangConfig(..), Locks, ReplM, HashedIDsRef)
+import OrthoLang.Core.Types        (Config(..), LocksRef, ReplM, IDsRef)
 import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
@@ -21,14 +21,14 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
-mkTestGroup ::  OrthoLangConfig -> Locks -> HashedIDsRef -> String
-            -> [OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree] -> IO TestTree
+mkTestGroup ::  Config -> LocksRef -> IDsRef -> String
+            -> [Config -> LocksRef -> IDsRef -> IO TestTree] -> IO TestTree
 mkTestGroup cfg ref ids name trees = do
   let trees' = mapM (\t -> t cfg ref ids) trees
   trees'' <- trees'
   return $ testGroup name trees''
 
-mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg ref ids = mkTestGroup cfg ref ids "mock REPL interaction"
                 [goldenRepls, goldenReplTrees]
 
@@ -50,7 +50,7 @@ mockPrompt handle stdinStr promptStr = do
 -- TODO why did this get messed up??
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
-mockRepl :: [String] -> FilePath -> OrthoLangConfig -> Locks -> HashedIDsRef -> IO ()
+mockRepl :: [String] -> FilePath -> Config -> LocksRef -> IDsRef -> IO ()
 mockRepl stdinLines path cfg ref ids = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
@@ -64,7 +64,7 @@ mockRepl stdinLines path cfg ref ids = do
   return ()
 
 -- TODO include goldenTree here too (should pass both at once)
-goldenRepl :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> IO TestTree
+goldenRepl :: Config -> LocksRef -> IDsRef -> FilePath -> IO TestTree
 goldenRepl cfg ref ids goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
@@ -91,14 +91,14 @@ findGoldenFiles = do
   let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
   return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles'
 
-goldenRepls :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+goldenRepls :: Config -> LocksRef -> IDsRef -> IO TestTree
 goldenRepls cfg ref ids = do
   golds <- findGoldenFiles
   let tests = mapM (goldenRepl cfg ref ids) golds
       group = testGroup "prints expected output"
   fmap group tests
 
-goldenReplTree :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> IO TestTree
+goldenReplTree :: Config -> LocksRef -> IDsRef -> FilePath -> IO TestTree
 goldenReplTree cfg ref ids ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
@@ -120,7 +120,7 @@ goldenReplTree cfg ref ids ses = do
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 
-goldenReplTrees :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+goldenReplTrees :: Config -> LocksRef -> IDsRef -> IO TestTree
 goldenReplTrees cfg ref ids = do
   txts <- findGoldenFiles
   let tests = mapM (goldenReplTree cfg ref ids) txts

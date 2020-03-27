@@ -66,9 +66,9 @@ import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative, replaceBaseName)
 -- import OrthoLang.Core.Debug        (debug)
-import OrthoLang.Core.Paths        (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, checkLit,
-                                   checkLits, cacheDir, cutPathString,
-                                   stringOrthoLangPath, toGeneric, sharedPath)
+import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit,
+                                   checkLits, cacheDir, pathString,
+                                   stringPath, toGeneric, sharedPath)
 import OrthoLang.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie, debug, trace, traceShow)
 import OrthoLang.Core.Locks        (withReadLock', withReadLocks',
@@ -111,8 +111,8 @@ traceA name out args = trace "core.actions" msg out
     msg = name ++ " creating " ++ show out ++ " from " ++ show args
 
 -- TODO is this .need thing the best convention?
-need' :: OrthoLangConfig -> Locks -> String -> [FilePath] -> Action ()
-need' cfg ref fnName paths = mapM_ (needShared cfg ref fnName . toOrthoLangPath cfg) paths
+need' :: Config -> LocksRef -> String -> [FilePath] -> Action ()
+need' cfg ref fnName paths = mapM_ (needShared cfg ref fnName . toPath cfg) paths
 
 needDebug :: String -> [FilePath] -> Action ()
 needDebug fnName paths = do
@@ -121,9 +121,9 @@ needDebug fnName paths = do
 
 -- TODO how to force it to load the seqids when their downstream files aren't needed?
 --      probably list all the load* dependencies of the expr and want/need them first
-needShared :: OrthoLangConfig -> Locks -> String -> OrthoLangPath -> Action ()
-needShared cfg ref name path@(OrthoLangPath p) = do
-  let path' = fromOrthoLangPath cfg path
+needShared :: Config -> LocksRef -> String -> Path -> Action ()
+needShared cfg ref name path@(Path p) = do
+  let path' = fromPath cfg path
   done <- doesFileExist path'
   if done -- if done already, needing is cheap + more elegant than cache lookup
      || ("/load" `isInfixOf` p)
@@ -144,7 +144,7 @@ needShared cfg ref name path@(OrthoLangPath p) = do
           when (isPathList sp) $ do
             paths <- readPaths cfg ref sp
             liftIO $ putStrLn $ "paths: " ++ show paths
-            need' cfg ref name $ map (fromOrthoLangPath cfg) paths -- TODO rename?
+            need' cfg ref name $ map (fromPath cfg) paths -- TODO rename?
           liftIO $ createDirectoryIfMissing True $ takeDirectory path'
           -- TODO figure out better criteria for this
           if "download" `isInfixOf` sp
@@ -158,13 +158,13 @@ isPathList path
   && not (".str.list" `isSuffixOf` path)
   && not (".num.list" `isSuffixOf` path)
 
-needLink :: OrthoLangConfig -> Locks -> String -> FilePath -> Action ()
+needLink :: Config -> LocksRef -> String -> FilePath -> Action ()
 needLink cfg ref name link = do
   relPath <- liftIO $ readSymbolicLink link
   absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
   need' cfg ref name [absPath]
 
-lookupShared :: OrthoLangConfig -> OrthoLangPath -> Action (Maybe FilePath)
+lookupShared :: Config -> Path -> Action (Maybe FilePath)
 lookupShared cfg path = case sharedPath cfg path of
   Nothing -> return Nothing
   Just sp -> do
@@ -179,7 +179,7 @@ lookupShared cfg path = case sharedPath cfg path of
 -- TODO what about timeouts and stuff?
 -- TODO would downloading as binary be better?
 -- TODO how to remove the files after downloading?
-download :: OrthoLangConfig -> String -> IO (Maybe FilePath)
+download :: Config -> String -> IO (Maybe FilePath)
 -- download _ url = return Nothing
 download cfg url = do
   -- liftIO $ putStrLn $ "url: " ++ url
@@ -210,7 +210,7 @@ download cfg url = do
 
 -- Action version of readFileStrict. This is used for all reads during a cut;
 -- the raw one is just for showing results, reading cmd files etc.
-readFileStrict' :: OrthoLangConfig -> Locks -> FilePath -> Action String
+readFileStrict' :: Config -> LocksRef -> FilePath -> Action String
 readFileStrict' cfg ref path = do
   need' cfg ref "core.actions.readFileStrict'" [path]
   withReadLock' ref path $ liftIO (readFileStrict ref path)
@@ -221,7 +221,7 @@ readFileStrict' cfg ref path = do
  - failing, and from empty lists in case of an error in the typechecker.  This
  - also gives empty lists and strings distinct hashes.
  -}
-readLit :: OrthoLangConfig -> Locks -> FilePath -> Action String
+readLit :: Config -> LocksRef -> FilePath -> Action String
 readLit cfg locks path = do
   debugA' "readLit" path
   -- TODO need' here?
@@ -232,50 +232,50 @@ readLit cfg locks path = do
     else fmap (checkLit . init) -- TODO safe? already checked if empty
        $ readFileStrict' cfg locks path
 
-readLits :: OrthoLangConfig -> Locks -> FilePath -> Action [String]
+readLits :: Config -> LocksRef -> FilePath -> Action [String]
 readLits cfg ref path = readList cfg ref path >>= return . checkLits
 
-readPath :: OrthoLangConfig -> Locks -> FilePath -> Action OrthoLangPath
+readPath :: Config -> LocksRef -> FilePath -> Action Path
 readPath cfg ref path = readPaths cfg ref path >>= return . headOrDie "readPath failed"
 
 -- TODO should this have checkPaths?
-readPaths :: OrthoLangConfig -> Locks -> FilePath -> Action [OrthoLangPath]
-readPaths cfg ref path = (fmap . map) stringOrthoLangPath (readList cfg ref path)
+readPaths :: Config -> LocksRef -> FilePath -> Action [Path]
+readPaths cfg ref path = (fmap . map) stringPath (readList cfg ref path)
 
 -- makes a copy of a list of paths without ortholang funny business,
 -- suitible for external scripts to read
 -- TODO does this go here or somewhere else?
-absolutizePaths :: OrthoLangConfig -> Locks -> FilePath -> FilePath -> Action ()
+absolutizePaths :: Config -> LocksRef -> FilePath -> FilePath -> Action ()
 absolutizePaths cfg ref inPath outPath = do
   paths  <- readPaths cfg ref inPath
-  paths' <- mapM (liftIO . absolutize. fromOrthoLangPath cfg) paths
+  paths' <- mapM (liftIO . absolutize. fromPath cfg) paths
   need' cfg ref "core.actions.absolutizePaths" paths' -- because they will be read by the script next
   -- liftIO $ putStrLn $ "paths': " ++ show paths'
   withWriteLock' ref outPath $ writeFile' outPath $ unlines paths'
 
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
-readLitPaths :: OrthoLangConfig -> Locks -> FilePath -> Action [OrthoLangPath]
+readLitPaths :: Config -> LocksRef -> FilePath -> Action [Path]
 readLitPaths cfg ref path = do
   ls <- readList cfg ref path
-  return $ map (toOrthoLangPath cfg . toAbs) ls
+  return $ map (toPath cfg . toAbs) ls
   where
     toAbs line = if isAbsolute line
                    then line
                    else cfgWorkDir cfg </> line
 
 -- TODO how should this relate to readLit and readStr?
-readString :: OrthoLangType -> OrthoLangConfig -> Locks -> FilePath -> Action String
+readString :: Type -> Config -> LocksRef -> FilePath -> Action String
 readString etype cfg ref path = readStrings etype cfg ref path >>= return . headOrDie "readString failed"
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
- - the OrthoLangType (of each element, not the list!) so it knows how to convert from
+ - the Type (of each element, not the list!) so it knows how to convert from
  - String, and then within the function you treat them as Strings.
  -}
-readStrings :: OrthoLangType -> OrthoLangConfig -> Locks -> FilePath -> Action [String]
+readStrings :: Type -> Config -> LocksRef -> FilePath -> Action [String]
 readStrings etype cfg ref path = if etype' `elem` [str, num]
   then readLits cfg ref path
-  else (fmap . map) (fromOrthoLangPath cfg) (readPaths cfg ref path)
+  else (fmap . map) (fromPath cfg) (readPaths cfg ref path)
   where
     etype' = trace "core.actions.readStrings" ("readStrings (each " ++ extOf etype ++ ") from " ++ path) etype
 
@@ -286,7 +286,7 @@ readStrings etype cfg ref path = if etype' `elem` [str, num]
  -
  - Note that strict reading is important to avoid "too many open files" on long lists.
  -}
-readList :: OrthoLangConfig -> Locks -> FilePath -> Action [String]
+readList :: Config -> LocksRef -> FilePath -> Action [String]
 readList cfg locks path = do
   debugA' "readList" $ show path
   need' cfg locks "core.actions.readList" [path] -- Note isEmpty also does this
@@ -303,10 +303,10 @@ readList cfg locks path = do
 -- write files --
 -----------------
 
-cachedLinesPath :: OrthoLangConfig -> [String] -> FilePath
+cachedLinesPath :: Config -> [String] -> FilePath
 cachedLinesPath cfg content = cDir </> digest content <.> "txt"
   where
-    cDir = fromOrthoLangPath cfg $ cacheDir cfg "lines"
+    cDir = fromPath cfg $ cacheDir cfg "lines"
 
 -- TODO move to Util?
 first50 :: Show a => a -> String
@@ -335,39 +335,39 @@ TODO does it need to handle a race condition when writing to the cache?
 TODO any reason to keep original extensions instead of all using .txt?
      oh, if we're testing extensions anywhere. lets not do that though
 -}
-writeCachedLines :: OrthoLangConfig -> Locks -> FilePath -> [String] -> Action ()
+writeCachedLines :: Config -> LocksRef -> FilePath -> [String] -> Action ()
 writeCachedLines cfg ref outPath content = do
   let cache = cachedLinesPath cfg content
-  -- TODO show as OrthoLangPath?
+  -- TODO show as Path?
   debugA' "writeCachedLines" $ first50 content ++ " -> " ++ last50 cache
       -- lock  = cache <.> "lock"
   -- liftIO $ createDirectoryIfMissing True cDir
   withWriteOnce ref cache $ writeFile' cache $ unlines content -- TODO is this strict?
   -- unlessExists outPath $ -- TODO remove?
-  symlink cfg ref (toOrthoLangPath cfg outPath) (toOrthoLangPath cfg cache)
+  symlink cfg ref (toPath cfg outPath) (toPath cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
 -- TODO remove in favor of sanitizeFileInPlace?
-writeCachedVersion :: OrthoLangConfig -> Locks -> FilePath -> FilePath -> Action ()
+writeCachedVersion :: Config -> LocksRef -> FilePath -> FilePath -> Action ()
 writeCachedVersion cfg ref outPath inPath = do
   content <- fmap lines $ readFileStrict' cfg ref inPath
   let content' = map (toGeneric cfg) content
   writeCachedLines cfg ref outPath content'
 
--- TODO take a OrthoLangPath for the out file too
+-- TODO take a Path for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
-writePaths :: OrthoLangConfig -> Locks -> FilePath -> [OrthoLangPath] -> Action ()
+writePaths :: Config -> LocksRef -> FilePath -> [Path] -> Action ()
 writePaths cfg ref out cpaths = writeCachedLines cfg ref out paths >> trackWrite paths -- TODO trackwrite'?
   where
-    paths = if null cpaths then ["<<emptylist>>"] else map cutPathString cpaths
+    paths = if null cpaths then ["<<emptylist>>"] else map pathString cpaths
 
-writePath :: OrthoLangConfig -> Locks -> FilePath -> OrthoLangPath -> Action ()
+writePath :: Config -> LocksRef -> FilePath -> Path -> Action ()
 writePath cfg ref out path = do
   debugA' "writePath" (show path)
   writePaths cfg ref out [path]
 
-writeLits :: OrthoLangConfig -> Locks -> FilePath -> [String] -> Action ()
+writeLits :: Config -> LocksRef -> FilePath -> [String] -> Action ()
 writeLits cfg ref path lits = do
   debugA' "writeLits" $ show lits ++ " -> writeCachedLines " ++ show lits'
   writeCachedLines cfg ref path lits'
@@ -376,7 +376,7 @@ writeLits cfg ref path lits = do
 
 -- TODO any need to prevent writing <<emptystr>> in a .num?
 --      (seems almost certain to be caught on reading later)
-writeLit :: OrthoLangConfig -> Locks -> FilePath -> String -> Action ()
+writeLit :: Config -> LocksRef -> FilePath -> String -> Action ()
 writeLit cfg ref path lit = do
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: '" ++ lit ++ "'")
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: '" ++ lits ++ "'")
@@ -387,19 +387,19 @@ writeLit cfg ref path lit = do
 
 {-|
 Write a "list of whatever". Mostly for generic set operations. You include
-the OrthoLangType (of each element, not the list!) so it knows how to convert
+the Type (of each element, not the list!) so it knows how to convert
 to/from String, and then within the function you treat them as Strings.
 -}
-writeStrings :: OrthoLangType -> OrthoLangConfig -> Locks
+writeStrings :: Type -> Config -> LocksRef
              -> FilePath -> [String] -> Action ()
 writeStrings etype cfg ref out whatevers = do
   debugA' "writeStrings"
     $ first50 (take 3 whatevers) ++ " (each " ++ extOf etype ++ ") -> " ++ last50 out
   if etype `elem` [str, num]
     then writeLits  cfg ref out whatevers
-    else writePaths cfg ref out $ map (toOrthoLangPath cfg) whatevers
+    else writePaths cfg ref out $ map (toPath cfg) whatevers
 
-writeString :: OrthoLangType -> OrthoLangConfig -> Locks
+writeString :: Type -> Config -> LocksRef
             -> FilePath -> String -> Action ()
 writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whatever]
 
@@ -414,7 +414,7 @@ TODO rename like myReadFile, myReadLines?
 
 TODO move to Util?
 -}
-trackWrite' :: OrthoLangConfig -> [FilePath] -> Action ()
+trackWrite' :: Config -> [FilePath] -> Action ()
 trackWrite' cfg fs = do
   -- mapM_ (assertNonEmptyFile cfg ref) fs
   -- also ensure it only gets written once:
@@ -422,7 +422,7 @@ trackWrite' cfg fs = do
   liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
   trackWrite $ traceShow "core.actions.trackWrite'" fs
 
-setReadOnly :: OrthoLangConfig -> FilePath -> IO ()
+setReadOnly :: Config -> FilePath -> IO ()
 setReadOnly cfg path = do
   path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
   -- TODO skip if path' outside tmpdir
@@ -438,7 +438,7 @@ distinguish them from runtime errors. This function replaces those with
 actual empty files before passing them to a cmd, so logic for that
 doesn't have to be duplicated over and over.
 -}
-fixEmptyText :: OrthoLangConfig -> Locks -> FilePath -> Action FilePath
+fixEmptyText :: Config -> LocksRef -> FilePath -> Action FilePath
 fixEmptyText cfg ref path = do
   need' cfg ref "core.actions.fixEmptyText" [path] -- Note isEmpty does this too
   empty <- isEmpty ref path
@@ -483,7 +483,7 @@ TODO if exit is wrong (usually non-zero), cat out stderr for user
 
 TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
 -}
-runCmd :: OrthoLangConfig -> Locks -> CmdDesc -> Action ()
+runCmd :: Config -> LocksRef -> CmdDesc -> Action ()
 runCmd cfg ref@(disk, _) desc = do
   let stdoutPath = replaceBaseName (cmdOutPath desc) "out"
       stderrPath = replaceBaseName (cmdOutPath desc) "err"
@@ -533,10 +533,10 @@ runCmd cfg ref@(disk, _) desc = do
 
 -- TODO does this do directories?
 -- TODO does this work on absolute paths?
-matchPattern :: OrthoLangConfig -> String -> Action [FilePath]
+matchPattern :: Config -> String -> Action [FilePath]
 matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
 
-handleCmdError :: OrthoLangConfig -> Locks -> String -> ExitCode -> FilePath -> [String] -> Action a
+handleCmdError :: Config -> LocksRef -> String -> ExitCode -> FilePath -> [String] -> Action a
 handleCmdError cfg ref bin n stderrPath rmPatterns = do
   hasErr <- doesFileExist stderrPath
   errMsg2 <- if hasErr
@@ -566,13 +566,13 @@ handleCmdError cfg ref bin n stderrPath rmPatterns = do
 
 -- | This is the only function that should access readFileStrict' directly;
 --   all others go through readStr and readList. TODO no longer true?
---   TODO use a OrthoLangPath here?
--- digestFile :: OrthoLangConfig -> Locks -> FilePath -> Action String
+--   TODO use a Path here?
+-- digestFile :: Config -> LocksRef -> FilePath -> Action String
 -- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
 
 -- TODO fixEmpties should be False here, but don't want to break existing tmpdir just yet
 -- TODO take mod time into account to avoid re-hashing (see if Shake exports that code)
-hashContent :: OrthoLangConfig -> Locks -> OrthoLangPath -> Action String
+hashContent :: Config -> LocksRef -> Path -> Action String
 hashContent cfg ref@(disk, _) path = do
   -- alwaysRerun -- TODO does this help?
   need' cfg ref "hashContent" [path']
@@ -586,7 +586,7 @@ hashContent cfg ref@(disk, _) path = do
   -- liftIO $ putStrLn $ "md5: " ++ md5
   return md5
   where
-    path' = fromOrthoLangPath cfg path
+    path' = fromPath cfg path
 
 {-|
 Hashing doesn't save any space here, but it puts the hashes in
@@ -606,18 +606,18 @@ TODO remove if ggplot turns out to be nondeterministic
 
 TODO use hash of expr + original ext instead so it looks nicer?
 -}
-withBinHash :: OrthoLangConfig -> Locks -> OrthoLangExpr -> OrthoLangPath
-            -> (OrthoLangPath -> Action ()) -> Action ()
+withBinHash :: Config -> LocksRef -> Expr -> Path
+            -> (Path -> Action ()) -> Action ()
 withBinHash cfg ref expr outPath actFn = do
-  let binDir'  = fromOrthoLangPath cfg $ cacheDir cfg "bin"
-      outPath' = fromOrthoLangPath cfg outPath
+  let binDir'  = fromPath cfg $ cacheDir cfg "bin"
+      outPath' = fromPath cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
   let binTmp' = binDir' </> digest expr -- <.> takeExtension outPath'
-      binTmp  = toOrthoLangPath cfg binTmp'
+      binTmp  = toPath cfg binTmp'
   _ <- actFn binTmp
   md5 <- hashContent cfg ref binTmp
   let binOut' = binDir' </> md5 -- <.> takeExtension outPath'
-      binOut  = toOrthoLangPath cfg binOut'
+      binOut  = toPath cfg binOut'
   -- debugS $ "withBinHash binOut: "  ++ show binOut
   -- debugS $ "withBinHash binOut': " ++ show binOut'
   debugA' "withBinHash" $ show binTmp ++ " -> " ++ show binOut
@@ -628,9 +628,9 @@ withBinHash cfg ref expr outPath actFn = do
 Takes source and destination paths in the tmpdir and makes a path between
 them with the right number of dots.
 
-TODO check that the OrthoLangPath is in TMPDIR, not WORKDIR!
+TODO check that the Path is in TMPDIR, not WORKDIR!
 -}
-tmpLink :: OrthoLangConfig -> FilePath -> FilePath -> FilePath
+tmpLink :: Config -> FilePath -> FilePath -> FilePath
 tmpLink cfg src dst = dots </> tmpRel dst
   where
     tmpRel  = makeRelative $ cfgTmpDir cfg
@@ -642,19 +642,19 @@ Note that src here means what's sometimes called the destination. The first arg
 should be the symlink path and the second the file it points to. (it was going
 to be kind of confusing either way)
 -}
-symlink :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action ()
+symlink :: Config -> LocksRef -> Path -> Path -> Action ()
 symlink cfg ref src dst = withWriteOnce ref src' $ do
   liftIO $ createDirectoryIfMissing True $ takeDirectory src'
   liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
   trackWrite' cfg [src']
   where
-    src' = fromOrthoLangPath cfg src
-    dst' = fromOrthoLangPath cfg dst
+    src' = fromPath cfg src
+    dst' = fromPath cfg dst
     dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
 
 -- Apply toGeneric to sanitize the output(s) of a script
 -- Should be done before trackWrite to avoid confusing Shake
-sanitizeFileInPlace :: OrthoLangConfig -> Locks -> FilePath -> Action ()
+sanitizeFileInPlace :: Config -> LocksRef -> FilePath -> Action ()
 sanitizeFileInPlace cfg ref path = do
   -- txt <- readFileStrict' cfg ref path
   exists <- doesFileExist path
@@ -671,5 +671,5 @@ sanitizeFileInPlace cfg ref path = do
 Apply toGeneric to sanitize the output(s) of a script.
 Should be done before trackWrite to avoid confusing Shake
 -}
-sanitizeFilesInPlace :: OrthoLangConfig -> Locks -> [FilePath] -> Action ()
+sanitizeFilesInPlace :: Config -> LocksRef -> [FilePath] -> Action ()
 sanitizeFilesInPlace cfg ref = mapM_ (sanitizeFileInPlace cfg ref)

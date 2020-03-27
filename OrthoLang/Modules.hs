@@ -39,7 +39,7 @@ import qualified OrthoLang.Modules.AllVsAll as AllVsAll
 import qualified OrthoLang.Modules.GreenCut as GreenCut
 import qualified OrthoLang.Modules.NewRulesTest as NewRulesTest
 
-modules :: [OrthoLangModule]
+modules :: [Module]
 modules =
   [ Replace.orthoLangModule
   , Repeat.orthoLangModule

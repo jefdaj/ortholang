@@ -9,11 +9,11 @@ import OrthoLang.Core.Types
 import System.FilePath ((<.>))
 import OrthoLang.Core.Compile (defaultTypeCheck, rExpr)
 import OrthoLang.Core.Actions (readLit, CmdDesc(..), runCmd)
-import OrthoLang.Core.Paths (exprPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths (exprPath, fromPath)
 import System.Exit (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Range"
   , mDesc = "Generate ranges of numbers"
   , mTypes = [num]
@@ -26,8 +26,8 @@ orthoLangModule = OrthoLangModule
     ]
   }
 
-mkRangeFn :: String -> Int -> OrthoLangFunction
-mkRangeFn name nArgs =  OrthoLangFunction
+mkRangeFn :: String -> Int -> Function
+mkRangeFn name nArgs =  Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck (take nArgs $ repeat num) (ListOf num)
   , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
@@ -37,9 +37,9 @@ mkRangeFn name nArgs =  OrthoLangFunction
 
 -- TODO put somewhere as the standard way to construct an rSimpleScript that takes numbers?
 rRange :: RulesFn
-rRange st@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ name args) = do
+rRange st@(_, cfg, ref, _) e@(Fun _ _ _ name args) = do
   let out = exprPath st e
-      out' = fromOrthoLangPath cfg out
+      out' = fromPath cfg out
   argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr st) args
   out' %> \_ -> do
     as <- mapM (readLit cfg ref) argPaths

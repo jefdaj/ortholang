@@ -7,8 +7,8 @@ import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimpleScript)
 import OrthoLang.Modules.Blast (bht)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "GreenCut"
   , mDesc = "A re-implementation of the original GreenCut(2) ortholog-finding algorithm"
   , mTypes = [gcr]
@@ -18,15 +18,15 @@ orthoLangModule = OrthoLangModule
   }
 
 -- TODO what should the file look like?
-gcr :: OrthoLangType
-gcr = OrthoLangType
+gcr :: Type
+gcr = Type
   { tExt  = "gcr"
   , tDesc = "GreenCut results"
   , tShow = defaultShow
   }
  
-greencutTwoFamilies :: OrthoLangFunction
-greencutTwoFamilies = OrthoLangFunction
+greencutTwoFamilies :: Function
+greencutTwoFamilies = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [bht, bht] gcr
   , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr

@@ -20,7 +20,7 @@ import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple)
 import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, traceA, symlink)
-import OrthoLang.Core.Paths         (toOrthoLangPath, fromOrthoLangPath, OrthoLangPath)
+import OrthoLang.Core.Paths         (toPath, fromPath, Path)
 import OrthoLang.Core.Util          (removeIfExists)
 import OrthoLang.Core.Locks         (withWriteLock)
 import OrthoLang.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
@@ -29,8 +29,8 @@ import System.Exit                 (ExitCode(..))
 import System.FilePath             (replaceBaseName, (<.>))
 -- import System.Posix.Escape         (escape)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
   , mTypes = [ndb, pdb, bht]
@@ -47,8 +47,8 @@ orthoLangModule = OrthoLangModule
 -- tsv with these columns:
 -- qseqid sseqid pident length mismatch gapopen
 -- qstart qend sstart send evalue bitscore
-bht :: OrthoLangType
-bht = OrthoLangType
+bht :: Type
+bht = Type
   { tExt  = "bht"
   , tDesc = "tab-separated table of blast hits (outfmt 6)"
   , tShow  = defaultShow
@@ -57,9 +57,9 @@ bht = OrthoLangType
 -- TODO need a separate db type for reverse fns?
 type BlastDesc =
   ( String  -- name and also system command to call
-  , OrthoLangType -- query fasta type
-  , OrthoLangType -- subject type when starting from fasta
-  , OrthoLangType -- subject type when starting from db
+  , Type -- query fasta type
+  , Type -- subject type when starting from fasta
+  , Type -- subject type when starting from db
   )
 
 blastDescs :: [BlastDesc]
@@ -76,8 +76,8 @@ blastDescs =
 -- *blast*_db --
 ----------------
 
-mkBlastFromDb :: BlastDesc -> OrthoLangFunction
-mkBlastFromDb d@(bCmd, qType, _, dbType) = OrthoLangFunction
+mkBlastFromDb :: BlastDesc -> Function
+mkBlastFromDb d@(bCmd, qType, _, dbType) = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
@@ -91,12 +91,12 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = OrthoLangFunction
 rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aMkBlastFromDb :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
   prefix <- readPath cfg ref p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
-      prefix' = fromOrthoLangPath cfg prefix
+      prefix' = fromPath cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
       ptn     = prefix' ++ "*"
       -- args    = [ "-db", takeFileName prefix'
@@ -160,12 +160,12 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink cfg ref o (toOrthoLangPath cfg stdoutPath)
+  symlink cfg ref o (toPath cfg stdoutPath)
   where
-    o'  = fromOrthoLangPath cfg o
-    q'  = fromOrthoLangPath cfg q
-    p'  = fromOrthoLangPath cfg p
-    e'  = fromOrthoLangPath cfg e
+    o'  = fromPath cfg o
+    q'  = fromPath cfg q
+    p'  = fromPath cfg p
+    e'  = fromPath cfg e
     o'' = traceA "aMkBlastFromDb" o' [bCmd, e', o', q', p']
 aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
@@ -173,8 +173,8 @@ aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 -- *blast* --
 -------------
 
-mkBlastFromFa :: BlastDesc -> OrthoLangFunction
-mkBlastFromFa d@(bCmd, qType, sType, _) = OrthoLangFunction
+mkBlastFromFa :: BlastDesc -> Function
+mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing, fName = bCmd
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
@@ -185,21 +185,21 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = OrthoLangFunction
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
 -- TODO check this works after writing the new non- _all makeblastdb fns
 rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _ [e, q, s])
-  = rules st (OrthoLangFun rtn salt deps name1 [e, q, dbExpr])
+rMkBlastFromFa d@(_, _, _, dbType) st (Fun rtn salt deps _ [e, q, s])
+  = rules st (Fun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fOldRules $ mkBlastFromDb d
     name1 = fName $ mkBlastFromDb d
     name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-    dbExpr = OrthoLangFun dbType salt (depsOf s) name2 [s] 
+    dbExpr = Fun dbType salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 ---------------------
 -- *blast*_db_each --
 ---------------------
 
-mkBlastFromDbEach :: BlastDesc -> OrthoLangFunction
-mkBlastFromDbEach d@(bCmd, qType, _, dbType) = OrthoLangFunction
+mkBlastFromDbEach :: BlastDesc -> Function
+mkBlastFromDbEach d@(bCmd, qType, _, dbType) = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
@@ -216,8 +216,8 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 -- *blast*_each --
 ------------------
 
-mkBlastFromFaEach :: BlastDesc -> OrthoLangFunction
-mkBlastFromFaEach d@(bCmd, qType, faType, _) = OrthoLangFunction
+mkBlastFromFaEach :: BlastDesc -> Function
+mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
@@ -229,11 +229,11 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = OrthoLangFunction
 
 -- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, dbType) st (OrthoLangFun rtn salt deps _   [e, q, ss])
-  =                              rules st (OrthoLangFun rtn salt deps fn2 [e, q, ss'])
+rMkBlastFromFaEach d@(_, _, _, dbType) st (Fun rtn salt deps _   [e, q, ss])
+  =                              rules st (Fun rtn salt deps fn2 [e, q, ss'])
   where
     rules = rMkBlastFromDbEach d
-    ss'   = OrthoLangFun (ListOf dbType) salt (depsOf ss) fn1 [ss]
+    ss'   = Fun (ListOf dbType) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

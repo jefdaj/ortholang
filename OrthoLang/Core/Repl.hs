@@ -58,13 +58,13 @@ import Development.Shake.FilePath (takeFileName)
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
 
-runRepl :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO ()
+runRepl :: Config -> LocksRef -> IDsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> OrthoLangConfig -> Locks -> HashedIDsRef -> IO ()
+       -> Config -> LocksRef -> IDsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids = do
   -- load initial script if any
   st <- case cfgScript cfg of
@@ -88,8 +88,8 @@ mkRepl promptFns hdl cfg ref ids = do
 promptArrow :: String
 promptArrow = " —▶ "
 
-shortOrthoLangPrompt :: OrthoLangConfig -> String
-shortOrthoLangPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command didn't print anything
+shortPrompt :: Config -> String
+shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command didn't print anything
   where
     name = case cfgScript cfg of
       Nothing -> "ortholang"
@@ -120,7 +120,7 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
   st@(_, cfg, _, _)  <- get
-  Just line <- promptFn $ shortOrthoLangPrompt cfg -- TODO can this fail?
+  Just line <- promptFn $ shortPrompt cfg -- TODO can this fail?
   st' <- liftIO $ try $ step st hdl line
   case st' of
     Right s -> put s >> loop promptFns hdl
@@ -165,35 +165,35 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
 -- which is especially a problem when auto-assigning "result"
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
-updateVars :: OrthoLangScript -> OrthoLangAssign -> OrthoLangScript
+updateVars :: Script -> Assign -> Script
 updateVars scr asn@(var, _) =
   if var /= res && var `elem` map fst scr -- TODO what's the map part for?
     then replaceVar asn' scr
     else delFromAL scr var ++ [asn']
   where
-    res = OrthoLangVar (ReplaceID Nothing) "result"
+    res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn
 
 -- replace an existing var in a script
-replaceVar :: OrthoLangAssign -> OrthoLangScript -> OrthoLangScript
+replaceVar :: Assign -> Script -> Script
 replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
 
 -- makes it ok to assign a var to itself in the repl
 -- by replacing the reference with its value at that point
 -- TODO forbid this in scripts though
-removeSelfReferences :: OrthoLangScript -> OrthoLangAssign -> OrthoLangAssign
+removeSelfReferences :: Script -> Assign -> Assign
 removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, dereference s v e)
 
 -- does the actual work of removing self-references
-dereference :: OrthoLangScript -> OrthoLangVar -> OrthoLangExpr -> OrthoLangExpr
-dereference scr var e@(OrthoLangRef _ _ _ v2)
+dereference :: Script -> Var -> Expr -> Expr
+dereference scr var e@(Ref _ _ _ v2)
   | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
   | otherwise = e
-dereference _   _   e@(OrthoLangLit _ _ _) = e
-dereference _   _   (OrthoLangRules _) = error "implement this! or rethink?"
-dereference scr var (OrthoLangBop  t n vs s e1 e2) = OrthoLangBop  t n (delete var vs) s (dereference scr var e1) (dereference scr var e2)
-dereference scr var (OrthoLangFun  t n vs s es   ) = OrthoLangFun  t n (delete var vs) s (map (dereference scr var) es)
-dereference scr var (OrthoLangList t n vs   es   ) = OrthoLangList t n (delete var vs)   (map (dereference scr var) es)
+dereference _   _   e@(Lit _ _ _) = e
+dereference _   _   (Com _) = error "implement this! or rethink?"
+dereference scr var (Bop  t n vs s e1 e2) = Bop  t n (delete var vs) s (dereference scr var e1) (dereference scr var e2)
+dereference scr var (Fun  t n vs s es   ) = Fun  t n (delete var vs) s (map (dereference scr var) es)
+dereference scr var (Lst t n vs   es   ) = Lst t n (delete var vs)   (map (dereference scr var) es)
 
 --------------------------
 -- dispatch to commands --
@@ -208,7 +208,7 @@ runCmd st@(_, cfg, _, _) hdl line = case matches of
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
 
-cmds :: OrthoLangConfig -> [(String, GlobalEnv -> Handle -> String -> IO GlobalEnv)]
+cmds :: Config -> [(String, GlobalEnv -> Handle -> String -> IO GlobalEnv)]
 cmds cfg =
   [ ("help"     , cmdHelp    )
   , ("load"     , cmdLoad    )
@@ -244,18 +244,18 @@ cmdHelp st@(_, cfg, _, _) hdl line = do
            _ -> getDoc ["repl"]
   hPutStrLn hdl doc >> return st
 
-mHelp :: OrthoLangModule -> IO String
+mHelp :: Module -> IO String
 mHelp m = getDoc ["modules" </> mName m]
 
 -- TODO move somewhere better
-fHelp :: OrthoLangFunction -> IO String
+fHelp :: Function -> IO String
 fHelp f = do
   doc <- getDoc ["functions" </> fName f]
   let msg = "\n" ++ fTypeDesc f ++ "\n\n" ++ doc
   return msg
 
 -- TODO move somewhere better
-tHelp :: OrthoLangConfig -> OrthoLangType -> IO String
+tHelp :: Config -> Type -> IO String
 tHelp cfg t = do
   doc <- getDoc ["types" </> extOf t]
   let msg = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
@@ -272,7 +272,7 @@ tHelp cfg t = do
                 ++ inputs
 
 -- TODO move somewhere better
-listFunctionTypesWithInput :: OrthoLangConfig -> OrthoLangType -> [String]
+listFunctionTypesWithInput :: Config -> Type -> [String]
 listFunctionTypesWithInput cfg cType = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
@@ -280,7 +280,7 @@ listFunctionTypesWithInput cfg cType = filter matches descs
     descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
 
 -- TODO move somewhere better
-listFunctionTypesWithOutput :: OrthoLangConfig -> OrthoLangType -> [String]
+listFunctionTypesWithOutput :: Config -> Type -> [String]
 listFunctionTypesWithOutput cfg cType = filter matches descs
   where
     matches d = (extOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
@@ -314,51 +314,51 @@ cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
     return (scr, cfg { cfgScript = Just path }, locks, ids)
-  [var, path] -> case lookup (OrthoLangVar (ReplaceID Nothing) var) scr of
+  [var, path] -> case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
 
 -- TODO where should this go?
-depsOnly :: OrthoLangExpr -> OrthoLangScript -> OrthoLangScript
+depsOnly :: Expr -> Script -> Script
 depsOnly expr scr = deps ++ [res]
   where
     deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
-    res  = (OrthoLangVar (ReplaceID Nothing) "result", expr)
+    res  = (Var (RepID Nothing) "result", expr)
 
 -- TODO where should this go?
-saveScript :: OrthoLangConfig -> OrthoLangScript -> FilePath -> IO ()
+saveScript :: Config -> Script -> FilePath -> IO ()
 saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
 cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeededBy st@(scr, cfg, _, _) hdl var = do
-  case lookup (OrthoLangVar (ReplaceID Nothing) var) scr of
+  case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (OrthoLangVar Nothing var):depsOf e) scr
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (OrthoLangVar (ReplaceID Nothing) var):depsOf e) scr
+    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (Var Nothing var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
   return st
 
 -- TODO move to Pretty.hs
--- prettyAssigns :: Handle -> (OrthoLangAssign -> Bool) -> OrthoLangScript -> IO ()
+-- prettyAssigns :: Handle -> (Assign -> Bool) -> Script -> IO ()
 -- prettyAssigns hdl fn scr = do
   -- txt <- renderIO $ pPrint $ filter fn scr
   -- hPutStrLn hdl txt
 
 cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeeds st@(scr, cfg, _, _) hdl var = do
-  let var' = OrthoLangVar (ReplaceID Nothing) var
+  let var' = Var (RepID Nothing) var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (OrthoLangVar (ReplaceID Nothing) var):rDepsOf scr var') scr
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') scr
   return st
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdDrop (_, cfg, ref, ids) _ [] = clear >> return ([], cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
 cmdDrop st@(scr, cfg, ref, ids) hdl var = do
-  let v = OrthoLangVar (ReplaceID Nothing) var
+  let v = Var (RepID Nothing) var
   case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just _  -> return (delFromAL scr v, cfg, ref, ids)
@@ -380,8 +380,8 @@ showExprType st e = case parseExpr st e of
   Right expr -> show $ typeOf expr
   Left  err  -> show err
 
-showAssignType :: OrthoLangAssign -> String
-showAssignType (OrthoLangVar _ v, e) = unwords [typedVar, "=", prettyExpr]
+showAssignType :: Assign -> String
+showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
   where
     -- parentheses also work:
     -- typedVar = v ++ " (" ++ show (typeOf e) ++ ")"
@@ -392,7 +392,7 @@ showAssignType (OrthoLangVar _ v, e) = unwords [typedVar, "=", prettyExpr]
 cmdShow :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
 cmdShow st@(scr, cfg, _, _) hdl var = do
-  case lookup (OrthoLangVar (ReplaceID Nothing) var) scr of
+  case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
   return st
@@ -443,7 +443,7 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
   where
     wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
-    varNames = map ((\(OrthoLangVar _ v) -> v) . fst) scr
+    varNames = map ((\(Var _ v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 
@@ -453,7 +453,7 @@ myComplete s = completeQuotedWord   (Just '\\') "\"'" (quotedCompletions s)
              $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
                                     (nakedCompletions s)
 
--- This is separate from the OrthoLangConfig because it shouldn't need changing.
+-- This is separate from the Config because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
 replSettings :: GlobalEnv -> Settings IO
 replSettings s@(_, cfg, _, _) = Settings

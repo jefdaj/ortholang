@@ -23,7 +23,7 @@ import Text.Parsec            (ParseError)
 
 -- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 -- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
-pList :: ParseM OrthoLangExpr
+pList :: ParseM Expr
 pList = debugParser "pList" $ do
   terms <- between (pSym '[') (pSym ']')
                    (sepBy pExpr (pSym ','))
@@ -31,7 +31,7 @@ pList = debugParser "pList" $ do
       deps  = if null terms then [] else foldr1 union $ map depsOf terms
   case eType of
     Left err -> fail err
-    Right t  -> return $ OrthoLangList t (RepeatSalt 0) deps terms
+    Right t  -> return $ Lst t (Salt 0) deps terms
 
 ---------------
 -- operators --
@@ -40,7 +40,7 @@ pList = debugParser "pList" $ do
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
-operatorTable :: OrthoLangConfig -> [[E.Operator String GlobalEnv Identity OrthoLangExpr]]
+operatorTable :: Config -> [[E.Operator String GlobalEnv Identity Expr]]
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
@@ -50,24 +50,24 @@ operatorTable cfg = [map binary bops]
 -- Tricky bit: needs to take two already-parsed expressions
 -- TODO verify they have the correct types
 -- TODO is this obsolete now that there's pBop?
--- pBop :: Char -> ParseM (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
+-- pBop :: Char -> ParseM (Expr -> Expr -> Expr)
 -- pBop o = pSym o *> (return $ \e1 e2 ->
 --   let deps = union (depsOf e1) (depsOf e2)
---   in OrthoLangBop (typeOf e1) deps [o] e1 e2)
+--   in Bop (typeOf e1) deps [o] e1 e2)
 
 -- TODO is there a better way than only taking one-char strings?
 -- TODO how to fail gracefully (with fail, not error) here??
-pBop :: OrthoLangFunction -> ParseM (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
+pBop :: Function -> ParseM (Expr -> Expr -> Expr)
 pBop bop
   | isJust (fOpChar bop) = (debugParser ("pBop " ++ fName bop)
                            (pSym (headOrDie "failed to read fName in pBop" $ [fromJust $ fOpChar bop])))
                            *> return (pBop' bop)
 pBop _ = fail "pBop only works with infix functions"
 
-pBop' :: OrthoLangFunction -> (OrthoLangExpr -> OrthoLangExpr -> OrthoLangExpr)
+pBop' :: Function -> (Expr -> Expr -> Expr)
 pBop' bop e1 e2 = case bopTypeCheck of
   Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-  Right rtn -> OrthoLangBop rtn (RepeatSalt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+  Right rtn -> Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
   where
     bopTypeCheck = case (fTypeCheck bop) [ListOf $ typeOf e1] of
       Left  e -> Left e
@@ -91,7 +91,7 @@ pFunName = do
 
 -- TODO any way to do this last so "function not found" error comes through??
 -- TODO should be able to commit after parsing the fn name, which would allow real failure
-pFun :: ParseM OrthoLangExpr
+pFun :: ParseM Expr
 pFun = do
   name <- try pFunName -- TODO try?
   -- debugParseM $ "pFun committed to parsing " ++ name
@@ -101,12 +101,12 @@ pFun = do
 
 -- TODO main parse error is in here, when pTerm fails on an arg??
 -- TODO so is pTerm failing on it, or pEnd succeeding?
-pArgs :: ParseM [OrthoLangExpr]
+pArgs :: ParseM [Expr]
 pArgs = debugParser "pArgs" $ manyTill (try pTerm) pEnd
 
 -- This function uses error rather than fail to prevent parsec from trying anything more
 -- (TODO is there a better way?)
-pFunArgs :: String -> [OrthoLangExpr] -> ParseM OrthoLangExpr
+pFunArgs :: String -> [Expr] -> ParseM Expr
 pFunArgs name args = debugParser "pFun" $ do
   (_, cfg, _, _) <- getState
   -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
@@ -122,22 +122,22 @@ pFunArgs name args = debugParser "pFun" $ do
 -- A reference is just a variable name, but that variable has to be in the script.
 -- TODO why does it fail after this, but only sometimes??
 -- TODO main error is in here when if fails on a ref that clearly exists?
--- pRef :: String -> ParseM OrthoLangExpr
+-- pRef :: String -> ParseM Expr
 -- pRef var = debugParser "pRef" $ do
 --
 -- Since this is the last term parser, it can actually error instead of failing
-pRef :: ParseM OrthoLangExpr
+pRef :: ParseM Expr
 pRef = debugParser "pRef" $ do
-  -- v@(OrthoLangVar var) <- pVarOnly
-  v@(OrthoLangVar _ var) <- pVar
-  -- let v = OrthoLangVar var
+  -- v@(Var var) <- pVarOnly
+  v@(Var _ var) <- pVar
+  -- let v = Var var
   (scr, _, _, _) <- getState
   -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v scr of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
-    Just e -> return $ OrthoLangRef (typeOf e) (RepeatSalt 0) (depsOf e) v
+    Just e -> return $ Ref (typeOf e) (Salt 0) (depsOf e) v
 
--- pFunOrRef :: ParseM OrthoLangExpr
+-- pFunOrRef :: ParseM Expr
 -- pFunOrRef = debugParser "pFunOrRef" $ do
 --   name <- try pIden -- TODO when it gets here, loader is cut off to oader
 --   traceM $ "parsed name: " ++ name
@@ -146,17 +146,17 @@ pRef = debugParser "pRef" $ do
 --     then pFunArgs name
 --     else pRef name
 
-typecheckArgs :: OrthoLangFunction -> [OrthoLangExpr] -> ParseM OrthoLangExpr
+typecheckArgs :: Function -> [Expr] -> ParseM Expr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
   Left  msg -> fail msg
   Right rtn -> let deps = foldr1 union $ map depsOf args
-               in return $ OrthoLangFun rtn (RepeatSalt 0) deps (fName fn) args
+               in return $ Fun rtn (Salt 0) deps (fName fn) args
 
 -----------------
 -- expressions --
 -----------------
 
-pParens :: ParseM OrthoLangExpr
+pParens :: ParseM Expr
 pParens = debugParser "pParens" (between (pSym '(') (pSym ')') pExpr <?> "parens")
 
 -- TODO need to commit to separate branches so Parsec doesn't try to parse
@@ -169,7 +169,7 @@ pParens = debugParser "pParens" (between (pSym '(') (pSym ')') pExpr <?> "parens
 
 -- TODO hey should I actually just name this pArg?
 
-pTerm :: ParseM OrthoLangExpr
+pTerm :: ParseM Expr
 -- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFunOrRef]
 pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pRef]
@@ -179,7 +179,7 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- to do without it. Also it seems like it will get more useful if I want to
 -- add non-assignment statements like assertions. See:
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
-pExpr :: ParseM OrthoLangExpr
+pExpr :: ParseM Expr
 pExpr = debugParser "pExpr" $ do
   st@(_, cfg, _, _) <- getState
   -- debugParseM "expr"
@@ -194,5 +194,5 @@ isExpr :: GlobalEnv -> String -> Bool
 isExpr state line = isRight $ parseWithEof pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: GlobalEnv -> String -> Either ParseError OrthoLangExpr
+parseExpr :: GlobalEnv -> String -> Either ParseError Expr
 parseExpr = runParseM pExpr

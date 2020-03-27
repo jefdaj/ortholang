@@ -4,7 +4,7 @@ module OrthoLang.Core.Pretty
   ( prettyShow
   -- , prettyResult (moved to Eval)
   , writeScript
-  , OrthoLangExpr(..)
+  , Expr(..)
   , prettyNum -- TODO get rid of this?
 
   -- re-export for convenience
@@ -37,7 +37,7 @@ getWidth = do
 
 -- Render with my custom style (just width so far)
 -- Needs to have the optional constant width for the REPL tests
-renderIO :: OrthoLangConfig -> Doc -> IO String
+renderIO :: Config -> Doc -> IO String
 renderIO cfg doc = do
   currentWidth <- getWidth
   let renderWidth = case cfgWidth cfg of
@@ -49,59 +49,59 @@ renderIO cfg doc = do
 
 -- Print something pretty to a handle, rendering with custom style from Pretty.hs
 -- TODO move to Pretty.hs?
-pPrintHdl :: Pretty a => OrthoLangConfig -> Handle -> a -> IO ()
+pPrintHdl :: Pretty a => Config -> Handle -> a -> IO ()
 pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl
 
-instance Pretty OrthoLangType where
+instance Pretty Type where
   pPrint Empty          = error "should never need to print Empty"
   pPrint (ListOf Empty) = text "empty list"
   pPrint (ListOf     t) = text "list of" <+> pPrint t <> text "s"
   pPrint (ScoresOf   t) = text "list of" <+> pPrint t <> text "s with scores"
-  pPrint (OrthoLangTypeGroup {tgExt = t, tgDesc = d}) = text t <+> parens (text d)
-  pPrint (OrthoLangType      { tExt = t,  tDesc = d}) = text t <+> parens (text d)
+  pPrint (TypeGroup {tgExt = t, tgDesc = d}) = text t <+> parens (text d)
+  pPrint (Type      { tExt = t,  tDesc = d}) = text t <+> parens (text d)
 
-instance Pretty OrthoLangVar where
-  pPrint (OrthoLangVar _ s) = text s -- TODO show the salt?
+instance Pretty Var where
+  pPrint (Var _ s) = text s -- TODO show the salt?
 
 -- TODO add descriptions here? if so, need to separate actual extension code
 -- instance Pretty Ext where
 --   pPrint (ListOf e) = pPrint e <> text "s"
 --   pPrint (Ext   e) = text e
 
-instance {-# OVERLAPPING #-} Pretty OrthoLangAssign where
+instance {-# OVERLAPPING #-} Pretty Assign where
   pPrint (v, e) = pPrint v <+> text "=" <+> pPrint e
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
-instance {-# OVERLAPPING #-} Pretty OrthoLangScript where
+instance {-# OVERLAPPING #-} Pretty Script where
   pPrint [] = empty
   -- pPrint as = text $ unlines $ map prettyShow as
   pPrint as = vcat $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?
-writeScript :: OrthoLangConfig -> OrthoLangScript -> FilePath -> IO ()
+writeScript :: Config -> Script -> FilePath -> IO ()
 writeScript cfg scr path = do
   txt <- renderIO cfg $ pPrint scr
   writeBinaryFile path txt
 
 -- TODO actual Eq instance, or what? how do we compare types?
-instance Pretty OrthoLangExpr where
-  pPrint e@(OrthoLangLit _ _ s)
+instance Pretty Expr where
+  pPrint e@(Lit _ _ s)
     | typeOf e == num = prettyNum s
     | otherwise = text $ show s
-  pPrint (OrthoLangRef _ _ _ v)    = pPrint v
-  pPrint (OrthoLangFun _ _ _ s es) = text s <+> sep (map pNested es)
-  pPrint (OrthoLangList _ _ _ es)  = pList es
-  pPrint (OrthoLangRules (CompiledExpr t (ExprPath p) _)) = text $ "Compiled " ++ extOf t ++ " " ++ p
+  pPrint (Ref _ _ _ v)    = pPrint v
+  pPrint (Fun _ _ _ s es) = text s <+> sep (map pNested es)
+  pPrint (Lst _ _ _ es)  = pList es
+  pPrint (Com (CompiledExpr t (ExprPath p) _)) = text $ "Compiled " ++ extOf t ++ " " ++ p
 
   -- this is almost right except it breaks lines too early (always nesting),
   -- which looks super weird for short bops:
-  -- pPrint (OrthoLangBop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (text c) $$ pPrint e2
+  -- pPrint (Bop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (text c) $$ pPrint e2
 
   -- this one is a little better: the first line is right and *then* it starts doing that
   -- TODO ask on stackoverflow if there's any better way, but later
-  pPrint (OrthoLangBop _ _ _ c e1 e2) = sep $ punctuate (text $ " " ++ c) [pPrint e1, pPrint e2]
+  pPrint (Bop _ _ _ c e1 e2) = sep $ punctuate (text $ " " ++ c) [pPrint e1, pPrint e2]
 
 pList :: (Pretty a) => [a] -> Doc
 pList es = text "[" <> sep (punctuate (text ",") (map pPrint es)) <> text "]"
@@ -116,25 +116,25 @@ prettyNum s = text $
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
-pNested :: OrthoLangExpr -> Doc
-pNested e@(OrthoLangFun  _ _ _ _ _  ) = parens $ pPrint e
-pNested e@(OrthoLangBop  _ _ _ _ _ _) = parens $ pPrint e
+pNested :: Expr -> Doc
+pNested e@(Fun  _ _ _ _ _  ) = parens $ pPrint e
+pNested e@(Bop  _ _ _ _ _ _) = parens $ pPrint e
 pNested e = pPrint e
 
 -- TODO update this by mapping over the fields
-instance Pretty OrthoLangConfig where
+instance Pretty Config where
   pPrint = text . showConfig
 
 -- TODO change this to something useful
-instance Pretty OrthoLangFunction where
-  pPrint fn = text $ "OrthoLangFunction '" ++ fName fn ++ "'"
+instance Pretty Function where
+  pPrint fn = text $ "Function '" ++ fName fn ++ "'"
 
-instance Show OrthoLangFunction where
+instance Show Function where
   show = prettyShow
 
 -- TODO change this to something useful
-instance Pretty OrthoLangModule where
-  pPrint fn = text $ "OrthoLangModule '" ++ mName fn ++ "'"
+instance Pretty Module where
+  pPrint fn = text $ "Module '" ++ mName fn ++ "'"
 
--- instance Show OrthoLangModule where
+-- instance Show Module where
   -- show = prettyShow

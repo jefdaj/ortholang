@@ -10,15 +10,15 @@ import OrthoLang.Modules.SeqIO      (fna, faa)
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple)
 import System.FilePath             ((</>), takeBaseName)
-import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths         (Path, toPath, fromPath)
 import OrthoLang.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..))
 import System.Directory            (createDirectoryIfMissing)
 import OrthoLang.Core.Util          (digest, unlessExists)
 import OrthoLang.Core.Locks         (withWriteLock')
 import System.Exit                 (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "SonicParanoid" , mDesc = "Very fast, accurate, and easy orthology."
   , mTypes = [faa, fna, spr]
   , mFunctions =
@@ -26,8 +26,8 @@ orthoLangModule = OrthoLangModule
       ]
   }
 
-spr :: OrthoLangType
-spr = OrthoLangType
+spr :: Type
+spr = Type
   { tExt  = "spr"
   , tDesc = "SonicParanoid results"
   , tShow = defaultShow
@@ -43,8 +43,8 @@ spr = OrthoLangType
 -- sonicparanoid --
 -------------------
 
-sonicparanoid :: OrthoLangFunction
-sonicparanoid = let name = "sonicparanoid" in OrthoLangFunction
+sonicparanoid :: Function
+sonicparanoid = let name = "sonicparanoid" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
   , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
@@ -55,7 +55,7 @@ sonicparanoid = let name = "sonicparanoid" in OrthoLangFunction
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
 -- TODO should get all results as an unusable file first, then extract what you want explicitly
-aSonicParanoid :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aSonicParanoid :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
   let cacheDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
@@ -68,10 +68,10 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
       -- TODO does this need some work to get consistently?
       statsPath'     = tmpDir </> "stats.tsv" -- this gets symlinked to the actual one, whose path varies
-      statsPath      = toOrthoLangPath cfg statsPath'
+      statsPath      = toPath cfg statsPath'
 
-      faListPath' = fromOrthoLangPath cfg faListPath
-      out'        = fromOrthoLangPath cfg out
+      faListPath' = fromPath cfg faListPath
+      out'        = fromPath cfg out
       statsPath''    = traceA "aSonicParanoid" out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 
@@ -79,9 +79,9 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
     faPaths <- readPaths cfg ref faListPath'
-    let faPaths' = map (fromOrthoLangPath cfg) faPaths
+    let faPaths' = map (fromPath cfg) faPaths
     need' cfg ref "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
-    let faLinks = map (\p -> toOrthoLangPath cfg $ inDir </> (takeBaseName $ fromOrthoLangPath cfg p)) faPaths
+    let faLinks = map (\p -> toPath cfg $ inDir </> (takeBaseName $ fromPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
     -- TODO decide mode based on fn name

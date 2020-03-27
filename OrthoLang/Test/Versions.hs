@@ -7,7 +7,7 @@ import OrthoLang.Core.Util (debug, time)
 
 import Development.Shake.FilePath ((<.>), (</>))
 import Paths_OrthoLang             (getDataFileName)
-import OrthoLang.Core.Types        (OrthoLangConfig(..), Locks, HashedIDsRef)
+import OrthoLang.Core.Types        (Config(..), LocksRef, IDsRef)
 import System.Process             (shell, readCreateProcessWithExitCode)
 import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
@@ -61,14 +61,14 @@ versionScripts os = map (\(a,b) -> (a, os ++ ":" ++ b))
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
-mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg _ _ = do
   testDir <- getDataFileName $ "tests"
   debug "test.versions" $ "test dir is " ++ testDir
   return $ testGroup "check dependency versions"
          $ map (mkTestVersion cfg testDir) (versionScripts $ cfgOS cfg)
 
-mkTestVersion :: OrthoLangConfig -> FilePath -> (TestName, String) -> TestTree
+mkTestVersion :: Config -> FilePath -> (TestName, String) -> TestTree
 mkTestVersion cfg dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name

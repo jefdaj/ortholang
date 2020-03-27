@@ -15,7 +15,7 @@ import OrthoLang.Core.Types
 import Control.Monad (when)
 import OrthoLang.Core.Actions (readStrings, readLits, writeLits, debugA)
 import OrthoLang.Core.Compile (rExpr, debugRules)
-import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, exprPath)
+import OrthoLang.Core.Paths         (Path, toPath, fromPath, exprPath)
 
 -- import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Modules.BlastHits (aCutCol)
@@ -24,8 +24,8 @@ import OrthoLang.Core.Compile (rSimple)
 debug :: String -> String -> Action ()
 debug name = debugA ("ortholang.modules.scores." ++ name)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Scores"
   , mDesc = "Score repeated variables for plotting"
   , mTypes = []
@@ -40,11 +40,11 @@ orthoLangModule = OrthoLangModule
 -- scores --
 ------------
 
-aScores :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> OrthoLangType -> OrthoLangPath -> Action ()
+aScores :: Config -> LocksRef -> Path -> Path -> Type -> Path -> Action ()
 aScores cfg ref scoresPath othersPath othersType outPath = do
-  scores <- readLits cfg ref $ fromOrthoLangPath cfg scoresPath
-  others <- readStrings othersType cfg ref $ fromOrthoLangPath cfg othersPath
-  let out' = fromOrthoLangPath cfg outPath
+  scores <- readLits cfg ref $ fromPath cfg scoresPath
+  others <- readStrings othersType cfg ref $ fromPath cfg othersPath
+  let out' = fromPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others
   when (length scores /= length others) $ error $ unlines
      ["mismatched scores and others in aScores:", show scores, show others]
@@ -61,8 +61,8 @@ aScores cfg ref scoresPath othersPath othersType outPath = do
 
 -- (No need to score repeatN because it already produces a num.list)
 
-scoreRepeats :: OrthoLangFunction
-scoreRepeats = OrthoLangFunction
+scoreRepeats :: Function
+scoreRepeats = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tScoreRepeats
@@ -72,23 +72,23 @@ scoreRepeats = OrthoLangFunction
   where
     name = "score_repeats"
 
-tScoreRepeats :: [OrthoLangType] -> Either String OrthoLangType
+tScoreRepeats :: [Type] -> Either String Type
 tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: RulesFn
-rScoreRepeats s@(_, cfg, ref, _) expr@(OrthoLangFun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
+rScoreRepeats s@(_, cfg, ref, _) expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr s subList
   scores <- rExpr s repEachExpr
-  let hack    = \(ExprPath p) -> toOrthoLangPath cfg p -- TODO remove! but how?
+  let hack    = \(ExprPath p) -> toPath cfg p -- TODO remove! but how?
       inputs' = hack inputs
       scores' = hack scores
   outPath' %> \_ -> aScores cfg ref scores' inputs' t outPath
   return $ ExprPath $ outPath'
   where
-    repEachExpr = OrthoLangFun (ListOf t) salt deps "replace_each" as
+    repEachExpr = Fun (ListOf t) salt deps "replace_each" as
     outPath  = exprPath s expr
-    outPath' = debugRules cfg "rScoreRepeats" expr $ fromOrthoLangPath cfg outPath
+    outPath' = debugRules cfg "rScoreRepeats" expr $ fromPath cfg outPath
 rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 
 ----------------------------------
@@ -96,8 +96,8 @@ rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 ----------------------------------
 
 -- TODO deduplicate with extractQueries?
-extractScores :: OrthoLangFunction
-extractScores = let name = "extract_scores" in OrthoLangFunction
+extractScores :: Function
+extractScores = let name = "extract_scores" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : X.scores -> num.list"
@@ -106,8 +106,8 @@ extractScores = let name = "extract_scores" in OrthoLangFunction
   }
 
 -- TODO deduplicate with extractTargets?
-extractScored :: OrthoLangFunction
-extractScored = let name = "extract_scored" in OrthoLangFunction
+extractScored :: Function
+extractScored = let name = "extract_scored" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : X.scores -> X.list"

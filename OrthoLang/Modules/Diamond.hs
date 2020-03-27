@@ -11,7 +11,7 @@ import OrthoLang.Core.Compile (defaultTypeCheck, rExpr, debugRules)
 import OrthoLang.Core.Compile (rSimpleScriptPar, aSimpleScriptPar, rSimple)
 import OrthoLang.Core.Locks         (withReadLock)
 import OrthoLang.Core.Util          (resolveSymlinks, headOrDie)
-import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath, exprPath)
+import OrthoLang.Core.Paths         (Path, fromPath, exprPath)
 import OrthoLang.Core.Actions       (readPaths, readLit, traceA, runCmd, CmdDesc(..), sanitizeFileInPlace)
 import OrthoLang.Modules.SeqIO      (fna, faa)
 import OrthoLang.Modules.Blast      (bht)
@@ -21,8 +21,8 @@ import System.FilePath             (replaceBaseName)
 import OrthoLang.Core.Compile   (rMap, rMapSimpleScript)
 import Data.List.Utils             (replace)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Diamond"
   , mDesc = "Accelerated BLAST compatible local sequence aligner."
   , mTypes = [fna, faa, dmnd]
@@ -34,8 +34,8 @@ orthoLangModule = OrthoLangModule
       ++ map mkDiamondBlast variants -- includes the _each ones too
   }
 
-dmnd :: OrthoLangType
-dmnd = OrthoLangType
+dmnd :: Type
+dmnd = Type
   { tExt  = "dmnd"
   , tDesc = "DIAMOND database"
   , tShow = \_ ref path -> do
@@ -49,8 +49,8 @@ dmnd = OrthoLangType
 -- diamond_makedb --
 --------------------
 
-diamondmakedb :: OrthoLangFunction
-diamondmakedb = let name = "diamond_makedb" in OrthoLangFunction
+diamondmakedb :: Function
+diamondmakedb = let name = "diamond_makedb" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck [faa] dmnd
@@ -64,8 +64,8 @@ diamondmakedb = let name = "diamond_makedb" in OrthoLangFunction
 
 -- TODO does this only work when --debug is disabled because of a Map .args issue?
 
-diamondmakedbEach :: OrthoLangFunction
-diamondmakedbEach = let name = "diamond_makedb_each" in OrthoLangFunction
+diamondmakedbEach :: Function
+diamondmakedbEach = let name = "diamond_makedb_each" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
   , fTypeCheck = defaultTypeCheck [ListOf faa] (ListOf dmnd)
@@ -77,8 +77,8 @@ diamondmakedbEach = let name = "diamond_makedb_each" in OrthoLangFunction
 -- diamond_makedb_all --
 ------------------------
 
-diamondmakedbAll :: OrthoLangFunction
-diamondmakedbAll = let name = "diamond_makedb_all" in OrthoLangFunction
+diamondmakedbAll :: Function
+diamondmakedbAll = let name = "diamond_makedb_all" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck [ListOf faa] dmnd
@@ -88,10 +88,10 @@ diamondmakedbAll = let name = "diamond_makedb_all" in OrthoLangFunction
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
 rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [fas]) = do
+rDiamondmakedbAll s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out  = exprPath s e
-      out' = debugRules cfg "rDiamondmakedbAll" e $ fromOrthoLangPath cfg out
+      out' = debugRules cfg "rDiamondmakedbAll" e $ fromPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths cfg ref fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
@@ -103,9 +103,9 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 --------------------
 
 -- type RulesFn     = RulesFn
--- type ActionFn    = OrthoLangConfig -> CacheDir -> [ExprPath] -> Action ()
-type ActionFn2 = OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
-type DiamondBlastDesc = (String, [String] -> RulesFn, [String], OrthoLangType, OrthoLangType, OrthoLangType)
+-- type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
+type ActionFn2 = Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+type DiamondBlastDesc = (String, [String] -> RulesFn, [String], Type, Type, Type)
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?
 variants :: [DiamondBlastDesc]
@@ -171,14 +171,14 @@ variants =
 
 -- TODO make into a more general utility?
 rFlip23 :: RulesFn -> RulesFn
-rFlip23 rFn st (OrthoLangFun rtn salt deps ids args) = rFn st (OrthoLangFun rtn salt deps ids $ fn args)
+rFlip23 rFn st (Fun rtn salt deps ids args) = rFn st (Fun rtn salt deps ids $ fn args)
   where
     fn (one:two:three:rest) = (one:three:two:rest)
     fn as = error $ "bad argument to rFlip23: " ++ show as
 rFlip23 _ _ e = error $ "bad argument to rFlip23: " ++ show e
 
-mkDiamondBlast :: DiamondBlastDesc -> OrthoLangFunction
-mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" ++ name in OrthoLangFunction
+mkDiamondBlast :: DiamondBlastDesc -> Function
+mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" ++ name in Function
   { fOpChar = Nothing, fName = name'
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
   , fTypeCheck = defaultTypeCheck [num, qType, sType] rType
@@ -205,32 +205,32 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     }
   sanitizeFileInPlace cfg ref o'
   where
-    o'  = fromOrthoLangPath cfg o
-    e'  = fromOrthoLangPath cfg e
-    q'  = fromOrthoLangPath cfg q
-    db' = fromOrthoLangPath cfg db
+    o'  = fromPath cfg o
+    e'  = fromPath cfg e
+    q'  = fromPath cfg q
+    db' = fromPath cfg db
     o'' = traceA "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
 aDiamondFromDb _ _ _ _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler
 rDiamondFromFa :: [String] -> RulesFn
-rDiamondFromFa dCmd st (OrthoLangFun rtn salt deps _ [e, q, s])
-  = rules st (OrthoLangFun rtn salt deps name1 [e, q, dbExpr])
+rDiamondFromFa dCmd st (Fun rtn salt deps _ [e, q, s])
+  = rules st (Fun rtn salt deps name1 [e, q, dbExpr])
   where
     rules  = rSimple $ aDiamondFromDb dCmd
     name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
-    dbExpr = OrthoLangFun dmnd salt (depsOf s) "diamond_makedb" [s]
+    dbExpr = Fun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
 
 -- same, but inserts a "makedb_each" call and maps over it
 rDiamondFromFaEach :: [String] -> RulesFn
-rDiamondFromFaEach dCmd st (OrthoLangFun rtn salt deps name [e, q, ss])
-  = rules st (OrthoLangFun rtn salt deps name_db [e, q, dbsExpr])
+rDiamondFromFaEach dCmd st (Fun rtn salt deps name [e, q, ss])
+  = rules st (Fun rtn salt deps name_db [e, q, dbsExpr])
   where
     rules   = rMap 3 $ aDiamondFromDb dCmd
     name_db = replace "_each" "_db_each" name
-    dbsExpr = OrthoLangFun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
+    dbsExpr = Fun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
 rDiamondFromFaEach _ _ _ = fail "bad argument to rDiamondFromFa"
 
 -- TODO this is passing the dmnd and faa args backward to diamond.sh, but why?
@@ -240,12 +240,12 @@ rDiamondFromFaEach _ _ _ = fail "bad argument to rDiamondFromFa"
 --        diamond_blastp_rev_db_each e (diamond_makedb s) qs
 --        ...
 rDiamondFromFaRevEach :: [String] -> RulesFn
-rDiamondFromFaRevEach dCmd st (OrthoLangFun rtn salt deps name [e, s, qs])
-  = rules st (OrthoLangFun rtn salt deps name' [e, dbExpr, qs])
+rDiamondFromFaRevEach dCmd st (Fun rtn salt deps name [e, s, qs])
+  = rules st (Fun rtn salt deps name' [e, dbExpr, qs])
   where
     rules   = rFlip23 . rMap 2 $ aDiamondFromDb dCmd
     -- name1   = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd ++ "_db_each" -- TODO is this right? get explicitly?
     name'  = replace "_rev_each" "_db_rev_each" name
-    -- dbsExpr = OrthoLangFun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
-    dbExpr = OrthoLangFun dmnd salt (depsOf s) "diamond_makedb" [s]
+    -- dbsExpr = Fun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
+    dbExpr = Fun dmnd salt (depsOf s) "diamond_makedb" [s]
 rDiamondFromFaRevEach _ _ _ = fail "bad argument to rDiamondFromFa"

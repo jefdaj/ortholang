@@ -20,48 +20,48 @@ import OrthoLang.Modules.SeqIO (faa)
 -- ASTs to use in the examples --
 ---------------------------------
 
-n1, n2 :: OrthoLangExpr
-n1 = OrthoLangLit num (RepeatSalt 0) "1.0"
-n2 = OrthoLangLit num (RepeatSalt 0) "2.0"
+n1, n2 :: Expr
+n1 = Lit num (Salt 0) "1.0"
+n2 = Lit num (Salt 0) "2.0"
 
-lst0, lst1, lst2, lst3 :: OrthoLangExpr
-lst0  = OrthoLangList Empty (RepeatSalt 0) [] [] -- ah, this is getting empty.list instead of empty
-lst1  = OrthoLangList num (RepeatSalt 0) [] [n1]
-lst2  = OrthoLangList num (RepeatSalt 0) [] [n1, n2]
-lst3  = OrthoLangList (ListOf num) (RepeatSalt 0) [] [lst1]
+lst0, lst1, lst2, lst3 :: Expr
+lst0  = Lst Empty (Salt 0) [] [] -- ah, this is getting empty.list instead of empty
+lst1  = Lst num (Salt 0) [] [n1]
+lst2  = Lst num (Salt 0) [] [n1, n2]
+lst3  = Lst (ListOf num) (Salt 0) [] [lst1]
 
-s4, lst4 :: OrthoLangExpr
-s4   = OrthoLangLit str (RepeatSalt 0) "four"
-lst4 = OrthoLangList str (RepeatSalt 0) [] [s4]
+s4, lst4 :: Expr
+s4   = Lit str (Salt 0) "four"
+lst4 = Lst str (Salt 0) [] [s4]
 
 -- TODO why do bops use the list type while lists use the elem type?
-bop00, bop10, bop01, bop40, bop04 :: OrthoLangExpr
-bop00 = OrthoLangBop (ListOf Empty) (RepeatSalt 0) [] "|" lst0 lst0
-bop10 = OrthoLangBop (ListOf num  ) (RepeatSalt 0) [] "|" lst1 lst0
-bop01 = OrthoLangBop (ListOf num  ) (RepeatSalt 0) [] "|" lst0 lst1
-bop40 = OrthoLangBop (ListOf str  ) (RepeatSalt 0) [] "|" lst4 lst0
-bop04 = OrthoLangBop (ListOf str  ) (RepeatSalt 0) [] "|" lst0 lst4
+bop00, bop10, bop01, bop40, bop04 :: Expr
+bop00 = Bop (ListOf Empty) (Salt 0) [] "|" lst0 lst0
+bop10 = Bop (ListOf num  ) (Salt 0) [] "|" lst1 lst0
+bop01 = Bop (ListOf num  ) (Salt 0) [] "|" lst0 lst1
+bop40 = Bop (ListOf str  ) (Salt 0) [] "|" lst4 lst0
+bop04 = Bop (ListOf str  ) (Salt 0) [] "|" lst0 lst4
 
-len :: [OrthoLangExpr] -> OrthoLangExpr
-len es = OrthoLangFun num (RepeatSalt 0) [] "length" es
+len :: [Expr] -> Expr
+len es = Fun num (Salt 0) [] "length" es
 
 addParens :: (String, a) -> (String, a)
 addParens (s, a) = ("(" ++ s ++ ")", a)
 
-faa0 :: OrthoLangExpr
-faa0  = OrthoLangFun (ListOf faa) (RepeatSalt 0) [] "load_faa_each" [lst0]
+faa0 :: Expr
+faa0  = Fun (ListOf faa) (Salt 0) [] "load_faa_each" [lst0]
 
 -- TODO fix pretty-printing to write (ListOf faa) instead of faa.lst here
-somefaa, loadsome, loadbop1 :: OrthoLangExpr
-somefaa  = OrthoLangList str (RepeatSalt 0) [] [OrthoLangLit str (RepeatSalt 0) "some.faa"]
-loadsome = (OrthoLangFun (ListOf faa) (RepeatSalt 0) [] "load_faa_each" [somefaa])
-loadbop1 = OrthoLangBop (ListOf faa) (RepeatSalt 0) [] "~" loadsome loadsome
+somefaa, loadsome, loadbop1 :: Expr
+somefaa  = Lst str (Salt 0) [] [Lit str (Salt 0) "some.faa"]
+loadsome = (Fun (ListOf faa) (Salt 0) [] "load_faa_each" [somefaa])
+loadbop1 = Bop (ListOf faa) (Salt 0) [] "~" loadsome loadsome
 
 --------------
 -- examples --
 --------------
 
-exFuns :: [(String, OrthoLangExpr)]
+exFuns :: [(String, Expr)]
 exFuns =
   [ ("length [   ]", len [lst0])
   , ("length [1  ]", len [lst1])
@@ -70,10 +70,10 @@ exFuns =
   ]
 
 -- TODO can this be done with the weird lambda thing? is it worth it?
--- exBops :: [(String, OrthoLangExpr)]
+-- exBops :: [(String, Expr)]
 -- exBops = undefined
 
-exTerms :: [(String, OrthoLangExpr)]
+exTerms :: [(String, Expr)]
 exTerms = exFuns ++ map addParens exFuns ++
   [ ("[1]"       , lst1)
   , ("[\"four\"]", lst4)
@@ -86,7 +86,7 @@ exTerms = exFuns ++ map addParens exFuns ++
   , ("load_faa_each [\"some.faa\"]", loadsome)
   ]
 
-exExprs :: [(String, OrthoLangExpr)]
+exExprs :: [(String, Expr)]
 exExprs = exTerms ++ map addParens exTerms ++
   -- empty lsts have a special type
   [ ("[] | []", bop00)
@@ -98,14 +98,14 @@ exExprs = exTerms ++ map addParens exTerms ++
   , ("[] | [\"four\"]", bop04)
 
   -- bops should be left-associative, and type-picking-up should still work
-  , ("[1] | [] | []", OrthoLangBop (ListOf num) (RepeatSalt 0) [] "|" bop10 lst0)
-  , ("[\"four\"] | [] | []", OrthoLangBop (ListOf str) (RepeatSalt 0) [] "|" bop40 lst0)
+  , ("[1] | [] | []", Bop (ListOf num) (Salt 0) [] "|" bop10 lst0)
+  , ("[\"four\"] | [] | []", Bop (ListOf str) (Salt 0) [] "|" bop40 lst0)
 
   -- can put fn calls in lsts, with or without separators
-  , ("[ length [] ]", OrthoLangList num (RepeatSalt 0) [] [len [lst0]])
-  , ("[(length [])]", OrthoLangList num (RepeatSalt 0) [] [len [lst0]])
-  , ("[length [],  length []]", OrthoLangList num (RepeatSalt 0) [] [len [lst0], len [lst0]])
-  , ("[length [],\nlength []]", OrthoLangList num (RepeatSalt 0) [] [len [lst0], len [lst0]])
+  , ("[ length [] ]", Lst num (Salt 0) [] [len [lst0]])
+  , ("[(length [])]", Lst num (Salt 0) [] [len [lst0]])
+  , ("[length [],  length []]", Lst num (Salt 0) [] [len [lst0], len [lst0]])
+  , ("[length [],\nlength []]", Lst num (Salt 0) [] [len [lst0], len [lst0]])
 
   -- should be able to put fn calls in bops, with or without parens
   , ("(load_faa_each [\"some.faa\"]) ~ (load_faa_each [\"some.faa\"])", loadbop1)
@@ -115,5 +115,5 @@ exExprs = exTerms ++ map addParens exTerms ++
 -- TODO list of pairs of expressions that should parse the same;
 --      then you don't have to actually write out the AST
 
-exStatements :: [(String, OrthoLangAssign)]
+exStatements :: [(String, Assign)]
 exStatements = []

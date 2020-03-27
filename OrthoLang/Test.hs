@@ -6,7 +6,7 @@ module OrthoLang.Test
   where
 
 import Paths_OrthoLang        (getDataFileName)
-import OrthoLang.Core.Types   (OrthoLangConfig(..), Locks, HashedIDsRef)
+import OrthoLang.Core.Types   (Config(..), LocksRef, IDsRef)
 import OrthoLang.Test.Repl    (mkTestGroup)
 import System.Directory      (getTemporaryDirectory, createDirectoryIfMissing,
                               setCurrentDirectory)
@@ -29,12 +29,12 @@ import qualified OrthoLang.Test.Scripts  as S
 -- filtering is done according to the TASTY_PATTERN environment var.
 -- Gotcha: can't print the test pattern in place of "all tests"
 -- because then they all match, ruining the filter.
-mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg ref ids = mkTestGroup cfg ref ids "all tests" tests
   where
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
 
-mkTestConfig :: OrthoLangConfig -> FilePath -> OrthoLangConfig
+mkTestConfig :: Config -> FilePath -> Config
 mkTestConfig cfg dir = cfg
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
@@ -45,7 +45,7 @@ mkTestConfig cfg dir = cfg
   -- , cfgReport  = Nothing
   }
 
-runTests :: Arguments -> OrthoLangConfig -> Locks -> HashedIDsRef -> IO ()
+runTests :: Arguments -> Config -> LocksRef -> IDsRef -> IO ()
 runTests args cfg ref ids = withArgs [] $ do
   let dbg = debug "test.runTests"
   tmpRootDir <- getTemporaryDirectory -- can't share /tmp on the Berkeley cluster!

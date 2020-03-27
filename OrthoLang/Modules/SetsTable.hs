@@ -5,8 +5,8 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Modules.Plots (rPlotListOfLists)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "SetsTable"
   , mDesc = "Generate set membership tables (spreadsheets) for easier list comparison"
   , mTypes = [tsv]
@@ -14,23 +14,23 @@ orthoLangModule = OrthoLangModule
   }
 
 -- TODO move to Types.hs?
-lit :: OrthoLangType
-lit = OrthoLangTypeGroup
+lit :: Type
+lit = TypeGroup
   { tgExt = "lit"
   , tgDesc = "basic literal (str or num)"
   , tgMember = \t -> t `elem` [str, num]
   }
 
 -- TODO should this be more specific?
-tsv :: OrthoLangType
-tsv = OrthoLangType
+tsv :: Type
+tsv = Type
   { tExt  = "tsv"
   , tDesc = "set membership table (spreadsheet)"
   , tShow = defaultShow
   }
 
-setsTable :: OrthoLangFunction
-setsTable = let name = "sets_table" in OrthoLangFunction
+setsTable :: Function
+setsTable = let name = "sets_table" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv

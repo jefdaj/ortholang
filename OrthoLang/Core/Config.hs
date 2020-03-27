@@ -7,15 +7,16 @@ module OrthoLang.Core.Config where
 -- TODO absolutize in the setters too? or unify them with initial loaders?
 
 import qualified Data.Configurator as C
+import qualified Data.Configurator.Types as C
 
-import Data.Configurator.Types    (Config, Worth(..))
+-- import Data.Configurator.Types    (Config, Worth(..))
 import Data.Maybe                 (isNothing)
 import Data.Text                  (pack)
 import Development.Shake           (newResourceIO)
 -- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
                                    -- removeFiles, liftIO)
 import Paths_OrthoLang             (getDataFileName)
-import OrthoLang.Core.Types        (OrthoLangConfig(..), OrthoLangModule(..))
+import OrthoLang.Core.Types        (Config(..), Module(..))
 import OrthoLang.Core.Util         (absolutize, justOrDie, debug)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)
@@ -32,7 +33,7 @@ import GHC.Conc (getNumProcessors)
 
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main OrthoLang config below.
- - TODO still put all the config stuff in OrthoLangConfig though, and make it changable in the repl!
+ - TODO still put all the config stuff in Config though, and make it changable in the repl!
  -}
 dispatch :: Arguments -> String -> IO () -> IO ()
 dispatch args arg act = when (isPresent args $ longOption arg) $ do
@@ -46,22 +47,22 @@ dispatch args arg act = when (isPresent args $ longOption arg) $ do
  - TODO remove this and rewrite with logging module
  -}
 -- debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
--- debug :: OrthoLangConfig -> String -> a -> a
+-- debug :: Config -> String -> a -> a
 -- debug _ msg rtn = traceSL ... (pack msg) rtn
 
 debug' :: String -> IO ()
 debug' = debug "config"
 
-loadField :: Arguments -> Config -> String -> IO (Maybe String)
+loadField :: Arguments -> C.Config -> String -> IO (Maybe String)
 loadField args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
   | otherwise = C.lookup cfg $ pack key
 
-loadConfig :: [OrthoLangModule] -> Arguments -> IO OrthoLangConfig
+loadConfig :: [Module] -> Arguments -> IO Config
 loadConfig mods args = do
   debug' $ "docopt arguments: " ++ show args
   let path = justOrDie "parse --config arg failed!" $ getArg args $ longOption "config"
-  cfg <- C.load [Optional path]
+  cfg <- C.load [C.Optional path]
   csc <- loadField args cfg "script"
   csc' <- case csc of
             Nothing -> return Nothing
@@ -78,7 +79,7 @@ loadConfig mods args = do
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
   os' <- getOS
   cp <- getNumProcessors
-  let res = OrthoLangConfig
+  let res = Config
               { cfgScript  = csc'
               , cfgInteractive = int
               , cfgTmpDir  = justOrDie "parse --tmpdir arg failed!" ctd
@@ -136,20 +137,20 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
  -}
 
 -- This is mainly for use in the REPL so no need to return usable data
-showConfigField :: OrthoLangConfig -> String -> String
+showConfigField :: Config -> String -> String
 showConfigField cfg key = case lookup key fields of
   Nothing -> "no such config setting: " ++ key
   Just (getter, _) -> getter cfg
 
-setConfigField :: OrthoLangConfig -> String -> String -> Either String (IO OrthoLangConfig)
+setConfigField :: Config -> String -> String -> Either String (IO Config)
 setConfigField cfg key val = case lookup key fields of
   Nothing -> Left $ "no such config setting: " ++ key
   Just (_, setter) -> setter cfg val
 
 -- TODO add modules? maybe not much need
 -- TODO add interactive?
-fields :: [(String, (OrthoLangConfig -> String,
-                     OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)))]
+fields :: [(String, (Config -> String,
+                     Config -> String -> Either String (IO Config)))]
 fields =
   [ ("script" , (show . cfgScript , setScript ))
   , ("tmpdir" , (show . cfgTmpDir , setTmpdir ))
@@ -163,12 +164,12 @@ fields =
   -- TODO add share?
   ]
 
-showConfig :: OrthoLangConfig -> String
+showConfig :: Config -> String
 showConfig cfg = unlines $ map showField fields
   where
     showField (name, (getter, _)) = name ++ " = " ++ getter cfg
 
-setDebug :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setDebug :: Config -> String -> Either String (IO Config)
 setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ do
@@ -186,45 +187,45 @@ updateDebug regex = case regex of
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
 
-setScript :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setScript :: Config -> String -> Either String (IO Config)
 setScript cfg "Nothing" = Right $ return $ cfg { cfgScript = Nothing }
 setScript cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgScript = Just v }
 
-setTmpdir :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setTmpdir :: Config -> String -> Either String (IO Config)
 setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgTmpDir = v }
 
-setWorkdir :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setWorkdir :: Config -> String -> Either String (IO Config)
 setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgWorkDir = v }
 
-setWrapper :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setWrapper :: Config -> String -> Either String (IO Config)
 setWrapper cfg "Nothing" = Right $ return $ cfg { cfgWrapper = Nothing }
 setWrapper cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgWrapper = Just v }
 
-setReport :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setReport :: Config -> String -> Either String (IO Config)
 setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   v       -> Right $ return $ cfg { cfgReport = v }
 
-setThreads :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setThreads :: Config -> String -> Either String (IO Config)
 setThreads cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgThreads = v }
 
-setWidth :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setWidth :: Config -> String -> Either String (IO Config)
 setWidth cfg "Nothing" = Right $ return $ cfg { cfgWidth = Nothing }
 setWidth cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
   Just n  -> Right $ return $ cfg { cfgWidth = Just n }
 
-setOutFile :: OrthoLangConfig -> String -> Either String (IO OrthoLangConfig)
+setOutFile :: Config -> String -> Either String (IO Config)
 setOutFile cfg "Nothing" = Right $ return $ cfg { cfgOutFile = Nothing }
 setOutFile cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val

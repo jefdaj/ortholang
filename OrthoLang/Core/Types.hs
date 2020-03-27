@@ -1,7 +1,7 @@
 module OrthoLang.Core.Types
   (
   -- * Types and Newtypes
-    OrthoLangPath(..)
+    Path(..)
   , Action1
   , Action2
   , Action3
@@ -14,10 +14,10 @@ module OrthoLang.Core.Types
   , NewAction3
   , NewRulesFn
   -- * Basic data structures
-  , OrthoLangAssign
-  , OrthoLangExpr(..)
+  , Assign
+  , Expr(..)
   , CompiledExpr(..)
-  , OrthoLangConfig(..)
+  , Config(..)
   , findType
   , findModule
   , findFunction
@@ -25,14 +25,14 @@ module OrthoLang.Core.Types
   , listFunctionNames
   , operatorChars
   -- , WrapperConfig(..)
-  , OrthoLangType(..)
-  , ReplaceID(..)
-  , RepeatSalt(..)
-  , OrthoLangVar(..)
-  , OrthoLangScript
-  , Locks
-  , HashedIDs(..)
-  , HashedIDsRef
+  , Type(..)
+  , RepID(..)
+  , Salt(..)
+  , Var(..)
+  , Script
+  , LocksRef
+  , IDs(..)
+  , IDsRef
   , GlobalEnv
   , ensureResult
   , lookupResult
@@ -56,10 +56,10 @@ module OrthoLang.Core.Types
   , defaultShow
   , defaultShowN -- same but lets you pick how many lines to show
   -- module stuff (in flux)
-  , OrthoLangFunction(..)
+  , Function(..)
   , FnTag(..)
   , mkTypeDesc
-  , OrthoLangModule(..)
+  , Module(..)
   , saltOf
   , setSalt
   , prefixOf
@@ -84,7 +84,7 @@ module OrthoLang.Core.Types
 import qualified Data.Map.Strict as M
 import Text.Parsec (Parsec)
 
-import OrthoLang.Core.Locks (Locks, withReadLock)
+import OrthoLang.Core.Locks (LocksRef, withReadLock)
 import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
@@ -97,25 +97,25 @@ import Data.IORef                     (IORef)
 import Data.Maybe (fromJust, catMaybes)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
-newtype OrthoLangPath = OrthoLangPath FilePath deriving (Eq, Ord, Show)
+newtype Path = Path FilePath deriving (Eq, Ord, Show)
 
--- Note that each ActionN takes N+1 OrthoLangPaths, because the first is the output
+-- Note that each ActionN takes N+1 Paths, because the first is the output
 -- TODO take the output last instead?
-type Action1 = OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
-type Action2 = OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> Action ()
-type Action3 = OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> Action ()
+type Action1 = Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
+type Action2 = Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Action ()
+type Action3 = Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Path -> Action ()
 
 -- TODO remove when able in favor of well-typed versions above
-type ActionFn    = OrthoLangConfig -> CacheDir -> [ExprPath] -> Action ()
+type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
 
-type RulesFn     = GlobalEnv -> OrthoLangExpr -> Rules ExprPath
-type TypeChecker = [OrthoLangType] -> Either String OrthoLangType
+type RulesFn     = GlobalEnv -> Expr -> Rules ExprPath
+type TypeChecker = [Type] -> Either String Type
 
-type NewAction1 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath                         -> Action ()
-type NewAction2 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath -> FilePath             -> Action ()
-type NewAction3 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+type NewAction1 = Config -> LocksRef -> IDsRef -> ExprPath -> FilePath                         -> Action ()
+type NewAction2 = Config -> LocksRef -> IDsRef -> ExprPath -> FilePath -> FilePath             -> Action ()
+type NewAction3 = Config -> LocksRef -> IDsRef -> ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
-type NewRulesFn = OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+type NewRulesFn = Config -> LocksRef -> IDsRef -> Rules ()
 
 newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.ortholang/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
@@ -130,12 +130,12 @@ newtype ExprDigest = ExprDigest String deriving (Read, Show, Eq, Ord)
 
 -- A digest identifying which replace_* call the variable is part of.
 -- TODO This isn't very elegant; can it be removed?
-newtype ReplaceID = ReplaceID (Maybe String) deriving (Eq, Show, Read)
+newtype RepID = RepID (Maybe String) deriving (Eq, Show, Read)
 
 -- A number that can be incremented to change the expression's hash, causing repeat evaluation.
-newtype RepeatSalt = RepeatSalt Int deriving (Eq, Show, Read)
+newtype Salt = Salt Int deriving (Eq, Show, Read)
 
-data OrthoLangVar = OrthoLangVar ReplaceID String
+data Var = Var RepID String
   deriving (Eq, Show, Read)
  
 -- the common fields are:
@@ -146,24 +146,24 @@ data OrthoLangVar = OrthoLangVar ReplaceID String
 -- TODO test that it works correctly! in particular, it should go thru refs!
 --      (do we need to add salts of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
-data OrthoLangExpr
-  = OrthoLangLit OrthoLangType RepeatSalt String
-  | OrthoLangRef OrthoLangType RepeatSalt [OrthoLangVar] OrthoLangVar -- do refs need a salt? yes! (i think?)
-  | OrthoLangBop OrthoLangType RepeatSalt [OrthoLangVar] String  OrthoLangExpr OrthoLangExpr
-  | OrthoLangFun OrthoLangType RepeatSalt [OrthoLangVar] String [OrthoLangExpr]
-  | OrthoLangList OrthoLangType RepeatSalt [OrthoLangVar] [OrthoLangExpr]
-  | OrthoLangRules CompiledExpr -- wrapper around previously-compiled rules (see below)
+data Expr
+  = Lit Type Salt String
+  | Ref Type Salt [Var] Var -- do refs need a salt? yes! (i think?)
+  | Bop Type Salt [Var] String  Expr Expr
+  | Fun Type Salt [Var] String [Expr]
+  | Lst Type Salt [Var] [Expr]
+  | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
 -- An expression that has already been compiled to Rules, wrapped so it can be
 -- passed to another function. Because Rules can't be shown or compared, we
--- also carry around the original OrthoLangExpr. TODO is the expr necessary? helpful?
+-- also carry around the original Expr. TODO is the expr necessary? helpful?
 -- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
 -- The extra ExprPath is weird, but seems to be required since we can't get at the second one.
-data CompiledExpr = CompiledExpr OrthoLangType ExprPath (Rules ExprPath)
+data CompiledExpr = CompiledExpr Type ExprPath (Rules ExprPath)
 
 -- TODO is it a bad idea to hide the compiled-ness?
--- TODO can this be made into a OrthoLangPath?
+-- TODO can this be made into a Path?
 -- TODO is show ever really needed?
 instance Show CompiledExpr where
   show (CompiledExpr t p _) = "CompiledExpr " ++ extOf t ++ " " ++ show p ++ " <<Rules ExprPath>>"
@@ -173,32 +173,32 @@ instance Eq CompiledExpr where
   (CompiledExpr _ p1 _) == (CompiledExpr _ p2 _) = p1 == p2
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-saltOf :: OrthoLangExpr -> RepeatSalt
-saltOf (OrthoLangLit _ n _)       = n
-saltOf (OrthoLangRef _ n _ _)     = n
-saltOf (OrthoLangBop _ n _ _ _ _) = n
-saltOf (OrthoLangFun _ n _ _ _)   = n
-saltOf (OrthoLangList _ n _ _)     = n
-saltOf (OrthoLangRules (CompiledExpr _ _ _)) = error "CompiledExprs don't have salts" -- TODO is that OK?
+saltOf :: Expr -> Salt
+saltOf (Lit _ n _)       = n
+saltOf (Ref _ n _ _)     = n
+saltOf (Bop _ n _ _ _ _) = n
+saltOf (Fun _ n _ _ _)   = n
+saltOf (Lst _ n _ _)     = n
+saltOf (Com (CompiledExpr _ _ _)) = error "CompiledExprs don't have salts" -- TODO is that OK?
 
 -- TODO this needs to be recursive?
 -- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
-setSalt :: Int -> OrthoLangExpr -> OrthoLangExpr
-setSalt r (OrthoLangLit t _ s)          = OrthoLangLit  t (RepeatSalt r) s
-setSalt r (OrthoLangRef t _ ds v)       = OrthoLangRef  t (RepeatSalt r) ds v
-setSalt r (OrthoLangBop t _ ds s e1 e2) = OrthoLangBop  t (RepeatSalt r) ds s e1 e2
-setSalt r (OrthoLangFun t _ ds s es)    = OrthoLangFun  t (RepeatSalt r) ds s es
-setSalt r (OrthoLangList t _ ds es)     = OrthoLangList t (RepeatSalt r) ds es
-setSalt _ (OrthoLangRules (CompiledExpr _ _ _)) = error "setSalt not implemented for compiled rules" -- TODO should it be?
+setSalt :: Int -> Expr -> Expr
+setSalt r (Lit t _ s)          = Lit  t (Salt r) s
+setSalt r (Ref t _ ds v)       = Ref  t (Salt r) ds v
+setSalt r (Bop t _ ds s e1 e2) = Bop  t (Salt r) ds s e1 e2
+setSalt r (Fun t _ ds s es)    = Fun  t (Salt r) ds s es
+setSalt r (Lst t _ ds es)     = Lst t (Salt r) ds es
+setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt not implemented for compiled rules" -- TODO should it be?
 
--- TODO add names to the OrthoLangBops themselves... or associate with prefix versions?
-prefixOf :: OrthoLangExpr -> String
-prefixOf (OrthoLangLit rtn _ _     ) = extOf rtn
-prefixOf (OrthoLangFun _ _ _ name _) = name
-prefixOf (OrthoLangList _ _ _ _    ) = "list"
-prefixOf (OrthoLangRef _ _ _ _     ) = error  "OrthoLangRefs don't need a prefix"
-prefixOf (OrthoLangRules (CompiledExpr _ _ _)) = error "CompiledExprs don't need a prefix"
-prefixOf (OrthoLangBop _ _ _ n _ _ ) = case n of
+-- TODO add names to the Bops themselves... or associate with prefix versions?
+prefixOf :: Expr -> String
+prefixOf (Lit rtn _ _     ) = extOf rtn
+prefixOf (Fun _ _ _ name _) = name
+prefixOf (Lst _ _ _ _    ) = "list"
+prefixOf (Ref _ _ _ _     ) = error  "Refs don't need a prefix"
+prefixOf (Com (CompiledExpr _ _ _)) = error "CompiledExprs don't need a prefix"
+prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
                                    "*" -> "multiply"
@@ -206,57 +206,57 @@ prefixOf (OrthoLangBop _ _ _ n _ _ ) = case n of
                                    "|" -> "any"
                                    "&" -> "all"
                                    "~" -> "diff"
-                                   x   -> error $ "unknown OrthoLangBop: '" ++ x ++ "'"
+                                   x   -> error $ "unknown Bop: '" ++ x ++ "'"
 
 
--- TODO have a separate OrthoLangAssign for "result"?
-type OrthoLangAssign = (OrthoLangVar, OrthoLangExpr)
-type OrthoLangScript = [OrthoLangAssign]
+-- TODO have a separate Assign for "result"?
+type Assign = (Var, Expr)
+type Script = [Assign]
 
-ensureResult :: OrthoLangScript -> OrthoLangScript
+ensureResult :: Script -> Script
 ensureResult scr = if null scr then noRes else scr'
   where
-    noRes = [(resVar, OrthoLangLit str (RepeatSalt 0) "no result")]
-    resVar = OrthoLangVar (ReplaceID Nothing) "result"
+    noRes = [(resVar, Lit str (Salt 0) "no result")]
+    resVar = Var (RepID Nothing) "result"
     scr' = scr ++ [(resVar, snd $ last scr)]
 
-lookupResult :: [(OrthoLangVar, b)] -> Maybe b
+lookupResult :: [(Var, b)] -> Maybe b
 lookupResult scr = if null matches
   then (if null scr then Nothing else Just (snd $ last scr))
   else Just (snd $ last matches)
   where
-    matches = filter (\(OrthoLangVar _ v, _) -> v == "result") scr
+    matches = filter (\(Var _ v, _) -> v == "result") scr
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
 -- TODO how to make the record fields not partial functions?
-data OrthoLangType
+data Type
   = Empty -- TODO remove this? should never be a need to define an empty list
-  | ListOf OrthoLangType
-  | ScoresOf OrthoLangType
+  | ListOf Type
+  | ScoresOf Type
 
   {- These are kind of like simpler, less extensible typeclasses. They're just
    - a list of types that can be treated similarly in some circumstances, for
    - example "files whose length is their number of lines" or "FASTA files (faa
    - or fna)".
    -}
-  | OrthoLangTypeGroup
+  | TypeGroup
     { tgExt   :: String
     , tgDesc  :: String
-    -- , tgShow  :: OrthoLangConfig -> Locks -> FilePath -> IO String -- TODO remove?
-    , tgMember :: OrthoLangType -> Bool
+    -- , tgShow  :: Config -> LocksRef -> FilePath -> IO String -- TODO remove?
+    , tgMember :: Type -> Bool
     }
 
-  | OrthoLangType
+  | Type
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
-    , tShow :: OrthoLangConfig -> Locks -> FilePath -> IO String
+    , tShow :: Config -> LocksRef -> FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
 
-defaultShow :: OrthoLangConfig -> Locks -> FilePath -> IO String
+defaultShow :: Config -> LocksRef -> FilePath -> IO String
 defaultShow = defaultShowN 5
 
-defaultShowN :: Int -> OrthoLangConfig -> Locks -> FilePath -> IO String
+defaultShowN :: Int -> Config -> LocksRef -> FilePath -> IO String
 defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
@@ -268,69 +268,69 @@ defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 -- TODO should this use typesMatch?
-instance Eq OrthoLangType where
+instance Eq Type where
   Empty        == Empty        = True
   (ListOf a)   == (ListOf b)   = a == b
   (ScoresOf a) == (ScoresOf b) = a == b
-  (OrthoLangType {tExt = t1}) == (OrthoLangType {tExt = t2}) = t1 == t2
-  (OrthoLangTypeGroup {tgExt = t1}) == (OrthoLangTypeGroup {tgExt = t2}) = t1 == t2
-  (OrthoLangTypeGroup {tgMember = fn}) == t = fn t
-  t == (OrthoLangTypeGroup {tgMember = fn}) = fn t
+  (Type {tExt = t1}) == (Type {tExt = t2}) = t1 == t2
+  (TypeGroup {tgExt = t1}) == (TypeGroup {tgExt = t2}) = t1 == t2
+  (TypeGroup {tgMember = fn}) == t = fn t
+  t == (TypeGroup {tgMember = fn}) = fn t
   _ == _ = False -- TODO should this behave differently?
 
-instance Show OrthoLangType where
+instance Show Type where
   show = extOf
 
-typeOf :: OrthoLangExpr -> OrthoLangType
-typeOf (OrthoLangLit   t _ _      ) = t
-typeOf (OrthoLangRef   t _ _ _    ) = t
-typeOf (OrthoLangBop   t _ _ _ _ _) = t
-typeOf (OrthoLangFun   t _ _ _ _  ) = t
-typeOf (OrthoLangList  t _ _ _    ) = ListOf t -- t can be Empty
-typeOf (OrthoLangRules (CompiledExpr t _ _)) = t
--- typeOf (OrthoLangList _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
--- typeOf (OrthoLangList _ _ _ []     ) = Empty
--- typeOf (OrthoLangList _ _ _ []     ) = ListOf Empty
+typeOf :: Expr -> Type
+typeOf (Lit   t _ _      ) = t
+typeOf (Ref   t _ _ _    ) = t
+typeOf (Bop   t _ _ _ _ _) = t
+typeOf (Fun   t _ _ _ _  ) = t
+typeOf (Lst  t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (Com (CompiledExpr t _ _)) = t
+-- typeOf (Lst _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
+-- typeOf (Lst _ _ _ []     ) = Empty
+-- typeOf (Lst _ _ _ []     ) = ListOf Empty
 
 -- Works around a bug where if the first element is an empty list but others
 -- have elements, it would call the whole thing an "emptylist.list".
 -- Note no typechecking happens here; heterogenous lists won't be noticed.
--- nonEmptyType :: [OrthoLangExpr] -> OrthoLangType
+-- nonEmptyType :: [Expr] -> Type
 -- nonEmptyType    []  = Empty
 -- nonEmptyType (x:[]) = typeOf x -- catches (ListOf Empty)
 -- nonEmptyType (_:xs) = nonEmptyType xs
 
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
-extOf :: OrthoLangType -> String
+extOf :: Type -> String
 extOf Empty                      = "empty" -- for lists with nothing in them yet
 extOf (ListOf                t ) = extOf t ++ ".list"
 extOf (ScoresOf              t ) = extOf t ++ ".scores"
-extOf (OrthoLangTypeGroup {tgExt = t}) = t -- TODO should this not be called an extension? it's never written to disk
+extOf (TypeGroup {tgExt = t}) = t -- TODO should this not be called an extension? it's never written to disk
                                      -- TODO put back the < > ?
-extOf (OrthoLangType      { tExt = t}) = t
+extOf (Type      { tExt = t}) = t
 
 -- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
-descOf :: OrthoLangType -> String
+descOf :: Type -> String
 descOf Empty         = "empty list" -- for lists with nothing in them yet
 descOf (ListOf   t ) = "list of " ++ descOf t
 descOf (ScoresOf t ) = "scores for " ++ descOf t
-descOf (OrthoLangTypeGroup {tgDesc = t}) = t
-descOf (OrthoLangType      { tDesc = t}) = t
+descOf (TypeGroup {tgDesc = t}) = t
+descOf (Type      { tDesc = t}) = t
 
-varOf :: OrthoLangExpr -> [OrthoLangVar]
-varOf (OrthoLangRef _ _ _ v) = [v]
+varOf :: Expr -> [Var]
+varOf (Ref _ _ _ v) = [v]
 varOf _                = [ ]
 
-depsOf :: OrthoLangExpr -> [OrthoLangVar]
-depsOf (OrthoLangLit  _ _ _         ) = []
-depsOf (OrthoLangRef  _ _ vs v      ) = v:vs -- TODO redundant?
-depsOf (OrthoLangBop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
-depsOf (OrthoLangFun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (OrthoLangList _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
-depsOf (OrthoLangRules (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+depsOf :: Expr -> [Var]
+depsOf (Lit  _ _ _         ) = []
+depsOf (Ref  _ _ vs v      ) = v:vs -- TODO redundant?
+depsOf (Bop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
+depsOf (Fun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Lst _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
-rDepsOf :: OrthoLangScript -> OrthoLangVar -> [OrthoLangVar]
+rDepsOf :: Script -> Var -> [Var]
 rDepsOf scr var = map fst rDeps
   where
     rDeps = filter (\(_,e) -> isRDep e) scr
@@ -340,8 +340,8 @@ rDepsOf scr var = map fst rDeps
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
 -- TODO how about lists/sets, are those core too?
 
-str :: OrthoLangType
-str = OrthoLangType
+str :: Type
+str = Type
   { tExt  = "str"
   , tDesc = "string"
   -- TODO make one of the read functions be IO for this instead
@@ -352,8 +352,8 @@ str = OrthoLangType
       return $ "\"" ++ txt' ++ "\""
   }
 
-num :: OrthoLangType
-num = OrthoLangType
+num :: Type
+num = Type
   { tExt  = "num"
   , tDesc = "number in scientific notation"
   , tShow = \_ ls f -> do
@@ -368,13 +368,13 @@ num = OrthoLangType
 -- TODO always load defaults for WorkDir, TmpDir, Verbose
 -- TODO make these into FilePaths and an Int/Bool
 -- TODO rename cfg prefix to just c?
-data OrthoLangConfig = OrthoLangConfig
+data Config = Config
   { cfgScript  :: Maybe FilePath
   , cfgInteractive :: Bool
   , cfgTmpDir  :: FilePath
   , cfgWorkDir :: FilePath
   , cfgDebug   :: Maybe String
-  , cfgModules :: [OrthoLangModule]
+  , cfgModules :: [Module]
   , cfgWrapper :: Maybe FilePath
   , cfgOutFile :: Maybe FilePath
   , cfgShare   :: Maybe FilePath
@@ -391,32 +391,32 @@ data OrthoLangConfig = OrthoLangConfig
 
 -- note: only lists the first name of each function,
 --       which for binary operators will be the single-char one
-listFunctionNames :: OrthoLangConfig -> [String]
+listFunctionNames :: Config -> [String]
 listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
 
-findModule :: OrthoLangConfig -> String -> Maybe OrthoLangModule
+findModule :: Config -> String -> Maybe Module
 findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
 
 -- used by the compiler and repl
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
-findFunction :: OrthoLangConfig -> String -> Maybe OrthoLangFunction
+findFunction :: Config -> String -> Maybe Function
 findFunction cfg name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar f) == Just name) fs
   where
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
 
-findType :: OrthoLangConfig -> String -> Maybe OrthoLangType
+findType :: Config -> String -> Maybe Type
 findType cfg ext = find (\t -> extOf t == ext) ts
   where
     ms = cfgModules cfg
     ts = concatMap mTypes ms
 
-listFunctions :: OrthoLangConfig -> [OrthoLangFunction]
+listFunctions :: Config -> [Function]
 listFunctions cfg = concatMap mFunctions $ cfgModules cfg
 
 -- Now with guard against accidentally including parts of prefix fn names!
-operatorChars :: OrthoLangConfig -> [Char]
+operatorChars :: Config -> [Char]
 operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 
 -----------------
@@ -430,19 +430,19 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 -- hExprs is for decoding exprs/<hash>/<hash>/... paths
 -- TODO use bytestring-tries rather than maps with string keys?
 -- TODO should this be ActionIDs in general? aka all the stuff that might be needed in Action
-data HashedIDs = HashedIDs
+data IDs = IDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: M.Map ExprDigest (OrthoLangType, OrthoLangPath) -- TODO move this to OrthoLangState below
+  , hExprs  :: M.Map ExprDigest (Type, Path) -- TODO move this to OrthoLangState below
   }
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
-type HashedIDsRef = IORef HashedIDs
+type IDsRef = IORef IDs
 
 -- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
-type GlobalEnv = (OrthoLangScript, OrthoLangConfig, Locks, HashedIDsRef)
-type ParseM a = Parsec String GlobalEnv a
+type GlobalEnv = (Script, Config, LocksRef, IDsRef)
+type ParseM a = Parsec String GlobalEnv a -- TODO only hold the script + config, not the whole global env
 
 ----------------
 -- Repl monad --
@@ -468,9 +468,9 @@ prompt = lift . lift . getInputLine
 -- Module stuff (all in flux) --
 --------------------------------
 
--- TODO replace current OrthoLangType with something like this:
+-- TODO replace current Type with something like this:
 -- TODO does eq make sense here?
--- data OrthoLangType = OrthoLangType
+-- data Type = Type
 --   { tName :: String
 --   , tExt  :: String
 --   , tDesc :: String
@@ -492,7 +492,7 @@ data FnTag
 
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
-data OrthoLangFunction = OrthoLangFunction
+data Function = Function
   { fName      :: String           -- ^ main (prefix) function name
   , fOpChar    :: Maybe Char       -- ^ infix operator symbol, if any
   , fTypeCheck :: TypeChecker      -- ^ checks input types, returning an error message or return type
@@ -504,46 +504,46 @@ data OrthoLangFunction = OrthoLangFunction
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   -- deriving (Eq, Read)
 
-mkTypeDesc :: String -> [OrthoLangType] -> OrthoLangType -> String
+mkTypeDesc :: String -> [Type] -> Type -> String
 mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
 
 -- TODO does eq make sense here?
-data OrthoLangModule = OrthoLangModule
+data Module = Module
   { mName      :: String
   , mDesc      :: String
-  , mTypes     :: [OrthoLangType]
-  , mFunctions :: [OrthoLangFunction]
+  , mTypes     :: [Type]
+  , mFunctions :: [Function]
   }
   -- deriving (Eq, Read)
 
 -- TODO what about prettyShow in Pretty.hs?
-instance Show OrthoLangModule where
+instance Show Module where
   show = mName
 
 -- TODO what if it's a function call?
 -- do we have to make a rule that you can't use those?
 -- (uuuugly! but not a show-stopper for now)
-extractExprs :: OrthoLangScript -> OrthoLangExpr -> [OrthoLangExpr]
-extractExprs  _  (OrthoLangList _ _ _ es) = es
-extractExprs scr (OrthoLangRef  _ _ _ v ) = case lookup v scr of
+extractExprs :: Script -> Expr -> [Expr]
+extractExprs  _  (Lst _ _ _ es) = es
+extractExprs scr (Ref  _ _ _ v ) = case lookup v scr of
                                         Nothing -> error $ "no such var " ++ show v
                                         Just e  -> extractExprs scr e
-extractExprs _   (OrthoLangFun _ _ _ _ _) = error explainFnBug
-extractExprs scr (OrthoLangBop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
+extractExprs _   (Fun _ _ _ _ _) = error explainFnBug
+extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show e
 
 -- TODO any good way to avoid fromJust here?
-exprDepsOf :: OrthoLangScript -> OrthoLangExpr -> [OrthoLangExpr]
+exprDepsOf :: Script -> Expr -> [Expr]
 exprDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
 
 -- needed to know what to still evaluate despite caching, so we can load seqid hashes
 -- TODO rename to reflect that it's mostly about getting the functions which can't be cached
-extractLoads :: OrthoLangScript -> OrthoLangExpr -> [OrthoLangExpr]
+extractLoads :: Script -> Expr -> [Expr]
 -- extractLoads s e = filter isLoad $ extractExprs s e
 extractLoads s e = filter isLoad' $ exprDepsOf s e
   where
     isLoad' expr = let res = isLoad expr in trace "ortholang.core.types.extractLoads" ("isLoad '" ++ show expr ++ "'? " ++ show res) res
-    isLoad (OrthoLangFun _ _ _ name _) = "load" `isPrefixOf` name || "glob" `isPrefixOf` name
+    isLoad (Fun _ _ _ name _) = "load" `isPrefixOf` name || "glob" `isPrefixOf` name
     isLoad _ = False
 
 -- TODO will this get printed, or will there just be a parse error?
@@ -560,23 +560,23 @@ explainFnBug =
 -- be any kind of list
 -- TODO is there any more elegant way? this seems error-prone...
 -- TODO is this the same as the Eq instance?
-typeMatches :: OrthoLangType -> OrthoLangType -> Bool
+typeMatches :: Type -> Type -> Bool
 typeMatches Empty _ = True
 typeMatches _ Empty = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
-typeMatches g1@(OrthoLangTypeGroup {}) g2@(OrthoLangTypeGroup {}) = g1 == g2
-typeMatches a (OrthoLangTypeGroup {tgMember = fn}) = fn a
-typeMatches (OrthoLangTypeGroup {tgMember = fn}) b = fn b
+typeMatches g1@(TypeGroup {}) g2@(TypeGroup {}) = g1 == g2
+typeMatches a (TypeGroup {tgMember = fn}) = fn a
+typeMatches (TypeGroup {tgMember = fn}) b = fn b
 typeMatches a b = a == b
 
-typesMatch :: [OrthoLangType] -> [OrthoLangType] -> Bool
+typesMatch :: [Type] -> [Type] -> Bool
 typesMatch as bs = sameLength && allMatch
   where
     sameLength = length as == length bs
     allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
 
-nonEmptyType :: [OrthoLangType] -> Either String OrthoLangType
+nonEmptyType :: [Type] -> Either String Type
 nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
   where
     nonEmpty = filter isNonEmpty ts
@@ -586,7 +586,7 @@ nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
     typesOK  = all (typeMatches elemType) ts
     errorMsg = "all elements of a list must have the same type"
 
-isNonEmpty :: OrthoLangType -> Bool
+isNonEmpty :: Type -> Bool
 isNonEmpty Empty      = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True

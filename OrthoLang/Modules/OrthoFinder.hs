@@ -12,15 +12,15 @@ import OrthoLang.Core.Actions       (traceA, need', readPaths, symlink, runCmd, 
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple)
 import OrthoLang.Core.Locks         (withWriteLock')
-import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths         (Path, toPath, fromPath)
 import OrthoLang.Core.Util          (digest, readFileStrict)
 import OrthoLang.Modules.SeqIO      (faa)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>), takeFileName, takeBaseName, replaceBaseName)
 import System.Exit                 (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "OrthoFinder"
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
   , mTypes = [faa, ofr]
@@ -29,8 +29,8 @@ orthoLangModule = OrthoLangModule
       ]
   }
 
-ofr :: OrthoLangType
-ofr = OrthoLangType
+ofr :: Type
+ofr = Type
   { tExt  = "ofr"
   , tDesc = "OrthoFinder results"
   , tShow = \_ ref path -> do
@@ -42,8 +42,8 @@ ofr = OrthoLangType
 -- orthofinder --
 -----------------
 
-orthofinder :: OrthoLangFunction
-orthofinder = let name = "orthofinder" in OrthoLangFunction
+orthofinder :: Function
+orthofinder = let name = "orthofinder" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
@@ -53,19 +53,19 @@ orthofinder = let name = "orthofinder" in OrthoLangFunction
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
 -- TODO what's diamond blast? do i need to add it?
-aOrthofinder :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aOrthofinder :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aOrthofinder cfg ref _ [out, faListPath] = do
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
-      statsPath = toOrthoLangPath cfg $ tmpDir
+      statsPath = toPath cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
                     </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
-      statsPath' = fromOrthoLangPath cfg statsPath
+      statsPath' = fromPath cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
   -- withWriteLock' ref (tmpDir </> "lock") $ do
   faPaths <- readPaths cfg ref faListPath'
-  let faPaths' = map (fromOrthoLangPath cfg) faPaths
+  let faPaths' = map (fromPath cfg) faPaths
   need' cfg ref "ortholang.modules.orthofinder.aOrthofinder" faPaths'
-  let faLinks = map (\p -> toOrthoLangPath cfg $ tmpDir </> (takeFileName $ fromOrthoLangPath cfg p)) faPaths
+  let faLinks = map (\p -> toPath cfg $ tmpDir </> (takeFileName $ fromPath cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1
   -- and we can't mark statsPath' as an extra outpath
@@ -91,8 +91,8 @@ aOrthofinder cfg ref _ [out, faListPath] = do
   trackWrite' cfg [statsPath']
   symlink cfg ref out statsPath
   where
-    out'        = fromOrthoLangPath cfg out
-    faListPath' = fromOrthoLangPath cfg faListPath
+    out'        = fromPath cfg out
+    faListPath' = fromPath cfg faListPath
     out''       = traceA "aOrthofinder" out' [out', faListPath']
 
 aOrthofinder _ _ _ args = error $ "bad argument to aOrthofinder: " ++ show args

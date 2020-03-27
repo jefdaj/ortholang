@@ -39,7 +39,7 @@ import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
 import OrthoLang.Core.Compile         (compileScript, rExpr, newCoreRules, newFunctionRules)
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
-import OrthoLang.Core.Paths            (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths            (Path, toPath, fromPath)
 import OrthoLang.Core.Locks            (withReadLock')
 import OrthoLang.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Core.Actions          (readLits, readPaths)
@@ -139,7 +139,7 @@ renderBar total nThreads fraction shaftChar headChar = shaft ++ heads ++ blank
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
-myShake :: OrthoLangConfig -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
+myShake :: Config -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
 myShake cfg pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   let shakeOpts = shakeOptions
@@ -172,26 +172,26 @@ myShake cfg pm delay rules = do
  - TODO idea for sets: if any element contains "\n", just add blank lines between them
  - TODO clean this up!
  -}
-prettyResult :: OrthoLangConfig -> Locks -> OrthoLangType -> OrthoLangPath -> Action Doc
+prettyResult :: Config -> LocksRef -> Type -> Path -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits cfg ref $ fromOrthoLangPath cfg f
+    lits <- readLits cfg ref $ fromPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths cfg ref $ fromOrthoLangPath cfg f
+    paths <- readPaths cfg ref $ fromPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg ref (ScoresOf _)  f = do
-  s <- liftIO (defaultShow cfg ref $ fromOrthoLangPath cfg f)
+  s <- liftIO (defaultShow cfg ref $ fromPath cfg f)
   return $ text s
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
     showFn = if t == num then prettyNum else text
-    f' = fromOrthoLangPath cfg f
+    f' = fromPath cfg f
 
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
@@ -199,7 +199,7 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangType -> Rules [ExprPath] -> Rules ResPath -> IO ()
+eval :: Handle -> Config -> LocksRef -> IDsRef -> Type -> Rules [ExprPath] -> Rules ResPath -> IO ()
 eval hdl cfg ref ids rtype ls p = do
   start <- getCurrentTime
   let ep = EvalProgress
@@ -251,28 +251,28 @@ eval hdl cfg ref ids rtype ls p = do
         when (cfgInteractive cfg) (printShort cfg ref ids pm rtype path)
         completeProgress pm
         case cfgOutFile cfg of
-          Just out -> writeResult cfg ref ids (toOrthoLangPath cfg path) out
+          Just out -> writeResult cfg ref ids (toPath cfg path) out
           Nothing  -> return () -- when (not $ cfgInteractive cfg) (printLong cfg ref ids pm path)
         return ()
 
-writeResult :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> FilePath -> Action ()
+writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
 writeResult cfg ref idsref path out = do
   -- liftIO $ putStrLn $ "writing result to '" ++ out ++ "'"
   unhashIDsFile cfg ref idsref path out
 
 -- TODO what happens when the txt is a binary plot image?
 -- TODO is this where the diamond makedb error comes in?
-printLong :: OrthoLangConfig -> Locks -> HashedIDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
+printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
 printLong _ ref idsref pm path = do
   ids <- liftIO $ readIORef idsref
   txt <- withReadLock' ref path $ readFile' path
   let txt' = unhashIDs False ids txt
   liftIO $ P.putMsgLn pm ("\n" ++ txt')
 
-printShort :: OrthoLangConfig -> Locks -> HashedIDsRef -> P.Meter' EvalProgress -> OrthoLangType -> FilePath -> Action ()
+printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
   ids <- liftIO $ readIORef idsref
-  res  <- prettyResult cfg ref rtype $ toOrthoLangPath cfg path
+  res  <- prettyResult cfg ref rtype $ toPath cfg path
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."
   -- TODO fix the bug that causes this to remove newlines after seqids:
@@ -288,7 +288,7 @@ evalScript hdl s@(as, c, ref, ids) =
               Just r  -> r
       loadExprs = extractLoads as res
       loads = mapM (rExpr s) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-  in eval hdl c ref ids (typeOf res) loads (compileScript s $ ReplaceID Nothing)
+  in eval hdl c ref ids (typeOf res) loads (compileScript s $ RepID Nothing)
 
 evalFile :: GlobalEnv -> Handle -> IO ()
 evalFile st@(_, cfg, ref, ids) hdl = case cfgScript cfg of

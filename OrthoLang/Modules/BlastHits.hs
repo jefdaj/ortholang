@@ -11,13 +11,13 @@ import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple)
 import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, writeCachedVersion, trackWrite')
-import OrthoLang.Core.Paths         (OrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths         (Path, fromPath)
 import OrthoLang.Modules.Blast      (bht)
 import OrthoLang.Modules.CRBBlast   (crb)
 import System.Exit                 (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "BlastHits"
   , mDesc = "Work with BLAST hit tables"
   , mTypes = [bht, crb, hittable]
@@ -32,8 +32,8 @@ orthoLangModule = OrthoLangModule
     ]
   }
 
-hittable :: OrthoLangType
-hittable = OrthoLangTypeGroup
+hittable :: Type
+hittable = TypeGroup
   { tgExt = "hittable"
   , tgDesc  = "BLAST hit table-like"
   , tgMember = \t -> t `elem` [bht, crb] -- TODO mms too
@@ -47,12 +47,12 @@ hittable = OrthoLangTypeGroup
 -- tExtract [x] | elem x [crb, bht] = Right $ ListOf str
 -- tExtract  _ = Left "expected a blast hits table"
 
--- tExtractEach :: [OrthoLangType] -> Either String OrthoLangType
+-- tExtractEach :: [Type] -> Either String Type
 -- tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
 -- tExtractEach  _ = Left "expected a list of blast hits tables"
 
-extractQueries :: OrthoLangFunction
-extractQueries = OrthoLangFunction
+extractQueries :: Function
+extractQueries = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
@@ -63,8 +63,8 @@ extractQueries = OrthoLangFunction
     name = "extract_queries"
 
 -- TODO this should have a typeclass
-extractQueriesEach :: OrthoLangFunction
-extractQueriesEach = OrthoLangFunction
+extractQueriesEach :: Function
+extractQueriesEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
@@ -75,8 +75,8 @@ extractQueriesEach = OrthoLangFunction
     name = "extract_queries_each"
 
 -- TODO this should have a typeclass
-extractTargets :: OrthoLangFunction
-extractTargets = OrthoLangFunction
+extractTargets :: Function
+extractTargets = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
@@ -86,8 +86,8 @@ extractTargets = OrthoLangFunction
   where
     name = "extract_targets"
 
-extractTargetsEach :: OrthoLangFunction
-extractTargetsEach = OrthoLangFunction
+extractTargetsEach :: Function
+extractTargetsEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
@@ -98,7 +98,7 @@ extractTargetsEach = OrthoLangFunction
     name = "extract_targets_each"
 
 -- TODO remove uniq, unless it's used somewhere?
-aCutCol :: Bool -> Int -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aCutCol :: Bool -> Int -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -119,12 +119,12 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   -- TODO remove this? why does it need to be here at all?
   -- let outOut = outPath' <.> "out"
   -- unlessExists outOut $ do
-  --   symlink cfg ref outPath $ toOrthoLangPath cfg outOut
+  --   symlink cfg ref outPath $ toPath cfg outOut
 
   where
-    outPath'  = fromOrthoLangPath cfg outPath
+    outPath'  = fromPath cfg outPath
     outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
-    tsvPath'  = fromOrthoLangPath cfg tsvPath
+    tsvPath'  = fromPath cfg tsvPath
     tmpPath'  = replaceBaseName outPath'' "tmp" -- the non-deduped version
 aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 
@@ -132,11 +132,11 @@ aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
 -- filter_*(_each) --
 ---------------------
 
-filterEvalue :: OrthoLangFunction
+filterEvalue :: Function
 filterEvalue = mkFilterHits "evalue"
 
-mkFilterHits :: String -> OrthoLangFunction
-mkFilterHits colname = OrthoLangFunction
+mkFilterHits :: String -> Function
+mkFilterHits colname = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
@@ -146,11 +146,11 @@ mkFilterHits colname = OrthoLangFunction
   where
     name = "filter_" ++ colname
 
-filterEvalueEach :: OrthoLangFunction
+filterEvalueEach :: Function
 filterEvalueEach = mkFilterHitsEach "evalue"
 
-mkFilterHitsEach :: String -> OrthoLangFunction
-mkFilterHitsEach colname = OrthoLangFunction
+mkFilterHitsEach :: String -> Function
+mkFilterHitsEach colname = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
@@ -160,7 +160,7 @@ mkFilterHitsEach colname = OrthoLangFunction
   where
     name = "filter_" ++ colname ++ "_each"
 
-aFilterHits :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aFilterHits :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aFilterHits colname cfg ref _ [out, cutoff, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -176,10 +176,10 @@ aFilterHits colname cfg ref _ [out, cutoff, hits] = do
     , cmdRmPatterns = [out'']
     }
   where
-    out'    = fromOrthoLangPath cfg out
+    out'    = fromPath cfg out
     out''   = traceA "aFilterHits" out' [out', cutoff', hits']
-    cutoff' = fromOrthoLangPath cfg cutoff
-    hits'   = fromOrthoLangPath cfg hits
+    cutoff' = fromPath cfg cutoff
+    hits'   = fromPath cfg hits
 aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
 
 -------------------------------
@@ -191,8 +191,8 @@ aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
 
 -- TODO should this return whatever hittable type it's given?
 -- TODO split into best_hits_evalue and best_hits_bitscore?
-bestHits :: OrthoLangFunction
-bestHits =  OrthoLangFunction
+bestHits :: Function
+bestHits =  Function
   { fOpChar = Nothing, fName = name 
   , fTypeCheck = defaultTypeCheck [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
@@ -202,8 +202,8 @@ bestHits =  OrthoLangFunction
   where
     name = "best_hits"
 
-bestHitsEach :: OrthoLangFunction
-bestHitsEach = OrthoLangFunction
+bestHitsEach :: Function
+bestHitsEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
@@ -213,7 +213,7 @@ bestHitsEach = OrthoLangFunction
   where
     name = "best_hits_each"
 
-aBestExtract :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aBestExtract :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aBestExtract cfg ref _ [out, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -229,7 +229,7 @@ aBestExtract cfg ref _ [out, hits] = do
     , cmdRmPatterns = [out']
     }
   where
-    out'  = fromOrthoLangPath cfg out
+    out'  = fromPath cfg out
     out'' = traceA "aBestExtract" out' [out', hits']
-    hits' = fromOrthoLangPath cfg hits
+    hits' = fromPath cfg hits
 aBestExtract _ _ _ args = error $ "bad argument to aBestExtract: " ++ show args

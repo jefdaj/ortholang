@@ -19,8 +19,8 @@ import OrthoLang.Modules.Replace (rReplaceEach)
 
 import Data.Scientific (Scientific(), toBoundedInteger)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random salts"
   , mTypes = []
@@ -31,8 +31,8 @@ orthoLangModule = OrthoLangModule
 -- repeat without permutation (to test robustness) --
 -----------------------------------------------------
 
-repeatN :: OrthoLangFunction
-repeatN = OrthoLangFunction
+repeatN :: Function
+repeatN = Function
   { fOpChar = Nothing, fName = "repeat"
   ,fTags = []
   , fTypeCheck = tRepeatN
@@ -43,7 +43,7 @@ repeatN = OrthoLangFunction
 -- takes a result type, a starting type, and an int,
 -- and returns a list of the result var type. start type can be whatever
 -- TODO does num here refer to actual num, or is it shadowing it?
-tRepeatN :: [OrthoLangType] -> Either String OrthoLangType 
+tRepeatN :: [Type] -> Either String Type 
 tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
 tRepeatN _ = Left "invalid args to repeatN"
 
@@ -53,9 +53,9 @@ readSciInt s = case toBoundedInteger (read s :: Scientific) of
   Just n  -> n
 
 -- TODO is the bug here? might need to convert string -> sci -> int
-extractNum :: OrthoLangScript -> OrthoLangExpr -> Int
-extractNum _   (OrthoLangLit x _ n) | x == num = readSciInt n
-extractNum scr (OrthoLangRef _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookup v scr
+extractNum :: Script -> Expr -> Int
+extractNum _   (Lit x _ n) | x == num = readSciInt n
+extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookup v scr
 extractNum _ _ = error "bad argument to extractNum"
 
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
@@ -64,13 +64,13 @@ extractNum _ _ = error "bad argument to extractNum"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the salts should work?
 rRepeatN :: RulesFn
-rRepeatN s@(scr, _, _, _) (OrthoLangFun t salt deps name [resExpr, subVar@(OrthoLangRef _ _ _ v), repsExpr]) =
-  rReplaceEach s (OrthoLangFun t salt deps name [resExpr, subVar, subList])
+rRepeatN s@(scr, _, _, _) (Fun t salt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
+  rReplaceEach s (Fun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v scr
     nReps   = extractNum scr repsExpr
     subs    = take nReps $ zipWith setSalt [0..] (repeat subExpr) -- TODO is always starting from 0 right?
-    -- subs    = zipWith setSalt (unfoldReplaceID salt nReps) (repeat subExpr)
+    -- subs    = zipWith setSalt (unfoldRepID salt nReps) (repeat subExpr)
     -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
-    subList = OrthoLangList (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
+    subList = Lst (typeOf subExpr) salt (depsOf subExpr) subs -- TODO salt right?
 rRepeatN _ _ = fail "bad argument to rRepeatN"

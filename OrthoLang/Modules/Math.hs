@@ -5,7 +5,7 @@ module OrthoLang.Modules.Math where
 --   need to have the list-needing function (multiply) need the list (works)
 --   then the list has to need its elements (not working), which have to have been compiled (not working)
 
--- simple idea: what if the compilation has to be evaluated strictly to fill HashedIDs?
+-- simple idea: what if the compilation has to be evaluated strictly to fill IDs?
 --   would make sense, but difficult to test without NFData instances
 --   if that's it, maybe you should rethink the design and keep the digests in the state directly!
 -- also create a NewRulesTest case for this
@@ -31,11 +31,11 @@ import OrthoLang.Core.Types
 import Data.Scientific        (Scientific, toRealFloat)
 import OrthoLang.Core.Actions (readLits, writeLit, need')
 import OrthoLang.Core.Compile (mkNewFn1)
-import OrthoLang.Core.Paths   (toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths   (toPath, fromPath)
 import Control.Monad.IO.Class (liftIO)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Math"
   , mDesc = "Basic math"
   , mTypes = [num]
@@ -54,7 +54,7 @@ divDouble n1 n2 = read $ show (answer :: Double)
   where
     answer = toRealFloat n1 / toRealFloat n2
 
-mkMathFn :: Char -> String -> (Scientific -> Scientific -> Scientific) -> OrthoLangFunction
+mkMathFn :: Char -> String -> (Scientific -> Scientific -> Scientific) -> Function
 mkMathFn opChar name fn = mkNewFn1 name (Just opChar) num [ListOf num] $ aMath fn
 
 -- oh this never runs, because shake can't find the input list
@@ -63,7 +63,7 @@ aMath fn cfg lRef _ (ExprPath out) a1 = do
   -- liftIO $ putStrLn $ "aMath a1: " ++ show a1
   -- paths <- readPaths cfg lRef a1
   -- liftIO $ putStrLn $ "aMath paths: " ++ show paths
-  -- inputs <- mapM (readLit cfg lRef) $ map (fromOrthoLangPath cfg) paths
+  -- inputs <- mapM (readLit cfg lRef) $ map (fromPath cfg) paths
   -- liftIO $ putStrLn $ "aMath inputs: " ++ show inputs
   -- need' cfg lRef "test" [a1]
   inputs <- readLits cfg lRef a1

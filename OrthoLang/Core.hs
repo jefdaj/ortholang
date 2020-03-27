@@ -1,8 +1,8 @@
 module OrthoLang.Core
   ( runRepl
   , evalFile
-  , OrthoLangConfig(..)
-  , OrthoLangModule(..)
+  , Config(..)
+  , Module(..)
   , prettyShow
   )
   where
@@ -13,4 +13,4 @@ module OrthoLang.Core
 import OrthoLang.Core.Pretty (prettyShow)
 import OrthoLang.Core.Eval   (evalFile)
 import OrthoLang.Core.Repl   (runRepl)
-import OrthoLang.Core.Types  (OrthoLangConfig(..), OrthoLangModule(..))
+import OrthoLang.Core.Types  (Config(..), Module(..))

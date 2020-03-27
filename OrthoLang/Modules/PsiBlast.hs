@@ -15,7 +15,7 @@ import OrthoLang.Core.Actions       (readLit, readPath,
                                     runCmd, CmdDesc(..), debugA, traceA, need',
                                     writeCachedLines, readFileStrict')
 import OrthoLang.Core.Compile (defaultTypeCheck, rFun3, map3of3, singleton)
-import OrthoLang.Core.Paths         (fromOrthoLangPath, cacheDir)
+import OrthoLang.Core.Paths         (fromPath, cacheDir)
 import OrthoLang.Core.Util          (headOrDie)
 import OrthoLang.Modules.BlastDB    (pdb)
 import OrthoLang.Modules.Blast      (bht)
@@ -33,8 +33,8 @@ import System.Exit                 (ExitCode(..))
 debug :: String -> String -> Action ()
 debug name = debugA ("ortholang.modules.psiblast." ++ name)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   -- TODO move doc to its file
   { mName = "PsiBLAST"
   , mDesc = "Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.\n\
@@ -116,8 +116,8 @@ orthoLangModule = OrthoLangModule
    ]
   }
 
-pssm :: OrthoLangType
-pssm = OrthoLangType
+pssm :: Type
+pssm = Type
   { tExt  = "pssm"
   , tDesc = "PSI-BLAST position-specific substitution matrix as ASCII"
   , tShow  = defaultShow
@@ -135,15 +135,15 @@ aPsiblastTrainDb = aPsiblastDb True trainingArgs
 aPsiblastSearchDb :: Action3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
 
-aPsiblastDb' :: Bool -> [String] -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aPsiblastDb' :: Bool -> [String] -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
   aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
 aPsiblastDb' _ _ _ _ _ _ = fail "bad argument to aPsiblastDb'"
 
-aPsiblastTrainDb' :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aPsiblastTrainDb' :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
 
-aPsiblastSearchDb' :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aPsiblastSearchDb' :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
@@ -151,26 +151,26 @@ aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 aPsiblastDb :: Bool -> [String] -> Action3
 aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
-  let oPath'  = fromOrthoLangPath cfg oPath
+  let oPath'  = fromPath cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
-      ePath'  = fromOrthoLangPath cfg ePath
-      qPath'  = fromOrthoLangPath cfg qPath -- might be a fasta or pssm
-      dbPath' = fromOrthoLangPath cfg dbPath
+      ePath'  = fromPath cfg ePath
+      qPath'  = fromPath cfg qPath -- might be a fasta or pssm
+      dbPath' = fromPath cfg dbPath
   need' cfg ref "ortholang.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
 
   eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
 
   -- TODO is there something wrong with the map handlign here? or general makeblastdb?
   -- dbPrePath <- readPath cfg ref dbPath' -- TODO is this right?
-  -- let dbPrePath' = fromOrthoLangPath cfg dbPrePath
+  -- let dbPrePath' = fromPath cfg dbPrePath
 
   -- this version works for withPdbSubject, but breaks something else?
   dbPre     <- readPath cfg ref dbPath' -- TODO is this right?
   debug "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
-      cDir = fromOrthoLangPath cfg $ cacheDir cfg "psiblast"
-      dbPre' = fromOrthoLangPath cfg dbPre
+      cDir = fromPath cfg $ cacheDir cfg "psiblast"
+      dbPre' = fromPath cfg dbPre
 
         -- , "-num_threads", "8"    -- TODO add this in the wrapper script
         -- , "-out", undefined      -- TODO include this?
@@ -241,39 +241,39 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 -- Wrap the 3rd arg of a function call in makeblastdb_prot_each
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO fix passing dbprefix as db itself
-withPdbSubjects :: OrthoLangExpr -> OrthoLangExpr
-withPdbSubjects (OrthoLangFun rtn salt deps name [a1, a2, xs ])
-  =             (OrthoLangFun rtn salt deps name [a1, a2, dbs])
+withPdbSubjects :: Expr -> Expr
+withPdbSubjects (Fun rtn salt deps name [a1, a2, xs ])
+  =             (Fun rtn salt deps name [a1, a2, dbs])
   where
-    dbs = OrthoLangFun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
+    dbs = Fun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
 -- Wraps a single faa or an faa.list in makeblastdb_prot
-withPdbSubject :: OrthoLangExpr -> OrthoLangExpr
-withPdbSubject (OrthoLangFun rtn salt deps name [a1, a2, x ])
-  =            (OrthoLangFun rtn salt deps name [a1, a2, db])
+withPdbSubject :: Expr -> Expr
+withPdbSubject (Fun rtn salt deps name [a1, a2, x ])
+  =            (Fun rtn salt deps name [a1, a2, db])
   where
-    db  = OrthoLangFun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
+    db  = Fun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> singleton x
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
--- Wrap the faa query argument of a psiblast OrthoLangFunction in psiblast_train_db
+-- Wrap the faa query argument of a psiblast Function in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
-withPssmQuery :: OrthoLangExpr -> OrthoLangExpr
-withPssmQuery (OrthoLangFun rtn salt deps name [n, q, s])
-  =           (OrthoLangFun rtn salt deps name [n, p, s])
+withPssmQuery :: Expr -> Expr
+withPssmQuery (Fun rtn salt deps name [n, q, s])
+  =           (Fun rtn salt deps name [n, p, s])
   where
-    p = OrthoLangFun pssm salt deps "psiblast_train_db" [n, q, s]
+    p = Fun pssm salt deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 -------------------------------
 -- search with fasta queries --
 -------------------------------
 
-psiblast :: OrthoLangFunction
-psiblast = OrthoLangFunction
+psiblast :: Function
+psiblast = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
@@ -284,8 +284,8 @@ psiblast = OrthoLangFunction
   where
     name = "psiblast"
 
-psiblastEach :: OrthoLangFunction
-psiblastEach = OrthoLangFunction
+psiblastEach :: Function
+psiblastEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
@@ -296,16 +296,16 @@ psiblastEach = OrthoLangFunction
     name = "psiblast_each"
 
 rPsiblastEach :: RulesFn
-rPsiblastEach st (OrthoLangFun rtn salt deps name [e, fa, fas])
+rPsiblastEach st (Fun rtn salt deps name [e, fa, fas])
   -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
   = (rMap 3 aPsiblastSearchDb') st expr'
   where
-    ps    = OrthoLangFun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
-    dbs   = OrthoLangFun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
-    expr' = OrthoLangFun rtn salt deps name [e, ps, dbs]
+    ps    = Fun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
+    dbs   = Fun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
+    expr' = Fun rtn salt deps name [e, ps, dbs]
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
-psiblastAll :: OrthoLangFunction
+psiblastAll :: Function
 psiblastAll = compose1 name
   (mkTypeDesc name [num, faa, ListOf faa] bht)
   psiblastEach
@@ -314,8 +314,8 @@ psiblastAll = compose1 name
   where
     name = "psiblast_all"
 
-psiblastDb :: OrthoLangFunction
-psiblastDb = OrthoLangFunction
+psiblastDb :: Function
+psiblastDb = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
@@ -328,8 +328,8 @@ psiblastDb = OrthoLangFunction
 -- TODO want map3of3 to read a pdb.list here and pass the individual paths,
 --      but that interferes with one of the others right?
 -- wait can psiblast just take a faa and pdb directly?
-psiblastDbEach :: OrthoLangFunction
-psiblastDbEach = OrthoLangFunction
+psiblastDbEach :: Function
+psiblastDbEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
@@ -359,8 +359,8 @@ trainingArgs =
   , "-out_ascii_pssm" -- < outPath will be appended here
   ]
 
-psiblastTrain :: OrthoLangFunction
-psiblastTrain = OrthoLangFunction
+psiblastTrain :: Function
+psiblastTrain = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
@@ -371,8 +371,8 @@ psiblastTrain = OrthoLangFunction
     name = "psiblast_train"
 
 -- TODO better name!
-psiblastTrainPssms :: OrthoLangFunction
-psiblastTrainPssms = OrthoLangFunction
+psiblastTrainPssms :: Function
+psiblastTrainPssms = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
@@ -385,8 +385,8 @@ psiblastTrainPssms = OrthoLangFunction
 
 -- TODO appears to succeed, but something is messed up about the mapping?
 --      (makes a list of length 1 from multiple faa subjects)
-psiblastTrainEach :: OrthoLangFunction
-psiblastTrainEach = OrthoLangFunction
+psiblastTrainEach :: Function
+psiblastTrainEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
@@ -396,8 +396,8 @@ psiblastTrainEach = OrthoLangFunction
   where
     name = "psiblast_train_each"
 
-psiblastTrainAll :: OrthoLangFunction
-psiblastTrainAll = OrthoLangFunction
+psiblastTrainAll :: Function
+psiblastTrainAll = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
@@ -407,8 +407,8 @@ psiblastTrainAll = OrthoLangFunction
   where
     name = "psiblast_train_all"
 
-psiblastTrainDb :: OrthoLangFunction
-psiblastTrainDb = OrthoLangFunction
+psiblastTrainDb :: Function
+psiblastTrainDb = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
@@ -418,8 +418,8 @@ psiblastTrainDb = OrthoLangFunction
   where
     name = "psiblast_train_db"
 
-psiblastTrainDbEach :: OrthoLangFunction
-psiblastTrainDbEach = OrthoLangFunction
+psiblastTrainDbEach :: Function
+psiblastTrainDbEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
@@ -429,8 +429,8 @@ psiblastTrainDbEach = OrthoLangFunction
   where
     name = "psiblast_train_db_each"
 
-psiblastTrainPssmsDb :: OrthoLangFunction
-psiblastTrainPssmsDb = OrthoLangFunction
+psiblastTrainPssmsDb :: Function
+psiblastTrainPssmsDb = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
@@ -445,8 +445,8 @@ psiblastTrainPssmsDb = OrthoLangFunction
 -- search with explicit pssm queries --
 ---------------------------------------
 
-psiblastPssm :: OrthoLangFunction
-psiblastPssm = OrthoLangFunction
+psiblastPssm :: Function
+psiblastPssm = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
@@ -457,8 +457,8 @@ psiblastPssm = OrthoLangFunction
     name = "psiblast_pssm"
 
 -- TODO why does this one fail? it's not even using rMap
-psiblastPssmAll :: OrthoLangFunction
-psiblastPssmAll = OrthoLangFunction
+psiblastPssmAll :: Function
+psiblastPssmAll = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
@@ -468,8 +468,8 @@ psiblastPssmAll = OrthoLangFunction
   where
     name = "psiblast_pssm_all"
 
-psiblastPssmEach :: OrthoLangFunction
-psiblastPssmEach = OrthoLangFunction
+psiblastPssmEach :: Function
+psiblastPssmEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
@@ -482,8 +482,8 @@ psiblastPssmEach = OrthoLangFunction
 searchArgs :: [String]
 searchArgs = ["-outfmt", "6", "-out"]
 
-psiblastPssmDb :: OrthoLangFunction
-psiblastPssmDb = OrthoLangFunction
+psiblastPssmDb :: Function
+psiblastPssmDb = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
@@ -493,8 +493,8 @@ psiblastPssmDb = OrthoLangFunction
   where
     name = "psiblast_pssm_db"
 
-psiblastPssmDbEach :: OrthoLangFunction
-psiblastPssmDbEach = OrthoLangFunction
+psiblastPssmDbEach :: Function
+psiblastPssmDbEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
@@ -510,8 +510,8 @@ psiblastPssmDbEach = OrthoLangFunction
 
 -- TODO better name? this one's pretty bad!
 -- TODO would a user ever want to use this one directly?
-psiblastEachPssmDb :: OrthoLangFunction
-psiblastEachPssmDb = OrthoLangFunction
+psiblastEachPssmDb :: Function
+psiblastEachPssmDb = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
@@ -522,7 +522,7 @@ psiblastEachPssmDb = OrthoLangFunction
   where
     name = "psiblast_each_pssm_db"
 
-psiblastPssmsDb :: OrthoLangFunction
+psiblastPssmsDb :: Function
 psiblastPssmsDb = compose1 name
   (mkTypeDesc name [num, ListOf pssm, pdb] bht)
   psiblastEachPssmDb
@@ -534,8 +534,8 @@ psiblastPssmsDb = compose1 name
 -- TODO withPdbSubject fails with rMap? psiblastTrainPssms and psiblastEachPssm
 -- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
 --      specific incompatibility with withPdbSubject?
-psiblastEachPssm :: OrthoLangFunction
-psiblastEachPssm = OrthoLangFunction
+psiblastEachPssm :: Function
+psiblastEachPssm = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
@@ -546,7 +546,7 @@ psiblastEachPssm = OrthoLangFunction
     name = "psiblast_each_pssm"
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
-psiblastPssms :: OrthoLangFunction
+psiblastPssms :: Function
 psiblastPssms = compose1 name
   (mkTypeDesc name [num, ListOf pssm, faa] bht)
   psiblastEachPssm
@@ -555,7 +555,7 @@ psiblastPssms = compose1 name
   where
     name = "psiblast_pssms"
 
-psiblastPssmsAll :: OrthoLangFunction
+psiblastPssmsAll :: Function
 psiblastPssmsAll = compose1 name
   (mkTypeDesc name [num, ListOf pssm, faa] bht)
   psiblastEachPssm
@@ -569,7 +569,7 @@ psiblastPssmsAll = compose1 name
 --      but can't actually do that the straightforward way
 --      could it use psiblastPssmAll and concat_each?
 -- TODO test this
-psiblastPssmsEach :: OrthoLangFunction
+psiblastPssmsEach :: Function
 psiblastPssmsEach = compose1 name
   -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
   (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))

@@ -7,7 +7,7 @@ import OrthoLang.Modules.SeqIO (faa)
 import OrthoLang.Modules.Muscle (aln)
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple, rSimpleScript)
-import OrthoLang.Core.Paths (OrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths (Path, fromPath)
 import OrthoLang.Core.Actions (traceA, runCmd, CmdDesc(..), readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
 -- import Data.List (isPrefixOf, nub, sort)
@@ -16,8 +16,8 @@ import System.FilePath             (takeFileName, (</>))
 import OrthoLang.Core.Compile  (rMap, rMapSimpleScript)
 import System.Exit (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "HMMER"
   , mDesc = "Search sequences with hidden Markov models"
   , mTypes = [faa, aln, hmm, hht]
@@ -26,8 +26,8 @@ orthoLangModule = OrthoLangModule
                   extractHmmTargets, extractHmmTargetsEach]
   }
 
-hmm :: OrthoLangType
-hmm = OrthoLangType
+hmm :: Type
+hmm = Type
   { tExt  = "hmm"
   , tDesc = "hidden markov model"
   -- , tShow = \_ _ f -> return $ "hidden markov model '" ++ f ++ "'"
@@ -35,8 +35,8 @@ hmm = OrthoLangType
   }
 
 -- TODO add to hit tables types in length, extract_hits etc.
-hht :: OrthoLangType
-hht = OrthoLangType
+hht :: Type
+hht = Type
   { tExt  = "hht"
   , tDesc = "HMMER hits table"
   , tShow = defaultShow
@@ -45,8 +45,8 @@ hht = OrthoLangType
 -- TODO hmmfetch : str -> hmm
 -- TODO hmmfetch_each : str.list -> hmm.list
 
-hmmbuild :: OrthoLangFunction
-hmmbuild = let name = "hmmbuild" in OrthoLangFunction
+hmmbuild :: Function
+hmmbuild = let name = "hmmbuild" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
@@ -54,8 +54,8 @@ hmmbuild = let name = "hmmbuild" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rSimpleScript "hmmbuild.sh"
   }
 
-hmmbuildEach :: OrthoLangFunction
-hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
+hmmbuildEach :: Function
+hmmbuildEach = let name = "hmmbuild_each" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
@@ -63,8 +63,8 @@ hmmbuildEach = let name = "hmmbuild_each" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
-hmmsearch :: OrthoLangFunction
-hmmsearch = let name = "hmmsearch" in OrthoLangFunction
+hmmsearch :: Function
+hmmsearch = let name = "hmmsearch" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
@@ -73,8 +73,8 @@ hmmsearch = let name = "hmmsearch" in OrthoLangFunction
   }
 
 -- TODO is this the right name for mapping over arg 2?
-hmmsearchEach :: OrthoLangFunction
-hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
+hmmsearchEach :: Function
+hmmsearchEach = let name = "hmmsearch_each" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
@@ -83,8 +83,8 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
   }
 
 -- TODO better name, or is this actually the most descriptive way?
--- hmmsearchEachEach :: OrthoLangFunction
--- hmmsearchEachEach = let name = "hmmsearch_each_each" in OrthoLangFunction
+-- hmmsearchEachEach :: Function
+-- hmmsearchEachEach = let name = "hmmsearch_each_each" in Function
 --   { fOpChar = Nothing, fName = name
 --   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
@@ -95,17 +95,17 @@ hmmsearchEach = let name = "hmmsearch_each" in OrthoLangFunction
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
 -- TODO convert to rSimpleScript?
--- aHmmbuild :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+-- aHmmbuild :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 -- aHmmbuild cfg ref _ [out, fa] = do
 --   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
 --   where
---     out'  = fromOrthoLangPath cfg out
+--     out'  = fromPath cfg out
 --     out'' = traceA "aHmmbuild" out' [out', fa']
---     fa'   = fromOrthoLangPath cfg fa
+--     fa'   = fromPath cfg fa
 -- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
-aHmmsearch :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aHmmsearch :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aHmmsearch cfg ref _ [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
@@ -133,15 +133,15 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
     , cmdRmPatterns = [out'', tmpOut]
     }
   where
-    out'  = fromOrthoLangPath cfg out
+    out'  = fromPath cfg out
     out'' = traceA "aHmmsearch" out' [out', fa']
-    e'    = fromOrthoLangPath cfg e
-    hm'   = fromOrthoLangPath cfg hm
-    fa'   = fromOrthoLangPath cfg fa
+    e'    = fromPath cfg e
+    hm'   = fromPath cfg hm
+    fa'   = fromPath cfg fa
 aHmmsearch _ _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
 
-extractHmmTargets :: OrthoLangFunction
-extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
+extractHmmTargets :: Function
+extractHmmTargets = let name = "extract_hmm_targets" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
@@ -149,8 +149,8 @@ extractHmmTargets = let name = "extract_hmm_targets" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rSimple $ aExtractHmm 1
   }
 
-extractHmmTargetsEach :: OrthoLangFunction
-extractHmmTargetsEach = let name = "extract_hmm_targets_each" in OrthoLangFunction
+extractHmmTargetsEach :: Function
+extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
@@ -160,7 +160,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in OrthoLangFuncti
 
 -- TODO clean this up! it's pretty ugly
 -- TODO how to integrate the script since it needs the colnum?
-aExtractHmm :: Int -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aExtractHmm :: Int -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aExtractHmm n cfg ref _ [outPath, tsvPath] = do
   -- lits <- readLits cfg ref tsvPath'
   -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
@@ -182,7 +182,7 @@ aExtractHmm n cfg ref _ [outPath, tsvPath] = do
     , cmdRmPatterns = [outPath']
     }
   where
-    outPath'  = fromOrthoLangPath cfg outPath
+    outPath'  = fromPath cfg outPath
     outPath'' = traceA "aExtractHmm" outPath' [show n, outPath', tsvPath']
-    tsvPath'  = fromOrthoLangPath cfg tsvPath
+    tsvPath'  = fromPath cfg tsvPath
 aExtractHmm _ _ _ _ _ = fail "bad arguments to aExtractHmm"

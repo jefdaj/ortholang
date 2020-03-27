@@ -69,7 +69,7 @@ import System.Posix.Files     (readSymbolicLink)
 import System.FilePath.Glob   (glob)
 -- import Data.Time.LocalTime (getZonedTime)
 -- import Data.Time.Format    (formatTime, defaultTimeLocale)
-import OrthoLang.Core.Locks    (Locks, withReadLock, withReadLock', withWriteLock)
+import OrthoLang.Core.Locks    (LocksRef, withReadLock, withReadLock', withWriteLock)
 
 import Control.Logging (traceSL, debugS, timedDebugEndS, traceShowSL)
 
@@ -99,18 +99,18 @@ time suffix msg act = timedDebugEndS (T.pack $ "ortholang." ++ suffix)
 
 -- TODO should this go in Util too?
 -- TODO remove if you can figure out a way to put stamps in regular debug
--- debugA :: OrthoLangConfig -> String -> a -> IO a
+-- debugA :: Config -> String -> a -> IO a
 -- debugA msg rtn = do
 --   stamp <- getTimeStamp
 --   return $ debug cfg (stamp ++ " " ++ msg) rtn
 
 -- TODO ok this goes in Util
---debug :: OrthoLangConfig -> String -> a -> a
+--debug :: Config -> String -> a -> a
 --debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
 
 -- TODO and this one 
 -- TODO stop exporting this in favor of the ones below?
--- debugShow :: Show a => OrthoLangConfig -> a -> b -> b
+-- debugShow :: Show a => Config -> a -> b -> b
 -- debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
 
 ----------------
@@ -126,11 +126,11 @@ time suffix msg act = timedDebugEndS (T.pack $ "ortholang." ++ suffix)
  - See: https://github.com/ndmitchell/shake/issues/37
  - TODO All (haskell) reads should eventually go through this function
  -}
-readFileStrict :: Locks -> FilePath -> IO String
+readFileStrict :: LocksRef -> FilePath -> IO String
 readFileStrict ref path = withReadLock ref path $ Strict.readFile path
 
 -- sometimes you do want the lazy version though, like when showing big files
-readFileLazy :: Locks -> FilePath -> IO String
+readFileLazy :: LocksRef -> FilePath -> IO String
 readFileLazy ls p = withReadLock ls p $ readFile p
 
 -------------
@@ -169,7 +169,7 @@ unlessMatch paths act = do
 
 -- TODO call this module something besides Debug now that it also handles errors?
 -- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
-removeIfExists :: (MonadIO m, MonadCatch m) => Locks -> FilePath -> m ()
+removeIfExists :: (MonadIO m, MonadCatch m) => LocksRef -> FilePath -> m ()
 removeIfExists ref fileName = (liftIO (withWriteLock ref fileName $ removeFile fileName)) `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
@@ -221,7 +221,7 @@ absolutize aPath = do
 
 -- makes a copy of a list of lists of lits, suitible for passing to a script
 -- TODO separate version for a list of lists of paths?
--- absolutizeListOfLitLists :: OrthoLangConfig -> Locks -> OrthoLangPath -> FilePath
+-- absolutizeListOfLitLists :: Config -> LocksRef -> Path -> FilePath
 -- absolutizeListOfLitLists cfg ref path = do
 --   paths <- readPaths
 
@@ -259,7 +259,7 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- Note that this is the only lazy read function. Will it mess anything up?
 -- TODO should readLit and readList be based on this?
-isEmpty :: Locks -> FilePath -> Action Bool
+isEmpty :: LocksRef -> FilePath -> Action Bool
 isEmpty ref path = do
   -- TODO remove? prevents "invalid byte sequence" error reading binary files
   if "cache/bin" `isInfixOf` path

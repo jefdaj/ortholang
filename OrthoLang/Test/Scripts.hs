@@ -17,8 +17,8 @@ import OrthoLang.Core.Parse        (parseFileIO)
 import OrthoLang.Core.Paths        (toGeneric)
 import OrthoLang.Core.Util         (justOrDie)
 -- import OrthoLang.Core.Pretty       (writeScript)
-import OrthoLang.Core.Types        (OrthoLangConfig(..), OrthoLangModule(..), HashedIDsRef)
-import OrthoLang.Core.Locks        (Locks, withWriteLock)
+import OrthoLang.Core.Types        (Config(..), Module(..), IDsRef)
+import OrthoLang.Core.Locks        (LocksRef, withWriteLock)
 import OrthoLang.Test.Repl         (mkTestGroup)
 import OrthoLang.Modules          (modules)
 import System.Directory           (doesFileExist)
@@ -89,18 +89,18 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
-mkOutTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
+mkOutTest :: Config -> LocksRef -> IDsRef -> FilePath -> TestTree
 mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
-      out <- runOrthoLang cfg ref ids
+      out <- runScript cfg ref ids
       -- uncomment to update the golden stdout files:
       -- writeFile ("/home/jefdaj/ortholang/tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
 
-mkTreeTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
+mkTreeTest :: Config -> LocksRef -> IDsRef -> FilePath -> TestTree
 mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
@@ -112,14 +112,14 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
     treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
-      _ <- runOrthoLang cfg ref ids
+      _ <- runScript cfg ref ids
       out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
 
 -- TODO use safe writes here
-mkTripTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> TestTree
+mkTripTest :: Config -> LocksRef -> IDsRef -> FilePath -> TestTree
 mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
   where
     desc = "unchanged by round-trip to file"
@@ -138,7 +138,7 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
 
 -- test that no absolute paths snuck into the tmpfiles
 -- TODO sanitize stdout + stderr too when running scripts
-mkAbsTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO [TestTree]
+mkAbsTest :: Config -> LocksRef -> IDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
@@ -146,15 +146,15 @@ mkAbsTest cfg ref ids = testSpecs $ it desc $
     grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err", "--exclude=*.ini", "--exclude=*.log",
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
-      _ <- runOrthoLang cfg ref ids
+      _ <- runScript cfg ref ids
       (_, out, err) <- readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
 {- This is more or less idempotent because re-running the same cut multiple
  - times is fast. So it's OK to run it once for each test in a group.
  -}
-runOrthoLang :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO String
-runOrthoLang cfg ref ids =  do
+runScript :: Config -> LocksRef -> IDsRef -> IO String
+runScript cfg ref ids =  do
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
   (out, ()) <- hCapture [stdout, stderr] $ evalFile ([], cfg, ref, ids) stdout
   delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
@@ -164,7 +164,7 @@ runOrthoLang cfg ref ids =  do
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
-              -> OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+              -> Config -> LocksRef -> IDsRef -> IO TestTree
 mkScriptTests (name, cut, out, tre, mchk) cfg ref ids = do
   absTests   <- mkAbsTest   cfg' ref ids -- just one, but comes as a list
   checkTests <- case mchk of
@@ -185,12 +185,12 @@ mkScriptTests (name, cut, out, tre, mchk) cfg ref ids = do
  - they should give no output if the tests pass, and print errors otherwise
  - TODO move stdout inside the tmpdir?
  -}
-mkCheckTest :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> IO [TestTree]
+mkCheckTest :: Config -> LocksRef -> IDsRef -> FilePath -> IO [TestTree]
 mkCheckTest cfg ref ids scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
   where
     desc = "output + tmpfiles checked by script"
     runCheck = do
-      _ <- runOrthoLang cfg ref ids
+      _ <- runScript cfg ref ids
       (_, out, err) <- readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
@@ -203,7 +203,7 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
-mkTestsPrefix :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> String -> Maybe String -> IO TestTree
+mkTestsPrefix :: Config -> LocksRef -> IDsRef -> FilePath -> String -> Maybe String -> IO TestTree
 mkTestsPrefix cfg ref ids testDir groupName mPrefix = do
   names   <- getTestScripts testDir mPrefix
   mchecks <- mapM (findTestFile testDir "check" "sh") names
@@ -214,7 +214,7 @@ mkTestsPrefix cfg ref ids testDir groupName mPrefix = do
       groups = map mkScriptTests hepts
   mkTestGroup cfg ref ids groupName groups
 
-mkExampleTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> FilePath -> FilePath -> IO TestTree
+mkExampleTests :: Config -> LocksRef -> IDsRef -> FilePath -> FilePath -> IO TestTree
 mkExampleTests cfg ref ids exDir testDir = do
   names <- getTestScripts exDir Nothing
   let names' = map ("examples:" ++) names
@@ -233,7 +233,7 @@ removePrefix = last . splitOn ":"
 simplify :: String -> String
 simplify = filter (`elem` ['a'..'z']) . map toLower
 
-mkTests :: OrthoLangConfig -> Locks -> HashedIDsRef -> IO TestTree
+mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg ref ids = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"

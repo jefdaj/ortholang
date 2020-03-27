@@ -5,14 +5,14 @@ module OrthoLang.Modules.Sample where
 import Development.Shake
 import OrthoLang.Core.Types
 import OrthoLang.Core.Compile  (rExpr)
-import OrthoLang.Core.Paths (exprPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths (exprPath, toPath, fromPath)
 import OrthoLang.Core.Actions (readLit, readStrings, writeStrings, debugA)
 import Data.Scientific
 import System.Random (StdGen)
 import System.Random.Shuffle (shuffle')
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Sample"
   , mDesc = "Random (but reproducable) sampling of list elements.\n\n\
             \WARNING: Because of the way OrthoLang caches tempfiles, calling these\n\
@@ -22,8 +22,8 @@ orthoLangModule = OrthoLangModule
   , mFunctions = [sample]
   }
 
-sample :: OrthoLangFunction
-sample = OrthoLangFunction
+sample :: Function
+sample = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tSample
@@ -33,28 +33,28 @@ sample = OrthoLangFunction
   where
     name = "sample"
 
-tSample :: [OrthoLangType] -> Either String OrthoLangType
+tSample :: [Type] -> Either String Type
 tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(_, cfg, ref, ids) expr@(OrthoLangFun _ salt _ _ [n, lst]) = do
+rSample st@(_, cfg, ref, ids) expr@(Fun _ salt _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr st n
   (ExprPath inPath') <- rExpr st lst
-  let nPath    = toOrthoLangPath cfg nPath'
-      inPath   = toOrthoLangPath cfg inPath'
+  let nPath    = toPath cfg nPath'
+      inPath   = toPath cfg inPath'
       outPath  = exprPath st expr
-      outPath' = fromOrthoLangPath cfg outPath
+      outPath' = fromPath cfg outPath
       (ListOf t) = typeOf lst
   outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath
   return $ ExprPath outPath'
 rSample _ _ = fail "bad argument to rSample"
 
-aSample :: RepeatSalt -> OrthoLangType -> Action2
+aSample :: Salt -> Type -> Action2
 aSample salt t cfg ref _ outPath nPath lstPath = do
-  let nPath'   = fromOrthoLangPath cfg nPath
-      lstPath' = fromOrthoLangPath cfg lstPath
-      outPath' = fromOrthoLangPath cfg outPath
+  let nPath'   = fromPath cfg nPath
+      lstPath' = fromPath cfg lstPath
+      outPath' = fromPath cfg outPath
   nStr <- readLit cfg ref nPath'
   lst  <- readStrings t cfg ref lstPath'
   debugA ("ortholang.modules.sample.aSample") ("salt: " ++ show salt)
@@ -62,8 +62,8 @@ aSample salt t cfg ref _ outPath nPath lstPath = do
       elements' = randomSample salt n lst
   writeStrings t cfg ref outPath' elements'
 
-randomSample :: RepeatSalt -> Int -> [String] -> [String]
-randomSample (RepeatSalt s) n lst = take n $ shuffle lst randGen
+randomSample :: Salt -> Int -> [String] -> [String]
+randomSample (Salt s) n lst = take n $ shuffle lst randGen
   where
     shuffle xs = shuffle' xs $ length xs
     -- according to the docs, and string is OK as a random seed

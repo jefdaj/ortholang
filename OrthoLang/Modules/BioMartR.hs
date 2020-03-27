@@ -24,7 +24,7 @@ module OrthoLang.Modules.BioMartR where
 import OrthoLang.Core.Types
 import Development.Shake
 import OrthoLang.Core.Actions (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
-import OrthoLang.Core.Paths  (exprPath, OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths  (exprPath, Path, toPath, fromPath)
 import OrthoLang.Core.Compile (rExpr, defaultTypeCheck)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
@@ -44,8 +44,8 @@ import System.Exit (ExitCode(..))
 -- module description --
 ------------------------
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
   , mTypes = [search, fnagz, faagz]
@@ -58,8 +58,8 @@ orthoLangModule = OrthoLangModule
     ]
   }
 
-search :: OrthoLangType
-search = OrthoLangType
+search :: Type
+search = Type
   { tExt  = "search" -- TODO should these be recognizable (tsv)?
   , tDesc = "intermediate table describing biomartr searches"
   -- , tShow = \ls f -> readFileStrict ls f
@@ -67,24 +67,24 @@ search = OrthoLangType
   }
 
 -- TODO unify with fna? or replace it?
-fnagz :: OrthoLangType
-fnagz = OrthoLangType
+fnagz :: Type
+fnagz = Type
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
   , tShow = \_ _ f -> return $ "gzipped fna file '" ++ f ++ "'"
   }
 
 -- TODO unify with faa? or replace it?
-faagz :: OrthoLangType
-faagz = OrthoLangType
+faagz :: Type
+faagz = Type
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
   , tShow = \_ _ f -> return $ "gzipped faa file '" ++ f ++ "'"
   }
 
 -- TODO does this work at all?
-parseSearches :: OrthoLangFunction
-parseSearches = let name = "parse_searches" in OrthoLangFunction
+parseSearches :: Function
+parseSearches = let name = "parse_searches" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf str] search
   , fTypeDesc  = mkTypeDesc name [ListOf str] search
@@ -96,8 +96,8 @@ parseSearches = let name = "parse_searches" in OrthoLangFunction
 -- get_genomes --
 -----------------
 
-getGenomes :: OrthoLangFunction
-getGenomes = let name = "get_genomes" in OrthoLangFunction
+getGenomes :: Function
+getGenomes = let name = "get_genomes" in Function
   { fOpChar = Nothing, fName = name 
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
@@ -109,8 +109,8 @@ getGenomes = let name = "get_genomes" in OrthoLangFunction
 -- get_proteomes --
 -------------------
 
-getProteomes :: OrthoLangFunction
-getProteomes = let name = "get_proteomes" in OrthoLangFunction
+getProteomes :: Function
+getProteomes = let name = "get_proteomes" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
@@ -187,16 +187,16 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: RulesFn
-rParseSearches s@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [searches]) = do
+rParseSearches s@(_, cfg, ref, ids) expr@(Fun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   let searchTable  = exprPath s expr
-      searchTable' = fromOrthoLangPath cfg searchTable
-      sList' = toOrthoLangPath cfg sList
+      searchTable' = fromPath cfg searchTable
+      sList' = toPath cfg sList
   searchTable' %> \_ -> aParseSearches cfg ref ids sList' searchTable
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
-aParseSearches :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
+aParseSearches :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
 aParseSearches cfg ref _ sList out = do
   parses <- (fmap . map) readSearch (readLits cfg ref sList')
   let (errors, searches') = partitionEithers parses
@@ -205,8 +205,8 @@ aParseSearches cfg ref _ sList out = do
     then error "invalid search!"
     else writeLits cfg ref out'' $ toTsvRows searches'
   where
-    sList' = fromOrthoLangPath cfg sList
-    out'   = fromOrthoLangPath cfg out
+    sList' = fromPath cfg sList
+    out'   = fromPath cfg out
     out''  = traceA "aParseSearches" out' [sList', out']
 
 ------------------
@@ -216,29 +216,29 @@ aParseSearches cfg ref _ sList out = do
 -- TODO move nearer the top?
 
 -- TODO this is where to parse the searches?
--- cGetGenome :: OrthoLangConfig -> OrthoLangExpr -> Rules ExprPath
--- cGetGenome (_,cfg) expr@(OrthoLangFun _ _ _ [s]) = undefined
+-- cGetGenome :: Config -> Expr -> Rules ExprPath
+-- cGetGenome (_,cfg) expr@(Fun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> RulesFn
-rBioMartR fn s@(_, cfg, ref, ids) expr@(OrthoLangFun rtn salt _ _ [ss]) = do
-  (ExprPath bmFn  ) <- rExpr s (OrthoLangLit str (RepeatSalt 0) fn)
+rBioMartR fn s@(_, cfg, ref, ids) expr@(Fun rtn salt _ _ [ss]) = do
+  (ExprPath bmFn  ) <- rExpr s (Lit str (Salt 0) fn)
   -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr s $ OrthoLangFun rtn salt (depsOf ss) "parse_searches" [ss]
+  (ExprPath sTable) <- rExpr s $ Fun rtn salt (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
-      tmp'    = toOrthoLangPath cfg bmTmp
+      tmp'    = toPath cfg bmTmp
       out     = exprPath s expr
-      out'    = fromOrthoLangPath cfg out
-      sTable' = toOrthoLangPath cfg sTable
-      bmFn'   = toOrthoLangPath cfg bmFn
+      out'    = fromPath cfg out
+      sTable' = toPath cfg sTable
+      bmFn'   = toPath cfg bmFn
   out' %> \_ -> aBioMartR cfg ref ids out bmFn' tmp' sTable'
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: OrthoLangConfig -> Locks -> HashedIDsRef
-          -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> Action ()
+aBioMartR :: Config -> LocksRef -> IDsRef
+          -> Path -> Path -> Path -> Path -> Action ()
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
   need' cfg ref "ortholang.modules.biomartr.aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
@@ -259,8 +259,8 @@ aBioMartR cfg ref _ out bmFn bmTmp sTable = do
     , cmdOptions = [Cwd bmTmp'] -- TODO remove?
     }
   where
-    out'    = fromOrthoLangPath cfg out
-    bmFn'   = fromOrthoLangPath cfg bmFn
-    bmTmp'  = fromOrthoLangPath cfg bmTmp
-    sTable' = fromOrthoLangPath cfg sTable
+    out'    = fromPath cfg out
+    bmFn'   = fromPath cfg bmFn
+    bmTmp'  = fromPath cfg bmTmp
+    sTable' = fromPath cfg sTable
     out'' = traceA "aBioMartR" out' [out', bmFn', bmTmp', sTable']

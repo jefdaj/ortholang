@@ -18,12 +18,12 @@ import Development.Shake.FilePath  ((</>))
 import OrthoLang.Core.Compile (rExpr, typeError, debugRules)
 import OrthoLang.Core.Actions       (readStrings, readPaths, writeStrings, traceA, hashContent)
 -- import OrthoLang.Core.Debug         (debugRules, traceA)
-import OrthoLang.Core.Paths         (exprPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths         (exprPath, toPath, fromPath)
 import OrthoLang.Core.Util          (resolveSymlinks)
 import OrthoLang.Core.Sanitize      (unhashIDs)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Sets"
   , mDesc = "Set operations for use with lists"
   , mTypes = []
@@ -36,8 +36,8 @@ type SetOpDesc =
   , Set String -> Set String -> Set String -- haskell set op
   )
 
-{- An awkward intermediate: until I get around to actually merging OrthoLangBops into
- - OrthoLangFuns, we'll just create them from a common description. The Bop versions
+{- An awkward intermediate: until I get around to actually merging Bops into
+ - Funs, we'll just create them from a common description. The Bop versions
  - work on two lists and can be chained together; the prefix (regular function)
  - ones work on lists of lists.
  -
@@ -51,12 +51,12 @@ setOpDescs =
   , ("diff", '~', difference)
   ]
 
-mkSetFunction :: SetOpDesc -> OrthoLangFunction
+mkSetFunction :: SetOpDesc -> Function
 mkSetFunction (foldName, opChar, setFn) = setFold
   where
     mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
     mkFoldDesc name = name ++ " : X.list.list -> X.list"
-    setFold = OrthoLangFunction
+    setFold = Function
       { fName = foldName
       , fOpChar    = Just opChar
       , fTypeCheck = tSetFold
@@ -65,14 +65,14 @@ mkSetFunction (foldName, opChar, setFn) = setFold
       , fNewRules = Nothing, fOldRules = rSetFold (foldr1 setFn)
       }
 
-tSetFold :: [OrthoLangType] -> Either String OrthoLangType
+tSetFold :: [Type] -> Either String Type
 tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
 
 rSetFold :: ([Set String] -> Set String) -> RulesFn
-rSetFold fn s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [lol]) = do
+rSetFold fn s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
-  let oPath      = fromOrthoLangPath cfg $ exprPath s e
+  let oPath      = fromPath cfg $ exprPath s e
       oPath'     = cfgTmpDir cfg </> oPath
       oPath''    = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
@@ -80,11 +80,11 @@ rSetFold fn s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [lol]) = do
   return (ExprPath oPath'')
 rSetFold _ _ _ = fail "bad argument to rSetFold"
 
-aSetFold :: OrthoLangConfig -> Locks -> HashedIDsRef -> ([Set String] -> Set String)
-         -> OrthoLangType -> FilePath -> FilePath -> Action ()
+aSetFold :: Config -> LocksRef -> IDsRef -> ([Set String] -> Set String)
+         -> Type -> FilePath -> FilePath -> Action ()
 aSetFold cfg ref idsRef fn (ListOf etype) oPath setsPath = do
   setPaths  <- readPaths cfg ref setsPath
-  setElems  <- mapM (readStrings etype cfg ref) (map (fromOrthoLangPath cfg) setPaths)
+  setElems  <- mapM (readStrings etype cfg ref) (map (fromPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   ids <- liftIO $ readIORef idsRef
   let sets = map fromList setElems'
@@ -99,7 +99,7 @@ aSetFold _ _ _ _ _ _ _ = fail "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
-canonicalLinks :: OrthoLangConfig -> OrthoLangType -> [FilePath] -> IO [FilePath]
+canonicalLinks :: Config -> Type -> [FilePath] -> IO [FilePath]
 canonicalLinks cfg rtn =
   if rtn `elem` [str, num]
     then return
@@ -107,15 +107,15 @@ canonicalLinks cfg rtn =
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898
-dedupByContent :: OrthoLangConfig -> Locks -> [FilePath] -> Action [FilePath]
+dedupByContent :: Config -> LocksRef -> [FilePath] -> Action [FilePath]
 dedupByContent cfg ref paths = do
   -- TODO if the paths are already in the load cache, no need for content?
-  hashes <- mapM (hashContent cfg ref) $ map (toOrthoLangPath cfg) paths
+  hashes <- mapM (hashContent cfg ref) $ map (toPath cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
 
-some :: OrthoLangFunction
-some = OrthoLangFunction
+some :: Function
+some = Function
   { fOpChar = Nothing, fName = "some"
   , fTypeCheck = tSetFold
   , fTypeDesc  = "some : X.list.list -> X.list"
@@ -124,9 +124,9 @@ some = OrthoLangFunction
   }
 
 rSome :: RulesFn
-rSome s (OrthoLangFun rtn salt deps _ lol) = rExpr s diffExpr
+rSome s (Fun rtn salt deps _ lol) = rExpr s diffExpr
   where
-    anyExpr  = OrthoLangFun rtn salt deps "any" lol
-    allExpr  = OrthoLangFun rtn salt deps "all" lol
-    diffExpr = OrthoLangBop rtn salt deps "~" anyExpr allExpr
+    anyExpr  = Fun rtn salt deps "any" lol
+    allExpr  = Fun rtn salt deps "all" lol
+    diffExpr = Bop rtn salt deps "~" anyExpr allExpr
 rSome _ _ = fail "bad argument to rSome"

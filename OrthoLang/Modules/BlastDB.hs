@@ -20,8 +20,8 @@ import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), debugA,
                                     cachedLinesPath, writeStrings, readStrings, writePaths,
                                     readFileStrict)
 import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, debugRules, singleton)
-import OrthoLang.Core.Paths         (exprPath, cacheDir, fromOrthoLangPath,
-                                    toOrthoLangPath, OrthoLangPath)
+import OrthoLang.Core.Paths         (exprPath, cacheDir, fromPath,
+                                    toPath, Path)
 import OrthoLang.Core.Util          (stripWhiteSpace, resolveSymlinks)
 import OrthoLang.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeFileName, takeBaseName, takeExtension, (</>), (<.>),
@@ -57,11 +57,11 @@ import OrthoLang.Core.Pretty (Pretty)
 debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdb." ++ name)
 
-debugR' :: (Pretty a, Show b) => OrthoLangConfig -> String -> a -> b -> b
+debugR' :: (Pretty a, Show b) => Config -> String -> a -> b -> b
 debugR' cfg name = debugRules cfg ("modules.blastdb." ++ name)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
   , mTypes = [ndb, pdb]
@@ -104,16 +104,16 @@ orthoLangModule = OrthoLangModule
 
 -- TODO add a blastdb type group? seems natural but i'm not sure you ever need to mix them
 
-ndb :: OrthoLangType
-ndb = OrthoLangType
+ndb :: Type
+ndb = Type
   { tExt  = "ndb"
   , tDesc = "BLAST nucleotide database"
   , tShow  = showBlastDb
   }
 
 -- TODO will people confuse this with PDB files for viewing molecules?
-pdb :: OrthoLangType
-pdb = OrthoLangType
+pdb :: Type
+pdb = Type
   { tExt  = "pdb"
   , tDesc = "BLAST protein database"
   , tShow  = showBlastDb
@@ -128,8 +128,8 @@ pdb = OrthoLangType
  - files that you can read to get the proper prefix pattern.
  -}
 
-mkLoadDB :: String -> OrthoLangType -> OrthoLangFunction
-mkLoadDB name rtn = OrthoLangFunction
+mkLoadDB :: String -> Type -> Function
+mkLoadDB name rtn = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
@@ -137,8 +137,8 @@ mkLoadDB name rtn = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rLoadDB
   }
 
-mkLoadDBEach :: String -> OrthoLangType -> OrthoLangFunction
-mkLoadDBEach name rtn = OrthoLangFunction
+mkLoadDBEach :: String -> Type -> Function
+mkLoadDBEach name rtn = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
@@ -147,36 +147,36 @@ mkLoadDBEach name rtn = OrthoLangFunction
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [s]) = do
+rLoadDB st@(_, cfg, ref, ids) e@(Fun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
-  let sPath' = toOrthoLangPath cfg sPath
+  let sPath' = toPath cfg sPath
   oPath' %> \_ -> aLoadDB cfg ref ids oPath sPath'
   return (ExprPath oPath')
   where
     oPath  = exprPath st e
-    oPath' = fromOrthoLangPath cfg oPath
+    oPath' = fromPath cfg oPath
 rLoadDB _ _ = fail "bad argument to rLoadDB"
 
-aLoadDB :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
+aLoadDB :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
 aLoadDB cfg ref _ oPath sPath = do
   pattern <- readLit cfg ref sPath'
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
   writeLit cfg ref oPath'' pattern'
   where
-    oPath'  = fromOrthoLangPath cfg oPath
-    sPath'  = fromOrthoLangPath cfg sPath
+    oPath'  = fromPath cfg oPath
+    sPath'  = fromPath cfg sPath
     oPath'' = traceA "aLoadDB" oPath' [oPath', sPath']
 
-loadNuclDB :: OrthoLangFunction
+loadNuclDB :: Function
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
 
-loadProtDB :: OrthoLangFunction
+loadProtDB :: Function
 loadProtDB = mkLoadDB "load_prot_db" pdb
 
-loadNuclDBEach :: OrthoLangFunction
+loadNuclDBEach :: Function
 loadNuclDBEach = mkLoadDBEach "load_nucl_db_each" ndb
 
-loadProtDBEach :: OrthoLangFunction
+loadProtDBEach :: Function
 loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 
 ------------------------
@@ -184,8 +184,8 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 ------------------------
 
 -- takes a filter string (leave empty for all results)
-blastdblist :: OrthoLangFunction
-blastdblist = let name = "blastdblist" in OrthoLangFunction
+blastdblist :: Function
+blastdblist = let name = "blastdblist" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
@@ -199,30 +199,30 @@ filterNames s cs = filter matchFn cs
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
 -- we use two different ones here because it matches the rMap behavior of using just fn name
-blastdbgetCache :: OrthoLangConfig -> OrthoLangPath
+blastdbgetCache :: Config -> Path
 blastdbgetCache cfg = cacheDir cfg "blastdbget"
 
 -- we use two different ones here because it matches the rMap behavior of using just fn name
-makeblastdbCache :: OrthoLangConfig -> OrthoLangPath
+makeblastdbCache :: Config -> Path
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [f]) = do
+rBlastdblist s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
-  let fPath' = toOrthoLangPath   cfg fPath
+  let fPath' = toPath   cfg fPath
   listTmp %> \_ -> aBlastdblist   cfg ref ids lTmp'
   oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
     oPath   = exprPath s e
     tmpDir  = blastdbgetCache cfg
-    tmpDir' = fromOrthoLangPath cfg tmpDir
+    tmpDir' = fromPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
-    oPath'  = fromOrthoLangPath cfg oPath
-    lTmp'   = toOrthoLangPath   cfg listTmp
+    oPath'  = fromPath cfg oPath
+    lTmp'   = toPath   cfg listTmp
 rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 
-aBlastdblist :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action ()
+aBlastdblist :: Config -> LocksRef -> IDsRef -> Path -> Action ()
 aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
   withWriteLock' ref tmpDir $ do
@@ -240,13 +240,13 @@ aBlastdblist cfg ref _ listTmp = do
       , cmdExitCode = ExitFailure 1
       }
   where
-    listTmp' = fromOrthoLangPath cfg listTmp
+    listTmp' = fromPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
     oPath    = traceA "aBlastdblist" listTmp' [listTmp']
 
 -- TODO generalize so it works with busco_list_lineages too?
 -- TODO move to a "Filter" module once that gets started
-aFilterList :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> Action ()
+aFilterList :: Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Action ()
 aFilterList cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
   out       <- readLits cfg ref listTmp'
@@ -255,13 +255,13 @@ aFilterList cfg ref _ oPath listTmp fPath = do
   debugA' "aFilterList" $ "names': " ++ show names'
   writeLits cfg ref oPath'' names'
   where
-    fPath'   = fromOrthoLangPath cfg fPath
-    oPath'   = fromOrthoLangPath cfg oPath
-    listTmp' = fromOrthoLangPath cfg listTmp
+    fPath'   = fromPath cfg fPath
+    oPath'   = fromPath cfg oPath
+    listTmp' = fromPath cfg listTmp
     oPath''  = traceA "aFilterList" oPath' [oPath', listTmp', fPath']
 
-mkBlastdbget :: String -> OrthoLangType -> OrthoLangFunction
-mkBlastdbget name dbType = OrthoLangFunction
+mkBlastdbget :: String -> Type -> Function
+mkBlastdbget name dbType = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
@@ -269,24 +269,24 @@ mkBlastdbget name dbType = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rBlastdbget
   }
 
-blastdbgetNucl :: OrthoLangFunction
+blastdbgetNucl :: Function
 blastdbgetNucl = mkBlastdbget "blastdbget_nucl" ndb
 
-blastdbgetProt :: OrthoLangFunction
+blastdbgetProt :: Function
 blastdbgetProt = mkBlastdbget "blastdbget_prot" pdb
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [name]) = do
+rBlastdbget st@(_, cfg, ref, ids) e@(Fun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath st e -- final prefix
-      dbPrefix' = fromOrthoLangPath cfg dbPrefix
-      nPath'    = toOrthoLangPath cfg nPath
+      dbPrefix' = fromPath cfg dbPrefix
+      nPath'    = toPath cfg nPath
   dbPrefix' %> \_ -> aBlastdbget cfg ref ids dbPrefix tmpDir nPath'
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
-aBlastdbget :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> OrthoLangPath -> Action ()
+aBlastdbget :: Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Action ()
 aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
   need' cfg ref "ortholang.modules.blastdb.aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
@@ -310,9 +310,9 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
     }
   writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
   where
-    tmp'       = fromOrthoLangPath cfg tmpDir
-    nPath'     = fromOrthoLangPath cfg nPath
-    dbPrefix'  = fromOrthoLangPath cfg dbPrefix
+    tmp'       = fromPath cfg tmpDir
+    nPath'     = fromPath cfg nPath
+    dbPrefix'  = fromPath cfg dbPrefix
     dbPrefix'' = traceA "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
 
 --------------------------------------------
@@ -324,8 +324,8 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
 --      in addition to actual inputs?
-makeblastdbNuclAll :: OrthoLangFunction
-makeblastdbNuclAll = OrthoLangFunction
+makeblastdbNuclAll :: Function
+makeblastdbNuclAll = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tMakeblastdbAll name ndb
   , fTypeDesc  = name ++ " : fa.list -> ndb"
@@ -335,8 +335,8 @@ makeblastdbNuclAll = OrthoLangFunction
   where
     name = "makeblastdb_nucl_all"
 
-makeblastdbProtAll :: OrthoLangFunction
-makeblastdbProtAll = OrthoLangFunction
+makeblastdbProtAll :: Function
+makeblastdbProtAll = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tMakeblastdbAll name pdb
   , fTypeDesc  = name ++ " : faa.list -> pdb"
@@ -347,7 +347,7 @@ makeblastdbProtAll = OrthoLangFunction
     name = "makeblastdb_prot_all"
 
 -- TODO allow fna.list -> pdb.list using translate?
-tMakeblastdbAll :: String -> OrthoLangType -> TypeChecker
+tMakeblastdbAll :: String -> Type -> TypeChecker
 tMakeblastdbAll _ dbType [ListOf faType]
   | dbType == pdb && faType   ==    faa       = Right pdb
   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
@@ -359,12 +359,12 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdbAll :: RulesFn
-rMakeblastdbAll s@(_, cfg, ref, ids) e@(OrthoLangFun rtn _ _ _ [fas]) = do
+rMakeblastdbAll s@(_, cfg, ref, ids) e@(Fun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out       = exprPath s e
-      out'      = debugR' cfg "rMakeblastdbAll" e $ fromOrthoLangPath cfg out
+      out'      = debugR' cfg "rMakeblastdbAll" e $ fromPath cfg out
       cDir      = makeblastdbCache cfg
-      fasPath'   = toOrthoLangPath cfg fasPath
+      fasPath'   = toPath cfg fasPath
 
   -- TODO need new shake first:
   -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
@@ -382,7 +382,7 @@ listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . 
 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
-aMakeblastdbAll :: OrthoLangType -> OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ()
+aMakeblastdbAll :: Type -> Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ()
 aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
@@ -396,7 +396,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
 
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> fasHash <.> extOf dbType
-      dbOut' = toOrthoLangPath cfg dbOut
+      dbOut' = toPath cfg dbOut
       out''  = traceA "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
       dbPtn  = cDir' </> fasHash </> "*" -- TODO does this actually help?
 
@@ -409,11 +409,11 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
   faPaths <- readPaths cfg ref fasPath'
-  let noQuoting  = unwords $ map (fromOrthoLangPath cfg) faPaths
+  let noQuoting  = unwords $ map (fromPath cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
       -- quoteInner = "\"" ++ unwords
-      --              (map (\p -> "'" ++ fromOrthoLangPath cfg p ++ "'") faPaths)
+      --              (map (\p -> "'" ++ fromPath cfg p ++ "'") faPaths)
       --              ++ "\""
 
   let dbg = debugA' "aMakeblastdbAll"
@@ -462,9 +462,9 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO why should this work when outside the when block but not inside?? something about retries?
   writePath cfg ref out'' dbOut'
   where
-    out'     = fromOrthoLangPath cfg out
-    cDir'    = fromOrthoLangPath cfg cDir
-    fasPath' = fromOrthoLangPath cfg fasPath
+    out'     = fromPath cfg out
+    cDir'    = fromPath cfg cDir
+    fasPath' = fromPath cfg fasPath
 aMakeblastdbAll _ _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
 ----------------------------------------
@@ -474,8 +474,8 @@ aMakeblastdbAll _ _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++
 -- these are oddly implemented in terms of the _all ones above,
 -- because that turned out to be easier
 
-makeblastdbNucl :: OrthoLangFunction
-makeblastdbNucl = OrthoLangFunction
+makeblastdbNucl :: Function
+makeblastdbNucl = Function
   { fOpChar = Nothing, fName = "makeblastdb_nucl"
   , fTypeCheck = tMakeblastdb ndb
   , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
@@ -483,8 +483,8 @@ makeblastdbNucl = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rMakeblastdb
   }
 
-makeblastdbProt :: OrthoLangFunction
-makeblastdbProt = OrthoLangFunction
+makeblastdbProt :: Function
+makeblastdbProt = Function
   { fOpChar = Nothing, fName = "makeblastdb_prot"
   , fTypeCheck = tMakeblastdb pdb
   , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
@@ -492,7 +492,7 @@ makeblastdbProt = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rMakeblastdb
   }
 
-tMakeblastdb :: OrthoLangType -> TypeChecker
+tMakeblastdb :: Type -> TypeChecker
 tMakeblastdb dbType [faType]
   | dbType == pdb && faType   ==    faa       = Right pdb
   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
@@ -502,17 +502,17 @@ rMakeblastdb :: RulesFn
 rMakeblastdb s e = rMakeblastdbAll s $ withSingleton e
 
 -- TODO is this map1of1?
-withSingleton :: OrthoLangExpr -> OrthoLangExpr
-withSingleton (OrthoLangFun rtn salt deps name [s])
-  =           (OrthoLangFun rtn salt deps name [singleton s])
+withSingleton :: Expr -> Expr
+withSingleton (Fun rtn salt deps name [s])
+  =           (Fun rtn salt deps name [singleton s])
 withSingleton e = error $ "bad argument to withSingleton: " ++ show e
 
 -----------------------------------------------
 -- make list of dbs from list of FASTA files --
 -----------------------------------------------
 
-mkMakeblastdbEach :: OrthoLangType -> OrthoLangFunction
-mkMakeblastdbEach dbType = OrthoLangFunction
+mkMakeblastdbEach :: Type -> Function
+mkMakeblastdbEach dbType = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tMakeblastdbEach dbType
   , fTypeDesc  = desc
@@ -525,22 +525,22 @@ mkMakeblastdbEach dbType = OrthoLangFunction
     ext  = if dbType == ndb then "fa" else "faa"
 
 -- TODO no! depends on an arg
-tMakeblastdbEach :: OrthoLangType -> TypeChecker
+tMakeblastdbEach :: Type -> TypeChecker
 tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
 
 -- rFun1 :: Action1 -> RulesFn
--- rFun1 act1 st@(_, cfg, ref) expr@(OrthoLangFun _ _ _ _ [a1]) = do
+-- rFun1 act1 st@(_, cfg, ref) expr@(Fun _ _ _ _ [a1]) = do
 
--- map1of1 :: OrthoLangType -> OrthoLangType -> Action1 -> Action1
+-- map1of1 :: Type -> Type -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
--- rMap :: Int -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()) -> RulesFn
+-- rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
 -- rMap index actFn = rMapMain index Nothing actFn'
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, _) (OrthoLangFun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, _) (Fun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
@@ -548,7 +548,7 @@ rMakeblastdbEach st@(_, cfg, _, _) (OrthoLangFun (ListOf dbType) salt deps name 
     tmpDir = makeblastdbCache cfg 
     -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
     act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
-    expr' = OrthoLangFun (ListOf dbType) salt deps name [withSingletons e]
+    expr' = Fun (ListOf dbType) salt deps name [withSingletons e]
     -- expr'' = trace ("expr':" ++ show expr') expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
@@ -558,13 +558,13 @@ rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
 -- TODO move this to its own module? remove it when possible?
 
-withSingletons :: OrthoLangExpr -> OrthoLangExpr
-withSingletons e = OrthoLangFun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
+withSingletons :: Expr -> Expr
+withSingletons e = Fun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
 
 -- Only used for the makeblastdb_*_each functions so far
 -- TODO hide from users?
-singletons :: OrthoLangFunction
-singletons = OrthoLangFunction
+singletons :: Function
+singletons = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
@@ -574,25 +574,25 @@ singletons = OrthoLangFunction
   where
     name = "singletons"
 
-tSingletons :: [OrthoLangType] -> Either String OrthoLangType
+tSingletons :: [Type] -> Either String Type
 tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
-rSingletons st@(_, cfg, ref, ids) expr@(OrthoLangFun rtn _ _ _ [listExpr]) = do
+rSingletons st@(_, cfg, ref, ids) expr@(Fun rtn _ _ _ [listExpr]) = do
   (ExprPath listPath') <- rExpr st listExpr
   let outPath  = exprPath st expr
-      outPath' = fromOrthoLangPath cfg outPath
-      listPath = toOrthoLangPath cfg listPath'
+      outPath' = fromPath cfg outPath
+      listPath = toPath cfg listPath'
       (ListOf (ListOf t)) = rtn
   outPath' %> \_ -> aSingletons t cfg ref ids outPath listPath
   return $ ExprPath outPath'
 rSingletons _ _ = fail "bad argument to rSingletons"
 
-aSingletons :: OrthoLangType -> Action1
+aSingletons :: Type -> Action1
 aSingletons elemType cfg ref _ outPath listPath = do
-  let listPath' = fromOrthoLangPath cfg listPath
-      outPath'  = fromOrthoLangPath cfg outPath
+  let listPath' = fromPath cfg listPath
+      outPath'  = fromPath cfg outPath
       dbg = debugA' "aSingletons"
   dbg $ "listpath': " ++ listPath'
   dbg $ "outpath': " ++ outPath'
@@ -600,7 +600,7 @@ aSingletons elemType cfg ref _ outPath listPath = do
   dbg $ "elems: " ++ show elems
   singletonPaths <- forM elems $ \e -> do
     let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
-        singletonPath  = toOrthoLangPath cfg singletonPath'
+        singletonPath  = toPath cfg singletonPath'
     dbg $ "singletonPath': " ++ singletonPath'
     writeStrings elemType cfg ref singletonPath' [e]
     return singletonPath
@@ -611,7 +611,7 @@ aSingletons elemType cfg ref _ outPath listPath = do
 ------------------
 
 -- TODO remove the Volumes... lines too?
-showBlastDb :: OrthoLangConfig -> Locks -> FilePath -> IO String
+showBlastDb :: Config -> LocksRef -> FilePath -> IO String
 showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir  = takeDirectory path'

@@ -10,7 +10,7 @@ module OrthoLang.Core.Compile.Compose
   where
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Paths (exprPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths (exprPath, fromPath)
 -- import OrthoLang.Core.Compile.Basic
 
 --------------
@@ -22,11 +22,11 @@ import OrthoLang.Core.Paths (exprPath, fromOrthoLangPath)
 
 compose1 :: String      -- overall function name
          -> String      -- overall type description for :type command
-         -> OrthoLangFunction -- first function (takes inputs, returns intermediate)
-         -> OrthoLangType     -- intermediate type to be passed from fn1 to fn2
-         -> OrthoLangFunction -- second function (takes intermediate, returns output)
-         -> OrthoLangFunction -- overall fn (runs fn1, then fn2 on its output)
-compose1 name desc fn1 type1 fn2 = OrthoLangFunction
+         -> Function -- first function (takes inputs, returns intermediate)
+         -> Type     -- intermediate type to be passed from fn1 to fn2
+         -> Function -- second function (takes intermediate, returns output)
+         -> Function -- overall fn (runs fn1, then fn2 on its output)
+compose1 name desc fn1 type1 fn2 = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tCompose1 fn1 type1 fn2
   , fNewRules = Nothing, fOldRules = rCompose1 fn1 type1 fn2
@@ -34,7 +34,7 @@ compose1 name desc fn1 type1 fn2 = OrthoLangFunction
   ,fTags = []
   }
 
-tCompose1 :: OrthoLangFunction -> OrthoLangType -> OrthoLangFunction -> TypeChecker
+tCompose1 :: Function -> Type -> Function -> TypeChecker
 tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
   (Left  errMsg) -> Left errMsg
   (Right actual) -> if actual == expected
@@ -43,11 +43,11 @@ tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
                              ++ " produces a " ++ extOf actual
                              ++ ", not " ++ extOf expected
 
-rCompose1 :: OrthoLangFunction -> OrthoLangType -> OrthoLangFunction -> RulesFn
-rCompose1 fn1 rtn1 fn2 st@(_, cfg, _, _) (OrthoLangFun rtn2 salt deps _ args) = (fOldRules fn2) st expr2
+rCompose1 :: Function -> Type -> Function -> RulesFn
+rCompose1 fn1 rtn1 fn2 st@(_, cfg, _, _) (Fun rtn2 salt deps _ args) = (fOldRules fn2) st expr2
   where
-    expr1'  = OrthoLangFun rtn1 salt deps (fName fn1) args
-    path1'  = ExprPath $ fromOrthoLangPath cfg $ exprPath st expr1'
-    expr1'' = OrthoLangRules $ CompiledExpr rtn1 path1' $ (fOldRules fn1) st expr1'
-    expr2   = OrthoLangFun rtn2 salt deps (fName fn2) [expr1'']
+    expr1'  = Fun rtn1 salt deps (fName fn1) args
+    path1'  = ExprPath $ fromPath cfg $ exprPath st expr1'
+    expr1'' = Com $ CompiledExpr rtn1 path1' $ (fOldRules fn1) st expr1'
+    expr2   = Fun rtn2 salt deps (fName fn2) [expr1'']
 rCompose1 _ _ _ _ _ = fail "bad argument to rCompose1"

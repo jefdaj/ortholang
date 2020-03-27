@@ -6,7 +6,7 @@ module OrthoLang.Modules.Busco
 
 import Development.Shake
 import OrthoLang.Core.Types
-import OrthoLang.Core.Paths (cacheDir, toOrthoLangPath, fromOrthoLangPath, exprPath)
+import OrthoLang.Core.Paths (cacheDir, toPath, fromPath, exprPath)
 import OrthoLang.Core.Actions (traceA, writeLits, runCmd, CmdDesc(..), readLit, readPaths, writePaths,
                               readFileStrict', symlink, readFileStrict, sanitizeFileInPlace)
 import OrthoLang.Core.Compile (defaultTypeCheck, rExpr, mkLoad, curl)
@@ -24,8 +24,8 @@ import Control.Monad (when)
 import Data.List ((\\))
 import Data.Maybe (isJust)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
   , mTypes = [blh, bsr, bst, faa]
@@ -42,15 +42,15 @@ orthoLangModule = OrthoLangModule
       ]
   }
 
-blh :: OrthoLangType
-blh = OrthoLangType
+blh :: Type
+blh = Type
   { tExt  = "blh"
   , tDesc = "BUSCO lineage HMMs"
   , tShow = defaultShowN 6
   }
 
-bsr :: OrthoLangType
-bsr = OrthoLangType
+bsr :: Type
+bsr = Type
   { tExt  = "bsr"
   , tDesc = "BUSCO results"
   , tShow = \_ ref path -> do
@@ -59,25 +59,25 @@ bsr = OrthoLangType
       return $ init $ "BUSCO result:" ++ tail9 txt
   }
 
-bst :: OrthoLangType
-bst = OrthoLangType
+bst :: Type
+bst = Type
   { tExt  = "bst"
   , tDesc = "BUSCO scores table"
   , tShow = defaultShow
   }
 
-loadLineage :: OrthoLangFunction
+loadLineage :: Function
 loadLineage = mkLoad False "load_lineage" blh
 
-buscoCache :: OrthoLangConfig -> OrthoLangPath
+buscoCache :: Config -> Path
 buscoCache cfg = cacheDir cfg "busco"
 
 -------------------------
 -- busco_list_lineages --
 -------------------------
 
-buscoListLineages :: OrthoLangFunction
-buscoListLineages = OrthoLangFunction
+buscoListLineages :: Function
+buscoListLineages = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
@@ -88,27 +88,27 @@ buscoListLineages = OrthoLangFunction
     name = "busco_list_lineages"
 
 rBuscoListLineages :: RulesFn
-rBuscoListLineages s@(_, cfg, ref, ids) e@(OrthoLangFun _ _ _ _ [f]) = do
+rBuscoListLineages s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
-  let fPath' = toOrthoLangPath   cfg fPath
+  let fPath' = toPath   cfg fPath
   listTmp %> \_ -> aBuscoListLineages   cfg ref ids lTmp'
   oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
     oPath   = exprPath s e
     tmpDir  = buscoCache cfg
-    tmpDir' = fromOrthoLangPath cfg tmpDir
+    tmpDir' = fromPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
-    oPath'  = fromOrthoLangPath cfg oPath
-    lTmp'   = toOrthoLangPath   cfg listTmp
+    oPath'  = fromPath cfg oPath
+    lTmp'   = toPath   cfg listTmp
 rBuscoListLineages _ _ = fail "bad argument to rBuscoListLineages"
 
-aBuscoListLineages :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action ()
+aBuscoListLineages :: Config -> LocksRef -> IDsRef -> Path -> Action ()
 aBuscoListLineages cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
   writeLits cfg ref oPath allLineages
   where
-    listTmp' = fromOrthoLangPath cfg listTmp
+    listTmp' = fromPath cfg listTmp
     tmpDir   = takeDirectory $ listTmp'
     oPath    = traceA "aBuscoListLineages" listTmp' [listTmp']
     -- These seem static, but may have to be updated later.
@@ -177,8 +177,8 @@ aBuscoListLineages cfg ref _ listTmp = do
 -- TODO consistent naming with similar functions
 -- TODO busco_fetch_lineages? (the _each version)
 
-buscoFetchLineage :: OrthoLangFunction
-buscoFetchLineage  = OrthoLangFunction
+buscoFetchLineage :: Function
+buscoFetchLineage  = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
@@ -189,7 +189,7 @@ buscoFetchLineage  = OrthoLangFunction
     name = "busco_fetch_lineage"
 
 -- TODO move to Util?
-untar :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> Action ()
+untar :: Config -> LocksRef -> Path -> Path -> Action ()
 untar cfg ref from to = runCmd cfg ref $ CmdDesc
   { cmdBinary = "tar"
   , cmdArguments = (if isJust (cfgDebug cfg) then "-v" else ""):["-xf", from', "-C", takeDirectory to']
@@ -204,24 +204,24 @@ untar cfg ref from to = runCmd cfg ref $ CmdDesc
   , cmdRmPatterns = [to']
   }
   where
-    from' = fromOrthoLangPath cfg from
-    to' = fromOrthoLangPath cfg to
+    from' = fromPath cfg from
+    to' = fromPath cfg to
 
 rBuscoFetchLineage :: RulesFn
-rBuscoFetchLineage st@(_, cfg, ref, _) expr@(OrthoLangFun _ _ _ _ [nPath]) = do
+rBuscoFetchLineage st@(_, cfg, ref, _) expr@(Fun _ _ _ _ [nPath]) = do
   (ExprPath namePath) <- rExpr st nPath
   let outPath  = exprPath st expr
-      outPath' = fromOrthoLangPath cfg outPath
-      blhDir   = (fromOrthoLangPath cfg $ buscoCache cfg) </> "lineages"
+      outPath' = fromPath cfg outPath
+      blhDir   = (fromPath cfg $ buscoCache cfg) </> "lineages"
   outPath' %> \_ -> do
     nameStr <- readLit cfg ref namePath
     let untarPath = blhDir </> nameStr
         url       = "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
         datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
-        datasetPath   = toOrthoLangPath cfg datasetPath'
-    tarPath <- fmap (fromOrthoLangPath cfg) $ curl cfg ref url
+        datasetPath   = toPath cfg datasetPath'
+    tarPath <- fmap (fromPath cfg) $ curl cfg ref url
     unlessExists untarPath $ do
-      untar cfg ref (toOrthoLangPath cfg tarPath) (toOrthoLangPath cfg untarPath)
+      untar cfg ref (toPath cfg tarPath) (toPath cfg untarPath)
     symlink cfg ref outPath datasetPath
   return $ ExprPath outPath'
 rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show e
@@ -230,8 +230,8 @@ rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show 
 -- busco_{genome,proteins,transcriptome} --
 -------------------------------------------
 
-mkBusco :: String -> String -> OrthoLangType -> OrthoLangFunction
-mkBusco name mode inType = OrthoLangFunction
+mkBusco :: String -> String -> Type -> Function
+mkBusco name mode inType = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
@@ -239,18 +239,18 @@ mkBusco name mode inType = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rSimple $ aBusco mode
   }
 
-buscoProteins, buscoTranscriptome :: OrthoLangFunction
+buscoProteins, buscoTranscriptome :: Function
 buscoProteins      = mkBusco "busco_proteins"      "prot" faa
 buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
 
-aBusco :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aBusco :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aBusco mode cfg ref _ [outPath, blhPath, faaPath] = do
-  let out' = fromOrthoLangPath cfg outPath
-      blh' = takeDirectory $ fromOrthoLangPath cfg blhPath
-      cDir = fromOrthoLangPath cfg $ buscoCache cfg
+  let out' = fromPath cfg outPath
+      blh' = takeDirectory $ fromPath cfg blhPath
+      cDir = fromPath cfg $ buscoCache cfg
       rDir = cDir </> "runs"
-      faa' = fromOrthoLangPath cfg faaPath
+      faa' = fromPath cfg faaPath
   blh'' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) blh'
   liftIO $ createDirectoryIfMissing True rDir
   runCmd cfg ref $ CmdDesc
@@ -271,15 +271,15 @@ aBusco mode cfg ref _ [outPath, blhPath, faaPath] = do
       tmpOutPtn = rDir </> oBasePtn </> "short_summary*.txt"
   tmpOut <- liftIO $ fmap (headOrDie "failed to read BUSCO summary in aBusco") $ glob tmpOutPtn
   sanitizeFileInPlace cfg ref tmpOut -- will this confuse shake?
-  symlink cfg ref outPath $ toOrthoLangPath cfg tmpOut
+  symlink cfg ref outPath $ toPath cfg tmpOut
 aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
 
 ------------------------------------------------
 -- busco_{genome,proteins,transcriptome}_each --
 ------------------------------------------------
 
-mkBuscoEach :: String -> String -> OrthoLangType -> OrthoLangFunction
-mkBuscoEach name mode inType = OrthoLangFunction
+mkBuscoEach :: String -> String -> Type -> Function
+mkBuscoEach name mode inType = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
@@ -287,7 +287,7 @@ mkBuscoEach name mode inType = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rMap 2 $ aBusco mode
   }
 
-buscoProteinsEach, buscoTranscriptomeEach :: OrthoLangFunction
+buscoProteinsEach, buscoTranscriptomeEach :: Function
 buscoProteinsEach      = mkBuscoEach "busco_proteins_each"      "prot" faa
 buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
 -- buscoGenomeEach = mkBusco "busco_genome_each" "geno"
@@ -296,8 +296,8 @@ buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
 -- busco_percent_complete* --
 -----------------------------
 
-buscoPercentComplete :: OrthoLangFunction
-buscoPercentComplete  = OrthoLangFunction
+buscoPercentComplete :: Function
+buscoPercentComplete  = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
@@ -307,8 +307,8 @@ buscoPercentComplete  = OrthoLangFunction
   where
     name = "busco_percent_complete"
 
-buscoPercentCompleteEach :: OrthoLangFunction
-buscoPercentCompleteEach  = OrthoLangFunction
+buscoPercentCompleteEach :: Function
+buscoPercentCompleteEach  = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
@@ -322,8 +322,8 @@ buscoPercentCompleteEach  = OrthoLangFunction
 -- busco_scores_table --
 ------------------------
 
-buscoScoresTable :: OrthoLangFunction
-buscoScoresTable  = OrthoLangFunction
+buscoScoresTable :: Function
+buscoScoresTable  = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
@@ -336,13 +336,13 @@ buscoScoresTable  = OrthoLangFunction
 
 -- TODO variant of rSimpleScript that reads + passes in a list of input files?
 rBuscoScoresTable :: RulesFn
-rBuscoScoresTable s@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [l]) = do
+rBuscoScoresTable s@(_, cfg, ref, _) e@(Fun _ _ _ _ [l]) = do
   (ExprPath lsPath) <- rExpr s l
   let o  = exprPath s e
-      o' = fromOrthoLangPath cfg o
+      o' = fromPath cfg o
   o' %> \_ -> do
     ins <- readPaths cfg ref lsPath
-    let ins' = map (fromOrthoLangPath cfg) ins
+    let ins' = map (fromPath cfg) ins
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "busco_scores_table.py"
       , cmdArguments = o':ins'
@@ -369,8 +369,8 @@ rBuscoScoresTable _ e = error $ "bad argument to rBuscoScoresTable: " ++ show e
 -- TODO remove busco_percent_complete* afterward since the table will be more useful?
 -- TODO make an _each version of this one
 
-buscoFilterCompleteness :: OrthoLangFunction
-buscoFilterCompleteness  = OrthoLangFunction
+buscoFilterCompleteness :: Function
+buscoFilterCompleteness  = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
@@ -386,12 +386,12 @@ buscoFilterCompleteness  = OrthoLangFunction
 -- TODO try the same way it works for sets: one canonical full path!
 -- TODO do it the simple way for now, then see if it breaks and if so fix it
 rBuscoFilterCompleteness :: RulesFn
-rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [m, t, fs]) = do
+rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(Fun _ _ _ _ [m, t, fs]) = do
   (ExprPath scorePath) <- rExpr s m
   (ExprPath tablePath) <- rExpr s t
   (ExprPath faasList ) <- rExpr s fs
   let out  = exprPath s e
-      out' = fromOrthoLangPath cfg out
+      out' = fromPath cfg out
   out' %> \_ -> do
     score <- fmap (read :: String -> Scientific) $ readLit  cfg ref scorePath
     table <- readFileStrict' cfg ref tablePath -- TODO best read fn?
@@ -404,7 +404,7 @@ rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [m, t, fs]) 
     writePaths cfg ref out' okPaths
   return $ ExprPath out'
   where
-    parseWords (p:c:_) = (OrthoLangPath p, read c :: Scientific)
+    parseWords (p:c:_) = (Path p, read c :: Scientific)
     parseWords ws = error $ "bad argument to parseWords: " ++ show ws
 rBuscoFilterCompleteness _ e = error $
   "bad argument to rBuscoFilterCompleteness: " ++ show e

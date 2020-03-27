@@ -10,7 +10,7 @@ build.
 
 It should also reduce boilerplace in the modules: in most cases only one
 'NewActionN' function will be needed (where N = 1, 2, 3, ...) per
-'OrthoLangFunction' definition.
+'Function' definition.
 -}
 
 module OrthoLang.Core.Compile.NewRules
@@ -27,12 +27,12 @@ import Development.Shake
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions (need')
 import OrthoLang.Core.Compile.Basic
-import OrthoLang.Core.Paths (fromOrthoLangPath, decodeNewRulesDeps)
+import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Core.Types
 import Data.Maybe (catMaybes)
 
 
-newFunctionRules :: OrthoLangConfig -> Locks -> HashedIDsRef -> Rules ()
+newFunctionRules :: Config -> LocksRef -> IDsRef -> Rules ()
 newFunctionRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
   where
    fns   = concatMap mFunctions $ cfgModules cfg
@@ -63,45 +63,37 @@ newCoreRules cfg lRef iRef = do
 ------------------------------
 
 -- TODO ExprPaths for deps?
--- TODO or OrthoLangPaths throughout?
+-- TODO or Paths throughout?
 -- TODO can you encode NewAction1, 2, 3... easily?
 
 rNewRules1 :: String -> TypeChecker -> NewAction1 -> NewRulesFn
 rNewRules1 = rNewRules 1 applyList1
 
-applyList1
-  :: (FilePath -> Action ())
-  -> [FilePath] -> Action ()
+applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList1 fn deps = fn (deps !! 0)
 
 rNewRules2 :: String -> TypeChecker -> NewAction2 -> NewRulesFn
 rNewRules2 = rNewRules 2 applyList2
 
-applyList2
-  :: (FilePath -> FilePath -> Action ())
-  -> [FilePath] -> Action ()
+applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
 rNewRules3 :: String -> TypeChecker -> NewAction3 -> NewRulesFn
 rNewRules3 = rNewRules 3 applyList3
 
-applyList3
-  :: (FilePath -> FilePath -> FilePath -> Action ())
-  -> [FilePath] -> Action ()
+applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
 
 -- TODO any need to look up prefixOf to get the canonical name?
-newPattern :: OrthoLangConfig -> String -> Int -> FilePattern
+newPattern :: Config -> String -> Int -> FilePattern
 newPattern cfg name nArgs =
   cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
 
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 -- TODO one less * if not using repeat salt
 rNewRules
-  :: Int -> (t -> [FilePath] -> Action ()) -> String
-  -> TypeChecker
-  -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
-  -> NewRulesFn
+  :: Int -> (t -> [FilePath] -> Action ()) -> String -> TypeChecker
+  -> (Config -> LocksRef -> IDsRef -> ExprPath -> t) -> NewRulesFn
 rNewRules nArgs applyFn name tFn aFn cfg lRef iRef = do
   newPattern cfg name nArgs %> \p -> aNewRules applyFn tFn aFn cfg lRef iRef (ExprPath p)
   return ()
@@ -109,16 +101,15 @@ rNewRules nArgs applyFn name tFn aFn cfg lRef iRef = do
 aNewRules
   :: (t -> [FilePath] -> Action ()) -- one of the apply{1,2,3} fns
   -> TypeChecker
-  -> (OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> t)
-  ->  OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath
-  -> Action ()
+  -> (Config -> LocksRef -> IDsRef -> ExprPath -> t)
+  ->  Config -> LocksRef -> IDsRef -> ExprPath -> Action ()
 aNewRules applyFn tFn aFn cfg lRef iRef out = do
   (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef out
   case tFn dTypes of
     Left err -> error err
     Right rType -> do
       when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
-      let deps' = map (fromOrthoLangPath cfg) deps
+      let deps' = map (fromPath cfg) deps
       need' cfg lRef "ortholang.modules.newrulestest.aNewRules" deps'
       -- TODO look up out too and assert that its type matches typechecker result
       -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
@@ -127,22 +118,21 @@ aNewRules applyFn tFn aFn cfg lRef iRef out = do
       applyFn (aFn cfg lRef iRef out) deps'
 
 -- TODO do the applyFn thing at the action level rather than rules?
-mkNewFn1 :: String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> NewAction1 -> OrthoLangFunction
+mkNewFn1 :: String -> Maybe Char -> Type -> [Type] -> NewAction1 -> Function
 mkNewFn1 = mkNewFn rNewRules1
 
-mkNewFn2 :: String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> NewAction2 -> OrthoLangFunction
+mkNewFn2 :: String -> Maybe Char -> Type -> [Type] -> NewAction2 -> Function
 mkNewFn2 = mkNewFn rNewRules2
 
-mkNewFn3 :: String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> NewAction3 -> OrthoLangFunction
+mkNewFn3 :: String -> Maybe Char -> Type -> [Type] -> NewAction3 -> Function
 mkNewFn3 = mkNewFn rNewRules3
 
 mkNewFn
   :: (String -> TypeChecker -> t -> NewRulesFn)
-  -> String -> Maybe Char -> OrthoLangType -> [OrthoLangType] -> t
-  -> OrthoLangFunction
+  -> String -> Maybe Char -> Type -> [Type] -> t -> Function
 mkNewFn rFn name mChar oType dTypes aFn =
   let tFn = defaultTypeCheck dTypes oType
-  in OrthoLangFunction
+  in Function
        { fOpChar    = mChar
        , fName      = name
        , fTypeDesc  = mkTypeDesc name dTypes oType

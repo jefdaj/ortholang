@@ -103,18 +103,18 @@ pIden = debugParser "pIden" $ lexeme $ do
     first = letter
     rest  = letter <|> digit <|> oneOf "-_"
 
-pVar :: ParseM OrthoLangVar
-pVar = debugParser "pVar" (OrthoLangVar (ReplaceID Nothing) <$> pIden)
+pVar :: ParseM Var
+pVar = debugParser "pVar" (Var (RepID Nothing) <$> pIden)
 
 -- TODO is the error in here?? maybe it consumes a space and therefore doesn't fail?
 pEq :: ParseM ()
 -- pEq = debugParser "pEq" ((void $ spaces <* pSym '=') <?> "equals sign")
 pEq = debugParser "pEq" $ pSym '='
 
-pVarEq :: ParseM OrthoLangVar
+pVarEq :: ParseM Var
 pVarEq = debugParser "pVarEq" ((pVar <* pEq) <?> "variable assignment")
 
-pVarOnly :: ParseM OrthoLangVar
+pVarOnly :: ParseM Var
 pVarOnly = debugParser "pVarOnly " (pVar <* notFollowedBy pEq)
 
 --------------
@@ -122,7 +122,7 @@ pVarOnly = debugParser "pVarOnly " (pVar <* notFollowedBy pEq)
 --------------
 
 -- TODO hey Scientific has its own parser, would it work to add?
-pNum :: ParseM OrthoLangExpr
+pNum :: ParseM Expr
 pNum = debugParser "pNum" $ do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
@@ -135,7 +135,7 @@ pNum = debugParser "pNum" $ do
                Just s -> s
                _ -> ' '
       lit = show (read (sign:n:ns) :: Scientific)
-  return $ OrthoLangLit num (RepeatSalt 0) lit
+  return $ Lit num (Salt 0) lit
 
 -- list of chars which can be escaped in OrthoLang
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -158,5 +158,5 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
-pStr :: ParseM OrthoLangExpr
-pStr = debugParser "pStr" (OrthoLangLit str (RepeatSalt 0) <$> pQuoted <?> "string literal")
+pStr :: ParseM Expr
+pStr = debugParser "pStr" (Lit str (Salt 0) <$> pQuoted <?> "string literal")

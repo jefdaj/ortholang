@@ -36,7 +36,7 @@ stripComments = unlines . map stripComment . lines
     stripComment = takeWhile (/= '#')
 
 -- TODO make this parser nicer like the others? or leave simple like other languages?
-readScriptWithIncludes :: Locks -> FilePath -> IO String
+readScriptWithIncludes :: LocksRef -> FilePath -> IO String
 readScriptWithIncludes ref path = do
   txt <- readFileStrict ref path
   fmap unlines $ mapM processInclude $ lines txt
@@ -54,22 +54,22 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 -- statements --
 ----------------
 
-stripResult :: OrthoLangScript -> OrthoLangScript
+stripResult :: Script -> Script
 stripResult scr = filter notRes scr
   where
-    notRes ((OrthoLangVar _ "result"), _) = False
+    notRes ((Var _ "result"), _) = False
     notRes _ = True
 
 -- TODO combine pVar and pVarEq somehow to reduce try issues?
 
 -- TODO message in case it doesn't parse?
 -- TODO should reject duplicate variables! except replace result
-pAssign :: ParseM OrthoLangAssign
+pAssign :: ParseM Assign
 pAssign = debugParser "pAssign" $ do
   (scr, cfg, ref, ids) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
-  v@(OrthoLangVar _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
+  v@(Var _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
   when ((not $ cfgInteractive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
   e <- (lexeme pExpr)
   -- let scr' = case vName of
@@ -92,13 +92,13 @@ pAssign = debugParser "pAssign" $ do
 --      (later when working on statement issues)
 -- TODO if the statement is literally `result`, what do we do?
 --      maybe we need a separate type of assignment statement for this?
-pResult :: ParseM OrthoLangAssign
+pResult :: ParseM Assign
 pResult = debugParser "pResult" $ do
   e <- pExpr
-  let res = (OrthoLangVar (ReplaceID Nothing) "result", e)
+  let res = (Var (RepID Nothing) "result", e)
   return res
 
-pStatement :: ParseM OrthoLangAssign
+pStatement :: ParseM Assign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)
   -- (_, cfg) <- getState
   -- res <- pAssign <|> pResult
@@ -111,39 +111,39 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 -------------
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: GlobalEnv -> FilePath -> IO OrthoLangScript
+parseFileIO :: GlobalEnv -> FilePath -> IO Script
 parseFileIO st scr = do
   mscr1 <- parseFile st scr
   case mscr1 of
     Left  e -> fail $ show e
     Right s -> return s
 
--- TODO need GlobalEnv here? or just OrthoLangConfig?
-parseStatement :: GlobalEnv -> String -> Either ParseError OrthoLangAssign
+-- TODO need GlobalEnv here? or just Config?
+parseStatement :: GlobalEnv -> String -> Either ParseError Assign
 parseStatement = parseWithEof pStatement
 
 -- The name doesn't do a good job of explaining this, but it's expected to be
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
 -- TODO error if it has leftover?
-parseString :: OrthoLangConfig -> Locks -> HashedIDsRef -> String
-            -> Either ParseError OrthoLangScript
+parseString :: Config -> LocksRef -> IDsRef -> String
+            -> Either ParseError Script
 parseString c r ids = parseWithEof pScript ([], c, r, ids)
 
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
 -- Not sure why this should be necessary, but it was easier than fixing the parser to reject multiple results.
 -- TODO one result *per repeat ID*, not total!
-lastResultOnly :: OrthoLangScript -> OrthoLangScript
+lastResultOnly :: Script -> Script
 lastResultOnly scr = otherVars ++ [lastRes]
   where
-    (resVars, otherVars) = partition (\(v, _) -> v == OrthoLangVar (ReplaceID Nothing) "result") scr
+    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") scr
     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 
 -- TODO message in case it doesn't parse?
 -- TODO should it get automatically `put` here, or manually in the repl?
-pScript :: ParseM OrthoLangScript
+pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   (_, cfg, ref, ids) <- getState
   optional spaces
@@ -155,7 +155,7 @@ pScript = debugParser "pScript" $ do
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: GlobalEnv -> FilePath -> IO (Either ParseError OrthoLangScript)
+parseFile :: GlobalEnv -> FilePath -> IO (Either ParseError Script)
 parseFile st@(_, cfg, ref, ids) path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path

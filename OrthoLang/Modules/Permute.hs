@@ -10,12 +10,12 @@ import OrthoLang.Core.Util (trace)
 import Development.Shake.FilePath   (makeRelative)
 import OrthoLang.Core.Compile  (rExpr)
 import OrthoLang.Core.Actions (readStrings, writeStrings, traceA, need')
-import OrthoLang.Core.Paths (exprPath, exprPathExplicit, fromOrthoLangPath)
+import OrthoLang.Core.Paths (exprPath, exprPathExplicit, fromPath)
 -- import OrthoLang.Core.Debug          (traceA, debug)
 import OrthoLang.Core.Util           (digest)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Permute"
   , mDesc = "Generate random permutations of lists"
   , mTypes = []
@@ -37,9 +37,9 @@ orthoLangModule = OrthoLangModule
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
          -> RulesFn
-rPermute comboFn s@(_, cfg, _, _) expr@(OrthoLangFun _ salt _ _ [iList]) = do
+rPermute comboFn s@(_, cfg, _, _) expr@(Fun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
-  let oList      = fromOrthoLangPath cfg $ exprPath s expr
+  let oList      = fromPath cfg $ exprPath s expr
       (ListOf t) = typeOf iList
   oList %> aPermute s comboFn iPath t salt
   return (ExprPath oList)
@@ -49,7 +49,7 @@ rPermute _ _ _ = fail "bad argument to rCombos"
 -- TODO do something more obvious than writing to the "list" prefix??
 aPermute :: GlobalEnv
          -> ([String] -> [[String]])
-         -> FilePath -> OrthoLangType -> RepeatSalt
+         -> FilePath -> Type -> Salt
          -> FilePath -> Action ()
 aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
   need' cfg ref "ortholang.modules.permute.aPermute" [iPath]
@@ -59,7 +59,7 @@ aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
   -- TODO will this match other files?
   let mkOut p = exprPathExplicit cfg "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
-      oPaths' = map (fromOrthoLangPath cfg) oPaths
+      oPaths' = map (fromPath cfg) oPaths
       combos  = comboFn elements
   -- TODO traceA instead here?
   mapM_ (\(p,ps) -> writeStrings eType cfg ref p $
@@ -75,8 +75,8 @@ aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
 
 -- TODO rename actual function to drop_each?
 
-leaveEachOut :: OrthoLangFunction
-leaveEachOut = let name = "leave_each_out" in OrthoLangFunction
+leaveEachOut :: Function
+leaveEachOut = let name = "leave_each_out" in Function
   { fOpChar = Nothing, fName = name 
   ,fTags = []
   , fTypeCheck = combosTypeCheck
@@ -84,7 +84,7 @@ leaveEachOut = let name = "leave_each_out" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rPermute dropEach
   }
 
-combosTypeCheck :: [OrthoLangType] -> Either String OrthoLangType
+combosTypeCheck :: [Type] -> Either String Type
 combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t
 combosTypeCheck _ = Left "type error in leave_each_out!"
 

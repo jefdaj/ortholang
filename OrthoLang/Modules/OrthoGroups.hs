@@ -21,7 +21,7 @@ import OrthoLang.Core.Actions       (readLit, readLits, writeLits, cachedLinesPa
                                     writePaths, readFileStrict', readPaths, runCmd, CmdDesc(..), need')
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple)
-import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, exprPath, upBy, cacheDir)
+import OrthoLang.Core.Paths         (Path, toPath, fromPath, exprPath, upBy, cacheDir)
 import OrthoLang.Core.Util          (headOrDie, digest)
 import OrthoLang.Core.Sanitize      (lookupID)
 import System.FilePath             ((</>), takeDirectory)
@@ -41,14 +41,14 @@ import OrthoLang.Modules.SonicParanoid (spr)
 import OrthoLang.Modules.GreenCut      (gcr)
 
 -- this is just shorthand
-sll :: OrthoLangType
+sll :: Type
 sll = ListOf (ListOf str)
 
 type PickerFn = Int -> Int
 type PickerFn2 = Double -> Int -> Int
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
   , mTypes = [og, ofr, spr, gcr]
@@ -70,8 +70,8 @@ orthoLangModule = OrthoLangModule
   }
 
 -- TODO should there be single and plural versions?
-og :: OrthoLangType
-og = OrthoLangTypeGroup
+og :: Type
+og = TypeGroup
   { tgExt = "og"
   , tgDesc = "orthogroups (orthofinder, sonicparanoid, or greencut results)"
   , tgMember = \t -> t `elem` [ofr, spr, gcr]
@@ -87,8 +87,8 @@ og = OrthoLangTypeGroup
 -- TODO separate module that works with multiple ortholog programs?
 -- TODO version to get the group matching an ID
 -- TODO this works with ofr files too; put them back using a type group!
-orthogroups :: OrthoLangFunction
-orthogroups = let name = "orthogroups" in OrthoLangFunction
+orthogroups :: Function
+orthogroups = let name = "orthogroups" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og] sll
   , fTypeCheck = defaultTypeCheck [og] sll
@@ -97,15 +97,15 @@ orthogroups = let name = "orthogroups" in OrthoLangFunction
   }
 
 rOrthogroups :: RulesFn
-rOrthogroups st e@(OrthoLangFun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
+rOrthogroups st e@(Fun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
 rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
 
 -- TODO move parse fns to their respective modules for easier maintenance
 
 -- TODO why are we unhashing the ids here?
-parseOrthoFinder :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action [[String]]
+parseOrthoFinder :: Config -> LocksRef -> IDsRef -> Path -> Action [[String]]
 parseOrthoFinder cfg ref _ ofrPath = do
-  let resDir = fromOrthoLangPath cfg $ upBy 2 ofrPath
+  let resDir = fromPath cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   -- ids <- liftIO $ readIORef idref
   -- txt <- fmap (unhashIDs False ids) $ readFileStrict' cfg ref orthoPath -- TODO openFile error during this?
@@ -113,9 +113,9 @@ parseOrthoFinder cfg ref _ ofrPath = do
   let groups = map (words . drop 11) (lines txt)
   return groups
 
-parseSonicParanoid :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action [[String]]
+parseSonicParanoid :: Config -> LocksRef -> IDsRef -> Path -> Action [[String]]
 parseSonicParanoid cfg ref _ ogPath = do
-  let resDir = takeDirectory $ fromOrthoLangPath cfg ogPath
+  let resDir = takeDirectory $ fromPath cfg ogPath
       grpPath = resDir </> "ortholog_groups.tsv"
   -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
   -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' cfg ref grpPath -- TODO openFile error during this?
@@ -128,15 +128,15 @@ parseSonicParanoid cfg ref _ ogPath = do
   where
     parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
 
-parseGreenCut :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Action [[String]]
+parseGreenCut :: Config -> LocksRef -> IDsRef -> Path -> Action [[String]]
 parseGreenCut cfg ref _ ogPath = do
-  txt <- readFileStrict' cfg ref $ fromOrthoLangPath cfg ogPath
+  txt <- readFileStrict' cfg ref $ fromPath cfg ogPath
   let groups = map parseLine $ lines txt
   return groups
   where
     parseLine l = filter (/= ":") $ split "\t" l
 
-writeOrthogroups :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [[String]] -> Action ()
+writeOrthogroups :: Config -> LocksRef -> IDsRef -> Path -> [[String]] -> Action ()
 writeOrthogroups cfg ref _ out groups = do
   -- let groups' = (map . map) (unhashIDs cfg ids) groups
   -- ids   <- liftIO $ readIORef idsref
@@ -145,13 +145,13 @@ writeOrthogroups cfg ref _ out groups = do
         -- group' = map (unhashIDs cfg ids) group
     -- liftIO $ putStrLn $ "group': " ++ show group'
     writeLits cfg ref path group
-    return $ toOrthoLangPath cfg path
-  writePaths cfg ref (fromOrthoLangPath cfg out) paths
+    return $ toPath cfg path
+  writePaths cfg ref (fromPath cfg out) paths
 
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
-aOrthogroups :: OrthoLangType -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aOrthogroups :: Type -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aOrthogroups rtn cfg ref idsref [out, ogPath] = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
   -- TODO extract this into a parseOrthogroups function
@@ -167,8 +167,8 @@ aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show arg
 -- orthogroup_containing --
 ---------------------------
 
-orthogroupContaining :: OrthoLangFunction
-orthogroupContaining = let name = "orthogroup_containing" in OrthoLangFunction
+orthogroupContaining :: Function
+orthogroupContaining = let name = "orthogroup_containing" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
@@ -176,17 +176,17 @@ orthogroupContaining = let name = "orthogroup_containing" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rSimple aOrthogroupContaining
   }
 
-aOrthogroupContaining :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aOrthogroupContaining :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   ids' <- liftIO $ readIORef ids
-  partialID <- readLit cfg ref $ fromOrthoLangPath cfg idPath
+  partialID <- readLit cfg ref $ fromPath cfg idPath
   -- TODO should there be a separate case for multiple matches?
   let geneId = case lookupID ids' partialID of
                  Just k -> k
                  Nothing -> error $ "ERROR: id '" ++ partialID ++ "' not found"
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
-  writeLits cfg ref (fromOrthoLangPath cfg out) group
+  writeLits cfg ref (fromPath cfg out) group
 aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ----------------------------
@@ -194,8 +194,8 @@ aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContainin
 ----------------------------
 
 -- TODO think of a better name for this
-orthogroupsContaining :: OrthoLangFunction
-orthogroupsContaining = let name = "orthogroups_containing" in OrthoLangFunction
+orthogroupsContaining :: Function
+orthogroupsContaining = let name = "orthogroups_containing" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf str] sll
@@ -210,10 +210,10 @@ containsOneOf :: FilterFn
 containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
 -- TODO should this error when not finding one too, like aOrthogroupContaining?
-aOrthogroupsFilter :: FilterFn -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aOrthogroupsFilter :: FilterFn -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
   ids' <- liftIO $ readIORef ids
-  lookups <- fmap (map $ lookupID ids') $ readLits cfg ref $ fromOrthoLangPath cfg idsPath
+  lookups <- fmap (map $ lookupID ids') $ readLits cfg ref $ fromPath cfg idsPath
   when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
   let geneIds = catMaybes lookups
   groups <- parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
@@ -226,8 +226,8 @@ aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining
 ---------------------
 
 -- TODO flip args so it reads more naturally?
-orthologInAny :: OrthoLangFunction
-orthologInAny = let name = "ortholog_in_any" in OrthoLangFunction
+orthologInAny :: Function
+orthologInAny = let name = "ortholog_in_any" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
@@ -236,18 +236,18 @@ orthologInAny = let name = "ortholog_in_any" in OrthoLangFunction
   }
 
 mkOrthologsStrRules :: String -> RulesFn
-mkOrthologsStrRules name st (OrthoLangFun rType salt deps _  [groups , faas]) =
-  rExpr st $ OrthoLangFun rType salt deps (name ++ "_str")   [groups', faas']
+mkOrthologsStrRules name st (Fun rType salt deps _  [groups , faas]) =
+  rExpr st $ Fun rType salt deps (name ++ "_str")   [groups', faas']
   where
-    groups' = OrthoLangFun sll salt (depsOf groups) "orthogroups"      [groups]
-    faas'   = OrthoLangFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+    groups' = Fun sll salt (depsOf groups) "orthogroups"      [groups]
+    faas'   = Fun sll salt (depsOf faas  ) "extract_ids_each" [faas]
 mkOrthologsStrRules _ _ _ = error "bad arguments to mkOrthologsStrRules"
 
 -- TODO can this be removed somehow?
 -- TODO flip args so it reads more naturally?
 
-orthologInAnyStr :: OrthoLangFunction
-orthologInAnyStr = let name = "ortholog_in_any_str" in OrthoLangFunction
+orthologInAnyStr :: Function
+orthologInAnyStr = let name = "ortholog_in_any_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
@@ -259,12 +259,12 @@ pickAny :: Int -> Int
 pickAny _ = 1
 
 rOrthologFilterStr :: String -> PickerFn -> RulesFn
-rOrthologFilterStr fnName pickerFn st@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [groupLists, idLists]) = do
+rOrthologFilterStr fnName pickerFn st@(_, cfg, ref, _) e@(Fun _ _ _ _ [groupLists, idLists]) = do
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists
   let out     = exprPath st e
-      out'    = debugRules cfg "rOrthologFilterStr" e $ fromOrthoLangPath cfg out
-      ogDir   = fromOrthoLangPath cfg $ ogCache cfg
+      out'    = debugRules cfg "rOrthologFilterStr" e $ fromPath cfg out
+      ogDir   = fromPath cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
@@ -297,8 +297,8 @@ rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
 
 -- TODO flip args so it reads more naturally?
 
-orthologInAll :: OrthoLangFunction
-orthologInAll = let name = "ortholog_in_all" in OrthoLangFunction
+orthologInAll :: Function
+orthologInAll = let name = "ortholog_in_all" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
@@ -306,8 +306,8 @@ orthologInAll = let name = "ortholog_in_all" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
 
-orthologInAllStr :: OrthoLangFunction
-orthologInAllStr = let name = "ortholog_in_all_str" in OrthoLangFunction
+orthologInAllStr :: Function
+orthologInAllStr = let name = "ortholog_in_all_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck [sll, sll] sll
@@ -330,8 +330,8 @@ pickMin userNum nGroups
   | userNum < 0 = pickMin (fromIntegral nGroups + userNum) nGroups
   | otherwise = ceiling userNum -- TODO floor?
 
-orthologInMinStr :: OrthoLangFunction
-orthologInMinStr = let name = "ortholog_in_min_str" in OrthoLangFunction
+orthologInMinStr :: Function
+orthologInMinStr = let name = "ortholog_in_min_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
@@ -343,17 +343,17 @@ orthologInMinStr = let name = "ortholog_in_min_str" in OrthoLangFunction
 -- toDecimal :: String -> String
 -- toDecimal s = formatScientific Fixed Nothing (read s)
 
-ogCache :: OrthoLangConfig -> OrthoLangPath
+ogCache :: Config -> Path
 ogCache cfg = cacheDir cfg "orthogroups"
 
 rOrthologFilterStrFrac :: String -> PickerFn2 -> RulesFn
-rOrthologFilterStrFrac fnName pickerFn st@(_, cfg, ref, _) e@(OrthoLangFun _ _ _ _ [frac, groupLists, idLists]) = do
+rOrthologFilterStrFrac fnName pickerFn st@(_, cfg, ref, _) e@(Fun _ _ _ _ [frac, groupLists, idLists]) = do
   (ExprPath fracPath      ) <- rExpr st frac
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists
   let out     = exprPath st e
-      out'    = debugRules cfg "rOrthologFilterStr" e $ fromOrthoLangPath cfg out
-      ogDir   = fromOrthoLangPath cfg $ ogCache cfg
+      out'    = debugRules cfg "rOrthologFilterStr" e $ fromPath cfg out
+      ogDir   = fromPath cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
@@ -381,8 +381,8 @@ rOrthologFilterStrFrac fnName pickerFn st@(_, cfg, ref, _) e@(OrthoLangFun _ _ _
   return (ExprPath out')
 rOrthologFilterStrFrac _ _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 
-orthologInMin :: OrthoLangFunction
-orthologInMin = let name = "ortholog_in_min" in OrthoLangFunction
+orthologInMin :: Function
+orthologInMin = let name = "ortholog_in_min" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
@@ -391,19 +391,19 @@ orthologInMin = let name = "ortholog_in_min" in OrthoLangFunction
   }
 
 mkOrthologsStrFracRules :: String -> RulesFn
-mkOrthologsStrFracRules name st (OrthoLangFun rType salt deps _ [frac, groups , faas]) =
-  rExpr st $ OrthoLangFun rType salt deps (name ++ "_str")  [frac, groups', faas']
+mkOrthologsStrFracRules name st (Fun rType salt deps _ [frac, groups , faas]) =
+  rExpr st $ Fun rType salt deps (name ++ "_str")  [frac, groups', faas']
   where
-    groups' = OrthoLangFun sll salt (depsOf groups) "orthogroups"      [groups]
-    faas'   = OrthoLangFun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+    groups' = Fun sll salt (depsOf groups) "orthogroups"      [groups]
+    faas'   = Fun sll salt (depsOf faas  ) "extract_ids_each" [faas]
 mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
 
 ---------------------
 -- ortholog_in_max --
 ---------------------
 
-orthologInMax :: OrthoLangFunction
-orthologInMax = let name = "ortholog_in_max" in OrthoLangFunction
+orthologInMax :: Function
+orthologInMax = let name = "ortholog_in_max" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
@@ -411,8 +411,8 @@ orthologInMax = let name = "ortholog_in_max" in OrthoLangFunction
   , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
 
-orthologInMaxStr :: OrthoLangFunction
-orthologInMaxStr = let name = "ortholog_in_max_str" in OrthoLangFunction
+orthologInMaxStr :: Function
+orthologInMaxStr = let name = "ortholog_in_max_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck [num, sll, sll] sll

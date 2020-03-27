@@ -45,13 +45,13 @@ import Development.Shake
 import OrthoLang.Core.Types
 
 import OrthoLang.Core.Actions       (writeLits, writePaths, readLit, traceA)
-import OrthoLang.Core.Paths         (exprPath, fromOrthoLangPath,
-                                    OrthoLangPath, toOrthoLangPath, fromOrthoLangPath)
+import OrthoLang.Core.Paths         (exprPath, fromPath,
+                                    Path, toPath, fromPath)
 import OrthoLang.Core.Compile (rExpr, compileScript, debugRules)
 import OrthoLang.Core.Util          (digest, stripWhiteSpace)
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Replace"
   , mDesc = "Replace variables in the script to see how the results change"
   , mTypes = []
@@ -72,32 +72,32 @@ orthoLangModule = OrthoLangModule
  - TODO should it go in Types, or maybe Paths?
  -}
 
-mangleExpr :: (OrthoLangVar -> OrthoLangVar) -> OrthoLangExpr -> OrthoLangExpr
-mangleExpr _ e@(OrthoLangLit  _ _ _) = e
-mangleExpr fn (OrthoLangRef  t n vs v      ) = OrthoLangRef  t n (map fn vs)   (fn v)
-mangleExpr fn (OrthoLangBop  t n vs s e1 e2) = OrthoLangBop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
-mangleExpr fn (OrthoLangFun  t n vs s es   ) = OrthoLangFun  t n (map fn vs) s (map (mangleExpr fn) es)
-mangleExpr fn (OrthoLangList t n vs   es   ) = OrthoLangList t n (map fn vs)   (map (mangleExpr fn) es)
-mangleExpr _ (OrthoLangRules _) = error "implement this!"
+mangleExpr :: (Var -> Var) -> Expr -> Expr
+mangleExpr _ e@(Lit  _ _ _) = e
+mangleExpr fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
+mangleExpr fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
+mangleExpr fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mangleExpr fn) es)
+mangleExpr fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mangleExpr fn) es)
+mangleExpr _ (Com _) = error "implement this!"
 
-mangleAssign :: (OrthoLangVar -> OrthoLangVar) -> OrthoLangAssign -> OrthoLangAssign
+mangleAssign :: (Var -> Var) -> Assign -> Assign
 mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
 
-mangleScript :: (OrthoLangVar -> OrthoLangVar) -> OrthoLangScript -> OrthoLangScript
+mangleScript :: (Var -> Var) -> Script -> Script
 mangleScript fn = map (mangleAssign fn)
 
-setReplaceID :: ReplaceID -> OrthoLangVar -> OrthoLangVar
-setReplaceID newID (OrthoLangVar _ name) = OrthoLangVar newID name
+setRepID :: RepID -> Var -> Var
+setRepID newID (Var _ name) = Var newID name
 
-setReplaceIDs :: ReplaceID -> OrthoLangScript -> OrthoLangScript
-setReplaceIDs newID = mangleScript (setReplaceID newID)
+setRepIDs :: RepID -> Script -> Script
+setRepIDs newID = mangleScript (setRepID newID)
 
 -------------
 -- replace --
 -------------
 
-replace :: OrthoLangFunction
-replace = OrthoLangFunction
+replace :: Function
+replace = Function
   { fOpChar = Nothing, fName = "replace"
   ,fTags = []
   , fTypeCheck = tReplace
@@ -105,7 +105,7 @@ replace = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rReplace
   }
 
-tReplace :: [OrthoLangType] -> Either String OrthoLangType
+tReplace :: [Type] -> Either String Type
 tReplace (res:sub:sub':[]) | sub == sub' = Right res
 tReplace _ = Left "invalid args to replace" -- TODO better errors here
 
@@ -114,7 +114,7 @@ dReplace :: String
 dReplace = "replace : <outputvar> <vartoreplace> <exprtoreplacewith> -> <newoutput>"
 
 rReplace :: RulesFn
-rReplace st (OrthoLangFun _ _ _ _ (resExpr:(OrthoLangRef _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
+rReplace st (Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
 rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
 
 {- This does the actual replace operation. It takes an expression to edit, the
@@ -127,16 +127,16 @@ rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
  - TODO any reason not to merge it into rReplace above?
  -}
 rReplace' :: GlobalEnv
-          -> OrthoLangExpr -- the result expression for a single replacement, which *doesn't* contain all the info
-          -> OrthoLangVar  -- we also need the variable to be replaced
-          -> OrthoLangExpr -- and an expression to replace it with (which could be a ref to another variable)
+          -> Expr -- the result expression for a single replacement, which *doesn't* contain all the info
+          -> Var  -- we also need the variable to be replaced
+          -> Expr -- and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
-rReplace' st@(script, cfg, ref, ids) resExpr subVar@(OrthoLangVar _ _) subExpr = do
-  let res   = (OrthoLangVar (ReplaceID Nothing) "result", resExpr)
+rReplace' st@(script, cfg, ref, ids) resExpr subVar@(Var _ _) subExpr = do
+  let res   = (Var (RepID Nothing) "result", resExpr)
       sub   = (subVar, subExpr)
       deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
-      newID = calcReplaceID st resExpr subVar subExpr
-      scr'  = (setReplaceIDs newID ([sub] ++ deps ++ [res]))
+      newID = calcRepID st resExpr subVar subExpr
+      scr'  = (setRepIDs newID ([sub] ++ deps ++ [res]))
   (ResPath resPath) <- compileScript (scr', cfg, ref, ids) newID -- TODO remove the ID here, or is it useful?
   return (ExprPath resPath)
 
@@ -147,8 +147,8 @@ rReplace' st@(script, cfg, ref, ids) resExpr subVar@(OrthoLangVar _ _) subExpr =
  -
  - TODO think carefully about whether all of these need to be in here
  -}
-calcReplaceID :: GlobalEnv -> OrthoLangExpr -> OrthoLangVar -> OrthoLangExpr -> ReplaceID
-calcReplaceID (scr, _, _, _) resExpr subVar subExpr = ReplaceID $ Just $ digest
+calcRepID :: GlobalEnv -> Expr -> Var -> Expr -> RepID
+calcRepID (scr, _, _, _) resExpr subVar subExpr = RepID $ Just $ digest
   [ show scr
   , show resExpr
   , show subVar
@@ -159,37 +159,37 @@ calcReplaceID (scr, _, _, _) resExpr subVar subExpr = ReplaceID $ Just $ digest
  - TODO factor out, and maybe unify with rListLits
  - TODO subPaths is only one path? if so, rename it
  -}
-aReplaceEachLits :: OrthoLangType -> OrthoLangConfig -> Locks
-                -> OrthoLangPath -> OrthoLangPath -> [OrthoLangPath] -> Action ()
+aReplaceEachLits :: Type -> Config -> LocksRef
+                -> Path -> Path -> [Path] -> Action ()
 aReplaceEachLits _ cfg ref outPath subPaths resPaths = do
   lits <- mapM (readLit cfg ref) resPaths'
   let lits' = map stripWhiteSpace lits
   writeLits cfg ref out lits'
   where
-    outPath'  = fromOrthoLangPath cfg outPath
-    subPaths' = fromOrthoLangPath cfg subPaths
-    resPaths' = map (fromOrthoLangPath cfg) resPaths
+    outPath'  = fromPath cfg outPath
+    subPaths' = fromPath cfg subPaths
+    resPaths' = map (fromPath cfg) resPaths
     out = traceA "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
 
 {- Helper function to write the final list when the results are links to files
  - TODO factor out, and maybe unify with rListLinks
  -}
-aReplaceEachLinks :: OrthoLangConfig -> Locks -> OrthoLangPath -> OrthoLangPath -> [OrthoLangPath] -> Action ()
+aReplaceEachLinks :: Config -> LocksRef -> Path -> Path -> [Path] -> Action ()
 aReplaceEachLinks cfg ref outPath subPaths resPaths = do
   need (subPaths':resPaths') -- TODO is needing subPaths required?
   writePaths cfg ref out resPaths
   where
-    outPath'  = fromOrthoLangPath cfg outPath
-    subPaths' = fromOrthoLangPath cfg subPaths
-    resPaths' = map (fromOrthoLangPath cfg) resPaths
+    outPath'  = fromPath cfg outPath
+    subPaths' = fromPath cfg subPaths
+    resPaths' = map (fromPath cfg) resPaths
     out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
 
 ------------------
 -- replace_each --
 ------------------
 
-replaceEach :: OrthoLangFunction
-replaceEach = OrthoLangFunction
+replaceEach :: Function
+replaceEach = Function
   { fOpChar = Nothing, fName = "replace_each"
   ,fTags = []
   , fTypeCheck = tReplaceEach
@@ -197,7 +197,7 @@ replaceEach = OrthoLangFunction
   , fNewRules = Nothing, fOldRules = rReplaceEach
   }
 
-tReplaceEach :: [OrthoLangType] -> Either String OrthoLangType
+tReplaceEach :: [Type] -> Either String Type
 tReplaceEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 tReplaceEach _ = Left "invalid args to replace_each" -- TODO better errors here
 
@@ -221,8 +221,8 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - 3) then given paths we can build CompiledExprs using the known types
  -
  - But then I remembered Core.Compile.Map, which might be able to help:
- - rMap :: Int -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()) -> RulesFn
- - type Action1  = OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> OrthoLangPath -> Action ()
+ - rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
+ - type Action1  = Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
  - you give it a single function and an index for the argument to map over, and it does everything
  - but it only works on Action functions, so it will take some adapting to use here
  - it does seem promising though: write replace and get a proper replace_each almost for free?
@@ -231,16 +231,16 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - I'm not that sure the rMap thing will work because it deals with Actions though.
  -}
 rReplaceEach :: GlobalEnv
-             -> OrthoLangExpr -- the final result expression, which contains all the info we need
+             -> Expr -- the final result expression, which contains all the info we need
              -> Rules ExprPath
-rReplaceEach s@(scr, cfg, ref, _) expr@(OrthoLangFun _ _ _ _ (resExpr:(OrthoLangRef _ _ _ subVar):subList:[])) = do
+rReplaceEach s@(scr, cfg, ref, _) expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (rReplace' s resExpr subVar) subExprs
-  let subPaths' = (\(ExprPath p) -> toOrthoLangPath cfg p) subPaths
-      resPaths' = map (\(ExprPath p) -> toOrthoLangPath cfg p) resPaths
+  let subPaths' = (\(ExprPath p) -> toPath cfg p) subPaths
+      resPaths' = map (\(ExprPath p) -> toPath cfg p) resPaths
       outPath   = exprPath s expr
-      outPath'  = debugRules cfg "rReplaceEach" expr $ fromOrthoLangPath cfg outPath
+      outPath'  = debugRules cfg "rReplaceEach" expr $ fromPath cfg outPath
   outPath' %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aReplaceEachLits (typeOf expr)

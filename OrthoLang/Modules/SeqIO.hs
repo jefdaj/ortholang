@@ -12,7 +12,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Util          (digest)
 import OrthoLang.Core.Actions       (readPaths, traceA, need', readLit,
                                     writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
-import OrthoLang.Core.Paths         (toOrthoLangPath, fromOrthoLangPath, OrthoLangPath, cacheDir)
+import OrthoLang.Core.Paths         (toPath, fromPath, Path, cacheDir)
 import OrthoLang.Core.Sanitize      (lookupIDsFile)
 import OrthoLang.Core.Compile (defaultTypeCheck)
 import OrthoLang.Core.Compile (rSimple, rSimpleScript, aSimpleScriptNoFix)
@@ -22,8 +22,8 @@ import System.Directory            (createDirectoryIfMissing)
 import OrthoLang.Modules.Load       (mkLoaders)
 import System.Exit                 (ExitCode(..))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
   , mTypes = [gbk, faa, fna, fa]
@@ -45,29 +45,29 @@ orthoLangModule = OrthoLangModule
     ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
   }
 
-gbk :: OrthoLangType
-gbk = OrthoLangType
+gbk :: Type
+gbk = Type
   { tExt  = "gbk"
   , tDesc = "genbank"
   , tShow = defaultShow
   }
 
-fa :: OrthoLangType
-fa = OrthoLangTypeGroup
+fa :: Type
+fa = TypeGroup
   { tgExt = "fa"
   , tgDesc  = "FASTA (nucleic OR amino acid)"
   , tgMember = \t -> t `elem` [fna, faa]
   }
 
-faa :: OrthoLangType
-faa = OrthoLangType
+faa :: Type
+faa = Type
   { tExt  = "faa"
   , tDesc = "FASTA (amino acid)"
   , tShow = defaultShow
   }
 
-fna :: OrthoLangType
-fna = OrthoLangType
+fna :: Type
+fna = Type
   { tExt  = "fna"
   , tDesc = "FASTA (nucleic acid)"
   , tShow = defaultShow
@@ -79,8 +79,8 @@ fna = OrthoLangType
 
 -- TODO should these automatically fill in the "CDS" string?
 
-gbkToFaa :: OrthoLangFunction
-gbkToFaa = OrthoLangFunction
+gbkToFaa :: Function
+gbkToFaa = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
@@ -91,8 +91,8 @@ gbkToFaa = OrthoLangFunction
     name = "gbk_to_faa"
 
 -- TODO need to hash IDs afterward!
-gbkToFaaEach :: OrthoLangFunction
-gbkToFaaEach = OrthoLangFunction
+gbkToFaaEach :: Function
+gbkToFaaEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
@@ -102,8 +102,8 @@ gbkToFaaEach = OrthoLangFunction
   where
     name = "gbk_to_faa_each"
 
-gbkToFna :: OrthoLangFunction
-gbkToFna = OrthoLangFunction
+gbkToFna :: Function
+gbkToFna = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
@@ -113,8 +113,8 @@ gbkToFna = OrthoLangFunction
   where
     name = "gbk_to_fna"
 
-gbkToFnaEach :: OrthoLangFunction
-gbkToFnaEach = OrthoLangFunction
+gbkToFnaEach :: Function
+gbkToFnaEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
@@ -126,15 +126,15 @@ gbkToFnaEach = OrthoLangFunction
 
 -- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
-aGenbankToFasta :: OrthoLangType -> String
-                -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aGenbankToFasta :: Type -> String
+                -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
-  let faPath'   = fromOrthoLangPath cfg faPath
-      ftPath'   = fromOrthoLangPath cfg ftPath
+  let faPath'   = fromPath cfg faPath
+      ftPath'   = fromPath cfg ftPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
-      tmpDir'   = fromOrthoLangPath cfg $ cacheDir cfg "seqio"
+      tmpDir'   = fromPath cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ extOf rtn
-      outPath'  = fromOrthoLangPath cfg outPath
+      outPath'  = fromPath cfg outPath
       outPath'' = traceA "aGenbankToFasta" outPath' [outPath', faPath']
   -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
   ft <- readLit cfg ref ftPath'
@@ -170,8 +170,8 @@ aGenbankToFasta _ _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++
 -- TODO also extract them from genbank files
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
-extractIds :: OrthoLangFunction
-extractIds = OrthoLangFunction
+extractIds :: Function
+extractIds = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tExtractIds
@@ -182,8 +182,8 @@ extractIds = OrthoLangFunction
     name = "extract_ids"
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
-extractIdsEach :: OrthoLangFunction
-extractIdsEach = OrthoLangFunction
+extractIdsEach :: Function
+extractIdsEach = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tExtractIdsEach
@@ -193,11 +193,11 @@ extractIdsEach = OrthoLangFunction
   where
     name = "extract_ids_each"
 
-tExtractIds :: [OrthoLangType] -> Either String OrthoLangType
+tExtractIds :: [Type] -> Either String Type
 tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractIds _ = Left "expected a fasta file"
 
-tExtractIdsEach :: [OrthoLangType] -> Either String OrthoLangType
+tExtractIdsEach :: [Type] -> Either String Type
 tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
 tExtractIdsEach _ = Left "expected a fasta file"
 
@@ -208,8 +208,8 @@ tExtractIdsEach _ = Left "expected a fasta file"
 -- TODO also extract them from genbank files
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
-extractSeqs :: OrthoLangFunction
-extractSeqs = OrthoLangFunction
+extractSeqs :: Function
+extractSeqs = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tExtractSeqs
@@ -219,19 +219,19 @@ extractSeqs = OrthoLangFunction
   where
     name = "extract_seqs"
 
-aExtractSeqs :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aExtractSeqs :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aExtractSeqs cfg ref ids [outPath, inFa, inList] = do
-  let cDir     = fromOrthoLangPath cfg $ cacheDir cfg "seqio"
+  let cDir     = fromPath cfg $ cacheDir cfg "seqio"
       tmpList' = cDir </> digest inList <.> "txt"
-      tmpList  = toOrthoLangPath cfg tmpList'
+      tmpList  = toPath cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
   lookupIDsFile cfg ref ids inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" cfg ref ids [outPath, inFa, tmpList]
 aExtractSeqs _ _ _ ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
-extractSeqsEach :: OrthoLangFunction
-extractSeqsEach = OrthoLangFunction
+extractSeqsEach :: Function
+extractSeqsEach = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tExtractSeqsEach
@@ -241,11 +241,11 @@ extractSeqsEach = OrthoLangFunction
   where
     name = "extract_seqs_each"
 
-tExtractSeqs  :: [OrthoLangType] -> Either String OrthoLangType
+tExtractSeqs  :: [Type] -> Either String Type
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
 
-tExtractSeqsEach  :: [OrthoLangType] -> Either String OrthoLangType
+tExtractSeqsEach  :: [Type] -> Either String Type
 tExtractSeqsEach [x, ListOf (ListOf s)]
   | s == str && elem x [faa, fna] = Right $ ListOf x
 tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
@@ -255,8 +255,8 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 ----------------------
 
 -- TODO name something else like fna_to_faa?
-translate :: OrthoLangFunction
-translate = OrthoLangFunction
+translate :: Function
+translate = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = defaultTypeCheck [fna] faa
@@ -266,8 +266,8 @@ translate = OrthoLangFunction
   where
     name = "translate"
 
-translateEach :: OrthoLangFunction
-translateEach = OrthoLangFunction
+translateEach :: Function
+translateEach = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
@@ -283,8 +283,8 @@ translateEach = OrthoLangFunction
 
 -- TODO separate concat module?
 
-mkConcat :: OrthoLangType -> OrthoLangFunction
-mkConcat cType = OrthoLangFunction
+mkConcat :: Type -> Function
+mkConcat cType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf cType] cType
@@ -295,8 +295,8 @@ mkConcat cType = OrthoLangFunction
     ext  = extOf cType
     name = "concat_" ++ ext
 
-mkConcatEach :: OrthoLangType -> OrthoLangFunction
-mkConcatEach cType = OrthoLangFunction
+mkConcatEach :: Type -> Function
+mkConcatEach cType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
@@ -313,12 +313,12 @@ mkConcatEach cType = OrthoLangFunction
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
--- aConcat :: OrthoLangType -> OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+-- aConcat :: Type -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
 --   fPaths <- readPaths cfg ref fs'
---   let fPaths' = map (fromOrthoLangPath cfg) fPaths
+--   let fPaths' = map (fromPath cfg) fPaths
 --   need' cfg ref "aConcat" fPaths'
---   let out'    = fromOrthoLangPath cfg oPath
+--   let out'    = fromPath cfg oPath
 --       out''   = traceA "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
 --       emptyStr = "<<empty" ++ extOf cType ++ ">>"
@@ -331,11 +331,11 @@ mkConcatEach cType = OrthoLangFunction
 --     then liftIO $ writeFile out'' emptyStr
 --     else copyFile' outTmp out''
 --   where
---     fs' = fromOrthoLangPath cfg fsPath
+--     fs' = fromPath cfg fsPath
 -- aConcat _ _ _ _ = fail "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
-aConcat :: OrthoLangType -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aConcat :: Type -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aConcat cType cfg ref ids [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
@@ -344,29 +344,29 @@ aConcat cType cfg ref ids [outPath, inList] = do
       emptyStr  = "<<empty" ++ extOf cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
-  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromOrthoLangPath cfg outPath
+  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath cfg outPath
   writeCachedLines cfg ref emptyPath [emptyStr]
-  inPaths <- readPaths cfg ref $ fromOrthoLangPath cfg inList
-  let inPaths' = map (fromOrthoLangPath cfg) inPaths
+  inPaths <- readPaths cfg ref $ fromPath cfg inList
+  let inPaths' = map (fromPath cfg) inPaths
   need' cfg ref "ortholang.modules.seqio.aConcat" inPaths'
   writeCachedLines cfg ref inList' inPaths'
   aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
-                                      , toOrthoLangPath cfg inList'
-                                      , toOrthoLangPath cfg emptyPath]
+                                      , toPath cfg inList'
+                                      , toPath cfg emptyPath]
 aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 
 -- writeCachedLines cfg ref outPath content = do
 
 -- TODO would it work to just directly creat a string and tack onto paths here?
--- aSimpleScript' :: Bool -> String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+-- aSimpleScript' :: Bool -> String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 -- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
 
 ------------------------
 -- split_fasta(_each) --
 ------------------------
 
-splitFasta :: OrthoLangType -> OrthoLangFunction
-splitFasta faType = OrthoLangFunction
+splitFasta :: Type -> Function
+splitFasta faType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
@@ -377,8 +377,8 @@ splitFasta faType = OrthoLangFunction
     ext  = extOf faType
     name = "split_" ++ ext
 
-splitFastaEach :: OrthoLangType -> OrthoLangFunction
-splitFastaEach faType = OrthoLangFunction
+splitFastaEach :: Type -> Function
+splitFastaEach faType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
@@ -389,14 +389,14 @@ splitFastaEach faType = OrthoLangFunction
     ext  = extOf faType
     name = "split_" ++ ext ++ "_each"
 
-aSplit :: String -> String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aSplit :: String -> String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aSplit name ext cfg ref _ [outPath, faPath] = do
-  let faPath'   = fromOrthoLangPath cfg faPath
+  let faPath'   = fromPath cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
       tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
       prefix'   = tmpDir' </> digest faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ ext
-      outPath'  = fromOrthoLangPath cfg outPath
+      outPath'  = fromPath cfg outPath
       outPath'' = traceA "aSplit" outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath']

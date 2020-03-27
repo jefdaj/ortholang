@@ -8,7 +8,7 @@ import OrthoLang.Core.Compile (rSimple, aSimpleScriptNoFix)
 import OrthoLang.Core.Compile  (rMap)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, absolutizePaths)
 -- import OrthoLang.Core.Debug         (traceA)
-import OrthoLang.Core.Paths         (OrthoLangPath, toOrthoLangPath, fromOrthoLangPath, cacheDir)
+import OrthoLang.Core.Paths         (Path, toPath, fromPath, cacheDir)
 import OrthoLang.Core.Util          (digest)
 import OrthoLang.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
@@ -23,14 +23,14 @@ import Data.List.Utils             (replace)
 -- TODO test each one: first all the peices, then together
 
 -- for tracking down non-deduplicating blastp functions
-debugNames :: OrthoLangConfig -> String -> OrthoLangExpr -> OrthoLangExpr -> a -> a
-debugNames cfg fnName (OrthoLangFun _ _ _ bname _) (OrthoLangFun _ _ _ aname _) rtn = debug cfg fnName msg rtn
+debugNames :: Config -> String -> Expr -> Expr -> a -> a
+debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = debug cfg fnName msg rtn
   where
     msg = "'" ++ bname ++ "' -> '" ++ aname ++ "'"
 debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "BlastRBH"
   , mDesc = "Reciprocal BLAST+ best hits"
   , mTypes = [faa, ndb, pdb, bht]
@@ -55,8 +55,8 @@ blastDescsRev = filter isReversible blastDescs
 -- *blast*_rev --
 -----------------
 
-mkBlastFromFaRev :: BlastDesc -> OrthoLangFunction
-mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoLangFunction
+mkBlastFromFaRev :: BlastDesc -> Function
+mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, sType, qType] bht
   , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
@@ -66,9 +66,9 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in OrthoL
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (OrthoLangFun rtn salt deps name [e, q, s]) = rules st expr
+rMkBlastFromFaRev d st (Fun rtn salt deps name [e, q, s]) = rules st expr
   where
-    expr  = OrthoLangFun rtn salt deps name_norev [e, s, q]
+    expr  = Fun rtn salt deps name_norev [e, s, q]
     rules = fOldRules $ mkBlastFromFa d
     name_norev  = replace "_rev" "" name
     -- name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
@@ -79,8 +79,8 @@ rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 ----------------------
 
 -- TODO fix expression paths!
-mkBlastFromFaRevEach :: BlastDesc -> OrthoLangFunction
-mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
+mkBlastFromFaRevEach :: BlastDesc -> Function
+mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, sType, ListOf qType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
@@ -95,13 +95,13 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = OrthoLangFunction
 -- expression over the new action fn.
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) st (OrthoLangFun rtn salt deps _ [e, s, qs])
+rMkBlastFromFaRevEach (bCmd, qType, _, _) st (Fun rtn salt deps _ [e, s, qs])
   = rMap 3 revDbAct st editedExpr
   where
     revDbAct   = aMkBlastFromDbRev bCmd
-    sList      = OrthoLangList (typeOf s) salt (depsOf s) [s]
-    subjDbExpr = OrthoLangFun dbType salt (depsOf sList) dbFnName [sList]
-    editedExpr = OrthoLangFun rtn salt deps editedName [e, subjDbExpr, qs]
+    sList      = Lst (typeOf s) salt (depsOf s) [s]
+    subjDbExpr = Fun dbType salt (depsOf sList) dbFnName [sList]
+    editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
     editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
     (dbFnName, dbType) = if qType == faa
                            then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
@@ -110,7 +110,7 @@ rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
 -- TODO is it deduplicating properly with the fn name?
-aMkBlastFromDbRev :: String -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ())
+aMkBlastFromDbRev :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]
 aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
@@ -121,8 +121,8 @@ aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
 
 -- TODO move to Tables.hs? And rename that to BlastHits?
 
-reciprocalBest :: OrthoLangFunction
-reciprocalBest = OrthoLangFunction
+reciprocalBest :: Function
+reciprocalBest = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [bht, bht] bht
   , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
@@ -134,7 +134,7 @@ reciprocalBest = OrthoLangFunction
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 -- TODO why is this the only one that fails, and only when called from repeat??
-aReciprocalBest :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aReciprocalBest :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aReciprocalBest cfg ref _ [out, left, right] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -150,9 +150,9 @@ aReciprocalBest cfg ref _ [out, left, right] = do
     , cmdRmPatterns = [out']
     }
   where
-    out'   = fromOrthoLangPath cfg out
-    left'  = fromOrthoLangPath cfg left
-    right' = fromOrthoLangPath cfg right
+    out'   = fromPath cfg out
+    left'  = fromPath cfg left
+    right' = fromPath cfg right
     out''  = traceA "aReciprocalBest" out' [out', left', right']
 aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
 
@@ -160,8 +160,8 @@ aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show
 -- reciprocal_best_each --
 --------------------------
 
-reciprocalBestAll :: OrthoLangFunction
-reciprocalBestAll = OrthoLangFunction
+reciprocalBestAll :: Function
+reciprocalBestAll = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
@@ -171,22 +171,22 @@ reciprocalBestAll = OrthoLangFunction
   where
     name = "reciprocal_best_all"
 
-aReciprocalBestAll :: OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()
+aReciprocalBestAll :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aReciprocalBestAll cfg ref ids (out:ins) = do
-  let cDir = fromOrthoLangPath cfg $ cacheDir cfg "blastrbh"
+  let cDir = fromPath cfg $ cacheDir cfg "blastrbh"
       tmpPath p = cDir </> digest p <.> "bht"
-      ins' = map (\p -> (p, tmpPath p)) $ map (fromOrthoLangPath cfg) ins
+      ins' = map (\p -> (p, tmpPath p)) $ map (fromPath cfg) ins
   liftIO $ createDirectoryIfMissing True cDir
   mapM_ (\(inPath, outPath) -> absolutizePaths cfg ref inPath outPath) ins'
-  aSimpleScriptNoFix "reciprocal_best_all.R" cfg ref ids (out:map (toOrthoLangPath cfg . snd) ins')
+  aSimpleScriptNoFix "reciprocal_best_all.R" cfg ref ids (out:map (toPath cfg . snd) ins')
 aReciprocalBestAll _ _ _ ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
 
 -----------------
 -- *blast*_rbh --
 -----------------
 
-mkBlastRbh :: BlastDesc -> OrthoLangFunction
-mkBlastRbh d@(bCmd, qType, sType, _) = OrthoLangFunction
+mkBlastRbh :: BlastDesc -> Function
+mkBlastRbh d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
@@ -198,19 +198,19 @@ mkBlastRbh d@(bCmd, qType, sType, _) = OrthoLangFunction
 
 -- TODO this only works with symmetric fns so far... either fix or restrict to those!
 rMkBlastRbh :: BlastDesc -> RulesFn
-rMkBlastRbh (bCmd, _, _, _) s (OrthoLangFun _ salt deps _ [e, l, r]) = rExpr s main
+rMkBlastRbh (bCmd, _, _, _) s (Fun _ salt deps _ [e, l, r]) = rExpr s main
   where
-    main  = OrthoLangFun bht salt deps "reciprocal_best" [lHits, rHits]
-    lHits = OrthoLangFun bht salt deps  bCmd            [e, l, r]
-    rHits = OrthoLangFun bht salt deps (bCmd ++ "_rev") [e, l, r]
+    main  = Fun bht salt deps "reciprocal_best" [lHits, rHits]
+    lHits = Fun bht salt deps  bCmd            [e, l, r]
+    rHits = Fun bht salt deps (bCmd ++ "_rev") [e, l, r]
 rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 
 ----------------------
 -- *blast*_rbh_each --
 ----------------------
 
-mkBlastRbhEach :: BlastDesc -> OrthoLangFunction
-mkBlastRbhEach d@(bCmd, qType, sType, _) = OrthoLangFunction
+mkBlastRbhEach :: BlastDesc -> Function
+mkBlastRbhEach d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [num, qType, ListOf sType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
@@ -221,9 +221,9 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = OrthoLangFunction
     name = bCmd ++ "_rbh_each"
 
 rMkBlastRbhEach :: BlastDesc -> RulesFn
-rMkBlastRbhEach (bCmd, _, _, _) s (OrthoLangFun _ salt deps _ [e, l, rs]) = rExpr s main
+rMkBlastRbhEach (bCmd, _, _, _) s (Fun _ salt deps _ [e, l, rs]) = rExpr s main
   where
-    main  = OrthoLangFun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
-    lHits = OrthoLangFun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
-    rHits = OrthoLangFun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
+    main  = Fun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
+    lHits = Fun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
+    rHits = Fun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
 rMkBlastRbhEach _ _ _ = fail "bad argument to rMkBlastRbh"

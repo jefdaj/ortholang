@@ -47,8 +47,8 @@ import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), replaceBaseName)
 import OrthoLang.Core.Actions      (readPaths, writePaths, symlink,
                                    readLit, writeLits, traceA, debugA, need')
-import OrthoLang.Core.Paths        (cacheDir, toOrthoLangPath, fromOrthoLangPath, exprPath,
-                                   OrthoLangPath, exprPathExplicit, argHashes)
+import OrthoLang.Core.Paths        (cacheDir, toPath, fromPath, exprPath,
+                                   Path, exprPathExplicit, argHashes)
 import OrthoLang.Core.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)
 import OrthoLang.Core.Locks       (withWriteOnce)
@@ -64,13 +64,13 @@ debugA' name msg = debugA ("ortholang.core.compile.map." ++ name) msg
 ------------------------------------
 
 -- for action functions that don't need a tmpdir
-rMap :: Int -> (OrthoLangConfig -> Locks -> HashedIDsRef -> [OrthoLangPath] -> Action ()) -> RulesFn
+rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
 rMap index actFn = rMapMain index Nothing actFn'
   where
     actFn' cfg ref ids _ args = actFn cfg ref ids args -- drops unused tmpdir
 
 -- for action functions that need one tmpdir reused between calls
-rMapTmp :: Int -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
+rMapTmp :: Int -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
         -> String -> RulesFn
 rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rMapMain index (Just tmpFn) actFn s
   where
@@ -80,14 +80,14 @@ rMapTmp index actFn tmpPrefix s@(_, cfg, _, _) = rMapMain index (Just tmpFn) act
 -- for action functions that need a unique tmpdir each call
 -- TODO use a hash for the cached path rather than the name, which changes!
 rMapTmps :: Int
-          -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
+          -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
           -> String -> RulesFn
 rMapTmps index actFn tmpPrefix s@(_, cfg, _, _) e = rMapMain index (Just tmpFn) actFn s e
   where
     tmpFn args = do
       let base = concat $ intersperse "/" $ map digest args
-          dir  = fromOrthoLangPath cfg $ cacheDir cfg tmpPrefix
-      return $ toOrthoLangPath cfg (dir </> base)
+          dir  = fromPath cfg $ cacheDir cfg tmpPrefix
+      return $ toPath cfg (dir </> base)
 
 {- Like rSimpleScript, but the last argument should be a list.
  - It will be evaluated and one call made to aSimpleScript with each element.
@@ -108,20 +108,20 @@ rMapSimpleScript index = rMap index . aSimpleScript
  - over. Given that I'm not sure there's any way to avoid intermediate files,
  - but am open to alternatives if anyone thinks of something!
  -}
-rMapMain :: Int -> Maybe ([OrthoLangPath] -> IO OrthoLangPath)
-         -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
+rMapMain :: Int -> Maybe ([Path] -> IO Path)
+         -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
          -> RulesFn
-rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(OrthoLangFun r salt _ name exprs) = do
+rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(Fun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, normalExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) normalExprs
   (ExprPath mappedArgsPath) <- rExpr s mappedExpr
   let singleName     = replace "_each" "" name -- TODO any less brittle ideas? could make this a fn
-      mainOutPath    = fromOrthoLangPath cfg $ exprPath s e
-      regularArgPaths'  = map (\(ExprPath p) -> toOrthoLangPath cfg p) regularArgPaths
-      argLastsPath'  = toOrthoLangPath cfg mappedArgsPath
-      elemCacheDir   = (fromOrthoLangPath cfg $ cacheDir cfg "each") </> hashFun s e
-      elemCacheDir'  = toOrthoLangPath cfg elemCacheDir -- TODO redundant?
+      mainOutPath    = fromPath cfg $ exprPath s e
+      regularArgPaths'  = map (\(ExprPath p) -> toPath cfg p) regularArgPaths
+      argLastsPath'  = toPath cfg mappedArgsPath
+      elemCacheDir   = (fromPath cfg $ cacheDir cfg "each") </> hashFun s e
+      elemCacheDir'  = toPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> extOf eType
       eType = case r of
                 (ListOf t) -> debug cfg "rMapMain" ("type of '" ++ render (pPrint e)
@@ -132,25 +132,25 @@ rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(OrthoLangFun r salt _ nam
   return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
-hashFun :: GlobalEnv -> OrthoLangExpr -> String
-hashFun st e@(OrthoLangFun _ s _ n _) = digest $ [n, show s] ++ argHashes st e
+hashFun :: GlobalEnv -> Expr -> String
+hashFun st e@(Fun _ s _ n _) = digest $ [n, show s] ++ argHashes st e
 hashFun _ _ = error "hashFun only hashes function calls so far"
 
 {- This calls aMapArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
  -}
-aMapMain :: OrthoLangConfig -> Locks -> HashedIDsRef -> Int
-         -> [OrthoLangPath] -> OrthoLangPath -> OrthoLangType -> OrthoLangPath -> FilePath
+aMapMain :: Config -> LocksRef -> IDsRef -> Int
+         -> [Path] -> Path -> Type -> Path -> FilePath
          -> Action ()
 aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   need' cfg ref "ortholang.core.compile.map.aMapMain" regularArgs'
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths cfg ref mappedArgList'
-  mappedPaths' <- liftIO $ mapM resolve $ map (fromOrthoLangPath cfg) mappedPaths
+  mappedPaths' <- liftIO $ mapM resolve $ map (fromPath cfg) mappedPaths
   debugA' "aMapMain" $ "mappedPaths': " ++ show mappedPaths'
   mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
-        (map (toOrthoLangPath cfg) mappedPaths') -- TODO wrong if lits?
+        (map (toPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
   need' cfg ref "ortholang.core.compile.map.aMapMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
@@ -158,33 +158,33 @@ aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
     then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
-    else writePaths cfg ref out $ map (toOrthoLangPath cfg) outPaths'
+    else writePaths cfg ref out $ map (toPath cfg) outPaths'
   where
-    regularArgs'   = map (fromOrthoLangPath cfg) regularArgs
-    mappedArgList' = fromOrthoLangPath cfg mappedArg
-    mapTmpDir'     = fromOrthoLangPath cfg mapTmpDir
+    regularArgs'   = map (fromPath cfg) regularArgs
+    mappedArgList' = fromPath cfg mappedArg
+    mapTmpDir'     = fromPath cfg mapTmpDir
 
--- TODO take + return OrthoLangPaths?
+-- TODO take + return Paths?
 -- TODO blast really might be nondeterministic here now that paths are hashed!
-eachPath :: OrthoLangConfig -> FilePath -> OrthoLangType -> FilePath -> FilePath
+eachPath :: Config -> FilePath -> Type -> FilePath -> FilePath
 eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> extOf eType TODO /result?
   where
-    path' = toOrthoLangPath cfg path
+    path' = toPath cfg path
     hash  = digest path'
     hash' = debug cfg "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
 
 -- This leaves arguments in .args files for aMapElem to find.
 -- TODO This should be done for each replace operation in replace_each
 -- TODO put mapIndex and mappedArg together, and rename that something with path
-aMapArgs :: OrthoLangConfig -> Locks -> HashedIDsRef -> Int
-         -> OrthoLangType -> [FilePath] -> FilePath -> OrthoLangPath
+aMapArgs :: Config -> LocksRef -> IDsRef -> Int
+         -> Type -> [FilePath] -> FilePath -> Path
          -> Action ()
 aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
-  let mappedArg' = fromOrthoLangPath cfg mappedArg
+  let mappedArg' = fromPath cfg mappedArg
       argsPath   = replaceBaseName (eachPath cfg tmp' eType mappedArg') "args"
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
       argPaths   = insertAt mapIndex mappedArg' regularArgs'
-      argPaths'  = map (toOrthoLangPath cfg) argPaths
+      argPaths'  = map (toPath cfg) argPaths
   debugFn $ "mappedArg': " ++ show mappedArg'
   debugFn $ "argsPath: " ++ show argsPath
   debugFn $ "argPaths: " ++ show argPaths
@@ -202,18 +202,18 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
  - the time comes.
  -
  - TODO does it have a race condition for writing the single file?
- - TODO any way to make that last FilePath into a OrthoLangPath? does it even matter?
+ - TODO any way to make that last FilePath into a Path? does it even matter?
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
  - TODO after singleFn works, can we remove tmpFn? (ok if not)
  -}
-aMapElem :: OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangType
-         -> Maybe ([OrthoLangPath] -> IO OrthoLangPath)
-         -> (OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> [OrthoLangPath] -> Action ())
-         -> String -> RepeatSalt -> FilePath -> Action ()
+aMapElem :: Config -> LocksRef -> IDsRef -> Type
+         -> Maybe ([Path] -> IO Path)
+         -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
+         -> String -> Salt -> FilePath -> Action ()
 aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let argsPath = replaceBaseName out "args"
   args <- readPaths cfg ref argsPath
-  let args' = map (fromOrthoLangPath cfg) args
+  let args' = map (fromPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
   need' cfg ref "ortholang.core.compile.map.aMapElem" args'
   debugA "ortholang.core.compile.map.aMapElem" $ "out: " ++ show out
@@ -221,15 +221,15 @@ aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do
       d <- fn args
-      let d' = fromOrthoLangPath cfg d
+      let d' = fromPath cfg d
       createDirectoryIfMissing True d'
       return d
-  let out' = traceA "aMapElem" (toOrthoLangPath cfg out) args''
+  let out' = traceA "aMapElem" (toPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
-      hashes  = map (digest . toOrthoLangPath cfg) args'' -- TODO make it match exprPath
+      hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
       single  = exprPathExplicit cfg singleName eType salt hashes
-      single' = fromOrthoLangPath cfg single
-      args''' = single:map (toOrthoLangPath cfg) args''
+      single' = fromPath cfg single
+      args''' = single:map (toPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?
   unlessExists single' $ actFn cfg ref ids dir args'''
   -- TODO is there a way to use withWriteOnce without an indefinite block??

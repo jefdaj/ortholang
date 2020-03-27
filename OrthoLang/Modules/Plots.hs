@@ -11,22 +11,22 @@ import Development.Shake
 import OrthoLang.Core.Types
 import OrthoLang.Core.Actions (withBinHash, writeCachedLines, writeLits, need')
 import OrthoLang.Core.Util (digest)
-import OrthoLang.Core.Paths (exprPath, toOrthoLangPath, fromOrthoLangPath, cacheDir)
+import OrthoLang.Core.Paths (exprPath, toPath, fromPath, cacheDir)
 import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, defaultTypeCheck)
 import OrthoLang.Core.Compile (aSimpleScript)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))
 
-orthoLangModule :: OrthoLangModule
-orthoLangModule = OrthoLangModule
+orthoLangModule :: Module
+orthoLangModule = Module
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
   , mTypes = [png]
   , mFunctions = [histogram, linegraph, scatterplot, venndiagram] -- TODO bargraph
   }
 
-png :: OrthoLangType
-png = OrthoLangType
+png :: Type
+png = Type
   { tExt  = "png"
   , tDesc = "plot image"
   , tShow = \_ _ f -> return $ "plot image '" ++ f ++ "'"
@@ -41,24 +41,24 @@ png = OrthoLangType
  - Otherwise it will return an empty string, which the script should ignore.
  -}
 varName :: RulesFn
-varName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
-  (OrthoLangRef _ _ _ (OrthoLangVar _ name)) -> name
+varName st expr = rExpr st $ Lit str (Salt 0) $ case expr of
+  (Ref _ _ _ (Var _ name)) -> name
   _ -> ""
 
 -- Like varName, but for a list of names
 varNames :: RulesFn
 varNames _ expr = undefined lits -- TODO implement this
   where
-    lits = OrthoLangLit str (RepeatSalt 0) $ case expr of
-             (OrthoLangRef _ _ _ (OrthoLangVar _ name)) -> name
+    lits = Lit str (Salt 0) $ case expr of
+             (Ref _ _ _ (Var _ name)) -> name
              _ -> ""
 
 ---------------------
 -- plot a num.list --
 ---------------------
 
-histogram :: OrthoLangFunction
-histogram = let name = "histogram" in OrthoLangFunction
+histogram :: Function
+histogram = let name = "histogram" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
@@ -67,23 +67,23 @@ histogram = let name = "histogram" in OrthoLangFunction
   }
 
 -- for reference:
--- dedupByContent :: OrthoLangConfig -> Locks -> [FilePath] -> Action [FilePath]
+-- dedupByContent :: Config -> LocksRef -> [FilePath] -> Action [FilePath]
 -- dedupByContent cfg ref paths = do
 --   -- TODO if the paths are already in the load cache, no need for content?
---   hashes <- mapM (hashContent cfg ref) $ map (toOrthoLangPath cfg) paths
+--   hashes <- mapM (hashContent cfg ref) $ map (toPath cfg) paths
 --   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
 --   return paths'
 
 rPlotNumList :: FilePath -> RulesFn
-rPlotNumList script st@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [title, nums]) = do
+rPlotNumList script st@(_, cfg, ref, ids) expr@(Fun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- varName st nums
   let outPath   = exprPath st expr
-      outPath'  = fromOrthoLangPath cfg outPath
+      outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toOrthoLangPath cfg p) args
+      args'     = map (\(ExprPath p) -> toPath cfg p) args
   outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
                       aSimpleScript script cfg ref ids (out:args')
   return outPath''
@@ -98,8 +98,8 @@ tPlotScores [s, ScoresOf n] | s == str && n == num = Right png
 tPlotScores _ = Left "expected a title and scores"
 
 -- TODO line graph should label axis by input var name (always there!)
-linegraph :: OrthoLangFunction
-linegraph = let name = "linegraph" in OrthoLangFunction
+linegraph :: Function
+linegraph = let name = "linegraph" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
@@ -108,8 +108,8 @@ linegraph = let name = "linegraph" in OrthoLangFunction
   }
 
 -- TODO scatterplot should label axis by input var name (always there!)
-scatterplot :: OrthoLangFunction
-scatterplot = let name = "scatterplot" in OrthoLangFunction
+scatterplot :: Function
+scatterplot = let name = "scatterplot" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
@@ -121,16 +121,16 @@ scatterplot = let name = "scatterplot" in OrthoLangFunction
 -- TODO also get y axis from dependent variable?
 rPlotNumScores :: (RulesFn)
                -> FilePath -> RulesFn
-rPlotNumScores xFn script st@(_, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [title, nums]) = do
+rPlotNumScores xFn script st@(_, cfg, ref, ids) expr@(Fun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- xFn   st nums
   -- ylabPath  <- yFn   st nums
   let outPath   = exprPath st expr
-      outPath'  = fromOrthoLangPath cfg outPath
+      outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toOrthoLangPath cfg p) args
+      args'     = map (\(ExprPath p) -> toPath cfg p) args
   outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
                       aSimpleScript script cfg ref ids (out:args')
   return outPath''
@@ -140,21 +140,21 @@ rPlotRepeatScores :: FilePath -> RulesFn
 rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: RulesFn
-indRepeatVarName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
-  (OrthoLangFun _ _ _ _ [_, (OrthoLangRef _ _ _ (OrthoLangVar _ v)), _]) -> v
+indRepeatVarName st expr = rExpr st $ Lit str (Salt 0) $ case expr of
+  (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
   _ -> ""
 
 depRepeatVarName :: RulesFn
-depRepeatVarName st expr = rExpr st $ OrthoLangLit str (RepeatSalt 0) $ case expr of
-  (OrthoLangFun _ _ _ _ [_, (OrthoLangRef _ _ _ (OrthoLangVar _ v)), _]) -> v
+depRepeatVarName st expr = rExpr st $ Lit str (Salt 0) $ case expr of
+  (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
   _ -> ""
 
 ----------------------
 -- plot X.list.list --
 ----------------------
 
-venndiagram :: OrthoLangFunction
-venndiagram = let name = "venndiagram" in OrthoLangFunction
+venndiagram :: Function
+venndiagram = let name = "venndiagram" in Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tPlotListOfLists
   , fTypeDesc  = name ++ " : X.list.list -> png"
@@ -167,33 +167,33 @@ tPlotListOfLists [(ListOf (ListOf _))] = Right png
 tPlotListOfLists _ = Left "expected a list of lists"
 
 -- TODO is this a reasonable way to do it for now?
-plotLabel :: GlobalEnv -> OrthoLangExpr -> String
-plotLabel _ (OrthoLangRef _ _ _ (OrthoLangVar _ v)) = v
-plotLabel st expr = let (OrthoLangPath p) = exprPath st expr in takeBaseName p
+plotLabel :: GlobalEnv -> Expr -> String
+plotLabel _ (Ref _ _ _ (Var _ v)) = v
+plotLabel st expr = let (Path p) = exprPath st expr in takeBaseName p
 
-plotCache :: OrthoLangConfig -> OrthoLangPath
+plotCache :: Config -> Path
 plotCache cfg = cacheDir cfg "plots"
 
 rPlotListOfLists :: FilePath -> RulesFn
-rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(OrthoLangFun _ _ _ _ [lol]) = do
+rPlotListOfLists script st@(scr, cfg, ref, ids) expr@(Fun _ _ _ _ [lol]) = do
   let labels = map (plotLabel st) (extractExprs scr lol)
       lists  = map (exprPath  st) (extractExprs scr lol)
       outPath   = exprPath st expr
-      outPath'  = fromOrthoLangPath cfg outPath
+      outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
-      cDir      = fromOrthoLangPath cfg $ plotCache cfg
+      cDir      = fromPath cfg $ plotCache cfg
   outPath' %> \_ -> do
-    need' cfg ref "rPlotListOfLists" $ map (fromOrthoLangPath cfg) lists
+    need' cfg ref "rPlotListOfLists" $ map (fromPath cfg) lists
     -- write labels + list paths to the cache dir
     let labPath  = cDir </> digest expr ++ "_names.txt"
         aLolPath = cDir </> digest expr ++ "_lists.txt"
     liftIO $ createDirectoryIfMissing True cDir
     writeCachedLines cfg ref labPath labels
-    writeLits cfg ref aLolPath $ map (fromOrthoLangPath cfg) lists
+    writeLits cfg ref aLolPath $ map (fromPath cfg) lists
     let args = [labPath, aLolPath]
     -- call the main script
     withBinHash cfg ref expr outPath $ \out ->
-      aSimpleScript script cfg ref ids (out:map (toOrthoLangPath cfg) args)
+      aSimpleScript script cfg ref ids (out:map (toPath cfg) args)
   return outPath''
 rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 
@@ -201,5 +201,5 @@ rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 -- plot X.scores --
 -------------------
 
-bargraph :: OrthoLangFunction
+bargraph :: Function
 bargraph = undefined
