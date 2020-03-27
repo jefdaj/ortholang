@@ -5,6 +5,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
+import OrthoLang.Core.Paths (exprPath, exprPathDigest)
 
 import Control.Applicative    ((<|>), many)
 import System.FilePath        ((</>), takeDirectory)
@@ -14,6 +15,7 @@ import Text.Parsec.Combinator (optional)
 import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
+import qualified Data.Map.Strict as M
 
 -------------------
 -- preprocessing --
@@ -66,7 +68,7 @@ stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
 -- TODO should reject duplicate variables! except replace result
 pAssign :: ParseM Assign
 pAssign = debugParser "pAssign" $ do
-  (scr, cfg, ref, ids) <- getState
+  st@(scr, cfg, ref, ids) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   v@(Var _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
@@ -77,9 +79,12 @@ pAssign = debugParser "pAssign" $ do
                -- "result" -> stripResult scr ++ [(v, e)]
                -- -- _ -> trace "this is not a result assignment" $ scr ++ [(v,e)]
                -- _ -> scr ++ [(v,e)]
-  let as' = (sAssigns scr) ++ [(v, e)]
+  let as'  = (sAssigns scr) ++ [(v, e)]
+      dVal@(_, p) = (typeOf e, exprPath st e)
+      dKey = exprPathDigest p
+      ds'  = M.insert dKey dVal (sDigests scr)
   -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
-  putState (scr {sAssigns=as'}, cfg, ref, ids)
+  putState (scr {sAssigns=as', sDigests=ds'}, cfg, ref, ids) -- TODO add digests here?
   -- debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
       -- res' = debugParser cfg "pAssign" res
@@ -157,7 +162,7 @@ pScript = debugParser "pScript" $ do
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: GlobalEnv -> FilePath -> IO (Either ParseError Script)
-parseFile st@(_, cfg, ref, ids) path = do
+parseFile (_, cfg, ref, ids) path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path
   return $ (parseString cfg ref ids . stripComments) txt
