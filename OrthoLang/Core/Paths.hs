@@ -266,7 +266,7 @@ cacheDir cfg modName = toOrthoLangPath cfg path
 
 -- | This is just a convenience used in exprPath
 -- TODO rename hSomething?
-argHashes :: OrthoLangState -> OrthoLangExpr -> [String]
+argHashes :: GlobalEnv -> OrthoLangExpr -> [String]
 argHashes s@(scr,_, _, _) (OrthoLangRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v
                                          Just e  -> argHashes s e
@@ -303,7 +303,7 @@ argHashes _ (OrthoLangRules (CompiledExpr _ p _)) = [digest p] -- TODO is this O
 --     joinPath = undefined
 
 -- TODO rename to tmpPath?
-exprPath :: OrthoLangState -> OrthoLangExpr -> OrthoLangPath
+exprPath :: GlobalEnv -> OrthoLangExpr -> OrthoLangPath
 exprPath (_, cfg, _, _) (OrthoLangRules (CompiledExpr _ (ExprPath p) _)) = toOrthoLangPath cfg p
 exprPath s@(scr, _, _, _) (OrthoLangRef _ _ _ v) = case lookup v scr of
                                          Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show scr
@@ -319,7 +319,7 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
 exprPathDigest :: OrthoLangPath -> ExprDigest
 exprPathDigest = ExprDigest . digest
 
-insertNewRulesDigest :: OrthoLangState -> OrthoLangExpr -> IO ()
+insertNewRulesDigest :: GlobalEnv -> OrthoLangExpr -> IO ()
 insertNewRulesDigest st@(_, cfg, _, idr) expr
   = traceD "insertNewRulesDigest" st expr
   $ atomicModifyIORef' idr

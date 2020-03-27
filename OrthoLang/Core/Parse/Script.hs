@@ -111,15 +111,15 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 -------------
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: OrthoLangState -> FilePath -> IO OrthoLangScript
+parseFileIO :: GlobalEnv -> FilePath -> IO OrthoLangScript
 parseFileIO st scr = do
   mscr1 <- parseFile st scr
   case mscr1 of
     Left  e -> fail $ show e
     Right s -> return s
 
--- TODO need OrthoLangState here? or just OrthoLangConfig?
-parseStatement :: OrthoLangState -> String -> Either ParseError OrthoLangAssign
+-- TODO need GlobalEnv here? or just OrthoLangConfig?
+parseStatement :: GlobalEnv -> String -> Either ParseError OrthoLangAssign
 parseStatement = parseWithEof pStatement
 
 -- The name doesn't do a good job of explaining this, but it's expected to be
@@ -155,7 +155,7 @@ pScript = debugParser "pScript" $ do
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: OrthoLangState -> FilePath -> IO (Either ParseError OrthoLangScript)
+parseFile :: GlobalEnv -> FilePath -> IO (Either ParseError OrthoLangScript)
 parseFile st@(_, cfg, ref, ids) path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path

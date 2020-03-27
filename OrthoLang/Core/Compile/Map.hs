@@ -132,7 +132,7 @@ rMapMain mapIndex mTmpFn actFn s@(_, cfg, ref, ids) e@(OrthoLangFun r salt _ nam
   return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
-hashFun :: OrthoLangState -> OrthoLangExpr -> String
+hashFun :: GlobalEnv -> OrthoLangExpr -> String
 hashFun st e@(OrthoLangFun _ s _ n _) = digest $ [n, show s] ++ argHashes st e
 hashFun _ _ = error "hashFun only hashes function calls so far"
 

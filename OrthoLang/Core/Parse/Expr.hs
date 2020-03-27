@@ -40,7 +40,7 @@ pList = debugParser "pList" $ do
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
-operatorTable :: OrthoLangConfig -> [[E.Operator String OrthoLangState Identity OrthoLangExpr]]
+operatorTable :: OrthoLangConfig -> [[E.Operator String GlobalEnv Identity OrthoLangExpr]]
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
@@ -190,9 +190,9 @@ pExpr = debugParser "pExpr" $ do
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)
-isExpr :: OrthoLangState -> String -> Bool
+isExpr :: GlobalEnv -> String -> Bool
 isExpr state line = isRight $ parseWithEof pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: OrthoLangState -> String -> Either ParseError OrthoLangExpr
+parseExpr :: GlobalEnv -> String -> Either ParseError OrthoLangExpr
 parseExpr = runParseM pExpr

@@ -167,7 +167,7 @@ tPlotListOfLists [(ListOf (ListOf _))] = Right png
 tPlotListOfLists _ = Left "expected a list of lists"
 
 -- TODO is this a reasonable way to do it for now?
-plotLabel :: OrthoLangState -> OrthoLangExpr -> String
+plotLabel :: GlobalEnv -> OrthoLangExpr -> String
 plotLabel _ (OrthoLangRef _ _ _ (OrthoLangVar _ v)) = v
 plotLabel st expr = let (OrthoLangPath p) = exprPath st expr in takeBaseName p
 

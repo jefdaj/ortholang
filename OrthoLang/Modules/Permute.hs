@@ -47,7 +47,7 @@ rPermute _ _ _ = fail "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
-aPermute :: OrthoLangState
+aPermute :: GlobalEnv
          -> ([String] -> [[String]])
          -> FilePath -> OrthoLangType -> RepeatSalt
          -> FilePath -> Action ()

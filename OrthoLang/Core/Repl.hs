@@ -145,7 +145,7 @@ instance Show QuitRepl where
 -- Attempts to process a line of input, but prints an error and falls back to
 -- the current state if anything goes wrong. This should eventually be the only
 -- place exceptions are caught.
-step :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+step :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 step st hdl line = case stripWhiteSpace line of
   ""        -> return st
   ('#':_  ) -> return st
@@ -153,7 +153,7 @@ step st hdl line = case stripWhiteSpace line of
   statement -> runStatement st hdl statement
 
 -- TODO insert ids
-runStatement :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+runStatement :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
   Left  e -> hPutStrLn hdl (show e) >> return st
   Right r -> do
@@ -199,7 +199,7 @@ dereference scr var (OrthoLangList t n vs   es   ) = OrthoLangList t n (delete v
 -- dispatch to commands --
 --------------------------
 
-runCmd :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+runCmd :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 runCmd st@(_, cfg, _, _) hdl line = case matches of
   [(_, fn)] -> fn st hdl $ stripWhiteSpace args
   []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
@@ -208,7 +208,7 @@ runCmd st@(_, cfg, _, _) hdl line = case matches of
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
 
-cmds :: OrthoLangConfig -> [(String, OrthoLangState -> Handle -> String -> IO OrthoLangState)]
+cmds :: OrthoLangConfig -> [(String, GlobalEnv -> Handle -> String -> IO GlobalEnv)]
 cmds cfg =
   [ ("help"     , cmdHelp    )
   , ("load"     , cmdLoad    )
@@ -232,7 +232,7 @@ cmds cfg =
 -- TODO update to include :config getting + setting
 -- TODO if possible, make this open in `less`?
 -- TODO why does this one have a weird path before the :help text?
-cmdHelp :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdHelp :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdHelp st@(_, cfg, _, _) hdl line = do
   doc <- case words line of
            [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
@@ -288,7 +288,7 @@ listFunctionTypesWithOutput cfg cType = filter matches descs
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO should it be an error for the new script not to play well with an existing one?
-cmdLoad :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdLoad :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdLoad st@(scr, cfg, ref, ids) hdl path = do
   clear
   path' <- absolutize path
@@ -304,12 +304,12 @@ cmdLoad st@(scr, cfg, ref, ids) hdl path = do
         Right s -> cmdShow (s, cfg', ref, ids) hdl ""
         -- Right s -> return (s, cfg', ref, ids)
 
-cmdReload :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdReload :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
   Nothing -> cmdDrop st hdl ""
   Just s  -> cmdLoad st hdl s
 
-cmdWrite :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdWrite :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
@@ -332,7 +332,7 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdNeededBy :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeededBy st@(scr, cfg, _, _) hdl var = do
   case lookup (OrthoLangVar (ReplaceID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
@@ -346,7 +346,7 @@ cmdNeededBy st@(scr, cfg, _, _) hdl var = do
   -- txt <- renderIO $ pPrint $ filter fn scr
   -- hPutStrLn hdl txt
 
-cmdNeeds :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeeds st@(scr, cfg, _, _) hdl var = do
   let var' = OrthoLangVar (ReplaceID Nothing) var
   case lookup var' scr of
@@ -355,7 +355,7 @@ cmdNeeds st@(scr, cfg, _, _) hdl var = do
   return st
 
 -- TODO factor out the variable lookup stuff
-cmdDrop :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdDrop (_, cfg, ref, ids) _ [] = clear >> return ([], cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
 cmdDrop st@(scr, cfg, ref, ids) hdl var = do
   let v = OrthoLangVar (ReplaceID Nothing) var
@@ -363,7 +363,7 @@ cmdDrop st@(scr, cfg, ref, ids) hdl var = do
     Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
     Just _  -> return (delFromAL scr v, cfg, ref, ids)
 
-cmdType :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdType :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
   where
     typeInfo = case stripWhiteSpace s of
@@ -375,7 +375,7 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
     allTypes = init $ unlines $ map showAssignType scr
 
 -- TODO insert id?
-showExprType :: OrthoLangState -> String -> String
+showExprType :: GlobalEnv -> String -> String
 showExprType st e = case parseExpr st e of
   Right expr -> show $ typeOf expr
   Left  err  -> show err
@@ -389,7 +389,7 @@ showAssignType (OrthoLangVar _ v, e) = unwords [typedVar, "=", prettyExpr]
     prettyExpr = render $ pPrint e
 
 -- TODO factor out the variable lookup stuff
-cmdShow :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdShow :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
 cmdShow st@(scr, cfg, _, _) hdl var = do
   case lookup (OrthoLangVar (ReplaceID Nothing) var) scr of
@@ -398,16 +398,16 @@ cmdShow st@(scr, cfg, _, _) hdl var = do
   return st
 
 -- TODO does this one need to be a special case now?
-cmdQuit :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdQuit :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdQuit _ _ _ = throw QuitRepl
 -- cmdQuit _ _ _ = ioError $ userError "Bye for now!"
 
-cmdBang :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdBang :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
-cmdConfig :: OrthoLangState -> Handle -> String -> IO OrthoLangState
+cmdConfig :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdConfig st@(scr, cfg, ref, ids) hdl s = do
   let ws = words s
   if (length ws == 0)
@@ -427,7 +427,7 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
 --------------------
 
 -- complete things in quotes: filenames, seqids
-quotedCompletions :: MonadIO m => OrthoLangState -> String -> m [Completion]
+quotedCompletions :: MonadIO m => GlobalEnv -> String -> m [Completion]
 quotedCompletions (_, _, _, idRef) wordSoFar = do
   files  <- listFiles wordSoFar
   seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ fmap (M.unions . M.elems . hSeqIDs) $ liftIO $ readIORef idRef
@@ -436,7 +436,7 @@ quotedCompletions (_, _, _, idRef) wordSoFar = do
 
 -- complete everything else: fn names, var names, :commands, types
 -- these can be filenames too, but only if the line starts with a :command
-nakedCompletions :: MonadIO m => OrthoLangState -> String -> String -> m [Completion]
+nakedCompletions :: MonadIO m => GlobalEnv -> String -> String -> m [Completion]
 nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
@@ -448,14 +448,14 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 
 -- this is mostly lifted from Haskeline's completeFile
-myComplete :: MonadIO m => OrthoLangState -> CompletionFunc m
+myComplete :: MonadIO m => GlobalEnv -> CompletionFunc m
 myComplete s = completeQuotedWord   (Just '\\') "\"'" (quotedCompletions s)
              $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
                                     (nakedCompletions s)
 
 -- This is separate from the OrthoLangConfig because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
-replSettings :: OrthoLangState -> Settings IO
+replSettings :: GlobalEnv -> Settings IO
 replSettings s@(_, cfg, _, _) = Settings
   { complete       = myComplete s
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"

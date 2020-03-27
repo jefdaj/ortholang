@@ -126,7 +126,7 @@ rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
  -
  - TODO any reason not to merge it into rReplace above?
  -}
-rReplace' :: OrthoLangState
+rReplace' :: GlobalEnv
           -> OrthoLangExpr -- the result expression for a single replacement, which *doesn't* contain all the info
           -> OrthoLangVar  -- we also need the variable to be replaced
           -> OrthoLangExpr -- and an expression to replace it with (which could be a ref to another variable)
@@ -147,7 +147,7 @@ rReplace' st@(script, cfg, ref, ids) resExpr subVar@(OrthoLangVar _ _) subExpr =
  -
  - TODO think carefully about whether all of these need to be in here
  -}
-calcReplaceID :: OrthoLangState -> OrthoLangExpr -> OrthoLangVar -> OrthoLangExpr -> ReplaceID
+calcReplaceID :: GlobalEnv -> OrthoLangExpr -> OrthoLangVar -> OrthoLangExpr -> ReplaceID
 calcReplaceID (scr, _, _, _) resExpr subVar subExpr = ReplaceID $ Just $ digest
   [ show scr
   , show resExpr
@@ -230,7 +230,7 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - So the new plan is relatively simple: implement replace first, and then try replace_each again.
  - I'm not that sure the rMap thing will work because it deals with Actions though.
  -}
-rReplaceEach :: OrthoLangState
+rReplaceEach :: GlobalEnv
              -> OrthoLangExpr -- the final result expression, which contains all the info we need
              -> Rules ExprPath
 rReplaceEach s@(scr, cfg, ref, _) expr@(OrthoLangFun _ _ _ _ (resExpr:(OrthoLangRef _ _ _ subVar):subList:[])) = do

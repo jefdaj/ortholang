@@ -477,7 +477,7 @@ and will help enforce consistency because all the patterns are enforced in one p
 
 TODO should it track the .out and .err files, or ignore them?
 
-TODO take OrthoLangState instead of individual cfg + locks?
+TODO take GlobalEnv instead of individual cfg + locks?
 
 TODO if exit is wrong (usually non-zero), cat out stderr for user
 

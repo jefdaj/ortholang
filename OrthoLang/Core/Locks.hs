@@ -40,7 +40,7 @@ import System.IO.Error            (isDoesNotExistError)
 -- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO parametarize FilePath and re-export with OrthoLangPath in Types.hs?
--- TODO can this go into ActionState/OrthoLangState in any saner way?
+-- TODO can this go into ActionState/GlobalEnv in any saner way?
 type Locks = (Resource, IORef (Map FilePath RWLock))
 
 {- A horrible hack to avoid import the import cycle caused by using a OrthoLangConfig

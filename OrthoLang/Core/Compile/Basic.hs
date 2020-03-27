@@ -104,7 +104,7 @@ debugRules cfg name input out = debug cfg name msg out
 
 -- This should return the same outPath as the old RulesFns, without doing anything else.
 -- TODO remove it once the new rules are all written
--- deprecatedRules :: OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+-- deprecatedRules :: GlobalEnv -> OrthoLangExpr -> Rules ExprPath
 -- deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
 --   where
 --     out  = exprPath s e
@@ -118,7 +118,7 @@ debugRules cfg name input out = debug cfg name msg out
 --      (because some are generated automatically, not parsed at all!)
 -- TODO and put them into the state explicitly without this IORef hack
 
-withInsertNewRulesDigests:: OrthoLangState -> [OrthoLangExpr] -> a -> a
+withInsertNewRulesDigests:: GlobalEnv -> [OrthoLangExpr] -> a -> a
 withInsertNewRulesDigests s@(_,_,_,r) es a = unsafePerformIO $ do
   mapM_ (insertNewRulesDigest s) es
   (HashedIDs {hExprs = ids}) <- readIORef r
@@ -147,7 +147,7 @@ rExpr' s e@(OrthoLangBop t r ds _ e1 e2) = withInsertNewRulesDigests s [e1,e2,es
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
-rNamedFunction :: OrthoLangState -> OrthoLangExpr -> String -> Rules ExprPath
+rNamedFunction :: GlobalEnv -> OrthoLangExpr -> String -> Rules ExprPath
 rNamedFunction s e@(OrthoLangFun _ _ _ _ es) n = withInsertNewRulesDigests s es $ rNamedFunction' s e n
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
@@ -159,7 +159,7 @@ rNamedFunction' s@(_, cfg, _, _) expr name = case findFunction cfg name of
                             else (fOldRules f) s expr
                Just _ -> return $ ExprPath $ fromOrthoLangPath cfg $ exprPath s expr
 
-rAssign :: OrthoLangState -> OrthoLangAssign -> Rules (OrthoLangVar, VarPath)
+rAssign :: GlobalEnv -> OrthoLangAssign -> Rules (OrthoLangVar, VarPath)
 rAssign s@(_, cfg, _, _) (var, expr) = do
   (ExprPath path) <- rExpr s expr
   path' <- rVar s var expr $ toOrthoLangPath cfg path
@@ -170,7 +170,7 @@ rAssign s@(_, cfg, _, _) (var, expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
-compileScript :: OrthoLangState -> ReplaceID -> Rules ResPath
+compileScript :: GlobalEnv -> ReplaceID -> Rules ResPath
 compileScript s@(as, _, _, _) _ = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
@@ -324,7 +324,7 @@ rRef _ _ = fail "bad argument to rRef"
 -- Creates a symlink from varname to expression file.
 -- TODO unify with rLink2, rLoad etc?
 -- TODO do we need both the OrthoLangExpr and ExprPath? seems like OrthoLangExpr would do
-rVar :: OrthoLangState -> OrthoLangVar -> OrthoLangExpr -> OrthoLangPath -> Rules VarPath
+rVar :: GlobalEnv -> OrthoLangVar -> OrthoLangExpr -> OrthoLangPath -> Rules VarPath
 rVar (_, cfg, ref, ids) var expr oPath = do
   vPath' %> \_ -> aVar cfg ref ids vPath oPath
   return (VarPath vPath')

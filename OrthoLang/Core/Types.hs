@@ -33,7 +33,7 @@ module OrthoLang.Core.Types
   , Locks
   , HashedIDs(..)
   , HashedIDsRef
-  , OrthoLangState
+  , GlobalEnv
   , ensureResult
   , lookupResult
   -- , Assoc(..) -- we reuse this from Parsec
@@ -108,7 +108,7 @@ type Action3 = OrthoLangConfig -> Locks -> HashedIDsRef -> OrthoLangPath -> Orth
 -- TODO remove when able in favor of well-typed versions above
 type ActionFn    = OrthoLangConfig -> CacheDir -> [ExprPath] -> Action ()
 
-type RulesFn     = OrthoLangState -> OrthoLangExpr -> Rules ExprPath
+type RulesFn     = GlobalEnv -> OrthoLangExpr -> Rules ExprPath
 type TypeChecker = [OrthoLangType] -> Either String OrthoLangType
 
 type NewAction1 = OrthoLangConfig -> Locks -> HashedIDsRef -> ExprPath -> FilePath                         -> Action ()
@@ -447,18 +447,18 @@ data HashedIDs = HashedIDs
 type HashedIDsRef = IORef HashedIDs
 
 -- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
-type OrthoLangState = (OrthoLangScript, OrthoLangConfig, Locks, HashedIDsRef)
-type ParseM a = Parsec String OrthoLangState a
+type GlobalEnv = (OrthoLangScript, OrthoLangConfig, Locks, HashedIDsRef)
+type ParseM a = Parsec String GlobalEnv a
 
 ----------------
 -- Repl monad --
 ----------------
 
-type ReplM a = StateT OrthoLangState (MaybeT (InputT IO)) a
+type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
 
 -- TODO use useFile(Handle) for stdin?
 -- TODO use getExternalPrint to safely print during Tasty tests!
-runReplM :: Settings IO -> ReplM a -> OrthoLangState -> IO (Maybe OrthoLangState)
+runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
 runReplM settings replm state =
   runInputT settings $ runMaybeT $ execStateT replm state
 
