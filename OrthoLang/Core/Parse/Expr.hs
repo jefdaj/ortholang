@@ -76,7 +76,7 @@ pBop bop
 pBop _ = fail "pBop only works with infix functions"
 
 mkBop :: GlobalEnv -> Function -> ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
-mkBop st bop (e1, ds1) (e2, ds2) = case bopTypeCheck of
+mkBop st bop (e1, ds1) (e2, ds2) = case bopTypeCheck (typeOf e1) (typeOf e2) of
   Left  msg -> error msg -- TODO can't `fail` because not in monad here?
   Right rtn -> let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
                    p    = exprPath st expr
@@ -85,11 +85,15 @@ mkBop st bop (e1, ds1) (e2, ds2) = case bopTypeCheck of
                    dMap = M.unions [M.singleton dKey dVal, ds1, ds2]
                in (expr, dMap)
   where
-    bopTypeCheck = case (fTypeCheck bop) [ListOf $ typeOf e1] of
+    -- TODO does typesMatch already cover (ListOf Empty) comparisons?
+    bopTypeCheck (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
+    bopTypeCheck (ListOf x    ) (ListOf Empty) = Right $ ListOf x
+    bopTypeCheck (ListOf Empty) (ListOf x    ) = Right $ ListOf x
+    bopTypeCheck t1 t2 = case (fTypeCheck bop) [ListOf t1] of
       Left  e -> Left e
-      Right r -> if typeOf e1 /= typeOf e2
-                   then Left $ "mismatched bop types: " ++ show (typeOf e1) ++ " and " ++ show (typeOf e2)
-                   else Right r
+      Right r -> if typesMatch [t1] [t2]
+                   then Right r
+                   else Left $ "mismatched bop types: " ++ show t1 ++ " and " ++ show t2
 
 ---------------
 -- functions --

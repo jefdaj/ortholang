@@ -199,8 +199,8 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> Config -> LocksRef -> IDsRef -> Type -> Rules [ExprPath] -> Rules ResPath -> IO ()
-eval hdl cfg ref ids rtype ls p = do
+eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestMap -> Type -> Rules [ExprPath] -> Rules ResPath -> IO ()
+eval hdl cfg ref ids dm rtype ls p = do
   start <- getCurrentTime
   let ep = EvalProgress
              { epTitle = takeFileName $ fromMaybe "ortholang" $ cfgScript cfg
@@ -234,8 +234,8 @@ eval hdl cfg ref ids rtype ls p = do
 --       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
-      runRulesR (cfg, ref, ids) newCoreRules
-      runRulesR (cfg, ref, ids) newFunctionRules
+      runRulesR (cfg, ref, ids, dm) newCoreRules
+      runRulesR (cfg, ref, ids, dm) newFunctionRules
       lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
       want ["eval"]
@@ -288,7 +288,7 @@ evalScript hdl s@(scr, c, ref, ids) =
               Just r  -> r
       loadExprs = extractLoads scr res
       loads = mapM (rExpr s) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-  in eval hdl c ref ids (typeOf res) loads (compileScript s $ RepID Nothing)
+  in eval hdl c ref ids (sDigests scr) (typeOf res) loads (compileScript s $ RepID Nothing)
 
 evalFile :: GlobalEnv -> Handle -> IO ()
 evalFile st@(_, cfg, ref, ids) hdl = case cfgScript cfg of

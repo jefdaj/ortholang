@@ -155,7 +155,7 @@ type ActionR3 = ExprPath -> FilePath -> FilePath -> FilePath -> ActionR ()
 -- this isn't really needed, but makes passing globalenv around easier
 -- TODO use it? or remove it
 -- for now, same as GlobalEnv. but not sure if refs are needed
-type RulesEnv = (Config, LocksRef, IDsRef) -- TODO remove locks? ids? put script back?
+type RulesEnv = (Config, LocksRef, IDsRef, DigestMap) -- TODO remove locks? ids? put script back?
 type RulesR a = ReaderT RulesEnv Rules a -- TODO is this right?
 
 runRulesR :: RulesEnv -> RulesR a -> Rules a

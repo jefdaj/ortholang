@@ -34,7 +34,7 @@ import Control.Monad.Reader
 
 newFunctionRules :: RulesR ()
 newFunctionRules = do
-  (cfg, _, _) <- ask
+  (cfg, _, _, _) <- ask
   let fns   = concatMap mFunctions $ cfgModules cfg
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
@@ -46,10 +46,10 @@ newFunctionRules = do
 -- type NewRulesFn = Config -> LocksRef -> IDsRef -> Rules ()
 -- newFunctionRules2 :: RulesR ()
 -- newFunctionRules2 = do
---   (_, cfg, lRef, iRef) <- ask
+--   (_, cfg, lRef, iRef, dMap) <- ask
 --   let fns   = concatMap mFunctions $ cfgModules cfg
 --       rules = catMaybes $ map fNewRules fns
---   mapM_ (\r -> r cfg lRef iRef) rules
+--   mapM_ (\r -> r cfg lRef iRef, dMap) rules
 
 newCoreRules :: RulesR ()
 newCoreRules = do
@@ -108,13 +108,13 @@ rNewRules
   :: Int -> (t -> [FilePath] -> ActionR ()) -> String -> TypeChecker
   -> (ExprPath -> t) -> RulesR ()
 rNewRules nArgs applyFn name tFn aFn = do
-  (cfg, lRef, iRef) <- ask
+  (cfg, lRef, iRef, dMap) <- ask
   newPattern cfg name nArgs %>> aNewRules applyFn tFn aFn
 
 (%>>) :: FilePattern -> (ExprPath -> ActionR ()) -> RulesR ()
 ptn %>> act = do
-  (cfg, lRef, iRef) <- ask
-  let run = runActionR (cfg, lRef, iRef, undefined)
+  (cfg, lRef, iRef, dMap) <- ask
+  let run = runActionR (cfg, lRef, iRef, dMap)
   lift $ ptn %> \p -> run $ act $ ExprPath p
 
 aNewRules
