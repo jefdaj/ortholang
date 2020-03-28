@@ -1,3 +1,34 @@
+{-|
+TODO add pretty-printing round trips to everything
+
+TODO move some of the test utilties here to Utils.hs?
+
+TODO adjust generators to handle script state!
+
+need to:
+
+* generate number and string statements
+
+* generate references to those
+
+* generate function calls with those
+
+some ideas for alternative/easier formulation:
+
+* given a valid script, a reference to any var is valid
+
+* given a valid script, fn calls made from refs are valid
+  (unless they create cycles? see what happens!)
+
+TODO example function calls
+
+TODO example bop expressions
+
+TODO everything with and without parens
+
+TODO test operator precedence
+-}
+
 module OrthoLang.Test.Parse where
 
 import OrthoLang.Core.Types
@@ -24,21 +55,32 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- import Test.Tasty.QuickCheck (testProperty)
 -- import Text.Parsec           (ParseError)
 
--- TODO add pretty-printing round trips to everything
--- TODO move some of the test utilties here to Utils.hs?
--- TODO adjust generators to handle script state!
---      need to:
---      * generate number and string statements
---      * generate references to those
---      * generate function calls with those
---      some ideas for alternative/easier formulation:
---      * given a valid script, a reference to any var is valid
---      * given a valid script, fn calls made from refs are valid
---        (unless they create cycles? see what happens!)
+-- import Data.IORef            (newIORef)
+-- import qualified Data.Map.Strict as M
+-- import OrthoLang.Core.Config (defaultConfig)
+-- import OrthoLang.Core.Locks (initLocks)
+-- import OrthoLang.Core.Paths (exprPath, exprPathDigest)
+-- import Control.Logging (withFileLogging)
+-- import OrthoLang.Core.Util         (absolutize)
 
 ------------------------
 -- utility functions --
 -----------------------
+
+-- exGlobals :: LocksRef -> IDsRef -> IO GlobalEnv
+-- exGlobals lRef iRef = do
+--   dir  <- absolutize "." -- doesn't matter since it will be removed from Paths
+--   cfg  <- defaultConfig dir dir
+--   return (emptyScript, cfg, lRef, iRef)
+
+-- TODO does this generally need to be recursive, digests of the exprs inside it too?
+-- digestExample :: GlobalEnv -> (String, Expr) -> (String, Expr, DigestMap)
+-- digestExample st (s, e) = let p = exprPath st e
+--                           in (s, e, M.singleton (exprPathDigest p) (typeOf e, p))
+
+-- TODO remember to wrap in withFileLogging if running from stack repl
+-- digestExamples :: GlobalEnv -> [(String, Expr)] -> IO [(String, Expr, DigestMap)]
+-- digestExamples st = mapM (digestExample st)
 
 regularParse :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Either ParseError a
 regularParse p cfg ref ids = parseWithEof p (emptyScript, cfg, ref, ids)
@@ -51,26 +93,30 @@ parsedItAll p cfg ref ids str' = case parseWithLeftOver p (emptyScript, cfg, ref
   Right (_, "") -> True
   _ -> False
 
--- parse some cut code, pretty-print it, parse again,
--- and check that the two parsed ASTs are equal
+{-|
+Parse some cut code, pretty-print it, parse again,
+and check that the two parsed ASTs + DigestMaps are equal.
+-}
 roundTrip :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef
-          -> ParseM a -> String -> Either (String, String) a
+          -> ParseM (a, DigestMap) -> String -> Either (String, String) (a, DigestMap)
 roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
   Left  l1 -> Left (code, show l1)
-  Right r1 -> case regularParse psr cfg ref ids $ prettyShow r1 of
+  Right (r1, d1) -> case regularParse psr cfg ref ids $ prettyShow r1 of
     Left  l2 -> Left (code, show l2)
-    Right r2 -> if r1 == r2
-                  then Right r2
+    Right (r2, d2) -> if r1 == r2 && d1 == d2
+                  then Right (r2, d2)
                   else Left (code, show r2)
 
--- Test that a list of example strings can be parsed + printed + parsed,
--- and both parses come out correctly, or return the first error.
-tripExamples :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef -> ParseM a
+{-|
+Test that a list of example strings can be parsed + printed + parsed,
+and both parses come out correctly, or return the first error.
+-}
+tripExamples :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef -> ParseM (a, DigestMap)
              -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ _ _ [] = Right ()
 tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
   Left  l -> Left (a, show l)
-  Right r -> if r == b
+  Right (r, _) -> if r == b
     then tripExamples cfg ref ids p xs
     else Left (a, show r)
 
@@ -80,11 +126,15 @@ tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
 
 mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg ref ids = return $ testGroup "test parser"
-                               [exTests cfg ref ids, wsProps cfg ref ids, acProps cfg ref ids]
+  [ exTests cfg ref ids
+  , wsProps cfg ref ids
+  , acProps cfg ref ids
+  ]
 
+-- a here can be: Expr, Assign, ...
 mkCase :: (Show a, Eq a, Pretty a) => Config -> LocksRef -> IDsRef
-       -> String -> ParseM a -> [(String, a)] -> TestTree
-mkCase cfg ref ids name parser examples = 
+       -> String -> ParseM (a, DigestMap) -> [(String, a)] -> TestTree
+mkCase cfg ref ids name parser examples =
   testCase name $ Right () @=? tripExamples cfg ref ids parser examples
 
 exTests :: Config -> LocksRef -> IDsRef -> TestTree

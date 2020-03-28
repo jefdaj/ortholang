@@ -73,7 +73,7 @@ pAssign = debugParser "pAssign" $ do
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   v@(Var _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
   when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
-  e <- (lexeme pExpr)
+  (e, ds) <- (lexeme pExpr)
   -- let scr' = case vName of
                -- -- "result" -> trace "stripping old result" $ stripResult scr ++ [(v, e)]
                -- "result" -> stripResult scr ++ [(v, e)]
@@ -87,10 +87,10 @@ pAssign = debugParser "pAssign" $ do
   putState (scr {sAssigns=as', sDigests=ds'}, cfg, ref, ids) -- TODO remove this?
   -- debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
-      dmap = M.fromList [(dKey, dVal)] -- TODO or remove this?
+      dMap = M.insert dKey dVal ds
       -- res' = debugParser cfg "pAssign" res
   -- return $ traceShow scr' res
-  return (res, dmap)
+  return (res, dMap)
 
 -- Handles the special case of a naked top-level expression, which is treated
 -- as being assigned to "result". This parses the same in a script or the repl.
@@ -100,9 +100,9 @@ pAssign = debugParser "pAssign" $ do
 --      maybe we need a separate type of assignment statement for this?
 pResult :: ParseM (Assign, DigestMap)
 pResult = debugParser "pResult" $ do
-  e <- pExpr
+  (e, ds) <- pExpr
   let res = (Var (RepID Nothing) "result", e)
-  return (res, M.empty)
+  return (res, ds) -- TODO is there any new result digest needed?
 
 pStatement :: ParseM (Assign, DigestMap)
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)

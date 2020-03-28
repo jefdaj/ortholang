@@ -33,7 +33,7 @@ module OrthoLang.Core.Types
   , emptyScript
   , LocksRef
   , IDs(..)
-  , DigestMap(..)
+  , DigestMap
   , IDsRef
   , GlobalEnv
   , ensureResult

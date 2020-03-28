@@ -58,6 +58,31 @@ loadField args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
   | otherwise = C.lookup cfg $ pack key
 
+defaultConfig :: FilePath -> FilePath -> IO Config
+defaultConfig td wd = do
+  par <- newResourceIO "parallel" 8 -- TODO set to number of nodes
+  os' <- getOS
+  cp <- getNumProcessors
+  return Config
+    { cfgScript      = Nothing
+    , cfgInteractive = False
+    , cfgTmpDir      = td
+    , cfgWorkDir     = wd
+    , cfgDebug       = Nothing
+    , cfgModules     = [] -- TODO fix this
+    , cfgWrapper     = Nothing
+    , cfgOutFile     = Nothing
+    , cfgShare       = Nothing
+    , cfgReport      = Nothing
+    , cfgTestPtn     = [] -- [] means run all tests
+    , cfgWidth       = Nothing
+    , cfgSecure      = False
+    , cfgNoProg      = True
+    , cfgParLock     = par
+    , cfgOS          = os'
+    , cfgThreads     = cp
+    }
+
 loadConfig :: [Module] -> Arguments -> IO Config
 loadConfig mods args = do
   debug' $ "docopt arguments: " ++ show args
@@ -70,20 +95,18 @@ loadConfig mods args = do
   dbg <- loadField args cfg "debug"
   ctd <- mapM absolutize =<< loadField args cfg "tmpdir"
   cwd <- mapM absolutize =<< loadField args cfg "workdir"
+  let ctd' = justOrDie "parse --tmpdir arg failed!" ctd
+      cwd' = justOrDie "parse --workdir arg failed!" cwd
+  def <- defaultConfig ctd' cwd'
   rep <- mapM absolutize =<< loadField args cfg "report"
   cls <- mapM absolutize =<< loadField args cfg "wrapper"
   out <- mapM absolutize =<< loadField args cfg "output"
   shr <- mapM (\p -> if "http" `isPrefixOf` p then return p else absolutize p) =<< loadField args cfg "shared"
   let ctp = getAllArgs args (longOption "test")
-  par <- newResourceIO "parallel" 8 -- TODO set to number of nodes
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
-  os' <- getOS
-  cp <- getNumProcessors
-  let res = Config
+  let res = def
               { cfgScript  = csc'
               , cfgInteractive = int
-              , cfgTmpDir  = justOrDie "parse --tmpdir arg failed!" ctd
-              , cfgWorkDir = justOrDie "parse --workdir arg failed!" cwd
               , cfgDebug   = dbg
               , cfgModules = mods
               , cfgWrapper = cls
@@ -92,11 +115,8 @@ loadConfig mods args = do
               , cfgWidth   = Nothing -- not used except in testing
               , cfgSecure  = isPresent args $ longOption "secure"
               , cfgNoProg  = isPresent args $ longOption "noprogress"
-              , cfgParLock = par
               , cfgOutFile = out
               , cfgShare   = shr
-              , cfgOS      = os'
-              , cfgThreads = cp
               }
   debug' $ show res
   updateDebug dbg

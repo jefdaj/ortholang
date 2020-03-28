@@ -377,7 +377,7 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String
 showExprType st e = case parseExpr st e of
-  Right expr -> show $ typeOf expr
+  Right (expr, _) -> show $ typeOf expr
   Left  err  -> show err
 
 showAssignType :: Assign -> String

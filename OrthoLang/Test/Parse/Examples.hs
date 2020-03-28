@@ -1,20 +1,16 @@
 module OrthoLang.Test.Parse.Examples
-  ( exFuns
-  , exTerms
-  , exExprs
-  , exStatements
-  )
+  -- ( exFuns
+  -- , exFuns
+  -- , exTerms
+  -- , exExprs
+  -- , exStatements
+  -- )
   where
 
 -- TODO test nested Bops! (A ~ B) | (B ~ A) for example
 
 import OrthoLang.Core.Types
 import OrthoLang.Modules.SeqIO (faa)
-
--- TODO example function calls
--- TODO example bop expressions
--- TODO everything with and without parens
--- TODO test operator precedence
 
 ---------------------------------
 -- ASTs to use in the examples --
@@ -115,5 +111,5 @@ exExprs = exTerms ++ map addParens exTerms ++
 -- TODO list of pairs of expressions that should parse the same;
 --      then you don't have to actually write out the AST
 
-exStatements :: [(String, (Assign, DigestMap))]
+exStatements :: [(String, Assign)]
 exStatements = []

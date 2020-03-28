@@ -4,6 +4,7 @@ module OrthoLang.Core.Parse.Basic where
 
 import OrthoLang.Core.Types
 import OrthoLang.Core.Util (trace)
+import OrthoLang.Core.Paths (exprPath, exprPathDigest)
 -- import OrthoLang.Core.Pretty (Pretty, pPrint, render)
 
 import Control.Applicative    ((<|>), many)
@@ -14,6 +15,7 @@ import Text.Parsec            (getState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim (ParsecT, Stream)
+import qualified Data.Map.Strict as M
 
 -- based on Text.Parsec.Combinator.parserTrace, but:
 --   uses the logging module
@@ -122,7 +124,7 @@ pVarOnly = debugParser "pVarOnly " (pVar <* notFollowedBy pEq)
 --------------
 
 -- TODO hey Scientific has its own parser, would it work to add?
-pNum :: ParseM Expr
+pNum :: ParseM (Expr, DigestMap)
 pNum = debugParser "pNum" $ do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
@@ -131,11 +133,17 @@ pNum = debugParser "pNum" $ do
   ns <- many (digit <|> oneOf ".e-")
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
+  st <- getState
   let sign = case neg of
                Just s -> s
                _ -> ' '
       lit = show (read (sign:n:ns) :: Scientific)
-  return $ Lit num (Salt 0) lit
+      expr = Lit num (Salt 0) lit 
+      dKey = exprPathDigest p
+      p    = exprPath st expr
+      dVal = (typeOf expr, p)
+      dMap = M.singleton dKey dVal
+  return (expr, dMap)
 
 -- list of chars which can be escaped in OrthoLang
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -158,5 +166,12 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
-pStr :: ParseM Expr
-pStr = debugParser "pStr" (Lit str (Salt 0) <$> pQuoted <?> "string literal")
+pStr :: ParseM (Expr, DigestMap)
+pStr = debugParser "pStr" $ do
+  expr <- Lit str (Salt 0) <$> pQuoted <?> "string literal"
+  st <- getState
+  let dKey = exprPathDigest p
+      p    = exprPath st expr
+      dVal = (typeOf expr, p)
+      dMap = M.singleton dKey dVal
+  return (expr, dMap)
