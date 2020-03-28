@@ -82,7 +82,7 @@ import System.Directory           (createDirectoryIfMissing)
 
 import Data.Maybe (isJust, fromJust)
 
-import OrthoLang.Core.Paths (insertNewRulesDigest)
+-- import OrthoLang.Core.Paths (insertNewRulesDigest)
 import System.IO.Unsafe (unsafePerformIO)
 
 
@@ -118,12 +118,12 @@ debugRules cfg name input out = debug cfg name msg out
 --      (because some are generated automatically, not parsed at all!)
 -- TODO and put them into the state explicitly without this IORef hack
 
-withInsertNewRulesDigests:: GlobalEnv -> [Expr] -> a -> a
-withInsertNewRulesDigests s@(_,_,_,r) es a = unsafePerformIO $ do
-  mapM_ (insertNewRulesDigest s) es
-  (IDs {hExprs = ids}) <- readIORef r
-  print ids
-  return a
+-- withInsertNewRulesDigests:: GlobalEnv -> [Expr] -> a -> a
+-- withInsertNewRulesDigests s@(_,_,_,r) es a = unsafePerformIO $ do
+--   mapM_ (insertNewRulesDigest s) es
+--   (IDs {hExprs = ids}) <- readIORef r
+--   print ids
+--   return a
 
 {-|
 The main entry point for compiling any 'Expr'. Use this by default
@@ -132,15 +132,12 @@ unless you have a reason to delve into the more specific compilers below!
 TODO remove the insert digests hack? or is this the main entry point for that too?
 -}
 rExpr :: RulesFn
-rExpr s@(_, cfg, _, _) e = withInsertNewRulesDigests s [e] $ rExpr' s e
-
-rExpr' :: RulesFn
-rExpr' s e@(Lit _ _ _      ) = rLit s e
-rExpr' s e@(Ref _ _ _ _    ) = rRef s e
-rExpr' s e@(Lst _ _ _ _   ) = rList s e
-rExpr' s e@(Fun _ _ _ n _  ) = rNamedFunction s e n -- TODO deprecate this
-rExpr' _   (Com (CompiledExpr _ _ rules)) = rules
-rExpr' s e@(Bop t r ds _ e1 e2) = withInsertNewRulesDigests s [e1,e2,es] $ rExpr s fn
+rExpr s e@(Lit _ _ _      ) = rLit s e
+rExpr s e@(Ref _ _ _ _    ) = rRef s e
+rExpr s e@(Lst _ _ _ _   ) = rList s e
+rExpr s e@(Fun _ _ _ n _  ) = rNamedFunction s e n -- TODO deprecate this
+rExpr _   (Com (CompiledExpr _ _ rules)) = rules
+rExpr s e@(Bop t r ds _ e1 e2) = rExpr s fn
   where
     es = Lst t r ds [e1, e2]
     fn = Fun t r ds (prefixOf e) [es]
@@ -148,7 +145,7 @@ rExpr' s e@(Bop t r ds _ e1 e2) = withInsertNewRulesDigests s [e1,e2,es] $ rExpr
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
 rNamedFunction :: GlobalEnv -> Expr -> String -> Rules ExprPath
-rNamedFunction s e@(Fun _ _ _ _ es) n = withInsertNewRulesDigests s es $ rNamedFunction' s e n
+rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
 rNamedFunction' s@(_, cfg, _, _) expr name = case findFunction cfg name of
@@ -215,8 +212,8 @@ TODO remove the insert digests hack
 -}
 rList :: RulesFn
 rList s e@(Lst rtn _ _ es)
-  | rtn `elem` [Empty, str, num] = withInsertNewRulesDigests s (e:es) $ rListLits  s e
-  | otherwise                    = withInsertNewRulesDigests s (e:es) $ rListPaths s e
+  | rtn `elem` [Empty, str, num] = rListLits  s e
+  | otherwise                    = rListPaths s e
 rList _ _ = error "bad arguemnt to rList"
 
 {-|

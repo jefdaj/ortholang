@@ -133,7 +133,7 @@ module OrthoLang.Core.Paths
 
   -- * Generate path digests
   , exprPathDigest
-  , insertNewRulesDigest
+  -- , insertNewRulesDigest
   , decodeNewRulesDeps
 
   -- * Misc utilities (move to Util.hs?)
