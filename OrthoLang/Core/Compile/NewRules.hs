@@ -30,16 +30,29 @@ import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Core.Types
 import Data.Maybe (catMaybes)
+import Control.Monad.Reader
 
+newFunctionRules :: RulesR ()
+newFunctionRules = do
+  (_, cfg, _, _) <- ask
+  let fns   = concatMap mFunctions $ cfgModules cfg
+      rules = catMaybes $ map fNewRules fns
+  sequence_ rules
 
-newFunctionRules :: Config -> LocksRef -> IDsRef -> Rules ()
-newFunctionRules cfg lRef iRef = mconcat $ map (\r -> r cfg lRef iRef) rules
-  where
-   fns   = concatMap mFunctions $ cfgModules cfg
-   rules = catMaybes $ map fNewRules fns
+-- TODO can this replace NewRulesFn everywhere?
+-- type NewRulesFn2 = RulesR ()
 
-newCoreRules :: NewRulesFn
-newCoreRules cfg lRef iRef = do
+-- TODO try ActionR first, then come back to this if it still sounds useful
+-- type NewRulesFn = Config -> LocksRef -> IDsRef -> Rules ()
+-- newFunctionRules2 :: RulesR ()
+-- newFunctionRules2 = do
+--   (_, cfg, lRef, iRef) <- ask
+--   let fns   = concatMap mFunctions $ cfgModules cfg
+--       rules = catMaybes $ map fNewRules fns
+--   mapM_ (\r -> r cfg lRef iRef) rules
+
+newCoreRules :: RulesR ()
+newCoreRules = do
 
   -- this is a nice idea in general, but won't work with the special lit compilers
   -- (because they need direct access to the expressions to get their lit values)
@@ -66,22 +79,22 @@ newCoreRules cfg lRef iRef = do
 -- TODO or Paths throughout?
 -- TODO can you encode NewAction1, 2, 3... easily?
 
-rNewRules1 :: String -> TypeChecker -> NewAction1 -> NewRulesFn
+rNewRules1 :: String -> TypeChecker -> ActionR1 -> RulesR ()
 rNewRules1 = rNewRules 1 applyList1
 
-applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList1 :: (FilePath -> ActionR ()) -> [FilePath] -> ActionR ()
 applyList1 fn deps = fn (deps !! 0)
 
-rNewRules2 :: String -> TypeChecker -> NewAction2 -> NewRulesFn
+rNewRules2 :: String -> TypeChecker -> ActionR2 -> RulesR ()
 rNewRules2 = rNewRules 2 applyList2
 
-applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList2 :: (FilePath -> FilePath -> ActionR ()) -> [FilePath] -> ActionR ()
 applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
-rNewRules3 :: String -> TypeChecker -> NewAction3 -> NewRulesFn
+rNewRules3 :: String -> TypeChecker -> ActionR3 -> RulesR ()
 rNewRules3 = rNewRules 3 applyList3
 
-applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList3 :: (FilePath -> FilePath -> FilePath -> ActionR ()) -> [FilePath] -> ActionR ()
 applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
 
 -- TODO any need to look up prefixOf to get the canonical name?
@@ -92,43 +105,58 @@ newPattern cfg name nArgs =
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 -- TODO one less * if not using repeat salt
 rNewRules
-  :: Int -> (t -> [FilePath] -> Action ()) -> String -> TypeChecker
-  -> (Config -> LocksRef -> IDsRef -> ExprPath -> t) -> NewRulesFn
-rNewRules nArgs applyFn name tFn aFn cfg lRef iRef = do
-  newPattern cfg name nArgs %> \p -> aNewRules applyFn tFn aFn cfg lRef iRef (ExprPath p)
-  return ()
+  :: Int -> (t -> [FilePath] -> ActionR ()) -> String -> TypeChecker
+  -> (ExprPath -> t) -> RulesR ()
+rNewRules nArgs applyFn name tFn aFn = do
+  (_, cfg, lRef, iRef) <- ask
+  newPattern cfg name nArgs %>> aNewRules applyFn tFn aFn
+
+(%>>) :: FilePattern -> (ExprPath -> ActionR ()) -> RulesR ()
+ptn %>> act = do
+  (_, cfg, lRef, iRef) <- ask
+  let run = runActionR (cfg, lRef, iRef, undefined)
+  lift $ ptn %> \p -> run $ act $ ExprPath p
 
 aNewRules
-  :: (t -> [FilePath] -> Action ()) -- one of the apply{1,2,3} fns
+  :: (t -> [FilePath] -> ActionR ()) -- one of the apply{1,2,3} fns
   -> TypeChecker
-  -> (Config -> LocksRef -> IDsRef -> ExprPath -> t)
-  ->  Config -> LocksRef -> IDsRef -> ExprPath -> Action ()
-aNewRules applyFn tFn aFn cfg lRef iRef out = do
-  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg undefined out -- TODO how to pass it dMap?
+  -> (ExprPath -> t)
+  ->  ExprPath -> ActionR ()
+aNewRules applyFn tFn aFn out = do
+  (cfg, lRef, iRef, dMap) <- ask
+  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dMap out
   case tFn dTypes of
     Left err -> error err
     Right rType -> do
       when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
       let deps' = map (fromPath cfg) deps
-      need' cfg lRef "ortholang.modules.newrulestest.aNewRules" deps'
+
+      -- TODO this needs to be either wrapped or used inside ActionR, right?
+      needR "ortholang.modules.newrulestest.aNewRules" deps'
+
       -- TODO look up out too and assert that its type matches typechecker result
       -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
       -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
       -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
-      applyFn (aFn cfg lRef iRef out) deps'
+      applyFn (aFn out) deps'
+
+needR :: String -> [FilePath] -> ActionR ()
+needR name deps = do
+  (cfg, lRef, _, _) <- ask
+  lift $ need' cfg lRef name deps
 
 -- TODO do the applyFn thing at the action level rather than rules?
-mkNewFn1 :: String -> Maybe Char -> Type -> [Type] -> NewAction1 -> Function
+mkNewFn1 :: String -> Maybe Char -> Type -> [Type] -> ActionR1 -> Function
 mkNewFn1 = mkNewFn rNewRules1
 
-mkNewFn2 :: String -> Maybe Char -> Type -> [Type] -> NewAction2 -> Function
+mkNewFn2 :: String -> Maybe Char -> Type -> [Type] -> ActionR2 -> Function
 mkNewFn2 = mkNewFn rNewRules2
 
-mkNewFn3 :: String -> Maybe Char -> Type -> [Type] -> NewAction3 -> Function
+mkNewFn3 :: String -> Maybe Char -> Type -> [Type] -> ActionR3 -> Function
 mkNewFn3 = mkNewFn rNewRules3
 
 mkNewFn
-  :: (String -> TypeChecker -> t -> NewRulesFn)
+  :: (String -> TypeChecker -> t -> RulesR ())
   -> String -> Maybe Char -> Type -> [Type] -> t -> Function
 mkNewFn rFn name mChar oType dTypes aFn =
   let tFn = defaultTypeCheck dTypes oType

@@ -82,6 +82,9 @@ module OrthoLang.Core.Types
   -- new rules infrastructure
   , ActionEnv
   , ActionR
+  , ActionR1
+  , ActionR2
+  , ActionR3
   , runActionR
   , RulesEnv
   , RulesR
@@ -145,11 +148,15 @@ type ActionR a = ReaderT ActionEnv Action a
 runActionR :: ActionEnv -> ActionR a -> Action a
 runActionR env act = runReaderT act env
 
+type ActionR1 = ExprPath -> FilePath                         -> ActionR ()
+type ActionR2 = ExprPath -> FilePath -> FilePath             -> ActionR ()
+type ActionR3 = ExprPath -> FilePath -> FilePath -> FilePath -> ActionR ()
+
 -- this isn't really needed, but makes passing globalenv around easier
 -- TODO use it? or remove it
 -- for now, same as GlobalEnv. but not sure if refs are needed
 type RulesEnv = (Script, Config, LocksRef, IDsRef) -- TODO remove locks? ids?
-type RulesR a = ReaderT RulesEnv Rules a
+type RulesR a = ReaderT RulesEnv Rules a -- TODO is this right?
 
 runRulesR :: RulesEnv -> RulesR a -> Rules a
 runRulesR env act = runReaderT act env
@@ -547,7 +554,7 @@ data Function = Function
   , fTypeDesc  :: String           -- ^ human-readable description
   , fTags      :: [FnTag]          -- ^ function tags (TODO implement these)
   , fOldRules  :: RulesFn          -- ^ old-style rules (TODO deprecate, then remove)
-  , fNewRules  :: Maybe NewRulesFn -- ^ new-style rules (TODO write them all, then remove the Maybe)
+  , fNewRules  :: Maybe (RulesR ()) -- ^ new-style rules (TODO write them all, then remove the Maybe)
   }
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   -- deriving (Eq, Read)
