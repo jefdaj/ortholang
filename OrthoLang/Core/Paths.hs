@@ -137,6 +137,7 @@ module OrthoLang.Core.Paths
   , decodeNewRulesDeps
 
   -- * Misc utilities (move to Util.hs?)
+  , bop2fun
   , argHashes
   , upBy
   , makeTmpdirRelative
@@ -185,7 +186,7 @@ import Control.Monad (when)
 import Data.Maybe (fromJust, catMaybes)
 import Data.IORef (atomicModifyIORef')
 
-import Text.PrettyPrint.HughesPJClass (Pretty)
+import Text.PrettyPrint.HughesPJClass (Pretty, pPrint, render)
 
 -- TODO take Text instead?
 traceP :: (Pretty a, Show b) => String -> a -> b -> b
@@ -302,12 +303,23 @@ argHashes _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's abo
 --     splitPath = undefined
 --     joinPath = undefined
 
+-- rExpr s e@(Bop t r ds _ e1 e2) = rExpr s fn
+--   where
+--     es = 
+--     fn = 
+
+-- | Temporary hack to fix Bop expr paths
+bop2fun :: Expr -> Expr
+bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t r ds [e1, e2]]
+bop2fun e = error $ "bop2fun call with non-Bop: '" ++ render (pPrint e) ++ "'"
+
 -- TODO rename to tmpPath?
 exprPath :: GlobalEnv -> Expr -> Path
 exprPath (_, cfg, _, _) (Com (CompiledExpr _ (ExprPath p) _)) = toPath cfg p
 exprPath s@(scr, _, _, _) (Ref _ _ _ v) = case lookup v (sAssigns scr) of
                                          Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show (sAssigns scr)
                                          Just e  -> exprPath s e
+exprPath s@(_, cfg, _, _) e@(Bop _ _ _ _ _ _) = exprPath s (bop2fun e)
 exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
   where
     prefix = prefixOf expr

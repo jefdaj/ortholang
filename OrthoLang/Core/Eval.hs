@@ -40,7 +40,7 @@ import OrthoLang.Core.Compile         (compileScript, rExpr, newCoreRules, newFu
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (Path, toPath, fromPath)
--- import OrthoLang.Core.Locks            (withReadLock')
+import OrthoLang.Core.Locks            (withReadLock')
 import OrthoLang.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Core.Actions          (readLits, readPaths)
 import OrthoLang.Core.Util             (trace)
@@ -252,7 +252,7 @@ eval hdl cfg ref ids dm rtype ls p = do
         completeProgress pm
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids (toPath cfg path) out
-          Nothing  -> return () -- when (not $ cfgInteractive cfg) (printLong cfg ref ids pm path)
+          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids pm rtype path)
         return ()
 
 writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
@@ -262,17 +262,18 @@ writeResult cfg ref idsref path out = do
 
 -- TODO what happens when the txt is a binary plot image?
 -- TODO is this where the diamond makedb error comes in?
--- printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
--- printLong _ ref idsref pm path = do
---   ids <- liftIO $ readIORef idsref
---   txt <- withReadLock' ref path $ readFile' path
---   let txt' = unhashIDs False ids txt
---   liftIO $ P.putMsgLn pm ("\n" ++ txt')
+-- TODO have to tShow this right?
+printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
+printLong _ ref idsref pm _ path = do
+  ids <- liftIO $ readIORef idsref
+  txt <- withReadLock' ref path $ readFile' path
+  let txt' = unhashIDs False ids txt
+  liftIO $ P.putMsgLn pm ("\n" ++ txt')
 
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
   ids <- liftIO $ readIORef idsref
-  res  <- prettyResult cfg ref rtype $ toPath cfg path
+  res <- prettyResult cfg ref rtype $ toPath cfg path
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."
   -- TODO fix the bug that causes this to remove newlines after seqids:

@@ -107,7 +107,6 @@ import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
 import Data.Maybe (fromJust, catMaybes)
--- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
 
 import Control.Monad.Reader -- TODO only specific imports
 

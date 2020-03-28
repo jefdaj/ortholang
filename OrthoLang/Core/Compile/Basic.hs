@@ -65,7 +65,7 @@ import OrthoLang.Core.Pretty
 import qualified Data.Map.Strict as M
 
 import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toPath,
-                            fromPath, varPath, Path)
+                            fromPath, varPath, Path, bop2fun)
 
 import Data.IORef                 (atomicModifyIORef', readIORef)
 import Data.List                  (isPrefixOf, isInfixOf)
@@ -137,10 +137,7 @@ rExpr s e@(Ref _ _ _ _    ) = rRef s e
 rExpr s e@(Lst _ _ _ _   ) = rList s e
 rExpr s e@(Fun _ _ _ n _  ) = rNamedFunction s e n -- TODO deprecate this
 rExpr _   (Com (CompiledExpr _ _ rules)) = rules
-rExpr s e@(Bop t r ds _ e1 e2) = rExpr s fn
-  where
-    es = Lst t r ds [e1, e2]
-    fn = Fun t r ds (prefixOf e) [es]
+rExpr s e@(Bop _ _ _ _ _ _) = rExpr s $ bop2fun e
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.

@@ -17,6 +17,8 @@ import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
 import qualified Data.Map.Strict as M
 
+import Debug.Trace
+
 -------------------
 -- preprocessing --
 -------------------
@@ -159,7 +161,7 @@ pScript = debugParser "pScript" $ do
       scr  = emptyScript {sAssigns = as, sDigests = ds'}
       scr' = lastResultOnly scr
   putState (scr', cfg, ref, ids)
-  return scr'
+  return $ trace (unlines $ map show $ M.toList ds') scr'
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
