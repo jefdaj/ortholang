@@ -80,6 +80,12 @@ module OrthoLang.Core.Types
   , nonEmptyType
   , isNonEmpty
   -- new rules infrastructure
+  , ActionEnv
+  , ActionR
+  , runActionR
+  , RulesEnv
+  , RulesR
+  , runRulesR
   )
   where
 
@@ -91,7 +97,7 @@ import OrthoLang.Core.Locks (LocksRef, withReadLock)
 import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
-import Control.Monad.IO.Class (liftIO)
+-- import Control.Monad.IO.Class (liftIO)
 import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
@@ -99,6 +105,8 @@ import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings
 import Data.IORef                     (IORef)
 import Data.Maybe (fromJust, catMaybes)
 -- import Text.PrettyPrint.HughesPJClass (Doc, text, doubleQuotes)
+
+import Control.Monad.Reader -- TODO only specific imports
 
 newtype Path = Path FilePath deriving (Eq, Ord, Show)
 
@@ -125,6 +133,26 @@ newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/e
 newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/<varname>.<type>
 newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/result[.<hash>.<type>]
 newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
+
+-----------------------------------------------
+-- experimental: add state to Rules + Action --
+-----------------------------------------------
+
+-- this is needed to pass DigestMap around, and makes the rest easier
+type ActionEnv = (Config, LocksRef, IDsRef, DigestMap)
+type ActionR a = ReaderT ActionEnv Action a
+
+runActionR :: ActionEnv -> ActionR a -> Action a
+runActionR env act = runReaderT act env
+
+-- this isn't really needed, but makes passing globalenv around easier
+-- TODO use it? or remove it
+-- for now, same as GlobalEnv. but not sure if refs are needed
+type RulesEnv = (Script, Config, LocksRef, IDsRef) -- TODO remove locks? ids?
+type RulesR a = ReaderT RulesEnv Rules a
+
+runRulesR :: RulesEnv -> RulesR a -> Rules a
+runRulesR env act = runReaderT act env
 
 -- Filename extension, which in OrthoLang is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -381,6 +409,8 @@ num = Type
 -- TODO always load defaults for WorkDir, TmpDir, Verbose
 -- TODO make these into FilePaths and an Int/Bool
 -- TODO rename cfg prefix to just c?
+-- TODO remove anything non-printable
+-- TODO read defaults from a config file
 data Config = Config
   { cfgScript  :: Maybe FilePath
   , cfgInteractive :: Bool
