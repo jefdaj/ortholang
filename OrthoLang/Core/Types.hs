@@ -33,6 +33,7 @@ module OrthoLang.Core.Types
   , emptyScript
   , LocksRef
   , IDs(..)
+  , emptyIDs
   , DigestMap
   , IDsRef
   , GlobalEnv
@@ -445,8 +446,11 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 data IDs = IDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  , hExprs  :: DigestMap
+  -- , hExprs  :: DigestMap
   }
+
+emptyIDs :: IDs
+emptyIDs = IDs M.empty M.empty
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right

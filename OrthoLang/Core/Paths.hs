@@ -319,15 +319,15 @@ exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
 exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
 
-insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
-insertNewRulesDigest st@(_, cfg, _, idr) expr
-  = traceD "insertNewRulesDigest" st expr
-  $ atomicModifyIORef' idr
-  $ \h@(IDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
-  where
-    eType   = typeOf expr
-    ePath   = exprPath st expr
-    eDigest = exprPathDigest ePath
+-- insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
+-- insertNewRulesDigest st@(_, cfg, _, idr) expr
+--   = traceD "insertNewRulesDigest" st expr
+--   $ atomicModifyIORef' idr
+--   $ \h@(IDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
+--   where
+--     eType   = typeOf expr
+--     ePath   = exprPath st expr
+--     eDigest = exprPathDigest ePath
 
 -- TODO what monad should this be in?
 -- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
@@ -335,17 +335,16 @@ insertNewRulesDigest st@(_, cfg, _, idr) expr
 -- TODO remove any unneccesary path components before lookup, and count the necessary ones
 -- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
 -- TODO better split function
-decodeNewRulesDeps :: Config -> IDsRef -> ExprPath
+decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
                    -> IO (Type, [Type], [Path])
-decodeNewRulesDeps cfg idsRef o@(ExprPath out) = do
-  IDs {hExprs = ids} <- readIORef idsRef
+decodeNewRulesDeps cfg dMap o@(ExprPath out) = do
   let dKeys  = map PathDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
-      dVals  = catMaybes $ map (\k -> M.lookup k ids) dKeys
+      dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("'" ++ out ++ "' -> " ++ show dVals) dVals
       dTypes = map fst dVals'
       dPaths = map snd dVals'
       oKey   = exprPathDigest $ toPath cfg out
-      Just (oType, _) = M.lookup oKey ids
+      Just (oType, _) = M.lookup oKey dMap
   -- TODO user-visible error here if one or more lookups fails
   -- liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
   -- liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p

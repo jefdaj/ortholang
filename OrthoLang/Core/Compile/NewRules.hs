@@ -104,7 +104,7 @@ aNewRules
   -> (Config -> LocksRef -> IDsRef -> ExprPath -> t)
   ->  Config -> LocksRef -> IDsRef -> ExprPath -> Action ()
 aNewRules applyFn tFn aFn cfg lRef iRef out = do
-  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg iRef out
+  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg undefined out -- TODO how to pass it dMap?
   case tFn dTypes of
     Left err -> error err
     Right rType -> do
