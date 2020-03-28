@@ -10,7 +10,7 @@ import Paths_OrthoLang        (version)
 import OrthoLang.Core         (runRepl, evalFile)
 import OrthoLang.Core.Config  (getUsage, loadConfig, dispatch)
 -- import OrthoLang.Core.Debug   (debug)
-import OrthoLang.Core.Types   (Config(..), IDs(..), emptyScript)
+import OrthoLang.Core.Types   (Config(..), IDs(..), emptyScript, emptyIDs)
 import OrthoLang.Core.Locks   (initLocks)
 import OrthoLang.Modules      (modules)
 import OrthoLang.Test         (runTests)
@@ -55,7 +55,7 @@ main = withFileLogging "ortholang.log" $ do
   setEnv "TMPDIR" $ cfgTmpDir cfg -- for subprocesses like R
   ref <- initLocks
   setCurrentDirectory $ cfgWorkDir cfg
-  ids <- newIORef $ IDs M.empty M.empty M.empty
+  ids <- newIORef emptyIDs
 
   -- TODO should these be mutually exclusive?
 

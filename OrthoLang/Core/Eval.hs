@@ -40,7 +40,7 @@ import OrthoLang.Core.Compile         (compileScript, rExpr, newCoreRules, newFu
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (Path, toPath, fromPath)
-import OrthoLang.Core.Locks            (withReadLock')
+-- import OrthoLang.Core.Locks            (withReadLock')
 import OrthoLang.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Core.Actions          (readLits, readPaths)
 import OrthoLang.Core.Util             (trace)
@@ -50,7 +50,7 @@ import Data.IORef                     (readIORef)
 import Control.Monad                  (when)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
-import Control.Retry          (rsIterNumber)
+-- import Control.Retry          (rsIterNumber)
 import Control.Exception.Safe (catchAny)
 
 import Control.Concurrent
@@ -109,7 +109,7 @@ data EvalProgress = EvalProgress
 -- TODO hey should the state just be a Progress{..} itself? seems simpler + more flexible
 renderProgress :: EvalProgress -> String
 renderProgress EvalProgress{..}
-  | (round $ diffUTCTime epUpdate epStart) < 5 || epDone == 0 = ""
+  | (round $ diffUTCTime epUpdate epStart) < (5 :: Int) || epDone == 0 = ""
   | otherwise = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
   where
     -- details  = if epDone >= epTotal then [] else [fraction]
@@ -229,14 +229,14 @@ eval hdl cfg ref ids rtype ls p = do
     -- Reports how many failures so far and runs the main fn normally
     -- TODO putStrLn rather than debug?
     -- TODO remove if not using retryIgnore?
-    report fn status = case rsIterNumber status of
-      0 -> fn
-      n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
+--     report fn status = case rsIterNumber status of
+--       0 -> fn
+--       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
-      runRulesR undefined newCoreRules
-      runRulesR undefined newFunctionRules
-      lpaths' <- (fmap . map) (\(ExprPath p) -> p) lpaths
+      runRulesR (cfg, ref, ids) newCoreRules
+      runRulesR (cfg, ref, ids) newFunctionRules
+      lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
       want ["eval"]
       "eval" ~> do
@@ -262,12 +262,12 @@ writeResult cfg ref idsref path out = do
 
 -- TODO what happens when the txt is a binary plot image?
 -- TODO is this where the diamond makedb error comes in?
-printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
-printLong _ ref idsref pm path = do
-  ids <- liftIO $ readIORef idsref
-  txt <- withReadLock' ref path $ readFile' path
-  let txt' = unhashIDs False ids txt
-  liftIO $ P.putMsgLn pm ("\n" ++ txt')
+-- printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> FilePath -> Action ()
+-- printLong _ ref idsref pm path = do
+--   ids <- liftIO $ readIORef idsref
+--   txt <- withReadLock' ref path $ readFile' path
+--   let txt' = unhashIDs False ids txt
+--   liftIO $ P.putMsgLn pm ("\n" ++ txt')
 
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
