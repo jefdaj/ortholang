@@ -22,17 +22,17 @@ module OrthoLang.Core.Compile.NewRules
   )
   where
 
-import Debug.Trace
-
-import Control.Monad (when)
-import Development.Shake
-import Development.Shake.FilePath ((</>))
-import OrthoLang.Core.Actions (need')
-import OrthoLang.Core.Compile.Basic
-import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
-import OrthoLang.Core.Types
-import Data.Maybe (catMaybes)
 import Control.Monad.Reader
+import Development.Shake
+import OrthoLang.Core.Compile.Basic
+import OrthoLang.Core.Types
+
+import Control.Monad              (when)
+import Data.Maybe                 (catMaybes)
+import Development.Shake.FilePath ((</>))
+import OrthoLang.Core.Actions     (need')
+import OrthoLang.Core.Paths       (fromPath, decodeNewRulesDeps)
+import OrthoLang.Core.Util        (traceShow)
 
 newFunctionRules :: RulesR ()
 newFunctionRules = do
@@ -112,7 +112,7 @@ rNewRules
 rNewRules nArgs applyFn name tFn aFn = do
   (cfg, lRef, iRef, dMap) <- ask
   let ptn = newPattern cfg name nArgs
-      ptn' = trace ("rNewRules ptn: '" ++ show ptn ++ "'") ptn
+      ptn' = traceShow "rNewrules" ptn
   ptn' %>> aNewRules applyFn tFn aFn
 
 (%>>) :: FilePattern -> (ExprPath -> ActionR ()) -> RulesR ()

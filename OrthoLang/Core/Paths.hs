@@ -170,13 +170,13 @@ module OrthoLang.Core.Paths
   )
   where
 
-import qualified Debug.Trace as DT
+-- import qualified Debug.Trace as DT
 
 import Path (parseAbsFile, fromAbsFile)
 import OrthoLang.Core.Types -- (Config)
 -- import OrthoLang.Core.Config (debug)
 import OrthoLang.Core.Pretty (render, pPrint)
-import OrthoLang.Core.Util (digest, trace)
+import OrthoLang.Core.Util (digest, trace, traceShow)
 import Data.String.Utils          (replace)
 import Development.Shake.FilePath ((</>), (<.>), isAbsolute, makeRelative, splitPath)
 import Data.List                  (intersperse, isPrefixOf)
@@ -337,10 +337,11 @@ exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
 
 exprDigest :: Config -> Script -> Expr -> DigestMap
-exprDigest cfg scr expr = M.singleton dKey (typeOf expr, p)
+exprDigest cfg scr expr = traceShow "core.paths.exprDigest" res
   where
     p = exprPath cfg scr expr
     dKey = PathDigest $ digest p
+    res = M.singleton dKey (typeOf expr, p)
 
 exprDigests :: Config -> Script -> [Expr] -> DigestMap
 exprDigests cfg scr exprs = M.unions $ map (exprDigest cfg scr) $ concatMap listExprs exprs
