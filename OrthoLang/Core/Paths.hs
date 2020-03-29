@@ -356,9 +356,9 @@ TODO is there a better word for this, or a matching typeclass?
 listExprs :: Expr -> [Expr]
 listExprs e@(Lit _ _ _) = [e]
 listExprs e@(Ref _ _ _ _) = [e]
-listExprs e@(Bop _ _ _ _ e1 e2) = concatMap listExprs [e, e1, e2]
-listExprs e@(Fun _ _ _ _ es   ) = concatMap listExprs (e:es)
-listExprs e@(Lst _ _ _   es   ) = concatMap listExprs (e:es)
+listExprs e@(Bop _ _ _ _ e1 e2) = e : concatMap listExprs [e1, e2]
+listExprs e@(Fun _ _ _ _ es   ) = e : concatMap listExprs es
+listExprs e@(Lst _ _ _   es   ) = e : concatMap listExprs es
 listExprs e@(Com _) = [e] -- TODO is this right?
 
 listScriptExprs :: Script -> [Expr]

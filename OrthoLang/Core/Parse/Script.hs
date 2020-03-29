@@ -34,10 +34,13 @@ module OrthoLang.Core.Parse.Script
   )
   where
 
+import Debug.Trace
+
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Types
+import OrthoLang.Core.Paths (scriptDigests)
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)
@@ -104,7 +107,7 @@ pAssign = debugParser "pAssign" $ do
   when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ do
     fail $ "duplicate variable '" ++ vName ++ "'"
   e <- lexeme pExpr
-  putAssign  "pAssign" (v, e) -- TODO is this covered by returning it?
+  -- putAssign  "pAssign" (v, e) -- TODO is this covered by returning it?
   -- putDigests "pAssign" [e]
   return (v, e)
 
@@ -184,11 +187,15 @@ pScript = debugParser "pScript" $ do
   -- let (as, ds) = unzip ads 
   -- let ds'  = M.union (sDigests scr) $ exprDigests cfg scr $ map snd as
       -- scr  = emptyScript {sAssigns = as, sDigests = ds'}
+  cfg <- getConfig
   let scr  = emptyScript {sAssigns = as}
       scr' = lastResultOnly scr
-  putScript scr'
-  putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
-  return scr'
+      ds   = scriptDigests cfg scr'
+      scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
+  -- putScript scr'
+  -- putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
+  putScript scr''
+  return scr''
   -- return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 
 -- TODO could generalize to other parsers/checkers like above for testing
