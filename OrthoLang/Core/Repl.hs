@@ -155,7 +155,7 @@ step st hdl line = case stripWhiteSpace line of
 -- TODO insert ids
 runStatement :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement (cfg, scr) line of
-  Left  e -> hPutStrLn hdl (show e) >> return st
+  Left  e -> hPutStrLn hdl e >> return st
   Right r -> do
     let st' = (updateVars scr r, cfg, ref, ids)
     when (isExpr (cfg, scr) line) (evalScript hdl st')

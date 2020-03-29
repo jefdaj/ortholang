@@ -45,7 +45,7 @@ import Control.Monad          (void)
 import Data.Either            (isRight)
 import Data.List              (union)
 import Data.Maybe             (isJust, fromJust)
-import Text.Parsec            (ParseError, try, (<?>))
+import Text.Parsec            (try, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 
@@ -271,5 +271,5 @@ isExpr :: ParseEnv -> String -> Bool
 isExpr state line = isRight $ parseWithEof pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: ParseEnv -> String -> Either ParseError Expr
+parseExpr :: ParseEnv -> String -> Either String Expr
 parseExpr = runParseM pExpr

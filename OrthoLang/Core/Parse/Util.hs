@@ -29,7 +29,6 @@ import qualified Text.Parsec as P
 
 import Development.Shake.FilePath (makeRelative)
 -- import OrthoLang.Core.Util        (trace)
-import Text.Parsec                (ParseError)
 import Text.Parsec.Combinator     (manyTill, eof, anyToken)
 import OrthoLang.Core.Util    (trace)
 
@@ -56,12 +55,12 @@ parseAndShow p s str' = case runParseM p s str' of
 --              Nothing -> "repl"
 --              Just f  -> makeRelative (cfgWorkDir cfg) f
 
-parseWithLeftOver :: ParseM a -> ParseEnv -> String -> Either ParseError (a,String)
+parseWithLeftOver :: ParseM a -> ParseEnv -> String -> Either String (a,String)
 parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof
 
-parseWithEof :: ParseM a -> ParseEnv -> String -> Either ParseError a
+parseWithEof :: ParseM a -> ParseEnv -> String -> Either String a
 parseWithEof p s = runParseM (p <* eof) s
 
 {-|
@@ -106,10 +105,10 @@ debugParser name pFn = parserTraced' name pFn
 type ParseM a = ParsecT String ParseEnv (Except String) a
 
 -- based on https://stackoverflow.com/a/54089987/429898
-runParseM :: ParseM a -> ParseEnv -> String -> Either ParseError a
+runParseM :: ParseM a -> ParseEnv -> String -> Either String a
 runParseM op e@(cfg, _) input = case runExcept (runPT op e sn input) of
-  Left s          -> fail s -- turn the ExceptT string into a ParseError
-  Right (Left  e) -> Left e -- return an actual ParseError from Parsec
+  Left s          -> Left s        -- parseFail; return the String
+  Right (Left  e) -> Left (show e) -- Parsec error; convert to String
   Right (Right r) -> Right r
   where
     sn = case cfgScript cfg of

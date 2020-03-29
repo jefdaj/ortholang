@@ -48,7 +48,7 @@ import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Core.Util    (readFileStrict, debug)
 import System.FilePath        ((</>), takeDirectory)
-import Text.Parsec            (ParseError, try)
+import Text.Parsec            (try)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
 
@@ -143,7 +143,7 @@ parseFileIO st scr = do
     Right s -> return s
 
 -- TODO need GlobalEnv here? or just Config?
-parseStatement :: ParseEnv -> String -> Either ParseError Assign
+parseStatement :: ParseEnv -> String -> Either String Assign
 parseStatement = parseWithEof pStatement
 
 {-|
@@ -154,7 +154,7 @@ TODO clarify that
 
 TODO error if it has leftover?
 -}
-parseString :: Config -> String -> Either ParseError Script
+parseString :: Config -> String -> Either String Script
 parseString c = parseWithEof pScript (c, emptyScript)
 
 {-|
@@ -201,7 +201,7 @@ pScript = debugParser "pScript" $ do
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: GlobalEnv -> FilePath -> IO (Either ParseError Script)
+parseFile :: GlobalEnv -> FilePath -> IO (Either String Script)
 parseFile (_, cfg, ref, _) path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path

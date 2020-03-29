@@ -46,7 +46,6 @@ import Test.Tasty            (TestTree, testGroup)
 -- TODO switch this to use HSpec?
 import Test.Tasty.HUnit      ((@=?), testCase)
 
-import Text.Parsec           (ParseError)
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- import Data.Map.Strict              (empty)
@@ -83,7 +82,7 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- digestExamples :: GlobalEnv -> [(String, Expr)] -> IO [(String, Expr, DigestMap)]
 -- digestExamples st = mapM (digestExample st)
 
-regularParse :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Either ParseError a
+regularParse :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Either String a
 regularParse p cfg ref ids = parseWithEof p (cfg, emptyScript)
 
 takeVar :: String -> Var
