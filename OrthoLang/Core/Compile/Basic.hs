@@ -138,14 +138,15 @@ rExpr s e@(Lit _ _ _      ) = rLit s e
 rExpr s e@(Ref _ _ _ _    ) = rRef s e
 rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO why is the map part needed?
-rExpr s e@(Bop _ _ _ _ e1 e2) = mapM (rExpr s) [e1, e2] >> rBop s e
+-- TODO possible bug source: the list expr path + digest is never returned, even though it's compiled
+rExpr s e@(Bop t r ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t r ds [e1, e2]] >> rBop s e
 rExpr _ (Com (CompiledExpr _ _ rules)) = rules
 
 -- | Temporary hack to fix Bops
 rBop :: RulesFn
 rBop s e@(Bop t r ds _ e1 e2) = rExpr s es >> rExpr s fn
   where
-    es = Lst t r ds [e1, e2]
+    es = Lst t r ds [e1, e2] -- TODO (ListOf t)?
     fn = Fun t r ds (prefixOf e) [es]
 rBop _ e = error $ "rBop call with non-Bop: '" ++ render (pPrint e) ++ "'"
 

@@ -5,7 +5,9 @@ module OrthoLang.Core.Parse.Expr
 
   -- * Binary Operators
   , operatorTable
+  , BopExprsParser
   , pBop
+  , pBopOp
   , mkBop
 
   -- * Functions
@@ -27,6 +29,8 @@ module OrthoLang.Core.Parse.Expr
   )
   where
 
+import Debug.Trace
+
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty ()
 import OrthoLang.Core.Parse.Util
@@ -42,7 +46,6 @@ import Data.Either            (isRight)
 import Data.List              (union)
 import Data.Maybe             (isJust, fromJust)
 import OrthoLang.Core.Paths   (exprPath, exprPathDigest)
-import OrthoLang.Core.Util    (headOrDie)
 import Text.Parsec            (ParseError, try, getState, putState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
@@ -87,37 +90,56 @@ operatorTable cfg = [map binary bops]
     bops = filter (isJust . fOpChar) (concat $ map mFunctions mods)
     mods = cfgModules cfg
 
+{-|
+This is an annoying extra type, but I can't figure out how to implement pBop without it.
+
+TODO how to putState in here?? that's probably the multiply bug
+-}
+type BopExprsParser = ParseM ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
+
 {-
 TODO is there a better way than only taking one-char strings?
 
 TODO how to fail gracefully (with fail, not error) here??
+
+TODO is the error that putState is never called in here?
 -}
-pBop :: Function -> ParseM ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
-pBop bop
-  | isJust (fOpChar bop) = (debugParser ("pBop " ++ fName bop)
-                           (pSym (headOrDie "failed to read fName in pBop" $ [fromJust $ fOpChar bop])))
-                           *> do { st <- getState; return (mkBop st bop) }
+pBop :: Function -> BopExprsParser
+pBop bop | isJust (fOpChar bop) = pBopOp (fName bop) (fromJust $ fOpChar bop) *> mkBop bop
 pBop _ = fail "pBop only works with infix functions"
 
-mkBop :: ParseEnv -> Function -> ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
-mkBop (cfg, scr) bop (e1, ds1) (e2, ds2) = case bopTypeCheck (typeOf e1) (typeOf e2) of
-  Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-  Right rtn -> let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
-                   p    = exprPath cfg scr expr
-                   dKey = exprPathDigest p
-                   dVal = (typeOf expr, p)
-                   dMap' = M.unions [M.singleton dKey dVal, ds1, ds2, sDigests scr]
-               in (expr, dMap')
-  where
-    -- TODO does typesMatch already cover (ListOf Empty) comparisons?
-    bopTypeCheck (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
-    bopTypeCheck (ListOf x    ) (ListOf Empty) = Right $ ListOf x
-    bopTypeCheck (ListOf Empty) (ListOf x    ) = Right $ ListOf x
-    bopTypeCheck t1 t2 = case (fTypeCheck bop) [ListOf t1] of
-      Left  e -> Left e
-      Right r -> if typesMatch [t1] [t2]
-                   then Right r
-                   else Left $ "mismatched bop types: " ++ show t1 ++ " and " ++ show t2
+pBopOp :: String -> Char -> ParseM ()
+pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
+
+mkBop :: Function -> BopExprsParser
+mkBop bop = do
+  (cfg, scr) <- getState
+  return $ \(e1, ds1) (e2, ds2) -> do
+    case bopTypeCheck (fTypeCheck bop) (typeOf e1) (typeOf e2) of
+      Left  msg -> error msg -- TODO can't `fail` because not in monad here?
+      Right rtn ->
+        -- TODO is naming it after the opchar wrong now?
+        let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+            p    = exprPath cfg scr expr
+            dKey = exprPathDigest p
+            dVal = (typeOf expr, p)
+            dMap' = M.unions
+                      [ M.insert dKey dVal (sDigests scr)
+                      , trace ("mkBop ds1: " ++ show ds1) ds1
+                      , trace ("mkBop ds2: " ++ show ds2) ds2
+                      ]
+        in (expr, trace ("mkbop dMap': " ++ show dMap') dMap')
+
+-- TODO does typesMatch already cover (ListOf Empty) comparisons?
+bopTypeCheck :: TypeChecker -> Type -> Type -> Either String Type
+bopTypeCheck _ (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
+bopTypeCheck _ (ListOf x    ) (ListOf Empty) = Right $ ListOf x
+bopTypeCheck _ (ListOf Empty) (ListOf x    ) = Right $ ListOf x
+bopTypeCheck tFn t1 t2 = case tFn [ListOf t1] of
+  Left  e -> Left e
+  Right r -> if typesMatch [t1] [t2]
+               then Right r
+               else Left $ "mismatched bop types: " ++ show t1 ++ " and " ++ show t2
 
 ---------------
 -- functions --
@@ -253,7 +275,7 @@ pExpr = debugParser "pExpr" $ do
   let p    = exprPath cfg scr e
       dKey = exprPathDigest p
       dVal = (typeOf e, p)
-      dMap = M.unions $ [M.singleton dKey dVal, sDigests scr, ds]
+      dMap = M.union (M.insert dKey dVal $ sDigests scr) ds -- TODO does this include pBop digests?
   putState (cfg, scr {sDigests = dMap})
   return (e, dMap)
 
