@@ -107,8 +107,11 @@ pAssign = debugParser "pAssign" $ do
   when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
-  -- putAssign  "pAssign" (v, e) -- TODO is this covered by returning it?
-  -- putDigests "pAssign" [e]
+
+  -- TODO actually, is *this* the only place it's needed rather than in pScript?
+  putAssign  "pAssign" (v, e)
+  putDigests "pAssign" [e]
+
   return (v, e)
 
 {-|
