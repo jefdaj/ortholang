@@ -2,45 +2,41 @@
 
 module Main where
 
-import System.Locale.SetLocale
-import qualified Data.Map.Strict as M
+import Control.Logging
 
-import Data.Version          (showVersion)
-import Paths_OrthoLang        (version)
-import OrthoLang.Core         (runRepl, evalFile)
-import OrthoLang.Core.Config  (getUsage, loadConfig, dispatch)
--- import OrthoLang.Core.Debug   (debug)
-import OrthoLang.Core.Types   (Config(..), IDs(..), emptyScript, emptyIDs)
-import OrthoLang.Core.Locks   (initLocks)
-import OrthoLang.Modules      (modules)
-import OrthoLang.Test         (runTests)
-import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
-import System.Environment    (getArgs)
-import System.Exit           (exitSuccess)
--- import System.IO             (hSetBuffering, BufferMode(..), stdin, stdout)
-import System.IO             (stdout)
-import System.Directory      (setCurrentDirectory)
 import Data.IORef            (newIORef)
+import Data.Version          (showVersion)
+import OrthoLang.Core        (runRepl, evalFile)
+import OrthoLang.Core.Config (getUsage, loadConfig, dispatch)
+import OrthoLang.Core.Locks  (initLocks)
+import OrthoLang.Core.Types  (Config(..), emptyScript, emptyIDs)
+import OrthoLang.Modules     (modules)
+import OrthoLang.Test        (runTests)
+import Paths_OrthoLang       (version)
+import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
+import System.Directory      (setCurrentDirectory)
+import System.Environment    (getArgs)
 import System.Environment    (setEnv)
-
--- import Data.Text (pack)
--- import Data.Text.Internal (Text)
-import Control.Logging -- (withFileLogging)
+import System.Exit           (exitSuccess)
+import System.IO             (stdout)
 
 -- debug :: Text -> IO ()
 -- debug = debugS "ortholang.main"
 
+-- TODO does this work everywhere?
+-- forceUtf8 = do
+--   _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
+--   setEnv "LANG" "en_US.UTF-8" -- TODO and is this part superfluous now?
+--   hSetBuffering stdin  LineBuffering
+--   hSetBuffering stdout LineBuffering
+
 -- TODO any good way to configure logging from the beginning, before docopt?
+-- TODO switch to stderr? withStderrLogging dumps to console,
+--      but lets you run main from ghci more than once
 main:: IO ()
 main = withFileLogging "ortholang.log" $ do
   setLogTimeFormat "[%Y-%m-%d %H:%M:%S %q]"
-  debugS' "ortholang.main" "starting"
-
-  -- TODO does this work everywhere?
-  -- _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
-  -- setEnv "LANG" "en_US.UTF-8" -- TODO and is this part superfluous now?
-  -- hSetBuffering stdin  LineBuffering
-  -- hSetBuffering stdout LineBuffering
+  debugS' "ortholang.main" "starting main"
 
   usage <- getUsage
   args  <- parseArgsOrExit usage =<< getArgs
@@ -57,16 +53,6 @@ main = withFileLogging "ortholang.log" $ do
   setCurrentDirectory $ cfgWorkDir cfg
   ids <- newIORef emptyIDs
 
-  -- TODO should these be mutually exclusive?
-
-  -- TODO hide this from users?
-  -- when (hasArg args "reference") $ do
-    -- debug "handling --reference"
-  -- dispatch args "reference" $ do
-  --   writeReference
-  --   writeDocPlaceholders (cfgModules cfg)
-  --   exitSuccess -- TODO combine into one docs dir
-
   dispatch args "test" $ do
     -- args is used here to set up the Tasty environment vars
     runTests args (cfg {cfgWidth = Just 100}) ref ids
@@ -78,4 +64,4 @@ main = withFileLogging "ortholang.log" $ do
     else evalFile (emptyScript, cfg, ref, ids) stdout
 
   -- TODO is it a problem that --test never reaches this?
-  -- debug "finished main"
+  debug "finished main"
