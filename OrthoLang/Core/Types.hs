@@ -43,7 +43,7 @@ module OrthoLang.Core.Types
   -- , Assoc(..) -- we reuse this from Parsec
   -- , OrthoLangFixity(..)
   -- parse monad
-  , ParseM
+  -- , ParseM
   -- repl monad
   -- , print
   , prompt
@@ -96,7 +96,7 @@ module OrthoLang.Core.Types
 
 -- import Prelude hiding (print)
 import qualified Data.Map.Strict as M
-import Text.Parsec (Parsec)
+-- import Text.Parsec (Parsec)
 
 import OrthoLang.Core.Locks (LocksRef, withReadLock)
 import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
@@ -504,7 +504,7 @@ type GlobalEnv = (Script, Config, LocksRef, IDsRef)
 
 -- TODO config always first? or make a record + ask* fns
 type ParseEnv = (Config, Script) -- script also contains the digestmap now
-type ParseM a = Parsec String ParseEnv a
+-- type ParseM a = Parsec String ParseEnv a
 
 ----------------
 -- Repl monad --

@@ -54,6 +54,7 @@ import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim       (ParsecT, Stream)
 import OrthoLang.Core.Paths   (exprDigests)
+import OrthoLang.Core.Parse.Util (ParseM)
 
 --------------
 -- utilites --

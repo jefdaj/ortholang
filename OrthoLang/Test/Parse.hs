@@ -34,6 +34,7 @@ module OrthoLang.Test.Parse where
 import OrthoLang.Core.Types
 import OrthoLang.Core.Parse
 import OrthoLang.Core.Pretty -- (prettyShow)
+import OrthoLang.Core.Parse.Util (ParseM)
 import OrthoLang.Test.Parse.Arbitrary
 import OrthoLang.Test.Parse.Examples
 import Test.Tasty.QuickCheck

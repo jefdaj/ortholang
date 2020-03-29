@@ -35,6 +35,8 @@ import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 
 import qualified Text.Parsec.Expr as E
+import OrthoLang.Core.Parse.Util (ParseM)
+import Control.Monad.Trans.Except
 -- import qualified Data.Map.Strict  as M
 
 import Control.Applicative    ((<|>))
@@ -74,7 +76,7 @@ For now, I think all binary operators at the same precedence should work.
 but it gets more complicated I'll write out an actual table here with a
 prefix function too etc. See the jake wheat tutorial.
 -}
-operatorTable :: Config -> [[E.Operator String ParseEnv Identity Expr]]
+operatorTable :: Config -> [[E.Operator String ParseEnv (Except String) Expr]]
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
