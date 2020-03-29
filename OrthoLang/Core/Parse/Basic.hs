@@ -1,25 +1,57 @@
-module OrthoLang.Core.Parse.Basic where
+module OrthoLang.Core.Parse.Basic
+  (
+  -- * Debugging
+    parserTrace'
+  , parserTraced'
+  , debugParser
+
+  -- * Whitespace and endings
+  , lexeme
+  , spaceChars
+  , spaces1
+  , pEnd
+
+  -- * Misc utilities
+  , escapeChars
+  , literalChars
+  , pSym
+
+  -- * Variable assignment
+  , pIden
+  , pVar
+  , pVarOnly
+  , pEq
+  , pVarEq
+
+  -- * Literals
+  , pNum
+  , pQuoted
+  , pStr
+  )
+  where
 
 -- TODO hold up, is Logging missing a bunch of NOINLINE statements?
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Util (trace)
-import OrthoLang.Core.Paths (exprPath, exprPathDigest)
--- import OrthoLang.Core.Pretty (Pretty, pPrint, render)
+import qualified Data.Map.Strict as M
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
+import OrthoLang.Core.Paths   (exprPath, exprPathDigest)
+import OrthoLang.Core.Util    (trace)
 import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
-import Text.Parsec.Prim (ParsecT, Stream)
-import qualified Data.Map.Strict as M
+import Text.Parsec.Prim       (ParsecT, Stream)
 
--- based on Text.Parsec.Combinator.parserTrace, but:
---   uses the logging module
---   shortens long strings to fit on one line
+{-|
+Based on Text.Parsec.Combinator.parserTrace, but:
+
+* uses the logging module
+* shortens long strings to fit on one line
+-}
 parserTrace' :: (Show t, Stream s m t) => String -> ParsecT s u m ()
 parserTrace' s = pt <|> return ()
     where
@@ -32,9 +64,12 @@ parserTrace' s = pt <|> return ()
            trace ("core.parser." ++ s) (x') $ try $ eof
            fail x'
 
--- based on Text.Parsec.Combinator.parserTraced, but:
---   uses the logging module
---   shortens long strings to fit on one line
+{-|
+Based on Text.Parsec.Combinator.parserTraced, but:
+
+* uses the logging module
+* shortens long strings to fit on one line
+-}
 parserTraced' :: (Stream s m t, Show t) => String -> ParsecT s u m b -> ParsecT s u m b
 parserTraced' s p = do
   parserTrace' s
@@ -43,24 +78,32 @@ parserTraced' s p = do
   p <|> trace ("core.parser." ++ s) "backtracked" (fail s)
   -- p
 
--- trace for a parser
--- TODO go back to removing it when not in debug mode for speed, even though order might change?
+{-|
+Trace for a parser
+
+TODO go back to removing it when not in debug mode for speed, even though order might change?
+-}
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = do
   parserTraced' name pFn
 
--- There's a convention in parsers that each one should consume whitespace
--- after itself (handled by this function), and you only skip leading
--- whitespace at the top level. That way all the whitespace gets skipped
--- exactly once. (I guess it would work the other way around too)
+{-|
+There's a convention in parsers that each one should consume whitespace after
+itself (handled by this function), and you only skip leading whitespace at the
+top level. That way all the whitespace gets skipped exactly once. (I guess it
+would work the other way around too)
+-}
 lexeme :: ParseM a -> ParseM a
 lexeme p = p <* spaces
 
 spaceChars :: [Char]
 spaceChars = " \t\n"
 
--- this is like spaces, except it requires at least one
--- TODO can this be replaced with something from Text.Parsec.Token?
+{-|
+This is like spaces, except it requires at least one.
+
+TODO can this be replaced with something from Text.Parsec.Token?
+-}
 spaces1 :: ParseM ()
 spaces1 = debugParser "spaces1" ((void $ many1 $ oneOf spaceChars) <?> "whitespace and/or newline")
 
@@ -71,21 +114,17 @@ pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++
 -- identifiers --
 -----------------
 
--- Tests for the end of a single argument: space, comma, close bracket of some kind, or eof.
--- Doesn't consume any input or return a value.
--- TODO use this in pEnd? and rename that pEndArgs
--- TODO is there any reason not to use pEnd itself for this?
--- pEndArg :: ParseM ()
--- pEndArg = do
---   (_, cfg, _, _) <- getState
---   lookAhead $ void $ choice $ map (try . pSym) $ operatorChars cfg ++ ")],"
+{-|
+This is a kludge to make my preference for Haskell-style function application
+with spaces work. It's used to test whether we've reached the end of a list of
+arguments for the function currently being parsed. Probably very slow.
 
--- This is a kludge to make my "interesting" preference for spaces as function
--- application work right. It's used to test whether we've reached the end of a
--- list of arguments for the function currently being parsed.
--- TODO can factor the try out to be by void right?
--- TODO error in here when it somehow succeeds on full7942?
--- TODO this must be succeding on 'loaner... right?
+TODO can factor the try out to be by void right?
+
+TODO error in here when it somehow succeeds on full7942?
+
+TODO this must be succeding on 'loaner... right?
+-}
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
   (cfg, _) <- getState
@@ -143,7 +182,7 @@ pNum = debugParser "pNum" $ do
       p    = exprPath c s expr
       dVal = (typeOf expr, p)
       dMap = M.insert dKey dVal $ sDigests s
-  putState (c, s {sDigests = dMap}) -- TODO sprinkle these all around
+  putState (c, s {sDigests = dMap})
   return (expr, dMap)
 
 -- list of chars which can be escaped in OrthoLang
@@ -175,5 +214,5 @@ pStr = debugParser "pStr" $ do
       p    = exprPath c s expr
       dVal = (typeOf expr, p)
       dMap = M.insert dKey dVal $ sDigests s
-  putState (c, s {sDigests = dMap}) -- TODO sprinkle these all around
+  putState (c, s {sDigests = dMap})
   return (expr, dMap)
