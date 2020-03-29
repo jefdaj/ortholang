@@ -1,17 +1,30 @@
-module OrthoLang.Core.Parse.Util where
+{-|
+Parse utilities. Some are from the Parsec tutorial here:
+
+<https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing>
+
+Most aren't needed in production, but they help with debugging.
+-}
+
+module OrthoLang.Core.Parse.Util
+  (
+  -- * Parse utilities
+    parseAndShow
+  , parseWithLeftOver
+  , parseWithEof
+  , runParseM
+  )
+  where
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Util (trace)
-
 import qualified Text.Parsec as P
+
+import Development.Shake.FilePath (makeRelative)
+import OrthoLang.Core.Util        (trace)
 import Text.Parsec                (ParseError)
 import Text.Parsec.Combinator     (manyTill, eof, anyToken)
-import Development.Shake.FilePath (makeRelative)
 
 -- TODO make an empty GlobalEnv so you can run these in ghci again
-
--- Some are from the Parsec tutorial here:
--- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
 -- TODO is this ever needed in production? probably not
 parseAndShow :: (Show a) => ParseM a -> ParseEnv -> String -> String
