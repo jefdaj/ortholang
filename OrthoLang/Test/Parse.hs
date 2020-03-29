@@ -98,25 +98,25 @@ Parse some cut code, pretty-print it, parse again,
 and check that the two parsed ASTs + DigestMaps are equal.
 -}
 roundTrip :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef
-          -> ParseM (a, DigestMap) -> String -> Either (String, String) (a, DigestMap)
+          -> ParseM a -> String -> Either (String, String) a
 roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
   Left  l1 -> Left (code, show l1)
-  Right (r1, d1) -> case regularParse psr cfg ref ids $ prettyShow r1 of
+  Right r1 -> case regularParse psr cfg ref ids $ prettyShow r1 of
     Left  l2 -> Left (code, show l2)
-    Right (r2, d2) -> if r1 == r2 && d1 == d2
-                  then Right (r2, d2)
+    Right r2 -> if r1 == r2
+                  then Right r2
                   else Left (code, show r2)
 
 {-|
 Test that a list of example strings can be parsed + printed + parsed,
 and both parses come out correctly, or return the first error.
 -}
-tripExamples :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef -> ParseM (a, DigestMap)
+tripExamples :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef -> ParseM a
              -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ _ _ [] = Right ()
 tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
   Left  l -> Left (a, show l)
-  Right (r, _) -> if r == b
+  Right r -> if r == b
     then tripExamples cfg ref ids p xs
     else Left (a, show r)
 
@@ -133,7 +133,7 @@ mkTests cfg ref ids = return $ testGroup "test parser"
 
 -- a here can be: Expr, Assign, ...
 mkCase :: (Show a, Eq a, Pretty a) => Config -> LocksRef -> IDsRef
-       -> String -> ParseM (a, DigestMap) -> [(String, a)] -> TestTree
+       -> String -> ParseM a -> [(String, a)] -> TestTree
 mkCase cfg ref ids name parser examples =
   testCase name $ Right () @=? tripExamples cfg ref ids parser examples
 

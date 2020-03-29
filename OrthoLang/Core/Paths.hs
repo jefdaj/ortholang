@@ -133,6 +133,8 @@ module OrthoLang.Core.Paths
 
   -- * Generate path digests
   , exprPathDigest
+  , exprDigest
+  , exprDigests
   -- , insertNewRulesDigest
   , decodeNewRulesDeps
 
@@ -331,6 +333,15 @@ exprPath c s expr = traceP "exprPath" expr res
 
 exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
+
+exprDigest :: Config -> Script -> Expr -> DigestMap
+exprDigest cfg scr expr = M.singleton dKey (typeOf expr, p)
+  where
+    p = exprPath cfg scr expr
+    dKey = exprPathDigest p
+
+exprDigests :: Config -> Script -> [Expr] -> DigestMap
+exprDigests cfg scr exprs = M.unions $ map (exprDigest cfg scr) exprs
 
 -- insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
 -- insertNewRulesDigest st@(_, cfg, _, idr) expr

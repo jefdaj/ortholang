@@ -165,8 +165,8 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement (cfg, scr) l
 -- which is especially a problem when auto-assigning "result"
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
-updateVars :: Script -> (Assign, DigestMap) -> Script
-updateVars scr (asn@(var, _), ds) = scr {sAssigns = as', sDigests = M.union (sDigests scr) ds}
+updateVars :: Script -> Assign -> Script
+updateVars scr asn@(var, _) = scr {sAssigns = as'} -- TODO anything with digests needed here?
   where
     res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn
@@ -377,7 +377,7 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String
 showExprType (s, c, _, _) e = case parseExpr (c, s) e of
-  Right (expr, _) -> show $ typeOf expr
+  Right expr -> show $ typeOf expr
   Left  err  -> show err
 
 showAssignType :: Assign -> String

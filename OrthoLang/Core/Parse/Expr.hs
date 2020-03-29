@@ -29,8 +29,6 @@ module OrthoLang.Core.Parse.Expr
   )
   where
 
-import Debug.Trace
-
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty ()
 import OrthoLang.Core.Parse.Util
@@ -45,8 +43,7 @@ import Control.Monad.Identity (Identity)
 import Data.Either            (isRight)
 import Data.List              (union)
 import Data.Maybe             (isJust, fromJust)
-import OrthoLang.Core.Paths   (exprPath, exprPathDigest)
-import Text.Parsec            (ParseError, try, getState, putState, (<?>))
+import Text.Parsec            (ParseError, try, getState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 
@@ -56,23 +53,17 @@ TODO how hard would it be to get Haskell's sequence notation? would it be useful
 
 TODO once there's [ we can commit to a list, right? should allow failing for real afterward
 -}
-pList :: ParseM (Expr, DigestMap)
+pList :: ParseM Expr
 pList = debugParser "pList" $ do
-  tds <- between (pSym '[') (pSym ']') (sepBy pExpr (pSym ','))
-  let (terms, ds) = unzip tds
-      eType = nonEmptyType $ map typeOf terms
+  terms <- between (pSym '[') (pSym ']') (sepBy pExpr (pSym ','))
+  let eType = nonEmptyType $ map typeOf terms
   case eType of
     Left err -> fail err
     Right t  -> do
-      (cfg, scr) <- getState
       let deps  = if null terms then [] else foldr1 union $ map depsOf terms
           expr  = Lst t (Salt 0) deps terms
-          p    = exprPath cfg scr expr
-          dKey = exprPathDigest p
-          dVal = (typeOf expr, p)
-          dMap' = M.unions $ (M.insert dKey dVal $ sDigests scr) : ds
-      putState (cfg, scr {sDigests = dMap'})
-      return (expr, dMap')
+      putDigests "pList" (expr:terms)
+      return expr
 
 ---------------
 -- operators --
@@ -83,7 +74,7 @@ For now, I think all binary operators at the same precedence should work.
 but it gets more complicated I'll write out an actual table here with a
 prefix function too etc. See the jake wheat tutorial.
 -}
-operatorTable :: Config -> [[E.Operator String ParseEnv Identity (Expr, DigestMap)]]
+operatorTable :: Config -> [[E.Operator String ParseEnv Identity Expr]]
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
@@ -95,7 +86,7 @@ This is an annoying extra type, but I can't figure out how to implement pBop wit
 
 TODO how to putState in here?? that's probably the multiply bug
 -}
-type BopExprsParser = ParseM ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
+type BopExprsParser = ParseM (Expr -> Expr -> Expr)
 
 {-
 TODO is there a better way than only taking one-char strings?
@@ -112,23 +103,23 @@ pBopOp :: String -> Char -> ParseM ()
 pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
 
 mkBop :: Function -> BopExprsParser
-mkBop bop = do
-  (cfg, scr) <- getState
-  return $ \(e1, ds1) (e2, ds2) -> do
-    case bopTypeCheck (fTypeCheck bop) (typeOf e1) (typeOf e2) of
-      Left  msg -> error msg -- TODO can't `fail` because not in monad here?
-      Right rtn ->
+mkBop bop = return $ \e1 e2 -> do
+  case bopTypeCheck (fTypeCheck bop) (typeOf e1) (typeOf e2) of
+    Left  msg -> error msg -- TODO can't `fail` because not in monad here?
+    Right rtn -> Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+
         -- TODO is naming it after the opchar wrong now?
-        let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
-            p    = exprPath cfg scr expr
-            dKey = exprPathDigest p
-            dVal = (typeOf expr, p)
-            dMap' = M.unions
-                      [ M.insert dKey dVal (sDigests scr)
-                      , trace ("mkBop ds1: " ++ show ds1) ds1
-                      , trace ("mkBop ds2: " ++ show ds2) ds2
-                      ]
-        in (expr, trace ("mkbop dMap': " ++ show dMap') dMap')
+-- TODO how to putState with these? is it needed at all?
+--         let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+--             p    = exprPath cfg scr expr
+--             dKey = exprPathDigest p
+--             dVal = (typeOf expr, p)
+--             dMap' = M.unions
+--                       [ M.insert dKey dVal (sDigests scr)
+--                       , trace ("mkBop ds1: " ++ show ds1) ds1
+--                       , trace ("mkBop ds2: " ++ show ds2) ds2
+--                       ]
+        -- in (expr, trace ("mkbop dMap': " ++ show dMap') dMap')
 
 -- TODO does typesMatch already cover (ListOf Empty) comparisons?
 bopTypeCheck :: TypeChecker -> Type -> Type -> Either String Type
@@ -154,7 +145,7 @@ TODO get function names from modules
 -}
 pFunName :: ParseM String
 pFunName = do
-  (cfg, _) <- getState
+  cfg <- getConfig
   (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
@@ -164,26 +155,25 @@ TODO any way to do this last so "function not found" error comes through??
 
 TODO should be able to commit after parsing the fn name, which would allow real failure
 -}
-pFun :: ParseM (Expr, DigestMap)
+pFun :: ParseM Expr
 pFun = do
-  name <- try pFunName -- TODO try?
-  -- debugParseM $ "pFun committed to parsing " ++ name
+  name <- try pFunName
   args <- pArgs
-  -- debugParseM $ "pFun " ++ name ++ " args: " ++ show args
-  -- TODO hey is this where it's missing the dMap??
+  putDigests "pFun" args
   pFunArgs name args
 
 {-|
 TODO main parse error is in here, when pTerm fails on an arg??
 
 TODO so is pTerm failing on it, or pEnd succeeding?
+
+TODO is this where we forget to add the list digest?
 -}
-pArgs :: ParseM ([Expr], DigestMap)
+pArgs :: ParseM [Expr]
 pArgs = debugParser "pArgs" $ do
-  eds <- manyTill (try pTerm) pEnd
-  let (es, ds) = unzip eds
-      dMap = M.unions ds
-  return (es, dMap)
+  es <- manyTill (try pTerm) pEnd
+  putDigests "pArgs" es
+  return es
 
 {-|
 This function uses error rather than fail to prevent parsec from trying anything more
@@ -192,9 +182,9 @@ TODO is there a better way?
 
 TODO hey is this where it's missing the dmap?
 -}
-pFunArgs :: String -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
-pFunArgs name (args, ds) = debugParser "pFun" $ do
-  (cfg, _) <- getState
+pFunArgs :: String -> [Expr] -> ParseM Expr
+pFunArgs name args = debugParser "pFun" $ do
+  cfg <- getConfig
   -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
   -- args <- pArgs
   -- args <- manyTill pTerm pEnd
@@ -202,22 +192,18 @@ pFunArgs name (args, ds) = debugParser "pFun" $ do
       fns' = filter (\f -> fName f == name) fns
   case fns' of
     []      -> fail $ "no function found with name '" ++ name ++ "'"
-    (fn:[]) -> typecheckArgs fn (args, ds) -- TODO why no full7942??
+    (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
     _       -> fail $ "function name collision! multiple fns match '" ++ name ++ "'"
 
-typecheckArgs :: Function -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
-typecheckArgs fn (args, ds) = case (fTypeCheck fn) (map typeOf args) of
+typecheckArgs :: Function -> [Expr] -> ParseM Expr
+typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
   Left  msg -> fail msg
   Right rtn -> do
-    (c, s) <- getState
     let expr = Fun rtn (Salt 0) deps (fName fn) args
         deps = foldr1 union $ map depsOf args
-        dKey = exprPathDigest p
-        p    = exprPath c s expr
-        dVal = (typeOf expr, p)
-        dMap = M.insert dKey dVal $ M.union (sDigests s) ds
-    putState (c, s {sDigests = dMap})
-    return (expr, dMap)
+        -- TODO hey should ParseM be ReaderT Config, StateT Script ... instead of StateT both?
+    putDigests "typecheckArgs" (expr:args)
+    return expr
 
 {-|
 A reference is just a variable name, but that variable has to be in the script.
@@ -226,23 +212,25 @@ Since this is the last term parser, it can actually error instead of failing.
 TODO why does it fail after this, but only sometimes??
 
 TODO main error is in here when if fails on a ref that clearly exists?
+
+TODO any need for digests here?
 -}
-pRef :: ParseM (Expr, DigestMap)
+pRef :: ParseM Expr
 pRef = debugParser "pRef" $ do
   -- v@(Var var) <- pVarOnly
   v@(Var _ var) <- pVar
   -- let v = Var var
-  (_, scr) <- getState
+  scr <- getScript
   -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v (sAssigns scr) of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
-    Just e -> return (Ref (typeOf e) (Salt 0) (depsOf e) v, M.empty) -- TODO is it always empty?
+    Just e -> return $ Ref (typeOf e) (Salt 0) (depsOf e) v
 
 -----------------
 -- expressions --
 -----------------
 
-pParens :: ParseM (Expr, DigestMap)
+pParens :: ParseM Expr
 pParens = debugParser "pParens" (between (pSym '(') (pSym ')') pExpr <?> "parens")
 
 -- TODO need to commit to separate branches so Parsec doesn't try to parse
@@ -255,7 +243,7 @@ pParens = debugParser "pParens" (between (pSym '(') (pSym ')') pExpr <?> "parens
 
 -- TODO hey should I actually just name this pArg?
 
-pTerm :: ParseM (Expr, DigestMap)
+pTerm :: ParseM Expr
 -- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFunOrRef]
 pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pRef]
@@ -265,19 +253,14 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- to do without it. Also it seems like it will get more useful if I want to
 -- add non-assignment statements like assertions. See:
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
-pExpr :: ParseM (Expr, DigestMap)
+pExpr :: ParseM Expr
 pExpr = debugParser "pExpr" $ do
-  (cfg, scr) <- getState
   -- debugParseM "expr"
-  (e, ds) <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
+  cfg <- getConfig
+  e <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
-  -- let res' = debugParser cfg "pExpr" res
-  let p    = exprPath cfg scr e
-      dKey = exprPathDigest p
-      dVal = (typeOf e, p)
-      dMap = M.union (M.insert dKey dVal $ sDigests scr) ds -- TODO does this include pBop digests?
-  putState (cfg, scr {sDigests = dMap})
-  return (e, dMap)
+  putDigests "pExpr" [e]
+  return e
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)
@@ -285,5 +268,5 @@ isExpr :: ParseEnv -> String -> Bool
 isExpr state line = isRight $ parseWithEof pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: ParseEnv -> String -> Either ParseError (Expr, DigestMap)
+parseExpr :: ParseEnv -> String -> Either ParseError Expr
 parseExpr = runParseM pExpr

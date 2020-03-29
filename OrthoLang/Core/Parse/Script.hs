@@ -46,10 +46,10 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
-import OrthoLang.Core.Paths   (exprPath, exprPathDigest)
+import OrthoLang.Core.Paths   (exprPath, exprDigest, exprDigests)
 import OrthoLang.Core.Util    (readFileStrict, debug)
 import System.FilePath        ((</>), takeDirectory)
-import Text.Parsec            (ParseError, try, getState, putState)
+import Text.Parsec            (ParseError, try)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
 
@@ -97,31 +97,20 @@ TODO message in case it doesn't parse?
 
 TODO should reject duplicate variables! except replace result
 -}
-pAssign :: ParseM (Assign, DigestMap)
+pAssign :: ParseM Assign
 pAssign = debugParser "pAssign" $ do
-  (cfg, scr) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
-  v@(Var _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
-  when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ fail $ "duplicate variable '" ++ vName ++ "'"
-  (e, ds) <- (lexeme pExpr)
-  -- let scr' = case vName of
-               -- -- "result" -> trace "stripping old result" $ stripResult scr ++ [(v, e)]
-               -- "result" -> stripResult scr ++ [(v, e)]
-               -- -- _ -> trace "this is not a result assignment" $ scr ++ [(v,e)]
-               -- _ -> scr ++ [(v,e)]
-  let as'  = (sAssigns scr) ++ [(v, e)]
-      dVal@(_, p) = (typeOf e, exprPath cfg scr e)
-      dKey = exprPathDigest p
-      ds'  = M.union ds $ M.insert dKey dVal (sDigests scr)
-  -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
-  putState (cfg, scr {sAssigns=as', sDigests=ds'}) -- TODO remove this?
-  -- debugParseM $ "assigned var " ++ show v
-  let res  = (v,e)
-      -- dMap = M.insert dKey dVal ds
-      -- res' = debugParser cfg "pAssign" res
-  -- return $ traceShow scr' res
-  return (res, ds')
+  -- TODO use lookAhead here to decide whether to commit to it?
+  cfg <- getConfig
+  scr <- getScript
+  v@(Var _ vName) <- (try (optional newline *> pVarEq))
+  when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ do
+    fail $ "duplicate variable '" ++ vName ++ "'"
+  e <- lexeme pExpr
+  putAssign  "pAssign" (v, e) -- TODO is this covered by returning it?
+  putDigests "pAssign" [e]
+  return (v, e)
 
 {-|
 Handles the special case of a naked top-level expression, which is treated as
@@ -133,13 +122,13 @@ TODO Prevent assignments that include the variable being assigned to
 TODO If the statement is literally `result`, what do we do?
      Maybe we need a separate type of assignment statement for this?
 -}
-pResult :: ParseM (Assign, DigestMap)
+pResult :: ParseM Assign
 pResult = debugParser "pResult" $ do
-  (e, ds) <- pExpr
+  e <- pExpr
   let res = (Var (RepID Nothing) "result", e)
-  return (res, ds) -- TODO is there any new result digest needed?
+  return res -- TODO is there any new result digest needed?
 
-pStatement :: ParseM (Assign, DigestMap)
+pStatement :: ParseM Assign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 
 -------------
@@ -155,7 +144,7 @@ parseFileIO st scr = do
     Right s -> return s
 
 -- TODO need GlobalEnv here? or just Config?
-parseStatement :: ParseEnv -> String -> Either ParseError (Assign, DigestMap)
+parseStatement :: ParseEnv -> String -> Either ParseError Assign
 parseStatement = parseWithEof pStatement
 
 {-|
@@ -192,15 +181,19 @@ TODO should it get automatically `put` here, or manually in the repl?
 -}
 pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
-  (cfg, _) <- getState
   optional spaces
-  ads <- many pStatement
-  let (as, ds) = unzip ads 
-      ds'  = M.unions ds
-      scr  = emptyScript {sAssigns = as, sDigests = ds'}
+  as <- many pStatement
+  -- (cfg, scr) <- getState
+  -- scr <- getScript
+  -- let (as, ds) = unzip ads 
+  -- let ds'  = M.union (sDigests scr) $ exprDigests cfg scr $ map snd as
+      -- scr  = emptyScript {sAssigns = as, sDigests = ds'}
+  let scr  = emptyScript {sAssigns = as}
       scr' = lastResultOnly scr
-  putState (cfg, scr')
-  return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
+  putScript  "pScript" scr'
+  putDigests "pScript" $ map snd as -- TODO this is redundant right?
+  return scr'
+  -- return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?

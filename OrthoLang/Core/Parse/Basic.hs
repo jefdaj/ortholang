@@ -1,7 +1,14 @@
 module OrthoLang.Core.Parse.Basic
   (
+  -- * Utilities
+    getConfig
+  , getScript
+  , putDigests
+  , putAssign
+  , putScript
+
   -- * Debugging
-    parserTrace'
+  , parserTrace'
   , parserTraced'
   , debugParser
 
@@ -32,6 +39,8 @@ module OrthoLang.Core.Parse.Basic
 
 -- TODO hold up, is Logging missing a bunch of NOINLINE statements?
 
+import qualified Debug.Trace as DT
+
 import OrthoLang.Core.Types
 import qualified Data.Map.Strict as M
 
@@ -39,12 +48,43 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
-import OrthoLang.Core.Paths   (exprPath, exprPathDigest)
 import OrthoLang.Core.Util    (trace)
 import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim       (ParsecT, Stream)
+import OrthoLang.Core.Paths   (exprDigests)
+
+--------------
+-- utilites --
+--------------
+
+-- TODO move to Types? or move more of that here?
+
+getConfig :: ParseM Config
+getConfig = getState >>= return . fst
+
+getScript :: ParseM Script
+getScript = getState >>= return . snd
+
+putDigests :: String -> [Expr] -> ParseM ()
+putDigests name exprs = do
+  (c, s) <- getState
+  let ds = exprDigests c s exprs
+      s' = s { sDigests = M.union (sDigests s) ds }
+  putState (c, DT.trace (name ++ " adding digests: " ++ show ds) s')
+  -- TODO also show if there are any duplicates
+  return()
+
+putAssign :: String -> Assign -> ParseM ()
+putAssign name a = do
+  (c, s) <- getState
+  putState (c, s {sAssigns = (sAssigns s) ++ [a]})
+
+putScript :: String -> Script -> ParseM ()
+putScript name scr = do
+  (c, _) <- getState -- TODO any reason to union the digests?
+  putState (c, scr)
 
 {-|
 Based on Text.Parsec.Combinator.parserTrace, but:
@@ -163,7 +203,7 @@ pVarOnly = debugParser "pVarOnly " (pVar <* notFollowedBy pEq)
 --------------
 
 -- TODO hey Scientific has its own parser, would it work to add?
-pNum :: ParseM (Expr, DigestMap)
+pNum :: ParseM Expr
 pNum = debugParser "pNum" $ do
   -- TODO optional minus sign here? see it doesn't conflict with subtraction
   -- TODO try this for negative numbers: https://stackoverflow.com/a/39050006
@@ -172,18 +212,11 @@ pNum = debugParser "pNum" $ do
   ns <- many (digit <|> oneOf ".e-")
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
-  (c, s) <- getState
-  let sign = case neg of
-               Just x -> x
-               _ -> ' '
-      lit = show (read (sign:n:ns) :: Scientific)
+  let sign = case neg of { Just x -> x; _ -> ' ' }
+      lit  = show (read (sign:n:ns) :: Scientific)
       expr = Lit num (Salt 0) lit 
-      dKey = exprPathDigest p
-      p    = exprPath c s expr
-      dVal = (typeOf expr, p)
-      dMap = M.insert dKey dVal $ sDigests s
-  putState (c, s {sDigests = dMap})
-  return (expr, dMap)
+  putDigests "pNum" [expr]
+  return expr
 
 -- list of chars which can be escaped in OrthoLang
 -- (they're also escaped in Haskell, so need extra backslashes here)
@@ -206,13 +239,8 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
-pStr :: ParseM (Expr, DigestMap)
+pStr :: ParseM Expr
 pStr = debugParser "pStr" $ do
   expr <- Lit str (Salt 0) <$> pQuoted <?> "string literal"
-  (c, s) <- getState
-  let dKey = exprPathDigest p
-      p    = exprPath c s expr
-      dVal = (typeOf expr, p)
-      dMap = M.insert dKey dVal $ sDigests s
-  putState (c, s {sDigests = dMap})
-  return (expr, dMap)
+  putDigests "pStr" [expr]
+  return expr
