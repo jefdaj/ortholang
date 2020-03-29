@@ -2,22 +2,31 @@
 -- TODO make sure expressions consume the whole string
 --      for example right now "\"this\" 2" parses as a str
 
+-- TODO stop accidentally interpreting args in the wrong order as one big variable
+-- TODO fix bug where a non-function with args parses to varname with args dropped
+--       (example: 'this = load_that cool')
+
 module OrthoLang.Core.Parse
-  -- parsec stuff
-  ( ParseError
+  (
+  -- * Parsec stuff
+    ParseError
   , parseWithEof
   , parseWithLeftOver
   , parseAndShow -- TODO remove for production?
-  -- functions used elsewhere in core
+
+  -- * Functions used elsewhere in core
   , isExpr
   , parseExpr
   , parseStatement
   , parseFile
   , parseFileIO
-  -- functiosn only used for testing
+
+  -- * Functions only used for testing
   , escapeChars
-  -- , fnNames -- TODO load these from modules
   , literalChars
+  -- , fnNames -- TODO load these from modules
+
+  -- * Parsers
   , pNum
   , pBop
   , pTerm
@@ -34,13 +43,9 @@ module OrthoLang.Core.Parse
   )
   where
 
--- TODO stop accidentally interpreting args in the wrong order as one big variable
--- TODO fix bug where a non-function with args parses to varname with args dropped
---       (example: 'this = load_that cool')
-
-import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
 import OrthoLang.Core.Parse.Script
+import OrthoLang.Core.Parse.Util
 
 import Text.Parsec (ParseError)
