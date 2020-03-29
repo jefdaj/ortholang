@@ -12,6 +12,9 @@ module OrthoLang.Core.Parse.Util
     parseAndShow
   , parseWithLeftOver
   , parseWithEof
+  , parserTrace'
+  , parserTraced'
+  , debugParser
   -- , runParseM
 
   -- * New parse utilities with errors
@@ -28,6 +31,7 @@ import Development.Shake.FilePath (makeRelative)
 -- import OrthoLang.Core.Util        (trace)
 import Text.Parsec                (ParseError)
 import Text.Parsec.Combinator     (manyTill, eof, anyToken)
+import OrthoLang.Core.Util    (trace)
 
 -- for ParseM (new ParseM with errors)
 import Control.Monad.Trans
@@ -60,6 +64,41 @@ parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
 parseWithEof :: ParseM a -> ParseEnv -> String -> Either ParseError a
 parseWithEof p s = runParseM (p <* eof) s
 
+{-|
+Based on Text.Parsec.Combinator.parserTrace, but:
+
+* uses the logging module
+* shortens long strings to fit on one line
+-}
+parserTrace' :: (Show t, Stream s m t) => String -> ParsecT s u m ()
+parserTrace' s = pt <|> return ()
+    where
+        n = 30
+        pt = try $ do
+           x <- try $ many1 anyToken
+           let x' = let sx = show x in if length sx > n then take n sx ++ "\"..." else sx
+           trace ("core.parser." ++ s) (x') $ try $ eof
+           fail x'
+
+{-|
+Based on Text.Parsec.Combinator.parserTraced, but:
+
+* uses the logging module
+* shortens long strings to fit on one line
+-}
+parserTraced' :: (Stream s m t, Show t) => String -> ParsecT s u m b -> ParsecT s u m b
+parserTraced' s p = do
+  parserTrace' s
+  p <|> trace ("core.parser." ++ s) "backtracked" (fail s)
+
+{-|
+Trace for a parser
+
+TODO go back to removing it when not in debug mode for speed, even though order might change?
+-}
+debugParser :: Show a => String -> ParseM a -> ParseM a
+debugParser name pFn = parserTraced' name pFn
+
 ---------------------------------
 -- attempt to add nicer errors --
 ---------------------------------
@@ -68,7 +107,7 @@ type ParseM a = ParsecT String ParseEnv (Except String) a
 
 -- based on https://stackoverflow.com/a/54089987/429898
 runParseM :: ParseM a -> ParseEnv -> String -> Either ParseError a
-runParseM op (cfg, _) input = case runExcept (runPT op undefined sn input) of
+runParseM op e@(cfg, _) input = case runExcept (runPT op e sn input) of
   Left s          -> fail s -- turn the ExceptT string into a ParseError
   Right (Left  e) -> Left e -- return an actual ParseError from Parsec
   Right (Right r) -> Right r

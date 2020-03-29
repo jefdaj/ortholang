@@ -31,17 +31,17 @@ module OrthoLang.Core.Parse.Expr
 
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty ()
-import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
+import OrthoLang.Core.Parse.Util
+
+import OrthoLang.Core.Util (trace)
 
 import qualified Text.Parsec.Expr as E
-import OrthoLang.Core.Parse.Util (ParseM)
 import Control.Monad.Trans.Except
 -- import qualified Data.Map.Strict  as M
 
 import Control.Applicative    ((<|>))
 import Control.Monad          (void)
-import Control.Monad.Identity (Identity)
 import Data.Either            (isRight)
 import Data.List              (union)
 import Data.Maybe             (isJust, fromJust)
@@ -60,7 +60,7 @@ pList = debugParser "pList" $ do
   terms <- between (pSym '[') (pSym ']') (sepBy pExpr (pSym ','))
   let eType = nonEmptyType $ map typeOf terms
   case eType of
-    Left err -> fail err
+    Left err -> parseFail err
     Right t  -> do
       let deps  = if null terms then [] else foldr1 union $ map depsOf terms
           expr  = Lst t (Salt 0) deps terms
@@ -99,7 +99,7 @@ TODO is the error that putState is never called in here?
 -}
 pBop :: Function -> BopExprsParser
 pBop bop | isJust (fOpChar bop) = pBopOp (fName bop) (fromJust $ fOpChar bop) *> mkBop bop
-pBop _ = fail "pBop only works with infix functions"
+pBop _ = parseFail "pBop only works with infix functions"
 
 pBopOp :: String -> Char -> ParseM ()
 pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
@@ -193,13 +193,13 @@ pFunArgs name args = debugParser "pFun" $ do
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fns' = filter (\f -> fName f == name) fns
   case fns' of
-    []      -> fail $ "no function found with name '" ++ name ++ "'"
+    []      -> parseFail $ "no function found with name '" ++ name ++ "'"
     (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
-    _       -> fail $ "function name collision! multiple fns match '" ++ name ++ "'"
+    _       -> parseFail $ "function name collision! multiple fns match '" ++ name ++ "'"
 
 typecheckArgs :: Function -> [Expr] -> ParseM Expr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
-  Left  msg -> fail msg
+  Left  msg -> parseFail msg
   Right rtn -> do
     let expr = Fun rtn (Salt 0) deps (fName fn) args
         deps = foldr1 union $ map depsOf args
@@ -219,14 +219,15 @@ TODO any need for digests here?
 -}
 pRef :: ParseM Expr
 pRef = debugParser "pRef" $ do
-  -- v@(Var var) <- pVarOnly
   v@(Var _ var) <- pVar
-  -- let v = Var var
   scr <- getScript
-  -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v (sAssigns scr) of
-    Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
+    Nothing -> trace "pRef" ("scr before lookup of '" ++ var ++ "': " ++ show scr) $
+                 parseFail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
     Just e -> return $ Ref (typeOf e) (Salt 0) (depsOf e) v
+
+-- debugParseM :: String -> String -> 
+-- debugParseM name msg = 
 
 -----------------
 -- expressions --

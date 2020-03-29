@@ -7,11 +7,6 @@ module OrthoLang.Core.Parse.Basic
   , putAssign
   , putScript
 
-  -- * Debugging
-  , parserTrace'
-  , parserTraced'
-  , debugParser
-
   -- * Whitespace and endings
   , lexeme
   , spaceChars
@@ -39,8 +34,6 @@ module OrthoLang.Core.Parse.Basic
 
 -- TODO hold up, is Logging missing a bunch of NOINLINE statements?
 
-import qualified Debug.Trace as DT
-
 import OrthoLang.Core.Types
 import qualified Data.Map.Strict as M
 
@@ -48,13 +41,13 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
-import OrthoLang.Core.Util    (trace)
 import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim       (ParsecT, Stream)
 import OrthoLang.Core.Paths   (exprDigests)
-import OrthoLang.Core.Parse.Util (ParseM)
+import OrthoLang.Core.Parse.Util (ParseM, debugParser)
+import OrthoLang.Core.Util    (trace)
 
 --------------
 -- utilites --
@@ -73,7 +66,7 @@ putDigests name exprs = do
   (c, s) <- getState
   let ds = exprDigests c s exprs
       s' = s { sDigests = M.union (sDigests s) ds }
-  putState (c, DT.trace (name ++ " adding digests: " ++ show ds) s')
+  putState (c, trace name ("adding digests: " ++ show ds) s')
   -- TODO also show if there are any duplicates
   return()
 
@@ -81,54 +74,13 @@ putDigests name exprs = do
 putAssign :: String -> Assign -> ParseM ()
 putAssign name a = do
   (c, s) <- getState
-  let as' = DT.trace (name ++ " adding assignment: " ++ show a) $ sAssigns s ++ [a]
+  let as' = trace name ("adding assignment: " ++ show a) $ sAssigns s ++ [a]
   putState (c, s {sAssigns = as'})
 
 putScript :: Script -> ParseM ()
 putScript scr = do
   (c, _) <- getState -- TODO any reason to union the digests?
   putState (c, scr)
-
-{-|
-Based on Text.Parsec.Combinator.parserTrace, but:
-
-* uses the logging module
-* shortens long strings to fit on one line
--}
-parserTrace' :: (Show t, Stream s m t) => String -> ParsecT s u m ()
-parserTrace' s = pt <|> return ()
-    where
-        n = 30
-        pt = try $ do
-           x <- try $ many1 anyToken
-           let x' = let sx = show x in if length sx > n then take n sx ++ "\"..." else sx
-           -- TODO why does this output to stderr no matter what??
-           --      the extra messages don't obey the filter either
-           trace ("core.parser." ++ s) (x') $ try $ eof
-           fail x'
-
-{-|
-Based on Text.Parsec.Combinator.parserTraced, but:
-
-* uses the logging module
-* shortens long strings to fit on one line
--}
-parserTraced' :: (Stream s m t, Show t) => String -> ParsecT s u m b -> ParsecT s u m b
-parserTraced' s p = do
-  parserTrace' s
-  -- TODO why does this output to stderr no matter what??
-  --      the extra messages don't obey the filter either
-  p <|> trace ("core.parser." ++ s) "backtracked" (fail s)
-  -- p
-
-{-|
-Trace for a parser
-
-TODO go back to removing it when not in debug mode for speed, even though order might change?
--}
-debugParser :: Show a => String -> ParseM a -> ParseM a
-debugParser name pFn = do
-  parserTraced' name pFn
 
 {-|
 There's a convention in parsers that each one should consume whitespace after
