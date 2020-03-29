@@ -31,6 +31,7 @@ module OrthoLang.Core.Types
   , Var(..)
   , Script(..)
   , emptyScript
+  , emptyDigests
   , LocksRef
   , IDs(..)
   , emptyIDs
@@ -89,6 +90,7 @@ module OrthoLang.Core.Types
   , RulesEnv
   , RulesR
   , runRulesR
+  , ParseEnv
   )
   where
 
@@ -259,6 +261,9 @@ instance Show Script where
 
 emptyScript :: Script
 emptyScript = Script {sAssigns = [], sDigests = M.empty}
+
+emptyDigests :: DigestMap
+emptyDigests = M.empty
 
 ensureResult :: Script -> Script
 ensureResult scr@(Script {sAssigns = as}) = if null as then noRes else scr'
@@ -495,8 +500,12 @@ type IDsRef = IORef IDs
 type DigestMap = M.Map PathDigest (Type, Path)
 
 -- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
+-- TODO config always first? or make a record + ask* fns
 type GlobalEnv = (Script, Config, LocksRef, IDsRef)
-type ParseM a = Parsec String GlobalEnv a -- TODO only hold the script + config, not the whole global env
+
+-- TODO config always first? or make a record + ask* fns
+type ParseEnv = (Config, Script) -- script also contains the digestmap now
+type ParseM a = Parsec String ParseEnv a -- TODO only hold the script + config, not the whole global env
 
 ----------------
 -- Repl monad --

@@ -98,14 +98,14 @@ aSimpleScript' _ _ _ _ _ _ as = error $ "bad argument to aSimpleScript: " ++ sho
 rSimple' :: Maybe String
          -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
          -> RulesFn
-rSimple' mTmpPrefix actFn s@(_, cfg, ref, ids) e@(Fun _ _ _ _ exprs) = do
+rSimple' mTmpPrefix actFn s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ exprs) = do
   argPaths <- mapM (rExpr s) exprs
   let argPaths' = map (\(ExprPath p) -> toPath cfg p) argPaths
   outPath' %> \_ -> aSimple' cfg ref ids outPath actFn mTmpDir argPaths'
   return (ExprPath outPath')
   where
     mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
-    outPath  = exprPath s e
+    outPath  = exprPath cfg scr e
     outPath' = fromPath cfg outPath
 rSimple' _ _ _ _ = fail "bad argument to rSimple'"
 

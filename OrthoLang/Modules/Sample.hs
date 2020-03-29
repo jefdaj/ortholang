@@ -38,12 +38,12 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(_, cfg, ref, ids) expr@(Fun _ salt _ _ [n, lst]) = do
+rSample st@(scr, cfg, ref, ids) expr@(Fun _ salt _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr st n
   (ExprPath inPath') <- rExpr st lst
   let nPath    = toPath cfg nPath'
       inPath   = toPath cfg inPath'
-      outPath  = exprPath st expr
+      outPath  = exprPath cfg scr expr
       outPath' = fromPath cfg outPath
       (ListOf t) = typeOf lst
   outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath

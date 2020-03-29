@@ -137,7 +137,6 @@ module OrthoLang.Core.Paths
   , decodeNewRulesDeps
 
   -- * Misc utilities (move to Util.hs?)
-  , bop2fun
   , argHashes
   , upBy
   , makeTmpdirRelative
@@ -195,13 +194,13 @@ traceP name expr path = trace ("core.paths." ++ name) msg path
     ren = render $ pPrint expr
     msg = "'" ++ ren ++ "' -> " ++ show path -- TODO include types?
 
-traceD name st expr = trace ("core.paths." ++ name) msg
-  where
-    ren  = render $ pPrint expr
-    -- ren  = show expr
-    path = exprPath st expr
-    dig  = exprPathDigest path
-    msg  = "'" ++ ren ++ "' -> (" ++ show dig ++ ", " ++ show path ++ ")"
+-- traceD name c s expr = trace ("core.paths." ++ name) msg
+--   where
+--     ren  = render $ pPrint expr
+--     -- ren  = show expr
+--     path = exprPath c s expr
+--     dig  = exprPathDigest path
+--     msg  = "'" ++ ren ++ "' -> (" ++ show dig ++ ", " ++ show path ++ ")"
 
 --------------
 -- cutpaths --
@@ -267,15 +266,16 @@ cacheDir cfg modName = toPath cfg path
 
 -- | This is just a convenience used in exprPath
 -- TODO rename hSomething?
-argHashes :: GlobalEnv -> Expr -> [String]
-argHashes s@(scr,_, _, _) (Ref _ _ _ v) = case lookup v (sAssigns scr) of
+-- TODO does it need the config at all?
+argHashes :: Config -> Script -> Expr -> [String]
+argHashes c s (Ref _ _ _ v) = case lookup v (sAssigns s) of
                                          Nothing -> error $ "no such var " ++ show v
-                                         Just e  -> argHashes s e
-argHashes _ (Lit  _ _     v    ) = [digest v]
-argHashes s (Fun  _ _ _ _ es   ) = map (digest . exprPath s) es
-argHashes s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath s) [e1, e2]
-argHashes s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath s) es]
-argHashes _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
+                                         Just e  -> argHashes c s e
+argHashes _ _ (Lit  _ _     v    ) = [digest v]
+argHashes c s (Fun  _ _ _ _ es   ) = map (digest . exprPath c s) es
+argHashes c s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c s) [e1, e2]
+argHashes c s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c s) es]
+argHashes _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
 
 -- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
 -- resolveVar :: Config -> Path -> IO Path
@@ -314,19 +314,20 @@ bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t r ds [e1, e2]]
 bop2fun e = error $ "bop2fun call with non-Bop: '" ++ render (pPrint e) ++ "'"
 
 -- TODO rename to tmpPath?
-exprPath :: GlobalEnv -> Expr -> Path
-exprPath (_, cfg, _, _) (Com (CompiledExpr _ (ExprPath p) _)) = toPath cfg p
-exprPath s@(scr, _, _, _) (Ref _ _ _ v) = case lookup v (sAssigns scr) of
-                                         Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show (sAssigns scr)
-                                         Just e  -> exprPath s e
-exprPath s@(_, cfg, _, _) e@(Bop _ _ _ _ _ _) = exprPath s (bop2fun e)
-exprPath s@(_, cfg, _, _) expr = traceP "exprPath" expr res
+-- TODO remove the third parseenv arg (digestmap)?
+exprPath :: Config -> Script -> Expr -> Path
+exprPath c _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
+exprPath c s (Ref _ _ _ v) = case lookup v (sAssigns s) of
+                               Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show (sAssigns s)
+                               Just e  -> exprPath c s e
+exprPath c s e@(Bop _ _ _ _ _ _) = exprPath c s (bop2fun e)
+exprPath c s expr = traceP "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr
     salt   = saltOf expr
-    hashes = argHashes s expr
-    res    = exprPathExplicit cfg prefix rtype salt hashes
+    hashes = argHashes c s expr
+    res    = exprPathExplicit c prefix rtype salt hashes
 
 exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
@@ -338,7 +339,7 @@ exprPathDigest = PathDigest . digest
 --   $ \h@(IDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
 --   where
 --     eType   = typeOf expr
---     ePath   = exprPath st expr
+--     ePath   = exprPath cfg scr expr
 --     eDigest = exprPathDigest ePath
 
 -- TODO what monad should this be in?

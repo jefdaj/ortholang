@@ -70,7 +70,7 @@ stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
 -- TODO should reject duplicate variables! except replace result
 pAssign :: ParseM (Assign, DigestMap)
 pAssign = debugParser "pAssign" $ do
-  st@(scr, cfg, ref, ids) <- getState
+  (cfg, scr) <- getState
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   v@(Var _ vName) <- (try (optional newline *> pVarEq)) -- TODO use lookAhead here to decide whether to commit to it
@@ -82,17 +82,17 @@ pAssign = debugParser "pAssign" $ do
                -- -- _ -> trace "this is not a result assignment" $ scr ++ [(v,e)]
                -- _ -> scr ++ [(v,e)]
   let as'  = (sAssigns scr) ++ [(v, e)]
-      dVal@(_, p) = (typeOf e, exprPath st e)
+      dVal@(_, p) = (typeOf e, exprPath cfg scr e)
       dKey = exprPathDigest p
-      ds'  = M.insert dKey dVal (sDigests scr)
+      ds'  = M.union ds $ M.insert dKey dVal (sDigests scr)
   -- trace ("got past scr' with scr: " ++ show scr ++ " -> " ++ show scr') $ putState (scr', cfg, ref, ids)
-  putState (scr {sAssigns=as', sDigests=ds'}, cfg, ref, ids) -- TODO remove this?
+  putState (cfg, scr {sAssigns=as', sDigests=ds'}) -- TODO remove this?
   -- debugParseM $ "assigned var " ++ show v
   let res  = (v,e)
-      dMap = M.insert dKey dVal ds
+      -- dMap = M.insert dKey dVal ds
       -- res' = debugParser cfg "pAssign" res
   -- return $ traceShow scr' res
-  return (res, dMap)
+  return (res, ds')
 
 -- Handles the special case of a naked top-level expression, which is treated
 -- as being assigned to "result". This parses the same in a script or the repl.
@@ -127,16 +127,16 @@ parseFileIO st scr = do
     Right s -> return s
 
 -- TODO need GlobalEnv here? or just Config?
-parseStatement :: GlobalEnv -> String -> Either ParseError (Assign, DigestMap)
+parseStatement :: ParseEnv -> String -> Either ParseError (Assign, DigestMap)
 parseStatement = parseWithEof pStatement
 
 -- The name doesn't do a good job of explaining this, but it's expected to be
 -- parsing an entire script from a string (no previous state).
 -- TODO clarify that
 -- TODO error if it has leftover?
-parseString :: Config -> LocksRef -> IDsRef -> String
-            -> Either ParseError Script
-parseString c r ids = parseWithEof pScript (emptyScript, c, r, ids)
+-- TODO remove the ref args
+parseString :: Config -> String -> Either ParseError Script
+parseString c = parseWithEof pScript (c, emptyScript)
 
 -- TODO add a preprocessing step that strips comments + recurses on imports?
 
@@ -153,21 +153,21 @@ lastResultOnly scr@(Script {sAssigns = as}) = scr {sAssigns = otherVars ++ [last
 -- TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
-  (_, cfg, ref, ids) <- getState
+  (cfg, scr) <- getState
   optional spaces
   ads <- many pStatement
   let (as, ds) = unzip ads 
       ds'  = M.unions ds
       scr  = emptyScript {sAssigns = as, sDigests = ds'}
       scr' = lastResultOnly scr
-  putState (scr', cfg, ref, ids)
-  return $ trace (unlines $ map show $ M.toList ds') scr'
+  putState (cfg, scr')
+  return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: GlobalEnv -> FilePath -> IO (Either ParseError Script)
-parseFile (_, cfg, ref, ids) path = do
+parseFile (_, cfg, ref, _) path = do
   debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
   txt <- readScriptWithIncludes ref path
-  return $ (parseString cfg ref ids . stripComments) txt
+  return $ (parseString cfg . stripComments) txt

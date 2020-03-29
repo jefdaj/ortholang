@@ -187,9 +187,9 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: RulesFn
-rParseSearches s@(_, cfg, ref, ids) expr@(Fun _ _ _ _ [searches]) = do
+rParseSearches s@(scr, cfg, ref, ids) expr@(Fun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
-  let searchTable  = exprPath s expr
+  let searchTable  = exprPath cfg scr expr
       searchTable' = fromPath cfg searchTable
       sList' = toPath cfg sList
   searchTable' %> \_ -> aParseSearches cfg ref ids sList' searchTable
@@ -217,19 +217,19 @@ aParseSearches cfg ref _ sList out = do
 
 -- TODO this is where to parse the searches?
 -- cGetGenome :: Config -> Expr -> Rules ExprPath
--- cGetGenome (_,cfg) expr@(Fun _ _ _ [s]) = undefined
+-- cGetGenome (scr,cfg) expr@(Fun _ _ _ [s]) = undefined
 -- cGetGenome _ _ = error "bad cGetGenome call"
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> RulesFn
-rBioMartR fn s@(_, cfg, ref, ids) expr@(Fun rtn salt _ _ [ss]) = do
+rBioMartR fn s@(scr, cfg, ref, ids) expr@(Fun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (Lit str (Salt 0) fn)
   -- (ExprPath sTable) <- rParseSearches s ss
   (ExprPath sTable) <- rExpr s $ Fun rtn salt (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
       tmp'    = toPath cfg bmTmp
-      out     = exprPath s expr
+      out     = exprPath cfg scr expr
       out'    = fromPath cfg out
       sTable' = toPath cfg sTable
       bmFn'   = toPath cfg bmFn

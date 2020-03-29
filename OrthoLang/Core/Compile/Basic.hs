@@ -65,7 +65,7 @@ import OrthoLang.Core.Pretty
 import qualified Data.Map.Strict as M
 
 import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toPath,
-                            fromPath, varPath, Path, bop2fun)
+                            fromPath, varPath, Path)
 
 import Data.IORef                 (atomicModifyIORef', readIORef)
 import Data.List                  (isPrefixOf, isInfixOf)
@@ -107,8 +107,8 @@ debugRules cfg name input out = debug cfg name msg out
 -- deprecatedRules :: GlobalEnv -> Expr -> Rules ExprPath
 -- deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
 --   where
---     out  = exprPath s e
---     out' = fromPath cfg $ exprPath s e
+--     out  = exprPath cfg scr e
+--     out' = fromPath cfg $ exprPath cfg scr e
 
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
@@ -130,14 +130,24 @@ The main entry point for compiling any 'Expr'. Use this by default
 unless you have a reason to delve into the more specific compilers below!
 
 TODO remove the insert digests hack? or is this the main entry point for that too?
+
+TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -}
 rExpr :: RulesFn
 rExpr s e@(Lit _ _ _      ) = rLit s e
 rExpr s e@(Ref _ _ _ _    ) = rRef s e
-rExpr s e@(Lst _ _ _ _   ) = rList s e
+rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO why is the map part needed?
-rExpr _   (Com (CompiledExpr _ _ rules)) = rules
-rExpr s e@(Bop _ _ _ _ _ _) = rExpr s $ bop2fun e
+rExpr s e@(Bop _ _ _ _ e1 e2) = mapM (rExpr s) [e1, e2] >> rBop s e
+rExpr _ (Com (CompiledExpr _ _ rules)) = rules
+
+-- | Temporary hack to fix Bops
+rBop :: RulesFn
+rBop s e@(Bop t r ds _ e1 e2) = rExpr s es >> rExpr s fn
+  where
+    es = Lst t r ds [e1, e2]
+    fn = Fun t r ds (prefixOf e) [es]
+rBop _ e = error $ "rBop call with non-Bop: '" ++ render (pPrint e) ++ "'"
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
@@ -145,14 +155,14 @@ rNamedFunction :: GlobalEnv -> Expr -> String -> Rules ExprPath
 rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
-rNamedFunction' s@(_, cfg, _, _) expr name = case findFunction cfg name of
+rNamedFunction' s@(scr, cfg, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function '" ++ name ++ "'"
   Just f  -> case fNewRules f of
                Nothing -> if "load_" `isPrefixOf` fName f
                             then (fOldRules f) s $ setSalt 0 expr
                             else (fOldRules f) s expr
                -- TODO is this where the digest fails to be added?
-               Just _ -> let p   = fromPath cfg $ exprPath s expr
+               Just _ -> let p   = fromPath cfg $ exprPath cfg scr expr
                              res = ExprPath p
                          in return $ debugRules cfg "rNamedFunction'" expr res
 
@@ -185,8 +195,8 @@ compileScript s@(scr, _, _, _) _ = do
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn
-rLit s@(_, cfg, ref, ids) expr = do
-  let path  = exprPath s expr -- absolute paths allowed!
+rLit s@(scr, cfg, ref, ids) expr = do
+  let path  = exprPath cfg scr expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromPath cfg path
   path' %> \_ -> aLit cfg ref ids expr path
   return (ExprPath path')
@@ -243,13 +253,13 @@ TODO can it be mostly unified with rListPaths digest-wise?
 TODO what happens when you make a list of literals in two steps using links?
 -}
 rListLits :: RulesFn
-rListLits s@(_, cfg, ref, ids) e@(Lst _ _ _ exprs) = do
+rListLits s@(scr, cfg, ref, ids) e@(Lst _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> toPath cfg p) litPaths
   outPath' %> \_ -> aListLits cfg ref ids litPaths' outPath
   return (ExprPath outPath')
   where
-    outPath  = exprPath s e
+    outPath  = exprPath cfg scr e
     outPath' = debugRules cfg "rListLits" e $ fromPath cfg outPath
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
@@ -287,12 +297,12 @@ known until after the function runs.
 TODO hash mismatch error here?
 -}
 rListPaths :: RulesFn
-rListPaths s@(_, cfg, ref, ids) e@(Lst rtn salt _ exprs) = do
+rListPaths s@(scr, cfg, ref, ids) e@(Lst rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toPath cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
-      outPath  = exprPath s e
+      outPath  = exprPath cfg scr e
       outPath' = debugRules cfg "rListPaths" e $ fromPath cfg outPath
   outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
@@ -399,12 +409,12 @@ mkLoadList hashSeqIDs name rtn = Function
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
 rLoad :: Bool -> RulesFn
-rLoad hashSeqIDs s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [p]) = do
+rLoad hashSeqIDs s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr s p
   out' %> \_ -> aLoad hashSeqIDs cfg ref ids (toPath cfg strPath) out
   return (ExprPath out')
   where
-    out  = exprPath s e
+    out  = exprPath cfg scr e
     out' = fromPath cfg out
 rLoad _ _ _ = fail "bad argument to rLoad"
 
@@ -507,13 +517,13 @@ rLoadList _ _ _ = fail "bad arguments to rLoadList"
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 -- TODO don't need to hash seqids here right?
 rLoadListLits :: RulesFn
-rLoadListLits s@(_, cfg, ref, ids) expr = do
+rLoadListLits s@(scr, cfg, ref, ids) expr = do
   (ExprPath litsPath') <- rExpr s expr
   let litsPath = toPath cfg litsPath'
   outPath' %> \_ -> aLoadListLits cfg ref ids outPath litsPath
   return (ExprPath outPath')
   where
-    outPath  = exprPath s expr
+    outPath  = exprPath cfg scr expr
     outPath' = fromPath cfg outPath
 
 aLoadListLits :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
@@ -529,11 +539,11 @@ aLoadListLits cfg ref _ outPath litsPath = do
 -- regular case for lists of any other file type
 -- TODO hash mismatch here?
 rLoadListPaths :: Bool -> RulesFn
-rLoadListPaths hashSeqIDs s@(_, cfg, ref, ids) e@(Fun rtn salt _ _ [es]) = do
+rLoadListPaths hashSeqIDs s@(scr, cfg, ref, ids) e@(Fun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   -- let hash     = digest $ toPath cfg pathsPath
   --     outPath  = exprPathExplicit cfg "list" rtn salt [hash]
-  let outPath  = exprPath s e
+  let outPath  = exprPath cfg scr e
       outPath' = fromPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toPath cfg pathsPath) outPath
   return (ExprPath outPath')

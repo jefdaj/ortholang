@@ -88,9 +88,9 @@ diamondmakedbAll = let name = "diamond_makedb_all" in Function
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
 rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [fas]) = do
+rDiamondmakedbAll s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
-  let out  = exprPath s e
+  let out  = exprPath cfg scr e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths cfg ref fasPath

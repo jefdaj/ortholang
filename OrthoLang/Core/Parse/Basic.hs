@@ -11,7 +11,7 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
 import Data.Scientific        (Scientific())
-import Text.Parsec            (getState, (<?>), try)
+import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim (ParsecT, Stream)
@@ -88,7 +88,7 @@ pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++
 -- TODO this must be succeding on 'loaner... right?
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
-  (_, cfg, _, _) <- getState
+  (cfg, _) <- getState
   try $ lookAhead $ choice
     [ eof
     , void $ choice $ map pSym $ operatorChars cfg ++ ")],"
@@ -133,16 +133,17 @@ pNum = debugParser "pNum" $ do
   ns <- many (digit <|> oneOf ".e-")
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
-  st <- getState
+  (c, s) <- getState
   let sign = case neg of
-               Just s -> s
+               Just x -> x
                _ -> ' '
       lit = show (read (sign:n:ns) :: Scientific)
       expr = Lit num (Salt 0) lit 
       dKey = exprPathDigest p
-      p    = exprPath st expr
+      p    = exprPath c s expr
       dVal = (typeOf expr, p)
-      dMap = M.singleton dKey dVal
+      dMap = M.insert dKey dVal $ sDigests s
+  putState (c, s {sDigests = dMap}) -- TODO sprinkle these all around
   return (expr, dMap)
 
 -- list of chars which can be escaped in OrthoLang
@@ -169,9 +170,10 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
 pStr :: ParseM (Expr, DigestMap)
 pStr = debugParser "pStr" $ do
   expr <- Lit str (Salt 0) <$> pQuoted <?> "string literal"
-  st <- getState
+  (c, s) <- getState
   let dKey = exprPathDigest p
-      p    = exprPath st expr
+      p    = exprPath c s expr
       dVal = (typeOf expr, p)
-      dMap = M.singleton dKey dVal
+      dMap = M.insert dKey dVal $ sDigests s
+  putState (c, s {sDigests = dMap}) -- TODO sprinkle these all around
   return (expr, dMap)

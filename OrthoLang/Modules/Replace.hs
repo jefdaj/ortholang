@@ -239,7 +239,7 @@ rReplaceEach s@(scr, cfg, ref, _) expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):
   resPaths <- mapM (rReplace' s resExpr subVar) subExprs
   let subPaths' = (\(ExprPath p) -> toPath cfg p) subPaths
       resPaths' = map (\(ExprPath p) -> toPath cfg p) resPaths
-      outPath   = exprPath s expr
+      outPath   = exprPath cfg scr expr
       outPath'  = debugRules cfg "rReplaceEach" expr $ fromPath cfg outPath
   outPath' %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]

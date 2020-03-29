@@ -88,14 +88,14 @@ buscoListLineages = Function
     name = "busco_list_lineages"
 
 rBuscoListLineages :: RulesFn
-rBuscoListLineages s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
+rBuscoListLineages s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toPath   cfg fPath
   listTmp %> \_ -> aBuscoListLineages   cfg ref ids lTmp'
   oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
-    oPath   = exprPath s e
+    oPath   = exprPath cfg scr e
     tmpDir  = buscoCache cfg
     tmpDir' = fromPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
@@ -208,9 +208,9 @@ untar cfg ref from to = runCmd cfg ref $ CmdDesc
     to' = fromPath cfg to
 
 rBuscoFetchLineage :: RulesFn
-rBuscoFetchLineage st@(_, cfg, ref, _) expr@(Fun _ _ _ _ [nPath]) = do
+rBuscoFetchLineage st@(scr, cfg, ref, _) expr@(Fun _ _ _ _ [nPath]) = do
   (ExprPath namePath) <- rExpr st nPath
-  let outPath  = exprPath st expr
+  let outPath  = exprPath cfg scr expr
       outPath' = fromPath cfg outPath
       blhDir   = (fromPath cfg $ buscoCache cfg) </> "lineages"
   outPath' %> \_ -> do
@@ -336,9 +336,9 @@ buscoScoresTable  = Function
 
 -- TODO variant of rSimpleScript that reads + passes in a list of input files?
 rBuscoScoresTable :: RulesFn
-rBuscoScoresTable s@(_, cfg, ref, _) e@(Fun _ _ _ _ [l]) = do
+rBuscoScoresTable s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [l]) = do
   (ExprPath lsPath) <- rExpr s l
-  let o  = exprPath s e
+  let o  = exprPath cfg scr e
       o' = fromPath cfg o
   o' %> \_ -> do
     ins <- readPaths cfg ref lsPath
@@ -386,11 +386,11 @@ buscoFilterCompleteness  = Function
 -- TODO try the same way it works for sets: one canonical full path!
 -- TODO do it the simple way for now, then see if it breaks and if so fix it
 rBuscoFilterCompleteness :: RulesFn
-rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(Fun _ _ _ _ [m, t, fs]) = do
+rBuscoFilterCompleteness s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [m, t, fs]) = do
   (ExprPath scorePath) <- rExpr s m
   (ExprPath tablePath) <- rExpr s t
   (ExprPath faasList ) <- rExpr s fs
-  let out  = exprPath s e
+  let out  = exprPath cfg scr e
       out' = fromPath cfg out
   out' %> \_ -> do
     score <- fmap (read :: String -> Scientific) $ readLit  cfg ref scorePath
@@ -398,7 +398,7 @@ rBuscoFilterCompleteness s@(_, cfg, ref, _) e@(Fun _ _ _ _ [m, t, fs]) = do
     faaPaths <- readPaths cfg ref faasList
     let allScores = map parseWords $ map words $ lines table
         missing   = faaPaths \\ map fst allScores
-        okPaths   = map fst $ filter (\(_, c) -> c >= score) allScores
+        okPaths   = map fst $ filter (\(scr, c) -> c >= score) allScores
     when (not $ null missing) $
       error $ "these paths are missing from the table: " ++ show missing
     writePaths cfg ref out' okPaths

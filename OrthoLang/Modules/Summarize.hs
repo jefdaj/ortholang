@@ -38,12 +38,12 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
 rSummary :: ([[FilePath]] -> [FilePath]) -> RulesFn
-rSummary summaryFn s@(_, cfg, ref, _) expr@(Fun _ _ _ _ [iList]) = do
+rSummary summaryFn s@(scr, cfg, ref, _) expr@(Fun _ _ _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   -- let (ListOf (ListOf eType)) = typeOf iList
       -- (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
                                           -- [show expr, iPath]
-  let oPath = fromPath cfg $ exprPath s expr
+  let oPath = fromPath cfg $ exprPath cfg scr expr
   oPath %> aSummary cfg ref summaryFn iPath
   return (ExprPath oPath)
 rSummary _ _ _ = fail "bad argument to rSummary"

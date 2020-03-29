@@ -58,9 +58,9 @@ globFiles = Function
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: RulesFn
-rGlobFiles s@(_, cfg, ref, _) e@(Fun _ _ _ _ [p]) = do
+rGlobFiles s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr s p
-  let outPath = exprPath s e
+  let outPath = exprPath cfg scr e
       out'    = fromPath cfg outPath
       path'   = toPath cfg path
   out' %> \_ -> aGlobFiles cfg ref outPath path'

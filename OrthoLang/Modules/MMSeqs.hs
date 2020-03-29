@@ -84,9 +84,9 @@ tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files,
  - its suffix later for now.
  -}
 rMmseqsCreateDbAll :: RulesFn
-rMmseqsCreateDbAll s@(_, cfg, ref, _) e@(Fun _ _ _ _ [fas]) = do
+rMmseqsCreateDbAll s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
-  let out    = exprPath s e
+  let out    = exprPath cfg scr e
       out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromPath cfg out
       createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       dbPath = createDbDir </> digest fas <.> "mmseqs2db" -- TODO take hash from somewhere else?
@@ -163,11 +163,11 @@ tMmseqsSearchDb n types = fail $ n ++ " requires a number, fasta, and mmseqs2 db
  - suffix later when needed.
  -}
 rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb st@(_, cfg, ref, _) e@(Fun _ salt _ _ [n, q, s]) = do
+rMmseqsSearchDb st@(scr, cfg, ref, _) e@(Fun _ salt _ _ [n, q, s]) = do
   (ExprPath ePath) <- rExpr st n
   (ExprPath qPath) <- rExpr st $ Fun mms salt (depsOf q) "mmseqs_createdb" [q]
   (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db
-  let out    = exprPath st e
+  let out    = exprPath cfg scr e
       out'   = debugRules cfg "rMmseqsSearch" e $ fromPath cfg out
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?

@@ -15,7 +15,7 @@ import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
 import Data.List              (union)
 import Data.Maybe (isJust, fromJust)
-import Text.Parsec            (try, getState, (<?>))
+import Text.Parsec            (try, getState, putState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 
@@ -30,7 +30,7 @@ pList :: ParseM (Expr, DigestMap)
 pList = debugParser "pList" $ do
   tds <- between (pSym '[') (pSym ']')
                  (sepBy pExpr (pSym ','))
-  st <- getState
+  (cfg, scr) <- getState
   let (terms, ds) = unzip tds
       eType = nonEmptyType $ map typeOf terms
       deps  = if null terms then [] else foldr1 union $ map depsOf terms
@@ -38,11 +38,12 @@ pList = debugParser "pList" $ do
     Left err -> fail err
     Right t  -> do
       let expr  = Lst t (Salt 0) deps terms
-          p    = exprPath st expr
+          p    = exprPath cfg scr expr
           dKey = exprPathDigest p
           dVal = (typeOf expr, p)
-          dMap = M.unions $ (M.singleton dKey dVal) : ds
-      return (expr, dMap)
+          dMap' = M.unions $ (M.insert dKey dVal $ sDigests scr) : ds
+      putState (cfg, scr {sDigests = dMap'})
+      return (expr, dMap')
 
 ---------------
 -- operators --
@@ -51,7 +52,7 @@ pList = debugParser "pList" $ do
 -- for now, I think all binary operators at the same precedence should work.
 -- but it gets more complicated I'll write out an actual table here with a
 -- prefix function too etc. see the jake wheat tutorial
-operatorTable :: Config -> [[E.Operator String GlobalEnv Identity (Expr, DigestMap)]]
+operatorTable :: Config -> [[E.Operator String ParseEnv Identity (Expr, DigestMap)]]
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
@@ -75,15 +76,15 @@ pBop bop
                            *> do { st <- getState; return (mkBop st bop) }
 pBop _ = fail "pBop only works with infix functions"
 
-mkBop :: GlobalEnv -> Function -> ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
-mkBop st bop (e1, ds1) (e2, ds2) = case bopTypeCheck (typeOf e1) (typeOf e2) of
+mkBop :: ParseEnv -> Function -> ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
+mkBop (cfg, scr) bop (e1, ds1) (e2, ds2) = case bopTypeCheck (typeOf e1) (typeOf e2) of
   Left  msg -> error msg -- TODO can't `fail` because not in monad here?
   Right rtn -> let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
-                   p    = exprPath st expr
+                   p    = exprPath cfg scr expr
                    dKey = exprPathDigest p
                    dVal = (typeOf expr, p)
-                   dMap = M.unions [M.singleton dKey dVal, ds1, ds2]
-               in (expr, dMap)
+                   dMap' = M.unions [M.singleton dKey dVal, ds1, ds2, sDigests scr]
+               in (expr, dMap')
   where
     -- TODO does typesMatch already cover (ListOf Empty) comparisons?
     bopTypeCheck (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
@@ -104,7 +105,7 @@ mkBop st bop (e1, ds1) (e2, ds2) = case bopTypeCheck (typeOf e1) (typeOf e2) of
 -- TODO get function names from modules
 pFunName :: ParseM String
 pFunName = do
-  (_, cfg, _, _) <- getState
+  (cfg, _) <- getState
   (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
@@ -134,7 +135,7 @@ pArgs = debugParser "pArgs" $ do
 -- TODO hey is this where it's missing the dmap?
 pFunArgs :: String -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
 pFunArgs name (args, ds) = debugParser "pFun" $ do
-  (_, cfg, _, _) <- getState
+  (cfg, _) <- getState
   -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
   -- args <- pArgs
   -- args <- manyTill pTerm pEnd
@@ -157,7 +158,7 @@ pRef = debugParser "pRef" $ do
   -- v@(Var var) <- pVarOnly
   v@(Var _ var) <- pVar
   -- let v = Var var
-  (scr, _, _, _) <- getState
+  (_, scr) <- getState
   -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
   case lookup v (sAssigns scr) of
     Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
@@ -176,13 +177,14 @@ typecheckArgs :: Function -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
 typecheckArgs fn (args, ds) = case (fTypeCheck fn) (map typeOf args) of
   Left  msg -> fail msg
   Right rtn -> do
-    st <- getState
+    (c, s) <- getState
     let expr = Fun rtn (Salt 0) deps (fName fn) args
         deps = foldr1 union $ map depsOf args
         dKey = exprPathDigest p
-        p    = exprPath st expr
+        p    = exprPath c s expr
         dVal = (typeOf expr, p)
-        dMap = M.insert dKey dVal ds
+        dMap = M.insert dKey dVal $ M.union (sDigests s) ds
+    putState (c, s {sDigests = dMap})
     return (expr, dMap)
 
 -----------------
@@ -214,22 +216,23 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 -- jakewheat.github.io/intro_to_parsing/#_operator_table_and_the_first_value_expression_parser
 pExpr :: ParseM (Expr, DigestMap)
 pExpr = debugParser "pExpr" $ do
-  st@(_, cfg, _, _) <- getState
+  (cfg, scr) <- getState
   -- debugParseM "expr"
   (e, ds) <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
   -- let res' = debugParser cfg "pExpr" res
-  let p    = exprPath st e
+  let p    = exprPath cfg scr e
       dKey = exprPathDigest p
       dVal = (typeOf e, p)
-      dMap = M.insert dKey dVal ds
+      dMap = M.unions $ [M.singleton dKey dVal, sDigests scr, ds]
+  putState (cfg, scr {sDigests = dMap})
   return (e, dMap)
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)
-isExpr :: GlobalEnv -> String -> Bool
+isExpr :: ParseEnv -> String -> Bool
 isExpr state line = isRight $ parseWithEof pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: GlobalEnv -> String -> Either ParseError (Expr, DigestMap)
+parseExpr :: ParseEnv -> String -> Either ParseError (Expr, DigestMap)
 parseExpr = runParseM pExpr

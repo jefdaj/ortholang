@@ -14,23 +14,23 @@ import Development.Shake.FilePath (makeRelative)
 -- https://jakewheat.github.io/intro_to_parsing/#functions-and-types-for-parsing
 
 -- TODO is this ever needed in production? probably not
-parseAndShow :: (Show a) => ParseM a -> GlobalEnv -> String -> String
+parseAndShow :: (Show a) => ParseM a -> ParseEnv -> String -> String
 parseAndShow p s str' = case runParseM p s str' of
   Left err -> show err
   Right s2 -> show s2
 
 -- TODO adjust this to fail when there's extra text off the end of the line!
-runParseM :: ParseM a -> GlobalEnv -> String -> Either ParseError a
-runParseM p s@(_, cfg, _, _) = P.runParser p s desc
+runParseM :: ParseM a -> ParseEnv -> String -> Either ParseError a
+runParseM p s@(cfg, _) = P.runParser p s desc
   where
     desc = case cfgScript cfg of
              Nothing -> "repl"
              Just f  -> makeRelative (cfgWorkDir cfg) f
 
-parseWithLeftOver :: ParseM a -> GlobalEnv -> String -> Either ParseError (a,String)
+parseWithLeftOver :: ParseM a -> ParseEnv -> String -> Either ParseError (a,String)
 parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
   where
     leftOver = manyTill anyToken eof
 
-parseWithEof :: ParseM a -> GlobalEnv -> String -> Either ParseError a
+parseWithEof :: ParseM a -> ParseEnv -> String -> Either ParseError a
 parseWithEof p s = runParseM (p <* eof) s

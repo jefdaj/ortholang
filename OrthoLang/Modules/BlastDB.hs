@@ -147,13 +147,13 @@ mkLoadDBEach name rtn = Function
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(_, cfg, ref, ids) e@(Fun _ _ _ _ [s]) = do
+rLoadDB st@(scr,cfg, ref, ids) e@(Fun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
   let sPath' = toPath cfg sPath
   oPath' %> \_ -> aLoadDB cfg ref ids oPath sPath'
   return (ExprPath oPath')
   where
-    oPath  = exprPath st e
+    oPath  = exprPath cfg scr e
     oPath' = fromPath cfg oPath
 rLoadDB _ _ = fail "bad argument to rLoadDB"
 
@@ -207,14 +207,14 @@ makeblastdbCache :: Config -> Path
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(_, cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
+rBlastdblist s@(scr,cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toPath   cfg fPath
   listTmp %> \_ -> aBlastdblist   cfg ref ids lTmp'
   oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
-    oPath   = exprPath s e
+    oPath   = exprPath cfg scr e
     tmpDir  = blastdbgetCache cfg
     tmpDir' = fromPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
@@ -276,10 +276,10 @@ blastdbgetProt :: Function
 blastdbgetProt = mkBlastdbget "blastdbget_prot" pdb
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(_, cfg, ref, ids) e@(Fun _ _ _ _ [name]) = do
+rBlastdbget st@(scr,cfg, ref, ids) e@(Fun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
-      dbPrefix  = exprPath st e -- final prefix
+      dbPrefix  = exprPath cfg scr e -- final prefix
       dbPrefix' = fromPath cfg dbPrefix
       nPath'    = toPath cfg nPath
   dbPrefix' %> \_ -> aBlastdbget cfg ref ids dbPrefix tmpDir nPath'
@@ -359,9 +359,9 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdbAll :: RulesFn
-rMakeblastdbAll s@(_, cfg, ref, ids) e@(Fun rtn _ _ _ [fas]) = do
+rMakeblastdbAll s@(scr,cfg, ref, ids) e@(Fun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
-  let out       = exprPath s e
+  let out       = exprPath cfg scr e
       out'      = debugR' cfg "rMakeblastdbAll" e $ fromPath cfg out
       cDir      = makeblastdbCache cfg
       fasPath'   = toPath cfg fasPath
@@ -530,7 +530,7 @@ tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
 
 -- rFun1 :: Action1 -> RulesFn
--- rFun1 act1 st@(_, cfg, ref) expr@(Fun _ _ _ _ [a1]) = do
+-- rFun1 act1 st@(scr,cfg, ref) expr@(Fun _ _ _ _ [a1]) = do
 
 -- map1of1 :: Type -> Type -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
@@ -540,7 +540,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, _) (Fun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(scr,cfg, _, _) (Fun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
@@ -579,9 +579,9 @@ tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
-rSingletons st@(_, cfg, ref, ids) expr@(Fun rtn _ _ _ [listExpr]) = do
+rSingletons st@(scr,cfg, ref, ids) expr@(Fun rtn _ _ _ [listExpr]) = do
   (ExprPath listPath') <- rExpr st listExpr
-  let outPath  = exprPath st expr
+  let outPath  = exprPath cfg scr expr
       outPath' = fromPath cfg outPath
       listPath = toPath cfg listPath'
       (ListOf (ListOf t)) = rtn
