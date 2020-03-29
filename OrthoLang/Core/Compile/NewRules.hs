@@ -22,6 +22,8 @@ module OrthoLang.Core.Compile.NewRules
   )
   where
 
+import Debug.Trace
+
 import Control.Monad (when)
 import Development.Shake
 import Development.Shake.FilePath ((</>))
@@ -109,7 +111,9 @@ rNewRules
   -> (ExprPath -> t) -> RulesR ()
 rNewRules nArgs applyFn name tFn aFn = do
   (cfg, lRef, iRef, dMap) <- ask
-  newPattern cfg name nArgs %>> aNewRules applyFn tFn aFn
+  let ptn = newPattern cfg name nArgs
+      ptn' = trace ("rNewRules ptn: '" ++ show ptn ++ "'") ptn
+  ptn' %>> aNewRules applyFn tFn aFn
 
 (%>>) :: FilePattern -> (ExprPath -> ActionR ()) -> RulesR ()
 ptn %>> act = do
@@ -145,7 +149,6 @@ needR name deps = do
   (cfg, lRef, _, _) <- ask
   lift $ need' cfg lRef name deps
 
--- TODO do the applyFn thing at the action level rather than rules?
 mkNewFn1 :: String -> Maybe Char -> Type -> [Type] -> ActionR1 -> Function
 mkNewFn1 = mkNewFn rNewRules1
 

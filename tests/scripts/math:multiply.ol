@@ -6,13 +6,19 @@
 # (PathDigest "e77c7a2b98",(num,Path "$TMPDIR/exprs/multiply/7ca850b5f6/0/result"))
 #
 # so what's still wrong about it? result path is correct so just a need issue?
-result = 2 * 3.5
+# no, it fails to decode the path but DOES need it in shake. just never gets in the digestmap :/
+# result = 2 * 3.5
 
+# SOLVED :D (but not the first one ^ yet)
+# it DOES get added in the long form multiply version
+# but somehow that still fails with another bug? maybe just fn args aren't being needed in newrules.hs?
+# that one (fa0) doesn't show up in any of these tests at all
+# the issue isn't in aMath because that never runs yet; must be in the list compiler itself? or handoff between them
 # ("08c7e293bb",(num,"$TMPDIR/exprs/num/ea11b49459/0/result")) 2.0
 # ("1337284c73",(num,"$TMPDIR/exprs/num/992d750479/0/result")) 3.5
 # ("7ca850b5f6",(num.list,"$TMPDIR/exprs/list/fa0b8b18ad/0/result")) [2.0, 3.5]
 # ("e77c7a2b98",(num,"$TMPDIR/exprs/multiply/7ca850b5f6/0/result")) 7.0
-# result = multiply [2, 3.5]
+result = multiply [2, 3.5]
 
 # hah fixed this one with bop2fun in exprPath
 # missing before: list of lists [[2.0, 3.5], [7.0]]

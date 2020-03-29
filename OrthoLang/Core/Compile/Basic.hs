@@ -135,14 +135,14 @@ rExpr :: RulesFn
 rExpr s e@(Lit _ _ _      ) = rLit s e
 rExpr s e@(Ref _ _ _ _    ) = rRef s e
 rExpr s e@(Lst _ _ _ _   ) = rList s e
-rExpr s e@(Fun _ _ _ n _  ) = rNamedFunction s e n -- TODO deprecate this
+rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO why is the map part needed?
 rExpr _   (Com (CompiledExpr _ _ rules)) = rules
 rExpr s e@(Bop _ _ _ _ _ _) = rExpr s $ bop2fun e
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
 rNamedFunction :: GlobalEnv -> Expr -> String -> Rules ExprPath
-rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n
+rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
 rNamedFunction' s@(_, cfg, _, _) expr name = case findFunction cfg name of
@@ -151,7 +151,10 @@ rNamedFunction' s@(_, cfg, _, _) expr name = case findFunction cfg name of
                Nothing -> if "load_" `isPrefixOf` fName f
                             then (fOldRules f) s $ setSalt 0 expr
                             else (fOldRules f) s expr
-               Just _ -> return $ ExprPath $ fromPath cfg $ exprPath s expr
+               -- TODO is this where the digest fails to be added?
+               Just _ -> let p   = fromPath cfg $ exprPath s expr
+                             res = ExprPath p
+                         in return $ debugRules cfg "rNamedFunction'" expr res
 
 rAssign :: GlobalEnv -> Assign -> Rules (Var, VarPath)
 rAssign s@(_, cfg, _, _) (var, expr) = do

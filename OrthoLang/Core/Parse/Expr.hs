@@ -117,6 +117,7 @@ pFun = do
   -- debugParseM $ "pFun committed to parsing " ++ name
   args <- pArgs
   -- debugParseM $ "pFun " ++ name ++ " args: " ++ show args
+  -- TODO hey is this where it's missing the dMap??
   pFunArgs name args
 
 -- TODO main parse error is in here, when pTerm fails on an arg??
@@ -130,6 +131,7 @@ pArgs = debugParser "pArgs" $ do
 
 -- This function uses error rather than fail to prevent parsec from trying anything more
 -- (TODO is there a better way?)
+-- TODO hey is this where it's missing the dmap?
 pFunArgs :: String -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
 pFunArgs name (args, ds) = debugParser "pFun" $ do
   (_, cfg, _, _) <- getState

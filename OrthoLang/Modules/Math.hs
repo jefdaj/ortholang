@@ -62,14 +62,14 @@ mkMathFn opChar name fn = mkNewFn1 name (Just opChar) num [ListOf num] $ aMath f
 -- oh this never runs, because shake can't find the input list
 aMath :: (Scientific -> Scientific -> Scientific) -> ActionR1
 aMath fn (ExprPath out) a1 = do
-  -- liftIO $ putStrLn $ "aMath a1: " ++ show a1
+  liftIO $ putStrLn $ "aMath a1: " ++ show a1
   -- paths <- readPaths cfg lRef a1
   -- liftIO $ putStrLn $ "aMath paths: " ++ show paths
   -- inputs <- mapM (readLit cfg lRef) $ map (fromPath cfg) paths
-  -- liftIO $ putStrLn $ "aMath inputs: " ++ show inputs
-  -- need' cfg lRef "test" [a1]
   (cfg, lRef, _, _) <- ask
+  lift $ need' cfg lRef "test" [a1]
   inputs <- lift $ readLits cfg lRef a1
+  liftIO $ putStrLn $ "aMath inputs: " ++ show inputs
   let result = foldl1 fn $ map (\n -> read n :: Scientific) inputs
-  -- liftIO $ putStrLn $ "aMath result: " ++ show result
+  liftIO $ putStrLn $ "aMath result: " ++ show result
   lift $ writeLit cfg lRef out $ show result
