@@ -499,13 +499,12 @@ type IDsRef = IORef IDs
 
 type DigestMap = M.Map PathDigest (Type, Path)
 
--- TODO can this be broken up by scope? GlobalState, RulesState, ActionState
 -- TODO config always first? or make a record + ask* fns
 type GlobalEnv = (Script, Config, LocksRef, IDsRef)
 
 -- TODO config always first? or make a record + ask* fns
 type ParseEnv = (Config, Script) -- script also contains the digestmap now
-type ParseM a = Parsec String ParseEnv a -- TODO only hold the script + config, not the whole global env
+type ParseM a = Parsec String ParseEnv a
 
 ----------------
 -- Repl monad --

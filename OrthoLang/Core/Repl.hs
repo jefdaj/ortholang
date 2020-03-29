@@ -154,11 +154,11 @@ step st hdl line = case stripWhiteSpace line of
 
 -- TODO insert ids
 runStatement :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement st line of
+runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement (cfg, scr) line of
   Left  e -> hPutStrLn hdl (show e) >> return st
   Right r -> do
     let st' = (updateVars scr r, cfg, ref, ids)
-    when (isExpr st line) (evalScript hdl st')
+    when (isExpr (cfg, scr) line) (evalScript hdl st')
     return st'
 
 -- this is needed to avoid assigning a variable literally to itself,
@@ -376,7 +376,7 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
 
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String
-showExprType st e = case parseExpr st e of
+showExprType (s, c, _, _) e = case parseExpr (c, s) e of
   Right (expr, _) -> show $ typeOf expr
   Left  err  -> show err
 

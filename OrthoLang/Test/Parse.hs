@@ -83,13 +83,13 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- digestExamples st = mapM (digestExample st)
 
 regularParse :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Either ParseError a
-regularParse p cfg ref ids = parseWithEof p (emptyScript, cfg, ref, ids)
+regularParse p cfg ref ids = parseWithEof p (cfg, emptyScript)
 
 takeVar :: String -> Var
 takeVar = Var (RepID Nothing) . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Bool
-parsedItAll p cfg ref ids str' = case parseWithLeftOver p (emptyScript, cfg, ref, ids) str' of
+parsedItAll p cfg ref ids str' = case parseWithLeftOver p (cfg, emptyScript) str' of
   Right (_, "") -> True
   _ -> False
 
@@ -150,16 +150,16 @@ wsProps :: Config -> LocksRef -> IDsRef -> TestTree
 wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(Var _ s)) (ExSpace w) ->
-      parseWithLeftOver pVar (emptyScript, cfg, ref, ids) (s ++ w) == Right (v, "")
+      parseWithLeftOver pVar (cfg, emptyScript) (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
-      parseWithLeftOver (pSym c) (emptyScript, cfg, ref, ids) (c:w) == Right ((), "")
+      parseWithLeftOver (pSym c) (cfg, emptyScript) (c:w) == Right ((), "")
   , testProperty "after equals signs in assignment statements" $
     \(ExAssign a) (ExSpace w) ->
-      parseWithLeftOver pVarEq (emptyScript, cfg, ref, ids) (a ++ w) == Right (takeVar a, "")
+      parseWithLeftOver pVarEq (cfg, emptyScript) (a ++ w) == Right (takeVar a, "")
   , testProperty "after quoted strings" $
     \(ExQuoted q) (ExSpace w) ->
-      parseWithLeftOver pQuoted (emptyScript, cfg, ref, ids) (q ++ w) == Right (read q, "")
+      parseWithLeftOver pQuoted (cfg, emptyScript) (q ++ w) == Right (read q, "")
   , testProperty "after numbers" $
     \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg ref ids (n ++ w)
   ]
@@ -168,12 +168,12 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
 acProps :: Config -> LocksRef -> IDsRef -> TestTree
 acProps cfg ref ids = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
-      \(ExVar v@(Var _ s)) -> parseWithLeftOver pVar (emptyScript, cfg, ref, ids) s == Right (v, "")
+      \(ExVar v@(Var _ s)) -> parseWithLeftOver pVar (cfg, emptyScript) s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
-      \(ExSymbol c) -> parseWithLeftOver (pSym c) (emptyScript, cfg, ref, ids) [c] == Right ((), "")
+      \(ExSymbol c) -> parseWithLeftOver (pSym c) (cfg, emptyScript) [c] == Right ((), "")
   , testProperty "variables with equal signs after" $
       \(ExAssign a) ->
-        parseWithLeftOver pVarEq (emptyScript, cfg, ref, ids) a == Right (takeVar a, "")
+        parseWithLeftOver pVarEq (cfg, emptyScript) a == Right (takeVar a, "")
   , testProperty "quoted strings" $
       \(ExQuoted q) -> regularParse pQuoted cfg ref ids q == Right (read q)
   , testProperty "positive numbers" $
