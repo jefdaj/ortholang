@@ -1,43 +1,69 @@
-module OrthoLang.Core.Parse.Expr where
+module OrthoLang.Core.Parse.Expr
+  (
+  -- * Lists
+    pList
+
+  -- * Binary Operators
+  , operatorTable
+  , pBop
+  , mkBop
+
+  -- * Functions
+  , pFunName
+  , pFun
+  , pArgs
+  , pFunArgs
+  , typecheckArgs
+
+  -- * References
+  , pRef
+
+  -- * Expressions
+  , pParens
+  , pTerm
+  , pExpr
+  , isExpr
+  , parseExpr
+  )
+  where
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Pretty()
+import OrthoLang.Core.Pretty ()
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
-import OrthoLang.Core.Util (headOrDie)
-import OrthoLang.Core.Paths (exprPath, exprPathDigest)
 
 import qualified Text.Parsec.Expr as E
--- import Text.PrettyPrint.HughesPJClass (render, pPrint)
+import qualified Data.Map.Strict  as M
 
 import Control.Applicative    ((<|>))
 import Control.Monad          (void)
 import Control.Monad.Identity (Identity)
+import Data.Either            (isRight)
 import Data.List              (union)
-import Data.Maybe (isJust, fromJust)
-import Text.Parsec            (try, getState, putState, (<?>))
+import Data.Maybe             (isJust, fromJust)
+import OrthoLang.Core.Paths   (exprPath, exprPathDigest)
+import OrthoLang.Core.Util    (headOrDie)
+import Text.Parsec            (ParseError, try, getState, putState, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 
-import Data.Either            (isRight)
-import Text.Parsec            (ParseError)
 
-import qualified Data.Map.Strict as M
+{-
+TODO how hard would it be to get Haskell's sequence notation? would it be useful?
 
--- TODO how hard would it be to get Haskell's sequence notation? would it be useful?
--- TODO once there's [ we can commit to a list, right? should allow failing for real afterward
+TODO once there's [ we can commit to a list, right? should allow failing for real afterward
+-}
 pList :: ParseM (Expr, DigestMap)
 pList = debugParser "pList" $ do
-  tds <- between (pSym '[') (pSym ']')
-                 (sepBy pExpr (pSym ','))
-  (cfg, scr) <- getState
+  tds <- between (pSym '[') (pSym ']') (sepBy pExpr (pSym ','))
   let (terms, ds) = unzip tds
       eType = nonEmptyType $ map typeOf terms
-      deps  = if null terms then [] else foldr1 union $ map depsOf terms
   case eType of
     Left err -> fail err
     Right t  -> do
-      let expr  = Lst t (Salt 0) deps terms
+      (cfg, scr) <- getState
+      let deps  = if null terms then [] else foldr1 union $ map depsOf terms
+          expr  = Lst t (Salt 0) deps terms
           p    = exprPath cfg scr expr
           dKey = exprPathDigest p
           dVal = (typeOf expr, p)
@@ -49,9 +75,11 @@ pList = debugParser "pList" $ do
 -- operators --
 ---------------
 
--- for now, I think all binary operators at the same precedence should work.
--- but it gets more complicated I'll write out an actual table here with a
--- prefix function too etc. see the jake wheat tutorial
+{-|
+For now, I think all binary operators at the same precedence should work.
+but it gets more complicated I'll write out an actual table here with a
+prefix function too etc. See the jake wheat tutorial.
+-}
 operatorTable :: Config -> [[E.Operator String ParseEnv Identity (Expr, DigestMap)]]
 operatorTable cfg = [map binary bops]
   where
@@ -59,16 +87,11 @@ operatorTable cfg = [map binary bops]
     bops = filter (isJust . fOpChar) (concat $ map mFunctions mods)
     mods = cfgModules cfg
 
--- Tricky bit: needs to take two already-parsed expressions
--- TODO verify they have the correct types
--- TODO is this obsolete now that there's pBop?
--- pBop :: Char -> ParseM (Expr -> Expr -> Expr)
--- pBop o = pSym o *> (return $ \e1 e2 ->
---   let deps = union (depsOf e1) (depsOf e2)
---   in Bop (typeOf e1) deps [o] e1 e2)
+{-
+TODO is there a better way than only taking one-char strings?
 
--- TODO is there a better way than only taking one-char strings?
--- TODO how to fail gracefully (with fail, not error) here??
+TODO how to fail gracefully (with fail, not error) here??
+-}
 pBop :: Function -> ParseM ((Expr, DigestMap) -> (Expr, DigestMap) -> (Expr, DigestMap))
 pBop bop
   | isJust (fOpChar bop) = (debugParser ("pBop " ++ fName bop)
@@ -100,9 +123,13 @@ mkBop (cfg, scr) bop (e1, ds1) (e2, ds2) = case bopTypeCheck (typeOf e1) (typeOf
 -- functions --
 ---------------
 
--- TODO load names from modules, of course
--- TODO put this in terms of "keyword" or something?
--- TODO get function names from modules
+{-|
+TODO load names from modules, of course
+
+TODO put this in terms of "keyword" or something?
+
+TODO get function names from modules
+-}
 pFunName :: ParseM String
 pFunName = do
   (cfg, _) <- getState
@@ -110,8 +137,11 @@ pFunName = do
   where
     str' s = string s <* (void spaces1 <|> eof)
 
--- TODO any way to do this last so "function not found" error comes through??
--- TODO should be able to commit after parsing the fn name, which would allow real failure
+{-|
+TODO any way to do this last so "function not found" error comes through??
+
+TODO should be able to commit after parsing the fn name, which would allow real failure
+-}
 pFun :: ParseM (Expr, DigestMap)
 pFun = do
   name <- try pFunName -- TODO try?
@@ -121,8 +151,11 @@ pFun = do
   -- TODO hey is this where it's missing the dMap??
   pFunArgs name args
 
--- TODO main parse error is in here, when pTerm fails on an arg??
--- TODO so is pTerm failing on it, or pEnd succeeding?
+{-|
+TODO main parse error is in here, when pTerm fails on an arg??
+
+TODO so is pTerm failing on it, or pEnd succeeding?
+-}
 pArgs :: ParseM ([Expr], DigestMap)
 pArgs = debugParser "pArgs" $ do
   eds <- manyTill (try pTerm) pEnd
@@ -130,9 +163,13 @@ pArgs = debugParser "pArgs" $ do
       dMap = M.unions ds
   return (es, dMap)
 
--- This function uses error rather than fail to prevent parsec from trying anything more
--- (TODO is there a better way?)
--- TODO hey is this where it's missing the dmap?
+{-|
+This function uses error rather than fail to prevent parsec from trying anything more
+
+TODO is there a better way?
+
+TODO hey is this where it's missing the dmap?
+-}
 pFunArgs :: String -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
 pFunArgs name (args, ds) = debugParser "pFun" $ do
   (cfg, _) <- getState
@@ -145,33 +182,6 @@ pFunArgs name (args, ds) = debugParser "pFun" $ do
     []      -> fail $ "no function found with name '" ++ name ++ "'"
     (fn:[]) -> typecheckArgs fn (args, ds) -- TODO why no full7942??
     _       -> fail $ "function name collision! multiple fns match '" ++ name ++ "'"
-
--- A reference is just a variable name, but that variable has to be in the script.
--- TODO why does it fail after this, but only sometimes??
--- TODO main error is in here when if fails on a ref that clearly exists?
--- pRef :: String -> ParseM (Expr, DigestMap)
--- pRef var = debugParser "pRef" $ do
---
--- Since this is the last term parser, it can actually error instead of failing
-pRef :: ParseM (Expr, DigestMap)
-pRef = debugParser "pRef" $ do
-  -- v@(Var var) <- pVarOnly
-  v@(Var _ var) <- pVar
-  -- let v = Var var
-  (_, scr) <- getState
-  -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
-  case lookup v (sAssigns scr) of
-    Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
-    Just e -> return (Ref (typeOf e) (Salt 0) (depsOf e) v, M.empty) -- TODO is it always empty?
-
--- pFunOrRef :: ParseM (Expr, DigestMap)
--- pFunOrRef = debugParser "pFunOrRef" $ do
---   name <- try pIden -- TODO when it gets here, loader is cut off to oader
---   traceM $ "parsed name: " ++ name
---   (_, cfg, _, _) <- getState
---   if name `elem` fnNames cfg
---     then pFunArgs name
---     else pRef name
 
 typecheckArgs :: Function -> ([Expr], DigestMap) -> ParseM (Expr, DigestMap)
 typecheckArgs fn (args, ds) = case (fTypeCheck fn) (map typeOf args) of
@@ -186,6 +196,25 @@ typecheckArgs fn (args, ds) = case (fTypeCheck fn) (map typeOf args) of
         dMap = M.insert dKey dVal $ M.union (sDigests s) ds
     putState (c, s {sDigests = dMap})
     return (expr, dMap)
+
+{-|
+A reference is just a variable name, but that variable has to be in the script.
+Since this is the last term parser, it can actually error instead of failing.
+
+TODO why does it fail after this, but only sometimes??
+
+TODO main error is in here when if fails on a ref that clearly exists?
+-}
+pRef :: ParseM (Expr, DigestMap)
+pRef = debugParser "pRef" $ do
+  -- v@(Var var) <- pVarOnly
+  v@(Var _ var) <- pVar
+  -- let v = Var var
+  (_, scr) <- getState
+  -- debugParseM $ "scr before lookup of '" ++ var ++ "': " ++ show scr
+  case lookup v (sAssigns scr) of
+    Nothing -> fail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
+    Just e -> return (Ref (typeOf e) (Salt 0) (depsOf e) v, M.empty) -- TODO is it always empty?
 
 -----------------
 -- expressions --
