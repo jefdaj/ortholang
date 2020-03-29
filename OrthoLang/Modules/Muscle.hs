@@ -22,7 +22,7 @@ aln :: Type
 aln = Type
   { tExt  = "aln"
   , tDesc = "multiple sequence alignment"
-  -- , tShow = \_ _ f -> return $ "multiple sequence alignment '" ++ f ++ "'" -- TODO actually show?
+  -- , tShow = \_ _ f -> return $ "multiple sequence alignment \"" ++ f ++ "\"" -- TODO actually show?
   , tShow = defaultShow
   }
 

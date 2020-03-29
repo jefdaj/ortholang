@@ -30,7 +30,7 @@ hmm :: Type
 hmm = Type
   { tExt  = "hmm"
   , tDesc = "hidden markov model"
-  -- , tShow = \_ _ f -> return $ "hidden markov model '" ++ f ++ "'"
+  -- , tShow = \_ _ f -> return $ "hidden markov model \"" ++ f ++ "\""
   , tShow = defaultShow
   }
 

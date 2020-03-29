@@ -71,7 +71,7 @@ fnagz :: Type
 fnagz = Type
   { tExt  = "fna.gz"
   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tShow = \_ _ f -> return $ "gzipped fna file '" ++ f ++ "'"
+  , tShow = \_ _ f -> return $ "gzipped fna file \"" ++ f ++ "\""
   }
 
 -- TODO unify with faa? or replace it?
@@ -79,7 +79,7 @@ faagz :: Type
 faagz = Type
   { tExt  = "faa.gz"
   , tDesc = "gzipped fasta amino acid (proteome)"
-  , tShow = \_ _ f -> return $ "gzipped faa file '" ++ f ++ "'"
+  , tShow = \_ _ f -> return $ "gzipped faa file \"" ++ f ++ "\""
   }
 
 -- TODO does this work at all?

@@ -193,9 +193,9 @@ pFunArgs name args = debugParser "pFun" $ do
   let fns  = concat $ map mFunctions $ cfgModules cfg
       fns' = filter (\f -> fName f == name) fns
   case fns' of
-    []      -> parseFail $ "no function found with name '" ++ name ++ "'"
+    []      -> parseFail $ "no function found with name \"" ++ name ++ "\""
     (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
-    _       -> parseFail $ "function name collision! multiple fns match '" ++ name ++ "'"
+    _       -> parseFail $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
 typecheckArgs :: Function -> [Expr] -> ParseM Expr
 typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
@@ -222,8 +222,8 @@ pRef = debugParser "pRef" $ do
   v@(Var _ var) <- pVar
   scr <- getScript
   case lookup v (sAssigns scr) of
-    Nothing -> trace "pRef" ("scr before lookup of '" ++ var ++ "': " ++ show scr) $
-                 parseFail $ "no such variable '" ++ var ++ "'" ++ "\n" -- ++ show scr
+    Nothing -> trace "pRef" ("scr before lookup of \"" ++ var ++ "': " ++ show scr) $
+                 parseFail $ "no such variable \"" ++ var ++ "\"" ++ "\n" -- ++ show scr
     Just e -> return $ Ref (typeOf e) (Salt 0) (depsOf e) v
 
 -- debugParseM :: String -> String -> 

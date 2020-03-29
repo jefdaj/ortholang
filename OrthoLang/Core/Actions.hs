@@ -378,8 +378,8 @@ writeLits cfg ref path lits = do
 --      (seems almost certain to be caught on reading later)
 writeLit :: Config -> LocksRef -> FilePath -> String -> Action ()
 writeLit cfg ref path lit = do
-  -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: '" ++ lit ++ "'")
-  -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: '" ++ lits ++ "'")
+  -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: \"" ++ lit ++ "\"")
+  -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: \"" ++ lits ++ "\"")
   debugA' "writeLit" $ show lit ++ " -> writeLits " ++ show lits
   writeLits cfg ref path lits
   where
@@ -661,7 +661,7 @@ sanitizeFileInPlace cfg ref path = do
   when exists $ do
     txt <- liftIO $ readFileStrict ref path -- can't use need here
     let txt' = toGeneric cfg txt
-    -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
+    -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""
     writeFile' path txt'
     trackWrite' cfg [path]
     -- writeFile' path $ toGeneric cfg txt

@@ -95,7 +95,7 @@ debugRules :: (Pretty a, Show b) => Config -> String -> a -> b -> b
 debugRules cfg name input out = debug cfg name msg out
   where
     ren = render $ pPrint input
-    msg = "'" ++ ren ++ "' -> " ++ show out
+    msg = "\"" ++ ren ++ "' -> " ++ show out
 
 
 ------------------------------
@@ -148,7 +148,7 @@ rBop s e@(Bop t r ds _ e1 e2) = rExpr s es >> rExpr s fn
   where
     es = Lst t r ds [e1, e2] -- TODO (ListOf t)?
     fn = Fun t r ds (prefixOf e) [es]
-rBop _ e = error $ "rBop call with non-Bop: '" ++ render (pPrint e) ++ "'"
+rBop _ e = error $ "rBop call with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
@@ -157,7 +157,7 @@ rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this mi
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
 rNamedFunction' s@(scr, cfg, _, _) expr name = case findFunction cfg name of
-  Nothing -> error $ "no such function '" ++ name ++ "'"
+  Nothing -> error $ "no such function \"" ++ name ++ "\""
   Just f  -> case fNewRules f of
                Nothing -> if "load_" `isPrefixOf` fName f
                             then (fOldRules f) s $ setSalt 0 expr
@@ -360,6 +360,7 @@ aVar cfg ref _ vPath oPath = do
 -- [t]ypechecking functions --
 ------------------------------
 
+-- TODO show the failing function here! which means reworking the Fun definitions a bit
 typeError :: [Type] -> [Type] -> String
 typeError expected actual =
   "Type error: expected " ++ show expected
@@ -491,8 +492,8 @@ aLoad hashSeqIDs cfg ref ids strPath outPath = do
             -- then curl cfg ref pth
             -- else 
   -- liftIO $ putStrLn $ "src': " ++ src'
-  -- debugA $ "aLoad src': '" ++ src' ++ "'"
-  -- debugA $ "aLoad outPath': '" ++ outPath' ++ "'"
+  -- debugA $ "aLoad src': \"" ++ src' ++ "\""
+  -- debugA $ "aLoad outPath': \"" ++ outPath' ++ "\""
   -- TODO why doesn't this rerun?
   hashPath <- aLoadHash hashSeqIDs cfg ref ids pth' (takeExtension outPath')
   -- let hashPath'    = fromPath cfg hashPath

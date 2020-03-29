@@ -103,7 +103,7 @@ spaces1 :: ParseM ()
 spaces1 = debugParser "spaces1" ((void $ many1 $ oneOf spaceChars) <?> "whitespace and/or newline")
 
 pSym :: Char -> ParseM ()
-pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol '" ++ [c] ++ "'"
+pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol \"" ++ [c] ++ "\""
 
 -----------------
 -- identifiers --
@@ -189,7 +189,7 @@ literalChars = filter valid $ map toEnum [0..127]
 -- see stackoverflow.com/questions/24106314
 -- TODO can the between part be replaced with something from Text.Parsec.Token?
 pQuoted :: ParseM String
-pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many (lit <|> esc)) <?> "quoted")
+pQuoted = debugParser "pQuoted" ((lexeme $ between (char '\"') (char '\"') $ many (lit <|> esc)) <?> "quoted")
   where
     lit = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars

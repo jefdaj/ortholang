@@ -124,7 +124,7 @@ rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids) e@(Fun r salt _ name exprs
       elemCacheDir'  = toPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> extOf eType
       eType = case r of
-                (ListOf t) -> debug cfg "rMapMain" ("type of '" ++ render (pPrint e)
+                (ListOf t) -> debug cfg "rMapMain" ("type of \"" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error $ "bad argument to rMapMain: " ++ show e
   elemCachePtn %> aMapElem cfg ref ids eType mTmpFn actFn singleName salt

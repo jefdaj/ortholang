@@ -183,7 +183,7 @@ aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
   -- TODO should there be a separate case for multiple matches?
   let geneId = case lookupID ids' partialID of
                  Just k -> k
-                 Nothing -> error $ "ERROR: id '" ++ partialID ++ "' not found"
+                 Nothing -> error $ "ERROR: id \"" ++ partialID ++ "' not found"
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits cfg ref (fromPath cfg out) group

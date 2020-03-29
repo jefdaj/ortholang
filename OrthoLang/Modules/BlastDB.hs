@@ -413,7 +413,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
       -- quoteInner = "\"" ++ unwords
-      --              (map (\p -> "'" ++ fromPath cfg p ++ "'") faPaths)
+      --              (map (\p -> "\"" ++ fromPath cfg p ++ "\"") faPaths)
       --              ++ "\""
 
   let dbg = debugA' "aMakeblastdbAll"
@@ -616,7 +616,7 @@ showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
-  debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: '" ++ dbDir ++ "'"
+  debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: \"" ++ dbDir ++ "\""
   out <- withReadLock ref path' $
            readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
   let out1 = lines out

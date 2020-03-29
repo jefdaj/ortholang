@@ -245,7 +245,7 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "|" -> "any"
                                    "&" -> "all"
                                    "~" -> "diff"
-                                   x   -> error $ "unknown Bop: '" ++ x ++ "'"
+                                   x   -> error $ "unknown Bop: \"" ++ x ++ "\""
 
 
 -- TODO have a separate Assign for "result"?
@@ -604,7 +604,7 @@ extractLoads :: Script -> Expr -> [Expr]
 -- extractLoads s e = filter isLoad $ extractExprs s e
 extractLoads s e = filter isLoad' $ exprDepsOf s e
   where
-    isLoad' expr = let res = isLoad expr in trace "ortholang.core.types.extractLoads" ("isLoad '" ++ show expr ++ "'? " ++ show res) res
+    isLoad' expr = let res = isLoad expr in trace "ortholang.core.types.extractLoads" ("isLoad \"" ++ show expr ++ "'? " ++ show res) res
     isLoad (Fun _ _ _ name _) = "load" `isPrefixOf` name || "glob" `isPrefixOf` name
     isLoad _ = False
 

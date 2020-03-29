@@ -54,9 +54,9 @@ mockRepl :: [String] -> FilePath -> Config -> LocksRef -> IDsRef -> IO ()
 mockRepl stdinLines path cfg ref ids = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
-    -- putStrLn ("stdin: '" ++ unlines stdinLines ++ "'")
+    -- putStrLn ("stdin: \"" ++ unlines stdinLines ++ "\"")
     _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids
-    -- putStrLn $ "stdout: '" ++ out ++ "'"
+    -- putStrLn $ "stdout: \"" ++ out ++ "\""
     return ()
   out <- readFileStrict ref tmpPath
   writeFile path $ toGeneric cfg out

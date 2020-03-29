@@ -73,7 +73,7 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 --   let (!fasta', !ids) = hashIDsTxt txt
 --       (Path k) = outPath
 --       v = takeFileName inPath'
---       -- ids' = trace ("k: '" ++ k ++ "' v: '" ++ v ++ "'") $ M.insert k v ids
+--       -- ids' = trace ("k: \"" ++ k ++ "' v: \"" ++ v ++ "\"") $ M.insert k v ids
 --       ids' = M.insert k v ids
 --   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
 --   trackWrite' cfg [outPath']
@@ -159,12 +159,12 @@ unhashIDsFile cfg ref idref inPath outPath = do
   let inPath'  = fromPath cfg inPath
   -- txt <- withReadLock' ref inPath' $ readFile' $ fromPath cfg inPath
   txt <- readFileStrict' cfg ref inPath'
-  -- liftIO $ putStrLn $ "txt: '" ++ txt ++ "'"
+  -- liftIO $ putStrLn $ "txt: \"" ++ txt ++ "\""
   -- let txt' = unhashIDs ids txt
   ids <- liftIO $ readIORef idref
   -- liftIO $ putStrLn $ "ids: " ++ show ids
   let txt' = unhashIDs False ids txt
-  -- liftIO $ putStrLn $ "txt': '" ++ txt' ++ "'"
+  -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""
   withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' cfg [outPath]
 
@@ -180,7 +180,7 @@ readIDs cfg ref path = do
   txt <- readFileStrict' cfg ref path'
   -- let splitFn l = let ws = split "\t" l
   --                 in if length ws < 2
-  --                      then error ("failed to split '" ++ l ++ "'")
+  --                      then error ("failed to split \"" ++ l ++ "\"")
   --                      else (head ws, concat $ intersperse "\t" $ tail ws)
   let splitFn = splitAtFirst '\t'
       ids = map splitFn $ lines txt
@@ -212,7 +212,7 @@ lookupIDsFile cfg ref ids inPath outPath = do
   let lookupFn v = case lookupID ids' v of
                      Just i  -> return i
                      Nothing -> do
-                       liftIO $ putStrLn ("warning: no ID found for '" ++ v ++ "'")
+                       liftIO $ putStrLn ("warning: no ID found for \"" ++ v ++ "\"")
                        return v
   idKeys <- mapM lookupFn partialIDs
   writeCachedLines cfg ref (fromPath cfg outPath) idKeys

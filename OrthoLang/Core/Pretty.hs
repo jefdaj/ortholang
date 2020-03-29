@@ -127,14 +127,14 @@ instance Pretty Config where
 
 -- TODO change this to something useful
 instance Pretty Function where
-  pPrint fn = text $ "Function '" ++ fName fn ++ "'"
+  pPrint fn = text $ "Function \"" ++ fName fn ++ "\""
 
 instance Show Function where
   show = prettyShow
 
 -- TODO change this to something useful
 instance Pretty Module where
-  pPrint fn = text $ "Module '" ++ mName fn ++ "'"
+  pPrint fn = text $ "Module \"" ++ mName fn ++ "\""
 
 -- instance Show Module where
   -- show = prettyShow

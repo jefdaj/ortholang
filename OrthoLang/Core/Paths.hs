@@ -196,7 +196,7 @@ traceP :: (Pretty a, Show b) => String -> a -> b -> b
 traceP name expr path = trace ("core.paths." ++ name) msg path
   where
     ren = render $ pPrint expr
-    msg = "'" ++ ren ++ "' -> " ++ show path -- TODO include types?
+    msg = "\"" ++ ren ++ "' -> " ++ show path -- TODO include types?
 
 -- traceD name c s expr = trace ("core.paths." ++ name) msg
 --   where
@@ -204,7 +204,7 @@ traceP name expr path = trace ("core.paths." ++ name) msg path
 --     -- ren  = show expr
 --     path = exprPath c s expr
 --     dig  = exprPathDigest path
---     msg  = "'" ++ ren ++ "' -> (" ++ show dig ++ ", " ++ show path ++ ")"
+--     msg  = "\"" ++ ren ++ "' -> (" ++ show dig ++ ", " ++ show path ++ ")"
 
 --------------
 -- cutpaths --
@@ -315,7 +315,7 @@ argHashes _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's a
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
 bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t r ds [e1, e2]]
-bop2fun e = error $ "bop2fun call with non-Bop: '" ++ render (pPrint e) ++ "'"
+bop2fun e = error $ "bop2fun call with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
@@ -386,7 +386,7 @@ decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
 decodeNewRulesDeps cfg dMap o@(ExprPath out) = do
   let dKeys  = map PathDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
       dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
-      dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("'" ++ out ++ "' -> " ++ show dVals) dVals
+      dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
       dTypes = map fst dVals'
       dPaths = map snd dVals'
       oKey   = exprPathDigest $ toPath cfg out
@@ -397,7 +397,7 @@ decodeNewRulesDeps cfg dMap o@(ExprPath out) = do
   -- liftIO $ putStrLn $ "decodeNewRulesDeps dKeys: " ++ show dKeys
   -- liftIO $ putStrLn $ "decodeNewRulesDeps dTypes: " ++ show dTypes
   -- liftIO $ putStrLn $ "decodeNewRulesDeps dVals': " ++ show dVals'
-  when (length dVals /= length dKeys) $ error $ "failed to decode path: '" ++ out ++ "'"
+  when (length dVals /= length dKeys) $ error $ "failed to decode path: \"" ++ out ++ "\""
   return (oType, dTypes, dPaths)
 
 -- TODO remove repeat salt if fn is deterministic
@@ -425,7 +425,7 @@ varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir <
 -- and can be removed once the rest of the IO stuff is solid.
 checkLit :: String -> String
 checkLit lit = if isGeneric lit
-                 then error $ "placeholder in lit: '" ++ lit ++ "'"
+                 then error $ "placeholder in lit: \"" ++ lit ++ "\""
                  else lit
 
 checkLits :: [String] -> [String] -- (or error, but let's ignore that)
@@ -435,7 +435,7 @@ checkLits = map checkLit
 checkPath :: FilePath -> FilePath
 checkPath path = if isAbsolute path || isGeneric path
                    then path
-                   else error $ "invalid path: '" ++ path ++ "'"
+                   else error $ "invalid path: \"" ++ path ++ "\""
 
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath

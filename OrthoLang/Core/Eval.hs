@@ -257,7 +257,7 @@ eval hdl cfg ref ids dm rtype ls p = do
 
 writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
 writeResult cfg ref idsref path out = do
-  -- liftIO $ putStrLn $ "writing result to '" ++ out ++ "'"
+  -- liftIO $ putStrLn $ "writing result to \"" ++ out ++ "\""
   unhashIDsFile cfg ref idsref path out
 
 -- TODO what happens when the txt is a binary plot image?

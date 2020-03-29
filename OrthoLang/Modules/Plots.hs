@@ -29,7 +29,7 @@ png :: Type
 png = Type
   { tExt  = "png"
   , tDesc = "plot image"
-  , tShow = \_ _ f -> return $ "plot image '" ++ f ++ "'"
+  , tShow = \_ _ f -> return $ "plot image \"" ++ f ++ "\""
   }
 
 -------------------

@@ -188,7 +188,7 @@ rmAll = mapM_ removePathForcibly
  -}
 resolveSymlinks :: Maybe FilePath -> FilePath -> IO FilePath
 resolveSymlinks mPrefix path = do
-  -- liftIO $ putStrLn $ "resolveSymlinks path: '" ++ path ++ "'"
+  -- liftIO $ putStrLn $ "resolveSymlinks path: \"" ++ path ++ "\""
   isLink <- pathIsSymbolicLink path
   if not isLink
     then return path

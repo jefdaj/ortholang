@@ -105,7 +105,7 @@ pAssign = debugParser "pAssign" $ do
   scr <- getScript
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
   when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ do
-    fail $ "duplicate variable '" ++ vName ++ "'"
+    fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
   -- putAssign  "pAssign" (v, e) -- TODO is this covered by returning it?
   -- putDigests "pAssign" [e]
@@ -203,6 +203,6 @@ pScript = debugParser "pScript" $ do
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: GlobalEnv -> FilePath -> IO (Either String Script)
 parseFile (_, cfg, ref, _) path = do
-  debug "core.parse.script.parseFile" $ "parseFile '" ++ path ++ "'"
+  debug "core.parse.script.parseFile" $ "parseFile \"" ++ path ++ "\""
   txt <- readScriptWithIncludes ref path
   return $ (parseString cfg . stripComments) txt

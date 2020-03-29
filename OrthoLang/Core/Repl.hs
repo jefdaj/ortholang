@@ -315,9 +315,9 @@ cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
     saveScript cfg scr path
     return (scr, cfg { cfgScript = Just path }, locks, ids)
   [var, path] -> case lookup (Var (RepID Nothing) var) (sAssigns scr) of
-    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
-  _ -> hPutStrLn hdl ("invalid save command: '" ++ line ++ "'") >> return st
+  _ -> hPutStrLn hdl ("invalid save command: \"" ++ line ++ "\"") >> return st
 
 -- TODO where should this go?
 depsOnly :: Expr -> Script -> Script
@@ -335,7 +335,7 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeededBy st@(scr, cfg, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) (sAssigns scr) of
-    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (Var Nothing var):depsOf e) scr
     Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
   return st
@@ -350,7 +350,7 @@ cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeeds st@(scr, cfg, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
   case lookup var' (sAssigns scr) of
-    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') (sAssigns scr)
   return st
 
@@ -360,7 +360,7 @@ cmdDrop (_, cfg, ref, ids) _ [] = clear >> return (emptyScript, cfg { cfgScript 
 cmdDrop st@(scr, cfg, ref, ids) hdl var = do
   let v = Var (RepID Nothing) var
   case lookup v (sAssigns scr) of
-    Nothing -> hPutStrLn hdl ("Var '" ++ var ++ "' not found") >> return st
+    Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just _  -> return (scr {sAssigns = delFromAL (sAssigns scr) v}, cfg, ref, ids)
 
 cmdType :: GlobalEnv -> Handle -> String -> IO GlobalEnv
@@ -394,7 +394,7 @@ cmdShow :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns s) >> return st
 cmdShow st@(scr, cfg, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) (sAssigns scr) of
-    Nothing -> hPutStrLn hdl $ "Var '" ++ var ++ "' not found"
+    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
   return st
 
@@ -450,7 +450,7 @@ nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
 
 -- this is mostly lifted from Haskeline's completeFile
 myComplete :: MonadIO m => GlobalEnv -> CompletionFunc m
-myComplete s = completeQuotedWord   (Just '\\') "\"'" (quotedCompletions s)
+myComplete s = completeQuotedWord   (Just '\\') "\"\"" (quotedCompletions s)
              $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
                                     (nakedCompletions s)
 

@@ -119,7 +119,7 @@ aSimple' ::  Config -> LocksRef -> IDsRef -> Path
 aSimple' cfg ref ids outPath actFn mTmpDir argPaths = do
   need' cfg ref "ortholang.core.compile.basic.aSimple'" argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
-  let o' = debug cfg "aSimple'" ("outPath': " ++ outPath' ++ "'") outPath
+  let o' = debug cfg "aSimple'" ("outPath': " ++ outPath' ++ "\"") outPath
       as = debug cfg "aSimple'" ("argsPaths'': " ++ show argPaths'') argPaths''
   actFn cfg ref ids tmpDir (o':as)
   trackWrite [out] -- TODO remove?
