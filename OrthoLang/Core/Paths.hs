@@ -133,8 +133,10 @@ module OrthoLang.Core.Paths
 
   -- * Generate path digests
   , exprPathDigest
-  , exprDigest
   , exprDigests
+  , scriptDigests
+  , listExprs
+  , listScriptExprs
   -- , insertNewRulesDigest
   , decodeNewRulesDeps
 
@@ -338,10 +340,29 @@ exprDigest :: Config -> Script -> Expr -> DigestMap
 exprDigest cfg scr expr = M.singleton dKey (typeOf expr, p)
   where
     p = exprPath cfg scr expr
-    dKey = exprPathDigest p
+    dKey = PathDigest $ digest p
 
 exprDigests :: Config -> Script -> [Expr] -> DigestMap
-exprDigests cfg scr exprs = M.unions $ map (exprDigest cfg scr) exprs
+exprDigests cfg scr exprs = M.unions $ map (exprDigest cfg scr) $ concatMap listExprs exprs
+
+scriptDigests :: Config -> Script -> DigestMap
+scriptDigests cfg scr = exprDigests cfg scr $ listScriptExprs scr
+
+{-|
+"Flatten" (or "unfold"?) an expression into a list of it + subexpressions.
+
+TODO is there a better word for this, or a matching typeclass?
+-}
+listExprs :: Expr -> [Expr]
+listExprs e@(Lit _ _ _) = [e]
+listExprs e@(Ref _ _ _ _) = [e]
+listExprs e@(Bop _ _ _ _ e1 e2) = concatMap listExprs [e, e1, e2]
+listExprs e@(Fun _ _ _ _ es   ) = concatMap listExprs (e:es)
+listExprs e@(Lst _ _ _   es   ) = concatMap listExprs (e:es)
+listExprs e@(Com _) = [e] -- TODO is this right?
+
+listScriptExprs :: Script -> [Expr]
+listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
 
 -- insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
 -- insertNewRulesDigest st@(_, cfg, _, idr) expr

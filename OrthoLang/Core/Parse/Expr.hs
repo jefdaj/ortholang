@@ -35,7 +35,7 @@ import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Parse.Basic
 
 import qualified Text.Parsec.Expr as E
-import qualified Data.Map.Strict  as M
+-- import qualified Data.Map.Strict  as M
 
 import Control.Applicative    ((<|>))
 import Control.Monad          (void)
@@ -43,7 +43,7 @@ import Control.Monad.Identity (Identity)
 import Data.Either            (isRight)
 import Data.List              (union)
 import Data.Maybe             (isJust, fromJust)
-import Text.Parsec            (ParseError, try, getState, (<?>))
+import Text.Parsec            (ParseError, try, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 
@@ -62,7 +62,7 @@ pList = debugParser "pList" $ do
     Right t  -> do
       let deps  = if null terms then [] else foldr1 union $ map depsOf terms
           expr  = Lst t (Salt 0) deps terms
-      putDigests "pList" (expr:terms)
+      -- putDigests "pList" (expr:terms)
       return expr
 
 ---------------
@@ -159,7 +159,7 @@ pFun :: ParseM Expr
 pFun = do
   name <- try pFunName
   args <- pArgs
-  putDigests "pFun" args
+  -- putDigests "pFun" args
   pFunArgs name args
 
 {-|
@@ -172,7 +172,7 @@ TODO is this where we forget to add the list digest?
 pArgs :: ParseM [Expr]
 pArgs = debugParser "pArgs" $ do
   es <- manyTill (try pTerm) pEnd
-  putDigests "pArgs" es
+  -- putDigests "pArgs" es
   return es
 
 {-|
@@ -202,7 +202,7 @@ typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
     let expr = Fun rtn (Salt 0) deps (fName fn) args
         deps = foldr1 union $ map depsOf args
         -- TODO hey should ParseM be ReaderT Config, StateT Script ... instead of StateT both?
-    putDigests "typecheckArgs" (expr:args)
+    -- putDigests "typecheckArgs" (expr:args)
     return expr
 
 {-|
@@ -259,7 +259,7 @@ pExpr = debugParser "pExpr" $ do
   cfg <- getConfig
   e <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
-  putDigests "pExpr" [e]
+  -- putDigests "pExpr" [e]
   return e
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?

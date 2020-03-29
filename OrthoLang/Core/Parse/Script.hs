@@ -34,19 +34,15 @@ module OrthoLang.Core.Parse.Script
   )
   where
 
-import Debug.Trace -- TODO remove
-
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Types
-import qualified Data.Map.Strict as M
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
-import OrthoLang.Core.Paths   (exprPath, exprDigest, exprDigests)
 import OrthoLang.Core.Util    (readFileStrict, debug)
 import System.FilePath        ((</>), takeDirectory)
 import Text.Parsec            (ParseError, try)
@@ -109,7 +105,7 @@ pAssign = debugParser "pAssign" $ do
     fail $ "duplicate variable '" ++ vName ++ "'"
   e <- lexeme pExpr
   putAssign  "pAssign" (v, e) -- TODO is this covered by returning it?
-  putDigests "pAssign" [e]
+  -- putDigests "pAssign" [e]
   return (v, e)
 
 {-|
@@ -190,8 +186,8 @@ pScript = debugParser "pScript" $ do
       -- scr  = emptyScript {sAssigns = as, sDigests = ds'}
   let scr  = emptyScript {sAssigns = as}
       scr' = lastResultOnly scr
-  putScript  "pScript" scr'
-  putDigests "pScript" $ map snd as -- TODO this is redundant right?
+  putScript scr'
+  putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
   return scr'
   -- return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 

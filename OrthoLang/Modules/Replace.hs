@@ -44,11 +44,10 @@ module OrthoLang.Modules.Replace where
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Actions       (writeLits, writePaths, readLit, traceA)
-import OrthoLang.Core.Paths         (exprPath, fromPath,
-                                    Path, toPath, fromPath)
+import OrthoLang.Core.Actions (writeLits, writePaths, readLit, traceA)
 import OrthoLang.Core.Compile (rExpr, compileScript, debugRules)
-import OrthoLang.Core.Util          (digest, stripWhiteSpace)
+import OrthoLang.Core.Paths   (exprPath, fromPath, Path, toPath, fromPath)
+import OrthoLang.Core.Util    (digest, stripWhiteSpace)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -72,25 +71,25 @@ orthoLangModule = Module
  - TODO should it go in Types, or maybe Paths?
  -}
 
-mangleExpr :: (Var -> Var) -> Expr -> Expr
-mangleExpr _ e@(Lit  _ _ _) = e
-mangleExpr fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
-mangleExpr fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mangleExpr fn e1) (mangleExpr fn e2)
-mangleExpr fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mangleExpr fn) es)
-mangleExpr fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mangleExpr fn) es)
-mangleExpr _ (Com _) = error "implement this!"
+mapExprVars :: (Var -> Var) -> Expr -> Expr
+mapExprVars _ e@(Lit  _ _ _) = e
+mapExprVars fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
+mapExprVars fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
+mapExprVars fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mapExprVars fn) es)
+mapExprVars fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mapExprVars fn) es)
+mapExprVars _ (Com _) = error "implement this!"
 
-mangleAssign :: (Var -> Var) -> Assign -> Assign
-mangleAssign fn (var, expr) = (fn var, mangleExpr fn expr)
+mapAssignVars :: (Var -> Var) -> Assign -> Assign
+mapAssignVars fn (var, expr) = (fn var, mapExprVars fn expr)
 
-mangleScript :: (Var -> Var) -> Script -> Script
-mangleScript fn scr = scr {sAssigns = map (mangleAssign fn) (sAssigns scr)}
+mapScriptVars :: (Var -> Var) -> Script -> Script
+mapScriptVars fn scr = scr {sAssigns = map (mapAssignVars fn) (sAssigns scr)}
 
 setRepID :: RepID -> Var -> Var
 setRepID newID (Var _ name) = Var newID name
 
 setRepIDs :: RepID -> Script -> Script
-setRepIDs newID = mangleScript (setRepID newID)
+setRepIDs newID = mapScriptVars (setRepID newID)
 
 -------------
 -- replace --

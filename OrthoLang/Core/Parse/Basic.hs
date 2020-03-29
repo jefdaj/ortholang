@@ -76,13 +76,15 @@ putDigests name exprs = do
   -- TODO also show if there are any duplicates
   return()
 
+-- TODO remove if this is only used once in pScript
 putAssign :: String -> Assign -> ParseM ()
 putAssign name a = do
   (c, s) <- getState
-  putState (c, s {sAssigns = (sAssigns s) ++ [a]})
+  let as' = DT.trace (name ++ " adding assignment: " ++ show a) $ sAssigns s ++ [a]
+  putState (c, s {sAssigns = as'})
 
-putScript :: String -> Script -> ParseM ()
-putScript name scr = do
+putScript :: Script -> ParseM ()
+putScript scr = do
   (c, _) <- getState -- TODO any reason to union the digests?
   putState (c, scr)
 
@@ -215,7 +217,7 @@ pNum = debugParser "pNum" $ do
   let sign = case neg of { Just x -> x; _ -> ' ' }
       lit  = show (read (sign:n:ns) :: Scientific)
       expr = Lit num (Salt 0) lit 
-  putDigests "pNum" [expr]
+  -- putDigests "pNum" [expr]
   return expr
 
 -- list of chars which can be escaped in OrthoLang
@@ -242,5 +244,5 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '"') (char '"') $ many 
 pStr :: ParseM Expr
 pStr = debugParser "pStr" $ do
   expr <- Lit str (Salt 0) <$> pQuoted <?> "string literal"
-  putDigests "pStr" [expr]
+  -- putDigests "pStr" [expr]
   return expr
