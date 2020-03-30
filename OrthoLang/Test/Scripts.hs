@@ -1,38 +1,33 @@
 module OrthoLang.Test.Scripts where
 
--- import Prelude hiding (writeFile)
+import qualified Control.Concurrent.Thread.Delay as D
+import qualified Data.ByteString.Lazy            as BL
+import qualified Data.ByteString.Lazy.Char8      as B8
 
-import Control.Concurrent.Thread.Delay (delay)
-import Control.Monad              (when)
--- import Data.ByteString.Lazy.Char8 (pack, ByteString) -- TODO use binary?
-import qualified Data.ByteString.Lazy  as BL
--- import qualified Data.ByteString.Lazy  as BL -- TODO is this needed?
-import qualified Data.ByteString.Lazy.Char8 as B8
-import Data.Char                  (toLower)
-import Data.List                  (zip5, isPrefixOf)
-import Data.List.Split            (splitOn)
-import Paths_OrthoLang             (getDataFileName)
-import OrthoLang.Core.Eval         (evalFile)
-import OrthoLang.Core.Parse        (parseFileIO)
-import OrthoLang.Core.Paths        (toGeneric)
-import OrthoLang.Core.Util         (justOrDie)
--- import OrthoLang.Core.Pretty       (writeScript)
-import OrthoLang.Core.Types        (Config(..), Module(..), IDsRef, emptyScript)
-import OrthoLang.Core.Locks        (LocksRef, withWriteLock)
-import OrthoLang.Test.Repl         (mkTestGroup)
-import OrthoLang.Modules          (modules)
-import System.Directory           (doesFileExist)
-import System.FilePath.Posix      (takeBaseName, (</>), (<.>))
-import System.IO                  (stdout, stderr)
-import System.IO.Silently         (hCapture)
-import System.Process             (readCreateProcess, readProcessWithExitCode,
-                                   cwd, shell)
-import Test.Hspec                 (it)
-import Test.Tasty                 (TestTree, testGroup)
-import Test.Tasty.Golden          (goldenVsStringDiff, findByExtension, writeBinaryFile)
-import Test.Tasty.Hspec           (testSpecs, shouldReturn)
+import Control.Monad         (when)
+import Data.Char             (toLower)
+import Data.List             (zip5, isPrefixOf)
+import Data.List.Split       (splitOn)
+import OrthoLang.Core.Eval   (evalFile)
+import OrthoLang.Core.Locks  (LocksRef, withWriteLock)
+import OrthoLang.Core.Parse  (parseFileIO)
+import OrthoLang.Core.Paths  (toGeneric)
+import OrthoLang.Core.Types  (Config(..), Module(..), IDsRef, emptyScript)
+import OrthoLang.Core.Util   (justOrDie)
+import OrthoLang.Modules     (modules)
+import OrthoLang.Test.Repl   (mkTestGroup)
+import Paths_OrthoLang       (getDataFileName)
+import System.Directory      (doesFileExist)
+import System.FilePath.Posix (takeBaseName, (</>), (<.>))
+import System.IO             (stdout, stderr)
+import System.IO.Silently    (hCapture)
+import System.Process        (readCreateProcess, readProcessWithExitCode, cwd, shell)
+import Test.Hspec            (it)
+import Test.Tasty            (TestTree, testGroup)
+import Test.Tasty.Golden     (goldenVsStringDiff, findByExtension, writeBinaryFile)
+import Test.Tasty.Hspec      (testSpecs, shouldReturn)
 
--- these work, but the tmpfiles vary so they require a check script
+-- | These work, but the tmpfiles vary so they require a check script.
 tmpfilesVary :: [FilePath]
 tmpfilesVary =
   [ "crbblast:crb_blast_each2" -- TODO should this be fixable?
@@ -52,7 +47,7 @@ tmpfilesVary =
   , "plots:histogram"
   ]
 
--- these work, but the stdout varies so they require a check script
+-- | These work, but the stdout varies so they require a check script.
 stdoutVaries :: [FilePath]
 stdoutVaries =
   [ "crbblast:crb_blast_each2"
@@ -60,12 +55,10 @@ stdoutVaries =
   , "blasthits:best_hits"
   ]
 
--- these generally need work and should be skipped for now :(
+-- | These generally need work and should be skipped for now :(
 badlyBroken :: [FilePath]
 badlyBroken =
-  -- TODO fix replace_each to work with generated lists
-  [ "orthofinder:orthofinder_sets" -- TODO is this gone?
-  -- TODO what's up with these?
+  [ "orthofinder:orthofinder_sets"
   , "psiblast:psiblast_each_pssm"
   , "psiblast:psiblast_empty_pssms"
   , "psiblast:psiblast_map"
@@ -96,7 +89,7 @@ mkOutTest cfg ref ids gld = goldenDiff desc gld scriptAct
     scriptAct = do
       out <- runScript cfg ref ids
       -- uncomment to update the golden stdout files:
-      -- writeFile ("/home/jefdaj/ortholang/tests/stdout" </> takeBaseName gld <.> "txt") out
+      -- writeFile ("tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
     desc = "prints expected output"
 
@@ -115,7 +108,7 @@ mkTreeTest cfg ref ids t = goldenDiff desc t treeAct
       _ <- runScript cfg ref ids
       out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
-      -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName t <.> "txt") out
+      -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
 
 -- TODO use safe writes here
@@ -125,7 +118,8 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
     desc = "unchanged by round-trip to file"
     tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
-      scr1 <- parseFileIO (emptyScript, cfg, ref, ids) $ justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
+      scr1 <- parseFileIO (emptyScript, cfg, ref, ids) $
+                justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
       -- this is useful for debugging
       -- writeScript cut scr1
       withWriteLock ref tripShow $ writeBinaryFile tripShow $ show scr1
@@ -136,31 +130,36 @@ mkTripTest cfg ref ids cut = goldenDiff desc tripShow tripAct
       scr2 <- parseFileIO (emptyScript, cfg, ref, ids) cut
       return $ B8.pack $ show scr2
 
--- test that no absolute paths snuck into the tmpfiles
--- TODO sanitize stdout + stderr too when running scripts
+{-|
+Test that no absolute paths snuck into the tmpfiles.
+
+TODO sanitize stdout + stderr too when running scripts
+-}
 mkAbsTest :: Config -> LocksRef -> IDsRef -> IO [TestTree]
 mkAbsTest cfg ref ids = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
     desc = "expr files free of absolute paths"
-    grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err", "--exclude=*.ini", "--exclude=*.log",
+    grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err",
+                "--exclude=*.ini", "--exclude=*.log",
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
       _ <- runScript cfg ref ids
       (_, out, err) <- readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
-{- This is more or less idempotent because re-running the same cut multiple
- - times is fast. So it's OK to run it once for each test in a group.
- -}
+{-|
+This is more or less idempotent because re-running the same cut multiple
+times is fast. So it's OK to run it once for each test in a group.
+-}
 runScript :: Config -> LocksRef -> IDsRef -> IO String
 runScript cfg ref ids =  do
-  delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
+  D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids) stdout
-  delay 100000 -- wait 0.1 second so we don't capture output from tasty (TODO is that long enough?)
+  D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
-  writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out -- for the shell script tests
+  writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
@@ -180,11 +179,14 @@ mkScriptTests (name, cut, out, tre, mchk) cfg ref ids = do
   where
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
 
-{- "check scripts" for handling the tricky cases:
- - they get passed the tmpdir as their only argument
- - they should give no output if the tests pass, and print errors otherwise
- - TODO move stdout inside the tmpdir?
- -}
+{-|
+"Check scripts" for handling the tricky cases where tmpfile names vary. They
+get passed the tmpdir as their only argument, and can inspect it however is
+needed. They should give no output if the tests pass, and print errors
+otherwise.
+
+TODO move stdout inside the tmpdir?
+-}
 mkCheckTest :: Config -> LocksRef -> IDsRef -> FilePath -> IO [TestTree]
 mkCheckTest cfg ref ids scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
   where
@@ -203,7 +205,8 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
-mkTestsPrefix :: Config -> LocksRef -> IDsRef -> FilePath -> String -> Maybe String -> IO TestTree
+mkTestsPrefix :: Config -> LocksRef -> IDsRef -> FilePath
+              -> String -> Maybe String -> IO TestTree
 mkTestsPrefix cfg ref ids testDir groupName mPrefix = do
   names   <- getTestScripts testDir mPrefix
   mchecks <- mapM (findTestFile testDir "check" "sh") names
@@ -237,6 +240,7 @@ mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg ref ids = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
-  groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids testDir mn $ Just mn) $ map (simplify . mName) modules
+  groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids testDir mn $ Just mn) $
+               map (simplify . mName) modules
   exGroup <- mkExampleTests cfg ref ids exDir testDir
   return $ testGroup "run test scripts" $ groups ++ [exGroup]
