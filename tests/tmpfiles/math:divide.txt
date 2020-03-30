@@ -2,20 +2,26 @@
 |-- cache
 |-- exprs
 |   |-- divide
-|   |   |-- 8b184bb3d7
-|   |   |   `-- d2d5ae5cad
-|   |   |       `-- 0
-|   |   |           `-- result -> ../../../../../cache/lines/...
-|   |   |-- c32d32c633
-|   |   |   `-- 8b184bb3d7
-|   |   |       `-- 0
-|   |   |           `-- result -> ../../../../../cache/lines/...
-|   |   `-- f89070018f
-|   |       `-- bc47f42e5c
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   |-- 4df103e00e
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 550211f094
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- a651c507ed
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   `-- 547fdc4f4e
+|   |   |-- 1b7b7fda1a
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 6054fbb3a7
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 7b3cdf5f40
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- f16d40dbaf
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- num
@@ -35,9 +41,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- harder.num -> ../exprs/divide/8b184bb3d7/d2d5ae5cad/0/result
-    |-- one_half.num -> ../exprs/divide/f89070018f/bc47f42e5c/0/result
-    |-- result -> ../exprs/list/547fdc4f4e/0/result
-    `-- three_quarters.num -> ../exprs/divide/c32d32c633/8b184bb3d7/0/result
+    |-- harder.num -> ../exprs/divide/550211f094/0/result
+    |-- one_half.num -> ../exprs/divide/4df103e00e/0/result
+    |-- result -> ../exprs/list/6054fbb3a7/0/result
+    `-- three_quarters.num -> ../exprs/divide/a651c507ed/0/result
 
-27 directories, 13 files
+30 directories, 16 files

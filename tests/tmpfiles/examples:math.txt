@@ -2,28 +2,42 @@
 |-- cache
 |-- exprs
 |   |-- add
-|   |   |-- 7a756370ef
-|   |   |   `-- f88b2b1b09
-|   |   |       `-- 0
-|   |   |           `-- result -> ../../../../../cache/lines/...
-|   |   |-- a5e419fd08
-|   |   |   `-- bc47f42e5c
-|   |   |       `-- 0
-|   |   |           `-- result -> ../../../../../cache/lines/...
-|   |   `-- f89070018f
-|   |       `-- f89070018f
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   |-- b9261f7a49
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- cbe753516f
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- d471d35aa1
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- divide
-|   |   `-- 89c1e8db00
-|   |       `-- 6c7145e74b
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   `-- 2dca204df8
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- list
+|   |   |-- 1b7b7fda1a
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 492364fc12
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 5b1734fdfc
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- b34ac40174
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- b52f45c87d
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- c1824ac17d
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- multiply
-|   |   `-- 72d3d9e268
-|   |       `-- 582c3b5c81
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   `-- 39b6ef9f1a
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   |-- b2fc577686
 |   |   |   `-- 0
@@ -38,15 +52,14 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- subtract
-|       `-- f89070018f
-|           `-- bc47f42e5c
-|               `-- 0
-|                   `-- result -> ../../../../../cache/lines/...
+|       `-- 4df103e00e
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- n1.num -> ../exprs/add/f89070018f/f89070018f/0/result
-    |-- n2.num -> ../exprs/subtract/f89070018f/bc47f42e5c/0/result
-    |-- n3.num -> ../exprs/multiply/72d3d9e268/582c3b5c81/0/result
-    |-- n5.num -> ../exprs/add/7a756370ef/f88b2b1b09/0/result
+    |-- n1.num -> ../exprs/add/d471d35aa1/0/result
+    |-- n2.num -> ../exprs/subtract/4df103e00e/0/result
+    |-- n3.num -> ../exprs/multiply/39b6ef9f1a/0/result
+    |-- n5.num -> ../exprs/add/b9261f7a49/0/result
     `-- result -> ../vars/n5.num
 
-34 directories, 15 files
+41 directories, 21 files

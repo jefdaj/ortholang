@@ -86,6 +86,8 @@ traceShow suffix = traceShowSL (T.pack $ "ortholang." ++ suffix)
 debug :: String -> String -> IO ()
 debug suffix msg = debugS (T.pack $ "ortholang." ++ suffix) (T.pack msg)
 
+-- TODO rearrange imports so you can make a debugA :: ActionR () too
+
 time :: String -> String -> IO a -> IO a
 time suffix msg act = timedDebugEndS (T.pack $ "ortholang." ++ suffix)
                                      (T.pack msg) act

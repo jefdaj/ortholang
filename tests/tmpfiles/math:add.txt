@@ -2,15 +2,18 @@
 |-- cache
 |-- exprs
 |   |-- add
-|   |   `-- f89070018f
-|   |       `-- f89070018f
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   `-- d471d35aa1
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- list
+|   |   `-- b34ac40174
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- num
 |       `-- ee383407c9
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/add/f89070018f/f89070018f/0/result
+    `-- result -> ../exprs/add/d471d35aa1/0/result
 
-10 directories, 3 files
+12 directories, 4 files
