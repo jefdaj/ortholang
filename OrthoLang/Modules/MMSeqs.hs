@@ -21,18 +21,12 @@ module OrthoLang.Modules.MMSeqs
 import Development.Shake
 import OrthoLang.Core
 
--- import Data.List                   (isSuffixOf)
-import OrthoLang.Core       (readLit, readPaths, runCmd, CmdDesc(..), symlink)
-import OrthoLang.Core (rExpr, debugRules)
-import OrthoLang.Core         (toPath, fromPath, exprPath)
-import OrthoLang.Core          (digest, unlessExists, resolveSymlinks, headOrDie)
-import OrthoLang.Core         (withReadLock)
-import OrthoLang.Modules.Blast      (bht)
-import OrthoLang.Modules.BlastDB    (withSingleton) -- TODO move to core?
-import OrthoLang.Modules.SeqIO      (fna, faa)
-import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
-import System.Exit                 (ExitCode(..))
+import OrthoLang.Modules.Blast   (bht)
+import OrthoLang.Modules.BlastDB (withSingleton) -- TODO move to core?
+import OrthoLang.Modules.SeqIO   (fna, faa)
+import System.Directory          (createDirectoryIfMissing)
+import System.Exit               (ExitCode(..))
+import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 
 orthoLangModule :: Module
 orthoLangModule = Module

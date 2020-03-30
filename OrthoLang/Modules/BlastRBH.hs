@@ -2,24 +2,15 @@ module OrthoLang.Modules.BlastRBH where
 
 import Development.Shake
 import OrthoLang.Core
-
 import OrthoLang.Core.Compile as C
 
-import OrthoLang.Core (rExpr, defaultTypeCheck)
-import OrthoLang.Core (rSimple, aSimpleScriptNoFix)
-import OrthoLang.Core  (rMap)
-import OrthoLang.Core       (runCmd, CmdDesc(..), traceA, absolutizePaths)
--- import OrthoLang.Core         (traceA)
-import OrthoLang.Core         (Path, toPath, fromPath, cacheDir)
-import OrthoLang.Core          (digest)
-import OrthoLang.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
-                                    aMkBlastFromDb)
-import OrthoLang.Modules.BlastDB    (ndb, pdb)
-import OrthoLang.Modules.SeqIO      (faa)
-import System.Exit                 (ExitCode(..))
-import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             ((</>), (<.>))
-import Data.List.Utils             (replace)
+import Data.List.Utils           (replace)
+import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)
+import OrthoLang.Modules.BlastDB (ndb, pdb)
+import OrthoLang.Modules.SeqIO   (faa)
+import System.Directory          (createDirectoryIfMissing)
+import System.Exit               (ExitCode(..))
+import System.FilePath           ((</>), (<.>))
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together

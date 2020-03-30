@@ -10,33 +10,18 @@ module OrthoLang.Modules.BlastDB where
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core.Util (debug)
 
-import Data.Maybe                  (isJust)
-import Control.Monad               (when, forM, unless)
-import OrthoLang.Core       (runCmd, CmdDesc(..), debugA,
-                                    trackWrite', readLit, readPaths, writeLit, readLits,
-                                    writeLits, writePath, traceA, need',
-                                    cachedLinesPath, writeStrings, readStrings, writePaths,
-                                    readFileStrict)
-import OrthoLang.Core (rExpr, defaultTypeCheck, debugRules, singleton)
-import OrthoLang.Core         (exprPath, cacheDir, fromPath,
-                                    toPath, Path)
-import OrthoLang.Core          (stripWhiteSpace, resolveSymlinks)
-import OrthoLang.Modules.SeqIO      (faa, fna)
-import System.FilePath             (takeFileName, takeBaseName, takeExtension, (</>), (<.>),
-                                    makeRelative, takeDirectory)
-import Data.List                   (isInfixOf)
-import Data.Char                   (toLower)
-import System.Directory           (createDirectoryIfMissing)
-import OrthoLang.Core (fromGeneric)
-import OrthoLang.Core (rMap)
-import OrthoLang.Core (withReadLock, withWriteLock')
-import System.Process
-import Data.String.Utils (split)
-import Data.List (isPrefixOf)
-import System.Exit (ExitCode(..))
-import OrthoLang.Core (Pretty)
+import Control.Monad           (when, forM)
+import Data.Char               (toLower)
+import Data.List               (isInfixOf)
+import Data.List               (isPrefixOf)
+import Data.Maybe              (isJust)
+import Data.String.Utils       (split)
+import OrthoLang.Modules.SeqIO (faa, fna)
+import System.Directory        (createDirectoryIfMissing)
+import System.Exit             (ExitCode(..))
+import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
+import System.Process          (readCreateProcess, proc)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -540,7 +525,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(scr,cfg, _, _) (Fun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, _) (Fun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where

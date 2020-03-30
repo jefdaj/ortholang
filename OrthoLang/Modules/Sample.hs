@@ -4,11 +4,9 @@ module OrthoLang.Modules.Sample where
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core  (rExpr)
-import OrthoLang.Core (exprPath, toPath, fromPath)
-import OrthoLang.Core (readLit, readStrings, writeStrings, debugA)
-import Data.Scientific
-import System.Random (StdGen)
+
+import Data.Scientific       (formatScientific, FPFormat(..))
+import System.Random         (StdGen)
 import System.Random.Shuffle (shuffle')
 
 orthoLangModule :: Module

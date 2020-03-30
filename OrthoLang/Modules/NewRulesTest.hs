@@ -1,11 +1,10 @@
 module OrthoLang.Modules.NewRulesTest where
 
 import OrthoLang.Core
-import OrthoLang.Core (mkNewFn2, mkNewFn3)
-import OrthoLang.Core (writeCachedLines, readLit)
-import OrthoLang.Modules.SeqIO (faa)
+
+import OrthoLang.Modules.SeqIO    (faa)
 import Control.Monad.Trans.Reader (ask)
-import Control.Monad.Trans (lift)
+import Control.Monad.Trans        (lift)
 
 orthoLangModule :: Module
 orthoLangModule = Module

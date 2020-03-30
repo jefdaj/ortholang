@@ -13,10 +13,9 @@ module OrthoLang.Modules.Repeat where
 -- TODO debug transformations too!
 
 import OrthoLang.Core
-import OrthoLang.Core (justOrDie)
-import OrthoLang.Modules.Replace (rReplaceEach)
 
-import Data.Scientific (Scientific(), toBoundedInteger)
+import OrthoLang.Modules.Replace (rReplaceEach)
+import Data.Scientific           (Scientific(), toBoundedInteger)
 
 orthoLangModule :: Module
 orthoLangModule = Module

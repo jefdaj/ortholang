@@ -6,16 +6,10 @@ module OrthoLang.Modules.SonicParanoid
 import Development.Shake
 import OrthoLang.Core
 
-import OrthoLang.Modules.SeqIO      (fna, faa)
-import OrthoLang.Core (defaultTypeCheck)
-import OrthoLang.Core (rSimple)
-import System.FilePath             ((</>), takeBaseName)
-import OrthoLang.Core         (Path, toPath, fromPath)
-import OrthoLang.Core       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..))
-import System.Directory            (createDirectoryIfMissing)
-import OrthoLang.Core          (digest, unlessExists)
-import OrthoLang.Core         (withWriteLock')
-import System.Exit                 (ExitCode(..))
+import OrthoLang.Modules.SeqIO (fna, faa)
+import System.Directory        (createDirectoryIfMissing)
+import System.Exit             (ExitCode(..))
+import System.FilePath         ((</>), takeBaseName)
 
 orthoLangModule :: Module
 orthoLangModule = Module

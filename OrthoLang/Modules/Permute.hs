@@ -4,15 +4,7 @@ module OrthoLang.Modules.Permute where
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core (trace)
--- import OrthoLang.Core (debug)
-
-import Development.Shake.FilePath   (makeRelative)
-import OrthoLang.Core  (rExpr)
-import OrthoLang.Core (readStrings, writeStrings, traceA, need')
-import OrthoLang.Core (exprPath, exprPathExplicit, fromPath)
--- import OrthoLang.Core          (traceA, debug)
-import OrthoLang.Core           (digest)
+import Development.Shake.FilePath (makeRelative)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -51,7 +43,7 @@ aPermute :: GlobalEnv
          -> ([String] -> [[String]])
          -> FilePath -> Type -> Salt
          -> FilePath -> Action ()
-aPermute (scr, cfg, ref, _) comboFn iPath eType salt out = do
+aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
   need' cfg ref "ortholang.modules.permute.aPermute" [iPath]
   elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?

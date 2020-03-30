@@ -44,11 +44,6 @@ module OrthoLang.Modules.Replace where
 import Development.Shake
 import OrthoLang.Core
 
-import OrthoLang.Core (writeLits, writePaths, readLit, traceA)
-import OrthoLang.Core (rExpr, compileScript, debugRules)
-import OrthoLang.Core   (exprPath, fromPath, Path, toPath, fromPath)
-import OrthoLang.Core    (digest, stripWhiteSpace)
-
 orthoLangModule :: Module
 orthoLangModule = Module
   { mName = "Replace"

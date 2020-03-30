@@ -6,17 +6,9 @@ module OrthoLang.Modules.CRBBlast where
 import OrthoLang.Core
 import Development.Shake
 
-import Development.Shake.FilePath  ((</>), takeFileName)
-import OrthoLang.Core       (runCmd, CmdDesc(..), symlink, traceA, need')
-import OrthoLang.Core         (toPath)
-import OrthoLang.Core (defaultTypeCheck)
-import OrthoLang.Core (rSimpleTmp)
-import OrthoLang.Core  (rMapTmps)
--- import OrthoLang.Core         (traceA)
-import OrthoLang.Core         (Path, fromPath)
-import OrthoLang.Core          (resolveSymlinks)
-import OrthoLang.Modules.SeqIO      (faa, fna, fa)
-import System.Exit (ExitCode(..))
+import Development.Shake.FilePath ((</>), takeFileName)
+import OrthoLang.Modules.SeqIO    (faa, fna, fa)
+import System.Exit                (ExitCode(..))
 
 orthoLangModule :: Module
 orthoLangModule = Module

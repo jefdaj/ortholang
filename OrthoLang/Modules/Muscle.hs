@@ -3,12 +3,7 @@ module OrthoLang.Modules.Muscle
 
 -- import Development.Shake
 import OrthoLang.Core
-
-import OrthoLang.Core (defaultTypeCheck)
-import OrthoLang.Core (rSimpleScript)
-import OrthoLang.Core   (rMapSimpleScript)
--- import OrthoLang.Core         (Path, fromPath)
-import OrthoLang.Modules.SeqIO      (faa)
+import OrthoLang.Modules.SeqIO (faa)
 
 orthoLangModule :: Module
 orthoLangModule = Module

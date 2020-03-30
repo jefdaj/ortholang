@@ -9,11 +9,7 @@ module OrthoLang.Modules.Plots where
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core (withBinHash, writeCachedLines, writeLits, need')
-import OrthoLang.Core (digest)
-import OrthoLang.Core (exprPath, toPath, fromPath, cacheDir)
-import OrthoLang.Core (rExpr, defaultTypeCheck, defaultTypeCheck)
-import OrthoLang.Core (aSimpleScript)
+
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))
 

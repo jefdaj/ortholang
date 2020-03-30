@@ -4,16 +4,12 @@ module OrthoLang.Modules.Load where
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core (rExpr, defaultTypeCheck, mkLoad, mkLoadList)
-import OrthoLang.Core (readLit, writeLits, traceA)
-import OrthoLang.Core (exprPath, Path, toPath, fromPath)
-import Data.List                  (sort)
-import Data.String.Utils          (strip)
-import OrthoLang.Core (compose1)
 
-import System.FilePath.Glob       (glob)
-import System.Directory (makeRelativeToCurrentDirectory)
--- import OrthoLang.Core        (traceA)
+import Data.List            (sort)
+import Data.String.Utils    (strip)
+import OrthoLang.Core       (compose1)
+import System.Directory     (makeRelativeToCurrentDirectory)
+import System.FilePath.Glob (glob)
 
 orthoLangModule :: Module
 orthoLangModule = Module

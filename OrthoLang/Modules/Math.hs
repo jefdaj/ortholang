@@ -7,8 +7,6 @@ import qualified OrthoLang.Core.Util as U
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans    (lift)
 import Data.Scientific        (Scientific, toRealFloat)
-import OrthoLang.Core (readLits, writeLit)
-import OrthoLang.Core (mkNewBop)
 
 orthoLangModule :: Module
 orthoLangModule = Module

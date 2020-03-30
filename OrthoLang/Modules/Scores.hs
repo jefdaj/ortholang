@@ -21,8 +21,8 @@ import OrthoLang.Core         (Path, toPath, fromPath, exprPath)
 import OrthoLang.Modules.BlastHits (aCutCol)
 import OrthoLang.Core (rSimple)
 
-debug :: String -> String -> Action ()
-debug name = debugA ("ortholang.modules.scores." ++ name)
+dbg :: String -> String -> Action ()
+dbg name = debugA ("ortholang.modules.scores." ++ name)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -53,7 +53,7 @@ aScores cfg ref scoresPath othersPath othersType outPath = do
   debug' $ "aScores rows: "    ++ show rows
   writeLits cfg ref out' rows
   where
-    debug' = debug "aScores"
+    debug' = dbg "aScores"
 
 -----------------------------------------------------
 -- replace_each and score the inputs by the outputs --

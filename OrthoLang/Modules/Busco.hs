@@ -6,23 +6,18 @@ module OrthoLang.Modules.Busco
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core (cacheDir, toPath, fromPath, exprPath)
-import OrthoLang.Core (traceA, writeLits, runCmd, CmdDesc(..), readLit, readPaths, writePaths,
-                              readFileStrict', symlink, readFileStrict, sanitizeFileInPlace)
-import OrthoLang.Core (defaultTypeCheck, rExpr, mkLoad, curl)
-import OrthoLang.Core (rSimple, rSimpleScript)
-import OrthoLang.Core   (rMap, rMapSimpleScript)
-import OrthoLang.Modules.SeqIO (fna, faa, mkConcat)
+
+import Control.Monad             (when)
+import Data.List                 ((\\))
+import Data.Maybe                (isJust)
+import Data.Scientific           (Scientific)
+import OrthoLang.Core            (resolveSymlinks, unlessExists, headOrDie)
 import OrthoLang.Modules.BlastDB (aFilterList)
-import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
-import System.Directory           (createDirectoryIfMissing)
-import OrthoLang.Core         (resolveSymlinks, unlessExists, headOrDie)
-import System.Exit (ExitCode(..))
-import System.FilePath.Glob       (glob)
-import Data.Scientific -- (formatScientific, FPFormat(..))
-import Control.Monad (when)
-import Data.List ((\\))
-import Data.Maybe (isJust)
+import OrthoLang.Modules.SeqIO   (fna, faa, mkConcat)
+import System.Directory          (createDirectoryIfMissing)
+import System.Exit               (ExitCode(..))
+import System.FilePath           (takeBaseName, takeDirectory, (<.>), (</>))
+import System.FilePath.Glob      (glob)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -398,7 +393,7 @@ rBuscoFilterCompleteness s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [m, t, fs]) = do
     faaPaths <- readPaths cfg ref faasList
     let allScores = map parseWords $ map words $ lines table
         missing   = faaPaths \\ map fst allScores
-        okPaths   = map fst $ filter (\(scr, c) -> c >= score) allScores
+        okPaths   = map fst $ filter (\(_, c) -> c >= score) allScores
     when (not $ null missing) $
       error $ "these paths are missing from the table: " ++ show missing
     writePaths cfg ref out' okPaths

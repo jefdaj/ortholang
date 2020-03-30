@@ -137,7 +137,7 @@ module OrthoLang.Core
   , stripWhiteSpace
   , trace
   , unlessExists
-  -- , debug TODO disambiguate
+  , U.debug -- TODO disambiguate the others
 
   )
   where
@@ -149,7 +149,9 @@ import OrthoLang.Core.Paths
 import OrthoLang.Core.Pretty
 import OrthoLang.Core.Sanitize
 import OrthoLang.Core.Types
-import OrthoLang.Core.Util
+
+import OrthoLang.Core.Util hiding (debug)
+import qualified OrthoLang.Core.Util as U
 
 import OrthoLang.Core.Eval (evalFile)
 import OrthoLang.Core.Repl (runRepl)

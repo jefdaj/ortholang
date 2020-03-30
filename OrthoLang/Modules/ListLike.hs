@@ -7,16 +7,10 @@ module OrthoLang.Modules.ListLike where
 import Development.Shake
 import OrthoLang.Core
 
-import OrthoLang.Core  (readPaths, writeLit, traceA)
--- import OrthoLang.Core    (traceA)
-import OrthoLang.Core    (exprPath, fromPath,
-                               toPath, Path)
-import OrthoLang.Core     (rExpr, defaultTypeCheck)
-import OrthoLang.Core     (rMap)
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import OrthoLang.Modules.MMSeqs   (mms)
-import Data.Scientific (Scientific())
+import Data.Scientific            (Scientific())
 
 orthoLangModule :: Module
 orthoLangModule = Module

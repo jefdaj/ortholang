@@ -11,27 +11,19 @@ module OrthoLang.Modules.PsiBlast where
 
 import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core       (readLit, readPath, 
-                                    runCmd, CmdDesc(..), debugA, traceA, need',
-                                    writeCachedLines, readFileStrict')
-import OrthoLang.Core (defaultTypeCheck, rFun3, map3of3, singleton)
-import OrthoLang.Core         (fromPath, cacheDir)
-import OrthoLang.Core          (headOrDie)
-import OrthoLang.Modules.BlastDB    (pdb)
-import OrthoLang.Modules.Blast      (bht)
-import OrthoLang.Modules.SeqIO      (faa)
-import Data.Scientific             (formatScientific, FPFormat(..))
-import System.FilePath             ((<.>), takeFileName)
--- import System.Directory            (removeFile)
-import Control.Monad               (when)
-import OrthoLang.Modules.SeqIO      (mkConcat)
-import OrthoLang.Core (compose1)
-import OrthoLang.Core (rMap)
-import System.Directory            (createDirectoryIfMissing)
-import System.Exit                 (ExitCode(..))
 
-debug :: String -> String -> Action ()
-debug name = debugA ("ortholang.modules.psiblast." ++ name)
+import Control.Monad             (when)
+import Data.Scientific           (formatScientific, FPFormat(..))
+import OrthoLang.Modules.Blast   (bht)
+import OrthoLang.Modules.BlastDB (pdb)
+import OrthoLang.Modules.SeqIO   (faa)
+import OrthoLang.Modules.SeqIO   (mkConcat)
+import System.Directory          (createDirectoryIfMissing)
+import System.Exit               (ExitCode(..))
+import System.FilePath           ((<.>), takeFileName)
+
+dbg :: String -> String -> Action ()
+dbg name = debugA ("ortholang.modules.psiblast." ++ name)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -166,7 +158,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
   -- this version works for withPdbSubject, but breaks something else?
   dbPre     <- readPath cfg ref dbPath' -- TODO is this right?
-  debug "aPsiblastDb" $ "dbPre: " ++ show dbPre
+  dbg "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromPath cfg $ cacheDir cfg "psiblast"
@@ -180,7 +172,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
   -- TODO is this needed, or will it end up the default?
   -- psiblastBin <- fmap stripWhiteSpace $
   --                  wrappedCmdOut True cfg ref [] [] [] "which" ["psiblast"]
-  -- debug "aPsiblastDb" $ "binary: " ++ psiblastBin
+  -- dbg "aPsiblastDb" $ "binary: " ++ psiblastBin
 
   -- TODO what to do when no hits found? use seqid + nothing as output format
   --      and check for that in the search fn?

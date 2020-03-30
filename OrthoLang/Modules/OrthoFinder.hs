@@ -8,17 +8,11 @@ module OrthoLang.Modules.OrthoFinder
 import Development.Shake (Action)
 import OrthoLang.Core
 
-import OrthoLang.Core       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..), trackWrite')
-import OrthoLang.Core (defaultTypeCheck)
-import OrthoLang.Core (rSimple)
-import OrthoLang.Core         (withWriteLock')
-import OrthoLang.Core         (Path, toPath, fromPath)
-import OrthoLang.Core          (digest, readFileStrict)
-import OrthoLang.Modules.SeqIO      (faa)
-import System.Directory            (createDirectoryIfMissing)
-import System.FilePath             ((</>), (<.>), takeFileName, takeBaseName, replaceBaseName)
-import System.Exit                 (ExitCode(..))
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.IO.Class  (liftIO)
+import OrthoLang.Modules.SeqIO (faa)
+import System.Directory        (createDirectoryIfMissing)
+import System.Exit             (ExitCode(..))
+import System.FilePath         ((</>), takeFileName, replaceBaseName)
 
 orthoLangModule :: Module
 orthoLangModule = Module

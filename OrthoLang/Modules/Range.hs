@@ -6,11 +6,8 @@ module OrthoLang.Modules.Range
 import Development.Shake
 import OrthoLang.Core
 
+import System.Exit     (ExitCode(..))
 import System.FilePath ((<.>))
-import OrthoLang.Core (defaultTypeCheck, rExpr)
-import OrthoLang.Core (readLit, CmdDesc(..), runCmd)
-import OrthoLang.Core (exprPath, fromPath)
-import System.Exit (ExitCode(..))
 
 orthoLangModule :: Module
 orthoLangModule = Module

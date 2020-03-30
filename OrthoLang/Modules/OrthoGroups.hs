@@ -13,32 +13,21 @@ module OrthoLang.Modules.OrthoGroups
 
 import Development.Shake
 import OrthoLang.Core
--- import qualified Data.Map.Strict as M
-
-import Control.Monad               (forM, when)
-import Data.Maybe                  (isJust, catMaybes)
-import OrthoLang.Core       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
-                                    writePaths, readFileStrict', readPaths, runCmd, CmdDesc(..), need')
-import OrthoLang.Core (defaultTypeCheck)
-import OrthoLang.Core (rSimple)
-import OrthoLang.Core         (Path, toPath, fromPath, exprPath, upBy, cacheDir)
-import OrthoLang.Core          (headOrDie, digest)
-import OrthoLang.Core      (lookupID)
-import System.FilePath             ((</>), takeDirectory)
-import Text.Regex.Posix            ((=~))
-import OrthoLang.Core (rExpr, debugRules)
-import Data.Scientific             (toRealFloat)
-import System.Exit                 (ExitCode(..))
-import System.FilePath             ((<.>))
-import System.Directory            (createDirectoryIfMissing)
-import Data.IORef                  (readIORef)
--- import Data.List                   (isPrefixOf)
-import Data.String.Utils           (split)
 
 import OrthoLang.Modules.SeqIO         (faa)
 import OrthoLang.Modules.OrthoFinder   (ofr)
 import OrthoLang.Modules.SonicParanoid (spr)
 import OrthoLang.Modules.GreenCut      (gcr)
+
+import Control.Monad     (forM, when)
+import Data.IORef        (readIORef)
+import Data.Maybe        (isJust, catMaybes)
+import Data.Scientific   (toRealFloat)
+import Data.String.Utils (split)
+import System.Directory  (createDirectoryIfMissing)
+import System.Exit       (ExitCode(..))
+import System.FilePath   ((<.>), (</>), takeDirectory)
+import Text.Regex.Posix  ((=~))
 
 -- this is just shorthand
 sll :: Type
