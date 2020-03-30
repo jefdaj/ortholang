@@ -361,10 +361,12 @@ aVar cfg ref _ vPath oPath = do
 ------------------------------
 
 -- TODO show the failing function here! which means reworking the Fun definitions a bit
+-- TODO different text for failing Bops
 typeError :: String -> [Type] -> [Type] -> String
 typeError name expected actual =
-  "Type error: the " ++ name ++ "function requires input types " ++ show expected
-           ++ ", but got " ++ show actual
+  "Type mismatch :(\nThe function " ++ name ++
+  " requires these inputs: "        ++ unwords (map show expected) ++
+  "\nBut it was given these: "      ++ unwords (map show actual)
 
 -- TODO this should fail for type errors like multiplying a list by a num!
 defaultTypeCheck :: String -> [Type] -> Type
