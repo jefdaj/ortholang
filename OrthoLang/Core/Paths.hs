@@ -139,6 +139,7 @@ module OrthoLang.Core.Paths
   , listScriptExprs
   -- , insertNewRulesDigest
   , decodeNewRulesDeps
+  , listDigestsInPath
 
   -- * Misc utilities (move to Util.hs?)
   , argHashes
@@ -172,6 +173,9 @@ module OrthoLang.Core.Paths
 
 -- import qualified Debug.Trace as DT
 
+import Prelude hiding (log)
+import qualified OrthoLang.Core.Util as U
+
 import Path (parseAbsFile, fromAbsFile)
 import OrthoLang.Core.Types -- (Config)
 -- import OrthoLang.Core.Config (debug)
@@ -197,6 +201,8 @@ traceP name expr path = trace ("core.paths." ++ name) msg path
   where
     ren = render $ pPrint expr
     msg = "\"" ++ ren ++ "' -> " ++ show path -- TODO include types?
+
+log fnName varName thing = U.debug fnName $ varName ++ ": " ++ show thing
 
 -- traceD name c s expr = trace ("core.paths." ++ name) msg
 --   where
@@ -384,24 +390,34 @@ listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
 decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
                    -> IO (Type, [Type], [Path])
 decodeNewRulesDeps cfg dMap o@(ExprPath out) = do
-  let dKeys  = map PathDigest
-             $ reverse $ dropWhile (/= "exprs")
-             $ reverse $ drop 2
-             $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
+  log "decodeNewRulesDeps" "out" out
+  let dKeys  = listDigestsInPath cfg out
       dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
       dTypes = map fst dVals'
       dPaths = map snd dVals'
       oKey   = exprPathDigest $ toPath cfg out
       Just (oType, _) = M.lookup oKey dMap
-  -- TODO user-visible error here if one or more lookups fails
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps ids: " ++ show ids
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps p: " ++ show p
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps dKeys: " ++ show dKeys
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps dTypes: " ++ show dTypes
-  -- liftIO $ putStrLn $ "decodeNewRulesDeps dVals': " ++ show dVals'
+  log "decodeNewRulesDeps" "dKeys" dKeys
+  log "decodeNewRulesDeps" "dTypes" dTypes
+  log "decodeNewRulesDeps" "dVals'" dVals'
+  log "decodeNewRulesDeps" "dPaths" dPaths
+  log "decodeNewRulesDeps" "oKey" oKey
   when (length dVals /= length dKeys) $ error $ "failed to decode path: \"" ++ out ++ "\""
   return (oType, dTypes, dPaths)
+
+-- TODO hey, is it worth just looking up every path component to make it more robust?
+listDigestsInPath :: Config -> FilePath -> [PathDigest]
+listDigestsInPath cfg
+  = map PathDigest
+  . reverse
+  . drop 2
+  . reverse
+  . drop 2
+  . dropWhile (/= "exprs")
+  . map (filter (/= '/'))
+  . splitPath
+  . makeRelative (cfgTmpDir cfg)
 
 -- TODO remove repeat salt if fn is deterministic
 exprPathExplicit :: Config -> String -> Type -> Salt -> [String] -> Path

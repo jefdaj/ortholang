@@ -170,7 +170,7 @@ aNewRules applyFn tFn aFn out = do
   (cfg, lRef, iRef, dMap) <- ask
   (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dMap out
   case tFn dTypes of
-    Left err -> error err
+    Left err -> fail err -- TODO bop type error here :(
     Right rType -> do
       when (rType /= oType) $
         error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
