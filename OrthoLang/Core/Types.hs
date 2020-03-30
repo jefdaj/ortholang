@@ -8,11 +8,6 @@ module OrthoLang.Core.Types
   , ActionFn
   , RulesFn
   , TypeChecker
-  -- * Action functions for NewRules
-  , NewAction1
-  , NewAction2
-  , NewAction3
-  , NewRulesFn
   -- * Basic data structures
   , Assign
   , Expr(..)
@@ -114,12 +109,6 @@ type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
 
 type RulesFn     = GlobalEnv -> Expr -> Rules ExprPath
 type TypeChecker = [Type] -> Either String Type
-
-type NewAction1 = Config -> LocksRef -> IDsRef -> ExprPath -> FilePath                         -> Action ()
-type NewAction2 = Config -> LocksRef -> IDsRef -> ExprPath -> FilePath -> FilePath             -> Action ()
-type NewAction3 = Config -> LocksRef -> IDsRef -> ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
-
-type NewRulesFn = Config -> LocksRef -> IDsRef -> Rules ()
 
 newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.ortholang/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
