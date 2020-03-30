@@ -5,30 +5,30 @@ module OrthoLang.Test
   )
   where
 
-import Paths_OrthoLang        (getDataFileName)
-import OrthoLang.Core.Types   (Config(..), LocksRef, IDsRef)
-import OrthoLang.Test.Repl    (mkTestGroup)
-import System.Directory      (getTemporaryDirectory, createDirectoryIfMissing,
-                              setCurrentDirectory)
+import OrthoLang.Core.Types  (Config(..), LocksRef, IDsRef)
+import OrthoLang.Core.Util   (debug)
+import OrthoLang.Test.Repl   (mkTestGroup)
+import Paths_OrthoLang       (getDataFileName)
+import System.Console.Docopt (Arguments, longOption, getAllArgs)
+import System.Directory      (getTemporaryDirectory, createDirectoryIfMissing, setCurrentDirectory)
 import System.Environment    (setEnv, withArgs)
 import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
--- import Data.IORef            (IORef)
 
-import System.Console.Docopt (Arguments, longOption, getAllArgs)
-import OrthoLang.Core.Util (trace, debug)
-
+-- we just need <each of these>.mkTests
 import qualified OrthoLang.Test.Versions as V
 import qualified OrthoLang.Test.Parse    as P
 import qualified OrthoLang.Test.Repl     as R
 import qualified OrthoLang.Test.Scripts  as S
 
--- This is weird because all tests are always created;
--- filtering is done according to the TASTY_PATTERN environment var.
--- Gotcha: can't print the test pattern in place of "all tests"
--- because then they all match, ruining the filter.
+{-|
+This is weird because all tests are always created;
+filtering is done according to the TASTY_PATTERN environment var.
+Gotcha: can't print the test pattern in place of "all tests"
+because then they all match, ruining the filter.
+-}
 mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
 mkTests cfg ref ids = mkTestGroup cfg ref ids "all tests" tests
   where
@@ -39,10 +39,6 @@ mkTestConfig cfg dir = cfg
   { cfgScript  = Nothing
   , cfgTmpDir  = dir
   , cfgWorkDir = dir
-  -- , cfgDebug   = Nothing
-  -- , cfgModules = mods
-  -- , cfgWrapper = Nothing -- TODO test this?
-  -- , cfgReport  = Nothing
   }
 
 runTests :: Arguments -> Config -> LocksRef -> IDsRef -> IO ()
@@ -56,13 +52,16 @@ runTests args cfg ref ids = withArgs [] $ do
     setCurrentDirectory wd -- TODO issue with this in the stack tests?
     dbg $ "working dir is " ++ wd
     -- TODO check exit code?
-    setEnv "TASTY_NUM_THREADS" "1" -- TODO can more be done without repl issues?
+
+    -- each test can be multithreaded, but running more than one at a time
+    -- confuses the stdout/stderr capturing
+    setEnv "TASTY_NUM_THREADS" "1"
+
     case getAllArgs args (longOption "test") of
       [] -> return ()
       ps -> setEnv "TASTY_PATTERN" $ unwords ps
     let exSrc = wd </> "examples"
         exDst = tmpSubDir </> "examples"
-    -- TODO why not use the symlink function here?
     (_,_,_) <- readCreateProcessWithExitCode
       (shell $ unwords ["ln -s", exSrc, exDst]) ""
     dbg $ "created examples dir " ++ exDst
