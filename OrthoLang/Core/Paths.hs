@@ -384,7 +384,10 @@ listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
 decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
                    -> IO (Type, [Type], [Path])
 decodeNewRulesDeps cfg dMap o@(ExprPath out) = do
-  let dKeys  = map PathDigest $ reverse $ drop 2 $ reverse $ drop 2 $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
+  let dKeys  = map PathDigest
+             $ reverse $ dropWhile (/= "exprs")
+             $ reverse $ drop 2
+             $ map init $ splitPath $ makeRelative (cfgTmpDir cfg) out
       dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
       dTypes = map fst dVals'
