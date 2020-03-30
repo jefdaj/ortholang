@@ -16,6 +16,7 @@ It should also reduce boilerplace in the modules: in most cases only one
 module OrthoLang.Core.Compile.NewRules
   ( newCoreRules
   , newFunctionRules
+  , mkNewBop
   , mkNewFn1
   , mkNewFn2
   , mkNewFn3
@@ -34,6 +35,12 @@ import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths       (fromPath, decodeNewRulesDeps)
 import OrthoLang.Core.Util        (traceShow)
 
+{-|
+The old-style rules in use throughout OrthoLang now require the compilers to
+return exact paths. These new ones use proper patterns instead, so they can be
+added once per program run rather than once per expression. They should also
+allow Shake to infer mapping patterns, but that isn't implemented yet.
+-}
 newFunctionRules :: RulesR ()
 newFunctionRules = do
   (cfg, _, _, _) <- ask
@@ -41,18 +48,10 @@ newFunctionRules = do
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
 
--- TODO can this replace NewRulesFn everywhere?
--- type NewRulesFn2 = RulesR ()
-
--- TODO try ActionR first, then come back to this if it still sounds useful
--- type NewRulesFn = Config -> LocksRef -> IDsRef -> Rules ()
--- newFunctionRules2 :: RulesR ()
--- newFunctionRules2 = do
---   (_, cfg, lRef, iRef, dMap) <- ask
---   let fns   = concatMap mFunctions $ cfgModules cfg
---       rules = catMaybes $ map fNewRules fns
---   mapM_ (\r -> r cfg lRef iRef, dMap) rules
-
+{-|
+I'm not sure yet which of the core language feature compilers can be converted
+to new-style rules. Perhaps none of them? If not, remote this.
+-}
 newCoreRules :: RulesR ()
 newCoreRules = do
 
@@ -122,7 +121,7 @@ ptn %>> act = do
   lift $ ptn %> \p -> run $ act $ ExprPath p
 
 aNewRules
-  :: (t -> [FilePath] -> ActionR ()) -- one of the apply{1,2,3} fns
+  :: (t -> [FilePath] -> ActionR ()) -- ^ one of the apply{1,2,3} fns
   -> TypeChecker
   -> (ExprPath -> t)
   ->  ExprPath -> ActionR ()
@@ -132,16 +131,10 @@ aNewRules applyFn tFn aFn out = do
   case tFn dTypes of
     Left err -> error err
     Right rType -> do
-      when (rType /= oType) $ error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
+      when (rType /= oType) $
+        error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
       let deps' = map (fromPath cfg) deps
-
-      -- TODO this needs to be either wrapped or used inside ActionR, right?
       needR "ortholang.modules.newrulestest.aNewRules" deps'
-
-      -- TODO look up out too and assert that its type matches typechecker result
-      -- liftIO $ putStrLn $ "aNewRules dTypes: " ++ show dTypes
-      -- liftIO $ putStrLn $ "aNewRules typechecker says: " ++ show (tFn dTypes)
-      -- liftIO $ putStrLn $ "aNewRules deps: " ++ show deps
       applyFn (aFn out) deps'
 
 needR :: String -> [FilePath] -> ActionR ()
@@ -149,15 +142,40 @@ needR name deps = do
   (cfg, lRef, _, _) <- ask
   lift $ need' cfg lRef name deps
 
-mkNewFn1 :: String -> Maybe Char -> Type -> [Type] -> ActionR1 -> Function
-mkNewFn1 = mkNewFn rNewRules1
+mkNewBop :: String   -- ^ name
+         -> Char     -- ^ opchar
+         -> Type     -- ^ return type
+         -> Type     -- ^ 1 argument type (each side of the bop will be this)
+         -> ActionR1 -- ^ 1-argument action (list of two args in case of bop, or any number for prefix fn)
+         -> Function
+mkNewBop n c r a1 = mkNewFn rNewRules1
+         n (Just c) r [ListOf a1]
 
-mkNewFn2 :: String -> Maybe Char -> Type -> [Type] -> ActionR2 -> Function
-mkNewFn2 = mkNewFn rNewRules2
+mkNewFn1 :: String     -- ^ name
+         -> Type       -- ^ return type
+         -> Type       -- ^ 1 argument type
+         -> ActionR1   -- ^ 1-argument action
+         -> Function
+mkNewFn1 n r a1 = mkNewFn rNewRules1
+         n Nothing r [a1]
 
-mkNewFn3 :: String -> Maybe Char -> Type -> [Type] -> ActionR3 -> Function
-mkNewFn3 = mkNewFn rNewRules3
+mkNewFn2 :: String       -- ^ name
+         -> Type         -- ^ return type
+         -> (Type, Type) -- ^ 2 argument types
+         -> ActionR2     -- ^ 2-argument action
+         -> Function
+mkNewFn2 n r (a1, a2) = mkNewFn rNewRules2
+         n Nothing r [a1, a2]
 
+mkNewFn3 :: String             -- ^ name
+         -> Type               -- ^ return type
+         -> (Type, Type, Type) -- ^ 3 argument types
+         -> ActionR3           -- ^ 3-argument action
+         -> Function
+mkNewFn3 n r (a1, a2, a3) = mkNewFn rNewRules3
+         n Nothing r [a1, a2, a3]
+
+-- | Use the argument-specific numbered version above instead.
 mkNewFn
   :: (String -> TypeChecker -> t -> RulesR ())
   -> String -> Maybe Char -> Type -> [Type] -> t -> Function

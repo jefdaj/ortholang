@@ -19,7 +19,7 @@ orthoLangModule = Module
   }
 
 test1 :: Function
-test1 = mkNewFn2 "newrulestest1" Nothing str [str, str] aTest1
+test1 = mkNewFn2 "newrulestest1" str (str, str) aTest1
 
 -- TODO make these all Paths?
 aTest1 :: ActionR2
@@ -30,7 +30,7 @@ aTest1 (ExprPath out) d1 d2 = do
   lift $ writeCachedLines cfg lRef out ["result would go here, but for now these were the inputs:", s1, s2]
 
 test2 :: Function
-test2 = mkNewFn3 "newrulestest2" Nothing faa [str, faa, faa] aTest2
+test2 = mkNewFn3 "newrulestest2" faa (str, faa, faa) aTest2
 
 aTest2 :: ActionR3
 aTest2 (ExprPath out) a1 a2 a3 = do

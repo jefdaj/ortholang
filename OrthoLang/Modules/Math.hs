@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans    (lift)
 import Data.Scientific        (Scientific, toRealFloat)
 import OrthoLang.Core.Actions (readLits, writeLit)
-import OrthoLang.Core.Compile (mkNewFn1)
+import OrthoLang.Core.Compile (mkNewBop)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -16,10 +16,10 @@ orthoLangModule = Module
   , mDesc = "Basic math"
   , mTypes = [num]
   , mFunctions =
-    [ mkMathFn '+' "add"      (+)
-    , mkMathFn '-' "subtract" (-)
-    , mkMathFn '*' "multiply" (*)
-    , mkMathFn '/' "divide"   (divDouble)
+    [ mkMathBop "add"      '+' (+)
+    , mkMathBop "subtract" '-' (-)
+    , mkMathBop "multiply" '*' (*)
+    , mkMathBop "divide"   '/' (divDouble)
     ]
   }
 
@@ -28,14 +28,14 @@ divDouble n1 n2 = read $ show (answer :: Double)
   where
     answer = toRealFloat n1 / toRealFloat n2
 
-mkMathFn :: Char -> String -> (Scientific -> Scientific -> Scientific) -> Function
-mkMathFn opChar name fn = mkNewFn1 name (Just opChar) num [ListOf num] $ aMath fn
+mkMathBop :: String -> Char -> (Scientific -> Scientific -> Scientific) -> Function
+mkMathBop name opChar fn = mkNewBop name opChar num num $ aMathBop fn
 
 log :: Show a => a -> ActionR ()
 log = lift . liftIO . U.debug "modules.math.amath" . show
 
-aMath :: (Scientific -> Scientific -> Scientific) -> ActionR1
-aMath mathFn (ExprPath outPath) nsPath = do
+aMathBop :: (Scientific -> Scientific -> Scientific) -> ActionR1
+aMathBop mathFn (ExprPath outPath) nsPath = do
   log nsPath
   cfg  <- askConfig
   lRef <- askLocks
