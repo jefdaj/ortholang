@@ -48,6 +48,8 @@ import Data.Maybe             (isJust, fromJust)
 import Text.Parsec            (try, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
+import Control.Monad.Reader   (ReaderT, ask)
+import Text.Parsec            (getState)
 
 
 {-
@@ -76,7 +78,7 @@ For now, I think all binary operators at the same precedence should work.
 but it gets more complicated I'll write out an actual table here with a
 prefix function too etc. See the jake wheat tutorial.
 -}
-operatorTable :: Config -> [[E.Operator String ParseEnv (Except String) Expr]]
+operatorTable :: Config -> [[E.Operator String Script (ReaderT Config (Except String)) Expr]]
 operatorTable cfg = [map binary bops]
   where
     binary f = E.Infix (pBop f) E.AssocLeft
@@ -147,7 +149,7 @@ TODO get function names from modules
 -}
 pFunName :: ParseM String
 pFunName = do
-  cfg <- getConfig
+  cfg <- ask
   (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
@@ -186,7 +188,7 @@ TODO hey is this where it's missing the dmap?
 -}
 pFunArgs :: String -> [Expr] -> ParseM Expr
 pFunArgs name args = debugParser "pFun" $ do
-  cfg <- getConfig
+  cfg <- ask
   -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
   -- args <- pArgs
   -- args <- manyTill pTerm pEnd
@@ -220,7 +222,7 @@ TODO any need for digests here?
 pRef :: ParseM Expr
 pRef = debugParser "pRef" $ do
   v@(Var _ var) <- pVar
-  scr <- getScript
+  scr <- getState
   case lookup v (sAssigns scr) of
     Nothing -> trace "pRef" ("scr before lookup of \"" ++ var ++ "': " ++ show scr) $
                  parseFail $ "no such variable \"" ++ var ++ "\"" ++ "\n" -- ++ show scr
@@ -259,17 +261,17 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 pExpr :: ParseM Expr
 pExpr = debugParser "pExpr" $ do
   -- debugParseM "expr"
-  cfg <- getConfig
-  e <- E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
+  cfg <- ask
+  E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
   -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
   -- putDigests "pExpr" [e]
-  return e
+  -- return e
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)
-isExpr :: ParseEnv -> String -> Bool
+isExpr :: (Config, Script) -> String -> Bool
 isExpr state line = isRight $ parseWithEof pExpr state line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: ParseEnv -> String -> Either String Expr
+parseExpr :: (Config, Script) -> String -> Either String Expr
 parseExpr = runParseM pExpr

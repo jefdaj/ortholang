@@ -1,11 +1,7 @@
 module OrthoLang.Core.Parse.Basic
   (
   -- * Utilities
-    getConfig
-  , getScript
-  -- , putDigests
-  , putAssign
-  , putScript
+    putAssign
 
   -- * Whitespace and endings
   , lexeme
@@ -48,39 +44,18 @@ import Text.Parsec.Prim       (ParsecT, Stream)
 -- import OrthoLang.Core.Paths   (exprDigests)
 import OrthoLang.Core.Parse.Util (ParseM, debugParser)
 import OrthoLang.Core.Util    (trace)
+import Control.Monad.Reader   (ask)
 
 --------------
 -- utilites --
 --------------
 
--- TODO move to Types? or move more of that here?
-
-getConfig :: ParseM Config
-getConfig = getState >>= return . fst
-
-getScript :: ParseM Script
-getScript = getState >>= return . snd
-
--- putDigests :: String -> [Expr] -> ParseM ()
--- putDigests name exprs = do
---   (c, s) <- getState
---   let ds = exprDigests c s exprs
---       s' = s { sDigests = M.union (sDigests s) ds }
---   putState (c, trace name ("adding digests: " ++ show ds) s')
---   -- TODO also show if there are any duplicates
---   return()
-
 -- TODO remove if this is only used once in pScript
 putAssign :: String -> Assign -> ParseM ()
 putAssign name a = do
-  (c, s) <- getState
+  s <- getState
   let as' = trace name ("adding assignment: " ++ show a) $ sAssigns s ++ [a]
-  putState (c, s {sAssigns = as'})
-
-putScript :: Script -> ParseM ()
-putScript scr = do
-  (c, _) <- getState -- TODO any reason to union the digests?
-  putState (c, scr)
+  putState $ s {sAssigns = as'}
 
 {-|
 There's a convention in parsers that each one should consume whitespace after
@@ -122,7 +97,8 @@ TODO this must be succeding on 'loaner... right?
 -}
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
-  (cfg, _) <- getState
+  -- (cfg, _) <- getState
+  cfg <- ask
   try $ lookAhead $ choice
     [ eof
     , void $ choice $ map pSym $ operatorChars cfg ++ ")],"

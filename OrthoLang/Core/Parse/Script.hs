@@ -48,9 +48,10 @@ import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Core.Util    (readFileStrict, debug)
 import System.FilePath        ((</>), takeDirectory)
-import Text.Parsec            (try)
+import Text.Parsec            (try, getState, putState)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
+import Control.Monad.Reader   (ask)
 
 -------------------
 -- preprocessing --
@@ -101,8 +102,8 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
-  cfg <- getConfig
-  scr <- getScript
+  cfg <- ask
+  scr <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
   when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
@@ -146,7 +147,7 @@ parseFileIO st scr = do
     Right s -> return s
 
 -- TODO need GlobalEnv here? or just Config?
-parseStatement :: ParseEnv -> String -> Either String Assign
+parseStatement :: (Config, Script) -> String -> Either String Assign
 parseStatement = parseWithEof pStatement
 
 {-|
@@ -180,7 +181,7 @@ lastResultOnly scr@(Script {sAssigns = as}) = scr {sAssigns = otherVars ++ [last
 
 {-|
 This one is special because if it parses it replaces the whole script in
-ParseEnv, and if not the original script should remain unaltered.
+(Config, Script), and if not the original script should remain unaltered.
 
 TODO message in case it doesn't parse?
 
@@ -191,18 +192,18 @@ pScript = debugParser "pScript" $ do
   optional spaces
   as <- many pStatement
   -- (cfg, scr) <- getState
-  -- scr <- getScript
+  -- scr <- getState
   -- let (as, ds) = unzip ads 
   -- let ds'  = M.union (sDigests scr) $ exprDigests cfg scr $ map snd as
       -- scr  = emptyScript {sAssigns = as, sDigests = ds'}
-  cfg <- getConfig
+  cfg <- ask
   let scr  = emptyScript {sAssigns = as}
       scr' = lastResultOnly scr
       ds   = scriptDigests cfg scr'
       scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
-  -- putScript scr'
+  -- putState scr'
   -- putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
-  putScript scr''
+  putState scr''
   return scr''
   -- return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 

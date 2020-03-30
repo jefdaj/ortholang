@@ -92,7 +92,7 @@ module OrthoLang.Core.Types
   , RulesEnv
   , RulesR
   , runRulesR
-  , ParseEnv
+  -- , ParseEnv
   )
   where
 
@@ -513,10 +513,6 @@ type DigestMap = M.Map PathDigest (Type, Path)
 
 -- TODO config always first? or make a record + ask* fns
 type GlobalEnv = (Script, Config, LocksRef, IDsRef)
-
--- TODO config always first? or make a record + ask* fns
-type ParseEnv = (Config, Script) -- script also contains the digestmap now
--- type ParseM a = Parsec String ParseEnv a
 
 ----------------
 -- Repl monad --
