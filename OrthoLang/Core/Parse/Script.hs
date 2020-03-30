@@ -110,7 +110,7 @@ pAssign = debugParser "pAssign" $ do
 
   -- TODO actually, is *this* the only place it's needed rather than in pScript?
   putAssign  "pAssign" (v, e)
-  putDigests "pAssign" [e]
+  -- putDigests "pAssign" [e]
 
   return (v, e)
 
@@ -156,9 +156,14 @@ parsing an entire script from a string (no previous state).
 TODO clarify that
 
 TODO error if it has leftover?
+
+TODO is this the only place we ever need to add digests?
 -}
 parseString :: Config -> String -> Either String Script
-parseString c = parseWithEof pScript (c, emptyScript)
+parseString c s = fmap addDigests $ parseWithEof pScript (c, emptyScript) s
+  where
+    addDigests :: Script -> Script
+    addDigests scr = scr {sDigests = scriptDigests c scr}
 
 {-|
 Not sure why this should be necessary, but it was easier than fixing the parser

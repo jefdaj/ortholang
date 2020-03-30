@@ -3,7 +3,7 @@ module OrthoLang.Core.Parse.Basic
   -- * Utilities
     getConfig
   , getScript
-  , putDigests
+  -- , putDigests
   , putAssign
   , putScript
 
@@ -45,7 +45,7 @@ import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim       (ParsecT, Stream)
-import OrthoLang.Core.Paths   (exprDigests)
+-- import OrthoLang.Core.Paths   (exprDigests)
 import OrthoLang.Core.Parse.Util (ParseM, debugParser)
 import OrthoLang.Core.Util    (trace)
 
@@ -61,14 +61,14 @@ getConfig = getState >>= return . fst
 getScript :: ParseM Script
 getScript = getState >>= return . snd
 
-putDigests :: String -> [Expr] -> ParseM ()
-putDigests name exprs = do
-  (c, s) <- getState
-  let ds = exprDigests c s exprs
-      s' = s { sDigests = M.union (sDigests s) ds }
-  putState (c, trace name ("adding digests: " ++ show ds) s')
-  -- TODO also show if there are any duplicates
-  return()
+-- putDigests :: String -> [Expr] -> ParseM ()
+-- putDigests name exprs = do
+--   (c, s) <- getState
+--   let ds = exprDigests c s exprs
+--       s' = s { sDigests = M.union (sDigests s) ds }
+--   putState (c, trace name ("adding digests: " ++ show ds) s')
+--   -- TODO also show if there are any duplicates
+--   return()
 
 -- TODO remove if this is only used once in pScript
 putAssign :: String -> Assign -> ParseM ()
