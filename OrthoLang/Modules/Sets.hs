@@ -5,7 +5,7 @@ module OrthoLang.Modules.Sets where
 -- TODO remove long form of diff?
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 import qualified Data.Set as Set
 
@@ -15,12 +15,12 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Data.IORef                  (readIORef)
 import Development.Shake.FilePath  ((</>))
-import OrthoLang.Core.Compile (rExpr, typeError, debugRules)
-import OrthoLang.Core.Actions       (readStrings, readPaths, writeStrings, traceA, hashContent)
--- import OrthoLang.Core.Debug         (debugRules, traceA)
-import OrthoLang.Core.Paths         (exprPath, toPath, fromPath)
-import OrthoLang.Core.Util          (resolveSymlinks)
-import OrthoLang.Core.Sanitize      (unhashIDs)
+import OrthoLang.Core (rExpr, debugRules)
+import OrthoLang.Core       (readStrings, readPaths, writeStrings, traceA, hashContent)
+-- import OrthoLang.Core         (debugRules, traceA)
+import OrthoLang.Core         (exprPath, toPath, fromPath)
+import OrthoLang.Core          (resolveSymlinks)
+import OrthoLang.Core      (unhashIDs)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -54,7 +54,7 @@ setOpDescs =
 mkSetFunction :: SetOpDesc -> Function
 mkSetFunction (foldName, opChar, setFn) = setFold
   where
-    mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
+    -- mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
     mkFoldDesc name = name ++ " : X.list.list -> X.list"
     setFold = Function
       { fName = foldName

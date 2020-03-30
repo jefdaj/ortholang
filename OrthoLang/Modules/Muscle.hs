@@ -2,12 +2,12 @@ module OrthoLang.Modules.Muscle
   where
 
 -- import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimpleScript)
-import OrthoLang.Core.Compile   (rMapSimpleScript)
--- import OrthoLang.Core.Paths         (Path, fromPath)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimpleScript)
+import OrthoLang.Core   (rMapSimpleScript)
+-- import OrthoLang.Core         (Path, fromPath)
 import OrthoLang.Modules.SeqIO      (faa)
 
 orthoLangModule :: Module

@@ -1,15 +1,17 @@
 module OrthoLang.Modules.BlastRBH where
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
-import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, debug)
-import OrthoLang.Core.Compile (rSimple, aSimpleScriptNoFix)
-import OrthoLang.Core.Compile  (rMap)
-import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, absolutizePaths)
--- import OrthoLang.Core.Debug         (traceA)
-import OrthoLang.Core.Paths         (Path, toPath, fromPath, cacheDir)
-import OrthoLang.Core.Util          (digest)
+import OrthoLang.Core.Compile as C
+
+import OrthoLang.Core (rExpr, defaultTypeCheck)
+import OrthoLang.Core (rSimple, aSimpleScriptNoFix)
+import OrthoLang.Core  (rMap)
+import OrthoLang.Core       (runCmd, CmdDesc(..), traceA, absolutizePaths)
+-- import OrthoLang.Core         (traceA)
+import OrthoLang.Core         (Path, toPath, fromPath, cacheDir)
+import OrthoLang.Core          (digest)
 import OrthoLang.Modules.Blast      (bht, BlastDesc, blastDescs, mkBlastFromFa,
                                     aMkBlastFromDb)
 import OrthoLang.Modules.BlastDB    (ndb, pdb)
@@ -24,7 +26,7 @@ import Data.List.Utils             (replace)
 
 -- for tracking down non-deduplicating blastp functions
 debugNames :: Config -> String -> Expr -> Expr -> a -> a
-debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = debug cfg fnName msg rtn
+debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = C.debug cfg fnName msg rtn
   where
     msg = "\"" ++ bname ++ "' -> \"" ++ aname ++ "\""
 debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName

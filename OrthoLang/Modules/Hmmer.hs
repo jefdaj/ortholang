@@ -2,18 +2,18 @@ module OrthoLang.Modules.Hmmer
   where
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 import OrthoLang.Modules.SeqIO (faa)
 import OrthoLang.Modules.Muscle (aln)
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple, rSimpleScript)
-import OrthoLang.Core.Paths (Path, fromPath)
-import OrthoLang.Core.Actions (traceA, runCmd, CmdDesc(..), readLit)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple, rSimpleScript)
+import OrthoLang.Core (Path, fromPath)
+import OrthoLang.Core (traceA, runCmd, CmdDesc(..), readLit)
 import Data.Scientific (formatScientific, FPFormat(..))
 -- import Data.List (isPrefixOf, nub, sort)
 import System.Directory           (createDirectoryIfMissing)
 import System.FilePath             (takeFileName, (</>))
-import OrthoLang.Core.Compile  (rMap, rMapSimpleScript)
+import OrthoLang.Core  (rMap, rMapSimpleScript)
 import System.Exit (ExitCode(..))
 
 orthoLangModule :: Module

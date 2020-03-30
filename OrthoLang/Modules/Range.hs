@@ -4,12 +4,12 @@ module OrthoLang.Modules.Range
   where
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 import System.FilePath ((<.>))
-import OrthoLang.Core.Compile (defaultTypeCheck, rExpr)
-import OrthoLang.Core.Actions (readLit, CmdDesc(..), runCmd)
-import OrthoLang.Core.Paths (exprPath, fromPath)
+import OrthoLang.Core (defaultTypeCheck, rExpr)
+import OrthoLang.Core (readLit, CmdDesc(..), runCmd)
+import OrthoLang.Core (exprPath, fromPath)
 import System.Exit (ExitCode(..))
 
 orthoLangModule :: Module

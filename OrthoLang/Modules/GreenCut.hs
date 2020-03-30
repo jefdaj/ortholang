@@ -2,9 +2,9 @@ module OrthoLang.Modules.GreenCut
   where
 
 -- import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimpleScript)
+import OrthoLang.Core
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimpleScript)
 import OrthoLang.Modules.Blast (bht)
 
 orthoLangModule :: Module

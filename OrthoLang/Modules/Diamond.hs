@@ -5,20 +5,20 @@ module OrthoLang.Modules.Diamond
 -- TODO can't just cat the .dmnd files!
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
-import OrthoLang.Core.Compile (defaultTypeCheck, rExpr, debugRules)
-import OrthoLang.Core.Compile (rSimpleScriptPar, aSimpleScriptPar, rSimple)
-import OrthoLang.Core.Locks         (withReadLock)
-import OrthoLang.Core.Util          (resolveSymlinks, headOrDie)
-import OrthoLang.Core.Paths         (Path, fromPath, exprPath)
-import OrthoLang.Core.Actions       (readPaths, readLit, traceA, runCmd, CmdDesc(..), sanitizeFileInPlace)
+import OrthoLang.Core (defaultTypeCheck, rExpr, debugRules)
+import OrthoLang.Core (rSimpleScriptPar, aSimpleScriptPar, rSimple)
+import OrthoLang.Core         (withReadLock)
+import OrthoLang.Core          (resolveSymlinks, headOrDie)
+import OrthoLang.Core         (Path, fromPath, exprPath)
+import OrthoLang.Core       (readPaths, readLit, traceA, runCmd, CmdDesc(..), sanitizeFileInPlace)
 import OrthoLang.Modules.SeqIO      (fna, faa)
 import OrthoLang.Modules.Blast      (bht)
 import System.Process              (readProcess)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             (replaceBaseName)
-import OrthoLang.Core.Compile   (rMap, rMapSimpleScript)
+import OrthoLang.Core   (rMap, rMapSimpleScript)
 import Data.List.Utils             (replace)
 
 orthoLangModule :: Module

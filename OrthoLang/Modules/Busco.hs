@@ -5,18 +5,18 @@ module OrthoLang.Modules.Busco
 -- TODO add old datasets? maybe no need
 
 import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Paths (cacheDir, toPath, fromPath, exprPath)
-import OrthoLang.Core.Actions (traceA, writeLits, runCmd, CmdDesc(..), readLit, readPaths, writePaths,
+import OrthoLang.Core
+import OrthoLang.Core (cacheDir, toPath, fromPath, exprPath)
+import OrthoLang.Core (traceA, writeLits, runCmd, CmdDesc(..), readLit, readPaths, writePaths,
                               readFileStrict', symlink, readFileStrict, sanitizeFileInPlace)
-import OrthoLang.Core.Compile (defaultTypeCheck, rExpr, mkLoad, curl)
-import OrthoLang.Core.Compile (rSimple, rSimpleScript)
-import OrthoLang.Core.Compile   (rMap, rMapSimpleScript)
+import OrthoLang.Core (defaultTypeCheck, rExpr, mkLoad, curl)
+import OrthoLang.Core (rSimple, rSimpleScript)
+import OrthoLang.Core   (rMap, rMapSimpleScript)
 import OrthoLang.Modules.SeqIO (fna, faa, mkConcat)
 import OrthoLang.Modules.BlastDB (aFilterList)
 import System.FilePath (takeBaseName, takeDirectory, (<.>), (</>))
 import System.Directory           (createDirectoryIfMissing)
-import OrthoLang.Core.Util         (resolveSymlinks, unlessExists, headOrDie)
+import OrthoLang.Core         (resolveSymlinks, unlessExists, headOrDie)
 import System.Exit (ExitCode(..))
 import System.FilePath.Glob       (glob)
 import Data.Scientific -- (formatScientific, FPFormat(..))
@@ -46,7 +46,7 @@ blh :: Type
 blh = Type
   { tExt  = "blh"
   , tDesc = "BUSCO lineage HMMs"
-  , tShow = defaultShowN 6
+  , tShow = defaultShow
   }
 
 bsr :: Type

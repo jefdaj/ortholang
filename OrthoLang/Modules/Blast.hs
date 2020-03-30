@@ -13,16 +13,16 @@ module OrthoLang.Modules.Blast
 -- TODO can i reuse most of this code for DIAMOND?
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 import Data.Scientific             (formatScientific, FPFormat(..))
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple)
-import OrthoLang.Core.Compile  (rMap)
-import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), readLit, readPath, traceA, symlink)
-import OrthoLang.Core.Paths         (toPath, fromPath, Path)
-import OrthoLang.Core.Util          (removeIfExists)
-import OrthoLang.Core.Locks         (withWriteLock)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple)
+import OrthoLang.Core  (rMap)
+import OrthoLang.Core       (runCmd, CmdDesc(..), readLit, readPath, traceA, symlink)
+import OrthoLang.Core         (toPath, fromPath, Path)
+import OrthoLang.Core          (removeIfExists)
+import OrthoLang.Core         (withWriteLock)
 import OrthoLang.Modules.BlastDB    (ndb, pdb) -- TODO import rMakeBlastDB too?
 import OrthoLang.Modules.SeqIO      (faa, fna, mkConcat, mkConcatEach)
 import System.Exit                 (ExitCode(..))

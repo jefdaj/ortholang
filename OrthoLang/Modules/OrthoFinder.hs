@@ -5,19 +5,20 @@ module OrthoLang.Modules.OrthoFinder
 -- TODO can all "extract" functions be renamed with "list"?
 -- TODO try DIAMOND, MMseqs2
 
-import Development.Shake
-import OrthoLang.Core.Types
+import Development.Shake (Action)
+import OrthoLang.Core
 
-import OrthoLang.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..), trackWrite')
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple)
-import OrthoLang.Core.Locks         (withWriteLock')
-import OrthoLang.Core.Paths         (Path, toPath, fromPath)
-import OrthoLang.Core.Util          (digest, readFileStrict)
+import OrthoLang.Core       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..), trackWrite')
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple)
+import OrthoLang.Core         (withWriteLock')
+import OrthoLang.Core         (Path, toPath, fromPath)
+import OrthoLang.Core          (digest, readFileStrict)
 import OrthoLang.Modules.SeqIO      (faa)
 import System.Directory            (createDirectoryIfMissing)
 import System.FilePath             ((</>), (<.>), takeFileName, takeBaseName, replaceBaseName)
 import System.Exit                 (ExitCode(..))
+import Control.Monad.IO.Class (liftIO)
 
 orthoLangModule :: Module
 orthoLangModule = Module

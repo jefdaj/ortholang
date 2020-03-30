@@ -5,14 +5,14 @@ module OrthoLang.Modules.ListLike where
 -- TODO make this the first typeclass
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
-import OrthoLang.Core.Actions  (readPaths, writeLit, traceA)
--- import OrthoLang.Core.Debug    (traceA)
-import OrthoLang.Core.Paths    (exprPath, fromPath,
+import OrthoLang.Core  (readPaths, writeLit, traceA)
+-- import OrthoLang.Core    (traceA)
+import OrthoLang.Core    (exprPath, fromPath,
                                toPath, Path)
-import OrthoLang.Core.Compile     (rExpr, defaultTypeCheck)
-import OrthoLang.Core.Compile     (rMap)
+import OrthoLang.Core     (rExpr, defaultTypeCheck)
+import OrthoLang.Core     (rMap)
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import OrthoLang.Modules.MMSeqs   (mms)

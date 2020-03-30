@@ -12,21 +12,21 @@ module OrthoLang.Modules.OrthoGroups
   where
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 -- import qualified Data.Map.Strict as M
 
 import Control.Monad               (forM, when)
 import Data.Maybe                  (isJust, catMaybes)
-import OrthoLang.Core.Actions       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
+import OrthoLang.Core       (readLit, readLits, writeLits, cachedLinesPath, absolutizePaths,
                                     writePaths, readFileStrict', readPaths, runCmd, CmdDesc(..), need')
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple)
-import OrthoLang.Core.Paths         (Path, toPath, fromPath, exprPath, upBy, cacheDir)
-import OrthoLang.Core.Util          (headOrDie, digest)
-import OrthoLang.Core.Sanitize      (lookupID)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple)
+import OrthoLang.Core         (Path, toPath, fromPath, exprPath, upBy, cacheDir)
+import OrthoLang.Core          (headOrDie, digest)
+import OrthoLang.Core      (lookupID)
 import System.FilePath             ((</>), takeDirectory)
 import Text.Regex.Posix            ((=~))
-import OrthoLang.Core.Compile (rExpr, debugRules)
+import OrthoLang.Core (rExpr, debugRules)
 import Data.Scientific             (toRealFloat)
 import System.Exit                 (ExitCode(..))
 import System.FilePath             ((<.>))

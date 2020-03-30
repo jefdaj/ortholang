@@ -19,14 +19,14 @@ module OrthoLang.Modules.MMSeqs
 --      (that can be done but requires a separate script with a few steps)
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 -- import Data.List                   (isSuffixOf)
-import OrthoLang.Core.Actions       (readLit, readPaths, runCmd, CmdDesc(..), symlink)
-import OrthoLang.Core.Compile (rExpr, debugRules)
-import OrthoLang.Core.Paths         (toPath, fromPath, exprPath)
-import OrthoLang.Core.Util          (digest, unlessExists, resolveSymlinks, headOrDie)
-import OrthoLang.Core.Locks         (withReadLock)
+import OrthoLang.Core       (readLit, readPaths, runCmd, CmdDesc(..), symlink)
+import OrthoLang.Core (rExpr, debugRules)
+import OrthoLang.Core         (toPath, fromPath, exprPath)
+import OrthoLang.Core          (digest, unlessExists, resolveSymlinks, headOrDie)
+import OrthoLang.Core         (withReadLock)
 import OrthoLang.Modules.Blast      (bht)
 import OrthoLang.Modules.BlastDB    (withSingleton) -- TODO move to core?
 import OrthoLang.Modules.SeqIO      (fna, faa)

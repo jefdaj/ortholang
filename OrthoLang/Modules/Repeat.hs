@@ -12,9 +12,8 @@ module OrthoLang.Modules.Repeat where
 -- TODO which parts of this should go in Core/Repeat.hs?
 -- TODO debug transformations too!
 
-import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Util (justOrDie)
+import OrthoLang.Core
+import OrthoLang.Core (justOrDie)
 import OrthoLang.Modules.Replace (rReplaceEach)
 
 import Data.Scientific (Scientific(), toBoundedInteger)

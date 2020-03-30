@@ -1,14 +1,14 @@
 module OrthoLang.Modules.Math where
 
 import Prelude hiding (log)
-import OrthoLang.Core.Types
+import OrthoLang.Core
 import qualified OrthoLang.Core.Util as U
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans    (lift)
 import Data.Scientific        (Scientific, toRealFloat)
-import OrthoLang.Core.Actions (readLits, writeLit)
-import OrthoLang.Core.Compile (mkNewBop)
+import OrthoLang.Core (readLits, writeLit)
+import OrthoLang.Core (mkNewBop)
 
 orthoLangModule :: Module
 orthoLangModule = Module

@@ -3,17 +3,17 @@ module OrthoLang.Modules.Load where
 -- TODO move all the mkLoad* stuff from Core here? it's still kind of core
 
 import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, mkLoad, mkLoadList)
-import OrthoLang.Core.Actions (readLit, writeLits, traceA)
-import OrthoLang.Core.Paths (exprPath, Path, toPath, fromPath)
+import OrthoLang.Core
+import OrthoLang.Core (rExpr, defaultTypeCheck, mkLoad, mkLoadList)
+import OrthoLang.Core (readLit, writeLits, traceA)
+import OrthoLang.Core (exprPath, Path, toPath, fromPath)
 import Data.List                  (sort)
 import Data.String.Utils          (strip)
-import OrthoLang.Core.Compile (compose1)
+import OrthoLang.Core (compose1)
 
 import System.FilePath.Glob       (glob)
 import System.Directory (makeRelativeToCurrentDirectory)
--- import OrthoLang.Core.Debug        (traceA)
+-- import OrthoLang.Core        (traceA)
 
 orthoLangModule :: Module
 orthoLangModule = Module

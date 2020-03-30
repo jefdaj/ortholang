@@ -14,12 +14,18 @@ It should also reduce boilerplace in the modules: in most cases only one
 -}
 
 module OrthoLang.Core.Compile.NewRules
-  ( newCoreRules
-  , newFunctionRules
-  , mkNewBop
+  (
+
+  -- * The new API
+    mkNewBop
   , mkNewFn1
   , mkNewFn2
   , mkNewFn3
+
+  -- * Static rules to add to every eval call
+  , newFunctionRules
+  , newCoreRules
+
   )
   where
 
@@ -50,7 +56,7 @@ newFunctionRules = do
 
 {-|
 I'm not sure yet which of the core language feature compilers can be converted
-to new-style rules. Perhaps none of them? If not, remote this.
+to new-style rules. Perhaps none of them? If not, remove this.
 -}
 newCoreRules :: RulesR ()
 newCoreRules = do

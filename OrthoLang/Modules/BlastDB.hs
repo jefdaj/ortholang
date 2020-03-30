@@ -9,34 +9,34 @@ module OrthoLang.Modules.BlastDB where
 -- TODO need to remove tmpfiles in /tmp on quit to save space?
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 import OrthoLang.Core.Util (debug)
 
 import Data.Maybe                  (isJust)
 import Control.Monad               (when, forM, unless)
-import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), debugA,
+import OrthoLang.Core       (runCmd, CmdDesc(..), debugA,
                                     trackWrite', readLit, readPaths, writeLit, readLits,
                                     writeLits, writePath, traceA, need',
                                     cachedLinesPath, writeStrings, readStrings, writePaths,
                                     readFileStrict)
-import OrthoLang.Core.Compile (rExpr, defaultTypeCheck, debugRules, singleton)
-import OrthoLang.Core.Paths         (exprPath, cacheDir, fromPath,
+import OrthoLang.Core (rExpr, defaultTypeCheck, debugRules, singleton)
+import OrthoLang.Core         (exprPath, cacheDir, fromPath,
                                     toPath, Path)
-import OrthoLang.Core.Util          (stripWhiteSpace, resolveSymlinks)
+import OrthoLang.Core          (stripWhiteSpace, resolveSymlinks)
 import OrthoLang.Modules.SeqIO      (faa, fna)
 import System.FilePath             (takeFileName, takeBaseName, takeExtension, (</>), (<.>),
                                     makeRelative, takeDirectory)
 import Data.List                   (isInfixOf)
 import Data.Char                   (toLower)
 import System.Directory           (createDirectoryIfMissing)
-import OrthoLang.Core.Paths (fromGeneric)
-import OrthoLang.Core.Compile (rMap)
-import OrthoLang.Core.Locks (withReadLock, withWriteLock')
+import OrthoLang.Core (fromGeneric)
+import OrthoLang.Core (rMap)
+import OrthoLang.Core (withReadLock, withWriteLock')
 import System.Process
 import Data.String.Utils (split)
 import Data.List (isPrefixOf)
 import System.Exit (ExitCode(..))
-import OrthoLang.Core.Pretty (Pretty)
+import OrthoLang.Core (Pretty)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...

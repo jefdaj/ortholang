@@ -42,12 +42,12 @@ module OrthoLang.Modules.Replace where
  -}
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
-import OrthoLang.Core.Actions (writeLits, writePaths, readLit, traceA)
-import OrthoLang.Core.Compile (rExpr, compileScript, debugRules)
-import OrthoLang.Core.Paths   (exprPath, fromPath, Path, toPath, fromPath)
-import OrthoLang.Core.Util    (digest, stripWhiteSpace)
+import OrthoLang.Core (writeLits, writePaths, readLit, traceA)
+import OrthoLang.Core (rExpr, compileScript, debugRules)
+import OrthoLang.Core   (exprPath, fromPath, Path, toPath, fromPath)
+import OrthoLang.Core    (digest, stripWhiteSpace)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -66,7 +66,7 @@ orthoLangModule = Module
 
 {- This does the filename mangling by setting a "replace ID" in each variable
  - in a script. If it's anything other than Nothing it gets used by
- - OrthoLang.Core.Paths.varPath to set the rep dir.
+ - OrthoLang.Core to set the rep dir.
  -
  - TODO should it go in Types, or maybe Paths?
  -}
@@ -219,7 +219,7 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  -    and because of that so does the rReplace' call? is that even possible?
  - 3) then given paths we can build CompiledExprs using the known types
  -
- - But then I remembered Core.Compile.Map, which might be able to help:
+ - But then I remembered Core, which might be able to help:
  - rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
  - type Action1  = Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
  - you give it a single function and an index for the argument to map over, and it does everything

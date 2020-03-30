@@ -4,14 +4,14 @@ module OrthoLang.Modules.BlastHits where
 -- TODO rename all extract_ functions to not have the extract part? or replace it with list_?
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 import System.FilePath             (replaceBaseName)
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple)
-import OrthoLang.Core.Compile  (rMap)
-import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), traceA, writeCachedVersion, trackWrite')
-import OrthoLang.Core.Paths         (Path, fromPath)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple)
+import OrthoLang.Core  (rMap)
+import OrthoLang.Core       (runCmd, CmdDesc(..), traceA, writeCachedVersion, trackWrite')
+import OrthoLang.Core         (Path, fromPath)
 import OrthoLang.Modules.Blast      (bht)
 import OrthoLang.Modules.CRBBlast   (crb)
 import System.Exit                 (ExitCode(..))

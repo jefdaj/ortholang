@@ -3,16 +3,16 @@ module OrthoLang.Modules.Permute where
 -- TODO put this in Core because with the salts it's not separable
 
 import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Util (trace)
--- import OrthoLang.Core.Config (debug)
+import OrthoLang.Core
+import OrthoLang.Core (trace)
+-- import OrthoLang.Core (debug)
 
 import Development.Shake.FilePath   (makeRelative)
-import OrthoLang.Core.Compile  (rExpr)
-import OrthoLang.Core.Actions (readStrings, writeStrings, traceA, need')
-import OrthoLang.Core.Paths (exprPath, exprPathExplicit, fromPath)
--- import OrthoLang.Core.Debug          (traceA, debug)
-import OrthoLang.Core.Util           (digest)
+import OrthoLang.Core  (rExpr)
+import OrthoLang.Core (readStrings, writeStrings, traceA, need')
+import OrthoLang.Core (exprPath, exprPathExplicit, fromPath)
+-- import OrthoLang.Core          (traceA, debug)
+import OrthoLang.Core           (digest)
 
 orthoLangModule :: Module
 orthoLangModule = Module

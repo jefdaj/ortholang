@@ -10,13 +10,13 @@ module OrthoLang.Modules.PsiBlast where
 -- TODO automatically add fn name to type signatures rather than passing each time
 
 import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Actions       (readLit, readPath, 
+import OrthoLang.Core
+import OrthoLang.Core       (readLit, readPath, 
                                     runCmd, CmdDesc(..), debugA, traceA, need',
                                     writeCachedLines, readFileStrict')
-import OrthoLang.Core.Compile (defaultTypeCheck, rFun3, map3of3, singleton)
-import OrthoLang.Core.Paths         (fromPath, cacheDir)
-import OrthoLang.Core.Util          (headOrDie)
+import OrthoLang.Core (defaultTypeCheck, rFun3, map3of3, singleton)
+import OrthoLang.Core         (fromPath, cacheDir)
+import OrthoLang.Core          (headOrDie)
 import OrthoLang.Modules.BlastDB    (pdb)
 import OrthoLang.Modules.Blast      (bht)
 import OrthoLang.Modules.SeqIO      (faa)
@@ -25,8 +25,8 @@ import System.FilePath             ((<.>), takeFileName)
 -- import System.Directory            (removeFile)
 import Control.Monad               (when)
 import OrthoLang.Modules.SeqIO      (mkConcat)
-import OrthoLang.Core.Compile (compose1)
-import OrthoLang.Core.Compile (rMap)
+import OrthoLang.Core (compose1)
+import OrthoLang.Core (rMap)
 import System.Directory            (createDirectoryIfMissing)
 import System.Exit                 (ExitCode(..))
 

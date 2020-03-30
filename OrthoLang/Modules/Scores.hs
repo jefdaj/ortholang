@@ -10,16 +10,16 @@ module OrthoLang.Modules.Scores where
  -}
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 import Control.Monad (when)
-import OrthoLang.Core.Actions (readStrings, readLits, writeLits, debugA)
-import OrthoLang.Core.Compile (rExpr, debugRules)
-import OrthoLang.Core.Paths         (Path, toPath, fromPath, exprPath)
+import OrthoLang.Core (readStrings, readLits, writeLits, debugA)
+import OrthoLang.Core (rExpr, debugRules)
+import OrthoLang.Core         (Path, toPath, fromPath, exprPath)
 
--- import OrthoLang.Core.Compile  (rMap)
+-- import OrthoLang.Core  (rMap)
 import OrthoLang.Modules.BlastHits (aCutCol)
-import OrthoLang.Core.Compile (rSimple)
+import OrthoLang.Core (rSimple)
 
 debug :: String -> String -> Action ()
 debug name = debugA ("ortholang.modules.scores." ++ name)

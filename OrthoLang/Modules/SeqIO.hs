@@ -6,17 +6,17 @@ module OrthoLang.Modules.SeqIO where
 
 import Development.Shake
 
-import OrthoLang.Core.Types
--- import OrthoLang.Core.Config (debug)
+import OrthoLang.Core
+-- import OrthoLang.Core (debug)
 
-import OrthoLang.Core.Util          (digest)
-import OrthoLang.Core.Actions       (readPaths, traceA, need', readLit,
+import OrthoLang.Core          (digest)
+import OrthoLang.Core       (readPaths, traceA, need', readLit,
                                     writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
-import OrthoLang.Core.Paths         (toPath, fromPath, Path, cacheDir)
-import OrthoLang.Core.Sanitize      (lookupIDsFile)
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple, rSimpleScript, aSimpleScriptNoFix)
-import OrthoLang.Core.Compile  (rMap, rMapSimpleScript)
+import OrthoLang.Core         (toPath, fromPath, Path, cacheDir)
+import OrthoLang.Core      (lookupIDsFile)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple, rSimpleScript, aSimpleScriptNoFix)
+import OrthoLang.Core  (rMap, rMapSimpleScript)
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
 import OrthoLang.Modules.Load       (mkLoaders)

@@ -1,8 +1,8 @@
 module OrthoLang.Modules.SetsTable
   where
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Compile (defaultTypeCheck)
+import OrthoLang.Core
+import OrthoLang.Core (defaultTypeCheck)
 import OrthoLang.Modules.Plots (rPlotListOfLists)
 
 orthoLangModule :: Module

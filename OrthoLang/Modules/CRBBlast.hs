@@ -3,18 +3,18 @@ module OrthoLang.Modules.CRBBlast where
 -- TODO expose the e-value cutoff, since it is an option?
 --      does it make a difference?
 
-import OrthoLang.Core.Types
+import OrthoLang.Core
 import Development.Shake
 
 import Development.Shake.FilePath  ((</>), takeFileName)
-import OrthoLang.Core.Actions       (runCmd, CmdDesc(..), symlink, traceA, need')
-import OrthoLang.Core.Paths         (toPath)
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimpleTmp)
-import OrthoLang.Core.Compile  (rMapTmps)
--- import OrthoLang.Core.Debug         (traceA)
-import OrthoLang.Core.Paths         (Path, fromPath)
-import OrthoLang.Core.Util          (resolveSymlinks)
+import OrthoLang.Core       (runCmd, CmdDesc(..), symlink, traceA, need')
+import OrthoLang.Core         (toPath)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimpleTmp)
+import OrthoLang.Core  (rMapTmps)
+-- import OrthoLang.Core         (traceA)
+import OrthoLang.Core         (Path, fromPath)
+import OrthoLang.Core          (resolveSymlinks)
 import OrthoLang.Modules.SeqIO      (faa, fna, fa)
 import System.Exit (ExitCode(..))
 

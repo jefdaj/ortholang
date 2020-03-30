@@ -4,17 +4,17 @@ module OrthoLang.Modules.SonicParanoid
 -- TODO when sonicparanoid fails, delete the whole hash dir to avoid crashing next time
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Core
 
 import OrthoLang.Modules.SeqIO      (fna, faa)
-import OrthoLang.Core.Compile (defaultTypeCheck)
-import OrthoLang.Core.Compile (rSimple)
+import OrthoLang.Core (defaultTypeCheck)
+import OrthoLang.Core (rSimple)
 import System.FilePath             ((</>), takeBaseName)
-import OrthoLang.Core.Paths         (Path, toPath, fromPath)
-import OrthoLang.Core.Actions       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..))
+import OrthoLang.Core         (Path, toPath, fromPath)
+import OrthoLang.Core       (traceA, need', readPaths, symlink, runCmd, CmdDesc(..))
 import System.Directory            (createDirectoryIfMissing)
-import OrthoLang.Core.Util          (digest, unlessExists)
-import OrthoLang.Core.Locks         (withWriteLock')
+import OrthoLang.Core          (digest, unlessExists)
+import OrthoLang.Core         (withWriteLock')
 import System.Exit                 (ExitCode(..))
 
 orthoLangModule :: Module
@@ -58,9 +58,9 @@ sonicparanoid = let name = "sonicparanoid" in Function
 aSonicParanoid :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
-  let cacheDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
-      sharedDir   = cacheDir </> "shared"
-      tmpDir      = cacheDir </> digest faListPath
+  let cDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
+      sharedDir   = cDir </> "shared"
+      tmpDir      = cDir </> digest faListPath
       -- mmseqsDir   = sharedDir </> "mmseqs2_db"
       dbDir       = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
       -- outDir      = tmpDir </> "result" -- TODO copy input files here?
