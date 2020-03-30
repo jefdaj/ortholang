@@ -22,6 +22,16 @@ module OrthoLang.Core.Compile.NewRules
   , mkNewFn2
   , mkNewFn3
 
+  -- * Types
+  , ActionEnv
+  , ActionR
+  , ActionR1
+  , ActionR2
+  , ActionR3
+  , runActionR
+  , askConfig -- TODO needs to work with multiple Env monads?
+  , askLocks
+
   -- * Static rules to add to every eval call
   , newFunctionRules
   , newCoreRules
@@ -40,6 +50,31 @@ import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths       (fromPath, decodeNewRulesDeps)
 import OrthoLang.Core.Util        (traceShow)
+
+-----------------------------------------------
+-- experimental: add state to Rules + Action --
+-----------------------------------------------
+
+-- this is needed to pass DigestMap around, and makes the rest easier
+type ActionEnv = (Config, LocksRef, IDsRef, DigestMap)
+type ActionR a = ReaderT ActionEnv Action a
+
+runActionR :: ActionEnv -> ActionR a -> Action a
+runActionR env act = runReaderT act env
+
+askConfig :: ActionR Config
+askConfig = do
+  (cfg, _, _, _) <- ask
+  return cfg
+
+askLocks :: ActionR LocksRef
+askLocks = do
+  (_, lRef, _, _) <- ask
+  return lRef
+
+type ActionR1 = ExprPath -> FilePath                         -> ActionR ()
+type ActionR2 = ExprPath -> FilePath -> FilePath             -> ActionR ()
+type ActionR3 = ExprPath -> FilePath -> FilePath -> FilePath -> ActionR ()
 
 {-|
 The old-style rules in use throughout OrthoLang now require the compilers to

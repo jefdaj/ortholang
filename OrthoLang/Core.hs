@@ -144,6 +144,7 @@ module OrthoLang.Core
 
 import OrthoLang.Core.Actions
 import OrthoLang.Core.Compile
+import OrthoLang.Core.Compile.NewRules
 import OrthoLang.Core.Locks
 import OrthoLang.Core.Paths
 import OrthoLang.Core.Pretty
