@@ -87,6 +87,8 @@ module OrthoLang.Core.Types
   , ActionR2
   , ActionR3
   , runActionR
+  , askConfig -- TODO needs to work with multiple Env monads?
+  , askLocks
   , RulesEnv
   , RulesR
   , runRulesR
@@ -148,6 +150,16 @@ type ActionR a = ReaderT ActionEnv Action a
 
 runActionR :: ActionEnv -> ActionR a -> Action a
 runActionR env act = runReaderT act env
+
+askConfig :: ActionR Config
+askConfig = do
+  (cfg, _, _, _) <- ask
+  return cfg
+
+askLocks :: ActionR LocksRef
+askLocks = do
+  (_, lRef, _, _) <- ask
+  return lRef
 
 type ActionR1 = ExprPath -> FilePath                         -> ActionR ()
 type ActionR2 = ExprPath -> FilePath -> FilePath             -> ActionR ()

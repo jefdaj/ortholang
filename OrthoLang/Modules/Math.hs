@@ -1,17 +1,14 @@
 module OrthoLang.Modules.Math where
 
+import Prelude hiding (log)
 import OrthoLang.Core.Types
 import qualified OrthoLang.Core.Util as U
 
-import Control.Monad.IO.Class     (liftIO)
-import Control.Monad.Trans        (lift)
-import Control.Monad.Trans.Reader (ask)
-import Data.Scientific            (Scientific, toRealFloat)
-import OrthoLang.Core.Actions     (readLits, writeLit, need')
-import OrthoLang.Core.Compile     (mkNewFn1)
-
-debugShow :: Show a => a -> ActionR ()
-debugShow thing = lift $ liftIO $ U.debug "modules.math.amath" $ show thing
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans    (lift)
+import Data.Scientific        (Scientific, toRealFloat)
+import OrthoLang.Core.Actions (readLits, writeLit)
+import OrthoLang.Core.Compile (mkNewFn1)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -26,8 +23,6 @@ orthoLangModule = Module
     ]
   }
 
--- for some reason division is a lot harder than I expected!
--- TODO is there a more elegant way without converting to string?
 divDouble :: Scientific -> Scientific -> Scientific
 divDouble n1 n2 = read $ show (answer :: Double)
   where
@@ -36,13 +31,16 @@ divDouble n1 n2 = read $ show (answer :: Double)
 mkMathFn :: Char -> String -> (Scientific -> Scientific -> Scientific) -> Function
 mkMathFn opChar name fn = mkNewFn1 name (Just opChar) num [ListOf num] $ aMath fn
 
+log :: Show a => a -> ActionR ()
+log = lift . liftIO . U.debug "modules.math.amath" . show
+
 aMath :: (Scientific -> Scientific -> Scientific) -> ActionR1
-aMath fn (ExprPath out) a1 = do
-  debugShow a1
-  (cfg, lRef, _, _) <- ask
-  -- lift $ need' cfg lRef "test" [a1]
-  inputs <- lift $ readLits cfg lRef a1
-  debugShow inputs
-  let result = foldl1 fn $ map (\n -> read n :: Scientific) inputs
-  lift $ writeLit cfg lRef out $ show result
-  debugShow result
+aMath mathFn (ExprPath outPath) nsPath = do
+  log nsPath
+  cfg  <- askConfig
+  lRef <- askLocks
+  ns <- lift $ readLits cfg lRef nsPath
+  log ns
+  let n = foldl1 mathFn $ map (read :: String -> Scientific) ns
+  lift $ writeLit cfg lRef outPath $ show n
+  log n
