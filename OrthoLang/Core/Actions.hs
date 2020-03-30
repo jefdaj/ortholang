@@ -514,7 +514,7 @@ runCmd cfg ref@(disk, _) desc = do
     Exit code <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
       Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
       Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
-    Exit _ <- command [] "sync" [] -- TODO is this needed?
+    -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
     -- trackWrite' cfg [stdoutPath, stderrPath] -- TODO does this happen here?

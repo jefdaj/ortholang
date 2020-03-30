@@ -87,7 +87,7 @@ updateProgress pm iosp = do
 completeProgress :: P.Meter' EvalProgress -> Action ()
 completeProgress pm = do
   liftIO $ P.modifyMeter pm (\ep2 -> ep2 {epDone = epTotal ep2})
-  Exit _ <- command [] "sync" [] -- why is this needed?
+  -- Exit _ <- command [] "sync" [] -- why is this needed?
   return ()
 
 data EvalProgress = EvalProgress
