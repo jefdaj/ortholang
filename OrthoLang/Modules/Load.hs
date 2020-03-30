@@ -36,7 +36,7 @@ loadList = mkLoad False "load_list" (ListOf str)
 globFiles :: Function
 globFiles = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rGlobFiles

@@ -41,7 +41,7 @@ orthofinder :: Function
 orthofinder = let name = "orthofinder" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
-  , fTypeCheck = defaultTypeCheck [ListOf faa] ofr
+  , fTypeCheck = defaultTypeCheck name [ListOf faa] ofr
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aOrthofinder
   }

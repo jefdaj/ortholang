@@ -31,7 +31,7 @@ mkAva :: String -> Function
 mkAva name = let name' = name ++ "_ava" in Function
   { fOpChar = Nothing, fName = name'
   , fTypeDesc  = mkTypeDesc  name' [num, ListOf faa] ava
-  , fTypeCheck = defaultTypeCheck  [num, ListOf faa] ava
+  , fTypeCheck = defaultTypeCheck name' [num, ListOf faa] ava
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkAva
   }

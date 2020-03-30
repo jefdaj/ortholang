@@ -361,18 +361,18 @@ aVar cfg ref _ vPath oPath = do
 ------------------------------
 
 -- TODO show the failing function here! which means reworking the Fun definitions a bit
-typeError :: [Type] -> [Type] -> String
-typeError expected actual =
-  "Type error: expected " ++ show expected
-           ++ " but got " ++ show actual
+typeError :: String -> [Type] -> [Type] -> String
+typeError name expected actual =
+  "Type error: the " ++ name ++ "function requires input types " ++ show expected
+           ++ ", but got " ++ show actual
 
 -- TODO this should fail for type errors like multiplying a list by a num!
-defaultTypeCheck :: [Type] -> Type
+defaultTypeCheck :: String -> [Type] -> Type
                  -> [Type] -> Either String Type
-defaultTypeCheck expected returned actual =
+defaultTypeCheck name expected returned actual =
   if actual `typesMatch` expected
     then Right returned
-    else Left $ typeError expected actual
+    else Left $ typeError name expected actual
 
 
 --------------------------
@@ -387,7 +387,7 @@ defaultTypeCheck expected returned actual =
 mkLoad :: Bool -> String -> Type -> Function
 mkLoad hashSeqIDs name rtn = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] rtn
+  , fTypeCheck = defaultTypeCheck name [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rLoad hashSeqIDs
@@ -401,7 +401,7 @@ mkLoad hashSeqIDs name rtn = Function
 mkLoadList :: Bool -> String -> Type -> Function
 mkLoadList hashSeqIDs name rtn = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf rtn)
+  , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rLoadList hashSeqIDs

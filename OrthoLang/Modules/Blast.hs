@@ -70,8 +70,9 @@ blastDescs =
 
 mkBlastFromDb :: BlastDesc -> Function
 mkBlastFromDb d@(bCmd, qType, _, dbType) = Function
-  { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, qType, dbType] bht
+  { fOpChar = Nothing
+  , fName = name
+  , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromDb d
@@ -167,8 +168,9 @@ aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
 
 mkBlastFromFa :: BlastDesc -> Function
 mkBlastFromFa d@(bCmd, qType, sType, _) = Function
-  { fOpChar = Nothing, fName = bCmd
-  , fTypeCheck = defaultTypeCheck [num, qType, sType] bht
+  { fOpChar = Nothing
+  , fName = bCmd
+  , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
@@ -193,7 +195,7 @@ rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 mkBlastFromDbEach :: BlastDesc -> Function
 mkBlastFromDbEach d@(bCmd, qType, _, dbType) = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf dbType] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromDbEach d
@@ -211,7 +213,7 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 mkBlastFromFaEach :: BlastDesc -> Function
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, qType, ListOf faType] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMkBlastFromFaEach d

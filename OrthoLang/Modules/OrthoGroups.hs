@@ -80,7 +80,7 @@ orthogroups :: Function
 orthogroups = let name = "orthogroups" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og] sll
-  , fTypeCheck = defaultTypeCheck [og] sll
+  , fTypeCheck = defaultTypeCheck name [og] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthogroups
   }
@@ -160,7 +160,7 @@ orthogroupContaining :: Function
 orthogroupContaining = let name = "orthogroup_containing" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
-  , fTypeCheck = defaultTypeCheck [og, str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck name [og, str] (ListOf str)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aOrthogroupContaining
   }
@@ -187,7 +187,7 @@ orthogroupsContaining :: Function
 orthogroupsContaining = let name = "orthogroups_containing" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
-  , fTypeCheck = defaultTypeCheck [og, ListOf str] sll
+  , fTypeCheck = defaultTypeCheck name [og, ListOf str] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
   }
@@ -219,7 +219,7 @@ orthologInAny :: Function
 orthologInAny = let name = "ortholog_in_any" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [og, ListOf faa] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrRules name
   }
@@ -239,7 +239,7 @@ orthologInAnyStr :: Function
 orthologInAnyStr = let name = "ortholog_in_any_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
-  , fTypeCheck = defaultTypeCheck [sll, sll] sll
+  , fTypeCheck = defaultTypeCheck name [sll, sll] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAny
   }
@@ -290,7 +290,7 @@ orthologInAll :: Function
 orthologInAll = let name = "ortholog_in_all" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [og, ListOf faa] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
@@ -299,7 +299,7 @@ orthologInAllStr :: Function
 orthologInAllStr = let name = "ortholog_in_all_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
-  , fTypeCheck = defaultTypeCheck [sll, sll] sll
+  , fTypeCheck = defaultTypeCheck name [sll, sll] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAll
   }
@@ -323,7 +323,7 @@ orthologInMinStr :: Function
 orthologInMinStr = let name = "ortholog_in_min_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
-  , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
+  , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "min" pickMin
   }
@@ -374,7 +374,7 @@ orthologInMin :: Function
 orthologInMin = let name = "ortholog_in_min" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [num, og, ListOf faa] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
@@ -395,7 +395,7 @@ orthologInMax :: Function
 orthologInMax = let name = "ortholog_in_max" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck [num, og, ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [num, og, ListOf faa] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
   }
@@ -404,7 +404,7 @@ orthologInMaxStr :: Function
 orthologInMaxStr = let name = "ortholog_in_max_str" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
-  , fTypeCheck = defaultTypeCheck [num, sll, sll] sll
+  , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "max" pickMax
   }

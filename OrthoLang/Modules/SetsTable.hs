@@ -32,7 +32,7 @@ tsv = Type
 setsTable :: Function
 setsTable = let name = "sets_table" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf (ListOf lit)] tsv
+  , fTypeCheck = defaultTypeCheck name [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotListOfLists "sets_table.R"

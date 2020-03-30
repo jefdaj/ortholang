@@ -43,7 +43,7 @@ hht = Type
 hmmbuild :: Function
 hmmbuild = let name = "hmmbuild" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [aln] hmm
+  , fTypeCheck = defaultTypeCheck name [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleScript "hmmbuild.sh"
@@ -52,7 +52,7 @@ hmmbuild = let name = "hmmbuild" in Function
 hmmbuildEach :: Function
 hmmbuildEach = let name = "hmmbuild_each" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf aln] (ListOf hmm)
+  , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
@@ -61,7 +61,7 @@ hmmbuildEach = let name = "hmmbuild_each" in Function
 hmmsearch :: Function
 hmmsearch = let name = "hmmsearch" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, hmm, faa] hht
+  , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aHmmsearch
@@ -71,7 +71,7 @@ hmmsearch = let name = "hmmsearch" in Function
 hmmsearchEach :: Function
 hmmsearchEach = let name = "hmmsearch_each" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf hmm, faa] (ListOf hht)
+  , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch
@@ -81,7 +81,7 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 -- hmmsearchEachEach :: Function
 -- hmmsearchEachEach = let name = "hmmsearch_each_each" in Function
 --   { fOpChar = Nothing, fName = name
---   , fTypeCheck = defaultTypeCheck [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
+--   , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
 --   ,fTags = []
 --   , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch -- TODO this won't work right?
@@ -138,7 +138,7 @@ aHmmsearch _ _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
 extractHmmTargets :: Function
 extractHmmTargets = let name = "extract_hmm_targets" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [hht] (ListOf str)
+  , fTypeCheck = defaultTypeCheck name [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aExtractHmm 1
@@ -147,7 +147,7 @@ extractHmmTargets = let name = "extract_hmm_targets" in Function
 extractHmmTargetsEach :: Function
 extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf hht] (ListOf $ ListOf str)
+  , fTypeCheck = defaultTypeCheck name [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 $ aExtractHmm 1

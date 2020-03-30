@@ -116,7 +116,7 @@ pdb = Type
 mkLoadDB :: String -> Type -> Function
 mkLoadDB name rtn = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] rtn
+  , fTypeCheck = defaultTypeCheck name [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rLoadDB
@@ -125,7 +125,7 @@ mkLoadDB name rtn = Function
 mkLoadDBEach :: String -> Type -> Function
 mkLoadDBEach name rtn = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf str] (ListOf rtn)
+  , fTypeCheck = defaultTypeCheck name [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = undefined -- TODO write this!
@@ -172,7 +172,7 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 blastdblist :: Function
 blastdblist = let name = "blastdblist" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBlastdblist
@@ -248,7 +248,7 @@ aFilterList cfg ref _ oPath listTmp fPath = do
 mkBlastdbget :: String -> Type -> Function
 mkBlastdbget name dbType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] dbType -- TODO are there protein ones too?
+  , fTypeCheck = defaultTypeCheck name [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBlastdbget

@@ -56,7 +56,7 @@ varNames _ expr = undefined lits -- TODO implement this
 histogram :: Function
 histogram = let name = "histogram" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str, ListOf num] png
+  , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rPlotNumList "histogram.R"

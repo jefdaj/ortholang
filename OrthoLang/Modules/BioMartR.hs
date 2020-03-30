@@ -86,7 +86,7 @@ faagz = Type
 parseSearches :: Function
 parseSearches = let name = "parse_searches" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf str] search
+  , fTypeCheck = defaultTypeCheck name [ListOf str] search
   , fTypeDesc  = mkTypeDesc name [ListOf str] search
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rParseSearches
@@ -99,7 +99,7 @@ parseSearches = let name = "parse_searches" in Function
 getGenomes :: Function
 getGenomes = let name = "get_genomes" in Function
   { fOpChar = Nothing, fName = name 
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf fnagz)
+  , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf fnagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBioMartR "getGenome"
@@ -112,7 +112,7 @@ getGenomes = let name = "get_genomes" in Function
 getProteomes :: Function
 getProteomes = let name = "get_proteomes" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [(ListOf str)] (ListOf faagz)
+  , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf faagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBioMartR "getProteome"

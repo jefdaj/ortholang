@@ -267,7 +267,7 @@ withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 psiblast :: Function
 psiblast = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, faa] bht
+  , fTypeCheck = defaultTypeCheck name [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
   ,fTags = []
   -- , fNewRules = Nothing, fOldRules = rPsiblast
@@ -279,7 +279,7 @@ psiblast = Function
 psiblastEach :: Function
 psiblastEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rPsiblastEach
@@ -309,7 +309,7 @@ psiblastAll = compose1 name
 psiblastDb :: Function
 psiblastDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, pdb] bht
+  , fTypeCheck = defaultTypeCheck name [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
@@ -323,7 +323,7 @@ psiblastDb = Function
 psiblastDbEach :: Function
 psiblastDbEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
   ,fTags = []
   -- can't use withPssmQuery here because there's a list of things to train against
@@ -354,7 +354,7 @@ trainingArgs =
 psiblastTrain :: Function
 psiblastTrain = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, faa] pssm
+  , fTypeCheck = defaultTypeCheck name [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
@@ -366,7 +366,7 @@ psiblastTrain = Function
 psiblastTrainPssms :: Function
 psiblastTrainPssms = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf faa, faa] (ListOf pssm)
+  , fTypeCheck = defaultTypeCheck name [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
   ,fTags = []
   -- , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
@@ -380,7 +380,7 @@ psiblastTrainPssms = Function
 psiblastTrainEach :: Function
 psiblastTrainEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] (ListOf pssm)
+  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
@@ -391,7 +391,7 @@ psiblastTrainEach = Function
 psiblastTrainAll :: Function
 psiblastTrainAll = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf faa] pssm
+  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
@@ -402,7 +402,7 @@ psiblastTrainAll = Function
 psiblastTrainDb :: Function
 psiblastTrainDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, pdb] pssm
+  , fTypeCheck = defaultTypeCheck name [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rFun3 aPsiblastTrainDb
@@ -413,7 +413,7 @@ psiblastTrainDb = Function
 psiblastTrainDbEach :: Function
 psiblastTrainDbEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, faa, ListOf pdb] (ListOf pssm)
+  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
@@ -424,7 +424,7 @@ psiblastTrainDbEach = Function
 psiblastTrainPssmsDb :: Function
 psiblastTrainPssmsDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf faa, pdb] (ListOf pssm)
+  , fTypeCheck = defaultTypeCheck name [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
   ,fTags = []
   -- , fNewRules = Nothing, fOldRules = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
@@ -440,7 +440,7 @@ psiblastTrainPssmsDb = Function
 psiblastPssm :: Function
 psiblastPssm = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, pssm, faa] bht
+  , fTypeCheck = defaultTypeCheck name [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
@@ -452,7 +452,7 @@ psiblastPssm = Function
 psiblastPssmAll :: Function
 psiblastPssmAll = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] bht
+  , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
@@ -463,7 +463,7 @@ psiblastPssmAll = Function
 psiblastPssmEach :: Function
 psiblastPssmEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf faa] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
@@ -477,7 +477,7 @@ searchArgs = ["-outfmt", "6", "-out"]
 psiblastPssmDb :: Function
 psiblastPssmDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, pssm, pdb] bht
+  , fTypeCheck = defaultTypeCheck name [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rFun3 aPsiblastSearchDb
@@ -488,7 +488,7 @@ psiblastPssmDb = Function
 psiblastPssmDbEach :: Function
 psiblastPssmDbEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, pssm, ListOf pdb] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
@@ -505,7 +505,7 @@ psiblastPssmDbEach = Function
 psiblastEachPssmDb :: Function
 psiblastEachPssmDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf pssm, pdb] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   ,fTags = []
   -- , fNewRules = Nothing, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
@@ -529,7 +529,7 @@ psiblastPssmsDb = compose1 name
 psiblastEachPssm :: Function
 psiblastEachPssm = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, ListOf pssm, faa] (ListOf bht)
+  , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)

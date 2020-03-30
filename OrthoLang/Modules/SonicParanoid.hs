@@ -41,7 +41,7 @@ sonicparanoid :: Function
 sonicparanoid = let name = "sonicparanoid" in Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
-  , fTypeCheck = defaultTypeCheck [ListOf faa] spr -- TODO or fna
+  , fTypeCheck = defaultTypeCheck name [ListOf faa] spr -- TODO or fna
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple aSonicParanoid
   }

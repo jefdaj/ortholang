@@ -36,7 +36,7 @@ tListLike x = x `elem` [bht, crb, mms]
 len :: Function
 len = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [listlike] num
+  , fTypeCheck = defaultTypeCheck name [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rLen
@@ -48,7 +48,7 @@ lenEach :: Function
 lenEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
-  , fTypeCheck = defaultTypeCheck [ListOf listlike] (ListOf num)
+  , fTypeCheck = defaultTypeCheck name [ListOf listlike] (ListOf num)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 1 aLen -- TODO is 1 wrong?
   }

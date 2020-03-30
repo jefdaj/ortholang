@@ -46,7 +46,7 @@ blastCRB :: Function
 blastCRB = Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
-  , fTypeCheck = defaultTypeCheck [fna, fa] crb
+  , fTypeCheck = defaultTypeCheck name [fna, fa] crb
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleTmp name aCRBBlast
   }
@@ -58,7 +58,7 @@ blastCRB = Function
 blastCRBEach :: Function
 blastCRBEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [fna, ListOf fa] (ListOf crb)
+  , fTypeCheck = defaultTypeCheck name [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"

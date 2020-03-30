@@ -74,7 +74,7 @@ buscoCache cfg = cacheDir cfg "busco"
 buscoListLineages :: Function
 buscoListLineages = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBuscoListLineages
@@ -175,7 +175,7 @@ aBuscoListLineages cfg ref _ listTmp = do
 buscoFetchLineage :: Function
 buscoFetchLineage  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str] blh
+  , fTypeCheck = defaultTypeCheck name [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBuscoFetchLineage
@@ -228,7 +228,7 @@ rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show 
 mkBusco :: String -> String -> Type -> Function
 mkBusco name mode inType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [blh, inType] bsr
+  , fTypeCheck = defaultTypeCheck name [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aBusco mode
@@ -276,7 +276,7 @@ aBusco _ _ _ _ as = error $ "bad argument to aBusco: " ++ show as
 mkBuscoEach :: String -> String -> Type -> Function
 mkBuscoEach name mode inType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [blh, (ListOf inType)] (ListOf bsr)
+  , fTypeCheck = defaultTypeCheck name [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 $ aBusco mode
@@ -294,7 +294,7 @@ buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
 buscoPercentComplete :: Function
 buscoPercentComplete  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [bsr] num
+  , fTypeCheck = defaultTypeCheck name [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimpleScript "busco_percent_complete.sh"
@@ -305,7 +305,7 @@ buscoPercentComplete  = Function
 buscoPercentCompleteEach :: Function
 buscoPercentCompleteEach  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf bsr] (ListOf num)
+  , fTypeCheck = defaultTypeCheck name [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
@@ -320,7 +320,7 @@ buscoPercentCompleteEach  = Function
 buscoScoresTable :: Function
 buscoScoresTable  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [ListOf bsr] bst
+  , fTypeCheck = defaultTypeCheck name [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
   ,fTags = []
   -- , fNewRules = Nothing, fOldRules = rSimpleScript $ name <.> "py"
@@ -367,7 +367,7 @@ rBuscoScoresTable _ e = error $ "bad argument to rBuscoScoresTable: " ++ show e
 buscoFilterCompleteness :: Function
 buscoFilterCompleteness  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
+  , fTypeCheck = defaultTypeCheck name [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rBuscoFilterCompleteness

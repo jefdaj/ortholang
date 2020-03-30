@@ -187,7 +187,7 @@ mkNewBop :: String   -- ^ name
          -> Char     -- ^ opchar
          -> Type     -- ^ return type
          -> Type     -- ^ 1 argument type (each side of the bop will be this)
-         -> ActionR1 -- ^ 1-argument action (list of two args in case of bop, or any number for prefix fn)
+         -> ActionR1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
          -> Function
 mkNewBop n c r a1 = mkNewFn rNewRules1
          n (Just c) r [ListOf a1]
@@ -221,7 +221,7 @@ mkNewFn
   :: (String -> TypeChecker -> t -> RulesR ())
   -> String -> Maybe Char -> Type -> [Type] -> t -> Function
 mkNewFn rFn name mChar oType dTypes aFn =
-  let tFn = defaultTypeCheck dTypes oType
+  let tFn = defaultTypeCheck name dTypes oType
   in Function
        { fOpChar    = mChar
        , fName      = name

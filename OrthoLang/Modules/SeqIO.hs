@@ -82,7 +82,7 @@ fna = Type
 gbkToFaa :: Function
 gbkToFaa = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str, gbk] faa
+  , fTypeCheck = defaultTypeCheck name [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta faa "aa"
@@ -94,7 +94,7 @@ gbkToFaa = Function
 gbkToFaaEach :: Function
 gbkToFaaEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf faa)
+  , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
@@ -105,7 +105,7 @@ gbkToFaaEach = Function
 gbkToFna :: Function
 gbkToFna = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str, gbk] fna
+  , fTypeCheck = defaultTypeCheck name [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
@@ -116,7 +116,7 @@ gbkToFna = Function
 gbkToFnaEach :: Function
 gbkToFnaEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck [str, ListOf gbk] (ListOf fna)
+  , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
@@ -259,7 +259,7 @@ translate :: Function
 translate = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = defaultTypeCheck [fna] faa
+  , fTypeCheck = defaultTypeCheck name [fna] faa
   , fTypeDesc  = mkTypeDesc name  [fna] faa
   , fNewRules = Nothing, fOldRules = rSimpleScript "translate.py"
   }
@@ -270,7 +270,7 @@ translateEach :: Function
 translateEach = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = defaultTypeCheck [ListOf fna] (ListOf faa)
+  , fTypeCheck = defaultTypeCheck name [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
   , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "translate.py"
   }
@@ -287,7 +287,7 @@ mkConcat :: Type -> Function
 mkConcat cType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = defaultTypeCheck [ListOf cType] cType
+  , fTypeCheck = defaultTypeCheck name [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
   , fNewRules = Nothing, fOldRules = rSimple $ aConcat cType
   }
@@ -299,7 +299,7 @@ mkConcatEach :: Type -> Function
 mkConcatEach cType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = defaultTypeCheck [ListOf $ ListOf cType] (ListOf cType)
+  , fTypeCheck = defaultTypeCheck name [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
   , fNewRules = Nothing, fOldRules = rMap 1 $ aConcat cType
   }
@@ -369,7 +369,7 @@ splitFasta :: Type -> Function
 splitFasta faType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = defaultTypeCheck [faType] (ListOf faType)
+  , fTypeCheck = defaultTypeCheck name [faType] (ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
   , fNewRules = Nothing, fOldRules = rSimple $ aSplit name ext
   }
@@ -381,7 +381,7 @@ splitFastaEach :: Type -> Function
 splitFastaEach faType = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = defaultTypeCheck [ListOf faType] (ListOf $ ListOf faType)
+  , fTypeCheck = defaultTypeCheck name [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
   , fNewRules = Nothing, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
   }

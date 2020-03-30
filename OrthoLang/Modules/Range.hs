@@ -26,7 +26,7 @@ orthoLangModule = Module
 mkRangeFn :: String -> Int -> Function
 mkRangeFn name nArgs =  Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck (take nArgs $ repeat num) (ListOf num)
+  , fTypeCheck = defaultTypeCheck name (take nArgs $ repeat num) (ListOf num)
   , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
   ,fTags = []
   , fNewRules = Nothing, fOldRules = rRange
