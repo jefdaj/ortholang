@@ -7,7 +7,10 @@
 #
 # so what's still wrong about it? result path is correct so just a need issue?
 # no, it fails to decode the path but DOES need it in shake. just never gets in the digestmap :/
-# result = 2 * 3.5
+#
+# maybe it's because they are being added to the map but not passed on in RulesR?
+# modify state each time and see if that fixes it
+result = 2 * 3.5
 
 # SOLVED :D (but not the first one ^ yet)
 # it DOES get added in the long form multiply version
@@ -18,7 +21,7 @@
 # ("1337284c73",(num,"$TMPDIR/exprs/num/992d750479/0/result")) 3.5
 # ("7ca850b5f6",(num.list,"$TMPDIR/exprs/list/fa0b8b18ad/0/result")) [2.0, 3.5]
 # ("e77c7a2b98",(num,"$TMPDIR/exprs/multiply/7ca850b5f6/0/result")) 7.0
-result = multiply [2, 3.5]
+# result = multiply [2, 3.5]
 
 # hah fixed this one with bop2fun in exprPath
 # missing before: list of lists [[2.0, 3.5], [7.0]]

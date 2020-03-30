@@ -11,4 +11,5 @@ set2 = ["5",
         "14",
         "15"]
 set3 = ["5", "6", "7", "8", "9", "10"]
-result = some [set1, set2, set3]
+fn = some [set1, set2, set3]
+result = fn
