@@ -46,9 +46,6 @@ module OrthoLang.Core.Types
   -- , ParseM
   -- repl monad
   -- , print
-  , prompt
-  , runReplM
-  , ReplM
   -- misc
   -- , prettyShow
   , str, num -- TODO load these from modules
@@ -105,8 +102,6 @@ import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
 -- import Control.Monad.IO.Class (liftIO)
-import Control.Monad.State.Lazy       (StateT, execStateT, lift)
-import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Data.List                      (nub, find, isPrefixOf)
 import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
@@ -513,21 +508,6 @@ type DigestMap = M.Map PathDigest (Type, Path)
 
 -- TODO config always first? or make a record + ask* fns
 type GlobalEnv = (Script, Config, LocksRef, IDsRef)
-
-----------------
--- Repl monad --
-----------------
-
-type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
-
--- TODO use useFile(Handle) for stdin?
--- TODO use getExternalPrint to safely print during Tasty tests!
-runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
-runReplM settings replm state =
-  runInputT settings $ runMaybeT $ execStateT replm state
-
-prompt :: String -> ReplM (Maybe String)
-prompt = lift . lift . getInputLine
 
 -- eODO does this need rewriting for externalPrint?
 -- print :: (String -> IO ()) -> String -> ReplM ()

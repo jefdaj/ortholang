@@ -50,8 +50,25 @@ import Control.Exception.Safe   (Typeable, throw, try)
 import System.Console.ANSI      (clearScreen, cursorUp)
 import Data.IORef               (readIORef)
 import Development.Shake.FilePath (takeFileName)
+import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
+import Control.Monad.State.Lazy       (StateT, execStateT, lift)
 
---------------------
+-----------------
+-- Repl monad --
+----------------
+
+type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
+
+-- TODO use useFile(Handle) for stdin?
+-- TODO use getExternalPrint to safely print during Tasty tests!
+runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
+runReplM settings replm state =
+  runInputT settings $ runMaybeT $ execStateT replm state
+
+prompt :: String -> ReplM (Maybe String)
+prompt = lift . lift . getInputLine
+
+-------------------
 -- main interface --
 --------------------
 
