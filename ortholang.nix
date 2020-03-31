@@ -32,6 +32,6 @@ mkDerivation {
   license = stdenv.lib.licenses.agpl3;
 
   # uncomment for profiling (for example with +RTS -p -RTS):
-  enableExecutableProfiling = false;
-  enableLibraryProfiling = false;
+  enableExecutableProfiling = true;
+  enableLibraryProfiling = true;
 }
