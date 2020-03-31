@@ -39,7 +39,7 @@ import OrthoLang.Core.Eval       (evalScript)
 import OrthoLang.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
-import OrthoLang.Core.Util       (absolutize, stripWhiteSpace, justOrDie, headOrDie)
+import OrthoLang.Util       (absolutize, stripWhiteSpace, justOrDie, headOrDie)
 import OrthoLang.Core.Config     (showConfigField, setConfigField, getDoc)
 -- import System.Command           (runCommand, waitForProcess)
 import System.Process           (runCommand, waitForProcess)

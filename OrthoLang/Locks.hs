@@ -1,4 +1,4 @@
-module OrthoLang.Core.Locks
+module OrthoLang.Locks
   ( LocksRef
   , initLocks
   , withReadLock

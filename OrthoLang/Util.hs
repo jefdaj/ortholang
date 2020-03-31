@@ -1,4 +1,4 @@
-module OrthoLang.Core.Util
+module OrthoLang.Util
 
   -- debugging
   ( trace
@@ -69,7 +69,7 @@ import System.Posix.Files     (readSymbolicLink)
 import System.FilePath.Glob   (glob)
 -- import Data.Time.LocalTime (getZonedTime)
 -- import Data.Time.Format    (formatTime, defaultTimeLocale)
-import OrthoLang.Core.Locks    (LocksRef, withReadLock, withReadLock', withWriteLock)
+import OrthoLang.Locks    (LocksRef, withReadLock, withReadLock', withWriteLock)
 
 import Control.Logging (traceSL, debugS, timedDebugEndS, traceShowSL)
 

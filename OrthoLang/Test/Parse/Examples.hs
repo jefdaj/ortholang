@@ -9,7 +9,7 @@ module OrthoLang.Test.Parse.Examples
 
 -- TODO test nested Bops! (A ~ B) | (B ~ A) for example
 
-import OrthoLang.Core.Types
+import OrthoLang.Core
 import OrthoLang.Modules.SeqIO (faa)
 
 ---------------------------------

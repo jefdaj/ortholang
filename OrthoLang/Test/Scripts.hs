@@ -4,16 +4,14 @@ import qualified Control.Concurrent.Thread.Delay as D
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Lazy.Char8      as B8
 
+import OrthoLang.Core
+import OrthoLang.Locks
+import OrthoLang.Util   (justOrDie)
+
 import Control.Monad         (when)
 import Data.Char             (toLower)
 import Data.List             (zip5, isPrefixOf)
 import Data.List.Split       (splitOn)
-import OrthoLang.Core.Eval   (evalFile)
-import OrthoLang.Core.Locks  (LocksRef, withWriteLock)
-import OrthoLang.Core.Parse  (parseFileIO)
-import OrthoLang.Core.Paths  (toGeneric)
-import OrthoLang.Core.Types  (Config(..), Module(..), IDsRef, emptyScript)
-import OrthoLang.Core.Util   (justOrDie)
 import OrthoLang.Modules     (modules)
 import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)

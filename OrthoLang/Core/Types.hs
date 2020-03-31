@@ -84,8 +84,8 @@ module OrthoLang.Core.Types
 import qualified Data.Map.Strict as M
 -- import Text.Parsec (Parsec)
 
-import OrthoLang.Core.Locks (LocksRef, withReadLock)
-import OrthoLang.Core.Util  (readFileStrict, readFileLazy, headOrDie, trace)
+import OrthoLang.Locks (LocksRef, withReadLock)
+import OrthoLang.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 
 import Development.Shake              (Rules, Action, Resource)
 -- import Control.Monad.IO.Class (liftIO)

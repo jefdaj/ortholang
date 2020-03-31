@@ -6,6 +6,7 @@ module OrthoLang.Modules.Diamond
 
 import Development.Shake
 import OrthoLang.Core
+import OrthoLang.Locks
 
 import Data.List.Utils         (replace)
 import OrthoLang.Modules.Blast (bht)

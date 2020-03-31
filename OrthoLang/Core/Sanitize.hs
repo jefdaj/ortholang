@@ -32,8 +32,8 @@ import qualified Data.Map.Strict   as M
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Core.Util    (digest, digestLength, headOrDie, trace)
-import OrthoLang.Core.Locks   (withWriteLock')
+import OrthoLang.Util    (digest, digestLength, headOrDie, trace)
+import OrthoLang.Locks   (withWriteLock')
 import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
 import OrthoLang.Core.Paths   (toPath, fromPath)
 import Data.Char             (isSpace)

@@ -20,13 +20,13 @@ import OrthoLang.Core.Types
 
 import Prelude hiding (log)
 import qualified Data.Map.Strict as M
-import qualified OrthoLang.Core.Util as U
+import qualified OrthoLang.Util as U
 
 import Control.Monad              (when)
 import Data.Maybe                 (catMaybes)
 import Development.Shake.FilePath (makeRelative, splitPath)
 import OrthoLang.Core.Paths       (toPath, exprPath, bop2fun)
-import OrthoLang.Core.Util        (digest, trace, traceShow)
+import OrthoLang.Util        (digest, trace, traceShow)
 
 
 log :: Show a => String -> String -> a -> IO ()

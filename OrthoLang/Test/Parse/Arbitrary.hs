@@ -28,10 +28,10 @@ module OrthoLang.Test.Parse.Arbitrary where
 -- TODO email test function to jakewheatmail@gmail.com?
 
 import Data.Scientific
-import OrthoLang.Core.Types
-import OrthoLang.Modules (modules)
-import OrthoLang.Core.Parse   (spaceChars, escapeChars, literalChars)
+import OrthoLang.Core
 import Test.QuickCheck
+
+import OrthoLang.Modules (modules)
 
 -------------------------
 -- Arbitrary instances --

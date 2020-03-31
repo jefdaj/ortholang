@@ -28,7 +28,7 @@ module OrthoLang.Core.Compile.Map2
 import Development.Shake
 import OrthoLang.Core.Types
 import OrthoLang.Core.Paths
-import OrthoLang.Core.Util (digest)
+import OrthoLang.Util (digest)
 import Control.Monad (forM, forM_)
 import OrthoLang.Core.Actions (readStrings, writeStrings, debugA)
 import System.FilePath ((</>))

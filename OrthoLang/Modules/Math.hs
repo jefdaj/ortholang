@@ -2,7 +2,7 @@ module OrthoLang.Modules.Math where
 
 import Prelude hiding (log)
 import OrthoLang.Core
-import qualified OrthoLang.Core.Util as U
+import qualified OrthoLang.Util as U
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans    (lift)

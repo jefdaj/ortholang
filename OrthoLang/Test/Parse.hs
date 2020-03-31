@@ -31,10 +31,7 @@ TODO test operator precedence
 
 module OrthoLang.Test.Parse where
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Parse
-import OrthoLang.Core.Pretty -- (prettyShow)
-import OrthoLang.Core.Parse.Util (ParseM)
+import OrthoLang.Core
 import OrthoLang.Test.Parse.Arbitrary
 import OrthoLang.Test.Parse.Examples
 import Test.Tasty.QuickCheck
@@ -48,20 +45,6 @@ import Test.Tasty.HUnit      ((@=?), testCase)
 
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
--- import Data.Map.Strict              (empty)
--- import Data.IORef            (IORef)
-
--- import Test.Tasty            (TestTree, testGroup)
--- import Test.Tasty.QuickCheck (testProperty)
--- import Text.Parsec           (ParseError)
-
--- import Data.IORef            (newIORef)
--- import qualified Data.Map.Strict as M
--- import OrthoLang.Core.Config (defaultConfig)
--- import OrthoLang.Core.Locks (initLocks)
--- import OrthoLang.Core.Paths (exprPath, exprPathDigest)
--- import Control.Logging (withFileLogging)
--- import OrthoLang.Core.Util         (absolutize)
 
 ------------------------
 -- utility functions --

@@ -147,7 +147,7 @@ import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import OrthoLang.Core.Pretty          (render, pPrint)
-import OrthoLang.Core.Util            (digest, trace)
+import OrthoLang.Util            (digest, trace)
 import Path                           (parseAbsFile, fromAbsFile)
 import Text.PrettyPrint.HughesPJClass (Pretty)
 

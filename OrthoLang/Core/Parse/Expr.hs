@@ -34,7 +34,7 @@ import OrthoLang.Core.Pretty ()
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Util
 
-import OrthoLang.Core.Util (trace)
+import OrthoLang.Util (trace)
 
 import qualified Text.Parsec.Expr as E
 import Control.Monad.Trans.Except

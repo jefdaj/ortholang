@@ -43,7 +43,7 @@ import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead,
 import Text.Parsec.Prim       (ParsecT, Stream)
 -- import OrthoLang.Core.Paths   (exprDigests)
 import OrthoLang.Core.Parse.Util (ParseM, debugParser)
-import OrthoLang.Core.Util    (trace)
+import OrthoLang.Util    (trace)
 import Control.Monad.Reader   (ask)
 
 --------------

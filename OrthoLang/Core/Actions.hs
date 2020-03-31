@@ -69,9 +69,9 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit,
                                    checkLits, cacheDir, pathString,
                                    stringPath, toGeneric, sharedPath)
-import OrthoLang.Core.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
+import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie, debug, trace, traceShow)
-import OrthoLang.Core.Locks        (withReadLock', withReadLocks',
+import OrthoLang.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
 import System.Exit                (ExitCode(..))

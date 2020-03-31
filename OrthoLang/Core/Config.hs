@@ -17,7 +17,7 @@ import Development.Shake           (newResourceIO)
                                    -- removeFiles, liftIO)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Types        (Config(..), Module(..))
-import OrthoLang.Core.Util         (absolutize, justOrDie, debug)
+import OrthoLang.Util         (absolutize, justOrDie, debug)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)

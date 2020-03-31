@@ -18,6 +18,31 @@ module OrthoLang.Core
   , evalFile
   , prettyShow
 
+  -- * Things used in Test
+  , spaceChars
+  , escapeChars
+  , literalChars
+  , ParseM
+  , ReplM
+  , toGeneric
+  , promptArrow
+  , mkRepl
+  , promptArrow
+  , parseFileIO
+  , emptyScript
+  , pQuoted
+  , pNum
+  , pFunName
+  , pVarEq
+  , pSym
+  , pVar
+  , pStatement
+  , pExpr
+  , pFun
+  , pTerm
+  , parseWithLeftOver -- TODO move to Test/Parse?
+  , parseWithEof -- TODO move to Test/Parse?
+
   -- * Old module API: Types
   , Action1
   , Action2
@@ -120,9 +145,9 @@ module OrthoLang.Core
   , upBy
 
   -- * Old module API: Locks
-  , withReadLock
-  , withWriteLock
-  , withWriteLock'
+  -- , withReadLock
+  -- , withWriteLock
+  -- , withWriteLock'
 
   -- * Old module API: Sanitize
   , unhashIDs
@@ -145,14 +170,16 @@ module OrthoLang.Core
 import OrthoLang.Core.Actions
 import OrthoLang.Core.Compile
 import OrthoLang.Core.Compile.NewRules
-import OrthoLang.Core.Locks
 import OrthoLang.Core.Paths
 import OrthoLang.Core.Pretty
 import OrthoLang.Core.Sanitize
 import OrthoLang.Core.Types
+import OrthoLang.Core.Parse
+import OrthoLang.Core.Parse.Util
+import OrthoLang.Core.Repl hiding (runCmd) -- TODO disambiguate
 
-import OrthoLang.Core.Util hiding (debug)
-import qualified OrthoLang.Core.Util as U
+import OrthoLang.Util hiding (debug)
+import qualified OrthoLang.Util as U
 
 import OrthoLang.Core.Eval (evalFile)
 import OrthoLang.Core.Repl (runRepl)

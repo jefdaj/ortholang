@@ -7,6 +7,7 @@ module OrthoLang.Modules.OrthoFinder
 
 import Development.Shake (Action)
 import OrthoLang.Core
+import OrthoLang.Locks
 
 import Control.Monad.IO.Class  (liftIO)
 import OrthoLang.Modules.SeqIO (faa)

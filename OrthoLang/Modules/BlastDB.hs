@@ -10,6 +10,7 @@ module OrthoLang.Modules.BlastDB where
 
 import Development.Shake
 import OrthoLang.Core
+import OrthoLang.Locks
 
 import Control.Monad           (when, forM)
 import Data.Char               (toLower)

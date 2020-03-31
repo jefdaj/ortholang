@@ -5,8 +5,9 @@ module OrthoLang.Test
   )
   where
 
-import OrthoLang.Core.Types  (Config(..), LocksRef, IDsRef)
-import OrthoLang.Core.Util   (debug)
+import OrthoLang.Core
+import qualified OrthoLang.Util as U
+
 import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)
 import System.Console.Docopt (Arguments, longOption, getAllArgs)
@@ -41,9 +42,11 @@ mkTestConfig cfg dir = cfg
   , cfgWorkDir = dir
   }
 
+dbg :: String -> IO ()
+dbg = U.debug "test.runTests"
+
 runTests :: Arguments -> Config -> LocksRef -> IDsRef -> IO ()
 runTests args cfg ref ids = withArgs [] $ do
-  let dbg = debug "test.runTests"
   tmpRootDir <- getTemporaryDirectory -- can't share /tmp on the Berkeley cluster!
   createDirectoryIfMissing True tmpRootDir
   withTempDirectory tmpRootDir "ortholang" $ \tmpSubDir -> do

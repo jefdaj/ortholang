@@ -49,9 +49,9 @@ import OrthoLang.Core.Actions      (readPaths, writePaths, symlink,
                                    readLit, writeLits, traceA, debugA, need')
 import OrthoLang.Core.Paths        (cacheDir, toPath, fromPath, exprPath,
                                    Path, exprPathExplicit, argHashes)
-import OrthoLang.Core.Util         (digest, resolveSymlinks, unlessExists,
+import OrthoLang.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)
-import OrthoLang.Core.Locks       (withWriteOnce)
+import OrthoLang.Locks       (withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 
 -- TODO swap out plain debug fn for a proper one with module name

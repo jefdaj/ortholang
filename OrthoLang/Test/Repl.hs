@@ -2,17 +2,14 @@ module OrthoLang.Test.Repl where
 
 -- TODO could the mock repl be implemented more cleanly with Haskeline's Behaviors?
 
+import OrthoLang.Core
+import Paths_OrthoLang             (getDataFileName)
+import OrthoLang.Util         (readFileStrict)
+
 import System.IO.Temp             (emptySystemTempFile)
-import OrthoLang.Core.Paths        (toGeneric)
-import OrthoLang.Core.Repl         (promptArrow)
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.List                  (isPrefixOf)
-import Paths_OrthoLang             (getDataFileName)
-import OrthoLang.Core.Repl         (mkRepl)
-import OrthoLang.Core.Util         (readFileStrict)
-import OrthoLang.Core.Types        (Config(..), LocksRef, IDsRef)
-import OrthoLang.Core.Repl        (ReplM)
 import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))

@@ -20,6 +20,7 @@ module OrthoLang.Modules.MMSeqs
 
 import Development.Shake
 import OrthoLang.Core
+import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)
 import OrthoLang.Modules.BlastDB (withSingleton) -- TODO move to core?

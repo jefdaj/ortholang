@@ -5,6 +5,7 @@ module OrthoLang.Modules.SonicParanoid
 
 import Development.Shake
 import OrthoLang.Core
+import OrthoLang.Locks
 
 import OrthoLang.Modules.SeqIO (fna, faa)
 import System.Directory        (createDirectoryIfMissing)
