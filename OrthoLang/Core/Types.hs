@@ -24,7 +24,7 @@ module OrthoLang.Core.Types
   , RepID(..)
   , Salt(..)
   , Var(..)
-  , Script(..)
+  , Script
   , emptyScript
   , emptyDigests
   , LocksRef
@@ -93,12 +93,12 @@ import OrthoLang.Util  (readFileStrict, readFileLazy, headOrDie, trace)
 import Development.Shake              (Rules, Action, Resource)
 -- import Control.Monad.IO.Class (liftIO)
 import Data.List                      (nub, find, isPrefixOf)
-import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
+-- import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
 import Data.Maybe (fromJust, catMaybes)
 
 import Control.Monad.Reader -- TODO only specific imports
-import Control.Monad.State.Lazy       -- (StateT, execStateT, lift)
+-- import Control.Monad.State.Lazy       -- (StateT, execStateT, lift)
 
 newtype Path = Path FilePath deriving (Eq, Ord, Show)
 
@@ -126,12 +126,10 @@ newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 type RulesEnv = (Config, LocksRef, IDsRef, DigestsRef) -- TODO remove locks? ids? put script back?
 type RulesR a = ReaderT RulesEnv Rules a
 
--- type RulesR2 a = StateT DigestMap (ReaderT RulesEnv Rules) a
-
 -- the problem with this is it seems like the digests map wouldn't
 -- persist/share between invocations of runRulesR2, and we want all actions to
 -- get the whole thing! better to pass it around like before, but via ioref for now
--- type RulesEnv2 = (Config, LocksRef, IDsRef) -- TODO remove locks? ids? put script back?
+-- type RulesEnv2 = (Config, LocksRef, IDsRef)
 -- type RulesR2 a = ReaderT RulesEnv2 (StateT DigestMap Rules) a
 
 runRulesR :: RulesEnv -> RulesR a -> Rules a

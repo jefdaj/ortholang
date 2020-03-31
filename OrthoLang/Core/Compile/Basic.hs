@@ -62,6 +62,7 @@ import Development.Shake
 import Development.Shake.FilePath (isAbsolute)
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty
+import OrthoLang.Core.Digests (exprDigests)
 import qualified Data.Map.Strict as M
 
 import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toPath,
@@ -84,6 +85,8 @@ import Data.Maybe (isJust, fromJust)
 
 -- import OrthoLang.Core.Paths (insertNewRulesDigest)
 import System.IO.Unsafe (unsafePerformIO)
+import Control.Monad.Reader (ask)
+import Control.Monad.Trans.Class (lift)
 
 
 debug :: Config -> String -> String -> a -> a
@@ -125,6 +128,20 @@ debugRules cfg name input out = debug cfg name msg out
 --   print ids
 --   return a
 
+-- shit, turns out statet might have been the way to go after all? can't get to IO in Rules...
+-- tomorrow morning, try reverting on a new branch and threading the dmap through runRulesR2 calls
+-- alternatively, didn't shake have an option for carrying state around?
+-- (no maybe not. but after the threading thing ^, look into FSATrace! sounds promising)
+addDigests :: GlobalEnv -> Expr -> Rules ()
+addDigests env e = do
+  (scr, cfg, _, dRef) <- (_ :: Rules GlobalEnv)
+  let ds = exprDigests cfg scr [e]
+  liftIO $ atomicModifyIORef' dRef $ \r -> (M.union r ds, ())
+  return ()
+
+withAddDigests :: RulesFn -> GlobalEnv -> Expr -> Rules ExprPath
+withAddDigests fn env e = addDigests env e >> fn env e
+
 {-|
 The main entry point for compiling any 'Expr'. Use this by default
 unless you have a reason to delve into the more specific compilers below!
@@ -134,12 +151,12 @@ TODO remove the insert digests hack? or is this the main entry point for that to
 TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -}
 rExpr :: RulesFn
-rExpr s e@(Lit _ _ _      ) = rLit s e
-rExpr s e@(Ref _ _ _ _    ) = rRef s e
-rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
-rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO why is the map part needed?
+rExpr s e@(Lit _ _ _      ) = withAddDigests rLit s e
+rExpr s e@(Ref _ _ _ _    ) = withAddDigests rRef s e
+rExpr s e@(Lst _ _ _   es) = mapM (withAddDigests rExpr s) es >> rList s e
+rExpr s e@(Fun _ _ _ n es) = mapM (withAddDigests rExpr s) es >> rNamedFunction s e n -- TODO why is the map part needed?
 -- TODO possible bug source: the list expr path + digest is never returned, even though it's compiled
-rExpr s e@(Bop t r ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t r ds [e1, e2]] >> rBop s e
+rExpr s e@(Bop t r ds _ e1 e2) = mapM (withAddDigests rExpr s) [e1, e2, Lst t r ds [e1, e2]] >> rBop s e
 rExpr _ (Com (CompiledExpr _ _ rules)) = rules
 
 -- | Temporary hack to fix Bops
