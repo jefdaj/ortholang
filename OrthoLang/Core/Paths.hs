@@ -131,69 +131,25 @@ module OrthoLang.Core.Paths
   , checkPath
   , checkPaths
 
-  -- * Generate path digests
-  , exprPathDigest
-  , exprDigests
-  , scriptDigests
-  , listExprs
-  , listScriptExprs
-  -- , insertNewRulesDigest
-  , decodeNewRulesDeps
-  , listDigestsInPath
-
   -- * Misc utilities (move to Util.hs?)
   , argHashes
   , upBy
   , makeTmpdirRelative
+  , bop2fun
 
-  -- TODO remove? move to Actions?
-  -- tmpfiles
-  -- , hashContent
-  -- , resolveVar
-  -- , resolveVars
-  -- , readPath
-  -- , readPaths
-  -- , readLitPaths
-  -- , writePath
-  -- , writePaths
-  -- , readLit
-  -- , readLits
-  -- , writeLit
-  -- , writeLits
-  -- read and write tmpfiles as strings
-  -- , readString
-  -- , readStrings
-  -- , writeString
-  -- , writeStrings
-  -- symlink stuff
-  -- , tmpLink
-  -- , symlink
   )
   where
 
--- import qualified Debug.Trace as DT
+import OrthoLang.Core.Types
 
-import Prelude hiding (log)
-import qualified OrthoLang.Core.Util as U
-
-import Path (parseAbsFile, fromAbsFile)
-import OrthoLang.Core.Types -- (Config)
--- import OrthoLang.Core.Config (debug)
-import OrthoLang.Core.Pretty (render, pPrint)
-import OrthoLang.Core.Util (digest, trace, traceShow)
-import Data.String.Utils          (replace)
-import Development.Shake.FilePath ((</>), (<.>), isAbsolute, makeRelative, splitPath)
-import Data.List                  (intersperse, isPrefixOf)
-import Data.List.Split            (splitOn)
-
-import qualified Data.Map.Strict as M
-import Development.Shake
-import Data.IORef                 (readIORef, atomicModifyIORef')
-import Control.Monad (when)
-import Data.Maybe (fromJust, catMaybes)
-import Data.IORef (atomicModifyIORef')
-
-import Text.PrettyPrint.HughesPJClass (Pretty, pPrint, render)
+import Data.List                      (intersperse, isPrefixOf)
+import Data.List.Split                (splitOn)
+import Data.String.Utils              (replace)
+import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
+import OrthoLang.Core.Pretty          (render, pPrint)
+import OrthoLang.Core.Util            (digest, trace)
+import Path                           (parseAbsFile, fromAbsFile)
+import Text.PrettyPrint.HughesPJClass (Pretty)
 
 -- TODO take Text instead?
 traceP :: (Pretty a, Show b) => String -> a -> b -> b
@@ -202,23 +158,16 @@ traceP name expr path = trace ("core.paths." ++ name) msg path
     ren = render $ pPrint expr
     msg = "\"" ++ ren ++ "' -> " ++ show path -- TODO include types?
 
-log fnName varName thing = U.debug fnName $ varName ++ ": " ++ show thing
+-----------
+-- paths --
+-----------
 
--- traceD name c s expr = trace ("core.paths." ++ name) msg
---   where
---     ren  = render $ pPrint expr
---     -- ren  = show expr
---     path = exprPath c s expr
---     dig  = exprPathDigest path
---     msg  = "\"" ++ ren ++ "' -> (" ++ show dig ++ ", " ++ show path ++ ")"
+{-|
+Replace current absolute paths with generic placeholders that won't change
+when the tmpDir is moved later or whatever.
 
---------------
--- cutpaths --
---------------
-
--- | Replace current absolute paths with generic placeholders that won't change
--- when the tmpDir is moved later or whatever.
--- TODO rewrite with a more elegant [(fn, string)] if there's time
+TODO rewrite with a more elegant [(fn, string)] if there's time
+-}
 toGeneric :: Config -> String -> String
 toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
                   $ replace (cfgTmpDir  cfg) "$TMPDIR"
@@ -274,9 +223,13 @@ cacheDir cfg modName = toPath cfg path
 -- tmpfiles --
 --------------
 
--- | This is just a convenience used in exprPath
--- TODO rename hSomething?
--- TODO does it need the config at all?
+{-|
+This is just a convenience used in exprPath
+
+TODO rename hSomething?
+
+TODO does it need the config at all?
+-}
 argHashes :: Config -> Script -> Expr -> [String]
 argHashes c s (Ref _ _ _ v) = case lookup v (sAssigns s) of
                                          Nothing -> error $ "no such var " ++ show v
@@ -286,37 +239,6 @@ argHashes c s (Fun  _ _ _ _ es   ) = map (digest . exprPath c s) es
 argHashes c s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c s) [e1, e2]
 argHashes c s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c s) es]
 argHashes _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
-
--- This is like the "resolve refs" part of argHashes, but works on plain paths in IO
--- resolveVar :: Config -> Path -> IO Path
--- resolveVar cfg p@(Path path) =
---   -- TODO is just using Path directly here OK?
---   if "$TMPDIR/vars" `isPrefixOf` path
---     then resolveSymlinks cfg True (fromPath cfg p) >>= resolveVar cfg . toPath cfg
---     else return p
-
--- resolveVars :: Config -> [Path] -> IO [Path]
--- resolveVars cfg = mapM (resolveVar cfg)
-
-{- | An attempt to speed up file access by making a tree of smaller dirs instead
- -   of one giant one with a million+ files in it. Since it would complicate the
- -   .tree files to split everything up, for now I just have a list of dirs that
- -   are likely to benefit from it.
- -
- - TODO write this in haskell instead of python! (currently in split_faa)
- -}
--- expandHashDirs :: FilePath -> FilePath
--- expandHashDirs = joinPath . map expandDir . splitPath 
---   where
---     expandDir d = if d `elem` dirsToExpand then undefined else d
---     dirsToExpand = ["load_faa"]
---     splitPath = undefined
---     joinPath = undefined
-
--- rExpr s e@(Bop t r ds _ e1 e2) = rExpr s fn
---   where
---     es = 
---     fn = 
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
@@ -339,89 +261,10 @@ exprPath c s expr = traceP "exprPath" expr res
     hashes = argHashes c s expr
     res    = exprPathExplicit c prefix rtype salt hashes
 
-exprPathDigest :: Path -> PathDigest
-exprPathDigest = PathDigest . digest
-
-exprDigest :: Config -> Script -> Expr -> DigestMap
-exprDigest cfg scr expr = traceShow "core.paths.exprDigest" res
-  where
-    p = exprPath cfg scr expr
-    dKey = PathDigest $ digest p
-    res = M.singleton dKey (typeOf expr, p)
-
-exprDigests :: Config -> Script -> [Expr] -> DigestMap
-exprDigests cfg scr exprs = M.unions $ map (exprDigest cfg scr) $ concatMap listExprs exprs
-
-scriptDigests :: Config -> Script -> DigestMap
-scriptDigests cfg scr = exprDigests cfg scr $ listScriptExprs scr
-
-{-|
-"Flatten" (or "unfold"?) an expression into a list of it + subexpressions.
-
-TODO is there a better word for this, or a matching typeclass?
--}
-listExprs :: Expr -> [Expr]
-listExprs e@(Lit _ _ _) = [e]
-listExprs e@(Ref _ _ _ _) = [e]
-listExprs e@(Bop _ _ _ _ e1 e2) = e : concatMap listExprs [bop2fun e, e1, e2] -- TODO remove e?
-listExprs e@(Fun _ _ _ _ es   ) = e : concatMap listExprs es
-listExprs e@(Lst _ _ _   es   ) = e : concatMap listExprs es
-listExprs e@(Com _) = [e] -- TODO is this right?
-
-listScriptExprs :: Script -> [Expr]
-listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
-
--- insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
--- insertNewRulesDigest st@(_, cfg, _, idr) expr
---   = traceD "insertNewRulesDigest" st expr
---   $ atomicModifyIORef' idr
---   $ \h@(IDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
---   where
---     eType   = typeOf expr
---     ePath   = exprPath cfg scr expr
---     eDigest = exprPathDigest ePath
-
--- TODO what monad should this be in?
--- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
--- TODO take an ExprPath
--- TODO remove any unneccesary path components before lookup, and count the necessary ones
--- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
--- TODO better split function
-decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
-                   -> IO (Type, [Type], [Path])
-decodeNewRulesDeps cfg dMap o@(ExprPath out) = do
-  log "decodeNewRulesDeps" "out" out
-  let dKeys  = listDigestsInPath cfg out
-      dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
-      dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
-      dTypes = map fst dVals'
-      dPaths = map snd dVals'
-      oKey   = exprPathDigest $ toPath cfg out
-      Just (oType, _) = M.lookup oKey dMap
-  log "decodeNewRulesDeps" "dKeys" dKeys
-  log "decodeNewRulesDeps" "dTypes" dTypes
-  log "decodeNewRulesDeps" "dVals'" dVals'
-  log "decodeNewRulesDeps" "dPaths" dPaths
-  log "decodeNewRulesDeps" "oKey" oKey
-  when (length dVals /= length dKeys) $ error $ "failed to decode path: \"" ++ out ++ "\""
-  return (oType, dTypes, dPaths)
-
--- TODO hey, is it worth just looking up every path component to make it more robust?
-listDigestsInPath :: Config -> FilePath -> [PathDigest]
-listDigestsInPath cfg
-  = map PathDigest
-  . reverse
-  . drop 2
-  . reverse
-  . drop 2
-  . dropWhile (/= "exprs")
-  . map (filter (/= '/'))
-  . splitPath
-  . makeRelative (cfgTmpDir cfg)
-
 -- TODO remove repeat salt if fn is deterministic
+-- TODO why is rtype unused?
 exprPathExplicit :: Config -> String -> Type -> Salt -> [String] -> Path
-exprPathExplicit cfg prefix rtype (Salt s) hashes = toPath cfg path
+exprPathExplicit cfg prefix _ (Salt s) hashes = toPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = (concat $ intersperse "/" $ hashes ++ [show s])
@@ -440,8 +283,10 @@ varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir <
 -- io checks --
 ---------------
 
--- | These are just to alert me of programming mistakes,
--- and can be removed once the rest of the IO stuff is solid.
+{-|
+These are just to alert me of programming mistakes,
+and can be removed once the rest of the IO stuff is solid.
+-}
 checkLit :: String -> String
 checkLit lit = if isGeneric lit
                  then error $ "placeholder in lit: \"" ++ lit ++ "\""
@@ -459,7 +304,6 @@ checkPath path = if isAbsolute path || isGeneric path
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath
 
-
 -----------
 -- utils --
 -----------
@@ -475,13 +319,14 @@ upBy n (Path path) = Path path'
     components' = reverse $ drop n $ reverse components
     path' = concat $ intersperse "/" $ components'
 
-{- | For passing scripts paths that don't depend on the $TMPDIR location, but
- -   also don't require any ortholang funny business to read. It relies on the
- -   assumption that the script will be called from inside $TMPDIR. The level
- -   is how many ..s to add to get back up to $TMPDIR from where you call it.
- -
- - TODO any good way to simplify that?
- -}
+{-|
+For passing scripts paths that don't depend on the $TMPDIR location, but also
+don't require any ortholang funny business to read. It relies on the assumption
+that the script will be called from inside $TMPDIR. The level is how many ..s
+to add to get back up to $TMPDIR from where you call it.
+
+TODO any good way to simplify that?
+-}
 makeTmpdirRelative :: Int -> Path -> FilePath
 makeTmpdirRelative level (Path path) = replace "$TMPDIR" dots path
   where

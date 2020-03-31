@@ -40,7 +40,7 @@ import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Types
-import OrthoLang.Core.Paths (scriptDigests)
+import OrthoLang.Core.Digests (scriptDigests)
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)

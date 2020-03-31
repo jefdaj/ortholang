@@ -48,7 +48,8 @@ import Control.Monad              (when)
 import Data.Maybe                 (catMaybes)
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions     (need')
-import OrthoLang.Core.Paths       (fromPath, decodeNewRulesDeps)
+import OrthoLang.Core.Paths (fromPath)
+import OrthoLang.Core.Digests (decodeNewRulesDeps)
 import OrthoLang.Core.Util        (traceShow)
 
 -----------------------------------------------
