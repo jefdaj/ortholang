@@ -27,7 +27,6 @@ module OrthoLang.Core
   , toGeneric
   , promptArrow
   , mkRepl
-  , promptArrow
   , parseFileIO
   , emptyScript
   , pQuoted
