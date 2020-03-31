@@ -72,7 +72,7 @@ rMap index actFn = rMapMain index Nothing actFn'
 -- for action functions that need one tmpdir reused between calls
 rMapTmp :: Int -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
         -> String -> RulesFn
-rMapTmp index actFn tmpPrefix s@(scr, cfg, _, _) = rMapMain index (Just tmpFn) actFn s
+rMapTmp index actFn tmpPrefix s@(scr, cfg, _, _, _) = rMapMain index (Just tmpFn) actFn s
   where
     tmpDir = cacheDir cfg tmpPrefix
     tmpFn  = return . const tmpDir
@@ -82,7 +82,7 @@ rMapTmp index actFn tmpPrefix s@(scr, cfg, _, _) = rMapMain index (Just tmpFn) a
 rMapTmps :: Int
           -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
           -> String -> RulesFn
-rMapTmps index actFn tmpPrefix s@(scr, cfg, _, _) e = rMapMain index (Just tmpFn) actFn s e
+rMapTmps index actFn tmpPrefix s@(scr, cfg, _, _, _) e = rMapMain index (Just tmpFn) actFn s e
   where
     tmpFn args = do
       let base = concat $ intersperse "/" $ map digest args
@@ -111,7 +111,7 @@ rMapSimpleScript index = rMap index . aSimpleScript
 rMapMain :: Int -> Maybe ([Path] -> IO Path)
          -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
          -> RulesFn
-rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids) e@(Fun r salt _ name exprs) = do
+rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids, dMap) e@(Fun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, normalExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) normalExprs

@@ -105,7 +105,7 @@ debugRules cfg name input out = debug cfg name msg out
 -- This should return the same outPath as the old RulesFns, without doing anything else.
 -- TODO remove it once the new rules are all written
 -- deprecatedRules :: GlobalEnv -> Expr -> Rules ExprPath
--- deprecatedRules s@(_, cfg, _, _) e = return $ ExprPath out'
+-- deprecatedRules s@(_, cfg, _, _, _) e = return $ ExprPath out'
 --   where
 --     out  = exprPath cfg scr e
 --     out' = fromPath cfg $ exprPath cfg scr e
@@ -156,7 +156,7 @@ rNamedFunction :: GlobalEnv -> Expr -> String -> Rules ExprPath
 rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
-rNamedFunction' s@(scr, cfg, _, _) expr name = case findFunction cfg name of
+rNamedFunction' s@(scr, cfg, _, _, _) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function \"" ++ name ++ "\""
   Just f  -> case fNewRules f of
                Nothing -> if "load_" `isPrefixOf` fName f
@@ -168,7 +168,7 @@ rNamedFunction' s@(scr, cfg, _, _) expr name = case findFunction cfg name of
                          in return $ debugRules cfg "rNamedFunction'" expr res
 
 rAssign :: GlobalEnv -> Assign -> Rules (Var, VarPath)
-rAssign s@(_, cfg, _, _) (var, expr) = do
+rAssign s@(_, cfg, _, _, _) (var, expr) = do
   (ExprPath path) <- rExpr s expr
   path' <- rVar s var expr $ toPath cfg path
   let res  = (var, path')
@@ -179,13 +179,13 @@ rAssign s@(_, cfg, _, _) (var, expr) = do
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
 compileScript :: GlobalEnv -> RepID -> Rules ResPath
-compileScript s@(scr, _, _, _) _ = do
+compileScript s@(scr, _, _, _, _) _ = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
-  rpaths <- mapM (rAssign s) (sAssigns scr)
+  rpaths <- mapM (rAssign s) scr
   res <- case lookupResult rpaths of
-    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr s $ fromJust $ lookupResult $ sAssigns $ ensureResult scr
+    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr s $ fromJust $ lookupResult $ ensureResult scr
     Just r  -> fmap (\(VarPath  p) -> p) $ return r
   return $ ResPath res
   -- where
@@ -196,7 +196,7 @@ compileScript s@(scr, _, _, _) _ = do
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn
-rLit s@(scr, cfg, ref, ids) expr = do
+rLit s@(scr, cfg, ref, ids, dRef) expr = do
   let path  = exprPath cfg scr expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromPath cfg path
   path' %> \_ -> aLit cfg ref ids expr path
@@ -254,7 +254,7 @@ TODO can it be mostly unified with rListPaths digest-wise?
 TODO what happens when you make a list of literals in two steps using links?
 -}
 rListLits :: RulesFn
-rListLits s@(scr, cfg, ref, ids) e@(Lst _ _ _ exprs) = do
+rListLits s@(scr, cfg, ref, ids, dRef) e@(Lst _ _ _ exprs) = do
   litPaths <- mapM (rExpr s) exprs
   let litPaths' = map (\(ExprPath p) -> toPath cfg p) litPaths
   outPath' %> \_ -> aListLits cfg ref ids litPaths' outPath
@@ -298,7 +298,7 @@ known until after the function runs.
 TODO hash mismatch error here?
 -}
 rListPaths :: RulesFn
-rListPaths s@(scr, cfg, ref, ids) e@(Lst rtn salt _ exprs) = do
+rListPaths s@(scr, cfg, ref, ids, dRef) e@(Lst rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toPath cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
@@ -324,7 +324,7 @@ aListPaths cfg ref _ paths outPath = do
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 rRef :: RulesFn
-rRef (_, cfg, _, _) e@(Ref _ _ _ var) = return $ ePath $ varPath cfg var e
+rRef (_, cfg, _, _, _) e@(Ref _ _ _ var) = return $ ePath $ varPath cfg var e
   where
     ePath p = ExprPath $ debugRules cfg "rRef" e $ fromPath cfg p
 rRef _ _ = fail "bad argument to rRef"
@@ -333,7 +333,7 @@ rRef _ _ = fail "bad argument to rRef"
 -- TODO unify with rLink2, rLoad etc?
 -- TODO do we need both the Expr and ExprPath? seems like Expr would do
 rVar :: GlobalEnv -> Var -> Expr -> Path -> Rules VarPath
-rVar (_, cfg, ref, ids) var expr oPath = do
+rVar (_, cfg, ref, ids, dRef) var expr oPath = do
   vPath' %> \_ -> aVar cfg ref ids vPath oPath
   return (VarPath vPath')
   where
@@ -413,7 +413,7 @@ mkLoadList hashSeqIDs name rtn = Function
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
 rLoad :: Bool -> RulesFn
-rLoad hashSeqIDs s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [p]) = do
+rLoad hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr s p
   out' %> \_ -> aLoad hashSeqIDs cfg ref ids (toPath cfg strPath) out
   return (ExprPath out')
@@ -521,7 +521,7 @@ rLoadList _ _ _ = fail "bad arguments to rLoadList"
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 -- TODO don't need to hash seqids here right?
 rLoadListLits :: RulesFn
-rLoadListLits s@(scr, cfg, ref, ids) expr = do
+rLoadListLits s@(scr, cfg, ref, ids, dRef) expr = do
   (ExprPath litsPath') <- rExpr s expr
   let litsPath = toPath cfg litsPath'
   outPath' %> \_ -> aLoadListLits cfg ref ids outPath litsPath
@@ -543,7 +543,7 @@ aLoadListLits cfg ref _ outPath litsPath = do
 -- regular case for lists of any other file type
 -- TODO hash mismatch here?
 rLoadListPaths :: Bool -> RulesFn
-rLoadListPaths hashSeqIDs s@(scr, cfg, ref, ids) e@(Fun rtn salt _ _ [es]) = do
+rLoadListPaths hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   -- let hash     = digest $ toPath cfg pathsPath
   --     outPath  = exprPathExplicit cfg "list" rtn salt [hash]

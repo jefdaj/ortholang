@@ -19,15 +19,15 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
-mkTestGroup ::  Config -> LocksRef -> IDsRef -> String
-            -> [Config -> LocksRef -> IDsRef -> IO TestTree] -> IO TestTree
-mkTestGroup cfg ref ids name trees = do
-  let trees' = mapM (\t -> t cfg ref ids) trees
+mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
+            -> [Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree] -> IO TestTree
+mkTestGroup cfg ref ids dRef name trees = do
+  let trees' = mapM (\t -> t cfg ref ids dRef) trees
   trees'' <- trees'
   return $ testGroup name trees''
 
-mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
-mkTests cfg ref ids = mkTestGroup cfg ref ids "mock REPL interaction"
+mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+mkTests cfg ref ids dRef = mkTestGroup cfg ref ids dRef "mock REPL interaction"
                 [goldenRepls, goldenReplTrees]
 
 -- returns just the parts of a pasted REPL session that represent user input
@@ -48,12 +48,12 @@ mockPrompt handle stdinStr promptStr = do
 -- TODO why did this get messed up??
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
-mockRepl :: [String] -> FilePath -> Config -> LocksRef -> IDsRef -> IO ()
-mockRepl stdinLines path cfg ref ids = do
+mockRepl :: [String] -> FilePath -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
+mockRepl stdinLines path cfg ref ids dRef = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
     -- putStrLn ("stdin: \"" ++ unlines stdinLines ++ "\"")
-    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids
+    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids dRef
     -- putStrLn $ "stdout: \"" ++ out ++ "\""
     return ()
   out <- readFileStrict ref tmpPath
@@ -62,15 +62,15 @@ mockRepl stdinLines path cfg ref ids = do
   return ()
 
 -- TODO include goldenTree here too (should pass both at once)
-goldenRepl :: Config -> LocksRef -> IDsRef -> FilePath -> IO TestTree
-goldenRepl cfg ref ids goldenFile = do
+goldenRepl :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestTree
+goldenRepl cfg ref ids dRef goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
       desc   = "repl output matches " ++ name <.> "txt"
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tstOut = cfgTmpDir cfg' <.> "txt"
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
-      action = mockRepl stdin tstOut cfg' ref ids
+      action = mockRepl stdin tstOut cfg' ref ids dRef
                -- uncomment to update repl golden files:
                -- >> copyFile tstOut ("/home/jefdaj/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
   return $ goldenVsFile desc goldenFile tstOut action
@@ -89,15 +89,15 @@ findGoldenFiles = do
   let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
   return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles'
 
-goldenRepls :: Config -> LocksRef -> IDsRef -> IO TestTree
-goldenRepls cfg ref ids = do
+goldenRepls :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+goldenRepls cfg ref ids dRef = do
   golds <- findGoldenFiles
-  let tests = mapM (goldenRepl cfg ref ids) golds
+  let tests = mapM (goldenRepl cfg ref ids dRef) golds
       group = testGroup "prints expected output"
   fmap group tests
 
-goldenReplTree :: Config -> LocksRef -> IDsRef -> FilePath -> IO TestTree
-goldenReplTree cfg ref ids ses = do
+goldenReplTree :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestTree
+goldenReplTree cfg ref ids dRef ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
       desc   = name <.> "txt" ++ " creates expected tmpfiles"
@@ -110,7 +110,7 @@ goldenReplTree cfg ref ids ses = do
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
       cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
       action = do
-                 _ <- mockRepl stdin tmpOut cfg' ref ids
+                 _ <- mockRepl stdin tmpOut cfg' ref ids dRef
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  -- uncomment to update golden repl trees
@@ -118,9 +118,9 @@ goldenReplTree cfg ref ids ses = do
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 
-goldenReplTrees :: Config -> LocksRef -> IDsRef -> IO TestTree
-goldenReplTrees cfg ref ids = do
+goldenReplTrees :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+goldenReplTrees cfg ref ids dRef = do
   txts <- findGoldenFiles
-  let tests = mapM (goldenReplTree cfg ref ids) txts
+  let tests = mapM (goldenReplTree cfg ref ids dRef) txts
       group = testGroup "repl creates expected tmpfiles"
   fmap group tests

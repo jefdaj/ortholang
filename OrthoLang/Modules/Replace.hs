@@ -78,7 +78,7 @@ mapAssignVars :: (Var -> Var) -> Assign -> Assign
 mapAssignVars fn (var, expr) = (fn var, mapExprVars fn expr)
 
 mapScriptVars :: (Var -> Var) -> Script -> Script
-mapScriptVars fn scr = scr {sAssigns = map (mapAssignVars fn) (sAssigns scr)}
+mapScriptVars fn scr = map (mapAssignVars fn) scr
 
 setRepID :: RepID -> Var -> Var
 setRepID newID (Var _ name) = Var newID name
@@ -125,13 +125,13 @@ rReplace' :: GlobalEnv
           -> Var  -- we also need the variable to be replaced
           -> Expr -- and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
-rReplace' st@(script, cfg, ref, ids) resExpr subVar@(Var _ _) subExpr = do
+rReplace' st@(script, cfg, ref, ids, dRef) resExpr subVar@(Var _ _) subExpr = do
   let res   = (Var (RepID Nothing) "result", resExpr)
       sub   = (subVar, subExpr)
-      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) (sAssigns script)
+      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       newID = calcRepID st resExpr subVar subExpr
-      scr'  = (setRepIDs newID (script {sAssigns = [sub] ++ deps ++ [res]}))
-  (ResPath resPath) <- compileScript (scr', cfg, ref, ids) newID -- TODO remove the ID here, or is it useful?
+      scr'  = setRepIDs newID $ [sub] ++ deps ++ [res]
+  (ResPath resPath) <- compileScript (scr', cfg, ref, ids, dRef) newID -- TODO remove the ID here, or is it useful?
   return (ExprPath resPath)
 
 {- This decides the "replace ID" in rReplace' above. It's important because the
@@ -142,7 +142,7 @@ rReplace' st@(script, cfg, ref, ids) resExpr subVar@(Var _ _) subExpr = do
  - TODO think carefully about whether all of these need to be in here
  -}
 calcRepID :: GlobalEnv -> Expr -> Var -> Expr -> RepID
-calcRepID (scr, _, _, _) resExpr subVar subExpr = RepID $ Just $ digest
+calcRepID (scr, _, _, _, _) resExpr subVar subExpr = RepID $ Just $ digest
   [ show scr
   , show resExpr
   , show subVar
@@ -227,7 +227,7 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
 rReplaceEach :: GlobalEnv
              -> Expr -- the final result expression, which contains all the info we need
              -> Rules ExprPath
-rReplaceEach s@(scr, cfg, ref, _) expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
+rReplaceEach s@(scr, cfg, ref, _, _) expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr s subList
   let subExprs = extractExprs scr subList
   resPaths <- mapM (rReplace' s resExpr subVar) subExprs

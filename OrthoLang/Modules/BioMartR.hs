@@ -187,7 +187,7 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: RulesFn
-rParseSearches s@(scr, cfg, ref, ids) expr@(Fun _ _ _ _ [searches]) = do
+rParseSearches s@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
   let searchTable  = exprPath cfg scr expr
       searchTable' = fromPath cfg searchTable
@@ -222,7 +222,7 @@ aParseSearches cfg ref _ sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> RulesFn
-rBioMartR fn s@(scr, cfg, ref, ids) expr@(Fun rtn salt _ _ [ss]) = do
+rBioMartR fn s@(scr, cfg, ref, ids, dRef) expr@(Fun rtn salt _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr s (Lit str (Salt 0) fn)
   -- (ExprPath sTable) <- rParseSearches s ss
   (ExprPath sTable) <- rExpr s $ Fun rtn salt (depsOf ss) "parse_searches" [ss]

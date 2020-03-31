@@ -107,8 +107,8 @@ tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
 -- tests --
 -----------
 
-mkTests :: Config -> LocksRef -> IDsRef -> IO TestTree
-mkTests cfg ref ids = return $ testGroup "test parser"
+mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+mkTests cfg ref ids _ = return $ testGroup "test parser"
   [ exTests cfg ref ids
   , wsProps cfg ref ids
   , acProps cfg ref ids

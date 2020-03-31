@@ -133,7 +133,7 @@ mkLoadDBEach name rtn = Function
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(scr,cfg, ref, ids) e@(Fun _ _ _ _ [s]) = do
+rLoadDB st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr st s
   let sPath' = toPath cfg sPath
   oPath' %> \_ -> aLoadDB cfg ref ids oPath sPath'
@@ -193,7 +193,7 @@ makeblastdbCache :: Config -> Path
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(scr,cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
+rBlastdblist s@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toPath   cfg fPath
   listTmp %> \_ -> aBlastdblist   cfg ref ids lTmp'
@@ -262,7 +262,7 @@ blastdbgetProt :: Function
 blastdbgetProt = mkBlastdbget "blastdbget_prot" pdb
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(scr,cfg, ref, ids) e@(Fun _ _ _ _ [name]) = do
+rBlastdbget st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath cfg scr e -- final prefix
@@ -345,7 +345,7 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdbAll :: RulesFn
-rMakeblastdbAll s@(scr,cfg, ref, ids) e@(Fun rtn _ _ _ [fas]) = do
+rMakeblastdbAll s@(scr,cfg, ref, ids, dRef) e@(Fun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
   let out       = exprPath cfg scr e
       out'      = debugR' cfg "rMakeblastdbAll" e $ fromPath cfg out
@@ -526,7 +526,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, _) (Fun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach st@(_, cfg, _, _, _) (Fun (ListOf dbType) salt deps name [e]) =
   -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) st expr'
   where
@@ -565,7 +565,7 @@ tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
-rSingletons st@(scr,cfg, ref, ids) expr@(Fun rtn _ _ _ [listExpr]) = do
+rSingletons st@(scr,cfg, ref, ids, dRef) expr@(Fun rtn _ _ _ [listExpr]) = do
   (ExprPath listPath') <- rExpr st listExpr
   let outPath  = exprPath cfg scr expr
       outPath' = fromPath cfg outPath

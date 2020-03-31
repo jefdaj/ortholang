@@ -56,7 +56,7 @@ lenEach = Function
     name = "length_each"
 
 rLen :: RulesFn
-rLen s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [l]) = do
+rLen s@(scr, cfg, ref, ids, _) e@(Fun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr s l
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath

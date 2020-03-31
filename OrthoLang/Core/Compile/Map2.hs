@@ -177,7 +177,7 @@ map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
 rFun1 :: Action1 -> RulesFn
-rFun1 act1 st@(scr, cfg, ref, ids) expr@(Fun _ _ _ _ [a1]) = do
+rFun1 act1 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1]) = do
   (ExprPath arg1') <- rExpr st a1
   let arg1   = toPath cfg arg1'
       oPath  = exprPath cfg scr expr
@@ -195,7 +195,7 @@ rFun1 _ _ e = error $ "bad argument to rFun1: " ++ show e
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
 rFun3 :: Action3 -> RulesFn
-rFun3 act3 st@(scr, cfg, ref, ids) expr@(Fun _ _ _ _ [a1, a2, a3]) = do
+rFun3 act3 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1, a2, a3]) = do
   (ExprPath arg1') <- rExpr st a1
   (ExprPath arg2') <- rExpr st a2
   (ExprPath arg3') <- rExpr st a3

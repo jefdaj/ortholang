@@ -75,14 +75,14 @@ prompt = lift . lift . getInputLine
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
 
-runRepl :: Config -> LocksRef -> IDsRef -> IO ()
+runRepl :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> Config -> LocksRef -> IDsRef -> IO ()
-mkRepl promptFns hdl cfg ref ids = do
+       -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
+mkRepl promptFns hdl cfg ref ids dRef = do
   -- load initial script if any
   st <- case cfgScript cfg of
           Nothing -> do
@@ -90,8 +90,8 @@ mkRepl promptFns hdl cfg ref ids = do
             hPutStrLn hdl
               "Welcome to the OrthoLang interpreter!\n\
               \Type :help for a list of the available commands."
-            return  (emptyScript, cfg, ref, ids)
-          Just path -> cmdLoad (emptyScript, cfg, ref, ids) hdl path
+            return  (emptyScript, cfg, ref, ids, dRef)
+          Just path -> cmdLoad (emptyScript, cfg, ref, ids, dRef) hdl path
   -- run repl with initial state
   _ <- runReplM (replSettings st) (loop promptFns hdl) st
   return ()
@@ -136,7 +136,7 @@ loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 -- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
 loop [] _ = return ()
 loop (promptFn:promptFns) hdl = do
-  st@(_, cfg, _, _)  <- get
+  st@(_, cfg, _, _, _)  <- get
   Just line <- promptFn $ shortPrompt cfg -- TODO can this fail?
   st' <- liftIO $ try $ step st hdl line
   case st' of
@@ -171,10 +171,10 @@ step st hdl line = case stripWhiteSpace line of
 
 -- TODO insert ids
 runStatement :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement (cfg, scr) line of
+runStatement st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement (cfg, scr) line of
   Left  e -> hPutStrLn hdl e >> return st
   Right r -> do
-    let st' = (updateVars scr r, cfg, ref, ids)
+    let st' = (updateVars scr r, cfg, ref, ids, dRef)
     when (isExpr (cfg, scr) line) (evalScript hdl st')
     return st'
 
@@ -183,13 +183,13 @@ runStatement st@(scr, cfg, ref, ids) hdl line = case parseStatement (cfg, scr) l
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
 updateVars :: Script -> Assign -> Script
-updateVars scr asn@(var, _) = scr {sAssigns = as'} -- TODO anything with digests needed here?
+updateVars scr asn@(var, _) = as'
   where
     res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn
-    as' = if var /= res && var `elem` map fst (sAssigns scr)
-            then replaceVar asn' $ sAssigns scr
-            else delFromAL (sAssigns scr) var ++ [asn']
+    as' = if var /= res && var `elem` map fst scr
+            then replaceVar asn' scr
+            else delFromAL scr var ++ [asn']
 
 -- replace an existing var in a script
 replaceVar :: Assign -> [Assign] -> [Assign]
@@ -204,7 +204,7 @@ removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, der
 -- does the actual work of removing self-references
 dereference :: Script -> Var -> Expr -> Expr
 dereference scr var e@(Ref _ _ _ v2)
-  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var $ sAssigns scr
+  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
   | otherwise = e
 dereference _   _   e@(Lit _ _ _) = e
 dereference _   _   (Com _) = error "implement this! or rethink?"
@@ -217,7 +217,7 @@ dereference scr var (Lst t n vs   es   ) = Lst t n (delete var vs)   (map (deref
 --------------------------
 
 runCmd :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-runCmd st@(_, cfg, _, _) hdl line = case matches of
+runCmd st@(_, cfg, _, _, _) hdl line = case matches of
   [(_, fn)] -> fn st hdl $ stripWhiteSpace args
   []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
   _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
@@ -250,7 +250,7 @@ cmds cfg =
 -- TODO if possible, make this open in `less`?
 -- TODO why does this one have a weird path before the :help text?
 cmdHelp :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdHelp st@(_, cfg, _, _) hdl line = do
+cmdHelp st@(_, cfg, _, _, _) hdl line = do
   doc <- case words line of
            [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
                     [ fmap fHelp $ findFunction cfg w
@@ -306,7 +306,7 @@ listFunctionTypesWithOutput cfg cType = filter matches descs
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO should it be an error for the new script not to play well with an existing one?
 cmdLoad :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdLoad st@(scr, cfg, ref, ids) hdl path = do
+cmdLoad st@(scr, cfg, ref, ids, dRef) hdl path = do
   clear
   path' <- absolutize path
   dfe   <- doesFileExist path'
@@ -314,33 +314,33 @@ cmdLoad st@(scr, cfg, ref, ids) hdl path = do
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
       let cfg' = cfg { cfgScript = Just path' } -- TODO why the False??
-      new <- parseFile (scr, cfg', ref, ids) path' -- TODO insert ids
+      new <- parseFile (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         -- TODO put this back? not sure if it makes repl better
-        Right s -> cmdShow (s, cfg', ref, ids) hdl ""
-        -- Right s -> return (s, cfg', ref, ids)
+        Right s -> cmdShow (s, cfg', ref, ids, dRef) hdl ""
+        -- Right s -> return (s, cfg', ref, ids, dRef)
 
 cmdReload :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdReload st@(_, cfg, _, _) hdl _ = case cfgScript cfg of
+cmdReload st@(_, cfg, _, _, _) hdl _ = case cfgScript cfg of
   Nothing -> cmdDrop st hdl ""
   Just s  -> cmdLoad st hdl s
 
 cmdWrite :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdWrite st@(scr, cfg, locks, ids) hdl line = case words line of
+cmdWrite st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
-    return (scr, cfg { cfgScript = Just path }, locks, ids)
-  [var, path] -> case lookup (Var (RepID Nothing) var) (sAssigns scr) of
+    return (scr, cfg { cfgScript = Just path }, locks, ids, dRef)
+  [var, path] -> case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: \"" ++ line ++ "\"") >> return st
 
 -- TODO where should this go?
 depsOnly :: Expr -> Script -> Script
-depsOnly expr scr = scr {sAssigns = deps ++ [res]}
+depsOnly expr scr = deps ++ [res]
   where
-    deps = filter (\(v,_) -> (elem v $ depsOf expr)) $ sAssigns scr
+    deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
     res  = (Var (RepID Nothing) "result", expr)
 
 -- TODO where should this go?
@@ -350,11 +350,11 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
 cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdNeededBy st@(scr, cfg, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) (sAssigns scr) of
+cmdNeededBy st@(scr, cfg, _, _, _) hdl var = do
+  case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (Var Nothing var):depsOf e) scr
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
   return st
 
 -- TODO move to Pretty.hs
@@ -364,24 +364,24 @@ cmdNeededBy st@(scr, cfg, _, _) hdl var = do
   -- hPutStrLn hdl txt
 
 cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdNeeds st@(scr, cfg, _, _) hdl var = do
+cmdNeeds st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
-  case lookup var' (sAssigns scr) of
+  case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') (sAssigns scr)
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') scr
   return st
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdDrop (_, cfg, ref, ids) _ [] = clear >> return (emptyScript, cfg { cfgScript = Nothing }, ref, ids) -- TODO drop ids too?
-cmdDrop st@(scr, cfg, ref, ids) hdl var = do
+cmdDrop (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { cfgScript = Nothing }, ref, ids, dRef) -- TODO drop ids too?
+cmdDrop st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
-  case lookup v (sAssigns scr) of
+  case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
-    Just _  -> return (scr {sAssigns = delFromAL (sAssigns scr) v}, cfg, ref, ids)
+    Just _  -> return (delFromAL scr v, cfg, ref, ids, dRef)
 
 cmdType :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
+cmdType st@(scr, cfg, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
   where
     typeInfo = case stripWhiteSpace s of
       "" -> allTypes
@@ -389,11 +389,11 @@ cmdType st@(scr, cfg, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
     oneType e = case findFunction cfg e of
       Just f  -> fTypeDesc f
       Nothing -> showExprType st e -- TODO also show the expr itself?
-    allTypes = init $ unlines $ map showAssignType $ sAssigns scr
+    allTypes = init $ unlines $ map showAssignType scr
 
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String
-showExprType (s, c, _, _) e = case parseExpr (c, s) e of
+showExprType (s, c, _, _, _) e = case parseExpr (c, s) e of
   Right expr -> show $ typeOf expr
   Left  err  -> show err
 
@@ -408,9 +408,9 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
 -- TODO factor out the variable lookup stuff
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdShow st@(s, c, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns s) >> return st
-cmdShow st@(scr, cfg, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) (sAssigns scr) of
+cmdShow st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
+cmdShow st@(scr, cfg, _, _, _) hdl var = do
+  case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
   return st
@@ -426,7 +426,7 @@ cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
 cmdConfig :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdConfig st@(scr, cfg, ref, ids) hdl s = do
+cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
   let ws = words s
   if (length ws == 0)
     then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
@@ -438,7 +438,7 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
                Left err -> hPutStrLn hdl err >> return st
                Right iocfg' -> do
                  cfg' <- iocfg'
-                 return (scr, cfg', ref, ids)
+                 return (scr, cfg', ref, ids, dRef)
 
 --------------------
 -- tab completion --
@@ -446,7 +446,7 @@ cmdConfig st@(scr, cfg, ref, ids) hdl s = do
 
 -- complete things in quotes: filenames, seqids
 quotedCompletions :: MonadIO m => GlobalEnv -> String -> m [Completion]
-quotedCompletions (_, _, _, idRef) wordSoFar = do
+quotedCompletions (_, _, _, idRef, _) wordSoFar = do
   files  <- listFiles wordSoFar
   seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ fmap (M.unions . M.elems . hSeqIDs) $ liftIO $ readIORef idRef
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
@@ -455,13 +455,13 @@ quotedCompletions (_, _, _, idRef) wordSoFar = do
 -- complete everything else: fn names, var names, :commands, types
 -- these can be filenames too, but only if the line starts with a :command
 nakedCompletions :: MonadIO m => GlobalEnv -> String -> String -> m [Completion]
-nakedCompletions (scr, cfg, _, _) lineReveresed wordSoFar = do
+nakedCompletions (scr, cfg, _, _, _) lineReveresed wordSoFar = do
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
   where
     wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
-    varNames = map ((\(Var _ v) -> v) . fst) (sAssigns scr)
+    varNames = map ((\(Var _ v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
     typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
 
@@ -474,7 +474,7 @@ myComplete s = completeQuotedWord   (Just '\\') "\"\"" (quotedCompletions s)
 -- This is separate from the Config because it shouldn't need changing.
 -- TODO do we actually need the script here? only if we're recreating it every loop i guess
 replSettings :: GlobalEnv -> Settings IO
-replSettings s@(_, cfg, _, _) = Settings
+replSettings s@(_, cfg, _, _, _) = Settings
   { complete       = myComplete s
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
   , autoAddHistory = True

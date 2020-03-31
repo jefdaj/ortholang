@@ -85,7 +85,7 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 ----------------
 
 stripResult :: Script -> Script
-stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
+stripResult = filter notRes
   where
     notRes ((Var _ "result"), _) = False
     notRes _ = True
@@ -105,7 +105,7 @@ pAssign = debugParser "pAssign" $ do
   cfg <- ask
   scr <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
-  when ((not $ cfgInteractive cfg) && (hasKeyAL v $ sAssigns scr) && (vName /= "result")) $ do
+  when ((not $ cfgInteractive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
 
@@ -158,13 +158,12 @@ TODO clarify that
 
 TODO error if it has leftover?
 
-TODO is this the only place we ever need to add digests?
 -}
 parseString :: Config -> String -> Either String Script
-parseString c s = fmap addDigests $ parseWithEof pScript (c, emptyScript) s
-  where
-    addDigests :: Script -> Script
-    addDigests scr = scr {sDigests = scriptDigests c scr}
+parseString c s = parseWithEof pScript (c, emptyScript) s
+  -- where
+  --   addDigests :: Script -> Script
+  --   addDigests scr = scr {sDigests = scriptDigests c scr}
 
 {-|
 Not sure why this should be necessary, but it was easier than fixing the parser
@@ -173,9 +172,9 @@ to reject multiple results.
 TODO one result *per repeat ID*, not total!
 -}
 lastResultOnly :: Script -> Script
-lastResultOnly scr@(Script {sAssigns = as}) = scr {sAssigns = otherVars ++ [lastRes]}
+lastResultOnly scr = otherVars ++ [lastRes]
   where
-    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") as
+    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") scr
     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 
@@ -190,28 +189,28 @@ TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
-  as <- many pStatement
+  scr <- many pStatement
   -- (cfg, scr) <- getState
   -- scr <- getState
   -- let (as, ds) = unzip ads 
   -- let ds'  = M.union (sDigests scr) $ exprDigests cfg scr $ map snd as
       -- scr  = emptyScript {sAssigns = as, sDigests = ds'}
   cfg <- ask
-  let scr  = emptyScript {sAssigns = as}
-      scr' = lastResultOnly scr
-      ds   = scriptDigests cfg scr'
-      scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
+  -- let scr  = emptyScript {sAssigns = as}
+  let scr' = lastResultOnly scr
+      -- ds   = scriptDigests cfg scr'
+      -- scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
   -- putState scr'
   -- putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
-  putState scr''
-  return scr''
+  putState scr'
+  return scr'
   -- return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: GlobalEnv -> FilePath -> IO (Either String Script)
-parseFile (_, cfg, ref, _) path = do
+parseFile (_, cfg, ref, _, _) path = do
   debug "core.parse.script.parseFile" $ "parseFile \"" ++ path ++ "\""
   txt <- readScriptWithIncludes ref path
   return $ (parseString cfg . stripComments) txt

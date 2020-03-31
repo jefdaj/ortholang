@@ -83,7 +83,7 @@ buscoListLineages = Function
     name = "busco_list_lineages"
 
 rBuscoListLineages :: RulesFn
-rBuscoListLineages s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [f]) = do
+rBuscoListLineages s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr s f
   let fPath' = toPath   cfg fPath
   listTmp %> \_ -> aBuscoListLineages   cfg ref ids lTmp'
@@ -203,7 +203,7 @@ untar cfg ref from to = runCmd cfg ref $ CmdDesc
     to' = fromPath cfg to
 
 rBuscoFetchLineage :: RulesFn
-rBuscoFetchLineage st@(scr, cfg, ref, _) expr@(Fun _ _ _ _ [nPath]) = do
+rBuscoFetchLineage st@(scr, cfg, ref, _, _) expr@(Fun _ _ _ _ [nPath]) = do
   (ExprPath namePath) <- rExpr st nPath
   let outPath  = exprPath cfg scr expr
       outPath' = fromPath cfg outPath
@@ -331,7 +331,7 @@ buscoScoresTable  = Function
 
 -- TODO variant of rSimpleScript that reads + passes in a list of input files?
 rBuscoScoresTable :: RulesFn
-rBuscoScoresTable s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [l]) = do
+rBuscoScoresTable s@(scr, cfg, ref, _, _) e@(Fun _ _ _ _ [l]) = do
   (ExprPath lsPath) <- rExpr s l
   let o  = exprPath cfg scr e
       o' = fromPath cfg o
@@ -381,7 +381,7 @@ buscoFilterCompleteness  = Function
 -- TODO try the same way it works for sets: one canonical full path!
 -- TODO do it the simple way for now, then see if it breaks and if so fix it
 rBuscoFilterCompleteness :: RulesFn
-rBuscoFilterCompleteness s@(scr, cfg, ref, _) e@(Fun _ _ _ _ [m, t, fs]) = do
+rBuscoFilterCompleteness s@(scr, cfg, ref, _, _) e@(Fun _ _ _ _ [m, t, fs]) = do
   (ExprPath scorePath) <- rExpr s m
   (ExprPath tablePath) <- rExpr s t
   (ExprPath faasList ) <- rExpr s fs

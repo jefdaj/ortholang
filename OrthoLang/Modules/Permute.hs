@@ -29,7 +29,7 @@ orthoLangModule = Module
 --      (if it turns out to be re-running stuff unneccesarily)
 rPermute :: ([String] -> [[String]])
          -> RulesFn
-rPermute comboFn s@(scr, cfg, _, _) expr@(Fun _ salt _ _ [iList]) = do
+rPermute comboFn s@(scr, cfg, _, _, _) expr@(Fun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   let oList      = fromPath cfg $ exprPath cfg scr expr
       (ListOf t) = typeOf iList
@@ -43,7 +43,7 @@ aPermute :: GlobalEnv
          -> ([String] -> [[String]])
          -> FilePath -> Type -> Salt
          -> FilePath -> Action ()
-aPermute (_, cfg, ref, _) comboFn iPath eType salt out = do
+aPermute (_, cfg, ref, _, _) comboFn iPath eType salt out = do
   need' cfg ref "ortholang.modules.permute.aPermute" [iPath]
   elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?

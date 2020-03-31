@@ -54,8 +54,8 @@ import Control.Monad.Reader   (ask)
 putAssign :: String -> Assign -> ParseM ()
 putAssign name a = do
   s <- getState
-  let as' = trace name ("adding assignment: " ++ show a) $ sAssigns s ++ [a]
-  putState $ s {sAssigns = as'}
+  let s' = trace name ("adding assignment: " ++ show a) $ s ++ [a]
+  putState $ s'
 
 {-|
 There's a convention in parsers that each one should consume whitespace after

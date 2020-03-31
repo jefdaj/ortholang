@@ -223,7 +223,7 @@ pRef :: ParseM Expr
 pRef = debugParser "pRef" $ do
   v@(Var _ var) <- pVar
   scr <- getState
-  case lookup v (sAssigns scr) of
+  case lookup v scr of
     Nothing -> trace "pRef" ("scr before lookup of \"" ++ var ++ "': " ++ show scr) $
                  parseFail $ "no such variable \"" ++ var ++ "\"" ++ "\n" -- ++ show scr
     Just e -> return $ Ref (typeOf e) (Salt 0) (depsOf e) v

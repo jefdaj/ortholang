@@ -70,7 +70,7 @@ tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
 
 rSetFold :: ([Set String] -> Set String) -> RulesFn
-rSetFold fn s@(scr, cfg, ref, ids) e@(Fun _ _ _ _ [lol]) = do
+rSetFold fn s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr s lol
   let oPath      = fromPath cfg $ exprPath cfg scr e
       oPath'     = cfgTmpDir cfg </> oPath

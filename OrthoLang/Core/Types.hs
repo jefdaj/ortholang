@@ -31,6 +31,7 @@ module OrthoLang.Core.Types
   , IDs(..)
   , emptyIDs
   , DigestMap
+  , DigestsRef
   , IDsRef
   , GlobalEnv
   , ensureResult
@@ -76,6 +77,8 @@ module OrthoLang.Core.Types
   , RulesEnv
   , RulesR
   , runRulesR
+  -- , RulesR2
+  -- , runRulesR2
   -- , ParseEnv
   )
   where
@@ -95,6 +98,7 @@ import Data.IORef                     (IORef)
 import Data.Maybe (fromJust, catMaybes)
 
 import Control.Monad.Reader -- TODO only specific imports
+import Control.Monad.State.Lazy       -- (StateT, execStateT, lift)
 
 newtype Path = Path FilePath deriving (Eq, Ord, Show)
 
@@ -119,11 +123,34 @@ newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 -- this isn't really needed, but makes passing globalenv around easier
 -- TODO use it? or remove it
 -- for now, same as GlobalEnv. but not sure if refs are needed
-type RulesEnv = (Config, LocksRef, IDsRef, DigestMap) -- TODO remove locks? ids? put script back?
-type RulesR a = ReaderT RulesEnv Rules a -- TODO is this right?
+type RulesEnv = (Config, LocksRef, IDsRef, DigestsRef) -- TODO remove locks? ids? put script back?
+type RulesR a = ReaderT RulesEnv Rules a
+
+-- type RulesR2 a = StateT DigestMap (ReaderT RulesEnv Rules) a
+
+-- the problem with this is it seems like the digests map wouldn't
+-- persist/share between invocations of runRulesR2, and we want all actions to
+-- get the whole thing! better to pass it around like before, but via ioref for now
+-- type RulesEnv2 = (Config, LocksRef, IDsRef) -- TODO remove locks? ids? put script back?
+-- type RulesR2 a = ReaderT RulesEnv2 (StateT DigestMap Rules) a
 
 runRulesR :: RulesEnv -> RulesR a -> Rules a
 runRulesR env act = runReaderT act env
+
+-- runRulesR2 :: RulesEnv -> RulesR2 a -> Rules a
+-- runRulesR2 env act = execStateT M.empty (runReaderT act env)
+-- runRulesR2 env act = runReaderT env (execStateT emptyDigests act)
+-- runRulesR2 env act = execStateT emptyDigests undefined -- (runReaderT act env)
+
+-- runRulesR2 :: RulesEnv2 -> RulesR2 a -> Rules (a, DigestMap)
+-- runRulesR2 env act = runStateT (runReaderT act env) emptyDigests -- (runReaderT act env)
+
+-- TODO use useFile(Handle) for stdin?
+-- TODO use getExternalPrint to safely print during Tasty tests!
+-- runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
+-- runReplM settings replm state =
+  -- runInputT settings $ runMaybeT $ execStateT replm state
+
 
 -- Filename extension, which in OrthoLang is equivalent to variable type
 -- TODO can this be done better with phantom types?
@@ -213,27 +240,27 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
 
 -- TODO have a separate Assign for "result"?
 type Assign = (Var, Expr)
-data Script = Script
-  { sAssigns :: [Assign]  -- ^ Structured representation of the code suitable for printing, transforming, etc.
-  , sDigests :: DigestMap -- ^ Map suitable for auto-discovery of dependencies from expression paths
-  }
+type Script = [Assign]
+  -- { sAssigns :: [Assign]  -- ^ Structured representation of the code suitable for printing, transforming, etc.
+  -- , sDigests :: DigestMap -- ^ Map suitable for auto-discovery of dependencies from expression paths
+  -- }
 
 -- TODO is totally ignoring sDigests OK here?
-instance Show Script where
-  show scr = show (sAssigns scr)
+-- instance Show Script where
+  -- show scr = show scr
 
 emptyScript :: Script
-emptyScript = Script {sAssigns = [], sDigests = M.empty}
+emptyScript = []
 
 emptyDigests :: DigestMap
 emptyDigests = M.empty
 
 ensureResult :: Script -> Script
-ensureResult scr@(Script {sAssigns = as}) = if null as then noRes else scr'
+ensureResult as = if null as then noRes else scr'
   where
     resVar = Var (RepID Nothing) "result"
-    noRes  = scr {sAssigns = as ++ [(resVar, Lit str (Salt 0) "no result")]}
-    scr'   = scr {sAssigns = as ++ [(resVar, snd $ last as)               ]}
+    noRes  = as ++ [(resVar, Lit str (Salt 0) "no result")]
+    scr'   = as ++ [(resVar, snd $ last as)               ]
 
 lookupResult :: [(Var, b)] -> Maybe b
 lookupResult scr = if null matches
@@ -348,7 +375,7 @@ depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? 
 rDepsOf :: Script -> Var -> [Var]
 rDepsOf scr var = map fst rDeps
   where
-    rDeps = filter (\(_,e) -> isRDep e) (sAssigns scr)
+    rDeps = filter (\(_,e) -> isRDep e) scr
     isRDep expr = elem var $ depsOf expr
 
 -- TODO move to modules as soon as parsing works again
@@ -461,9 +488,10 @@ emptyIDs = IDs M.empty M.empty
 type IDsRef = IORef IDs
 
 type DigestMap = M.Map PathDigest (Type, Path)
+type DigestsRef = IORef DigestMap
 
 -- TODO config always first? or make a record + ask* fns
-type GlobalEnv = (Script, Config, LocksRef, IDsRef)
+type GlobalEnv = (Script, Config, LocksRef, IDsRef, DigestsRef)
 
 -- eODO does this need rewriting for externalPrint?
 -- print :: (String -> IO ()) -> String -> ReplM ()
@@ -531,7 +559,7 @@ instance Show Module where
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs  _  (Lst _ _ _ es) = es
-extractExprs scr (Ref  _ _ _ v ) = case lookup v (sAssigns scr) of
+extractExprs scr (Ref  _ _ _ v ) = case lookup v scr of
                                         Nothing -> error $ "no such var " ++ show v
                                         Just e  -> extractExprs scr e
 extractExprs _   (Fun _ _ _ _ _) = error explainFnBug
@@ -540,7 +568,7 @@ extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show 
 
 -- TODO any good way to avoid fromJust here?
 exprDepsOf :: Script -> Expr -> [Expr]
-exprDepsOf scr expr = map (\e -> fromJust $ lookup e $ sAssigns scr) (depsOf expr)
+exprDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
 
 -- needed to know what to still evaluate despite caching, so we can load seqid hashes
 -- TODO rename to reflect that it's mostly about getting the functions which can't be cached

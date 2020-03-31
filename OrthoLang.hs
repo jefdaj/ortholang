@@ -9,7 +9,7 @@ import Data.Version          (showVersion)
 import OrthoLang.Core        (runRepl, evalFile)
 import OrthoLang.Core.Config (getUsage, loadConfig, dispatch)
 import OrthoLang.Locks  (initLocks)
-import OrthoLang.Core.Types  (Config(..), emptyScript, emptyIDs)
+import OrthoLang.Core.Types  (Config(..), emptyDigests, emptyScript, emptyIDs)
 import OrthoLang.Modules     (modules)
 import OrthoLang.Test        (runTests)
 import Paths_OrthoLang       (version)
@@ -52,16 +52,17 @@ main = withFileLogging "ortholang.log" $ do
   ref <- initLocks
   setCurrentDirectory $ cfgWorkDir cfg
   ids <- newIORef emptyIDs
+  dRef <- newIORef emptyDigests
 
   dispatch args "test" $ do
     -- args is used here to set up the Tasty environment vars
-    runTests args (cfg {cfgWidth = Just 100}) ref ids
+    runTests args (cfg {cfgWidth = Just 100}) ref ids dRef
     exitSuccess
 
   -- TODO typecheck only option here
   if (cfgInteractive cfg)
-    then runRepl cfg ref ids -- TODO take an entire state here too?
-    else evalFile (emptyScript, cfg, ref, ids) stdout
+    then runRepl cfg ref ids dRef -- TODO take an entire state here too?
+    else evalFile (emptyScript, cfg, ref, ids, dRef) stdout
 
   -- TODO is it a problem that --test never reaches this?
   debug "finished main"

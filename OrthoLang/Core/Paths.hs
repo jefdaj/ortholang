@@ -231,7 +231,7 @@ TODO rename hSomething?
 TODO does it need the config at all?
 -}
 argHashes :: Config -> Script -> Expr -> [String]
-argHashes c s (Ref _ _ _ v) = case lookup v (sAssigns s) of
+argHashes c s (Ref _ _ _ v) = case lookup v s of
                                          Nothing -> error $ "no such var " ++ show v
                                          Just e  -> argHashes c s e
 argHashes _ _ (Lit  _ _     v    ) = [digest v]
@@ -249,8 +249,8 @@ bop2fun e = error $ "bop2fun call with non-Bop: \"" ++ render (pPrint e) ++ "\""
 -- TODO remove the third parseenv arg (digestmap)?
 exprPath :: Config -> Script -> Expr -> Path
 exprPath c _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
-exprPath c s (Ref _ _ _ v) = case lookup v (sAssigns s) of
-                               Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show (sAssigns s)
+exprPath c s (Ref _ _ _ v) = case lookup v s of
+                               Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show s
                                Just e  -> exprPath c s e
 exprPath c s e@(Bop _ _ _ _ _ _) = exprPath c s (bop2fun e)
 exprPath c s expr = traceP "exprPath" expr res

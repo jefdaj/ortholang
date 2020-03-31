@@ -75,8 +75,8 @@ instance {-# OVERLAPPING #-} Pretty Assign where
 
 -- TODO is totally ignoring the sDigests part OK here?
 instance {-# OVERLAPPING #-} Pretty Script where
-  pPrint (Script {sAssigns = []}) = empty
-  pPrint (Script {sAssigns = as}) = vcat $ map pPrint as
+  pPrint [] = empty
+  pPrint as = vcat $ map pPrint as
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?

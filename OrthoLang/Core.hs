@@ -24,6 +24,7 @@ module OrthoLang.Core
   , literalChars
   , ParseM
   , ReplM
+  , DigestsRef
   , toGeneric
   , promptArrow
   , mkRepl
@@ -62,7 +63,7 @@ module OrthoLang.Core
   , ResPath(..)
   , RulesFn
   , Salt(..)
-  , Script(..)
+  , Script
   , Type(..)
   , TypeChecker
   , Var(..)

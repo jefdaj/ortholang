@@ -77,7 +77,7 @@ tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf n
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: RulesFn
-rScoreRepeats s@(scr, cfg, ref, _) expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
+rScoreRepeats s@(scr, cfg, ref, _, _) expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr s subList
   scores <- rExpr s repEachExpr
   let hack    = \(ExprPath p) -> toPath cfg p -- TODO remove! but how?

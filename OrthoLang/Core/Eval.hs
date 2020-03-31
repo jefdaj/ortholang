@@ -199,8 +199,8 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestMap -> Type -> Rules [ExprPath] -> Rules ResPath -> IO ()
-eval hdl cfg ref ids dm rtype ls p = do
+eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules [ExprPath] -> Rules ResPath -> IO ()
+eval hdl cfg ref ids dr rtype ls p = do
   start <- getCurrentTime
   let ep = EvalProgress
              { epTitle = takeFileName $ fromMaybe "ortholang" $ cfgScript cfg
@@ -234,8 +234,8 @@ eval hdl cfg ref ids dm rtype ls p = do
 --       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
-      runRulesR (cfg, ref, ids, dm) newCoreRules
-      runRulesR (cfg, ref, ids, dm) newFunctionRules
+      runRulesR (cfg, ref, ids, dr) newCoreRules
+      runRulesR (cfg, ref, ids, dr) newFunctionRules
       lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
       want ["eval"]
@@ -283,17 +283,18 @@ printShort cfg ref idsref pm rtype path = do
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> GlobalEnv -> IO ()
-evalScript hdl s@(scr, c, ref, ids) =
-  let res = case lookupResult (sAssigns scr) of
-              Nothing -> fromJust $ lookupResult $ sAssigns $ ensureResult scr
+evalScript hdl s@(scr, c, ref, ids, dRef) =
+  let res = case lookupResult scr of
+              Nothing -> fromJust $ lookupResult $ ensureResult scr
               Just r  -> r
       loadExprs = extractLoads scr res
       loads = mapM (rExpr s) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-  in eval hdl c ref ids (sDigests scr) (typeOf res) loads (compileScript s $ RepID Nothing)
+  in eval hdl c ref ids dRef (typeOf res) loads (compileScript s $ RepID Nothing)
 
+-- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: GlobalEnv -> Handle -> IO ()
-evalFile st@(_, cfg, ref, ids) hdl = case cfgScript cfg of
+evalFile st@(_, cfg, ref, ids, dRef) hdl = case cfgScript cfg of
   Nothing  -> putStrLn "no script during eval. that's not right!"
   Just scr -> do
     s <- parseFileIO st scr -- TODO just take a GlobalEnv?
-    evalScript hdl (s, cfg, ref, ids)
+    evalScript hdl (s, cfg, ref, ids, dRef)

@@ -27,6 +27,7 @@ import Data.Maybe                 (catMaybes)
 import Development.Shake.FilePath (makeRelative, splitPath)
 import OrthoLang.Core.Paths       (toPath, exprPath, bop2fun)
 import OrthoLang.Util        (digest, trace, traceShow)
+import Data.IORef (readIORef)
 
 
 log :: String -> String -> IO ()
@@ -64,7 +65,7 @@ listExprs e@(Lst _ _ _   es   ) = e : concatMap listExprs es
 listExprs e@(Com _) = [e] -- TODO is this right?
 
 listScriptExprs :: Script -> [Expr]
-listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
+listScriptExprs scr = concatMap listExprs $ map snd scr
 
 -- insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
 -- insertNewRulesDigest st@(_, cfg, _, idr) expr
@@ -82,10 +83,11 @@ listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
 -- TODO remove any unneccesary path components before lookup, and count the necessary ones
 -- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
 -- TODO better split function
-decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
+decodeNewRulesDeps :: Config -> DigestsRef -> ExprPath
                    -> IO (Type, [Type], [Path])
-decodeNewRulesDeps cfg dMap (ExprPath out) = do
+decodeNewRulesDeps cfg dRef (ExprPath out) = do
   log "decodeNewRulesDeps" $ "out: " ++ show out
+  dMap <- readIORef dRef
   let dKeys  = listDigestsInPath cfg out
       dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals

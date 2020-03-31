@@ -248,7 +248,7 @@ pickAny :: Int -> Int
 pickAny _ = 1
 
 rOrthologFilterStr :: String -> PickerFn -> RulesFn
-rOrthologFilterStr fnName pickerFn st@(scr, cfg, ref, _) e@(Fun _ _ _ _ [groupLists, idLists]) = do
+rOrthologFilterStr fnName pickerFn st@(scr, cfg, ref, _, _) e@(Fun _ _ _ _ [groupLists, idLists]) = do
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists
   let out     = exprPath cfg scr e
@@ -336,7 +336,7 @@ ogCache :: Config -> Path
 ogCache cfg = cacheDir cfg "orthogroups"
 
 rOrthologFilterStrFrac :: String -> PickerFn2 -> RulesFn
-rOrthologFilterStrFrac fnName pickerFn st@(scr, cfg, ref, _) e@(Fun _ _ _ _ [frac, groupLists, idLists]) = do
+rOrthologFilterStrFrac fnName pickerFn st@(scr, cfg, ref, _, _) e@(Fun _ _ _ _ [frac, groupLists, idLists]) = do
   (ExprPath fracPath      ) <- rExpr st frac
   (ExprPath groupListsPath) <- rExpr st groupLists
   (ExprPath idListsPath   ) <- rExpr st idLists

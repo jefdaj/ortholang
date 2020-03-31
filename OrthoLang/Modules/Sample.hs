@@ -36,7 +36,7 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(scr, cfg, ref, ids) expr@(Fun _ salt _ _ [n, lst]) = do
+rSample st@(scr, cfg, ref, ids, dRef) expr@(Fun _ salt _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr st n
   (ExprPath inPath') <- rExpr st lst
   let nPath    = toPath cfg nPath'

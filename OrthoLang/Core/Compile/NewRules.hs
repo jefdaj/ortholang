@@ -57,7 +57,7 @@ import OrthoLang.Util        (traceShow)
 -----------------------------------------------
 
 -- this is needed to pass DigestMap around, and makes the rest easier
-type ActionEnv = (Config, LocksRef, IDsRef, DigestMap)
+type ActionEnv = (Config, LocksRef, IDsRef, DigestsRef)
 type ActionR a = ReaderT ActionEnv Action a
 
 runActionR :: ActionEnv -> ActionR a -> Action a
@@ -151,15 +151,15 @@ rNewRules
   :: Int -> (t -> [FilePath] -> ActionR ()) -> String -> TypeChecker
   -> (ExprPath -> t) -> RulesR ()
 rNewRules nArgs applyFn name tFn aFn = do
-  (cfg, lRef, iRef, dMap) <- ask
+  (cfg, _, _, _) <- ask
   let ptn = newPattern cfg name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %>> aNewRules applyFn tFn aFn
 
 (%>>) :: FilePattern -> (ExprPath -> ActionR ()) -> RulesR ()
 ptn %>> act = do
-  (cfg, lRef, iRef, dMap) <- ask
-  let run = runActionR (cfg, lRef, iRef, dMap)
+  (cfg, lRef, iRef, dRef) <- ask
+  let run = runActionR (cfg, lRef, iRef, dRef)
   lift $ ptn %> \p -> run $ act $ ExprPath p
 
 aNewRules
@@ -168,8 +168,8 @@ aNewRules
   -> (ExprPath -> t)
   ->  ExprPath -> ActionR ()
 aNewRules applyFn tFn aFn out = do
-  (cfg, lRef, iRef, dMap) <- ask
-  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dMap out
+  (cfg, lRef, iRef, dRef) <- ask
+  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dRef out
   case tFn dTypes of
     Left err -> fail err -- TODO bop type error here :(
     Right rType -> do
