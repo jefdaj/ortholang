@@ -29,8 +29,10 @@ import OrthoLang.Core.Paths       (toPath, exprPath, bop2fun)
 import OrthoLang.Util        (digest, trace, traceShow)
 
 
-log :: Show a => String -> String -> a -> IO ()
-log fnName varName thing = U.debug fnName $ varName ++ ": " ++ show thing
+log :: String -> String -> IO ()
+log fnName msg = U.debug fnName msg
+
+-- TODO err function
 
 exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
@@ -83,7 +85,7 @@ listScriptExprs (Script {sAssigns = as}) = concatMap listExprs $ map snd as
 decodeNewRulesDeps :: Config -> DigestMap -> ExprPath
                    -> IO (Type, [Type], [Path])
 decodeNewRulesDeps cfg dMap (ExprPath out) = do
-  log "decodeNewRulesDeps" "out" out
+  log "decodeNewRulesDeps" $ "out: " ++ show out
   let dKeys  = listDigestsInPath cfg out
       dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
@@ -91,12 +93,16 @@ decodeNewRulesDeps cfg dMap (ExprPath out) = do
       dPaths = map snd dVals'
       oKey   = exprPathDigest $ toPath cfg out
       Just (oType, _) = M.lookup oKey dMap
-  log "decodeNewRulesDeps" "dKeys" dKeys
-  log "decodeNewRulesDeps" "dTypes" dTypes
-  log "decodeNewRulesDeps" "dVals'" dVals'
-  log "decodeNewRulesDeps" "dPaths" dPaths
-  log "decodeNewRulesDeps" "oKey" oKey
-  when (length dVals /= length dKeys) $ error $ "failed to decode path: \"" ++ out ++ "\""
+  log "decodeNewRulesDeps" $ "dKeys: " ++ show dKeys
+  log "decodeNewRulesDeps" $ "dTypes: " ++ show dTypes
+  log "decodeNewRulesDeps" $ "dVals': " ++ show dVals'
+  log "decodeNewRulesDeps" $ "dPaths: " ++ show dPaths
+  log "decodeNewRulesDeps" $ "oKey: " ++ show oKey
+  when (length dVals /= length dKeys) $ do
+    -- TODO err function here
+    log "decodeNewRulesDeps" $ "failed to decode path: " ++ out
+    log "decodeNewRulesDeps" $ unlines $ "dMap when lookup failed:\n" : (map show $ M.toList dMap)
+    error $ "failed to decode path: \"" ++ out ++ "\""
   return (oType, dTypes, dPaths)
 
 -- TODO hey, is it worth just looking up every path component to make it more robust?
