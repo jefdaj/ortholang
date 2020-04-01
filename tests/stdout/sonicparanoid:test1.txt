@@ -1,0 +1,12 @@
+ignored error: Error when running Shake build system:
+  at want, called at ./OrthoLang/Core/Eval.hs:247:7 in main:OrthoLang.Core.Eval
+* Depends on: eval
+  at need, called at ./OrthoLang/Core/Eval.hs:250:25 in main:OrthoLang.Core.Eval
+* Depends on: $TMPDIR/vars/result
+  at need, called at ./OrthoLang/Core/Actions.hs:122:3 in main:OrthoLang.Core.Actions
+* Depends on: $TMPDIR/vars/pairs.spr
+  at need, called at ./OrthoLang/Core/Actions.hs:122:3 in main:OrthoLang.Core.Actions
+* Depends on: $TMPDIR/exprs/sonicparanoid/ba95008b6b/0/result
+* Raised the exception:
+sonicparanoid.sh: createProcess: runInteractiveProcess: exec: does not exist (No such file or directory)
+

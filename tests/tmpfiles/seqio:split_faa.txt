@@ -1,33 +1,33 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 52b984265a
-|   |       `-- 35bbfd4e56
+|   |   `-- 6ce3c8695b
+|   |       `-- 9df8c2af69
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/length/35bbfd4e56/0/result
+|   |           `-- result -> ../../../../exprs/length/9df8c2af69/0/result
 |   |-- load
 |   |   |-- bb17ca9dfe -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
 |   |   |-- cb3e90dc00
 |   |   `-- cb3e90dc00.ids
 |   |-- seqio
 |   `-- split_faa
-|       `-- 1b7c1db9d4
+|       `-- 1526b30a41
 |-- exprs
 |   |-- gbk_to_faa
-|   |   `-- c73dd7aee4
-|   |       `-- 2f38da9b65
+|   |   `-- 169f0411dc
+|   |       `-- fb068ed793
 |   |           `-- 0
 |   |               `-- result
 |   |-- length
-|   |   `-- 35bbfd4e56
+|   |   `-- 9df8c2af69
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- length_each
-|   |   `-- 18f48de961
+|   |   `-- b2f8405c72
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   `-- 1135f45194
+|   |   `-- b4360f1fef
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
@@ -49,15 +49,15 @@
 |   |   |           `-- 16
 |   |   |               `-- 2c
 |   |   |                   `-- a
+|   |   |-- 998406b615
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/load/cb3e90dc00
 |   |   |-- a0
 |   |   |   `-- 94
 |   |   |       `-- e4
 |   |   |           `-- 16
 |   |   |               `-- f6
 |   |   |                   `-- c
-|   |   |-- d10d10f063
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/cb3e90dc00
 |   |   `-- d9
 |   |       `-- d2
 |   |           `-- 7d
@@ -65,14 +65,14 @@
 |   |                   `-- 35
 |   |                       `-- 2
 |   |-- load_gbk
-|   |   `-- 334c8c38b1
+|   |   `-- 54f0f526a0
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/bb17ca9dfe
 |   |-- split_faa
-|   |   |-- a21c914d7a
+|   |   |-- 39e5f1bb34
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- f32c7eb7cf
+|   |   `-- ee6b931ef7
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
@@ -86,9 +86,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- faas1.faa.list -> ../exprs/split_faa/f32c7eb7cf/0/result
-    |-- faas2.faa.list -> ../exprs/split_faa/a21c914d7a/0/result
-    |-- lengths.num.list -> ../exprs/length_each/18f48de961/0/result
+    |-- faas1.faa.list -> ../exprs/split_faa/ee6b931ef7/0/result
+    |-- faas2.faa.list -> ../exprs/split_faa/39e5f1bb34/0/result
+    |-- lengths.num.list -> ../exprs/length_each/b2f8405c72/0/result
     `-- result -> ../vars/lengths.num.list
 
 66 directories, 25 files

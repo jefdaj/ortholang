@@ -5,18 +5,18 @@
 |       `-- 9c67ed8020 -> $WORKDIR/examples/genome-lists/proteomes-small.txt
 |-- exprs
 |   |-- any
-|   |   `-- 0272044948
+|   |   `-- 50b7b5d1aa
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   `-- 3288eebb1b
+|   |   `-- 5c30d81b84
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_list
-|   |   |-- 75494f7f88
+|   |   |-- 6565f9c3da
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/load/9c67ed8020
-|   |   `-- 8cfaa0d644
+|   |   `-- a9b660b4f8
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/1dd6f75231
 |   `-- str
@@ -27,8 +27,8 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- refseq.str.list -> ../exprs/load_list/8cfaa0d644/0/result
-    |-- result -> ../exprs/any/0272044948/0/result
-    `-- small.str.list -> ../exprs/load_list/75494f7f88/0/result
+    |-- refseq.str.list -> ../exprs/load_list/a9b660b4f8/0/result
+    |-- result -> ../exprs/any/50b7b5d1aa/0/result
+    `-- small.str.list -> ../exprs/load_list/6565f9c3da/0/result
 
 20 directories, 11 files

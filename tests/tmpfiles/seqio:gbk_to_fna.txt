@@ -5,13 +5,13 @@
 |   `-- seqio
 |-- exprs
 |   |-- gbk_to_fna
-|   |   `-- c73dd7aee4
-|   |       `-- ed75f67df6
+|   |   `-- 169f0411dc
+|   |       `-- 7b73b35244
 |   |           `-- 0
 |   |               `-- result
 |   |-- load_fna
 |   |-- load_gbk
-|   |   `-- a6b552f7e9
+|   |   `-- a2d4927026
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/28ce925871
 |   `-- str
@@ -22,8 +22,8 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- fna.fna -> ../exprs/gbk_to_fna/c73dd7aee4/ed75f67df6/0/result
-    |-- gbk.gbk -> ../exprs/load_gbk/a6b552f7e9/0/result
+    |-- fna.fna -> ../exprs/gbk_to_fna/169f0411dc/7b73b35244/0/result
+    |-- gbk.gbk -> ../exprs/load_gbk/a2d4927026/0/result
     `-- result -> ../vars/fna.fna
 
 18 directories, 8 files

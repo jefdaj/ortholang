@@ -2,20 +2,20 @@
 |-- cache
 |-- exprs
 |   |-- diff
-|   |   `-- d041e8cdc6
+|   |   `-- 7416441ec6
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 7a3d56d3a5
+|   |   |-- 082165ab46
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 7a72fbcfa9
+|   |   |-- 41dd9f6adc
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 83e29ae8f9
+|   |   |-- 7c4c04144e
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- e45e34a384
+|   |   `-- f2984359b8
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- num
@@ -65,10 +65,10 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- res1.num.list -> ../exprs/diff/d041e8cdc6/0/result
-    |-- res2.num.list -> ../exprs/diff/d041e8cdc6/0/result
-    |-- result -> ../exprs/list/7a72fbcfa9/0/result
-    |-- set1.num.list -> ../exprs/list/83e29ae8f9/0/result
-    `-- set2.num.list -> ../exprs/list/7a3d56d3a5/0/result
+    |-- res1.num.list -> ../exprs/diff/7416441ec6/0/result
+    |-- res2.num.list -> ../exprs/diff/7416441ec6/0/result
+    |-- result -> ../exprs/list/082165ab46/0/result
+    |-- set1.num.list -> ../exprs/list/7c4c04144e/0/result
+    `-- set2.num.list -> ../exprs/list/f2984359b8/0/result
 
 46 directories, 25 files

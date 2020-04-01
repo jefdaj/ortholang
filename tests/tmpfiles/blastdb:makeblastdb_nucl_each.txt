@@ -1,13 +1,13 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 400688cc90
-|   |       |-- 59f0b91c27
+|   |   `-- ab0621a2f2
+|   |       |-- 7e1503e6de
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/makeblastdb_nucl/59f0b91c27/0/result
-|   |       `-- 80bcf7db10
+|   |       |   `-- result -> ../../../../exprs/makeblastdb_nucl/7e1503e6de/0/result
+|   |       `-- ccb0e7ea5e
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/makeblastdb_nucl/80bcf7db10/0/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_nucl/ccb0e7ea5e/0/result
 |   |-- load
 |   |   |-- 6046a54e92
 |   |   |-- 6046a54e92.ids
@@ -28,29 +28,29 @@
 |           `-- 5d1696ca54.ndb.out
 |-- exprs
 |   |-- list
-|   |   `-- fb2c20f954
+|   |   `-- f0a3447532
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_fna
-|   |   |-- b06189156a
+|   |   |-- 7360a5acb0
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/8723e7ac8c
-|   |   `-- f4e1d9e6a0
+|   |   |       `-- result -> ../../../../cache/load/6046a54e92
+|   |   `-- 8c18a0665c
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/6046a54e92
+|   |           `-- result -> ../../../../cache/load/8723e7ac8c
 |   |-- makeblastdb_nucl
-|   |   |-- 59f0b91c27
+|   |   |-- 7e1503e6de
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 80bcf7db10
+|   |   `-- ccb0e7ea5e
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- makeblastdb_nucl_each
-|   |   `-- e4ef899f3d
+|   |   `-- 0014bc50af
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- singletons
-|   |   `-- 8f1bade8bb
+|   |   `-- 009fb8faf5
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
@@ -61,9 +61,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- dbs.ndb.list -> ../exprs/makeblastdb_nucl_each/e4ef899f3d/0/result
-    |-- genes5.fna -> ../exprs/load_fna/f4e1d9e6a0/0/result
+    |-- dbs.ndb.list -> ../exprs/makeblastdb_nucl_each/0014bc50af/0/result
+    |-- genes5.fna -> ../exprs/load_fna/7360a5acb0/0/result
     |-- result -> ../vars/dbs.ndb.list
-    `-- single.fna -> ../exprs/load_fna/b06189156a/0/result
+    `-- single.fna -> ../exprs/load_fna/8c18a0665c/0/result
 
 35 directories, 31 files

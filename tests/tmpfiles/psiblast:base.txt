@@ -15,18 +15,18 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 9fe31e7ad0
+|   |   `-- 39b18dbf05
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 385ba48b5c
+|   |   |-- 649c67c82e
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- 72a50a6cda
+|   |   `-- fee73b8143
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/36189032ad
 |   |-- makeblastdb_prot
-|   |   `-- 57970a58d4
+|   |   `-- 356d67a59b
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
@@ -34,17 +34,17 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- psiblast_pssm_db
-|   |   `-- 9f0f80d584
-|   |       `-- a73b2b0118
-|   |           `-- 635b625879
+|   |   `-- e98f5a87c6
+|   |       `-- b508238400
+|   |           `-- cf68c67e51
 |   |               `-- 0
 |   |                   |-- result
 |   |                   |-- result.err
 |   |                   `-- result.out
 |   |-- psiblast_train_db
-|   |   `-- 9f0f80d584
-|   |       `-- c8f3331792
-|   |           `-- 635b625879
+|   |   `-- e98f5a87c6
+|   |       `-- f08a52b741
+|   |           `-- cf68c67e51
 |   |               `-- 0
 |   |                   |-- result -> ../../../../../../cache/lines/...
 |   |                   |-- result.tmp.err
@@ -57,11 +57,11 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hittable.bht -> ../exprs/psiblast_pssm_db/9f0f80d584/a73b2b0118/635b625879/0/result
-    |-- magadb.pdb -> ../exprs/makeblastdb_prot/57970a58d4/0/result
-    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
-    |-- pssm.pssm -> ../exprs/psiblast_train_db/9f0f80d584/c8f3331792/635b625879/0/result
-    |-- query.faa -> ../exprs/load_faa/385ba48b5c/0/result
+    |-- hittable.bht -> ../exprs/psiblast_pssm_db/e98f5a87c6/b508238400/cf68c67e51/0/result
+    |-- magadb.pdb -> ../exprs/makeblastdb_prot/356d67a59b/0/result
+    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
+    |-- pssm.pssm -> ../exprs/psiblast_train_db/e98f5a87c6/f08a52b741/cf68c67e51/0/result
+    |-- query.faa -> ../exprs/load_faa/649c67c82e/0/result
     `-- result -> ../vars/hittable.bht
 
 36 directories, 28 files

@@ -7,26 +7,26 @@
 |       `-- 36189032ad.ids
 |-- exprs
 |   |-- diamond_blastp
-|   |   `-- 8f00850928
-|   |       `-- ed39c166ed
-|   |           `-- 56b6441383
+|   |   `-- 82cd2c1301
+|   |       `-- baaaae33ea
+|   |           `-- cb10e2ac0f
 |   |               `-- 0
 |   |                   |-- err
 |   |                   |-- out
 |   |                   `-- result
 |   |-- diamond_makedb
-|   |   `-- 954b3ac6f3
+|   |   `-- b8ba873461
 |   |       `-- 0
 |   |           |-- err
 |   |           |-- out
 |   |           `-- result
 |   |-- load_faa
-|   |   |-- 72a50a6cda
+|   |   |-- b4f8a9bd8e
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/36189032ad
-|   |   `-- ad6ae7249f
+|   |   |       `-- result -> ../../../../cache/load/10ffe0cf0f
+|   |   `-- fee73b8143
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/10ffe0cf0f
+|   |           `-- result -> ../../../../cache/load/36189032ad
 |   |-- num
 |   |   `-- 6de785566e
 |   |       `-- 0
@@ -39,8 +39,8 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
-    |-- mgen.faa -> ../exprs/load_faa/ad6ae7249f/0/result
-    `-- result -> ../exprs/diamond_blastp/8f00850928/ed39c166ed/56b6441383/0/result
+    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
+    |-- mgen.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
+    `-- result -> ../exprs/diamond_blastp/82cd2c1301/baaaae33ea/cb10e2ac0f/0/result
 
 25 directories, 18 files

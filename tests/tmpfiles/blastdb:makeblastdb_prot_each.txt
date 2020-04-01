@@ -1,13 +1,13 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 672cdb6759
-|   |       |-- 3e59dc264f
+|   |   `-- 33957ed5ae
+|   |       |-- 0c17a12f7f
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/makeblastdb_prot/3e59dc264f/0/result
-|   |       `-- 863be06054
+|   |       |   `-- result -> ../../../../exprs/makeblastdb_prot/0c17a12f7f/0/result
+|   |       `-- a9909d8c9b
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/makeblastdb_prot/863be06054/0/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_prot/a9909d8c9b/0/result
 |   |-- load
 |   |   |-- 28e059b2a9
 |   |   |-- 28e059b2a9.ids
@@ -28,29 +28,29 @@
 |           `-- 4f18717f1c.pdb.psq
 |-- exprs
 |   |-- list
-|   |   `-- cb392f00cd
+|   |   `-- f04d901533
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 385ba48b5c
+|   |   |-- 649c67c82e
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- d10d10f063
+|   |   `-- 998406b615
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/cb3e90dc00
 |   |-- makeblastdb_prot
-|   |   |-- 3e59dc264f
+|   |   |-- 0c17a12f7f
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 863be06054
+|   |   `-- a9909d8c9b
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- makeblastdb_prot_each
-|   |   `-- 3346d29604
+|   |   `-- f68e38cc0b
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- singletons
-|   |   `-- 13493f18d7
+|   |   `-- 24ea89c454
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
@@ -61,9 +61,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- dbs.pdb.list -> ../exprs/makeblastdb_prot_each/3346d29604/0/result
-    |-- genes5.faa -> ../exprs/load_faa/d10d10f063/0/result
+    |-- dbs.pdb.list -> ../exprs/makeblastdb_prot_each/f68e38cc0b/0/result
+    |-- genes5.faa -> ../exprs/load_faa/998406b615/0/result
     |-- result -> ../vars/dbs.pdb.list
-    `-- single.faa -> ../exprs/load_faa/385ba48b5c/0/result
+    `-- single.faa -> ../exprs/load_faa/649c67c82e/0/result
 
 35 directories, 31 files

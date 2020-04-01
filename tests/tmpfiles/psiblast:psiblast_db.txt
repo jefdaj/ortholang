@@ -15,18 +15,18 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 6e716d5fa0
+|   |   `-- 39b18dbf05
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 385ba48b5c
+|   |   |-- 649c67c82e
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- 72a50a6cda
+|   |   `-- fee73b8143
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/36189032ad
 |   |-- makeblastdb_prot
-|   |   `-- 57970a58d4
+|   |   `-- 356d67a59b
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
@@ -34,17 +34,17 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- psiblast_db
-|   |   `-- 56c12851e0
-|   |       `-- da2a068968
-|   |           `-- 635b625879
+|   |   `-- 6a51491fae
+|   |       `-- 32e5ebfbcd
+|   |           `-- cf68c67e51
 |   |               `-- 0
 |   |                   |-- result
 |   |                   |-- result.err
 |   |                   `-- result.out
 |   |-- psiblast_train_db
-|   |   `-- 56c12851e0
-|   |       `-- c8f3331792
-|   |           `-- 635b625879
+|   |   `-- 6a51491fae
+|   |       `-- f08a52b741
+|   |           `-- cf68c67e51
 |   |               `-- 0
 |   |                   |-- result -> ../../../../../../cache/lines/...
 |   |                   |-- result.tmp.err
@@ -57,9 +57,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/psiblast_db/56c12851e0/da2a068968/635b625879/0/result
-    |-- maga.pdb -> ../exprs/makeblastdb_prot/57970a58d4/0/result
-    |-- query.faa -> ../exprs/load_faa/385ba48b5c/0/result
+    |-- hits.bht -> ../exprs/psiblast_db/6a51491fae/32e5ebfbcd/cf68c67e51/0/result
+    |-- maga.pdb -> ../exprs/makeblastdb_prot/356d67a59b/0/result
+    |-- query.faa -> ../exprs/load_faa/649c67c82e/0/result
     `-- result -> ../vars/hits.bht
 
 36 directories, 26 files

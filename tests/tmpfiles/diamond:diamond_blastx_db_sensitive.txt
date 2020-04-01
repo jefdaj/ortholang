@@ -7,31 +7,31 @@
 |   `-- seqio
 |-- exprs
 |   |-- diamond_blastx_db_sensitive
-|   |   `-- 8f00850928
-|   |       `-- 65b5d83a9b
-|   |           `-- 56b6441383
+|   |   `-- 82cd2c1301
+|   |       `-- c11b3cd068
+|   |           `-- cb10e2ac0f
 |   |               `-- 0
 |   |                   |-- err
 |   |                   |-- out
 |   |                   `-- result
 |   |-- diamond_makedb
-|   |   `-- 954b3ac6f3
+|   |   `-- b8ba873461
 |   |       `-- 0
 |   |           |-- err
 |   |           |-- out
 |   |           `-- result
 |   |-- gbk_to_fna
-|   |   `-- c73dd7aee4
-|   |       `-- 2f38da9b65
+|   |   `-- 169f0411dc
+|   |       `-- fb068ed793
 |   |           `-- 0
 |   |               `-- result
 |   |-- load_faa
-|   |   `-- ad6ae7249f
+|   |   `-- b4f8a9bd8e
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/10ffe0cf0f
 |   |-- load_fna
 |   |-- load_gbk
-|   |   `-- 334c8c38b1
+|   |   `-- 54f0f526a0
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/bb17ca9dfe
 |   |-- num
@@ -49,9 +49,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/954b3ac6f3/0/result
-    |-- maga.fna -> ../exprs/gbk_to_fna/c73dd7aee4/2f38da9b65/0/result
-    |-- mgen.faa -> ../exprs/load_faa/ad6ae7249f/0/result
-    `-- result -> ../exprs/diamond_blastx_db_sensitive/8f00850928/65b5d83a9b/56b6441383/0/result
+    |-- db.dmnd -> ../exprs/diamond_makedb/b8ba873461/0/result
+    |-- maga.fna -> ../exprs/gbk_to_fna/169f0411dc/fb068ed793/0/result
+    |-- mgen.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
+    `-- result -> ../exprs/diamond_blastx_db_sensitive/82cd2c1301/c11b3cd068/cb10e2ac0f/0/result
 
 34 directories, 20 files

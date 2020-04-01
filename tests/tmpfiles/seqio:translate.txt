@@ -1,53 +1,54 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- f06d93e013
-|   |       `-- 4528a36f2f
+|   |   `-- 4485930015
+|   |       `-- 438a4164fa
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/translate/4528a36f2f/0/result
+|   |           `-- result -> ../../../../exprs/translate/438a4164fa/0/result
 |   `-- load
 |       |-- 6046a54e92
 |       `-- 6046a54e92.ids
 |-- exprs
 |   |-- any
-|   |   `-- 2501200f6d
+|   |   `-- 6c6dcf6359
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 47deec11ba
+|   |   |-- 4c66f655fe
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 49af321016
+|   |   |-- dad29563a4
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 948e59e22f
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- ef4413f3a3
+|   |   `-- e30bfc8e29
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_fna
-|   |   `-- f4e1d9e6a0
+|   |   `-- 7360a5acb0
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/6046a54e92
+|   |-- load_fna_each
+|   |   `-- 96ca212fbf
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- str
 |   |   `-- ac19b3d2a1
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- translate
-|   |   |-- 27d007fff5
+|   |   |-- 438a4164fa
 |   |   |   `-- 0
 |   |   |       `-- result
-|   |   `-- 4528a36f2f
+|   |   `-- fb66f3099a
 |   |       `-- 0
 |   |           `-- result
 |   `-- translate_each
-|       `-- bea34db408
+|       `-- 62cb5534f8
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- mapped.faa.list -> ../exprs/translate_each/bea34db408/0/result
-    |-- result -> ../exprs/any/2501200f6d/0/result
-    `-- single.faa -> ../exprs/translate/27d007fff5/0/result
+    |-- mapped.faa.list -> ../exprs/translate_each/62cb5534f8/0/result
+    |-- result -> ../exprs/any/6c6dcf6359/0/result
+    `-- single.faa -> ../exprs/translate/fb66f3099a/0/result
 
-33 directories, 17 files
+34 directories, 17 files
