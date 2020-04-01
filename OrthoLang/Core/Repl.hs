@@ -75,13 +75,13 @@ prompt = lift . lift . getInputLine
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
 
-runRepl :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
+runRepl :: DigestsRef -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
 mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
+       -> DigestsRef -> IO ()
 mkRepl promptFns hdl cfg ref ids dRef = do
   -- load initial script if any
   st <- case cfgScript cfg of

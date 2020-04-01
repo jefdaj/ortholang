@@ -27,6 +27,7 @@ import Development.Shake hiding (doesFileExist)
 import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
 import Data.List                        (nub)
+import Data.Maybe                       (fromJust)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef')
 import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
@@ -81,16 +82,18 @@ withReadLock ref path ioFn = do -- TODO IO issue here?
     (debugLock ("withReadLock releasing \"" ++ path ++ "\"") >> RWLock.releaseRead l)
     ioFn
 
-withReadLock' :: LocksRef -> FilePath -> Action a -> Action a
-withReadLock' ref path actFn = do
+withReadLock' :: FilePath -> Action a -> Action a
+withReadLock' path actFn = do
+  ref <- fmap fromJust getShakeExtra
   l <- liftIO $ getLock ref path
   debugLock' $ "withReadLock' acquiring \"" ++ path ++ "\""
   (liftIO (RWLock.acquireRead l) >> actFn)
     `actionFinally`
     (debugLock ("withReadLock' releasing \"" ++ path ++ "\"") >> RWLock.releaseRead l)
 
-withReadLocks' :: LocksRef -> [FilePath] -> Action a -> Action a
-withReadLocks' ref paths actFn = do
+withReadLocks' :: [FilePath] -> Action a -> Action a
+withReadLocks' paths actFn = do
+  ref <- fmap fromJust getShakeExtra
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   debugLock' $ "withReadLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireRead locks) >> actFn)
@@ -125,19 +128,21 @@ withWriteLock ref path ioFn = do
   assertNonEmptyFile ref path
   return res
 
-withWriteLocks' :: LocksRef -> [FilePath] -> Action a -> Action a
-withWriteLocks' ref paths actFn = do
+withWriteLocks' :: [FilePath] -> Action a -> Action a
+withWriteLocks' paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
+  ref <- fmap fromJust getShakeExtra
   locks <- liftIO $ mapM (getLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireWrite locks) >> actFn)
     `actionFinally`
     (debugLock ("withWriteLocks' releasing " ++ show paths) >> mapM_ RWLock.releaseWrite locks)
 
-withWriteLock' :: LocksRef -> FilePath -> Action a -> Action a
-withWriteLock' ref path actFn = do
+withWriteLock' :: FilePath -> Action a -> Action a
+withWriteLock' path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path
   debugLock' $ "withWriteLock' acquiring \"" ++ path ++ "\""
+  ref <- fmap fromJust getShakeExtra
   l <- liftIO $ getLock ref path
   (liftIO (RWLock.acquireWrite l) >> actFn)
     `actionFinally`
@@ -150,9 +155,11 @@ withWriteLock' ref path actFn = do
  - keeping track of some files outside Shake?
  -
  - This also re-implements some of debugTrackWrite to avoid an import cycle.
+ -
+ - TODO can this be removed once newrules work?
  -}
-withWriteOnce :: LocksRef -> FilePath -> Action () -> Action ()
-withWriteOnce ref path actFn = withWriteLock' ref path $ do
+withWriteOnce :: FilePath -> Action () -> Action ()
+withWriteOnce path actFn = withWriteLock' path $ do
   -- liftIO $ delay 500000 -- 1/2 second
   exists <- liftIO $ doesFileExist path -- Do not use Shake's version here
   when (not exists) actFn

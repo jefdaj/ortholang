@@ -33,6 +33,7 @@ import Control.Monad (forM, forM_)
 import OrthoLang.Core.Actions (readStrings, writeStrings, debugA)
 import System.FilePath ((</>))
 import OrthoLang.Core.Compile.Basic (rExpr, debugRules)
+import Data.Maybe (fromJust)
 
 debugA' :: String -> String -> Action ()
 debugA' name msg = debugA ("ortholang.core.compile.map2." ++ name) msg
@@ -49,8 +50,9 @@ debugA' name msg = debugA ("ortholang.core.compile.map2." ++ name) msg
 --      might have to sort afterward, or is order automatically preserved?
 -- TODO make sure hashes match the single versions or there will be trouble?
 map1of1 :: Type -> Type -> Action1 -> Action1
-map1of1 inType outType act1 cfg locks ids out a1 = do
-  inPaths <- readStrings inType cfg locks $ fromPath cfg a1
+map1of1 inType outType act1 out a1 = do
+  cfg <- fmap fromJust getShakeExtra
+  inPaths <- readStrings inType $ fromPath cfg a1
   debugFn $ "a1: " ++ show a1
   debugFn $ "inPaths: " ++ show inPaths
   let tmpDir = mapCache cfg
@@ -58,11 +60,11 @@ map1of1 inType outType act1 cfg locks ids out a1 = do
   outPaths <- forM inPaths $ \i -> do
     let o = tmpDir </> digest [out, toPath cfg i] </> "result" -- <.> extOf outType
     debugFn $ "o: " ++ show o
-    act1 cfg locks ids (toPath cfg o) (toPath cfg i)
+    act1 (toPath cfg o) (toPath cfg i)
     return o
   debugFn $ "map1of1 outPaths: " ++ show outPaths
   debugFn $ "map1of1 out: " ++ show out
-  writeStrings outType cfg locks (fromPath cfg out) outPaths
+  writeStrings outType (fromPath cfg out) outPaths
   where
     debugFn = debugA' "map1of1"
 
@@ -89,16 +91,17 @@ mapCache cfg = cfgTmpDir cfg </> "cache" </> "map"
 --        map2of3 act3 a1 a2 a3 = mapBase a2 a1 a3 $ \a3' a1' a2' -> act3 a1' a2' a3'
 
 map2of3 :: Type -> Type -> Action3 -> Action3
-map2of3 inType outType act3 cfg locks ids out a1 a2 a3 = do
-  inPaths <- readStrings inType cfg locks $ fromPath cfg a2
+map2of3 inType outType act3 out a1 a2 a3 = do
+  cfg <- fmap fromJust getShakeExtra
+  inPaths <- readStrings inType $ fromPath cfg a2
   let tmpDir   = mapCache cfg
       outPaths = (flip map) inPaths $ \i ->
                    tmpDir </> digest [out, toPath cfg i] </> "result" -- <.> extOf outType
       ioPairs  = zip inPaths outPaths
   -- TODO can this be done with forP in parallel? have to only do one overall read lock on input
   -- might need to pass a list of already-locked files to skip locking inside?
-  forM_ ioPairs $ \(i,o) -> act3 cfg locks ids (toPath cfg o) a1 (toPath cfg i) a3
-  writeStrings outType cfg locks (fromPath cfg out) outPaths
+  forM_ ioPairs $ \(i,o) -> act3 (toPath cfg o) a1 (toPath cfg i) a3
+  writeStrings outType (fromPath cfg out) outPaths
 
 -- TODO fix this
 -- map2of3 :: Type -> Type -> Action3 -> Action3
@@ -111,11 +114,12 @@ map3of3 :: Type -> Type -> Action3 -> Action3
 map3of3 = map3Base -- because it's already the 3rd
 
 map3Base :: Type -> Type -> Action3 -> Action3
-map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
+map3Base inType outType act3 out a1 a2 a3 = do
   -- debugA $ "map3Base arg paths: " ++ show [a1, a2, a3]
 
   -- this way breaks psiblast_db_each
-  inPaths <- readStrings inType cfg locks $ fromPath cfg a3
+  cfg <- fmap fromJust getShakeExtra
+  inPaths <- readStrings inType $ fromPath cfg a3
 
   -- but this way breaks something too, right?
   -- a3path  <- readPath locks $ fromPath cfg a3
@@ -132,8 +136,8 @@ map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
   -- TODO can this be done with forP in parallel? have to only do one overall read lock on input
   forM_ ioPairs $ \(i,o) -> do
     debugFn $ "map3Base input and output: " ++ show i ++ ", " ++ show o
-    act3 cfg locks ids (toPath cfg o) a1 a2 (toPath cfg i)
-  writeStrings outType cfg locks (fromPath cfg out) outPaths
+    act3 (toPath cfg o) a1 a2 (toPath cfg i)
+  writeStrings outType (fromPath cfg out) outPaths
   where
     debugFn = debugA' "map3Base"
 
@@ -177,15 +181,17 @@ map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
 rFun1 :: Action1 -> RulesFn
-rFun1 act1 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1]) = do
-  (ExprPath arg1') <- rExpr st a1
+rFun1 act1 scr expr@(Fun _ _ _ _ [a1]) = do
+  (ExprPath arg1') <- rExpr scr a1
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let arg1   = toPath cfg arg1'
       oPath  = exprPath cfg dRef scr expr
       oPath' = debugRules cfg "rFun1" expr $ fromPath cfg oPath
   oPath' %> \_ -> do
     debugFn $ "rFun1 arg1: "  ++ show arg1
     debugFn $ "rFun1 oPath: " ++ show oPath
-    act1 cfg ref ids oPath arg1
+    act1 oPath arg1
   return $ ExprPath oPath'
   where
     debugFn = debugA' "rFun1"
@@ -195,10 +201,12 @@ rFun1 _ _ e = error $ "bad argument to rFun1: " ++ show e
 -- TODO is it really this simple? if so, replace everything with these! rFun1, rFun2...
 -- TODO include the fn name when debugging
 rFun3 :: Action3 -> RulesFn
-rFun3 act3 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1, a2, a3]) = do
-  (ExprPath arg1') <- rExpr st a1
-  (ExprPath arg2') <- rExpr st a2
-  (ExprPath arg3') <- rExpr st a3
+rFun3 act3 scr expr@(Fun _ _ _ _ [a1, a2, a3]) = do
+  (ExprPath arg1') <- rExpr scr a1
+  (ExprPath arg2') <- rExpr scr a2
+  (ExprPath arg3') <- rExpr scr a3
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let arg1   = toPath cfg arg1'
       arg2   = toPath cfg arg2'
       arg3   = toPath cfg arg3'
@@ -209,7 +217,7 @@ rFun3 act3 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1, a2, a3]) = do
     debugFn $ "rFun3 arg2: "  ++ show arg2
     debugFn $ "rFun3 arg3: "  ++ show arg3
     debugFn $ "rFun3 oPath: " ++ show oPath
-    act3 cfg ref ids oPath arg1 arg2 arg3
+    act3 oPath arg1 arg2 arg3
   return $ ExprPath oPath'
   where
     debugFn = debugA' "rFun3"

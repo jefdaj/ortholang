@@ -261,13 +261,13 @@ stripWhiteSpace = dropWhile isSpace . dropWhileEnd isSpace
 
 -- Note that this is the only lazy read function. Will it mess anything up?
 -- TODO should readLit and readList be based on this?
-isEmpty :: LocksRef -> FilePath -> Action Bool
-isEmpty ref path = do
+isEmpty :: FilePath -> Action Bool
+isEmpty path = do
   -- TODO remove? prevents "invalid byte sequence" error reading binary files
   if "cache/bin" `isInfixOf` path
     then return False
     else do
-      txt <- withReadLock' ref path $ readFile' path
+      txt <- withReadLock' path $ readFile' path
       return $ "<<empty" `isPrefixOf` txt
 
 isReallyEmpty :: FilePath -> Action Bool

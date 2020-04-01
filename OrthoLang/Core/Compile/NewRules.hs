@@ -153,16 +153,8 @@ aNewRules applyFn tFn aFn out = do
       when (rType /= oType) $
         error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
       let deps' = map (fromPath cfg) deps
-      needR "ortholang.modules.newrulestest.aNewRules" deps'
+      need' "ortholang.modules.newrulestest.aNewRules" deps'
       applyFn (aFn out) deps'
-
--- TODO remove this
-needR :: String -> [FilePath] -> Action ()
-needR name deps = do
-  -- (cfg, lRef, _, _) <- getShakeExtra
-  cfg  <- fmap fromJust $ getShakeExtra
-  lRef <- fmap fromJust $ getShakeExtra
-  need' cfg lRef name deps
 
 mkNewBop :: String   -- ^ name
          -> Char     -- ^ opchar

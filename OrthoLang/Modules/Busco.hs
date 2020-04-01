@@ -98,7 +98,7 @@ rBuscoListLineages s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
     lTmp'   = toPath   cfg listTmp
 rBuscoListLineages _ _ = fail "bad argument to rBuscoListLineages"
 
-aBuscoListLineages :: Config -> LocksRef -> IDsRef -> Path -> Action ()
+aBuscoListLineages :: Path -> Action ()
 aBuscoListLineages cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
   writeLits cfg ref oPath allLineages
@@ -239,7 +239,7 @@ buscoProteins      = mkBusco "busco_proteins"      "prot" faa
 buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
 
-aBusco :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+aBusco :: String -> ([Path] -> Action ())
 aBusco mode cfg ref _ [outPath, blhPath, faaPath] = do
   let out' = fromPath cfg outPath
       blh' = takeDirectory $ fromPath cfg blhPath
@@ -336,7 +336,7 @@ rBuscoScoresTable s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [l]) = do
   let o  = exprPath cfg dRef scr e
       o' = fromPath cfg o
   o' %> \_ -> do
-    ins <- readPaths cfg ref lsPath
+    ins <- readPaths lsPath
     let ins' = map (fromPath cfg) ins
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "busco_scores_table.py"
@@ -389,8 +389,8 @@ rBuscoFilterCompleteness s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [m, t, fs]) =
       out' = fromPath cfg out
   out' %> \_ -> do
     score <- fmap (read :: String -> Scientific) $ readLit  cfg ref scorePath
-    table <- readFileStrict' cfg ref tablePath -- TODO best read fn?
-    faaPaths <- readPaths cfg ref faasList
+    table <- readFileStrict' tablePath -- TODO best read fn?
+    faaPaths <- readPaths faasList
     let allScores = map parseWords $ map words $ lines table
         missing   = faaPaths \\ map fst allScores
         okPaths   = map fst $ filter (\(_, c) -> c >= score) allScores

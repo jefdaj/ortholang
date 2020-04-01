@@ -90,7 +90,7 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 -- TODO is it parallel?
 -- TODO reverse order? currently matches blast fns but not native hmmbuild args
 -- TODO convert to rSimpleScript?
--- aHmmbuild :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+-- aHmmbuild :: [Path] -> Action ()
 -- aHmmbuild cfg ref _ [out, fa] = do
 --   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
 --   where
@@ -100,7 +100,7 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 -- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
-aHmmsearch :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aHmmsearch :: [Path] -> Action ()
 aHmmsearch cfg ref _ [out, e, hm, fa] = do
   eStr <- readLit cfg ref e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
@@ -155,9 +155,9 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
 
 -- TODO clean this up! it's pretty ugly
 -- TODO how to integrate the script since it needs the colnum?
-aExtractHmm :: Int -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aExtractHmm :: Int -> [Path] -> Action ()
 aExtractHmm n cfg ref _ [outPath, tsvPath] = do
-  -- lits <- readLits cfg ref tsvPath'
+  -- lits <- readLits tsvPath'
   -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
   --     lits''  = if uniq then sort $ nub lits' else lits'
   --     lits''' = map (\l -> (words l) !! (n - 1)) lits''

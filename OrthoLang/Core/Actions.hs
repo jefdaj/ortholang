@@ -82,7 +82,7 @@ import System.Posix.Files         (readSymbolicLink, createSymbolicLink, setFile
 import System.Posix.Escape         (escape)
 -- import System.IO.Temp (emptyTempFile)
 -- import Control.Concurrent.Thread.Delay (delay)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromJust)
 -- import Network.HTTP (simpleHTTP, getRequest, Response(..))
 import System.IO.Temp (writeTempFile)
 import qualified Data.ByteString as BS
@@ -111,8 +111,10 @@ traceA name out args = trace "core.actions" msg out
     msg = name ++ " creating " ++ show out ++ " from " ++ show args
 
 -- TODO is this .need thing the best convention?
-need' :: Config -> LocksRef -> String -> [FilePath] -> Action ()
-need' cfg ref fnName paths = mapM_ (needShared cfg ref fnName . toPath cfg) paths
+need' :: String -> [FilePath] -> Action ()
+need' fnName paths = do
+  cfg <- fmap fromJust getShakeExtra
+  mapM_ (needShared fnName . toPath cfg) paths
 
 needDebug :: String -> [FilePath] -> Action ()
 needDebug fnName paths = do
@@ -121,8 +123,9 @@ needDebug fnName paths = do
 
 -- TODO how to force it to load the seqids when their downstream files aren't needed?
 --      probably list all the load* dependencies of the expr and want/need them first
-needShared :: Config -> LocksRef -> String -> Path -> Action ()
-needShared cfg ref name path@(Path p) = do
+needShared :: String -> Path -> Action ()
+needShared name path@(Path p) = do
+  (cfg :: Config) <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
   done <- doesFileExist path'
   if done -- if done already, needing is cheap + more elegant than cache lookup
@@ -135,22 +138,22 @@ needShared cfg ref name path@(Path p) = do
      || (not $ "$TMPDIR" `isPrefixOf` p)
     then needDebug name [path']
     else do
-      shared <- lookupShared cfg path
+      shared <- lookupShared path
       case shared of
         Nothing -> needDebug name [path']
         Just sp -> do
           isLink <- liftIO $ pathIsSymbolicLink sp
-          when isLink $ needLink cfg ref name sp
+          when isLink $ needLink name sp
           when (isPathList sp) $ do
-            paths <- readPaths cfg ref sp
+            paths <- readPaths sp
             liftIO $ putStrLn $ "paths: " ++ show paths
-            need' cfg ref name $ map (fromPath cfg) paths -- TODO rename?
+            need' name $ map (fromPath cfg) paths -- TODO rename?
           liftIO $ createDirectoryIfMissing True $ takeDirectory path'
           -- TODO figure out better criteria for this
           if "download" `isInfixOf` sp
             then liftIO $ renameFile sp path'
-            else withWriteOnce ref path' $ liftIO $ copyFile sp path'
-          trackWrite' cfg [path']
+            else withWriteOnce path' $ liftIO $ copyFile sp path'
+          trackWrite' [path']
 
 isPathList :: FilePath -> Bool
 isPathList path
@@ -158,23 +161,25 @@ isPathList path
   && not (".str.list" `isSuffixOf` path)
   && not (".num.list" `isSuffixOf` path)
 
-needLink :: Config -> LocksRef -> String -> FilePath -> Action ()
-needLink cfg ref name link = do
+needLink :: String -> FilePath -> Action ()
+needLink name link = do
   relPath <- liftIO $ readSymbolicLink link
   absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
-  need' cfg ref name [absPath]
+  need' name [absPath]
 
-lookupShared :: Config -> Path -> Action (Maybe FilePath)
-lookupShared cfg path = case sharedPath cfg path of
-  Nothing -> return Nothing
-  Just sp -> do
-    if "http" `isPrefixOf` sp -- TODO come up with something more robust to detect urls!
+lookupShared :: Path -> Action (Maybe FilePath)
+lookupShared path = do
+  cfg <- fmap fromJust getShakeExtra
+  case sharedPath cfg path of
+    Nothing -> return Nothing
+    Just sp -> do
+      if "http" `isPrefixOf` sp -- TODO come up with something more robust to detect urls!
       then liftIO $ download cfg sp
-      else do
-        exists <- doesFileExist sp
-        return $ if exists
-          then Just sp
-          else Nothing
+        else do
+          exists <- doesFileExist sp
+          return $ if exists
+            then Just sp
+            else Nothing
 
 -- TODO what about timeouts and stuff?
 -- TODO would downloading as binary be better?
@@ -210,10 +215,11 @@ download cfg url = do
 
 -- Action version of readFileStrict. This is used for all reads during a cut;
 -- the raw one is just for showing results, reading cmd files etc.
-readFileStrict' :: Config -> LocksRef -> FilePath -> Action String
-readFileStrict' cfg ref path = do
-  need' cfg ref "core.actions.readFileStrict'" [path]
-  withReadLock' ref path $ liftIO (readFileStrict ref path)
+readFileStrict' :: FilePath -> Action String
+readFileStrict' path = do
+  ref <- fmap fromJust getShakeExtra
+  need' "core.actions.readFileStrict'" [path]
+  withReadLock' path $ liftIO (readFileStrict ref path)
 -- {-# INLINE readFileStrict' #-}
 
 {- OrthoLang requires empty strings to contain the text <<emptystr>> so we
@@ -221,61 +227,64 @@ readFileStrict' cfg ref path = do
  - failing, and from empty lists in case of an error in the typechecker.  This
  - also gives empty lists and strings distinct hashes.
  -}
-readLit :: Config -> LocksRef -> FilePath -> Action String
-readLit cfg locks path = do
+readLit :: FilePath -> Action String
+readLit path = do
   debugA' "readLit" path
   -- TODO need' here?
   need [path] -- Note isEmpty also does this
-  empty <- isEmpty locks path
+  empty <- isEmpty path
   if empty
     then return ""
     else fmap (checkLit . init) -- TODO safe? already checked if empty
-       $ readFileStrict' cfg locks path
+       $ readFileStrict' path
 
-readLits :: Config -> LocksRef -> FilePath -> Action [String]
-readLits cfg ref path = readList cfg ref path >>= return . checkLits
+readLits :: FilePath -> Action [String]
+readLits path = readList path >>= return . checkLits
 
-readPath :: Config -> LocksRef -> FilePath -> Action Path
-readPath cfg ref path = readPaths cfg ref path >>= return . headOrDie "readPath failed"
+readPath :: FilePath -> Action Path
+readPath path = readPaths path >>= return . headOrDie "readPath failed"
 
 -- TODO should this have checkPaths?
-readPaths :: Config -> LocksRef -> FilePath -> Action [Path]
-readPaths cfg ref path = (fmap . map) stringPath (readList cfg ref path)
+readPaths :: FilePath -> Action [Path]
+readPaths path = (fmap . map) stringPath (readList path)
 
 -- makes a copy of a list of paths without ortholang funny business,
 -- suitible for external scripts to read
 -- TODO does this go here or somewhere else?
-absolutizePaths :: Config -> LocksRef -> FilePath -> FilePath -> Action ()
-absolutizePaths cfg ref inPath outPath = do
-  paths  <- readPaths cfg ref inPath
+absolutizePaths :: FilePath -> FilePath -> Action ()
+absolutizePaths inPath outPath = do
+  paths  <- readPaths inPath
+  cfg <- fmap fromJust getShakeExtra
   paths' <- mapM (liftIO . absolutize. fromPath cfg) paths
-  need' cfg ref "core.actions.absolutizePaths" paths' -- because they will be read by the script next
+  need' "core.actions.absolutizePaths" paths' -- because they will be read by the script next
   -- liftIO $ putStrLn $ "paths': " ++ show paths'
-  withWriteLock' ref outPath $ writeFile' outPath $ unlines paths'
+  withWriteLock' outPath $ writeFile' outPath $ unlines paths'
 
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
-readLitPaths :: Config -> LocksRef -> FilePath -> Action [Path]
-readLitPaths cfg ref path = do
-  ls <- readList cfg ref path
+readLitPaths :: FilePath -> Action [Path]
+readLitPaths path = do
+  cfg <- fmap fromJust getShakeExtra
+  let toAbs line = if isAbsolute line
+                     then line
+                     else cfgWorkDir cfg </> line
+  ls <- readList path
   return $ map (toPath cfg . toAbs) ls
-  where
-    toAbs line = if isAbsolute line
-                   then line
-                   else cfgWorkDir cfg </> line
 
 -- TODO how should this relate to readLit and readStr?
-readString :: Type -> Config -> LocksRef -> FilePath -> Action String
-readString etype cfg ref path = readStrings etype cfg ref path >>= return . headOrDie "readString failed"
+readString :: Type -> FilePath -> Action String
+readString etype path = readStrings etype path >>= return . headOrDie "readString failed"
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
  - the Type (of each element, not the list!) so it knows how to convert from
  - String, and then within the function you treat them as Strings.
  -}
-readStrings :: Type -> Config -> LocksRef -> FilePath -> Action [String]
-readStrings etype cfg ref path = if etype' `elem` [str, num]
-  then readLits cfg ref path
-  else (fmap . map) (fromPath cfg) (readPaths cfg ref path)
+readStrings :: Type -> FilePath -> Action [String]
+readStrings etype path = if etype' `elem` [str, num]
+  then readLits path
+  else do
+    cfg <- fmap fromJust getShakeExtra
+    (fmap . map) (fromPath cfg) (readPaths path)
   where
     etype' = trace "core.actions.readStrings" ("readStrings (each " ++ extOf etype ++ ") from " ++ path) etype
 
@@ -286,17 +295,19 @@ readStrings etype cfg ref path = if etype' `elem` [str, num]
  -
  - Note that strict reading is important to avoid "too many open files" on long lists.
  -}
-readList :: Config -> LocksRef -> FilePath -> Action [String]
-readList cfg locks path = do
+readList :: FilePath -> Action [String]
+readList path = do
   debugA' "readList" $ show path
-  need' cfg locks "core.actions.readList" [path] -- Note isEmpty also does this
-  empty <- isEmpty locks path
+  need' "core.actions.readList" [path] -- Note isEmpty also does this
+  empty <- isEmpty path
   if empty
     then return []
-    else fmap lines
-       $ withReadLock' locks path
-       $ liftIO
-       $ readFileStrict locks path
+    else do
+      lRef <- fmap fromJust getShakeExtra
+      fmap lines
+        $ withReadLock' path
+        $ liftIO
+        $ readFileStrict lRef path
 
 
 -----------------
@@ -335,53 +346,55 @@ TODO does it need to handle a race condition when writing to the cache?
 TODO any reason to keep original extensions instead of all using .txt?
      oh, if we're testing extensions anywhere. lets not do that though
 -}
-writeCachedLines :: Config -> LocksRef -> FilePath -> [String] -> Action ()
-writeCachedLines cfg ref outPath content = do
+writeCachedLines :: FilePath -> [String] -> Action ()
+writeCachedLines outPath content = do
+  cfg <- fmap fromJust getShakeExtra
   let cache = cachedLinesPath cfg content
   -- TODO show as Path?
   debugA' "writeCachedLines" $ first50 content ++ " -> " ++ last50 cache
       -- lock  = cache <.> "lock"
   -- liftIO $ createDirectoryIfMissing True cDir
-  withWriteOnce ref cache $ writeFile' cache $ unlines content -- TODO is this strict?
+  withWriteOnce cache $ writeFile' cache $ unlines content -- TODO is this strict?
   -- unlessExists outPath $ -- TODO remove?
-  symlink cfg ref (toPath cfg outPath) (toPath cfg cache)
+  symlink (toPath cfg outPath) (toPath cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
 -- TODO remove in favor of sanitizeFileInPlace?
-writeCachedVersion :: Config -> LocksRef -> FilePath -> FilePath -> Action ()
-writeCachedVersion cfg ref outPath inPath = do
-  content <- fmap lines $ readFileStrict' cfg ref inPath
+writeCachedVersion :: FilePath -> FilePath -> Action ()
+writeCachedVersion outPath inPath = do
+  content <- fmap lines $ readFileStrict' inPath
+  cfg <- fmap fromJust getShakeExtra
   let content' = map (toGeneric cfg) content
-  writeCachedLines cfg ref outPath content'
+  writeCachedLines outPath content'
 
 -- TODO take a Path for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
-writePaths :: Config -> LocksRef -> FilePath -> [Path] -> Action ()
-writePaths cfg ref out cpaths = writeCachedLines cfg ref out paths >> trackWrite paths -- TODO trackwrite'?
+writePaths :: FilePath -> [Path] -> Action ()
+writePaths out cpaths = writeCachedLines out paths >> trackWrite paths -- TODO trackwrite'?
   where
     paths = if null cpaths then ["<<emptylist>>"] else map pathString cpaths
 
-writePath :: Config -> LocksRef -> FilePath -> Path -> Action ()
-writePath cfg ref out path = do
+writePath :: FilePath -> Path -> Action ()
+writePath out path = do
   debugA' "writePath" (show path)
-  writePaths cfg ref out [path]
+  writePaths out [path]
 
-writeLits :: Config -> LocksRef -> FilePath -> [String] -> Action ()
-writeLits cfg ref path lits = do
+writeLits :: FilePath -> [String] -> Action ()
+writeLits path lits = do
   debugA' "writeLits" $ show lits ++ " -> writeCachedLines " ++ show lits'
-  writeCachedLines cfg ref path lits'
+  writeCachedLines path lits'
   where
     lits' = if null lits then ["<<emptylist>>"] else checkLits lits
 
 -- TODO any need to prevent writing <<emptystr>> in a .num?
 --      (seems almost certain to be caught on reading later)
-writeLit :: Config -> LocksRef -> FilePath -> String -> Action ()
-writeLit cfg ref path lit = do
+writeLit :: FilePath -> String -> Action ()
+writeLit path lit = do
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: \"" ++ lit ++ "\"")
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: \"" ++ lits ++ "\"")
   debugA' "writeLit" $ show lit ++ " -> writeLits " ++ show lits
-  writeLits cfg ref path lits
+  writeLits path lits
   where
     lits = [if null lit then "<<emptystr>>" else lit]
 
@@ -390,18 +403,18 @@ Write a "list of whatever". Mostly for generic set operations. You include
 the Type (of each element, not the list!) so it knows how to convert
 to/from String, and then within the function you treat them as Strings.
 -}
-writeStrings :: Type -> Config -> LocksRef
-             -> FilePath -> [String] -> Action ()
-writeStrings etype cfg ref out whatevers = do
+writeStrings :: Type -> FilePath -> [String] -> Action ()
+writeStrings etype out whatevers = do
   debugA' "writeStrings"
     $ first50 (take 3 whatevers) ++ " (each " ++ extOf etype ++ ") -> " ++ last50 out
   if etype `elem` [str, num]
-    then writeLits  cfg ref out whatevers
-    else writePaths cfg ref out $ map (toPath cfg) whatevers
+    then writeLits  out whatevers
+    else do
+      cfg <- fmap fromJust getShakeExtra
+      writePaths out $ map (toPath cfg) whatevers
 
-writeString :: Type -> Config -> LocksRef
-            -> FilePath -> String -> Action ()
-writeString etype cfg ref out whatever = writeStrings etype cfg ref out [whatever]
+writeString :: Type -> FilePath -> String -> Action ()
+writeString etype out whatever = writeStrings etype out [whatever]
 
 {-|
 Turns out there's a race condition during `repeat` calls, because the same
@@ -414,11 +427,12 @@ TODO rename like myReadFile, myReadLines?
 
 TODO move to Util?
 -}
-trackWrite' :: Config -> [FilePath] -> Action ()
-trackWrite' cfg fs = do
-  -- mapM_ (assertNonEmptyFile cfg ref) fs
+trackWrite' :: [FilePath] -> Action ()
+trackWrite' fs = do
+  -- mapM_ (assertNonEmptyFile) fs
   -- also ensure it only gets written once:
   -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
+  cfg <- fmap fromJust getShakeExtra
   liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
   trackWrite $ traceShow "core.actions.trackWrite'" fs
 
@@ -438,10 +452,10 @@ distinguish them from runtime errors. This function replaces those with
 actual empty files before passing them to a cmd, so logic for that
 doesn't have to be duplicated over and over.
 -}
-fixEmptyText :: Config -> LocksRef -> FilePath -> Action FilePath
-fixEmptyText cfg ref path = do
-  need' cfg ref "core.actions.fixEmptyText" [path] -- Note isEmpty does this too
-  empty <- isEmpty ref path
+fixEmptyText :: FilePath -> Action FilePath
+fixEmptyText path = do
+  need' "core.actions.fixEmptyText" [path] -- Note isEmpty does this too
+  empty <- isEmpty path
   return $ if empty then "/dev/null" else path -- TODO will /dev/null work?
 
 -- TODO call this when exiting nonzero and/or exception thrown
@@ -483,8 +497,9 @@ TODO if exit is wrong (usually non-zero), cat out stderr for user
 
 TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
 -}
-runCmd :: Config -> LocksRef -> CmdDesc -> Action ()
-runCmd cfg ref@(disk, _) desc = do
+runCmd :: CmdDesc -> Action ()
+runCmd desc = do
+  cfg <- fmap fromJust getShakeExtra
   let stdoutPath = replaceBaseName (cmdOutPath desc) "out"
       stderrPath = replaceBaseName (cmdOutPath desc) "err"
       dbg = debugA' "runCmd"
@@ -492,8 +507,8 @@ runCmd cfg ref@(disk, _) desc = do
 
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns desc
   inPaths' <- if cmdFixEmpties desc
-                then mapM (fixEmptyText cfg ref) inPaths
-                else need' cfg ref "core.actions.runCmd" inPaths >> return inPaths
+                then mapM (fixEmptyText) inPaths
+                else need' "core.actions.runCmd" inPaths >> return inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
   dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
@@ -503,31 +518,32 @@ runCmd cfg ref@(disk, _) desc = do
       -- writeLockPaths = (cmdOutPath desc):(cmdExtraOutPaths desc)
       writeLockFn fn = do
         dbg $ "runCmd acquiring main write lock: " ++ show (cmdOutPath desc)
-        withWriteOnce ref (cmdOutPath desc) $ do
+        withWriteOnce (cmdOutPath desc) $ do
           dbg $ "runCmd acquiring extra write locks: " ++ show (cmdExtraOutPaths desc)
-          withWriteLocks' ref (cmdExtraOutPaths desc) $ parLockFn fn
+          withWriteLocks' (cmdExtraOutPaths desc) $ parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
-  writeLockFn $ withReadLocks' ref inPaths' $ do
+  writeLockFn $ withReadLocks' inPaths' $ do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
+    Just (disk, _) <- (getShakeExtra :: Action (Maybe LocksRef))
     Exit code <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
       Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
       Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    -- trackWrite' cfg [stdoutPath, stderrPath] -- TODO does this happen here?
+    -- trackWrite' [stdoutPath, stderrPath] -- TODO does this happen here?
     -- return ()
 
     -- TODO use exitWith here?
     when (code /= cmdExitCode desc) $
       let rmPatterns = (replaceBaseName (cmdOutPath desc) "*"):(cmdRmPatterns desc)
-      in handleCmdError cfg ref (cmdBinary desc) code stderrPath rmPatterns
+      in handleCmdError (cmdBinary desc) code stderrPath rmPatterns
 
   let sPaths = stdoutPath:stderrPath:cmdSanitizePaths desc -- TODO main outpath too?
-  -- sanitizeFilesInPlace cfg ref $ cmdSanitizePaths desc
-  sanitizeFilesInPlace cfg ref sPaths
+  -- sanitizeFilesInPlace $ cmdSanitizePaths desc
+  sanitizeFilesInPlace sPaths
 
   return () -- TODO out, err, code here?
 
@@ -536,15 +552,16 @@ runCmd cfg ref@(disk, _) desc = do
 matchPattern :: Config -> String -> Action [FilePath]
 matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
 
-handleCmdError :: Config -> LocksRef -> String -> ExitCode -> FilePath -> [String] -> Action a
-handleCmdError cfg ref bin n stderrPath rmPatterns = do
+handleCmdError :: String -> ExitCode -> FilePath -> [String] -> Action a
+handleCmdError bin n stderrPath rmPatterns = do
   hasErr <- doesFileExist stderrPath
   errMsg2 <- if hasErr
                then do
-                 errTxt <- readFileStrict' cfg ref stderrPath
+                 errTxt <- readFileStrict' stderrPath
                  return $ ["Stderr was:", errTxt]
                else return []
   -- let files' = sort $ nub rmPatterns
+  cfg <- fmap fromJust getShakeExtra
   files' <- fmap concat $ mapM (matchPattern cfg) rmPatterns
   let files'' = sort $ nub files'
   liftIO $ if isJust $ cfgDebug cfg
@@ -567,26 +584,27 @@ handleCmdError cfg ref bin n stderrPath rmPatterns = do
 -- | This is the only function that should access readFileStrict' directly;
 --   all others go through readStr and readList. TODO no longer true?
 --   TODO use a Path here?
--- digestFile :: Config -> LocksRef -> FilePath -> Action String
--- digestFile cfg ref path = readFileStrict' cfg ref path >>= return . digest
+-- digestFile :: FilePath -> Action String
+-- digestFile path = readFileStrict' path >>= return . digest
 
 -- TODO fixEmpties should be False here, but don't want to break existing tmpdir just yet
 -- TODO take mod time into account to avoid re-hashing (see if Shake exports that code)
-hashContent :: Config -> LocksRef -> Path -> Action String
-hashContent cfg ref@(disk, _) path = do
+hashContent :: Path -> Action String
+hashContent path = do
   -- alwaysRerun -- TODO does this help?
-  need' cfg ref "hashContent" [path']
-  -- Stdout out <- withReadLock' ref path' $ command [] "md5sum" [path']
-  -- out <- wrappedCmdOut False True cfg ref [path'] [] [] "md5sum" [path'] -- TODO runCmd here
-  Stdout out <- withReadLock' ref path' $ withResource disk 1 $ case cfgWrapper cfg of
+  cfg <- fmap fromJust getShakeExtra
+  Just (disk, _) <- (getShakeExtra :: Action (Maybe LocksRef))
+  let path' = fromPath cfg path
+  need' "hashContent" [path']
+  -- Stdout out <- withReadLock' path' $ command [] "md5sum" [path']
+  -- out <- wrappedCmdOut False True [path'] [] [] "md5sum" [path'] -- TODO runCmd here
+  Stdout out <- withReadLock' path' $ withResource disk 1 $ case cfgWrapper cfg of
     Nothing -> command [] "md5sum" [path']
     Just w  -> command [Shell] w ["md5sum", path']
   -- liftIO $ putStrLn $ "out: " ++ out
   let md5 = take digestLength out
   -- liftIO $ putStrLn $ "md5: " ++ md5
   return md5
-  where
-    path' = fromPath cfg path
 
 {-|
 Hashing doesn't save any space here, but it puts the hashes in
@@ -606,23 +624,24 @@ TODO remove if ggplot turns out to be nondeterministic
 
 TODO use hash of expr + original ext instead so it looks nicer?
 -}
-withBinHash :: Config -> LocksRef -> Expr -> Path
+withBinHash :: Expr -> Path
             -> (Path -> Action ()) -> Action ()
-withBinHash cfg ref expr outPath actFn = do
+withBinHash expr outPath actFn = do
+  cfg <- fmap fromJust getShakeExtra
   let binDir'  = fromPath cfg $ cacheDir cfg "bin"
       outPath' = fromPath cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
   let binTmp' = binDir' </> digest expr -- <.> takeExtension outPath'
       binTmp  = toPath cfg binTmp'
   _ <- actFn binTmp
-  md5 <- hashContent cfg ref binTmp
+  md5 <- hashContent binTmp
   let binOut' = binDir' </> md5 -- <.> takeExtension outPath'
       binOut  = toPath cfg binOut'
   -- debugS $ "withBinHash binOut: "  ++ show binOut
   -- debugS $ "withBinHash binOut': " ++ show binOut'
   debugA' "withBinHash" $ show binTmp ++ " -> " ++ show binOut
-  symlink cfg ref binOut  binTmp
-  symlink cfg ref outPath binOut
+  symlink binOut  binTmp
+  symlink outPath binOut
 
 {-|
 Takes source and destination paths in the tmpdir and makes a path between
@@ -642,34 +661,37 @@ Note that src here means what's sometimes called the destination. The first arg
 should be the symlink path and the second the file it points to. (it was going
 to be kind of confusing either way)
 -}
-symlink :: Config -> LocksRef -> Path -> Path -> Action ()
-symlink cfg ref src dst = withWriteOnce ref src' $ do
-  liftIO $ createDirectoryIfMissing True $ takeDirectory src'
-  liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
-  trackWrite' cfg [src']
-  where
-    src' = fromPath cfg src
-    dst' = fromPath cfg dst
-    dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
+symlink :: Path -> Path -> Action ()
+symlink src dst = do
+  cfg <- fmap fromJust getShakeExtra
+  let src' = fromPath cfg src
+      dst' = fromPath cfg dst
+      dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
+  withWriteOnce src' $ do
+    liftIO $ createDirectoryIfMissing True $ takeDirectory src'
+    liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
+    trackWrite' [src']
 
 -- Apply toGeneric to sanitize the output(s) of a script
 -- Should be done before trackWrite to avoid confusing Shake
-sanitizeFileInPlace :: Config -> LocksRef -> FilePath -> Action ()
-sanitizeFileInPlace cfg ref path = do
-  -- txt <- readFileStrict' cfg ref path
+sanitizeFileInPlace :: FilePath -> Action ()
+sanitizeFileInPlace path = do
+  -- txt <- readFileStrict' path
   exists <- doesFileExist path
   when exists $ do
+    ref <- fmap fromJust getShakeExtra
     txt <- liftIO $ readFileStrict ref path -- can't use need here
+    cfg <- fmap fromJust getShakeExtra
     let txt' = toGeneric cfg txt
     -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""
     writeFile' path txt'
-    trackWrite' cfg [path]
+    trackWrite' [path]
     -- writeFile' path $ toGeneric cfg txt
-    -- writeCachedLines cfg ref path []
+    -- writeCachedLines path []
 
 {-|
 Apply toGeneric to sanitize the output(s) of a script.
 Should be done before trackWrite to avoid confusing Shake
 -}
-sanitizeFilesInPlace :: Config -> LocksRef -> [FilePath] -> Action ()
-sanitizeFilesInPlace cfg ref = mapM_ (sanitizeFileInPlace cfg ref)
+sanitizeFilesInPlace :: [FilePath] -> Action ()
+sanitizeFilesInPlace = mapM_ (sanitizeFileInPlace)

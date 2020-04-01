@@ -103,7 +103,7 @@ rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
 -- TODO is it deduplicating properly with the fn name?
-aMkBlastFromDbRev :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+aMkBlastFromDbRev :: String -> ([Path] -> Action ())
 aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
   aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]
 aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
@@ -127,7 +127,7 @@ reciprocalBest = Function
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 -- TODO why is this the only one that fails, and only when called from repeat??
-aReciprocalBest :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aReciprocalBest :: [Path] -> Action ()
 aReciprocalBest cfg ref _ [out, left, right] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -164,7 +164,7 @@ reciprocalBestAll = Function
   where
     name = "reciprocal_best_all"
 
-aReciprocalBestAll :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aReciprocalBestAll :: [Path] -> Action ()
 aReciprocalBestAll cfg ref ids (out:ins) = do
   let cDir = fromPath cfg $ cacheDir cfg "blastrbh"
       tmpPath p = cDir </> digest p <.> "bht"

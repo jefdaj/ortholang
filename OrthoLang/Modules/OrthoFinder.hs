@@ -49,7 +49,7 @@ orthofinder = let name = "orthofinder" in Function
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
 -- TODO what's diamond blast? do i need to add it?
-aOrthofinder :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aOrthofinder :: [Path] -> Action ()
 aOrthofinder cfg ref _ [out, faListPath] = do
   let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
       statsPath = toPath cfg $ tmpDir
@@ -57,16 +57,16 @@ aOrthofinder cfg ref _ [out, faListPath] = do
                     </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
       statsPath' = fromPath cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
-  -- withWriteLock' ref (tmpDir </> "lock") $ do
-  faPaths <- readPaths cfg ref faListPath'
+  -- withWriteLock' (tmpDir </> "lock") $ do
+  faPaths <- readPaths faListPath'
   let faPaths' = map (fromPath cfg) faPaths
-  need' cfg ref "ortholang.modules.orthofinder.aOrthofinder" faPaths'
+  need' "ortholang.modules.orthofinder.aOrthofinder" faPaths'
   let faLinks = map (\p -> toPath cfg $ tmpDir </> (takeFileName $ fromPath cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1
   -- and we can't mark statsPath' as an extra outpath
   -- TODO patch orthofinder not to adjust and then do this the standard way
-  withWriteLock' ref tmpDir $ do -- this is important to prevent multiple threads trying at once
+  withWriteLock' tmpDir $ do -- this is important to prevent multiple threads trying at once
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
     runCmd cfg ref $ CmdDesc
       { cmdBinary = "orthofinder.sh"
@@ -84,7 +84,7 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     -- liftIO $ putStrLn $ "out: " ++ show out
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
-  trackWrite' cfg [statsPath']
+  trackWrite' [statsPath']
   symlink cfg ref out statsPath
   where
     out'        = fromPath cfg out

@@ -53,6 +53,7 @@ import OrthoLang.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)
 import OrthoLang.Locks       (withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
+import Data.Maybe (fromJust)
 
 -- TODO swap out plain debug fn for a proper one with module name
 
@@ -64,30 +65,29 @@ debugA' name msg = debugA ("ortholang.core.compile.map." ++ name) msg
 ------------------------------------
 
 -- for action functions that don't need a tmpdir
-rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
+rMap :: Int -> ([Path] -> Action ()) -> RulesFn
 rMap index actFn = rMapMain index Nothing actFn'
   where
-    actFn' cfg ref ids _ args = actFn cfg ref ids args -- drops unused tmpdir
+    actFn' _ args = actFn args -- drops unused tmpdir
 
 -- for action functions that need one tmpdir reused between calls
-rMapTmp :: Int -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
-        -> String -> RulesFn
-rMapTmp index actFn tmpPrefix s@(scr, cfg, _, _, _) = rMapMain index (Just tmpFn) actFn s
-  where
-    tmpDir = cacheDir cfg tmpPrefix
-    tmpFn  = return . const tmpDir
+rMapTmp :: Int -> (Path -> [Path] -> Action ()) -> String -> RulesFn
+rMapTmp index actFn tmpPrefix s e = do
+  cfg <- fmap fromJust getShakeExtraRules
+  let tmpDir = cacheDir cfg tmpPrefix
+      tmpFn  = return . const tmpDir
+  rMapMain index (Just tmpFn) actFn s e
 
 -- for action functions that need a unique tmpdir each call
 -- TODO use a hash for the cached path rather than the name, which changes!
-rMapTmps :: Int
-          -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
-          -> String -> RulesFn
-rMapTmps index actFn tmpPrefix s@(scr, cfg, _, _, _) e = rMapMain index (Just tmpFn) actFn s e
-  where
-    tmpFn args = do
-      let base = concat $ intersperse "/" $ map digest args
-          dir  = fromPath cfg $ cacheDir cfg tmpPrefix
-      return $ toPath cfg (dir </> base)
+rMapTmps :: Int -> (Path -> [Path] -> Action ()) -> String -> RulesFn
+rMapTmps index actFn tmpPrefix scr e = do
+  cfg <- fmap fromJust getShakeExtraRules
+  let tmpFn args = do
+        let base = concat $ intersperse "/" $ map digest args
+            dir  = fromPath cfg $ cacheDir cfg tmpPrefix
+        return $ toPath cfg (dir </> base)
+  rMapMain index (Just tmpFn) actFn scr e
 
 {- Like rSimpleScript, but the last argument should be a list.
  - It will be evaluated and one call made to aSimpleScript with each element.
@@ -108,14 +108,14 @@ rMapSimpleScript index = rMap index . aSimpleScript
  - over. Given that I'm not sure there's any way to avoid intermediate files,
  - but am open to alternatives if anyone thinks of something!
  -}
-rMapMain :: Int -> Maybe ([Path] -> IO Path)
-         -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
-         -> RulesFn
-rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids, dRef) e@(Fun r salt _ name exprs) = do
+rMapMain :: Int -> Maybe ([Path] -> IO Path) -> (Path -> [Path] -> Action ()) -> RulesFn
+rMapMain mapIndex mTmpFn actFn scr e@(Fun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, normalExprs) = popFrom mapIndex' exprs
-  regularArgPaths <- mapM (rExpr s) normalExprs
-  (ExprPath mappedArgsPath) <- rExpr s mappedExpr
+  regularArgPaths <- mapM (rExpr scr) normalExprs
+  (ExprPath mappedArgsPath) <- rExpr scr mappedExpr
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let singleName     = replace "_each" "" name -- TODO any less brittle ideas? could make this a fn
       mainOutPath    = fromPath cfg $ exprPath cfg dRef scr e
       regularArgPaths'  = map (\(ExprPath p) -> toPath cfg p) regularArgPaths
@@ -127,8 +127,8 @@ rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids, dRef) e@(Fun r salt _ name
                 (ListOf t) -> debug cfg "rMapMain" ("type of \"" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error $ "bad argument to rMapMain: " ++ show e
-  elemCachePtn %> aMapElem cfg ref ids dRef eType mTmpFn actFn singleName salt
-  mainOutPath  %> aMapMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
+  elemCachePtn %> aMapElem eType mTmpFn actFn singleName salt
+  mainOutPath  %> aMapMain mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
@@ -139,30 +139,30 @@ hashFun _ _ _ _ = error "hashFun only hashes function calls so far"
 {- This calls aMapArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
  -}
-aMapMain :: Config -> LocksRef -> IDsRef -> Int
+aMapMain :: Int
          -> [Path] -> Path -> Type -> Path -> FilePath
          -> Action ()
-aMapMain cfg ref ids mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
-  need' cfg ref "ortholang.core.compile.map.aMapMain" regularArgs'
+aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
+  cfg <- fmap fromJust getShakeExtra
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
+      regularArgs'   = map (fromPath cfg) regularArgs
+      mappedArgList' = fromPath cfg mappedArg
+      mapTmpDir'     = fromPath cfg mapTmpDir
+  need' "ortholang.core.compile.map.aMapMain" regularArgs'
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
-  mappedPaths  <- readPaths cfg ref mappedArgList'
+  mappedPaths  <- readPaths mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromPath cfg) mappedPaths
   debugA' "aMapMain" $ "mappedPaths': " ++ show mappedPaths'
-  mapM_ (aMapArgs cfg ref ids mapIndex eType regularArgs'' mapTmpDir')
+  mapM_ (aMapArgs mapIndex eType regularArgs'' mapTmpDir')
         (map (toPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
-  need' cfg ref "ortholang.core.compile.map.aMapMain" outPaths
+  need' "ortholang.core.compile.map.aMapMain" outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
   let out = traceA "aMapMain" outPath
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
-    then mapM (readLit cfg ref) outPaths' >>= writeLits cfg ref out
-    else writePaths cfg ref out $ map (toPath cfg) outPaths'
-  where
-    regularArgs'   = map (fromPath cfg) regularArgs
-    mappedArgList' = fromPath cfg mappedArg
-    mapTmpDir'     = fromPath cfg mapTmpDir
+    then mapM readLit outPaths' >>= writeLits out
+    else writePaths out $ map (toPath cfg) outPaths'
 
 -- TODO take + return Paths?
 -- TODO blast really might be nondeterministic here now that paths are hashed!
@@ -176,10 +176,11 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> extOf eTyp
 -- This leaves arguments in .args files for aMapElem to find.
 -- TODO This should be done for each replace operation in replace_each
 -- TODO put mapIndex and mappedArg together, and rename that something with path
-aMapArgs :: Config -> LocksRef -> IDsRef -> Int
+aMapArgs :: Int
          -> Type -> [FilePath] -> FilePath -> Path
          -> Action ()
-aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
+aMapArgs mapIndex eType regularArgs' tmp' mappedArg = do
+  cfg <- fmap fromJust getShakeExtra
   let mappedArg' = fromPath cfg mappedArg
       argsPath   = replaceBaseName (eachPath cfg tmp' eType mappedArg') "args"
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
@@ -189,7 +190,7 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
   debugFn $ "argsPath: " ++ show argsPath
   debugFn $ "argPaths: " ++ show argPaths
   debugFn $ "argPaths': " ++ show argPaths'
-  writePaths cfg ref argsPath argPaths'
+  writePaths argsPath argPaths'
   where
     debugFn = debugA' "aMapArgs"
 
@@ -206,16 +207,17 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
  - TODO after singleFn works, can we remove tmpFn? (ok if not)
  -}
-aMapElem :: Config -> LocksRef -> IDsRef -> DigestsRef -> Type
+aMapElem :: Type
          -> Maybe ([Path] -> IO Path)
-         -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
+         -> (Path -> [Path] -> Action ())
          -> String -> Salt -> FilePath -> Action ()
-aMapElem cfg ref ids dRef eType tmpFn actFn singleName salt out = do
+aMapElem eType tmpFn actFn singleName salt out = do
   let argsPath = replaceBaseName out "args"
-  args <- readPaths cfg ref argsPath
+  args <- readPaths argsPath
+  cfg <- fmap fromJust getShakeExtra
   let args' = map (fromPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
-  need' cfg ref "ortholang.core.compile.map.aMapElem" args'
+  need' "ortholang.core.compile.map.aMapElem" args'
   debugA "ortholang.core.compile.map.aMapElem" $ "out: " ++ show out
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
@@ -224,6 +226,7 @@ aMapElem cfg ref ids dRef eType tmpFn actFn singleName salt out = do
       let d' = fromPath cfg d
       createDirectoryIfMissing True d'
       return d
+  dRef <- fmap fromJust getShakeExtra
   let out' = traceA "aMapElem" (toPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
@@ -231,10 +234,10 @@ aMapElem cfg ref ids dRef eType tmpFn actFn singleName salt out = do
       single' = fromPath cfg single
       args''' = single:map (toPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?
-  unlessExists single' $ actFn cfg ref ids dir args'''
+  unlessExists single' $ actFn dir args'''
   -- TODO is there a way to use withWriteOnce without an indefinite block??
-  -- withWriteOnce ref single' $ actFn cfg ref ids dir args''' -- TODO is this the bug???
-  -- withWriteOnce ref (single' <.> "test") $ do
-  --   actFn cfg ref ids dir args''' -- TODO is this the bug???
+  -- withWriteOnce single' $ actFn dir args''' -- TODO is this the bug???
+  -- withWriteOnce (single' <.> "test") $ do
+  --   actFn dir args''' -- TODO is this the bug???
   --   writeFile' (single' <.> "test") ""
-  symlink cfg ref out' single
+  symlink out' single

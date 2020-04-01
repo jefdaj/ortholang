@@ -44,7 +44,7 @@ aPermute :: GlobalEnv
          -> FilePath -> Type -> Salt
          -> FilePath -> Action ()
 aPermute (_, cfg, ref, _, dRef) comboFn iPath eType salt out = do
-  need' cfg ref "ortholang.modules.permute.aPermute" [iPath]
+  need' "ortholang.modules.permute.aPermute" [iPath]
   elements <- readStrings eType cfg ref iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)

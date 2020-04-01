@@ -127,7 +127,7 @@ gbkToFnaEach = Function
 -- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
 aGenbankToFasta :: Type -> String
-                -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+                -> ([Path] -> Action ())
 aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
   let faPath'   = fromPath cfg faPath
       ftPath'   = fromPath cfg ftPath
@@ -219,7 +219,7 @@ extractSeqs = Function
   where
     name = "extract_seqs"
 
-aExtractSeqs :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aExtractSeqs :: [Path] -> Action ()
 aExtractSeqs cfg ref ids [outPath, inFa, inList] = do
   let cDir     = fromPath cfg $ cacheDir cfg "seqio"
       tmpList' = cDir </> digest inList <.> "txt"
@@ -313,11 +313,11 @@ mkConcatEach cType = Function
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
--- aConcat :: Type -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+-- aConcat :: Type -> [Path] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
---   fPaths <- readPaths cfg ref fs'
+--   fPaths <- readPaths fs'
 --   let fPaths' = map (fromPath cfg) fPaths
---   need' cfg ref "aConcat" fPaths'
+--   need' "aConcat" fPaths'
 --   let out'    = fromPath cfg oPath
 --       out''   = traceA "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
@@ -335,7 +335,7 @@ mkConcatEach cType = Function
 -- aConcat _ _ _ _ = fail "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
-aConcat :: Type -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+aConcat :: Type -> ([Path] -> Action ())
 aConcat cType cfg ref ids [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
@@ -345,20 +345,20 @@ aConcat cType cfg ref ids [outPath, inList] = do
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath cfg outPath
-  writeCachedLines cfg ref emptyPath [emptyStr]
-  inPaths <- readPaths cfg ref $ fromPath cfg inList
+  writeCachedLines emptyPath [emptyStr]
+  inPaths <- readPaths $ fromPath cfg inList
   let inPaths' = map (fromPath cfg) inPaths
-  need' cfg ref "ortholang.modules.seqio.aConcat" inPaths'
-  writeCachedLines cfg ref inList' inPaths'
+  need' "ortholang.modules.seqio.aConcat" inPaths'
+  writeCachedLines inList' inPaths'
   aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
                                       , toPath cfg inList'
                                       , toPath cfg emptyPath]
 aConcat _ _ _ _ _ = fail "bad argument to aConcat"
 
--- writeCachedLines cfg ref outPath content = do
+-- writeCachedLines outPath content = do
 
 -- TODO would it work to just directly creat a string and tack onto paths here?
--- aSimpleScript' :: Bool -> String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+-- aSimpleScript' :: Bool -> String -> ([Path] -> Action ())
 -- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
 
 ------------------------
@@ -389,7 +389,7 @@ splitFastaEach faType = Function
     ext  = extOf faType
     name = "split_" ++ ext ++ "_each"
 
-aSplit :: String -> String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+aSplit :: String -> String -> ([Path] -> Action ())
 aSplit name ext cfg ref _ [outPath, faPath] = do
   let faPath'   = fromPath cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
@@ -408,7 +408,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
   -- out <- wrappedCmdOut False True cfg ref [faPath'] [] [] "split_fasta.py" args
   -- TODO why does this work when loaders are called one at a time, but not as part of a big script?
   -- TODO the IDs are always written properly, so why not the sequences??
-  -- withWriteLock' ref tmpDir' $ do -- why is this required?
+  -- withWriteLock' tmpDir' $ do -- why is this required?
   runCmd cfg ref $ CmdDesc
     { cmdBinary = "split_fasta.py"
     , cmdArguments = args
@@ -422,7 +422,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'', tmpList] -- TODO any more?
     }
-  -- loadPaths <- readPaths cfg ref tmpList
+  -- loadPaths <- readPaths tmpList
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   -- writePaths cfg ref outPath'' loadPaths
   writeCachedVersion cfg ref outPath'' tmpList

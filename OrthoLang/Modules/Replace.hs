@@ -215,8 +215,8 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - 3) then given paths we can build CompiledExprs using the known types
  -
  - But then I remembered Core, which might be able to help:
- - rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
- - type Action1  = Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
+ - rMap :: Int -> ([Path] -> Action ()) -> RulesFn
+ - type Action1  = Path -> Path -> Action ()
  - you give it a single function and an index for the argument to map over, and it does everything
  - but it only works on Action functions, so it will take some adapting to use here
  - it does seem promising though: write replace and get a proper replace_each almost for free?

@@ -180,13 +180,13 @@ prettyResult :: Config -> LocksRef -> Type -> Path -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits cfg ref $ fromPath cfg f
+    lits <- readLits $ fromPath cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths cfg ref $ fromPath cfg f
+    paths <- readPaths $ fromPath cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
 prettyResult cfg ref (ScoresOf _)  f = do
@@ -273,7 +273,7 @@ shakeEnv cfg lRef iRef dRef =
 writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
 writeResult cfg ref idsref path out = do
   -- liftIO $ putStrLn $ "writing result to \"" ++ out ++ "\""
-  unhashIDsFile cfg ref idsref path out
+  unhashIDsFile path out
 
 -- TODO what happens when the txt is a binary plot image?
 -- TODO is this where the diamond makedb error comes in?
@@ -281,7 +281,7 @@ writeResult cfg ref idsref path out = do
 printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printLong _ ref idsref pm _ path = do
   ids <- liftIO $ readIORef idsref
-  txt <- withReadLock' ref path $ readFile' path
+  txt <- withReadLock' path $ readFile' path
   let txt' = unhashIDs False ids txt
   liftIO $ P.putMsgLn pm ("\n" ++ txt')
 
@@ -298,13 +298,13 @@ printShort cfg ref idsref pm rtype path = do
 
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> GlobalEnv -> IO ()
-evalScript hdl s@(scr, c, ref, ids, dRef) =
+evalScript hdl (scr, c, ref, ids, dRef) =
   let res = case lookupResult scr of
               Nothing -> fromJust $ lookupResult $ ensureResult scr
               Just r  -> r
       loadExprs = extractLoads scr res
-      loads = mapM (rExpr s) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-  in eval hdl c ref ids dRef (typeOf res) loads (compileScript s $ RepID Nothing)
+      loads = mapM (rExpr scr) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
+  in eval hdl c ref ids dRef (typeOf res) loads (compileScript scr $ RepID Nothing)
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: GlobalEnv -> Handle -> IO ()

@@ -196,9 +196,9 @@ rParseSearches s@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [searches]) = do
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
-aParseSearches :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
+aParseSearches :: Path -> Path -> Action ()
 aParseSearches cfg ref _ sList out = do
-  parses <- (fmap . map) readSearch (readLits cfg ref sList')
+  parses <- (fmap . map) readSearch (readLits sList')
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
@@ -240,7 +240,7 @@ rBioMartR _ _ _ = error "bad rBioMartR call"
 aBioMartR :: Config -> LocksRef -> IDsRef
           -> Path -> Path -> Path -> Path -> Action ()
 aBioMartR cfg ref _ out bmFn bmTmp sTable = do
-  need' cfg ref "ortholang.modules.biomartr.aBioMartR" [bmFn', sTable']
+  need' "ortholang.modules.biomartr.aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
   -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']

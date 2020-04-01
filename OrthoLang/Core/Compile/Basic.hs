@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 {-|
 This module "compiles" an expression it by translating it into a set of Shake
 build rules. To actually run the rules, use `eval` in the Interpret module.
@@ -154,25 +156,29 @@ rBop _ e = error $ "rBop call with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
-rNamedFunction :: GlobalEnv -> Expr -> String -> Rules ExprPath
+rNamedFunction :: Script -> Expr -> String -> Rules ExprPath
 rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
-rNamedFunction' s@(scr, cfg, _, _, dRef) expr name = case findFunction cfg name of
-  Nothing -> error $ "no such function \"" ++ name ++ "\""
-  Just f  -> case fNewRules f of
-               Nothing -> if "load_" `isPrefixOf` fName f
-                            then (fOldRules f) s $ setSalt 0 expr
-                            else (fOldRules f) s expr
-               -- TODO is this where the digest fails to be added?
-               Just _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
-                             res = ExprPath p
-                         in return $ debugRules cfg "rNamedFunction'" expr res
+rNamedFunction' scr expr name = do
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  case findFunction cfg name of
+    Nothing -> error $ "no such function \"" ++ name ++ "\""
+    Just f  -> case fNewRules f of
+                 Nothing -> if "load_" `isPrefixOf` fName f
+                              then (fOldRules f) scr $ setSalt 0 expr
+                              else (fOldRules f) scr expr
+                 -- TODO is this where the digest fails to be added?
+                 Just _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
+                               res = ExprPath p
+                           in return $ debugRules cfg "rNamedFunction'" expr res
 
-rAssign :: GlobalEnv -> Assign -> Rules (Var, VarPath)
-rAssign s@(_, cfg, _, _, _) (var, expr) = do
-  (ExprPath path) <- rExpr s expr
-  path' <- rVar s var expr $ toPath cfg path
+rAssign :: Script -> Assign -> Rules (Var, VarPath)
+rAssign scr (var, expr) = do
+  (ExprPath path) <- rExpr scr expr
+  cfg <- fmap fromJust getShakeExtraRules
+  path' <- rVar var expr $ toPath cfg path
   let res  = (var, path')
       res' = debugRules cfg "rAssign" (var, expr) res
   return res'
@@ -180,14 +186,14 @@ rAssign s@(_, cfg, _, _, _) (var, expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
-compileScript :: GlobalEnv -> RepID -> Rules ResPath
-compileScript s@(scr, _, _, _, _) _ = do
+compileScript :: Script -> RepID -> Rules ResPath
+compileScript scr _ = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
-  rpaths <- mapM (rAssign s) scr
+  rpaths <- mapM (rAssign scr) scr -- TODO is having scr be both an issue? 
   res <- case lookupResult rpaths of
-    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr s $ fromJust $ lookupResult $ ensureResult scr
+    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr scr $ fromJust $ lookupResult $ ensureResult scr
     Just r  -> fmap (\(VarPath  p) -> p) $ return r
   return $ ResPath res
   -- where
@@ -198,23 +204,26 @@ compileScript s@(scr, _, _, _, _) _ = do
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn
-rLit s@(scr, cfg, ref, ids, dRef) expr = do
+rLit scr expr = do
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let path  = exprPath cfg dRef scr expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromPath cfg path
-  path' %> \_ -> aLit cfg ref ids expr path
+  path' %> \_ -> aLit expr path
   return (ExprPath path')
 
 -- TODO take the path, not the expression?
 -- TODO these actions all need to decode their dependencies from the outpath rather than the expression
-aLit :: Config -> LocksRef -> IDsRef -> Expr -> Path -> Action ()
-aLit cfg ref _ expr out = writeLit cfg ref out'' ePath -- TODO too much dedup?
-  where
-    paths :: Expr -> FilePath
-    paths (Lit _ _ p) = p
-    paths _ = fail "bad argument to paths"
-    ePath = paths expr
-    out'  = fromPath cfg out
-    out'' = traceA "aLit" out' [ePath, out']
+aLit :: Expr -> Path -> Action ()
+aLit expr out = do
+  cfg <- fmap fromJust getShakeExtra
+  let paths :: Expr -> FilePath
+      paths (Lit _ _ p) = p
+      paths _ = fail "bad argument to paths"
+      ePath = paths expr
+      out'  = fromPath cfg out
+      out'' = traceA "aLit" out' [ePath, out']
+  writeLit out'' ePath -- TODO too much dedup?
 
 {-|
 Lists written explicitly in the source code (not generated by function calls).
@@ -256,28 +265,29 @@ TODO can it be mostly unified with rListPaths digest-wise?
 TODO what happens when you make a list of literals in two steps using links?
 -}
 rListLits :: RulesFn
-rListLits s@(scr, cfg, ref, ids, dRef) e@(Lst _ _ _ exprs) = do
-  litPaths <- mapM (rExpr s) exprs
+rListLits scr e@(Lst _ _ _ exprs) = do
+  litPaths <- mapM (rExpr scr) exprs
+  cfg <- fmap fromJust getShakeExtraRules
   let litPaths' = map (\(ExprPath p) -> toPath cfg p) litPaths
-  outPath' %> \_ -> aListLits cfg ref ids litPaths' outPath
+  dRef <- fmap fromJust getShakeExtraRules
+  let outPath  = exprPath cfg dRef scr e
+      outPath' = debugRules cfg "rListLits" e $ fromPath cfg outPath
+  outPath' %> \_ -> aListLits litPaths' outPath
   return (ExprPath outPath')
-  where
-    outPath  = exprPath cfg dRef scr e
-    outPath' = debugRules cfg "rListLits" e $ fromPath cfg outPath
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
 -- TODO put this in a cache dir by content hash and link there
-aListLits :: Config -> LocksRef -> IDsRef -> [Path] -> Path -> Action ()
-aListLits cfg ref _ paths outPath = do
+aListLits :: [Path] -> Path -> Action ()
+aListLits paths outPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'   = fromPath cfg outPath
+      out''  = traceA "aListLits" out' (out':paths')
+      paths' = map (fromPath cfg) paths
   need paths'
-  lits <- mapM (readLit cfg ref) paths'
+  lits <- mapM readLit paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
   debugA "core.compile.basic.aListLits" $ "lits': " ++ show lits'
-  writeLits cfg ref out'' lits'
-  where
-    out'   = fromPath cfg outPath
-    out''  = traceA "aListLits" out' (out':paths')
-    paths' = map (fromPath cfg) paths
+  writeLits out'' lits'
 
 {-|
 Regular case for writing a list of links to some other file type
@@ -300,62 +310,68 @@ known until after the function runs.
 TODO hash mismatch error here?
 -}
 rListPaths :: RulesFn
-rListPaths s@(scr, cfg, ref, ids, dRef) e@(Lst rtn salt _ exprs) = do
-  paths <- mapM (rExpr s) exprs
+rListPaths scr e@(Lst rtn salt _ exprs) = do
+  paths <- mapM (rExpr scr) exprs
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let paths'   = map (\(ExprPath p) -> toPath cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath  = exprPath cfg dRef scr e
       outPath' = debugRules cfg "rListPaths" e $ fromPath cfg outPath
-  outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
+  outPath' %> \_ -> aListPaths paths' outPath
   return (ExprPath outPath')
 rListPaths _ _ = error "bad arguemnts to rListPaths"
 
-aListPaths :: Config -> LocksRef -> IDsRef -> [Path] -> Path -> Action ()
-aListPaths cfg ref _ paths outPath = do
-  need' cfg ref "core.compile.basic.aListPaths" paths'
+aListPaths :: [Path] -> Path -> Action ()
+aListPaths paths outPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'   = fromPath cfg outPath
+      out''  = traceA "aListPaths" out' (out':paths')
+      paths' = map (fromPath cfg) paths -- TODO remove this
+  need' "core.compile.basic.aListPaths" paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  need' cfg ref "core.compile.basic.aListPaths" paths''
+  need' "core.compile.basic.aListPaths" paths''
   let paths''' = map (toPath cfg) paths'' -- TODO not working?
-  writePaths cfg ref out'' paths'''
-  where
-    out'   = fromPath cfg outPath
-    out''  = traceA "aListPaths" out' (out':paths')
-    paths' = map (fromPath cfg) paths -- TODO remove this
+  writePaths out'' paths'''
 
 -- return a link to an existing named variable
 -- (assumes the var will be made by other rules)
 rRef :: RulesFn
-rRef (_, cfg, _, _, _) e@(Ref _ _ _ var) = return $ ePath $ varPath cfg var e
-  where
-    ePath p = ExprPath $ debugRules cfg "rRef" e $ fromPath cfg p
+rRef _ e@(Ref _ _ _ var) = do
+  cfg <- fmap fromJust getShakeExtraRules
+  let ePath p = ExprPath $ debugRules cfg "rRef" e $ fromPath cfg p
+  return $ ePath $ varPath cfg var e
+    
 rRef _ _ = fail "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.
 -- TODO unify with rLink2, rLoad etc?
 -- TODO do we need both the Expr and ExprPath? seems like Expr would do
-rVar :: GlobalEnv -> Var -> Expr -> Path -> Rules VarPath
-rVar (_, cfg, ref, ids, dRef) var expr oPath = do
-  vPath' %> \_ -> aVar cfg ref ids vPath oPath
+rVar :: Var -> Expr -> Path -> Rules VarPath
+rVar var expr oPath = do
+  cfg <- fmap fromJust getShakeExtraRules
+  let vPath  = varPath cfg var expr
+      vPath' = debugRules cfg "rVar" var $ fromPath cfg vPath
+  vPath' %> \_ -> aVar vPath oPath
   return (VarPath vPath')
-  where
-    vPath  = varPath cfg var expr
-    vPath' = debugRules cfg "rVar" var $ fromPath cfg vPath
 
-aVar :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
-aVar cfg ref _ vPath oPath = do
+aVar :: Path -> Path -> Action ()
+aVar vPath oPath = do
   alwaysRerun
-  need' cfg ref "core.compile.basic.aVar" [oPath']
+  cfg <- fmap fromJust getShakeExtra
+  let oPath'  = fromPath cfg oPath
+      vPath'  = fromPath cfg vPath
+      vPath'' = traceA "aVar" vPath [vPath', oPath']
+  need' "core.compile.basic.aVar" [oPath']
+  ref <- fmap fromJust getShakeExtra
   liftIO $ removeIfExists ref vPath'
   -- TODO should it sometimes symlink and sometimes copy?
   -- TODO before copying, think about how you might have to re-hash again!
-  symlink cfg ref vPath'' oPath
+  symlink vPath'' oPath
   -- ids' <- liftIO $ readIORef ids
-  -- unhashIDsFile cfg ref ids' oPath vPath''
+  -- unhashIDsFile ' oPath vPath''
   where
-    oPath'  = fromPath cfg oPath
-    vPath'  = fromPath cfg vPath
-    vPath'' = traceA "aVar" vPath [vPath', oPath']
 
 
 ------------------------------
@@ -415,59 +431,63 @@ mkLoadList hashSeqIDs name rtn = Function
 -- link to. So after compiling it we get a path to *that str*, and have to read
 -- the file to access it. Then we want to `ln` to the file it points to.
 rLoad :: Bool -> RulesFn
-rLoad hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [p]) = do
-  (ExprPath strPath) <- rExpr s p
-  out' %> \_ -> aLoad hashSeqIDs cfg ref ids (toPath cfg strPath) out
+rLoad hashSeqIDs scr e@(Fun _ _ _ _ [p]) = do
+  (ExprPath strPath) <- rExpr scr p
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  let out  = exprPath cfg dRef scr e
+      out' = fromPath cfg out
+  out' %> \_ -> aLoad hashSeqIDs (toPath cfg strPath) out
   return (ExprPath out')
-  where
-    out  = exprPath cfg dRef scr e
-    out' = fromPath cfg out
 rLoad _ _ _ = fail "bad argument to rLoad"
 
 -- TODO is running this lots of times at once the problem?
 -- TODO see if shake exports code for only hashing when timestamps change
 -- TODO remove ext? not sure it does anything
-aLoadHash :: Bool -> Config -> LocksRef -> IDsRef -> Path -> String -> Action Path
-aLoadHash hashSeqIDs cfg ref ids src _ = do
+aLoadHash :: Bool -> Path -> String -> Action Path
+aLoadHash hashSeqIDs src _ = do
   alwaysRerun
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
-  need' cfg ref "core.compile.basic.aLoadHash" [src']
-  md5 <- hashContent cfg ref src -- TODO permission error here?
+  cfg <- fmap fromJust getShakeExtra
+  let src' = fromPath cfg src
+  need' "core.compile.basic.aLoadHash" [src']
+  md5 <- hashContent src -- TODO permission error here?
   let tmpDir'   = fromPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
       hashPath' = tmpDir' </> md5 -- <.> ext
       hashPath  = toPath cfg hashPath'
   if not hashSeqIDs
-    then symlink cfg ref hashPath src
+    then symlink hashPath src
     else do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toPath cfg idsPath'
 
-      unlessExists idsPath' $ hashIDsFile2 cfg ref src hashPath
+      unlessExists idsPath' $ hashIDsFile2 src hashPath
 
       let (Path k) = hashPath
           v = takeFileName src'
-      newIDs <- readIDs cfg ref idsPath
+      newIDs <- readIDs idsPath
+      ids <- fmap fromJust getShakeExtra
       liftIO $ atomicModifyIORef' ids $
         \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
                                                        , hSeqIDs = M.insert k newIDs s}, ())
 
   return hashPath
-  where
-    src' = fromPath cfg src
 
 -- This is hacky, but should work with multiple protocols like http(s):// and ftp://
 isURL :: String -> Bool
 isURL s = "://" `isInfixOf` take 10 s
 
 -- TODO move to Load module?
-curl :: Config -> LocksRef -> String -> Action Path
-curl cfg ref url = do
+curl :: String -> Action Path
+curl url = do
   -- liftIO $ putStrLn $ "url: " ++ url
+  (cfg :: Config) <- fmap fromJust getShakeExtra
   let verbosity = if isJust (cfgDebug cfg) then "" else "-s"
       cDir      = fromPath cfg $ cacheDir cfg "curl"
       outPath   = cDir </> digest url
   liftIO $ createDirectoryIfMissing True cDir
-  runCmd cfg ref $ CmdDesc
+  (ref :: LocksRef) <- fmap fromJust getShakeExtra
+  runCmd $ CmdDesc
     { cmdBinary = "download.sh"
     , cmdArguments = [outPath, url, verbosity]
     , cmdFixEmpties = False
@@ -482,35 +502,36 @@ curl cfg ref url = do
     }
   return $ toPath cfg outPath
 
-aLoad :: Bool -> Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
-aLoad hashSeqIDs cfg ref ids strPath outPath = do
+aLoad :: Bool -> Path -> Path -> Action ()
+aLoad hashSeqIDs strPath outPath = do
   alwaysRerun
-  need' cfg ref "core.compile.basic.aLoad" [strPath']
-  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits cfg ref strPath' -- TODO safer!
+  cfg <- fmap fromJust getShakeExtra
+  let strPath'  = fromPath cfg strPath
+      outPath'  = fromPath cfg outPath
+      outPath'' = traceA "aLoad" outPath [strPath', outPath']
+      toAbs line = if isAbsolute line
+                     then line
+                     else cfgWorkDir cfg </> line
+  need' "core.compile.basic.aLoad" [strPath']
+  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits strPath' -- TODO safer!
   -- liftIO $ putStrLn $ "pth: " ++ pth
   pth' <- if isURL pth
-            then curl cfg ref pth
+            then curl pth
             else fmap (toPath cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
   -- liftIO $ putStrLn $ "pth': " ++ show pth'
   -- src' <- if isURL pth
-            -- then curl cfg ref pth
+            -- then curl ref pth
             -- else 
   -- liftIO $ putStrLn $ "src': " ++ src'
   -- debugA $ "aLoad src': \"" ++ src' ++ "\""
   -- debugA $ "aLoad outPath': \"" ++ outPath' ++ "\""
   -- TODO why doesn't this rerun?
-  hashPath <- aLoadHash hashSeqIDs cfg ref ids pth' (takeExtension outPath')
+  hashPath <- aLoadHash hashSeqIDs pth' (takeExtension outPath')
   -- let hashPath'    = fromPath cfg hashPath
       -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
-  symlink cfg ref outPath'' hashPath
-  -- trackWrite' cfg [outPath'] -- TODO WTF? why does this not get called by symlink?
+  symlink outPath'' hashPath
+  -- trackWrite' [outPath'] -- TODO WTF? why does this not get called by symlink?
   where
-    strPath'  = fromPath cfg strPath
-    outPath'  = fromPath cfg outPath
-    outPath'' = traceA "aLoad" outPath [strPath', outPath']
-    toAbs line = if isAbsolute line
-                   then line
-                   else cfgWorkDir cfg </> line
 
 rLoadList :: Bool -> RulesFn
 rLoadList hashSeqIDs s e@(Fun (ListOf r) _ _ _ [es])
@@ -523,55 +544,59 @@ rLoadList _ _ _ = fail "bad arguments to rLoadList"
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 -- TODO don't need to hash seqids here right?
 rLoadListLits :: RulesFn
-rLoadListLits s@(scr, cfg, ref, ids, dRef) expr = do
-  (ExprPath litsPath') <- rExpr s expr
-  let litsPath = toPath cfg litsPath'
-  outPath' %> \_ -> aLoadListLits cfg ref ids outPath litsPath
+rLoadListLits scr expr = do
+  (ExprPath litsPath') <- rExpr scr expr
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  let outPath  = exprPath cfg dRef scr expr
+      outPath' = fromPath cfg outPath
+      litsPath = toPath cfg litsPath'
+  outPath' %> \_ -> aLoadListLits outPath litsPath
   return (ExprPath outPath')
   where
-    outPath  = exprPath cfg dRef scr expr
-    outPath' = fromPath cfg outPath
 
-aLoadListLits :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
-aLoadListLits cfg ref _ outPath litsPath = do
+aLoadListLits :: Path -> Path -> Action ()
+aLoadListLits outPath litsPath = do
+  cfg  <- fmap fromJust getShakeExtra
   let litsPath' = fromPath cfg litsPath
+      outPath'  = fromPath cfg outPath
       out       = traceA "aLoadListLits" outPath' [outPath', litsPath']
-  lits  <- readLits cfg ref litsPath'
+  lits  <- readLits litsPath'
   lits' <- liftIO $ mapM absolutize lits
-  writeLits cfg ref out lits'
-  where
-    outPath' = fromPath cfg outPath
+  writeLits out lits'
 
 -- regular case for lists of any other file type
 -- TODO hash mismatch here?
 rLoadListPaths :: Bool -> RulesFn
-rLoadListPaths hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun rtn salt _ _ [es]) = do
-  (ExprPath pathsPath) <- rExpr s es
+rLoadListPaths hashSeqIDs scr e@(Fun rtn salt _ _ [es]) = do
+  (ExprPath pathsPath) <- rExpr scr es
   -- let hash     = digest $ toPath cfg pathsPath
   --     outPath  = unsafeExprPathExplicit cfg "list" rtn salt [hash]
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr e
       outPath' = fromPath cfg outPath
-  outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toPath cfg pathsPath) outPath
+  outPath' %> \_ -> aLoadListLinks hashSeqIDs (toPath cfg pathsPath) outPath
   return (ExprPath outPath')
 rLoadListPaths _ _ _ = fail "bad arguments to rLoadListPaths"
 
-aLoadListLinks :: Bool -> Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
-aLoadListLinks hashSeqIDs cfg ref ids pathsPath outPath = do
+aLoadListLinks :: Bool -> Path -> Path -> Action ()
+aLoadListLinks hashSeqIDs pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
   -- through as a (ListOf str) here; have to read as Strings and convert to
   -- Paths
   -- alwaysRerun -- TODO does this help?
-  paths <- readLitPaths cfg ref pathsPath'
+  cfg <- fmap fromJust getShakeExtra
+  let outPath'   = fromPath cfg outPath
+      pathsPath' = fromPath cfg pathsPath
+      out = traceA "aLoadListLinks" outPath' [outPath', pathsPath']
+  paths <- readLitPaths pathsPath'
   let paths' = map (fromPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   let paths''' = map (toPath cfg) paths''
-  hashPaths <- mapM (\p -> aLoadHash hashSeqIDs cfg ref ids p
+  hashPaths <- mapM (\p -> aLoadHash hashSeqIDs p
                          $ takeExtension $ fromPath cfg p) paths'''
   let hashPaths' = map (fromPath cfg) hashPaths
   -- debugA $ "about to need: " ++ show paths''
-  need' cfg ref "core.compile.basic.aLoadListLinks" hashPaths'
-  writePaths cfg ref out hashPaths
-  where
-    outPath'   = fromPath cfg outPath
-    pathsPath' = fromPath cfg pathsPath
-    out = traceA "aLoadListLinks" outPath' [outPath', pathsPath']
+  need' "core.compile.basic.aLoadListLinks" hashPaths'
+  writePaths out hashPaths

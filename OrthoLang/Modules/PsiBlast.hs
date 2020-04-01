@@ -127,15 +127,15 @@ aPsiblastTrainDb = aPsiblastDb True trainingArgs
 aPsiblastSearchDb :: Action3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
 
-aPsiblastDb' :: Bool -> [String] -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aPsiblastDb' :: Bool -> [String] -> [Path] -> Action ()
 aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
   aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
 aPsiblastDb' _ _ _ _ _ _ = fail "bad argument to aPsiblastDb'"
 
-aPsiblastTrainDb' :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aPsiblastTrainDb' :: [Path] -> Action ()
 aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
 
-aPsiblastSearchDb' :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aPsiblastSearchDb' :: [Path] -> Action ()
 aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
@@ -148,7 +148,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
       ePath'  = fromPath cfg ePath
       qPath'  = fromPath cfg qPath -- might be a fasta or pssm
       dbPath' = fromPath cfg dbPath
-  need' cfg ref "ortholang.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
+  need' "ortholang.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
 
   eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
 
@@ -182,9 +182,9 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
 
   -- before running psiblast, check whether the query is an empty pssm
   -- and if so, just return empty hits immediately
-  lines2 <- fmap (take 2 . lines) $ readFileStrict' cfg ref qPath'
+  lines2 <- fmap (take 2 . lines) $ readFileStrict' qPath'
   if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
-    then writeCachedLines cfg ref oPath' ["<<emptybht>>"]
+    then writeCachedLines oPath' ["<<emptybht>>"]
     else do
 
       -- TODO need Cwd here too, or maybe instead?
@@ -216,14 +216,14 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
        -}
       when writingPssm $ do
         let head' = headOrDie "aPsiblastDb failed to read querySeqId"
-        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' cfg ref qPath'
-        pssmLines <- fmap lines $ readFileStrict' cfg ref tPath'
+        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' qPath'
+        pssmLines <- fmap lines $ readFileStrict' tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName dbPre'
             trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"
             queryInfo  = unwords [querySeqId, trainInfo]
             pssmWithId = queryInfo : pssmLines'
-        writeCachedLines cfg ref oPath'' pssmWithId
+        writeCachedLines oPath'' pssmWithId
         -- liftIO $ removeFile tPath'
     
 ----------------------------------------------

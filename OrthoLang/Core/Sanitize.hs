@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module OrthoLang.Core.Sanitize
   -- ( hashIDsFile
@@ -37,7 +38,7 @@ import OrthoLang.Locks   (withWriteLock')
 import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
 import OrthoLang.Core.Paths   (toPath, fromPath)
 import Data.Char             (isSpace)
-import Data.Maybe            (catMaybes, mapMaybe)
+import Data.Maybe            (catMaybes, mapMaybe, fromJust)
 import Data.List             (isPrefixOf, intersperse)
 import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName, takeDirectory, (<.>))
@@ -68,20 +69,21 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 -- hashIDsFile cfg ref inPath outPath = do
 --   let inPath'  = fromPath cfg inPath
 --       outPath' = fromPath cfg outPath
---   -- txt <- withReadLock' ref inPath' $ readFile' $ fromPath cfg inPath
---   txt <- readFileStrict' cfg ref inPath'
+--   -- txt <- withReadLock' inPath' $ readFile' $ fromPath cfg inPath
+--   txt <- readFileStrict' inPath'
 --   let (!fasta', !ids) = hashIDsTxt txt
 --       (Path k) = outPath
 --       v = takeFileName inPath'
 --       -- ids' = trace ("k: \"" ++ k ++ "' v: \"" ++ v ++ "\"") $ M.insert k v ids
 --       ids' = M.insert k v ids
---   withWriteLock' ref outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
---   trackWrite' cfg [outPath']
+--   withWriteLock' outPath' $ liftIO $ writeFile outPath' fasta' -- TODO be strict?
+--   trackWrite' [outPath']
 --   return ids'
 
 -- rewrite of hashIDsFile as a python script; will it fix the space leak?
-hashIDsFile2 :: Config -> LocksRef -> Path -> Path -> Action ()
-hashIDsFile2 cfg ref inFa outFa = do
+hashIDsFile2 :: Path -> Path -> Action ()
+hashIDsFile2 inFa outFa = do
+  cfg <- fmap fromJust getShakeExtra
   let inFa'   = fromPath cfg inFa
       outFa'  = fromPath cfg outFa
       outIDs' = outFa' <.> "ids"
@@ -91,7 +93,8 @@ hashIDsFile2 cfg ref inFa outFa = do
       -- ids' = M.insert k v ids
   liftIO $ createDirectoryIfMissing True $ takeDirectory inFa'
   liftIO $ createDirectoryIfMissing True $ takeDirectory outFa'
-  runCmd cfg ref $ CmdDesc
+  (ref :: LocksRef) <- fmap fromJust getShakeExtra
+  runCmd $ CmdDesc
     { cmdBinary = "hash_seqids.py"
     , cmdArguments = [outFa', inFa']
     , cmdFixEmpties = False
@@ -107,13 +110,13 @@ hashIDsFile2 cfg ref inFa outFa = do
 
 -- writeIDs :: Config -> LocksRef -> Path -> IDs -> Action ()
 -- writeIDs cfg ref path ids = do
---   withWriteLock' ref path'
+--   withWriteLock' path'
 --     $ liftIO
 --     $ writeFile path' -- TODO be strict?
 --     $ unlines
 --     $ map toLine
 --     $ M.toList ids
---   trackWrite' cfg [path']
+--   trackWrite' [path']
 --   where
 --     path' = fromPath cfg path
 --     toLine (h, i) = h ++ "\t" ++ i
@@ -154,30 +157,33 @@ unhashIDs longIDs ids t = case findNext t of
 
 -- This sometimes operates internally, but also writes the final result of the cut to a file.
 -- In that case the outpath might not be able to be a cutpath.
-unhashIDsFile :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
-unhashIDsFile cfg ref idref inPath outPath = do
+unhashIDsFile :: Path -> FilePath -> Action ()
+unhashIDsFile inPath outPath = do
+  cfg <- fmap fromJust getShakeExtra
   let inPath'  = fromPath cfg inPath
-  -- txt <- withReadLock' ref inPath' $ readFile' $ fromPath cfg inPath
-  txt <- readFileStrict' cfg ref inPath'
+  -- txt <- withReadLock' inPath' $ readFile' $ fromPath cfg inPath
+  txt <- readFileStrict' inPath'
   -- liftIO $ putStrLn $ "txt: \"" ++ txt ++ "\""
   -- let txt' = unhashIDs ids txt
+  idref <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idref
   -- liftIO $ putStrLn $ "ids: " ++ show ids
   let txt' = unhashIDs False ids txt
   -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""
-  withWriteLock' ref outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
-  trackWrite' cfg [outPath]
+  withWriteLock' outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
+  trackWrite' [outPath]
 
 -- from: https://stackoverflow.com/a/40297465
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
 -- TODO should this be IO or Action?
-readIDs :: Config -> LocksRef -> Path -> Action (M.Map String String)
-readIDs cfg ref path = do
+readIDs :: Path -> Action (M.Map String String)
+readIDs path = do
+  cfg <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
-  -- txt <- withReadLock' ref path' $ readFile' path'
-  txt <- readFileStrict' cfg ref path'
+  -- txt <- withReadLock' path' $ readFile' path'
+  txt <- readFileStrict' path'
   -- let splitFn l = let ws = split "\t" l
   --                 in if length ws < 2
   --                      then error ("failed to split \"" ++ l ++ "\"")
@@ -205,9 +211,12 @@ lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
     xs  -> trace "core.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)
 
 -- TODO move to Actions? causes an import cycle so far
-lookupIDsFile :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
-lookupIDsFile cfg ref ids inPath outPath = do
-  partialIDs <- readList cfg ref $ fromPath cfg inPath
+lookupIDsFile :: Path -> Path -> Action ()
+lookupIDsFile inPath outPath = do
+  cfg <- fmap fromJust getShakeExtra
+  (ref :: LocksRef) <- fmap fromJust getShakeExtra
+  partialIDs <- readList $ fromPath cfg inPath
+  ids <- fmap fromJust getShakeExtra
   ids' <- liftIO $ readIORef ids
   let lookupFn v = case lookupID ids' v of
                      Just i  -> return i
@@ -215,4 +224,4 @@ lookupIDsFile cfg ref ids inPath outPath = do
                        liftIO $ putStrLn ("warning: no ID found for \"" ++ v ++ "\"")
                        return v
   idKeys <- mapM lookupFn partialIDs
-  writeCachedLines cfg ref (fromPath cfg outPath) idKeys
+  writeCachedLines (fromPath cfg outPath) idKeys

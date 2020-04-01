@@ -61,7 +61,7 @@ versionScripts os = map (\(a,b) -> (a, os ++ ":" ++ b))
   ]
 
 -- Unlike the other tests, these don't need access to the runtime config
-mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+mkTests :: DigestsRef -> IO TestTree
 mkTests cfg _ _ _ = do
   testDir <- getDataFileName $ "tests"
   U.debug "test.versions" $ "test dir is " ++ testDir

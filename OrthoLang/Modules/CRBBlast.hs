@@ -73,9 +73,9 @@ blastCRBEach = Function
  -
  - TODO adjust cache paths to be deterministic!
  -}
-aCRBBlast :: Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ()
+aCRBBlast :: Path -> [Path] -> Action ()
 aCRBBlast cfg ref _ tmpDir [o, q, t] = do
-  need' cfg ref "ortholang.modules.crbblast.aCRBBlast" [q', t']
+  need' "ortholang.modules.crbblast.aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
@@ -90,7 +90,7 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
       tDst' = toPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toPath cfg oPath
-  need' cfg ref "ortholang.core.modules.crbblast.aCRBBlast" [qDst, tDst]
+  need' "ortholang.core.modules.crbblast.aCRBBlast" [qDst, tDst]
   symlink cfg ref qSrc' qDst'
   symlink cfg ref tSrc' tDst'
   runCmd cfg ref $ CmdDesc

@@ -65,13 +65,13 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- digestExamples :: GlobalEnv -> [(String, Expr)] -> IO [(String, Expr, DigestMap)]
 -- digestExamples st = mapM (digestExample st)
 
-regularParse :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Either String a
+regularParse :: ParseM a -> String -> Either String a
 regularParse p cfg ref ids = parseWithEof p (cfg, emptyScript)
 
 takeVar :: String -> Var
 takeVar = Var (RepID Nothing) . takeWhile (flip elem $ vNonFirstChars)
 
-parsedItAll :: ParseM a -> Config -> LocksRef -> IDsRef -> String -> Bool
+parsedItAll :: ParseM a -> String -> Bool
 parsedItAll p cfg ref ids str' = case parseWithLeftOver p (cfg, emptyScript) str' of
   Right (_, "") -> True
   _ -> False
@@ -94,7 +94,7 @@ roundTrip cfg ref ids psr code = case regularParse psr cfg ref ids code of
 Test that a list of example strings can be parsed + printed + parsed,
 and both parses come out correctly, or return the first error.
 -}
-tripExamples :: (Eq a, Show a, Pretty a) => Config -> LocksRef -> IDsRef -> ParseM a
+tripExamples :: (Eq a, Show a, Pretty a) => ParseM a
              -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ _ _ [] = Right ()
 tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
@@ -107,7 +107,7 @@ tripExamples cfg ref ids p ((a,b):xs) = case roundTrip cfg ref ids p a of
 -- tests --
 -----------
 
-mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+mkTests :: DigestsRef -> IO TestTree
 mkTests cfg ref ids _ = return $ testGroup "test parser"
   [ exTests cfg ref ids
   , wsProps cfg ref ids
@@ -120,7 +120,7 @@ mkCase :: (Show a, Eq a, Pretty a) => Config -> LocksRef -> IDsRef
 mkCase cfg ref ids name parser examples =
   testCase name $ Right () @=? tripExamples cfg ref ids parser examples
 
-exTests :: Config -> LocksRef -> IDsRef -> TestTree
+exTests :: TestTree
 exTests cfg ref ids = testGroup "round-trip handwritten cut code"
   [ mkCase cfg ref ids "function calls"   pFun       exFuns
   , mkCase cfg ref ids "terms"            pTerm      exTerms
@@ -129,7 +129,7 @@ exTests cfg ref ids = testGroup "round-trip handwritten cut code"
   -- , mkCase cfg "binary operators" pBop       exBops
   ]
 
-wsProps :: Config -> LocksRef -> IDsRef -> TestTree
+wsProps :: TestTree
 wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(Var _ s)) (ExSpace w) ->
@@ -148,7 +148,7 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   ]
 
 -- TODO use round-trip here too
-acProps :: Config -> LocksRef -> IDsRef -> TestTree
+acProps :: TestTree
 acProps cfg ref ids = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
       \(ExVar v@(Var _ s)) -> parseWithLeftOver pVar (cfg, emptyScript) s == Right (v, "")

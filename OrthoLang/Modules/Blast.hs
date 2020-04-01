@@ -84,7 +84,7 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = Function
 rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
-aMkBlastFromDb :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+aMkBlastFromDb :: String -> ([Path] -> Action ())
 aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   eStr   <- readLit cfg ref e'
   prefix <- readPath cfg ref p'

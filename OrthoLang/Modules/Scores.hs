@@ -42,7 +42,7 @@ orthoLangModule = Module
 
 aScores :: Config -> LocksRef -> Path -> Path -> Type -> Path -> Action ()
 aScores cfg ref scoresPath othersPath othersType outPath = do
-  scores <- readLits cfg ref $ fromPath cfg scoresPath
+  scores <- readLits $ fromPath cfg scoresPath
   others <- readStrings othersType cfg ref $ fromPath cfg othersPath
   let out' = fromPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others

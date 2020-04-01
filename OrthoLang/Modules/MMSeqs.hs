@@ -49,9 +49,9 @@ mms = Type
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \_ ref path -> do
       path' <- fmap (-<.> "lookup") $ resolveSymlinks Nothing path
-      Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
+      Stdout out <- withReadLock path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
-      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' cfg ref path'
+      -- h5    <- fmap (take 5 . lines) $ withReadLock path $ readFileStrict' path'
       let desc = "MMSeqs2 database (" ++ n ++ " sequences)" -- TODO include a hash?
       return desc
   }
@@ -88,7 +88,7 @@ rMmseqsCreateDbAll s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [fas]) = do
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
-      faPaths <- readPaths cfg ref fasPath
+      faPaths <- readPaths fasPath
       let faPaths' = map (fromPath cfg) faPaths
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?

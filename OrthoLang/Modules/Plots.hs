@@ -179,12 +179,12 @@ rPlotListOfLists script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [lol]) =
       outPath'' = ExprPath outPath'
       cDir      = fromPath cfg $ plotCache cfg
   outPath' %> \_ -> do
-    need' cfg ref "rPlotListOfLists" $ map (fromPath cfg) lists
+    need' "rPlotListOfLists" $ map (fromPath cfg) lists
     -- write labels + list paths to the cache dir
     let labPath  = cDir </> digest expr ++ "_names.txt"
         aLolPath = cDir </> digest expr ++ "_lists.txt"
     liftIO $ createDirectoryIfMissing True cDir
-    writeCachedLines cfg ref labPath labels
+    writeCachedLines labPath labels
     writeLits cfg ref aLolPath $ map (fromPath cfg) lists
     let args = [labPath, aLolPath]
     -- call the main script

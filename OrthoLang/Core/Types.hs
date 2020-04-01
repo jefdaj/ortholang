@@ -107,9 +107,9 @@ newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
 
 -- Note that each ActionN takes N+1 Paths, because the first is the output
 -- TODO take the output last instead?
-type Action1 = Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
-type Action2 = Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Action ()
-type Action3 = Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Path -> Action ()
+type Action1 = Path -> Path -> Action ()
+type Action2 = Path -> Path -> Path -> Action ()
+type Action3 = Path -> Path -> Path -> Path -> Action ()
 
 -- TODO remove when able in favor of well-typed versions above
 type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()

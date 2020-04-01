@@ -80,10 +80,10 @@ rSetFold fn s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [lol]) = do
   return (ExprPath oPath'')
 rSetFold _ _ _ = fail "bad argument to rSetFold"
 
-aSetFold :: Config -> LocksRef -> IDsRef -> ([Set String] -> Set String)
+aSetFold :: ([Set String] -> Set String)
          -> Type -> FilePath -> FilePath -> Action ()
 aSetFold cfg ref idsRef fn (ListOf etype) oPath setsPath = do
-  setPaths  <- readPaths cfg ref setsPath
+  setPaths  <- readPaths setsPath
   setElems  <- mapM (readStrings etype cfg ref) (map (fromPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   ids <- liftIO $ readIORef idsRef

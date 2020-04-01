@@ -19,14 +19,14 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
-mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
-            -> [Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree] -> IO TestTree
+mkTestGroup ::  DigestsRef -> String
+            -> [DigestsRef -> IO TestTree] -> IO TestTree
 mkTestGroup cfg ref ids dRef name trees = do
   let trees' = mapM (\t -> t cfg ref ids dRef) trees
   trees'' <- trees'
   return $ testGroup name trees''
 
-mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+mkTests :: DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = mkTestGroup cfg ref ids dRef "mock REPL interaction"
                 [goldenRepls, goldenReplTrees]
 
@@ -48,7 +48,7 @@ mockPrompt handle stdinStr promptStr = do
 -- TODO why did this get messed up??
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
-mockRepl :: [String] -> FilePath -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
+mockRepl :: [String] -> FilePath -> DigestsRef -> IO ()
 mockRepl stdinLines path cfg ref ids dRef = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
@@ -62,7 +62,7 @@ mockRepl stdinLines path cfg ref ids dRef = do
   return ()
 
 -- TODO include goldenTree here too (should pass both at once)
-goldenRepl :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestTree
+goldenRepl :: DigestsRef -> FilePath -> IO TestTree
 goldenRepl cfg ref ids dRef goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
@@ -89,14 +89,14 @@ findGoldenFiles = do
   let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
   return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles'
 
-goldenRepls :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+goldenRepls :: DigestsRef -> IO TestTree
 goldenRepls cfg ref ids dRef = do
   golds <- findGoldenFiles
   let tests = mapM (goldenRepl cfg ref ids dRef) golds
       group = testGroup "prints expected output"
   fmap group tests
 
-goldenReplTree :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestTree
+goldenReplTree :: DigestsRef -> FilePath -> IO TestTree
 goldenReplTree cfg ref ids dRef ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
@@ -118,7 +118,7 @@ goldenReplTree cfg ref ids dRef ses = do
                  return $ pack $ toGeneric cfg out
   return $ goldenVsString desc tree action
 
-goldenReplTrees :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
+goldenReplTrees :: DigestsRef -> IO TestTree
 goldenReplTrees cfg ref ids dRef = do
   txts <- findGoldenFiles
   let tests = mapM (goldenReplTree cfg ref ids dRef) txts

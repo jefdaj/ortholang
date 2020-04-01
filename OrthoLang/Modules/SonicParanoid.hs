@@ -50,7 +50,7 @@ sonicparanoid = let name = "sonicparanoid" in Function
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
 -- TODO should get all results as an unusable file first, then extract what you want explicitly
-aSonicParanoid :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aSonicParanoid :: [Path] -> Action ()
 aSonicParanoid cfg ref _ [out, faListPath] = do
 
   let cDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
@@ -70,12 +70,12 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
       statsPath''    = traceA "aSonicParanoid" out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 
-  withWriteLock' ref tmpDir $ unlessExists statsPath' $ do
+  withWriteLock' tmpDir $ unlessExists statsPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
-    faPaths <- readPaths cfg ref faListPath'
+    faPaths <- readPaths faListPath'
     let faPaths' = map (fromPath cfg) faPaths
-    need' cfg ref "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
+    need' "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
     let faLinks = map (\p -> toPath cfg $ inDir </> (takeBaseName $ fromPath cfg p)) faPaths
     mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
 
@@ -109,7 +109,7 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     -- putNormal $ unlines [o, e] -- TODO remove
 
   -- TODO does this fix the "does not exist" issue?
-  -- trackWrite' cfg [statsPath']
+  -- trackWrite' [statsPath']
   symlink cfg ref out statsPath
 
 aSonicParanoid _ _ _ args = error $ "bad argument to aSonicParanoid: " ++ show args

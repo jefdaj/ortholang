@@ -93,7 +93,7 @@ extractTargetsEach = Function
     name = "extract_targets_each"
 
 -- TODO remove uniq, unless it's used somewhere?
-aCutCol :: Bool -> Int -> Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aCutCol :: Bool -> Int -> [Path] -> Action ()
 aCutCol _ n cfg ref _ [outPath, tsvPath] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -108,7 +108,7 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath']
     }
-  trackWrite' cfg [tmpPath']
+  trackWrite' [tmpPath']
   writeCachedVersion cfg ref outPath'' tmpPath'
 
   -- TODO remove this? why does it need to be here at all?
@@ -155,7 +155,7 @@ mkFilterHitsEach colname = Function
   where
     name = "filter_" ++ colname ++ "_each"
 
-aFilterHits :: String -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ())
+aFilterHits :: String -> ([Path] -> Action ())
 aFilterHits colname cfg ref _ [out, cutoff, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False
@@ -208,7 +208,7 @@ bestHitsEach = Function
   where
     name = "best_hits_each"
 
-aBestExtract :: Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+aBestExtract :: [Path] -> Action ()
 aBestExtract cfg ref _ [out, hits] = do
   runCmd cfg ref $ CmdDesc
     { cmdParallel = False

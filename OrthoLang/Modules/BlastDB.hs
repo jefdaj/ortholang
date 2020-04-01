@@ -143,7 +143,7 @@ rLoadDB st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [s]) = do
     oPath' = fromPath cfg oPath
 rLoadDB _ _ = fail "bad argument to rLoadDB"
 
-aLoadDB :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
+aLoadDB :: Path -> Path -> Action ()
 aLoadDB cfg ref _ oPath sPath = do
   pattern <- readLit cfg ref sPath'
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
@@ -208,10 +208,10 @@ rBlastdblist s@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
     lTmp'   = toPath   cfg listTmp
 rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 
-aBlastdblist :: Config -> LocksRef -> IDsRef -> Path -> Action ()
+aBlastdblist :: Path -> Action ()
 aBlastdblist cfg ref _ listTmp = do
   liftIO $ createDirectoryIfMissing True tmpDir
-  withWriteLock' ref tmpDir $ do
+  withWriteLock' tmpDir $ do
     runCmd cfg ref $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
@@ -232,10 +232,10 @@ aBlastdblist cfg ref _ listTmp = do
 
 -- TODO generalize so it works with busco_list_lineages too?
 -- TODO move to a "Filter" module once that gets started
-aFilterList :: Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Action ()
+aFilterList :: Path -> Path -> Path -> Action ()
 aFilterList cfg ref _ oPath listTmp fPath = do
   filterStr <- readLit  cfg ref fPath'
-  out       <- readLits cfg ref listTmp'
+  out       <- readLits listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
   debugA' "aFilterList" $ "names': " ++ show names'
@@ -272,9 +272,9 @@ rBlastdbget st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [name]) = do
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
-aBlastdbget :: Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Action ()
+aBlastdbget :: Path -> Path -> Path -> Action ()
 aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
-  need' cfg ref "ortholang.modules.blastdb.aBlastdbget" [nPath']
+  need' "ortholang.modules.blastdb.aBlastdbget" [nPath']
   dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
@@ -368,12 +368,12 @@ listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . 
 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
-aMakeblastdbAll :: Type -> Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ()
+aMakeblastdbAll :: Type -> Path -> [Path] -> Action ()
 aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
   let dbType' = if dbType == ndb then "nucl" else "prot"
-  need' cfg ref "ortholang.modules.blastdb.aMakeblastdbAll" [fasPath']
+  need' "ortholang.modules.blastdb.aMakeblastdbAll" [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
@@ -394,7 +394,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   -- solution is just to avoid that for now?
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
-  faPaths <- readPaths cfg ref fasPath'
+  faPaths <- readPaths fasPath'
   let noQuoting  = unwords $ map (fromPath cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
@@ -433,7 +433,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
     -- check that all the right files were created
     after <- listPrefixFiles dbPtn
     -- liftIO $ putStrLn "running makeblastdb"
-    trackWrite' cfg after
+    trackWrite' after
 
     -- usually there's an index file too, but not always
     -- TODO put these back? they sometimes fail when it splits into .00.pin etc.
@@ -521,7 +521,7 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 -- map1of1 :: Type -> Type -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
--- rMap :: Int -> (Config -> LocksRef -> IDsRef -> [Path] -> Action ()) -> RulesFn
+-- rMap :: Int -> ([Path] -> Action ()) -> RulesFn
 -- rMap index actFn = rMapMain index Nothing actFn'
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
@@ -603,7 +603,7 @@ showBlastDb cfg ref path = do
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
   debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: \"" ++ dbDir ++ "\""
-  out <- withReadLock ref path' $
+  out <- withReadLock path' $
            readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
   let out1 = lines out
       out2 = concatMap (split "\t") out1

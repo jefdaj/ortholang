@@ -34,7 +34,7 @@ dmnd = Type
   , tDesc = "DIAMOND database"
   , tShow = \_ ref path -> do
       path' <- resolveSymlinks Nothing path
-      out <- withReadLock ref path' $ readProcess "diamond_dbinfo.sh" [path'] []
+      out <- withReadLock path' $ readProcess "diamond_dbinfo.sh" [path'] []
       let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
       return desc
   }
@@ -87,7 +87,7 @@ rDiamondmakedbAll s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [fas]) = do
   let out  = exprPath cfg dRef scr e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromPath cfg out
   out' %> \_ -> do
-    faPaths <- readPaths cfg ref fasPath
+    faPaths <- readPaths fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
@@ -98,7 +98,7 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 
 -- type RulesFn     = RulesFn
 -- type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
-type ActionFn2 = Config -> LocksRef -> IDsRef -> [Path] -> Action ()
+type ActionFn2 = [Path] -> Action ()
 type DiamondBlastDesc = (String, [String] -> RulesFn, [String], Type, Type, Type)
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?

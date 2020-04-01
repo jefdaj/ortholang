@@ -51,9 +51,9 @@ rSummary _ _ _ = fail "bad argument to rSummary"
 aSummary :: Config -> LocksRef -> ([[String]] -> [String])
          -> FilePath -> FilePath -> Action ()
 aSummary cfg ref summaryFn iPath out = do
-  need' cfg ref "ortholang.modules.summary.aSummary" [iPath]
-  iLists <- readLits cfg ref iPath
-  iElems <- mapM (readLits cfg ref . (\p -> cfgTmpDir cfg </> p)) iLists
+  need' "ortholang.modules.summary.aSummary" [iPath]
+  iLists <- readLits iPath
+  iElems <- mapM (readLits . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
       out' = traceA "aSummary" out [out, iPath]
   writeLits cfg ref out' oElems
