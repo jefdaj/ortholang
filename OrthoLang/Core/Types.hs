@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module OrthoLang.Core.Types
   (
   -- * Types and Newtypes
@@ -99,8 +101,9 @@ import Data.Maybe (fromJust, catMaybes)
 
 import Control.Monad.Reader -- TODO only specific imports
 -- import Control.Monad.State.Lazy       -- (StateT, execStateT, lift)
+import Data.Typeable hiding (typeOf)
 
-newtype Path = Path FilePath deriving (Eq, Ord, Show)
+newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
 
 -- Note that each ActionN takes N+1 Paths, because the first is the output
 -- TODO take the output last instead?
@@ -111,14 +114,14 @@ type Action3 = Config -> LocksRef -> IDsRef -> Path -> Path -> Path -> Path -> A
 -- TODO remove when able in favor of well-typed versions above
 type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
 
-type RulesFn     = GlobalEnv -> Expr -> Rules ExprPath
+type RulesFn     = Script -> Expr -> Rules ExprPath
 type TypeChecker = [Type] -> Either String Type
 
-newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq) -- ~/.ortholang/cache/<modname>
-newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
-newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/<varname>.<type>
-newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq) -- ~/.ortholang/vars/result[.<hash>.<type>]
-newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
+newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/cache/<modname>
+newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
+newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/vars/<varname>.<type>
+newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/vars/result[.<hash>.<type>]
+newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord, Typeable)
 
 -- this isn't really needed, but makes passing globalenv around easier
 -- TODO use it? or remove it
@@ -157,13 +160,13 @@ runRulesR env act = runReaderT act env
 
 -- A digest identifying which replace_* call the variable is part of.
 -- TODO This isn't very elegant; can it be removed?
-newtype RepID = RepID (Maybe String) deriving (Eq, Show, Read)
+newtype RepID = RepID (Maybe String) deriving (Eq, Show, Read, Typeable)
 
 -- A number that can be incremented to change the expression's hash, causing repeat evaluation.
-newtype Salt = Salt Int deriving (Eq, Show, Read)
+newtype Salt = Salt Int deriving (Eq, Show, Read, Typeable)
 
 data Var = Var RepID String
-  deriving (Eq, Show, Read)
+  deriving (Eq, Show, Read, Typeable)
  
 -- the common fields are:
 -- * return type
@@ -180,7 +183,7 @@ data Expr
   | Fun Type Salt [Var] String [Expr]
   | Lst Type Salt [Var] [Expr]
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
-  deriving (Eq, Show)
+  deriving (Eq, Show, Typeable)
 
 -- An expression that has already been compiled to Rules, wrapped so it can be
 -- passed to another function. Because Rules can't be shown or compared, we
@@ -429,7 +432,7 @@ data Config = Config
   , cfgOS      :: String
   , cfgThreads :: Int
   }
-  deriving Show
+  deriving (Show, Typeable)
 
 -- note: only lists the first name of each function,
 --       which for binary operators will be the single-char one
@@ -520,7 +523,7 @@ data FnTag
   | ReadsURL   -- do not repeat, do not cache/share?
   | Broken     -- remove from functions list when loading
   | Hidden     -- remove from user-facing lists
-  deriving (Eq, Read, Show)
+  deriving (Eq, Read, Show, Typeable)
 
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
@@ -547,6 +550,7 @@ data Module = Module
   , mFunctions :: [Function]
   }
   -- deriving (Eq, Read)
+  deriving (Typeable)
 
 -- TODO what about prettyShow in Pretty.hs?
 instance Show Module where

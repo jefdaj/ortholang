@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 {-|
 Attempt to compose OrthoLang functions. Work in progress, but promising!
 
@@ -11,6 +13,8 @@ module OrthoLang.Core.Compile.Compose
 
 import OrthoLang.Core.Types
 import OrthoLang.Core.Paths (exprPath, fromPath)
+import Data.Maybe (fromJust)
+import Development.Shake -- (getShakeExtraRules)
 -- import OrthoLang.Core.Compile.Basic
 
 --------------
@@ -44,10 +48,12 @@ tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
                              ++ ", not " ++ extOf expected
 
 rCompose1 :: Function -> Type -> Function -> RulesFn
-rCompose1 fn1 rtn1 fn2 st@(scr, cfg, _, _, dRef) (Fun rtn2 salt deps _ args) = (fOldRules fn2) st expr2
-  where
-    expr1'  = Fun rtn1 salt deps (fName fn1) args
-    path1'  = ExprPath $ fromPath cfg $ exprPath cfg dRef scr expr1'
-    expr1'' = Com $ CompiledExpr rtn1 path1' $ (fOldRules fn1) st expr1'
-    expr2   = Fun rtn2 salt deps (fName fn2) [expr1'']
+rCompose1 fn1 rtn1 fn2 scr (Fun rtn2 salt deps _ args) = do
+  (cfg  :: Config    ) <- fmap fromJust getShakeExtraRules
+  (dRef :: DigestsRef) <- fmap fromJust getShakeExtraRules
+  let expr1'  = Fun rtn1 salt deps (fName fn1) args
+      path1'  = ExprPath $ fromPath cfg $ exprPath cfg dRef scr expr1'
+      expr1'' = Com $ CompiledExpr rtn1 path1' $ (fOldRules fn1) scr expr1'
+      expr2   = Fun rtn2 salt deps (fName fn2) [expr1'']
+  (fOldRules fn2) scr expr2
 rCompose1 _ _ _ _ _ = fail "bad argument to rCompose1"
