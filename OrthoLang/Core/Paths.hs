@@ -274,7 +274,7 @@ bop2fun e = error $ "bop2fun call with non-Bop: \"" ++ render (pPrint e) ++ "\""
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
 exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
-exprPath c d _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
+exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
 exprPath c d s (Ref _ _ _ v) = case lookup v s of
                                Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show s
                                Just e  -> exprPath c d s e
@@ -368,11 +368,13 @@ makeTmpdirRelative level (Path path) = replace "$TMPDIR" dots path
 
 -- TODO should the safe version still exist? should one be renamed?
 unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Salt -> [String] -> Path
-unsafeExprPathExplicit cfg dRef prefix rtype salt hashes = unsafePerformIO $ do
-  let path = exprPathExplicit cfg prefix rtype salt hashes
-      dig  = exprPathDigest path
-  atomicModifyIORef' dRef $ \ds -> (M.insert dig (rtype, path) ds, ())
-  return path
+unsafeExprPathExplicit cfg dRef prefix rtype salt hashes =
+  dig `seq` unsafePerformIO $ do
+    atomicModifyIORef' dRef $ \ds -> (M.insert dig (rtype, path) ds, ())
+    return path
+  where
+    path = exprPathExplicit cfg prefix rtype salt hashes
+    dig  = exprPathDigest path
 
 exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
