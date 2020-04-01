@@ -84,7 +84,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in Function
 rDiamondmakedbAll :: RulesFn
 rDiamondmakedbAll s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
-  let out  = exprPath cfg scr e
+  let out  = exprPath cfg dRef scr e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths cfg ref fasPath

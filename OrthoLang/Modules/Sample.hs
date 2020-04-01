@@ -41,7 +41,7 @@ rSample st@(scr, cfg, ref, ids, dRef) expr@(Fun _ salt _ _ [n, lst]) = do
   (ExprPath inPath') <- rExpr st lst
   let nPath    = toPath cfg nPath'
       inPath   = toPath cfg inPath'
-      outPath  = exprPath cfg scr expr
+      outPath  = exprPath cfg dRef scr expr
       outPath' = fromPath cfg outPath
       (ListOf t) = typeOf lst
   outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath

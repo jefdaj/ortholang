@@ -189,7 +189,7 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
 rParseSearches :: RulesFn
 rParseSearches s@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr s searches
-  let searchTable  = exprPath cfg scr expr
+  let searchTable  = exprPath cfg dRef scr expr
       searchTable' = fromPath cfg searchTable
       sList' = toPath cfg sList
   searchTable' %> \_ -> aParseSearches cfg ref ids sList' searchTable
@@ -229,7 +229,7 @@ rBioMartR fn s@(scr, cfg, ref, ids, dRef) expr@(Fun rtn salt _ _ [ss]) = do
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
       tmp'    = toPath cfg bmTmp
-      out     = exprPath cfg scr expr
+      out     = exprPath cfg dRef scr expr
       out'    = fromPath cfg out
       sTable' = toPath cfg sTable
       bmFn'   = toPath cfg bmFn

@@ -115,7 +115,7 @@ mkBop bop = return $ \e1 e2 -> do
         -- TODO is naming it after the opchar wrong now?
 -- TODO how to putState with these? is it needed at all?
 --         let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
---             p    = exprPath cfg scr expr
+--             p    = exprPath cfg dRef scr expr
 --             dKey = exprPathDigest p
 --             dVal = (typeOf expr, p)
 --             dMap' = M.unions

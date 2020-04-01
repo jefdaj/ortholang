@@ -75,7 +75,7 @@ rPlotNumList script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [title, nums
   titlePath <- rExpr st title
   numsPath  <- rExpr st nums
   xlabPath  <- varName st nums
-  let outPath   = exprPath cfg scr expr
+  let outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
@@ -122,7 +122,7 @@ rPlotNumScores xFn script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [title
   numsPath  <- rExpr st nums
   xlabPath  <- xFn   st nums
   -- ylabPath  <- yFn   st nums
-  let outPath   = exprPath cfg scr expr
+  let outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
@@ -165,7 +165,7 @@ tPlotListOfLists _ = Left "expected a list of lists"
 -- TODO is this a reasonable way to do it for now?
 plotLabel :: GlobalEnv -> Expr -> String
 plotLabel _ (Ref _ _ _ (Var _ v)) = v
-plotLabel (scr, cfg, _, _, _) expr = let (Path p) = exprPath cfg scr expr in takeBaseName p
+plotLabel (scr, cfg, _, _, dRef) expr = let (Path p) = exprPath cfg dRef scr expr in takeBaseName p
 
 plotCache :: Config -> Path
 plotCache cfg = cacheDir cfg "plots"
@@ -173,8 +173,8 @@ plotCache cfg = cacheDir cfg "plots"
 rPlotListOfLists :: FilePath -> RulesFn
 rPlotListOfLists script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [lol]) = do
   let labels = map (plotLabel st)     (extractExprs scr lol)
-      lists  = map (exprPath cfg scr) (extractExprs scr lol)
-      outPath   = exprPath cfg scr expr
+      lists  = map (exprPath cfg dRef scr) (extractExprs scr lol)
+      outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       cDir      = fromPath cfg $ plotCache cfg

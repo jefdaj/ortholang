@@ -34,8 +34,8 @@ mkRangeFn name nArgs =  Function
 
 -- TODO put somewhere as the standard way to construct an rSimpleScript that takes numbers?
 rRange :: RulesFn
-rRange st@(scr, cfg, ref, _, _) e@(Fun _ _ _ name args) = do
-  let out = exprPath cfg scr e
+rRange st@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ name args) = do
+  let out = exprPath cfg dRef scr e
       out' = fromPath cfg out
   argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr st) args
   out' %> \_ -> do

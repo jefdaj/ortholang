@@ -58,7 +58,7 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
 -- TODO does this generally need to be recursive, digests of the exprs inside it too?
 -- digestExample :: GlobalEnv -> (String, Expr) -> (String, Expr, DigestMap)
--- digestExample st (s, e) = let p = exprPath cfg scr e
+-- digestExample st (s, e) = let p = exprPath cfg dRef scr e
 --                           in (s, e, M.singleton (exprPathDigest p) (typeOf e, p))
 
 -- TODO remember to wrap in withFileLogging if running from stack repl

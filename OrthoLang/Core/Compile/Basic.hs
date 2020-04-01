@@ -109,8 +109,8 @@ debugRules cfg name input out = debug cfg name msg out
 -- deprecatedRules :: GlobalEnv -> Expr -> Rules ExprPath
 -- deprecatedRules s@(_, cfg, _, _, _) e = return $ ExprPath out'
 --   where
---     out  = exprPath cfg scr e
---     out' = fromPath cfg $ exprPath cfg scr e
+--     out  = exprPath cfg dRef scr e
+--     out' = fromPath cfg $ exprPath cfg dRef scr e
 
 -- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
 -- TODO wait! it's the rules that might not need to be returned, not the path, right?
@@ -158,14 +158,14 @@ rNamedFunction :: GlobalEnv -> Expr -> String -> Rules ExprPath
 rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
 
-rNamedFunction' s@(scr, cfg, _, _, _) expr name = case findFunction cfg name of
+rNamedFunction' s@(scr, cfg, _, _, dRef) expr name = case findFunction cfg name of
   Nothing -> error $ "no such function \"" ++ name ++ "\""
   Just f  -> case fNewRules f of
                Nothing -> if "load_" `isPrefixOf` fName f
                             then (fOldRules f) s $ setSalt 0 expr
                             else (fOldRules f) s expr
                -- TODO is this where the digest fails to be added?
-               Just _ -> let p   = fromPath cfg $ exprPath cfg scr expr
+               Just _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
                              res = ExprPath p
                          in return $ debugRules cfg "rNamedFunction'" expr res
 
@@ -199,7 +199,7 @@ compileScript s@(scr, _, _, _, _) _ = do
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn
 rLit s@(scr, cfg, ref, ids, dRef) expr = do
-  let path  = exprPath cfg scr expr -- absolute paths allowed!
+  let path  = exprPath cfg dRef scr expr -- absolute paths allowed!
       path' = debugRules cfg "rLit" expr $ fromPath cfg path
   path' %> \_ -> aLit cfg ref ids expr path
   return (ExprPath path')
@@ -262,7 +262,7 @@ rListLits s@(scr, cfg, ref, ids, dRef) e@(Lst _ _ _ exprs) = do
   outPath' %> \_ -> aListLits cfg ref ids litPaths' outPath
   return (ExprPath outPath')
   where
-    outPath  = exprPath cfg scr e
+    outPath  = exprPath cfg dRef scr e
     outPath' = debugRules cfg "rListLits" e $ fromPath cfg outPath
 rListLits _ e = error $ "bad argument to rListLits: " ++ show e
 
@@ -305,7 +305,7 @@ rListPaths s@(scr, cfg, ref, ids, dRef) e@(Lst rtn salt _ exprs) = do
   let paths'   = map (\(ExprPath p) -> toPath cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) salt [hash]
-      outPath  = exprPath cfg scr e
+      outPath  = exprPath cfg dRef scr e
       outPath' = debugRules cfg "rListPaths" e $ fromPath cfg outPath
   outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
   return (ExprPath outPath')
@@ -420,7 +420,7 @@ rLoad hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [p]) = do
   out' %> \_ -> aLoad hashSeqIDs cfg ref ids (toPath cfg strPath) out
   return (ExprPath out')
   where
-    out  = exprPath cfg scr e
+    out  = exprPath cfg dRef scr e
     out' = fromPath cfg out
 rLoad _ _ _ = fail "bad argument to rLoad"
 
@@ -529,7 +529,7 @@ rLoadListLits s@(scr, cfg, ref, ids, dRef) expr = do
   outPath' %> \_ -> aLoadListLits cfg ref ids outPath litsPath
   return (ExprPath outPath')
   where
-    outPath  = exprPath cfg scr expr
+    outPath  = exprPath cfg dRef scr expr
     outPath' = fromPath cfg outPath
 
 aLoadListLits :: Config -> LocksRef -> IDsRef -> Path -> Path -> Action ()
@@ -549,7 +549,7 @@ rLoadListPaths hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun rtn salt _ _ [es])
   (ExprPath pathsPath) <- rExpr s es
   -- let hash     = digest $ toPath cfg pathsPath
   --     outPath  = unsafeExprPathExplicit cfg "list" rtn salt [hash]
-  let outPath  = exprPath cfg scr e
+  let outPath  = exprPath cfg dRef scr e
       outPath' = fromPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toPath cfg pathsPath) outPath
   return (ExprPath outPath')

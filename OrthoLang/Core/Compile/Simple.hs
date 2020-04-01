@@ -105,7 +105,7 @@ rSimple' mTmpPrefix actFn s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ exprs) = d
   return (ExprPath outPath')
   where
     mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
-    outPath  = exprPath cfg scr e
+    outPath  = exprPath cfg dRef scr e
     outPath' = fromPath cfg outPath
 rSimple' _ _ _ _ = fail "bad argument to rSimple'"
 

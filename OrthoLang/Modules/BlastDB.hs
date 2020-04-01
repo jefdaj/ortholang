@@ -139,7 +139,7 @@ rLoadDB st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [s]) = do
   oPath' %> \_ -> aLoadDB cfg ref ids oPath sPath'
   return (ExprPath oPath')
   where
-    oPath  = exprPath cfg scr e
+    oPath  = exprPath cfg dRef scr e
     oPath' = fromPath cfg oPath
 rLoadDB _ _ = fail "bad argument to rLoadDB"
 
@@ -200,7 +200,7 @@ rBlastdblist s@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
   oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
-    oPath   = exprPath cfg scr e
+    oPath   = exprPath cfg dRef scr e
     tmpDir  = blastdbgetCache cfg
     tmpDir' = fromPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
@@ -265,7 +265,7 @@ rBlastdbget :: RulesFn
 rBlastdbget st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr st name
   let tmpDir    = blastdbgetCache cfg
-      dbPrefix  = exprPath cfg scr e -- final prefix
+      dbPrefix  = exprPath cfg dRef scr e -- final prefix
       dbPrefix' = fromPath cfg dbPrefix
       nPath'    = toPath cfg nPath
   dbPrefix' %> \_ -> aBlastdbget cfg ref ids dbPrefix tmpDir nPath'
@@ -347,7 +347,7 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 rMakeblastdbAll :: RulesFn
 rMakeblastdbAll s@(scr,cfg, ref, ids, dRef) e@(Fun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr s fas
-  let out       = exprPath cfg scr e
+  let out       = exprPath cfg dRef scr e
       out'      = debugR' cfg "rMakeblastdbAll" e $ fromPath cfg out
       cDir      = makeblastdbCache cfg
       fasPath'   = toPath cfg fasPath
@@ -567,7 +567,7 @@ tSingletons _ = Left "tSingletons expected a list"
 rSingletons :: RulesFn
 rSingletons st@(scr,cfg, ref, ids, dRef) expr@(Fun rtn _ _ _ [listExpr]) = do
   (ExprPath listPath') <- rExpr st listExpr
-  let outPath  = exprPath cfg scr expr
+  let outPath  = exprPath cfg dRef scr expr
       outPath' = fromPath cfg outPath
       listPath = toPath cfg listPath'
       (ListOf (ListOf t)) = rtn

@@ -180,7 +180,7 @@ rFun1 :: Action1 -> RulesFn
 rFun1 act1 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1]) = do
   (ExprPath arg1') <- rExpr st a1
   let arg1   = toPath cfg arg1'
-      oPath  = exprPath cfg scr expr
+      oPath  = exprPath cfg dRef scr expr
       oPath' = debugRules cfg "rFun1" expr $ fromPath cfg oPath
   oPath' %> \_ -> do
     debugFn $ "rFun1 arg1: "  ++ show arg1
@@ -202,7 +202,7 @@ rFun3 act3 st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [a1, a2, a3]) = do
   let arg1   = toPath cfg arg1'
       arg2   = toPath cfg arg2'
       arg3   = toPath cfg arg3'
-      oPath  = exprPath cfg scr expr
+      oPath  = exprPath cfg dRef scr expr
       oPath' = debugRules cfg "rFun3" expr $ fromPath cfg oPath
   oPath' %> \_ -> do
     debugFn $ "rFun3 arg1: "  ++ show arg1

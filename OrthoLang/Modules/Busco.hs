@@ -90,7 +90,7 @@ rBuscoListLineages s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
   oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
   return (ExprPath oPath')
   where
-    oPath   = exprPath cfg scr e
+    oPath   = exprPath cfg dRef scr e
     tmpDir  = buscoCache cfg
     tmpDir' = fromPath cfg tmpDir
     listTmp = tmpDir' </> "dblist" <.> "txt"
@@ -203,9 +203,9 @@ untar cfg ref from to = runCmd cfg ref $ CmdDesc
     to' = fromPath cfg to
 
 rBuscoFetchLineage :: RulesFn
-rBuscoFetchLineage st@(scr, cfg, ref, _, _) expr@(Fun _ _ _ _ [nPath]) = do
+rBuscoFetchLineage st@(scr, cfg, ref, _, dRef) expr@(Fun _ _ _ _ [nPath]) = do
   (ExprPath namePath) <- rExpr st nPath
-  let outPath  = exprPath cfg scr expr
+  let outPath  = exprPath cfg dRef scr expr
       outPath' = fromPath cfg outPath
       blhDir   = (fromPath cfg $ buscoCache cfg) </> "lineages"
   outPath' %> \_ -> do
@@ -331,9 +331,9 @@ buscoScoresTable  = Function
 
 -- TODO variant of rSimpleScript that reads + passes in a list of input files?
 rBuscoScoresTable :: RulesFn
-rBuscoScoresTable s@(scr, cfg, ref, _, _) e@(Fun _ _ _ _ [l]) = do
+rBuscoScoresTable s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [l]) = do
   (ExprPath lsPath) <- rExpr s l
-  let o  = exprPath cfg scr e
+  let o  = exprPath cfg dRef scr e
       o' = fromPath cfg o
   o' %> \_ -> do
     ins <- readPaths cfg ref lsPath
@@ -381,11 +381,11 @@ buscoFilterCompleteness  = Function
 -- TODO try the same way it works for sets: one canonical full path!
 -- TODO do it the simple way for now, then see if it breaks and if so fix it
 rBuscoFilterCompleteness :: RulesFn
-rBuscoFilterCompleteness s@(scr, cfg, ref, _, _) e@(Fun _ _ _ _ [m, t, fs]) = do
+rBuscoFilterCompleteness s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [m, t, fs]) = do
   (ExprPath scorePath) <- rExpr s m
   (ExprPath tablePath) <- rExpr s t
   (ExprPath faasList ) <- rExpr s fs
-  let out  = exprPath cfg scr e
+  let out  = exprPath cfg dRef scr e
       out' = fromPath cfg out
   out' %> \_ -> do
     score <- fmap (read :: String -> Scientific) $ readLit  cfg ref scorePath

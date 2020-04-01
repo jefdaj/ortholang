@@ -413,7 +413,7 @@ listScriptExprs scr = concatMap listExprs $ map snd scr
 --   $ \h@(IDs {hExprs = ids}) -> (h {hExprs = M.insert eDigest (eType, ePath) ids}, ())
 --   where
 --     eType   = typeOf expr
---     ePath   = exprPath cfg scr expr
+--     ePath   = exprPath cfg dRef scr expr
 --     eDigest = exprPathDigest ePath
 
 -- TODO what monad should this be in?

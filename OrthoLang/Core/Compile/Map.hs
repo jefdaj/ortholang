@@ -111,30 +111,30 @@ rMapSimpleScript index = rMap index . aSimpleScript
 rMapMain :: Int -> Maybe ([Path] -> IO Path)
          -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
          -> RulesFn
-rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids, dMap) e@(Fun r salt _ name exprs) = do
+rMapMain mapIndex mTmpFn actFn s@(scr, cfg, ref, ids, dRef) e@(Fun r salt _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, normalExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr s) normalExprs
   (ExprPath mappedArgsPath) <- rExpr s mappedExpr
   let singleName     = replace "_each" "" name -- TODO any less brittle ideas? could make this a fn
-      mainOutPath    = fromPath cfg $ exprPath cfg scr e
+      mainOutPath    = fromPath cfg $ exprPath cfg dRef scr e
       regularArgPaths'  = map (\(ExprPath p) -> toPath cfg p) regularArgPaths
       argLastsPath'  = toPath cfg mappedArgsPath
-      elemCacheDir   = (fromPath cfg $ cacheDir cfg "each") </> hashFun cfg scr e
+      elemCacheDir   = (fromPath cfg $ cacheDir cfg "each") </> hashFun cfg dRef scr e
       elemCacheDir'  = toPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> extOf eType
       eType = case r of
                 (ListOf t) -> debug cfg "rMapMain" ("type of \"" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error $ "bad argument to rMapMain: " ++ show e
-  elemCachePtn %> aMapElem cfg ref ids eType mTmpFn actFn singleName salt
+  elemCachePtn %> aMapElem cfg ref ids dRef eType mTmpFn actFn singleName salt
   mainOutPath  %> aMapMain cfg ref ids mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
-hashFun :: Config -> Script -> Expr -> String
-hashFun cfg scr e@(Fun _ s _ n _) = digest $ [n, show s] ++ argHashes cfg scr e
-hashFun _ _ _ = error "hashFun only hashes function calls so far"
+hashFun :: Config -> DigestsRef -> Script -> Expr -> String
+hashFun cfg dRef scr e@(Fun _ s _ n _) = digest $ [n, show s] ++ argHashes cfg dRef scr e
+hashFun _ _ _ _ = error "hashFun only hashes function calls so far"
 
 {- This calls aMapArgs to leave a .args file for each set of args, then gathers
  - up the corresponding outPaths and returns a list of them.
@@ -206,11 +206,11 @@ aMapArgs cfg ref _ mapIndex eType regularArgs' tmp' mappedArg = do
  - TODO can actFn here be looked up from the individal fn itsef passed in the definition?
  - TODO after singleFn works, can we remove tmpFn? (ok if not)
  -}
-aMapElem :: Config -> LocksRef -> IDsRef -> Type
+aMapElem :: Config -> LocksRef -> IDsRef -> DigestsRef -> Type
          -> Maybe ([Path] -> IO Path)
          -> (Config -> LocksRef -> IDsRef -> Path -> [Path] -> Action ())
          -> String -> Salt -> FilePath -> Action ()
-aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
+aMapElem cfg ref ids dRef eType tmpFn actFn singleName salt out = do
   let argsPath = replaceBaseName out "args"
   args <- readPaths cfg ref argsPath
   let args' = map (fromPath cfg) args
@@ -227,7 +227,7 @@ aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let out' = traceA "aMapElem" (toPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
-      single  = unsafeExprPathExplicit cfg singleName eType salt hashes
+      single  = unsafeExprPathExplicit cfg dRef singleName eType salt hashes
       single' = fromPath cfg single
       args''' = single:map (toPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?
