@@ -118,7 +118,6 @@ library
                     OrthoLang.Core.Parse.Expr,
                     OrthoLang.Core.Parse.Script,
                     OrthoLang.Core.Parse.Util,
-                    OrthoLang.Core.Digests,
                     OrthoLang.Core.Paths,
                     OrthoLang.Core.Pretty,
                     OrthoLang.Core.Repl,
