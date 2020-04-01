@@ -531,7 +531,7 @@ data Function = Function
   , fTypeDesc  :: String           -- ^ human-readable description
   , fTags      :: [FnTag]          -- ^ function tags (TODO implement these)
   , fOldRules  :: RulesFn          -- ^ old-style rules (TODO deprecate, then remove)
-  , fNewRules  :: Maybe (RulesR ()) -- ^ new-style rules (TODO write them all, then remove the Maybe)
+  , fNewRules  :: Maybe (Rules ()) -- ^ new-style rules (TODO write them all, then remove the Maybe)
   }
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   -- deriving (Eq, Read)

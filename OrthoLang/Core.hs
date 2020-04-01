@@ -6,10 +6,10 @@ module OrthoLang.Core
   , mkNewFn1
   , mkNewFn2
   , mkNewFn3
-  , ActionR
-  , ActionR1
-  , ActionR2
-  , ActionR3
+  -- , ActionR
+  , ActionN1
+  , ActionN2
+  , ActionN3
   , newCoreRules
   , newFunctionRules
 
@@ -68,8 +68,8 @@ module OrthoLang.Core
   , TypeChecker
   , Var(..)
   , VarPath(..)
-  , askConfig
-  , askLocks
+  -- , askConfig
+  -- , askLocks
   , defaultShow
   , depsOf
   , extOf

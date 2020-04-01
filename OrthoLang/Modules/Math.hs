@@ -1,12 +1,13 @@
 module OrthoLang.Modules.Math where
 
+import Development.Shake
 import Prelude hiding (log)
 import OrthoLang.Core
 import qualified OrthoLang.Util as U
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans    (lift)
 import Data.Scientific        (Scientific, toRealFloat)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -29,16 +30,16 @@ divDouble n1 n2 = read $ show (answer :: Double)
 mkMathBop :: String -> Char -> (Scientific -> Scientific -> Scientific) -> Function
 mkMathBop name opChar fn = mkNewBop name opChar num num $ aMathBop fn
 
-log :: Show a => a -> ActionR ()
-log = lift . liftIO . U.debug "modules.math.amath" . show
+log :: Show a => a -> Action ()
+log = liftIO . U.debug "modules.math.amath" . show
 
-aMathBop :: (Scientific -> Scientific -> Scientific) -> ActionR1
+-- aMathBop :: (Scientific -> Scientific -> Scientific) -> Action ()
 aMathBop mathFn (ExprPath outPath) nsPath = do
   log nsPath
-  cfg  <- askConfig
-  lRef <- askLocks
-  ns <- lift $ readLits cfg lRef nsPath
+  cfg  <- fmap fromJust getShakeExtra
+  lRef <- fmap fromJust getShakeExtra
+  ns <- readLits cfg lRef nsPath
   log ns
   let n = foldl1 mathFn $ map (read :: String -> Scientific) ns
-  lift $ writeLit cfg lRef outPath $ show n
+  writeLit cfg lRef outPath $ show n
   log n

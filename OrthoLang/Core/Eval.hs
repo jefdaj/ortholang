@@ -32,7 +32,9 @@ import OrthoLang.Core.Pretty (renderIO)
 -- import OrthoLang.Core.Config (debug)
 
 -- import Control.Applicative ((<>))
--- import qualified Data.Map.Strict as M
+import qualified Data.HashMap.Strict as M
+import Data.Dynamic (Dynamic, toDyn, dynTypeRep)
+import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
@@ -139,8 +141,9 @@ renderBar total nThreads fraction shaftChar headChar = shaft ++ heads ++ blank
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
-myShake :: Config -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
-myShake cfg pm delay rules = do
+myShake :: Config -> LocksRef -> IDsRef -> DigestsRef
+        -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
+myShake cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   let shakeOpts = shakeOptions
         { shakeFiles     = cfgTmpDir cfg
@@ -158,6 +161,7 @@ myShake cfg pm delay rules = do
         -- , shakeStaunch = True -- TODO is this a good idea?
         -- , shakeColor = True
         -- TODO shakeShare to implement shared cache on the demo site!
+        , shakeExtra = shakeEnv cfg ref ids dr
         }
 
   (shake shakeOpts . alternatives) rules
@@ -233,9 +237,11 @@ eval hdl cfg ref ids dr rtype ls p = do
 --       0 -> fn
 --       n -> trace "core.eval.eval" ("error! eval failed " ++ show n ++ " times") fn
 
-    eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg pm delay $ do
-      runRulesR (cfg, ref, ids, dr) newCoreRules
-      runRulesR (cfg, ref, ids, dr) newFunctionRules
+    eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
+      -- runRulesR (cfg, ref, ids, dr) newCoreRules
+      -- runRulesR (cfg, ref, ids, dr) newFunctionRules
+      newCoreRules
+      newFunctionRules
       lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
       want ["eval"]
@@ -254,6 +260,15 @@ eval hdl cfg ref ids dr rtype ls p = do
           Just out -> writeResult cfg ref ids (toPath cfg path) out
           Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids pm rtype path)
         return ()
+
+shakeEnv :: Config -> LocksRef -> IDsRef -> DigestsRef -> M.HashMap TypeRep Dynamic
+shakeEnv cfg lRef iRef dRef =
+  M.fromList $ map (\v -> (dynTypeRep v, v))
+    [ toDyn cfg
+    , toDyn lRef
+    , toDyn iRef
+    , toDyn dRef
+    ]
 
 writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
 writeResult cfg ref idsref path out = do

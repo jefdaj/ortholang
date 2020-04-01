@@ -23,14 +23,14 @@ module OrthoLang.Core.Compile.NewRules
   , mkNewFn3
 
   -- * Types
-  , ActionEnv
-  , ActionR
-  , ActionR1
-  , ActionR2
-  , ActionR3
-  , runActionR
-  , askConfig -- TODO needs to work with multiple Env monads?
-  , askLocks
+  -- , ActionEnv
+  -- , Action
+  , ActionN1
+  , ActionN2
+  , ActionN3
+  -- , runAction
+  -- , askConfig -- TODO needs to work with multiple Env monads?
+  -- , askLocks
 
   -- * Static rules to add to every eval call
   , newFunctionRules
@@ -45,36 +45,16 @@ import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Types
 
 import Control.Monad              (when)
-import Data.Maybe                 (catMaybes)
+import Data.Maybe                 (catMaybes, fromJust)
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Util        (traceShow)
 
------------------------------------------------
--- experimental: add state to Rules + Action --
------------------------------------------------
-
--- this is needed to pass DigestMap around, and makes the rest easier
-type ActionEnv = (Config, LocksRef, IDsRef, DigestsRef)
-type ActionR a = ReaderT ActionEnv Action a
-
-runActionR :: ActionEnv -> ActionR a -> Action a
-runActionR env act = runReaderT act env
-
-askConfig :: ActionR Config
-askConfig = do
-  (cfg, _, _, _) <- ask
-  return cfg
-
-askLocks :: ActionR LocksRef
-askLocks = do
-  (_, lRef, _, _) <- ask
-  return lRef
-
-type ActionR1 = ExprPath -> FilePath                         -> ActionR ()
-type ActionR2 = ExprPath -> FilePath -> FilePath             -> ActionR ()
-type ActionR3 = ExprPath -> FilePath -> FilePath -> FilePath -> ActionR ()
+-- first arg is the outpath, and the rest are inputs
+type ActionN1 = ExprPath -> FilePath                         -> Action ()
+type ActionN2 = ExprPath -> FilePath -> FilePath             -> Action ()
+type ActionN3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
 {-|
 The old-style rules in use throughout OrthoLang now require the compilers to
@@ -82,9 +62,10 @@ return exact paths. These new ones use proper patterns instead, so they can be
 added once per program run rather than once per expression. They should also
 allow Shake to infer mapping patterns, but that isn't implemented yet.
 -}
-newFunctionRules :: RulesR ()
+newFunctionRules :: Rules ()
 newFunctionRules = do
-  (cfg, _, _, _) <- ask
+  -- (cfg, _, _, _) <- ask
+  cfg <- fmap fromJust $ getShakeExtraRules
   let fns   = concatMap mFunctions $ cfgModules cfg
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
@@ -93,7 +74,7 @@ newFunctionRules = do
 I'm not sure yet which of the core language feature compilers can be converted
 to new-style rules. Perhaps none of them? If not, remove this.
 -}
-newCoreRules :: RulesR ()
+newCoreRules :: Rules ()
 newCoreRules = do
 
   -- this is a nice idea in general, but won't work with the special lit compilers
@@ -119,24 +100,24 @@ newCoreRules = do
 
 -- TODO ExprPaths for deps?
 -- TODO or Paths throughout?
--- TODO can you encode NewAction1, 2, 3... easily?
+-- TODO can you encode NewActionN1, 2, 3... easily?
 
-rNewRules1 :: String -> TypeChecker -> ActionR1 -> RulesR ()
+rNewRules1 :: String -> TypeChecker -> ActionN1 -> Rules ()
 rNewRules1 = rNewRules 1 applyList1
 
-applyList1 :: (FilePath -> ActionR ()) -> [FilePath] -> ActionR ()
+applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList1 fn deps = fn (deps !! 0)
 
-rNewRules2 :: String -> TypeChecker -> ActionR2 -> RulesR ()
+rNewRules2 :: String -> TypeChecker -> ActionN2 -> Rules ()
 rNewRules2 = rNewRules 2 applyList2
 
-applyList2 :: (FilePath -> FilePath -> ActionR ()) -> [FilePath] -> ActionR ()
+applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
-rNewRules3 :: String -> TypeChecker -> ActionR3 -> RulesR ()
+rNewRules3 :: String -> TypeChecker -> ActionN3 -> Rules ()
 rNewRules3 = rNewRules 3 applyList3
 
-applyList3 :: (FilePath -> FilePath -> FilePath -> ActionR ()) -> [FilePath] -> ActionR ()
+applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
 
 -- TODO any need to look up prefixOf to get the canonical name?
@@ -147,27 +128,24 @@ newPattern cfg name nArgs =
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 -- TODO one less * if not using repeat salt
 rNewRules
-  :: Int -> (t -> [FilePath] -> ActionR ()) -> String -> TypeChecker
-  -> (ExprPath -> t) -> RulesR ()
+  :: Int -> (t -> [FilePath] -> Action ()) -> String -> TypeChecker
+  -> (ExprPath -> t) -> Rules ()
 rNewRules nArgs applyFn name tFn aFn = do
-  (cfg, _, _, _) <- ask
+  -- (cfg, _, _, _) <- ask
+  cfg <- fmap fromJust $ getShakeExtraRules
   let ptn = newPattern cfg name nArgs
       ptn' = traceShow "rNewrules" ptn
-  ptn' %>> aNewRules applyFn tFn aFn
-
-(%>>) :: FilePattern -> (ExprPath -> ActionR ()) -> RulesR ()
-ptn %>> act = do
-  (cfg, lRef, iRef, dRef) <- ask
-  let run = runActionR (cfg, lRef, iRef, dRef)
-  lift $ ptn %> \p -> run $ act $ ExprPath p
+  ptn' %> \p -> aNewRules applyFn tFn aFn (ExprPath p)
 
 aNewRules
-  :: (t -> [FilePath] -> ActionR ()) -- ^ one of the apply{1,2,3} fns
+  :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1,2,3} fns
   -> TypeChecker
   -> (ExprPath -> t)
-  ->  ExprPath -> ActionR ()
+  ->  ExprPath -> Action ()
 aNewRules applyFn tFn aFn out = do
-  (cfg, lRef, iRef, dRef) <- ask
+  -- (cfg, lRef, iRef, dRef) <- ask
+  cfg  <- fmap fromJust $ getShakeExtra
+  dRef <- fmap fromJust $ getShakeExtra
   (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dRef out
   case tFn dTypes of
     Left err -> fail err -- TODO bop type error here :(
@@ -178,16 +156,19 @@ aNewRules applyFn tFn aFn out = do
       needR "ortholang.modules.newrulestest.aNewRules" deps'
       applyFn (aFn out) deps'
 
-needR :: String -> [FilePath] -> ActionR ()
+-- TODO remove this
+needR :: String -> [FilePath] -> Action ()
 needR name deps = do
-  (cfg, lRef, _, _) <- ask
-  lift $ need' cfg lRef name deps
+  -- (cfg, lRef, _, _) <- getShakeExtra
+  cfg  <- fmap fromJust $ getShakeExtra
+  lRef <- fmap fromJust $ getShakeExtra
+  need' cfg lRef name deps
 
 mkNewBop :: String   -- ^ name
          -> Char     -- ^ opchar
          -> Type     -- ^ return type
          -> Type     -- ^ 1 argument type (each side of the bop will be this)
-         -> ActionR1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
+         -> ActionN1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
          -> Function
 mkNewBop n c r a1 = mkNewFn rNewRules1
          n (Just c) r [ListOf a1]
@@ -195,7 +176,7 @@ mkNewBop n c r a1 = mkNewFn rNewRules1
 mkNewFn1 :: String     -- ^ name
          -> Type       -- ^ return type
          -> Type       -- ^ 1 argument type
-         -> ActionR1   -- ^ 1-argument action
+         -> ActionN1   -- ^ 1-argument action
          -> Function
 mkNewFn1 n r a1 = mkNewFn rNewRules1
          n Nothing r [a1]
@@ -203,7 +184,7 @@ mkNewFn1 n r a1 = mkNewFn rNewRules1
 mkNewFn2 :: String       -- ^ name
          -> Type         -- ^ return type
          -> (Type, Type) -- ^ 2 argument types
-         -> ActionR2     -- ^ 2-argument action
+         -> ActionN2     -- ^ 2-argument action
          -> Function
 mkNewFn2 n r (a1, a2) = mkNewFn rNewRules2
          n Nothing r [a1, a2]
@@ -211,14 +192,14 @@ mkNewFn2 n r (a1, a2) = mkNewFn rNewRules2
 mkNewFn3 :: String             -- ^ name
          -> Type               -- ^ return type
          -> (Type, Type, Type) -- ^ 3 argument types
-         -> ActionR3           -- ^ 3-argument action
+         -> ActionN3           -- ^ 3-argument action
          -> Function
 mkNewFn3 n r (a1, a2, a3) = mkNewFn rNewRules3
          n Nothing r [a1, a2, a3]
 
 -- | Use the argument-specific numbered version above instead.
 mkNewFn
-  :: (String -> TypeChecker -> t -> RulesR ())
+  :: (String -> TypeChecker -> t -> Rules ())
   -> String -> Maybe Char -> Type -> [Type] -> t -> Function
 mkNewFn rFn name mChar oType dTypes aFn =
   let tFn = defaultTypeCheck name dTypes oType

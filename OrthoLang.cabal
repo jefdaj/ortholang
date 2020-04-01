@@ -80,6 +80,7 @@ common shared-properties
                     text,
                     transformers,
                     unbounded-delays,
+                    unordered-containers,
                     unix,
                     utility-ht,
                     time,
