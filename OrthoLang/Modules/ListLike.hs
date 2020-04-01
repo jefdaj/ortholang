@@ -11,6 +11,7 @@ import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import OrthoLang.Modules.MMSeqs   (mms)
 import Data.Scientific            (Scientific())
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -56,27 +57,29 @@ lenEach = Function
     name = "length_each"
 
 rLen :: RulesFn
-rLen s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [l]) = do
-  (ExprPath lPath) <- rExpr s l
+rLen scr e@(Fun _ _ _ _ [l]) = do
+  (ExprPath lPath) <- rExpr scr l
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath
   -- (ExprPath outPath) = unsafeExprPathExplicit cfg True num "length" [relPath]
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let outPath = exprPath cfg dRef scr e
       out'    = fromPath cfg outPath
       lPath'  = toPath   cfg lPath
-  out' %> \_ -> aLen cfg ref ids [outPath, lPath']
+  out' %> \_ -> aLen [outPath, lPath']
   return (ExprPath out')
 rLen _ _ = fail "bad arguments to rLen"
 
 -- TODO if given a list with empty lists, should return zeros!
 -- TODO account for the last empty line in mms files! (currently returns length + 1)
 aLen :: [Path] -> Action ()
-aLen cfg ref _ [out, lst] = do
+aLen [out, lst] = do
   let count ls = read (show $ length ls) :: Scientific
+  cfg <- fmap fromJust getShakeExtra
+  let out'  = fromPath cfg out
+      lst'  = fromPath cfg lst
+      out'' = traceA "aLen" out' [out', lst']
   n <- fmap count $ readPaths lst'
-  writeLit cfg ref out'' $ show n
-  where
-    out'  = fromPath cfg out
-    lst'  = fromPath cfg lst
-    out'' = traceA "aLen" out' [out', lst']
-aLen _ _ _ args = error $ "bad arguments to aLen: " ++ show args
+  writeLit out'' $ show n
+aLen args = error $ "bad arguments to aLen: " ++ show args

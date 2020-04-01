@@ -8,6 +8,7 @@ import OrthoLang.Core
 
 import System.Exit     (ExitCode(..))
 import System.FilePath ((<.>))
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -34,13 +35,15 @@ mkRangeFn name nArgs =  Function
 
 -- TODO put somewhere as the standard way to construct an rSimpleScript that takes numbers?
 rRange :: RulesFn
-rRange st@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ name args) = do
+rRange scr e@(Fun _ _ _ name args) = do
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out = exprPath cfg dRef scr e
       out' = fromPath cfg out
-  argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr st) args
+  argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr scr) args
   out' %> \_ -> do
-    as <- mapM (readLit cfg ref) argPaths
-    runCmd cfg ref $ CmdDesc
+    as <- mapM readLit argPaths
+    runCmd $ CmdDesc
       { cmdBinary = name <.> "R"
       , cmdArguments = out':as
       , cmdFixEmpties = False

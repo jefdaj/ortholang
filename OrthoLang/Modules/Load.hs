@@ -10,6 +10,7 @@ import Data.String.Utils    (strip)
 import OrthoLang.Core       (compose1)
 import System.Directory     (makeRelativeToCurrentDirectory)
 import System.FilePath.Glob (glob)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -54,28 +55,30 @@ globFiles = Function
 -- ... looks like this is actually rGlobFiles!
 -- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: RulesFn
-rGlobFiles s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [p]) = do
-  (ExprPath path) <- rExpr s p
+rGlobFiles scr e@(Fun _ _ _ _ [p]) = do
+  (ExprPath path) <- rExpr scr p
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let outPath = exprPath cfg dRef scr e
       out'    = fromPath cfg outPath
       path'   = toPath cfg path
-  out' %> \_ -> aGlobFiles cfg ref outPath path'
+  out' %> \_ -> aGlobFiles outPath path'
   return (ExprPath out')
 rGlobFiles _ _ = fail "bad arguments to rGlobFiles"
 
-aGlobFiles :: Config -> LocksRef -> Path -> Path -> Action ()
-aGlobFiles cfg ref outPath path = do
-  ptn   <- fmap strip $ readLit cfg ref path'
+aGlobFiles :: Path -> Path -> Action ()
+aGlobFiles outPath path = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'  = fromPath cfg outPath
+      path' = fromPath cfg path
+      out'' = traceA "aGlobFiles" out' [out', path']
+  ptn <- fmap strip $ readLit path'
   -- liftIO $ putStrLn $ "ptn: " ++ show ptn
   -- paths <- liftIO $ mapM absolutize =<< glob ptn
   paths  <- liftIO $ fmap sort $ glob ptn
   paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
   -- toLstStr cfg str (ExprPath outPath) paths
-  writeLits cfg ref out'' paths'
-  where
-    out'  = fromPath cfg outPath
-    path' = fromPath cfg path
-    out'' = traceA "aGlobFiles" out' [out', path']
+  writeLits out'' paths'
 
 ------------
 -- load_* --

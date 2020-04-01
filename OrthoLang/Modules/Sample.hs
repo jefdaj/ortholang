@@ -8,6 +8,7 @@ import OrthoLang.Core
 import Data.Scientific       (formatScientific, FPFormat(..))
 import System.Random         (StdGen)
 import System.Random.Shuffle (shuffle')
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -36,29 +37,32 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample st@(scr, cfg, ref, ids, dRef) expr@(Fun _ salt _ _ [n, lst]) = do
-  (ExprPath nPath' ) <- rExpr st n
-  (ExprPath inPath') <- rExpr st lst
+rSample scr expr@(Fun _ salt _ _ [n, lst]) = do
+  (ExprPath nPath' ) <- rExpr scr n
+  (ExprPath inPath') <- rExpr scr lst
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let nPath    = toPath cfg nPath'
       inPath   = toPath cfg inPath'
       outPath  = exprPath cfg dRef scr expr
       outPath' = fromPath cfg outPath
       (ListOf t) = typeOf lst
-  outPath' %> \_ -> aSample salt t cfg ref ids outPath nPath inPath
+  outPath' %> \_ -> aSample salt t outPath nPath inPath
   return $ ExprPath outPath'
 rSample _ _ = fail "bad argument to rSample"
 
 aSample :: Salt -> Type -> Action2
-aSample salt t cfg ref _ outPath nPath lstPath = do
+aSample salt t outPath nPath lstPath = do
+  cfg <- fmap fromJust getShakeExtra
   let nPath'   = fromPath cfg nPath
       lstPath' = fromPath cfg lstPath
       outPath' = fromPath cfg outPath
-  nStr <- readLit cfg ref nPath'
-  lst  <- readStrings t cfg ref lstPath'
+  nStr <- readLit nPath'
+  lst  <- readStrings t lstPath'
   debugA ("ortholang.modules.sample.aSample") ("salt: " ++ show salt)
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
       elements' = randomSample salt n lst
-  writeStrings t cfg ref outPath' elements'
+  writeStrings t outPath' elements'
 
 randomSample :: Salt -> Int -> [String] -> [String]
 randomSample (Salt s) n lst = take n $ shuffle lst randGen

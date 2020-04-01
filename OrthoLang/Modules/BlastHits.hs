@@ -10,6 +10,7 @@ import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import System.Exit                (ExitCode(..))
 import System.FilePath            (replaceBaseName)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -94,8 +95,13 @@ extractTargetsEach = Function
 
 -- TODO remove uniq, unless it's used somewhere?
 aCutCol :: Bool -> Int -> [Path] -> Action ()
-aCutCol _ n cfg ref _ [outPath, tsvPath] = do
-  runCmd cfg ref $ CmdDesc
+aCutCol _ n [outPath, tsvPath] = do
+  cfg <- fmap fromJust getShakeExtra
+  let outPath'  = fromPath cfg outPath
+      outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
+      tsvPath'  = fromPath cfg tsvPath
+      tmpPath'  = replaceBaseName outPath'' "tmp" -- the non-deduped version
+  runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = tmpPath'
@@ -109,19 +115,14 @@ aCutCol _ n cfg ref _ [outPath, tsvPath] = do
     , cmdRmPatterns = [outPath']
     }
   trackWrite' [tmpPath']
-  writeCachedVersion cfg ref outPath'' tmpPath'
+  writeCachedVersion outPath'' tmpPath'
 
   -- TODO remove this? why does it need to be here at all?
   -- let outOut = outPath' <.> "out"
   -- unlessExists outOut $ do
-  --   symlink cfg ref outPath $ toPath cfg outOut
+  --   symlink outPath $ toPath cfg outOut
 
-  where
-    outPath'  = fromPath cfg outPath
-    outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
-    tsvPath'  = fromPath cfg tsvPath
-    tmpPath'  = replaceBaseName outPath'' "tmp" -- the non-deduped version
-aCutCol _ _ _ _ _ _ = fail "bad arguments to aCutCol"
+aCutCol _ _ _ = fail "bad arguments to aCutCol"
 
 ---------------------
 -- filter_*(_each) --
@@ -156,8 +157,13 @@ mkFilterHitsEach colname = Function
     name = "filter_" ++ colname ++ "_each"
 
 aFilterHits :: String -> ([Path] -> Action ())
-aFilterHits colname cfg ref _ [out, cutoff, hits] = do
-  runCmd cfg ref $ CmdDesc
+aFilterHits colname [out, cutoff, hits] = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'    = fromPath cfg out
+      out''   = traceA "aFilterHits" out' [out', cutoff', hits']
+      cutoff' = fromPath cfg cutoff
+      hits'   = fromPath cfg hits
+  runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = out''
@@ -170,12 +176,7 @@ aFilterHits colname cfg ref _ [out, cutoff, hits] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out'']
     }
-  where
-    out'    = fromPath cfg out
-    out''   = traceA "aFilterHits" out' [out', cutoff', hits']
-    cutoff' = fromPath cfg cutoff
-    hits'   = fromPath cfg hits
-aFilterHits _ _ _ _ args = error $ "bad argument to aFilterHits: " ++ show args
+aFilterHits _ args = error $ "bad argument to aFilterHits: " ++ show args
 
 -------------------------------
 -- get the best hit per gene --
@@ -209,8 +210,12 @@ bestHitsEach = Function
     name = "best_hits_each"
 
 aBestExtract :: [Path] -> Action ()
-aBestExtract cfg ref _ [out, hits] = do
-  runCmd cfg ref $ CmdDesc
+aBestExtract [out, hits] = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'  = fromPath cfg out
+      out'' = traceA "aBestExtract" out' [out', hits']
+      hits' = fromPath cfg hits
+  runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = out''
@@ -223,8 +228,4 @@ aBestExtract cfg ref _ [out, hits] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
-  where
-    out'  = fromPath cfg out
-    out'' = traceA "aBestExtract" out' [out', hits']
-    hits' = fromPath cfg hits
-aBestExtract _ _ _ args = error $ "bad argument to aBestExtract: " ++ show args
+aBestExtract args = error $ "bad argument to aBestExtract: " ++ show args

@@ -30,7 +30,7 @@ filtering is done according to the TASTY_PATTERN environment var.
 Gotcha: can't print the test pattern in place of "all tests"
 because then they all match, ruining the filter.
 -}
-mkTests :: DigestsRef -> IO TestTree
+mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = mkTestGroup cfg ref ids dRef "all tests" tests
   where
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
@@ -45,7 +45,7 @@ mkTestConfig cfg dir = cfg
 dbg :: String -> IO ()
 dbg = U.debug "test.runTests"
 
-runTests :: Arguments -> DigestsRef -> IO ()
+runTests :: Arguments -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
 runTests args cfg ref ids dRef = withArgs [] $ do
   tmpRootDir <- getTemporaryDirectory -- can't share /tmp on the Berkeley cluster!
   createDirectoryIfMissing True tmpRootDir

@@ -20,6 +20,7 @@ import OrthoLang.Modules.BlastDB (ndb, pdb) -- TODO import rMakeBlastDB too?
 import OrthoLang.Modules.SeqIO   (faa, fna, mkConcat, mkConcatEach)
 import System.Exit               (ExitCode(..))
 import System.FilePath           (replaceBaseName)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -85,9 +86,15 @@ rMkBlastFromDb :: BlastDesc -> RulesFn
 rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
 aMkBlastFromDb :: String -> ([Path] -> Action ())
-aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
-  eStr   <- readLit cfg ref e'
-  prefix <- readPath cfg ref p'
+aMkBlastFromDb bCmd [o, e, q, p] = do
+  cfg <- fmap fromJust getShakeExtra
+  let o'  = fromPath cfg o
+      q'  = fromPath cfg q
+      p'  = fromPath cfg p
+      e'  = fromPath cfg e
+      o'' = traceA "aMkBlastFromDb" o' [bCmd, e', o', q', p']
+  eStr   <- readLit e'
+  prefix <- readPath p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromPath cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
@@ -138,9 +145,10 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
   -- want to be real sure not to accidentally mistake these for done:
   let stdoutPath = replaceBaseName o'' "out"
       stderrPath = replaceBaseName o'' "err"
+  ref <- fmap fromJust getShakeExtra
   liftIO $ removeIfExists ref stdoutPath
   liftIO $ removeIfExists ref stderrPath
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdBinary = "blast.sh"
     , cmdArguments = [stdoutPath, bCmd', eDec, q', prefix']
     , cmdFixEmpties = False
@@ -153,14 +161,8 @@ aMkBlastFromDb bCmd cfg ref _ [o, e, q, p] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink cfg ref o (toPath cfg stdoutPath)
-  where
-    o'  = fromPath cfg o
-    q'  = fromPath cfg q
-    p'  = fromPath cfg p
-    e'  = fromPath cfg e
-    o'' = traceA "aMkBlastFromDb" o' [bCmd, e', o', q', p']
-aMkBlastFromDb _ _ _ _ _ = error $ "bad argument to aMkBlastFromDb"
+  symlink o (toPath cfg stdoutPath)
+aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------
 -- *blast* --

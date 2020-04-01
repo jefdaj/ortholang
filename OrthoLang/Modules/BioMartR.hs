@@ -31,7 +31,7 @@ import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
 import Text.Parsec.Char (char, string, alphaNum, oneOf)
 import Text.Parsec.Combinator (between, optionMaybe)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, fromJust)
 import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
@@ -187,27 +187,29 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
 rParseSearches :: RulesFn
-rParseSearches s@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [searches]) = do
-  (ExprPath sList) <- rExpr s searches
+rParseSearches scr expr@(Fun _ _ _ _ [searches]) = do
+  (ExprPath sList) <- rExpr scr searches
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let searchTable  = exprPath cfg dRef scr expr
       searchTable' = fromPath cfg searchTable
       sList' = toPath cfg sList
-  searchTable' %> \_ -> aParseSearches cfg ref ids sList' searchTable
+  searchTable' %> \_ -> aParseSearches sList' searchTable
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 
 aParseSearches :: Path -> Path -> Action ()
-aParseSearches cfg ref _ sList out = do
+aParseSearches sList out = do
+  cfg <- fmap fromJust getShakeExtra
+  let sList' = fromPath cfg sList
+      out'   = fromPath cfg out
+      out''  = traceA "aParseSearches" out' [sList', out']
   parses <- (fmap . map) readSearch (readLits sList')
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    else writeLits cfg ref out'' $ toTsvRows searches'
-  where
-    sList' = fromPath cfg sList
-    out'   = fromPath cfg out
-    out''  = traceA "aParseSearches" out' [sList', out']
+    else writeLits out'' $ toTsvRows searches'
 
 ------------------
 -- run biomartr --
@@ -222,30 +224,37 @@ aParseSearches cfg ref _ sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> RulesFn
-rBioMartR fn s@(scr, cfg, ref, ids, dRef) expr@(Fun rtn salt _ _ [ss]) = do
-  (ExprPath bmFn  ) <- rExpr s (Lit str (Salt 0) fn)
+rBioMartR fn scr expr@(Fun rtn salt _ _ [ss]) = do
+  (ExprPath bmFn  ) <- rExpr scr (Lit str (Salt 0) fn)
   -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr s $ Fun rtn salt (depsOf ss) "parse_searches" [ss]
+  (ExprPath sTable) <- rExpr scr $ Fun rtn salt (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
       tmp'    = toPath cfg bmTmp
       out     = exprPath cfg dRef scr expr
       out'    = fromPath cfg out
       sTable' = toPath cfg sTable
       bmFn'   = toPath cfg bmFn
-  out' %> \_ -> aBioMartR cfg ref ids out bmFn' tmp' sTable'
+  out' %> \_ -> aBioMartR out bmFn' tmp' sTable'
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
 
-aBioMartR :: Config -> LocksRef -> IDsRef
-          -> Path -> Path -> Path -> Path -> Action ()
-aBioMartR cfg ref _ out bmFn bmTmp sTable = do
+aBioMartR :: Path -> Path -> Path -> Path -> Action ()
+aBioMartR out bmFn bmTmp sTable = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'    = fromPath cfg out
+      bmFn'   = fromPath cfg bmFn
+      bmTmp'  = fromPath cfg bmTmp
+      sTable' = fromPath cfg sTable
+      out'' = traceA "aBioMartR" out' [out', bmFn', bmTmp', sTable']
   need' "ortholang.modules.biomartr.aBioMartR" [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
   -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
   --   "biomartr.R" [out'', bmFn', sTable']
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdBinary = "biomartr.R"
     , cmdArguments = [out'', bmFn', sTable']
     , cmdExitCode = ExitSuccess
@@ -258,9 +267,3 @@ aBioMartR cfg ref _ out bmFn bmTmp sTable = do
     , cmdSanitizePaths = []
     , cmdOptions = [Cwd bmTmp'] -- TODO remove?
     }
-  where
-    out'    = fromPath cfg out
-    bmFn'   = fromPath cfg bmFn
-    bmTmp'  = fromPath cfg bmTmp
-    sTable' = fromPath cfg sTable
-    out'' = traceA "aBioMartR" out' [out', bmFn', bmTmp', sTable']

@@ -11,6 +11,7 @@ import OrthoLang.Modules.SeqIO   (faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>))
+import Data.Maybe (fromJust)
 
 -- TODO should the _rev functions also be moved here?
 -- TODO test each one: first all the peices, then together
@@ -59,7 +60,7 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Functi
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d st (Fun rtn salt deps name [e, q, s]) = rules st expr
+rMkBlastFromFaRev d scr (Fun rtn salt deps name [e, q, s]) = rules scr expr
   where
     expr  = Fun rtn salt deps name_norev [e, s, q]
     rules = fOldRules $ mkBlastFromFa d
@@ -88,25 +89,24 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
 -- expression over the new action fn.
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) st (Fun rtn salt deps _ [e, s, qs])
-  = rMap 3 revDbAct st editedExpr
-  where
-    revDbAct   = aMkBlastFromDbRev bCmd
-    sList      = Lst (typeOf s) salt (depsOf s) [s]
-    subjDbExpr = Fun dbType salt (depsOf sList) dbFnName [sList]
-    editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
-    editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
-    (dbFnName, dbType) = if qType == faa
-                           then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
-                           else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
+rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn salt deps _ [e, s, qs]) = do
+  let revDbAct   = aMkBlastFromDbRev bCmd
+      sList      = Lst (typeOf s) salt (depsOf s) [s]
+      subjDbExpr = Fun dbType salt (depsOf sList) dbFnName [sList]
+      editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
+      editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
+      (dbFnName, dbType) = if qType == faa
+                             then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
+                             else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
+  rMap 3 revDbAct scr editedExpr
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 
 -- TODO which blast commands make sense with this?
 -- TODO is it deduplicating properly with the fn name?
 aMkBlastFromDbRev :: String -> ([Path] -> Action ())
-aMkBlastFromDbRev bCmd cfg ref ids [oPath, eValue, dbPrefix, queryFa] =
-  aMkBlastFromDb  bCmd cfg ref ids [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ _ _ _ = fail "bad argument to aMkBlastFromDbRev"
+aMkBlastFromDbRev bCmd [oPath, eValue, dbPrefix, queryFa] =
+  aMkBlastFromDb  bCmd [oPath, eValue, queryFa, dbPrefix]
+aMkBlastFromDbRev _ _ = fail "bad argument to aMkBlastFromDbRev"
 
 ---------------------
 -- reciprocal_best --
@@ -128,8 +128,13 @@ reciprocalBest = Function
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 -- TODO why is this the only one that fails, and only when called from repeat??
 aReciprocalBest :: [Path] -> Action ()
-aReciprocalBest cfg ref _ [out, left, right] = do
-  runCmd cfg ref $ CmdDesc
+aReciprocalBest [out, left, right] = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'   = fromPath cfg out
+      left'  = fromPath cfg left
+      right' = fromPath cfg right
+      out''  = traceA "aReciprocalBest" out' [out', left', right']
+  runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = out''
@@ -142,12 +147,7 @@ aReciprocalBest cfg ref _ [out, left, right] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
-  where
-    out'   = fromPath cfg out
-    left'  = fromPath cfg left
-    right' = fromPath cfg right
-    out''  = traceA "aReciprocalBest" out' [out', left', right']
-aReciprocalBest _ _ _ args = error $ "bad argument to aReciprocalBest: " ++ show args
+aReciprocalBest args = error $ "bad argument to aReciprocalBest: " ++ show args
 
 --------------------------
 -- reciprocal_best_each --
@@ -165,14 +165,15 @@ reciprocalBestAll = Function
     name = "reciprocal_best_all"
 
 aReciprocalBestAll :: [Path] -> Action ()
-aReciprocalBestAll cfg ref ids (out:ins) = do
+aReciprocalBestAll (out:ins) = do
+  cfg <- fmap fromJust getShakeExtra
   let cDir = fromPath cfg $ cacheDir cfg "blastrbh"
       tmpPath p = cDir </> digest p <.> "bht"
       ins' = map (\p -> (p, tmpPath p)) $ map (fromPath cfg) ins
   liftIO $ createDirectoryIfMissing True cDir
-  mapM_ (\(inPath, outPath) -> absolutizePaths cfg ref inPath outPath) ins'
-  aSimpleScriptNoFix "reciprocal_best_all.R" cfg ref ids (out:map (toPath cfg . snd) ins')
-aReciprocalBestAll _ _ _ ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
+  mapM_ (\(inPath, outPath) -> absolutizePaths inPath outPath) ins'
+  aSimpleScriptNoFix "reciprocal_best_all.R" (out:map (toPath cfg . snd) ins')
+aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
 
 -----------------
 -- *blast*_rbh --

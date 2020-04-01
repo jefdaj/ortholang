@@ -62,8 +62,8 @@ extractNum _ _ = error "bad argument to extractNum"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the salts should work?
 rRepeatN :: RulesFn
-rRepeatN s@(scr, _, _, _, _) (Fun t salt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
-  rReplaceEach s (Fun t salt deps name [resExpr, subVar, subList])
+rRepeatN scr (Fun t salt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
+  rReplaceEach scr (Fun t salt deps name [resExpr, subVar, subList])
   where
     subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v scr
     nReps   = extractNum scr repsExpr

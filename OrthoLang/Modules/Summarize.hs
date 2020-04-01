@@ -8,6 +8,7 @@ import OrthoLang.Core      (rExpr)
 import OrthoLang.Core (readLits, writeLits, traceA, need')
 -- import OrthoLang.Core (traceA)
 import Development.Shake.FilePath ((</>))
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -38,22 +39,24 @@ summaryTypeCheck _ = Left "type error in summary!"
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
 rSummary :: ([[FilePath]] -> [FilePath]) -> RulesFn
-rSummary summaryFn s@(scr, cfg, ref, _, dRef) expr@(Fun _ _ _ _ [iList]) = do
-  (ExprPath iPath) <- rExpr s iList
+rSummary summaryFn scr expr@(Fun _ _ _ _ [iList]) = do
+  (ExprPath iPath) <- rExpr scr iList
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   -- let (ListOf (ListOf eType)) = typeOf iList
       -- (ExprPath oPath) = unsafeExprPathExplicit cfg True (ListOf eType) fnName 
                                           -- [show expr, iPath]
   let oPath = fromPath cfg $ exprPath cfg dRef scr expr
-  oPath %> aSummary cfg ref summaryFn iPath
+  oPath %> aSummary summaryFn iPath
   return (ExprPath oPath)
 rSummary _ _ _ = fail "bad argument to rSummary"
 
-aSummary :: Config -> LocksRef -> ([[String]] -> [String])
-         -> FilePath -> FilePath -> Action ()
-aSummary cfg ref summaryFn iPath out = do
+aSummary :: ([[String]] -> [String]) -> FilePath -> FilePath -> Action ()
+aSummary summaryFn iPath out = do
   need' "ortholang.modules.summary.aSummary" [iPath]
   iLists <- readLits iPath
+  cfg <- fmap fromJust getShakeExtra
   iElems <- mapM (readLits . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
       out' = traceA "aSummary" out [out, iPath]
-  writeLits cfg ref out' oElems
+  writeLits out' oElems

@@ -11,6 +11,7 @@ import OrthoLang.Modules.SeqIO (fna, faa)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         ((</>), takeBaseName)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -51,8 +52,8 @@ sonicparanoid = let name = "sonicparanoid" in Function
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
 -- TODO should get all results as an unusable file first, then extract what you want explicitly
 aSonicParanoid :: [Path] -> Action ()
-aSonicParanoid cfg ref _ [out, faListPath] = do
-
+aSonicParanoid [out, faListPath] = do
+  cfg <- fmap fromJust getShakeExtra
   let cDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
       sharedDir   = cDir </> "shared"
       tmpDir      = cDir </> digest faListPath
@@ -77,11 +78,11 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
     let faPaths' = map (fromPath cfg) faPaths
     need' "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
     let faLinks = map (\p -> toPath cfg $ inDir </> (takeBaseName $ fromPath cfg p)) faPaths
-    mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
+    mapM_ (\(p, l) -> symlink l p) $ zip faPaths faLinks
 
     -- TODO decide mode based on fn name
     -- TODO decide -d (debug) based on cfg? or leave one way?
-    runCmd cfg ref $ CmdDesc
+    runCmd $ CmdDesc
       { cmdBinary = "sonicparanoid.sh"
       , cmdArguments = [tmpDir, sharedDir, dbDir, inDir, "fast", "-d"]
       , cmdFixEmpties = False -- TODO do that?
@@ -110,6 +111,6 @@ aSonicParanoid cfg ref _ [out, faListPath] = do
 
   -- TODO does this fix the "does not exist" issue?
   -- trackWrite' [statsPath']
-  symlink cfg ref out statsPath
+  symlink out statsPath
 
-aSonicParanoid _ _ _ args = error $ "bad argument to aSonicParanoid: " ++ show args
+aSonicParanoid args = error $ "bad argument to aSonicParanoid: " ++ show args

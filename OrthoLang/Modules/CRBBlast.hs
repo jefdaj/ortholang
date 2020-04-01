@@ -9,6 +9,7 @@ import Development.Shake
 import Development.Shake.FilePath ((</>), takeFileName)
 import OrthoLang.Modules.SeqIO    (faa, fna, fa)
 import System.Exit                (ExitCode(..))
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -74,7 +75,13 @@ blastCRBEach = Function
  - TODO adjust cache paths to be deterministic!
  -}
 aCRBBlast :: Path -> [Path] -> Action ()
-aCRBBlast cfg ref _ tmpDir [o, q, t] = do
+aCRBBlast tmpDir [o, q, t] = do
+  cfg <- fmap fromJust getShakeExtra
+  let o'   = fromPath cfg o
+      o''  = traceA "aCRBBlast" o [fromPath cfg tmpDir, o', q', t']
+      tmp' = fromPath cfg tmpDir
+      q'   = fromPath cfg q
+      t'   = fromPath cfg t
   need' "ortholang.modules.crbblast.aCRBBlast" [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
@@ -91,9 +98,9 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
       oPath = tmp' </> "results.crb"
       oPath' = toPath cfg oPath
   need' "ortholang.core.modules.crbblast.aCRBBlast" [qDst, tDst]
-  symlink cfg ref qSrc' qDst'
-  symlink cfg ref tSrc' tDst'
-  runCmd cfg ref $ CmdDesc
+  symlink qSrc' qDst'
+  symlink tSrc' tDst'
+  runCmd $ CmdDesc
     { cmdParallel = False -- TODO true?
     , cmdFixEmpties = True
     , cmdOutPath = oPath
@@ -106,11 +113,5 @@ aCRBBlast cfg ref _ tmpDir [o, q, t] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o', tmp'] -- TODO the whole thing, right?
     }
-  symlink cfg ref o'' oPath'
-  where
-    o'   = fromPath cfg o
-    o''  = traceA "aCRBBlast" o [fromPath cfg tmpDir, o', q', t']
-    tmp' = fromPath cfg tmpDir
-    q'   = fromPath cfg q
-    t'   = fromPath cfg t
-aCRBBlast _ _ _ _ args = error $ "bad argument to aCRBBlast: " ++ show args
+  symlink o'' oPath'
+aCRBBlast _ args = error $ "bad argument to aCRBBlast: " ++ show args

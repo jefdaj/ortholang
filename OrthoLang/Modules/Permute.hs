@@ -5,6 +5,7 @@ module OrthoLang.Modules.Permute where
 import Development.Shake
 import OrthoLang.Core
 import Development.Shake.FilePath (makeRelative)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -27,39 +28,41 @@ orthoLangModule = Module
 -- TODO produce each output list in a separate Shake monad section?
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
-rPermute :: ([String] -> [[String]])
-         -> RulesFn
-rPermute comboFn s@(scr, cfg, _, _, dRef) expr@(Fun _ salt _ _ [iList]) = do
-  (ExprPath iPath) <- rExpr s iList
+rPermute :: ([String] -> [[String]]) -> RulesFn
+rPermute comboFn scr expr@(Fun _ salt _ _ [iList]) = do
+  (ExprPath iPath) <- rExpr scr iList
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let oList      = fromPath cfg $ exprPath cfg dRef scr expr
       (ListOf t) = typeOf iList
-  oList %> aPermute s comboFn iPath t salt
+  oList %> aPermute comboFn iPath t salt
   return (ExprPath oList)
 rPermute _ _ _ = fail "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
-aPermute :: GlobalEnv
-         -> ([String] -> [[String]])
+aPermute :: ([String] -> [[String]])
          -> FilePath -> Type -> Salt
          -> FilePath -> Action ()
-aPermute (_, cfg, ref, _, dRef) comboFn iPath eType salt out = do
+aPermute comboFn iPath eType salt out = do
   need' "ortholang.modules.permute.aPermute" [iPath]
-  elements <- readStrings eType cfg ref iPath
+  elements <- readStrings eType iPath
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   -- TODO will this match other files?
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
   let mkOut p = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromPath cfg) oPaths
       combos  = comboFn elements
   -- TODO traceA instead here?
-  mapM_ (\(p,ps) -> writeStrings eType cfg ref p $
+  mapM_ (\(p,ps) -> writeStrings eType p $
                       trace "modules.permute.aPermute"
                                ("combo: " ++ show ps) ps)
                                (zip oPaths' combos)
   let out' = traceA "aPermute" out [iPath, extOf eType, out]
-  writeStrings (ListOf eType) cfg ref out' oPaths'
+  writeStrings (ListOf eType) out' oPaths'
 
 --------------------
 -- leave_each_out --

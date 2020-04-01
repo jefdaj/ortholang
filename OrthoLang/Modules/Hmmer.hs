@@ -10,6 +10,7 @@ import OrthoLang.Modules.SeqIO  (faa)
 import System.Directory         (createDirectoryIfMissing)
 import System.Exit              (ExitCode(..))
 import System.FilePath          (takeFileName, (</>))
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -101,8 +102,14 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 
 -- TODO make it parallel and mark as such if possible
 aHmmsearch :: [Path] -> Action ()
-aHmmsearch cfg ref _ [out, e, hm, fa] = do
-  eStr <- readLit cfg ref e'
+aHmmsearch [out, e, hm, fa] = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'  = fromPath cfg out
+      out'' = traceA "aHmmsearch" out' [out', fa']
+      e'    = fromPath cfg e
+      hm'   = fromPath cfg hm
+      fa'   = fromPath cfg fa
+  eStr <- readLit e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
 
       -- TODO warn users about this? hmmer fails on smaller values than ~1e-307 on my machine
@@ -114,7 +121,7 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
   liftIO $ createDirectoryIfMissing True tmpDir
   -- wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [tmpOut] []
   --   "hmmsearch.sh" [out'', eDec', tmpOut, hm', fa']
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdBinary = "hmmsearch.sh"
     , cmdArguments = [out'', eDec', tmpOut, hm', fa']
     , cmdFixEmpties = True
@@ -127,13 +134,7 @@ aHmmsearch cfg ref _ [out, e, hm, fa] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out'', tmpOut]
     }
-  where
-    out'  = fromPath cfg out
-    out'' = traceA "aHmmsearch" out' [out', fa']
-    e'    = fromPath cfg e
-    hm'   = fromPath cfg hm
-    fa'   = fromPath cfg fa
-aHmmsearch _ _ _ args = error $ "bad argument to aHmmsearch: " ++ show args
+aHmmsearch args = error $ "bad argument to aHmmsearch: " ++ show args
 
 extractHmmTargets :: Function
 extractHmmTargets = let name = "extract_hmm_targets" in Function
@@ -156,14 +157,18 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
 -- TODO clean this up! it's pretty ugly
 -- TODO how to integrate the script since it needs the colnum?
 aExtractHmm :: Int -> [Path] -> Action ()
-aExtractHmm n cfg ref _ [outPath, tsvPath] = do
+aExtractHmm n [outPath, tsvPath] = do
   -- lits <- readLits tsvPath'
   -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
   --     lits''  = if uniq then sort $ nub lits' else lits'
   --     lits''' = map (\l -> (words l) !! (n - 1)) lits''
-  -- writeLits cfg ref outPath'' lits'''
+  -- writeLits outPath'' lits'''
   -- wrappedCmdWrite False True cfg ref outPath'' [outPath'] [] [] "extract-hmm.py" [outPath', tsvPath', show n]
-  runCmd cfg ref $ CmdDesc
+  cfg <- fmap fromJust getShakeExtra
+  let outPath'  = fromPath cfg outPath
+      outPath'' = traceA "aExtractHmm" outPath' [show n, outPath', tsvPath']
+      tsvPath'  = fromPath cfg tsvPath
+  runCmd $ CmdDesc
     { cmdBinary = "extract-hmm.py"
     , cmdArguments = [outPath', tsvPath', show n]
     , cmdParallel = False
@@ -176,8 +181,4 @@ aExtractHmm n cfg ref _ [outPath, tsvPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath']
     }
-  where
-    outPath'  = fromPath cfg outPath
-    outPath'' = traceA "aExtractHmm" outPath' [show n, outPath', tsvPath']
-    tsvPath'  = fromPath cfg tsvPath
-aExtractHmm _ _ _ _ _ = fail "bad arguments to aExtractHmm"
+aExtractHmm _ _ = fail "bad arguments to aExtractHmm"

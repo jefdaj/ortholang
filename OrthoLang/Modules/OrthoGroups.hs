@@ -28,6 +28,7 @@ import System.Directory  (createDirectoryIfMissing)
 import System.Exit       (ExitCode(..))
 import System.FilePath   ((<.>), (</>), takeDirectory)
 import Text.Regex.Posix  ((=~))
+import Data.Maybe (fromJust)
 
 -- this is just shorthand
 sll :: Type
@@ -93,7 +94,8 @@ rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
 
 -- TODO why are we unhashing the ids here?
 parseOrthoFinder :: Path -> Action [[String]]
-parseOrthoFinder cfg ref _ ofrPath = do
+parseOrthoFinder ofrPath = do
+  cfg <- fmap fromJust getShakeExtra
   let resDir = fromPath cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   -- ids <- liftIO $ readIORef idref
@@ -103,7 +105,8 @@ parseOrthoFinder cfg ref _ ofrPath = do
   return groups
 
 parseSonicParanoid :: Path -> Action [[String]]
-parseSonicParanoid cfg ref _ ogPath = do
+parseSonicParanoid ogPath = do
+  cfg <- fmap fromJust getShakeExtra
   let resDir = takeDirectory $ fromPath cfg ogPath
       grpPath = resDir </> "ortholog_groups.tsv"
   -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
@@ -118,7 +121,8 @@ parseSonicParanoid cfg ref _ ogPath = do
     parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
 
 parseGreenCut :: Path -> Action [[String]]
-parseGreenCut cfg ref _ ogPath = do
+parseGreenCut ogPath = do
+  cfg <- fmap fromJust getShakeExtra
   txt <- readFileStrict' $ fromPath cfg ogPath
   let groups = map parseLine $ lines txt
   return groups
@@ -126,31 +130,32 @@ parseGreenCut cfg ref _ ogPath = do
     parseLine l = filter (/= ":") $ split "\t" l
 
 writeOrthogroups :: Path -> [[String]] -> Action ()
-writeOrthogroups cfg ref _ out groups = do
+writeOrthogroups out groups = do
   -- let groups' = (map . map) (unhashIDs cfg ids) groups
   -- ids   <- liftIO $ readIORef idsref
+  cfg <- fmap fromJust getShakeExtra
   paths <- forM groups $ \group -> do
     let path = cachedLinesPath cfg group -- TODO should this use group'?
         -- group' = map (unhashIDs cfg ids) group
     -- liftIO $ putStrLn $ "group': " ++ show group'
-    writeLits cfg ref path group
+    writeLits path group
     return $ toPath cfg path
-  writePaths cfg ref (fromPath cfg out) paths
+  writePaths (fromPath cfg out) paths
 
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
 aOrthogroups :: Type -> [Path] -> Action ()
-aOrthogroups rtn cfg ref idsref [out, ogPath] = do
+aOrthogroups rtn [out, ogPath] = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
   -- TODO extract this into a parseOrthogroups function
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
                else if rtn == gcr then parseGreenCut
                else error $ "bad type for aOrthogroups: " ++ show rtn
-  groups <- parser cfg ref idsref ogPath
-  writeOrthogroups cfg ref idsref out groups
-aOrthogroups _ _ _ _ args = error $ "bad argument to aOrthogroups: " ++ show args
+  groups <- parser ogPath
+  writeOrthogroups out groups
+aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
 ---------------------------
 -- orthogroup_containing --
@@ -166,17 +171,19 @@ orthogroupContaining = let name = "orthogroup_containing" in Function
   }
 
 aOrthogroupContaining :: [Path] -> Action ()
-aOrthogroupContaining cfg ref ids [out, ofrPath, idPath] = do
+aOrthogroupContaining [out, ofrPath, idPath] = do
+  ids  <- fmap fromJust getShakeExtra
   ids' <- liftIO $ readIORef ids
-  partialID <- readLit cfg ref $ fromPath cfg idPath
+  cfg  <- fmap fromJust getShakeExtra
+  partialID <- readLit $ fromPath cfg idPath
   -- TODO should there be a separate case for multiple matches?
   let geneId = case lookupID ids' partialID of
                  Just k -> k
                  Nothing -> error $ "ERROR: id \"" ++ partialID ++ "' not found"
-  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
+  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
-  writeLits cfg ref (fromPath cfg out) group
-aOrthogroupContaining _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+  writeLits (fromPath cfg out) group
+aOrthogroupContaining args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ----------------------------
 -- orthogroups_containing --
@@ -200,15 +207,17 @@ containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
 -- TODO should this error when not finding one too, like aOrthogroupContaining?
 aOrthogroupsFilter :: FilterFn -> [Path] -> Action ()
-aOrthogroupsFilter filterFn cfg ref ids [out, ofrPath, idsPath] = do
+aOrthogroupsFilter filterFn [out, ofrPath, idsPath] = do
+  ids  <- fmap fromJust getShakeExtra
   ids' <- liftIO $ readIORef ids
+  cfg <- fmap fromJust getShakeExtra
   lookups <- fmap (map $ lookupID ids') $ readLits $ fromPath cfg idsPath
   when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
   let geneIds = catMaybes lookups
-  groups <- parseOrthoFinder cfg ref ids ofrPath -- TODO handle the others!
+  groups <- parseOrthoFinder ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
-  writeOrthogroups cfg ref ids out groups'
-aOrthogroupsFilter _ _ _ _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+  writeOrthogroups out groups'
+aOrthogroupsFilter _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ---------------------
 -- ortholog_in_any --
@@ -248,23 +257,25 @@ pickAny :: Int -> Int
 pickAny _ = 1
 
 rOrthologFilterStr :: String -> PickerFn -> RulesFn
-rOrthologFilterStr fnName pickerFn st@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [groupLists, idLists]) = do
-  (ExprPath groupListsPath) <- rExpr st groupLists
-  (ExprPath idListsPath   ) <- rExpr st idLists
+rOrthologFilterStr fnName pickerFn scr e@(Fun _ _ _ _ [groupLists, idLists]) = do
+  (ExprPath groupListsPath) <- rExpr scr groupLists
+  (ExprPath idListsPath   ) <- rExpr scr idLists
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out     = exprPath cfg dRef scr e
       out'    = debugRules cfg "rOrthologFilterStr" e $ fromPath cfg out
       ogDir   = fromPath cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
-  ogsPath %> absolutizePaths cfg ref groupListsPath
-  idsPath %> absolutizePaths cfg ref idListsPath
+  ogsPath %> absolutizePaths groupListsPath
+  idsPath %> absolutizePaths idListsPath
   out' %> \_ -> do
     -- TODO is there a way to avoid reading this?
     nIDs  <- fmap length $ readPaths idListsPath
     let fnArg' = show $ pickerFn nIDs
     need' "ortholang.modules.orthogroups.rOrthologFilterStr" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
-    runCmd cfg ref $ CmdDesc
+    runCmd $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
       , cmdOutPath = out'
@@ -336,25 +347,27 @@ ogCache :: Config -> Path
 ogCache cfg = cacheDir cfg "orthogroups"
 
 rOrthologFilterStrFrac :: String -> PickerFn2 -> RulesFn
-rOrthologFilterStrFrac fnName pickerFn st@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [frac, groupLists, idLists]) = do
-  (ExprPath fracPath      ) <- rExpr st frac
-  (ExprPath groupListsPath) <- rExpr st groupLists
-  (ExprPath idListsPath   ) <- rExpr st idLists
+rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idLists]) = do
+  (ExprPath fracPath      ) <- rExpr scr frac
+  (ExprPath groupListsPath) <- rExpr scr groupLists
+  (ExprPath idListsPath   ) <- rExpr scr idLists
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out     = exprPath cfg dRef scr e
       out'    = debugRules cfg "rOrthologFilterStr" e $ fromPath cfg out
       ogDir   = fromPath cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
-  ogsPath %> absolutizePaths cfg ref groupListsPath
-  idsPath %> absolutizePaths cfg ref idListsPath
+  ogsPath %> absolutizePaths groupListsPath
+  idsPath %> absolutizePaths idListsPath
   out' %> \_ -> do
     -- TODO is there a way to avoid reading this?
     nIDs  <- fmap length $ readPaths idListsPath
-    fnArg <- readLit cfg ref fracPath
+    fnArg <- readLit fracPath
     let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
     need' "ortholang.modules.orthogroups.rOrthologFilterStrFrac" [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
-    runCmd cfg ref $ CmdDesc
+    runCmd $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
       , cmdOutPath = out'

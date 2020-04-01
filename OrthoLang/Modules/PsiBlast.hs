@@ -21,6 +21,7 @@ import OrthoLang.Modules.SeqIO   (mkConcat)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((<.>), takeFileName)
+import Data.Maybe (fromJust)
 
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.psiblast." ++ name)
@@ -128,9 +129,9 @@ aPsiblastSearchDb :: Action3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
 
 aPsiblastDb' :: Bool -> [String] -> [Path] -> Action ()
-aPsiblastDb' writingPssm args cfg ref ids [oPath, ePath,  qPath, dbPath] =
-  aPsiblastDb writingPssm args cfg ref ids oPath ePath qPath dbPath
-aPsiblastDb' _ _ _ _ _ _ = fail "bad argument to aPsiblastDb'"
+aPsiblastDb' writingPssm args [oPath, ePath,  qPath, dbPath] =
+  aPsiblastDb writingPssm args oPath ePath qPath dbPath
+aPsiblastDb' _ _ _ = fail "bad argument to aPsiblastDb'"
 
 aPsiblastTrainDb' :: [Path] -> Action ()
 aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
@@ -141,8 +142,9 @@ aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
 -- aPsiblastSearchDb to search with an existing PSSM.
 aPsiblastDb :: Bool -> [String] -> Action3
-aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
+aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
 
+  cfg <- fmap fromJust getShakeExtra
   let oPath'  = fromPath cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
       ePath'  = fromPath cfg ePath
@@ -150,14 +152,14 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
       dbPath' = fromPath cfg dbPath
   need' "ortholang.modules.psiblast.aPsiblastDb" [ePath', qPath', dbPath']
 
-  eStr  <- readLit  cfg ref ePath'  -- TODO is converting to decimal needed?
+  eStr  <- readLit ePath'  -- TODO is converting to decimal needed?
 
   -- TODO is there something wrong with the map handlign here? or general makeblastdb?
-  -- dbPrePath <- readPath cfg ref dbPath' -- TODO is this right?
+  -- dbPrePath <- readPath dbPath' -- TODO is this right?
   -- let dbPrePath' = fromPath cfg dbPrePath
 
   -- this version works for withPdbSubject, but breaks something else?
-  dbPre     <- readPath cfg ref dbPath' -- TODO is this right?
+  dbPre     <- readPath dbPath' -- TODO is this right?
   dbg "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
@@ -190,7 +192,7 @@ aPsiblastDb writingPssm args cfg ref _ oPath ePath qPath dbPath = do
       -- TODO need Cwd here too, or maybe instead?
       let oPath'' = traceA "aPsiblastDb" oPath' [eDec, qPath', dbPath']
 
-      runCmd cfg ref $ CmdDesc
+      runCmd $ CmdDesc
         { cmdBinary = "psiblast.sh"
         , cmdInPatterns = [dbPre' ++ ".*"]
         , cmdExtraOutPaths = []

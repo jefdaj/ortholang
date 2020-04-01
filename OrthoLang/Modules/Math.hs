@@ -7,7 +7,6 @@ import qualified OrthoLang.Util as U
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Scientific        (Scientific, toRealFloat)
-import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -33,13 +32,11 @@ mkMathBop name opChar fn = mkNewBop name opChar num num $ aMathBop fn
 log :: Show a => a -> Action ()
 log = liftIO . U.debug "modules.math.amath" . show
 
--- aMathBop :: (Scientific -> Scientific -> Scientific) -> Action ()
+aMathBop :: (Scientific -> Scientific -> Scientific) -> ActionN1
 aMathBop mathFn (ExprPath outPath) nsPath = do
   log nsPath
-  cfg  <- fmap fromJust getShakeExtra
-  lRef <- fmap fromJust getShakeExtra
-  ns <- readLits cfg lRef nsPath
+  ns <- readLits nsPath
   log ns
   let n = foldl1 mathFn $ map (read :: String -> Scientific) ns
-  writeLit cfg lRef outPath $ show n
+  writeLit outPath $ show n
   log n

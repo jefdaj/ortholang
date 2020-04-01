@@ -80,7 +80,7 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
-mkOutTest :: DigestsRef -> FilePath -> TestTree
+mkOutTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
 mkOutTest cfg ref ids dRef gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
@@ -91,7 +91,7 @@ mkOutTest cfg ref ids dRef gld = goldenDiff desc gld scriptAct
       return $ B8.pack out
     desc = "prints expected output"
 
-mkTreeTest :: DigestsRef -> FilePath -> TestTree
+mkTreeTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
 mkTreeTest cfg ref ids dRef t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
@@ -110,7 +110,7 @@ mkTreeTest cfg ref ids dRef t = goldenDiff desc t treeAct
       return $ B8.pack out
 
 -- TODO use safe writes here
-mkTripTest :: DigestsRef -> FilePath -> TestTree
+mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
 mkTripTest cfg ref ids dRef cut = goldenDiff desc tripShow tripAct
   where
     desc = "unchanged by round-trip to file"
@@ -120,7 +120,7 @@ mkTripTest cfg ref ids dRef cut = goldenDiff desc tripShow tripAct
                 justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
       -- this is useful for debugging
       -- writeScript cut scr1
-      withWriteLock tripShow $ writeBinaryFile tripShow $ show scr1
+      withWriteLock ref tripShow $ writeBinaryFile tripShow $ show scr1
     -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
@@ -133,7 +133,7 @@ Test that no absolute paths snuck into the tmpfiles.
 
 TODO sanitize stdout + stderr too when running scripts
 -}
-mkAbsTest :: DigestsRef -> IO [TestTree]
+mkAbsTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO [TestTree]
 mkAbsTest cfg ref ids dRef = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
@@ -150,7 +150,7 @@ mkAbsTest cfg ref ids dRef = testSpecs $ it desc $
 This is more or less idempotent because re-running the same cut multiple
 times is fast. So it's OK to run it once for each test in a group.
 -}
-runScript :: DigestsRef -> IO String
+runScript :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO String
 runScript cfg ref ids dRef =  do
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids, dRef) stdout
@@ -161,7 +161,7 @@ runScript cfg ref ids dRef =  do
   return $ toGeneric cfg out
 
 mkScriptTests :: (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
-              -> DigestsRef -> IO TestTree
+              -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkScriptTests (name, cut, out, tre, mchk) cfg ref ids dRef = do
   absTests   <- mkAbsTest   cfg' ref ids dRef -- just one, but comes as a list
   checkTests <- case mchk of
@@ -185,7 +185,7 @@ otherwise.
 
 TODO move stdout inside the tmpdir?
 -}
-mkCheckTest :: DigestsRef -> FilePath -> IO [TestTree]
+mkCheckTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO [TestTree]
 mkCheckTest cfg ref ids dRef scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
   where
     desc = "output + tmpfiles checked by script"
@@ -203,7 +203,7 @@ findTestFile base dir ext name = do
   exists <- doesFileExist path
   return $ if exists then Just path else Nothing
 
-mkTestsPrefix :: DigestsRef -> FilePath
+mkTestsPrefix :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath
               -> String -> Maybe String -> IO TestTree
 mkTestsPrefix cfg ref ids dRef testDir groupName mPrefix = do
   names   <- getTestScripts testDir mPrefix
@@ -215,7 +215,7 @@ mkTestsPrefix cfg ref ids dRef testDir groupName mPrefix = do
       groups = map mkScriptTests hepts
   mkTestGroup cfg ref ids dRef groupName groups
 
-mkExampleTests :: DigestsRef -> FilePath -> FilePath -> IO TestTree
+mkExampleTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> IO TestTree
 mkExampleTests cfg ref ids dRef exDir testDir = do
   names <- getTestScripts exDir Nothing
   let names' = map ("examples:" ++) names
@@ -234,7 +234,7 @@ removePrefix = last . splitOn ":"
 simplify :: String -> String
 simplify = filter (`elem` ['a'..'z']) . map toLower
 
-mkTests :: DigestsRef -> IO TestTree
+mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"

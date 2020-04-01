@@ -43,6 +43,7 @@ module OrthoLang.Modules.Replace where
 
 import Development.Shake
 import OrthoLang.Core
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -120,18 +121,18 @@ rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
  -
  - TODO any reason not to merge it into rReplace above?
  -}
-rReplace' :: GlobalEnv
+rReplace' :: Script
           -> Expr -- the result expression for a single replacement, which *doesn't* contain all the info
           -> Var  -- we also need the variable to be replaced
           -> Expr -- and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
-rReplace' st@(script, cfg, ref, ids, dRef) resExpr subVar@(Var _ _) subExpr = do
+rReplace' script resExpr subVar@(Var _ _) subExpr = do
   let res   = (Var (RepID Nothing) "result", resExpr)
       sub   = (subVar, subExpr)
       deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
-      newID = calcRepID st resExpr subVar subExpr
+      newID = calcRepID script resExpr subVar subExpr
       scr'  = setRepIDs newID $ [sub] ++ deps ++ [res]
-  (ResPath resPath) <- compileScript (scr', cfg, ref, ids, dRef) newID -- TODO remove the ID here, or is it useful?
+  (ResPath resPath) <- compileScript scr' newID -- TODO remove the ID here, or is it useful?
   return (ExprPath resPath)
 
 {- This decides the "replace ID" in rReplace' above. It's important because the
@@ -141,8 +142,8 @@ rReplace' st@(script, cfg, ref, ids, dRef) resExpr subVar@(Var _ _) subExpr = do
  -
  - TODO think carefully about whether all of these need to be in here
  -}
-calcRepID :: GlobalEnv -> Expr -> Var -> Expr -> RepID
-calcRepID (scr, _, _, _, _) resExpr subVar subExpr = RepID $ Just $ digest
+calcRepID :: Script -> Expr -> Var -> Expr -> RepID
+calcRepID scr resExpr subVar subExpr = RepID $ Just $ digest
   [ show scr
   , show resExpr
   , show subVar
@@ -153,30 +154,29 @@ calcRepID (scr, _, _, _, _) resExpr subVar subExpr = RepID $ Just $ digest
  - TODO factor out, and maybe unify with rListLits
  - TODO subPaths is only one path? if so, rename it
  -}
-aReplaceEachLits :: Type -> Config -> LocksRef
-                -> Path -> Path -> [Path] -> Action ()
-aReplaceEachLits _ cfg ref outPath subPaths resPaths = do
-  lits <- mapM (readLit cfg ref) resPaths'
+aReplaceEachLits :: Type -> Path -> Path -> [Path] -> Action ()
+aReplaceEachLits _ outPath subPaths resPaths = do
+  cfg <- fmap fromJust getShakeExtra
+  let outPath'  = fromPath cfg outPath
+      subPaths' = fromPath cfg subPaths
+      resPaths' = map (fromPath cfg) resPaths
+      out = traceA "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
+  lits <- mapM readLit resPaths'
   let lits' = map stripWhiteSpace lits
-  writeLits cfg ref out lits'
-  where
-    outPath'  = fromPath cfg outPath
-    subPaths' = fromPath cfg subPaths
-    resPaths' = map (fromPath cfg) resPaths
-    out = traceA "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
+  writeLits out lits'
 
 {- Helper function to write the final list when the results are links to files
  - TODO factor out, and maybe unify with rListLinks
  -}
-aReplaceEachLinks :: Config -> LocksRef -> Path -> Path -> [Path] -> Action ()
-aReplaceEachLinks cfg ref outPath subPaths resPaths = do
+aReplaceEachLinks :: Path -> Path -> [Path] -> Action ()
+aReplaceEachLinks outPath subPaths resPaths = do
+  cfg <- fmap fromJust getShakeExtra
+  let outPath'  = fromPath cfg outPath
+      subPaths' = fromPath cfg subPaths
+      resPaths' = map (fromPath cfg) resPaths
+      out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
   need (subPaths':resPaths') -- TODO is needing subPaths required?
-  writePaths cfg ref out resPaths
-  where
-    outPath'  = fromPath cfg outPath
-    subPaths' = fromPath cfg subPaths
-    resPaths' = map (fromPath cfg) resPaths
-    out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
+  writePaths out resPaths
 
 ------------------
 -- replace_each --
@@ -185,7 +185,7 @@ aReplaceEachLinks cfg ref outPath subPaths resPaths = do
 replaceEach :: Function
 replaceEach = Function
   { fOpChar = Nothing, fName = "replace_each"
-  ,fTags = []
+  , fTags = []
   , fTypeCheck = tReplaceEach
   , fTypeDesc  = dReplaceEach
   , fNewRules = Nothing, fOldRules = rReplaceEach
@@ -224,13 +224,15 @@ dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.li
  - So the new plan is relatively simple: implement replace first, and then try replace_each again.
  - I'm not that sure the rMap thing will work because it deals with Actions though.
  -}
-rReplaceEach :: GlobalEnv
+rReplaceEach :: Script
              -> Expr -- the final result expression, which contains all the info we need
              -> Rules ExprPath
-rReplaceEach s@(scr, cfg, ref, _, dRef) expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
-  subPaths <- rExpr s subList
+rReplaceEach scr expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
+  subPaths <- rExpr scr subList
   let subExprs = extractExprs scr subList
-  resPaths <- mapM (rReplace' s resExpr subVar) subExprs
+  resPaths <- mapM (rReplace' scr resExpr subVar) subExprs
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let subPaths' = (\(ExprPath p) -> toPath cfg p) subPaths
       resPaths' = map (\(ExprPath p) -> toPath cfg p) resPaths
       outPath   = exprPath cfg dRef scr expr
@@ -239,6 +241,6 @@ rReplaceEach s@(scr, cfg, ref, _, dRef) expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ su
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aReplaceEachLits (typeOf expr)
                   else aReplaceEachLinks
-    in actFn cfg ref outPath subPaths' resPaths'
+    in actFn outPath subPaths' resPaths'
   return (ExprPath outPath')
 rReplaceEach _ expr = fail $ "bad argument to rReplaceEach: " ++ show expr

@@ -21,6 +21,7 @@ import OrthoLang.Core       (readStrings, readPaths, writeStrings, traceA, hashC
 import OrthoLang.Core         (exprPath, toPath, fromPath)
 import OrthoLang.Core          (resolveSymlinks)
 import OrthoLang.Core      (unhashIDs)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -70,22 +71,26 @@ tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"
 
 rSetFold :: ([Set String] -> Set String) -> RulesFn
-rSetFold fn s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [lol]) = do
-  (ExprPath setsPath) <- rExpr s lol
+rSetFold fn scr e@(Fun _ _ _ _ [lol]) = do
+  (ExprPath setsPath) <- rExpr scr lol
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let oPath      = fromPath cfg $ exprPath cfg dRef scr e
       oPath'     = cfgTmpDir cfg </> oPath
       oPath''    = debugRules cfg "rSetFold" e oPath
       (ListOf t) = typeOf lol
-  oPath %> \_ -> aSetFold cfg ref ids fn t oPath' setsPath
+  oPath %> \_ -> aSetFold fn t oPath' setsPath
   return (ExprPath oPath'')
 rSetFold _ _ _ = fail "bad argument to rSetFold"
 
 aSetFold :: ([Set String] -> Set String)
          -> Type -> FilePath -> FilePath -> Action ()
-aSetFold cfg ref idsRef fn (ListOf etype) oPath setsPath = do
+aSetFold fn (ListOf etype) oPath setsPath = do
   setPaths  <- readPaths setsPath
-  setElems  <- mapM (readStrings etype cfg ref) (map (fromPath cfg) setPaths)
+  cfg <- fmap fromJust getShakeExtra
+  setElems  <- mapM (readStrings etype) (map (fromPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
+  idsRef <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idsRef
   let sets = map fromList setElems'
       sets' = (map . Set.map) (unhashIDs False ids) sets -- TODO will this work?
@@ -93,9 +98,9 @@ aSetFold cfg ref idsRef fn (ListOf etype) oPath setsPath = do
       oPath' = traceA "aSetFold" oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
-              else dedupByContent cfg ref oLst -- TODO remove?
-  writeStrings etype cfg ref oPath' oLst''
-aSetFold _ _ _ _ _ _ _ = fail "bad argument to aSetFold"
+              else dedupByContent oLst -- TODO remove?
+  writeStrings etype oPath' oLst''
+aSetFold _ _ _ _ = fail "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
@@ -107,10 +112,11 @@ canonicalLinks cfg rtn =
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898
-dedupByContent :: Config -> LocksRef -> [FilePath] -> Action [FilePath]
-dedupByContent cfg ref paths = do
+dedupByContent :: [FilePath] -> Action [FilePath]
+dedupByContent paths = do
   -- TODO if the paths are already in the load cache, no need for content?
-  hashes <- mapM (hashContent cfg ref) $ map (toPath cfg) paths
+  cfg <- fmap fromJust getShakeExtra
+  hashes <- mapM hashContent $ map (toPath cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
 

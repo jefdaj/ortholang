@@ -28,6 +28,7 @@ import OrthoLang.Modules.SeqIO   (fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -49,9 +50,9 @@ mms = Type
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \_ ref path -> do
       path' <- fmap (-<.> "lookup") $ resolveSymlinks Nothing path
-      Stdout out <- withReadLock path' $ cmd "wc" ["-l", path']
+      Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
-      -- h5    <- fmap (take 5 . lines) $ withReadLock path $ readFileStrict' path'
+      -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' path'
       let desc = "MMSeqs2 database (" ++ n ++ " sequences)" -- TODO include a hash?
       return desc
   }
@@ -79,8 +80,10 @@ tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files,
  - its suffix later for now.
  -}
 rMmseqsCreateDbAll :: RulesFn
-rMmseqsCreateDbAll s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr s fas
+rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
+  (ExprPath fasPath) <- rExpr scr fas
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
       out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromPath cfg out
       createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
@@ -92,7 +95,7 @@ rMmseqsCreateDbAll s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [fas]) = do
       let faPaths' = map (fromPath cfg) faPaths
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
-      runCmd cfg ref $ CmdDesc
+      runCmd $ CmdDesc
         { cmdParallel = False -- TODO true?
         , cmdFixEmpties = True
         , cmdOutPath = out'
@@ -105,7 +108,7 @@ rMmseqsCreateDbAll s@(scr, cfg, ref, _, dRef) e@(Fun _ _ _ _ [fas]) = do
         , cmdExitCode = ExitSuccess
         , cmdRmPatterns = [out', dbPath ++ "*"] -- TODO adjust the code to handle patterns!
         }
-    symlink cfg ref out $ toPath cfg index
+    symlink out $ toPath cfg index
   return (ExprPath out')
 rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
@@ -158,10 +161,12 @@ tMmseqsSearchDb n types = fail $ n ++ " requires a number, fasta, and mmseqs2 db
  - suffix later when needed.
  -}
 rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb st@(scr, cfg, ref, _, dRef) e@(Fun _ salt _ _ [n, q, s]) = do
-  (ExprPath ePath) <- rExpr st n
-  (ExprPath qPath) <- rExpr st $ Fun mms salt (depsOf q) "mmseqs_createdb" [q]
-  (ExprPath sPath) <- rExpr st s -- note: the subject should already have been converted to a db
+rMmseqsSearchDb scr e@(Fun _ salt _ _ [n, q, s]) = do
+  (ExprPath ePath) <- rExpr scr n
+  (ExprPath qPath) <- rExpr scr $ Fun mms salt (depsOf q) "mmseqs_createdb" [q]
+  (ExprPath sPath) <- rExpr scr s -- note: the subject should already have been converted to a db
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
       out'   = debugRules cfg "rMmseqsSearch" e $ fromPath cfg out
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
@@ -170,8 +175,8 @@ rMmseqsSearchDb st@(scr, cfg, ref, _, dRef) e@(Fun _ salt _ _ [n, q, s]) = do
       outDbBase = searchDbDir </> digest out <.> "mmseqs2db"
       -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
       outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
-  outDbIndex %> \_ -> aMmseqsSearchDb    cfg ref ePath qPath sPath outDbBase
-  out'   %> \_ -> aMmseqConvertAlis cfg ref       qPath sPath outDbIndex out'
+  outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase
+  out'   %> \_ -> aMmseqConvertAlis qPath sPath outDbIndex out'
   return (ExprPath out')
 rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
 
@@ -187,14 +192,14 @@ resolveMmseqsDb path = do
 -- TODO is the db being passed in place of the fa too?
 -- TODO interesting! it works in stack repl but not stack exec
 -- TODO search creates some db.* files but not the plain base file or .index! separate into different dir?
-aMmseqsSearchDb :: Config -> LocksRef -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
-aMmseqsSearchDb cfg ref ePath qDb sDb outDb = do
-  eStr <- readLit cfg ref ePath
+aMmseqsSearchDb :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqsSearchDb ePath qDb sDb outDb = do
+  eStr <- readLit ePath
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
   let tmpDir = takeDirectory outDb </> "tmp" -- TODO align this with sonicparanoid
   liftIO $ createDirectoryIfMissing True tmpDir
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdParallel = False -- TODO true?
     , cmdFixEmpties = True
     , cmdOutPath = outDb
@@ -210,15 +215,15 @@ aMmseqsSearchDb cfg ref ePath qDb sDb outDb = do
   -- liftIO $ removeDirectoryRecursive tmpDir
 
 -- TODO remember to remove the .index extension when actually calling mmseqs
-aMmseqConvertAlis :: Config -> LocksRef -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
-aMmseqConvertAlis cfg ref qDb sDb outDbIndex outTab = do
+aMmseqConvertAlis :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqConvertAlis qDb sDb outDbIndex outTab = do
   -- let outDbBase = dropExtension outDbIndex
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
   oDb' <- fmap dropExtension $ resolveMmseqsDb outDbIndex
   -- TODO check this matches my existing blast hit tables, since mmseqs seems to have removed the format option?
   -- , "--format-output", "query target pident alnlen mismatch gapopen qstart qend tstart tend evalue bits"
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdParallel = False -- TODO true?
     , cmdFixEmpties = True
     , cmdOutPath = outTab

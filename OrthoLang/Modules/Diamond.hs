@@ -14,6 +14,7 @@ import OrthoLang.Modules.SeqIO (fna, faa)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (replaceBaseName)
 import System.Process          (readProcess)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -34,7 +35,7 @@ dmnd = Type
   , tDesc = "DIAMOND database"
   , tShow = \_ ref path -> do
       path' <- resolveSymlinks Nothing path
-      out <- withReadLock path' $ readProcess "diamond_dbinfo.sh" [path'] []
+      out <- withReadLock ref path' $ readProcess "diamond_dbinfo.sh" [path'] []
       let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
       return desc
   }
@@ -82,13 +83,15 @@ diamondmakedbAll = let name = "diamond_makedb_all" in Function
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
 rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll s@(scr, cfg, ref, ids, dRef) e@(Fun _ _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr s fas
+rDiamondmakedbAll scr e@(Fun _ _ _ _ [fas]) = do
+  (ExprPath fasPath) <- rExpr scr fas
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out  = exprPath cfg dRef scr e
       out' = debugRules cfg "rDiamondmakedbAll" e $ fromPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths fasPath
-    aSimpleScriptPar "diamond_makedb_all.sh" cfg ref ids (out:faPaths)
+    aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
  
@@ -165,7 +168,7 @@ variants =
 
 -- TODO make into a more general utility?
 rFlip23 :: RulesFn -> RulesFn
-rFlip23 rFn st (Fun rtn salt deps ids args) = rFn st (Fun rtn salt deps ids $ fn args)
+rFlip23 rFn scr (Fun rtn salt deps ids args) = rFn scr (Fun rtn salt deps ids $ fn args)
   where
     fn (one:two:three:rest) = (one:three:two:rest)
     fn as = error $ "bad argument to rFlip23: " ++ show as
@@ -181,10 +184,16 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   }
 
 aDiamondFromDb :: [String] -> ActionFn2
-aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
-  eStr <- readLit  cfg ref e'
+aDiamondFromDb dCmd [o, e, q, db] = do
   -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
-  runCmd cfg ref $ CmdDesc
+  cfg <- fmap fromJust getShakeExtra
+  let o'  = fromPath cfg o
+      e'  = fromPath cfg e
+      q'  = fromPath cfg q
+      db' = fromPath cfg db
+      o'' = traceA "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
+  eStr <- readLit e'
+  runCmd $ CmdDesc
     { cmdBinary = "diamond.sh"
     , cmdArguments = [o'', q', eStr, db'] ++ dCmd
     , cmdFixEmpties = True
@@ -197,14 +206,8 @@ aDiamondFromDb dCmd cfg ref _ [o, e, q, db] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'', replaceBaseName o'' "out"]
     }
-  sanitizeFileInPlace cfg ref o'
-  where
-    o'  = fromPath cfg o
-    e'  = fromPath cfg e
-    q'  = fromPath cfg q
-    db' = fromPath cfg db
-    o'' = traceA "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
-aDiamondFromDb _ _ _ _ _ = error $ "bad argument to aDiamondFromDb"
+  sanitizeFileInPlace o'
+aDiamondFromDb _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler

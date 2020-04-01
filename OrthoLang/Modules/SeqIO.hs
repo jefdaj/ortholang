@@ -21,6 +21,7 @@ import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
 import OrthoLang.Modules.Load       (mkLoaders)
 import System.Exit                 (ExitCode(..))
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -126,9 +127,9 @@ gbkToFnaEach = Function
 
 -- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
-aGenbankToFasta :: Type -> String
-                -> ([Path] -> Action ())
-aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
+aGenbankToFasta :: Type -> String -> ([Path] -> Action ())
+aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
+  cfg <- fmap fromJust getShakeExtra
   let faPath'   = fromPath cfg faPath
       ftPath'   = fromPath cfg ftPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
@@ -137,7 +138,7 @@ aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
       outPath'  = fromPath cfg outPath
       outPath'' = traceA "aGenbankToFasta" outPath' [outPath', faPath']
   -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
-  ft <- readLit cfg ref ftPath'
+  ft <- readLit ftPath'
   let ft' = if ft  == "cds" then "CDS" else ft
       (st', extraArgs) = if ft' == "whole" then ("whole", ["--annotations", "all"]) else (st, [])
       args = [ "--in_file", faPath'
@@ -147,7 +148,7 @@ aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
   -- liftIO $ putStrLn $ "args: " ++ show args
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdBinary = "genbank_to_fasta.py"
     , cmdArguments = args
     , cmdFixEmpties = False
@@ -160,7 +161,7 @@ aGenbankToFasta rtn st cfg ref _ [outPath, ftPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'']
     }
-aGenbankToFasta _ _ _ _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
+aGenbankToFasta _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
 
 ------------------------
 -- extract_ids(_each) --
@@ -220,14 +221,15 @@ extractSeqs = Function
     name = "extract_seqs"
 
 aExtractSeqs :: [Path] -> Action ()
-aExtractSeqs cfg ref ids [outPath, inFa, inList] = do
+aExtractSeqs [outPath, inFa, inList] = do
+  cfg <- fmap fromJust getShakeExtra
   let cDir     = fromPath cfg $ cacheDir cfg "seqio"
       tmpList' = cDir </> digest inList <.> "txt"
       tmpList  = toPath cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
-  lookupIDsFile cfg ref ids inList tmpList
-  aSimpleScriptNoFix "extract_seqs.py" cfg ref ids [outPath, inFa, tmpList]
-aExtractSeqs _ _ _ ps = error $ "bad argument to aExtractSeqs: " ++ show ps
+  lookupIDsFile inList tmpList
+  aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
+aExtractSeqs ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: Function
@@ -336,9 +338,10 @@ mkConcatEach cType = Function
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
 aConcat :: Type -> ([Path] -> Action ())
-aConcat cType cfg ref ids [outPath, inList] = do
+aConcat cType [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
+  cfg <- fmap fromJust getShakeExtra
   let tmpDir'   = cfgTmpDir cfg </> "cache" </> "concat"
       emptyPath = tmpDir' </> ("empty" ++ extOf cType) <.> "txt"
       emptyStr  = "<<empty" ++ extOf cType ++ ">>"
@@ -350,10 +353,10 @@ aConcat cType cfg ref ids [outPath, inList] = do
   let inPaths' = map (fromPath cfg) inPaths
   need' "ortholang.modules.seqio.aConcat" inPaths'
   writeCachedLines inList' inPaths'
-  aSimpleScriptNoFix "cat.py" cfg ref ids [ outPath
-                                      , toPath cfg inList'
-                                      , toPath cfg emptyPath]
-aConcat _ _ _ _ _ = fail "bad argument to aConcat"
+  aSimpleScriptNoFix "cat.py" [ outPath
+                              , toPath cfg inList'
+                              , toPath cfg emptyPath]
+aConcat _ _ = fail "bad argument to aConcat"
 
 -- writeCachedLines outPath content = do
 
@@ -390,7 +393,8 @@ splitFastaEach faType = Function
     name = "split_" ++ ext ++ "_each"
 
 aSplit :: String -> String -> ([Path] -> Action ())
-aSplit name ext cfg ref _ [outPath, faPath] = do
+aSplit name ext [outPath, faPath] = do
+  cfg <- fmap fromJust getShakeExtra
   let faPath'   = fromPath cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
       tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
@@ -409,7 +413,7 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
   -- TODO why does this work when loaders are called one at a time, but not as part of a big script?
   -- TODO the IDs are always written properly, so why not the sequences??
   -- withWriteLock' tmpDir' $ do -- why is this required?
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdBinary = "split_fasta.py"
     , cmdArguments = args
     , cmdFixEmpties = False -- TODO will be done in the next step right?
@@ -424,6 +428,6 @@ aSplit name ext cfg ref _ [outPath, faPath] = do
     }
   -- loadPaths <- readPaths tmpList
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
-  -- writePaths cfg ref outPath'' loadPaths
-  writeCachedVersion cfg ref outPath'' tmpList
-aSplit _ _ _ _ _ paths = error $ "bad argument to aSplit: " ++ show paths
+  -- writePaths outPath'' loadPaths
+  writeCachedVersion outPath'' tmpList
+aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths

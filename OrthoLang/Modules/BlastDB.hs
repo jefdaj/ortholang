@@ -16,7 +16,7 @@ import Control.Monad           (when, forM)
 import Data.Char               (toLower)
 import Data.List               (isInfixOf)
 import Data.List               (isPrefixOf)
-import Data.Maybe              (isJust)
+import Data.Maybe              (isJust, fromJust)
 import Data.String.Utils       (split)
 import OrthoLang.Modules.SeqIO (faa, fna)
 import System.Directory        (createDirectoryIfMissing)
@@ -133,25 +133,26 @@ mkLoadDBEach name rtn = Function
   }
 
 rLoadDB :: RulesFn
-rLoadDB st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [s]) = do
-  (ExprPath sPath) <- rExpr st s
+rLoadDB scr e@(Fun _ _ _ _ [s]) = do
+  (ExprPath sPath) <- rExpr scr s
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  let oPath  = exprPath cfg dRef scr e
+      oPath' = fromPath cfg oPath
   let sPath' = toPath cfg sPath
-  oPath' %> \_ -> aLoadDB cfg ref ids oPath sPath'
+  oPath' %> \_ -> aLoadDB oPath sPath'
   return (ExprPath oPath')
-  where
-    oPath  = exprPath cfg dRef scr e
-    oPath' = fromPath cfg oPath
 rLoadDB _ _ = fail "bad argument to rLoadDB"
 
 aLoadDB :: Path -> Path -> Action ()
-aLoadDB cfg ref _ oPath sPath = do
-  pattern <- readLit cfg ref sPath'
+aLoadDB oPath sPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let oPath'  = fromPath cfg oPath
+      sPath'  = fromPath cfg sPath
+      oPath'' = traceA "aLoadDB" oPath' [oPath', sPath']
+  pattern <- readLit sPath'
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
-  writeLit cfg ref oPath'' pattern'
-  where
-    oPath'  = fromPath cfg oPath
-    sPath'  = fromPath cfg sPath
-    oPath'' = traceA "aLoadDB" oPath' [oPath', sPath']
+  writeLit oPath'' pattern'
 
 loadNuclDB :: Function
 loadNuclDB = mkLoadDB "load_nucl_db" ndb
@@ -193,26 +194,31 @@ makeblastdbCache :: Config -> Path
 makeblastdbCache cfg = cacheDir cfg "makeblastdb"
 
 rBlastdblist :: RulesFn
-rBlastdblist s@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [f]) = do
-  (ExprPath fPath) <- rExpr s f
-  let fPath' = toPath   cfg fPath
-  listTmp %> \_ -> aBlastdblist   cfg ref ids lTmp'
-  oPath'  %> \_ -> aFilterList cfg ref ids oPath lTmp' fPath'
+rBlastdblist scr e@(Fun _ _ _ _ [f]) = do
+  (ExprPath fPath) <- rExpr scr f
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  let fPath' = toPath cfg fPath
+      oPath   = exprPath cfg dRef scr e
+      tmpDir  = blastdbgetCache cfg
+      tmpDir' = fromPath cfg tmpDir
+      listTmp = tmpDir' </> "dblist" <.> "txt"
+      oPath'  = fromPath cfg oPath
+      lTmp'   = toPath   cfg listTmp
+  listTmp %> \_ -> aBlastdblist lTmp'
+  oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
   return (ExprPath oPath')
-  where
-    oPath   = exprPath cfg dRef scr e
-    tmpDir  = blastdbgetCache cfg
-    tmpDir' = fromPath cfg tmpDir
-    listTmp = tmpDir' </> "dblist" <.> "txt"
-    oPath'  = fromPath cfg oPath
-    lTmp'   = toPath   cfg listTmp
 rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 
 aBlastdblist :: Path -> Action ()
-aBlastdblist cfg ref _ listTmp = do
+aBlastdblist listTmp = do
+  cfg <- fmap fromJust getShakeExtra
+  let listTmp' = fromPath cfg listTmp
+      tmpDir   = takeDirectory $ listTmp'
+      oPath    = traceA "aBlastdblist" listTmp' [listTmp']
   liftIO $ createDirectoryIfMissing True tmpDir
   withWriteLock' tmpDir $ do
-    runCmd cfg ref $ CmdDesc
+    runCmd $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
       , cmdOutPath = oPath
@@ -225,26 +231,22 @@ aBlastdblist cfg ref _ listTmp = do
       , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
       , cmdExitCode = ExitFailure 1
       }
-  where
-    listTmp' = fromPath cfg listTmp
-    tmpDir   = takeDirectory $ listTmp'
-    oPath    = traceA "aBlastdblist" listTmp' [listTmp']
 
 -- TODO generalize so it works with busco_list_lineages too?
 -- TODO move to a "Filter" module once that gets started
 aFilterList :: Path -> Path -> Path -> Action ()
-aFilterList cfg ref _ oPath listTmp fPath = do
-  filterStr <- readLit  cfg ref fPath'
+aFilterList oPath listTmp fPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let fPath'   = fromPath cfg fPath
+      oPath'   = fromPath cfg oPath
+      listTmp' = fromPath cfg listTmp
+      oPath''  = traceA "aFilterList" oPath' [oPath', listTmp', fPath']
+  filterStr <- readLit  fPath'
   out       <- readLits listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
   debugA' "aFilterList" $ "names': " ++ show names'
-  writeLits cfg ref oPath'' names'
-  where
-    fPath'   = fromPath cfg fPath
-    oPath'   = fromPath cfg oPath
-    listTmp' = fromPath cfg listTmp
-    oPath''  = traceA "aFilterList" oPath' [oPath', listTmp', fPath']
+  writeLits oPath'' names'
 
 mkBlastdbget :: String -> Type -> Function
 mkBlastdbget name dbType = Function
@@ -262,26 +264,33 @@ blastdbgetProt :: Function
 blastdbgetProt = mkBlastdbget "blastdbget_prot" pdb
 
 rBlastdbget :: RulesFn
-rBlastdbget st@(scr,cfg, ref, ids, dRef) e@(Fun _ _ _ _ [name]) = do
-  (ExprPath nPath) <- rExpr st name
+rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
+  (ExprPath nPath) <- rExpr scr name
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath cfg dRef scr e -- final prefix
       dbPrefix' = fromPath cfg dbPrefix
       nPath'    = toPath cfg nPath
-  dbPrefix' %> \_ -> aBlastdbget cfg ref ids dbPrefix tmpDir nPath'
+  dbPrefix' %> \_ -> aBlastdbget dbPrefix tmpDir nPath'
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
 aBlastdbget :: Path -> Path -> Path -> Action ()
-aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
+aBlastdbget dbPrefix tmpDir nPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let tmp'       = fromPath cfg tmpDir
+      nPath'     = fromPath cfg nPath
+      dbPrefix'  = fromPath cfg dbPrefix
+      dbPrefix'' = traceA "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
   need' "ortholang.modules.blastdb.aBlastdbget" [nPath']
-  dbName <- fmap stripWhiteSpace $ readLit cfg ref nPath' -- TODO need to strip?
+  dbName <- fmap stripWhiteSpace $ readLit nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
   -- TODO was taxdb needed for anything else?
   debugA' "aBlastdbget" $ "dbPrefix'': " ++ dbPrefix''
   debugA' "aBlastdbget" $ "dbPath: " ++ dbPath
-  runCmd cfg ref $ CmdDesc
+  runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = dbPrefix''
@@ -294,12 +303,7 @@ aBlastdbget cfg ref _ dbPrefix tmpDir nPath = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
     }
-  writeLit cfg ref dbPrefix'' dbPath -- note this writes the path itself!
-  where
-    tmp'       = fromPath cfg tmpDir
-    nPath'     = fromPath cfg nPath
-    dbPrefix'  = fromPath cfg dbPrefix
-    dbPrefix'' = traceA "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
+  writeLit dbPrefix'' dbPath -- note this writes the path itself!
 
 --------------------------------------------
 -- make one db from a list of FASTA files --
@@ -345,8 +349,10 @@ tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files,
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
 rMakeblastdbAll :: RulesFn
-rMakeblastdbAll s@(scr,cfg, ref, ids, dRef) e@(Fun rtn _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr s fas
+rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
+  (ExprPath fasPath) <- rExpr scr fas
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let out       = exprPath cfg dRef scr e
       out'      = debugR' cfg "rMakeblastdbAll" e $ fromPath cfg out
       cDir      = makeblastdbCache cfg
@@ -355,7 +361,7 @@ rMakeblastdbAll s@(scr,cfg, ref, ids, dRef) e@(Fun rtn _ _ _ [fas]) = do
   -- TODO need new shake first:
   -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
 
-  out' %> \_ -> aMakeblastdbAll rtn cfg ref ids cDir [out, fasPath']
+  out' %> \_ -> aMakeblastdbAll rtn cDir [out, fasPath']
   -- TODO what's up with the linking? just write the prefix to the outfile!
   return (ExprPath out')
 rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
@@ -369,9 +375,13 @@ listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
 aMakeblastdbAll :: Type -> Path -> [Path] -> Action ()
-aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
+aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
-  -- let relDb = makeRelative (cfgTmpDir cfg) dbOut
+  -- let relDb = makeRel_ ative (cfgTmpDir cfg) dbOut
+  cfg <- fmap fromJust getShakeExtra
+  let out'     = fromPath cfg out
+      cDir'    = fromPath cfg cDir
+      fasPath' = fromPath cfg fasPath
   let dbType' = if dbType == ndb then "nucl" else "prot"
   need' "ortholang.modules.blastdb.aMakeblastdbAll" [fasPath']
 
@@ -416,7 +426,7 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
   when (length before < 5) $ do
     dbg $ "this is dbPtn: " ++ dbPtn
     dbg $ "this will be dbOut: " ++ dbOut
-    runCmd cfg ref $ CmdDesc
+    runCmd $ CmdDesc
       { cmdParallel = False
       , cmdFixEmpties = True
       , cmdOutPath = out'
@@ -446,12 +456,8 @@ aMakeblastdbAll dbType cfg ref _ cDir [out, fasPath] = do
     
     dbg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
-  writePath cfg ref out'' dbOut'
-  where
-    out'     = fromPath cfg out
-    cDir'    = fromPath cfg cDir
-    fasPath' = fromPath cfg fasPath
-aMakeblastdbAll _ _ _ _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
+  writePath out'' dbOut'
+aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
 ----------------------------------------
 -- make a db from a single FASTA file --
@@ -526,16 +532,13 @@ tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed erro
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach st@(_, cfg, _, _, _) (Fun (ListOf dbType) salt deps name [e]) =
+rMakeblastdbEach scr (Fun (ListOf dbType) salt deps name [e]) = do
+  cfg <- fmap fromJust getShakeExtraRules
+  let tmpDir = makeblastdbCache cfg 
+      act1 = aMakeblastdbAll dbType tmpDir -- TODO should be i right? not ids?
+      expr' = Fun (ListOf dbType) salt deps name [withSingletons e]
   -- rFun1 (map1of1 faType dbType act1) st expr'
-  (rMap 1 act1) st expr'
-  where
-    -- faType = typeOf e
-    tmpDir = makeblastdbCache cfg 
-    -- act1 c r o a1 = aMakeblastdbAll dbType c r tmpDir [o, a1]
-    act1 c r i = aMakeblastdbAll dbType c r i tmpDir -- TODO should be i right? not ids?
-    expr' = Fun (ListOf dbType) salt deps name [withSingletons e]
-    -- expr'' = trace ("expr':" ++ show expr') expr'
+  (rMap 1 act1) scr expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
 ----------------
@@ -565,32 +568,35 @@ tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
-rSingletons st@(scr,cfg, ref, ids, dRef) expr@(Fun rtn _ _ _ [listExpr]) = do
-  (ExprPath listPath') <- rExpr st listExpr
+rSingletons scr expr@(Fun rtn _ _ _ [listExpr]) = do
+  (ExprPath listPath') <- rExpr scr listExpr
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr expr
       outPath' = fromPath cfg outPath
       listPath = toPath cfg listPath'
       (ListOf (ListOf t)) = rtn
-  outPath' %> \_ -> aSingletons t cfg ref ids outPath listPath
+  outPath' %> \_ -> aSingletons t outPath listPath
   return $ ExprPath outPath'
 rSingletons _ _ = fail "bad argument to rSingletons"
 
 aSingletons :: Type -> Action1
-aSingletons elemType cfg ref _ outPath listPath = do
+aSingletons elemType outPath listPath = do
+  cfg <- fmap fromJust getShakeExtra
   let listPath' = fromPath cfg listPath
       outPath'  = fromPath cfg outPath
       dbg = debugA' "aSingletons"
   dbg $ "listpath': " ++ listPath'
   dbg $ "outpath': " ++ outPath'
-  elems <- readStrings elemType cfg ref listPath'
+  elems <- readStrings elemType listPath'
   dbg $ "elems: " ++ show elems
   singletonPaths <- forM elems $ \e -> do
     let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
         singletonPath  = toPath cfg singletonPath'
     dbg $ "singletonPath': " ++ singletonPath'
-    writeStrings elemType cfg ref singletonPath' [e]
+    writeStrings elemType singletonPath' [e]
     return singletonPath
-  writePaths cfg ref outPath' singletonPaths -- TODO nondeterministic?
+  writePaths outPath' singletonPaths -- TODO nondeterministic?
 
 ------------------
 -- show db info --
@@ -603,7 +609,7 @@ showBlastDb cfg ref path = do
   let dbDir  = takeDirectory path'
       dbBase = takeFileName  path'
   debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: \"" ++ dbDir ++ "\""
-  out <- withReadLock path' $
+  out <- withReadLock ref path' $
            readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
   let out1 = lines out
       out2 = concatMap (split "\t") out1

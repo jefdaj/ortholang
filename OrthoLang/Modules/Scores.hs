@@ -16,6 +16,7 @@ import Control.Monad (when)
 import OrthoLang.Core (readStrings, readLits, writeLits, debugA)
 import OrthoLang.Core (rExpr, debugRules)
 import OrthoLang.Core         (Path, toPath, fromPath, exprPath)
+import Data.Maybe (fromJust)
 
 -- import OrthoLang.Core  (rMap)
 import OrthoLang.Modules.BlastHits (aCutCol)
@@ -40,10 +41,11 @@ orthoLangModule = Module
 -- scores --
 ------------
 
-aScores :: Config -> LocksRef -> Path -> Path -> Type -> Path -> Action ()
-aScores cfg ref scoresPath othersPath othersType outPath = do
+aScores :: Path -> Path -> Type -> Path -> Action ()
+aScores scoresPath othersPath othersType outPath = do
+  cfg <- fmap fromJust getShakeExtra
   scores <- readLits $ fromPath cfg scoresPath
-  others <- readStrings othersType cfg ref $ fromPath cfg othersPath
+  others <- readStrings othersType $ fromPath cfg othersPath
   let out' = fromPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others
   when (length scores /= length others) $ error $ unlines
@@ -51,7 +53,7 @@ aScores cfg ref scoresPath othersPath othersType outPath = do
   debug' $ "aScores scores': " ++ show scores
   debug' $ "aScores others': " ++ show others
   debug' $ "aScores rows: "    ++ show rows
-  writeLits cfg ref out' rows
+  writeLits out' rows
   where
     debug' = dbg "aScores"
 
@@ -77,18 +79,19 @@ tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf n
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: RulesFn
-rScoreRepeats s@(scr, cfg, ref, _, dRef) expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
-  inputs <- rExpr s subList
-  scores <- rExpr s repEachExpr
+rScoreRepeats scr expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
+  inputs <- rExpr scr subList
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  let repEachExpr = Fun (ListOf t) salt deps "replace_each" as
+      outPath  = exprPath cfg dRef scr expr
+      outPath' = debugRules cfg "rScoreRepeats" expr $ fromPath cfg outPath
+  scores <- rExpr scr repEachExpr
   let hack    = \(ExprPath p) -> toPath cfg p -- TODO remove! but how?
       inputs' = hack inputs
       scores' = hack scores
-  outPath' %> \_ -> aScores cfg ref scores' inputs' t outPath
+  outPath' %> \_ -> aScores scores' inputs' t outPath
   return $ ExprPath $ outPath'
-  where
-    repEachExpr = Fun (ListOf t) salt deps "replace_each" as
-    outPath  = exprPath cfg dRef scr expr
-    outPath' = debugRules cfg "rScoreRepeats" expr $ fromPath cfg outPath
 rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 
 ----------------------------------

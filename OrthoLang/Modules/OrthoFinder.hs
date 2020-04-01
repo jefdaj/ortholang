@@ -5,7 +5,7 @@ module OrthoLang.Modules.OrthoFinder
 -- TODO can all "extract" functions be renamed with "list"?
 -- TODO try DIAMOND, MMseqs2
 
-import Development.Shake (Action)
+import Development.Shake
 import OrthoLang.Core
 import OrthoLang.Locks
 
@@ -14,6 +14,7 @@ import OrthoLang.Modules.SeqIO (faa)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         ((</>), takeFileName, replaceBaseName)
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -50,8 +51,12 @@ orthofinder = let name = "orthofinder" in Function
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
 -- TODO what's diamond blast? do i need to add it?
 aOrthofinder :: [Path] -> Action ()
-aOrthofinder cfg ref _ [out, faListPath] = do
-  let tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
+aOrthofinder [out, faListPath] = do
+  cfg <- fmap fromJust getShakeExtra
+  let out'        = fromPath cfg out
+      faListPath' = fromPath cfg faListPath
+      out''       = traceA "aOrthofinder" out' [out', faListPath']
+      tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
       statsPath = toPath cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
                     </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
@@ -67,8 +72,8 @@ aOrthofinder cfg ref _ [out, faListPath] = do
   -- and we can't mark statsPath' as an extra outpath
   -- TODO patch orthofinder not to adjust and then do this the standard way
   withWriteLock' tmpDir $ do -- this is important to prevent multiple threads trying at once
-    mapM_ (\(p, l) -> symlink cfg ref l p) $ zip faPaths faLinks
-    runCmd cfg ref $ CmdDesc
+    mapM_ (\(p, l) -> symlink l p) $ zip faPaths faLinks
+    runCmd $ CmdDesc
       { cmdBinary = "orthofinder.sh"
       , cmdArguments = [replaceBaseName out'' "out", tmpDir, "diamond", "-n", digest faListPath]
       , cmdFixEmpties = False
@@ -85,10 +90,6 @@ aOrthofinder cfg ref _ [out, faListPath] = do
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
   trackWrite' [statsPath']
-  symlink cfg ref out statsPath
-  where
-    out'        = fromPath cfg out
-    faListPath' = fromPath cfg faListPath
-    out''       = traceA "aOrthofinder" out' [out', faListPath']
+  symlink out statsPath
 
-aOrthofinder _ _ _ args = error $ "bad argument to aOrthofinder: " ++ show args
+aOrthofinder args = error $ "bad argument to aOrthofinder: " ++ show args

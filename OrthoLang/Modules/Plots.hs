@@ -12,6 +12,7 @@ import OrthoLang.Core
 
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))
+import Data.Maybe (fromJust)
 
 orthoLangModule :: Module
 orthoLangModule = Module
@@ -37,7 +38,7 @@ png = Type
  - Otherwise it will return an empty string, which the script should ignore.
  -}
 varName :: RulesFn
-varName st expr = rExpr st $ Lit str (Salt 0) $ case expr of
+varName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
   (Ref _ _ _ (Var _ name)) -> name
   _ -> ""
 
@@ -71,17 +72,19 @@ histogram = let name = "histogram" in Function
 --   return paths'
 
 rPlotNumList :: FilePath -> RulesFn
-rPlotNumList script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [title, nums]) = do
-  titlePath <- rExpr st title
-  numsPath  <- rExpr st nums
-  xlabPath  <- varName st nums
+rPlotNumList script scr expr@(Fun _ _ _ _ [title, nums]) = do
+  titlePath <- rExpr scr title
+  numsPath  <- rExpr scr nums
+  xlabPath  <- varName scr nums
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   let outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toPath cfg p) args
-  outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
-                      aSimpleScript script cfg ref ids (out:args')
+  outPath' %> \_ -> withBinHash expr outPath $ \out ->
+                      aSimpleScript script (out:args')
   return outPath''
 rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
 
@@ -115,20 +118,21 @@ scatterplot = let name = "scatterplot" in Function
 
 -- TODO take an argument for extracting the axis name
 -- TODO also get y axis from dependent variable?
-rPlotNumScores :: (RulesFn)
-               -> FilePath -> RulesFn
-rPlotNumScores xFn script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [title, nums]) = do
-  titlePath <- rExpr st title
-  numsPath  <- rExpr st nums
-  xlabPath  <- xFn   st nums
+rPlotNumScores :: RulesFn -> FilePath -> RulesFn
+rPlotNumScores xFn sPath scr expr@(Fun _ _ _ _ [title, nums]) = do
+  titlePath <- rExpr scr title
+  numsPath  <- rExpr scr nums
+  xlabPath  <- xFn   scr nums
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
   -- ylabPath  <- yFn   st nums
   let outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toPath cfg p) args
-  outPath' %> \_ -> withBinHash cfg ref expr outPath $ \out ->
-                      aSimpleScript script cfg ref ids (out:args')
+  outPath' %> \_ -> withBinHash expr outPath $ \out ->
+                      aSimpleScript sPath (out:args')
   return outPath''
 rPlotNumScores _ _ _ _ = fail "bad argument to rPlotNumScores"
 
@@ -136,12 +140,12 @@ rPlotRepeatScores :: FilePath -> RulesFn
 rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: RulesFn
-indRepeatVarName st expr = rExpr st $ Lit str (Salt 0) $ case expr of
+indRepeatVarName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
   (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
   _ -> ""
 
 depRepeatVarName :: RulesFn
-depRepeatVarName st expr = rExpr st $ Lit str (Salt 0) $ case expr of
+depRepeatVarName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
   (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
   _ -> ""
 
@@ -163,17 +167,19 @@ tPlotListOfLists [(ListOf (ListOf _))] = Right png
 tPlotListOfLists _ = Left "expected a list of lists"
 
 -- TODO is this a reasonable way to do it for now?
-plotLabel :: GlobalEnv -> Expr -> String
-plotLabel _ (Ref _ _ _ (Var _ v)) = v
-plotLabel (scr, cfg, _, _, dRef) expr = let (Path p) = exprPath cfg dRef scr expr in takeBaseName p
+plotLabel :: Config -> DigestsRef -> Script -> Expr -> String
+plotLabel _ _ _ (Ref _ _ _ (Var _ v)) = v
+plotLabel cfg dRef scr expr = let (Path p) = exprPath cfg dRef scr expr in takeBaseName p
 
 plotCache :: Config -> Path
 plotCache cfg = cacheDir cfg "plots"
 
 rPlotListOfLists :: FilePath -> RulesFn
-rPlotListOfLists script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [lol]) = do
-  let labels = map (plotLabel st)     (extractExprs scr lol)
-      lists  = map (exprPath cfg dRef scr) (extractExprs scr lol)
+rPlotListOfLists sPath scr expr@(Fun _ _ _ _ [lol]) = do
+  cfg  <- fmap fromJust getShakeExtraRules
+  dRef <- fmap fromJust getShakeExtraRules
+  let labels = map (plotLabel cfg dRef scr) (extractExprs scr lol)
+      lists  = map (exprPath  cfg dRef scr) (extractExprs scr lol)
       outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
@@ -185,11 +191,11 @@ rPlotListOfLists script st@(scr, cfg, ref, ids, dRef) expr@(Fun _ _ _ _ [lol]) =
         aLolPath = cDir </> digest expr ++ "_lists.txt"
     liftIO $ createDirectoryIfMissing True cDir
     writeCachedLines labPath labels
-    writeLits cfg ref aLolPath $ map (fromPath cfg) lists
+    writeLits aLolPath $ map (fromPath cfg) lists
     let args = [labPath, aLolPath]
     -- call the main script
-    withBinHash cfg ref expr outPath $ \out ->
-      aSimpleScript script cfg ref ids (out:map (toPath cfg) args)
+    withBinHash expr outPath $ \out ->
+      aSimpleScript sPath (out:map (toPath cfg) args)
   return outPath''
 rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 
