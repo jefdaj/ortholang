@@ -138,7 +138,7 @@ module OrthoLang.Core
   -- * Old module API: Paths
   , cacheDir
   , exprPath
-  , exprPathExplicit
+  , unsafeExprPathExplicit
   , fromGeneric
   , fromPath
   , toPath

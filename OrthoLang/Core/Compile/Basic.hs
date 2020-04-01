@@ -64,7 +64,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty
 import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toPath,
+import OrthoLang.Core.Paths (cacheDir, exprPath, unsafeExprPathExplicit, toPath,
                             fromPath, varPath, Path)
 
 import Data.IORef                 (atomicModifyIORef', readIORef)
@@ -304,7 +304,7 @@ rListPaths s@(scr, cfg, ref, ids, dRef) e@(Lst rtn salt _ exprs) = do
   paths <- mapM (rExpr s) exprs
   let paths'   = map (\(ExprPath p) -> toPath cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
-      -- outPath  = exprPathExplicit cfg "list" (ListOf rtn) salt [hash]
+      -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath  = exprPath cfg scr e
       outPath' = debugRules cfg "rListPaths" e $ fromPath cfg outPath
   outPath' %> \_ -> aListPaths cfg ref ids paths' outPath
@@ -548,7 +548,7 @@ rLoadListPaths :: Bool -> RulesFn
 rLoadListPaths hashSeqIDs s@(scr, cfg, ref, ids, dRef) e@(Fun rtn salt _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr s es
   -- let hash     = digest $ toPath cfg pathsPath
-  --     outPath  = exprPathExplicit cfg "list" rtn salt [hash]
+  --     outPath  = unsafeExprPathExplicit cfg "list" rtn salt [hash]
   let outPath  = exprPath cfg scr e
       outPath' = fromPath cfg outPath
   outPath' %> \_ -> aLoadListLinks hashSeqIDs cfg ref ids (toPath cfg pathsPath) outPath

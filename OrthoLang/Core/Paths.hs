@@ -122,7 +122,8 @@ module OrthoLang.Core.Paths
   -- * Generate paths
   , cacheDir
   , exprPath
-  , exprPathExplicit
+  -- , exprPathExplicit
+  , unsafeExprPathExplicit
   , varPath
 
   -- * Validate paths
@@ -135,7 +136,7 @@ module OrthoLang.Core.Paths
   , exprPathDigest
   , exprDigest
   , exprDigests
-  , scriptDigests
+  -- , scriptDigests
   , decodeNewRulesDeps
 
   -- * Internal utilities
@@ -169,7 +170,8 @@ import Control.Monad              (when)
 import Data.Maybe                 (catMaybes)
 import Development.Shake.FilePath (makeRelative, splitPath)
 import OrthoLang.Util        (traceShow)
-import Data.IORef (readIORef)
+import Data.IORef (readIORef, atomicModifyIORef')
+import System.IO.Unsafe (unsafePerformIO)
 
 
 log :: String -> String -> IO ()
@@ -254,15 +256,15 @@ TODO rename hSomething?
 
 TODO does it need the config at all?
 -}
-argHashes :: Config -> Script -> Expr -> [String]
-argHashes c s (Ref _ _ _ v) = case lookup v s of
+argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
+argHashes c d s (Ref _ _ _ v) = case lookup v s of
                                          Nothing -> error $ "no such var " ++ show v
-                                         Just e  -> argHashes c s e
-argHashes _ _ (Lit  _ _     v    ) = [digest v]
-argHashes c s (Fun  _ _ _ _ es   ) = map (digest . exprPath c s) es
-argHashes c s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c s) [e1, e2]
-argHashes c s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c s) es]
-argHashes _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
+                                         Just e  -> argHashes c d s e
+argHashes _ _ _ (Lit  _ _     v    ) = [digest v]
+argHashes c d s (Fun  _ _ _ _ es   ) = map (digest . exprPath c d s) es
+argHashes c d s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2]
+argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es]
+argHashes _ _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
@@ -271,22 +273,23 @@ bop2fun e = error $ "bop2fun call with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
-exprPath :: Config -> Script -> Expr -> Path
-exprPath c _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
-exprPath c s (Ref _ _ _ v) = case lookup v s of
+exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
+exprPath c d _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
+exprPath c d s (Ref _ _ _ v) = case lookup v s of
                                Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show s
-                               Just e  -> exprPath c s e
-exprPath c s e@(Bop _ _ _ _ _ _) = exprPath c s (bop2fun e)
-exprPath c s expr = traceP "exprPath" expr res
+                               Just e  -> exprPath c d s e
+exprPath c d s e@(Bop _ _ _ _ _ _) = exprPath c d s (bop2fun e)
+exprPath c d s expr = traceP "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr
     salt   = saltOf expr
-    hashes = argHashes c s expr
-    res    = exprPathExplicit c prefix rtype salt hashes
+    hashes = argHashes c d s expr
+    res    = unsafeExprPathExplicit c d prefix rtype salt hashes
 
 -- TODO remove repeat salt if fn is deterministic
 -- TODO why is rtype unused?
+-- note this is always used with its unsafe digest wrapper (below)
 exprPathExplicit :: Config -> String -> Type -> Salt -> [String] -> Path
 exprPathExplicit cfg prefix _ (Salt s) hashes = toPath cfg path
   where
@@ -363,21 +366,29 @@ makeTmpdirRelative level (Path path) = replace "$TMPDIR" dots path
 
 -- TODO err function
 
+-- TODO should the safe version still exist? should one be renamed?
+unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Salt -> [String] -> Path
+unsafeExprPathExplicit cfg dRef prefix rtype salt hashes = unsafePerformIO $ do
+  let path = exprPathExplicit cfg prefix rtype salt hashes
+      dig  = exprPathDigest path
+  atomicModifyIORef' dRef $ \ds -> (M.insert dig (rtype, path) ds, ())
+  return path
+
 exprPathDigest :: Path -> PathDigest
 exprPathDigest = PathDigest . digest
 
-exprDigest :: Config -> Script -> Expr -> DigestMap
-exprDigest cfg scr expr = traceShow "core.paths.exprDigest" res
+exprDigest :: Config -> DigestsRef -> Script -> Expr -> DigestMap
+exprDigest cfg dRef scr expr = traceShow "core.paths.exprDigest" res
   where
-    p = exprPath cfg scr expr
+    p = exprPath cfg dRef scr expr
     dKey = PathDigest $ digest p
     res = M.singleton dKey (typeOf expr, p)
 
-exprDigests :: Config -> Script -> [Expr] -> DigestMap
-exprDigests cfg scr exprs = M.unions $ map (exprDigest cfg scr) $ concatMap listExprs exprs
+exprDigests :: Config -> DigestsRef -> Script -> [Expr] -> DigestMap
+exprDigests cfg dRef scr exprs = M.unions $ map (exprDigest cfg dRef scr) $ concatMap listExprs exprs
 
-scriptDigests :: Config -> Script -> DigestMap
-scriptDigests cfg scr = exprDigests cfg scr $ listScriptExprs scr
+-- scriptDigests :: Config -> Script -> DigestMap
+-- scriptDigests cfg scr = exprDigests cfg scr $ listScriptExprs scr
 
 {-|
 "Flatten" (or "unfold"?) an expression into a list of it + subexpressions.

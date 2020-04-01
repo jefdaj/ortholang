@@ -49,7 +49,7 @@ aPermute (_, cfg, ref, _, _) comboFn iPath eType salt out = do
   -- TODO these aren't digesting properly! elements need to be compiled first?
   --      (digesting the elements themselves rather than the path to them)
   -- TODO will this match other files?
-  let mkOut p = exprPathExplicit cfg "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
+  let mkOut p = unsafeExprPathExplicit cfg "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromPath cfg) oPaths
       combos  = comboFn elements

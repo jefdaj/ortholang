@@ -8,7 +8,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty
 import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Paths (cacheDir, exprPath, exprPathExplicit, toPath,
+import OrthoLang.Core.Paths (cacheDir, exprPath, unsafeExprPathExplicit, toPath,
                             fromPath, varPath, Path)
 
 import Data.IORef                 (atomicModifyIORef')
@@ -27,8 +27,7 @@ import System.Directory           (createDirectoryIfMissing)
 
 import Data.Maybe (isJust, fromJust)
 
-import OrthoLang.Core.Paths (fromPath)
-import OrthoLang.Core.Digests (decodeNewRulesDeps)
+import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Core.Actions (writeCachedLines, need', readLit)
 import System.FilePath ((</>))
 import Control.Monad (when)

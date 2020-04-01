@@ -48,7 +48,7 @@ import Development.Shake.FilePath ((</>), (<.>), replaceBaseName)
 import OrthoLang.Core.Actions      (readPaths, writePaths, symlink,
                                    readLit, writeLits, traceA, debugA, need')
 import OrthoLang.Core.Paths        (cacheDir, toPath, fromPath, exprPath,
-                                   Path, exprPathExplicit, argHashes)
+                                   Path, unsafeExprPathExplicit, argHashes)
 import OrthoLang.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)
 import OrthoLang.Locks       (withWriteOnce)
@@ -227,7 +227,7 @@ aMapElem cfg ref ids eType tmpFn actFn singleName salt out = do
   let out' = traceA "aMapElem" (toPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
-      single  = exprPathExplicit cfg singleName eType salt hashes
+      single  = unsafeExprPathExplicit cfg singleName eType salt hashes
       single' = fromPath cfg single
       args''' = single:map (toPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?

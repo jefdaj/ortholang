@@ -41,7 +41,7 @@ rSummary :: ([[FilePath]] -> [FilePath]) -> RulesFn
 rSummary summaryFn s@(scr, cfg, ref, _, _) expr@(Fun _ _ _ _ [iList]) = do
   (ExprPath iPath) <- rExpr s iList
   -- let (ListOf (ListOf eType)) = typeOf iList
-      -- (ExprPath oPath) = exprPathExplicit cfg True (ListOf eType) fnName 
+      -- (ExprPath oPath) = unsafeExprPathExplicit cfg True (ListOf eType) fnName 
                                           -- [show expr, iPath]
   let oPath = fromPath cfg $ exprPath cfg scr expr
   oPath %> aSummary cfg ref summaryFn iPath

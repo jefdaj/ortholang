@@ -137,7 +137,7 @@ map3Base inType outType act3 cfg locks ids out a1 a2 a3 = do
   where
     debugFn = debugA' "map3Base"
 
--- TODO match the single outpaths with exprPathExplicit! otherwise loooots of duplication
+-- TODO match the single outpaths with unsafeExprPathExplicit! otherwise loooots of duplication
 -- map3Base :: Type -> Type -> Action3 -> Action3
 -- map3Base inType outType act3 cfg locks out a1 a2 a3 = do
 --   debugA $ "map3Base arg paths: " ++ show [a1, a2, a3]
