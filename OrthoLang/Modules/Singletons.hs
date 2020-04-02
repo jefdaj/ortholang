@@ -3,7 +3,7 @@ module OrthoLang.Modules.Singletons
 
   -- * Expr transformers
     withSingleton
-  , fnWithSingleton
+  , withSingletonArg
   , withSingletons
 
   -- * OrthoLang functions for transforming (TODO remove?)
@@ -42,11 +42,11 @@ withSingleton e = Lst (typeOf e) (saltOf e) (depsOf e) [e]
 withSingletons :: Expr -> Expr
 withSingletons e = Fun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
 
--- TODO remove this, right?
-fnWithSingleton :: Expr -> Expr
-fnWithSingleton (Fun rtn salt deps name [s])
-  =           (Fun rtn salt deps name [fnWithSingleton s])
-fnWithSingleton e = error $ "bad argument to fnWithSingleton: " ++ show e
+-- | Take a function call with one arg, and make the arg a singleton list
+withSingletonArg :: Expr -> Expr
+withSingletonArg (Fun rtn salt deps name [s])
+  =           (Fun rtn salt deps name [withSingletonArg s])
+withSingletonArg e = error $ "bad argument to withSingletonArg: " ++ show e
 
 -- Only used for the makeblastdb_*_each functions so far
 -- TODO hide from users

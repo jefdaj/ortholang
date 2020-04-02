@@ -23,7 +23,7 @@ import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
-import OrthoLang.Modules.Singletons (singletons, withSingletons, fnWithSingleton)
+import OrthoLang.Modules.Singletons (singletons, withSingletons, withSingletonArg)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -492,7 +492,7 @@ tMakeblastdb dbType [faType]
 tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 rMakeblastdb :: RulesFn
-rMakeblastdb s e = rMakeblastdbAll s $ fnWithSingleton e
+rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 
 -----------------------------------------------
 -- make list of dbs from list of FASTA files --
