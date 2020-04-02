@@ -4,6 +4,9 @@ module OrthoLang.Modules.ListLike where
 -- TODO what should happen with length of a bht? currently it just prints itself!
 -- TODO make this the first typeclass
 
+import Prelude hiding (length)
+import qualified Prelude as P
+
 import Development.Shake
 import OrthoLang.Core
 
@@ -18,7 +21,7 @@ olModule = Module
   { mName = "ListLike"
   , mDesc = "Operations on files that can be treated like lists"
   , mTypes = [bht, crb, mms, listlike]
-  , mFunctions = [len, lenEach]
+  , mFunctions = [length, lengthEach]
   }
 
 listlike :: Type
@@ -33,31 +36,30 @@ tListLike Empty      = True
 tListLike (ListOf _) = True
 tListLike x = x `elem` [bht, crb, mms]
 
--- can't name it length because that's a standard Haskell function
-len :: Function
-len = Function
+length :: Function
+length = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = defaultTypeCheck name [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rLen
+  , fNewRules = Nothing, fOldRules = rLength
   }
   where
     name = "length"
 
-lenEach :: Function
-lenEach = Function
+lengthEach :: Function
+lengthEach = Function
   { fOpChar = Nothing, fName = name
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck name [ListOf listlike] (ListOf num)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 1 aLen -- TODO is 1 wrong?
+  , fNewRules = Nothing, fOldRules = rMap 1 aLength -- TODO is 1 wrong?
   }
   where
     name = "length_each"
 
-rLen :: RulesFn
-rLen scr e@(Fun _ _ _ _ [l]) = do
+rLength :: RulesFn
+rLength scr e@(Fun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr scr l
   -- TODO once all modules are converted, add back phantom types!
   -- let relPath = makeRelative (cfgTmpDir cfg) lPath
@@ -67,19 +69,19 @@ rLen scr e@(Fun _ _ _ _ [l]) = do
   let outPath = exprPath cfg dRef scr e
       out'    = fromPath cfg outPath
       lPath'  = toPath   cfg lPath
-  out' %> \_ -> aLen [outPath, lPath']
+  out' %> \_ -> aLength [outPath, lPath']
   return (ExprPath out')
-rLen _ _ = fail "bad arguments to rLen"
+rLength _ _ = fail "bad arguments to rLength"
 
 -- TODO if given a list with empty lists, should return zeros!
 -- TODO account for the last empty line in mms files! (currently returns length + 1)
-aLen :: [Path] -> Action ()
-aLen [out, lst] = do
-  let count ls = read (show $ length ls) :: Scientific
+aLength :: [Path] -> Action ()
+aLength [out, lst] = do
+  let count ls = read (show $ P.length ls) :: Scientific
   cfg <- fmap fromJust getShakeExtra
   let out'  = fromPath cfg out
       lst'  = fromPath cfg lst
-      out'' = traceA "aLen" out' [out', lst']
+      out'' = traceA "aLength" out' [out', lst']
   n <- fmap count $ readPaths lst'
   writeLit out'' $ show n
-aLen args = error $ "bad arguments to aLen: " ++ show args
+aLength args = error $ "bad arguments to aLength: " ++ show args

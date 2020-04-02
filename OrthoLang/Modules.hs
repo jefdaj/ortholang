@@ -48,7 +48,7 @@ modules =
   , NewRulesTest.olModule
 
   -- core language features
-  , ListLike.olModule
+  , ListLike.olModule -- TODO expose Function fields in API
   , Load.olModule
   , Math.olModule
   , Permute.olModule
