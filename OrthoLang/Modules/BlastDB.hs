@@ -521,9 +521,6 @@ tMakeblastdbEach :: Type -> TypeChecker
 tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
 
--- rFun1 :: Action1 -> RulesFn
--- rFun1 act1 st@(scr,cfg, ref) expr@(Fun _ _ _ _ [a1]) = do
-
 -- map1of1 :: Type -> Type -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do
 
@@ -537,7 +534,6 @@ rMakeblastdbEach scr (Fun (ListOf dbType) salt deps name [e]) = do
   let tmpDir = makeblastdbCache cfg 
       act1 = aMakeblastdbAll dbType tmpDir -- TODO should be i right? not ids?
       expr' = Fun (ListOf dbType) salt deps name [withSingletons e]
-  -- rFun1 (map1of1 faType dbType act1) st expr'
   (rMap 1 act1) scr expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
