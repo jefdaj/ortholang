@@ -25,7 +25,6 @@ module OrthoLang.Core.Compile.NewRules
 
   -- * Static rules to add to every eval call
   , newFunctionRules
-  , newCoreRules
 
   -- * The new API
   , mkNewBop
@@ -70,29 +69,6 @@ newFunctionRules = do
   let fns   = concatMap mFunctions $ cfgModules cfg
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
-
-{-|
-I'm not sure yet which of the core language feature compilers can be converted
-to new-style rules. Perhaps none of them? If not, remove this.
--}
-newCoreRules :: Rules ()
-newCoreRules = do
-
-  -- this is a nice idea in general, but won't work with the special lit compilers
-  -- (because they need direct access to the expressions to get their lit values)
-  -- newPattern cfg "str" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] str) aLit cfg lRef iRef (ExprPath p)
-  -- newPattern cfg "num" 2 %> \p -> aNewRules applyList1 (defaultTypeCheck [str] num) aLit cfg lRef iRef (ExprPath p)
-
-  -- TODO rBop
-  -- TODO rLoad{,List,ListLits,ListLinks}
-  -- TODO rSimple{,Tmp,Script,ScriptPar,ScriptNoFix,'}
-  -- TODO rReplace{,',Each}
-  -- TODO rMap{,Tmp,Tmps,SimpleScript}
-  -- TODO rCompose1
-  -- TODO rFun{1,3}
-  -- TODO rRepeatN
-
-  return ()
 
 
 ------------------------------

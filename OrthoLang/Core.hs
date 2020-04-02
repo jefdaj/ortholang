@@ -15,7 +15,6 @@ module OrthoLang.Core
   , ActionN1
   , ActionN2
   , ActionN3
-  , newCoreRules
   , newFunctionRules
 
   -- * Things used in Main
