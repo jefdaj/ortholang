@@ -23,8 +23,8 @@ import OrthoLang.Core          (resolveSymlinks)
 import OrthoLang.Core      (unhashIDs)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Sets"
   , mDesc = "Set operations for use with lists"
   , mTypes = []

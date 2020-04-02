@@ -12,8 +12,8 @@ import System.Directory     (makeRelativeToCurrentDirectory)
 import System.FilePath.Glob (glob)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Load"
   , mDesc = "Load generic lists"
   , mTypes = [] -- TODO include str?

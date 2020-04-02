@@ -5,8 +5,8 @@ module OrthoLang.Modules.GreenCut
 import OrthoLang.Core
 import OrthoLang.Modules.Blast (bht)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "GreenCut"
   , mDesc = "A re-implementation of the original GreenCut(2) ortholog-finding algorithm"
   , mTypes = [gcr]

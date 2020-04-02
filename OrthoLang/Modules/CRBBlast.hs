@@ -11,8 +11,8 @@ import OrthoLang.Modules.SeqIO    (faa, fna, fa)
 import System.Exit                (ExitCode(..))
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
   , mTypes = [fna, faa, fa, crb]
@@ -97,7 +97,7 @@ aCRBBlast tmpDir [o, q, t] = do
       tDst' = toPath cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toPath cfg oPath
-  need' "ortholang.core.modules.crbblast.aCRBBlast" [qDst, tDst]
+  need' "ortholang.modules.crbblast.aCRBBlast" [qDst, tDst]
   symlink qSrc' qDst'
   symlink tSrc' tDst'
   runCmd $ CmdDesc

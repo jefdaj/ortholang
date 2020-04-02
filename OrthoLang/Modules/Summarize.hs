@@ -10,8 +10,8 @@ import OrthoLang.Core (readLits, writeLits, traceA, need')
 import Development.Shake.FilePath ((</>))
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Summarize"
   , mDesc = "Collapse a list of results into a single summary"
   , mTypes = []

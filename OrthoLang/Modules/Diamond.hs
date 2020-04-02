@@ -16,8 +16,8 @@ import System.FilePath         (replaceBaseName)
 import System.Process          (readProcess)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Diamond"
   , mDesc = "Accelerated BLAST compatible local sequence aligner."
   , mTypes = [fna, faa, dmnd]

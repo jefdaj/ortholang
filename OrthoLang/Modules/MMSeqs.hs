@@ -30,8 +30,8 @@ import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "MMSeqs"
   , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite"
   , mTypes = [faa, fna, bht, mms]

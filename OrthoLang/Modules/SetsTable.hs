@@ -5,8 +5,8 @@ import OrthoLang.Core
 import OrthoLang.Core (defaultTypeCheck)
 import OrthoLang.Modules.Plots (rPlotListOfLists)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "SetsTable"
   , mDesc = "Generate set membership tables (spreadsheets) for easier list comparison"
   , mTypes = [tsv]

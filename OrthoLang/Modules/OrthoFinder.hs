@@ -16,8 +16,8 @@ import System.Exit             (ExitCode(..))
 import System.FilePath         ((</>), takeFileName, replaceBaseName)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "OrthoFinder"
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
   , mTypes = [faa, ofr]

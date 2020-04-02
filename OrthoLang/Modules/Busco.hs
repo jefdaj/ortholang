@@ -19,8 +19,8 @@ import System.Exit               (ExitCode(..))
 import System.FilePath           (takeBaseName, takeDirectory, (<.>), (</>))
 import System.FilePath.Glob      (glob)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
   , mTypes = [blh, bsr, bst, faa]

@@ -10,8 +10,8 @@ import System.Exit     (ExitCode(..))
 import System.FilePath ((<.>))
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Range"
   , mDesc = "Generate ranges of numbers"
   , mTypes = [num]

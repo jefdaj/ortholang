@@ -13,8 +13,8 @@ import OrthoLang.Modules.MMSeqs   (mms)
 import Data.Scientific            (Scientific())
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "ListLike"
   , mDesc = "Operations on files that can be treated like lists"
   , mTypes = [bht, crb, mms, listlike]

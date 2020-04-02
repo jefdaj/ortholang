@@ -44,8 +44,8 @@ import System.Exit (ExitCode(..))
 -- module description --
 ------------------------
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
   , mTypes = [search, fnagz, faagz]

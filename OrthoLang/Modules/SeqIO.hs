@@ -23,8 +23,8 @@ import OrthoLang.Modules.Load       (mkLoaders)
 import System.Exit                 (ExitCode(..))
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
   , mTypes = [gbk, faa, fna, fa]

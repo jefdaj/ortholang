@@ -17,8 +17,8 @@ import OrthoLang.Core
 import OrthoLang.Modules.Replace (rReplaceEach)
 import Data.Scientific           (Scientific(), toBoundedInteger)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random salts"
   , mTypes = []

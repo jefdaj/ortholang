@@ -1,5 +1,5 @@
 module OrthoLang.Modules.Blast
-  ( orthoLangModule
+  ( olModule
   , bht
   -- the rest is for blastrbh, which is pretty intimately related:
   , BlastDesc
@@ -22,8 +22,8 @@ import System.Exit               (ExitCode(..))
 import System.FilePath           (replaceBaseName)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
   , mTypes = [ndb, pdb, bht]

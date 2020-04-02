@@ -26,8 +26,8 @@ import Data.Maybe (fromJust)
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.psiblast." ++ name)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   -- TODO move doc to its file
   { mName = "PsiBLAST"
   , mDesc = "Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.\n\

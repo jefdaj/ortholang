@@ -14,8 +14,8 @@ import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
   , mTypes = [png]

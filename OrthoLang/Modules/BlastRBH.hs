@@ -23,8 +23,8 @@ debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = C.debug cfg 
     msg = "\"" ++ bname ++ "' -> \"" ++ aname ++ "\""
 debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "BlastRBH"
   , mDesc = "Reciprocal BLAST+ best hits"
   , mTypes = [faa, ndb, pdb, bht]

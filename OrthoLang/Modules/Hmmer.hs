@@ -12,8 +12,8 @@ import System.Exit              (ExitCode(..))
 import System.FilePath          (takeFileName, (</>))
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "HMMER"
   , mDesc = "Search sequences with hidden Markov models"
   , mTypes = [faa, aln, hmm, hht]

@@ -12,8 +12,8 @@ import System.Exit                (ExitCode(..))
 import System.FilePath            (replaceBaseName)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "BlastHits"
   , mDesc = "Work with BLAST hit tables"
   , mTypes = [bht, crb, hittable]

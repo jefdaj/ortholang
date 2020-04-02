@@ -37,8 +37,8 @@ sll = ListOf (ListOf str)
 type PickerFn = Int -> Int
 type PickerFn2 = Double -> Int -> Int
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
   , mTypes = [og, ofr, spr, gcr]

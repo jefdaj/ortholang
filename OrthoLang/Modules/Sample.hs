@@ -10,8 +10,8 @@ import System.Random         (StdGen)
 import System.Random.Shuffle (shuffle')
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Sample"
   , mDesc = "Random (but reproducable) sampling of list elements.\n\n\
             \WARNING: Because of the way OrthoLang caches tempfiles, calling these\n\

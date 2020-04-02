@@ -8,8 +8,8 @@ import qualified OrthoLang.Util as U
 import Control.Monad.IO.Class (liftIO)
 import Data.Scientific        (Scientific, toRealFloat)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Math"
   , mDesc = "Basic math"
   , mTypes = [num]

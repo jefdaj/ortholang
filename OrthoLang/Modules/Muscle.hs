@@ -5,8 +5,8 @@ module OrthoLang.Modules.Muscle
 import OrthoLang.Core
 import OrthoLang.Modules.SeqIO (faa)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "MUSCLE"
   , mDesc = "Align sequences with MUSCLE"
   , mTypes = [faa, aln]

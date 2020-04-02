@@ -8,8 +8,8 @@ module OrthoLang.Modules.AllVsAll
 import OrthoLang.Core
 import OrthoLang.Modules.SeqIO (faa)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "All-Vs-All"
   , mDesc = "Creates all-vs-all hit tables from any BLAST-like search for use in ortholog finding algorithms"
   , mTypes = [ava]

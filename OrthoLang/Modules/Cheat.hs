@@ -38,8 +38,8 @@ import Development.Shake
 -- import OrthoLang.Core (typeError)
 import OrthoLang.Core
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Cheat"
   , mDesc = "Run your own script and OrthoLang will assume the types are valid"
   , mTypes = []

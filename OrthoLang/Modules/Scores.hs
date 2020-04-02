@@ -25,8 +25,8 @@ import OrthoLang.Core (rSimple)
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.scores." ++ name)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Scores"
   , mDesc = "Score repeated variables for plotting"
   , mTypes = []

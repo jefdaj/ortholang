@@ -46,8 +46,8 @@ debugA' name = debugA ("modules.blastdb." ++ name)
 debugR' :: (Pretty a, Show b) => Config -> String -> a -> b -> b
 debugR' cfg name = debugRules cfg ("modules.blastdb." ++ name)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
   , mTypes = [ndb, pdb]

@@ -7,8 +7,8 @@ import OrthoLang.Core
 import Development.Shake.FilePath (makeRelative)
 import Data.Maybe (fromJust)
 
-orthoLangModule :: Module
-orthoLangModule = Module
+olModule :: Module
+olModule = Module
   { mName = "Permute"
   , mDesc = "Generate random permutations of lists"
   , mTypes = []
