@@ -16,6 +16,7 @@ module OrthoLang.Core
   , NewAction2
   , NewAction3
   , newFunctionRules
+  , singleton
 
   -- * Things used in Main
   , runRepl
@@ -135,7 +136,6 @@ module OrthoLang.Core
   , rSimpleScript
   , rSimpleScriptPar
   , rSimpleTmp
-  , singleton
   , typeError
   -- , debug TODO disambiguate with Util.debug?
 

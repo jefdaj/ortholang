@@ -39,9 +39,10 @@ module OrthoLang.Core.Compile.NewRules
 
   -- * Expr transformers
   -- $transformers
+  , singleton
 
   -- * Extra steps
-  -- $extrasteps
+  -- $hiddensteps
 
   )
   where
@@ -204,13 +205,17 @@ newFn rFn name mChar oType dTypes aFn =
 -- It might actually be worth making fNewRules optional too, because some
 -- functions could be implemented entirely with transforms + re-compiling the
 -- new expression normally through rExpr.
+--
+-- Think about: should these also have access to the whole script, or is only
+-- the current Expr enough?
 
--- $extrasteps
+singleton :: Expr -> Expr
+singleton e = Lst (typeOf e) (saltOf e) (depsOf e) [e]
+
+-- $hiddensteps
 -- Some of the current OrthoLang RulesFns only require one script/step to run,
 -- and they're simple. But others need to build tmpfiles first, and this is an
--- attempt to standardize that. The basic pattern is that each step is a Shake
--- pattern + associated Action. They can be put together in one RulesFn, or
--- probably separated.
+-- attempt to standardize that.
 --
 -- Use cases:
 --
@@ -221,7 +226,10 @@ newFn rFn name mChar oType dTypes aFn =
 -- * crb-blast tmpdirs?
 -- * bin caches?
 -- * concat caches?
--- * mmseqs caches?
+-- * mmseqs databases
+-- * psiblast PSSMs
+-- * all-vs-all searches
+-- * ortholog searches starting from any kind of blast
 --
--- Could they be implemented simply with hidden fns + transformers? That might
--- be much nicer than the current way.
+-- They're implemented the same as regular functions, but don't have to have
+-- docs and don't show up in the REPL unless you turn on 'cfgDevMode'.
