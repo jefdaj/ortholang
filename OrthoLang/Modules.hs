@@ -42,19 +42,10 @@ modules :: [Module]
 modules =
   [
 
-  -- works in progress and/or tests
-    AllVsAll.olModule
-  , Cheat.olModule
-  , GreenCut.olModule
-  , NewRulesTest.olModule
-  , Summarize.olModule
-  , OrthoFinder.olModule
-  , Singletons.olModule
-
   -- core language features
+    Math.olModule
   , ListLike.olModule -- TODO expose Function fields in API
   , Load.olModule     -- TODO glob_files first, then mkGlob after Compose
-  , Math.olModule
   , Permute.olModule  -- could do rPermute
   , Range.olModule    -- could do rRange
   , Repeat.olModule   -- implemented in terms of rReplaceEach
@@ -91,5 +82,14 @@ modules =
   -- plots and figures
   , Plots.olModule     -- somewhat complicated Rules... Script transform?
   , SetsTable.olModule -- implemented in terms of plots
+
+  -- works in progress and/or tests
+  , AllVsAll.olModule
+  , Cheat.olModule
+  , GreenCut.olModule
+  , NewRulesTest.olModule
+  , Summarize.olModule
+  , OrthoFinder.olModule
+  , Singletons.olModule
 
   ]

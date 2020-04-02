@@ -217,8 +217,8 @@ newFn rFn name mChar oType dTypes aFn =
 -- * all-vs-all searches
 -- * ortholog searches starting from any kind of blast
 --
--- Think about: should these also have access to the whole script, or is only
--- the current Expr enough?
+-- Macros get read access to the entire 'Script' up to where they were called,
+-- but can only return one altered 'Expr'.
 
 type MacroExpansion = Script -> Expr -> Expr
 
