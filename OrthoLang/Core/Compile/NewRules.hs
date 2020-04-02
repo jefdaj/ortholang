@@ -18,22 +18,30 @@ prefer the first one that handles your problem somewhat elegantly.
 
 module OrthoLang.Core.Compile.NewRules
   (
-  -- * Types
-    ActionN1
+
+  -- * Static rules to add to every eval call
+  -- $static
+    newFunctionRules
+
+  -- * Basic functions
+  -- $actionN
+  , ActionN1
   , ActionN2
   , ActionN3
 
-  -- * Static rules to add to every eval call
-  , newFunctionRules
-
-  -- * The new API
-  , mkNewBop
+  -- $basic
   , mkNewFn1
   , mkNewFn2
   , mkNewFn3
 
-  -- $exprtransformers
+  -- * Binary operators
+  -- $bops
+  , mkNewBop
 
+  -- * Expr transformers
+  -- $transformers
+
+  -- * Extra steps
   -- $extrasteps
 
   )
@@ -51,17 +59,18 @@ import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Util        (traceShow)
 
--- first arg is the outpath, and the rest are inputs
+-- $actionN
+-- TODO write actionN section
+
 type ActionN1 = ExprPath -> FilePath                         -> Action ()
 type ActionN2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type ActionN3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
-{-|
-The old-style rules in use throughout OrthoLang now require the compilers to
-return exact paths. These new ones use proper patterns instead, so they can be
-added once per program run rather than once per expression. They should also
-allow Shake to infer mapping patterns, but that isn't implemented yet.
--}
+-- $static
+-- The old-style rules in use throughout OrthoLang now require the compilers to
+-- return exact paths. These new ones use proper patterns instead, so they can
+-- be added once per program run rather than once per expression. They should
+-- also allow Shake to infer mapping patterns, but that isn't implemented yet.
 newFunctionRules :: Rules ()
 newFunctionRules = do
   -- (cfg, _, _, _) <- ask
@@ -70,10 +79,44 @@ newFunctionRules = do
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
 
+-- $basic
+-- TODO write basic section
 
-------------------------------
--- new rules infrastructure --
-------------------------------
+mkNewFn1 :: String     -- ^ name
+         -> Type       -- ^ return type
+         -> Type       -- ^ 1 argument type
+         -> ActionN1   -- ^ 1-argument action
+         -> Function
+mkNewFn1 n r a1 = mkNewFn rNewRules1
+         n Nothing r [a1]
+
+mkNewFn2 :: String       -- ^ name
+         -> Type         -- ^ return type
+         -> (Type, Type) -- ^ 2 argument types
+         -> ActionN2     -- ^ 2-argument action
+         -> Function
+mkNewFn2 n r (a1, a2) = mkNewFn rNewRules2
+         n Nothing r [a1, a2]
+
+mkNewFn3 :: String             -- ^ name
+         -> Type               -- ^ return type
+         -> (Type, Type, Type) -- ^ 3 argument types
+         -> ActionN3           -- ^ 3-argument action
+         -> Function
+mkNewFn3 n r (a1, a2, a3) = mkNewFn rNewRules3
+         n Nothing r [a1, a2, a3]
+
+-- $bops
+-- TODO write bops section
+
+mkNewBop :: String   -- ^ name
+         -> Char     -- ^ opchar
+         -> Type     -- ^ return type
+         -> Type     -- ^ 1 argument type (each side of the bop will be this)
+         -> ActionN1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
+         -> Function
+mkNewBop n c r a1 = mkNewFn rNewRules1
+         n (Just c) r [ListOf a1]
 
 -- TODO ExprPaths for deps?
 -- TODO or Paths throughout?
@@ -133,39 +176,6 @@ aNewRules applyFn tFn aFn out = do
       need' "ortholang.modules.newrulestest.aNewRules" deps'
       applyFn (aFn out) deps'
 
-mkNewBop :: String   -- ^ name
-         -> Char     -- ^ opchar
-         -> Type     -- ^ return type
-         -> Type     -- ^ 1 argument type (each side of the bop will be this)
-         -> ActionN1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
-         -> Function
-mkNewBop n c r a1 = mkNewFn rNewRules1
-         n (Just c) r [ListOf a1]
-
-mkNewFn1 :: String     -- ^ name
-         -> Type       -- ^ return type
-         -> Type       -- ^ 1 argument type
-         -> ActionN1   -- ^ 1-argument action
-         -> Function
-mkNewFn1 n r a1 = mkNewFn rNewRules1
-         n Nothing r [a1]
-
-mkNewFn2 :: String       -- ^ name
-         -> Type         -- ^ return type
-         -> (Type, Type) -- ^ 2 argument types
-         -> ActionN2     -- ^ 2-argument action
-         -> Function
-mkNewFn2 n r (a1, a2) = mkNewFn rNewRules2
-         n Nothing r [a1, a2]
-
-mkNewFn3 :: String             -- ^ name
-         -> Type               -- ^ return type
-         -> (Type, Type, Type) -- ^ 3 argument types
-         -> ActionN3           -- ^ 3-argument action
-         -> Function
-mkNewFn3 n r (a1, a2, a3) = mkNewFn rNewRules3
-         n Nothing r [a1, a2, a3]
-
 -- | Use the argument-specific numbered version above instead.
 mkNewFn
   :: (String -> TypeChecker -> t -> Rules ())
@@ -182,25 +192,15 @@ mkNewFn rFn name mChar oType dTypes aFn =
        , fNewRules  = Just $ rFn name tFn aFn
        }
 
------------------------
--- expr transformers --
------------------------
+-- $transformers
+-- Some of the current OrthoLang function compilers are implemented partly by
+-- transforming their input Exprs to soemthing else, then compiling them using
+-- standard and/or custom code. This is an attempt to standardize that.
+-- Functions using it can be implemented with Haskell function composition.
 
-{-| $exprtransformers
-Some of the current OrthoLang function compilers are implemented partly by
-transforming their input Exprs to soemthing else, then compiling them using
-standard and/or custom code. This is an attempt to standardize that. Functions
-using it can be implemented with Haskell function composition.
--}
-
------------------
--- extra steps --
------------------
-
-{-| $extrasteps
-Some of the current OrthoLang RulesFns only require one script/step to run, and
-they're simple. But others need to build tmpfiles first, and this is an attempt
-to standardize that. The basic pattern is that each step is a Shake pattern +
-associated Action. They can be put together in one RulesFn, or probably
-separated.
--}
+-- $extrasteps
+-- Some of the current OrthoLang RulesFns only require one script/step to run,
+-- and they're simple. But others need to build tmpfiles first, and this is an
+-- attempt to standardize that. The basic pattern is that each step is a Shake
+-- pattern + associated Action. They can be put together in one RulesFn, or
+-- probably separated.
