@@ -7,10 +7,10 @@ module OrthoLang.Modules.Singletons
   , withSingletons
 
   -- * OrthoLang functions for transforming (TODO remove?)
-  , singletons
+  -- , singletons
 
   -- * OrthoLang module
-  , olModule
+  , olModule -- TODO don't export this?
 
   )
   where
@@ -44,8 +44,7 @@ withSingletons e = Fun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e
 
 -- | Take a function call with one arg, and make the arg a singleton list
 withSingletonArg :: Expr -> Expr
-withSingletonArg (Fun rtn salt deps name [s])
-  =           (Fun rtn salt deps name [withSingletonArg s])
+withSingletonArg (Fun rtn salt deps name [s]) = Fun rtn salt deps name [withSingleton s]
 withSingletonArg e = error $ "bad argument to withSingletonArg: " ++ show e
 
 -- Only used for the makeblastdb_*_each functions so far

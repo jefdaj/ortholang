@@ -23,7 +23,7 @@ import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
-import OrthoLang.Modules.Singletons (singletons, withSingletons, withSingletonArg)
+import OrthoLang.Modules.Singletons (withSingletons, withSingletonArg)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -83,9 +83,6 @@ olModule = Module
     , blastdbgetProt -- TODO mapped version so you can list -> git at once?
     , blastdblist
     -- , TODO write loadBlastDB
-
-    -- TODO hide this from users?
-    , singletons
     ]
   }
 
