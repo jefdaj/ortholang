@@ -46,48 +46,48 @@ modules =
   , Cheat.olModule
   , GreenCut.olModule
   , NewRulesTest.olModule
+  , Summarize.olModule
+  , OrthoFinder.olModule
 
   -- core language features
   , ListLike.olModule -- TODO expose Function fields in API
-  , Load.olModule
+  , Load.olModule     -- TODO glob_files first, then mkGlob after Compose
   , Math.olModule
-  , Permute.olModule
-  , Range.olModule
-  , Repeat.olModule
-  , Replace.olModule
-  , Sample.olModule
-  , Scores.olModule
-  , Sets.olModule
-  , SetsTable.olModule
-  , Summarize.olModule
+  , Permute.olModule  -- could do rPermute
+  , Range.olModule    -- could do rRange
+  , Repeat.olModule   -- implemented in terms of rReplaceEach
+  , Replace.olModule  -- implement as Script -> Script, then normal?
+  , Sample.olModule   -- could do rSample
+  , Scores.olModule   -- looks semi complicated to convert
+  , Sets.olModule     -- could do it same as math?
 
   -- load, download, and convert sequences
-  , BioMartR.olModule
-  , SeqIO.olModule
+  , BioMartR.olModule -- rewrite without the parse searches thing
+  , SeqIO.olModule    -- mix of rSimple* and rMap* functions
 
   -- BLAST
-  , Blast.olModule
-  , BlastDB.olModule
-  , BlastHits.olModule
-  , PsiBlast.olModule
+  , Blast.olModule      -- surprisingly, looks doable via rSimple
+  , BlastDB.olModule    -- could do some, some will require expr transforms too
+  , BlastHits.olModule  -- simplest case of rMap use? aCutCol etc.
+  , PsiBlast.olModule   -- complicated :(
 
   -- BLAST reciprocal best hits
-  , BlastRBH.olModule
-  , CRBBlast.olModule
+  , BlastRBH.olModule -- fairly simple but some minor rMap
+  , CRBBlast.olModule -- rSimpleTmp, rMapTmps
 
   -- other sequence search programs
-  , Diamond.olModule
-  , Hmmer.olModule
-  , MMSeqs.olModule
-  , Muscle.olModule
+  , Diamond.olModule -- long, and uses rSimple + rMap
+  , Hmmer.olModule   -- short, uses rSimple + rMap
+  , MMSeqs.olModule  -- custom Actions, but Rules look reasonably easy
+  , Muscle.olModule  -- very short use of rSimple
 
   -- orthogroup search programs
-  , Busco.olModule
-  , OrthoFinder.olModule
-  , OrthoGroups.olModule
-  , SonicParanoid.olModule
+  , Busco.olModule         -- medium complicated
+  , OrthoGroups.olModule   -- complicated str code, but simple Rules?
+  , SonicParanoid.olModule -- short and simple Rules
 
   -- plots and figures
-  , Plots.olModule
+  , Plots.olModule     -- somewhat complicated Rules... Script transform?
+  , SetsTable.olModule -- implemented in terms of plots
 
   ]
