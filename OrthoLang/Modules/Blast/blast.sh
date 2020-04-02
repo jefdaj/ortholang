@@ -1,4 +1,4 @@
-#!/nix/store/rm1hz1lybxangc8sdl7xvzs5dcvigvf7-bash-4.4-p23/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
