@@ -63,7 +63,7 @@ mkSetFunction (foldName, opChar, setFn) = setFold
       , fTypeCheck = tSetFold
       , fTypeDesc  = mkFoldDesc foldName
       , fTags = []
-      , fNewRules = Nothing, fOldRules = rSetFold (foldr1 setFn)
+      , fNewRules = NewNotImplemented, fOldRules = rSetFold (foldr1 setFn)
       }
 
 tSetFold :: [Type] -> Either String Type
@@ -126,7 +126,7 @@ some = Function
   , fTypeCheck = tSetFold
   , fTypeDesc  = "some : X.list.list -> X.list"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSome
+  , fNewRules = NewNotImplemented, fOldRules = rSome
   }
 
 rSome :: RulesFn

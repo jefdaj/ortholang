@@ -83,7 +83,7 @@ orthogroups = let name = "orthogroups" in Function
   , fTypeDesc  = mkTypeDesc  name [og] sll
   , fTypeCheck = defaultTypeCheck name [og] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rOrthogroups
+  , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
   }
 
 rOrthogroups :: RulesFn
@@ -167,7 +167,7 @@ orthogroupContaining = let name = "orthogroup_containing" in Function
   , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
   , fTypeCheck = defaultTypeCheck name [og, str] (ListOf str)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple aOrthogroupContaining
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthogroupContaining
   }
 
 aOrthogroupContaining :: [Path] -> Action ()
@@ -196,7 +196,7 @@ orthogroupsContaining = let name = "orthogroups_containing" in Function
   , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
   , fTypeCheck = defaultTypeCheck name [og, ListOf str] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
   }
 
 type FilterFn = [[String]] -> [String] -> [[String]]
@@ -230,7 +230,7 @@ orthologInAny = let name = "ortholog_in_any" in Function
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck name [og, ListOf faa] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = mkOrthologsStrRules name
+  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules name
   }
 
 mkOrthologsStrRules :: String -> RulesFn
@@ -250,7 +250,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in Function
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck name [sll, sll] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAny
+  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
   }
 
 pickAny :: Int -> Int
@@ -303,7 +303,7 @@ orthologInAll = let name = "ortholog_in_all" in Function
   , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck name [og, ListOf faa] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = mkOrthologsStrRules "ortholog_in_all"
+  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
 
 orthologInAllStr :: Function
@@ -312,7 +312,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in Function
   , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   , fTypeCheck = defaultTypeCheck name [sll, sll] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rOrthologFilterStr "min" pickAll
+  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
   }
 
 pickAll :: Int -> Int
@@ -336,7 +336,7 @@ orthologInMinStr = let name = "ortholog_in_min_str" in Function
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "min" pickMin
+  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "min" pickMin
   }
 
 -- read a scientific and print again as a string
@@ -389,7 +389,7 @@ orthologInMin = let name = "ortholog_in_min" in Function
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck name [num, og, ListOf faa] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
+  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
   }
 
 mkOrthologsStrFracRules :: String -> RulesFn
@@ -410,7 +410,7 @@ orthologInMax = let name = "ortholog_in_max" in Function
   , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
   , fTypeCheck = defaultTypeCheck name [num, og, ListOf faa] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = mkOrthologsStrFracRules name
+  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
   }
 
 orthologInMaxStr :: Function
@@ -419,7 +419,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in Function
   , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rOrthologFilterStrFrac "max" pickMax
+  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "max" pickMax
   }
 
 pickMax :: (RealFrac a, Integral b) => a -> b -> b

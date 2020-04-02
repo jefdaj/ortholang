@@ -50,7 +50,7 @@ diamondmakedb = let name = "diamond_makedb" in Function
   , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
   , fTypeCheck = defaultTypeCheck name [faa] dmnd
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
   }
 
 -------------------------
@@ -65,7 +65,7 @@ diamondmakedbEach = let name = "diamond_makedb_each" in Function
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
   , fTypeCheck = defaultTypeCheck name [ListOf faa] (ListOf dmnd)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
 ------------------------
@@ -78,7 +78,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in Function
   , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
   , fTypeCheck = defaultTypeCheck name [ListOf faa] dmnd
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rDiamondmakedbAll
+  , fNewRules = NewNotImplemented, fOldRules = rDiamondmakedbAll
   }
 
 -- TODO should the reading the list + paths thing be included in rSimpleScript?
@@ -180,7 +180,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
   , fTypeCheck = defaultTypeCheck name [num, qType, sType] rType
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rFn dCmd
+  , fNewRules = NewNotImplemented, fOldRules = rFn dCmd
   }
 
 aDiamondFromDb :: [String] -> ActionFn2

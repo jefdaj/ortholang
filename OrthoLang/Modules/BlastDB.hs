@@ -121,7 +121,7 @@ mkLoadDB name rtn = Function
   , fTypeCheck = defaultTypeCheck name [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rLoadDB
+  , fNewRules = NewNotImplemented, fOldRules = rLoadDB
   }
 
 mkLoadDBEach :: String -> Type -> Function
@@ -130,7 +130,7 @@ mkLoadDBEach name rtn = Function
   , fTypeCheck = defaultTypeCheck name [ListOf str] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = undefined -- TODO write this!
+  , fNewRules = NewNotImplemented, fOldRules = undefined -- TODO write this!
   }
 
 rLoadDB :: RulesFn
@@ -178,7 +178,7 @@ blastdblist = let name = "blastdblist" in Function
   , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBlastdblist
+  , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
   }
 
 filterNames :: String -> [String] -> [String]
@@ -255,7 +255,7 @@ mkBlastdbget name dbType = Function
   , fTypeCheck = defaultTypeCheck name [str] dbType -- TODO are there protein ones too?
   , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBlastdbget
+  , fNewRules = NewNotImplemented, fOldRules = rBlastdbget
   }
 
 blastdbgetNucl :: Function
@@ -321,7 +321,7 @@ makeblastdbNuclAll = Function
   , fTypeCheck = tMakeblastdbAll name ndb
   , fTypeDesc  = name ++ " : fa.list -> ndb"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMakeblastdbAll
+  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
     name = "makeblastdb_nucl_all"
@@ -332,7 +332,7 @@ makeblastdbProtAll = Function
   , fTypeCheck = tMakeblastdbAll name pdb
   , fTypeDesc  = name ++ " : faa.list -> pdb"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMakeblastdbAll
+  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
     name = "makeblastdb_prot_all"
@@ -473,7 +473,7 @@ makeblastdbNucl = Function
   , fTypeCheck = tMakeblastdb ndb
   , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMakeblastdb
+  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
 makeblastdbProt :: Function
@@ -482,7 +482,7 @@ makeblastdbProt = Function
   , fTypeCheck = tMakeblastdb pdb
   , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMakeblastdb
+  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
 tMakeblastdb :: Type -> TypeChecker
@@ -504,7 +504,7 @@ mkMakeblastdbEach dbType = Function
   , fTypeCheck = tMakeblastdbEach dbType
   , fTypeDesc  = desc
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMakeblastdbEach
+  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
   where
     desc = name ++ " : " ++ ext ++ ".list -> " ++ extOf dbType ++ ".list"

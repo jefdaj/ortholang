@@ -42,7 +42,7 @@ length = Function
   , fTypeCheck = defaultTypeCheck name [listlike] num
   , fTypeDesc  = mkTypeDesc name  [listlike] num
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rLength
+  , fNewRules = NewNotImplemented, fOldRules = rLength
   }
   where
     name = "length"
@@ -53,7 +53,7 @@ lengthEach = Function
   , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
   , fTypeCheck = defaultTypeCheck name [ListOf listlike] (ListOf num)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 1 aLength -- TODO is 1 wrong?
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aLength -- TODO is 1 wrong?
   }
   where
     name = "length_each"

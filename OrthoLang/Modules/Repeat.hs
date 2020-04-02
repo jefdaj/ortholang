@@ -35,7 +35,7 @@ repeatN = Function
   ,fTags = []
   , fTypeCheck = tRepeatN
   , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
-  , fNewRules = Nothing, fOldRules = rRepeatN
+  , fNewRules = NewNotImplemented, fOldRules = rRepeatN
   }
 
 -- takes a result type, a starting type, and an int,

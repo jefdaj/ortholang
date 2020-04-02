@@ -89,7 +89,7 @@ parseSearches = let name = "parse_searches" in Function
   , fTypeCheck = defaultTypeCheck name [ListOf str] search
   , fTypeDesc  = mkTypeDesc name [ListOf str] search
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rParseSearches
+  , fNewRules = NewNotImplemented, fOldRules = rParseSearches
   }
 
 -----------------
@@ -102,7 +102,7 @@ getGenomes = let name = "get_genomes" in Function
   , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf fnagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBioMartR "getGenome"
+  , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getGenome"
   }
 
 -------------------
@@ -115,7 +115,7 @@ getProteomes = let name = "get_proteomes" in Function
   , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf faagz)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBioMartR "getProteome"
+  , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getProteome"
   }
 
 --------------------

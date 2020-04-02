@@ -166,13 +166,14 @@ rNamedFunction' scr expr name = do
   case findFunction cfg name of
     Nothing -> error $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
-                 Nothing -> if "load_" `isPrefixOf` fName f
-                              then (fOldRules f) scr $ setSalt 0 expr
-                              else (fOldRules f) scr expr
-                 -- TODO is this where the digest fails to be added?
-                 Just _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
-                               res = ExprPath p
-                           in return $ debugRules cfg "rNamedFunction'" expr res
+                 NewNotImplemented -> if "load_" `isPrefixOf` fName f
+                                        then (fOldRules f) scr $ setSalt 0 expr
+                                        else (fOldRules f) scr expr
+                 -- note that the rules themselves should have been added by 'newFunctionRules'
+                 NewRules _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
+                                   res = ExprPath p
+                               in return $ debugRules cfg "rNamedFunction'" expr res
+                 NewMacro mFn -> rExpr scr $ mFn expr
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do
@@ -410,7 +411,7 @@ mkLoad hashSeqIDs name rtn = Function
   , fTypeCheck = defaultTypeCheck name [str] rtn
   , fTypeDesc  = mkTypeDesc name [str] rtn
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rLoad hashSeqIDs
+  , fNewRules = NewNotImplemented, fOldRules = rLoad hashSeqIDs
   }
 
 {- Like cLoad, except it operates on a list of strings. Note that you can also
@@ -424,7 +425,7 @@ mkLoadList hashSeqIDs name rtn = Function
   , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rLoadList hashSeqIDs
+  , fNewRules = NewNotImplemented, fOldRules = rLoadList hashSeqIDs
   }
 
 -- The paths here are a little confusing: expr is a str of the path we want to

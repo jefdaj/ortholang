@@ -67,7 +67,7 @@ mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in Function
   , fTypeDesc  = name ++ " : fa.list -> mms"
   , fTypeCheck = tMmseqsCreateDbAll name
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMmseqsCreateDbAll
+  , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDbAll
   }
 
 tMmseqsCreateDbAll :: String -> TypeChecker
@@ -122,7 +122,7 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in Function
   , fTypeDesc  = name ++ " : fa -> mms"
   , fTypeCheck = tMmseqsCreateDb name
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMmseqsCreateDb
+  , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDb
   }
 
 tMmseqsCreateDb :: String -> TypeChecker
@@ -145,7 +145,7 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in Function
   , fTypeDesc  = name ++ " : num fa mms -> bht"
   , fTypeCheck = tMmseqsSearchDb name
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMmseqsSearchDb
+  , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearchDb
   }
 
 tMmseqsSearchDb :: String -> TypeChecker
@@ -247,7 +247,7 @@ mmseqsSearch = let name = "mmseqs_search" in Function
   , fTypeDesc  = name ++ " : num fa fa -> bht"
   , fTypeCheck = tMmseqsSearch name
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMmseqsSearch
+  , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearch
   }
 
 tMmseqsSearch :: String -> TypeChecker

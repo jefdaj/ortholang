@@ -59,7 +59,7 @@ singletons =
     , fTags      = [Hidden]
     , fTypeDesc  = name ++ " : X.list -> X.list.list"
     , fTypeCheck = tSingletons
-    , fNewRules  = Nothing
+    , fNewRules  = NewNotImplemented
     , fOldRules  = rSingletons
     }
 

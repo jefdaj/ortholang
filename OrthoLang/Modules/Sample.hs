@@ -26,7 +26,7 @@ sample = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
   , fTypeCheck = tSample
-  , fNewRules = Nothing, fOldRules = rSample
+  , fNewRules = NewNotImplemented, fOldRules = rSample
   , fTypeDesc  = name ++ " : num X.list -> X.list"
   }
   where

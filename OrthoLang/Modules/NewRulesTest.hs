@@ -1,9 +1,8 @@
 module OrthoLang.Modules.NewRulesTest where
 
 import OrthoLang.Core
-import Development.Shake
+-- import Development.Shake
 import OrthoLang.Modules.SeqIO (faa)
-import Data.Maybe (fromJust)
 
 olModule :: Module
 olModule = Module
@@ -13,6 +12,7 @@ olModule = Module
   , mFunctions =
       [ test1
       , test2
+      , test3
       ]
   }
 
@@ -31,3 +31,11 @@ test2 = newFn3 "newrulestest2" faa (str, faa, faa) aTest2
 
 aTest2 :: NewAction3
 aTest2 (ExprPath out) a1 a2 a3 = writeCachedLines out ["inputs:", a1, a2, a3]
+
+-- TODO any obvious way to constrain the number of args?
+test3 :: Function
+test3 = newMacro "newrulestest3" str [str, str, str] mTest3
+
+mTest3 :: MacroExpansion
+mTest3 (Fun _ _ _ _ _) = undefined
+mTest3 e = error $ "bad argument to mTest3: " ++ show e

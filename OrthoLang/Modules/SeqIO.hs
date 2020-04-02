@@ -86,7 +86,7 @@ gbkToFaa = Function
   , fTypeCheck = defaultTypeCheck name [str, gbk] faa
   , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta faa "aa"
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa"
@@ -98,7 +98,7 @@ gbkToFaaEach = Function
   , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa_each"
@@ -109,7 +109,7 @@ gbkToFna = Function
   , fTypeCheck = defaultTypeCheck name [str, gbk] fna
   , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna"
@@ -120,7 +120,7 @@ gbkToFnaEach = Function
   , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf fna)
   , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna_each"
@@ -177,7 +177,7 @@ extractIds = Function
   ,fTags = []
   , fTypeCheck = tExtractIds
   , fTypeDesc  = name ++ " : fa -> str.list"
-  , fNewRules = Nothing, fOldRules = rSimpleScript "extract_ids.py"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "extract_ids.py"
   }
   where
     name = "extract_ids"
@@ -189,7 +189,7 @@ extractIdsEach = Function
   ,fTags = []
   , fTypeCheck = tExtractIdsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "extract_ids.py"
+  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "extract_ids.py"
   }
   where
     name = "extract_ids_each"
@@ -215,7 +215,7 @@ extractSeqs = Function
   ,fTags = []
   , fTypeCheck = tExtractSeqs
   , fTypeDesc  = name ++ " : fa str.list -> fa"
-  , fNewRules = Nothing, fOldRules = rSimple aExtractSeqs 
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aExtractSeqs 
   }
   where
     name = "extract_seqs"
@@ -238,7 +238,7 @@ extractSeqsEach = Function
   ,fTags = []
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fNewRules = Nothing, fOldRules = rMap 1 aExtractSeqs
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aExtractSeqs
   }
   where
     name = "extract_seqs_each"
@@ -263,7 +263,7 @@ translate = Function
   ,fTags = []
   , fTypeCheck = defaultTypeCheck name [fna] faa
   , fTypeDesc  = mkTypeDesc name  [fna] faa
-  , fNewRules = Nothing, fOldRules = rSimpleScript "translate.py"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "translate.py"
   }
   where
     name = "translate"
@@ -274,7 +274,7 @@ translateEach = Function
   ,fTags = []
   , fTypeCheck = defaultTypeCheck name [ListOf fna] (ListOf faa)
   , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
-  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "translate.py"
+  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "translate.py"
   }
   where
     name = "translate_each"
@@ -291,7 +291,7 @@ mkConcat cType = Function
   ,fTags = []
   , fTypeCheck = defaultTypeCheck name [ListOf cType] cType
   , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
-  , fNewRules = Nothing, fOldRules = rSimple $ aConcat cType
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aConcat cType
   }
   where
     ext  = extOf cType
@@ -303,7 +303,7 @@ mkConcatEach cType = Function
   ,fTags = []
   , fTypeCheck = defaultTypeCheck name [ListOf $ ListOf cType] (ListOf cType)
   , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
-  , fNewRules = Nothing, fOldRules = rMap 1 $ aConcat cType
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aConcat cType
   }
   where
     ext  = extOf cType
@@ -374,7 +374,7 @@ splitFasta faType = Function
   ,fTags = []
   , fTypeCheck = defaultTypeCheck name [faType] (ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
-  , fNewRules = Nothing, fOldRules = rSimple $ aSplit name ext
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aSplit name ext
   }
   where
     ext  = extOf faType
@@ -386,7 +386,7 @@ splitFastaEach faType = Function
   ,fTags = []
   , fTypeCheck = defaultTypeCheck name [ListOf faType] (ListOf $ ListOf faType)
   , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
-  , fNewRules = Nothing, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where
     ext  = extOf faType

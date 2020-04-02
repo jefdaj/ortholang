@@ -27,7 +27,7 @@ olModule = Module
 --   ,fTags = []
 --   , fTypeCheck = summaryTypeCheck
 --   , fDesc = Nothing, fTypeDesc  = undefined
---   , fNewRules = Nothing, fOldRules = rSummary (foldr1 intersect)
+--   , fNewRules = NewNotImplemented, fOldRules = rSummary (foldr1 intersect)
 --   }
 
 summaryTypeCheck :: [Type] -> Either String Type

@@ -49,7 +49,7 @@ blastCRB = Function
   , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
   , fTypeCheck = defaultTypeCheck name [fna, fa] crb
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimpleTmp name aCRBBlast
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleTmp name aCRBBlast
   }
   where
     name = "crb_blast"
@@ -62,7 +62,7 @@ blastCRBEach = Function
   , fTypeCheck = defaultTypeCheck name [fna, ListOf fa] (ListOf crb)
   , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
+  , fNewRules = NewNotImplemented, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }
   where
     name = "crb_blast_each"

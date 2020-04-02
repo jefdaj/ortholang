@@ -76,7 +76,7 @@ mkBlastFromDb d@(bCmd, qType, _, dbType) = Function
   , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromDb d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
   }
   where
     name = bCmd ++ "_db"
@@ -175,7 +175,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromFa d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
   }
 
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
@@ -200,7 +200,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, dbType) = Function
   , fTypeCheck = defaultTypeCheck name [num, qType, ListOf dbType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromDbEach d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDbEach d
   }
   where
     name = bCmd ++ "_db_each"
@@ -218,7 +218,7 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   , fTypeCheck = defaultTypeCheck name [num, qType, ListOf faType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromFaEach d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaEach d
   }
   where
     name = bCmd ++ "_each"

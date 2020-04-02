@@ -77,7 +77,7 @@ buscoListLineages = Function
   , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBuscoListLineages
+  , fNewRules = NewNotImplemented, fOldRules = rBuscoListLineages
   }
   where
     name = "busco_list_lineages"
@@ -180,7 +180,7 @@ buscoFetchLineage  = Function
   , fTypeCheck = defaultTypeCheck name [str] blh
   , fTypeDesc  = mkTypeDesc name  [str] blh
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBuscoFetchLineage
+  , fNewRules = NewNotImplemented, fOldRules = rBuscoFetchLineage
   }
   where
     name = "busco_fetch_lineage"
@@ -236,7 +236,7 @@ mkBusco name mode inType = Function
   , fTypeCheck = defaultTypeCheck name [blh, inType] bsr
   , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aBusco mode
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aBusco mode
   }
 
 buscoProteins, buscoTranscriptome :: Function
@@ -285,7 +285,7 @@ mkBuscoEach name mode inType = Function
   , fTypeCheck = defaultTypeCheck name [blh, (ListOf inType)] (ListOf bsr)
   , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 2 $ aBusco mode
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aBusco mode
   }
 
 buscoProteinsEach, buscoTranscriptomeEach :: Function
@@ -303,7 +303,7 @@ buscoPercentComplete  = Function
   , fTypeCheck = defaultTypeCheck name [bsr] num
   , fTypeDesc  = mkTypeDesc name  [bsr] num
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimpleScript "busco_percent_complete.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "busco_percent_complete.sh"
   }
   where
     name = "busco_percent_complete"
@@ -314,7 +314,7 @@ buscoPercentCompleteEach  = Function
   , fTypeCheck = defaultTypeCheck name [ListOf bsr] (ListOf num)
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
   }
   where
     name = "busco_percent_complete_each"
@@ -329,8 +329,8 @@ buscoScoresTable  = Function
   , fTypeCheck = defaultTypeCheck name [ListOf bsr] bst
   , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
   ,fTags = []
-  -- , fNewRules = Nothing, fOldRules = rSimpleScript $ name <.> "py"
-  , fNewRules = Nothing, fOldRules = rBuscoScoresTable
+  -- , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name <.> "py"
+  , fNewRules = NewNotImplemented, fOldRules = rBuscoScoresTable
   }
   where
     name = "busco_scores_table"
@@ -378,7 +378,7 @@ buscoFilterCompleteness  = Function
   , fTypeCheck = defaultTypeCheck name [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rBuscoFilterCompleteness
+  , fNewRules = NewNotImplemented, fOldRules = rBuscoFilterCompleteness
   }
   where
     name = "busco_filter_completeness"

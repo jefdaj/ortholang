@@ -33,7 +33,7 @@ mkAva name = let name' = name ++ "_ava" in Function
   , fTypeDesc  = mkTypeDesc  name' [num, ListOf faa] ava
   , fTypeCheck = defaultTypeCheck name' [num, ListOf faa] ava
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkAva
+  , fNewRules = NewNotImplemented, fOldRules = rMkAva
   }
 
 -- TODO any reason to take the name as a separate arg here?

@@ -27,7 +27,7 @@ muscle = let name = "muscle" in Function
   , fTypeCheck = defaultTypeCheck name [faa] aln
   , fTypeDesc  = name ++ " : faa -> aln"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimpleScript "muscle.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "muscle.sh"
   }
 
 muscleEach :: Function
@@ -36,5 +36,5 @@ muscleEach = let name = "muscle_each" in Function
   , fTypeCheck = defaultTypeCheck name [ListOf faa] (ListOf aln)
   , fTypeDesc  = name ++ " : faa.list -> aln.list"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "muscle.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "muscle.sh"
   }

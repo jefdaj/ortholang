@@ -53,7 +53,7 @@ extractQueries = Function
   , fTypeCheck = defaultTypeCheck name [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol True 1
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 1
   }
   where
     name = "extract_queries"
@@ -65,7 +65,7 @@ extractQueriesEach = Function
   , fTypeCheck = defaultTypeCheck name [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 1 $ aCutCol True 1
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 1
   }
   where
     name = "extract_queries_each"
@@ -77,7 +77,7 @@ extractTargets = Function
   , fTypeCheck = defaultTypeCheck name [hittable] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [hittable] (ListOf str)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol True 2
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 2
   }
   where
     name = "extract_targets"
@@ -88,7 +88,7 @@ extractTargetsEach = Function
   , fTypeCheck = defaultTypeCheck name [ListOf hittable] (ListOf (ListOf str))
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf (ListOf str))
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 1 $ aCutCol True 2
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 2
   }
   where
     name = "extract_targets_each"
@@ -137,7 +137,7 @@ mkFilterHits colname = Function
   , fTypeCheck = defaultTypeCheck name [num, hittable] bht
   , fTypeDesc  = mkTypeDesc name  [num, hittable] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aFilterHits colname
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aFilterHits colname
   }
   where
     name = "filter_" ++ colname
@@ -151,7 +151,7 @@ mkFilterHitsEach colname = Function
   , fTypeCheck = defaultTypeCheck name [num, ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf hittable] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 2 $ aFilterHits colname
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aFilterHits colname
   }
   where
     name = "filter_" ++ colname ++ "_each"
@@ -193,7 +193,7 @@ bestHits =  Function
   , fTypeCheck = defaultTypeCheck name [hittable] bht -- TODO is bht right?
   , fTypeDesc  = mkTypeDesc name  [hittable] bht -- TODO is bht right?
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple aBestExtract
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aBestExtract
   }
   where
     name = "best_hits"
@@ -204,7 +204,7 @@ bestHitsEach = Function
   , fTypeCheck = defaultTypeCheck name [ListOf hittable] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [ListOf hittable] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 1 aBestExtract
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestExtract
   }
   where
     name = "best_hits_each"

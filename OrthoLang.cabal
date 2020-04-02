@@ -157,6 +157,7 @@ library
                     OrthoLang.Modules.SeqIO,
                     OrthoLang.Modules.Sets,
                     OrthoLang.Modules.SetsTable,
+                    OrthoLang.Modules.Singletons,
                     OrthoLang.Modules.SonicParanoid,
                     OrthoLang.Modules.Summarize,
                     OrthoLang.Test,

@@ -52,7 +52,7 @@ cheat = Function
   , fTypeCheck = cheatTypeCheck
   , fTypeDesc  = "cheat : ??? (implement this)"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rCheat
+  , fNewRules = NewNotImplemented, fOldRules = rCheat
   }
 
 -- TODO detect return type based on string contents,

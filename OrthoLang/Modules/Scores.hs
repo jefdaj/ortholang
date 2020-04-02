@@ -69,7 +69,7 @@ scoreRepeats = Function
   ,fTags = []
   , fTypeCheck = tScoreRepeats
   , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
-  , fNewRules = Nothing, fOldRules = rScoreRepeats
+  , fNewRules = NewNotImplemented, fOldRules = rScoreRepeats
   }
   where
     name = "score_repeats"
@@ -105,7 +105,7 @@ extractScores = let name = "extract_scores" in Function
   , fTypeCheck = tExtractScores
   , fTypeDesc  = name ++ " : X.scores -> num.list"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol False 1
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 1
   }
 
 -- TODO deduplicate with extractTargets?
@@ -115,7 +115,7 @@ extractScored = let name = "extract_scored" in Function
   , fTypeCheck = tExtractScored
   , fTypeDesc  = name ++ " : X.scores -> X.list"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aCutCol False 2
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 2
   }
 
 tExtractScores :: TypeChecker

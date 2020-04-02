@@ -11,6 +11,7 @@ module OrthoLang.Core
   , newFn1
   , newFn2
   , newFn3
+  , newMacro
   -- , ActionR
   , NewAction1
   , NewAction2
@@ -18,6 +19,8 @@ module OrthoLang.Core
   , newFunctionRules
   , Function(..)
   , FnTag(..)
+  , NewRules(..)
+  , MacroExpansion
 
   -- * Things used in Main
   , runRepl

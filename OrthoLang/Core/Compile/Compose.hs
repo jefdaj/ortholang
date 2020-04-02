@@ -33,7 +33,7 @@ compose1 :: String      -- overall function name
 compose1 name desc fn1 type1 fn2 = Function
   { fOpChar = Nothing, fName = name
   , fTypeCheck = tCompose1 fn1 type1 fn2
-  , fNewRules = Nothing, fOldRules = rCompose1 fn1 type1 fn2
+  , fNewRules = NewNotImplemented, fOldRules = rCompose1 fn1 type1 fn2
   , fTypeDesc  = desc
   ,fTags = []
   }

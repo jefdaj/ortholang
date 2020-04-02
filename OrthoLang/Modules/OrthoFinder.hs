@@ -45,7 +45,7 @@ orthofinder = let name = "orthofinder" in Function
   , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
   , fTypeCheck = defaultTypeCheck name [ListOf faa] ofr
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple aOrthofinder
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthofinder
   }
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results

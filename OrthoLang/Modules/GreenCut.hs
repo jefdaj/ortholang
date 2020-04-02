@@ -29,7 +29,7 @@ greencutTwoFamilies = Function
   , fTypeCheck = defaultTypeCheck name [bht, bht] gcr
   , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimpleScript $ name ++ ".py"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name ++ ".py"
   }
   where
     name = "greencut2_families"

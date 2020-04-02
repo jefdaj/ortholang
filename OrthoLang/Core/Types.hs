@@ -79,6 +79,7 @@ module OrthoLang.Core.Types
   , RulesEnv
   , RulesR
   , runRulesR
+  , NewRules(..)
   -- , RulesR2
   -- , runRulesR2
   -- , ParseEnv
@@ -529,16 +530,21 @@ data FnTag
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data Function = Function
-  { fName      :: String           -- ^ main (prefix) function name
-  , fOpChar    :: Maybe Char       -- ^ infix operator symbol, if any
-  , fTypeCheck :: TypeChecker      -- ^ checks input types, returning an error message or return type
-  , fTypeDesc  :: String           -- ^ human-readable description
-  , fTags      :: [FnTag]          -- ^ function tags (TODO implement these)
-  , fOldRules  :: RulesFn          -- ^ old-style rules (TODO deprecate, then remove)
-  , fNewRules  :: Maybe (Rules ()) -- ^ new-style rules (TODO write them all, then remove the Maybe)
+  { fName      :: String      -- ^ main (prefix) function name
+  , fOpChar    :: Maybe Char  -- ^ infix operator symbol, if any
+  , fTypeCheck :: TypeChecker -- ^ checks input types, returning an error message or return type
+  , fTypeDesc  :: String      -- ^ human-readable description
+  , fTags      :: [FnTag]     -- ^ function tags (TODO implement these)
+  , fOldRules  :: RulesFn     -- ^ old-style rules (TODO deprecate, then remove)
+  , fNewRules  :: NewRules    -- ^ new-style rules (TODO write them all, then remove the Maybe)
   }
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   -- deriving (Eq, Read)
+
+data NewRules
+  = NewRules (Rules ())
+  | NewMacro (Expr -> Expr)
+  | NewNotImplemented -- TODO remove
 
 mkTypeDesc :: String -> [Type] -> Type -> String
 mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]

@@ -47,7 +47,7 @@ hmmbuild = let name = "hmmbuild" in Function
   , fTypeCheck = defaultTypeCheck name [aln] hmm
   , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimpleScript "hmmbuild.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "hmmbuild.sh"
   }
 
 hmmbuildEach :: Function
@@ -56,7 +56,7 @@ hmmbuildEach = let name = "hmmbuild_each" in Function
   , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
   , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
+  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
 hmmsearch :: Function
@@ -65,7 +65,7 @@ hmmsearch = let name = "hmmsearch" in Function
   , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
   , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple aHmmsearch
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aHmmsearch
   }
 
 -- TODO is this the right name for mapping over arg 2?
@@ -75,7 +75,7 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
   , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
   , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 aHmmsearch
   }
 
 -- TODO better name, or is this actually the most descriptive way?
@@ -85,7 +85,7 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 --   , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
 --   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
 --   ,fTags = []
---   , fNewRules = Nothing, fOldRules = rMap 2 aHmmsearch -- TODO this won't work right?
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aHmmsearch -- TODO this won't work right?
 --   }
 
 -- TODO is it parallel?
@@ -142,7 +142,7 @@ extractHmmTargets = let name = "extract_hmm_targets" in Function
   , fTypeCheck = defaultTypeCheck name [hht] (ListOf str)
   , fTypeDesc  = name ++ " : hht -> str.list"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple $ aExtractHmm 1
+  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aExtractHmm 1
   }
 
 extractHmmTargetsEach :: Function
@@ -151,7 +151,7 @@ extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
   , fTypeCheck = defaultTypeCheck name [ListOf hht] (ListOf $ ListOf str)
   , fTypeDesc  = name ++ " : hht.list -> str.list.list"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMap 1 $ aExtractHmm 1
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aExtractHmm 1
   }
 
 -- TODO clean this up! it's pretty ugly

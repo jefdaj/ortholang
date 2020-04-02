@@ -55,7 +55,7 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Functi
   , fTypeCheck = defaultTypeCheck name [num, sType, qType] bht
   , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromFaRev d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaRev d
   }
 
 -- flips the query and subject arguments and reuses the regular compiler above
@@ -79,7 +79,7 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
   , fTypeCheck = defaultTypeCheck name [num, sType, ListOf qType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromFaRevEach d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaRevEach d
   }
   where
     name = bCmd ++ "_rev_each"
@@ -120,7 +120,7 @@ reciprocalBest = Function
   , fTypeCheck = defaultTypeCheck name [bht, bht] bht
   , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple aReciprocalBest
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aReciprocalBest
   }
   where
     name = "reciprocal_best"
@@ -159,7 +159,7 @@ reciprocalBestAll = Function
   , fTypeCheck = defaultTypeCheck name [ListOf bht, ListOf bht] bht
   , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rSimple aReciprocalBestAll
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aReciprocalBestAll
   }
   where
     name = "reciprocal_best_all"
@@ -185,7 +185,7 @@ mkBlastRbh d@(bCmd, qType, sType, _) = Function
   , fTypeCheck = defaultTypeCheck name [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastRbh d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastRbh d
   }
   where
     name = bCmd ++ "_rbh"
@@ -209,7 +209,7 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = Function
   , fTypeCheck = defaultTypeCheck name [num, qType, ListOf sType] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastRbhEach d
+  , fNewRules = NewNotImplemented, fOldRules = rMkBlastRbhEach d
   }
   where
     name = bCmd ++ "_rbh_each"

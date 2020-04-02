@@ -35,5 +35,5 @@ setsTable = let name = "sets_table" in Function
   , fTypeCheck = defaultTypeCheck name [ListOf (ListOf lit)] tsv
   , fTypeDesc  = mkTypeDesc  name [ListOf (ListOf lit)] tsv
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rPlotListOfLists "sets_table.R"
+  , fNewRules = NewNotImplemented, fOldRules = rPlotListOfLists "sets_table.R"
   }

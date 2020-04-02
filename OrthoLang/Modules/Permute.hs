@@ -76,7 +76,7 @@ leaveEachOut = let name = "leave_each_out" in Function
   ,fTags = []
   , fTypeCheck = combosTypeCheck
   , fTypeDesc  = name ++ " : X.list -> X.list.list"
-  , fNewRules = Nothing, fOldRules = rPermute dropEach
+  , fNewRules = NewNotImplemented, fOldRules = rPermute dropEach
   }
 
 combosTypeCheck :: [Type] -> Either String Type

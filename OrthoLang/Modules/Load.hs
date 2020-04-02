@@ -40,7 +40,7 @@ globFiles = Function
   , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
   , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rGlobFiles
+  , fNewRules = NewNotImplemented, fOldRules = rGlobFiles
   }
   where
     name = "glob_files"

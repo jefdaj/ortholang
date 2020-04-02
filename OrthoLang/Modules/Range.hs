@@ -30,7 +30,7 @@ mkRangeFn name nArgs =  Function
   , fTypeCheck = defaultTypeCheck name (take nArgs $ repeat num) (ListOf num)
   , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rRange
+  , fNewRules = NewNotImplemented, fOldRules = rRange
   }
 
 -- TODO put somewhere as the standard way to construct an rSimpleScript that takes numbers?

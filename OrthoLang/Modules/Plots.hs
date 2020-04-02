@@ -60,7 +60,7 @@ histogram = let name = "histogram" in Function
   , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
   , fTypeDesc  = name ++ " : str num.list -> png"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rPlotNumList "histogram.R"
+  , fNewRules = NewNotImplemented, fOldRules = rPlotNumList "histogram.R"
   }
 
 -- for reference:
@@ -103,7 +103,7 @@ linegraph = let name = "linegraph" in Function
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rPlotRepeatScores "linegraph.R"
+  , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "linegraph.R"
   }
 
 -- TODO scatterplot should label axis by input var name (always there!)
@@ -113,7 +113,7 @@ scatterplot = let name = "scatterplot" in Function
   , fTypeCheck = tPlotScores
   , fTypeDesc  = name ++ " : str num.scores -> png"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rPlotRepeatScores "scatterplot.R"
+  , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "scatterplot.R"
   }
 
 -- TODO take an argument for extracting the axis name
@@ -159,7 +159,7 @@ venndiagram = let name = "venndiagram" in Function
   , fTypeCheck = tPlotListOfLists
   , fTypeDesc  = name ++ " : X.list.list -> png"
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rPlotListOfLists "venndiagram.R"
+  , fNewRules = NewNotImplemented, fOldRules = rPlotListOfLists "venndiagram.R"
   }
 
 tPlotListOfLists :: TypeChecker

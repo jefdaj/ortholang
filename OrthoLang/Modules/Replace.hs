@@ -97,7 +97,7 @@ replace = Function
   ,fTags = []
   , fTypeCheck = tReplace
   , fTypeDesc  = dReplace
-  , fNewRules = Nothing, fOldRules = rReplace
+  , fNewRules = NewNotImplemented, fOldRules = rReplace
   }
 
 tReplace :: [Type] -> Either String Type
@@ -188,7 +188,7 @@ replaceEach = Function
   , fTags = []
   , fTypeCheck = tReplaceEach
   , fTypeDesc  = dReplaceEach
-  , fNewRules = Nothing, fOldRules = rReplaceEach
+  , fNewRules = NewNotImplemented, fOldRules = rReplaceEach
   }
 
 tReplaceEach :: [Type] -> Either String Type

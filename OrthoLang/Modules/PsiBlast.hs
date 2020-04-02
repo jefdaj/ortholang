@@ -273,8 +273,8 @@ psiblast = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
   ,fTags = []
-  -- , fNewRules = Nothing, fOldRules = rPsiblast
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
+  -- , fNewRules = NewNotImplemented, fOldRules = rPsiblast
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
   }
   where
     name = "psiblast"
@@ -285,7 +285,7 @@ psiblastEach = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rPsiblastEach
+  , fNewRules = NewNotImplemented, fOldRules = rPsiblastEach
   }
   where
     name = "psiblast_each"
@@ -315,7 +315,7 @@ psiblastDb = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
   }
   where
     name = "psiblast_db"
@@ -331,8 +331,8 @@ psiblastDbEach = Function
   ,fTags = []
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
-  -- , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
-  , fNewRules = Nothing, fOldRules = rMap 3 aPsiblastSearchDb'
+  -- , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
+  , fNewRules = NewNotImplemented, fOldRules = rMap 3 aPsiblastSearchDb'
   }
   where
     name = "psiblast_db_each"
@@ -360,7 +360,7 @@ psiblastTrain = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
   where
     name = "psiblast_train"
@@ -372,8 +372,8 @@ psiblastTrainPssms = Function
   , fTypeCheck = defaultTypeCheck name [num, ListOf faa, faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
   ,fTags = []
-  -- , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
-  , fNewRules = Nothing, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
+  -- , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
   }
   where
     name = "psiblast_train_pssms"
@@ -386,7 +386,7 @@ psiblastTrainEach = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_train_each"
@@ -397,7 +397,7 @@ psiblastTrainAll = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
   }
   where
     name = "psiblast_train_all"
@@ -408,7 +408,7 @@ psiblastTrainDb = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, pdb] pssm
   , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rFun3 aPsiblastTrainDb
+  , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastTrainDb
   }
   where
     name = "psiblast_train_db"
@@ -419,7 +419,7 @@ psiblastTrainDbEach = Function
   , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
+  , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
   where
     name = "psiblast_train_db_each"
@@ -430,8 +430,8 @@ psiblastTrainPssmsDb = Function
   , fTypeCheck = defaultTypeCheck name [num, ListOf faa, pdb] (ListOf pssm)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
   ,fTags = []
-  -- , fNewRules = Nothing, fOldRules = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
-  , fNewRules = Nothing, fOldRules = rMap 2 aPsiblastTrainDb'
+  -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrainDb'
   }
   where
     name = "psiblast_train_pssms_db"
@@ -446,7 +446,7 @@ psiblastPssm = Function
   , fTypeCheck = defaultTypeCheck name [num, pssm, faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
     name = "psiblast_pssm"
@@ -458,7 +458,7 @@ psiblastPssmAll = Function
   , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
     name = "psiblast_pssm_all"
@@ -469,7 +469,7 @@ psiblastPssmEach = Function
   , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
   where
     name = "psiblast_pssm_each"
@@ -483,7 +483,7 @@ psiblastPssmDb = Function
   , fTypeCheck = defaultTypeCheck name [num, pssm, pdb] bht
   , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rFun3 aPsiblastSearchDb
+  , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastSearchDb
   }
   where
     name = "psiblast_pssm_db"
@@ -494,7 +494,7 @@ psiblastPssmDbEach = Function
   , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
+  , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
   where
     name = "psiblast_pssm_db_each"
@@ -511,8 +511,8 @@ psiblastEachPssmDb = Function
   , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, pdb] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
   ,fTags = []
-  -- , fNewRules = Nothing, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
-  , fNewRules = Nothing, fOldRules = rMap 2 aPsiblastSearchDb'
+  -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
+  , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearchDb'
   }
   where
     name = "psiblast_each_pssm_db"
@@ -535,7 +535,7 @@ psiblastEachPssm = Function
   , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, faa] (ListOf bht)
   , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
+  , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
   }
   where
     name = "psiblast_each_pssm"
