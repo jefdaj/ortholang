@@ -16,7 +16,8 @@ module OrthoLang.Core
   , NewAction2
   , NewAction3
   , newFunctionRules
-  , singleton
+  , Function(..)
+  , FnTag(..)
 
   -- * Things used in Main
   , runRepl
@@ -57,7 +58,6 @@ module OrthoLang.Core
   , Config(..)
   , Expr(..)
   , ExprPath(..)
-  , Function(..)
   , GlobalEnv
   , IDsRef
   , LocksRef

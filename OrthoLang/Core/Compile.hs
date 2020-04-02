@@ -26,7 +26,6 @@ module OrthoLang.Core.Compile
   , rSimpleScript
   , rSimpleScriptPar
   , rSimpleTmp
-  , singleton
   , typeError
   )
   where

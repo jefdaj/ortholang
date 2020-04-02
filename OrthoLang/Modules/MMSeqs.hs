@@ -23,7 +23,7 @@ import OrthoLang.Core
 import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)
-import OrthoLang.Modules.BlastDB (withSingleton) -- TODO move to core?
+import OrthoLang.Modules.Singletons (withSingleton)
 import OrthoLang.Modules.SeqIO   (fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))

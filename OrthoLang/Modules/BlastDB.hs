@@ -23,6 +23,7 @@ import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
+import OrthoLang.Modules.Singletons (singletons, withSingletons, fnWithSingleton)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -491,13 +492,7 @@ tMakeblastdb dbType [faType]
 tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 rMakeblastdb :: RulesFn
-rMakeblastdb s e = rMakeblastdbAll s $ withSingleton e
-
--- TODO is this map1of1?
-withSingleton :: Expr -> Expr
-withSingleton (Fun rtn salt deps name [s])
-  =           (Fun rtn salt deps name [singleton s])
-withSingleton e = error $ "bad argument to withSingleton: " ++ show e
+rMakeblastdb s e = rMakeblastdbAll s $ fnWithSingleton e
 
 -----------------------------------------------
 -- make list of dbs from list of FASTA files --
@@ -536,63 +531,6 @@ rMakeblastdbEach scr (Fun (ListOf dbType) salt deps name [e]) = do
       expr' = Fun (ListOf dbType) salt deps name [withSingletons e]
   (rMap 1 act1) scr expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
-
-----------------
--- singletons --
-----------------
-
--- TODO move this to its own module? remove it when possible?
-
-withSingletons :: Expr -> Expr
-withSingletons e = Fun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
-
--- Only used for the makeblastdb_*_each functions so far
--- TODO hide from users?
-singletons :: Function
-singletons = Function
-  { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeDesc  = name ++ " : X.list -> X.list.list"
-  , fTypeCheck = tSingletons
-  , fNewRules = Nothing, fOldRules = rSingletons
-  }
-  where
-    name = "singletons"
-
-tSingletons :: [Type] -> Either String Type
-tSingletons [ListOf x] = Right $ ListOf $ ListOf x
-tSingletons _ = Left "tSingletons expected a list"
-
-rSingletons :: RulesFn
-rSingletons scr expr@(Fun rtn _ _ _ [listExpr]) = do
-  (ExprPath listPath') <- rExpr scr listExpr
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath cfg outPath
-      listPath = toPath cfg listPath'
-      (ListOf (ListOf t)) = rtn
-  outPath' %> \_ -> aSingletons t outPath listPath
-  return $ ExprPath outPath'
-rSingletons _ _ = fail "bad argument to rSingletons"
-
-aSingletons :: Type -> Action1
-aSingletons elemType outPath listPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let listPath' = fromPath cfg listPath
-      outPath'  = fromPath cfg outPath
-      dbg = debugA' "aSingletons"
-  dbg $ "listpath': " ++ listPath'
-  dbg $ "outpath': " ++ outPath'
-  elems <- readStrings elemType listPath'
-  dbg $ "elems: " ++ show elems
-  singletonPaths <- forM elems $ \e -> do
-    let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
-        singletonPath  = toPath cfg singletonPath'
-    dbg $ "singletonPath': " ++ singletonPath'
-    writeStrings elemType singletonPath' [e]
-    return singletonPath
-  writePaths outPath' singletonPaths -- TODO nondeterministic?
 
 ------------------
 -- show db info --

@@ -34,6 +34,7 @@ import qualified OrthoLang.Modules.Scores        as Scores
 import qualified OrthoLang.Modules.SeqIO         as SeqIO
 import qualified OrthoLang.Modules.Sets          as Sets
 import qualified OrthoLang.Modules.SetsTable     as SetsTable
+import qualified OrthoLang.Modules.Singletons    as Singletons
 import qualified OrthoLang.Modules.SonicParanoid as SonicParanoid
 import qualified OrthoLang.Modules.Summarize     as Summarize
 
@@ -48,6 +49,7 @@ modules =
   , NewRulesTest.olModule
   , Summarize.olModule
   , OrthoFinder.olModule
+  , Singletons.olModule
 
   -- core language features
   , ListLike.olModule -- TODO expose Function fields in API

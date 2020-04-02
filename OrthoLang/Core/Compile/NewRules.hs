@@ -39,7 +39,6 @@ module OrthoLang.Core.Compile.NewRules
 
   -- * Expr transformers
   -- $transformers
-  , singleton
 
   -- * Extra steps
   -- $hiddensteps
@@ -208,9 +207,6 @@ newFn rFn name mChar oType dTypes aFn =
 --
 -- Think about: should these also have access to the whole script, or is only
 -- the current Expr enough?
-
-singleton :: Expr -> Expr
-singleton e = Lst (typeOf e) (saltOf e) (depsOf e) [e]
 
 -- $hiddensteps
 -- Some of the current OrthoLang RulesFns only require one script/step to run,

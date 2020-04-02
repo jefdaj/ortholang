@@ -22,6 +22,7 @@ import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((<.>), takeFileName)
 import Data.Maybe (fromJust)
+import OrthoLang.Modules.Singletons (withSingleton)
 
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.psiblast." ++ name)
@@ -250,7 +251,7 @@ withPdbSubject (Fun rtn salt deps name [a1, a2, x ])
     db  = Fun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
-            _          -> singleton x
+            _          -> withSingleton x
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
 -- Wrap the faa query argument of a psiblast Function in psiblast_train_db
