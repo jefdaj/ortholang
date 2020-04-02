@@ -195,7 +195,15 @@ newFn rFn name mChar oType dTypes aFn =
 -- Some of the current OrthoLang function compilers are implemented partly by
 -- transforming their input Exprs to soemthing else, then compiling them using
 -- standard and/or custom code. This is an attempt to standardize that.
--- Functions using it can be implemented with Haskell function composition.
+--
+-- If given, these will be used to transform the input expression before
+-- passing it to the Rules. They could be implemented as a new fTransform
+-- Function field, or as in fOldRules by passing the script + expression
+-- directly. But to be honest that got very confusing!
+--
+-- It might actually be worth making fNewRules optional too, because some
+-- functions could be implemented entirely with transforms + re-compiling the
+-- new expression normally through rExpr.
 
 -- $extrasteps
 -- Some of the current OrthoLang RulesFns only require one script/step to run,
@@ -203,3 +211,17 @@ newFn rFn name mChar oType dTypes aFn =
 -- attempt to standardize that. The basic pattern is that each step is a Shake
 -- pattern + associated Action. They can be put together in one RulesFn, or
 -- probably separated.
+--
+-- Use cases:
+--
+-- * blast databases
+-- * busco lineages
+-- * curl output (tarball?)
+-- * loaders?
+-- * crb-blast tmpdirs?
+-- * bin caches?
+-- * concat caches?
+-- * mmseqs caches?
+--
+-- Could they be implemented simply with hidden fns + transformers? That might
+-- be much nicer than the current way.

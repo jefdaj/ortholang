@@ -175,7 +175,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
   , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   ,fTags = []
-  , fNewRules = Nothing, fOldRules = rMkBlastFromFa d -- TODO rewrite in new rFun3 style like Psiblast?
+  , fNewRules = Nothing, fOldRules = rMkBlastFromFa d
   }
 
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
