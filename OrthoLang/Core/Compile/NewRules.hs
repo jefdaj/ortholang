@@ -14,34 +14,34 @@ It should also reduce boilerplace in the modules: in most cases only one
 
 Functions are listed in order of increasing complexity, so you should probably
 prefer the first one that handles your problem somewhat elegantly.
+
+TODO can API-facing Rules be entirely eliminated? Maybe just NewActions + Macros is enough.
 -}
 
 module OrthoLang.Core.Compile.NewRules
   (
 
-  -- * Types
-  -- $newactions
-    NewAction1
-  , NewAction2
-  , NewAction3
-
   -- * Static rules to add to every eval call
-  , newFunctionRules
+    newFunctionRules
 
   -- * Basic functions
   -- $basic
   , newFn1
   , newFn2
   , newFn3
+  , NewAction1
+  , NewAction2
+  , NewAction3
 
   -- * Binary operators
   , newBop
 
-  -- * Expr transformers
-  -- $transformers
+  -- * Macros ('Expr' transformers)
+  -- $macros
+  , Macro
 
-  -- * Extra steps
-  -- $hiddensteps
+  -- * Hide macro-only functions
+  , hidden
 
   )
   where
@@ -59,11 +59,12 @@ import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Util        (traceShow)
 
 {-|
-The old-style rules in use throughout OrthoLang now require the compilers to
-return exact paths. These new ones use proper patterns instead, so they can
-be added once per program run rather than once per expression. They should
-also allow Shake to infer mapping patterns, but that isn't implemented yet.
-This set of "new function" rules should be added to every eval call.
+This gathers all the 'fNewRules' 'Development.Shake.Rules' together for use in
+'OrthoLang.Core.Eval.eval'. The old-style rules in use throughout OrthoLang now
+require the compilers to return exact paths. These new ones use proper patterns
+instead, so they can be added once per program run rather than once per
+expression. They should also allow Shake to infer mapping patterns, but that
+isn't implemented yet.
 -}
 newFunctionRules :: Rules ()
 newFunctionRules = do
@@ -72,19 +73,15 @@ newFunctionRules = do
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
 
--- $newactions
--- These are the types of typical 'Development.Shake.Action's to be added to
--- 'Function' definitions. They enforce that the 'Development.Shake.Action'
--- expects the same number of input files that the 'Function' expects to pass
--- it.
+-- $basic
+-- If you just need to turn a standalone script into an OrthoLang function, you
+-- probably want one of these! The NewAction{1,2,3} types enforce that the
+-- 'Development.Shake.Action' expects the same number of input files that the
+-- 'Function' will pass it.
 
 type NewAction1 = ExprPath -> FilePath                         -> Action ()
 type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
-
--- $basic
--- If you just need to turn a standalone script into an OrthoLang function,
--- you probably want one of these!
 
 newFn1 :: String     -- ^ name
        -> Type       -- ^ return type
@@ -191,27 +188,15 @@ newFn rFn name mChar oType dTypes aFn =
        , fNewRules  = Just $ rFn name tFn aFn
        }
 
--- $transformers
--- Some of the current OrthoLang function compilers are implemented partly by
--- transforming their input Exprs to soemthing else, then compiling them using
--- standard and/or custom code. This is an attempt to standardize that.
+-- $macros
+-- Some of the current 'Function' compilers are implemented partly by
+-- transforming their input 'Expr's to something else, then compiling them
+-- under other function names. This is an attempt to standardize that.
 --
--- If given, these will be used to transform the input expression before
--- passing it to the Rules. They could be implemented as a new fTransform
--- Function field, or as in fOldRules by passing the script + expression
--- directly. But to be honest that got very confusing!
---
--- It might actually be worth making fNewRules optional too, because some
--- functions could be implemented entirely with transforms + re-compiling the
--- new expression normally through rExpr.
---
--- Think about: should these also have access to the whole script, or is only
--- the current Expr enough?
-
--- $hiddensteps
--- Some of the current OrthoLang RulesFns only require one script/step to run,
--- and they're simple. But others need to build tmpfiles first, and this is an
--- attempt to standardize that.
+-- These can be given instead of 'fNewRules'. They will be used to expand the
+-- input expression, and then it will be passed back to 'rExpr' for
+-- compilation. The expanded functions may be standard user-facing functions,
+-- or 'hidden' ones if this is their only use case.
 --
 -- Use cases:
 --
@@ -227,5 +212,17 @@ newFn rFn name mChar oType dTypes aFn =
 -- * all-vs-all searches
 -- * ortholog searches starting from any kind of blast
 --
--- They're implemented the same as regular functions, but don't have to have
--- docs and don't show up in the REPL unless you turn on 'cfgDevMode'.
+-- Think about: should these also have access to the whole script, or is only
+-- the current Expr enough?
+
+type Macro = Expr -> Expr
+
+{-|
+Some functions are only meant to be generated by macro expansion (above)
+rather than called by the user. This hides them to prevent confusion.
+They're implemented the same as regular functions, but don't have to have
+docs and don't show up in the REPL unless you turn on 'cfgDevMode'.
+No need to call this if you've manually added 'Hidden' to 'fTags'.
+-}
+hidden :: Function -> Function
+hidden fn = fn { fTags = Hidden : fTags fn }

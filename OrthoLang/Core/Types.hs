@@ -431,6 +431,7 @@ data Config = Config
   , cfgParLock :: Resource
   , cfgOS      :: String
   , cfgThreads :: Int
+  , cfgDevMode :: Bool
   }
   deriving (Show, Typeable)
 

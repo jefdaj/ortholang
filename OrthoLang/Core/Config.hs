@@ -81,6 +81,7 @@ defaultConfig td wd = do
     , cfgParLock     = par
     , cfgOS          = os'
     , cfgThreads     = cp
+    , cfgDevMode     = False
     }
 
 loadConfig :: [Module] -> Arguments -> IO Config
