@@ -1,3 +1,8 @@
+{-|
+This is a work in progress. It exports everything used by the current code,
+and I'm working on simplifying that down to a more principled module API.
+-}
+
 module OrthoLang.Core
   (
 

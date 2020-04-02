@@ -11,30 +11,31 @@ build.
 It should also reduce boilerplace in the modules: in most cases only one
 'NewActionN' function will be needed (where N = 1, 2, 3, ...) per
 'Function' definition.
+
+Functions are listed in order of increasing complexity, so you should probably
+prefer the first one that handles your problem somewhat elegantly.
 -}
 
 module OrthoLang.Core.Compile.NewRules
   (
-
-  -- * The new API
-    mkNewBop
-  , mkNewFn1
-  , mkNewFn2
-  , mkNewFn3
-
   -- * Types
-  -- , ActionEnv
-  -- , Action
-  , ActionN1
+    ActionN1
   , ActionN2
   , ActionN3
-  -- , runAction
-  -- , askConfig -- TODO needs to work with multiple Env monads?
-  -- , askLocks
 
   -- * Static rules to add to every eval call
   , newFunctionRules
   , newCoreRules
+
+  -- * The new API
+  , mkNewBop
+  , mkNewFn1
+  , mkNewFn2
+  , mkNewFn3
+
+  -- $exprtransformers
+
+  -- $extrasteps
 
   )
   where
@@ -204,3 +205,26 @@ mkNewFn rFn name mChar oType dTypes aFn =
        , fOldRules  = undefined
        , fNewRules  = Just $ rFn name tFn aFn
        }
+
+-----------------------
+-- expr transformers --
+-----------------------
+
+{-| $exprtransformers
+Some of the current OrthoLang function compilers are implemented partly by
+transforming their input Exprs to soemthing else, then compiling them using
+standard and/or custom code. This is an attempt to standardize that. Functions
+using it can be implemented with Haskell function composition.
+-}
+
+-----------------
+-- extra steps --
+-----------------
+
+{-| $extrasteps
+Some of the current OrthoLang RulesFns only require one script/step to run, and
+they're simple. But others need to build tmpfiles first, and this is an attempt
+to standardize that. The basic pattern is that each step is a Shake pattern +
+associated Action. They can be put together in one RulesFn, or probably
+separated.
+-}
