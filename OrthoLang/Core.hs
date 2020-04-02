@@ -7,14 +7,14 @@ module OrthoLang.Core
   (
 
   -- * New module API
-    mkNewBop
-  , mkNewFn1
-  , mkNewFn2
-  , mkNewFn3
+    newBop
+  , newFn1
+  , newFn2
+  , newFn3
   -- , ActionR
-  , ActionN1
-  , ActionN2
-  , ActionN3
+  , NewAction1
+  , NewAction2
+  , NewAction3
   , newFunctionRules
 
   -- * Things used in Main

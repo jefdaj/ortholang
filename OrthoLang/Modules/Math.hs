@@ -27,12 +27,12 @@ divDouble n1 n2 = read $ show (answer :: Double)
     answer = toRealFloat n1 / toRealFloat n2
 
 mkMathBop :: String -> Char -> (Scientific -> Scientific -> Scientific) -> Function
-mkMathBop name opChar fn = mkNewBop name opChar num num $ aMathBop fn
+mkMathBop name opChar fn = newBop name opChar num num $ aMathBop fn
 
 log :: Show a => a -> Action ()
 log = liftIO . U.debug "modules.math.amath" . show
 
-aMathBop :: (Scientific -> Scientific -> Scientific) -> ActionN1
+aMathBop :: (Scientific -> Scientific -> Scientific) -> NewAction1
 aMathBop mathFn (ExprPath outPath) nsPath = do
   log nsPath
   ns <- readLits nsPath

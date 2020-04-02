@@ -11,10 +11,10 @@ module OrthoLang.Core.Compile
   , map3of3
   , mkLoad
   , mkLoadList
-  , mkNewBop
-  , mkNewFn1
-  , mkNewFn2
-  , mkNewFn3
+  , newBop
+  , newFn1
+  , newFn2
+  , newFn3
   , newFunctionRules
   -- , rBop
   , rExpr

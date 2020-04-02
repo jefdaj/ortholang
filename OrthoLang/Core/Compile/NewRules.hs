@@ -19,24 +19,23 @@ prefer the first one that handles your problem somewhat elegantly.
 module OrthoLang.Core.Compile.NewRules
   (
 
+  -- * Types
+  -- $newactions
+    NewAction1
+  , NewAction2
+  , NewAction3
+
   -- * Static rules to add to every eval call
-  -- $static
-    newFunctionRules
+  , newFunctionRules
 
   -- * Basic functions
-  -- $actionN
-  , ActionN1
-  , ActionN2
-  , ActionN3
-
   -- $basic
-  , mkNewFn1
-  , mkNewFn2
-  , mkNewFn3
+  , newFn1
+  , newFn2
+  , newFn3
 
   -- * Binary operators
-  -- $bops
-  , mkNewBop
+  , newBop
 
   -- * Expr transformers
   -- $transformers
@@ -59,82 +58,84 @@ import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 import OrthoLang.Util        (traceShow)
 
--- $actionN
--- TODO write actionN section
-
-type ActionN1 = ExprPath -> FilePath                         -> Action ()
-type ActionN2 = ExprPath -> FilePath -> FilePath             -> Action ()
-type ActionN3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
-
--- $static
--- The old-style rules in use throughout OrthoLang now require the compilers to
--- return exact paths. These new ones use proper patterns instead, so they can
--- be added once per program run rather than once per expression. They should
--- also allow Shake to infer mapping patterns, but that isn't implemented yet.
+{-|
+The old-style rules in use throughout OrthoLang now require the compilers to
+return exact paths. These new ones use proper patterns instead, so they can
+be added once per program run rather than once per expression. They should
+also allow Shake to infer mapping patterns, but that isn't implemented yet.
+This set of "new function" rules should be added to every eval call.
+-}
 newFunctionRules :: Rules ()
 newFunctionRules = do
-  -- (cfg, _, _, _) <- ask
   cfg <- fmap fromJust $ getShakeExtraRules
   let fns   = concatMap mFunctions $ cfgModules cfg
       rules = catMaybes $ map fNewRules fns
   sequence_ rules
 
+-- $newactions
+-- These are the types of typical 'Development.Shake.Action's to be added to
+-- 'Function' definitions. They enforce that the 'Development.Shake.Action'
+-- expects the same number of input files that the 'Function' expects to pass
+-- it.
+
+type NewAction1 = ExprPath -> FilePath                         -> Action ()
+type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
+type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+
 -- $basic
--- TODO write basic section
+-- If you just need to turn a standalone script into an OrthoLang function,
+-- you probably want one of these!
 
-mkNewFn1 :: String     -- ^ name
-         -> Type       -- ^ return type
-         -> Type       -- ^ 1 argument type
-         -> ActionN1   -- ^ 1-argument action
-         -> Function
-mkNewFn1 n r a1 = mkNewFn rNewRules1
-         n Nothing r [a1]
+newFn1 :: String     -- ^ name
+       -> Type       -- ^ return type
+       -> Type       -- ^ 1 argument type
+       -> NewAction1 -- ^ 1-argument action
+       -> Function
+newFn1 n r a1 = newFn rNewRules1 n Nothing r [a1]
 
-mkNewFn2 :: String       -- ^ name
-         -> Type         -- ^ return type
-         -> (Type, Type) -- ^ 2 argument types
-         -> ActionN2     -- ^ 2-argument action
-         -> Function
-mkNewFn2 n r (a1, a2) = mkNewFn rNewRules2
-         n Nothing r [a1, a2]
+newFn2 :: String       -- ^ name
+       -> Type         -- ^ return type
+       -> (Type, Type) -- ^ 2 argument types
+       -> NewAction2   -- ^ 2-argument action
+       -> Function
+newFn2 n r (a1, a2) = newFn rNewRules2 n Nothing r [a1, a2]
 
-mkNewFn3 :: String             -- ^ name
-         -> Type               -- ^ return type
-         -> (Type, Type, Type) -- ^ 3 argument types
-         -> ActionN3           -- ^ 3-argument action
-         -> Function
-mkNewFn3 n r (a1, a2, a3) = mkNewFn rNewRules3
-         n Nothing r [a1, a2, a3]
+newFn3 :: String             -- ^ name
+       -> Type               -- ^ return type
+       -> (Type, Type, Type) -- ^ 3 argument types
+       -> NewAction3         -- ^ 3-argument action
+       -> Function
+newFn3 n r (a1, a2, a3) = newFn rNewRules3 n Nothing r [a1, a2, a3]
 
--- $bops
--- TODO write bops section
-
-mkNewBop :: String   -- ^ name
-         -> Char     -- ^ opchar
-         -> Type     -- ^ return type
-         -> Type     -- ^ 1 argument type (each side of the bop will be this)
-         -> ActionN1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
-         -> Function
-mkNewBop n c r a1 = mkNewFn rNewRules1
-         n (Just c) r [ListOf a1]
+{-|
+This is for the specific case where you want to make a binary operator.
+It probably isn't very useful outside math and set operations.
+-}
+newBop :: String     -- ^ name
+       -> Char       -- ^ opchar
+       -> Type       -- ^ return type
+       -> Type       -- ^ 1 argument type (each side of the bop will be this)
+       -> NewAction1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
+       -> Function
+newBop n c r a1 = newFn rNewRules1 n (Just c) r [ListOf a1]
 
 -- TODO ExprPaths for deps?
 -- TODO or Paths throughout?
--- TODO can you encode NewActionN1, 2, 3... easily?
+-- TODO can you encode NewNewAction1, 2, 3... easily?
 
-rNewRules1 :: String -> TypeChecker -> ActionN1 -> Rules ()
+rNewRules1 :: String -> TypeChecker -> NewAction1 -> Rules ()
 rNewRules1 = rNewRules 1 applyList1
 
 applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList1 fn deps = fn (deps !! 0)
 
-rNewRules2 :: String -> TypeChecker -> ActionN2 -> Rules ()
+rNewRules2 :: String -> TypeChecker -> NewAction2 -> Rules ()
 rNewRules2 = rNewRules 2 applyList2
 
 applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
-rNewRules3 :: String -> TypeChecker -> ActionN3 -> Rules ()
+rNewRules3 :: String -> TypeChecker -> NewAction3 -> Rules ()
 rNewRules3 = rNewRules 3 applyList3
 
 applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
@@ -151,7 +152,6 @@ rNewRules
   :: Int -> (t -> [FilePath] -> Action ()) -> String -> TypeChecker
   -> (ExprPath -> t) -> Rules ()
 rNewRules nArgs applyFn name tFn aFn = do
-  -- (cfg, _, _, _) <- ask
   cfg <- fmap fromJust $ getShakeExtraRules
   let ptn = newPattern cfg name nArgs
       ptn' = traceShow "rNewrules" ptn
@@ -163,7 +163,6 @@ aNewRules
   -> (ExprPath -> t)
   ->  ExprPath -> Action ()
 aNewRules applyFn tFn aFn out = do
-  -- (cfg, lRef, iRef, dRef) <- ask
   cfg  <- fmap fromJust $ getShakeExtra
   dRef <- fmap fromJust $ getShakeExtra
   (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dRef out
@@ -177,10 +176,10 @@ aNewRules applyFn tFn aFn out = do
       applyFn (aFn out) deps'
 
 -- | Use the argument-specific numbered version above instead.
-mkNewFn
+newFn
   :: (String -> TypeChecker -> t -> Rules ())
   -> String -> Maybe Char -> Type -> [Type] -> t -> Function
-mkNewFn rFn name mChar oType dTypes aFn =
+newFn rFn name mChar oType dTypes aFn =
   let tFn = defaultTypeCheck name dTypes oType
   in Function
        { fOpChar    = mChar
