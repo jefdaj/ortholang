@@ -220,7 +220,7 @@ newFn rFn name mChar oType dTypes aFn =
 -- Think about: should these also have access to the whole script, or is only
 -- the current Expr enough?
 
-type MacroExpansion = Expr -> Expr
+type MacroExpansion = Script -> Expr -> Expr
 
 newMacro :: String -> Type -> [Type] -> MacroExpansion -> Function
 newMacro name oType dTypes mFn =

@@ -173,7 +173,7 @@ rNamedFunction' scr expr name = do
                  NewRules _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
                                    res = ExprPath p
                                in return $ debugRules cfg "rNamedFunction'" expr res
-                 NewMacro mFn -> rExpr scr $ mFn expr
+                 NewMacro mFn -> rExpr scr $ mFn scr expr
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do

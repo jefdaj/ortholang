@@ -37,5 +37,5 @@ test3 :: Function
 test3 = newMacro "newrulestest3" str [str, str, str] mTest3
 
 mTest3 :: MacroExpansion
-mTest3 (Fun _ _ _ _ _) = undefined
-mTest3 e = error $ "bad argument to mTest3: " ++ show e
+mTest3 _ (Fun _ _ _ _ _) = undefined
+mTest3 _ e = error $ "bad argument to mTest3: " ++ show e

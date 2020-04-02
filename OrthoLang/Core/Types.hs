@@ -543,7 +543,7 @@ data Function = Function
 
 data NewRules
   = NewRules (Rules ())
-  | NewMacro (Expr -> Expr)
+  | NewMacro (Script -> Expr -> Expr) -- type alias in NewRules.hs for now
   | NewNotImplemented -- TODO remove
 
 mkTypeDesc :: String -> [Type] -> Type -> String
