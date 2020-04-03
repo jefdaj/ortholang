@@ -5,7 +5,7 @@ import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Lazy.Char8      as B8
 
 import OrthoLang.Core
-import OrthoLang.Locks
+import OrthoLang.Locks (withWriteLockEmpty)
 import OrthoLang.Util   (justOrDie)
 
 import Control.Monad         (when)
@@ -93,6 +93,9 @@ mkOutTest cfg ref ids dRef gld = goldenDiff desc gld scriptAct
       return $ B8.pack out
     desc = "prints expected output"
 
+withTmpDirLock :: Config -> LocksRef -> IO a -> IO a
+withTmpDirLock cfg ref act = withWriteLockEmpty ref (cfgTmpDir cfg </> "lock") act
+
 mkTreeTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
 mkTreeTest cfg ref ids dRef t = goldenDiff desc t treeAct
   where
@@ -106,7 +109,7 @@ mkTreeTest cfg ref ids dRef t = goldenDiff desc t treeAct
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runScript cfg ref ids dRef
-      out <- fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
+      out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
@@ -122,9 +125,9 @@ mkTripTest cfg ref ids dRef cut = goldenDiff desc tripShow tripAct
                 justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
       -- this is useful for debugging
       -- writeScript cut scr1
-      withWriteLock ref tripShow $ writeBinaryFile tripShow $ show scr1
+      writeBinaryFile tripShow $ show scr1
     -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
-    tripAct = do
+    tripAct = withTmpDirLock cfg ref $ do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
       scr2 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) cut
@@ -145,7 +148,7 @@ mkAbsTest cfg ref ids dRef = testSpecs $ it desc $
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
       _ <- runScript cfg ref ids dRef
-      (_, out, err) <- readProcessWithExitCode "grep" grepArgs ""
+      (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
 {-|
@@ -153,7 +156,7 @@ This is more or less idempotent because re-running the same cut multiple
 times is fast. So it's OK to run it once for each test in a group.
 -}
 runScript :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO String
-runScript cfg ref ids dRef =  do
+runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids, dRef) stdout
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
@@ -194,7 +197,7 @@ mkCheckTest cfg ref ids dRef scr = testSpecs $ it desc $ runCheck `shouldReturn`
     desc = "output + tmpfiles checked by script"
     runCheck = do
       _ <- runScript cfg ref ids dRef -- TODO any reason to reuse ids here?
-      (_, out, err) <- readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
+      (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
 testFilePath :: FilePath -> FilePath -> FilePath -> FilePath -> FilePath

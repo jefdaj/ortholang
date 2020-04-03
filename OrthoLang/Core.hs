@@ -153,7 +153,7 @@ module OrthoLang.Core
 
   -- * Old module API: Locks
   -- , withReadLock
-  -- , withWriteLock
+  -- , withWriteLockEmpty
   -- , withWriteLock'
 
   -- * Old module API: Sanitize

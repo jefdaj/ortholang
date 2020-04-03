@@ -5,6 +5,7 @@ module OrthoLang.Locks
   , withReadLock'
   , withReadLocks'
   , withWriteLock
+  , withWriteLockEmpty
   , withWriteLock'
   , withWriteLocks'
   , withWriteOnce
@@ -119,13 +120,22 @@ assertNonEmptyFile ref path = do
 
 withWriteLock :: LocksRef -> FilePath -> IO a -> IO a
 withWriteLock ref path ioFn = do
+  res <- withWriteLockEmpty ref path ioFn
+  assertNonEmptyFile ref path
+  return res
+
+{-|
+Usually we want to make sure the script didn't write an empty file,
+but sometimes a lock is just a lock. Then you want this function instead.
+-}
+withWriteLockEmpty :: LocksRef -> FilePath -> IO a -> IO a
+withWriteLockEmpty ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   l <- liftIO $ getLock ref path
   res <- bracket_
     (debugLock ("withWriteLock acquiring \"" ++ path ++ "\"") >> RWLock.acquireWrite l)
     (debugLock ("withWriteLock releasing \"" ++ path ++ "\"") >> RWLock.releaseWrite l)
     ioFn
-  assertNonEmptyFile ref path
   return res
 
 withWriteLocks' :: [FilePath] -> Action a -> Action a
