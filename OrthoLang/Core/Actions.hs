@@ -146,7 +146,7 @@ needShared name path@(Path p) = do
           when isLink $ needLink name sp
           when (isPathList sp) $ do
             paths <- readPaths sp
-            liftIO $ putStrLn $ "paths: " ++ show paths
+            -- liftIO $ putStrLn $ "paths: " ++ show paths
             need' name $ map (fromPath cfg) paths -- TODO rename?
           liftIO $ createDirectoryIfMissing True $ takeDirectory path'
           -- TODO figure out better criteria for this

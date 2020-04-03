@@ -230,7 +230,7 @@ eval hdl cfg ref ids dr rtype ls p = do
   ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
     -- ignoreErrors fn = catchAny fn (\_ -> return ())
-    ignoreErrors fn = catchAny fn (\e -> putStrLn ("ignored error: " ++ show e))
+    ignoreErrors fn = catchAny fn (\e -> return $ trace "core.eval.eval.ignoreErrors" (show e) ())
     -- Reports how many failures so far and runs the main fn normally
     -- TODO putStrLn rather than debug?
     -- TODO remove if not using retryIgnore?
