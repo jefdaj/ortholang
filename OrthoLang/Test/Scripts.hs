@@ -6,7 +6,7 @@ import qualified Data.ByteString.Lazy.Char8      as B8
 
 import OrthoLang.Core
 import OrthoLang.Locks (withWriteLockEmpty)
-import OrthoLang.Util   (justOrDie)
+import OrthoLang.Util   (justOrDie, rmAll)
 
 import Control.Monad         (when)
 import Data.Char             (toLower)
@@ -89,6 +89,7 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runScript cfg ref ids dRef sDir
+      _ <- copyToShared cfg sDir ref
       -- uncomment to update the golden stdout files:
       -- writeFile ("tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
@@ -110,6 +111,7 @@ mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runScript cfg ref ids dRef sDir
+      _ <- copyToShared cfg sDir ref
       out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
@@ -134,6 +136,16 @@ mkTripTest cfg ref ids dRef name cut = goldenDiff desc tripShow tripAct
       scr2 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) cut
       return $ B8.pack $ show scr2
 
+mkShareTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> String -> TestTree
+mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
+  where
+    cfg' = cfg { cfgShare = Just sDir }
+    shareAct = do
+      withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] -- to see if it can use the shared one instead
+      out <- runScript cfg' ref ids dRef sDir
+      return $ B8.pack out
+    desc = name ++ ".ol re-uses shared tmpfiles"
+
 {-|
 Test that no absolute paths snuck into the tmpfiles.
 
@@ -149,12 +161,12 @@ mkAbsTest cfg ref ids name dRef sDir = testSpecs $ it desc $
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
       _ <- runScript cfg ref ids dRef sDir
+      _ <- copyToShared cfg sDir ref
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
--- note: no tmpdir lock because it's called from inside runScript
 copyToShared :: Config -> FilePath -> LocksRef -> IO ()
-copyToShared cfg sDir ref = do
+copyToShared cfg sDir ref = withTmpDirLock cfg ref $ do
   createDirectoryIfMissing True $ sDir </> "cache"
   createDirectoryIfMissing True $ sDir </> "exprs"
   let rsync p = readProcess "rsync" ["-qraz", cfgTmpDir cfg </> p ++ "/", sDir </> p ++ "/"] ""
@@ -172,7 +184,6 @@ runScript cfg ref ids dRef sDir = withTmpDirLock cfg ref $ do
   result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
   when (not result) (fail out)
   writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out
-  copyToShared cfg sDir ref
   return $ toGeneric cfg out
 
 mkScriptTests :: FilePath -> (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
@@ -182,12 +193,13 @@ mkScriptTests sDir (name, cut, out, tre, mchk) cfg ref ids dRef = do
   checkTests <- case mchk of
                   Nothing -> return []
                   Just c  -> mkCheckTest cfg' ref ids dRef sDir name c
-  let tripTest  = mkTripTest cfg' ref ids dRef name cut
+  let tripTest  = mkTripTest  cfg' ref ids dRef name cut
+      shareTest = mkShareTest cfg' ref ids dRef sDir name out
       outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
       treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef sDir name tre]
       tests     = if (name `elem` badlyBroken)
-                    then []
-                    else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
+                     then []
+                     else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths
@@ -207,6 +219,7 @@ mkCheckTest cfg ref ids dRef sDir name scr = testSpecs $ it desc $ runCheck `sho
     desc = name ++ ".ol output + tmpfiles checked by script"
     runCheck = do
       _ <- runScript cfg ref ids dRef sDir -- TODO any reason to reuse ids here?
+      _ <- copyToShared cfg sDir ref
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
