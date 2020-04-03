@@ -63,6 +63,7 @@ badlyBroken =
   , "psiblast:psiblast_empty_pssms"
   , "psiblast:psiblast_map"
   , "psiblast:psiblast_pssm_all"
+  , "psiblast:compose1"
   , "sonicparanoid:test1"
   , "sonicparanoid:myco3" -- TODO finish writing module first
   ]
@@ -82,8 +83,8 @@ goldenDiff name file action = goldenVsStringDiff name fn file action
     fn ref new = ["diff", "--text", "-u", ref, new]
 
 -- TODO use <testdir>/output.txt instead of the raw output?
-mkOutTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
-mkOutTest cfg ref ids dRef gld = goldenDiff desc gld scriptAct
+mkOutTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> String -> TestTree
+mkOutTest cfg ref ids dRef name gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
@@ -91,17 +92,17 @@ mkOutTest cfg ref ids dRef gld = goldenDiff desc gld scriptAct
       -- uncomment to update the golden stdout files:
       -- writeFile ("tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
-    desc = "prints expected output"
+    desc = name ++ ".ol prints expected output"
 
 withTmpDirLock :: Config -> LocksRef -> IO a -> IO a
 withTmpDirLock cfg ref act = withWriteLockEmpty ref (cfgTmpDir cfg </> "lock") act
 
-mkTreeTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
-mkTreeTest cfg ref ids dRef t = goldenDiff desc t treeAct
+mkTreeTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> String -> TestTree
+mkTreeTest cfg ref ids dRef name t = goldenDiff desc t treeAct
   where
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
-    desc = "creates expected tmpfiles"
+    desc = name ++ ".ol creates expected tmpfiles"
     -- TODO add nondeterministic expression + cache dirs here by parsing modules:
     ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt|jobs'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
@@ -115,10 +116,10 @@ mkTreeTest cfg ref ids dRef t = goldenDiff desc t treeAct
       return $ B8.pack out
 
 -- TODO use safe writes here
-mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
-mkTripTest cfg ref ids dRef cut = goldenDiff desc tripShow tripAct
+mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> String -> TestTree
+mkTripTest cfg ref ids dRef name cut = goldenDiff desc tripShow tripAct
   where
-    desc = "unchanged by round-trip to file"
+    desc = name ++ ".ol unchanged by round-trip to file"
     tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
       scr1 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) $
@@ -138,11 +139,11 @@ Test that no absolute paths snuck into the tmpfiles.
 
 TODO sanitize stdout + stderr too when running scripts
 -}
-mkAbsTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO [TestTree]
-mkAbsTest cfg ref ids dRef = testSpecs $ it desc $
+mkAbsTest :: Config -> LocksRef -> IDsRef -> String -> DigestsRef -> IO [TestTree]
+mkAbsTest cfg ref ids name dRef = testSpecs $ it desc $
   absGrep `shouldReturn` ""
   where
-    desc = "expr files free of absolute paths"
+    desc = name ++ ".ol expr files free of absolute paths"
     grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err",
                 "--exclude=*.ini", "--exclude=*.log",
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
@@ -168,13 +169,13 @@ runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
 mkScriptTests :: (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
               -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkScriptTests (name, cut, out, tre, mchk) cfg ref ids dRef = do
-  absTests   <- mkAbsTest   cfg' ref ids dRef -- just one, but comes as a list
+  absTests   <- mkAbsTest  cfg' ref ids name dRef -- just one, but comes as a list
   checkTests <- case mchk of
                   Nothing -> return []
-                  Just c  -> mkCheckTest cfg' ref ids dRef c
-  let tripTest  = mkTripTest cfg' ref ids dRef cut
-      outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids dRef out]
-      treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef tre]
+                  Just c  -> mkCheckTest cfg' ref ids dRef name c
+  let tripTest  = mkTripTest cfg' ref ids dRef name cut
+      outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids dRef name out]
+      treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef name tre]
       tests     = if (name `elem` badlyBroken)
                     then []
                     else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
@@ -191,10 +192,10 @@ otherwise.
 
 TODO move stdout inside the tmpdir?
 -}
-mkCheckTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO [TestTree]
-mkCheckTest cfg ref ids dRef scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
+mkCheckTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> String -> IO [TestTree]
+mkCheckTest cfg ref ids dRef name scr = testSpecs $ it desc $ runCheck `shouldReturn` ""
   where
-    desc = "output + tmpfiles checked by script"
+    desc = name ++ ".ol output + tmpfiles checked by script"
     runCheck = do
       _ <- runScript cfg ref ids dRef -- TODO any reason to reuse ids here?
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
