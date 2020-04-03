@@ -9,7 +9,7 @@ import OrthoLang.Core
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import System.Exit                (ExitCode(..))
-import System.FilePath            (replaceBaseName)
+import System.FilePath            ((-<.>))
 import Data.Maybe (fromJust)
 
 olModule :: Module
@@ -100,7 +100,7 @@ aCutCol _ n [outPath, tsvPath] = do
   let outPath'  = fromPath cfg outPath
       outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
       tsvPath'  = fromPath cfg tsvPath
-      tmpPath'  = replaceBaseName outPath'' "tmp" -- the non-deduped version
+      tmpPath'  = outPath'' -<.> "tmp" -- the non-deduped version
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
