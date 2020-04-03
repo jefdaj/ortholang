@@ -174,7 +174,12 @@ rNamedFunction' scr expr name = do
                                    res = ExprPath p
                                in return $ debugRules cfg "rNamedFunction'" expr res
                  -- TODO typecheck here to make sure the macro didn't mess anything up
-                 NewMacro mFn -> rExpr scr $ mFn scr expr
+                 NewMacro mFn -> rMacro cfg mFn scr expr
+
+rMacro :: Config -> (Script -> Expr -> Expr) -> Script -> Expr -> Rules ExprPath
+rMacro cfg mFn scr expr = rExpr scr $ debugRules cfg "rMacro" expr expr'
+  where
+    expr' = mFn scr expr
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do
