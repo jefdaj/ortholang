@@ -689,13 +689,13 @@
 |   |-- curl
 |   |   `-- 9c46bc8ed4
 |   |-- each
-|   |   `-- 965a050007
-|   |       |-- 789b09c9e1
+|   |   `-- 606ca87c3f
+|   |       |-- 3926b9a46b
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/busco_proteins/5a6cf44862/789b09c9e1/0/result
-|   |       `-- f3acb45197
+|   |       |   `-- result -> ../../../../exprs/busco_proteins/d9e802246e/3926b9a46b/0/result
+|   |       `-- 7725ce8ba9
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/busco_proteins/5a6cf44862/f3acb45197/0/result
+|   |           `-- result -> ../../../../exprs/busco_proteins/d9e802246e/7725ce8ba9/0/result
 |   `-- load
 |       |-- 0d8dfa261e
 |       |-- 0d8dfa261e.ids
@@ -703,39 +703,39 @@
 |       `-- 11bbf54fc6.ids
 |-- exprs
 |   |-- busco_fetch_lineage
-|   |   `-- 3838cc59ba
+|   |   `-- c2b623aad0
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
 |   |-- busco_proteins
-|   |   `-- 5a6cf44862
-|   |       |-- 789b09c9e1
+|   |   `-- d9e802246e
+|   |       |-- 3926b9a46b
 |   |       |   `-- 0
 |   |       |       |-- result -> ../../../../../cache/busco/runs/run_result/short_summary_result.txt
 |   |       |       |-- result.err
 |   |       |       `-- result.out
-|   |       `-- f3acb45197
+|   |       `-- 7725ce8ba9
 |   |           `-- 0
 |   |               |-- result -> ../../../../../cache/busco/runs/run_result/short_summary_result.txt
 |   |               |-- result.err
 |   |               `-- result.out
 |   |-- busco_proteins_each
-|   |   `-- 5c9b5cd262
-|   |       `-- 8dc5314a7b
+|   |   `-- edd00d7f92
+|   |       `-- ddc60ffcea
 |   |           `-- 0
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- busco_scores_table
-|   |   `-- a70b567efe
+|   |   `-- 24486246f4
 |   |       `-- 0
 |   |           `-- result
 |   |-- list
-|   |   `-- def8d20b32
+|   |   `-- 744e193f65
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 2774b3aa5c
+|   |   |-- 1264040575
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/load/0d8dfa261e
-|   |   `-- d7b94f4516
+|   |   `-- 5477a8255c
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/11bbf54fc6
 |   `-- str
@@ -749,11 +749,11 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/2774b3aa5c/0/result
-    |-- mgen.faa -> ../exprs/load_faa/d7b94f4516/0/result
-    |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/3838cc59ba/0/result
+    |-- maga.faa -> ../exprs/load_faa/1264040575/0/result
+    |-- mgen.faa -> ../exprs/load_faa/5477a8255c/0/result
+    |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/c2b623aad0/0/result
     |-- result -> ../vars/table.bst
-    |-- scores.bsr.list -> ../exprs/busco_proteins_each/5c9b5cd262/8dc5314a7b/0/result
-    `-- table.bst -> ../exprs/busco_scores_table/a70b567efe/0/result
+    |-- scores.bsr.list -> ../exprs/busco_proteins_each/edd00d7f92/ddc60ffcea/0/result
+    `-- table.bst -> ../exprs/busco_scores_table/24486246f4/0/result
 
 51 directories, 705 files
