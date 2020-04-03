@@ -11,6 +11,7 @@ let
 in haskell.lib.overrideCabal ortholang (drv: {
 
   buildDepends = drv.buildDepends ++ devDepends;
+  src = if lib.inNixShell then null else drv.src;
 
   # TODO this isn't being run by overrideCabal at all. get it to work
   # TODO is the find command going? that could maybe make the difference
