@@ -32,7 +32,7 @@ tmpfilesVary =
   , "crbblast:crb_blast_two_cyanos"
   , "blasthits:reciprocal_best"
   , "blasthits:best_hits"
-  , "sonicparanoid_myco3"
+  , "sonicparanoid:myco3"
   , "orthogroups:ortholog_in_all"
   , "orthogroups:ortholog_in_any"
   , "orthogroups:ortholog_in_max"
@@ -173,7 +173,7 @@ mkScriptTests (name, cut, out, tre, mchk) cfg ref ids dRef = do
       tests     = if (name `elem` badlyBroken)
                     then []
                     else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
-  return $ testGroup name tests
+  return $ testGroup (removePrefix name) tests
   where
     cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
 
@@ -211,7 +211,7 @@ mkTestsPrefix cfg ref ids dRef testDir groupName mPrefix = do
   let cuts   = map (testFilePath testDir "scripts"  "ol" ) names
       outs   = map (testFilePath testDir "stdout"   "txt") names
       trees  = map (testFilePath testDir "tmpfiles" "txt") names
-      hepts  = zip5 (map removePrefix names) cuts outs trees mchecks
+      hepts  = zip5 names cuts outs trees mchecks
       groups = map mkScriptTests hepts
   mkTestGroup cfg ref ids dRef groupName groups
 
@@ -223,7 +223,7 @@ mkExampleTests cfg ref ids dRef exDir testDir = do
   let cuts   = map (testFilePath exDir   "scripts"  "ol" ) names
       outs   = map (testFilePath testDir "stdout"   "txt") names'
       trees  = map (testFilePath testDir "tmpfiles" "txt") names'
-      hepts  = zip5 (map removePrefix names) cuts outs trees mchecks
+      hepts  = zip5 names cuts outs trees mchecks
       groups = map mkScriptTests hepts
   mkTestGroup cfg ref ids dRef "examples for demo site" groups
 
