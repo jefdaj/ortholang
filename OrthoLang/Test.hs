@@ -17,6 +17,7 @@ import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
+import Data.List.Utils       (replace)
 
 -- we just need <each of these>.mkTests
 import qualified OrthoLang.Test.Versions as V
@@ -36,11 +37,13 @@ mkTests cfg ref ids dRef = mkTestGroup cfg ref ids dRef "all tests" tests
     tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
 
 mkTestConfig :: Config -> FilePath -> Config
-mkTestConfig cfg dir = cfg
-  { cfgScript  = Nothing
-  , cfgTmpDir  = dir
-  , cfgWorkDir = dir
-  }
+mkTestConfig cfg dir =
+  let dir' = replace ":" "_" dir -- ':' messes with BLASTDB paths, and probably others
+  in cfg
+    { cfgScript  = Nothing
+    , cfgTmpDir  = dir'
+    , cfgWorkDir = dir'
+    }
 
 dbg :: String -> IO ()
 dbg = U.debug "test.runTests"

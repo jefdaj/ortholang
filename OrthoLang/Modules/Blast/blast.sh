@@ -18,12 +18,12 @@ fi
 DBDIR="$(dirname "$PPATH")"
 DBNAME="$(basename "$PPATH")"
 
-cd "$DBDIR" # TODO remove?
-export BLASTDB="$DBNAME" # TODO DBPATH?
+# cd "$DBDIR" # TODO remove?
+# export BLASTDB="$DBNAME" # TODO DBPATH?
 
 # Keep sequence of output same as the order of input. Normally the output of a
 # job will be printed as soon as the job completes.
-PARCMD="parallel -k --group"
+PARCMD="parallel -k --group --workdir $DBDIR"
 
 # This should help prevent overloading the system when Shake runs multiple parallel BLASTs at once.
 PARCMD="$PARCMD --load 90% --noswap"

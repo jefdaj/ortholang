@@ -12,6 +12,7 @@ import Control.Monad         (when)
 import Data.Char             (toLower)
 import Data.List             (zip5, isPrefixOf)
 import Data.List.Split       (splitOn)
+import Data.List.Utils       (replace)
 import OrthoLang.Modules     (modules)
 import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)
@@ -57,6 +58,7 @@ stdoutVaries =
 badlyBroken :: [FilePath]
 badlyBroken =
   [ "orthofinder:orthofinder_sets"
+  , "blast:blastdb_each"
   , "psiblast:psiblast_each_pssm"
   , "psiblast:psiblast_empty_pssms"
   , "psiblast:psiblast_map"
@@ -175,7 +177,8 @@ mkScriptTests (name, cut, out, tre, mchk) cfg ref ids dRef = do
                     else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
   return $ testGroup (removePrefix name) tests
   where
-    cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name) }
+    name' = replace ":" "_" name -- ':' messes with BLASTDB paths
+    cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name') }
 
 {-|
 "Check scripts" for handling the tricky cases where tmpfile names vary. They
