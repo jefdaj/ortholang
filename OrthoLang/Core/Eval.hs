@@ -247,8 +247,10 @@ eval hdl cfg ref ids dr rtype ls p = do
         completeProgress pm
         case cfgOutFile cfg of
           Just out -> writeResult cfg ref ids (toPath cfg path) out
-          Nothing  -> when (not $ cfgInteractive cfg) (printLong cfg ref ids pm rtype path)
-        return ()
+          Nothing  -> when (not $ cfgInteractive cfg)
+                        -- TODO printLong should work more like printShort but no line limit?
+                        -- (printLong cfg ref ids pm rtype path)
+                        (printShort cfg ref ids pm rtype path)
 
 shakeEnv :: Config -> LocksRef -> IDsRef -> DigestsRef -> M.HashMap TypeRep Dynamic
 shakeEnv cfg lRef iRef dRef =
