@@ -124,6 +124,7 @@ library
                     OrthoLang.Core.Repl,
                     OrthoLang.Core.Sanitize,
                     OrthoLang.Core.Types,
+                    OrthoLang.Debug,
                     OrthoLang.Util,
                     OrthoLang.Modules,
                     OrthoLang.Modules.AllVsAll,
