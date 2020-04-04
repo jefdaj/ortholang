@@ -101,6 +101,7 @@ getWriteLock (_, ref) path = do
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
     Just (_ , ReadOnly ) -> error $ "Attempt to write read-only file: '" ++ path ++ "'"
 
+-- TODO milder error that doesn't crash here
 markDone :: LocksRef -> FilePath -> IO ()
 markDone (_, ref) path = do
   debugLock $ "markDone '" ++ path ++ "'"
@@ -117,7 +118,16 @@ whitelisted :: FilePath -> Bool
 whitelisted path = any (\p -> path =~ p) regexes
   where
     regexes =
-      [ "\\.show$"
+      [
+
+      -- test files, which legitimately can be locked multiple times
+        "\\.show$"
+
+      -- mistakes which should be removed when possible
+      -- TODO fix these
+      , ".*load_.*"
+      , ".*cache\\/lines.*"
+
       ]
 
 withMarkDone :: LocksRef -> [FilePath] -> IO a -> IO a
