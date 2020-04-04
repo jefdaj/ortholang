@@ -24,12 +24,11 @@ module OrthoLang.Core.Parse.Util
   )
   where
 
+import OrthoLang.Debug
 import OrthoLang.Core.Types
 
 import Development.Shake.FilePath (makeRelative)
--- import OrthoLang.Util        (trace)
 import Text.Parsec.Combinator     (manyTill, eof, anyToken)
-import OrthoLang.Util    (trace)
 
 -- for ParseM (new ParseM with errors)
 import Control.Monad.Reader

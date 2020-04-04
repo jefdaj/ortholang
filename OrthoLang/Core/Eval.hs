@@ -24,6 +24,7 @@ module OrthoLang.Core.Eval
   )
   where
 
+import OrthoLang.Debug
 import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
@@ -45,7 +46,7 @@ import OrthoLang.Core.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
 import OrthoLang.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Core.Actions          (readLits, readPaths)
-import OrthoLang.Util             (trace, ignoreErrors)
+import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)

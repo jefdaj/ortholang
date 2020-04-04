@@ -15,9 +15,10 @@ import Data.Text                  (pack)
 import Development.Shake           (newResourceIO)
 -- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
                                    -- removeFiles, liftIO)
+import OrthoLang.Debug
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Core.Types        (Config(..), Module(..))
-import OrthoLang.Util         (absolutize, justOrDie, debug)
+import OrthoLang.Util         (absolutize, justOrDie)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)

@@ -2,6 +2,7 @@ module OrthoLang.Modules.Math where
 
 import Development.Shake
 import Prelude hiding (log)
+import OrthoLang.Debug
 import OrthoLang.Core
 import qualified OrthoLang.Util as U
 
@@ -29,14 +30,14 @@ divDouble n1 n2 = read $ show (answer :: Double)
 mkMathBop :: String -> Char -> (Scientific -> Scientific -> Scientific) -> Function
 mkMathBop name opChar fn = newBop name opChar num num $ aMathBop fn
 
-log :: Show a => a -> Action ()
-log = liftIO . U.debug "modules.math.amath" . show
+log' :: Show a => a -> Action ()
+log' = liftIO . debug "modules.math.amath" . show
 
 aMathBop :: (Scientific -> Scientific -> Scientific) -> NewAction1
 aMathBop mathFn (ExprPath outPath) nsPath = do
-  log nsPath
+  log' nsPath
   ns <- readLits nsPath
-  log ns
+  log' ns
   let n = foldl1 mathFn $ map (read :: String -> Scientific) ns
   writeLit outPath $ show n
-  log n
+  log' n

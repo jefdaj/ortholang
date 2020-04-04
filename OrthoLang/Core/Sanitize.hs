@@ -25,7 +25,8 @@ module OrthoLang.Core.Sanitize
 -- TODO would having it be a set from the beginning be faster still?
 -- TODO would doing it in a separate script be better so it can run on other nodes?
 
-import Prelude hiding (readList)
+import Prelude hiding (readList, error)
+import OrthoLang.Debug
 -- import qualified Data.DList as D
 import qualified Data.Map.Strict   as M
 -- import qualified Text.Regex as R
@@ -33,7 +34,7 @@ import qualified Data.Map.Strict   as M
 import Development.Shake
 import OrthoLang.Core.Types
 
-import OrthoLang.Util    (digest, digestLength, headOrDie, trace)
+import OrthoLang.Util    (digest, digestLength, headOrDie)
 import OrthoLang.Locks   (withWriteLock')
 import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
 import OrthoLang.Core.Paths   (toPath, fromPath)

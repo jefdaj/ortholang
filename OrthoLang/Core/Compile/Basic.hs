@@ -38,7 +38,7 @@ module OrthoLang.Core.Compile.Basic
 
   -- * Misc functions for export
   , curl
-  , debug
+  , debugC
   , debugRules
   , defaultTypeCheck
   , typeError
@@ -60,6 +60,8 @@ module OrthoLang.Core.Compile.Basic
 
 -- TODO does turning of traces radically speed up the interpreter?
 
+import Prelude hiding (error)
+import OrthoLang.Debug
 import Development.Shake
 import Development.Shake.FilePath (isAbsolute)
 import OrthoLang.Core.Types
@@ -77,7 +79,7 @@ import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLitPaths, writePaths, symlink)
 import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
 import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie, trace, unlessExists)
+                                   digest, removeIfExists, headOrDie, unlessExists)
 import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
@@ -90,13 +92,14 @@ import Control.Monad.Reader (ask)
 import Control.Monad.Trans.Class (lift)
 
 
-debug :: Config -> String -> String -> a -> a
-debug cfg name msg rtn = if isJust (cfgDebug cfg) then trace ("core.compile." ++ name) msg rtn else rtn
+debugC :: Config -> String -> String -> a -> a
+debugC cfg name msg rtn = if isJust (cfgDebug cfg) then trace ("core.compile." ++ name) msg rtn else rtn
 
 -- TODO restrict to Expr?
+-- TODO export?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
 debugRules :: (Pretty a, Show b) => Config -> String -> a -> b -> b
-debugRules cfg name input out = debug cfg name msg out
+debugRules cfg name input out = debugC cfg name msg out
   where
     ren = render $ pPrint input
     msg = "\"" ++ ren ++ "' -> " ++ show out
@@ -152,19 +155,19 @@ rBop s e@(Bop t r ds _ e1 e2) = rExpr s es >> rExpr s fn
   where
     es = Lst t r ds [e1, e2] -- TODO (ListOf t)?
     fn = Fun t r ds (prefixOf e) [es]
-rBop _ e = error $ "rBop call with non-Bop: \"" ++ render (pPrint e) ++ "\""
+rBop _ e = error "rBop" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
 rNamedFunction :: Script -> Expr -> String -> Rules ExprPath
 rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
-rNamedFunction _ _ n = error $ "bad argument to rNamedFunction: " ++ n
+rNamedFunction _ _ n = error "rNamedFunction" $ "bad argument: " ++ n
 
 rNamedFunction' scr expr name = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   case findFunction cfg name of
-    Nothing -> error $ "no such function \"" ++ name ++ "\""
+    Nothing -> error "rNamedFunction" $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
                  NewNotImplemented -> if "load_" `isPrefixOf` fName f
                                         then (fOldRules f) scr $ setSalt 0 expr
@@ -243,7 +246,7 @@ rList :: RulesFn
 rList s e@(Lst rtn _ _ es)
   | rtn `elem` [Empty, str, num] = rListLits  s e
   | otherwise                    = rListPaths s e
-rList _ _ = error "bad arguemnt to rList"
+rList _ _ = error "rList" "bad arguemnt"
 
 {-|
 Special case for writing lists of literals ('str's or 'num's) in the source code.
@@ -281,7 +284,7 @@ rListLits scr e@(Lst _ _ _ exprs) = do
       outPath' = debugRules cfg "rListLits" e $ fromPath cfg outPath
   outPath' %> \_ -> aListLits litPaths' outPath
   return (ExprPath outPath')
-rListLits _ e = error $ "bad argument to rListLits: " ++ show e
+rListLits _ e = error "rListLits" $ "bad argument: " ++ show e
 
 -- TODO put this in a cache dir by content hash and link there
 aListLits :: [Path] -> Path -> Action ()
@@ -328,7 +331,7 @@ rListPaths scr e@(Lst rtn salt _ exprs) = do
       outPath' = debugRules cfg "rListPaths" e $ fromPath cfg outPath
   outPath' %> \_ -> aListPaths paths' outPath
   return (ExprPath outPath')
-rListPaths _ _ = error "bad arguemnts to rListPaths"
+rListPaths _ _ = error "rListPaths" "bad argument"
 
 aListPaths :: [Path] -> Path -> Action ()
 aListPaths paths outPath = do

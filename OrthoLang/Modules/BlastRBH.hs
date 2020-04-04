@@ -18,7 +18,7 @@ import Data.Maybe (fromJust)
 
 -- for tracking down non-deduplicating blastp functions
 debugNames :: Config -> String -> Expr -> Expr -> a -> a
-debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = C.debug cfg fnName msg rtn
+debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = C.debugC cfg fnName msg rtn
   where
     msg = "\"" ++ bname ++ "' -> \"" ++ aname ++ "\""
 debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName

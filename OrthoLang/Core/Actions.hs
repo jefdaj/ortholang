@@ -56,7 +56,8 @@ module OrthoLang.Core.Actions
   )
   where
 
-import Prelude hiding (readList)
+import Prelude hiding (readList, error)
+import OrthoLang.Debug
 import Development.Shake
 import OrthoLang.Core.Types
 -- import OrthoLang.Core.Config (debug)
@@ -70,7 +71,7 @@ import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit,
                                    checkLits, cacheDir, pathString,
                                    stringPath, toGeneric, sharedPath)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
-                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie, debug, trace, traceShow)
+                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import OrthoLang.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
@@ -575,7 +576,7 @@ handleCmdError bin n stderrPath rmPatterns = do
                    [ bin ++ " failed with " ++ show n ++ "."
                    , "The files it was working on have been deleted:"
                    ] ++ files'
-  error $ unlines $ errMsg ++ errMsg2
+  error "handleCmdError" $ unlines $ errMsg ++ errMsg2
 
 ----------
 -- misc --

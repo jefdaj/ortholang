@@ -2,6 +2,8 @@ module OrthoLang.Core.Compile.Simple where
 
 import OrthoLang.Core.Compile.Basic
 
+import Prelude hiding (error)
+import OrthoLang.Debug
 import Development.Shake
 import Development.Shake.FilePath (isAbsolute)
 import OrthoLang.Core.Types
@@ -20,7 +22,7 @@ import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
 -- import OrthoLang.Core.Locks        (withWriteLock')
 import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
 import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie, trace, unlessExists)
+                                   digest, removeIfExists, headOrDie, unlessExists)
 import System.FilePath            (takeExtension)
 import System.Exit                (ExitCode(..))
 import System.Directory           (createDirectoryIfMissing)
@@ -94,7 +96,7 @@ aSimpleScript' parCmd fixEmpties script (out:ins) = do
                          }
       actFn _ _ = fail "bad argument to aSimpleScript actFn"
   aSimple' out actFn Nothing ins
-aSimpleScript' _ _ _ as = error $ "bad argument to aSimpleScript: " ++ show as
+aSimpleScript' _ _ _ as = error "aSimpleScript'" $ "bad argument: " ++ show as
 
 rSimple' :: Maybe String
          -> (Path -> [Path] -> Action ())
@@ -130,7 +132,7 @@ aSimple' outPath actFn mTmpDir argPaths = do
                   Just dir -> let d = fromPath cfg dir </> hashes in (toPath cfg d, d)
   need' "ortholang.core.compile.basic.aSimple'" argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
-  let o' = debug cfg "aSimple'" ("outPath': " ++ outPath' ++ "\"") outPath
-      as = debug cfg "aSimple'" ("argsPaths'': " ++ show argPaths'') argPaths''
+  let o' = debugC cfg "aSimple'" ("outPath': " ++ outPath' ++ "\"") outPath
+      as = debugC cfg "aSimple'" ("argsPaths'': " ++ show argPaths'') argPaths''
   actFn tmpDir (o':as)
   trackWrite [out] -- TODO remove?

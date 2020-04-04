@@ -47,6 +47,8 @@ module OrthoLang.Core.Compile.NewRules
   )
   where
 
+import Prelude hiding (error)
+import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake
 import OrthoLang.Core.Compile.Basic
@@ -57,7 +59,6 @@ import Data.Maybe                 (catMaybes, fromJust)
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
-import OrthoLang.Util        (traceShow)
 
 {-|
 This gathers all the 'fNewRules' 'Development.Shake.Rules' together for use in
@@ -172,7 +173,7 @@ aNewRules applyFn tFn aFn out = do
     Left err -> fail err -- TODO bop type error here :(
     Right rType -> do
       when (rType /= oType) $
-        error $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
+        error "aNewRules" $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
       let deps' = map (fromPath cfg) deps
       need' "ortholang.modules.newrulestest.aNewRules" deps'
       applyFn (aFn out) deps'

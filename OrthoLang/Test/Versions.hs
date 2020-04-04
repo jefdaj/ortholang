@@ -3,8 +3,8 @@
 
 module OrthoLang.Test.Versions where
 
+import OrthoLang.Debug
 import OrthoLang.Core
-import qualified OrthoLang.Util as U
 import Paths_OrthoLang             (getDataFileName)
 
 import Development.Shake.FilePath ((<.>), (</>))
@@ -64,7 +64,7 @@ versionScripts os = map (\(a,b) -> (a, os ++ ":" ++ b))
 mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg _ _ _ = do
   testDir <- getDataFileName $ "tests"
-  U.debug "test.versions" $ "test dir is " ++ testDir
+  debug "test.versions" $ "test dir is " ++ testDir
   return $ testGroup "check dependency versions"
          $ map (mkTestVersion cfg testDir) (versionScripts $ cfgOS cfg)
 
@@ -75,7 +75,7 @@ mkTestVersion cfg dir (name, cmd) = goldenVsString desc gld act
     gld = dir </> "versions" </> takeBaseName cmd <.> "txt"
     msg = "tested " ++ name ++ " " ++ cfgOS cfg ++ " version"
     act = do
-      (_, out, err) <- U.time "test.versions" msg $ readCreateProcessWithExitCode (shell cmd) ""
+      (_, out, err) <- time "test.versions" msg $ readCreateProcessWithExitCode (shell cmd) ""
       -- helpful for updating tests
       -- writeFile ("/tmp" </> takeBaseName gld <.> "txt") $ toGeneric cfg $ err ++ out
       return $ C8.pack $ err ++ out

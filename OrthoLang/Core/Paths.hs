@@ -158,31 +158,21 @@ import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import OrthoLang.Core.Pretty          (render, pPrint)
-import OrthoLang.Util            (digest, trace)
+import OrthoLang.Util            (digest)
 import Path                           (parseAbsFile, fromAbsFile)
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
-import Prelude hiding (log)
+import Prelude hiding (error, log)
 import qualified Data.Map.Strict as M
 import qualified OrthoLang.Util as U
 
 import Control.Monad              (when)
 import Data.Maybe                 (catMaybes)
 import Development.Shake.FilePath (makeRelative, splitPath)
-import OrthoLang.Util        (traceShow)
+import OrthoLang.Debug
 import Data.IORef (readIORef, atomicModifyIORef')
 import System.IO.Unsafe (unsafePerformIO)
 
-
-log :: String -> String -> IO ()
-log fnName msg = U.debug fnName msg
-
--- TODO take Text instead?
-traceP :: (Pretty a, Show b) => String -> a -> b -> b
-traceP name expr path = trace ("core.paths." ++ name) msg path
-  where
-    ren = render $ pPrint expr
-    msg = "\"" ++ ren ++ "' -> " ++ show path -- TODO include types?
 
 -----------
 -- paths --
@@ -217,7 +207,7 @@ toPath :: Config -> FilePath -> Path
 toPath cfg = Path . checkPath . toGeneric cfg . normalize
   where
     normalize p = case parseAbsFile p of
-      Nothing -> error $ "toPath can't parse: " ++ p
+      Nothing -> error "toPath" $ "can't parse: " ++ p
       Just p' -> fromAbsFile p'
 
 fromPath :: Config -> Path -> FilePath
@@ -258,7 +248,7 @@ TODO does it need the config at all?
 -}
 argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
 argHashes c d s (Ref _ _ _ v) = case lookup v s of
-                                         Nothing -> error $ "no such var " ++ show v
+                                         Nothing -> error "argHashes" $ "no such var " ++ show v
                                          Just e  -> argHashes c d s e
 argHashes _ _ _ (Lit  _ _     v    ) = [digest v]
 argHashes c d s (Fun  _ _ _ _ es   ) = map (digest . exprPath c d s) es
@@ -269,14 +259,14 @@ argHashes _ _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
 bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t r ds [e1, e2]]
-bop2fun e = error $ "bop2fun call with non-Bop: \"" ++ render (pPrint e) ++ "\""
+bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
 exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
 exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
 exprPath c d s (Ref _ _ _ v) = case lookup v s of
-                               Nothing -> error $ "no such var " ++ show v ++ "\n" ++ show s
+                               Nothing -> error "exprPath" $ "no such var " ++ show v ++ "\n" ++ show s
                                Just e  -> exprPath c d s e
 exprPath c d s e@(Bop _ _ _ _ _ _) = exprPath c d s (bop2fun e)
 exprPath c d s expr = traceP "exprPath" expr res
@@ -316,7 +306,7 @@ and can be removed once the rest of the IO stuff is solid.
 -}
 checkLit :: String -> String
 checkLit lit = if isGeneric lit
-                 then error $ "placeholder in lit: \"" ++ lit ++ "\""
+                 then error "checkLit" $ "placeholder in lit: \"" ++ lit ++ "\""
                  else lit
 
 checkLits :: [String] -> [String] -- (or error, but let's ignore that)
@@ -326,7 +316,7 @@ checkLits = map checkLit
 checkPath :: FilePath -> FilePath
 checkPath path = if isAbsolute path || isGeneric path
                    then path
-                   else error $ "invalid path: \"" ++ path ++ "\""
+                   else error "checkPath" $ "invalid path: \"" ++ path ++ "\""
 
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath
@@ -445,7 +435,7 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
     -- TODO err function here
     log "decodeNewRulesDeps" $ "failed to decode path: " ++ out
     log "decodeNewRulesDeps" $ unlines $ "dMap when lookup failed:\n" : (map show $ M.toList dMap)
-    error $ "failed to decode path: \"" ++ out ++ "\""
+    error "decodeNewRulesDeps" $ "failed to decode path: \"" ++ out ++ "\""
   return (oType, dTypes, dPaths)
 
 -- TODO hey, is it worth just looking up every path component to make it more robust?

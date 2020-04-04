@@ -5,7 +5,7 @@ module OrthoLang.Core.Compile
   , compose1
   , compileScript
   , curl
-  , debug
+  , debugC
   , debugRules
   , defaultTypeCheck
   , map3of3

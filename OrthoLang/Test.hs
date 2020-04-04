@@ -5,8 +5,8 @@ module OrthoLang.Test
   )
   where
 
+import OrthoLang.Debug
 import OrthoLang.Core
-import qualified OrthoLang.Util as U
 
 import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)
@@ -47,7 +47,7 @@ mkTestConfig cfg dir =
     }
 
 dbg :: String -> IO ()
-dbg = U.debug "test.runTests"
+dbg = debug "test.runTests"
 
 runTests :: Arguments -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
 runTests args cfg ref ids dRef = withArgs [] $ do

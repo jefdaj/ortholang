@@ -25,6 +25,9 @@ module OrthoLang.Locks
  - respectively. It should handle the rest.
  -}
 
+import Prelude hiding (log, error)
+import OrthoLang.Debug
+
 import qualified Data.Map.Strict                  as Map
 import qualified Control.Concurrent.ReadWriteLock as RWLock
 
@@ -44,6 +47,9 @@ import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
 -- import System.FilePath.Glob       (compile, match)
 import Text.Regex.Posix           ((=~))
+
+import qualified Control.Logging as L
+import qualified Data.Text as T
 
 -- import Control.Concurrent.Thread.Delay (delay)
 
@@ -83,7 +89,7 @@ getReadLock (_, ref) path = do
   debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> (Map.insert path (l, ReadOnly) c, l) -- TODO error here too sometimes?
-    Just (_ , Attempt _) -> error $ "Attempt to read file not written successfully yet: '" ++ path ++ "'"
+    Just (_ , Attempt _) -> error "getReadLock" $ "Attempt to read file not written successfully yet: '" ++ path ++ "'"
     Just (l', ReadOnly ) -> (c, l')
     Just (l', Success _) -> (c, l')
 
@@ -96,21 +102,21 @@ getWriteLock (_, ref) path = do
     -- TODO hey should this be l' in the insert???
     -- Just (l', Success n) -> if whitelisted path
     --                           then (Map.insert path (l, Success (n+1)) c, l')
-    --                           else error $ "Attempt to re-write successful file: '" ++ path ++ "'" -- TODO remove error?
+    --                           else warn "getWriteLock" $ "Attempt to re-write successful file: '" ++ path ++ "'"
     Just (l', Success n) -> (Map.insert path (l', Attempt (n+1)) c, l')
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
-    Just (_ , ReadOnly ) -> error $ "Attempt to write read-only file: '" ++ path ++ "'"
+    Just (_ , ReadOnly ) -> error "getWriteLock" $ "Attempt to write read-only file: '" ++ path ++ "'"
 
 -- TODO milder error that doesn't crash here
 markDone :: LocksRef -> FilePath -> IO ()
 markDone (_, ref) path = do
   debugLock $ "markDone '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
-    Nothing -> error $ "markDone called on nonexistent lock path '" ++ path ++ "'"
-    Just (_, ReadOnly ) -> error $ "markDone called on read-only lock path '" ++ path ++ "'"
+    Nothing -> error "markDone" $ "markDone called on nonexistent lock path '" ++ path ++ "'"
+    Just (_, ReadOnly ) -> error "markDone" $ "markDone called on read-only lock path '" ++ path ++ "'"
     Just (l, Success n) -> if whitelisted path
                              then (Map.insert path (l, Success (n+1)) c, ())
-                             else error $ "markDone called on already-finished lock path '" ++ path ++ "'"
+                             else error "markDone" $ "markDone called on already-finished lock path '" ++ path ++ "'"
     Just (l, Attempt n) -> (Map.insert path (l, Success (n+1)) c, ())
 
 -- describes some paths we don't want to see duplicate write errors for
@@ -184,7 +190,7 @@ assertNonEmptyFile :: LocksRef -> FilePath -> IO ()
 assertNonEmptyFile ref path = do
   -- debugA $ "assertNonNull checking \"" ++ path ++ "\""
   empty <- isActuallyEmpty ref path
-  when empty $ error $ "script wrote actual empty file: \"" ++ path ++ "\""
+  when empty $ error "assertNonEmptyFile" $ "script wrote actual empty file: \"" ++ path ++ "\""
 
 withWriteLock :: LocksRef -> FilePath -> IO a -> IO a
 withWriteLock ref path ioFn = do

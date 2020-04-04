@@ -1,13 +1,8 @@
 module OrthoLang.Util
-
-  -- debugging
-  ( trace
-  , traceShow
-  , debug
-  , time
+  (
 
   -- read files
-  , readFileStrict
+    readFileStrict
   , readFileLazy
 
   -- hashing
@@ -41,7 +36,9 @@ module OrthoLang.Util
   )
   where
 
+import Prelude hiding (error)
 import Development.Shake
+import OrthoLang.Debug
 
 import qualified System.IO.Strict as Strict
 import qualified Data.ByteString.Char8 as C8
@@ -71,26 +68,7 @@ import System.FilePath.Glob   (glob)
 -- import Data.Time.Format    (formatTime, defaultTimeLocale)
 import OrthoLang.Locks    (LocksRef, withReadLock, withReadLock', withWriteLock)
 
-import Control.Logging (traceSL, debugS, timedDebugEndS, traceShowSL)
-
----------------
--- debugging --
----------------
-
-trace :: String -> String -> a -> a
-trace suffix msg = traceSL (T.pack $ "ortholang." ++ suffix) (T.pack msg)
-
-traceShow :: Show a => String -> a -> a
-traceShow suffix = traceShowSL (T.pack $ "ortholang." ++ suffix)
-
-debug :: String -> String -> IO ()
-debug suffix msg = debugS (T.pack $ "ortholang." ++ suffix) (T.pack msg)
-
--- TODO rearrange imports so you can make a debugA :: ActionR () too
-
-time :: String -> String -> IO a -> IO a
-time suffix msg act = timedDebugEndS (T.pack $ "ortholang." ++ suffix)
-                                     (T.pack msg) act
+import qualified Control.Logging as L -- (traceSL, debugS, timedDebugEndS, traceShowSL)
 
 -- TODO put this in Util
 -- TODO this works, but isn't used yet
@@ -279,10 +257,10 @@ isReallyEmpty path = do
       return (fileSize stat == 0)
 
 popFrom :: Int -> [a] -> (a, [a])
-popFrom _ [] = error "attempt to pop elem from empty list"
+popFrom _ [] = error "popFrom" "attempt to pop elem from empty list"
 popFrom n xs
   | n < length xs = (xs !! n, take n xs ++ drop (n+1) xs)
-  | otherwise = error $ "attempt to pop elem "
+  | otherwise = error "popFrom" $ "attempt to pop elem "
                   ++ show n ++ " from a list with "
                   ++ show (length xs) ++ " elements"
 
@@ -290,19 +268,19 @@ popFrom n xs
 -- should reconstruct a list after using popFrom with the same index
 insertAt :: Int -> a -> [a] -> [a]
 insertAt i newElement as
-  | null as && i /= 0 = error "Cannot insert into empty list other than position 0."
+  | null as && i /= 0 = error "insertAt" "Cannot insert into empty list other than position 0."
   | null as && i == 0 = [newElement]
   | i >= 0 = let (prefix, suffix) = splitAt i as
              in prefix <> [newElement] <> suffix
-insertAt _ _ _ = error "bad arg to insertAt"
+insertAt _ _ _ = error "insertAt" "bad argument"
 
 -- like fromJust, but at least this gives you something to debug
 justOrDie :: String -> Maybe a -> a
 justOrDie msg val = case val of
-                 Nothing -> error msg
+                 Nothing -> error "justOrDie" msg
                  Just v -> v
 
 -- like head, but at least this gives you something to debug
 headOrDie :: String -> [a] -> a
-headOrDie msg [] = error msg
+headOrDie msg [] = error "headOrDie" msg
 headOrDie _ lst = head lst

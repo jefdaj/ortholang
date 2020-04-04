@@ -34,8 +34,7 @@ module OrthoLang.Core.Parse.Script
   )
   where
 
-import Debug.Trace
-
+import OrthoLang.Debug
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Expr
 import OrthoLang.Core.Parse.Util
@@ -46,7 +45,7 @@ import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)
 import Data.List              (partition)
 import Data.List.Utils        (hasKeyAL)
-import OrthoLang.Util    (readFileStrict, debug)
+import OrthoLang.Util    (readFileStrict)
 import System.FilePath        ((</>), takeDirectory)
 import Text.Parsec            (try, getState, putState)
 import Text.Parsec.Char       (newline, spaces)

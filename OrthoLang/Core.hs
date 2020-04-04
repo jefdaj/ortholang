@@ -169,11 +169,12 @@ module OrthoLang.Core
   , stripWhiteSpace
   , trace
   , unlessExists
-  , U.debug -- TODO disambiguate the others
+  , debug -- TODO disambiguate the others
 
   )
   where
 
+import OrthoLang.Debug
 import OrthoLang.Core.Actions
 import OrthoLang.Core.Compile
 import OrthoLang.Core.Compile.NewRules
@@ -185,7 +186,7 @@ import OrthoLang.Core.Parse
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Repl hiding (runCmd) -- TODO disambiguate
 
-import OrthoLang.Util hiding (debug)
+import OrthoLang.Util
 import qualified OrthoLang.Util as U
 
 import OrthoLang.Core.Eval (evalFile)

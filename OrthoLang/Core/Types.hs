@@ -86,12 +86,13 @@ module OrthoLang.Core.Types
   )
   where
 
--- import Prelude hiding (print)
 import qualified Data.Map.Strict as M
 -- import Text.Parsec (Parsec)
 
+import Prelude hiding (error)
+import OrthoLang.Debug
 import OrthoLang.Locks (LocksRef, withReadLock)
-import OrthoLang.Util  (readFileStrict, readFileLazy, headOrDie, trace)
+import OrthoLang.Util  (readFileStrict, readFileLazy, headOrDie)
 
 import Development.Shake              (Rules, Action, Resource)
 -- import Control.Monad.IO.Class (liftIO)
@@ -210,7 +211,7 @@ saltOf (Ref _ n _ _)     = n
 saltOf (Bop _ n _ _ _ _) = n
 saltOf (Fun _ n _ _ _)   = n
 saltOf (Lst _ n _ _)     = n
-saltOf (Com (CompiledExpr _ _ _)) = error "CompiledExprs don't have salts" -- TODO is that OK?
+saltOf (Com (CompiledExpr _ _ _)) = error "saltOf" "CompiledExprs don't have salts" -- TODO is that OK?
 
 -- TODO this needs to be recursive?
 -- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
@@ -220,15 +221,15 @@ setSalt r (Ref t _ ds v)       = Ref  t (Salt r) ds v
 setSalt r (Bop t _ ds s e1 e2) = Bop  t (Salt r) ds s e1 e2
 setSalt r (Fun t _ ds s es)    = Fun  t (Salt r) ds s es
 setSalt r (Lst t _ ds es)     = Lst t (Salt r) ds es
-setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt not implemented for compiled rules" -- TODO should it be?
+setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for compiled rules" -- TODO should it be?
 
 -- TODO add names to the Bops themselves... or associate with prefix versions?
 prefixOf :: Expr -> String
 prefixOf (Lit rtn _ _     ) = extOf rtn
 prefixOf (Fun _ _ _ name _) = name
 prefixOf (Lst _ _ _ _    ) = "list"
-prefixOf (Ref _ _ _ _     ) = error  "Refs don't need a prefix"
-prefixOf (Com (CompiledExpr _ _ _)) = error "CompiledExprs don't need a prefix"
+prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
+prefixOf (Com (CompiledExpr _ _ _)) = error "prefixOf" "CompiledExprs don't need a prefix"
 prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -237,7 +238,7 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "|" -> "any"
                                    "&" -> "all"
                                    "~" -> "diff"
-                                   x   -> error $ "unknown Bop: \"" ++ x ++ "\""
+                                   x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
 
 
 -- TODO have a separate Assign for "result"?
@@ -569,11 +570,11 @@ instance Show Module where
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs  _  (Lst _ _ _ es) = es
 extractExprs scr (Ref  _ _ _ v ) = case lookup v scr of
-                                        Nothing -> error $ "no such var " ++ show v
+                                        Nothing -> error "extractExprs" $ "no such var " ++ show v
                                         Just e  -> extractExprs scr e
-extractExprs _   (Fun _ _ _ _ _) = error explainFnBug
+extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
 extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
-extractExprs  _   e               = error $ "bad arg to extractExprs: " ++ show e
+extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e
 
 -- TODO any good way to avoid fromJust here?
 exprDepsOf :: Script -> Expr -> [Expr]

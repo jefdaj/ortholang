@@ -29,12 +29,12 @@ module OrthoLang.Core.Parse.Expr
   )
   where
 
+import Prelude hiding (error)
+import OrthoLang.Debug
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty ()
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Util
-
-import OrthoLang.Util (trace)
 
 import qualified Text.Parsec.Expr as E
 import Control.Monad.Trans.Except
@@ -109,7 +109,7 @@ pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
 mkBop :: Function -> BopExprsParser
 mkBop bop = return $ \e1 e2 -> do
   case bopTypeCheck (fTypeCheck bop) (typeOf e1) (typeOf e2) of
-    Left  msg -> error msg -- TODO can't `fail` because not in monad here?
+    Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
     Right rtn -> Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 
         -- TODO is naming it after the opchar wrong now?
