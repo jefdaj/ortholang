@@ -89,7 +89,6 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff desc gld scriptAct
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
       out <- runScript cfg ref ids dRef sDir
-      _ <- copyToShared cfg sDir ref
       -- uncomment to update the golden stdout files:
       -- writeFile ("tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
@@ -111,7 +110,6 @@ mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
       _ <- runScript cfg ref ids dRef sDir
-      _ <- copyToShared cfg sDir ref
       out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
@@ -141,6 +139,8 @@ mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
   where
     cfg' = cfg { cfgShare = Just sDir }
     shareAct = do
+      _ <- runScript cfg ref ids dRef sDir
+      _ <- copyToShared cfg sDir ref
       withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] -- to see if it can use the shared one instead
       out <- runScript cfg' ref ids dRef sDir
       return $ B8.pack out
@@ -161,7 +161,6 @@ mkAbsTest cfg ref ids name dRef sDir = testSpecs $ it desc $
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
       _ <- runScript cfg ref ids dRef sDir
-      _ <- copyToShared cfg sDir ref
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
@@ -219,7 +218,6 @@ mkCheckTest cfg ref ids dRef sDir name scr = testSpecs $ it desc $ runCheck `sho
     desc = name ++ ".ol output + tmpfiles checked by script"
     runCheck = do
       _ <- runScript cfg ref ids dRef sDir -- TODO any reason to reuse ids here?
-      _ <- copyToShared cfg sDir ref
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
