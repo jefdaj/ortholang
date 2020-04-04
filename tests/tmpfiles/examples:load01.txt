@@ -7,11 +7,11 @@
 |       `-- ff08c7f09e.ids
 |-- exprs
 |   |-- glob_files
-|   |   `-- 3f5d03125d
+|   |   `-- de772ac298
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
-|   |-- list
-|   |   `-- c82011eae5
+|   |-- load_fna_each
+|   |   `-- 9c2320da00
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
@@ -19,7 +19,7 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- both.fna.list -> ../exprs/list/c82011eae5/0/result
+    |-- both.fna.list -> ../exprs/load_fna_each/9c2320da00/0/result
     `-- result -> ../vars/both.fna.list
 
 13 directories, 9 files

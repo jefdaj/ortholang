@@ -45,6 +45,8 @@
 |   |       |-- 00c7323087
 |   |       |   `-- a7a58aa234
 |   |       |       `-- 0
+|   |       |           |-- err
+|   |       |           `-- out
 |   |       |-- 022da0f082
 |   |       |   `-- a7a58aa234
 |   |       |       `-- 0
@@ -80,10 +82,11 @@
 |   |       |-- 78026afd2f
 |   |       |   `-- a7a58aa234
 |   |       |       `-- 0
+|   |       |           |-- err
+|   |       |           `-- out
 |   |       `-- c46169fbf7
 |   |           `-- a7a58aa234
 |   |               `-- 0
-|   |                   `-- result -> out
 |   |-- extract_queries
 |   |   |-- 32868fa705
 |   |   |   `-- 0
@@ -253,4 +256,4 @@
     |-- revHits.bht -> ../exprs/blastp_db/4300292626/050c896520/d304d9760a/0/result
     `-- solidRec.str.list -> ../exprs/all/dfd0f4a568/0/result
 
-134 directories, 119 files
+134 directories, 122 files

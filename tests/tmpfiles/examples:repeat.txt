@@ -1,38 +1,11 @@
 .
 |-- cache
 |-- exprs
-|   |-- list
-|   |   `-- 44e8692b07
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- multiply
-|   |   |-- 77fc578b23
-|   |   |   `-- 0
-|   |   `-- 973f7e3236
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- num
-|   |   |-- a629005e3c
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- ea11b49459
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- repeat
-|   |   `-- a66a36fd1b
-|   |       `-- 08c7e293bb
-|   |           `-- e635163239
-|   |               `-- 0
 |   `-- str
 |       `-- 914592cfd6
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
-|-- reps
-|   |-- 58663c46d7
-|   |   `-- result -> ../../exprs/multiply/973f7e3236/0/result
-|   `-- 9d9af40ecc
 `-- vars
-    |-- result -> ../exprs/str/914592cfd6/0/result
-    `-- var1.num -> ../exprs/num/ea11b49459/0/result
+    `-- result -> ../exprs/str/914592cfd6/0/result
 
-27 directories, 8 files
+6 directories, 2 files

@@ -20,35 +20,35 @@
 |           `-- c27509026d.pdb.psq
 |-- exprs
 |   |-- blastp_db
-|   |   `-- 66dc2a3b29
-|   |       |-- 954b3ac6f3
-|   |       |   `-- 635b625879
+|   |   `-- 4300292626
+|   |       |-- b8ba873461
+|   |       |   `-- cf68c67e51
 |   |       |       `-- 0
-|   |       `-- ed39c166ed
-|   |           `-- 332367b160
+|   |       `-- baaaae33ea
+|   |           `-- 486b6736b7
 |   |               `-- 0
 |   |                   |-- err
 |   |                   |-- out
 |   |                   `-- result -> out
 |   |-- list
-|   |   |-- 3d6147ea9d
+|   |   |-- 39b18dbf05
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 9fe31e7ad0
+|   |   `-- b9ee7bd884
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 72a50a6cda
+|   |   |-- b4f8a9bd8e
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/36189032ad
-|   |   `-- ad6ae7249f
+|   |   |       `-- result -> ../../../../cache/load/10ffe0cf0f
+|   |   `-- fee73b8143
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/10ffe0cf0f
+|   |           `-- result -> ../../../../cache/load/36189032ad
 |   |-- makeblastdb_prot
-|   |   |-- 57970a58d4
+|   |   |-- 356d67a59b
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- f420ff315a
+|   |   `-- 5c92533dc8
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
@@ -56,8 +56,8 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- reciprocal_best
-|   |   `-- b29787dfbc
-|   |       `-- 5c288f3e9b
+|   |   `-- b1b48058e7
+|   |       `-- 8599057397
 |   |           `-- 0
 |   |               `-- result
 |   `-- str
@@ -68,11 +68,11 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- fwdHits.bht -> ../exprs/blastp_db/66dc2a3b29/ed39c166ed/332367b160/0/result
-    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
-    |-- mgen.faa -> ../exprs/load_faa/ad6ae7249f/0/result
-    |-- recHits.bht -> ../exprs/reciprocal_best/b29787dfbc/5c288f3e9b/0/result
+    |-- fwdHits.bht -> ../exprs/blastp_db/4300292626/baaaae33ea/486b6736b7/0/result
+    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
+    |-- mgen.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
+    |-- recHits.bht -> ../exprs/reciprocal_best/b1b48058e7/8599057397/0/result
     |-- result -> ../vars/recHits.bht
-    `-- revHits.bht -> ../exprs/blastp_db/66dc2a3b29/954b3ac6f3/635b625879/0/result
+    `-- revHits.bht -> ../exprs/blastp_db/4300292626/b8ba873461/cf68c67e51/0/result
 
 42 directories, 33 files

@@ -1,68 +1,11 @@
 .
 |-- cache
-|   |-- load
-|   |   |-- 28e059b2a9
-|   |   |-- 28e059b2a9.ids
-|   |   |-- 36189032ad
-|   |   `-- 36189032ad.ids
-|   |-- makeblastdb
-|   |   `-- c27509026d
-|   |       |-- c27509026d.pdb.list.err
-|   |       |-- c27509026d.pdb.list.out
-|   |       |-- c27509026d.pdb.list.phr
-|   |       |-- c27509026d.pdb.list.pin
-|   |       `-- c27509026d.pdb.list.psq
-|   `-- psiblast
 |-- exprs
-|   |-- list
-|   |   `-- 9fe31e7ad0
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 385ba48b5c
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- 72a50a6cda
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
-|   |-- makeblastdb_prot_all
-|   |   `-- 57970a58d4
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- num
-|   |   `-- 3e281fad0f
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- psiblast
-|   |   `-- 56c12851e0
-|   |       `-- bf9b28eec2
-|   |           `-- 3a9cc6431e
-|   |               `-- 0
-|   |                   |-- result
-|   |                   |-- result.err
-|   |                   `-- result.out
-|   |-- psiblast_train_db
-|   |   `-- 56c12851e0
-|   |       `-- c8f3331792
-|   |           `-- 3a9cc6431e
-|   |               `-- 0
-|   |                   |-- result -> ../../../../../../cache/lines/...
-|   |                   |-- result.tmp.err
-|   |                   `-- result.tmp.out
 |   `-- str
-|       |-- 1e020faf26
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
-|       |-- 824ccbd8b2
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
 |       `-- 914592cfd6
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/psiblast/56c12851e0/bf9b28eec2/3a9cc6431e/0/result
-    |-- maga.faa -> ../exprs/load_faa/72a50a6cda/0/result
-    |-- query.faa -> ../exprs/load_faa/385ba48b5c/0/result
     `-- result -> ../exprs/str/914592cfd6/0/result
 
-38 directories, 27 files
+6 directories, 2 files

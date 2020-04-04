@@ -1,15 +1,23 @@
 .
 |-- cache
 |-- exprs
+|   |-- list
+|   |   |-- 52a480654a
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 9a95aa88f9
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- fad06516ce
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- multiply
-|   |   |-- 5a77837553
-|   |   |   `-- 9b715cff19
-|   |   |       `-- 0
-|   |   |           `-- result -> ../../../../../cache/lines/...
-|   |   `-- fe402d6efe
-|   |       `-- 75a5f67a7d
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   |-- 58d5c28fca
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- a17ec09dcb
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   |-- 9d7db6f932
 |   |   |   `-- 0
@@ -21,14 +29,13 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- subtract
-|       `-- 76d0e6dcf8
-|           `-- 75a5f67a7d
-|               `-- 0
-|                   `-- result -> ../../../../../cache/lines/...
+|       `-- cdb83bba2b
+|           `-- 0
+|               `-- result -> ../../../../cache/lines/...
 `-- vars
     |-- result -> ../vars/var4.num
     |-- var1.num -> ../exprs/num/ca076eb63f/0/result
-    |-- var3.num -> ../exprs/multiply/fe402d6efe/75a5f67a7d/0/result
-    `-- var4.num -> ../exprs/subtract/76d0e6dcf8/75a5f67a7d/0/result
+    |-- var3.num -> ../exprs/multiply/58d5c28fca/0/result
+    `-- var4.num -> ../exprs/subtract/cdb83bba2b/0/result
 
-21 directories, 10 files
+25 directories, 13 files

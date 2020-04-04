@@ -1,31 +1,31 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 60bf70441e.txt -> ../../cache/lines/...
-|   |   |-- emptyfaa.txt -> ../../cache/lines/...
-|   |   `-- f8222fbd6b.txt -> ../../cache/lines/...
+|   |   |-- 1bb4e11878.txt -> ../../cache/lines/...
+|   |   |-- 2d9874dbf2.txt -> ../../cache/lines/...
+|   |   `-- emptyfaa.txt -> ../../cache/lines/...
 |   |-- each
-|   |   |-- 47ca75983a
-|   |   |   |-- 0197b8cb55
+|   |   |-- 167564532a
+|   |   |   |-- 4489902099
 |   |   |   |   |-- args -> ../../../../cache/lines/...
-|   |   |   |   `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/0197b8cb55/0/result
-|   |   |   `-- 4b181c7a74
+|   |   |   |   `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/4489902099/0/result
+|   |   |   `-- 5b8c12652f
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/4b181c7a74/0/result
-|   |   |-- d3e5b6c584
-|   |   |   |-- 0197b8cb55
+|   |   |       `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/5b8c12652f/0/result
+|   |   |-- 79696507ee
+|   |   |   |-- 4489902099
 |   |   |   |   |-- args -> ../../../../cache/lines/...
-|   |   |   |   `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/0197b8cb55/0/result
-|   |   |   `-- 4b181c7a74
+|   |   |   |   `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/4489902099/0/result
+|   |   |   `-- 5b8c12652f
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/4b181c7a74/0/result
-|   |   `-- fec3c06864
-|   |       |-- 0197b8cb55
+|   |   |       `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/5b8c12652f/0/result
+|   |   `-- e50cf908af
+|   |       |-- 4489902099
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/0197b8cb55/0/result
-|   |       `-- 4b181c7a74
+|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/4489902099/0/result
+|   |       `-- 5b8c12652f
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/4b181c7a74/0/result
+|   |           `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/5b8c12652f/0/result
 |   |-- load
 |   |   |-- 48cdcb15a8 -> $WORKDIR/examples/genome-lists/pcc-7942-genbank.txt
 |   |   |-- 597257619d
@@ -35,75 +35,76 @@
 |   `-- seqio
 |-- exprs
 |   |-- concat_faa
-|   |   |-- a61b994fe8
+|   |   |-- 0e87b96cf2
 |   |   |   `-- 0
 |   |   |       `-- result
-|   |   |-- cb8f72c92c
+|   |   |-- 2281560154
 |   |   |   `-- 0
 |   |   |       `-- result
-|   |   |-- e03455bbf2
+|   |   |-- 67fd2d5d7e
 |   |   |   `-- 0
 |   |   |       `-- result
-|   |   `-- f54321a3da
+|   |   `-- 6b2ff554c7
 |   |       `-- 0
 |   |           `-- result
 |   |-- gbk_to_faa
-|   |   |-- 37fd11c13a
-|   |   |   |-- 0197b8cb55
-|   |   |   |   `-- 0
-|   |   |   |       `-- result
-|   |   |   `-- 4b181c7a74
+|   |   |-- 169f0411dc
+|   |   |   `-- 33de89560b
 |   |   |       `-- 0
 |   |   |           `-- result
-|   |   `-- c73dd7aee4
-|   |       `-- 19270de99f
+|   |   `-- a1cea34ec0
+|   |       |-- 4489902099
+|   |       |   `-- 0
+|   |       |       `-- result
+|   |       `-- 5b8c12652f
 |   |           `-- 0
 |   |               `-- result
 |   |-- gbk_to_faa_each
-|   |   `-- c73dd7aee4
-|   |       |-- 59effc90f8
+|   |   `-- 169f0411dc
+|   |       |-- 37e7920eb0
 |   |       |   `-- 0
 |   |       |       `-- result -> ../../../../../cache/lines/...
-|   |       |-- 867c874bee
+|   |       |-- 68fb8d7f62
 |   |       |   `-- 0
 |   |       |       `-- result -> ../../../../../cache/lines/...
-|   |       `-- d470832ece
+|   |       `-- 93e2ca8356
 |   |           `-- 0
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- glob_files
-|   |   `-- e122e4adf8
+|   |   `-- 2ee4832e75
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
-|   |   |-- 0caef3d21f
+|   |   |-- 02a87cbe39
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 0dee9358c3
+|   |   |-- 415212dd66
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 29f2c01e23
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 2d84b9dc3c
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 80270625df
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- ab020e8296
+|   |   `-- 4f0029d0ab
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
 |   |-- load_fna
-|   |   `-- e82f986a14
+|   |   `-- 7b1830a6d9
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/597257619d
 |   |-- load_gbk
-|   |   `-- 772f4f8d8c
+|   |   `-- dd0371226e
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/d8da51f7cd
+|   |-- load_gbk_each
+|   |   |-- 5f28c3a5fb
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 7a35f3eadb
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- 92f524e420
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_list
-|   |   `-- 5b822fab2d
+|   |   `-- 5d694a4326
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/48cdcb15a8
 |   |-- str
@@ -126,15 +127,15 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   `-- translate
-|       `-- 6afc4b8a5a
+|       `-- 2daf534642
 |           `-- 0
 |               `-- result
 `-- vars
-    |-- pcc7942v1.faa -> ../exprs/concat_faa/e03455bbf2/0/result
-    |-- pcc7942v2.faa -> ../exprs/concat_faa/a61b994fe8/0/result
-    |-- pcc7942v3.faa -> ../exprs/concat_faa/a61b994fe8/0/result
-    |-- pcc7942v4.faa -> ../exprs/concat_faa/cb8f72c92c/0/result
-    |-- pcc7942v5.faa -> ../exprs/concat_faa/f54321a3da/0/result
-    `-- result -> ../exprs/list/ab020e8296/0/result
+    |-- pcc7942v1.faa -> ../exprs/concat_faa/6b2ff554c7/0/result
+    |-- pcc7942v2.faa -> ../exprs/concat_faa/67fd2d5d7e/0/result
+    |-- pcc7942v3.faa -> ../exprs/concat_faa/67fd2d5d7e/0/result
+    |-- pcc7942v4.faa -> ../exprs/concat_faa/0e87b96cf2/0/result
+    |-- pcc7942v5.faa -> ../exprs/concat_faa/2281560154/0/result
+    `-- result -> ../exprs/list/415212dd66/0/result
 
-84 directories, 53 files
+85 directories, 53 files

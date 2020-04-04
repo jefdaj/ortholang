@@ -1,5 +1,5 @@
-/nix/store/3pgqfavgwr8r6czfvgff8j723cr91zx5-python-2.7.17-env/lib/python2.7/site-packages/Bio/Seq.py:2715: BiopythonWarning: Partial codon, len(sequence) not a multiple of three. Explicitly trim the sequence or add trailing N before translation. This may become an error in future.
-  BiopythonWarning)
+/nix/store/nxfap76shz3s4kc2nawvsikiknisq4zl-python-2.7.17-env/lib/python2.7/site-packages/Bio/Seq.py:2859: BiopythonWarning: Partial codon, len(sequence) not a multiple of three. Explicitly trim the sequence or add trailing N before translation. This may become an error in future.
+  BiopythonWarning,
 [>Synpcc7942_0001 | Synpcc7942_0001 | DNA polymerase III, beta subunit | 65:12...
 MLWQDCDQRLGQPPPMKLVCRQNELNTSLSLVSRAVPSRPNHPVLANVLLAADAGTQRLS
 LTAFDLSLGIQTSFAAQVERSGAITLPAKLLNDIVSRLPNDSDVTLEDNDAAATLSVGSG

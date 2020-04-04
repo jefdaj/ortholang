@@ -1,40 +1,11 @@
 .
 |-- cache
 |-- exprs
-|   |-- diff
-|   |   `-- 0fef981915
-|   |       `-- 0
-|   |-- list
-|   |   |-- 306d49599d
-|   |   |   `-- 0
-|   |   |-- 4e5e0f3b24
-|   |   |   `-- 0
-|   |   |-- cbf0923630
-|   |   |   `-- 0
-|   |   `-- e23ae94380
-|   |       `-- 0
-|   |-- multiply
-|   |   |-- 16dae2df34
-|   |   |   `-- 0
-|   |   |-- 1f3c453272
-|   |   |   `-- 0
-|   |   |-- 30206e787e
-|   |   |   `-- 0
-|   |   |-- 4819ebdaf8
-|   |   |   `-- 0
-|   |   `-- 4b4886debe
-|   |       `-- 0
 |   `-- str
 |       `-- 914592cfd6
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
-|-- reps
-|   |-- 133af8a0ba
-|   |-- 66fa5d4387
-|   |-- 883b3cb1b2
-|   |-- b5df9e599b
-|   `-- cd2731a427
 `-- vars
     `-- result -> ../exprs/str/914592cfd6/0/result
 
-35 directories, 2 files
+6 directories, 2 files

@@ -1,44 +1,58 @@
 .
 |-- cache
 |   `-- bin
-|       |-- 0c281b733d -> ../../cache/bin/376d88b433
-|       |-- 376d88b433
-|       |-- 760e214f19
-|       `-- f8f22de7c0 -> ../../cache/bin/760e214f19
+|       |-- 41b92160c7 -> ../../cache/bin/e7000e57c0
+|       |-- 783bf86a8d
+|       |-- d2cd0bb60a -> ../../cache/bin/783bf86a8d
+|       `-- e7000e57c0
 |-- exprs
 |   |-- linegraph
-|   |   |-- 608f2f90d8
-|   |   |   `-- 89b1fc602f
+|   |   |-- 3c54534534
+|   |   |   `-- 1cde7c3e23
 |   |   |       `-- 0
-|   |   |           `-- result -> ../../../../../cache/bin/0c281b733d
-|   |   `-- a3177e3890
-|   |       `-- 89b1fc602f
+|   |   |           `-- result -> ../../../../../cache/bin/41b92160c7
+|   |   `-- 4b62357349
+|   |       `-- 1cde7c3e23
 |   |           `-- 0
-|   |               `-- result -> ../../../../../cache/bin/f8f22de7c0
+|   |               `-- result -> ../../../../../cache/bin/d2cd0bb60a
 |   |-- list
-|   |   |-- 3a36f11c25
+|   |   |-- 306d49599d
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 9614a28689
+|   |   |-- 3d034e28f0
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 6f41279254
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- b9c8778e5c
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- c6b94111f1
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- dc13ac5b07
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- f3e26181c7
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- multiply
-|   |   `-- 086435d94d
-|   |       |-- 8b184bb3d7
-|   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
-|   |       |-- 9b715cff19
-|   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
-|   |       |-- bc47f42e5c
-|   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
-|   |       |-- c32d32c633
-|   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
-|   |       `-- f89070018f
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |   |-- 16dae2df34
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 1f3c453272
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 30206e787e
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- 4819ebdaf8
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- 4b4886debe
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   |-- 254e420f28
 |   |   |   `-- 0
@@ -59,15 +73,15 @@
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- replace_each
-|   |   `-- 6267fc7de2
-|   |       `-- f89070018f
-|   |           `-- 0c2776b652
+|   |   `-- def0faf30b
+|   |       `-- c65a522c5c
+|   |           `-- 0a30b2de40
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- score_repeats
-|   |   `-- 6267fc7de2
-|   |       `-- f89070018f
-|   |           `-- 0c2776b652
+|   |   `-- def0faf30b
+|   |       `-- c65a522c5c
+|   |           `-- 0a30b2de40
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
@@ -81,30 +95,30 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 |-- reps
-|   |-- 008eb41ea7
-|   |   |-- result -> ../../reps/008eb41ea7/yvar.num
+|   |-- adb4e92292
+|   |   |-- result -> ../../reps/adb4e92292/yvar.num
+|   |   |-- xvar.num -> ../../exprs/num/ea11b49459/0/result
+|   |   `-- yvar.num -> ../../exprs/multiply/16dae2df34/0/result
+|   |-- bb78e29fe5
+|   |   |-- result -> ../../reps/bb78e29fe5/yvar.num
 |   |   |-- xvar.num -> ../../exprs/num/eaad7f2e40/0/result
-|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/9b715cff19/0/result
-|   |-- 4d2c8477cf
-|   |   |-- result -> ../../reps/4d2c8477cf/yvar.num
+|   |   `-- yvar.num -> ../../exprs/multiply/4b4886debe/0/result
+|   |-- bc66ccfda8
+|   |   |-- result -> ../../reps/bc66ccfda8/yvar.num
 |   |   |-- xvar.num -> ../../exprs/num/a629005e3c/0/result
-|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/c32d32c633/0/result
-|   |-- 6bb560f9f9
-|   |   |-- result -> ../../reps/6bb560f9f9/yvar.num
-|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/f89070018f/0/result
-|   |-- 7b996446f2
-|   |   |-- result -> ../../reps/7b996446f2/yvar.num
-|   |   |-- xvar.num -> ../../exprs/num/89fb8b4aed/0/result
-|   |   `-- yvar.num -> ../../exprs/multiply/086435d94d/8b184bb3d7/0/result
-|   `-- b5132898f7
-|       |-- result -> ../../reps/b5132898f7/yvar.num
-|       |-- xvar.num -> ../../exprs/num/ea11b49459/0/result
-|       `-- yvar.num -> ../../exprs/multiply/086435d94d/bc47f42e5c/0/result
+|   |   `-- yvar.num -> ../../exprs/multiply/30206e787e/0/result
+|   |-- f1a3d59435
+|   |   |-- result -> ../../reps/f1a3d59435/yvar.num
+|   |   `-- yvar.num -> ../../exprs/multiply/1f3c453272/0/result
+|   `-- f7d767d99f
+|       |-- result -> ../../reps/f7d767d99f/yvar.num
+|       |-- xvar.num -> ../../exprs/num/89fb8b4aed/0/result
+|       `-- yvar.num -> ../../exprs/multiply/4819ebdaf8/0/result
 `-- vars
-    |-- named.num.scores -> ../exprs/score_repeats/6267fc7de2/f89070018f/0c2776b652/0/result
-    |-- plots.png.list -> ../exprs/list/9614a28689/0/result
+    |-- named.num.scores -> ../exprs/score_repeats/def0faf30b/c65a522c5c/0a30b2de40/0/result
+    |-- plots.png.list -> ../exprs/list/3d034e28f0/0/result
     |-- result -> ../vars/plots.png.list
-    |-- unnamed.num.scores -> ../exprs/score_repeats/6267fc7de2/f89070018f/0c2776b652/0/result
+    |-- unnamed.num.scores -> ../exprs/score_repeats/def0faf30b/c65a522c5c/0a30b2de40/0/result
     `-- xvar.num -> ../exprs/num/ee383407c9/0/result
 
-64 directories, 43 files
+73 directories, 48 files

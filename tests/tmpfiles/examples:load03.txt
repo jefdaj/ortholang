@@ -1,55 +1,56 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- emptyfaa.txt -> ../../cache/lines/...
-|   |   `-- f8222fbd6b.txt -> ../../cache/lines/...
+|   |   |-- 1bb4e11878.txt -> ../../cache/lines/...
+|   |   `-- emptyfaa.txt -> ../../cache/lines/...
 |   |-- each
-|   |   `-- fec3c06864
-|   |       |-- 0197b8cb55
+|   |   `-- 167564532a
+|   |       |-- 4489902099
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/0197b8cb55/0/result
-|   |       `-- 4b181c7a74
+|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/4489902099/0/result
+|   |       `-- 5b8c12652f
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/gbk_to_faa/37fd11c13a/4b181c7a74/0/result
+|   |           `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/5b8c12652f/0/result
 |   |-- load
 |   |   |-- 5e5e074c73 -> $WORKDIR/examples/gene-lists/pcc7942-random-100.txt
 |   |   |-- d8da51f7cd -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
 |   |   `-- ec9540d17e -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
 |   `-- seqio
-|       `-- 4abc1a828c.txt -> ../../cache/lines/...
+|       `-- 50a7cc881c.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- concat_faa
-|   |   `-- e03455bbf2
+|   |   `-- 6b2ff554c7
 |   |       `-- 0
 |   |           `-- result
 |   |-- extract_seqs
-|   |   `-- 46d7caa2ad
-|   |       `-- 3bcc9bcb0a
+|   |   `-- 98c32d62ce
+|   |       `-- f4fd3e6a1f
 |   |           `-- 0
 |   |               `-- result
 |   |-- gbk_to_faa
-|   |   `-- 37fd11c13a
-|   |       |-- 0197b8cb55
+|   |   `-- a1cea34ec0
+|   |       |-- 4489902099
 |   |       |   `-- 0
 |   |       |       `-- result
-|   |       `-- 4b181c7a74
+|   |       `-- 5b8c12652f
 |   |           `-- 0
 |   |               `-- result
 |   |-- gbk_to_faa_each
-|   |   `-- c73dd7aee4
-|   |       `-- 867c874bee
+|   |   `-- 169f0411dc
+|   |       `-- 37e7920eb0
 |   |           `-- 0
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- list
-|   |   |-- 0dee9358c3
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 80270625df
+|   |   `-- 02a87cbe39
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
+|   |-- load_gbk_each
+|   |   `-- 92f524e420
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_list
-|   |   `-- dfb5c31d35
+|   |   `-- c5b6d83a5a
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/5e5e074c73
 |   `-- str
@@ -66,9 +67,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- genes_of_interest.str.list -> ../exprs/load_list/dfb5c31d35/0/result
-    |-- pcc7942genes.faa -> ../exprs/concat_faa/e03455bbf2/0/result
+    |-- genes_of_interest.str.list -> ../exprs/load_list/c5b6d83a5a/0/result
+    |-- pcc7942genes.faa -> ../exprs/concat_faa/6b2ff554c7/0/result
     |-- result -> ../vars/sequences_of_interest.faa
-    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/46d7caa2ad/3bcc9bcb0a/0/result
+    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/98c32d62ce/f4fd3e6a1f/0/result
 
-45 directories, 26 files
+46 directories, 26 files
