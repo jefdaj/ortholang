@@ -7,17 +7,17 @@
 |   |-- any
 |   |   `-- bf92a8b4c8
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- list
 |   |   |-- 843c803bed
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   |-- cbc1a7320c
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   `-- ef4d70f9c8
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- load_faa
 |   |   `-- 649c67c82e
 |   |       `-- 0

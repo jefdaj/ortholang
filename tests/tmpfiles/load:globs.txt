@@ -57,7 +57,7 @@
 |   |-- diff
 |   |   `-- fb33d3c4d0
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- glob_files
 |   |   |-- 844850e0c9
 |   |   |   `-- 0
@@ -68,7 +68,7 @@
 |   |-- list
 |   |   `-- 62f1cec61d
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- load_faa_each
 |   |   |-- 5d2d23e5b6
 |   |   |   `-- 0

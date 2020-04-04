@@ -4,7 +4,7 @@
 |   |-- list
 |   |   `-- 1b7b7fda1a
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- num
 |   |   |-- ea11b49459
 |   |   |   `-- 0

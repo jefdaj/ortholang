@@ -4,20 +4,20 @@
 |   |-- leave_each_out
 |   |   `-- f65012038d
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- list
 |   |   |-- 825916e7f0
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   |-- a629005e3c
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   |-- ea11b49459
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   `-- ee383407c9
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   `-- num
 |       |-- a629005e3c
 |       |   `-- 0

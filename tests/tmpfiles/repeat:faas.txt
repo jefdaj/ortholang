@@ -4,7 +4,7 @@
 |   |-- all
 |   |   `-- 5d605325cd
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- glob_files
 |   |   `-- 61ea1c489e
 |   |       |-- 0
@@ -220,309 +220,309 @@
 |   |       `-- d07ae4c49a
 |   |           `-- 6dff06710c
 |   |               `-- 0
-|   |                   `-- result -> ../../../../../../cache/lines/...
+|   |                   `-- result
 |   |-- sample
 |   |   `-- 8664e15cfc
 |   |       |-- 03722159bc
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 07a3a6a5ea
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 08284e44d4
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 0a76afa25e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 0e23bf4be8
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 0e99158e9b
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 10e789886a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 16239aa858
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 1a2f7d12fe
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 1f8fb5256f
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 239b5ded89
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 2547471a2b
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 25c62463d4
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 25d2c1710c
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 2a953f7b3e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 2f25a432f8
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 3512cc702e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 3559f6d7dd
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 35884e394d
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 3af1865d2f
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 3f14f14afb
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 43a78e525a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 4471fddc89
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 46ede00d0a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 4a70e7cfd2
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 4b605d5021
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 4d0bf193eb
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 4e0294fdbe
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 500d71571f
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 5108738048
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 537220bac1
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 5601c25746
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 57fed512cc
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 580c4b8c74
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 587c1e07e9
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 65dd2e8bf8
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 685f970ba6
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 6a665e7876
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 6bc45fac06
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 6c19b1c92e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 6c1ea7ca80
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 6eab6be7fb
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 705a4654ca
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 79d172fe19
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 7aa3eea89c
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 7d98009eb9
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 8232c27dd2
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 88b60b5515
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 8a7cb0c34b
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 8c892fe9f1
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 8e46202967
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 90fbbf2359
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 942e3a1db3
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 963aa831e5
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 97ee3d7b9b
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 98c0e5e07d
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 9ec71e6526
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- 9f6c585d18
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- a3265569d4
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- a39a1097a6
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- a7fa79f49e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- aa728e9736
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- abc4e5be9c
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b17df0ae80
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b327543b28
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b3b7a2709a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b5d82cf04d
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b71f57fbe5
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b7a77280a1
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- b8abbdf61f
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- bbf9c9589a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- bd2df7e79e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- bf69b73e91
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- bffe9f3aad
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- c110e6a72c
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- c368f32cfd
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- c81dce2497
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- c823819273
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- cee2331b8c
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- cf4e2be719
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d07ae4c49a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d0d06868ee
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d3483e72f8
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d4877459b3
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d5c988811e
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d6251b4c04
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d652392647
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- d9a62a1f68
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- dde7a02bd9
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- de43c7bce7
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- e25a35de36
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- e4393a875a
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- e782af4c11
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- e8b576a7c3
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- ea5b49ad37
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- ed04935328
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- edfa8eaa6d
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- f2381fb201
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       |-- f24181a2f3
 |   |       |   `-- 0
-|   |       |       `-- result -> ../../../../../cache/lines/...
+|   |       |       `-- result
 |   |       `-- f72ac9c25b
 |   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |               `-- result
 |   `-- str
 |       `-- 3b58ff9708
 |           `-- 0

@@ -6,17 +6,17 @@
 |   |-- any
 |   |   `-- 350be011b1
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- list
 |   |   |-- 188929ba5e
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   |-- 3cd247875d
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   `-- df4d134ad6
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- load_gbk
 |   |   `-- a2d4927026
 |   |       `-- 0

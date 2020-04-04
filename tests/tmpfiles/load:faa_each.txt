@@ -15,13 +15,13 @@
 |   |-- list
 |   |   |-- 843c803bed
 |   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |       `-- result
 |   |   |-- a7ae44003c
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- ef4d70f9c8
 |   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |           `-- result
 |   |-- load_faa
 |   |   `-- 649c67c82e
 |   |       `-- 0
