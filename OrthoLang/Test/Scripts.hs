@@ -88,11 +88,13 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
+      -- so the shared tmpfiles will be looked through first
+      withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] 
       out <- runScript cfg ref ids dRef sDir
       -- uncomment to update the golden stdout files:
       -- writeFile ("tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
-    desc = name ++ ".ol prints expected output"
+    desc = name ++ ".ol prints expected output with shared tmpfiles"
 
 withTmpDirLock :: Config -> LocksRef -> IO a -> IO a
 withTmpDirLock cfg ref act = withWriteLockEmpty ref (cfgTmpDir cfg </> "lock") act
@@ -139,12 +141,12 @@ mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
   where
     cfg' = cfg { cfgShare = Just sDir }
     shareAct = do
-      _ <- runScript cfg ref ids dRef sDir
-      _ <- copyToShared cfg sDir ref
-      withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] -- to see if it can use the shared one instead
+      -- shouldn't be needed, but just in case this isn't the first test
+      withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] 
       out <- runScript cfg' ref ids dRef sDir
+      _ <- copyToShared cfg sDir ref
       return $ B8.pack out
-    desc = name ++ ".ol re-uses shared tmpfiles"
+    desc = name ++ ".ol prints expected output without shared tmpfiles"
 
 {-|
 Test that no absolute paths snuck into the tmpfiles.
@@ -198,7 +200,7 @@ mkScriptTests sDir (name, cut, out, tre, mchk) cfg ref ids dRef = do
       treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef sDir name tre]
       tests     = if (name `elem` badlyBroken)
                      then []
-                     else [tripTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
+                     else [tripTest, shareTest] ++ outTests ++ absTests ++ treeTests ++ checkTests
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths
@@ -266,7 +268,8 @@ mkTests cfg ref ids dRef = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
   let sDir = cfgTmpDir cfg </> "sharedir"
-  groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids dRef testDir mn sDir $ Just mn) $
+      cfg' = cfg {cfgShare = Just sDir}
+  groups  <- mapM (\mn -> mkTestsPrefix cfg' ref ids dRef testDir mn sDir $ Just mn) $
                map (simplify . mName) modules
-  exGroup <- mkExampleTests cfg ref ids dRef exDir sDir testDir
+  exGroup <- mkExampleTests cfg' ref ids dRef exDir sDir testDir
   return $ testGroup "run test scripts" $ groups ++ [exGroup]
