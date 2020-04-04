@@ -88,7 +88,7 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff desc gld scriptAct
   where
     -- TODO put toGeneric back here? or avoid paths in output altogether?
     scriptAct = do
-      out <- runScript cfg ref ids dRef sDir
+      out <- runScript cfg ref ids dRef
       -- uncomment to update the golden stdout files:
       -- writeFile ("tests/stdout" </> takeBaseName gld <.> "txt") out
       return $ B8.pack out
@@ -109,7 +109,7 @@ mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
     treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
     treeAct = do
-      _ <- runScript cfg ref ids dRef sDir
+      _ <- runScript cfg ref ids dRef
       out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
@@ -139,10 +139,10 @@ mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
   where
     cfg' = cfg { cfgShare = Just sDir }
     shareAct = do
-      _ <- runScript cfg ref ids dRef sDir
+      _ <- runScript cfg ref ids dRef
       _ <- copyToShared cfg sDir ref
       withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] -- to see if it can use the shared one instead
-      out <- runScript cfg' ref ids dRef sDir
+      out <- runScript cfg' ref ids dRef
       return $ B8.pack out
     desc = name ++ ".ol re-uses shared tmpfiles"
 
@@ -160,7 +160,7 @@ mkAbsTest cfg ref ids name dRef sDir = testSpecs $ it desc $
                 "--exclude=*.ini", "--exclude=*.log",
                 cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
     absGrep = do
-      _ <- runScript cfg ref ids dRef sDir
+      _ <- runScript cfg ref ids dRef
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
@@ -175,8 +175,8 @@ copyToShared cfg sDir ref = withTmpDirLock cfg ref $ do
 This is more or less idempotent because re-running the same cut multiple
 times is fast. So it's OK to run it once for each test in a group.
 -}
-runScript :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO String
-runScript cfg ref ids dRef sDir = withTmpDirLock cfg ref $ do
+runScript :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO String
+runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids, dRef) stdout
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
@@ -217,7 +217,7 @@ mkCheckTest cfg ref ids dRef sDir name scr = testSpecs $ it desc $ runCheck `sho
   where
     desc = name ++ ".ol output + tmpfiles checked by script"
     runCheck = do
-      _ <- runScript cfg ref ids dRef sDir -- TODO any reason to reuse ids here?
+      _ <- runScript cfg ref ids dRef -- TODO any reason to reuse ids here?
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
       return $ toGeneric cfg $ out ++ err
 

@@ -1,8 +1,9 @@
 -- TODO remove any unneccessary locks that aren't withWriteOnce* from the other modules!
 -- TODO wait do that, but also in a separate branch rewrite the locking simpler with whole expr dirs at once!
 
-module OrthoLang.Core.Locks
+module OrthoLang.Locks
   ( Locks
+  , LocksRef
   , initLocks
   , withReadLock
   , withReadLock'
@@ -47,7 +48,9 @@ import Text.Regex.Posix           ((=~))
 -- import Control.Concurrent.Thread.Delay (delay)
 
 -- TODO parametarize FilePath and re-export with OrthoLangPath in Types.hs?
-type Locks = (Resource, IORef (Map FilePath (RWLock, FileProgress)))
+-- type Locks = (Resource, IORef (Map FilePath (RWLock, FileProgress)))
+type Locks    = Map FilePath (RWLock, FileProgress)
+type LocksRef = (Resource, IORef Locks)
 
 -- TODO should there also be Failed?
 data FileProgress = ReadOnly | Success Int | Attempt Int
@@ -74,7 +77,7 @@ initLocks = do
   locks <- newIORef Map.empty
   return (disk, locks)
 
-getReadLock :: Locks -> FilePath -> IO RWLock
+getReadLock :: LocksRef -> FilePath -> IO RWLock
 getReadLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
@@ -84,7 +87,7 @@ getReadLock (_, ref) path = do
     Just (l', ReadOnly ) -> (c, l')
     Just (l', Success _) -> (c, l')
 
-getWriteLock :: Locks -> FilePath -> IO RWLock
+getWriteLock :: LocksRef -> FilePath -> IO RWLock
 getWriteLock (_, ref) path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
@@ -96,13 +99,14 @@ getWriteLock (_, ref) path = do
     --                           else error $ "Attempt to re-write successful file: '" ++ path ++ "'" -- TODO remove error?
     Just (l', Success n) -> (Map.insert path (l', Attempt (n+1)) c, l')
     Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
-    Just (l', ReadOnly ) -> error $ "Attempt to write read-only file: '" ++ path ++ "'"
+    Just (_ , ReadOnly ) -> error $ "Attempt to write read-only file: '" ++ path ++ "'"
 
-markDone :: Locks -> FilePath -> IO ()
+markDone :: LocksRef -> FilePath -> IO ()
 markDone (_, ref) path = do
   debugLock $ "markDone '" ++ path ++ "'"
   atomicModifyIORef' ref $ \c -> case Map.lookup path c of
     Nothing -> error $ "markDone called on nonexistent lock path '" ++ path ++ "'"
+    Just (_, ReadOnly ) -> error $ "markDone called on read-only lock path '" ++ path ++ "'"
     Just (l, Success n) -> if whitelisted path
                              then (Map.insert path (l, Success (n+1)) c, ())
                              else error $ "markDone called on already-finished lock path '" ++ path ++ "'"
@@ -116,20 +120,20 @@ whitelisted path = any (\p -> path =~ p) regexes
       [ "\\.show$"
       ]
 
-withMarkDone :: Locks -> [FilePath] -> IO a -> IO a
+withMarkDone :: LocksRef -> [FilePath] -> IO a -> IO a
 withMarkDone ref paths act = do
   res <- act
   mapM_ (markDone ref) paths
   return res
 
 -- TODO use MonadIO or something to unify these?
-withMarkDone' :: Locks -> [FilePath] -> Action a -> Action a
+withMarkDone' :: LocksRef -> [FilePath] -> Action a -> Action a
 withMarkDone' ref paths act = do
   res <- act
   liftIO $ mapM_ (markDone ref) paths
   return res
 
-withReadLock :: Locks -> FilePath -> IO a -> IO a
+withReadLock :: LocksRef -> FilePath -> IO a -> IO a
 withReadLock ref path ioFn = do -- TODO IO issue here?
   l <- liftIO $ getReadLock ref path
   bracket_
@@ -137,16 +141,18 @@ withReadLock ref path ioFn = do -- TODO IO issue here?
     (debugLock ("withReadLock releasing \"" ++ path ++ "\"") >> RWLock.releaseRead l)
     ioFn
 
-withReadLock' :: Locks -> FilePath -> Action a -> Action a
-withReadLock' ref path actFn = do
+withReadLock' :: FilePath -> Action a -> Action a
+withReadLock' path actFn = do
+  ref <- fmap fromJust getShakeExtra
   l <- liftIO $ getReadLock ref path
   debugLock' $ "withReadLock' acquiring '" ++ path ++ "'"
   (liftIO (RWLock.acquireRead l) >> actFn)
     `actionFinally`
     (debugLock ("withReadLock' releasing \"" ++ path ++ "\"") >> RWLock.releaseRead l)
 
-withReadLocks' :: Locks -> [FilePath] -> Action a -> Action a
-withReadLocks' ref paths actFn = do
+withReadLocks' :: [FilePath] -> Action a -> Action a
+withReadLocks' paths actFn = do
+  ref <- fmap fromJust getShakeExtra
   locks <- liftIO $ mapM (getReadLock ref) (nub paths)
   debugLock' $ "withReadLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireRead locks) >> actFn)
@@ -188,12 +194,12 @@ withWriteLockEmpty ref path ioFn = do
     (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
     (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
     (withMarkDone ref [path] ioFn)
-  assertNonEmptyFile ref path
   return res
 
 withWriteLocks' :: [FilePath] -> Action a -> Action a
 withWriteLocks' paths actFn = do
   liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
+  ref <- fmap fromJust getShakeExtra
   locks <- liftIO $ mapM (getWriteLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
   (liftIO (mapM_ RWLock.acquireWrite locks) >> withMarkDone' ref (nub paths) actFn)
@@ -204,6 +210,7 @@ withWriteLock' :: FilePath -> Action a -> Action a
 withWriteLock' path actFn = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path
   debugLock' $ "withWriteLock' acquiring '" ++ path ++ "'"
+  ref <- fmap fromJust getShakeExtra
   l <- liftIO $ getWriteLock ref path
   (liftIO (RWLock.acquireWrite l) >> withMarkDone' ref [path] actFn)
     `actionFinally`
