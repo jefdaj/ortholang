@@ -27,7 +27,7 @@ module OrthoLang.Util
   , globFiles
 
   -- error handling
-  -- , ignoreErrors
+  , ignoreErrors
   , retryIgnore
 
   -- misc
@@ -239,7 +239,7 @@ globFiles ptn = expandTildes ptn >>= glob >>= mapM absolutize
 -- error handling --
 --------------------
 
-ignoreErrors fn = catchAny fn (\e -> putStrLn ("error! " ++ show e))
+ignoreErrors fn = catchAny fn (\e -> return $ trace "util.ignoreErrors" (show e) ())
 
 -- This one is as bad as it sounds, so remove it when able! It's the only
 -- way I've managed to solve the occasional "openFile" lock conflicts.
