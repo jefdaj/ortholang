@@ -176,7 +176,11 @@ aReplaceEachLinks outPath subPaths resPaths = do
       resPaths' = map (fromPath cfg) resPaths
       out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
   need' "aReplaceEachLinks" (subPaths':resPaths') -- TODO is needing subPaths required?
+
+  -- this fixes load:faa.ol but breaks repeat:load.ol and repeat:replace_each_recursive.ol
+  -- wait no, it doesn't fix that either lol
   -- mapM_ readPaths resPaths'
+
   writePaths out resPaths
 
 ------------------

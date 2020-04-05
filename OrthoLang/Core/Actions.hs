@@ -145,6 +145,7 @@ needShared name path@(Path p) = do
   done <- doesFileExist path'
   if done
      -- these depend on the local filesystem
+     || ("$TMPDIR/cache/load" `isPrefixOf` p)
      || ("$TMPDIR/exprs/load" `isPrefixOf` p)
      || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
      || (not $ "$TMPDIR" `isPrefixOf` p)
