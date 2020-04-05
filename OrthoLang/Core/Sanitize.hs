@@ -94,7 +94,6 @@ hashIDsFile2 inFa outFa = do
       -- ids' = M.insert k v ids
   liftIO $ createDirectoryIfMissing True $ takeDirectory inFa'
   liftIO $ createDirectoryIfMissing True $ takeDirectory outFa'
-  (ref :: LocksRef) <- fmap fromJust getShakeExtra
   runCmd $ CmdDesc
     { cmdBinary = "hash_seqids.py"
     , cmdArguments = [outFa', inFa']

@@ -141,6 +141,7 @@ needShared :: String -> Path -> Action ()
 needShared name path@(Path p) = do
   cfg <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
+  debugA' "needShared" $ "called for '" ++ path' ++ "'"
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
   if done
@@ -158,20 +159,27 @@ needShared name path@(Path p) = do
      || ("$TMPDIR/exprs/num/" `isInfixOf` p)
      --  ("$TMPDIR/exprs/list/" `isInfixOf` p)
     -- if any of those ^ special cases apply, skip shared lookup
-    then needDebug name [path']
+    then do
+      debugA' "needShared" $ "skip shared lookup and needDebug normally: '" ++ path' ++ "'"
+      needDebug name [path']
     -- otherwise, attempt it
     else do
       -- if it's a symlink, recurse on the source file first
       -- (unlike the list of paths case, this should be done first so the symlink works)
       -- TODO should this go way at the top?
       -- needLinkSrcIfAny name path'
+      debugA' "needShared" $ "checking for shared version: '" ++ show path ++ "'"
       shared <- lookupShared path
       case shared of
         -- path not in shared cache; need via the usual mechanism instead
-        Nothing -> needDebug name [path']
+        Nothing -> do
+          debugA' "needShared" $ "no shared version found, so needDebug normally: '" ++ path' ++ "'"
+          needDebug name [path']
         -- path is available!
         -- now the main task: copy and/or download the file
-        Just sp -> fetchShared sp path'
+        Just sp -> do
+          debugA' "needShared" $ "found shared path for '" ++ path' ++ "': '" ++ sp ++ "'"
+          fetchShared sp path'
 
 -- TODO figure out better criteria for download
 -- TODO and do it via macro expansion rather than as a case in here
@@ -284,7 +292,8 @@ readLitPaths path = do
   ls <- readList path
   let ls'  = map toAbs ls
       ls'' = map (toPath cfg) ls'
-  need' "core.actinos.readLitPaths" ls'
+  -- Note: need' causes infinite recursion here, so we skip to needDebug
+  needDebug "core.actinos.readLitPaths" ls'
   return ls''
 
 -- TODO how should this relate to readLit and readStr?

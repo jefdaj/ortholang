@@ -550,6 +550,7 @@ rLoadList _ _ _ = fail "bad arguments to rLoadList"
 -- TODO remove rtn and use (typeOf expr)?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 -- TODO don't need to hash seqids here right?
+-- TODO need to readLitPaths?
 rLoadListLits :: RulesFn
 rLoadListLits scr expr = do
   (ExprPath litsPath') <- rExpr scr expr
@@ -562,6 +563,7 @@ rLoadListLits scr expr = do
   return (ExprPath outPath')
   where
 
+-- TODO have to listLitPaths here too?
 aLoadListLits :: Path -> Path -> Action ()
 aLoadListLits outPath litsPath = do
   cfg  <- fmap fromJust getShakeExtra
