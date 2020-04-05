@@ -176,26 +176,35 @@ needShared name path@(Path p) = do
 
         -- path is available!
         -- now the main task: copy and/or download the file
-        -- TODO figure out better criteria for download
-        Just sp -> do
-          liftIO $ createDirectoryIfMissing True $ takeDirectory path'
-          withWriteOnce path' $ liftIO $ do
-            if "download" `isInfixOf` sp
-              then renameFile sp path'
-              else copyFile sp path'
-          trackWrite' [path']
+        Just sp -> fetchShared sp path'
 
   -- after needing the file by whatever mechanism,
   -- check if it refers to more paths we also need to need
   -- (unlike the symlinks case, this has to be done after the main file)
-  needPathsIfAny name path'
+  -- needPathsIfAny name path'
 
+-- TODO figure out better criteria for download
+-- TODO and do it via macro expansion rather than as a case in here
+fetchShared :: FilePath -> FilePath -> Action ()
+fetchShared sp path' = withWriteOnce path' $ do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory path'
+  liftIO $ if "download" `isInfixOf` sp
+             then renameFile sp path'
+             else copyFile   sp path'
+  trackWrite' [path']
+
+-- TODO can this always be handled by readPaths instead?
 -- TODO also take the type
-needPathsIfAny :: String -> FilePath -> Action ()
-needPathsIfAny name path = do
-  paths <- readPaths path
-  cfg <- fmap fromJust getShakeExtra
-  need' name $ map (fromPath cfg) paths
+-- needPathsIfAny :: String -> Type -> FilePath -> Action ()
+-- needPathsIfAny name ptype path = when (isPathList ptype) $ do
+--   paths <- readPaths path
+--   cfg <- fmap fromJust getShakeExtra
+--   need' name ptype $ map (fromPath cfg) paths
+
+-- TODO move to Types.hs?
+-- isPathList :: Type -> Bool
+-- isPathList (ListOf x) = not $ x `elem` [str, num]
+-- isPathList _ = False
 
 -- TODO and should the symlink also be created?
 -- TODO this will get the abspath of the *cache* version, right? have to get the local one!
