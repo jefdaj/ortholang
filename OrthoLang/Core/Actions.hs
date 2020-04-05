@@ -157,6 +157,8 @@ needShared name path@(Path p) = do
      -- these are probably faster to recompute than fetch
      || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
      || ("$TMPDIR/exprs/num/" `isInfixOf` p)
+     -- this fixes load functions, but mysteriously breaks repeat:load.ol
+     || ("$TMPDIR/exprs/list/" `isInfixOf` p)
      --  ("$TMPDIR/exprs/list/" `isInfixOf` p)
     -- if any of those ^ special cases apply, skip shared lookup
     then do
