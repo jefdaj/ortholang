@@ -132,56 +132,44 @@ Take a list of FnTags, and skip shared lookup if they say it depends on the loca
 If the path already exists or is to a str, num, or list of those, skip shared lookup for speed.
 Is the special case for downloaded paths needed? Maybe remove it.
 If the path is available in the shared cache, copy it over + trackWrite. Otherwise needDebug as normal.
-If the path is to a list of paths, also recursively need those at the end (whether or not it already exists).
+
+TODO If the path is to a list of paths, should we also recursively need those
+     at the end (whether or not it already exists)?
 -}
 -- TODO replace these with FnTags saying not to fetch them
 needShared :: String -> Path -> Action ()
 needShared name path@(Path p) = do
   cfg <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
-
   -- if it's a symlink, recurse on the source file first
   -- (unlike the list of paths case, this should be done first so the symlink works)
   -- TODO should this go way at the top?
   needLinkSrcIfAny name path'
-
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
   if done
-
      -- these depend on the local filesystem
      || ("$TMPDIR/exprs/load" `isPrefixOf` p)
      || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
      || (not $ "$TMPDIR" `isPrefixOf` p)
-
      -- don't mess with these for now
      -- TODO does caching them help? or hurt?
      || ("$TMPDIR/reps/" `isPrefixOf` p)
      || ("$TMPDIR/vars/" `isPrefixOf` p)
-
      -- these are probably faster to recompute than fetch
      || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
      || ("$TMPDIR/exprs/num/" `isInfixOf` p)
-
     -- if any of those ^ special cases apply, skip shared lookup
     then needDebug name [path']
-
     -- otherwise, attempt it
     else do
       shared <- lookupShared path
       case shared of
-
         -- path not in shared cache; need via the usual mechanism instead
         Nothing -> needDebug name [path']
-
         -- path is available!
         -- now the main task: copy and/or download the file
         Just sp -> fetchShared sp path'
-
-  -- after needing the file by whatever mechanism,
-  -- check if it refers to more paths we also need to need
-  -- (unlike the symlinks case, this has to be done after the main file)
-  -- needPathsIfAny name path'
 
 -- TODO figure out better criteria for download
 -- TODO and do it via macro expansion rather than as a case in here
@@ -192,19 +180,6 @@ fetchShared sp path' = withWriteOnce path' $ do
              then renameFile sp path'
              else copyFile   sp path'
   trackWrite' [path']
-
--- TODO can this always be handled by readPaths instead?
--- TODO also take the type
--- needPathsIfAny :: String -> Type -> FilePath -> Action ()
--- needPathsIfAny name ptype path = when (isPathList ptype) $ do
---   paths <- readPaths path
---   cfg <- fmap fromJust getShakeExtra
---   need' name ptype $ map (fromPath cfg) paths
-
--- TODO move to Types.hs?
--- isPathList :: Type -> Bool
--- isPathList (ListOf x) = not $ x `elem` [str, num]
--- isPathList _ = False
 
 -- TODO and should the symlink also be created?
 -- TODO this will get the abspath of the *cache* version, right? have to get the local one!
@@ -231,29 +206,9 @@ lookupShared path = do
             then Just sp
             else Nothing
 
--- TODO what about timeouts and stuff?
--- TODO would downloading as binary be better?
--- TODO how to remove the files after downloading?
+-- TODO where should this go?
 download :: Config -> String -> IO (Maybe FilePath)
--- download _ url = return Nothing
 download cfg url = do
-  -- liftIO $ putStrLn $ "url: " ++ url
-
-  -- works, but seems to have problems with timeouts or something
-  -- response <- simpleHTTP $ getRequest url
-  -- case fmap rspCode response of
-  --   Left _ -> do
-  --     -- liftIO $ putStrLn $ show err
-  --     return Nothing
-  --   Right (2,0,0) -> case fmap rspBody response of
-  --     Left _ -> return Nothing
-  --     Right txt -> do
-  --       path <- writeTempFile (cfgTmpDir cfg) "download.txt" txt
-  --       -- liftIO $ putStrLn $ "downloaded: " ++ path
-  --       return $ Just path
-  --   Right _ -> return Nothing
-
-  -- use download instead of HTTP
   es <- openURIString url
   case es of
     Left _ -> return Nothing
@@ -295,8 +250,12 @@ readPath :: FilePath -> Action Path
 readPath path = readPaths path >>= return . headOrDie "readPath failed"
 
 -- TODO should this have checkPaths?
+-- TODO what happens when each is itself a list of paths?
 readPaths :: FilePath -> Action [Path]
-readPaths path = (fmap . map) stringPath (readList path)
+readPaths path = do
+  paths <- (fmap . map) stringPath $ readList path
+  mapM_ (needShared "readPaths") paths
+  return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
 -- suitible for external scripts to read
