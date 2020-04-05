@@ -134,6 +134,7 @@ needShared name path@(Path p) = do
      || ("/glob" `isInfixOf` p)
      || ("exprs/str" `isInfixOf` p)
      || ("exprs/num" `isInfixOf` p)
+     || ("exprs/list" `isInfixOf` p) -- TODO put lists back? causes lockup in load_*_each
      || ("/reps/" `isInfixOf` p)
      || ("/vars/" `isInfixOf` p)
      || (not $ "$TMPDIR" `isPrefixOf` p)
