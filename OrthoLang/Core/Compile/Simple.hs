@@ -18,7 +18,7 @@ import Data.List                  (intersperse, isPrefixOf, isInfixOf)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName)
 import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, writePaths, symlink)
+                                   writePaths, symlink)
 -- import OrthoLang.Core.Locks        (withWriteLock')
 import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
 import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,

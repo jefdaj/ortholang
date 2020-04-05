@@ -141,10 +141,6 @@ needShared :: String -> Path -> Action ()
 needShared name path@(Path p) = do
   cfg <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
-  -- if it's a symlink, recurse on the source file first
-  -- (unlike the list of paths case, this should be done first so the symlink works)
-  -- TODO should this go way at the top?
-  needLinkSrcIfAny name path'
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
   if done
@@ -159,10 +155,15 @@ needShared name path@(Path p) = do
      -- these are probably faster to recompute than fetch
      || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
      || ("$TMPDIR/exprs/num/" `isInfixOf` p)
+     --  ("$TMPDIR/exprs/list/" `isInfixOf` p)
     -- if any of those ^ special cases apply, skip shared lookup
     then needDebug name [path']
     -- otherwise, attempt it
     else do
+      -- if it's a symlink, recurse on the source file first
+      -- (unlike the list of paths case, this should be done first so the symlink works)
+      -- TODO should this go way at the top?
+      -- needLinkSrcIfAny name path'
       shared <- lookupShared path
       case shared of
         -- path not in shared cache; need via the usual mechanism instead
@@ -254,7 +255,8 @@ readPath path = readPaths path >>= return . headOrDie "readPath failed"
 readPaths :: FilePath -> Action [Path]
 readPaths path = do
   paths <- (fmap . map) stringPath $ readList path
-  mapM_ (needShared "readPaths") paths
+  cfg <- fmap fromJust getShakeExtra
+  need' "core.actions.readPaths" $ map (fromPath cfg) paths
   return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
@@ -271,6 +273,7 @@ absolutizePaths inPath outPath = do
 
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
+-- Note this does *not* imply that the paths are to literals
 readLitPaths :: FilePath -> Action [Path]
 readLitPaths path = do
   cfg <- fmap fromJust getShakeExtra
@@ -278,7 +281,10 @@ readLitPaths path = do
                      then line
                      else cfgWorkDir cfg </> line
   ls <- readList path
-  return $ map (toPath cfg . toAbs) ls
+  let ls'  = map toAbs ls
+      ls'' = map (toPath cfg) ls'
+  need' "core.actinos.readLitPaths" ls'
+  return ls''
 
 -- TODO how should this relate to readLit and readStr?
 readString :: Type -> FilePath -> Action String

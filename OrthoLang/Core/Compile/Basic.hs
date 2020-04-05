@@ -293,7 +293,7 @@ aListLits paths outPath = do
   let out'   = fromPath cfg outPath
       out''  = traceA "aListLits" out' (out':paths')
       paths' = map (fromPath cfg) paths
-  need paths'
+  need' "core.compile.basic.aListLits" paths' -- TODO remove?
   lits <- mapM readLit paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
   debugA "core.compile.basic.aListLits" $ "lits': " ++ show lits'

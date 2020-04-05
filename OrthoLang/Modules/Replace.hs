@@ -175,7 +175,8 @@ aReplaceEachLinks outPath subPaths resPaths = do
       subPaths' = fromPath cfg subPaths
       resPaths' = map (fromPath cfg) resPaths
       out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
-  need (subPaths':resPaths') -- TODO is needing subPaths required?
+  need' "aReplaceEachLinks" (subPaths':resPaths') -- TODO is needing subPaths required?
+  -- mapM_ readPaths resPaths'
   writePaths out resPaths
 
 ------------------

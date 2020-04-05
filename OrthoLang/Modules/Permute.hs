@@ -46,11 +46,8 @@ aPermute :: ([String] -> [[String]])
          -> FilePath -> Action ()
 aPermute comboFn iPath eType salt out = do
   need' "ortholang.modules.permute.aPermute" [iPath]
-  elements <- readStrings eType iPath
-  -- TODO these aren't digesting properly! elements need to be compiled first?
-  --      (digesting the elements themselves rather than the path to them)
-  -- TODO will this match other files?
   cfg  <- fmap fromJust getShakeExtra
+  elements <- readStrings eType iPath
   dRef <- fmap fromJust getShakeExtra
   let mkOut p = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
