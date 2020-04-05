@@ -129,33 +129,25 @@ needShared name path@(Path p) = do
   (cfg :: Config) <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
   done <- doesFileExist path'
+  -- TODO replace these with FnTags saying not to fetch them
   if done -- if done already, needing is cheap + more elegant than cache lookup
-     || ("/load" `isInfixOf` p)
-     || ("/glob" `isInfixOf` p)
-     || ("exprs/str" `isInfixOf` p)
-     || ("exprs/num" `isInfixOf` p)
-     || ("exprs/list" `isInfixOf` p) -- TODO put lists back? causes lockup in load_*_each
-     || ("/reps/" `isInfixOf` p)
-     || ("/vars/" `isInfixOf` p)
      || (not $ "$TMPDIR" `isPrefixOf` p)
+     || ("$TMPDIR/exprs/load" `isPrefixOf` p) -- TODO exempt load_*_each fns?
+     || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
+     || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
+     || ("$TMPDIR/exprs/num/" `isInfixOf` p)
+     -- ("$TMPDIR/exprs/list/" `isPrefixOf` p) -- TODO put lists back? causes lockup in load_*_each
+     || ("$TMPDIR/reps/" `isPrefixOf` p)
+     || ("$TMPDIR/vars/" `isPrefixOf` p)
     then needDebug name [path']
     else do
       shared <- lookupShared path
       case shared of
-        Nothing -> do
-          needDebug name [path']
-          -- copy the file into the shared dir afterward
-          -- TODO could it be moved + symlinked to save space?
-          let shared = sharedPath cfg path
-          case shared of
-            Nothing -> return ()
-            Just sp -> do
-              liftIO $ createDirectoryIfMissing True $ takeDirectory sp
-              withWriteOnce sp $ liftIO $ copyFile path' sp
+        Nothing -> needDebug name [path']
         Just sp -> do
           isLink <- liftIO $ pathIsSymbolicLink sp
-          when isLink $ needLink name sp
-          when (isPathList sp) $ do
+          when isLink $ needLink name sp -- TODO replace with actual type!
+          when (isPathList sp) $ do      -- TODO replace with actual type!
             paths <- readPaths sp
             -- liftIO $ putStrLn $ "paths: " ++ show paths
             need' name $ map (fromPath cfg) paths -- TODO rename?
@@ -172,6 +164,8 @@ isPathList path
   && not (".str.list" `isSuffixOf` path)
   && not (".num.list" `isSuffixOf` path)
 
+-- TODO replace with actual type check
+-- TODO and should the symlink also be created?
 needLink :: String -> FilePath -> Action ()
 needLink name link = do
   relPath <- liftIO $ readSymbolicLink link
