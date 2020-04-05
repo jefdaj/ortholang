@@ -141,7 +141,16 @@ needShared name path@(Path p) = do
     else do
       shared <- lookupShared path
       case shared of
-        Nothing -> needDebug name [path']
+        Nothing -> do
+          needDebug name [path']
+          -- copy the file into the shared dir afterward
+          -- TODO could it be moved + symlinked to save space?
+          let shared = sharedPath cfg path
+          case shared of
+            Nothing -> return ()
+            Just sp -> do
+              liftIO $ createDirectoryIfMissing True $ takeDirectory sp
+              withWriteOnce sp $ liftIO $ copyFile path' sp
         Just sp -> do
           isLink <- liftIO $ pathIsSymbolicLink sp
           when isLink $ needLink name sp
