@@ -122,56 +122,92 @@ needDebug fnName paths = do
   debugA (fnName ++ ".need") (show paths)
   need paths
 
--- TODO how to force it to load the seqids when their downstream files aren't needed?
---      probably list all the load* dependencies of the expr and want/need them first
+{-|
+A version of 'Development.Shake.need' with both debugging and shared cache lookup.
+There are a few extra cases to account for when doing shared lookup...
+
+If the path is to reps, vars, or somewhere outside the TMPDIR, don't try to mess with it.
+Take a list of FnTags, and skip shared lookup if they say it depends on the local filesystem.
+(This can be accurately approximated with the specific load + glob exceptions below for now)
+If the path already exists or is to a str, num, or list of those, skip shared lookup for speed.
+Is the special case for downloaded paths needed? Maybe remove it.
+If the path is available in the shared cache, copy it over + trackWrite. Otherwise needDebug as normal.
+If the path is to a list of paths, also recursively need those at the end (whether or not it already exists).
+-}
+-- TODO replace these with FnTags saying not to fetch them
 needShared :: String -> Path -> Action ()
 needShared name path@(Path p) = do
-  (cfg :: Config) <- fmap fromJust getShakeExtra
+  cfg <- fmap fromJust getShakeExtra
   let path' = fromPath cfg path
+
+  -- if it's a symlink, recurse on the source file first
+  -- (unlike the list of paths case, this should be done first so the symlink works)
+  -- TODO should this go way at the top?
+  needLinkSrcIfAny name path'
+
+  -- skip cache lookup if the file exists already
   done <- doesFileExist path'
-  -- TODO replace these with FnTags saying not to fetch them
-  if done -- if done already, needing is cheap + more elegant than cache lookup
-     || (not $ "$TMPDIR" `isPrefixOf` p)
-     || ("$TMPDIR/exprs/load" `isPrefixOf` p) -- TODO exempt load_*_each fns?
+  if done
+
+     -- these depend on the local filesystem
+     || ("$TMPDIR/exprs/load" `isPrefixOf` p)
      || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
-     || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
-     || ("$TMPDIR/exprs/num/" `isInfixOf` p)
-     -- ("$TMPDIR/exprs/list/" `isPrefixOf` p) -- TODO put lists back? causes lockup in load_*_each
+     || (not $ "$TMPDIR" `isPrefixOf` p)
+
+     -- don't mess with these for now
+     -- TODO does caching them help? or hurt?
      || ("$TMPDIR/reps/" `isPrefixOf` p)
      || ("$TMPDIR/vars/" `isPrefixOf` p)
+
+     -- these are probably faster to recompute than fetch
+     || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
+     || ("$TMPDIR/exprs/num/" `isInfixOf` p)
+
+    -- if any of those ^ special cases apply, skip shared lookup
     then needDebug name [path']
+
+    -- otherwise, attempt it
     else do
       shared <- lookupShared path
       case shared of
+
+        -- path not in shared cache; need via the usual mechanism instead
         Nothing -> needDebug name [path']
+
+        -- path is available!
+        -- now the main task: copy and/or download the file
+        -- TODO figure out better criteria for download
         Just sp -> do
-          isLink <- liftIO $ pathIsSymbolicLink sp
-          when isLink $ needLink name sp -- TODO replace with actual type!
-          when (isPathList sp) $ do      -- TODO replace with actual type!
-            paths <- readPaths sp
-            -- liftIO $ putStrLn $ "paths: " ++ show paths
-            need' name $ map (fromPath cfg) paths -- TODO rename?
           liftIO $ createDirectoryIfMissing True $ takeDirectory path'
-          -- TODO figure out better criteria for this
-          if "download" `isInfixOf` sp
-            then liftIO $ renameFile sp path'
-            else withWriteOnce path' $ liftIO $ copyFile sp path'
+          withWriteOnce path' $ liftIO $ do
+            if "download" `isInfixOf` sp
+              then renameFile sp path'
+              else copyFile sp path'
           trackWrite' [path']
 
-isPathList :: FilePath -> Bool
-isPathList path
-  =  (".list" `isSuffixOf` path)
-  && not (".str.list" `isSuffixOf` path)
-  && not (".num.list" `isSuffixOf` path)
+  -- after needing the file by whatever mechanism,
+  -- check if it refers to more paths we also need to need
+  -- (unlike the symlinks case, this has to be done after the main file)
+  needPathsIfAny name path'
 
--- TODO replace with actual type check
+-- TODO also take the type
+needPathsIfAny :: String -> FilePath -> Action ()
+needPathsIfAny name path = do
+  paths <- readPaths path
+  cfg <- fmap fromJust getShakeExtra
+  need' name $ map (fromPath cfg) paths
+
 -- TODO and should the symlink also be created?
-needLink :: String -> FilePath -> Action ()
-needLink name link = do
-  relPath <- liftIO $ readSymbolicLink link
-  absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
-  need' name [absPath]
+-- TODO this will get the abspath of the *cache* version, right? have to get the local one!
+needLinkSrcIfAny :: String -> FilePath -> Action ()
+needLinkSrcIfAny name link = do
+  isLink <- liftIO $ pathIsSymbolicLink link
+  when isLink $ do
+    relPath <- liftIO $ readSymbolicLink link
+    absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
+    need' name [absPath]
 
+-- TODO move download from here to a macro expansion
 lookupShared :: Path -> Action (Maybe FilePath)
 lookupShared path = do
   cfg <- fmap fromJust getShakeExtra
