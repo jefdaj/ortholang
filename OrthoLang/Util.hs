@@ -84,15 +84,6 @@ import qualified Control.Logging as L -- (traceSL, debugS, timedDebugEndS, trace
 --   stamp <- getTimeStamp
 --   return $ debug cfg (stamp ++ " " ++ msg) rtn
 
--- TODO ok this goes in Util
---debug :: Config -> String -> a -> a
---debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
-
--- TODO and this one 
--- TODO stop exporting this in favor of the ones below?
--- debugShow :: Show a => Config -> a -> b -> b
--- debugShow cfg shw rtn = if cfgDebug cfg then traceShow shw rtn else rtn
-
 ----------------
 -- read files --
 ----------------

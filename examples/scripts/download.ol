@@ -20,5 +20,8 @@ pcc7942p = get_proteomes ["Synechococcus elongatus PCC 7942 (refseq)"]
 pcc7942n = get_genomes   ["Synechococcus elongatus PCC 7942 (refseq)"]
 pcc6803  = get_proteomes ["Synechocystis sp. PCC 6803 (refseq)"]
 
+# You can also load files directly from URLs, like so:
+samplefa = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+
 # TODO what should we evaluate here?
 result = ncbi_human_db_list

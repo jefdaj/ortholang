@@ -93,7 +93,7 @@ import Control.Monad.Trans.Class (lift)
 
 
 debugC :: Config -> String -> String -> a -> a
-debugC cfg name msg rtn = if isJust (cfgDebug cfg) then trace ("core.compile." ++ name) msg rtn else rtn
+debugC cfg name msg rtn = trace ("core.compile." ++ name) msg rtn
 
 -- TODO restrict to Expr?
 -- TODO export?
@@ -490,16 +490,13 @@ isURL s = "://" `isInfixOf` take 10 s
 -- TODO move to Load module?
 curl :: String -> Action Path
 curl url = do
-  -- liftIO $ putStrLn $ "url: " ++ url
-  (cfg :: Config) <- fmap fromJust getShakeExtra
-  let verbosity = if isJust (cfgDebug cfg) then "" else "-s"
-      cDir      = fromPath cfg $ cacheDir cfg "curl"
-      outPath   = cDir </> digest url
+  cfg <- fmap fromJust getShakeExtra
+  let cDir    = fromPath cfg $ cacheDir cfg "curl"
+      outPath = cDir </> digest url
   liftIO $ createDirectoryIfMissing True cDir
-  (ref :: LocksRef) <- fmap fromJust getShakeExtra
   runCmd $ CmdDesc
     { cmdBinary = "download.sh"
-    , cmdArguments = [outPath, url, verbosity]
+    , cmdArguments = [outPath, url]
     , cmdFixEmpties = False
     , cmdParallel = False
     , cmdInPatterns = []

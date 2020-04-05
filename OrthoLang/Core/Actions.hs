@@ -561,21 +561,17 @@ handleCmdError bin n stderrPath rmPatterns = do
                  errTxt <- readFileStrict' stderrPath
                  return $ ["Stderr was:", errTxt]
                else return []
-  -- let files' = sort $ nub rmPatterns
   cfg <- fmap fromJust getShakeExtra
   files' <- fmap concat $ mapM (matchPattern cfg) rmPatterns
   let files'' = sort $ nub files'
-  liftIO $ if isJust $ cfgDebug cfg
-    then putStrLn $ "these files would be deleted, --debug is enabled: " ++ show files''
-    else rmAll files'' -- TODO should these be patterns to match first?
+  liftIO $ rmAll files''
+  let errMsg = [ bin ++ " failed with " ++ show n ++ "."
+               , "The files it was working on have been deleted:"
+               ] ++ files''
+
+  -- TODO should this be a different type of failure?
   -- TODO does this get caught by recoverAll in eval? make sure it does!
   -- TODO also try adding a manual flush before each external command in case it's an io delay thing
-  let errMsg = if isJust $ cfgDebug cfg
-                 then []
-                 else
-                   [ bin ++ " failed with " ++ show n ++ "."
-                   , "The files it was working on have been deleted:"
-                   ] ++ files'
   error "handleCmdError" $ unlines $ errMsg ++ errMsg2
 
 ----------

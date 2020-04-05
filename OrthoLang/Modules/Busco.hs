@@ -193,7 +193,7 @@ untar from to = do
       to' = fromPath cfg to
   runCmd $ CmdDesc
     { cmdBinary = "tar"
-    , cmdArguments = (if isJust (cfgDebug cfg) then "-v" else ""):["-xf", from', "-C", takeDirectory to']
+    , cmdArguments = ["-xf", from', "-C", takeDirectory to']
     , cmdFixEmpties = False
     , cmdParallel   = False
     , cmdInPatterns = [from']

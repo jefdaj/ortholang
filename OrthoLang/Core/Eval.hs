@@ -148,7 +148,6 @@ myShake cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   let shakeOpts = shakeOptions
         { shakeFiles     = cfgTmpDir cfg
-        -- , shakeVerbosity = if isJust (cfgDebug cfg) then Chatty else Quiet
         , shakeVerbosity = Quiet
         , shakeThreads   = 8 -- max 1 (cfgThreads cfg - 1)
         , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
@@ -225,9 +224,6 @@ eval hdl cfg ref ids dr rtype ls p = do
                 , progressInitial = ep
                 , progressRender = if cfgNoProg cfg then (const "") else renderProgress
                 }
-  -- if isJust (cfgDebug cfg)
-  --   then eval' delay pOpts ls p
-  --   else
   ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do

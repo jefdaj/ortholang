@@ -47,10 +47,6 @@ dispatch args arg act = when (isPresent args $ longOption arg) $ do
  -
  - TODO remove this and rewrite with logging module
  -}
--- debug cfg msg rtn = if cfgDebug cfg then trace msg rtn else rtn
--- debug :: Config -> String -> a -> a
--- debug _ msg rtn = traceSL ... (pack msg) rtn
-
 debug' :: String -> IO ()
 debug' = debug "config"
 
