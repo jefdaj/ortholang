@@ -21,19 +21,16 @@ TODO can API-facing Rules be entirely eliminated? Maybe just NewActions + Macros
 module OrthoLang.Core.Compile.NewRules
   (
 
-  -- * Static rules to add to every eval call
-    newRules
-
   -- * Action Types
   -- $newactions
-  , NewAction1
+    NewAction1
   , NewAction2
   , NewAction3
 
   -- * Functions from external scripts
-  -- , newFnS1
-  -- , newFnS2
-  -- , newFnS3
+  , newFnS1
+  , newFnS2
+  , newFnS3
 
   -- * Functions from Actions
   , newFnA1
@@ -43,11 +40,14 @@ module OrthoLang.Core.Compile.NewRules
   -- * Binary operators from Actions
   , newBop
 
-  -- * Macros ('Expr' transformers)
+  -- * Functions from Macros
   -- $macros
   , MacroExpansion
   , newMacro
   , hidden
+
+  -- * Implementation details
+  , newRules
 
   )
   where
@@ -64,6 +64,83 @@ import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
+
+---------
+-- API --
+---------
+
+-- $newactions
+-- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
+-- expects the same number of input files that the 'Function' will pass it.
+
+type NewAction1 = ExprPath -> FilePath                         -> Action ()
+type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
+type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+
+newFnS1
+  :: String -- ^ name
+  -> Type   -- ^ return type
+  -> Type   -- ^ 1 argument type
+  -> String -- ^ script basename
+  -> Function
+newFnS1 n r a1 s = undefined -- newFn rNewRulesA1 n Nothing r [a1]
+
+newFnS2
+  :: String       -- ^ name
+  -> Type         -- ^ return type
+  -> (Type, Type) -- ^ 2 argument types
+  -> String       -- ^ script basename
+  -> Function
+newFnS2 n r (a1, a2) s = undefined -- newFn rNewRulesA1 n Nothing r [a1]
+
+newFnS3
+  :: String             -- ^ name
+  -> Type               -- ^ return type
+  -> (Type, Type, Type) -- ^ 3 argument types
+  -> String             -- ^ script basename
+  -> Function
+newFnS3 n r (a1, a2, a3) s = undefined -- newFn rNewRulesA1 n Nothing r [a1]
+
+newFnA1
+  :: String     -- ^ name
+  -> Type       -- ^ return type
+  -> Type       -- ^ 1 argument type
+  -> NewAction1 -- ^ 1-argument action function
+  -> Function
+newFnA1 n r a1 = newFn n Nothing r [a1] rNewRulesA1 
+
+newFnA2
+  :: String       -- ^ name
+  -> Type         -- ^ return type
+  -> (Type, Type) -- ^ 2 argument types
+  -> NewAction2   -- ^ 2-argument action function
+  -> Function
+newFnA2 n r (a1, a2) = newFn n Nothing r [a1, a2] rNewRulesA2 
+
+newFnA3
+  :: String             -- ^ name
+  -> Type               -- ^ return type
+  -> (Type, Type, Type) -- ^ 3 argument types
+  -> NewAction3         -- ^ 3-argument action function
+  -> Function
+newFnA3 n r (a1, a2, a3) = newFn n Nothing r [a1, a2, a3] rNewRulesA3 
+
+{-|
+This is for the specific case where you want to make a binary operator.
+It probably isn't very useful outside math and set operations.
+-}
+newBop
+  :: String     -- ^ name
+  -> Char       -- ^ opchar
+  -> Type       -- ^ return type
+  -> Type       -- ^ 1 argument type (each side of the bop will be this)
+  -> NewAction1 -- ^ 1-argument action function (list of 2 args in case of bop, or 2+ for the prefix fn)
+  -> Function
+newBop n c r a1 = newFn n (Just c) r [ListOf a1] rNewRulesA1 
+
+--------------------
+-- implementation --
+--------------------
 
 {-|
 This gathers all the 'fNewRules' 'Development.Shake.Rules' together for use in
@@ -84,80 +161,17 @@ newRules = do
     catRules ((NewRules r):xs) = r : catRules xs
     catRules (_:xs) = catRules xs
 
--- $newactions
--- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
--- expects the same number of input files that the 'Function' will pass it.
-
-type NewAction1 = ExprPath -> FilePath                         -> Action ()
-type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
-type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
-
-newFnA1
-  :: String     -- ^ name
-  -> Type       -- ^ return type
-  -> Type       -- ^ 1 argument type
-  -> NewAction1 -- ^ 1-argument action
-  -> Function
-newFnA1 n r a1 = newFn rNewRules1 n Nothing r [a1]
-
-newFnA2
-  :: String       -- ^ name
-  -> Type         -- ^ return type
-  -> (Type, Type) -- ^ 2 argument types
-  -> NewAction2   -- ^ 2-argument action
-  -> Function
-newFnA2 n r (a1, a2) = newFn rNewRules2 n Nothing r [a1, a2]
-
-newFnA3
-  :: String             -- ^ name
-  -> Type               -- ^ return type
-  -> (Type, Type, Type) -- ^ 3 argument types
-  -> NewAction3         -- ^ 3-argument action
-  -> Function
-newFnA3 n r (a1, a2, a3) = newFn rNewRules3 n Nothing r [a1, a2, a3]
-
-{-|
-This is for the specific case where you want to make a binary operator.
-It probably isn't very useful outside math and set operations.
--}
-newBop
-  :: String     -- ^ name
-  -> Char       -- ^ opchar
-  -> Type       -- ^ return type
-  -> Type       -- ^ 1 argument type (each side of the bop will be this)
-  -> NewAction1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
-  -> Function
-newBop n c r a1 = newFn rNewRules1 n (Just c) r [ListOf a1]
-
--- TODO ExprPaths for deps?
--- TODO or Paths throughout?
--- TODO can you encode NewNewAction1, 2, 3... easily?
-
-rNewRules1 :: String -> TypeChecker -> NewAction1 -> Rules ()
-rNewRules1 = rNewRules 1 applyList1
-
-applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList1 fn deps = fn (deps !! 0)
-
-rNewRules2 :: String -> TypeChecker -> NewAction2 -> Rules ()
-rNewRules2 = rNewRules 2 applyList2
-
-applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList2 fn deps = fn (deps !! 0) (deps !! 1)
-
-rNewRules3 :: String -> TypeChecker -> NewAction3 -> Rules ()
-rNewRules3 = rNewRules 3 applyList3
-
-applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
-
 -- TODO any need to look up prefixOf to get the canonical name?
+{-|
+-}
 newPattern :: Config -> String -> Int -> FilePattern
 newPattern cfg name nArgs =
   cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
 
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 -- TODO one less * if not using repeat salt
+{-|
+-}
 rNewRules
   :: Int -> (t -> [FilePath] -> Action ()) -> String -> TypeChecker
   -> (ExprPath -> t) -> Rules ()
@@ -167,6 +181,26 @@ rNewRules nArgs applyFn name tFn aFn = do
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> aNewRules applyFn tFn aFn (ExprPath p)
 
+rNewRulesA1 :: String -> TypeChecker -> NewAction1 -> Rules ()
+rNewRulesA1 = rNewRules 1 applyList1
+
+applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList1 fn deps = fn (deps !! 0)
+
+rNewRulesA2 :: String -> TypeChecker -> NewAction2 -> Rules ()
+rNewRulesA2 = rNewRules 2 applyList2
+
+applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList2 fn deps = fn (deps !! 0) (deps !! 1)
+
+rNewRulesA3 :: String -> TypeChecker -> NewAction3 -> Rules ()
+rNewRulesA3 = rNewRules 3 applyList3
+
+applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
+
+{-|
+-}
 aNewRules
   :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1,2,3} fns
   -> TypeChecker
@@ -185,16 +219,20 @@ aNewRules applyFn tFn aFn out = do
       need' "ortholang.modules.newrulestest.aNewRules" deps'
       applyFn (aFn out) deps'
 
--- | Use the argument-specific numbered versions above instead.
+{-|
+Use the more specific, polished, versions above instead if possible. This one
+is not type safe because it assumes the list of argument types will match the
+rules function + action function.
+-}
 newFn
-  :: (String -> TypeChecker -> t -> Rules ())
-  -> String
-  -> Maybe Char
-  -> Type
-  -> [Type]
-  -> t
+  :: String     -- ^ name
+  -> Maybe Char -- ^ opchar
+  -> Type       -- ^ return type
+  -> [Type]     -- ^ list of argument types
+  -> (String -> TypeChecker -> t -> Rules ()) -- ^ rules function
+  -> t                                        -- ^ matching action function
   -> Function
-newFn rFn name mChar oType dTypes aFn =
+newFn name mChar oType dTypes rFn aFn =
   let tFn = defaultTypeCheck name dTypes oType
   in Function
        { fOpChar    = mChar
@@ -205,6 +243,8 @@ newFn rFn name mChar oType dTypes aFn =
        , fOldRules  = undefined
        , fNewRules  = NewRules $ rFn name tFn aFn
        }
+
+-- TODO move macros to a separate file?
 
 -- $macros
 -- Some of the current 'Function' compilers are implemented partly by
