@@ -22,26 +22,31 @@ module OrthoLang.Core.Compile.NewRules
   (
 
   -- * Static rules to add to every eval call
-    newFunctionRules
+    newRules
 
-  -- * Basic functions
-  -- $basic
-  , newFn1
-  , newFn2
-  , newFn3
+  -- * Action Types
+  -- $newactions
   , NewAction1
   , NewAction2
   , NewAction3
 
-  -- * Binary operators
+  -- * Functions from external scripts
+  -- , newFnS1
+  -- , newFnS2
+  -- , newFnS3
+
+  -- * Functions from Actions
+  , newFnA1
+  , newFnA2
+  , newFnA3
+
+  -- * Binary operators from Actions
   , newBop
 
   -- * Macros ('Expr' transformers)
   -- $macros
   , MacroExpansion
   , newMacro
-
-  -- * Hide macro-only functions
   , hidden
 
   )
@@ -55,7 +60,7 @@ import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Types
 
 import Control.Monad              (when)
-import Data.Maybe                 (catMaybes, fromJust)
+import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
@@ -68,8 +73,8 @@ instead, so they can be added once per program run rather than once per
 expression. They should also allow Shake to infer mapping patterns, but that
 isn't implemented yet.
 -}
-newFunctionRules :: Rules ()
-newFunctionRules = do
+newRules :: Rules ()
+newRules = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let fns   = concatMap mFunctions $ cfgModules cfg
       rules = catRules $ map fNewRules fns
@@ -79,47 +84,49 @@ newFunctionRules = do
     catRules ((NewRules r):xs) = r : catRules xs
     catRules (_:xs) = catRules xs
 
--- $basic
--- If you just need to turn a standalone script into an OrthoLang function, you
--- probably want one of these! The NewAction{1,2,3} types enforce that the
--- 'Development.Shake.Action' expects the same number of input files that the
--- 'Function' will pass it.
+-- $newactions
+-- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
+-- expects the same number of input files that the 'Function' will pass it.
 
 type NewAction1 = ExprPath -> FilePath                         -> Action ()
 type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
-newFn1 :: String     -- ^ name
-       -> Type       -- ^ return type
-       -> Type       -- ^ 1 argument type
-       -> NewAction1 -- ^ 1-argument action
-       -> Function
-newFn1 n r a1 = newFn rNewRules1 n Nothing r [a1]
+newFnA1
+  :: String     -- ^ name
+  -> Type       -- ^ return type
+  -> Type       -- ^ 1 argument type
+  -> NewAction1 -- ^ 1-argument action
+  -> Function
+newFnA1 n r a1 = newFn rNewRules1 n Nothing r [a1]
 
-newFn2 :: String       -- ^ name
-       -> Type         -- ^ return type
-       -> (Type, Type) -- ^ 2 argument types
-       -> NewAction2   -- ^ 2-argument action
-       -> Function
-newFn2 n r (a1, a2) = newFn rNewRules2 n Nothing r [a1, a2]
+newFnA2
+  :: String       -- ^ name
+  -> Type         -- ^ return type
+  -> (Type, Type) -- ^ 2 argument types
+  -> NewAction2   -- ^ 2-argument action
+  -> Function
+newFnA2 n r (a1, a2) = newFn rNewRules2 n Nothing r [a1, a2]
 
-newFn3 :: String             -- ^ name
-       -> Type               -- ^ return type
-       -> (Type, Type, Type) -- ^ 3 argument types
-       -> NewAction3         -- ^ 3-argument action
-       -> Function
-newFn3 n r (a1, a2, a3) = newFn rNewRules3 n Nothing r [a1, a2, a3]
+newFnA3
+  :: String             -- ^ name
+  -> Type               -- ^ return type
+  -> (Type, Type, Type) -- ^ 3 argument types
+  -> NewAction3         -- ^ 3-argument action
+  -> Function
+newFnA3 n r (a1, a2, a3) = newFn rNewRules3 n Nothing r [a1, a2, a3]
 
 {-|
 This is for the specific case where you want to make a binary operator.
 It probably isn't very useful outside math and set operations.
 -}
-newBop :: String     -- ^ name
-       -> Char       -- ^ opchar
-       -> Type       -- ^ return type
-       -> Type       -- ^ 1 argument type (each side of the bop will be this)
-       -> NewAction1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
-       -> Function
+newBop
+  :: String     -- ^ name
+  -> Char       -- ^ opchar
+  -> Type       -- ^ return type
+  -> Type       -- ^ 1 argument type (each side of the bop will be this)
+  -> NewAction1 -- ^ 1-argument action (list of 2 args in case of bop, or 2+ for the prefix fn)
+  -> Function
 newBop n c r a1 = newFn rNewRules1 n (Just c) r [ListOf a1]
 
 -- TODO ExprPaths for deps?
@@ -178,10 +185,15 @@ aNewRules applyFn tFn aFn out = do
       need' "ortholang.modules.newrulestest.aNewRules" deps'
       applyFn (aFn out) deps'
 
--- | Use the argument-specific numbered version above instead.
+-- | Use the argument-specific numbered versions above instead.
 newFn
   :: (String -> TypeChecker -> t -> Rules ())
-  -> String -> Maybe Char -> Type -> [Type] -> t -> Function
+  -> String
+  -> Maybe Char
+  -> Type
+  -> [Type]
+  -> t
+  -> Function
 newFn rFn name mChar oType dTypes aFn =
   let tFn = defaultTypeCheck name dTypes oType
   in Function

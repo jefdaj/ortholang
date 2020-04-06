@@ -12,11 +12,11 @@ module OrthoLang.Core.Compile
   , mkLoad
   , mkLoadList
   , newBop
-  , newFn1
-  , newFn2
-  , newFn3
+  , newFnA1
+  , newFnA2
+  , newFnA3
   , newMacro
-  , newFunctionRules
+  , newRules
   , MacroExpansion
   -- , rBop
   , rExpr

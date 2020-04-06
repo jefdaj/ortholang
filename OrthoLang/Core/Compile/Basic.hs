@@ -172,7 +172,7 @@ rNamedFunction' scr expr name = do
                  NewNotImplemented -> if "load_" `isPrefixOf` fName f
                                         then (fOldRules f) scr $ setSalt 0 expr
                                         else (fOldRules f) scr expr
-                 -- note that the rules themselves should have been added by 'newFunctionRules'
+                 -- note that the rules themselves should have been added by 'newRules'
                  NewRules _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
                                    res = ExprPath p
                                in return $ debugRules cfg "rNamedFunction'" expr res

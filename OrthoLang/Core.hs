@@ -8,15 +8,15 @@ module OrthoLang.Core
 
   -- * New module API
     newBop
-  , newFn1
-  , newFn2
-  , newFn3
+  , newFnA1
+  , newFnA2
+  , newFnA3
   , newMacro
   -- , ActionR
   , NewAction1
   , NewAction2
   , NewAction3
-  , newFunctionRules
+  , newRules
   , Function(..)
   , FnTag(..)
   , NewRules(..)

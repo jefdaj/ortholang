@@ -39,7 +39,7 @@ import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Core.Compile         (compileScript, rExpr, newFunctionRules)
+import OrthoLang.Core.Compile         (compileScript, rExpr, newRules)
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (Path, toPath, fromPath)
@@ -227,7 +227,7 @@ eval hdl cfg ref ids dr rtype ls p = do
   ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
   where
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
-      newFunctionRules
+      newRules
       lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
       want ["eval"]
