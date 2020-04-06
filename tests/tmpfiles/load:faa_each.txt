@@ -15,13 +15,13 @@
 |   |-- list
 |   |   |-- 843c803bed
 |   |   |   `-- 0
-|   |   |       `-- result
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   |-- a7ae44003c
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- ef4d70f9c8
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
 |   |   `-- 649c67c82e
 |   |       `-- 0
@@ -35,8 +35,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
+    |-- l1.str.list -> ../exprs/list/843c803bed/0/result
     |-- list1.faa.list -> ../exprs/load_faa_each/81db1a5c42/0/result
     |-- list2.faa.list -> ../exprs/list/ef4d70f9c8/0/result
     `-- result -> ../exprs/length/a9ccee3202/0/result
 
-26 directories, 13 files
+26 directories, 14 files

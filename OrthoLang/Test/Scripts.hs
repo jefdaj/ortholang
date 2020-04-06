@@ -104,7 +104,7 @@ mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
     -- TODO refactor them to come from the same fn
     desc = name ++ ".ol creates expected tmpfiles"
     -- TODO add nondeterministic expression + cache dirs here by parsing modules:
-    ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt|jobs'"
+    ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt|jobs|out|err'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }

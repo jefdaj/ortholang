@@ -4,23 +4,32 @@
 |   |-- diff
 |   |   `-- ca6f83f68b
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
 |   |   |-- dd1aa667cd
 |   |   |   `-- 0
-|   |   |       `-- result
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   |-- eff90616f3
 |   |   |   `-- 0
-|   |   |       `-- result
-|   |   `-- f20ee94a27
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |-- f20ee94a27
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- fa0b8b18ad
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- multiply
 |   |   `-- 7ca850b5f6
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- num
-|       `-- 528d27de63
+|       |-- 528d27de63
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       |-- 992d750479
+|       |   `-- 0
+|       |       `-- result -> ../../../../cache/lines/...
+|       `-- ea11b49459
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
@@ -28,4 +37,4 @@
     |-- r2.num -> ../exprs/multiply/7ca850b5f6/0/result
     `-- result -> ../exprs/diff/ca6f83f68b/0/result
 
-19 directories, 9 files
+25 directories, 12 files

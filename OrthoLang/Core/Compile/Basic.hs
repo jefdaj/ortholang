@@ -434,7 +434,7 @@ mkLoadList hashSeqIDs name rtn = Function
   , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
   , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rLoadList hashSeqIDs
+  , fNewRules = NewNotImplemented, fOldRules = rLoadList hashSeqIDs -- TODO different from src lists?
   }
 
 -- The paths here are a little confusing: expr is a str of the path we want to
@@ -594,6 +594,7 @@ aLoadListLinks hashSeqIDs pathsPath outPath = do
   -- Careful! The user will write paths relative to workdir and those come
   -- through as a (ListOf str) here; have to read as Strings and convert to
   -- Paths
+  -- TODO this should be a macro expansion in the loader fns rather than a basic rule!
   -- alwaysRerun -- TODO does this help?
   cfg <- fmap fromJust getShakeExtra
   let outPath'   = fromPath cfg outPath

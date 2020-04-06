@@ -7,17 +7,17 @@
 |   |-- any
 |   |   `-- bf92a8b4c8
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
 |   |   |-- 843c803bed
 |   |   |   `-- 0
-|   |   |       `-- result
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   |-- cbc1a7320c
 |   |   |   `-- 0
-|   |   |       `-- result
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- ef4d70f9c8
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_faa
 |   |   `-- 649c67c82e
 |   |       `-- 0
@@ -32,7 +32,8 @@
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
     |-- mapped.faa.list -> ../exprs/load_faa_each/81db1a5c42/0/result
+    |-- mylist.str.list -> ../exprs/list/843c803bed/0/result
     |-- result -> ../exprs/any/bf92a8b4c8/0/result
     `-- single.faa -> ../exprs/load_faa/649c67c82e/0/result
 
-23 directories, 12 files
+23 directories, 13 files

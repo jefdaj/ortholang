@@ -145,21 +145,21 @@ needShared name path@(Path p) = do
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
   if done
-     -- these depend on the local filesystem
-     || ("$TMPDIR/cache/load" `isPrefixOf` p)
-     || ("$TMPDIR/exprs/load" `isPrefixOf` p)
-     || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
-     || (not $ "$TMPDIR" `isPrefixOf` p)
-     -- don't mess with these for now
-     -- TODO does caching them help? or hurt?
-     || ("$TMPDIR/reps/" `isPrefixOf` p)
-     || ("$TMPDIR/vars/" `isPrefixOf` p)
-     -- these are probably faster to recompute than fetch
-     || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
-     || ("$TMPDIR/exprs/num/" `isInfixOf` p)
-     -- this fixes load functions, but mysteriously breaks repeat:load.ol
-     || ("$TMPDIR/exprs/list/" `isInfixOf` p)
-     --  ("$TMPDIR/exprs/list/" `isInfixOf` p)
+
+    -- these are probably faster to recompute than fetch
+    || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
+    || ("$TMPDIR/exprs/num/" `isPrefixOf` p)
+    || ("$TMPDIR/reps/" `isPrefixOf` p)
+    || ("$TMPDIR/vars/" `isPrefixOf` p)
+
+    -- these depend on the local filesystem
+    || (not $ "$TMPDIR" `isPrefixOf` p)
+    || ("$TMPDIR/exprs/load" `isPrefixOf` p)
+    || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
+
+    -- this fixes load functions, but mysteriously breaks repeat:load.ol
+    -- ("$TMPDIR/exprs/list/" `isInfixOf` p)
+
     -- if any of those ^ special cases apply, skip shared lookup
     then do
       debugA' "needShared" $ "skip shared lookup and needDebug normally: '" ++ path' ++ "'"

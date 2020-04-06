@@ -7,11 +7,11 @@
 |   |-- any
 |   |   `-- 50b7b5d1aa
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- list
 |   |   `-- 5c30d81b84
 |   |       `-- 0
-|   |           `-- result
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- load_list
 |   |   |-- 6565f9c3da
 |   |   |   `-- 0
