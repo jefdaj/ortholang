@@ -1,4 +1,14 @@
-module OrthoLang.Modules.Load where
+module OrthoLang.Modules.Load
+  (
+
+  -- * Module with load_list, glob_files
+    olModule
+
+  -- * Generate load_* functions in other modules
+  , mkLoaders
+
+  )
+  where
 
 -- TODO move all the mkLoad* stuff from Core here? it's still kind of core
 
@@ -45,15 +55,6 @@ globFiles = Function
   where
     name = "glob_files"
 
--- TODO ok first part looks good, but now need another step?
--- 1. user gives glob as a str
--- 2. compiler saves that to (ExprPath path)
--- 3. this fn needs path, then reads it to ptn
--- 4. this fn does the actual globbing, creating paths
--- 5. toLstStr puts them in OrthoLang literal format
---    (should use str rather than elemRtnType tho)
--- ... looks like this is actually rGlobFiles!
--- now just need to hook it up to other types: load_faa_all etc.
 rGlobFiles :: RulesFn
 rGlobFiles scr e@(Fun _ _ _ _ [p]) = do
   (ExprPath path) <- rExpr scr p
@@ -77,7 +78,6 @@ aGlobFiles outPath path = do
   -- paths <- liftIO $ mapM absolutize =<< glob ptn
   paths  <- liftIO $ fmap sort $ glob ptn
   paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
-  -- toLstStr cfg str (ExprPath outPath) paths
   writeLits out'' paths'
 
 ------------
