@@ -1,43 +1,38 @@
-module OrthoLang.Core.Compile.Simple where
+module OrthoLang.Core.Compile.Simple
+  (
+
+  -- * Action makers
+    aSimpleScript
+  , aSimpleScriptNoFix
+  , aSimpleScriptPar
+
+  -- * RulesFns
+  , rSimple
+  , rSimpleScript
+  , rSimpleScriptPar
+  , rSimpleTmp
+
+  )
+  where
 
 import OrthoLang.Core.Compile.Basic
 
 import Prelude hiding (error)
 import OrthoLang.Debug
 import Development.Shake
-import Development.Shake.FilePath (isAbsolute)
 import OrthoLang.Core.Types
-import OrthoLang.Core.Pretty
-import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Paths (cacheDir, exprPath, unsafeExprPathExplicit, toPath,
-                            fromPath, varPath, Path)
+import OrthoLang.Core.Paths (cacheDir, exprPath, toPath,
+                            fromPath, Path)
 
-import Data.IORef                 (atomicModifyIORef')
-import Data.List                  (intersperse, isPrefixOf, isInfixOf)
-import Development.Shake.FilePath ((</>), (<.>), takeFileName)
-import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
-                                   readLit, readLits, writeLit, writeLits, hashContent,
-                                   writePaths, symlink)
--- import OrthoLang.Core.Locks        (withWriteLock')
-import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
-import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie, unlessExists)
-import System.FilePath            (takeExtension)
+import Data.List                  (intersperse)
+import Development.Shake.FilePath ((</>))
+import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, need')
+import OrthoLang.Util         (resolveSymlinks, digest)
 import System.Exit                (ExitCode(..))
-import System.Directory           (createDirectoryIfMissing)
 
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (fromJust)
 
-import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
-import OrthoLang.Core.Actions (writeCachedLines, need', readLit)
-import System.FilePath ((</>))
-import Control.Monad (when)
-
-
--- based on https://stackoverflow.com/a/18627837
--- uniqLines :: Ord a => [a] -> [a]
--- uniqLines = unlines . toList . fromList . lines
 
 -- takes an action fn with any number of args and calls it with a tmpdir.
 -- TODO rename something that goes with the map fns?
@@ -59,9 +54,6 @@ rSimpleScript = rSimple . aSimpleScript
 
 rSimpleScriptPar :: String -> RulesFn
 rSimpleScriptPar = rSimple . aSimpleScriptPar
-
-rSimpleScriptNoFix :: String -> RulesFn
-rSimpleScriptNoFix = rSimple . aSimpleScriptNoFix
 
 aSimpleScriptNoFix :: String -> ([Path] -> Action ())
 aSimpleScriptNoFix = aSimpleScript' False False
@@ -112,9 +104,6 @@ rSimple' mTmpPrefix actFn scr e@(Fun _ _ _ _ exprs) = do
   outPath' %> \_ -> aSimple' outPath actFn mTmpDir argPaths'
   return (ExprPath outPath')
 rSimple' _ _ _ _ = fail "bad argument to rSimple'"
-
--- TODO aSimpleScript that calls aSimple' with a wrappedCmd as the actFn
--- TODO rSimpleScript that calls rSimple + that
 
 -- TODO need to handle empty lists here?
 aSimple' ::  Path
