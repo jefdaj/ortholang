@@ -1,8 +1,10 @@
 module OrthoLang.Core.Compile.Simple
   (
 
-  -- * Action makers
+  -- * Used in Core
     aSimpleScript
+
+  -- * Action makers
   , aSimpleScriptNoFix
   , aSimpleScriptPar
 
@@ -16,6 +18,7 @@ module OrthoLang.Core.Compile.Simple
   where
 
 import OrthoLang.Core.Compile.Basic
+import OrthoLang.Core.Compile.NewRules
 
 import Prelude hiding (error)
 import OrthoLang.Debug
