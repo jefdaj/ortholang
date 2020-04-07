@@ -11,6 +11,18 @@ module OrthoLang.Core
   , newFnA1
   , newFnA2
   , newFnA3
+  , newFnAT1
+  , newFnAT2
+  , newFnAT3
+  , newFnS1
+  , newFnS2
+  , newFnS3
+  , newFnST1
+  , newFnST2
+  , newFnST3
+  , aNewRulesS1
+  , aNewRulesS2
+  , aNewRulesS3
   , newMacro
   -- , ActionR
   , NewAction1

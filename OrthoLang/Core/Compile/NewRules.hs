@@ -165,18 +165,20 @@ aNewRulesS3 sname opts o a1 a2 a3 = aNewRulesS sname opts o [a1, a2, a3]
 Approximate rewrite of 'OrthoLang.Core.Compile.Simple.aSimpleScript'.
 Use the safer versions above if possible; this one does not check number of arguments.
 Use cmdOpts to update the 'CmdDesc' with any non-default options needed.
+
+Note that you can also use one or more of these inside a larger NewAction1,2,3.
 -}
 aNewRulesS :: String -> (CmdDesc -> CmdDesc) -> ExprPath -> [FilePath] -> Action ()
-aNewRulesS sname opts (ExprPath o) args = do
-  let eDir = takeDirectory o -- TODO gotta be a more elegant way right?
+aNewRulesS sname opts (ExprPath out) args = do
+  let eDir = takeDirectory out -- TODO gotta be a more elegant way right?
   runCmd $ opts $ CmdDesc
     { cmdBinary        = sname
-    , cmdArguments     = args  -- TODO pre- and post-processing?
-    , cmdFixEmpties    = True  -- TODO any cases where you wouldn't want to?
-    , cmdParallel      = False -- TODO how to handle this?
-    , cmdInPatterns    = args  -- TODO remove and always use the whole folder?
-    , cmdOutPath       = o     -- TODO remove and always use the whole folder?
-    , cmdExtraOutPaths = []    -- TODO should this just refer to cache paths/dirs?
+    , cmdArguments     = out:args -- TODO pre- and post-processing?
+    , cmdFixEmpties    = True     -- TODO any cases where you wouldn't want to?
+    , cmdParallel      = False    -- TODO how to handle this?
+    , cmdInPatterns    = args     -- TODO remove and always use the whole folder?
+    , cmdOutPath       = out      -- TODO remove and always use the whole folder?
+    , cmdExtraOutPaths = []       -- TODO should this just refer to cache paths/dirs?
     , cmdSanitizePaths = []
     , cmdOptions       = [Cwd eDir] -- TODO remove? but then how would makeblastdb work?
     , cmdExitCode      = ExitSuccess

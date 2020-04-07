@@ -200,37 +200,29 @@ tExtractIdsEach _ = Left "expected a fasta file"
 
 -- TODO also extract them from genbank files
 
--- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
--- extractSeqs :: Function
--- extractSeqs = Function
---   { fOpChar = Nothing, fName = name
---   ,fTags = []
---   , fTypeCheck = tExtractSeqs
---   , fTypeDesc  = name ++ " : fa str.list -> fa"
---   , fNewRules = undefined
---   , fOldRules = rSimple aExtractSeqs 
---   }
---   where
---     name = "extract_seqs"
-
--- TODO any good way to restrict the return type to the *same* type of fa?
 extractSeqs :: Function
-extractSeqs = newFnA2 "extract_seqs" fa (fa, ListOf str) aExtractSeqsNew
+extractSeqs = newFnAT2 name tExtractSeqs desc aExtractSeqs
+  where
+    name = "extract_seqs"
+    desc = name ++ " : fa str.list -> fa" -- TODO include descs (but not names) in TypeCheckers
 
-aExtractSeqsNew :: NewAction2
-aExtractSeqsNew (ExprPath outPath) inFa inList = do
+{-|
+This is a little more complicated than it would seem because users will
+provide a list of actual seqids, and we need to look up their hashes to extract
+the hash-named ones from the previously-sanitized fasta file.
+-}
+aExtractSeqs :: NewAction2
+aExtractSeqs out inFa inList = do
   cfg <- fmap fromJust getShakeExtra
-  let cDir     = fromPath cfg $ cacheDir cfg "seqio"
-      tmpList' = cDir </> digest (toPath cfg inList) <.> "txt"
-      tmpList  = toPath cfg tmpList'
-  liftIO $ createDirectoryIfMissing True cDir
-  lookupIDsFile (toPath cfg inList) tmpList -- step 1
-  aSimpleScriptNoFix "extract_seqs.py" [toPath cfg outPath, toPath cfg inFa, tmpList] -- step 2
+  let tmp = fromPath cfg $ cacheDir cfg "seqio"
+      ids = tmp </> digest (toPath cfg inList) <.> "txt"
+  lookupIDsFile (toPath cfg inList) (toPath cfg ids)
+  aNewRulesS2 "extract_seqs.py" id out inFa ids
 
 -- this is still used for the mapped version. remove it the least invasive way first, with an adapter fn
 -- TODO hey could applyList2 do that?
-aExtractSeqs :: [Path] -> Action ()
-aExtractSeqs [outPath, inFa, inList] = do
+aExtractSeqsOld :: [Path] -> Action ()
+aExtractSeqsOld [outPath, inFa, inList] = do
   cfg <- fmap fromJust getShakeExtra
   let cDir     = fromPath cfg $ cacheDir cfg "seqio"
       tmpList' = cDir </> digest inList <.> "txt"
@@ -238,7 +230,7 @@ aExtractSeqs [outPath, inFa, inList] = do
   liftIO $ createDirectoryIfMissing True cDir
   lookupIDsFile inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
-aExtractSeqs ps = error $ "bad argument to aExtractSeqs: " ++ show ps
+aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: Function
@@ -247,7 +239,7 @@ extractSeqsEach = Function
   ,fTags = []
   , fTypeCheck = tExtractSeqsEach
   , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aExtractSeqs
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aExtractSeqsOld
   }
   where
     name = "extract_seqs_each"
