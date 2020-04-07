@@ -25,6 +25,7 @@ module OrthoLang.Core.Compile.Basic
   , rListLits
   , rListPaths
   , rNamedFunction
+  , rMacro
 
   -- * Script compilers
   , rRef
