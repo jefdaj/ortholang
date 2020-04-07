@@ -87,7 +87,7 @@ import Control.Monad              (when)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>), takeDirectory)
 import OrthoLang.Core.Actions     (need')
-import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
+import OrthoLang.Core.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
 
 ---------
 -- API --
@@ -98,6 +98,7 @@ import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 -- Write everything in an external script, add it to your PATH, and wrap it using one of these functions.
 -- Note that to fully integrate it with OrthoLang you'll also need to package the dependencies with Nix.
 
+-- TODO you can get the return types here too...
 newFnS1
   :: String               -- ^ name
   -> Type                 -- ^ 1 argument type
@@ -107,6 +108,7 @@ newFnS1
   -> Function
 newFnS1 n a1 r s os = newFn n Nothing [a1] r rNewRulesA1 $ aNewRulesS1 s os
 
+-- TODO but here? maybe we need to completely remove custom typecheckers
 newFnST1
   :: String      -- ^ name
   -> TypeChecker -- ^ type checker (should take 1 argument)
@@ -116,6 +118,7 @@ newFnST1
   -> Function
 newFnST1 n tFn td s os = newFnT n Nothing tFn td rNewRulesA1 $ aNewRulesS1 s os
 
+-- TODO failed to lookup out path in here?
 aNewRulesS1 :: String -> (CmdDesc -> CmdDesc) -> NewAction1
 aNewRulesS1 sname opts o a1 = aNewRulesS sname opts o [a1]
 
@@ -167,6 +170,8 @@ Use the safer versions above if possible; this one does not check number of argu
 Use cmdOpts to update the 'CmdDesc' with any non-default options needed.
 
 Note that you can also use one or more of these inside a larger NewAction1,2,3.
+
+TODO can this add the outpath digest, or does that need handling individually?
 -}
 aNewRulesS :: String -> (CmdDesc -> CmdDesc) -> ExprPath -> [FilePath] -> Action ()
 aNewRulesS sname opts (ExprPath out) args = do
@@ -194,6 +199,7 @@ type NewAction1 = ExprPath -> FilePath                         -> Action ()
 type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
+-- TODO all these could pass the return type, but not the script ones right? :/
 newFnA1
   :: String     -- ^ name
   -> Type       -- ^ 1 argument type
@@ -285,6 +291,7 @@ newPattern :: Config -> String -> Int -> FilePattern
 newPattern cfg name nArgs =
   cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
 
+-- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 -- TODO one less * if not using repeat salt
 {-|
@@ -299,8 +306,11 @@ rNewRules nArgs applyFn tFn name aFn = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let ptn = newPattern cfg name nArgs
       ptn' = traceShow "rNewrules" ptn
-  ptn' %> \p -> aNewRules applyFn tFn aFn (ExprPath p)
+  ptn' %> \p -> do
+    -- TODO if adding rules works anywhere in an action it'll be here right?
+    aNewRules applyFn tFn aFn (ExprPath p)
 
+-- TODO is it possible to get the return type here?
 rNewRulesA1 :: TypeChecker -> String -> NewAction1 -> Rules ()
 rNewRulesA1 = rNewRules 1 applyList1
 
@@ -326,18 +336,25 @@ aNewRules
   -> TypeChecker
   -> (ExprPath -> t)
   ->  ExprPath -> Action ()
-aNewRules applyFn tFn aFn out = do
+aNewRules applyFn tFn aFn o@(ExprPath out) = do
   cfg  <- fmap fromJust $ getShakeExtra
   dRef <- fmap fromJust $ getShakeExtra
-  (oType, dTypes, deps) <- liftIO $ decodeNewRulesDeps cfg dRef out
+  -- TODO don't try to return oType here because outpath won't have a digest entry yet
+  (oType, dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef o
   case tFn dTypes of
     Left err -> fail err -- TODO bop type error here :(
     Right rType -> do
       when (rType /= oType) $
         error "aNewRules" $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
-      let deps' = map (fromPath cfg) deps
-      need' "ortholang.modules.newrulestest.aNewRules" deps'
-      applyFn (aFn out) deps'
+
+      -- TODO shit, does this need to be known at rules time before running anything?
+      --      if so that would result in a more elegant + typesafe system overall i guess
+      --      start by separating + committing the addDigest changes, because those were good
+      liftIO $ addDigest dRef rType $ toPath cfg out
+
+      let dPaths' = map (fromPath cfg) dPaths
+      need' "ortholang.modules.newrulestest.aNewRules" dPaths'
+      applyFn (aFn o) dPaths'
 
 {-|
 Use the more specific, polished, versions above instead if possible. This one

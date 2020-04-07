@@ -123,6 +123,7 @@ module OrthoLang.Core.Paths
   , cacheDir
   , exprPath
   -- , exprPathExplicit
+  , addDigest
   , unsafeExprPathExplicit
   , varPath
 
@@ -133,7 +134,7 @@ module OrthoLang.Core.Paths
   , checkPaths
 
   -- * Generate path digests
-  , exprPathDigest
+  , pathDigest
   , exprDigest
   , exprDigests
   -- , scriptDigests
@@ -144,7 +145,7 @@ module OrthoLang.Core.Paths
   , bop2fun
   , listDigestsInPath
   , listExprs
-  , listScriptExprs
+  -- , listScriptExprs
   , makeTmpdirRelative
   , upBy
 
@@ -356,18 +357,18 @@ makeTmpdirRelative level (Path path) = replace "$TMPDIR" dots path
 
 -- TODO err function
 
+addDigest :: DigestsRef -> Type -> Path -> IO ()
+addDigest dRef rtype path = atomicModifyIORef' dRef $ \ds ->
+  (M.insert (pathDigest path) (rtype, path) ds, ())
+
 -- TODO should the safe version still exist? should one be renamed?
 unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Salt -> [String] -> Path
 unsafeExprPathExplicit cfg dRef prefix rtype salt hashes =
-  dig `seq` unsafePerformIO $ do
-    atomicModifyIORef' dRef $ \ds -> (M.insert dig (rtype, path) ds, ())
-    return path
-  where
-    path = exprPathExplicit cfg prefix rtype salt hashes
-    dig  = exprPathDigest path
+  let path = exprPathExplicit cfg prefix rtype salt hashes
+  in path `seq` unsafePerformIO $ addDigest dRef rtype path >> return path
 
-exprPathDigest :: Path -> PathDigest
-exprPathDigest = PathDigest . digest
+pathDigest :: Path -> PathDigest
+pathDigest = PathDigest . digest
 
 exprDigest :: Config -> DigestsRef -> Script -> Expr -> DigestMap
 exprDigest cfg dRef scr expr = traceShow "core.paths.exprDigest" res
@@ -395,8 +396,8 @@ listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
 listExprs e@(Lst _ _ _    es) = e : concatMap listExprs es
 listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 
-listScriptExprs :: Script -> [Expr]
-listScriptExprs scr = concatMap listExprs $ map snd scr
+-- listScriptExprs :: Script -> [Expr]
+-- listScriptExprs scr = concatMap listExprs $ map snd scr
 
 -- insertNewRulesDigest :: GlobalEnv -> Expr -> IO ()
 -- insertNewRulesDigest st@(_, cfg, _, idr) expr
@@ -406,7 +407,7 @@ listScriptExprs scr = concatMap listExprs $ map snd scr
 --   where
 --     eType   = typeOf expr
 --     ePath   = exprPath cfg dRef scr expr
---     eDigest = exprPathDigest ePath
+--     eDigest = pathDigest ePath
 
 -- TODO what monad should this be in?
 -- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
@@ -424,7 +425,7 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
       dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
       dTypes = map fst dVals'
       dPaths = map snd dVals'
-      oKey   = exprPathDigest $ toPath cfg out
+      oKey   = pathDigest $ toPath cfg out
       Just (oType, _) = M.lookup oKey dMap
   log "decodeNewRulesDeps" $ "dKeys: " ++ show dKeys
   log "decodeNewRulesDeps" $ "dTypes: " ++ show dTypes

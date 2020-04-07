@@ -33,6 +33,7 @@ module OrthoLang.Core
   , FnTag(..)
   , NewRules(..)
   , MacroExpansion
+  , addDigest
 
   -- * Transitional stuff
   -- , applyList2

@@ -37,7 +37,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Util    (digest, digestLength, headOrDie)
 import OrthoLang.Locks   (withWriteLock')
 import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
-import OrthoLang.Core.Paths   (toPath, fromPath)
+import OrthoLang.Core.Paths   (toPath, fromPath, addDigest)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes, mapMaybe, fromJust)
 import Data.List             (isPrefixOf, intersperse)
@@ -223,4 +223,6 @@ lookupIDsFile inPath outPath = do
                        liftIO $ putStrLn ("warning: no ID found for \"" ++ v ++ "\"")
                        return v
   idKeys <- mapM lookupFn partialIDs
+  dRef <- fmap fromJust getShakeExtra
+  liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
   writeCachedLines (fromPath cfg outPath) idKeys

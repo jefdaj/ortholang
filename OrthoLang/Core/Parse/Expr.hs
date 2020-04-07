@@ -116,7 +116,7 @@ mkBop bop = return $ \e1 e2 -> do
 -- TODO how to putState with these? is it needed at all?
 --         let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 --             p    = exprPath cfg dRef scr expr
---             dKey = exprPathDigest p
+--             dKey = pathDigest p
 --             dVal = (typeOf expr, p)
 --             dMap' = M.unions
 --                       [ M.insert dKey dVal (sDigests scr)

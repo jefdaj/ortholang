@@ -69,7 +69,7 @@ import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelati
 -- import OrthoLang.Core.Debug        (debug)
 import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit,
                                    checkLits, cacheDir, pathString,
-                                   stringPath, toGeneric, sharedPath)
+                                   stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import OrthoLang.Locks        (withReadLock', withReadLocks',

@@ -214,10 +214,11 @@ the hash-named ones from the previously-sanitized fasta file.
 aExtractSeqs :: NewAction2
 aExtractSeqs out inFa inList = do
   cfg <- fmap fromJust getShakeExtra
-  let tmp = fromPath cfg $ cacheDir cfg "seqio"
-      ids = tmp </> digest (toPath cfg inList) <.> "txt"
-  lookupIDsFile (toPath cfg inList) (toPath cfg ids) -- writes hashed ids
-  aNewRulesS2 "extract_seqs.py" id out inFa ids      -- extracts sequences
+  let tmp  = fromPath cfg $ cacheDir cfg "seqio"
+      ids  = tmp </> digest (toPath cfg inList) <.> "txt"
+      ids' = toPath cfg ids
+  lookupIDsFile (toPath cfg inList) ids' -- TODO implement as a macro
+  aNewRulesS2 "extract_seqs.py" id out inFa ids
 
 -- TODO remove by rewriting map functions to work on the new one above
 aExtractSeqsOld :: [Path] -> Action ()
@@ -255,8 +256,6 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 -- translate(_each) --
 ----------------------
 
--- TODO name something else like fna_to_faa?
--- translate :: Function
 -- translate = Function
 --   { fOpChar = Nothing, fName = name
 --   ,fTags = []
@@ -267,6 +266,8 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 --   where
 --     name = "translate"
 
+-- TODO fix unable to decode the fna error
+--      must be that load_fna* aren't adding their digests?
 translate :: Function
 translate = newFnS1 "translate" fna faa "translate.py" id
 
