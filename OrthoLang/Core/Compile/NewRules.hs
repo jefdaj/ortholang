@@ -57,10 +57,10 @@ module OrthoLang.Core.Compile.NewRules
   , applyList1
   , applyList2
   , applyList3
-  , aCmd1
-  , aCmd2
-  , aCmd3
-  , aCmd
+  , aNewRulesS1
+  , aNewRulesS2
+  , aNewRulesS3
+  , aNewRulesS
   , aNewRules
 
   )
@@ -94,45 +94,48 @@ type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
 newFnS1
-  :: String -- ^ name
-  -> Type   -- ^ return type
-  -> Type   -- ^ 1 argument type
-  -> String -- ^ script basename
+  :: String               -- ^ name
+  -> Type                 -- ^ return type
+  -> Type                 -- ^ 1 argument type
+  -> String               -- ^ script basename
+  -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS1 n r a1 s = newFn n Nothing r [a1] rNewRulesA1 $ aCmd1 s
+newFnS1 n r a1 s os = newFn n Nothing r [a1] rNewRulesA1 $ aNewRulesS1 s os
 
-aCmd1 :: String -> NewAction1
-aCmd1 sname o a1 = aCmd sname id o [a1]
+aNewRulesS1 :: String -> (CmdDesc -> CmdDesc) -> NewAction1
+aNewRulesS1 sname opts o a1 = aNewRulesS sname opts o [a1]
 
 newFnS2
-  :: String       -- ^ name
-  -> Type         -- ^ return type
-  -> (Type, Type) -- ^ 2 argument types
-  -> String       -- ^ script basename
+  :: String               -- ^ name
+  -> Type                 -- ^ return type
+  -> (Type, Type)         -- ^ 2 argument types
+  -> String               -- ^ script basename
+  -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS2 n r (a1, a2) s = newFn n Nothing r [a1, a2] rNewRulesA2 $ aCmd2 s
+newFnS2 n r (a1, a2) s os = newFn n Nothing r [a1, a2] rNewRulesA2 $ aNewRulesS2 s os
 
-aCmd2 :: String -> NewAction2
-aCmd2 sname o a1 a2 = aCmd sname id o [a1, a2]
+aNewRulesS2 :: String -> (CmdDesc -> CmdDesc) -> NewAction2
+aNewRulesS2 sname opts o a1 a2 = aNewRulesS sname opts o [a1, a2]
 
 newFnS3
-  :: String             -- ^ name
-  -> Type               -- ^ return type
-  -> (Type, Type, Type) -- ^ 3 argument types
-  -> String             -- ^ script basename
+  :: String               -- ^ name
+  -> Type                 -- ^ return type
+  -> (Type, Type, Type)   -- ^ 3 argument types
+  -> String               -- ^ script basename
+  -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS3 n r (a1, a2, a3) s = newFn n Nothing r [a1, a2, a3] rNewRulesA3 $ aCmd3 s
+newFnS3 n r (a1, a2, a3) s os = newFn n Nothing r [a1, a2, a3] rNewRulesA3 $ aNewRulesS3 s os
 
-aCmd3 :: String -> NewAction3
-aCmd3 sname o a1 a2 a3 = aCmd sname id o [a1, a2, a3]
+aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
+aNewRulesS3 sname opts o a1 a2 a3 = aNewRulesS sname opts o [a1, a2, a3]
 
 {-|
 Approximate rewrite of 'OrthoLang.Core.Compile.Simple.aSimpleScript'.
 Use the safer versions above if possible; this one does not check number of arguments.
 Use cmdOpts to update the 'CmdDesc' with any non-default options needed.
 -}
-aCmd :: String -> (CmdDesc -> CmdDesc) -> ExprPath -> [FilePath] -> Action ()
-aCmd sname opts (ExprPath o) args = do
+aNewRulesS :: String -> (CmdDesc -> CmdDesc) -> ExprPath -> [FilePath] -> Action ()
+aNewRulesS sname opts (ExprPath o) args = do
   let eDir = takeDirectory o -- TODO gotta be a more elegant way right?
   runCmd $ opts $ CmdDesc
     { cmdBinary        = sname
