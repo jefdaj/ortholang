@@ -9,14 +9,6 @@ import Development.Shake
 import OrthoLang.Core
 -- import OrthoLang.Core (debug)
 
-import OrthoLang.Core          (digest)
-import OrthoLang.Core       (readPaths, traceA, need', readLit,
-                                    writeCachedLines, runCmd, CmdDesc(..), readPaths, writeCachedVersion)
-import OrthoLang.Core         (toPath, fromPath, Path, cacheDir)
-import OrthoLang.Core      (lookupIDsFile)
-import OrthoLang.Core (defaultTypeCheck)
-import OrthoLang.Core (rSimple, rSimpleScript, aSimpleScriptNoFix)
-import OrthoLang.Core  (rMap, rMapSimpleScript)
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
 import OrthoLang.Modules.Load       (mkLoaders)
@@ -209,16 +201,21 @@ tExtractIdsEach _ = Left "expected a fasta file"
 -- TODO also extract them from genbank files
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
+-- extractSeqs :: Function
+-- extractSeqs = Function
+--   { fOpChar = Nothing, fName = name
+--   ,fTags = []
+--   , fTypeCheck = tExtractSeqs
+--   , fTypeDesc  = name ++ " : fa str.list -> fa"
+--   , fNewRules = undefined
+--   , fOldRules = rSimple aExtractSeqs 
+--   }
+--   where
+--     name = "extract_seqs"
+
+-- TODO any good way to restrict the return type to the *same* type of fa?
 extractSeqs :: Function
-extractSeqs = Function
-  { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = tExtractSeqs
-  , fTypeDesc  = name ++ " : fa str.list -> fa"
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aExtractSeqs 
-  }
-  where
-    name = "extract_seqs"
+extractSeqs = newFnA2 "extract_seqs" fa (fa, ListOf str) aExtractSeqsNew
 
 aExtractSeqs :: [Path] -> Action ()
 aExtractSeqs [outPath, inFa, inList] = do
@@ -230,6 +227,16 @@ aExtractSeqs [outPath, inFa, inList] = do
   lookupIDsFile inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
 aExtractSeqs ps = error $ "bad argument to aExtractSeqs: " ++ show ps
+
+aExtractSeqsNew :: NewAction2
+aExtractSeqsNew (ExprPath outPath) inFa inList = do
+  cfg <- fmap fromJust getShakeExtra
+  let cDir     = fromPath cfg $ cacheDir cfg "seqio"
+      tmpList' = cDir </> digest (toPath cfg inList) <.> "txt"
+      tmpList  = toPath cfg tmpList'
+  liftIO $ createDirectoryIfMissing True cDir
+  lookupIDsFile (toPath cfg inList) tmpList -- step 1
+  aSimpleScriptNoFix "extract_seqs.py" [toPath cfg outPath, toPath cfg inFa, tmpList] -- step 2
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: Function

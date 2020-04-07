@@ -214,11 +214,10 @@ lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
 lookupIDsFile :: Path -> Path -> Action ()
 lookupIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
-  (ref :: LocksRef) <- fmap fromJust getShakeExtra
   partialIDs <- readList $ fromPath cfg inPath
-  ids <- fmap fromJust getShakeExtra
-  ids' <- liftIO $ readIORef ids
-  let lookupFn v = case lookupID ids' v of
+  ref <- fmap fromJust getShakeExtra
+  ids <- liftIO $ readIORef ref
+  let lookupFn v = case lookupID ids v of
                      Just i  -> return i
                      Nothing -> do
                        liftIO $ putStrLn ("warning: no ID found for \"" ++ v ++ "\"")
