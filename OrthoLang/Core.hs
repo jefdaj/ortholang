@@ -22,6 +22,9 @@ module OrthoLang.Core
   , NewRules(..)
   , MacroExpansion
 
+  -- * Transitional stuff
+  -- , applyList2
+
   -- * Things used in Main
   , runRepl
   , evalFile

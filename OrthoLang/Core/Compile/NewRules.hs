@@ -18,6 +18,9 @@ prefer the first one that handles your problem somewhat elegantly.
 TODO can API-facing Rules be entirely eliminated? Maybe just NewActions + Macros is enough.
 -}
 
+-- TODO versions of the newFn* functions that take custom typecheckers and lists of args?
+--      do it because it lets you keep the same custom typechecker behavior as the current fns
+
 module OrthoLang.Core.Compile.NewRules
   (
 
@@ -156,7 +159,6 @@ type NewAction1 = ExprPath -> FilePath                         -> Action ()
 type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
-
 newFnA1
   :: String     -- ^ name
   -> Type       -- ^ return type
@@ -229,8 +231,11 @@ newPattern cfg name nArgs =
 {-|
 -}
 rNewRules
-  :: Int -> (t -> [FilePath] -> Action ()) -> String -> TypeChecker
-  -> (ExprPath -> t) -> Rules ()
+  :: Int -> (t -> [FilePath] -> Action ())
+  -> String
+  -> TypeChecker
+  -> (ExprPath -> t)
+  -> Rules ()
 rNewRules nArgs applyFn name tFn aFn = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let ptn = newPattern cfg name nArgs

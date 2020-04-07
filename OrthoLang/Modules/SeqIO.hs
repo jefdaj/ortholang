@@ -217,6 +217,18 @@ tExtractIdsEach _ = Left "expected a fasta file"
 extractSeqs :: Function
 extractSeqs = newFnA2 "extract_seqs" fa (fa, ListOf str) aExtractSeqsNew
 
+aExtractSeqsNew :: NewAction2
+aExtractSeqsNew (ExprPath outPath) inFa inList = do
+  cfg <- fmap fromJust getShakeExtra
+  let cDir     = fromPath cfg $ cacheDir cfg "seqio"
+      tmpList' = cDir </> digest (toPath cfg inList) <.> "txt"
+      tmpList  = toPath cfg tmpList'
+  liftIO $ createDirectoryIfMissing True cDir
+  lookupIDsFile (toPath cfg inList) tmpList -- step 1
+  aSimpleScriptNoFix "extract_seqs.py" [toPath cfg outPath, toPath cfg inFa, tmpList] -- step 2
+
+-- this is still used for the mapped version. remove it the least invasive way first, with an adapter fn
+-- TODO hey could applyList2 do that?
 aExtractSeqs :: [Path] -> Action ()
 aExtractSeqs [outPath, inFa, inList] = do
   cfg <- fmap fromJust getShakeExtra
@@ -227,16 +239,6 @@ aExtractSeqs [outPath, inFa, inList] = do
   lookupIDsFile inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
 aExtractSeqs ps = error $ "bad argument to aExtractSeqs: " ++ show ps
-
-aExtractSeqsNew :: NewAction2
-aExtractSeqsNew (ExprPath outPath) inFa inList = do
-  cfg <- fmap fromJust getShakeExtra
-  let cDir     = fromPath cfg $ cacheDir cfg "seqio"
-      tmpList' = cDir </> digest (toPath cfg inList) <.> "txt"
-      tmpList  = toPath cfg tmpList'
-  liftIO $ createDirectoryIfMissing True cDir
-  lookupIDsFile (toPath cfg inList) tmpList -- step 1
-  aSimpleScriptNoFix "extract_seqs.py" [toPath cfg outPath, toPath cfg inFa, tmpList] -- step 2
 
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: Function
@@ -250,13 +252,15 @@ extractSeqsEach = Function
   where
     name = "extract_seqs_each"
 
+-- TODO shit, it doesn't take into account the outpath?
+-- applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
+
 tExtractSeqs  :: [Type] -> Either String Type
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
 
 tExtractSeqsEach  :: [Type] -> Either String Type
-tExtractSeqsEach [x, ListOf (ListOf s)]
-  | s == str && elem x [faa, fna] = Right $ ListOf x
+tExtractSeqsEach [x, ListOf (ListOf s)] | s == str && elem x [faa, fna] = Right $ ListOf x
 tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 
 ----------------------

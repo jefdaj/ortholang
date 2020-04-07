@@ -2,6 +2,7 @@ module OrthoLang.Core.Compile
   ( aSimpleScript
   , aSimpleScriptNoFix
   , aSimpleScriptPar
+  -- , applyList2
   , compose1
   , compileScript
   , curl
