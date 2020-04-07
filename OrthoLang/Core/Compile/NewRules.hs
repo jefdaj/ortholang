@@ -21,18 +21,17 @@ TODO can API-facing Rules be entirely eliminated? Maybe just NewActions + Macros
 module OrthoLang.Core.Compile.NewRules
   (
 
-  -- * Action Types
-  -- $newactions
-    NewAction1
-  , NewAction2
-  , NewAction3
-
   -- * Functions from external scripts
-  , newFnS1
+  -- $fromscripts
+    newFnS1
   , newFnS2
   , newFnS3
 
   -- * Functions from Actions
+  -- $fromactions
+  , NewAction1
+  , NewAction2
+  , NewAction3
   , newFnA1
   , newFnA2
   , newFnA3
@@ -41,7 +40,7 @@ module OrthoLang.Core.Compile.NewRules
   , newBop
 
   -- * Functions from Macros
-  -- $macros
+  -- $frommacros
   , MacroExpansion
   , newMacro
   , hidden
@@ -85,13 +84,10 @@ import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 -- API --
 ---------
 
--- $newactions
--- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
--- expects the same number of input files that the 'Function' will pass it.
-
-type NewAction1 = ExprPath -> FilePath                         -> Action ()
-type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
-type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+-- $fromscripts
+-- This is the best way to create an OrthoLang function if you want to write minimal Haskell.
+-- Write everything in an external script, add it to your PATH, and wrap it using one of these functions.
+-- Note that to fully integrate it with OrthoLang you'll also need to package the dependencies with Nix.
 
 newFnS1
   :: String               -- ^ name
@@ -150,6 +146,16 @@ aNewRulesS sname opts (ExprPath o) args = do
     , cmdExitCode      = ExitSuccess
     , cmdRmPatterns    = [eDir </> "*"] -- TODO remove and always use the whole folder?
     }
+
+-- $fromactions
+-- Use these functions when writing a "script" that would be easier in Haskell, or benefit from Shake integration.
+-- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
+-- expects the same number of input files that the 'Function' will pass it.
+
+type NewAction1 = ExprPath -> FilePath                         -> Action ()
+type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
+type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+
 
 newFnA1
   :: String     -- ^ name
@@ -296,7 +302,7 @@ newFn name mChar oType dTypes rFn aFn =
 
 -- TODO move macros to a separate file?
 
--- $macros
+-- $frommacros
 -- Some of the current 'Function' compilers are implemented partly by
 -- transforming their input 'Expr's to something else, then compiling them
 -- under other function names. This is an attempt to standardize that.
