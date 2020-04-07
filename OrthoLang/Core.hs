@@ -189,8 +189,7 @@ import OrthoLang.Core.Parse
 import OrthoLang.Core.Parse.Util
 import OrthoLang.Core.Repl hiding (runCmd) -- TODO disambiguate
 
-import OrthoLang.Util
-import qualified OrthoLang.Util as U
+import OrthoLang.Util -- TODO remove?
 
 import OrthoLang.Core.Eval (evalFile)
 import OrthoLang.Core.Repl (runRepl)

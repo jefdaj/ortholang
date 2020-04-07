@@ -30,6 +30,11 @@ module OrthoLang.Core.Compile.NewRules
   , newFnS2
   , newFnS3
 
+  -- * Functions with custom types from external scripts
+  , newFnST1
+  , newFnST2
+  , newFnST3
+
   -- * Functions from Actions
   -- $fromactions
   , NewAction1
@@ -101,6 +106,15 @@ newFnS1
   -> Function
 newFnS1 n r a1 s os = newFn n Nothing r [a1] rNewRulesA1 $ aNewRulesS1 s os
 
+newFnST1
+  :: String      -- ^ name
+  -> TypeChecker -- ^ type checker (should take 1 argument)
+  -> String      -- ^ type description
+  -> String      -- ^ script basename
+  -> (CmdDesc -> CmdDesc) -- ^ extra options
+  -> Function
+newFnST1 n tFn td s os = newFnT n Nothing tFn td rNewRulesA1 $ aNewRulesS1 s os
+
 aNewRulesS1 :: String -> (CmdDesc -> CmdDesc) -> NewAction1
 aNewRulesS1 sname opts o a1 = aNewRulesS sname opts o [a1]
 
@@ -113,6 +127,15 @@ newFnS2
   -> Function
 newFnS2 n r (a1, a2) s os = newFn n Nothing r [a1, a2] rNewRulesA2 $ aNewRulesS2 s os
 
+newFnST2
+  :: String      -- ^ name
+  -> TypeChecker -- ^ type checker (should take 2 arguments)
+  -> String      -- ^ type description
+  -> String      -- ^ script basename
+  -> (CmdDesc -> CmdDesc) -- ^ extra options
+  -> Function
+newFnST2 n tFn td s os = newFnT n Nothing tFn td rNewRulesA2 $ aNewRulesS2 s os
+
 aNewRulesS2 :: String -> (CmdDesc -> CmdDesc) -> NewAction2
 aNewRulesS2 sname opts o a1 a2 = aNewRulesS sname opts o [a1, a2]
 
@@ -124,6 +147,15 @@ newFnS3
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
 newFnS3 n r (a1, a2, a3) s os = newFn n Nothing r [a1, a2, a3] rNewRulesA3 $ aNewRulesS3 s os
+
+newFnST3
+  :: String      -- ^ name
+  -> TypeChecker -- ^ type checker (should take 3 arguments)
+  -> String      -- ^ type description
+  -> String      -- ^ script basename
+  -> (CmdDesc -> CmdDesc) -- ^ extra options
+  -> Function
+newFnST3 n tFn td s os = newFnT n Nothing tFn td rNewRulesA3 $ aNewRulesS3 s os
 
 aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
 aNewRulesS3 sname opts o a1 a2 a3 = aNewRulesS sname opts o [a1, a2, a3]
@@ -232,29 +264,29 @@ newPattern cfg name nArgs =
 -}
 rNewRules
   :: Int -> (t -> [FilePath] -> Action ())
-  -> String
   -> TypeChecker
+  -> String
   -> (ExprPath -> t)
   -> Rules ()
-rNewRules nArgs applyFn name tFn aFn = do
+rNewRules nArgs applyFn tFn name aFn = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let ptn = newPattern cfg name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> aNewRules applyFn tFn aFn (ExprPath p)
 
-rNewRulesA1 :: String -> TypeChecker -> NewAction1 -> Rules ()
+rNewRulesA1 :: TypeChecker -> String -> NewAction1 -> Rules ()
 rNewRulesA1 = rNewRules 1 applyList1
 
 applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList1 fn deps = fn (deps !! 0)
 
-rNewRulesA2 :: String -> TypeChecker -> NewAction2 -> Rules ()
+rNewRulesA2 :: TypeChecker -> String -> NewAction2 -> Rules ()
 rNewRulesA2 = rNewRules 2 applyList2
 
 applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
-rNewRulesA3 :: String -> TypeChecker -> NewAction3 -> Rules ()
+rNewRulesA3 :: TypeChecker -> String -> NewAction3 -> Rules ()
 rNewRulesA3 = rNewRules 3 applyList3
 
 applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
@@ -290,7 +322,7 @@ newFn
   -> Maybe Char -- ^ opchar
   -> Type       -- ^ return type
   -> [Type]     -- ^ list of argument types
-  -> (String -> TypeChecker -> t -> Rules ()) -- ^ rules function
+  -> (TypeChecker -> String -> t -> Rules ()) -- ^ rules function
   -> t                                        -- ^ matching action function
   -> Function
 newFn name mChar oType dTypes rFn aFn =
@@ -302,8 +334,32 @@ newFn name mChar oType dTypes rFn aFn =
        , fTypeCheck = tFn
        , fTags      = []
        , fOldRules  = undefined
-       , fNewRules  = NewRules $ rFn name tFn aFn
+       , fNewRules  = NewRules $ rFn tFn name aFn
        }
+
+{-|
+Like 'newFn', but you include a custom 'TypeChecker' and a description of it.
+For functions that require more flexibility than the regular typechecking
+provides. See if you can use a 'TypeGroup' instead!
+-}
+newFnT
+  :: String      -- ^ name
+  -> Maybe Char  -- ^ opchar
+  -> TypeChecker -- ^ type checker
+  -> String      -- ^ type description
+  -> (TypeChecker -> String -> t -> Rules ()) -- ^ rules function
+  -> t                                        -- ^ matching action function
+  -> Function
+newFnT name mChar tFn td rFn aFn =
+  Function
+    { fOpChar    = mChar
+    , fName      = name
+    , fTypeDesc  = td
+    , fTypeCheck = tFn
+    , fTags      = []
+    , fOldRules  = undefined
+    , fNewRules  = NewRules $ rFn tFn name aFn
+    }
 
 -- TODO move macros to a separate file?
 
