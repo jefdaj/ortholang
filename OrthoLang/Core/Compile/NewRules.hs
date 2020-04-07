@@ -29,8 +29,6 @@ module OrthoLang.Core.Compile.NewRules
     newFnS1
   , newFnS2
   , newFnS3
-
-  -- * Functions with custom types from external scripts
   , newFnST1
   , newFnST2
   , newFnST3
@@ -43,6 +41,9 @@ module OrthoLang.Core.Compile.NewRules
   , newFnA1
   , newFnA2
   , newFnA3
+  , newFnAT1
+  , newFnAT2
+  , newFnAT3
 
   -- * Binary operators from Actions
   , newBop
@@ -199,6 +200,14 @@ newFnA1
   -> Function
 newFnA1 n r a1 = newFn n Nothing r [a1] rNewRulesA1 
 
+newFnAT1
+  :: String      -- ^ name
+  -> TypeChecker -- ^ type checker (should take 1 argument)
+  -> String      -- ^ type description
+  -> NewAction1  -- ^ 1-argument action function
+  -> Function
+newFnAT1 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA1 aFn
+
 newFnA2
   :: String       -- ^ name
   -> Type         -- ^ return type
@@ -207,6 +216,14 @@ newFnA2
   -> Function
 newFnA2 n r (a1, a2) = newFn n Nothing r [a1, a2] rNewRulesA2 
 
+newFnAT2
+  :: String      -- ^ name
+  -> TypeChecker -- ^ type checker (should take 2 arguments)
+  -> String      -- ^ type description
+  -> NewAction2  -- ^ 2-argument action function
+  -> Function
+newFnAT2 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA2 aFn
+
 newFnA3
   :: String             -- ^ name
   -> Type               -- ^ return type
@@ -214,6 +231,14 @@ newFnA3
   -> NewAction3         -- ^ 3-argument action function
   -> Function
 newFnA3 n r (a1, a2, a3) = newFn n Nothing r [a1, a2, a3] rNewRulesA3 
+
+newFnAT3
+  :: String      -- ^ name
+  -> TypeChecker -- ^ type checker (should take 3 arguments)
+  -> String      -- ^ type description
+  -> NewAction3  -- ^ 3-argument action function
+  -> Function
+newFnAT3 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA3 aFn
 
 {-|
 This is for the specific case where you want to make a binary operator.
