@@ -334,7 +334,8 @@ makeblastdbProtAll = Function
   where
     name = "makeblastdb_prot_all"
 
--- TODO allow fna.list -> pdb.list using translate?
+-- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
+-- shown as "fa.list -> fa.blastdb, where fa is a fasta file"
 tMakeblastdbAll :: String -> Type -> TypeChecker
 tMakeblastdbAll _ dbType [ListOf faType]
   | dbType == pdb && faType   ==    faa       = Right pdb
@@ -482,6 +483,8 @@ makeblastdbProt = Function
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
+-- (Some fa "a fasta file") (Encoded blastdb (Some fa "a fasta file"))
+-- shown as "fa -> fa.blastdb, where fa is a fasta file"
 tMakeblastdb :: Type -> TypeChecker
 tMakeblastdb dbType [faType]
   | dbType == pdb && faType   ==    faa       = Right pdb
@@ -508,7 +511,8 @@ mkMakeblastdbEach dbType = Function
     name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     ext  = if dbType == ndb then "fa" else "faa"
 
--- TODO no! depends on an arg
+-- (ListOf (Some fa "a fasta file")) (ListOf (Encoded blastdb (Some fa "a fasta file")))
+-- shown as "fa.list -> fa.blastdb.list, where: fa is a fasta file"
 tMakeblastdbEach :: Type -> TypeChecker
 tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
 tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error

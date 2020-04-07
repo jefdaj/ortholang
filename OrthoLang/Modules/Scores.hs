@@ -74,6 +74,8 @@ scoreRepeats = Function
   where
     name = "score_repeats"
 
+-- (num, Some ot "any type", ListOf num) (ScoresOf num)
+-- shown as "num t num.list -> num.scores, where t is any type"
 tScoreRepeats :: [Type] -> Either String Type
 tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
 tScoreRepeats _ = Left "invalid args to scoreRepeats"
@@ -118,10 +120,14 @@ extractScored = let name = "extract_scored" in Function
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 2
   }
 
+-- (ScoresOf (Some ot "any type")) (ListOf num)
+-- shown as "t.scores -> num.list, where t is any type"
 tExtractScores :: TypeChecker
 tExtractScores [(ScoresOf _)]= Right $ ListOf num
 tExtractScores _ = Left "extract_scores requires scores"
 
+-- (ScoresOf (Some ot "any type")) (ListOf (SomeOt "any type"))
+-- shown as "t.scores -> t.list, where t is any type"
 tExtractScored :: TypeChecker
 tExtractScored [(ScoresOf x)] = Right $ ListOf x
 tExtractScored _ = Left "extract_scored requires scores"

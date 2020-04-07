@@ -66,6 +66,12 @@ mkSetFunction (foldName, opChar, setFn) = setFold
       , fNewRules = NewNotImplemented, fOldRules = rSetFold (foldr1 setFn)
       }
 
+-- (ListOf (ListOf (Some ot "any type"))) (ListOf (Some ot "any type"))
+-- shown as "t.list.list -> t.list, where t is any type"
+--
+-- TODO generate the two-arg version for the bops too though:
+-- (ListOf (Some ot "any type"), ListOf (Some ot "any type")) (ListOf ot "any type")
+-- shown as "t.list t.list -> t.list, where t is any type"
 tSetFold :: [Type] -> Either String Type
 tSetFold [ListOf (ListOf x)] = Right $ ListOf x
 tSetFold _ = Left "expecting a list of lists"

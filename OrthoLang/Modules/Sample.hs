@@ -32,6 +32,8 @@ sample = Function
   where
     name = "sample"
 
+-- (num, ListOf (Some ot "any type")) (ListOf ot "any type")
+-- shown as "num t.list -> t.list, where t is any type"
 tSample :: [Type] -> Either String Type
 tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"

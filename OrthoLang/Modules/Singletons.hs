@@ -62,6 +62,8 @@ singletons =
     , fOldRules  = rSingletons
     }
 
+-- (ListOf (Some ot "any type")) (ListOf (ListOf (Some ot "any type")))
+-- shown as "t.list -> t.list.list, where t is any type"
 tSingletons :: [Type] -> Either String Type
 tSingletons [ListOf x] = Right $ ListOf $ ListOf x
 tSingletons _ = Left "tSingletons expected a list"

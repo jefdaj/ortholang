@@ -70,6 +70,8 @@ mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in Function
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDbAll
   }
 
+-- (ListOf (Some fa "any fasta file")) (EncodedAs mmseqsdb (Some fa "any fasta file"))
+-- shown as "fa.list -> fa.mmseqsdb, where fa is any fasta file"
 tMmseqsCreateDbAll :: String -> TypeChecker
 tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
 tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files, but got " ++ show types
@@ -125,6 +127,8 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in Function
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDb
   }
 
+-- (Some fa "any fasta file") (EncodedAs mmseqsdb (Some fa "any fasta file"))
+-- shown as "fa -> fa.mmseqsdb, where fa is any fasta file"
 tMmseqsCreateDb :: String -> TypeChecker
 tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
 tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
@@ -148,6 +152,8 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in Function
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearchDb
   }
 
+-- (num, (Some fa "any fasta file"), (EncodedAs mmseqsdb (Some fa "also any fasta file"))) bht
+-- shown as "num fa1 fa2.mmseqsdb -> bht, where fa1 is any fasta file, fa2 is also any fasta file"
 tMmseqsSearchDb :: String -> TypeChecker
 -- TODO can this error be maintained despite the vague mms type? maybe not...
 -- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."

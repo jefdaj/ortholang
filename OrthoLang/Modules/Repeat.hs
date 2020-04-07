@@ -40,7 +40,8 @@ repeatN = Function
 
 -- takes a result type, a starting type, and an int,
 -- and returns a list of the result var type. start type can be whatever
--- TODO does num here refer to actual num, or is it shadowing it?
+-- (Some ot "any type", num) (ListOf (Some ot "any type"))
+-- shown as "t num -> t.list, where t is any type"
 tRepeatN :: [Type] -> Either String Type 
 tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
 tRepeatN _ = Left "invalid args to repeatN"

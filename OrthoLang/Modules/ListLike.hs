@@ -47,6 +47,12 @@ length = Function
   where
     name = "length"
 
+-- tLength is (Some listlike "any list-like file") num
+-- shown as "ll -> num, where ll is any list-like file"
+
+-- tLengthEach is (ListOf (Some listlike "any list-like file")) (ListOf num)
+-- shown as "ll.list -> num.list, where ll is any list-like file"
+
 lengthEach :: Function
 lengthEach = Function
   { fOpChar = Nothing, fName = name

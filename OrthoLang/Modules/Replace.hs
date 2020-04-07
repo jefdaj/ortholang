@@ -100,6 +100,11 @@ replace = Function
   , fNewRules = NewNotImplemented, fOldRules = rReplace
   }
 
+-- (Some ot "the return type",
+--  Some ot "the type of the var to replace",
+--  Some ot "the type of the var to replace") (Some ot "the return type")
+-- shown as "t1 t2 t2 -> t1, where t1 is the return type, t2 is the type of the var to replace"
+-- TODO make a generic typegroup that matches anything, and gets represented as A, B, ...
 tReplace :: [Type] -> Either String Type
 tReplace (res:sub:sub':[]) | sub == sub' = Right res
 tReplace _ = Left "invalid args to replace" -- TODO better errors here
@@ -196,6 +201,10 @@ replaceEach = Function
   , fNewRules = NewNotImplemented, fOldRules = rReplaceEach
   }
 
+-- (Some ot "the return type",
+--  Some ot "the type of the var to replace",
+--  (ListOf (Some ot "the type of the var to replace")) (ListOf (Some ot "the return type"))
+-- shown as "t1 t2 t2.list -> t1.list, where t1 is the return type, t2 is the type of the var to replace"
 tReplaceEach :: [Type] -> Either String Type
 tReplaceEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
 tReplaceEach _ = Left "invalid args to replace_each" -- TODO better errors here

@@ -92,6 +92,8 @@ rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
 -- plot num.scores --
 ---------------------
 
+-- (str, ScoresOf num) png
+-- shown as "str num.scores -> png"
 tPlotScores :: TypeChecker
 tPlotScores [s, ScoresOf n] | s == str && n == num = Right png
 tPlotScores _ = Left "expected a title and scores"
@@ -162,6 +164,10 @@ venndiagram = let name = "venndiagram" in Function
   , fNewRules = NewNotImplemented, fOldRules = rPlotListOfLists "venndiagram.R"
   }
 
+-- (ListOf (ListOf (Some ot "any type"))) png
+-- shown as "t.list.list -> png, where t is any type"
+-- TODO does that actually make sense for specifying something you can plot?
+--      yes but only for venn diagrams
 tPlotListOfLists :: TypeChecker
 tPlotListOfLists [(ListOf (ListOf _))] = Right png
 tPlotListOfLists _ = Left "expected a list of lists"

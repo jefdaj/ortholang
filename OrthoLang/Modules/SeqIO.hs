@@ -186,10 +186,14 @@ extractIdsEach = Function
   where
     name = "extract_ids_each"
 
+-- Some fa "any fasta file" (ListOf str)
+-- shown as "fa -> str.list, where fa is any fasta file"
 tExtractIds :: [Type] -> Either String Type
 tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
 tExtractIds _ = Left "expected a fasta file"
 
+-- (ListOf (Some fa "any fasta file")) (ListOf (ListOf str))
+-- shown as "fa.list -> str.list.list, where fa is any fasta file"
 tExtractIdsEach :: [Type] -> Either String Type
 tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
 tExtractIdsEach _ = Left "expected a fasta file"
@@ -244,10 +248,16 @@ extractSeqsEach = Function
   where
     name = "extract_seqs_each"
 
+-- (Some fa "any fasta file", ListOf str) (Some fa "any fasta file")
+-- shown as "fa str.list -> fa, where fa is any fasta file"
 tExtractSeqs  :: [Type] -> Either String Type
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
 
+-- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
+--      or maybe for singletons or something?
+-- (Some fa "any fasta file", (ListOf (ListOf str))) (ListOf (Some fa "any fasta file"))
+-- shown as "fa str.list -> fa.list, where fa is any fasta file"
 tExtractSeqsEach  :: [Type] -> Either String Type
 tExtractSeqsEach [x, ListOf (ListOf s)] | s == str && elem x [faa, fna] = Right $ ListOf x
 tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
