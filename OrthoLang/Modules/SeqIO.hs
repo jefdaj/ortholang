@@ -216,11 +216,10 @@ aExtractSeqs out inFa inList = do
   cfg <- fmap fromJust getShakeExtra
   let tmp = fromPath cfg $ cacheDir cfg "seqio"
       ids = tmp </> digest (toPath cfg inList) <.> "txt"
-  lookupIDsFile (toPath cfg inList) (toPath cfg ids)
-  aNewRulesS2 "extract_seqs.py" id out inFa ids
+  lookupIDsFile (toPath cfg inList) (toPath cfg ids) -- writes hashed ids
+  aNewRulesS2 "extract_seqs.py" id out inFa ids      -- extracts sequences
 
--- this is still used for the mapped version. remove it the least invasive way first, with an adapter fn
--- TODO hey could applyList2 do that?
+-- TODO remove by rewriting map functions to work on the new one above
 aExtractSeqsOld :: [Path] -> Action ()
 aExtractSeqsOld [outPath, inFa, inList] = do
   cfg <- fmap fromJust getShakeExtra
@@ -244,9 +243,6 @@ extractSeqsEach = Function
   where
     name = "extract_seqs_each"
 
--- TODO shit, it doesn't take into account the outpath?
--- applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-
 tExtractSeqs  :: [Type] -> Either String Type
 tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
 tExtractSeqs _ = Left "expected a fasta file and a list of strings"
@@ -260,16 +256,19 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 ----------------------
 
 -- TODO name something else like fna_to_faa?
+-- translate :: Function
+-- translate = Function
+--   { fOpChar = Nothing, fName = name
+--   ,fTags = []
+--   , fTypeCheck = defaultTypeCheck name [fna] faa
+--   , fTypeDesc  = mkTypeDesc name  [fna] faa
+--   , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "translate.py"
+--   }
+--   where
+--     name = "translate"
+
 translate :: Function
-translate = Function
-  { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = defaultTypeCheck name [fna] faa
-  , fTypeDesc  = mkTypeDesc name  [fna] faa
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "translate.py"
-  }
-  where
-    name = "translate"
+translate = newFnS1 "translate" fna faa "translate.py" id
 
 translateEach :: Function
 translateEach = Function

@@ -100,12 +100,12 @@ import OrthoLang.Core.Paths (fromPath, decodeNewRulesDeps)
 
 newFnS1
   :: String               -- ^ name
-  -> Type                 -- ^ return type
   -> Type                 -- ^ 1 argument type
+  -> Type                 -- ^ return type
   -> String               -- ^ script basename
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS1 n r a1 s os = newFn n Nothing r [a1] rNewRulesA1 $ aNewRulesS1 s os
+newFnS1 n a1 r s os = newFn n Nothing [a1] r rNewRulesA1 $ aNewRulesS1 s os
 
 newFnST1
   :: String      -- ^ name
@@ -121,12 +121,12 @@ aNewRulesS1 sname opts o a1 = aNewRulesS sname opts o [a1]
 
 newFnS2
   :: String               -- ^ name
-  -> Type                 -- ^ return type
   -> (Type, Type)         -- ^ 2 argument types
+  -> Type                 -- ^ return type
   -> String               -- ^ script basename
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS2 n r (a1, a2) s os = newFn n Nothing r [a1, a2] rNewRulesA2 $ aNewRulesS2 s os
+newFnS2 n (a1, a2) r s os = newFn n Nothing [a1, a2] r rNewRulesA2 $ aNewRulesS2 s os
 
 newFnST2
   :: String      -- ^ name
@@ -142,12 +142,12 @@ aNewRulesS2 sname opts o a1 a2 = aNewRulesS sname opts o [a1, a2]
 
 newFnS3
   :: String               -- ^ name
-  -> Type                 -- ^ return type
   -> (Type, Type, Type)   -- ^ 3 argument types
+  -> Type                 -- ^ return type
   -> String               -- ^ script basename
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS3 n r (a1, a2, a3) s os = newFn n Nothing r [a1, a2, a3] rNewRulesA3 $ aNewRulesS3 s os
+newFnS3 n (a1, a2, a3) r s os = newFn n Nothing [a1, a2, a3] r rNewRulesA3 $ aNewRulesS3 s os
 
 newFnST3
   :: String      -- ^ name
@@ -196,11 +196,11 @@ type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 
 newFnA1
   :: String     -- ^ name
-  -> Type       -- ^ return type
   -> Type       -- ^ 1 argument type
+  -> Type       -- ^ return type
   -> NewAction1 -- ^ 1-argument action function
   -> Function
-newFnA1 n r a1 = newFn n Nothing r [a1] rNewRulesA1 
+newFnA1 n a1 r = newFn n Nothing [a1] r rNewRulesA1
 
 newFnAT1
   :: String      -- ^ name
@@ -212,11 +212,11 @@ newFnAT1 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA1 aFn
 
 newFnA2
   :: String       -- ^ name
-  -> Type         -- ^ return type
   -> (Type, Type) -- ^ 2 argument types
+  -> Type         -- ^ return type
   -> NewAction2   -- ^ 2-argument action function
   -> Function
-newFnA2 n r (a1, a2) = newFn n Nothing r [a1, a2] rNewRulesA2 
+newFnA2 n (a1, a2) r = newFn n Nothing [a1, a2] r rNewRulesA2
 
 newFnAT2
   :: String      -- ^ name
@@ -228,11 +228,11 @@ newFnAT2 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA2 aFn
 
 newFnA3
   :: String             -- ^ name
-  -> Type               -- ^ return type
   -> (Type, Type, Type) -- ^ 3 argument types
+  -> Type               -- ^ return type
   -> NewAction3         -- ^ 3-argument action function
   -> Function
-newFnA3 n r (a1, a2, a3) = newFn n Nothing r [a1, a2, a3] rNewRulesA3 
+newFnA3 n (a1, a2, a3) r = newFn n Nothing [a1, a2, a3] r rNewRulesA3
 
 newFnAT3
   :: String      -- ^ name
@@ -249,11 +249,11 @@ It probably isn't very useful outside math and set operations.
 newBop
   :: String     -- ^ name
   -> Char       -- ^ opchar
-  -> Type       -- ^ return type
   -> Type       -- ^ 1 argument type (each side of the bop will be this)
+  -> Type       -- ^ return type
   -> NewAction1 -- ^ 1-argument action function (list of 2 args in case of bop, or 2+ for the prefix fn)
   -> Function
-newBop n c r a1 = newFn n (Just c) r [ListOf a1] rNewRulesA1 
+newBop n c a1 r = newFn n (Just c) [ListOf a1] r rNewRulesA1
 
 --------------------
 -- implementation --
@@ -347,12 +347,12 @@ rules function + action function.
 newFn
   :: String     -- ^ name
   -> Maybe Char -- ^ opchar
-  -> Type       -- ^ return type
   -> [Type]     -- ^ list of argument types
+  -> Type       -- ^ return type
   -> (TypeChecker -> String -> t -> Rules ()) -- ^ rules function
   -> t                                        -- ^ matching action function
   -> Function
-newFn name mChar oType dTypes rFn aFn =
+newFn name mChar dTypes oType rFn aFn =
   let tFn = defaultTypeCheck name dTypes oType
   in Function
        { fOpChar    = mChar
@@ -425,8 +425,8 @@ directly.  The only type checking planned so far is that
 'OrthoLang.Core.Compile.Basic.rMacro' will prevent macro expansions from
 changing the return type of their input 'Expr'.
 -}
-newMacro :: String -> Type -> [Type] -> MacroExpansion -> Function
-newMacro name oType dTypes mFn =
+newMacro :: String -> [Type] -> Type -> MacroExpansion -> Function
+newMacro name dTypes oType mFn =
   let tFn = defaultTypeCheck name dTypes oType
   in Function
        { fOpChar    = Nothing

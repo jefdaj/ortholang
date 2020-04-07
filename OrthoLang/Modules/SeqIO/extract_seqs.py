@@ -1,14 +1,12 @@
 #!/usr/bin/env python2
 
 # Convert a list of genes back to FASTA.
-# Usage: extract-seqs-by-id <tmpdir> <outfasta> <infasta> <idlist>
-# TODO why does this create an empty fasta file??
+# Usage: extract_seqs.py <outfasta> <infasta> <idlist>
 
 from Bio import SeqIO
 from sys import argv
 
-# tmpdir = argv[1] # passed by convention, but not used here TODO remove?
-outfa  = argv[1]
+outfa  = argv[1] # TODO pass tmpdir instead and have scripts assume 'result'
 infa   = argv[2]
 inids  = argv[3]
 
