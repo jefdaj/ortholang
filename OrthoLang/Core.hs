@@ -105,6 +105,7 @@ module OrthoLang.Core
   , saltOf
   , setSalt
   , str
+  , lit
   , typeOf
 
   -- * Old module API: Actions

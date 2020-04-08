@@ -41,8 +41,8 @@ olModule :: Module
 olModule = Module
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
-  , mTypes = [og, ofr, spr, gcr]
-  , mGroups = []
+  , mTypes = [ofr, spr, gcr]
+  , mGroups = [og]
   , mFunctions =
       [ orthogroups
       , orthogroupContaining
@@ -61,11 +61,11 @@ olModule = Module
   }
 
 -- TODO should there be single and plural versions?
-og :: Type
+og :: TypeGroup
 og = TypeGroup
   { tgExt = "og"
   , tgDesc = "orthogroups (orthofinder, sonicparanoid, or greencut results)"
-  , tgMember = \t -> t `elem` [ofr, spr, gcr]
+  , tgTypes = [ofr, spr, gcr]
   }
 
 -----------------
@@ -81,8 +81,8 @@ og = TypeGroup
 orthogroups :: Function
 orthogroups = let name = "orthogroups" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [og] sll
-  , fTypeCheck = defaultTypeCheck name [og] sll
+  , fTypeDesc  = mkTypeDesc       name [Some og "some orthogroup"] sll
+  , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup"] sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
   }
@@ -165,8 +165,8 @@ aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 orthogroupContaining :: Function
 orthogroupContaining = let name = "orthogroup_containing" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [og, str] (ListOf str)
-  , fTypeCheck = defaultTypeCheck name [og, str] (ListOf str)
+  , fTypeDesc  = mkTypeDesc       name [Some og "some orthogroup", str] (ListOf str)
+  , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", str] (ListOf str)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthogroupContaining
   }
@@ -194,8 +194,8 @@ aOrthogroupContaining args = error $ "bad argument to aOrthogroupContaining: " +
 orthogroupsContaining :: Function
 orthogroupsContaining = let name = "orthogroups_containing" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [og, ListOf str] sll
-  , fTypeCheck = defaultTypeCheck name [og, ListOf str] sll
+  , fTypeDesc  = mkTypeDesc       name [Some og "some orthogroup", ListOf str] sll
+  , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", ListOf str] sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
   }
@@ -228,8 +228,8 @@ aOrthogroupsFilter _ args = error $ "bad argument to aOrthogroupContaining: " ++
 orthologInAny :: Function
 orthologInAny = let name = "ortholog_in_any" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck name [og, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc       name [Some og "some orthogroup", ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", ListOf faa] sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules name
   }
@@ -301,8 +301,8 @@ rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
 orthologInAll :: Function
 orthologInAll = let name = "ortholog_in_all" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck name [og, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc       name [Some og "some orthogroup", ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", ListOf faa] sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
@@ -387,8 +387,8 @@ rOrthologFilterStrFrac _ _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 orthologInMin :: Function
 orthologInMin = let name = "ortholog_in_min" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck name [num, og, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc       name [num, Some og "some orthogroup", ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [num, Some og "some orthogroup", ListOf faa] sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
   }
@@ -408,8 +408,8 @@ mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
 orthologInMax :: Function
 orthologInMax = let name = "ortholog_in_max" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [num, og, ListOf faa] sll
-  , fTypeCheck = defaultTypeCheck name [num, og, ListOf faa] sll
+  , fTypeDesc  = mkTypeDesc       name [num, Some og "some orthogroup", ListOf faa] sll
+  , fTypeCheck = defaultTypeCheck name [num, Some og "some orthogroup", ListOf faa] sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
   }

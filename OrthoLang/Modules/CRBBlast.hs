@@ -15,8 +15,8 @@ olModule :: Module
 olModule = Module
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
-  , mTypes = [fna, faa, fa, crb]
-  , mGroups = []
+  , mTypes = [fna, faa, crb]
+  , mGroups = [fa]
   , mFunctions =
     [ blastCRB
     , blastCRBEach -- TODO someting nicer than this!
@@ -47,8 +47,8 @@ crb = Type
 blastCRB :: Function
 blastCRB = Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc name  [fna, fa] crb
-  , fTypeCheck = defaultTypeCheck name [fna, fa] crb
+  , fTypeDesc  = mkTypeDesc       name [fna, Some fa "some fa"] crb
+  , fTypeCheck = defaultTypeCheck name [fna, Some fa "some fa"] crb
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimpleTmp name aCRBBlast
   }
@@ -60,8 +60,8 @@ blastCRB = Function
 blastCRBEach :: Function
 blastCRBEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [fna, ListOf fa] (ListOf crb)
-  , fTypeDesc  = mkTypeDesc name  [fna, ListOf fa] (ListOf crb)
+  , fTypeCheck = defaultTypeCheck name [fna, ListOf (Some fa "some fa")] (ListOf crb)
+  , fTypeDesc  = mkTypeDesc       name [fna, ListOf (Some fa "some fa")] (ListOf crb)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }

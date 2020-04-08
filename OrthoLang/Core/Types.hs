@@ -48,6 +48,7 @@ module OrthoLang.Core.Types
   -- misc
   -- , prettyShow
   , str, num -- TODO load these from modules
+  , lit
   , typeOf
   , extOf
   , descOf
@@ -314,17 +315,27 @@ These are kind of like simpler, less extensible typeclasses. They're just a
 list of types that can be treated similarly in some circumstances, for example
 "files whose length is their number of lines" or "FASTA files (faa or fna)".
 -}
-data TypeGroup = TypeGroup
-  { tgExt   :: String
-  , tgDesc  :: String
-  , tgTypes :: [Type]
-  }
+data TypeGroup
+  = AnyType
+  | TypeGroup
+    { tgExt   :: String
+    , tgDesc  :: String
+    , tgTypes :: [Type]
+    }
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq TypeGroup where
   (TypeGroup {tgExt = e1}) == (TypeGroup {tgExt = e2}) = e1 == e2
   _ == _ = False
+
+-- TODO either use this in the core compilers or remove it
+lit :: TypeGroup
+lit = TypeGroup
+  { tgExt = "lit"
+  , tgDesc = "basic literal (str or num)"
+  , tgTypes = [str, num]
+  }
 
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
 defaultShow = defaultShowN 5
@@ -546,8 +557,15 @@ data FnTag
 data Function = Function
   { fName      :: String      -- ^ main (prefix) function name
   , fOpChar    :: Maybe Char  -- ^ infix operator symbol, if any
+
+  -- TODO remove these
   , fTypeCheck :: TypeChecker -- ^ checks input types, returning an error message or return type
   , fTypeDesc  :: String      -- ^ human-readable description
+
+  -- TODO write these, then remove the old descs + typecheckers above
+  , fInputs :: Maybe [Type] -- ^ new input (argument) types
+  , fOutput :: Maybe  Type  -- ^ new output (return) type
+
   , fTags      :: [FnTag]     -- ^ function tags (TODO implement these)
   , fOldRules  :: RulesFn     -- ^ old-style rules (TODO deprecate, then remove)
   , fNewRules  :: NewRules    -- ^ new-style rules (TODO write them all, then remove the Maybe)

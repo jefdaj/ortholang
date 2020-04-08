@@ -20,28 +20,23 @@ olModule :: Module
 olModule = Module
   { mName = "ListLike"
   , mDesc = "Operations on files that can be treated like lists"
-  , mTypes = [bht, crb, mms, listlike]
-  , mGroups = []
+  , mTypes = [bht, crb, mms]
+  , mGroups = [ll]
   , mFunctions = [length, lengthEach]
   }
 
-listlike :: Type
-listlike = TypeGroup
-  { tgExt  = "listlike"
-  , tgDesc   = "files that can be treated like lists"
-  , tgMember = tListLike
+ll :: TypeGroup
+ll = TypeGroup
+  { tgExt  = "ll"
+  , tgDesc  = "files that can be treated like lists"
+  , tgTypes = [bht, crb, mms]
   }
-
-tListLike :: Type -> Bool
-tListLike Empty      = True
-tListLike (ListOf _) = True
-tListLike x = x `elem` [bht, crb, mms]
 
 length :: Function
 length = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [listlike] num
-  , fTypeDesc  = mkTypeDesc name  [listlike] num
+  , fTypeCheck = defaultTypeCheck name [Some ll "something list-like"] num
+  , fTypeDesc  = mkTypeDesc       name [Some ll "something list-like"] num
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLength
   }
@@ -57,8 +52,8 @@ length = Function
 lengthEach :: Function
 lengthEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc name [(ListOf listlike)] (ListOf num)
-  , fTypeCheck = defaultTypeCheck name [ListOf listlike] (ListOf num)
+  , fTypeDesc  = mkTypeDesc       name [ListOf (Some ll "something list-like")] (ListOf num)
+  , fTypeCheck = defaultTypeCheck name [ListOf (Some ll "something list-like")] (ListOf num)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 aLength -- TODO is 1 wrong?
   }
