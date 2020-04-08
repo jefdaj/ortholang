@@ -29,9 +29,6 @@ module OrthoLang.Core.Compile.NewRules
     newFnS1
   , newFnS2
   , newFnS3
-  , newFnST1
-  , newFnST2
-  , newFnST3
 
   -- * Functions from Actions
   -- $fromactions
@@ -41,9 +38,6 @@ module OrthoLang.Core.Compile.NewRules
   , newFnA1
   , newFnA2
   , newFnA3
-  , newFnAT1
-  , newFnAT2
-  , newFnAT3
 
   -- * Binary operators from Actions
   , newBop
@@ -108,16 +102,6 @@ newFnS1
   -> Function
 newFnS1 n a1 r s os = newFn n Nothing [a1] r rNewRulesA1 $ aNewRulesS1 s os
 
--- TODO but here? maybe we need to completely remove custom typecheckers
-newFnST1
-  :: String      -- ^ name
-  -> TypeChecker -- ^ type checker (should take 1 argument)
-  -> String      -- ^ type description
-  -> String      -- ^ script basename
-  -> (CmdDesc -> CmdDesc) -- ^ extra options
-  -> Function
-newFnST1 n tFn td s os = newFnT n Nothing tFn td rNewRulesA1 $ aNewRulesS1 s os
-
 -- TODO failed to lookup out path in here?
 aNewRulesS1 :: String -> (CmdDesc -> CmdDesc) -> NewAction1
 aNewRulesS1 sname opts o a1 = aNewRulesS sname opts o [a1]
@@ -131,15 +115,6 @@ newFnS2
   -> Function
 newFnS2 n (a1, a2) r s os = newFn n Nothing [a1, a2] r rNewRulesA2 $ aNewRulesS2 s os
 
-newFnST2
-  :: String      -- ^ name
-  -> TypeChecker -- ^ type checker (should take 2 arguments)
-  -> String      -- ^ type description
-  -> String      -- ^ script basename
-  -> (CmdDesc -> CmdDesc) -- ^ extra options
-  -> Function
-newFnST2 n tFn td s os = newFnT n Nothing tFn td rNewRulesA2 $ aNewRulesS2 s os
-
 aNewRulesS2 :: String -> (CmdDesc -> CmdDesc) -> NewAction2
 aNewRulesS2 sname opts o a1 a2 = aNewRulesS sname opts o [a1, a2]
 
@@ -151,15 +126,6 @@ newFnS3
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
 newFnS3 n (a1, a2, a3) r s os = newFn n Nothing [a1, a2, a3] r rNewRulesA3 $ aNewRulesS3 s os
-
-newFnST3
-  :: String      -- ^ name
-  -> TypeChecker -- ^ type checker (should take 3 arguments)
-  -> String      -- ^ type description
-  -> String      -- ^ script basename
-  -> (CmdDesc -> CmdDesc) -- ^ extra options
-  -> Function
-newFnST3 n tFn td s os = newFnT n Nothing tFn td rNewRulesA3 $ aNewRulesS3 s os
 
 aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
 aNewRulesS3 sname opts o a1 a2 a3 = aNewRulesS sname opts o [a1, a2, a3]
@@ -208,14 +174,6 @@ newFnA1
   -> Function
 newFnA1 n a1 r = newFn n Nothing [a1] r rNewRulesA1
 
-newFnAT1
-  :: String      -- ^ name
-  -> TypeChecker -- ^ type checker (should take 1 argument)
-  -> String      -- ^ type description
-  -> NewAction1  -- ^ 1-argument action function
-  -> Function
-newFnAT1 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA1 aFn
-
 newFnA2
   :: String       -- ^ name
   -> (Type, Type) -- ^ 2 argument types
@@ -224,14 +182,6 @@ newFnA2
   -> Function
 newFnA2 n (a1, a2) r = newFn n Nothing [a1, a2] r rNewRulesA2
 
-newFnAT2
-  :: String      -- ^ name
-  -> TypeChecker -- ^ type checker (should take 2 arguments)
-  -> String      -- ^ type description
-  -> NewAction2  -- ^ 2-argument action function
-  -> Function
-newFnAT2 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA2 aFn
-
 newFnA3
   :: String             -- ^ name
   -> (Type, Type, Type) -- ^ 3 argument types
@@ -239,14 +189,6 @@ newFnA3
   -> NewAction3         -- ^ 3-argument action function
   -> Function
 newFnA3 n (a1, a2, a3) r = newFn n Nothing [a1, a2, a3] r rNewRulesA3
-
-newFnAT3
-  :: String      -- ^ name
-  -> TypeChecker -- ^ type checker (should take 3 arguments)
-  -> String      -- ^ type description
-  -> NewAction3  -- ^ 3-argument action function
-  -> Function
-newFnAT3 n tFn td aFn = newFnT n Nothing tFn td rNewRulesA3 aFn
 
 {-|
 This is for the specific case where you want to make a binary operator.
@@ -380,30 +322,6 @@ newFn name mChar dTypes oType rFn aFn =
        , fOldRules  = undefined
        , fNewRules  = NewRules $ rFn tFn name aFn
        }
-
-{-|
-Like 'newFn', but you include a custom 'TypeChecker' and a description of it.
-For functions that require more flexibility than the regular typechecking
-provides. See if you can use a 'TypeGroup' instead!
--}
-newFnT
-  :: String      -- ^ name
-  -> Maybe Char  -- ^ opchar
-  -> TypeChecker -- ^ type checker
-  -> String      -- ^ type description
-  -> (TypeChecker -> String -> t -> Rules ()) -- ^ rules function
-  -> t                                        -- ^ matching action function
-  -> Function
-newFnT name mChar tFn td rFn aFn =
-  Function
-    { fOpChar    = mChar
-    , fName      = name
-    , fTypeDesc  = td
-    , fTypeCheck = tFn
-    , fTags      = []
-    , fOldRules  = undefined
-    , fNewRules  = NewRules $ rFn tFn name aFn
-    }
 
 -- TODO move macros to a separate file?
 

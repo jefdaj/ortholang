@@ -9,7 +9,7 @@ module OrthoLang.Core.Types
   , Action3
   , ActionFn
   , RulesFn
-  , TypeChecker
+  -- , TypeChecker
   -- * Basic data structures
   , Assign
   , Expr(..)
@@ -25,6 +25,7 @@ module OrthoLang.Core.Types
   -- , WrapperConfig(..)
   , Type(..)
   , TypeGroup(..)
+  , TypeSig(..)
   , RepID(..)
   , Salt(..)
   , Var(..)
@@ -75,7 +76,7 @@ module OrthoLang.Core.Types
   , extractExprs
   , extractLoads
   , typeSigMatches
-  , typeSigsMatch
+  -- , typeSigsMatch
   -- new rules infrastructure
   , RulesEnv
   , RulesR
@@ -118,7 +119,7 @@ type Action3 = Path -> Path -> Path -> Path -> Action ()
 type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
 
 type RulesFn     = Script -> Expr -> Rules ExprPath
-type TypeChecker = [Type] -> Either String Type
+-- type TypeChecker = [Type] -> Either String Type
 
 newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
@@ -305,13 +306,19 @@ instance Show Type where
 
 {-|
 These are used to specify the input + output types of functions.
-During parsing they are checked and used to determine the concrete 'Type' for each 'Expr'.
+During parsing they are checked and used to determine the 'Type' for each 'Expr'.
+Constructors are from vague to specific.
 -}
 data TypeSig
-  = AnyType
+  = AnyType               -- ^ generic placeholder called "any type" in help text
   | Some TypeGroup String -- ^ the string is used for equality and in the help text
-  | Concrete Type
-  deriving (Eq)
+  | Exactly Type          -- ^ one regular Type wrapped for use in type signatures
+  deriving (Eq, Show)
+
+--instance Show TypeSig where
+--  show AnyType = "AnyType"
+--  show (Some g s) = "Some " ++ tgExt g ++ " " ++ show s
+--  show (Exactly t) = "Exactly " ++ show t
 
 {-|
 These are kind of like simpler, less extensible typeclasses. They're just a
@@ -323,6 +330,7 @@ data TypeGroup = TypeGroup
   , tgDesc  :: String
   , tgMembers :: [TypeSig]
   }
+  deriving (Show)
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
@@ -334,7 +342,7 @@ lit :: TypeGroup
 lit = TypeGroup
   { tgExt = "lit"
   , tgDesc = "basic literal (str or num)"
-  , tgMembers = [Concrete str, Concrete num]
+  , tgMembers = [Exactly str, Exactly num]
   }
 
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
@@ -564,12 +572,12 @@ data Function = Function
   , fOpChar    :: Maybe Char  -- ^ infix operator symbol, if any
 
   -- TODO remove these
-  , fTypeCheck :: TypeChecker -- ^ checks input types, returning an error message or return type
-  , fTypeDesc  :: String      -- ^ human-readable description
+  -- , fTypeCheck :: TypeChecker -- ^ checks input types, returning an error message or return type
+  -- , fTypeDesc  :: String      -- ^ human-readable description
 
   -- TODO write these, then remove the old descs + typecheckers above
-  , fInputs :: Maybe [TypeSig] -- ^ new input (argument) types
-  , fOutput :: Maybe  TypeSig  -- ^ new output (return) type
+  , fInputs :: [TypeSig] -- ^ new input (argument) types TODO any way to make it a variable length tuple?
+  , fOutput ::  TypeSig  -- ^ new output (return) type
 
   , fTags      :: [FnTag]     -- ^ function tags (TODO implement these)
   , fOldRules  :: RulesFn     -- ^ old-style rules (TODO deprecate, then remove)
@@ -644,12 +652,13 @@ explainFnBug =
 typeSigMatches :: TypeSig -> Type -> Bool
 typeSigMatches AnyType _ = True
 typeSigMatches (Some g _) t = any (\s -> typeSigMatches s t) (tgMembers g)
-typeSigMatches (Concrete (ListOf   t1)) (ListOf   t2) = typeSigMatches (Concrete t1) t2
-typeSigMatches (Concrete (ScoresOf t1)) (ScoresOf t2) = typeSigMatches (Concrete t1) t2
-typeSigMatches (Concrete t1) t2 = t1 == t2
+typeSigMatches (Exactly (ListOf   t1)) (ListOf   t2) = typeSigMatches (Exactly t1) t2
+typeSigMatches (Exactly (ScoresOf t1)) (ScoresOf t2) = typeSigMatches (Exactly t1) t2
+typeSigMatches (Exactly t1) t2 = t1 == t2
 
-typeSigsMatch :: [TypeSig] -> [Type] -> Bool
-typeSigsMatch as bs = sameLength && allMatch
-  where
-    sameLength = length as == length bs
-    allMatch   = all (\(s,t) -> typeSigMatches s t) (zip as bs)
+-- TODO remove?
+-- typeSigsMatch :: [TypeSig] -> [Type] -> Bool
+-- typeSigsMatch as bs = sameLength && allMatch
+--   where
+--     sameLength = length as == length bs
+--     allMatch   = all (\(s,t) -> typeSigMatches s t) (zip as bs)

@@ -41,7 +41,7 @@ module OrthoLang.Core.Compile.Basic
   , curl
   , debugC
   , debugRules
-  , defaultTypeCheck
+  -- , defaultTypeCheck
   , typeError
 
   -- misc internal functions (TODO export them too?)
@@ -421,8 +421,8 @@ mkLoad hashSeqIDs name rtn = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [str] rtn
   -- , fTypeDesc  = mkTypeDesc name [str] rtn
-  , fInputs = [Concrete str]
-  , fOutput =  Concrete rtn
+  , fInputs = [Exactly str]
+  , fOutput =  Exactly rtn
   , fTags = []
   , fOldRules = rLoad hashSeqIDs
   , fNewRules = NewNotImplemented
@@ -438,8 +438,8 @@ mkLoadList hashSeqIDs name rtn = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
   -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
-  , fInputs = [Concrete (ListOf str)]
-  , fOutputs = Concrete (ListOf rtn)
+  , fInputs = [Exactly (ListOf str)]
+  , fOutput = Exactly (ListOf rtn)
   , fTags = []
   , fOldRules = rLoadList hashSeqIDs -- TODO different from src lists?
   , fNewRules = NewNotImplemented

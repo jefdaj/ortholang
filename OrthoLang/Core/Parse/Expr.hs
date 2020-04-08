@@ -43,9 +43,9 @@ import Control.Monad.Trans.Except
 
 import Control.Applicative    ((<|>))
 import Control.Monad          (void)
-import Data.Either            (isRight)
+import Data.Either            (isRight, partitionEithers)
 import Data.List              (union)
-import Data.Maybe             (isJust, fromJust)
+import Data.Maybe             (isJust, fromJust, catMaybes)
 import Text.Parsec            (try, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
@@ -127,7 +127,7 @@ pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
 
 mkBop :: Function -> BopExprsParser
 mkBop bop = return $ \e1 e2 -> do
-  case bopTypeCheck (fTypeCheck bop) (typeOf e1) (typeOf e2) of
+  case typecheckFn [fromJust $ fOpChar bop] (fOutput bop) (bopInputs $ fInputs bop) [typeOf e1, typeOf e2] of
     Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
     Right rtn -> Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 
@@ -145,15 +145,21 @@ mkBop bop = return $ \e1 e2 -> do
         -- in (expr, trace ("mkbop dMap': " ++ show dMap') dMap')
 
 -- TODO does typeSigsMatch already cover (ListOf Empty) comparisons?
-bopTypeCheck :: TypeChecker -> Type -> Type -> Either String Type
-bopTypeCheck _ (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
-bopTypeCheck _ (ListOf x    ) (ListOf Empty) = Right $ ListOf x
-bopTypeCheck _ (ListOf Empty) (ListOf x    ) = Right $ ListOf x
-bopTypeCheck tFn t1 t2 = case tFn [ListOf t1] of
-  Left  e -> Left e
-  Right r -> if t1 == t2
-               then Right r
-               else Left $ "mismatched bop types: " ++ show t1 ++ " and " ++ show t2
+-- bopTypeCheck :: TypeChecker -> Type -> Type -> Either String Type
+-- bopTypeCheck _ (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
+-- bopTypeCheck _ (ListOf x    ) (ListOf Empty) = Right $ ListOf x
+-- bopTypeCheck _ (ListOf Empty) (ListOf x    ) = Right $ ListOf x
+-- bopTypeCheck tFn t1 t2 = case tFn [ListOf t1] of
+--   Left  e -> Left e
+--   Right r -> if t1 == t2
+--                then Right r
+--                else Left $ "mismatched bop types: " ++ show t1 ++ " and " ++ show t2
+
+-- a hack to generate bop type signatures from the associate fold functions
+-- TODO should it live somewhere else?
+bopInputs :: [TypeSig] -> [TypeSig]
+bopInputs [Exactly (ListOf t)] = [Exactly t, Exactly t]
+bopInputs s = error "core.parse.expr.bopInputs" $ "bad argument: " ++ show s
 
 ---------------
 -- functions --
@@ -218,8 +224,9 @@ pFunArgs name args = debugParser "pFun" $ do
     (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
     _       -> parseFail $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
+-- TODO this one should be the parser; write a simpler pure typecheck fn
 typecheckArgs :: Function -> [Expr] -> ParseM Expr
-typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
+typecheckArgs fn args = case typecheckFn (fName fn) (fOutput fn) (fInputs fn) (map typeOf args) of
   Left  msg -> parseFail msg
   Right rtn -> do
     let expr = Fun rtn (Salt 0) deps (fName fn) args
@@ -227,6 +234,39 @@ typecheckArgs fn args = case (fTypeCheck fn) (map typeOf args) of
         -- TODO hey should ParseM be ReaderT Config, StateT Script ... instead of StateT both?
     -- putDigests "typecheckArgs" (expr:args)
     return expr
+
+-- | Determines whether a function's type signature matches a list of concrete types.
+--   Returns an error message or the function's final output type.
+-- TODO rename typecheckArgs? typecheckFn?
+typecheckFn :: String -> TypeSig -> [TypeSig] -> [Type] -> Either String Type
+typecheckFn name outSig inSigs inTypes =
+  let nExp = length inSigs
+      nAct = length inTypes
+  in if nExp /= nAct
+       then Left $ "expected " ++ show nExp ++ " arguments to " ++ name ++ ", but got " ++ show nAct
+       else typecheckFn' outSig inSigs inTypes
+
+{-|
+Folds over a list of expected type signatures + actual types, ...
+
+Rules:
+  if output is Some, the same one must appear in the sigs (error otherwise)
+  if output sig is Some, give it the same exact type as that index in the types
+
+Cases:
+  signature typegroups are wrong (check separately while loading modules?)
+-}
+typecheckFn' :: TypeSig -> [TypeSig] -> [Type] -> Either String Type
+typecheckFn' outSig inSigs inTypes = if null failures
+  then Right rtn
+  else Left $ unlines $ map explain failures
+  where
+    triples = zip3 [1..] inSigs inTypes
+    sigMatch (n,s,t) = if typeSigMatches s t then Left (n,s,t) else Right (n,s,t) -- TODO better way?
+    (failures, matches) = partitionEithers $ map sigMatch triples
+    rtnMatch (_,s,t) = if s == outSig then Just t else Nothing
+    rtn = headOrDie "invalid type signature" $ catMaybes $ map rtnMatch matches
+    explain (n,s,t) = "input " ++ show n ++ " should be a " ++ show s ++ ", but it was actually a " ++ show t
 
 {-|
 A reference is just a variable name, but that variable has to be in the script.

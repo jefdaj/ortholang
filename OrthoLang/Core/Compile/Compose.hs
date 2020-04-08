@@ -32,20 +32,25 @@ compose1 :: String      -- overall function name
          -> Function -- overall fn (runs fn1, then fn2 on its output)
 compose1 name desc fn1 type1 fn2 = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tCompose1 fn1 type1 fn2
-  , fNewRules = NewNotImplemented, fOldRules = rCompose1 fn1 type1 fn2
-  , fTypeDesc  = desc
-  ,fTags = []
+  -- , fTypeCheck = tCompose1 fn1 type1 fn2
+  -- , fTypeDesc  = desc
+  , fOldRules = rCompose1 fn1 type1 fn2
+  , fNewRules = NewNotImplemented
+  , fInputs = undefined -- TODO write this
+  , fOutput = undefined -- TODO write this
+  , fTags = []
   }
 
-tCompose1 :: Function -> Type -> Function -> TypeChecker
-tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
-  (Left  errMsg) -> Left errMsg
-  (Right actual) -> if actual == expected
-                      then fTypeCheck fn2 [expected]
-                      else Left $ "error: composed fn " ++ fName fn1
-                             ++ " produces a " ++ tExtOf actual
-                             ++ ", not " ++ tExtOf expected
+tCompose1 = undefined -- TODO rewrite with TypeSigs
+
+-- tCompose1 :: Function -> Type -> Function -> TypeChecker
+-- tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
+--   (Left  errMsg) -> Left errMsg
+--   (Right actual) -> if actual == expected
+--                       then fTypeCheck fn2 [expected]
+--                       else Left $ "error: composed fn " ++ fName fn1
+--                              ++ " produces a " ++ tExtOf actual
+--                              ++ ", not " ++ tExtOf expected
 
 rCompose1 :: Function -> Type -> Function -> RulesFn
 rCompose1 fn1 rtn1 fn2 scr (Fun rtn2 salt deps _ args) = do

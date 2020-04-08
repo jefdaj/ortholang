@@ -89,6 +89,7 @@ olModule = Module
 
 -- TODO add a blastdb type group? seems natural but i'm not sure you ever need to mix them
 
+-- TODO remove?
 ndb :: Type
 ndb = Type
   { tExt  = "ndb"
@@ -96,6 +97,7 @@ ndb = Type
   , tShow  = showBlastDb
   }
 
+-- TODO remove?
 -- TODO will people confuse this with PDB files for viewing molecules?
 pdb :: Type
 pdb = Type
@@ -114,19 +116,23 @@ pdb = Type
  -}
 
 mkLoadDB :: String -> Type -> Function
-mkLoadDB name rtn = Function
+mkLoadDB name faType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str] rtn
-  , fTypeDesc  = mkTypeDesc name [str] rtn
-  ,fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [str] rtn
+  -- , fTypeDesc  = mkTypeDesc name [str] rtn
+  , fInputs = [Exactly str]
+  , fOutput =  Exactly (EncodedAs "blastdb" faType)
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLoadDB
   }
 
 mkLoadDBEach :: String -> Type -> Function
-mkLoadDBEach name rtn = Function
+mkLoadDBEach name faType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf str] (ListOf rtn)
-  , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
+  -- , fTypeCheck = defaultTypeCheck name [ListOf str] (ListOf rtn)
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
+  , fInputs = [Exactly (ListOf str)]
+  , fOutput =  Exactly (ListOf (EncodedAs "blastdb" faType))
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = undefined -- TODO write this!
   }
@@ -154,16 +160,16 @@ aLoadDB oPath sPath = do
   writeLit oPath'' pattern'
 
 loadNuclDB :: Function
-loadNuclDB = mkLoadDB "load_nucl_db" ndb
+loadNuclDB = mkLoadDB "load_nucl_db" fna
 
 loadProtDB :: Function
-loadProtDB = mkLoadDB "load_prot_db" pdb
+loadProtDB = mkLoadDB "load_prot_db" faa
 
 loadNuclDBEach :: Function
-loadNuclDBEach = mkLoadDBEach "load_nucl_db_each" ndb
+loadNuclDBEach = mkLoadDBEach "load_nucl_db_each" fna
 
 loadProtDBEach :: Function
-loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
+loadProtDBEach = mkLoadDBEach "load_prot_db_each" faa
 
 ------------------------
 -- download from NCBI --
@@ -173,8 +179,10 @@ loadProtDBEach = mkLoadDBEach "load_prot_db_each" pdb
 blastdblist :: Function
 blastdblist = let name = "blastdblist" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
-  , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
+  -- , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
+  -- , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
+  , fInputs = [Exactly str]
+  , fOutput =  Exactly (ListOf str)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
   }
@@ -248,19 +256,23 @@ aFilterList oPath listTmp fPath = do
   writeLits oPath'' names'
 
 mkBlastdbget :: String -> Type -> Function
-mkBlastdbget name dbType = Function
+mkBlastdbget name faType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str] dbType -- TODO are there protein ones too?
-  , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
-  ,fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [str] dbType -- TODO are there protein ones too?
+  -- , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
+  , fInputs = [Exactly str]
+  , fOutput =  Exactly (EncodedAs "blastdb" faType)
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBlastdbget
   }
 
+-- TODO rename with fna
 blastdbgetNucl :: Function
-blastdbgetNucl = mkBlastdbget "blastdbget_nucl" ndb
+blastdbgetNucl = mkBlastdbget "blastdbget_nucl" fna
 
+-- TODO rename with faa
 blastdbgetProt :: Function
-blastdbgetProt = mkBlastdbget "blastdbget_prot" pdb
+blastdbgetProt = mkBlastdbget "blastdbget_prot" faa
 
 rBlastdbget :: RulesFn
 rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
@@ -316,9 +328,11 @@ aBlastdbget dbPrefix tmpDir nPath = do
 makeblastdbNuclAll :: Function
 makeblastdbNuclAll = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tMakeblastdbAll name ndb
-  , fTypeDesc  = name ++ " : fa.list -> ndb"
-  ,fTags = []
+  -- , fTypeCheck = tMakeblastdbAll name ndb
+  -- , fTypeDesc  = name ++ " : fa.list -> ndb"
+  , fInputs = [Exactly (ListOf fna)]
+  , fOutput =  Exactly (EncodedAs "blastdb" fna)
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
@@ -327,9 +341,11 @@ makeblastdbNuclAll = Function
 makeblastdbProtAll :: Function
 makeblastdbProtAll = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tMakeblastdbAll name pdb
-  , fTypeDesc  = name ++ " : faa.list -> pdb"
-  ,fTags = []
+  -- , fTypeCheck = tMakeblastdbAll name pdb
+  -- , fTypeDesc  = name ++ " : faa.list -> pdb"
+  , fInputs = [Exactly (ListOf faa)]
+  , fOutput = Exactly (Encoded "blastdb" faa)
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
@@ -337,11 +353,11 @@ makeblastdbProtAll = Function
 
 -- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa.list -> fa.blastdb, where fa is a fasta file"
-tMakeblastdbAll :: String -> Type -> TypeChecker
-tMakeblastdbAll _ dbType [ListOf faType]
-  | dbType == pdb && faType   ==    faa       = Right pdb
-  | dbType == ndb && faType `elem` [faa, fna] = Right dbType
-tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files, but got "
+-- tMakeblastdbAll :: String -> Type -> TypeChecker
+-- tMakeblastdbAll _ dbType [ListOf faType]
+--   | dbType == pdb && faType   ==    faa       = Right pdb
+--   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
+-- tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files, but got "
                                             ++ show types
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
@@ -469,8 +485,10 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 makeblastdbNucl :: Function
 makeblastdbNucl = Function
   { fOpChar = Nothing, fName = "makeblastdb_nucl"
-  , fTypeCheck = tMakeblastdb ndb
-  , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
+  -- , fTypeCheck = tMakeblastdb ndb
+  -- , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
+  , fInputs = [Exactly (ListOf fna)] -- TODO can't do it from faa right?
+  , fOutput =  Exactly (Encoded "blastdb" fna)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
@@ -478,19 +496,21 @@ makeblastdbNucl = Function
 makeblastdbProt :: Function
 makeblastdbProt = Function
   { fOpChar = Nothing, fName = "makeblastdb_prot"
-  , fTypeCheck = tMakeblastdb pdb
-  , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  -- , fTypeCheck = tMakeblastdb pdb
+  -- , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  , fInputs = [Exactly (ListOf faa)] -- TODO can't do it from faa right?
+  , fOutput =  Exactly (Encoded "blastdb" faa)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
 -- (Some fa "a fasta file") (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa -> fa.blastdb, where fa is a fasta file"
-tMakeblastdb :: Type -> TypeChecker
-tMakeblastdb dbType [faType]
-  | dbType == pdb && faType   ==    faa       = Right pdb
-  | dbType == ndb && faType `elem` [faa, fna] = Right dbType
-tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
+-- tMakeblastdb :: Type -> TypeChecker
+-- tMakeblastdb dbType [faType]
+--   | dbType == pdb && faType   ==    faa       = Right pdb
+--   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
+-- tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
 rMakeblastdb :: RulesFn
 rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
@@ -500,17 +520,19 @@ rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 -----------------------------------------------
 
 mkMakeblastdbEach :: Type -> Function
-mkMakeblastdbEach dbType = Function
+mkMakeblastdbEach faType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tMakeblastdbEach dbType
-  , fTypeDesc  = desc
-  ,fTags = []
+  -- , fTypeCheck = tMakeblastdbEach dbType
+  -- , fTypeDesc  = desc
+  , fInputs = [Exactly (ListOf faType)]
+  , fOutput =  Exactly (EncodedAs "blastdb" faType)
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
-  where
-    desc = name ++ " : " ++ ext ++ ".list -> " ++ tExtOf dbType ++ ".list"
-    name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
-    ext  = if dbType == ndb then "fa" else "faa"
+  -- where
+    -- desc = name ++ " : " ++ ext ++ ".list -> " ++ tExtOf dbType ++ ".list"
+    -- name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+    -- ext  = if dbType == ndb then "fa" else "faa"
 
 -- (ListOf (Some fa "a fasta file")) (ListOf (Encoded blastdb (Some fa "a fasta file")))
 -- shown as "fa.list -> fa.blastdb.list, where: fa is a fasta file"
