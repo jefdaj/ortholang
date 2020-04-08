@@ -12,3 +12,4 @@ nixpkgs/inparanoid/*.zip
 release-*
 result*
 tmp
+todo.txt
