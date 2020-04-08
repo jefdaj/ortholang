@@ -416,13 +416,13 @@ typeError name expected actual =
  - links, and the only ones that point outside the temp dir.
  - TODO still true?
  -}
-mkLoad :: Bool -> String -> Type -> Function
-mkLoad hashSeqIDs name rtn = Function
+mkLoad :: Bool -> String -> TypeSig -> Function
+mkLoad hashSeqIDs name oSig = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [str] rtn
   -- , fTypeDesc  = mkTypeDesc name [str] rtn
   , fInputs = [Exactly str]
-  , fOutput =  Exactly rtn
+  , fOutput = oSig
   , fTags = []
   , fOldRules = rLoad hashSeqIDs
   , fNewRules = NewNotImplemented
@@ -433,13 +433,13 @@ mkLoad hashSeqIDs name rtn = Function
  - write the list in a file, whereas this can handle literal lists in the
  - source code.
  -}
-mkLoadList :: Bool -> String -> Type -> Function
-mkLoadList hashSeqIDs name rtn = Function
+mkLoadList :: Bool -> String -> TypeSig -> Function
+mkLoadList hashSeqIDs name elemSig = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
   -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly (ListOf rtn)
+  , fOutput = ListSigs elemSig -- TODO need to set the string here?
   , fTags = []
   , fOldRules = rLoadList hashSeqIDs -- TODO different from src lists?
   , fNewRules = NewNotImplemented

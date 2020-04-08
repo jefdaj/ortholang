@@ -95,40 +95,40 @@ import OrthoLang.Core.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
 -- TODO you can get the return types here too...
 newFnS1
   :: String               -- ^ name
-  -> Type                 -- ^ 1 argument type
-  -> Type                 -- ^ return type
+  -> TypeSig              -- ^ 1 argument type
+  -> TypeSig              -- ^ return type
   -> String               -- ^ script basename
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS1 n a1 r s os = newFn n Nothing [a1] r rNewRulesA1 $ aNewRulesS1 s os
+newFnS1 n i1 r s os = newFn n Nothing [i1] r rNewRulesA1 $ aNewRulesS1 s os
 
 -- TODO failed to lookup out path in here?
 aNewRulesS1 :: String -> (CmdDesc -> CmdDesc) -> NewAction1
-aNewRulesS1 sname opts o a1 = aNewRulesS sname opts o [a1]
+aNewRulesS1 sname opts o i1 = aNewRulesS sname opts o [i1]
 
 newFnS2
   :: String               -- ^ name
-  -> (Type, Type)         -- ^ 2 argument types
-  -> Type                 -- ^ return type
+  -> (TypeSig, TypeSig)   -- ^ 2 argument types
+  -> TypeSig              -- ^ return type
   -> String               -- ^ script basename
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS2 n (a1, a2) r s os = newFn n Nothing [a1, a2] r rNewRulesA2 $ aNewRulesS2 s os
+newFnS2 n (i1, i2) r s os = newFn n Nothing [i1, i2] r rNewRulesA2 $ aNewRulesS2 s os
 
 aNewRulesS2 :: String -> (CmdDesc -> CmdDesc) -> NewAction2
-aNewRulesS2 sname opts o a1 a2 = aNewRulesS sname opts o [a1, a2]
+aNewRulesS2 sname opts o i1 i2 = aNewRulesS sname opts o [i1, i2]
 
 newFnS3
-  :: String               -- ^ name
-  -> (Type, Type, Type)   -- ^ 3 argument types
-  -> Type                 -- ^ return type
-  -> String               -- ^ script basename
-  -> (CmdDesc -> CmdDesc) -- ^ extra options
+  :: String                      -- ^ name
+  -> (TypeSig, TypeSig, TypeSig) -- ^ 3 argument types
+  -> TypeSig                     -- ^ return type
+  -> String                      -- ^ script basename
+  -> (CmdDesc -> CmdDesc)        -- ^ extra options
   -> Function
-newFnS3 n (a1, a2, a3) r s os = newFn n Nothing [a1, a2, a3] r rNewRulesA3 $ aNewRulesS3 s os
+newFnS3 n (i1, i2, i3) r s os = newFn n Nothing [i1, i2, i3] r rNewRulesA3 $ aNewRulesS3 s os
 
 aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
-aNewRulesS3 sname opts o a1 a2 a3 = aNewRulesS sname opts o [a1, a2, a3]
+aNewRulesS3 sname opts o i1 i2 i3 = aNewRulesS sname opts o [i1, i2, i3]
 
 {-|
 Approximate rewrite of 'OrthoLang.Core.Compile.Simple.aSimpleScript'.
@@ -168,27 +168,27 @@ type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
 -- TODO all these could pass the return type, but not the script ones right? :/
 newFnA1
   :: String     -- ^ name
-  -> Type       -- ^ 1 argument type
-  -> Type       -- ^ return type
-  -> NewAction1 -- ^ 1-argument action function
+  -> TypeSig    -- ^ 1 input type
+  -> TypeSig    -- ^ return type
+  -> NewAction1 -- ^ 1-input action function
   -> Function
-newFnA1 n a1 r = newFn n Nothing [a1] r rNewRulesA1
+newFnA1 n i1 r = newFn n Nothing [i1] r rNewRulesA1
 
 newFnA2
-  :: String       -- ^ name
-  -> (Type, Type) -- ^ 2 argument types
-  -> Type         -- ^ return type
-  -> NewAction2   -- ^ 2-argument action function
+  :: String             -- ^ name
+  -> (TypeSig, TypeSig) -- ^ 2 input types
+  -> TypeSig            -- ^ return type
+  -> NewAction2         -- ^ 2-input action function
   -> Function
-newFnA2 n (a1, a2) r = newFn n Nothing [a1, a2] r rNewRulesA2
+newFnA2 n (i1, i2) r = newFn n Nothing [i1, i2] r rNewRulesA2
 
 newFnA3
-  :: String             -- ^ name
-  -> (Type, Type, Type) -- ^ 3 argument types
-  -> Type               -- ^ return type
-  -> NewAction3         -- ^ 3-argument action function
+  :: String                      -- ^ name
+  -> (TypeSig, TypeSig, TypeSig) -- ^ 3 input types
+  -> TypeSig                     -- ^ return type
+  -> NewAction3                  -- ^ 3-input action function
   -> Function
-newFnA3 n (a1, a2, a3) r = newFn n Nothing [a1, a2, a3] r rNewRulesA3
+newFnA3 n (i1, i2, i3) r = newFn n Nothing [i1, i2, i3] r rNewRulesA3
 
 {-|
 This is for the specific case where you want to make a binary operator.
@@ -197,11 +197,11 @@ It probably isn't very useful outside math and set operations.
 newBop
   :: String     -- ^ name
   -> Char       -- ^ opchar
-  -> Type       -- ^ 1 argument type (each side of the bop will be this)
-  -> Type       -- ^ return type
-  -> NewAction1 -- ^ 1-argument action function (list of 2 args in case of bop, or 2+ for the prefix fn)
+  -> TypeSig    -- ^ 1 input type (each side of the bop will be this)
+  -> TypeSig    -- ^ return type
+  -> NewAction1 -- ^ 1-input action function (list of 2 args in case of bop, or 2+ for the prefix fn)
   -> Function
-newBop n c a1 r = newFn n (Just c) [ListOf a1] r rNewRulesA1
+newBop n c i r = newFn n (Just c) [ListSigs i] r rNewRulesA1
 
 --------------------
 -- implementation --
@@ -239,33 +239,34 @@ newPattern cfg name nArgs =
 {-|
 -}
 rNewRules
-  :: Int -> (t -> [FilePath] -> Action ())
-  -> TypeChecker
+  :: Int
+  -> (t -> [FilePath] -> Action ())
+  -> TypeSig
   -> String
   -> (ExprPath -> t)
   -> Rules ()
-rNewRules nArgs applyFn tFn name aFn = do
+rNewRules nArgs applyFn oSig name aFn = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let ptn = newPattern cfg name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> do
     -- TODO if adding rules works anywhere in an action it'll be here right?
-    aNewRules applyFn tFn aFn (ExprPath p)
+    aNewRules applyFn oSig aFn (ExprPath p)
 
 -- TODO is it possible to get the return type here?
-rNewRulesA1 :: TypeChecker -> String -> NewAction1 -> Rules ()
+rNewRulesA1 :: TypeSig -> String -> NewAction1 -> Rules ()
 rNewRulesA1 = rNewRules 1 applyList1
 
 applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList1 fn deps = fn (deps !! 0)
 
-rNewRulesA2 :: TypeChecker -> String -> NewAction2 -> Rules ()
+rNewRulesA2 :: TypeSig -> String -> NewAction2 -> Rules ()
 rNewRulesA2 = rNewRules 2 applyList2
 
 applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList2 fn deps = fn (deps !! 0) (deps !! 1)
 
-rNewRulesA3 :: TypeChecker -> String -> NewAction3 -> Rules ()
+rNewRulesA3 :: TypeSig -> String -> NewAction3 -> Rules ()
 rNewRulesA3 = rNewRules 3 applyList3
 
 applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
@@ -275,53 +276,50 @@ applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
 -}
 aNewRules
   :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1,2,3} fns
-  -> TypeChecker
+  -> TypeSig
   -> (ExprPath -> t)
   ->  ExprPath -> Action ()
-aNewRules applyFn tFn aFn o@(ExprPath out) = do
+aNewRules applyFn oSig aFn o@(ExprPath out) = do
   cfg  <- fmap fromJust $ getShakeExtra
   dRef <- fmap fromJust $ getShakeExtra
   -- TODO don't try to return oType here because outpath won't have a digest entry yet
   (oType, dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef o
-  case tFn dTypes of
-    Left err -> fail err -- TODO bop type error here :(
-    Right rType -> do
-      when (rType /= oType) $
-        error "aNewRules" $ "typechecking error: " ++ show rType ++ " /= " ++ show oType
 
-      -- TODO shit, does this need to be known at rules time before running anything?
-      --      if so that would result in a more elegant + typesafe system overall i guess
-      --      start by separating + committing the addDigest changes, because those were good
-      liftIO $ addDigest dRef rType $ toPath cfg out
+  -- TODO produce a better error message here
+  when (not $ oSig `typeSigMatches` oType) $
+    error "aNewRules" $ "typechecking error: " ++ show oSig ++ " /= " ++ show oType
 
-      let dPaths' = map (fromPath cfg) dPaths
-      need' "ortholang.modules.newrulestest.aNewRules" dPaths'
-      applyFn (aFn o) dPaths'
+  dRef <- fmap fromJust $ getShakeExtra
+  liftIO $ addDigest dRef oType $ toPath cfg out
+
+  let dPaths' = map (fromPath cfg) dPaths
+  need' "ortholang.modules.newrulestest.aNewRules" dPaths'
+  applyFn (aFn o) dPaths'
 
 {-|
 Use the more specific, polished, versions above instead if possible. This one
-is not type safe because it assumes the list of argument types will match the
+is not type safe because it assumes the list of input types will match the
 rules function + action function.
 -}
 newFn
   :: String     -- ^ name
   -> Maybe Char -- ^ opchar
-  -> [Type]     -- ^ list of argument types
-  -> Type       -- ^ return type
-  -> (TypeChecker -> String -> t -> Rules ()) -- ^ rules function
-  -> t                                        -- ^ matching action function
+  -> [TypeSig]     -- ^ list of input types
+  ->  TypeSig      -- ^ return type
+  -> (TypeSig -> String -> t -> Rules ()) -- ^ rules function
+  -> t                                 -- ^ matching action function
   -> Function
-newFn name mChar dTypes oType rFn aFn =
-  let tFn = defaultTypeCheck name dTypes oType
-  in Function
-       { fOpChar    = mChar
-       , fName      = name
-       , fTypeDesc  = mkTypeDesc name dTypes oType
-       , fTypeCheck = tFn
-       , fTags      = []
-       , fOldRules  = undefined
-       , fNewRules  = NewRules $ rFn tFn name aFn
-       }
+newFn name mChar iSigs oSig rFn aFn =Function
+  { fOpChar    = mChar
+  , fName      = name
+  -- , fTypeDesc  = mkTypeDesc name dTypes oType
+  -- , fTypeCheck = tFn
+  , fInputs    = iSigs
+  , fOutput    = oSig
+  , fTags      = []
+  , fOldRules  = undefined
+  , fNewRules  = NewRules $ rFn oSig name aFn
+  }
 
 -- TODO move macros to a separate file?
 
@@ -360,18 +358,18 @@ directly.  The only type checking planned so far is that
 'OrthoLang.Core.Compile.Basic.rMacro' will prevent macro expansions from
 changing the return type of their input 'Expr'.
 -}
-newMacro :: String -> [Type] -> Type -> MacroExpansion -> Function
-newMacro name dTypes oType mFn =
-  let tFn = defaultTypeCheck name dTypes oType
-  in Function
-       { fOpChar    = Nothing
-       , fName      = name
-       , fTypeDesc  = mkTypeDesc name dTypes oType
-       , fTypeCheck = tFn
-       , fTags      = []
-       , fOldRules  = undefined
-       , fNewRules  = NewMacro mFn
-       }
+newMacro :: String -> [TypeSig] -> TypeSig -> MacroExpansion -> Function
+newMacro name iSigs oSig mFn = Function
+  { fOpChar    = Nothing
+  , fName      = name
+  -- , fTypeDesc  = mkTypeDesc name dTypes oType
+  -- , fTypeCheck = tFn
+  , fInputs    = iSigs
+  , fOutput    = oSig
+  , fTags      = []
+  , fOldRules  = undefined
+  , fNewRules  = NewMacro mFn
+  }
 
 {-|
 Some functions are only meant to be generated by macro expansion (above)

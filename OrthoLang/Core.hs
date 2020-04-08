@@ -84,7 +84,8 @@ module OrthoLang.Core
   , Script
   , Type(..)
   , TypeGroup(..)
-  , TypeChecker
+  , TypeSig(..)
+  -- , TypeChecker
   , Var(..)
   , VarPath(..)
   -- , askConfig
@@ -138,7 +139,7 @@ module OrthoLang.Core
   , compose1
   , curl
   , debugRules
-  , defaultTypeCheck
+  -- , defaultTypeCheck
   , map3of3
   , mkLoad
   , mkLoadList

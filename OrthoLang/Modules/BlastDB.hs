@@ -344,7 +344,7 @@ makeblastdbProtAll = Function
   -- , fTypeCheck = tMakeblastdbAll name pdb
   -- , fTypeDesc  = name ++ " : faa.list -> pdb"
   , fInputs = [Exactly (ListOf faa)]
-  , fOutput = Exactly (Encoded "blastdb" faa)
+  , fOutput = Exactly (EncodedAs "blastdb" faa)
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
@@ -358,7 +358,7 @@ makeblastdbProtAll = Function
 --   | dbType == pdb && faType   ==    faa       = Right pdb
 --   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
 -- tMakeblastdbAll name _ types = error $ name ++ " requires a list of fasta files, but got "
-                                            ++ show types
+--                                             ++ show types
 
 -- TODO why does this get rebuilt one extra time, but *only* one?
 -- TODO is rtn always the same as dbType?
@@ -488,7 +488,7 @@ makeblastdbNucl = Function
   -- , fTypeCheck = tMakeblastdb ndb
   -- , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
   , fInputs = [Exactly (ListOf fna)] -- TODO can't do it from faa right?
-  , fOutput =  Exactly (Encoded "blastdb" fna)
+  , fOutput =  Exactly (EncodedAs "blastdb" fna)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
@@ -499,7 +499,7 @@ makeblastdbProt = Function
   -- , fTypeCheck = tMakeblastdb pdb
   -- , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
   , fInputs = [Exactly (ListOf faa)] -- TODO can't do it from faa right?
-  , fOutput =  Exactly (Encoded "blastdb" faa)
+  , fOutput =  Exactly (EncodedAs "blastdb" faa)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
@@ -529,16 +529,16 @@ mkMakeblastdbEach faType = Function
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
-  -- where
+  where
+    name = "makeblastdb_" ++ tExtOf faType ++ "_each" -- TODO change scripts to match!
     -- desc = name ++ " : " ++ ext ++ ".list -> " ++ tExtOf dbType ++ ".list"
-    -- name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     -- ext  = if dbType == ndb then "fa" else "faa"
 
 -- (ListOf (Some fa "a fasta file")) (ListOf (Encoded blastdb (Some fa "a fasta file")))
 -- shown as "fa.list -> fa.blastdb.list, where: fa is a fasta file"
-tMakeblastdbEach :: Type -> TypeChecker
-tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
-tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
+-- tMakeblastdbEach :: Type -> TypeChecker
+-- tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
+-- tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
 
 -- map1of1 :: Type -> Type -> Action1 -> Action1
 -- map1of1 inType outType act1 cfg locks out a1 = do

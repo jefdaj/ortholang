@@ -61,8 +61,10 @@ mkSetFunction (foldName, opChar, setFn) = setFold
     setFold = Function
       { fName = foldName
       , fOpChar    = Just opChar
-      , fTypeCheck = tSetFold
-      , fTypeDesc  = mkFoldDesc foldName
+      -- , fTypeCheck = tSetFold
+      -- , fTypeDesc  = mkFoldDesc foldName
+      , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
+      , fOutput =  ListSigs (AnyType "any type")
       , fTags = []
       , fNewRules = NewNotImplemented, fOldRules = rSetFold (foldr1 setFn)
       }
@@ -130,8 +132,10 @@ dedupByContent paths = do
 some :: Function
 some = Function
   { fOpChar = Nothing, fName = "some"
-  , fTypeCheck = tSetFold
-  , fTypeDesc  = "some : X.list.list -> X.list"
+  -- , fTypeCheck = tSetFold
+  -- , fTypeDesc  = "some : X.list.list -> X.list"
+  , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
+  , fOutput =  ListSigs (AnyType "any type")
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSome
   }

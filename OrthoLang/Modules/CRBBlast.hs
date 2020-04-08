@@ -47,10 +47,13 @@ crb = Type
 blastCRB :: Function
 blastCRB = Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc       name [fna, Some fa "some fa"] crb
-  , fTypeCheck = defaultTypeCheck name [fna, Some fa "some fa"] crb
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleTmp name aCRBBlast
+  -- , fTypeDesc  = mkTypeDesc       name [fna, Some fa "some fa"] crb
+  -- , fTypeCheck = defaultTypeCheck name [fna, Some fa "some fa"] crb
+  , fInputs = [Exactly fna, Some fa "any fasta file"]
+  , fOutput = Exactly crb
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimpleTmp name aCRBBlast
   }
   where
     name = "crb_blast"
@@ -60,8 +63,10 @@ blastCRB = Function
 blastCRBEach :: Function
 blastCRBEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [fna, ListOf (Some fa "some fa")] (ListOf crb)
-  , fTypeDesc  = mkTypeDesc       name [fna, ListOf (Some fa "some fa")] (ListOf crb)
+  -- , fTypeCheck = defaultTypeCheck name [fna, ListOf (Some fa "some fa")] (ListOf crb)
+  -- , fTypeDesc  = mkTypeDesc       name [fna, ListOf (Some fa "some fa")] (ListOf crb)
+  , fInputs = [Exactly fna, ListSigs (Some fa "any fasta file")]
+  , fOutput = Exactly (ListOf crb)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }

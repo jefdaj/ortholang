@@ -21,7 +21,7 @@ n1 = Lit num (Salt 0) "1.0"
 n2 = Lit num (Salt 0) "2.0"
 
 lst0, lst1, lst2, lst3 :: Expr
-lst0  = Lst AnyType (Salt 0) [] [] -- ah, this is getting empty.list instead of empty
+lst0  = Lst Empty (Salt 0) [] [] -- ah, this is getting empty.list instead of empty
 lst1  = Lst num (Salt 0) [] [n1]
 lst2  = Lst num (Salt 0) [] [n1, n2]
 lst3  = Lst (ListOf num) (Salt 0) [] [lst1]
@@ -32,11 +32,11 @@ lst4 = Lst str (Salt 0) [] [s4]
 
 -- TODO why do bops use the list type while lists use the elem type?
 bop00, bop10, bop01, bop40, bop04 :: Expr
-bop00 = Bop (ListOf AnyType) (Salt 0) [] "|" lst0 lst0
-bop10 = Bop (ListOf num    ) (Salt 0) [] "|" lst1 lst0
-bop01 = Bop (ListOf num    ) (Salt 0) [] "|" lst0 lst1
-bop40 = Bop (ListOf str    ) (Salt 0) [] "|" lst4 lst0
-bop04 = Bop (ListOf str    ) (Salt 0) [] "|" lst0 lst4
+bop00 = Bop (ListOf Empty) (Salt 0) [] "|" lst0 lst0
+bop10 = Bop (ListOf num  ) (Salt 0) [] "|" lst1 lst0
+bop01 = Bop (ListOf num  ) (Salt 0) [] "|" lst0 lst1
+bop40 = Bop (ListOf str  ) (Salt 0) [] "|" lst4 lst0
+bop04 = Bop (ListOf str  ) (Salt 0) [] "|" lst0 lst4
 
 len :: [Expr] -> Expr
 len es = Fun num (Salt 0) [] "length" es

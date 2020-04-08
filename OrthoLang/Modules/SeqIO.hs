@@ -34,8 +34,8 @@ olModule = Module
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-    ++ mkLoaders True fna
-    ++ mkLoaders True faa
+    ++ mkLoaders True  fna
+    ++ mkLoaders True  faa
     ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
   }
 
@@ -50,7 +50,7 @@ fa :: TypeGroup
 fa = TypeGroup
   { tgExt = "fa"
   , tgDesc  = "FASTA (nucleic OR amino acid)"
-  , tgMembers = [fna, faa]
+  , tgMembers = [Exactly fna, Exactly faa]
   }
 
 faa :: Type
@@ -76,10 +76,13 @@ fna = Type
 gbkToFaa :: Function
 gbkToFaa = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str, gbk] faa
-  , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aGenbankToFasta faa "aa"
+  -- , fTypeCheck = defaultTypeCheck name [str, gbk] faa
+  -- , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
+  , fInputs = [Exactly str, Exactly gbk]
+  , fOutput = Exactly faa
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa"
@@ -88,10 +91,13 @@ gbkToFaa = Function
 gbkToFaaEach :: Function
 gbkToFaaEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
-  , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
+  -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
+  -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
+  , fInputs = [Exactly str, Exactly (ListOf gbk)]
+  , fOutput = Exactly (ListOf faa)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
   }
   where
     name = "gbk_to_faa_each"
@@ -99,10 +105,13 @@ gbkToFaaEach = Function
 gbkToFna :: Function
 gbkToFna = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str, gbk] fna
-  , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  -- , fTypeCheck = defaultTypeCheck name [str, gbk] fna
+  -- , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
+  , fInputs = [Exactly str, Exactly gbk]
+  , fOutput = Exactly fna
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna"
@@ -110,10 +119,13 @@ gbkToFna = Function
 gbkToFnaEach :: Function
 gbkToFnaEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf fna)
-  , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
+  -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf fna)
+  -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
+  , fInputs = [Exactly str, Exactly (ListOf gbk)]
+  , fOutput = Exactly (ListOf fna)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
     name = "gbk_to_fna_each"
@@ -167,10 +179,13 @@ aGenbankToFasta _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show 
 extractIds :: Function
 extractIds = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = tExtractIds
-  , fTypeDesc  = name ++ " : fa -> str.list"
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "extract_ids.py"
+  , fTags = []
+  -- , fTypeCheck = tExtractIds
+  -- , fTypeDesc  = name ++ " : fa -> str.list"
+  , fInputs = [Some fa "any fasta file"]
+  , fOutput = Exactly (ListOf str)
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimpleScript "extract_ids.py"
   }
   where
     name = "extract_ids"
@@ -179,25 +194,28 @@ extractIds = Function
 extractIdsEach :: Function
 extractIdsEach = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = tExtractIdsEach
-  , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "extract_ids.py"
+  , fTags = []
+  -- , fTypeCheck = tExtractIdsEach
+  -- , fTypeDesc  = name ++ " : fa.list -> str.list.list"
+  , fInputs = [ListSigs (Some fa "any fasta file")]
+  , fOutput = Exactly (ListOf (ListOf str))
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMapSimpleScript 1 "extract_ids.py"
   }
   where
     name = "extract_ids_each"
 
 -- Some fa "any fasta file" (ListOf str)
 -- shown as "fa -> str.list, where fa is any fasta file"
-tExtractIds :: [Type] -> Either String Type
-tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
-tExtractIds _ = Left "expected a fasta file"
+-- tExtractIds :: [Type] -> Either String Type
+-- tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
+-- tExtractIds _ = Left "expected a fasta file"
 
 -- (ListOf (Some fa "any fasta file")) (ListOf (ListOf str))
 -- shown as "fa.list -> str.list.list, where fa is any fasta file"
-tExtractIdsEach :: [Type] -> Either String Type
-tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
-tExtractIdsEach _ = Left "expected a fasta file"
+-- tExtractIdsEach :: [Type] -> Either String Type
+-- tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
+-- tExtractIdsEach _ = Left "expected a fasta file"
 
 -------------------------
 -- extract_seqs(_each) --
@@ -206,10 +224,11 @@ tExtractIdsEach _ = Left "expected a fasta file"
 -- TODO also extract them from genbank files
 
 extractSeqs :: Function
-extractSeqs = newFnAT2 name tExtractSeqs desc aExtractSeqs
-  where
-    name = "extract_seqs"
-    desc = name ++ " : fa str.list -> fa" -- TODO include descs (but not names) in TypeCheckers
+extractSeqs = newFnA2
+  "extract_seqs"
+  (Some fa "any fasta file", Exactly $ ListOf str)
+  (Some fa "any fasta file")
+  aExtractSeqs
 
 {-|
 This is a little more complicated than it would seem because users will
@@ -237,31 +256,34 @@ aExtractSeqsOld [outPath, inFa, inList] = do
   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
 aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
+-- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
+--      or maybe for singletons or something?
 -- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: Function
 extractSeqsEach = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = tExtractSeqsEach
-  , fTypeDesc  = name ++ " : fa.list -> str.list.list"
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aExtractSeqsOld
+  , fTags = []
+  -- , fTypeCheck = tExtractSeqsEach
+  -- , fTypeDesc  = name ++ " : fa.list -> str.list.list"
+  , fInputs = [Some fa "any fasta file", Exactly (ListOf (ListOf str))]
+  , fOutput = ListSigs (Some fa "any fasta file")
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 1 aExtractSeqsOld
   }
   where
     name = "extract_seqs_each"
 
 -- (Some fa "any fasta file", ListOf str) (Some fa "any fasta file")
 -- shown as "fa str.list -> fa, where fa is any fasta file"
-tExtractSeqs  :: [Type] -> Either String Type
-tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
-tExtractSeqs _ = Left "expected a fasta file and a list of strings"
+-- tExtractSeqs  :: [Type] -> Either String Type
+-- tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
+-- tExtractSeqs _ = Left "expected a fasta file and a list of strings"
 
--- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
---      or maybe for singletons or something?
 -- (Some fa "any fasta file", (ListOf (ListOf str))) (ListOf (Some fa "any fasta file"))
 -- shown as "fa str.list -> fa.list, where fa is any fasta file"
-tExtractSeqsEach  :: [Type] -> Either String Type
-tExtractSeqsEach [x, ListOf (ListOf s)] | s == str && elem x [faa, fna] = Right $ ListOf x
-tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
+-- tExtractSeqsEach  :: [Type] -> Either String Type
+-- tExtractSeqsEach [x, ListOf (ListOf s)] | s == str && elem x [faa, fna] = Right $ ListOf x
+-- tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 
 ----------------------
 -- translate(_each) --
@@ -280,15 +302,18 @@ tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
 -- TODO fix unable to decode the fna error
 --      must be that load_fna* aren't adding their digests?
 translate :: Function
-translate = newFnS1 "translate" fna faa "translate.py" id
+translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" id
 
 translateEach :: Function
 translateEach = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = defaultTypeCheck name [ListOf fna] (ListOf faa)
-  , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
-  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "translate.py"
+  , fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [ListOf fna] (ListOf faa)
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
+  , fInputs = [Exactly (ListOf fna)]
+  , fOutput =  Exactly (ListOf faa)
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMapSimpleScript 1 "translate.py"
   }
   where
     name = "translate_each"
@@ -302,10 +327,13 @@ translateEach = Function
 mkConcat :: Type -> Function
 mkConcat cType = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = defaultTypeCheck name [ListOf cType] cType
-  , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aConcat cType
+  , fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [ListOf cType] cType
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
+  , fInputs = [Exactly (ListOf cType)]
+  , fOutput =  Exactly cType
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aConcat cType
   }
   where
     ext  = tExtOf cType
@@ -314,10 +342,13 @@ mkConcat cType = Function
 mkConcatEach :: Type -> Function
 mkConcatEach cType = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = defaultTypeCheck name [ListOf $ ListOf cType] (ListOf cType)
-  , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aConcat cType
+  , fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [ListOf $ ListOf cType] (ListOf cType)
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
+  , fInputs = [Exactly (ListOf (ListOf cType))]
+  , fOutput =  Exactly (ListOf cType)
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 1 $ aConcat cType
   }
   where
     ext  = tExtOf cType
@@ -385,10 +416,13 @@ aConcat _ _ = fail "bad argument to aConcat"
 splitFasta :: Type -> Function
 splitFasta faType = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = defaultTypeCheck name [faType] (ListOf faType)
-  , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aSplit name ext
+  , fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [faType] (ListOf faType)
+  -- , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
+  , fInputs = [Exactly faType]
+  , fOutput =  Exactly (ListOf faType)
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aSplit name ext
   }
   where
     ext  = tExtOf faType
@@ -397,10 +431,13 @@ splitFasta faType = Function
 splitFastaEach :: Type -> Function
 splitFastaEach faType = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
-  , fTypeCheck = defaultTypeCheck name [ListOf faType] (ListOf $ ListOf faType)
-  , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
+  , fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [ListOf faType] (ListOf $ ListOf faType)
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
+  , fInputs = [Exactly (ListOf faType)]
+  , fOutput =  Exactly (ListOf (ListOf faType))
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where
     ext  = tExtOf faType

@@ -96,9 +96,16 @@ replace :: Function
 replace = Function
   { fOpChar = Nothing, fName = "replace"
   ,fTags = []
-  , fTypeCheck = tReplace
-  , fTypeDesc  = dReplace
-  , fNewRules = NewNotImplemented, fOldRules = rReplace
+  -- , fTypeCheck = tReplace
+  -- , fTypeDesc  = dReplace
+  , fInputs =
+      [ AnyType "the return type"
+      , AnyType "the type of the var to replace"
+      , AnyType "the type of the var to replace"
+      ]
+  , fOutput = AnyType "the return type"
+  , fOldRules = rReplace
+  , fNewRules = NewNotImplemented
   }
 
 -- (Some ot "the return type",
@@ -197,9 +204,16 @@ replaceEach :: Function
 replaceEach = Function
   { fOpChar = Nothing, fName = "replace_each"
   , fTags = []
-  , fTypeCheck = tReplaceEach
-  , fTypeDesc  = dReplaceEach
-  , fNewRules = NewNotImplemented, fOldRules = rReplaceEach
+  -- , fTypeCheck = tReplaceEach
+  -- , fTypeDesc  = dReplaceEach
+  , fInputs =
+      [ AnyType "the return type"
+      , AnyType "the type of the var to replace"
+      , ListSigs (AnyType "the type of the var to replace")
+      ]
+  , fOutput = ListSigs (AnyType "the return type")
+  , fNewRules = NewNotImplemented
+  , fOldRules = rReplaceEach
   }
 
 -- (Some ot "the return type",

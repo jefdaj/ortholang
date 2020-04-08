@@ -2,7 +2,6 @@ module OrthoLang.Modules.SetsTable
   where
 
 import OrthoLang.Core
-import OrthoLang.Core (defaultTypeCheck)
 import OrthoLang.Modules.Plots (rPlotListOfLists)
 
 olModule :: Module
@@ -25,8 +24,11 @@ tsv = Type
 setsTable :: Function
 setsTable = let name = "sets_table" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf (ListOf (Some lit "some lit"))] tsv
-  , fTypeDesc  = mkTypeDesc       name [ListOf (ListOf (Some lit "some lit"))] tsv
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rPlotListOfLists "sets_table.R"
+  -- , fTypeCheck = defaultTypeCheck name [ListOf (ListOf (Some lit "some lit"))] tsv
+  -- , fTypeDesc  = mkTypeDesc       name [ListOf (ListOf (Some lit "some lit"))] tsv
+  , fInputs = [ListSigs (ListSigs (Some lit "some lit"))] -- TODO would any type work, not just lits?
+  , fOutput = Exactly tsv -- TODO would it help to make this EncodedAs tsv ...?
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rPlotListOfLists "sets_table.R"
   }

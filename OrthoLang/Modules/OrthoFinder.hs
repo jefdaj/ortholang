@@ -43,10 +43,13 @@ ofr = Type
 orthofinder :: Function
 orthofinder = let name = "orthofinder" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
-  , fTypeCheck = defaultTypeCheck name [ListOf faa] ofr
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthofinder
+  -- , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
+  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] ofr
+  , fInputs = [Exactly (ListOf faa)]
+  , fOutput = Exactly ofr
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple aOrthofinder
   }
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results

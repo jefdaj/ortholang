@@ -58,10 +58,13 @@ varNames _ expr = undefined lits -- TODO implement this
 histogram :: Function
 histogram = let name = "histogram" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
-  , fTypeDesc  = name ++ " : str num.list -> png"
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rPlotNumList "histogram.R"
+  -- , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
+  -- , fTypeDesc  = name ++ " : str num.list -> png"
+  , fInputs = [Exactly str, Exactly (ListOf num)]
+  , fOutput =  Exactly png
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rPlotNumList "histogram.R"
   }
 
 -- for reference:
@@ -95,16 +98,18 @@ rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
 
 -- (str, ScoresOf num) png
 -- shown as "str num.scores -> png"
-tPlotScores :: TypeChecker
-tPlotScores [s, ScoresOf n] | s == str && n == num = Right png
-tPlotScores _ = Left "expected a title and scores"
+-- tPlotScores :: TypeChecker
+-- tPlotScores [s, ScoresOf n] | s == str && n == num = Right png
+-- tPlotScores _ = Left "expected a title and scores"
 
 -- TODO line graph should label axis by input var name (always there!)
 linegraph :: Function
 linegraph = let name = "linegraph" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tPlotScores
-  , fTypeDesc  = name ++ " : str num.scores -> png"
+  -- , fTypeCheck = tPlotScores
+  -- , fTypeDesc  = name ++ " : str num.scores -> png"
+  , fInputs = [Exactly str, Exactly (ScoresOf num)]
+  , fOutput =  Exactly png
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "linegraph.R"
   }
@@ -113,8 +118,10 @@ linegraph = let name = "linegraph" in Function
 scatterplot :: Function
 scatterplot = let name = "scatterplot" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tPlotScores
-  , fTypeDesc  = name ++ " : str num.scores -> png"
+  -- , fTypeCheck = tPlotScores
+  -- , fTypeDesc  = name ++ " : str num.scores -> png"
+  , fInputs = [Exactly str, Exactly (ScoresOf num)]
+  , fOutput =  Exactly png
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "scatterplot.R"
   }
@@ -159,19 +166,22 @@ depRepeatVarName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
 venndiagram :: Function
 venndiagram = let name = "venndiagram" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tPlotListOfLists
-  , fTypeDesc  = name ++ " : X.list.list -> png"
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rPlotListOfLists "venndiagram.R"
+  -- , fTypeCheck = tPlotListOfLists
+  -- , fTypeDesc  = name ++ " : X.list.list -> png"
+  , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
+  , fOutput = Exactly png
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rPlotListOfLists "venndiagram.R"
   }
 
 -- (ListOf (ListOf (Some ot "any type"))) png
 -- shown as "t.list.list -> png, where t is any type"
 -- TODO does that actually make sense for specifying something you can plot?
 --      yes but only for venn diagrams
-tPlotListOfLists :: TypeChecker
-tPlotListOfLists [(ListOf (ListOf _))] = Right png
-tPlotListOfLists _ = Left "expected a list of lists"
+-- tPlotListOfLists :: TypeChecker
+-- tPlotListOfLists [(ListOf (ListOf _))] = Right png
+-- tPlotListOfLists _ = Left "expected a list of lists"
 
 -- TODO is this a reasonable way to do it for now?
 plotLabel :: Config -> DigestsRef -> Script -> Expr -> String

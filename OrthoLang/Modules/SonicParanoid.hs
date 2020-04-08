@@ -42,10 +42,13 @@ spr = Type
 sonicparanoid :: Function
 sonicparanoid = let name = "sonicparanoid" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
-  , fTypeCheck = defaultTypeCheck name [ListOf faa] spr -- TODO or fna
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aSonicParanoid
+  -- , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
+  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] spr -- TODO or fna
+  , fInputs = [Exactly $ ListOf faa]
+  , fOutput = Exactly spr
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple aSonicParanoid
   }
 
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo

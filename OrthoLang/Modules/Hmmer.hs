@@ -45,38 +45,50 @@ hht = Type
 hmmbuild :: Function
 hmmbuild = let name = "hmmbuild" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [aln] hmm
-  , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "hmmbuild.sh"
+  -- , fTypeCheck = defaultTypeCheck name [aln] hmm
+  -- , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
+  , fInputs = [Exactly aln]
+  , fOutput =  Exactly hmm
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimpleScript "hmmbuild.sh"
   }
 
 hmmbuildEach :: Function
 hmmbuildEach = let name = "hmmbuild_each" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
-  , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
+  -- , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
+  -- , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
+  , fInputs = [Exactly (ListOf aln)]
+  , fOutput =  Exactly (ListOf hmm)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
   }
 
 hmmsearch :: Function
 hmmsearch = let name = "hmmsearch" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
-  , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aHmmsearch
+  -- , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
+  -- , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
+  , fInputs = [Exactly num, Exactly hmm, Exactly faa] 
+  , fOutput =  Exactly hht -- TODO add to ht group?
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple aHmmsearch
   }
 
 -- TODO is this the right name for mapping over arg 2?
 hmmsearchEach :: Function
 hmmsearchEach = let name = "hmmsearch_each" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
-  , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 aHmmsearch
+  -- , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
+  -- , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
+  , fInputs = [Exactly num, Exactly (ListOf hmm), Exactly faa]
+  , fOutput =  Exactly hht
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 2 aHmmsearch
   }
 
 -- TODO better name, or is this actually the most descriptive way?
@@ -140,19 +152,25 @@ aHmmsearch args = error $ "bad argument to aHmmsearch: " ++ show args
 extractHmmTargets :: Function
 extractHmmTargets = let name = "extract_hmm_targets" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [hht] (ListOf str)
-  , fTypeDesc  = name ++ " : hht -> str.list"
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aExtractHmm 1
+  -- , fTypeCheck = defaultTypeCheck name [hht] (ListOf str)
+  -- , fTypeDesc  = name ++ " : hht -> str.list"
+  , fInputs = [Exactly hht]
+  , fOutput = Exactly (ListOf str)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aExtractHmm 1
   }
 
 extractHmmTargetsEach :: Function
 extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf hht] (ListOf $ ListOf str)
-  , fTypeDesc  = name ++ " : hht.list -> str.list.list"
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aExtractHmm 1
+  -- , fTypeCheck = defaultTypeCheck name [ListOf hht] (ListOf $ ListOf str)
+  -- , fTypeDesc  = name ++ " : hht.list -> str.list.list"
+  , fInputs = [Exactly (ListOf hht)]
+  , fOutput = Exactly (ListOf (ListOf str))
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 1 $ aExtractHmm 1
   }
 
 -- TODO clean this up! it's pretty ugly

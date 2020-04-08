@@ -8,7 +8,7 @@ module OrthoLang.Core.Compile
   , curl
   , debugC
   , debugRules
-  , defaultTypeCheck
+  -- , defaultTypeCheck
   , map3of3
   , mkLoad
   , mkLoadList

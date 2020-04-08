@@ -269,7 +269,7 @@ mHelp m = getDoc ["modules" </> mName m]
 fHelp :: Function -> IO String
 fHelp f = do
   doc <- getDoc ["functions" </> fName f]
-  let msg = "\n" ++ fTypeDesc f ++ "\n\n" ++ doc
+  let msg = "\n" ++ renderTypeSig f ++ "\n\n" ++ doc
   return msg
 
 -- TODO move somewhere better
@@ -295,14 +295,14 @@ listFunctionTypesWithInput cfg cType = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
     matches d = (tExtOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
-    descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
+    descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions cfg)
 
 -- TODO move somewhere better
 listFunctionTypesWithOutput :: Config -> Type -> [String]
 listFunctionTypesWithOutput cfg cType = filter matches descs
   where
     matches d = (tExtOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
-    descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
+    descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions cfg)
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO should it be an error for the new script not to play well with an existing one?
@@ -388,9 +388,13 @@ cmdType st@(scr, cfg, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
       "" -> allTypes
       s' -> oneType s'
     oneType e = case findFunction cfg e of
-      Just f  -> fTypeDesc f
+      Just f  -> renderTypeSig f
       Nothing -> showExprType st e -- TODO also show the expr itself?
     allTypes = init $ unlines $ map showAssignType scr
+
+-- TODO move somewhere. Pretty?
+renderTypeSig :: Function -> String
+renderTypeSig f = render (pPrint $ fInputs f) ++ " -> " ++ render (pPrint $ fOutput f)
 
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String

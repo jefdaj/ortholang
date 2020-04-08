@@ -56,8 +56,10 @@ singletons =
     { fOpChar    = Nothing
     , fName      = name
     , fTags      = [Hidden]
-    , fTypeDesc  = name ++ " : X.list -> X.list.list"
-    , fTypeCheck = tSingletons
+    -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
+    -- , fTypeCheck = tSingletons
+    , fInputs    = [ListSigs (AnyType "any type")]
+    , fOutput    =  ListSigs (ListSigs (AnyType "any type"))
     , fNewRules  = NewNotImplemented
     , fOldRules  = rSingletons
     }

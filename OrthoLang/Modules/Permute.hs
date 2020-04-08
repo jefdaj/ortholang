@@ -71,15 +71,18 @@ aPermute comboFn iPath eType salt out = do
 leaveEachOut :: Function
 leaveEachOut = let name = "leave_each_out" in Function
   { fOpChar = Nothing, fName = name 
-  ,fTags = []
-  , fTypeCheck = combosTypeCheck
-  , fTypeDesc  = name ++ " : X.list -> X.list.list"
-  , fNewRules = NewNotImplemented, fOldRules = rPermute dropEach
+  , fTags = []
+  -- , fTypeCheck = combosTypeCheck
+  -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
+  , fInputs = [ListSigs (AnyType "any type")]
+  , fOutput =  ListSigs (AnyType "any type")
+  , fNewRules = NewNotImplemented
+  , fOldRules = rPermute dropEach
   }
 
-combosTypeCheck :: [Type] -> Either String Type
-combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t
-combosTypeCheck _ = Left "type error in leave_each_out!"
+-- combosTypeCheck :: [Type] -> Either String Type
+-- combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t
+-- combosTypeCheck _ = Left "type error in leave_each_out!"
 
 -- drops the element at index n from a list
 -- (for some reason this isn't a built-in function?)

@@ -94,7 +94,7 @@ import qualified Data.Map.Strict as M
 import Prelude hiding (error)
 import OrthoLang.Debug
 import OrthoLang.Locks (LocksRef, withReadLock)
-import OrthoLang.Util  (readFileStrict, readFileLazy, headOrDie)
+import OrthoLang.Util  (readFileStrict, readFileLazy)
 
 import Development.Shake              (Rules, Action, Resource)
 -- import Control.Monad.IO.Class (liftIO)
@@ -310,9 +310,17 @@ During parsing they are checked and used to determine the 'Type' for each 'Expr'
 Constructors are from vague to specific.
 -}
 data TypeSig
-  = AnyType               -- ^ generic placeholder called "any type" in help text
+
+  -- these are analagous to their Type equivalents above:
+  = ListSigs   TypeSig        -- ^ like ListOf with possibly ambiguous sigs inside
+  | ScoresSigs TypeSig        -- ^ like ScoresOf with possibly ambiguous sigs inside
+  | EncodedSig String TypeSig -- ^ like EncodedAs with possibly ambiguous sigs inside
+
+  -- these are new:
+  | AnyType String        -- ^ generic placeholder. string used like in Some
   | Some TypeGroup String -- ^ the string is used for equality and in the help text
   | Exactly Type          -- ^ one regular Type wrapped for use in type signatures
+
   deriving (Eq, Show)
 
 --instance Show TypeSig where
@@ -650,11 +658,15 @@ explainFnBug =
 -- note: this function isn't associative! expected types on left, actual types on right
 -- TODO do we still need an empty list case here?
 typeSigMatches :: TypeSig -> Type -> Bool
-typeSigMatches AnyType _ = True
-typeSigMatches (Some g _) t = any (\s -> typeSigMatches s t) (tgMembers g)
-typeSigMatches (Exactly (ListOf   t1)) (ListOf   t2) = typeSigMatches (Exactly t1) t2
-typeSigMatches (Exactly (ScoresOf t1)) (ScoresOf t2) = typeSigMatches (Exactly t1) t2
-typeSigMatches (Exactly t1) t2 = t1 == t2
+typeSigMatches (AnyType _)       _                = True
+typeSigMatches (Exactly t1)      t2               = t1 == t2
+typeSigMatches (ListSigs s)      (ListOf t)       = typeSigMatches s t
+typeSigMatches (ScoresSigs s)    (ScoresOf t)     = typeSigMatches s t
+typeSigMatches (EncodedSig e1 s) (EncodedAs e2 t) = e1 == e2 && typeSigMatches s t
+typeSigMatches (ListSigs _)      _                = False
+typeSigMatches (ScoresSigs _)    _                = False
+typeSigMatches (EncodedSig _ _)  _                = False
+typeSigMatches (Some g _)        t                = any (\s -> typeSigMatches s t) (tgMembers g)
 
 -- TODO remove?
 -- typeSigsMatch :: [TypeSig] -> [Type] -> Bool

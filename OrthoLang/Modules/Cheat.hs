@@ -50,23 +50,26 @@ olModule = Module
 cheat :: Function
 cheat = Function
   { fOpChar = Nothing, fName = "cheat"
-  , fTypeCheck = cheatTypeCheck
-  , fTypeDesc  = "cheat : ??? (implement this)"
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rCheat
+  -- , fTypeCheck = cheatTypeCheck
+  -- , fTypeDesc  = "cheat : ??? (implement this)"
+  , fInputs = [Exactly str, AnyType "the return type", Exactly str] -- TODO variable args needed?
+  , fOutput = AnyType "the return type"
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rCheat
   }
 
 -- TODO detect return type based on string contents,
 --      and make a new temporary type if the given one doesn't exist
 -- TODO guess that requires either compile-time or runtime list of types?
 --      do you keep a global runtime list of them, or have separate "cheat" types?
-cheatTypeCheck :: [Type] -> Either String Type
-cheatTypeCheck (script : rtype : _)
-  | script == str && rtype == str = findOrMake $ tExt rtype
-  where
-    findOrMake _ = undefined
-cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
-                          \be strings specifying the script path and return type"
+-- cheatTypeCheck :: [Type] -> Either String Type
+-- cheatTypeCheck (script : rtype : _)
+--   | script == str && rtype == str = findOrMake $ tExt rtype
+--   where
+--     findOrMake _ = undefined
+-- cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
+--                           \be strings specifying the script path and return type"
 
 rCheat :: RulesFn
 rCheat = undefined

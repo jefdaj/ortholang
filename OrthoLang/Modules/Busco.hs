@@ -63,7 +63,7 @@ bst = Type
   }
 
 loadLineage :: Function
-loadLineage = mkLoad False "load_lineage" blh
+loadLineage = mkLoad False "load_lineage" (Exactly blh)
 
 buscoCache :: Config -> Path
 buscoCache cfg = cacheDir cfg "busco"
@@ -75,10 +75,13 @@ buscoCache cfg = cacheDir cfg "busco"
 buscoListLineages :: Function
 buscoListLineages = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
-  , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rBuscoListLineages
+  -- , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
+  -- , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
+  , fInputs = [Exactly str]
+  , fOutput = Exactly (ListOf str)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rBuscoListLineages
   }
   where
     name = "busco_list_lineages"
@@ -178,10 +181,13 @@ aBuscoListLineages listTmp = do
 buscoFetchLineage :: Function
 buscoFetchLineage  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str] blh
-  , fTypeDesc  = mkTypeDesc name  [str] blh
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rBuscoFetchLineage
+  -- , fTypeCheck = defaultTypeCheck name [str] blh
+  -- , fTypeDesc  = mkTypeDesc name  [str] blh
+  , fInputs = [Exactly str]
+  , fOutput = Exactly blh
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rBuscoFetchLineage
   }
   where
     name = "busco_fetch_lineage"
@@ -234,10 +240,13 @@ rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show 
 mkBusco :: String -> String -> Type -> Function
 mkBusco name mode inType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [blh, inType] bsr
-  , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aBusco mode
+  -- , fTypeCheck = defaultTypeCheck name [blh, inType] bsr
+  -- , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
+  , fInputs = [Exactly blh, Exactly inType]
+  , fOutput = Exactly bsr
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aBusco mode
   }
 
 buscoProteins, buscoTranscriptome :: Function
@@ -283,10 +292,13 @@ aBusco _ as = error $ "bad argument to aBusco: " ++ show as
 mkBuscoEach :: String -> String -> Type -> Function
 mkBuscoEach name mode inType = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [blh, (ListOf inType)] (ListOf bsr)
-  , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aBusco mode
+  -- , fTypeCheck = defaultTypeCheck name [blh, (ListOf inType)] (ListOf bsr)
+  -- , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
+  , fInputs = [Exactly blh, Exactly (ListOf inType)]
+  , fOutput = Exactly (ListOf bsr)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 2 $ aBusco mode
   }
 
 buscoProteinsEach, buscoTranscriptomeEach :: Function
@@ -301,10 +313,13 @@ buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
 buscoPercentComplete :: Function
 buscoPercentComplete  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [bsr] num
-  , fTypeDesc  = mkTypeDesc name  [bsr] num
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "busco_percent_complete.sh"
+  -- , fTypeCheck = defaultTypeCheck name [bsr] num
+  -- , fTypeDesc  = mkTypeDesc name  [bsr] num
+  , fInputs = [Exactly bsr]
+  , fOutput = Exactly num
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimpleScript "busco_percent_complete.sh"
   }
   where
     name = "busco_percent_complete"
@@ -312,10 +327,13 @@ buscoPercentComplete  = Function
 buscoPercentCompleteEach :: Function
 buscoPercentCompleteEach  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf bsr] (ListOf num)
-  , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
+  -- , fTypeCheck = defaultTypeCheck name [ListOf bsr] (ListOf num)
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
+  , fInputs = [Exactly (ListOf bsr)]
+  , fOutput =  Exactly (ListOf num)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
   }
   where
     name = "busco_percent_complete_each"
@@ -327,11 +345,14 @@ buscoPercentCompleteEach  = Function
 buscoScoresTable :: Function
 buscoScoresTable  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf bsr] bst
-  , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
-  ,fTags = []
+  -- , fTypeCheck = defaultTypeCheck name [ListOf bsr] bst
+  -- , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
+  , fInputs = [Exactly (ListOf bsr)]
+  , fOutput = Exactly bst
+  , fTags = []
   -- , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name <.> "py"
-  , fNewRules = NewNotImplemented, fOldRules = rBuscoScoresTable
+  , fNewRules = NewNotImplemented
+  , fOldRules = rBuscoScoresTable
   }
   where
     name = "busco_scores_table"
@@ -376,10 +397,13 @@ rBuscoScoresTable _ e = error $ "bad argument to rBuscoScoresTable: " ++ show e
 buscoFilterCompleteness :: Function
 buscoFilterCompleteness  = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
-  , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rBuscoFilterCompleteness
+  -- , fTypeCheck = defaultTypeCheck name [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
+  -- , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
+  , fInputs = [Exactly num, Exactly bst, Exactly (ListOf faa)]
+  , fOutput = Exactly (ListOf faa)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rBuscoFilterCompleteness
   }
   where
     name = "busco_filter_completeness"

@@ -26,9 +26,12 @@ sample :: Function
 sample = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = tSample
-  , fNewRules = NewNotImplemented, fOldRules = rSample
-  , fTypeDesc  = name ++ " : num X.list -> X.list"
+  -- , fTypeCheck = tSample
+  -- , fTypeDesc  = name ++ " : num X.list -> X.list"
+  , fInputs = [ListSigs (AnyType "any type")]
+  , fOutput =  ListSigs (AnyType "any type")
+  , fOldRules = rSample
+  , fNewRules = NewNotImplemented
   }
   where
     name = "sample"

@@ -34,9 +34,12 @@ repeatN :: Function
 repeatN = Function
   { fOpChar = Nothing, fName = "repeat"
   ,fTags = []
-  , fTypeCheck = tRepeatN
-  , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
-  , fNewRules = NewNotImplemented, fOldRules = rRepeatN
+  -- , fTypeCheck = tRepeatN
+  -- , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
+  , fInputs = [AnyType "the return type", Exactly num]
+  , fOutput =  ListSigs (AnyType "the return type")
+  , fNewRules = NewNotImplemented
+  , fOldRules = rRepeatN
   }
 
 -- takes a result type, a starting type, and an int,
