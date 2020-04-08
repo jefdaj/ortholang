@@ -9,6 +9,7 @@ olModule = Module
   { mName = "Test"
   , mDesc = "Test module for the 'new rules' infrastructure"
   , mTypes = [str]
+  , mGroups = []
   , mFunctions =
       [ test1
       , test2

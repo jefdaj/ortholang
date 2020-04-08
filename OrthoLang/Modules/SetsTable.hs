@@ -10,15 +10,17 @@ olModule = Module
   { mName = "SetsTable"
   , mDesc = "Generate set membership tables (spreadsheets) for easier list comparison"
   , mTypes = [tsv]
+  , mGroups = [lit]
   , mFunctions = [setsTable]
   }
 
--- TODO move to Types.hs?
-lit :: Type
+-- TODO move to Types.hs
+-- TODO and either use it in the core compilers or remove it
+lit :: TypeGroup
 lit = TypeGroup
   { tgExt = "lit"
   , tgDesc = "basic literal (str or num)"
-  , tgMember = \t -> t `elem` [str, num]
+  , tgTypes = [str, num]
   }
 
 -- TODO should this be more specific?

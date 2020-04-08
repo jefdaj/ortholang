@@ -16,6 +16,7 @@ olModule = Module
   { mName = "CRB-BLAST"
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
   , mTypes = [fna, faa, fa, crb]
+  , mGroups = []
   , mFunctions =
     [ blastCRB
     , blastCRBEach -- TODO someting nicer than this!

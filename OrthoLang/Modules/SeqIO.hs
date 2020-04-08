@@ -19,7 +19,8 @@ olModule :: Module
 olModule = Module
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
-  , mTypes = [gbk, faa, fna, fa]
+  , mTypes = [gbk, faa, fna]
+  , mGroups = [fa]
   , mFunctions =
     [ gbkToFaa, gbkToFaaEach
     , gbkToFna, gbkToFnaEach
@@ -45,7 +46,7 @@ gbk = Type
   , tShow = defaultShow
   }
 
-fa :: Type
+fa :: TypeGroup
 fa = TypeGroup
   { tgExt = "fa"
   , tgDesc  = "FASTA (nucleic OR amino acid)"

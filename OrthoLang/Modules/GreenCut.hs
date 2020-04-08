@@ -10,6 +10,7 @@ olModule = Module
   { mName = "GreenCut"
   , mDesc = "A re-implementation of the original GreenCut(2) ortholog-finding algorithm"
   , mTypes = [gcr]
+  , mGroups = []
   , mFunctions =
       [ greencutTwoFamilies
       ]

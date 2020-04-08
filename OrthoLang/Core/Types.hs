@@ -23,6 +23,7 @@ module OrthoLang.Core.Types
   , operatorChars
   -- , WrapperConfig(..)
   , Type(..)
+  , TypeGroup(..)
   , RepID(..)
   , Salt(..)
   , Var(..)
@@ -274,22 +275,16 @@ lookupResult scr = if null matches
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
 -- TODO how to make the record fields not partial functions?
+-- TODO remove tShow and make a separate typeclass for "showable from filepath" so this can be Eq, Ord, ...
 data Type
   = Empty -- TODO remove this? should never be a need to define an empty list
-  | ListOf Type
-  | ScoresOf Type
+  | ListOf    Type
+  | ScoresOf  Type
 
-  {- These are kind of like simpler, less extensible typeclasses. They're just
-   - a list of types that can be treated similarly in some circumstances, for
-   - example "files whose length is their number of lines" or "FASTA files (faa
-   - or fna)".
-   -}
-  | TypeGroup
-    { tgExt   :: String
-    , tgDesc  :: String
-    -- , tgShow  :: Config -> LocksRef -> FilePath -> IO String -- TODO remove?
-    , tgMember :: Type -> Bool
-    }
+  -- TODO does the encoding need to be more than a string (extension)?
+  | EncodedAs String Type -- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
+
+  | Some TypeGroup String -- ^ replaces the old TypeGroup constructor and adds comments
 
   | Type
     { tExt  :: String
@@ -297,6 +292,39 @@ data Type
     , tShow :: Config -> LocksRef -> FilePath -> IO String
     }
   -- deriving (Eq, Show, Read)
+
+-- TODO is it dangerous to just assume they're the same by extension?
+--      maybe we need to assert no duplicates while loading modules?
+-- TODO should this use typesMatch?
+instance Eq Type where
+  Empty              == Empty              = True
+  (ListOf t1)        == (ListOf t2)        = t1 == t2
+  (ScoresOf t1)      == (ScoresOf t2)      = t1 == t2
+  (EncodedAs e1 t1)  == (EncodedAs e2 t2)  = e1 == e2 && t1 == t2
+  (Some g1 s1)       == (Some g2 s2)       = g1 == g2 && s1 == s2
+  (Type {tExt = e1}) == (Type {tExt = e2}) = e1 == e2
+  _                  ==                  _ = False
+
+-- TODO don't call this Show! maybe Pretty?
+instance Show Type where
+  show = extOf
+
+{-|
+These are kind of like simpler, less extensible typeclasses. They're just a
+list of types that can be treated similarly in some circumstances, for example
+"files whose length is their number of lines" or "FASTA files (faa or fna)".
+-}
+data TypeGroup = TypeGroup
+  { tgExt   :: String
+  , tgDesc  :: String
+  , tgTypes :: [Type]
+  }
+
+-- TODO is it dangerous to just assume they're the same by extension?
+--      maybe we need to assert no duplicates while loading modules?
+instance Eq TypeGroup where
+  (TypeGroup {tgExt = e1}) == (TypeGroup {tgExt = e2}) = e1 == e2
+  _ == _ = False
 
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
 defaultShow = defaultShowN 5
@@ -309,22 +337,6 @@ defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy 
                   in if length nPlusOne > nLines
                     then init nPlusOne ++ ["..."]
                     else nPlusOne
-
--- TODO is it dangerous to just assume they're the same by extension?
---      maybe we need to assert no duplicates while loading modules?
--- TODO should this use typesMatch?
-instance Eq Type where
-  Empty        == Empty        = True
-  (ListOf a)   == (ListOf b)   = a == b
-  (ScoresOf a) == (ScoresOf b) = a == b
-  (Type {tExt = t1}) == (Type {tExt = t2}) = t1 == t2
-  (TypeGroup {tgExt = t1}) == (TypeGroup {tgExt = t2}) = t1 == t2
-  (TypeGroup {tgMember = fn}) == t = fn t
-  t == (TypeGroup {tgMember = fn}) = fn t
-  _ == _ = False -- TODO should this behave differently?
-
-instance Show Type where
-  show = extOf
 
 typeOf :: Expr -> Type
 typeOf (Lit   t _ _      ) = t
@@ -348,20 +360,21 @@ typeOf (Com (CompiledExpr t _ _)) = t
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
 extOf :: Type -> String
-extOf Empty                      = "empty" -- for lists with nothing in them yet
-extOf (ListOf                t ) = extOf t ++ ".list"
-extOf (ScoresOf              t ) = extOf t ++ ".scores"
-extOf (TypeGroup {tgExt = t}) = t -- TODO should this not be called an extension? it's never written to disk
-                                     -- TODO put back the < > ?
-extOf (Type      { tExt = t}) = t
+extOf Empty        = "empty" -- for lists with nothing in them yet
+extOf (ListOf   t) = extOf t ++ ".list"
+extOf (ScoresOf t) = extOf t ++ ".scores"
+extOf (EncodedAs e t) = extOf t ++ "." ++ e
+extOf (Some (TypeGroup {tgExt = e}) _) = e
+extOf (Type            { tExt = e}   ) = e
 
 -- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
 descOf :: Type -> String
-descOf Empty         = "empty list" -- for lists with nothing in them yet
-descOf (ListOf   t ) = "list of " ++ descOf t
-descOf (ScoresOf t ) = "scores for " ++ descOf t
-descOf (TypeGroup {tgDesc = t}) = t
-descOf (Type      { tDesc = t}) = t
+descOf Empty           = "empty list" -- for lists with nothing in them yet
+descOf (ListOf      t) = "list of " ++ descOf t
+descOf (ScoresOf    t) = "scores for " ++ descOf t
+descOf (EncodedAs e t) = descOf t ++ " encoded as " ++ e
+descOf (Some (TypeGroup {tgDesc = d}) s) = d ++ "(" ++ s ++ ")" -- TODO refine this
+descOf (Type            { tDesc = d}   ) = d
 
 varOf :: Expr -> [Var]
 varOf (Ref _ _ _ v) = [v]
@@ -555,6 +568,7 @@ data Module = Module
   { mName      :: String
   , mDesc      :: String
   , mTypes     :: [Type]
+  , mGroups    :: [TypeGroup]
   , mFunctions :: [Function]
   }
   -- deriving (Eq, Read)
@@ -609,9 +623,12 @@ typeMatches Empty _ = True
 typeMatches _ Empty = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
-typeMatches g1@(TypeGroup {}) g2@(TypeGroup {}) = g1 == g2
-typeMatches a (TypeGroup {tgMember = fn}) = fn a
-typeMatches (TypeGroup {tgMember = fn}) b = fn b
+
+-- TODO can these be removed and regular equality (Eq instance above) used?
+-- typeMatches g1@(TypeGroup {}) g2@(TypeGroup {}) = g1 == g2
+-- typeMatches a g@(TypeGroup {tgTypes = ts}) = fn a
+-- typeMatches (TypeGroup {tgMember = fn}) b = fn b
+
 typeMatches a b = a == b
 
 typesMatch :: [Type] -> [Type] -> Bool

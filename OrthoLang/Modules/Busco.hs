@@ -24,6 +24,7 @@ olModule = Module
   { mName = "Busco"
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
   , mTypes = [blh, bsr, bst, faa]
+  , mGroups = []
   , mFunctions =
       [ loadLineage
       , buscoListLineages

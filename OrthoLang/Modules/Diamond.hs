@@ -21,6 +21,7 @@ olModule = Module
   { mName = "Diamond"
   , mDesc = "Accelerated BLAST compatible local sequence aligner."
   , mTypes = [fna, faa, dmnd]
+  , mGroups = []
   , mFunctions =
       [ diamondmakedb
       , diamondmakedbEach

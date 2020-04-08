@@ -22,6 +22,7 @@ olModule = Module
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random salts"
   , mTypes = []
+  , mGroups = []
   , mFunctions = [repeatN]
   }
 

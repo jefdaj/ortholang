@@ -18,6 +18,7 @@ olModule = Module
             \more than once will give the same sublist each time! For different\n\
             \sublists, use in combination with the 'repeat' function"
   , mTypes = []
+  , mGroups = []
   , mFunctions = [sample]
   }
 

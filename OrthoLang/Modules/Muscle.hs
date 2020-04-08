@@ -10,6 +10,7 @@ olModule = Module
   { mName = "MUSCLE"
   , mDesc = "Align sequences with MUSCLE"
   , mTypes = [faa, aln]
+  , mGroups = []
   , mFunctions = [muscle, muscleEach]
   }
 

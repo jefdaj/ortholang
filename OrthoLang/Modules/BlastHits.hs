@@ -17,6 +17,7 @@ olModule = Module
   { mName = "BlastHits"
   , mDesc = "Work with BLAST hit tables"
   , mTypes = [bht, crb, hittable]
+  , mGroups = []
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach

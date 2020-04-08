@@ -21,6 +21,7 @@ olModule = Module
   { mName = "ListLike"
   , mDesc = "Operations on files that can be treated like lists"
   , mTypes = [bht, crb, mms, listlike]
+  , mGroups = []
   , mFunctions = [length, lengthEach]
   }
 

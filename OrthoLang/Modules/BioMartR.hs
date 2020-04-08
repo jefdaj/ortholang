@@ -49,6 +49,7 @@ olModule = Module
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
   , mTypes = [search, fnagz, faagz]
+  , mGroups = []
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
     -- TODO single and _each versions?

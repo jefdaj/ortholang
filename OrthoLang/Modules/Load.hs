@@ -27,6 +27,7 @@ olModule = Module
   { mName = "Load"
   , mDesc = "Load generic lists"
   , mTypes = [] -- TODO include str?
+  , mGroups = []
   , mFunctions = [loadList, globFiles]
   }
 

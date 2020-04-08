@@ -42,6 +42,7 @@ olModule = Module
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
   , mTypes = [og, ofr, spr, gcr]
+  , mGroups = []
   , mFunctions =
       [ orthogroups
       , orthogroupContaining

@@ -70,6 +70,7 @@ olModule = Module
             \TODO individual help descriptions for each fn"
 
   , mTypes = [faa, pdb, bht, pssm]
+  , mGroups = []
   , mFunctions =
 
     -- runs without obvious errors, but needs more careful verification:

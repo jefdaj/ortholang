@@ -19,6 +19,7 @@ olModule = Module
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
   , mTypes = [png]
+  , mGroups = []
   , mFunctions = [histogram, linegraph, scatterplot, venndiagram] -- TODO bargraph
   }
 

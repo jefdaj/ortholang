@@ -12,6 +12,7 @@ olModule = Module
   { mName = "Permute"
   , mDesc = "Generate random permutations of lists"
   , mTypes = []
+  , mGroups = []
   , mFunctions =
     [ leaveEachOut
     -- TODO sample n elements n times

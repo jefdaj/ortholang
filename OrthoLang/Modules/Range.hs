@@ -15,6 +15,7 @@ olModule = Module
   { mName = "Range"
   , mDesc = "Generate ranges of numbers"
   , mTypes = [num]
+  , mGroups = []
   , mFunctions =
     [ mkRangeFn "range_add"      3
     , mkRangeFn "range_exponent" 4

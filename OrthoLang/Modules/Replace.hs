@@ -50,6 +50,7 @@ olModule = Module
   { mName = "Replace"
   , mDesc = "Replace variables in the script to see how the results change"
   , mTypes = []
+  , mGroups = []
   , mFunctions =
       [ replace
       , replaceEach

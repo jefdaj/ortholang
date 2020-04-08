@@ -35,6 +35,7 @@ olModule = Module
   { mName = "MMSeqs"
   , mDesc = "Many-against-many sequence searching: ultra fast and sensitive search and clustering suite"
   , mTypes = [faa, fna, bht, mms]
+  , mGroups = []
   , mFunctions =
       [ mmseqsCreateDbAll
       , mmseqsCreateDb

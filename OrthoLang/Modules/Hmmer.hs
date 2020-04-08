@@ -17,6 +17,7 @@ olModule = Module
   { mName = "HMMER"
   , mDesc = "Search sequences with hidden Markov models"
   , mTypes = [faa, aln, hmm, hht]
+  , mGroups = []
   , mFunctions = [hmmbuild, hmmbuildEach,
                   hmmsearch, hmmsearchEach,
                   extractHmmTargets, extractHmmTargetsEach]

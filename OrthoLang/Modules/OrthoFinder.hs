@@ -21,6 +21,7 @@ olModule = Module
   { mName = "OrthoFinder"
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
   , mTypes = [faa, ofr]
+  , mGroups = []
   , mFunctions =
       [ orthofinder
       ]

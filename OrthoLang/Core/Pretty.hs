@@ -53,12 +53,13 @@ pPrintHdl :: Pretty a => Config -> Handle -> a -> IO ()
 pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl
 
 instance Pretty Type where
-  pPrint Empty          = error "should never need to print Empty"
-  pPrint (ListOf Empty) = text "empty list"
-  pPrint (ListOf     t) = text "list of" <+> pPrint t <> text "s"
-  pPrint (ScoresOf   t) = text "list of" <+> pPrint t <> text "s with scores"
-  pPrint (TypeGroup {tgExt = t, tgDesc = d}) = text t <+> parens (text d)
-  pPrint (Type      { tExt = t,  tDesc = d}) = text t <+> parens (text d)
+  pPrint Empty           = error "should never need to print Empty"
+  pPrint (ListOf Empty ) = text "empty list"
+  pPrint (ListOf      t) = text "list of" <+> pPrint t <> text "s"
+  pPrint (ScoresOf    t) = text "list of" <+> pPrint t <> text "s with scores"
+  pPrint (EncodedAs e t) = pPrint t <+> text "encoded as" <+> text e
+  pPrint (Some (TypeGroup {tgExt = t, tgDesc = d}) s) = text t <+> parens (text d) <+> parens (text s) -- TODO refine this
+  pPrint (Type            { tExt = t,  tDesc = d}   ) = text t <+> parens (text d)
 
 instance Pretty Var where
   pPrint (Var _ s) = text s -- TODO show the salt?

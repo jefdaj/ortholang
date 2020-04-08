@@ -27,6 +27,7 @@ olModule = Module
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
   , mTypes = [ndb, pdb, bht]
+  , mGroups = []
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?

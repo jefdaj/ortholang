@@ -28,6 +28,7 @@ olModule = Module
   { mName = "Sets"
   , mDesc = "Set operations for use with lists"
   , mTypes = []
+  , mGroups = []
   , mFunctions = some : map mkSetFunction setOpDescs
   }
 

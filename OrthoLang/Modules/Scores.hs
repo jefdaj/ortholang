@@ -30,6 +30,7 @@ olModule = Module
   { mName = "Scores"
   , mDesc = "Score repeated variables for plotting"
   , mTypes = []
+  , mGroups = []
   , mFunctions =
     [ scoreRepeats
     , extractScores

@@ -43,6 +43,7 @@ olModule = Module
   { mName = "Cheat"
   , mDesc = "Run your own script and OrthoLang will assume the types are valid"
   , mTypes = []
+  , mGroups = []
   , mFunctions = [cheat]
   }
 
