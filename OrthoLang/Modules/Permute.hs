@@ -59,7 +59,7 @@ aPermute comboFn iPath eType salt out = do
                       trace "modules.permute.aPermute"
                                ("combo: " ++ show ps) ps)
                                (zip oPaths' combos)
-  let out' = traceA "aPermute" out [iPath, extOf eType, out]
+  let out' = traceA "aPermute" out [iPath, tExtOf eType, out]
   writeStrings (ListOf eType) out' oPaths'
 
 --------------------

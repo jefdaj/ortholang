@@ -177,9 +177,8 @@ myShake cfg ref ids dr pm delay rules = do
  - TODO clean this up!
  -}
 prettyResult :: Config -> LocksRef -> Type -> Path -> Action Doc
-prettyResult _ _ AnyType  _ = return $ text "" -- TODO does this make sense?
+prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
-  | t == AnyType = return "[]"
   | t `elem` [str, num] = do
     lits <- readLits $ fromPath cfg f
     let lits' = if t == str

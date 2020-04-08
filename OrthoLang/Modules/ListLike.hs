@@ -29,7 +29,7 @@ ll :: TypeGroup
 ll = TypeGroup
   { tgExt  = "ll"
   , tgDesc  = "files that can be treated like lists"
-  , tgTypes = [ListOf AnyType, bht, crb, mms]
+  , tgMembers = [ListOf AnyType, bht, crb, mms]
   }
 
 length :: Function

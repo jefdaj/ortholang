@@ -97,7 +97,7 @@ module OrthoLang.Core
   -- , askLocks
   , defaultShow
   , depsOf
-  , extOf
+  , tExtOf
   , extractExprs
   , lookupIDsFile
   , mkTypeDesc

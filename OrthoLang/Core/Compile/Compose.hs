@@ -44,8 +44,8 @@ tCompose1 fn1 expected fn2 types = case fTypeCheck fn1 types of
   (Right actual) -> if actual == expected
                       then fTypeCheck fn2 [expected]
                       else Left $ "error: composed fn " ++ fName fn1
-                             ++ " produces a " ++ extOf actual
-                             ++ ", not " ++ extOf expected
+                             ++ " produces a " ++ tExtOf actual
+                             ++ ", not " ++ tExtOf expected
 
 rCompose1 :: Function -> Type -> Function -> RulesFn
 rCompose1 fn1 rtn1 fn2 scr (Fun rtn2 salt deps _ args) = do

@@ -26,6 +26,7 @@ module OrthoLang.Core.Parse.Util
 
 import OrthoLang.Debug
 import OrthoLang.Core.Types
+import OrthoLang.Util (headOrDie)
 
 import Development.Shake.FilePath (makeRelative)
 import Text.Parsec.Combinator     (manyTill, eof, anyToken)

@@ -275,8 +275,8 @@ fHelp f = do
 -- TODO move somewhere better
 tHelp :: Config -> Type -> IO String
 tHelp cfg t = do
-  doc <- getDoc ["types" </> extOf t]
-  let msg = "The ." ++ extOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
+  doc <- getDoc ["types" </> tExtOf t]
+  let msg = "The ." ++ tExtOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
             ++ doc ++ "\n\n"
             ++ tFnList
   return msg
@@ -294,14 +294,14 @@ listFunctionTypesWithInput :: Config -> Type -> [String]
 listFunctionTypesWithInput cfg cType = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
-    matches d = (extOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    matches d = (tExtOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
 
 -- TODO move somewhere better
 listFunctionTypesWithOutput :: Config -> Type -> [String]
 listFunctionTypesWithOutput cfg cType = filter matches descs
   where
-    matches d = (extOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    matches d = (tExtOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ fTypeDesc f) (listFunctions cfg)
 
 -- TODO this is totally duplicating code from putAssign; factor out
@@ -464,7 +464,7 @@ nakedCompletions (scr, cfg, _, _, _) lineReveresed wordSoFar = do
     fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
     varNames = map ((\(Var _ v) -> v) . fst) scr
     cmdNames = map ((':':) . fst) (cmds cfg)
-    typeExts = map extOf $ concatMap mTypes $ cfgModules cfg
+    typeExts = map tExtOf $ concatMap mTypes $ cfgModules cfg
 
 -- this is mostly lifted from Haskeline's completeFile
 myComplete :: MonadIO m => GlobalEnv -> CompletionFunc m

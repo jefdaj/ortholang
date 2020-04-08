@@ -124,7 +124,7 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r salt _ name exprs) = do
       argLastsPath'  = toPath cfg mappedArgsPath
       elemCacheDir   = (fromPath cfg $ cacheDir cfg "each") </> hashFun cfg dRef scr e
       elemCacheDir'  = toPath cfg elemCacheDir -- TODO redundant?
-      elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> extOf eType
+      elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> tExtOf eType
       eType = case r of
                 (ListOf t) -> debugC cfg "rMapMain" ("type of \"" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
@@ -169,7 +169,7 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
 -- TODO take + return Paths?
 -- TODO blast really might be nondeterministic here now that paths are hashed!
 eachPath :: Config -> FilePath -> Type -> FilePath -> FilePath
-eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> extOf eType TODO /result?
+eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> tExtOf eType TODO /result?
   where
     path' = toPath cfg path
     hash  = digest path'

@@ -245,8 +245,8 @@ TODO remove the insert digests hack
 -}
 rList :: RulesFn
 rList s e@(Lst rtn _ _ es)
-  | rtn `elem` [AnyType, str, num] = rListLits  s e
-  | otherwise                      = rListPaths s e
+  | rtn `elem` [Empty, str, num] = rListLits  s e
+  | otherwise                    = rListPaths s e
 rList _ _ = error "rList" "bad arguemnt"
 
 {-|
@@ -398,12 +398,13 @@ typeError name expected actual =
   "\nBut it was given these: "      ++ unwords (map show actual)
 
 -- TODO this should fail for type errors like multiplying a list by a num!
-defaultTypeCheck :: String -> [Type] -> Type
-                 -> [Type] -> Either String Type
-defaultTypeCheck name expected returned actual =
-  if actual `typesMatch` expected
-    then Right returned
-    else Left $ typeError name expected actual
+-- TODO remove this entirely rather than trying to migrate it to the new model
+--defaultTypeCheck :: String -> [Type] -> Type
+--                 -> [Type] -> Either String Type
+--defaultTypeCheck name expected returned actual =
+--  if actual `typeSigsMatch` expected
+--    then Right returned
+--    else Left $ typeError name expected actual
 
 
 --------------------------
@@ -418,10 +419,13 @@ defaultTypeCheck name expected returned actual =
 mkLoad :: Bool -> String -> Type -> Function
 mkLoad hashSeqIDs name rtn = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [str] rtn
-  , fTypeDesc  = mkTypeDesc name [str] rtn
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rLoad hashSeqIDs
+  -- , fTypeCheck = defaultTypeCheck name [str] rtn
+  -- , fTypeDesc  = mkTypeDesc name [str] rtn
+  , fInputs = [Concrete str]
+  , fOutput =  Concrete rtn
+  , fTags = []
+  , fOldRules = rLoad hashSeqIDs
+  , fNewRules = NewNotImplemented
   }
 
 {- Like cLoad, except it operates on a list of strings. Note that you can also
@@ -432,10 +436,13 @@ mkLoad hashSeqIDs name rtn = Function
 mkLoadList :: Bool -> String -> Type -> Function
 mkLoadList hashSeqIDs name rtn = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
-  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rLoadList hashSeqIDs -- TODO different from src lists?
+  -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
+  -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
+  , fInputs = [Concrete (ListOf str)]
+  , fOutputs = Concrete (ListOf rtn)
+  , fTags = []
+  , fOldRules = rLoadList hashSeqIDs -- TODO different from src lists?
+  , fNewRules = NewNotImplemented
   }
 
 -- The paths here are a little confusing: expr is a str of the path we want to

@@ -42,7 +42,7 @@ map3of3 inType outType act3 out a1 a2 a3 = do
   debugFn $ "map3Base inPaths read from a3: " ++ show inPaths
   let tmpDir   = cfgTmpDir cfg </> "cache" </> "map" -- TODO figure this out better
       outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toPath cfg i] </> "result"
-                 -- <.> extOf outType
+                 -- <.> tExtOf outType
       ioPairs  = zip inPaths outPaths
   forM_ ioPairs $ \(i,o) -> do
     debugFn $ "map3Base input and output: " ++ show i ++ ", " ++ show o

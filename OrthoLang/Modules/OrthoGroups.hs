@@ -65,7 +65,7 @@ og :: TypeGroup
 og = TypeGroup
   { tgExt = "og"
   , tgDesc = "orthogroups (orthofinder, sonicparanoid, or greencut results)"
-  , tgTypes = [ofr, spr, gcr]
+  , tgMembers = [ofr, spr, gcr]
   }
 
 -----------------

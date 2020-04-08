@@ -50,9 +50,8 @@ module OrthoLang.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , lit
-  , ot
   , typeOf
-  , extOf
+  , tExtOf
   , descOf
   , depsOf
   , rDepsOf
@@ -75,10 +74,8 @@ module OrthoLang.Core.Types
   -- * Misc experimental stuff
   , extractExprs
   , extractLoads
-  , typeMatches
-  , typesMatch
-  , nonEmptyType
-  , isNonEmpty
+  , typeSigMatches
+  , typeSigsMatch
   -- new rules infrastructure
   , RulesEnv
   , RulesR
@@ -202,7 +199,7 @@ data CompiledExpr = CompiledExpr Type ExprPath (Rules ExprPath)
 -- TODO can this be made into a Path?
 -- TODO is show ever really needed?
 instance Show CompiledExpr where
-  show (CompiledExpr t p _) = "CompiledExpr " ++ extOf t ++ " " ++ show p ++ " <<Rules ExprPath>>"
+  show (CompiledExpr t p _) = "CompiledExpr " ++ tExtOf t ++ " " ++ show p ++ " <<Rules ExprPath>>"
 
 -- CompiledExprs are compared by the expressions they were compiled from.
 instance Eq CompiledExpr where
@@ -229,7 +226,7 @@ setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for comp
 
 -- TODO add names to the Bops themselves... or associate with prefix versions?
 prefixOf :: Expr -> String
-prefixOf (Lit rtn _ _     ) = extOf rtn
+prefixOf (Lit rtn _ _     ) = tExtOf rtn
 prefixOf (Fun _ _ _ name _) = name
 prefixOf (Lst _ _ _ _    ) = "list"
 prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
@@ -280,15 +277,11 @@ lookupResult scr = if null matches
 -- TODO how to make the record fields not partial functions?
 -- TODO remove tShow and make a separate typeclass for "showable from filepath" so this can be Eq, Ord, ...
 data Type
-  = AnyType -- ^ placeholder used in type signatures and in the types of empty lists
+  = Empty -- ^ used in (ListOf Empty) to denote empty lists
   | ListOf    Type
   | ScoresOf  Type
-
   -- TODO does the encoding need to be more than a string (extension)?
   | EncodedAs String Type -- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
-
-  | Some TypeGroup String -- ^ replaces the old TypeGroup constructor and adds comments
-
   | Type
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -298,19 +291,27 @@ data Type
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
--- TODO should this use typesMatch?
+-- TODO should this use typeSigsMatch?
 instance Eq Type where
-  AnyType            == AnyType            = True -- matches others, but only == itself
   (ListOf t1)        == (ListOf t2)        = t1 == t2
   (ScoresOf t1)      == (ScoresOf t2)      = t1 == t2
   (EncodedAs e1 t1)  == (EncodedAs e2 t2)  = e1 == e2 && t1 == t2
-  (Some g1 s1)       == (Some g2 s2)       = g1 == g2 && s1 == s2
   (Type {tExt = e1}) == (Type {tExt = e2}) = e1 == e2
   _                  ==                  _ = False
 
 -- TODO don't call this Show! maybe Pretty?
 instance Show Type where
-  show = extOf
+  show = tExtOf
+
+{-|
+These are used to specify the input + output types of functions.
+During parsing they are checked and used to determine the concrete 'Type' for each 'Expr'.
+-}
+data TypeSig
+  = AnyType
+  | Some TypeGroup String -- ^ the string is used for equality and in the help text
+  | Concrete Type
+  deriving (Eq)
 
 {-|
 These are kind of like simpler, less extensible typeclasses. They're just a
@@ -320,7 +321,7 @@ list of types that can be treated similarly in some circumstances, for example
 data TypeGroup = TypeGroup
   { tgExt   :: String
   , tgDesc  :: String
-  , tgTypes :: [Type]
+  , tgMembers :: [TypeSig]
   }
 
 -- TODO is it dangerous to just assume they're the same by extension?
@@ -333,15 +334,7 @@ lit :: TypeGroup
 lit = TypeGroup
   { tgExt = "lit"
   , tgDesc = "basic literal (str or num)"
-  , tgTypes = [str, num]
-  }
-
--- a typegroup that stands for "any type" in function type signatures
-ot :: TypeGroup
-ot = TypeGroup
-  { tgExt = "ag" -- TODO does this make sense?
-  , tgDesc = "any type"
-  , tgTypes = [AnyType]
+  , tgMembers = [Concrete str, Concrete num]
   }
 
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
@@ -363,36 +356,35 @@ typeOf (Bop   t _ _ _ _ _) = t
 typeOf (Fun   t _ _ _ _  ) = t
 typeOf (Lst  t _ _ _    ) = ListOf t
 typeOf (Com (CompiledExpr t _ _)) = t
--- typeOf (Lst _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
+-- typeOf (Lst _ _ _ ts     ) = ListOf $ firstNonEmpty $ map typeOf ts
 -- typeOf (Lst _ _ _ []     ) = Empty
 -- typeOf (Lst _ _ _ []     ) = ListOf Empty
 
 -- Works around a bug where if the first element is an empty list but others
 -- have elements, it would call the whole thing an "emptylist.list".
 -- Note no typechecking happens here; heterogenous lists won't be noticed.
--- nonEmptyType :: [Expr] -> Type
--- nonEmptyType    []  = Empty
--- nonEmptyType (x:[]) = typeOf x -- catches (ListOf Empty)
--- nonEmptyType (_:xs) = nonEmptyType xs
+-- firstNonEmpty :: [Expr] -> Type
+-- firstNonEmpty    []  = Empty
+-- firstNonEmpty (x:[]) = typeOf x -- catches (ListOf Empty)
+-- firstNonEmpty (_:xs) = firstNonEmpty xs
 
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
-extOf :: Type -> String
-extOf AnyType      = "any" -- for lists with nothing in them yet? TODO empty string instead?
-extOf (ListOf   t) = extOf t ++ ".list"
-extOf (ScoresOf t) = extOf t ++ ".scores"
-extOf (EncodedAs e t) = extOf t ++ "." ++ e
-extOf (Some (TypeGroup {tgExt = e}) _) = e
-extOf (Type            { tExt = e}   ) = e
+tExtOf :: Type -> String
+tExtOf Empty        = "empty" -- special case for empty lists with no element type
+tExtOf (ListOf   t) = tExtOf t ++ ".list"
+tExtOf (ScoresOf t) = tExtOf t ++ ".scores"
+tExtOf (EncodedAs e t) = tExtOf t ++ "." ++ e
+tExtOf (Type {tExt = e}) = e
 
+-- TODO equivalent needed for type groups, right?
 -- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
 descOf :: Type -> String
-descOf AnyType         = "any type" -- for lists with nothing in them yet TODO rethink this
+descOf Empty           = "empty list" -- for lists with nothing in them yet
 descOf (ListOf      t) = "list of " ++ descOf t
 descOf (ScoresOf    t) = "scores for " ++ descOf t
 descOf (EncodedAs e t) = descOf t ++ " encoded as " ++ e
-descOf (Some (TypeGroup {tgDesc = d}) s) = d ++ "(" ++ s ++ ")" -- TODO refine this
-descOf (Type            { tDesc = d}   ) = d
+descOf (Type {tDesc = d}) = d
 
 varOf :: Expr -> [Var]
 varOf (Ref _ _ _ v) = [v]
@@ -486,7 +478,7 @@ findFunction cfg name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar
     fs = concatMap mFunctions ms
 
 findType :: Config -> String -> Maybe Type
-findType cfg ext = find (\t -> extOf t == ext) ts
+findType cfg ext = find (\t -> tExtOf t == ext) ts
   where
     ms = cfgModules cfg
     ts = concatMap mTypes ms
@@ -576,8 +568,8 @@ data Function = Function
   , fTypeDesc  :: String      -- ^ human-readable description
 
   -- TODO write these, then remove the old descs + typecheckers above
-  , fInputs :: Maybe [Type] -- ^ new input (argument) types
-  , fOutput :: Maybe  Type  -- ^ new output (return) type
+  , fInputs :: Maybe [TypeSig] -- ^ new input (argument) types
+  , fOutput :: Maybe  TypeSig  -- ^ new output (return) type
 
   , fTags      :: [FnTag]     -- ^ function tags (TODO implement these)
   , fOldRules  :: RulesFn     -- ^ old-style rules (TODO deprecate, then remove)
@@ -592,7 +584,7 @@ data NewRules
   | NewNotImplemented -- TODO remove
 
 mkTypeDesc :: String -> [Type] -> Type -> String
-mkTypeDesc n is o = unwords $ [n, ":"] ++ map extOf is ++ ["->", extOf o]
+mkTypeDesc n is o = unwords $ [n, ":"] ++ map tExtOf is ++ ["->", tExtOf o]
 
 -- TODO does eq make sense here?
 data Module = Module
@@ -647,39 +639,17 @@ explainFnBug =
 
 -- this mostly checks equality, but also has to deal with how an empty list can
 -- be any kind of list
--- TODO is there any more elegant way? this seems error-prone...
--- TODO is this the same as the Eq instance?
-typeMatches :: Type -> Type -> Bool
-typeMatches AnyType _ = True
-typeMatches _ AnyType = True
-typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
-typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
+-- note: this function isn't associative! expected types on left, actual types on right
+-- TODO do we still need an empty list case here?
+typeSigMatches :: TypeSig -> Type -> Bool
+typeSigMatches AnyType _ = True
+typeSigMatches (Some g _) t = any (\s -> typeSigMatches s t) (tgMembers g)
+typeSigMatches (Concrete (ListOf   t1)) (ListOf   t2) = typeSigMatches (Concrete t1) t2
+typeSigMatches (Concrete (ScoresOf t1)) (ScoresOf t2) = typeSigMatches (Concrete t1) t2
+typeSigMatches (Concrete t1) t2 = t1 == t2
 
--- TODO can these be removed and regular equality (Eq instance above) used?
--- typeMatches g1@(TypeGroup {}) g2@(TypeGroup {}) = g1 == g2
--- typeMatches a g@(TypeGroup {tgTypes = ts}) = fn a
--- typeMatches (TypeGroup {tgMember = fn}) b = fn b
-
-typeMatches a b = a == b
-
-typesMatch :: [Type] -> [Type] -> Bool
-typesMatch as bs = sameLength && allMatch
+typeSigsMatch :: [TypeSig] -> [Type] -> Bool
+typeSigsMatch as bs = sameLength && allMatch
   where
     sameLength = length as == length bs
-    allMatch   = all (\(a,b) -> a `typeMatches` b) (zip as bs)
-
-nonEmptyType :: [Type] -> Either String Type
-nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
-  where
-    nonEmpty = filter isNonEmpty ts
-    elemType = if      null ts       then AnyType
-               else if null nonEmpty then headOrDie "nonEmptyType failed" ts -- for example (ListOf Empty)
-               else    headOrDie "nonEmptyType failed" nonEmpty
-    typesOK  = all (typeMatches elemType) ts
-    errorMsg = "all elements of a list must have the same type"
-
--- TODO rethink... does it make sense with AnyType in place of Empty?
-isNonEmpty :: Type -> Bool
-isNonEmpty AnyType    = False
-isNonEmpty (ListOf t) = isNonEmpty t
-isNonEmpty _          = True
+    allMatch   = all (\(s,t) -> typeSigMatches s t) (zip as bs)

@@ -50,7 +50,7 @@ fa :: TypeGroup
 fa = TypeGroup
   { tgExt = "fa"
   , tgDesc  = "FASTA (nucleic OR amino acid)"
-  , tgTypes = [fna, faa]
+  , tgMembers = [fna, faa]
   }
 
 faa :: Type
@@ -127,7 +127,7 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
       ftPath'   = fromPath cfg ftPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
       tmpDir'   = fromPath cfg $ cacheDir cfg "seqio"
-      outDir'   = exprDir' </> "load_" ++ extOf rtn
+      outDir'   = exprDir' </> "load_" ++ tExtOf rtn
       outPath'  = fromPath cfg outPath
       outPath'' = traceA "aGenbankToFasta" outPath' [outPath', faPath']
   -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
@@ -308,7 +308,7 @@ mkConcat cType = Function
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aConcat cType
   }
   where
-    ext  = extOf cType
+    ext  = tExtOf cType
     name = "concat_" ++ ext
 
 mkConcatEach :: Type -> Function
@@ -320,7 +320,7 @@ mkConcatEach cType = Function
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aConcat cType
   }
   where
-    ext  = extOf cType
+    ext  = tExtOf cType
     name = "concat_" ++ ext ++ "_each"
 
 {- This is just a fancy `cat`, with handling for a couple cases:
@@ -337,7 +337,7 @@ mkConcatEach cType = Function
 --   let out'    = fromPath cfg oPath
 --       out''   = traceA "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
---       emptyStr = "<<empty" ++ extOf cType ++ ">>"
+--       emptyStr = "<<empty" ++ tExtOf cType ++ ">>"
 --       grepCmd = "egrep -v '^" ++ emptyStr ++ "$'"
 --       catArgs = fPaths' ++ ["|", grepCmd, ">", outTmp]
 --   wrappedCmdWrite cfg ref outTmp fPaths' [] [Shell] "cat"
@@ -357,8 +357,8 @@ aConcat cType [outPath, inList] = do
   -- ... there's gotta be a simpler way right?
   cfg <- fmap fromJust getShakeExtra
   let tmpDir'   = cfgTmpDir cfg </> "cache" </> "concat"
-      emptyPath = tmpDir' </> ("empty" ++ extOf cType) <.> "txt"
-      emptyStr  = "<<empty" ++ extOf cType ++ ">>"
+      emptyPath = tmpDir' </> ("empty" ++ tExtOf cType) <.> "txt"
+      emptyStr  = "<<empty" ++ tExtOf cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath cfg outPath
@@ -391,7 +391,7 @@ splitFasta faType = Function
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aSplit name ext
   }
   where
-    ext  = extOf faType
+    ext  = tExtOf faType
     name = "split_" ++ ext
 
 splitFastaEach :: Type -> Function
@@ -403,7 +403,7 @@ splitFastaEach faType = Function
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
   }
   where
-    ext  = extOf faType
+    ext  = tExtOf faType
     name = "split_" ++ ext ++ "_each"
 
 aSplit :: String -> String -> ([Path] -> Action ())

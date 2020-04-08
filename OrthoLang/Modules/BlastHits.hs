@@ -34,7 +34,7 @@ ht :: TypeGroup
 ht = TypeGroup
   { tgExt = "ht"
   , tgDesc  = "BLAST hit table-like"
-  , tgTypes = [bht, crb] -- TODO mms too
+  , tgMembers = [bht, crb] -- TODO mms too
   }
 
 ----------------------

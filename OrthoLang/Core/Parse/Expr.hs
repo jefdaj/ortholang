@@ -35,6 +35,7 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty ()
 import OrthoLang.Core.Parse.Basic
 import OrthoLang.Core.Parse.Util
+import OrthoLang.Util (headOrDie)
 
 import qualified Text.Parsec.Expr as E
 import Control.Monad.Trans.Except
@@ -60,7 +61,7 @@ TODO once there's [ we can commit to a list, right? should allow failing for rea
 pList :: ParseM Expr
 pList = debugParser "pList" $ do
   terms <- between (pSym '[') (pSym ']') (sepBy pExpr (pSym ','))
-  let eType = nonEmptyType $ map typeOf terms
+  let eType = listElemType $ map typeOf terms
   case eType of
     Left err -> parseFail err
     Right t  -> do
@@ -68,6 +69,24 @@ pList = debugParser "pList" $ do
           expr  = Lst t (Salt 0) deps terms
       -- putDigests "pList" (expr:terms)
       return expr
+
+{-|
+Searches for the first non-empty type to determine the type of a list.
+-}
+listElemType :: [Type] -> Either String Type
+listElemType ts = if typesOK then Right elemType else Left errorMsg
+  where
+    nonEmpty = filter isNonEmpty ts
+    elemType = if      null ts       then Empty
+               else if null nonEmpty then headOrDie "listElemType failed" ts -- for example (ListOf Empty)
+               else    headOrDie "listElemType failed" nonEmpty
+    typesOK  = all (== elemType) ts -- TODO is this where we could allow heterogenous lists?
+    errorMsg = "all elements of a list must have the same type"
+
+isNonEmpty :: Type -> Bool
+isNonEmpty Empty      = False
+isNonEmpty (ListOf t) = isNonEmpty t
+isNonEmpty _          = True
 
 ---------------
 -- operators --
@@ -125,14 +144,14 @@ mkBop bop = return $ \e1 e2 -> do
 --                       ]
         -- in (expr, trace ("mkbop dMap': " ++ show dMap') dMap')
 
--- TODO does typesMatch already cover (ListOf Empty) comparisons?
+-- TODO does typeSigsMatch already cover (ListOf Empty) comparisons?
 bopTypeCheck :: TypeChecker -> Type -> Type -> Either String Type
-bopTypeCheck _ (ListOf AnyType) (ListOf AnyType) = Right $ ListOf AnyType
-bopTypeCheck _ (ListOf x      ) (ListOf AnyType) = Right $ ListOf x
-bopTypeCheck _ (ListOf AnyType) (ListOf x      ) = Right $ ListOf x
+bopTypeCheck _ (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
+bopTypeCheck _ (ListOf x    ) (ListOf Empty) = Right $ ListOf x
+bopTypeCheck _ (ListOf Empty) (ListOf x    ) = Right $ ListOf x
 bopTypeCheck tFn t1 t2 = case tFn [ListOf t1] of
   Left  e -> Left e
-  Right r -> if typesMatch [t1] [t2]
+  Right r -> if t1 == t2
                then Right r
                else Left $ "mismatched bop types: " ++ show t1 ++ " and " ++ show t2
 

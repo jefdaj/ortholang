@@ -391,9 +391,9 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) fasPath'
 
   let dbDir  = cDir' </> fasHash
-      dbOut  = dbDir </> fasHash <.> extOf dbType
+      dbOut  = dbDir </> fasHash <.> tExtOf dbType
       dbOut' = toPath cfg dbOut
-      out''  = traceA "aMakeblastdbAll" out' [extOf dbType, out', dbOut, fasPath']
+      out''  = traceA "aMakeblastdbAll" out' [tExtOf dbType, out', dbOut, fasPath']
       dbPtn  = cDir' </> fasHash </> "*" -- TODO does this actually help?
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
@@ -508,7 +508,7 @@ mkMakeblastdbEach dbType = Function
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
   where
-    desc = name ++ " : " ++ ext ++ ".list -> " ++ extOf dbType ++ ".list"
+    desc = name ++ " : " ++ ext ++ ".list -> " ++ tExtOf dbType ++ ".list"
     name = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
     ext  = if dbType == ndb then "fa" else "faa"
 

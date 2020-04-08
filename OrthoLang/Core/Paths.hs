@@ -286,13 +286,13 @@ exprPathExplicit cfg prefix _ (Salt s) hashes = toPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = (concat $ intersperse "/" $ hashes ++ [show s])
-    path = dir </> base </> "result" -- <.> extOf rtype
+    path = dir </> base </> "result" -- <.> tExtOf rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
 varPath :: Config -> Var -> Expr -> Path
 varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir </> base
   where
-    base = if var == "result" then var else var <.> extOf (typeOf expr)
+    base = if var == "result" then var else var <.> tExtOf (typeOf expr)
     repDir = case rep of
                Nothing -> "vars"
                Just r  -> "reps" </> r -- TODO digest other stuff too, like the expr?

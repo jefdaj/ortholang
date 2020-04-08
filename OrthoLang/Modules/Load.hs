@@ -96,7 +96,7 @@ mkLoadGlob name loadType eachFn = compose1 name desc globFiles (ListOf str) each
 mkLoaders :: Bool -> Type -> [Function]
 mkLoaders hashSeqIDs loadType = [single, each, glb]
   where
-    ext    = extOf loadType
+    ext    = tExtOf loadType
     single = mkLoad     hashSeqIDs ("load_" ++ ext           ) loadType
     each   = mkLoadList hashSeqIDs ("load_" ++ ext ++ "_each") loadType
     glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each
