@@ -127,9 +127,9 @@ mkBop bop = return $ \e1 e2 -> do
 
 -- TODO does typesMatch already cover (ListOf Empty) comparisons?
 bopTypeCheck :: TypeChecker -> Type -> Type -> Either String Type
-bopTypeCheck _ (ListOf Empty) (ListOf Empty) = Right $ ListOf Empty
-bopTypeCheck _ (ListOf x    ) (ListOf Empty) = Right $ ListOf x
-bopTypeCheck _ (ListOf Empty) (ListOf x    ) = Right $ ListOf x
+bopTypeCheck _ (ListOf AnyType) (ListOf AnyType) = Right $ ListOf AnyType
+bopTypeCheck _ (ListOf x      ) (ListOf AnyType) = Right $ ListOf x
+bopTypeCheck _ (ListOf AnyType) (ListOf x      ) = Right $ ListOf x
 bopTypeCheck tFn t1 t2 = case tFn [ListOf t1] of
   Left  e -> Left e
   Right r -> if typesMatch [t1] [t2]

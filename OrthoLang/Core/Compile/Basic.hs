@@ -245,8 +245,8 @@ TODO remove the insert digests hack
 -}
 rList :: RulesFn
 rList s e@(Lst rtn _ _ es)
-  | rtn `elem` [Empty, str, num] = rListLits  s e
-  | otherwise                    = rListPaths s e
+  | rtn `elem` [AnyType, str, num] = rListLits  s e
+  | otherwise                      = rListPaths s e
 rList _ _ = error "rList" "bad arguemnt"
 
 {-|

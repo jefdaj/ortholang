@@ -53,8 +53,8 @@ pPrintHdl :: Pretty a => Config -> Handle -> a -> IO ()
 pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl
 
 instance Pretty Type where
-  pPrint Empty           = error "should never need to print Empty"
-  pPrint (ListOf Empty ) = text "empty list"
+  pPrint AnyType         = error "should never need to print AnyType"
+  pPrint (ListOf AnyType) = text "empty list"
   pPrint (ListOf      t) = text "list of" <+> pPrint t <> text "s"
   pPrint (ScoresOf    t) = text "list of" <+> pPrint t <> text "s with scores"
   pPrint (EncodedAs e t) = pPrint t <+> text "encoded as" <+> text e

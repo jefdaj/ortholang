@@ -16,6 +16,7 @@ module OrthoLang.Core.Types
   , CompiledExpr(..)
   , Config(..)
   , findType
+  , findGroup
   , findModule
   , findFunction
   , listFunctions
@@ -49,6 +50,7 @@ module OrthoLang.Core.Types
   -- , prettyShow
   , str, num -- TODO load these from modules
   , lit
+  , ot
   , typeOf
   , extOf
   , descOf
@@ -278,7 +280,7 @@ lookupResult scr = if null matches
 -- TODO how to make the record fields not partial functions?
 -- TODO remove tShow and make a separate typeclass for "showable from filepath" so this can be Eq, Ord, ...
 data Type
-  = Empty -- TODO remove this? should never be a need to define an empty list
+  = AnyType -- ^ placeholder used in type signatures and in the types of empty lists
   | ListOf    Type
   | ScoresOf  Type
 
@@ -298,7 +300,7 @@ data Type
 --      maybe we need to assert no duplicates while loading modules?
 -- TODO should this use typesMatch?
 instance Eq Type where
-  Empty              == Empty              = True
+  AnyType            == AnyType            = True -- matches others, but only == itself
   (ListOf t1)        == (ListOf t2)        = t1 == t2
   (ScoresOf t1)      == (ScoresOf t2)      = t1 == t2
   (EncodedAs e1 t1)  == (EncodedAs e2 t2)  = e1 == e2 && t1 == t2
@@ -315,19 +317,16 @@ These are kind of like simpler, less extensible typeclasses. They're just a
 list of types that can be treated similarly in some circumstances, for example
 "files whose length is their number of lines" or "FASTA files (faa or fna)".
 -}
-data TypeGroup
-  = AnyType
-  | TypeGroup
-    { tgExt   :: String
-    , tgDesc  :: String
-    , tgTypes :: [Type]
-    }
+data TypeGroup = TypeGroup
+  { tgExt   :: String
+  , tgDesc  :: String
+  , tgTypes :: [Type]
+  }
 
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq TypeGroup where
   (TypeGroup {tgExt = e1}) == (TypeGroup {tgExt = e2}) = e1 == e2
-  _ == _ = False
 
 -- TODO either use this in the core compilers or remove it
 lit :: TypeGroup
@@ -335,6 +334,14 @@ lit = TypeGroup
   { tgExt = "lit"
   , tgDesc = "basic literal (str or num)"
   , tgTypes = [str, num]
+  }
+
+-- a typegroup that stands for "any type" in function type signatures
+ot :: TypeGroup
+ot = TypeGroup
+  { tgExt = "ag" -- TODO does this make sense?
+  , tgDesc = "any type"
+  , tgTypes = [AnyType]
   }
 
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
@@ -354,7 +361,7 @@ typeOf (Lit   t _ _      ) = t
 typeOf (Ref   t _ _ _    ) = t
 typeOf (Bop   t _ _ _ _ _) = t
 typeOf (Fun   t _ _ _ _  ) = t
-typeOf (Lst  t _ _ _    ) = ListOf t -- t can be Empty
+typeOf (Lst  t _ _ _    ) = ListOf t
 typeOf (Com (CompiledExpr t _ _)) = t
 -- typeOf (Lst _ _ _ ts     ) = ListOf $ nonEmptyType $ map typeOf ts
 -- typeOf (Lst _ _ _ []     ) = Empty
@@ -371,7 +378,7 @@ typeOf (Com (CompiledExpr t _ _)) = t
 -- note that traceShow in here can cause an infinite loop
 -- and that there will be an issue if it's called on Empty alone
 extOf :: Type -> String
-extOf Empty        = "empty" -- for lists with nothing in them yet
+extOf AnyType      = "any" -- for lists with nothing in them yet? TODO empty string instead?
 extOf (ListOf   t) = extOf t ++ ".list"
 extOf (ScoresOf t) = extOf t ++ ".scores"
 extOf (EncodedAs e t) = extOf t ++ "." ++ e
@@ -380,7 +387,7 @@ extOf (Type            { tExt = e}   ) = e
 
 -- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
 descOf :: Type -> String
-descOf Empty           = "empty list" -- for lists with nothing in them yet
+descOf AnyType         = "any type" -- for lists with nothing in them yet TODO rethink this
 descOf (ListOf      t) = "list of " ++ descOf t
 descOf (ScoresOf    t) = "scores for " ++ descOf t
 descOf (EncodedAs e t) = descOf t ++ " encoded as " ++ e
@@ -483,6 +490,12 @@ findType cfg ext = find (\t -> extOf t == ext) ts
   where
     ms = cfgModules cfg
     ts = concatMap mTypes ms
+
+findGroup :: Config -> String -> Maybe TypeGroup
+findGroup cfg ext = find (\g -> tgExt g == ext) ts
+  where
+    ms = cfgModules cfg
+    ts = concatMap mGroups ms
 
 listFunctions :: Config -> [Function]
 listFunctions cfg = concatMap mFunctions $ cfgModules cfg
@@ -637,8 +650,8 @@ explainFnBug =
 -- TODO is there any more elegant way? this seems error-prone...
 -- TODO is this the same as the Eq instance?
 typeMatches :: Type -> Type -> Bool
-typeMatches Empty _ = True
-typeMatches _ Empty = True
+typeMatches AnyType _ = True
+typeMatches _ AnyType = True
 typeMatches (ListOf   a) (ListOf   b) = typeMatches a b
 typeMatches (ScoresOf a) (ScoresOf b) = typeMatches a b
 
@@ -659,13 +672,14 @@ nonEmptyType :: [Type] -> Either String Type
 nonEmptyType ts = if typesOK then Right elemType else Left errorMsg
   where
     nonEmpty = filter isNonEmpty ts
-    elemType = if      null ts       then Empty
+    elemType = if      null ts       then AnyType
                else if null nonEmpty then headOrDie "nonEmptyType failed" ts -- for example (ListOf Empty)
                else    headOrDie "nonEmptyType failed" nonEmpty
     typesOK  = all (typeMatches elemType) ts
     errorMsg = "all elements of a list must have the same type"
 
+-- TODO rethink... does it make sense with AnyType in place of Empty?
 isNonEmpty :: Type -> Bool
-isNonEmpty Empty      = False
+isNonEmpty AnyType    = False
 isNonEmpty (ListOf t) = isNonEmpty t
 isNonEmpty _          = True

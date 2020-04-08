@@ -256,6 +256,7 @@ cmdHelp st@(_, cfg, _, _, _) hdl line = do
                     [ fmap fHelp $ findFunction cfg w
                     , fmap mHelp $ findModule   cfg w
                     , fmap (tHelp cfg) $ findType cfg w
+                    -- TODO fix this , fmap (tHelp cfg) $ findGroup cfg w
                     , Just $ getDoc ["notfound"]
                     ]
            _ -> getDoc ["repl"]
