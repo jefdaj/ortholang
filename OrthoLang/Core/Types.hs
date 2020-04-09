@@ -186,7 +186,7 @@ data Expr
   = Lit Type Salt String
   | Ref Type Salt [Var] Var -- do refs need a salt? yes! (i think?)
   | Bop Type Salt [Var] String  Expr Expr
-  | Fun Type Salt [Var] String [Expr]
+  | Fun Type Salt [Var] String [Expr] -- TODO is the Eq instance wrong?
   | Lst Type Salt [Var] [Expr]
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show, Typeable)
@@ -296,6 +296,7 @@ data Type
 --      maybe we need to assert no duplicates while loading modules?
 -- TODO should this use typeSigsMatch?
 instance Eq Type where
+  Empty              == Empty              = True
   (ListOf t1)        == (ListOf t2)        = t1 == t2
   (ScoresOf t1)      == (ScoresOf t2)      = t1 == t2
   (EncodedAs e1 t1)  == (EncodedAs e2 t2)  = e1 == e2 && t1 == t2

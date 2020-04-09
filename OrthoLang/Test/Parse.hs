@@ -78,17 +78,17 @@ parsedItAll p cfg str' = case parseWithLeftOver p (cfg, emptyScript) str' of
 
 {-|
 Parse some cut code, pretty-print it, parse again,
-and check that the two parsed ASTs + DigestMaps are equal.
+and check that the two parsed ASTs are equal.
 -}
 roundTrip :: (Eq a, Show a, Pretty a) => Config
           -> ParseM a -> String -> Either (String, String) a
 roundTrip cfg psr code = case regularParse psr cfg code of
-  Left  l1 -> Left (code, show l1)
+  Left  l1 -> Left (code, "parse 1 failed: " ++ show l1)
   Right r1 -> case regularParse psr cfg $ prettyShow r1 of
-    Left  l2 -> Left (code, show l2)
+    Left  l2 -> Left (code, "parse 2 failed: " ++ show l2)
     Right r2 -> if r1 == r2
                   then Right r2
-                  else Left (code, show r2)
+                  else Left (code, "equality failed: " ++ show r2 ++ " /= " ++ show r1)
 
 {-|
 Test that a list of example strings can be parsed + printed + parsed,
@@ -98,10 +98,10 @@ tripExamples :: (Eq a, Show a, Pretty a) => Config
              -> ParseM a -> [(String, a)] -> Either (String, String) ()
 tripExamples _ _ [] = Right ()
 tripExamples cfg p ((a,b):xs) = case roundTrip cfg p a of
-  Left  l -> Left (a, show l)
+  Left  l -> Left (a, "round-trip failed: " ++ show l)
   Right r -> if r == b
     then tripExamples cfg p xs
-    else Left (a, show r)
+    else Left (a, "round-trip was wrong: " ++ show r ++ " /= " ++ show b)
 
 -----------
 -- tests --
