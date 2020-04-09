@@ -308,7 +308,7 @@ rPsiblastEach st (Fun rtn salt deps name [e, fa, fas])
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 psiblastAll :: Function
-psiblastAll = undefined -- TODO rewrite once compose works
+psiblastAll = compose1 "psiblast_all" psiblastEach (mkConcat bht) -- TODO name the mkConcat?
 -- psiblastAll = compose1 name
 --   (mkTypeDesc name [num, faa, ListOf faa] bht)
 --   psiblastEach
@@ -556,7 +556,7 @@ psiblastEachPssmDb = Function
     name = "psiblast_each_pssm_db"
 
 psiblastPssmsDb :: Function
-psiblastPssmsDb = undefined -- TODO rewrite once compose works
+psiblastPssmsDb = compose1 "psiblast_pssms_db" psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
 -- psiblastPssmsDb = compose1 name
 --   (mkTypeDesc name [num, ListOf pssm, pdb] bht)
 --   psiblastEachPssmDb
@@ -583,7 +583,7 @@ psiblastEachPssm = Function
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
 psiblastPssms :: Function
-psiblastPssms = undefined
+psiblastPssms = compose1 "psiblast_pssms" psiblastEachPssm (mkConcat bht)
 -- psiblastPssms = compose1 name
 --   (mkTypeDesc name [num, ListOf pssm, faa] bht)
 --   psiblastEachPssm
@@ -592,8 +592,9 @@ psiblastPssms = undefined
 --   where
 --     name = "psiblast_pssms"
 
+-- TODO wait, this is the same as above?
 psiblastPssmsAll :: Function
-psiblastPssmsAll = undefined
+psiblastPssmsAll = compose1 "psiblast_pssms_all" psiblastEachPssm (mkConcat bht)
 -- psiblastPssmsAll = compose1 name
 --   (mkTypeDesc name [num, ListOf pssm, faa] bht)
 --   psiblastEachPssm
@@ -607,8 +608,9 @@ psiblastPssmsAll = undefined
 --      but can't actually do that the straightforward way
 --      could it use psiblastPssmAll and concat_each?
 -- TODO test this
+-- TODO wait this is the same as above too??
 psiblastPssmsEach :: Function
-psiblastPssmsEach = undefined
+psiblastPssmsEach = compose1 "psiblast_pssms_each" psiblastEachPssm (mkConcat bht)
 -- psiblastPssmsEach = compose1 name
 --   -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
 --   (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))
