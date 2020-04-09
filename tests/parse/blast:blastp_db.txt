@@ -104,7 +104,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 

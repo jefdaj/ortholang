@@ -28,7 +28,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "ofres" 
         , Var ( RepID Nothing ) "smallbacteria" 
         ] "length" 

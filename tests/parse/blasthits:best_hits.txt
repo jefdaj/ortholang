@@ -56,7 +56,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "best3" 
         , Var ( RepID Nothing ) "hits3" 
         , Var ( RepID Nothing ) "hits" 

@@ -62,7 +62,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun faa.blastdb.list.list ( Salt 0 ) 
+    , Fun num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "singles" 
         , Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 

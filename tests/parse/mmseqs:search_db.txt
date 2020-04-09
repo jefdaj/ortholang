@@ -33,7 +33,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun bht ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgendb" 

@@ -23,7 +23,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun bht.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 

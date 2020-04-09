@@ -1,12 +1,12 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
     , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
     , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "fwdHits" 
@@ -35,21 +35,7 @@
         ] 
     ) 
 , 
-    ( Var ( RepID Nothing ) "bestFwd" 
-    , Fun bht ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "fwdHits" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "best_hits" 
-        [ Ref bht ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] 
-            ( Var ( RepID Nothing ) "fwdHits" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "bestRec" 
+    ( Var ( RepID Nothing ) "recHits" 
     , Fun bht ( Salt 0 ) 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
@@ -69,32 +55,18 @@
         ] 
     ) 
 , 
-    ( Var ( RepID Nothing ) "best5fwd" 
-    , Fun bht.list ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "bestFwd" 
-        , Var ( RepID Nothing ) "fwdHits" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "repeat" 
-        [ Ref bht ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "fwdHits" 
-            , Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] 
-            ( Var ( RepID Nothing ) "bestFwd" )
-        , Ref faa ( Salt 0 ) [] 
-            ( Var ( RepID Nothing ) "maga" )
-        , Lit num ( Salt 0 ) "5.0" 
-        ] 
+    ( Var ( RepID Nothing ) "n_repeats" 
+    , Lit num ( Salt 0 ) "3.0" 
     ) 
 , 
-    ( Var ( RepID Nothing ) "best5rec" 
+    ( Var ( RepID Nothing ) "solidHits" 
     , Fun bht.list ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "bestRec" 
+        [ Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
+        , Var ( RepID Nothing ) "n_repeats" 
         ] "repeat" 
         [ Ref bht ( Salt 0 ) 
             [ Var ( RepID Nothing ) "fwdHits" 
@@ -102,87 +74,125 @@
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "revHits" 
             ] 
-            ( Var ( RepID Nothing ) "bestRec" )
+            ( Var ( RepID Nothing ) "recHits" )
         , Ref faa ( Salt 0 ) [] 
-            ( Var ( RepID Nothing ) "maga" )
-        , Lit num ( Salt 0 ) "5.0" 
+            ( Var ( RepID Nothing ) "mgen" )
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n_repeats" )
         ] 
     ) 
 , 
-    ( Var ( RepID Nothing ) "solidFwd" 
+    ( Var ( RepID Nothing ) "solidHitIDs" 
     , Fun str.list ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "best5fwd" 
-        , Var ( RepID Nothing ) "bestFwd" 
-        , Var ( RepID Nothing ) "fwdHits" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "all" 
-        [ Fun str.list.list ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "best5fwd" 
-            , Var ( RepID Nothing ) "bestFwd" 
-            , Var ( RepID Nothing ) "fwdHits" 
-            , Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "extract_queries_each" 
-            [ Ref bht.list ( Salt 0 ) 
-                [ Var ( RepID Nothing ) "bestFwd" 
-                , Var ( RepID Nothing ) "fwdHits" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] 
-                ( Var ( RepID Nothing ) "best5fwd" )
-            ]
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "solidRec" 
-    , Fun str.list ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "best5rec" 
-        , Var ( RepID Nothing ) "bestRec" 
+        [ Var ( RepID Nothing ) "solidHits" 
+        , Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
+        , Var ( RepID Nothing ) "n_repeats" 
         ] "all" 
         [ Fun str.list.list ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "best5rec" 
-            , Var ( RepID Nothing ) "bestRec" 
+            [ Var ( RepID Nothing ) "solidHits" 
+            , Var ( RepID Nothing ) "recHits" 
             , Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "revHits" 
+            , Var ( RepID Nothing ) "n_repeats" 
             ] "extract_queries_each" 
             [ Ref bht.list ( Salt 0 ) 
-                [ Var ( RepID Nothing ) "bestRec" 
+                [ Var ( RepID Nothing ) "recHits" 
                 , Var ( RepID Nothing ) "fwdHits" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
                 ] 
-                ( Var ( RepID Nothing ) "best5rec" )
+                ( Var ( RepID Nothing ) "solidHits" )
             ]
         ]
     ) 
 , 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun num ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "solidRec" 
-        , Var ( RepID Nothing ) "best5rec" 
-        , Var ( RepID Nothing ) "bestRec" 
+    ( Var ( RepID Nothing ) "n_hits_by_n_repeats" 
+    , Fun num.scores ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "solidHitIDs" 
+        , Var ( RepID Nothing ) "solidHits" 
+        , Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
-        ] "length" 
-        [ Ref str.list ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "best5rec" 
-            , Var ( RepID Nothing ) "bestRec" 
+        , Var ( RepID Nothing ) "n_repeats" 
+        ] "score_repeats" 
+        [ Fun num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "solidHitIDs" 
+            , Var ( RepID Nothing ) "solidHits" 
+            , Var ( RepID Nothing ) "recHits" 
             , Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "revHits" 
+            , Var ( RepID Nothing ) "n_repeats" 
+            ] "length" 
+            [ Ref str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "solidHits" 
+                , Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] 
+                ( Var ( RepID Nothing ) "solidHitIDs" )
+            ]
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n_repeats" )
+        , Lst num ( Salt 0 ) [] 
+            [ Lit num ( Salt 0 ) "1.0" 
+            , Lit num ( Salt 0 ) "2.0" 
+            , Lit num ( Salt 0 ) "3.0" 
+            , Lit num ( Salt 0 ) "4.0" 
+            , Lit num ( Salt 0 ) "5.0" 
+            , Lit num ( Salt 0 ) "6.0" 
+            , Lit num ( Salt 0 ) "7.0" 
+            , Lit num ( Salt 0 ) "8.0" 
+            , Lit num ( Salt 0 ) "9.0" 
+            , Lit num ( Salt 0 ) "10.0" 
+            , Lit num ( Salt 0 ) "15.0" 
+            , Lit num ( Salt 0 ) "20.0" 
+            , Lit num ( Salt 0 ) "30.0" 
+            , Lit num ( Salt 0 ) "50.0" 
+            , Lit num ( Salt 0 ) "75.0" 
+            , Lit num ( Salt 0 ) "100.0" 
             ] 
-            ( Var ( RepID Nothing ) "solidRec" )
-        ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun png ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n_hits_by_n_repeats" 
+        , Var ( RepID Nothing ) "solidHitIDs" 
+        , Var ( RepID Nothing ) "solidHits" 
+        , Var ( RepID Nothing ) "recHits" 
+        , Var ( RepID Nothing ) "fwdHits" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "revHits" 
+        , Var ( RepID Nothing ) "n_repeats" 
+        ] "linegraph" 
+        [ Lit str ( Salt 0 ) "After X repeats, how many genes have been found every time?" 
+        , Ref num.scores ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "solidHitIDs" 
+            , Var ( RepID Nothing ) "solidHits" 
+            , Var ( RepID Nothing ) "recHits" 
+            , Var ( RepID Nothing ) "fwdHits" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "revHits" 
+            , Var ( RepID Nothing ) "n_repeats" 
+            ] 
+            ( Var ( RepID Nothing ) "n_hits_by_n_repeats" )
+        ] 
     ) 
 ] 

@@ -38,7 +38,7 @@ length = Function
   -- , fTypeCheck = defaultTypeCheck name [Some ll "something list-like"] num
   -- , fTypeDesc  = mkTypeDesc       name [Some ll "something list-like"] num
   , fInputs = [Some ll "something list-like"]
-  , fOutput =  Some ll "something list-like"
+  , fOutput = Exactly num
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLength
   }
@@ -57,7 +57,7 @@ lengthEach = Function
   -- , fTypeDesc  = mkTypeDesc       name [ListOf (Some ll "something list-like")] (ListOf num)
   -- , fTypeCheck = defaultTypeCheck name [ListOf (Some ll "something list-like")] (ListOf num)
   , fInputs = [ListSigs (Some ll "something list-like")]
-  , fOutput =  ListSigs (Some ll "something list-like")
+  , fOutput = Exactly (ListOf num)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 aLength -- TODO is 1 wrong?
   }

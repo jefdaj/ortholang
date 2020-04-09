@@ -62,7 +62,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "large_hits" 
         , Var ( RepID Nothing ) "reference" 
         , Var ( RepID Nothing ) "large" 

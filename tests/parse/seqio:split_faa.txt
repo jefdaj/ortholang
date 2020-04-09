@@ -17,7 +17,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "lengths" 
-    , Fun faa.list.list ( Salt 0 ) 
+    , Fun num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "faas1" 
         , Var ( RepID Nothing ) "faas2" 
         ] "length_each" 
@@ -34,7 +34,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref faa.list.list ( Salt 0 ) 
+    , Ref num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "faas1" 
         , Var ( RepID Nothing ) "faas2" 
         ] 

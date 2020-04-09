@@ -24,7 +24,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun faa.list.list ( Salt 0 ) 
+    , Fun num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "genes" 
         , Var ( RepID Nothing ) "multifa" 
         , Var ( RepID Nothing ) "mapped" 

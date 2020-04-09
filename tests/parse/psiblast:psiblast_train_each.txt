@@ -36,7 +36,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun pssm.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "pssms" 
         , Var ( RepID Nothing ) "query" 
         , Var ( RepID Nothing ) "mgen" 

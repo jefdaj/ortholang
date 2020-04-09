@@ -1,0 +1,280 @@
+[ 
+    ( Var ( RepID Nothing ) "query" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "queries" 
+    , Fun faa.list ( Salt 0 ) [] "split_faa" 
+        [ Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgendb" 
+    , Fun faa.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "magadb" 
+    , Fun faa.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssm" 
+    , Fun pssm ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_train_db" 
+        [ Lit num ( Salt 0 ) "1.0e-2" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            ( Var ( RepID Nothing ) "magadb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssms1" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "psiblast_train_db_each" 
+        [ Lit num ( Salt 0 ) "1.0e-2" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Lst faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            [ Ref faa.blastdb ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "maga" ] 
+                ( Var ( RepID Nothing ) "magadb" )
+            , Ref faa.blastdb ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "mgen" ] 
+                ( Var ( RepID Nothing ) "mgendb" )
+            ] 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssms2" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "queries" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_train_pssms_db" 
+        [ Lit num ( Salt 0 ) "1.0e-2" 
+        , Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "queries" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            ( Var ( RepID Nothing ) "magadb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "tables1" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssm" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "psiblast_pssm_db_each" 
+        [ Lit num ( Salt 0 ) "0.1" 
+        , Ref pssm ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "pssm" )
+        , Lst faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            [ Ref faa.blastdb ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "mgen" ] 
+                ( Var ( RepID Nothing ) "mgendb" )
+            , Ref faa.blastdb ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "maga" ] 
+                ( Var ( RepID Nothing ) "magadb" )
+            ] 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "tables2" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssms1" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "psiblast_each_pssm_db" 
+        [ Lit num ( Salt 0 ) "0.1" 
+        , Ref pssm.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            ( Var ( RepID Nothing ) "pssms1" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            ( Var ( RepID Nothing ) "magadb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "tables3" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssms1" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "psiblast_each_pssm" 
+        [ Lit num ( Salt 0 ) "0.1" 
+        , Ref pssm.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            ( Var ( RepID Nothing ) "pssms1" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lst num ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssms1" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "pssms2" 
+        , Var ( RepID Nothing ) "queries" 
+        , Var ( RepID Nothing ) "tables1" 
+        , Var ( RepID Nothing ) "pssm" 
+        , Var ( RepID Nothing ) "tables2" 
+        , Var ( RepID Nothing ) "tables3" 
+        ] 
+        [ Fun num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "pssms1" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "length" 
+            [ Ref pssm.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "pssms1" )
+            ]
+        , Fun num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "pssms2" 
+            , Var ( RepID Nothing ) "queries" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "length" 
+            [ Ref pssm.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "queries" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                ( Var ( RepID Nothing ) "pssms2" )
+            ]
+        , Fun num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "tables1" 
+            , Var ( RepID Nothing ) "pssm" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "length" 
+            [ Ref bht.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "pssm" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "tables1" )
+            ]
+        , Fun num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "tables2" 
+            , Var ( RepID Nothing ) "pssms1" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "length" 
+            [ Ref bht.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "pssms1" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "tables2" )
+            ]
+        , Fun num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "tables3" 
+            , Var ( RepID Nothing ) "pssms1" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "length" 
+            [ Ref bht.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "pssms1" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "tables3" )
+            ]
+        ] 
+    ) 
+] 

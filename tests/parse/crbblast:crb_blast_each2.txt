@@ -37,7 +37,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun crb.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 

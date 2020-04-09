@@ -57,14 +57,14 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "lengths" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "cutoff" 
         , Var ( RepID Nothing ) "pcc7942" 
         , Var ( RepID Nothing ) "pcc6803" 
         , Var ( RepID Nothing ) "cutoffs" 
         ] "replace_each" 
-        [ Fun str.list ( Salt 0 ) 
+        [ Fun num ( Salt 0 ) 
             [ Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "cutoff" 
             , Var ( RepID Nothing ) "pcc7942" 
@@ -85,7 +85,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list.list ( Salt 0 ) 
+    , Ref num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "cutoff" 
         , Var ( RepID Nothing ) "pcc7942" 

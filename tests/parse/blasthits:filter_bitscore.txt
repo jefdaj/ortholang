@@ -71,7 +71,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun num ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "small" 
