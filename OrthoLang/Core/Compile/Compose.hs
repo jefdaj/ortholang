@@ -40,7 +40,7 @@ depended on should be correct for both already. This checks that the first
 otherwise assumes the 'Expr' is set up properly. For example, it doesn't check
 the names.
 
-TODO try to factor some of this boilerplate out into rMacro
+TODO try to factor some of this boilerplate out and make a generic mCompose
 -}
 mCompose1 :: Function -> Function -> MacroExpansion
 mCompose1 f1 f2 _ (Fun r2 salt deps n2 es)
