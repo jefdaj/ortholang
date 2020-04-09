@@ -91,16 +91,13 @@ aGlobFiles outPath path = do
 -- These are the Haskell functions for generating the Functions;
 -- They should be called in other modules with specific types to make loaders for
 
-mkLoadGlob :: String -> Type -> Function -> Function
-mkLoadGlob = undefined -- TODO write once compose works again
--- mkLoadGlob name loadType eachFn = compose1 name desc globFiles (ListOf str) eachFn
---   where
---     desc = mkTypeDesc name [str] (ListOf loadType)
+mkLoadGlob :: String -> Function -> Function
+mkLoadGlob name eachFn = compose1 name globFiles eachFn
 
 mkLoaders :: Bool -> Type -> [Function]
 mkLoaders hashSeqIDs loadType = [single, each, glb]
   where
-    ext    = undefined -- TODO write sExtOf loadType
+    ext    = tExtOf loadType
     single = mkLoad     hashSeqIDs ("load_" ++ ext           ) (Exactly loadType) -- TODO is this right?
     each   = mkLoadList hashSeqIDs ("load_" ++ ext ++ "_each") (Exactly loadType) -- TODO is this right?
-    glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") loadType each
+    glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") each

@@ -46,8 +46,8 @@ import Control.Monad.Trans.Except
 
 import Control.Applicative    ((<|>))
 import Control.Monad          (void)
-import Data.Either            (isRight, partitionEithers)
-import Data.List              (union)
+import Data.Either            (isRight)
+import Data.List              (union, find)
 import Data.Maybe             (isJust, fromJust, catMaybes)
 import Text.Parsec            (try, (<?>))
 import Text.Parsec.Char       (string)
@@ -247,7 +247,7 @@ typecheckFn name outSig inSigs inTypes =
       nAct = length inTypes
   in if nExp /= nAct
        then Left $ "expected " ++ show nExp ++ " arguments to " ++ name ++ ", but got " ++ show nAct
-       else typecheckFn' outSig inSigs inTypes
+       else typecheckFn' name outSig inSigs inTypes
 
 {-|
 Folds over a list of expected type signatures + actual types, ...
@@ -259,17 +259,46 @@ Rules:
 Cases:
   signature typegroups are wrong (check separately while loading modules?)
 -}
-typecheckFn' :: TypeSig -> [TypeSig] -> [Type] -> Either String Type
-typecheckFn' outSig inSigs inTypes = if null failures
-  then Right rtn
-  else Left $ unlines $ map explain failures
+typecheckFn' :: String -> TypeSig -> [TypeSig] -> [Type] -> Either String Type
+typecheckFn' name outSig inSigs inTypes =
+  if not (null errors)
+    then Left $ errHeader ++ unlines errors
+    else inferOutputType outSig $ zip inSigs inTypes
   where
-    triples = zip3 [1..] inSigs inTypes
-    sigMatch (n,s,t) = if typeSigMatches s t then Left (n,s,t) else Right (n,s,t) -- TODO better way?
-    (failures, matches) = partitionEithers $ map sigMatch triples
-    rtnMatch (_,s,t) = if s == outSig then Just t else Nothing
-    rtn = headOrDie "invalid type signature" $ catMaybes $ map rtnMatch matches
-    explain (n,s,t) = "input " ++ show n ++ " should be a " ++ show s ++ ", but it was actually a " ++ show t
+    errors = catMaybes $ map sigMatch $ zip3 [1..] inSigs inTypes
+    sigMatch (n,s,t) = if typeSigMatches s t then Nothing else Just $ explain (n,s,t)
+    errHeader = name ++ " has the type signature " ++ show inSigs
+                     ++ ",\nwhich doesn't match its inputs "   ++ show inTypes
+                     ++ "\nSpecifically..."
+    explain (n,s,t) = "\nThe " ++ show t ++ " in position " ++ show (n :: Int)
+                      ++ " doesn't match " ++ show s ++ "."
+
+{-|
+If outSig can be converted to an exact type, do that. If it's a typegroup, find the matching
+inSig and return that exact type. Return an error if it doesn't match exactly one.
+
+TODO also error if it matches more than one unique type
+-}
+inferOutputType :: TypeSig -> [(TypeSig, Type)] -> Either String Type
+inferOutputType (Exactly t) _ = Right t
+inferOutputType (ListSigs     s) sts = fmap  ListOf       $ inferOutputType s sts
+inferOutputType (ScoresSigs   s) sts = fmap  ScoresOf     $ inferOutputType s sts
+inferOutputType (EncodedSig e s) sts = fmap (EncodedAs e) $ inferOutputType s sts
+inferOutputType s@(AnyType _) sts = inferOutputType' s sts
+inferOutputType s@(Some  _ _) sts = inferOutputType' s sts
+
+{-|
+The rule is that when a function has an ambiguous output type (it includes an
+AnyType or Some constructor), that same ambiguous type has to also be one of
+the inputs. Then we can assume that the matching actual input 'Type' should
+also be the return type. Note that equality includes the 'String' descriptions.
+
+Errors here should be evaluated immediately so they don't confuse users later!
+-}
+inferOutputType' :: TypeSig -> [(TypeSig, Type)] -> Either String Type
+inferOutputType' s sts = case find (\(s2,_) -> s == s2) sts of
+  Nothing -> Left $ "Invalid type signature: " ++ show s ++ " doesn't match any of " ++ show sts
+  Just (_,t) -> Right t
 
 {-|
 A reference is just a variable name, but that variable has to be in the script.
