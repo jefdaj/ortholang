@@ -671,7 +671,9 @@ explainFnBug =
 -- TODO do we still need an empty list case here?
 typeSigMatches :: TypeSig -> Type -> Bool
 typeSigMatches (AnyType _)       _                = True
+typeSigMatches (Exactly (ListOf _)) (ListOf Empty) = True
 typeSigMatches (Exactly t1)      t2               = t1 == t2
+typeSigMatches (ListSigs _)      (ListOf Empty)   = True
 typeSigMatches (ListSigs s)      (ListOf t)       = typeSigMatches s t
 typeSigMatches (ScoresSigs s)    (ScoresOf t)     = typeSigMatches s t
 typeSigMatches (EncodedSig e1 s) (EncodedAs e2 t) = e1 == e2 && typeSigMatches s t

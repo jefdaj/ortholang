@@ -83,8 +83,8 @@ listElemType ts = if typesOK then Right elemType else Left errorMsg
     elemType = if      null ts       then Empty
                else if null nonEmpty then headOrDie "listElemType failed" ts -- for example (ListOf Empty)
                else    headOrDie "listElemType failed" nonEmpty
-    typesOK  = all (== elemType) ts -- TODO is this where we could allow heterogenous lists?
-    errorMsg = "all elements of a list must have the same type"
+    typesOK  = all (== elemType) nonEmpty -- TODO is this where we could allow heterogenous lists?
+    errorMsg = "list elements have different types: " ++ show ts
 
 isNonEmpty :: Type -> Bool
 isNonEmpty Empty      = False
@@ -129,10 +129,14 @@ pBopOp :: String -> Char -> ParseM ()
 pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
 
 mkBop :: Function -> BopExprsParser
-mkBop bop = return $ \e1 e2 -> do
-  case typecheckFn [fromJust $ fOpChar bop] (fOutput bop) (bopInputs $ fInputs bop) [typeOf e1, typeOf e2] of
-    Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
-    Right rtn -> Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+mkBop bop = return $ \e1 e2 ->
+  let eType = listElemType $ [typeOf e1, typeOf e2]
+  in case eType of
+       Left  e  -> error "mkBop" e -- TODO is a better error type possible here?
+       Right r1 ->
+         case typecheckFn [fromJust $ fOpChar bop] (fOutput bop) (bopInputs $ fInputs bop) [typeOf e1, typeOf e2] of
+           Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
+           Right _ -> Bop r1 (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 
         -- TODO is naming it after the opchar wrong now?
 -- TODO how to putState with these? is it needed at all?
