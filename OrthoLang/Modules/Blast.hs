@@ -58,12 +58,12 @@ type BlastDesc =
 
 blastDescs :: [BlastDesc]
 blastDescs =
-  [ ( "blastn"   , fna, fna, ndb) -- old blastn default for more distant sequences
-  , ( "megablast", fna, fna, ndb) -- new blastn default (highly similar sequences)
-  , ( "blastp"   , faa, faa, pdb)
-  , ( "blastx"   , fna, faa, pdb)
-  , ("tblastn"   , faa, fna, ndb)
-  , ("tblastx"   , fna, fna, ndb)
+  [ ( "blastn"   , fna, fna, fna) -- old blastn default for more distant sequences
+  , ( "megablast", fna, fna, fna) -- new blastn default (highly similar sequences)
+  , ( "blastp"   , faa, faa, faa)
+  , ( "blastx"   , fna, faa, faa)
+  , ("tblastn"   , faa, fna, fna)
+  , ("tblastx"   , fna, fna, fna)
   ]
 
 ----------------
@@ -71,11 +71,13 @@ blastDescs =
 ----------------
 
 mkBlastFromDb :: BlastDesc -> Function
-mkBlastFromDb d@(bCmd, qType, _, dbType) = Function
+mkBlastFromDb d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing
   , fName = name
-  , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
-  , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
+  -- , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
+  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs "blastdb" sType)]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
   }
@@ -173,8 +175,10 @@ mkBlastFromFa :: BlastDesc -> Function
 mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing
   , fName = bCmd
-  , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
-  , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
+  -- , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
+  -- , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
+  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs "blastdb" sType)]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
   }
@@ -196,10 +200,12 @@ rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 ---------------------
 
 mkBlastFromDbEach :: BlastDesc -> Function
-mkBlastFromDbEach d@(bCmd, qType, _, dbType) = Function
+mkBlastFromDbEach d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, qType, ListOf dbType] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf dbType] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
+  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs "blastdb" sType))]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDbEach d
   }
@@ -216,8 +222,10 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 mkBlastFromFaEach :: BlastDesc -> Function
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, qType, ListOf faType] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf faType] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
+  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs "blastdb" faType))]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaEach d
   }

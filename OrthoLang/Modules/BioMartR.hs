@@ -23,9 +23,10 @@ module OrthoLang.Modules.BioMartR where
 -- import OrthoLang.Modules.Blast (gom) -- TODO fix that/deprecate
 import OrthoLang.Core
 import Development.Shake
-import OrthoLang.Core (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
-import OrthoLang.Core  (exprPath, Path, toPath, fromPath)
-import OrthoLang.Core (rExpr, defaultTypeCheck)
+import OrthoLang.Modules.SeqIO (fna, faa)
+-- import OrthoLang.Core (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
+-- import OrthoLang.Core  (exprPath, Path, toPath, fromPath)
+-- import OrthoLang.Core (rExpr)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -48,7 +49,7 @@ olModule :: Module
 olModule = Module
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
-  , mTypes = [search, fnagz, faagz]
+  , mTypes = [search, fna, faa]
   , mGroups = []
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
@@ -68,27 +69,33 @@ search = Type
   }
 
 -- TODO unify with fna? or replace it?
-fnagz :: Type
-fnagz = Type
-  { tExt  = "fna.gz"
-  , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
-  , tShow = \_ _ f -> return $ "gzipped fna file \"" ++ f ++ "\""
-  }
+-- fnagz :: Type
+-- fnagz = Type
+--   { tExt  = "fna.gz"
+--   , tDesc = "gzipped fasta nucleic acid acid (gene list or genome)"
+--   , tShow = \_ _ f -> return $ "gzipped fna file \"" ++ f ++ "\""
+--   }
 
 -- TODO unify with faa? or replace it?
-faagz :: Type
-faagz = Type
-  { tExt  = "faa.gz"
-  , tDesc = "gzipped fasta amino acid (proteome)"
-  , tShow = \_ _ f -> return $ "gzipped faa file \"" ++ f ++ "\""
-  }
+-- faagz :: Type
+-- faagz = Type
+--   { tExt  = "faa.gz"
+--   , tDesc = "gzipped fasta amino acid (proteome)"
+--   , tShow = \_ _ f -> return $ "gzipped faa file \"" ++ f ++ "\""
+--   }
+
+-- just shorthand
+fnagz = EncodedAs "gz" fna :: Type
+faagz = EncodedAs "gz" faa :: Type
 
 -- TODO does this work at all?
 parseSearches :: Function
 parseSearches = let name = "parse_searches" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf str] search
-  , fTypeDesc  = mkTypeDesc name [ListOf str] search
+  -- , fTypeCheck = defaultTypeCheck name [ListOf str] search
+  -- , fTypeDesc  = mkTypeDesc name [ListOf str] search
+  , fInputs = [Exactly (ListOf str)]
+  , fOutput = Exactly search
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rParseSearches
   }
@@ -100,8 +107,10 @@ parseSearches = let name = "parse_searches" in Function
 getGenomes :: Function
 getGenomes = let name = "get_genomes" in Function
   { fOpChar = Nothing, fName = name 
-  , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf fnagz)
-  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
+  -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf fnagz)
+  -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
+  , fInputs = [Exactly (ListOf str)]
+  , fOutput = Exactly fnagz
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getGenome"
   }
@@ -113,8 +122,10 @@ getGenomes = let name = "get_genomes" in Function
 getProteomes :: Function
 getProteomes = let name = "get_proteomes" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf faagz)
-  , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
+  -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf faagz)
+  -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
+  , fInputs = [Exactly (ListOf str)]
+  , fOutput = Exactly faagz
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getProteome"
   }

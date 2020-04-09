@@ -68,8 +68,10 @@ scoreRepeats :: Function
 scoreRepeats = Function
   { fOpChar = Nothing, fName = name
   ,fTags = []
-  , fTypeCheck = tScoreRepeats
-  , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
+  -- , fTypeCheck = tScoreRepeats
+  -- , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
+  , fInputs = [Exactly num, AnyType "the input type", ListSigs (AnyType "the input type")]
+  , fOutput = ScoresSigs (Exactly num) -- TODO is that right?
   , fNewRules = NewNotImplemented, fOldRules = rScoreRepeats
   }
   where
@@ -77,9 +79,9 @@ scoreRepeats = Function
 
 -- (num, Some ot "any type", ListOf num) (ScoresOf num)
 -- shown as "num t num.list -> num.scores, where t is any type"
-tScoreRepeats :: [Type] -> Either String Type
-tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
-tScoreRepeats _ = Left "invalid args to scoreRepeats"
+-- tScoreRepeats :: [Type] -> Either String Type
+-- tScoreRepeats [n1, _, (ListOf n2)] | n1 == num && n2 == num = Right $ ScoresOf num
+-- tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: RulesFn
 rScoreRepeats scr expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
@@ -105,8 +107,10 @@ rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 extractScores :: Function
 extractScores = let name = "extract_scores" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tExtractScores
-  , fTypeDesc  = name ++ " : X.scores -> num.list"
+  -- , fTypeCheck = tExtractScores
+  -- , fTypeDesc  = name ++ " : X.scores -> num.list"
+  , fInputs = [ScoresSigs (AnyType "the input type")]
+  , fOutput = Exactly (ListOf num)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 1
   }
@@ -115,22 +119,24 @@ extractScores = let name = "extract_scores" in Function
 extractScored :: Function
 extractScored = let name = "extract_scored" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = tExtractScored
-  , fTypeDesc  = name ++ " : X.scores -> X.list"
+  -- , fTypeCheck = tExtractScored
+  -- , fTypeDesc  = name ++ " : X.scores -> X.list"
+  , fInputs = [ScoresSigs (AnyType "the input type")]
+  , fOutput =  ListSigs (AnyType "the input type")
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 2
   }
 
 -- (ScoresOf (Some ot "any type")) (ListOf num)
 -- shown as "t.scores -> num.list, where t is any type"
-tExtractScores :: TypeChecker
-tExtractScores [(ScoresOf _)]= Right $ ListOf num
-tExtractScores _ = Left "extract_scores requires scores"
+-- tExtractScores :: TypeChecker
+-- tExtractScores [(ScoresOf _)]= Right $ ListOf num
+-- tExtractScores _ = Left "extract_scores requires scores"
 
 -- (ScoresOf (Some ot "any type")) (ListOf (SomeOt "any type"))
 -- shown as "t.scores -> t.list, where t is any type"
-tExtractScored :: TypeChecker
-tExtractScored [(ScoresOf x)] = Right $ ListOf x
-tExtractScored _ = Left "extract_scored requires scores"
+-- tExtractScored :: TypeChecker
+-- tExtractScored [(ScoresOf x)] = Right $ ListOf x
+-- tExtractScored _ = Left "extract_scored requires scores"
 
 -- TODO _each versions?

@@ -51,7 +51,7 @@ olModule :: Module
 olModule = Module
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
-  , mTypes = [ndb, pdb]
+  , mTypes = [fna, faa]
   , mGroups = []
   , mFunctions =
 
@@ -89,22 +89,26 @@ olModule = Module
 
 -- TODO add a blastdb type group? seems natural but i'm not sure you ever need to mix them
 
+-- shorthand
+ndb = EncodedAs "blastdb" fna
+pdb = EncodedAs "blastdb" faa
+
 -- TODO remove?
-ndb :: Type
-ndb = Type
-  { tExt  = "ndb"
-  , tDesc = "BLAST nucleotide database"
-  , tShow  = showBlastDb
-  }
+-- ndb :: Type
+-- ndb = Type
+--   { tExt  = "ndb"
+--   , tDesc = "BLAST nucleotide database"
+--   , tShow  = showBlastDb
+--   }
 
 -- TODO remove?
 -- TODO will people confuse this with PDB files for viewing molecules?
-pdb :: Type
-pdb = Type
-  { tExt  = "pdb"
-  , tDesc = "BLAST protein database"
-  , tShow  = showBlastDb
-  }
+-- pdb :: Type
+-- pdb = Type
+--   { tExt  = "pdb"
+--   , tDesc = "BLAST protein database"
+--   , tShow  = showBlastDb
+--   }
 
 ---------------------
 -- load from files --

@@ -15,7 +15,6 @@ import OrthoLang.Core
 import Control.Monad             (when)
 import Data.Scientific           (formatScientific, FPFormat(..))
 import OrthoLang.Modules.Blast   (bht)
-import OrthoLang.Modules.BlastDB (pdb)
 import OrthoLang.Modules.SeqIO   (faa)
 import OrthoLang.Modules.SeqIO   (mkConcat)
 import System.Directory          (createDirectoryIfMissing)
@@ -117,6 +116,9 @@ pssm = Type
   , tDesc = "PSI-BLAST position-specific substitution matrix as ASCII"
   , tShow  = defaultShow
   }
+
+-- shorthand
+pdb = EncodedAs "blastdb" faa
 
 --------------------
 -- base functions --
@@ -271,8 +273,10 @@ withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 psiblast :: Function
 psiblast = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, faa] bht
-  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, faa] bht
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, faa] bht
+  , fInputs = [Exactly num, Exactly faa, Exactly faa]
+  , fOutput = Exactly bht
   ,fTags = []
   -- , fNewRules = NewNotImplemented, fOldRules = rPsiblast
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
@@ -283,8 +287,10 @@ psiblast = Function
 psiblastEach :: Function
 psiblastEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf bht)
+  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rPsiblastEach
   }
@@ -302,19 +308,22 @@ rPsiblastEach st (Fun rtn salt deps name [e, fa, fas])
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 psiblastAll :: Function
-psiblastAll = compose1 name
-  (mkTypeDesc name [num, faa, ListOf faa] bht)
-  psiblastEach
-  (ListOf bht)
-  (mkConcat bht)
-  where
-    name = "psiblast_all"
+psiblastAll = undefined -- TODO rewrite once compose works
+-- psiblastAll = compose1 name
+--   (mkTypeDesc name [num, faa, ListOf faa] bht)
+--   psiblastEach
+--   (ListOf bht)
+--   (mkConcat bht)
+--   where
+--     name = "psiblast_all"
 
 psiblastDb :: Function
 psiblastDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, pdb] bht
-  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, pdb] bht
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] bht
+  , fInputs = [Exactly num, Exactly faa, Exactly pdb]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
   }
@@ -327,8 +336,10 @@ psiblastDb = Function
 psiblastDbEach :: Function
 psiblastDbEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf bht)
+  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
@@ -358,8 +369,10 @@ trainingArgs =
 psiblastTrain :: Function
 psiblastTrain = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, faa] pssm
-  , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, faa] pssm
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, faa] pssm
+  , fInputs = [Exactly num, Exactly faa, Exactly faa]
+  , fOutput = Exactly pssm
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
@@ -370,8 +383,10 @@ psiblastTrain = Function
 psiblastTrainPssms :: Function
 psiblastTrainPssms = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, ListOf faa, faa] (ListOf pssm)
-  , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
+  -- , fTypeCheck = defaultTypeCheck name [num, ListOf faa, faa] (ListOf pssm)
+  -- , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, faa] (ListOf pssm)
+  , fInputs = [Exactly num, Exactly (ListOf faa), Exactly faa]
+  , fOutput = Exactly (ListOf pssm)
   ,fTags = []
   -- , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
@@ -384,8 +399,10 @@ psiblastTrainPssms = Function
 psiblastTrainEach :: Function
 psiblastTrainEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf pssm)
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] (ListOf pssm)
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] (ListOf pssm)
+  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
+  , fOutput = Exactly (ListOf pssm)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
@@ -395,8 +412,10 @@ psiblastTrainEach = Function
 psiblastTrainAll :: Function
 psiblastTrainAll = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] pssm
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, ListOf faa] pssm
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf faa] pssm
+  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
+  , fOutput = Exactly pssm
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
   }
@@ -406,8 +425,10 @@ psiblastTrainAll = Function
 psiblastTrainDb :: Function
 psiblastTrainDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, pdb] pssm
-  , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, pdb] pssm
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
+  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
+  , fOutput = Exactly pssm
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastTrainDb
   }
@@ -417,8 +438,10 @@ psiblastTrainDb = Function
 psiblastTrainDbEach :: Function
 psiblastTrainDbEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf pssm)
-  , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
+  -- , fTypeCheck = defaultTypeCheck name [num, faa, ListOf pdb] (ListOf pssm)
+  -- , fTypeDesc  = mkTypeDesc name  [num, faa, ListOf pdb] (ListOf pssm)
+  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
+  , fOutput = Exactly (ListOf pssm)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
@@ -428,8 +451,10 @@ psiblastTrainDbEach = Function
 psiblastTrainPssmsDb :: Function
 psiblastTrainPssmsDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, ListOf faa, pdb] (ListOf pssm)
-  , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
+  -- , fTypeCheck = defaultTypeCheck name [num, ListOf faa, pdb] (ListOf pssm)
+  -- , fTypeDesc  = mkTypeDesc name  [num, ListOf faa, pdb] (ListOf pssm)
+  , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
+  , fOutput = Exactly (ListOf pssm)
   ,fTags = []
   -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrainDb'
@@ -444,8 +469,10 @@ psiblastTrainPssmsDb = Function
 psiblastPssm :: Function
 psiblastPssm = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, pssm, faa] bht
-  , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, pssm, faa] bht
+  -- , fTypeDesc  = mkTypeDesc name  [num, pssm, faa] bht
+  , fInputs = [Exactly num, Exactly pssm, Exactly faa]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
@@ -456,8 +483,10 @@ psiblastPssm = Function
 psiblastPssmAll :: Function
 psiblastPssmAll = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] bht
-  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] bht
+  -- , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] bht
+  , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
@@ -467,8 +496,10 @@ psiblastPssmAll = Function
 psiblastPssmEach :: Function
 psiblastPssmEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf faa] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf faa] (ListOf bht)
+  , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
@@ -481,8 +512,10 @@ searchArgs = ["-outfmt", "6", "-out"]
 psiblastPssmDb :: Function
 psiblastPssmDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, pssm, pdb] bht
-  , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, pssm, pdb] bht
+  -- , fTypeDesc  = mkTypeDesc name  [num, pssm, pdb] bht
+  , fInputs = [Exactly num, Exactly pssm, Exactly pdb]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastSearchDb
   }
@@ -492,8 +525,10 @@ psiblastPssmDb = Function
 psiblastPssmDbEach :: Function
 psiblastPssmDbEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf pdb] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, pssm, ListOf pdb] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, pssm, ListOf pdb] (ListOf bht)
+  , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf pdb)]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
@@ -509,8 +544,10 @@ psiblastPssmDbEach = Function
 psiblastEachPssmDb :: Function
 psiblastEachPssmDb = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, pdb] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, pdb] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
+  , fInputs = [Exactly num, Exactly pssm, Exactly pdb]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearchDb'
@@ -519,13 +556,14 @@ psiblastEachPssmDb = Function
     name = "psiblast_each_pssm_db"
 
 psiblastPssmsDb :: Function
-psiblastPssmsDb = compose1 name
-  (mkTypeDesc name [num, ListOf pssm, pdb] bht)
-  psiblastEachPssmDb
-  (ListOf bht)
-  (mkConcat bht)
-  where
-    name = "psiblast_pssms_db"
+psiblastPssmsDb = undefined -- TODO rewrite once compose works
+-- psiblastPssmsDb = compose1 name
+--   (mkTypeDesc name [num, ListOf pssm, pdb] bht)
+--   psiblastEachPssmDb
+--   (ListOf bht)
+--   (mkConcat bht)
+--   where
+--     name = "psiblast_pssms_db"
 
 -- TODO withPdbSubject fails with rMap? psiblastTrainPssms and psiblastEachPssm
 -- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
@@ -533,8 +571,10 @@ psiblastPssmsDb = compose1 name
 psiblastEachPssm :: Function
 psiblastEachPssm = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, faa] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, faa] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, faa] (ListOf bht)
+  , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly faa]
+  , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
   }
@@ -543,22 +583,24 @@ psiblastEachPssm = Function
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
 psiblastPssms :: Function
-psiblastPssms = compose1 name
-  (mkTypeDesc name [num, ListOf pssm, faa] bht)
-  psiblastEachPssm
-  (ListOf bht)
-  (mkConcat bht)
-  where
-    name = "psiblast_pssms"
+psiblastPssms = undefined
+-- psiblastPssms = compose1 name
+--   (mkTypeDesc name [num, ListOf pssm, faa] bht)
+--   psiblastEachPssm
+--   (ListOf bht)
+--   (mkConcat bht)
+--   where
+--     name = "psiblast_pssms"
 
 psiblastPssmsAll :: Function
-psiblastPssmsAll = compose1 name
-  (mkTypeDesc name [num, ListOf pssm, faa] bht)
-  psiblastEachPssm
-  (ListOf bht)
-  (mkConcat bht)
-  where
-    name = "psiblast_pssms_all"
+psiblastPssmsAll = undefined
+-- psiblastPssmsAll = compose1 name
+--   (mkTypeDesc name [num, ListOf pssm, faa] bht)
+--   psiblastEachPssm
+--   (ListOf bht)
+--   (mkConcat bht)
+--   where
+--     name = "psiblast_pssms_all"
 
 -- TODO think how to write this!
 --      it needs the effect of map3of3 psiblast_pssms_all ^
@@ -566,11 +608,12 @@ psiblastPssmsAll = compose1 name
 --      could it use psiblastPssmAll and concat_each?
 -- TODO test this
 psiblastPssmsEach :: Function
-psiblastPssmsEach = compose1 name
-  -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
-  (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))
-  psiblastEachPssm
-  (ListOf bht)
-  (mkConcat bht)
-  where
-    name = "psiblast_pssms_each"
+psiblastPssmsEach = undefined
+-- psiblastPssmsEach = compose1 name
+--   -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
+--   (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))
+--   psiblastEachPssm
+--   (ListOf bht)
+--   (mkConcat bht)
+--   where
+--     name = "psiblast_pssms_each"

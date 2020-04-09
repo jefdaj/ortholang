@@ -34,7 +34,7 @@ ht :: TypeGroup
 ht = TypeGroup
   { tgExt = "ht"
   , tgDesc  = "BLAST hit table-like"
-  , tgMembers = [bht, crb] -- TODO mms too
+  , tgMembers = [Exactly bht, Exactly crb] -- TODO mms too
   }
 
 ----------------------
@@ -52,10 +52,13 @@ ht = TypeGroup
 extractQueries :: Function
 extractQueries = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [Some ht "hit table"] (ListOf str)
-  , fTypeDesc  = mkTypeDesc       name [Some ht "hit table"] (ListOf str)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 1
+  -- , fTypeCheck = defaultTypeCheck name  (ListOf str)
+  -- , fTypeDesc  = mkTypeDesc       name [Some ht "hit table"] (ListOf str)
+  , fInputs = [Some ht "hit table"]
+  , fOutput = Exactly (ListOf str)
+  , fTags = []
+  , fNewRules = NewNotImplemented
+  , fOldRules = rSimple $ aCutCol True 1
   }
   where
     name = "extract_queries"
@@ -64,8 +67,10 @@ extractQueries = Function
 extractQueriesEach :: Function
 extractQueriesEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
-  , fTypeDesc  = mkTypeDesc       name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
+  -- , fTypeCheck = defaultTypeCheck name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
+  -- , fTypeDesc  = mkTypeDesc       name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
+  , fInputs = [ListSigs (Some ht "hit table")]
+  , fOutput = Exactly (ListOf (ListOf str))
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 1
   }
@@ -76,8 +81,10 @@ extractQueriesEach = Function
 extractTargets :: Function
 extractTargets = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [Some ht "hit table"] (ListOf str)
-  , fTypeDesc  = mkTypeDesc       name [Some ht "hit table"] (ListOf str)
+  -- , fTypeCheck = defaultTypeCheck name [Some ht "hit table"] (ListOf str)
+  -- , fTypeDesc  = mkTypeDesc       name [Some ht "hit table"] (ListOf str)
+  , fInputs = [Some ht "hit table"]
+  , fOutput = Exactly (ListOf str)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 2
   }
@@ -87,8 +94,10 @@ extractTargets = Function
 extractTargetsEach :: Function
 extractTargetsEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
-  , fTypeDesc  = mkTypeDesc       name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
+  -- , fTypeCheck = defaultTypeCheck name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
+  -- , fTypeDesc  = mkTypeDesc       name [ListOf (Some ht "hit table")] (ListOf (ListOf str))
+  , fInputs = [ListSigs (Some ht "hit table")]
+  , fOutput = Exactly (ListOf (ListOf str))
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 2
   }
@@ -136,8 +145,10 @@ filterEvalue = mkFilterHits "evalue"
 mkFilterHits :: String -> Function
 mkFilterHits colname = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, Some ht "hit table"] bht
-  , fTypeDesc  = mkTypeDesc       name [num, Some ht "hit table"] bht
+  -- , fTypeCheck = defaultTypeCheck name [num, Some ht "hit table"] bht
+  -- , fTypeDesc  = mkTypeDesc       name [num, Some ht "hit table"] bht
+  , fInputs = [Exactly num, Some ht "hit table"]
+  , fOutput = Some ht "hit table" -- TODO or bht like before?
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aFilterHits colname
   }
@@ -150,8 +161,10 @@ filterEvalueEach = mkFilterHitsEach "evalue"
 mkFilterHitsEach :: String -> Function
 mkFilterHitsEach colname = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [num, ListOf (Some ht "hit table")] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc       name [num, ListOf (Some ht "hit table")] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [num, ListOf (Some ht "hit table")] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc       name [num, ListOf (Some ht "hit table")] (ListOf bht)
+  , fInputs = [Exactly num, ListSigs (Some ht "hit table")]
+  , fOutput = ListSigs (Some ht "hit table")
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aFilterHits colname
   }
@@ -192,8 +205,10 @@ aFilterHits _ args = error $ "bad argument to aFilterHits: " ++ show args
 bestHits :: Function
 bestHits =  Function
   { fOpChar = Nothing, fName = name 
-  , fTypeCheck = defaultTypeCheck name [Some ht "hit table"] bht -- TODO some ht, not bht!
-  , fTypeDesc  = mkTypeDesc       name [Some ht "hit table"] bht -- TODO some ht, not bht!
+  -- , fTypeCheck = defaultTypeCheck name [Some ht "hit table"] bht -- TODO some ht, not bht!
+  -- , fTypeDesc  = mkTypeDesc       name [Some ht "hit table"] bht -- TODO some ht, not bht!
+  , fInputs = [Some ht "hit table"]
+  , fOutput =  Some ht "hit table"
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple aBestExtract
   }
@@ -203,8 +218,10 @@ bestHits =  Function
 bestHitsEach :: Function
 bestHitsEach = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [ListOf (Some ht "hit table")] (ListOf bht)
-  , fTypeDesc  = mkTypeDesc       name [ListOf (Some ht "hit table")] (ListOf bht)
+  -- , fTypeCheck = defaultTypeCheck name [ListOf (Some ht "hit table")] (ListOf bht)
+  -- , fTypeDesc  = mkTypeDesc       name [ListOf (Some ht "hit table")] (ListOf bht)
+  , fInputs = [ListSigs (Some ht "hit table")]
+  , fOutput =  ListSigs (Some ht "hit table")
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestExtract
   }

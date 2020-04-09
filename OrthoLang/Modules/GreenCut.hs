@@ -27,8 +27,10 @@ gcr = Type
 greencutTwoFamilies :: Function
 greencutTwoFamilies = Function
   { fOpChar = Nothing, fName = name
-  , fTypeCheck = defaultTypeCheck name [bht, bht] gcr
-  , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
+  -- , fTypeCheck = defaultTypeCheck name [bht, bht] gcr
+  -- , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
+  , fInputs = [Exactly bht, Exactly bht]
+  , fOutput = Exactly gcr
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name ++ ".py"
   }

@@ -24,7 +24,7 @@ import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)
 import OrthoLang.Modules.Singletons (withSingleton)
-import OrthoLang.Modules.SeqIO   (fna, faa)
+import OrthoLang.Modules.SeqIO   (fa, fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
@@ -65,17 +65,19 @@ mms = Type
 mmseqsCreateDbAll :: Function
 mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = name ++ " : fa.list -> mms"
-  , fTypeCheck = tMmseqsCreateDbAll name
+  -- , fTypeDesc  = name ++ " : fa.list -> mms"
+  -- , fTypeCheck = tMmseqsCreateDbAll name
+  , fInputs = [ListSigs (Some fa "any fasta type")]
+  , fOutput = Exactly mms
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDbAll
   }
 
 -- (ListOf (Some fa "any fasta file")) (EncodedAs mmseqsdb (Some fa "any fasta file"))
 -- shown as "fa.list -> fa.mmseqsdb, where fa is any fasta file"
-tMmseqsCreateDbAll :: String -> TypeChecker
-tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
-tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files, but got " ++ show types
+-- tMmseqsCreateDbAll :: String -> TypeChecker
+-- tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
+-- tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files, but got " ++ show types
 
 {- Looks like mmseqs2 expects later commands to be smart about index naming? It
  - doesn't always create the plain no-suffix index file, but expects that
@@ -122,17 +124,19 @@ rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 mmseqsCreateDb :: Function
 mmseqsCreateDb = let name = "mmseqs_createdb" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = name ++ " : fa -> mms"
-  , fTypeCheck = tMmseqsCreateDb name
+  -- , fTypeDesc  = name ++ " : fa -> mms"
+  -- , fTypeCheck = tMmseqsCreateDb name
+  , fInputs = [Some fa "any fasta type"]
+  , fOutput = Exactly mms
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDb
   }
 
 -- (Some fa "any fasta file") (EncodedAs mmseqsdb (Some fa "any fasta file"))
 -- shown as "fa -> fa.mmseqsdb, where fa is any fasta file"
-tMmseqsCreateDb :: String -> TypeChecker
-tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
-tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
+-- tMmseqsCreateDb :: String -> TypeChecker
+-- tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
+-- tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
 
 rMmseqsCreateDb :: RulesFn
 rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
@@ -147,19 +151,21 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
 mmseqsSearchDb :: Function
 mmseqsSearchDb = let name = "mmseqs_search_db" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = name ++ " : num fa mms -> bht"
-  , fTypeCheck = tMmseqsSearchDb name
+  -- , fTypeDesc  = name ++ " : num fa mms -> bht"
+  -- , fTypeCheck = tMmseqsSearchDb name
+  , fInputs = [Exactly num, Some fa "any fasta file", Exactly mms]
+  , fOutput = Exactly bht -- TODO exact format right?
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearchDb
   }
 
 -- (num, (Some fa "any fasta file"), (EncodedAs mmseqsdb (Some fa "also any fasta file"))) bht
 -- shown as "num fa1 fa2.mmseqsdb -> bht, where fa1 is any fasta file, fa2 is also any fasta file"
-tMmseqsSearchDb :: String -> TypeChecker
+-- tMmseqsSearchDb :: String -> TypeChecker
 -- TODO can this error be maintained despite the vague mms type? maybe not...
 -- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."
-tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Right bht
-tMmseqsSearchDb n types = fail $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
+-- tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Right bht
+-- tMmseqsSearchDb n types = fail $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
 
 {- Even though all the MMseqs2 commands make some kind of database, the files
  - it will include are obscure to me. The search ones here have .0, .1 ... .n
@@ -251,16 +257,18 @@ aMmseqConvertAlis qDb sDb outDbIndex outTab = do
 mmseqsSearch :: Function
 mmseqsSearch = let name = "mmseqs_search" in Function
   { fOpChar = Nothing, fName = name
-  , fTypeDesc  = name ++ " : num fa fa -> bht"
-  , fTypeCheck = tMmseqsSearch name
+  -- , fTypeDesc  = name ++ " : num fa fa -> bht"
+  -- , fTypeCheck = tMmseqsSearch name
+  , fInputs = [Exactly num, Some fa "query (any fasta)", Some fa "subject (any fasta)"]
+  , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearch
   }
 
-tMmseqsSearch :: String -> TypeChecker
-tMmseqsSearch n [_, y, z] | y == fna && z == fna = fail $ "Both " ++ n ++ " args can't be fna; translate one first."
-tMmseqsSearch _ [x, y, z] | x == num && y `elem` [fna, faa] && z `elem` [fna, faa] = Right bht
-tMmseqsSearch n types = fail $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
+-- tMmseqsSearch :: String -> TypeChecker
+-- tMmseqsSearch n [_, y, z] | y == fna && z == fna = fail $ "Both " ++ n ++ " args can't be fna; translate one first."
+-- tMmseqsSearch _ [x, y, z] | x == num && y `elem` [fna, faa] && z `elem` [fna, faa] = Right bht
+-- tMmseqsSearch n types = fail $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
 
 rMmseqsSearch :: RulesFn
 rMmseqsSearch st (Fun rtn salt deps name [e, q, s])
