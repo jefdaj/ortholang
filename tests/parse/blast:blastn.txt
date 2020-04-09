@@ -55,7 +55,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "mbov" 
         , Var ( RepID Nothing ) "mgen" 

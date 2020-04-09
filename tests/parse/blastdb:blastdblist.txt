@@ -20,18 +20,18 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "dbs" 
         , Var ( RepID Nothing ) "nrs" 
         , Var ( RepID Nothing ) "proks" 
         , Var ( RepID Nothing ) "human" 
         ] "|" 
-        ( Bop str.list.list ( Salt 0 ) 
+        ( Bop str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "dbs" 
             , Var ( RepID Nothing ) "nrs" 
             , Var ( RepID Nothing ) "proks" 
             ] "|" 
-            ( Bop str.list.list ( Salt 0 ) 
+            ( Bop str.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "dbs" 
                 , Var ( RepID Nothing ) "nrs" 
                 ] "|" 

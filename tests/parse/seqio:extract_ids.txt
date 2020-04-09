@@ -48,7 +48,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "bothFna" 
-    , Bop str.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "singleFna" 
         , Var ( RepID Nothing ) "fna" 
         , Var ( RepID Nothing ) "mappedFna" 
@@ -69,7 +69,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "bothFaa" 
-    , Bop str.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "singleFaa" 
         , Var ( RepID Nothing ) "faa" 
         , Var ( RepID Nothing ) "mappedFaa" 
@@ -90,7 +90,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "bothFna" 
         , Var ( RepID Nothing ) "singleFna" 
         , Var ( RepID Nothing ) "fna" 
@@ -100,14 +100,14 @@
         , Var ( RepID Nothing ) "faa" 
         , Var ( RepID Nothing ) "mappedFaa" 
         ] "|" 
-        ( Ref str.list.list.list ( Salt 0 ) 
+        ( Ref str.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "singleFna" 
             , Var ( RepID Nothing ) "fna" 
             , Var ( RepID Nothing ) "mappedFna" 
             ] 
             ( Var ( RepID Nothing ) "bothFna" )
         ) 
-        ( Ref str.list.list.list ( Salt 0 ) 
+        ( Ref str.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "singleFaa" 
             , Var ( RepID Nothing ) "faa" 
             , Var ( RepID Nothing ) "mappedFaa" 

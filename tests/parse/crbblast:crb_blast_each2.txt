@@ -37,13 +37,13 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun crb.list.list ( Salt 0 ) 
+    , Fun crb.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mapped" 
         ] "length" 
-        [ Bop crb.list.list ( Salt 0 ) 
+        [ Bop crb.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "minimgen" 
             , Var ( RepID Nothing ) "maga" 

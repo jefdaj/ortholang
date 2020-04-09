@@ -104,7 +104,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "singleFwd" 
         , Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 
@@ -128,7 +128,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Bop str.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "mappedFwd" 
         , Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 
@@ -152,7 +152,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "singleFwd" 
         , Var ( RepID Nothing ) "n" 
@@ -163,7 +163,7 @@
         , Var ( RepID Nothing ) "mappedFwd" 
         , Var ( RepID Nothing ) "mappedRev" 
         ] "|" 
-        ( Lst str.list.list ( Salt 0 ) 
+        ( Lst str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "singleFwd" 
             , Var ( RepID Nothing ) "n" 
@@ -171,7 +171,7 @@
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "singleRev" 
             ] 
-            [ Ref str.list.list ( Salt 0 ) 
+            [ Ref str.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "singleFwd" 
                 , Var ( RepID Nothing ) "n" 
                 , Var ( RepID Nothing ) "maga5" 
@@ -181,7 +181,7 @@
                 ( Var ( RepID Nothing ) "single" )
             ]
         ) 
-        ( Ref str.list.list.list ( Salt 0 ) 
+        ( Ref str.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "mappedFwd" 
             , Var ( RepID Nothing ) "n" 
             , Var ( RepID Nothing ) "maga5" 

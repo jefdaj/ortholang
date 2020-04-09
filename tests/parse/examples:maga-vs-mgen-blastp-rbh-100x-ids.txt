@@ -83,7 +83,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidHitIDs" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
@@ -115,7 +115,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidHitIDs100" 
-    , Fun str.list.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "solidHitIDs" 
         , Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 
@@ -125,7 +125,7 @@
         , Var ( RepID Nothing ) "revHits" 
         , Var ( RepID Nothing ) "n_repeats" 
         ] "all" 
-        [ Fun str.list.list.list ( Salt 0 ) 
+        [ Fun str.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "solidHitIDs" 
             , Var ( RepID Nothing ) "solidHits" 
             , Var ( RepID Nothing ) "recHits" 
@@ -135,7 +135,7 @@
             , Var ( RepID Nothing ) "revHits" 
             , Var ( RepID Nothing ) "n_repeats" 
             ] "repeat" 
-            [ Ref str.list.list ( Salt 0 ) 
+            [ Ref str.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "solidHits" 
                 , Var ( RepID Nothing ) "recHits" 
                 , Var ( RepID Nothing ) "fwdHits" 
@@ -153,7 +153,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list.list.list ( Salt 0 ) 
+    , Ref str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "solidHitIDs" 
         , Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 

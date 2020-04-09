@@ -104,7 +104,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list.list ( Salt 0 ) 
+    , Fun str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
@@ -113,7 +113,7 @@
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "mappeddb" 
         ] "length_each" 
-        [ Bop str.list.list.list ( Salt 0 ) 
+        [ Bop str.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
@@ -122,7 +122,7 @@
             , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "mappeddb" 
             ] "|" 
-            ( Bop str.list.list.list ( Salt 0 ) 
+            ( Bop str.list.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
@@ -130,7 +130,7 @@
                 , Var ( RepID Nothing ) "singledb" 
                 , Var ( RepID Nothing ) "mgendb" 
                 ] "|" 
-                ( Bop str.list.list.list ( Salt 0 ) 
+                ( Bop str.list.list ( Salt 0 ) 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 

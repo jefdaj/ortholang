@@ -57,18 +57,18 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst num.list.list.list ( Salt 0 ) 
+    , Lst num.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "same1" 
         , Var ( RepID Nothing ) "list1" 
         , Var ( RepID Nothing ) "same2" 
         , Var ( RepID Nothing ) "diffs" 
         ] 
-        [ Fun num.list.list.list ( Salt 0 ) 
+        [ Fun num.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "same1" 
             , Var ( RepID Nothing ) "list1" 
             , Var ( RepID Nothing ) "same2" 
             ] "length" 
-            [ Fun num.list.list.list ( Salt 0 ) 
+            [ Fun num.list.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "same1" 
                 , Var ( RepID Nothing ) "list1" 
                 , Var ( RepID Nothing ) "same2" 
@@ -93,12 +93,12 @@
                     ]
                 ]
             ]
-        , Fun num.list.list.list ( Salt 0 ) 
+        , Fun num.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "diffs" 
             , Var ( RepID Nothing ) "same1" 
             , Var ( RepID Nothing ) "list1" 
             ] "length" 
-            [ Fun num.list.list.list ( Salt 0 ) 
+            [ Fun num.list.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "diffs" 
                 , Var ( RepID Nothing ) "same1" 
                 , Var ( RepID Nothing ) "list1" 

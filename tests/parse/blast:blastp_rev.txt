@@ -80,7 +80,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "singleFwd" 
         , Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 

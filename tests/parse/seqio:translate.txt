@@ -16,7 +16,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop faa.list.list ( Salt 0 ) 
+    , Bop faa.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "mapped" 
         ] "|" 

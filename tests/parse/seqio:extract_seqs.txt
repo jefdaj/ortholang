@@ -80,7 +80,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "fnaDiff" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "fnaSmallAll" 
         , Var ( RepID Nothing ) "fnaSmallSeqs" 
         , Var ( RepID Nothing ) "fnaSmall" 
@@ -100,7 +100,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "faaDiff" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "faaSmallAll" 
         , Var ( RepID Nothing ) "faaSmallSeqs" 
         , Var ( RepID Nothing ) "faaSmall" 
@@ -120,7 +120,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "fnaDiff" 
         , Var ( RepID Nothing ) "fnaSmallAll" 
         , Var ( RepID Nothing ) "fnaSmallSeqs" 
@@ -132,7 +132,7 @@
         , Var ( RepID Nothing ) "faaSmall" 
         , Var ( RepID Nothing ) "faaSmallIDs" 
         ] "|" 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "fnaSmallAll" 
             , Var ( RepID Nothing ) "fnaSmallSeqs" 
             , Var ( RepID Nothing ) "fnaSmall" 
@@ -140,7 +140,7 @@
             ] 
             ( Var ( RepID Nothing ) "fnaDiff" )
         ) 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "faaSmallAll" 
             , Var ( RepID Nothing ) "faaSmallSeqs" 
             , Var ( RepID Nothing ) "faaSmall" 

@@ -20,12 +20,12 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun faa.list.list ( Salt 0 ) 
+    , Fun faa.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "list1" 
         , Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "list2" 
         ] "length" 
-        [ Bop faa.list.list ( Salt 0 ) 
+        [ Bop faa.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "list1" 
             , Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "list2" 

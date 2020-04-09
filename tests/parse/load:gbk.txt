@@ -12,7 +12,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop gbk.list.list ( Salt 0 ) 
+    , Bop gbk.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "mapped" 
         ] "|" 

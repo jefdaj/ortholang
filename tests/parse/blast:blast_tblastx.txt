@@ -31,7 +31,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "genes5" 
         , Var ( RepID Nothing ) "maga" 

@@ -24,7 +24,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "hitlists" 
         , Var ( RepID Nothing ) "mgen5" 
         , Var ( RepID Nothing ) "mycoplasma" 

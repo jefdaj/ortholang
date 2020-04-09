@@ -24,12 +24,12 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun faa.list.list.list ( Salt 0 ) 
+    , Fun faa.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "genes" 
         , Var ( RepID Nothing ) "multifa" 
         , Var ( RepID Nothing ) "mapped" 
         ] "length_each" 
-        [ Bop faa.list.list.list ( Salt 0 ) 
+        [ Bop faa.list.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "genes" 
             , Var ( RepID Nothing ) "multifa" 
             , Var ( RepID Nothing ) "mapped" 

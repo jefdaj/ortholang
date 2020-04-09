@@ -110,7 +110,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidFwd" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "best5fwd" 
         , Var ( RepID Nothing ) "bestFwd" 
         , Var ( RepID Nothing ) "fwdHits" 
@@ -136,7 +136,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidRec" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "best5rec" 
         , Var ( RepID Nothing ) "bestRec" 
         , Var ( RepID Nothing ) "fwdHits" 
@@ -165,7 +165,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "solidRec" 
         , Var ( RepID Nothing ) "best5rec" 
         , Var ( RepID Nothing ) "bestRec" 
@@ -174,7 +174,7 @@
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "length" 
-        [ Ref str.list.list ( Salt 0 ) 
+        [ Ref str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "best5rec" 
             , Var ( RepID Nothing ) "bestRec" 
             , Var ( RepID Nothing ) "fwdHits" 

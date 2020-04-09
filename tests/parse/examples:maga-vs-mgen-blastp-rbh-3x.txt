@@ -83,7 +83,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidHitIDs" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
@@ -115,7 +115,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list.list ( Salt 0 ) 
+    , Ref str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 

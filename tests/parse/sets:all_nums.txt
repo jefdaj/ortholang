@@ -31,7 +31,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "res1" 
-    , Fun num.list.list ( Salt 0 ) 
+    , Fun num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "all" 
@@ -48,7 +48,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "res2" 
-    , Bop num.list.list ( Salt 0 ) 
+    , Bop num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "&" 
@@ -61,18 +61,18 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst num.list.list ( Salt 0 ) 
+    , Lst num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "res1" 
         , Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         , Var ( RepID Nothing ) "res2" 
         ] 
-        [ Ref num.list.list ( Salt 0 ) 
+        [ Ref num.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 
             ( Var ( RepID Nothing ) "res1" )
-        , Ref num.list.list ( Salt 0 ) 
+        , Ref num.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 

@@ -138,7 +138,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "hits2_ids" 
         , Var ( RepID Nothing ) "hits2" 
         , Var ( RepID Nothing ) "hits_hmm" 

@@ -12,7 +12,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop fna.list.list ( Salt 0 ) 
+    , Bop fna.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "mapped" 
         ] "|" 

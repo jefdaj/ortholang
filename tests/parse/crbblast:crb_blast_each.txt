@@ -1,0 +1,107 @@
+[ 
+    ( Var ( RepID Nothing ) "reference" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "small" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+        [ Lst str ( Salt 0 ) [] 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "large" 
+    , Bop faa.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "small" ] "|" 
+        ( Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+            [ Lst str ( Salt 0 ) [] 
+                [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+            ]
+        ) 
+        ( Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "small" )
+        )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "small_hits" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "reference" 
+        , Var ( RepID Nothing ) "small" 
+        ] "extract_queries_each" 
+        [ Fun crb.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "reference" 
+            , Var ( RepID Nothing ) "small" 
+            ] "crb_blast_each" 
+            [ Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "reference" )
+            , Ref faa.list ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "small" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "large_hits" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "reference" 
+        , Var ( RepID Nothing ) "large" 
+        , Var ( RepID Nothing ) "small" 
+        ] "extract_queries_each" 
+        [ Fun crb.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "reference" 
+            , Var ( RepID Nothing ) "large" 
+            , Var ( RepID Nothing ) "small" 
+            ] "crb_blast_each" 
+            [ Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "reference" )
+            , Ref faa.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "small" ] 
+                ( Var ( RepID Nothing ) "large" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "large_hits" 
+        , Var ( RepID Nothing ) "reference" 
+        , Var ( RepID Nothing ) "large" 
+        , Var ( RepID Nothing ) "small" 
+        , Var ( RepID Nothing ) "small_hits" 
+        ] "length" 
+        [ Bop str.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "large_hits" 
+            , Var ( RepID Nothing ) "reference" 
+            , Var ( RepID Nothing ) "large" 
+            , Var ( RepID Nothing ) "small" 
+            , Var ( RepID Nothing ) "small_hits" 
+            ] "~" 
+            ( Fun str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "large_hits" 
+                , Var ( RepID Nothing ) "reference" 
+                , Var ( RepID Nothing ) "large" 
+                , Var ( RepID Nothing ) "small" 
+                ] "any" 
+                [ Ref str.list.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "reference" 
+                    , Var ( RepID Nothing ) "large" 
+                    , Var ( RepID Nothing ) "small" 
+                    ] 
+                    ( Var ( RepID Nothing ) "large_hits" )
+                ]
+            ) 
+            ( Fun str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "small_hits" 
+                , Var ( RepID Nothing ) "reference" 
+                , Var ( RepID Nothing ) "small" 
+                ] "any" 
+                [ Ref str.list.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "reference" 
+                    , Var ( RepID Nothing ) "small" 
+                    ] 
+                    ( Var ( RepID Nothing ) "small_hits" )
+                ]
+            )
+        ]
+    ) 
+] 

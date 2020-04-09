@@ -141,7 +141,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst num.list.list ( Salt 0 ) 
+    , Lst num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "depsSeparate" 
         , Var ( RepID Nothing ) "dep1" 
         , Var ( RepID Nothing ) "dep" 
@@ -152,7 +152,7 @@
         , Var ( RepID Nothing ) "dep5" 
         , Var ( RepID Nothing ) "depsTogether" 
         ] 
-        [ Bop num.list.list ( Salt 0 ) 
+        [ Bop num.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "depsSeparate" 
             , Var ( RepID Nothing ) "dep1" 
             , Var ( RepID Nothing ) "dep" 
@@ -180,7 +180,7 @@
                 ] 
                 ( Var ( RepID Nothing ) "depsTogether" )
             )
-        , Bop num.list.list ( Salt 0 ) 
+        , Bop num.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "depsTogether" 
             , Var ( RepID Nothing ) "dep" 
             , Var ( RepID Nothing ) "ind" 

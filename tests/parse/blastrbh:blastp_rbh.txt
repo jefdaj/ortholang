@@ -135,7 +135,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "lists" 
-    , Bop str.list.list.list ( Salt 0 ) 
+    , Bop str.list.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "rbh1" 
         , Var ( RepID Nothing ) "fwd" 
         , Var ( RepID Nothing ) "n" 
@@ -218,7 +218,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "lists" 
         , Var ( RepID Nothing ) "rbh1" 
         , Var ( RepID Nothing ) "fwd" 
@@ -231,7 +231,7 @@
         , Var ( RepID Nothing ) "rbh3" 
         , Var ( RepID Nothing ) "rbh4" 
         ] "~" 
-        ( Fun str.list.list.list ( Salt 0 ) 
+        ( Fun str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "lists" 
             , Var ( RepID Nothing ) "rbh1" 
             , Var ( RepID Nothing ) "fwd" 
@@ -244,7 +244,7 @@
             , Var ( RepID Nothing ) "rbh3" 
             , Var ( RepID Nothing ) "rbh4" 
             ] "any" 
-            [ Ref str.list.list.list ( Salt 0 ) 
+            [ Ref str.list.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "rbh1" 
                 , Var ( RepID Nothing ) "fwd" 
                 , Var ( RepID Nothing ) "n" 
@@ -259,7 +259,7 @@
                 ( Var ( RepID Nothing ) "lists" )
             ]
         ) 
-        ( Fun str.list.list.list ( Salt 0 ) 
+        ( Fun str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "lists" 
             , Var ( RepID Nothing ) "rbh1" 
             , Var ( RepID Nothing ) "fwd" 
@@ -272,7 +272,7 @@
             , Var ( RepID Nothing ) "rbh3" 
             , Var ( RepID Nothing ) "rbh4" 
             ] "all" 
-            [ Ref str.list.list.list ( Salt 0 ) 
+            [ Ref str.list.list ( Salt 0 ) 
                 [ Var ( RepID Nothing ) "rbh1" 
                 , Var ( RepID Nothing ) "fwd" 
                 , Var ( RepID Nothing ) "n" 

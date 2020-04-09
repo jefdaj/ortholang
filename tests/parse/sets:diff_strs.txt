@@ -31,7 +31,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "res1" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "diff" 
@@ -48,7 +48,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "res2" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "~" 
@@ -61,18 +61,18 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst str.list.list ( Salt 0 ) 
+    , Lst str.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "res1" 
         , Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         , Var ( RepID Nothing ) "res2" 
         ] 
-        [ Ref str.list.list ( Salt 0 ) 
+        [ Ref str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 
             ( Var ( RepID Nothing ) "res1" )
-        , Ref str.list.list ( Salt 0 ) 
+        , Ref str.list ( Salt 0 ) 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 

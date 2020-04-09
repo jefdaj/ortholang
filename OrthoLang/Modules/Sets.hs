@@ -63,7 +63,7 @@ mkSetFunction (foldName, opChar, setFn) = setFold
       , fOpChar    = Just opChar
       -- , fTypeCheck = tSetFold
       -- , fTypeDesc  = mkFoldDesc foldName
-      , fInputs = [ListSigs (AnyType "any type")]
+      , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
       , fOutput =  ListSigs (AnyType "any type")
       , fTags = []
       , fNewRules = NewNotImplemented, fOldRules = rSetFold (foldr1 setFn)

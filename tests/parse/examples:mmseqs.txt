@@ -1,0 +1,113 @@
+[ 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mbov" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_bovis_small.fa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits1" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mbov" 
+        ] "mmseqs_search" 
+        [ Lit num ( Salt 0 ) "1.0e-20" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mbov" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "genes1" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits1" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mbov" 
+        ] "extract_queries" 
+        [ Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mbov" 
+            ] 
+            ( Var ( RepID Nothing ) "hits1" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "others" 
+    , Bop faa.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" ] "~" 
+        ( Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+            [ Fun str.list ( Salt 0 ) [] "glob_files" 
+                [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_refseq.faa" ]
+            ]
+        ) 
+        ( Lst faa ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            [ Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga" )
+            ]
+        )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits2" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "others" 
+        ] "mmseqs_search_db" 
+        [ Lit num ( Salt 0 ) "1.0e-20" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        , Fun mms ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "others" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "mmseqs_createdb_all" 
+            [ Ref faa.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "maga" ] 
+                ( Var ( RepID Nothing ) "others" )
+            ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "genes2" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits2" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "others" 
+        ] "extract_queries" 
+        [ Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "others" 
+            ] 
+            ( Var ( RepID Nothing ) "hits2" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "genes1" 
+        , Var ( RepID Nothing ) "hits1" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mbov" 
+        , Var ( RepID Nothing ) "genes2" 
+        , Var ( RepID Nothing ) "hits2" 
+        , Var ( RepID Nothing ) "others" 
+        ] "~" 
+        ( Ref str.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits1" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mbov" 
+            ] 
+            ( Var ( RepID Nothing ) "genes1" )
+        ) 
+        ( Ref str.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits2" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "others" 
+            ] 
+            ( Var ( RepID Nothing ) "genes2" )
+        )
+    ) 
+] 

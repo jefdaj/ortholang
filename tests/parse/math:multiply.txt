@@ -15,7 +15,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop num.list.list ( Salt 0 ) 
+    , Bop num.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "r1" 
         , Var ( RepID Nothing ) "r2" 
         ] "~" 
