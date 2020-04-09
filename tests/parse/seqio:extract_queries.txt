@@ -1,0 +1,51 @@
+[ 
+    ( Var ( RepID Nothing ) "hits" 
+    , Fun bht ( Salt 0 ) [] "blastp" 
+        [ Lit num ( Salt 0 ) "1.0e-5" 
+        , Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+        , Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "single" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits" ] "extract_queries" 
+        [ Ref bht ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "hits" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits" ] "extract_queries_each" 
+        [ Lst bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits" ] 
+            [ Ref bht ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "hits" )
+            ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "|" 
+        ( Lst str.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "hits" 
+            ] 
+            [ Ref str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "hits" ] 
+                ( Var ( RepID Nothing ) "single" )
+            ]
+        ) 
+        ( Ref str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits" ] 
+            ( Var ( RepID Nothing ) "mapped" )
+        )
+    ) 
+] 

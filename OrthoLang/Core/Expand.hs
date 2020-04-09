@@ -29,9 +29,7 @@ import OrthoLang.Core.Types
 
 -- | Runs eScript until everything has been expanded
 expandMacros :: Config -> Script -> Script
-expandMacros cfg scr = if scr' == scr then scr else expandMacros cfg scr'
-  where
-    scr' = eScript cfg scr
+expandMacros = eScript
 
 eScript :: Config -> Script -> Script
 eScript cfg scr = map (eAssign cfg scr) scr
@@ -40,7 +38,11 @@ eAssign :: Config -> Script -> Assign -> Assign
 eAssign cfg scr (v, e) = (v, eExpr cfg scr e)
 
 eExpr :: Config -> Script -> Expr -> Expr
-eExpr cfg scr e@(Fun _ _ _ name _) =
+eExpr cfg scr e = if e' == e then e else eExpr' cfg scr e'
+  where
+    e' = eExpr' cfg scr e
+
+eExpr' cfg scr e@(Fun _ _ _ name _) =
   case findFun cfg name of
     Left err -> error err
     Right fn -> case fNewRules fn of
@@ -48,7 +50,7 @@ eExpr cfg scr e@(Fun _ _ _ name _) =
                                     Left err -> error err
                                     Right e' -> e'
                   _ -> e
-eExpr _ _ e = e
+eExpr' _ _ e = e
 
 typecheck :: Config -> Expr -> Either String Expr
 typecheck cfg expr = undefined

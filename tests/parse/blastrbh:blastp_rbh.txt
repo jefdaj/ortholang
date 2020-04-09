@@ -1,0 +1,291 @@
+[ 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "n" 
+    , Lit num ( Salt 0 ) "1.0e-5" 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "fwd" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "blastp" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rev1" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "blastp" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rev2" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "blastp_rev" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rbh1" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "fwd" 
+        , Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "rev1" 
+        ] "reciprocal_best" 
+        [ Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "fwd" )
+        , Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            ( Var ( RepID Nothing ) "rev1" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rbh2" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "fwd" 
+        , Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "rev2" 
+        ] "reciprocal_best" 
+        [ Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "fwd" )
+        , Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "rev2" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rbh3" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "blastp_rbh" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rbh4" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "blastp_rbh" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "lists" 
+    , Bop str.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "rbh1" 
+        , Var ( RepID Nothing ) "fwd" 
+        , Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "rev1" 
+        , Var ( RepID Nothing ) "rbh2" 
+        , Var ( RepID Nothing ) "rev2" 
+        , Var ( RepID Nothing ) "rbh3" 
+        , Var ( RepID Nothing ) "rbh4" 
+        ] "|" 
+        ( Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "rbh1" 
+            , Var ( RepID Nothing ) "fwd" 
+            , Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "rev1" 
+            , Var ( RepID Nothing ) "rbh2" 
+            , Var ( RepID Nothing ) "rev2" 
+            , Var ( RepID Nothing ) "rbh3" 
+            ] "extract_queries_each" 
+            [ Lst bht ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "rbh1" 
+                , Var ( RepID Nothing ) "fwd" 
+                , Var ( RepID Nothing ) "n" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "rev1" 
+                , Var ( RepID Nothing ) "rbh2" 
+                , Var ( RepID Nothing ) "rev2" 
+                , Var ( RepID Nothing ) "rbh3" 
+                ] 
+                [ Ref bht ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "fwd" 
+                    , Var ( RepID Nothing ) "n" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "rev1" 
+                    ] 
+                    ( Var ( RepID Nothing ) "rbh1" )
+                , Ref bht ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "fwd" 
+                    , Var ( RepID Nothing ) "n" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "rev2" 
+                    ] 
+                    ( Var ( RepID Nothing ) "rbh2" )
+                , Ref bht ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "rbh3" )
+                ] 
+            ]
+        ) 
+        ( Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "rbh4" 
+            , Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "extract_targets_each" 
+            [ Lst bht ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "rbh4" 
+                , Var ( RepID Nothing ) "n" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                [ Ref bht ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
+                    ( Var ( RepID Nothing ) "rbh4" )
+                ]
+            ]
+        )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "lists" 
+        , Var ( RepID Nothing ) "rbh1" 
+        , Var ( RepID Nothing ) "fwd" 
+        , Var ( RepID Nothing ) "n" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "rev1" 
+        , Var ( RepID Nothing ) "rbh2" 
+        , Var ( RepID Nothing ) "rev2" 
+        , Var ( RepID Nothing ) "rbh3" 
+        , Var ( RepID Nothing ) "rbh4" 
+        ] "~" 
+        ( Fun str.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "lists" 
+            , Var ( RepID Nothing ) "rbh1" 
+            , Var ( RepID Nothing ) "fwd" 
+            , Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "rev1" 
+            , Var ( RepID Nothing ) "rbh2" 
+            , Var ( RepID Nothing ) "rev2" 
+            , Var ( RepID Nothing ) "rbh3" 
+            , Var ( RepID Nothing ) "rbh4" 
+            ] "any" 
+            [ Ref str.list.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "rbh1" 
+                , Var ( RepID Nothing ) "fwd" 
+                , Var ( RepID Nothing ) "n" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "rev1" 
+                , Var ( RepID Nothing ) "rbh2" 
+                , Var ( RepID Nothing ) "rev2" 
+                , Var ( RepID Nothing ) "rbh3" 
+                , Var ( RepID Nothing ) "rbh4" 
+                ] 
+                ( Var ( RepID Nothing ) "lists" )
+            ]
+        ) 
+        ( Fun str.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "lists" 
+            , Var ( RepID Nothing ) "rbh1" 
+            , Var ( RepID Nothing ) "fwd" 
+            , Var ( RepID Nothing ) "n" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "rev1" 
+            , Var ( RepID Nothing ) "rbh2" 
+            , Var ( RepID Nothing ) "rev2" 
+            , Var ( RepID Nothing ) "rbh3" 
+            , Var ( RepID Nothing ) "rbh4" 
+            ] "all" 
+            [ Ref str.list.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "rbh1" 
+                , Var ( RepID Nothing ) "fwd" 
+                , Var ( RepID Nothing ) "n" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "rev1" 
+                , Var ( RepID Nothing ) "rbh2" 
+                , Var ( RepID Nothing ) "rev2" 
+                , Var ( RepID Nothing ) "rbh3" 
+                , Var ( RepID Nothing ) "rbh4" 
+                ] 
+                ( Var ( RepID Nothing ) "lists" )
+            ]
+        )
+    ) 
+] 

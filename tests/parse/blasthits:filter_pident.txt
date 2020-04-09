@@ -1,0 +1,111 @@
+[ 
+    ( Var ( RepID Nothing ) "small" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "small" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "blastp" 
+        [ Lit num ( Salt 0 ) "1.0e-5" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "small" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "single" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "small" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "extract_queries" 
+        [ Fun bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "small" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "filter_pident" 
+            [ Lit num ( Salt 0 ) "80.0" 
+            , Ref bht ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "small" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "hits" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "small" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "extract_queries_each" 
+        [ Fun bht.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "small" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "filter_pident_each" 
+            [ Lit num ( Salt 0 ) "80.0" 
+            , Lst bht ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "small" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                [ Ref bht ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "small" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
+                    ( Var ( RepID Nothing ) "hits" )
+                ]
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "small" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "length" 
+        [ Bop str.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "small" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "small" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                [ Ref str.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "small" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
+                    ( Var ( RepID Nothing ) "single" )
+                ]
+            ) 
+            ( Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "small" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "mapped" )
+            )
+        ]
+    ) 
+] 
