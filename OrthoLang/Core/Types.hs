@@ -19,7 +19,8 @@ module OrthoLang.Core.Types
   , findType
   , findGroup
   , findModule
-  , findFunction
+  , findFunction -- TODO remove?
+  , findFun
   , listFunctions
   , listFunctionNames
   , operatorChars
@@ -488,11 +489,20 @@ findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
 -- used by the compiler and repl
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
+-- TODO remove in favor of findFun below?
 findFunction :: Config -> String -> Maybe Function
 findFunction cfg name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar f) == Just name) fs
   where
     ms = cfgModules cfg
     fs = concatMap mFunctions ms
+
+findFun :: Config -> String -> Either String Function
+findFun cfg name =
+  let fns = concat $ map mFunctions $ cfgModules cfg
+  in case filter (\f -> fName f == name) fns of
+       []     -> Left $ "no function found with name \"" ++ name ++ "\""
+       (f:[]) -> Right f
+       _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
 findType :: Config -> String -> Maybe Type
 findType cfg ext = find (\t -> tExtOf t == ext) ts

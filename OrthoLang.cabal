@@ -107,6 +107,7 @@ library
   exposed-modules:  Paths_OrthoLang,
                     OrthoLang.Core,
                     OrthoLang.Core.Actions,
+                    OrthoLang.Core.Expand,
                     OrthoLang.Core.Compile,
                     OrthoLang.Core.Compile.Basic,
                     OrthoLang.Core.Compile.Compose,

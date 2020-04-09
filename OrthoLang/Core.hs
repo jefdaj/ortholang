@@ -189,6 +189,7 @@ module OrthoLang.Core
 
 import OrthoLang.Debug
 import OrthoLang.Core.Actions
+import OrthoLang.Core.Expand
 import OrthoLang.Core.Compile
 import OrthoLang.Core.Compile.NewRules
 import OrthoLang.Core.Paths

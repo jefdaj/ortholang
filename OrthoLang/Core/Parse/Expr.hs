@@ -218,15 +218,10 @@ TODO hey is this where it's missing the dmap?
 pFunArgs :: String -> [Expr] -> ParseM Expr
 pFunArgs name args = debugParser "pFun" $ do
   cfg <- ask
-  -- name <- try pFunName -- after this, we can commit to the fn and error on bad args
-  -- args <- pArgs
-  -- args <- manyTill pTerm pEnd
-  let fns  = concat $ map mFunctions $ cfgModules cfg
-      fns' = filter (\f -> fName f == name) fns
-  case fns' of
-    []      -> parseFail $ "no function found with name \"" ++ name ++ "\""
-    (fn:[]) -> typecheckArgs fn args -- TODO why no full7942??
-    _       -> parseFail $ "function name collision! multiple fns match \"" ++ name ++ "\""
+  case findFun cfg name of
+    Left err -> parseFail err
+    Right fn -> typecheckArgs fn args -- TODO why no full7942??
+
 
 -- TODO this one should be the parser; write a simpler pure typecheck fn
 typecheckArgs :: Function -> [Expr] -> ParseM Expr
