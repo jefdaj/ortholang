@@ -1,0 +1,905 @@
+[ 
+    ( Var ( RepID Nothing ) "g1" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "1" 
+        , Lit str ( Salt 0 ) "2" 
+        , Lit str ( Salt 0 ) "3" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "g2" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "2" 
+        , Lit str ( Salt 0 ) "3" 
+        , Lit str ( Salt 0 ) "4" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "g3" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "4" 
+        , Lit str ( Salt 0 ) "5" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "g4" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "6" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "groups" 
+    , Lst str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "g1" 
+        , Var ( RepID Nothing ) "g2" 
+        , Var ( RepID Nothing ) "g3" 
+        , Var ( RepID Nothing ) "g4" 
+        ] 
+        [ Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "g1" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "g2" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "g3" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "g4" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "f1" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "1" 
+        , Lit str ( Salt 0 ) "2" 
+        , Lit str ( Salt 0 ) "3" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "f2" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "4" 
+        , Lit str ( Salt 0 ) "5" 
+        , Lit str ( Salt 0 ) "6" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "f3" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "one" 
+        , Lit str ( Salt 0 ) "two" 
+        , Lit str ( Salt 0 ) "three" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "fastas" 
+    , Lst str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "f1" 
+        , Var ( RepID Nothing ) "f2" 
+        , Var ( RepID Nothing ) "f3" 
+        ] 
+        [ Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "f1" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "f2" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "f3" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lst str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "groups" 
+        , Var ( RepID Nothing ) "g1" 
+        , Var ( RepID Nothing ) "g2" 
+        , Var ( RepID Nothing ) "g3" 
+        , Var ( RepID Nothing ) "g4" 
+        , Var ( RepID Nothing ) "fastas" 
+        , Var ( RepID Nothing ) "f1" 
+        , Var ( RepID Nothing ) "f2" 
+        , Var ( RepID Nothing ) "f3" 
+        ] 
+        [ Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_any_str" 
+            [ Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_all_str" 
+            [ Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "1.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "2.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "3.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "1.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "2.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "3.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "-1.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "-2.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "-3.0" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.1" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.2" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.3" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.4" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.5" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.6" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.7" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.8" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_min_str" 
+            [ Lit num ( Salt 0 ) "0.9" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.1" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.2" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.3" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.4" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.5" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.6" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.7" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.8" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        , Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "groups" 
+            , Var ( RepID Nothing ) "g1" 
+            , Var ( RepID Nothing ) "g2" 
+            , Var ( RepID Nothing ) "g3" 
+            , Var ( RepID Nothing ) "g4" 
+            , Var ( RepID Nothing ) "fastas" 
+            , Var ( RepID Nothing ) "f1" 
+            , Var ( RepID Nothing ) "f2" 
+            , Var ( RepID Nothing ) "f3" 
+            ] "ortholog_in_max_str" 
+            [ Lit num ( Salt 0 ) "0.9" 
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "g1" 
+                , Var ( RepID Nothing ) "g2" 
+                , Var ( RepID Nothing ) "g3" 
+                , Var ( RepID Nothing ) "g4" 
+                ] 
+                ( Var ( RepID Nothing ) "groups" )
+            , Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "f1" 
+                , Var ( RepID Nothing ) "f2" 
+                , Var ( RepID Nothing ) "f3" 
+                ] 
+                ( Var ( RepID Nothing ) "fastas" )
+            ] 
+        ] 
+    ) 
+] 

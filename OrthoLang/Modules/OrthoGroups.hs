@@ -258,7 +258,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in Function
   { fOpChar = Nothing, fName = name
   -- , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   -- , fTypeCheck = defaultTypeCheck name [sll, sll] sll
-  , fInputs = [Some og "some orthogroup", Exactly sll]
+  , fInputs = [Exactly sll, Exactly sll]
   , fOutput = Exactly sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
@@ -324,7 +324,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in Function
   { fOpChar = Nothing, fName = name
   -- , fTypeDesc  = mkTypeDesc  name [sll, sll] sll
   -- , fTypeCheck = defaultTypeCheck name [sll, sll] sll
-  , fInputs = [Some og "some orthogroup", Exactly sll]
+  , fInputs = [Exactly sll, Exactly sll]
   , fOutput = Exactly sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
@@ -439,7 +439,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in Function
   { fOpChar = Nothing, fName = name
   -- , fTypeDesc  = mkTypeDesc  name [num, sll, sll] sll
   -- , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
-  , fInputs = [Exactly num, Some og "some orthogroup", Exactly sll]
+  , fInputs = [Exactly num, Exactly sll, Exactly sll]
   , fOutput = Exactly sll
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "max" pickMax
