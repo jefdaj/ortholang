@@ -1,0 +1,196 @@
+[ 
+    ( Var ( RepID Nothing ) "query" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "magadb" 
+    , Fun faa.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" ] "makeblastdb_prot" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgendb" 
+    , Fun faa.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_prot" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "cutoff" 
+    , Lit num ( Salt 0 ) "0.5" 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssmmaga" 
+    , Fun pssm ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_train_db" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoff" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            ( Var ( RepID Nothing ) "magadb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssmmgen" 
+    , Fun pssm ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "psiblast_train_db" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoff" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mgen" ] 
+            ( Var ( RepID Nothing ) "mgendb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "cutoffs" 
+    , Lst num ( Salt 0 ) [] 
+        [ Lit num ( Salt 0 ) "1.0" 
+        , Lit num ( Salt 0 ) "0.5" 
+        , Lit num ( Salt 0 ) "0.1" 
+        , Lit num ( Salt 0 ) "1.0e-2" 
+        , Lit num ( Salt 0 ) "1.0e-3" 
+        , Lit num ( Salt 0 ) "1.0e-5" 
+        , Lit num ( Salt 0 ) "1.0e-10" 
+        , Lit num ( Salt 0 ) "1.0e-20" 
+        , Lit num ( Salt 0 ) "1.0e-50" 
+        , Lit num ( Salt 0 ) "1.0e-100" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssmsmaga" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssmmaga" 
+        , Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "cutoffs" 
+        ] "replace_each" 
+        [ Ref pssm ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "cutoff" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "pssmmaga" )
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoff" )
+        , Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoffs" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssmsmgen" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssmmgen" 
+        , Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "cutoffs" 
+        ] "replace_each" 
+        [ Ref pssm ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "cutoff" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            ( Var ( RepID Nothing ) "pssmmgen" )
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoff" )
+        , Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoffs" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hitsmaga" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "pssmsmaga" 
+        , Var ( RepID Nothing ) "pssmmaga" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "cutoffs" 
+        ] "psiblast_each_pssm" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoff" )
+        , Ref pssm.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "pssmmaga" 
+            , Var ( RepID Nothing ) "cutoff" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "cutoffs" 
+            ] 
+            ( Var ( RepID Nothing ) "pssmsmaga" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hitsmgen" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "pssmsmgen" 
+        , Var ( RepID Nothing ) "pssmmgen" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "cutoffs" 
+        ] "psiblast_each_pssm" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "cutoff" )
+        , Ref pssm.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "pssmmgen" 
+            , Var ( RepID Nothing ) "cutoff" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "cutoffs" 
+            ] 
+            ( Var ( RepID Nothing ) "pssmsmgen" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "cutoff" 
+        , Var ( RepID Nothing ) "pssmsmgen" 
+        , Var ( RepID Nothing ) "pssmmgen" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "cutoffs" 
+        ] 
+        ( Var ( RepID Nothing ) "hitsmgen" )
+    ) 
+] 

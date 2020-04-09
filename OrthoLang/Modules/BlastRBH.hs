@@ -6,8 +6,8 @@ import OrthoLang.Core.Compile as C
 
 import Data.List.Utils           (replace)
 import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)
-import OrthoLang.Modules.BlastDB (ndb, pdb)
-import OrthoLang.Modules.SeqIO   (faa)
+-- import OrthoLang.Modules.BlastDB (ndb, pdb)
+import OrthoLang.Modules.SeqIO   (fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>))
@@ -27,7 +27,7 @@ olModule :: Module
 olModule = Module
   { mName = "BlastRBH"
   , mDesc = "Reciprocal BLAST+ best hits"
-  , mTypes = [faa, ndb, pdb, bht]
+  , mTypes = [faa, bht]
   , mGroups = []
   , mFunctions =
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
@@ -101,8 +101,8 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn salt deps _ [e, s, qs]) =
       editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
       editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
       (dbFnName, dbType) = if qType == faa
-                             then ("makeblastdb_prot_all", pdb) -- TODO use non _all version?
-                             else ("makeblastdb_nucl_all", ndb) -- TODO use non _all version?
+                             then ("makeblastdb_prot_all", EncodedAs "blastdb" faa) -- TODO use non _all version?
+                             else ("makeblastdb_nucl_all", EncodedAs "blastdb" fna) -- TODO use non _all version?
   rMap 3 revDbAct scr editedExpr
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 

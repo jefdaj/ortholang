@@ -16,7 +16,7 @@ import Development.Shake
 import OrthoLang.Core
 
 import Data.Scientific           (formatScientific, FPFormat(..))
-import OrthoLang.Modules.BlastDB (ndb, pdb) -- TODO import rMakeBlastDB too?
+-- import OrthoLang.Modules.BlastDB (ndb, pdb) -- TODO import rMakeBlastDB too?
 import OrthoLang.Modules.SeqIO   (faa, fna, mkConcat, mkConcatEach)
 import System.Exit               (ExitCode(..))
 import System.FilePath           (replaceBaseName)
@@ -26,7 +26,7 @@ olModule :: Module
 olModule = Module
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
-  , mTypes = [ndb, pdb, bht]
+  , mTypes = [bht]
   , mGroups = []
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
@@ -184,13 +184,13 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = Function
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
 -- TODO check this works after writing the new non- _all makeblastdb fns
 rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, dbType) st (Fun rtn salt deps _ [e, q, s])
+rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn salt deps _ [e, q, s])
   = rules st (Fun rtn salt deps name1 [e, q, dbExpr])
   where
     rules = fOldRules $ mkBlastFromDb d
     name1 = fName $ mkBlastFromDb d
-    name2 = "makeblastdb" ++ if dbType == ndb then "_nucl" else "_prot"
-    dbExpr = Fun dbType salt (depsOf s) name2 [s] 
+    name2 = "makeblastdb" ++ if sType == fna then "_nucl" else "_prot"
+    dbExpr = Fun (EncodedAs "blastdb" sType) salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 ---------------------
@@ -222,7 +222,7 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf faType] (ListOf bht)
   -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs "blastdb" faType))]
+  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf faType)]
   , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaEach d
@@ -232,11 +232,11 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
 
 -- combination of the two above: insert the makeblastdbcall, then map
 rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, dbType) st (Fun rtn salt deps _   [e, q, ss])
+rMkBlastFromFaEach d@(_, _, _, sType) st (Fun rtn salt deps _   [e, q, ss])
   =                              rules st (Fun rtn salt deps fn2 [e, q, ss'])
   where
     rules = rMkBlastFromDbEach d
-    ss'   = Fun (ListOf dbType) salt (depsOf ss) fn1 [ss]
-    fn1   = "makeblastdb" ++ (if dbType == ndb then "_nucl" else "_prot") ++ "_each"
+    ss'   = Fun (ListOf (EncodedAs "blastdb" sType)) salt (depsOf ss) fn1 [ss]
+    fn1   = "makeblastdb" ++ (if sType == fna then "_nucl" else "_prot") ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

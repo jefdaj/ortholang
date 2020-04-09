@@ -1,0 +1,64 @@
+[ 
+    ( Var ( RepID Nothing ) "query" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "magadb" 
+    , Fun faa.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" ] "makeblastdb_prot" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssm" 
+    , Fun pssm ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_train_db" 
+        [ Lit num ( Salt 0 ) "1.0e-2" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            ( Var ( RepID Nothing ) "magadb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hittable" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssm" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_pssm_db" 
+        [ Lit num ( Salt 0 ) "1.0e-2" 
+        , Ref pssm ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "magadb" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "pssm" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" ] 
+            ( Var ( RepID Nothing ) "magadb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pssm" 
+        , Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "magadb" 
+        , Var ( RepID Nothing ) "maga" 
+        ] 
+        ( Var ( RepID Nothing ) "hittable" )
+    ) 
+] 

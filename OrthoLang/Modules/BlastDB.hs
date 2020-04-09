@@ -77,8 +77,8 @@ olModule = Module
     -- these are used in the _rbh machinery
     -- they're a little weird because they are implemented using the non _all
     -- versions, so they internally make their args into lists of singleton lists
-    , mkMakeblastdbEach ndb -- makeblastdb_nucl_each : fa.list  -> ndb.list
-    , mkMakeblastdbEach pdb -- makeblastdb_prot_each : faa.list -> pdb.list
+    , mkMakeblastdbEach fna -- makeblastdb_nucl_each : fa.list  -> ndb.list
+    , mkMakeblastdbEach faa -- makeblastdb_prot_each : faa.list -> pdb.list
 
     , blastdbgetNucl -- TODO mapped version so you can list -> git at once?
     , blastdbgetProt -- TODO mapped version so you can list -> git at once?
@@ -90,8 +90,8 @@ olModule = Module
 -- TODO add a blastdb type group? seems natural but i'm not sure you ever need to mix them
 
 -- shorthand
-ndb = EncodedAs "blastdb" fna
-pdb = EncodedAs "blastdb" faa
+-- ndb = EncodedAs "blastdb" fna
+-- pdb = EncodedAs "blastdb" faa
 
 -- TODO remove?
 -- ndb :: Type
@@ -402,7 +402,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   let out'     = fromPath cfg out
       cDir'    = fromPath cfg cDir
       fasPath' = fromPath cfg fasPath
-  let dbType' = if dbType == ndb then "nucl" else "prot"
+  let dbType' = if dbType == (EncodedAs "blastdb" fna) then "nucl" else "prot"
   need' "ortholang.modules.blastdb.aMakeblastdbAll" [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
@@ -491,7 +491,7 @@ makeblastdbNucl = Function
   { fOpChar = Nothing, fName = "makeblastdb_nucl"
   -- , fTypeCheck = tMakeblastdb ndb
   -- , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
-  , fInputs = [Exactly (ListOf fna)] -- TODO can't do it from faa right?
+  , fInputs = [Exactly fna] -- TODO can't do it from faa right?
   , fOutput =  Exactly (EncodedAs "blastdb" fna)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
@@ -502,7 +502,7 @@ makeblastdbProt = Function
   { fOpChar = Nothing, fName = "makeblastdb_prot"
   -- , fTypeCheck = tMakeblastdb pdb
   -- , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
-  , fInputs = [Exactly (ListOf faa)] -- TODO can't do it from faa right?
+  , fInputs = [Exactly faa] -- TODO can't do it from faa right?
   , fOutput =  Exactly (EncodedAs "blastdb" faa)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
@@ -529,7 +529,7 @@ mkMakeblastdbEach faType = Function
   -- , fTypeCheck = tMakeblastdbEach dbType
   -- , fTypeDesc  = desc
   , fInputs = [Exactly (ListOf faType)]
-  , fOutput =  Exactly (EncodedAs "blastdb" faType)
+  , fOutput =  Exactly (ListOf (EncodedAs "blastdb" faType))
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
