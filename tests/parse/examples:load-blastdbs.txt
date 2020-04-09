@@ -1,121 +1,121 @@
 [ 
     ( Var ( RepID Nothing ) "microbial16s" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "16SMicrobial" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "env_nt" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "env_nt" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "est" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "est" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "est_human" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "est_human" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "est_human_blob" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "est_human_blob" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "est_mouse" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "est_mouse" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "est_mouse_blob" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "est_mouse_blob" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "est_others" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "est_others" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "gss" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "gss" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "htgs" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "htgs" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "human_genomic" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "human_genomic" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "nt" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "nt" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "other_genomic" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "other_genomic" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "patnt" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "patnt" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pdbnt" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "pdbnt" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "ref_prok_rep_genomes" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "ref_prok_rep_genomes" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "ref_viroids_rep_genomes" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "ref_viroids_rep_genomes" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "ref_viruses_rep_genomes" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "ref_viruses_rep_genomes" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "refseq_genomic" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "refseq_genomic" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "refseq_rna" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "refseq_rna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "refseqgene" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "refseqgene" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "sts" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "sts" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "tsa_nt" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "tsa_nt" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "vector" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "vector" ]
     ) 
 , 
@@ -198,47 +198,47 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "cdd_delta" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "cdd_delta" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "env_nr" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "env_nr" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "landmark" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "landmark" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "nr" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "nr" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pataa" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "pataa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pdbaa" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "pdbaa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "refseq_protein" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "refseq_protein" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "swissprot" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "tsa_nr" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "tsa_nr" ]
     ) 
 , 
