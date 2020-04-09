@@ -68,7 +68,7 @@ olModule = Module
             \\n\
             \TODO individual help descriptions for each fn"
 
-  , mTypes = [faa, pdb, bht, pssm]
+  , mTypes = [faa, bht, pssm]
   , mGroups = []
   , mFunctions =
 
@@ -118,6 +118,7 @@ pssm = Type
   }
 
 -- shorthand
+pdb :: Type
 pdb = EncodedAs "blastdb" faa
 
 --------------------
@@ -236,22 +237,22 @@ aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
 -- helpers that make blast dbs and/or pssms --
 ----------------------------------------------
 
--- Wrap the 3rd arg of a function call in makeblastdb_prot_each
+-- Wrap the 3rd arg of a function call in makeblastdb_faa_each
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO fix passing dbprefix as db itself
 withPdbSubjects :: Expr -> Expr
 withPdbSubjects (Fun rtn salt deps name [a1, a2, xs ])
   =             (Fun rtn salt deps name [a1, a2, dbs])
   where
-    dbs = Fun  (ListOf pdb) salt (depsOf xs) "makeblastdb_prot_each" [xs]
+    dbs = Fun  (ListOf pdb) salt (depsOf xs) "makeblastdb_faa_each" [xs]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
--- Wraps a single faa or an faa.list in makeblastdb_prot
+-- Wraps a single faa or an faa.list in makeblastdb_faa
 withPdbSubject :: Expr -> Expr
 withPdbSubject (Fun rtn salt deps name [a1, a2, x ])
   =            (Fun rtn salt deps name [a1, a2, db])
   where
-    db  = Fun  (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_all" [fas]
+    db  = Fun  (ListOf pdb) salt (depsOf fas) "makeblastdb_faa_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> withSingleton x
@@ -303,7 +304,7 @@ rPsiblastEach st (Fun rtn salt deps name [e, fa, fas])
   = (rMap 3 aPsiblastSearchDb') st expr'
   where
     ps    = Fun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
-    dbs   = Fun (ListOf pdb) salt (depsOf fas) "makeblastdb_prot_each" [fas]
+    dbs   = Fun (ListOf pdb) salt (depsOf fas) "makeblastdb_faa_each" [fas]
     expr' = Fun rtn salt deps name [e, ps, dbs]
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 

@@ -55,10 +55,10 @@ olModule = Module
   , mGroups = []
   , mFunctions =
 
-    [ loadNuclDB
-    , loadProtDB
-    , loadNuclDBEach
-    , loadProtDBEach
+    [ loadFnaDb
+    , loadFaaDb
+    , loadFnaDbEach
+    , loadFaaDbEach
     -- , mkMakeblastdb ndb
     -- , mkMakeblastdb pdb
 
@@ -80,8 +80,8 @@ olModule = Module
     , mkMakeblastdbEach fna -- makeblastdb_fna_each : fa.list  -> ndb.list
     , mkMakeblastdbEach faa -- makeblastdb_faa_each : faa.list -> pdb.list
 
-    , blastdbgetNucl -- TODO mapped version so you can list -> git at once?
-    , blastdbgetProt -- TODO mapped version so you can list -> git at once?
+    , blastdbgetFna -- TODO mapped version so you can list -> git at once?
+    , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
     , blastdblist
     -- , TODO write loadBlastDB
     ]
@@ -163,17 +163,17 @@ aLoadDB oPath sPath = do
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
   writeLit oPath'' pattern'
 
-loadNuclDB :: Function
-loadNuclDB = mkLoadDB "load_fna_db" fna
+loadFnaDb :: Function
+loadFnaDb = mkLoadDB "load_fna_db" fna
 
-loadProtDB :: Function
-loadProtDB = mkLoadDB "load_faa_db" faa
+loadFaaDb :: Function
+loadFaaDb = mkLoadDB "load_faa_db" faa
 
-loadNuclDBEach :: Function
-loadNuclDBEach = mkLoadDBEach "load_fna_db_each" fna
+loadFnaDbEach :: Function
+loadFnaDbEach = mkLoadDBEach "load_fna_db_each" fna
 
-loadProtDBEach :: Function
-loadProtDBEach = mkLoadDBEach "load_faa_db_each" faa
+loadFaaDbEach :: Function
+loadFaaDbEach = mkLoadDBEach "load_faa_db_each" faa
 
 ------------------------
 -- download from NCBI --
@@ -271,12 +271,12 @@ mkBlastdbget name faType = Function
   }
 
 -- TODO rename with fna
-blastdbgetNucl :: Function
-blastdbgetNucl = mkBlastdbget "blastdbget_fna" fna
+blastdbgetFna :: Function
+blastdbgetFna = mkBlastdbget "blastdbget_fna" fna
 
 -- TODO rename with faa
-blastdbgetProt :: Function
-blastdbgetProt = mkBlastdbget "blastdbget_faa" faa
+blastdbgetFaa :: Function
+blastdbgetFaa = mkBlastdbget "blastdbget_faa" faa
 
 rBlastdbget :: RulesFn
 rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
