@@ -1,0 +1,91 @@
+[ 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "blastp" 
+        [ Lit num ( Salt 0 ) "1.0e-5" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits3" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "repeat" 
+        [ Ref bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "hits" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        , Lit num ( Salt 0 ) "3.0" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "best3" 
+    , Fun bht.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits3" 
+        , Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "best_hits_each" 
+        [ Ref bht.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "hits3" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "best3" 
+        , Var ( RepID Nothing ) "hits3" 
+        , Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "length" 
+        [ Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "best3" 
+            , Var ( RepID Nothing ) "hits3" 
+            , Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "all" 
+            [ Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "best3" 
+                , Var ( RepID Nothing ) "hits3" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "extract_targets_each" 
+                [ Ref bht.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "hits3" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "best3" )
+                ]
+            ]
+        ]
+    ) 
+] 

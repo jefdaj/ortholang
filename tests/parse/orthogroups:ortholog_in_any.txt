@@ -1,0 +1,41 @@
+[ 
+    ( Var ( RepID Nothing ) "mycoplasma" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+        [ Fun str.list ( Salt 0 ) [] "glob_files" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_refseq.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "ofres" 
+    , Fun ofr ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mycoplasma" ] "orthofinder" 
+        [ Fun faa.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mycoplasma" ] "sample" 
+            [ Lit num ( Salt 0 ) "3.0" 
+            , Ref faa.list ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mycoplasma" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "shared" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "ofres" 
+        , Var ( RepID Nothing ) "mycoplasma" 
+        ] "ortholog_in_any" 
+        [ Ref ofr ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mycoplasma" ] 
+            ( Var ( RepID Nothing ) "ofres" )
+        , Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mycoplasma" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "ofres" 
+        , Var ( RepID Nothing ) "mycoplasma" 
+        ] 
+        ( Var ( RepID Nothing ) "shared" )
+    ) 
+] 

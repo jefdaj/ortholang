@@ -1,0 +1,340 @@
+[ 
+    ( Var ( RepID Nothing ) "mycoplasma" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+        [ Fun str.list ( Salt 0 ) [] "glob_files" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_refseq.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "n_to_use" 
+    , Lit num ( Salt 0 ) "4.0" 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "faas_to_use" 
+    , Fun faa.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "n_to_use" 
+        , Var ( RepID Nothing ) "mycoplasma" 
+        ] "sample" 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "n_to_use" )
+        , Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mycoplasma" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "spres" 
+    , Fun ofr ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "faas_to_use" 
+        , Var ( RepID Nothing ) "n_to_use" 
+        , Var ( RepID Nothing ) "mycoplasma" 
+        ] "orthofinder" 
+        [ Ref faa.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "n_to_use" 
+            , Var ( RepID Nothing ) "mycoplasma" 
+            ] 
+            ( Var ( RepID Nothing ) "faas_to_use" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "spres" 
+        , Var ( RepID Nothing ) "faas_to_use" 
+        , Var ( RepID Nothing ) "n_to_use" 
+        , Var ( RepID Nothing ) "mycoplasma" 
+        ] "length_each" 
+        [ Lst str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "spres" 
+            , Var ( RepID Nothing ) "faas_to_use" 
+            , Var ( RepID Nothing ) "n_to_use" 
+            , Var ( RepID Nothing ) "mycoplasma" 
+            ] 
+            [ Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "0.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "1.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "2.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "3.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "4.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "5.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "10.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "0.1" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "0.2" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "0.3" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "0.4" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "0.5" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "-0.1" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "-1.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            , Fun str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "spres" 
+                , Var ( RepID Nothing ) "faas_to_use" 
+                , Var ( RepID Nothing ) "n_to_use" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_max" 
+                [ Lit num ( Salt 0 ) "-10.0" 
+                , Ref ofr ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "faas_to_use" 
+                    , Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "spres" )
+                , Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "n_to_use" 
+                    , Var ( RepID Nothing ) "mycoplasma" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faas_to_use" )
+                ] 
+            ] 
+        ]
+    ) 
+] 

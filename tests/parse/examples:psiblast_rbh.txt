@@ -1,0 +1,59 @@
+[ 
+    ( Var ( RepID Nothing ) "g1" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/PCC_6803_genes.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "g2" 
+    , Fun faa ( Salt 0 ) [] "concat_faa" 
+        [ Lst faa ( Salt 0 ) [] 
+            [ Fun faa ( Salt 0 ) [] "gbk_to_faa" 
+                [ Lit str ( Salt 0 ) "cds" 
+                , Fun gbk ( Salt 0 ) [] "load_gbk" 
+                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_chr.gbk" ]
+                ] 
+            , Fun faa ( Salt 0 ) [] "gbk_to_faa" 
+                [ Lit str ( Salt 0 ) "cds" 
+                , Fun gbk ( Salt 0 ) [] "load_gbk" 
+                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_pANL.gbk" ]
+                ] 
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "g1_10_genes" 
+    , Fun faa.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "g1" ] "sample" 
+        [ Lit num ( Salt 0 ) "10.0" 
+        , Fun faa.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "g1" ] "split_faa" 
+            [ Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "g1" )
+            ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssms" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "g1_10_genes" 
+        , Var ( RepID Nothing ) "g1" 
+        , Var ( RepID Nothing ) "g2" 
+        ] "psiblast_train_pssms" 
+        [ Lit num ( Salt 0 ) "1.0e-10" 
+        , Ref faa.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "g1" ] 
+            ( Var ( RepID Nothing ) "g1_10_genes" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "g2" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "g1_10_genes" 
+        , Var ( RepID Nothing ) "g1" 
+        , Var ( RepID Nothing ) "g2" 
+        ] 
+        ( Var ( RepID Nothing ) "pssms" )
+    ) 
+] 

@@ -1,0 +1,55 @@
+[ 
+    ( Var ( RepID Nothing ) "genes5" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun fna ( Salt 0 ) [] "gbk_to_fna" 
+        [ Lit str ( Salt 0 ) "cds" 
+        , Fun gbk ( Salt 0 ) [] "load_gbk" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "genes5" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "extract_queries" 
+        [ Fun bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "genes5" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "tblastx" 
+            [ Lit num ( Salt 0 ) "1.0e-5" 
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "genes5" )
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "hits" 
+        , Var ( RepID Nothing ) "genes5" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "all" 
+        [ Fun str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "genes5" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "repeat" 
+            [ Ref str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "genes5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                ( Var ( RepID Nothing ) "hits" )
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "genes5" )
+            , Lit num ( Salt 0 ) "10.0" 
+            ] 
+        ]
+    ) 
+] 

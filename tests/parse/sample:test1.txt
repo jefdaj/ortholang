@@ -1,0 +1,121 @@
+[ 
+    ( Var ( RepID Nothing ) "list1" 
+    , Lst num ( Salt 0 ) [] 
+        [ Lit num ( Salt 0 ) "1.0" 
+        , Lit num ( Salt 0 ) "2.0" 
+        , Lit num ( Salt 0 ) "3.0" 
+        , Lit num ( Salt 0 ) "4.0" 
+        , Lit num ( Salt 0 ) "5.0" 
+        , Lit num ( Salt 0 ) "6.0" 
+        , Lit num ( Salt 0 ) "7.0" 
+        , Lit num ( Salt 0 ) "8.0" 
+        , Lit num ( Salt 0 ) "9.0" 
+        , Lit num ( Salt 0 ) "10.0" 
+        , Lit num ( Salt 0 ) "11.0" 
+        , Lit num ( Salt 0 ) "12.0" 
+        , Lit num ( Salt 0 ) "13.0" 
+        , Lit num ( Salt 0 ) "14.0" 
+        , Lit num ( Salt 0 ) "15.0" 
+        , Lit num ( Salt 0 ) "16.0" 
+        , Lit num ( Salt 0 ) "17.0" 
+        , Lit num ( Salt 0 ) "18.0" 
+        , Lit num ( Salt 0 ) "19.0" 
+        , Lit num ( Salt 0 ) "20.0" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "same1" 
+    , Fun num.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "list1" ] "sample" 
+        [ Lit num ( Salt 0 ) "15.0" 
+        , Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "list1" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "same2" 
+    , Fun num.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "list1" ] "sample" 
+        [ Lit num ( Salt 0 ) "15.0" 
+        , Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "list1" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "diffs" 
+    , Fun num.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "same1" 
+        , Var ( RepID Nothing ) "list1" 
+        ] "repeat" 
+        [ Ref num.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "list1" ] 
+            ( Var ( RepID Nothing ) "same1" )
+        , Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "list1" )
+        , Lit num ( Salt 0 ) "2.0" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lst num.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "same1" 
+        , Var ( RepID Nothing ) "list1" 
+        , Var ( RepID Nothing ) "same2" 
+        , Var ( RepID Nothing ) "diffs" 
+        ] 
+        [ Fun num.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "same1" 
+            , Var ( RepID Nothing ) "list1" 
+            , Var ( RepID Nothing ) "same2" 
+            ] "length" 
+            [ Fun num.list.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "same1" 
+                , Var ( RepID Nothing ) "list1" 
+                , Var ( RepID Nothing ) "same2" 
+                ] "any" 
+                [ Fun num.list.list.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "same1" 
+                    , Var ( RepID Nothing ) "list1" 
+                    , Var ( RepID Nothing ) "same2" 
+                    ] "singletons" 
+                    [ Lst num.list ( Salt 0 ) 
+                        [ Var ( RepID Nothing ) "same1" 
+                        , Var ( RepID Nothing ) "list1" 
+                        , Var ( RepID Nothing ) "same2" 
+                        ] 
+                        [ Ref num.list ( Salt 0 ) 
+                            [ Var ( RepID Nothing ) "list1" ] 
+                            ( Var ( RepID Nothing ) "same1" )
+                        , Ref num.list ( Salt 0 ) 
+                            [ Var ( RepID Nothing ) "list1" ] 
+                            ( Var ( RepID Nothing ) "same2" )
+                        ] 
+                    ]
+                ]
+            ]
+        , Fun num.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "diffs" 
+            , Var ( RepID Nothing ) "same1" 
+            , Var ( RepID Nothing ) "list1" 
+            ] "length" 
+            [ Fun num.list.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "diffs" 
+                , Var ( RepID Nothing ) "same1" 
+                , Var ( RepID Nothing ) "list1" 
+                ] "any" 
+                [ Fun num.list.list.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "diffs" 
+                    , Var ( RepID Nothing ) "same1" 
+                    , Var ( RepID Nothing ) "list1" 
+                    ] "singletons" 
+                    [ Ref num.list.list ( Salt 0 ) 
+                        [ Var ( RepID Nothing ) "same1" 
+                        , Var ( RepID Nothing ) "list1" 
+                        ] 
+                        ( Var ( RepID Nothing ) "diffs" )
+                    ]
+                ]
+            ]
+        ] 
+    ) 
+] 

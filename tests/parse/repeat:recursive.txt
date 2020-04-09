@@ -1,0 +1,44 @@
+[ 
+    ( Var ( RepID Nothing ) "var1" 
+    , Lit num ( Salt 0 ) "2.0" 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "var2" 
+    , Fun num.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "var1" ] "repeat" 
+        [ Bop num ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "var1" ] "*" 
+            ( Ref num ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "var1" )
+            ) 
+            ( Lit num ( Salt 0 ) "3.0" )
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "var1" )
+        , Lit num ( Salt 0 ) "5.0" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun num.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "var1" 
+        , Var ( RepID Nothing ) "var2" 
+        ] "repeat" 
+        [ Lst num.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "var1" 
+            , Var ( RepID Nothing ) "var2" 
+            ] 
+            [ Lst num ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "var1" ] 
+                [ Ref num ( Salt 0 ) [] 
+                    ( Var ( RepID Nothing ) "var1" )
+                ]
+            , Ref num.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "var1" ] 
+                ( Var ( RepID Nothing ) "var2" )
+            ] 
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "var1" )
+        , Lit num ( Salt 0 ) "4.0" 
+        ] 
+    ) 
+] 
