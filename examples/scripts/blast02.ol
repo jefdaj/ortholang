@@ -3,7 +3,7 @@ pcc7942 = concat_faa [gbk_to_faa "cds" (load_gbk "examples/sequences/PCC_7942_ch
                       gbk_to_faa "cds" (load_gbk "examples/sequences/PCC_7942_pANL.gbk")]
 
 # BLAST against the SwissProt database
-hits = blastp_db 1e-50 pcc7942 (blastdbget_prot "swissprot")
+hits = blastp_db 1e-50 pcc7942 (blastdbget_faa "swissprot")
 
 # find Synechococcus orthologs of Synechocystis genes
 # (this lists the Synechococcus genes themselves;

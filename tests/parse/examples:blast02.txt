@@ -27,7 +27,7 @@
         [ Lit num ( Salt 0 ) "1.0e-50" 
         , Ref faa ( Salt 0 ) [] 
             ( Var ( RepID Nothing ) "pcc7942" )
-        , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+        , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
             [ Lit str ( Salt 0 ) "swissprot" ]
         ] 
     ) 

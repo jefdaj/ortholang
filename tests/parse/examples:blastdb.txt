@@ -1,16 +1,16 @@
 [ 
     ( Var ( RepID Nothing ) "human" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "human_est" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "swissprot" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mycodb" 
-    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_prot_all" 
+    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_faa_all" 
         [ Fun faa.list ( Salt 0 ) [] "load_faa_glob" 
             [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_refseq.faa" ]
         ]
@@ -48,7 +48,7 @@
         , Ref faa ( Salt 0 ) [] 
             ( Var ( RepID Nothing ) "pcc7942" )
         , Fun fna.blastdb ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "pcc6803" ] "makeblastdb_nucl" 
+            [ Var ( RepID Nothing ) "pcc6803" ] "makeblastdb_fna" 
             [ Ref fna ( Salt 0 ) [] 
                 ( Var ( RepID Nothing ) "pcc6803" )
             ]

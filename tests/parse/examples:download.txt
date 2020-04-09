@@ -10,22 +10,22 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "human_est" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "human_est" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "swissprot" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "rsprotein" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "refseq_protein" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "rsgenomic" 
-    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_fna" 
         [ Lit str ( Salt 0 ) "refseq_genomic" ]
     ) 
 , 

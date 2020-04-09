@@ -8,8 +8,8 @@
 # will be much faster. But it may be convenient to fetch them locally to use in
 # a larger pipeline, or because you want to do a large number of searches in
 # parallel.
-human     = blastdbget_prot "human_est"
-swissprot = blastdbget_prot "swissprot"
+human     = blastdbget_faa "human_est"
+swissprot = blastdbget_faa "swissprot"
 
 # You can also make your own databases from one or more species of interest.
 # Note that if you just want to do a quick BLAST search you can skip this and

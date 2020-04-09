@@ -8,10 +8,10 @@ ncbi_human_db_list = blastdblist "human"
 # And then download them like this (WARNING: huge files! 100GB+)
 # Annoyingly, you have to figure out yourself whether each database is protein
 # or nucleic acid. But in most cases you probably already know.
-human_est = blastdbget_prot "human_est"
-swissprot = blastdbget_prot "swissprot"
-rsprotein = blastdbget_prot "refseq_protein"
-rsgenomic = blastdbget_nucl "refseq_genomic"
+human_est = blastdbget_faa "human_est"
+swissprot = blastdbget_faa "swissprot"
+rsprotein = blastdbget_faa "refseq_protein"
+rsgenomic = blastdbget_fna "refseq_genomic"
 
 # For genomes and proteomes, try BioMartR.
 # Give the complete species name and the database in parentheses.

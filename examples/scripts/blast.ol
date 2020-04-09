@@ -3,7 +3,7 @@
 my_species = gbk_to_fna "cds" (load_gbk "examples/sequences/PCC_6803_genome.gbff")
 
 # download the SwissProt datbase
-swissprot = blastdbget_prot "swissprot"
+swissprot = blastdbget_faa "swissprot"
 
 # BLAST your genes against it
 blast_hits = blastx_db 1e-20 my_species swissprot

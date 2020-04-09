@@ -8,7 +8,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
         [ Lit str ( Salt 0 ) "swissprot" ]
     ) 
 , 
