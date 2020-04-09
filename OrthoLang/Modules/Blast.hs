@@ -73,16 +73,14 @@ blastDescs =
 mkBlastFromDb :: BlastDesc -> Function
 mkBlastFromDb d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing
-  , fName = name
+  , fName = bCmd ++ "_db"
   -- , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
   -- , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs "blastdb" sType)]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
   }
-  where
-    name = bCmd ++ "_db"
 
 -- TODO remove tmp?
 rMkBlastFromDb :: BlastDesc -> RulesFn
@@ -177,7 +175,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   , fName = bCmd
   -- , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
   -- , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
-  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs "blastdb" sType)]
+  , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly bht
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d

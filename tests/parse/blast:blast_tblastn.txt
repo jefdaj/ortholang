@@ -1,0 +1,84 @@
+[ 
+    ( Var ( RepID Nothing ) "maga5" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "single" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga5" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "extract_queries" 
+        [ Fun bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga5" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "tblastn" 
+            [ Lit num ( Salt 0 ) "1.0e-5" 
+            , Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga5" )
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga5" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "extract_queries_each" 
+        [ Fun bht.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga5" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "tblastn_each" 
+            [ Lit num ( Salt 0 ) "1.0e-5" 
+            , Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga5" )
+            , Lst fna ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "maga" ] 
+                [ Ref fna ( Salt 0 ) [] 
+                    ( Var ( RepID Nothing ) "maga" )
+                ]
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "maga5" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "all" 
+        [ Bop str.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "maga5" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "maga5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                [ Ref str.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "maga5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "single" )
+                ]
+            ) 
+            ( Ref str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "maga5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                ( Var ( RepID Nothing ) "mapped" )
+            )
+        ]
+    ) 
+] 

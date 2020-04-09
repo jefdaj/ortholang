@@ -1,0 +1,50 @@
+[ 
+    ( Var ( RepID Nothing ) "query" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgendb" 
+    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_prot" 
+        [ Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "magadb" 
+    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_prot" 
+        [ Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssm" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "magadb" 
+        ] "psiblast_train_db_each" 
+        [ Lit num ( Salt 0 ) "1.0e-2" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Lst faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "magadb" 
+            ] 
+            [ Ref faa.blastdb ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mgendb" )
+            , Ref faa.blastdb ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "magadb" )
+            ] 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "mgendb" 
+        , Var ( RepID Nothing ) "magadb" 
+        ] 
+        ( Var ( RepID Nothing ) "pssm" )
+    ) 
+] 

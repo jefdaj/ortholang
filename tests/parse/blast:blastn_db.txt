@@ -1,0 +1,85 @@
+[ 
+    ( Var ( RepID Nothing ) "mbov" 
+    , Fun fna ( Salt 0 ) [] "gbk_to_fna" 
+        [ Lit str ( Salt 0 ) "cds" 
+        , Fun gbk ( Salt 0 ) [] "load_gbk" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk" ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun fna.blastdb ( Salt 0 ) [] "makeblastdb_nucl" 
+        [ Fun fna ( Salt 0 ) [] "gbk_to_fna" 
+            [ Lit str ( Salt 0 ) "cds" 
+            , Fun gbk ( Salt 0 ) [] "load_gbk" 
+                [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "single" 
+    , Fun str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mbov" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "extract_queries" 
+        [ Fun bht ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mbov" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "blastn_db" 
+            [ Lit num ( Salt 0 ) "1.0e-5" 
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mbov" )
+            , Ref fna.blastdb ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mgen" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Fun str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mbov" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "extract_queries_each" 
+        [ Fun bht.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mbov" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "blastn_db_each" 
+            [ Lit num ( Salt 0 ) "1.0e-5" 
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mbov" )
+            , Lst fna.blastdb ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "mgen" ] 
+                [ Ref fna.blastdb ( Salt 0 ) [] 
+                    ( Var ( RepID Nothing ) "mgen" )
+                ]
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "mbov" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "|" 
+        ( Lst str.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "mbov" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            [ Ref str.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "single" )
+            ]
+        ) 
+        ( Ref str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mbov" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            ( Var ( RepID Nothing ) "mapped" )
+        )
+    ) 
+] 

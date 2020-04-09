@@ -1,0 +1,61 @@
+[ 
+    ( Var ( RepID Nothing ) "human" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+        [ Lit str ( Salt 0 ) "human_est" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "swissprot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+        [ Lit str ( Salt 0 ) "swissprot" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mycodb" 
+    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_prot_all" 
+        [ Fun faa.list ( Salt 0 ) [] "load_faa_glob" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_refseq.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc7942" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_genes.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc6803" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "examples/sequences/PCC_6803_genes.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits1" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pcc7942" 
+        , Var ( RepID Nothing ) "pcc6803" 
+        ] "tblastn" 
+        [ Lit num ( Salt 0 ) "1.0e-50" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "pcc7942" )
+        , Ref fna ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "pcc6803" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "hits2" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pcc7942" 
+        , Var ( RepID Nothing ) "pcc6803" 
+        ] "tblastn_db" 
+        [ Lit num ( Salt 0 ) "1.0e-50" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "pcc7942" )
+        , Fun fna.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "pcc6803" ] "makeblastdb_nucl" 
+            [ Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "pcc6803" )
+            ]
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lit str ( Salt 0 ) "nothing so far" 
+    ) 
+] 

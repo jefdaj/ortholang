@@ -242,7 +242,10 @@ typecheckFn name outSig inSigs inTypes =
   let nExp = length inSigs
       nAct = length inTypes
   in if nExp /= nAct
-       then Left $ "expected " ++ show nExp ++ " arguments to " ++ name ++ ", but got " ++ show nAct
+       then Left $ "expected " ++ show nExp ++ " arguments to " ++ name ++
+                   ", but got " ++ show nAct ++ "." ++
+                   "\nType signature is: " ++ show inSigs ++
+                   "\nInputs are: " ++ show inTypes
        else typecheckFn' name outSig inSigs inTypes
 
 {-|
