@@ -14,6 +14,7 @@ module OrthoLang.Core.Compile.Compose
 import OrthoLang.Core.Types
 import OrthoLang.Core.Parse.Expr (typecheckFn) -- TODO move somewhere else
 import OrthoLang.Core.Compile.NewRules
+import Control.DeepSeq
 
 -- | `compose fn1 fn2` is kind of like `fn2 . fn1` in Haskell
 -- TODO can it figure out the types automatically from fn1 and fn2?
@@ -22,9 +23,11 @@ compose1
   -> Function -- ^ first function (takes inputs, returns 1 intermediate file)
   -> Function -- ^ second function (takes intermediate file, produces output)
   -> Function -- ^ overall fn (runs fn1, then fn2 on its output)
-compose1 name fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) $ mCompose1 fn1 fn2
+compose1 name fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro'
+  where
+    macro = mCompose1 fn1 fn2
+    macro' = macro `deepseq` macro -- force composition errors immediately
 
--- TODO strictly evaluate functions when loading, so these all get revealed!
 err :: a
 err = error "core.compile.compose.mCompose1"
 
