@@ -85,8 +85,11 @@ search = Type
 --   }
 
 -- just shorthand
-fnagz = EncodedAs "gz" fna :: Type
-faagz = EncodedAs "gz" faa :: Type
+fnagz :: Type
+fnagz = EncodedAs "gz" fna
+
+faagz :: Type
+faagz = EncodedAs "gz" faa
 
 -- TODO does this work at all?
 parseSearches :: Function
@@ -110,7 +113,7 @@ getGenomes = let name = "get_genomes" in Function
   -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf fnagz)
   -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly fnagz
+  , fOutput = Exactly (ListOf fnagz)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getGenome"
   }
@@ -125,7 +128,7 @@ getProteomes = let name = "get_proteomes" in Function
   -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf faagz)
   -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly faagz
+  , fOutput = Exactly (ListOf faagz)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getProteome"
   }

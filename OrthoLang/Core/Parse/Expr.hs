@@ -269,7 +269,7 @@ typecheckFn' name outSig inSigs inTypes =
     errHeader = name ++ " has the type signature " ++ show inSigs
                      ++ ",\nwhich doesn't match its inputs "   ++ show inTypes
                      ++ "\nSpecifically..."
-    explain (n,s,t) = "\nThe " ++ show t ++ " in position " ++ show (n :: Int)
+    explain (n,s,t) = "The " ++ show t ++ " in position " ++ show (n :: Int)
                       ++ " doesn't match " ++ show s ++ "."
 
 {-|
