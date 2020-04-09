@@ -1,7 +1,14 @@
+{-|
+This is also a convenient place to fully evaluate 'Module's, which ensures no
+hidden 'undefined' fields are lurking anywhere. This is a work in progress
+because there are still some undefined parts of OrthoLang!
+-}
+
 module OrthoLang.Modules (modules)
   where
 
 import OrthoLang.Core.Types (Module)
+-- TODO ensure nothing is undefined: import Control.DeepSeq
 
 import qualified OrthoLang.Modules.AllVsAll      as AllVsAll
 import qualified OrthoLang.Modules.BioMartR      as BioMartR

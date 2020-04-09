@@ -46,6 +46,7 @@ common shared-properties
                     cryptohash,
                     directory,
                     data-default-class,
+                    deepseq,
                     docopt,
                     -- exceptions,
                     -- enclosed-exceptions,
