@@ -1,0 +1,34 @@
+[ 
+    ( Var ( RepID Nothing ) "one_half" 
+    , Bop num ( Salt 0 ) [] "/" 
+        ( Lit num ( Salt 0 ) "1.0" ) 
+        ( Lit num ( Salt 0 ) "2.0" )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "three_quarters" 
+    , Bop num ( Salt 0 ) [] "/" 
+        ( Lit num ( Salt 0 ) "3.0" ) 
+        ( Lit num ( Salt 0 ) "4.0" )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "harder" 
+    , Bop num ( Salt 0 ) [] "/" 
+        ( Lit num ( Salt 0 ) "4.0" ) 
+        ( Lit num ( Salt 0 ) "89.0" )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lst num ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "one_half" 
+        , Var ( RepID Nothing ) "three_quarters" 
+        , Var ( RepID Nothing ) "harder" 
+        ] 
+        [ Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "one_half" )
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "three_quarters" )
+        , Ref num ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "harder" )
+        ] 
+    ) 
+] 

@@ -1,0 +1,7 @@
+[ 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop num ( Salt 0 ) [] "+" 
+        ( Lit num ( Salt 0 ) "1.0" ) 
+        ( Lit num ( Salt 0 ) "1.0" )
+    ) 
+]

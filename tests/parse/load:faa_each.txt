@@ -1,0 +1,42 @@
+[ 
+    ( Var ( RepID Nothing ) "l1" 
+    , Lst str ( Salt 0 ) [] 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "list1" 
+    , Fun faa.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "l1" ] "load_faa_each" 
+        [ Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "l1" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "list2" 
+    , Lst faa ( Salt 0 ) [] 
+        [ Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun faa.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "list1" 
+        , Var ( RepID Nothing ) "l1" 
+        , Var ( RepID Nothing ) "list2" 
+        ] "length" 
+        [ Bop faa.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "list1" 
+            , Var ( RepID Nothing ) "l1" 
+            , Var ( RepID Nothing ) "list2" 
+            ] "|" 
+            ( Ref faa.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "l1" ] 
+                ( Var ( RepID Nothing ) "list1" )
+            ) 
+            ( Ref faa.list ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "list2" )
+            )
+        ]
+    ) 
+] 

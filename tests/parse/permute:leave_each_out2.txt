@@ -1,0 +1,11 @@
+[ 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun num.list ( Salt 0 ) [] "leave_each_out" 
+        [ Lst num ( Salt 0 ) [] 
+            [ Lit num ( Salt 0 ) "1.0" 
+            , Lit num ( Salt 0 ) "2.0" 
+            , Lit num ( Salt 0 ) "3.0" 
+            ] 
+        ]
+    ) 
+]

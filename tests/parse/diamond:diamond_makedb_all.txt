@@ -1,0 +1,16 @@
+[ 
+    ( Var ( RepID Nothing ) "mycoplasma" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+        [ Fun str.list ( Salt 0 ) [] "glob_files" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_small.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun dmnd ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mycoplasma" ] "diamond_makedb_all" 
+        [ Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mycoplasma" )
+        ]
+    ) 
+] 

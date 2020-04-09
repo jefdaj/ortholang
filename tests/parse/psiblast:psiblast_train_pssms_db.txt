@@ -1,0 +1,63 @@
+[ 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "cyanodb" 
+    , Fun faa.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "makeblastdb_prot_all" 
+        [ Lst faa ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            [ Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mgen" )
+            , Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "queries" 
+    , Fun faa.list ( Salt 0 ) [] "split_faa" 
+        [ Fun faa ( Salt 0 ) [] "load_faa" 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssms" 
+    , Fun pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "queries" 
+        , Var ( RepID Nothing ) "cyanodb" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_train_pssms_db" 
+        [ Lit num ( Salt 0 ) "1.0e-10" 
+        , Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "queries" )
+        , Ref faa.blastdb ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "cyanodb" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref pssm.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "queries" 
+        , Var ( RepID Nothing ) "cyanodb" 
+        , Var ( RepID Nothing ) "mgen" 
+        , Var ( RepID Nothing ) "maga" 
+        ] 
+        ( Var ( RepID Nothing ) "pssms" )
+    ) 
+] 

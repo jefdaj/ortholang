@@ -1,0 +1,52 @@
+[ 
+    ( Var ( RepID Nothing ) "multifa" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "genes" 
+    , Fun faa.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "multifa" ] "split_faa" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "multifa" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Fun faa.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "multifa" ] "split_faa_each" 
+        [ Lst faa ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "multifa" ] 
+            [ Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "multifa" )
+            ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun faa.list.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "genes" 
+        , Var ( RepID Nothing ) "multifa" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "length_each" 
+        [ Bop faa.list.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "genes" 
+            , Var ( RepID Nothing ) "multifa" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst faa.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "genes" 
+                , Var ( RepID Nothing ) "multifa" 
+                ] 
+                [ Ref faa.list ( Salt 0 ) 
+                    [ Var ( RepID Nothing ) "multifa" ] 
+                    ( Var ( RepID Nothing ) "genes" )
+                ]
+            ) 
+            ( Ref faa.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "multifa" ] 
+                ( Var ( RepID Nothing ) "mapped" )
+            )
+        ]
+    ) 
+] 

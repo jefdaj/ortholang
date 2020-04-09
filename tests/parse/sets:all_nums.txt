@@ -1,0 +1,82 @@
+[ 
+    ( Var ( RepID Nothing ) "set1" 
+    , Lst num ( Salt 0 ) [] 
+        [ Lit num ( Salt 0 ) "1.0" 
+        , Lit num ( Salt 0 ) "2.0" 
+        , Lit num ( Salt 0 ) "3.0" 
+        , Lit num ( Salt 0 ) "4.0" 
+        , Lit num ( Salt 0 ) "5.0" 
+        , Lit num ( Salt 0 ) "6.0" 
+        , Lit num ( Salt 0 ) "7.0" 
+        , Lit num ( Salt 0 ) "8.0" 
+        , Lit num ( Salt 0 ) "9.0" 
+        , Lit num ( Salt 0 ) "10.0" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "set2" 
+    , Lst num ( Salt 0 ) [] 
+        [ Lit num ( Salt 0 ) "5.0" 
+        , Lit num ( Salt 0 ) "6.0" 
+        , Lit num ( Salt 0 ) "7.0" 
+        , Lit num ( Salt 0 ) "8.0" 
+        , Lit num ( Salt 0 ) "9.0" 
+        , Lit num ( Salt 0 ) "10.0" 
+        , Lit num ( Salt 0 ) "11.0" 
+        , Lit num ( Salt 0 ) "12.0" 
+        , Lit num ( Salt 0 ) "13.0" 
+        , Lit num ( Salt 0 ) "14.0" 
+        , Lit num ( Salt 0 ) "15.0" 
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "res1" 
+    , Fun num.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "set1" 
+        , Var ( RepID Nothing ) "set2" 
+        ] "all" 
+        [ Lst num.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "set1" 
+            , Var ( RepID Nothing ) "set2" 
+            ] 
+            [ Ref num.list ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "set1" )
+            , Ref num.list ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "set2" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "res2" 
+    , Bop num.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "set1" 
+        , Var ( RepID Nothing ) "set2" 
+        ] "&" 
+        ( Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "set1" )
+        ) 
+        ( Ref num.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "set2" )
+        )
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lst num.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "res1" 
+        , Var ( RepID Nothing ) "set1" 
+        , Var ( RepID Nothing ) "set2" 
+        , Var ( RepID Nothing ) "res2" 
+        ] 
+        [ Ref num.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "set1" 
+            , Var ( RepID Nothing ) "set2" 
+            ] 
+            ( Var ( RepID Nothing ) "res1" )
+        , Ref num.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "set1" 
+            , Var ( RepID Nothing ) "set2" 
+            ] 
+            ( Var ( RepID Nothing ) "res2" )
+        ] 
+    ) 
+] 

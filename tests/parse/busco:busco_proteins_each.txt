@@ -1,0 +1,36 @@
+[ 
+    ( Var ( RepID Nothing ) "odb9_firmicutes" 
+    , Fun blh ( Salt 0 ) [] "busco_fetch_lineage" 
+        [ Lit str ( Salt 0 ) "v2/datasets/firmicutes_odb9" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun bsr.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "odb9_firmicutes" 
+        , Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "busco_proteins_each" 
+        [ Ref blh ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "odb9_firmicutes" )
+        , Lst faa ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] 
+            [ Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "maga" )
+            , Ref faa ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "mgen" )
+            ] 
+        ] 
+    ) 
+] 

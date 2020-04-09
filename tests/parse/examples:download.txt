@@ -1,0 +1,62 @@
+[ 
+    ( Var ( RepID Nothing ) "ncbi_db_list" 
+    , Fun str.list ( Salt 0 ) [] "blastdblist" 
+        [ Lit str ( Salt 0 ) "" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "ncbi_human_db_list" 
+    , Fun str.list ( Salt 0 ) [] "blastdblist" 
+        [ Lit str ( Salt 0 ) "human" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "human_est" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+        [ Lit str ( Salt 0 ) "human_est" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "swissprot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+        [ Lit str ( Salt 0 ) "swissprot" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rsprotein" 
+    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_prot" 
+        [ Lit str ( Salt 0 ) "refseq_protein" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "rsgenomic" 
+    , Fun fna.blastdb ( Salt 0 ) [] "blastdbget_nucl" 
+        [ Lit str ( Salt 0 ) "refseq_genomic" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc7942p" 
+    , Fun faa.gz ( Salt 0 ) [] "get_proteomes" 
+        [ Lst str ( Salt 0 ) [] 
+            [ Lit str ( Salt 0 ) "Synechococcus elongatus PCC 7942 (refseq)" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc7942n" 
+    , Fun fna.gz ( Salt 0 ) [] "get_genomes" 
+        [ Lst str ( Salt 0 ) [] 
+            [ Lit str ( Salt 0 ) "Synechococcus elongatus PCC 7942 (refseq)" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc6803" 
+    , Fun faa.gz ( Salt 0 ) [] "get_proteomes" 
+        [ Lst str ( Salt 0 ) [] 
+            [ Lit str ( Salt 0 ) "Synechocystis sp. PCC 6803 (refseq)" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "samplefa" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "https://molb7621.github.io/workshop/_downloads/sample.fa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref str.list ( Salt 0 ) [] 
+        ( Var ( RepID Nothing ) "ncbi_human_db_list" )
+    ) 
+] 

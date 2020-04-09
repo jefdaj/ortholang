@@ -1,0 +1,36 @@
+[ 
+    ( Var ( RepID Nothing ) "single" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "genes5" 
+    , Fun fna ( Salt 0 ) [] "load_fna" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "db" 
+    , Fun fna.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "genes5" 
+        ] "makeblastdb_nucl_all" 
+        [ Lst fna ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "genes5" 
+            ] 
+            [ Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "single" )
+            , Ref fna ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "genes5" )
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref fna.blastdb ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "genes5" 
+        ] 
+        ( Var ( RepID Nothing ) "db" )
+    ) 
+] 

@@ -1,0 +1,32 @@
+[ 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "query" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pssm" 
+    , Fun pssm ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "maga" 
+        ] "psiblast_train" 
+        [ Lit num ( Salt 0 ) "1.0e-10" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "query" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref pssm ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "query" 
+        , Var ( RepID Nothing ) "maga" 
+        ] 
+        ( Var ( RepID Nothing ) "pssm" )
+    ) 
+] 

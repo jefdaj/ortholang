@@ -8,7 +8,7 @@
 , stdenv, store, strict, tasty, tasty-golden, tasty-hspec
 , tasty-hunit, tasty-quickcheck, temporary, terminal-size, text
 , time, transformers, unbounded-delays, unix, unordered-containers
-, utility-ht, zlib
+, utility-ht, zlib, pretty-simple
 }:
 mkDerivation {
   pname = "OrthoLang";
@@ -27,6 +27,7 @@ mkDerivation {
     shake silently split store strict tasty tasty-golden tasty-hspec
     tasty-hunit tasty-quickcheck temporary terminal-size text time
     transformers unbounded-delays unix unordered-containers utility-ht
+    pretty-simple
   ];
   libraryPkgconfigDepends = [ zlib ];
   executableHaskellDepends = [
@@ -39,6 +40,7 @@ mkDerivation {
     shake silently split store strict tasty tasty-golden tasty-hspec
     tasty-hunit tasty-quickcheck temporary terminal-size text time
     transformers unbounded-delays unix unordered-containers utility-ht
+    pretty-simple
   ];
   executablePkgconfigDepends = [ zlib ];
   description = "Short, reproducible phylogenomic cuts";

@@ -1,0 +1,34 @@
+[ 
+    ( Var ( RepID Nothing ) "all_faa" 
+    , Fun str.list ( Salt 0 ) [] "glob_files" 
+        [ Lit str ( Salt 0 ) "examples/sequences/*.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "all_fna" 
+    , Fun str.list ( Salt 0 ) [] "glob_files" 
+        [ Lit str ( Salt 0 ) "examples/sequences/*.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc7942" 
+    , Fun str.list ( Salt 0 ) [] "glob_files" 
+        [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_*.gbk" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "two_cyanos" 
+    , Fun str.list ( Salt 0 ) [] "load_list" 
+        [ Lit str ( Salt 0 ) "examples/genome-lists/genbank-two-cyanos.txt" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "two_genbank_files" 
+    , Fun gbk.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "two_cyanos" ] "load_gbk_each" 
+        [ Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "two_cyanos" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref str.list ( Salt 0 ) [] 
+        ( Var ( RepID Nothing ) "pcc7942" )
+    ) 
+] 

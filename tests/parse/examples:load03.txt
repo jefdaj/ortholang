@@ -1,0 +1,53 @@
+[ 
+    ( Var ( RepID Nothing ) "genome_names" 
+    , Fun str.list ( Salt 0 ) [] "load_list" 
+        [ Lit str ( Salt 0 ) "examples/genome-lists/genbank-two-cyanos.txt" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "genomes" 
+    , Fun gbk.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "genome_names" ] "load_gbk_each" 
+        [ Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "genome_names" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "pcc7942genes" 
+    , Fun faa ( Salt 0 ) [] "concat_faa" 
+        [ Fun faa.list ( Salt 0 ) [] "gbk_to_faa_each" 
+            [ Lit str ( Salt 0 ) "cds" 
+            , Fun gbk.list ( Salt 0 ) [] "load_gbk_each" 
+                [ Lst str ( Salt 0 ) [] 
+                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_chr.gbk" 
+                    , Lit str ( Salt 0 ) "examples/sequences/PCC_7942_pANL.gbk" 
+                    ] 
+                ]
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "genes_of_interest" 
+    , Fun str.list ( Salt 0 ) [] "load_list" 
+        [ Lit str ( Salt 0 ) "examples/gene-lists/pcc7942-random-100.txt" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "sequences_of_interest" 
+    , Fun faa ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pcc7942genes" 
+        , Var ( RepID Nothing ) "genes_of_interest" 
+        ] "extract_seqs" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "pcc7942genes" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "genes_of_interest" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref faa ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "pcc7942genes" 
+        , Var ( RepID Nothing ) "genes_of_interest" 
+        ] 
+        ( Var ( RepID Nothing ) "sequences_of_interest" )
+    ) 
+] 

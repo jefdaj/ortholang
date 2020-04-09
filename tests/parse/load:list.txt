@@ -1,0 +1,24 @@
+[ 
+    ( Var ( RepID Nothing ) "small" 
+    , Fun str.list ( Salt 0 ) [] "load_list" 
+        [ Lit str ( Salt 0 ) "examples/genome-lists/proteomes-small.txt" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "refseq" 
+    , Fun str.list ( Salt 0 ) [] "load_list" 
+        [ Lit str ( Salt 0 ) "examples/genome-lists/proteomes-refseq.txt" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "small" 
+        , Var ( RepID Nothing ) "refseq" 
+        ] "|" 
+        ( Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "small" )
+        ) 
+        ( Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "refseq" )
+        )
+    ) 
+] 

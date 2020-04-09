@@ -1,0 +1,24 @@
+[ 
+    ( Var ( RepID Nothing ) "all_faas" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_glob" 
+        [ Lit str ( Salt 0 ) "examples/sequences/*.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "small_faas" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_glob" 
+        [ Lit str ( Salt 0 ) "examples/sequences/*_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop faa.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "all_faas" 
+        , Var ( RepID Nothing ) "small_faas" 
+        ] "~" 
+        ( Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "all_faas" )
+        ) 
+        ( Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "small_faas" )
+        )
+    ) 
+] 

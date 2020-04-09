@@ -1,0 +1,5 @@
+[ 
+    ( Var ( RepID Nothing ) "result" 
+    , Lit str ( Salt 0 ) "crb_blast example not written yet" 
+    ) 
+]

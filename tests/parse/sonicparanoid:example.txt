@@ -1,0 +1,5 @@
+[ 
+    ( Var ( RepID Nothing ) "result" 
+    , Lit str ( Salt 0 ) "sonicparanoid example not written yet" 
+    ) 
+]

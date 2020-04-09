@@ -1,0 +1,23 @@
+[ 
+    ( Var ( RepID Nothing ) "blins" 
+    , Fun str.list ( Salt 0 ) [] "busco_list_lineages" 
+        [ Lit str ( Salt 0 ) "bac" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "ball" 
+    , Fun str.list ( Salt 0 ) [] "busco_list_lineages" 
+        [ Lit str ( Salt 0 ) "" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lst str.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "blins" 
+        , Var ( RepID Nothing ) "ball" 
+        ] 
+        [ Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "blins" )
+        , Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "ball" )
+        ] 
+    ) 
+] 

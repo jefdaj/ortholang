@@ -1,0 +1,9 @@
+[ 
+    ( Var ( RepID Nothing ) "e" 
+    , Lit num ( Salt 0 ) "1.0e-20" 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Lit str ( Salt 0 ) "example not written yet" 
+    ) 
+] 

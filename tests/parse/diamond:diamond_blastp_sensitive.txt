@@ -1,0 +1,24 @@
+[ 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "maga" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun bht ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "maga" 
+        , Var ( RepID Nothing ) "mgen" 
+        ] "diamond_blastp_sensitive" 
+        [ Lit num ( Salt 0 ) "1.0e-50" 
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "maga" )
+        , Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ] 
+    ) 
+] 

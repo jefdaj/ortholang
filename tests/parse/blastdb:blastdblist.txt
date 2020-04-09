@@ -1,0 +1,53 @@
+[ 
+    ( Var ( RepID Nothing ) "dbs" 
+    , Fun str.list ( Salt 0 ) [] "blastdblist" 
+        [ Lit str ( Salt 0 ) "" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "nrs" 
+    , Fun str.list ( Salt 0 ) [] "blastdblist" 
+        [ Lit str ( Salt 0 ) "nr" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "proks" 
+    , Fun str.list ( Salt 0 ) [] "blastdblist" 
+        [ Lit str ( Salt 0 ) "prok" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "human" 
+    , Fun str.list ( Salt 0 ) [] "blastdblist" 
+        [ Lit str ( Salt 0 ) "human" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "dbs" 
+        , Var ( RepID Nothing ) "nrs" 
+        , Var ( RepID Nothing ) "proks" 
+        , Var ( RepID Nothing ) "human" 
+        ] "|" 
+        ( Bop str.list.list ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "dbs" 
+            , Var ( RepID Nothing ) "nrs" 
+            , Var ( RepID Nothing ) "proks" 
+            ] "|" 
+            ( Bop str.list.list ( Salt 0 ) 
+                [ Var ( RepID Nothing ) "dbs" 
+                , Var ( RepID Nothing ) "nrs" 
+                ] "|" 
+                ( Ref str.list ( Salt 0 ) [] 
+                    ( Var ( RepID Nothing ) "dbs" )
+                ) 
+                ( Ref str.list ( Salt 0 ) [] 
+                    ( Var ( RepID Nothing ) "nrs" )
+                )
+            ) 
+            ( Ref str.list ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "proks" )
+            )
+        ) 
+        ( Ref str.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "human" )
+        )
+    ) 
+] 

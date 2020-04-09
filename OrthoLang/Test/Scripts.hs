@@ -10,7 +10,7 @@ import OrthoLang.Util   (justOrDie, rmAll)
 
 import Control.Monad         (when)
 import Data.Char             (toLower)
-import Data.List             (zip5, isPrefixOf)
+import Data.List             (zip6, isPrefixOf)
 import Data.List.Split       (splitOn)
 import Data.List.Utils       (replace)
 import OrthoLang.Modules     (modules)
@@ -25,6 +25,9 @@ import Test.Hspec            (it)
 import Test.Tasty            (TestTree, testGroup)
 import Test.Tasty.Golden     (goldenVsStringDiff, findByExtension, writeBinaryFile)
 import Test.Tasty.Hspec      (testSpecs, shouldReturn)
+
+import qualified Data.Text.Lazy as T
+import Text.Pretty.Simple
 
 -- | These work, but the tmpfiles vary so they require a check script.
 tmpfilesVary :: [FilePath]
@@ -116,23 +119,23 @@ mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
       return $ B8.pack out
 
 -- TODO use safe writes here
-mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> String -> TestTree
-mkTripTest cfg ref ids dRef name cut = goldenDiff desc tripShow tripAct
+mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -> FilePath -> TestTree
+mkTripTest cfg ref ids dRef name cut parse = goldenDiff desc parse tripAct
   where
     desc = name ++ ".ol unchanged by round-trip to file"
-    tripShow  = cfgTmpDir cfg </> "round-trip.show"
+    -- tripShow  = cfgTmpDir cfg </> "round-trip.show"
     tripSetup = do
       scr1 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) $
                 justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
       -- this is useful for debugging
       -- writeScript cut scr1
-      writeBinaryFile tripShow $ show scr1
+      writeBinaryFile parse $ T.unpack $ pShowNoColor scr1
     -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
     tripAct = withTmpDirLock cfg ref $ do
       -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
       _ <- tripSetup
       scr2 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) cut
-      return $ B8.pack $ show scr2
+      return $ B8.pack $ T.unpack $ pShowNoColor scr2
 
 mkShareTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> String -> TestTree
 mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
@@ -185,14 +188,14 @@ runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out
   return $ toGeneric cfg out
 
-mkScriptTests :: FilePath -> (FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
+mkScriptTests :: FilePath -> (FilePath, FilePath, FilePath, FilePath, FilePath, Maybe FilePath)
               -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
-mkScriptTests sDir (name, cut, out, tre, mchk) cfg ref ids dRef = do
+mkScriptTests sDir (name, cut, parse, out, tre, mchk) cfg ref ids dRef = do
   absTests   <- mkAbsTest  cfg' ref ids name dRef sDir -- just one, but comes as a list
   checkTests <- case mchk of
                   Nothing -> return []
                   Just c  -> mkCheckTest cfg' ref ids dRef sDir name c
-  let tripTest  = mkTripTest  cfg' ref ids dRef name cut
+  let tripTest  = mkTripTest  cfg' ref ids dRef name cut parse
       shareTest = mkShareTest cfg' ref ids dRef sDir name out
       outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
       treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef sDir name tre]
@@ -236,10 +239,12 @@ mkTestsPrefix cfg ref ids dRef testDir groupName shareDir mPrefix = do
   names   <- getTestScripts testDir mPrefix
   mchecks <- mapM (findTestFile testDir "check" "sh") names
   let cuts   = map (testFilePath testDir "scripts"  "ol" ) names
+      parses = map (testFilePath testDir "parse"    "txt") names
+      -- macros = map (testFilePath testDir "expand"   "txt") names TODO separate early compile stage for this
       outs   = map (testFilePath testDir "stdout"   "txt") names
       trees  = map (testFilePath testDir "tmpfiles" "txt") names
-      hepts  = zip5 names cuts outs trees mchecks
-      groups = map (mkScriptTests shareDir) hepts
+      hexes  = zip6 names cuts parses outs trees mchecks
+      groups = map (mkScriptTests shareDir) hexes
   mkTestGroup cfg ref ids dRef groupName groups
 
 mkExampleTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> FilePath -> IO TestTree
@@ -248,10 +253,11 @@ mkExampleTests cfg ref ids dRef exDir shareDir testDir = do
   let names' = map ("examples:" ++) names
   mchecks <- mapM (findTestFile testDir "check" "sh") names'
   let cuts   = map (testFilePath exDir   "scripts"  "ol" ) names
+      parses = map (testFilePath testDir "parse"    "txt") names'
       outs   = map (testFilePath testDir "stdout"   "txt") names'
       trees  = map (testFilePath testDir "tmpfiles" "txt") names'
-      hepts  = zip5 names cuts outs trees mchecks
-      groups = map (mkScriptTests shareDir) hepts
+      hexes  = zip6 names cuts parses outs trees mchecks
+      groups = map (mkScriptTests shareDir) hexes
   mkTestGroup cfg ref ids dRef "examples for demo site" groups
 
 removePrefix :: String -> String

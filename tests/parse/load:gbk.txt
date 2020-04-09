@@ -1,0 +1,29 @@
+[ 
+    ( Var ( RepID Nothing ) "single" 
+    , Fun gbk ( Salt 0 ) [] "load_gbk" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Fun gbk.list ( Salt 0 ) [] "load_gbk_each" 
+        [ Lst str ( Salt 0 ) [] 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop gbk.list.list ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "|" 
+        ( Lst gbk ( Salt 0 ) 
+            [ Var ( RepID Nothing ) "single" ] 
+            [ Ref gbk ( Salt 0 ) [] 
+                ( Var ( RepID Nothing ) "single" )
+            ]
+        ) 
+        ( Ref gbk.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mapped" )
+        )
+    ) 
+] 

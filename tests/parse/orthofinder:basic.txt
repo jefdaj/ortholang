@@ -1,0 +1,24 @@
+[ 
+    ( Var ( RepID Nothing ) "smallbacteria" 
+    , Fun faa.list ( Salt 0 ) [] "load_faa_each" 
+        [ Lst str ( Salt 0 ) [] 
+            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+            , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" 
+            ] 
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "ofres" 
+    , Fun ofr ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "smallbacteria" ] "orthofinder" 
+        [ Ref faa.list ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "smallbacteria" )
+        ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref ofr ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "smallbacteria" ] 
+        ( Var ( RepID Nothing ) "ofres" )
+    ) 
+] 

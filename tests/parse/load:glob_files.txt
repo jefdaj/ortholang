@@ -1,0 +1,6 @@
+[ 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun str.list ( Salt 0 ) [] "glob_files" 
+        [ Lit str ( Salt 0 ) "examples/sequences/*.faa" ]
+    ) 
+]

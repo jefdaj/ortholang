@@ -1,0 +1,21 @@
+[ 
+    ( Var ( RepID Nothing ) "gbk" 
+    , Fun gbk ( Salt 0 ) [] "load_gbk" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "fna" 
+    , Fun fna ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "gbk" ] "gbk_to_fna" 
+        [ Lit str ( Salt 0 ) "cds" 
+        , Ref gbk ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "gbk" )
+        ] 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Ref fna ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "gbk" ] 
+        ( Var ( RepID Nothing ) "fna" )
+    ) 
+] 

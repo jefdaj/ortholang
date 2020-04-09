@@ -1,0 +1,14 @@
+[ 
+    ( Var ( RepID Nothing ) "mgen" 
+    , Fun faa ( Salt 0 ) [] "load_faa" 
+        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Fun dmnd ( Salt 0 ) 
+        [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
+        [ Ref faa ( Salt 0 ) [] 
+            ( Var ( RepID Nothing ) "mgen" )
+        ]
+    ) 
+] 
