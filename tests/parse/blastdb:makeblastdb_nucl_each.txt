@@ -9,11 +9,11 @@
         [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
     ) 
 , 
-    ( Var ( RepID Nothing ) "db" 
-    , Fun fna.blastdb ( Salt 0 ) 
+    ( Var ( RepID Nothing ) "dbs" 
+    , Fun fna.blastdb.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
-        ] "makeblastdb_fna_all" 
+        ] "makeblastdb_fna_each" 
         [ Lst fna ( Salt 0 ) 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
@@ -27,10 +27,10 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref fna.blastdb ( Salt 0 ) 
+    , Ref fna.blastdb.list ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         ] 
-        ( Var ( RepID Nothing ) "db" )
+        ( Var ( RepID Nothing ) "dbs" )
     ) 
 ] 

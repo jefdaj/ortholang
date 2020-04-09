@@ -70,8 +70,9 @@ scoreRepeats = Function
   ,fTags = []
   -- , fTypeCheck = tScoreRepeats
   -- , fTypeDesc  = name ++ " : <outputnum> <inputvar> <inputlist> -> <input>.scores"
-  , fInputs = [Exactly num, AnyType "the input type", ListSigs (AnyType "the input type")]
-  , fOutput = ScoresSigs (Exactly num) -- TODO is that right?
+  , fInputs = [Exactly num, AnyType "the input type",
+                  ListSigs (AnyType "the input type")]
+  , fOutput =   ScoresSigs (AnyType "the input type") -- TODO does this break the current flattenAmbigTypes?
   , fNewRules = NewNotImplemented, fOldRules = rScoreRepeats
   }
   where

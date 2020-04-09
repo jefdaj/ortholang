@@ -6,8 +6,8 @@ query   = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
 queries = split_faa (load_faa "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa")
 mgen = load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"
 maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
-mgendb  = makeblastdb_prot mgen
-magadb  = makeblastdb_prot maga
+mgendb  = makeblastdb_faa mgen
+magadb  = makeblastdb_faa maga
 pssm    = psiblast_train_db 1e-2 query magadb
 
 # training fns

@@ -13,7 +13,7 @@
     , Fun faa.blastdb ( Salt 0 ) 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
-        ] "makeblastdb_prot_all" 
+        ] "makeblastdb_faa_all" 
         [ Lst faa ( Salt 0 ) 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 

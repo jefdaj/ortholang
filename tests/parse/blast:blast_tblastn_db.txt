@@ -5,7 +5,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_prot" 
+    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_faa" 
         [ Fun faa ( Salt 0 ) [] "load_faa" 
             [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
         ]

@@ -8,7 +8,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun fna.blastdb ( Salt 0 ) [] "makeblastdb_nucl" 
+    , Fun fna.blastdb ( Salt 0 ) [] "makeblastdb_fna" 
         [ Fun fna ( Salt 0 ) [] "gbk_to_fna" 
             [ Lit str ( Salt 0 ) "cds" 
             , Fun gbk ( Salt 0 ) [] "load_gbk" 

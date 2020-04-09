@@ -11,7 +11,7 @@
 , 
     ( Var ( RepID Nothing ) "magadb" 
     , Fun faa.blastdb ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "maga" ] "makeblastdb_prot" 
+        [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
         [ Ref faa ( Salt 0 ) [] 
             ( Var ( RepID Nothing ) "maga" )
         ]
@@ -24,7 +24,7 @@
 , 
     ( Var ( RepID Nothing ) "mgendb" 
     , Fun faa.blastdb ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_prot" 
+        [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
         [ Ref faa ( Salt 0 ) [] 
             ( Var ( RepID Nothing ) "mgen" )
         ]

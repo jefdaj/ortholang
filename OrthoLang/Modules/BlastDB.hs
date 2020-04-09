@@ -65,20 +65,20 @@ olModule = Module
     -- these are actually the most basic ones, because that way we can have
     -- only one main action function that takes a quoted list of paths, rather
     -- than that + a regular non-quoted one
-    , makeblastdbNuclAll -- makeblastdb_nucl_all : fa.list  -> ndb
-    , makeblastdbProtAll -- makeblastdb_prot_all : faa.list -> pdb
+    , makeblastdbFnaAll -- makeblastdb_fna_all : fa.list  -> ndb
+    , makeblastdbFaaAll -- makeblastdb_faa_all : faa.list -> pdb
 
     -- these are implemented using the _all versions above and singleton lists
     -- you can make a nucl db from either, but a protein db only from faa.. backward?
     -- TODO replace most of the singleton lists in test cuts with these
-    , makeblastdbNucl    -- makeblastdb_nucl     : fa       -> ndb
-    , makeblastdbProt    -- makeblastdb_prot     : faa      -> pdb
+    , makeblastdbFna    -- makeblastdb_fna     : fa       -> ndb
+    , makeblastdbFaa    -- makeblastdb_faa     : faa      -> pdb
 
     -- these are used in the _rbh machinery
     -- they're a little weird because they are implemented using the non _all
     -- versions, so they internally make their args into lists of singleton lists
-    , mkMakeblastdbEach fna -- makeblastdb_nucl_each : fa.list  -> ndb.list
-    , mkMakeblastdbEach faa -- makeblastdb_prot_each : faa.list -> pdb.list
+    , mkMakeblastdbEach fna -- makeblastdb_fna_each : fa.list  -> ndb.list
+    , mkMakeblastdbEach faa -- makeblastdb_faa_each : faa.list -> pdb.list
 
     , blastdbgetNucl -- TODO mapped version so you can list -> git at once?
     , blastdbgetProt -- TODO mapped version so you can list -> git at once?
@@ -164,16 +164,16 @@ aLoadDB oPath sPath = do
   writeLit oPath'' pattern'
 
 loadNuclDB :: Function
-loadNuclDB = mkLoadDB "load_nucl_db" fna
+loadNuclDB = mkLoadDB "load_fna_db" fna
 
 loadProtDB :: Function
-loadProtDB = mkLoadDB "load_prot_db" faa
+loadProtDB = mkLoadDB "load_faa_db" faa
 
 loadNuclDBEach :: Function
-loadNuclDBEach = mkLoadDBEach "load_nucl_db_each" fna
+loadNuclDBEach = mkLoadDBEach "load_fna_db_each" fna
 
 loadProtDBEach :: Function
-loadProtDBEach = mkLoadDBEach "load_prot_db_each" faa
+loadProtDBEach = mkLoadDBEach "load_faa_db_each" faa
 
 ------------------------
 -- download from NCBI --
@@ -272,11 +272,11 @@ mkBlastdbget name faType = Function
 
 -- TODO rename with fna
 blastdbgetNucl :: Function
-blastdbgetNucl = mkBlastdbget "blastdbget_nucl" fna
+blastdbgetNucl = mkBlastdbget "blastdbget_fna" fna
 
 -- TODO rename with faa
 blastdbgetProt :: Function
-blastdbgetProt = mkBlastdbget "blastdbget_prot" faa
+blastdbgetProt = mkBlastdbget "blastdbget_faa" faa
 
 rBlastdbget :: RulesFn
 rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
@@ -329,21 +329,21 @@ aBlastdbget dbPrefix tmpDir nPath = do
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
 --      in addition to actual inputs?
-makeblastdbNuclAll :: Function
-makeblastdbNuclAll = Function
+makeblastdbFnaAll :: Function
+makeblastdbFnaAll = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = tMakeblastdbAll name ndb
   -- , fTypeDesc  = name ++ " : fa.list -> ndb"
-  , fInputs = [Exactly (ListOf fna)]
+  , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
   , fOutput =  Exactly (EncodedAs "blastdb" fna)
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
-    name = "makeblastdb_nucl_all"
+    name = "makeblastdb_fna_all"
 
-makeblastdbProtAll :: Function
-makeblastdbProtAll = Function
+makeblastdbFaaAll :: Function
+makeblastdbFaaAll = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = tMakeblastdbAll name pdb
   -- , fTypeDesc  = name ++ " : faa.list -> pdb"
@@ -353,7 +353,7 @@ makeblastdbProtAll = Function
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
-    name = "makeblastdb_prot_all"
+    name = "makeblastdb_faa_all"
 
 -- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa.list -> fa.blastdb, where fa is a fasta file"
@@ -486,22 +486,22 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 -- these are oddly implemented in terms of the _all ones above,
 -- because that turned out to be easier
 
-makeblastdbNucl :: Function
-makeblastdbNucl = Function
-  { fOpChar = Nothing, fName = "makeblastdb_nucl"
+makeblastdbFna :: Function
+makeblastdbFna = Function
+  { fOpChar = Nothing, fName = "makeblastdb_fna"
   -- , fTypeCheck = tMakeblastdb ndb
-  -- , fTypeDesc  = "makeblastdb_nucl : fa -> ndb"
+  -- , fTypeDesc  = "makeblastdb_fna : fa -> ndb"
   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
   , fOutput =  Exactly (EncodedAs "blastdb" fna)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
-makeblastdbProt :: Function
-makeblastdbProt = Function
-  { fOpChar = Nothing, fName = "makeblastdb_prot"
+makeblastdbFaa :: Function
+makeblastdbFaa = Function
+  { fOpChar = Nothing, fName = "makeblastdb_faa"
   -- , fTypeCheck = tMakeblastdb pdb
-  -- , fTypeDesc  = "makeblastdb_prot : faa -> pdb"
+  -- , fTypeDesc  = "makeblastdb_faa : faa -> pdb"
   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
   , fOutput =  Exactly (EncodedAs "blastdb" faa)
   ,fTags = []
@@ -523,6 +523,7 @@ rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 -- make list of dbs from list of FASTA files --
 -----------------------------------------------
 
+-- TODO convert to just one function that makes either kind of db? or let ppl choose the type
 mkMakeblastdbEach :: Type -> Function
 mkMakeblastdbEach faType = Function
   { fOpChar = Nothing, fName = name
