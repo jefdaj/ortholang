@@ -47,7 +47,7 @@ import Control.Monad.Trans.Except
 import Control.Applicative    ((<|>))
 import Control.Monad          (void)
 import Data.Either            (isRight)
-import Data.List              (union, find)
+import Data.List              (union, find, intercalate)
 import Data.Maybe             (isJust, fromJust, catMaybes)
 import Text.Parsec            (try, (<?>))
 import Text.Parsec.Char       (string)
@@ -162,6 +162,7 @@ mkBop bop = return $ \e1 e2 -> do
 -- TODO should it live somewhere else?
 bopInputs :: [TypeSig] -> [TypeSig]
 bopInputs [Exactly (ListOf t)] = [Exactly t, Exactly t]
+bopInputs [ListSigs s] = [s, s]
 bopInputs s = error "core.parse.expr.bopInputs" $ "bad argument: " ++ show s
 
 ---------------
@@ -263,7 +264,7 @@ typecheckFn' :: String -> TypeSig -> [TypeSig] -> [Type] -> Either String Type
 typecheckFn' name outSig inSigs inTypes =
   if not (null errors)
     then Left $ errHeader ++ unlines errors
-    else inferOutputType outSig $ zip inSigs inTypes
+    else inferOutputType name outSig $ zip inSigs inTypes
   where
     errors = catMaybes $ map sigMatch $ zip3 [1..] inSigs inTypes
     sigMatch (n,s,t) = if typeSigMatches s t then Nothing else Just $ explain (n,s,t)
@@ -279,26 +280,47 @@ inSig and return that exact type. Return an error if it doesn't match exactly on
 
 TODO also error if it matches more than one unique type
 -}
-inferOutputType :: TypeSig -> [(TypeSig, Type)] -> Either String Type
-inferOutputType (Exactly t) _ = Right t
-inferOutputType (ListSigs     s) sts = fmap  ListOf       $ inferOutputType s sts
-inferOutputType (ScoresSigs   s) sts = fmap  ScoresOf     $ inferOutputType s sts
-inferOutputType (EncodedSig e s) sts = fmap (EncodedAs e) $ inferOutputType s sts
-inferOutputType s@(AnyType _) sts = inferOutputType' s sts
-inferOutputType s@(Some  _ _) sts = inferOutputType' s sts
+inferOutputType :: String -> TypeSig -> [(TypeSig, Type)] -> Either String Type
+inferOutputType _ (Exactly t) _ = Right t
+inferOutputType n (ListSigs     s) sts = fmap  ListOf       $ inferOutputType n s sts
+inferOutputType n (ScoresSigs   s) sts = fmap  ScoresOf     $ inferOutputType n s sts
+inferOutputType n (EncodedSig e s) sts = fmap (EncodedAs e) $ inferOutputType n s sts
+inferOutputType n s@(AnyType _) sts = inferAmbigOutputType n s sts
+inferOutputType n s@(Some  _ _) sts = inferAmbigOutputType n s sts
 
 {-|
 The rule is that when a function has an ambiguous output type (it includes an
 AnyType or Some constructor), that same ambiguous type has to also be one of
 the inputs. Then we can assume that the matching actual input 'Type' should
 also be the return type. Note that equality includes the 'String' descriptions.
-
 Errors here should be evaluated immediately so they don't confuse users later!
+
+TODO should still work when the matching sig is inside another
 -}
-inferOutputType' :: TypeSig -> [(TypeSig, Type)] -> Either String Type
-inferOutputType' s sts = case find (\(s2,_) -> s == s2) sts of
-  Nothing -> Left $ "Invalid type signature: " ++ show s ++ " doesn't match any of " ++ show sts
-  Just (_,t) -> Right t
+inferAmbigOutputType :: String -> TypeSig -> [(TypeSig, Type)] -> Either String Type
+inferAmbigOutputType n s sts =
+  let sts' = flattenAmbigTypes [] sts
+  in case find (\(s2,_) -> s == s2) sts' of
+       Nothing -> Left $ "Invalid type signature for " ++ n ++ "!" ++
+                         "\nAmbiguous return type " ++  show s ++
+                         " doesn't match any of the ambiguous inputs:\n" ++ 
+                         intercalate "\n" (map show sts')
+       Just (_,t) -> Right t
+
+-- | Accumulates a flat list of ambiguous 'TypeSig's with their matching 'Type's,
+--   which is necessary because the one we want might be nested.
+flattenAmbigTypes :: [(TypeSig, Type)] -> [(TypeSig, Type)] -> [(TypeSig, Type)]
+flattenAmbigTypes acc [] = acc
+flattenAmbigTypes acc (x:xs) = case x of
+  (ListSigs     s, ListOf      t) -> flattenAmbigTypes acc ((s,t):xs)
+  (ListSigs     _, _            ) -> flattenAmbigTypes acc xs
+  (ScoresSigs   s, ScoresOf    t) -> flattenAmbigTypes acc ((s,t):xs)
+  (ScoresSigs   _, _            ) -> flattenAmbigTypes acc xs
+  (EncodedSig _ s, EncodedAs _ t) -> flattenAmbigTypes acc ((s,t):xs)
+  (EncodedSig _ _, _            ) -> flattenAmbigTypes acc xs
+  (Exactly      _, _            ) -> flattenAmbigTypes acc xs
+  ((AnyType _),_) -> flattenAmbigTypes (x:acc) xs
+  ((Some  _ _),_) -> flattenAmbigTypes (x:acc) xs
 
 {-|
 A reference is just a variable name, but that variable has to be in the script.

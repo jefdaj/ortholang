@@ -57,13 +57,13 @@ mkSetFunction :: SetOpDesc -> Function
 mkSetFunction (foldName, opChar, setFn) = setFold
   where
     -- mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
-    mkFoldDesc name = name ++ " : X.list.list -> X.list"
+    -- mkFoldDesc name = name ++ " : X.list.list -> X.list"
     setFold = Function
       { fName = foldName
       , fOpChar    = Just opChar
       -- , fTypeCheck = tSetFold
       -- , fTypeDesc  = mkFoldDesc foldName
-      , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
+      , fInputs = [ListSigs (AnyType "any type")]
       , fOutput =  ListSigs (AnyType "any type")
       , fTags = []
       , fNewRules = NewNotImplemented, fOldRules = rSetFold (foldr1 setFn)
