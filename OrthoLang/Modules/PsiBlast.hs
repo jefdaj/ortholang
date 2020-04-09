@@ -427,7 +427,7 @@ psiblastTrainDb = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [num, faa, pdb] pssm
   -- , fTypeDesc  = mkTypeDesc name  [num, faa, pdb] pssm
-  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
+  , fInputs = [Exactly num, Exactly faa, Exactly pdb]
   , fOutput = Exactly pssm
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastTrainDb
@@ -546,7 +546,7 @@ psiblastEachPssmDb = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [num, ListOf pssm, pdb] (ListOf bht)
   -- , fTypeDesc  = mkTypeDesc name  [num, ListOf pssm, pdb] (ListOf bht)
-  , fInputs = [Exactly num, Exactly pssm, Exactly pdb]
+  , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
   , fOutput = Exactly (ListOf bht)
   ,fTags = []
   -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
