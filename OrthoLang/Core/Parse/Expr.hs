@@ -26,6 +26,9 @@ module OrthoLang.Core.Parse.Expr
   , pExpr
   , isExpr
   , parseExpr
+
+    -- * Misc
+  , typecheckFn
   )
   where
 

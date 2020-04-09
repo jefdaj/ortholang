@@ -9,6 +9,7 @@ module OrthoLang.Core.Types
   , Action3
   , ActionFn
   , RulesFn
+  -- , typecheckFn
   -- , TypeChecker
   -- * Basic data structures
   , Assign
