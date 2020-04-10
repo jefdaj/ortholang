@@ -6,6 +6,7 @@ module OrthoLang.Modules.Busco
 
 import Development.Shake
 import OrthoLang.Core
+import OrthoLang.Modules.Load (mkLoad, curl)
 
 import Control.Monad             (when)
 import Data.List                 ((\\))

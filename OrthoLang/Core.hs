@@ -138,12 +138,12 @@ module OrthoLang.Core
   , aSimpleScriptPar
   , compileScript
   , compose1
-  , curl
+  -- , curl
   , debugRules
   -- , defaultTypeCheck
   , map3of3
-  , mkLoad
-  , mkLoadList
+  -- , mkLoad
+  -- , mkLoadList
   , rExpr
   , rFun3
   , rMap

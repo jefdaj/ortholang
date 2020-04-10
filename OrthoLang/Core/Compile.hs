@@ -5,13 +5,13 @@ module OrthoLang.Core.Compile
   -- , applyList2
   , compose1
   , compileScript
-  , curl
+  -- , curl
   , debugC
   , debugRules
   -- , defaultTypeCheck
   , map3of3
-  , mkLoad
-  , mkLoadList
+  -- , mkLoad
+  -- , mkLoadList
   , newBop
   , newFnA1
   , newFnA2
