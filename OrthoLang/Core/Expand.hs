@@ -25,6 +25,7 @@ module OrthoLang.Core.Expand
   )
   where
 
+import OrthoLang.Debug (trace)
 import OrthoLang.Core.Types
 
 expandMacros :: Config -> Script -> Script
@@ -52,7 +53,7 @@ eExpr' cfg scr e@(Fun _ _ _ name _) =
                   -- (NewMacro m) -> case typecheck cfg (m scr e) of
                   --                   Left err -> error err
                   --                   Right e' -> e'
-                  (NewMacro m) -> m scr e
+                  (NewMacro m) -> let e' = m scr e in trace "core.expand.eExpr'" ("expanded macro: " ++ show e ++ " -> " ++ show e') e'
                   _ -> e
 eExpr' _ _ e = e
 
