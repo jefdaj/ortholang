@@ -23,25 +23,18 @@ module OrthoLang.Modules.Load
   where
 
 import OrthoLang.Core
-import OrthoLang.Core.Types   -- TODO move needed stuff to Core.hs
-import OrthoLang.Core.Actions -- TODO move needed stuff to Core.hs
-
--- TODO move to Core.hs:
-import OrthoLang.Core             (compose1)
-import OrthoLang.Core.Sanitize    (hashIDsFile2, readIDs)
-
 import OrthoLang.Modules.Curl (curl, isURL)
 
 import qualified Data.Map.Strict as M
 
 import Control.Monad.IO.Class     (liftIO)
 import Data.IORef                 (atomicModifyIORef')
-import Data.List                  (isInfixOf, sort)
+import Data.List                  (sort)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake          (Action, getShakeExtra, getShakeExtraRules, (%>), alwaysRerun)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName, isAbsolute)
-import OrthoLang.Util             (absolutize, resolveSymlinks, digest, headOrDie, unlessExists)
+import OrthoLang.Util             (absolutize, resolveSymlinks, headOrDie, unlessExists)
 import System.Directory           (makeRelativeToCurrentDirectory)
 import System.FilePath            (takeExtension)
 import System.FilePath.Glob       (glob)
@@ -54,9 +47,6 @@ olModule = Module
   , mGroups = []
   , mFunctions = [loadList, globFiles]
   }
-
--- See also the mkLoaders fn at the bottom, which should be used whenever
--- another module introduces a loadable type
 
 ---------------
 -- load_list --
@@ -83,9 +73,6 @@ aGlobNew (ExprPath out) a1 = do
 -- load_* --
 ------------
 
--- These are the Haskell functions for generating the Functions;
--- They should be called in other modules with specific types to make loaders for
-
 mkLoadGlob :: String -> Function -> Function
 mkLoadGlob name eachFn = compose1 name globFiles eachFn
 
@@ -97,20 +84,18 @@ mkLoaders hashSeqIDs loadType = [single, each, glb]
     each   = mkLoadList hashSeqIDs ("load_" ++ ext ++ "_each") (Exactly loadType) -- TODO is this right?
     glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") each
 
----------------
--- from core --
----------------
+-------------
+-- mkLoad* --
+-------------
 
-{- Takes a string with the filepath to load. Creates a trivial expression file
- - that's just a symlink to the given path. These should be the only absolute
- - links, and the only ones that point outside the temp dir.
- - TODO still true?
- -}
+{-|
+Takes a string with the filepath to load. Creates a trivial expression file
+that's just a symlink to the given path. These should be the only absolute
+links, and the only ones that point outside the temp dir.
+-}
 mkLoad :: Bool -> String -> TypeSig -> Function
 mkLoad hashSeqIDs name oSig = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str] rtn
-  -- , fTypeDesc  = mkTypeDesc name [str] rtn
   , fInputs = [Exactly str]
   , fOutput = oSig
   , fTags = []
@@ -118,26 +103,30 @@ mkLoad hashSeqIDs name oSig = Function
   , fNewRules = NewNotImplemented
   }
 
-{- Like cLoad, except it operates on a list of strings. Note that you can also
- - load lists using cLoad, but it's not recommended because then you have to
- - write the list in a file, whereas this can handle literal lists in the
- - source code.
- -}
+{-|
+Like mkLoad, except it operates on a list of strings. Note that you can also
+load lists using mkLoad, but it's not recommended because then you have to write
+the list in a file, whereas this can handle literal lists in the source code.
+-}
 mkLoadList :: Bool -> String -> TypeSig -> Function
 mkLoadList hashSeqIDs name elemSig = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [(ListOf str)] (ListOf rtn)
-  -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf rtn)
   , fInputs = [Exactly (ListOf str)]
-  , fOutput = ListSigs elemSig -- TODO need to set the string here?
+  , fOutput = ListSigs elemSig
   , fTags = []
-  , fOldRules = rLoadList hashSeqIDs -- TODO different from src lists?
+  , fOldRules = rLoadList hashSeqIDs
   , fNewRules = NewNotImplemented
   }
 
--- The paths here are a little confusing: expr is a str of the path we want to
--- link to. So after compiling it we get a path to *that str*, and have to read
--- the file to access it. Then we want to `ln` to the file it points to.
+--------------------
+-- implementation --
+--------------------
+
+{-|
+The paths here are a little confusing: expr is a str of the path we want to
+link to. So after compiling it we get a path to *that str*, and have to read
+the file to access it. Then we want to `ln` to the file it points to.
+-}
 rLoad :: Bool -> RulesFn
 rLoad hashSeqIDs scr e@(Fun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr scr p
@@ -149,8 +138,6 @@ rLoad hashSeqIDs scr e@(Fun _ _ _ _ [p]) = do
   return (ExprPath out')
 rLoad _ _ _ = fail "bad argument to rLoad"
 
--- TODO is running this lots of times at once the problem?
--- TODO see if shake exports code for only hashing when timestamps change
 -- TODO remove ext? not sure it does anything
 aLoadHash :: Bool -> Path -> String -> Action Path
 aLoadHash hashSeqIDs src _ = do
@@ -160,7 +147,7 @@ aLoadHash hashSeqIDs src _ = do
   let src' = fromPath cfg src
   need' "core.compile.basic.aLoadHash" [src']
   md5 <- hashContent src -- TODO permission error here?
-  let tmpDir'   = fromPath cfg $ cacheDir cfg "load" -- TODO should IDs be written to this + _ids.txt?
+  let tmpDir'   = fromPath cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 -- <.> ext
       hashPath  = toPath cfg hashPath'
   if not hashSeqIDs
@@ -168,9 +155,7 @@ aLoadHash hashSeqIDs src _ = do
     else do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toPath cfg idsPath'
-
       unlessExists idsPath' $ hashIDsFile2 src hashPath
-
       let (Path k) = hashPath
           v = takeFileName src'
       newIDs <- readIDs idsPath
@@ -205,7 +190,7 @@ rLoadList hashSeqIDs s e@(Fun (ListOf r) _ _ _ [es])
   | otherwise = rLoadListPaths hashSeqIDs s e
 rLoadList _ _ _ = fail "bad arguments to rLoadList"
 
--- special case for lists of str and num
+-- | Special case for lists of str and num
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
 -- TODO need to readLitPaths?
 rLoadListLits :: RulesFn
@@ -230,13 +215,11 @@ aLoadListLits outPath litsPath = do
   lits' <- liftIO $ mapM absolutize lits
   writeLits out lits'
 
--- regular case for lists of any other file type
+-- | Regular case for lists of any other file type
 -- TODO hash mismatch here?
 rLoadListPaths :: Bool -> RulesFn
 rLoadListPaths hashSeqIDs scr e@(Fun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr scr es
-  -- let hash     = digest $ toPath cfg pathsPath
-  --     outPath  = unsafeExprPathExplicit cfg "list" rtn salt [hash]
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr e
@@ -263,6 +246,5 @@ aLoadListPaths hashSeqIDs pathsPath outPath = do
   hashPaths <- mapM (\p -> aLoadHash hashSeqIDs p
                          $ takeExtension $ fromPath cfg p) paths'''
   let hashPaths' = map (fromPath cfg) hashPaths
-  -- debugA $ "about to need: " ++ show paths''
   need' "core.compile.basic.aLoadListPaths" hashPaths'
   writePaths out hashPaths

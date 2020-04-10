@@ -73,6 +73,7 @@ module OrthoLang.Core
   , Expr(..)
   , ExprPath(..)
   , GlobalEnv
+  , IDs(..)
   , IDsRef
   , LocksRef
   , Module(..)
@@ -114,6 +115,7 @@ module OrthoLang.Core
   , need'
   , readFileStrict'
   , readLit
+  , readLitPaths
   , readLits
   , readPath
   , readPaths
@@ -180,6 +182,10 @@ module OrthoLang.Core
   , trace
   , unlessExists
   , debug -- TODO disambiguate the others
+
+  -- * Old module API: Sanitize
+  , hashIDsFile2
+  , readIDs
 
   )
   where
