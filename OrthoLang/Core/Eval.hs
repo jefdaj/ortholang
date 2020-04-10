@@ -47,7 +47,7 @@ import OrthoLang.Core.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
 import OrthoLang.Core.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Core.Actions          (readLits, readPaths)
-import OrthoLang.Util             (ignoreErrors)
+-- import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
@@ -225,7 +225,7 @@ eval hdl cfg ref ids dr rtype ls p = do
                 , progressInitial = ep
                 , progressRender = if cfgNoProg cfg then (const "") else renderProgress
                 }
-  ignoreErrors $ eval' delay pOpts ls p -- TODO retry again for production?
+  eval' delay pOpts ls p -- TODO ignoreErrors again?
   where
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
       newRules
