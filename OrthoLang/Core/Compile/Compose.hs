@@ -35,13 +35,13 @@ err :: String -> a
 err = error "core.compile.compose.mCompose1"
 
 {-|
-When this function recieves the initial expression it should be named like f2,
-but have the proper input 'Expr's for f1. We fix that by creating an f1 'Expr'
-around them and inserting it as the only input to f2. The 'Salt' and 'Var's
-depended on should be correct for both already. This checks that the first
-`Function`'s return type matches the second `Function`'s only input, but
-otherwise assumes the 'Expr' is set up properly. For example, it doesn't check
-the names.
+When this function recieves the initial expression it should be named after the
+macro function, but have the proper input 'Expr's for f1. We fix that by
+creating an f1 'Expr' around them and inserting it as the only input to f2, and
+changing the name of f2. The 'Salt' and 'Var's depended on should be correct
+for both already. This checks that the first `Function`'s return type matches
+the second `Function`'s only input, but otherwise assumes the 'Expr' is set up
+properly. For example, it doesn't check the names.
 
 TODO try to factor some of this boilerplate out and make a generic mCompose
 -}

@@ -24,4 +24,4 @@ pcc6803  = get_proteomes ["Synechocystis sp. PCC 6803 (refseq)"]
 samplefa = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
 
 # TODO what should we evaluate here?
-result = ncbi_human_db_list
+result = samplefa
