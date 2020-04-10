@@ -28,6 +28,7 @@ olModule = Module
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
   , mTypes = []
+  , mGroups = []
   , mFunctions =
     [ singletons -- TODO non-plural version too
     ]
@@ -58,7 +59,7 @@ singletons =
     , fTags      = [Hidden]
     -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
     -- , fTypeCheck = tSingletons
-    , fInputs    = [ListSigs (AnyType "any type")]
+    , fInputs    =           [ListSigs (AnyType "any type")]
     , fOutput    =  ListSigs (ListSigs (AnyType "any type"))
     , fNewRules  = NewNotImplemented
     , fOldRules  = rSingletons
@@ -66,9 +67,9 @@ singletons =
 
 -- (ListOf (Some ot "any type")) (ListOf (ListOf (Some ot "any type")))
 -- shown as "t.list -> t.list.list, where t is any type"
-tSingletons :: [Type] -> Either String Type
-tSingletons [ListOf x] = Right $ ListOf $ ListOf x
-tSingletons _ = Left "tSingletons expected a list"
+-- tSingletons :: [Type] -> Either String Type
+-- tSingletons [ListOf x] = Right $ ListOf $ ListOf x
+-- tSingletons _ = Left "tSingletons expected a list"
 
 rSingletons :: RulesFn
 rSingletons scr expr@(Fun rtn _ _ _ [listExpr]) = do
