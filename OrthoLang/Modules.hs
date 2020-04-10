@@ -23,6 +23,7 @@ import qualified OrthoLang.Modules.Diamond       as Diamond
 import qualified OrthoLang.Modules.GreenCut      as GreenCut
 import qualified OrthoLang.Modules.Hmmer         as Hmmer
 import qualified OrthoLang.Modules.ListLike      as ListLike
+import qualified OrthoLang.Modules.Curl          as Curl
 import qualified OrthoLang.Modules.Load          as Load
 import qualified OrthoLang.Modules.MMSeqs        as MMSeqs
 import qualified OrthoLang.Modules.Math          as Math
@@ -51,6 +52,7 @@ modules =
 
   -- core language features
     Math.olModule
+  -- , Curl.olModule
   , ListLike.olModule -- TODO expose Function fields in API
   , Load.olModule     -- TODO glob_files first, then mkGlob after Compose
   , Permute.olModule  -- could do rPermute

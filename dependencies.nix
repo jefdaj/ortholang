@@ -129,7 +129,8 @@ in rec {
                      [ myBlast hmmer busco python36 which tarWithGzip ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
-  ortholang-load          = mkModule ./OrthoLang/Modules/Load          [ curl ] "";
+  ortholang-curl          = mkModule ./OrthoLang/Modules/Curl          [ curl ] "";
+  ortholang-load          = mkModule ./OrthoLang/Modules/Load          [ ] "";
   ortholang-orthogroups   = mkModule ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
   ortholang-greencut      = mkModule ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
@@ -153,6 +154,7 @@ in rec {
     # ortholang-treecl
     # ortholang-justorthologs
     ortholang-busco
+    ortholang-curl
     ortholang-load
     ortholang-range
     ortholang-orthogroups

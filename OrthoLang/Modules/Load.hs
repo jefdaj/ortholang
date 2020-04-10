@@ -5,7 +5,6 @@ module OrthoLang.Modules.Load
     olModule
 
   -- * Functions for use in other modules
-  , curl
   , mkLoad
   , mkLoadList
   , mkLoadGlob
@@ -19,7 +18,6 @@ module OrthoLang.Modules.Load
   , aLoad
   , aLoadListLits
   , aLoadListPaths
-  , isURL
 
   )
   where
@@ -27,6 +25,12 @@ module OrthoLang.Modules.Load
 import OrthoLang.Core
 import OrthoLang.Core.Types   -- TODO move needed stuff to Core.hs
 import OrthoLang.Core.Actions -- TODO move needed stuff to Core.hs
+
+-- TODO move to Core.hs:
+import OrthoLang.Core             (compose1)
+import OrthoLang.Core.Sanitize    (hashIDsFile2, readIDs)
+
+import OrthoLang.Modules.Curl (curl, isURL)
 
 import qualified Data.Map.Strict as M
 
@@ -37,12 +41,8 @@ import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake          (Action, getShakeExtra, getShakeExtraRules, (%>), alwaysRerun)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName, isAbsolute)
-import OrthoLang.Core             (compose1)
-import OrthoLang.Core.Sanitize    (hashIDsFile2, readIDs)
 import OrthoLang.Util             (absolutize, resolveSymlinks, digest, headOrDie, unlessExists)
-import System.Directory           (createDirectoryIfMissing)
 import System.Directory           (makeRelativeToCurrentDirectory)
-import System.Exit                (ExitCode(..))
 import System.FilePath            (takeExtension)
 import System.FilePath.Glob       (glob)
 
@@ -179,32 +179,6 @@ aLoadHash hashSeqIDs src _ = do
         \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
                                                  , hSeqIDs = M.insert k newIDs s}, ())
   return hashPath
-
--- This is hacky, but should work with multiple protocols like http(s):// and ftp://
-isURL :: String -> Bool
-isURL s = "://" `isInfixOf` take 10 s
-
--- TODO move to its own module
-curl :: String -> Action Path
-curl url = do
-  cfg <- fmap fromJust getShakeExtra
-  let cDir    = fromPath cfg $ cacheDir cfg "curl"
-      outPath = cDir </> digest url
-  liftIO $ createDirectoryIfMissing True cDir
-  runCmd $ CmdDesc
-    { cmdBinary = "download.sh"
-    , cmdArguments = [outPath, url]
-    , cmdFixEmpties = False
-    , cmdParallel = False
-    , cmdInPatterns = []
-    , cmdOutPath = outPath
-    , cmdExtraOutPaths = []
-    , cmdSanitizePaths = []
-    , cmdOptions = []
-    , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [outPath]
-    }
-  return $ toPath cfg outPath
 
 aLoad :: Bool -> Path -> Path -> Action ()
 aLoad hashSeqIDs strPath outPath = do
