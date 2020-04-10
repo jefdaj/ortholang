@@ -14,3 +14,4 @@ DBOUT="$(dirname "$DBOUT")/result"
 # echo "TITLE: $TITLE"
 
 makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE" > "${DBOUT}.out" 2> "${DBOUT}.err"
+touch "$DBOUT" # TODO is this the best way?

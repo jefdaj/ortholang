@@ -386,8 +386,8 @@ rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
   return (ExprPath out')
 rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
 
-listPrefixFiles :: FilePattern -> Action [FilePath]
-listPrefixFiles prefix = liftIO (getDirectoryFilesIO pDir [pName]) >>= return . map (pDir </>)
+listPrefixFiles :: FilePattern -> IO [FilePath]
+listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir </>)
   where
     pDir  = takeDirectory prefix
     pName = takeFileName  prefix
@@ -414,7 +414,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
       dbOut  = dbDir </> "result"
       dbOut' = toPath cfg dbOut
       out''  = traceA "aMakeblastdbAll" out' [tExtOf dbType, out', dbOut, fasPath']
-      dbPtn  = cDir' </> fasHash </> "*" -- TODO does this actually help?
+      dbPtn  = dbDir </> "*" -- TODO does this actually help?
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
   -- be passed as one quoted arg, but we also have to take into account Shake's
@@ -440,41 +440,42 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   dbg $ "dbType': "    ++ dbType'
   dbg $ "cfg: "        ++ show cfg
   dbg $ "fixedPaths: " ++ show fixedPaths
+  dbg $ "dbPtn: "      ++ dbPtn
+  dbg $ "dbOut: "      ++ dbOut
 
-  liftIO $ createDirectoryIfMissing True dbDir
-  before <- listPrefixFiles dbPtn
-  when (length before < 5) $ do
-    dbg $ "this is dbPtn: " ++ dbPtn
-    dbg $ "this will be dbOut: " ++ dbOut
-    runCmd $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = out'
-      , cmdInPatterns = [dbPtn]
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = []
-      , cmdOptions =[]
-      , cmdBinary = "makeblastdb.sh"
-      , cmdArguments = [dbOut, fixedPaths, dbType']
-      , cmdExitCode = ExitSuccess
-      , cmdRmPatterns = [dbDir]
-      }
+  -- liftIO $ createDirectoryIfMissing True dbDir
+  -- before <- liftIO $ listPrefixFiles dbPtn
+  -- when (length before < 5) $ do
+  runCmd $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = dbOut
+    , cmdInPatterns = [dbPtn]
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = []
+    , cmdOptions =[]
+    , cmdBinary = "makeblastdb.sh"
+    , cmdArguments = [dbOut, fixedPaths, dbType']
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [dbDir]
+    }
 
-    -- check that all the right files were created
-    after <- listPrefixFiles dbPtn
-    -- liftIO $ putStrLn "running makeblastdb"
-    trackWrite' after
+  -- check that all the right files were created
+  after <- liftIO $ listPrefixFiles dbPtn
+  -- liftIO $ putStrLn "running makeblastdb"
+  dbg $ "after: " ++ show after
+  trackWrite' after
 
-    -- usually there's an index file too, but not always
-    -- TODO put these back? they sometimes fail when it splits into .00.pin etc.
-    -- let expected = if dbType == ndb
-    --                  then [".nhr", ".nin", ".nsq"]
-    --                  else [".phr", ".pin", ".psq"]
-    --     success = all (\e -> e `elem` (map takeExtension after)) expected
-    -- dbg $ "these actual db files were created: " ++ show after
-    -- unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
+  -- usually there's an index file too, but not always
+  -- TODO put these back? they sometimes fail when it splits into .00.pin etc.
+  -- let expected = if dbType == ndb
+  --                  then [".nhr", ".nin", ".nsq"]
+  --                  else [".phr", ".pin", ".psq"]
+  --     success = all (\e -> e `elem` (map takeExtension after)) expected
+  -- dbg $ "these actual db files were created: " ++ show after
+  -- unless success $ error $ "makeblastdb failed to create some database files: " ++ show after
     
-    dbg $ "dbOut was also created: " ++ dbOut
+  -- dbg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
   writePath out'' dbOut'
 aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths

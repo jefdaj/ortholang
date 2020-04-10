@@ -16,7 +16,8 @@ if [[ -d "$OUTDIR" && "$(ls "$OUTDIR" | wc -l)" -gt 0 ]]; then
 fi
 
 DBDIR="$(dirname "$PPATH")"
-DBNAME="$(basename "$PPATH")"
+# DBNAME="$(basename "$PPATH")"
+DBNAME=result
 
 # cd "$DBDIR" # TODO remove?
 # export BLASTDB="$DBNAME" # TODO DBPATH?
