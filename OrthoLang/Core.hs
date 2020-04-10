@@ -138,12 +138,9 @@ module OrthoLang.Core
   , aSimpleScriptPar
   , compileScript
   , compose1
-  -- , curl
   , debugRules
   -- , defaultTypeCheck
   , map3of3
-  -- , mkLoad
-  -- , mkLoadList
   , rExpr
   , rFun3
   , rMap
@@ -153,7 +150,6 @@ module OrthoLang.Core
   , rSimpleScript
   , rSimpleScriptPar
   , rSimpleTmp
-  , typeError
   -- , debug TODO disambiguate with Util.debug?
 
   -- * Old module API: Paths

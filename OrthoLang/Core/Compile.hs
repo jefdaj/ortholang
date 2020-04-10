@@ -5,13 +5,10 @@ module OrthoLang.Core.Compile
   -- , applyList2
   , compose1
   , compileScript
-  -- , curl
   , debugC
   , debugRules
   -- , defaultTypeCheck
   , map3of3
-  -- , mkLoad
-  -- , mkLoadList
   , newBop
   , newFnA1
   , newFnA2
@@ -35,7 +32,6 @@ module OrthoLang.Core.Compile
   , rSimpleScript
   , rSimpleScriptPar
   , rSimpleTmp
-  , typeError
   )
   where
 

@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 {-|
 This module "compiles" an expression it by translating it into a set of Shake
 build rules. To actually run the rules, use `eval` in the Interpret module.
@@ -25,35 +23,23 @@ module OrthoLang.Core.Compile.Basic
   , rListLits
   , rListPaths
   , rNamedFunction
+  , rBop
 
   -- * Script compilers
   , rRef
-  , compileScript
   , rVar
   , rAssign
-
-  -- * Function compilers for export
-  -- , mkLoad
-  -- , mkLoadList
+  , compileScript
 
   -- * Misc functions for export
-  -- , curl
   , debugC
   , debugRules
-  -- , defaultTypeCheck
-  , typeError
+  -- , typeError
 
-  -- misc internal functions (TODO export them too?)
-  -- , aLit
-  -- , aLoad
-  -- , aLoadHash
-  -- , aLoadListLinks
-  -- , aLoadListLits
-  -- , aListLits
-  -- , aListPaths
-  -- , aVar
-  -- , isURL
-  -- , withInsertNewRulesDigests
+  -- * Implementation details
+  , aLit
+  , aListLits
+  , aListPaths
 
   )
   where
@@ -61,26 +47,17 @@ module OrthoLang.Core.Compile.Basic
 -- TODO does turning of traces radically speed up the interpreter?
 
 import Prelude hiding (error)
+
 import OrthoLang.Debug
 import Development.Shake
-import Development.Shake.FilePath (isAbsolute)
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty
-import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Paths (cacheDir, exprPath, toPath,
-                            fromPath, varPath, Path)
-
-import Data.List                  (isPrefixOf)
-import Development.Shake.FilePath ((</>), (<.>), takeFileName)
-import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
-                                   readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, writePaths, symlink)
-import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
-import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie, unlessExists)
-
-import Data.Maybe (fromJust)
+import Data.List              (isPrefixOf)
+import Data.Maybe             (fromJust)
+import OrthoLang.Core.Actions (traceA, debugA, need', readLit, writeLit, writeLits, writePaths, symlink)
+import OrthoLang.Core.Paths   (exprPath, toPath, fromPath, varPath, Path)
+import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
 
 -- import OrthoLang.Core.Paths (insertNewRulesDigest)
 
@@ -89,7 +66,6 @@ debugC :: String -> String -> a -> a
 debugC name msg rtn = trace ("core.compile." ++ name) msg rtn
 
 -- TODO restrict to Expr?
--- TODO export?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
 debugRules :: (Pretty a, Show b) => String -> a -> b -> b
 debugRules name input out = debugC name msg out
@@ -97,33 +73,9 @@ debugRules name input out = debugC name msg out
     ren = render $ pPrint input
     msg = "\"" ++ ren ++ "' -> " ++ show out
 
-
 ------------------------------
 -- compile the OrthoLang AST --
 ------------------------------
-
--- This should return the same outPath as the old RulesFns, without doing anything else.
--- TODO remove it once the new rules are all written
--- deprecatedRules :: GlobalEnv -> Expr -> Rules ExprPath
--- deprecatedRules s@(_, cfg, _, _, _) e = return $ ExprPath out'
---   where
---     out  = exprPath cfg dRef scr e
---     out' = fromPath cfg $ exprPath cfg dRef scr e
-
--- for functions with fNewRules, ignore fOldRules and return Nothing immediately. otherwise carry on as normal
--- TODO wait! it's the rules that might not need to be returned, not the path, right?
---            that actually makes it easy to use the same function types but not do any actual rules :D
-
--- TODO insert digests as they're compiled here, not as they're parsed
---      (because some are generated automatically, not parsed at all!)
--- TODO and put them into the state explicitly without this IORef hack
-
--- withInsertNewRulesDigests:: GlobalEnv -> [Expr] -> a -> a
--- withInsertNewRulesDigests s@(_,_,_,r) es a = unsafePerformIO $ do
---   mapM_ (insertNewRulesDigest s) es
---   (IDs {hExprs = ids}) <- readIORef r
---   print ids
---   return a
 
 {-|
 The main entry point for compiling any 'Expr'. Use this by default
@@ -137,8 +89,7 @@ rExpr :: RulesFn
 rExpr s e@(Lit _ _ _      ) = rLit s e
 rExpr s e@(Ref _ _ _ _    ) = rRef s e
 rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
-rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO why is the map part needed?
--- TODO possible bug source: the list expr path + digest is never returned, even though it's compiled
+rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
 rExpr s e@(Bop t r ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t r ds [e1, e2]] >> rBop s e
 rExpr _ (Com (CompiledExpr _ _ rules)) = rules
 
@@ -153,9 +104,10 @@ rBop _ e = error "rBop" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
 rNamedFunction :: Script -> Expr -> String -> Rules ExprPath
-rNamedFunction s e@(Fun _ _ _ _ es) n = rNamedFunction' s e n -- TODO is this missing the map part above?
+rNamedFunction s e@(Fun _ _ _ _ _) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error "rNamedFunction" $ "bad argument: " ++ n
 
+rNamedFunction' :: Script -> Expr -> String -> Rules ExprPath
 rNamedFunction' scr expr name = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
@@ -170,8 +122,8 @@ rNamedFunction' scr expr name = do
                                    res = ExprPath p
                                in return $ debugRules "rNamedFunction'" expr res
                  -- TODO typecheck here to make sure the macro didn't mess anything up?
-                 NewMacro mFn -> fail $ "all macros should have been expanded already," ++
-                                        " but rNamedFunction found " ++ name
+                 NewMacro _ -> fail $ "all macros should have been expanded already," ++
+                                      " but rNamedFunction found " ++ name
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do
@@ -232,7 +184,7 @@ whose type is a @'ListOf' \<something\>@ instead.
 TODO remove the insert digests hack
 -}
 rList :: RulesFn
-rList s e@(Lst rtn _ _ es)
+rList s e@(Lst rtn _ _ _)
   | rtn `elem` [Empty, str, num] = rListLits  s e
   | otherwise                    = rListPaths s e
 rList _ _ = error "rList" "bad arguemnt"
@@ -309,7 +261,7 @@ known until after the function runs.
 TODO hash mismatch error here?
 -}
 rListPaths :: RulesFn
-rListPaths scr e@(Lst rtn salt _ exprs) = do
+rListPaths scr e@(Lst _ _ _ exprs) = do
   paths <- mapM (rExpr scr) exprs
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
@@ -370,33 +322,3 @@ aVar vPath oPath = do
   symlink vPath'' oPath
   -- ids' <- liftIO $ readIORef ids
   -- unhashIDsFile ' oPath vPath''
-  where
-
-
-------------------------------
--- [t]ypechecking functions --
-------------------------------
-
--- TODO show the failing function here! which means reworking the Fun definitions a bit
--- TODO different text for failing Bops
-typeError :: String -> [Type] -> [Type] -> String
-typeError name expected actual =
-  "Type mismatch :(\nThe function " ++ name ++
-  " requires these inputs: "        ++ unwords (map show expected) ++
-  "\nBut it was given these: "      ++ unwords (map show actual)
-
--- TODO this should fail for type errors like multiplying a list by a num!
--- TODO remove this entirely rather than trying to migrate it to the new model
---defaultTypeCheck :: String -> [Type] -> Type
---                 -> [Type] -> Either String Type
---defaultTypeCheck name expected returned actual =
---  if actual `typeSigsMatch` expected
---    then Right returned
---    else Left $ typeError name expected actual
-
-
---------------------------
--- links to input files --
---------------------------
-
-
