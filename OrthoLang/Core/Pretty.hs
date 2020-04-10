@@ -57,9 +57,12 @@ instance Pretty Type where
   pPrint (ListOf  Empty) = text "empty list"
   pPrint (ListOf      t) = text "list of" <+> pPrint t <> text "s"
   pPrint (ScoresOf    t) = text "list of" <+> pPrint t <> text "s with scores"
-  pPrint (EncodedAs e t) = pPrint t <+> text "encoded as" <+> text e
+  pPrint (EncodedAs e t) = pPrint t <+> text "encoded as" <+> text (enExt e)
   -- pPrint (Some (TypeGroup {tgExt = t, tgDesc = d}) s) = text t <+> parens (text d) <+> parens (text s) -- TODO refine this
   pPrint (Type            { tExt = t,  tDesc = d}   ) = text t <+> parens (text d)
+
+instance Pretty Encoding where
+  pPrint e = text $ enExt e
 
 instance Pretty Var where
   pPrint (Var _ s) = text s -- TODO show the salt?
@@ -149,40 +152,7 @@ instance Pretty TypeGroup where
 instance Pretty TypeSig where
   pPrint (ListSigs s)     = pPrint s <> text ".list"
   pPrint (ScoresSigs s)   = pPrint s <> text ".scores"
-  pPrint (EncodedSig e s) = pPrint s <> text ("." ++ e)
+  pPrint (EncodedSig e s) = pPrint s <> text ("." ++ enExt e)
   pPrint (AnyType _)      = text "anytype" -- TODO does this make sense? might have to do variables
   pPrint (Some g _)       = pPrint g
   pPrint (Exactly t)      = pPrint t
-  
--- data TypeSig
--- 
---   -- these are analagous to their Type equivalents above:
---   = ListSigs   TypeSig        -- ^ like ListOf with possibly ambiguous sigs inside
---   | ScoresSigs TypeSig        -- ^ like ScoresOf with possibly ambiguous sigs inside
---   | EncodedSig String TypeSig -- ^ like EncodedAs with possibly ambiguous sigs inside
--- 
---   -- these are new:
---   | AnyType               -- ^ generic placeholder called "any type" in help text
---   | Some TypeGroup String -- ^ the string is used for equality and in the help text
---   | Exactly Type          -- ^ one regular Type wrapped for use in type signatures
--- 
---   deriving (Eq, Show)
--- 
--- --instance Show TypeSig where
--- --  show AnyType = "AnyType"
--- --  show (Some g s) = "Some " ++ tgExt g ++ " " ++ show s
--- --  show (Exactly t) = "Exactly " ++ show t
--- 
--- {-|
--- These are kind of like simpler, less extensible typeclasses. They're just a
--- list of types that can be treated similarly in some circumstances, for example
--- "files whose length is their number of lines" or "FASTA files (faa or fna)".
--- -}
--- data TypeGroup = TypeGroup
---   { tgExt   :: String
---   , tgDesc  :: String
---   , tgMembers :: [TypeSig]
---   }
---   deriving (Show)
--- 
--- 

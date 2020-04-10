@@ -26,6 +26,7 @@ module OrthoLang.Core.Types
   , operatorChars
   -- , WrapperConfig(..)
   , Type(..)
+  , Encoding(..)
   , TypeGroup(..)
   , TypeSig(..)
   , RepID(..)
@@ -283,8 +284,7 @@ data Type
   = Empty -- ^ used in (ListOf Empty) to denote empty lists
   | ListOf    Type
   | ScoresOf  Type
-  -- TODO does the encoding need to be more than a string (extension)?
-  | EncodedAs String Type -- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
+  | EncodedAs Encoding Type
   | Type
     { tExt  :: String
     , tDesc :: String -- TODO include a longer help text too
@@ -307,6 +307,20 @@ instance Eq Type where
 instance Show Type where
   show = tExtOf
 
+-- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
+-- TODO can it be unified with Type using typeclasses or something? redesign this part
+data Encoding = Encoding
+  { enExt :: String
+  , enDesc :: String
+  , enShow :: Config -> LocksRef -> FilePath -> IO String
+  }
+
+instance Show Encoding where
+  show = enExt
+
+instance Eq Encoding where
+  (Encoding {enExt = e1}) == (Encoding {enExt = e2}) = e1 == e2
+
 {-|
 These are used to specify the input + output types of functions.
 During parsing they are checked and used to determine the 'Type' for each 'Expr'.
@@ -317,7 +331,7 @@ data TypeSig
   -- these are analagous to their Type equivalents above:
   = ListSigs   TypeSig        -- ^ like ListOf with possibly ambiguous sigs inside
   | ScoresSigs TypeSig        -- ^ like ScoresOf with possibly ambiguous sigs inside
-  | EncodedSig String TypeSig -- ^ like EncodedAs with possibly ambiguous sigs inside
+  | EncodedSig Encoding TypeSig -- ^ like EncodedAs with possibly ambiguous sigs inside
 
   -- these are new:
   | AnyType String        -- ^ generic placeholder. string used like in Some
@@ -393,7 +407,7 @@ tExtOf :: Type -> String
 tExtOf Empty        = "empty" -- special case for empty lists with no element type
 tExtOf (ListOf   t) = tExtOf t ++ ".list"
 tExtOf (ScoresOf t) = tExtOf t ++ ".scores"
-tExtOf (EncodedAs e t) = tExtOf t ++ "." ++ e
+tExtOf (EncodedAs e t) = tExtOf t ++ "." ++ enExt e
 tExtOf (Type {tExt = e}) = e
 
 -- TODO equivalent needed for type groups, right?
@@ -402,7 +416,7 @@ descOf :: Type -> String
 descOf Empty           = "empty list" -- for lists with nothing in them yet
 descOf (ListOf      t) = "list of " ++ descOf t
 descOf (ScoresOf    t) = "scores for " ++ descOf t
-descOf (EncodedAs e t) = descOf t ++ " encoded as " ++ e
+descOf (EncodedAs e t) = descOf t ++ " encoded as " ++ enDesc e
 descOf (Type {tDesc = d}) = d
 
 varOf :: Expr -> [Var]
@@ -620,6 +634,7 @@ data Module = Module
   , mDesc      :: String
   , mTypes     :: [Type]
   , mGroups    :: [TypeGroup]
+  , mEncodings :: [Encoding]
   , mFunctions :: [Function]
   }
   -- deriving (Eq, Read)

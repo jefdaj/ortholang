@@ -9,8 +9,11 @@ module OrthoLang.Modules.BlastDB where
 -- TODO need to remove tmpfiles in /tmp on quit to save space?
 
 import Development.Shake
+
 import OrthoLang.Core
 import OrthoLang.Locks
+import OrthoLang.Modules.SeqIO      (faa, fna)
+import OrthoLang.Modules.Singletons (withSingletons, withSingletonArg)
 
 import Control.Monad           (when, forM)
 import Data.Char               (toLower)
@@ -18,12 +21,10 @@ import Data.List               (isInfixOf)
 import Data.List               (isPrefixOf)
 import Data.Maybe              (isJust, fromJust)
 import Data.String.Utils       (split)
-import OrthoLang.Modules.SeqIO (faa, fna)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
-import OrthoLang.Modules.Singletons (withSingletons, withSingletonArg)
 
 {- There are a few types of BLAST database files. For nucleic acids:
  - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
@@ -51,8 +52,9 @@ olModule :: Module
 olModule = Module
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
-  , mTypes = [fna, faa]
+  , mTypes = [fna, faa, ndb, pdb]
   , mGroups = []
+  , mEncodings = [blastdb]
   , mFunctions =
 
     [ loadFnaDb
@@ -89,9 +91,16 @@ olModule = Module
 
 -- TODO add a blastdb type group? seems natural but i'm not sure you ever need to mix them
 
+blastdb :: Encoding
+blastdb = Encoding
+  { enExt = "blastdb"
+  , enDesc = "NCBI BLAST+ sequence database"
+  , enShow = undefined
+  }
+
 -- shorthand
--- ndb = EncodedAs "blastdb" fna
--- pdb = EncodedAs "blastdb" faa
+ndb = EncodedAs blastdb fna
+pdb = EncodedAs blastdb faa
 
 -- TODO remove?
 -- ndb :: Type
@@ -125,7 +134,7 @@ mkLoadDB name faType = Function
   -- , fTypeCheck = defaultTypeCheck name [str] rtn
   -- , fTypeDesc  = mkTypeDesc name [str] rtn
   , fInputs = [Exactly str]
-  , fOutput =  Exactly (EncodedAs "blastdb" faType)
+  , fOutput =  Exactly (EncodedAs blastdb faType)
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLoadDB
   }
@@ -136,7 +145,7 @@ mkLoadDBEach name faType = Function
   -- , fTypeCheck = defaultTypeCheck name [ListOf str] (ListOf rtn)
   -- , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   , fInputs = [Exactly (ListOf str)]
-  , fOutput =  Exactly (ListOf (EncodedAs "blastdb" faType))
+  , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = undefined -- TODO write this!
   }
@@ -265,7 +274,7 @@ mkBlastdbget name faType = Function
   -- , fTypeCheck = defaultTypeCheck name [str] dbType -- TODO are there protein ones too?
   -- , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
   , fInputs = [Exactly str]
-  , fOutput =  Exactly (EncodedAs "blastdb" faType)
+  , fOutput =  Exactly (EncodedAs blastdb faType)
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rBlastdbget
   }
@@ -335,7 +344,7 @@ makeblastdbFnaAll = Function
   -- , fTypeCheck = tMakeblastdbAll name ndb
   -- , fTypeDesc  = name ++ " : fa.list -> ndb"
   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
-  , fOutput =  Exactly (EncodedAs "blastdb" fna)
+  , fOutput =  Exactly ndb
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
@@ -348,7 +357,7 @@ makeblastdbFaaAll = Function
   -- , fTypeCheck = tMakeblastdbAll name pdb
   -- , fTypeDesc  = name ++ " : faa.list -> pdb"
   , fInputs = [Exactly (ListOf faa)]
-  , fOutput = Exactly (EncodedAs "blastdb" faa)
+  , fOutput = Exactly pdb
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
@@ -402,7 +411,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   let out'     = fromPath cfg out
       cDir'    = fromPath cfg cDir
       fasPath' = fromPath cfg fasPath
-  let dbType' = if dbType == (EncodedAs "blastdb" fna) then "nucl" else "prot"
+  let dbType' = if dbType == ndb then "nucl" else "prot"
   need' "ortholang.modules.blastdb.aMakeblastdbAll" [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
@@ -493,7 +502,7 @@ makeblastdbFna = Function
   -- , fTypeCheck = tMakeblastdb ndb
   -- , fTypeDesc  = "makeblastdb_fna : fa -> ndb"
   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
-  , fOutput =  Exactly (EncodedAs "blastdb" fna)
+  , fOutput =  Exactly ndb
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
@@ -504,7 +513,7 @@ makeblastdbFaa = Function
   -- , fTypeCheck = tMakeblastdb pdb
   -- , fTypeDesc  = "makeblastdb_faa : faa -> pdb"
   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
-  , fOutput =  Exactly (EncodedAs "blastdb" faa)
+  , fOutput =  Exactly pdb
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
@@ -531,7 +540,7 @@ mkMakeblastdbEach faType = Function
   -- , fTypeCheck = tMakeblastdbEach dbType
   -- , fTypeDesc  = desc
   , fInputs = [Exactly (ListOf faType)]
-  , fOutput =  Exactly (ListOf (EncodedAs "blastdb" faType))
+  , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }

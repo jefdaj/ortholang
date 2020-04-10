@@ -85,6 +85,7 @@ module OrthoLang.Core
   , Salt(..)
   , Script
   , Type(..)
+  , Encoding(..)
   , TypeGroup(..)
   , TypeSig(..)
   -- , TypeChecker

@@ -14,10 +14,11 @@ module OrthoLang.Modules.Blast
 
 import Development.Shake
 import OrthoLang.Core
+import OrthoLang.Modules.SeqIO   (faa, fna, mkConcat, mkConcatEach)
+import OrthoLang.Modules.BlastDB (blastdb)
 
 import Data.Scientific           (formatScientific, FPFormat(..))
 -- import OrthoLang.Modules.BlastDB (ndb, pdb) -- TODO import rMakeBlastDB too?
-import OrthoLang.Modules.SeqIO   (faa, fna, mkConcat, mkConcatEach)
 import System.Exit               (ExitCode(..))
 import System.FilePath           (replaceBaseName)
 import Data.Maybe (fromJust)
@@ -26,8 +27,9 @@ olModule :: Module
 olModule = Module
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
-  , mTypes = [bht]
+  , mTypes = [bht] -- TODO ndb, pdb?
   , mGroups = []
+  , mEncodings = [blastdb]
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
@@ -76,7 +78,7 @@ mkBlastFromDb d@(bCmd, qType, _, sType) = Function
   , fName = bCmd ++ "_db"
   -- , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
   -- , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
-  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs "blastdb" sType)]
+  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
   , fOutput = Exactly bht
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
@@ -190,7 +192,7 @@ rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn salt deps _ [e, q, s])
     rules = fOldRules $ mkBlastFromDb d
     name1 = fName $ mkBlastFromDb d
     name2 = "makeblastdb_" ++ tExtOf sType
-    dbExpr = Fun (EncodedAs "blastdb" sType) salt (depsOf s) name2 [s] 
+    dbExpr = Fun (EncodedAs blastdb sType) salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 ---------------------
@@ -202,7 +204,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf dbType] (ListOf bht)
   -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs "blastdb" sType))]
+  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType))]
   , fOutput = Exactly (ListOf bht)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDbEach d
@@ -236,7 +238,7 @@ rMkBlastFromFaEach d@(_, _, _, sType) st (Fun rtn salt deps _   [e, q, ss])
   =                              rules st (Fun rtn salt deps fn2 [e, q, ss'])
   where
     rules = rMkBlastFromDbEach d
-    ss'   = Fun (ListOf (EncodedAs "blastdb" sType)) salt (depsOf ss) fn1 [ss]
+    ss'   = Fun (ListOf (EncodedAs blastdb sType)) salt (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb_" ++ tExtOf sType ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

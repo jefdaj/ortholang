@@ -1,13 +1,14 @@
 module OrthoLang.Modules.BlastRBH where
 
 import Development.Shake
+
 import OrthoLang.Core
 import OrthoLang.Core.Compile as C
+import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)
+import OrthoLang.Modules.BlastDB (blastdb)
+import OrthoLang.Modules.SeqIO   (fna, faa)
 
 import Data.List.Utils           (replace)
-import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)
--- import OrthoLang.Modules.BlastDB (ndb, pdb)
-import OrthoLang.Modules.SeqIO   (fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>))
@@ -29,6 +30,7 @@ olModule = Module
   , mDesc = "Reciprocal BLAST+ best hits"
   , mTypes = [fna, faa, bht]
   , mGroups = []
+  , mEncodings = [blastdb]
   , mFunctions =
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
     map mkBlastFromFaRev     blastDescsRev ++
@@ -101,10 +103,7 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn salt deps _ [e, s, qs]) =
       editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
       editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
       dbFnName   = "makeblastdb_" ++ tExtOf qType ++ "_all"
-      dbType     = EncodedAs "blastdb" qType
-      -- (dbFnName, dbType) = if qType == faa
-      --                        then ("makeblastdb_faa_all", EncodedAs "blastdb" faa) -- TODO use non _all version?
-      --                        else ("makeblastdb_fna_all", EncodedAs "blastdb" fna) -- TODO use non _all version?
+      dbType     = EncodedAs blastdb qType
   rMap 3 revDbAct scr editedExpr
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
 

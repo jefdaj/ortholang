@@ -193,6 +193,12 @@ prettyResult cfg ref (ListOf t) f
 prettyResult cfg ref (ScoresOf _)  f = do
   s <- liftIO (defaultShow cfg ref $ fromPath cfg f)
   return $ text s
+
+-- TODO case for EncodedAs here, and later redesign this as a typeclass
+prettyResult cfg ref (EncodedAs e _)  f = liftIO $ fmap text $ enShow e cfg ref f'
+  where
+    f' = fromPath cfg f
+
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
     showFn = if t == num then prettyNum else text

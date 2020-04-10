@@ -49,8 +49,9 @@ olModule :: Module
 olModule = Module
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
-  , mTypes = [search, fna, faa]
+  , mTypes = [search, fna, faa, fnagz, faagz]
   , mGroups = []
+  , mEncodings = [gz]
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
     -- TODO single and _each versions?
@@ -84,12 +85,18 @@ search = Type
 --   , tShow = \_ _ f -> return $ "gzipped faa file \"" ++ f ++ "\""
 --   }
 
--- just shorthand
+gz :: Encoding
+gz = Encoding
+  { enExt = "gz"
+  , enDesc = "gunzip archive" -- TODO and maybe also tarballed?
+  , enShow = undefined
+  }
+
 fnagz :: Type
-fnagz = EncodedAs "gz" fna
+fnagz = EncodedAs gz fna
 
 faagz :: Type
-faagz = EncodedAs "gz" faa
+faagz = EncodedAs gz faa
 
 -- TODO does this work at all?
 parseSearches :: Function

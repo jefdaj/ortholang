@@ -10,18 +10,19 @@ module OrthoLang.Modules.PsiBlast where
 -- TODO automatically add fn name to type signatures rather than passing each time
 
 import Development.Shake
+
 import OrthoLang.Core
+import OrthoLang.Modules.BlastDB    (pdb)
+import OrthoLang.Modules.Blast      (bht)
+import OrthoLang.Modules.SeqIO      (mkConcat, faa)
+import OrthoLang.Modules.Singletons (withSingleton)
 
 import Control.Monad             (when)
 import Data.Scientific           (formatScientific, FPFormat(..))
-import OrthoLang.Modules.Blast   (bht)
-import OrthoLang.Modules.SeqIO   (faa)
-import OrthoLang.Modules.SeqIO   (mkConcat)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((<.>), takeFileName)
 import Data.Maybe (fromJust)
-import OrthoLang.Modules.Singletons (withSingleton)
 
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.psiblast." ++ name)
@@ -68,8 +69,9 @@ olModule = Module
             \\n\
             \TODO individual help descriptions for each fn"
 
-  , mTypes = [faa, bht, pssm]
+  , mTypes = [faa, bht, pssm, pdb]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
 
     -- runs without obvious errors, but needs more careful verification:
@@ -116,10 +118,6 @@ pssm = Type
   , tDesc = "PSI-BLAST position-specific substitution matrix as ASCII"
   , tShow  = defaultShow
   }
-
--- shorthand
-pdb :: Type
-pdb = EncodedAs "blastdb" faa
 
 --------------------
 -- base functions --
