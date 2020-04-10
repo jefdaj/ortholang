@@ -411,7 +411,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) fasPath'
 
   let dbDir  = cDir' </> fasHash
-      dbOut  = dbDir </> fasHash <.> tExtOf dbType
+      dbOut  = dbDir </> "result"
       dbOut' = toPath cfg dbOut
       out''  = traceA "aMakeblastdbAll" out' [tExtOf dbType, out', dbOut, fasPath']
       dbPtn  = cDir' </> fasHash </> "*" -- TODO does this actually help?
@@ -570,10 +570,10 @@ showBlastDb :: Config -> LocksRef -> FilePath -> IO String
 showBlastDb cfg ref path = do
   path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir  = takeDirectory path'
-      dbBase = takeFileName  path'
+      -- dbBase = takeBaseName  dbDir
   debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: \"" ++ dbDir ++ "\""
   out <- withReadLock ref path' $
-           readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
+           readCreateProcess (proc "blastdbcmd.sh" [dbDir]) ""
   let out1 = lines out
       out2 = concatMap (split "\t") out1
       out3 = filter (not . null) out2
