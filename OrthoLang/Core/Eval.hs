@@ -294,12 +294,14 @@ printShort cfg ref idsref pm rtype path = do
 -- TODO get the type of result and pass to eval
 evalScript :: Handle -> GlobalEnv -> IO ()
 evalScript hdl (scr, c, ref, ids, dRef) =
-  let res = case lookupResult scr of
-              Nothing -> fromJust $ lookupResult $ ensureResult scr
+  let scr'  = expandMacros c scr
+      scr'' = trace "ortholang.core.eval.evalScript" ("after macro expansion: " ++ unlines (map show scr')) scr'
+      res = case lookupResult scr'' of
+              Nothing -> fromJust $ lookupResult $ ensureResult scr''
               Just r  -> r
-      loadExprs = extractLoads scr res
-      loads = mapM (rExpr scr) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-  in eval hdl c ref ids dRef (typeOf res) loads (compileScript (expandMacros c scr) $ RepID Nothing)
+      loadExprs = extractLoads scr'' res
+      loads = mapM (rExpr scr'') $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
+  in eval hdl c ref ids dRef (typeOf res) loads (compileScript $ seq scr'' scr'')
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: GlobalEnv -> Handle -> IO ()

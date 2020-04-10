@@ -11,6 +11,9 @@ module OrthoLang.Core.Compile.Compose
   )
   where
 
+import Prelude hiding (error)
+import OrthoLang.Debug (error)
+
 import OrthoLang.Core.Types
 import OrthoLang.Core.Parse.Expr (typecheckFn) -- TODO move somewhere else
 import OrthoLang.Core.Compile.NewRules
@@ -28,7 +31,7 @@ compose1 name fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro'
     macro = mCompose1 fn1 fn2
     macro' = macro `deepseq` macro -- force composition errors immediately
 
-err :: a
+err :: String -> a
 err = error "core.compile.compose.mCompose1"
 
 {-|
@@ -43,7 +46,7 @@ the names.
 TODO try to factor some of this boilerplate out and make a generic mCompose
 -}
 mCompose1 :: Function -> Function -> MacroExpansion
-mCompose1 f1 f2 _ (Fun r2 salt deps n2 es)
+mCompose1 f1 f2 _ (Fun r2 salt deps _ es)
 
   -- first check that f2 expects one input
   | length (fInputs f2) /= 1 =
@@ -51,17 +54,23 @@ mCompose1 f1 f2 _ (Fun r2 salt deps n2 es)
     in err $ fName f2 ++ "has " ++ n ++ " inputs, so you can't use compose1"
   | otherwise =
 
-    -- then check that it matches the output of f1, so they could be composed
-    case typecheckFn (fName f1) (fOutput f1) (fInputs f2) (map typeOf es) of
-      Left e -> err $ "typecheckFn error: '" ++ e ++ "'"
+    -- find the exact return type of f1, because it's needed in the next step
+    case typecheckFn (fName f1) (fOutput f1) (fInputs f1) (map typeOf es) of
+      Left e -> err $ "typecheckFn error in f1: '" ++ e ++ "'"
+      Right r1 ->
 
-      -- finally, check that the composed fn has the expected output type
-      Right r1 -> if r1 /= r2
-        then err $ "return types don't match: " ++ show r1 ++ " /= " ++ show r2
+        -- then check that it typechecks as the input of f2, so they could be composed
+        case typecheckFn (fName f2) (fOutput f2) [fOutput f1] [r1] of
+          Left e -> err $ "typecheckFn error in f2: '" ++ e ++ "'"
 
-        -- if types look OK, make the composed function
-        else let e1 = Fun r1 salt deps (fName f1) es
-             in Fun r2 salt deps n2 [e1]
+          -- finally, check that the composed fn has the expected output type
+          Right r2' -> if r2' /= r2
+            then err $ "return type of f2 does not match its macro definition: " ++
+                       show r2' ++ " /= " ++ show r2
+
+            -- if types look OK, make the composed function
+            else let e1 = Fun r1 salt deps (fName f1) es
+                 in Fun r2 salt deps (fName f2) [e1]
 
 -- oh, and the very first check is that mCompose1 was given a Fun
 mCompose1 _ _ _ e = err $ "bad argument: " ++ show e

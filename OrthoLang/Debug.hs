@@ -26,7 +26,7 @@ error :: String -> String -> a
 error suffix msg = L.errorSL' (T.pack $ "ortholang." ++ suffix) (T.pack msg)
 
 trace :: String -> String -> a -> a
-trace suffix msg = L.traceSL (T.pack $ "ortholang." ++ suffix) (T.pack msg)
+trace suffix msg = L.traceSL' (T.pack $ "ortholang." ++ suffix) (T.pack msg)
 
 -- TODO deduplicate with the one in Locks.hs
 warn :: String -> String -> IO ()

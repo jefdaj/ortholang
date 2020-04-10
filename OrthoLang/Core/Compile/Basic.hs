@@ -123,7 +123,7 @@ rNamedFunction' scr expr name = do
                                in return $ debugRules "rNamedFunction'" expr res
                  -- TODO typecheck here to make sure the macro didn't mess anything up?
                  NewMacro _ -> fail $ "all macros should have been expanded already," ++
-                                      " but rNamedFunction found " ++ name
+                                      " but rNamedFunction found " ++ name ++ " in " ++ show expr
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do
@@ -137,8 +137,8 @@ rAssign scr (var, expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
-compileScript :: Script -> RepID -> Rules ResPath
-compileScript scr _ = do
+compileScript :: Script -> Rules ResPath
+compileScript scr = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands

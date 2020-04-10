@@ -145,7 +145,7 @@ rReplace' script resExpr subVar@(Var _ _) subExpr = do
       deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
       newID = calcRepID script resExpr subVar subExpr
       scr'  = setRepIDs newID $ [sub] ++ deps ++ [res]
-  (ResPath resPath) <- compileScript scr' newID -- TODO remove the ID here, or is it useful?
+  (ResPath resPath) <- compileScript scr'
   return (ExprPath resPath)
 
 {- This decides the "replace ID" in rReplace' above. It's important because the
