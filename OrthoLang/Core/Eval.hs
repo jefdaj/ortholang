@@ -29,6 +29,7 @@ import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
 import OrthoLang.Core.Types
+import OrthoLang.Core.Expand (expandMacros)
 import OrthoLang.Core.Pretty (renderIO)
 -- import OrthoLang.Core.Config (debug)
 
@@ -292,7 +293,7 @@ evalScript hdl (scr, c, ref, ids, dRef) =
               Just r  -> r
       loadExprs = extractLoads scr res
       loads = mapM (rExpr scr) $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
-  in eval hdl c ref ids dRef (typeOf res) loads (compileScript scr $ RepID Nothing)
+  in eval hdl c ref ids dRef (typeOf res) loads (compileScript (expandMacros c scr) $ RepID Nothing)
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: GlobalEnv -> Handle -> IO ()

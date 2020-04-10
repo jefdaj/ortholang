@@ -25,7 +25,6 @@ module OrthoLang.Core.Compile.Basic
   , rListLits
   , rListPaths
   , rNamedFunction
-  , rMacro
 
   -- * Script compilers
   , rRef
@@ -177,13 +176,9 @@ rNamedFunction' scr expr name = do
                  NewRules _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
                                    res = ExprPath p
                                in return $ debugRules cfg "rNamedFunction'" expr res
-                 -- TODO typecheck here to make sure the macro didn't mess anything up
-                 NewMacro mFn -> rMacro cfg mFn scr expr
-
-rMacro :: Config -> (Script -> Expr -> Expr) -> Script -> Expr -> Rules ExprPath
-rMacro cfg mFn scr expr = rExpr scr $ debugRules cfg "rMacro" expr expr'
-  where
-    expr' = mFn scr expr
+                 -- TODO typecheck here to make sure the macro didn't mess anything up?
+                 NewMacro mFn -> fail $ "all macros should have been expanded already," ++
+                                        " but rNamedFunction found " ++ name
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do

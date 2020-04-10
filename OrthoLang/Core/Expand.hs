@@ -27,7 +27,6 @@ module OrthoLang.Core.Expand
 
 import OrthoLang.Core.Types
 
--- | Runs eScript until everything has been expanded
 expandMacros :: Config -> Script -> Script
 expandMacros = eScript
 
@@ -37,20 +36,25 @@ eScript cfg scr = map (eAssign cfg scr) scr
 eAssign :: Config -> Script -> Assign -> Assign
 eAssign cfg scr (v, e) = (v, eExpr cfg scr e)
 
+-- | This one is recursive in case one macro expression is hidden inside the
+--   result of another
 eExpr :: Config -> Script -> Expr -> Expr
 eExpr cfg scr e = if e' == e then e else eExpr' cfg scr e'
   where
     e' = eExpr' cfg scr e
 
+eExpr' :: Config -> Script -> Expr -> Expr
 eExpr' cfg scr e@(Fun _ _ _ name _) =
   case findFun cfg name of
     Left err -> error err
     Right fn -> case fNewRules fn of
-                  (NewMacro m) -> case typecheck cfg (m scr e) of
-                                    Left err -> error err
-                                    Right e' -> e'
+                  -- TODO is another typechecking step necessary? maybe doesn't add anything
+                  -- (NewMacro m) -> case typecheck cfg (m scr e) of
+                  --                   Left err -> error err
+                  --                   Right e' -> e'
+                  (NewMacro m) -> m scr e
                   _ -> e
 eExpr' _ _ e = e
 
-typecheck :: Config -> Expr -> Either String Expr
-typecheck cfg expr = undefined
+-- typecheck :: Config -> Expr -> Either String Expr
+-- typecheck cfg expr = undefined
