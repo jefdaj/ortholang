@@ -24,40 +24,33 @@ module OrthoLang.Modules.Load
   )
   where
 
--- TODO move all the mkLoad* stuff from Core here? it's still kind of core
-
-import Development.Shake
 import OrthoLang.Core
-import OrthoLang.Core.Types
+import OrthoLang.Core.Types   -- TODO move needed stuff to Core.hs
+import OrthoLang.Core.Actions -- TODO move needed stuff to Core.hs
+
 import qualified Data.Map.Strict as M
-import System.FilePath            (takeExtension)
-import Data.Maybe (isJust, fromJust)
-import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
-import Data.IORef                 (atomicModifyIORef', readIORef)
-import Data.List                  (isPrefixOf, isInfixOf)
+
+import Control.Monad.IO.Class     (liftIO)
+import Data.IORef                 (atomicModifyIORef')
+import Data.List                  (isInfixOf, sort)
+import Data.Maybe                 (fromJust)
+import Data.String.Utils          (strip)
+import Development.Shake          (Action, getShakeExtra, getShakeExtraRules, (%>), alwaysRerun)
+import Development.Shake.FilePath ((</>), (<.>), takeFileName, isAbsolute)
+import OrthoLang.Core             (compose1)
+import OrthoLang.Core.Sanitize    (hashIDsFile2, readIDs)
+import OrthoLang.Util             (absolutize, resolveSymlinks, digest, headOrDie, unlessExists)
 import System.Directory           (createDirectoryIfMissing)
+import System.Directory           (makeRelativeToCurrentDirectory)
 import System.Exit                (ExitCode(..))
-import Development.Shake.FilePath (isAbsolute)
-import Development.Shake.FilePath ((</>), (<.>), takeFileName)
-import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
-                                   digest, removeIfExists, headOrDie, unlessExists)
-
-import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
-                                   readLit, readLits, writeLit, writeLits, hashContent,
-                                   readLitPaths, writePaths, symlink)
-
-import Data.List            (sort)
-import Data.String.Utils    (strip)
-import OrthoLang.Core       (compose1)
-import System.Directory     (makeRelativeToCurrentDirectory)
-import System.FilePath.Glob (glob)
--- import Data.Maybe (fromJust)
+import System.FilePath            (takeExtension)
+import System.FilePath.Glob       (glob)
 
 olModule :: Module
 olModule = Module
   { mName = "Load"
   , mDesc = "Load generic lists"
-  , mTypes = [] -- TODO include str?
+  , mTypes = [str]
   , mGroups = []
   , mFunctions = [loadList, globFiles]
   }
@@ -191,7 +184,7 @@ aLoadHash hashSeqIDs src _ = do
 isURL :: String -> Bool
 isURL s = "://" `isInfixOf` take 10 s
 
--- TODO move to Load module?
+-- TODO move to its own module
 curl :: String -> Action Path
 curl url = do
   cfg <- fmap fromJust getShakeExtra
@@ -225,23 +218,11 @@ aLoad hashSeqIDs strPath outPath = do
                      else cfgWorkDir cfg </> line
   need' "core.compile.basic.aLoad" [strPath']
   pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits strPath' -- TODO safer!
-  -- liftIO $ putStrLn $ "pth: " ++ pth
   pth' <- if isURL pth
             then curl pth
             else fmap (toPath cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
-  -- liftIO $ putStrLn $ "pth': " ++ show pth'
-  -- src' <- if isURL pth
-            -- then curl ref pth
-            -- else 
-  -- liftIO $ putStrLn $ "src': " ++ src'
-  -- debugA $ "aLoad src': \"" ++ src' ++ "\""
-  -- debugA $ "aLoad outPath': \"" ++ outPath' ++ "\""
-  -- TODO why doesn't this rerun?
   hashPath <- aLoadHash hashSeqIDs pth' (takeExtension outPath')
-  -- let hashPath'    = fromPath cfg hashPath
-      -- hashPathRel' = ".." </> ".." </> makeRelative (cfgTmpDir cfg) hashPath'
   symlink outPath'' hashPath
-  -- trackWrite' [outPath'] -- TODO WTF? why does this not get called by symlink?
   where
 
 rLoadList :: Bool -> RulesFn
@@ -251,9 +232,7 @@ rLoadList hashSeqIDs s e@(Fun (ListOf r) _ _ _ [es])
 rLoadList _ _ _ = fail "bad arguments to rLoadList"
 
 -- special case for lists of str and num
--- TODO remove rtn and use (typeOf expr)?
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
--- TODO don't need to hash seqids here right?
 -- TODO need to readLitPaths?
 rLoadListLits :: RulesFn
 rLoadListLits scr expr = do
@@ -265,7 +244,6 @@ rLoadListLits scr expr = do
       litsPath = toPath cfg litsPath'
   outPath' %> \_ -> aLoadListLits outPath litsPath
   return (ExprPath outPath')
-  where
 
 -- TODO have to listLitPaths here too?
 aLoadListLits :: Path -> Path -> Action ()
@@ -281,7 +259,7 @@ aLoadListLits outPath litsPath = do
 -- regular case for lists of any other file type
 -- TODO hash mismatch here?
 rLoadListPaths :: Bool -> RulesFn
-rLoadListPaths hashSeqIDs scr e@(Fun rtn salt _ _ [es]) = do
+rLoadListPaths hashSeqIDs scr e@(Fun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr scr es
   -- let hash     = digest $ toPath cfg pathsPath
   --     outPath  = unsafeExprPathExplicit cfg "list" rtn salt [hash]
