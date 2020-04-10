@@ -4,13 +4,11 @@
 |   |-- extract_scored
 |   |   `-- 04a5544d0a
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- extract_scores
 |   |   `-- 04a5544d0a
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- list
@@ -109,4 +107,4 @@
     |-- result -> ../exprs/list/4be8e62b21/0/result
     `-- scores.num.list -> ../exprs/extract_scores/04a5544d0a/0/result
 
-64 directories, 45 files
+64 directories, 43 files

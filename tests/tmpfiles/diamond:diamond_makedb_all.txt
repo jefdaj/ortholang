@@ -11,8 +11,6 @@
 |   |-- diamond_makedb_all
 |   |   `-- f9584a63b1
 |   |       `-- 0
-|   |           |-- err
-|   |           |-- out
 |   |           `-- result
 |   |-- glob_files
 |   |   `-- fee4eba648
@@ -30,4 +28,4 @@
     |-- mycoplasma.faa.list -> ../exprs/load_faa_each/e87423a183/0/result
     `-- result -> ../exprs/diamond_makedb_all/f9584a63b1/0/result
 
-16 directories, 14 files
+16 directories, 12 files

@@ -11,14 +11,10 @@
 |   |       `-- c11b3cd068
 |   |           `-- cb10e2ac0f
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
 |   |                   `-- result
 |   |-- diamond_makedb
 |   |   `-- b8ba873461
 |   |       `-- 0
-|   |           |-- err
-|   |           |-- out
 |   |           `-- result
 |   |-- gbk_to_fna
 |   |   `-- 169f0411dc
@@ -53,4 +49,4 @@
     |-- mgen.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
     `-- result -> ../exprs/diamond_blastx/82cd2c1301/c11b3cd068/cb10e2ac0f/0/result
 
-34 directories, 19 files
+34 directories, 15 files

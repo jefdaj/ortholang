@@ -7,11 +7,11 @@
 |   |   `-- cb3e90dc00.ids
 |   `-- makeblastdb
 |       `-- 583d3fe84e
-|           |-- 583d3fe84e.pdb.err
-|           |-- 583d3fe84e.pdb.out
-|           |-- 583d3fe84e.pdb.phr
-|           |-- 583d3fe84e.pdb.pin
-|           `-- 583d3fe84e.pdb.psq
+|           |-- 583d3fe84e.faa.blastdb.err
+|           |-- 583d3fe84e.faa.blastdb.out
+|           |-- 583d3fe84e.faa.blastdb.phr
+|           |-- 583d3fe84e.faa.blastdb.pin
+|           `-- 583d3fe84e.faa.blastdb.psq
 |-- exprs
 |   |-- list
 |   |   `-- f04d901533
@@ -24,7 +24,7 @@
 |   |   `-- 998406b615
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/cb3e90dc00
-|   |-- makeblastdb_prot_all
+|   |-- makeblastdb_faa_all
 |   |   `-- 24ea89c454
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -36,9 +36,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- db.pdb -> ../exprs/makeblastdb_prot_all/24ea89c454/0/result
+    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/24ea89c454/0/result
     |-- genes5.faa -> ../exprs/load_faa/998406b615/0/result
-    |-- result -> ../vars/db.pdb
+    |-- result -> ../vars/db.faa.blastdb
     `-- single.faa -> ../exprs/load_faa/649c67c82e/0/result
 
 22 directories, 19 files

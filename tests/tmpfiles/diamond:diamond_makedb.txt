@@ -7,8 +7,6 @@
 |   |-- diamond_makedb
 |   |   `-- b8ba873461
 |   |       `-- 0
-|   |           |-- err
-|   |           |-- out
 |   |           `-- result
 |   |-- load_faa
 |   |   `-- b4f8a9bd8e
@@ -22,4 +20,4 @@
     |-- mgen.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
     `-- result -> ../exprs/diamond_makedb/b8ba873461/0/result
 
-13 directories, 9 files
+13 directories, 7 files

@@ -16,7 +16,7 @@
 |   |   |-- d8da51f7cd -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
 |   |   `-- ec9540d17e -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
 |   `-- seqio
-|       `-- 50a7cc881c.txt -> ../../cache/lines/...
+|       `-- f4fd3e6a1f.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- concat_faa
 |   |   `-- 6b2ff554c7
@@ -67,9 +67,7 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- genes_of_interest.str.list -> ../exprs/load_list/c5b6d83a5a/0/result
-    |-- pcc7942genes.faa -> ../exprs/concat_faa/6b2ff554c7/0/result
     |-- result -> ../vars/sequences_of_interest.faa
     `-- sequences_of_interest.faa -> ../exprs/extract_seqs/98c32d62ce/f4fd3e6a1f/0/result
 
-46 directories, 26 files
+46 directories, 24 files
