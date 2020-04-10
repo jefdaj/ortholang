@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 2012199ab8
+|   |   |-- c3d3beb3e3
 |   |   |   `-- d5ed104df0
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/blastn_db/e10471b511/6c397c8b00/d5ed104df0/0/result
+|   |   |       `-- result -> ../../../../exprs/blastn_db/e10471b511/2e96efdd27/d5ed104df0/0/result
 |   |   `-- d20a940be8
-|   |       `-- 9d89f0871b
+|   |       `-- a3585f731d
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/9d89f0871b/0/result
+|   |           `-- result -> ../../../../exprs/extract_queries/a3585f731d/0/result
 |   |-- load
 |   |   |-- 6046a54e92
 |   |   |-- 6046a54e92.ids
@@ -16,11 +16,12 @@
 |   |   `-- 8723e7ac8c.ids
 |   `-- makeblastdb
 |       `-- 5d1696ca54
-|           |-- 5d1696ca54.ndb.err
-|           |-- 5d1696ca54.ndb.nhr
-|           |-- 5d1696ca54.ndb.nin
-|           |-- 5d1696ca54.ndb.nsq
-|           `-- 5d1696ca54.ndb.out
+|           |-- result
+|           |-- result.err
+|           |-- result.nhr
+|           |-- result.nin
+|           |-- result.nsq
+|           `-- result.out
 |-- exprs
 |   |-- all
 |   |   `-- 322eda1844
@@ -36,21 +37,17 @@
 |   |-- blastn_db
 |   |   |-- 4300292626
 |   |   |   `-- 3b8450818a
-|   |   |       `-- fcc541cc67
+|   |   |       `-- 3d0a36f1a0
 |   |   |           `-- 0
-|   |   |               |-- err
-|   |   |               |-- out
 |   |   |               `-- result -> out
 |   |   `-- e10471b511
-|   |       `-- 6c397c8b00
+|   |       `-- 2e96efdd27
 |   |           `-- d5ed104df0
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
 |   |                   `-- result -> out
 |   |-- blastn_db_each
 |   |   `-- 4300292626
-|   |       `-- 533a15c281
+|   |       `-- e2dfb7b3fc
 |   |           `-- 16d27ca626
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
@@ -61,17 +58,14 @@
 |   |-- extract_queries
 |   |   |-- 0925881afc
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 7e6e7f75e9
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
-|   |   `-- 9d89f0871b
+|   |   `-- a3585f731d
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- extract_queries_each
@@ -98,11 +92,11 @@
 |   |   `-- 8c18a0665c
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/8723e7ac8c
-|   |-- makeblastdb_nucl
+|   |-- makeblastdb_fna
 |   |   `-- 79cc7a23f6
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
-|   |-- makeblastdb_nucl_all
+|   |-- makeblastdb_fna_all
 |   |   `-- 79cc7a23f6
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -125,4 +119,4 @@
     |-- small.fna -> ../exprs/load_fna/8c18a0665c/0/result
     `-- srevs.str.list -> ../exprs/extract_queries/7e6e7f75e9/0/result
 
-74 directories, 51 files
+74 directories, 45 files

@@ -2,20 +2,21 @@
 |-- cache
 |   |-- each
 |   |   `-- 32f979071a
-|   |       `-- db912ac43b
+|   |       `-- a6fba81a0d
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_targets/db912ac43b/0/result
+|   |           `-- result -> ../../../../exprs/extract_targets/a6fba81a0d/0/result
 |   |-- load
 |   |   |-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |   |-- cb3e90dc00
 |   |   `-- cb3e90dc00.ids
 |   |-- makeblastdb
 |   |   `-- 31154a4077
-|   |       |-- 31154a4077.pdb.err
-|   |       |-- 31154a4077.pdb.out
-|   |       |-- 31154a4077.pdb.phr
-|   |       |-- 31154a4077.pdb.pin
-|   |       `-- 31154a4077.pdb.psq
+|   |       |-- result
+|   |       |-- result.err
+|   |       |-- result.out
+|   |       |-- result.phr
+|   |       |-- result.pin
+|   |       `-- result.psq
 |   `-- seqio
 |-- exprs
 |   |-- any
@@ -25,20 +26,16 @@
 |   |-- blastp_db
 |   |   `-- 4300292626
 |   |       `-- ee6b931ef7
-|   |           `-- 8c25b87659
+|   |           `-- bea47970ed
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
 |   |                   `-- result -> out
 |   |-- extract_targets
 |   |   |-- 4c9e965a01
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
-|   |   `-- db912ac43b
+|   |   `-- a6fba81a0d
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- extract_targets_each
@@ -71,7 +68,7 @@
 |   |   `-- a2d4927026
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/28ce925871
-|   |-- makeblastdb_prot
+|   |-- makeblastdb_faa
 |   |   `-- d7d9ee0745
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -90,9 +87,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/4300292626/ee6b931ef7/8c25b87659/0/result
+    |-- hits.bht -> ../exprs/blastp_db/4300292626/ee6b931ef7/bea47970ed/0/result
     |-- mapped.str.list.list -> ../exprs/extract_targets_each/dd92d9060c/0/result
     |-- result -> ../exprs/any/e9c01e832f/0/result
     `-- single.str.list -> ../exprs/extract_targets/4c9e965a01/0/result
 
-58 directories, 37 files
+58 directories, 34 files

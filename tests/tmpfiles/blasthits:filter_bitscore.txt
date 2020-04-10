@@ -2,13 +2,13 @@
 |-- cache
 |   |-- each
 |   |   |-- 5a2fef0b6d
-|   |   |   `-- b6e637d20f
+|   |   |   `-- 72001006b5
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/filter_bitscore/17c2daf7fd/b6e637d20f/0/result
+|   |   |       `-- result -> ../../../../exprs/filter_bitscore/17c2daf7fd/72001006b5/0/result
 |   |   `-- 9eac9716bc
-|   |       `-- f35582916a
+|   |       `-- 7f1173ad34
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/f35582916a/0/result
+|   |           `-- result -> ../../../../exprs/extract_queries/7f1173ad34/0/result
 |   |-- load
 |   |   |-- 10ffe0cf0f
 |   |   |-- 10ffe0cf0f.ids
@@ -16,11 +16,12 @@
 |   |   `-- 11bbf54fc6.ids
 |   `-- makeblastdb
 |       `-- de368a5ecd
-|           |-- de368a5ecd.pdb.err
-|           |-- de368a5ecd.pdb.out
-|           |-- de368a5ecd.pdb.phr
-|           |-- de368a5ecd.pdb.pin
-|           `-- de368a5ecd.pdb.psq
+|           |-- result
+|           |-- result.err
+|           |-- result.out
+|           |-- result.phr
+|           |-- result.pin
+|           `-- result.psq
 |-- exprs
 |   |-- any
 |   |   `-- db9c163ec6
@@ -29,20 +30,16 @@
 |   |-- blastp_db
 |   |   `-- 4300292626
 |   |       `-- b8ba873461
-|   |           `-- 0d5dfb075c
+|   |           `-- 4d7ae18bc1
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
 |   |                   `-- result -> out
 |   |-- extract_queries
-|   |   |-- 8c165ffd86
+|   |   |-- 7f1173ad34
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
-|   |   `-- f35582916a
+|   |   `-- 8c165ffd86
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- extract_queries_each
@@ -51,7 +48,7 @@
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- filter_bitscore
 |   |   |-- 17c2daf7fd
-|   |   |   `-- b6e637d20f
+|   |   |   `-- 72001006b5
 |   |   |       `-- 0
 |   |   |           `-- result
 |   |   `-- 439476c9ff
@@ -87,7 +84,7 @@
 |   |   `-- b4f8a9bd8e
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/10ffe0cf0f
-|   |-- makeblastdb_prot
+|   |-- makeblastdb_faa
 |   |   `-- 876bd5aef4
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -106,11 +103,11 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/4300292626/b8ba873461/0d5dfb075c/0/result
+    |-- hits.bht -> ../exprs/blastp_db/4300292626/b8ba873461/4d7ae18bc1/0/result
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/f70d232073/0/result
     |-- mgen.faa -> ../exprs/load_faa/5477a8255c/0/result
     |-- result -> ../exprs/length/aed8ef951d/0/result
     |-- single.str.list -> ../exprs/extract_queries/8c165ffd86/0/result
     `-- small.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
 
-68 directories, 45 files
+68 directories, 42 files

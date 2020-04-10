@@ -6,11 +6,12 @@
 |   |   `-- 6046a54e92.ids
 |   |-- makeblastdb
 |   |   `-- 0272ba9a4f
-|   |       |-- 0272ba9a4f.ndb.err
-|   |       |-- 0272ba9a4f.ndb.nhr
-|   |       |-- 0272ba9a4f.ndb.nin
-|   |       |-- 0272ba9a4f.ndb.nsq
-|   |       `-- 0272ba9a4f.ndb.out
+|   |       |-- result
+|   |       |-- result.err
+|   |       |-- result.nhr
+|   |       |-- result.nin
+|   |       |-- result.nsq
+|   |       `-- result.out
 |   `-- seqio
 |-- exprs
 |   |-- all
@@ -20,52 +21,42 @@
 |   |-- extract_queries
 |   |   |-- 064563ac0f
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 091ed8fd1c
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 265189a9ee
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 32bbed03f4
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 53463f33e3
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 78e80caf9b
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 794cbe7749
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- 8a476a6fbf
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   |-- b43dfe9390
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   `-- f141f33e8d
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- gbk_to_fna
@@ -88,7 +79,7 @@
 |   |   `-- a2d4927026
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/28ce925871
-|   |-- makeblastdb_nucl
+|   |-- makeblastdb_fna
 |   |   `-- 648b8e90fa
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -115,44 +106,45 @@
 |   `-- tblastx_db
 |       `-- 4300292626
 |           |-- 0a16715ea9
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
+|           |           `-- result -> out
 |           |-- 39d6be932b
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
+|           |           `-- result -> out
 |           |-- 3d81f10bfb
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
 |           |           `-- result -> out
 |           |-- 6b79cd5ade
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
-|           |           |-- err
-|           |           `-- out
+|           |           `-- result -> out
 |           |-- 796f07b1e9
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
+|           |           `-- result -> out
 |           |-- 8919b922f0
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
 |           |           `-- result -> out
 |           |-- f1fd0f5ca8
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
 |           |           `-- result -> out
 |           |-- f2026cc2f7
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
 |           |           `-- result -> out
 |           |-- f4d0391a73
-|           |   `-- 417e96cdfd
+|           |   `-- 1d23fe349c
 |           |       `-- 0
 |           |           `-- result -> out
 |           `-- fb66f3099a
-|               `-- 417e96cdfd
+|               `-- 1d23fe349c
 |                   `-- 0
-|                       |-- err
-|                       `-- out
+|                       `-- result -> out
 |-- reps
 |   |-- 05f15d33cc
 |   |   |-- genes5.fna -> ../../exprs/load_fna/7360a5acb0/0/result
@@ -198,4 +190,4 @@
     |-- maga.fna -> ../exprs/gbk_to_fna/169f0411dc/7b73b35244/0/result
     `-- result -> ../exprs/all/6efee800e6/0/result
 
-107 directories, 91 files
+107 directories, 83 files

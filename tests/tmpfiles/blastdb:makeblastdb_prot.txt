@@ -2,12 +2,12 @@
 |-- cache
 |   |-- each
 |   |   |-- 46d506879e
-|   |   |   |-- 30756e07df
+|   |   |   |-- 54a3aeae67
 |   |   |   |   |-- args -> ../../../../cache/lines/...
-|   |   |   |   `-- result -> ../../../../exprs/length/30756e07df/0/result
-|   |   |   `-- 457bf62d9c
+|   |   |   |   `-- result -> ../../../../exprs/length/54a3aeae67/0/result
+|   |   |   `-- f0cdf0b70d
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/length/457bf62d9c/0/result
+|   |   |       `-- result -> ../../../../exprs/length/f0cdf0b70d/0/result
 |   |   `-- 4b723a5e9e
 |   |       |-- 0c17a12f7f
 |   |       |   |-- args -> ../../../../cache/lines/...
@@ -22,33 +22,36 @@
 |   |   `-- cb3e90dc00.ids
 |   `-- makeblastdb
 |       |-- 1eed3be6ea
-|       |   |-- 1eed3be6ea.faa.blastdb.err
-|       |   |-- 1eed3be6ea.faa.blastdb.out
-|       |   |-- 1eed3be6ea.faa.blastdb.phr
-|       |   |-- 1eed3be6ea.faa.blastdb.pin
-|       |   `-- 1eed3be6ea.faa.blastdb.psq
+|       |   |-- result
+|       |   |-- result.err
+|       |   |-- result.out
+|       |   |-- result.phr
+|       |   |-- result.pin
+|       |   `-- result.psq
 |       |-- 4f18717f1c
-|       |   |-- 4f18717f1c.faa.blastdb.err
-|       |   |-- 4f18717f1c.faa.blastdb.out
-|       |   |-- 4f18717f1c.faa.blastdb.phr
-|       |   |-- 4f18717f1c.faa.blastdb.pin
-|       |   `-- 4f18717f1c.faa.blastdb.psq
+|       |   |-- result
+|       |   |-- result.err
+|       |   |-- result.out
+|       |   |-- result.phr
+|       |   |-- result.pin
+|       |   `-- result.psq
 |       `-- 583d3fe84e
-|           |-- 583d3fe84e.faa.blastdb.err
-|           |-- 583d3fe84e.faa.blastdb.out
-|           |-- 583d3fe84e.faa.blastdb.phr
-|           |-- 583d3fe84e.faa.blastdb.pin
-|           `-- 583d3fe84e.faa.blastdb.psq
+|           |-- result
+|           |-- result.err
+|           |-- result.out
+|           |-- result.phr
+|           |-- result.pin
+|           `-- result.psq
 |-- exprs
 |   |-- any
 |   |   `-- 934ca92e4a
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- length
-|   |   |-- 30756e07df
+|   |   |-- 54a3aeae67
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 457bf62d9c
+|   |   `-- f0cdf0b70d
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- length_each
@@ -124,4 +127,4 @@
     |-- single.faa -> ../exprs/load_faa/649c67c82e/0/result
     `-- singles.faa.blastdb.list -> ../exprs/list/de5ce70c60/0/result
 
-69 directories, 55 files
+69 directories, 58 files

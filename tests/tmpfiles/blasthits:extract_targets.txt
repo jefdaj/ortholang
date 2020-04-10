@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 86e5e68910
-|   |       `-- 04c0e6ee0f
+|   |       `-- 1c8e892c31
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_targets/04c0e6ee0f/0/result
+|   |           `-- result -> ../../../../exprs/extract_targets/1c8e892c31/0/result
 |   |-- load
 |   |   |-- 10ffe0cf0f
 |   |   |-- 10ffe0cf0f.ids
@@ -12,11 +12,12 @@
 |   |   `-- 36189032ad.ids
 |   `-- makeblastdb
 |       `-- c27509026d
-|           |-- c27509026d.pdb.err
-|           |-- c27509026d.pdb.out
-|           |-- c27509026d.pdb.phr
-|           |-- c27509026d.pdb.pin
-|           `-- c27509026d.pdb.psq
+|           |-- result
+|           |-- result.err
+|           |-- result.out
+|           |-- result.phr
+|           |-- result.pin
+|           `-- result.psq
 |-- exprs
 |   |-- any
 |   |   `-- 6f0ead7807
@@ -25,20 +26,16 @@
 |   |-- blastp_db
 |   |   `-- 4300292626
 |   |       `-- b8ba873461
-|   |           `-- cf68c67e51
+|   |           `-- a884ed83b6
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
 |   |                   `-- result -> out
 |   |-- extract_targets
-|   |   |-- 04c0e6ee0f
+|   |   |-- 1c8e892c31
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
 |   |   `-- 8599057397
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- extract_targets_each
@@ -65,7 +62,7 @@
 |   |   `-- fee73b8143
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/36189032ad
-|   |-- makeblastdb_prot
+|   |-- makeblastdb_faa
 |   |   `-- 356d67a59b
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -81,9 +78,9 @@
 |           `-- 0
 |               `-- result -> ../../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/4300292626/b8ba873461/cf68c67e51/0/result
+    |-- hits.bht -> ../exprs/blastp_db/4300292626/b8ba873461/a884ed83b6/0/result
     |-- mapped.str.list.list -> ../exprs/extract_targets_each/a6befca20f/0/result
     |-- result -> ../exprs/any/6f0ead7807/0/result
     `-- single.str.list -> ../exprs/extract_targets/8599057397/0/result
 
-50 directories, 36 files
+50 directories, 33 files

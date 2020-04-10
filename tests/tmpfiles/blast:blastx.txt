@@ -1,28 +1,29 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 2073b2f9e6
-|   |   |   `-- 5fe29045ea
+|   |   |-- 66e957820f
+|   |   |   `-- 2e8c429af2
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/makeblastdb_prot/5fe29045ea/0/result
+|   |   |       `-- result -> ../../../../exprs/blastx_db/e10471b511/46394aaf9c/2e8c429af2/0/result
 |   |   |-- a1cf09a1b7
-|   |   |   `-- d7813df4ba
+|   |   |   `-- 768847a837
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_queries/d7813df4ba/0/result
-|   |   `-- c694d0ffff
-|   |       `-- 5b64e50993
+|   |   |       `-- result -> ../../../../exprs/extract_queries/768847a837/0/result
+|   |   `-- c504ea807a
+|   |       `-- 5fe29045ea
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/blastx_db/e10471b511/46394aaf9c/5b64e50993/0/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_faa/5fe29045ea/0/result
 |   |-- load
 |   |   |-- 1e7afd22cf -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   `-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |-- makeblastdb
 |   |   `-- 31154a4077
-|   |       |-- 31154a4077.pdb.err
-|   |       |-- 31154a4077.pdb.out
-|   |       |-- 31154a4077.pdb.phr
-|   |       |-- 31154a4077.pdb.pin
-|   |       `-- 31154a4077.pdb.psq
+|   |       |-- result
+|   |       |-- result.err
+|   |       |-- result.out
+|   |       |-- result.phr
+|   |       |-- result.pin
+|   |       `-- result.psq
 |   `-- seqio
 |-- exprs
 |   |-- any
@@ -32,33 +33,27 @@
 |   |-- blastx_db
 |   |   |-- 4300292626
 |   |   |   `-- 46394aaf9c
-|   |   |       `-- 8c25b87659
+|   |   |       `-- bea47970ed
 |   |   |           `-- 0
-|   |   |               |-- err
-|   |   |               |-- out
 |   |   |               `-- result -> out
 |   |   `-- e10471b511
 |   |       `-- 46394aaf9c
-|   |           `-- 5b64e50993
+|   |           `-- 2e8c429af2
 |   |               `-- 0
-|   |                   |-- err
-|   |                   |-- out
 |   |                   `-- result -> out
 |   |-- blastx_db_each
 |   |   `-- 4300292626
 |   |       `-- 46394aaf9c
-|   |           `-- a949502736
+|   |           `-- eaf36bc3d2
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
 |   |   |-- 61504fcc0e
 |   |   |   `-- 0
-|   |   |       |-- err
 |   |   |       |-- result -> ../../../../cache/lines/...
 |   |   |       `-- tmp
-|   |   `-- d7813df4ba
+|   |   `-- 768847a837
 |   |       `-- 0
-|   |           |-- err
 |   |           |-- result -> ../../../../cache/lines/...
 |   |           `-- tmp
 |   |-- extract_queries_each
@@ -94,14 +89,14 @@
 |   |   `-- a2d4927026
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/load/28ce925871
-|   |-- makeblastdb_prot
+|   |-- makeblastdb_faa
 |   |   |-- 5fe29045ea
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- d7d9ee0745
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
-|   |-- makeblastdb_prot_each
+|   |-- makeblastdb_faa_each
 |   |   `-- cc1918f737
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -130,4 +125,4 @@
     |-- result -> ../exprs/any/1e7990954b/0/result
     `-- single.str.list -> ../exprs/extract_queries/61504fcc0e/0/result
 
-82 directories, 48 files
+82 directories, 43 files
