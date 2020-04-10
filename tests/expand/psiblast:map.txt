@@ -1,0 +1,13 @@
+query = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
+queries = split_faa (load_faa "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa")
+mgen = load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"
+maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
+mgendb = makeblastdb_faa mgen
+magadb = makeblastdb_faa maga
+pssm = psiblast_train_db 1.0e-2 query magadb
+pssms1 = psiblast_train_db_each 1.0e-2 query [magadb, mgendb]
+pssms2 = psiblast_train_pssms_db 1.0e-2 queries magadb
+tables1 = psiblast_pssm_db_each 0.1 pssm [mgendb, magadb]
+tables2 = psiblast_each_pssm_db 0.1 pssms1 magadb
+tables3 = psiblast_each_pssm 0.1 pssms1 maga
+result = [length pssms1, length pssms2, length tables1, length tables2, length tables3]

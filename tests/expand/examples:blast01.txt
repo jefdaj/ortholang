@@ -1,0 +1,3 @@
+human_dbs = blastdblist "human"
+swissprot = blastdbget_faa "swissprot"
+result = human_dbs

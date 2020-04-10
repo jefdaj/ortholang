@@ -1,0 +1,10 @@
+ind = 1
+dep = 1200 * ind
+dep1 = replace dep ind 1
+dep2 = replace dep ind 2
+dep3 = replace dep ind 3
+dep4 = replace dep ind 4
+dep5 = replace dep ind 5
+depsSeparate = [dep1, dep2, dep3, dep4, dep5]
+depsTogether = replace_each dep ind [1, 2, 3, 4, 5]
+result = [depsSeparate ~ depsTogether, depsTogether ~ depsSeparate]

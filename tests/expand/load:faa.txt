@@ -1,0 +1,4 @@
+single = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
+mylist = ["examples/sequences/Mycoplasma_genitalium_single.faa"]
+mapped = load_faa_each mylist
+result = [single] | mapped

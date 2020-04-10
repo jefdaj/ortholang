@@ -35,6 +35,7 @@ module OrthoLang.Core
   -- * Things used in Main
   , runRepl
   , evalFile
+  , expandMacros
   , prettyShow
 
   -- * Things used in Test

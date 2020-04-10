@@ -1,0 +1,12 @@
+pcc7942v1 = concat_faa (gbk_to_faa_each "cds"
+                                        (load_gbk_each ["examples/sequences/PCC_7942_chr.gbk",
+                                                        "examples/sequences/PCC_7942_pANL.gbk"]))
+pcc7942v2 = concat_faa [translate (load_fna "examples/sequences/PCC_7942_genome.fna"),
+                        gbk_to_faa "cds" (load_gbk "examples/sequences/PCC_7942_pANL.gbk")]
+chr = load_fna "examples/sequences/PCC_7942_genome.fna"
+panl = load_gbk "examples/sequences/PCC_7942_pANL.gbk"
+pcc7942v3 = concat_faa [translate chr, gbk_to_faa "cds" panl]
+pcc7942v4 = concat_faa (gbk_to_faa_each "cds"
+                                        (load_gbk_each (load_list "examples/genome-lists/pcc-7942-genbank.txt")))
+pcc7942v5 = concat_faa (gbk_to_faa_each "cds" (load_gbk_glob "examples/sequences/PCC_7942_*.gbk"))
+result = [pcc7942v1, pcc7942v2, pcc7942v3, pcc7942v4, pcc7942v5]
