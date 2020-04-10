@@ -90,7 +90,7 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
-      out'   = debugRules cfg "rMmseqsCreateDbAll" e $ fromPath cfg out
+      out'   = debugRules "rMmseqsCreateDbAll" e $ fromPath cfg out
       createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       dbPath = createDbDir </> digest fas <.> "mmseqs2db" -- TODO take hash from somewhere else?
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
@@ -181,7 +181,7 @@ rMmseqsSearchDb scr e@(Fun _ salt _ _ [n, q, s]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
-      out'   = debugRules cfg "rMmseqsSearch" e $ fromPath cfg out
+      out'   = debugRules "rMmseqsSearch" e $ fromPath cfg out
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       searchDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search"

@@ -45,7 +45,7 @@ debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdb." ++ name)
 
 debugR' :: (Pretty a, Show b) => Config -> String -> a -> b -> b
-debugR' cfg name = debugRules cfg ("modules.blastdb." ++ name)
+debugR' cfg name = debugRules ("modules.blastdb." ++ name)
 
 olModule :: Module
 olModule = Module

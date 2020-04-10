@@ -63,7 +63,7 @@ rFun3 act3 scr expr@(Fun _ _ _ _ [a1, a2, a3]) = do
       arg2   = toPath cfg arg2'
       arg3   = toPath cfg arg3'
       oPath  = exprPath cfg dRef scr expr
-      oPath' = debugRules cfg "rFun3" expr $ fromPath cfg oPath
+      oPath' = debugRules "rFun3" expr $ fromPath cfg oPath
   oPath' %> \_ -> do
     debugFn $ "rFun3 arg1: "  ++ show arg1
     debugFn $ "rFun3 arg2: "  ++ show arg2

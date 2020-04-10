@@ -265,7 +265,7 @@ rReplaceEach scr expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
   let subPaths' = (\(ExprPath p) -> toPath cfg p) subPaths
       resPaths' = map (\(ExprPath p) -> toPath cfg p) resPaths
       outPath   = exprPath cfg dRef scr expr
-      outPath'  = debugRules cfg "rReplaceEach" expr $ fromPath cfg outPath
+      outPath'  = debugRules "rReplaceEach" expr $ fromPath cfg outPath
   outPath' %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aReplaceEachLits (typeOf expr)

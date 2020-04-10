@@ -86,7 +86,7 @@ rSetFold fn scr e@(Fun _ _ _ _ [lol]) = do
   dRef <- fmap fromJust getShakeExtraRules
   let oPath      = fromPath cfg $ exprPath cfg dRef scr e
       oPath'     = cfgTmpDir cfg </> oPath
-      oPath''    = debugRules cfg "rSetFold" e oPath
+      oPath''    = debugRules "rSetFold" e oPath
       (ListOf t) = typeOf lol
   oPath %> \_ -> aSetFold fn t oPath' setsPath
   return (ExprPath oPath'')

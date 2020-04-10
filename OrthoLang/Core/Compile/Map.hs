@@ -126,12 +126,12 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r salt _ name exprs) = do
       elemCacheDir'  = toPath cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> tExtOf eType
       eType = case r of
-                (ListOf t) -> debugC cfg "rMapMain" ("type of \"" ++ render (pPrint e)
+                (ListOf t) -> debugC "rMapMain" ("type of \"" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error "rMapMain" $ "bad argument: " ++ show e
   elemCachePtn %> aMapElem eType mTmpFn actFn singleName salt
   mainOutPath  %> aMapMain mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
-  return $ debugRules cfg "rMapMain" e $ ExprPath mainOutPath
+  return $ debugRules "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
 hashFun :: Config -> DigestsRef -> Script -> Expr -> String
@@ -173,7 +173,7 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> tExtOf eTy
   where
     path' = toPath cfg path
     hash  = digest path'
-    hash' = debugC cfg "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
+    hash' = debugC "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
 
 -- This leaves arguments in .args files for aMapElem to find.
 -- TODO This should be done for each replace operation in replace_each

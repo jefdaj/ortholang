@@ -68,11 +68,10 @@ import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty
 import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Paths (cacheDir, exprPath, unsafeExprPathExplicit, toPath,
+import OrthoLang.Core.Paths (cacheDir, exprPath, toPath,
                             fromPath, varPath, Path)
 
-import Data.IORef                 (atomicModifyIORef', readIORef)
-import Data.List                  (isPrefixOf, isInfixOf)
+import Data.List                  (isPrefixOf)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName)
 import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
                                    readLit, readLits, writeLit, writeLits, hashContent,
@@ -80,26 +79,20 @@ import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, debugA, need',
 import OrthoLang.Core.Sanitize     (hashIDsFile2, readIDs)
 import OrthoLang.Util         (absolutize, resolveSymlinks, stripWhiteSpace,
                                    digest, removeIfExists, headOrDie, unlessExists)
-import System.FilePath            (takeExtension)
-import System.Exit                (ExitCode(..))
-import System.Directory           (createDirectoryIfMissing)
 
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (fromJust)
 
 -- import OrthoLang.Core.Paths (insertNewRulesDigest)
-import System.IO.Unsafe (unsafePerformIO)
-import Control.Monad.Reader (ask)
-import Control.Monad.Trans.Class (lift)
 
 
-debugC :: Config -> String -> String -> a -> a
-debugC cfg name msg rtn = trace ("core.compile." ++ name) msg rtn
+debugC :: String -> String -> a -> a
+debugC name msg rtn = trace ("core.compile." ++ name) msg rtn
 
 -- TODO restrict to Expr?
 -- TODO export?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
-debugRules :: (Pretty a, Show b) => Config -> String -> a -> b -> b
-debugRules cfg name input out = debugC cfg name msg out
+debugRules :: (Pretty a, Show b) => String -> a -> b -> b
+debugRules name input out = debugC name msg out
   where
     ren = render $ pPrint input
     msg = "\"" ++ ren ++ "' -> " ++ show out
@@ -175,7 +168,7 @@ rNamedFunction' scr expr name = do
                  -- note that the rules themselves should have been added by 'newRules'
                  NewRules _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
                                    res = ExprPath p
-                               in return $ debugRules cfg "rNamedFunction'" expr res
+                               in return $ debugRules "rNamedFunction'" expr res
                  -- TODO typecheck here to make sure the macro didn't mess anything up?
                  NewMacro mFn -> fail $ "all macros should have been expanded already," ++
                                         " but rNamedFunction found " ++ name
@@ -186,7 +179,7 @@ rAssign scr (var, expr) = do
   cfg <- fmap fromJust getShakeExtraRules
   path' <- rVar var expr $ toPath cfg path
   let res  = (var, path')
-      res' = debugRules cfg "rAssign" (var, expr) res
+      res' = debugRules "rAssign" (var, expr) res
   return res'
 
 -- TODO how to fail if the var doesn't exist??
@@ -214,7 +207,7 @@ rLit scr expr = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let path  = exprPath cfg dRef scr expr -- absolute paths allowed!
-      path' = debugRules cfg "rLit" expr $ fromPath cfg path
+      path' = debugRules "rLit" expr $ fromPath cfg path
   path' %> \_ -> aLit expr path
   return (ExprPath path')
 
@@ -277,7 +270,7 @@ rListLits scr e@(Lst _ _ _ exprs) = do
   let litPaths' = map (\(ExprPath p) -> toPath cfg p) litPaths
   dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr e
-      outPath' = debugRules cfg "rListLits" e $ fromPath cfg outPath
+      outPath' = debugRules "rListLits" e $ fromPath cfg outPath
   outPath' %> \_ -> aListLits litPaths' outPath
   return (ExprPath outPath')
 rListLits _ e = error "rListLits" $ "bad argument: " ++ show e
@@ -324,7 +317,7 @@ rListPaths scr e@(Lst rtn salt _ exprs) = do
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath  = exprPath cfg dRef scr e
-      outPath' = debugRules cfg "rListPaths" e $ fromPath cfg outPath
+      outPath' = debugRules "rListPaths" e $ fromPath cfg outPath
   outPath' %> \_ -> aListPaths paths' outPath
   return (ExprPath outPath')
 rListPaths _ _ = error "rListPaths" "bad argument"
@@ -346,7 +339,7 @@ aListPaths paths outPath = do
 rRef :: RulesFn
 rRef _ e@(Ref _ _ _ var) = do
   cfg <- fmap fromJust getShakeExtraRules
-  let ePath p = ExprPath $ debugRules cfg "rRef" e $ fromPath cfg p
+  let ePath p = ExprPath $ debugRules "rRef" e $ fromPath cfg p
   return $ ePath $ varPath cfg var e
     
 rRef _ _ = fail "bad argument to rRef"
@@ -358,7 +351,7 @@ rVar :: Var -> Expr -> Path -> Rules VarPath
 rVar var expr oPath = do
   cfg <- fmap fromJust getShakeExtraRules
   let vPath  = varPath cfg var expr
-      vPath' = debugRules cfg "rVar" var $ fromPath cfg vPath
+      vPath' = debugRules "rVar" var $ fromPath cfg vPath
   vPath' %> \_ -> aVar vPath oPath
   return (VarPath vPath')
 

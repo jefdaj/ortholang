@@ -274,7 +274,7 @@ rOrthologFilterStr fnName pickerFn scr e@(Fun _ _ _ _ [groupLists, idLists]) = d
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out     = exprPath cfg dRef scr e
-      out'    = debugRules cfg "rOrthologFilterStr" e $ fromPath cfg out
+      out'    = debugRules "rOrthologFilterStr" e $ fromPath cfg out
       ogDir   = fromPath cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
@@ -371,7 +371,7 @@ rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idL
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out     = exprPath cfg dRef scr e
-      out'    = debugRules cfg "rOrthologFilterStr" e $ fromPath cfg out
+      out'    = debugRules "rOrthologFilterStr" e $ fromPath cfg out
       ogDir   = fromPath cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"

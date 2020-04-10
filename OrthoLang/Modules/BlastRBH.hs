@@ -17,11 +17,11 @@ import Data.Maybe (fromJust)
 -- TODO test each one: first all the peices, then together
 
 -- for tracking down non-deduplicating blastp functions
-debugNames :: Config -> String -> Expr -> Expr -> a -> a
-debugNames cfg fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = C.debugC cfg fnName msg rtn
+debugNames :: String -> Expr -> Expr -> a -> a
+debugNames fnName (Fun _ _ _ bname _) (Fun _ _ _ aname _) rtn = C.debugC fnName msg rtn
   where
     msg = "\"" ++ bname ++ "' -> \"" ++ aname ++ "\""
-debugNames _ fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
+debugNames fnName _ _ _ = error $ "bad argument to debugNames from " ++ fnName
 
 olModule :: Module
 olModule = Module
@@ -68,7 +68,7 @@ rMkBlastFromFaRev d scr (Fun rtn salt deps name [e, q, s]) = rules scr expr
     expr  = Fun rtn salt deps name_norev [e, s, q]
     rules = fOldRules $ mkBlastFromFa d
     name_norev  = replace "_rev" "" name
-    -- name_norev' = debugNames cfg "rMkBlastFromFaRev" b expr name_norev
+    -- name_norev' = debugNames "rMkBlastFromFaRev" b expr name_norev
 rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 
 ----------------------

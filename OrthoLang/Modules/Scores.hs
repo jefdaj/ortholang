@@ -91,7 +91,7 @@ rScoreRepeats scr expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
   dRef <- fmap fromJust getShakeExtraRules
   let repEachExpr = Fun (ListOf t) salt deps "replace_each" as
       outPath  = exprPath cfg dRef scr expr
-      outPath' = debugRules cfg "rScoreRepeats" expr $ fromPath cfg outPath
+      outPath' = debugRules "rScoreRepeats" expr $ fromPath cfg outPath
   scores <- rExpr scr repEachExpr
   let hack    = \(ExprPath p) -> toPath cfg p -- TODO remove! but how?
       inputs' = hack inputs

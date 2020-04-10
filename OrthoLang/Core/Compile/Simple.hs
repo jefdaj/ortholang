@@ -124,7 +124,7 @@ aSimple' outPath actFn mTmpDir argPaths = do
                   Just dir -> let d = fromPath cfg dir </> hashes in (toPath cfg d, d)
   need' "ortholang.core.compile.basic.aSimple'" argPaths'
   argPaths'' <- liftIO $ mapM (fmap (toPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
-  let o' = debugC cfg "aSimple'" ("outPath': " ++ outPath' ++ "\"") outPath
-      as = debugC cfg "aSimple'" ("argsPaths'': " ++ show argPaths'') argPaths''
+  let o' = debugC "aSimple'" ("outPath': " ++ outPath' ++ "\"") outPath
+      as = debugC "aSimple'" ("argsPaths'': " ++ show argPaths'') argPaths''
   actFn tmpDir (o':as)
   trackWrite [out] -- TODO remove?

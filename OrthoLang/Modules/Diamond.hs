@@ -96,7 +96,7 @@ rDiamondmakedbAll scr e@(Fun _ _ _ _ [fas]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out  = exprPath cfg dRef scr e
-      out' = debugRules cfg "rDiamondmakedbAll" e $ fromPath cfg out
+      out' = debugRules "rDiamondmakedbAll" e $ fromPath cfg out
   out' %> \_ -> do
     faPaths <- readPaths fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
