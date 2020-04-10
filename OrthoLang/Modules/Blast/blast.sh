@@ -10,9 +10,11 @@ PPATH="$5" # TODO why not QPATH?
 
 # TODO remove once all bugs are clearly worked out?
 if [[ -d "$OUTDIR" && "$(ls "$OUTDIR" | wc -l)" -gt 0 ]]; then
-  echo "ERROR! old results remain in '$OUTDIR':"
-  ls -al "$OUTDIR"
-  exit 1
+  # TODO why is this happening?
+  # echo "ERROR! old results remain in '$OUTDIR':"
+  # ls -al "$OUTDIR"
+  # exit 1
+  rm -rf "$OUTDIR"/*
 fi
 
 DBDIR="$(dirname "$PPATH")"

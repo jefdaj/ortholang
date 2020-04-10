@@ -542,8 +542,9 @@ runCmd desc = do
   let parLockFn = if cmdParallel desc
                     then \f -> withResource (cfgParLock cfg) 1 f
                     else id
-      -- writeLockPaths = (cmdOutPath desc):(cmdExtraOutPaths desc)
-      writeLockFn fn = do
+      -- TODO any problem locking the whole dir?
+      -- TODO and if not, can the other locks inside that be removed?
+      writeLockFn fn = withWriteLock' (takeDirectory $ cmdOutPath desc) $ do
         dbg $ "runCmd acquiring main write lock: " ++ show (cmdOutPath desc)
         withWriteOnce (cmdOutPath desc) $ do
           dbg $ "runCmd acquiring extra write locks: " ++ show (cmdExtraOutPaths desc)
@@ -565,7 +566,7 @@ runCmd desc = do
 
     -- TODO use exitWith here?
     when (code /= cmdExitCode desc) $
-      let rmPatterns = (replaceBaseName (cmdOutPath desc) "*"):(cmdRmPatterns desc)
+      let rmPatterns = (takeDirectory (cmdOutPath desc) </> "*"):(cmdRmPatterns desc)
       in handleCmdError (cmdBinary desc) code stderrPath rmPatterns
 
   let sPaths = stdoutPath:stderrPath:cmdSanitizePaths desc -- TODO main outpath too?
