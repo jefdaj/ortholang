@@ -61,6 +61,7 @@ module OrthoLang.Errors
 
   -- * Eval exceptions
   , ScriptFailed(..)
+  , ShakeError(..)
   -- TODO lock errors
   -- TODO no such file/dir
   -- TODO permissions error
@@ -74,6 +75,8 @@ module OrthoLang.Errors
 
   )
   where
+
+import qualified Development.Shake as S
 
 import Control.Exception (Exception, SomeException, fromException, toException)
 import Data.Typeable     (Typeable, cast)
@@ -212,6 +215,27 @@ evalFromException :: Exception e => SomeException -> Maybe e
 evalFromException x = do
   SomeEvalException a <- fromException x
   cast a
+
+----------------------
+-- shake exceptions --
+----------------------
+
+-- TODO how to wrap shake exceptions?
+-- TODO ScriptFailed needs to be a subset of shake exceptions
+--      probably need to provide a function that catches them and re-throws one of my exceptions?
+
+-- TODO write the long shake error to a logfile and print single-line description of it
+--      does that require a separate catch-and-re-throw function to do the writing?
+data ShakeError = ShakeError S.ShakeException
+
+instance Show ShakeError where
+  show (ShakeError e) = "Shake failed: " ++ firstLine ++ "... See ortholang.log for details."
+    where
+      firstLine = takeWhile (/= '\n') $ show e
+
+instance Exception ShakeError where
+  toException   = evalToException
+  fromException = evalFromException
 
 data ScriptFailed = ScriptFailed String FilePath Int
 
