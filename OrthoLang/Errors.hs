@@ -20,11 +20,11 @@ another hint
 no such var: 'bob'
 
 λ: throw (ScriptFailed "test.sh" "test.log" 3) \`catch\` \\e -> putStrLn (show (e :: SomeEvalException))
-test.sh failed with exit code 3. Check test.log for details.
+test.sh failed with exit code 3. See test.log for details.
 
 λ: throw (MissingDigest "aTestAction" "$TMPDIR\/exprs\/whatever\/result" "230478234")
   \`catch\` \\e -> putStrLn $ show (e :: SomeCompilerException)
-Missing digest '230478234', which is needed by aTestAction to build '$TMPDIR/exprs/whatever/result'
+Missing digest '230478234', needed by aTestAction to build '$TMPDIR/exprs/whatever/result'
 
 @
 
@@ -160,7 +160,7 @@ data MissingDigest = MissingDigest String FilePath String
 
 instance Show MissingDigest where
   show (MissingDigest act path dig) =
-    "Missing digest '" ++ dig ++ "', which is needed by " ++ act ++ " to build '" ++ path ++ "'"
+    "Missing digest '" ++ dig ++ "', needed by " ++ act ++ " to build '" ++ path ++ "'"
 
 instance Exception MissingDigest where
   toException   = compilerToException
@@ -212,8 +212,7 @@ data ScriptFailed = ScriptFailed String FilePath Int
 
 instance Show ScriptFailed where
   show (ScriptFailed name logfile code) =
-    name ++ " failed with exit code " ++ show code ++
-            ". Check " ++ logfile ++ " for details."
+    name ++ " failed with exit code " ++ show code ++ ". See " ++ logfile ++ " for details."
 
 instance Exception ScriptFailed where
   toException   = evalToException
