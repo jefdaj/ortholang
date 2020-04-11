@@ -7,25 +7,29 @@ to. Based on the standard 'Control.Exception' Haddocks, as well as
 Shake's 'Development.Shake.Internal.Errors'. 
 
 They should be 'Control.Exception.throw'n using the most specific class
-possible. Then you can 'Control.Exception.catch' them using any superclass up to
-'Control.Exception.SomeException'. Tou get \"Caught ...\" if the class matches,
-or \"*** Exception: ...\" if not:
+possible. Then you can 'Control.Exception.catch' them using any superclass up
+through 'Control.Exception.SomeException':
 
 @
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: NoSuchVar))
-Caught NoSuchVar
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeParserException))
-Caught NoSuchVar
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeOLException))
-Caught NoSuchVar
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeException))
-Caught NoSuchVar
+λ: throw (NoSuchVar "bob") \`catch\` \\e -> putStrLn $ show (e :: SomeParserException)
+no such var: 'bob'
+
+λ: throw (ScriptFailed "test.sh" "test.log" 3) \`catch\` \\e -> putStrLn (show (e :: SomeEvalException))
+test.sh failed with exit code 3. Check test.log for details.
+
+λ: throw (pleaseReport ["this is a hint", "another hint"]) \`catch\` \\e -> putStrLn $ show (e :: SomeOLException)
+Programming error! Please report it to Jeff Johnson:
+this is a hint
+another hint
 @
 
+If none of the superclasses match, you get an actual error:
+
 @
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeReplException))
+λ: throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeReplException))
 *** Exception: NoSuchVar
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: IOException))
+
+λ: throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: IOException))
 *** Exception: NoSuchVar
 @
 -}
@@ -33,39 +37,31 @@ Caught NoSuchVar
 module OrthoLang.Errors
   (
 
-  -- * Base class (TODO not exported?)
-    SomeOLException(..)
-  , olToException
-  , olFromException
-  , pleaseReport
+  -- * Generic exceptions
+    pleaseReport
 
-  -- * Parser exeptions
-  , SomeParserException(..)
-  , parserToException
-  , parserFromException
+  -- * Parser exceptions
   , NoSuchVar(..)
   -- TODO type errors (a hierarchy?)
 
-  -- * Compiler exeptions
-  , SomeCompilerException(..)
-  , compilerToException
-  , compilerFromException
+  -- * Compiler exceptions
   -- TODO type errors (a hierarchy?)
 
-  -- * Repl exeptions
-  , SomeReplException(..)
-  , replToException
-  , replFromException
+  -- * Repl exceptions
   -- TODO no such function/module/type/encoding
 
-  -- * Eval exeptions
-  , SomeEvalException(..)
-  , evalToException
-  , evalFromException
+  -- * Eval exceptions
+  , ScriptFailed(..)
   -- TODO lock errors
   -- TODO no such file/dir
   -- TODO permissions error
-  -- TODO script failed
+
+  -- * Implementation details
+  , SomeOLException(..)
+  , SomeParserException(..)
+  , SomeCompilerException(..)
+  , SomeReplException(..)
+  , SomeEvalException(..)
 
   )
   where
@@ -90,11 +86,12 @@ olToException = toException . SomeOLException
 
 olFromException :: Exception e => SomeException -> Maybe e
 olFromException x = do
-    SomeOLException a <- fromException x
-    cast a
+  SomeOLException a <- fromException x
+  cast a
 
-pleaseReport :: String -> SomeException
-pleaseReport msg = toException $ ErrorCall $ unlines ["Coding error! Please report it to Jeff:", msg]
+pleaseReport :: [String] -> SomeException
+pleaseReport hints = olToException $ ErrorCall $ unlines $
+  "Programming error! Please report it to Jeff Johnson:" : hints
 
 -----------------------
 -- parser exceptions --
@@ -103,26 +100,28 @@ pleaseReport msg = toException $ ErrorCall $ unlines ["Coding error! Please repo
 data SomeParserException = forall e . Exception e => SomeParserException e
 
 instance Show SomeParserException where
-    show (SomeParserException e) = show e
+  show (SomeParserException e) = show e
 
 instance Exception SomeParserException where
-    toException   = olToException
-    fromException = olFromException
+  toException   = olToException
+  fromException = olFromException
 
 parserToException :: Exception e => e -> SomeException
 parserToException = toException . SomeParserException
 
 parserFromException :: Exception e => SomeException -> Maybe e
 parserFromException x = do
-    SomeParserException a <- fromException x
-    cast a
+  SomeParserException a <- fromException x
+  cast a
 
-data NoSuchVar = NoSuchVar
-    deriving Show
+data NoSuchVar = NoSuchVar String
+
+instance Show NoSuchVar where
+  show (NoSuchVar var) = "no such var: '" ++ var ++ "'"
 
 instance Exception NoSuchVar where
-    toException   = parserToException
-    fromException = parserFromException
+  toException   = parserToException
+  fromException = parserFromException
 
 -------------------------
 -- compiler exceptions --
@@ -131,19 +130,19 @@ instance Exception NoSuchVar where
 data SomeCompilerException = forall e . Exception e => SomeCompilerException e
 
 instance Show SomeCompilerException where
-    show (SomeCompilerException e) = show e
+  show (SomeCompilerException e) = show e
 
 instance Exception SomeCompilerException where
-    toException   = olToException
-    fromException = olFromException
+  toException   = olToException
+  fromException = olFromException
 
 compilerToException :: Exception e => e -> SomeException
 compilerToException = toException . SomeCompilerException
 
 compilerFromException :: Exception e => SomeException -> Maybe e
 compilerFromException x = do
-    SomeCompilerException a <- fromException x
-    cast a
+  SomeCompilerException a <- fromException x
+  cast a
 
 ---------------------
 -- repl exceptions --
@@ -152,19 +151,19 @@ compilerFromException x = do
 data SomeReplException = forall e . Exception e => SomeReplException e
 
 instance Show SomeReplException where
-    show (SomeReplException e) = show e
+  show (SomeReplException e) = show e
 
 instance Exception SomeReplException where
-    toException   = olToException
-    fromException = olFromException
+  toException   = olToException
+  fromException = olFromException
 
 replToException :: Exception e => e -> SomeException
 replToException = toException . SomeReplException
 
 replFromException :: Exception e => SomeException -> Maybe e
 replFromException x = do
-    SomeReplException a <- fromException x
-    cast a
+  SomeReplException a <- fromException x
+  cast a
 
 ---------------------
 -- eval exceptions --
@@ -173,16 +172,27 @@ replFromException x = do
 data SomeEvalException = forall e . Exception e => SomeEvalException e
 
 instance Show SomeEvalException where
-    show (SomeEvalException e) = show e
+  show (SomeEvalException e) = show e
 
 instance Exception SomeEvalException where
-    toException   = olToException
-    fromException = olFromException
+  toException   = olToException
+  fromException = olFromException
 
 evalToException :: Exception e => e -> SomeException
 evalToException = toException . SomeEvalException
 
 evalFromException :: Exception e => SomeException -> Maybe e
 evalFromException x = do
-    SomeEvalException a <- fromException x
-    cast a
+  SomeEvalException a <- fromException x
+  cast a
+
+data ScriptFailed = ScriptFailed String FilePath Int
+
+instance Show ScriptFailed where
+  show (ScriptFailed name logfile code) =
+    name ++ " failed with exit code " ++ show code ++
+            ". Check " ++ logfile ++ " for details."
+
+instance Exception ScriptFailed where
+  toException   = evalToException
+  fromException = evalFromException
