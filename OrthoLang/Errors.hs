@@ -11,10 +11,13 @@ possible. Then you can 'Control.Exception.catch' them using any superclass up
 through 'Control.Exception.SomeException':
 
 @
+λ: :m OrthoLang.Errors
+λ: import Control.Exception
+
 λ: throw (Mistake ["this is a hint", "another hint"]) \`catch\` \\e -> putStrLn $ show (e :: SomeOLException)
 Programming mistake! Please report it to Jeff Johnson:
-this is a hint
-another hint
+  this is a hint
+  another hint
 
 λ: throw (NoSuchVar "bob") \`catch\` \\e -> putStrLn $ show (e :: SomeParserException)
 no such var: 'bob'
@@ -72,7 +75,7 @@ module OrthoLang.Errors
   )
   where
 
-import Control.Exception (Exception, SomeException, fromException, toException, ErrorCall(..))
+import Control.Exception (Exception, SomeException, fromException, toException)
 import Data.Typeable     (Typeable, cast)
 
 ------------------------
@@ -98,7 +101,9 @@ olFromException x = do
 data Mistake = Mistake [String]
 
 instance Show Mistake where
-  show (Mistake hints) = unlines $ "Programming mistake! Please report it to Jeff Johnson:" : hints
+  show (Mistake hints) = unlines $ "Programming mistake! Please report it to Jeff Johnson:" : hints'
+    where
+      hints' = map ("  " ++) hints
 
 instance Exception Mistake where
   toException   = olToException
