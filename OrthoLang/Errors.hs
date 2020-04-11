@@ -8,17 +8,21 @@ Shake's 'Development.Shake.Internal.Errors'.
 
 They should be 'Control.Exception.throw'n using the most specific class
 possible. Then you can 'Control.Exception.catch' them using any superclass up to
-'Control.Exception.SomeException':
+'Control.Exception.SomeException'. Tou get \"Caught ...\" if the class matches,
+or \"*** Exception: ...\" if not:
 
 @
 *Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: NoSuchVar))
 Caught NoSuchVar
-*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeParseException))
+*Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeParserException))
 Caught NoSuchVar
 *Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeOLException))
 Caught NoSuchVar
 *Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeException))
 Caught NoSuchVar
+@
+
+@
 *Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: SomeReplException))
 *** Exception: NoSuchVar
 *Main> throw NoSuchVar \`catch\` \\e -> putStrLn (\"Caught \" ++ show (e :: IOException))
@@ -33,23 +37,41 @@ module OrthoLang.Errors
     SomeOLException(..)
   , olToException
   , olFromException
+  , pleaseReport
 
-  -- * Parse exeptions
-  , SomeParseException(..)
-  , parseToException
-  , parseFromException
+  -- * Parser exeptions
+  , SomeParserException(..)
+  , parserToException
+  , parserFromException
   , NoSuchVar(..)
+  -- TODO type errors (a hierarchy?)
+
+  -- * Compiler exeptions
+  , SomeCompilerException(..)
+  , compilerToException
+  , compilerFromException
+  -- TODO type errors (a hierarchy?)
 
   -- * Repl exeptions
   , SomeReplException(..)
   , replToException
   , replFromException
+  -- TODO no such function/module/type/encoding
+
+  -- * Eval exeptions
+  , SomeEvalException(..)
+  , evalToException
+  , evalFromException
+  -- TODO lock errors
+  -- TODO no such file/dir
+  -- TODO permissions error
+  -- TODO script failed
 
   )
   where
 
-import Control.Exception
-import Data.Typeable
+import Control.Exception (Exception, SomeException, fromException, toException, ErrorCall(..))
+import Data.Typeable     (Typeable, cast)
 
 ----------------
 -- base class --
@@ -71,33 +93,57 @@ olFromException x = do
     SomeOLException a <- fromException x
     cast a
 
-----------------------
--- parse exceptions --
-----------------------
+pleaseReport :: String -> SomeException
+pleaseReport msg = toException $ ErrorCall $ unlines ["Coding error! Please report it to Jeff:", msg]
 
-data SomeParseException = forall e . Exception e => SomeParseException e
+-----------------------
+-- parser exceptions --
+-----------------------
 
-instance Show SomeParseException where
-    show (SomeParseException e) = show e
+data SomeParserException = forall e . Exception e => SomeParserException e
 
-instance Exception SomeParseException where
+instance Show SomeParserException where
+    show (SomeParserException e) = show e
+
+instance Exception SomeParserException where
     toException   = olToException
     fromException = olFromException
 
-parseToException :: Exception e => e -> SomeException
-parseToException = toException . SomeParseException
+parserToException :: Exception e => e -> SomeException
+parserToException = toException . SomeParserException
 
-parseFromException :: Exception e => SomeException -> Maybe e
-parseFromException x = do
-    SomeParseException a <- fromException x
+parserFromException :: Exception e => SomeException -> Maybe e
+parserFromException x = do
+    SomeParserException a <- fromException x
     cast a
 
 data NoSuchVar = NoSuchVar
     deriving Show
 
 instance Exception NoSuchVar where
-    toException   = parseToException
-    fromException = parseFromException
+    toException   = parserToException
+    fromException = parserFromException
+
+-------------------------
+-- compiler exceptions --
+-------------------------
+
+data SomeCompilerException = forall e . Exception e => SomeCompilerException e
+
+instance Show SomeCompilerException where
+    show (SomeCompilerException e) = show e
+
+instance Exception SomeCompilerException where
+    toException   = olToException
+    fromException = olFromException
+
+compilerToException :: Exception e => e -> SomeException
+compilerToException = toException . SomeCompilerException
+
+compilerFromException :: Exception e => SomeException -> Maybe e
+compilerFromException x = do
+    SomeCompilerException a <- fromException x
+    cast a
 
 ---------------------
 -- repl exceptions --
@@ -118,4 +164,25 @@ replToException = toException . SomeReplException
 replFromException :: Exception e => SomeException -> Maybe e
 replFromException x = do
     SomeReplException a <- fromException x
+    cast a
+
+---------------------
+-- eval exceptions --
+---------------------
+
+data SomeEvalException = forall e . Exception e => SomeEvalException e
+
+instance Show SomeEvalException where
+    show (SomeEvalException e) = show e
+
+instance Exception SomeEvalException where
+    toException   = olToException
+    fromException = olFromException
+
+evalToException :: Exception e => e -> SomeException
+evalToException = toException . SomeEvalException
+
+evalFromException :: Exception e => SomeException -> Maybe e
+evalFromException x = do
+    SomeEvalException a <- fromException x
     cast a
