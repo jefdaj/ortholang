@@ -60,6 +60,7 @@ module OrthoLang.Errors
 
   -- * Compiler exceptions
   , MissingDigests(..)
+  , PathLitMixup(..)
   -- TODO type errors (a hierarchy?)
 
   -- * Repl exceptions
@@ -179,6 +180,15 @@ instance Show MissingDigests where
 instance Exception MissingDigests where
   toException   = compilerToException
   fromException = compilerFromException
+
+data PathLitMixup = PathLitMixup String
+
+instance Exception PathLitMixup where
+  toException   = compilerToException
+  fromException = compilerFromException
+
+instance Show PathLitMixup where
+  show (PathLitMixup s) = s
 
 ---------------------
 -- repl exceptions --

@@ -174,7 +174,7 @@ import Development.Shake.FilePath (makeRelative, splitPath)
 import OrthoLang.Debug
 import Data.IORef (readIORef, atomicModifyIORef')
 import System.IO.Unsafe (unsafePerformIO)
-import Control.Exception (throwIO)
+import Control.Exception (throw, throwIO)
 
 -----------
 -- paths --
@@ -305,13 +305,11 @@ varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir <
 {-|
 These are just to alert me of programming mistakes,
 and can be removed once the rest of the IO stuff is solid.
-
-TODO error types for these
 -}
 checkLit :: String -> String
 checkLit l = if isGeneric l
-                 then error "checkLit" $ "placeholder in lit: \"" ++ l ++ "\""
-                 else l
+               then throw $ PathLitMixup $ "'" ++  l ++ "' looks like a path"
+               else l
 
 checkLits :: [String] -> [String] -- (or error, but let's ignore that)
 checkLits = map checkLit
@@ -320,7 +318,7 @@ checkLits = map checkLit
 checkPath :: FilePath -> FilePath
 checkPath path = if isAbsolute path || isGeneric path
                    then path
-                   else error "checkPath" $ "invalid path: \"" ++ path ++ "\""
+                   else throw $ PathLitMixup $ "'" ++ path ++ "' looks like a literal"
 
 checkPaths :: [FilePath] -> [FilePath]
 checkPaths = map checkPath
